@@ -5,8 +5,8 @@ BASE_REPO=$PWD
 update_website() {
   cd ..; mkdir gh-pages; cd gh-pages
   git init
-  git config user.name ""
-  git config user.email ""
+  git config user.name "" #missing name
+  git config user.email "" #missing email
   git config --global push.default simple
   git remote add upstream "https://$GH_TOKEN@github.com/Robinlovelace/rgeobook.git"
   git fetch upstream 2>err.txt
