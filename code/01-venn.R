@@ -1,0 +1,5 @@
+library(sf)
+p = st_sfc(st_point(c(0, 1)), st_point(c(1, 1)))
+b = st_buffer(p, dist = 1)
+plot(b)
+text(x = c(-0.5, 1.5), y = 1, labels = c("Geography", "R"))
