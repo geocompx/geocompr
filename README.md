@@ -1,1 +1,1 @@
-# Geography with R: an Introduction
+# Geography with R: a Practical Introduction
