@@ -1,8 +1,50 @@
 # Reading and writing spatial data {#read-write}
 
-Spatial data comes in a wide variety of file formats.
+Spatial data comes in a wide variety of file formats, and **sf** is adept at handling them, via its interface to GDAL.
+A major advantage of **sf** is that it is fast at geographical data I/O, as illustrated in the benchmark below:
 
-## Vector
+```{r, results='hide'}
+library(microbenchmark)
+bench_read = microbenchmark(times = 1,
+        st_read(f),
+        rgdal::readOGR(f)
+)
+```
+
+```{r}
+bench_read$time[1] / bench_read$time[2]
+```
+
+The results demonstrate that **sf** is around *50 times faster* than **rgdal** at reading-in the world countries shapefile.
+
+The counterpart of `st_read()` is `st_write()`. This allows writing to a range of geographic file types, including the common formats `.geojson`, `.shp` and `.gpkg`. `st_read()` will decide which driver to use automatically, based on the file name, as illustrated in the benchmark below demonstrating write speeds for each format.
+
+```{r, echo=FALSE, results='hide'}
+w_files = list.files(pattern = "w\\.")
+file.remove(w_files)
+```
+
+```{r, warning=FALSE, results='hide'}
+bench_write = microbenchmark(times = 1,
+        st_write(w, "w.geojson"),
+        st_write(w, "w.shp"),
+        st_write(w, "w.gpkg")
+)
+```
+
+```{r}
+bench_write
+```
+
+
+The full range of file-types supported by **sf** is reported by `st_drivers()`, the first 2 of which are shown below:
+
+```{r}
+st_drivers()[1:2,]
+```
+
+
+<!-- ## Vector -->
 
 <!-- 
 - sf package 
@@ -13,7 +55,7 @@ Spatial data comes in a wide variety of file formats.
 - WKT, WKB, sp (st_as_sf)
 -->
 
-## Raster
+<!-- ## Raster -->
 
 <!-- 
 - raster package 
