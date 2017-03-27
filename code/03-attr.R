@@ -1,77 +1,92 @@
-## ---- eval=FALSE---------------------------------------------------------
-## # subsetting simple feature rows
-## w[1:3, ]
+## ---- echo=FALSE, include=FALSE------------------------------------------
+source("code/01-introduction.R")
 
 ## ------------------------------------------------------------------------
-# subsetting simple feature columns
-selc = 1:3
-w_few_cols = w[selc]
-head(w_few_cols)
+class(world)
+
+## ------------------------------------------------------------------------
+dim(world) # it is a 2 dimensional object, with rows and columns
+nrow(world) # how many rows?
+ncol(world) # how many columns?
+
+## ------------------------------------------------------------------------
+world_df = world
+st_geometry(world_df) = NULL
+class(world_df)
+
+## ---- eval=FALSE---------------------------------------------------------
+#> world[1:6, ] # subsetting rows
+
+## ------------------------------------------------------------------------
+world[, 1:3] # subsetting columns
 
 ## ---- message=FALSE------------------------------------------------------
 library(dplyr)
 
 ## ------------------------------------------------------------------------
-# subsetting simple feature columns by name
-w_few_cols2 = w[c('name', 'continent')]
+world = select(world, name, continent, population = pop_est)
+head(world)
 
-#OR
+## ---- eval=FALSE---------------------------------------------------------
+#> world = world[c("name", "continent", "pop_est")] # subset columns by name
+#> names(world)[3] = "population" # rename column manually
 
-w_few_cols2 = w %>%
+## ------------------------------------------------------------------------
+world_few_cols2 = world %>%
         select(., name, continent)
 
-head(w_few_cols2)
+head(world_few_cols2)
 
 ## ------------------------------------------------------------------------
 # ==, !=, >, >=, <, <=, &, |
 
 # subsetting simple feature rows by values
-w_few_rows = w[w$pop_est>1000000000, ]
+world_few_rows = world[world$pop_est>1000000000, ]
 
 #OR
-w_few_rows = w %>% 
+world_few_rows = world %>% 
         filter(., pop_est>1000000000)
 
-head(w_few_rows)
+head(world_few_rows)
 
 ## ------------------------------------------------------------------------
 # add a new column
-w$area = raster::area(as(w, "Spatial")) / 1000000 #it there any function for area calculation on sf object?
-w$pop_density = w$pop_est / w$area
+world$area = raster::area(as(world, "Spatial")) / 1000000 #it there any function for area calculation on sf object?
+world$pop_density = world$pop_est / world$area
 
 # OR
 
-w = w %>% 
+world = world %>% 
         mutate(area=raster::area(as(., "Spatial")) / 1000000) %>% 
         mutate(pop_density=pop_est/area)
 
 ## ------------------------------------------------------------------------
 # data summary
-summary(w)
+summary(world)
 
 # data summary by groups
-w_continents = w %>% 
+world_continents = world %>% 
         group_by(continent) %>% 
         summarise(continent_pop=sum(pop_est), country_n=n())
-w_continents
+world_continents
 
 ## ------------------------------------------------------------------------
 # sort variables
 ## by name
-w_continents %>% 
+world_continents %>% 
         arrange(continent)
 ## by population (in descending order)
-w_continents %>% 
+world_continents %>% 
         arrange(-continent_pop)
 
 ## ------------------------------------------------------------------------
-w_st = w
-st_geometry(w_st) = NULL
-class(w_st)
+world_st = world
+st_geometry(world_st) = NULL
+class(world_st)
 
 # OR
 
-w_st2 = w
-w_st2 = w_st2 %>% st_set_geometry(., NULL)
-class(w_st2)
+world_st2 = world
+world_st2 = world_st2 %>% st_set_geometry(., NULL)
+class(world_st2)
 

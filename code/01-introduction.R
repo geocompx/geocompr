@@ -2,22 +2,22 @@
 knitr::include_graphics("figures/simple-feature-class-hierarchy.png")
 
 ## ---- eval=FALSE---------------------------------------------------------
-## vignette("sf1") # for an introduction to the package
-## vignette("sf2") # for reading, writing and converting Simple Features
-## vignette("sf3") # for manipulating simple features
+#> vignette("sf1") # for an introduction to the package
+#> vignette("sf2") # for reading, writing and converting Simple Features
+#> vignette("sf3") # for manipulating simple features
 
 ## ---- results='hide'-----------------------------------------------------
 library(sf)
 # devtools::install_github("nowosad/spData")
 f = system.file("shapes/ne_110m_admin_0_countries.shp", package = "spData")
-w = st_read(f)
+world = st_read(f)
 
 ## ------------------------------------------------------------------------
-class(w)
+class(world)
 
 ## ------------------------------------------------------------------------
-w[1:2, 1:3]
+world[1:2, 1:3]
 
 ## ------------------------------------------------------------------------
-w_sp = as(object = w, Class = "Spatial")
+world_sp = as(object = world, Class = "Spatial")
 
