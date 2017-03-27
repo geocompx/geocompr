@@ -1,5 +1,14 @@
 # Reading and writing spatial data {#read-write}
 
+## Prerequisites {-}
+
+- You must have run the code in Chapter 1
+
+```{r, echo=FALSE, include=FALSE}
+if(!exists("world"))
+        source("code/01-introduction.R")
+```
+
 Spatial data comes in a wide variety of file formats, and **sf** is adept at handling them, via its interface to GDAL.
 A major advantage of **sf** is that it is fast at geographical data I/O, as illustrated in the benchmark below:
 
@@ -15,26 +24,26 @@ bench_read = microbenchmark(times = 5,
 bench_read$time[1] / bench_read$time[2]
 ```
 
-The results demonstrate that **sf** can be about *`r round(bench_read$time[1] / bench_read$time[2], 0)` times faster* than **rgdal** at reading-in the world countries shapefile.
+The results demonstrate that **sf** can be much faster (*`r round(bench_read$time[1] / bench_read$time[2], 0)` times faster* in this case) than **rgdal** at reading-in the world countries shapefile.
 
 The counterpart of `st_read()` is `st_write()`. This allows writing to a range of geographic vector file types, including the common formats `.geojson`, `.shp` and `.gpkg`. `st_read()` will decide which driver to use automatically, based on the file name, as illustrated in the benchmark below demonstrating write speeds for each format.
 
 ```{r, echo=FALSE, results='hide'}
-w_files = list.files(pattern = "w\\.")
-file.remove(w_files)
+world_files = list.files(pattern = "world\\.")
+file.remove(world_files)
 ```
 
 ```{r, warning=FALSE, results='hide'}
 bench_write = microbenchmark(times = 1,
-        st_write(w, "w.geojson"),
-        st_write(w, "w.shp"),
-        st_write(w, "w.gpkg")
+        st_write(world, "world.geojson"),
+        st_write(world, "world.shp"),
+        st_write(world, "world.gpkg")
 )
 ```
 
 ```{r, echo=FALSE, results='hide'}
-w_files = list.files(pattern = "w\\.")
-file.remove(w_files)
+world_files = list.files(pattern = "world\\.")
+file.remove(world_files)
 ```
 
 ```{r}
@@ -44,7 +53,8 @@ bench_write
 The full range of file-types supported by **sf** is reported by `st_drivers()`, the first 2 of which are shown below:
 
 ```{r}
-st_drivers()[1:2,]
+sf_drivers = st_drivers()
+head(sf_drivers, n = 2)
 ```
 
 
