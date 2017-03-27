@@ -13,26 +13,26 @@ source("code/01-introduction.R")
 
 Attribute data is non-geographical information associated with columns geometry.
 **sf** makes working with attribute data because objects of class `sf` are data frames.
-This is illustrated below for the `w` object representing the countries of the world:
+This is illustrated below for the `world` object representing the countries of the world:
 
 ```{r}
-class(w)
+class(world)
 ```
 
 This 'world' dataset contains 63 non-geographical variables (and one geometry column) with data for almost 200 countries, as can be ascertained using base functions for working with tabular data:
 
 ```{r}
-dim(w) # it is a 2 dimensional object, with rows and columns
-nrow(w) # how many rows?
-ncol(w) # how many columns?
+dim(world) # it is a 2 dimensional object, with rows and columns
+nrow(world) # how many rows?
+ncol(world) # how many columns?
 ```
 
 Extracting the attribute data of an `sf` object is the same as removing the geometry column:
 
 ```{r}
-w_df = w
-st_geometry(w_df) = NULL
-class(w_df)
+world_df = world
+st_geometry(world_df) = NULL
+class(world_df)
 ```
 
 This can be useful if the geometry column causes problem, e.g. by occupying large amounts of RAM.
@@ -46,11 +46,11 @@ The subsequent examples briefly demonstrate how attribute data in `sf` objects c
 `sf` objects behave exactly the same as `data.frame` objects for most base R operations, including subsetting rows and columns, creating new variables and modelling, as illustrated in the code examples below.
 
 ```{r, eval=FALSE}
-w[1:6, ] # subsetting rows
+world[1:6, ] # subsetting rows
 ```
 
 ```{r}
-w[, 1:3] # subsetting columns
+world[, 1:3] # subsetting columns
 ```
 
 Note that after each operation, the geometry column is preserved.
@@ -67,80 +67,82 @@ library(dplyr)
 The `select()` function, for example, can be used to both subset and renames columns in a single line, for example:
 
 ```{r}
-w = select(w, name, continent, population = pop_est)
-head(w)
+world = select(world, name, continent, population = pop_est)
+head(world)
 ```
 
 This is more concises than the base R equivalent:
 
-```{r}
-w = w[c("name", "continent", "pop_est")] # subset columns by name
-names(w)[3] = "population" # rename column manually
+```{r, eval=FALSE}
+world = world[c("name", "continent", "pop_est")] # subset columns by name
+names(world)[3] = "population" # rename column manually
+```
 
-w_few_cols2 = w %>%
+```{r}
+world_few_cols2 = world %>%
         select(., name, continent)
 
-head(w_few_cols2)
+head(world_few_cols2)
 ```
 
 ```{r}
 # ==, !=, >, >=, <, <=, &, |
 
 # subsetting simple feature rows by values
-w_few_rows = w[w$pop_est>1000000000, ]
+world_few_rows = world[world$pop_est>1000000000, ]
 
 #OR
-w_few_rows = w %>% 
+world_few_rows = world %>% 
         filter(., pop_est>1000000000)
 
-head(w_few_rows)
+head(world_few_rows)
 ```
 
 ```{r}
 # add a new column
-w$area = raster::area(as(w, "Spatial")) / 1000000 #it there any function for area calculation on sf object?
-w$pop_density = w$pop_est / w$area
+world$area = raster::area(as(world, "Spatial")) / 1000000 #it there any function for area calculation on sf object?
+world$pop_density = world$pop_est / world$area
 
 # OR
 
-w = w %>% 
+world = world %>% 
         mutate(area=raster::area(as(., "Spatial")) / 1000000) %>% 
         mutate(pop_density=pop_est/area)
 ```
 
 ```{r}
 # data summary
-summary(w)
+summary(world)
 
 # data summary by groups
-w_continents = w %>% 
+world_continents = world %>% 
         group_by(continent) %>% 
         summarise(continent_pop=sum(pop_est), country_n=n())
-w_continents
+world_continents
 ```
 
 ```{r}
 # sort variables
 ## by name
-w_continents %>% 
+world_continents %>% 
         arrange(continent)
 ## by population (in descending order)
-w_continents %>% 
+world_continents %>% 
         arrange(-continent_pop)
 ```
 
 Most of the function from **sf** package do not drop a `geometry` column. To extract a data frame `st_geometry()` or `st_set_geometry()` function can be used.
 
 ```{r}
-w_st = w
-st_geometry(w_st) = NULL
-class(w_st)
+world_st = world
+st_geometry(world_st) = NULL
+class(world_st)
 
 # OR
 
-w_st2 = w
-w_st2 = w_st2 %>% st_set_geometry(., NULL)
-class(w_st2)
+world_st2 = world
+world_st2 = world_st2 %>% st_set_geometry(., NULL)
+class(world_st2)
 ```
 
 
