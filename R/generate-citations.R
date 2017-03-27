@@ -1,7 +1,7 @@
 #' Cite R packages
-#' from https://github.com/csgillespie/efficientR/blob/master/appendix.Rmd
-#' 
-#' 
+#'
+#' See https://github.com/csgillespie/efficientR/blob/master/appendix.Rmd
+#'
 generate_citations = function() {
         desc = read.dcf("DESCRIPTION")
         headings = dimnames(desc)[[2]]
@@ -12,11 +12,11 @@ generate_citations = function() {
         pkgs = gsub(" ", "", pkgs)
         pkgs = gsub("\\(.*)", "", pkgs) # Remove versions from packages
         to_install = !pkgs %in% rownames(installed.packages())
-        
+
         if(sum(to_install) > 0){
                 install.packages(pkgs[to_install])
         }
-        
+
         i = 1
         pkgs = pkgs[order(pkgs)]
         pkgs_df = data.frame(Name = pkgs, Title = NA, cite = NA, version = NA)
