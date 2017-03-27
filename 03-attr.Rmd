@@ -6,7 +6,8 @@
 - You must have run the code in Chapter 1
 
 ```{r, echo=FALSE, include=FALSE}
-source("code/01-introduction.R")
+if(!exists("world"))
+        source("code/01-introduction.R")
 ```
 
 ## Introduction
@@ -43,14 +44,14 @@ The subsequent examples briefly demonstrate how attribute data in `sf` objects c
 
 ## Handling attribute data with base R
 
-`sf` objects behave exactly the same as `data.frame` objects for most base R operations, including subsetting rows and columns, creating new variables and modelling, as illustrated in the code examples below.
+`sf` objects behave exactly the same as `data.frame` objects for most base R operations, including subsetting rows and columns, creating new variables and modelling, as illustrated in the code examples below (results not shown).
 
 ```{r, eval=FALSE}
-world[1:6, ] # subsetting rows
+world[1:6, ] # subset rows
 ```
 
-```{r}
-world[, 1:3] # subsetting columns
+```{r, eval=FALSE}
+world[, 1:3] # subset columns
 ```
 
 Note that after each operation, the geometry column is preserved.
@@ -67,29 +68,37 @@ library(dplyr)
 The `select()` function, for example, can be used to both subset and renames columns in a single line, for example:
 
 ```{r}
-world = select(world, name, continent, population = pop_est)
+world_orig = world # create copy of world dataset for future reference
+world = select(world_orig, name, continent, population = pop_est)
 head(world)
 ```
 
-This is more concises than the base R equivalent:
+This is more concises than the base R equivalent (which saves the result as an object called `world2` to avoid overiding the `world` dataset created previously):
 
 ```{r, eval=FALSE}
-world = world[c("name", "continent", "pop_est")] # subset columns by name
-names(world)[3] = "population" # rename column manually
+world2 = world_orig[c("name", "continent", "pop_est")] # subset columns by name
+names(world2)[3] = "population" # rename column manually
 ```
+
+The *pipe* operator (` %>% `), which passes the output of one function into the first argument of the next function, is commonly used in **dplyr** data analysis workflows.
+This works because the fundamental **dplyr** functions (or 'verbs', like `select()`) all take a data frame object in and spit a data frame object out.
+Combining many functions together with pipes is called *chaining* or *piping*.
+The advantage over base R for complex data processing operations is that this approach prevents nested functions and is easy to read because there is a clear order and modularity to the work (a piped command can be commented out, for example).
+
+The example below shows yet another way of creating the renamed `world` dataset, using the pipe operator:
 
 ```{r}
-world_few_cols2 = world %>%
-        select(., name, continent)
-
-head(world_few_cols2)
+world4 = world_orig %>%
+        select(name, continent)
 ```
+
+The pipe operator can be used for many data processing tasks with attribute data:
 
 ```{r}
 # ==, !=, >, >=, <, <=, &, |
 
 # subsetting simple feature rows by values
-world_few_rows = world[world$pop_est>1000000000, ]
+world_few_rows = world[world$population>1000000000, ]
 
 #OR
 world_few_rows = world %>% 
