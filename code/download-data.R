@@ -28,6 +28,7 @@ plot(cycle_hire) # looks right
 class(cycle_hire) # class sf and tbl
 devtools::use_data(cycle_hire)
 
+
 # worldbank  ---------------------------------------------------
 # install.packages("wbstats")
 # devtools::install_github("ropenscilabs/rnaturalearth")

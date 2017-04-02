@@ -1,1 +1,1 @@
-# Geography with R: a Practical Introduction
+# Geocomputation with R
