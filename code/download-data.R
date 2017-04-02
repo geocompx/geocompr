@@ -49,7 +49,7 @@ wb_data_create <- function(indicator, our_name, year, ...){
         return(df)
 }
 
-## IMPORTANT - sometimes wb_data_create function needs to be executed a few times to work!
+## IMPORTANT - repeat if a server is down
 
 data_pop <- wb_data_create(indicator = "SP.POP.TOTL", our_name = "pop", year = 2014, country = "countries_only")
 data_lifeexp <- wb_data_create(indicator = "SP.DYN.LE00.IN", our_name = "lifeExp", year = 2014, country = "countries_only")
@@ -63,4 +63,7 @@ world_sf <- ne_countries(returnclass = 'sf') %>%
         select(iso_a2, name_long, continent, region_un, subregion, type, area_km2, pop, lifeExp, gdpPercap)
 
 plot(world_sf)
-ggplot(world_sf, aes(fill=lifeExp)) + geom_sf() + scale_fill_viridis() + theme_void()
+ggplot(world_sf, aes(fill=pop)) +
+        geom_sf() +
+        scale_fill_viridis() +
+        theme_void()
