@@ -2,8 +2,27 @@
 knit: "bookdown::preview_chapter"
 ---
 
-```{r, echo=FALSE}
-rm(list=ls())
+## Prerequisites {-}
+
+- ...
+
+```{r, include=FALSE}
+devtools::install_github("dgrtwo/gganimate")
+pkgs_c10 = c(
+        "cowplot",
+        "wbstats",
+        "rnaturalearth",
+        "viridis",
+        "sf",
+        "tidyverse",
+        "gganimate",
+        "units"
+)
+pacman::p_load(char = pkgs_c10)
+if(!exists("world")) {
+        source("code/01-introduction.R")
+}
+        
 ```
 
 # Advanced map making {#adv-map}
@@ -22,12 +41,6 @@ rm(list=ls())
 ## Animations
 
 ```{r}
-library(wbstats)
-library(rnaturalearth)
-library(viridis)
-library(gganimate)
-library(sf)
-library(tidyverse)
 options(scipen = 999)
 
 wb_data_create <- function(indicator, our_name, year, ...){
@@ -48,7 +61,7 @@ data_lifeExp <- seq(1963, 2013, by=5) %>%
 
 world_sf_temporal <- ne_countries(returnclass = 'sf') %>%
         left_join(., data_lifeExp, by = c('iso_a2')) %>%
-        mutate(area_km2 = raster::area(as(., "Spatial")) / 1000000) %>%
+        mutate(area_km2 = set_units(st_area(.), km^2)) %>%
         select(iso_a2, name_long, continent, region_un, subregion, type, area_km2, `1963`:`2013`) %>%
         gather(year, lifeExp, `1963`:`2013`)
 
