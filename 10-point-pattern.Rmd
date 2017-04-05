@@ -1,16 +1,8 @@
----
-title: 'Point Pattern analysis and spatial interpolation with R'
-output:
-  github_document: 
-    toc: yes
-bibliography: references.bib
----
+# Point Pattern analysis and spatial interpolation
 
-```{r, echo=FALSE}
-knitr::opts_knit$set(root.dir = "..")
-```
+## Prerequisites {-}
 
-# Introduction
+## Introduction
 
 This tutorial teaches the basics of point pattern analysis in R.
 It is influenced by the chapter on Spatial Point Pattern Analysis in *Applied Spatial Data Analysis with R* [@bivand_applied_2013] and an [online tutorial](http://rspatial.org/analysis/rst/8-pointpat.html) on Point Pattern Analyis by Robert Hijmans.
@@ -51,7 +43,7 @@ But how to describe that information quantitatively, and extrapolate the values 
 
 It is the purpose of this tutorial to provide the know-how to answer such questions, that should be extensible to many applications that involve point data.
 
-# Point density
+## Point density
 
 A basic statistic to compute on points within a polygon is the number of points per polygon, and the related statistic of point density.
 Let's first compute that for London overall, before doing a zone-by-zone breakdown:
@@ -78,7 +70,7 @@ crs(bb_hire) = crs(lnd)
 c_area = area(bb_hire) / 1e6
 ```
 
-## Exercises
+### Exercises
 
 - What is the average point density of cycle hire points within the scheme's bounding box?
 
@@ -91,12 +83,12 @@ c_area = area(bb_hire) / 1e6
 - Why are there two `crs()` calls?
 - The above chunk uses **raster** functions. How would you write the above code using **sp** code?
 
-## Challenges
+### Challenges
 
 - Reproduce the result using **sp** code.
 - Reproduce the results using **sf** code.
 
-# Points in polygons and raster cells
+## Points in polygons and raster cells
 
 A useful level of analysis at which to analyse the geographical distribution of points is the zone-level.
 We can aggregate the points per zone and provide summary statistics.
@@ -106,14 +98,14 @@ Starting with the number of points per polygon, this would calculated as follows
 cycle_hire_ag = aggregate(cycle_hire["id"], lnd, FUN = "length")
 ```
 
-## Exercises
+### Exercises
 
 Based on an analysis of the `cycle_hire_ag`:
 
 - How many zones contain no cycle hire points?
 - What is the average number of cycle hire points per zone?
 
-## Challenge
+### Challenge
 
 Find the average density of cycle hire points per zone in London.
 
@@ -167,13 +159,13 @@ The resulting interactive plot draws attention to the areas of high point densit
 
 ![](point-pattern_files/figure-markdown_github/victoria-plot.png)
 
-## Exercises
+### Exercises
 
 - Explore the interactive map created by **mapview** above.
 - Try to explain the location of the high density clusters: what are they near?
 - Where would you suggest building more cycle hire points? 
 
-# Point distance analysis
+## Point distance analysis
 
 Another important characteristic of point patterns is the distances between points, which can be calculated using **raster**'s `dist()` function:
 
@@ -206,7 +198,7 @@ Gd = Gd / length(dmin)
 plot(distance, Gd)
 ```
 
-# Spatial interpolation
+## Spatial interpolation
 
 Spatial interpolation refers to methods of estimating the value of something in one place, based on measurements taken elsewhere.
 It depends on spatial autocorrelation, defined in Waldo Tobler's 'first law of Geography' as follows [@miller_toblers_2004]: 
@@ -244,12 +236,12 @@ plot(r_interp1)
 points(cycle_hire)
 ```
 
-## Exercises
+### Exercises
 
 - Experiment with different matrix sizes of `w` in the above code block. What difference does the size make?
 - Note that the 9x9 cell focal point leads to an 'over smoothing' of the results. Find a way to include only values from touching cells in the results.
 
-# Voronoi polygon interpolation
+## Voronoi polygon interpolation
 
 The raster cell method of spatial interpolation was fun, but not that sophisticated or spatially precise, with a resolution of around 1 km.
 
@@ -264,13 +256,13 @@ tm_shape(v) +
   qtm(cycle_hire, symbols.size = 0.2)
 ```
 
-## Exercises
+### Exercises
 
 - Create a point at a random location on the map and plot it prominently on top of the previously plotted layers.
 - What would be it's estimated 'nbikes' a) from the voronoi polygon interpolation and b) from the raster interpolation.
 - Which do you think is most accurate?
 
-# Interpolation with the gstat package
+## Interpolation with the gstat package
 
 **gstat** provides a number of functions for spatial prediction and interpolation using a range of models.
 The most basic of these, and a workhorse for spatial interpolation is Inverse Distance Weighting (IDW):
@@ -282,11 +274,9 @@ r_idw = interpolate(r, gs)
 plot(r_idw)
 ```
 
-## Exercises
+### Exercises
 
 - Look at the original data - what could explain the spatial distribution of the `nbikes` variable?
 - Experiment with the spatial resolution - we're using 1 km grid cells which are huge!
 - Try using other methods described in Robert Hijman's [tutorial](http://rspatial.org/analysis/rst/4-interpolation.html) on spatial interpolation.
 - Try cross-validating the results. Which performs best?
-
-# References
