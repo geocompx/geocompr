@@ -5,18 +5,17 @@
 - ...
 
 ```{r, include=FALSE}
-devtools::install_github("dgrtwo/gganimate")
-pkgs_c10 = c(
+pkgs_c11 = c(
         "cowplot",
         "wbstats",
         "rnaturalearth",
         "viridis",
         "sf",
         "tidyverse",
-        "gganimate",
+        "tmap",
         "units"
 )
-pacman::p_load(char = pkgs_c10)
+pacman::p_load(char = pkgs_c11)
 if(!exists("world")) {
         source("code/01-introduction.R")
 }
@@ -38,7 +37,7 @@ if(!exists("world")) {
 
 ## Animations
 
-```{r}
+```{r ani_data_prep}
 options(scipen = 999)
 
 wb_data_create <- function(indicator, our_name, year, ...){
@@ -62,40 +61,53 @@ world_sf_temporal <- ne_countries(returnclass = 'sf') %>%
         mutate(area_km2 = set_units(st_area(.), km^2)) %>%
         select(iso_a2, name_long, continent, region_un, subregion, type, area_km2, `1963`:`2013`) %>%
         gather(year, lifeExp, `1963`:`2013`)
-
-p <- ggplot(world_sf_temporal, aes(fill = lifeExp, frame = year)) +
-        geom_sf() +
-        scale_fill_viridis(name='Life \nexpectancy:') +
-        scale_y_continuous(expand = c(0,0)) +
-        scale_x_continuous(expand = c(0,0)) +
-        theme_void() +
-        # theme(legend.position = c(.15, .4)) +
-        coord_sf()
-
-gganimate(p, filename = 'plot1.gif')
-
-world_sf_temporal2 <- filter(world_sf_temporal, !(continent %in% c("Seven seas (open ocean)", "Antarctica")))
-p2 <- ggplot(world_sf_temporal2, aes(fill = lifeExp, frame = year)) +
-        geom_sf() +
-        scale_fill_viridis(name='Life \nexpectancy:') +
-        scale_y_continuous(expand = c(0,0)) +
-        scale_x_continuous(expand = c(0,0)) +
-        theme_void() +
-        facet_wrap(~continent, scales='free') +
-        coord_sf()
-
-gganimate(p2, filename = 'plot2.gif')
-
-world_sf_temporal3 <- filter(world_sf_temporal, continent == 'Africa')
-p3 <- ggplot(world_sf_temporal3, aes(fill = lifeExp, frame = year)) +
-        geom_sf() +
-        scale_fill_viridis(name='Life \nexpectancy:', option = "B") +
-        scale_y_continuous(expand = c(0,0)) +
-        scale_x_continuous(expand = c(0,0)) +
-        theme_void() +
-        facet_wrap(~name_long, scales='free') +
-        coord_sf()
-
-gganimate(p3, filename = 'plot3.gif')
 ```
 
+```{r animation1, eval=FALSE}
+## failed
+world_sf_temporal2 <- filter(world_sf_temporal, type!='Indeterminate')
+tm_shape(world_sf_temporal2) +
+    tm_polygons(c("lifeExp"))
+
+m1 <- tm_shape(world_sf_temporal2) + 
+        tm_polygons("lifeExp") +
+        tm_facets(by = "year", nrow=1, ncol=1)
+
+animation_tmap(m1, filename="temp.gif", width=800, delay=40)
+```
+
+
+<!-- p <- ggplot(world_sf_temporal, aes(fill = lifeExp, frame = year)) + -->
+<!--         geom_sf() + -->
+<!--         scale_fill_viridis(name='Life \nexpectancy:') + -->
+<!--         scale_y_continuous(expand = c(0,0)) + -->
+<!--         scale_x_continuous(expand = c(0,0)) + -->
+<!--         theme_void() + -->
+<!--         # theme(legend.position = c(.15, .4)) + -->
+<!--         coord_sf() -->
+
+<!-- gganimate(p, filename = 'plot1.gif') -->
+
+<!-- world_sf_temporal2 <- filter(world_sf_temporal, !(continent %in% c("Seven seas (open ocean)", "Antarctica"))) -->
+<!-- p2 <- ggplot(world_sf_temporal2, aes(fill = lifeExp, frame = year)) + -->
+<!--         geom_sf() + -->
+<!--         scale_fill_viridis(name='Life \nexpectancy:') + -->
+<!--         scale_y_continuous(expand = c(0,0)) + -->
+<!--         scale_x_continuous(expand = c(0,0)) + -->
+<!--         theme_void() + -->
+<!--         facet_wrap(~continent, scales='free') + -->
+<!--         coord_sf() -->
+
+<!-- gganimate(p2, filename = 'plot2.gif') -->
+
+<!-- world_sf_temporal3 <- filter(world_sf_temporal, continent == 'Africa') -->
+<!-- p3 <- ggplot(world_sf_temporal3, aes(fill = lifeExp, frame = year)) + -->
+<!--         geom_sf() + -->
+<!--         scale_fill_viridis(name='Life \nexpectancy:', option = "B") + -->
+<!--         scale_y_continuous(expand = c(0,0)) + -->
+<!--         scale_x_continuous(expand = c(0,0)) + -->
+<!--         theme_void() + -->
+<!--         facet_wrap(~name_long, scales='free') + -->
+<!--         coord_sf() -->
+
+<!-- gganimate(p3, filename = 'plot3.gif') -->
