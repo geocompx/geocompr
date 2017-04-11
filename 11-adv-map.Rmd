@@ -40,8 +40,8 @@ if(!exists("world")) {
 ```{r ani_data_prep}
 options(scipen = 999)
 
-wb_data_create <- function(indicator, our_name, year, ...){
-        df <- wb(indicator = indicator, startdate = year, enddate = year, ...) %>%
+wb_data_create = function(indicator, our_name, year, ...){
+        df = wb(indicator = indicator, startdate = year, enddate = year, ...) %>%
                 as_data_frame() %>%
                 select(iso_a2=iso2c, value) %>%
                 mutate(indicator = our_name) %>%
@@ -49,14 +49,14 @@ wb_data_create <- function(indicator, our_name, year, ...){
         return(df)
 }
 
-data_lifeExp <- seq(1963, 2013, by=5) %>%
+data_lifeExp = seq(1963, 2013, by=5) %>%
         set_names(.) %>%
         map_df(~wb_data_create(.x, indicator = "SP.DYN.LE00.IN",
                                our_name = "lifeExp",
                                country = "countries_only"), .id='year') %>%
         spread(year, lifeExp)
 
-world_sf_temporal <- ne_countries(returnclass = 'sf') %>%
+world_sf_temporal = ne_countries(returnclass = 'sf') %>%
         left_join(., data_lifeExp, by = c('iso_a2')) %>%
         mutate(area_km2 = set_units(st_area(.), km^2)) %>%
         select(iso_a2, name_long, continent, region_un, subregion, type, area_km2, `1963`:`2013`) %>%
@@ -64,20 +64,23 @@ world_sf_temporal <- ne_countries(returnclass = 'sf') %>%
 ```
 
 ```{r animation1, eval=FALSE}
-## failed
-world_sf_temporal2 <- filter(world_sf_temporal, type!='Indeterminate')
-tm_shape(world_sf_temporal2) +
-    tm_polygons(c("lifeExp"))
-
-m1 <- tm_shape(world_sf_temporal2) + 
+m1 = tm_shape(world_sf_temporal) + 
         tm_polygons("lifeExp") +
-        tm_facets(by = "year", nrow=1, ncol=1)
+        tm_facets(by = "year", nrow = 1, ncol = 1, drop.units = TRUE)
 
-animation_tmap(m1, filename="temp.gif", width=800, delay=40)
+animation_tmap(m1, filename = "temp.gif", width = 2000, height = 600, delay = 40)
+```
+
+```{r animation2, eval=FALSE}
+# world_sf_temporal2 = filter(world_sf_temporal, !(continent %in% c("Seven seas (open ocean)", "Antarctica")))
+# m2 = tm_shape(world_sf_temporal2) + 
+#         tm_polygons("lifeExp") +
+#         tm_facets(by = c("continent", "year"), nrow = 1, ncol = 1, free.coords = TRUE) 
+# m2
 ```
 
 
-<!-- p <- ggplot(world_sf_temporal, aes(fill = lifeExp, frame = year)) + -->
+<!-- p = ggplot(world_sf_temporal, aes(fill = lifeExp, frame = year)) + -->
 <!--         geom_sf() + -->
 <!--         scale_fill_viridis(name='Life \nexpectancy:') + -->
 <!--         scale_y_continuous(expand = c(0,0)) + -->
@@ -88,8 +91,8 @@ animation_tmap(m1, filename="temp.gif", width=800, delay=40)
 
 <!-- gganimate(p, filename = 'plot1.gif') -->
 
-<!-- world_sf_temporal2 <- filter(world_sf_temporal, !(continent %in% c("Seven seas (open ocean)", "Antarctica"))) -->
-<!-- p2 <- ggplot(world_sf_temporal2, aes(fill = lifeExp, frame = year)) + -->
+<!-- world_sf_temporal2 = filter(world_sf_temporal, !(continent %in% c("Seven seas (open ocean)", "Antarctica"))) -->
+<!-- p2 = ggplot(world_sf_temporal2, aes(fill = lifeExp, frame = year)) + -->
 <!--         geom_sf() + -->
 <!--         scale_fill_viridis(name='Life \nexpectancy:') + -->
 <!--         scale_y_continuous(expand = c(0,0)) + -->
@@ -100,8 +103,8 @@ animation_tmap(m1, filename="temp.gif", width=800, delay=40)
 
 <!-- gganimate(p2, filename = 'plot2.gif') -->
 
-<!-- world_sf_temporal3 <- filter(world_sf_temporal, continent == 'Africa') -->
-<!-- p3 <- ggplot(world_sf_temporal3, aes(fill = lifeExp, frame = year)) + -->
+<!-- world_sf_temporal3 = filter(world_sf_temporal, continent == 'Africa') -->
+<!-- p3 = ggplot(world_sf_temporal3, aes(fill = lifeExp, frame = year)) + -->
 <!--         geom_sf() + -->
 <!--         scale_fill_viridis(name='Life \nexpectancy:', option = "B") + -->
 <!--         scale_y_continuous(expand = c(0,0)) + -->
