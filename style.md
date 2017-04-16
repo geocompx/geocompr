@@ -33,3 +33,7 @@ Leave a single empty line space before and after each code chunk.
 **package_name**
 `class_of_object`
 `function_name()`
+
+# Figures
+
+Names of the figures should contain a chapter number, e.g. `04-world_map.png` or `11-population_animation.gif`.
