@@ -1,5 +1,5 @@
 library(methods)
-library(rgeobook)
+library(geocompr)
 
 knitr::opts_chunk$set(
         comment = "#>",
@@ -13,4 +13,4 @@ set.seed(2017)
 options(digits = 3)
 options(dplyr.print_min = 4, dplyr.print_max = 4)
 
-rgeobook:::generate_chapter_code()
+geocompr:::generate_chapter_code()
