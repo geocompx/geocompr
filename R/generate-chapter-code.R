@@ -11,8 +11,8 @@ generate_chapter_code = function(dir = ".", out_dir  = "code/") {
 
 #' Generate a data frame of book statistics per chapter
 generate_book_stats = function(dir = ".") {
-        require(tidytext)
-        require(dplyr)
+        library(tidytext)
+        library(dplyr)
         rmd_files = list.files(path = dir, pattern = ".Rmd")
         chapters = lapply(rmd_files, readLines)
         chapters = lapply(chapters, function(x) data_frame(line = 1:length(x), text = x))
