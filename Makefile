@@ -17,9 +17,8 @@ md:
 install:
 	Rscript -e 'devtools::install_github("Robinlovelace/geocompr")'
 
-# Boodown account name should be added here:
 deploy:
-	Rscript -e 'bookdown::publish_book(render = "local", account = "")'
+	Rscript -e 'bookdown::publish_book(render = "local", account = "robinlovelace")'
 
 clean:
 	Rscript -e "bookdown::clean_book(TRUE)"
