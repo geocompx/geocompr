@@ -9,7 +9,7 @@ knitr::include_graphics("figures/simple-feature-class-hierarchy.png")
 ## ---- results='hide'-----------------------------------------------------
 library(sf)
 # devtools::install_github("nowosad/spData")
-f = system.file("shapes/ne_110m_admin_0_countries.shp", package = "spData")
+f = system.file("shapes/wrld.shp", package = "spData")
 world = st_read(f)
 
 ## ------------------------------------------------------------------------
