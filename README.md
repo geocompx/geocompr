@@ -20,7 +20,7 @@ This book will be developed in the open and published by CRC Press in late 2018.
 
 We encourage contributions on any part of the book, including:
 
-- Improvements to the text, e.g. clarifying unclear sentences, fixing typos (see guidance from [Yihui Xie](https://yihui.name/en/2013/06/fix-typo-in-documentation/) for help on that.
+- Improvements to the text, e.g. clarifying unclear sentences, fixing typos (see guidance from [Yihui Xie](https://yihui.name/en/2013/06/fix-typo-in-documentation/)).
 - Changes to the code, e.g. to do things in a more efficient way.
 - Suggestions on content (see the project's [issue tracker](https://github.com/Robinlovelace/geocompr/issues)).
 
@@ -59,13 +59,6 @@ browseURL("_book/index.html") # to view it
 An indication of the book's progress over time is illustrated below (to be updated roughly every week as the book progresses).
 
 
-
-
-```r
-ggplot(book_stats) +
-        geom_area(aes(date, n_pages, fill = chapter), position = "stack") +
-        ylab("Estimated number of pages")
-```
 
 ![plot of chunk bookstats](figure/bookstats-1.png)
 
