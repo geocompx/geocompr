@@ -1,33 +1,31 @@
----
-output: github_document
----
-
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+Geocomputation with R
+=====================
 
-# Geocomputation with R  
-
-# Introduction
+Introduction
+============
 
 This repository hosts the code underlying Geocomputation with R, a book by Robin Lovelace and Jakub Nowosad.
 
 This book will be developed in the open published by CRC Press in late 2018.
 
-## Contributing
+Contributing
+------------
 
 We encourage contributions on any part of the book, including:
 
-- Improvements to the text, e.g. clarifying unclear sentences, fixing typos.
-- Changes to the code, e.g. to do things in a more efficient way.
-- Suggestions on content (see the project's [issue tracker](https://github.com/Robinlovelace/geocompr/issues)).
+-   Improvements to the text, e.g. clarifying unclear sentences, fixing typos.
+-   Changes to the code, e.g. to do things in a more efficient way.
+-   Suggestions on content (see the project's [issue tracker](https://github.com/Robinlovelace/geocompr/issues)).
 
 Please see [style.md](https://github.com/Robinlovelace/geocompr/blob/master/style.md).
 
-## Reproducing the book
+Reproducing the book
+--------------------
 
 To ease reproducibility, this book is also a package. Installing it from GitHub, will ensure all dependencies are available on your computer:
 
-
-```r
+``` r
 if(!require(devtools)) {
   install.packages("devtools")
 } 
@@ -36,21 +34,17 @@ devtools::install_github("robinlovelace/geocompr")
 
 You need a recent version of the GDAL, GEOS, Proj.4 and UDUNITS libraries installed for this to work on Mac and Linux. See the package's
 
-## Book statistics
+Book statistics
+---------------
 
 An indication of the book's progress over time is illustrated below (to be updated roughly every week as the book progresses).
 
-
-
-
-```r
+``` r
 ggplot(book_stats) +
         geom_area(aes(date, n_pages, fill = chapter), position = "stack") +
         ylab("Estimated number of pages")
 ```
 
-![plot of chunk bookstats](figure/bookstats-1.png)
+![](README_files/figure-markdown_github/bookstats-1.png)
 
 Book statistics: estimated number of pages per chapter over time.
-
-
