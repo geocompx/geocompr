@@ -26,8 +26,7 @@ Please see [style.md](https://github.com/Robinlovelace/geocompr/blob/master/styl
 
 To ease reproducibility, this book is also a package. Installing it from GitHub, will ensure all dependencies are available on your computer:
 
-
-```r
+```{r}
 if(!require(devtools)) {
   install.packages("devtools")
 } 
@@ -39,16 +38,25 @@ if(!require(devtools)) {
 
 An indication of the book's progress over time is illustrated below (to be updated roughly every week as the book progresses).
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# Should eventually be n_pages
+source("R/generate-chapter-code.R") # shouldn't have to run this
+book_stats = readr::read_csv("extdata/word-count-time.csv")
+if(Sys.Date() > max(book_stats$date)) {
+       book_stats_new = generate_book_stats()
+       book_stats = bind_rows(book_stats, book_stats_new)
+       readr::write_csv(book_stats, "extdata/word-count-time.csv")
+}
+library(ggplot2)
+book_stats$chapter = formatC(book_stats$chapter, width = 2, format = "d", flag = "0")
+book_stats$n_pages = book_stats$n_words / 300
+```
 
-
-
-```r
+```{r bookstats, warning=FALSE}
 ggplot(book_stats) +
         geom_area(aes(date, n_pages, fill = chapter), position = "stack") +
         ylab("Estimated number of pages")
 ```
-
-![plot of chunk bookstats](figure/bookstats-1.png)
 
 Book statistics: estimated number of pages per chapter over time.
 
