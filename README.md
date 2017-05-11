@@ -2,6 +2,8 @@
 Geocomputation with R
 =====================
 
+[![Build Status](https://travis-ci.org/Robinlovelace/geocompr.svg?branch=master)](https://travis-ci.org/Robinlovelace/geocompr)
+
 Introduction
 ============
 
