@@ -31,9 +31,10 @@ To ease reproducibility, this book is also a package. Installing it from GitHub,
 if(!require(devtools)) {
   install.packages("devtools")
 } 
-# devtools::install_github("robinlovelace/geocompr")
+devtools::install_github("robinlovelace/geocompr")
 ```
 
+You need a recent version of the GDAL, GEOS, Proj.4 and UDUNITS libraries installed for this to work on Mac and Linux. See the package's
 
 ## Book statistics
 
