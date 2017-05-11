@@ -1,13 +1,13 @@
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- README.md is generated from README.Rmd. Please edit that file - rmarkdown::render('README.Rmd', output_format = 'md_document', output_file = 'README.md') -->
 Geocomputation with R
 =====================
 
 Introduction
 ============
 
-This repository hosts the code underlying Geocomputation with R, a book by Robin Lovelace and Jakub Nowosad.
+This repository hosts the code underlying Geocomputation with R, a book by [Robin Lovelace](http://robinlovelace.net/) and [Jakub Nowosad](https://nowosad.github.io/).
 
-This book will be developed in the open published by CRC Press in late 2018.
+This book will be developed in the open and published by CRC Press in late 2018.
 
 Contributing
 ------------
@@ -32,7 +32,7 @@ if(!require(devtools)) {
 devtools::install_github("robinlovelace/geocompr")
 ```
 
-You need a recent version of the GDAL, GEOS, Proj.4 and UDUNITS libraries installed for this to work on Mac and Linux. See the package's
+You need a recent version of the GDAL, GEOS, Proj.4 and UDUNITS libraries installed for this to work on Mac and Linux. See the **sfr** package's [README](https://github.com/edzer/sfr) for information on that.
 
 Book statistics
 ---------------
