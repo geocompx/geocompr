@@ -7,6 +7,86 @@
 - classes and methods in R
 -->
 
+## An introduction to Simple Features
+
+Simple Features is an open standard data model developed and endorsed by the Open Geospatial Consortium ([OGC](http://portal.opengeospatial.org/files/?artifact_id=25355)) to describe how features with geographical and non-geographical features should be represented.
+It is a hierarchical data model that simplifies geographic data by condensing the complex range of possible geographic forms (e.g., line, point, polygon, multipolygon forms) into a single geometry class.
+
+<!-- (Figure \@ref(fig:sf-ogc)). -->
+
+<!-- ```{r sf-ogc, fig.cap="The Simple Features class hierarchy, used with permission (on condition of linking to the source) from the Open Geospatial Consortium's document 06-103r4 (see http://www.opengeospatial.org/standards/sfa)", out.width="100%", echo=FALSE} -->
+<!-- knitr::include_graphics("figures/simple-feature-class-hierarchy.png") -->
+<!-- ``` -->
+
+The R implementation of Simple Features is provided by the **sf** package [@R-sf].
+**sf** incorporates the functionality of the 3 main packages of the **sp** paradigm (**sp** [@R-sp] for the class system, **rgdal** [@R-rgdal] for reading and writing data, **rgeos** [@R-rgeos] for spatial operations undertaken by GEOS) in a single, cohesive whole.
+This is well-documented in **sf**'s [vignettes](http://cran.rstudio.com/package=sf):
+
+```{r, eval=FALSE}
+vignette("sf1") # for an introduction to the package
+vignette("sf2") # for reading, writing and converting Simple Features
+vignette("sf3") # for manipulating Simple Features
+```
+
+As the first vignette explains, simple feature objects in R are stored in a data frame, with geographical data occupying special column, a 'list-column'. This column is usually named 'geom' or 'geometry'.
+Let's see how simple feature in R work, with reference to world boundary data from the **spData** package:
+
+```{r, results='hide'}
+library(sf)
+# devtools::install_github("nowosad/spData")
+f = system.file("shapes/wrld.shp", package = "spData")
+world = st_read(f)
+```
+
+This has loaded an object that is simultaneously of class `data.frame` and `sf`:
+
+```{r}
+class(world)
+```
+
+The output of the preceding command shows that objects with class `sf` are also data frames. Thus, they can be treated like regular `data.frame`, making life easy if you are already used to working with data frames.
+
+Let's look the first 2 rows and 3 columns of this object.
+The output shows 2 major differences compared with a regular `data.frame`: the inclusion of additional geographical data (`geometry type`, `dimension`, `bbox` and CRS information - `epsg (SRID)`, `proj4string`), and the presence of final `geometry` column:
+
+```{r}
+world[1:2, 1:3]
+```
+
+All this may seem rather complex, especially for a class system that is supposed to be simple.
+However, there are good reasons for organizing things this way and using **sf**.
+
+### Exercises
+
+What does the summary of the `geometry` column tell us about the `world` dataset, in terms of:
+
+- The geometry type?
+- How many countries there are?
+- The coordinate reference system (CRS)?
+
+## Why Simple Features?
+
+There are many advantages of **sf** over **sp**, including:
+
+- Faster reading and writing of data (more than 10 times faster in some cases)
+- Better plotting performance
+- **sf** objects can be treated as dataframes in most operations
+- **sf** functions can be combined using `%>%` operator and works well with the [tidyverse](http://tidyverse.org/) collection of R packages
+- **sf** function names are relatively consistent and intuitive (all begin with `st_`) compared with the function names and syntax of the **sp**, **rgdal** and **rgeos** packages that it supersedes.
+
+A broader advantage is that simple features are so well supported by other software products, not least PostGIS, which has heavily influenced the design of **sf**.
+
+A disadvantage you should be aware of, however, is that **sf** is not *feature complete* and that it continues to evolve.
+The transition from **sp** to **sf** will likely take many years, and many spatial packages may never switch.
+Even if you discover spatial data with R through the **sf** package, it is still worth at least being aware of **sp** classes, even if you rarely use them for everyday geospatial tasks.
+
+Fortunately it is easy to translate between **sp** and **sf** using the `as()` function, even when **sp** is not loaded: 
+
+```{r, eval=FALSE}
+world_sp = as(object = world, Class = "Spatial")
+```
+
+
 ## Vector data
 
 <!-- 
