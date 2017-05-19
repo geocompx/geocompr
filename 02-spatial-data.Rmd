@@ -80,9 +80,10 @@ A disadvantage you should be aware of, however, is that **sf** is not *feature c
 The transition from **sp** to **sf** will likely take many years, and many spatial packages may never switch.
 Even if you discover spatial data with R through the **sf** package, it is still worth at least being aware of **sp** classes, even if you rarely use them for everyday geospatial tasks.
 
-Fortunately it is easy to translate between **sp** and **sf** using the `as()` function, even when **sp** is not loaded: 
+Fortunately it is easy to translate between **sp** and **sf** using the `as()` function: 
 
 ```{r, eval=FALSE}
+library(sp)
 world_sp = as(object = world, Class = "Spatial")
 ```
 
@@ -92,7 +93,7 @@ Basic maps in **sf** can be created quickly with the base `plot()` function. Unl
 
 ```{r sfplot, fig.cap="Plotting with sf, with multiple variables (left) and a single variable (right).", out.width="49%", fig.show='hold', warning=FALSE}
 plot(world)
-plot(world["population"])
+plot(world["pop"])
 ```
 
 As with **sp**, you can add layers to your maps created with `plot()`, with the argument `add = TRUE`^[In
@@ -101,9 +102,9 @@ fact, when you `plot()` an **sf** object, R is calling `sf:::plot.sf()` behind t
 However, this only works if the initial plot has only 1 layer (result not shown):
 
 ```{r, fig.show='hide'}
-plot(world["population"])
-africa = world_continents[1, ]
-plot(africa, add = TRUE, col = "red")
+plot(world["pop"])
+china = world[world$name_long == "China", ]
+plot(china, add = TRUE, col = "red")
 ```
 
 This can be very useful when quickly checking the geographic correspondence between two or more layers.
@@ -124,7 +125,8 @@ Using **sf**'s `plot()` command, create a map of Nigeria in context, like the on
 - Hint: `border` is an additional argument of `plot()` for **sf** objects.
 
 ```{r nigeria, warning=FALSE, echo=FALSE, fig.cap="Map of Nigeria in context illustrating sf's plotting capabilities"}
-nigeria = filter(world, name_long == "Nigeria")
+nigeria = world[world$name_long == "Nigeria",]
+africa = world[world$continent == "Africa",]
 bb_africa = st_bbox(africa)
 plot(africa[2], col = "white", lwd = 3, main = "Nigeria in context", border = "lightgrey")
 # plot(world, lty = 3, add = TRUE, border = "grey")
