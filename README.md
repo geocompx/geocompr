@@ -2,7 +2,7 @@
 Geocomputation with R
 =====================
 
-[![Build Status](https://travis-ci.org/Robinlovelace/geocompr.svg?branch=master)](https://travis-ci.org/Robinlovelace/geocompr)
+[![Build Status](https://travis-ci.org/Robinlovelace/geocompr.svg?branch=master)](https://travis-ci.org/Robinlovelace/geocompr) [![Gitter](https://badges.gitter.im/geocompr/lobby.svg)](https://gitter.im/geocompr/Lobby)
 
 Introduction
 ============
