@@ -25,7 +25,7 @@ Please see [style.md](https://github.com/Robinlovelace/geocompr/blob/master/styl
 Note: the `.Rproj` file is configured to build a website not a single page. To reproduce this [README](https://github.com/Robinlovelace/geocompr/blob/master/README.Rmd) use the following command:
 
 ``` r
-rmarkdown::render('README.Rmd', output_format = 'md_document', output_file = 'README.md')
+rmarkdown::render("README.Rmd", output_format = "md_document", output_file = "README.md")
 ```
 
 Reproducing the book
