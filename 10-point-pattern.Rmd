@@ -1,10 +1,5 @@
 # Point Pattern analysis and spatial interpolation
 
-## Prerequisites {-}
-
-This is a work-in-progress chapter.
-
-
 ## Introduction
 
 This tutorial teaches the basics of point pattern analysis in R.
@@ -29,28 +24,30 @@ lapply(pkgs, library, character.only = TRUE)
 
 ## Data
 
-This tutorial assumes you have downloaded the relevant data onto your hard-disk, e.g. with the following commands:
+This tutorial uses two datasets on the spatial distribution and some attributes of cycle hire 'docking stations', one from OpenStreetMap and one from an on-line data feed.^[
+Docking stations enable sustainable and fast mobility for people in central London.
+They are automated bicycle parking facilities which allow people can borrow and return bicycles for a small fee.
+The sturdy 3-speed bicycles they contain have become known as 'Boris bikes' and, among some Londoners, 'Sadiq cycles', after the past and present London Mayors Boris Johnson and Sadiq Khan, although their official name is 'Santander cycles'.
+See `?cycle_hire` for further information about these datasets.
+]
+It also uses boundary data representing the 33 boroughs of London.
+These datasets live in the **spData** package and can be loaded as follows:
 
 ```{r}
-if(!dir.exists("data")) {
-  dir.create("data")
-  f1 = "https://github.com/Robinlovelace/Creating-maps-in-R/raw/master/data/cycle_hire.geojson"
-  f2 = "https://github.com/Robinlovelace/Creating-maps-in-R/raw/master/data/cycle_hire-osm.geojson"
-  f3 = "https://github.com/Robinlovelace/Creating-maps-in-R/raw/master/data/lnd.geojson"
-  download.file(f1, "data/cycle_hire.geojson")
-  download.file(f2, "data/cycle_hire-osm.geojson")
-  download.file(f3, "data/lnd.geojson")
-}
+library(spData)
+data("lnd")
+data("cycle_hire")
+data("cycle_hire_osm")
 ```
 
-
-The input datasets, cunningly stored in the `data/` directory,  are on 'Boris Bikes' docking stations around London, and can be read-in and visualised with the following commands:
+We convert the datasets to the `Spatial` classes used by the **sp** dataset, as required by point pattern analysis functions used in the chapter.
+This, and a basic plot of the data, is done in the code chunk below (note the similarities with **sf** plots):
 
 ```{r cycle-hire1}
-lnd = rgdal::readOGR("data/lnd.geojson")
-cycle_hire = rgdal::readOGR("data/cycle_hire.geojson")
-cycle_hire_osm = rgdal::readOGR("data/cycle_hire-osm.geojson")
-library(sp) # to plot spatial data
+lnd = as(lnd, "Spatial")
+cycle_hire = as(cycle_hire, "Spatial")
+cycle_hire_osm = as(cycle_hire_osm, "Spatial")
+library(sp) 
 plot(cycle_hire)
 points(cycle_hire_osm, col = "red")
 plot(lnd, add = TRUE)
