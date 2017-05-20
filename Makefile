@@ -28,3 +28,5 @@ cleaner:
 	make clean && rm -fvr rsconnect
 	rm -frv *.aux *.out  *.toc # Latex output
 	rm -fvr *.html # rogue html files
+	rm -fvr *utf8.md # rogue md files
+
