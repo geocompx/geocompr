@@ -1,3 +1,23 @@
+```{r include=FALSE, cache=FALSE}
+library(methods)
+# library(geocompr)
+
+knitr::opts_chunk$set(
+        comment = "#>",
+        collapse = TRUE,
+        cache = TRUE,
+        fig.align = "center",
+        fig.pos = "t",
+        fig.path = "figures/"
+)
+
+set.seed(2017)
+options(digits = 3)
+options(dplyr.print_min = 4, dplyr.print_max = 4)
+
+# geocompr:::generate_chapter_code()
+
+```
 # Geographical data I/O {#read-write}
 
 The previous chapters introduced this book and provided an overview of spatial data classes in R, with a focus on simple features.
@@ -37,22 +57,48 @@ f = system.file("shapes/wrld.gpkg", package = "spData")
 world = st_read(f)
 ```
 
+A major advantage of **sf** is that it is fast.
+To demonstrate this, we will use a function to compare `st_read` with it's **sp** equivalent, `rgdal::readOGR`:
 
-A major advantage of **sf** is that it is fast at geographical data I/O, as illustrated in the benchmark below:
+```{r}
+bench_read = function(file, n) {
+  m = microbenchmark(times = n,
+                     rgdal::readOGR(f),
+                     st_read(f)
+  )
+  mean(m$time[1:n]) / mean(m$time[(n + 1):(n * 2)])
+}
+```
+
+This function takes as arguments an input file (`file`) and a number of times to run each command (`n`) and returns how many times faster `st_read()` is than `readOGR()`.
+Let's run the benchmark for the `wrld.gpkg` file represented by the object `f`:
+We as illustrated in the benchmark below:
 
 ```{r, results='hide'}
 library(microbenchmark)
-bench_read = microbenchmark(times = 5,
-        st_read(f),
-        rgdal::readOGR(f)
-)
+read_world_gpkg = bench_read(file = f, n = 5)
 ```
 
 ```{r}
-bench_read$time[1] / bench_read$time[2]
+read_world_gpkg
 ```
 
-The results demonstrate that **sf** can be much faster (*`r round(bench_read$time[1] / bench_read$time[2], 0)` times faster* in this case) than **rgdal** at reading-in the world countries shapefile.
+
+The results demonstrate that **sf** was around `r round(read_world_gpkg)` times faster than **rgdal** at reading-in the world countries shapefile.
+The relative performance of `st_read()` compared with other functions will vary depending on file format and the nature of the data.
+To illustrate this point, we performed the same operation on a geojson file and found a greater speed saving:
+
+```{r, results='hide'}
+f = system.file("shapes/lnd.geojson", package = "spData")
+read_lnd_geojson = bench_read(file = f, n = 5)
+```
+
+```{r}
+read_lnd_geojson
+```
+
+In this case **sf** was around `r round(read_lnd_geojson)` times faster than **rgdal**.
+
 
 The counterpart of `st_read()` is `st_write()`. This allows writing to a range of geographic vector file types, including the common formats `.geojson`, `.shp` and `.gpkg`. `st_read()` will decide which driver to use automatically, based on the file name, as illustrated in the benchmark below demonstrating write speeds for each format.
 
