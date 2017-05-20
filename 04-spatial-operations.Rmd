@@ -1,7 +1,53 @@
 # Spatial data operations
 
+## Prerequisites {-}
+
+- This chapter requires **tidyverse**, **sf**, **units**, and **spData** packages:
+
+```{r, message=FALSE}
+library(sf)
+library(tidyverse)
+library(units)
+```
+
+- You must have loaded the `world` data from the spData package:
+
+```{r, results='hide'}
+f = system.file("shapes/wrld.gpkg", package = "spData")
+world = st_read(f)
+```
+
+## Introduction
+
 ## Attribute subsetting
 
 ## Attribute data aggregation 
 
 ## Attribute data joining 
+
+## Attribute data creation
+
+```{r}
+# add a new column
+world$area = set_units(st_area(world), value = km^2)
+world$pop_density = world$pop / world$area
+
+# OR
+world = world %>%
+        mutate(area = set_units(st_area(.), value = km^2)) %>%
+        mutate(pop_density = pop / area)
+```
+
+Note that this has created a attributes for the area and population density variables:
+
+```{r}
+attributes(world$area)
+attributes(world$pop_density)
+```
+
+These can be set to `NULL` as follows:
+
+```{r}
+attributes(world$area) = NULL
+attributes(world$pop_density) = NULL
+```
