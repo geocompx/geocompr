@@ -1,13 +1,12 @@
 # Point Pattern analysis and spatial interpolation
 
 This chapter teaches the basics of point pattern analysis in R.
-It is influenced by the chapter on Spatial Point Pattern Analysis in *Applied Spatial Data Analysis with R* [@bivand_applied_2013] and an [online tutorial](http://rspatial.org/analysis/rst/8-pointpat.html) on Point Pattern Analyis by Robert Hijmans.
+It is influenced by the chapter on Spatial Point Pattern Analysis [@bivand_applied_2013] and an [online tutorial](http://rspatial.org/analysis/rst/8-pointpat.html) on Point Pattern Analyis by Robert Hijmans.
 
 We will use the **sp** package for this rather than the newer **sf** package, as point pattern analysis is more established for the former `Spatial` class system than the latter's `sf` classes. We will also use **raster** as it has concise and well-designed functions for spatial data:
 
-```{r, results='hide'}
+```{r, message=FALSE, results='hide'}
 pkgs = c(
-  "sp",
   "tmap",
   "raster",
   "mapview",
@@ -31,7 +30,7 @@ See `?cycle_hire` for further information about these datasets.
 It also uses boundary data representing the 33 boroughs of London.
 These datasets live in the **spData** package and can be loaded as follows:
 
-```{r}
+```{r, results='hide'}
 library(spData)
 f = system.file("shapes/", package = "spData")
 lnd = rgdal::readOGR(paste0(f, "lnd.geojson"))
@@ -40,10 +39,23 @@ cycle_hire_osm = rgdal::readOGR(paste0(f, "cycle_hire_osm.geojson"))
 ```
 
 We use the `Spatial` classes used by the **sp** dataset, as these are required by point pattern analysis functions used in the chapter.
-This, and a basic plot of the data, is done in the code chunk below (note the similarities with **sf** plots):
+The majority of the chapter will use only the official `cycle_hire` dataset.
+Towards the end of the chapter we will compare the two point patterns to see how similar they are.
+But first we focus only on the former dataset.
+<!-- TODO: ensure we do this -->
 
-```{r cycle-hire1}
-library(sp) 
+
+## Basic point pattern analysis
+
+Before undertaking more advanced analysis, it makes sense to start simple, with basic statistics and visualizations describing point patterns.
+As with most analysis tasks this first stage involves visual inspection of the data.
+This done in the code chunk below, which generates Figure
+\@ref(fig:cycle-hire1):^[
+Note the similarities and differences between **sp** and **sf** plotting code and results. Both extend the `plot()` command to create a simple static map, meaning that arguments used in base graphics such as `col` work. However, **sp**'s plot method does not create facets for multiple variables by default and therefore you do not have to specify columns to create a single map.
+**sp** plots omit a colourscheme by default.
+]
+
+```{r cycle-hire1, fig.cap="The spatial distribution of cycle hire points in London according to two datasets. One is from the cyclehireapp.com website (black); the other is from OpenStreetMap (red)."}
 plot(cycle_hire)
 points(cycle_hire_osm, col = "red")
 plot(lnd, add = TRUE)
@@ -67,7 +79,7 @@ nrow(cycle_hire)
 lnd_area = sum(area(lnd)) / 1e6
 ```
 
-The results show that there are 742 cycle hire points and that London covers an area of just over one and a half thousand square kilometres (1 km^2^ = 1000000 m^2^ = 1e6 m^2^ in scientific notation).
+The results show that there are 742 cycle hire points and that London covers an area of just over one-and-a-half thousand square kilometres (1 km^2^ = 1000000 m^2^ = 1e6 m^2^ in scientific notation).
 That represents on average roughly one cycle parking rental space per 2 square kilometers, or half a rental point per square kilometer, as revealed by the results of the calculation below:
 
 ```{r}
