@@ -70,3 +70,14 @@ ggplot(world_sf, aes(fill=pop)) +
         geom_sf() +
         scale_fill_viridis() +
         theme_void()
+
+# yellowstone borders ---------------------------------------------
+library(sf)
+download.file("http://www.wsgs.wyo.gov/gis-files/yellowstoneboundary.zip", "data/yellowstoneboundary.zip")
+unzip("data/yellowstoneboundary.zip", exdir = "data")
+st_read('data/YellowstoneBoundary/boundary.shp') %>% 
+  st_transform(., 2246) %>% 
+  st_write('data/yellowstone.gpkg')
+file.remove('data/yellowstoneboundary.zip')
+unlink('data/YellowstoneBoundary/', recursive = TRUE)
+
