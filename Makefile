@@ -3,6 +3,7 @@ html:
 	cp -fvr css/style.css _book/
 	# cp -fvr images _book/
 	cp -fvr _main.utf8.md _book/main.md
+	cp -fvr gs.html _book/
 
 build:
 	make html
