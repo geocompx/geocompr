@@ -29,24 +29,6 @@ To ease reproducibility, this book is also a package. Installing it from GitHub 
 
 ``` r
 devtools::install_github("robinlovelace/geocompr")
-#> Downloading GitHub repo robinlovelace/geocompr@master
-#> from URL https://api.github.com/repos/robinlovelace/geocompr/zipball/master
-#> Installing geocompr
-#> Downloading GitHub repo nowosad/spData@master
-#> from URL https://api.github.com/repos/nowosad/spData/zipball/master
-#> Installing spData
-#> '/usr/lib/R/bin/R' --no-site-file --no-environ --no-save --no-restore  \
-#>   --quiet CMD INSTALL  \
-#>   '/tmp/RtmpcoH1sN/devtools5bf9388ec893/Nowosad-spData-3c08b43'  \
-#>   --library='/home/robin/R/x86_64-pc-linux-gnu-library/3.4'  \
-#>   --install-tests
-#> 
-#> '/usr/lib/R/bin/R' --no-site-file --no-environ --no-save --no-restore  \
-#>   --quiet CMD INSTALL  \
-#>   '/tmp/RtmpcoH1sN/devtools5bf95b4e13c3/Robinlovelace-geocompr-e467f5f'  \
-#>   --library='/home/robin/R/x86_64-pc-linux-gnu-library/3.4'  \
-#>   --install-tests
-#> 
 ```
 
 You need a recent version of the GDAL, GEOS, Proj.4 and UDUNITS libraries installed for this to work on Mac and Linux. See the **sf** package's [README](https://github.com/edzer/sfr) for information on that.
@@ -80,34 +62,47 @@ To cite packages used in this book we use code from [Efficient R Programming](ht
 
 ``` r
 geocompr:::generate_citations()
-#> Warning in citation(pkg, auto = if (pkg == "base") NULL else TRUE): no date
-#> field in DESCRIPTION file of package 'spData'
-#> Warning in citation(pkg, auto = if (pkg == "base") NULL else TRUE): could
-#> not determine year for 'spData' from package DESCRIPTION file
 ```
 
 This generates .bib and .csv files containing the packages. The current list of files used is as follows:
 
 ``` r
 pkg_df = readr::read_csv("extdata/package_list.csv")
-#> Parsed with column specification:
-#> cols(
-#>   Name = col_character(),
-#>   Title = col_character(),
-#>   version = col_character()
-#> )
 knitr::kable(pkg_df)
 ```
 
-| Name           | Title                                                                         | version |
-|:---------------|:------------------------------------------------------------------------------|:--------|
-| bookdown       | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]       | 0.4     |
-| dismo          | Species Distribution Modeling \[@R-dismo\]                                    | 1.1.4   |
-| gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction \[@R-gstat\] | 1.1.5   |
-| mapview        | Interactive Viewing of Spatial Objects in R \[@R-mapview\]                    | 2.0.1   |
-| microbenchmark | Accurate Timing Functions \[@R-microbenchmark\]                               | 1.4.2.1 |
-| raster         | Geographic Data Analysis and Modeling \[@R-raster\]                           | 2.5.8   |
-| sf             | Simple Features for R \[@R-sf\]                                               | 0.4.3   |
-| spData         | Datasets for spatial analysis packages \[@R-spData\]                          | 0.1.20  |
-| tidyverse      | Easily Install and Load 'Tidyverse' Packages \[@R-tidyverse\]                 | 1.1.1   |
-| tmap           | Thematic Maps \[@R-tmap\]                                                     | 1.10    |
+| Name           | Title                                                                                       | version |
+|:---------------|:--------------------------------------------------------------------------------------------|:--------|
+| bookdown       | Authoring Books and Technical Documents with R Markdown (Xie 2017)                          | 0.4     |
+| dismo          | Species Distribution Modeling (Hijmans et al. 2017)                                         | 1.1.4   |
+| gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction (Pebesma and Graeler 2017) | 1.1.5   |
+| mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                         | 2.0.1   |
+| microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                   | 1.4.2.1 |
+| raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                        | 2.5.8   |
+| sf             | Simple Features for R (Pebesma 2017)                                                        | 0.4.3   |
+| spData         | Datasets for spatial analysis packages (Bivand 2017)                                        | 0.1.20  |
+| tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                 | 1.1.1   |
+| tmap           | Thematic Maps (Tennekes 2017)                                                               | 1.10    |
+
+References
+----------
+
+Appelhans, Tim, Florian Detsch, Christoph Reudenbach, and Stefan Woellauer. 2017. *Mapview: Interactive Viewing of Spatial Objects in R*. <https://CRAN.R-project.org/package=mapview>.
+
+Bivand, Roger. 2017. *SpData: Datasets for Spatial Analysis Packages*.
+
+Hijmans, Robert J. 2016. *Raster: Geographic Data Analysis and Modeling*. <https://CRAN.R-project.org/package=raster>.
+
+Hijmans, Robert J., Steven Phillips, John Leathwick, and Jane Elith. 2017. *Dismo: Species Distribution Modeling*. <https://CRAN.R-project.org/package=dismo>.
+
+Mersmann, Olaf. 2015. *Microbenchmark: Accurate Timing Functions*. <https://CRAN.R-project.org/package=microbenchmark>.
+
+Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://CRAN.R-project.org/package=sf>.
+
+Pebesma, Edzer, and Benedikt Graeler. 2017. *Gstat: Spatial and Spatio-Temporal Geostatistical Modelling, Prediction and Simulation*. <https://CRAN.R-project.org/package=gstat>.
+
+Tennekes, Martijn. 2017. *Tmap: Thematic Maps*. <https://CRAN.R-project.org/package=tmap>.
+
+Wickham, Hadley. 2017. *Tidyverse: Easily Install and Load ’Tidyverse’ Packages*. <https://CRAN.R-project.org/package=tidyverse>.
+
+Xie, Yihui. 2017. *Bookdown: Authoring Books and Technical Documents with R Markdown*. <https://CRAN.R-project.org/package=bookdown>.
