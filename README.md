@@ -22,12 +22,6 @@ We encourage contributions on any part of the book, including:
 
 Please see [style.md](https://github.com/Robinlovelace/geocompr/blob/master/style.md) for the book's style.
 
-Note: the `.Rproj` file is configured to build a website not a single page. To reproduce this [README](https://github.com/Robinlovelace/geocompr/blob/master/README.Rmd) use the following command:
-
-``` r
-rmarkdown::render("README.Rmd", output_format = "md_document", output_file = "README.md")
-```
-
 Reproducing the book
 --------------------
 
@@ -44,6 +38,12 @@ Once the dependencies have been installed you should be able to build and view a
 ``` r
 bookdown::render_book("index.Rmd") # to build the book
 browseURL("_book/index.html") # to view it
+```
+
+Note: the `.Rproj` file is configured to build a website not a single page. To reproduce this [README](https://github.com/Robinlovelace/geocompr/blob/master/README.Rmd) use the following command:
+
+``` r
+rmarkdown::render("README.Rmd", output_format = "md_document", output_file = "README.md")
 ```
 
 Book statistics
