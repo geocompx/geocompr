@@ -135,6 +135,43 @@ head(sf_drivers, n = 2)
 st_write(obj = world, dsn = "world.gpkg")
 ```
 
+**Note**: if you try write to the same data source again will fail.
+This is demonstrated in the code below for a modified version of the world in which the population doubles in all countries (don't worry about the `dplyr` code for now, this is covered in Chapter \@ref(attr)):
+
+```{r}
+world_mod = dplyr::mutate(world, pop = pop * 2)
+```
+
+```{r, eval=FALSE}
+st_write(obj = world, dsn = "world.gpkg")
+##   GDAL Error 1: Layer world.gpkg already exists, CreateLayer failed.
+## Use the layer creation option OVERWRITE=YES to replace it.
+```
+
+The error message provides some information about why it failed, some of which is provided in the comments.
+It is an issue at the GDAL level.
+This is clear from the statement `GDAL Error 1`.
+A further clue is provided by suggestion to use `OVERWRITE=YES`: this is not an option in `st_write`.
+To address this potentially common issue, `st_write()` has an argument, `delete_layer`, that deletes the previous layers in the data source before attempting to write (note there is also a `delete_dsn` argument).
+Setting this argument to `TRUE` makes the rewrite operation work:
+
+```{r}
+st_write(obj = world, dsn = "world.gpkg", delete_layer = TRUE)
+```
+
+This can also be done with the function `write_sf()`, which is equivalent to (technically an *alias* for) `st_write()`, except that it has `delete_layer = TRUE` and `quiet = TRUE` by default.
+This enables spatial data to be overwritten more concisely and with less output going to screen:
+
+```{r}
+write_sf(obj = world, dsn = "world.gpkg")
+```
+
+A blunter way to update file-based geographic data sources such as `.gpkg` files is to simply delete them.
+This is not generally recommended, as it will not work for multi-file data sources such as `.shp` files:
+
+```{r}
+file.remove("world.gpkg")
+```
 
 
 The counterpart of `st_read()` is `st_write()`. This allows writing to a range of geographic vector file types, including the common formats `.geojson`, `.shp` and `.gpkg`. `st_read()` will decide which driver to use automatically, based on the file name, as illustrated in the benchmark below demonstrating write speeds for each format.
