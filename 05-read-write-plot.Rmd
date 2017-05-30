@@ -1,43 +1,3 @@
-```{r include=FALSE, cache=FALSE}
-library(methods)
-# library(geocompr)
-
-knitr::opts_chunk$set(
-        comment = "#>",
-        collapse = TRUE,
-        cache = TRUE,
-        fig.align = "center",
-        fig.pos = "t",
-        fig.path = "figures/"
-)
-
-set.seed(2017)
-options(digits = 3)
-options(dplyr.print_min = 4, dplyr.print_max = 4)
-
-# geocompr:::generate_chapter_code()
-
-```
-```{r include=FALSE, cache=FALSE}
-library(methods)
-# library(geocompr)
-
-knitr::opts_chunk$set(
-        comment = "#>",
-        collapse = TRUE,
-        cache = TRUE,
-        fig.align = "center",
-        fig.pos = "t",
-        fig.path = "figures/"
-)
-
-set.seed(2017)
-options(digits = 3)
-options(dplyr.print_min = 4, dplyr.print_max = 4)
-
-# geocompr:::generate_chapter_code()
-
-```
 # Geographic data I/O {#read-write}
 
 The previous chapters introduced this book and provided an overview of spatial data classes in R, with a focus on simple features.
@@ -143,7 +103,7 @@ world_mod = dplyr::mutate(world, pop = pop * 2)
 ```
 
 ```{r, eval=FALSE}
-st_write(obj = world, dsn = "world.gpkg")
+st_write(obj = world_mod, dsn = "world.gpkg")
 ##   GDAL Error 1: Layer world.gpkg already exists, CreateLayer failed.
 ## Use the layer creation option OVERWRITE=YES to replace it.
 ```
@@ -151,8 +111,13 @@ st_write(obj = world, dsn = "world.gpkg")
 The error message provides some information about why it failed, some of which is provided in the comments.
 It is an issue at the GDAL level.
 This is clear from the statement `GDAL Error 1`.
-A further clue is provided by suggestion to use `OVERWRITE=YES`: this is not an option in `st_write`.
-To address this potentially common issue, `st_write()` has an argument, `delete_layer`, that deletes the previous layers in the data source before attempting to write (note there is also a `delete_dsn` argument).
+A further clue is provided by suggestion to use `OVERWRITE=YES`: this is not an option in `st_write`, but can be added with the argument `layer_options`:
+
+```{r, results='hide'}
+st_write(obj = world_mod, dsn = "world.gpkg", layer_options = "OVERWRITE=YES")
+```
+
+Another solution to this issue is to use the argument `delete_layer` that deletes the previous layers in the data source before attempting to write (note there is also a `delete_dsn` argument).
 Setting this argument to `TRUE` makes the rewrite operation work:
 
 ```{r}
