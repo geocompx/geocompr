@@ -122,3 +122,35 @@ zion_landsats <- c('data/landsat_b2.tif',
 
 zion_landsats %>% 
   map(~zion_crop(., zion))
+
+### worldbank data -------------------------------------------------------------
+library(wbstats)
+library(tidyverse)
+library(sf)
+
+wbsearch("HDI")
+wbsearch("urbanization")
+wbsearch("unemployment")
+wbsearch("Population growth rate")
+
+# literacy, migrations, import/export, higher education, poverty
+# worldbank wiki
+
+# query_lifeexp <- wbsearch(pattern = "life expectancy")
+# query_gdp <- wbsearch("GDP")
+
+wb_data_create <- function(indicator, our_name, year, ...){
+  df <- wb(indicator = indicator, startdate = year, enddate = year, ...) %>%
+    as_data_frame() %>%
+    select(iso_a2=iso2c, value) %>%
+    mutate(indicator = our_name) %>%
+    spread(indicator, value)
+  return(df)
+}
+
+## IMPORTANT - repeat if a server is down
+
+data_hdi <- wb_data_create(indicator = "UNDP.HDI.XD", our_name = "HDI", year = 2011, country = "countries_only")
+data_urbanpop <- wb_data_create(indicator = "SP.URB.TOTL", our_name = "urban_pop", year = 2014, country = "countries_only")
+data_unemployment <- wb_data_create(indicator = "SL.UEM.TOTL.NE.ZS", our_name = "unemployment", year = 2014, country = "countries_only")
+data_popgrowth <- wb_data_create(indicator = "SP.POP.GROW", our_name = "pop_growth", year = 2014, country = "countries_only")
