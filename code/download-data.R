@@ -132,8 +132,11 @@ wbsearch("HDI")
 wbsearch("urbanization")
 wbsearch("unemployment")
 wbsearch("Population growth rate")
-
-# literacy, migrations, import/export, higher education, poverty
+wbsearch("literacy")
+# wbsearch("poverty")
+# wbsearch("migration")
+# wbsearch("net exports")
+wbsearch("education")
 # worldbank wiki
 
 # query_lifeexp <- wbsearch(pattern = "life expectancy")
@@ -154,3 +157,14 @@ data_hdi <- wb_data_create(indicator = "UNDP.HDI.XD", our_name = "HDI", year = 2
 data_urbanpop <- wb_data_create(indicator = "SP.URB.TOTL", our_name = "urban_pop", year = 2014, country = "countries_only")
 data_unemployment <- wb_data_create(indicator = "SL.UEM.TOTL.NE.ZS", our_name = "unemployment", year = 2014, country = "countries_only")
 data_popgrowth <- wb_data_create(indicator = "SP.POP.GROW", our_name = "pop_growth", year = 2014, country = "countries_only")
+data_literacy <- wb_data_create(indicator = "SE.ADT.LITR.ZS", our_name = "literacy", year = 2014, country = "countries_only")
+data_tertiary_edu_per_100000 <- wb_data_create(indicator = "UIS.TE_100000.56", our_name = "tertiary_edu_per_100000", year = 2014, country = "countries_only")
+
+world_df <- data_hdi %>% 
+  full_join(., data_urbanpop, by = c('iso_a2')) %>%
+  full_join(., data_unemployment, by = c('iso_a2')) %>%
+  full_join(., data_popgrowth, by = c('iso_a2')) %>% 
+  full_join(., data_literacy, by = c('iso_a2')) %>%
+  full_join(., data_tertiary_edu_per_100000, by = c('iso_a2'))
+
+write_csv(world_df, 'data/world_df.csv')
