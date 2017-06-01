@@ -160,7 +160,7 @@ data_urbanpop <- wb_data_create(indicator = "SP.URB.TOTL", our_name = "urban_pop
 data_unemployment <- wb_data_create(indicator = "SL.UEM.TOTL.NE.ZS", our_name = "unemployment", year = 2014, country = "countries_only")
 data_popgrowth <- wb_data_create(indicator = "SP.POP.GROW", our_name = "pop_growth", year = 2014, country = "countries_only")
 data_literacy <- wb_data_create(indicator = "SE.ADT.LITR.ZS", our_name = "literacy", year = 2014, country = "countries_only")
-data_tertiary_edu_per_100000 <- wb_data_create(indicator = "UIS.TE_100000.56", our_name = "tertiary_edu_per_100000", year = 2014, country = "countries_only")
+# data_tertiary_edu_per_100000 <- wb_data_create(indicator = "UIS.TE_100000.56", our_name = "tertiary_edu_per_100000", year = 2014, country = "countries_only")
 
 country_names <- ne_countries(returnclass = 'sf') %>%
   select(name=name_long, iso_a2) %>% 
@@ -171,7 +171,7 @@ world_df <- data_hdi %>%
   full_join(., data_unemployment, by = c('iso_a2')) %>%
   full_join(., data_popgrowth, by = c('iso_a2')) %>% 
   full_join(., data_literacy, by = c('iso_a2')) %>%
-  full_join(., data_tertiary_edu_per_100000, by = c('iso_a2')) %>% 
+  # full_join(., data_tertiary_edu_per_100000, by = c('iso_a2')) %>% 
   left_join(., country_names, by = c('iso_a2')) %>% 
   select(name, everything())
 
