@@ -8,6 +8,7 @@ The code does not have to be self-standing: it can depend on code run previously
 - ` = ` , ` > `, etc. - spaces around operators
 - `"text"` - double quotes for character values
 - `for(i in 1:9) {print(i)}` - use space separation for curly brackets
+- When indenting your code, use two spaces
 
 # Comments
 
