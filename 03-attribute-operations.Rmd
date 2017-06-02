@@ -2,12 +2,11 @@
 
 ## Prerequisites {-}
 
-- This chapter requires **tidyverse**, **sf**, **units**, and **spData** packages:
+- This chapter requires **tidyverse**, **sf**, and **spData** packages:
 
 ```{r, message=FALSE}
 library(sf)
 library(tidyverse)
-library(units)
 ```
 
 - You must have loaded the `world` and `worldbank_df` data from the spData package:
@@ -167,12 +166,88 @@ world_continents %>%
 <!-- - how duplicate keys works with sf -->
 <!-- - exercises -->
 
+<!-- data prep -->
+
+```{r, echo=FALSE}
+north_america = world %>%
+        filter(subregion == "Northern America") %>%
+        select(iso_a2, name_long)
+# plot(north_america[0])
+wb_north_america = worldbank_df %>% 
+        filter(name %in% c("Canada", "Mexico", "United States"))
+```
+
 <!-- left_join() -->
+
+```{r}
+left_join1 <- north_america %>% 
+        left_join(., wb_north_america, by = "iso_a2")
+left_join1
+plot(left_join1["pop_growth"])
+```
+
+```{r}
+left_join2 <- north_america %>% 
+        left_join(., wb_north_america, by = c("name_long" = "name"))
+left_join2
+```
+
+```{r}
+left_join3 <- north_america %>% 
+        left_join(., wb_north_america, by = c("iso_a2", "name_long" = "name"))
+left_join3
+```
+
 <!-- right_join() -->
+
+```{r}
+# error
+right_join1 <- north_america %>% 
+        right_join(., wb_north_america, by = "iso_a2") #%>% plot()
+right_join1
+```
+
+```{r}
+# error
+right_join2 <- wb_north_america %>% 
+        right_join(., north_america, by = "iso_a2") #%>% plot()
+right_join2
+```
+
 <!-- inner_join() -->
+
+```{r}
+inner_join1 <- north_america %>% 
+        inner_join(., wb_north_america, by = "iso_a2") 
+inner_join1
+plot(inner_join1["pop_growth"])
+```
+
 <!-- full_join() -->
+
+```{r}
+# error
+full_join1 <- north_america %>% 
+        full_join(., wb_north_america, by = "iso_a2") #%>% plot()
+full_join1
+```
+
 <!-- semi_join() -->
+
+```{r}
+semi_join1 <- north_america %>% 
+        semi_join(., wb_north_america, by = "iso_a2")
+semi_join1
+```
+
 <!-- anti_join() -->
+
+```{r}
+anti_join1 <- north_america %>% 
+        anti_join(., wb_north_america, by = "iso_a2")
+anti_join1
+```
+
 <!-- https://github.com/dgrtwo/fuzzyjoin -->
 <!-- http://r4ds.had.co.nz/relational-data.html -->
 
