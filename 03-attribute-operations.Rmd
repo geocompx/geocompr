@@ -170,6 +170,7 @@ world_continents %>%
 
 <!-- https://github.com/dgrtwo/fuzzyjoin -->
 <!-- http://r4ds.had.co.nz/relational-data.html -->
+<!-- non-unique keys -->
 
 Combining data from different sources is one of the most common task in data preparation. 
 It could be done using joins - methods created to work with a pair of tables.
@@ -188,15 +189,34 @@ We will use an `sf` object `north_america` with country codes (`iso_a2`), names 
 north_america = world %>%
   filter(subregion == "Northern America") %>%
   select(iso_a2, name_long)
+north_america
+```
+<!-- # plot(north_america[0]) -->
 
-plot(north_america[0])
-
+```{r}
 wb_north_america = worldbank_df %>% 
   filter(name %in% c("Canada", "Mexico", "United States")) %>%
   select(name, iso_a2, urban_pop, unemploy = unemployment)
+
+wb_north_america
 ```
 
+In this book, we focus on spatial data. 
+All of the following examples will have a `sf` object as the first argument and a `data.frame` object as the second argument. 
+A new `sf` object will be a result of these joins. 
+However, the reverse order is also possible and will result in a `data.frame` object.
+This is beyond the scope of this book, but we encourage you to try it.
+
 ### Left joins
+
+Left join is the most often used type of joins.
+The `left_join()` returns all observations from the left object (`north_america`) and the matched observations from the right object (`wb_north_america`). 
+In cases, like `Greenland`, when we don't have a data in the right object, `NA` values will be introduced.
+
+To connect two object we need to specify a key.
+This is a variable (or variables) that uniquely identifies each observation (row). 
+The argument `by` is used to state which variable is the key. 
+In simple cases, a single, unique variable exist in both objects, for example `iso_a2` column:
 
 ```{r}
 left_join1 = north_america %>% 
@@ -204,18 +224,25 @@ left_join1 = north_america %>%
 left_join1
 ```
 
+It is also possible to join objects by different variables.
+Both of the datasets have variables with names of countries, but they are named differently.
+The `north_america` has a `name_long` column and the `wb_north_america` has a `name` column.
+In these cases, we can use a named vector to specify the connection, e.g. `c("name_long" = "name")`:
+
 ```{r}
 left_join2 = north_america %>% 
   left_join(wb_north_america, by = c("name_long" = "name"))
 left_join2
 ```
 
+The new object `left_join2`, however is still not perfectly connected as it has two duplicated variables - `iso_a2.x` and `iso_a2.y`.
+To solve this problem we should specify all the keys:
+
 ```{r}
 left_join3 = north_america %>% 
   left_join(wb_north_america, by = c("iso_a2", "name_long" = "name"))
 left_join3
 ```
-
 
 <!-- ```{r} -->
 <!-- # error: keeps geom col -->
@@ -280,11 +307,11 @@ semi_join1 = north_america %>%
 semi_join1
 ```
 
-```{r}
-semi_join2 = wb_north_america %>%
-  semi_join(north_america, by = "iso_a2")
-semi_join2
-```
+<!-- ```{r} -->
+<!-- semi_join2 = wb_north_america %>% -->
+<!--   semi_join(north_america, by = "iso_a2") -->
+<!-- semi_join2 -->
+<!-- ``` -->
 
 ### Anti joins
 
@@ -294,11 +321,11 @@ anti_join1 = north_america %>%
 anti_join1
 ```
 
-```{r}
-anti_join2 = wb_north_america %>% 
-  anti_join(north_america, by = "iso_a2")
-anti_join2
-```
+<!-- ```{r} -->
+<!-- anti_join2 = wb_north_america %>%  -->
+<!--   anti_join(north_america, by = "iso_a2") -->
+<!-- anti_join2 -->
+<!-- ``` -->
 
 ### Exercises
 
