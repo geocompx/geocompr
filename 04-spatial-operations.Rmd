@@ -84,8 +84,33 @@ text(x = 0.5, y = 1, "y")
 par(mfrow = c(1, 1))
 ```
 
-To illustrate the relationship between subsetting and clipping spatial data, we will generate points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
+To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
 We will see that there are different ways to subset these points to fit into combinations of the circles: via clipping and logical operators.
+But first we must generate some points.
+We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y`, using the code below to generate the situation plotted in Figure \@ref(fig:venn-subset):
+
+```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y."}
+bb = st_bbox(st_union(x, y))
+pmat = matrix(c(bb[c(1, 2, 3, 2, 3, 4, 1, 4, 1, 2)]), ncol = 2, byrow = TRUE)
+box = st_polygon(list(pmat))
+set.seed(2017)
+p = st_sample(x = box, size = 10)
+plot(box)
+plot(x, add = T)
+plot(y, add = T)
+plot(p, add = T)
+text(x = c(-0.5, 1.5), y = 1, labels = l)
+```
+
+```{r, echo=FALSE}
+# An alternative way to sample from the bb
+bb = st_bbox(st_union(x, y))
+pmulti = st_multipoint(pmat)
+box = st_convex_hull(pmulti)
+```
+
+
+
 
 
 ### Exercises
