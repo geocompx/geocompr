@@ -35,8 +35,11 @@ generate_citations = function() {
         knitr::write_bib(pkgs, file="packages.bib")
 }
 
-download_zotero_citations = function() {
+#' @examples \dontrun{
+dl_citations(f = "refs.bib", 216746, Sys.getenv("ZOTERO"), collection = "VJS7CTCC")
+#' }
+dl_citations = function(f, user, key, collection) {
         # Get bibliography (run once from project root)
-        u = "https://www.zotero.org/api/groups/418217/collections/93E7I2E7/items/top?limit=100&format=bibtex&v=1"
-        b = httr::GET(url = u, httr::write_disk("refs.bib", overwrite = T))
+        bib = RefManageR::ReadZotero(user = user, .params = list(key = key, collection = collection))
+        RefManageR::WriteBib(bib = bib, file = f)
 }
