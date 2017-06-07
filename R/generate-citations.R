@@ -35,9 +35,9 @@ generate_citations = function() {
   knitr::write_bib(pkgs, file="packages.bib")
 }
 
-#' @examples \dontrun{
-#' dl_citations(f = "refs.bib", 216746, Sys.getenv("ZOTERO"), collection = "VJS7CTCC")
-#' }
+#' Download citations
+#' # Dependes on a zotero API key (e.g. stored in Sys.getenv("ZOTERO")):
+#' # dl_citations(f = "refs.bib", 216746, Sys.getenv("ZOTERO"), collection = "VJS7CTCC")
 dl_citations = function(f, user, key, collection) {
   # Get bibliography (run once from project root)
   bib = RefManageR::ReadZotero(user = user, .params = list(key = key, collection = collection))
