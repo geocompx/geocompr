@@ -87,11 +87,11 @@ Two arguments are required, one for rows (observations) and one for columns (var
 These arguments could be either numeric, which indicates a position, or character, which indicates a name of row or column.
 
 ```{r, eval=FALSE}
-world[1:6, ] # subset rows
+world[1:6, ] # subset rows by position
 ```
 
 ```{r, eval=FALSE}
-world[, 1:3] # subset columns
+world[, 1:3] # subset columns by position
 ```
 
 ```{r, eval=FALSE}
@@ -110,29 +110,60 @@ You can also subset a `sf` object based on a given condition using (surprise, su
 small_countries = subset(world, area_km2 < 10000)
 ```
 
-**dplyr** makes working with data frames easier and is compatible with `sf` objects.
-
 <!-- , after the package has been loaded: [or - it is a part of tidyverse] -->
-<!-- attribute subsetting in dplyr is could be done using two functions - select and filter -->
+**dplyr** makes working with data frames easier and is compatible with `sf` objects.
+The two main **dplyr** functions that help with attribute subsetting are `select()` and `filter()`.
 
-<!-- simple select example (without renaming) -->
-
-The `select()` function can be used to both subset and renames columns in a single line, for example:
+The `select()` function picks columns by its name.
+For example, you could select only two columns - `name_long` and `pop`:
 
 ```{r}
-world1 = select(world, name_long, continent, population = pop)
+world1 = select(world, name_long, pop)
 head(world1, n = 2)
 ```
 
-This is more concise than the base R equivalent (which saves the result as an object called `world2` to avoid overriding the `world` dataset created previously):
+This function gives a possibility to select a range of columns with an `:` operator or remove some columns with an `-` operator:
 
 ```{r, eval=FALSE}
-world2 = world[c("name_long", "continent", "pop")] # subset columns by name
-names(world2)[3] = "population" # rename column manually
+# all columns between name_long and pop (inclusive)
+world2 = select(world, name_long:pop)
+head(world2, n = 2)
 ```
 
-<!-- another one is filter -->
-<!-- filter() keeps rows matching given criteria -->
+```{r, eval=FALSE}
+# all columns except subregion and area_km2 (inclusive)
+world3 = select(world, -subregion, -area_km2)
+head(world3, n = 2)
+```
+
+The `select()` function can be also used to both subset and renames columns in a single line, for example:
+
+```{r}
+world4 = select(world, name_long, population = pop)
+head(world4, n = 2)
+```
+
+This is more concise than the base R equivalent (which saves the result as an object called `world5` to avoid overriding the `world` dataset created previously):
+
+```{r, eval=FALSE}
+world5 = world[c("name_long", "pop")] # subset columns by name
+names(world5)[3] = "population" # rename column manually
+```
+
+The `select()` function works with a number of special functions that help with more complicated selection. 
+More details could be find on the function help page - `?select`.
+
+The `filter()` function is a **dplyr** alternative to the `subset()` function.
+Its role is to keeps rows matching given criteria.
+
+```{r, eval=FALSE}
+# only countries with a life expectation larger than 82 years
+world6 = filter(world, lifeExp > 82)
+```
+
+The standard set of comparison operators can be used in the `filter()` function: `==`, `!=`, `>`, `>=`, `<`, `<=`, `&`, `|`. 
+<!-- todo - describe these: ==, !=, >, >=, <, <=, &, | -->
+<!-- more examples -->
 
 The *pipe* operator (` %>% `), which passes the output of one function into the first argument of the next function, is commonly used in **dplyr** data analysis workflows.
 This works because the fundamental **dplyr** functions (or 'verbs', like `select()`) all take a data frame object in and spit a data frame object out.
@@ -142,7 +173,7 @@ The advantage over base R for complex data processing operations is that this ap
 The example below shows yet another way of creating the renamed `world` dataset, using the pipe operator:
 
 ```{r}
-world3 = world %>%
+world7 = world %>%
   select(name_long, continent)
 ```
 
@@ -154,7 +185,6 @@ world4 = select(world, name_long, continent)
 ```
 
 <!-- more complicated example of using pipes (select + filter) -->
-
 The pipe operator can be used for many data processing tasks with attribute data.
 
 ```{r}
@@ -162,9 +192,6 @@ The pipe operator can be used for many data processing tasks with attribute data
 world %>%
   filter(pop > 1e9) 
 ```
-
-<!-- todo - describe these: ==, !=, >, >=, <, <=, &, | -->
-<!-- more examples -->
 
 This is equivalent to the following base R code (not run to preserve the NAs):^[[Note](https://github.com/Robinlovelace/geocompr/issues/28) NAs do not work for subsetting by inequalities in base R, hence conversion of NAs to 0s in this version)]
 
