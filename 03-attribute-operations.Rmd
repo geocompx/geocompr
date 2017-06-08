@@ -431,38 +431,31 @@ full_join1
 
 ## Attribute data creation
 
-<!-- base R example?? -->
-<!-- new varaibles could be add with mutate() -->
-<!-- you can create pop_dens by ... and gdp by ... -->
+It is often the case when a new column needs to be created based on existing columns.
+For example, we want to calculate population density.
+We need to divide a `pop` column (population) by a `area_km2` column (unit area in square km).
+In base R it could be done this way:
+
+```{r}
+world_new <- world # not to overwrite our original data
+world_new$pop_dens = world_new$pop / world_new$area_km2
+```
+
+Alternatively, we can use one of **dplyr** functions - `mutate()` or `transmute()`.
+`mutate()` adds new columns at second-to-last position in the `sf` object (the last one is reserved for the geometry):
 
 ```{r}
 world %>% 
-  mutate(pop_dens = pop / area_km2,
-         gdp = gdpPercap * pop)
+  mutate(pop_dens = pop / area_km2)
 ```
 
-<!-- transmute -->
+The difference between `mutate()` and `transmute()` is that the latter do not preserve existing columns:
 
 ```{r}
 world %>% 
-  transmute(pop_dens = pop / area_km2,
-         gdp = gdpPercap * pop)
+  transmute(pop_dens = pop / area_km2)
 ```
 
-<!-- rename -->
-
-```{r}
-world %>% 
-  rename(name = name_long)
-```
-
-```{r}
-new_names = c("ISO_A2", "Name", "Continent", "Region", "Subregion", 
-              "Country_type", "Area_in_km2", "Population", "Life_Expectancy",
-              "GDP_per_capita", "geom")
-world %>% 
-  set_names(new_names)
-```
 
 <!-- unite ?? -->
 <!-- https://github.com/edzer/sfr/issues/378 -->
@@ -473,9 +466,34 @@ world %>%
 <!-- ``` -->
 
 <!-- separate -->
+
+<!-- rename -->
+
+Two helper functions, `rename()` and `set_names` can be used to change columns names.
+The first one, `rename()` replace an old name with a new one.
+For example, we want to change a name of column from `name_long` to `name`:
+
+```{r}
+world %>% 
+  rename(name = name_long)
+```
+
+`set_names` can be used to change names of many columns. 
+In this function, we do not need to provide old names: 
+
+```{r}
+new_names = c("ISO_A2", "Name", "Continent", "Region", "Subregion", 
+              "Country_type", "Area_in_km2", "Population", "Life_Expectancy",
+              "GDP_per_capita", "geom")
+world %>% 
+  set_names(new_names)
+```
+
 <!-- lubridate? -->
 
 ### Exercises
+
+<!-- calculate gdp -->
 
 ## Removing spatial information
 
