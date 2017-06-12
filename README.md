@@ -55,8 +55,8 @@ An indication of the book's progress over time is illustrated below (to be updat
 
 Book statistics: estimated number of pages per chapter over time.
 
-Package citations
------------------
+Citations
+---------
 
 To cite packages used in this book we use code from [Efficient R Programming](https://csgillespie.github.io/efficientR/):
 
@@ -80,17 +80,32 @@ knitr::kable(pkg_df)
 | mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.0.1      |
 | microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                    | 1.4.2.1    |
 | raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8      |
-| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.4.3      |
-| spData         | Datasets for spatial analysis packages (Bivand 2017)                                         | 0.1.20     |
+| rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.7      |
+| rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23     |
+| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.0      |
+| sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2016)                               | 1.2.4      |
+| spData         | Datasets for spatial analysis packages (Bivand, Nowosad, and Lovelace 2017)                  | 0.1.25     |
 | tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1      |
 | tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.10       |
+
+Other citations are stored online using Zotero and downloaded with:
+
+``` r
+geocompr:::dl_citations(f = "refs.bib", user = 418217, collection = "9K6FRP6N")
+```
+
+If you would like to add to the references, please join Zotero and add your citation to the open [geocompr group library](https://www.zotero.org/groups/418217/energy-and-transport/items/collectionKey/9K6FRP6N).
 
 References
 ----------
 
 Appelhans, Tim, Florian Detsch, Christoph Reudenbach, and Stefan Woellauer. 2017. *Mapview: Interactive Viewing of Spatial Objects in R*. <https://CRAN.R-project.org/package=mapview>.
 
-Bivand, Roger. 2017. *SpData: Datasets for Spatial Analysis Packages*.
+Bivand, Roger, and Colin Rundel. 2017. *Rgeos: Interface to Geometry Engine - Open Source (Geos)*. <https://CRAN.R-project.org/package=rgeos>.
+
+Bivand, Roger, Tim Keitt, and Barry Rowlingson. 2017. *Rgdal: Bindings for the Geospatial Data Abstraction Library*. <https://CRAN.R-project.org/package=rgdal>.
+
+Bivand, Roger, Jakub Nowosad, and Robin Lovelace. 2017. *SpData: Datasets for Spatial Analysis Packages*. <https://github.com/Nowosad/spData>.
 
 Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2017. *Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library*. <http://rstudio.github.io/leaflet/>.
 
@@ -100,7 +115,9 @@ Hijmans, Robert J., Steven Phillips, John Leathwick, and Jane Elith. 2017. *Dism
 
 Mersmann, Olaf. 2015. *Microbenchmark: Accurate Timing Functions*. <https://CRAN.R-project.org/package=microbenchmark>.
 
-Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://CRAN.R-project.org/package=sf>.
+Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://github.com/edzer/sfr/>.
+
+Pebesma, Edzer, and Roger Bivand. 2016. *Sp: Classes and Methods for Spatial Data*. <https://CRAN.R-project.org/package=sp>.
 
 Pebesma, Edzer, and Benedikt Graeler. 2017. *Gstat: Spatial and Spatio-Temporal Geostatistical Modelling, Prediction and Simulation*. <https://CRAN.R-project.org/package=gstat>.
 
