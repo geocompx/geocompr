@@ -31,7 +31,8 @@ But there are times when it's useful to 'point and click'.
 - -->
 
 ## (R)QGIS
-QGIS provides a Python API that allows the user to run QGIS functionality outside of its GUI. **RQGIS** establishes a tunnel to this Python API through the **reticulate** (cite reticulate) package. Basically, functions `set_env` and `open_app` are doing this. Note that it is optional to run `set_env` and `open_app` since all functions depending on their output will run them automatically if needed. Before running **RQGIS** you have to make sure to have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS. To help you with the installation process, please follow the steps as detailled in `vignette("install_guide", package = "RQGIS")` for several platforms (Windows, Linux, MacOS).
+The main advantage of using QGIS is that it provides a unified interface to many open-source GIS. First and foremost this means that you have access to GDAL/OGR, GRASS and SAGA through QGIS but also to other third-party providers such as TauDEM, Orfeo Toolbox and Lastools (tools for LiDAR data) [@Graser.2015]. To run all these geoalgorithms (frequently more than 1000 depending on your set up) outside of the QGIS GUI, 
+QGIS provides a Python API. **RQGIS** establishes a tunnel to this Python API through the **reticulate** (cite reticulate) package. Basically, functions `set_env` and `open_app` are doing this. Note that it is optional to run `set_env` and `open_app` since all functions depending on their output will run them automatically if needed. Before running **RQGIS** you have to make sure to have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS. To help you with the installation process, please follow the steps as detailled in `vignette("install_guide", package = "RQGIS")` for several platforms (Windows, Linux, MacOS).
 
 ```{r qgis_setup}
 library("RQGIS")
@@ -39,7 +40,7 @@ set_env()
 open_app()
 ```
 
-Leaving the `path`-argument of `set_env` unspecified will search the computer for a QGIS installation. Hence, it is faster to specify explicitly the path to your QGIS installation. Subsequently, `open_app` sets all paths necessary to run QGIS from within R, and finally creates a so-called QGIS custom application [http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications). We are now ready for some QGIS geoprocessing from within R! First of all, we load some data from **spData**-package, namely the boroughs of London (`lnd`) and cycle hire points in London (`cycle_hire`).
+Leaving the `path`-argument of `set_env` unspecified will search the computer for a QGIS installation. Hence, it is faster to specify explicitly the path to your QGIS installation. Subsequently, `open_app` sets all paths necessary to run QGIS from within R, and finally creates a so-called QGIS custom application [http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications). We are now ready for some QGIS geoprocessing from within R! First of all, we load some data from the **spData**-package, namely the boroughs of London (`lnd`) and cycle hire points in London (`cycle_hire`).
 
 ```{r}
 library("spData")
@@ -47,10 +48,10 @@ data("cycle_hire")
 data("lnd")
 ```
 <!-- silly example, other suggestions welcome also with regard to RSAGA and rgrass7-->
-In chapter 2 (reference it), we already learned how to do a spatial overlay using the **sf**-package. Of course, any GIS is also able to perform spatial overlays. Here, we would like to know how many cycle points we can find per borough. First of all, we need to come up with the name of the function in QGIS. `find_algorithms` lets you search all QGIS geoalgorithms. Here, we assume that the short description of the function contains first the word "point" and secondly somewhere later also the word "poly". If you have no clue at all what to look for you can leave the `search_term`-argument empty which will return a list of all available geoalgorithms.
+In chapter 2 (reference it), we already learned how to do a spatial overlay using the **sf**-package. Of course, any GIS is also able to perform spatial overlays. Here, we would like to know how many cycle points we can find per borough. First of all, we need to come up with the name of the function in QGIS. `find_algorithms` lets you search all QGIS geoalgorithms with the help of regular expressions. Here, we assume that the short description of the function contains first the word "point" and secondly somewhere later also the word "poly". If you have no clue at all what to look for you can leave the `search_term`-argument empty which will return a list of all available QGIS geoalgorithms. If you also want to have a short description for each geoalgorithm, set the `name_only`-parameter to FALSE.
 
 ```{r}
-find_algorithms("points.*poly")
+find_algorithms("points.*poly", name_only = TRUE)
 ```
 
 Now that we know the name of the function ("qgis:countpointsinpolygon"), we wonder how we can use it. `get_usage` returns all function parameters and default values. `open_help` lets you access the corresponding online help.
@@ -73,15 +74,68 @@ summary(bike_points$no_bikes)
 sum(bike_points$no_bikes > 0)
 ```
 
+In case you leave some parameters of a geoalgorithm unspecified, `run_qgis` will automatically use the default values as arguments if available. To find out about the default values, run `get_args_man`.  
+
+```{r}
+get_args_man(alg)
+```
+
+In this case the output tells us, had we left the `FIELDS`-parameter unspecified, our output (attribute) field would have been named "NUMPOINTS" (instead of "no_bikes").
+
+<!--
+"grass7:v.vect.stats" would achieve the same but is unavailable in QGIS
+-->
+
+Other notes:
+- leaving the output parameter(s) unspecified, saves the resulting QGIS output to a temporary folder created by QGIS. `run_qgis` prints these paths to the console after sucessfully runing the QGIS engine.
+- If the output consists of multiple files and you have set `load_output` to `TRUE`, `run_qgis` will return a list with each element corresponding to one output file.
+
+To learn more about **RQGIS** please refer to the (hopefully) forthcoming paper (cite). 
 
 ## (R)SAGA
 "SAGA CMD is a command line interface to execute SAGA modules. Other than SAGA GUI, it provides no functionality for data management and data visualization. It's purpose is to automate tasks by writing scripts or to execute SAGA modules from within an other application like a web server. This section will describe the necessary setup of your system to use SAGA CMD and execute modules" [https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/).
 
 hint to vignette("RSAGA-landslides", package = "RSAGA").
 
+Though SAGA is a hybrid GIS, its main focus has been from the beginning on raster processing (and specifically on hydrological/climatolgical/geomorphometric raster processing -> look it up). Hence, SAGA is especially good at the processing of large rasters data sets. Overall, there are more than 600 geoalgorithms available [@Conrad.2015].  
+
+cite citation("RSAGA").
 
 ## GRASS through **rgrass7**
 
 use **link2GI** for an easy set-up of the GRASS environment (though it is beneficial to GRASS users to have a working knowledge of how GRASS works internally)
 
+GRASS more than 500 functions (\url{http://grass.osgeo.org/grass72/manuals/})
+
 ## When to use what?
+
+@article{Conrad.2015,
+ author = {O. Conrad and Benjamin Bechtel and M. Bock and H. Dietrich and E. Fischer and Lars Gerlitz and J. Wehberg and V. Wichmann and J{\"u}rgen B{\"o}hner},
+ year = {2015},
+ title = {System for Automated Geoscientific Analyses (SAGA) v. 2.1.4},
+ pages = {1991--2007},
+ volume = {8},
+ number = {7},
+ issn = {1991-959X},
+ journal = {Geoscientific Model Development}
+}
+
+ @article{Graser.2015,
+ author = {Anita Graser and Victor Olaya},
+ year = {2015},
+ title = {Processing: A Python Framework for the Seamless Integration of Geoprocessing Tools in QGIS},
+ url = {http://www.mdpi.com/2220-9964/4/4/2219/pdf},
+ pages = {2219--2245},
+ volume = {4},
+ number = {4},
+ journal = {ISPRS International Journal of Geo-Information},
+ doi = {10.3390/ijgi4042219}
+}
+
+@book{Neteler.2008,
+ author = {Markus Neteler and Helena Mitasova},
+ year = {2008},
+ title = {Open Source GIS: A GRASS GIS Approach},
+ address = {New York},
+ publisher = {Springer-Verlag}
+}
