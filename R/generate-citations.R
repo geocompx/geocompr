@@ -1,7 +1,6 @@
 #' Cite R packages
 #'
 #' See https://github.com/csgillespie/efficientR/blob/master/appendix.Rmd
-#'
 generate_citations = function() {
   desc = read.dcf("DESCRIPTION")
   headings = dimnames(desc)[[2]]
@@ -38,8 +37,17 @@ generate_citations = function() {
 #' Download citations
 #' # Dependes on a zotero API key (e.g. stored in Sys.getenv("ZOTERO")):
 #' # dl_citations(f = "refs.bib", 216746, Sys.getenv("ZOTERO"), collection = "VJS7CTCC")
-dl_citations = function(f, user, key, collection) {
-  # Get bibliography (run once from project root)
-  bib = RefManageR::ReadZotero(user = user, .params = list(key = key, collection = collection))
-  RefManageR::WriteBib(bib = bib, file = f)
+dl_citations = function(f, user, collection, key = NULL) {
+  if(is.null(key)) {
+    req = paste0("https://www.zotero.org/api/groups/",
+                 user,
+                 "/collections/",
+                 collection,
+                 "/items/top?limit=100&format=bibtex&v=1")
+    bib = httr::GET(req, httr::write_disk(f, overwrite = T)) # old download method - no longer works
+  } else {
+    bib = RefManageR::ReadZotero(user = user, .params = list(key = key, collection = collection))
+    # Get bibliography (run once from project root)
+    RefManageR::WriteBib(bib = bib, file = f)
+  }
 }
