@@ -6,20 +6,19 @@
 
 ```{r, include=FALSE}
 pkgs_c11 = c(
-        "cowplot",
-        "wbstats",
-        "rnaturalearth",
-        "viridis",
-        "sf",
-        "tidyverse",
-        "tmap",
-        "units"
+  "cowplot",
+  "wbstats",
+  "rnaturalearth",
+  "viridis",
+  "sf",
+  "tidyverse",
+  "tmap",
+  "units"
 )
 pacman::p_load(char = pkgs_c11)
 if(!exists("world")) {
-        source("code/01-introduction.R")
+  source("code/01-introduction.R")
 }
-        
 ```
 
 # Advanced map making {#adv-map}
@@ -41,32 +40,32 @@ if(!exists("world")) {
 options(scipen = 999)
 
 wb_data_create = function(indicator, our_name, year, ...){
-        df = wb(indicator = indicator, startdate = year, enddate = year, ...) %>%
-                as_data_frame() %>%
-                select(iso_a2=iso2c, value) %>%
-                mutate(indicator = our_name) %>%
-                spread(indicator, value)
-        return(df)
+  df = wb(indicator = indicator, startdate = year, enddate = year, ...) %>%
+    as_data_frame() %>%
+    select(iso_a2=iso2c, value) %>%
+    mutate(indicator = our_name) %>%
+    spread(indicator, value)
+  return(df)
 }
 
 data_lifeExp = seq(1963, 2013, by=5) %>%
-        set_names(.) %>%
-        map_df(~wb_data_create(.x, indicator = "SP.DYN.LE00.IN",
-                               our_name = "lifeExp",
-                               country = "countries_only"), .id='year') %>%
-        spread(year, lifeExp)
+  set_names(.) %>%
+  map_df(~wb_data_create(.x, indicator = "SP.DYN.LE00.IN",
+                   our_name = "lifeExp",
+                   country = "countries_only"), .id='year') %>%
+  spread(year, lifeExp)
 
 world_sf_temporal = ne_countries(returnclass = 'sf') %>%
-        left_join(., data_lifeExp, by = c('iso_a2')) %>%
-        mutate(area_km2 = set_units(st_area(.), km^2)) %>%
-        select(iso_a2, name_long, continent, region_un, subregion, type, area_km2, `1963`:`2013`) %>%
-        gather(year, lifeExp, `1963`:`2013`)
+  left_join(., data_lifeExp, by = c('iso_a2')) %>%
+  mutate(area_km2 = set_units(st_area(.), km^2)) %>%
+  select(iso_a2, name_long, continent, region_un, subregion, type, area_km2, `1963`:`2013`) %>%
+  gather(year, lifeExp, `1963`:`2013`)
 ```
 
 ```{r animation1, eval=FALSE}
 m1 = tm_shape(world_sf_temporal) + 
-        tm_polygons("lifeExp") +
-        tm_facets(by = "year", nrow = 1, ncol = 1, drop.units = TRUE)
+  tm_polygons("lifeExp") +
+  tm_facets(by = "year", nrow = 1, ncol = 1, drop.units = TRUE)
 
 animation_tmap(m1, filename = "figures/11-lifeExp_animation.gif", width = 2000, height = 600, delay = 40)
 ```
@@ -74,7 +73,7 @@ animation_tmap(m1, filename = "figures/11-lifeExp_animation.gif", width = 2000, 
 ```{r animation2, eval=FALSE}
 world_sf_temporal2 = filter(world_sf_temporal, continent == "South America")
 m2 = tm_shape(world_sf_temporal2) +
-        tm_polygons("lifeExp", n = 12) +
-        tm_facets(by = "name_long", along = "year", drop.units = TRUE, free.coords = TRUE)
+  tm_polygons("lifeExp", n = 12) +
+  tm_facets(by = "name_long", along = "year", drop.units = TRUE, free.coords = TRUE)
 animation_tmap(m2, filename = "figures/11-lifeExp_sa_animation.gif", width = 1600, height = 1000, delay = 40)
 ```
