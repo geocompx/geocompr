@@ -40,8 +40,8 @@ But there are times when it's useful to 'point and click'.
 - -->
 
 ## (R)QGIS
-The main advantage of using QGIS is that it provide a unified interface to many open-source GIS.
-First and foremost this means that you have access to GDAL/OGR, GRASS and SAGA through QGIS but also to other third-party providers such as [TauDEM](http://hydrology.usu.edu/taudem/taudem5/index.html), [Orfeo Toolbox](https://www.orfeo-toolbox.org/) and [Lastools](https://rapidlasso.com/lastools/) (tools for LiDAR data) [@graser_processing:_2015]. 
+QGIS is one of the most popular open-source GIS [\@ref(tab:gis_comp); @graser_processing:_2015]. Its main advantage lies in the fact that it provides a unified interface to several other open-source GIS.
+First and foremost, this means that you have access to GDAL/OGR, GRASS and SAGA through QGIS but also to other third-party providers such as [TauDEM](http://hydrology.usu.edu/taudem/taudem5/index.html), [Orfeo Toolbox](https://www.orfeo-toolbox.org/) and [Lastools](https://rapidlasso.com/lastools/) (tools for LiDAR data) [@graser_processing:_2015]. 
 To run all these geoalgorithms (frequently more than 1000 depending on your set up) outside of the QGIS GUI, QGIS provides a Python API.
 **RQGIS** establishes a tunnel to this Python API through the **reticulate** (cite reticulate) package. 
 Basically, functions `set_env` and `open_app` are doing this. 
@@ -118,12 +118,14 @@ In this case the output tells us, had we left the `FIELDS`-parameter unspecified
 -->
 
 Other notes:
-- Leaving the output parameter(s) unspecified, saves the resulting QGIS output to a temporary folder created by QGIS. `run_qgis` prints these paths to the console after sucessfully runing the QGIS engine.
+- Leaving the output parameter(s) unspecified, saves the resulting QGIS output to a temporary folder created by QGIS.
+`run_qgis` prints these paths to the console after sucessfully runing the QGIS engine.
 - If the output consists of multiple files and you have set `load_output` to `TRUE`, `run_qgis` will return a list with each element corresponding to one output file.
 
 To learn more about **RQGIS** please refer to the (hopefully) forthcoming paper (cite). 
 
 ## (R)SAGA
+The System for Automated Geoscientific Analyses (SAGA;  \@ref(tab:gis_comp)).
 "SAGA CMD is a command line interface to execute SAGA modules.
 Other than SAGA GUI, it provides no functionality for data management and data visualization.
 It's purpose is to automate tasks by writing scripts or to execute SAGA modules from within an other application like a web server. 
@@ -136,10 +138,52 @@ Though SAGA is a hybrid GIS, its main focus has been on raster processing, and h
 cite citation("RSAGA").
 
 ## GRASS through **rgrass7**
-[@neteler_open_2008]
+Geographical Resources Analysis Support System (GRASS)   \@ref(tab:gis_comp) [@neteler_open_2008].
+Inexperienced GIS users might find GRASS a bit intimidating in the beginning.
+Before starting the GUI you have to create a mapset, a location (basically a geodatabase), define the projection and boundaries of your GRASS project. 
+You have to do exactly the same from within R:
 
+```{r}
+library("rgrass7")
+initGRASS(gisBase = "C:/Program Files (x86)/GRASS GIS 7.4.2")
+```
+
+**link2GI** fascilitates this tedious task. So instead of defining all the stuff yourself, you call:
+ 
+ ```{r}
+ library("link2GI")
+ 
+ ```
 use **link2GI** for an easy set-up of the GRASS environment (though it is beneficial to GRASS users to have a working knowledge of how GRASS works internally)
 
-GRASS more than 500 functions (\url{http://grass.osgeo.org/grass72/manuals/})
-
 ## When to use what?
+<!-- more or less brainstorming -->
+**RQGIS** unified interface to GRASS and SAGA (and GDAL/OGR, Orfeo Toolbox, TauDEM, Lastools) + QGIS geoalgorithms. 
+So far QGIS supports a subset of the available geoalgorithms. Depending on your version this is around 235 for SAGA and 160 for GRASS. 
+So you should stick to **RSAGA** and **rgrass7** if you are also using less common GIS functionalities.
+In case you aim for topological correct data, we recommend the usage of GRASS. 
+Many of the unsupported GRASS functions in QGIS relate to geodatabase-management.
+Hence, if you strive for the advantages of a geodatabase, we would again  recommend to use GRASS.
+**RSAGA** provides numerous user-friendly functions (i.e. wrappers).
+Secondly, **RSAGA** also offers geocomputing functions written in R (e.g., `multi.local.function`, `pick.from.grid`, etc.).
+To sum it up, we like all three packages.
+To recommend a single one is hard since the usage depends on personal preferences, the tasks at hand and your familiarity with different GIS.
+The latter means if you have already prefer the GUI of a certain GIS, you are quite likely to use the corresponding interface.
+Certainly, RQGIS is an appropriate choice for most use cases. Additionally:
+- unified access to several GIS, and therefore provision of >1000 geoalgorithms (of course, this includes duplicated functionality, e.g., you can perform overlay-operations using QGIS-, SAGA- or GRASS-geoalgorithms) 
+- QGIS automatically takes care of data format conversions
+- **RQGIS** can also handle spatial objects residing in R as input for geoalgorithms, and loads QGIS output automatically back into R if desired
+- convenience functions to support the access of the online help and R named arguments, automatic default value retrieval though the latter two features are also available in **rgrass7** or to be honest, **rgrass7** features have inspired those now found in RQGIS.
+- Currently (but this might change), **RQGIS** supports newer SAGA (2.3.1) versions than **RSAGA** (2.2.3)
+
+
+```{r gis_comp, echo = FALSE, message = FALSE}
+library("tidyverse")
+d <- tibble("GIS" = c("GRASS", "QGIS", "SAGA"),
+            "first release" = c("1984", "2002", "2004"),
+            "no. functions" = c(">500", ">1000", ">600"),
+            "support" = c("hybrid", "hybrid", "hybrid"))
+knitr::kable(x = d, caption = "Comparison between three open-source GIS. Hybrid refers to the support of vector and raster operations.") %>%
+  kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see [http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/](http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/)), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
+```
+
