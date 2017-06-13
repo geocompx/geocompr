@@ -14,7 +14,8 @@
 
 ## open
 
-- 2017-04-01 - emhancement - returnclass='sf' as default - https://github.com/ropenscilabs/rnaturalearth/issues/16
+- 2017-04-01 - enhancement - returnclass='sf' as default - https://github.com/ropenscilabs/rnaturalearth/issues/16
 - 2017-05-29 - Function idea - a qgis style file creator (.qml) - https://github.com/jannes-m/RQGIS/issues/70
 - 2017-06-02 - bug - Joins between data.frames and sf objects - https://github.com/tidyverse/dplyr/issues/2833
 - 2017-06-06 - enhancement - skim of `sf` objects - https://github.com/ropenscilabs/skimr/issues/88
+- 2017-06-12 - bug - Combine polygons by attribute - https://github.com/edzer/sfr/issues/382
