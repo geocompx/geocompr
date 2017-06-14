@@ -13,6 +13,7 @@
 - 2017-06-07 - bug - tidyr::unite error - https://github.com/edzer/sfr/issues/378
 - 2017-06-08 - bug - Behaviour of the `head` function - https://github.com/edzer/sfr/issues/379
 - 2017-06-02 - bug - Joins between data.frames and sf objects - https://github.com/tidyverse/dplyr/issues/2833
+- 2017-06-14 - question - Simple features types - https://github.com/edzer/sfr/issues/383
 
 ## open
 
@@ -20,4 +21,3 @@
 - 2017-05-29 - enhancement - a qgis style file creator (.qml) - https://github.com/jannes-m/RQGIS/issues/70
 - 2017-06-06 - enhancement - skim of `sf` objects - https://github.com/ropenscilabs/skimr/issues/88
 - 2017-06-12 - bug - Combine polygons by attribute - https://github.com/edzer/sfr/issues/382
-- 2017-06-14 - question - Simple features types - https://github.com/edzer/sfr/issues/383
