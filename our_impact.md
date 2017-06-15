@@ -21,3 +21,4 @@
 - 2017-05-29 - enhancement - a qgis style file creator (.qml) - https://github.com/jannes-m/RQGIS/issues/70
 - 2017-06-06 - enhancement - skim of `sf` objects - https://github.com/ropenscilabs/skimr/issues/88
 - 2017-06-12 - bug - Combine polygons by attribute - https://github.com/edzer/sfr/issues/382
+- 2017-06-15 - enhancement - Add a support for `sf` objects - https://github.com/oswaldosantos/ggsn/issues/16
