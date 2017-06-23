@@ -9,7 +9,7 @@ Using compiled code for new geoprocessing functionality (particularly with the h
 However, there is already a wide range of algorithms that can be accessed via R's interfaces to dedicated GIS software.
 It makes sense to understand these before moving to develop your own optimised algorithms.
 For this reason this chapter focusses on 'bridges' to the mature GIS products [QGIS](http://qgis.org/) (via the package **RQGIS**), [SAGA](http://www.saga-gis.org/) (**RSAGA**) and [GRASS](https://grass.osgeo.org/) (**rgrass7**) from within R.
-By the end of the chapter you should have working knowledge of the functionality such packages open up, and a more nuanced understanding of the  'CLI vs GUI' debate.
+By the end of the chapter you should have a working knowledge of the functionality such packages open up, and a more nuanced understanding of the  'CLI vs GUI' debate.
 <!-- sounds like you would like to focus on open-source GIS? There is also the RPyGeo-package integrating R with ArcGIS. Admittedly, it needs some polishing (a student of ours will take care of this) but maybe we can at least mention it -->
 <!-- Sound like a good list of contents? -->
 As mentioned in chapter \@ref(intro), doing GIS at the command-line makes it more reproducible, in-line with the principles of Geographic Data Science.
@@ -125,16 +125,27 @@ Other notes:
 To learn more about **RQGIS** please refer to the (hopefully) forthcoming paper (cite). 
 
 ## (R)SAGA
-The System for Automated Geoscientific Analyses (SAGA;  \@ref(tab:gis_comp)).
-"SAGA CMD is a command line interface to execute SAGA modules.
-Other than SAGA GUI, it provides no functionality for data management and data visualization.
-It's purpose is to automate tasks by writing scripts or to execute SAGA modules from within an other application like a web server. 
-This section will describe the necessary setup of your system to use SAGA CMD and execute modules" [https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/).
+Similar to QGIS, the System for Automated Geoscientific Analyses (SAGA;  \@ref(tab:gis_comp)) provides the possibility to run SAGA modules from Python (SAGA Python API).
+In addition, there is also a command line interface (saga_cmd.exe) to execute SAGA modules (see also [https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/)).
+**RSAGA** uses the latter to run SAGA from within R.
+Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here particularly on digital elevation models (soil properties, terrain attributes, climate parameters). Hence, SAGA is especially good at the fast processing of large (high-resolution) rasters data sets [@conrad_system_2015]. 
+Therefore, we will introduce **RSAGA** with a raster and use case from @muenchow_geomorphic_2012. First of all, we need to tell **RSAGA** where to find SAGA on the computer.
+Usually, `rsaga.env()` will detect SAGA automatically. However, I have 'hidden' SAGA in my OSGEO4W-installation (-> RSAGA feature request), which is why I have to indicate the corresponding path:
 
-hint to vignette("RSAGA-landslides", package = "RSAGA").
+```{r}
+library("RSAGA")
+saga_env <- rsaga.env(path = "C:/OSGeo4W64/apps/saga")
+```
 
-Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here particularly on digital elevation models (soil properties, terrain attributes, climate parameters). Hence, SAGA is especially good at the fast processing of large (high-resolution) rasters data sets. Overall, there are more than 600 geoalgorithms available [@conrad_system_2015].  
+Secondly, we need to write the digital elevation model to a SAGA-format:
 
+```{r}
+data("landslides")
+write.sgrd(data = dem, file = "dem", header = dem$header,
+env = rsaga_env)
+```
+ 
+You can find a more detailed example for statistical geocomputation in the RSAGA vignette `vignette("RSAGA-landslides")`.
 cite citation("RSAGA").
 
 ## GRASS through **rgrass7**
