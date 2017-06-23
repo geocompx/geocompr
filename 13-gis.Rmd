@@ -16,7 +16,7 @@ Instead of implementing existing GIS algorithms in R, it makes sense to avoid 'r
 Using compiled code for new geoprocessing functionality (particularly with the help of the excellent **Rcpp** package) could form the basis of new R packages, building on the success of **sf**.
 However, there is already a wide range of algorithms that can be accessed via R's interfaces to dedicated GIS software.
 It makes sense to understand these before moving to develop your own optimised algorithms.
-For this reason this chapter focusses on 'bridges' to the mature GIS products [QGIS](http://qgis.org/) (via the package **RQGIS**), [SAGA](http://www.saga-gis.org/) (**RSAGA**) and [GRASS](https://grass.osgeo.org/) (**rgrass7**) from within R.
+For this reason this chapter focusses on 'bridges' to the mature GIS products [QGIS](http://qgis.org/) (via the package **RQGIS**), [SAGA](http://www.saga-gis.org/) (**RSAGA**) and [GRASS](https://grass.osgeo.org/) (**rgrass7**) from within R. Obviously, we here focus on open-source software solutions, however, there is also a bridge to the commercial GIS leader [ArcGIS](https://www.arcgis.com) through the **RPyGeo** package. And the so-called [R-ArcGIS bridge](https://github.com/R-ArcGIS/r-bridge) allows to use R from within ArcGIS.
 By the end of the chapter you should have a working knowledge of the functionality such packages open up, and a more nuanced understanding of the  'CLI vs GUI' debate.
 <!-- sounds like you would like to focus on open-source GIS? There is also the RPyGeo-package integrating R with ArcGIS. Admittedly, it needs some polishing (a student of ours will take care of this) but maybe we can at least mention it -->
 <!-- Sound like a good list of contents? -->
@@ -74,7 +74,7 @@ data("cycle_hire")
 data("lnd")
 ```
 <!-- silly example, other suggestions welcome also with regard to RSAGA and rgrass7-->
-In chapter 2 (reference it), we already learned how to do a spatial overlay using the **sf**-package.
+In chapter @ref(spatial-class), we already learned how to do a spatial overlay using the **sf**-package.
 Of course, any GIS is also able to perform spatial overlays. Here, we would like to know how many cycle points we can find per borough.
 First of all, we need to come up with the name of the function in QGIS. `find_algorithms` lets you search all QGIS geoalgorithms with the help of regular expressions.
 Here, we assume that the short description of the function contains first the word "point" and secondly somewhere later also the word "poly".
@@ -138,19 +138,19 @@ In addition, there is also a command line interface (saga_cmd.exe) to execute SA
 **RSAGA** uses the latter to run SAGA from within R.
 Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here particularly on digital elevation models (soil properties, terrain attributes, climate parameters). Hence, SAGA is especially good at the fast processing of large (high-resolution) rasters data sets [@conrad_system_2015]. 
 Therefore, we will introduce **RSAGA** with a raster and use case from @muenchow_geomorphic_2012. First of all, we need to tell **RSAGA** where to find SAGA on the computer.
-Usually, `rsaga.env()` will detect SAGA automatically. However, I have 'hidden' SAGA in my OSGEO4W-installation (-> RSAGA feature request), which is why I have to indicate the corresponding path:
+Usually, `rsaga.env()` will detect SAGA automatically. However, we have 'hidden' SAGA in the OSGEO4W-installation (-> RSAGA feature request), which is why we have to indicate the corresponding path:
 
 ```{r}
 library("RSAGA")
 saga_env <- rsaga.env(path = "C:/OSGeo4W64/apps/saga")
 ```
 
-Secondly, we need to write the digital elevation model to a SAGA-format:
+Secondly, we need to write the digital elevation model to a SAGA-format. Note that calling `data("landslides")` attaches two object to the global environment - `dem`, a digital elevation model in the form of a `list`, and `landslides`, a `data.frame` containing observations representing the presence or absence of a landslide:
 
 ```{r}
 data("landslides")
 write.sgrd(data = dem, file = "dem", header = dem$header,
-env = rsaga_env)
+           env = rsaga_env)
 ```
  
 You can find a more detailed example for statistical geocomputation in the RSAGA vignette `vignette("RSAGA-landslides")`.
@@ -183,6 +183,7 @@ So you should stick to **RSAGA** and **rgrass7** if you are also using less comm
 In case you aim for topological correct data, we recommend the usage of GRASS. 
 Many of the unsupported GRASS functions in QGIS relate to geodatabase-management.
 Hence, if you strive for the advantages of a geodatabase, we would again  recommend to use GRASS.
+Also if you would like to run simulations using GRASS, use **rgrass7** directly (-> include an example from Roger) since **RQGIS** always starts a new GRASS session with each function call.
 **RSAGA** provides numerous user-friendly functions (i.e. wrappers).
 Secondly, **RSAGA** also offers geocomputing functions written in R (e.g., `multi.local.function`, `pick.from.grid`, etc.).
 To sum it up, we like all three packages.
