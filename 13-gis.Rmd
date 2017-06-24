@@ -136,13 +136,21 @@ To learn more about **RQGIS** please refer to the (hopefully) forthcoming paper 
 Similar to QGIS, the System for Automated Geoscientific Analyses (SAGA;  \@ref(tab:gis_comp)) provides the possibility to run SAGA modules from Python (SAGA Python API).
 In addition, there is also a command line interface (saga_cmd.exe) to execute SAGA modules (see also [https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/)).
 **RSAGA** uses the latter to run SAGA from within R.
-Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here particularly on digital elevation models (soil properties, terrain attributes, climate parameters). Hence, SAGA is especially good at the fast processing of large (high-resolution) rasters data sets [@conrad_system_2015]. 
-Therefore, we will introduce **RSAGA** with a raster and use case from @muenchow_geomorphic_2012. First of all, we need to tell **RSAGA** where to find SAGA on the computer.
-Usually, `rsaga.env()` will detect SAGA automatically. However, we have 'hidden' SAGA in the OSGEO4W-installation (-> RSAGA feature request), which is why we have to indicate the corresponding path:
+
+Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here particularly on digital elevation models (soil properties, terrain attributes, climate parameters). 
+Hence, SAGA is especially good at the fast processing of large (high-resolution) rasters data sets [@conrad_system_2015]. 
+Therefore, we will introduce **RSAGA** with a raster and use case from @muenchow_geomorphic_2012.
+Specifically, we would like to compute the SAGA wetness index from a digital elevation model.
+First of all, we need to make sure that **RSAGA** will find SAGA on the computer when called.
+For this, all **RSAGA** functions using SAGA in the background make use of `rsaga.env()`. 
+Usually, `rsaga.env()` will detect SAGA automatically by searching several likely directories (see its help for more information). However, we have 'hidden' SAGA in the OSGEO4W-installation, a location `rsaga.env()` does not search automatically. Therefore, to ensure that `rsaga.env()` finds the SAGA installation, we add the corresponding path to the PATH environment variable. Naturally, these steps are unnecessary under Linux and MacOS. 
 
 ```{r}
 library("RSAGA")
-env <- rsaga.env(path = "C:/OSGeo4W64/apps/saga")
+path <- Sys.getenv("PATH")
+path <- paste(c("C:\\OSGeo4W64\\apps\\saga", path), collapse = ";")
+Sys.setenv(PATH = path)
+rsaga.env()
 ```
 
 Secondly, we need to write the digital elevation model to a SAGA-format. 
@@ -150,52 +158,51 @@ Note that calling `data("landslides")` attaches two object to the global environ
 
 ```{r}
 data("landslides")
-write.sgrd(data = dem, file = file.path(tempdir(), "dem"),
-           header = dem$header, env = env)
+write.sgrd(data = dem, file = file.path(tempdir(), "dem"), header = dem$header)
 ```
  
-The organization of SAGA is modular. Libraries contain so-called modules (or geoalgorithms).
-To find out which libraries are available, run (instead of presenting all available libraries we only show the last ten):
+The organization of SAGA is modular.
+Libraries contain so-called modules, i.e., geoalgorithms.
+To find out which libraries are available, run:
 
 ```{r}
-tail(rsaga.get.libraries(path = env$modules), 10)
+tail(rsaga.get.libraries(), 10)
 ```
 
-Subsequently, we can access the available modules of a specific library (here: 'ta_morphometry') as follows:
+Instead of presenting all available libraries we have shown only the last ten. 
+We choose the library 'ta_hydrology' (ta is the abbreviation for terrain analysis).
+Subsequently, we can access the available modules of a specific library (here: 'ta_hydrology') as follows:
 
 ```{r}
-rsaga.get.modules(libs = "ta_hydrology", env = env)
+rsaga.get.modules(libs = "ta_hydrology")
 ```
 
-Similarly to **RQGIS** `get_usage()`, `rsaga.get.usage()` finds the function paramters of a specific geoalgorighm.
+Similarly to `RQGIS::get_usage()`, `rsaga.get.usage()` prints the function paramters of a specific geoalgorithm, e.g., the `SAGA Wetness Index`, to the console.
 
 ```{r, eval = FALSE}
-rsaga.get.usage(lib = "ta_hydrology", module = "SAGA Wetness Index",
-                env = env)
+rsaga.get.usage(lib = "ta_hydrology", module = "SAGA Wetness Index")
 ```
 
-in other SAGA versions also called: 'Catchment Area (Top-Down)' or 'Flow Accumulation (Top-Down)'
-
- 
-Finally, you can run SAGA from within R using **RSAGA**'S geoprocessing workhorse function `rsaga.geoprocessor()`. 
+Finally, you can run SAGA from within R using **RSAGA**'s geoprocessing workhorse function `rsaga.geoprocessor()`. 
 The function expects a parameter-argument list in which you have specified all necessary parameters.
 
 ```{r}
 params <- list(DEM = file.path(tempdir(), "dem.sgrd"),
                TWI = file.path(tempdir(), "twi.sdat"))
-rsaga.geoprocessor(lib = "ta_hydrology", module = "SAGA Wetness Index",
-                   param = params, env = env)
+rsaga.geoprocessor(lib = "ta_hydrology", module = "SAGA Wetness Index", 
+                   param = params)
 ```
 
-To fasciliate the access to the SAGA interface, RSAGA frequently provides user-friendly wrapper-functions with meaningful default values (see RSAGA documentation for examples). So the function call for calculating the 'SAGA Wetness Index' becomes as simple as:
+To fasciliate the access to the SAGA interface, RSAGA frequently provides user-friendly wrapper-functions with meaningful default values (see RSAGA documentation for examples, e.g., `?rsaga.wetness.index`).
+So the function call for calculating the 'SAGA Wetness Index' becomes as simple as:
 
 ```{r}
-rsaga.wetness.index(in.dem = "dem", 
-                    out.wetness.index = file.path(tempdir(), "twi"),
-                    env = env)
+rsaga.wetness.index(in.dem = file.path(tempdir(), "dem"), 
+                    out.wetness.index = file.path(tempdir(), "twi"))
 ```
 
-You can find a much more extended version of the here presented example in the RSAGA vignette `vignette("RSAGA-landslides")` including statistical geocomputing.
+You can find a much more extended version of the here presented example in the RSAGA vignette `vignette("RSAGA-landslides")`.
+This example includes statistical geocomputing, i.e., it uses a GIS to derive terrain attributes as predictors for a non-linear Generalized Linear Model (GAM) to predict spatially landslide susceptibility [@muenchow_geomorphic_2012].
 The term statistical geocomputation emphasizes the strength of combining R's data science power with the geoprocessing power of a GIS which is at the very heart of building a bridge from R to GIS.
 
 ## GRASS through **rgrass7**
