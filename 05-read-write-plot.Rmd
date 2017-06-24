@@ -23,13 +23,13 @@ Loading/saving data is yet another way of saying the same thing.
 ## Data Input (I)
 
 To efficiently read data into R, it helps to have an understanding of what happens 'under the hood'.
-Executing commands such as `sf::st_read` (the main function we use for loading spatial data, from the **sf** package) or `readr::read_csv` silently sets-off a chain of events that loads spatial objects.
+Executing commands such as `sf::st_read()` (the main function we use for loading spatial data, from the **sf** package) or `readr::read_csv()` silently sets-off a chain of events that loads spatial objects.
 "Loading" in this context means loading the data into R or, more precisely, assigning objects to your workspace, stored in RAM accessible from the `.GlobalEnv` of your current R session.
 <!-- coud add a footnote here mentioning `.GlobalEnv` -->
 
-Spatial data comes in a wide variety of file formats, and **sf** is adept at handling them, via the command `st_read`.
+Spatial data comes in a wide variety of file formats, and **sf** is adept at handling them, via the command `st_read()`.
 This function uses GDAL behind the scenes, enabling a very wide range of spatial data formats to be imported.
-The first arguement of `st_read` is `file`, which should be a text string or an object containing a single text string:
+The first arguement of `st_read()` is `file`, which should be a text string or an object containing a single text string:
 
 ```{r}
 library(sf)
@@ -38,7 +38,6 @@ world = st_read(f)
 ```
 
 **Tip**: `read_sf()` and `write_sf()` can be used as easy-to-remember alternatives to `st_read()` and `st_write()`. Remember they hide information about the data source and overwrite existing data, though..
-
 
 A major advantage of **sf** is that it is fast.
 To demonstrate this, we will use a function to compare `st_read` with it's **sp** equivalent, `rgdal::readOGR`:
@@ -55,7 +54,7 @@ bench_read = function(file, n) {
 
 This function takes as arguments an input file (`file`) and a number of times to run each command (`n`) and returns how many times faster `st_read()` is than `readOGR()`.
 Let's run the benchmark for the `world.gpkg` file represented by the object `f`:
-We as illustrated in the benchmark below:
+<!-- We as illustrated in the benchmark below: -->
 
 ```{r, results='hide'}
 library(microbenchmark)
@@ -90,16 +89,30 @@ head(sf_drivers, n = 2)
 
 ## Data output (O)
 
-```{r, echo=FALSE}
-if (file.exists("world.gpkg")) file.remove("world.gpkg")
+```{r, echo=FALSE, results='hide'}
+world_files = list.files(pattern = "world\\.")
+file.remove(world_files)
 ```
 
-```{r}
-st_write(obj = world, dsn = "world.gpkg")
+The counterpart of `st_read()` is `st_write()`. This allows writing to a range of geographic vector file types, including the common formats `.geojson`, `.shp` and `.gpkg`. `st_read()` will decide which driver to use automatically, based on the file name, as illustrated in the benchmark below demonstrating write speeds for each format.
+
+```{r, warning=FALSE}
+system.time(st_write(world, "world.geojson", quiet = TRUE))
+system.time(st_write(world, "world.shp", quiet = TRUE)) 
+system.time(st_write(world, "world.gpkg", quiet = TRUE))
 ```
+
+```{r, echo=FALSE, results='hide'}
+world_files = list.files(pattern = "world\\.")
+file.remove(world_files)
+```
+
+<!-- ```{r} -->
+<!-- st_write(obj = world, dsn = "world.gpkg") -->
+<!-- ``` -->
 
 **Note**: if you try write to the same data source again will fail.
-This is demonstrated in the code below for a modified version of the world in which the population doubles in all countries (don't worry about the `dplyr` code for now, this is covered in Chapter \@ref(attr)):
+This is demonstrated in the code below for a modified version of the world in which the population doubles in all countries (don't worry about the **dplyr** code for now, this is covered in Chapter \@ref(attr)):
 
 ```{r}
 world_mod = dplyr::mutate(world, pop = pop * 2)
@@ -118,23 +131,24 @@ st_write(obj = world_mod, dsn = "world.gpkg")
 The error message provides some information about why it failed, some of which is provided in the comments.
 It is an issue at the GDAL level.
 This is clear from the statement `GDAL Error 1`.
-A further clue is provided by suggestion to use `OVERWRITE=YES`: this is not an option in `st_write`, but can be added with the argument `layer_options`:
+A further clue is provided by suggestion to use `OVERWRITE=YES`: this is not an option in `st_write()`, but the GDAL option.
+It can be added with the argument `layer_options`:
 
 ```{r, results='hide'}
 st_write(obj = world_mod, dsn = "world.gpkg", layer_options = "OVERWRITE=YES")
 ```
 
-Another solution to this issue is to use the argument `delete_layer` that deletes the previous layers in the data source before attempting to write (note there is also a `delete_dsn` argument).
+Another solution to this issue is to use the `st_write()` argument `delete_layer` that deletes the previous layers in the data source before attempting to write (note there is also a `delete_dsn` argument).
 Setting this argument to `TRUE` makes the rewrite operation work:
 
-```{r}
+```{r, results='hide'}
 st_write(obj = world_mod, dsn = "world.gpkg", delete_layer = TRUE)
 ```
 
 This can also be done with the function `write_sf()`, which is equivalent to (technically an *alias* for) `st_write()`, except that it has `delete_layer = TRUE` and `quiet = TRUE` by default.
 This enables spatial data to be overwritten more concisely and with less output going to screen:
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, results='hide'}
 if (file.exists("world.gpkg")) file.remove("world.gpkg")
 ```
 
@@ -145,34 +159,21 @@ write_sf(obj = world_mod, dsn = "world.gpkg")
 A blunter way to update file-based geographic data sources such as `.gpkg` files is to simply delete them.
 This is not generally recommended, as it will not work for multi-file data sources such as `.shp` files:
 
-```{r}
+```{r, results='hide'}
 file.remove("world.gpkg")
 ```
 
-The counterpart of `st_read()` is `st_write()`. This allows writing to a range of geographic vector file types, including the common formats `.geojson`, `.shp` and `.gpkg`. `st_read()` will decide which driver to use automatically, based on the file name, as illustrated in the benchmark below demonstrating write speeds for each format.
-
-```{r, warning=FALSE}
-system.time(st_write(world, "world.geojson", quiet = TRUE))
-system.time(st_write(world, "world.shp", quiet = TRUE)) 
-system.time(st_write(world, "world.gpkg", quiet = TRUE))
-```
-
-```{r, echo=FALSE, results='hide'}
-world_files = list.files(pattern = "world\\.")
-file.remove(world_files)
-```
-
 ## File formats
+
+<!-- don't use shp -->
 
 ## Visual outputs
 
 ## Exercises
 
-
 1. Name three differences between `write_sf()` and the more well-known function `st_write()`.
 
 1. What are the default arguments of `read_sf()` and `write_sf()` that enable two of these differences?
-
 
 <!-- ## Vector -->
 
