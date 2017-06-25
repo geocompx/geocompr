@@ -24,3 +24,4 @@ library(ggplot2)
 ggfig = ggplot(data = dd, mapping = aes(date, Downloads, color = package)) +
   geom_line()
 ggsave("figures/spatial-package-growth.png", ggfig)
+ggfig
