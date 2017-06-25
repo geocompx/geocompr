@@ -101,6 +101,11 @@ Code with additional dependencies
 
 To reduce the book's dependencies, scripts to be run infrequently to generate input for the book are run on creation of this README:
 
+``` r
+source("code/cranlogs.R")
+source("code/sf-revdep.R")
+```
+
 References
 ----------
 
