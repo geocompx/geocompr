@@ -4,7 +4,7 @@
 library(cranlogs)
 library(tidyverse)
 # exclude maps 
-dd = cranlogs::cran_downloads(packages = c("sp", "raster", "sf", "tmap", "spatstat", "leaflet", "ggmap", ),
+dd = cranlogs::cran_downloads(packages = c("sp", "raster", "sf", "tmap", "spatstat", "leaflet", "ggmap"),
                               from = "2013-01-01", to = Sys.Date())
 dd$Downloads <- ave(
   dd$count,
