@@ -94,7 +94,7 @@ Other citations are stored online using Zotero and downloaded with:
 geocompr:::dl_citations(f = "refs.bib", user = 418217, collection = "9K6FRP6N")
 ```
 
-If you would like to add to the references, please join Zotero and add your citation to the open [geocompr group library](https://www.zotero.org/groups/418217/energy-and-transport/items/collectionKey/9K6FRP6N).
+If you would like to add to the references, please use Zotero, join the [open group](https://www.zotero.org/groups/418217/energy-and-transport) add your citation to the open [geocompr library](https://www.zotero.org/groups/418217/energy-and-transport/items/collectionKey/9K6FRP6N).
 
 Code with additional dependencies
 ---------------------------------
