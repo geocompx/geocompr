@@ -52,7 +52,7 @@ Geography has played an important role in explaining and influencing humanity's 
 Geocomputation in this book therefore means more than simply analyzing geographic data on a computer.
 It's about trying to make research which involves making geographic data more reproducible, scientific and socially beneficial.
 This book is also part of the movement towards Geographic Data Science (GDS) which differs from GIS in several ways, some of which are outlined in Table \@ref(tab:gdsl).
-Inspired by the emphasis of GDS research on reproducibility, this book aims to teach how to do geocomputation rather than just think about it.
+Inspired by the emphasis of GDS research on reproducible research, this book aims to teach how to do geocomputation rather than just think about it.
 
 ```{r gdsl, echo=FALSE, message=FALSE}
 d = readr::read_csv("extdata/gis-vs-gds-table.csv")
@@ -66,7 +66,7 @@ Early geographers used a variety of tools including rulers, compasses and sextan
 <!--nowadays part-->
 It is important to remember that while R is a powerful tool, especially when interfaced with other software such as [GDAL](http://www.gdal.org/) and [PostGIS](http://postgis.net/), other tools may be better for certain tasks. <!-- What exactly do you mean? Which tasks? Is there a geocomputational task for which we do not have an interface? So maybe rephrase along the lines that R is not a GIS and therefore not suited for some geoprocessing tasks but that interfaces close this gap. -->
 
-R is characterised by its flexibility, enabling geographical software developers to extend it in multiple ways.
+R is characterized by its flexibility, enabling geographical software developers to extend it in multiple ways.
 A good example of this is support for generating interactive maps thanks to **leaflet** [@R-leaflet], which has been subsequently built-on by **tmap** and **mapview** [@R-tmap; @R-mapview].
 These packages help overcome the criticism that R has "limited interactive [plotting] facilities" [@bivand_applied_2013].
 This is no longer true, as illustrated by the code below which generates Figure \@ref(fig:interactive).
@@ -90,7 +90,7 @@ It would be difficult to produce Figure \@ref(fig:interactive) with only 4 lines
 
 <!-- Other reasons for using R for geocompuation include: -->
 
-R provides a stable language that should behave consistently across multiple computers, free of charge.
+R provides a stable language that behaves consistently across multiple computers, free of charge.
 The use of R code therefore enables teaching geocomputation with reference to reproducible examples such as that provided in \@ref(fig:interactive) rather than abstract concepts.
 But before cracking-on with the action, a few introductory remarks are needed to explain the approach taken here and provide context.
 
@@ -99,13 +99,68 @@ But before cracking-on with the action, a few introductory remarks are needed to
 <!-- paragraphs (with references to chapters in the book): -->
 <!-- 1. this book focus -> sf + raster/stars + leaflet/mapview (the recent state of spatial R); the history of R spatial is way longer -->
 
-This book focuses mainly on the most recent state of R's spatial ecosystem.
-We would like to give you the ability to use the **sf**,<!--raster/stars,--> `**tmap**`, **leaflet** and **mapview** packages to solve spatial problems. 
-However, spatial analysis in R has a long history.
+This book teaches Geocomputational techniques using an ecosystem of R packages that in many ways supersede their predecessors in terms of speed and performance.
+This evolution is common in open source software: because all the code is open, developers can learn from the experiences of prior work, 'standing on the shoulders of giants', as Isaac Newton put it in [1675](http://digitallibrary.hsp.org/index.php/Detail/Object/Show/object_id/9285), rather than constantly reinventing the wheel.
+In the context of spatial vector data classes in R, this can be clearly seen in the evolution of the **sf** package which in many ways evolved from the earlier **sp** package.
+
+R's evolving spatial ecosystem should also be understood in the context of developments in the wider R community.
+The visualisation and data processing packages **ggplot2** and **dplyr** (released on CRAN in [2007](https://cran.r-project.org/src/contrib/Archive/ggplot2/) and [2014](https://cran.r-project.org/src/contrib/Archive/dplyr/) respectively) exemplify these shifts.
+These and other packages written by Hadley Wickham and collaborators share a common style, with a focus on 'tidy data' (hence the emergence of the term 'Hadleyverse' in [2013](https://trends.google.com/trends/explore?q=hadleyverse)).
+For ease of installation and to harmonize packages in this style, the **tidyverse** 'metapackage' was released in late [2016](https://cran.r-project.org/src/contrib/Archive/tidyverse/).
+Although there is no equivalent **sfverse**, there are a growing number of actively developed package which use **sf** (Table \@ref(tab:revdep)) and discussion of harmonization among R's many spatial packages.^[
+See the [r-spatial](https://github.com/r-spatial/) organisation and conversations in the [discussion](https://github.com/r-spatial/discuss/issues/11) repo for more on this.
+]
+
+```{r revdep, echo=FALSE, message=FALSE}
+top_dls = readr::read_csv("extdata/top_dls.csv")
+cap = paste0("The top 5 most downloaded packages that depend on sf, in terms of average number of downloads per day over the previous month. As of ", min(top_dls$date), " there are ", nrow(top_dls), " packages which import sf.")
+knitr::kable(top_dls[1:5, 1:2], digits = 0, caption = cap)
+# cranlogs::cran_top_downloads(when = "last-month") # most downloaded pkgs
+```
+
+A surge in development time (and interest) in 'R-Geo' has followed the award of a grant by the R Consortium for the development of support for Simple Features and the resulting **sf** package (covered in \@ref(intro-sf)).
+This is illustrated in multiple places, not least the [R-sig-Geo Archives](https://stat.ethz.ch/pipermail/r-sig-geo/), a long-standing open access email list containing much R-spatial wisdom accumulated over the years.
+Many posts on the list now discuss **sf** and related packages, suggesting that R's spatial software developers are using the package and, therefore, it is here to stay.
+We will see in the next chapter how Simple Features in R work and their many advantages.
+
+We propose that the release of **sf** heralds a new era for spatial data analysis and geocomputation in R.
+This era (which we refrain from labelling the **sfverse** with any sersiousness, awaiting a better name!) clearly has the wind in its sails and is set to dominate future developments in R's spatial ecosystem for years to come.
+So time invested in learning the 'new ways' of handling spatial data and, hopefully, reading this book, is well spent!
+
+```{r cranlogs, fig.cap="The popularity of spatial packages in R. The y axis shows the average number of downloads, within a 30 day rolling window, of R's top 5 spatial packages, defined as those with the highest number of downloads within the last 30 days.", echo=FALSE}
+knitr::include_graphics("figures/spatial-package-growth.png")
+```
+
+This book focuses on the 'new' way of doing geocomputation for practical purposes and to ensure that what you learn here is 'future-proof'.
+There is one caveat to this, however: younger packages are generally less stable and may undergo changes to the way they function or (more commonly) add more features. In other words:
+
+> If you live on the cutting edge you risk getting hurt.
+
+It is therefore worth being aware of the history of the development of spatial data functionality in R.
+This not only because the incumbent packages are highly mature: there is a wealth of functions, use-cases and teaching material written using older packages in R's spatial ecosystem, so it's worth being aware of the history preceding the rise of **sf** depicted in Figure \@ref(fig:cranlogs).
+
+## The history of geocomputing with R
+
+<!-- We would like to give you the ability to use the **sf**, raster/stars, **tmap**, **leaflet** and **mapview** packages to solve spatial problems.  -->
+<!-- However, spatial analysis in R has a long history. -->
+
+<!-- 2. R spatial story (from spatstat, by maptools, sp, raster, leaflet, to sf) -->
+In the volume 1/2 of R News (the predecessor of The R Journal), Brian Ripley created an overview of the spatial statistics state in June 2001 [@ripley_spatial_2001]. <!-- https://pdfs.semanticscholar.org/9a0a/40ac215bfc0d52605b487f66928caf6abc99.pdf -->
+He shortly described eight packages, mostly used for spatial smoothing end interpolation (such as **akima**, **spatial**, **sgeostat** and **geoR**) and spatial point patterns (**splancs** and **spatstat**).
+Most of these packages where based on the previous code written for S or S-PLUS.
+<!-- one/two sentences about the spatstat package -->
+In the next issue of R News, Roger Bivand gave an introduction to the **splanc** package and suggested some future prospects [@bivand_more_2001].<!-- https://cran.r-project.org/doc/Rnews/Rnews_2001-3.pdf -->
+The most notably, he mentioned the need for standardized R spatial interface, more efficient mechanisms for exchanging data with GIS, and better ways to treat spatial metadata (such as spatial projections).
+<!-- It was extended by the paper ... -->
+<!-- spdep and Opportunities for advancing spatial data analysis in R --> 
+<!-- spdep -->
+<!-- opportunities; mapping capabilities -->
+<!-- https://pdfs.semanticscholar.org/9bb5/c9571d64bd3e1ae376967b6c6aca39d6fa70.pdf -->
+<!-- http://onlinelibrary.wiley.com/doi/10.1111/j.0016-7363.2005.00672.x/full -->
+
 
 <!-- 2. R spatial story (from spatstat, by maptools, sp, raster, leaflet, to sf) -->
 <!-- https://pdfs.semanticscholar.org/9bb5/c9571d64bd3e1ae376967b6c6aca39d6fa70.pdf -->
-<!-- https://pdfs.semanticscholar.org/9a0a/40ac215bfc0d52605b487f66928caf6abc99.pdf -->
 <!-- ASDAR - p. VIII - the Distributed Statistical Computing conference in Vienna in 2003 -->
 <!-- ASDAR - p. 3 - For over 10 years, R has had an increasing number of contributed packages for handling and analysing spatial data. All these packages used to make diﬀer- ent assumptions about how spatial data were organised, and R itself had no capabilities for distinguishing coordinates from other numbers. In addition, methods for plotting spatial data and other tasks were scattered, made diﬀer- ent assumptions on the organisation of the data, and were rudimentary. This was not unlike the situation for time series data at the time. -->
 <!-- the creation of the sp package - sp_0.7-3.tar.gz	2005-04-28 08:20	459K	(CRAN archive) -->
@@ -117,6 +172,9 @@ However, spatial analysis in R has a long history.
 <!-- R also as an interface to GIS software GRASS GIS, SAGA, QGIS, ArcGIS (calls from R and from the software) reference to the CLI/GUI integration chapter -->
 
 <!-- 3. short S story - an interface to Fortran and C -> nowodays R is an interface to many programming languages C, Fortran, C++, JavaScript, Go; -->
+
+<!-- Nowadays xx spatial packages in R -->
+
 The most important recent evolution in R's spatial ecosystem has without doubt been support for simple features thanks to the **sf** package [@R-sf], described in Chapter \@ref(spatial-class).
 
 <!-- 

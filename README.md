@@ -84,7 +84,7 @@ knitr::kable(pkg_df)
 | rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23  |
 | sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.1   |
 | sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2016)                               | 1.2.4   |
-| spData         | Datasets for spatial analysis packages (Bivand, Nowosad, and Lovelace 2017)                  | 0.1.26  |
+| spData         | Datasets for spatial analysis packages (Bivand, Nowosad, and Lovelace 2017)                  | 0.1.3   |
 | tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1   |
 | tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.10    |
 
@@ -94,7 +94,17 @@ Other citations are stored online using Zotero and downloaded with:
 geocompr:::dl_citations(f = "refs.bib", user = 418217, collection = "9K6FRP6N")
 ```
 
-If you would like to add to the references, please join Zotero and add your citation to the open [geocompr group library](https://www.zotero.org/groups/418217/energy-and-transport/items/collectionKey/9K6FRP6N).
+If you would like to add to the references, please use Zotero, join the [open group](https://www.zotero.org/groups/418217/energy-and-transport) add your citation to the open [geocompr library](https://www.zotero.org/groups/418217/energy-and-transport/items/collectionKey/9K6FRP6N).
+
+Code with additional dependencies
+---------------------------------
+
+To reduce the book's dependencies, scripts to be run infrequently to generate input for the book are run on creation of this README:
+
+``` r
+source("code/cranlogs.R")
+source("code/sf-revdep.R")
+```
 
 References
 ----------
