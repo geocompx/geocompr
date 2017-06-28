@@ -13,6 +13,7 @@ pos <- coordinates(c(1, 3, 3))
 # plot(pos, type = 'n')
 # text(pos)
 # par(mar = rep(1, 4))
+png(filename = "figures/sf-classes.png", width = 600, height = 400)
 openplotmat()
 straightarrow(from = pos[5, ], to = pos[2, ])
 straightarrow(from = pos[6, ], to = pos[3, ])
@@ -24,6 +25,7 @@ for(i in seq_along(n))
   textrect(mid = pos[i,], radx = 0.14, rady = 0.05, lab = n[i])
 i = 1
 textrect(mid = pos[i,], radx = 0.18, rady = 0.05, lab = n[i])
+dev.off()
 
 ## attempt with DiagrammR -----
 # nodes = create_node_df(n = length(n), label = n, shape = "rectangle", width = 3, )
