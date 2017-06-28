@@ -104,16 +104,7 @@ To reduce the book's dependencies, scripts to be run infrequently to generate in
 ``` r
 source("code/cranlogs.R")
 source("code/sf-revdep.R")
-```
-
-![](README_files/figure-markdown_github/cranlogs-1.png)
-
-``` r
-png(filename = "figures/sf-classes.png", width = 600, height = 400)
 source("code/sfr-class-diagram-gen.R")
-dev.off()
-#> RStudioGD 
-#>         2
 ```
 
 References
