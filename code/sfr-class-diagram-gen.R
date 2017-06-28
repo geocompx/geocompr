@@ -8,6 +8,11 @@ n = gsub(pattern = "GEOMETRY", replacement = "GEOMETRY COLLECTION", n)
 n = sort(n)[c(1, 4, 3, 5, 6, 2, 7)]
 
 # see https://davetang.org/muse/2017/03/31/creating-flowchart-using-r/
+# openplotmat()
+pos <- coordinates(c(1, 3, 3))
+# plot(pos, type = 'n')
+# text(pos)
+# par(mar = rep(1, 4))
 openplotmat()
 straightarrow(from = pos[5, ], to = pos[2, ])
 straightarrow(from = pos[6, ], to = pos[3, ])
@@ -20,7 +25,7 @@ for(i in seq_along(n))
 i = 1
 textrect(mid = pos[i,], radx = 0.18, rady = 0.05, lab = n[i])
 
-## attempt with DiagrammR ----------------------------------
+## attempt with DiagrammR -----
 # nodes = create_node_df(n = length(n), label = n, shape = "rectangle", width = 3, )
 # graph_attrs <- c("layout = circo",
 #                  "overlap = false",
