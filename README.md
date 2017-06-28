@@ -20,7 +20,7 @@ We encourage contributions on any part of the book, including:
 -   Changes to the code, e.g. to do things in a more efficient way.
 -   Suggestions on content (see the project's [issue tracker](https://github.com/Robinlovelace/geocompr/issues) and the [work-in-progress](https://github.com/Robinlovelace/geocompr/tree/master/work-in-progress) folder for chapters in the pipeline).
 
-Please see [style.md](https://github.com/Robinlovelace/geocompr/blob/master/style.md) for the book's style.
+Please see [our\_style.md](https://github.com/Robinlovelace/geocompr/blob/master/our_style.md) for the book's style.
 
 Reproducing the book
 --------------------
@@ -71,22 +71,22 @@ pkg_df = readr::read_csv("extdata/package_list.csv")
 knitr::kable(pkg_df)
 ```
 
-| Name           | Title                                                                                        | version    |
-|:---------------|:---------------------------------------------------------------------------------------------|:-----------|
-| bookdown       | Authoring Books and Technical Documents with R Markdown (Xie 2017)                           | 0.4        |
-| dismo          | Species Distribution Modeling (Hijmans et al. 2017)                                          | 1.1.4      |
-| gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction (Pebesma and Graeler 2017)  | 1.1.5      |
-| leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' (Cheng, Karambelkar, and Xie 2017) | 1.1.0.9000 |
-| mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.0.1      |
-| microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                    | 1.4.2.1    |
-| raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8      |
-| rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.7      |
-| rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23     |
-| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.2      |
-| sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2016)                               | 1.2.4      |
-| spData         | Datasets for spatial analysis packages (Bivand, Nowosad, and Lovelace 2017)                  | 0.1.3      |
-| tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1      |
-| tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.10       |
+| Name           | Title                                                                                        | version |
+|:---------------|:---------------------------------------------------------------------------------------------|:--------|
+| bookdown       | Authoring Books and Technical Documents with R Markdown (Xie 2017)                           | 0.4     |
+| dismo          | Species Distribution Modeling (Hijmans et al. 2017)                                          | 1.1.4   |
+| gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction (Pebesma and Graeler 2017)  | 1.1.5   |
+| leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' (Cheng, Karambelkar, and Xie 2017) | 1.1.0   |
+| mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.0.1   |
+| microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                    | 1.4.2.1 |
+| raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8   |
+| rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.7   |
+| rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23  |
+| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.2   |
+| sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2016)                               | 1.2.4   |
+| spData         | Datasets for spatial analysis packages (Bivand, Nowosad, and Lovelace 2017)                  | 0.1.3   |
+| tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1   |
+| tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.10    |
 
 Other citations are stored online using Zotero and downloaded with:
 
@@ -106,6 +106,16 @@ source("code/cranlogs.R")
 source("code/sf-revdep.R")
 ```
 
+![](README_files/figure-markdown_github/cranlogs-1.png)
+
+``` r
+png(filename = "figures/sf-classes.png", width = 600, height = 400)
+source("code/sfr-class-diagram-gen.R")
+dev.off()
+#> RStudioGD 
+#>         2
+```
+
 References
 ----------
 
@@ -117,7 +127,7 @@ Bivand, Roger, Tim Keitt, and Barry Rowlingson. 2017. *Rgdal: Bindings for the G
 
 Bivand, Roger, Jakub Nowosad, and Robin Lovelace. 2017. *SpData: Datasets for Spatial Analysis Packages*. <https://github.com/Nowosad/spData>.
 
-Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2017. *Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library*. <http://rstudio.github.io/leaflet/>.
+Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2017. *Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library*. <https://CRAN.R-project.org/package=leaflet>.
 
 Hijmans, Robert J. 2016. *Raster: Geographic Data Analysis and Modeling*. <https://CRAN.R-project.org/package=raster>.
 
