@@ -51,7 +51,7 @@ Book statistics
 
 An indication of the book's progress over time is illustrated below (to be updated roughly every week as the book progresses).
 
-![](README_files/figure-markdown_github/bookstats-1.png)
+![](figures/bookstats-1.png)
 
 Book statistics: estimated number of pages per chapter over time.
 
