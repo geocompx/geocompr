@@ -77,13 +77,13 @@ knitr::kable(pkg_df)
 | dismo          | Species Distribution Modeling (Hijmans et al. 2017)                                          | 1.1.4   |
 | gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction (Pebesma and Graeler 2017)  | 1.1.5   |
 | leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' (Cheng, Karambelkar, and Xie 2017) | 1.1.0   |
-| mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.0.1   |
+| mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.1.0   |
 | microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                    | 1.4.2.1 |
 | raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8   |
 | rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.7   |
 | rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23  |
 | sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.2   |
-| sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2016)                               | 1.2.4   |
+| sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2017)                               | 1.2.5   |
 | spData         | Datasets for spatial analysis packages (Bivand, Nowosad, and Lovelace 2017)                  | 0.1.3   |
 | tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1   |
 | tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.10    |
@@ -128,7 +128,7 @@ Mersmann, Olaf. 2015. *Microbenchmark: Accurate Timing Functions*. <https://CRAN
 
 Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://github.com/edzer/sfr/>.
 
-Pebesma, Edzer, and Roger Bivand. 2016. *Sp: Classes and Methods for Spatial Data*. <https://CRAN.R-project.org/package=sp>.
+Pebesma, Edzer, and Roger Bivand. 2017. *Sp: Classes and Methods for Spatial Data*. <https://CRAN.R-project.org/package=sp>.
 
 Pebesma, Edzer, and Benedikt Graeler. 2017. *Gstat: Spatial and Spatio-Temporal Geostatistical Modelling, Prediction and Simulation*. <https://CRAN.R-project.org/package=gstat>.
 
