@@ -306,8 +306,8 @@ points = cycle_hire[sample(1:nrow(cycle_hire), 25), ]
 
 library(rgrass7)
 library(maptools)
-# library(link2GI)
-# linkGRASS7(streets_int, c("C:/OSGeo4W64", "grass-7.2.1", "osgeo4W"))
+library(link2GI)
+linkGRASS7(streets_int, c("C:/OSGeo4W64", "grass-7.2.1", "osgeo4W"))
 
 # library(spgrass6)
 # g <- initGRASS(gisBase = "C:/Program Files (x86)/GRASS GIS 6.4.4", )
@@ -317,34 +317,20 @@ library(maptools)
 writeVECT(as(streets_int, "Spatial"), "streets", v.in.ogr_flags = "o")
 writeVECT(as(points, "Spatial"), "points")
 
-execGRASS(cmd = "v.clean", 
-          parameters = list(input = "streets", output = "streets_clean",
-                            tool = "break"), flags = c("overwrite")) 
-# find out why doGRASS is not working...
-# doGRASS("v.clean",  flags = c("overwrite"), input = "streets", output = "streets_clean",
-#         tool = "break")
+execGRASS(cmd = "v.clean", input = "streets", output = "streets_clean",
+          tool = "break")
 # prepare network by connecting points to roads / changes roads
-execGRASS(cmd = "v.net", 
-          parameters = list(input = "streets_clean", output = "streets_points_con", 
-                            points = "points", operation = "connect",
-                            threshold = 1000), flags = c("overwrite", "c"))
-doGRASS(cmd = "v.net", input = "streets_clean", output = "street_points",
-          points = "points", operation = "connect", threshold = 1000,
+execGRASS(cmd = "v.net", input = "streets_clean", output = "streets_points_con", 
+          points = "points", operation = "connect", threshold = 0.001,
           flags = c("overwrite", "c"))
-
 # run tsp
-execGRASS(cmd = "v.net.salesman", 
-          parameters = list(input = "streets_points_con", output = "final_route",
-                            center_cats = "1-50"), flags = c("overwrite"))
-# doGRASS(cmd = "v.net.salesman", input = "street_points", 
-#         output = "final_route", center_cats = "1-50", flags = "overwrite")
+execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
+          output = "shortest_route", center_cats = paste0("1-", nrow(points)),
+          flags = c("overwrite"))
 
-route <- readVECT("final_route")
-points <- readVECT("points")
+route <- readVECT("shortest_route")
 mapview::mapview(route) +
   mapview::mapview(points)
-
-
 ```
 
 
