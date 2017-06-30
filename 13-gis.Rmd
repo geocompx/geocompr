@@ -9,17 +9,12 @@ The mature GRASS GIS software package and PostGIS are quite popular in academia 
 In [2008](http://gama.fsv.cvut.cz/~landa/publications/2008/gis-ostrava-08/paper/landa-grass-gui-wxpython.pdf) GRASS developers added a sophisticated GUI, shifting the emphasis slightly away from its CLI.
 However, GRASS lacks a sophisticated and feature-rich IDE such as RStudio that supports 'CLI newbies'. 
 On the other hand, PostGIS is the spatial extension of the popular PostgreSQL open source database, and therefore not really a dedicated GIS. 
-This is also highlighted by its description of 'legacy GIS' on its [website](http://workshops.boundlessgeo.com/postgis-intro/introduction.html).
+This is also highlighted by the fact that PostGIS lacks any geovisualization capabilities and its description of 'legacy GIS' on its [website](http://workshops.boundlessgeo.com/postgis-intro/introduction.html).
 Similar to GRASS, PostgreSQGL provides a (partial) GUI called [pgAdmin](https://www.pgadmin.org/) to fascilitate the editing and administration of the database. 
 To make it clear, though PostGIS provides spatial functions, its main purpose is the handling of spatial objects in a relational database management system.
 Therefore, frequently users store their spatial data in PostGIS, and interact with it through a dedicated GIS software such as QGIS. Of course, you can also use R to access data from PostGIS (**sf**, **rgdal**, **rpostgis**).
 In summary,  a typical workflow would be: perform a large spatial query with PostGIS, then load the result into a further application (QGIS, R) for further geoprocessing.   
 ]
-<!--
-maybe we should delete the half sentence in parentheses because neither was RStudio designed for spatial analysis. And PostGIS was certainly also intended to be accessible through other applications. Or maybe I am not sure what you are referring to. What do you mean by CLI, just the console? If so, how does it differ substantially from other CLIs? I have the impression you are mostly talking about RStudio, right? 
-
-PostGIS also lacks a sophisticated CLI With the partial exception of [pgAdmin](https://www.pgadmin.org/) (which was not designed for handling spatial data), and many users interact with it through GUIs such as that provided by QGIS.
--->
 
 > With the advent of 'modern' GIS software, most people want to point and
 click their way through life. That’s good, but there is a tremendous amount
@@ -81,8 +76,6 @@ Obviously, we here focus on open-source software solutions, however, there is al
 And the so-called [R-ArcGIS bridge](https://github.com/R-ArcGIS/r-bridge) allows to use R from within ArcGIS.
 As a final note, we would like to point out that aside from interfaces to desktop GIS there are also interfaces to geospatial libraries such as [GDAL](www.gdal.org) (**gdalUtils**, **rgdal**, **sf**) and [GEOS](https://trac.osgeo.org/geos/) (**rgeos**, **sf**). 
 By the end of the chapter you should have a working knowledge of the functionality such packages open up, and a more nuanced understanding of the  'CLI vs GUI' debate.
-<!-- sounds like you would like to focus on open-source GIS? There is also the RPyGeo-package integrating R with ArcGIS. Admittedly, it needs some polishing (a student of ours will take care of this) but maybe we can at least mention it -->
-<!-- Sound like a good list of contents? -->
 As mentioned in chapter \@ref(intro), doing GIS at the command-line makes it more reproducible, in-line with the principles of Geographic Data Science.
 
 ## (R)QGIS
@@ -272,9 +265,85 @@ So instead of defining all the stuff yourself, you call:
  
  ```{r}
  library("link2GI")
- 
- ```
+  ```
 use **link2GI** for an easy set-up of the GRASS environment (though it is beneficial to GRASS users to have a working knowledge of how GRASS works internally)
+
+example ideas: 
+- r.sim.water (requires various processing steps)
+- traveling salesman problem; nice example, finding the shortest paths between 25 randomly select cycle points.
+
+
+```{r}
+library(sf)
+# Download osm data
+dir_main <- tempdir()
+dir_main <- "D:/test"
+download.file(file.path("http://download.geofabrik.de/europe/great-britain/", 
+                        "england/greater-london-latest-free.shp.zip"),
+              destfile = file.path(dir_main, "london_osm.zip"))
+# unzip the downloaded file
+unzip(zipfile = file.path(dir_main, "london_osm.zip"), exdir = dir_main)
+# load streets into R environment
+streets = sf::st_read(file.path(dir_main, "gis.osm_roads_free_1.shp"))
+st_crs(streets) = 4326
+data(cycle_hire, package = "spData")
+
+b_box = st_bbox(cycle_hire)
+coords = expand.grid(c(b_box["xmin"], b_box["xmax"]), 
+                     c(b_box["ymin"], b_box["ymax"]))[c(1, 3, 4, 2, 1), ]
+poly <- st_polygon(list(as.matrix(coords)))
+poly <- st_sfc(poly)
+st_crs(poly) = 4326
+int = st_intersects(streets, poly)
+streets_int = streets[sapply(int, length) > 0, ]
+plot(streets_int$geometry)
+plot(cycle_hire$geometry, col = "red", pch = 16, add = TRUE)
+# randomly select 25 points
+points = cycle_hire[sample(1:nrow(cycle_hire), 25), ]
+
+library(rgrass7)
+library(maptools)
+# library(link2GI)
+# linkGRASS7(streets_int, c("C:/OSGeo4W64", "grass-7.2.1", "osgeo4W"))
+
+# library(spgrass6)
+# g <- initGRASS(gisBase = "C:/Program Files (x86)/GRASS GIS 6.4.4", )
+# execGRASS("g.mapset", mapset = "PERMANENT")
+# execGRASS("g.proj", flag = "c", 
+#           proj4 = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+writeVECT(as(streets_int, "Spatial"), "streets", v.in.ogr_flags = "o")
+writeVECT(as(points, "Spatial"), "points")
+
+execGRASS(cmd = "v.clean", 
+          parameters = list(input = "streets", output = "streets_clean",
+                            tool = "break"), flags = c("overwrite")) 
+# find out why doGRASS is not working...
+# doGRASS("v.clean",  flags = c("overwrite"), input = "streets", output = "streets_clean",
+#         tool = "break")
+# prepare network by connecting points to roads / changes roads
+execGRASS(cmd = "v.net", 
+          parameters = list(input = "streets_clean", output = "streets_points_con", 
+                            points = "points", operation = "connect",
+                            threshold = 1000), flags = c("overwrite", "c"))
+doGRASS(cmd = "v.net", input = "streets_clean", output = "street_points",
+          points = "points", operation = "connect", threshold = 1000,
+          flags = c("overwrite", "c"))
+
+# run tsp
+execGRASS(cmd = "v.net.salesman", 
+          parameters = list(input = "streets_points_con", output = "final_route",
+                            center_cats = "1-50"), flags = c("overwrite"))
+# doGRASS(cmd = "v.net.salesman", input = "street_points", 
+#         output = "final_route", center_cats = "1-50", flags = "overwrite")
+
+route <- readVECT("final_route")
+points <- readVECT("points")
+mapview::mapview(route) +
+  mapview::mapview(points)
+
+
+```
+
 
 ## When to use what?
 <!-- more or less brainstorming -->
