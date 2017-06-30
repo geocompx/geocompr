@@ -22,5 +22,6 @@ dd = dplyr::filter(dd, Downloads > 0, package %in% top_pkgs)
 
 library(ggplot2)
 ggfig = ggplot(data = dd, mapping = aes(date, Downloads, color = package)) +
-  geom_line()
+  geom_line() +
+  labs(x = "Date", color = "Package: ")
 ggsave("figures/spatial-package-growth.png", ggfig)
