@@ -80,7 +80,7 @@ knitr::kable(pkg_df)
 | mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.1.0   |
 | microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                    | 1.4.2.1 |
 | raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8   |
-| rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.7   |
+| rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.8   |
 | rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23  |
 | sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.2   |
 | sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2017)                               | 1.2.5   |
