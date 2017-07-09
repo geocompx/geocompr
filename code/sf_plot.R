@@ -1,5 +1,8 @@
 library(sf)
 library(ggplot2)
+library(grid)
+library(gridBase)
+library(gridExtra)
 
 ## sfc objects creation ---------
 point_sfc = st_sfc(st_point(c(1, 1)), crs = 4326)
@@ -18,7 +21,7 @@ multipolygon_sfc = st_sfc(st_multipolygon(list(list(rbind(c(1.4, 1.2), c(1.6, 1.
 point_sf = st_sf(geometry = point_sfc)
 linestring_sf = st_sf(geometry = linestring_sfc)
 polygon_sf = st_sf(geometry = polygon_sfc)
-mutlipoint_sf = st_sf(geometry = multipoint_sfc)
+multipoint_sf = st_sf(geometry = multipoint_sfc)
 multilinestring_sf = st_sf(geometry = multilinestring_sfc)
 multipolygon_sf = st_sf(geometry = multipolygon_sfc)
 geometrycollection_sf = st_cast(c(point_sfc,
@@ -28,24 +31,32 @@ geometrycollection_sf = st_cast(c(point_sfc,
                                    multilinestring_sfc,
                                    multipolygon_sfc), "GEOMETRYCOLLECTION")
 
-# ## single plots ----------
-# p_point_sf = ggplot() + geom_sf(data = point_sf) + labs(title = "POINT")
-# p_point_sf
-# 
-# p_linestring_sf = ggplot() + geom_sf(data = linestring_sf) + labs(title = "LINESTRING")
-# p_linestring_sf
-# 
-# p_polygon_sf = ggplot() + geom_sf(data = polygon_sf) + labs(title = "POLYGON")
-# p_polygon_sf
-# 
-# p_multipoint_sf = ggplot() + geom_sf(data = mutlipoint_sf) + labs(title = "MULTIPOINT")
-# p_multipoint_sf
-# 
-# p_multilinestring_sf = ggplot() + geom_sf(data = multilinestring_sf) + labs(title = "MULTILINESTRING")
-# p_multilinestring_sf
-# 
-# p_multipolygon_sf = ggplot() + geom_sf(data = multipolygon_sf) + labs(title = "MULTIPOLYGON")
-# p_multipolygon_sf
-# 
-# p_geometrycollection_sf = ggplot() + geom_sf(data = geometrycollection_sf) + labs(title = "GEOMETRYCOLLECTION")
-# p_geometrycollection_sf
+## single plots ----------
+p_point_sf = ggplot() + geom_sf(data = point_sf) + labs(title = "POINT")
+p_point_sf
+
+p_linestring_sf = ggplot() + geom_sf(data = linestring_sf) + labs(title = "LINESTRING")
+p_linestring_sf
+
+p_polygon_sf = ggplot() + geom_sf(data = polygon_sf) + labs(title = "POLYGON")
+p_polygon_sf
+
+p_multipoint_sf = ggplot() + geom_sf(data = multipoint_sf) + labs(title = "MULTIPOINT")
+p_multipoint_sf
+
+p_multilinestring_sf = ggplot() + geom_sf(data = multilinestring_sf) + labs(title = "MULTILINESTRING")
+p_multilinestring_sf
+
+p_multipolygon_sf = ggplot() + geom_sf(data = multipolygon_sf) + labs(title = "MULTIPOLYGON")
+p_multipolygon_sf
+
+p_geometrycollection_sf = ggplot() +
+  geom_sf(data = point_sf) +
+  geom_sf(data = linestring_sf) +
+  geom_sf(data = polygon_sf) +
+  geom_sf(data = multipoint_sf) +
+  geom_sf(data = multilinestring_sf) +
+  geom_sf(data = multipolygon_sf) +
+  labs(title = "GEOMETRYCOLLECTION")
+
+## combine plot ------------
