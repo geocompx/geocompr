@@ -1,5 +1,8 @@
 library(sf)
 library(ggplot2)
+library(lattice)
+library(grid)
+library(gridExtra)
 
 ## sfc objects creation ---------
 point_sfc = st_sfc(st_point(c(1, 1)), crs = 4326)
@@ -31,6 +34,7 @@ geometrycollection_sf = st_cast(c(point_sfc,
 p_point_sf = ggplot() + 
   geom_sf(data = point_sf) +
   labs(title = "POINT") + 
+  coord_sf(xlim = c(0.6, 1.6), ylim = c(0.4, 1.4)) + 
   theme(line = element_blank(),
         axis.text=element_blank(),
         axis.title=element_blank())
@@ -38,13 +42,15 @@ p_point_sf = ggplot() +
 p_linestring_sf = ggplot() +
   geom_sf(data = linestring_sf) + 
   labs(title = "LINESTRING") + 
+  coord_sf(xlim = c(0.6, 1.6), ylim = c(0.4, 1.4)) + 
   theme(line = element_blank(),
         axis.text=element_blank(),
         axis.title=element_blank())
 
 p_polygon_sf = ggplot() +
   geom_sf(data = polygon_sf, fill = "grey") + 
-  labs(title = "POLYGON") + 
+  labs(title = "POLYGON")  + 
+  coord_sf(xlim = c(0.6, 1.6), ylim = c(0.4, 1.4)) + 
   theme(line = element_blank(),
         axis.text=element_blank(),
         axis.title=element_blank())
@@ -52,6 +58,7 @@ p_polygon_sf = ggplot() +
 p_multipoint_sf = ggplot() + 
   geom_sf(data = multipoint_sf) +
   labs(title = "MULTIPOINT") + 
+  coord_sf(xlim = c(0.6, 1.6), ylim = c(0.4, 1.4)) + 
   theme(line = element_blank(),
         axis.text=element_blank(),
         axis.title=element_blank())
@@ -59,13 +66,15 @@ p_multipoint_sf = ggplot() +
 p_multilinestring_sf = ggplot() +
   geom_sf(data = multilinestring_sf) +
   labs(title = "MULTILINESTRING") + 
+  coord_sf(xlim = c(0.6, 1.6), ylim = c(0.4, 1.4)) + 
   theme(line = element_blank(),
         axis.text=element_blank(),
         axis.title=element_blank())
 
 p_multipolygon_sf = ggplot() + 
   geom_sf(data = multipolygon_sf, fill = "grey") +
-  labs(title = "MULTIPOLYGON") + 
+  labs(title = "MULTIPOLYGON")  + 
+  coord_sf(xlim = c(0.6, 1.6), ylim = c(0.4, 1.4)) + 
   theme(line = element_blank(),
         axis.text=element_blank(),
         axis.title=element_blank())
@@ -77,9 +86,34 @@ p_geometrycollection_sf = ggplot() +
   geom_sf(data = multipoint_sf) +
   geom_sf(data = multilinestring_sf) +
   geom_sf(data = multipolygon_sf, fill = "grey") +
-  labs(title = "GEOMETRYCOLLECTION") + 
+  labs(title = "GEOMETRYCOLLECTION")  + 
+  coord_sf(xlim = c(0.6, 1.6), ylim = c(0.4, 1.4)) + 
   theme(line = element_blank(),
         axis.text=element_blank(),
         axis.title=element_blank())
 
 ## combine plot ------------
+# Empty grob for spacing
+b = nullGrob() # per @baptiste's comment, use nullGrob() instead of rectGrob()
+
+# grid.bezier with a few hard-coded settings
+mygb = function(x,y) {
+  grid.bezier(x=x, y=y, gp=gpar(fill="black"), 
+              arrow=arrow(type="closed", length=unit(2,"mm")))
+}
+
+r1 = arrangeGrob(b, p_multilinestring_sf, b, p_multipoint_sf, b, layout_matrix = rbind(c(1, 2, 3, 4, 5)), widths = c(13.3, 30, 13.3, 30, 13.3))
+r2 = arrangeGrob(b)
+r3 = arrangeGrob(p_multipolygon_sf, b, p_geometrycollection_sf, b, p_polygon_sf, layout_matrix = rbind(c(1, 2, 3, 4, 5)), widths = c(30, 5, 30, 5, 30))
+r4 = arrangeGrob(b)
+r5 = arrangeGrob(b, p_point_sf, b, p_linestring_sf, b, layout_matrix = rbind(c(1, 2, 3, 4, 5)), widths = c(13.3, 30, 13.3, 30, 13.3))
+
+grid.arrange(r1, r2, r3, r4, r5, ncol = 1, heights = c(30, 5, 30, 5, 30))
+
+# Switch to viewport for first set of arrows
+# vp = viewport(x = 0.5, y=.75, width=0.09, height=0.4)
+# pushViewport(vp)
+# 
+# grid.rect(gp=gpar(fill="black", alpha=0.1)) # Use this to see where your viewport is located on the full graph layout
+# 
+# mygb(x=c(0,0.8,0.8,1), y=c(1,0.8,0.6,0.6))
