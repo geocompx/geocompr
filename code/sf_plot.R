@@ -110,10 +110,49 @@ r5 = arrangeGrob(b, p_point_sf, b, p_linestring_sf, b, layout_matrix = rbind(c(1
 
 grid.arrange(r1, r2, r3, r4, r5, ncol = 1, heights = c(30, 5, 30, 5, 30))
 
-# Switch to viewport for first set of arrows
-# vp = viewport(x = 0.5, y=.75, width=0.09, height=0.4)
-# pushViewport(vp)
-# 
+# topleft arrow
+vp = viewport(x = 0.35, y = 0.66, width = 0.08, height=0.1)
+pushViewport(vp)
+
 # grid.rect(gp=gpar(fill="black", alpha=0.1)) # Use this to see where your viewport is located on the full graph layout
-# 
-# mygb(x=c(0,0.8,0.8,1), y=c(1,0.8,0.6,0.6))
+
+mygb(x=c(0, 0.4, 0.4, 1), y=c(1, 0.4, 0.4, 0))
+
+# left arrow
+popViewport()
+vp = viewport(x = 0.33, y = 0.5, width = 0.12, height=0.1)
+pushViewport(vp)
+
+mygb(x=c(0, 0.33, 0.66, 1), y=c(0.5, 0.5, 0.5, 0.5))
+
+# bottom left arrow
+popViewport()
+vp = viewport(x = 0.35, y = 0.31, width = 0.08, height=0.1)
+pushViewport(vp)
+
+mygb(x=c(0, 0.6, 0.6, 1), y=c(0, 0.4, 0.4, 1))
+
+
+# bottom right arrow
+popViewport()
+vp = viewport(x = 0.65, y = 0.31, width = 0.08, height=0.1)
+pushViewport(vp)
+
+mygb(x=c(1, 0.4, 0.4, 0), y=c(0, 0.4, 0.4, 1))
+
+# right arrow 
+popViewport()
+vp = viewport(x = 0.68, y = 0.5, width = 0.12, height=0.1)
+pushViewport(vp)
+
+mygb(x=c(1, 0.66, 0.33, 0), y=c(0.5, 0.5, 0.5, 0.5))
+
+# top right arrow
+popViewport()
+vp = viewport(x = 0.65, y = 0.66, width = 0.08, height=0.1)
+pushViewport(vp)
+
+mygb(x=c(1, 0.6, 0.6, 0), y=c(1, 0.4, 0.4, 0))
+
+
+
