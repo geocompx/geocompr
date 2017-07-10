@@ -91,7 +91,8 @@ p_geometrycollection_sf = ggplot() +
   coord_sf(xlim = c(0.6, 1.6), ylim = c(0.4, 1.4)) + 
   theme(line = element_blank(),
         axis.text=element_blank(),
-        axis.title=element_blank())
+        axis.title=element_blank(),
+        title=element_text(size=8))
 
 ## combine plot ------------
 # Empty grob for spacing
@@ -99,7 +100,7 @@ b = nullGrob() # per @baptiste's comment, use nullGrob() instead of rectGrob()
 
 # grid.bezier with a few hard-coded settings
 mygb = function(x,y) {
-  grid.bezier(x=x, y=y, gp=gpar(fill="black"), 
+  grid.bezier(x=x, y=y, gp=gpar(col = "grey", fill="grey"), 
               arrow=arrow(type="closed", length=unit(2,"mm")))
 }
 
