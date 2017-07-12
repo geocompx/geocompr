@@ -48,8 +48,8 @@ dev.off()
 # JANNES---------------------------------------------------
 #**********************************************************
 
-n = c("POINT", "MULTIPOINT", "LINE", "MULTILINE", "POLY", "MULTIPOLY", 
-      "GEOM COLLECTION")
+n = c("POINT", "MULTIPOINT", "LINESTRING", "MULTILINESTRING", "POLYGON", 
+      "MULTIPOLYGON", "GEOM COLLECTION")
 pos = coordinates(rep(2, 4))
 # plot(pos, type = 'n')
 # text(pos)
