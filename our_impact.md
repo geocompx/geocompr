@@ -24,6 +24,9 @@
 - 2017-05-29 - enhancement - a qgis style file creator (.qml) - https://github.com/jannes-m/RQGIS/issues/70
 - 2017-06-06 - enhancement - skim of `sf` objects - https://github.com/ropenscilabs/skimr/issues/88
 - 2017-06-15 - enhancement - Add a support for `sf` objects - https://github.com/oswaldosantos/ggsn/issues/16
+- 2017-07-11 - bug - Errors when plotting sfs (without crs - may be issue) - https://github.com/tidyverse/ggplot2/issues/2199
+- 2017-07-11 - bug - Problem with plots of the multipoint type - https://github.com/mtennekes/tmap/issues/126
+- 2017-07-11 - bug - `geom_sf()` return values of latitude and longitude for data in a projected coordinate system - https://github.com/tidyverse/ggplot2/issues/2200
 
 # Other
 
