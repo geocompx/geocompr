@@ -2,7 +2,7 @@
 Geocomputation with R
 =====================
 
-[![Build Status](https://travis-ci.org/Robinlovelace/geocompr.svg?branch=master)](https://travis-ci.org/Robinlovelace/geocompr) [![Gitter](https://badges.gitter.im/geocompr/lobby.svg)](https://gitter.im/geocompr/Lobby)
+[![Build Status](https://travis-ci.org/Robinlovelace/geocompr.svg?branch=master)](https://travis-ci.org/Robinlovelace/geocompr)
 
 Introduction
 ============
@@ -71,22 +71,23 @@ pkg_df = readr::read_csv("extdata/package_list.csv")
 knitr::kable(pkg_df)
 ```
 
-| Name           | Title                                                                                        | version |
-|:---------------|:---------------------------------------------------------------------------------------------|:--------|
-| bookdown       | Authoring Books and Technical Documents with R Markdown (Xie 2017)                           | 0.4     |
-| dismo          | Species Distribution Modeling (Hijmans et al. 2017)                                          | 1.1.4   |
-| gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction (Pebesma and Graeler 2017)  | 1.1.5   |
-| leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' (Cheng, Karambelkar, and Xie 2017) | 1.1.0   |
-| mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.1.0   |
-| microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                    | 1.4.2.1 |
-| raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8   |
-| rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.8   |
-| rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23  |
-| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.2   |
-| sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2017)                               | 1.2.5   |
-| spData         | Datasets for spatial analysis packages (Bivand, Nowosad, and Lovelace 2017)                  | 0.1.3   |
-| tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1   |
-| tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.10    |
+| Name           | Title                                                                                        | version    |
+|:---------------|:---------------------------------------------------------------------------------------------|:-----------|
+| bookdown       | Authoring Books and Technical Documents with R Markdown (Xie 2017)                           | 0.4        |
+| dismo          | Species Distribution Modeling (Hijmans et al. 2017)                                          | 1.1.4      |
+| gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction (Pebesma and Graeler 2017)  | 1.1.5      |
+| leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' (Cheng, Karambelkar, and Xie 2017) | 1.1.0.9000 |
+| mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.1.0      |
+| microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                    | 1.4.2.1    |
+| raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8      |
+| rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.8      |
+| rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23     |
+| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.1      |
+| sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2017)                               | 1.2.5      |
+| spData         | Datasets for spatial analysis packages (Bivand, Nowosad, and Lovelace 2017)                  | 0.1.3      |
+| spdep          | Spatial Dependence: Weighting Schemes, Statistics and Models (Bivand 2017)                   | 0.6.13     |
+| tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1      |
+| tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.10       |
 
 Other citations are stored online using Zotero and downloaded with:
 
@@ -112,13 +113,15 @@ References
 
 Appelhans, Tim, Florian Detsch, Christoph Reudenbach, and Stefan Woellauer. 2017. *Mapview: Interactive Viewing of Spatial Objects in R*. <https://CRAN.R-project.org/package=mapview>.
 
+Bivand, Roger. 2017. *Spdep: Spatial Dependence: Weighting Schemes, Statistics and Models*. <https://CRAN.R-project.org/package=spdep>.
+
 Bivand, Roger, and Colin Rundel. 2017. *Rgeos: Interface to Geometry Engine - Open Source (Geos)*. <https://CRAN.R-project.org/package=rgeos>.
 
 Bivand, Roger, Tim Keitt, and Barry Rowlingson. 2017. *Rgdal: Bindings for the Geospatial Data Abstraction Library*. <https://CRAN.R-project.org/package=rgdal>.
 
 Bivand, Roger, Jakub Nowosad, and Robin Lovelace. 2017. *SpData: Datasets for Spatial Analysis Packages*. <https://github.com/Nowosad/spData>.
 
-Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2017. *Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library*. <https://CRAN.R-project.org/package=leaflet>.
+Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2017. *Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library*. <http://rstudio.github.io/leaflet/>.
 
 Hijmans, Robert J. 2016. *Raster: Geographic Data Analysis and Modeling*. <https://CRAN.R-project.org/package=raster>.
 
@@ -126,7 +129,7 @@ Hijmans, Robert J., Steven Phillips, John Leathwick, and Jane Elith. 2017. *Dism
 
 Mersmann, Olaf. 2015. *Microbenchmark: Accurate Timing Functions*. <https://CRAN.R-project.org/package=microbenchmark>.
 
-Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://github.com/edzer/sfr/>.
+Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://CRAN.R-project.org/package=sf>.
 
 Pebesma, Edzer, and Roger Bivand. 2017. *Sp: Classes and Methods for Spatial Data*. <https://CRAN.R-project.org/package=sp>.
 
