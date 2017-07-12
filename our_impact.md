@@ -31,3 +31,4 @@
 # Other
 
 - Encouraged the publication and dissemination of previously lost slides on the R/GIS 'bridge' online: http://spatial.nhh.no/misc/?C=M;O=D
+- 2017-07-12 - Pull request accepted to **sf** improving documentation of units - https://github.com/r-spatial/sf/pull/415
