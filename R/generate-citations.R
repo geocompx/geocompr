@@ -44,7 +44,7 @@ dl_citations = function(f, user, collection, key = NULL) {
                  "/collections/",
                  collection,
                  "/items/top?limit=100&format=bibtex&v=1")
-    bib = httr::GET(req, httr::write_disk(f, overwrite = T)) # old download method - no longer works
+    bib = httr::GET(req, httr::write_disk(f, overwrite = TRUE)) # old download method - no longer works
   } else {
     bib = RefManageR::ReadZotero(user = user, .params = list(key = key, collection = collection))
     # Get bibliography (run once from project root)

@@ -17,6 +17,7 @@
 - 2017-06-14 - question - Simple features types - https://github.com/edzer/sfr/issues/383
 - 2017-06-12 - bug - Combine polygons by attribute - https://github.com/edzer/sfr/issues/382
 - 2017-06-23 - bug - Graticules in `geom_sf` - https://github.com/edzer/sfr/issues/396
+- 2017-07-11 - bug - `geom_sf()` return values of latitude and longitude for data in a projected coordinate system - https://github.com/tidyverse/ggplot2/issues/2200
 
 ## open
 
@@ -26,8 +27,8 @@
 - 2017-06-15 - enhancement - Add a support for `sf` objects - https://github.com/oswaldosantos/ggsn/issues/16
 - 2017-07-11 - bug - Errors when plotting sfs (without crs - may be issue) - https://github.com/tidyverse/ggplot2/issues/2199
 - 2017-07-11 - bug - Problem with plots of the multipoint type - https://github.com/mtennekes/tmap/issues/126
-- 2017-07-11 - bug - `geom_sf()` return values of latitude and longitude for data in a projected coordinate system - https://github.com/tidyverse/ggplot2/issues/2200
 
 # Other
 
 - Encouraged the publication and dissemination of previously lost slides on the R/GIS 'bridge' online: http://spatial.nhh.no/misc/?C=M;O=D
+- 2017-07-12 - Pull request accepted to **sf** improving documentation of units - https://github.com/r-spatial/sf/pull/415
