@@ -45,19 +45,36 @@ In section \@ref(attribute-subsetting) we saw how rows could be subsetted with t
 This means `world[1:6,]` subsets the first 6 countries of the world and that `world[world$area_km2 < 10000,]` returns the subset of countries that have a small surface area.
 
 *Spatial* subsetting with the `[` operator follows the same pattern except you place *another spatial object* inside the square brackets.
-To illustrate this concise and consistent syntax, let's create a hypothetical scenario: we want to select all countries in the world that lie within 5 degrees of the point where the equator (where latitude = 0 degrees) intersects the prime meridian (longitude = 0 degrees), as illustrated in Figure \@ref(fig:globe).
+To illustrate this concise and consistent syntax, let's create a hypothetical scenario: we want to select all countries in the world that lie within 20 degrees of the point where the equator (where latitude = 0 degrees) intersects the prime meridian (longitude = 0 degrees), as illustrated in Figure \@ref(fig:globe).
 The input data for the subsetting layer is defined below (the data to be subset, or 'target layer', is the `world` object used in previous chapters):
 
-```{r}
-center = st_sf(st_sfc(st_point(c(0, 0))))
-buff_equator = st_buffer(x = center, dist = 10)
+```{r, warning=FALSE}
+center = st_sf(st_sfc(st_point(c(0, 0)), crs = 4326))
+buff_equator = st_buffer(x = center, dist = 20)
 ```
 
-```{r globe, echo=FALSE, fig.cap="Hypothetical subsetting scenario: select all countries which intersect with a circle of 10 degrees in radius around planet Earth. Figure created with the **[globe](https://cran.r-project.org/package=globe)** package."}
+```{r globe, echo=FALSE, fig.cap="Hypothetical subsetting scenario: select all countries which intersect with a circle of 20 degrees in radius around planet Earth. Figure created with the **[globe](https://cran.r-project.org/package=globe)** package."}
 knitr::include_graphics("figures/globe.png")
 ```
 
+Now that the input data is set-up, the spatial subsetting operation is a single, concise command:
 
+```{r}
+world_buff_equator = world[buff_equator,]
+```
+
+Note that the command emits a warning message on execution: buffer and other spatial operations (especially distance and area calculations) cannot be assumed to be accurate in a geographic (longitude/latitude) CRS.
+This is justified in because of the data's proximity to the equator and its use as an illustrative example, but it's something to be aware of when working with 'lon/lat' data.
+In any case the spatial subsetting clearly worked, as illustrated by Figure \@ref(fig:buffeq), which was generated using the following commands:
+
+```{r buffeq, fig.cap="Subset of the `world` data selected based on their intersection with a circle 20 degrees in radius with a center point at 0 degrees longitude and 0 degrees latitude."}
+plot(world_buff_equator$geom)
+plot(buff_equator, add = TRUE)
+```
+
+Note that countries that only just touch the giant circle are selected such as the large country at the north of plot (Algeria).
+This is because the default spatial subsetting operation (`st_relates()`) includes countries that only just touch the selection object.
+Other spatial subsetting operations are more conservative, as described in the next section.
 
 ### Topological relations
 
