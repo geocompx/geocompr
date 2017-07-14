@@ -25,7 +25,7 @@ Please see [our\_style.md](https://github.com/Robinlovelace/geocompr/blob/master
 Reproducing the book
 --------------------
 
-To ease reproducibility, this book is also a package. Installing it from GitHub will ensure all dependencies are available on your computer (you need [**devtools**](https://github.com/hadley/devtools)):
+To ease reproducibility, this book is also a package. Installing it from GitHub will ensure all dependencies to build the book are available on your computer (you need [**devtools**](https://github.com/hadley/devtools)):
 
 ``` r
 devtools::install_github("robinlovelace/geocompr")
@@ -38,6 +38,39 @@ Once the dependencies have been installed you should be able to build and view a
 ``` r
 bookdown::render_book("index.Rmd") # to build the book
 browseURL("_book/index.html") # to view it
+```
+
+Reproducing this README
+-----------------------
+
+To reduce the book's dependencies, scripts to be run infrequently to generate input for the book are run on creation of this README.
+
+The additional packages required for this can be installed as follows:
+
+``` r
+library(tidyverse)
+pkgs = read_csv("pkg,      description
+cranlogs, # packages for logging CRAN downloads
+diagram, # create diagrams
+globe, # create spherical maps of the world
+")
+to_install = !pkgs$pkg %in% installed.packages()
+if(any(to_install)) {
+  install.packages(pkgs[to_install])
+}
+```
+
+With these additional dependencies installed, you should be able to run the following scripts, which create input figures for the book:
+
+``` r
+source("code/cranlogs.R")
+source("code/sf-revdep.R")
+```
+
+![](figures/cranlogs-1.png)
+
+``` r
+source("code/sfr-class-diagram-gen.R")
 ```
 
 Note: the `.Rproj` file is configured to build a website not a single page. To reproduce this [README](https://github.com/Robinlovelace/geocompr/blob/master/README.Rmd) use the following command:
@@ -82,10 +115,11 @@ knitr::kable(pkg_df)
 | raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8      |
 | rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.8      |
 | rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23     |
-| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.1      |
+| RQGIS          | Integrating R with QGIS (Muenchow and Schratz 2017)                                          | 1.0.1      |
+| RSAGA          | SAGA Geoprocessing and Terrain Analysis in R (Brenning and Bangs 2016)                       | 0.94.5     |
+| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.3      |
 | sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2017)                               | 1.2.5      |
 | spData         | Datasets for spatial analysis packages (Bivand, Nowosad, and Lovelace 2017)                  | 0.1.3      |
-| spdep          | Spatial Dependence: Weighting Schemes, Statistics and Models (Bivand 2017)                   | 0.6.13     |
 | tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1      |
 | tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.10       |
 
@@ -97,29 +131,18 @@ geocompr:::dl_citations(f = "refs.bib", user = 418217, collection = "9K6FRP6N")
 
 If you would like to add to the references, please use Zotero, join the [open group](https://www.zotero.org/groups/418217/energy-and-transport) add your citation to the open [geocompr library](https://www.zotero.org/groups/418217/energy-and-transport/items/collectionKey/9K6FRP6N).
 
-Code with additional dependencies
----------------------------------
-
-To reduce the book's dependencies, scripts to be run infrequently to generate input for the book are run on creation of this README:
-
-``` r
-source("code/cranlogs.R")
-source("code/sf-revdep.R")
-source("code/sfr-class-diagram-gen.R")
-```
-
 References
 ----------
 
 Appelhans, Tim, Florian Detsch, Christoph Reudenbach, and Stefan Woellauer. 2017. *Mapview: Interactive Viewing of Spatial Objects in R*. <https://CRAN.R-project.org/package=mapview>.
-
-Bivand, Roger. 2017. *Spdep: Spatial Dependence: Weighting Schemes, Statistics and Models*. <https://CRAN.R-project.org/package=spdep>.
 
 Bivand, Roger, and Colin Rundel. 2017. *Rgeos: Interface to Geometry Engine - Open Source (Geos)*. <https://CRAN.R-project.org/package=rgeos>.
 
 Bivand, Roger, Tim Keitt, and Barry Rowlingson. 2017. *Rgdal: Bindings for the Geospatial Data Abstraction Library*. <https://CRAN.R-project.org/package=rgdal>.
 
 Bivand, Roger, Jakub Nowosad, and Robin Lovelace. 2017. *SpData: Datasets for Spatial Analysis Packages*. <https://github.com/Nowosad/spData>.
+
+Brenning, Alexander, and Donovan Bangs. 2016. *RSAGA: SAGA Geoprocessing and Terrain Analysis in R*. <https://CRAN.R-project.org/package=RSAGA>.
 
 Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2017. *Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library*. <http://rstudio.github.io/leaflet/>.
 
@@ -129,7 +152,9 @@ Hijmans, Robert J., Steven Phillips, John Leathwick, and Jane Elith. 2017. *Dism
 
 Mersmann, Olaf. 2015. *Microbenchmark: Accurate Timing Functions*. <https://CRAN.R-project.org/package=microbenchmark>.
 
-Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://CRAN.R-project.org/package=sf>.
+Muenchow, Jannes, and Patrick Schratz. 2017. *RQGIS: Integrating R with Qgis*. <https://CRAN.R-project.org/package=RQGIS>.
+
+Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://github.com/r-spatial/sf/>.
 
 Pebesma, Edzer, and Roger Bivand. 2017. *Sp: Classes and Methods for Spatial Data*. <https://CRAN.R-project.org/package=sp>.
 
