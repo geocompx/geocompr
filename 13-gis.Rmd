@@ -251,11 +251,12 @@ This example includes statistical geocomputing, i.e., it uses a GIS to derive te
 The term statistical geocomputation emphasizes the strength of combining R's data science power with the geoprocessing power of a GIS which is at the very heart of building a bridge from R to GIS.
 
 ## GRASS through **rgrass7**
-
-Geographical Resources Analysis Support System (GRASS)   \@ref(tab:gis_comp) [@neteler_open_2008].
+The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the hybrid raster-vector Geographical Resources Analysis Support System (GRASS) \@ref(tab:gis_comp) [@neteler_open_2008] from 1982 to 1995. 
+Academia continued this work since 1997.
 Inexperienced GIS users might find GRASS a bit intimidating in the beginning.
-Before starting the GUI you have to create a map-set, a location (basically a geodatabase), define the projection and boundaries of your GRASS project. 
-You have to do exactly the same from within R:
+Before starting the GUI you have to create a map-set, a location (basically a geodatabase), define the projection and boundaries of your GRASS project. You have to do exactly the same from within R:
+
+
 
 
 ```{r, eval = FALSE}
@@ -275,54 +276,65 @@ example ideas:
 - r.sim.water (requires various processing steps)
 - traveling salesman problem; nice example, finding the shortest paths between 25 randomly select cycle points.
 
+One of the most interesting problems in GIScience is the traveling salesman problem. 
+Suppose a traveling salesman would like to visit 99 customers while covering the shortest distance possible.
+Additionally, he would like to set out his journy a this home, and come back to it after
+There is a single best solution to this problem, however, to find it, is even for modern computers impossible.
+In our case, this corresponds to factorial(100 - 1) / 2 (we do not differentiate between back and forth).
+Even if one iteration can be done in a ms this still corresponds to (factorial(100 - 1) / (1000 * 60 * 60 * 24 * 365)) years
 
 ```{r}
 library(sf)
-# Download osm data
-dir_main <- tempdir()
-dir_main <- "D:/test"
-download.file(file.path("http://download.geofabrik.de/europe/great-britain/", 
-                        "england/greater-london-latest-free.shp.zip"),
-              destfile = file.path(dir_main, "london_osm.zip"))
-# unzip the downloaded file
-unzip(zipfile = file.path(dir_main, "london_osm.zip"), exdir = dir_main)
-# load streets into R environment
-streets = sf::st_read(file.path(dir_main, "gis.osm_roads_free_1.shp"))
-st_crs(streets) = 4326
-data(cycle_hire, package = "spData")
+library(osmdata)
 
-b_box = st_bbox(cycle_hire)
-coords = expand.grid(c(b_box["xmin"], b_box["xmax"]), 
-                     c(b_box["ymin"], b_box["ymax"]))[c(1, 3, 4, 2, 1), ]
-poly <- st_polygon(list(as.matrix(coords)))
-poly <- st_sfc(poly)
-st_crs(poly) = 4326
-int = st_intersects(streets, poly)
-streets_int = streets[sapply(int, length) > 0, ]
-plot(streets_int$geometry)
-plot(cycle_hire$geometry, col = "red", pch = 16, add = TRUE)
+streets = opq(b_box) %>%
+  add_feature(key = "highway") %>%
+  osmdata_sf()
+
+# plot(st_geometry(streets))
+# plot(st_geometry(cycle_hire), col = "red", pch = 16, add = TRUE)
 # randomly select 25 points
 points = cycle_hire[sample(1:nrow(cycle_hire), 25), ]
+```
 
+```{r}
 library(rgrass7)
 library(maptools)
 library(link2GI)
+if (Sys.info()["sysname"] == "Windows") {
+link2GI::searchGRASSW()  
+} else {
+  link2GI::searchGRASSX()
+}
+
 linkGRASS7(streets_int, c("C:/OSGeo4W64", "grass-7.2.1", "osgeo4W"))
 
-# library(spgrass6)
-# g <- initGRASS(gisBase = "C:/Program Files (x86)/GRASS GIS 6.4.4", )
-# execGRASS("g.mapset", mapset = "PERMANENT")
-# execGRASS("g.proj", flag = "c", 
-#           proj4 = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+```
+
+Before using GRASS, we need to add data to its spatial database. Luckily, the convenience functions `writeVECT` and `writeRAST` do this for us. Here, we only transfer our street and cycle point vector data.
+```{r}
 writeVECT(as(streets_int, "Spatial"), "streets", v.in.ogr_flags = "o")
 writeVECT(as(points, "Spatial"), "points")
+```
 
+To perform our network analysis, we need a topological clean street network.
+GRASS's `v.clean` takes care of the removal of duplicates, small angles and dangles, among others.
+Our cycling station points not necessarily lie on a street.
+To find the shortest route between them, we need to connect them to the streets.
+`v.net`'s connect-operator does exactly this, it connects the points to to the nearest street segment (check visually if this is true!!). 
+
+```{r}
 execGRASS(cmd = "v.clean", input = "streets", output = "streets_clean",
           tool = "break")
 # prepare network by connecting points to roads / changes roads
 execGRASS(cmd = "v.net", input = "streets_clean", output = "streets_points_con", 
           points = "points", operation = "connect", threshold = 0.001,
           flags = c("overwrite", "c"))
+```
+
+Finally, we can find the shortest route between all points using the `v.net.salesman`-algorithm.
+
+```{r}
 # run tsp
 execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
           output = "shortest_route", center_cats = paste0("1-", nrow(points)),
