@@ -61,7 +61,7 @@ The data to be subset, or 'target layer', is the `world` object used in previous
 
 ```{r, warning=FALSE}
 center = st_sf(st_sfc(st_point(c(0, 0)), crs = 4326))
-buff_equator = st_buffer(x = center, dist = 20)
+buff = st_buffer(x = center, dist = 20)
 ```
 
 ```{r globe, echo=FALSE, fig.cap="Hypothetical subsetting scenario: select all countries which intersect with a circle of 20 degrees in radius around planet Earth. Figure created with the **[globe](https://cran.r-project.org/package=globe)** package."}
@@ -71,7 +71,7 @@ knitr::include_graphics("figures/globe.png")
 Now that the input data is set-up, the spatial subsetting operation is a single, concise command:
 
 ```{r}
-world_buff_equator = world[buff_equator,]
+world_buff = world[buff,]
 ```
 
 Note that the command emits a message: about assuming `planar coordinates`.
@@ -81,8 +81,8 @@ In any case, the spatial subsetting clearly worked.
 As illustrated by Figure \@ref(fig:buffeq), only countries which spatially intersect with the giant circle are returned:
 
 ```{r buffeq, fig.cap="Subset of the `world` data selected based on their intersection with a circle 20 degrees in radius with a center point at 0 degrees longitude and 0 degrees latitude."}
-plot(world_buff_equator$geom)
-plot(buff_equator, add = TRUE)
+plot(world_buff$geom)
+plot(buff, add = TRUE)
 ```
 
 Note that countries that only just touch the giant circle are selected such as the large country at the north of plot (Algeria).
@@ -91,22 +91,27 @@ Other spatial subsetting operations such as `st_within()` are more conservative,
 
 Before we progress to explore the differences between different spatial subsetting operations, it is worth seeing alternative ways to acheive the same result,
 to deepen understanding of what is going on 'under the hood' (vital for developing advanced geocomputation applications).
-The first way to reproduce the subsetting operation illustrated in Figure \@ref(fig:buffeq) simply involves expanding the operation over 2 lines:
+The second way to reproduce the subsetting operation illustrated in Figure \@ref(fig:buffeq) simply involves expanding the operation over 2 lines:
 
 ```{r}
-sel_relate = st_intersects(x = world, y = buff_equator, sparse = FALSE)
-world_buff_equator2 = world[sel_relate,]
+sel_buff = st_intersects(x = world, y = buff, sparse = FALSE)
+world_buff2 = world[sel_buff,]
 ```
 
-
-
-Furthermore it will demonstrate the foundations of a 'tidy' spatial data analysis workflow that you'll find familiar if you already use **dplyr** for data manipulation.
-
-How can we be sure that the results obtained through the 4 subsetting operations demonstrated above?
-We can test it as follows:
+The third way is essentially the same as the second, but uses the `filter()` function introduced in section \@ref(attribute-subsetting), forming the foundations of a 'tidy' spatial data analysis workflow.
+If you already use **dplyr** for data manipulation, this way should seem familiar:
 
 ```{r}
-identical(x = world_buff_equator, y = world_buff_equator2)
+world_buff3 = world %>%
+  filter(st_intersects(x = ., y = buff, sparse = FALSE))
+```
+
+How can we be sure that the results obtained through the 4 subsetting operations demonstrated above?
+We can test them as follows:
+
+```{r}
+identical(x = world_buff, y = world_buff2)
+identical(x = world_buff, y = world_buff3)
 ```
 
 
