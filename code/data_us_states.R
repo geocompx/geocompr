@@ -26,6 +26,7 @@ median_income_15 <- get_acs(geography = "state", variables = "B06011_001E", year
   select(GEOID, median_income_15 = estimate)
 
 ## spatial data 
+## I NEED TO ADD GROUPS
 us_states = states(resolution = "20m") 
 us_states49 = us_states %>% 
   filter(DIVISION != 0) %>% 
