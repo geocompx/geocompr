@@ -352,10 +352,10 @@ wb_north_america
 ```
 
 In this book, we focus on spatial data. 
-All of the following examples will have a `sf` object as the first argument and a `data.frame` object as the second argument. 
+Most of the following examples will have a `sf` object as the first argument and a `data.frame` object as the second argument. 
 A new `sf` object will be a result of these joins. 
 However, the reverse order is also possible and will result in a `data.frame` object.
-This is beyond the scope of this book, but we encourage you to try it.
+This is mostly beyond the scope of this book, but we encourage you to try it.
 
 ### Left joins
 
@@ -394,18 +394,36 @@ left_join3 = north_america %>%
 left_join3
 ```
 
-<!-- Explain the reverse order -->
-<!-- , and how to go back to sf -->
-<!-- . and how to remove geom col -->
-<!-- this apply to every case where df is the second agrument -->
-<!-- ```{r} -->
-<!-- # keeps geom col; drops sf class -->
-<!-- left_join4 = wb_north_america %>% -->
-<!--   left_join(north_america, by = c("iso_a2")) -->
-<!-- left_join4 -->
-<!-- left_join4_sf = st_as_sf(left_join4) -->
-<!-- left_join4_sf -->
-<!-- ``` -->
+It is also possible to use our objects in the reverse order, where a `data.frame` object is the first argument and a `sf` object is the second argument.
+This would always result in a new `data.frame` object.
+For example, `left_join()` would create a new `data.frame` with a `geom` column:
+
+```{r}
+# keeps the geom column, but drops the sf class
+left_join4 = wb_north_america %>%
+  left_join(north_america, by = c("iso_a2"))
+left_join4
+class(left_join4)
+```
+
+`left_join4` has only one class - `data.frame`, however it is possible to add spatial `sf` class using the `st_as_sf()` function: 
+
+```{r}
+left_join4_sf = st_as_sf(left_join4)
+left_join4_sf
+class(left_join4_sf)
+```
+
+On the other hand, it is also possible to remove the `geom` column using base R functions or `dplyr`:
+
+```{r}
+# base R
+left_join4_df = subset(left_join4, select = -geom)
+# or dplyr
+left_join4_df = left_join4 %>% select(-geom)
+left_join4_df
+class(left_join4_df)
+```
 
 ### Right joins
 
