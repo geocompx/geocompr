@@ -8,11 +8,11 @@ n = gsub(pattern = "GEOMETRY", replacement = "GEOMETRY COLLECTION", n)
 n = sort(n)[c(1, 4, 3, 5, 6, 2, 7)]
 
 # see https://davetang.org/muse/2017/03/31/creating-flowchart-using-r/
-# openplotmat()
+openplotmat()
 pos <- coordinates(c(1, 3, 3))
-# plot(pos, type = 'n')
-# text(pos)
-# par(mar = rep(1, 4))
+plot(pos, type = 'n')
+text(pos)
+par(mar = rep(1, 4))
 png(filename = "figures/sf-classes.png", width = 600, height = 500)
 openplotmat()
 straightarrow(from = pos[5, ], to = pos[2, ])
