@@ -34,6 +34,9 @@ us_states49 = us_states %>%
   
 plot(us_states49["REGION"])
 
+us_states = us_states49
+save(us_states, file = "data/us_states.rda")
+
 ## non-spatial data
 # B06011_001E - Median income in the past 12 months --!!Total:
 median_income_10 = get_acs(geography = "state", variables = "B06011_001E", year = 2010) %>% 
@@ -50,3 +53,6 @@ us_state_eco = median_income_10 %>%
   left_join(median_income_15, by = "NAME") %>% 
   left_join(poverty_level_10, by = "NAME") %>% 
   left_join(poverty_status_15, by = "NAME")
+
+us_states_df = us_state_eco
+save(us_states, file = "data/us_states_df.rda")
