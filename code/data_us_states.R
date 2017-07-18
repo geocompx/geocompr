@@ -25,17 +25,18 @@ median_income_10 <- get_acs(geography = "state", variables = "B06011_001E", year
 median_income_15 <- get_acs(geography = "state", variables = "B06011_001E", year = 2015) %>% 
   select(GEOID, median_income_15 = estimate)
 
+## groups - Census Bureau-designated regions
 ## spatial data 
-## I NEED TO ADD GROUPS
 us_states = states(resolution = "20m") 
 us_states49 = us_states %>% 
   filter(DIVISION != 0) %>% 
   filter(NAME != "Alaska", NAME != "Hawaii") %>% 
-  select(GEOID, NAME) %>%
+  select(GEOID, NAME, REGION) %>%
+  mutate(REGION = factor(REGION, labels = c("Norteast", "Midwest", "South", "West"))) %>% 
   mutate(AREA = units::set_units(st_area(.), km^2)) %>% 
   left_join(., total_pop_10, by = "GEOID") %>% 
   left_join(., total_pop_15, by = "GEOID") %>% 
   left_join(., median_income_10, by = "GEOID") %>% 
   left_join(., median_income_15, by = "GEOID") 
   
-plot(us_states49$geometry)
+plot(us_states49["REGION"])
