@@ -52,7 +52,7 @@ poverty_level_15 = get_acs(geography = "state", variables = "B17001_002E", year 
 us_state_eco = median_income_10 %>% 
   left_join(median_income_15, by = "NAME") %>% 
   left_join(poverty_level_10, by = "NAME") %>% 
-  left_join(poverty_status_15, by = "NAME")
+  left_join(poverty_level_15, by = "NAME")
 
 us_states_df = us_state_eco
-save(us_states, file = "data/us_states_df.rda")
+save(us_states_df, file = "data/us_states_df.rda")
