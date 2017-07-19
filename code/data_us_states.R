@@ -1,10 +1,12 @@
 # devtools::install_github('walkerke/tigris')
 # devtools::install_github('walkerke/tidycensus')
+# devtools::install_github('ateucher/rmapshaper', ref = 'sf')
 library(tigris)
 library(tidycensus)
 library(sf)
 library(tidyverse)
 library(units)
+library(rmapshaper)
 options(tigris_class = "sf")
 
 ## census data
@@ -22,10 +24,14 @@ total_pop_15 = get_acs(geography = "state", variables = "B01003_001E", year = 20
 
 ## groups - Census Bureau-designated regions
 ## spatial data 
-us_states = states(resolution = "20m") 
+us_states = states() 
+
 us_states49 = us_states %>% 
   filter(DIVISION != 0) %>% 
   filter(NAME != "Alaska", NAME != "Hawaii") %>% 
+  ms_simplify()
+  
+  
   select(GEOID, NAME, REGION) %>%
   mutate(REGION = factor(REGION, labels = c("Norteast", "Midwest", "South", "West"))) %>% 
   mutate(AREA = units::set_units(st_area(.), km^2)) %>% 
