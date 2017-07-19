@@ -29,9 +29,7 @@ us_states = states()
 us_states49 = us_states %>% 
   filter(DIVISION != 0) %>% 
   filter(NAME != "Alaska", NAME != "Hawaii") %>% 
-  ms_simplify()
-  
-  
+  ms_simplify(., keep=0.005) %>% 
   select(GEOID, NAME, REGION) %>%
   mutate(REGION = factor(REGION, labels = c("Norteast", "Midwest", "South", "West"))) %>% 
   mutate(AREA = units::set_units(st_area(.), km^2)) %>% 
