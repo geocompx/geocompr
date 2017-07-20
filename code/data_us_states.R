@@ -54,6 +54,7 @@ poverty_level_15 = get_acs(geography = "state", variables = "B17001_002E", year 
   select(NAME, poverty_level_15 = estimate)
 
 us_state_eco = median_income_10 %>% 
+  filter(NAME != "Puerto Rico") %>% 
   left_join(median_income_15, by = "NAME") %>% 
   left_join(poverty_level_10, by = "NAME") %>% 
   left_join(poverty_level_15, by = "NAME")
