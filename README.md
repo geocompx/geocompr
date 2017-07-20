@@ -48,13 +48,8 @@ To reduce the book's dependencies, scripts to be run infrequently to generate in
 The additional packages required for this can be installed as follows:
 
 ``` r
-library(tidyverse)
-pkgs = read_csv("pkg,      description
-cranlogs, # packages for logging CRAN downloads
-diagram, # create diagrams
-globe, # create spherical maps of the world
-")
-to_install = !pkgs$pkg %in% installed.packages()
+pkgs = c("cranlogs", "diagram", "globe")
+to_install = !pkgs %in% installed.packages()
 if(any(to_install)) {
   install.packages(pkgs[to_install])
 }
@@ -65,13 +60,10 @@ With these additional dependencies installed, you should be able to run the foll
 ``` r
 source("code/cranlogs.R")
 source("code/sf-revdep.R")
-```
-
-![](figures/cranlogs-1.png)
-
-``` r
 source("code/sfr-class-diagram-gen.R")
 ```
+
+![](figures/cranlogs-1.png)![](figures/cranlogs-2.png)
 
 Note: the `.Rproj` file is configured to build a website not a single page. To reproduce this [README](https://github.com/Robinlovelace/geocompr/blob/master/README.Rmd) use the following command:
 
@@ -117,9 +109,9 @@ knitr::kable(pkg_df)
 | rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23     |
 | RQGIS          | Integrating R with QGIS (Muenchow and Schratz 2017)                                          | 1.0.1      |
 | RSAGA          | SAGA Geoprocessing and Terrain Analysis in R (Brenning and Bangs 2016)                       | 0.94.5     |
-| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.3      |
+| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.2      |
 | sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2017)                               | 1.2.5      |
-| spData         | Datasets for spatial analysis packages (Bivand, Nowosad, and Lovelace 2017)                  | 0.1.3      |
+| spData         | Datasets for spatial analysis packages (Bivand, Nowosad, and Lovelace 2017)                  | 0.1.4      |
 | tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1      |
 | tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.10       |
 
@@ -154,7 +146,7 @@ Mersmann, Olaf. 2015. *Microbenchmark: Accurate Timing Functions*. <https://CRAN
 
 Muenchow, Jannes, and Patrick Schratz. 2017. *RQGIS: Integrating R with Qgis*. <https://CRAN.R-project.org/package=RQGIS>.
 
-Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://github.com/r-spatial/sf/>.
+Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://CRAN.R-project.org/package=sf>.
 
 Pebesma, Edzer, and Roger Bivand. 2017. *Sp: Classes and Methods for Spatial Data*. <https://CRAN.R-project.org/package=sp>.
 
