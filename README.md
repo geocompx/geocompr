@@ -109,7 +109,7 @@ knitr::kable(pkg_df)
 | RSAGA          | SAGA Geoprocessing and Terrain Analysis in R (Brenning and Bangs 2016)                       | 0.94.5  |
 | sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.3   |
 | sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2017)                               | 1.2.5   |
-| spData         | Datasets for spatial analysis (Bivand, Nowosad, and Lovelace 2017)                           | 0.2.1   |
+| spData         | Datasets for Spatial Analysis (Bivand, Nowosad, and Lovelace 2017)                           | 0.2.2   |
 | tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1   |
 | tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.11    |
 
