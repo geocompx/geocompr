@@ -19,6 +19,7 @@
 - 2017-06-23 - bug - Graticules in `geom_sf` - https://github.com/edzer/sfr/issues/396
 - 2017-07-11 - bug - `geom_sf()` return values of latitude and longitude for data in a projected coordinate system - https://github.com/tidyverse/ggplot2/issues/2200
 - 2017-07-11 - bug - Errors when plotting sfs (without crs - may be issue) - https://github.com/tidyverse/ggplot2/issues/2199
+- 2017-07-15 - issue - aggregate methods not user friendly https://github.com/r-spatial/sf/issues/429
 
 ## open
 
@@ -32,3 +33,4 @@
 
 - Encouraged the publication and dissemination of previously lost slides on the R/GIS 'bridge' online: http://spatial.nhh.no/misc/?C=M;O=D
 - 2017-07-12 - Pull request accepted to **sf** improving documentation of units - https://github.com/r-spatial/sf/pull/415
+- 2017-07-24 - PR - improve documentation of aggregate.sf **sf**
