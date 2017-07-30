@@ -1,2 +1,1 @@
 - How best to represent the sf class system so students benefit most from the diagram in section 2.1? See discussion in this commit for at least 3 options of the best way forward: https://github.com/Robinlovelace/geocompr/commit/46f50e4c556c2252e372b69b2df1ad9eff09c709
-- Should we keep all the Exercises at the end of the chapters for consistency, or add additional Exercises before the end?

@@ -12,12 +12,13 @@ We recommend getting up-to-speed with the language, with reference to resources 
 * * *
 
 After R is installed and set-up, packages which extend R must be installed and loaded for it to handle spatial data.
-On Mac and Linux operating systems there are a few additional requirements: see the [README](https://github.com/r-spatial/sf) of the **sf** package for instructions.
-The **sf** and **spData** packages used in this chapter can be installed and loaded with the following commands:
+On Mac and Linux operating systems there are a few additional requirements: see the [README](https://github.com/edzer/sfr) of the **sf** package for instructions.
+The **sf** and **spData** packages used in this chapter can be installed and loaded with the following commands (which requires **devtools**):
 
 ```{r, eval=FALSE}
 install.packages("sf")
-install.packages("spData")
+install.packages("devtools")
+devtools::install_github("nowosad/spData")
 library(sf)
 library(spData)
 ```
@@ -56,26 +57,25 @@ The **mapedit** package can be used to create spatial data manually on an intera
 p = c(1, 3)
 ```
 
-Now this can be plotted in Cartesian space, as illustrated in figure \@ref(fig:cartesian):
+Now this can be plotted in Cartesian space:
 
-```{r cartesian, fig.cap="Illustration of vector point data in base R."}
+```{r}
 plot(p[1], p[2], xlim =  c(0, 5), ylim = c(0, 5))
 ```
 
-Generally vector datasets have a high level of precision (but not necessarily accuracy as we will see in \@ref(units)).
-Raster datasets, by contrast, use cells that break the surface up into a cells of constant size (*resolution*). Rasters therefore aggregate spatially specific features to a given resolution resulting in small features being blurred or lost in raster datasets.
-<!-- todo: add figure(s) showing raster data and blurring? -->
-This book uses **sf** and **raster** packages to work with vector data and raster datasets respectively.
+Generally vector points have a high level of precision (but not necessarily accuracy as we will see in \@ref(units)) as opposed to raster data which relies on cells that break the surface up into a discrete number of cells of the same size.
+This book uses simple features to work with vector data.
 
-### An introduction to simple features {#intro-sf}
+### An introduction to Simple Features {#intro-sf}
 
-Simple features is an open standard developed and endorsed by the Open Geospatial Consortium ([OGC](http://portal.opengeospatial.org/files/?artifact_id=25355)) to represent a wide range of geographical information.
-It is a hierarchical data model that simplifies geographic data by condensing a complex range of geographic forms into a single geometry class.
+Simple features is an open standard data model developed and endorsed by the Open Geospatial Consortium ([OGC](http://portal.opengeospatial.org/files/?artifact_id=25355)) to represent a wide range of geographical information.
+Simple features is a hierarchical data model that simplifies geographic data by condensing a complex range of geographic forms into a single geometry class.
 Only 7 out of 68 possible types of simple feature are currently used in the vast majority of GIS operations (Figure \@ref(fig:sf-ogc)).
 All of these are fully supported (with plotting methods etc) in the R package **sf** [@R-sf].^[
 The full OGC standard includes rather exotic geometry types including 'surface' and 'curve' geometry types, which currently have limited application in real world applications.
 All 68 types can be represented in R, although (at the time of writing) all methods, such as plotting, are only supported for the 7 types that are used.
 ]
+
 
 ```{r sf-ogc, fig.cap="The subset of the Simple Features class hierarchy supported by sf. Figure based on the Open Geospatial Consortium document [06-103r4](http://www.opengeospatial.org/standards/sfa).", out.width="100%", echo=FALSE}
 knitr::include_graphics("figures/sf-classes.png")
@@ -84,7 +84,7 @@ knitr::include_graphics("figures/sf-classes.png")
 **sf** can represent all common vector geometry types (raster data classes are not supported by **sf**): points, lines, polygons and their respective 'multi' versions (which group together features of the same type into a single feature).
 **sf** also supports geometry collections, which can contain multiple geometry types in a single feature.
 Given the breadth of geographic data forms, it may come as a surprise that a class system to support all of them is provided in a single package, which can be installed from CRAN:^[The
-development version, which may contain new features, can be installed with `devtools::install_github("r-spatial/sf").`
+development version, which may contain new features, can be installed with `devtools::install_github("edzer/sfr").`
 ]
 **sf** incorporates the functionality of the 3 main packages of the **sp** paradigm (**sp** [@R-sp] for the class system, **rgdal** [@R-rgdal] for reading and writing data, **rgeos** [@R-rgeos] for spatial operations undertaken by GEOS) in a single, cohesive whole.
 This is well-documented in **sf**'s [vignettes](http://cran.rstudio.com/package=sf):
@@ -103,7 +103,7 @@ library(spData)
 data("world")
 ```
 
-In the above code **spData** silently loaded the `world` dataset (and many other spatial datasets - see [the spData website](https://nowosad.github.io/spData/) for a full list).
+In the above code **spData** silently loaded the `world` dataset (and many other spatial datasets - see [nowosad/spData](https://nowosad.github.io/spData/) for a full list).
 The dataset contains spatial and non-spatial information, as shown by the function `names()`, which reports the column headings in data frames. 
 This can be seen as the final column name of `world`:
 
@@ -148,6 +148,14 @@ world[1:2, 1:3]
 All this may seem rather complex, especially for a class system that is supposed to be simple.
 However, there are good reasons for organizing things this way and using **sf**.
 
+#### Exercises
+
+What does the summary of the `geometry` column tell us about the `world` dataset, in terms of:
+
+- The geometry type?
+- How many countries there are?
+- The coordinate reference system (CRS)?
+
 <!-- It's a `MULTIPOLYGON` with 177 features and a geographical (longitude/latidue) coordinate reference system (CRS) with an EPSG code of `4326`. -->
 
 ### Why Simple Features?
@@ -160,7 +168,7 @@ There are many advantages of **sf** over **sp**, including:
 - **sf** functions can be combined using `%>%` operator and works well with the [tidyverse](http://tidyverse.org/) collection of R packages
 - **sf** function names are relatively consistent and intuitive (all begin with `st_`) compared with the function names and syntax of the **sp**, **rgdal** and **rgeos** packages that it supersedes.
 
-A broader advantage is that simple features are so well-supported by other software products, not least PostGIS, which has heavily influenced the design of **sf**.
+A broader advantage is that simple features are so well supported by other software products, not least PostGIS, which has heavily influenced the design of **sf**.
 
 A disadvantage you should be aware of, however, is that **sf** is not *feature complete* and that it continues to evolve.
 The transition from **sp** to **sf** will likely take many years, and many spatial packages may never switch.
@@ -202,7 +210,7 @@ plot(asia, add = TRUE, col = "red")
 
 This can be very useful for quickly checking the geographic correspondence between two or more layers: 
 the `plot()` function is fast to execute and requires few lines of code, but does not create interactive maps with a wide range of options.
-For more advanced map making we recommend using a dedicated visualization package such as **tmap**, **ggplot2**, **mapview**, or **leaflet**.
+For more advanced map making we recommend using a dedicated visualisation package such as **tmap**, **ggplot2**, **mapview**, or **leaflet**.
 <!-- TODO: cross reference advanced mapping chapter -->
 
 <!-- 
@@ -214,6 +222,27 @@ For more advanced map making we recommend using a dedicated visualization packag
 
 ```{r, eval=FALSE, echo=FALSE}
 plot(africa[0], lwd = 3, main = "Nigeria in context", border = "lightgrey")
+```
+
+#### Exercise
+
+Using **sf**'s `plot()` command, create a map of Nigeria in context, building on the code that creates and plots Asia above (see Figure \@ref(fig:nigeria) for an example of what this could look like). 
+
+- Hint: this used the `lwd`, `main` and `col` arguments of `plot()`. 
+- Bonus: make the country boundaries a dotted grey line.
+- Hint: `border` is an additional argument of `plot()` for **sf** objects.
+
+```{r nigeria, warning=FALSE, echo=FALSE, fig.cap="Map of Nigeria in context illustrating sf's plotting capabilities"}
+nigeria = world[world$name_long == "Nigeria",]
+africa = world[world$continent == "Africa",]
+bb_africa = st_bbox(africa)
+plot(africa[2], col = "white", lwd = 3, main = "Nigeria in context", border = "lightgrey")
+# plot(world, lty = 3, add = TRUE, border = "grey")
+plot(world, add = TRUE, border = "grey")
+plot(nigeria, col = "yellow", add = TRUE, border = "darkgrey")
+ncentre = st_centroid(nigeria)
+ncentre_num = st_coordinates(ncentre)
+text(x = ncentre_num[1], y = ncentre_num[2], labels = "Nigeria")
 ```
 
 #### Further work
@@ -247,6 +276,12 @@ plot(world_centroids, add = TRUE, cex = world$pop / 1e8, lwd = 3)
 <!-- africa_centroids2 = world_centroids[sel_africa,] -->
 <!-- identical(africa_centroids, africa_centroids2) -->
 <!-- ``` -->
+
+#### Exercises
+
+- What does the `lwd` argument do in the `plot()` code that generates Figure \@ref(fig:africa). 
+- Perform the same operations and map making for another continent of your choice.
+- Bonus: Download some global geographic data and add attribute variables assigning them to the continents of the world.
 
 ### Simple feature classes {#sf_classes}
 
@@ -437,13 +472,14 @@ st_geometrycollection(gemetrycollection_list)
 <!-- figure - image/fig1.jpg -->
 <!-- they are interconnected - points could create mulitpoints or lines; -->
 <!-- lines could create mutlilines or polygons, etc. -->
-<!-- https://r-spatial.github.io/sf/articles/sf1.html -->
+<!-- https://edzer.github.io/sfr/articles/sf1.html -->
 
 #### Simple feature collections {#sfc}
 
 One `sfg` object contains only a single simple feature geometry. 
 A simple feature collection (`sfc`) is a list of `sfg` objects with information about a coordinate reference system.
-The `st_sfc()` function can be used to create `sfc` objects, as illustrated in the code below, which combines two simple features of a point type into a single feature:
+The `st_sfc()` function can be used to create `sfc` objects.
+For example, we want to collect two simple features of a point type:
 
 ```{r}
 # sfc POINT
@@ -558,13 +594,13 @@ Simple features are created using the `st_sf()` function:
 ```{r}
 # sfg objects
 london_point = st_point(c(0.1, 51.5))
-ruan_point = st_point(c(-9, 53))
+craggy_island_point = st_point(c(-9.6, 53.0))
 
 # sfc object
-our_geometry = st_sfc(london_point, ruan_point, crs = 4326)
+our_geometry = st_sfc(london_point, craggy_island_point, crs = 4326)
 
 # data.frame object
-our_attributes = data.frame(name = c("London", "Ruan"),
+our_attributes = data.frame(name = c("London", "Craggy Island"),
                             temperature = c(25, 13),
                             date = c(as.Date("2017-06-21"), as.Date("2017-06-22")),
                             category = c("city", "village"),
@@ -600,7 +636,7 @@ Simple features are, in essence, data frames with a spatial extension.
 <!-- methods -->
 <!-- methods(class = "sf") -->
 <!-- plots -->
-<!-- https://r-spatial.github.io/sf/articles/sf1.html#how-attributes-relate-to-geometries -->
+<!-- https://edzer.github.io/sfr/articles/sf1.html#how-attributes-relate-to-geometries -->
 
 ## Raster data
 
@@ -612,70 +648,12 @@ This section is work in progress.
 <!-- - RasterStack -->
 <!-- - RasterBrick -->
 
-## Coordinate Reference Systems
-
-This section is in progress.
-
-Despite the differences between vector and raster spatial data types, they are united by shared concepts intrinsic to spatial data. Perhaps the most important of these is Coordinate Reference System (CRS), which defines how the spatial elements of the data relate to the surface of the Earth (or other body).
-
-In **sf** the CRS of an object can be retrieved and set using `st_crs()` and `st_set_crs()` respectively:
-
-```{r}
-old_crs = st_crs(sf_points) # get CRS
-old_crs # print CRS
-sf_points = st_set_crs(sf_points, 27700) # set CRS
-```
-
-Note the warning emitted after the CRS for `sf_points` was set to `27700`.
-This is a good thing: we have imposed a spatial reference onto data without knowing what that means.
-To discover what the 'magic number' `27700` means, we can retrieve the CRS again:
-
-```{r}
-st_crs(sf_points)
-```
-
-Note that the result shows that the `epsg` has been updated and that `proj4string` element of the CRS has been updated to contain, among other things `+proj=tmerc` (meaning it is a projected CRS using the [tranverse Mercator](https://en.wikipedia.org/wiki/Transverse_Mercator_projection) projection) and `+units=m` (meaning the units of the coordinates are meters).
-Another function, from the **rgdal** library, provides a note about the CRS (its name):
-
-```{r}
-crs_codes = rgdal::make_EPSG()[1:2]
-dplyr::filter(crs_codes, code == 27700)
-```
-
-The result shows that the EPSG code 27700 represents the British National Grid, a result that could have been found by searching online for "[CRS 27700](https://www.google.com/search?q=CRS+27700)".
-This projection is clearly inappropriate for the data: the coordinates represent degrees of longitude and latitude, and this can also be seen by plotting it over a basemap, e.g. with the **mapview** package: `mapview::mapview(sf_points)`.
-
-The formula that converts a geographic point into a point on the surface of the Earth is provided by the `proj4string` element of the `crs` (see [proj4.org](http://proj4.org/) for further details):
-
-```{r}
-st_crs(27700)$proj4string
-```
-
-The CRS of `sf_points` can be restored to its orginial, correct value as follows (which demonstrates another way of setting CRSs):
-
-```{r}
-st_crs(sf_points) = old_crs
-```
-
-### Pro tip {-}
-
-The EPSG code can be found inside the `crs` attribute of the object's geometry.
-It is hidden from view for most of the time except when the object is printed but can be can identified and set using the functions `attribute()` and `attr()`, as illustrated below:
-
-```{r}
-attr(sf_points$geometry, which = "crs")$epsg
-```
-
 ## Units
 
 <!-- https://cran.r-project.org/web/packages/units/vignettes/measurement_units_in_R.html -->
 The final thing to say about `sf` objects in this chapter is that they have units.
 This is advantageous because it prevents confusion caused by the fact that different CRSs use different units (most use meters, some use feet).
 Furthermore, it also provides information on dimensionality, as illustrated by calculating the area of Nigeria:
-
-```{r}
-nigeria = world[world$name_long == "Nigeria",]
-```
 
 ```{r}
 st_area(nigeria)
@@ -701,36 +679,3 @@ units::set_units(st_area(nigeria), km^2)
 <!-- ``` -->
 
 <!-- ## Precision -->
-
-## Exercises
-
-1. What does the summary of the `geometry` column tell us about the `world` dataset, in terms of:
-
-- The geometry type?
-- How many countries there are?
-- The coordinate reference system (CRS)?
-
-2. Using **sf**'s `plot()` command, create a map of Nigeria in context, building on the code that creates and plots Asia above (see Figure \@ref(fig:nigeria) for an example of what this could look like). 
-
-- Hint: this used the `lwd`, `main` and `col` arguments of `plot()`. 
-- Bonus: make the country boundaries a dotted grey line.
-- Hint: `border` is an additional argument of `plot()` for **sf** objects.
-
-```{r nigeria, warning=FALSE, echo=FALSE, fig.cap="Map of Nigeria in context illustrating sf's plotting capabilities"}
-nigeria = world[world$name_long == "Nigeria",]
-africa = world[world$continent == "Africa",]
-bb_africa = st_bbox(africa)
-plot(africa[2], col = "white", lwd = 3, main = "Nigeria in context", border = "lightgrey")
-# plot(world, lty = 3, add = TRUE, border = "grey")
-plot(world, add = TRUE, border = "grey")
-plot(nigeria, col = "yellow", add = TRUE, border = "darkgrey")
-ncentre = st_centroid(nigeria)
-ncentre_num = st_coordinates(ncentre)
-text(x = ncentre_num[1], y = ncentre_num[2], labels = "Nigeria")
-```
-
-3. Exercise 3 <!--missing title-->
-
-- What does the `lwd` argument do in the `plot()` code that generates Figure \@ref(fig:africa). 
-- Perform the same operations and map making for another continent of your choice.
-- Bonus: Download some global geographic data and add attribute variables assigning them to the continents of the world.
