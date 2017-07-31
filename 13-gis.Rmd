@@ -83,14 +83,14 @@ As mentioned in chapter \@ref(intro), doing GIS at the command-line makes it mor
 QGIS is one of the most popular open-source GIS [\@ref(tab:gis_comp); @graser_processing:_2015]. Its main advantage lies in the fact that it provides a unified interface to several other open-source GIS.
 First and foremost, this means that you have access to GDAL/OGR, GRASS and SAGA through QGIS but also to other third-party providers such as [TauDEM](http://hydrology.usu.edu/taudem/taudem5/index.html), [Orfeo Toolbox](https://www.orfeo-toolbox.org/) and [Lastools](https://rapidlasso.com/lastools/) (tools for LiDAR data) [@graser_processing:_2015]. 
 To run all these geoalgorithms (frequently more than 1000 depending on your set up) outside of the QGIS GUI, QGIS provides a Python API.
-**RQGIS** establishes a tunnel to this Python API through the **reticulate** (cite reticulate) package. 
+**RQGIS** establishes a tunnel to this Python API through the **reticulate** package. 
 Basically, functions `set_env` and `open_app` are doing this. 
 Note that it is optional to run `set_env` and `open_app` since all functions depending on their output will run them automatically if needed.
 Before running **RQGIS** you have to make sure to have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS.
 To help you with the installation process, please follow the steps as detailed in `vignette("install_guide", package = "RQGIS")` for several platforms (Windows, Linux, MacOS).
 
 ```{r qgis_setup}
-library("RQGIS")
+library(RQGIS)
 set_env()
 open_app()
 ```
@@ -101,11 +101,11 @@ Subsequently, `open_app` sets all paths necessary to run QGIS from within R, and
 We are now ready for some QGIS geoprocessing from within R! First of all, we load some data from the **spData**-package, namely the boroughs of London (`lnd`) and cycle hire points in London (`cycle_hire`).
 
 ```{r}
-library("spData")
-data("cycle_hire")
-data("lnd")
+library(spData)
+data(cycle_hire)
+data(lnd)
 ```
-<!-- silly example, other suggestions welcome also with regard to RSAGA and rgrass7-->
+
 In chapter @ref(spatial-class), we already learned how to do a spatial overlay using the **sf**-package.
 Of course, any GIS is also able to perform spatial overlays. Here, we would like to know how many cycle points we can find per borough.
 First of all, we need to come up with the name of the function in QGIS. `find_algorithms` lets you search all QGIS geoalgorithms with the help of regular expressions.
@@ -178,17 +178,17 @@ For this, all **RSAGA** functions using SAGA in the background make use of `rsag
 Usually, `rsaga.env()` will detect SAGA automatically by searching several likely directories (see its help for more information). However, we have 'hidden' SAGA in the OSGEO4W-installation, a location `rsaga.env()` does not search automatically. `linkSAGA` searches your computer for a valid SAGA installation. If it finds one, it adds it to the PATH environment variable thereby making sure that `rsaga.env` runs successfully.
 
 ```{r, warning = FALSE, message = FALSE}
-library("RSAGA")
-library("link2GI")
+library(RSAGA)
+library(link2GI)
 linkSAGA()
 rsaga.env()
 ```
 
 Secondly, we need to write the digital elevation model to a SAGA-format. 
-Note that calling `data("landslides")` attaches two object to the global environment - `dem`, a digital elevation model in the form of a `list`, and `landslides`, a `data.frame` containing observations representing the presence or absence of a landslide:
+Note that calling `data(landslides)` attaches two object to the global environment - `dem`, a digital elevation model in the form of a `list`, and `landslides`, a `data.frame` containing observations representing the presence or absence of a landslide:
 
 ```{r}
-data("landslides")
+data(landslides)
 write.sgrd(data = dem, file = file.path(tempdir(), "dem"), header = dem$header)
 ```
  
@@ -235,7 +235,7 @@ rsaga.wetness.index(in.dem = file.path(tempdir(), "dem"),
 Of course, we would like to inspect our result visually. To load and plot the SAGA output file, we use the **raster** package. 
 
 ```{r}
-library("raster")
+library(raster)
 twi = raster::raster(file.path(tempdir(), "twi.sdat"))
 plot(twi, col = RColorBrewer::brewer.pal(n = 9, name = "Blues"))
 # or using mapview
@@ -256,11 +256,8 @@ Academia continued this work since 1997.
 Inexperienced GIS users might find GRASS a bit intimidating in the beginning.
 Before starting the GUI you have to create a map-set, a location (basically a geodatabase), define the projection and boundaries of your GRASS project. You have to do exactly the same from within R:
 
-
-
-
 ```{r, eval = FALSE}
-library("rgrass7")
+library(rgrass7)
 initGRASS(gisBase = "C:/Program Files (x86)/GRASS GIS 7.4.2")
 ```
 
@@ -268,7 +265,7 @@ initGRASS(gisBase = "C:/Program Files (x86)/GRASS GIS 7.4.2")
 So instead of defining all the stuff yourself, you call:
  
  ```{r}
- library("link2GI")
+ library(link2GI)
   ```
 use **link2GI** for an easy set-up of the GRASS environment (though it is beneficial to GRASS users to have a working knowledge of how GRASS works internally)
 
@@ -278,24 +275,44 @@ example ideas:
 
 One of the most interesting problems in GIScience is the traveling salesman problem. 
 Suppose a traveling salesman would like to visit 99 customers while covering the shortest distance possible.
-Additionally, he would like to set out his journy a this home, and come back to it after
+Additionally, the salesman would like to set out his journey at home, and come back to it after having finished all customer visits.
 There is a single best solution to this problem, however, to find it, is even for modern computers impossible.
 In our case, this corresponds to factorial(100 - 1) / 2 (we do not differentiate between back and forth).
-Even if one iteration can be done in a ms this still corresponds to (factorial(100 - 1) / (1000 * 60 * 60 * 24 * 365)) years
+Even if one iteration can be done in a ms this still corresponds to `r (factorial(100 - 1) / (2 * 1000 * 60 * 60 * 24 * 365))` years
+
+Instead of visiting customers, we would like to find the shortest path between 25 randomly selected bicycle stations on London's streets.
+
+```{r}
+library(spData)
+data(cycle_hire)
+points = cycle_hire[sample(1:nrow(cycle_hire), 25), ]
+```
+
+Aside from the cycle hire points data, we will need the OpenStreetMap data of London.
+We download it with the help of the **osmdata** package.
+We constrain the download of the street network (in OSM language called highway) to  the bounding box of the cycle hire data, and attach the corresponding data as an `sf`-object.
+`osmdata_sf` returns a list with several spatial objects (points, lines, polygons, etc.).
+Here, we will only keep the line objects.
+To learn more about how to use the **osmdata**-package, please refer to [https://ropensci.github.io/osmdata/](https://ropensci.github.io/osmdata/).
 
 ```{r}
 library(sf)
 library(osmdata)
 
+b_box = sf::st_bbox(points)
 streets = opq(b_box) %>%
   add_feature(key = "highway") %>%
-  osmdata_sf()
-
-# plot(st_geometry(streets))
-# plot(st_geometry(cycle_hire), col = "red", pch = 16, add = TRUE)
-# randomly select 25 points
-points = cycle_hire[sample(1:nrow(cycle_hire), 25), ]
+  osmdata_sf() %>%
+  `]`(., "osm_lines")
 ```
+
+
+<!--
+```{r}
+plot(st_geometry(streets))
+plot(st_geometry(cycle_hire), col = "red", pch = 16, add = TRUE)
+```
+-->
 
 ```{r}
 library(rgrass7)
@@ -311,10 +328,13 @@ linkGRASS7(streets_int, c("C:/OSGeo4W64", "grass-7.2.1", "osgeo4W"))
 
 ```
 
-Before using GRASS, we need to add data to its spatial database. Luckily, the convenience functions `writeVECT` and `writeRAST` do this for us. Here, we only transfer our street and cycle point vector data.
+Before using GRASS, we need to add data to its spatial database.
+Luckily, the convenience function `writeVECT` does this for us.
+Use `writeRast` in the case of raster data.
+In our case we add the street and cycle hire point data, and name them also `streets` and `points`. 
 ```{r}
-writeVECT(as(streets_int, "Spatial"), "streets", v.in.ogr_flags = "o")
-writeVECT(as(points, "Spatial"), "points")
+writeVECT(SDF = as(streets, "Spatial"), vname = "streets")
+writeVECT(as(points, "Spatial"), vname = "points")
 ```
 
 To perform our network analysis, we need a topological clean street network.
@@ -369,7 +389,7 @@ Certainly, RQGIS is an appropriate choice for most use cases. Additionally:
 
 
 ```{r gis_comp, echo = FALSE, message = FALSE}
-library("tidyverse")
+library(tidyverse)
 d = tibble("GIS" = c("GRASS", "QGIS", "SAGA"),
             "first release" = c("1984", "2002", "2004"),
             "no. functions" = c(">500", ">1000", ">600"),
