@@ -28,6 +28,7 @@
 - 2017-05-29 - enhancement - a qgis style file creator (.qml) - https://github.com/jannes-m/RQGIS/issues/70
 - 2017-06-06 - enhancement - skim of `sf` objects - https://github.com/ropenscilabs/skimr/issues/88
 - 2017-07-11 - bug - Problem with plots of the multipoint type - https://github.com/mtennekes/tmap/issues/126
+- 2017-07-31 - enhancement - Add a support for the `sf` objects - https://github.com/hunzikp/velox/issues/7
 
 # Other
 
