@@ -35,3 +35,4 @@
 - Encouraged the publication and dissemination of previously lost slides on the R/GIS 'bridge' online: http://spatial.nhh.no/misc/?C=M;O=D
 - 2017-07-12 - Pull request accepted to **sf** improving documentation of units - https://github.com/r-spatial/sf/pull/415
 - 2017-07-24 - PR - improve documentation of aggregate.sf **sf**
+- 2017-07-12 - Pull request accepted to **sf** exporting and documenting `as_Spatial()` - https://github.com/r-spatial/sf/pull/445
