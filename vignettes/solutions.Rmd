@@ -17,6 +17,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(sf)
 library(tidyverse)
 library(spData)
+data("world")
 data("us_states")
 data("us_states_df")
 ```
@@ -40,6 +41,37 @@ data("us_states_df")
 - `-` Non standard data format
 
 # Chapter 2
+
+1. What does the summary of the `geometry` column tell us about the `world` dataset, in terms of:
+
+- The geometry type?
+- How many countries there are?
+- The coordinate reference system (CRS)?
+
+2. Using **sf**'s `plot()` command, create a map of Nigeria in context, building on the code that creates and plots Asia above (see Figure \@ref(fig:nigeria) for an example of what this could look like). 
+
+- Hint: this used the `lwd`, `main` and `col` arguments of `plot()`. 
+- Bonus: make the country boundaries a dotted grey line.
+- Hint: `border` is an additional argument of `plot()` for **sf** objects.
+
+```{r nigeria, warning=FALSE, echo=FALSE, fig.cap="Map of Nigeria in context illustrating sf's plotting capabilities"}
+nigeria = world[world$name_long == "Nigeria",]
+africa = world[world$continent == "Africa",]
+bb_africa = st_bbox(africa)
+plot(africa[2], col = "white", lwd = 3, main = "Nigeria in context", border = "lightgrey")
+# plot(world, lty = 3, add = TRUE, border = "grey")
+plot(world, add = TRUE, border = "grey")
+plot(nigeria, col = "yellow", add = TRUE, border = "darkgrey")
+ncentre = st_centroid(nigeria)
+ncentre_num = st_coordinates(ncentre)
+text(x = ncentre_num[1], y = ncentre_num[2], labels = "Nigeria")
+```
+
+3. Exercise 3 <!--missing title-->
+
+- What does the `lwd` argument do in the `plot()` code that generates Figure \@ref(fig:africa). 
+- Perform the same operations and map making for another continent of your choice.
+- Bonus: Download some global geographic data and add attribute variables assigning them to the continents of the world.
 
 # Chapter 3
 
@@ -71,15 +103,18 @@ us_states %>% filter(total_pop_15 < 750000)
 ```{r}
 us_states %>% filter(total_pop_15 < 750000)
 ```
-<!-- UNITS PROBLEM! -->
 - Belongs to the West region, had an area smaller than 250,000 km^2^ and total population in 2015 larger than 5,000,000 residents
-<!-- ```{r} -->
-<!-- us_states %>% filter(REGION == "West", AREA < 250000, total_pop_15 > 5000000) -->
-<!-- ``` -->
+```{r}
+us_states %>% filter(REGION == "West", AREA < units::set_units(250000, km^2),total_pop_15 > 5000000)
+# or
+us_states %>% filter(REGION == "West", as.numeric(AREA) < 250000,total_pop_15 > 5000000)
+```
 - Belongs to the South region, had an area larger than 150,000 km^2^ or total population in 2015 larger than 7,000,000 residents
-<!-- ```{r} -->
-<!-- us_states %>% filter(REGION == "South", AREA > 150000, total_pop_15 > 7000000)  -->
-<!-- ``` -->
+```{r}
+us_states %>% filter(REGION == "South", AREA > units::set_units(150000, km^2), total_pop_15 > 7000000)
+# or
+us_states %>% filter(REGION == "South", as.numeric(AREA) > 150000, total_pop_15 > 7000000)
+```
 <!-- 4. Exercises about additional select and filter helper functions (one_of; between, is.na, near, etc.) -->
 <!-- Attribute aggregation -->
 4. What was the total population in 2015 in the `us_states` database? What was the minimum and maximum total population in 2015?
