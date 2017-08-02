@@ -253,6 +253,7 @@ The term statistical geocomputation emphasizes the strength of combining R's dat
 ## GRASS through **rgrass7**
 The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the hybrid raster-vector Geographical Resources Analysis Support System (GRASS) \@ref(tab:gis_comp) [@neteler_open_2008] from 1982 to 1995. 
 Academia continued this work since 1997.
+Similar to SAGA, GRASS focussed on raster processing in the beginning while only later adding advanced vector functionality (since GRASS 6.0).
 
 We will introduce **rgrass7*** with one of the most interesting problems in GIScience - the traveling salesman problem. 
 Suppose a traveling salesman would like to visit 99 customers while covering the shortest distance possible.
@@ -262,13 +263,20 @@ In our case, this corresponds to factorial(100 - 1) / 2 (we do not differentiate
 Even if one iteration can be done in a ms this still corresponds to `r (factorial(100 - 1) / (2 * 1000 * 60 * 60 * 24 * 365))` years. 
 Luckily, there are clever almost optimal solutions which run in a tiny fraction of this inconceibable amount of time.
 GRASS GIS provides one of these solutions (for more details see [v.net.salesman](https://grass.osgeo.org/grass72/manuals/v.net.salesman.html)). 
-In our use case, we would like to find the shortest path between 25 randomly selected bicycle stations (instead of customers) on London's streets.
+In our use case, we would like to find the shortest path between the first 25 bicycle stations (instead of customers) on London's streets.
 
 ```{r}
 library(spData)
 data(cycle_hire)
-points = cycle_hire[sample(1:nrow(cycle_hire), 25), ]
+points = cycle_hire[1:25, ]
 ```
+
+<!--
+```{r}
+plot(st_geometry(streets))
+plot(st_geometry(cycle_hire), col = "red", pch = 16, add = TRUE)
+```
+-->
 
 Aside from the cycle hire points data, we will need the OpenStreetMap data of London.
 We download it with the help of the **osmdata** package.
@@ -281,27 +289,35 @@ To learn more about how to use the **osmdata**-package, please refer to [https:/
 library(sf)
 library(osmdata)
 
-b_box = sf::st_bbox(points)
+b_box = sf::st_bbox(cycle_hire)
 streets = opq(b_box) %>%
   add_feature(key = "highway") %>%
   osmdata_sf() %>%
   `[[`(., "osm_lines")
 ```
 
-<!--
-```{r}
-plot(st_geometry(streets))
-plot(st_geometry(cycle_hire), col = "red", pch = 16, add = TRUE)
-```
--->
+Now that we have the data, we can go on and initiate a GRASS session, i.e., we have to create a GRASS geodatabase.
+The GRASS geodatabase system is based on SQLite.
+Consequently, different users can easily work on the same project, possibly with different read/write permissions.
+However, one has to set up this geodatabase (also from within R), and users used to a GIS GUI popping up by one click might find this process a bit intimidating in the beginning.
+First of all, the GRASS database requires its own directory, and contains a location \@ref(fig:grass_loc).
+The location in turn simply contains the geodata for one project. 
+Within one location several mapsets can exist, and typically refer to different users. 
+PERMANENT is a mandatory mapset, and created automatically.
+It stores the projection, the spatial extent and the default resolution for raster data.
+In order to share spatial data with all users of a project, the database own can add spatial data to the PERMANENT mapset.
+Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass72/manuals/helptext.html) for more information on the GRASS geodatabase system.
 
-Now that we have the data, we can go on and initiate a GRASS session (basically a geodatabase), i.e., we have to define a mapset, a location, a projection and the boundaries of our GRASS project [for more information see @neteler_open_2008].
-You have to do the same if you wanted to use the GRASS GUI. 
-This might be a reason why inexperienced GIS users at times find GRASS a bit intimidating in the beginning.
+```{r grass_loc, fig.cap="Structure of the GRASS geodatabase system including locations and mapsets Figure was taken from https://grass.osgeo.org/grass72/manuals/help_loc_struct.png.", echo=FALSE}
+knitr::include_graphics("https://grass.osgeo.org/grass72/manuals/help_loc_struct.png")
+```
+
+Naturally, you have to set up a location and a mapset if you want to use GRASS from within R.
 Fortunately, **link2GI** greatly fascilitates this tedious but important task.
 First of all, we need to find out if and where GRASS7 is installed on the computer.
 
 ```{r}
+library(link2GI)
 if (Sys.info()["sysname"] == "Windows") {
   link = link2GI::searchGRASSW()  
 } else {
@@ -312,70 +328,111 @@ if (Sys.info()["sysname"] == "Windows") {
 `link` is a `data.frame` which contains in its rows the GRASS installations on your computer. 
 Here, we will use a GRASS7 installation.
 If you have not installed GRASS7 on your computer, we recommend that you do so now.
-^[Of course, you can also use GRASS6 but then you would also have to use the `spgrass6`-package.]
 
-
-```{r}
+```{r, echo = FALSE}
 library(rgrass7)
 library(maptools)
-library(link2GI)
 
-linkGRASS7(streets, link[grepl("7.2", link[, "version"]), ])
+# Eventually, we will get rid off the if-else and of the link-dataframe given
+# that this issue is resolved: https://github.com/gisma/link2GI/issues/2
+if (Sys.info()["sysname"] == "Windows") {
+  loc <- linkGRASS7(streets, link[grepl("7.2", link[, "version"]), ])
+} else {
+  loc <- linkGRASS7(streets)
+}
+
 # linkGRASS7(streets_int, c("C:/OSGeo4W64", "grass-7.2.1", "osgeo4W"))
 ```
 
 ^[
-Here's how you do it manually. We save our geodatabase to a temporary folder, and name the location `london` and the mapset `tsp`.
+Here is how you do it manually. We save our geodatabase to a temporary folder, and name the location `london` and use the PERMANENT mapset.
+Subsequently, we define the projection, the extent and the resolution.
 
 ```{r, eval = FALSE}
 library(rgrass7)
-ind <- grepl("7.", link$version)
+# next line of code only necessary if we want to use GRASS as installed by 
+# OSGeo4W. Among others, open_app adds some paths to PATH, which are also needed
+# for running GRASS.
+# link2GI::getparams_GRASS4W would do more or less the same but is less handy
+RQGIS::open_app()  
+ind <- grepl("7.2", link$version)
 grass_path <- ifelse(link$installation_type[ind] == "osgeo4W",
                     file.path(link$instDir[ind], "apps/grass", link$version[ind]),
                     link$instDir)
 initGRASS(gisBase = grass_path,
-          gisDbase = tempdir(),
-          location = "london", mapset = "tsp", override = TRUE)
+          # home parameter necessary under UNIX-based systems
+          home = tempdir(),
+          gisDbase = tempdir(), location = basename(tempfile()), 
+          mapset = "PERMANENT")
+execGRASS("g.proj", flags = c("c", "quiet"), 
+          proj4 = sf::st_crs(streets)$proj4string)
+b_box <- sf::st_bbox(streets) 
+execGRASS("g.region", flags = c("quiet"), 
+          n = as.character(b_box["ymax"]), s = as.character(b_box["ymin"]), 
+          e = as.character(b_box["xmax"]), w = as.character(b_box["xmin"]), 
+          res = "1")
 ```
-
 ]
-Before using GRASS, we need to add data to its spatial database.
+
+Before using GRASS geoalgorithms, we need to add data to our spatial database.
 Luckily, the convenience function `writeVECT` does this for us.
-Use `writeRast` in the case of raster data.
-In our case we add the street and cycle hire point data, and name them also `streets` and `points`. 
+(Use `writeRast` in the case of raster data.)
+In our case we add the street and cycle hire point data while using only the first attribute column, and name them also `streets` and `points`. 
+
 ```{r}
-writeVECT(SDF = as(streets, "Spatial"), vname = "streets")
-writeVECT(as(points, "Spatial"), vname = "points")
+writeVECT(as(streets[, 1], "Spatial"), vname = "streets")
+writeVECT(SDF = as(points[, 1], "Spatial"), vname = "points")
 ```
 
 To perform our network analysis, we need a topological clean street network.
-GRASS's `v.clean` takes care of the removal of duplicates, small angles and dangles, among others.
-Our cycling station points not necessarily lie on a street.
-To find the shortest route between them, we need to connect them to the streets.
-`v.net`'s connect-operator does exactly this, it connects the points to to the nearest street segment (check visually if this is true!!). 
+GRASS's `v.clean` takes care of the removal of duplicates, small angles and dangles, among others. 
+Here, we break lines at each intersection to ensure that the subsequent routing algorithm can actually turn right or left at an intersection, and save the output in a GRASS object named `streets_clean`.
+Probably a few of our cycling station points do not exactly lie on a street segment.
+However, to find the shortest route between them, we need to connect them to the nearest streets segment.
+`v.net`'s connect-operator does exactly this. 
+We save `v.nets`'s output in `streets_points_con`.
 
 ```{r}
 execGRASS(cmd = "v.clean", input = "streets", output = "streets_clean",
-          tool = "break")
-# prepare network by connecting points to roads / changes roads
+          tool = "break", flags = "overwrite")
 execGRASS(cmd = "v.net", input = "streets_clean", output = "streets_points_con", 
           points = "points", operation = "connect", threshold = 0.001,
           flags = c("overwrite", "c"))
 ```
 
-Finally, we can find the shortest route between all points using the `v.net.salesman`-algorithm.
+The resulting clean dataset serves as input for the `v.net.salesman`-algorithm, which finally finds the shortest route between all cycle hire stations.
+`center_cats` requires a numeric range as input.
+This range represents the points for which a shortest route should be calculated. 
+Since we would like to calculate the route for all cycle stations, we set it to `1-25`.
+To access the GRASS help page of the traveling salesman algorithm, run `execGRASS("g.manual", entry = "v.net.salesman")`.
 
 ```{r}
-# run tsp
 execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
           output = "shortest_route", center_cats = paste0("1-", nrow(points)),
           flags = c("overwrite"))
-
-route <- readVECT("shortest_route")
-mapview::mapview(route) +
-  mapview::mapview(points)
 ```
 
+To visualize our result, we import the output layer into R, and visualize it with the help of the **mapview** package.
+
+```{r}
+library(mapview)
+route = readVECT("shortest_route")
+mapview(route) +
+  mapview(points)
+```
+
+Further notes:
+- Please note that we have used GRASS's geodatabase (based on SQLite) which allows faster processing. 
+That means we have only exported spatial data in the beginning.
+Then we created new objects but only imported the final result back into R.
+To find out which datasets are currently available, run `execGRASS("g.list", type = "vector,raster", flags = "p")`.
+Of course, we could have also accessed an already existing GRASS geodatabase from within R.
+Prior to importing data into R, you might want to perform some (spatial) subsetting.
+Use `v.select` and `v.extract` for vector data. 
+`db.select` lets you select subsets of the attribute table of a vector layer without returning the correponding geometry.
+- You can start R also from within a running GRASS session [for more information please refer to @bivand_applied_2013 and this [wiki](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7)].
+- Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass72/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm.
+- If you would like to use GRASS 6 from within R, use the R package **spgrass6**.
 
 ## When to use what?
 <!-- more or less brainstorming -->
