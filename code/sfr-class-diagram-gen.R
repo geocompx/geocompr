@@ -68,8 +68,7 @@ curvedarrow(from = pos[4, ], to = pos[7, ], curve = -0.3, lcol = "lightblue")
 straightarrow(from = pos[5, ], to = pos[7, ], lcol = "lightblue")
 straightarrow(pos[6, ], pos[7, ], lcol = "lightblue")
 
-textrect(mid = pos[1,], radx = 0.14, rady = 0.05, lab = n[1], font = 2)
-for (i in 2:7) {
+for (i in 1:7) {
   textrect(mid = pos[i,], radx = 0.14, rady = 0.05, lab = n[i])
 }
 dev.off()
