@@ -42,34 +42,3 @@ dev.off()
 # 
 # render_graph(g, layout = "forceDirected")
 # export_graph(g,file_name = "f.gexf", file_type = "gexf")
-
-
-# JANNES----------------------
-
-
-n = c("POINT", "MULTIPOINT", "LINE", "MULTILINE", "POLY", "MULTIPOLY", 
-      "GEOM COLLECTION")
-pos = coordinates(rep(2, 4))
-# plot(pos, type = 'n')
-# text(pos)
-
-png(filename = "figures/sf-classes-jannes.png", width = 600, height = 500)
-openplotmat()
-mapply(function(i, ii) {
-  straightarrow(from = pos[i, ], to = pos[ii, ])
-}, i = 1:5, ii = 2:6)
-
-
-
-curvedarrow(from = pos[1, ], to = pos[7, ], curve = 0.3, lcol = "lightblue")
-curvedarrow(from = pos[2, ], to = pos[7, ], curve = -0.5, lcol = "lightblue")
-curvedarrow(from = pos[3, ], to = pos[7, ], curve = 0.2, lcol = "lightblue", 
-            arr.pos = 0.65)
-curvedarrow(from = pos[4, ], to = pos[7, ], curve = -0.3, lcol = "lightblue")
-straightarrow(from = pos[5, ], to = pos[7, ], lcol = "lightblue")
-straightarrow(pos[6, ], pos[7, ], lcol = "lightblue")
-
-for (i in 1:7) {
-  textrect(mid = pos[i,], radx = 0.14, rady = 0.05, lab = n[i])
-}
-dev.off()
