@@ -94,24 +94,26 @@ pkg_df = readr::read_csv("extdata/package_list.csv")
 knitr::kable(pkg_df)
 ```
 
-| Name           | Title                                                                                        | version |
-|:---------------|:---------------------------------------------------------------------------------------------|:--------|
-| bookdown       | Authoring Books and Technical Documents with R Markdown (Xie 2017)                           | 0.4     |
-| dismo          | Species Distribution Modeling (Hijmans et al. 2017)                                          | 1.1.4   |
-| gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction (Pebesma and Graeler 2017)  | 1.1.5   |
-| leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' (Cheng, Karambelkar, and Xie 2017) | 1.1.0   |
-| mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.1.0   |
-| microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                    | 1.4.2.1 |
-| raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8   |
-| rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.8   |
-| rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23  |
-| RQGIS          | Integrating R with QGIS (Muenchow and Schratz 2017)                                          | 1.0.1   |
-| RSAGA          | SAGA Geoprocessing and Terrain Analysis in R (Brenning and Bangs 2016)                       | 0.94.5  |
-| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.3   |
-| sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2017)                               | 1.2.5   |
-| spData         | Datasets for Spatial Analysis (Bivand, Nowosad, and Lovelace 2017)                           | 0.2.2   |
-| tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1   |
-| tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.11    |
+| Name           | Title                                                                                        | version    |
+|:---------------|:---------------------------------------------------------------------------------------------|:-----------|
+| bookdown       | Authoring Books and Technical Documents with R Markdown (Xie 2017a)                          | 0.4        |
+| dismo          | Species Distribution Modeling (Hijmans et al. 2017)                                          | 1.1.4      |
+| gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction (Pebesma and Graeler 2017)  | 1.1.5      |
+| knitr          | A General-Purpose Package for Dynamic Report Generation in R (Xie 2017b)                     | 1.16       |
+| leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' (Cheng, Karambelkar, and Xie 2017) | 1.1.0      |
+| mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.1.4      |
+| microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                    | 1.4.2.1    |
+| raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8      |
+| rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.8      |
+| rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23     |
+| rmarkdown      | Dynamic Documents for R (Allaire et al. 2017)                                                | 1.6        |
+| RQGIS          | Integrating R with QGIS (Muenchow and Schratz 2017)                                          | 1.0.1      |
+| RSAGA          | SAGA Geoprocessing and Terrain Analysis in R (Brenning and Bangs 2016)                       | 0.94.5     |
+| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.4      |
+| sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2017)                               | 1.2.5      |
+| spData         | Datasets for Spatial Analysis (Bivand, Nowosad, and Lovelace 2017)                           | 0.2.4.9000 |
+| tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1      |
+| tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.11       |
 
 Other citations are stored online using Zotero and downloaded with:
 
@@ -123,6 +125,8 @@ If you would like to add to the references, please use Zotero, join the [open gr
 
 References
 ----------
+
+Allaire, JJ, Joe Cheng, Yihui Xie, Jonathan McPherson, Winston Chang, Jeff Allen, Hadley Wickham, Aron Atkins, Rob Hyndman, and Ruben Arslan. 2017. *Rmarkdown: Dynamic Documents for R*. <https://CRAN.R-project.org/package=rmarkdown>.
 
 Appelhans, Tim, Florian Detsch, Christoph Reudenbach, and Stefan Woellauer. 2017. *Mapview: Interactive Viewing of Spatial Objects in R*. <https://CRAN.R-project.org/package=mapview>.
 
@@ -154,4 +158,6 @@ Tennekes, Martijn. 2017. *Tmap: Thematic Maps*. <https://github.com/mtennekes/tm
 
 Wickham, Hadley. 2017. *Tidyverse: Easily Install and Load ’Tidyverse’ Packages*. <https://CRAN.R-project.org/package=tidyverse>.
 
-Xie, Yihui. 2017. *Bookdown: Authoring Books and Technical Documents with R Markdown*. <https://CRAN.R-project.org/package=bookdown>.
+Xie, Yihui. 2017a. *Bookdown: Authoring Books and Technical Documents with R Markdown*. <https://CRAN.R-project.org/package=bookdown>.
+
+———. 2017b. *Knitr: A General-Purpose Package for Dynamic Report Generation in R*. <https://CRAN.R-project.org/package=knitr>.

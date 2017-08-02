@@ -28,9 +28,11 @@
 - 2017-05-29 - enhancement - a qgis style file creator (.qml) - https://github.com/jannes-m/RQGIS/issues/70
 - 2017-06-06 - enhancement - skim of `sf` objects - https://github.com/ropenscilabs/skimr/issues/88
 - 2017-07-11 - bug - Problem with plots of the multipoint type - https://github.com/mtennekes/tmap/issues/126
+- 2017-07-31 - enhancement - Add a support for the `sf` objects - https://github.com/hunzikp/velox/issues/7
 
 # Other
 
 - Encouraged the publication and dissemination of previously lost slides on the R/GIS 'bridge' online: http://spatial.nhh.no/misc/?C=M;O=D
 - 2017-07-12 - Pull request accepted to **sf** improving documentation of units - https://github.com/r-spatial/sf/pull/415
 - 2017-07-24 - PR - improve documentation of aggregate.sf **sf**
+- 2017-07-12 - Pull request accepted to **sf** exporting and documenting `as_Spatial()` - https://github.com/r-spatial/sf/pull/445
