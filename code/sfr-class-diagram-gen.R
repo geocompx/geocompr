@@ -44,9 +44,8 @@ dev.off()
 # export_graph(g,file_name = "f.gexf", file_type = "gexf")
 
 
-#**********************************************************
-# JANNES---------------------------------------------------
-#**********************************************************
+# JANNES----------------------
+
 
 n = c("POINT", "MULTIPOINT", "LINE", "MULTILINE", "POLY", "MULTIPOLY", 
       "GEOM COLLECTION")
@@ -59,6 +58,8 @@ openplotmat()
 mapply(function(i, ii) {
   straightarrow(from = pos[i, ], to = pos[ii, ])
 }, i = 1:5, ii = 2:6)
+
+
 
 curvedarrow(from = pos[1, ], to = pos[7, ], curve = 0.3, lcol = "lightblue")
 curvedarrow(from = pos[2, ], to = pos[7, ], curve = -0.5, lcol = "lightblue")
