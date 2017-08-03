@@ -132,6 +132,58 @@ row.names(world[world$subregion == "Northern Europe",])
 row.names(filter(world, subregion == "Northern Europe"))
 ```
 
+## Spatial data aggregation 
+
+<!-- - `aggregate.sf()` - aggregate an sf object, possibly union-ing geometries -->
+<!-- - disaggregation?? `st_cast()` - https://github.com/edzer/sfr/wiki/migrating -->
+<!-- - `group_by()` + `summarise()` - potential errors -->
+<!-- - ? generalization **rmapsharper** - https://github.com/ateucher/rmapshaper -->
+<!-- `st_union` -->
+
+## Spatial data joining 
+
+<!-- e.g. two point's datasets (non-overlapping) -->
+<!-- e.g. two point's datasets (overlapping) -->
+<!-- ? topological problems of joining lines/polygons? -->
+<!-- joining different types (e.g. points + polygons = geometry) -> save as GPKG? -->
+<!-- `merge()`; `st_interpolate_aw()` -->
+
+## Spatial data creation
+
+<!-- where should "area" example be? in this or the previous chapter? -->
+<!-- `st_centroid()` -->
+<!-- `st_buffer()` -->
+<!-- http://r-spatial.org//r/2017/06/09/mapedit_0-2-0.html -->
+
+```{r}
+# add a new column
+world$area = set_units(st_area(world), value = km^2)
+world$pop_density = world$pop / world$area
+
+# OR
+world = world %>%
+        mutate(area = set_units(st_area(.), value = km^2)) %>%
+        mutate(pop_density = pop / area)
+```
+
+Note that this has created a attributes for the area and population density variables:
+
+```{r}
+attributes(world$area)
+attributes(world$pop_density)
+```
+
+These can be set to `NULL` as follows:
+
+```{r}
+attributes(world$area) = NULL
+attributes(world$pop_density) = NULL
+```
+
+
+<!-- ## Spatial data transformation -->
+<!-- changes classes; polygonize, etc-->
+
 ### Topological relations
 
 <!-- https://edzer.github.io/sfr/articles/sf3.html -->
@@ -345,55 +397,3 @@ scattered points with the command
 <!-- blobs = st_buffer(x = blob_points, dist = 1) -->
 <!-- plot(blobs) -->
 <!-- ``` -->
-
-## Spatial data aggregation 
-
-<!-- - `aggregate.sf()` - aggregate an sf object, possibly union-ing geometries -->
-<!-- - disaggregation?? `st_cast()` - https://github.com/edzer/sfr/wiki/migrating -->
-<!-- - `group_by()` + `summarise()` - potential errors -->
-<!-- - ? generalization **rmapsharper** - https://github.com/ateucher/rmapshaper -->
-<!-- `st_union` -->
-
-## Spatial data joining 
-
-<!-- e.g. two point's datasets (non-overlapping) -->
-<!-- e.g. two point's datasets (overlapping) -->
-<!-- ? topological problems of joining lines/polygons? -->
-<!-- joining different types (e.g. points + polygons = geometry) -> save as GPKG? -->
-<!-- `merge()`; `st_interpolate_aw()` -->
-
-## Spatial data creation
-
-<!-- where should "area" example be? in this or the previous chapter? -->
-<!-- `st_centroid()` -->
-<!-- `st_buffer()` -->
-<!-- http://r-spatial.org//r/2017/06/09/mapedit_0-2-0.html -->
-
-```{r}
-# add a new column
-world$area = set_units(st_area(world), value = km^2)
-world$pop_density = world$pop / world$area
-
-# OR
-world = world %>%
-        mutate(area = set_units(st_area(.), value = km^2)) %>%
-        mutate(pop_density = pop / area)
-```
-
-Note that this has created a attributes for the area and population density variables:
-
-```{r}
-attributes(world$area)
-attributes(world$pop_density)
-```
-
-These can be set to `NULL` as follows:
-
-```{r}
-attributes(world$area) = NULL
-attributes(world$pop_density) = NULL
-```
-
-
-<!-- ## Spatial data transformation -->
-<!-- changes classes; polygonize, etc-->
