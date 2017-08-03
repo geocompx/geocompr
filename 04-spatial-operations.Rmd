@@ -151,6 +151,16 @@ In section \@ref(attribute-data-aggregation) the aggregation process condensed t
 
 Spatial data aggregation is the same conceptually but uses a *spatial* grouping object:
 the number of rows in the output represents the number of features in the *grouping object* that relate to the *geometries* of the input dataset.
+As with spatial subsetting, spatial aggregation operations work by extending existing functions.
+Since mid-2017 (with the release of **sf** `0.5-3`) the base R function `aggregate()` works with a spatial object as a grouping variable.
+Building on the example presented the previous section (\@ref(spatial-subsetting)), we demonstrate this by aggregating all countries in the `world` that intersect with the buffer at zero degrees longitude at latitude (represented by the `buff` object).
+The command below allows to answer the question, :
+
+```{r}
+aggregate(world["pop"], buff, FUN = sum)
+```
+
+Of course, the same result ()
 
 <!-- - `aggregate.sf()` - aggregate an sf object, possibly union-ing geometries -->
 <!-- - disaggregation?? `st_cast()` - https://github.com/edzer/sfr/wiki/migrating -->
@@ -401,11 +411,17 @@ box = st_convex_hull(pmulti)
 
 ### Exercises
 
-Write code that subsets points that are contained within `x` *and* `y` (illustrated by the plot in the 2^nd^ row and the 1^st^ column in Figure \@ref(fig:venn-clip)).
-
+1. Write code that subsets points that are contained within `x` *and* `y` (illustrated by the plot in the 2^nd^ row and the 1^st^ column in Figure \@ref(fig:venn-clip)).
 - Create a randomly located point with the command `st_point()` (refer back to section \@ref(sfg) to see how to create spatial data 'from scratch').
+2. Write code that uses functions `aggregate()` and `st_buffer()` to answers the following question: What proportion of the world's population is found within a 10 degree radius of the intersection between the equator and the [9^th^ meridian](https://en.wikipedia.org/wiki/9th_meridian_east)? (Advanced challenge: find the point with the highest number of people within a 10 degree radius.)
 
-scattered points with the command 
+```{r}
+center9 = st_sf(st_sfc(st_point(c(-9, 0)), crs = 4326))
+buff9 = st_buffer(center9, dist = 10)
+agg9 = aggregate(world["pop"], buff9, FUN = sum)
+agg9$pop / sum(world$pop, na.rm = TRUE)
+```
+
 
 <!-- TODO? create a series of polygons distributed evenly over the surface of the Earth and clip them. -->
 
