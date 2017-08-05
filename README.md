@@ -9,7 +9,7 @@ Introduction
 
 This repository hosts the code underlying Geocomputation with R, a book by [Robin Lovelace](http://robinlovelace.net/) and [Jakub Nowosad](https://nowosad.github.io/).
 
-The online version of the book will be developed in the open. We plan to publish the hard copy of the book with CRC Press in 2018.
+The online version of the book is developed at <http://robinlovelace.net/geocompr/>. We plan to publish the hard copy of the book with CRC Press in 2018.
 
 Contributing
 ------------
