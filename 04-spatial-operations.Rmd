@@ -37,9 +37,9 @@ readers can see this default value of `op` set in the first line of the function
 There are 9 well-defined operations that can be used for spatial subsetting, covered in section \@ref(topological-relations).
 This may seem daunting but the good news is that you do not have to learn all of them separately:
 after you understand how to spatially subset objects that *intersect* another (via `st_intersects()`) it is easy to subset based on other types of spatial operation such as `st_touches()`, `st_crosses()` and `st_within()`.
-For this reason now we focus only one of the spatial subsetting operation.
+For this reason now we focus only pn one of the spatial subsetting operations.
 We use `st_intersects()` instead of any of the others not only because it the default when subsetting with `[`,
-`st_intersects()` is useful as a 'catch all' that identifies all types of spatial relations.
+but also `st_intersects()` is useful as a 'catch all' that identifies all types of spatial relations.
 
 In general terms, spatial subsetting is simply the spatial equivalent of *attribute subsetting*.
 However, to do spatial subsetting *two spatial objects are needed* the spatial relation between which is to be established.
@@ -114,19 +114,19 @@ identical(x = world_buff, y = world_buff2)
 identical(x = world_buff, y = world_buff3)
 ```
 
-One difference with the third spatially subset object (`world_buff3`) is that does not retain the row names from the original object, unlike the objects created using base subsetting methods:
+The reason that the third spatially subset object (`world_buff3`) is not identical is that **dplyr** changes the row names:
 
 ```{r}
 head(row.names(world_buff))
 head(row.names(world_buff3))
 ```
 
-<!-- If the row names are re-set, the objects become identical: -->
+If the row names are re-set, the objects become identical:
 
-<!-- ```{r} -->
-<!-- row.names(world_buff3) = row.names(world_buff) -->
-<!-- identical(world_buff, world_buff3) -->
-<!-- ``` -->
+```{r}
+attr(world_buff3, "row.names") = attr(x = world_buff, "row.names")
+identical(world_buff, world_buff3)
+```
 
 
 ### Note {-}
@@ -153,14 +153,31 @@ Spatial data aggregation is the same conceptually but uses a *spatial* grouping 
 the number of rows in the output represents the number of features in the *grouping object* that relate to the *geometries* of the input dataset.
 As with spatial subsetting, spatial aggregation operations work by extending existing functions.
 Since mid-2017 (with the release of **sf** `0.5-3`) the base R function `aggregate()` works with a spatial object as a grouping variable.
-Building on the example presented the previous section (\@ref(spatial-subsetting)), we demonstrate this by aggregating all countries in the `world` that intersect with the buffer at zero degrees longitude at latitude (represented by the `buff` object).
+Building on the example presented the previous section (\@ref(spatial-subsetting)), we demonstrate this by aggregating countries that by the buffer represented by the `buff` object.
 The command below allows to answer the question, :
 
 ```{r}
-aggregate(world["pop"], buff, FUN = sum)
+buff_agg = aggregate(x = world["pop"], by = buff, FUN = sum)
 ```
 
-Of course, the same result ()
+The result, `buff_agg`, is a spatial object with the same geometry as `by` (the circular buffer in this case) but with an additional variable, `pop` reporting summary statistics for all features in `x` that intersect with `by` (the total population of the countries that touch the buffer in this case).
+Plotting the result (with `plot(buff_agg)`) shows that the operation does not really make sense:
+Figure \@ref(fig:buff-agg) shows a population of over half a billion people in a giant circle floating off the west coast of Africa!  
+
+```{r buff-agg, fig.cap="Result of spatial aggregation showing the total population of countries that intersect with a large circle whose center lies at 0 degrees longitude and latituge", echo=FALSE, message=FALSE}
+library(tmap)
+pal = tmaptools::get_brewer_pal(palette = "BuPu", n = 4, plot = F)
+breaks = c(0, 1e7, 1e8, 5e8, 1e9)
+tm_shape(world_buff) +
+  tm_fill("pop", palette = pal, breaks = breaks) +
+  tm_borders() +
+  qtm(buff_agg, fill = pal[4], fill.alpha = 0.5) +
+  qtm(world[st_disjoint(world, buff, sparse = F),])
+detach("package:tmap", unload = TRUE)
+```
+
+
+
 
 <!-- - `aggregate.sf()` - aggregate an sf object, possibly union-ing geometries -->
 <!-- - disaggregation?? `st_cast()` - https://github.com/edzer/sfr/wiki/migrating -->
@@ -214,6 +231,7 @@ attributes(world$pop_density) = NULL
 
 ### Topological relations
 
+<!-- http://lin-ear-th-inking.blogspot.com/2007/06/subtleties-of-ogc-covers-spatial.html -->
 <!-- https://edzer.github.io/sfr/articles/sf3.html -->
 <!-- https://github.com/edzer/sfr/wiki/migrating#relevant-commands-exported-by-rgeos -->
 <!-- Relations and inverse relations -->
@@ -245,12 +263,15 @@ plot(p, add = TRUE)
 ```
 
 Equals:
+<!-- https://postgis.net/docs/ST_Equals.html -->
 
 ```{r, eval=FALSE}
 st_equals(a, b, sparse = FALSE)
 ```
 
 Contains:
+<!-- https://postgis.net/docs/ST_Contains.html -->
+<!-- https://postgis.net/docs/ST_ContainsProperly.html -->
 
 ```{r, eval=FALSE}
 st_contains(a, b, sparse = FALSE)
@@ -258,6 +279,8 @@ st_contains_properly(a, b, sparse = FALSE)
 ```
 
 Covers:
+<!-- https://postgis.net/docs/ST_Covers.html -->
+<!-- https://postgis.net/docs/ST_CoveredBy.html -->
 
 ```{r, eval=FALSE}
 st_covers(a, b, sparse = FALSE)
@@ -265,36 +288,42 @@ st_covered_by(a, b, sparse = FALSE)
 ```
 
 Within:
+<!-- https://postgis.net/docs/ST_Within.html -->
 
 ```{r, eval=FALSE}
 st_within(a, b, sparse = FALSE)
 ```
 
 Overlaps:
+<!-- https://postgis.net/docs/ST_Overlaps.html -->
 
 ```{r, eval=FALSE}
 st_overlaps(a, b, sparse = FALSE)
 ```
 
 Intersects:
+<!-- https://postgis.net/docs/ST_Intersects.html -->
 
 ```{r, eval=FALSE}
 st_intersects(a, b, sparse = FALSE)
 ```
 
 Disjoint:
+<!-- https://postgis.net/docs/ST_Disjoint.html -->
 
 ```{r, eval=FALSE}
 st_disjoint(a, b, sparse = FALSE)
 ```
 
 Touches:
+<!-- https://postgis.net/docs/ST_Touches.html -->
 
 ```{r, eval=FALSE}
 st_touches(a, b, sparse = FALSE)
 ```
 
 Crosses:
+<!-- https://postgis.net/docs/ST_Crosses.html -->
 
 ```{r, eval=FALSE}
 st_crosses(a, b, sparse = FALSE)
