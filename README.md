@@ -9,7 +9,7 @@ Introduction
 
 This repository hosts the code underlying Geocomputation with R, a book by [Robin Lovelace](http://robinlovelace.net/) and [Jakub Nowosad](https://nowosad.github.io/).
 
-The online version of the book will be developed in the open. We plan to publish the hard copy of the book with CRC Press in 2018.
+The online version of the book is developed at <http://robinlovelace.net/geocompr/>. We plan to publish the hard copy of the book with CRC Press in 2018.
 
 Contributing
 ------------
@@ -53,9 +53,6 @@ to_install = !pkgs %in% installed.packages()
 if(any(to_install)) {
   install.packages(pkgs[to_install])
 }
-#> Installing packages into '/home/robin/R/x86_64-pc-linux-gnu-library/3.4'
-#> (as 'lib' is unspecified)
-#> also installing the dependency 'shape'
 ```
 
 With these additional dependencies installed, you should be able to run the following scripts, which create input figures for the book:
@@ -103,7 +100,7 @@ knitr::kable(pkg_df)
 | dismo          | Species Distribution Modeling (Hijmans et al. 2017)                                          | 1.1.4      |
 | gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction (Pebesma and Graeler 2017)  | 1.1.5      |
 | knitr          | A General-Purpose Package for Dynamic Report Generation in R (Xie 2017b)                     | 1.16       |
-| leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' (Cheng, Karambelkar, and Xie 2017) | 1.1.0.9000 |
+| leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' (Cheng, Karambelkar, and Xie 2017) | 1.1.0      |
 | mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.1.4      |
 | microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                    | 1.4.2.1    |
 | raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8      |
@@ -112,11 +109,11 @@ knitr::kable(pkg_df)
 | rmarkdown      | Dynamic Documents for R (Allaire et al. 2017)                                                | 1.6        |
 | RQGIS          | Integrating R with QGIS (Muenchow and Schratz 2017)                                          | 1.0.1      |
 | RSAGA          | SAGA Geoprocessing and Terrain Analysis in R (Brenning and Bangs 2016)                       | 0.94.5     |
-| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.3      |
+| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.4      |
 | sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2017)                               | 1.2.5      |
-| spData         | Datasets for Spatial Analysis (Bivand, Nowosad, and Lovelace 2017)                           | 0.2.2      |
+| spData         | Datasets for Spatial Analysis (Bivand, Nowosad, and Lovelace 2017)                           | 0.2.4.9000 |
 | tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1      |
-| tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.10       |
+| tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.11       |
 
 Other citations are stored online using Zotero and downloaded with:
 
@@ -137,11 +134,11 @@ Bivand, Roger, and Colin Rundel. 2017. *Rgeos: Interface to Geometry Engine - Op
 
 Bivand, Roger, Tim Keitt, and Barry Rowlingson. 2017. *Rgdal: Bindings for the Geospatial Data Abstraction Library*. <https://CRAN.R-project.org/package=rgdal>.
 
-Bivand, Roger, Jakub Nowosad, and Robin Lovelace. 2017. *SpData: Datasets for Spatial Analysis*. <https://CRAN.R-project.org/package=spData>.
+Bivand, Roger, Jakub Nowosad, and Robin Lovelace. 2017. *SpData: Datasets for Spatial Analysis*. <https://github.com/Nowosad/spData>.
 
 Brenning, Alexander, and Donovan Bangs. 2016. *RSAGA: SAGA Geoprocessing and Terrain Analysis in R*. <https://CRAN.R-project.org/package=RSAGA>.
 
-Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2017. *Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library*. <http://rstudio.github.io/leaflet/>.
+Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2017. *Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library*. <https://CRAN.R-project.org/package=leaflet>.
 
 Hijmans, Robert J. 2016. *Raster: Geographic Data Analysis and Modeling*. <https://CRAN.R-project.org/package=raster>.
 
@@ -151,13 +148,13 @@ Mersmann, Olaf. 2015. *Microbenchmark: Accurate Timing Functions*. <https://CRAN
 
 Muenchow, Jannes, and Patrick Schratz. 2017. *RQGIS: Integrating R with Qgis*. <https://CRAN.R-project.org/package=RQGIS>.
 
-Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://CRAN.R-project.org/package=sf>.
+Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://github.com/r-spatial/sf/>.
 
 Pebesma, Edzer, and Roger Bivand. 2017. *Sp: Classes and Methods for Spatial Data*. <https://CRAN.R-project.org/package=sp>.
 
 Pebesma, Edzer, and Benedikt Graeler. 2017. *Gstat: Spatial and Spatio-Temporal Geostatistical Modelling, Prediction and Simulation*. <https://CRAN.R-project.org/package=gstat>.
 
-Tennekes, Martijn. 2017. *Tmap: Thematic Maps*. <https://CRAN.R-project.org/package=tmap>.
+Tennekes, Martijn. 2017. *Tmap: Thematic Maps*. <https://github.com/mtennekes/tmap>.
 
 Wickham, Hadley. 2017. *Tidyverse: Easily Install and Load ’Tidyverse’ Packages*. <https://CRAN.R-project.org/package=tidyverse>.
 
