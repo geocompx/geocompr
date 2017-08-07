@@ -9,8 +9,8 @@ Foundations
 Geocomputational methods
 
 - 06-transform - jn
-- 07-vector - rl
-- 08-raster - jn
+- 07-vector-methods - rl
+- 08-raster-methods - jn
 - 09-raster-vector - jn
 - 10-spatial-crossvalidation - jm
 - 11-advanced-visualization - jn
