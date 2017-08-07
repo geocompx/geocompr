@@ -8,7 +8,7 @@ Foundations
 
 Geocomputational methods
 
-- 06-coord - jn
+- 06-transform - jn
 - 07-vector - rl
 - 08-raster - jn
 - 09-raster-vector - jn
