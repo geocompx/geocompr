@@ -335,11 +335,12 @@ library(rgrass7)
 # OSGeo4W. Among others, open_app adds some paths to PATH, which are also needed
 # for running GRASS.
 # link2GI::getparams_GRASS4W would do more or less the same but is less handy
-RQGIS::open_app()  
-ind <- grepl("7.2", link$version)
-grass_path <- ifelse(link$installation_type[ind] == "osgeo4W",
-                    file.path(link$instDir[ind], "apps/grass", link$version[ind]),
-                    link$instDir)
+try(RQGIS::open_app())
+ind = grep("7", link$version)[1]
+grass_path <- ifelse(!is.null(link$installation_type) && 
+                       link$installation_type[ind] == "osgeo4W",
+                     file.path(link$instDir[ind], "apps/grass", link$version[ind]),
+                     link$instDir)
 initGRASS(gisBase = grass_path,
           # home parameter necessary under UNIX-based systems
           home = tempdir(),
@@ -362,15 +363,15 @@ Once you are familiar how to set up the GRASS environment, it becomes tedious to
 Luckily, `linkGRASS7` of the **link2GI** packages lets you do it with one line of code.
 The only thing you need to provide is a spatial object which determines the projection and the extent of the geodatabase.
  
-```{r, echo = FALSE}
+```{r}
 library(rgrass7)
 
 # Eventually, we will get rid off the if-else and of the link-dataframe given
 # that this issue is resolved: https://github.com/gisma/link2GI/issues/2
 if (Sys.info()["sysname"] == "Windows") {
-  loc <- linkGRASS7(streets, link[grepl("7.2", link[, "version"]), ])
+  linkGRASS7(streets, link[grep("7", link$version)[1], ])
 } else {
-  loc <- linkGRASS7(streets)
+  linkGRASS7(streets)
 }
 
 # linkGRASS7(streets_int, c("C:/OSGeo4W64", "grass-7.2.1", "osgeo4W"))
