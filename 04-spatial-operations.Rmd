@@ -176,6 +176,43 @@ tm_shape(world_buff) +
 detach("package:tmap", unload = TRUE)
 ```
 
+### Spatial congruence and areal interpolation
+
+
+Spatial congruence is an important concept when interpreting the results of spatial aggregation and other operations.
+An *aggregating object* object (which we will refer to as `y`, representing the buffer object in the previous section) is *congruent* with the target object `x`, corresponding to the first argument of `aggregate()` in the previous section, if the two objects have shared borders:
+no feature in `x` overlaps one or more features in `y`.
+*Incongruent* objects, by contrast do not share common borders [@qiu_development_2012].
+This is the case illustrated in Figure \@ref(fig:buff-agg), where the borders of the countries in the 'target' object bear no relation to, and frequently cross, the outline of the aggregating buffer.
+
+This is problematic if one wants to convert from type of *areal* unit that is incongruent with another, as illustrated in Figure \@ref(fig:areal-example).
+Areal interpolation resolves this problem.
+A number of methods have been developed to for the task, all of which start from the following constraint, succinctly described in a classic paper on the subject [@tobler_smooth_1979]:
+"that the original [target] data arrive packaged in discrete  collection regions."
+
+```{r areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units.", warning=FALSE}
+rx = st_as_sf(raster::rasterToPolygons(raster::raster(ncol = 4, nrow = 4)))
+ry = st_as_sf(raster::rasterToPolygons(raster::raster(ncol = 2, nrow = 2)))
+rxo = st_as_sf(st_set_geometry(rx, NULL), geometry = rx$geometry + 15)
+st_crs(rx) = NA
+rx = rbind(rx, rxo)
+set.seed(1985)
+rx$value = rep(runif(nrow(rx) / 2), 2)
+rx$layer = rep(c("Congruent", "Incongruent"), each = nrow(rxo))
+library(tmap)
+qtm(rx, "value") + tm_facets(by = "layer", drop.units = T, ncol = 2) +
+    tm_shape(ry) +
+  tm_borders(lwd = 10) +
+  tm_layout(legend.show = FALSE)
+detach("package:tmap", unload = TRUE)
+```
+
+The simplest useful method for spatial interpolation is *area weighted* spatial interpolation.
+This is implemented in `st_interpolate_aw()`, as demonstrated below:
+
+```{r}
+buff_agg_aw = st_interpolate_aw(x = world["pop"], to = buff, extensive = TRUE)
+```
 
 
 
@@ -442,7 +479,7 @@ box = st_convex_hull(pmulti)
 
 1. Write code that subsets points that are contained within `x` *and* `y` (illustrated by the plot in the 2^nd^ row and the 1^st^ column in Figure \@ref(fig:venn-clip)).
 - Create a randomly located point with the command `st_point()` (refer back to section \@ref(sfg) to see how to create spatial data 'from scratch').
-2. Write code that uses functions `aggregate()` and `st_buffer()` to answers the following question: What proportion of the world's population is found within a 10 degree radius of the intersection between the equator and the [9^th^ meridian](https://en.wikipedia.org/wiki/9th_meridian_east)? (Advanced challenge: find the point with the highest number of people within a 10 degree radius.)
+2. Write code that uses functions `aggregate()` and `st_buffer()` to answers the following question: What proportion of the world's population lives in countries that intersect a circle with a 10 degree radius of the intersection between the equator and the [9^th^ meridian](https://en.wikipedia.org/wiki/9th_meridian_east)? (Advanced challenge: find the point with the highest number of people within a 10 degree radius.)
 
 ```{r}
 center9 = st_sf(st_sfc(st_point(c(-9, 0)), crs = 4326))
@@ -450,6 +487,14 @@ buff9 = st_buffer(center9, dist = 10)
 agg9 = aggregate(world["pop"], buff9, FUN = sum)
 agg9$pop / sum(world$pop, na.rm = TRUE)
 ```
+
+3. Assuming that people are evenly distributed across countries, estimate the population living *within* the circle created to answer the previous question.
+
+```{r}
+interp9 = st_interpolate_aw(x = world["pop"], to = buff9, extensive = TRUE)
+
+```
+
 
 
 <!-- TODO? create a series of polygons distributed evenly over the surface of the Earth and clip them. -->
