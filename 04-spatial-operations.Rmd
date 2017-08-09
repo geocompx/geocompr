@@ -150,11 +150,11 @@ there are only 8 unique continents but 177 countries.
 In section \@ref(attribute-data-aggregation) the aggregation process condensed the `world` dataset down into only 8 rows and an aggregated `pop` variable representing the total population per continent (see Figure \@ref(fig:continent-pop)).
 
 Spatial data aggregation is the same conceptually but uses a *spatial* grouping object:
-the number of rows in the output represents the number of features in the *grouping object* that relate to the *geometries* of the input dataset.
+the *output* is the same, in terms of number of rows/features and geometry, as the *grouping object*, but with new variables corresponding to the input dataset.
 As with spatial subsetting, spatial aggregation operations work by extending existing functions.
 Since mid-2017 (with the release of **sf** `0.5-3`) the base R function `aggregate()` works with a spatial object as a grouping variable.
-Building on the example presented the previous section (\@ref(spatial-subsetting)), we demonstrate this by aggregating countries that by the buffer represented by the `buff` object.
-The command below allows to answer the question, :
+
+Building on the example presented the previous section (\@ref(spatial-subsetting)), we demonstrate this by aggregating the population of countries that intersect with the buffer represented by the circular `buff` object created in the previous section.
 
 ```{r}
 buff_agg = aggregate(x = world["pop"], by = buff, FUN = sum)
@@ -162,19 +162,28 @@ buff_agg = aggregate(x = world["pop"], by = buff, FUN = sum)
 
 The result, `buff_agg`, is a spatial object with the same geometry as `by` (the circular buffer in this case) but with an additional variable, `pop` reporting summary statistics for all features in `x` that intersect with `by` (the total population of the countries that touch the buffer in this case).
 Plotting the result (with `plot(buff_agg)`) shows that the operation does not really make sense:
-Figure \@ref(fig:buff-agg) shows a population of over half a billion people in a giant circle floating off the west coast of Africa!  
+Figure \@ref(fig:buff-agg) shows a population of over half a billion people mostly located in a giant circle floating off the west coast of Africa!  
 
 ```{r buff-agg, fig.cap="Result of spatial aggregation showing the total population of countries that intersect with a large circle whose center lies at 0 degrees longitude and latituge", echo=FALSE, message=FALSE}
 library(tmap)
 pal = tmaptools::get_brewer_pal(palette = "BuPu", n = 4, plot = F)
 breaks = c(0, 1e7, 1e8, 5e8, 1e9)
-tm_shape(world_buff) +
+bb_buff = tmaptools::bb(buff_agg, ext = 1.5)
+qtm(buff_agg, fill = pal[4], bbox = bb_buff) +
+  tm_shape(world_buff) +
   tm_fill("pop", palette = pal, breaks = breaks) +
   tm_borders() +
-  qtm(buff_agg, fill = pal[4], fill.alpha = 0.5) +
-  qtm(world[st_disjoint(world, buff, sparse = F),])
+  qtm(world[st_disjoint(world, buff, sparse = F),]) +
+  tm_shape(buff) +
+  tm_borders(lwd = 3, lty = 3) 
 detach("package:tmap", unload = TRUE)
 ```
+
+The results of the spatial aggregation exercise presented in Figure \@ref(fig:buff-agg) are unrealistic for at least two reasons: people do not live in the sea, and it is wrong to assume that all the people living in countries that *touch* the buffer reside *within* it.
+The most extreme example of this is Sudan, the most northerly country selected:
+the spatial aggregation operation assumes that all `r round(world$pop[world$name_long == "Sudan"] / 1e6)` Sudanese people reside in the tiny southerly tip that is within the circular buffer.
+
+
 
 ### Spatial congruence and areal interpolation
 
