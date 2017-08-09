@@ -13,12 +13,14 @@ We recommend getting up-to-speed with the language, with reference to resources 
 
 After R is installed and set-up, packages which extend R must be installed and loaded for it to handle spatial data.
 On Mac and Linux operating systems there are a few additional requirements: see the [README](https://github.com/r-spatial/sf) of the **sf** package for instructions.
-The **sf** and **spData** packages used in this chapter can be installed and loaded with the following commands:
+The **sf**, **raster**, and **spData** packages used in this chapter can be installed and loaded with the following commands:
 
 ```{r, eval=FALSE}
 install.packages("sf")
+install.packages("raster")
 install.packages("spData")
 library(sf)
+library(raster)
 library(spData)
 ```
 
@@ -615,11 +617,12 @@ Raster objects in R are supported by the `raster` package.
 ### Raster classes
 
 The `raster` package provides three main classes of objects - `RasterLayer`, `RasterBrick` and `RasterStack`.
+
 `RasterLayer` represents the simplest raster object, consisting of only one layer and store information about a number of rows and columns, spatial object extent and coordinate reference system used. 
 <!-- CRS as proj4 -->
 This raster class could store raster values in a RAM memory or only point to a file on hard drive that holds the values.
 
-Object of the `RasterLayer` class is created by the `raster` function:
+Object of the `RasterLayer` class is created by the `raster()` function:
 <!-- explanation that this function can do many more things -->
 
 ```{r}
@@ -635,29 +638,37 @@ r1
 values(r1) <- sample(1:ncell(r1)) # adding random values to the new raster object
 ```
 
-<!-- ### RasterBrick oraz RasterStack -->
+Two additional classes, `RasterBrick` and `RasterStack` are used when dealing with multiple layers.
+These two classes differ in terms of a number of supported files, type of representation and processing speed.
 
-<!-- W przypadku, gdy dane są bardziej złożone, tj. zawierają więcej niż jedną warstwę, konieczne jest wykorzystanie innych klas obiektów - `RasterBrick` lub `RasterStack`. Różnią się one liczbą obsługiwanych plików, sposobem ich reprezentacji i prędkością przetwarzania.  -->
+A `RasterBrick` contain multiple layers of raster data, which refer to only a single, mutlilayer file.
+<!-- ... -->
+<!-- (such as mulitspectral satellite images). -->
 
-<!-- `RasterBrick` jest wielowarstwowym obiektem, łączącym się z pojedynczym, wielowarstwowym plikiem. `RasterStack` natomiast jest kolekcją obiektow klasy RasterLayer i może być stworzony na podstawie oddzielnych plików składających się z wielu warstw. -->
+```{r}
+r2 <- r1
+values(r2) <- sample(1:ncell(r1))
+```
 
-<!-- Z uwagi na sposób reprezentacji, przetwarzanie obiektów klasy `RasterBrick` może być bardziej wydajne niż klasy `RasterStack`. -->
+<!-- change this example to a file one -->
+```{r}
+r_brick <- brick(r1, r2)
+r_brick
+```
 
-<!-- ```{r} -->
-<!-- r2 <- r1 -->
-<!-- values(r2) <- sample(1:ncell(r1)) -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- r_stack <- stack(r1, r2) -->
-<!-- r_stack -->
-<!-- ``` -->
+A `RasterStack` is a collection of `RasterLayer` objects with the same extent and resolution. 
+It can be created based on a group of object from many sources, either different files, another band in a multi-band file or a `RasterLayer` object created in R. <!--check it!--> 
 
 
-<!-- ```{r} -->
-<!-- r_brick <- brick(r1, r2) -->
-<!-- r_brick -->
-<!-- ``` -->
+```{r}
+r_stack <- stack(r1, r2)
+r_stack
+```
+
+Due to its properties, `RasterBrick` objects should be processed in a shorter time than `RasterStack`.
+On the other hand, `RasterStack` give more flexibility. 
+<!-- single object could be stored in memory and on disk (??in the same time) -->
+<!-- RasterBrick objects could be stored in memory OR on disk (??check) -->
 
 ## Coordinate Reference Systems
 
