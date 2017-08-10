@@ -633,9 +633,9 @@ r
 
 ```{r}
 # creation of the RasterLayer object with given number of columns and rows, and extent
-r1 = raster(ncol = 20, nrow = 20, xmn = 10, xmx = 30, ymn = 40, ymx = 50)
+r1 = raster(ncol = 101, nrow = 77, xmn = 0, xmx = 101, ymn = 0, ymx = 77)
 r1
-values(r1) <- sample(1:ncell(r1)) # adding random values to the new raster object
+values(r1) = sample(1:ncell(r1)) # adding random values to the new raster object
 ```
 
 Two additional classes, `RasterBrick` and `RasterStack` are used when dealing with multiple layers.
@@ -644,11 +644,6 @@ These two classes differ in terms of a number of supported files, type of repres
 A `RasterBrick` contain multiple layers of raster data, which refer to only a single, mutlilayer file.
 <!-- ... -->
 <!-- (such as mulitspectral satellite images). -->
-
-```{r}
-r2 <- r1
-values(r2) <- sample(1:ncell(r1))
-```
 
 `RasterBrick` objects are created using the `brick()` function. 
 This function usually takes a filename to a multilayer raster file.
@@ -668,21 +663,28 @@ nlayers(r_brick)
 ```
 
 A `RasterStack` is a list of `RasterLayer` objects with the same extent and resolution. 
-It can be created based on a group of object from many sources, either different files, another band in a multi-band file or a `RasterLayer` object created in R. <!--check it!--> 
+It can be created based on a group of object from many sources - different files, another bands in a multi-band file and `RasterLayer` objects created in R. 
 
 ```{r}
-r_stack <- stack(r1, r2)
+raster_on_disk = raster(multilayer_raster_filepath, layer = 1)
+raster_in_memory = raster(xmn = 0, xmx = 101, ymn = 0, ymx = 77, res = 1)
+values(raster_in_memory) = sample(1:ncell(raster_in_memory))
+crs(raster_in_memory) = crs(raster_on_disk)
+```
+
+```{r}
+r_stack <- stack(raster_in_memory, raster_on_disk)
 r_stack
 ```
 
 Due to its properties, `RasterBrick` objects should be processed in a shorter time than `RasterStack`.
-On the other hand, `RasterStack` give more flexibility. 
-<!-- single object could be stored in memory and on disk (??in the same time) -->
-<!-- RasterBrick objects could be stored in memory OR on disk (??check) -->
+Additionally, operations on `RasterBrick` and `RasterStack` objects will typically return `RasterBrick`.
+On the other hand, `RasterStack` give more flexibility, as a single object could be related to data stored in a memory and on disk in the same time.
+`RasterBrick` objects could be stored only in a memory or on disk.
 
 ## Coordinate Reference Systems
 
-This section is in progress.
+This section is work in progress.
 
 Despite the differences between vector and raster spatial data types, they are united by shared concepts intrinsic to spatial data. Perhaps the most important of these is Coordinate Reference System (CRS), which defines how the spatial elements of the data relate to the surface of the Earth (or other body).
 
