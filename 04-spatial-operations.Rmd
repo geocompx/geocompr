@@ -179,14 +179,24 @@ qtm(buff_agg, fill = pal[4], bbox = bb_buff) +
 detach("package:tmap", unload = TRUE)
 ```
 
-The results of the spatial aggregation exercise presented in Figure \@ref(fig:buff-agg) are unrealistic for at least two reasons: people do not live in the sea, and it is wrong to assume that all the people living in countries that *touch* the buffer reside *within* it.
-The most extreme example of this is Algeria, the most northerly country selected:
-the spatial aggregation operation assumes that all `r round(world$pop[world$name_long == "Algeria"] / 1e6)` Algerian citizens reside in the tiny southerly tip that is within the circular buffer.
+The results of the spatial aggregation exercise presented in Figure \@ref(fig:buff-agg) are unrealistic for three reasons:
 
-<!-- Todo: total population in centroids -->
+- People do not live in the sea (the geometry of the aggregating object is not appropriate for the geometry target object).
+- This method would 'double count' countries whose borders cross aggregating polygons when multiple, spatially contiguous, features are used as the aggregating object.
+- It is wrong to assume that all the people living in countries that *touch* the buffer reside *within* it (the default spatial operator `st_intersects()` is too 'greedy'). The most extreme example of this is Algeria, the most northerly country selected:
+the spatial aggregation operation assumes that all 39 million Algerian citizens reside in the tiny southerly tip that is within the circular buffer.
+
+A number of methods can be used to overcome these issues, which result in unrealistically high population attributed to the circular buffer illustrated in Figure \@ref(fig:buff-agg).
+The simplest of these is to convert the country polygons into points representing their *geographic centroids* before aggregation.
+<!-- Todo: reference section where we demonstrate geographic centroid generation -->
+This would ensure that any spatially contiguous aggregating object covering the target object (the Earth in this case) would result in the same total: there would be no double counting.
+The estimated total population residing within the study area would be more realistic if geographic centroids were used.
+(The centroid of Algeria, for example, is far outside the aggregating buffer.)
+Except in cases where the number of target features per aggregating feature is very large, or where the aggregating object is *spatially congruent* with the target (covered in section \@ref(spatial-congruence-and-areal-interpolation)), using centroids can also lead to errors due to boundary effects:
+imagine a buffer that covers a large area but contains no centroids.
+These issues can be tackled when aggregating areal target data with areal interpolation.
 
 ### Spatial congruence and areal interpolation
-
 
 Spatial congruence is an important concept when interpreting the results of spatial aggregation and other operations.
 An *aggregating object* object (which we will refer to as `y`, representing the buffer object in the previous section) is *congruent* with the target object `x`, corresponding to the first argument of `aggregate()` in the previous section, if the two objects have shared borders:
