@@ -698,42 +698,10 @@ sf_points = st_set_crs(sf_points, 27700) # set CRS
 
 Note the warning emitted after the CRS for `sf_points` was set to `27700`.
 This is a good thing: we have imposed a spatial reference onto data without knowing what that means.
-To discover what the 'magic number' `27700` means, we can retrieve the CRS again:
+To discover what the 'magic number' `27700` means, we can retrieve the CRS again (see Chapter \@ref(coord) for more on CRSs):
 
 ```{r}
 st_crs(sf_points)
-```
-
-Note that the result shows that the `epsg` has been updated and that `proj4string` element of the CRS has been updated to contain, among other things `+proj=tmerc` (meaning it is a projected CRS using the [tranverse Mercator](https://en.wikipedia.org/wiki/Transverse_Mercator_projection) projection) and `+units=m` (meaning the units of the coordinates are meters).
-Another function, from the **rgdal** library, provides a note about the CRS (its name):
-
-```{r}
-crs_codes = rgdal::make_EPSG()[1:2]
-dplyr::filter(crs_codes, code == 27700)
-```
-
-The result shows that the EPSG code 27700 represents the British National Grid, a result that could have been found by searching online for "[CRS 27700](https://www.google.com/search?q=CRS+27700)".
-This projection is clearly inappropriate for the data: the coordinates represent degrees of longitude and latitude, and this can also be seen by plotting it over a basemap, e.g. with the **mapview** package: `mapview::mapview(sf_points)`.
-
-The formula that converts a geographic point into a point on the surface of the Earth is provided by the `proj4string` element of the `crs` (see [proj4.org](http://proj4.org/) for further details):
-
-```{r}
-st_crs(27700)$proj4string
-```
-
-The CRS of `sf_points` can be restored to its orginial, correct value as follows (which demonstrates another way of setting CRSs):
-
-```{r}
-st_crs(sf_points) = old_crs
-```
-
-### Pro tip {-}
-
-The EPSG code can be found inside the `crs` attribute of the object's geometry.
-It is hidden from view for most of the time except when the object is printed but can be can identified and set using the functions `attribute()` and `attr()`, as illustrated below:
-
-```{r}
-attr(sf_points$geometry, which = "crs")$epsg
 ```
 
 ## Units
