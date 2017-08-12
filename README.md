@@ -101,8 +101,10 @@ knitr::kable(pkg_df)
 | gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction (Pebesma and Graeler 2017)  | 1.1.5      |
 | knitr          | A General-Purpose Package for Dynamic Report Generation in R (Xie 2017b)                     | 1.16       |
 | leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' (Cheng, Karambelkar, and Xie 2017) | 1.1.0      |
+| link2GI        | Linking GIS, Remote Sensing and Other Command Line Tools (Reudenbach 2017)                   | 0.1.0      |
 | mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.1.4      |
 | microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                    | 1.4.2.1    |
+| osmdata        | Import 'OpenStreetMap' Data as Simple Features or Spatial (Padgham et al. 2017)              | 0.0.4      |
 | raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8      |
 | rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.8      |
 | rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23     |
@@ -148,11 +150,15 @@ Mersmann, Olaf. 2015. *Microbenchmark: Accurate Timing Functions*. <https://CRAN
 
 Muenchow, Jannes, and Patrick Schratz. 2017. *RQGIS: Integrating R with Qgis*. <https://CRAN.R-project.org/package=RQGIS>.
 
+Padgham, Mark, Bob Rudis, Robin Lovelace, and Maëlle Salmon. 2017. *Osmdata: Import ’Openstreetmap’ Data as Simple Features or Spatial Objects*. <https://CRAN.R-project.org/package=osmdata>.
+
 Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://github.com/r-spatial/sf/>.
 
 Pebesma, Edzer, and Roger Bivand. 2017. *Sp: Classes and Methods for Spatial Data*. <https://CRAN.R-project.org/package=sp>.
 
 Pebesma, Edzer, and Benedikt Graeler. 2017. *Gstat: Spatial and Spatio-Temporal Geostatistical Modelling, Prediction and Simulation*. <https://CRAN.R-project.org/package=gstat>.
+
+Reudenbach, Chris. 2017. *Link2GI: Linking Gis, Remote Sensing and Other Command Line Tools*. <https://CRAN.R-project.org/package=link2GI>.
 
 Tennekes, Martijn. 2017. *Tmap: Thematic Maps*. <https://github.com/mtennekes/tmap>.
 
