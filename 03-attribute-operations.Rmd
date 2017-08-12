@@ -27,14 +27,12 @@ The list elements correspond to the number of observations in the attribute tabl
 But each list element can contain more than one coordinate if required or even another list as it is the case for polygons with holes (see previous sections).
 This structure enables multiple columns to represent a range of attributes for thousands of features (one row per feature).
 
-There is a strong overlap between geographical and non-geographical operations:
-non-spatial subset, aggregate and join each have their geographical equivalents.
-The subsetting functions `[` from base R and `filter()` from the **tidyverse**, for example, are also applicable to spatial data: the skills are cross-transferable.
-This chapter, therefore, provides the foundation for Chapter \@ref(spatial-data-operations) in terms of structure and input data.
+This chapter focuses on non-geographical operations such as subsetting, aggregating or joining attribute data. 
+Note that the corresponding functions also have a geographical equivalent.
+For example, you can also subset spatial data based on the spatial extent of another spatial object using the exact same functions you know from base R (`[`]) or from the **tidyverse** (`filter()`).
+That is the skills you learn here are cross-transferable which is also why this chapter lays the foundation for the next chapter (Chapter \@ref(spatial-data-operations)).
 
-As outlined in Chapter \@ref(spatial-class), **sf** provided the support for simple features in R.
-Additionally, **sf** added methods to generic R functions such as `plot()` and `summary()` to work with simple features. To convince yourself run for example `methods("summary")` and/or `methods("plot")`.
-<!--The reason for this is that simple features have their own class, which behave simultaneously as geographic data objects (e.g., plotting as maps) and square tables (e.g., with attribute columns referred to with the `$` operator).-->
+As outlined in Chapter \@ref(spatial-class), **sf** provided support for simple features in R and made them work with generic R functions such as `plot()` and `summary()` (as can be seen by executing `methods("summary")` and/or `methods("plot")`).
 
 The reliable `data.frame` (and modifications of it such as the `tibble` class used in the tidyverse) is the basis for data analysis in R.
 Extending this system to work with spatial data has many advantages. 
@@ -63,8 +61,10 @@ For most cases, however, there is no harm in keeping the geometry column because
 For this reason, being good at working with attribute data of spatial objects is the same as being proficient at handling data frames in R.
 For many applications, **dplyr** offers the most effective and most intuitive approach of working with data frames, as we will see in the next
 section.^[
-Unlike objects of class `Spatial` of the **sp** package, `sf` objects are also compatible with the packages **dplyr** and **data.table** (at least in theory). Both packages provide fast and powerful functions for data manipulation (see [Section 6.7](https://csgillespie.github.io/efficientR/data-carpentry.html#data-processing-with-data.table) of @gillespie_efficient_2016).
-This chapter focuses on **dplyr** because of its intuitive function names and ability to perform multiple chained operations using the pipe operator.]
+Unlike objects of class `Spatial` of the **sp** package, `sf` objects are also compatible with the **tidyverse** packages **dplyr** and **ggplot2**.
+The former provides fast and powerful functions for data manipulation (see [Section 6.7](https://csgillespie.github.io/efficientR/data-carpentry.html#data-processing-with-data.table) of @gillespie_efficient_2016), and the latter provides powerful plotting capabilities.
+]
+This chapter focuses on **dplyr** because of its intuitive function names and ability to perform multiple chained operations using the pipe operator.
 
 ## Attribute subsetting
 
@@ -214,44 +214,18 @@ It also lets you read this workflow from left to right, and avoids less easier t
 Another advantage over the nesting approach is that you can easily comment out certain parts of a pipe.
 **dplyr** works especially well with the pipe operator because its fundamental functions (or 'verbs', like `select()`) expect a data frame object as input and also return one.^[If you want **dplyr** to return a vector, use `pull`.]
 
-<!--
-The pipe operator can be used for many data processing tasks with attribute data.
-```{r}
-# 1,000,000,000 could be expressed as 1e9 in the scientific notation 
-world %>%
-  filter(pop > 1e9) 
-```
-
-This is equivalent to the following base R code (not run to preserve the NAs):^[[Note](https://github.com/Robinlovelace/geocompr/issues/28) NAs do not work for subsetting by inequalities in base R, hence conversion of NAs to 0s in this version)]
-
-```{r, eval=FALSE}
-# subsetting simple feature rows by values
-world$pop[is.na(world$pop)] = 0 # set NAs to 0
-world_few_rows = world[world$pop > 1e9,]
-```
-
-Overall, the ` %>% ` operator works best for combining many operations.^[However, note that too many pipes can make your code also less easier to read and reproduce.]
-For example, we would like to (1) rename the `name_long` column to `name`, (2) we only select the columns `name`, `subregion` and `gdpPercap` and (3) we only keep countries from "Eastern Asia" with a gross domestic product per capita that is larger than 30,000$:
-
-```{r}
-world %>% 
-  select(name = name_long, subregion, gdpPercap) %>% 
-  filter(subregion == "Eastern Asia" & gdpPercap > 30000)
-```
--->
-
 ## Attribute data aggregation 
 
 <!-- https://github.com/ropenscilabs/skimr ?? -->
 
-As demonstrated in chapter \@ref(spatial-class), `summary()` provides a quick summary of the spatial and non-spatial components of spatial objects.
-Enter the following command to for an overview of the `world` object and all its variables (result not shown):
+<!-- As demonstrated in chapter \@ref(spatial-class), `summary()` provides a quick summary of the spatial and non-spatial components of spatial objects.
+Enter the following command for an overview of the `world` object and all its variables (result not shown):
 
 ```{r, eval=FALSE}
 summary(world)
 ```
 
-This function is useful when using R interactively, but lacks flexibility and should not be used to create new objects.
+This function is useful when using R interactively, but lacks flexibility and should not be used to create new objects.-->
 The **dplyr** equivalent is `summarize()`, which returns summary statistics of groups and variables defined by the user.
 The following code, for example, calculates the total population and number of all countries in the world:
 
@@ -262,14 +236,16 @@ world_summary = world %>%
 world_summary
 ```
 
-The new object, `world_summary` contains only one feature, representing all 177 countries.
-The new object contains 2 variables representing the total population and number of countries of the world, created by the `pop =` and `country_n =` arguments in the `summarize()` function call above.
+The new object, `world_summary`, is an aggregation of all 177 world's countries.
+It consists of one row and two columns. 
+The `pop =` and `country_n =` created the names of the two columns, while the `sum()`- and `n()`-function actually did the aggregation.
+The first function added up all inhabitants, while the latter simply counted the number of rows. 
+ 
+You can use a wide range of functions within `summarize()` for aggregation and summary purposes.
+Type `?summarize` for a list with useful functions and more information.
 
-`summarize()` allows a wide range of summary statistics to be generated.
-A list of useful summary statistics can be found in the help page associated with the function: see `?summarize` for more information.
-
-`summarize()` becomes even more powerful when combined with `group_by()`, allowing *per group* summaries, analogous to the base R function `aggregate()`.
-The following code chunk calculates the total population and number of countries on *per continent* (see Chapter 5 of [R for Data Science](http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize) for a more detailed overview of `summarize()`):
+`summarize()` becomes even more powerful when combined with `group_by()`, which allows simultaneous aggregate/summary operations *per group*, analogous to the base R function `aggregate()`.
+The following code chunk calculates the total population and number of countries *per continent* (see Chapter 5 of [R for Data Science](http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize) for a more detailed overview of `summarize()`):
 
 ```{r}
 # data summary by groups
@@ -279,15 +255,15 @@ world_continents = world %>%
 world_continents
 ```
 
-`sf` objects are well-integrated with the **tidyverse**, as illustrated by the fact that the aggregated objects preserve the geometry of the original `world` object.
+`sf` objects are well-integrated with the **tidyverse**, as illustrated by the fact that the aggregated objects preserve the geometry of the original `world` object.^[Such a spatial aggregation of polygon data is know as "to dissolve polygons" in the GIS world.]
 This means that summaries of the world's continents can be plotted spatially, as illustrated below, which generates a plot of population by continent (note that borders between countries have largely been removed):
 
 ```{r continent-pop, fig.cap="Geographic representation of attribute aggregation by continent: total population by continent generated by `summarize()`."}
 plot(world_continents["pop"])
 ```
 
-The same result can be obtained using R's base `aggregrate()` function.
-This has a slightly different syntax, requiring the grouping variable as a list:
+ 
+Using the base R function `aggregate()`you can obtain the same result with a slightly different syntax: you have to indicate the grouping variable as a `list`-object:
 
 ```{r}
 ag_var = list(world$continent)
