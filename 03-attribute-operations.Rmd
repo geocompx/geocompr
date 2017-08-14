@@ -357,7 +357,7 @@ left_join2 = north_america %>%
 left_join2
 ```
 
-The new object `left_join2`, however is still not perfectly connected as it has two duplicated variables - `iso_a2.x` and `iso_a2.y`.
+The new object `left_join2`, however, contains two duplicated variables - `iso_a2.x` and `iso_a2.y` because both of the input tables possessed a variable named `iso_a2`.
 To solve this problem we should specify all the keys:
 
 ```{r}
@@ -367,8 +367,7 @@ left_join3
 ```
 
 It is also possible to use our objects in the reverse order, where a `data.frame` object is the first argument and a `sf` object is the second argument.
-This would always result in a new `data.frame` object.
-For example, `left_join()` would create a new `data.frame` with a `geom` column:
+This would keep the geometry column but drop the `sf` class, and result in a `data.frame` object.
 
 ```{r}
 # keeps the geom column, but drops the sf class
@@ -386,7 +385,8 @@ left_join4_sf
 class(left_join4_sf)
 ```
 
-On the other hand, it is also possible to remove the `geom` column using base R functions or `dplyr`:
+On the other hand, it is also possible to remove the geometry column of `left_join4` using base R functions or `dplyr`.
+Here, this is this simple because the geometry column is just another `data.frame` column and no longer the sticky geometry column of an `sf` object (see also Chapter \@ref(spatial-class)):
 
 ```{r}
 # base R
@@ -468,10 +468,10 @@ full_join1
 ## Attribute data creation
 <!-- lubridate? -->
 
-It is often the case when a new column needs to be created based on existing columns.
+Often, we would like to create a new column based on already existing columns.
 For example, we want to calculate population density for each country.
-We need to divide a `pop` column (population) by a `area_km2` column (unit area in square km).
-It could be done this way in base R:
+For this we need to divide a population column, here `pop`, by an area column , here `area_km2` with unit area in square km.
+Using base R, we can type:
 
 ```{r}
 data("world")
@@ -480,14 +480,14 @@ world_new$pop_dens = world_new$pop / world_new$area_km2
 ```
 
 Alternatively, we can use one of **dplyr** functions - `mutate()` or `transmute()`.
-`mutate()` adds new columns at second-to-last position in the `sf` object (the last one is reserved for the geometry):
+`mutate()` adds new columns at the penultimate position in the `sf` object (the last one is reserved for the geometry):
 
 ```{r, eval=FALSE}
 world %>% 
   mutate(pop_dens = pop / area_km2)
 ```
 
-The difference between `mutate()` and `transmute()` is that the latter do not preserve existing columns:
+The difference between `mutate()` and `transmute()` is that the latter skips all other existing columns (except for the sticky geometry column):
 
 ```{r, eval=FALSE}
 world %>% 
@@ -536,10 +536,11 @@ world %>%
 ```
 
 ## Removing spatial information
+<!-- Shouln't that be part of chapter 2-->
 
 It is important to note that the attribute data operations preserve the geometry of the simple features.
 As mentioned at the outset of the chapter, however, it can be useful to remove the geometry.
-In the case of the `world` dataset we've been using, this can be done using
+In the case of the `world` dataset, this can be done using
 `st_set_geometry()`^[Note that
 `st_geometry(world_st) = NULL`
 also works to remove the geometry from `world` but overwrites the original object.
