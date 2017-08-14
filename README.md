@@ -87,35 +87,11 @@ To cite packages used in this book we use code from [Efficient R Programming](ht
 geocompr:::generate_citations()
 ```
 
-This generates .bib and .csv files containing the packages. The current list of files used is as follows:
+This generates .bib and .csv files containing the packages. The current of packages used can be read-in as follows:
 
 ``` r
 pkg_df = readr::read_csv("extdata/package_list.csv")
-knitr::kable(pkg_df)
 ```
-
-| Name           | Title                                                                                        | version    |
-|:---------------|:---------------------------------------------------------------------------------------------|:-----------|
-| bookdown       | Authoring Books and Technical Documents with R Markdown (Xie 2017a)                          | 0.4        |
-| dismo          | Species Distribution Modeling (Hijmans et al. 2017)                                          | 1.1.4      |
-| gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction (Pebesma and Graeler 2017)  | 1.1.5      |
-| knitr          | A General-Purpose Package for Dynamic Report Generation in R (Xie 2017b)                     | 1.16       |
-| leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' (Cheng, Karambelkar, and Xie 2017) | 1.1.0      |
-| link2GI        | Linking GIS, Remote Sensing and Other Command Line Tools (Reudenbach 2017)                   | 0.1.0      |
-| mapview        | Interactive Viewing of Spatial Objects in R (Appelhans et al. 2017)                          | 2.1.4      |
-| microbenchmark | Accurate Timing Functions (Mersmann 2015)                                                    | 1.4.2.1    |
-| osmdata        | Import 'OpenStreetMap' Data as Simple Features or Spatial (Padgham et al. 2017)              | 0.0.4      |
-| raster         | Geographic Data Analysis and Modeling (Hijmans 2016)                                         | 2.5.8      |
-| rgdal          | Bindings for the Geospatial Data Abstraction Library (Bivand, Keitt, and Rowlingson 2017)    | 1.2.8      |
-| rgeos          | Interface to Geometry Engine - Open Source (GEOS) (Bivand and Rundel 2017)                   | 0.3.23     |
-| rmarkdown      | Dynamic Documents for R (Allaire et al. 2017)                                                | 1.6        |
-| RQGIS          | Integrating R with QGIS (Muenchow and Schratz 2017)                                          | 1.0.1      |
-| RSAGA          | SAGA Geoprocessing and Terrain Analysis in R (Brenning and Bangs 2016)                       | 0.94.5     |
-| sf             | Simple Features for R (Pebesma 2017)                                                         | 0.5.4      |
-| sp             | Classes and Methods for Spatial Data (Pebesma and Bivand 2017)                               | 1.2.5      |
-| spData         | Datasets for Spatial Analysis (Bivand, Nowosad, and Lovelace 2017)                           | 0.2.4.9000 |
-| tidyverse      | Easily Install and Load 'Tidyverse' Packages (Wickham 2017)                                  | 1.1.1      |
-| tmap           | Thematic Maps (Tennekes 2017)                                                                | 1.11       |
 
 Other citations are stored online using Zotero and downloaded with:
 
@@ -128,42 +104,29 @@ If you would like to add to the references, please use Zotero, join the [open gr
 References
 ----------
 
-Allaire, JJ, Joe Cheng, Yihui Xie, Jonathan McPherson, Winston Chang, Jeff Allen, Hadley Wickham, Aron Atkins, Rob Hyndman, and Ruben Arslan. 2017. *Rmarkdown: Dynamic Documents for R*. <https://CRAN.R-project.org/package=rmarkdown>.
+``` r
+knitr::kable(pkg_df)
+```
 
-Appelhans, Tim, Florian Detsch, Christoph Reudenbach, and Stefan Woellauer. 2017. *Mapview: Interactive Viewing of Spatial Objects in R*. <https://CRAN.R-project.org/package=mapview>.
-
-Bivand, Roger, and Colin Rundel. 2017. *Rgeos: Interface to Geometry Engine - Open Source (Geos)*. <https://CRAN.R-project.org/package=rgeos>.
-
-Bivand, Roger, Tim Keitt, and Barry Rowlingson. 2017. *Rgdal: Bindings for the Geospatial Data Abstraction Library*. <https://CRAN.R-project.org/package=rgdal>.
-
-Bivand, Roger, Jakub Nowosad, and Robin Lovelace. 2017. *SpData: Datasets for Spatial Analysis*. <https://github.com/Nowosad/spData>.
-
-Brenning, Alexander, and Donovan Bangs. 2016. *RSAGA: SAGA Geoprocessing and Terrain Analysis in R*. <https://CRAN.R-project.org/package=RSAGA>.
-
-Cheng, Joe, Bhaskar Karambelkar, and Yihui Xie. 2017. *Leaflet: Create Interactive Web Maps with the Javascript ’Leaflet’ Library*. <https://CRAN.R-project.org/package=leaflet>.
-
-Hijmans, Robert J. 2016. *Raster: Geographic Data Analysis and Modeling*. <https://CRAN.R-project.org/package=raster>.
-
-Hijmans, Robert J., Steven Phillips, John Leathwick, and Jane Elith. 2017. *Dismo: Species Distribution Modeling*. <https://CRAN.R-project.org/package=dismo>.
-
-Mersmann, Olaf. 2015. *Microbenchmark: Accurate Timing Functions*. <https://CRAN.R-project.org/package=microbenchmark>.
-
-Muenchow, Jannes, and Patrick Schratz. 2017. *RQGIS: Integrating R with Qgis*. <https://CRAN.R-project.org/package=RQGIS>.
-
-Padgham, Mark, Bob Rudis, Robin Lovelace, and Maëlle Salmon. 2017. *Osmdata: Import ’Openstreetmap’ Data as Simple Features or Spatial Objects*. <https://CRAN.R-project.org/package=osmdata>.
-
-Pebesma, Edzer. 2017. *Sf: Simple Features for R*. <https://github.com/r-spatial/sf/>.
-
-Pebesma, Edzer, and Roger Bivand. 2017. *Sp: Classes and Methods for Spatial Data*. <https://CRAN.R-project.org/package=sp>.
-
-Pebesma, Edzer, and Benedikt Graeler. 2017. *Gstat: Spatial and Spatio-Temporal Geostatistical Modelling, Prediction and Simulation*. <https://CRAN.R-project.org/package=gstat>.
-
-Reudenbach, Chris. 2017. *Link2GI: Linking Gis, Remote Sensing and Other Command Line Tools*. <https://CRAN.R-project.org/package=link2GI>.
-
-Tennekes, Martijn. 2017. *Tmap: Thematic Maps*. <https://github.com/mtennekes/tmap>.
-
-Wickham, Hadley. 2017. *Tidyverse: Easily Install and Load ’Tidyverse’ Packages*. <https://CRAN.R-project.org/package=tidyverse>.
-
-Xie, Yihui. 2017a. *Bookdown: Authoring Books and Technical Documents with R Markdown*. <https://CRAN.R-project.org/package=bookdown>.
-
-———. 2017b. *Knitr: A General-Purpose Package for Dynamic Report Generation in R*. <https://CRAN.R-project.org/package=knitr>.
+| Name           | Title                                                                         | version    |
+|:---------------|:------------------------------------------------------------------------------|:-----------|
+| bookdown       | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]       | 0.4        |
+| dismo          | Species Distribution Modeling \[@R-dismo\]                                    | 1.1.4      |
+| gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction \[@R-gstat\] | 1.1.5      |
+| knitr          | A General-Purpose Package for Dynamic Report Generation in R \[@R-knitr\]     | 1.16       |
+| leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' \[@R-leaflet\]      | 1.1.0.9000 |
+| link2GI        | Linking GIS, Remote Sensing and Other Command Line Tools \[@R-link2GI\]       | 0.1.0      |
+| mapview        | Interactive Viewing of Spatial Objects in R \[@R-mapview\]                    | 2.1.4      |
+| microbenchmark | Accurate Timing Functions \[@R-microbenchmark\]                               | 1.4.2.1    |
+| osmdata        | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]      | 0.0.5      |
+| raster         | Geographic Data Analysis and Modeling \[@R-raster\]                           | 2.5.8      |
+| rgdal          | Bindings for the Geospatial Data Abstraction Library \[@R-rgdal\]             | 1.2.8      |
+| rgeos          | Interface to Geometry Engine - Open Source (GEOS) \[@R-rgeos\]                | 0.3.23     |
+| rmarkdown      | Dynamic Documents for R \[@R-rmarkdown\]                                      | 1.6        |
+| RQGIS          | Integrating R with QGIS \[@R-RQGIS\]                                          | 1.0.1      |
+| RSAGA          | SAGA Geoprocessing and Terrain Analysis in R \[@R-RSAGA\]                     | 0.94.5     |
+| sf             | Simple Features for R \[@R-sf\]                                               | 0.5.3      |
+| sp             | Classes and Methods for Spatial Data \[@R-sp\]                                | 1.2.5      |
+| spData         | Datasets for Spatial Analysis \[@R-spData\]                                   | 0.2.2      |
+| tidyverse      | Easily Install and Load 'Tidyverse' Packages \[@R-tidyverse\]                 | 1.1.1      |
+| tmap           | Thematic Maps \[@R-tmap\]                                                     | 1.10       |
