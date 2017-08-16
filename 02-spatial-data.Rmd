@@ -83,7 +83,7 @@ This book uses **sf** and **raster** packages to work with vector data and raste
 Simple features is an open standard developed and endorsed by the Open Geospatial Consortium ([OGC](http://portal.opengeospatial.org/files/?artifact_id=25355)) to represent a wide range of geographical information.
 It is a hierarchical data model that simplifies geographic data by condensing a complex range of geographic forms into a single geometry class.
 Only 7 out of 68 possible types of simple feature are currently used in the vast majority of GIS operations (Figure \@ref(fig:sf-ogc)).
-All of these are fully supported (with plotting methods etc) in the R package **sf** [@R-sf].^[
+The R package **sf** [@R-sf] fully supports all of these (including plotting methods etc.).^[
 The full OGC standard includes rather exotic geometry types including 'surface' and 'curve' geometry types, which currently have limited application in real world applications.
 All 68 types can be represented in R, although (at the time of writing) all methods, such as plotting, are only supported for the 7 types that are used.
 ]
@@ -93,11 +93,11 @@ knitr::include_graphics("figures/sf-classes.png")
 ```
 
 **sf** can represent all common vector geometry types (raster data classes are not supported by **sf**): points, lines, polygons and their respective 'multi' versions (which group together features of the same type into a single feature).
-**sf** also supports geometry collections, which can contain multiple geometry types in a single feature.
+**sf** also supports geometry collections, which can contain multiple geometry types in a single object.
 Given the breadth of geographic data forms, it may come as a surprise that a class system to support all of them is provided in a single package, which can be installed from CRAN:^[The
 development version, which may contain new features, can be installed with `devtools::install_github("r-spatial/sf").`
 ]
-**sf** incorporates the functionality of the 3 main packages of the **sp** paradigm (**sp** [@R-sp] for the class system, **rgdal** [@R-rgdal] for reading and writing data, **rgeos** [@R-rgeos] for spatial operations undertaken by GEOS) in a single, cohesive whole.
+**sf** incorporates the functionality of the three main packages of the **sp** paradigm (**sp** [@R-sp] for the class system, **rgdal** [@R-rgdal] for reading and writing data, **rgeos** [@R-rgeos] for spatial operations undertaken by GEOS) in a single, cohesive whole.
 This is well-documented in **sf**'s [vignettes](http://cran.rstudio.com/package=sf):
 
 ```{r, eval=FALSE}
@@ -106,24 +106,24 @@ vignette("sf2") # for reading, writing and converting Simple Features
 vignette("sf3") # for manipulating Simple Features
 ```
 
-As the first vignette explains, simple feature objects in R are stored in a data frame, with geographic data occupying special column, a 'list-column'. This column is usually named 'geom' or 'geometry'.
-A 'real world' example is loaded by the **spData** package, which loads the `world` object:
+As the first vignette explains, simple feature objects in R are stored in a data frame, with geographic data occupying a special column, a 'list-column'. This column is usually named 'geom' or 'geometry'.
+Let us load a 'real world' example, here the `world` dataset, with the help of the **spData** package:
 
 ```{r, results='hide'}
 library(spData)
-data("world")
 ```
 
-In the above code **spData** silently loaded the `world` dataset (and many other spatial datasets - see [the spData website](https://nowosad.github.io/spData/) for a full list).
-The dataset contains spatial and non-spatial information, as shown by the function `names()`, which reports the column headings in data frames. 
-This can be seen as the final column name of `world`:
+**spData** silently loaded the `world` dataset (and many other spatial datasets - see [the spData website](https://nowosad.github.io/spData/) for a full list).
+This dataset contains spatial and non-spatial information, as shown by the function `names()`, which reports the column headings in data frames. 
+Please note that the last column contains the geographic information:
 
 ```{r}
 names(world)
 ```
 
 It is the contents of this modest-looking `geom` column that gives `sf` objects their spatial powers.
-It's actually a list-column, containing all the coordinates needed to plot the result as a map using the `plot()` method, the results of which are presented in Figure \@ref(fig:world-all).
+This so-called list-column contains all the coordinates.
+**sf**'s `plot()` method uses these coordinates to create a map (Figure \@ref(fig:world-all)).
 
 ```{r world-all, fig.cap="A spatial plot of the world using the sf package, with a facet for each attribute."}
 library(sf) # must be loaded to plot sf objects
@@ -134,23 +134,24 @@ Note that instead of creating a single map, as most GIS programs would, the `plo
 This behavior can be useful for exploring the spatial distribution of different variables and is discussed further in \@ref(basic-map) below.
 
 Being able to treat spatial objects as regular data frames with spatial powers has many advantages, especially if you are already used to working with data frames.
-The commonly used `summary()` function, for example, provides a useful overview of the variables within the `world` object, but prefixed with some information about the object's spatial component:
+The commonly used `summary()` function, for example, provides a useful overview of the variables within the `world` object.
 
 ```{r}
 summary(world["lifeExp"])
 ```
 
-The result provides a quick summary of both the non-spatial and spatial data contained in `world`: the average life expectancy is 73 years (ranging from less than 50 to more than 80 years) across all countries, and these are represented by `MULTIPOLYGON`s, allowing many polygons per country (this is needed for countries with many islands such as Indonesia and Greece). 
+Although we have only selected one variable for the `summary` command, it also outputs an report on the geometry (we explore such 'attribute operations' in more depth in Chapter \@ref(attr)).
+This is due to the sticky behavior of the geometry columns of **sf** objects (see Chapter \@ref(attr)).
+Hence, the result provides a quick summary of both the non-spatial and spatial data contained in `world`: the average life expectancy is 73 years (ranging from less than 50 to more than 80 years) across all countries which are represented in the form of `MULTIPOLYGON`s.
+`MULTIPOLYGON`s allow more than one polygon per row (here: country).
+This representation is necessary for countries with many islands such as Indonesia and Greece. 
 
 <!-- TODO: cross-reference section covering CRSs. -->
-
-Note that by appending `["lifeExp"]` onto the object name in the previous code chunk, only the relevant column was summarized.
-We explore such 'attribute operations' in Chapter \@ref(attr).
-First, it's worth taking a look at the basic behavior and contents of this simple feature object, which can usefully be thought of as a '**S**patial data**F**rame).
+It is worth taking a deeper look at the basic behavior and contents of this simple feature object, which can usefully be thought of as a '**S**patial data**F**rame).
 
 `sf` objects are easy to subset.
-The code below shows its first 2 rows and 3 columns.
-The output shows 2 major differences compared with a regular `data.frame`: the inclusion of additional geographic data (`geometry type`, `dimension`, `bbox` and CRS information - `epsg (SRID)`, `proj4string`), and the presence of final `geometry` column:
+The code below shows its first two rows and three columns.
+The output shows two major differences compared with a regular `data.frame`: the inclusion of additional geographic data (`geometry type`, `dimension`, `bbox` and CRS information - `epsg (SRID)`, `proj4string`), and the presence of final `geometry` column:
 
 ```{r}
 world[1:2, 1:3]
@@ -184,19 +185,21 @@ library(sp)
 world_sp = as(object = world, Class = "Spatial")
 ```
 
+@bivand_applied_2013 provides an excellent introduction to **sp**.
+
 ### Basic map making {#basic-map}
 
-Basic maps in **sf** can be created quickly with the base `plot()` function. Unlike **sp**, however, **sf** by default creates a faceted plot, one sub-plot for each variable, as illustrated in the left-hand image in Figure \@ref(fig:sfplot). 
+You can quickly create basic maps in **sf** with the base `plot()` function. By default, **sf** creates a multi-panel plot (like **sp**'s `spplot()`), one sub-plot for each variable (see left-hand image in Figure \@ref(fig:sfplot)). 
 
 ```{r sfplot, fig.cap="Plotting with sf, with multiple variables (left) and a single variable (right).", out.width="49%", fig.show='hold', warning=FALSE}
 plot(world[3:4])
 plot(world["pop"])
 ```
 
-As with **sp**, you can add layers to your maps created with `plot()`, with the argument `add = TRUE`.^[In
+As with **sp**, you can add further layers to your maps using the `add = TRUE`-argument of the `plot()` function .^[In
 fact, when you `plot()` an **sf** object, R is calling `sf:::plot.sf()` behind the scenes.
 `plot()` is a generic method that behaves differently depending on the class of object being plotted.]
-To illustrate this, and prepare for content covered in chapters \@ref(attr) and \@ref(spatial-data-operations) on attribute and spatial data operations, we will subset and combine countries in the `world` object, to create a single object that represents Asia:
+To illustrate this, and prepare for content covered in chapters \@ref(attr) and \@ref(spatial-data-operations) on attribute and spatial data operations, we will subset and combine countries in the `world` object, which creates a single object representing Asia:
 
 ```{r, warning=FALSE}
 asia = world[world$continent == "Asia", ]
@@ -204,7 +207,7 @@ asia = st_union(asia)
 ```
 
 We can now plot the Asian continent over a map of the world.
-Note, however, that this only works if the initial plot has only 1 layer:
+Note, however, that this only works if the initial plot has only one layer:
 
 ```{r asia, out.width='50%'}
 plot(world["pop"])
@@ -221,7 +224,8 @@ For more advanced map making we recommend using a dedicated visualization packag
 - map export 
 -->
 
-<!-- Maybe show also somewhere that `world[0]` produces only a plot of the geometry which is rather useful if you do not want to plot a specific attribute. This way, you can for example dismiss the col = "white"-argument in your Nigeria example. -->
+<!-- Maybe show also somewhere that `world[0]` produces only a plot of the geometry which is rather useful if you do not want to plot a specific attribute. This way, you can for example dismiss the col = "white"-argument in your Nigeria example.
+Sorry for commenting on this again but just to clarify africa[0] selects zero columns but since the geometry column is sticky it won't be dismissed. Neverthess, to be more explicit one should probably use plot(st_geometry(africa))-->
 
 ```{r, eval=FALSE, echo=FALSE}
 plot(africa[0], lwd = 3, main = "Nigeria in context", border = "lightgrey")
@@ -229,10 +233,12 @@ plot(africa[0], lwd = 3, main = "Nigeria in context", border = "lightgrey")
 
 #### Further work
 
-**sf** makes R data objects more closely aligned to the data model used in GDAL and GEOS, in theory making spatial data operations faster.
-The work here provides a taste of the way **sf** operates but there is much more to learn (see Chapter \@ref(spatial-data-operations)). And there is also a wealth of information in the highly recommended vignettes of the package.
+**sf** makes R data objects more closely aligned to the data model used in GDAL and GEOS, in theory making spatial data operations faster <!--I am not sure what you mean-->.
+The work here provides a taste of the way **sf** operates but there is much more to learn (see Chapter \@ref(spatial-data-operations)).
+And there is also a wealth of information in the highly recommended vignettes of the package.
 
-As a final exercise, we'll see one way of how to do a spatial overlay in **sf**. First, we convert the countries of the world into centroids, and then subset those in Asia. Finally, the `summary`-command tells us how many centroids (countries) are part of Asia (43) and how many are not (134).
+As a final exercise, we will see one way of how to do a spatial overlay in **sf**.
+First, we convert the countries of the world into centroids, and then subset those in Asia. Finally, the `summary`-command tells us how many centroids (countries) are part of Asia (43) and how many are not (134).
 
 ```{r}
 world_centroids = st_centroid(world)
@@ -240,10 +246,11 @@ sel_asia = st_intersects(world_centroids, asia, sparse = FALSE)
 summary(sel_asia)
 ```
 
-Note: another way of achieving the same result is with a GEOS function for identifying spatial overlay, which we'll cover in more detail in Chapter \@ref(spatial-data-operations).
+<!--Note: another way of achieving the same result is with a GEOS function for identifying spatial overlay, which we will cover in more detail in Chapter \@ref(spatial-data-operations).-->
 
-**sf**'s `plot()` function builds on base plotting methods, allowing access to its many optional arguments (see `?plot`).
-This provides powerful but not necessarily intuitive functionality, as illustrated by the variable circle sizes generated by the `cex` argument (see Figure \@ref(fig:africa), generated by the code below).
+Since **sf**'s `plot()` function builds on base plotting methods, you may also use its many optional arguments (see `?plot` and `?par`).
+This provides powerful but not necessarily intuitive functionality.
+For instance, in order to make the diameter of a circle proportional to a country's population, we provide the `cex` argument with the result of a calculation (see Figure \@ref(fig:africa), and the code below).
 
 ```{r africa, fig.cap="Centroids representing country population, diameter being proportional to population.", warning=FALSE}
 plot(world["continent"])
