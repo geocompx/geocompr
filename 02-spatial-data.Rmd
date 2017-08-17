@@ -269,36 +269,38 @@ plot(world_centroids, add = TRUE, cex = world$pop / 1e8, lwd = 3)
 ### Simple feature classes {#sf_classes}
 
 To understand new data formats in depth, it often helps to generate them for first principles.
-This section walks through vector spatial classes step-by-step, from the elementary simple feature geometry to simple feature objects, with class `sf`, representing complex spatial data.
-Before describing each geometry type that the **sf** package supports it is worth taking a step back to understand the building blocks of `sf` objects. 
-As stated in section \@ref(intro-sf), simple features are simply dataframes with at least one special column that makes it spatial.
+This section walks through vector spatial classes step-by-step, from the elementary simple feature geometry to simple feature objects of class `sf` representing complex spatial data.
+Before describing each geometry type that the **sf** package supports, it is worth taking a step back to understand the building blocks of `sf` objects. 
+As stated in section \@ref(intro-sf), simple features are simply data frames with at least one special column that makes it spatial.
 These spatial columns are often called `geom` or `geometry` and can be like non-spatial columns: `world$geom` refers to the spatial element of the `world` object described above.
 These geometry columns are 'list columns' of class `sfc`: they are simple feature collections.
 In turn, `sfc` objects are composed of one or more objects of class `sfg`: simple feature geometries.
 
 To understand how the spatial components of simple features work, it is vital to understand simple feature geometries.
-For this reason we cover each type currently supported `sfg` in the next sections before moving to describe how they can be combined to form `sfc` and eventually full `sf` objects.
+For this reason we cover each currently supported `sfg` type in the next subsections before moving on to describe how these can be combined to form `sfc` and eventually full `sf` objects.
 
 #### Simple feature geometry types {#geometry}
 
 <!-- This section demonstrates how the full range of geometry types supported by the **sf** package can be created, combined and plotted. -->
 Geometries are the basic building blocks of simple features.
-Simple features could be represented as one of the 17 geometry types using the **sf** package.
-In this chapter we will focus on seven, the most commonly used, simple features types: `POINT`, `LINESTRING`, `POLYGON`, `MULTIPOINT`, `MULTILINESTRING`, `MULTIPOLYGON` and `GEOMETRYCOLLECTION`.<!--FIG-->
-The whole list of possible feature types could be found in [the PostGIS manual ](http://postgis.net/docs/using_postgis_dbmanagement.html).
+Simple features in R can take on one of the 17 geometry types supported by the **sf** package.
+In this chapter we will focus on the seven most commonly used types: `POINT`, `LINESTRING`, `POLYGON`, `MULTIPOINT`, `MULTILINESTRING`, `MULTIPOLYGON` and `GEOMETRYCOLLECTION`.<!--FIG-->
+Find the whole list of possible feature types in [the PostGIS manual ](http://postgis.net/docs/using_postgis_dbmanagement.html).
 
-Simple features, outside of an R environment, could be represented in one of two ways, ether as a well-known binary (WKB) or well-known text (WKT). 
-Well-known binary (WKB) representations are usually hexadecimal strings, which are used to transfer and store geometry objects in databases.
-Well-known text (WKT), on the other hand, is a text markup description of simple features. 
-Both formats are exchangeable, therefore we would focus only on the well-known text (WKT) representation.
+Generally, well-known binary (WKB) or well-known text (WKT) are the standard encoding for simple feature geometries.
+WKB representations are usually hexadecimal strings easible readable for computers.
+This is why, GIS and spatial databases use WKB to transfer and store geometry objects.
+WKT, on the other hand, is a human-readable text markup description of simple features. 
+Both formats are exchangeable, and if we present one, we will naturally choose the WKT representation.
 
-All of the geometry types are built of points. 
-Each point could be described as coordinates in a 2D, 3D or 4D space:
+The basis for each of the geometry types is the point. 
+A point is simply a coordinate in 2D, 3D or 4D space:
 
-- X and Y coordinates represent location of points. It could be either easting and northing or longitude and latitude.
-- A Z coordinate denotes altitude.
+- X and Y coordinates represent the location of the points on the surface of the Earth. Depending on the coordinate reference system you use, this can be, for example, easting and northing or longitude and latitude.
+- Additionally, a Z coordinate might denote altitude but be aware of the fact that this representation is only a crude 3D-approximation.
+The ability of a GIS and R to handle true volumes and surfaces is still limited.
 - An M coordinate ("measure") allows to represent some measure associated to the point, but not the whole feature. 
-This coordinate could be a time of measurement, information who measured this point or what's the error of measurement.
+This coordinate could be a time of measurement, information on who has measured the point or what is the error of measurement.
 
 As a result, four possible types of points exist - XY (two-dimensional), XYZ (three-dimensional containing altitude), XYM (three-dimensional containing measure) and XYZM (four-dimensional).
 They could be easily describes as a well-known text:
