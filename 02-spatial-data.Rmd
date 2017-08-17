@@ -341,7 +341,8 @@ plot(st_as_sfc("POLYGON((1 5, 2 2, 4 1, 4 4, 1 5))"), col="gray", axes = TRUE, m
 plot(st_as_sfc("POLYGON((1 5, 2 2, 4 1, 4 4, 1 5), (2 4, 3 4, 3 3, 2 3, 2 4))"), col="gray", axes = TRUE, main = "POLYGON with a hole")
 ```
 
-The next three geometry types are the sets of previous ones: a multipoint is a set of points, multilinestring is a set strings and multipolygon is a set of polygons:
+So far, our geometry types have just included one feature.
+To represent multiple features in one object, we can use the "multi"-version of each geometry type:
 
 - Multipoint - `MULTIPOINT (5 2, 1 3, 3 4, 3 2)`
 - Multistring - `MULTILINESTRING ((1 5, 4 4, 4 1, 2 2, 3 2), (1 2, 2 4))`
@@ -355,8 +356,7 @@ plot(st_as_sfc("MULTIPOLYGON (((1 5, 2 2, 4 1, 4 4, 1 5), (0 2, 0 3, 1 3, 1 2, 0
 par(mfrow = c(1, 1))
 ```
 
-A geometry collection is the most heterogeneous type.
-It could consists of a set of any geometry types previously mentioned, for example:
+Finally, a geometry collection might contain any combination of geometry types:
 
 - Geometry collection - `GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2), LINESTRING (1 5, 4 4, 4 1, 2 2, 3 2)))`
 
@@ -367,13 +367,11 @@ plot(st_as_sfc("GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2), LINESTRING 
 
 #### Simple feature geometry (sfg) objects {#sfg}
 
-Simple feature geometry types are represented in R by objects of a `sfg` class. 
-A `sfg` object is a geometry of a single feature - a point, linestring, polygon, multipoint, multilinestring, multipolygon or geometry collection.
+In R, the `sfg` class represents the differente simple feature geometry types: (multi-)point, (multi-) linestring, (multi-)polygon or geometry collection.
 
-Usually you don't need to create geometries on your own. 
-In most cases, geometries are read from spatial files.
-However, a set of function to create simple feature geometry objects (`sfg`) exists in R and could be used in special cases.
-The names of these functions are simple and consistent, as they start with a `st_`  prefix and end with name of geometry types in lowercase letters:
+Usually you are spared the tedious taks of creating geometries on your own since you can simply import an already existing spatial file.
+However, there are a set of function to create simple feature geometry objects (`sfg`) from scratch if needed.
+The names of these functions are simple and consistent, as they all start with the `st_`  prefix and end with the name of the geometry type in lowercase letters:
 
 - A point - `st_point()`
 - A linestring - `st_linestring()`
@@ -383,13 +381,13 @@ The names of these functions are simple and consistent, as they start with a `st
 - A multipolygon - `st_multipolygon()`
 - A geometry collection - `st_geometrycollection()`
 
-In R, `sfg` objects are represented by three native data types:
+In R, you create `sfg` objects with the help of three native data types:
 
 1. A numeric vector - a single point
 2. A matrix - a set of points, where each row contains a point - a multipoint or linestring
 3. A list - any other set, e.g. a multilinestring or geometry collection
 
-To create point objects, we could use the `st_point()` function:
+To create point objects, we use the `st_point()` function in conjunction with a numeric vector:
 
 ```{r}
 # note that we use a numeric vector for points
@@ -399,13 +397,14 @@ st_point(c(5, 2, 1), dim = "XYM") # XYM point
 st_point(c(5, 2, 3, 1)) # XYZM point
 ```
 
+<!-- is this really important? -->
 XY, XYZ and XYZM types of points are automatically created based on the length of a numeric vector. 
 Only the XYM type needs to be specified using a `dim` argument.
 
-Multipoint and linestring objects are created based on a matrix using `st_multipoint()` and `st_linestring()` functions:
+By contrast, use matrices in the case of multipoint (`st_multipoint()`) and linestring (`st_linestring()`) objects:
 
 ```{r}
-# the rbind function simplify creation of matrices
+# the rbind function simplifies the creation of matrices
 ## MULTIPOINT
 multipoint_matrix = rbind(c(5, 2), c(1, 3), c(3, 4), c(3, 2))
 st_multipoint(multipoint_matrix)
@@ -415,7 +414,7 @@ linestring_matrix = rbind(c(1, 5), c(4, 4), c(4, 1), c(2, 2), c(3, 2))
 st_linestring(linestring_matrix)
 ```
 
-The rest of objects are represented by lists:
+Finally, use lists for the creatin of multilinestrings, (mult-)polygons and geometry collections:
 
 ```{r}
 ## POLYGON
@@ -461,8 +460,9 @@ st_geometrycollection(gemetrycollection_list)
 #### Simple feature collections {#sfc}
 
 One `sfg` object contains only a single simple feature geometry. 
-A simple feature collection (`sfc`) is a list of `sfg` objects with information about a coordinate reference system.
-The `st_sfc()` function can be used to create `sfc` objects, as illustrated in the code below, which combines two simple features of a point type into a single feature:
+A simple feature collection (`sfc`) is a list of `sfg` objects and can additionally contain information about the coordinate reference system in use.
+For instance, to combine two simples features into one object with two features, we can use the `st_sfc()` function. 
+This is important since this collection respresents the geometry column in **sf** data frames:
 
 ```{r}
 # sfc POINT
@@ -471,8 +471,9 @@ point2 = st_point(c(1, 3))
 st_sfc(point1, point2)
 ```
 
-In most cases, an `sfc` object contains objects of identical geometry type.
-Therefore, when we combine `sfg` objects of a polygon type we would get `sfc` of a polygon type, and a collection of multilinestring would result into `sfc` of a multilinestring type:
+In most cases, an `sfc` object contains objects of the same geometry type.
+Therefore, when we convert `sfg` objects of type polygon into a simple feature collection, we would also end up with an `sfc` object of type polygon. 
+Equally, a collection of multilinestring would result in an `sfc` object of type multilinestring:
 
 ```{r}
 # sfc POLYGON
@@ -494,8 +495,7 @@ multilinestring2 = st_multilinestring((multilinestring_list2))
 st_sfc(multilinestring1, multilinestring2)
 ```
 
-It is possible to create a `sfc` object from `sfg` objects with different geometry types.
-This new object would have a "geometry" geometry type:
+It is also possible to create an `sfc` object from `sfg` objects with different geometry types:
 
 ```{r}
 # sfc GEOMETRY
@@ -507,23 +507,19 @@ st_sfc(point1, multilinestring1)
 <!-- http://r-spatial.org/r/2017/01/12/newssf.html -->
 <!-- methods(class = "sfc") -->
 
-The simple feature collection objects could have more information about spatial data than just geometries.
-It is possible to store coordinate reference systems (CRS) in them.
+As mentioned before, `sfc` objects can additionally store information on the coordinate reference systems (CRS).
 <!-- What's CRS -->
-CRS can be represented by `epsg (SRID)` and `proj4string` attributes.
-The default value of `epsg (SRID)` and `proj4string` is `NA` (*Not Available*), which is used when the CRS is unknown:
+To specify a certain CRS, we can use the `epsg (SRID)` or `proj4string` attributes of an `sfc` object.
+The default value of `epsg (SRID)` and `proj4string` is `NA` (*Not Available*):
 
 ```{r}
 st_sfc(point1, point2)
 ```
 
-The `sfc` object could have `NA` values in both attributes or have an actual value for one or two CRS attributes.
-Importantly, all geometries in the `sfc` objects must have the same CRS. 
+Of course, all geometries in an `sfc` object must have the same CRS. 
 
 We can add coordinate reference system as a `crs` argument of `st_sfc()`. 
-This argument could accept either an integer with the `epsg` code or character with `proj4string`.
-
-For example, we can set the WGS 84 using either its epsg code (`4326`) or its `proj4string` definition (`"+proj=longlat +datum=WGS84 +no_defs"`):
+This argument accepts either an integer with the `epsg` code (e.g., `4326`)  or a `proj4string` character string (e.g., `"+proj=longlat +datum=WGS84 +no_defs"`):
 
 ```{r}
 # EPSG definition
@@ -536,15 +532,14 @@ st_sfc(point1, point2, crs = "+proj=longlat +datum=WGS84 +no_defs")
 ```
 
 Both of these approaches have advantages and disadvantages. 
-An `epsg` code is usually shorter and therefore easier to remember. 
+An `epsg` code is usually shorter, and therefore easier to remember. 
 The code also refers to only one, well-defined coordinate reference system. 
-It could be, however, considered a limitation of `epsg`, as it is not flexible.
-On the hand, a `proj4string` definition is longer - it could specify many different parameters, such as projection type, datum and ellipsoid. 
-This makes `proj4string` more complicated, but also allows to create many different projections and modify existing ones.
-`proj4string` is also supported by the PROJ.4 software (and therefore by the `sf` package), which enables transformations between different projections.
+On the other hand, a `proj4string` definition allows you more flexibility when it comes to specifying different parameters such as the projection type, the datum and the ellipsoid. 
+This way you can specify many different projections, and modify existing ones.
+This makes the `proj4string` approach also more complicated.^[In the background, `sf` uses the [PROJ.4](http://proj4.org/) software, which enables transformations between different projections].
 
-`epsg` always points to a particular CRS.
-This property makes possible for PROJ.4 to convert `epsg` into corresponding `proj4string`.
+`epsg` always points to exactly one particular CRS.
+Therefore, there is also only one possible `proj4string` for a specific `epsg`-code.
 For example, we can set the UTM Zone 11N projection with `epsg` code `2955`:
 
 ```{r}
@@ -558,8 +553,8 @@ Now we can try to set the CRS using `proj4string`:
 st_sfc(point1, point2, crs = "+proj=utm +zone=11 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
 ```
 
-The above result doesn't contain `epsg`. 
-This is due the fact that no general method for conversion from `proj4string` to `epsg` exists.
+However, the `epsg` string of our result remained empty. 
+This is because there is no general method to convert from `proj4string` to `epsg`.
 
 <!-- precision -->
 <!-- plots can be made -->
