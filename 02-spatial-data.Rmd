@@ -676,43 +676,28 @@ summary(new_raster)
 hist(new_raster)
 ```
 
-`getValues()` can be used to extract the values as a numerical vector.
+`getValues()` extracts a raster's values as a numerical vector.
+To only select specific rows, use the `row` parameter.
 
 ```{r}
 new_raster_values = getValues(new_raster)
 head(new_raster_values)
 ```
 
-The new vector, `new_raster_values`, could be an input for many statistical operations.
+The new vector, `new_raster_values`, can serve as input for subsequent statistical operations.
 
-Metadata in `Raster*` include, for example a class of the object, path to the source of the data and names of the layers.
-
-```{r}
-# class of the object
-class(new_raster)
-```
-
-```{r}
-# file path to the data source
-filename(new_raster)
-```
-
-```{r}
-# names of layer in the `Raster*` object
-names(new_raster)
-```
-
-Sometimes it could be important to know if the values of the files are in RAM or on disk using the `inMemory()` function:
+Sometimes it is important to know if all values of a raster are currently in memory or on disk.
+Find out with the `inMemory()` function:
 
 ```{r}
 inMemory(new_raster)
 ```
 
-The full list of the **raster** function could be found using `help(package = "raster", topic = "raster-package")`.
+`help(package = "raster", topic = "raster-package")` returns a full list of all available **raster** functions.
 
 ### Basic map making
 
-Just as in the **sf** package, basic raster maps can be created with the `plot()` function.
+Similar to the **sf** package, **raster** also provides a `plot()` method for objects of class raster.
 
 ```{r}
 plot(new_raster)
@@ -725,11 +710,10 @@ plot(new_raster)
 
 ### Raster classes
 
-`RasterLayer` represents the simplest raster object, consisting of only one layer and store information about a number of rows and columns, spatial object extent and coordinate reference system used. 
+The `RasterLayer` class represents the simplest form of a raster object, and consists of only one layer.
 <!-- CRS as proj4 -->
-This raster class could store raster values in a RAM memory or only point to a file on hard drive that holds the values.
 
-Object of the `RasterLayer` class is created by the `raster()` function:
+To create an object of class `RasterLayer`, we can use the `raster()` function:
 <!-- explanation that this function can do many more things -->
 <!-- how to add crs -->
 <!-- how to add values -->
@@ -747,14 +731,13 @@ r1
 values(r1) = sample(1:ncell(r1)) # adding random values to the new raster object
 ```
 
-Two additional classes, `RasterBrick` and `RasterStack` are used when dealing with multiple layers.
-These two classes differ in terms of a number of supported files, type of representation and processing speed.
+Aside from the `RasterLayer`, there are two additional classes: `RasterBrick` and `RasterStack`.
+<!--What do you mean by type of representation?-->
+Both can handle multiple layers, but differ regarding the number of supported file formats, type of representation and processing speed.
 
-A `RasterBrick` contain multiple layers of raster data, which refer to only a single, mutlilayer file, such as multispectral satellite image.
-`RasterBrick` objects are created using the `brick()` function. 
-This function usually takes a filename to a multilayer raster file.
-However, it is also possible to provide a `Raster*` object, `array` and a few more.
-All of possible formats could be found on the help file of this function - `?brick`.
+A `RasterBrick` consists of multiple layers, which typically correspond to a multispectral satellite file. 
+The `brick()` function creates a `RasterBrick` object.
+Usually, you provide it with a filename to a multilayer raster file but might also use another raster object and other spatial objects (see its help page for all supported formats).
 <!-- should we use this example or have our own multilayer dataset? -->
 ```{r}
 multilayer_raster_filepath = system.file("external/rlogo.grd", package="raster")
@@ -762,14 +745,17 @@ r_brick = brick(multilayer_raster_filepath)
 r_brick
 ```
 
-The `nlayers` function helps to get the number of layers in a `Raster*` object:
+The `nlayers` function retrieves the number of layers stored in a `Raster*` object:
 
 ```{r}
 nlayers(r_brick)
 ```
 
-A `RasterStack` is a list of `RasterLayer` objects with the same extent and resolution. 
-It can be created based on a group of object from many sources - different files, another bands in a multi-band file and `RasterLayer` objects created in R. 
+A `RasterStack` is similar to a `RasterBrick` in the sense that it consists also of multiple layers.
+More specifically, a `RasterStack` is a list of `RasterLayer` objects with the same extent and resolution. 
+Hence, one way to create it is with the help of spatial objects already existing in R's global environment. 
+And again, one can simply specify a path to a file stored on disk.
+The possibility to create a `RasterStack` from a file stored on disk and an object residing in R's global environment is one of the main differences compared to a `RasterBrick`.
 
 ```{r}
 raster_on_disk = raster(multilayer_raster_filepath, layer = 1)
@@ -783,16 +769,15 @@ r_stack <- stack(raster_in_memory, raster_on_disk)
 r_stack
 ```
 
-Due to its properties, `RasterBrick` objects should be processed in a shorter time than `RasterStack`.
-Additionally, operations on `RasterBrick` and `RasterStack` objects will typically return `RasterBrick`.
-On the other hand, `RasterStack` give more flexibility, as a single object could be related to data stored in a memory and on disk in the same time.
-`RasterBrick` objects could be stored only in a memory or on disk.
+Another difference is that the processing time for `RasterBrick` objects should be usually shorter than for `RasterStack` objects.
+Note that operations on `RasterBrick` and `RasterStack` objects will typically return a `RasterBrick`.
 
 ## Coordinate Reference Systems
 
 This section is work in progress.
 
-Despite the differences between vector and raster spatial data types, they are united by shared concepts intrinsic to spatial data. Perhaps the most important of these is Coordinate Reference System (CRS), which defines how the spatial elements of the data relate to the surface of the Earth (or other body).
+Despite the differences between vector and raster spatial data types, they are united by shared concepts intrinsic to spatial data.
+Perhaps the most important of these is the Coordinate Reference System (CRS), which defines how the spatial elements of the data relate to the surface of the Earth (or other body).
 
 In **sf** the CRS of an object can be retrieved and set using `st_crs()` and `st_set_crs()` respectively:
 
@@ -811,7 +796,7 @@ st_crs(sf_points)
 ```
 
 ## Units
-
+<!-- If this is the final thing about sf, we should move it up before starting to explain raster stuff -->
 <!-- https://cran.r-project.org/web/packages/units/vignettes/measurement_units_in_R.html -->
 The final thing to say about `sf` objects in this chapter is that they have units.
 This is advantageous because it prevents confusion caused by the fact that different CRSs use different units (most use meters, some use feet).
@@ -832,8 +817,8 @@ To translate the huge number into a more digestible size, it is tempting to divi
 st_area(nigeria) / 1e6
 ```
 
-However, the result is incorrectly given in the same units.
-The solution is to set the units with the **units** package:
+However, the result is incorrectly given again as square meters.
+The solution is to set the correct units with the **units** package:
 
 ```{r}
 units::set_units(st_area(nigeria), km^2)
