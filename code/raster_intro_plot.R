@@ -3,6 +3,8 @@ library(visualraster)
 library(gridExtra)
 theme_set(theme_fullframe())
 
+set.seed(2017-04-01)
+
 small_ras = raster(matrix(1:16, 4, 4, byrow =TRUE))
 small_ras_val = raster(matrix(sample.int(100, 16), 4, 4, byrow =TRUE))
 small_ras_val[c(7, 9)] = NA
