@@ -95,8 +95,8 @@ In any case, the spatial subsetting clearly worked.
 As illustrated by Figure \@ref(fig:buffeq), only countries which spatially intersect with the giant circle are returned:
 
 ```{r buffeq, fig.cap="Subset of the `africa` data selected based on their intersection with a circle 20 degrees in radius with a center point at 0 degrees longitude and 0 degrees latitude."}
-plot(africa_buff["pop"])
-plot(buff, add = TRUE)
+# plot(africa_buff["pop"])
+# plot(buff, add = TRUE)
 ```
 
 Note that countries that only just touch the giant circle are selected such as the large country at the north of plot (Algeria).
@@ -183,10 +183,11 @@ library(tmap)
 pal = tmaptools::get_brewer_pal(palette = "BuPu", n = 4, plot = F)
 breaks = c(0, 1e7, 1e8, 5e8, 1e9)
 bb_buff = tmaptools::bb(buff_agg, ext = 1.5)
-qtm(buff_agg, fill = pal[4], bbox = bb_buff) +
-  tm_shape(africa_buff) +
-  tm_fill("pop", palette = pal, breaks = breaks) +
-  tm_borders() #+
+qtm(buff_agg, fill = pal[4], bbox = bb_buff)
+# +
+#   tm_shape(africa_buff) +
+#   tm_fill("pop", palette = pal, breaks = breaks) +
+#   tm_borders() #+
   # qtm(africa[st_disjoint(africa, buff, sparse = FALSE),]) +
   # tm_shape(buff) +
   # tm_borders(lwd = 3, lty = 3) 
@@ -212,16 +213,13 @@ These issues can be tackled when aggregating areal target data with areal interp
 
 ### Spatial congruence and areal interpolation
 
-Spatial congruence is an important concept when interpreting the results of spatial aggregation and other operations.
-An *aggregating object* object (which we will refer to as `y`, representing the buffer object in the previous section) is *congruent* with the target object `x`, corresponding to the first argument of `aggregate()` in the previous section, if the two objects have shared borders:
-no feature in `x` overlaps one or more features in `y`.
-*Incongruent* objects, by contrast do not share common borders [@qiu_development_2012].
-This is the case illustrated in Figure \@ref(fig:buff-agg), where the borders of the countries in the 'target' object bear no relation to, and frequently cross, the outline of the aggregating buffer.
+Spatial congruence is an important concept related to spatial aggregation.
+An *aggregating object* object (which we will refer to as `y`, representing the buffer object in the previous section) is *congruent* with the target object (`x`, representing the countries in the previous section) if the two objects have shared borders.
 
-This is problematic if one wants to convert from type of *areal* unit that is incongruent with another, as illustrated in Figure \@ref(fig:areal-example).
-Areal interpolation resolves this problem.
-A number of methods have been developed to for the task, all of which start from the following constraint, succinctly described in a classic paper on the subject [@tobler_smooth_1979]:
-"that the original [target] data arrive packaged in discrete  collection regions."
+*Incongruent* aggregating objects, by contrast, do not share common borders with the target [@qiu_development_2012].
+This is problematic for spatial aggregation (and other spatial operations) illustrated in Figure \@ref(fig:areal-example).
+Areal interpolation resolves this issue.
+A number of algorithms have been developed for areal interpolation, including area weighted and pycnophylactic interpolation methods task [@tobler_smooth_1979].
 
 ```{r areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units.", warning=FALSE}
 rx = st_as_sf(raster::rasterToPolygons(raster::raster(ncol = 4, nrow = 4)))
