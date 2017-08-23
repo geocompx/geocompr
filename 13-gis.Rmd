@@ -81,6 +81,17 @@ As mentioned in chapter \@ref(intro), doing GIS at the command-line makes it mor
 
 ## (R)QGIS
 QGIS is one of the most popular open-source GIS [Table \@ref(tab:gis_comp); @graser_processing:_2015]. Its main advantage lies in the fact that it provides a unified interface to several other open-source GIS.
+
+```{r gis_comp, echo = FALSE, message = FALSE}
+library(tidyverse)
+d = tibble("GIS" = c("GRASS", "QGIS", "SAGA"),
+            "first release" = c("1984", "2002", "2004"),
+            "no. functions" = c(">500", ">1000", ">600"),
+            "support" = c("hybrid", "hybrid", "hybrid"))
+knitr::kable(x = d, caption = "Comparison between three open-source GIS. Hybrid refers to the support of vector and raster operations.") %>%
+  kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see [http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/](http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/)), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
+```
+
 First and foremost, this means that you have access to GDAL/OGR, GRASS and SAGA through QGIS but also to other third-party providers such as [TauDEM](http://hydrology.usu.edu/taudem/taudem5/index.html), [Orfeo Toolbox](https://www.orfeo-toolbox.org/) and [Lastools](https://rapidlasso.com/lastools/) (tools for LiDAR data) [@graser_processing:_2015]. 
 To run all these geoalgorithms (frequently more than 1000 depending on your set up) outside of the QGIS GUI, QGIS provides a Python API.
 **RQGIS** establishes a tunnel to this Python API through the **reticulate** package. 
@@ -433,33 +444,23 @@ Use `v.select` and `v.extract` for vector data.
 - If you would like to use GRASS 6 from within R, use the R package **spgrass6**.
 
 ## When to use what?
-**RQGIS** unified interface to GRASS and SAGA (and GDAL/OGR, Orfeo Toolbox, TauDEM, Lastools) + QGIS geoalgorithms. 
-So far QGIS supports a subset of the available geoalgorithms. Depending on your version this is around 235 for SAGA and 160 for GRASS. 
-So you should stick to **RSAGA** and **rgrass7** if you are also using less common GIS functionality.
-In case you aim for topological correct data, we recommend the usage of GRASS. 
-Many of the unsupported GRASS functions in QGIS relate to geodatabase-management.
-Hence, if you strive for the advantages of a geodatabase, we would again  recommend to use GRASS.
-Also if you would like to run simulations using GRASS, use **rgrass7** directly (-> include an example from Roger) since **RQGIS** always starts a new GRASS session with each function call.
-**RSAGA** provides numerous user-friendly functions (i.e. wrappers).
-Secondly, **RSAGA** also offers geocomputing functions written in R (e.g., `multi.local.function`, `pick.from.grid`, etc.).
-To sum it up, we like all three packages.
-To recommend a single one is hard since the usage depends on personal preferences, the tasks at hand and your familiarity with different GIS.
-The latter means if you have already prefer the GUI of a certain GIS, you are quite likely to use the corresponding interface.
-Certainly, RQGIS is an appropriate choice for most use cases. Additionally:
-- unified access to several GIS, and therefore provision of >1000 geoalgorithms (of course, this includes duplicated functionality, e.g., you can perform overlay-operations using QGIS-, SAGA- or GRASS-geoalgorithms) 
-- QGIS automatically takes care of data format conversions
-- **RQGIS** can also handle spatial objects residing in R as input for geoalgorithms, and loads QGIS output automatically back into R if desired
-- convenience functions to support the access of the online help and R named arguments, automatic default value retrieval though the latter two features are also available in **rgrass7** or to be honest, **rgrass7** features have inspired those now found in RQGIS.
+
+To recommend a single R-GIS interface is hard since the usage depends on personal preferences, the tasks at hand and your familiarity with different GIS.
+The latter means if you have already preferred the GUI of a certain GIS, you are quite likely to use the corresponding interface.
+Certainly, RQGIS is an appropriate choice for most use cases.
+The main advantages of **RQGIS** are:
+- unified access to several GIS, and therefore the provision of >1000 geoalgorithms.
+Of course, this includes duplicated functionality, e.g., you can perform overlay-operations using QGIS-, SAGA- or GRASS-geoalgorithms.
+- automatic data format conversions.
+- **RQGIS** can also handle spatial objects residing in R as input for geoalgorithms, and loads QGIS output automatically back into R if desired.
+- convenience functions to support the access of the online help, R named arguments and automatic default value retrieval.
+Please note that **rgrass7** inspired the latter two features.
 - Currently (but this might change), **RQGIS** supports newer SAGA (2.3.1) versions than **RSAGA** (2.2.3)
 
-
-```{r gis_comp, echo = FALSE, message = FALSE}
-library(tidyverse)
-d = tibble("GIS" = c("GRASS", "QGIS", "SAGA"),
-            "first release" = c("1984", "2002", "2004"),
-            "no. functions" = c(">500", ">1000", ">600"),
-            "support" = c("hybrid", "hybrid", "hybrid"))
-knitr::kable(x = d, caption = "Comparison between three open-source GIS. Hybrid refers to the support of vector and raster operations.") %>%
-  kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see [http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/](http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/)), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
-```
-
+However, there are use cases when you certainly should use one of the other R-GIS bridges.
+QGIS only provides access to a subset of GRASS and SAGA functionality.
+Therefore, to use the complete set of SAGA and GRASS functions, stick with **RSAGA** and **rgrass7**. 
+Use **RSAGA**'s numerous user-friendly functions when doing so.
+Note also, that **RSAGA** offers native R functions for geocomputation such as `multi.local.function`, `pick.from.grid` and many more.
+In case you need topological correct data and/or geodatabase-management functionality, we recommend the usage of GRASS. 
+In addition, if you would like to run simulations with the help of a geodatabase, use **rgrass7** directly since **RQGIS** always starts a new GRASS session for each call.
