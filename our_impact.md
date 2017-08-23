@@ -31,6 +31,7 @@
 - 2017-07-11 - bug - Problem with plots of the multipoint type - https://github.com/mtennekes/tmap/issues/126
 - 2017-07-31 - enhancement - Add a support for the `sf` objects - https://github.com/hunzikp/velox/issues/7
 - 2017-08-03 - bug - aggregate.sf does not return an object with the same length as by - https://github.com/r-spatial/sf/issues/452
+- 2017-08-23 - bug - mapedit does not seem to save the end result after editing - https://github.com/r-spatial/mapedit/issues/63
 
 # Other
 
