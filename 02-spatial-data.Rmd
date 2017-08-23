@@ -26,6 +26,8 @@ install.packages("spData")
 library(sf)
 library(raster)
 library(spData)
+install.packages("spDataLarge")
+library(spDataLarge)
 ```
 
 This chapter will provide brief explanations of the fundamental geographic data models: vector and raster.
@@ -617,8 +619,24 @@ Simple features are, in essence, data frames with a spatial extension.
 
 ## Raster data
 
-<!-- what is raster ?? -->
-<!-- Raster data is a matrix or cube with additional spatial metadata (e.g. extent, resolution, and projection) that allow its values to be mapped onto geographical space. -->
+Raster data is a matrix (or a grid) of values with additional spatial metadata, such as extent, resolution and coordinate reference system.
+This grid consists of cells (often called pixels) representing an area on the surface (\@ref(fig:raster-intro-plot):A).
+All cells in a raster must have the same size, which could be represented by a Cartesian (e.g. meters) or geographic coordinate system (degrees).
+Cell numbers in rasters start at 1 in the upper left corner, and its number increase from left to right and then from top to bottom (\@ref(fig:raster-intro-plot):B).
+Each cell in raster data could hold a value, which could be an integer or float (\@ref(fig:raster-intro-plot):C).
+Additionally, it is possible to set the NA (*not available*) value which indicates the absence of data or cells outside of the area of interests.
+You can see them as the gray cells in the C and D panel of the figure \@ref(fig:raster-intro-plot).
+The final raster map, as seen in the D panel of the \@ref(fig:raster-intro-plot) figure, is a color presentation of the raster values.
+
+```{r raster-intro-plot, echo=FALSE, fig.cap="Raster data: A - a grid representation; B - numbers of the cells; C - values of the cells; D - a final raster map"}
+knitr::include_graphics("figures/raster_intro_plot.png")
+```
+
+Raster data can be continuous or categorical. 
+Continuous rasters have a range of quantitative values, which could represent phenomena such as elevation, temperature, population density or spectral data.
+Categorical rasters, also known as discrete, represent features or categories.
+This could be landcover, soils, or climate categories data.
+<!-- (one, two panel plot)  -->
 
 ### An introduction to raster
 
@@ -630,8 +648,8 @@ Aside from general raster data manipulation, **raster** provides many low level 
 In this case, **raster** provides the possiblity to divide the raster into smaller chunks (rows or blocks), and processes these iteratively instead of loading the whole raster file into RAM (for more information, please refer to `vignette("functions", package = "raster").
 
 <!-- we should replace it with our own dataset -->
-<!-- example dataset from spData -->
-```{r}
+<!-- example dataset from spDataLarge -->
+```{r, message=FALSE}
 library(raster)
 raster_filepath = system.file("external/test.grd", package="raster")
 new_raster = raster(raster_filepath)
@@ -648,6 +666,11 @@ To access individual header information, you can use following commands:
 ```{r}
 # dimensions (number of rows, number of columns, number of cells)
 dim(new_raster)
+```
+
+```{r}
+# spatial resolution
+res(new_raster)
 ```
 
 ```{r}
@@ -671,7 +694,7 @@ You can summarize and plot them using base R functions such as `summary()` and `
 summary(new_raster)
 ```
 
-```{r}
+```{r new_raster-hist}
 # histogram of the values
 hist(new_raster)
 ```
@@ -699,7 +722,7 @@ inMemory(new_raster)
 
 Similar to the **sf** package, **raster** also provides `plot()` methods for its own classes.
 
-```{r}
+```{r basic-new-raster-plot}
 plot(new_raster)
 ```
 
@@ -719,7 +742,6 @@ To create an object of class `RasterLayer`, we can use the `raster()` function:
 <!-- how to add values -->
 
 ```{r}
-library(raster)
 r = raster() # creation of an empty RasterLayer object
 r
 ```
