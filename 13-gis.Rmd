@@ -331,12 +331,12 @@ Assuming that we have found a working installation on your computer, we use the 
 
 ```{r, eval = FALSE}
 library(rgrass7)
-# next line of code only necessary if we want to use GRASS as installed by 
-# OSGeo4W. Among others, open_app adds some paths to PATH, which are also needed
-# for running GRASS.
-# link2GI::getparams_GRASS4W would do more or less the same but is less handy
-try(RQGIS::open_app())
+# find a GRASS7 installation, and use the first one
 ind = grep("7", link$version)[1]
+# next line of code only necessary if we want to use GRASS as installed by 
+# OSGeo4W. Among others, this adds some paths to PATH, which are also needed
+# for running GRASS.
+link2GI::getparams_GRASS4W(link[ind, ])
 grass_path <- ifelse(!is.null(link$installation_type) && 
                        link$installation_type[ind] == "osgeo4W",
                      file.path(link$instDir[ind], "apps/grass", link$version[ind]),
@@ -362,22 +362,17 @@ execGRASS("g.region", flags = c("quiet"),
 Once you are familiar how to set up the GRASS environment, it becomes tedious to do so over and over again.
 Luckily, `linkGRASS7` of the **link2GI** packages lets you do it with one line of code.
 The only thing you need to provide is a spatial object which determines the projection and the extent of the geodatabase.
+First, `linkGRASS7` finds all GRASS installations on your computer.
+Since we have set `ver_select` to `TRUE`, we can interactively choose one of the found GRASS-installations.
+If there is just one installation, the `linkGRASS7` automatically chooses this one.
+Secondly, `linkGRASS7` establishes a connection to GRASS7.
  
-```{r}
+```{r, eval = FALSE}
 library(rgrass7)
-
-# Eventually, we will get rid off the if-else and of the link-dataframe given
-# that this issue is resolved: https://github.com/gisma/link2GI/issues/2
-if (Sys.info()["sysname"] == "Windows") {
-  linkGRASS7(streets, link[grep("7", link$version)[1], ])
-} else {
-  linkGRASS7(streets)
-}
-
-# linkGRASS7(streets_int, c("C:/OSGeo4W64", "grass-7.2.1", "osgeo4W"))
+linkGRASS7(streets, ver_select = TRUE)
 ```
 
-Before using GRASS geoalgorithms, we need to add data to our spatial database.
+Before we can use GRASS geoalgorithms, we need to add data to GRASS's spatial database.
 Luckily, the convenience function `writeVECT` does this for us.
 (Use `writeRast` in the case of raster data.)
 In our case we add the street and cycle hire point data while using only the first attribute column, and name them also `streets` and `points`. 
@@ -429,7 +424,7 @@ Further notes:
 That means we have only exported spatial data in the beginning.
 Then we created new objects but only imported the final result back into R.
 To find out which datasets are currently available, run `execGRASS("g.list", type = "vector,raster", flags = "p")`.
-Of course, we could have also accessed an already existing GRASS geodatabase from within R.
+- Of course, we could have also accessed an already existing GRASS geodatabase from within R.
 Prior to importing data into R, you might want to perform some (spatial) subsetting.
 Use `v.select` and `v.extract` for vector data. 
 `db.select` lets you select subsets of the attribute table of a vector layer without returning the correponding geometry.
@@ -438,7 +433,6 @@ Use `v.select` and `v.extract` for vector data.
 - If you would like to use GRASS 6 from within R, use the R package **spgrass6**.
 
 ## When to use what?
-<!-- more or less brainstorming -->
 **RQGIS** unified interface to GRASS and SAGA (and GDAL/OGR, Orfeo Toolbox, TauDEM, Lastools) + QGIS geoalgorithms. 
 So far QGIS supports a subset of the available geoalgorithms. Depending on your version this is around 235 for SAGA and 160 for GRASS. 
 So you should stick to **RSAGA** and **rgrass7** if you are also using less common GIS functionality.
