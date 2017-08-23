@@ -297,7 +297,7 @@ world_continents2 = aggregate(world["pop"], by = ag_var, FUN = sum, na.rm = TRUE
 Combining data from different sources is one of the most common tasks in data preparation. 
 Joins are methods to combine pair of tables based on a shared key variable.
 The **dplyr** package has a set of verbs to easily join `data.frames` - `left_join()`, `right_join()`,  `inner_join()`, `full_join`, `semi_join()` and `anti_join()`.
-The function names follow SQL naming conventions, and @grolemund_r_2016 explain these functions thoroughly in the Relational data chapter in the book R for Data Science .
+These function names follow conventions used in the database language SQL, as explained in [Chapter 13](http://r4ds.had.co.nz/relational-data.html) of *R for Data Science* [@grolemund_r_2016].
 
 Working with spatial data, however, usually involves a connection between spatial data (`sf` objects) and tables (`data.frame` objects).
 Fortunately, the **sf** package has all of the **dplyr** join functions adapted to work with `sf` objects.
@@ -332,9 +332,11 @@ Most of the following join examples will have a `sf` object as the first argumen
 However, the reverse order is also possible and will give you back a `data.frame` object.
 This is mostly beyond the scope of this book, but we encourage you to try it.
 
+The next subsections focuses on the commonly used left and inner joins, which use the same syntax as the other join types [@grolemund_r_2016].
+
 ### Left joins
 
-The left join is the most often used type of joins.
+Left joins are the most commonly used operation for adding attributes to spatial data. 
 The `left_join()` returns all observations from the left object (`north_america`) and the matched observations from the right object (`wb_north_america`). 
 In cases, like `Greenland`, absent in the right object, `NA` values will show up.
 
@@ -400,25 +402,6 @@ left_join4_df
 class(left_join4_df)
 ```
 
-### Right joins
-
-`right_join()` keeps all observations from the second object (`wb_north_america` in this case) but preserves the `sf` class from the left object (`north_america`).
-
-```{r}
-right_join1 = north_america %>% 
-  right_join(wb_north_america, by = c("iso_a2", "name_long" = "name"))
-right_join1
-```
-
-The output shows that the result, `right_join1`, has information about Mexico, but drops information about Greenland.
-Furthermore, our right object, as a `data.frame`, doesn't have a geometry representation of Mexico.
-As a result, the `right_join1` object contains only non-spatial data of Mexico.
-It could be easily illustrated using the `plot` function:
-
-```{r}
-plot(right_join1[0]) # Canada and United States only
-```
-
 ### Inner joins
 
 The `inner_join()` keeps only observations from the left object (`north_america`) where there are matching observations in the right object (`wb_north_america`). 
@@ -428,44 +411,6 @@ Additionally, all columns from the left and right object are kept:
 inner_join1 = north_america %>% 
   inner_join(wb_north_america, by = c("iso_a2", "name_long" = "name"))
 inner_join1
-```
-
-### Semi joins
-
-The `semi_join()` is very similar to the `inner_join()`. 
-It also keeps only observations from the left object (`north_america`) where there are matching observations in the right object, but keeping just columns from the left one:
-<!-- filtering? -->
-
-```{r}
-semi_join1 = north_america %>% 
-  semi_join(wb_north_america, by = "iso_a2")
-semi_join1
-```
-
-### Anti joins
-
-The `anti_join()` returns all rows from the left object that are not matching observations in the right object.
-Only columns from the right object are kept:
-
-```{r}
-anti_join1 = north_america %>% 
-  anti_join(wb_north_america, by = "iso_a2")
-anti_join1
-```
-
-```{r}
-plot(anti_join1[0])
-```
-
-### Full joins
-
-The `full_join()` returns all rows and all columns from both the left and right object. 
-It also puts `NA` in cases where there are not matching values and returns an empty geometry for cases that only exist in the right object:
-
-```{r}
-full_join1 = north_america %>% 
-  full_join(wb_north_america, by = "iso_a2")
-full_join1
 ```
 
 ## Attribute data creation
@@ -584,7 +529,7 @@ Hint: try to use helper functions, such as `contains` or `starts_with` from **dp
 6. What was the minimum and maximum total population in 2015 in each region? What was the total population in 2015 in each region?
 <!-- Attribute joining -->
 7. Add variables from `us_states_df` to `us_states` and create a new object called `us_states_stats`. What function did you use and why? Which variable is the key in the both datasets? What is the class of a new object?
-8. `us_states_df` has two more variables than `us_states`. How you can find them?
+8. `us_states_df` has two more variables than `us_states`. How you can find them? (hint: try to use the `dplyr::anti_join` function)
 <!-- Attribute creation -->
 9. What was the population density in 2015 in each state? What was the population density in 2010 in each state?
 10. How much has population density changed between 2010 and 2015 in each state? Calculate the change in percentages and map them.
