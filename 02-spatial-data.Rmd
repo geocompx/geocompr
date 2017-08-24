@@ -13,16 +13,16 @@ We recommend getting up-to-speed with the language, with reference to resources 
 
 After R is installed and set-up, packages which extend R must be installed and loaded for it to handle spatial data.
 On Mac and Linux operating systems there are a few additional requirements: see the [README](https://github.com/r-spatial/sf) of the **sf** package for instructions.
-The **sf**, **raster**, and **spData** packages used in this chapter can be installed and loaded with the following commands:
+The **sf**, **raster**, **spData**, and **spDataLarge** packages used in this chapter can be installed and loaded with the following commands:
 
 ```{r, eval=FALSE}
 install.packages("sf")
 install.packages("raster")
 install.packages("spData")
+install.packages("spDataLarge", repos="http://nowosad.github.io/drat")
 library(sf)
 library(raster)
 library(spData)
-install.packages("spDataLarge")
 library(spDataLarge)
 ```
 
@@ -641,11 +641,12 @@ When manipulating this dataset, values are read and processed in a small chunk a
 The **raster** package provides three main classes of objects - `RasterLayer`, `RasterBrick` and `RasterStack`. 
 We would refer to all of them as `Raster*`.
 
-<!-- we should replace it with our own dataset -->
-<!-- example dataset from spDataLarge -->
+<!-- short description of the data -->
+
 ```{r, message=FALSE}
+library(spDataLarge)
 library(raster)
-raster_filepath = system.file("external/test.grd", package="raster")
+raster_filepath = system.file("raster/srtm.tif", package="spDataLarge")
 new_raster = raster(raster_filepath)
 ```
 
@@ -735,7 +736,21 @@ Just as in the **sf** package, basic raster maps can be created with the `plot()
 plot(new_raster)
 ```
 
-<!-- combining raster with vector for a plot -->
+Moreover, it is possible to plot raster together with vector data.
+For this purpose, we need to read a vector dataset:
+
+```{r}
+vector_filepath = system.file("vector/zion.gpkg", package="spDataLarge")
+new_vector = st_read(vector_filepath)
+```
+
+Our new object, `new_vector`, is a polygon representing borders of Zion National Park.
+We could impose these borders on a elevation map with the second use of the `plot()` function, this time with the `add` argument set to `TRUE`:
+
+```{r basic-new-raster-vector-plot}
+plot(new_raster)
+plot(new_vector, add = TRUE)
+```
 
 <!-- TODO: cross reference advanced mapping chapter -->
 <!-- more advanced options - rasterVis, tmap, mapview, leaflet -->
@@ -773,7 +788,7 @@ However, it is also possible to provide a `Raster*` object, `array` and a few mo
 All of possible formats could be found on the help file of this function - `?brick`.
 <!-- should we use this example or have our own multilayer dataset? -->
 ```{r}
-multilayer_raster_filepath = system.file("external/rlogo.grd", package="raster")
+multilayer_raster_filepath = system.file("raster/landsat.tif", package="spDataLarge")
 r_brick = brick(multilayer_raster_filepath)
 r_brick
 ```
@@ -789,8 +804,8 @@ These layers could contain the same variable over some time or many different va
 `RasterStack` can be created based on a group of object from many sources - different files, another bands in a multi-band file and `RasterLayer` objects created in R. 
 
 ```{r}
-raster_on_disk = raster(multilayer_raster_filepath, layer = 1)
-raster_in_memory = raster(xmn = 0, xmx = 101, ymn = 0, ymx = 77, res = 1)
+raster_on_disk = raster(r_brick, layer = 1)
+raster_in_memory = raster(xmn = 301905, xmx = 335745, ymn = 4111245, ymx = 4154085, res = 30)
 values(raster_in_memory) = sample(1:ncell(raster_in_memory))
 crs(raster_in_memory) = crs(raster_on_disk)
 ```
