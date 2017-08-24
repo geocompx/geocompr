@@ -198,7 +198,9 @@ rsaga.env()
 Secondly, we need to write the digital elevation model to a SAGA-format. 
 Note that calling `data(landslides)` attaches two object to the global environment - `dem`, a digital elevation model in the form of a `list`, and `landslides`, a `data.frame` containing observations representing the presence or absence of a landslide:
 
-```{r}
+<!-- The following examples only work with SAGA < 2.3. We have informed the package maintainer to update SAGA -->
+
+```{r, eval = FALSE}
 data(landslides)
 write.sgrd(data = dem, file = file.path(tempdir(), "dem"), header = dem$header)
 ```
@@ -207,7 +209,7 @@ The organization of SAGA is modular.
 Libraries contain so-called modules, i.e., geoalgorithms.
 To find out which libraries are available, run:
 
-```{r}
+```{r, eval = FALSE}
 tail(rsaga.get.libraries(), 10)
 ```
 
@@ -215,7 +217,7 @@ Instead of presenting all available libraries we have shown only the last ten.
 We choose the library 'ta_hydrology' (ta is the abbreviation for terrain analysis).
 Subsequently, we can access the available modules of a specific library (here: 'ta_hydrology') as follows:
 
-```{r}
+```{r, eval = FALSE}
 rsaga.get.modules(libs = "ta_hydrology")
 ```
 
@@ -228,7 +230,7 @@ rsaga.get.usage(lib = "ta_hydrology", module = "SAGA Wetness Index")
 Finally, you can run SAGA from within R using **RSAGA**'s geoprocessing workhorse function `rsaga.geoprocessor()`. 
 The function expects a parameter-argument list in which you have specified all necessary parameters.
 
-```{r}
+```{r, eval = FALSE}
 params = list(DEM = file.path(tempdir(), "dem.sgrd"),
               TWI = file.path(tempdir(), "twi.sdat"))
 rsaga.geoprocessor(lib = "ta_hydrology", module = "SAGA Wetness Index", 
@@ -238,14 +240,14 @@ rsaga.geoprocessor(lib = "ta_hydrology", module = "SAGA Wetness Index",
 To facilitate the access to the SAGA interface, RSAGA frequently provides user-friendly wrapper-functions with meaningful default values (see RSAGA documentation for examples, e.g., `?rsaga.wetness.index`).
 So the function call for calculating the 'SAGA Wetness Index' becomes as simple as:
 
-```{r}
+```{r, eval = FALSE}
 rsaga.wetness.index(in.dem = file.path(tempdir(), "dem"), 
                     out.wetness.index = file.path(tempdir(), "twi"))
 ```
 
 Of course, we would like to inspect our result visually (Figure \@ref(fig:saga_twi)). To load and plot the SAGA output file, we use the **raster** package. 
 
-```{r saga_twi, fig.cap = "SAGA wetness index of Mount Mongón, Peru."}
+```{r saga_twi, fig.cap = "SAGA wetness index of Mount Mongón, Peru.", eval = FALSE}
 library(raster)
 twi = raster::raster(file.path(tempdir(), "twi.sdat"))
 plot(twi, col = RColorBrewer::brewer.pal(n = 9, name = "Blues"))
@@ -379,7 +381,6 @@ If there is just one installation, the `linkGRASS7` automatically chooses this o
 Secondly, `linkGRASS7` establishes a connection to GRASS7.
  
 ```{r, eval = FALSE}
-library(rgrass7)
 linkGRASS7(streets, ver_select = TRUE)
 ```
 
@@ -387,6 +388,8 @@ Before we can use GRASS geoalgorithms, we need to add data to GRASS's spatial da
 Luckily, the convenience function `writeVECT` does this for us.
 (Use `writeRast` in the case of raster data.)
 In our case we add the street and cycle hire point data while using only the first attribute column, and name them also `streets` and `points`. 
+
+<!-- in time we can also use sf- and raster-objects with rgrass7, Roger has already implemented this in the rgrass7 developer version -->
 
 ```{r}
 writeVECT(as(streets[, 1], "Spatial"), vname = "streets")
