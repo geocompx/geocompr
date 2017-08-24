@@ -17,7 +17,7 @@ This will make it easier to run this book's worked examples on your computer.
 
 After having successfully installed R, you have to install and load add-on packages to handle spatial data.
 On Mac and Linux operating systems there are a few additional requirements: see the [README](https://github.com/r-spatial/sf) of the **sf** package for instructions.
-The **sf**, **raster**, and **spData** packages used in this chapter can be installed and loaded with the following commands:
+The **sf**, **raster**, **spData**, and **spDataLarge** packages used in this chapter can be installed and loaded with the following commands:
 
 ```{r, eval=FALSE}
 install.packages("sf")
@@ -598,6 +598,10 @@ Simple features are, in essence, data frames with a spatial extension.
 
 ## Raster data
 
+```{r raster-intro-plot, echo=FALSE, fig.cap="Raster data: A - a grid representation; B - numbers of the cells; C - values of the cells; D - a final raster map"}
+knitr::include_graphics("figures/raster_intro_plot.png")
+```
+
 The geographic raster data model consists of a raster header and a matrix (with rows and columns) representing equally spaced cells (often also called pixels; \@ref(fig:raster-intro-plot):A).
 The raster header defines the coordinate reference system, the extent and the origin.
 The origin (or starting point) is frequently the coordinate of the lower-left corner of the matrix (the **raster** package, however, uses the upper left corner, by default (\@ref(fig:raster-intro-plot):B)).
@@ -612,15 +616,16 @@ You can also specify a nodata value in the header of a raster, frequently -9999 
 Use NA instead of gray values in Fig. C
 You can see them as the gray cells in the C and D panel of the figure \@ref(fig:raster-intro-plot).
 -->
-Raster maps usually represent continous phenomena such as elevation, temperature, population density or spectral data (\@ref(fig:raster-intro-plot):D).
-Of course, we can represent discrete features such as soil or landcover classes also with the help of a raster data model.
+Raster maps usually represent continous phenomena such as elevation, temperature, population density or spectral data (\@ref(fig:raster-intro-plot2).
+Of course, we can represent discrete features such as soil or landcover classes also with the help of a raster data model (\@ref(fig:raster-intro-plot2).
 Consequently, the discrete borders of these features become blurred, and depending on the spatial task a vector representation might be more suitable.
 
-```{r raster-intro-plot, echo=FALSE, fig.cap="Raster data: A - a grid representation; B - numbers of the cells; C - values of the cells; D - a final raster map"}
-knitr::include_graphics("figures/raster_intro_plot.png")
+```{r raster-intro-plot2, echo=FALSE, fig.cap="Exampled of continuous (left) and categorical (right) raster"}
+knitr::include_graphics("figures/raster_intro_plot2.png")
 ```
 
-### An introduction to **raster**
+### An introduction to raster
+>>>>>>> upstream/master
 
 The **raster** package supports raster objects in R. 
 It provides an extensive set of functions to create, read, export, manipulate and process raster datasets.
@@ -628,11 +633,12 @@ Aside from general raster data manipulation, **raster** provides many low level 
 **raster** also lets you work on large raster datasets that are too large to fit into the main memory . 
 In this case, **raster** provides the possiblity to divide the raster into smaller chunks (rows or blocks), and processes these iteratively instead of loading the whole raster file into RAM (for more information, please refer to `vignette("functions", package = "raster").
 
-<!-- we should replace it with our own dataset -->
-<!-- example dataset from spDataLarge -->
+<!-- short description of the data -->
+
 ```{r, message=FALSE}
+library(spDataLarge)
 library(raster)
-raster_filepath = system.file("external/test.grd", package="raster")
+raster_filepath = system.file("raster/srtm.tif", package="spDataLarge")
 new_raster = raster(raster_filepath)
 ```
 
@@ -705,7 +711,21 @@ Similar to the **sf** package, **raster** also provides `plot()` methods for its
 plot(new_raster)
 ```
 
-<!-- combining raster with vector for a plot -->
+Moreover, it is possible to plot raster together with vector data.
+For this purpose, we need to read a vector dataset:
+
+```{r, message=FALSE}
+vector_filepath = system.file("vector/zion.gpkg", package="spDataLarge")
+new_vector = st_read(vector_filepath)
+```
+
+Our new object, `new_vector`, is a polygon representing borders of Zion National Park.
+We could impose these borders on a elevation map with the second use of the `plot()` function, this time with the `add` argument set to `TRUE`:
+
+```{r basic-new-raster-vector-plot}
+plot(new_raster)
+plot(new_vector, add = TRUE)
+```
 
 <!-- TODO: cross reference advanced mapping chapter -->
 <!-- more advanced options - rasterVis, tmap, mapview, leaflet -->
@@ -741,7 +761,7 @@ The `brick()` function creates a `RasterBrick` object.
 Usually, you provide it with a filename to a multilayer raster file but might also use another raster object and other spatial objects (see its help page for all supported formats).
 <!-- should we use this example or have our own multilayer dataset? -->
 ```{r}
-multilayer_raster_filepath = system.file("external/rlogo.grd", package="raster")
+multilayer_raster_filepath = system.file("raster/landsat.tif", package="spDataLarge")
 r_brick = brick(multilayer_raster_filepath)
 r_brick
 ```
@@ -759,8 +779,8 @@ And again, one can simply specify a path to a file stored on disk.
 The possibility to create a `RasterStack` from a file stored on disk and an object residing in R's global environment is one of the main differences compared to a `RasterBrick`.
 
 ```{r}
-raster_on_disk = raster(multilayer_raster_filepath, layer = 1)
-raster_in_memory = raster(xmn = 0, xmx = 101, ymn = 0, ymx = 77, res = 1)
+raster_on_disk = raster(r_brick, layer = 1)
+raster_in_memory = raster(xmn = 301905, xmx = 335745, ymn = 4111245, ymx = 4154085, res = 30)
 values(raster_in_memory) = sample(1:ncell(raster_in_memory))
 crs(raster_in_memory) = crs(raster_on_disk)
 ```
