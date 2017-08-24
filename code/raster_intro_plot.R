@@ -53,21 +53,25 @@ rclmat = matrix(m, ncol=3, byrow=TRUE)
 cat_raster = reclassify(cat_raster, rclmat, include.lowest = TRUE, right = NA) %>% 
   ratify(.)
 
-landcover = data.frame(landcover = c("Barren", "Cultivated", "Developed", "Forest", "Herbaceous", "Shrubland", "Water", "Wetlands"))
+landcover = data.frame(landcover = c("Water", "Developed", "Barren", "Forest", "Shrubland", "Herbaceous", "Cultivated", "Wetlands"))
 levels(cat_raster) = cbind(levels(cat_raster)[[1]], landcover) 
 
 landcover_col = c("#b2ada3", "#dbd83d", "#aa0000", "#68aa63", "#c9c977", "#a58c30", "#476ba0", "#bad8ea")
 
 ## Key
-my_key = list(text=list(lab=as.character(landcover$landcover)),
+key_landcover = c("Barren", "Cultivated","Developed", "Forest", "Herbaceous", "Shrubland", "Water", "Wetlands")
+my_key = list(text=list(lab=key_landcover),
               rectangles=list(col = landcover_col),
-              space = 'inside',
-              columns = 1)
+              space = "inside",
+              columns = 1,
+              background = "white")
 
 p2 = levelplot(cat_raster, col.regions = landcover_col, 
                colorkey = FALSE, key = my_key)
 
-p1 = levelplot(cla_raster, margin = FALSE)
+p1 = levelplot(cla_raster, margin = FALSE, colorkey = FALSE)
 
-print(p1, split=c(1, 1, 2, 1), more=TRUE)
-print(p2, split=c(2, 1, 2, 1))
+png(filename = "figures/raster_intro_plot2.png", width = 950, height = 555)
+plot(p1, split=c(1, 1, 2, 1), more=TRUE)
+plot(p2, split=c(2, 1, 2, 1))
+dev.off()
