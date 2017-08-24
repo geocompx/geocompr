@@ -23,27 +23,27 @@ small_ras_val_2[c(7, 9)] <- NA
 
 cells_num_plot = ggplot() +
   vr_geom_raster_seq(small_ras) +
-  vr_geom_text(small_ras) + 
+  vr_geom_text(small_ras, cex = 3) + 
   scale_fill_gradientn(colors = c("white")) +
   labs(title = "A. Cell IDs")
 
 cells_val_plot = ggplot() +
   vr_geom_raster_seq(small_ras_val) +
-  vr_geom_text(small_ras_val) + 
+  vr_geom_text(small_ras_val, cex = 3) + 
   scale_fill_gradientn(colors = c("white")) +
   labs(title = "B. Cell values")
 
 map_plot = ggplot() +
   vr_geom_raster_seq(small_ras_val_2) +
   # vr_geom_text(small_ras_val) +
-  labs(title = "C. Coloring cell values") +
+  labs(title = "C. Colored cell values") +
   scale_fill_gradientn(colours=c("#a50026", "#ffffbf", "#006837"))
 
 raster_intro_plot = arrangeGrob(cells_num_plot,
              cells_val_plot, map_plot, 
              ncol = 3)
 
-ggsave(plot = raster_intro_plot, filename = "figures/raster_intro_plot.png", width = 5, height = 5)
+ggsave(plot = raster_intro_plot, filename = "figures/raster_intro_plot.png", width = 7, height = 3)
 
 # second intro plot -----------------------------------------------------------
 library(rasterVis)
