@@ -242,7 +242,7 @@ sel_asia = st_intersects(world_centroids, asia, sparse = FALSE)
 summary(sel_asia)
 ```
 
-<!--Note: another way of achieving the same result is with a GEOS function for identifying spatial overlay, which we will cover in more detail in Chapter \@ref(spatial-data-operations).-->
+Note: `st_intersects()` uses [GEOS](https://trac.osgeo.org/geos/) in the background for the spatial overlay operation (see also Chapter \@ref(spatial-data-operations)).
 
 Since **sf**'s `plot()` function builds on base plotting methods, you may also use its many optional arguments (see `?plot` and `?par`).
 This provides powerful but not necessarily intuitive functionality.
@@ -264,8 +264,8 @@ plot(world_centroids, add = TRUE, cex = world$pop / 1e8, lwd = 3)
 
 ### Simple feature classes {#sf_classes}
 
-To understand new data formats in depth, it often helps to generate them for first principles.
-This section walks through vector spatial classes step-by-step, from the elementary simple feature geometry to simple feature objects of class `sf` representing complex spatial data.
+To understand new data formats in depth, it often helps to build them from the ground up.
+This section walks you through vector spatial classes step-by-step, from the elementary simple feature geometry to simple feature objects of class `sf` representing complex spatial data.
 Before describing each geometry type that the **sf** package supports, it is worth taking a step back to understand the building blocks of `sf` objects. 
 As stated in section \@ref(intro-sf), simple features are simply data frames with at least one special column that makes it spatial.
 These spatial columns are often called `geom` or `geometry` and can be like non-spatial columns: `world$geom` refers to the spatial element of the `world` object described above.
@@ -289,23 +289,10 @@ This is why, GIS and spatial databases use WKB to transfer and store geometry ob
 WKT, on the other hand, is a human-readable text markup description of simple features. 
 Both formats are exchangeable, and if we present one, we will naturally choose the WKT representation.
 
-The basis for each of the geometry types is the point. 
-A point is simply a coordinate in 2D, 3D or 4D space:
+The basis for each geometry type is the point. 
+A point is simply a coordinate in 2D, 3D or 4D space (see `vignette("sf1")` for more information) such as:
 
--  X and Y coordinates represent the location points in 2D space, with units depending on the coordinate reference system (CRS) of the geometry data.
-Commonly used units include easting and northing in meters or longitude and latitude (see Chapter 6).
-- Additionally, a Z coordinate might denote altitude but be aware of the fact that this representation is only a crude 3D-approximation since you only have one altitude value for one point.
-The ability of a GIS and R to handle true volumes and surfaces is still limited.
-- An M coordinate ("measure") allows to represent some measure associated to the point, but not the whole feature. 
-This coordinate could be a time of measurement, information on who has measured the point or what is the error of measurement.
-
-As a result, four possible types of points exist - XY (two-dimensional), XYZ (three-dimensional containing altitude), XYM (three-dimensional containing measure) and XYZM (four-dimensional).
-They could be easily describes as a well-known text:
-
-- XY - `POINT (5 2)`
-- XYZ - `POINT (5 2 3)`
-- XYM - `POINTM (5 2 1)`
-- XYZM - `POINT (5 2 3 1)`
+- `POINT (5 2)`
 
 ```{r point, echo=FALSE}
 plot(st_as_sfc(c("POINT(5 2)")), axes = TRUE, main = "POINT")
@@ -319,12 +306,9 @@ A linestring is a sequence of points with a straight line connecting the points,
 plot(st_as_sfc("LINESTRING(1 5, 4 4, 4 1, 2 2, 3 2)"), axes = TRUE, main = "LINESTRING")
 ```
 
-Linestring cannot have self intersecting line parts.
-In other words, lines shouldn't pass through the same point twice (except for the endpoint).
-
 A polygon is a sequence of points that form a closed, non-intersecting ring.
 Closed means that the first and the last point of a polygon have the same coordinates. 
-By definition, a polygon has one exterior boundary (outer ring) and can have zero or more interior boundaries (inner ring), also known as holes.
+By definition, a polygon has one exterior boundary (outer ring) and can have zero or more interior boundaries (inner rings), also known as holes.
 
 - Polygon without a hole - `POLYGON ((1 5, 2 2, 4 1, 4 4, 1 5))`
 
@@ -614,26 +598,29 @@ Simple features are, in essence, data frames with a spatial extension.
 
 ## Raster data
 
-Raster data is a matrix (or a grid) of values with additional spatial metadata, such as extent, resolution and coordinate reference system.
-This grid consists of cells (often called pixels) representing an area on the surface (\@ref(fig:raster-intro-plot):A).
-All cells in a raster must have the same size, which could be represented by a Cartesian (e.g. meters) or geographic coordinate system (degrees).
-Cell numbers in rasters start at 1 in the upper left corner, and its number increase from left to right and then from top to bottom (\@ref(fig:raster-intro-plot):B).
-Each cell in raster data could hold a value, which could be an integer or float (\@ref(fig:raster-intro-plot):C).
-Additionally, it is possible to set the NA (*not available*) value which indicates the absence of data or cells outside of the area of interests.
+The geographic raster data model consists of a raster header and a matrix (with rows and columns) representing equally spaced cells (often also called pixels; \@ref(fig:raster-intro-plot):A).
+The raster header defines the coordinate reference system, the extent and the origin.
+The origin (or starting point) is frequently the coordinate of the lower-left corner of the matrix (the **raster** package, however, uses the upper left corner, by default (\@ref(fig:raster-intro-plot):B)).
+The header defines the extent via the number of columns, the number of rows and the cell size resolution.
+Hence, starting from the origin, we can easily access and modify each single cell by either using the ID of a cell  (\@ref(fig:raster-intro-plot):B) or by explicitly specifying the rows and columns.
+This matrix representation avoids storing explicitly the coordinates for the four corner points (in fact it only stores one coordinate, namely the origin) of each cell corner as would be the case for rectangular vector polygons.
+This and matrix algebra makes raster processing much more efficient and faster than vector data processing.
+However, in contrast to vector data, a raster cell can only hold a single value.
+The value might be numeric or categoric (\@ref(fig:raster-intro-plot):C).
+You can also specify a nodata value in the header of a raster, frequently -9999 (in R we often use `NA`).
+<!--
+Use NA instead of gray values in Fig. C
 You can see them as the gray cells in the C and D panel of the figure \@ref(fig:raster-intro-plot).
-The final raster map, as seen in the D panel of the \@ref(fig:raster-intro-plot) figure, is a color presentation of the raster values.
+-->
+Raster maps usually represent continous phenomena such as elevation, temperature, population density or spectral data (\@ref(fig:raster-intro-plot):D).
+Of course, we can represent discrete features such as soil or landcover classes also with the help of a raster data model.
+Consequently, the discrete borders of these features become blurred, and depending on the spatial task a vector representation might be more suitable.
 
 ```{r raster-intro-plot, echo=FALSE, fig.cap="Raster data: A - a grid representation; B - numbers of the cells; C - values of the cells; D - a final raster map"}
 knitr::include_graphics("figures/raster_intro_plot.png")
 ```
 
-Raster data can be continuous or categorical. 
-Continuous rasters have a range of quantitative values, which could represent phenomena such as elevation, temperature, population density or spectral data.
-Categorical rasters, also known as discrete, represent features or categories.
-This could be landcover, soils, or climate categories data.
-<!-- (one, two panel plot)  -->
-
-### An introduction to raster
+### An introduction to **raster**
 
 The **raster** package supports raster objects in R. 
 It provides an extensive set of functions to create, read, export, manipulate and process raster datasets.
@@ -649,7 +636,7 @@ raster_filepath = system.file("external/test.grd", package="raster")
 new_raster = raster(raster_filepath)
 ```
 
-If you just type the name of the raster in the console, this will print out the so-called raster header (extent, dimensions, resolution, CRS) and some additional information (class, data source name, summary of the raster values): 
+If you just type the name of the raster in the console, this will print out the raster header (extent, dimensions, resolution, CRS) and some additional information (class, data source name, summary of the raster values): 
 
 ```{r}
 new_raster
@@ -679,9 +666,7 @@ crs(new_raster)
 
 <!--CRSargs(CRS("+init=epsg:4326"))-->
 Note that in contrast to the **sf** package, **raster** only accepts the `proj4string` representation of the coordinate reference system.
-
-Values of the cells are the only non-spatial information in the `Raster*` object.
-You can summarize and plot them using base R functions such as `summary()` and `hist()`.
+You can also summarize and plot raster cell values in a non-spatial fashion using base R functions such as `summary()` and `hist()`.
 
 ```{r}
 # numerical summary of the data
