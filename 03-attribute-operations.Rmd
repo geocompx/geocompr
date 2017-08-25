@@ -497,6 +497,74 @@ world_data = world %>% st_set_geometry(NULL)
 class(world_data)
 ```
 
+## Intro attribute data raster
+<!-- Not sure if we should start with an intro here or if we should add it to the general intro in the beginning which so far only talks about sf -->
+In Chapter \@ref{spatial-class} we learned that a raster is basically a rectangular grid with equally-spaced cells, and that one cell can contain only one value. 
+This is in stark contrast to vector data where one feature can have multiple attributes. 
+However, raster stacks and bricks can consist of multiple raster layers with each of them representing one attribute such as temperature, elevation and rainfall (see Chapter \@ref{spatial-class}).
+In the coming subsections we will learn how to create, summarize and reclassify a raster, and how to extract cell values from one layer and multiple layers at once (subsetting).
+
+## Creating and summarizing raster objects
+The easiest way to create a raster is to read a raster file from disk or from a server with the help of the `raster::raster()` command.
+For instance, to load a rasterized version of the famous `meuse` dataset, you can use `raster(system.file("external/test.grd", package = "raster"))`.
+To support numerous drivers, the **raster** package uses **rgdal** under the hood.
+To find out which drivers are available on your system, run `raster::writeFormats()` and `rgdal::gdalDrivers()`.
+
+Here, however, we will create manually a very simple raster.
+This should make it easy to understand how **raster** and related operations work.
+Our raster should consist of just three rows and columns centered around the null meridian and the equator (see `xmn`, `xmx`, `ymn` and `ymx` parameters).
+Additionally, we define a resolution of 1, which here corresponds to one degree since the default `proj4string` of a raster object is WGS84.
+Finally, we set the values with the `vals` argument.
+As we have seen in Chapter \@ref{spatial-class}, this corresponds to a rowwise cell filling  starting at the upper left corner.
+Consequently, the upper first row contains the values 1, 2 and 3, the second row 4, 5 and 6 and the last row 7, 8 and 9.
+
+```{r}
+library(raster)
+r = raster(nrow = 3, ncol = 3, res = 1, 
+           xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+           vals = 1:9)
+plot(r)
+```
+
+Just printing the raster object to the console will yield the minimum and maximum value.
+You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
+If we are interested in further summary operations such as the standard deviation (see below) or if we want to define our own summary functions, we can do so with the `cellStats` command. 
+```{r}
+cellStats(r, sd)
+```
+
+Note that a raster object can also contain categorical data.
+For this, we can use either boolean or factor variables in R.
+For instance, we can create a raster representing grain sizes:
+
+```{r}
+grain_size = c("clay", "silt", "sand")
+r_2 = raster(nrow = 3, ncol = 3, res = 1, 
+             xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+             vals = factor(rep(grain_size, each = 3), levels = grain_size))
+```
+
+Internally, R represents boolean and factor variables as integers.
+This is why the `summary()` and `plot()` function will return numbers instead of classes.
+Finally, if you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately. Try `summary(brick(r, r_2))`. 
+
+## Raster subsetting and manipulation
+
+- by cell
+- by coordinates
+- by matrix notation i, j
+- reclass
+
+
+
+what about:
+- raster aggregation (-> in fact a spatial operation, corresponds to polygon dissolving)
+- raster merging (-> merging of two rasters is also a spatial operation)
+- raster algebra (adding, substracting, squaring, etc.)
+- crop, overlay, reclassify
+- focal functions
+- extract values to points
+
 ## Exercises
 
 For these exercises we will use the `us_states` and `us_states_df` datasets from the **spData** package:
