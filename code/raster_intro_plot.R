@@ -78,12 +78,3 @@ png(filename = "figures/raster_intro_plot2.png", width = 950, height = 555)
 plot(p1, split=c(1, 1, 2, 1), more=TRUE)
 plot(p2, split=c(2, 1, 2, 1))
 dev.off()
-
-
-r1 <- raster(system.file("external/rlogo.grd", package="raster"))
-r2 <- r1
-NAvalue(r2)
-NAvalue(r2) <- 255
-plot(r1)
-x11()
-plot(r2)
