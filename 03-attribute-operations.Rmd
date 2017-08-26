@@ -18,7 +18,17 @@ library(spData)
 ## Introduction
 
 Attribute data is non-spatial information associated with geographic (geometry) data.
-A bus station, for example, could be represented by a field containing its name (attribute data), associated with its latitude and longitude position (geometry data).
+A bus station, for example, could be represented by an attribute field containing its name, associated with its latitude and longitude position (geometry data).
+A raster example might be the elevation value (attribute) for a specific grid cell.
+Interestingly, the raster data model stores the coordinate of the grid cell only indirectly.
+Say, we are in the 3rd row and the 4th column of a raster matrix.
+To derive the corresponding coordinate, we have to move from the origin three cells in x-direction and four cells in y-direction with the cell resolution defining the distance for each x- and y-step.
+The raster header simply gives the matrix a spatial dimension which we need when plotting the raster or when we want to combine two rasters, think, for instance, of adding the values of one raster to another.
+Before such an operation, the corresponding algorithm simply checks if the two rasters share the same extent, projection and resolution, that is the raster headers. 
+Hence, the spatial dimension of raster data is (often) of no importance at the processing level.
+Then, raster processing uses in fact matrix algebra which is why it is so much faster compared to vector processing.
+<!-- should we somewhere add a table comparing advantages/disadvantages of using the vector or raster data model, would fit nicely into chapter 2 -->
+
 Simple features, described in the previous chapter, store attribute data in a data frame, with each column corresponding to a variable (such as 'name') and each row to one observation (such as an individual bus station).
 In addition, a special column, usually named `geom` or `geometry`, stores the geometry data of **sf** objects.
 For a bus station, that would likely be a single point representing its coordinate of the bus station.
@@ -29,12 +39,17 @@ The list elements correspond to the number of observations in the attribute tabl
 But each list element can contain more than one coordinate if required or even another list as it is the case for polygons with holes (see previous sections).
 This structure enables multiple columns to represent a range of attributes for thousands of features (one row per feature).
 
-This chapter focuses on non-geographical operations such as subsetting, aggregating or joining attribute data. 
+This chapter focuses on non-geographical operations on vector and raster data.
+Regarding vector data, we will introduce subsetting, aggregating or joining attribute data. 
 Note that the corresponding functions also have a geographical equivalent.
 Sometimes you can even use the same functions for attribute and spatial operations.
 This is, for example, the case for subsetting as base R's `[` and tidyverse's `filter()` let you also subset spatial data based on the spatial extent of another spatial object (see Chapter \@ref(spatial-data-operations)).
 That is, the skills you learn here are cross-transferable which is also why this chapter lays the foundation for the next chapter (Chapter \@ref(spatial-data-operations)) which extends the here presented methods to the spatial world.
 
+In the case of raster data we will learn how to create, summarize and reclassify a raster, and how to extract cell values from one layer and multiple layers at once (subsetting).
+Finally, we will also have a glimpse on raster algebra which is basically matrix algebra (see above), which is why we predominantly consider it a non-spatial operation.
+
+## Summarizing and subsetting vector attributes
 As outlined in Chapter \@ref(spatial-class), **sf** provided support for simple features in R and made them work with generic R functions such as `plot()` and `summary()` (as can be seen by executing `methods("summary")` and/or `methods("plot")`).
 
 The reliable `data.frame` (and modifications to it such as the `tibble` class used in the tidyverse) is the basis for data analysis in R.
@@ -68,8 +83,6 @@ Unlike objects of class `Spatial` of the **sp** package, `sf` objects are also c
 The former provides fast and powerful functions for data manipulation (see [Section 6.7](https://csgillespie.github.io/efficientR/data-carpentry.html#data-processing-with-data.table) of @gillespie_efficient_2016), and the latter provides powerful plotting capabilities.
 ]
 This chapter focuses on **dplyr** because of its intuitive function names and ability to perform multiple chained operations using the pipe operator.
-
-## Attribute subsetting
 
 Because simple feature objects are also data frames (run `class(world)`to verify), you can use a wide range of functions (from base R and other packages) for subsetting them.
 Base R subsetting functions include `[`, `subset()` and  `$`.
@@ -215,7 +228,7 @@ It allows operations to be written in a clear order, line-by-line and from left 
 Another advantage over the nesting approach is that you can easily comment out certain parts of a pipe.
 **dplyr** works especially well with the pipe operator because its fundamental functions (or 'verbs', like `select()`) expect a data frame object as input and also return one.^[If you want **dplyr** to return a vector, use `pull`.]
 
-## Attribute data aggregation 
+## Aggregating vector attributes 
 
 <!-- https://github.com/ropenscilabs/skimr ?? -->
 
@@ -286,7 +299,7 @@ world_continents2 = aggregate(world["pop"], by = ag_var, FUN = sum, na.rm = TRUE
 <!--   arrange(-pop) -->
 <!-- ``` -->
 
-## Attribute data joining 
+## Joining vector attributes 
 
 <!-- https://github.com/dgrtwo/fuzzyjoin -->
 <!-- http://r4ds.had.co.nz/relational-data.html -->
@@ -411,7 +424,7 @@ inner_join1 = north_america %>%
 inner_join1
 ```
 
-## Attribute data creation
+## Creating vector attributes and removing spatial information
 <!-- lubridate? -->
 
 Often, we would like to create a new column based on already existing columns.
@@ -481,8 +494,6 @@ world %>%
   set_names(new_names)
 ```
 
-## Removing spatial information
-
 It is important to note that the attribute data operations preserve the geometry of the simple features.
 As mentioned at the outset of the chapter, however, it can be useful to remove the geometry.
 Do do this, you have to explicitly remove it because `sf` explicitly makes the geometry column sticky.
@@ -497,15 +508,8 @@ world_data = world %>% st_set_geometry(NULL)
 class(world_data)
 ```
 
-## Intro attribute data raster
-<!-- Not sure if we should start with an intro here or if we should add it to the general intro in the beginning which so far only talks about sf -->
-In Chapter \@ref{spatial-class} we learned that a raster is basically a rectangular grid with equally-spaced cells, and that one cell can contain only one value. 
-This is in stark contrast to vector data where one feature can have multiple attributes. 
-However, raster stacks and bricks can consist of multiple raster layers with each of them representing one attribute such as temperature, elevation and rainfall (see Chapter \@ref{spatial-class}).
-In the coming subsections we will learn how to create, summarize and reclassify a raster, and how to extract cell values from one layer and multiple layers at once (subsetting).
-
 ## Creating and summarizing raster objects
-The easiest way to create a raster is to read a raster file from disk or from a server with the help of the `raster::raster()` command.
+The easiest way to create a raster object in R is to read-in a raster file from disk or from a server.
 For instance, to load a rasterized version of the famous `meuse` dataset, you can use `raster(system.file("external/test.grd", package = "raster"))`.
 To support numerous drivers, the **raster** package uses **rgdal** under the hood.
 To find out which drivers are available on your system, run `raster::writeFormats()` and `rgdal::gdalDrivers()`.
@@ -526,7 +530,7 @@ r = raster(nrow = 3, ncol = 3, res = 1,
 plot(r)
 ```
 
-Just printing the raster object to the console will yield the minimum and maximum value.
+Printing the raster object to the console yields the raster header and also the minimum and maximum raster value.
 You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
 If we are interested in further summary operations such as the standard deviation (see below) or if we want to define our own summary functions, we can do so with the `cellStats` command. 
 ```{r}
@@ -551,19 +555,20 @@ Finally, if you provide the `summary()` and `cellStats()` functions with a raste
 ## Raster subsetting and manipulation
 
 - by cell
-- by coordinates
+- by coordinates (cellFromXY)
 - by matrix notation i, j
 - reclass
 
+## Raster algebra (adding, substracting, squaring, etc.)
 
-
-what about:
-- raster aggregation (-> in fact a spatial operation, corresponds to polygon dissolving)
-- raster merging (-> merging of two rasters is also a spatial operation)
-- raster algebra (adding, substracting, squaring, etc.)
-- crop, overlay, reclassify
+just raster algebra, and therefore not really a spatial calculation
 - focal functions
-- extract values to points
+
+Spatial functions for later chapters, I guess:
+- raster aggregation/disaggregation (changing spatial resolution)
+- raster merging (-> merging of two rasters is also a spatial operation)
+- crop, overlay
+- extract values to points and raster from points -> probably vector/raster chapter
 
 ## Exercises
 
