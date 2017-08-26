@@ -553,11 +553,44 @@ This is why the `summary()` and `plot()` function will return numbers instead of
 Finally, if you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately. Try `summary(brick(r, r_2))`. 
 
 ## Raster subsetting and manipulation
+There are several ways how to subset raster datasets:
 
-- by cell
-- by coordinates (cellFromXY)
-- by matrix notation i, j
-- reclass
+- using row-column indexing with the help of `[`
+- by cell ID
+- by coordinates
+
+So if we want to access the value of the upper left corner cell, we can use one of the following commands:
+
+```{r, eval = FALSE}
+# row 1, column 1
+r[1, 1]
+# cell ID 1
+r[1]
+# xy coordinates x = -1 and y = 1
+r[cellFromXY(r, xy = c(-1, 1))]
+```
+
+To extract all values or complete rows, you can use `values()` and `getValues()`
+In case you apply subsetting to a raster stack or brick, this will return the cell value(s) for each single layer, for example `stack(r, r_2)[1]` returns a matrix with one row and two columns - one for each layer.
+On the other hand, the `raster::subset()` command lets you extract a specific or several layers from a raster stack or brick.
+For the same operation, you can also use the `$` operator.
+
+To modify cell values, we overwrite existing values with the help of subsetting operations.
+For instance, let us replace the upper left cell with a value of 12:
+
+```{r}
+r[1, 1] = 12
+r[]
+```
+
+Leaving the square brackets empty is a shortcut version of `values()` for retrieving all values of a raster.
+Another common raster operation is to convert values into classes, for example one might to divide a digital elevation model into low (class 1), middle (class 2) and high elevations (class ).
+Using the `reclassify()` command, we need to construct a reclassification matrix, where the first column corresponds to the lower, the second column to the upper end of the class and the third column represents the new value for this range.
+
+```{r, eval = FALSE}
+rcl = matrix(c(0, 3, 1, 3, 6, 2, 6, 12, 3), ncol = 3, byrow = TRUE)
+recl = reclassify(r, rcl = rcl)
+```
 
 ## Raster algebra (adding, substracting, squaring, etc.)
 
