@@ -11,39 +11,36 @@ set.seed(2017-04-01)
 
 small_ras = raster(matrix(1:16, 4, 4, byrow =TRUE))
 small_ras_val = raster(matrix(sample.int(100, 16), 4, 4, byrow =TRUE))
-NAvalue(small_ras_val) <- -9999
-small_ras_val[c(7, 9)] = -9999
-small_ras_val_2 <- small_ras_val
-small_ras_val_2[c(7, 9)] <- NA
+small_ras_val[c(7, 9)] = NA
 
-# empty_grid_plot = ggplot() +
-#   vr_geom_raster_seq(small_ras) +
-#   scale_fill_gradientn(colors = c("white")) +
-#   labs(title = "A. Raster grid")
+empty_grid_plot = ggplot() +
+  vr_geom_raster_seq(small_ras) +
+  scale_fill_gradientn(colors = c("white")) +
+  labs(title = "A. Raster grid")
 
 cells_num_plot = ggplot() +
   vr_geom_raster_seq(small_ras) +
-  vr_geom_text(small_ras, cex = 3) + 
+  vr_geom_text(small_ras) + 
   scale_fill_gradientn(colors = c("white")) +
-  labs(title = "A. Cell IDs")
+  labs(title = "B. Cells numbers")
 
 cells_val_plot = ggplot() +
   vr_geom_raster_seq(small_ras_val) +
-  vr_geom_text(small_ras_val, cex = 3) + 
+  vr_geom_text(small_ras_val) + 
   scale_fill_gradientn(colors = c("white")) +
-  labs(title = "B. Cell values")
+  labs(title = "C. Cells values")
 
 map_plot = ggplot() +
-  vr_geom_raster_seq(small_ras_val_2) +
+  vr_geom_raster_seq(small_ras_val) +
   # vr_geom_text(small_ras_val) +
-  labs(title = "C. Colored cell values") +
+  labs(title = "D. Raster map") +
   scale_fill_gradientn(colours=c("#a50026", "#ffffbf", "#006837"))
 
-raster_intro_plot = arrangeGrob(cells_num_plot,
+raster_intro_plot = arrangeGrob(empty_grid_plot, cells_num_plot,
              cells_val_plot, map_plot, 
-             ncol = 3)
+             ncol = 2)
 
-ggsave(plot = raster_intro_plot, filename = "figures/raster_intro_plot.png", width = 7, height = 3)
+ggsave(plot = raster_intro_plot, filename = "figures/02_raster_intro_plot.png", width = 5, height = 5)
 
 # second intro plot -----------------------------------------------------------
 library(rasterVis)
@@ -74,7 +71,7 @@ p2 = levelplot(cat_raster, col.regions = landcover_col,
 
 p1 = levelplot(cla_raster, margin = FALSE, colorkey = FALSE)
 
-png(filename = "figures/raster_intro_plot2.png", width = 950, height = 555)
+png(filename = "figures/02_raster_intro_plot2.png", width = 950, height = 555)
 plot(p1, split=c(1, 1, 2, 1), more=TRUE)
 plot(p2, split=c(2, 1, 2, 1))
 dev.off()
