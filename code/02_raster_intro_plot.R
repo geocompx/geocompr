@@ -40,7 +40,7 @@ raster_intro_plot = arrangeGrob(empty_grid_plot, cells_num_plot,
              cells_val_plot, map_plot, 
              ncol = 2)
 
-ggsave(plot = raster_intro_plot, filename = "figures/raster_intro_plot.png", width = 5, height = 5)
+ggsave(plot = raster_intro_plot, filename = "figures/02_raster_intro_plot.png", width = 5, height = 5)
 
 # second intro plot -----------------------------------------------------------
 library(rasterVis)
@@ -71,7 +71,7 @@ p2 = levelplot(cat_raster, col.regions = landcover_col,
 
 p1 = levelplot(cla_raster, margin = FALSE, colorkey = FALSE)
 
-png(filename = "figures/raster_intro_plot2.png", width = 950, height = 555)
+png(filename = "figures/02_raster_intro_plot2.png", width = 950, height = 555)
 plot(p1, split=c(1, 1, 2, 1), more=TRUE)
 plot(p2, split=c(2, 1, 2, 1))
 dev.off()
