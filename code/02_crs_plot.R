@@ -33,7 +33,7 @@ ggsave(plot = vector_crs,
 
 ## raster plot ---------------------------------------------------------------
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
-new_raster = raster(raster_filepath) %>% mask(., new_vector)
+new_raster = raster(raster_filepath) #%>% mask(., new_vector)
 new_raster2 = projectRaster(new_raster, crs = "+init=epsg:4326")
 
 pr1 = levelplot(new_raster, margin = FALSE, colorkey = FALSE)
