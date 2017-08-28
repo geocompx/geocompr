@@ -22,6 +22,7 @@
 - 2017-07-15 - issue - aggregate methods not user friendly https://github.com/r-spatial/sf/issues/429
 - 2017-06-15 - enhancement - Add a support for `sf` objects - https://github.com/oswaldosantos/ggsn/issues/16
 - 2017-08-03 - bug - st_join with st_relate doesn't work - https://github.com/r-spatial/sf/issues/454
+- 2017-08-03 - bug - aggregate.sf does not return an object with the same length as by - https://github.com/r-spatial/sf/issues/452
 
 ## open
 
@@ -30,7 +31,6 @@
 - 2017-06-06 - enhancement - skim of `sf` objects - https://github.com/ropenscilabs/skimr/issues/88
 - 2017-07-11 - bug - Problem with plots of the multipoint type - https://github.com/mtennekes/tmap/issues/126
 - 2017-07-31 - enhancement - Add a support for the `sf` objects - https://github.com/hunzikp/velox/issues/7
-- 2017-08-03 - bug - aggregate.sf does not return an object with the same length as by - https://github.com/r-spatial/sf/issues/452
 - 2017-08-23 - bug - mapedit does not seem to save the end result after editing - https://github.com/r-spatial/mapedit/issues/63
 
 # Other
