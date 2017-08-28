@@ -1,6 +1,6 @@
 # Geographic data I/O {#read-write}
 
-The previous chapters provided an overview of spatial data classes in R, with a focus on simple features.
+The previous chapters provided an overview of spatial data classes in R, with a focus on simple features and raster.
 This chapter is about getting spatial data onto your computer and then, perhaps after processing it with techniques described in this book, back out to the world.
 <!-- Not sure if this is the place for the following two sentences... Or if so, some kind of link is missing.-->
 We include a section (\@ref(visual-outputs)) on visualization because outputting data in a human (not just computer) readable format enables non-programmers to benefit from your work.
@@ -11,7 +11,6 @@ We use the acronym instead of plain English not to confuse you or to make chapte
 Concepts such as computational efficiency, hard disk space and 'idempotence' are useful when thinking about reading and writing geographic datasets, which can become large and difficult to handle.
 Loading/saving data is yet another way of saying the same thing.
 ]
-<!-- todo: check we mention computational efficiency, disk-space and 'idempotence' -->
 
 <!-- Old intro to this chapter - can we salvage anything from this? -->
 <!-- Reading, writing and plotting are 3 of the most important initial stages in geocomputation. -->
@@ -23,58 +22,59 @@ Loading/saving data is yet another way of saying the same thing.
 ## Data Input (I)
 
 To efficiently read data into R, it helps to have an understanding of what happens 'under the hood'.
-Executing commands such as `sf::st_read()` (the main function we use for loading spatial data, from the **sf** package) or `readr::read_csv()` silently sets off a chain of events that loads objects.
-<!-- I would suggest to avoid confusion. readr::read_csv cannot load spatial objects. Since you write "happens under the hood", I would also expect a bit more detail on "silently sets off a chain of events". -->
+Executing commands such as `sf::st_read()` (the main function we use for loading vector data, from the **sf** package), `raster::raster()` (the main function used for loading raster data, from the **raster** package),  or `readr::read_csv()` (which can we used to read spatial data from text files) silently sets off a chain of events that loads objects.
 "Loading" in this context means loading the data into R or, more precisely, assigning objects to your workspace, stored in RAM accessible from the `.GlobalEnv` of your current R session.
 <!-- What is your understanding of workspace? Or what is the difference between workspace and the global environment here?-->
 <!-- coud add a footnote here mentioning `.GlobalEnv` -->
 
-Spatial data comes in a wide variety of file formats, and **sf** is able to handle most of them <!-- is that right? --> via its `st_read()` command.
-Behind the scenes it uses GDAL, which supports the import of a very wide range of spatial data formats.
+### Vector data
+
+Spatial vector data comes in a wide variety of file formats, and **sf** is able to handle most of them <!-- is that right? --> via its `st_read()` command.
+Behind the scenes it uses GDAL, which supports the import of a very wide range of vector data formats^[A list of supported formats could be found using `sf::st_drivers()`].
 The first argument of `st_read()` is `file`, which should be a text string or an object containing a single text string:
 
 ```{r}
 library(sf)
-f = system.file("shapes/world.gpkg", package = "spData")
-world = st_read(f)
+vector_filepath = system.file("shapes/world.gpkg", package = "spData")
+world = st_read(vector_filepath)
 ```
 
+<!-- isn't that confusing? -->
 **Tip**: `read_sf()` and `write_sf()` can be used as easy-to-remember alternatives to `st_read()` and `st_write()`.
 Remember they hide information about the data source and overwrite existing data, though.
 
 A major advantage of **sf** is that it is fast.
-To demonstrate this, we will use a function to compare `st_read` with its **sp** equivalent, `rgdal::readOGR`:
+To demonstrate this, we will use a function to compare `st_read()` with its **sp** equivalent, `rgdal::readOGR()`:
 
 ```{r}
 bench_read = function(file, n) {
   m = microbenchmark(times = n,
-                     rgdal::readOGR(f),
-                     st_read(f)
+                     rgdal::readOGR(vector_filepath),
+                     st_read(vector_filepath)
   )
   mean(m$time[1:n]) / mean(m$time[(n + 1):(n * 2)])
 }
 ```
 
 This function takes as arguments an input file (`file`) and a number of times to run each command (`n`) and returns how many times faster `st_read()` is than `readOGR()`.
-Let's run the benchmark for the `world.gpkg` file represented by the object `f`:
-<!-- We as illustrated in the benchmark below: -->
+Let's run the benchmark for the `world.gpkg` file represented by the object `vector_filepath`:
 
 ```{r, results='hide'}
 library(microbenchmark)
-read_world_gpkg = bench_read(file = f, n = 5)
+read_world_gpkg = bench_read(file = vector_filepath, n = 5)
 ```
 
 ```{r}
 read_world_gpkg
 ```
 
-The results demonstrate that **sf** was around `r round(read_world_gpkg)` times faster than **rgdal** at reading-in the world countries shapefile.
+The results demonstrate that **sf** was around `r round(read_world_gpkg)` times faster than **rgdal** at reading-in the world countries vector.
 The relative performance of `st_read()` compared with other functions will vary depending on file format and the nature of the data.
 To illustrate this point, we performed the same operation on a geojson file and found a greater speed saving:
 
 ```{r, results='hide'}
-f = system.file("shapes/cycle_hire_osm.geojson", package = "spData")
-read_lnd_geojson = bench_read(file = f, n = 5)
+vector_filepath_gj = system.file("shapes/cycle_hire_osm.geojson", package = "spData")
+read_lnd_geojson = bench_read(file = vector_filepath_gj, n = 5)
 ```
 
 ```{r}
@@ -90,7 +90,26 @@ sf_drivers = st_drivers()
 head(sf_drivers, n = 2)
 ```
 
+### Raster data
+
+Raster data also could exist in many different file formats.
+<!-- single and multilayered -->^[A list of supported raster formats could be found using `rgdal::gdalDrivers()`].
+
+<!-- raster -->
+<!-- brick -->
+<!-- stack -->
+
+```{r}
+gdalDrivers()
+```
+
+<!-- additional save to text subsection? -->
+
 ## Data output (O)
+
+<!-- raster + vector + text intro -->
+
+### Vector data
 
 ```{r, echo=FALSE, results='hide'}
 world_files = list.files(pattern = "world\\.")
@@ -171,8 +190,16 @@ This is not generally recommended, as it will not work for multi-file data sourc
 file.remove("world.gpkg")
 ```
 
-<!-- RASTER DATA -->
+### Raster data
+
+<!-- writeRaster -->
 <!-- + datatypes -->
+<!-- + options (for example geotiff) -->
+<!-- + bylayer -->
+
+```{r}
+writeFormats()
+```
 
 ## File formats
 
