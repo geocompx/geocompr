@@ -509,27 +509,19 @@ class(world_data)
 
 ## Manipulating raster objects
 In contrast to simple features (vector data), raster data represents continuous surfaces.
-In the following, we first explain how to create and subset a raster. 
-Subsequently, we classify raster operations into four categories using the map algebra scheme [@Tomlin_1990_geographic], and present each of these classes individually by example.
+In the following, we shortly repeat how to create a raster.
+However, here we will use both numerical and categorical data as raster values.
+Next we will have a look at subsetting operations. 
+And finally, we classify raster operations into four categories using the map algebra scheme [@Tomlin_1990_geographic], and present each of these classes individually by example.
 
-The easiest way to create a raster object in R is to read-in a raster file from disk or from a server.
-For instance, to load a rasterized version of the famous `meuse` dataset, you can use `raster(system.file("external/test.grd", package = "raster"))`.
-To support numerous drivers, the **raster** package uses **rgdal** under the hood.
-To find out which drivers are available on your system, run `raster::writeFormats()` and `rgdal::gdalDrivers()`.
-
-Here, however, we will create manually a very simple raster.
+Let us start with manually recreating the raster dataset of Chapter \@ref{spatial-class}.
 This should make it easy to understand how **raster** and related operations work.
-Our raster should consist of just three rows and columns centered around the null meridian and the equator (see `xmn`, `xmx`, `ymn` and `ymx` parameters).
-Additionally, we define a resolution of 1, which here corresponds to one degree since the default `proj4string` of a raster object is WGS84.
-Finally, we set the values with the `vals` argument.
-As we have seen in Chapter \@ref{spatial-class}, this corresponds to a rowwise cell filling  starting at the upper left corner.
-Consequently, the upper first row contains the values 1, 2 and 3, the second row 4, 5 and 6 and the last row 7, 8 and 9.
 
 ```{r}
 library(raster)
-r = raster(nrow = 3, ncol = 3, res = 1, 
+r = raster(nrow = 6, ncol = 6, res = 0.5, 
            xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-           vals = 1:9)
+           vals = 1:36)
 plot(r)
 ```
 
@@ -539,9 +531,9 @@ For instance, we can create a raster representing grain sizes:
 
 ```{r}
 grain_size = c("clay", "silt", "sand")
-r_2 = raster(nrow = 3, ncol = 3, res = 1, 
+r_2 = raster(nrow = 6, ncol = 6, res = 0.5, 
              xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-             vals = factor(rep(grain_size, each = 3), levels = grain_size))
+             vals = factor(rep(grain_size, each = 12), levels = grain_size))
 ```
 
 Internally, R represents boolean and factor variables as integers.
@@ -575,15 +567,15 @@ If you only want to extract a single layer, you might also use the `$` operator.
 Map algebra (or cartographic modeling) divides raster operations into four subclasses [@Tomlin_1990_geographic], with each of them either working on one or several grids simultaneously:
 
 1. *Local* or per-cell operations.
-2. *Focal* or neighborhood operations. Most often the output cell value is the result of a 3 x 3 input cell block.
+2. *Focal* or neighborhood operations.
+Most often the output cell value is the result of a 3 x 3 input cell block.
 3. *Zonal* operations are similar to focal operations but instead of a predefined neighborhood, classes, which can take on any, i.e. also irregular size and shape, are the basis for calculations.
 4. *Global* or per-raster operations, that means the output cell derives its value potentially from one or several entire rasters
-
-In the following paragraphs, we will explain each of these operations by example.
 
 This classification scheme uses basically the number of cells involved in a processing step as distinguishing feature.
 Of course, one can classify raster operations based on other characteristics such as discipline.
 Think, for instance, of terrain, hydrological analysis or image classifications.
+In the following paragraphs, we will explain each of the four map algebra operations by example.
 
 Local operations comprise all cell-by-cell operations in one or several layers.
 In the simplest case, we modify a single cell value.
