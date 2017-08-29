@@ -48,7 +48,7 @@ poly_target =
   as(., "Spatial")
 
 #**********************************************************
-# 1 FOCAL EXAMPLE------------------------------------------
+# 2 FOCAL EXAMPLE------------------------------------------
 #**********************************************************
 
 # polygonize raster data
@@ -65,7 +65,7 @@ p_1 = spplot(polys, colorkey = FALSE, col = gray(0.5),
                     first = FALSE),
                list("sp.polygons", poly_target, col = "gold", lwd = 4, 
                     first = FALSE),
-               list("sp.text", xyFromCell(r, 1:ncell(r)), 1:ncell(r)) 
+               list("sp.text", xyFromCell(r, 1:ncell(r)), values(r)) 
              ))
 
 p_2 = spplot(poly_focal, colorkey = FALSE, col = gray(0.5),
@@ -73,7 +73,8 @@ p_2 = spplot(poly_focal, colorkey = FALSE, col = gray(0.5),
              sp.layout = list(
                list("sp.polygons", poly_target, col = "gold", lwd = 4, 
                     first = FALSE),
-               list("sp.text", xyFromCell(r_focal, 1:ncell(r_focal)), values(r_focal)) 
+               list("sp.text", xyFromCell(r_focal, 1:ncell(r_focal)),
+                    values(r_focal)) 
              ))
 
 png(filename = "figures/03_focal_example.png", width = 950, height = 555)
