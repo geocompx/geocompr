@@ -29,6 +29,8 @@ library(raster)
 r = raster(nrow = 3, ncol = 3, res = 0.5, 
            xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
            vals = 1:36)
+# in the book chapter we show subsetting, that's why we have to do so here also
+r[1, 1] = 0
 # create polygons
 # moving window
 poly_window = 
