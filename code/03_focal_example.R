@@ -53,7 +53,7 @@ poly_target =
 
 # polygonize raster data
 polys = raster::rasterToPolygons(r, na.rm = FALSE)
-r_focal = focal(r, w = matrix(1, nrow = 3, ncol = 3))
+r_focal = focal(r, w = matrix(1, nrow = 3, ncol = 3), fun = min)
 # focal sum
 poly_focal = rasterToPolygons(r_focal, na.rm = FALSE)
 
