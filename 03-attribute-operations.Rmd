@@ -512,7 +512,7 @@ In contrast to simple features (vector data), raster data represents continuous 
 In the following, we shortly repeat how to create a raster.
 However, here we will use both numerical and categorical data as raster values.
 Next we will have a look at subsetting operations. 
-And finally, we classify raster operations into four categories using the map algebra scheme [@Tomlin_1990_geographic], and present each of these classes individually by example.
+And finally, we classify raster operations into four categories using the map algebra scheme [@tomlin_geographic_1990], and present each of these classes individually by example.
 
 Let us start with manually recreating the raster dataset of Chapter \@ref{spatial-class}.
 This should make it easy to understand how **raster** and related operations work.
@@ -564,7 +564,7 @@ For the same operation, you can also use the `[[` operator.
 If you only want to extract a single layer, you might also use the `$` operator.
 
 ### Map algebra
-Map algebra (or cartographic modeling) divides raster operations into four subclasses [@Tomlin_1990_geographic], with each of them either working on one or several grids simultaneously:
+Map algebra (or cartographic modeling) divides raster operations into four subclasses [@tomlin_geographic_1990], with each of them either working on one or several grids simultaneously:
 
 1. *Local* or per-cell operations.
 2. *Focal* or neighborhood operations.
@@ -631,22 +631,50 @@ Predictive mapping is another interesting application of local raster operations
 We fit a model (using `lm`, `glm`, `gam` or a machine-learning technique) to predict, for example, species richness, the presence of landslides, tree disease or crop yield.
 The response variable correspond to points in space.
 We retrieve the predictor variables from various rasters (elevation, pH, precipitation, temperature, landcover, soil class, etc.).
-To make a spatial prediction, all we have to do, is to apply the estimated coefficients to the predictor rasters, and summing up the resulting output rasters (Chapter ??; see also @Muenchow_2013_predictive).
+To make a spatial prediction, all we have to do, is to apply the estimated coefficients to the predictor rasters, and summing up the resulting output rasters (Chapter ??; see also @muenchow_predictive_2013).
 <!-- add reference to chapter ecological modeling -->
 
-While local functions operate on one cell, though possibly from multiple layers, focal operations take into account a target cell and its neigbors.
-The neigborhood under considertation is typically of size 3 x 3 cells (that is one target cell and the eight surrounding neighbors) but can take on any other (not necessarily rectangular) shape as defined by the user.
-The output of a focal operation can be the mean (or any other function) of all cells within the moving window.
-Alternatively, one can also provide a weight matrix, say the eight neigbouring cells should only have a weight of 0.5, while the center has a weight of 2.
+While local functions operate on one cell, though possibly from multiple layers, focal operations take into account a central cell and its neigbors.
+The neigborhood (also named kernel, filter or moving window) under consideration is typically of size 3-by-3 cells (that is the central cell and its eight surrounding neighbors) but can take on any other (not necessarily rectangular) shape as defined by the user.
+A focal operation applies an aggregation function to all cells within the specified neighborhood, uses the corresponding output as the new value for the the central cell, and moves on to the next central cell (Figure @ref(fig:focal_example)).
+Other names for this operation are spatial filtering and convolution [@burrough_principles_2015].
 
-Image filtering is probably the most common use case for focal operations.
+To retrieve the minimum for a 3-by-3 moving window, we can use the `focal()` function in R (Figure @ref(fig:focal_example)).
+We define the function we wish to apply to this neighborhood with the `fun` argument and the shape of the moving window with a `matrix` whose values correspond to weights.
+Here, we choose the minimum, but of course we can use any other function such as the the sum, the mean, the median, the maximum, the variance or a function which returns the most frequent appearance.
 
-```{r raster-intro-plot2, echo=FALSE, fig.cap="Examples of continuous (left) and categorical (right) raster"}
+```{r, eval = FALSE}
+r_focal = focal(r, w = matrix(1, nrow = 3, ncol = 3), fun = min)
+```
+
+
+```{r focal_example, echo = FALSE, fig.cap = "Input raster (left) and resulting output raster (right) due to a focal operation - summing up 3-by-3 windows"}
 knitr::include_graphics("figures/03_focal_example.png")
 ```
 
- filtering (sog. Filterfunktionen zu nennen, die in der Bildverarbeitung eine große Rolle spielen (vgl. Kap. 10.6.4),) in image processing (smoothing), slope, aspect calculation
-see the help for the creation of a cellular automat to run the Game of Life
+We can quickly check if the output meets our expectations.
+In our example, the minimum value has to be always the upper left corner of the moving window (remember we have created the input raster by rowwise incrementing the cell values by one starting at the upper left corner).
+Of course, the `focal()`-function has computed the correct result.
+Finally, our weighting matrix consists only of 1s.
+This means each cell has the same weight on the output.
+Naturally, you can change this by specifying different weights.
+
+Focal functions or filters play a dominant role in image processing.
+Low-pass or smoothing filters use the mean function to remove extremes.
+In the case of categorical data, we can replace the mean with the mode, which is the most common value.
+By contrast, high-pass filters accentuate features.
+The line detection Laplace and Sobel filters might serve as an example here.
+Check the `focal()` help page how to use them in R.
+
+Also, terrain processing uses heavily focal functions.
+Think, for instance, of the calculation of the slope, aspect and flow directions.
+The `terrain()` function lets you compute of few of these terrain characteristics but has not implemented all popular methods, for example, the the Zevenbergen and Thorne method to compute the slope is missing.
+Equally, many other terrain and GIS functions are **not** implemented in R such as curvatures, contributing areas, wetness indexes, and many more.
+Fortunately, desktop GIS commonly provide these algorithms.
+In Chapter 13 we will learn how to access GIS functionality from within R.
+<!-- Reference 13-gis chapter -->
+
+Incremental operators fall also into the class of neighborhood operations.
 
 INKREMENTELLE Operatoren gehen entlang von vorgegebenen ein-, zwei- oder dreidimensionalen Geoobjekten vor (z.B. entlang einer Kette von Zellen oder über ein Gelände hinweg). Die Berechnungen von Abflussrichtungen und Abflusswegen ausgehend vom Höhenwert eines Pixels sind wichtige Beispiele.
 
