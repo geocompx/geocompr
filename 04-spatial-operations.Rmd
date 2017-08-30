@@ -265,6 +265,99 @@ buff_agg_aw = st_interpolate_aw(x = africa["pop"], to = buff, extensive = TRUE)
 <!-- joining different types (e.g. points + polygons = geometry) -> save as GPKG? -->
 <!-- `merge()`; `st_interpolate_aw()` -->
 
+
+## Modifying geometry data
+
+Spatial clipping is a form of spatial subsetting that involves changes to the `geometry` columns of at least some of the affected features.
+
+Clipping can only apply to features more complex than points: 
+lines, polygons and their 'multi' equivalents.
+To illustrate the concept we will start with a simple example:
+two overlapping circles with a centrepoint 1 unit away from each other and radius of 1:
+
+```{r points, fig.cap="Overlapping circles."}
+b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
+b = st_buffer(b, dist = 1) # convert points to circles
+l = c("x", "y")
+plot(b)
+text(x = c(-0.5, 1.5), y = 1, labels = l) # add text
+```
+
+Imagine you want to select not one circle or the other, but the space covered by both `x` *and* `y`.
+This can be done using the function `st_intersection()`, illustrated using objects named `x` and `y` which represent the left and right-hand circles:
+
+```{r}
+x = b[1]
+y = b[2]
+x_and_y = st_intersection(x, y)
+plot(b)
+plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
+```
+
+The subsequent code chunk demonstrate how this works for all combinations of the 'venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book R for Data Science [@grolemund_r_2016].
+<!-- Todo: reference r4ds -->
+
+```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators"}
+par(mfrow = c(3, 3), mai = c(0.1, 0.1, 0.1, 0.1))
+plot(b)
+y_not_x = st_difference(y, x)
+plot(y_not_x, col = "grey", add = TRUE)
+text(x = 0.5, y = 1, "st_difference(y, x)")
+plot(b)
+plot(x, add = TRUE, col = "grey")
+text(x = 0.5, y = 1, "x")
+plot(b, add = TRUE)
+x_or_y = st_union(x, y)
+plot(x_or_y, col = "grey")
+text(x = 0.5, y = 1, "st_union(x, y)")
+x_and_y = st_intersection(x, y)
+plot(b)
+plot(x_and_y, col = "grey", add = TRUE) 
+text(x = 0.5, y = 1, "st_intersection(x, y)")
+# x_xor_y = st_difference(x_xor_y, x_and_y) # failing
+x_not_y = st_difference(x, y)
+x_xor_y = st_union(y_not_x, x_not_y)
+plot(x_xor_y, col = "grey")
+text(x = 0.5, y = 1, "st_union(y_not_x, x_not_y)")
+plot.new()
+plot(b)
+plot(x_not_y, col = "grey", add = TRUE)
+text(x = 0.5, y = 1, "st_difference(x, y)")
+plot(b)
+plot(y, col = "grey", add = TRUE)
+plot(b, add = TRUE)
+text(x = 0.5, y = 1, "y")
+par(mfrow = c(1, 1))
+```
+
+To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
+Some points will be inside just one circle, some will be inside both and some will be inside neither.
+To generate the points will use a function not yet covered in this book, `st_sample()`.
+
+There are two different ways to subset points that fit into combinations of the circles: via clipping and logical operators.
+But first we must generate some points.
+We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y`, using the code below to generate the situation plotted in Figure \@ref(fig:venn-subset):
+
+```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y."}
+bb = st_bbox(st_union(x, y))
+pmat = matrix(c(bb[c(1, 2, 3, 2, 3, 4, 1, 4, 1, 2)]), ncol = 2, byrow = TRUE)
+box = st_polygon(list(pmat))
+set.seed(2017)
+p = st_sample(x = box, size = 10)
+plot(box)
+plot(x, add = T)
+plot(y, add = T)
+plot(p, add = T)
+text(x = c(-0.5, 1.5), y = 1, labels = l)
+```
+
+```{r, echo=FALSE}
+# An alternative way to sample from the bb
+bb = st_bbox(st_union(x, y))
+pmulti = st_multipoint(pmat)
+box = st_convex_hull(pmulti)
+```
+
 ## Spatial data creation
 
 <!-- where should "area" example be? in this or the previous chapter? -->
@@ -425,4 +518,24 @@ st_distance(a, b)
 <!-- blob_points = st_sample(x = world, size = 2) -->
 <!-- blobs = st_buffer(x = blob_points, dist = 1) -->
 <!-- plot(blobs) -->
-<!-- ``` -->
+
+### Exercises
+
+1. Write code that subsets points that are contained within `x` *and* `y` (illustrated by the plot in the 2^nd^ row and the 1^st^ column in Figure \@ref(fig:venn-clip)).
+- Create a randomly located point with the command `st_point()` (refer back to section \@ref(sfg) to see how to create spatial data 'from scratch').
+2. Write code that uses functions `aggregate()` and `st_buffer()` to answers the following question: What proportion of the world's population lives in countries that intersect a circle with a 10 degree radius of the intersection between the equator and the [9^th^ meridian](https://en.wikipedia.org/wiki/9th_meridian_east)? (Advanced challenge: find the point with the highest number of people within a 10 degree radius.)
+
+```{r}
+center9 = st_sf(st_sfc(st_point(c(-9, 0)), crs = 4326))
+buff9 = st_buffer(center9, dist = 10)
+agg9 = aggregate(world["pop"], buff9, FUN = sum)
+agg9$pop / sum(world$pop, na.rm = TRUE)
+```
+
+3. Assuming that people are evenly distributed across countries, estimate the population living *within* the circle created to answer the previous question.
+
+```{r}
+interp9 = st_interpolate_aw(x = world["pop"], to = buff9, extensive = TRUE)
+
+```
+
