@@ -619,6 +619,11 @@ log(r)
 r > 5
 ```
 
+Instead of arithmetic operators, you can also use the `calc()` and `overlay()` functions.
+These functions are more efficient.
+So you should use them if you have to process large raster datasets. 
+Additionally, they let you directly store an output file.
+
 The calculation of the normalized difference vegetation index (NDVI) is one of the most famous local, i.e. pixel-by-pixel, raster operations.
 It ranges between - 1 and 1 with positive values indicating the presence of living plants (mostly > 0.2).
 To calculate the NDVI, one uses the red and near-infrared bands of remotely sensed imagery (e.g., Landsat or Sentinel imagery) exploiting the fact that vegetation absorpts light heavily in the visible light spectrum, and especially in the red channel, while reflecting it in the near-infrared spectrum.
@@ -679,37 +684,60 @@ Fortunately, desktop GIS commonly provide these algorithms.
 In Chapter 13 we will learn how to access GIS functionality from within R.
 <!-- Reference 13-gis chapter -->
 
-**Zonal and global operations**
-
 *Zonal* operations are similar to focal operations.
-They are different in that zonal filters can take on any shape. 
-That means the unifying element is a class instead of a predefined filter window of size 3-by-3 pixels.
-Our grain size raster is a good example.
+The difference is that zonal filters can take on any shape instead of just a predefined window.
+Our grain size raster is a good example (Figure @ref(fig:grainsize)) because the different grain sizes are spread in an irregular fashion throughout the raster.
 
-```{r, echo = FALSE}
+```{r grainsiz, echo = FALSE}
 spplot(r_2, col.regions = c("brown","sandybrown", "rosybrown"))
 ```
 
 Now suppose, the first raster we created (`r`) represents elevation. 
-To find the mean elevation for each grain size class we can use the `zonal()` command. 
-
+To find the mean elevation for each grain size class, we can use the `zonal()` command.
+This kind of operation is also known as *zonal statistics* in the GIS world. 
 
 ```{r}
 z = zonal(r, r_2, fun = "mean") %>%
   as.data.frame
 z
-
 ```
 
-The `zonal()` command returns the statistics, here the mean altitude for each grainsize class.
-A true raster operation is of course to assign the mean values to the raster cells in question.
-This implies we would have to replace our grain sizes by the mean elevation
+This returns the statistics for each category, here the mean altitude for each grain size class.
+Of course, we can add this statistic to the attribute table of the ratified raster (remember RAT stands for raster attribute table).
 
 ```{r}
 levels(r_2)[[1]] =  cbind(levels(r_2)[[1]], mean_elev = z$mean)
+r_2
 ``` 
 
-Printing the raster object to the console yields the raster header and also the minimum and maximum raster value.You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
+This is really interesting since we have learned that each raster cell can only possess one value.
+In fact, the raster cells themselves still consist of only one value, namely an integer which represents a unique identifier.
+This identifier can then be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`).
+Say, we would like to know the grain size and the mean altitude of rows and columns 1, 3, 5 and 6. 
+First, we have to find out the cell IDs for our indexes.
+With these, we extract the values from the raster.
+Finally, the `factorValues()` command returns the attributes for the raster cell values.
+
+```{r}
+cells = cellFromRowCol(r_2, rownr = c(2, 3, 5, 6), colnr = c(2, 3, 5, 6))
+vals = r_2[cells]
+factorValues(r_2, vals)
+```
+
+
+
+*Zonal* 
+
+Global operations are similar to zonal operations whereby the entire raster dataset’s extent represents a single zone. Typical global operations include determining basic statistical values for the raster as a whole. For example, the minimum, maximum, average, range, and so forth can be quickly calculated over the entire extent of the input raster and subsequently be output to a raster in which every cell contains that calculated value
+
+Operate on the entire grid at once. Each cell is a function of all input cells
+
+EucDistance, WeightDistance,
+Hydrological, Surface, Visibility,
+Viewshed, Max,
+
+Printing the raster object to the console yields the raster header and also the minimum and maximum raster value.
+You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
 If we are interested in further summary operations such as the standard deviation (see below) or if we want to define our own summary functions, we can do so with the `cellStats` command. 
 ```{r}
 cellStats(r, sd)
