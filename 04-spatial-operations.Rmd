@@ -23,13 +23,16 @@ There are clear overlaps between spatial and non-spatial operations.
 Common spatial attribute data processing tasks include spatial subsetting (as we will see in section \@ref(spatial-subsetting)) aggregation (\@ref(spatial-aggregation)) and joining (covered in \@ref(spatial-joining)).
 Each of these spatial operations has a non-spatial equivalent, as demonstrated in sections \@ref(attribute-subsetting), \@ref(attribute-data-aggregation) and \@ref(attribute-data-joining) respectively in Chapter \@ref(attr).
 
-In addition to these basic spatial operations, the chapter will briefly demonstrate how new spatial data can be created 'from scratch' in section \@ref(spatial-data-creation), setting the scene for the subsequent chapter (\@ref(read-write)).
-There are some topics that make spatial data operations more complex:
-a variety of *topological relations* can be used for any spatial operation;
-all spatial objects are nearer or further away from each other in space;
-and the geometry of spatial objects can be modified, e.g. by clipping.
-These topics are covered in sections \@ref(topological-relations), \@ref(distance-relations) and \@ref(spatial-clipping) respectively.
-It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in \@ref(coordinate-reference-systems) and which will be covered in more depth in Chapter 6.
+Some operations covered in this chapter are unique to spatial data.
+New spatial data can be created by modifying existing spatial objects, using operations such as 'buffer' and 'clip', described in section \@ref(modifying-geometry-data).
+Another unique aspect of spatial objects is distance.
+All features are related to each other in geographic space, as demonstrated in section \@ref(distance-relations), which shows how distance calculations can be used to find which spatial features are nearer or further away from a given point or each other.
+The final topic covered in this chapter is *topological relations*, a variety of which can be used for any spatial operation.
+This advanced topic is explored in section \@ref(topological-relations).
+
+### Note {-}
+
+It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in \@ref(crs-intro) and which will be covered in more depth in Chapter 6.
 
 ## Spatial subsetting
 
@@ -64,13 +67,13 @@ follows:^[Recall
 that we can also subset simple features using the `filter()` function, e.g. with `filter(world, continent == "Africa")`]
 
 ```{r}
-africa_wgs = world[world$subregion == "Western Africa", ]
+africa_wgs = world[world$continent == "Africa", ]
 ```
 
 To further set-up the input data, we will reproject the data to the coordinate reference system (CRS) 32630 (it's EPSG code, explained in Chapter 6):
 
 ```{r}
-africa = st_transform(africa_wgs, crs = 32630) 
+africa = st_transform(africa_wgs, crs = 32630)
 ```
 
 *Spatial* subsetting in base R use the same method as attribute subsetting, except *another spatial object* is placed inside the square brackets in the place of an `integer` or `logical` vector.
@@ -100,11 +103,11 @@ Note that the command emits a message: about assuming `planar coordinates`.
 This is because spatial operations (especially distance and area calculations) cannot be assumed to be accurate in a geographic (longitude/latitude) CRS.
 In this case there is a clear justification: the data is close to the equator where there is least distortion caused by the curvature of the earth, and the example illustrates the method, which would more usually be used on pojected ('planar') data.
 In any case, the spatial subsetting clearly worked.
-As illustrated by Figure \@ref(fig:buffeq), only countries which spatially intersect with the giant circle are returned:
+As illustrated by Figure \@ref(fig:africa-buff), only countries which spatially intersect with the giant circle are returned:
 
-```{r buffeq, fig.cap="Subset of the `africa` data selected based on their intersection with a circle 20 degrees in radius with a center point at 0 degrees longitude and 0 degrees latitude."}
-# plot(africa_buff["pop"])
-# plot(buff, add = TRUE)
+```{r africa-buff, fig.cap="Subset of the `africa` data selected based on their intersection with a circle 20 degrees in radius with a center point at 0 degrees longitude and 0 degrees latitude."}
+plot(africa_buff["pop"])
+plot(buff, add = TRUE)
 ```
 
 Note that countries that only just touch the giant circle are selected such as the large country at the north of plot (Algeria).
@@ -113,7 +116,7 @@ Other spatial subsetting operations such as `st_within()` are more conservative,
 
 Before we progress to explore the differences between different spatial subsetting operations, it is worth seeing alternative ways to acheive the same result,
 to deepen understanding of what is going on 'under the hood' (vital for developing advanced geocomputation applications).
-The second way to reproduce the subsetting operation illustrated in Figure \@ref(fig:buffeq) simply involves expanding the operation over 2 lines:
+The second way to reproduce the subsetting operation illustrated in Figure \@ref(fig:africa-buff) simply involves expanding the operation over 2 lines:
 
 ```{r}
 sel_buff = st_intersects(x = africa, y = buff, sparse = FALSE)
@@ -267,37 +270,138 @@ buff_agg_aw = st_interpolate_aw(x = africa["pop"], to = buff, extensive = TRUE)
 <!-- joining different types (e.g. points + polygons = geometry) -> save as GPKG? -->
 <!-- `merge()`; `st_interpolate_aw()` -->
 
-## Spatial data creation
+
+## Modifying geometry data
+
+Spatial clipping is a form of spatial subsetting that involves changes to the `geometry` columns of at least some of the affected features.
+
+Clipping can only apply to features more complex than points: 
+lines, polygons and their 'multi' equivalents.
+To illustrate the concept we will start with a simple example:
+two overlapping circles with a centrepoint 1 unit away from each other and radius of 1:
+
+```{r points, fig.cap="Overlapping circles."}
+b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
+b = st_buffer(b, dist = 1) # convert points to circles
+l = c("x", "y")
+plot(b)
+text(x = c(-0.5, 1.5), y = 1, labels = l) # add text
+```
+
+Imagine you want to select not one circle or the other, but the space covered by both `x` *and* `y`.
+This can be done using the function `st_intersection()`, illustrated using objects named `x` and `y` which represent the left and right-hand circles:
+
+```{r}
+x = b[1]
+y = b[2]
+x_and_y = st_intersection(x, y)
+plot(b)
+plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
+```
+
+The subsequent code chunk demonstrate how this works for all combinations of the 'venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book R for Data Science [@grolemund_r_2016].
+<!-- Todo: reference r4ds -->
+
+```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators"}
+par(mfrow = c(3, 3), mai = c(0.1, 0.1, 0.1, 0.1))
+plot(b)
+y_not_x = st_difference(y, x)
+plot(y_not_x, col = "grey", add = TRUE)
+text(x = 0.5, y = 1, "st_difference(y, x)")
+plot(b)
+plot(x, add = TRUE, col = "grey")
+text(x = 0.5, y = 1, "x")
+plot(b, add = TRUE)
+x_or_y = st_union(x, y)
+plot(x_or_y, col = "grey")
+text(x = 0.5, y = 1, "st_union(x, y)")
+x_and_y = st_intersection(x, y)
+plot(b)
+plot(x_and_y, col = "grey", add = TRUE) 
+text(x = 0.5, y = 1, "st_intersection(x, y)")
+# x_xor_y = st_difference(x_xor_y, x_and_y) # failing
+x_not_y = st_difference(x, y)
+x_xor_y = st_union(y_not_x, x_not_y)
+plot(x_xor_y, col = "grey")
+text(x = 0.5, y = 1, "st_union(y_not_x, x_not_y)")
+plot.new()
+plot(b)
+plot(x_not_y, col = "grey", add = TRUE)
+text(x = 0.5, y = 1, "st_difference(x, y)")
+plot(b)
+plot(y, col = "grey", add = TRUE)
+plot(b, add = TRUE)
+text(x = 0.5, y = 1, "y")
+par(mfrow = c(1, 1))
+```
+
+To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
+Some points will be inside just one circle, some will be inside both and some will be inside neither.
+To generate the points will use a function not yet covered in this book, `st_sample()`.
+
+There are two different ways to subset points that fit into combinations of the circles: via clipping and logical operators.
+But first we must generate some points.
+We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y`, using the code below to generate the situation plotted in Figure \@ref(fig:venn-subset):
+
+```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y."}
+bb = st_bbox(st_union(x, y))
+pmat = matrix(c(bb[c(1, 2, 3, 2, 3, 4, 1, 4, 1, 2)]), ncol = 2, byrow = TRUE)
+box = st_polygon(list(pmat))
+set.seed(2017)
+p = st_sample(x = box, size = 10)
+plot(box)
+plot(x, add = T)
+plot(y, add = T)
+plot(p, add = T)
+text(x = c(-0.5, 1.5), y = 1, labels = l)
+```
+
+```{r, echo=FALSE}
+# An alternative way to sample from the bb
+bb = st_bbox(st_union(x, y))
+pmulti = st_multipoint(pmat)
+box = st_convex_hull(pmulti)
+```
+
+## Distance relations
+
+```{r, eval=FALSE}
+st_distance(a, b)
+```
+
+<!-- ## Spatial data creation -->
 
 <!-- where should "area" example be? in this or the previous chapter? -->
+<!-- Not here - I think this chapter should focus on geomtry data -->
 <!-- `st_centroid()` -->
 <!-- `st_buffer()` -->
 <!-- http://r-spatial.org//r/2017/06/09/mapedit_0-2-0.html -->
 
-```{r}
-# add a new column
-africa$area = set_units(st_area(africa), value = km^2)
-africa$pop_density = africa$pop / africa$area
+<!-- Commented out - think this would be better in c3 (RL) -->
+<!-- ```{r} -->
+<!-- # add a new column -->
+<!-- africa$area = set_units(st_area(africa), value = km^2) -->
+<!-- africa$pop_density = africa$pop / africa$area -->
 
-# OR
-africa = africa %>%
-        mutate(area = set_units(st_area(.), value = km^2)) %>%
-        mutate(pop_density = pop / area)
-```
+<!-- # OR -->
+<!-- africa = africa %>% -->
+<!--         mutate(area = set_units(st_area(.), value = km^2)) %>% -->
+<!--         mutate(pop_density = pop / area) -->
+<!-- ``` -->
 
-Note that this has created a attributes for the area and population density variables:
+<!-- Note that this has created a attributes for the area and population density variables: -->
 
-```{r}
-attributes(africa$area)
-attributes(africa$pop_density)
-```
+<!-- ```{r} -->
+<!-- attributes(africa$area) -->
+<!-- attributes(africa$pop_density) -->
+<!-- ``` -->
 
-These can be set to `NULL` as follows:
+<!-- These can be set to `NULL` as follows: -->
 
-```{r}
-attributes(africa$area) = NULL
-attributes(africa$pop_density) = NULL
-```
+<!-- ```{r} -->
+<!-- attributes(africa$area) = NULL -->
+<!-- attributes(africa$pop_density) = NULL -->
+<!-- ``` -->
 
 <!-- ## Spatial data transformation -->
 <!-- changes classes; polygonize, etc-->
@@ -413,103 +517,13 @@ st_relate(a, b, sparse = FALSE)
 <!-- examples (points/lines) -->
 <!-- examples (lines/polygons) -->
 
-## Distance relations
+<!-- TODO? create a series of polygons distributed evenly over the surface of the Earth and clip them. -->
 
-```{r, eval=FALSE}
-st_distance(a, b)
-```
-
-## Spatial clipping
-
-Spatial clipping is a form of spatial subsetting that involves changes to the `geometry` columns of at least some of the affected features.
-
-Clipping can only apply to features more complex than points: 
-lines, polygons and their 'multi' equivalents.
-To illustrate the concept we will start with a simple example:
-two overlapping circles with a centrepoint 1 unit away from each other and radius of 1:
-
-```{r points, fig.cap="Overlapping circles."}
-b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
-b = st_buffer(b, dist = 1) # convert points to circles
-l = c("x", "y")
-plot(b)
-text(x = c(-0.5, 1.5), y = 1, labels = l) # add text
-```
-
-Imagine you want to select not one circle or the other, but the space covered by both `x` *and* `y`.
-This can be done using the function `st_intersection()`, illustrated using objects named `x` and `y` which represent the left and right-hand circles:
-
-```{r}
-x = b[1]
-y = b[2]
-x_and_y = st_intersection(x, y)
-plot(b)
-plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
-```
-
-The subsequent code chunk demonstrate how this works for all combinations of the 'venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book R for Data Science [@grolemund_r_2016].
-<!-- Todo: reference r4ds -->
-
-```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators"}
-par(mfrow = c(3, 3), mai = c(0.1, 0.1, 0.1, 0.1))
-plot(b)
-y_not_x = st_difference(y, x)
-plot(y_not_x, col = "grey", add = TRUE)
-text(x = 0.5, y = 1, "st_difference(y, x)")
-plot(b)
-plot(x, add = TRUE, col = "grey")
-text(x = 0.5, y = 1, "x")
-plot(b, add = TRUE)
-x_or_y = st_union(x, y)
-plot(x_or_y, col = "grey")
-text(x = 0.5, y = 1, "st_union(x, y)")
-x_and_y = st_intersection(x, y)
-plot(b)
-plot(x_and_y, col = "grey", add = TRUE) 
-text(x = 0.5, y = 1, "st_intersection(x, y)")
-# x_xor_y = st_difference(x_xor_y, x_and_y) # failing
-x_not_y = st_difference(x, y)
-x_xor_y = st_union(y_not_x, x_not_y)
-plot(x_xor_y, col = "grey")
-text(x = 0.5, y = 1, "st_union(y_not_x, x_not_y)")
-plot.new()
-plot(b)
-plot(x_not_y, col = "grey", add = TRUE)
-text(x = 0.5, y = 1, "st_difference(x, y)")
-plot(b)
-plot(y, col = "grey", add = TRUE)
-plot(b, add = TRUE)
-text(x = 0.5, y = 1, "y")
-par(mfrow = c(1, 1))
-```
-
-To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
-Some points will be inside just one circle, some will be inside both and some will be inside neither.
-To generate the points will use a function not yet covered in this book, `st_sample()`.
-
-There are two different ways to subset points that fit into combinations of the circles: via clipping and logical operators.
-But first we must generate some points.
-We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y`, using the code below to generate the situation plotted in Figure \@ref(fig:venn-subset):
-
-```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y."}
-bb = st_bbox(st_union(x, y))
-pmat = matrix(c(bb[c(1, 2, 3, 2, 3, 4, 1, 4, 1, 2)]), ncol = 2, byrow = TRUE)
-box = st_polygon(list(pmat))
-set.seed(2017)
-p = st_sample(x = box, size = 10)
-plot(box)
-plot(x, add = T)
-plot(y, add = T)
-plot(p, add = T)
-text(x = c(-0.5, 1.5), y = 1, labels = l)
-```
-
-```{r, echo=FALSE}
-# An alternative way to sample from the bb
-bb = st_bbox(st_union(x, y))
-pmulti = st_multipoint(pmat)
-box = st_convex_hull(pmulti)
-```
+<!-- ```{r} -->
+<!-- set.seed(2018) -->
+<!-- blob_points = st_sample(x = world, size = 2) -->
+<!-- blobs = st_buffer(x = blob_points, dist = 1) -->
+<!-- plot(blobs) -->
 
 ### Exercises
 
@@ -531,11 +545,3 @@ interp9 = st_interpolate_aw(x = world["pop"], to = buff9, extensive = TRUE)
 
 ```
 
-<!-- TODO? create a series of polygons distributed evenly over the surface of the Earth and clip them. -->
-
-<!-- ```{r} -->
-<!-- set.seed(2018) -->
-<!-- blob_points = st_sample(x = world, size = 2) -->
-<!-- blobs = st_buffer(x = blob_points, dist = 1) -->
-<!-- plot(blobs) -->
-<!-- ``` -->
