@@ -531,13 +531,20 @@ For instance, we can create a raster representing grain sizes:
 
 ```{r}
 grain_size = c("clay", "silt", "sand")
+
 r_2 = raster(nrow = 6, ncol = 6, res = 0.5, 
              xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-             vals = factor(rep(grain_size, each = 12), levels = grain_size))
+             vals = factor(sample(grain_size, 36, replace = TRUE), 
+                           levels = grain_size))
+r_2
 ```
 
-Internally, R represents boolean and factor variables as integers.
-This is why the legend shows numbers when plotting a categorical raster.
+The **raster** package represents boolean and factor variables as integers.
+Hence, `r_2[1, 1]` returns an integer instead of "sand", "silt" or "clay".
+These integers in turn represent unique identifiers. 
+The raster object stores the corresponding look-up table or "Raster Attribute Table" as a data frame in a new slot named `attributes` which you see when you print a ratified raster to the console.
+Use `levels()` to just retrieve the attribute table.
+See the help page of the `ratify()` command for more information.
 
 ### Raster subsetting
 There are several ways how to subset raster datasets in R:
@@ -580,7 +587,7 @@ Map algebra (or cartographic modeling) divides raster operations into four subcl
 1. *Local* or per-cell operations.
 2. *Focal* or neighborhood operations.
 Most often the output cell value is the result of a 3 x 3 input cell block.
-3. *Zonal* operations are similar to focal operations but instead of a predefined neighborhood, classes, which can take on any, i.e. also irregular size and shape, are the basis for calculations.
+3. *Zonal* operations are similar to focal operations but instead of a predefined neighborhood, classes, which can take on any, i.e. also an irregular size and shape, are the basis for calculations.
 4. *Global* or per-raster operations, that means the output cell derives its value potentially from one or several entire rasters
 
 This classification scheme uses basically the number of cells involved in a processing step as distinguishing feature.
@@ -654,7 +661,7 @@ In our example, the minimum value has to be always the upper left corner of the 
 Of course, the `focal()`-function has computed the correct result.
 In this example, our weighting matrix consists only of 1s.
 This means each cell has the same weight on the output.
-You can change this by specifying different weights.
+If appropriate, you can change this by specifying different weights.
 
 Focal functions or filters play a dominant role in image processing.
 Low-pass or smoothing filters use the mean function to remove extremes.
@@ -667,12 +674,40 @@ Also, terrain processing uses heavily focal functions.
 Think, for instance, of the calculation of the slope, aspect and flow directions.
 The `terrain()` function lets you compute a few of these terrain characteristics but has not implemented all popular methods
 For example, the Zevenbergen and Thorne method to compute the slope is missing.
-Equally, many other terrain and GIS functions are **not** implemented in R such as curvatures, contributing areas, wetness indexes, and many more.
+Equally, many other terrain and GIS functions are **not** implemented in R such as curvatures, contributing areas, different wetness indexes, and many more.
 Fortunately, desktop GIS commonly provide these algorithms.
 In Chapter 13 we will learn how to access GIS functionality from within R.
 <!-- Reference 13-gis chapter -->
 
 **Zonal and global operations**
+
+*Zonal* operations are similar to focal operations.
+They are different in that zonal filters can take on any shape. 
+That means the unifying element is a class instead of a predefined filter window of size 3-by-3 pixels.
+Our grain size raster is a good example.
+
+```{r, echo = FALSE}
+spplot(r_2, col.regions = c("brown","sandybrown", "rosybrown"))
+```
+
+Now suppose, the first raster we created (`r`) represents elevation. 
+To find the mean elevation for each grain size class we can use the `zonal()` command. 
+
+
+```{r}
+z = zonal(r, r_2, fun = "mean") %>%
+  as.data.frame
+z
+
+```
+
+The `zonal()` command returns the statistics, here the mean altitude for each grainsize class.
+A true raster operation is of course to assign the mean values to the raster cells in question.
+This implies we would have to replace our grain sizes by the mean elevation
+
+```{r}
+levels(r_2)[[1]] =  cbind(levels(r_2)[[1]], mean_elev = z$mean)
+``` 
 
 Printing the raster object to the console yields the raster header and also the minimum and maximum raster value.You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
 If we are interested in further summary operations such as the standard deviation (see below) or if we want to define our own summary functions, we can do so with the `cellStats` command. 
@@ -684,14 +719,6 @@ Finally, if you provide the `summary()` and `cellStats()` functions with a raste
 
 global: distance from one cell
 
-Let us find out the mean elevation (raster `r`) for each grain size (raster object `r_2` with the classes clay, silt and sand). 
-
-```{r}
-zonal(r, r_2, fun = "mean")
-```
-
-The `zonal()` command returns the statistics, here the mean altitude for each grainsize class.
-A true raster operation is of course to assign the mean values to the 
 
 
 global: viewshed, zwei Hauptgruppen von globalen Operatoren, die auf der euklidischen oder gewichteten Distanz beruhen (z.B. Berechnung von Kostenoberflächen). see ESRI HELPPAGE
