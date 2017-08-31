@@ -522,7 +522,6 @@ library(raster)
 r = raster(nrow = 6, ncol = 6, res = 0.5, 
            xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
            vals = 1:36)
-plot(r)
 ```
 
 Note that a raster object can also contain categorical data.
@@ -531,7 +530,6 @@ For instance, we can create a raster representing grain sizes:
 
 ```{r}
 grain_size = c("clay", "silt", "sand")
-
 r_2 = raster(nrow = 6, ncol = 6, res = 0.5, 
              xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
              vals = factor(sample(grain_size, 36, replace = TRUE), 
@@ -724,11 +722,21 @@ vals = r_2[cells]
 factorValues(r_2, vals)
 ```
 
+*Global* operations are a special case of zonal operations where the complete raster dataset represents a single zone.
+Descriptive raster statistics are typical global operations.
+Printing the raster object to the console already returns the minimum and maximum values of a raster.
+You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
+If we are interested in further summary operations such as the standard deviation (see below) or if we want to define our own summary functions, we can do so with the `cellStats` command. 
+```{r}
+cellStats(r, sd)
+```
+
+Note: if you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately.
+Try `summary(brick(r, r_2))`. 
 
 
-*Zonal* 
 
-Global operations are similar to zonal operations whereby the entire raster dataset’s extent represents a single zone. Typical global operations include determining basic statistical values for the raster as a whole. For example, the minimum, maximum, average, range, and so forth can be quickly calculated over the entire extent of the input raster and subsequently be output to a raster in which every cell contains that calculated value
+For example, the minimum, maximum, average, range, and so forth can be quickly calculated over the entire extent of the input raster and subsequently be output to a raster in which every cell contains that calculated value.
 
 Operate on the entire grid at once. Each cell is a function of all input cells
 
@@ -736,14 +744,6 @@ EucDistance, WeightDistance,
 Hydrological, Surface, Visibility,
 Viewshed, Max,
 
-Printing the raster object to the console yields the raster header and also the minimum and maximum raster value.
-You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
-If we are interested in further summary operations such as the standard deviation (see below) or if we want to define our own summary functions, we can do so with the `cellStats` command. 
-```{r}
-cellStats(r, sd)
-```
-
-Finally, if you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately. Try `summary(brick(r, r_2))`. 
 
 global: distance from one cell
 
