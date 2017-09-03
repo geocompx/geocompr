@@ -2,7 +2,7 @@
 
 ## Prerequisites {-}
 
-- This chapter requires the packages **tidyverse** and **sf**:
+- This chapter requires the packages **tidyverse**, **sf** and **raster**:
 
 ```{r, message=FALSE}
 library(sf)
@@ -88,7 +88,7 @@ The former provides fast and powerful functions for data manipulation (see [Sect
 ]
 This chapter focuses on **dplyr** because of its intuitive function names and ability to perform multiple chained operations using the pipe operator.
 
-### Subsetting
+###  Vector attribute subsetting
 Because simple feature objects are also data frames (run `class(world)`to verify), you can use a wide range of functions (from base R and other packages) for subsetting them.
 Base R subsetting functions include `[`, `subset()` and  `$`.
 **dplyr** subsetting functions include `select()`, `filter()`, and `pull()`.
@@ -233,7 +233,7 @@ It allows operations to be written in a clear order, line-by-line and from left 
 Another advantage over the nesting approach is that you can easily comment out certain parts of a pipe.
 **dplyr** works especially well with the pipe operator because its fundamental functions (or 'verbs', like `select()`) expect a data frame object as input and also return one.^[If you want **dplyr** to return a vector, use `pull`.]
 
-### Aggregating
+### Vector attribute aggregation
 
 <!-- https://github.com/ropenscilabs/skimr ?? -->
 
@@ -304,7 +304,7 @@ world_continents2 = aggregate(world["pop"], by = ag_var, FUN = sum, na.rm = TRUE
 <!--   arrange(-pop) -->
 <!-- ``` -->
 
-### Joining
+###  Vector attribute joining
 
 <!-- https://github.com/dgrtwo/fuzzyjoin -->
 <!-- http://r4ds.had.co.nz/relational-data.html -->
@@ -511,16 +511,16 @@ class(world_data)
 ```
 
 ## Manipulating raster objects
+
 In contrast to simple features (vector data), raster data represents continuous surfaces.
-In the following, we shortly repeat how to create a raster.
-However, here we will use both numerical and categorical data as raster values.
-Next we will have a look at subsetting operations. 
-And finally, we classify raster operations into four categories using the map algebra scheme [@tomlin_geographic_1990], and present each of these classes individually by example.
+In this section we will use a raster object created *from scratch*, building on section \@ref(an-introduction-to-raster).
+Raster data has a fundamentally different structure than vector data, so subsetting and other operations work in a different way, as demonstrated in section \@ref(raster-subsetting).
+Raster operations can be classified into four categories using the map algebra scheme [@tomlin_geographic_1990], as we will see in section \@ref(map-algebra).
 
-Let us start with manually recreating the raster dataset of Chapter \@ref{spatial-class}.
-This should make it easy to understand how **raster** and related operations work (Figure @ref(fig:cont_cate_rasters)).
+Let us start with manually recreating the raster dataset of Chapter \@ref(raster-classes).
+This should make it easy to understand how **raster** and related operations work (Figure \@ref(fig:cont-cate-rasters)).
 
-```{r}
+```{r, message=FALSE}
 library(raster)
 r = raster(nrow = 6, ncol = 6, res = 0.5, 
            xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
@@ -529,7 +529,7 @@ r = raster(nrow = 6, ncol = 6, res = 0.5,
 
 Note that a raster object can also contain categorical data.
 For this, we can use either boolean or factor variables in R.
-For instance, we can create a raster representing grain sizes (Figure @ref(fig:cont_cate_rasters)):
+For instance, we can create a raster representing grain sizes (Figure \@ref(fig:cont-cate-rasters)):
 
 ```{r}
 grain_size = c("clay", "silt", "sand")
@@ -548,26 +548,26 @@ Use `levels()` to just retrieve the attribute table.
 See the help page of the `ratify()` command for more information.
 
 
-```{r cont_cate_rasters, echo = FALSE, fig.cap = "Raster with numberic values (left) and a raster with categorical values"}
+```{r cont-cate-rasters, echo = FALSE, fig.cap = "Raster with numberic values (left) and a raster with categorical values"}
 knitr::include_graphics("figures/03_cont_categ_rasters.png")
 ```
 
 ### Raster subsetting
-There are several ways how to subset raster datasets in R:
+Raster datasets can be subset in many ways, including:
 
 - using row-column indexing with the help of `[`
 - by cell ID
 - by coordinates
 
-So if we want to access the value of the upper left corner cell, we can use one of the following commands:
+These subsetting options are demonstrated in the three commands below, all of which return the value of the top left pixel in the raster object `r` (results not shown):
 
 ```{r, eval = FALSE}
 # row 1, column 1
 r[1, 1]
 # cell ID 1
 r[1]
-# xy coordinates x = -1 and y = 1
-r[cellFromXY(r, xy = c(-1, 1))]
+# point within the top left pixel
+r[cellFromXY(r, xy = c(-1.5, 1.5))]
 ```
 
 To extract all values or complete rows, you can use `values()` and `getValues()`
@@ -587,6 +587,7 @@ r[]
 Leaving the square brackets empty is a shortcut version of `values()` for retrieving all values of a raster.
 Of course, one can use indexing to modify multiple cells or even blocks.
 
+<<<<<<< HEAD
 ### Map algebra
 Map algebra (or cartographic modeling) divides raster operations into four subclasses [@tomlin_geographic_1990], with each of them either working on one or several grids simultaneously:
 
@@ -745,22 +746,6 @@ We might also want to consider topography, that means, we are not only intereste
 To do so, we can weight the distance with elevation so that each additional altitudinal meter 'prolongs' the euclidean distance.
 Visibility and viewshed computations also belong to the family of global operations (in the exercises of Chapter ?? you will compute a viewshed raster).
 <!-- reference 13-gis chapter -->
-
-<!--
-Spatial functions for later chapters, I guess:
-- raster aggregation/disaggregation/resample (changing spatial resolution)
- e1 <- extent(-10, 10, -20, 20)
-> e2 <- extent(0, 20, -40, 5)
-> union(e1, e2)
-- raster merging (-> merging of two rasters is also a spatial operation), mosaicking
-- raster::buffer, crop, mask
-distancefromPoints
-gridDistance
-compareRaster, erase, extend
-- crop/intersect
-- extract values to points and raster from points -> probably vector/raster chapter
-- projectRaster
--->
 
 ## Exercises
 

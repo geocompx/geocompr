@@ -90,6 +90,14 @@ sf_drivers = st_drivers()
 head(sf_drivers, n = 2)
 ```
 
+<!-- temporal text subsection -->
+<!-- data needs to be added to spData -->
+```{r, eval=FALSE}
+cycle_hire1 = st_read("cycle_hire_xy.csv", options = c("X_POSSIBLE_NAMES=X",
+                                                       "Y_POSSIBLE_NAMES=Y"))
+cycle_hire2 = st_read("cycle_hire_wkt.csv", options = "GEOM_POSSIBLE_NAMES=WKT")
+```
+
 ### Raster data
 
 Raster data also could exist in many different file formats, with some of the formats supporting multilayer files ^[A list of supported raster formats could be found using `rgdal::gdalDrivers()`].
@@ -131,7 +139,8 @@ multilayer_layer_stack = stack(raster_l1_filepath, raster_l2_filepath)
 The only limitation to `stack()` is that all datasets need to have the same spatial extent and resolution.
 
 <!-- NetCDF? -->
-<!-- additional read from text subsection? -->
+<!-- temporal text subsection -->
+
 
 ## Data output (O)
 
@@ -218,23 +227,59 @@ This is not generally recommended, as it will not work for multi-file data sourc
 file.remove("world.gpkg")
 ```
 
+<!-- temporal text subsection -->
+
+<!-- saving sf POINT object as csv -->
+```{r, eval=FALSE}
+library(spData)
+st_write(cycle_hire, "cycle_hire_xy.csv", layer_options = "GEOMETRY=AS_XY")
+st_write(cycle_hire, "cycle_hire_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
+```
+
 ### Raster data
 
-The `writeRaster()` function save `Raster*` objects to files. 
+The `writeRaster()` function save the `Raster*` objects to files. 
 There are several decision to be made while saving rasters, such as an output data type, file format, and specific GDAL options related to selected file format.
 The complete list of an arguments to this function could be found by typing `?writeRaster()`.
 
 <!-- datatypes -->
+The **raster** package offers nine following datatypes: LOG1S, INT1S, INT1U, INT2S, INT2U, INT4S, INT4U, FLT4S, and FLT8S.
+Datatype determines the type of numbers and the range of the raster values that would be written to disk.
+Decision which datatype should be used depends on the expected range of the values in the output file.
+For example, LOG1S is used for bitmap (binary) images, unsigned integers (INT1U, INT2U, INT4U) are mostly used for categorical data, while floats (FLT4S and FLTS8S) usually represent continuous data.
+The datatype used in `writeRaster()` is FLT4S.
+While it works in most of the cases, the size of the output file would be large.
+Therefore, a rule of thumb is to use the smallest representation that fits all the values (range of values could be checked using the `summary()` function).
+<!-- table? -->
+
 <!-- file formats -->
+
 <!-- options (geotiff) -->
+GeoTIFF is one of the most popular raster formats. 
+Its structure is similar to the regular `.tif` format, however GeoTIFF also stores additional spatial metadata, such as coordinate reference system, spatial extent, `NoData` value, and the data resolution.
+You need to add the `.tif` file extention to save the raster object to a GeoTIFF file, for example:
 
 ```{r, eval=FALSE}
-writeRaster()
+writeRaster(x = single_layer,
+            filename = "my_raster.tif",
+            datatype = "INT2U")
 ```
 
+Some raster file formats also accept additional creation options^[Creation options for the GeoTIFF format are at http://www.gdal.org/frmt_gtiff.html. Full list of formats with theirs creation options could be found at http://www.gdal.org/formats_list.html].
+For example, you could specify a compress method using the `COMPRESS` option:
+
 ```{r, eval=FALSE}
-raster::writeFormats()
+writeRaster(x = single_layer,
+            filename = "my_raster.tif",
+            datatype = "INT2U",
+            options = c("COMPRESS=DEFLATE"))
 ```
+
+Other raster file formats include `.grd`, `.nc`, `.asc`, and `.img`.
+Full list of the supported file format for writing `Raster*` objects could be found using `writeFormats().`
+
+<!-- temporal text subsection -->
+<!-- saving raster object as csv ?? - should be include that?-->
 
 ## File formats
 
