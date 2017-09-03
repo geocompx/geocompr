@@ -174,7 +174,7 @@ names(world2)
 
 Omit specific columns with the `-` operator:
 
-```{r, eval=TRUE}
+```{r}
 # all columns except subregion and area_km2 (inclusive)
 world3 = dplyr::select(world, -subregion, -area_km2)
 ```
@@ -228,7 +228,7 @@ The *pipe* operator feeds ('pipes forward') the output of one function into the 
 Combining many functions together with pipes is called *chaining* or *piping*.
 For example, let us first take the `world` dataset, then let us select the two columns named `name_long` and `continent`, and then we just would like to return the first five rows.
 
-```{r}
+```{r, eval=FALSE}
 world %>%
   dplyr::select(name_long, continent) %>%
   slice(1:5)
@@ -258,7 +258,7 @@ The following code, for example, calculates the total population and number of a
 # customized data summary
 world_summary = world %>% 
   summarize(pop = sum(pop, na.rm = TRUE), country_n = n())
-world_summary
+world_summary$pop # A total population > 7 billion
 ```
 
 The new object, `world_summary`, is an aggregation of all 177 world's countries.
@@ -270,15 +270,21 @@ You can use a wide range of functions within `summarize()` for aggregation and s
 Type `?summarize` for a list with useful functions and more information.
 
 `summarize()` becomes even more powerful when combined with `group_by()`, which allows simultaneous aggregate/summary operations *per group*, analogous to the base R function `aggregate()`.
-The following code chunk calculates the total population and number of countries *per continent* (see Chapter 5 of [R for Data Science](http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize) for a more detailed overview of `summarize()`):
+The following code chunk calculates the total population and number of countries *per continent* (see Chapter 5 of [R for Data Science](http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize) for a more detailed overview of `summarize()`), with results for the top 3 most populous continents illustrated in Table \@ref(tab:continents).
 
 ```{r}
 # data summary by groups
 world_continents = world %>% 
   group_by(continent) %>% 
   summarize(pop = sum(pop, na.rm = TRUE), country_n = n())
-world_continents
 ```
+
+```{r, echo=FALSE}
+world_continents %>% 
+  st_set_geometry(value = NULL) %>% 
+  knitr::kable()
+```
+
 
 `sf` objects are well-integrated with the **tidyverse**, as illustrated by the fact that the aggregated objects preserve the geometry of the original `world` object.
 What is more, under the hood `sf` is already doing a spatial aggregation of polygon data which is known as 'dissolving polygons' in the GIS world - an operation we will explain in more detail in the the next chapter.
