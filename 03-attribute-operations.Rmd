@@ -21,12 +21,9 @@ Attribute data is non-spatial information associated with geographic (geometry) 
 A bus station, for example, could be represented by an attribute field containing its name, associated with its latitude and longitude position (geometry data).
 A raster example might be the elevation value (attribute) for a specific grid cell.
 Interestingly, the raster data model stores the coordinate of the grid cell only indirectly.
-Say, we are in the 3rd row and the 4th column of a raster matrix.
+Say, we are in the 3^rd^ row and the 4^th^ column of a raster matrix.
 To derive the corresponding coordinate, we have to move from the origin three cells in x-direction and four cells in y-direction with the cell resolution defining the distance for each x- and y-step.
-The raster header simply gives the matrix a spatial dimension which we need when plotting the raster or when we want to combine two rasters, think, for instance, of adding the values of one raster to another.
-Before such an operation, the corresponding algorithm simply checks if the two rasters share the same extent, projection and resolution, that is the raster headers. 
-Hence, the spatial dimension of raster data is (often) of no importance at the processing level.
-Then, raster processing uses in fact map algebra, a special case of matrix algebra, which is why it is so much faster compared to vector processing.
+The raster header simply gives the matrix a spatial dimension which we need when plotting the raster or when we want to combine two rasters, think, for instance, of adding the values of one raster to another (see also next Chapter).
 <!-- should we somewhere add a table comparing advantages/disadvantages of using the vector or raster data model, would fit nicely into chapter 2 -->
 
 Simple features, described in the previous chapter, store attribute data in a data frame, with each column corresponding to a variable (such as 'name') and each row to one observation (such as an individual bus station).
@@ -46,12 +43,9 @@ Sometimes you can even use the same functions for attribute and spatial operatio
 This is, for example, the case for subsetting as base R's `[` and tidyverse's `filter()` let you also subset spatial data based on the spatial extent of another spatial object (see Chapter \@ref(spatial-data-operations)).
 That is, the skills you learn here are cross-transferable which is also why this chapter lays the foundation for the next chapter (Chapter \@ref(spatial-data-operations)) which extends the here presented methods to the spatial world.
 
-In the case of raster data we will learn how to create, and how to extract cell values from one layer and multiple layers at once (subsetting).
-Finally, we will introduce the concept of map algebra. 
-Since the underlying mathematics is a special case of matrix algebra^[A position of an individual raster cell corresponds to a position in space. 
-Map algebra makes sure that the position stays the same when the cell value changes during some processing.
-This one-to-one locational correspondence is also true in matrix algebra in the case of additions and subtractions, but not in the case of multiplications, divisions, etc. 
-By contrast, map algebra also retains the one-to-one locational correspondence for the latter operations.] (see above), we present them in this chapter (non-spatial attribute operations).
+In the case of raster data we will learn how to create continuous and categorical raster layers, and how to extract cell values from one layer and multiple layers at once (subsetting). 
+Finally, we will have a peak glance at global raster operations by 
+
 
 ## Vector attribute manipulation
 As outlined in Chapter \@ref(spatial-class), **sf** provided support for simple features in R and made them work with generic R functions such as `plot()` and `summary()` (as can be seen by executing `methods("summary")` and/or `methods("plot")`).
@@ -515,7 +509,6 @@ class(world_data)
 In contrast to simple features (vector data), raster data represents continuous surfaces.
 In this section we will use a raster object created *from scratch*, building on section \@ref(an-introduction-to-raster).
 Raster data has a fundamentally different structure than vector data, so subsetting and other operations work in a different way, as demonstrated in section \@ref(raster-subsetting).
-Raster operations can be classified into four categories using the map algebra scheme [@tomlin_geographic_1990], as we will see in section \@ref(map-algebra).
 
 Let us start with manually recreating the raster dataset of Chapter \@ref(raster-classes).
 This should make it easy to understand how **raster** and related operations work (Figure \@ref(fig:cont-cate-rasters)).
@@ -543,9 +536,28 @@ r_2
 The **raster** package represents boolean and factor variables as integers.
 Hence, `r_2[1, 1]` returns an integer instead of "sand", "silt" or "clay".
 These integers in turn represent unique identifiers. 
-The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes` which you see when you print a 'ratified' raster to the console.
+The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes` which you see when you print a 'ratified' raster to the console (see the help page of the `ratify()` command for more information).
 Use `levels()` to just retrieve the attribute table.
-See the help page of the `ratify()` command for more information.
+We can even add further columns to this attribute table:
+
+```{r}
+levels(r_2)[[1]] =  cbind(levels(r_2)[[1]], wetness = c("wet", "moist", "dry"))
+levels(r_2)
+```
+
+This is really interesting since we have learned that each raster cell can only possess one value.
+In fact, the raster cells themselves still consist of only one value, namely an integer which represents a unique identifier.
+This identifier can then be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`).
+Say, we would like to know the grain size and the wetness of rows and columns 1, 3, 5 and 6. 
+First, we have to find out the cell IDs for our indexes.
+With these, we extract the values from the raster.
+Finally, the `factorValues()` command returns the attributes for the raster cell values.
+
+```{r}
+cells = cellFromRowCol(r_2, rownr = c(2, 3, 5, 6), colnr = c(2, 3, 5, 6))
+vals = r_2[cells]
+factorValues(r_2, vals)
+```
 
 
 ```{r cont-cate-rasters, echo = FALSE, fig.cap = "Raster with numberic values (left) and a raster with categorical values"}
@@ -587,148 +599,8 @@ r[]
 Leaving the square brackets empty is a shortcut version of `values()` for retrieving all values of a raster.
 Of course, one can use indexing to modify multiple cells or even blocks.
 
-<<<<<<< HEAD
-### Map algebra
-Map algebra (or cartographic modeling) divides raster operations into four subclasses [@tomlin_geographic_1990], with each of them either working on one or several grids simultaneously:
-
-1. *Local* or per-cell operations.
-2. *Focal* or neighborhood operations.
-Most often the output cell value is the result of a 3 x 3 input cell block.
-3. *Zonal* operations are similar to focal operations but instead of a predefined neighborhood, classes, which can take on any, i.e. also an irregular size and shape, are the basis for calculations.
-4. *Global* or per-raster operations, that means the output cell derives its value potentially from one or several entire rasters
-
-This classification scheme uses basically the number of cells involved in a processing step as distinguishing feature.
-Of course, one can classify raster operations based on other characteristics such as discipline.
-Think, for instance, of terrain, hydrological analysis or image classifications.
-In the following paragraphs, we will explain each of the four map algebra operations by example.
-
-**Local** operations comprise all cell-by-cell operations in one or several layers.
-A good example is the classification of intervals of numeric values into groups such as grouping a digital elevation model into low (class 1), middle (class 2) and high elevations (class 3).
-Using the `reclassify()` command, we need first to construct a reclassification matrix, where the first column corresponds to the lower and the second column to the upper end of the class.
-The third column represents the new value for the specified ranges in column one and two.
-Here, we assign the raster values 1 to 3, 4 to 6 and 7 to 12 to the classes 1, 2 and 3, respectively.
-
-```{r, eval = FALSE}
-rcl = matrix(c(0, 12, 1, 12, 24, 2, 24, 36, 3), ncol = 3, byrow = TRUE)
-recl = reclassify(r, rcl = rcl)
-```
-
-Raster algebra is another classical use case of local operations.
-This includes adding, subtracting and squaring two rasters.
-Raster algebra also allows logical operations such as finding all raster cells that are greater than a specific value (5 in our example below).
-The **raster** package allows all these operations in a way natural to R users.
-Please see the `Raster`-vignette for a more detailed description on algebraic operations (`vignette("Raster", package = "raster")`).
-
-```{r, eval = FALSE}
-r + r
-r^2
-log(r)
-r > 5
-```
-
-Instead of arithmetic operators, you can also use the `calc()` and `overlay()` functions.
-These functions are more efficient.
-So you should use them if you have to process large raster datasets. 
-Additionally, they let you directly store an output file.
-
-The calculation of the normalized difference vegetation index (NDVI) is one of the most famous local, i.e. pixel-by-pixel, raster operations.
-It ranges between - 1 and 1 with positive values indicating the presence of living plants (mostly > 0.2).
-To calculate the NDVI, one uses the red and near-infrared bands of remotely sensed imagery (e.g., Landsat or Sentinel imagery) exploiting the fact that vegetation absorbs light heavily in the visible light spectrum, and especially in the red channel, while reflecting it in the near-infrared spectrum.
-
-$$
-\begin{split}
-NDVI&= \frac{\text{NIR} - \text{Red}}{\text{NIR} + \text{Red}}\\
-\end{split}
-$$
-where NIR = near infrared channel
-      Red = red channel
-
-Predictive mapping is another interesting application of local raster operations.
-The response variable correspond to measured or observed points in space, for example, species richness, the presence of landslides, tree disease or crop yield.
-Consequently, we can easily retrieve space- or airborne predictor variables from various rasters (elevation, pH, precipitation, temperature, landcover, soil class, etc.).
-Subsequently, we model our response as a function of our predictors using `lm`, `glm`, `gam` or a machine-learning technique. 
-To make a spatial prediction, all we have to do, is to apply the estimated coefficients to the predictor rasters, and summing up the resulting output rasters (Chapter ??; see also @muenchow_predictive_2013).
-<!-- add reference to chapter ecological modeling -->
-
-While local functions operate on one cell, though possibly from multiple layers, **focal** operations take into account a central cell and its neighbors.
-The neighborhood (also named kernel, filter or moving window) under consideration is typically of size 3-by-3 cells (that is the central cell and its eight surrounding neighbors) but can take on any other (not necessarily rectangular) shape as defined by the user.
-A focal operation applies an aggregation function to all cells within the specified neighborhood, uses the corresponding output as the new value for the the central cell, and moves on to the next central cell (Figure @ref(fig:focal_example)).
-Other names for this operation are spatial filtering and convolution [@burrough_principles_2015].
-
-In R, we can use the `focal()` function to perform spatial filtering. 
-We define the shape of the moving window with a `matrix` whose values correspond to weights.
-Secondly, the the `fun` argument lets us specify the function we wish to apply to this neighborhood.
-Here, we choose the minimum, but of course we can use any other function such as the the sum, the mean, the median, the mode, the maximum or the variance.
-
-```{r, eval = FALSE}
-r_focal = focal(r, w = matrix(1, nrow = 3, ncol = 3), fun = min)
-```
-
-```{r focal_example, echo = FALSE, fig.cap = "Input raster (left) and resulting output raster (right) due to a focal operation - summing up 3-by-3 windows"}
-knitr::include_graphics("figures/03_focal_example.png")
-```
-
-We can quickly check if the output meets our expectations.
-In our example, the minimum value has to be always the upper left corner of the moving window (remember we have created the input raster by rowwise incrementing the cell values by one starting at the upper left corner).
-Of course, the `focal()`-function has computed the correct result.
-In this example, our weighting matrix consists only of 1s.
-This means each cell has the same weight on the output.
-If appropriate, you can change this by specifying different weights.
-
-Focal functions or filters play a dominant role in image processing.
-Low-pass or smoothing filters use the mean function to remove extremes.
-In the case of categorical data, we can replace the mean with the mode, which is the most common value.
-By contrast, high-pass filters accentuate features.
-The line detection Laplace and Sobel filters might serve as an example here.
-Check the `focal()` help page how to use them in R.
-
-Also, terrain processing uses heavily focal functions.
-Think, for instance, of the calculation of the slope, aspect and flow directions.
-The `terrain()` function lets you compute a few of these terrain characteristics but has not implemented all popular methods
-For example, the Zevenbergen and Thorne method to compute the slope is missing.
-Equally, many other terrain and GIS functions are **not** implemented in R such as curvatures, contributing areas, different wetness indexes, and many more.
-Fortunately, desktop GIS commonly provide these algorithms.
-In Chapter 13 we will learn how to access GIS functionality from within R.
-<!-- Reference 13-gis chapter -->
-
-*Zonal* operations are similar to focal operations.
-The difference is that zonal filters can take on any shape instead of just a predefined window.
-Our grain size raster is a good example (Figure @ref(fig:cont_cate_rasters)) because the different grain sizes are spread in an irregular fashion throughout the raster.
-
-Now suppose, the first raster we created (`r`) represents elevation. 
-To find the mean elevation for each grain size class, we can use the `zonal()` command.
-This kind of operation is also known as *zonal statistics* in the GIS world. 
-
-```{r}
-z = zonal(r, r_2, fun = "mean") %>%
-  as.data.frame
-z
-```
-
-This returns the statistics for each category, here the mean altitude for each grain size class.
-Of course, we can add this statistic to the attribute table of the ratified raster (remember RAT stands for raster attribute table).
-
-```{r}
-levels(r_2)[[1]] =  cbind(levels(r_2)[[1]], mean_elev = z$mean)
-r_2
-``` 
-
-This is really interesting since we have learned that each raster cell can only possess one value.
-In fact, the raster cells themselves still consist of only one value, namely an integer which represents a unique identifier.
-This identifier can then be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`).
-Say, we would like to know the grain size and the mean altitude of rows and columns 1, 3, 5 and 6. 
-First, we have to find out the cell IDs for our indexes.
-With these, we extract the values from the raster.
-Finally, the `factorValues()` command returns the attributes for the raster cell values.
-
-```{r}
-cells = cellFromRowCol(r_2, rownr = c(2, 3, 5, 6), colnr = c(2, 3, 5, 6))
-vals = r_2[cells]
-factorValues(r_2, vals)
-```
-
-*Global* operations are a special case of zonal operations with the entire raster dataset representing a single zone.
-Descriptive raster statistics are typical global operations.
+### Summarizing raster objects
+In R we can easily derive descriptive statistics for entire rasters.
 Printing the raster object to the console already returns the minimum and maximum values of a raster.
 You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
 If we are interested in further summary operations such as the standard deviation (see below) or if we want to define our own summary functions, we can do so with the `cellStats` command. 
@@ -738,14 +610,12 @@ cellStats(r, sd)
 
 Note: if you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately.
 Try `summary(brick(r, r_2))`. 
+Nothing stops us from visualizing descriptive raster statistics.
+We can manually retrieving raster values with the help of the `values()` and `getValues()` function, and putting their output into any `plot()` function we like.
+Or we can make use of the `boxplot()`, `density()`, `hist()` and `pairs()` methods for raster objects.
 
-Global operations are also useful for the computation of distance and weight rasters.
-In the first case, one can calculate the distance from each cell to a specific target cell.
-For example, one might want to compute the distance to the nearest coast (see also `raster::distance()`).
-We might also want to consider topography, that means, we are not only interested in the pure distance but would like also to avoid the crossing of mountain ranges when going to the coast.
-To do so, we can weight the distance with elevation so that each additional altitudinal meter 'prolongs' the euclidean distance.
-Visibility and viewshed computations also belong to the family of global operations (in the exercises of Chapter ?? you will compute a viewshed raster).
-<!-- reference 13-gis chapter -->
+Descriptive raster statistics belong to the so-called global raster operations.
+These and other typical raster processing operations are part of the map algebra scheme which we will get to know better in the next chapter.
 
 ## Exercises
 
@@ -798,12 +668,11 @@ Change the name of the `median_income_15` column to `Income`.
 13. Calculate the change in median income between 2010 and 2015 for each state.
 Bonus: what was the minimum, average and maximum median income in 2015 for each region?
 What is the region with the largest increase of the median income?
-14. Use `data(dem, package = "RQGIS")`, and reclassify the elevation in three classes: low, middle and high.
-Secondly, compute the NDVI (`data(ndvi, package = "RQGIS")`) and the mean elevation for each altitudinal class.
-15. Apply a line detection filter to `data(dem, package = "RQGIS")`.
-16. Calculate the NDVI of a Landsat image. 
-Use the Landsat image provided by the **spDataLarge** package (`system.file("raster/landsat.tif", package="spDataLarge")`).
-17. This [post](https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances) shows how to use `raster::distance()`.
-Extract Spain, calculate a distance raster and weight it with elevation.
-Finally, compute the difference between the raster using the euclidean distance and the raster weighted by elevation.
-(Hint: Have a look at `getData()` to retrieve a digital elevation model for Spain.)
+<!-- Raster exercises -->
+14. Create a raster from scratch with nine rows and columns and a resolution of 0.5 decimal degrees (WGS84).
+Fill it with random numbers.
+Extract the values of the four corner cells. 
+15. What is the most common class of our example raster `r_2` (Hint: `modal()`).
+16. Plot the histogram and the boxplot of the `data(dem, package = "RQGIS")` raster. 
+17. Now attach also `data(ndvi, package = "RQGIS")`. 
+Create a raster stack using `dem` and `ndvi`, and make a `pairs()` plot
