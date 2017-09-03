@@ -2,12 +2,12 @@
 
 ## Prerequisites {-}
 
-- This chapter requires **tidyverse**, **sf**, **units**, and **spData** packages:
+- This chapter requires **tidyverse**, **sf**, and **spData** packages:
 
 ```{r, message=FALSE}
 library(sf)
+library(raster)
 library(tidyverse)
-library(units)
 ```
 
 - You must have loaded the `world` data from the **spData** package:
@@ -20,15 +20,15 @@ library(spData)
 
 Spatial operations are an important component of any geospatial software and vital for many applications involving spatial data.
 There are clear overlaps between spatial and non-spatial operations.
-Common spatial attribute data processing tasks include spatial subsetting (as we will see in section \@ref(spatial-subsetting)) aggregation (\@ref(spatial-aggregation)) and joining (covered in \@ref(spatial-joining)).
-Each of these spatial operations has a non-spatial equivalent, as demonstrated in sections \@ref(attribute-subsetting), \@ref(attribute-data-aggregation) and \@ref(attribute-data-joining) respectively in Chapter \@ref(attr).
+Common spatial attribute data processing tasks include spatial subsetting (as we will see in section \@ref(spatial-subsetting)), joining and aggregation (\@ref(spatial-joining-and-aggregation)).
+Each of these spatial operations has a non-spatial equivalent, as demonstrated in section \@ref(vector-attribute-manipulation) in the previous chapter.
 
 Some operations covered in this chapter are unique to spatial data.
-New spatial data can be created by modifying existing spatial objects, using operations such as 'buffer' and 'clip', described in section \@ref(modifying-geometry-data).
+A variety of *topological relations* can be used to subset/join vector geometries (by default **sf** uses the catch-all *intersects* but other relations such as *within* can be very useful), a topic that is explored in section \@ref(topological-relations).
+New geometry data can be created by modifying existing spatial objects, using operations such as 'buffer' and 'clip', described in section \@ref(modifying-geometry-data).
 Another unique aspect of spatial objects is distance.
-All features are related to each other in geographic space, as demonstrated in section \@ref(distance-relations), which shows how distance calculations can be used to find which spatial features are nearer or further away from a given point or each other.
-The final topic covered in this chapter is *topological relations*, a variety of which can be used for any spatial operation.
-This advanced topic is explored in section \@ref(topological-relations).
+All features are related to each other in geographic space, and distance calculations can be used to find which spatial features are nearer or further away from a given point or each other, as we'll see in section \@ref(distance-relations).
+The final topic covered in this chapter is spatial raster operations \@ref(spatial-operations-on-raster-data).
 
 ### Note {-}
 
@@ -48,20 +48,20 @@ readers can see this default value of `op` set in the first line of the function
 There are 9 well-defined operations that can be used for spatial subsetting, covered in section \@ref(topological-relations).
 This may seem daunting but the good news is that you do not have to learn all of them separately:
 after you understand how to spatially subset objects that *intersect* another (via `st_intersects()`) it is easy to subset based on other types of spatial operation such as `st_touches()`, `st_crosses()` and `st_within()`.
-For this reason now we focus only pn one of the spatial subsetting operations.
+For this reason now we focus only on one of the spatial subsetting operations.
 We use `st_intersects()` instead of any of the others not only because it the default when subsetting with `[`,
 but also `st_intersects()` is useful as a 'catch all' that identifies all types of spatial relations.
 
 In general terms, spatial subsetting is simply the spatial equivalent of *attribute subsetting*.
 However, to do spatial subsetting *two spatial objects are needed* the spatial relation between which is to be established.
 As with attribute subsetting, spatial subsetting is a *binary operation*: an object is either selected or not.
-As in section \@ref(attribute-subsetting), we start with base methods before describing how to do it in the **tidyverse**.
+As in section \@ref(vector-attribute-subsetting), we start with base methods before describing how to do it in the **tidyverse**.
 <!-- todo: link to non-binary links, e.g. area-weighted spatial interpolation -->
 
 <!-- ### Spatial subsetting in base R -->
 
 Attribute subsetting in base R is done with the `[` operator and passing into the square brackets a vector of class `integer` (whole numbers) or `logical` (a vector of `TRUE`s and `FALSE`s).
-This means `world[1:6,]` subsets the first 6 countries of the world and that `world[world$area_km2 < 10000,]` returns the subset of countries that have a small surface area.
+This means `world[1:6, ]` subsets the first 6 countries of the world and that `world[world$area_km2 < 10000, ]` returns the subset of countries that have a small surface area.
 For this chapter we will use countries in Africa, which can be generated using this method as
 follows:^[Recall
 that we can also subset simple features using the `filter()` function, e.g. with `filter(world, continent == "Africa")`]
@@ -114,7 +114,7 @@ Note that countries that only just touch the giant circle are selected such as t
 `st_relates()` includes countries that only touch (but are not within or overlapping with) the selection object.
 Other spatial subsetting operations such as `st_within()` are more conservative, as shown in section \@ref(topological-relations).
 
-Before we progress to explore the differences between different spatial subsetting operations, it is worth seeing alternative ways to acheive the same result,
+Before we progress to explore the differences between different spatial subsetting operations, it is worth seeing alternative ways to achieve the same result,
 to deepen understanding of what is going on 'under the hood' (vital for developing advanced geocomputation applications).
 The second way to reproduce the subsetting operation illustrated in Figure \@ref(fig:africa-buff) simply involves expanding the operation over 2 lines:
 
@@ -123,7 +123,7 @@ sel_buff = st_intersects(x = africa, y = buff, sparse = FALSE)
 africa_buff2 = africa[sel_buff, ]
 ```
 
-The third way is essentially the same as the second, but uses the `filter()` function introduced in section \@ref(attribute-subsetting), forming the foundations of a 'tidy' spatial data analysis workflow.
+The third way is essentially the same as the second, but uses the `filter()` function introduced in section \@ref(vector-attribute-subsetting), forming the foundations of a 'tidy' spatial data analysis workflow.
 If you already use **dplyr** for data manipulation, this way should seem familiar:
 
 ```{r}
@@ -161,18 +161,18 @@ data:^[**dplyr** discards row names by design.
 For further discussion of this decision, and some controversy, see the (closed) issue [#366](https://github.com/tidyverse/dplyr/issues/366) in the package's issue tracker.]
 
 ```{r}
-row.names(africa[africa$subregion == "Northern Europe",])
+row.names(africa[africa$subregion == "Northern Europe", ])
 row.names(filter(africa, subregion == "Northern Europe"))
 ```
 
-## Spatial aggregation 
+## Spatial joining and aggregation 
 
-Like attribute data aggregation, covered in section \@ref(attribute-data-aggregation), spatial data aggregation is a way of *condensing* data.
+Like attribute data aggregation, covered in section \@ref(vector-attribute-aggregation), spatial data aggregation is a way of *condensing* data.
 Aggregated data show some statistic about a variable (typically mean average or total) in relation to some kind of *grouping variable*. 
 For attribute data aggregation the grouping variable is another variable, typically one with few unique values relative to the number of rows.
 The `continent` variable in the `world` dataset is a good example:
 there are only 8 unique continents but 177 countries.
-In section \@ref(attribute-data-aggregation) the aggregation process condensed the `world` dataset down into only 8 rows and an aggregated `pop` variable representing the total population per continent (see Figure \@ref(fig:continent-pop)).
+In section \@ref(vector-attribute-aggregation) the aggregation process condensed the `world` dataset down into only 8 rows and an aggregated `pop` variable representing the total population per continent (see Figure \@ref(fig:continent-pop)).
 
 Spatial data aggregation is the same conceptually but uses a *spatial* grouping object:
 the *output* is the same, in terms of number of rows/features and geometry, as the *grouping object*, but with new variables corresponding to the input dataset.
@@ -189,19 +189,19 @@ The result, `buff_agg`, is a spatial object with the same geometry as `by` (the 
 Plotting the result (with `plot(buff_agg)`) shows that the operation does not really make sense:
 Figure \@ref(fig:buff-agg) shows a population of over half a billion people mostly located in a giant circle floating off the west coast of Africa!  
 
-```{r buff-agg, fig.cap="Result of spatial aggregation showing the total population of countries that intersect with a large circle whose center lies at 0 degrees longitude and latituge", echo=FALSE, message=FALSE}
+```{r buff-agg, fig.cap="Result of spatial aggregation showing the total population of countries that intersect with a large circle whose center lies at 0 degrees longitude and latitude", echo=FALSE, message=FALSE}
 library(tmap)
 pal = tmaptools::get_brewer_pal(palette = "BuPu", n = 4, plot = F)
 breaks = c(0, 1e7, 1e8, 5e8, 1e9)
 bb_buff = tmaptools::bb(buff_agg, ext = 1.5)
-qtm(buff_agg, fill = pal[4], bbox = bb_buff)
-# +
-#   tm_shape(africa_buff) +
-#   tm_fill("pop", palette = pal, breaks = breaks) +
-#   tm_borders() #+
-  # qtm(africa[st_disjoint(africa, buff, sparse = FALSE),]) +
-  # tm_shape(buff) +
-  # tm_borders(lwd = 3, lty = 3) 
+qtm(buff_agg, fill = pal[4], bbox = bb_buff) +
+  tm_shape(africa_buff) +
+  tm_fill("pop", palette = pal, breaks = breaks) +
+  tm_borders() +
+  qtm(africa[st_disjoint(africa, buff, sparse = FALSE), ]) +
+  tm_shape(buff) +
+  tm_borders(lwd = 3, lty = 3) +
+  tm_layout(legend.position = c("left", "bottom"))
 detach("package:tmap", unload = TRUE)
 ```
 
@@ -212,12 +212,13 @@ The results of the spatial aggregation exercise presented in Figure \@ref(fig:bu
 - It is wrong to assume that all the people living in countries that *touch* the buffer reside *within* it (the default spatial operator `st_intersects()` is too 'greedy'). The most extreme example of this is Algeria, the most northerly country selected:
 the spatial aggregation operation assumes that all 39 million Algerian citizens reside in the tiny southerly tip that is within the circular buffer.
 
-A number of methods can be used to overcome these issues, which result in unrealistically high population attributed to the circular buffer illustrated in Figure \@ref(fig:buff-agg).
-The simplest of these is to convert the country polygons into points representing their *geographic centroids* before aggregation.
+A number of methods can be used to overcome these issues, and generate a more realistic population attributed to the circular buffer illustrated in Figure \@ref(fig:buff-agg).
+The simplest of these is to convert the country polygons into points representing their *geographic centroids* before aggregation, covered in section \@ref(modifying-geometry-data).
 <!-- Todo: reference section where we demonstrate geographic centroid generation -->
 This would ensure that any spatially contiguous aggregating object covering the target object (the Earth in this case) would result in the same total: there would be no double counting.
 The estimated total population residing within the study area would be more realistic if geographic centroids were used.
 (The centroid of Algeria, for example, is far outside the aggregating buffer.)
+
 Except in cases where the number of target features per aggregating feature is very large, or where the aggregating object is *spatially congruent* with the target (covered in section \@ref(spatial-congruence-and-areal-interpolation)), using centroids can also lead to errors due to boundary effects:
 imagine a buffer that covers a large area but contains no centroids.
 These issues can be tackled when aggregating areal target data with areal interpolation.
@@ -226,6 +227,7 @@ These issues can be tackled when aggregating areal target data with areal interp
 
 Spatial congruence is an important concept related to spatial aggregation.
 An *aggregating object* object (which we will refer to as `y`, representing the buffer object in the previous section) is *congruent* with the target object (`x`, representing the countries in the previous section) if the two objects have shared borders.
+Often this is the case for administrative boundary data, whereby the larger units (e.g. Middle Layer Super Output Areas in the UK) are composed of many smaller units (Output Areas in this case, see [ons.gov.uk](https://www.ons.gov.uk/methodology/geography/ukgeographies/censusgeography) for further details).
 
 *Incongruent* aggregating objects, by contrast, do not share common borders with the target [@qiu_development_2012].
 This is problematic for spatial aggregation (and other spatial operations) illustrated in Figure \@ref(fig:areal-example).
@@ -262,149 +264,13 @@ buff_agg_aw = st_interpolate_aw(x = africa["pop"], to = buff, extensive = TRUE)
 <!-- - ? generalization **rmapsharper** - https://github.com/ateucher/rmapshaper -->
 <!-- `st_union` -->
 
-## Spatial joining 
+### Non-overlapping joins 
 
 <!-- e.g. two point's datasets (non-overlapping) -->
 <!-- e.g. two point's datasets (overlapping) -->
 <!-- ? topological problems of joining lines/polygons? -->
 <!-- joining different types (e.g. points + polygons = geometry) -> save as GPKG? -->
 <!-- `merge()`; `st_interpolate_aw()` -->
-
-
-## Modifying geometry data
-
-Spatial clipping is a form of spatial subsetting that involves changes to the `geometry` columns of at least some of the affected features.
-
-Clipping can only apply to features more complex than points: 
-lines, polygons and their 'multi' equivalents.
-To illustrate the concept we will start with a simple example:
-two overlapping circles with a centrepoint 1 unit away from each other and radius of 1:
-
-```{r points, fig.cap="Overlapping circles."}
-b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
-b = st_buffer(b, dist = 1) # convert points to circles
-l = c("x", "y")
-plot(b)
-text(x = c(-0.5, 1.5), y = 1, labels = l) # add text
-```
-
-Imagine you want to select not one circle or the other, but the space covered by both `x` *and* `y`.
-This can be done using the function `st_intersection()`, illustrated using objects named `x` and `y` which represent the left and right-hand circles:
-
-```{r}
-x = b[1]
-y = b[2]
-x_and_y = st_intersection(x, y)
-plot(b)
-plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
-```
-
-The subsequent code chunk demonstrate how this works for all combinations of the 'venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book R for Data Science [@grolemund_r_2016].
-<!-- Todo: reference r4ds -->
-
-```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators"}
-par(mfrow = c(3, 3), mai = c(0.1, 0.1, 0.1, 0.1))
-plot(b)
-y_not_x = st_difference(y, x)
-plot(y_not_x, col = "grey", add = TRUE)
-text(x = 0.5, y = 1, "st_difference(y, x)")
-plot(b)
-plot(x, add = TRUE, col = "grey")
-text(x = 0.5, y = 1, "x")
-plot(b, add = TRUE)
-x_or_y = st_union(x, y)
-plot(x_or_y, col = "grey")
-text(x = 0.5, y = 1, "st_union(x, y)")
-x_and_y = st_intersection(x, y)
-plot(b)
-plot(x_and_y, col = "grey", add = TRUE) 
-text(x = 0.5, y = 1, "st_intersection(x, y)")
-# x_xor_y = st_difference(x_xor_y, x_and_y) # failing
-x_not_y = st_difference(x, y)
-x_xor_y = st_union(y_not_x, x_not_y)
-plot(x_xor_y, col = "grey")
-text(x = 0.5, y = 1, "st_union(y_not_x, x_not_y)")
-plot.new()
-plot(b)
-plot(x_not_y, col = "grey", add = TRUE)
-text(x = 0.5, y = 1, "st_difference(x, y)")
-plot(b)
-plot(y, col = "grey", add = TRUE)
-plot(b, add = TRUE)
-text(x = 0.5, y = 1, "y")
-par(mfrow = c(1, 1))
-```
-
-To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
-Some points will be inside just one circle, some will be inside both and some will be inside neither.
-To generate the points will use a function not yet covered in this book, `st_sample()`.
-
-There are two different ways to subset points that fit into combinations of the circles: via clipping and logical operators.
-But first we must generate some points.
-We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y`, using the code below to generate the situation plotted in Figure \@ref(fig:venn-subset):
-
-```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y."}
-bb = st_bbox(st_union(x, y))
-pmat = matrix(c(bb[c(1, 2, 3, 2, 3, 4, 1, 4, 1, 2)]), ncol = 2, byrow = TRUE)
-box = st_polygon(list(pmat))
-set.seed(2017)
-p = st_sample(x = box, size = 10)
-plot(box)
-plot(x, add = T)
-plot(y, add = T)
-plot(p, add = T)
-text(x = c(-0.5, 1.5), y = 1, labels = l)
-```
-
-```{r, echo=FALSE}
-# An alternative way to sample from the bb
-bb = st_bbox(st_union(x, y))
-pmulti = st_multipoint(pmat)
-box = st_convex_hull(pmulti)
-```
-
-## Distance relations
-
-```{r, eval=FALSE}
-st_distance(a, b)
-```
-
-<!-- ## Spatial data creation -->
-
-<!-- where should "area" example be? in this or the previous chapter? -->
-<!-- Not here - I think this chapter should focus on geomtry data -->
-<!-- `st_centroid()` -->
-<!-- `st_buffer()` -->
-<!-- http://r-spatial.org//r/2017/06/09/mapedit_0-2-0.html -->
-
-<!-- Commented out - think this would be better in c3 (RL) -->
-<!-- ```{r} -->
-<!-- # add a new column -->
-<!-- africa$area = set_units(st_area(africa), value = km^2) -->
-<!-- africa$pop_density = africa$pop / africa$area -->
-
-<!-- # OR -->
-<!-- africa = africa %>% -->
-<!--         mutate(area = set_units(st_area(.), value = km^2)) %>% -->
-<!--         mutate(pop_density = pop / area) -->
-<!-- ``` -->
-
-<!-- Note that this has created a attributes for the area and population density variables: -->
-
-<!-- ```{r} -->
-<!-- attributes(africa$area) -->
-<!-- attributes(africa$pop_density) -->
-<!-- ``` -->
-
-<!-- These can be set to `NULL` as follows: -->
-
-<!-- ```{r} -->
-<!-- attributes(africa$area) = NULL -->
-<!-- attributes(africa$pop_density) = NULL -->
-<!-- ``` -->
-
-<!-- ## Spatial data transformation -->
-<!-- changes classes; polygonize, etc-->
 
 ## Topological relations
 
@@ -524,6 +390,315 @@ st_relate(a, b, sparse = FALSE)
 <!-- blob_points = st_sample(x = world, size = 2) -->
 <!-- blobs = st_buffer(x = blob_points, dist = 1) -->
 <!-- plot(blobs) -->
+
+
+## Modifying geometry data
+
+Spatial clipping is a form of spatial subsetting that involves changes to the `geometry` columns of at least some of the affected features.
+
+Clipping can only apply to features more complex than points: 
+lines, polygons and their 'multi' equivalents.
+To illustrate the concept we will start with a simple example:
+two overlapping circles with a centrepoint 1 unit away from each other and radius of 1:
+
+```{r points, fig.cap="Overlapping circles."}
+b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
+b = st_buffer(b, dist = 1) # convert points to circles
+l = c("x", "y")
+plot(b)
+text(x = c(-0.5, 1.5), y = 1, labels = l) # add text
+```
+
+Imagine you want to select not one circle or the other, but the space covered by both `x` *and* `y`.
+This can be done using the function `st_intersection()`, illustrated using objects named `x` and `y` which represent the left and right-hand circles:
+
+```{r}
+x = b[1]
+y = b[2]
+x_and_y = st_intersection(x, y)
+plot(b)
+plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
+```
+
+The subsequent code chunk demonstrate how this works for all combinations of the 'venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book R for Data Science [@grolemund_r_2016].
+<!-- Todo: reference r4ds -->
+
+```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators"}
+par(mfrow = c(3, 3), mai = c(0.1, 0.1, 0.1, 0.1))
+plot(b)
+y_not_x = st_difference(y, x)
+plot(y_not_x, col = "grey", add = TRUE)
+text(x = 0.5, y = 1, "st_difference(y, x)")
+plot(b)
+plot(x, add = TRUE, col = "grey")
+text(x = 0.5, y = 1, "x")
+plot(b, add = TRUE)
+x_or_y = st_union(x, y)
+plot(x_or_y, col = "grey")
+text(x = 0.5, y = 1, "st_union(x, y)")
+x_and_y = st_intersection(x, y)
+plot(b)
+plot(x_and_y, col = "grey", add = TRUE) 
+text(x = 0.5, y = 1, "st_intersection(x, y)")
+# x_xor_y = st_difference(x_xor_y, x_and_y) # failing
+x_not_y = st_difference(x, y)
+x_xor_y = st_union(y_not_x, x_not_y)
+plot(x_xor_y, col = "grey")
+text(x = 0.5, y = 1, "st_union(y_not_x, x_not_y)")
+plot.new()
+plot(b)
+plot(x_not_y, col = "grey", add = TRUE)
+text(x = 0.5, y = 1, "st_difference(x, y)")
+plot(b)
+plot(y, col = "grey", add = TRUE)
+plot(b, add = TRUE)
+text(x = 0.5, y = 1, "y")
+par(mfrow = c(1, 1))
+```
+
+To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
+Some points will be inside just one circle, some will be inside both and some will be inside neither.
+To generate the points will use a function not yet covered in this book, `st_sample()`.
+
+There are two different ways to subset points that fit into combinations of the circles: via clipping and logical operators.
+But first we must generate some points.
+We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y`, using the code below to generate the situation plotted in Figure \@ref(fig:venn-subset):
+
+```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y."}
+bb = st_bbox(st_union(x, y))
+pmat = matrix(c(bb[c(1, 2, 3, 2, 3, 4, 1, 4, 1, 2)]), ncol = 2, byrow = TRUE)
+box = st_polygon(list(pmat))
+set.seed(2017)
+p = st_sample(x = box, size = 10)
+plot(box)
+plot(x, add = T)
+plot(y, add = T)
+plot(p, add = T)
+text(x = c(-0.5, 1.5), y = 1, labels = l)
+```
+
+```{r, echo=FALSE}
+# An alternative way to sample from the bb
+bb = st_bbox(st_union(x, y))
+pmulti = st_multipoint(pmat)
+box = st_convex_hull(pmulti)
+```
+
+## Distance relations
+
+```{r, eval=FALSE}
+st_distance(a, b)
+```
+
+## Spatial operations on raster data
+
+This section builds on \@ref(manipulating-raster-objects), which highlights various basic methods for manipulating raster datasets, to demonstrate more advanced and explicitly spatial raster operations,
+and uses the same objects `r` and `r_2`.
+
+```{r, echo=FALSE}
+source("code/create-rasters.R")
+```
+
+
+###  Map algebra: local, focal, zonal, global
+
+Map algebra (or cartographic modeling) divides raster operations into four subclasses [@tomlin_geographic_1990], with each of them either working on one or several grids simultaneously:
+
+1. *Local* or per-cell operations.
+2. *Focal* or neighborhood operations.
+Most often the output cell value is the result of a 3 x 3 input cell block.
+3. *Zonal* operations are similar to focal operations but instead of a predefined neighborhood, classes, which can take on any, i.e. also an irregular size and shape, are the basis for calculations.
+4. *Global* or per-raster operations, that means the output cell derives its value potentially from one or several entire rasters
+
+This classification scheme uses basically the number of cells involved in a processing step as distinguishing feature.
+Of course, one can classify raster operations based on other characteristics such as discipline.
+Think, for instance, of terrain, hydrological analysis or image classifications.
+In the following paragraphs, we will explain each of the four map algebra operations by example.
+
+**Local** operations comprise all cell-by-cell operations in one or several layers.
+A good example is the classification of intervals of numeric values into groups such as grouping a digital elevation model into low (class 1), middle (class 2) and high elevations (class 3).
+Using the `reclassify()` command, we need first to construct a reclassification matrix, where the first column corresponds to the lower and the second column to the upper end of the class.
+The third column represents the new value for the specified ranges in column one and two.
+Here, we assign the raster values in the ranges 0--12, 12--24 and 24--36 are *reclassified* to take values 1, 2 and 3, respectively.
+
+```{r, eval = FALSE}
+rcl = matrix(c(0, 12, 1, 12, 24, 2, 24, 36, 3), ncol = 3, byrow = TRUE)
+recl = reclassify(r, rcl = rcl)
+```
+
+Raster algebra is another classical use case of local operations.
+This includes adding, subtracting and squaring two rasters.
+Raster algebra also allows logical operations such as finding all raster cells that are greater than a specific value (5 in our example below).
+The **raster** package allows all these operations in a way natural to R users.
+Please see the `Raster`-vignette for a more detailed description on algebraic operations (`vignette("Raster", package = "raster")`).
+
+```{r, eval = FALSE}
+r + r
+r^2
+log(r)
+r > 5
+```
+
+Instead of arithmetic operators, you can also use the `calc()` and `overlay()` functions.
+These functions are more efficient.
+So you should use them if you have to process large raster datasets. 
+Additionally, they let you directly store an output file.
+
+The calculation of the normalized difference vegetation index (NDVI) is one of the most famous local, i.e. pixel-by-pixel, raster operations.
+It ranges between - 1 and 1 with positive values indicating the presence of living plants (mostly > 0.2).
+To calculate the NDVI, one uses the red and near-infrared bands of remotely sensed imagery (e.g., Landsat or Sentinel imagery) exploiting the fact that vegetation absorpts light heavily in the visible light spectrum, and especially in the red channel, while reflecting it in the near-infrared spectrum.
+
+$$
+\begin{split}
+NDVI&= \frac{\text{NIR} - \text{Red}}{\text{NIR} + \text{Red}}\\
+\end{split}
+$$
+where NIR = near infrared channel
+      Red = red channel
+
+Predictive mapping is another interesting application of local raster operations.
+The response variable correspond to measured or observed points in space, for example, species richness, the presence of landslides, tree disease or crop yield.
+Consequently, we can easily retrieve space- or airborne predictor variables from various rasters (elevation, pH, precipitation, temperature, landcover, soil class, etc.).
+Subsequently, we model our response as a function of our predictors using `lm`, `glm`, `gam` or a machine-learning technique. 
+To make a spatial prediction, all we have to do, is to apply the estimated coefficients to the predictor rasters, and summing up the resulting output rasters (<!--Chapter ??; -->see also @muenchow_predictive_2013).
+<!-- add reference to chapter ecological modeling -->
+
+While local functions operate on one cell, though possibly from multiple layers, **focal** operations take into account a central cell and its neigbors.
+The neigborhood (also named kernel, filter or moving window) under consideration is typically of size 3-by-3 cells (that is the central cell and its eight surrounding neighbors) but can take on any other (not necessarily rectangular) shape as defined by the user.
+A focal operation applies an aggregation function to all cells within the specified neighborhood, uses the corresponding output as the new value for the the central cell, and moves on to the next central cell (Figure \@ref(fig:focal-example)).
+Other names for this operation are spatial filtering and convolution [@burrough_principles_2015].
+
+In R, we can use the `focal()` function to perform spatial filtering. 
+We define the shape of the moving window with a `matrix` whose values correspond to weights.
+Secondly, the the `fun` argument lets us specify the function we wish to apply to this neighborhood.
+Here, we choose the minimum, but of course we can use any other function such as the the sum, the mean, the median, the mode, the maximum or the variance.
+
+```{r, eval = FALSE}
+r_focal = focal(r, w = matrix(1, nrow = 3, ncol = 3), fun = min)
+```
+
+```{r focal-example, echo = FALSE, fig.cap = "Input raster (left) and resulting output raster (right) due to a focal operation - summing up 3-by-3 windows"}
+knitr::include_graphics("figures/03_focal_example.png")
+```
+
+We can quickly check if the output meets our expectations.
+In our example, the minimum value has to be always the upper left corner of the moving window (remember we have created the input raster by rowwise incrementing the cell values by one starting at the upper left corner).
+Of course, the `focal()`-function has computed the correct result.
+In this example, our weighting matrix consists only of 1s.
+This means each cell has the same weight on the output.
+If appropriate, you can change this by specifying different weights.
+
+Focal functions or filters play a dominant role in image processing.
+Low-pass or smoothing filters use the mean function to remove extremes.
+In the case of categorical data, we can replace the mean with the mode, which is the most common value.
+By contrast, high-pass filters accentuate features.
+The line detection Laplace and Sobel filters might serve as an example here.
+Check the `focal()` help page how to use them in R.
+
+Also, terrain processing uses heavily focal functions.
+Think, for instance, of the calculation of the slope, aspect and flow directions.
+The `terrain()` function lets you compute a few of these terrain characteristics but has not implemented all popular methods
+For example, the Zevenbergen and Thorne method to compute the slope is missing.
+Equally, many other terrain and GIS functions are **not** implemented in R such as curvatures, contributing areas, different wetness indexes, and many more.
+Fortunately, desktop GIS commonly provide these algorithms.
+In Chapter 13 we will learn how to access GIS functionality from within R.
+<!-- Reference 13-gis chapter -->
+
+*Zonal* operations are similar to focal operations.
+The difference is that zonal filters can take on any shape instead of just a predefined window.
+Our grain size raster is a good example (Figure \@ref(fig:cont-cate-rasters)) because the different grain sizes are spread in an irregular fashion throughout the raster.
+
+Now suppose, the first raster we created (`r`) represents elevation. 
+To find the mean elevation for each grain size class, we can use the `zonal()` command.
+This kind of operation is also known as *zonal statistics* in the GIS world. 
+
+```{r}
+z = zonal(r, r_2, fun = "mean") %>%
+  as.data.frame
+z
+```
+
+This returns the statistics for each category, here the mean altitude for each grain size class.
+Of course, we can add this statistic to the attribute table of the ratified raster (remember RAT stands for raster attribute table).
+
+```{r}
+levels(r_2)[[1]] =  cbind(levels(r_2)[[1]], mean_elev = z$mean)
+r_2
+``` 
+
+This is really interesting since we have learned that each raster cell can only possess one value.
+In fact, the raster cells themselves still consist of only one value, namely an integer which represents a unique identifier.
+This identifier can then be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`).
+Say, we would like to know the grain size and the mean altitude of rows and columns 1, 3, 5 and 6. 
+First, we have to find out the cell IDs for our indexes.
+With these, we extract the values from the raster.
+Finally, the `factorValues()` command returns the attributes for the raster cell values.
+
+```{r}
+cells = cellFromRowCol(r_2, rownr = c(2, 3, 5, 6), colnr = c(2, 3, 5, 6))
+vals = r_2[cells]
+factorValues(r_2, vals)
+```
+
+*Global* operations are a special case of zonal operations with the entire raster dataset representing a single zone.
+Descriptive raster statistics are typical global operations.
+Printing the raster object to the console already returns the minimum and maximum values of a raster.
+You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
+If we are interested in further summary operations such as the standard deviation (see below) or if we want to define our own summary functions, we can do so with the `cellStats` command. 
+```{r}
+cellStats(r, sd)
+```
+
+Note: if you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately.
+Try `summary(brick(r, r_2))`. 
+
+Global operations are also usefuel for the computation of distance and weight rasters.
+In the first case, one can calculate the distance from each cell to a specific target cell.
+For example, one might want to compute the distance to the nearest coast (see also `raster::distance()`).
+We might also want to consider topography, that means, we are not only interested in the pure distance but would like also to avoid the crossing of mountain ranges when going to the coast.
+To do so, we can weight the distance with elevation so that each additional altitudinal meter 'prolongs' the euclidean distance.
+Visibility and viewshed computations also belong to the family of global operations (in the exercices of Chapter ?? you will compute a viewshed raster).
+
+### Mosaics
+
+### Raster aggregation, disaggregation and resampling
+
+<!-- ## Spatial data creation -->
+
+<!-- where should "area" example be? in this or the previous chapter? -->
+<!-- Not here - I think this chapter should focus on geomtry data -->
+<!-- `st_centroid()` -->
+<!-- `st_buffer()` -->
+<!-- http://r-spatial.org//r/2017/06/09/mapedit_0-2-0.html -->
+
+<!-- Commented out - think this would be better in c3 (RL) -->
+<!-- ```{r} -->
+<!-- # add a new column -->
+<!-- africa$area = set_units(st_area(africa), value = km^2) -->
+<!-- africa$pop_density = africa$pop / africa$area -->
+
+<!-- # OR -->
+<!-- africa = africa %>% -->
+<!--         mutate(area = set_units(st_area(.), value = km^2)) %>% -->
+<!--         mutate(pop_density = pop / area) -->
+<!-- ``` -->
+
+<!-- Note that this has created a attributes for the area and population density variables: -->
+
+<!-- ```{r} -->
+<!-- attributes(africa$area) -->
+<!-- attributes(africa$pop_density) -->
+<!-- ``` -->
+
+<!-- These can be set to `NULL` as follows: -->
+
+<!-- ```{r} -->
+<!-- attributes(africa$area) = NULL -->
+<!-- attributes(africa$pop_density) = NULL -->
+<!-- ``` -->
+
+<!-- ## Spatial data transformation -->
+<!-- changes classes; polygonize, etc-->
 
 ### Exercises
 
