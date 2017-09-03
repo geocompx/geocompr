@@ -399,7 +399,7 @@ Spatial clipping is a form of spatial subsetting that involves changes to the `g
 Clipping can only apply to features more complex than points: 
 lines, polygons and their 'multi' equivalents.
 To illustrate the concept we will start with a simple example:
-two overlapping circles with a centrepoint 1 unit away from each other and radius of 1:
+two overlapping circles with a centerpoint 1 unit away from each other and radius of 1:
 
 ```{r points, fig.cap="Overlapping circles."}
 b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
@@ -491,7 +491,6 @@ st_distance(a, b)
 ```
 
 ## Spatial operations on raster data
-
 This section builds on \@ref(manipulating-raster-objects), which highlights various basic methods for manipulating raster datasets, to demonstrate more advanced and explicitly spatial raster operations,
 and uses the same objects `r` and `r_2`.
 
@@ -499,8 +498,14 @@ and uses the same objects `r` and `r_2`.
 source("code/create-rasters.R")
 ```
 
-
 ###  Map algebra: local, focal, zonal, global
+Raster processing is really fast because it only implicitly stores coordinates, that is we can calculate the coordinate of a raster cell due to its matrix position and the help of the resolution and the origin.
+For the processing, however, the geographic position of a cell is barely relevant as long as we make sure that the cell position is still the same after the processing (one-to-one locational correspondence).
+Additionally, if two or more raster datasets share the same extent, projection and the resolution, one could treat them as matrixes for the processing.
+This is exactly what map algebra is doing.
+First, it checks the headers of the rasters on which to perform any algebraic operation, and only if they correspondent to each other, the processing goes on.
+And secondly, map algebra retains the so-called one-to-one locational correspondence.
+This is where it substantially differs from matrix algebra which changes positions when for example multiplying or dividing matrixes.
 
 Map algebra (or cartographic modeling) divides raster operations into four subclasses [@tomlin_geographic_1990], with each of them either working on one or several grids simultaneously:
 
@@ -546,7 +551,7 @@ Additionally, they let you directly store an output file.
 
 The calculation of the normalized difference vegetation index (NDVI) is one of the most famous local, i.e. pixel-by-pixel, raster operations.
 It ranges between - 1 and 1 with positive values indicating the presence of living plants (mostly > 0.2).
-To calculate the NDVI, one uses the red and near-infrared bands of remotely sensed imagery (e.g., Landsat or Sentinel imagery) exploiting the fact that vegetation absorpts light heavily in the visible light spectrum, and especially in the red channel, while reflecting it in the near-infrared spectrum.
+To calculate the NDVI, one uses the red and near-infrared bands of remotely sensed imagery (e.g., Landsat or Sentinel imagery) exploiting the fact that vegetation absorbs light heavily in the visible light spectrum, and especially in the red channel, while reflecting it in the near-infrared spectrum.
 
 $$
 \begin{split}
@@ -563,8 +568,8 @@ Subsequently, we model our response as a function of our predictors using `lm`, 
 To make a spatial prediction, all we have to do, is to apply the estimated coefficients to the predictor rasters, and summing up the resulting output rasters (<!--Chapter ??; -->see also @muenchow_predictive_2013).
 <!-- add reference to chapter ecological modeling -->
 
-While local functions operate on one cell, though possibly from multiple layers, **focal** operations take into account a central cell and its neigbors.
-The neigborhood (also named kernel, filter or moving window) under consideration is typically of size 3-by-3 cells (that is the central cell and its eight surrounding neighbors) but can take on any other (not necessarily rectangular) shape as defined by the user.
+While local functions operate on one cell, though possibly from multiple layers, **focal** operations take into account a central cell and its neighbors.
+The neighborhood (also named kernel, filter or moving window) under consideration is typically of size 3-by-3 cells (that is the central cell and its eight surrounding neighbors) but can take on any other (not necessarily rectangular) shape as defined by the user.
 A focal operation applies an aggregation function to all cells within the specified neighborhood, uses the corresponding output as the new value for the the central cell, and moves on to the next central cell (Figure \@ref(fig:focal-example)).
 Other names for this operation are spatial filtering and convolution [@burrough_principles_2015].
 
@@ -619,46 +624,21 @@ z
 ```
 
 This returns the statistics for each category, here the mean altitude for each grain size class.
-Of course, we can add this statistic to the attribute table of the ratified raster (remember RAT stands for raster attribute table).
+Of course, we can add this statistic to the attribute table of the ratified raster (remember RAT stands for raster attribute table, see also previous chapter).
 
 ```{r}
 levels(r_2)[[1]] =  cbind(levels(r_2)[[1]], mean_elev = z$mean)
-r_2
 ``` 
 
-This is really interesting since we have learned that each raster cell can only possess one value.
-In fact, the raster cells themselves still consist of only one value, namely an integer which represents a unique identifier.
-This identifier can then be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`).
-Say, we would like to know the grain size and the mean altitude of rows and columns 1, 3, 5 and 6. 
-First, we have to find out the cell IDs for our indexes.
-With these, we extract the values from the raster.
-Finally, the `factorValues()` command returns the attributes for the raster cell values.
-
-```{r}
-cells = cellFromRowCol(r_2, rownr = c(2, 3, 5, 6), colnr = c(2, 3, 5, 6))
-vals = r_2[cells]
-factorValues(r_2, vals)
-```
-
 *Global* operations are a special case of zonal operations with the entire raster dataset representing a single zone.
-Descriptive raster statistics are typical global operations.
-Printing the raster object to the console already returns the minimum and maximum values of a raster.
-You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
-If we are interested in further summary operations such as the standard deviation (see below) or if we want to define our own summary functions, we can do so with the `cellStats` command. 
-```{r}
-cellStats(r, sd)
-```
-
-Note: if you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately.
-Try `summary(brick(r, r_2))`. 
-
-Global operations are also usefuel for the computation of distance and weight rasters.
+The most common global operations are descriptive statistics for the entire raster dataset such as the minimum or maximum (see previous chapter).
+Aside from that, global operations are also useful for the computation of distance and weight rasters.
 In the first case, one can calculate the distance from each cell to a specific target cell.
 For example, one might want to compute the distance to the nearest coast (see also `raster::distance()`).
 We might also want to consider topography, that means, we are not only interested in the pure distance but would like also to avoid the crossing of mountain ranges when going to the coast.
 To do so, we can weight the distance with elevation so that each additional altitudinal meter 'prolongs' the euclidean distance.
-Visibility and viewshed computations also belong to the family of global operations (in the exercices of Chapter ?? you will compute a viewshed raster).
-
+Visibility and viewshed computations also belong to the family of global operations (in the exercises of Chapter ?? you will compute a viewshed raster).
+<!-- reference 13-gis chapter-->
 ### Mosaics
 
 ### Raster aggregation, disaggregation and resampling
@@ -720,3 +700,13 @@ interp9 = st_interpolate_aw(x = world["pop"], to = buff9, extensive = TRUE)
 
 ```
 
+<!-- Raster exercises-->
+4. Use `data(dem, package = "RQGIS")`, and reclassify the elevation in three classes: low, middle and high.
+Secondly, compute the NDVI (`data(ndvi, package = "RQGIS")`) and the mean elevation for each altitudinal class.
+5. Apply a line detection filter to `data(dem, package = "RQGIS")`.
+6. Calculate the NDVI of a Landsat image. 
+Use the Landsat image provided by the **spDataLarge** package (`system.file("raster/landsat.tif", package="spDataLarge")`).
+7. This [post](https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances) shows how to use `raster::distance()`.
+Extract Spain, calculate a distance raster and weight it with elevation.
+Finally, compute the difference between the raster using the euclidean distance and the raster weighted by elevation.
+(Hint: Have a look at `getData()` to retrieve a digital elevation model for Spain.)
