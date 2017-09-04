@@ -353,19 +353,26 @@ wb_north_america = worldbank_df %>%
   dplyr::select(name, iso_a2, urban_pop, unemploy = unemployment)
 ```
 
-We will use a left join, the most commonly used operation for adding attributes to spatial data to join the two datasets.
-Left joins return all observations from the left object (`north_america`) and the matched observations from the right object (`wb_north_america`).
+We will use a left join to combine the two datasets.
+Left joins are the most commonly used operation for adding attributes to spatial data, as they return all observations from the left object (`north_america`) and the matched observations from the right object (`wb_north_america`) in new columns.
 Rows in the left object without matches in the right (`Greenland` in this case) result in `NA` values.
 
 To join two objects we need to specify a key.
 This is a variable (or a set of variables) that uniquely identifies each observation (row). 
 The `by` argument of **dplyr**'s join functions lets you identify the key variable. 
-In simple cases, a single, unique variable exist in both objects like the `iso_a2` column in our example:
+In simple cases, a single, unique variable exist in both objects like the `iso_a2` column in our example (you may need to rename columns with identifying information for this to work):
 
 ```{r}
 left_join1 = north_america %>% 
   left_join(wb_north_america, by = "iso_a2")
-left_join1
+```
+
+This has created a spatial dataset with the new variables added.
+The utility of this is shown in Figure \@ref(fig:unemploy), which shows the unemployment rate (a World Bank variable) across the countries of North America.
+
+```{r, echo=FALSE}
+library(tmap)
+qtm(left_join1, "unemploy", fill.breaks = c(6, 6.5, 7))
 ```
 
 It is also possible to join objects by different variables.
