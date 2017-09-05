@@ -1,4 +1,9 @@
-# Attribute data operations {#attr}
+# Spatial data and the tidyverse {#attr}
+
+This is a draft version of Chapter 3 in the forethcoming book, Geocomputations with R, hosted at: https://github.com/Robinlovelace/geocompr
+
+This is work in progress: any feedback on the book welcome, e.g. via the projects' issue tracker at 
+https://github.com/Robinlovelace/geocompr/issues
 
 ## Prerequisites {-}
 
@@ -6,6 +11,7 @@
 
 ```{r, message=FALSE}
 library(sf)
+library(raster)
 library(tidyverse)
 ```
 
@@ -143,11 +149,16 @@ This comes in especially handy when working with large data sets.
 As a special bonus, **dplyr** is compatible with `sf` objects.
 The main **dplyr** subsetting functions are `select()`, `slice()`, `filter()` and `pull()`.
 
+```{block2, note-text, type='rmdnote'}
+Both **raster** and **dplyr** packages have a function called `select()`. If both packages are loaded, this can generate error messages containing the text: `unable to find an inherited method for function ‘select’ for signature ‘"sf"’`.
+To avoid this error message, and prevent ambiguity, we use the long-form function name, prefixed by the package name and two colons (usually omited from R scripts for concise code): `dplyr::select()`.
+```
+
 The `select()` function selects columns by name or position.
 For example, you could select only two columns, `name_long` and `pop`, with the following command (note the `geom` column remains):
 
 ```{r}
-world1 = select(world, name_long, pop)
+world1 = dplyr::select(world, name_long, pop)
 names(world1)
 ```
 
@@ -155,21 +166,21 @@ names(world1)
 
 ```{r, eval=TRUE}
 # all columns between name_long and pop (inclusive)
-world2 = select(world, name_long:pop)
+world2 = dplyr::select(world, name_long:pop)
 names(world2)
 ```
 
 Omit specific columns with the `-` operator:
 
-```{r, eval=TRUE}
+```{r}
 # all columns except subregion and area_km2 (inclusive)
-world3 = select(world, -subregion, -area_km2)
+world3 = dplyr::select(world, -subregion, -area_km2)
 ```
 
 Conveniently, `select()` lets you subset and rename columns at the same time, for example:
 
 ```{r}
-world4 = select(world, name_long, population = pop)
+world4 = dplyr::select(world, name_long, population = pop)
 names(world4)
 ```
 
@@ -197,13 +208,12 @@ It keeps only rows matching given criteria, e.g., only countries with a very hig
 world6 = filter(world, lifeExp > 82)
 ```
 
-The standard set of comparison operators can be used in the `filter()` function: 
+The standard set of comparison operators can be used in the `filter()` function, as illustrated in Table \@ref(tab:operators): 
 
-```{r, echo=FALSE}
-operators = c("`==`", "`!=`", "`>`", "`>=`", "`<`", "`<=`", "`&`", "|", "`!`")
-operators_exp = c("Equal to", "Not equal to", "Greater than", "Greater than or equal",
-                  "Less than", "Less than or equal", "And", "Or", "Not")
-knitr::kable(data_frame(Symbol = operators, Name = operators_exp))
+```{r operators, echo=FALSE}
+operators = c("`==`", "`!=`", "`>, <`", "`>=, <=`", "`&, |, !`")
+operators_exp = c("Equal to", "Not equal to", "Greater/Less than", "Greater/Less than or equal", "Logical operators: And, Or, Not")
+knitr::kable(data_frame(Symbol = operators, Name = operators_exp), caption = "Table of comparison operators that result in boolean (TRUE/FALSE) outputs.")
 ```
 
 <!-- describe these: ==, !=, >, >=, <, <=, &, | -->
@@ -215,9 +225,9 @@ The *pipe* operator feeds ('pipes forward') the output of one function into the 
 Combining many functions together with pipes is called *chaining* or *piping*.
 For example, let us first take the `world` dataset, then let us select the two columns named `name_long` and `continent`, and then we just would like to return the first five rows.
 
-```{r}
+```{r, eval=FALSE}
 world %>%
-  select(name_long, continent) %>%
+  dplyr::select(name_long, continent) %>%
   slice(1:5)
 ```
 
@@ -244,28 +254,36 @@ The following code, for example, calculates the total population and number of a
 ```{r}
 # customized data summary
 world_summary = world %>% 
-  summarize(pop = sum(pop, na.rm = TRUE), country_n = n())
-world_summary
+  summarize(pop = sum(pop, na.rm = TRUE), n_countries = n())
+world_summary$pop # A total population > 7 billion
 ```
 
 The new object, `world_summary`, is an aggregation of all 177 world's countries.
 It consists of one row and two columns. 
-The `pop =` and `country_n =` created the names of the two columns, while the `sum()`- and `n()`-function actually did the aggregation.
+The `pop =` and `n_countries =` created the names of the two columns, while the `sum()`- and `n()`-function actually did the aggregation.
 The first function added up all inhabitants, while the latter simply counted the number of rows. 
  
 You can use a wide range of functions within `summarize()` for aggregation and summary purposes.
 Type `?summarize` for a list with useful functions and more information.
 
 `summarize()` becomes even more powerful when combined with `group_by()`, which allows simultaneous aggregate/summary operations *per group*, analogous to the base R function `aggregate()`.
-The following code chunk calculates the total population and number of countries *per continent* (see Chapter 5 of [R for Data Science](http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize) for a more detailed overview of `summarize()`):
+The following code chunk calculates the total population and number of countries *per continent* (see Chapter 5 of [R for Data Science](http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize) for a more detailed overview of `summarize()`), with results for the top 3 most populous continents illustrated in Table \@ref(tab:continents).
 
 ```{r}
 # data summary by groups
 world_continents = world %>% 
   group_by(continent) %>% 
-  summarize(pop = sum(pop, na.rm = TRUE), country_n = n())
-world_continents
+  summarize(pop = sum(pop, na.rm = TRUE), n_countries = n())
 ```
+
+```{r continents, echo=FALSE}
+world_continents %>% 
+  st_set_geometry(value = NULL) %>%
+  top_n(n = 3, wt = pop) %>% 
+  arrange(desc(pop)) %>% 
+  knitr::kable(caption = "The top 3 most populous continents, and the number of countries in each")
+```
+
 
 `sf` objects are well-integrated with the **tidyverse**, as illustrated by the fact that the aggregated objects preserve the geometry of the original `world` object.
 What is more, under the hood `sf` is already doing a spatial aggregation of polygon data which is known as 'dissolving polygons' in the GIS world - an operation we will explain in more detail in the the next chapter.
@@ -313,48 +331,47 @@ Fortunately, the **sf** package has all of the **dplyr** join functions adapted 
 The only important difference between combining two `data.frames` and combining `sf` and `data.frame` objects is the special `sf` column storing the geometry information.
 Therefore, the result of data joins can be either an `sf` or `data.frame` object.
 
+Most joins involving spatial data will have an `sf` object as the first argument and a `data.frame` object as the second argument, resulting in a new `sf` object (the reverse order is also possible and will return a `data.frame`).
+We will focus on the commonly used left and inner joins, which use the same syntax as the other join types [see @grolemund_r_2016 for more join types].
+
 The easiest way to understand the concept of joins is to show how they work with a smaller dataset. 
 We will use an `sf` object `north_america` with country codes (`iso_a2`), names and geometries, as well as a `data.frame` object `wb_north_america` containing information about urban population and unemployment for three countries.
-It is important to add that the first object contains data about Canada, Greenland and the United States and the second one about Canada, Mexico and the United States:
+Note that `north_america` contains data about Canada, Greenland and the United States but the World Bank dataset (`wb_north_america`) contains information about Canada, Mexico and the United States:
 
 ```{r}
 north_america = world %>%
   filter(subregion == "Northern America") %>%
-  select(iso_a2, name_long)
-north_america
+  dplyr::select(iso_a2, name_long)
+north_america$name_long
 ```
 
-```{r}
-plot(north_america[0])
-```
 
 ```{r}
 wb_north_america = worldbank_df %>% 
   filter(name %in% c("Canada", "Mexico", "United States")) %>%
-  select(name, iso_a2, urban_pop, unemploy = unemployment)
-
-wb_north_america
+  dplyr::select(name, iso_a2, urban_pop, unemploy = unemployment)
 ```
 
-In this book, we focus on spatial data. 
-Most of the following join examples will have a `sf` object as the first argument and a `data.frame` object as the second argument which results in a new `sf` object.
-However, the reverse order is also possible and will give you back a `data.frame` object.
-This is mostly beyond the scope of this book, but we encourage you to try it.
-We will focus on the commonly used left and inner joins, which use the same syntax as the other join types [@grolemund_r_2016].
-
-Left joins are the most commonly used operation for adding attributes to spatial data. 
-The `left_join()` returns all observations from the left object (`north_america`) and the matched observations from the right object (`wb_north_america`). 
-In cases, like `Greenland`, absent in the right object, `NA` values will show up.
+We will use a left join to combine the two datasets.
+Left joins are the most commonly used operation for adding attributes to spatial data, as they return all observations from the left object (`north_america`) and the matched observations from the right object (`wb_north_america`) in new columns.
+Rows in the left object without matches in the right (`Greenland` in this case) result in `NA` values.
 
 To join two objects we need to specify a key.
 This is a variable (or a set of variables) that uniquely identifies each observation (row). 
 The `by` argument of **dplyr**'s join functions lets you identify the key variable. 
-In simple cases, a single, unique variable exist in both objects like the `iso_a2` column in our example:
+In simple cases, a single, unique variable exist in both objects like the `iso_a2` column in our example (you may need to rename columns with identifying information for this to work):
 
 ```{r}
 left_join1 = north_america %>% 
   left_join(wb_north_america, by = "iso_a2")
-left_join1
+```
+
+This has created a spatial dataset with the new variables added.
+The utility of this is shown in Figure \@ref(fig:unemploy), which shows the unemployment rate (a World Bank variable) across the countries of North America.
+
+```{r unemploy, echo=FALSE, fig.cap="The unemployment rate (taken from World Bank statistics) in Canada and the United States to illustrate the utility of joining attribute data on to spatial datasets."}
+library(tmap)
+qtm(left_join1, "unemploy", fill.breaks = c(6, 6.5, 7))
 ```
 
 It is also possible to join objects by different variables.
@@ -403,7 +420,7 @@ Here, this is this simple because the geometry column is just another `data.fram
 # base R
 left_join4_df = subset(left_join4, select = -geom)
 # or dplyr
-left_join4_df = left_join4 %>% select(-geom)
+left_join4_df = left_join4 %>% dplyr::select(-geom)
 left_join4_df
 class(left_join4_df)
 ```
@@ -648,6 +665,16 @@ Or we can make use of the `boxplot()`, `density()`, `hist()` and `pairs()` metho
 
 Descriptive raster statistics belong to the so-called global raster operations.
 These and other typical raster processing operations are part of the map algebra scheme which we will get to know better in the next chapter.
+
+### Note {-}
+
+Some function names in the **raster** package (e.g. `select`, as discussed in a previous note) clash with function names in the **tidyverse**. To prevent function names clashes, you can unload the offending package with `detach()`. The following command, for example, unload the **raster** package (this can also be done in the *package* tab in the right-bottom pane in RStudio):
+
+```{r}
+detach("package:raster", unload = TRUE)
+```
+
+
 
 ## Exercises
 
