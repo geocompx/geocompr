@@ -1,4 +1,4 @@
-# Filename: 03-focal_eample.R (2017-08-29)
+# Filename: 04-focal_eample.R (2017-08-29)
 #
 # TO DO: Illustrate how a focal function works
 #
@@ -26,31 +26,7 @@ library(sf)
 library(raster)
 
 #**********************************************************
-# 2 EXAMPLE RASTER AND GRAIN SIZE--------------------------
-#**********************************************************
-
-# create rasters
-r = raster(nrow = 6, ncol = 6, res = 0.5, 
-           xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-           vals = 1:36)
-grain_size = c("clay", "silt", "sand")
-r_2 = raster(nrow = 6, ncol = 6, res = 0.5, 
-             xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-             vals = factor(sample(grain_size, 36, replace = TRUE), 
-                           levels = grain_size))
-
-colfunc <- colorRampPalette(c("lightyellow", "rosybrown"))
-colfunc(10)
-# p_1 = spplot(r, col.regions = terrain.colors(36))
-p_1 = spplot(r, col.regions = colfunc(36))
-p_2 = spplot(r_2, col.regions = c("brown","sandybrown", "rosybrown"))
-
-png(filename = "figures/03_cont_categ_rasters.png", width = 950, height = 555)
-plot(arrangeGrob(p_1, p_2, ncol = 2))
-dev.off()
-
-#**********************************************************
-# 3 FOCAL EXAMPLE------------------------------------------
+# 2 FOCAL EXAMPLE------------------------------------------
 #**********************************************************
 
 # create data
