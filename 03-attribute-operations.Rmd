@@ -23,7 +23,7 @@ A raster example might be the elevation value (attribute) for a specific grid ce
 Interestingly, the raster data model stores the coordinate of the grid cell only indirectly.
 Say, we are in the 3^rd^ row and the 4^th^ column of a raster matrix.
 To derive the corresponding coordinate, we have to move from the origin three cells in x-direction and four cells in y-direction with the cell resolution defining the distance for each x- and y-step.
-The raster header simply gives the matrix a spatial dimension which we need when plotting the raster or when we want to combine two rasters, think, for instance, of adding the values of one raster to another (see also next Chapter).
+The raster header gives the matrix a spatial dimension which we need when plotting the raster or when we want to combine two rasters, think, for instance, of adding the values of one raster to another (see also next Chapter).
 <!-- should we somewhere add a table comparing advantages/disadvantages of using the vector or raster data model, would fit nicely into chapter 2 -->
 
 Simple features, described in the previous chapter, store attribute data in a data frame, with each column corresponding to a variable (such as 'name') and each row to one observation (such as an individual bus station).
@@ -45,7 +45,6 @@ That is, the skills you learn here are cross-transferable which is also why this
 
 In the case of raster data we will learn how to create continuous and categorical raster layers, and how to extract cell values from one layer and multiple layers at once (subsetting). 
 Finally, we will have a peak glance at global raster operations by summarizing descriptively entire raster datasets.
-
 
 ## Vector attribute manipulation
 As outlined in Chapter \@ref(spatial-class), **sf** provided support for simple features in R and made them work with generic R functions such as `plot()` and `summary()` (as can be seen by executing `methods("summary")` and/or `methods("plot")`).
@@ -536,7 +535,7 @@ r_2
 The **raster** package represents boolean and factor variables as integers.
 Hence, `r_2[1, 1]` returns an integer instead of "sand", "silt" or "clay".
 These integers in turn represent unique identifiers. 
-The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes` which you see when you print a 'ratified' raster to the console (see the help page of the `ratify()` command for more information).
+The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes` which you see when you print a so-called 'ratified' raster to the console (see the help page of the `ratify()` command for more information).
 Use `levels()` to just retrieve the attribute table.
 We can even add further columns to this attribute table:
 
@@ -560,30 +559,34 @@ factorValues(r_2, vals)
 ```
 
 
-```{r cont-cate-rasters, echo = FALSE, fig.cap = "Raster with numberic values (left) and a raster with categorical values"}
+```{r cont-cate-rasters, echo = FALSE, fig.cap = "Raster with numberic values (left) and a raster with categorical values (right)"}
 knitr::include_graphics("figures/03_cont_categ_rasters.png")
 ```
 
 ### Raster subsetting
-Raster datasets can be subset in many ways, including:
+You certainly have noticed, that we have already used raster subsetting in the last code example of the previous subsection. 
+The `cellFromRowCol()` retrieved the cell IDs for the specified row-column combinations.
+These cell IDs in turn were used to extract the corresponding cell values with the help of the `[` operator.
+The subsetting operator also accepts as input:
 
-- using row-column indexing with the help of `[`
-- by cell ID
-- by coordinates
+- row-column indexing
+- cell IDs
+- coordinates
+- another raster object
 
-These subsetting options are demonstrated in the three commands below, all of which return the value of the top left pixel in the raster object `r` (results not shown):
+We demonstrate the first two subsetting options in the three commands below, all of which return the value of the top left pixel in the raster object `r` (results not shown):
 
 ```{r, eval = FALSE}
 # row 1, column 1
 r[1, 1]
 # cell ID 1
 r[1]
-# point within the top left pixel
-r[cellFromXY(r, xy = c(-1.5, 1.5))]
 ```
 
 To extract all values or complete rows, you can use `values()` and `getValues()`
-In case you apply subsetting to a raster stack or brick, this will return the cell value(s) for each single layer, for example `stack(r, r_2)[1]` returns a matrix with one row and two columns - one for each layer.
+In case you apply subsetting to a raster stack or brick, this will return the cell value(s) for each single layer.
+For example, `stack(r, r_2)[1]` returns a matrix with one row and two columns - one for each layer.
+In this example we have used cell ID subsetting, of course, you can also use row-column or coordinate indexing.
 On the other hand, the `raster::subset()` command lets you extract a specific or several layers from a raster stack or brick.
 For the same operation, you can also use the `[[` operator.
 If you only want to extract a single layer, you might also use the `$` operator.
@@ -599,12 +602,41 @@ r[]
 Leaving the square brackets empty is a shortcut version of `values()` for retrieving all values of a raster.
 Of course, one can use indexing to modify multiple cells or even blocks.
 
+Naturally, cell ID and index subsetting have a spatial counterpart.
+To extract values from raster objects, we can also use coordinates and spatial objects.
+We present spatial subsetting in this chapter because the returned output is non-spatial, that is just a vector representing the cell values to be found within the specified spatial constraint.
+To use coordinates, we have to 'translate' them into the corresponding cell ID(s) or by using the `extract()` command.
+This operation is also known as extracting values/attributes to points.
+
+```{r, eval = FALSE}
+# point within the top left pixel
+r[cellFromXY(r, xy = c(-1.5, 1.5))]
+# the same as
+extract(r, data.frame(x = -1.5, y = 1.5))
+```
+
+The `cellFromXY()` and the `extract()` command accept also a `SpatialPoints` or `SpatialPointsDataFrame` object (though not an **sf** object).
+We can also use a raster object to subset another raster object (Figure \@ref(fig:raster-subset)).
+Basically, this amounts to retrieving the values of the first raster (here: `r`) falling within the extent of a second raster (here: `r_3`):
+
+```{r}
+r_3 = raster(nrow = 3, ncol = 3, res = 0.3, xmn = -0.45, xmx = 0,45, 
+           ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
+r[r_3]
+# corresponds to:
+extract(r, extent(r_3))
+```
+
+```{r raster-subset, echo = FALSE, fig.cap = "Subsetting raster values with the help of another raster."}
+knitr::include_graphics("figures/03_raster_subset.png")
+```
+
 ### Summarizing raster objects
 In R we can easily derive descriptive statistics for entire rasters.
 Printing the raster object to the console already returns the minimum and maximum values of a raster.
 You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
 If we are interested in further summary operations such as the standard deviation (see below) or if we want to define our own summary functions, we can do so with the `cellStats` command. 
-```{r}
+```{r, eval = FALSE}
 cellStats(r, sd)
 ```
 
