@@ -564,15 +564,10 @@ levels(r_2)
 This is really interesting since we have learned that each raster cell can only possess one value.
 In fact, the raster cells themselves still consist of only one value, namely an integer which represents a unique identifier.
 This identifier can then be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`).
-Say, we would like to know the grain size and the wetness of rows and columns 1, 3, 5 and 6. 
-First, we have to find out the cell IDs for our indexes.
-With these, we extract the values from the raster.
-Finally, the `factorValues()` command returns the attributes for the raster cell values.
+Say, we would like to know the grain size and the wetness of cell IDs 1, 12 and 36, we can run:
 
 ```{r}
-cells = cellFromRowCol(r_2, rownr = c(2, 3, 5, 6), colnr = c(2, 3, 5, 6))
-vals = r_2[cells]
-factorValues(r_2, vals)
+factorValues(r_2, r_2[1, 12, 36])
 ```
 
 
@@ -581,17 +576,16 @@ knitr::include_graphics("figures/03_cont_categ_rasters.png")
 ```
 
 ### Raster subsetting
-You certainly have noticed, that we have already used raster subsetting in the last code example of the previous subsection. 
-The `cellFromRowCol()` retrieved the cell IDs for the specified row-column combinations.
-These cell IDs in turn were used to extract the corresponding cell values with the help of the `[` operator.
-The subsetting operator also accepts as input:
+We can subset raster datasets with the help of `[` which accepts different types of input.
 
 - row-column indexing
 - cell IDs
 - coordinates
 - another raster object
 
-We demonstrate the first two subsetting options in the three commands below, all of which return the value of the top left pixel in the raster object `r` (results not shown):
+The latter two represent already spatial subsetting (see next section).
+Hewer, we demonstrate the first two subsetting options in the two commands below.
+Both return the value of the top left pixel in the raster object `r` (results not shown):
 
 ```{r, eval = FALSE}
 # row 1, column 1
@@ -618,35 +612,6 @@ r[]
 
 Leaving the square brackets empty is a shortcut version of `values()` for retrieving all values of a raster.
 Of course, one can use indexing to modify multiple cells or even blocks.
-
-Naturally, cell ID and index subsetting have a spatial counterpart.
-To extract values from raster objects, we can also use coordinates and spatial objects.
-We present spatial subsetting in this chapter because the returned output is non-spatial, that is just a vector representing the cell values to be found within the specified spatial constraint.
-To use coordinates, we have to 'translate' them into the corresponding cell ID(s) or by using the `extract()` command.
-This operation is also known as extracting values/attributes to points.
-
-```{r, eval = FALSE}
-# point within the top left pixel
-r[cellFromXY(r, xy = c(-1.5, 1.5))]
-# the same as
-extract(r, data.frame(x = -1.5, y = 1.5))
-```
-
-The `cellFromXY()` and the `extract()` command accept also a `SpatialPoints` or `SpatialPointsDataFrame` object (though not an **sf** object).
-We can also use a raster object to subset another raster object (Figure \@ref(fig:raster-subset)).
-Basically, this amounts to retrieving the values of the first raster (here: `r`) falling within the extent of a second raster (here: `r_3`):
-
-```{r}
-r_3 = raster(nrow = 3, ncol = 3, res = 0.3, xmn = -0.45, xmx = 0,45, 
-           ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
-r[r_3]
-# corresponds to:
-extract(r, extent(r_3))
-```
-
-```{r raster-subset, echo = FALSE, fig.cap = "Subsetting raster values with the help of another raster."}
-knitr::include_graphics("figures/03_raster_subset.png")
-```
 
 ### Summarizing raster objects
 In R we can easily derive descriptive statistics for entire rasters.

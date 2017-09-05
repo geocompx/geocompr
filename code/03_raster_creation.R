@@ -1,6 +1,6 @@
 # Filename: 03_raster_creation_subset.R (2017-09-05)
 #
-# TO DO: Create contnuous and categorical raster and spatial raster subsetting
+# TO DO: Create continuous and categorical raster and spatial raster subsetting
 #
 # Author(s): Jannes MUENCHOW
 #
@@ -47,21 +47,4 @@ p_2 = spplot(r_2, col.regions = c("brown","sandybrown", "rosybrown"))
 
 png(filename = "figures/03_cont_categ_rasters.png", width = 950, height = 555)
 plot(arrangeGrob(p_1, p_2, ncol = 2))
-dev.off()
-
-#**********************************************************
-# 3 SPATIAL SUBSETTING-------------------------------------
-#**********************************************************
-
-r_3 = raster(nrow = 3, ncol = 3, res = 0.3, xmn = -0.45, xmx = 0.45, 
-             ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
-p_3 = spplot(r, col.regions = colfunc(36), colorkey = FALSE,
-             sp.layout = list(
-               list("sp.polygons", rasterToPolygons(r), col = "lightgrey",
-                    first = FALSE),
-               list("sp.polygons", rasterToPolygons(r_3), col = "black", 
-                    lwd = 2, first = FALSE)))
-png(filename = "figures/03_raster_subset.png", width = 950 / 2, 
-    height = 950 / 2)
-plot(p_3)
 dev.off()
