@@ -498,6 +498,67 @@ and uses the same objects `r` and `r_2`.
 source("code/create-rasters.R")
 ```
 
+### Spatial subsetting
+Naturally, cell ID and index subsetting have a spatial counterpart.
+To extract values from raster objects, we can also use coordinates and spatial objects.
+To use coordinates, we have to 'translate' them into the corresponding cell ID(s) or by using the `extract()` command.
+This operation is also known as extracting values/attributes to points.
+
+```{r, eval = FALSE}
+# point within the top left pixel
+r[cellFromXY(r, xy = c(-1.5, 1.5))]
+# the same as
+extract(r, data.frame(x = -1.5, y = 1.5))
+```
+
+The `cellFromXY()` and the `extract()` command accept also a `SpatialPoints` or `SpatialPointsDataFrame` object (though not an **sf** object).
+We can also use a raster object to subset another raster object (Figure \@ref(fig:raster-subset)).
+
+```{r}
+r_3 = raster(nrow = 3, ncol = 3, res = 0.3, xmn = -0.45, xmx = 0.45, 
+             ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
+r[r_3]
+# we can also use extract
+# extract(r, extent(r_3))
+```
+
+Basically, this amounts to retrieving the values of the first raster (here: `r`) falling within the extent of a second raster (here: `r_3`).
+To retrieve a spatial output, we can tell R to keep the matrix structure.
+This will return the four output values as a raster object.
+
+```{r}
+r[r_3, drop = FALSE]
+```
+
+For the same operation we can also use the `intersect()` and `crop()` command.
+
+```{r raster-subset, echo = FALSE, fig.cap = "Subsetting raster values with the help of another raster."}
+knitr::include_graphics("figures/03_raster_subset.png")
+```
+
+Frequently, however, we have two rasters with the same extent and resolution where one raster object serves as a mask.
+In these cases `intersect()` and `crop()` are of little use.
+Instead we can use the `[` again or the `mask()` and `overlay()` commands.
+
+```{r, eval = FALSE}
+r_4 = raster(nrow = 6, ncol = 6, res = 0.5, 
+           xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+           vals = sample(c(FALSE, TRUE), 36, replace = TRUE))
+r[r_4, drop = FALSE]
+# using the mask command
+mask(r, r_4, maskvalue = TRUE)
+# using overlay
+# first we replace FALSE by NA
+r_4[r_4 == FALSE] = NA
+# then we retrieve the maximum values
+overlay(r, r_4, fun = "max")
+```
+
+In the code chunk above, we have created a mask object called `r_4` randomly using `FALSE` and `TRUE`.
+Next we only want to keep those values of `r` which are `TRUE` in `r_4`, or expressed differently, we want to mask `r` with `r_4`.
+These operations are in fact boolean local operations since we cellwise compare two rasters.
+The next subsection explores these and related operation in more detail.
+
 ###  Map algebra: local, focal, zonal, global
 Raster processing is really fast because it only implicitly stores coordinates, that is we can calculate the coordinate of a raster cell due to its matrix position and the help of the resolution and the origin.
 For the processing, however, the geographic position of a cell is barely relevant as long as we make sure that the cell position is still the same after the processing (one-to-one locational correspondence).
