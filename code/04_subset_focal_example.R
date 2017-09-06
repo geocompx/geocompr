@@ -28,31 +28,51 @@ library(raster)
 #**********************************************************
 # 2 SPATIAL SUBSETTING-------------------------------------
 #**********************************************************
-
-r_3 = raster(nrow = 3, ncol = 3, res = 0.3, xmn = -0.45, xmx = 0.45, 
-             ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
-p_3 = spplot(r, col.regions = colfunc(36), colorkey = FALSE,
-             sp.layout = list(
-               list("sp.polygons", rasterToPolygons(r), col = "lightgrey",
-                    first = FALSE),
-               list("sp.polygons", rasterToPolygons(r_3), col = "black", 
-                    lwd = 2, first = FALSE)))
-png(filename = "figures/04_raster_subset.png", width = 950 / 2, 
-    height = 950 / 2)
-plot(p_3)
-dev.off()
-
-# add another subsetting example (masking)
-
-#**********************************************************
-# 3 FOCAL EXAMPLE------------------------------------------
-#**********************************************************
-
 # create data
 # raster
 r = raster(nrow = 3, ncol = 3, res = 0.5, 
            xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
            vals = 1:36)
+
+r_3 = raster(nrow = 3, ncol = 3, res = 0.3, xmn = -0.45, xmx = 0.45, 
+             ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
+# create color scale
+colfunc <- colorRampPalette(c("lightyellow", "rosybrown"))
+
+p_1 = spplot(r, col.regions = colfunc(36), colorkey = FALSE,
+             sp.layout = list(
+               list("sp.polygons", rasterToPolygons(r), col = "lightgrey",
+                    first = FALSE),
+               list("sp.polygons", rasterToPolygons(r_3), col = "black", 
+                    lwd = 2, first = FALSE)))
+
+# add another subsetting example (masking)
+r_mask = raster(nrow = 6, ncol = 6, res = 0.5, 
+             xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+             vals = sample(c(NA, TRUE), 36, replace = TRUE))
+masked = r[r_mask, drop = FALSE]
+p_2 = spplot(r_mask, col.regions = colfunc(2), colorkey = FALSE,
+             sp.layout = list(
+               list("sp.polygons", rasterToPolygons(r_mask), col = "black",
+                    first = FALSE)
+             ))
+
+p_3 = spplot(masked, col.regions = colfunc(36), colorkey = FALSE,
+       sp.layout = list(
+         list("sp.polygons", rasterToPolygons(masked), col = "black",
+              first = FALSE)))
+
+png(filename = "figures/04_raster_subset.png", width = 800, 
+    height = 300)
+plot(arrangeGrob(p_1, p_2, p_3, ncol = 3))
+dev.off()
+
+
+#**********************************************************
+# 3 FOCAL EXAMPLE------------------------------------------
+#**********************************************************
+
+
 # in the book chapter we show subsetting, that's why we have to do so here also
 r[1, 1] = 0
 # create polygons
