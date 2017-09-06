@@ -34,16 +34,18 @@ r = raster(nrow = 3, ncol = 3, res = 0.5,
            xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
            vals = 1:36)
 
-r_3 = raster(nrow = 3, ncol = 3, res = 0.3, xmn = -0.45, xmx = 0.45, 
+clip = raster(nrow = 3, ncol = 3, res = 0.3, xmn = 0.9, xmx = 1.8, 
              ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
 # create color scale
 colfunc <- colorRampPalette(c("lightyellow", "rosybrown"))
 
-p_1 = spplot(r, col.regions = colfunc(36), colorkey = FALSE,
+p_1 = spplot(r, xlim = c(-1.5, 2), ylim = c(-1.5, 1.5),
+             col.regions = colfunc(36), colorkey = FALSE,
+             par.settings = list(axis.line = list(col =  'transparent')),
              sp.layout = list(
                list("sp.polygons", rasterToPolygons(r), col = "lightgrey",
                     first = FALSE),
-               list("sp.polygons", rasterToPolygons(r_3), col = "black", 
+               list("sp.polygons", rasterToPolygons(clip), col = "black", 
                     lwd = 2, first = FALSE)))
 
 # add another subsetting example (masking)
@@ -51,21 +53,35 @@ r_mask = raster(nrow = 6, ncol = 6, res = 0.5,
              xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
              vals = sample(c(NA, TRUE), 36, replace = TRUE))
 masked = r[r_mask, drop = FALSE]
-p_2 = spplot(r_mask, col.regions = colfunc(2), colorkey = FALSE,
+p_2 = spplot(r_mask, col.regions = colfunc(2), colorkey = FALSE, 
+             xlim = c(-1.5, 2),
+             par.settings = list(axis.line = list(col =  'transparent')),
              sp.layout = list(
                list("sp.polygons", rasterToPolygons(r_mask), col = "black",
-                    first = FALSE)
-             ))
+                    first = FALSE),
+               list("sp.polygons", rasterToPolygons(aggregate(r_mask, fact = 6)),
+                    border = "black", first = FALSE))
+             )
 
 p_3 = spplot(masked, col.regions = colfunc(36), colorkey = FALSE,
-       sp.layout = list(
-         list("sp.polygons", rasterToPolygons(masked), col = "black",
-              first = FALSE)))
+             xlim = c(-1.5, 2),
+             par.settings = list(axis.line = list(col =  'transparent')),
+             sp.layout = list(
+               list("sp.polygons", rasterToPolygons(masked), col = "black",
+                    first = FALSE),
+               list("sp.polygons", 
+                    rasterToPolygons(aggregate(r_mask, fact = 6)),
+                    border = "black", first = FALSE))
+             )
 
-png(filename = "figures/04_raster_subset.png", width = 800, 
-    height = 300)
-plot(arrangeGrob(p_1, p_2, p_3, ncol = 3))
-dev.off()
+ggplot2::ggsave(filename = "figures/04_raster_subset.png",
+                plot = arrangeGrob(p_1, p_2, p_3, ncol = 3),
+                width = 7.5, height = 3)
+
+# png(filename = "figures/04_raster_subset.png", width = 800, 
+#     height = 300)
+# plot(arrangeGrob(p_1, p_2, p_3, ncol = 3))
+# dev.off()
 
 
 #**********************************************************
@@ -137,21 +153,8 @@ elev_2 = raster(nrow = 6, ncol = 6, res = 0.5,
                 xmn = -1.5 + 1, xmx = 1.5 + 1, ymn = -1.5 + 1, ymx = 1.5 + 1,
                 vals = 1:36)
 # retrieves the intersection
-elev[elev_2, ]
+clip = elev[elev_2, drop = FALSE]
 
-tmp = elev
-tmp_2 = elev_2
-tmp[] = TRUE
-tmp_2[] = TRUE
-m = merge(tmp, tmp_2)
-m_2 = mosaic(tmp, tmp_2, fun = "sum")
-plot(m)
-plot(mosaic(elev, elev_2, fun = "mean"))
-
-clip = elev[m_2[m_2 == 2, drop = FALSE], drop = FALSE]
-
-spplot(m_2)
-plot(m_2)
 p_1 = spplot(elev, xlim = c(-2, 3), ylim = c(-2, 3), colorkey = FALSE, 
              col.regions = NA,
              par.settings =
@@ -175,14 +178,15 @@ p_3 = spplot(clip, col.regions = "lightgray", colorkey = FALSE,
                     border = "black", lwd = 2, first = FALSE)
              ))
 
-png(filename = "figures/04_mosaic_intersect.png", width = 450, 
-    height = 450)
-plot(arrangeGrob(p_1 + as.layer(p_2, under = TRUE) + as.layer(p_3)))
-dev.off()
+# png(filename = "figures/04_mosaic_intersect.png", width = 450, 
+#     height = 450)
+# plot(arrangeGrob(p_1 + as.layer(p_2, under = TRUE) + as.layer(p_3)))
+# dev.off()
 
 
 # doing the same with base plotting
-plot(m_2, col = NA, legend = FALSE, xlim = c(-2, 2), ylim = c(-3, 3))
+plot(merge(elev, elev_2), col = NA, legend = FALSE, xlim = c(-2, 2),
+     ylim = c(-3, 3))
 plot(rasterToPolygons(elev), add = TRUE, border = gray(0.7))
 plot(extent(elev), add = TRUE)
 plot(rasterToPolygons(elev_2), add = TRUE, border = gray(0.7))
