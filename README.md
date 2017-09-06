@@ -7,7 +7,7 @@ Geocomputation with R
 Introduction
 ============
 
-This repository hosts the code underlying Geocomputation with R, a book by [Robin Lovelace](http://robinlovelace.net/) and [Jakub Nowosad](https://nowosad.github.io/).
+This repository hosts the code underlying Geocomputation with R, a book by [Robin Lovelace](http://robinlovelace.net/) and [Jakub Nowosad](https://nowosad.github.io/) and [Jannes Muenchow](http://www.geographie.uni-jena.de/en/Muenchow.html).
 
 The online version of the book is developed at <http://robinlovelace.net/geocompr/>. We plan to publish the hard copy of the book with CRC Press in 2018.
 
@@ -53,6 +53,9 @@ to_install = !pkgs %in% installed.packages()
 if(any(to_install)) {
   install.packages(pkgs[to_install])
 }
+#> Installing packages into '/home/jn/R/x86_64-redhat-linux-gnu-library/3.4'
+#> (as 'lib' is unspecified)
+#> also installing the dependencies 'SnowballC', 'shape', 'hunspell', 'tokenizers', 'janeaustenr'
 ```
 
 With these additional dependencies installed, you should be able to run the following scripts, which create input figures for the book:
