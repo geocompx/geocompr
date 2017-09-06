@@ -28,6 +28,9 @@ library(raster)
 #**********************************************************
 # 2 SPATIAL SUBSETTING-------------------------------------
 #**********************************************************
+
+# Subsetting example I=====================================
+#**********************************************************
 # create data
 # raster
 r = raster(nrow = 3, ncol = 3, res = 0.5, 
@@ -82,6 +85,57 @@ ggplot2::ggsave(filename = "figures/04_raster_subset.png",
 #     height = 300)
 # plot(arrangeGrob(p_1, p_2, p_3, ncol = 3))
 # dev.off()
+
+# Subsetting example II====================================
+#**********************************************************
+elev = raster(nrow = 6, ncol = 6, res = 0.5, 
+              xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+              vals = 1:36)
+elev_2 = raster(nrow = 6, ncol = 6, res = 0.5, 
+                xmn = -1.5 + 1, xmx = 1.5 + 1, ymn = -1.5 + 1, ymx = 1.5 + 1,
+                vals = 1:36)
+# retrieves the intersection
+clip = elev[elev_2, drop = FALSE]
+
+p_1 = spplot(elev, xlim = c(-2, 3), ylim = c(-2, 3), colorkey = FALSE, 
+             col.regions = NA,
+             par.settings =
+               list(axis.line = list(col =  'transparent')),
+             sp.layout = list(
+               list("sp.polygons", rasterToPolygons(elev), col = gray(0.7),
+                    first = FALSE),
+               list("sp.polygons", rasterToPolygons(aggregate(elev, fact = 6)),
+                    border = "black", first = FALSE)))
+p_2 = spplot(elev_2, col.regions = NA, colorkey = FALSE,
+             sp.layout = list(
+               list("sp.polygons", rasterToPolygons(elev_2), col = gray(0.7),
+                    first = FALSE),
+               list("sp.polygons", rasterToPolygons(aggregate(elev_2, fact = 6)),
+                    border = "black", first = FALSE)))
+p_3 = spplot(clip, col.regions = "lightgray", colorkey = FALSE,
+             sp.layout = list(
+               list("sp.polygons", rasterToPolygons(clip), col = "black",
+                    first = FALSE),
+               list("sp.polygons", rasterToPolygons(aggregate(clip, fact = 4)),
+                    border = "black", lwd = 2, first = FALSE)
+             ))
+
+# png(filename = "figures/04_mosaic_intersect.png", width = 450, 
+#     height = 450)
+# plot(arrangeGrob(p_1 + as.layer(p_2, under = TRUE) + as.layer(p_3)))
+# dev.off()
+
+
+# doing the same with base plotting
+plot(merge(elev, elev_2), col = NA, legend = FALSE, xlim = c(-2, 2),
+     ylim = c(-3, 3))
+plot(rasterToPolygons(elev), add = TRUE, border = gray(0.7))
+plot(extent(elev), add = TRUE)
+plot(rasterToPolygons(elev_2), add = TRUE, border = gray(0.7))
+plot(extent(elev_2), add = TRUE)
+plot(rasterToPolygons(clip), add = TRUE, col = "lightgray")
+plot(extent(clip), lwd = 2, add = TRUE)
+
 
 
 #**********************************************************
@@ -141,58 +195,5 @@ grid.polyline(x = c(0.255, 0.59), y = c(0.685, 0.685),
               arrow = arrow(length = unit(0.2, "inches")), 
               gp = gpar(lwd = 2))
 dev.off()
-
-#**********************************************************
-# 4 MERGE, MOSAIC------------------------------------------
-#**********************************************************
-
-elev = raster(nrow = 6, ncol = 6, res = 0.5, 
-              xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-              vals = 1:36)
-elev_2 = raster(nrow = 6, ncol = 6, res = 0.5, 
-                xmn = -1.5 + 1, xmx = 1.5 + 1, ymn = -1.5 + 1, ymx = 1.5 + 1,
-                vals = 1:36)
-# retrieves the intersection
-clip = elev[elev_2, drop = FALSE]
-
-p_1 = spplot(elev, xlim = c(-2, 3), ylim = c(-2, 3), colorkey = FALSE, 
-             col.regions = NA,
-             par.settings =
-               list(axis.line = list(col =  'transparent')),
-             sp.layout = list(
-               list("sp.polygons", rasterToPolygons(elev), col = gray(0.7),
-                    first = FALSE),
-               list("sp.polygons", rasterToPolygons(aggregate(elev, fact = 6)),
-                    border = "black", first = FALSE)))
-p_2 = spplot(elev_2, col.regions = NA, colorkey = FALSE,
-             sp.layout = list(
-               list("sp.polygons", rasterToPolygons(elev_2), col = gray(0.7),
-                    first = FALSE),
-               list("sp.polygons", rasterToPolygons(aggregate(elev_2, fact = 6)),
-                    border = "black", first = FALSE)))
-p_3 = spplot(clip, col.regions = "lightgray", colorkey = FALSE,
-             sp.layout = list(
-               list("sp.polygons", rasterToPolygons(clip), col = "black",
-                    first = FALSE),
-               list("sp.polygons", rasterToPolygons(aggregate(clip, fact = 4)),
-                    border = "black", lwd = 2, first = FALSE)
-             ))
-
-# png(filename = "figures/04_mosaic_intersect.png", width = 450, 
-#     height = 450)
-# plot(arrangeGrob(p_1 + as.layer(p_2, under = TRUE) + as.layer(p_3)))
-# dev.off()
-
-
-# doing the same with base plotting
-plot(merge(elev, elev_2), col = NA, legend = FALSE, xlim = c(-2, 2),
-     ylim = c(-3, 3))
-plot(rasterToPolygons(elev), add = TRUE, border = gray(0.7))
-plot(extent(elev), add = TRUE)
-plot(rasterToPolygons(elev_2), add = TRUE, border = gray(0.7))
-plot(extent(elev_2), add = TRUE)
-plot(rasterToPolygons(clip), add = TRUE, col = "lightgray")
-plot(extent(clip), lwd = 2, add = TRUE)
-
 
 
