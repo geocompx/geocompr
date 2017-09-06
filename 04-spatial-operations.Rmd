@@ -504,32 +504,32 @@ source("code/create-rasters.R")
 ```
 
 ### Spatial subsetting
-In the previous chapter (\@ref(manipulating-raster-objects)) we have already learned how to subset raster datasets using cell IDs and matrix indexing.
+In the previous chapter (section \@ref(manipulating-raster-objects)) we have already learned how to subset raster datasets using cell IDs and matrix indexing.
 Naturally, we can subset rasters also with the help of coordinates and spatial objects.
 To use coordinates for subsetting, we have to 'translate' them into the corresponding cell ID(s) or by using the `extract()` command.
 This operation is also known as extracting values/attributes to points.
 
 ```{r, eval = FALSE}
 # point within the top left pixel
-r[cellFromXY(r, xy = c(-1.5, 1.5))]
+elev[cellFromXY(elev, xy = c(-1.5, 1.5))]
 # the same as
-extract(r, data.frame(x = -1.5, y = 1.5))
+extract(elev, data.frame(x = -1.5, y = 1.5))
 ```
 
 The `cellFromXY()` and the `extract()` command accept also a `SpatialPoints` or `SpatialPointsDataFrame` object (though not an **sf** object).
 We can also use a raster object to subset another raster object (Figure \@ref(fig:raster-subset) left panel).
 
 ```{r}
-clip = raster(nrow = 3, ncol = 3, res = 0.3, xmn = -0.45, xmx = 0.45, 
+clip = raster(nrow = 3, ncol = 3, res = 0.3, xmn = 0.9, xmx = 1.8, 
               ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
-r[clip]
+elev[clip]
 # we can also use extract
 # extract(elev, extent(clip))
 ```
 
 Basically, this amounts to retrieving the values of the first raster (here: `elev`) falling within the extent of a second raster (here: `clip`).
 To retrieve a spatial output, we can tell R to keep the matrix structure.
-This will return the four output values as a raster object.
+This will return the two output values as a raster object.
 
 ```{r}
 elev[clip, drop = FALSE]
@@ -538,7 +538,7 @@ elev[clip, drop = FALSE]
 For the same operation we can also use the `intersect()` and `crop()` command.
 
 ```{r raster-subset, echo = FALSE, fig.cap = "Subsetting raster values with the help of another raster (left). Raster mask (middle). Output of masking a raster."}
-knitr::include_graphics("figures/04_raster_subset.png")
+knitr::include_graphics("figures/04_raster_subset2.png")
 ```
 
 Frequently, however, we have two rasters with the same extent and resolution where one raster object serves as a mask (Figure \@ref(fig:raster-subset) middle and right panel).
@@ -737,7 +737,7 @@ This is possible with digital elevation data (SRTM, ASTER).
 In the following code chunk we first download the SRTM elevation data for Austria and Switzerland (for the country codes have a look at `ccodes()`).
 In a second step, we merge the two rasters into one.
 
-```{r}
+```{r, eval = FALSE}
 aut = getData("alt", country = "AUT", mask = TRUE)
 ch = getData("alt", country = "CHE", mask = TRUE)
 alps = merge(aut, ch)
