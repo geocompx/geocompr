@@ -492,7 +492,7 @@ st_distance(a, b)
 
 ## Spatial operations on raster data
 This section builds on \@ref(manipulating-raster-objects), which highlights various basic methods for manipulating raster datasets, to demonstrate more advanced and explicitly spatial raster operations,
-and uses the same objects `r` and `r_2`.
+and uses the same object `elev` and `grain`.
 
 ```{r, echo=FALSE}
 source("code/create-rasters.R")
@@ -515,19 +515,19 @@ The `cellFromXY()` and the `extract()` command accept also a `SpatialPoints` or 
 We can also use a raster object to subset another raster object (Figure \@ref(fig:raster-subset) left panel).
 
 ```{r}
-r_3 = raster(nrow = 3, ncol = 3, res = 0.3, xmn = -0.45, xmx = 0.45, 
-             ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
-r[r_3]
+clip = raster(nrow = 3, ncol = 3, res = 0.3, xmn = -0.45, xmx = 0.45, 
+              ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
+r[clip]
 # we can also use extract
-# extract(r, extent(r_3))
+# extract(elev, extent(clip))
 ```
 
-Basically, this amounts to retrieving the values of the first raster (here: `r`) falling within the extent of a second raster (here: `r_3`).
+Basically, this amounts to retrieving the values of the first raster (here: `elev`) falling within the extent of a second raster (here: `clip`).
 To retrieve a spatial output, we can tell R to keep the matrix structure.
 This will return the four output values as a raster object.
 
 ```{r}
-r[r_3, drop = FALSE]
+elev[clip, drop = FALSE]
 ```
 
 For the same operation we can also use the `intersect()` and `crop()` command.
@@ -541,27 +541,27 @@ In these cases `intersect()` and `crop()` are of little use.
 Instead we can use the `[` again or the `mask()` and `overlay()` commands:
 
 ```{r, eval = FALSE}
-r_4 = raster(nrow = 6, ncol = 6, res = 0.5, 
-           xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-           vals = sample(c(FALSE, TRUE), 36, replace = TRUE))
-r[r_4, drop = FALSE]
+rmask = raster(nrow = 6, ncol = 6, res = 0.5, 
+               xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+               vals = sample(c(FALSE, TRUE), 36, replace = TRUE))
+elev[rmask, drop = FALSE]
 # using the mask command
-mask(r, r_4, maskvalue = TRUE)
+mask(elev, rmask, maskvalue = TRUE)
 # using overlay
 # first we replace FALSE by NA
-r_4[r_4 == FALSE] = NA
+rmask[rmask == FALSE] = NA
 # then we retrieve the maximum values
-overlay(r, r_4, fun = "max")
+overlay(elev, rmask, fun = "max")
 ```
 
-In the code chunk above, we have created a mask object called `r_4` randomly using `FALSE` and `TRUE`.
-Next we only want to keep those values of `r` which are `TRUE` in `r_4`, or expressed differently, we want to mask `r` with `r_4`.
+In the code chunk above, we have created a mask object called `rmask` randomly setting its values to `FALSE` and `TRUE`.
+Next we only want to keep those values of `elev` which are `TRUE` in `rmask`, or expressed differently, we want to mask `elev` with `rmask`.
 These operations are in fact boolean local operations since we compare cellwise two rasters.
 The next subsection explores these and related operations in more detail.
 
 ###  Map algebra: local, focal, zonal, global
-Map algebras makes raster processing really fast.
-This is because we only implicitly store coordinates with raster datasets.
+Map algebra makes raster processing really fast.
+This is because raster datasets only implicitly store coordinates.
 To derive the coordinate of a specific cell, we have to calculate it using its matrix position and the raster resolution and origin.
 For the processing, however, the geographic position of a cell is barely relevant as long as we make sure that the cell position is still the same after the processing (one-to-one locational correspondence).
 Additionally, if two or more raster datasets share the same extent, projection and the resolution, one could treat them as matrixes for the processing.
@@ -591,7 +591,7 @@ Here, we assign the raster values in the ranges 0--12, 12--24 and 24--36 are *re
 
 ```{r, eval = FALSE}
 rcl = matrix(c(0, 12, 1, 12, 24, 2, 24, 36, 3), ncol = 3, byrow = TRUE)
-recl = reclassify(r, rcl = rcl)
+recl = reclassify(elev, rcl = rcl)
 ```
 
 Raster algebra is another classical use case of local operations.
@@ -601,10 +601,10 @@ The **raster** package allows all these operations in a way natural to R users.
 Please see the `Raster`-vignette for a more detailed description on algebraic operations (`vignette("Raster", package = "raster")`).
 
 ```{r, eval = FALSE}
-r + r
-r^2
-log(r)
-r > 5
+elev + elev
+elev^2
+log(elev)
+elev > 5
 ```
 
 Instead of arithmetic operators, you can also use the `calc()` and `overlay()` functions.
@@ -642,7 +642,7 @@ Secondly, the the `fun` argument lets us specify the function we wish to apply t
 Here, we choose the minimum, but of course we can use any other function such as the the sum, the mean, the median, the mode, the maximum or the variance.
 
 ```{r, eval = FALSE}
-r_focal = focal(r, w = matrix(1, nrow = 3, ncol = 3), fun = min)
+r_focal = focal(elev, w = matrix(1, nrow = 3, ncol = 3), fun = min)
 ```
 
 ```{r focal-example, echo = FALSE, fig.cap = "Input raster (left) and resulting output raster (right) due to a focal operation - summing up 3-by-3 windows"}
@@ -676,22 +676,17 @@ In Chapter 13 we will learn how to access GIS functionality from within R.
 The difference is that zonal filters can take on any shape instead of just a predefined window.
 Our grain size raster is a good example (Figure \@ref(fig:cont-cate-rasters)) because the different grain sizes are spread in an irregular fashion throughout the raster.
 
-Now suppose, the first raster we created (`r`) represents elevation. 
 To find the mean elevation for each grain size class, we can use the `zonal()` command.
 This kind of operation is also known as *zonal statistics* in the GIS world. 
 
 ```{r}
-z = zonal(r, r_2, fun = "mean") %>%
+z = zonal(elev, grain, fun = "mean") %>%
   as.data.frame
 z
 ```
 
 This returns the statistics for each category, here the mean altitude for each grain size class.
-Of course, we can add this statistic to the attribute table of the ratified raster (remember RAT stands for raster attribute table, see also previous chapter).
-
-```{r}
-levels(r_2)[[1]] =  cbind(levels(r_2)[[1]], mean_elev = z$mean)
-``` 
+Of course, we can add this statistic to the attribute table of the ratified raster (see previous chapter).
 
 *Global* operations are a special case of zonal operations with the entire raster dataset representing a single zone.
 The most common global operations are descriptive statistics for the entire raster dataset such as the minimum or maximum (see previous chapter).
