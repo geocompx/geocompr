@@ -528,12 +528,13 @@ Raster data has a fundamentally different structure than vector data, so subsett
 
 Let us start with manually recreating the raster dataset of Chapter \@ref(raster-classes).
 This should make it easy to understand how **raster** and related operations work (Figure \@ref(fig:cont-cate-rasters)).
+Here, we create a raster which should represent elevations, therefore, we name it accordingly `elev`.
 
 ```{r, message=FALSE}
 library(raster)
-r = raster(nrow = 6, ncol = 6, res = 0.5, 
-           xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-           vals = 1:36)
+elev = raster(nrow = 6, ncol = 6, res = 0.5, 
+              xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+              vals = 1:36)
 ```
 
 Note that a raster object can also contain categorical data.
@@ -542,11 +543,11 @@ For instance, we can create a raster representing grain sizes (Figure \@ref(fig:
 
 ```{r}
 grain_size = c("clay", "silt", "sand")
-r_2 = raster(nrow = 6, ncol = 6, res = 0.5, 
-             xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-             vals = factor(sample(grain_size, 36, replace = TRUE), 
-                           levels = grain_size))
-r_2
+grain = raster(nrow = 6, ncol = 6, res = 0.5, 
+               xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+               vals = factor(sample(grain_size, 36, replace = TRUE), 
+                             levels = grain_size))
+grain
 ```
 
 The **raster** package represents boolean and factor variables as integers.
@@ -557,8 +558,8 @@ Use `levels()` to just retrieve the attribute table.
 We can even add further columns to this attribute table:
 
 ```{r}
-levels(r_2)[[1]] =  cbind(levels(r_2)[[1]], wetness = c("wet", "moist", "dry"))
-levels(r_2)
+levels(grain)[[1]] =  cbind(levels(grain)[[1]], wetness = c("wet", "moist", "dry"))
+levels(grain)
 ```
 
 This is really interesting since we have learned that each raster cell can only possess one value.
@@ -567,7 +568,7 @@ This identifier can then be used to look up the attributes in the corresponding 
 Say, we would like to know the grain size and the wetness of cell IDs 1, 12 and 36, we can run:
 
 ```{r}
-factorValues(r_2, r_2[1, 12, 36])
+factorValues(grain, grain[1, 12, 36])
 ```
 
 
@@ -585,13 +586,13 @@ We can subset raster datasets with the help of `[` which accepts different types
 
 The latter two represent already spatial subsetting (see next section).
 Hewer, we demonstrate the first two subsetting options in the two commands below.
-Both return the value of the top left pixel in the raster object `r` (results not shown):
+Both return the value of the top left pixel in the raster object `elev` (results not shown):
 
 ```{r, eval = FALSE}
 # row 1, column 1
-r[1, 1]
+elev[1, 1]
 # cell ID 1
-r[1]
+elev[1]
 ```
 
 To extract all values or complete rows, you can use `values()` and `getValues()`
@@ -603,11 +604,11 @@ For the same operation, you can also use the `[[` operator.
 If you only want to extract a single layer, you might also use the `$` operator.
 
 To modify a single cell value, we overwrite existing values with the help of subsetting operations (see above).
-For instance, let us replace the upper left cell of `r`, which is 1, by 0:
+For instance, let us replace the upper left cell of `elev`, which is 1, by 0:
 
 ```{r}
-r[1, 1] = 0
-r[]
+elev[1, 1] = 0
+elev[]
 ```
 
 Leaving the square brackets empty is a shortcut version of `values()` for retrieving all values of a raster.
@@ -619,11 +620,11 @@ Printing the raster object to the console already returns the minimum and maximu
 You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
 If we are interested in further summary operations such as the standard deviation (see below) or if we want to define our own summary functions, we can do so with the `cellStats` command. 
 ```{r, eval = FALSE}
-cellStats(r, sd)
+cellStats(elev, sd)
 ```
 
 Note: if you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately.
-Try `summary(brick(r, r_2))`. 
+Try `summary(brick(elev, grain))`. 
 Nothing stops us from visualizing descriptive raster statistics.
 We can manually retrieving raster values with the help of the `values()` and `getValues()` function, and putting their output into any `plot()` function we like.
 Or we can make use of the `boxplot()`, `density()`, `hist()` and `pairs()` methods for raster objects.
@@ -700,7 +701,7 @@ What is the region with the largest increase of the median income?
 14. Create a raster from scratch with nine rows and columns and a resolution of 0.5 decimal degrees (WGS84).
 Fill it with random numbers.
 Extract the values of the four corner cells. 
-15. What is the most common class of our example raster `r_2` (Hint: `modal()`).
+15. What is the most common class of our example raster `grain` (Hint: `modal()`).
 16. Plot the histogram and the boxplot of the `data(dem, package = "RQGIS")` raster. 
 17. Now attach also `data(ndvi, package = "RQGIS")`. 
 Create a raster stack using `dem` and `ndvi`, and make a `pairs()` plot
