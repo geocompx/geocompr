@@ -6,7 +6,13 @@ Foundations
 - 04-spatial - jn
 - 05-read-write - rl
 
-Geocomputational methods
+Applications
+
+- 14-ecological - jm
+- 15-location-analysis - jm
+- 16-transport rl
+
+Advanced methods
 
 - 06-transform - jn
 - 07-vector-methods - rl
@@ -16,9 +22,3 @@ Geocomputational methods
 - 11-advanced-visualization - jn
 - 12-algorithms-functions - rl
 - 13-gis - jm
-
-Applications
-
-- 14-ecological - jm
-- 15-location-analysis - jm
-- 16-transport rl

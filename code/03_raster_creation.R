@@ -43,8 +43,15 @@ colfunc <- colorRampPalette(c("lightyellow", "rosybrown"))
 # colfunc(10)
 # p_1 = spplot(r, col.regions = terrain.colors(36))
 p_1 = spplot(r, col.regions = colfunc(36))
-p_2 = spplot(r_2, col.regions = c("brown","sandybrown", "rosybrown"))
+p_2 = spplot(r_2, 
+             col.regions =  c("brown","sandybrown", "rosybrown"),
+             colorkey = list(space = "right", axis.text = list(cex = 0.5),
+                             height = 0.3))
 
-png(filename = "figures/03_cont_categ_rasters.png", width = 950, height = 555)
-plot(arrangeGrob(p_1, p_2, ncol = 2))
-dev.off()
+ggplot2::ggsave(filename = "figures/03_cont_categ_rasters.png",
+                plot = arrangeGrob(p_1, p_2, ncol = 2),
+                width = 5.1, height = 3)
+# png(filename = "figures/03_cont_categ_rasters.png", width = 950, height = 555)
+# plot(arrangeGrob(p_1, p_2, ncol = 2))
+# dev.off()
+
