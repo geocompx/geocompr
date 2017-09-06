@@ -556,11 +556,13 @@ overlay(r, r_4, fun = "max")
 
 In the code chunk above, we have created a mask object called `r_4` randomly using `FALSE` and `TRUE`.
 Next we only want to keep those values of `r` which are `TRUE` in `r_4`, or expressed differently, we want to mask `r` with `r_4`.
-These operations are in fact boolean local operations since we cellwise compare two rasters.
+These operations are in fact boolean local operations since we compare cellwise two rasters.
 The next subsection explores these and related operations in more detail.
 
 ###  Map algebra: local, focal, zonal, global
-Raster processing is really fast because it only implicitly stores coordinates, that is we can calculate the coordinate of a raster cell due to its matrix position and the help of the resolution and the origin.
+Map algebras makes raster processing really fast.
+This is because we only implicitly store coordinates with raster datasets.
+To derive the coordinate of a specific cell, we have to calculate it using its matrix position and the raster resolution and origin.
 For the processing, however, the geographic position of a cell is barely relevant as long as we make sure that the cell position is still the same after the processing (one-to-one locational correspondence).
 Additionally, if two or more raster datasets share the same extent, projection and the resolution, one could treat them as matrixes for the processing.
 This is exactly what map algebra is doing.
@@ -705,7 +707,10 @@ Many map algebra operations have a counterpart in vector processing [@liu_essent
 Computing a distance raster (zonal operation) while only considering a maximum distance (logical focal operation) is the equivalent to a vector buffer operation.
 Reclassifying raster data (either local or zonal function depending on the input) is equivalent to dissolving vector data. 
 Overlaying two rasters (local operation), where one contains `NULL` or `NA` values representing a mask, is similar to vector clipping.
-Finally, we can intersect or union two rasters with the help of the boolean operations AND and OR.
+Quite similar to spatial clipping is intersecting two layers. 
+In R, we would have to merge/mosaic the two overlapping rasters. 
+Of course, this requires the two rasters to share the same resolution (and origin) <!--find out-->.
+Subsequently, we could use boolean operations to find the overlapping area.
 
 ```{r mapalg_vector, echo = FALSE}
 d = 
@@ -713,17 +718,16 @@ d =
            c("buffer (section \\@ref(modifying-geometry-data))",
              "dissolve (section \\@ref(spatial-joining-and-aggregation))",
              "clipping (section \\@ref(modifying-geometry-data))",
-             "intersection/union (section \\@ref(spatial-subsetting)))"),
+             "intersection (section \\@ref(spatial-subsetting)))"),
          "raster operations" = 
            c("distance raster rectricted to a threshold",
-             "reclassify",
-             "binary raster zonal operation",
-             "boolean operation OR/AND")
+             "reclassify or zonal statistics",
+             "boolean operation",
+             "boolean operation")
        )
 knitr::kable(x = d, caption = "Map algebra vector equivalents.")
 ```
-buffer distance raster within a specified threshold
-dissolve reclassifying 
+
 
 ### Mosaics
 
