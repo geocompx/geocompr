@@ -33,8 +33,8 @@ Spatial vector data comes in a wide variety of file formats, and **sf** is able 
 Behind the scenes it uses GDAL, which supports the import of a very wide range of vector data formats^[A list of supported formats could be found using `sf::st_drivers()`].
 The first argument of `st_read()` is `file`, which should be a text string or an object containing a single text string:
 
-```{r}
-library(sf, message=FALSE)
+```{r, message=FALSE}
+library(sf)
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
 world = st_read(vector_filepath)
 ```
@@ -44,44 +44,7 @@ world = st_read(vector_filepath)
 Remember they hide information about the data source and overwrite existing data, though.
 
 A major advantage of **sf** is that it is fast.
-To demonstrate this, we will use a function to compare `st_read()` with its **sp** equivalent, `rgdal::readOGR()`:
-
-```{r}
-bench_read = function(file, n) {
-  m = microbenchmark(times = n,
-                     rgdal::readOGR(vector_filepath),
-                     st_read(vector_filepath)
-  )
-  mean(m$time[1:n]) / mean(m$time[(n + 1):(n * 2)])
-}
-```
-
-This function takes as arguments an input file (`file`) and a number of times to run each command (`n`) and returns how many times faster `st_read()` is than `readOGR()`.
-Let's run the benchmark for the `world.gpkg` file represented by the object `vector_filepath`:
-
-```{r, results='hide'}
-library(microbenchmark)
-read_world_gpkg = bench_read(file = vector_filepath, n = 5)
-```
-
-```{r}
-read_world_gpkg
-```
-
-The results demonstrate that **sf** was around `r round(read_world_gpkg)` times faster than **rgdal** at reading-in the world countries vector.
-The relative performance of `st_read()` compared with other functions will vary depending on file format and the nature of the data.
-To illustrate this point, we performed the same operation on a geojson file and found a greater speed saving:
-
-```{r, results='hide'}
-vector_filepath_gj = system.file("shapes/cycle_hire_osm.geojson", package = "spData")
-read_lnd_geojson = bench_read(file = vector_filepath_gj, n = 5)
-```
-
-```{r}
-read_lnd_geojson
-```
-
-In this case **sf** was around `r round(read_lnd_geojson)` times faster than **rgdal**.
+<!-- reference to the vignette -->
 
 To find out which data formats **sf** supports, run `st_drivers()`. Here, we show only the first two drivers:
 
