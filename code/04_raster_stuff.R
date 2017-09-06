@@ -72,7 +72,6 @@ dev.off()
 # 3 FOCAL EXAMPLE------------------------------------------
 #**********************************************************
 
-
 # in the book chapter we show subsetting, that's why we have to do so here also
 r[1, 1] = 0
 # create polygons
@@ -137,6 +136,9 @@ elev = raster(nrow = 6, ncol = 6, res = 0.5,
 elev_2 = raster(nrow = 6, ncol = 6, res = 0.5, 
                 xmn = -1.5 + 1, xmx = 1.5 + 1, ymn = -1.5 + 1, ymx = 1.5 + 1,
                 vals = 1:36)
+# retrieves the intersection
+elev[elev_2, ]
+
 tmp = elev
 tmp_2 = elev_2
 tmp[] = TRUE

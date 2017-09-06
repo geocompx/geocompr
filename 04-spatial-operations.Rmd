@@ -708,9 +708,7 @@ Computing a distance raster (zonal operation) while only considering a maximum d
 Reclassifying raster data (either local or zonal function depending on the input) is equivalent to dissolving vector data. 
 Overlaying two rasters (local operation), where one contains `NULL` or `NA` values representing a mask, is similar to vector clipping.
 Quite similar to spatial clipping is intersecting two layers. 
-In R, we would have to merge/mosaic the two overlapping rasters. 
-Of course, this requires the two rasters to share the same resolution (and origin) <!--find out-->.
-Subsequently, we could use boolean operations to find the overlapping area.
+The difference is that two these two layers (vector or raster) simply share an overlapping area (see Figure \@ref(fig:venn-clip) for an example).
 
 ```{r mapalg_vector, echo = FALSE}
 d = 
@@ -730,16 +728,36 @@ knitr::kable(x = d, caption = "Map algebra vector equivalents.")
 
 
 ### Merge, mosaic rasters
+Suppose we would like to add airborne or remotely sensed information to all observations within our study area.
+The corresponding imagery is often divided into scenes covering a specific spatial extent.
+Frequently, a study area covers more than one scene.
+In these cases we would like to merge the scenes covered by our study area. 
+In the easiest case, we can just merge these scenes, that is put them side to side.
+This is possible with digital elevation data (SRTM, ASTER).
+In the following code chunk we first download the SRTM elevation data for Austria and Switzerland (for the country codes have a look at `ccodes()`).
+In a second step, we merge the two rasters into one.
 
-Figure \@ref(fig:mosaic-intersect))
-
-
-```{r mosaic-intersect, echo = FALSE, fig.cap = "Merging two input rasters and retrieving their intersection."}
-knitr::include_graphics("figures/04_mosaic_intersect.png")
+```{r}
+aut = getData("alt", country = "AUT", mask = TRUE)
+ch = getData("alt", country = "CHE", mask = TRUE)
+alps = merge(aut, ch)
 ```
 
-### Raster aggregation, disaggregation and resampling
+Raster's `merge()` command combines two images, and in case they overlap, it uses the value of the first raster.
+You can do exactly the same with `gdalUtils::mosaic_rasters()` which is faster, and therefore recommended if you have to merge a multitude of large rasters stored on disk.
 
+The merging approach is of little use when the overlapping values do not correspond to each other.
+This is frequently the case when you want to combine spectral imagery from scenes that were taken on different dates.
+The `merge()` command will still work but you will see a clear border in the resulting image.
+The `mosaic()` command lets you define a function for the overlapping area. 
+For instance, we could compute the mean value. 
+This might smooth the clear border in the merged result but it will most likely not make it disappear.
+To do so, we need a more advanced approach. 
+Remote scientist frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image.
+The packages **landsat**, **satellite** and **RStoolbox** provide the corresponding functions.
+
+### Raster aggregation, disaggregation and resampling
+gdalUtils::align_rasters
 <!-- ## Spatial data creation -->
 
 <!-- where should "area" example be? in this or the previous chapter? -->
