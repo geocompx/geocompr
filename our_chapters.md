@@ -1,24 +1,24 @@
 Foundations
 
-- 01-introduction - rl
-- 02-spatial-data - rl
-- 03-attr - jn
-- 04-spatial - jn
-- 05-read-write - rl
+- introduction - rl
+- spatial-data - rl
+- attr - jn
+- spatial - jn
+- read-write - rl
+- transform - jn
 
 Applications
 
-- 14-ecological - jm
-- 15-location-analysis - jm
-- 16-transport rl
+- ecological - jm
+- location-analysis - jm
+- transport rl
 
 Advanced methods
 
-- 06-transform - jn
-- 07-vector-methods - rl
-- 08-raster-methods - jn
-- 09-raster-vector - jn
-- 10-spatial-crossvalidation - jm
-- 11-advanced-visualization - jn
-- 12-algorithms-functions - rl
-- 13-gis - jm
+- advanced raster
+- advanced vector 
+- raster-vector - jn
+- spatial-crossvalidation - jm
+- advanced-visualization - jn
+- algorithms-functions - rl
+- gis - jm
