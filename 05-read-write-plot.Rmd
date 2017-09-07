@@ -1,6 +1,6 @@
 # Geographic data I/O {#read-write}
 
-The previous chapters provided an overview of spatial data classes in R, with a focus on simple features and raster.
+The previous chapters provided an overview of spatial data classes in R, with a focus on simple features and rasters.
 This chapter is about getting spatial data onto your computer and then, perhaps after processing it with techniques described in this book, back out to the world.
 <!-- Not sure if this is the place for the following two sentences... Or if so, some kind of link is missing.-->
 We include a section (\@ref(visual-outputs)) on visualization because outputting data in a human (not just computer) readable format enables non-programmers to benefit from your work.
@@ -22,7 +22,7 @@ Loading/saving data is yet another way of saying the same thing.
 ## Data Input (I)
 
 To efficiently read data into R, it helps to have an understanding of what happens 'under the hood'.
-Executing commands such as `sf::st_read()` (the main function we use for loading vector data, from the **sf** package), `raster::raster()` (the main function used for loading raster data, from the **raster** package),  or `readr::read_csv()` (which can we used to read spatial data from text files) silently sets off a chain of events that loads objects.
+Executing commands such as `sf::st_read()` (the main function we use for loading vector data), `raster::raster()` (the main function used for loading raster data),  or `readr::read_csv()` (which can we used to read spatial data from text files) silently sets off a chain of events that loads objects.
 "Loading" in this context means loading the data into R or, more precisely, assigning objects to your workspace, stored in RAM accessible from the `.GlobalEnv` of your current R session.
 <!-- What is your understanding of workspace? Or what is the difference between workspace and the global environment here?-->
 <!-- coud add a footnote here mentioning `.GlobalEnv` -->
@@ -30,13 +30,21 @@ Executing commands such as `sf::st_read()` (the main function we use for loading
 ### Vector data
 
 Spatial vector data comes in a wide variety of file formats, and **sf** is able to handle most of them <!-- is that right? --> via its `st_read()` command.
-Behind the scenes it uses GDAL, which supports the import of a very wide range of vector data formats^[A list of supported formats could be found using `sf::st_drivers()`].
+Behind the scenes it uses GDAL, which supports the import of a very wide range of vector data formats^[A list of supported formats could be found at http://www.gdal.org/ogr_formats.html].
 The first argument of `st_read()` is `file`, which should be a text string or an object containing a single text string:
 
 ```{r, message=FALSE}
 library(sf)
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
 world = st_read(vector_filepath)
+```
+
+<!-- temporal text subsection -->
+<!-- data needs to be added to spData -->
+```{r, eval=FALSE}
+cycle_hire1 = st_read("cycle_hire_xy.csv", options = c("X_POSSIBLE_NAMES=X",
+                                                       "Y_POSSIBLE_NAMES=Y"))
+cycle_hire2 = st_read("cycle_hire_wkt.csv", options = "GEOM_POSSIBLE_NAMES=WKT")
 ```
 
 <!-- isn't that confusing? -->
@@ -53,20 +61,12 @@ sf_drivers = st_drivers()
 head(sf_drivers, n = 2)
 ```
 
-<!-- temporal text subsection -->
-<!-- data needs to be added to spData -->
-```{r, eval=FALSE}
-cycle_hire1 = st_read("cycle_hire_xy.csv", options = c("X_POSSIBLE_NAMES=X",
-                                                       "Y_POSSIBLE_NAMES=Y"))
-cycle_hire2 = st_read("cycle_hire_wkt.csv", options = "GEOM_POSSIBLE_NAMES=WKT")
-```
-
 ### Raster data
 
-Raster data also could exist in many different file formats, with some of the formats supporting multilayer files ^[A list of supported raster formats could be found using `rgdal::gdalDrivers()`].
+Raster data also could exist in many different file formats, with some of the formats supporting multilayer files ^[A list of supported raster formats could be found at http://www.gdal.org/formats_list.html].
 
-The **raster** package support reading one layer by `raster()` and many layers using either `brick()` or `stack()`. 
-More information about the raster representation in this package could be find in the section \@ref(raster-classes).
+The **raster** package support reading a single layer by `raster()` and many layers using either `brick()` or `stack()`. 
+More information about the raster representation could be find in the section \@ref(raster-classes).
 
 The `raster()` function makes it possible to read a simple single layer file: 
 
@@ -90,7 +90,7 @@ The whole multilayer raster file is read by `brick()`:
 multilayer_layer_brick = brick(raster_multilayer_filepath)
 ```
 
-Finally, many single and multilayer files could be read in the same time with the `stack()` function:
+Finally, many single and multilayer rasters could be read together with the `stack()` function:
 
 ```{r}
 raster_l1_filepath = system.file("raster/landsat_b2.tif", package = "spDataLarge")
@@ -100,10 +100,6 @@ multilayer_layer_stack = stack(raster_l1_filepath, raster_l2_filepath)
 ```
 
 The only limitation to `stack()` is that all datasets need to have the same spatial extent and resolution.
-
-<!-- NetCDF? -->
-<!-- temporal text subsection -->
-
 
 ## Data output (O)
 
@@ -118,23 +114,13 @@ file.remove(world_files)
 
 The counterpart of `st_read()` is `st_write()`.
 It allows to write **sf** objects to a wide range of geographic vector file formats, including the most common ones such as `.geojson`, `.shp` and `.gpkg`.
-Based on the file name `st_write()` decides automatically which driver to use. How fast the writing process is depends also on the driver:
-<!-- Is this comparison here necessary, or shouldn't we instead focus on the automatic driver selection? -->
+Based on the file name `st_write()` decides automatically which driver to use. 
+How fast the writing process is depends also on the driver.
+<!-- ref to the vignette -->
 
-```{r, warning=FALSE}
-system.time(st_write(world, "world.geojson", quiet = TRUE))
-system.time(st_write(world, "world.shp", quiet = TRUE)) 
-system.time(st_write(world, "world.gpkg", quiet = TRUE))
+```{r}
+st_write(obj = world, dsn = "world.gpkg")
 ```
-
-```{r, echo=FALSE, results='hide'}
-world_files = list.files(pattern = "world\\.")
-file.remove(world_files)
-```
-
-<!-- ```{r} -->
-<!-- st_write(obj = world, dsn = "world.gpkg") -->
-<!-- ``` -->
 
 **Note**: if you try to write to the same data source again, the function will fail.
 <!-- Why are you creating a modified version? Could you not use the same object again to demonstrate that overwriting will fail? -->
