@@ -167,10 +167,36 @@ row.names(filter(africa, subregion == "Northern Europe"))
 
 ## Spatial joining and aggregation 
 
-Methods for combining two datasets based on attribute data were explored in \@ref(vector-attribute-joining), based on a shared key variable.
-Spatial data joining applies the same concept, but joins datasets based on features' shared presence (some degree of overlap) in geographic space.
+Joining two non-spatial datasets relies on a shared 'key' variable, as described in section \@ref(vector-attribute-joining).
+Spatial data joining applies the same concept, but instead relies on shared areas of geographic space.
+As with attribute data joining, the result is that a new column is added to the target object (the argument `x` in joining functions) from a source object (`y`).
 
+The process is illustrated in Figure \@ref(fig:spatial-join), which shows a target object (the `world` dataset, left) being joined to a source dataset (the top 10 largest cities of the world), resulting in a new attribute being added to the `world` dataset (right).
 <!-- Idea: use random points over Earth's surface to allocate data to world countries. -->
+
+```{r}
+urb = urban_agglomerations %>% 
+  filter(Year == 2020) %>% 
+  top_n(n = 3, wt = `Population (millions)`)
+asia = world %>% 
+  filter(continent == "Asia")
+```
+
+```{r, message=FALSE}
+joined = st_join(x = asia, y = urb)
+```
+
+
+```{r spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join: the populations of the world's 3 largest agglomerations joined onto their respective countries.", fig.asp=0.4}
+par(mfrow = c(1, 3))
+plot(urb$geometry, col = "white", main = "Target object")
+plot(asia$geom, add = TRUE)
+plot(urb["Population (millions)"], pch = 15, main = "Source object (points)")
+plot(joined$geom, border = "grey", add = TRUE)
+plot(urb["Population (millions)"], pch = 15, main = "Result of spatial join")
+plot(joined["Population (millions)"], add = TRUE)
+par(mfrow = c(1, 1))
+```
 
 Like attribute data aggregation, covered in section \@ref(vector-attribute-aggregation), spatial data aggregation can be a way of *condensing* data.
 Aggregated data show some statistic about a variable (typically mean average or total) in relation to some kind of *grouping variable*. 
@@ -271,6 +297,7 @@ buff_agg_aw = st_interpolate_aw(x = africa["pop"], to = buff, extensive = TRUE)
 
 ### Non-overlapping joins 
 
+<!-- Nearest neighbour analysis -->
 <!-- e.g. two point's datasets (non-overlapping) -->
 <!-- e.g. two point's datasets (overlapping) -->
 <!-- ? topological problems of joining lines/polygons? -->
@@ -447,9 +474,9 @@ plot(x_and_y, col = "grey", add = TRUE)
 text(x = 0.5, y = 1, "st_intersection(x, y)")
 # x_xor_y = st_difference(x_xor_y, x_and_y) # failing
 x_not_y = st_difference(x, y)
-x_xor_y = st_union(y_not_x, x_not_y)
+x_xor_y = st_sym_difference(x, y)
 plot(x_xor_y, col = "grey")
-text(x = 0.5, y = 1, "st_union(y_not_x, x_not_y)")
+text(x = 0.5, y = 1, "st_sym_difference(x, y)")
 plot.new()
 plot(b)
 plot(x_not_y, col = "grey", add = TRUE)
