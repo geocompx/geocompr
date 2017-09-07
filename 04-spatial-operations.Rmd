@@ -564,7 +564,7 @@ Next we only want to keep those values of `elev` which are `TRUE` in `rmask`, or
 These operations are in fact boolean local operations since we compare cellwise two rasters.
 The next subsection explores these and related operations in more detail.
 
-###  Map algebra: local, focal, zonal, global
+###  Map algebra
 Map algebra makes raster processing really fast.
 This is because raster datasets only implicitly store coordinates.
 To derive the coordinate of a specific cell, we have to calculate it using its matrix position and the raster resolution and origin.
@@ -710,9 +710,9 @@ Overlaying two rasters (local operation), where one contains `NULL` or `NA` valu
 Quite similar to spatial clipping is intersecting two layers (section \@ref(spatial-subsetting)). 
 The difference is that two these two layers (vector or raster) simply share an overlapping area (see Figure \@ref(fig:venn-clip) for an example).
 
-### Merge/mosaic rasters
-<!-- find a better transition-->
-Suppose we would like to add airborne or remotely sensed information to all observations within our study area.
+### Merging rasters
+Suppose we would like to compute the NDVI (see focal functions of the previous section), and additionally want to compute terrain attributes from elevational data for observations within a study area.
+Before such computations we would have to acquire airborne or remotely sensed information.
 The corresponding imagery is often divided into scenes covering a specific spatial extent.
 Frequently, a study area covers more than one scene.
 In these cases we would like to merge the scenes covered by our study area. 
@@ -724,10 +724,10 @@ In a second step, we merge the two rasters into one.
 ```{r, eval = FALSE}
 aut = getData("alt", country = "AUT", mask = TRUE)
 ch = getData("alt", country = "CHE", mask = TRUE)
-alps = merge(aut, ch)
+aut_ch = merge(aut, ch)
 ```
 
-Raster's `merge()` command combines two images, and in case they overlap, it uses the value of the first raster.
+**Raster**'s `merge()` command combines two images, and in case they overlap, it uses the value of the first raster.
 You can do exactly the same with `gdalUtils::mosaic_rasters()` which is faster, and therefore recommended if you have to merge a multitude of large rasters stored on disk.
 
 The merging approach is of little use when the overlapping values do not correspond to each other.
@@ -741,7 +741,7 @@ Remote scientist frequently apply histogram matching or use regression technique
 The packages **landsat**, **satellite** and **RStoolbox** provide the corresponding functions.
 
 ### Aligning rasters
-When merging or performing map algebra on rasters, their resolution, projection and origin/extent has to match.
+When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent has to match.
 Otherwise, how should we add the values of one raster with a resolution of 0.2 decimal degrees to a second with a resolution of 1 decimal degree?
 The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions.
 We can deal with such mismatches by aligning the rasters.
