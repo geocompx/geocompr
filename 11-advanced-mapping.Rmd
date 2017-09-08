@@ -5,20 +5,8 @@
 - ...
 
 ```{r, include=FALSE}
-pkgs_c11 = c(
-  "cowplot",
-  "wbstats",
-  "rnaturalearth",
-  "viridis",
-  "sf",
-  "tidyverse",
-  "tmap",
-  "units"
-)
-pacman::p_load(char = pkgs_c11)
-if(!exists("world")) {
-  source("code/01-introduction.R")
-}
+library(spData)
+library(tmap)
 ```
 
 # Advanced map making {#adv-map}
@@ -34,7 +22,42 @@ if(!exists("world")) {
 - color palettes (viridis, etc.)
 -->
 
+## Facetted maps
+
+Facetted maps are a common and potentially effect way of highlighting spatial relationships that are more complex that a single relationship.
+The population of cities at one moment in time can be represented easily on a single map, for example by making the size of symbols variable for each city depending on population.
+However, to represent the populations of cities at multiple moments in time requires an *extra dimension*.
+This could be added by an additional *aesthetic* such as colour but this risks cluttering the map because it will involve multiple overlapping points (cities do not tend to move over time!).
+
+```{r}
+library(tmap)
+qtm(world) +
+  tm_shape(urban_agglomerations) +
+  tm_dots(size = "population_millions") +
+  tm_facets(by = "year")
+```
+
 ## Animations
+
+Animated maps can be useful for communicating how spatial phenomena shift over time.
+An advantage of facetted plots are that they can be printed, but the approach has disadvantages:
+faceted maps can become very small with more than ~9 maps in one figure, and it can be hard to see the spatial relationships between each facet when each map is on a different part of the page!
+Furthermore, with the increasing proportion of communication that happens via digital screens, the disadvantage that animations cannot be printed is diminished.
+You can always link readers to a web-page containing an animated (or interactive) version of a printed map to help make it come alive.
+
+
+
+```{r}
+m = 
+  tm_shape(world) + 
+  tm_polygons() +
+  tm_shape(urban_agglomerations) +
+  tm_dots(size = "population_millions") +
+  tm_facets(by = "year", nrow = 1, ncol = 1) 
+animation_tmap(tm = m)
+```
+
+<!-- Robin, check the differences between by="year" and along="year" -->
 
 ```{r ani_data_prep}
 options(scipen = 999)
