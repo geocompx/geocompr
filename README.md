@@ -7,7 +7,7 @@ Geocomputation with R
 Introduction
 ============
 
-This repository hosts the code underlying Geocomputation with R, a book by [Robin Lovelace](http://robinlovelace.net/) and [Jakub Nowosad](https://nowosad.github.io/) and [Jannes Muenchow](http://www.geographie.uni-jena.de/en/Muenchow.html).
+This repository hosts the code underlying Geocomputation with R, a book by [Robin Lovelace](http://robinlovelace.net/), [Jakub Nowosad](https://nowosad.github.io/), and [Jannes Muenchow](http://www.geographie.uni-jena.de/en/Muenchow.html).
 
 The online version of the book is developed at <http://robinlovelace.net/geocompr/>. We plan to publish the hard copy of the book with CRC Press in 2018.
 
@@ -53,9 +53,6 @@ to_install = !pkgs %in% installed.packages()
 if(any(to_install)) {
   install.packages(pkgs[to_install])
 }
-#> Installing packages into '/home/jn/R/x86_64-redhat-linux-gnu-library/3.4'
-#> (as 'lib' is unspecified)
-#> also installing the dependencies 'SnowballC', 'shape', 'hunspell', 'tokenizers', 'janeaustenr'
 ```
 
 With these additional dependencies installed, you should be able to run the following scripts, which create input figures for the book:
@@ -130,7 +127,7 @@ knitr::kable(pkg_df)
 | RSAGA          | SAGA Geoprocessing and Terrain Analysis in R \[@R-RSAGA\]                     | 0.94.5  |
 | sf             | Simple Features for R \[@R-sf\]                                               | 0.5.4   |
 | sp             | Classes and Methods for Spatial Data \[@R-sp\]                                | 1.2.5   |
-| spData         | Datasets for Spatial Analysis \[@R-spData\]                                   | 0.2.5.0 |
+| spData         | Datasets for Spatial Analysis \[@R-spData\]                                   | 0.2.5.3 |
 | spDataLarge    | Large datasets for spatial analysis \[@R-spDataLarge\]                        | 0.2.3.0 |
 | tidyverse      | Easily Install and Load 'Tidyverse' Packages \[@R-tidyverse\]                 | 1.1.1   |
 | tmap           | Thematic Maps \[@R-tmap\]                                                     | 1.10    |
