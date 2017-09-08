@@ -12,32 +12,30 @@ Concepts such as computational efficiency, hard disk space and 'idempotence' are
 Loading/saving data is yet another way of saying the same thing.
 ]
 
-<!-- Old intro to this chapter - can we salvage anything from this? -->
-<!-- Reading, writing and plotting are 3 of the most important initial stages in geocomputation. -->
-<!-- If you cannot load your data, it's not even worth starting. -->
-<!-- If you cannot write your processed data, it will make it hard to collaborate with others. -->
-<!-- Furthermore, an often-overlooked issue is that if you cannot create visuals of your spatial data, it will be hard to understand. -->
-<!-- For this reason this introductory chapter also has a section on basic map making. -->
-
 ## Data Input (I)
 
 To efficiently read data into R, it helps to have an understanding of what happens 'under the hood'.
 Executing commands such as `sf::st_read()` (the main function we use for loading vector data), `raster::raster()` (the main function used for loading raster data),  or `readr::read_csv()` (which can we used to read spatial data from text files) silently sets off a chain of events that loads objects.
-"Loading" in this context means loading the data into R or, more precisely, assigning objects to your workspace, stored in RAM accessible from the `.GlobalEnv` of your current R session.
-<!-- What is your understanding of workspace? Or what is the difference between workspace and the global environment here?-->
-<!-- coud add a footnote here mentioning `.GlobalEnv` -->
+"Loading" in this context means loading the data into R or, more precisely, assigning objects to your workspace, stored in RAM accessible from the `.GlobalEnv`^[See http://adv-r.had.co.nz/Environments.html for more information on the environment] of your current R session.
 
 ### Vector data
 
-Spatial vector data comes in a wide variety of file formats, and **sf** is able to handle most of them <!-- is that right? --> via its `st_read()` command.
+Spatial vector data comes in a wide variety of file formats, and **sf** is able to handle most of them via its `st_read()` command.
 Behind the scenes it uses GDAL, which supports the import of a very wide range of vector data formats^[A list of supported formats could be found at http://www.gdal.org/ogr_formats.html].
-The first argument of `st_read()` is `file`, which should be a text string or an object containing a single text string:
+The first argument of `st_read()` is `dsn`, which should be a text string or an object containing a single text string.
+The content of a text string could vary between different drivers.
+In the most of cases, for example `ESRI Shapefile` or `GeoPackage`, it would be a file name.
+The `st_read` function, based on the file extension, knows how to read a file.
 
 ```{r, message=FALSE}
 library(sf)
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
 world = st_read(vector_filepath)
 ```
+
+
+
+
 
 <!-- temporal text subsection -->
 <!-- data needs to be added to spData -->
@@ -234,6 +232,17 @@ Full list of the supported file format for writing `Raster*` objects could be fo
 
 ### Vector formats
 
+```{r, eval=FALSE, echo=FALSE}
+vector_formats = tribble(~Name, ~Extension, ~Info, ~Model,
+                         "ESRI Shapefile", ".shp (the main file)", "", "",
+                         "GeoPackage", ".gpkg", "", "",
+                         # "WKT/WKB"??
+                         "GeoJSON", ".geojson", "", "",
+                         "GPX", ".gpx", "", "",
+                         "KML", ".kml", "", ""
+                         )
+```
+
 <!-- 1. shp - (short history, was more or less an accident, a long-living makeshift arrangement) - don't use shp! -->
 <!-- 2. gpkg - (maybe just mention here, gpkg since it is an SQLite 3 extension supporting both vector and raster formats) - reference to the "geodatabases" section -->
 <!-- 3. wkt and wkb -->
@@ -241,6 +250,19 @@ Full list of the supported file format for writing `Raster*` objects could be fo
 <!-- 5. maybe gpx - (maybe mention GPS formats such as GPX) -->
 
 ### Raster formats
+
+```{r, eval=FALSE, echo=FALSE}
+raster_formats = tribble(~Name, ~Extension, ~Info, ~Model,
+                         "GeoTIFF", ".tiff", "", "",
+                         "Arc ASCII", ".asc", "", "",
+                         # "JPEG??"
+                         "R-raster", ".gri, .grd", "", "",
+                         # "NCDF??"
+                         # "HDF??"
+                         "GeoPackage", ".gpkg", "", ""
+                         )
+```
+
 
 <!-- 1. geotiff -->
 <!-- 2. asc - (popular formats: asc (-> exported from ESRI)) -->
@@ -251,6 +273,16 @@ Full list of the supported file format for writing `Raster*` objects could be fo
 
 ### Geodatabases 
 <!--(can store vector and raster data)-->
+
+```{r, eval=FALSE, echo=FALSE}
+geodatabases = tribble(~Name, ~Extension, ~Info, ~Model,
+                         "SQLite", ".sqlite", "", "",
+                         # "WKT/WKB??",
+                         "ESRI FileGDB", ".gdb", "", "",
+                         "GeoPackage", ".gpkg", "", ""
+                         )
+```
+
 
 <!-- 1. SQLite/SpatialLite + mention GRASS (uses SQLite) -->
 <!-- 2. gpkg - explanation connected to the previous sections and to SQLite -->
