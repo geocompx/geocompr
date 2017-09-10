@@ -1,15 +1,12 @@
-# Advanced map making
+# Advanced map making {#adv-map}
 
 ## Prerequisites {-}
-
-- ...
 
 ```{r, include=FALSE}
 library(spData)
 library(tmap)
 ```
 
-# Advanced map making {#adv-map}
 
 <!-- 
 - tmap
@@ -24,12 +21,17 @@ library(tmap)
 
 ## Facetted maps
 
-Facetted maps are a common and potentially effect way of highlighting spatial relationships that are more complex that a single relationship.
+Facetted maps are a common and potentially effective way of visualizing spatial relationships that are more complex that a single relationship.
 The population of cities at one moment in time can be represented easily on a single map, for example by making the size of symbols variable for each city depending on population.
 However, to represent the populations of cities at multiple moments in time requires an *extra dimension*.
 This could be added by an additional *aesthetic* such as colour but this risks cluttering the map because it will involve multiple overlapping points (cities do not tend to move over time!).
 
-```{r}
+Facetted maps overcome this issue by creating 'small multiples' of spatial information.
+Typically, this will involve plotting the same geometry data multiple times, once for each variable present in the attribute data (this is the default plotting method for `sf` objects, as we saw in Chapter 2).
+However, facets can also represent shifting geometries, e.g. as the spatial distribution of a point pattern evolves over time.
+This use case of facetted plot is illustrated in Figure \@ref(fig:urban-facet).
+
+```{r urban-facet, fig.cap="Facetted map showing the top 30 largest 'urban agglomerations' from 1950 to 2030 based on population projects by the United Nations"}
 library(tmap)
 qtm(world) +
   tm_shape(urban_agglomerations) +
@@ -45,21 +47,41 @@ faceted maps can become very small with more than ~9 maps in one figure, and it 
 Furthermore, with the increasing proportion of communication that happens via digital screens, the disadvantage that animations cannot be printed is diminished.
 You can always link readers to a web-page containing an animated (or interactive) version of a printed map to help make it come alive.
 
+Figure \@ref(fig:urban-animated) is a simple example of the benefits of an animated map.
+Unlike the facetted plot presented in the previous section, it does not squeeze all 17 for them all to be displayed simultaneously (see the book's website for the animated version).
+
+```{r urban-animated, fig.cap="Animated map showing the top 30 largest 'urban agglomerations' from 1950 to 2030 based on population projects by the United Nations"}
+knitr::include_graphics("figures/urban-animated.gif")
+```
+
 
 
 ```{r}
-m = 
-  tm_shape(world) + 
+m = tm_shape(world) + 
   tm_polygons() +
   tm_shape(urban_agglomerations) +
   tm_dots(size = "population_millions") +
   tm_facets(by = "year", nrow = 1, ncol = 1) 
-animation_tmap(tm = m)
 ```
+
+```{r, echo=FALSE, eval=FALSE}
+library(dplyr)
+m_save = world %>% filter(continent != "Antarctica") %>% 
+  tm_shape() + 
+  tm_polygons() +
+  tm_shape(urban_agglomerations) +
+  tm_dots(size = "population_millions", title.size = "Population (m)", alpha = 0.5, col = "red") +
+  tm_facets(by = "year", nrow = 1, ncol = 1) 
+geocompr:::save_print_quality(m = m_save, f = "/tmp/urban-animated-print.png")
+animation_tmap(tm = m_save, filename = "/tmp/urban-animated.gif", width = 1200, height = 800)
+```
+
+
+
 
 <!-- Robin, check the differences between by="year" and along="year" -->
 
-```{r ani_data_prep}
+```{r ani_data_prep, eval=FALSE}
 options(scipen = 999)
 
 wb_data_create = function(indicator, our_name, year, ...){
