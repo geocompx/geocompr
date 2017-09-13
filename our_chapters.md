@@ -9,14 +9,13 @@ Foundations
 
 Applications
 
+- introductory transport rl
 - ecological - jm
 - location-analysis - jm
-- transport rl
+- land-use analysis - jn
 
 Advanced methods
 
-- advanced raster
-- advanced vector 
 - raster-vector - jn
 - spatial-crossvalidation - jm
 - advanced-visualization - jn
