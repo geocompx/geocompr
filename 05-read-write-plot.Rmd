@@ -42,18 +42,18 @@ Table \@ref(tab:formats) presents some basic information about selected, often u
 file_formats = tibble::tribble(~Name, ~Extension, ~Info, ~Type, ~Model, 
                          "ESRI Shapefile", ".shp (the main file)", "One of the most popular vector file format. Consists of at least three files. The main files size cannot exceed 2 GB. It lacks support for mixed type. Columns names are limited to 10 characters, and number of columns are limited at 255. It has poor support for Unicode standard. ", "Vector", "Partially open",
                          "GeoJSON", ".geojson", "Format designed for representation of simple features. It is often used for a web applications.", "Vector", "Open",
-                         "KML", ".kml", "XML-based format for spatial visualization, developed for use with Google Earth. Zipped KML file from the KMZ format.", "Vector", "Open",
+                         "KML", ".kml", "XML-based format for spatial visualization, developed for use with Google Earth. Zipped KML file forms the KMZ format.", "Vector", "Open",
                          "GPX", ".gpx", "XML schema created for exchange of GPS data.", "Vector", "Open",
                          "GeoTIFF", ".tiff", "GeoTIFF is one of the most popular raster formats. Its structure is similar to the regular `.tif` format, however GeoTIFF also stores additional spatial metadata, such as coordinate reference system, spatial extent, `NoData` value, and the data resolution.", "Raster", "Open",
-                         "Arc ASCII", ".asc", "Text format where the first six lines represent grid information and nodata value, followed by the values arranged in rows and columns.", "Raster", "?",
+                         "Arc ASCII", ".asc", "Text format where the first six lines represent grid information and nodata value, followed by the values arranged in rows and columns.", "Raster", "Open",
                          # "JPEG??"
-                         "R-raster", ".gri, .grd", "Native format of the raster package. ", "Raster", "Open",
+                         "R-raster", ".gri, .grd", "Native format of the raster package.", "Raster", "Open",
                          # "NCDF??"
                          # "HDF??"
                          "SQLite/SpatiaLite", ".sqlite", "SQLite is a standalone, relational database management system. It is used as a default database driver in GRASS GIS 7. SpatiaLite is an extension to SQLite providing a support for Simple Features.", "Vector and raster", "Open",
                          # "WKT/WKB??",
-                         "ESRI FileGDB", ".gdb", "Collection of spatial and nonspatial objects created in the ArcGIS software.", "Vector and raster", "?",
-                         "GeoPackage", ".gpkg", "An extended SQLite database file designed to be lightweight.", "Vector and raster", "Open"
+                         "ESRI FileGDB", ".gdb", "Collection of spatial and nonspatial objects created in the ArcGIS software. It allows to store multiple feature classes and enables use of topological definitions. Limited access to this format is provided by GDAL with the use of the OpenFileGDB and FileGDB drivers.", "Vector and raster", "Proprietary",
+                         "GeoPackage", ".gpkg", "An extended SQLite database file designed to be lightweight. All elements, such as spatial data, metadata, attribute tables, coordinate reference system, are stored in a single file.", "Vector and raster", "Open"
                          # "WKT/WKB"??
                          )
 knitr::kable(file_formats, caption = "Selected spatial file formats")
@@ -67,8 +67,9 @@ knitr::kable(file_formats, caption = "Selected spatial file formats")
 ## Data Input (I) {#data-input}
 
 To efficiently read data into R, it helps to have an understanding of what happens 'under the hood'.
-Executing commands such as `sf::st_read()` (the main function we use for loading vector data) or `raster::raster()` (the main function used for loading raster data) silently sets off a chain of events that loads objects.
-"Loading" in this context means loading the data into R or, more precisely, assigning objects to your workspace, stored in RAM accessible from the `.GlobalEnv`^[See http://adv-r.had.co.nz/Environments.html for more information on the environment] of your current R session.
+Executing commands such as `sf::st_read()` (the main function we use for loading vector data) or `raster::raster()` (the main function used for loading raster data) silently sets off a chain of events that reads data from files.
+Moreover, there are many R packages containing wide range of spatial data or providing simple access to different data sources.
+All of them load the data into R or, more precisely, assign objects to your workspace, stored in RAM accessible from the `.GlobalEnv`^[See http://adv-r.had.co.nz/Environments.html for more information on the environment] of your current R session.
 
 ### Vector data
 
@@ -172,6 +173,37 @@ multilayer_layer_stack = stack(raster_l1_filepath, raster_l2_filepath)
 ```
 
 The `stack()` class is limited to datasets that have the same spatial extent and resolution.
+
+### Data packages
+
+<!-- Vast amount of spatial data are available on the internet. -->
+<!-- You can access data files using a web browser, however in this book we encourage you to create reproducible workflows. -->
+
+<!-- Some data are shared as files.  -->
+<!-- You can easily access them from R by `download.file()`: -->
+
+<!-- an example -->
+
+Many open spatial datasets can be retrieved using R packages (Table \@ref(tab:datapackages)).
+
+```{r datapackages, echo=FALSE}
+datapackages = tibble::tribble(~`Package name`, ~Function, ~Description,
+                               "osmdata", "", "",
+                               "rnoaa", "", "",
+                               "raster", "", "", 
+                               "rWBclimate", "", ""
+)
+knitr::kable(datapackages, caption = "Selected R packages for spatial data retrieval")
+```
+
+<!-- https://cdn.rawgit.com/Nowosad/Intro_to_spatial_analysis/05676e29/Intro_to_spatial_analysis.html#39 -->
+<!-- Maybe add a section to Data I/O on where and how to retrieve data (with a focus on free data): osmdata (OpenStreetMap; maybe mention TomTom, HERE), rnoaa, raster (worldclim, MODIS, SRTM, ASTER), Landsat (wrspathrow), Sentinel (mention Python API), AVHRR, RapidEye rgbif, letsR, rWBclimate (world bank), etc. Of course, point to Transforming science through open data project (https://www.ropensci.org) -->
+
+<!-- two examples of data packages - how to download spatial data, check its class, and convert?? -->
+
+<!-- Finally, some R packages contains data objects. -->
+<!-- an example -->
+<!-- https://bookdown.org/csgillespie/efficientR/input-output.html#accessing-data-stored-in-packages -->
 
 ## Data output (O) {#data-output}
 
@@ -300,7 +332,9 @@ Full list of the supported file format for writing `Raster*` objects could be fo
 
 ## Visual outputs
 
-<!-- pdf, bmp, jpeg, png, and tiff graphic devices -->
+R support many different static and interactive graphics formats.
+
+The most general method to save a static plot is to open a graphic device, create a plot, and close a graphic device, for example:
 
 ```{r, eval=FALSE}
 png(filename = "lifeExp.png", width = 500, height = 350)
@@ -308,10 +342,12 @@ plot(world["lifeExp"])
 dev.off()
 ```
 
-<!-- Note about that the `plot` function do not create an object -->
-<!-- ```{r} -->
-<!-- a = plot(world["lifeExp"]) -->
-<!-- ``` -->
+Each of the available formats, `pdf()`, `bmp()`, `jpeg()`, `png()`, and `tiff()`, has its own function. 
+You can specify several properties of the output plot, including width and height.
+
+Additionally, several graphic packages provide its own function to save a graphical output.
+For example, the **tmap** package has the `save_tmap()` function.
+You can save a `tmap` object to different graphic formats by specifying the object name and a file path to a new graphic file.
 
 ```{r, eval=FALSE}
 library(tmap)
@@ -320,13 +356,19 @@ tmap_obj = tm_shape(world) +
 save_tmap(tm  = tmap_obj, filename = "lifeExp_tmap.png")
 ```
 
-<!-- Check what's wrong with mapview zcol -->
-<!-- info that PhantomJS could be needed... when creating a png file -->
+<!-- Note about that the `plot` function do not create an object -->
+<!-- ```{r} -->
+<!-- a = plot(world["lifeExp"]) -->
+<!-- ``` -->
+
+On the other hand, an interactive map could be usually saved as an HTML file. 
+This can be done with the `saveWidget()` function from the `htmlwidget` package:
+
 ```{r, eval=FALSE}
 library(mapview)
-mapview_obj = mapview(world, zcol = "lifeExp", legend = TRUE) 
-mapshot(mapview_obj, url = "lifeExp_mapview.html")
-mapshot(mapview_obj, file = "lifeExp_mapview.png")
+library(htmlwidgets)
+mapview_obj = mapview(world, zcol = "lifeExp", legend = TRUE)
+saveWidget(mapview_obj, file="my_interactive_map.html")
 ```
 
 ## Exercises
