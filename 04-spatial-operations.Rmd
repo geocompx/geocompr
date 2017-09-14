@@ -109,7 +109,7 @@ In this case one could justify the use of a lon/lat CRS: the data is close to th
 It is good practice to reproject spatial datasets before performing spatial operations on them.
 ```
 
-The spatial subsetting clearly worked: only countries which intersecting with the giant circle are returned (Figure \@ref(fig:africa-buff)):
+The spatial subsetting clearly worked: only countries intersecting with the giant circle are returned (Figure \@ref(fig:africa-buff)):
 
 ```{r africa-buff, fig.cap="Subset of the `africa` data selected based on their intersection with a circle 20 degrees in radius with a center point at 0 degrees longitude and 0 degrees latitude."}
 plot(africa_buff["pop"])
@@ -296,13 +296,13 @@ Joining two non-spatial datasets relies on a shared 'key' variable, as described
 Spatial data joining applies the same concept, but instead relies on shared areas of geographic space.
 As with attribute data joining adds a new column to the target object (the argument `x` in joining functions) from a source object (`y`).
 
-The process is illustrated in Figure \@ref(fig:spatial-join), which shows a target object (the `world` dataset, left) being joined to a source dataset (the top 10 largest cities of the world), resulting in a new attribute being added to the `world` dataset (right).
+The process is illustrated in Figure \@ref(fig:spatial-join), which shows a target object (the `world` dataset, left) being joined to a source dataset (the three most populous cities of the world), resulting in a new attribute being added to the `world` dataset (right).
 <!-- Idea: use random points over Earth's surface to allocate data to world countries. -->
 
 ```{r}
 urb = urban_agglomerations %>% 
   filter(year == 2020) %>% 
-  top_n(n = 4, wt = population_millions)
+  top_n(n = 3, wt = population_millions)
 asia = world %>% 
   filter(continent == "Asia")
 ```
@@ -325,62 +325,15 @@ par(mfrow = c(1, 1))
 ```
 
 This operation is also know as spatial overlay.
-The default of `st_join()` is to intersect the two layers.
-Of course, you can use any other of the topological operations we have already encountered above such as `st_within()` or or `st_touches()` (please refer also to the help page of `st_join()`.
+`st_join()` performs by default a left join (see chapter \@ref(vector-attribute-joining), but you can change this to an inner join operation.
+Another default of `st_join()` is to intersect the two provided layers.
+Of course, you can use any other topological operations we have already encountered above such as `st_within()` or or `st_touches()` (please refer also to the help page of `st_join()`.
 In the example above, we have added features of a point layer to a polygon layer.
-Of course, we can use other vector classes as well.
-For instance, polygons and lines or lines and points.
-Please note that there might be multiple matches for a polygon. 
-Had we chosen to select the four most populous cities in the world, two of them would belong to China (Shanghai and Beijing).
-In such a case `st_join()` simply adds a new row, i.e., in our example we would end up with two polygons representing China.
-In most cases this is not what you want.
-<!-- finally, refer to left and inner -->
+Please note that there might be multiple point matches for one polygon. 
+Had we chosen to select the four (instead of three) most populous cities in the world, two of them would have belonged to China (Shanghai and Beijing, give it a try yourself).
+In such a case `st_join()` simply adds a new row.
+In our example we would end up with two polygons representing China.
 
-<!-- I would expand it a little bit on spatial joins. Typically, this operation is also known as spatial overlay. Of course, you can also use other geometries (lines), and especially you can not only use st_intersects (another reason why the topological stuff should have been already covered before). Also interesting would be to show what happens if there are multiple matches, e.g., multiple points per polygon. In sp, this was solved using a list containing the IDs of the matched objects while not returning the corresponding attribute table. Overall, a comparison with sp::over would be also interesting -->
-
-
-#### Spatial congruence and areal interpolation
-
-Spatial congruence is an important concept related to spatial aggregation.
-An *aggregating object* object (which we will refer to as `y`, representing the buffer object in the previous section) is *congruent* with the target object (`x`, representing the countries in the previous section) if the two objects have shared borders.
-<!-- this really is very special in the UK, most other European countries have districts and municipalities but there is also the official NUTS classification for EU member states -:); maybe this is a more general classification scheme, see http://ec.europa.eu/eurostat/web/nuts/overview. I learned that when I was at geomarketing.-->
-Often this is the case for administrative boundary data, whereby the larger units (e.g., Middle Layer Super Output Areas in the UK) are composed of many smaller units (Output Areas in this case, see [ons.gov.uk](https://www.ons.gov.uk/methodology/geography/ukgeographies/censusgeography) for further details).
-
-*Incongruent* aggregating objects, by contrast, do not share common borders with the target [@qiu_development_2012].
-This is problematic for spatial aggregation (and other spatial operations) illustrated in Figure \@ref(fig:areal-example).
-Areal interpolation resolves this issue.
-<!-- well, pycnophylactic interpolation has been developed for spatial downscaling, e.g., predicting/interpoling the number of inhabitants at a finer spatial level (municipality) on the basis of inhabitants of a coarser spatial level (districts).-->
-A number of algorithms have been developed for areal interpolation, including area weighted and pycnophylactic interpolation methods task [@tobler_smooth_1979].
-
-```{r areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units.", warning=FALSE, fig.asp=0.4}
-rx = st_as_sf(raster::rasterToPolygons(raster::raster(ncol = 4, nrow = 4)))
-ry = st_as_sf(raster::rasterToPolygons(raster::raster(ncol = 2, nrow = 2)))
-rxo = st_as_sf(st_set_geometry(rx, NULL), geometry = rx$geometry + 15)
-st_crs(rx) = NA
-rx = rbind(rx, rxo)
-set.seed(1985)
-rx$value = rep(runif(nrow(rx) / 2), 2)
-rx$layer = rep(c("Congruent", "Incongruent"), each = nrow(rxo))
-library(tmap)
-qtm(rx, "value") + tm_facets(by = "layer", drop.units = TRUE, ncol = 2) +
-    tm_shape(ry) +
-  tm_borders(lwd = 10) +
-  tm_layout(legend.show = FALSE)
-detach("package:tmap", unload = TRUE)
-```
-
-The simplest useful method for spatial interpolation is *area weighted* spatial interpolation.
-This is implemented in `st_interpolate_aw()`, as demonstrated below:
-<!-- well, what you are doing here is weighting the inhabitants presumably on the basis of the area. The link between your congruent and incongruent example is somehow missing. One gets the impression, that the spatial interpolation takes care of incongruencies which is not the case. So I would suggest to clarify the weighting procedure.-->
-```{r}
-buff_agg_aw = st_interpolate_aw(x = africa["pop"], to = buff, extensive = TRUE)
-```
-
-<!-- - `aggregate.sf()` - aggregate an sf object, possibly union-ing geometries -->
-<!-- - disaggregation?? `st_cast()` - https://github.com/edzer/sfr/wiki/migrating -->
-<!-- - `group_by()` + `summarise()` - potential errors -->
-<!-- - ? generalization **rmapsharper** - https://github.com/ateucher/rmapshaper -->
-<!-- `st_union` -->
 
 #### Non-overlapping joins 
 
@@ -392,21 +345,39 @@ buff_agg_aw = st_interpolate_aw(x = africa["pop"], to = buff, extensive = TRUE)
 <!-- `merge()`; `st_interpolate_aw()` -->
 
 
-### Modifying geometry data - dissolving and clipping
+<!--### Modifying geometry data; still need to change the corresponding cross-references-->
+### Aggregating or dissolving 
+In the subsequent sections, we will present spatial operations that also act on and modify the underlying geometry, namely aggregating (dissolving) and clipping operations.
 
 Like attribute data aggregation, covered in section \@ref(vector-attribute-aggregation), spatial data aggregation (also known as dissolving polygons) can be a way of *condensing* data.
 Aggregated data show some statistic about a variable (typically mean average or total) in relation to some kind of *grouping variable*. 
 For attribute data aggregation the grouping variable is another variable, typically one with few unique values relative to the number of rows.
-The `continent` variable in the `world` dataset is a good example:
-there are only eight unique continents but 177 countries.
-In section \@ref(vector-attribute-aggregation) the aggregation process condensed the `world` dataset down into only eight rows and an aggregated `pop` variable representing the total population per continent (see Figure \@ref(fig:continent-pop)).
-<!-- CAREFUL, in fact, fig:continent-pop has already been a spatial operation (dissolving polygons). You should have shown the table only in the previous section --> 
-Spatial data aggregation is the same conceptually but uses a *spatial* grouping object:
-the *output* is the same, in terms of number of rows/features and geometry, as the *grouping object*, but with new variables corresponding to the input dataset.
-As with spatial subsetting, spatial aggregation operations work by extending existing functions.
-Since mid-2017 (with the release of **sf** `0.5-3`) the base R function `aggregate()` works with a spatial object as a grouping variable.
+The `REGION` variable in the `us_states` dataset is a good example:
+there are only four subregions but 49 states (excluding Hawaii and Alaska).
+In section \@ref(vector-attribute-aggregation) we have already seen how attribute aggregation process condensed the `world` dataset down into only eight rows.
+Spatial data aggregation is the same conceptually but in addition to aggregating the attribute data, it dissolves the underlying polygons.
+Here, we want to aggregate the state population into regions.
+This means that we not only end up with four rows but also with four polygons (out of 49 in the beginning).
+As with spatial subsetting, spatial aggregation operations work by extending existing functions:
 
-Building on the example presented the previous section (\@ref(spatial-subsetting)), we demonstrate this by aggregating the population of countries that intersect with the buffer represented by the circular `buff` object created in the previous section.
+```{r}
+regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
+                    FUN = sum, na.rm = TRUE)
+par(mfrow = c(1, 2))
+plot(us_states[, "total_pop_15"], main = "US states")
+plot(regions[, "total_pop_15"], main = "US regions")
+```
+
+Of course, there is also spatial tidyverse counterpart.
+You can achieve the same with:
+
+```{r, eval = FALSE}
+group_by(us_states, REGION) %>%
+  summarize(sum(pop = total_pop_15, na.rm = TRUE))
+```
+
+<!--Not sure how to elegantly include your circle buffer intersection example -->
+
 
 ```{r}
 buff_agg = aggregate(x = africa[, "pop"], by = buff, FUN = sum)
@@ -458,7 +429,51 @@ Except in cases where the number of target features per aggregating feature is v
 imagine a buffer that covers a large area but contains no centroids.
 These issues can be tackled when aggregating areal target data with areal interpolation.
 
+#### Spatial congruence and areal interpolation
 
+Spatial congruence is an important concept related to spatial aggregation.
+An *aggregating object* object (which we will refer to as `y`, representing the buffer object in the previous section) is *congruent* with the target object (`x`, representing the countries in the previous section) if the two objects have shared borders.
+Often this is the case for administrative boundary data, whereby the larger units (e.g., Middle Layer Super Output Areas in the UK or districts in many other European countries) are composed of many smaller units (Output Areas in this case, see [ons.gov.uk](https://www.ons.gov.uk/methodology/geography/ukgeographies/censusgeography) for further details or municipalities in many other European countries).
+
+*Incongruent* aggregating objects, by contrast, do not share common borders with the target [@qiu_development_2012].
+This is problematic for spatial aggregation (and other spatial operations) illustrated in Figure \@ref(fig:areal-example).
+Areal interpolation can help to alleviate this issue.
+It helps to transfer data from one set of areal units to another.
+A number of algorithms have been developed for areal interpolation, including area weighted and pycnophylactic interpolation methods task [@tobler_smooth_1979].
+
+```{r areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units.", warning=FALSE, fig.asp=0.4}
+rx = st_as_sf(raster::rasterToPolygons(raster::raster(ncol = 4, nrow = 4)))
+ry = st_as_sf(raster::rasterToPolygons(raster::raster(ncol = 2, nrow = 2)))
+rxo = st_as_sf(st_set_geometry(rx, NULL), geometry = rx$geometry + 15)
+st_crs(rx) = NA
+rx = rbind(rx, rxo)
+set.seed(1985)
+rx$value = rep(runif(nrow(rx) / 2), 2)
+rx$layer = rep(c("Congruent", "Incongruent"), each = nrow(rxo))
+library(tmap)
+qtm(rx, "value") + tm_facets(by = "layer", drop.units = TRUE, ncol = 2) +
+    tm_shape(ry) +
+  tm_borders(lwd = 10) +
+  tm_layout(legend.show = FALSE)
+detach("package:tmap", unload = TRUE)
+```
+
+The simplest useful method for spatial interpolation is *area weighted* spatial interpolation.
+This is implemented in `st_interpolate_aw()`, as demonstrated below:
+<!-- well, what you are doing here is weighting the inhabitants presumably on the basis of the area. The link between your congruent and incongruent example is somehow missing. One gets the impression, that the spatial interpolation takes care of incongruencies which is not the case. So I would suggest to clarify the weighting procedure.-->
+```{r}
+buff_agg_aw = st_interpolate_aw(x = africa["pop"], to = buff, extensive = TRUE)
+```
+
+Instead of simply aggregating, this procedure additionally applies a weight, in this case simply the area.
+For instance, if the intersection of our buffer and a country is 100 000 km^^2^^ but the country has 1 mio square kilometers and 1 mio inhabitants, our result will obtain just a tenth of total population, in this case 100 000 inhabitants.
+<!-- - `aggregate.sf()` - aggregate an sf object, possibly union-ing geometries -->
+<!-- - disaggregation?? `st_cast()` - https://github.com/edzer/sfr/wiki/migrating -->
+<!-- - `group_by()` + `summarise()` - potential errors -->
+<!-- - ? generalization **rmapsharper** - https://github.com/ateucher/rmapshaper -->
+<!-- `st_union` -->
+
+### Clipping
 Spatial clipping is a form of spatial subsetting that involves changes to the `geometry` columns of at least some of the affected features.
 
 Clipping can only apply to features more complex than points: 
