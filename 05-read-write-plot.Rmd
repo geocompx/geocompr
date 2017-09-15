@@ -186,6 +186,7 @@ Traditionally, is has been distributed on servers as files.
 You can easily access data files from R by `download.file()`<!--, for example ... :-->
 
 Many open spatial datasets can be retrieved using R packages (Table \@ref(tab:datapackages)).
+These packages either store small datasets or provide an access to dataset available on webservers.
 
 ```{r datapackages, echo=FALSE}
 datapackages = tibble::tribble(~`Package name`, ~Description,
@@ -197,9 +198,6 @@ datapackages = tibble::tribble(~`Package name`, ~Description,
 )
 knitr::kable(datapackages, caption = "Selected R packages for spatial data retrieval")
 ```
-
-
-
 <!-- https://cdn.rawgit.com/Nowosad/Intro_to_spatial_analysis/05676e29/Intro_to_spatial_analysis.html#39 -->
 <!-- Maybe add a section to Data I/O on where and how to retrieve data (with a focus on free data): osmdata (OpenStreetMap; maybe mention TomTom, HERE), Landsat (wrspathrow), Sentinel (mention Python API), AVHRR, RapidEye rgbif, letsR, etc. Of course, point to Transforming science through open data project (https://www.ropensci.org) -->
 <!-- https://github.com/ropensci/GSODR -->
@@ -207,11 +205,34 @@ knitr::kable(datapackages, caption = "Selected R packages for spatial data retri
 <!-- https://github.com/walkerke/tigris -->
 <!-- https://github.com/ropensci/hddtools/ -->
 
-<!-- two examples of data packages - how to download spatial data, check its class, and convert?? -->
+<!-- vector example -->
+```{r}
+library(rnaturalearth)
+# United States
+usa = ne_countries(country = "United States of America")
+class(usa)
+```
 
-<!-- Finally, some R packages contains data objects. -->
-<!-- an example -->
-<!-- https://bookdown.org/csgillespie/efficientR/input-output.html#accessing-data-stored-in-packages -->
+```{r}
+usa_sf = st_as_sf(usa)
+```
+
+<!-- raster example -->
+```{r}
+library(raster)
+worldclim_prec = getData(name = "worldclim", var = "prec", res = 10)
+class(worldclim_prec)
+```
+
+Finally, many R packages contain example data as R objects or in a raw form.
+Data in native R format could be accessed with the `data()` function.
+For example, you can get a list of dataset in a package, `data(package = "spData")`, or load a dataset by specifing the name of a dataset, `data("cycle_hire", package = "spData")`.
+To access a single raw file from the package, you need to specify the package name and the relative path to the dataset, for example:
+
+```{r}
+world_raw_filepath = system.file("shapes/world.gpkg", package = "spData")
+world_raw = st_read(world_raw_filepath)
+```
 
 More information on getting data using R packages could be found in [section 5.5](https://csgillespie.github.io/efficientR/input-output.html#download) and [section 5.6](https://csgillespie.github.io/efficientR/input-output.html#accessing-data-stored-in-packages) of @gillespie_efficient_2016.
 
