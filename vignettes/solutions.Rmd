@@ -231,4 +231,65 @@ pairs(s)
 
 # Chapter 4
 
+4. Use `data(dem, package = "RQGIS")`, and reclassify the elevation in three classes: low, middle and high.
+Secondly, compute the NDVI (`data(ndvi, package = "RQGIS")`) and the mean elevation for each altitudinal class.
+```{r}
+library(classInt)
+data(dem, package = "RQGIS")
+summary(dem)
+# find quantile breaks
+brk = classIntervals(values(dem), n = 3)$brk
+# also try
+# breask = classIntervals(values(dem), n = 3, style = "fisher")
+# construct reclassification matrix
+rcl = matrix(c(brk[1] - 1, brk[2], 1, brk[2], brk[3], 2, brk[3], brk[4], 3), 
+             ncol = 3, byrow = TRUE)
+# reclassify altitudinal raster
+recl = reclassify(dem, rcl = rcl)
+# compute the mean dem and ndvi values for each class
+zonal(stack(dem, ndvi), recl, fun = "mean")
+```
+
+5. Apply a line detection filter to `data(dem, package = "RQGIS")`.
+```{r}
+# from the focal help page:
+# Laplacian filter: filter=matrix(c(0,1,0,1,-4,1,0,1,0), nrow=3)
+# Sobel filter: filter=matrix(c(1,2,1,0,0,0,-1,-2,-1) / 4, nrow=3)
+# compute the Sobel filter
+# check if there are NAs
+is.na(dem)  # just 0s, so no NAs
+sobel = focal(dem, w = matrix(c(1, 2, 1, 0, 0, 0, -1, -2, -1) / 4, nrow = 3))
+# CHECK IF THIS IS CORRECT
+```
+
+6. Calculate the NDVI of a Landsat image. 
+Use the Landsat image provided by the **spDataLarge** package (`system.file("raster/landsat.tif", package="spDataLarge")`).
+```{r}
+file = system.file("raster/landsat.tif", package="spDataLarge")
+r = stack(file)
+# compute NDVI manually
+ndvi = (r[["landsat.4"]] - r[["landsat.3"]]) / (r[["landsat.4"]] + r[["landsat.3"]])
+# compute NDVI with the help of RStoolbox
+library(RStoolbox)
+ndvi_rstoolbox = spectralIndices(r, red = 3, nir = 4, indices = "NDVI")
+all.equal(ndvi, ndvi_rstoolbox)
+```
+
+7. This [post](https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances) shows how to use `raster::distance()`.
+Extract Spain, calculate a distance raster and weight it with elevation.
+Finally, compute the difference between the raster using the euclidean distance and the raster weighted by elevation.
+(Hint: Have a look at `getData()` to retrieve a digital elevation model for Spain.)
+```{r}
+dplyr::filter(ccodes(), NAME %in% "Spain")
+dem = getData("alt", country = "ESP", mask = TRUE)
+poly = getData("GADM", country = "ESP", level = 1)
+
+data(dem, package = "RQGIS")
+poly = st_read("D:/uni/fsu/teaching/misc/geostats_rqgis/data/mask.shp")
+poly = as(poly, "Spatial")
+dem = mask(dem, poly)
+dist = raster::distance(x = dem, poly)
+
+```
+
 # Chapter 5
