@@ -293,3 +293,152 @@ dist = raster::distance(x = dem, poly)
 ```
 
 # Chapter 5
+
+# Chapter R-GIS bridges
+
+1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see chapter \@ref(spatial-class)). 
+Calculate the intersection using:
+
+- **RQGIS**, **RSAGA** and **rgrass7**
+- **sf**
+
+```{r}
+library(sf)
+library(RQGIS)
+# create two polygons
+coords_1 =  
+  matrix(data = c(0, 0, 1, 0, 1, 1, 0, 1, 0, 0),
+         ncol = 2, byrow = TRUE)
+coords_2 =
+  matrix(data = c(-0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 
+                  -0.5, 0.5, -0.5, -0.5),
+         ncol = 2, byrow = TRUE)
+
+# create the first polygon
+poly_1 = st_polygon(list((coords_1))) 
+# convert it into a simple feature collection 
+poly_1 = st_sfc(poly_1)
+poly_1 = st_sfc(poly_1, crs = 4326)
+# finally, convert it into an sf-object
+poly_1 = st_sf(geometry = poly_1, data = data.frame(id = 1))
+
+# create a second polygon
+poly_2 = st_polygon(list((coords_2))) %>%
+  st_sfc(., crs = 4326) %>%
+  st_sf(geometry = ., data = data.frame(id = 1))
+# visualize it
+plot(st_geometry(poly_1), xlim = c(-1, 1), ylim = c(-1, 1))
+plot(st_geometry(poly_2), add = TRUE)
+
+# INTERSECTION USING RQGIS
+#***************************
+# first of all, we need to find out which function might do this for us
+find_algorithms("intersec")
+open_help("qgis:intersection")
+get_usage("qgis:intersection")
+# using R named arguments#
+int_qgis = run_qgis("qgis:intersection", INPUT = poly_1, INPUT2 = poly_2,
+                    OUTPUT = "int_qgis.shp", load_output = TRUE)
+# visualize it
+plot(st_geometry(poly_1), xlim = c(-1, 1), ylim = c(-1, 1))
+plot(st_geometry(poly_2), add = TRUE)
+plot(int_qgis, col = "lightblue", add = TRUE)
+
+
+# INTERSECTION USING RSAGA
+#***************************
+# The RSAGA examples only work with SAGA < 2.3. We have informed the
+# package maintainer to update SAGA
+library(RSAGA)
+library(link2GI)
+linkSAGA()
+rsaga.env()
+# save shapefile layers
+write_sf(poly_1, file.path(tempdir(), "poly_1.shp"))
+write_sf(poly_2, file.path(tempdir(), "poly_2.shp"))
+# find out how to union shapefiles with the help of SAGA
+rsaga.get.modules(lib = "shapes_polygons")
+rsaga.get.usage(lib = "shapes_polygons", module = "Intersect")
+# create parameter-argument list for RSAGA
+params = list(A = file.path(tempdir(), "poly_1.shp"),
+              B = file.path(tempdir(), "poly_2.shp"),
+              RESULT = file.path(tempdir(), "int_saga.shp"))
+rsaga.geoprocessor(lib = "shapes_polygons", module = "Intersect", 
+                   param = params)
+int_saga = st_read(file.path(tempdir(), "int_saga.shp"))
+# visualize it
+plot(st_geometry(poly_1), xlim = c(-1, 1), ylim = c(-1, 1))
+plot(st_geometry(poly_2), add = TRUE)
+plot(st_geometry(int_saga), col = "lightblue", add = TRUE)
+
+# INTERSECTION USING rgrass7
+#***************************
+library(link2GI)
+library(rgrass7)
+link2GI::linkGRASS7(rbind(poly_1, poly_2), ver_select = TRUE)
+# let's have a look at the help of v.overlay via rgrass7
+execGRASS("g.manual", entry = "v.overlay")
+# RQGIS::open_help("grass7:v.overlay")
+writeVECT(as(poly_1, "Spatial"), vname = "poly_1")
+writeVECT(as(poly_2, "Spatial"), vname = "poly_2")
+execGRASS("v.overlay", ainput = "poly_1", binput = "poly_2",
+          output = "int_grass", operator = "and", flag = "overwrite")
+out_grass <- readVECT("int_grass")
+plot(st_geometry(poly_1), xlim = c(-1, 1), ylim = c(-1, 1))
+plot(st_geometry(poly_2), add = TRUE)
+plot(int_grass, add = TRUE, col = "lightblue")
+
+# INTERSECTION USING sf
+#***************************
+
+int_sf = st_intersection(poly_1, poly_2)
+plot(st_geometry(poly_1), xlim = c(-1, 1), ylim = c(-1, 1))
+plot(st_geometry(poly_2), add = TRUE)
+plot(int_sf, add = TRUE, col = "lightblue")
+```
+
+2. Run `data(dem, package = "RQGIS")` and `data(random_points, package = "RQGIS")`.
+Select randomly a point from `random_points` and find all `dem` pixels that can be seen from this point (hint: viewshed).
+Visualize your result.
+For example, plot a hillshade, and on top of it the digital elevation model, your viewshed output and the point.
+Additionally, give `mapview` a try.
+
+```{r}
+library(RQGIS)
+data(dem, package = "RQGIS")
+data(random_points, package = "RQGIS")
+
+find_algorithms("viewshed")
+alg = "grass7:r.viewshed"
+get_usage(alg)
+open_help(alg)
+# let's find out about the default values
+get_args_man(alg)
+point = random_points[sample(1:nrow(random_points), 1), ]
+coord = paste(sf::st_coordinates(point), collapse = ",")
+out = run_qgis(alg, input = dem, coordinates = coord,
+               output = "out.tif", load_output = TRUE)
+
+# under Linux you might not get an output (I think we should file a bug...)
+# CHECK!!!!!!!!!!!!!!!!
+# using rgrass7
+library("rgrass7")
+link2GI::linkGRASS7(dem, ver_select = TRUE)
+writeRAST(as(dem, "SpatialGridDataFrame"), "dem")
+writeVECT(as(random_points, "Spatial"), vname = "points")
+execGRASS("r.viewshed", input = "dem", coordinates = sf::st_coordinates(point),
+          output = "view")
+out = raster(readRAST("view"))
+
+hs = hillShade(terrain(dem), terrain(dem, "aspect"), 40, 270)
+plot(hs, col = gray(0:100 / 100), legend = FALSE)
+plot(dem, add = TRUE, alpha = 0.5, legend = FALSE)
+plot(point, add = TRUE, col = "red", pch = 16)
+plot(out, add = TRUE, col = "lightgray", legend = FALSE)
+plot(point, add = TRUE, col = "red", pch = 16)
+
+# or using mapview
+library(mapview)
+mapview(out, col = "white", map.type = "Esri.WorldImagery") +
+  mapview(point)
+```
