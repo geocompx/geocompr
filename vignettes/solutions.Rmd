@@ -17,6 +17,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(sf)
 library(tidyverse)
 library(spData)
+library(raster)
 data("world")
 data("us_states")
 data("us_states_df")
@@ -187,6 +188,45 @@ us_states %>%
   filter(mean_income_change == max(mean_income_change)) %>%
   pull(REGION) %>%
   as.character()
+```
+
+14. Create a raster from scratch with nine rows and columns and a resolution of 0.5 decimal degrees (WGS84).
+Fill it with random numbers.
+Extract the values of the four corner cells. 
+```{r}
+library(raster)
+r = raster(nrow = 9, ncol = 9, res = 0.5, xmn = 0, xmx = 4.5,
+           ymn = 0, ymx = 4.5, vals = rnorm(81))
+# using cell IDs
+r[c(1, 9, 81 - 9, 81)]
+# using indexing
+r[c(1, nrow(r)), c(1, ncol(r))]
+# corresponds to [1, 1], [1, 9], [9, 1], [9, 9]
+```
+15. What is the most common class of our example raster `grain` (hint: `modal()`)?
+```{r}
+grain_size = c("clay", "silt", "sand")
+grain = raster(nrow = 6, ncol = 6, res = 0.5, 
+               xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+               vals = factor(sample(grain_size, 36, replace = TRUE), 
+                             levels = grain_size))
+cellStats(grain, modal) %>%
+  factorValues(grain, .)
+factorValues(grain, modal(values(grain)))
+```
+16. Plot the histogram and the boxplot of the `data(dem, package = "RQGIS")` raster. 
+```{r}
+data(dem, package = "RQGIS")
+par(mfrow = c(1, 2))
+hist(dem)
+boxplot(dem)
+```
+17. Now attach also `data(ndvi, package = "RQGIS")`. 
+Create a raster stack using `dem` and `ndvi`, and make a `pairs()` plot
+```{r}
+data(ndvi, package = "RQGIS")
+s = stack(dem, ndvi)
+pairs(s)
 ```
 
 # Chapter 4
