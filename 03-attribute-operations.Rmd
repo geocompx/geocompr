@@ -269,23 +269,28 @@ Imagine we would like to calculate the number of people per continent.
 Fortunately, our `world` dataset has the necessary ingredients, with the `pop` column containing the population per country and the grouping variable `continent`.
 In base R this can be done with `aggregate()` as follows:
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 aggregate(pop ~ continent, FUN = sum, data = world, na.rm = TRUE)
 ```
 
 The result is a non-spatial data frame with eight rows, one per continent, and two columns (see Table \@ref(tab:continents) with results for the top 3 most populous continents).
 
-`summarize()` is the **dplyr** equivalent of `aggregate()`.
-To specify groups, you will need also the `group_by()` command. 
-So obtaining the exact same result as above, you need to type `group_by(world, continent) %>% summarize(pop = sum(pop, na.rm = TRUE))`.
-If we leave the grouping variable unspecified, we simply retrieve the total, in our case the number of people living on Earth:
+`summarize()` is the **dplyr** equivalent of `aggregate()`, which uses the function `group_by()` to create the grouping variable.
+The tidy equivalent of the `aggregate()` method is as follows:
+
+```{r, eval=FALSE}
+group_by(world, continent) %>%
+  summarize(pop = sum(pop, na.rm = TRUE))
+```
+
+The result is a spatial data frame of class `sf`: the aggregation procedure dissolved boundaries within continental land masses.
+This approach is flexible, allowing the resulting columns to be named.
+Further, omitting the grouping variable puts everything on in one group, meaning the following command calculates Earth's total population (~7 billion) and number of countries:
 
 ```{r}
-# customized data summary
 world %>% 
   st_set_geometry(NULL) %>%
   summarize(pop = sum(pop, na.rm = TRUE), n_countries = n())
-# A total population > 7 billion
 ```
 
 The new object, `world_summary`, is an aggregation of all 177 world's countries.
