@@ -280,16 +280,38 @@ Extract Spain, calculate a distance raster and weight it with elevation.
 Finally, compute the difference between the raster using the euclidean distance and the raster weighted by elevation.
 (Hint: Have a look at `getData()` to retrieve a digital elevation model for Spain.)
 ```{r}
+library(raster)
+# find out the ISO_3 code of Spain
 dplyr::filter(ccodes(), NAME %in% "Spain")
-dem = getData("alt", country = "ESP", mask = TRUE)
+# retrieve a dem of Spain
+dem = getData("alt", country = "ESP", mask = FALSE)
+# change the resolution to decrease computing time
+agg = aggregate(dem, fact = 5)
 poly = getData("GADM", country = "ESP", level = 1)
-
-data(dem, package = "RQGIS")
-poly = st_read("D:/uni/fsu/teaching/misc/geostats_rqgis/data/mask.shp")
-poly = as(poly, "Spatial")
-dem = mask(dem, poly)
-dist = raster::distance(x = dem, poly)
-
+plot(dem)
+plot(poly, add = TRUE)
+# visualize NAs
+plot(is.na(agg))
+# construct a distance input raster
+# we have to set the land cells to NA and the sea cells to an arbitrary value since 
+# raster::distance computes the distance to the nearest non-NA cell
+dist = is.na(agg)
+cellStats(dist, summary)
+# convert land cells into NAs and sea cells into 1s
+dist[dist == FALSE] = NA
+dist[dist == TRUE] = 1
+plot(dist)
+# compute distance to nearest non-NA cell
+dist = raster::distance(dist)
+# just keep Spain
+dist = mask(dist, poly)
+# convert distance into km
+dist = dist / 1000
+# now let's weight each 100 altitudinal meters by an additionaly distance of 10 km
+agg = mask(agg, poly)
+agg[agg < 0] = 0
+weight = dist + agg / 100 * 10
+plot(weight - dist)
 ```
 
 # Chapter 5
