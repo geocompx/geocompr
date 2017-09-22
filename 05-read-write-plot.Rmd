@@ -1,209 +1,77 @@
 # Geographic data I/O {#read-write}
 
+## Prerequisites {-}
+
+- This chapter requires the packages **tidyverse**, **sf**, **spData** and **raster**. 
+
+```{r, message=FALSE}
+library(tidyverse)
+library(sf)
+library(spData)
+library(raster)
+```
+
+## Introduction
+
 The previous chapters provided an overview of spatial data classes in R, with a focus on simple features and rasters.
 This chapter is about getting spatial data onto your computer and then, perhaps after processing it with techniques described in this book, back out to the world.
-Geocomputation usually involves reading existing data, and saving it after processing sections.
-Therefore, it is important be aware of the most often used spatial file format and their strong and weak sides (see section \@ref(file-formats)).
+Before we can even think about processing data, we need to retrieve it, i.e. we need to know which sources are at our disposal (section \@{#retrieving-data}).
+Having data, we need to know how we can import them in our software.
+<!-- so far, I haven't seen a discussion on the pros and cons -->
+Therefore, it is important to be aware of the most often used spatial file formats and their pros and cons (see section \@ref(file-formats)).
 For the same purposes knowing how to efficiently read and write spatial data is crucial (see sections \@ref(data-input) and \@ref(data-output)).
 We also include a section (\@ref(visual-outputs)) on visualization because outputting data in a human (not just computer) readable format enables non-programmers to benefit from your work.
-If your aim is to use geocomputation to improve the world, e.g. by encouraging evidence-based policies, this final stage is vital.
 
 I/O is short for "input/output" which means, in plain English, "reading and writing data".
-We use the acronym instead of plain English not to confuse you or to make chapter names short, but because that's the term used in computer science and it is useful to think of data import and export from a computing perspective.^[
+We use the acronym instead of plain English not to confuse you or to make chapter names short, but because that is the term used in computer science, and it is useful to think of data import and export from a computing perspective.^[
 Concepts such as computational efficiency, hard disk space and 'idempotence' are useful when thinking about reading and writing geographic datasets, which can become large and difficult to handle.
 Loading/saving data is yet another way of saying the same thing.
 ]
 
-## File formats
-
-Spatial data is usually stored as files or geodatabases. 
-File-based data formats could keep either vector or raster data, while geodatabases could store both.
-Historically, GIS file formats were developed by mapping agencies and software companies. <!--examples-->
-It caused many issues with exchange of data between different sources.
-
-The big improvement came with the release of GDAL. <!--name and pronunciation-->
-It has enabled for reading and writing many raster and vector data formats and in the next few years was incorporated into many open and proprietary GIS software, such as GRASS GIS, QGIS, ArcGIS, and ENVI.
-<!-- GDAL (it's great - you can read, convert, and very often (though not always) write) -->
-<!-- GDAL info "it is possible to have smaller number of supported formats than there are on the GDAL webpage; you may need to recompile..." -->
-
-Another change for spatial data formats came with the foundation of Open Geospatial Consortium (OGC)^[http://www.opengeospatial.org].
-This organization collaborate on a development and implementation of open standards for geospatial content including file formats.
-Some of theirs products are the KML and GeoPackage formats, as well as the Simple Feature standard. 
-Development and maintaining of spatial file formats in an open model provides several benefits over the proprietary formats and eases interoperability.
-
-Nowadays, more than a hundred of spatial data formats exist, many of which could be used for the same purposes. 
-<!-- In the same time, they could differ in many ways. -->
-<!-- Spatial data could be stored as a single file (e.g. GeoPackage), multiple files (e.g. ESRI Shapefile), or folders (ESRI ArcInfo Coverages). -->
-<!-- way of storage (single file, multiple files, folders) -->
-Table \@ref(tab:formats) presents some basic information about selected, often used spatial file formats.
-
-
-```{r formats, echo=FALSE}
-file_formats = tibble::tribble(~Name, ~Extension, ~Info, ~Type, ~Model, 
-                         "ESRI Shapefile", ".shp (the main file)", "One of the most popular vector file format. Consists of at least three files. The main files size cannot exceed 2 GB. It lacks support for mixed type. Columns names are limited to 10 characters, and number of columns are limited at 255. It has poor support for Unicode standard. ", "Vector", "Partially open",
-                         "GeoJSON", ".geojson", "Format designed for representation of simple features. It is often used for a web applications.", "Vector", "Open",
-                         "KML", ".kml", "XML-based format for spatial visualization, developed for use with Google Earth. Zipped KML file forms the KMZ format.", "Vector", "Open",
-                         "GPX", ".gpx", "XML schema created for exchange of GPS data.", "Vector", "Open",
-                         "GeoTIFF", ".tiff", "GeoTIFF is one of the most popular raster formats. Its structure is similar to the regular `.tif` format, however GeoTIFF also stores additional spatial metadata, such as coordinate reference system, spatial extent, `NoData` value, and the data resolution.", "Raster", "Open",
-                         "Arc ASCII", ".asc", "Text format where the first six lines represent grid information and nodata value, followed by the values arranged in rows and columns.", "Raster", "Open",
-                         # "JPEG??"
-                         "R-raster", ".gri, .grd", "Native format of the raster package.", "Raster", "Open",
-                         # "NCDF??"
-                         # "HDF??"
-                         "SQLite/SpatiaLite", ".sqlite", "SQLite is a standalone, relational database management system. It is used as a default database driver in GRASS GIS 7. SpatiaLite is an extension to SQLite providing a support for Simple Features.", "Vector and raster", "Open",
-                         # "WKT/WKB??",
-                         "ESRI FileGDB", ".gdb", "Collection of spatial and nonspatial objects created in the ArcGIS software. It allows to store multiple feature classes and enables use of topological definitions. Limited access to this format is provided by GDAL with the use of the OpenFileGDB and FileGDB drivers.", "Vector and raster", "Proprietary",
-                         "GeoPackage", ".gpkg", "An extended SQLite database file designed to be lightweight. All elements, such as spatial data, metadata, attribute tables, coordinate reference system, are stored in a single file.", "Vector and raster", "Open"
-                         # "WKT/WKB"??
-                         )
-knitr::kable(file_formats, caption = "Selected spatial file formats")
-```
-
-<!-- 3. JPEG - (possibly mention SAGA's sdat, Erdas Imagine) -->
-<!-- 1. SQLite/SpatialLite + mention GRASS (uses SQLite) -->
-<!-- 3. WKT/WKB for transfering and storing geometry data on databases. PostGIS (has even its own raster WKT (https://trac.osgeo.org/postgis/wiki/WKTRasterTutorial01); WKT also supported by Spatiallite, Oracle, MySQL, etc. (https://en.wikipedia.org/wiki/Well-known_text#RDBMS_Engines_that_provide_support) -->
-<!-- 4. ESRI geodatabase, Oracle spatial database (mention + gdal support?) -->
-
-## Data Input (I) {#data-input}
-
-To efficiently read data into R, it helps to have an understanding of what happens 'under the hood'.
-Executing commands such as `sf::st_read()` (the main function we use for loading vector data) or `raster::raster()` (the main function used for loading raster data) silently sets off a chain of events that reads data from files.
-Moreover, there are many R packages containing wide range of spatial data or providing simple access to different data sources.
-All of them load the data into R or, more precisely, assign objects to your workspace, stored in RAM accessible from the `.GlobalEnv`^[See http://adv-r.had.co.nz/Environments.html for more information on the environment] of your current R session.
-
-### Vector data
-
-Spatial vector data comes in a wide variety of file formats, most of which can be read-in via the **sf** function `st_read()`.
-Behind the scenes this calls GDAL.
-<!-- One of the major advantages of **sf** is that it is fast. -->
-<!-- reference to the vignette -->
-The first argument of `st_read()` is `dsn`, which should be a text string or an object containing a single text string.
-The content of a text string could vary between different drivers.
-In most cases, as with `.shp` file of `ESRI Shapefile` or `.gpkg` files of `GeoPackage` formats, the `dsn` would be a file name.
-`st_read()` guesses the driver based on the file extension, as illustrated for a `.gpkg` file below:
-
-```{r}
-library(sf)
-vector_filepath = system.file("shapes/world.gpkg", package = "spData")
-world = st_read(vector_filepath)
-```
-
-For some drivers, `dsn` could be provided as a folder name, access credentials for a database, or a GeoJSON string representation.
-<!-- Do we have a place for the examples? -->
-
-Some of vector driver formats could store many layers of data. 
-`st_read` automatically read the first layer of the file specified in `dsn`, however it is also possible to select a different layer by its name using the `layer` argument.
-
-Many GDAL drivers have unique open options[^1]. 
-For example, spatial data in text files could be stored in several ways.
-Simple point dataset could just have two columns describing their x and y coordinates. 
-To read these files, you need to specify names of those columns using the `options` argument:
-
-```{r, results='hide'}
-cycle_hire_txt = system.file("misc/cycle_hire_xy.csv", package = "spData")
-cycle_hire_xy = st_read(cycle_hire_txt, options = c("X_POSSIBLE_NAMES=X",
-                                                    "Y_POSSIBLE_NAMES=Y"))
-```
-
-More complex geometries cannot be described using only two numbers, however they could be represented by the well-known text (WKT), well-known binary (WKB), and in the GeoJSON form, for example:
-
-```{r, results='hide'}
-world_txt = system.file("misc/world_wkt.csv", package = "spData")
-world_wkt = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT")
-```
-
-```{block2 type='rmdnote'}
-Not all of the supported vector file formats store information about theirs coordinate reference system.
-In these situations, it is possible to add the missing information using the `st_set_crs()` function.
-More on that in section \@ref(crs-intro).
-```
-
-<!-- isn't that confusing for users? -->
-**Tip**: `read_sf()` and `write_sf()` can be used as easy-to-remember alternatives to `st_read()` and `st_write()`.
-Remember they hide information about the data source and overwrite existing data, though.
-
-To find out which data formats **sf** supports, run `st_drivers()`. 
-Here, we show only the first two drivers (see Table \@ref(tab:drivers)):
-
-```{r, eval=FALSE}
-sf_drivers = st_drivers()
-head(sf_drivers, n = 5)
-```
-
-```{r drivers, echo=FALSE}
-sf_drivers = st_drivers() %>% dplyr::filter(name %in% c("ESRI Shapefile", "GeoJSON", "KML", "GPX", "GPKG"))
-knitr::kable(head(sf_drivers, n = 5), caption = "Sample of available drivers for reading/writing vector data (it could vary between different GDAL versions).")
-```
-
-### Raster data
-
-Raster data also could exist in many different file formats, with some of the formats supporting multilayer files.
-The **raster** package allow reading a single layer by `raster()` and many layers using either `brick()` or `stack()`. 
-More information about the raster representation in this package could be find in the section \@ref(raster-classes).
-
-The `raster()` function makes it possible to read a single layer file.
-
-```{r, message=FALSE}
-library(raster)
-library(spDataLarge)
-raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
-single_layer = raster(raster_filepath)
-```
-
-You can also read just one layer (band) from a multilayer file by specifying the `band` argument.
-
-```{r}
-raster_multilayer_filepath = system.file("raster/landsat.tif", package = "spDataLarge")
-single_layer_band3 = raster(raster_multilayer_filepath, band = 3)
-```
-
-The whole multilayer raster file is read by `brick()`.
-
-```{r}
-multilayer_layer_brick = brick(raster_multilayer_filepath)
-```
-
-Finally, many single and multilayer rasters could be read together using the `stack()` function:
-
-```{r}
-raster_l1_filepath = system.file("raster/landsat_b2.tif", package = "spDataLarge")
-raster_l2_filepath = system.file("raster/landsat_b3.tif", package = "spDataLarge")
- 
-multilayer_layer_stack = stack(raster_l1_filepath, raster_l2_filepath)
-```
-
-The `stack()` class is limited to datasets that have the same spatial extent and resolution.
-
-### Data packages
+## Retrieving open data {#retrieving-data}
 
 Nowadays, a vast amount of spatial data is available on the internet.
-This data could be accessed using a graphical user interface (GUI) via web browser.
-However, in this book we encourage you to create reproducible workflows.
-Data download in many cases could be automated, which not only save a time, but also allow to repeat and update this process in the future. 
+Best of all, much of it is freely available.
+You just have to know where to look.
+While we cannot provide a comprehensive guide to all available geodata, we point to a few of the most important sources.
+Overall, geolibraries and geoportals facilitate the search and download of geodata.
+Geolibraries are a very useful data source but often only contain data for a specific locations.
+Then the might struggle to find the exact geolibrary matching his or her demands.
+Here, geolibraries come to the rescue bundling the information of a collection of geolibraries.
+If you are looking for data from all over the world, the [GEOSS portal](http://www.geoportal.org/) might be a good starting point.
+We also would like you to point to the [EarthExplorer](https://earthexplorer.usgs.gov/) and the [Copernicus Open Access Hub](https://scihub.copernicus.eu/) for a wide variety of global datasets including multispectral and radar images.
+European data is available from the Initiative for spatial information in the European Comunity ([INSPIRE][http://inspire-geoportal.ec.europa.eu/)).
+This [Wikipedia article](https://en.wikipedia.org/wiki/Geoportal) lists a few more interesting geoportals.
 
-Data could be stored online in many ways. 
-Traditionally, is has been distributed on servers as files.
+Typically, geoportals provide an interface that lets you query interactively the existing data (spatial and temporal extent, and product).
+However, in this book we encourage you to create reproducible workflows.
+Automated data downloads are often possible through simple download calls or specific APIs (e.g., have a look at the Sentinel API), which saves human working time, and allows to easily repeat and update this process in the future. 
+
+Traditionally, files have been stored on servers.
 <!-- that's probably not the best example - replace it with something better -->
 <!-- btw naturalearth website has some problems today - the link will probably change in the future -->
-You can easily access data files from R by `download.file()`, for example National Park Service units in the United States:
+You can easily download such files with the `download.file()` command.
+For example, to download National Park Service units in the United States, run:
 
 ```{r, eval=FALSE}
-download.file(url = "http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_parks_and_protected_lands.zip",
+url = file.path("http://www.naturalearthdata.com/http//www.naturalearthdata.com",
+                "download/10m/cultural/ne_10m_parks_and_protected_lands.zip")
+download.file(url = url,
               destfile = "USA_parks.zip")
 unzip(zipfile = "USA_parks.zip")
 usa_parks = st_read("ne_10m_parks_and_protected_lands_area.shp")
 ```
 
-Many open spatial datasets can be retrieved using R packages (Table \@ref(tab:datapackages)).
-These packages either store small datasets or provide an access to dataset available on webservers.
+Specific R packages providing an interface to geolibraries or geoportals are even more user-friendly (Table \@ref(tab:datapackages)).
 
+<!-- add sentinel2 package as soon as it is published on CRAN https://github.com/IVFL-BOKU/sentinel2-->
 ```{r datapackages, echo=FALSE}
 datapackages = tibble::tribble(~`Package name`, ~Description,
-                               "osmdata", "An access to the OpenStreetMap data.",
+                               "osmdata", "Download and import of OpenStreetMap data.",
+                               "raster", "The `getData()` function downloads and imports administrative country, SRTM/ASTER elevation, WorldClim data.",
                                "rnaturalearth", "Functions to download Natural Earth vector and raster data, including world country borders.",
-                               "rnoaa", "An R interface to many National Oceanic and Atmospheric Administration (NOAA) data sources, such as climate data, sea ice data, and storm data.",
-                               "raster", "The `get_data()` function provides for example elevation data from SRTM and interpolated climate data from WorldClim.", 
-                               "rWBclimate", "An access to the World Bank climate data used in the World Bank climate knowledge portal."
+                               "rnoaa", "An R interface to National Oceanic and Atmospheric Administration (NOAA) climate data.",
+                                "rWBclimate", "An access to the World Bank climate data."
 )
 knitr::kable(datapackages, caption = "Selected R packages for spatial data retrieval")
 ```
@@ -215,23 +83,26 @@ knitr::kable(datapackages, caption = "Selected R packages for spatial data retri
 <!-- https://github.com/walkerke/tigris -->
 <!-- https://github.com/ropensci/hddtools/ -->
 
-For example, you can get borders of any country with the `ne_countries()` function from the **rnaturalearth** package:
+For example, you can get the borders of any country with the `ne_countries()` function from the **rnaturalearth** package:
 ```{r}
 library(rnaturalearth)
 usa = ne_countries(country = "United States of America") # United States borders
 class(usa)
+# you can do the same with raster::getData()
+# getData("GADM", country = "USA", level = 0)
 ```
 
-As a default, this and many other packages output data in the `Spatial*` class. 
+As a default, **rnaturalearth** returns the output as a `Spatial*` class. 
 You can easily convert it to the `sf` class with `st_as_sf()`:
 
 ```{r}
 usa_sf = st_as_sf(usa)
 ```
 
-It is also possible to get a raster data, for example using `getData()`.
-The code below download a series of rasters that contain global monthly precipitation sums in a ten minutes spatial resolution.
-As a result, the new object is a multilayer object of the `RasterStack` class.
+As a second example, we will download a raster dataset.
+The code below downloads a series of rasters that contains global monthly precipitation sums.
+The spatial resoultion is ten minutes.
+The result is a multilayer object of class `RasterStack`.
 
 ```{r}
 library(raster)
@@ -239,20 +110,176 @@ worldclim_prec = getData(name = "worldclim", var = "prec", res = 10)
 class(worldclim_prec)
 ```
 
-Finally, many R packages contain example data as R objects or in a raw form.
-Data in native R format could be accessed with the `data()` function.
-For example, you can get a list of dataset in a package, `data(package = "spData")`, or load a dataset by specifying the name of a dataset, `data("cycle_hire", package = "spData")`.
-To access a single raw file from the package, you need to specify the package name and the relative path to the dataset, for example:
+Finally, R packages might contain or just consist of spatial data (e.g., package **spData**).
+You can access such data with the `data()` function.
+For example, you can get a list of dataset in a package, `data(package = "spData")`.
+To attach the dataset to the global environment specify the name of a dataset (`data("cycle_hire", package = "spData")`).
+Sometimes, packages come also with the original files.^[Data loaded with `data()` often is a R dataset (`.Rdata` ord `.rda`)].
+To load such a file from the package, you need to specify the package name and the relative path to the dataset, for example:
 
 ```{r}
 world_raw_filepath = system.file("shapes/world.gpkg", package = "spData")
 world_raw = st_read(world_raw_filepath)
 ```
 
-More information on getting data using R packages could be found in [section 5.5](https://csgillespie.github.io/efficientR/input-output.html#download) and [section 5.6](https://csgillespie.github.io/efficientR/input-output.html#accessing-data-stored-in-packages) of @gillespie_efficient_2016.
+Find more information on getting data using R packages in [section 5.5](https://csgillespie.github.io/efficientR/input-output.html#download) and [section 5.6](https://csgillespie.github.io/efficientR/input-output.html#accessing-data-stored-in-packages) of @gillespie_efficient_2016.
+
+## File formats
+
+Spatial data is usually stored as files or in geodatabases. 
+File-based data formats can contain either vector or raster data, while geodatabases could store both.
+Historically, GIS file formats were developed by mapping agencies and software companies. <!--examples-->
+Exchanging spatial data between different software packages each coming with its own format was troublesome in the beginning.
+
+GDAL ^[prounounce "goo-dal", with the double o making a reference to object-orientation]put an end to these troubles by enabling <!--name and pronounciation--> reading and writing many raster and vector data formats.
+Subsequently, many open and proprietary GIS software (e.g., GRASS, QGIS, ArcGIS, ENVI) were quick to incorporate it.
+<!-- GDAL (it's great - you can read, convert, and very often (though not always) write) -->
+<!-- GDAL info "it is possible to have smaller number of supported formats than there are on the GDAL webpage; you may need to recompile..." -->
+
+Another change for spatial data formats came with the foundation of the Open Geospatial Consortium (OGC)^[http://www.opengeospatial.org].
+This organization collaborates on the development and implementation of open standards for geospatial content including file formats such as the KML and GeoPackage formats as well as the simple feature standard. 
+Developing and maintaining spatial file formats in an open model provides several benefits over the proprietary formats <!-- such as??-->, and eases interoperability.
+
+Nowadays, more than a hundred spatial data formats exist.
+<!-- In the same time, they could differ in many ways. -->
+<!-- Spatial data could be stored as a single file (e.g. GeoPackage), multiple files (e.g. ESRI Shapefile), or folders (ESRI ArcInfo Coverages). -->
+<!-- way of storage (single file, multiple files, folders) -->
+Table \@ref(tab:formats) presents some basic information about selected, often used spatial file formats.
+
+<!-- simple features are missing from this table-->
+```{r formats, echo=FALSE}
+file_formats = tibble::tribble(~Name, ~Extension, ~Info, ~Type, ~Model, 
+                         "ESRI Shapefile", ".shp (the main file)", "One of the most popular vector file format. Consists of at least three files. The main files size cannot exceed 2 GB. It lacks support for mixed type. Columns names are limited to 10 characters, and number of columns are limited at 255. It has poor support for Unicode standard. ", "Vector", "Partially open",
+                         "GeoJSON", ".geojson", "Extends the JSON exchange format by including a subset of the simple feature representation.", "Vector", "Open",
+                         "KML", ".kml", "XML-based format for spatial visualization, developed for use with Google Earth. Zipped KML file forms the KMZ format.", "Vector", "Open",
+                         "GPX", ".gpx", "XML schema created for exchange of GPS data.", "Vector", "Open",
+                         "GeoTIFF", ".tiff", "GeoTIFF is one of the most popular raster formats. Its structure is similar to the regular `.tif` format, however, additionally stores  the raster header.", "Raster", "Open",
+                         "Arc ASCII", ".asc", "Text format where the first six lines represent the raster header, followed by the raster cell values arranged in rows and columns.", "Raster", "Open",
+                         # "JPEG??"
+                         "R-raster", ".gri, .grd", "Native raster format of the R-package raster.", "Raster", "Open",
+                         # "NCDF??"
+                         # "HDF??"
+                         "SQLite/SpatiaLite", ".sqlite", "SQLite is a standalone, relational database management system. It is used as a default database driver in GRASS GIS 7. SpatiaLite is the spatial extension of SQLite providing support for simple features.", "Vector and raster", "Open",
+                         # "WKT/WKB??",
+                         "ESRI FileGDB", ".gdb", "Collection of spatial and nonspatial objects created in the ArcGIS software. It allows to store multiple feature classes and enables use of topological definitions. Limited access to this format is provided by GDAL with the use of the OpenFileGDB and FileGDB drivers.", "Vector and raster", "Proprietary",
+                         "GeoPackage", ".gpkg", "Lightweight database container based on SQLite allowing an easy and platform-independent exchange of geodata", "Vector and raster", "Open"
+                         # "WKT/WKB"??
+                         )
+knitr::kable(file_formats, caption = "Selected spatial file formats.")
+```
+
+<!-- 3. JPEG - (possibly mention SAGA's sdat, Erdas Imagine) -->
+<!-- 1. SQLite/SpatialLite + mention GRASS (uses SQLite) -->
+<!-- 3. WKT/WKB for transfering and storing geometry data on databases. PostGIS (has even its own raster WKT (https://trac.osgeo.org/postgis/wiki/WKTRasterTutorial01); WKT also supported by Spatiallite, Oracle, MySQL, etc. (https://en.wikipedia.org/wiki/Well-known_text#RDBMS_Engines_that_provide_support) -->
+<!-- 4. ESRI geodatabase, Oracle spatial database (mention + gdal support?) -->
+
+## Data Input (I) {#data-input}
+
+Executing commands such as `sf::st_read()` (the main function we use for loading vector data) or `raster::raster()` (the main function used for loading raster data) silently sets off a chain of events that reads data from files.
+<!-- transition is unclear, not sure what you would like to say -->
+Moreover, there are many R packages containing a wide range of spatial data or providing simple access to different data sources.
+All of them load the data into R or, more precisely, assign objects to your workspace, stored in RAM accessible from the `.GlobalEnv`^[See http://adv-r.had.co.nz/Environments.html for more information on the environment] of your current R session.
+
+### Vector data
+
+Spatial vector data comes in a wide variety of file formats, most of which can be read-in via the **sf** function `st_read()`.
+Behind the scenes this calls GDAL.
+To find out which data formats **sf** supports, run `st_drivers()`. 
+Here, we show only the first two drivers (see Table \@ref(tab:drivers)):
+
+```{r, eval=FALSE}
+sf_drivers = st_drivers()
+head(sf_drivers, n = 2)
+```
+
+```{r drivers, echo=FALSE}
+sf_drivers = st_drivers() %>% dplyr::filter(name %in% c("ESRI Shapefile", "GeoJSON", "KML", "GPX", "GPKG"))
+knitr::kable(head(sf_drivers, n = 5), caption = "Sample of available drivers for reading/writing vector data (it could vary between different GDAL versions).")
+```
+
+<!-- One of the major advantages of **sf** is that it is fast. -->
+<!-- reference to the vignette -->
+The first argument of `st_read()` is `dsn`, which should be a text string or an object containing a single text string.
+The content of a text string could vary between different drivers.
+In most cases, as with the ESRI Shapefile (`.shp`) or the `GeoPackage` format (`.gpkg`), the `dsn` would be a file name.
+`st_read()` guesses the driver based on the file extension, as illustrated for a `.gpkg` file below:
+
+```{r}
+library(sf)
+vector_filepath = system.file("shapes/world.gpkg", package = "spData")
+world = st_read(vector_filepath)
+```
+
+For some drivers, `dsn` could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the `st_read()` help page for more details).
+
+Some vector driver formats can store multiple data layers.
+By default, `st_read` automatically reads the first layer of the file specified in `dsn`, however, using the `layer` argument you can specify any other layer.
+
+Naturally, some options are specific to certain drivers[^1]. 
+For example, think of coordinates stored in a spreadsheet format (`.csv`).
+To read in such files as spatial objects, we naturally have to specify the names of the columns (`X` and `Y` in our example below) representing the coordinates.
+We can do this with the help of the `options` parameter.
+To find out about possible options, please refer to the 'Open Options' section of the corresponding GDAL driver description.
+For the comma-separated value (csv) format, visit http://www.gdal.org/drv_csv.html.
+
+```{r, results='hide'}
+cycle_hire_txt = system.file("misc/cycle_hire_xy.csv", package = "spData")
+cycle_hire_xy = st_read(cycle_hire_txt, options = c("X_POSSIBLE_NAMES=X",
+                                                    "Y_POSSIBLE_NAMES=Y"))
+```
+
+Instead of columns describing xy-coordinates, a single column can also contain the geometry information.
+Well-known text (WKT), well-known binary (WKB), and the GeoJSON formats are examples for this.
+For instance, the `world_wkt.csv` file has a column named `WKT` representing polygons of the world's countries.
+We will again use the `options` parameter to indicate this.
+Here, we will use `read_sf()` which does exactly the same as `st_read()` except it does not print the driver name to the console and stores strings as characters instead of factors.
+
+```{r, results='hide'}
+world_txt = system.file("misc/world_wkt.csv", package = "spData")
+world_wkt = read_sf(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT")
+# the same as
+world_wkt = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT", 
+                    quiet = TRUE, stringsAsFactors = FALSE)
+```
+
+```{block2 type='rmdnote'}
+Not all of the supported vector file formats store information about their coordinate reference system.
+In these situations, it is possible to add the missing information using the `st_set_crs()` function.
+Please refer also to section \@ref(crs-intro) for more information.
+```
+
+### Raster data
+
+Similar to vector data, raster data comes in many file formats with some of them supporting even multilayer files.
+**raster**'s `raster()` command reads in a single layer.
+
+```{r, message=FALSE}
+library(raster)
+library(spDataLarge)
+raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
+single_layer = raster(raster_filepath)
+```
+
+In case you want to read in a single band from a multilayer file use the `band` parameter to indicate a specific layer.
+
+```{r}
+multilayer_filepath = system.file("raster/landsat.tif", package = "spDataLarge")
+band3 = raster(multilayer_filepath, band = 3)
+```
+
+If you want to read in all bands, use `brick()` or `stack()`.
+
+```{r}
+
+multilayer_brick = brick(multilayer_filepath)
+multilayer_stack = stack(multilayer_filepath)
+```
+
+Please refer to section \@ref(raster-classes) for information on the difference between raster stacks and bricks.
 
 ## Data output (O) {#data-output}
 
+<!--maybe we can come up withan intro which is a bit more compelling-->
 The ability of writing spatial data could be used for conversion between different formats and for saving newly created objects.
 Depending on the data type (vector or raster), object class (e.g `multipoint` or `RasterLayer`), and type and amount of stored information (e.g. object size, range of values) - it is important to know how to store spatial files in the most efficient way.
 The next two section will show how to do that.
@@ -302,15 +329,12 @@ st_write(obj = world, dsn = "world.gpkg", delete_layer = TRUE)
 ```
 
 You can achieve the same with `write_sf()` since it is equivalent to (technically an *alias* for) `st_write()`, except that its defaults for `delete_layer` and `quiet` is `TRUE`.
-<!-- This enables spatial data to be overwritten more concisely, and with less output going to screen: -->
-<!-- What does this mean: overwritten more concisely? -->
 
 ```{r}
 write_sf(obj = world, dsn = "world.gpkg")
 ```
 
 <!-- how about saving multilayer gpkg? -->
-
 The `layer_options` argument could be also used for many different purposes.
 One of them is to write spatial data to a text file.
 This can be done by specifying `GEOMETRY` inside of `layer_options`. 
@@ -324,18 +348,19 @@ st_write(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
 
 ### Raster data
 
-The `writeRaster()` function save the `Raster*` objects to files. 
-There are several decision to be made while saving rasters, such as an output data type, file format, and specific GDAL options related to selected file format.
-The complete list of an arguments to this function could be found by typing `?writeRaster()`.
+The `writeRaster()` function saves `Raster*` objects to files on disk. 
+The function expects input regarding output datatype, file format, but also accepts GDAL options specific to a selected file format (see `?writeRaster` for more details).
 
 <!-- datatypes -->
-The **raster** package offers nine following datatypes: LOG1S, INT1S, INT1U, INT2S, INT2U, INT4S, INT4U, FLT4S, and FLT8S^[Using INT4U is not recommended as R does not support 32-bit unsigned integers.<!--recheck this info-->].
-Datatype determines the type of numbers and the range of the raster values that would be written to disk (\@ref(tab:datatypes)).
-Decision which datatype should be used depends on the expected range of the values in the output file.
-For example, LOG1S is used for bitmap (binary) images, unsigned integers (INT1U, INT2U, INT4U) are mostly used for categorical data, while floats (FLT4S and FLTS8S) usually represent continuous data.
-The default datatype used in `writeRaster()` is FLT4S.
-While it works in most of the cases, the size of the output file would be large.
-Therefore, a rule of thumb is to use the smallest representation that fits all the values (range of values could be checked using the `summary()` function).
+The **raster** package offers nine datatypes when saving a raster: LOG1S, INT1S, INT1U, INT2S, INT2U, INT4S, INT4U, FLT4S, and FLT8S^[Using INT4U is not recommended as R does not support 32-bit unsigned integers.<!--recheck this info-->].
+The datatype determines the bit representation of the raster object written to disk (\@ref(tab:datatypes)).
+Which datatype to use depends on the range of the values of your raster object.
+The more values a datatype can represent, the larger the file will get on disk.
+Commonly, one would use LOG1S for bitmap (binary) rasters.
+Unsigned integers (INT1U, INT2U, INT4U) are suitable for categorical data, while float numbers (FLT4S and FLTS8S) usually represent continuous data.
+`writeRaster()` uses FLT4S as the default.
+While this works in most cases, the size of the output file will be unnecessarly large if you save binary or categorical data.
+Therefore, we would recommend to use the datatyp that needs the least storing space but is still able to represent all values (check the range of values with the `summary()` function).
 
 ```{r datatypes, echo=FALSE}
 dT = tibble::tribble(
@@ -353,8 +378,8 @@ dT = tibble::tribble(
 knitr::kable(dT, caption = "Datatypes supported by the raster package")
 ```
 
-To save the `Raster*` object to a file, the file extension needs to be specified. 
-For example you need to add the `.tif` extension to create a GeoTIFF file:
+The file extension determines the output file when saving a `Raster*` object to disk.
+For example, the `.tif` extension will create a GeoTIFF file:
 
 ```{r, eval=FALSE}
 writeRaster(x = single_layer,
@@ -362,25 +387,25 @@ writeRaster(x = single_layer,
             datatype = "INT2U")
 ```
 
-The `raster` file format (native to the `raster` package) is used when a file extension is missing or is invalid. 
-
-Some raster file formats also accept additional creation options with the `options` argument[^2].
-For example, in GeoTIFF you could specify a compress method using the `COMPRESS` option^[Creation options for the GeoTIFF format are at http://www.gdal.org/frmt_gtiff.html]:
+The `raster` file format (native to the `raster` package) is used when a file extension is invalid or missing. 
+Some raster file formats come with additional options.
+You can use them with the `options` parameter[^2].
+For example, GeoTIFF allows to compress the output raster with the `COMPRESS` option^[Find out about GeoTIFF options under http://www.gdal.org/frmt_gtiff.html.]:
 
 ```{r, eval=FALSE}
 writeRaster(x = single_layer,
             filename = "my_raster.tif",
             datatype = "INT2U",
-            options = c("COMPRESS=DEFLATE"))
+            options = c("COMPRESS=DEFLATE"),
+            overwrite = TRUE)
 ```
 
-Full list of the supported file format for writing `Raster*` objects could be found using `writeFormats().`
+Note that `writeFormats()` returns a list with all supported file formats on your computer.
 
 ## Visual outputs
 
-R support many different static and interactive graphics formats.
-
-The most general method to save a static plot is to open a graphic device, create a plot, and close a graphic device, for example:
+R supports many different static and interactive graphics formats.
+The most general method to save a static plot is to open a graphic device, create a plot, and close it, for example:
 
 ```{r, eval=FALSE}
 png(filename = "lifeExp.png", width = 500, height = 350)
@@ -388,8 +413,8 @@ plot(world["lifeExp"])
 dev.off()
 ```
 
-Each of the available formats, `pdf()`, `bmp()`, `jpeg()`, `png()`, and `tiff()`, has its own function. 
-You can specify several properties of the output plot, including width and height.
+Other available graphic devices include `pdf()`, `bmp()`, `jpeg()`, `png()`, and `tiff()`. 
+You can specify several properties of the output plot, including width, height and resolution.
 
 Additionally, several graphic packages provide its own function to save a graphical output.
 For example, the **tmap** package has the `save_tmap()` function.
@@ -407,36 +432,36 @@ save_tmap(tm  = tmap_obj, filename = "lifeExp_tmap.png")
 <!-- a = plot(world["lifeExp"]) -->
 <!-- ``` -->
 
-On the other hand, an interactive map could be usually saved as an HTML file. 
-This can be done with the `saveWidget()` function from the `htmlwidget` package:
+On the other hand, on can save interactive maps as an HTML file using the `saveWidget()` function from the `htmlwidgets` package:
 
+<!-- example doesn't work, problem with colors I guess -->
 ```{r, eval=FALSE}
 library(mapview)
 library(htmlwidgets)
 mapview_obj = mapview(world, zcol = "lifeExp", legend = TRUE)
-saveWidget(mapview_obj, file="my_interactive_map.html")
+saveWidget(mapview_obj, file = "my_interactive_map.html")
 ```
 
 ## Exercises
 
 1. List and describe three types of vector, raster, and geodatabase formats.
 
-1. Name at least differences between `read_sf()` and the more well-known function `st_read()`.
+1. Name at least two differences between `read_sf()` and the more well-known function `st_read()`.
 
 1. Read the `cycle_hire_xy.csv` file from the **spData** package (Hint: it is located in the `misc\` folder).
-What is a geometry type of a new object? 
+What is a geometry type of the loaded object? 
 
-1. Download Germany borders data using **rnaturalearth** and create a new object called `germany_borders`.
+1. Download the borders of Germany using **rnaturalearth**, and create a new object called `germany_borders`.
 Write this new object to a file of the GeoPackage format.
 
-1. Download raster data of global monthly minimum temperature with five minutes resolution using the **raster** package.
-Extract only values for June and save them to the `tmin_june.tif` file (Hint: use `raster::subset()`).
+1. Download the global monthly minimum temperature with a spatial resolution of five minutes using the **raster** package.
+Extract the June values, and save them to a file named `tmin_june.tif` file (Hint: use `raster::subset()`).
 
-1. Create a static map of Germany borders and save it to a PNG file.
+1. Create a static map of Germany's borders, and save it to a PNG file.
 
 1. Create an interactive map using data from the `cycle_hire_xy.csv` file. 
-Export this map to the HTML file called `cycle_hire.html`.
+Export this map to a file called `cycle_hire.html`.
 
-[^1]: A list of supported vector formats and theirs options could be found at http://www.gdal.org/ogr_formats.html.
+[^1]: A list of supported vector formats and theirs options can be found at http://www.gdal.org/ogr_formats.html.
 
-[^2]: Full list of supported raster formats with theirs options could be found at http://www.gdal.org/formats_list.html
+[^2]: Full list of supported raster formats with theirs options can be found at http://www.gdal.org/formats_list.html
