@@ -20,7 +20,7 @@ File-based data formats can contain either vector or raster data, while geodatab
 Historically, GIS file formats were developed by mapping agencies and software companies. <!--examples-->
 Exchanging spatial data between different software packages each coming with its own format was troublesome in the beginnging.
 
-GDAL put an end to these troubles by enabling <!--name and pronounciation--> reading and writing many raster and vector data formats.
+GDAL ^[prounounce "goo-dal", with the double making a reference to object-orientation]put an end to these troubles by enabling <!--name and pronounciation--> reading and writing many raster and vector data formats.
 Subsequently, many open and proprietary GIS software (e.g., GRASS, QGIS, ArcGIS, ENVI) were quick to incorporate it.
 <!-- GDAL (it's great - you can read, convert, and very often (though not always) write) -->
 <!-- GDAL info "it is possible to have smaller number of supported formats than there are on the GDAL webpage; you may need to recompile..." -->
@@ -70,56 +70,8 @@ Moreover, there are many R packages containing a wide range of spatial data or p
 All of them load the data into R or, more precisely, assign objects to your workspace, stored in RAM accessible from the `.GlobalEnv`^[See http://adv-r.had.co.nz/Environments.html for more information on the environment] of your current R session.
 
 ### Vector data
-
 Spatial vector data comes in a wide variety of file formats, most of which can be read-in via the **sf** function `st_read()`.
 Behind the scenes this calls GDAL.
-<!-- One of the major advantages of **sf** is that it is fast. -->
-<!-- reference to the vignette -->
-The first argument of `st_read()` is `dsn`, which should be a text string or an object containing a single text string.
-The content of a text string could vary between different drivers.
-In most cases, as with `.shp` file of `ESRI Shapefile` or `.gpkg` files of `GeoPackage` formats, the `dsn` would be a file name.
-`st_read()` guesses the driver based on the file extension, as illustrated for a `.gpkg` file below:
-
-```{r}
-library(sf)
-vector_filepath = system.file("shapes/world.gpkg", package = "spData")
-world = st_read(vector_filepath)
-```
-
-For some drivers, `dsn` could be provided as a folder name, access credentials for a database, or a GeoJSON string representation.
-<!-- Do we have a place for the examples? -->
-
-Some of vector driver formats could store many layers of data. 
-`st_read` automatically read the first layer of the file specified in `dsn`, however it is also possible to select a different layer by its name using the `layer` argument.
-
-Many GDAL drivers have unique open options[^1]. 
-For example, spatial data in text files could be stored in several ways.
-Simple point dataset could just have two columns describing their x and y coordinates. 
-To read these files, you need to specify names of those columns using the `options` argument:
-
-```{r, results='hide'}
-cycle_hire_txt = system.file("misc/cycle_hire_xy.csv", package = "spData")
-cycle_hire_xy = st_read(cycle_hire_txt, options = c("X_POSSIBLE_NAMES=X",
-                                                    "Y_POSSIBLE_NAMES=Y"))
-```
-
-More complex geometries cannot be described using only two numbers, however they could be represented by the well-known text (WKT), well-known binary (WKB), and in the GeoJSON form, for example:
-
-```{r, results='hide'}
-world_txt = system.file("misc/world_wkt.csv", package = "spData")
-world_wkt = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT")
-```
-
-```{block2 type='rmdnote'}
-Not all of the supported vector file formats store information about theirs coordinate reference system.
-In these situations, it is possible to add the missing information using the `st_set_crs()` function.
-More on that in section \@ref(crs-intro).
-```
-
-<!-- isn't that confusing for users? -->
-**Tip**: `read_sf()` and `write_sf()` can be used as easy-to-remember alternatives to `st_read()` and `st_write()`.
-Remember they hide information about the data source and overwrite existing data, though.
-
 To find out which data formats **sf** supports, run `st_drivers()`. 
 Here, we show only the first two drivers (see Table \@ref(tab:drivers)):
 
@@ -133,8 +85,58 @@ sf_drivers = st_drivers() %>% dplyr::filter(name %in% c("ESRI Shapefile", "GeoJS
 knitr::kable(head(sf_drivers, n = 5), caption = "Sample of available drivers for reading/writing vector data (it could vary between different GDAL versions).")
 ```
 
-### Raster data
+<!-- One of the major advantages of **sf** is that it is fast. -->
+<!-- reference to the vignette -->
+The first argument of `st_read()` is `dsn`, which should be a text string or an object containing a single text string.
+The content of a text string could vary between different drivers.
+In most cases, as with the ESRI Shapefile (`.shp`) or the `GeoPackage` format (`.gpkg`), the `dsn` would be a file name.
+`st_read()` guesses the driver based on the file extension, as illustrated for a `.gpkg` file below:
 
+```{r}
+library(sf)
+vector_filepath = system.file("shapes/world.gpkg", package = "spData")
+world = st_read(vector_filepath)
+```
+
+For some drivers, `dsn` could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the `st_read()` help page for more details).
+
+Some vector driver formats can store multiple data layers.
+By default, `st_read` automatically reads the first layer of the file specified in `dsn`, however, using the `layer` argument you can specify any other layer.
+
+Naturally, some options are specific to certain drivers[^1]. 
+For example, think of coordinates stored in a spreadsheet format (`.csv`).
+To read in such files as spatial objects, we naturally have to specify the names of the columns (`X` and `Y` in our example below) representing the coordinates.
+We can do this with the help of the `options` parameter.
+To find out about possible options, please refer to the 'Open Options' section of the corresponding GDAL driver description.
+For the comma-separated value (csv) format, visit http://www.gdal.org/drv_csv.html.
+
+```{r, results='hide'}
+cycle_hire_txt = system.file("misc/cycle_hire_xy.csv", package = "spData")
+cycle_hire_xy = st_read(cycle_hire_txt, options = c("X_POSSIBLE_NAMES=X",
+                                                    "Y_POSSIBLE_NAMES=Y"))
+```
+
+Instead of columns describing xy-coordinates, a single column can also contain the geometry information.
+Well-known text (WKT), well-known binary (WKB), and the GeoJSON formats are examples for this.
+For instance, the `world_wkt.csv` file has a column named `WKT` representing polygons of the world's countries.
+We will again use the `options` parameter to indicate this.
+Here, we will use `read_sf()` which does exactly the same as `st_read()` except it does not print the driver name to the console and stores strings as characters instead of factors.
+
+```{r, results='hide'}
+world_txt = system.file("misc/world_wkt.csv", package = "spData")
+world_wkt = read_sf(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT")
+# the same as
+world_wkt = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT", 
+                    quiet = TRUE, stringsAsFactors = FALSE)
+```
+
+```{block2 type='rmdnote'}
+Not all of the supported vector file formats store information about their coordinate reference system.
+In these situations, it is possible to add the missing information using the `st_set_crs()` function.
+Please refer also to section \@ref(crs-intro) for more information.
+```
+
+### Raster data
 Raster data also could exist in many different file formats, with some of the formats supporting multilayer files.
 The **raster** package allow reading a single layer by `raster()` and many layers using either `brick()` or `stack()`. 
 More information about the raster representation in this package could be find in the section \@ref(raster-classes).
