@@ -351,13 +351,15 @@ The `writeRaster()` function saves `Raster*` objects to files on disk.
 The function expects input regarding output datatype, file format, but also accepts GDAL options specific to a selected file format (see `?writeRaster` for more details).
 
 <!-- datatypes -->
-The **raster** package offers nine following datatypes: LOG1S, INT1S, INT1U, INT2S, INT2U, INT4S, INT4U, FLT4S, and FLT8S^[Using INT4U is not recommended as R does not support 32-bit unsigned integers.<!--recheck this info-->].
-Datatype determines the type of numbers and the range of the raster values that would be written to disk (\@ref(tab:datatypes)).
-Decision which datatype should be used depends on the expected range of the values in the output file.
-For example, LOG1S is used for bitmap (binary) images, unsigned integers (INT1U, INT2U, INT4U) are mostly used for categorical data, while floats (FLT4S and FLTS8S) usually represent continuous data.
-The default datatype used in `writeRaster()` is FLT4S.
-While it works in most of the cases, the size of the output file would be large.
-Therefore, a rule of thumb is to use the smallest representation that fits all the values (range of values could be checked using the `summary()` function).
+The **raster** package offers nine datatypes when saving a raster: LOG1S, INT1S, INT1U, INT2S, INT2U, INT4S, INT4U, FLT4S, and FLT8S^[Using INT4U is not recommended as R does not support 32-bit unsigned integers.<!--recheck this info-->].
+The datatype determines the bit representation of the raster object written to disk (\@ref(tab:datatypes)).
+Which datatype to use depends on the range of the values of your raster object.
+The more values a datatype can represent, the larger the file will get on disk.
+Commonly, one would use LOG1S for bitmap (binary) rasters.
+Unsigned integers (INT1U, INT2U, INT4U) are suitable for categorical data, while float numbers (FLT4S and FLTS8S) usually represent continuous data.
+`writeRaster()` uses FLT4S as the default.
+While this works in most cases, the size of the output file will be unnecessarly large if you save binary or categorical data.
+Therefore, we would recommend to use the datatyp that needs the least storing space but still is able to represent all values (check the range of values with the `summary()` function).
 
 ```{r datatypes, echo=FALSE}
 dT = tibble::tribble(
@@ -375,8 +377,8 @@ dT = tibble::tribble(
 knitr::kable(dT, caption = "Datatypes supported by the raster package")
 ```
 
-To save the `Raster*` object to a file, the file extension needs to be specified. 
-For example you need to add the `.tif` extension to create a GeoTIFF file:
+The file extension determines the output file when saving a `Raster*` object to disk.
+For example, the `.tif` extension will create a GeoTIFF file:
 
 ```{r, eval=FALSE}
 writeRaster(x = single_layer,
@@ -384,19 +386,20 @@ writeRaster(x = single_layer,
             datatype = "INT2U")
 ```
 
-The `raster` file format (native to the `raster` package) is used when a file extension is missing or is invalid. 
-
-Some raster file formats also accept additional creation options with the `options` argument[^2].
-For example, in GeoTIFF you could specify a compress method using the `COMPRESS` option^[Creation options for the GeoTIFF format are at http://www.gdal.org/frmt_gtiff.html]:
+The `raster` file format (native to the `raster` package) is used when a file extension is invalid or missing. 
+Some raster file formats come with additional options.
+You can use them with the `options` parameter[^2].
+For example, GeoTIFF allows to compress the output raster with the `COMPRESS` option^[Find out about GeoTIFF options under http://www.gdal.org/frmt_gtiff.html.]:
 
 ```{r, eval=FALSE}
 writeRaster(x = single_layer,
             filename = "my_raster.tif",
             datatype = "INT2U",
-            options = c("COMPRESS=DEFLATE"))
+            options = c("COMPRESS=DEFLATE"),
+            overwrite = TRUE)
 ```
 
-Full list of the supported file format for writing `Raster*` objects could be found using `writeFormats().`
+Note that `writeFormats()` returns a list with all supported file formats on your computer.
 
 ## Visual outputs
 
