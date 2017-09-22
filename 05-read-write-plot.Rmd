@@ -2,15 +2,17 @@
 
 ## Prerequisites {-}
 
-- This chapter requires the packages **tidyverse**, **sf** and **raster**. 
+- This chapter requires the packages **tidyverse**, **sf**, **spData** and **raster**. 
 
 ```{r, message=FALSE}
 library(tidyverse)
 library(sf)
+library(spData)
 library(raster)
 ```
 
 ## Introduction
+
 The previous chapters provided an overview of spatial data classes in R, with a focus on simple features and rasters.
 This chapter is about getting spatial data onto your computer and then, perhaps after processing it with techniques described in this book, back out to the world.
 Before we can even think about processing data, we need to retrieve it, i.e. we need to know which sources are at our disposal (section \@{#retrieving-data}).
@@ -27,6 +29,7 @@ Loading/saving data is yet another way of saying the same thing.
 ]
 
 ## Retrieving open data {#retrieving-data}
+
 Nowadays, a vast amount of spatial data is available on the internet.
 Best of all, much of it is freely available.
 You just have to know where to look.
@@ -122,6 +125,7 @@ world_raw = st_read(world_raw_filepath)
 Find more information on getting data using R packages in [section 5.5](https://csgillespie.github.io/efficientR/input-output.html#download) and [section 5.6](https://csgillespie.github.io/efficientR/input-output.html#accessing-data-stored-in-packages) of @gillespie_efficient_2016.
 
 ## File formats
+
 Spatial data is usually stored as files or in geodatabases. 
 File-based data formats can contain either vector or raster data, while geodatabases could store both.
 Historically, GIS file formats were developed by mapping agencies and software companies. <!--examples-->
@@ -170,12 +174,14 @@ knitr::kable(file_formats, caption = "Selected spatial file formats.")
 <!-- 4. ESRI geodatabase, Oracle spatial database (mention + gdal support?) -->
 
 ## Data Input (I) {#data-input}
+
 Executing commands such as `sf::st_read()` (the main function we use for loading vector data) or `raster::raster()` (the main function used for loading raster data) silently sets off a chain of events that reads data from files.
 <!-- transition is unclear, not sure what you would like to say -->
 Moreover, there are many R packages containing a wide range of spatial data or providing simple access to different data sources.
 All of them load the data into R or, more precisely, assign objects to your workspace, stored in RAM accessible from the `.GlobalEnv`^[See http://adv-r.had.co.nz/Environments.html for more information on the environment] of your current R session.
 
 ### Vector data
+
 Spatial vector data comes in a wide variety of file formats, most of which can be read-in via the **sf** function `st_read()`.
 Behind the scenes this calls GDAL.
 To find out which data formats **sf** supports, run `st_drivers()`. 
@@ -243,6 +249,7 @@ Please refer also to section \@ref(crs-intro) for more information.
 ```
 
 ### Raster data
+
 Similar to vector data, raster data comes in many file formats with some of them supporting even multilayer files.
 **raster**'s `raster()` command reads in a single layer.
 
@@ -321,15 +328,12 @@ st_write(obj = world, dsn = "world.gpkg", delete_layer = TRUE)
 ```
 
 You can achieve the same with `write_sf()` since it is equivalent to (technically an *alias* for) `st_write()`, except that its defaults for `delete_layer` and `quiet` is `TRUE`.
-<!-- This enables spatial data to be overwritten more concisely, and with less output going to screen: -->
-<!-- What does this mean: overwritten more concisely? -->
 
 ```{r}
 write_sf(obj = world, dsn = "world.gpkg")
 ```
 
 <!-- how about saving multilayer gpkg? -->
-
 The `layer_options` argument could be also used for many different purposes.
 One of them is to write spatial data to a text file.
 This can be done by specifing `GEOMETRY` inside of `layer_options`. 
@@ -343,9 +347,8 @@ st_write(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
 
 ### Raster data
 
-The `writeRaster()` function save the `Raster*` objects to files. 
-There are several decision to be made while saving rasters, such as an output data type, file format, and specific GDAL options related to selected file format.
-The complete list of an arguments to this function could be found by typing `?writeRaster()`.
+The `writeRaster()` function saves `Raster*` objects to files on disk. 
+The function expects input regarding output datatype, file format, but also accepts GDAL options specific to a selected file format (see `?writeRaster` for more details).
 
 <!-- datatypes -->
 The **raster** package offers nine following datatypes: LOG1S, INT1S, INT1U, INT2S, INT2U, INT4S, INT4U, FLT4S, and FLT8S^[Using INT4U is not recommended as R does not support 32-bit unsigned integers.<!--recheck this info-->].
@@ -397,9 +400,8 @@ Full list of the supported file format for writing `Raster*` objects could be fo
 
 ## Visual outputs
 
-R support many different static and interactive graphics formats.
-
-The most general method to save a static plot is to open a graphic device, create a plot, and close a graphic device, for example:
+R supports many different static and interactive graphics formats.
+The most general method to save a static plot is to open a graphic device, create a plot, and close it, for example:
 
 ```{r, eval=FALSE}
 png(filename = "lifeExp.png", width = 500, height = 350)
@@ -407,8 +409,8 @@ plot(world["lifeExp"])
 dev.off()
 ```
 
-Each of the available formats, `pdf()`, `bmp()`, `jpeg()`, `png()`, and `tiff()`, has its own function. 
-You can specify several properties of the output plot, including width and height.
+Other available graphic devices include `pdf()`, `bmp()`, `jpeg()`, `png()`, and `tiff()`. 
+You can specify several properties of the output plot, including width, height and resolution.
 
 Additionally, several graphic packages provide its own function to save a graphical output.
 For example, the **tmap** package has the `save_tmap()` function.
@@ -426,14 +428,14 @@ save_tmap(tm  = tmap_obj, filename = "lifeExp_tmap.png")
 <!-- a = plot(world["lifeExp"]) -->
 <!-- ``` -->
 
-On the other hand, an interactive map could be usually saved as an HTML file. 
-This can be done with the `saveWidget()` function from the `htmlwidget` package:
+On the other hand, on can save interactive maps as an HTML file using the `saveWidget()` function from the `htmlwidgets` package:
 
+<!-- example doesn't work, problem with colors I guess -->
 ```{r, eval=FALSE}
 library(mapview)
 library(htmlwidgets)
 mapview_obj = mapview(world, zcol = "lifeExp", legend = TRUE)
-saveWidget(mapview_obj, file="my_interactive_map.html")
+saveWidget(mapview_obj, file = "my_interactive_map.html")
 ```
 
 ## Exercises
