@@ -406,61 +406,55 @@ tmap::qtm(left_join1, "unemploy", fill.breaks = c(6, 6.5, 7), fill.title="Unempl
 It is also possible to join objects by different variables.
 Both of the datasets have variables with names of countries, but they are named differently.
 The `north_america` has a `name_long` column and the `wb_north_america` has a `name` column.
-In these cases, we can use a named vector to specify the connection, e.g. `c("name_long" = "name")`:
+In these cases a named vector, such as `c("name_long" = "name")`, can specify the connection:
 
 ```{r}
 left_join2 = north_america %>% 
   left_join(wb_north_america, by = c("name_long" = "name"))
-left_join2
+names(left_join2)
 ```
 
-The new object `left_join2`, however, contains two duplicated variables - `iso_a2.x` and `iso_a2.y` because both of the input tables possessed a variable named `iso_a2`.
-To solve this problem we should specify all the keys:
+Note that the result contains two duplicated variables - `iso_a2.x` and `iso_a2.y` because both `x` and `y` objects have the column `iso_a2`.
+This can be solved by specifying all the keys:
 
 ```{r}
 left_join3 = north_america %>% 
   left_join(wb_north_america, by = c("iso_a2", "name_long" = "name"))
-left_join3
 ```
 
-It is also possible to use our objects in the reverse order, where a `data.frame` object is the first argument and a `sf` object is the second argument.
-This would keep the geometry column but drop the `sf` class, and result in a `data.frame` object.
+Joins also work when a data frame is the first argument.
+This keeps the geometry column but drops the `sf` class, returning a `data.frame` object.
 
 ```{r}
 # keeps the geom column, but drops the sf class
 left_join4 = wb_north_america %>%
   left_join(north_america, by = c("iso_a2"))
-left_join4
 class(left_join4)
 ```
 
-`left_join4` has only one class - `data.frame`, however it is possible to add spatial `sf` class using the `st_as_sf()` function: 
-
-```{r}
-left_join4_sf = st_as_sf(left_join4)
-left_join4_sf
-class(left_join4_sf)
+```{block2 type='rmdnote'}
+It is possible to convert a data frame with a geometry list column, such as `left_join4`, into an `sf` object with `st_as_sf()`, as follows: `st_as_sf(left_join4)`. 
 ```
 
-On the other hand, it is also possible to remove the geometry column of `left_join4` using base R functions or `dplyr`.
-Here, this is this simple because the geometry column is just another `data.frame` column and no longer the sticky geometry column of an `sf` object (see also Chapter \@ref(spatial-class)):
+<!-- On the other hand, it is also possible to remove the geometry column of `left_join4` using base R functions or `dplyr`. -->
+<!-- Here, this is this simple because the geometry column is just another `data.frame` column and no longer the sticky geometry column of an `sf` object (see also Chapter \@ref(spatial-class)): -->
 
-```{r}
-# base R
-left_join4_df = subset(left_join4, select = -geom)
-# or dplyr
-left_join4_df = left_join4 %>% dplyr::select(-geom)
-left_join4_df
-class(left_join4_df)
-```
+<!-- ```{r} -->
+<!-- # base R -->
+<!-- left_join4_df = subset(left_join4, select = -geom) -->
+<!-- # or dplyr -->
+<!-- left_join4_df = left_join4 %>% dplyr::select(-geom) -->
+<!-- left_join4_df -->
+<!-- class(left_join4_df) -->
+<!-- ``` -->
 
-In contrast `left_join()`, `inner_join()` keeps only observations from the left object (`north_america`) where there are matching observations in the right object (`wb_north_america`). 
+In contrast to `left_join()`, `inner_join()` keeps only observations from the left object (`north_america`) where there are matching observations in the right object (`wb_north_america`). 
 All columns from the left and right object are still kept:
 
 ```{r}
 inner_join1 = north_america %>% 
   inner_join(wb_north_america, by = c("iso_a2", "name_long" = "name"))
-inner_join1
+inner_join1$name_long
 ```
 
 ### Creating attributes and removing spatial information
