@@ -549,13 +549,12 @@ More details are provided in the help pages (which can be accessed via `?summari
 
 ## Manipulating raster objects
 
-In contrast to simple features (vector data), raster data represents continuous surfaces.
-In this section we will use a raster object created *from scratch*, building on section \@ref(an-introduction-to-raster).
-Raster data has a fundamentally different structure than vector data, so subsetting and other operations work in a different way, as demonstrated in section \@ref(raster-subsetting).
+In contrast to the vector data model underlying simple features (which represents points, lines and polygons as discrete entities in space), raster data represent continuous surfaces.
+This section shows how raster objects work, by creating them *from scratch*, building on section \@ref(an-introduction-to-raster).
+Because of their unique structure, subsetting and other operations on raster datasets work in a different way, as demonstrated in section \@ref(raster-subsetting).
 
-Let us start with manually recreating the raster dataset of Chapter \@ref(raster-classes).
-This should make it easy to understand how **raster** and related operations work (Figure \@ref(fig:cont-cate-rasters)).
-Here, we create a raster which should represent elevations, therefore, we name it accordingly `elev`.
+The following code recreates the raster dataset used in section \@ref(raster-classes), the result of which is illustrated in Figure \@ref(fig:cont-cate-rasters).
+This demonstrates how the `raster()` function works to create an example raster named `elev` (representing elevations).
 
 ```{r, message=FALSE}
 library(raster)
@@ -564,23 +563,23 @@ elev = raster(nrow = 6, ncol = 6, res = 0.5,
               vals = 1:36)
 ```
 
-Note that a raster object can also contain categorical data.
-For this, we can use either Boolean or factor variables in R.
-For instance, we can create a raster representing grain sizes (Figure \@ref(fig:cont-cate-rasters)):
+The result is a raster object with 6 rows and 6 columns (specified by the `nrow` and `ncol` arguments), and minimum and a minimum and maximum spatial extent (specified by `xmn`, `xmx` and equivalent arguments for the y axis).
+The `vals` argument sets the values that each cell contains: numeric data ranging from 1 to 36 in this case.
+Raster objects can also contain categorical values of class `logical` or `factor` variables in R.
+The following code creates a raster representing grain sizes (Figure \@ref(fig:cont-cate-rasters)):
 
 ```{r}
-grain_size = c("clay", "silt", "sand")
+grains = c("clay", "silt", "sand")
+grain_values = factor(sample(grains, 36, replace = TRUE))
 grain = raster(nrow = 6, ncol = 6, res = 0.5, 
                xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-               vals = factor(sample(grain_size, 36, replace = TRUE), 
-                             levels = grain_size))
-grain
+               vals = grain_values)
 ```
 
 The **raster** package represents Boolean and factor variables as integers.
 Hence, `grain[1, 1]` returns an integer instead of "sand", "silt" or "clay".
 These integers in turn represent unique identifiers. 
-The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes` which you see when you print a so-called 'ratified' raster to the console (see the help page of the `ratify()` command for more information).
+The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes` which you see when you print a so-called 'ratified' raster to the console (see `?ratify()` command for more information).
 Use `levels()` to just retrieve the attribute table.
 We can even add further columns to this attribute table:
 
