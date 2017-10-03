@@ -154,9 +154,7 @@ knitr::include_graphics("http://robinlovelace.net/geocompr/figures/spatial-packa
 - Major issues with Coordinate Reference Systems (CRSs)
 
 ```{r}
-library(spData)
-data(package = "spData")
-?afcon
+library(spData) # see data(package = "spData") and ?afcon for more info
 ```
 
 ```{r, fig.asp=0.5}
@@ -183,20 +181,122 @@ str(meuse)
 
 # sp visuals
 
+12 year-old code still works ([Pebesma and Bivand 2005](https://www.r-project.org/doc/Rnews/Rnews_2005-2.pdf))
+
 ```{r}
 plot(meuse, pch=1, cex = .05*sqrt(meuse$zinc))
 ```
 
+---
 
+# Packages building on sp
+
+**sp** has many *reverse dependencies*:
+
+```{r}
+sp_revdeps = devtools::revdep("sp", dependencies = "Depends")
+head(sp_revdeps)
+length(sp_revdeps)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+library(dplyr)
+dd = cranlogs::cran_downloads(packages = sp_revdeps,
+                              from = "2013-01-01", to = Sys.Date())
+dd$Downloads <- ave(
+  dd$count,
+  dd$package,
+  FUN = function(x)
+    zoo::rollmean(x, k = 30, na.pad = T)
+)
+top_pkgs = dd %>% 
+  filter(date > (Sys.Date() - 30)) %>% 
+  group_by(package) %>%
+  summarise(Downloads = mean(Downloads, na.rm = TRUE)) %>% 
+  top_n(n = 5, wt = Downloads) %>% 
+  pull(package)
+dd = dplyr::filter(dd, Downloads > 0, package %in% top_pkgs)
+
+library(ggplot2)
+ggfig = ggplot(data = dd, mapping = aes(date, Downloads, color = package)) +
+  geom_line() +
+  labs(x = "Date", color = "Package: ")
+ggsave("figures/sp-dep-package-growth.png", ggfig)
+```
+
+
+```{r}
+sp_revimps = devtools::revdep("sp", dependencies = "Imports")
+length(sp_revimps)
+```
+
+A few of note:
+
+- **adehabitat** for ecological modelling
+- **geosphere** for operations on a spherical surface
+- **spdep** for modelling spatial data
+- **rgdal** for reading/writing data
+
+---
+
+# The 5 most downloaded packages that depend on sp
+
+```{r, echo=FALSE, out.width="75%"}
+knitr::include_graphics("https://user-images.githubusercontent.com/1825120/31147295-49dd935a-a881-11e7-86a8-0e9d5c13fb84.png")
+```
+
+---
 
 # sf
 
+- Released in November 2016
+- Aims to supercede **sp**, **rgdal** and **rgeos** with unified interface
+- Treats spatial vector data as regular data frames
+- The basis of much of this tutorial
+
+```{r}
+library(sf)
+world_tbl = dplyr::as_data_frame(world)
+world_tbl
+```
+
+---
+
 # raster
 
+- A very large package first released in 2010
+- Provides support for raster classes, and user friendly functions for vector data
+- Very powerful
+
+```{r, fig.asp=0.5}
+library(raster)
+r = raster(nrows = 3, ncols = 3)
+values(r) = 1:9
+plot(r)
+```
+
+---
+
+# Visualisation pacakges
+
+- **ggplot2** support for **sf**
+- **leaflet** for low-level control of interactive maps
+- **mapview** for GIS-like feel
+- **tmap** powerful, flexible, user-friendly, general-purpose map-making
+
+---
+
+# Mini tmap demo
+
+```{r}
+library(tmap)
+tmap_mode("view")
+qtm(world, fill = "pop")
+```
 
 ---
 
 # References
 
-Pebesma, E.J., Bivand, R.S., 2005. Classes and methods for spatial data in R. R news 5, 9–13.
+Pebesma, E.J., Bivand, R.S., 2005. Classes and methods for spatial data in R. [R news](https://www.r-project.org/doc/Rnews/Rnews_2005-2.pdf) 5, 9–13.
 
