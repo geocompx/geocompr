@@ -199,8 +199,9 @@ row.names(filter(africa, subregion == "Northern Africa"))
 
 To understand topological relations, it helps to have some simple test data to work with.
 Figure \@ref(relation-objects) illustrates a polygon (`a`), a line (`l`) and some points (`p`).
+These objects are created in the code below.
 
-```{r relation-objects}
+```{r}
 a1 = st_polygon(list(rbind(c(-1, -1), c(1, -1), c(1, 1), c(-1, -1))))
 a = st_sfc(a1)
 
@@ -208,18 +209,43 @@ l1 = st_linestring(x = matrix(c(-1, -1, -0.5, 1), , 2))
 l = st_sfc(l1)
 
 p_matrix = matrix(c(0.5, 1, -1, 0, 0, 1, 0.5, 1), ncol = 2)
-p = st_multipoint(x = p_matrix)
+p_multi = st_multipoint(x = p_matrix)
+p = st_cast(st_sfc(p_multi), "POINT")
+```
 
+```{r relation-objects, echo=FALSE}
 plot(a, border = "red", axes = TRUE)
 plot(l, add = TRUE)
 plot(p, add = TRUE, lab = 1:4)
 text(p_matrix[, 1] + 0.05, p_matrix[, 2] + 0.05, 1:4)
 ```
 
+Starting with the simplest case, which can see which of the points intersect in some way with the polygon using `st_intersects()` as follows:
+
+```{r}
+st_intersects(p, a)
+```
+
+What is expected here is that we get a positive (`1`) response for the first two points and a negative (empty vector) from the last two.
+What may be unexpected is that the result comes in the form of a list.
+To return the result as a logical vector, of the type that can be used for subsetting and other operations, the result must be returned as a *dense matrix*.
+By default the results are a sparse matrix, which reduces the size of the output on multi-feature objects.
+This can be done using the `sparse` argument as follows:
+
+```{r}
+st_intersects(p, a, sparse = FALSE)
+```
+
+Note that this result can be used to subset the features of `p`, in a long-form way of doing subsetting (demonstrated for illustration purposes only, result not show):
+
+```{r}
+p[st_intersects(p, a, sparse = FALSE)]
+```
+
 
 
 ```{r, eval=FALSE, echo=FALSE}
-# startin simpler so commented
+# starting simpler so commented
 a1 = st_polygon(list(rbind(c(-1, -1), c(1, -1), c(1, 1), c(-1, -1))))
 a2 = st_polygon(list(rbind(c(2, 0), c(2, 2), c(3, 2), c(3, 0), c(2, 0))))
 a = st_sfc(a1, a2)
