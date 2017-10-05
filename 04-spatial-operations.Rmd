@@ -210,7 +210,7 @@ l = st_sfc(l1)
 
 p_matrix = matrix(c(0.5, 1, -1, 0, 0, 1, 0.5, 1), ncol = 2)
 p_multi = st_multipoint(x = p_matrix)
-p = st_cast(st_sfc(p_multi), "POINT")
+p = st_sf(st_cast(st_sfc(p_multi), "POINT"))
 ```
 
 ```{r relation-objects, echo=FALSE}
@@ -238,10 +238,45 @@ st_intersects(p, a, sparse = FALSE)
 
 Note that this result can be used to subset the features of `p`, in a long-form way of doing subsetting (demonstrated for illustration purposes only, result not show):
 
-```{r}
-p[st_intersects(p, a, sparse = FALSE)]
+```{r, eval=FALSE}
+p[st_intersects(p, a, sparse = FALSE), ]
 ```
 
+The second feature in the object `p` only just touches the polygon `a`, yet is selected because `st_intersects()` is a catch-all topological operation that returns `TRUE` if any kind of spatial relation.
+Other topological operators are more specific: `st_within()`, for example, returns `TRUE` only for objects that are completely within the selecting object.
+This applies only to the second object, which is inside the triangular polygon, as illustrated below:
+
+```{r}
+st_within(p, a, sparse = FALSE)
+```
+
+Note that although point 1 is *within* the triangle, it does not *touch* any part of its border.
+For this reason `st_touches()` only returns `TRUE` for the second point:
+
+```{r}
+st_touches(p, a, sparse = FALSE)
+```
+
+What about features that do not touch, but *almost touch* the selection object?
+These can be selected using `st_is_within_distance()`, which has an additional `dist` argument, which can be used to set how close target object need to be before they are selected.
+Note that although point 4 is 1 unit of distance from the nearest node of `a` (at point 2 in Figure \@ref(relation-object)), it is still selected when the distance is set to 0.9:
+
+```{r}
+st_is_within_distance(p, a, dist = 0.9) # can only return a sparse matrix
+```
+
+
+```{r, eval=FALSE, echo=FALSE}
+# other tests
+st_overlaps(p, a, sparse = FALSE)
+st_covers(p, a, sparse = FALSE)
+st_covered_by(p, a, sparse = FALSE)
+```
+
+
+```{r, eval=FALSE, echo=FALSE}
+st_contains(a, p[2, ], sparse = TRUE)
+```
 
 
 ```{r, eval=FALSE, echo=FALSE}
