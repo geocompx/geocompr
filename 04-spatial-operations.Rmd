@@ -18,20 +18,24 @@ library(spData)
 
 ## Introduction
 
-Spatial operations are an important component of any geospatial software and vital for many applications involving spatial data.
-There are clear overlaps between spatial and non-spatial operations.
-Common spatial attribute data processing tasks include spatial subsetting (as we will see in section \@ref(spatial-subsetting) and section \@ref(raster-subsetting)), joining and aggregation (see sections \@ref(spatial-joining-and-aggregation), \@ref(map-algebra), for example).
-In the case of vector data, each of these spatial operations has a non-spatial equivalent, as demonstrated in section \@ref(vector-attribute-manipulation) in the previous chapter.
-By contrast, subsetting is the only spatial raster operation we present in this chapter (section \@ref(spatial-operations-on-raster-data)) which also has a non-spatial counterpart.
-Nevertheless, spatial raster and vector operations share many similarities, at least in terms of functionality though the internal processing is completely different.
+Spatial operations are a vital part of geocomputation.
+This chapter shows how spatial objects can be modified in a multitude of ways based on their location and shape.
+The content clearly builds on the previous chapter because many spatial operations have a non-spatial (attribute) equivalent.
+Spatial operations on *vector* objects include spatial subsetting (covered in section \@ref(spatial-subsetting)), joining and aggregation (section \@ref(spatial-joining-and-aggregation)).
+These topics may sound daunting, but they have already been covered, in section \@ref(vector-attribute-manipulation).
+Spatial operations on *rasters* include merging and subsetting, covered in section \@ref(spatial-operations-on-raster-data).
 
-Some operations covered in this chapter are unique to spatial data.
+The chapter also introduces new concepts that are unique to spatial data.
 A variety of *topological relations* can be used to subset/join vector geometries (by default **sf** uses the catch-all *intersects* but other relations such as *within* can be very useful), a topic that is explored in section \@ref(topological-relations).
-New geometry data can be created by modifying existing spatial objects, using operations such as 'buffer' and 'clip', described in sections \@ref(modifying-geometry-data) and \@ref(map-algebra).
+New geometry data can be created by modifying existing spatial objects, using operations such as 'buffer' and 'clip', described in sections \@ref(modifying-geometry-data) and \@ref(clipping).
+Spatial operations on raster datasets involve *map algebra* and *alignment*, concepts introduced and demonstrated with simple examples in sections \@ref(map-algebra) and \@ref(aligning-rasters).
+
 Another unique aspect of spatial objects is distance.
-All features are related to each other in geographic space, and distance calculations resolve which spatial features are nearer or further away from a given point or each other (see sections \@ref(distance-relations) and \@ref(map-algebra)).
-The final section in this chapter additionally explores how to align two raster objects in case their headers mismatch (section \@ref(aligning-rasters)).
-This is especially important if we want to merge several rasters into one bigger raster or if we want to use several mismatching raster layers for algebraic operations.
+All features are related to each other in geographic space, and distance calculations resolve which spatial features are nearer or further away from a given point or each other (see section \@ref(distance-relations)).
+
+<!-- I've commented-out these sentences as map algebra and merging are now mentioned in the previous paragraph and this intro section seemed to be getting overly long! -->
+<!-- The final section in this chapter additionally explores how to align two raster objects in case their headers mismatch (section \@ref(aligning-rasters)). -->
+<!-- This is especially important if we want to merge several rasters into one bigger raster or if we want to use several mismatching raster layers for algebraic operations. -->
 
 ```{block2 type='rmdnote'}
 It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in \@ref(crs-intro) and which will be covered in more depth in Chapter 6.
@@ -39,17 +43,29 @@ It is important to note that spatial operations that use two spatial objects rel
 
 ## Spatial operations on vector data
 
+This section provides an overview of spatial operations in the **sf** package.
+
 ### Spatial subsetting
 
-Spatial subsetting is the process of selecting only those features of a spatial object that in some way *intersect* with another spatial object.
-<!-- can we already reference the intersection figure here? Generally asking, why can't we present the other topological operations here? Would fit nicely in this section... -->
-Note that 'intersect' in this context has a precise meaning:
-if `y` is used to subset features in a 'target' object of `x`, any features in `x` that touch, overlap or are within features in `y` will be selected.
-Intersect is the default operation for spatial subsetting but others can be used using the `op =`
-argument.^[Interested
+Spatial subsetting is the process of selecting features of a spatial object based on whether or not they some way *relate* in space to another object.
+There are many types of *topological relations*, including touching, overlapping and being within.
+These are implemented as *spatial operators* in **sf** functions such as `st_touches()`, `st_overlaps()` and `st_within()`, as described in section \@ref(topological-relations).
+
+As with attribute data, spatial data can be subset using the `[` operator, with commands such as `x[y, ]` being used to subset features of target object `x` by `y`.
+However, instead of `y` being of class `logical` (a vector of `TRUE` and `FALSE` values), it is another spatial (`sf`) object.
+
+The default spatial operator for spatial subsetting in **sf** (and other software) is *intersects*.
+This has a precise meaning:
+subsetting a spatial object `x` by another spatial object  `y` will return any features in `x` that touch, overlap or are within features in `y`.
+Others can be used using the `op =` argument.
+
+```{block2 type='rmdnote'}
+Interested
 readers can see this default value of `op` set in the first line of the function call by entering its long-form name into the console `` sf:::`[.sf` ``.
 The `?sf` help page documents this also.
-]
+```
+
+
 There are nine well-defined operations that can be used for spatial subsetting, covered in section \@ref(topological-relations).
 This may seem daunting but the good news is that you do not have to learn all of them separately:
 after you understand how to spatially subset objects that *intersect* another (via `st_intersects()`) it is easy to subset based on other types of spatial operation such as `st_touches()`, `st_crosses()` and `st_within()`.
@@ -181,7 +197,111 @@ row.names(filter(africa, subregion == "Northern Africa"))
 <!-- Distance relations -->
 <!-- Subset (1) points in polygons <-> (2) -->
 
+To understand topological relations, it helps to have some simple test data to work with.
+Figure \@ref(fig:relation-objects) illustrates a polygon (`a`), a line (`l`) and some points (`p`).
+These objects are created in the code below.
+
 ```{r}
+a_poly = st_polygon(list(rbind(c(-1, -1), c(1, -1), c(1, 1), c(-1, -1))))
+a = st_sfc(a_poly)
+
+l_line = st_linestring(x = matrix(c(-1, -1, -0.5, 1), , 2))
+l = st_sfc(l_line)
+
+p_matrix = matrix(c(0.5, 1, -1, 0, 0, 1, 0.5, 1), ncol = 2)
+p_multi = st_multipoint(x = p_matrix)
+p = st_sf(st_cast(st_sfc(p_multi), "POINT"))
+```
+
+```{r relation-objects, echo=FALSE, fig.cap="Points (p 1 to 4), line and polygon objects arranged to demonstrate spatial relations."}
+plot(a, border = "red", col = "grey", axes = TRUE)
+plot(l, add = TRUE)
+plot(p, add = TRUE, lab = 1:4)
+text(p_matrix[, 1] + 0.1, p_matrix[, 2] - 0.1, 1:4)
+```
+
+A simple query is: which of the points in `p` intersect in some way with polygon `a`?
+The question can be answered by inspection (points 1 and 2 are over or touch the triangle).
+It can also be answered by using the topological relation *intersects*, implemented in **sf** as follows:
+
+```{r}
+st_intersects(p, a)
+```
+
+The contents of the result should be as you expected:
+the function returns a positive (`1`) result for the first two points, and a negative result (represented by an empty vector, `integer(0)`) for the last two.
+What may be unexpected is that the result comes in the form of a list.
+This is because topological operations in the **sf** return a sparse matrix by default, which is useful in that it reduces the memory requirements of the output from operations on multi-feature objects.
+To return the result as a logical vector, of the type that can be used for subsetting and other operations, the result must be returned as a *dense matrix*.
+This can be done by setting the `sparse` argument to `FALSE` as follows:
+
+```{r}
+st_intersects(p, a, sparse = FALSE)
+```
+
+The output is an matrix with the four rows representing the four features in the target object `p`.
+The rows represent features in the selecting object: the first two features in `p` intersect with `a` (There is only one feature in `a` so the result has only one column).
+The result can be used to subset the features of `p` in a two-stage operation that is equivalent of `p[a, ]`:
+
+```{r, eval=FALSE}
+sel = st_intersects(p, a, sparse = FALSE)[, 1]
+p[sel, ]
+```
+
+Note the use of `[, 1]` to select only the first column --- we'll use this to return only a vector instead of matrix in subsequent code chunks.
+This operator ensures that the intermediary object `sel` is a `logical` vector (rather than a matrix).
+
+`st_intersects()` returns `TRUE` for the second feature in the object `p` even though it just touches the polygon `a`.
+This is because *intersects* is a catch-all topological operation that covers any type of spatial relation.
+There are many other topological operations that you can use, some of which we'll demonstrate below.
+The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object:
+
+```{r}
+st_disjoint(p, a, sparse = FALSE)[, 1]
+```
+
+Other topological operators are more specific.
+`st_within()`, for example, returns `TRUE` only for objects that are completely within the selecting object.
+This applies only to the second object, which is inside the triangular polygon, as illustrated below:
+
+```{r}
+st_within(p, a, sparse = FALSE)[, 1]
+```
+
+Note that although point 1 is *within* the triangle, it does not *touch* any part of its border.
+For this reason `st_touches()` only returns `TRUE` for the second point:
+
+```{r}
+st_touches(p, a, sparse = FALSE)[, 1]
+```
+
+What about features that do not touch, but *almost touch* the selection object?
+These can be selected using `st_is_within_distance()`, which has an additional `dist` argument.
+It can be used to set how close target object need to be before they are selected.
+Note that although point 4 is one unit of distance from the nearest node of `a` (at point 2 in Figure \@ref(fig:relation-objects)), it is still selected when the distance is set to 0.9.
+This is illustrated in the code chunk below, the second line of which converts the lengthy list output into a `logical` object:
+
+```{r}
+sel = st_is_within_distance(p, a, dist = 0.9) # can only return a sparse matrix
+lengths(sel) > 0
+```
+
+
+```{r, eval=FALSE, echo=FALSE}
+# other tests
+st_overlaps(p, a, sparse = FALSE)
+st_covers(p, a, sparse = FALSE)
+st_covered_by(p, a, sparse = FALSE)
+```
+
+
+```{r, eval=FALSE, echo=FALSE}
+st_contains(a, p[2, ], sparse = TRUE)
+```
+
+
+```{r, eval=FALSE, echo=FALSE}
+# starting simpler so commented
 a1 = st_polygon(list(rbind(c(-1, -1), c(1, -1), c(1, 1), c(-1, -1))))
 a2 = st_polygon(list(rbind(c(2, 0), c(2, 2), c(3, 2), c(3, 0), c(2, 0))))
 a = st_sfc(a1, a2)
@@ -202,79 +322,79 @@ plot(l, add = TRUE)
 plot(p, add = TRUE)
 ```
 
-Equals:
+<!-- Equals: -->
 <!-- https://postgis.net/docs/ST_Equals.html -->
 
-```{r, eval=FALSE}
-st_equals(a, b, sparse = FALSE)
-```
+<!-- ```{r, eval=FALSE} -->
+<!-- st_equals(a, b, sparse = FALSE) -->
+<!-- ``` -->
 
-Contains:
+<!-- Contains: -->
 <!-- https://postgis.net/docs/ST_Contains.html -->
 <!-- https://postgis.net/docs/ST_ContainsProperly.html -->
 
-```{r, eval=FALSE}
-st_contains(a, b, sparse = FALSE)
-st_contains_properly(a, b, sparse = FALSE)
-```
+<!-- ```{r, eval=FALSE} -->
+<!-- st_contains(a, b, sparse = FALSE) -->
+<!-- st_contains_properly(a, b, sparse = FALSE) -->
+<!-- ``` -->
 
-Covers:
+<!-- Covers: -->
 <!-- https://postgis.net/docs/ST_Covers.html -->
 <!-- https://postgis.net/docs/ST_CoveredBy.html -->
 
-```{r, eval=FALSE}
-st_covers(a, b, sparse = FALSE)
-st_covered_by(a, b, sparse = FALSE)
-```
+<!-- ```{r, eval=FALSE} -->
+<!-- st_covers(a, b, sparse = FALSE) -->
+<!-- st_covered_by(a, b, sparse = FALSE) -->
+<!-- ``` -->
 
-Within:
+<!-- Within: -->
 <!-- https://postgis.net/docs/ST_Within.html -->
 
-```{r, eval=FALSE}
-st_within(a, b, sparse = FALSE)
-```
+<!-- ```{r, eval=FALSE} -->
+<!-- st_within(a, b, sparse = FALSE) -->
+<!-- ``` -->
 
-Overlaps:
+<!-- Overlaps: -->
 <!-- https://postgis.net/docs/ST_Overlaps.html -->
 
-```{r, eval=FALSE}
-st_overlaps(a, b, sparse = FALSE)
-```
+<!-- ```{r, eval=FALSE} -->
+<!-- st_overlaps(a, b, sparse = FALSE) -->
+<!-- ``` -->
 
-Intersects:
+<!-- Intersects: -->
 <!-- https://postgis.net/docs/ST_Intersects.html -->
 
-```{r, eval=FALSE}
-st_intersects(a, b, sparse = FALSE)
-```
+<!-- ```{r, eval=FALSE} -->
+<!-- st_intersects(a, b, sparse = FALSE) -->
+<!-- ``` -->
 
-Disjoint:
+<!-- Disjoint: -->
 <!-- https://postgis.net/docs/ST_Disjoint.html -->
 
-```{r, eval=FALSE}
-st_disjoint(a, b, sparse = FALSE)
-```
+<!-- ```{r, eval=FALSE} -->
+<!-- st_disjoint(a, b, sparse = FALSE) -->
+<!-- ``` -->
 
-Touches:
+<!-- Touches: -->
 <!-- https://postgis.net/docs/ST_Touches.html -->
 
-```{r, eval=FALSE}
-st_touches(a, b, sparse = FALSE)
-```
+<!-- ```{r, eval=FALSE} -->
+<!-- st_touches(a, b, sparse = FALSE) -->
+<!-- ``` -->
 
-Crosses:
+<!-- Crosses: -->
 <!-- https://postgis.net/docs/ST_Crosses.html -->
 
-```{r, eval=FALSE}
-st_crosses(a, b, sparse = FALSE)
-```
+<!-- ```{r, eval=FALSE} -->
+<!-- st_crosses(a, b, sparse = FALSE) -->
+<!-- ``` -->
 
-DE9-IM - https://en.wikipedia.org/wiki/DE-9IM
+<!-- DE9-IM - https://en.wikipedia.org/wiki/DE-9IM -->
 <!-- https://edzer.github.io/sfr/reference/st_relate.html -->
 
-```{r, eval=FALSE}
-st_relate(a, b, sparse = FALSE)
-```
+<!-- ```{r, eval=FALSE} -->
+<!-- st_relate(a, b, sparse = FALSE) -->
+<!-- ``` -->
 
 <!-- examples (points/polygons) -->
 <!-- examples (points/lines) -->
@@ -472,7 +592,10 @@ For instance, if the intersection of our buffer and a country is 100 000 km^^2^^
 <!-- - ? generalization **rmapsharper** - https://github.com/ateucher/rmapshaper -->
 <!-- `st_union` -->
 
+### Modifying geometry data
+
 ### Clipping
+
 Spatial clipping is a form of spatial subsetting that involves changes to the `geometry` columns of at least some of the affected features.
 
 Clipping can only apply to features more complex than points: 
