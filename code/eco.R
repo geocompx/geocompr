@@ -53,21 +53,35 @@ dca$evals / sum(dca$evals)
 cumsum(dca$evals / sum(dca$evals))  # 45% and 69%
 
 # NMDS
-nmds = metaMDS(d, k = 4, try = 100)
+nmds = metaMDS(d, k = 4, try = 500)
+# best approach:
+# pa, k = 4
+# stress: 8.8
+# explained variance first axis: 61%, first 2 axes: 0.77
+# and plot(scores_1 ~ elev) looks reasonable
+
 nmds
 # Standard deviations of the axes
 apply(scores(nmds), 2, sd)
 
-#goodness of fit expressed as explained variance
+# goodness of fit expressed as explained variance
 cor(vegdist(pa), dist(scores(nmds)[, 1:2]))^2  # 0.83 first two axes
 cor(vegdist(pa), dist(scores(nmds)[, 1]))^2  # 0.62 only the first axis
 
-# Rotates NMDS result so that the first dimension is parallel to an
-# environmental variable (works quite good)
 elev = filter(random_points, id %in% rownames(d)) %>% 
   dplyr::pull(dem)
+plot(scores(nmds), type = "n", xlim = c(-1, 1))
+# text(scores(nmds), labels = rownames(pa))
+text(scores(nmds), labels = elev)
+
+# Rotates NMDS result so that the first dimension is parallel to an
+# environmental variable (works quite good)
+
 rotnmds = MDSrotate(nmds, elev)  # proxy for elevation
 cor(vegdist(pa), dist(scores(rotnmds)[, 1]))^2  # 0.59 only the first axis
+plot(rotnmds, type = "n", xlim = c(-1, 1))
+text(rotnmds, labels = elev, cex = 0.8)
+
 # plot(x = elev, y = scores(rotnmds)[, 1])
 # plot(elev, y = scores(rotnmds)[, 2])
 plot(x = elev, y = scores(nmds)[, 1])
@@ -105,7 +119,7 @@ isospec <-
 # my bad; this was the result when the first col was the id...
 plot(elev, bestiso$Scores[, 1])
 # pa: explained variance first two axes = 70.6 % (k = 32)
-resp = bestiso$Scores[, 1]
+resp = bestiso$Scores[, 3]
 fit = gam(resp ~ s(elev))
 summary(fit)  # deviance explained 91%
 plot(resp ~ elev)
