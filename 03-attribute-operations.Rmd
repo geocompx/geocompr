@@ -32,9 +32,9 @@ To derive the corresponding coordinate, we have to move from the origin three ce
 The raster header gives the matrix a spatial dimension which we need when plotting the raster or when we want to combine two rasters, think, for instance, of adding the values of one raster to another (see also next Chapter).
 <!-- should we somewhere add a table comparing advantages/disadvantages of using the vector or raster data model, would fit nicely into chapter 2 -->
 
-This chapter focuses on non-geographical operations on vector and raster data.
+This chapter focuses on non-geographic operations on vector and raster data.
 For vector data, we will introduce subsetting, aggregating and joining attribute data in the next section.
-Note that the corresponding functions also have a geographical equivalent.
+Note that the corresponding functions also have a geographic equivalent.
 Sometimes you can even use the same functions for attribute and spatial operations.
 This is the case for subsetting as base R's `[` and tidyverse's `filter()` let you also subset spatial data based on the spatial extent of another spatial object (see Chapter \@ref(spatial-data-operations)).
 Therefore the skills you learn here are cross-transferable which is also why this chapter lays the foundation for the next chapter (Chapter \@ref(spatial-data-operations)) which extends the here presented methods to the spatial world.
@@ -70,7 +70,7 @@ attributes(methods(class = "sf"))$info %>%
 
 Many of these functions, including `rbind()` (for binding rows of data together) and `$<-` (for creating new columns) were developed for data frames.
 A key feature of `sf` objects is that they store spatial and non-spatial data in the same way, as columns in a `data.frame` (the geometry column is typically called `geometry`).
-`sf` objects also support `tibble` and `tbl` classes used in the tidyverse, allowing 'tidy' data analysis workflows to apply for spatial data.
+`sf` objects also support `tibble` and `tbl` classes used in the tidyverse, allowing 'tidy' data analysis workflows for spatial data.
 Thus **sf** enables the full power of R's data analysis capabilities to be unleashed on geographic data.
 Before using these capabilities it's worth re-capping how to discover the basic properties of vector data objects.
 Let's start by using base R functions for to get a measure of the `world` dataset:
@@ -81,7 +81,7 @@ nrow(world) # how many rows?
 ncol(world) # how many columns?
 ```
 
-Our dataset contains ten non-geographical columns (and one geometry list-column) with almost 200 rows representing the world's countries.
+Our dataset contains ten non-geographic columns (and one geometry list-column) with almost 200 rows representing the world's countries.
 
 Extracting the attribute data of an `sf` object is the same as removing its geometry:
 
@@ -152,12 +152,14 @@ world$name_long
 ```
 
 <!-- , after the package has been loaded: [or - it is a part of tidyverse] -->
-Base R functions are essential, and we recommend that you have a working knowledge of them.
-However, **dplyr** can make working with data frames more intuitive, and can lead to faster code due to its C++ backend and ability to interface with data bases (important when working with big data).
+Base R functions are mature and widely used.
+However, the more recent **dplyr** approach has several advantages.
+It enables intuitive workflows.
+It's fast, due to its C++ backend and database integration, important when working with big data.
 The main **dplyr** subsetting functions are `select()`, `slice()`, `filter()` and `pull()`.
 
 ```{block type='rmdnote'}
-Both **raster** and **dplyr** packages have a function called `select()`. If both packages are loaded, this can generate error messages containing the text: `unable to find an inherited method for function ‘select’ for signature ‘"sf"’`.
+**raster** and **dplyr** packages have a function called `select()`. If both packages are loaded, this can generate error messages containing the text: `unable to find an inherited method for function ‘select’ for signature ‘"sf"’`.
 To avoid this error message, and prevent ambiguity, we use the long-form function name, prefixed by the package name and two colons (usually omitted from R scripts for concise code): `dplyr::select()`.
 ```
 
@@ -226,9 +228,14 @@ knitr::kable(data_frame(Symbol = operators, Name = operators_exp), caption = "Ta
 <!-- add warning about = vs == -->
 <!-- add info about combination of &, |, ! -->
 
-A benefit of **dplyr** is its ease of use, which is enhanced by its compatibility with the *pipe* operator ` %>% ` (from **magrittr**, which takes its name from the Unix pipe `|`).
-Despite its strange form (it points 'forward'), its behaviour is simple, 'piping' the output of a previous command into the first argument of the next function.
-Many functions can be combined in this way in a process called *chaining* because the fundamental functions (or 'verbs', like `select()`) of **dplyr** take a `data.frame` their first argument and also return one.^[If you want **dplyr** to return a vector, use `pull`.]
+A benefit of **dplyr** is its compatibility with the *pipe* operator ` %>% `.
+This 'R pipe', which takes its name from the Unix pipe `|` and is part of the **magrittr** package, enables expressive code by 'piping' the output of a previous command into the first argument of the next function.
+This allows *chaining* data analysis commands, with the data frame being passed from one function to the next.
+
+```{block2 type='rmdnote'}
+The **dplyr** function `pull()` extracts a single variable as a vector.
+```
+
 This is illustrate below, in which the `world` dataset is subset by columns (`name_long` and `continent`) and the first five rows (result not shown).
 
 ```{r}
@@ -292,25 +299,38 @@ world %>%
 ```
 
 The result is a spatial data frame of class `sf` (only the non-spatial results are shown): the aggregation procedure dissolves boundaries within continental land masses.
+In the previous code chunk `pop` and `n_countries` are column names in the result.
+`sum()` and `n()` were the aggregating functions.
 
-Aggregating with **dplyr** functions requires understanding of the syntax.
-The above code chunk the `pop =` and `n_countries =` arguments names the columns in the resulting data frame.
-`sum()` and `n()` were the the aggregating functions.
-More details are provided in the help pages (which can be accessed via `?summarize` and `vignette(package = "dplr")` and Chapter 5 of [R for Data Science](http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize). 
+Let's combine what we've learned so far about **dplyr** by chaining together functions to find the world's 3 most populous continents (with `dplyr::n()` ) and the number of countries they contain.
+The output of the following code is presented in Table \@ref(tab:continents)):
+
+```{r, eval=FALSE}
+world %>% 
+  dplyr::select(pop, continent) %>% 
+  group_by(continent) %>% 
+  summarize(pop = sum(pop, na.rm = TRUE), n_countries = n()) %>% 
+  top_n(n = 3, wt = pop) %>%
+  st_set_geometry(value = NULL) 
+```
+
 
 ```{r continents, echo=FALSE}
 world %>% 
-  st_set_geometry(value = NULL) %>%
-  top_n(n = 3, wt = pop) %>% 
+  dplyr::select(pop, continent) %>% 
+  group_by(continent) %>% 
+  summarize(pop = sum(pop, na.rm = TRUE), n_countries = n()) %>% 
+  top_n(n = 3, wt = pop) %>%
+  st_set_geometry(value = NULL) %>% 
   knitr::kable(caption = "The top 3 most populous continents, and the number of countries in each.")
 ```
 
-`sf` objects are well-integrated with the **tidyverse**, as illustrated by the fact that the aggregated objects preserve the geometry of the original `world` object.
-Here, we even had to make some efforts to prevent a spatial operation.
-When `aggregate()`ing the population we have just used the population vector. 
-Had we used the spatial object (world[, "population"]), `aggregate()` would have done a spatial aggregation of the polygon data. 
-The same would have happened, had we not dismissed the geometry prior to using the `summarize()` function.
-We will explain this so-called 'dissolving polygons' in more detail in the the next chapter.
+<!-- `sf` objects are well-integrated with the **tidyverse**, as illustrated by the fact that the aggregated objects preserve the geometry of the original `world` object. -->
+<!-- Here, we even had to make some efforts to prevent a spatial operation. -->
+<!-- When `aggregate()`ing the population we have just used the population vector.  -->
+<!-- Had we used the spatial object (world[, "population"]), `aggregate()` would have done a spatial aggregation of the polygon data.  -->
+<!-- The same would have happened, had we not dismissed the geometry prior to using the `summarize()` function. -->
+<!-- We will explain this so-called 'dissolving polygons' in more detail in the the next chapter. -->
 
 <!-- Todo (optional): add exercise exploring similarities/differences with `world_continents`? -->
 
@@ -333,15 +353,13 @@ We will explain this so-called 'dissolving polygons' in more detail in the the n
 <!-- http://r4ds.had.co.nz/relational-data.html -->
 <!-- non-unique keys -->
 
-Combining data from different sources is one of the most common tasks in data preparation. 
-Joins are methods to combine pair of tables based on a shared key variable.
-The **dplyr** package has a set of verbs to easily join `data.frames` - `left_join()`, `right_join()`,  `inner_join()`, `full_join`, `semi_join()` and `anti_join()`.
-These function names follow conventions used in the database language SQL, as explained in [Chapter 13](http://r4ds.had.co.nz/relational-data.html) of *R for Data Science* [@grolemund_r_2016].
-
-Working with spatial data, however, usually involves a connection between spatial data (`sf` objects) and tables (`data.frame` objects).
-Fortunately, the **sf** package has all of the **dplyr** join functions adapted to work with `sf` objects.
-The only important difference between combining two `data.frames` and combining `sf` and `data.frame` objects is the special `sf` column storing the geometry information.
-Therefore, the result of data joins can be either an `sf` or `data.frame` object.
+Combining data from different sources is a common task in data preparation. 
+Joins do this by combining tables based on a shared 'key' variable.
+**dplyr** has powerful functions for joining: `left_join()`, `right_join()`,  `inner_join()`, `full_join`, `semi_join()` and `anti_join()`.
+These function names follow conventions used in the database language [SQL](http://r4ds.had.co.nz/relational-data.html) [@grolemund_r_2016, Chapter 13].
+Using them with `sf` objects is the focus of this section.
+**dplyr** join functions work the same on data frames and `sf` objects, the only important difference being the `geometry` list column.
+The result of data joins can be either an `sf` or `data.frame` object.
 
 Most joins involving spatial data will have an `sf` object as the first argument and a `data.frame` object as the second argument, resulting in a new `sf` object (the reverse order is also possible and will return a `data.frame`).
 We will focus on the commonly used left and inner joins, which use the same syntax as the other join types [see @grolemund_r_2016 for more join types].
@@ -388,61 +406,55 @@ tmap::qtm(left_join1, "unemploy", fill.breaks = c(6, 6.5, 7), fill.title="Unempl
 It is also possible to join objects by different variables.
 Both of the datasets have variables with names of countries, but they are named differently.
 The `north_america` has a `name_long` column and the `wb_north_america` has a `name` column.
-In these cases, we can use a named vector to specify the connection, e.g. `c("name_long" = "name")`:
+In these cases a named vector, such as `c("name_long" = "name")`, can specify the connection:
 
 ```{r}
 left_join2 = north_america %>% 
   left_join(wb_north_america, by = c("name_long" = "name"))
-left_join2
+names(left_join2)
 ```
 
-The new object `left_join2`, however, contains two duplicated variables - `iso_a2.x` and `iso_a2.y` because both of the input tables possessed a variable named `iso_a2`.
-To solve this problem we should specify all the keys:
+Note that the result contains two duplicated variables - `iso_a2.x` and `iso_a2.y` because both `x` and `y` objects have the column `iso_a2`.
+This can be solved by specifying all the keys:
 
 ```{r}
 left_join3 = north_america %>% 
   left_join(wb_north_america, by = c("iso_a2", "name_long" = "name"))
-left_join3
 ```
 
-It is also possible to use our objects in the reverse order, where a `data.frame` object is the first argument and a `sf` object is the second argument.
-This would keep the geometry column but drop the `sf` class, and result in a `data.frame` object.
+Joins also work when a data frame is the first argument.
+This keeps the geometry column but drops the `sf` class, returning a `data.frame` object.
 
 ```{r}
 # keeps the geom column, but drops the sf class
 left_join4 = wb_north_america %>%
   left_join(north_america, by = c("iso_a2"))
-left_join4
 class(left_join4)
 ```
 
-`left_join4` has only one class - `data.frame`, however it is possible to add spatial `sf` class using the `st_as_sf()` function: 
-
-```{r}
-left_join4_sf = st_as_sf(left_join4)
-left_join4_sf
-class(left_join4_sf)
+```{block2 type='rmdnote'}
+It is possible to convert a data frame with a geometry list column, such as `left_join4`, into an `sf` object with `st_as_sf()`, as follows: `st_as_sf(left_join4)`. 
 ```
 
-On the other hand, it is also possible to remove the geometry column of `left_join4` using base R functions or `dplyr`.
-Here, this is this simple because the geometry column is just another `data.frame` column and no longer the sticky geometry column of an `sf` object (see also Chapter \@ref(spatial-class)):
+<!-- On the other hand, it is also possible to remove the geometry column of `left_join4` using base R functions or `dplyr`. -->
+<!-- Here, this is this simple because the geometry column is just another `data.frame` column and no longer the sticky geometry column of an `sf` object (see also Chapter \@ref(spatial-class)): -->
 
-```{r}
-# base R
-left_join4_df = subset(left_join4, select = -geom)
-# or dplyr
-left_join4_df = left_join4 %>% dplyr::select(-geom)
-left_join4_df
-class(left_join4_df)
-```
+<!-- ```{r} -->
+<!-- # base R -->
+<!-- left_join4_df = subset(left_join4, select = -geom) -->
+<!-- # or dplyr -->
+<!-- left_join4_df = left_join4 %>% dplyr::select(-geom) -->
+<!-- left_join4_df -->
+<!-- class(left_join4_df) -->
+<!-- ``` -->
 
-In contrast to the left join, the `inner_join()` keeps only observations from the left object (`north_america`) where there are matching observations in the right object (`wb_north_america`). 
-Additionally, all columns from the left and right object are kept:
+In contrast to `left_join()`, `inner_join()` keeps only observations from the left object (`north_america`) where there are matching observations in the right object (`wb_north_america`). 
+All columns from the left and right object are still kept:
 
 ```{r}
 inner_join1 = north_america %>% 
   inner_join(wb_north_america, by = c("iso_a2", "name_long" = "name"))
-inner_join1
+inner_join1$name_long
 ```
 
 ### Creating attributes and removing spatial information
@@ -531,15 +543,18 @@ world_data = world %>% st_set_geometry(NULL)
 class(world_data)
 ```
 
+```{block2 type='rmdnote'}
+More details are provided in the help pages (which can be accessed via `?summarize` and `vignette(package = "dplyr")` and Chapter 5 of [R for Data Science](http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize). 
+```
+
 ## Manipulating raster objects
 
-In contrast to simple features (vector data), raster data represents continuous surfaces.
-In this section we will use a raster object created *from scratch*, building on section \@ref(an-introduction-to-raster).
-Raster data has a fundamentally different structure than vector data, so subsetting and other operations work in a different way, as demonstrated in section \@ref(raster-subsetting).
+In contrast to the vector data model underlying simple features (which represents points, lines and polygons as discrete entities in space), raster data represent continuous surfaces.
+This section shows how raster objects work, by creating them *from scratch*, building on section \@ref(an-introduction-to-raster).
+Because of their unique structure, subsetting and other operations on raster datasets work in a different way, as demonstrated in section \@ref(raster-subsetting).
 
-Let us start with manually recreating the raster dataset of Chapter \@ref(raster-classes).
-This should make it easy to understand how **raster** and related operations work (Figure \@ref(fig:cont-cate-rasters)).
-Here, we create a raster which should represent elevations, therefore, we name it accordingly `elev`.
+The following code recreates the raster dataset used in section \@ref(raster-classes), the result of which is illustrated in Figure \@ref(fig:cont-cate-rasters).
+This demonstrates how the `raster()` function works to create an example raster named `elev` (representing elevations).
 
 ```{r, message=FALSE}
 library(raster)
@@ -548,35 +563,38 @@ elev = raster(nrow = 6, ncol = 6, res = 0.5,
               vals = 1:36)
 ```
 
-Note that a raster object can also contain categorical data.
-For this, we can use either Boolean or factor variables in R.
-For instance, we can create a raster representing grain sizes (Figure \@ref(fig:cont-cate-rasters)):
+The result is a raster object with 6 rows and 6 columns (specified by the `nrow` and `ncol` arguments), and minimum and a minimum and maximum spatial extent (specified by `xmn`, `xmx` and equivalent arguments for the y axis).
+The `vals` argument sets the values that each cell contains: numeric data ranging from 1 to 36 in this case.
+Raster objects can also contain categorical values of class `logical` or `factor` variables in R.
+The following code creates a raster representing grain sizes (Figure \@ref(fig:cont-cate-rasters)):
 
 ```{r}
-grain_size = c("clay", "silt", "sand")
+grain_order = c("clay", "silt", "sand")
+grain_char = sample(grain_order, 36, replace = TRUE)
+grain_fact = factor(grain_char, levels = grain_order)
 grain = raster(nrow = 6, ncol = 6, res = 0.5, 
                xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-               vals = factor(sample(grain_size, 36, replace = TRUE), 
-                             levels = grain_size))
-grain
+               vals = grain_fact)
 ```
 
-The **raster** package represents Boolean and factor variables as integers.
-Hence, `grain[1, 1]` returns an integer instead of "sand", "silt" or "clay".
-These integers in turn represent unique identifiers. 
-The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes` which you see when you print a so-called 'ratified' raster to the console (see the help page of the `ratify()` command for more information).
-Use `levels()` to just retrieve the attribute table.
-We can even add further columns to this attribute table:
+```{block2 type='rmdnote'}
+`raster` objects cannot contain values of class 'character'.
+For this reason the function `factor()` is used in the preceding code chunk.
+The `levels` argument was used to create an ordered factor:
+clay < silt < sand in terms of grain size, so the levels are provided in this order.
+```
+
+`raster` objects represent categorical varibles as integers, so `grain[1, 1]` returns a number that represents a unique identifiers, rather than "clay", "silt" or "sand". 
+The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes`, which can be viewed with `ratify(grain)` (see `?ratify()` for more information).
+Use the function `levels()` to retrieve the attribute table and add additional factor values:
 
 ```{r}
-levels(grain)[[1]] =  cbind(levels(grain)[[1]], wetness = c("wet", "moist", "dry"))
+levels(grain)[[1]] = cbind(levels(grain)[[1]], wetness = c("wet", "moist", "dry"))
 levels(grain)
 ```
 
-This is really interesting since we have learned that each raster cell can only possess one value.
-In fact, the raster cells themselves still consist of only one value, namely an integer which represents a unique identifier.
-This identifier can then be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`).
-Say, we would like to know the grain size and the wetness of cell IDs 1, 12 and 36, we can run:
+This behaviour demonstrates that raster cells can only possess one value, an identifier which can be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`).
+This is illustrated in command below, which returns the grain size and wetness of cell IDs 1, 12 and 36, we can run:
 
 ```{r}
 factorValues(grain, grain[c(1, 12, 36)])
@@ -588,16 +606,17 @@ knitr::include_graphics("figures/03_cont_categ_rasters.png")
 ```
 
 ### Raster subsetting
-We can subset raster datasets with the help of `[` which accepts different types of input.
+
+Raster subsetting is done with the base R operator `[`, which accepts a variety of inputs:
 
 - row-column indexing
 - cell IDs
 - coordinates
 - another raster object
 
-The latter two represent already spatial subsetting (see next chapter).
-Here, we demonstrate the first two subsetting options in the two commands below.
-Both return the value of the top left pixel in the raster object `elev` (results not shown):
+The latter two represent spatial subsetting (see the next chapter).
+The first two subsetting options are demonstrated in the commands below ---
+both return the value of the top left pixel in the raster object `elev` (results not shown):
 
 ```{r, eval = FALSE}
 # row 1, column 1
@@ -606,16 +625,14 @@ elev[1, 1]
 elev[1]
 ```
 
-To extract all values or complete rows, you can use `values()` and `getValues()`
-In case you apply subsetting to a raster stack or brick, this will return the cell value(s) for each single layer.
-For example, `stack(elev, grain)[1]` returns a matrix with one row and two columns - one for each layer.
-In this example we have used cell ID subsetting, of course, you can also use row-column or coordinate indexing.
-On the other hand, the `raster::subset()` command lets you extract a specific or several layers from a raster stack or brick.
-For the same operation, you can also use the `[[` operator.
-If you only want to extract a single layer, you might also use the `$` operator.
+To extract all values or complete rows, you can use `values()` and `getValues()`.
+For multi-layered raster objects `stack` or `brick`, this will return the cell value(s) for each layer.
+For example, `stack(elev, grain)[1]` returns a matrix with one row and two columns --- one for each layer.
+<!-- In this example we have used cell ID subsetting, of course, you can also use row-column or coordinate indexing. -->
+For multi-layer raster objects another way to subset is with `raster::subset()`, which extracts layers from a raster stack or brick. The `[[` and `$` operators can also be used.
 
-To modify a single cell value, we overwrite existing values with the help of subsetting operations (see above).
-For instance, let us replace the upper left cell of `elev`, which is 1, by 0:
+Cell values can be modified by overwriting existing values in conjunction with a subsetting operation.
+The following code chunk, for example, sets the upper left cell of `elev` to 0:
 
 ```{r}
 elev[1, 1] = 0
@@ -623,25 +640,36 @@ elev[]
 ```
 
 Leaving the square brackets empty is a shortcut version of `values()` for retrieving all values of a raster.
-Of course, one can use indexing to modify multiple cells or even blocks.
+Multiple cells can also be modified in this way:
+
+```{r}
+elev[1, 1:2] = 0
+```
 
 ### Summarizing raster objects
-In R we can easily derive descriptive statistics for entire rasters.
-Printing the raster object to the console already returns the minimum and maximum values of a raster.
-You can also use the `summary()` function for the most common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
-If we are interested in further summary operations such as the standard deviation (see below) or if we want to define our own summary functions, we can do so with the `cellStats` command. 
+
+**raster** contains functions for extracting descriptive statistics for entire rasters.
+Printing a raster object to the console by default, by typing its name, returns minimum and maximum values of a raster.
+`summary()` provides common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
+Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with `cellStats()`. 
+
 ```{r, eval = FALSE}
 cellStats(elev, sd)
 ```
 
-Note: if you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately.
-Try `summary(brick(elev, grain))`. 
-Nothing stops us from visualizing descriptive raster statistics.
-We can manually retrieving raster values with the help of the `values()` and `getValues()` function, and putting their output into any `plot()` function we like.
-Or we can make use of the `boxplot()`, `density()`, `hist()` and `pairs()` methods for raster objects.
+```{block2 type='rmdnote'}
+If you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately, as can be illustrated by running `summary(brick(elev, grain))`.
+```
+
+Raster value statistics can be visualized in a variety of ways.
+Raster values, e.g. returned by `values()` or `getValues()`, can be plotted in a variety of ways, including with `boxplot()`, `density()`, `hist()` and `pairs()`, which work for raster objects, as demonstrated in the histogram created with the command below (not shown):
+
+```{r, eval=FALSE}
+hist(elev)
+```
 
 Descriptive raster statistics belong to the so-called global raster operations.
-These and other typical raster processing operations are part of the map algebra scheme which we will get to know better in the next chapter.
+These and other typical raster processing operations are part of the map algebra scheme which are covered in the next chapter.
 
 ```{block type='rmdnote'}
 Some function names clash between packages (e.g., `select`, as discussed in a previous note).
