@@ -107,6 +107,41 @@ Aggregate it to a resolution of 20000 sqkm.
 ```{r}
 inh_agg = aggregate(inh, fact = 20000 / res(inh)[1], fun = sum)
 plot(inh_agg > 500000)
+polys = raster::rasterToPolygons(inh_agg[inh_agg > 500000, drop = FALSE])
+# dissolve on spatial neighborhood
+# GO ON FROM HERE TOMORROW-------------
+nbs = over(polys, polys, returnList = TRUE)
+polys = spTransform(polys, "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+coords = coordinates(polys)
+metros = lapply(1:nrow(coords), function(i) {
+  Sys.sleep(2)
+  ggmap::revgeocode(coords[i, ], output = "more")
+} 
+) 
+```
+
+
+```{r}
+library(osmdata)
+q0 <- opq('Dresden')
+q1 <- add_osm_feature(q0, key = 'highway', value = 'cycleway')
+cway_sev <- osmdata_sp(q1)
+
+
+metros = c("Munich", "Stuttgart", "Nuremberg", "Frankfurt", "Cologne",
+           "Hamburg", "Leipzig", "Berlin")
+ls_1 = lapply(metros, function(x) {
+  print(x)
+  q0 = opq(x)
+  q1 = add_osm_feature(q0, key = 'shop')
+  osmdata_sp(q1)
+})
+
+q = opq("Deutschland")
+q <- add_feature(q, key = 'highway')
+q <- add_feature(q, key = 'name')
+
+
 ```
 
 Munich, Stuttgart, Nuremberg, Frankfurt, Cologne/Düsseldorf, Hamburg, Leipzig, Berlin
