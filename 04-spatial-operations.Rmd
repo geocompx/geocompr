@@ -28,14 +28,11 @@ Spatial operations on *rasters* include merging and subsetting, covered in secti
 The chapter also introduces new concepts that are unique to spatial data.
 A variety of *topological relations* can be used to subset/join vector geometries (by default **sf** uses the catch-all *intersects* but other relations such as *within* can be very useful), a topic that is explored in section \@ref(topological-relations).
 New geometry data can be created by modifying existing spatial objects, using operations such as 'buffer' and 'clip', described in sections \@ref(modifying-geometry-data) and \@ref(clipping).
-Spatial operations on raster datasets involve *map algebra* and *alignment*, concepts introduced and demonstrated with simple examples in sections \@ref(map-algebra) and \@ref(aligning-rasters).
+Spatial operations on raster datasets involve *map algebra* (covered in sections \@ref(map-algebra) to \@ref(global-operations-and-distances)) and combining and aligning them (covered in sections \@ref(merging-rasters) and \@ref(aligning-rasters)).
 
 Another unique aspect of spatial objects is distance.
-All features are related to each other in geographic space, and distance calculations resolve which spatial features are nearer or further away from a given point or each other (see section \@ref(distance-relations)).
-
-<!-- I've commented-out these sentences as map algebra and merging are now mentioned in the previous paragraph and this intro section seemed to be getting overly long! -->
-<!-- The final section in this chapter additionally explores how to align two raster objects in case their headers mismatch (section \@ref(aligning-rasters)). -->
-<!-- This is especially important if we want to merge several rasters into one bigger raster or if we want to use several mismatching raster layers for algebraic operations. -->
+All spatial objects are related through space and distance calculations can be used to find the strength of this relationship between spatial entities.
+Distance operations are covered in sections \@ref(distance-relations) and \@ref(global-operations-and-distances) for vector and raster datasets respectively.
 
 ```{block2 type='rmdnote'}
 It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in \@ref(crs-intro) and which will be covered in more depth in Chapter 6.
@@ -763,7 +760,8 @@ Next we only want to keep those values of `elev` which are `TRUE` in `rmask`, or
 These operations are in fact Boolean local operations since we compare cell-wise two rasters.
 The next subsection explores these and related operations in more detail.
 
-###  Map algebra
+### Map algebra
+
 Map algebra makes raster processing really fast.
 This is because raster datasets only implicitly store coordinates.
 To derive the coordinate of a specific cell, we have to calculate it using its matrix position and the raster resolution and origin.
@@ -785,7 +783,9 @@ Most often the output cell value is the result of a 3 x 3 input cell block.
 This classification scheme uses basically the number of cells involved in a processing step as distinguishing feature.
 Of course, one can classify raster operations based on other characteristics such as discipline.
 Think, for instance, of terrain, hydrological analysis or image classifications.
-In the following paragraphs, we will explain each of the four map algebra operations by example.
+The following sections explain how each type of map algebra operations can be used, with reference to worked examples (also see `vignette("Raster")` for a technical description of map algebra).
+
+### Local operations
 
 **Local** operations comprise all cell-by-cell operations in one or several layers.
 A good example is the classification of intervals of numeric values into groups such as grouping a digital elevation model into low (class 1), middle (class 2) and high elevations (class 3).
@@ -801,8 +801,7 @@ recl = reclassify(elev, rcl = rcl)
 Raster algebra is another classical use case of local operations.
 This includes adding, subtracting and squaring two rasters.
 Raster algebra also allows logical operations such as finding all raster cells that are greater than a specific value (5 in our example below).
-The **raster** package allows all these operations in a way natural to R users.
-Please see the `Raster`-vignette for a more detailed description on algebraic operations (`vignette("Raster", package = "raster")`).
+The **raster** package supports all these operations and more, as described in `vignette("Raster")` and demonstrated below (results not show):
 
 ```{r, eval = FALSE}
 elev + elev
@@ -834,6 +833,8 @@ Consequently, we can easily retrieve space- or airborne predictor variables from
 Subsequently, we model our response as a function of our predictors using `lm`, `glm`, `gam` or a machine-learning technique. 
 To make a spatial prediction, all we have to do, is to apply the estimated coefficients to the predictor rasters, and summing up the resulting output rasters (<!--Chapter ??; -->see also @muenchow_predictive_2013).
 <!-- add reference to chapter ecological modeling -->
+
+### Focal operations
 
 While local functions operate on one cell, though possibly from multiple layers, **focal** operations take into account a central cell and its neighbors.
 The neighborhood (also named kernel, filter or moving window) under consideration is typically of size 3-by-3 cells (that is the central cell and its eight surrounding neighbors) but can take on any other (not necessarily rectangular) shape as defined by the user.
@@ -876,6 +877,8 @@ Fortunately, desktop GIS commonly provide these algorithms.
 In Chapter 13 we will learn how to access GIS functionality from within R.
 <!-- Reference 13-gis chapter -->
 
+### Zonal operations
+
 *Zonal* operations are similar to focal operations.
 The difference is that zonal filters can take on any shape instead of just a predefined window.
 Our grain size raster is a good example (Figure \@ref(fig:cont-cate-rasters)) because the different grain sizes are spread in an irregular fashion throughout the raster.
@@ -891,6 +894,8 @@ z
 
 This returns the statistics for each category, here the mean altitude for each grain size class.
 Of course, we can add this statistic to the attribute table of the ratified raster (see previous chapter).
+
+### Global operations and distances
 
 *Global* operations are a special case of zonal operations with the entire raster dataset representing a single zone.
 The most common global operations are descriptive statistics for the entire raster dataset such as the minimum or maximum (see previous chapter).
@@ -946,6 +951,7 @@ Remote scientist frequently apply histogram matching or use regression technique
 The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`calcHistMatch()`) and **RStoolbox** (`histMatch()`, `pifMatch()`) provide the corresponding functions.
 
 ### Aligning rasters
+
 When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent has to match.
 Otherwise, how should we add the values of one raster with a resolution of 0.2 decimal degrees to a second with a resolution of 1 decimal degree?
 The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions.
@@ -992,7 +998,6 @@ This is because **raster**:
 2. tries to fascilitate parallel processing.
 For more information have a look at the help pages of `beginCluster()` and `clusteR()`.
 Additionally, check out the *Multi-core functions* section in `vignette("functions", package = "raster")`.
-
 
 <!-- ## Spatial data creation -->
 
