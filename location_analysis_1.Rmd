@@ -1,0 +1,98 @@
+# Location analysis
+
+Suppose we would like to set up bike shops in all metropolitan areas of Germany.
+We know that the majority of our clients has an age between 20-40 years. 
+Besides, our clientele is predominantly male and lives alone or with just one person (single households, not families).
+
+Procedure:
+- download German census data and convert it into a raster (resolution: 1 km^2^)
+- find metropolitan areas, i.e. aggregate to a resolution of 10 sqkm (define a threshold for metropolitan areas, and point out that there are still more advanced ways to do so)
+- download OSM, find bike shops + other interesting POIs.
+Create a POI raster (= attraction raster)
+- restrict to metropolitan areas
+- weights:
+  - reclassify age raster: 16-40 weight = 2; all other weight = 1
+  - reclassify gender raster:
+  - reclassify household raster
+	- POIs: reclassify into 5 classes, the more POIs, the better
+	- finally map algebra: age + gender + POI raster will show the most favorable locations
+- Exercise: download the 100 m census inhabitant data and convert it into a raster (will be used in the chapter continuing location analysis)
+  
+advanced chapter continuing location analysis:
+ - restrict our analysis to Nuremberg (but point out that we could do the whole analysis simultaneously for all metropolitan areas in Germany)
+ - choose optimal location based on number of inhabitants -> you should reach as much people within 15 minutes as possible
+ - the farther away we get from a shop, the more unlikely people will go to our shop (-> decay distance)
+ - however, we have to take into account that there are already competitors (huff model, attraction) 
+
+## Prerequisites
+
+```{r} 
+library(sp)
+library(raster)
+library(osmdata)
+library(tidyverse)
+```
+
+## Data download
+
+Download the census data, unzip it and read it into R.
+```{r}
+url = paste0("https://www.zensus2011.de/SharedDocs/Downloads/DE/", 
+             "Pressemitteilung/DemografischeGrunddaten/csv_Zensusatlas_", 
+             "klassierte_Werte_1km_Gitter.zip?__blob=publicationFile&v=8")
+download.file(url = url, destfile = file.path(tempdir(), "class.zip"),
+              method = "auto", mode = "wb")
+# list the file names
+nms = unzip(file.path(tempdir(), "class.zip"), exdir = tempdir(), list = TRUE)
+# unzip only the csv file
+unzip(file.path(tempdir(), "class.zip"), files = nms$Name[2], exdir = tempdir())
+# read in the csv file
+input = readr::read_csv2(file.path(tempdir(), nms$Name[2]))
+```
+
+Next we would like to only select the variables we need. 
+Additionally, we would like to set the values -1 and -9 to `NA` since these values are either unknown or secret.
+
+```{r}
+# only select the variables we need
+# inh = inhabitants, hh_size = household size
+input = dplyr::select(input, x = x_mp_1km, y = y_mp_1km, inh = Einwohner,
+                      mean_age = Alter_D, women = Frauen_A, 
+                      hh_size = HHGroesse_D)
+# set -1 and -9 to NA since this corresponds to unknown or secret values
+input = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
+```
+
+After the data preprocessing, we can convert the table into a raster stack making use of the x- and y-coordinates.
+
+```{r}
+# convert table into a raster (x and y are cell midpoints)
+coordinates(input) =~ x + y
+# use the correct projection
+proj4string(input) = CRS("+init=epsg:3035")
+gridded(input) = TRUE
+# convert into a raster stack
+input = stack(input)
+# plot(input)
+```
+
+Reclassify inhabitant data.
+
+```{r}
+rcl = matrix(c(1, 1, 125, 2, 2, 375, 3, 3, 1250, 4, 4, 3000, 5, 5, 6000,
+               6, 6, 8000), ncol = 3, byrow = TRUE)
+inh = reclassify(input$inh, rcl = rcl, right = NA)
+```
+
+Aggregate it to a resolution of 20000 sqkm.
+
+```{r}
+inh_agg = aggregate(inh, fact = 20000 / res(inh)[1], fun = sum)
+plot(inh_agg > 500000)
+```
+
+Munich, Stuttgart, Nuremberg, Frankfurt, Cologne/Düsseldorf, Hamburg, Leipzig, Berlin
+(missing: Dresden, Bielefeld, Bremen, Hannover, but ok)
+
+
+Reference (Huff model): https://journal.r-project.org/archive/2017/RJ-2017-020/RJ-2017-020.pdf
