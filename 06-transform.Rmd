@@ -1,5 +1,17 @@
 # Reprojections and Transformations {#coord}
 
+## Prerequisites {-}
+
+- This chapter requires **tidyverse**, **sf**, and **spData** packages:
+
+```{r, message=FALSE}
+library(tidyverse)
+library(sf)
+library(spData)
+```
+
+## Introduction
+
 <!-- random notes -->
 <!-- CRS also represent spatial relationship between datasets. -->
 <!-- Therefore, spatial operations could only be correctly performed on data with the same CRS. -->
@@ -19,30 +31,10 @@
 <!-- - proj -->
 <!-- - proj4 + epsg -->
 <!-- - the most popular epsg -->
-
-## Prerequisites {-}
-
-- This chapter requires **tidyverse**, **sf**, and **spData** packages:
-
-```{r, message=FALSE}
-library(sf)
-library(tidyverse)
-```
-
-- You must have loaded the `world` data from the spData package:
-
-```{r, results='hide'}
-library(spData)
-```
-
-## Introduction
-
 <!--in most of the cases reproject vector, not raster-->
 
-## Setting and transforming the CRS
-
-As stated in Chapter \@ref(spatial-data-operations), it is important to understand which CRS you are working in when undertaking spatial operations.
-Many spatial operations assum that you are using a *projected* CRS (on a Euclidean grid with units of meters rather than a geographic 'lat/lon' grid with units of degrees).
+As stated in Chapter \@ref(crs-intro), it is important to understand which CRS you are working in when undertaking spatial operations.
+Many spatial operations assume that you are using a *projected* CRS (on a Euclidean grid with units of meters rather than a geographic 'lat/lon' grid with units of degrees).
 The GEOS engine underlying most spatial operations in **sf**, for example, assume your data is in a projected CRS.
 For this reason **sf** contains a function for checking if geometries have a geographic or projected CRS.
 This is illustrated below using the example of the *Greenwich point* which came to define 0 degrees longitude:
@@ -74,12 +66,11 @@ greenwich_buff_latlon = st_buffer(greenwich_latlon, 10)
 The results show that, as expected, `4326` is a geographic (lat/lon) CRS.
 As a result a warning message is emitted to warn the user that the operation may not work correctly and that, if the operation was intended, the distance should be in degrees (not meters or some other Euclidean distance measurement).
 The seemingly small difference in setting the CRS may seem inconsequential but it can have a huge impact.
-This is illustrated in Figure \@ref(crs-buf), which shows how the two buffers are plotted, with the (correctly) defined CRS of the latter object being dramatically elongated in the north-south direction due to the thinning of the vertical lines of longitude towards the Earth's poles.  
+This is illustrated in Figure \@ref(fig:crs-buf), which shows how the two buffers are plotted, with the (correctly) defined CRS of the latter object being dramatically elongated in the north-south direction due to the thinning of the vertical lines of longitude towards the Earth's poles.  
 
 ```{r, echo=FALSE}
 par(mfrow = c(1, 2))
 ```
-
 
 ```{r crs-buf, fig.cap="Buffers on geographic data with undefined (left) and defined (right) CRSs."}
 plot(greenwich_buff, graticule = st_crs(4326))
@@ -90,8 +81,9 @@ plot(greenwich_buff_latlon, graticule = st_crs(4326))
 
 While CRSs can be set manually, it is more common in real world applications to *transform* a known CRS into another.
 A typical example is when geometry data is provided in a geographic CRS but you want to do spatial operations, which require it to be in a projected CRS.
+Let's use real-world examples to illustrate this.
 
-Let's use a real-world example to illustrate this.
+<!-- Vector data -->
 The dataset `cycle_hire_osm` represents all cycle hire locations across London, take from OpenStreetMap (OSM).
 It is automatically loaded by the **spData** package, meaning we do not have to load it, and its CRS can be queried as follows:
 
@@ -105,7 +97,6 @@ Let's create a new version of it in a projected CRS, using the 'magic number' (a
 cycle_hire_projected = st_transform(cycle_hire_osm, 27700)
 st_crs(cycle_hire_projected)
 ```
-
 
 Note that the result shows that the `epsg` has been updated and that `proj4string` element of the CRS now contains, among other things `+proj=tmerc` (meaning it is a projected CRS using the [tranverse Mercator](https://en.wikipedia.org/wiki/Transverse_Mercator_projection) projection) and `+units=m` (meaning the units of the coordinates are meters).
 Another function, from the **rgdal** library, provides a note about the CRS (its name):
@@ -124,44 +115,9 @@ The formula that converts a geographic point into a point on the surface of the 
 st_crs(27700)$proj4string
 ```
 
-### Pro tip {-}
-
+```{block2 type='rmdnote'}
 The EPSG code can be found inside the `crs` attribute of the object's geometry.
-It is hidden from view for most of the time except when the object is printed but can be can identified and set using the functions `attribute()` and `attr()`, as illustrated below:
-
-```{r}
-attr(sf_points$geometry, which = "crs")$epsg
-```
-
-### Vector data
-
-<!-- CRS assign -->
-
-- In case when a coordinate reference system (CRS) is missing or the wrong CRS is set, `st_crs()` or `st_set_crs` function can be used:
-
-```{r, warning=FALSE}
-world_set3410 = st_set_crs(world, 3410)
-st_crs(world_set3410)
-```
-
-
-```{r coord_compare0, echo=FALSE}
-par(mfrow = c(1, 2), mar=c(0,0,0,0))
-plot(world_set3410[0]);plot(world[0])
-```
-
-<!-- Reprojection -->
-
-- The `st_transform()` can be used to transform coordinates
-
-```{r}
-world_3410 = st_transform(world, 3410)
-st_crs(world_3410)
-```
-
-```{r coord_compare, echo=FALSE}
-par(mfrow = c(1, 2), mar=c(0,0,0,0))
-plot(world_3410[0]);plot(world[0])
+It is hidden from view for most of the time except when the object is printed but can be can identified and set using the `st_crs` function, for example `st_crs(cycle_hire_osm)$epsg`.
 ```
 
 <!--
@@ -171,26 +127,27 @@ plot(world_3410[0]);plot(world[0])
 - ==
 - !st_is_longlat(x)
 - st_set_crs(x, crs)
-- st_proj_info
+- st_proj_info("proj");st_proj_info("ellps");st_proj_info("datum");st_proj_info("units")
 - st_bbox
+- st_wrap_dateline
 -->
 
-### Raster data
+<!--Raster data -->
 
 <!--
 - projectRaster
 -->
 
-## Affine transformations
+<!-- ## Affine transformations -->
 
-### Translating
+<!-- ### Translating -->
 
-### Scaling
+<!-- ### Scaling -->
 
-### Rotating
+<!-- ### Rotating -->
 
-### Reflecting
+<!-- ### Reflecting -->
 
-### Shearing
+<!-- ### Shearing -->
 
 <!-- Todo: add content on simplifying using mapshaper and other packages (e.g. sf) -->
