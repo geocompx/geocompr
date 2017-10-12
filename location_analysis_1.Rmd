@@ -111,9 +111,27 @@ polys = rasterToPolygons(inh_agg[inh_agg > 500000, drop = FALSE])
 polys = st_as_sf(polys)
 ```
 
-Plotting our polygons reveals eight regions.
+Plotting our polygons reveals eight metropolitan regions.
 Each region consists of one ore more polygons (pixels).
-It would be nice if we could merge the pixels belonging to one region.
+It would be nice if we could join all polygons belonging to one region.
+One approach is to dissolve all polygons.
+
+```{r}
+polys = summarize(polys, pop = sum(layer))
+```
+
+This returns one multipolygon feature with its elements corresponding to the metropolitan regions. 
+To extract these polygons from the multipolygon, we can use `st_cast()`.
+
+```{r}
+polys = st_cast(polys, "POLYGON")
+``` 
+
+The warning message tells us that the attributes are repeated for all sub-geometries.
+In our case, this means that each region receives the total population of all metropolitan areas combined.
+Clearly this is wrong but here we can safely ignore this since we are merely interested in the geometry.
+
+<!-- maybe a good if advanced exercise
 This requires finding the nearest neighbors (`st_intersects()`), and some additional processing.
 Do not worry too much about the following code.
 There is probably a better way to do it. 
@@ -157,7 +175,27 @@ polys = group_by(polys, region_id) %>%
   summarize(pop = sum(layer, na.rm = TRUE))
 # polys_2 = aggregate(polys, list(polys$region_id), sum)
 plot(polys[, "region_id"])
+
+# Another approach, can be also be part of an excercise
+
+coords = st_coordinates(polys_3) %>% 
+  as.data.frame
+ls = split(coords, f = coords$L2)
+ls = lapply(ls, function(x) {
+  dplyr::select(x, X, Y) %>%
+    as.matrix %>%
+    list %>%
+    st_polygon
+})
+metros = do.call(st_sfc, ls)
+metros = st_set_crs(metros, 3035)
+metros = st_sf(data.frame(region_id = 1:9), geometry = metros)
+st_intersects(metros, metros)
+plot(metros[-5,])
+st_centroid(metros) %>%
+  st_coordinates
 ```
+-->
 
 To name the found several metropolitan areas, we use a reverse geocoding approach.
 Reverse gecoding finds the address for a specific coordinate
