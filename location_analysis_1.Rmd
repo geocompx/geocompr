@@ -9,7 +9,7 @@ library(osmdata)
 library(tidyverse)
 ```
 
-## Introduction
+## Introduction and use case
 An ecological amplitude specifies a species' needs and optimum along different gradients.
 For example, an icebear prefers northern latitudinal regions where the ice is persisent throughout the summer, where there is enough food (seals and sea lions) and where it can find shelter for its offspring.
 The farther away an icebear is forced to live from these favorable conditions the more unlikely is its survival.
@@ -17,20 +17,16 @@ Similarily, a market product can have an economic niche.
 There are locations of low and high turnovers.
 And it is one task of geomarketing to identify regions where business is profitable.
 Typical geomarketing questions include:
-- Where are my clients?
-- Where are my target groups?
-- Can many customers easily reach my stores?
+- Where are my clients, my target groups, my competitors?
+- Can many customers easily reach and find my stores?
 - Do my stores over-/underexploit the market potential?
-- where are competitors?
-- How big is my market share, and are there spatial differences?
-- Are there regions with bigger turnovers?
-
-## Use case
+- How big is my market share and turnovers, and are there spatial differences?
 
 Suppose we would like to set up bike shops in all metropolitan areas of Germany.
 We know that the majority of our clients are between 20-40 years old. 
 Besides, our clientele is predominantly male, and lives alone or with just one person (single households, not families).
 
+<!-- just internal structure and brain storming -->
 Procedure:
 - download German census data and convert it into a raster (resolution: 1 km^2^)
 - find metropolitan areas, i.e. aggregate to a resolution of 10 sqkm (define a threshold for metropolitan areas, and point out that there are still more advanced ways to do so)
@@ -51,9 +47,12 @@ In an advanced chapter we could continue the analysis as follows:
  - the farther away we get from a shop, the more unlikely people will go to our shop (-> decay distance)
  - however, we have to take into account that there are already competitors (huff model, attraction) 
 
-## Data download
+## Create input rasters
 
-Download the census data, unzip it and read it into R.
+The German government provides a csv file containing the census data for Germany.
+You can either download a 1 km or a 100 m resolution.
+Here, we download the 1 km data, unzip it and read it into R.
+
 ```{r, eval = FALSE}
 url = paste0("https://www.zensus2011.de/SharedDocs/Downloads/DE/", 
              "Pressemitteilung/DemografischeGrunddaten/csv_Zensusatlas_", 
@@ -63,13 +62,14 @@ download.file(url = url, destfile = file.path(tempdir(), "census.zip"),
 # list the file names
 nms = unzip(file.path(tempdir(), "census.zip"), list = TRUE)
 # unzip only the csv file
-unzip(file.path(tempdir(), "census.zip"), files = nms$Name[2], exdir = tempdir())
+base_name = grep(".csv$", nms$Name, value = TRUE)
+unzip(file.path(tempdir(), "census.zip"), files = base_name, exdir = tempdir())
 # read in the csv file
-input = readr::read_csv2(file.path(tempdir(), nms$Name[2]))
+input = readr::read_csv2(file.path(tempdir(), base_name))
 ```
 
-Next we would like to only select the variables we need. 
-Additionally, we would like to set the values -1 and -9 to `NA` since these values are either unknown or secret.
+Next we select the variables we need: x and y coordinates, number of inhabitants, mean age, portion of women and the household size. 
+Additionally, we set the values -1 and -9 to `NA` since these values are unknown.
 
 ```{r}
 # only select the variables we need
@@ -77,11 +77,11 @@ Additionally, we would like to set the values -1 and -9 to `NA` since these valu
 input = dplyr::select(input, x = x_mp_1km, y = y_mp_1km, inh = Einwohner,
                       mean_age = Alter_D, women = Frauen_A, 
                       hh_size = HHGroesse_D)
-# set -1 and -9 to NA since this corresponds to unknown or secret values
+# set -1 and -9 to NA
 input = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
 ```
 
-After the data preprocessing, we can convert the table into a raster stack making use of the x- and y-coordinates.
+After the data preprocessing, we convert the table into a raster stack making use of the x- and y-coordinates.
 
 ```{r}
 # convert table into a raster (x and y are cell midpoints)
@@ -94,6 +94,8 @@ input = stack(input)
 # plot(input)
 ```
 
+
+## Define metroplitan areas
 Reclassify inhabitant data.
 
 ```{r}
@@ -124,7 +126,7 @@ This returns one multipolygon feature with its elements corresponding to the met
 To extract these polygons from the multipolygon, we can use `st_cast()`.
 
 ```{r}
-polys = st_cast(polys, "POLYGON")
+metros = st_cast(polys, "POLYGON")
 ``` 
 
 The warning message tells us that the attributes are repeated for all sub-geometries.
@@ -198,10 +200,9 @@ st_centroid(metros) %>%
 -->
 
 This leaves us with a tiny problem.
-There are only eight metropolitan areas whereas the dissolving left us with nine.
+Visual inspection reveals eight metropolitan areas whereas the dissolving comes up with nine.
 This is because one polygon just touches the corner of another polygon (western Germany, Cologne/Düsseldorf area).
-We could assign it to the neighboring region using another dissolving procedure, however, we leave this as an execercise to the reader.
-Here, we simply delete the polygon.
+One could assign it to the neighboring region using another dissolving procedure, however, we leave this as an exercise to the reader, and here simply delete the offending polygon.
 
 ```{r}
 # find out about the offending polygon
@@ -210,7 +211,7 @@ int = st_intersects(metros, metros)
 metros = metros[-5, ]
 ```
 
-Now that we have defined the metropolitan areas in which we want to place our bike shops, we additionally want to give them a name.
+Now that we have defined the metropolitan areas where to place our bike shops, we additionally want to give them a name.
 A reverse geocoding approach can help with that.
 Given a coordinate, reverse gecoding finds the corresponding address.
 Consequently, we need to extract the centroid coordinate of each metropolitan area.
@@ -242,6 +243,21 @@ metros = mutate(metros,
 Munich, Stuttgart, Nuremberg, Frankfurt, Cologne/Düsseldorf, Hamburg, Leipzig, Berlin
 (missing: Dresden, Bielefeld, Bremen, Hannover, but ok)
 
+## Points of interests
+
+OpenStreetMap is definition (VGI).
+In the meantime the Vollständigkeit and quality is often comparable to that of commercial data providers (TomTom, Here).
+The **osmdata** package provides a fantastic and easy-to-use interface to download OSM data.
+Here, we will download all shops for each metropolitan region.
+`opq()` defines the bounding box for the area for which data should be retrieved.
+You can provide the bounding box yourself or indicate the name of a location.
+We use the name of the metropolitan regions to define the bounding boxes. 
+Furthermore, we indicate that we only would like download `shop` features (see for a full list).
+`osmdata_sf()` returns a list with several spatial objects (points, lines, polygons, etc.).
+Here, we will only keep the point objects.
+
+To learn more about how to use the **osmdata**-package, please refer to [https://ropensci.github.io/osmdata/](https://ropensci.github.io/osmdata/).
+
 ```{r}
 library(osmdata)
 ls_1 = lapply(metros, function(x) {
@@ -256,6 +272,11 @@ ls_1 = lapply(metros, function(x) {
   })
 # rbind all shops
 shops = Reduce(rbind, ls_2)
+```
+
+
+
+```{r}
 shops$count = 1
 shops = st_transform(shops, proj4string(input$inh))
 shops = as(shops, "Spatial")
@@ -265,8 +286,15 @@ poi[] = NA
 poi = rasterize(x = shops, y = poi, field = "count", fun = "sum")
 plot(poi, xlim = c(4380000, 4420000), ylim = c(2920000, 2940000))
 ```
-
+## Finding suitable locations
 
 
 
 Reference (Huff model): https://journal.r-project.org/archive/2017/RJ-2017-020/RJ-2017-020.pdf
+
+## Exercises
+
+1. In the text we have deleted one polygon of the `metros` object (polygon number 5) since it only touches the border of another polygon.
+Recreate the `metros` object and instead of deleting polygon number 5, make it part of the Cologne/Düsseldorf metropolitan region (hint: create a column named region_id, add polygon number 5 to the Cologne/Düsseldorf area and dissolve).
+1. Suppose our bike shop predominantly sold E-bikes to older people. 
+Change the age raster accordingly, repeat the remaining analyses and compare the changes with our original result.
