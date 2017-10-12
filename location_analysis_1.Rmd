@@ -197,18 +197,35 @@ st_centroid(metros) %>%
 ```
 -->
 
-To name the found several metropolitan areas, we use a reverse geocoding approach.
-Reverse gecoding finds the address for a specific coordinate
-That is, we extract he centroid coordinate of each area, and send it to a reverse geocoding API.
-Re
+This leaves us with a tiny problem.
+There are only eight metropolitan areas whereas the dissolving left us with nine.
+This is because one polygon just touches the corner of another polygon (western Germany, Cologne/Düsseldorf area).
+We could assign it to the neighboring region using another dissolving procedure, however, we leave this as an execercise to the reader.
+Here, we simply delete the polygon.
+
+```{r}
+# find out about the offending polygon
+int = st_intersects(metros, metros)
+# polygons 5 and 9 share one border, delete polygon number 5
+metros = metros[-5, ]
+```
+
+Now that we have defined the metropolitan areas in which we want to place our bike shops, we additionally want to give them a name.
+A reverse geocoding approach can help with that.
+Given a coordinate, reverse gecoding finds the corresponding address.
+Consequently, we need to extract the centroid coordinate of each metropolitan area.
+The resulting coordinates can then serve as an input for a reverse geocoding API.
+Here, we make use of the one provided by Google accessed through the **ggmap** package.
+Note that Google lets you use its services on a free basis for a maximum of 2500 queries a day.
+Since `ggmap::revgeocode()` only accepts lat/lon coordinates, we need to first reproject the metropolitan polygons.
 
 ```{r}
 # reverse geocoding to find out about the metropolitan names
 polys_2 = st_transform(polys, 4326)
-# after the aggregation st_coordinates no longer works...
-# coords = st_coordinates(polys_2)
-coords = coordinates(as(polys_2, "Spatial"))
+coords = st_centroid(polys_2) %>%
+  st_coordinates
 metros = lapply(1:nrow(coords), function(i) {
+  # give the server a bit time
   Sys.sleep(sample(seq(1.2, 3, 0.1), 1))
   ggmap::revgeocode(coords[i, ], output = "more")
 })
