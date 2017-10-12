@@ -222,20 +222,29 @@ Since `ggmap::revgeocode()` only accepts lat/lon coordinates, we need to first r
 
 ```{r}
 # reverse geocoding to find out about the metropolitan names
-polys_2 = st_transform(polys, 4326)
-coords = st_centroid(polys_2) %>%
-  st_coordinates
-metros = lapply(1:nrow(coords), function(i) {
+metros_wgs = st_transform(metros, 4326)
+coords = st_centroid(metros_wgs) %>%
+  st_coordinates %>%
+  round(., 4)
+metro_ls = lapply(1:nrow(coords), function(i) {
   # give the server a bit time
-  Sys.sleep(sample(seq(1.2, 3, 0.1), 1))
-  ggmap::revgeocode(coords[i, ], output = "more")
+  Sys.sleep(sample(seq(1.2, 3.4, 0.1), 1))
+  add = ggmap::revgeocode(coords[i, ], output = "more")
+  x = 3
+  while (is.na(add$address) & x > 0) {
+    add = ggmap::revgeocode(coords[i, ], output = "more")
+    # just try three times
+    x = x - 1
+  }
+  add
 })
-metros = bind_rows(metros) %>%
+metro_names = bind_rows(metro_ls) %>%
   select(locality, administrative_area_level_2)
 # replace Velbert
-metros = mutate(metros, 
-                locality = ifelse(locality == "Velbert",
-                                  administrative_area_level_2, locality)) %>%
+metro_names = 
+  mutate(metro_names, 
+         locality = ifelse(locality == "Velbert",
+                           administrative_area_level_2, locality)) %>%
   select(locality) %>%
   pull
 ```
@@ -258,20 +267,39 @@ Here, we will only keep the point objects.
 
 To learn more about how to use the **osmdata**-package, please refer to [https://ropensci.github.io/osmdata/](https://ropensci.github.io/osmdata/).
 
-```{r}
+```{r, eval = FALSE}
 library(osmdata)
-ls_1 = lapply(metros, function(x) {
+shops = lapply(metro_names, function(x) {
   # give the server a bit time
-  Sys.sleep(10)
+  Sys.sleep(sample(seq(5, 10, 0.1), 1))
   q0 = opq(x)
-  q1 = add_osm_feature(q0, key = 'shop')
+  q1 = add_osm_feature(q0, key = "shop")
   points = osmdata_sf(q1)
-  points = dplyr::select(points, osm_points)
+  # request the same data again if nothing has been downloaded
+  iter = 3
+  while (nrow(points$osm_points) == 0 & iter > 0) {
+    points = osmdata_sf(q1)
+    iter = iter - 1
+  }
+  points = points$osm_points
   points = st_set_crs(points, 4326)
-  select(points, shop)
   })
-# rbind all shops
-shops = Reduce(rbind, ls_2)
+```
+
+Make sure that each list elements has at least a few features:
+
+```{r}
+if (any(sapply(shops, nrow) == 0)) {
+  message("There is still a metropolitan area without any features. Please fix!")
+}
+```
+
+If so, we select only the shop column, and finally bind all shops into one large sf-object.
+
+```{r}
+# select only the shop column and rbind all list elements
+shops = lapply(shops, select, shop)
+shops = Reduce(rbind, shops)
 ```
 
 
@@ -286,6 +314,7 @@ poi[] = NA
 poi = rasterize(x = shops, y = poi, field = "count", fun = "sum")
 plot(poi, xlim = c(4380000, 4420000), ylim = c(2920000, 2940000))
 ```
+
 ## Finding suitable locations
 
 
