@@ -4,6 +4,7 @@
 
 ```{r} 
 library(sf)
+library(sp)
 library(ggmap)
 library(raster)
 library(osmdata)
@@ -32,7 +33,6 @@ Typical geomarketing sub-questions include:
 - How many people can easily reach my stores?
 - Do existing services over or under-exploit the market potential?
 - How big is my market share and turnovers, and are there spatial differences?
-
 
 ## Use case
 
@@ -84,8 +84,7 @@ input = readr::read_csv2(file.path(tempdir(), base_name))
 Next we select the variables we need: x and y coordinates, number of inhabitants, mean age, portion of women and the household size. 
 Additionally, we set the values -1 and -9 to `NA` since these values are unknown.
 
-```{r}
-# only select the variables we need
+```{r, eval = FALSE}
 # inh = inhabitants, hh_size = household size
 input = dplyr::select(input, x = x_mp_1km, y = y_mp_1km, inh = Einwohner,
                       mean_age = Alter_D, women = Frauen_A, 
@@ -94,9 +93,12 @@ input = dplyr::select(input, x = x_mp_1km, y = y_mp_1km, inh = Einwohner,
 input = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
 ```
 
-After the data preprocessing, we convert the table into a raster stack making use of the x- and y-coordinates.
+After the data preprocessing, we convert the table into a raster stack.
+First, we use the x- and y-coordinates to convert the `data.frame` into a `SpatialPolygonsDataFrame` (we do not use sf-objects here, since the **raster** package does not support `sf`).
+<!-- make sure that this is the case -->
+`gridded()` converts `SpatialPolygonsDataFrame` into a `SpatialGridDataFrame` which in turn can be used as an input for **raster**'s `stack()` function.
 
-```{r}
+```{r, eval = FALSE}
 # convert table into a raster (x and y are cell midpoints)
 coordinates(input) =~ x + y
 # use the correct projection
@@ -107,11 +109,11 @@ input = stack(input)
 # plot(input)
 ```
 
-
 ## Define metropolitan areas
-Reclassify inhabitant data.
 
-```{r}
+Reclassify inhabitant data (see also section \@ref(map-algebra))
+
+```{r, eval = FALSE}
 rcl = matrix(c(1, 1, 125, 2, 2, 375, 3, 3, 1250, 4, 4, 3000, 5, 5, 6000,
                6, 6, 8000), ncol = 3, byrow = TRUE)
 inh = reclassify(input$inh, rcl = rcl, right = NA)
@@ -119,9 +121,9 @@ inh = reclassify(input$inh, rcl = rcl, right = NA)
 
 Aggregate it to a resolution of 20000 sq-km.
 
-```{r}
+```{r, eval = FALSE}
 inh_agg = aggregate(inh, fact = 20000 / res(inh)[1], fun = sum)
-plot(inh_agg > 500000)
+# plot(inh_agg > 500000)
 polys = rasterToPolygons(inh_agg[inh_agg > 500000, drop = FALSE])
 polys = st_as_sf(polys)
 ```
@@ -131,14 +133,14 @@ Each region consists of one ore more polygons (pixels).
 It would be nice if we could join all polygons belonging to one region.
 One approach is to dissolve all polygons.
 
-```{r}
+```{r, eval = FALSE}
 polys = summarize(polys, pop = sum(layer))
 ```
 
 This returns one multipolygon feature with its elements corresponding to the metropolitan regions. 
 To extract these polygons from the multipolygon, we can use `st_cast()`.
 
-```{r}
+```{r, eval = FALSE}
 metros = st_cast(polys, "POLYGON")
 ``` 
 
@@ -154,7 +156,7 @@ Nevertheless, it finds all pixels belonging to one region in a generic way.
 We use this information to assign each polygon (pixel) to a region.
 Subsequently, we can use the region information to dissolve the pixels into region polygons.
 
-```{r}
+```{r, eval = FALSE}
 # dissolve on spatial neighborhood
 nbs = st_intersects(polys, polys)
 # nbs = over(polys, polys, returnList = TRUE)
@@ -217,7 +219,7 @@ Visual inspection reveals eight metropolitan areas whereas the dissolving comes 
 This is because one polygon just touches the corner of another polygon (western Germany, Cologne/Düsseldorf area).
 One could assign it to the neighboring region using another dissolving procedure, however, we leave this as an exercise to the reader, and here simply delete the offending polygon.
 
-```{r}
+```{r, eval = FALSE}
 # find out about the offending polygon
 int = st_intersects(metros, metros)
 # polygons 5 and 9 share one border, delete polygon number 5
@@ -233,7 +235,7 @@ Here, we make use of the one provided by Google accessed through the **ggmap** p
 Note that Google lets you use its services on a free basis for a maximum of 2500 queries a day.
 Since `ggmap::revgeocode()` only accepts lat/lon coordinates, we need to first reproject the metropolitan polygons.
 
-```{r}
+```{r, eval = FALSE}
 # reverse geocoding to find out about the metropolitan names
 metros_wgs = st_transform(metros, 4326)
 coords = st_centroid(metros_wgs) %>%
@@ -277,7 +279,6 @@ We use the name of the metropolitan regions to define the bounding boxes.
 Furthermore, we indicate that we only would like download `shop` features (see for a full list).
 `osmdata_sf()` returns a list with several spatial objects (points, lines, polygons, etc.).
 Here, we will only keep the point objects.
-
 To learn more about how to use the **osmdata**-package, please refer to [https://ropensci.github.io/osmdata/](https://ropensci.github.io/osmdata/).
 
 ```{r, eval = FALSE}
@@ -301,7 +302,7 @@ shops = lapply(metro_names, function(x) {
 
 Make sure that each list elements has at least a few features:
 
-```{r}
+```{r, eval = FALSE}
 if (any(sapply(shops, nrow) == 0)) {
   message("There is still a metropolitan area without any features. Please fix!")
 }
@@ -309,7 +310,7 @@ if (any(sapply(shops, nrow) == 0)) {
 
 If so, we select only the shop column, and finally bind all shops into one large sf-object.
 
-```{r}
+```{r, eval = FALSE}
 # select only the shop column and rbind all list elements
 shops = lapply(shops, select, shop)
 shops = Reduce(rbind, shops)
@@ -317,7 +318,7 @@ shops = Reduce(rbind, shops)
 
 
 
-```{r}
+```{r, eval = FALSE}
 shops$count = 1
 shops = st_transform(shops, proj4string(input$inh))
 shops = as(shops, "Spatial")
