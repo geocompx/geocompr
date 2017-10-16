@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-```{r} 
+```{r, message = FALSE} 
 library(sf)
 library(sp)
 library(ggmap)
@@ -62,7 +62,7 @@ In an advanced chapter we could continue the analysis as follows:
  
 ## Create input rasters
 
-The German government provides a csv file containing the census data for Germany.
+The German government provides a csv-file containing gridded census data of 2011 for Germany.
 You can either download a 1 km or a 100 m resolution.
 Here, we download the 1 km data, unzip it and read it into R.
 
@@ -96,7 +96,8 @@ input = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
 After the data preprocessing, we convert the table into a raster stack.
 First, we use the x- and y-coordinates to convert the `data.frame` into a `SpatialPolygonsDataFrame` (we do not use sf-objects here, since the **raster** package does not support `sf`).
 <!-- make sure that this is the case -->
-`gridded()` converts a `SpatialPolygonsDataFrame` into a `SpatialGridDataFrame` which in turn can be used as an input for **raster**'s `stack()` function.
+`gridded()` converts a `SpatialPolygonsDataFrame` into a `SpatialPixelsDataFrame` which in turn can be used as an input for **raster**'s `stack()` function.
+The final raster stack consists of four layers: inhabitants, mean age, portion of women and household size.
 
 ```{r, eval = FALSE}
 # convert table into a raster (x and y are cell midpoints)
@@ -111,15 +112,21 @@ input = stack(input)
 
 ## Define metropolitan areas
 
-Reclassify inhabitant data (see also section \@ref(local-operations)).
+We arbitrarily define a a pixel of 20000 sq-km as metropolitan if more than half a million people lives in it.
+To do so, we first `reclassify()` (see also section \@ref(local-operations)) the ordinal-scaled inhabitant data into a numeric data type using class means.
+This means we use 127 for class 1 (ranging from 3 to 250 inhabitants), 375 for class 2 (ranging from 250 to 500 inhabitants), etc. ^[See also the Excel Sheet Datensatzbeschreibung lines 20 to 28 of the data description "Datensatzbeschreibung_klassierte_Werte_1km-Gitter.xlsx" you automatically have downloaded as well.
+Unfortunately, it is in German, but you get the meaning of the numbers.] 
+We arbitrarily chose 8000 inhabitants for class 6 since it contains all raster cells greater than 8000.
+Of course, this is only a simple approximation of the true population number (in the exercises you can explore the introduced error in more detail), however, for our purpose of delineating metropolitan areas the level of detail is good enough.
 
 ```{r, eval = FALSE}
-rcl = matrix(c(1, 1, 125, 2, 2, 375, 3, 3, 1250, 4, 4, 3000, 5, 5, 6000,
+rcl = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 4, 4, 3000, 5, 5, 6000,
                6, 6, 8000), ncol = 3, byrow = TRUE)
 inh = reclassify(input$inh, rcl = rcl, right = NA)
 ```
 
-Aggregate it to a resolution of 20000 sq-km.
+The `aggregate()` command helps to change the resolution from 1 to 20000 sq-km while each output pixel represents the sum of all 1 sq-km input pixels (see section \@ref(aligning-rasters)).
+Next, we only keep pixels with more than half a million inhabitants using a boolean operation, and convert the resulting pixels into spatial polygons of class `sf`.
 
 ```{r, eval = FALSE}
 inh_agg = aggregate(inh, fact = 20000 / res(inh)[1], fun = sum)
@@ -128,10 +135,10 @@ polys = rasterToPolygons(inh_agg[inh_agg > 500000, drop = FALSE])
 polys = st_as_sf(polys)
 ```
 
-Plotting our polygons reveals eight metropolitan regions.
+Plotting these polygons reveals eight metropolitan regions.
 Each region consists of one ore more polygons (pixels).
 It would be nice if we could join all polygons belonging to one region.
-One approach is to dissolve all polygons.
+One approach is to dissolve all polygons (see section \@ref(aggregating-or-dissolving)).
 
 ```{r, eval = FALSE}
 polys = summarize(polys, pop = sum(layer))
@@ -236,7 +243,7 @@ Note that Google lets you use its services on a free basis for a maximum of 2500
 Since `ggmap::revgeocode()` only accepts lat/lon coordinates, we need to first reproject the metropolitan polygons.
 
 ```{r, eval = FALSE}
-# reverse geocoding to find out about the metropolitan names
+# reverse geocoding to find out the names of the metropolitan areas
 metros_wgs = st_transform(metros, 4326)
 coords = st_centroid(metros_wgs) %>%
   st_coordinates %>%
@@ -338,11 +345,10 @@ Reference (Huff model): https://journal.r-project.org/archive/2017/RJ-2017-020/R
 ## Exercises
 
 1. Donwload the csv file containing inhabitant information for a 100 m cell resolution ( https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
-Please note that the unzipped file has a size of nearly 1.3 GB.
-To read it in you can use `readr::read_csv`.
+Please note that the unzipped file has a size of 1.23 GB.
+To read it into R you can use `readr::read_csv`.
 This takes 30 seconds on my machine (16 GB RAM)
-However, `data.table::fread()` is faster (on my machine 12 seconds).
-This will return an object of class `data.table()`.
+`data.table::fread()` might be even faster, and returns an object of class `data.table()`.
 Use `as.tibble()` to convert it into a tibble.
 Build an inhabitant raster, aggregate it to a cell resolution of 1 km, and compare the difference with the inhabitant raster (`inh`) we have created using class mean values.
 1. In the text we have deleted one polygon of the `metros` object (polygon number 5) since it only touches the border of another polygon.
