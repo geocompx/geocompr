@@ -760,9 +760,9 @@ Aside from reading in a raster, you can also create one from scratch.
 Running `raster()` creates an empty `RasterLayer`.
 Here, however, we will create manually a very simple raster.
 This should make it easy to understand how raster and related operations work.
-Our raster should consist of just three rows and columns centered around the null meridian and the equator (see xmn, xmx, ymn and ymx parameters).
+Our raster should consist of just three rows and columns centered around the null meridian and the equator (see `xmn`, `xmx`, `ymn` and `ymx` parameters).
 Additionally, we define a resolution of 0.5, which here corresponds to 0.5 degrees since the default proj4string of a raster object is WGS84.
-Finally, we set the values with the vals argument.
+Finally, we set the values with the `vals` argument.
 Here, we just number the cells, that means we assign 1 to cell 1, 2 to cell 2, and finally 36 to cell 36.
 We know that there are 36 cells by multiplying six (rows) by six (columns).
 As we have seen above, setting raster values in R corresponds to a rowwise cell filling starting at the upper left corner.
@@ -841,49 +841,70 @@ Note that operations on `RasterBrick` and `RasterStack` objects will typically r
 
 Vector and raster spatial data types share concepts intrinsic to spatial data.
 Perhaps the most important of these is the Coordinate Reference System (CRS), which defines how the spatial elements of the data relate to the surface of the Earth (or other bodies).
-Coordinate system could be either projected or geographic (Figures \@ref(fig:vector-crs) and \@ref(fig:raster-crs)).
+Coordinate system could be either geographic or projected (Figures \@ref(fig:vector-crs) and \@ref(fig:raster-crs)).
+
+### Geographic coordinate systems
 
 Geographic coordinate systems identify any location on the Earth's surface using two values - longitude and latitude. 
 The first one is an angle from the prime meridian plan and the second one is an angle from the equatorial plane to this location.
 Therefore, units of geographic coordinate systems are degrees.
 <!-- for example Los Angeles, Melbourne -->
 
-The surface of the earth is represented by a spherical of ellipsoidal surface in geographic coordinate systems.<!--fig?-->
+The surface of the earth in geographic coordinate systems is represented by a spherical or ellipsoidal surface.<!--fig?-->
 <!-- spherical model -->
 <!-- when working at larger scales, an ellipsoid representation of earth may be desired -->
 <!-- ellipsoidal model -->
-The shape of an ellipse is defined by two an equatorial radius and a polar radius. <!--fig?-->
-<!--should we mention flattening?-->
-<!-- WGS84   a=6378137.0     rf=298.257223563 -->
-<!-- a × (1 − rf) = b -->
+The shape of an ellipse could defined by either the equatorial radius (a) and the polar radius (b), or by a and the inverse flattening (rf), where:
+$$rf = 1/((a-b)/a)$$
+<!--fig?-->
+<!-- WGS84   a=6378137.0     rf=298.2572 -->
+<!-- 1/((a-b)/a) -->
+<!-- a - 1/rf * a = b -->
 Since the Earth is flattened at the poles, an equatorial radius is slightly longer than a polar axis.
-For example, the difference of the equatorial radius and polar radius is about 21.385 km for the WGS 84 ellipsoid.
+For example, the difference of the equatorial radius and polar radius in the WGS 84 ellipsoid is about 21.385 km.
 You can access a list of available ellipses and theirs properties using the `st_proj_info(type = "ellps")` function.
-
-<!--  -->
 <!-- ellipsoid example -->
 
-<!-- datum -->
-<!-- geoid - short explanation (a mean sea 
-level surface)-->
-<!-- global/geocentric datum -->
-<!-- local datum -->
-<!-- plot? -->
+Additionally, a position and orientation of the spheroid relative to the center of the earth needs to be defined using a datum.
+The earth’s surface is irregular due to gravitational and surface feature variations.
+Therefore, datums were created to account for the local variations in establishing a coordinate system.
+There are two types of datums - local and geocentric.
+In local datums, the ellipsoid surface aligns closely to the earth surface at a particular location.
+For example, NAD27 (North American Datum of 1927) is a local datum created for the United States area.
+Geocentric datums are aligned to the center of the earth.
+It includes WGS84 (World Geodetic System 1984) Datum.
+A list of datums supported in R could be obtain with `st_proj_info(type = "datum")`.
+<!-- plots? -->
 <!-- plus maybe table (few examples) -->
 
-
-<!-- st_proj_info(type = "datum") -->
+### Projected coordinate systems 
 
 Projected coordinate systems are based on Cartesian coordinates and represent any area on a flat surface. 
-<!-- projection types, e.g. Conic, Cylindrical, Planar -->
-Projected coordinate system needs to have an origin, x and y axes, and a linear unit of measure.
-
-<!-- spatial distortion: area, direction, distance, shape -->
+A projected coordinate system has an origin, x and y axes, and a linear unit of measure.
+All projected coordinate systems are based on geographic coordinate systems
 Maps projections are mathematical models for conversion of three-dimensional surface into a two-dimensional representation on a map.
+This transition cannot be done without adding some distortion.
 Therefore, some properties of the Earth's surface are distorted in this process, such as area, direction, distance, and shape.
-<!-- one more sentence and some references?? -->
+A projected coordinate system can preserve only one or two of those properties.
+Projections are often named based on a property they preserve: equal-area preserves area, azimuthal preserve direction, equidistant preserve distance, and conformal preserve local shape.
 
-Two main ways to describe CRS in R is an `epsg` code or a `proj4string` definition.
+There are three main groups of projection types - conic, cylindrical, and planar.
+In a conic projection the earth surface is projected onto a cone along a single line of tangency or two lines of tangency. 
+Distortions are minimized along the tangency lines and rise with the distance from those lines in this projection.
+Therefore, it is the best suited for maps of mid-latitude areas.
+A cylindrical projection maps the surface onto a cylinder.
+This projection also could be created by touching the earth's surface along a single line of tangency or two lines of tangency. 
+Cylindrical projections are the most often used in mapping of the entire world.
+A planar projection projects data onto a flat surface touching the globe at a point or along a line of tangency. 
+It is typically used in mapping polar regions.
+<!-- https://en.wikipedia.org/wiki/List_of_map_projections -->
+<!-- plus maybe table (few examples) -->
+<!-- add good reference to projections -->
+`st_proj_info(type = "proj")` gives a list of the available projections supported by the PROJ.4 library.
+
+### CRS in R
+
+Two main ways to describe CRS in R are an `epsg` code or a `proj4string` definition.
 Both of these approaches have advantages and disadvantages. 
 An `epsg` code is usually shorter, and therefore easier to remember. 
 The code also refers to only one, well-defined coordinate reference system. 
