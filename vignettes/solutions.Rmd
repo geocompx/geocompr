@@ -316,6 +316,70 @@ plot(weight - dist)
 
 # Chapter 5
 
+# Chapter 8 Location analysis
+
+1. Donwload the csv file containing inhabitant information for a 100 m cell resolution ( https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
+Please note that the unzipped file has a size of 1.23 GB.
+To read it into R you can use `readr::read_csv`.
+This takes 30 seconds on my machine (16 GB RAM)
+`data.table::fread()` might be even faster, and returns an object of class `data.table()`.
+Use `as.tibble()` to convert it into a tibble.
+Build an inhabitant raster, aggregate it to a cell resolution of 1 km, and compare the difference with the inhabitant raster (`inh`) we have created using class mean values.
+
+```{r, eval = FALSE}
+library(tidyverse)
+library(raster)
+library(sp)
+
+build_census_raster = function(url) {
+  download.file(url = url, destfile = file.path(tempdir(), "census.zip"),
+                method = "auto", mode = "wb")
+  # list the file names
+  nms = unzip(file.path(tempdir(), "census.zip"), list = TRUE)
+  # unzip only the csv file
+  base_name = grep(".csv$", nms$Name, value = TRUE)
+  unzip(file.path(tempdir(), "census.zip"), files = base_name, exdir = tempdir())
+  # read in the csv file
+  input = data.table::fread(file.path(tempdir(), base_name)) %>%
+    as.tibble
+  input = dplyr::select(input, x = starts_with("x_mp_1"), y = starts_with("y_mp_1"),
+                        inh = Einwohner)
+  # set -1 and -9 to NA
+  input = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
+  # convert table into a raster (x and y are cell midpoints)
+  coordinates(input) =~ x + y
+  # use the correct projection
+  proj4string(input) = CRS("+init=epsg:3035")
+  gridded(input) = TRUE
+  # convert into a raster stack
+  raster(input)
+}
+
+# download 1km resolution
+url = paste0("https://www.zensus2011.de/SharedDocs/Downloads/DE/", 
+             "Pressemitteilung/DemografischeGrunddaten/csv_Zensusatlas_", 
+             "klassierte_Werte_1km_Gitter.zip?__blob=publicationFile&v=8")
+inp_coarse = build_census_raster(url)
+# reclassify
+rcl = matrix(c(1, 1, 125, 2, 2, 375, 3, 3, 1250, 4, 4, 3000, 5, 5, 6000,
+               6, 6, 8000), ncol = 3, byrow = TRUE)
+inh_coarse = reclassify(inp_coarse, rcl = rcl, right = NA)
+
+# Download and build 1km inhabitant raster
+url = paste0("https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/",
+             "DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip", 
+             "?__blob=publicationFile&v=3")
+inh_fine = build_census_raster(url)
+inh_fine = aggregate(inh_fine, fact = 1000 / res(inp_fine)[1], fun = sum)
+inh_fine - inh_coarse  # origin has to be the same
+origin(inh_fine) = origin(inh_coarse)
+summary(inh_fine - inh_coarse)
+plot(inh_fine - inh_coarse)
+plot(abs(inh_fine - inh_coarse) > 1000)
+cellStats((abs(inh_fine - inh_coarse) > 1000), stat = "sum")
+cellStats((abs(inh_fine - inh_coarse) > 5000), stat = "sum")
+```
+
 # Chapter R-GIS bridges
 
 1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see chapter \@ref(spatial-class)). 
