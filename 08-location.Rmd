@@ -97,7 +97,7 @@ After the data preprocessing, we convert the table into a raster stack.
 First, we use the x- and y-coordinates to convert the `data.frame` into a `SpatialPolygonsDataFrame` (we do not use sf-objects here, since the **raster** package does not support `sf`).
 <!-- make sure that this is the case -->
 `gridded()` converts a `SpatialPolygonsDataFrame` into a `SpatialPixelsDataFrame` which in turn can be used as an input for **raster**'s `stack()` function.
-The final raster stack consists of four layers: inhabitants, mean age, portion of women and household size.
+The final raster stack consists of four layers: inhabitants, mean age, portion of women and household size (Fig. \@ref(fig:census-stack).
 
 ```{r, eval = FALSE}
 # convert table into a raster (x and y are cell midpoints)
@@ -107,15 +107,19 @@ proj4string(input) = CRS("+init=epsg:3035")
 gridded(input) = TRUE
 # convert into a raster stack
 input = stack(input)
-# plot(input)
 ```
+
+```{r census-stack, echo = FALSE, fig.cap = "Gridded German census data of 2011. Population (6 classes, number of persons): 1: 3-250, 2: 250-500, 3: 500-2000, 4: 4000-8000, 5: >8000; women (5 classes, %): 1: 0-40, 2: 40-47, 3: 47-53, 4: 53-60, 5: >60; mean age (5 classes, years): 1: 0-40, 2: 40-42, 3: 42-44, 4: 44-47, 5: >47; household size (5 classes, number of persons): 1: 1-2, 2: 2-2.5, 3: 2.5-3, 4: 3-3.5, 5: >3.5."}
+knitr::include_graphics("figures/08_census_stack.png")
+```
+
 
 ## Define metropolitan areas
 
 We arbitrarily define a a pixel of 20000 sq-km as metropolitan if more than half a million people lives in it.
 To do so, we first `reclassify()` (see also section \@ref(local-operations)) the ordinal-scaled inhabitant data into a numeric data type using class means.
-This means we use 127 for class 1 (ranging from 3 to 250 inhabitants), 375 for class 2 (ranging from 250 to 500 inhabitants), etc. ^[See also the Excel Sheet Datensatzbeschreibung lines 20 to 28 of the data description "Datensatzbeschreibung_klassierte_Werte_1km-Gitter.xlsx" you automatically have downloaded as well.
-Unfortunately, it is in German, but you get the meaning of the numbers.] 
+This means we use 127 for class 1 (ranging from 3 to 250 inhabitants), 375 for class 2 (ranging from 250 to 500 inhabitants), etc. ^[See also the Excel Sheet Datensatzbeschreibung lines 20 to 28 of the data description "Datensatzbeschreibung_klassierte_Werte_1km-Gitter.xlsx" located also in the downloaded file census.zip.
+Unfortunately, the description is in German, but you get the meaning of the numbers.] 
 We arbitrarily chose 8000 inhabitants for class 6 since it contains all raster cells greater than 8000.
 Of course, this is only a simple approximation of the true population number (in the exercises you can explore the introduced error in more detail), however, for our purpose of delineating metropolitan areas the level of detail is good enough.
 
@@ -223,7 +227,7 @@ st_centroid(metros) %>%
 
 However, visual inspection reveals eight metropolitan areas whereas the dissolving comes up with nine.
 This is because one polygon just touches the corner of another polygon (western Germany, Cologne/Düsseldorf area).
-One could assign it to the neighboring region using another dissolving procedure, however, we leave this as an exercise to the reader, and here simply delete the offending polygon.
+One could assign it to the neighboring region using another dissolving procedure, however, we leave this as an exercise to the reader, and simply delete the offending polygon.
 
 ```{r, eval = FALSE}
 # find out about the offending polygon
@@ -251,7 +255,7 @@ coords = st_centroid(metros_wgs) %>%
 Therefore, we iterate over each coordinate of `coords` via a loop (`ldply()`).
 `ldply()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.
 We are also good citizens in trying not to overburden the server with too many queries within a short amount of time. 
-Instead we let the algorithm sleep between 1.2 and 3.4 seconds before accessing the reverse geocoding API again.
+Instead we let the algorithm sleep between one and four seconds before accessing the reverse geocoding API again.
 Sometimes, the reverse geocoding API of Google is unable to find an address returning `NA`.
 Often enough trying the same coordinate again, returns an address at the second or third attempt (see `while()-loop`).
 However, if three attempts have already failed, this is a good indication that the requested information is indeed unavailable.
@@ -259,7 +263,7 @@ However, if three attempts have already failed, this is a good indication that t
 ```{r, eval = FALSE}
 metro_names = plyr::ldply(1:nrow(coords), function(i) {
   # give the server a bit time
-  Sys.sleep(sample(seq(1.2, 3.4, 0.1), 1))
+  Sys.sleep(sample(seq(1, 4, 0.1), 1))
   add = ggmap::revgeocode(coords[i, ], output = "more")
   x = 2
   while (is.na(add$address) & x > 0) {
@@ -272,7 +276,7 @@ metro_names = plyr::ldply(1:nrow(coords), function(i) {
 ```
 
 Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
-Overall, we are satisfied with the metropolitan names (Munich, Nuremberg, Stuttgart, Frankfurt, Hamburg, Berlin, Leipzig) bar one exception, namely Velbert.
+Overall, we are satisfied with the `locality` column serving as metropolitan names (Munich, Nuremberg, Stuttgart, Frankfurt, Hamburg, Berlin, Leipzig) bar one exception, namely Velbert.
 Hence, we replace Velbert with the correponding name in the `administrative_area_level_2` column, that is Düsseldorf.
 
 ```{r, eval = FALSE}
