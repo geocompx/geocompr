@@ -152,7 +152,7 @@ metros = st_cast(polys, "POLYGON")
 ``` 
 
 The warning message tells us that the attributes are repeated for all sub-geometries.
-In our case, this means that each region receives the total population of all metropolitan areas combined.
+Here, this means that each region receives the total population of all metropolitan areas combined.
 Clearly this is wrong but here we can safely ignore this since we are merely interested in the geometry.
 
 <!-- maybe a good if advanced exercise
@@ -221,8 +221,7 @@ st_centroid(metros) %>%
 ```
 -->
 
-This leaves us with a tiny problem.
-Visual inspection reveals eight metropolitan areas whereas the dissolving comes up with nine.
+However, visual inspection reveals eight metropolitan areas whereas the dissolving comes up with nine.
 This is because one polygon just touches the corner of another polygon (western Germany, Cologne/Düsseldorf area).
 One could assign it to the neighboring region using another dissolving procedure, however, we leave this as an exercise to the reader, and here simply delete the offending polygon.
 
@@ -233,14 +232,12 @@ int = st_intersects(metros, metros)
 metros = metros[-5, ]
 ```
 
-Now that we have defined the metropolitan areas where to place our bike shops, we additionally want to give them a name.
+The defined metropolitan areas suitable for bike shops are still missing a name.
 A reverse geocoding approach can help with that.
 Given a coordinate, reverse gecoding finds the corresponding address.
-Consequently, we need to extract the centroid coordinate of each metropolitan area.
-The resulting coordinates can then serve as an input for a reverse geocoding API.
-Here, we make use of the one provided by Google accessed through the **ggmap** package.
-Note that Google lets you use its services on a free basis for a maximum of 2500 queries a day.
-Since `ggmap::revgeocode()` only accepts lat/lon coordinates, we need to first reproject the metropolitan polygons.
+Consequently, extracting the centroid coordinate of each metropolitan area can serve as an input for a reverse geocoding API.
+The **ggmap** package makes use of the one provided by Google.^[Note that Google allows each user to access its services on a free basis for a maximum of 2500 queries a day.]
+Since `ggmap::revgeocode()` only accepts lat/lon coordinates, the first requirement is to bring the metropolitan polygons into an appropriate projection.
 
 ```{r, eval = FALSE}
 # reverse geocoding to find out the names of the metropolitan areas
@@ -248,11 +245,23 @@ metros_wgs = st_transform(metros, 4326)
 coords = st_centroid(metros_wgs) %>%
   st_coordinates %>%
   round(., 4)
-metro_ls = lapply(1:nrow(coords), function(i) {
+```
+
+`ggmap::revgeocode()` accepts one coordinate at a time.
+Therefore, we iterate over each coordinate of `coords` via a loop (`ldply()`).
+`ldply()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.
+We are also good citizens in trying not to overburden the server with too many queries within a short amount of time. 
+Instead we let the algorithm sleep between 1.2 and 3.4 seconds before accessing the reverse geocoding API again.
+Sometimes, the reverse geocoding API of Google is unable to find an address returning `NA`.
+Often enough trying the same coordinate again, returns an address at the second or third attempt (see `while()-loop`).
+However, if three attempts have already failed, this is a good indication that the requested information is indeed unavailable.
+
+```{r, eval = FALSE}
+metro_names = plyr::ldply(1:nrow(coords), function(i) {
   # give the server a bit time
   Sys.sleep(sample(seq(1.2, 3.4, 0.1), 1))
   add = ggmap::revgeocode(coords[i, ], output = "more")
-  x = 3
+  x = 2
   while (is.na(add$address) & x > 0) {
     add = ggmap::revgeocode(coords[i, ], output = "more")
     # just try three times
@@ -260,8 +269,14 @@ metro_ls = lapply(1:nrow(coords), function(i) {
   }
   add
 })
-metro_names = bind_rows(metro_ls) %>%
-  select(locality, administrative_area_level_2)
+```
+
+Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
+Overall, we are satisfied with the metropolitan names (Munich, Nuremberg, Stuttgart, Frankfurt, Hamburg, Berlin, Leipzig) bar one exception, namely Velbert.
+Hence, we replace Velbert with the correponding name in the `administrative_area_level_2` column, that is Düsseldorf.
+
+```{r, eval = FALSE}
+metro_names = select(locality, administrative_area_level_2)
 # replace Velbert
 metro_names = 
   mutate(metro_names, 
@@ -270,9 +285,6 @@ metro_names =
   select(locality) %>%
   pull
 ```
-
-Munich, Stuttgart, Nuremberg, Frankfurt, Cologne/Düsseldorf, Hamburg, Leipzig, Berlin
-(missing: Dresden, Bielefeld, Bremen, Hannover, but ok)
 
 ## Points of interests
 
