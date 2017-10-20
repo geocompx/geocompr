@@ -81,13 +81,13 @@ unzip(file.path(tempdir(), "census.zip"), files = base_name, exdir = tempdir())
 input = readr::read_csv2(file.path(tempdir(), base_name))
 ```
 
-Next we select the variables we need: x and y coordinates, number of inhabitants, mean age, portion of women and the household size. 
+Next we select the variables we need: x and y coordinates, the number of inhabitants (population), mean age, portion of women and the household size. 
 Additionally, we set the values -1 and -9 to `NA` since these values are unknown.
 
 ```{r, eval = FALSE}
-# inh = inhabitants, hh_size = household size
-input = dplyr::select(input, x = x_mp_1km, y = y_mp_1km, inh = Einwohner,
-                      mean_age = Alter_D, women = Frauen_A, 
+# pop = population, hh_size = household size
+input = dplyr::select(input, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
+                      women = Frauen_A, mean_age = Alter_D,
                       hh_size = HHGroesse_D)
 # set -1 and -9 to NA
 input = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
@@ -95,7 +95,6 @@ input = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
 
 After the data preprocessing, we convert the table into a raster stack.
 First, we use the x- and y-coordinates to convert the `data.frame` into a `SpatialPolygonsDataFrame` (we do not use sf-objects here, since the **raster** package does not support `sf`).
-<!-- make sure that this is the case -->
 `gridded()` converts a `SpatialPolygonsDataFrame` into a `SpatialPixelsDataFrame` which in turn can be used as an input for **raster**'s `stack()` function.
 The final raster stack consists of four layers: inhabitants, mean age, portion of women and household size (Fig. \@ref(fig:census-stack).
 
