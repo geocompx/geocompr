@@ -44,12 +44,13 @@ p_1 = spplot(input, col.regions = RColorBrewer::brewer.pal(6, "GnBu"),
              layout = c(4, 1), 
              # Leave some space between the panels
              between = list(x = 0.5),
-             colorkey = list(space = "bottom", width = 1, height = 0.2,
+             colorkey = list(space = "bottom", width = 0.8, height = 0.2,
                              labels = list(cex = 0.5)),
              strip = strip.custom(bg = 'white',
                                   par.strip.text = list(cex = 0.5),
-                                  factor.levels = c("inhabitants", "mean age", 
-                                                    "women", "household size")),
+                                  factor.levels = c("population", "women",
+                                                    "mean age", 
+                                                    "household size")),
              sp.layout = list(
                list("sp.polygons", ger, col = gray(0.5),
                     first = FALSE)))
