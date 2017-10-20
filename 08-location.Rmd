@@ -96,7 +96,7 @@ input = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
 After the data preprocessing, we convert the table into a raster stack.
 First, we use the x- and y-coordinates to convert the `data.frame` into a `SpatialPolygonsDataFrame` (we do not use sf-objects here, since the **raster** package does not support `sf`).
 `gridded()` converts a `SpatialPolygonsDataFrame` into a `SpatialPixelsDataFrame` which in turn can be used as an input for **raster**'s `stack()` function.
-The final raster stack consists of four layers: inhabitants, mean age, portion of women and household size (Fig. \@ref(fig:census-stack).
+The final raster stack consists of four layers: inhabitants, mean age, portion of women and household size (Fig. \@ref(fig:census-stack)).
 
 ```{r, eval = FALSE}
 # convert table into a raster (x and y are cell midpoints)
@@ -108,7 +108,7 @@ gridded(input) = TRUE
 input = stack(input)
 ```
 
-```{r census-stack, echo = FALSE, fig.cap = "Gridded German census data of 2011. Population (6 classes, number of persons): 1: 3-250, 2: 250-500, 3: 500-2000, 4: 4000-8000, 5: >8000; women (5 classes, %): 1: 0-40, 2: 40-47, 3: 47-53, 4: 53-60, 5: >60; mean age (5 classes, years): 1: 0-40, 2: 40-42, 3: 42-44, 4: 44-47, 5: >47; household size (5 classes, number of persons): 1: 1-2, 2: 2-2.5, 3: 2.5-3, 4: 3-3.5, 5: >3.5."}
+```{r census-stack, echo = FALSE, fig.cap = "Gridded German census data of 2011. Population (6 classes, number of persons): 1: 3-250, 2: 250-500, 3: 500-2000, 4: 4000-8000, 5: >8000; women (5 classes, %): 1: 0-40, 2: 40-47, 3: 47-53, 4: 53-60, 5: >60; mean age (5 classes, years): 1: 0-40, 2: 40-42, 3: 42-44, 4: 44-47, 5: >47; household size (5 classes, number of persons): 1: 1-2, 2: 2-2.5, 3: 2.5-3, 4: 3-3.5, 5: >3.5. See also the data description 'Datensatzbeschreibung_klassierte_Werte_1km-Gitter.xlsx' located in the downloaded file census.zip."}
 knitr::include_graphics("figures/08_census_stack.png")
 ```
 
@@ -117,8 +117,8 @@ knitr::include_graphics("figures/08_census_stack.png")
 
 We arbitrarily define a a pixel of 20000 sq-km as metropolitan if more than half a million people lives in it.
 To do so, we first `reclassify()` (see also section \@ref(local-operations)) the ordinal-scaled inhabitant data into a numeric data type using class means.
-This means we use 127 for class 1 (ranging from 3 to 250 inhabitants), 375 for class 2 (ranging from 250 to 500 inhabitants), etc. ^[See also the Excel Sheet Datensatzbeschreibung lines 20 to 28 of the data description "Datensatzbeschreibung_klassierte_Werte_1km-Gitter.xlsx" located also in the downloaded file census.zip.
-Unfortunately, the description is in German, but you get the meaning of the numbers.] 
+This means we use 127 for class 1 (ranging from 3 to 250 inhabitants), 375 for class 2 (ranging from 250 to 500 inhabitants), etc. ^[See also the Excel Sheet Datensatzbeschreibung lines 20 to 28 of the data description "Datensatzbeschreibung_klassierte_Werte_1km-Gitter.xlsx" located in the downloaded file census.zip.
+Unfortunately, the description is in German, but you get the meaning of the numbers.]
 We arbitrarily chose 8000 inhabitants for class 6 since it contains all raster cells greater than 8000.
 Of course, this is only a simple approximation of the true population number (in the exercises you can explore the introduced error in more detail), however, for our purpose of delineating metropolitan areas the level of detail is good enough.
 
@@ -250,19 +250,16 @@ coords = st_centroid(metros_wgs) %>%
   round(., 4)
 ```
 
-`ggmap::revgeocode()` accepts one coordinate at a time.
-Therefore, we iterate over each coordinate of `coords` via a loop (`ldply()`).
-`ldply()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.
-We are also good citizens in trying not to overburden the server with too many queries within a short amount of time. 
-Instead we let the algorithm sleep between one and four seconds before accessing the reverse geocoding API again.
+Since `ggmap::revgeocode()` only accepts one coordinate at a time, we iterate over each coordinate of `coords` via a loop (`ldply()`).
+`ldply()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.^[To learn more about the split-apply-combine strategy for data analysis, we refer the reader to @wickham_split-apply-combine_2011.]
 Sometimes, the reverse geocoding API of Google is unable to find an address returning `NA`.
 Often enough trying the same coordinate again, returns an address at the second or third attempt (see `while()-loop`).
 However, if three attempts have already failed, this is a good indication that the requested information is indeed unavailable.
+We are also good cyberspace citizens by trying not to overburden the server with too many queries within a short amount of time. 
+Instead we let the loop sleep between one and four seconds after each iterationbefore accessing the reverse geocoding API again.
 
 ```{r, eval = FALSE}
 metro_names = plyr::ldply(1:nrow(coords), function(i) {
-  # give the server a bit time
-  Sys.sleep(sample(seq(1, 4, 0.1), 1))
   add = ggmap::revgeocode(coords[i, ], output = "more")
   x = 2
   while (is.na(add$address) & x > 0) {
@@ -270,6 +267,9 @@ metro_names = plyr::ldply(1:nrow(coords), function(i) {
     # just try three times
     x = x - 1
   }
+  # give the server a bit time
+  Sys.sleep(sample(seq(1, 4, 0.1), 1))
+  # return the result
   add
 })
 ```
