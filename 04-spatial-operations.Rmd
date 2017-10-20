@@ -88,17 +88,17 @@ africa = st_transform(africa_wgs, crs = 32630)
 We can also use the `[` operator for *Spatial* subsetting.
 The difference is that we use *another spatial object* inside the square brackets instead of an `integer` or `logical` vector.
 This is a concise and consistent syntax, as shown in the next code chunk.
-Let's test it with a hypothetical scenario: we want to subset all countries within 20 degrees of the point where the equator (where latitude = 0 degrees) intersects the prime meridian (longitude = 0 degrees), as illustrated in Figure \@ref(fig:globe).
+Let's test it with a hypothetical scenario: we want to subset all countries within 2000 km of the point where the equator (where latitude = 0 degrees) intersects the prime meridian (longitude = 0 degrees), as illustrated in Figure \@ref(fig:globe).
 The subsetting object is created below.
 Note that this must have the same CRS as the target object (set with the `crs` argument):
 
 ```{r, warning=FALSE}
-center = st_sf(geometry = st_sfc(st_point(c(0, 0)), crs = 4326))
-buff = st_buffer(x = center, dist = 20)
-buff = st_transform(buff, 32630)
+center_wgs = st_sf(geometry = st_sfc(st_point(c(0, 0)), crs = 4326))
+center = st_transform(center_wgs, 32630)
+buff = st_buffer(center, dist = 2e6)
 ```
 
-```{r globe, echo=FALSE, fig.cap="Hypothetical subsetting scenario: select all countries which intersect with a circle of 20 degrees in radius around planet Earth. Figure created with the **[globe](https://cran.r-project.org/package=globe)** package."}
+```{r globe, echo=FALSE, fig.cap="Subsetting scenario: which countries intersect with a circle of 2000 km in radius located at zero degrees longitude and zero degrees latitude? Figure created with the **[globe](https://cran.r-project.org/package=globe)** package."}
 knitr::include_graphics("figures/globe.png")
 ```
 
@@ -106,7 +106,7 @@ The data to be subset, or 'target layer', is the `africa` object created above, 
 Subsequently, spatial subsetting can be done with a single, concise command:
 
 ```{r}
-africa_buff = africa[buff, ]
+africa_buf = africa[buff, ]
 ```
 
 ```{block2 type='rmdnote'}
@@ -118,13 +118,23 @@ It is good practice to reproject spatial datasets before performing spatial oper
 
 The spatial subsetting clearly worked: only countries intersecting with the giant circle are returned (Figure \@ref(fig:africa-buff)):
 
-```{r africa-buff, fig.cap="Subset of the `africa` data selected based on their intersection with a circle 20 degrees in radius with a center point at 0 degrees longitude and 0 degrees latitude."}
-plot(africa_buff["pop"])
+```{r, eval=FALSE}
+plot(africa_buf["pop"])
 plot(buff, add = TRUE)
 ```
 
-Note that countries that just touch the giant circle are selected such as Algeria (the large country at the north of plot).
-`st_relates()` includes countries that only touch (but are not within or overlapping with) the selection object.
+
+<!-- Todo: improve this figure, e.g. by creating a new hidden chunk - still show this one -->
+```{r africa-buff, fig.cap="Subset of the `africa` data selected based on their intersection with a circle 2000 km in radius with a center point at 0 degrees longitude and 0 degrees latitude.", echo=FALSE}
+library(leaflet)
+leaflet() %>% 
+  addProviderTiles("OpenMapSurfer.Grayscale") %>% 
+  addPolygons(data = st_transform(africa_buf, 4326)) %>% 
+  addPolygons(data = st_transform(buff, 4326), color = "red")
+```
+
+Note that countries that just touch the giant circle are selected such as Chad (northeast of the circle).
+This is because the default subsetting operator is `st_intersects()`, which returns any type of spatial relation.
 Other spatial subsetting operations such as `st_within()` are more conservative, as shown in section \@ref(topological-relations).
 
 Before we progress to explore the differences between different spatial subsetting operations, it is worth seeing alternative ways to achieve the same result,
@@ -133,36 +143,36 @@ The second way to reproduce the subsetting operation illustrated in Figure \@ref
 
 ```{r}
 sel_buff = st_intersects(x = africa, y = buff, sparse = FALSE)
-africa_buff2 = africa[sel_buff, ]
+africa_buf2 = africa[sel_buff, ]
 ```
 
 The third way is essentially the same as the second, but uses the `filter()` function introduced in section \@ref(vector-attribute-subsetting), forming the foundations of a 'tidy' spatial data analysis workflow.
 If you already use **dplyr** for data manipulation, this way should seem familiar:
 
 ```{r}
-africa_buff3 = filter(africa, sel_buff)
+africa_buf3 = filter(africa, sel_buff)
 ```
 
 How can we be sure that the results are the same for the three subsetting operations?
 We can test them as follows:
 
 ```{r}
-identical(x = africa_buff, y = africa_buff2)
-identical(x = africa_buff, y = africa_buff3)
+identical(x = africa_buf, y = africa_buf2)
+identical(x = africa_buf, y = africa_buf3)
 ```
 
-The reason that the third spatially subset object (`africa_buff3`) is not identical is that **dplyr** changes the row names:
+The reason that the third spatially subset object (`africa_buf3`) is not identical is that **dplyr** changes the row names:
 
 ```{r}
-head(row.names(africa_buff))
-head(row.names(africa_buff3))
+head(row.names(africa_buf))
+head(row.names(africa_buf3))
 ```
 
 If the row names are re-set, the objects become identical:
 
 ```{r}
-attr(africa_buff3, "row.names") = attr(x = africa_buff, "row.names")
-identical(africa_buff, africa_buff3)
+attr(africa_buf3, "row.names") = attr(x = africa_buf, "row.names")
+identical(africa_buf, africa_buf3)
 ```
 
 ```{block type='rmdnote'}
@@ -438,7 +448,7 @@ par(mfrow = c(1, 1))
 This operation is also know as spatial overlay.
 `st_join()` performs by default a left join (see chapter \@ref(vector-attribute-joining), but you can change this to an inner join operation.
 Another default of `st_join()` is to intersect the two provided layers.
-Of course, you can use any other topological operations we have already encountered above such as `st_within()` or or `st_touches()` (please refer also to the help page of `st_join()`.
+Of course, you can use any other topological operations we have already encountered above such as `st_within()` or or `st_touches()` (please refer also to the help page of `st_join()`).
 In the example above, we have added features of a point layer to a polygon layer.
 Please note that there might be multiple point matches for one polygon. 
 Had we chosen to select the four (instead of three) most populous cities in the world, two of them would have belonged to China (Shanghai and Beijing, give it a try yourself).
@@ -512,7 +522,7 @@ pal = tmaptools::get_brewer_pal(palette = "BuPu", n = 4, plot = F)
 breaks = c(0, 1e7, 1e8, 5e8, 1e9)
 bb_buff = tmaptools::bb(buff_agg, ext = 1.5)
 qtm(buff_agg, fill = pal[4], bbox = bb_buff) +
-  tm_shape(africa_buff) +
+  tm_shape(africa_buf) +
   tm_fill("pop", palette = pal, breaks = breaks) +
   tm_borders() +
   qtm(africa[st_disjoint(africa, buff, sparse = FALSE), ]) +
