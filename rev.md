@@ -2,7 +2,6 @@
 
 - [QUESTION] By frequently speaking to the reader using the "you" form, the book gets the feeling of a tutorial.
 - [QUESTION] The book does not make explicit who its target audience is. (2) The book fails to mention what its audience is.
-- [QUESTION] I’d prefer exercises at the end. That makes them easier to find, and if you want to refer to some in the middle of the chapter, something like “see exercise 4.2 for practice on this concept” could be added.
 - [QUESTION] In section 3.2.1, at the end, please provide an example using the -> operator. You claim that the code producing world7 is easier to understand than the code producing world8, although to me, the reverse is true. Maybe having the -> example will help me see the value in the %>% chaining operator.
 - [QUESTION] Decision about the sf figure
 - [QUESTION] In Ch 5, they do not seem to look at KML files, but probably should; they are mentioned, but not exemplified. Maybe Google Earth or similar are very yesterday now, but they are not that irrelevant.
@@ -49,6 +48,8 @@
 - [JAKUB] A third example is towards the end of section 3.2.3. You distinguish data.frame objects from sf objects in the situation of reversing the order of parameters in the left_join function. What are the implications of having the sf output versus the data.frame output? Why would I want to ensure I choose one over the other.
 - [JAKUB] On the flip side of this, please provide examples of the [[ and $ operators on raster data. 
 - [JAKUB] Since figure 2.9 (right) plots long/lat coordinates to a flat surface, you may want to explain which projection it uses.
+- [JAKUB] I’d prefer exercises at the end. That makes them easier to find, and if you want to refer to some in the middle of the chapter, something like “see exercise 4.2 for practice on this concept” could be added.
+
 
 # TO DO IN THE FUTURE 
 
