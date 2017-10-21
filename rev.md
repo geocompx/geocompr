@@ -33,8 +33,6 @@
 - [JAKUB] On the flip side of this, please provide examples of the [[ and $ operators on raster data. 
 - [JAKUB] Since figure 2.9 (right) plots long/lat coordinates to a flat surface, you may want to explain which projection it uses.
 - [JAKUB] I’d prefer exercises at the end. That makes them easier to find, and if you want to refer to some in the middle of the chapter, something like “see exercise 4.2 for practice on this concept” could be added.
-- [JAKUB] Decision about the sf figure
-- [JAKUB] MULTIPOLYGON s : this reads odd; I would replace it with MULTIPOLYGON geometries.
 
 # TO DO IN THE FUTURE 
 
@@ -90,3 +88,5 @@ but don't see it in the output of the book. What should readers of the book now 
 - [FIXED] "These packages help overcome the criticism that R has “limited interactive [plotting] facilities" - the functionality refered to is javascript, interfaced from R; the actual plotting limitations of R are not changed by it.
 - [FIXED] Fig 2.2: "The subset of the Simple Features class hierarchy supported by sf." Two remarks: (i) sf supports all 17 types., (ii) it is not clear what the arrows indicate. Is there a direct arrow intended from LINESTRING to GEOMETRYCOLLECTION?
 - [FIXED] "This enables non-spatial data operations to work alongside spatial operations" -- but not in the tidyverse.
+- [FIXED] MULTIPOLYGON s : this reads odd; I would replace it with MULTIPOLYGON geometries.
+- [FIXED] Decision about the sf figure
