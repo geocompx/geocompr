@@ -1,15 +1,13 @@
 # QUESTION
 
-- [QUESTION] Figure 4.6 is interesting: is this raster data? Can raster deal with this problem? 
 - [QUESTION] 5.2 What is a geolibrary?
 - [QUESTION] By frequently speaking to the reader using the "you" form, the book gets the feeling of a tutorial.
-- [QUESTION] The book does not make explicit who its target audience is.
+- [QUESTION] The book does not make explicit who its target audience is. (2) The book fails to mention what its audience is.
 - [QUESTION] I’d prefer exercises at the end. That makes them easier to find, and if you want to refer to some in the middle of the chapter, something like “see exercise 4.2 for practice on this concept” could be added.
 - [QUESTION] In section 3.2.1, at the end, please provide an example using the -> operator. You claim that the code producing world7 is easier to understand than the code producing world8, although to me, the reverse is true. Maybe having the -> example will help me see the value in the %>% chaining operator.
 - [QUESTION] Decision about the sf figure
 - [QUESTION] In Ch 5, they do not seem to look at KML files, but probably should; they are mentioned, but not exemplified. Maybe Google Earth or similar are very yesterday now, but they are not that irrelevant.
 - [QUESTION] Likewise, in section 4.3.3 and 4.3.4, examples with landsat, satellite, and/or RStoolbox packages could be helpful, as would examples of the origin() and extend() commands. 
-- [QUESTION] The book fails to mention what its audience is.
 - [QUESTION] It mentions a lot of how much sf is bleeding edge; I think these comments are no longer relevant, and certainly not by the time this book gets published.
 - [QUESTION] "These packages help overcome the criticism that R has “limited interactive [plotting] facilities" - the functionality refered to is javascript, interfaced from R; the actual plotting limitations of R are not changed by it.
 - [QUESTION] The comparison of R and C++ does not make much sense: for most of the audience of this book, R should be considered a program that can be used to carry out data analysis, and C++ a computer language that can be used to create programs for this.
@@ -43,6 +41,7 @@
 - [ROBIN] Fig 2.6 breaks with many cartographic conventions.
 - [ROBIN] 4.2.1: instead of mentioning a lot of options while forwarding to a future section for what is meant, I think this section would work better when it would start with a simple example. Introducing earlier what is meant by a spatial relation may also clarify this chapter.
 - [ROBIN and JANNES] I find the frequent use of "of course" in this chapter (chapter 4) somewhat disturbing: very little here actually is "of course".
+- [ROBIN] Figure 4.6 is interesting: is this raster data? Can raster deal with this problem? 
 
 # JAKUB
 
