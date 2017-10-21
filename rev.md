@@ -1,31 +1,15 @@
-# QUESTION
-
-- [QUESTION] By frequently speaking to the reader using the "you" form, the book gets the feeling of a tutorial.
-- [QUESTION] The book does not make explicit who its target audience is. (2) The book fails to mention what its audience is.
-- [QUESTION] In section 3.2.1, at the end, please provide an example using the -> operator. You claim that the code producing world7 is easier to understand than the code producing world8, although to me, the reverse is true. Maybe having the -> example will help me see the value in the %>% chaining operator.
-- [QUESTION] Decision about the sf figure
-- [QUESTION] In Ch 5, they do not seem to look at KML files, but probably should; they are mentioned, but not exemplified. Maybe Google Earth or similar are very yesterday now, but they are not that irrelevant.
-- [QUESTION] Likewise, in section 4.3.3 and 4.3.4, examples with landsat, satellite, and/or RStoolbox packages could be helpful, as would examples of the origin() and extend() commands. 
-- [QUESTION] It mentions a lot of how much sf is bleeding edge; I think these comments are no longer relevant, and certainly not by the time this book gets published.
-- [QUESTION] "These packages help overcome the criticism that R has “limited interactive [plotting] facilities" - the functionality refered to is javascript, interfaced from R; the actual plotting limitations of R are not changed by it.
-- [QUESTION] The comparison of R and C++ does not make much sense: for most of the audience of this book, R should be considered a program that can be used to carry out data analysis, and C++ a computer language that can be used to create programs for this.
-- [QUESTION] geostatistical community - spatial statistical community 
-- [QUESTION] "This enables non-spatial data operations to work alongside spatial operations" -- but not in the tidyverse.
-- [QUESTION] Fig 2.2: "The subset of the Simple Features class hierarchy supported by sf." Two remarks: (i) sf supports all 17 types., (ii) it is not clear what the arrows indicate. Is there a direct arrow intended from LINESTRING to GEOMETRYCOLLECTION?
-- [QUESTION] "This column is usually named ‘geom’ or ‘geometry’" - depends, not if you mostly import your data from a spatial database.
-- [QUESTION] MULTIPOLYGON s : this reads odd; I would replace it with MULTIPOLYGON geometries.
-- [QUESTION] I would not harm if the book would somewhere explain what is meant by a feature, and by a simple feature.
-- [QUESTION] st_proj_info(type = "ellps") still works, but may have to disappear when Proj.4 version 10 appears.
-- [QUESTION] "Correspondingly, there is also only one possible proj4string for a specific epsg-code." You would wish this were true; they may however differ (subtly) from one proj.4 version to another.
-
 # JANNES
 
 - [JANNES] I don't think that Java's memory management is much simpler than that of C++ when one uses properly types like std::vector.
 - [JANNES] 2.2 raster - "You can also specify a no-data value in the header of a raster, frequently -9999 (in R we often use NA)." This, and earlier sentences, pre-suppose that a raster is actually a file on disk, most likely something like an asciigrid file, but doesn't make this assumption explicit. As this is very often not the case, I think this information is confusing, and not needed: do NetCDF files have a header? It's irrelevant.
 - [ROBIN and JANNES] I find the frequent use of "of course" in this chapter (chapter 4) somewhat disturbing: very little here actually is "of course".
+- [JANNES] "This column is usually named ‘geom’ or ‘geometry’" - depends, not if you mostly import your data from a spatial database.
+- [JANNES] Likewise, in section 4.3.3 and 4.3.4, examples with landsat, satellite, and/or RStoolbox packages could be helpful, as would examples of the origin() and extend() commands. 
 
 # ROBIN 
 
+- [ROBIN] It mentions a lot of how much sf is bleeding edge; I think these comments are no longer relevant, and certainly not by the time this book gets published.
+- [ROBIN] The book does not make explicit who its target audience is. (2) The book fails to mention what its audience is.
 - [ROBIN] This might be related to my next comment, which is that you use the term “sticky geometry column” before we explain what “sticky” means here.
 - [ROBIN] Section 4.2.3.1 (Non-overlapping joins) is empty.
 - [ROBIN] Ch 1: GDS, GSD, Geographical information science; needs clean up.
@@ -49,7 +33,8 @@
 - [JAKUB] On the flip side of this, please provide examples of the [[ and $ operators on raster data. 
 - [JAKUB] Since figure 2.9 (right) plots long/lat coordinates to a flat surface, you may want to explain which projection it uses.
 - [JAKUB] I’d prefer exercises at the end. That makes them easier to find, and if you want to refer to some in the middle of the chapter, something like “see exercise 4.2 for practice on this concept” could be added.
-
+- [JAKUB] Decision about the sf figure
+- [JAKUB] MULTIPOLYGON s : this reads odd; I would replace it with MULTIPOLYGON geometries.
 
 # TO DO IN THE FUTURE 
 
@@ -93,5 +78,15 @@ but don't see it in the output of the book. What should readers of the book now 
 - [FIXED] (please refer also to the help page of st_join() - missing closing brace
 - [FIXED] Then the might struggle to find [...]
 - [FIXED] First line in 5.3: instead of geodatabases you may want to use "spatial databases", as geodatabase is strongly associated with ESRI, and is one of the many spatial databases.
-- [FIXED] 5.2 What is a geolibrary?
-    - We have fixed this by changing it to spatial library, and provided an example here: https://github.com/Robinlovelace/geocompr/commit/43e4a33a697792c06df3d7d3f1a56a6c620e7ea7
+- [FIXED] 5.2 What is a geolibrary? - We have fixed this by changing it to spatial library, and provided an example here: https://github.com/Robinlovelace/geocompr/commit/43e4a33a697792c06df3d7d3f1a56a6c620e7ea7
+- [FIXED] I would not harm if the book would somewhere explain what is meant by a feature, and by a simple feature.
+- [FIXED - issue opened] st_proj_info(type = "ellps") still works, but may have to disappear when Proj.4 version 10 appears.
+- [FIXED] "Correspondingly, there is also only one possible proj4string for a specific epsg-code." You would wish this were true; they may however differ (subtly) from one proj.4 version to another.
+- [FIXED] The comparison of R and C++ does not make much sense: for most of the audience of this book, R should be considered a program that can be used to carry out data analysis, and C++ a computer language that can be used to create programs for this.
+- [FIXED] geostatistical community - spatial statistical community 
+- [FIXED] In Ch 5, they do not seem to look at KML files, but probably should; they are mentioned, but not exemplified. Maybe Google Earth or similar are very yesterday now, but they are not that irrelevant.
+- [FIXED] In section 3.2.1, at the end, please provide an example using the -> operator. You claim that the code producing world7 is easier to understand than the code producing world8, although to me, the reverse is true. Maybe having the -> example will help me see the value in the %>% chaining operator.
+- [FIXED] By frequently speaking to the reader using the "you" form, the book gets the feeling of a tutorial.
+- [FIXED] "These packages help overcome the criticism that R has “limited interactive [plotting] facilities" - the functionality refered to is javascript, interfaced from R; the actual plotting limitations of R are not changed by it.
+- [FIXED] Fig 2.2: "The subset of the Simple Features class hierarchy supported by sf." Two remarks: (i) sf supports all 17 types., (ii) it is not clear what the arrows indicate. Is there a direct arrow intended from LINESTRING to GEOMETRYCOLLECTION?
+- [FIXED] "This enables non-spatial data operations to work alongside spatial operations" -- but not in the tidyverse.
