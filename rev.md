@@ -1,6 +1,5 @@
 # QUESTION
 
-- [QUESTION] Figure 4.6 is interesting: is this raster data? Can raster deal with this problem? 
 - [QUESTION] 5.2 What is a geolibrary?
 - [QUESTION] By frequently speaking to the reader using the "you" form, the book gets the feeling of a tutorial.
 - [QUESTION] The book does not make explicit who its target audience is.
@@ -43,6 +42,7 @@
 - [ROBIN] Fig 2.6 breaks with many cartographic conventions.
 - [ROBIN] 4.2.1: instead of mentioning a lot of options while forwarding to a future section for what is meant, I think this section would work better when it would start with a simple example. Introducing earlier what is meant by a spatial relation may also clarify this chapter.
 - [ROBIN and JANNES] I find the frequent use of "of course" in this chapter (chapter 4) somewhat disturbing: very little here actually is "of course".
+- [ROBIN] Figure 4.6 is interesting: is this raster data? Can raster deal with this problem? 
 
 # JAKUB
 
