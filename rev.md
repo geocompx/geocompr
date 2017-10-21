@@ -1,6 +1,5 @@
 # QUESTION
 
-- [QUESTION] 5.2 What is a geolibrary?
 - [QUESTION] By frequently speaking to the reader using the "you" form, the book gets the feeling of a tutorial.
 - [QUESTION] The book does not make explicit who its target audience is. (2) The book fails to mention what its audience is.
 - [QUESTION] I’d prefer exercises at the end. That makes them easier to find, and if you want to refer to some in the middle of the chapter, something like “see exercise 4.2 for practice on this concept” could be added.
@@ -93,3 +92,5 @@ but don't see it in the output of the book. What should readers of the book now 
 - [FIXED] (please refer also to the help page of st_join() - missing closing brace
 - [FIXED] Then the might struggle to find [...]
 - [FIXED] First line in 5.3: instead of geodatabases you may want to use "spatial databases", as geodatabase is strongly associated with ESRI, and is one of the many spatial databases.
+- [FIXED] 5.2 What is a geolibrary?
+    - We have fixed this by changing it to spatial library, and provided an example here: https://github.com/Robinlovelace/geocompr/commit/43e4a33a697792c06df3d7d3f1a56a6c620e7ea7
