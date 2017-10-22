@@ -11,7 +11,6 @@
 - [ROBIN] The book does not make explicit who its target audience is. (2) The book fails to mention what its audience is.
 - [ROBIN] This might be related to my next comment, which is that you use the term “sticky geometry column” before we explain what “sticky” means here.
 - [ROBIN] Section 4.2.3.1 (Non-overlapping joins) is empty.
-- [ROBIN] Ch 1: GDS, GSD, Geographical information science; needs clean up.
 - [ROBIN] The book uses the word "reproducible" a lot, but does not introduce it, define it, or discuss why it is a good (or required) thing.
 - [ROBIN] blazzingly/blazingly
 - [ROBIN] "Many people believe that R and Python are battling for supremacy in the field of data science." I think this sentence gives a wrong message. 
@@ -90,3 +89,4 @@ but don't see it in the output of the book. What should readers of the book now 
 - [FIXED] MULTIPOLYGON s : this reads odd; I would replace it with MULTIPOLYGON geometries.
 - [FIXED] Decision about the sf figure
 - [FIXED] It mentions a lot of how much sf is bleeding edge; I think these comments are no longer relevant, and certainly not by the time this book gets published.
+- [FIXED] Ch 1: GDS, GSD, Geographical information science; needs clean up.
