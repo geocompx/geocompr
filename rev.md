@@ -12,7 +12,6 @@
 - [ROBIN] This might be related to my next comment, which is that you use the term “sticky geometry column” before we explain what “sticky” means here.
 - [ROBIN] Section 4.2.3.1 (Non-overlapping joins) is empty.
 - [ROBIN] The book uses the word "reproducible" a lot, but does not introduce it, define it, or discuss why it is a good (or required) thing.
-- [ROBIN] These numbers represent point’s distance from an origin along the x (horizontal) and y (vertical) axis. - this is only the case for Cartesian coordinates.
 - [ROBIN] 2.1.2 does not answer the question "Why Simple Features?" but answers the question "why use package sf and not sp?"
 - [ROBIN] Fig 2.6 breaks with many cartographic conventions.
 - [ROBIN] 4.2.1: instead of mentioning a lot of options while forwarding to a future section for what is meant, I think this section would work better when it would start with a simple example. Introducing earlier what is meant by a spatial relation may also clarify this chapter.
@@ -92,3 +91,6 @@ but don't see it in the output of the book. What should readers of the book now 
     - We have removed this phrase - agreed it's not useful if no example is given and whether or not something is 'complete' or not is subjective.
 - [FIXED] "The transition from sp to sf will likely take many years," : the transition of what, or by whom? 
     - This has been fixed - we were refering to the transition of R packages.
+- [FIXED] These numbers represent point’s distance from an origin along the x (horizontal) and y (vertical) axis. - this is only the case for Cartesian coordinates.
+    - Clarified in the text and demonstrated with an exmaple of London
+
