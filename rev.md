@@ -3,6 +3,7 @@
 - [JANNES] I don't think that Java's memory management is much simpler than that of C++ when one uses properly types like std::vector.
 - [JANNES] 2.2 raster - "You can also specify a no-data value in the header of a raster, frequently -9999 (in R we often use NA)." This, and earlier sentences, pre-suppose that a raster is actually a file on disk, most likely something like an asciigrid file, but doesn't make this assumption explicit. As this is very often not the case, I think this information is confusing, and not needed: do NetCDF files have a header? It's irrelevant.
 - [ROBIN and JANNES] I find the frequent use of "of course" in this chapter (chapter 4) somewhat disturbing: very little here actually is "of course".
+- [JANNES] On the flip side of this, please provide examples of the [[ and $ operators on raster data. 
 - [JANNES] "This column is usually named ‘geom’ or ‘geometry’" - depends, not if you mostly import your data from a spatial database.
 - [JANNES] Likewise, in section 4.3.3 and 4.3.4, examples with landsat, satellite, and/or RStoolbox packages could be helpful, as would examples of the origin() and extend() commands. 
 
@@ -23,9 +24,7 @@
 - [JAKUB] CRSs - look at non-geographers' work too (eg. I think in Waller&Gotway and Banerjee et al.) Consider covering post-WGS84 datums (sorry, datums are the plural of datum in geodesy) for the US readership.
 - [JAKUB] Another example is that in section 2.2, describing when I might want to use a RasterStack versus a RasterBrick (or vice versa). You mention that RasterBricks are faster. It seems like the ability to create a RasterStack from a file on disk (as opposed to in memory?) is an advantage of a RasterStack. When would this be useful? I have a computer science degree and am having a hard time figuring out what the advantage truly is, and I’m sure my students would be harder pressed to figure it out. 
 - [JAKUB] A third example is towards the end of section 3.2.3. You distinguish data.frame objects from sf objects in the situation of reversing the order of parameters in the left_join function. What are the implications of having the sf output versus the data.frame output? Why would I want to ensure I choose one over the other.
-- [JAKUB] On the flip side of this, please provide examples of the [[ and $ operators on raster data. 
 - [JAKUB] Since figure 2.9 (right) plots long/lat coordinates to a flat surface, you may want to explain which projection it uses.
-- [JAKUB] I’d prefer exercises at the end. That makes them easier to find, and if you want to refer to some in the middle of the chapter, something like “see exercise 4.2 for practice on this concept” could be added.
 
 # TO DO IN THE FUTURE 
 
@@ -87,10 +86,8 @@ but don't see it in the output of the book. What should readers of the book now 
 - [FIXED] Ch 1: GDS, GSD, Geographical information science; needs clean up.
 - [FIXED] blazzingly/blazingly
 - [FIXED] "Many people believe that R and Python are battling for supremacy in the field of data science." I think this sentence gives a wrong message. 
-- [FIXED] "sf is not feature complete": the authors would do well in reporting which features of the simple feature access standard they find missing.
-    - We have removed this phrase - agreed it's not useful if no example is given and whether or not something is 'complete' or not is subjective.
-- [FIXED] "The transition from sp to sf will likely take many years," : the transition of what, or by whom? 
-    - This has been fixed - we were refering to the transition of R packages.
-- [FIXED] These numbers represent point’s distance from an origin along the x (horizontal) and y (vertical) axis. - this is only the case for Cartesian coordinates.
-    - Clarified in the text and demonstrated with an exmaple of London
+- [FIXED] "sf is not feature complete": the authors would do well in reporting which features of the simple feature access standard they find missing. - We have removed this phrase - agreed it's not useful if no example is given and whether or not something is 'complete' or not is subjective.
+- [FIXED] "The transition from sp to sf will likely take many years," : the transition of what, or by whom? - This has been fixed - we were refering to the transition of R packages.
+- [FIXED] These numbers represent point’s distance from an origin along the x (horizontal) and y (vertical) axis. - this is only the case for Cartesian coordinates.  - Clarified in the text and demonstrated with an exmaple of London
+- [FIXED] I’d prefer exercises at the end. That makes them easier to find, and if you want to refer to some in the middle of the chapter, something like “see exercise 4.2 for practice on this concept” could be added.
 
