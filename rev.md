@@ -8,7 +8,6 @@
 
 # ROBIN 
 
-- [ROBIN] It mentions a lot of how much sf is bleeding edge; I think these comments are no longer relevant, and certainly not by the time this book gets published.
 - [ROBIN] The book does not make explicit who its target audience is. (2) The book fails to mention what its audience is.
 - [ROBIN] This might be related to my next comment, which is that you use the term “sticky geometry column” before we explain what “sticky” means here.
 - [ROBIN] Section 4.2.3.1 (Non-overlapping joins) is empty.
@@ -90,3 +89,4 @@ but don't see it in the output of the book. What should readers of the book now 
 - [FIXED] "This enables non-spatial data operations to work alongside spatial operations" -- but not in the tidyverse.
 - [FIXED] MULTIPOLYGON s : this reads odd; I would replace it with MULTIPOLYGON geometries.
 - [FIXED] Decision about the sf figure
+- [FIXED] It mentions a lot of how much sf is bleeding edge; I think these comments are no longer relevant, and certainly not by the time this book gets published.
