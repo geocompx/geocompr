@@ -21,13 +21,13 @@
 
 # JAKUB
 
-- [JAKUB] CRSs - look at non-geographers' work too (eg. I think in Waller&Gotway and Banerjee et al.) Consider covering post-WGS84 datums (sorry, datums are the plural of datum in geodesy) for the US readership.
 - [JAKUB] Another example is that in section 2.2, describing when I might want to use a RasterStack versus a RasterBrick (or vice versa). You mention that RasterBricks are faster. It seems like the ability to create a RasterStack from a file on disk (as opposed to in memory?) is an advantage of a RasterStack. When would this be useful? I have a computer science degree and am having a hard time figuring out what the advantage truly is, and I’m sure my students would be harder pressed to figure it out. 
 - [JAKUB] A third example is towards the end of section 3.2.3. You distinguish data.frame objects from sf objects in the situation of reversing the order of parameters in the left_join function. What are the implications of having the sf output versus the data.frame output? Why would I want to ensure I choose one over the other.
-- [JAKUB] Since figure 2.9 (right) plots long/lat coordinates to a flat surface, you may want to explain which projection it uses.
 
 # TO DO IN THE FUTURE 
 
+- [ISSUE OPENED] Since figure 2.9 (right) plots long/lat coordinates to a flat surface, you may want to explain which projection it uses.
+- [ISSUE OPENED] CRSs - look at non-geographers' work too (eg. I think in Waller&Gotway and Banerjee et al.) Consider covering post-WGS84 datums (sorry, datums are the plural of datum in geodesy) for the US readership.
 - [ISSUE OPENED] the references need to be seriously checked as lots of the inserted author strings are wrong.
 - [FUTURE CHAPTERS] One example is at the end of section 2.2.2: “You can also do this with the rasterVis package which provides more advanced methods for plotting raster objects.” What more advanced methods? That might be helpful to know, even if you don’t go into details about how to carry out those advanced methods. 
 - [FUTURE CHAPTERS] Lastly on this, section 5.6 can be much expanded, as visualization is such an important part of geography and geographic analysis.
