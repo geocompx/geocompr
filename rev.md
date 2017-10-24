@@ -21,7 +21,7 @@
 # JAKUB
 
 - [JAKUB] Another example is that in section 2.2, describing when I might want to use a RasterStack versus a RasterBrick (or vice versa). You mention that RasterBricks are faster. It seems like the ability to create a RasterStack from a file on disk (as opposed to in memory?) is an advantage of a RasterStack. When would this be useful? I have a computer science degree and am having a hard time figuring out what the advantage truly is, and I’m sure my students would be harder pressed to figure it out. 
-- [JAKUB] A third example is towards the end of section 3.2.3. You distinguish data.frame objects from sf objects in the situation of reversing the order of parameters in the left_join function. What are the implications of having the sf output versus the data.frame output? Why would I want to ensure I choose one over the other.
+
 
 # TO DO IN THE FUTURE 
 
@@ -90,4 +90,4 @@ but don't see it in the output of the book. What should readers of the book now 
 - [FIXED] These numbers represent point’s distance from an origin along the x (horizontal) and y (vertical) axis. - this is only the case for Cartesian coordinates.  - Clarified in the text and demonstrated with an exmaple of London
 - [FIXED] I’d prefer exercises at the end. That makes them easier to find, and if you want to refer to some in the middle of the chapter, something like “see exercise 4.2 for practice on this concept” could be added.
 - [FIXED] I find the frequent use of "of course" in this chapter (chapter 4) somewhat disturbing: very little here actually is "of course".
-
+- [FIXED] - [JAKUB] A third example is towards the end of section 3.2.3. You distinguish data.frame objects from sf objects in the situation of reversing the order of parameters in the left_join function. What are the implications of having the sf output versus the data.frame output? Why would I want to ensure I choose one over the other.
