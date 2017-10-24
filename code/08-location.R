@@ -90,15 +90,53 @@ p_2 = spplot(inh_agg, col.regions = pal,
        sp.layout = list(
          list("sp.polygons", ger, col = gray(0.5), first = FALSE),
          list("sp.polygons", as(polys, "Spatial"), col = "gold",
-              lwd = 2, first = FALSE),
-         list("sp.text", coords, txt = metro_names, cex = 0.6, font = 2, first = FALSE)
-         )) 
+              lwd = 2, first = FALSE)
+         # list("sp.text", coords, txt = metro_names, cex = 0.7, font = 3,
+         #      first = FALSE)
+         ))
+
+
+theta = seq(pi / 4, 2 * pi, length.out = 8)
+xy = xy.coords(coords)
+xo = 75 * convertWidth(stringWidth("A"), unitTo = "native", valueOnly = TRUE)
+yo = 75 * convertWidth(stringHeight("A"), unitTo = "native", valueOnly = TRUE)
+p_3 = p_2 + 
+  # take care, layer uses NSE, you need to use the data-argument!!!
+  # See ?layer and:
+  # browseURL(paste0("https://procomun.wordpress.com/2013/04/24/", 
+  #                  "stamen-maps-with-spplot/))
+  # browseURL(paste0("https://gist.github.com/oscarperpinan/",
+  #                  "7482848#file-stamenpolywithlayerinfunction4-r"))
+  # shadowtext by Barry Rowlingson
+  # browseURL(paste0("http://blog.revolutionanalytics.com/2009/05/", 
+  #                  "make-text-stand-out-with-outlines.html"))
+  # needs some adjustment for lattice, strwidth and strheight replace by
+  # stringWidth and stringHeight (gridExtra), see
+  # browseURL("https://stat.ethz.ch/pipermail/r-help/2004-November/061255.html")
+  layer(
+    for (i in theta) {
+      ltext(x = xy$x + cos(i) * xo, y=  xy$y + sin(i) * yo, 
+            labels = metro_names, col = "white", font = 3, cex = 0.5)
+    },
+    data = list(xy = xy, metro_names = metro_names, theta = theta,
+                xo = xo, yo = yo)
+  ) +
+  layer(
+    ltext(x = xy$x, y =  xy$y, labels = metro_names, col = "black", cex = 0.5, 
+          font = 3),
+    data = list(xy = xy, metro_names = metro_names)
+  )
+  
 
 # save the output
 ggplot2::ggsave(filename = "figures/08_metro_areas.png",
-                plot = arrangeGrob(p_2, ncol = 1),
+                plot = arrangeGrob(p_3, ncol = 1),
                 width = 3, height = 4)
 
 # 2.3 POI figure===========================================
 #**********************************************************
 plot(poi)
+
+
+
+text(xy$x, xy$y, labels, col=col, ... )
