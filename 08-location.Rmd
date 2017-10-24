@@ -296,30 +296,28 @@ metro_names =
 
 ## Points of interests
 
-OpenStreetMap is definition (VGI).
-In the meantime the Vollständigkeit and quality is often comparable to that of commercial data providers (TomTom, Here).
-The **osmdata** package provides a fantastic and easy-to-use interface to download OSM data.
-Here, we will download all shops for each metropolitan region.
-`opq()` defines the bounding box for the area for which data should be retrieved.
-You can provide the bounding box yourself or indicate the name of a location.
-We use the name of the metropolitan regions to define the bounding boxes. 
-Furthermore, we indicate that we only would like download `shop` features (see for a full list).
+The **osmdata** package provides a fantastic and easy-to-use interface to download OSM data (see chapter \@ref{retrieving-data}).
+Instead of downloading all shops for the whole of Germany, the `lapply()` loop runs through all eight metropolitan names which subsequently define the bounding box in the `opq()` function.
+Alternatively, we could have provided the bounding box in the form of coordinates ourselves.
+Next, we indicate that we only would like to download `shop` features (see this [page](http://wiki.openstreetmap.org/wiki/Map_Features) for a full list of OpenStreetMap map features).
 `osmdata_sf()` returns a list with several spatial objects (points, lines, polygons, etc.).
 Here, we will only keep the point objects.
-To learn more about how to use the **osmdata**-package, please refer to [https://ropensci.github.io/osmdata/](https://ropensci.github.io/osmdata/).
+As with Google's reverse geocode API, the OSM-download will once in a while not work at the first attempt.
+The `while`-loop increases the number of download trials to three. 
+If then still no features can be downloaded, most likely there are none.
 
 ```{r, eval = FALSE}
 library(osmdata)
 shops = lapply(metro_names, function(x) {
   # give the server a bit time
   Sys.sleep(sample(seq(5, 10, 0.1), 1))
-  q0 = opq(x)
-  q1 = add_osm_feature(q0, key = "shop")
-  points = osmdata_sf(q1)
+  query = opq(x) %>%
+    add_osm_feature(query, key = "shop")
+  points = osmdata_sf(query)
   # request the same data again if nothing has been downloaded
-  iter = 3
+  iter = 2
   while (nrow(points$osm_points) == 0 & iter > 0) {
-    points = osmdata_sf(q1)
+    points = osmdata_sf(query)
     iter = iter - 1
   }
   points = points$osm_points
