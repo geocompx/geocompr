@@ -1,4 +1,4 @@
-# Location analysis
+# Location analysis {#location}
 
 ## Prerequisites
 
@@ -63,7 +63,7 @@ In an advanced chapter we could continue the analysis as follows:
 ## Create input rasters
 
 The German government provides a csv-file containing gridded census data of 2011 for Germany.
-You can either download a 1 km or a 100 m resolution.
+One can either download a 1 km or a 100 m resolution.
 Here, we download the 1 km data, unzip it and read it into R.
 
 ```{r, eval = FALSE}
@@ -117,9 +117,8 @@ knitr::include_graphics("figures/08_census_stack.png")
 
 We arbitrarily define a a pixel of 20000 sq-km as metropolitan if more than half a million people lives in it.
 To do so, we first `reclassify()` (see also section \@ref(local-operations)) the ordinal-scaled inhabitant data into a numeric data type using class means.
-This means we use 127 for class 1 (ranging from 3 to 250 inhabitants), 375 for class 2 (ranging from 250 to 500 inhabitants), etc. ^[See also the Excel Sheet Datensatzbeschreibung lines 20 to 28 of the data description "Datensatzbeschreibung_klassierte_Werte_1km-Gitter.xlsx" located in the downloaded file census.zip.
-Unfortunately, the description is in German, but you get the meaning of the numbers.]
-We arbitrarily chose 8000 inhabitants for class 6 since it contains all raster cells greater than 8000.
+This means we use 127 for class 1 (ranging from 3 to 250 inhabitants), 375 for class 2 (ranging from 250 to 500 inhabitants), etc. (see also Fig. \@ref(fig:census-stack)).
+We arbitrarily chose 8000 inhabitants for class 6 since it represents cells where more than 8000 persons live.
 Of course, this is only a simple approximation of the true population number (in the exercises you can explore the introduced error in more detail), however, for our purpose of delineating metropolitan areas the level of detail is good enough.
 
 ```{r, eval = FALSE}
@@ -128,8 +127,8 @@ rcl = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 4, 4, 3000, 5, 5, 6000,
 inh = reclassify(input$inh, rcl = rcl, right = NA)
 ```
 
-The `aggregate()` command helps to change the resolution from 1 to 20000 sq-km while each output pixel represents the sum of all 1 sq-km input pixels (see section \@ref(aligning-rasters)).
-Next, we only keep pixels with more than half a million inhabitants using a boolean operation, and convert the resulting pixels into spatial polygons of class `sf`.
+The `aggregate()` command helps to change the resolution from 1 to 20000 sq-km while each output cell represents the sum of all 1 sq-km input cells (see section \@ref(aligning-rasters)).
+Next, we only keep cells with more than half a million inhabitants using a boolean operation, and convert the resulting cells into spatial polygons of class `sf`.
 
 ```{r, eval = FALSE}
 inh_agg = aggregate(inh, fact = 20000 / res(inh)[1], fun = sum)
@@ -138,8 +137,8 @@ polys = rasterToPolygons(inh_agg[inh_agg > 500000, drop = FALSE])
 polys = st_as_sf(polys)
 ```
 
-Plotting these polygons reveals eight metropolitan regions.
-Each region consists of one ore more polygons (pixels).
+Plotting these polygons reveals eight metropolitan regions (Fig. \@ref(fig:metro-areas)).
+Each region consists of one ore more polygons (raster cells).
 It would be nice if we could join all polygons belonging to one region.
 One approach is to dissolve all polygons (see section \@ref(aggregating-or-dissolving)).
 
@@ -225,7 +224,7 @@ st_centroid(metros) %>%
 -->
 
 However, visual inspection reveals eight metropolitan areas whereas the dissolving comes up with nine.
-This is because one polygon just touches the corner of another polygon (western Germany, Cologne/Düsseldorf area; see Fig. \@ref(fig:metro-areas)).
+This is because one polygon just touches the corner of another polygon (western Germany, Cologne/Düsseldorf area; Fig. \@ref(fig:metro-areas)).
 
 ```{r metro-areas, echo = FALSE, fig.width = 1, fig.height = 1, fig.cap = "The aggregated raster (resolution: 20 km) with the identified metropolitan areas (golden rectangles) and the corresponding names."}
 knitr::include_graphics("figures/08_metro_areas.png")
@@ -246,7 +245,7 @@ A reverse geocoding approach can help with that.
 Given a coordinate, reverse gecoding finds the corresponding address.
 Consequently, extracting the centroid coordinate of each metropolitan area can serve as an input for a reverse geocoding API.
 The **ggmap** package makes use of the one provided by Google.^[Note that Google allows each user to access its services on a free basis for a maximum of 2500 queries a day.]
-Since `ggmap::revgeocode()` only accepts lat/lon coordinates, the first requirement is to bring the metropolitan polygons into an appropriate projection.
+`ggmap::revgeocode()` only accepts lat/lon coordinates, therefore, the first requirement is to bring the metropolitan polygons into an appropriate projection.
 
 ```{r, eval = FALSE}
 # reverse geocoding to find out the names of the metropolitan areas
@@ -256,13 +255,13 @@ coords = st_centroid(metros_wgs) %>%
   round(., 4)
 ```
 
-Since `ggmap::revgeocode()` only accepts one coordinate at a time, we iterate over each coordinate of `coords` via a loop (`ldply()`).
+Additionally, `ggmap::revgeocode()` only accepts one coordinate at a time, which is why we iterate over each coordinate of `coords` via a loop (`ldply()`).
 `ldply()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.^[To learn more about the split-apply-combine strategy for data analysis, we refer the reader to @wickham_split-apply-combine_2011.]
 Sometimes, the reverse geocoding API of Google is unable to find an address returning `NA`.
 Often enough trying the same coordinate again, returns an address at the second or third attempt (see `while()-loop`).
 However, if three attempts have already failed, this is a good indication that the requested information is indeed unavailable.
-We are also good cyberspace citizens by trying not to overburden the server with too many queries within a short amount of time. 
-Instead we let the loop sleep between one and four seconds after each iterationbefore accessing the reverse geocoding API again.
+Since it is our interest to be a good cyberspace citizens, we try not to overburden the server with too many queries within a short amount of time. 
+Instead we let the loop sleep between one and four seconds after each iteration before accessing the reverse geocoding API again.
 
 ```{r, eval = FALSE}
 metro_names = plyr::ldply(1:nrow(coords), function(i) {

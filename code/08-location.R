@@ -75,8 +75,8 @@ coords = st_centroid(metros) %>% st_coordinates
 coords = coords[-5, ]
 # move all labels up except for Düsseldorf
 ind = metro_names %in% c("Stuttgart", "Düsseldorf", "Berlin")
-coords[!ind, 2] = coords[!ind, 2] + 20000
-coords[ind, 2] = coords[ind, 2] + c(35000, 35000, 0)
+coords[!ind, 2] = coords[!ind, 2] + 30000
+coords[ind, 2] = coords[ind, 2] + c(45000, 45000, 0)
 
 p_2 = spplot(inh_agg, col.regions = pal,
        # par.settings = list(axis.line = list(col = 'transparent')), 
@@ -90,7 +90,7 @@ p_2 = spplot(inh_agg, col.regions = pal,
        sp.layout = list(
          list("sp.polygons", ger, col = gray(0.5), first = FALSE),
          list("sp.polygons", as(polys, "Spatial"), col = "gold",
-              lwd = 3, first = FALSE),
+              lwd = 2, first = FALSE),
          list("sp.text", coords, txt = metro_names, cex = 0.6, font = 2, first = FALSE)
          )) 
 
