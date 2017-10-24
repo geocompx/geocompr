@@ -16,7 +16,6 @@
 - [ROBIN] 2.1.2 does not answer the question "Why Simple Features?" but answers the question "why use package sf and not sp?"
 - [ROBIN] Fig 2.6 breaks with many cartographic conventions.
 - [ROBIN] 4.2.1: instead of mentioning a lot of options while forwarding to a future section for what is meant, I think this section would work better when it would start with a simple example. Introducing earlier what is meant by a spatial relation may also clarify this chapter.
-- [ROBIN and JANNES] I find the frequent use of "of course" in this chapter (chapter 4) somewhat disturbing: very little here actually is "of course".
 - [ROBIN] Figure 4.6 is interesting: is this raster data? Can raster deal with this problem? 
 
 # JAKUB
@@ -90,4 +89,5 @@ but don't see it in the output of the book. What should readers of the book now 
 - [FIXED] "The transition from sp to sf will likely take many years," : the transition of what, or by whom? - This has been fixed - we were refering to the transition of R packages.
 - [FIXED] These numbers represent point’s distance from an origin along the x (horizontal) and y (vertical) axis. - this is only the case for Cartesian coordinates.  - Clarified in the text and demonstrated with an exmaple of London
 - [FIXED] I’d prefer exercises at the end. That makes them easier to find, and if you want to refer to some in the middle of the chapter, something like “see exercise 4.2 for practice on this concept” could be added.
+- [FIXED] I find the frequent use of "of course" in this chapter (chapter 4) somewhat disturbing: very little here actually is "of course".
 
