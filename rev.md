@@ -10,7 +10,6 @@
 # ROBIN 
 
 - [ROBIN] Section 4.2.3.1 (Non-overlapping joins) is empty.
-- [ROBIN] The book uses the word "reproducible" a lot, but does not introduce it, define it, or discuss why it is a good (or required) thing.
 - [ROBIN] 2.1.2 does not answer the question "Why Simple Features?" but answers the question "why use package sf and not sp?"
 - [ROBIN] Fig 2.6 breaks with many cartographic conventions.
 - [ROBIN] 4.2.1: instead of mentioning a lot of options while forwarding to a future section for what is meant, I think this section would work better when it would start with a simple example. Introducing earlier what is meant by a spatial relation may also clarify this chapter.
@@ -90,5 +89,7 @@ but don't see it in the output of the book. What should readers of the book now 
 - [FIXED] I’d prefer exercises at the end. That makes them easier to find, and if you want to refer to some in the middle of the chapter, something like “see exercise 4.2 for practice on this concept” could be added.
 - [FIXED] I find the frequent use of "of course" in this chapter (chapter 4) somewhat disturbing: very little here actually is "of course".
 - [FIXED] - [JAKUB] A third example is towards the end of section 3.2.3. You distinguish data.frame objects from sf objects in the situation of reversing the order of parameters in the left_join function. What are the implications of having the sf output versus the data.frame output? Why would I want to ensure I choose one over the other.
-- [ROBIN] This might be related to my next comment, which is that you use the term “sticky geometry column” before we explain what “sticky” means here.
+- [FIXED] This might be related to my next comment, which is that you use the term “sticky geometry column” before we explain what “sticky” means here.
     - Fixed in https://github.com/Robinlovelace/geocompr/commit/db001dce67d8c8e8b66a3b67b85b3e3726fe904d
+- [FIXED] The book uses the word "reproducible" a lot, but does not introduce it, define it, or discuss why it is a good (or required) thing.
+    - https://github.com/Robinlovelace/geocompr/commit/88fc0eec41d3efeb227aaef99ad2326c09f5f35c
