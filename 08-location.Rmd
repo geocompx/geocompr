@@ -21,6 +21,7 @@ A good example is where to locate new health services so for the benefit of the 
 
 Ecological concepts can be useful in understanding location analysis.
 Animals have needs which they tend to meet by finding the optimal location based on variables that change over space (called gradients in the ecological literature --- see chapter xx).
+<!-- add reference!! -->
 A polar bear, for example, may prefer northern latitudinal regions where the ice is persistent throughout the summer, where the food (seals and sea lions) and shelter it has evolved for are plentiful.
 The further the bear lives from such conditions, the less likely is its survival.
 
@@ -54,13 +55,8 @@ Create a POI raster (= attraction raster)
 	- finally map algebra: age + gender + POI raster will show the most favorable locations
 - Exercise: download the 100 m census inhabitant data and convert it into a raster (will be used in the chapter continuing location analysis)
   
-In an advanced chapter we could continue the analysis as follows:
- - restrict our analysis to Nuremberg (but point out that we could do the whole analysis simultaneously for all metropolitan areas in Germany)
- - choose optimal location based on number of inhabitants -> you should reach as much people within 15 minutes as possible (routing, catchment area)
- - the farther away we get from a shop, the more unlikely people will go to our shop (-> decay distance)
- - however, we have to take into account that there are already competitors (huff model, attraction) 
- 
-## Create input rasters
+
+## Create census rasters
 
 The German government provides a csv-file containing gridded census data of 2011 for Germany.
 One can either download a 1 km or a 100 m resolution.
@@ -81,7 +77,31 @@ unzip(file.path(tempdir(), "census.zip"), files = base_name, exdir = tempdir())
 input = readr::read_csv2(file.path(tempdir(), base_name))
 ```
 
-Next we select the variables we need: x and y coordinates, the number of inhabitants (population), mean age, portion of women and the household size. 
+Next we select the variables we need: x and y coordinates, the number of inhabitants (population), mean age, portion of women and the household size (Table \@ref(tab:census-desc)). 
+
+```{r census-desc, echo = FALSE}
+tab = tribble(
+  ~"class", ~"pop", ~"women", ~"age", ~"hh",
+  1, "3-250", "0-40", "0-40", "1-2", 
+  2, "250-500", "40-47", "40-42", "2-2.5",
+  3, "500-2000", "47-53", "42-44", "2.5-3",
+  4, "2000-4000", "53-60", "44-47", "3-3.5",
+  5, "4000-8000", ">60", ">47", ">3.5",
+  6, ">8000", NA, NA, NA 
+)
+cap = paste("Excerpt from the data description",
+             "'Datensatzbeschreibung_klassierte_Werte_1km-Gitter.xlsx'", 
+             "located in the downloaded file census.zip describing the classes", 
+             "of the retained variables. The classes -1 and -9 refer to", 
+             "uninhabited areas or are areas which have to be kept secret", 
+             "for example due to anonymization reasons.")
+knitr::kable(tab,
+             col.names =  c("class", "population\\\n(number of persons)",
+                            "women\\\n(%)", "mean age\\\n(years)",
+                            "household size\\\n(number of persons)"),
+             caption = cap, align = "c", format = "html")
+```
+
 Additionally, we set the values -1 and -9 to `NA` since these values are unknown.
 
 ```{r, eval = FALSE}
@@ -92,7 +112,7 @@ input = dplyr::select(input, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
 # set -1 and -9 to NA
 input = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
 ```
-
+ 
 After the data preprocessing, we convert the table into a raster stack.
 First, we use the x- and y-coordinates to convert the `data.frame` into a `SpatialPolygonsDataFrame` (we do not use sf-objects here, since the **raster** package does not support `sf`).
 `gridded()` converts a `SpatialPolygonsDataFrame` into a `SpatialPixelsDataFrame` which in turn can be used as an input for **raster**'s `stack()` function.
@@ -101,39 +121,56 @@ The final raster stack consists of four layers: inhabitants, mean age, portion o
 ```{r, eval = FALSE}
 # convert table into a raster (x and y are cell midpoints)
 coordinates(input) =~ x + y
-# use the correct projection
+# use the correct projection (see data description)
 proj4string(input) = CRS("+init=epsg:3035")
 gridded(input) = TRUE
 # convert into a raster stack
 input = stack(input)
 ```
 
-```{r census-stack, echo = FALSE, fig.cap = "Gridded German census data of 2011. Population (6 classes, number of persons): 1: 3-250, 2: 250-500, 3: 500-2000, 4: 4000-8000, 5: >8000; women (5 classes, %): 1: 0-40, 2: 40-47, 3: 47-53, 4: 53-60, 5: >60; mean age (5 classes, years): 1: 0-40, 2: 40-42, 3: 42-44, 4: 44-47, 5: >47; household size (5 classes, number of persons): 1: 1-2, 2: 2-2.5, 3: 2.5-3, 4: 3-3.5, 5: >3.5. See also the data description 'Datensatzbeschreibung_klassierte_Werte_1km-Gitter.xlsx' located in the downloaded file census.zip."}
+```{r census-stack, echo = FALSE, fig.cap = "Gridded German census data of 2011."}
 knitr::include_graphics("figures/08_census_stack.png")
+```
+
+
+<!-- find out about new lines in headings + blank cells-->
+We `reclassify()` the ordinal-scaled raster in accordance with our survey (see section \@(use-case)).
+In the case of the population data we convert the classes into a numeric data type using class means. 
+This means we use 127 for class 1 (ranging from 3 to 250 inhabitants), 375 for class 2 (ranging from 250 to 500 inhabitants), etc. (see also Fig. \@ref(fig:census-stack)).
+We arbitrarily chose 8000 inhabitants for class 6 since it represents cells where more than 8000 persons live.
+Of course, this is only a simple approximation of the true population number (in the exercises you can explore the introduced error in more detail), however, for our purpose of delineating metropolitan areas the level of detail is good enough (see next section).
+By contrast, we convert the remaining input rasaters into weight rasters whereas the highest weights are in correspondence with our survey.
+For instance, the women class 1 (0-40%) receives a weight of 3 since our clientele is predominantly male.
+Equally, the mean age class containing the youngest people receives the highest weight as well as the single households class.
+
+```{r, eval = FALSE}
+rcl_pop = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 4, 4, 3000, 5, 5, 6000,
+               6, 6, 8000), ncol = 3, byrow = TRUE)
+rcl_women = matrix(c(1, 1, 3, 2, 2, 2, 3, 3, 1, 4, 4, 0, 5, 5, 0,
+                     6, 6, 8000), ncol = 3, byrow = TRUE)
+rcl_age = matrix(c(1, 1, 3, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0,
+                   6, 6, 8000), ncol = 3, byrow = TRUE)
+rcl_hh = matrix(c(1, 1, 3, 2, 2, 2, 3, 3, 1, 4, 4, 0, 5, 5, 0,
+                   6, 6, 8000), ncol = 3, byrow = TRUE)
+rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
+nms = names(input)
+for (i in seq_len(nlayers(input))) {
+  input[[i]] = reclassify(input[[i]], rcl = rcl[[i]], right = NA) 
+}
+names(input) = nms
 ```
 
 
 ## Define metropolitan areas
 
 We arbitrarily define a a pixel of 20000 sq-km as metropolitan if more than half a million people lives in it.
-To do so, we first `reclassify()` (see also section \@ref(local-operations)) the ordinal-scaled inhabitant data into a numeric data type using class means.
-This means we use 127 for class 1 (ranging from 3 to 250 inhabitants), 375 for class 2 (ranging from 250 to 500 inhabitants), etc. (see also Fig. \@ref(fig:census-stack)).
-We arbitrarily chose 8000 inhabitants for class 6 since it represents cells where more than 8000 persons live.
-Of course, this is only a simple approximation of the true population number (in the exercises you can explore the introduced error in more detail), however, for our purpose of delineating metropolitan areas the level of detail is good enough.
-
-```{r, eval = FALSE}
-rcl = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 4, 4, 3000, 5, 5, 6000,
-               6, 6, 8000), ncol = 3, byrow = TRUE)
-inh = reclassify(input$inh, rcl = rcl, right = NA)
-```
-
 The `aggregate()` command helps to change the resolution from 1 to 20000 sq-km while each output cell represents the sum of all 1 sq-km input cells (see section \@ref(aligning-rasters)).
 Next, we only keep cells with more than half a million inhabitants using a boolean operation, and convert the resulting cells into spatial polygons of class `sf`.
 
 ```{r, eval = FALSE}
-inh_agg = aggregate(inh, fact = 20000 / res(inh)[1], fun = sum)
+pop_agg = aggregate(input$pop, fact = 20000 / res(input)[1], fun = sum)
 # plot(inh_agg > 500000)
-polys = rasterToPolygons(inh_agg[inh_agg > 500000, drop = FALSE])
+polys = rasterToPolygons(pop_agg[pop_agg > 500000, drop = FALSE])
 polys = st_as_sf(polys)
 ```
 
@@ -281,7 +318,7 @@ metro_names = plyr::ldply(1:nrow(coords), function(i) {
 
 Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
 Overall, we are satisfied with the `locality` column serving as metropolitan names (Munich, Nuremberg, Stuttgart, Frankfurt, Hamburg, Berlin, Leipzig) bar one exception, namely Velbert.
-Hence, we replace Velbert with the correponding name in the `administrative_area_level_2` column, that is Düsseldorf.
+Hence, we replace Velbert with the correponding name in the `administrative_area_level_2` column, that is Düsseldorf (Fig. \@ref(fig:metro-areas)).
 
 ```{r, eval = FALSE}
 metro_names = select(locality, administrative_area_level_2)
@@ -296,8 +333,9 @@ metro_names =
 
 ## Points of interests
 
-The **osmdata** package provides a fantastic and easy-to-use interface to download OSM data (see chapter \@ref{retrieving-data}).
-Instead of downloading all shops for the whole of Germany, the `lapply()` loop runs through all eight metropolitan names which subsequently define the bounding box in the `opq()` function.
+The **osmdata** package provides a fantastic and easy-to-use interface to download OSM data (see also section \@ref(retrieving-data)).
+Instead of downloading all shops for the whole of Germany, we restrict the download to the defined metropolitan areas. 
+The `lapply()` loop runs through all eight metropolitan names which subsequently define the bounding box in the `opq()` function (see section \@ref(retrieving-data)).
 Alternatively, we could have provided the bounding box in the form of coordinates ourselves.
 Next, we indicate that we only would like to download `shop` features (see this [page](http://wiki.openstreetmap.org/wiki/Map_Features) for a full list of OpenStreetMap map features).
 `osmdata_sf()` returns a list with several spatial objects (points, lines, polygons, etc.).
@@ -355,8 +393,25 @@ plot(poi, xlim = c(4380000, 4420000), ylim = c(2920000, 2940000))
 ```
 
 ## Finding suitable locations
+zoom into Berlin 
+mapview(berlin) + mapview(suitable)
+
+## Discussion and next steps
+Here, normative Nutzung von GIS.
+
+population raster 100 m much more detailed
+INSPIRE database -> much more data available at a greater level of detail
+Interactions remained unconsidered. For example, men and single households?
 
 
+next steps:
+So far we have merely identified areas of possible interest for a bike shop in accordance with our survey.
+In an advanced chapter we could continue the analysis as follows:
+ - restrict our analysis to Nuremberg (but point out that we could do the whole analysis simultaneously for all metropolitan areas in Germany)
+ - choose optimal location based on number of inhabitants -> you should reach as much people within 15 minutes as possible (routing, catchment area)
+ - the farther away we get from a shop, the more unlikely people will go to our shop (-> decay distance)
+ - however, we have to take into account that there are already competitors (huff model, attraction)
+ - what about rent prices/housing costs
 
 Reference (Huff model): https://journal.r-project.org/archive/2017/RJ-2017-020/RJ-2017-020.pdf
 
