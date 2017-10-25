@@ -128,38 +128,35 @@ gridded(input) = TRUE
 input = stack(input)
 ```
 
-```{r census-stack, echo = FALSE, fig.cap = "Gridded German census data of 2011."}
+```{r census-stack, echo = FALSE, fig.cap = "Gridded German census data of 2011. See Table \\@ref(tab:census-desc) for a description of the classes."}
 knitr::include_graphics("figures/08_census_stack.png")
 ```
 
-
 <!-- find out about new lines in headings + blank cells-->
-We `reclassify()` the ordinal-scaled raster in accordance with our survey (see section \@(use-case)).
+We `reclassify()` the ordinal-scaled rasters in accordance with our survey (see section \@ref(use-case)).
 In the case of the population data we convert the classes into a numeric data type using class means. 
-This means we use 127 for class 1 (ranging from 3 to 250 inhabitants), 375 for class 2 (ranging from 250 to 500 inhabitants), etc. (see also Fig. \@ref(fig:census-stack)).
+This means we use 127 for class 1 (ranging from 3 to 250 inhabitants), 375 for class 2 (ranging from 250 to 500 inhabitants), etc. (Table \@ref(tab:census-desc)).
 We arbitrarily chose 8000 inhabitants for class 6 since it represents cells where more than 8000 persons live.
 Of course, this is only a simple approximation of the true population number (in the exercises you can explore the introduced error in more detail), however, for our purpose of delineating metropolitan areas the level of detail is good enough (see next section).
-By contrast, we convert the remaining input rasaters into weight rasters whereas the highest weights are in correspondence with our survey.
+By contrast, we convert the remaining input rasters into weight rasters whereas the highest weights are in correspondence with our survey.
 For instance, the women class 1 (0-40%) receives a weight of 3 since our clientele is predominantly male.
 Equally, the mean age class containing the youngest people receives the highest weight as well as the single households class.
 
 ```{r, eval = FALSE}
 rcl_pop = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 4, 4, 3000, 5, 5, 6000,
-               6, 6, 8000), ncol = 3, byrow = TRUE)
-rcl_women = matrix(c(1, 1, 3, 2, 2, 2, 3, 3, 1, 4, 4, 0, 5, 5, 0,
-                     6, 6, 8000), ncol = 3, byrow = TRUE)
-rcl_age = matrix(c(1, 1, 3, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0,
                    6, 6, 8000), ncol = 3, byrow = TRUE)
-rcl_hh = matrix(c(1, 1, 3, 2, 2, 2, 3, 3, 1, 4, 4, 0, 5, 5, 0,
-                   6, 6, 8000), ncol = 3, byrow = TRUE)
+rcl_women = matrix(c(1, 1, 3, 2, 2, 2, 3, 3, 1, 4, 5, 0), 
+                   ncol = 3, byrow = TRUE)
+rcl_age = matrix(c(1, 1, 3, 2, 2, 0, 3, 5, 0),
+                 ncol = 3, byrow = TRUE)
+rcl_hh = rcl_women
 rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
-nms = names(input)
-for (i in seq_len(nlayers(input))) {
-  input[[i]] = reclassify(input[[i]], rcl = rcl[[i]], right = NA) 
+reclass = input
+for (i in seq_len(nlayers(reclass))) {
+  reclass[[i]] = reclassify(reclass[[i]], rcl = rcl[[i]], right = NA) 
 }
-names(input) = nms
+names(reclass) = names(input)
 ```
-
 
 ## Define metropolitan areas
 
@@ -169,7 +166,6 @@ Next, we only keep cells with more than half a million inhabitants using a boole
 
 ```{r, eval = FALSE}
 pop_agg = aggregate(input$pop, fact = 20000 / res(input)[1], fun = sum)
-# plot(inh_agg > 500000)
 polys = rasterToPolygons(pop_agg[pop_agg > 500000, drop = FALSE])
 polys = st_as_sf(polys)
 ```
@@ -263,10 +259,9 @@ st_centroid(metros) %>%
 However, visual inspection reveals eight metropolitan areas whereas the dissolving comes up with nine.
 This is because one polygon just touches the corner of another polygon (western Germany, Cologne/Düsseldorf area; Fig. \@ref(fig:metro-areas)).
 
-```{r metro-areas, echo = FALSE, fig.width = 1, fig.height = 1, fig.cap = "The aggregated raster (resolution: 20 km) with the identified metropolitan areas (golden rectangles) and the corresponding names."}
+```{r metro-areas, echo = FALSE, fig.width = 1, fig.height = 1, fig.cap = "The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names."}
 knitr::include_graphics("figures/08_metro_areas.png")
 ```
-
 
 One could assign it to the neighboring region using another dissolving procedure, however, we leave this as an exercise to the reader, and simply delete the offending polygon.
 
@@ -278,7 +273,7 @@ metros = metros[-5, ]
 ```
 
 The defined metropolitan areas suitable for bike shops are still missing a name.
-A reverse geocoding approach can help with that.
+A reverse geocoding approach can settle this problem.
 Given a coordinate, reverse gecoding finds the corresponding address.
 Consequently, extracting the centroid coordinate of each metropolitan area can serve as an input for a reverse geocoding API.
 The **ggmap** package makes use of the one provided by Google.^[Note that Google allows each user to access its services on a free basis for a maximum of 2500 queries a day.]
