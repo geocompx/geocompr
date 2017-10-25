@@ -9,7 +9,6 @@
 
 # ROBIN 
 
-- [ROBIN] The book does not make explicit who its target audience is. (2) The book fails to mention what its audience is.
 - [ROBIN] This might be related to my next comment, which is that you use the term “sticky geometry column” before we explain what “sticky” means here.
 - [ROBIN] Section 4.2.3.1 (Non-overlapping joins) is empty.
 - [ROBIN] The book uses the word "reproducible" a lot, but does not introduce it, define it, or discuss why it is a good (or required) thing.
@@ -33,6 +32,7 @@
 - [THAT'S A PROPER LINK - IT LOOKS STRANGE THOUGH] The url for downloading National Park Service units in section 5.2 seems wrong, as it is duplicated in the code. 
 - [FUTURE CHAPTERS - chapter 6] CRSs - This seems good, especially if you have examples of where mismatched CRSs can cause problems and how to solve those problems.
 - [FUTURE CHAPTERS] I was missing a section on raster/vector integration.
+- [ISSUE OPENED] The book does not make explicit who its target audience is. (2) The book fails to mention what its audience is. See https://github.com/Robinlovelace/geocompr/issues/103
 
 # CANNOT FIND IT
 
