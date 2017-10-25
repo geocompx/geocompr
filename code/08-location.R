@@ -43,12 +43,17 @@ for (i in names(input)) {
   values(input[[i]]) = as.factor(values(input[[i]]))
 }
 
+# find out about lattice settings
+# trellis.par.get()
 p_1 = spplot(input, col.regions = RColorBrewer::brewer.pal(6, "GnBu"), 
+             main = list("Classes", cex = 0.5),
              layout = c(4, 1), 
              # Leave some space between the panels
              between = list(x = 0.5),
-             colorkey = list(space = "bottom", width = 0.8, height = 0.2,
-                             labels = list(cex = 0.5)),
+             colorkey = list(space = "top", width = 0.8, height = 0.2,
+                             # make tick size smaller
+                             tck = 0.5,
+                             labels = list(cex = 0.4)),
              strip = strip.custom(bg = 'white',
                                   par.strip.text = list(cex = 0.5),
                                   factor.levels = c("population", "women",
@@ -78,21 +83,29 @@ ind = metro_names %in% c("Stuttgart", "Düsseldorf", "Berlin")
 coords[!ind, 2] = coords[!ind, 2] + 30000
 coords[ind, 2] = coords[ind, 2] + c(45000, 45000, 0)
 
-p_2 = spplot(inh_agg, col.regions = pal,
-       # par.settings = list(axis.line = list(col = 'transparent')), 
-       colorkey = list(space = "right", width = 0.7, height = 0.3,
-                       labels = list(cex = 0.5, at = cuts,
-                                     labels = cuts / 1000),
-                       # draw a box and ticks around the legend
-                       axis.line = list(col = "black")),
-       # at command necessary again as we have a continous variable!!!
-       at = cuts,
-       sp.layout = list(
-         list("sp.polygons", ger, col = gray(0.5), first = FALSE),
-         list("sp.polygons", as(polys, "Spatial"), col = "gold",
-              lwd = 2, first = FALSE)
-         # list("sp.text", coords, txt = metro_names, cex = 0.7, font = 3,
-         #      first = FALSE)
+p_2 = 
+  spplot(inh_agg, col.regions = pal, 
+         main = list("Number of people in 1000", cex = 0.5),
+         # if we want to get rid of the plot frame around the map
+         # par.settings = list(axis.line = list(col = 'transparent')), 
+         colorkey = list(space = "top", width = 0.5, height = 0.4,
+                         # make tick length shorter
+                         tck = 0.5,
+                         labels = list(cex = 0.4, at = cuts,
+                                       labels = cuts / 1000),
+                         # draw a box and ticks around the legend
+                         axis.line = list(col = "black")),
+         # legend necessary if we do not use main as legend title
+         # legend = list(top = list(fun = grid::textGrob("Size\n(m)", x = 1.05))),
+         # at command necessary again as we have a continous variable!!!
+         at = cuts,
+         # overlay with further spatial objects
+         sp.layout = list(
+           list("sp.polygons", ger, col = gray(0.5), first = FALSE),
+           list("sp.polygons", as(polys, "Spatial"), col = "gold",
+                lwd = 2, first = FALSE)
+           # list("sp.text", coords, txt = metro_names, cex = 0.7, font = 3,
+           #      first = FALSE)
          ))
 
 
