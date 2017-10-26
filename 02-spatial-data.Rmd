@@ -301,13 +301,25 @@ summary(sel_asia)
 Note: `st_intersects()` uses [GEOS](https://trac.osgeo.org/geos/) in the background for the spatial overlay operation (see also Chapter \@ref(spatial-data-operations)).
 
 Since **sf**'s `plot()` function builds on base plotting methods, you may also use its many optional arguments (see `?plot` and `?par`).
-This provides powerful but not necessarily intuitive functionality.
-For instance, in order to make the diameter of a circle proportional to a country's population, we provide the `cex` argument with the result of a calculation (see Figure \@ref(fig:africa), and the code below).
+This provides a powerful but not necessarily intuitive interface.
+For instance, in order to make the area of a circle proportional to a country's population, we provide the `cex` argument with the result of a calculation (see Figure \@ref(fig:contpop), and the code below).
 
-```{r africa, fig.cap="Centroids representing country population, diameter being proportional to population.", warning=FALSE}
+```{r, eval=FALSE}
 plot(world["continent"])
-plot(world_centroids, add = TRUE, cex = world$pop / 1e8, lwd = 3)
+plot(world_centroids, add = TRUE, cex = sqrt(world$pop) / 10000)
 ```
+
+```{r contpop, fig.cap="Centroids representing country population, diameter being proportional to population.", echo=FALSE, warning=FALSE}
+world_proj = st_transform(world, "+proj=eck4")
+par_old = par()
+par(mar=c(0, 0, 0, 0)) 
+world_centroids_largest = st_centroid(world_proj, of_largest_polygon = TRUE)
+plot(st_graticule(x = world_proj)[1], col = "grey", main = "\nCountry continents and populations")
+plot(world_proj["continent"], add = TRUE)
+plot(world_centroids_largest, add = TRUE, cex = sqrt(world$pop) / 10000, pch = 16, col = "red")
+par(par_old)
+```
+
 
 <!-- More appropriate for subsequent chapters. -->
 <!-- This shows that there are 43 countries in Asia -->
