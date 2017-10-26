@@ -11,7 +11,6 @@
 
 - [ROBIN] Section 4.2.3.1 (Non-overlapping joins) is empty.
 - [ROBIN] 2.1.2 does not answer the question "Why Simple Features?" but answers the question "why use package sf and not sp?"
-- [ROBIN] Fig 2.6 breaks with many cartographic conventions.
 - [ROBIN] 4.2.1: instead of mentioning a lot of options while forwarding to a future section for what is meant, I think this section would work better when it would start with a simple example. Introducing earlier what is meant by a spatial relation may also clarify this chapter.
 - [ROBIN] Figure 4.6 is interesting: is this raster data? Can raster deal with this problem? 
 
@@ -93,3 +92,6 @@ but don't see it in the output of the book. What should readers of the book now 
     - Fixed in https://github.com/Robinlovelace/geocompr/commit/db001dce67d8c8e8b66a3b67b85b3e3726fe904d
 - [FIXED] The book uses the word "reproducible" a lot, but does not introduce it, define it, or discuss why it is a good (or required) thing.
     - https://github.com/Robinlovelace/geocompr/commit/88fc0eec41d3efeb227aaef99ad2326c09f5f35c
+- [FIXED] Fig 2.6 breaks with many cartographic conventions.
+    - I'm not sure which cartographic conventions you're referring to and would be grateful for clarification. However I agree the map was shoddy. It's been updated with various improvements including an equal area CRS, circle area (not diameter) proportional to population, centroids in the largest polygon and a better heading and caption.
+    - See https://github.com/Robinlovelace/geocompr/commit/7e5e41cd7af09f2211a9b49b970dd2d6eea49864
