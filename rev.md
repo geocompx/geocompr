@@ -2,8 +2,6 @@
 
 - [JANNES] I don't think that Java's memory management is much simpler than that of C++ when one uses properly types like std::vector.
 - [JANNES] 2.2 raster - "You can also specify a no-data value in the header of a raster, frequently -9999 (in R we often use NA)." This, and earlier sentences, pre-suppose that a raster is actually a file on disk, most likely something like an asciigrid file, but doesn't make this assumption explicit. As this is very often not the case, I think this information is confusing, and not needed: do NetCDF files have a header? It's irrelevant.
-- [JANNES] "This column is usually named ‘geom’ or ‘geometry’" - depends, not if you mostly import your data from a spatial database. footnote/RMD Note: geom, geometry (name of the geometry column -> can have also another name when importing from spatial databases)
-- [JANNES] Add possible KML example.
 
 
 # ROBIN 
@@ -98,3 +96,5 @@ but don't see it in the output of the book. What should readers of the book now 
     - See https://github.com/Robinlovelace/geocompr/commit/7e5e41cd7af09f2211a9b49b970dd2d6eea49864
 - [FIXED] On the flip side of this, please provide examples of the [[ and $ operators on raster data. 
 - [FIXED] Examples of the origin() and extend() commands. 
+- [FIXED] "This column is usually named ‘geom’ or ‘geometry’" - depends, not if you mostly import your data from a spatial database. footnote/RMD Note: geom, geometry (name of the geometry column -> can have also another name when importing from spatial databases)
+- [FIXED] Add possible KML example.
