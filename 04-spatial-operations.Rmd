@@ -435,7 +435,7 @@ joined = st_join(x = asia, y = urb) %>%
 ```
 
 
-```{r spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join: the populations of the world's 3 largest agglomerations joined onto their respective countries.", fig.asp=0.4}
+```{r spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join: the populations of the world's 3 largest agglomerations joined onto their respective countries.", fig.asp=0.4, warning=FALSE}
 par(mfrow = c(1, 3))
 plot(urb$geometry, col = "white", main = "Target object")
 plot(asia$geom, add = TRUE)
@@ -467,8 +467,8 @@ plot(cycle_hire$geometry, col = "blue")
 plot(cycle_hire_osm$geometry, add = T, pch = 3, col = "red")
 ```
 
-```{r, warning=FALSE}
-sum(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
+```{r, message=FALSE}
+any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
@@ -477,12 +477,23 @@ sum(cycle_hire$geometry %in% cycle_hire_osm$geometry)
 sum(st_coordinates(cycle_hire)[, 1] %in% st_coordinates(cycle_hire_osm)[, 1])
 ```
 
-```{r cycle-hire, fig.cap="The spatial distribution of cycle hire points in London based on official data (blue) and OpenStreetMap data (red)."}
-library(leaflet)
-leaflet() %>%
-  addProviderTiles(providers$OpenMapSurfer.Grayscale) %>% 
-  addCircles(data = cycle_hire) %>% 
-  addCircles(data = cycle_hire_osm, col = "red")
+```{r cycle-hire, fig.cap="The spatial distribution of cycle hire points in London based on official data (blue) and OpenStreetMap data (red).", echo=FALSE, warning=FALSE}
+library(tmap)
+osm_tiles = tmaptools::read_osm(tmaptools::bb(cycle_hire, ext = 1.3), type = "https://korona.geog.uni-heidelberg.de/tiles/roadsg/x={x}&y={y}&z={z}")
+qtm(osm_tiles) +
+  tm_shape(cycle_hire) +
+  tm_bubbles(col = "blue", alpha = 0.5, size = 0.2) +
+  tm_shape(cycle_hire_osm) +
+  tm_bubbles(col = "red", alpha = 0.5, size = 0.2) +
+  tm_scale_bar()
+# library(leaflet)
+# leaflet() %>%
+#   addProviderTiles(providers$Esri.WorldGrayCanvas) %>% 
+#   addCircles(data = cycle_hire) %>% 
+#   addCircles(data = cycle_hire_osm, col = "red") %>% 
+#   mapview::mapshot(file = "cycle-hire.png")
+# file.rename("cycle-hire.png", "figures/cycle-hire.png")
+# knitr::include_graphics("figures/cycle-hire.png")
 ```
 
 
