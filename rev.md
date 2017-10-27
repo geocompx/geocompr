@@ -2,10 +2,9 @@
 
 - [JANNES] I don't think that Java's memory management is much simpler than that of C++ when one uses properly types like std::vector.
 - [JANNES] 2.2 raster - "You can also specify a no-data value in the header of a raster, frequently -9999 (in R we often use NA)." This, and earlier sentences, pre-suppose that a raster is actually a file on disk, most likely something like an asciigrid file, but doesn't make this assumption explicit. As this is very often not the case, I think this information is confusing, and not needed: do NetCDF files have a header? It's irrelevant.
-- [ROBIN and JANNES] I find the frequent use of "of course" in this chapter (chapter 4) somewhat disturbing: very little here actually is "of course".
-- [JANNES] On the flip side of this, please provide examples of the [[ and $ operators on raster data. 
-- [JANNES] "This column is usually named ‘geom’ or ‘geometry’" - depends, not if you mostly import your data from a spatial database.
-- [JANNES] Likewise, in section 4.3.3 and 4.3.4, examples with landsat, satellite, and/or RStoolbox packages could be helpful, as would examples of the origin() and extend() commands. 
+- [JANNES] "This column is usually named ‘geom’ or ‘geometry’" - depends, not if you mostly import your data from a spatial database. footnote/RMD Note: geom, geometry (name of the geometry column -> can have also another name when importing from spatial databases)
+- [JANNES] Add possible KML example.
+
 
 # ROBIN 
 
@@ -21,6 +20,8 @@
 
 # TO DO IN THE FUTURE 
 
+- [ISSUE OPENED] Topical and functional indices before publishing.
+- [ISSUE OPENED] Likewise, in section 4.3.3 and 4.3.4, examples with landsat, satellite, and/or RStoolbox packages could be helpful. Maybe we use these packages in further chapters, and can then reference these here.
 - [ISSUE OPENED] Since figure 2.9 (right) plots long/lat coordinates to a flat surface, you may want to explain which projection it uses.
 - [ISSUE OPENED] CRSs - look at non-geographers' work too (eg. I think in Waller&Gotway and Banerjee et al.) Consider covering post-WGS84 datums (sorry, datums are the plural of datum in geodesy) for the US readership.
 - [ISSUE OPENED] the references need to be seriously checked as lots of the inserted author strings are wrong.
@@ -95,3 +96,5 @@ but don't see it in the output of the book. What should readers of the book now 
 - [FIXED] Fig 2.6 breaks with many cartographic conventions.
     - I'm not sure which cartographic conventions you're referring to and would be grateful for clarification. However I agree the map was shoddy. It's been updated with various improvements including an equal area CRS, circle area (not diameter) proportional to population, centroids in the largest polygon and a better heading and caption.
     - See https://github.com/Robinlovelace/geocompr/commit/7e5e41cd7af09f2211a9b49b970dd2d6eea49864
+- [FIXED] On the flip side of this, please provide examples of the [[ and $ operators on raster data. 
+- [FIXED] Examples of the origin() and extend() commands. 
