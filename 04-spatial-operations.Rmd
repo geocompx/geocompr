@@ -812,10 +812,9 @@ log(elev)
 elev > 5
 ```
 
-Instead of arithmetic operators, you can also use the `calc()` and `overlay()` functions.
-These functions are more efficient.
-So you should use them if you have to process large raster datasets. 
-Additionally, they let you directly store an output file.
+Instead of arithmetic operators, one can also use the `calc()` and `overlay()` functions.
+These functions are more efficient, hence, they are preferable in the presence of large raster datasets. 
+Additionally, they allow to directly store an output file.
 
 The calculation of the normalized difference vegetation index (NDVI) is one of the most famous local, i.e. pixel-by-pixel, raster operations.
 It ranges between - 1 and 1 with positive values indicating the presence of living plants (mostly > 0.2).
@@ -905,7 +904,7 @@ To do so, we can weight the distance with elevation so that each additional alti
 Visibility and viewshed computations also belong to the family of global operations <!--(in the exercises of Chapter ?? you will compute a viewshed raster)-->.
 <!-- reference 13-gis chapter-->
 
-Many map algebra operations have a counterpart in vector processing [@liu_essential_2009; Table \@ref(tab:mapalg_vector))].
+Many map algebra operations have a counterpart in vector processing [@liu_essential_2009].
 Computing a distance raster (zonal operation) while only considering a maximum distance (logical focal operation) is the equivalent to a vector buffer operation (section \@ref(modifying-geometry-data)).
 Reclassifying raster data (either local or zonal function depending on the input) is equivalent to dissolving vector data (section \@ref(spatial-joining-and-aggregation)). 
 Overlaying two rasters (local operation), where one contains `NULL` or `NA` values representing a mask, is similar to vector clipping (section \@ref(modifying-geometry-data)).
@@ -919,7 +918,7 @@ However, zonal operations might be the better raster equivalent compared to chan
 Zonal operations can dissolve the cells of one raster in accordance with the zones (categories) of another raster using an aggregation function (see above).
 
 ### Merging rasters
-Suppose we would like to compute the NDVI (see focal functions of the previous section), and additionally want to compute terrain attributes from elevation data for observations within a study area.
+Suppose we would like to compute the NDVI (see section \@ref(local-operations)), and additionally want to compute terrain attributes from elevation data for observations within a study area.
 Before such computations we would have to acquire airborne or remotely sensed information.
 The corresponding imagery is often divided into scenes covering a specific spatial extent.
 Frequently, a study area covers more than one scene.
@@ -948,6 +947,7 @@ To do so, we need a more advanced approach.
 Remote scientist frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image.
 The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`calcHistMatch()`) and **RStoolbox** (`histMatch()`, `pifMatch()`) provide the corresponding functions.
 
+
 ### Aligning rasters
 
 When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent has to match.
@@ -960,8 +960,26 @@ The origin is the point closest to (0, 0) if you moved towards it in steps of x 
 If two rasters have different origins, their cells do not overlap completely which would make map algebra impossible.
 To change the origin , use `origin()`.^[If the origins of two raster datasets are just marginally apart, it sometimes is sufficient to simply increase the `tolerance` argument  of `raster::rasterOptions()`.]
 Equally, map algebra operations require the same extent.
-To align the extent of one object with that of another, use the `extend()` command.
-If you perform an algebraic operation on two objects with differing extents in R, the **raster** package returns the intersection, and says so in a warning (try: `elev + extend(elev, 2)`).
+Following code adds one row and two columns to each side of the raster while setting all new values to an elevation of 1000 meters.
+
+```{r}
+elev_2 = extend(elev, c(1, 2), value = 1000)
+plot(elev_2)
+```
+
+Performing an algebraic operation on two objects with differing extents in R, the **raster** package returns the result for the intersection, and says so in a warning.
+
+```{r}
+elev_3 = elev + elev_2
+```
+
+However, we can also align the extent of two rasters with the `extend()` command.
+The default value of the `value` parameter is `NA`.
+
+```{r}
+elev_4 = extend(elev, elev_2)
+```
+
 
 The `aggregate()` and `disaggregate()` functions help to change the cell size resolution of a raster.
 For instance let us aggregate `elev` from a resolution of 0.5 to a resolution of 1, that means we aggregate by a factor of 2.
