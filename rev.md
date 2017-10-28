@@ -6,7 +6,6 @@
 
 # ROBIN 
 
-- [ROBIN] Figure 4.6 is interesting: is this raster data? Can raster deal with this problem? 
 
 # JAKUB
 
@@ -26,6 +25,8 @@
 - [FUTURE CHAPTERS - chapter 6] CRSs - This seems good, especially if you have examples of where mismatched CRSs can cause problems and how to solve those problems.
 - [FUTURE CHAPTERS] I was missing a section on raster/vector integration.
 - [ISSUE OPENED] The book does not make explicit who its target audience is. (2) The book fails to mention what its audience is. See https://github.com/Robinlovelace/geocompr/issues/103
+- [ISSUE OPENED] Figure 4.6 is interesting: is this raster data? Can raster deal with this problem?
+    - https://github.com/Robinlovelace/geocompr/issues/110
 
 # CANNOT FIND IT
 
