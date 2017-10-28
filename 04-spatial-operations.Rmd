@@ -45,18 +45,40 @@ This section provides an overview of spatial operations in the **sf** package.
 ### Spatial subsetting
 
 Spatial subsetting is the process of selecting features of a spatial object based on whether or not they in some way *relate* in space to another object.
-Various *topological relations* or *operators*, including `st_touches()`, `st_crosses()` and `st_within()`, described in section \@ref(topological-relations), can be used for spatial subsetting.
-`st_intersects()` is the default when subsetting with `[`, a useful as a 'catch all' that identifies all types of spatial relations.
-Topological relations are best understood in the context of subsetting, explaining why this topic is covered next, before other spatial operations.
-These are, starting with spatial joining and aggregation, described in section \@ref(spatial-joining-and-aggregation) onwards.
+An example of spatial subsetting is provided by the `nz` and `nz_height` datasets in **spData**, which provide projected data on the 16 main regions and 101 highest points in New Zealand (Figure \@ref(fig:nz-subset)).
+The following code subsets all the high points in the Canterbury region:
 
-As with attribute data, spatial data can be subset using the `[` operator, with commands such as `x[y, ]` being used to subset features of target object `x` by `y`.
-However, instead of `y` being of class `logical` (a vector of `TRUE` and `FALSE` values), it is another spatial (`sf`) object.
+```{r}
+canterbury = nz %>% filter(REGC2017_NAME == "Canterbury Region")
+canterbury_height = nz_height[canterbury, ]
+```
 
-The default spatial operator for spatial subsetting in **sf** (and other software) is *intersects*.
-This has a precise meaning:
-subsetting a spatial object `x` by another spatial object  `y` will return any features in `x` that touch, overlap or are within features in `y`.
-Others can be used using the `op =` argument.
+```{r nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting. The right-hand map was produced by subsetting the point data in the left hand map as follows: `nz_height[canterbury, ]`."}
+par_old = par()
+par(mar=c(0, 0, 1, 0), mfrow = c(1, 2))
+plot(nz$geometry, col = "white", bgc = "lightblue", main = "High points in New Zealand")
+plot(nz_height, add = TRUE, pch = 2, col = "red")
+plot(nz$geometry, col = "white", bgc = "lightblue", main = "High points in Canterbury")
+plot(canterbury$geometry, col = "grey", add = TRUE)
+plot(canterbury_height, add = TRUE, pch = 2, col = "red")
+par(par_old)
+```
+
+The preceding code chunk shows that, like attribute data, spatial data can be subset using the `[` operator: `x[y, ]` subsets features of target object `x` by `y`.
+Instead of `y` being of class `logical` (a vector of `TRUE` and `FALSE` values), it is another spatial (`sf`) object.
+
+Various *topological relations*, which determine the type of spatial relationship used for subsetting, can be used for spatial subsetting.
+As we'll see in section \@ref(topological-relations), these include features that *touch*, *cross* or are *within* the source object (`y`).
+*Intersects* is the default for subsetting (and other spatial operations) however, because it is a useful 'catch all' that identifies all types of spatial relations.
+Topological relations are best understood in the context of subsetting, explaining why this topic is covered in the next section.
+
+For now the important thing to remember is that subsetting a spatial object `x` by another spatial object `y` returns any features in `x` that in some way relate (using the *intersects* operator) in space to `y`.
+Other operators can be used using the `op =` argument.
+The following code, for example, would select all points in `nz_height` that do *not* intersect with Canterbury (result not shown):
+
+```{r, eval=FALSE}
+nz_height[canterbury, , op = st_disjoint]
+```
 
 ```{block2 type='rmdnote'}
 Interested
@@ -419,6 +441,7 @@ As with attribute data joining adds a new column to the target object (the argum
 
 The process is illustrated in Figure \@ref(fig:spatial-join), which shows a target object (the `world` dataset, left) being joined to a source dataset (the three most populous cities of the world), resulting in a new attribute being added to the `world` dataset (right).
 <!-- Idea: use random points over Earth's surface to allocate data to world countries. -->
+<!-- I'm not sure this is a good starting example to show how st_join works - thoughts? -->
 
 ```{r}
 urb = urban_agglomerations %>% 
@@ -429,12 +452,12 @@ asia = world %>%
 ```
 
 ```{r, message=FALSE}
-joined = st_join(x = asia, y = urb)
-joined[!is.na(joined$population_millions), ]
+joined = st_join(x = asia, y = urb) %>% 
+  na.omit()
 ```
 
 
-```{r spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join: the populations of the world's 3 largest agglomerations joined onto their respective countries.", fig.asp=0.4}
+```{r spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join: the populations of the world's 3 largest agglomerations joined onto their respective countries.", fig.asp=0.4, warning=FALSE}
 par(mfrow = c(1, 3))
 plot(urb$geometry, col = "white", main = "Target object")
 plot(asia$geom, add = TRUE)
@@ -446,17 +469,96 @@ par(mfrow = c(1, 1))
 ```
 
 This operation is also know as spatial overlay.
-`st_join()` performs by default a left join (see chapter \@ref(vector-attribute-joining), but you can change this to an inner join operation.
-Another default of `st_join()` is to intersect the two provided layers.
-Of course, you can use any other topological operations we have already encountered above such as `st_within()` or or `st_touches()` (please refer also to the help page of `st_join()`).
-In the example above, we have added features of a point layer to a polygon layer.
-Please note that there might be multiple point matches for one polygon. 
+By default, `st_join()` performs a left join (see section \@ref(vector-attribute-joining)), but it can also do inner joins by setting the argument `left = FALSE`.
+Like spatial subsetting, the default topological operator used by `st_join()` is `st_intersects()`.
+This can be changed with the `join` argument (see `?st_join` for details).
+In the example above, we have added features of a point layer to a polygon layer but there might be multiple point matches per polygon. 
 Had we chosen to select the four (instead of three) most populous cities in the world, two of them would have belonged to China (Shanghai and Beijing, give it a try yourself).
 In such a case `st_join()` simply adds a new row.
-In our example we would end up with two polygons representing China.
+In our example we would have ended up with two polygons representing China.
 
+### Non-overlapping joins
 
-#### Non-overlapping joins 
+Sometimes two geographic datasets do not touch but still have a strong geographic relationship enabling joins.
+The datasets `cycle_hire` and `cycle_hire_osm`, already loaded in the **spData** package, provide a good example.
+Plotting them shows that they are closely related but they do not touch, as shown in Figure \@ref(fig:cycle-hire), a base version of which is created with the following code below:
+
+```{r, eval=FALSE}
+plot(cycle_hire$geometry, col = "blue")
+plot(cycle_hire_osm$geometry, add = T, pch = 3, col = "red")
+```
+
+We can check if any points are the same `st_intersects()` as show below:
+
+```{r, message=FALSE}
+any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
+```
+
+```{r, echo=FALSE, eval=FALSE}
+# included to show alternative ways of showing there's no overlap
+sum(cycle_hire$geometry %in% cycle_hire_osm$geometry)
+sum(st_coordinates(cycle_hire)[, 1] %in% st_coordinates(cycle_hire_osm)[, 1])
+```
+
+```{r cycle-hire, fig.cap="The spatial distribution of cycle hire points in London based on official data (blue) and OpenStreetMap data (red).", echo=FALSE, warning=FALSE}
+library(tmap)
+# osm_tiles = tmaptools::read_osm(tmaptools::bb(cycle_hire, ext = 1.3), type = "https://korona.geog.uni-heidelberg.de/tiles/roadsg/x={x}&y={y}&z={z}")
+# qtm(osm_tiles) +
+  tm_shape(cycle_hire) +
+  tm_bubbles(col = "blue", alpha = 0.5, size = 0.2) +
+  tm_shape(cycle_hire_osm) +
+  tm_bubbles(col = "red", alpha = 0.5, size = 0.2) +
+  tm_scale_bar()
+# library(leaflet)
+# leaflet() %>%
+#   addProviderTiles(providers$Esri.WorldGrayCanvas) %>% 
+#   addCircles(data = cycle_hire) %>% 
+#   addCircles(data = cycle_hire_osm, col = "red") %>% 
+#   mapview::mapshot(file = "cycle-hire.png")
+# file.rename("cycle-hire.png", "figures/cycle-hire.png")
+# knitr::include_graphics("figures/cycle-hire.png")
+```
+
+Imagine that we need to join the `capacity` variable in `cycle_hire_osm` onto the official 'target' data contained in `cycle_hire`.
+This is when a non-overlapping join is needed.
+The simplest method is to use the topological operator `st_within_distance()` shown in section \@ref(topological-relations).
+Note that before performing the relation both datasets must be transformed into a projected CRS, saved as new objects denoted by the affix `P` (for projected) below, using a treshold distance of 20 m:
+
+```{r}
+# factor -> numeric: to be removed with later version of spData
+cycle_hire_osm$capacity = as.numeric(as.character(cycle_hire_osm$capacity))
+x = st_transform(cycle_hire, 27700)
+y = st_transform(cycle_hire_osm, 27700)
+sel = st_is_within_distance(x, y, dist = 20)
+summary(lengths(sel) > 0)
+```
+
+This shows that there are 436 points in the target object `cycle_hire` within the threshold distance.
+How to retrieve the *values* associated with the respective `cycle_hire_osm` points though?
+The solution is again with `st_join()` although the additional dist argument must be specified:
+
+```{r}
+z = st_join(x, y, st_is_within_distance, dist = 20)
+nrow(cycle_hire)
+nrow(z)
+```
+
+Note that the number of rows in the joined result is greater than the target.
+This is because some cycle hire stations in `x` have multiple matches in `y`.
+To aggregate the values for the overlapping points and return the mean, we can use the aggregation methods learned in Chapter 3, resulting in an object with the same number of rows as the target:
+
+```{r}
+z = z %>% group_by(id) %>% 
+  summarize(capacity = mean(capacity))
+nrow(z) == nrow(cycle_hire)
+```
+
+The capacity of nearby stations can be verified by comparing a plot of the capacity of the source `cycle_hire_osm` data with the results in this new object (plots not show):
+
+```{r, eval=FALSE}
+plot(cycle_hire_osm["capacity"])
+plot(z["capacity"])
+```
 
 <!-- Nearest neighbour analysis -->
 <!-- e.g. two point's datasets (non-overlapping) -->
@@ -489,8 +591,7 @@ plot(us_states[, "total_pop_15"], main = "US states")
 plot(regions[, "total_pop_15"], main = "US regions")
 ```
 
-Of course, there is also spatial tidyverse counterpart.
-You can achieve the same with:
+Spatial aggregation can also be done in the **tidyverse**, using **dplyr** functions as follows:
 
 ```{r, eval = FALSE}
 group_by(us_states, REGION) %>%
@@ -786,8 +887,7 @@ Most often the output cell value is the result of a 3 x 3 input cell block.
 4. *Global* or per-raster operations, that means the output cell derives its value potentially from one or several entire rasters
 
 This classification scheme uses basically the number of cells involved in a processing step as distinguishing feature.
-Of course, one can classify raster operations based on other characteristics such as discipline.
-Think, for instance, of terrain, hydrological analysis or image classifications.
+Raster operations can also be classified by discipline, for example terrain, hydrological analysis or image classifications.
 The following sections explain how each type of map algebra operations can be used, with reference to worked examples (also see `vignette("Raster")` for a technical description of map algebra).
 
 ### Local operations
@@ -815,10 +915,9 @@ log(elev)
 elev > 5
 ```
 
-Instead of arithmetic operators, you can also use the `calc()` and `overlay()` functions.
-These functions are more efficient.
-So you should use them if you have to process large raster datasets. 
-Additionally, they let you directly store an output file.
+Instead of arithmetic operators, one can also use the `calc()` and `overlay()` functions.
+These functions are more efficient, hence, they are preferable in the presence of large raster datasets. 
+Additionally, they allow to directly store an output file.
 
 The calculation of the normalized difference vegetation index (NDVI) is one of the most famous local, i.e. pixel-by-pixel, raster operations.
 It ranges between - 1 and 1 with positive values indicating the presence of living plants (mostly > 0.2).
@@ -847,9 +946,9 @@ A focal operation applies an aggregation function to all cells within the specif
 Other names for this operation are spatial filtering and convolution [@burrough_principles_2015].
 
 In R, we can use the `focal()` function to perform spatial filtering. 
-We define the shape of the moving window with a `matrix` whose values correspond to weights.
-Secondly, the the `fun` argument lets us specify the function we wish to apply to this neighborhood.
-Here, we choose the minimum, but of course we can use any other function such as the the sum, the mean, the median, the mode, the maximum or the variance.
+We define the shape of the moving window with a `matrix` whose values correspond to weights (see `w` parameter in the code chunk below).
+Secondly, the `fun` parameter lets us specify the function we wish to apply to this neighborhood.
+Here, we choose the minimum, but any other summary function, including `sum()`, `mean()`, or `var()` can be used.
 
 ```{r, eval = FALSE}
 r_focal = focal(elev, w = matrix(1, nrow = 3, ncol = 3), fun = min)
@@ -861,10 +960,7 @@ knitr::include_graphics("figures/04_focal_example.png")
 
 We can quickly check if the output meets our expectations.
 In our example, the minimum value has to be always the upper left corner of the moving window (remember we have created the input raster by rowwise incrementing the cell values by one starting at the upper left corner).
-Of course, the `focal()`-function has computed the correct result.
-In this example, our weighting matrix consists only of 1s.
-This means each cell has the same weight on the output.
-If appropriate, you can change this by specifying different weights.
+In this example, the weighting matrix consists only of 1s, meaning each cell has the same weight on the output, but this can be changed.
 
 Focal functions or filters play a dominant role in image processing.
 Low-pass or smoothing filters use the mean function to remove extremes.
@@ -897,8 +993,7 @@ z = zonal(elev, grain, fun = "mean") %>%
 z
 ```
 
-This returns the statistics for each category, here the mean altitude for each grain size class.
-Of course, we can add this statistic to the attribute table of the ratified raster (see previous chapter).
+This returns the statistics for each category, here the mean altitude for each grain size class and can be added to the attribute table of the ratified raster (see previous chapter).
 
 ### Global operations and distances
 
@@ -912,7 +1007,7 @@ To do so, we can weight the distance with elevation so that each additional alti
 Visibility and viewshed computations also belong to the family of global operations <!--(in the exercises of Chapter ?? you will compute a viewshed raster)-->.
 <!-- reference 13-gis chapter-->
 
-Many map algebra operations have a counterpart in vector processing [@liu_essential_2009; Table \@ref(tab:mapalg_vector))].
+Many map algebra operations have a counterpart in vector processing [@liu_essential_2009].
 Computing a distance raster (zonal operation) while only considering a maximum distance (logical focal operation) is the equivalent to a vector buffer operation (section \@ref(modifying-geometry-data)).
 Reclassifying raster data (either local or zonal function depending on the input) is equivalent to dissolving vector data (section \@ref(spatial-joining-and-aggregation)). 
 Overlaying two rasters (local operation), where one contains `NULL` or `NA` values representing a mask, is similar to vector clipping (section \@ref(modifying-geometry-data)).
@@ -926,7 +1021,7 @@ However, zonal operations might be the better raster equivalent compared to chan
 Zonal operations can dissolve the cells of one raster in accordance with the zones (categories) of another raster using an aggregation function (see above).
 
 ### Merging rasters
-Suppose we would like to compute the NDVI (see focal functions of the previous section), and additionally want to compute terrain attributes from elevation data for observations within a study area.
+Suppose we would like to compute the NDVI (see section \@ref(local-operations)), and additionally want to compute terrain attributes from elevation data for observations within a study area.
 Before such computations we would have to acquire airborne or remotely sensed information.
 The corresponding imagery is often divided into scenes covering a specific spatial extent.
 Frequently, a study area covers more than one scene.
@@ -955,6 +1050,7 @@ To do so, we need a more advanced approach.
 Remote scientist frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image.
 The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`calcHistMatch()`) and **RStoolbox** (`histMatch()`, `pifMatch()`) provide the corresponding functions.
 
+
 ### Aligning rasters
 
 When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent has to match.
@@ -963,18 +1059,33 @@ The same problem arises when we would like to merge satellite imagery from diffe
 We can deal with such mismatches by aligning the rasters.
 
 The `projectRaster()` function reprojects one raster to a desired projection, say from UTM to WGS84.
-The origin is the point closest to (0, 0) if you moved towards it in steps of x and y resolution.
-If two rasters have different origins, their cells do not overlap completely which would make map algebra impossible.
-To change the origin , use `origin()`.^[If the origins of two raster datasets are just marginally apart, it sometimes is sufficient to simply increase the `tolerance` argument  of `raster::rasterOptions()`.]
 Equally, map algebra operations require the same extent.
-To align the extent of one object with that of another, use the `extend()` command.
-If you perform an algebraic operation on two objects with differing extents in R, the **raster** package returns the intersection, and says so in a warning (try: `elev + extend(elev, 2)`).
+Following code adds one row and two columns to each side of the raster while setting all new values to an elevation of 1000 meters (\@ref(fig:extend-example)).
 
-The `aggregate()` and `disaggregate()` functions help to change the cell size resolution of a raster.
-For instance let us aggregate `elev` from a resolution of 0.5 to a resolution of 1, that means we aggregate by a factor of 2.
-Additionally, the output cell value should correspond to the mean of the input cells (but  you can use any other function as well):
+```{r extend-example, fig.cap = "Original raster extended by 1 one row on each side (top, bottom) and two columns on each side (right, left)."}
+elev_2 = extend(elev, c(1, 2), value = 1000)
+plot(elev_2)
+```
+
+Performing an algebraic operation on two objects with differing extents in R, the **raster** package returns the result for the intersection, and says so in a warning.
 
 ```{r}
+elev_3 = elev + elev_2
+```
+
+However, we can also align the extent of two rasters with the `extend()` command.
+Here, we extend the `elev` object to the extend of `elev_2`. 
+The newly added rows and column receive the default value of the `value` parameter, i.e., `NA`.
+
+```{r}
+elev_4 = extend(elev, elev_2)
+```
+
+The `aggregate()` and `disaggregate()` functions help to change the cell size resolution of a raster.
+For instance, let us aggregate `elev` from a resolution of 0.5 to a resolution of 1, that means we aggregate by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
+Additionally, the output cell value should correspond to the mean of the input cells (but  one could use other functions as well such as `median()`, `sum()`, etc.):
+
+```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."}
 elev_agg = aggregate(elev, fact = 2, fun = mean)
 par(mfrow = c(1, 2))
 plot(elev)
@@ -982,6 +1093,27 @@ plot(elev_agg)
 ```
 
 Note that the origin of `elev_agg` has changed, too.
+
+```{r}
+origin(elev)
+origin(elev_agg)
+```
+
+The origin is the point closest to (0, 0) if you moved towards it in steps of x and y resolution.
+If two rasters have different origins, their cells do not overlap completely which would make map algebra impossible.
+To change the origin , use `origin()`.^[If the origins of two raster datasets are just marginally apart, it sometimes is sufficient to simply increase the `tolerance` argument  of `raster::rasterOptions()`.]
+Looking at figure \@ref(fig:origin-example) reveals the effect of changing the origin.
+
+```{r origin-example, fig.cap = "Plotting rasters with the same values but different origins."}
+# plot the aggregated raster
+plot(elev_agg)
+# change the origin
+origin(elev_agg) = c(0, 0)
+# plot it again
+plot(elev_agg, add = TRUE)
+```
+
+
 The `resample()` command lets you align several raster properties in one go, namely origin, extent and resolution.
 Let us resample an extended `elev_agg` to the properties of `elev` again.
 
