@@ -6,7 +6,6 @@
 
 # ROBIN 
 
-- [ROBIN] 2.1.2 does not answer the question "Why Simple Features?" but answers the question "why use package sf and not sp?"
 - [ROBIN] 4.2.1: instead of mentioning a lot of options while forwarding to a future section for what is meant, I think this section would work better when it would start with a simple example. Introducing earlier what is meant by a spatial relation may also clarify this chapter.
 - [ROBIN] Figure 4.6 is interesting: is this raster data? Can raster deal with this problem? 
 
@@ -98,3 +97,5 @@ but don't see it in the output of the book. What should readers of the book now 
 - [FIXED] "This column is usually named ‘geom’ or ‘geometry’" - depends, not if you mostly import your data from a spatial database. footnote/RMD Note: geom, geometry (name of the geometry column -> can have also another name when importing from spatial databases)
 - [FIXED] Add possible KML example.
 - [FIXED] Section 4.2.3.1 (Non-overlapping joins) is empty.
+- [FIXED] 2.1.2 does not answer the question "Why Simple Features?" but answers the question "why use package sf and not sp?"
+    - https://github.com/Robinlovelace/geocompr/commit/678cd3a98ce1b3aeabf232efe6eb4a8a4ba50907
