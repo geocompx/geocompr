@@ -3,7 +3,6 @@
 - [JANNES] I don't think that Java's memory management is much simpler than that of C++ when one uses properly types like std::vector.
 - [JANNES] 2.2 raster - "You can also specify a no-data value in the header of a raster, frequently -9999 (in R we often use NA)." This, and earlier sentences, pre-suppose that a raster is actually a file on disk, most likely something like an asciigrid file, but doesn't make this assumption explicit. As this is very often not the case, I think this information is confusing, and not needed: do NetCDF files have a header? It's irrelevant.
 
-
 # ROBIN 
 
 
@@ -11,12 +10,10 @@
 
 - [JAKUB] Another example is that in section 2.2, describing when I might want to use a RasterStack versus a RasterBrick (or vice versa). You mention that RasterBricks are faster. It seems like the ability to create a RasterStack from a file on disk (as opposed to in memory?) is an advantage of a RasterStack. When would this be useful? I have a computer science degree and am having a hard time figuring out what the advantage truly is, and I’m sure my students would be harder pressed to figure it out. 
 
-
 # TO DO IN THE FUTURE 
 
 - [ISSUE OPENED] Topical and functional indices before publishing.
 - [ISSUE OPENED] Likewise, in section 4.3.3 and 4.3.4, examples with landsat, satellite, and/or RStoolbox packages could be helpful. Maybe we use these packages in further chapters, and can then reference these here.
-- [ISSUE OPENED] Since figure 2.9 (right) plots long/lat coordinates to a flat surface, you may want to explain which projection it uses.
 - [ISSUE OPENED] CRSs - look at non-geographers' work too (eg. I think in Waller&Gotway and Banerjee et al.) Consider covering post-WGS84 datums (sorry, datums are the plural of datum in geodesy) for the US readership.
 - [ISSUE OPENED] the references need to be seriously checked as lots of the inserted author strings are wrong.
 - [FUTURE CHAPTERS] One example is at the end of section 2.2.2: “You can also do this with the rasterVis package which provides more advanced methods for plotting raster objects.” What more advanced methods? That might be helpful to know, even if you don’t go into details about how to carry out those advanced methods. 
@@ -101,3 +98,4 @@ but don't see it in the output of the book. What should readers of the book now 
     - https://github.com/Robinlovelace/geocompr/commit/678cd3a98ce1b3aeabf232efe6eb4a8a4ba50907
 - [FIXED] 4.2.1: instead of mentioning a lot of options while forwarding to a future section for what is meant, I think this section would work better when it would start with a simple example. Introducing earlier what is meant by a spatial relation may also clarify this chapter.
     - https://github.com/Robinlovelace/geocompr/commit/9341211cbbee8cc3d949a424b34aaa186af1861b
+- [FIXED] Since figure 2.9 (right) plots long/lat coordinates to a flat surface, you may want to explain which projection it uses.
