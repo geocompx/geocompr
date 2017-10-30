@@ -330,6 +330,7 @@ metro_names =
 
 The **osmdata** package provides a fantastic and easy-to-use interface to download OSM data (see also section \@ref(retrieving-data)).
 Instead of downloading all shops for the whole of Germany, we restrict the download to the defined metropolitan areas. 
+This relieves the OSM server resources, reduces download time and above all only gives back the shop locations we are interested in.
 The `lapply()` loop runs through all eight metropolitan names which subsequently define the bounding box in the `opq()` function (see section \@ref(retrieving-data)).
 Alternatively, we could have provided the bounding box in the form of coordinates ourselves.
 Next, we indicate that we only would like to download `shop` features (see this [page](http://wiki.openstreetmap.org/wiki/Map_Features) for a full list of OpenStreetMap map features).
@@ -338,6 +339,8 @@ Here, we will only keep the point objects.
 As with Google's reverse geocode API, the OSM-download will once in a while not work at the first attempt.
 The `while`-loop increases the number of download trials to three. 
 If then still no features can be downloaded, most likely there are none.
+However, is is highly unlikely that there are no shops in any of our defined metropolitan areas.
+The `if`-condition at the end of the following code chunk checks if there is at least one shop for each region.
 
 ```{r, eval = FALSE}
 library(osmdata)
@@ -356,17 +359,16 @@ shops = lapply(metro_names, function(x) {
   points = points$osm_points
   points = st_set_crs(points, 4326)
   })
-```
-
-Make sure that each list elements has at least a few features:
-
-```{r, eval = FALSE}
+# checking if we have downloaded shops for each metropolitan area
 if (any(sapply(shops, nrow) == 0)) {
   message("There is still a metropolitan area without any features. Please fix!")
 }
 ```
 
-If so, we select only the shop column, and finally bind all shops into one large sf-object.
+To make sure that each list object comes with the same column, we only keep the `shop` column with the help of another `lapply`-loop.
+This is not a given since OSM contributors are not equally meticulous when collecting data.
+Finally, we `rbind` all shops into one large `sf`-object.
+<!-- maybe you should also keep the ID column and only keep unique elements -->
 
 ```{r, eval = FALSE}
 # select only the shop column and rbind all list elements
@@ -374,18 +376,28 @@ shops = lapply(shops, select, shop)
 shops = Reduce(rbind, shops)
 ```
 
-
+The only thing left to do is to convert the spatial point object into a raster.
+The `rasterize()` function does exactly this.
+As input it expects an `sp` vector object, here we use the spatial point object `shops`, and a raster object, here we use the population raster whose original values have been replaced by `NA`s.
+A function defines how the values from the spatial vector object are transferred to the raster object. 
+`count` simply counts the number of spatial object, here the shop points, falling into one raster cell, and returns this value as the output cell value.
+Hence, we end up with a shop density, namely the number of shops per square kilometer.
+Naturally, the projection of the input raster and the input vector object have to match which is why we first have to reproject our shops to the CRS of the raster object.
 
 ```{r, eval = FALSE}
-shops$count = 1
-shops = st_transform(shops, proj4string(input$inh))
+shops = st_transform(shops, proj4string(input$pop))
 shops = as(shops, "Spatial")
 # create poi raster
-poi = input$inh
+poi = input$pop
 poi[] = NA
-poi = rasterize(x = shops, y = poi, field = "count", fun = "sum")
+poi = rasterize(x = shops, y = poi, field = "id", fun = "count")
+# rasterize(shops, poi_2, field = "shop", fun = function(x, ...) length(x))
+# poi = rasterize(shops, poi_2, field = "count", fun = "count")
+# gives another result because there are NAs in the shop column
+# poi = rasterize(shops, poi_2, field = "shop", fun = "count")
 plot(poi, xlim = c(4380000, 4420000), ylim = c(2920000, 2940000))
 ```
+
 
 ## Finding suitable locations
 zoom into Berlin 
