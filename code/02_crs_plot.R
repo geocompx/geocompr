@@ -23,7 +23,7 @@ p2 = ggplot() +
   coord_sf(datum = sf::st_crs(4326)) +
   theme(axis.text = element_text(size = 4))
 
-vector_crs = arrangeGrob(p1, p2, nrow = 1)
+vector_crs = arrangeGrob(p2, p1, nrow = 1)
 
 ggsave(plot = vector_crs,
        filename = "figures/02_vector_crs.png",
@@ -40,6 +40,6 @@ pr1 = levelplot(new_raster, margin = FALSE, colorkey = FALSE)
 pr2 = levelplot(new_raster2, margin = FALSE, colorkey = FALSE)
 
 png(filename = "figures/02_raster_crs.png", width = 950, height = 555)
-plot(pr1, split=c(1, 1, 2, 1), more=TRUE)
-plot(pr2, split=c(2, 1, 2, 1))
+plot(pr2, split=c(1, 1, 2, 1), more=TRUE)
+plot(pr1, split=c(2, 1, 2, 1))
 dev.off()
