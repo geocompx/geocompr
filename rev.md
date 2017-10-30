@@ -1,12 +1,19 @@
-# JANNES
+We are very grateful for the detailed comments on chapters 1:5 in *Geocomputation with R*.
+We have acted on the majority of these already and we think the vital 'foundations' part of the book is more readable, accurate and cohesive as a result.
+
+For an overview of the bulk of the work done please see the Pull Request where we put the changes addressing these reviews: https://github.com/Robinlovelace/geocompr/pull/109
+
+As you'll see this contains 100+ commits and over 500 lines of code and text changed, plus plenty of conversation between authors discussing the best way to address the changes.
+We're confident that the majority of changes have been addressed directly however we do have a few questions:
+
+- What does the reviewer mean when they refer to `%>%` with reference to `intermediate objects`?
+- What were the cartographic conventions that Figure 2.6 was breaking? We've improved the figure greatly in any case and used as the basis for questions in Chapter 2. Any further suggestions, or links to resources on cartographic conventions, appreciated.
+- Does our updated description of the target audience in the preface seem appropriate: 
+
+# Work in Progress
 
 - [JANNES] I don't think that Java's memory management is much simpler than that of C++ when one uses properly types like std::vector.
 - [JANNES] 2.2 raster - "You can also specify a no-data value in the header of a raster, frequently -9999 (in R we often use NA)." This, and earlier sentences, pre-suppose that a raster is actually a file on disk, most likely something like an asciigrid file, but doesn't make this assumption explicit. As this is very often not the case, I think this information is confusing, and not needed: do NetCDF files have a header? It's irrelevant.
-
-# ROBIN 
-
-
-# JAKUB
 
 - [JAKUB] Another example is that in section 2.2, describing when I might want to use a RasterStack versus a RasterBrick (or vice versa). You mention that RasterBricks are faster. It seems like the ability to create a RasterStack from a file on disk (as opposed to in memory?) is an advantage of a RasterStack. When would this be useful? I have a computer science degree and am having a hard time figuring out what the advantage truly is, and I’m sure my students would be harder pressed to figure it out. 
 
