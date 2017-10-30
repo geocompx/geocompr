@@ -365,7 +365,7 @@ if (any(sapply(shops, nrow) == 0)) {
 }
 ```
 
-To make sure that each list object comes with the same column, we only keep the `shop` column with the help of another `lapply`-loop.
+To make sure that each list object comes with the same column, we only keep the `shop` and the `id` columns with the help of another `lapply`-loop.
 This is not a given since OSM contributors are not equally meticulous when collecting data.
 Finally, we `rbind` all shops into one large `sf`-object.
 <!-- maybe you should also keep the ID column and only keep unique elements -->
@@ -382,9 +382,10 @@ As input it expects an `sp` vector object, here we use the spatial point object 
 A function defines how the values from the spatial vector object are transferred to the raster object. 
 `count` simply counts the number of spatial object, here the shop points, falling into one raster cell, and returns this value as the output cell value.
 Hence, we end up with a shop density, namely the number of shops per square kilometer.
-Naturally, the projection of the input raster and the input vector object have to match which is why we first have to reproject our shops to the CRS of the raster object.
+Naturally, the projection of the input raster and the input vector object have to match which is why we first have to reproject our shops to the CRS of the raster object before rasterizing.
 
 ```{r, eval = FALSE}
+shops$id = 1
 shops = st_transform(shops, proj4string(input$pop))
 shops = as(shops, "Spatial")
 # create poi raster
@@ -398,8 +399,32 @@ poi = rasterize(x = shops, y = poi, field = "id", fun = "count")
 plot(poi, xlim = c(4380000, 4420000), ylim = c(2920000, 2940000))
 ```
 
+```{r, eval = FALSE}
+library(classInt)
+# construct reclassification matrix
+int = classInt::classIntervals(values(poi), n = 5, style = "fisher")
+int = round(int$brks)
+rcl_poi = matrix(c(int[1], rep(int[-c(1, length(int))], each = 2), 
+                   int[length(int)] + 1), ncol = 2, byrow = TRUE)
+rcl_poi = cbind(rcl_poi, 1:5)  
+# reclassify
+poi = reclassify(poi, rcl = rcl_poi, right = NA) 
+names(poi) = "poi"
+```
 
 ## Finding suitable locations
+
+```{r, eval = FALSE}
+# dismiss population raster
+reclass = dropLayer(reclass, "pop")
+# add poi raster
+reclass = addLayer(reclass, poi)
+# calculate the total score
+result = sum(reclass)
+# have a look at suitable bike shop locations in Berlin
+plot(result > 10, xlim = c(4540000, 4560000), ylim = c(3260000, 3290000))
+mapview(result > 10, xlim = c(4540000, 4560000), ylim = c(3260000, 3290000))
+```
 zoom into Berlin 
 mapview(berlin) + mapview(suitable)
 
