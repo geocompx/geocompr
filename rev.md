@@ -3,7 +3,7 @@ We have acted on the majority of these already and we think the vital 'foundatio
 
 For an overview of the bulk of the work done please see the Pull Request where we put the changes addressing these reviews: https://github.com/Robinlovelace/geocompr/pull/109
 
-As you'll see this contains 100+ commits and over 500 lines of code and text changed, plus plenty of conversation between authors discussing the best way to address the changes.
+As you'll see this contains 100+ commits and over 500 lines of code and text changed, plus plenty of conversation between authors discussing the best way to address the comments.
 We're confident that the majority of changes have been addressed directly however we do have a few questions:
 
 - What does the reviewer mean when they refer to `%>%` with reference to `intermediate objects`?
