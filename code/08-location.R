@@ -24,6 +24,7 @@ library(latticeExtra)
 library(grid)
 library(gridExtra)
 library(classInt)
+library(mapview)
 
 # attach data
 # change when the data has been put into spDataLarge
@@ -79,12 +80,12 @@ coords = st_centroid(metros) %>% st_coordinates
 # delete the fifth polygon (single cell of the Düsseldorf area)
 coords = coords[-5, ]
 # move all labels up except for Düsseldorf
-ind = metro_names %in% c("Stuttgart", "Düsseldorf", "Berlin")
+ind = metro_names %in% c("Stuttgart", "Duesseldorf", "Berlin")
 coords[!ind, 2] = coords[!ind, 2] + 30000
 coords[ind, 2] = coords[ind, 2] + c(45000, 45000, 0)
 
 p_2 = 
-  spplot(inh_agg, col.regions = pal, 
+  spplot(pop_agg, col.regions = pal, 
          main = list("Number of people in 1000", cex = 0.5),
          # if we want to get rid of the plot frame around the map
          # par.settings = list(axis.line = list(col = 'transparent')), 
@@ -148,8 +149,21 @@ ggplot2::ggsave(filename = "figures/08_metro_areas.png",
 
 # 2.3 POI figure===========================================
 #**********************************************************
-plot(poi)
 
-
-
-text(xy$x, xy$y, labels, col=col, ... )
+library(mapview)
+library(htmlwidgets)
+# dismiss population raster
+reclass = dropLayer(reclass, "pop")
+# add poi raster
+reclass = addLayer(reclass, poi)
+# calculate the total score
+result = sum(reclass)
+# have a look at suitable bike shop locations in Berlin
+# polygons 5 and 9 share one border, delete polygon number 5
+metros_2$names = metro_names
+berlin = dplyr::filter(metros_2, names == "Berlin")
+berlin_raster = crop(result, as(berlin, "Spatial"))
+berlin_raster = ratify(berlin_raster > 10)
+m = mapview(berlin_raster, col.regions = c(NA, "darkgreen"),
+            na.color = "transparent", legend = TRUE, map.type = "OpenStreetMap")
+mapshot(m, url = file.path(getwd(), "figures/08_bikeshops_berlin.html"))
