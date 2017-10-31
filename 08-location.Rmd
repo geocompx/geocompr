@@ -269,7 +269,7 @@ One could assign it to the neighboring region using another dissolving procedure
 # find out about the offending polygon
 int = st_intersects(metros, metros)
 # polygons 5 and 9 share one border, delete polygon number 5
-metros = metros[-5, ]
+metros_2 = metros[-5, ]
 ```
 
 The defined metropolitan areas suitable for bike shops are still missing a name.
@@ -281,7 +281,7 @@ The **ggmap** package makes use of the one provided by Google.^[Note that Google
 
 ```{r, eval = FALSE}
 # reverse geocoding to find out the names of the metropolitan areas
-metros_wgs = st_transform(metros, 4326)
+metros_wgs = st_transform(metros_2, 4326)
 coords = st_centroid(metros_wgs) %>%
   st_coordinates %>%
   round(., 4)
@@ -314,6 +314,7 @@ metro_names = plyr::ldply(1:nrow(coords), function(i) {
 Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
 Overall, we are satisfied with the `locality` column serving as metropolitan names (München, Nürnberg, Stuttgart, Frankfurt, Hamburg, Berlin, Leipzig) bar one exception, namely Velbert.
 Hence, we replace Velbert with the corresponding name in the `administrative_area_level_2` column, that is Düsseldorf (Fig. \@ref(fig:metro-areas)).
+Umlauts like `ü` might lead to trouble further on, for example when determing the bounding box of a metropolitan area with `opq()` (see further below), which is why we replace them.
 
 ```{r, eval = FALSE}
 metro_names = 
@@ -373,7 +374,7 @@ if (any(ind)) {
 }
 ```
 
-To make sure that each list object comes with the same column, we only keep the `shop` and the `id` columns with the help of another `lapply`-loop.
+To make sure that each list object comes with the same columns, we only keep the `osm_id` and the `shop` columns with the help of another `lapply`-loop.
 This is not a given since OSM contributors are not equally meticulous when collecting data.
 Finally, we `rbind` all shops into one large `sf`-object.
 
@@ -389,18 +390,17 @@ As input it expects an `sp` vector object, here we use the spatial point object 
 A function defines how the values from the spatial vector object are transferred to the raster object. 
 `count` simply counts the number of spatial object, here the shop points, falling into one raster cell, and returns this value as the output cell value.
 Hence, we end up with a shop density, namely the number of shops per square kilometer.
-But one has too be careful, had we used the `shop` instead of the `osm_id` column, we would have retrieved fewer shops per grid cell. 
-This is because the `shop` column contains `NA` values, which are omitted when rasterizing vector objects.
+But one has too be careful: had we used the `shop` instead of the `osm_id` column, we would have retrieved fewer shops per grid cell. 
+This is because the `shop` column contains `NA` values, which the `count()` function omits when rasterizing vector objects.
 Naturally, the projection of the input raster and the input vector object have to match which is why we first have to reproject our shops to the CRS of the raster object.
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, message = FALSE}
 shops = st_transform(shops, proj4string(input$pop))
 shops = as(shops, "Spatial")
 # create poi raster
 poi = input$pop
 poi[] = NA
 poi = rasterize(x = shops, y = poi, field = "osm_id", fun = "count")
-# plot(poi, xlim = c(4380000, 4420000), ylim = c(2920000, 2940000))
 ```
 
 ```{r, eval = FALSE, message = FALSE}
@@ -425,12 +425,14 @@ reclass = dropLayer(reclass, "pop")
 reclass = addLayer(reclass, poi)
 # calculate the total score
 result = sum(reclass)
-# have a look at suitable bike shop locations in Berlin
-plot(result > 10, xlim = c(4540000, 4560000), ylim = c(3260000, 3290000))
-mapview(result > 10, map.type = "OpenStreetMap", legend = TRUE)
 ```
-zoom into Berlin 
-mapview(berlin) + mapview(suitable)
+
+(Figure \@ref(fig:bikeshop-berlin))
+
+```{r bikeshop-berlin, echo = FALSE, fig.cap = "Suitable areas (i.e., raster cells with a score > 10) in accordance with our hypothetical survey for bike stores in Berlin."}
+knitr::include_url("figures/08_bikeshops_berlin.html")
+```
+
 
 ## Discussion and next steps
 Here, normative Nutzung von GIS (frequently termed expert-based and provided as justification in the absence of better data) which is typical for (geo-)marketing applications.
