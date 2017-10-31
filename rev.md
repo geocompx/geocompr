@@ -1,13 +1,19 @@
-# JANNES
+We are very grateful for the detailed comments on chapters 1:5 in *Geocomputation with R*.
+We have acted on the majority of these already and we think the vital 'foundations' part of the book is more readable, accurate and cohesive as a result.
+
+For an overview of the bulk of the work done please see the Pull Request where we put the changes addressing these reviews: https://github.com/Robinlovelace/geocompr/pull/109
+
+As you'll see this contains 100+ commits and over 500 lines of code and text changed, plus plenty of conversation between authors discussing the best way to address the comments.
+We're confident that the majority of changes have been addressed directly however we do have a few questions:
+
+- What does the reviewer mean when they refer to `%>%` with reference to `intermediate objects`?
+- What were the cartographic conventions that Figure 2.6 was breaking? We've improved the figure greatly in any case and used as the basis for questions in Chapter 2. Any further suggestions, or links to resources on cartographic conventions, appreciated.
+- Does our updated description of the target audience in the preface (http://robinlovelace.net/geocompr/preface.html) seem appropriate?
+
+# Work in Progress
 
 - [JANNES] I don't think that Java's memory management is much simpler than that of C++ when one uses properly types like std::vector.
 - [JANNES] 2.2 raster - "You can also specify a no-data value in the header of a raster, frequently -9999 (in R we often use NA)." This, and earlier sentences, pre-suppose that a raster is actually a file on disk, most likely something like an asciigrid file, but doesn't make this assumption explicit. As this is very often not the case, I think this information is confusing, and not needed: do NetCDF files have a header? It's irrelevant.
-
-# ROBIN 
-
-
-# JAKUB
-
 - [JAKUB] Another example is that in section 2.2, describing when I might want to use a RasterStack versus a RasterBrick (or vice versa). You mention that RasterBricks are faster. It seems like the ability to create a RasterStack from a file on disk (as opposed to in memory?) is an advantage of a RasterStack. When would this be useful? I have a computer science degree and am having a hard time figuring out what the advantage truly is, and I’m sure my students would be harder pressed to figure it out. 
 
 # TO DO IN THE FUTURE 
@@ -18,12 +24,9 @@
 - [ISSUE OPENED] the references need to be seriously checked as lots of the inserted author strings are wrong.
 - [FUTURE CHAPTERS] One example is at the end of section 2.2.2: “You can also do this with the rasterVis package which provides more advanced methods for plotting raster objects.” What more advanced methods? That might be helpful to know, even if you don’t go into details about how to carry out those advanced methods. 
 - [FUTURE CHAPTERS] Lastly on this, section 5.6 can be much expanded, as visualization is such an important part of geography and geographic analysis.
-- [THAT'S A PROPER LINK - IT LOOKS STRANGE THOUGH] The url for downloading National Park Service units in section 5.2 seems wrong, as it is duplicated in the code. 
 - [FUTURE CHAPTERS - chapter 6] CRSs - This seems good, especially if you have examples of where mismatched CRSs can cause problems and how to solve those problems.
 - [FUTURE CHAPTERS] I was missing a section on raster/vector integration.
-- [ISSUE OPENED] The book does not make explicit who its target audience is. (2) The book fails to mention what its audience is. See https://github.com/Robinlovelace/geocompr/issues/103
-- [ISSUE OPENED] Figure 4.6 is interesting: is this raster data? Can raster deal with this problem?
-    - https://github.com/Robinlovelace/geocompr/issues/110
+- [ISSUE OPENED] Figure 4.6 is interesting: is this raster data? Can raster deal with this problem? - https://github.com/Robinlovelace/geocompr/issues/110
 
 # CANNOT FIND IT
 
@@ -99,3 +102,5 @@ but don't see it in the output of the book. What should readers of the book now 
 - [FIXED] 4.2.1: instead of mentioning a lot of options while forwarding to a future section for what is meant, I think this section would work better when it would start with a simple example. Introducing earlier what is meant by a spatial relation may also clarify this chapter.
     - https://github.com/Robinlovelace/geocompr/commit/9341211cbbee8cc3d949a424b34aaa186af1861b
 - [FIXED] Since figure 2.9 (right) plots long/lat coordinates to a flat surface, you may want to explain which projection it uses.
+- [THAT'S A PROPER LINK] The url for downloading National Park Service units in section 5.2 seems wrong, as it is duplicated in the code. 
+- [FIXED] The book does not make explicit who its target audience is. (2) The book fails to mention what its audience is. See https://github.com/Robinlovelace/geocompr/issues/103
