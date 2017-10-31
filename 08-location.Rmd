@@ -165,7 +165,7 @@ The `aggregate()` command helps to change the resolution from 1 to 20 sq-km whil
 Next, we only keep cells with more than half a million inhabitants using a Boolean operation, and convert the resulting cells into spatial polygons of class `sf`.
 
 ```{r, eval = FALSE}
-pop_agg = aggregate(input$pop, fact = 20000 / res(input)[1], fun = sum)
+pop_agg = aggregate(reclass$pop, fact = 20000 / res(input)[1], fun = sum)
 polys = rasterToPolygons(pop_agg[pop_agg > 500000, drop = FALSE])
 polys = st_as_sf(polys)
 ```
@@ -312,16 +312,19 @@ metro_names = plyr::ldply(1:nrow(coords), function(i) {
 ```
 
 Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
-Overall, we are satisfied with the `locality` column serving as metropolitan names (Munich, Nuremberg, Stuttgart, Frankfurt, Hamburg, Berlin, Leipzig) bar one exception, namely Velbert.
+Overall, we are satisfied with the `locality` column serving as metropolitan names (München, Nürnberg, Stuttgart, Frankfurt, Hamburg, Berlin, Leipzig) bar one exception, namely Velbert.
 Hence, we replace Velbert with the corresponding name in the `administrative_area_level_2` column, that is Düsseldorf (Fig. \@ref(fig:metro-areas)).
 
 ```{r, eval = FALSE}
-metro_names = select(locality, administrative_area_level_2)
-# replace Velbert
 metro_names = 
-  mutate(metro_names, 
-         locality = ifelse(locality == "Velbert",
-                           administrative_area_level_2, locality)) %>%
+  dplyr::select(metro_names, locality, administrative_area_level_2) %>%
+  mutate_all(as.character)
+metro_names = 
+  mutate(metro_names,
+         # replace Velbert
+         locality = ifelse(locality == "Velbert", administrative_area_level_2, locality),
+         # replace umlaut ü
+         locality = gsub("ü", "ue", locality)) %>%
   select(locality) %>%
   pull
 ```
@@ -339,16 +342,19 @@ Here, we will only keep the point objects.
 As with Google's reverse geocode API, the OSM-download will once in a while not work at the first attempt.
 The `while`-loop increases the number of download trials to three. 
 If then still no features can be downloaded, most likely there are none.
-However, is is highly unlikely that there are no shops in any of our defined metropolitan areas.
+Or it is an indication that another error has ocurred before. 
+For instance, the `opq()` function has retrieved a wrong or too small bounding box.
+In any case, is is highly unlikely that there are no shops in any of our defined metropolitan areas.
 The `if`-condition at the end of the following code chunk checks if there is at least one shop for each region.
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, message = FALSE}
 library(osmdata)
 shops = lapply(metro_names, function(x) {
+  message("Downloading shops of:", x, "\n")
   # give the server a bit time
   Sys.sleep(sample(seq(5, 10, 0.1), 1))
   query = opq(x) %>%
-    add_osm_feature(query, key = "shop")
+    add_osm_feature(key = "shop")
   points = osmdata_sf(query)
   # request the same data again if nothing has been downloaded
   iter = 2
@@ -360,19 +366,20 @@ shops = lapply(metro_names, function(x) {
   points = st_set_crs(points, 4326)
   })
 # checking if we have downloaded shops for each metropolitan area
-if (any(sapply(shops, nrow) == 0)) {
-  message("There is still a metropolitan area without any features. Please fix!")
+ind = sapply(shops, nrow) == 0
+if (any(ind)) {
+  message("There are/is still (a) metropolitan area/s without any features:\n",
+          paste(metro_names[ind], collapse = ", "), "\nPlease fix!")
 }
 ```
 
 To make sure that each list object comes with the same column, we only keep the `shop` and the `id` columns with the help of another `lapply`-loop.
 This is not a given since OSM contributors are not equally meticulous when collecting data.
 Finally, we `rbind` all shops into one large `sf`-object.
-<!-- maybe you should also keep the ID column and only keep unique elements -->
 
 ```{r, eval = FALSE}
-# select only the shop column and rbind all list elements
-shops = lapply(shops, select, shop)
+# select only specific columns and rbind all list elements
+shops = lapply(shops, select, osm_id, shop)
 shops = Reduce(rbind, shops)
 ```
 
@@ -382,24 +389,21 @@ As input it expects an `sp` vector object, here we use the spatial point object 
 A function defines how the values from the spatial vector object are transferred to the raster object. 
 `count` simply counts the number of spatial object, here the shop points, falling into one raster cell, and returns this value as the output cell value.
 Hence, we end up with a shop density, namely the number of shops per square kilometer.
-Naturally, the projection of the input raster and the input vector object have to match which is why we first have to reproject our shops to the CRS of the raster object before rasterizing.
+But one has too be careful, had we used the `shop` instead of the `osm_id` column, we would have retrieved fewer shops per grid cell. 
+This is because the `shop` column contains `NA` values, which are omitted when rasterizing vector objects.
+Naturally, the projection of the input raster and the input vector object have to match which is why we first have to reproject our shops to the CRS of the raster object.
 
 ```{r, eval = FALSE}
-shops$id = 1
 shops = st_transform(shops, proj4string(input$pop))
 shops = as(shops, "Spatial")
 # create poi raster
 poi = input$pop
 poi[] = NA
-poi = rasterize(x = shops, y = poi, field = "id", fun = "count")
-# rasterize(shops, poi_2, field = "shop", fun = function(x, ...) length(x))
-# poi = rasterize(shops, poi_2, field = "count", fun = "count")
-# gives another result because there are NAs in the shop column
-# poi = rasterize(shops, poi_2, field = "shop", fun = "count")
-plot(poi, xlim = c(4380000, 4420000), ylim = c(2920000, 2940000))
+poi = rasterize(x = shops, y = poi, field = "osm_id", fun = "count")
+# plot(poi, xlim = c(4380000, 4420000), ylim = c(2920000, 2940000))
 ```
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, message = FALSE}
 library(classInt)
 # construct reclassification matrix
 int = classInt::classIntervals(values(poi), n = 5, style = "fisher")
@@ -423,7 +427,7 @@ reclass = addLayer(reclass, poi)
 result = sum(reclass)
 # have a look at suitable bike shop locations in Berlin
 plot(result > 10, xlim = c(4540000, 4560000), ylim = c(3260000, 3290000))
-mapview(result > 10, xlim = c(4540000, 4560000), ylim = c(3260000, 3290000))
+mapview(result > 10, map.type = "OpenStreetMap", legend = TRUE)
 ```
 zoom into Berlin 
 mapview(berlin) + mapview(suitable)
@@ -447,8 +451,8 @@ In an advanced chapter we could continue the analysis as follows:
  - however, we have to take into account that there are already competitors (huff model, attraction)
  - what about rent prices/housing costs
 
-Reference (Huff model): https://journal.r-project.org/archive/2017/RJ-2017-020/RJ-2017-020.pdf
-
+<!-- Reference (Huff model): https://journal.r-project.org/archive/2017/RJ-2017-020/RJ-2017-020.pdf
+-->
 ## Exercises
 
 1. Download the csv file containing inhabitant information for a 100 m cell resolution ( https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
