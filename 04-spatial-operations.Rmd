@@ -157,42 +157,40 @@ Following the structure of section \@ref(vector-attribute-subsetting), we start 
 <!-- This is because the default subsetting operator is `st_intersects()`, which returns any type of spatial relation. -->
 <!-- Other spatial subsetting operations such as `st_within()` are more conservative, as shown in section \@ref(topological-relations). -->
 
-Before we progress to explore the differences between different spatial subsetting operations, it is worth seeing alternative ways to achieve the same result,
-to deepen understanding of what is going on 'under the hood' (which in turn is vital for developing advanced geocomputation applications).
-The second way to reproduce the subsetting operation illustrated in Figure \@ref(fig:africa-buff) simply involves expanding the operation over 2 lines:
+Before we progress to the next section, it is worth seeing how subsetting can be done using *topological operators* directly.
+The result illustrated in Figure \@ref(fig:nz-subset) can be reproduced using the operator `st_intersects()` as follows:
 
 ```{r}
-sel_buff = st_intersects(x = africa, y = buff, sparse = FALSE)
-africa_buf2 = africa[sel_buff, ]
+sel = st_intersects(x = nz_height, y = canterbury, sparse = FALSE)
 ```
 
 The third way is essentially the same as the second, but uses the `filter()` function introduced in section \@ref(vector-attribute-subsetting), forming the foundations of a 'tidy' spatial data analysis workflow.
 If you already use **dplyr** for data manipulation, this way should seem familiar:
 
 ```{r}
-africa_buf3 = filter(africa, sel_buff)
+# africa_buf3 = filter(africa, sel_buff)
 ```
 
 How can we be sure that the results are the same for the three subsetting operations?
 We can test them as follows:
 
 ```{r}
-identical(x = africa_buf, y = africa_buf2)
-identical(x = africa_buf, y = africa_buf3)
+# identical(x = africa_buf, y = africa_buf2)
+# identical(x = africa_buf, y = africa_buf3)
 ```
 
 The reason that the third spatially subset object (`africa_buf3`) is not identical is that **dplyr** changes the row names:
 
 ```{r}
-head(row.names(africa_buf))
-head(row.names(africa_buf3))
+# head(row.names(africa_buf))
+# head(row.names(africa_buf3))
 ```
 
 If the row names are re-set, the objects become identical:
 
 ```{r}
-attr(africa_buf3, "row.names") = attr(x = africa_buf, "row.names")
-identical(africa_buf, africa_buf3)
+# attr(africa_buf3, "row.names") = attr(x = africa_buf, "row.names")
+# identical(africa_buf, africa_buf3)
 ```
 
 ```{block type='rmdnote'}
@@ -203,8 +201,8 @@ For further discussion of this decision, and some controversy, see the (closed) 
 ```
 
 ```{r}
-row.names(africa[africa$subregion == "Northern Africa", ])
-row.names(filter(africa, subregion == "Northern Africa"))
+# row.names(africa[africa$subregion == "Northern Africa", ])
+# row.names(filter(africa, subregion == "Northern Africa"))
 ```
 
 ### Topological relations
