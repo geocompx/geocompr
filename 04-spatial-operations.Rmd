@@ -605,35 +605,36 @@ group_by(us_states, REGION) %>%
 
 
 ```{r}
-buff_agg = aggregate(x = africa[, "pop"], by = buff, FUN = sum)
+# buff_agg = aggregate(x = africa[, "pop"], by = buff, FUN = sum)
 ```
 <!--
 show also tidyverse way, so what you are doing is basically a spatial join and a subsequent aggregation without a grouping variable. Didactically, it might be better to present a grouping variable.
-```{r}
-st_join(buff, africa[, "pop"]) %>%
-  summarize(pop = sum(pop, na.rm = TRUE))
+-->
+
+```{r, echo=FALSE}
+# st_join(buff, africa[, "pop"]) %>%
+#   summarize(pop = sum(pop, na.rm = TRUE))
 # summarize(africa[buff, "pop"], pop = sum(pop, na.rm = TRUE))
 ```
--->
 
 The result, `buff_agg`, is a spatial object with the same geometry as `by` (the circular buffer in this case) but with an additional variable, `pop` reporting summary statistics for all features in `x` that intersect with `by` (the total population of the countries that touch the buffer in this case).
 Plotting the result (with `plot(buff_agg)`) shows that the operation does not really make sense:
 Figure \@ref(fig:buff-agg) shows a population of over half a billion people mostly located in a giant circle floating off the west coast of Africa!  
 
-```{r buff-agg, fig.cap="Result of spatial aggregation showing the total population of countries that intersect with a large circle whose center lies at 0 degrees longitude and latitude.", echo=FALSE, message=FALSE}
-library(tmap)
-pal = tmaptools::get_brewer_pal(palette = "BuPu", n = 4, plot = F)
-breaks = c(0, 1e7, 1e8, 5e8, 1e9)
-bb_buff = tmaptools::bb(buff_agg, ext = 1.5)
-qtm(buff_agg, fill = pal[4], bbox = bb_buff) +
-  tm_shape(africa_buf) +
-  tm_fill("pop", palette = pal, breaks = breaks) +
-  tm_borders() +
-  qtm(africa[st_disjoint(africa, buff, sparse = FALSE), ]) +
-  tm_shape(buff) +
-  tm_borders(lwd = 3, lty = 3) +
-  tm_layout(legend.position = c("left", "bottom"))
-detach("package:tmap", unload = TRUE)
+```{r buff-agg, fig.cap="Result of spatial aggregation showing the total population of countries that intersect with a large circle whose center lies at 0 degrees longitude and latitude.", echo=FALSE, message=FALSE, eval=FALSE}
+# library(tmap)
+# pal = tmaptools::get_brewer_pal(palette = "BuPu", n = 4, plot = F)
+# breaks = c(0, 1e7, 1e8, 5e8, 1e9)
+# bb_buff = tmaptools::bb(buff_agg, ext = 1.5)
+# qtm(buff_agg, fill = pal[4], bbox = bb_buff) +
+#   tm_shape(africa_buf) +
+#   tm_fill("pop", palette = pal, breaks = breaks) +
+#   tm_borders() +
+#   qtm(africa[st_disjoint(africa, buff, sparse = FALSE), ]) +
+#   tm_shape(buff) +
+#   tm_borders(lwd = 3, lty = 3) +
+#   tm_layout(legend.position = c("left", "bottom"))
+# detach("package:tmap", unload = TRUE)
 ```
 
 The results of the spatial aggregation exercise presented in Figure \@ref(fig:buff-agg) are unrealistic for three reasons:
@@ -686,8 +687,9 @@ detach("package:tmap", unload = TRUE)
 The simplest useful method for spatial interpolation is *area weighted* spatial interpolation.
 This is implemented in `st_interpolate_aw()`, as demonstrated below:
 <!-- well, what you are doing here is weighting the inhabitants presumably on the basis of the area. The link between your congruent and incongruent example is somehow missing. One gets the impression, that the spatial interpolation takes care of incongruencies which is not the case. So I would suggest to clarify the weighting procedure.-->
+
 ```{r}
-buff_agg_aw = st_interpolate_aw(x = africa["pop"], to = buff, extensive = TRUE)
+# buff_agg_aw = st_interpolate_aw(x = africa["pop"], to = buff, extensive = TRUE)
 ```
 
 Instead of simply aggregating, this procedure additionally applies a weight, in this case simply the area.
