@@ -374,7 +374,7 @@ if (any(ind)) {
 }
 ```
 
-To make sure that each list object comes with the same columns, we only keep the `osm_id` and the `shop` columns with the help of another `lapply`-loop.
+To make sure that each list element (an sf data.frame) comes with the same columns, we only keep the `osm_id` and the `shop` columns with the help of another `lapply`-loop.
 This is not a given since OSM contributors are not equally meticulous when collecting data.
 Finally, we `rbind` all shops into one large `sf`-object.
 
@@ -388,7 +388,7 @@ The only thing left to do is to convert the spatial point object into a raster.
 The `rasterize()` function does exactly this.
 As input it expects an `sp` vector object, here we use the spatial point object `shops`, and a raster object, here we use the population raster whose original values have been replaced by `NA`'s.
 A function defines how the values from the spatial vector object are transferred to the raster object. 
-`count` simply counts the number of spatial object, here the shop points, falling into one raster cell, and returns this value as the output cell value.
+`count` simply counts the number of spatial objects, here the shop points, falling into one raster cell, and returns this value as the output cell value.
 Hence, we end up with a shop density, namely the number of shops per square kilometer.
 But one has too be careful: had we used the `shop` instead of the `osm_id` column, we would have retrieved fewer shops per grid cell. 
 This is because the `shop` column contains `NA` values, which the `count()` function omits when rasterizing vector objects.
@@ -403,14 +403,20 @@ poi[] = NA
 poi = rasterize(x = shops, y = poi, field = "osm_id", fun = "count")
 ```
 
+As with the other rasters (population, women, mean age, household size) we would like to classify the `poi` raster into four classes (see section \@ref(create-census-rasters)). 
+Defining class intervals is an arbitrary undertaking to a certain degree .
+One can use equal breaks, quantile breaks, fixed values and many more.
+Here, we choose the Fisher-Jenks natural breaks approach which tries to minimize the within-class variance.
+Naturally, the identified breaks serve as input for the reclassification matrix.
+
 ```{r, eval = FALSE, message = FALSE}
 library(classInt)
 # construct reclassification matrix
-int = classInt::classIntervals(values(poi), n = 5, style = "fisher")
+int = classInt::classIntervals(values(poi), n = 3, style = "fisher")
 int = round(int$brks)
 rcl_poi = matrix(c(int[1], rep(int[-c(1, length(int))], each = 2), 
                    int[length(int)] + 1), ncol = 2, byrow = TRUE)
-rcl_poi = cbind(rcl_poi, 1:5)  
+rcl_poi = cbind(rcl_poi, 0:3)  
 # reclassify
 poi = reclassify(poi, rcl = rcl_poi, right = NA) 
 names(poi) = "poi"
@@ -418,11 +424,19 @@ names(poi) = "poi"
 
 ## Finding suitable locations
 
+As usual in (geo-)data science, the data retrieval and preprocessing represented the lion's share of the overall workload.
+The final workstep, the calculation of a final score by summing up all prepared rasters, is a simple one-liner.
+Before doing that, we add the POI raster to and delete the population raster from the raster stack.
+The reasoning for the latter is twofold.
+First of all, we already have delineated metropolitan areas, that is areas where the population density is above average compared to the rest of Germany.
+Secondly, though it is advantageous to have many potential customers within a specific catchment area, the sheer number alone might not actually represent the desired target group.
+For instance, residential tower blocks are areas with a high population density but not necessarily with a high purchasing power for luxurious bike components.
+
 ```{r, eval = FALSE}
-# dismiss population raster
-reclass = dropLayer(reclass, "pop")
 # add poi raster
 reclass = addLayer(reclass, poi)
+# delete population raster
+reclass = dropLayer(reclass, "pop")
 # calculate the total score
 result = sum(reclass)
 ```
@@ -437,11 +451,13 @@ knitr::include_url("figures/08_bikeshops_berlin.html")
 ## Discussion and next steps
 Here, normative Nutzung von GIS (frequently termed expert-based and provided as justification in the absence of better data) which is typical for (geo-)marketing applications.
 
-classification of rasters, weight of rasters
+classification of rasters, equal weight of rasters but is the household size as important as the portion of men?
+
 
 population raster 100 m much more detailed
 INSPIRE database -> much more data available at a greater level of detail
 Interactions remained unconsidered. For example, men and single households?
+other variables of interest purchasing power and even better a retail purchasing power for bikes
 
 
 next steps:
