@@ -146,18 +146,37 @@ Let's take a look at two examples of raster transformation -  using categorical 
 <!-- intro to this object -->
 ```{r}
 cat_raster = raster(system.file("raster/nlcd2011.tif", package="spDataLarge"))
+cat_raster
 ```
 
 <!-- intro to this object -->
 ```{r}
 con_raster = raster(system.file("raster/srtm.tif", package="spDataLarge"))
+con_raster
 ```
 
-When reprojecting categorical raster, we need to ensure that our new estimated values would still have values of our classes.
-<!-- For example -->
-the values are class data, the ‘nearest neighbor’ is commonly used.
+<!-- intro to projectRaster -->
+```{r}
+?projectRaster()
+```
 
-<!-- Otherwise some sort of interpolation (e.g. ‘bilinear’). -->
+When reprojecting categorical raster, we need to ensure that our new estimated values would still have values of our original classes.
+This could be done using the nearest neighbor method.
+<!-- For example -->
+
+```{r}
+wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "ngb")
+cat_raster_wgs84
+```
+
+On the other hand, the nearest neighbor method should not be used for continuous raster data, as we want to preserve gradual changes in values.
+Continuous data could be reprojected using the bilinear method. 
+
+```{r}
+con_raster_wgs84 = projectRaster(con_raster, crs = wgs84, method = "bilinear")
+con_raster
+```
 
 <!-- different methods of computing values after transformation, such as ngb or bilinear  -->
 <!--in most of the cases reproject vector, not raster-->
@@ -166,6 +185,7 @@ the values are class data, the ‘nearest neighbor’ is commonly used.
 <!-- - projectRaster -->
 <!-- - an issue of resampling (comparision of old and new values) -->
 <!-- note: equal area projections are the best for raster calculations -->
+<!-- should we mentioned gdal_transform? -->
 
 <!-- ## Affine transformations -->
 
@@ -202,4 +222,10 @@ the values are class data, the ‘nearest neighbor’ is commonly used.
 <!-- plot(world_tmerc$geom) -->
 <!--  world_4326 = st_transform(world_tmerc, 4326) -->
 <!-- plot(world_4326$geom) -->
+<!-- ``` -->
+<!-- 2. Try to reproject categorical data using a bilinear interpolation method. What's wrong? -->
+<!-- ```{r} -->
+<!-- wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" -->
+<!-- cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "bilinear") -->
+<!-- cat_raster_wgs84 -->
 <!-- ``` -->
