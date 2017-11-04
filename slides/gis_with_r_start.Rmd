@@ -33,10 +33,50 @@ install.packages(c("raster", "sf", "rasterVis", "tmap", "leaflet",
                    "osmdata", "mapview", "opencage"))
 ```
 
-Note: `tidycensus` and `opencage` require API keys. More info [here](https://walkerke.github.io/tidycensus/articles/basic-usage.html) and [here](https://github.com/ropensci/opencage). 
-<!-- http://happygitwithr.com/api-tokens.html -->
-
 - Datasets downloaded from [this webpage](https://github.com/Nowosad/gis_with_r_how_to_start/archive/master.zip).
+
+---
+### Prerequisites
+
+Note: `tidycensus` and `opencage` require API keys.
+
+#### To get a `tidycensus` API key
+
+Go to http://api.census.gov/data/key_signup.html and complete the form there.
+Replace text YOUR API KEY GOES HERE with your census API key. 
+Execute the code below:
+
+```{r, eval=FALSE}
+library(tidycensus)
+census_api_key("YOUR API KEY GOES HERE", install = TRUE)
+```
+
+#### To get a `opencage` API key
+
+Go to https://geocoder.opencagedata.com/pricing, select the Free Trial, and complete the form there.
+Replace text YOUR API KEY GOES HERE with your opencage API key. 
+Execute the code below:
+
+```{r, eval=FALSE}
+cat("OPENCAGE_KEY=YOUR API CODE HERE", file=file.path(normalizePath("~/"), ".Renviron"), append=TRUE)
+```
+
+---
+### Prerequisites
+
+#### Check if the keys are installed
+
+Restart R/RStudio (Session -> Restart R) and execute the code below:
+
+```{r, eval=FALSE}
+Sys.getenv("CENSUS_API_KEY")
+Sys.getenv("OPENCAGE_KEY")
+```
+
+You should see your keys print to screen.
+
+More info can be found [here](https://walkerke.github.io/tidycensus/articles/basic-usage.html) and [here](https://github.com/ropensci/opencage). 
+<!-- http://happygitwithr.com/api-tokens.html -->
 
 ---
 class: center, middle
@@ -162,7 +202,7 @@ install.packages("raster")
 ```
 
 - To use a package, load it with function `library()`
-- Unlike `install.packages()`, you need to load selected packages everytime you run R!
+- Unlike `install.packages()`, you need to load selected packages every time you run R!
 
 ```{r}
 library(raster)
@@ -182,7 +222,7 @@ knitr::kable(x = d, caption = "Differences in emphasis between the fields of Geo
 
 - **sf** and **sp** are the most important R packages to handle vector data; **sf** is a successor of **sp** but its still evolving. Moreover, many other R packages depend on the functions and classes for the **sp** package
 - **raster** is an extension of spatial data classes to work with rasters
-- There are many ways to vizualize spatial data in R, such as the **ggplot2**, **rasterVis**, **tmap**, **leaflet**, and **mapview** packages
+- There are many ways to visualize spatial data in R, such as the **ggplot2**, **rasterVis**, **tmap**, **leaflet**, and **mapview** packages
 - It is easy to connect R with a GIS software - GRASS GIS (**rgrass7**), SAGA (**RSAGA**), QGIS (**RQGIS** and **qgisremote**), and ArcGIS (**arcgisbinding**)
 
 ---
@@ -385,7 +425,7 @@ The **raster** package consists of method and classes for raster processing. It 
 - Visualize raster data
 - Many more...
 
-Basic **raster** operations are ilustrated at https://rpubs.com/etiennebr/visualraster.
+Basic **raster** operations are illustrated at https://rpubs.com/etiennebr/visualraster.
 
 This package has three object classes:
 
@@ -613,7 +653,7 @@ p + layer(sp.points(ham_cities_sp, pch = 19, col = "black"))
 library(tmap)
 tm_shape(wrld, projection="wintri") +
         tm_polygons("lifeExp", style="pretty", palette="RdYlGn",
-                    auto.palette.mapping=FALSE, title=c("Life expactancy")) +
+                    auto.palette.mapping=FALSE, title=c("Life expectancy")) +
         tm_style_grey()
 ```
 
@@ -661,7 +701,7 @@ world_globe = sf::st_transform(world,
 
 p1 = ggplot(world_globe) +
         geom_sf(data = world_globe, aes(fill = lifeExp))  +
-        scale_fill_viridis_c(name = "Life expactancy: ") +
+        scale_fill_viridis_c(name = "Life expectancy: ") +
         theme_void()
 p1
 ggsave(p1, file="figs/01_world_globe.png", 
@@ -743,7 +783,7 @@ knitr::include_graphics("figs/04_anim.gif")
 
 <!-- https://github.com/mtennekes/tmap/issues/142 -->
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 library(gapminder)
 library(tidyverse)
 library(sf)
@@ -768,21 +808,25 @@ animation_tmap(m1, filename = "figs/04_anim.gif", width = 650, height = 600)
 ```
 
 ```{r, eval=FALSE, echo=FALSE}
+library(gapminder)
+library(tidyverse)
+library(sf)
+library(tmap)
+library(spData)
 world_gdp = world %>% 
         left_join(gapminder, by = c("name_long" = "country"))
 
 m1 = tm_shape(world_gdp, bbox = raster::extent(-13, 43, 34, 72)) + 
-        tm_fill("grey") +
-     tm_shape(world_gdp) +
-        tm_fill("gdpPercap.y", title = "GDP per capita: ") +
-        tm_borders() + 
+        tm_polygons("grey") +
+     tm_shape(world_gdp) + 
+        tm_polygons("gdpPercap.y", title = "GDP per capita: ", breaks = seq(0, 25000, by = 5000)) +
         tm_facets(by = "year", nrow = 1, ncol = 1, drop.units = TRUE, showNA = FALSE) + 
         tm_legend(text.size = 1,
                   title.size = 1.2,
                   position = c("left", "TOP"),
                   height = 0.3)
 
-animation_tmap(m1, filename = "figs/anim.gif", width = 650, height = 600)
+animation_tmap(m1, filename = "figs/04_anim.gif", width = 650, height = 600)
 ```
 
 ---
