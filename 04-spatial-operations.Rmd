@@ -85,12 +85,32 @@ Interested readers can see this default value of `op` set in the first line of t
 The `?sf` help page documents this also.
 ```
 
-Before we progress to the next section, it is worth seeing how subsetting can be done using *topological operators* directly.
-The result illustrated in Figure \@ref(fig:nz-subset) can be reproduced using the operator `st_intersects()` as follows:
+Before we progress to the next section it is worth seeing another way of doing spatial subsetting.
+This relies on *topological operators*'s ability to return `logical` objects --- when the argument `sparse` is set to `FALSE`:
 
 ```{r}
 sel = st_intersects(x = nz_height, y = canterbury, sparse = FALSE)
+canterbury_height2 = nz_height[sel, ]
 ```
+
+The preceding code chunk created an intermediary object named `sel`, short for selection, containing only `TRUE` and `FALSE` values.
+`sel` is a matrix with a row per feature in the target object and a column per feature in the source object (`nz_height` with 101 features and `canterbury` with ` feature respectively in this case).
+If there is more than 1 feature in `y` the resulting selection `matrix` must be converted into a `vector` before it is used for subsetting:
+
+```{r}
+y = nz %>% filter(grepl("Cant|Otag", REGC2017_NAME))
+sel_matrix = st_intersects(nz_height, y, sparse = FALSE)
+sel_vector = rowSums(sel_matrix) > 0
+heights_y = nz_height[sel_vector, ]
+```
+
+The above code chunk results in an object, `heights_y`, that represent the high points that intersect with either Canterbury *or* Otago region.
+It did this in four stages:
+
+1. Subset the regions of `nz` containing "Cant" or "Ortago" in their names. This was done using the pattern matching function `grepl()` in combination with the `|` character, which means 'or', resulting in the subsetting object `y`.
+2. Create a selection matrix representing which features of `nz_height` intersect with the regions in `y`.
+3. Convert the selection matrix into a `logical` 'selection vector' by using `rowSums()` to find which features matched *any* features in `y`.
+4. Use the result to subset `nz_heights`, creating a new object `heights_y`. 
 
 The third way is essentially the same as the second, but uses the `filter()` function introduced in section \@ref(vector-attribute-subsetting), forming the foundations of a 'tidy' spatial data analysis workflow.
 If you already use **dplyr** for data manipulation, this way should seem familiar:
