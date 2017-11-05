@@ -78,13 +78,6 @@ For example, loss of spatial information could occur when the new CRS is only ad
 The precision could be also lost when transformation is between coordinate systems that have different datum - in those situations approximations are used.
 However, in most cases CRS vector transformation is lossless.
 
-The dataset `cycle_hire_osm` represents all cycle hire locations across London, taken from OpenStreetMap (OSM).
-It is automatically loaded by the **spData** package, meaning we do not have to load it, and its CRS can be queried as follows:
-
-```{r}
-st_crs(cycle_hire_osm)
-```
-
 <!-- example of using epsg (without "magic number") -->
 <!-- example of using proj4 (expain it and maybe modify) -->
 <!-- show the results (e.g. two/three panels) -->
@@ -99,7 +92,15 @@ st_crs(cycle_hire_osm)
 <!-- - st_bbox -->
 <!-- - st_wrap_dateline -->
 
-Let's create a new version of it in a projected CRS, using the 'magic number' (a value to be explained subsequently) of 27700 \@ref(crs-in-r):
+The dataset `cycle_hire_osm` represents all cycle hire locations across London, taken from OpenStreetMap (OSM).
+It is automatically loaded by the **spData** package, meaning we do not have to load it, and its CRS can be queried as follows:
+
+```{r}
+st_crs(cycle_hire_osm)
+```
+
+CRS in R can be described as an `epsg` code or a `proj4string` definition as described in section \@ref(crs-in-r).
+Let's create a new version of it in a projected CRS, using the `epsg` number of 27700:
 
 ```{r}
 cycle_hire_projected = st_transform(cycle_hire_osm, 27700)
@@ -107,7 +108,7 @@ st_crs(cycle_hire_projected)
 ```
 
 Note that the result shows that the `epsg` has been updated and that `proj4string` element of the CRS now contains, among other things `+proj=tmerc` (meaning it is a projected CRS using the [tranverse Mercator](https://en.wikipedia.org/wiki/Transverse_Mercator_projection) projection) and `+units=m` (meaning the units of the coordinates are meters).
-Another function, from the **rgdal** library, provides a note about the CRS (its name):
+Another function, from the **rgdal** library, provides a note containing the name of the CRS:
 
 ```{r}
 crs_codes = rgdal::make_EPSG()[1:2]
@@ -115,8 +116,7 @@ dplyr::filter(crs_codes, code == 27700)
 ```
 
 The result shows that the EPSG code 27700 represents the British National Grid, a result that could have been found by searching online for "[CRS 27700](https://www.google.com/search?q=CRS+27700)".
-This projection is clearly inappropriate for the data: the coordinates represent degrees of longitude and latitude, and this can also be seen by plotting it over a basemap, e.g. with the **mapview** package: `mapview::mapview(cycle_hire_projected)`.
-
+<!-- This projection is clearly inappropriate for the data: the coordinates represent degrees of longitude and latitude, and this can also be seen by plotting it over a basemap, e.g. with the **mapview** package: `mapview::mapview(cycle_hire)`. -->
 The formula that converts a geographic point into a point on the surface of the Earth is provided by the `proj4string` element of the `crs` (see [proj4.org](http://proj4.org/) for further details):
 
 ```{r}
