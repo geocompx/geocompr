@@ -71,7 +71,7 @@ Like attribute subsetting `x[y, ]` subsets features of *target* object `x` using
 With spatial subsetting however, instead of `y` being `logical` --- a vector of `TRUE` and `FALSE` values --- it is another spatial (`sf`) object.
 
 Various *topological relations* can be used for spatial subsetting.
-These determine the type of spatial relationship that features in the target object must have with the source object to be selected, including *touches*, *crosses* or *within* (see section \@ref(topological-relations)). 
+These determine the type of spatial relationship that features in the target object must have with the subsetting object to be selected, including *touches*, *crosses* or *within* (see section \@ref(topological-relations)). 
 *Intersects* is the default spatial subsetting operator, a sensible default that identifies all types of spatial relations.
 Alternative operators can be specified using the `op =` argument.
 This is illustrated in the command below which selects all features in `nz_height` that do *not* intersect with Canterbury (result not shown):
@@ -85,8 +85,7 @@ Interested readers can see this default value of `op` set in the first line of t
 The `?sf` help page documents this also.
 ```
 
-Before we progress to the next section it is worth seeing another way of doing spatial subsetting.
-This relies on *topological operators*'s ability to return `logical` objects --- when the argument `sparse` is set to `FALSE`:
+Another way of doing spatial subsetting relies on the ability of *topological operators* to return `logical` objects by setting the `sparse` argument to `FALSE`:
 
 ```{r}
 sel = st_intersects(x = nz_height, y = canterbury, sparse = FALSE)
@@ -94,8 +93,51 @@ canterbury_height2 = nz_height[sel, ]
 ```
 
 The preceding code chunk created an intermediary object named `sel`, short for selection, containing only `TRUE` and `FALSE` values.
-`sel` is a matrix with a row per feature in the target object and a column per feature in the source object (`nz_height` with 101 features and `canterbury` with ` feature respectively in this case).
-If there is more than 1 feature in `y` the resulting selection `matrix` must be converted into a `vector` before it is used for subsetting:
+This 'selection object' also works with `filter()`, introduced in section \@ref(vector-attribute-subsetting):
+
+```{r}
+canterbury_height3 = nz_height %>% filter(sel)
+```
+
+For many applications this is all you'll need to know about spatial subsetting and if this is the case, you can safely skip to the next section (\@ref(topological-relations)).
+If you're interested in the details --- specifically the differences between `canterbury_height3` and the other `canterbury_height` objects, and the nature of `sel` --- read-on.
+
+At this point there are three versions of `canterbury_height`, one created with spatial subsetting directly and the other two via the intermediary object `sel`.
+We can test whether they are identical as follows:
+
+```{r}
+identical(x = canterbury_height, y = canterbury_height2)
+identical(x = canterbury_height, y = canterbury_height3)
+```
+
+What is different about `canterbury_height3`?
+The only difference is that `filter()` changed the row names:
+
+```{r}
+row.names(canterbury_height)[1:3]
+row.names(canterbury_height3)[1:3]
+```
+
+If the row names are re-set, the objects become identical:
+
+```{r}
+attr(canterbury_height3, "row.names") = attr(x = canterbury_height, "row.names")
+identical(canterbury_height, canterbury_height3)
+```
+
+```{block type='rmdnote'}
+This discarding of row names is not something that is specific to spatial
+data, as illustrated in the code chunk below.
+**dplyr** discards row names by design.
+For further discussion of this decision, and some controversy, see the (closed) issue [#366](https://github.com/tidyverse/dplyr/issues/366) in the package's issue tracker.
+```
+
+But what is `sel`?
+It is not, as one might imagine, a `logical` vector.
+It is a `logical` two-dimensional object, a *matrix*.
+`sel` has one row per feature in the target object (`nz_height`) and a column per feature in the subsetting object (`canterbury`).
+Cell `sel[i, j]` is `TRUE` if the i^th^ feature in the target object intersects with the j^th^ feature in the subsetting object.
+If there is more than 1 feature in `y` the resulting selection `matrix` must be converted into a `vector` before it is used for subsetting, as illustrated below:
 
 ```{r}
 y = nz %>% filter(grepl("Cant|Otag", REGC2017_NAME))
@@ -112,46 +154,14 @@ It did this in four stages:
 3. Convert the selection matrix into a `logical` 'selection vector' by using `rowSums()` to find which features matched *any* features in `y`.
 4. Use the result to subset `nz_heights`, creating a new object `heights_y`. 
 
-The third way is essentially the same as the second, but uses the `filter()` function introduced in section \@ref(vector-attribute-subsetting), forming the foundations of a 'tidy' spatial data analysis workflow.
-If you already use **dplyr** for data manipulation, this way should seem familiar:
+The nature of `sel_matrix` is verified below:
 
 ```{r}
-# africa_buf3 = filter(africa, sel_buff)
+class(sel_matrix)
+typeof(sel_matrix)
+dim(sel_matrix)
 ```
 
-How can we be sure that the results are the same for the three subsetting operations?
-We can test them as follows:
-
-```{r}
-# identical(x = africa_buf, y = africa_buf2)
-# identical(x = africa_buf, y = africa_buf3)
-```
-
-The reason that the third spatially subset object (`africa_buf3`) is not identical is that **dplyr** changes the row names:
-
-```{r}
-# head(row.names(africa_buf))
-# head(row.names(africa_buf3))
-```
-
-If the row names are re-set, the objects become identical:
-
-```{r}
-# attr(africa_buf3, "row.names") = attr(x = africa_buf, "row.names")
-# identical(africa_buf, africa_buf3)
-```
-
-```{block type='rmdnote'}
-This discarding of row names is not something that is specific to spatial
-data, as illustrated in the code chunk below.
-**dplyr** discards row names by design.
-For further discussion of this decision, and some controversy, see the (closed) issue [#366](https://github.com/tidyverse/dplyr/issues/366) in the package's issue tracker.
-```
-
-```{r}
-# row.names(africa[africa$subregion == "Northern Africa", ])
-# row.names(filter(africa, subregion == "Northern Africa"))
-```
 
 ### Topological relations
 
