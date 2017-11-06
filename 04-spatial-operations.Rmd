@@ -40,13 +40,16 @@ It is important to note that spatial operations that use two spatial objects rel
 
 ## Spatial operations on vector data
 
-This section provides an overview of spatial operations in the **sf** package.
+This section provides an overview of spatial operations on vector geographic data represented as simple features in the **sf** package before section \@ref(spatial-operations-on-raster-data), which presents spatial methods using the **raster** package.
 
 ### Spatial subsetting
 
 Spatial subsetting is the process of selecting features of a spatial object based on whether or not they in some way *relate* in space to another object.
-An example of spatial subsetting is provided by the `nz` and `nz_height` datasets in **spData**, which provide projected data on the 16 main regions and 101 highest points in New Zealand (Figure \@ref(fig:nz-subset)).
-The following code subsets all the high points in the Canterbury region:
+It is analogous to *attribute subsetting* (covered in section \@ref(vector-attribute-subsetting)) and can be done with the base R square bracket (`[`) operator or with the `filter()` function from the **tidyverse**.
+
+An example of spatial subsetting is provided by the `nz` and `nz_height` datasets in **spData**.
+These contain projected data on the 16 main regions and 101 highest points in New Zealand respectively (Figure \@ref(fig:nz-subset)).
+The following code chunk first creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region:
 
 ```{r}
 canterbury = nz %>% filter(REGC2017_NAME == "Canterbury Region")
@@ -64,13 +67,14 @@ plot(canterbury_height, add = TRUE, pch = 2, col = "red")
 par(par_old)
 ```
 
-The preceding code chunk shows that, like attribute data, spatial data can be subset using the `[` operator: `x[y, ]` subsets features of target object `x` by `y`.
-Instead of `y` being of class `logical` (a vector of `TRUE` and `FALSE` values), it is another spatial (`sf`) object.
+Like attribute subsetting `x[y, ]` subsets features of *target* object `x` using the contents of a *source* object `y`.
+With spatial subsetting however, instead of `y` being `logical` --- a vector of `TRUE` and `FALSE` values --- it is another spatial (`sf`) object.
 
-Various *topological relations*, which determine the type of spatial relationship used for subsetting, can be used for spatial subsetting.
-As we'll see in section \@ref(topological-relations), these include features that *touch*, *cross* or are *within* the source object (`y`).
-*Intersects* is the default for subsetting (and other spatial operations) because it is a useful 'catch all' that identifies all types of spatial relations.
-Alternative operators can be specified using the `op =` argument, as illustrated in the code below, which selects all `nz_height` points that do *not* intersect with Canterbury (result not shown):
+Various *topological relations* can be used for spatial subsetting.
+These determine the type of spatial relationship that features in the target object must have with the subsetting object to be selected, including *touches*, *crosses* or *within* (see section \@ref(topological-relations)). 
+*Intersects* is the default spatial subsetting operator, a sensible default that identifies all types of spatial relations.
+Alternative operators can be specified using the `op =` argument.
+This is illustrated in the command below which selects all features in `nz_height` that do *not* intersect with Canterbury (result not shown):
 
 ```{r, eval=FALSE}
 nz_height[canterbury, , op = st_disjoint]
@@ -81,112 +85,44 @@ Interested readers can see this default value of `op` set in the first line of t
 The `?sf` help page documents this also.
 ```
 
-In general terms, spatial subsetting is simply the spatial equivalent of *attribute subsetting*.
-As with attribute subsetting, spatial subsetting is a *binary operation*: an object is either selected or not.
-Following the structure of section \@ref(vector-attribute-subsetting), we start with base methods before describing how to do it in the **tidyverse**.
-<!-- todo: link to non-binary links, e.g. area-weighted spatial interpolation -->
-
-<!-- #### Spatial subsetting in base R -->
-
-<!-- Another spatial subsetting example will use an object representing the countries of Africa, created using attribute subsetting as follows:^[Recall -->
-<!-- attribute subsetting can also be done in base R with `africa_wgs = world[world$continent == "Africa", ]`.] -->
-
-<!-- ```{r} -->
-<!-- africa_wgs = world %>% filter(continent == "Africa") -->
-<!-- ``` -->
-
-<!-- To further prepare the input data, we will reproject the data to the coordinate reference system (CRS) 32630, its EPSG code (explained in Chapter 6): -->
-
-<!-- ```{r} -->
-<!-- africa = st_transform(africa_wgs, crs = 32630) -->
-<!-- ``` -->
-
-<!-- We can also use the `[` operator for *Spatial* subsetting. -->
-<!-- The difference is that we use *another spatial object* inside the square brackets instead of an `integer` or `logical` vector. -->
-<!-- This is a concise and consistent syntax, as shown in the next code chunk. -->
-<!-- Let's test it with a hypothetical scenario: we want to subset all countries within 2000 km of the point where the equator (where latitude = 0 degrees) intersects the prime meridian (longitude = 0 degrees), as illustrated in Figure \@ref(fig:globe). -->
-<!-- The subsetting object is created below. -->
-<!-- Note that this must have the same CRS as the target object (set with the `crs` argument): -->
-
-<!-- ```{r, warning=FALSE} -->
-<!-- center_wgs = st_sf(geometry = st_sfc(st_point(c(0, 0)), crs = 4326)) -->
-<!-- center = st_transform(center_wgs, 32630) -->
-<!-- buff = st_buffer(center, dist = 2e6) -->
-<!-- ``` -->
-
-<!-- ```{r globe, echo=FALSE, fig.cap="Subsetting scenario: which countries intersect with a circle of 2000 km in radius located at zero degrees longitude and zero degrees latitude? Figure created with the **[globe](https://cran.r-project.org/package=globe)** package."} -->
-<!-- knitr::include_graphics("figures/globe.png") -->
-<!-- ``` -->
-
-<!-- The data to be subset, or 'target layer', is the `africa` object created above, which has a projected CRS (`32630`). -->
-<!-- Subsequently, spatial subsetting can be done with a single, concise command: -->
-
-<!-- ```{r} -->
-<!-- africa_buf = africa[buff, ] -->
-<!-- ``` -->
-
-<!-- ```{block2 type='rmdnote'} -->
-<!-- If we were using geographic ('lon/lat') data the previous command would have emitted a message warning about assuming `planar coordinates`. -->
-<!-- This is because spatial operations (especially distance and area calculations) cannot be assumed to be accurate in a geographic (longitude/latitude) CRS. -->
-<!-- In this case one could justify the use of a lon/lat CRS: the data is close to the equator where there is least distortion caused by the curvature of the earth. -->
-<!-- It is good practice to reproject spatial datasets before performing spatial operations on them. -->
-<!-- ``` -->
-
-<!-- The spatial subsetting clearly worked: only countries intersecting with the giant circle are returned (Figure \@ref(fig:africa-buff)): -->
-
-<!-- ```{r, eval=FALSE} -->
-<!-- plot(africa_buf["pop"]) -->
-<!-- plot(buff, add = TRUE) -->
-<!-- ``` -->
-
-
-<!-- Todo: improve this figure, e.g. by creating a new hidden chunk - still show this one -->
-<!-- ```{r africa-buff, fig.cap="Subset of the `africa` data selected based on their intersection with a circle 2000 km in radius with a center point at 0 degrees longitude and 0 degrees latitude.", echo=FALSE} -->
-<!-- library(leaflet) -->
-<!-- leaflet() %>%  -->
-<!--   addProviderTiles("OpenMapSurfer.Grayscale") %>%  -->
-<!--   addPolygons(data = st_transform(africa_buf, 4326)) %>%  -->
-<!--   addPolygons(data = st_transform(buff, 4326), color = "red") -->
-<!-- ``` -->
-
-<!-- Note that countries that just touch the giant circle are selected such as Chad (northeast of the circle). -->
-<!-- This is because the default subsetting operator is `st_intersects()`, which returns any type of spatial relation. -->
-<!-- Other spatial subsetting operations such as `st_within()` are more conservative, as shown in section \@ref(topological-relations). -->
-
-Before we progress to the next section, it is worth seeing how subsetting can be done using *topological operators* directly.
-The result illustrated in Figure \@ref(fig:nz-subset) can be reproduced using the operator `st_intersects()` as follows:
+Another way of doing spatial subsetting relies on the ability of *topological operators* to return `logical` objects by setting the `sparse` argument to `FALSE`:
 
 ```{r}
 sel = st_intersects(x = nz_height, y = canterbury, sparse = FALSE)
+canterbury_height2 = nz_height[sel, ]
 ```
 
-The third way is essentially the same as the second, but uses the `filter()` function introduced in section \@ref(vector-attribute-subsetting), forming the foundations of a 'tidy' spatial data analysis workflow.
-If you already use **dplyr** for data manipulation, this way should seem familiar:
+The preceding code chunk created an intermediary object named `sel`, short for selection, containing only `TRUE` and `FALSE` values.
+This 'selection object' also works with `filter()`, introduced in section \@ref(vector-attribute-subsetting):
 
 ```{r}
-# africa_buf3 = filter(africa, sel_buff)
+canterbury_height3 = nz_height %>% filter(sel)
 ```
 
-How can we be sure that the results are the same for the three subsetting operations?
-We can test them as follows:
+For many applications this is all you'll need to know about spatial subsetting and if this is the case, you can safely skip to the next section (\@ref(topological-relations)).
+If you're interested in the details --- specifically the differences between `canterbury_height3` and the other `canterbury_height` objects, and the nature of `sel` --- read-on.
+
+At this point there are three versions of `canterbury_height`, one created with spatial subsetting directly and the other two via the intermediary object `sel`.
+We can test whether they are identical as follows:
 
 ```{r}
-# identical(x = africa_buf, y = africa_buf2)
-# identical(x = africa_buf, y = africa_buf3)
+identical(x = canterbury_height, y = canterbury_height2)
+identical(x = canterbury_height, y = canterbury_height3)
 ```
 
-The reason that the third spatially subset object (`africa_buf3`) is not identical is that **dplyr** changes the row names:
+What is different about `canterbury_height3`?
+The only difference is that `filter()` changed the row names:
 
 ```{r}
-# head(row.names(africa_buf))
-# head(row.names(africa_buf3))
+row.names(canterbury_height)[1:3]
+row.names(canterbury_height3)[1:3]
 ```
 
 If the row names are re-set, the objects become identical:
 
 ```{r}
-# attr(africa_buf3, "row.names") = attr(x = africa_buf, "row.names")
-# identical(africa_buf, africa_buf3)
+attr(canterbury_height3, "row.names") = attr(x = canterbury_height, "row.names")
+identical(canterbury_height, canterbury_height3)
 ```
 
 ```{block type='rmdnote'}
@@ -196,10 +132,36 @@ data, as illustrated in the code chunk below.
 For further discussion of this decision, and some controversy, see the (closed) issue [#366](https://github.com/tidyverse/dplyr/issues/366) in the package's issue tracker.
 ```
 
+But what is `sel`?
+It is not, as one might imagine, a `logical` vector.
+It is a `logical` two-dimensional object, a *matrix*.
+`sel` has one row per feature in the target object (`nz_height`) and a column per feature in the subsetting object (`canterbury`).
+Cell `sel[i, j]` is `TRUE` if the i^th^ feature in the target object intersects with the j^th^ feature in the subsetting object.
+If there is more than 1 feature in `y` the resulting selection `matrix` must be converted into a `vector` before it is used for subsetting, as illustrated below:
+
 ```{r}
-# row.names(africa[africa$subregion == "Northern Africa", ])
-# row.names(filter(africa, subregion == "Northern Africa"))
+y = nz %>% filter(grepl("Cant|Otag", REGC2017_NAME))
+sel_matrix = st_intersects(nz_height, y, sparse = FALSE)
+sel_vector = rowSums(sel_matrix) > 0
+heights_y = nz_height[sel_vector, ]
 ```
+
+The above code chunk results in an object, `heights_y`, that represent the high points that intersect with either Canterbury *or* Otago region.
+It did this in four stages:
+
+1. Subset the regions of `nz` containing "Cant" or "Ortago" in their names. This was done using the pattern matching function `grepl()` in combination with the `|` character, which means 'or', resulting in the subsetting object `y`.
+2. Create a selection matrix representing which features of `nz_height` intersect with the regions in `y`.
+3. Convert the selection matrix into a `logical` 'selection vector' by using `rowSums()` to find which features matched *any* features in `y`.
+4. Use the result to subset `nz_heights`, creating a new object `heights_y`. 
+
+The nature of `sel_matrix` is verified below:
+
+```{r}
+class(sel_matrix)
+typeof(sel_matrix)
+dim(sel_matrix)
+```
+
 
 ### Topological relations
 
