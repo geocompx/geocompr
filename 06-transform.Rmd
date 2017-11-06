@@ -2,12 +2,14 @@
 
 ## Prerequisites {-}
 
-- This chapter requires the packages **tidyverse**, **sf**, and **spData**:
+- This chapter requires the packages **tidyverse**, **sf**, **raster**, **spData**, and **spDataLarge**:
 
 ```{r, message=FALSE}
 library(tidyverse)
 library(sf)
+library(raster)
 library(spData)
+library(spDataLarge)
 ```
 
 ## Introduction
@@ -31,8 +33,7 @@ This can be seen by creating a huge buffer of 10 degrees around the `greenwich` 
 greenwich_buff = st_buffer(greenwich, dist = 10)
 ```
 
-Brief consideration of what has happened should set alarm bells ringing:
-the buffer will be highly distorted when projected onto the surface of the Earth.
+Brief consideration of what has happened should set alarm bells ringing: the buffer will be highly distorted when projected onto the surface of the Earth.
 For this reason, when **sf** (and other spatial packages) know that geometries are in lat/long coordinates they emit a warning.
 This is illustrated in the code below which sets the CRS of `greenwich` to a lat/lon CRS (the commonly used EPSG 4326 in this case), checks to ensure that R thinks it's a geographic CRS, and then re-applies the buffer:
 
@@ -74,14 +75,7 @@ Spatial reprojection of vectors is a mathematical transformation of coordinates 
 Depending on projections used, reprojection could be either lossy or lossless.
 For example, loss of spatial information could occur when the new CRS is only adequate for smaller area than input vector.
 The precision could be also lost when transformation is between coordinate systems that have different datum - in those situations approximations are used.
-However, in most cases CRS transformation is lossless.
-
-The dataset `cycle_hire_osm` represents all cycle hire locations across London, taken from OpenStreetMap (OSM).
-It is automatically loaded by the **spData** package, meaning we do not have to load it, and its CRS can be queried as follows:
-
-```{r}
-st_crs(cycle_hire_osm)
-```
+However, in most cases CRS vector transformation is lossless.
 
 <!-- example of using epsg (without "magic number") -->
 <!-- example of using proj4 (expain it and maybe modify) -->
@@ -97,7 +91,15 @@ st_crs(cycle_hire_osm)
 <!-- - st_bbox -->
 <!-- - st_wrap_dateline -->
 
-Let's create a new version of it in a projected CRS, using the 'magic number' (a value to be explained subsequently) of 27700:
+The dataset `cycle_hire_osm` represents all cycle hire locations across London, taken from OpenStreetMap (OSM).
+It is automatically loaded by the **spData** package, meaning we do not have to load it, and its CRS can be queried as follows:
+
+```{r}
+st_crs(cycle_hire_osm)
+```
+
+CRS in R can be described as an `epsg` code or a `proj4string` definition, as described in section \@ref(crs-in-r).
+Let's create a new version of `cycle_hire_osm` in a projected CRS, using the `epsg` number of 27700:
 
 ```{r}
 cycle_hire_projected = st_transform(cycle_hire_osm, 27700)
@@ -105,7 +107,7 @@ st_crs(cycle_hire_projected)
 ```
 
 Note that the result shows that the `epsg` has been updated and that `proj4string` element of the CRS now contains, among other things `+proj=tmerc` (meaning it is a projected CRS using the [tranverse Mercator](https://en.wikipedia.org/wiki/Transverse_Mercator_projection) projection) and `+units=m` (meaning the units of the coordinates are meters).
-Another function, from the **rgdal** library, provides a note about the CRS (its name):
+Another function, from the **rgdal** library, provides a note containing the name of the CRS:
 
 ```{r}
 crs_codes = rgdal::make_EPSG()[1:2]
@@ -113,8 +115,7 @@ dplyr::filter(crs_codes, code == 27700)
 ```
 
 The result shows that the EPSG code 27700 represents the British National Grid, a result that could have been found by searching online for "[CRS 27700](https://www.google.com/search?q=CRS+27700)".
-This projection is clearly inappropriate for the data: the coordinates represent degrees of longitude and latitude, and this can also be seen by plotting it over a basemap, e.g. with the **mapview** package: `mapview::mapview(cycle_hire_projected)`.
-
+<!-- This projection is clearly inappropriate for the data: the coordinates represent degrees of longitude and latitude, and this can also be seen by plotting it over a basemap, e.g. with the **mapview** package: `mapview::mapview(cycle_hire)`. -->
 The formula that converts a geographic point into a point on the surface of the Earth is provided by the `proj4string` element of the `crs` (see [proj4.org](http://proj4.org/) for further details):
 
 ```{r}
@@ -128,23 +129,54 @@ It is hidden from view for most of the time except when the object is printed bu
 
 ### Raster data
 
-<!-- The basic concepts of CRS apply to both, vector and raster, data model, however projection transformation differ between them. -->
-<!-- However, representation of due to  -->
-<!-- While the concept of CRS applies to both data types, conversion between coordinate reference systems differs between vector and raster. -->
-<!-- Transformation from one CRS to another in vector data changes only coordinates of vertices, keeping the values intact. -->
-<!-- (for most of the case is better to reproject vector than raster) -->
+The basic concepts of CRS apply to both vector and raster data model.
+However, there are important differences in reprojection of vectors and rasters.
+Transformation of CRS in vector data changes coordinates of each vertex. This do not apply to raster data.
+Rasters are are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters).
+To preserve this property, it is impossible to transform coordinates of cells separately.
+This entails that a new raster could have a different number of columns and rows, and therefore different number of cells that the original one.
 <!-- rasters: transformation means change of the coordinates of (special case of resampling) -->
 <!-- changes in dimensions, resolution, extent -->
 <!-- change shape and attributes) -->
-<!-- different methods of computing values after transformation, such as ngb or bilinear  -->
-<!--in most of the cases reproject vector, not raster-->
-<!-- merge two rasters with different projections, ref. to 4.3.7 Merging rasters -->
+As a result, values of these new cells need to be estimated.
+The `projectRaster()` function's role is to reproject `Raster*` objects into a new object with another coordinate reference system. 
+Compared to `st_tranform()`, `projectRaster()` only accepts `proj4string` definitions.
+Let's take a look at two examples of raster transformation - using categorical and continuous data.
 
-<!--
-- data? one numerical and one categorical
-- projectRaster
-- an issue of resampling (comparision of old and new values)
--->
+When reprojecting categorical raster, we need to ensure that our new estimated values would still have values of our original classes.
+This could be done using the nearest neighbor method.
+<!-- more info about ngb -->
+<!-- intro to this object -->
+```{r}
+cat_raster = raster(system.file("raster/nlcd2011.tif", package = "spDataLarge"))
+cat_raster
+```
+
+```{r}
+wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "ngb")
+cat_raster_wgs84
+```
+
+On the other hand, the nearest neighbor method should not be used for continuous raster data, as we want to preserve gradual changes in values.
+Continuous data could be reprojected using the bilinear method. 
+<!-- more info about bilinear -->
+<!-- intro to this object -->
+```{r}
+con_raster = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
+con_raster
+```
+
+```{r}
+con_raster_wgs84 = projectRaster(con_raster, crs = wgs84, method = "bilinear")
+con_raster_wgs84
+```
+
+<!-- - an issue of resampling (comparision of old and new values) -->
+<!-- res option in projectRaster? -->
+<!-- note1: in most of the cases reproject vector, not raster-->
+<!-- note2: equal area projections are the best for raster calculations -->
+<!-- q: should we mentioned gdal_transform? -->
 
 <!-- ## Affine transformations -->
 
@@ -168,6 +200,7 @@ It is hidden from view for most of the time except when the object is printed bu
 <!-- 3. what's important for both? -->
 <!-- - raster to vector -->
 <!-- - vector to raster -->
+<!-- 4. should the intro example have buffer in latlon? -->
 
 ### Exercises
 
@@ -181,4 +214,16 @@ It is hidden from view for most of the time except when the object is printed bu
 <!-- plot(world_tmerc$geom) -->
 <!--  world_4326 = st_transform(world_tmerc, 4326) -->
 <!-- plot(world_4326$geom) -->
+<!-- ``` -->
+<!-- 2. Try to reproject categorical data using a bilinear interpolation method. What's wrong? -->
+<!-- ```{r} -->
+<!-- wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" -->
+<!-- cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "bilinear") -->
+<!-- cat_raster_wgs84 -->
+<!-- ``` -->
+<!-- Try to reproject continuous data using a ngb interpolation method. What's wrong? -->
+<!-- ```{r} -->
+<!-- con_raster = raster(system.file("raster/srtm.tif", package="spDataLarge")) -->
+<!-- con_raster_wgs84 = projectRaster(con_raster, crs = wgs84, method = "ngb") -->
+<!-- con_raster_wgs84 -->
 <!-- ``` -->
