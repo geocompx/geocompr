@@ -140,19 +140,19 @@ Cell `sel[i, j]` is `TRUE` if the i^th^ feature in the target object intersects 
 If there is more than 1 feature in `y` the resulting selection `matrix` must be converted into a `vector` before it is used for subsetting, as illustrated below:
 
 ```{r}
-y = nz %>% filter(grepl("Cant|Otag", REGC2017_NAME))
-sel_matrix = st_intersects(nz_height, y, sparse = FALSE)
+co = nz %>% filter(grepl("Cant|Otag", REGC2017_NAME))
+sel_matrix = st_intersects(nz_height, co, sparse = FALSE)
 sel_vector = rowSums(sel_matrix) > 0
-heights_y = nz_height[sel_vector, ]
+heights_co = nz_height[sel_vector, ]
 ```
 
-The above code chunk results in an object, `heights_y`, that represent the high points that intersect with either Canterbury *or* Otago region.
+The above code chunk results in an object, `heights_co`, that represent the high points that intersect with either Canterbury *or* Otago region (hence the object name `co`).
 It did this in four stages:
 
-1. Subset the regions of `nz` containing "Cant" or "Ortago" in their names. This was done using the pattern matching function `grepl()` in combination with the `|` character, which means 'or', resulting in the subsetting object `y`.
-2. Create a selection matrix representing which features of `nz_height` intersect with the regions in `y`.
-3. Convert the selection matrix into a `logical` 'selection vector' by using `rowSums()` to find which features matched *any* features in `y`.
-4. Use the result to subset `nz_heights`, creating a new object `heights_y`. 
+1. Subset the regions of `nz` containing "Cant" or "Otago" in their names. This was done using the pattern matching function `grepl()` in combination with the `|` character, which means 'or', resulting in the subsetting object `co`.
+2. Create a selection matrix representing which features of `nz_height` intersect with the regions in `co`.
+3. Convert the selection matrix into a `logical` 'selection vector' by using `rowSums()` to find which features matched *any* features in `co`.
+4. Use the result to subset `nz_heights`, creating a new object `heights_co`. 
 
 The nature of `sel_matrix` is verified below:
 
@@ -174,10 +174,9 @@ dim(sel_matrix)
 <!-- ?geos_binary_pred -->
 <!-- Distance relations -->
 <!-- Subset (1) points in polygons <-> (2) -->
-
-To understand topological relations, it helps to have some simple test data to work with.
-Figure \@ref(fig:relation-objects) illustrates a polygon (`a`), a line (`l`) and some points (`p`).
-These objects are created in the code below.
+Topological relations define the spatial relationships between objects.
+To understand them, it helps to have some simple test data to work with.
+Figure \@ref(fig:relation-objects) contains a polygon (`a`), a line (`l`) and some points (`p`), which are created in the code below.
 
 ```{r}
 a_poly = st_polygon(list(rbind(c(-1, -1), c(1, -1), c(1, 1), c(-1, -1))))
@@ -207,39 +206,30 @@ st_intersects(p, a)
 ```
 
 The contents of the result should be as you expected:
-the function returns a positive (`1`) result for the first two points, and a negative result (represented by an empty vector, `integer(0)`) for the last two.
-What may be unexpected is that the result comes in the form of a list.
-This is because topological operations in the **sf** return a sparse matrix by default, which is useful in that it reduces the memory requirements of the output from operations on multi-feature objects.
-To return the result as a logical vector, of the type that can be used for subsetting and other operations, the result must be returned as a *dense matrix*.
-This can be done by setting the `sparse` argument to `FALSE` as follows:
+the function returns a positive (`1`) result for the first two points, and a negative result (represented by an empty vector) for the last two.
+What may be unexpected is that the result comes in the form of a list of vectors.
+This *sparse matrix* output only registers a relation if one exists, reducing the memory requirements of topological operations on multi-feature objects.
+As we saw in the previous section a *dense matrix* consisting of `TRUE` or `FALSE` values for each combination of features can also be returned when `sparse = FALSE`:
 
 ```{r}
 st_intersects(p, a, sparse = FALSE)
 ```
 
-The output is an matrix with the four rows representing the four features in the target object `p`.
-The rows represent features in the selecting object: the first two features in `p` intersect with `a` (There is only one feature in `a` so the result has only one column).
-The result can be used to subset the features of `p` in a two-stage operation that is equivalent of `p[a, ]`:
+The output is a matrix in which each row represents a feature in the target object and each column represents a feature in in the selecting object.
+In this case only the first two features in `p` intersect with `a` and there is only one feature in `a` so the result has only one column.
+The result can be used for subsetting as we saw in section \@ref(spatial-subsetting).
 
-```{r, eval=FALSE}
-sel = st_intersects(p, a, sparse = FALSE)[, 1]
-p[sel, ]
-```
-
-Note the use of `[, 1]` to select only the first column --- we'll use this to return only a vector instead of matrix in subsequent code chunks.
-This operator ensures that the intermediary object `sel` is a `logical` vector (rather than a matrix).
-
-`st_intersects()` returns `TRUE` for the second feature in the object `p` even though it just touches the polygon `a`.
+Note that `st_intersects()` returns `TRUE` for the second feature in the object `p` even though it just touches the polygon `a`.
 This is because *intersects* is a catch-all topological operation that covers any type of spatial relation.
-There are many other topological operations that you can use, some of which we'll demonstrate below.
-The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object:
+Other topological operations are demonstrated below.
+
+The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (`[, 1]` ensures the output is a vector consumin 1 rather than 4 lines when printed):
 
 ```{r}
 st_disjoint(p, a, sparse = FALSE)[, 1]
 ```
 
-Other topological operators are more specific.
-`st_within()`, for example, returns `TRUE` only for objects that are completely within the selecting object.
+`st_within()` returns `TRUE` only for objects that are completely within the selecting object.
 This applies only to the second object, which is inside the triangular polygon, as illustrated below:
 
 ```{r}
@@ -455,22 +445,19 @@ sum(st_coordinates(cycle_hire)[, 1] %in% st_coordinates(cycle_hire_osm)[, 1])
 ```
 
 ```{r cycle-hire, fig.cap="The spatial distribution of cycle hire points in London based on official data (blue) and OpenStreetMap data (red).", echo=FALSE, warning=FALSE}
-library(tmap)
+# library(tmap)
 # osm_tiles = tmaptools::read_osm(tmaptools::bb(cycle_hire, ext = 1.3), type = "https://korona.geog.uni-heidelberg.de/tiles/roadsg/x={x}&y={y}&z={z}")
 # qtm(osm_tiles) +
-  tm_shape(cycle_hire) +
-  tm_bubbles(col = "blue", alpha = 0.5, size = 0.2) +
-  tm_shape(cycle_hire_osm) +
-  tm_bubbles(col = "red", alpha = 0.5, size = 0.2) +
-  tm_scale_bar()
-# library(leaflet)
-# leaflet() %>%
-#   addProviderTiles(providers$Esri.WorldGrayCanvas) %>% 
-#   addCircles(data = cycle_hire) %>% 
-#   addCircles(data = cycle_hire_osm, col = "red") %>% 
-#   mapview::mapshot(file = "cycle-hire.png")
-# file.rename("cycle-hire.png", "figures/cycle-hire.png")
-# knitr::include_graphics("figures/cycle-hire.png")
+  # tm_shape(cycle_hire) +
+  # tm_bubbles(col = "blue", alpha = 0.5, size = 0.2) +
+  # tm_shape(cycle_hire_osm) +
+  # tm_bubbles(col = "red", alpha = 0.5, size = 0.2) +
+  # tm_scale_bar()
+library(leaflet)
+leaflet() %>%
+  addProviderTiles(providers$Esri.WorldGrayCanvas) %>%
+  addCircles(data = cycle_hire) %>%
+  addCircles(data = cycle_hire_osm, col = "red")
 ```
 
 Imagine that we need to join the `capacity` variable in `cycle_hire_osm` onto the official 'target' data contained in `cycle_hire`.
@@ -658,8 +645,6 @@ For instance, if the intersection of our buffer and a country is 100 000 km^^2^^
 <!-- - ? generalization **rmapsharper** - https://github.com/ateucher/rmapshaper -->
 <!-- `st_union` -->
 
-### Modifying geometry data
-
 ### Clipping
 
 Spatial clipping is a form of spatial subsetting that involves changes to the `geometry` columns of at least some of the affected features.
@@ -691,7 +676,7 @@ plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
 The subsequent code chunk demonstrate how this works for all combinations of the 'Venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book R for Data Science [@grolemund_r_2016].
 <!-- Todo: reference r4ds -->
 
-```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators."}
+```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators.", warning=FALSE}
 par(mfrow = c(3, 3), mai = c(0.1, 0.1, 0.1, 0.1))
 plot(b)
 y_not_x = st_difference(y, x)
@@ -721,7 +706,7 @@ plot(b)
 plot(y, col = "grey", add = TRUE)
 plot(b, add = TRUE)
 text(x = 0.5, y = 1, "y")
-par(mfrow = c(1, 1))
+par(old_par)
 ```
 
 To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
@@ -754,9 +739,33 @@ box = st_convex_hull(pmulti)
 
 ### Distance relations
 
-```{r, eval=FALSE}
-st_distance(a, b)
+While topological relations are binary --- a feature either intersects with another or does not --- distance relations are continuous.
+The distance between two objects is calculated with the **sf** function `st_distance()` function.
+This is illustrated in the code chunk below, which finds the distance between the highest point in New Zealand and the geographic centroid of the Canterbury region, created in section \@ref(spatial-subsetting):
+
+```{r}
+nz_heighest = nz_height %>% top_n(n = 1, wt = elevation)
+canterbury_centroid = st_centroid(canterbury)
+st_distance(nz_heighest, canterbury_centroid)
 ```
+
+There are two potentially surprising things about the result: 1) it comes with a `units` attribute, so you know that it's just over 100 km (not 100,000 inches, or any other measure of distance!); and 2) it is returned as a matrix, even though the result only contains a single value.
+This second feature hints at another useful feature of `st_distance()`, its ability to return *distance matrices* between all combinations of features in objects `x` and `y`.
+This is illustrated in the command below, which finds the distances between the first three features in `nz_height` and the Otago and Canterbury regions of New Zealand represented by the object `co`.
+
+```{r}
+st_distance(nz_height[1:3, ], co)
+```
+
+Note that the distance between the second and third feature in `nz_height` and the second feature in `co` is zero.
+This demonstrates the fact that distances between points and polygons refer to the distance to *any part of the polygon*:
+The second and third points in `nz_height` are *in* Otago, which can be verified by plotting them (result not shown):
+
+```{r, eval=FALSE}
+plot(co$geometry[2])
+plot(nz_height$geometry[2:3], add = TRUE)
+```
+
 
 ## Spatial operations on raster data
 
@@ -1095,7 +1104,7 @@ Nevertheless, you may also use **raster** with very large datasets.
 This is because **raster**:
 
 1. lets you work with raster datasets that are too large to fit into the main memory (RAM) by only processing chunks of it.
-2. tries to fascilitate parallel processing.
+2. tries to facilitate parallel processing.
 For more information have a look at the help pages of `beginCluster()` and `clusteR()`.
 Additionally, check out the *Multi-core functions* section in `vignette("functions", package = "raster")`.
 
