@@ -140,19 +140,19 @@ Cell `sel[i, j]` is `TRUE` if the i^th^ feature in the target object intersects 
 If there is more than 1 feature in `y` the resulting selection `matrix` must be converted into a `vector` before it is used for subsetting, as illustrated below:
 
 ```{r}
-y = nz %>% filter(grepl("Cant|Otag", REGC2017_NAME))
+co = nz %>% filter(grepl("Cant|Otag", REGC2017_NAME))
 sel_matrix = st_intersects(nz_height, y, sparse = FALSE)
 sel_vector = rowSums(sel_matrix) > 0
-heights_y = nz_height[sel_vector, ]
+heights_co = nz_height[sel_vector, ]
 ```
 
-The above code chunk results in an object, `heights_y`, that represent the high points that intersect with either Canterbury *or* Otago region.
+The above code chunk results in an object, `heights_co`, that represent the high points that intersect with either Canterbury *or* Otago region (hence the object name `co`).
 It did this in four stages:
 
-1. Subset the regions of `nz` containing "Cant" or "Ortago" in their names. This was done using the pattern matching function `grepl()` in combination with the `|` character, which means 'or', resulting in the subsetting object `y`.
-2. Create a selection matrix representing which features of `nz_height` intersect with the regions in `y`.
-3. Convert the selection matrix into a `logical` 'selection vector' by using `rowSums()` to find which features matched *any* features in `y`.
-4. Use the result to subset `nz_heights`, creating a new object `heights_y`. 
+1. Subset the regions of `nz` containing "Cant" or "Ortago" in their names. This was done using the pattern matching function `grepl()` in combination with the `|` character, which means 'or', resulting in the subsetting object `co`.
+2. Create a selection matrix representing which features of `nz_height` intersect with the regions in `co`.
+3. Convert the selection matrix into a `logical` 'selection vector' by using `rowSums()` to find which features matched *any* features in `co`.
+4. Use the result to subset `nz_heights`, creating a new object `heights_co`. 
 
 The nature of `sel_matrix` is verified below:
 
@@ -645,8 +645,6 @@ For instance, if the intersection of our buffer and a country is 100 000 km^^2^^
 <!-- - ? generalization **rmapsharper** - https://github.com/ateucher/rmapshaper -->
 <!-- `st_union` -->
 
-### Modifying geometry data
-
 ### Clipping
 
 Spatial clipping is a form of spatial subsetting that involves changes to the `geometry` columns of at least some of the affected features.
@@ -678,7 +676,7 @@ plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
 The subsequent code chunk demonstrate how this works for all combinations of the 'Venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book R for Data Science [@grolemund_r_2016].
 <!-- Todo: reference r4ds -->
 
-```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators."}
+```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators.", warning=FALSE}
 par(mfrow = c(3, 3), mai = c(0.1, 0.1, 0.1, 0.1))
 plot(b)
 y_not_x = st_difference(y, x)
@@ -708,7 +706,7 @@ plot(b)
 plot(y, col = "grey", add = TRUE)
 plot(b, add = TRUE)
 text(x = 0.5, y = 1, "y")
-par(mfrow = c(1, 1))
+par(old_par)
 ```
 
 To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
@@ -741,9 +739,33 @@ box = st_convex_hull(pmulti)
 
 ### Distance relations
 
-```{r, eval=FALSE}
-st_distance(a, b)
+While topological relations are binary --- a feature either intersects with another or does not --- distance relations are continuous.
+The distance between two objects is calculated with the **sf** function `st_distance()` function.
+This is illustrated in the code chunk below, which finds the distance between the highest point in New Zealand and the geographic centroid of the Canterbury region, created in section \@ref(spatial-subsetting):
+
+```{r}
+nz_heighest = nz_height %>% top_n(n = 1, wt = elevation)
+canterbury_centroid = st_centroid(canterbury)
+st_distance(nz_heighest, canterbury_centroid)
 ```
+
+There are two potentially surprising things about the result: 1) it comes with a `units` attribute, so you know that it's just over 100 km (not 100,000 inches, or any other measure of distance!); and 2) it is returned as a matrix, even though the result only contains a single value.
+This second feature hints at another useful feature of `st_distance()`, its ability to return *distance matrices* between all combinations of features in objects `x` and `y`.
+This is illustrated in the command below, which finds the distances between the first three features in `nz_height` and the Otago and Canterbury regions of New Zealand.
+
+```{r}
+st_distance(nz_height[1:3, ], y)
+```
+
+Note that the distance between the second and third feature in `nz_height` and the second feature in `y` is zero.
+This demonstrates the fact that distances between points and polygons refer to the distance to *any part of the polygon*:
+The second and third points in `nz_height` are *in* Otago, which can be verified by plotting them (result not shown):
+
+```{r, eval=FALSE}
+plot(co$geometry[2])
+plot(nz_height$geometry[2:3], add = TRUE)
+```
+
 
 ## Spatial operations on raster data
 
