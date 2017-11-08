@@ -60,7 +60,6 @@ With these additional dependencies installed, you should be able to run the foll
 ``` r
 source("code/cranlogs.R")
 source("code/sf-revdep.R")
-source("code/sfr-class-diagram-gen.R")
 ```
 
 Note: the `.Rproj` file is configured to build a website not a single page. To reproduce this [README](https://github.com/Robinlovelace/geocompr/blob/master/README.Rmd) use the following command:
@@ -117,19 +116,20 @@ knitr::kable(pkg_df)
 | knitr          | A General-Purpose Package for Dynamic Report Generation in R \[@R-knitr\]     | 1.17       |
 | leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' \[@R-leaflet\]      | 1.1.0      |
 | link2GI        | Linking GIS, Remote Sensing and Other Command Line Tools \[@R-link2GI\]       | 0.1.0      |
-| mapview        | Interactive Viewing of Spatial Objects in R \[@R-mapview\]                    | 2.1.4      |
+| mapview        | Interactive Viewing of Spatial Data in R \[@R-mapview\]                       | 2.2.0      |
 | microbenchmark | Accurate Timing Functions \[@R-microbenchmark\]                               | 1.4.2.1    |
 | osmdata        | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]      | 0.0.5      |
 | raster         | Geographic Data Analysis and Modeling \[@R-raster\]                           | 2.5.8      |
-| rgdal          | Bindings for the 'Geospatial' Data Abstraction Library \[@R-rgdal\]           | 1.2.13     |
-| rgeos          | Interface to Geometry Engine - Open Source ('GEOS') \[@R-rgeos\]              | 0.3.25     |
+| rgdal          | Bindings for the 'Geospatial' Data Abstraction Library \[@R-rgdal\]           | 1.2.15     |
+| rgeos          | Interface to Geometry Engine - Open Source ('GEOS') \[@R-rgeos\]              | 0.3.26     |
 | rmarkdown      | Dynamic Documents for R \[@R-rmarkdown\]                                      | 1.6        |
 | rnaturalearth  | World Map Data from Natural Earth \[@R-rnaturalearth\]                        | 0.1.0      |
-| RQGIS          | Integrating R with QGIS \[@R-RQGIS\]                                          | 1.0.1.9000 |
+| RQGIS          | Integrating R with QGIS \[@R-RQGIS\]                                          | 1.0.2.9000 |
 | RSAGA          | SAGA Geoprocessing and Terrain Analysis in R \[@R-RSAGA\]                     | 0.94.5     |
 | sf             | Simple Features for R \[@R-sf\]                                               | 0.5.5      |
 | sp             | Classes and Methods for Spatial Data \[@R-sp\]                                | 1.2.5      |
-| spData         | Datasets for Spatial Analysis \[@R-spData\]                                   | 0.2.6.0    |
+| spData         | Datasets for Spatial Analysis \[@R-spData\]                                   | 0.2.6.3    |
 | spDataLarge    | Large datasets for spatial analysis \[@R-spDataLarge\]                        | 0.2.3.0    |
+| tabularaster   | Tidy Tools for 'Raster' Data \[@R-tabularaster\]                              | 0.3.0      |
 | tidyverse      | Easily Install and Load 'Tidyverse' Packages \[@R-tidyverse\]                 | 1.1.1      |
-| tmap           | Thematic Maps \[@R-tmap\]                                                     | 1.10       |
+| tmap           | Thematic Maps \[@R-tmap\]                                                     | 1.11       |
