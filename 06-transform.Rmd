@@ -18,43 +18,60 @@ As stated in Chapter \@ref(crs-intro), it is important to understand which CRS y
 Many spatial operations assume that you are using a *projected* CRS (on a Euclidean grid with units of meters rather than a geographic 'lat/lon' grid with units of degrees).
 The GEOS engine underlying most spatial operations in **sf**, for example, assumes your data is in a projected CRS.
 For this reason **sf** contains a function for checking if geometries have a geographic or projected CRS.
-This is illustrated below using the example of the *Greenwich point* which came to define 0 degrees longitude:
+This is illustrated below using the example of *London*:
 
 ```{r}
-greenwich = st_sf(geometry = st_sfc(st_point(c(0, 51.5))))
-st_is_longlat(greenwich)
+london = st_sf(geometry = st_sfc(st_point(c(-0.1, 51.5))))
+st_is_longlat(london)
 ```
 
 The results show that when geographic data is created from scratch, or is loaded from a source that has no CRS metadata, the CRS is unspecified by default.
+CRS can be set with the `st_set_crs` function:^[CRS could be also added when creating the object with the following command: `st_sf(geometry = st_sfc(st_point(c(-0.1, 51.5))), crs = 4326)`]
+
+```{r}
+london = st_set_crs(london, 4326)
+st_is_longlat(london)
+```
+
 Spatial operations on objects without a CRS run on the implicit assumption that they are projected, even when in reality they are not.
-This can be seen by creating a huge buffer of 10 degrees around the `greenwich` point:
+This can be seen by creating a buffer of one degree around the `london` point:
 
 ```{r}
-greenwich_buff = st_buffer(greenwich, dist = 10)
+london_buff = st_buffer(london, dist = 1)
 ```
 
-Brief consideration of what has happened should set alarm bells ringing: the buffer will be highly distorted when projected onto the surface of the Earth.
-For this reason, when **sf** (and other spatial packages) know that geometries are in lat/long coordinates they emit a warning.
-This is illustrated in the code below which sets the CRS of `greenwich` to a lat/lon CRS (the commonly used EPSG 4326 in this case), checks to ensure that R thinks it's a geographic CRS, and then re-applies the buffer:
-
-```{r}
-greenwich_latlon = st_set_crs(greenwich, 4326)
-st_is_longlat(greenwich_latlon)
-greenwich_buff_latlon = st_buffer(greenwich_latlon, 10)
-```
-
-The results show that, as expected, `4326` is a geographic (lat/lon) CRS.
 As a result a warning message is emitted to warn the user that the operation may not work correctly and that, if the operation was intended, the distance should be in degrees (not meters or some other Euclidean distance measurement).
 The seemingly small difference in setting the CRS may seem inconsequential but it can have a huge impact.
-This is illustrated in Figure \@ref(fig:crs-buf), which shows how the two buffers are plotted, with the (correctly) defined CRS of the latter object being dramatically elongated in the north-south direction due to the thinning of the vertical lines of longitude towards the Earth's poles.  
+This is illustrated in Figure \@ref(fig:crs-buf), which shows how the buffer created in the geographic CRS is dramatically elongated in the north-south direction due to the thinning of the vertical lines of longitude towards the Earth's poles.  
 
-```{r, echo=FALSE}
-par(mfrow = c(1, 2))
+```{r crs-buf, fig.cap="Buffer on data with geographic CRS."}
+plot(london_buff, graticule = st_crs(4326), axes = TRUE)
+plot(london, add = TRUE)
 ```
 
-```{r crs-buf, fig.cap="Buffers on geographic data with undefined (top) and defined (bottom) CRSs."}
-plot(greenwich_buff, graticule = st_crs(4326))
-plot(greenwich_buff_latlon, graticule = st_crs(4326))
+To prevent this, we need to create a buffer based on a point in a projected CRS.
+For example, London has coordinates of `c(530000, 180000)` in British National Grid CRS (EPSG:27700):
+
+```{r}
+london_proj = st_sf(geometry = st_sfc(st_point(c(530000, 180000))), crs = 27700)
+```
+
+This projected CRS has units in meters. 
+One degree at the equator represents 111,319.9 meters and we can use this value to create our buffer:
+
+```{r}
+london_proj_buff = st_buffer(london_proj, 111319.9)
+```
+
+The result in Figure \@ref(fig:crs-buf-proj) shows that buffers based on a projected CRS are not distorted and we can expect the same distance from our point to the buffer's border.
+
+```{r, echo=FALSE}
+options(scipen = 99)
+```
+
+```{r crs-buf-proj, fig.cap="Buffer on data with projected CRS."}
+plot(london_proj_buff, graticule = st_crs(27700), axes = TRUE)
+plot(london_proj, add = TRUE)
 ```
 
 ## CRS transformation
