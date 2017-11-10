@@ -285,7 +285,7 @@ plot(near_lnd_new$geometry)
 
 You can also do tidy spatial subsetting:
 
-```{r}
+```{r, message=FALSE}
 near_lnd_tidy = world %>% 
   filter(st_intersects(., lnd_buff, sparse = FALSE))
 ```
@@ -297,9 +297,59 @@ row.names(near_lnd_tidy)
 row.names(near_lnd)
 ```
 
+- Consequences for joining - rownames can be useful! 
+
+Also affects non-spatial data - [tidyverse/dplyr#366](https://github.com/tidyverse/dplyr/issues/366)
+
+---
+
+# Tidyverse pitfall 2: Duplicate column names
+
+See [edzer/sf#544](https://github.com/r-spatial/sf/issues/544)
+
+```{r}
+names(world)
+names(lnd_buff)
+```
+
+```{r}
+lnd_buff$iso_a2 = NA
+```
 
 
+```{r, eval=FALSE}
+st_intersection(world, lnd_buff) # works
+world_tidy = st_as_sf(as_tibble(world))
+st_intersection(world_tidy, lnd_buff) # fails
+```
 
+```
+Error: Column `iso_a2` must have a unique name
+```
+
+---
+
+# Tidyverse pitfall 3: binding rows
+
+
+```{r, eval=FALSE}
+rbind(near_lnd, near_lnd) # works
+bind_rows(near_lnd, near_lnd)
+```
+
+```
+Error in .subset2(x, i, exact = exact) : 
+  attempt to select less than one element in get1index
+```
+
+But this does:
+
+```{r, warning=FALSE}
+near_lnd_data = st_set_geometry(near_lnd, NULL)
+d = bind_rows(near_lnd_data, near_lnd_data)
+d_sf = st_sf(d, geometry = c(near_lnd$geom, near_lnd$geom))
+plot(d_sf)
+```
 
 ---
 
