@@ -11,36 +11,39 @@ set.seed(2017-04-01)
 
 small_ras = raster(matrix(1:16, 4, 4, byrow =TRUE))
 small_ras_val = raster(matrix(sample.int(100, 16), 4, 4, byrow =TRUE))
-small_ras_val[c(7, 9)] = NA
+NAvalue(small_ras_val) <- -9999
+small_ras_val[c(7, 9)] = -9999
+small_ras_val_2 <- small_ras_val
+small_ras_val_2[c(7, 9)] <- NA
 
-empty_grid_plot = ggplot() +
-  vr_geom_raster_seq(small_ras) +
-  scale_fill_gradientn(colors = c("white")) +
-  labs(title = "A. Raster grid")
+# empty_grid_plot = ggplot() +
+#   vr_geom_raster_seq(small_ras) +
+#   scale_fill_gradientn(colors = c("white")) +
+#   labs(title = "A. Raster grid")
 
 cells_num_plot = ggplot() +
   vr_geom_raster_seq(small_ras) +
   vr_geom_text(small_ras) + 
   scale_fill_gradientn(colors = c("white")) +
-  labs(title = "B. Cells numbers")
+  labs(title = "A. Cell IDs")
 
 cells_val_plot = ggplot() +
   vr_geom_raster_seq(small_ras_val) +
   vr_geom_text(small_ras_val) + 
   scale_fill_gradientn(colors = c("white")) +
-  labs(title = "C. Cells values")
+  labs(title = "B. Cell values")
 
 map_plot = ggplot() +
-  vr_geom_raster_seq(small_ras_val) +
+  vr_geom_raster_seq(small_ras_val_2) +
   # vr_geom_text(small_ras_val) +
-  labs(title = "D. Raster map") +
+  labs(title = "C. Coloring cell values") +
   scale_fill_gradientn(colours=c("#a50026", "#ffffbf", "#006837"))
 
-raster_intro_plot = arrangeGrob(empty_grid_plot, cells_num_plot,
-             cells_val_plot, map_plot, 
-             ncol = 2)
+raster_intro_plot = arrangeGrob(cells_num_plot,
+                                cells_val_plot, map_plot, 
+                                ncol = 3)
 
-ggsave(plot = raster_intro_plot, filename = "figures/02_raster_intro_plot.png", width = 5, height = 5)
+ggsave(plot = raster_intro_plot, filename = "figures/02_raster_intro_plot.png", width = 6, height = 3, scale = 1.25)
 
 # second intro plot -----------------------------------------------------------
 library(rasterVis)
