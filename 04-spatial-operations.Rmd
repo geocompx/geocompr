@@ -513,7 +513,32 @@ In the subsequent sections, we will present spatial operations that also act on 
 ### Dissolving and aggregating polygons
 
 Like attribute data aggregation, covered in section \@ref(vector-attribute-aggregation), spatial data aggregation (also known as dissolving polygons) can be a way of *condensing* data.
-Aggregated data show some statistic about a variable (typically average or total) in relation to some kind of *grouping variable*. 
+Aggregated data show some statistic about a variable (typically average or total) in relation to some kind of *grouping variable*.
+Section \@ref(vector-attribute-aggregation) demonstrated how `aggregate()` and `group_by() %>% summarize()` condense data based on attribute variables.
+This section demonstrates how the same functions work using spatial grouping variables.
+
+Returning to the example of New Zealand, imagine you want to find out the average height of high points in each region.
+This is a good example of spatial aggregation: it is the geometry of the source (`y` or `nz` in this case) that defines how values in the target object (`x` or `nz_height`) are grouped.
+This is illustrated using the base `aggregate()` function below:
+
+```{r}
+nz_avheight = aggregate(nz_height, nz, FUN = mean)
+```
+
+The result of the previous command is an `sf` object with the same geometry as the (spatial) aggregating object (`nz`).^[This can be verified with `identical(nz$geometry, nz_avheight$geometry)`.]
+The input data and the result of the previous operation are illustrated in Figure \@ref(fig:spatial-aggregation).
+
+```{r spatial-aggregation, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial aggregation. The right map represents the average value of points in the left map, aggregated to the regional level in New Zealand."}
+par(mfrow = c(1, 2))
+breaks = seq(from = 2700, to = 3300, by = 100)
+plot(nz$geometry, main = "Point elevation")
+plot(nz_height["elevation"], key.pos = NULL, add = TRUE, breaks = breaks)
+plot(nz$geometry, main = "Average elevation")
+plot(nz_avheight["elevation"], key.pos = NULL, breaks = breaks, add = TRUE)
+par(mfrow = c(1, 1))
+```
+
+
 For attribute data aggregation the grouping variable is another variable, typically one with few unique values relative to the number of rows.
 The `REGION` variable in the `us_states` dataset is a good example:
 there are only four subregions but 49 states (excluding Hawaii and Alaska).
@@ -557,10 +582,11 @@ par(old_par)
 #   tm_facets(by = "Level", nrow = 1)
 ```
 
-Spatial aggregation can also be done in the **tidyverse**, using **dplyr** functions as follows:
+Spatial aggregation can also be done in the **tidyverse**, using **dplyr** functions as follows (result not shown):
 
-```{r, eval = FALSE}
-group_by(us_states, REGION) %>%
+```{r, eval=FALSE}
+us_states %>% 
+  group_by(REGION) %>%
   summarize(sum(pop = total_pop_15, na.rm = TRUE))
 ```
 
@@ -572,6 +598,8 @@ group_by(us_states, REGION) %>%
 <!--
 show also tidyverse way, so what you are doing is basically a spatial join and a subsequent aggregation without a grouping variable. Didactically, it might be better to present a grouping variable.
 -->
+
+The above 
 
 ```{r, echo=FALSE}
 # st_join(buff, africa[, "pop"]) %>%
