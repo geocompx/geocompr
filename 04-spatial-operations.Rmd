@@ -57,6 +57,8 @@ canterbury_height = nz_height[canterbury, ]
 ```
 
 ```{r nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing height points in New Zealand. The right-hand map contains only points in the Canterbury region (highlighted in grey). The points were subset with `nz_height[canterbury, ]`."}
+library(sf)
+library(spData)
 par_old = par()
 par(mfrow = c(1, 2), mar=c(0, 0, 1, 0))
 plot(nz$geometry, col = "white", bgc = "lightblue", main = "High points in New Zealand")
@@ -559,32 +561,31 @@ regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION)
 ```
 
 
-```{r us-regions, fig.cap="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.", echo=FALSE, warning=FALSE, fig.asp=0.4}
-# with base R ----
-old_par = par()
-breaks = c(1e5, 5e6, 1e7, 7e7, 2e8)
-rdf = st_set_geometry(regions, NULL)
-us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
-                                  dplyr::select(rdf, Group.1, total_pop_15),
-                                  by = c("REGION" = "Group.1")) %>% 
-  pull(total_pop_15)
+```{r us-regions, fig.cap="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.", echo=FALSE, warning=FALSE, fig.asp=0.2, out.width="100%"}
+# # with base R ----
+# old_par = par()
+# breaks = c(1e5, 5e6, 1e7, 7e7, 2e8)
+# rdf = st_set_geometry(regions, NULL)
+# us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
+#                                   dplyr::select(rdf, Group.1, total_pop_15),
+#                                   by = c("REGION" = "Group.1")) %>% 
+#   pull(total_pop_15)
+# 
+# par(mfrow = c(1, 2))
+# plot(us_states[, "total_pop_15"], main = "US states", breaks = breaks, key.pos = NULL)
+# plot(regions[, "total_pop_15"], main = "US regions", breaks = breaks, key.pos = NULL)
+# par(old_par)
+# with tmap ----
+library(tmap)
+us_states_facet = dplyr::select(us_states, REGION, total_pop_15) %>%
+  mutate(Level = "State")
+regions_facet = rename(regions, REGION = Group.1) %>%
+  mutate(Level = "Region")
+us_facet = rbind(us_states_facet, regions_facet) %>% 
+  mutate(Level = factor(Level, levels = c("State", "Region")))
 
-par(mfrow = c(1, 2))
-plot(us_states[, "total_pop_15"], main = "US states", breaks = breaks, key.pos = NULL)
-plot(regions[, "total_pop_15"], main = "US regions", breaks = breaks, key.pos = NULL)
-par(old_par)
-# # with tmap ----
-# library(tmap)
-# us_states_facet = dplyr::select(us_states, REGION, total_pop_15) %>% 
-#   mutate(Level = "State")
-# regions_facet = rename(regions, REGION = Group.1) %>% 
-#   mutate(Level = "Region")
-# us_facet = rbind(us_states_facet, regions_facet)
-# 
-# qtm(us_states, c("total_pop_15", "region_pop"))
-# 
-# qtm(us_facet, "total_pop_15") +
-#   tm_facets(by = "Level", nrow = 1)
+qtm(us_facet, "total_pop_15") +
+  tm_facets(by = "Level", nrow = 1, drop.units = TRUE)
 ```
 
 The equivalent result can be achieved using **tidyverse** functions as follows (result not shown):
