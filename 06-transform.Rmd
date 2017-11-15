@@ -174,7 +174,7 @@ In this method, value of the output cell is calculated based on the nearest cell
 
 For example, we want to change the CRS to WGS 84.  
 It can be desired when we want to visualize a raster data on top of a web basemaps, such as the Google or OpenStreetMap map tiles.
-The first step to do so is to obtain the proj4 definition of this CRS, which can be done using the [http://spatialreference.org](http://spatialreference.org/ref/epsg/wgs-84/) webpage. 
+The first step is to obtain the proj4 definition of this CRS, which can be done using the [http://spatialreference.org](http://spatialreference.org/ref/epsg/wgs-84/) webpage. 
 The second and last step is to define the reprojection method in the `projectRaster()` function, which in case of categorical data is the nearest neighbor method (`ngb`):
 
 ```{r}
@@ -190,16 +190,6 @@ In the same time, it keeps the same land cover classes - `unique(cat_raster_wgs8
 
 This process of reprojection is almost identical for continuous data.
 The `srtm.tif` file contains digital elevation model for the same area in Utah from [the Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/).
-The important difference is that this dataset's CRS is geographic CRS and we want to transform it to projected CRS.
-
-```{block2 type='rmdnote'}
-All the grid cells in equal-area projections have the same size.
-Therefore, these projections are recommended when performing many raster operations, such as distance calculation.
-```
-
-<!-- http://projectionwizard.org/ -->
-<!-- It can be desired when we want to visualize a raster data on top of a web basemaps, such as the Google or OpenStreetMap map tiles. -->
-
 Each value in this raster represents elevation measured in meters.
 
 ```{r}
@@ -211,15 +201,25 @@ The nearest neighbor method should not be used for continuous raster data, as we
 Alternatively, continuous data could be reprojected in the **raster** package using the bilinear method. 
 In this technique, value of the output cell is calculated based on four nearest cells in the original raster. 
 The new value is a weighted average of values from these four cells, adjusted for their distance from the center of the output cell. 
+This dataset has geographic CRS and we want to transform it into projected CRS.
+
+```{block2 type='rmdnote'}
+All the grid cells in equal-area projections have the same size.
+Therefore, these projections are recommended when performing many raster operations, such as distance calculation.
+```
+
+In the fist step we need to obtain the proj4 definition of the existing projected CRS appropariate for this area or create a new one using the [Projection Wizard](http://projectionwizard.org/) online tool [@savric_projection_2016].
+For this example, we used the Oblique Lambert azimuthal equal-area projection.
+The second step is to define the `bilinear` reprojection method:
 
 ```{r}
-equalarea = "+proj=laea +lat_0=37.32243222222222 +lon_0=-113.04597222222222"
+equalarea = "+proj=laea +lat_0=37.32 +lon_0=-113.04"
 con_raster_ea = projectRaster(con_raster, crs = equalarea, method = "bilinear")
 con_raster_ea
 ```
 
-Reprojection of continuous rasters changes spatial properties, such as the number of cells, resolution, and extent.
-It also slightly modifies values in the new raster, which can be seen by comparing the outputs of the `summary()` function between `con_raster` and `con_raster_ea`.
+Reprojection of continuous rasters also changes spatial properties, such as the number of cells, resolution, and extent.
+Moreover, it slightly modifies values in the new raster, which can be seen by comparing the outputs of the `summary()` function between `con_raster` and `con_raster_ea`.
 
 ```{r, eval=FALSE}
 summary(con_raster)
