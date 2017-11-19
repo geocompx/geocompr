@@ -7,6 +7,7 @@
 ```{r, message=FALSE}
 library(tidyverse)
 library(sf)
+library(lwgeom)
 library(raster)
 ```
 
@@ -26,8 +27,6 @@ library(spDataLarge)
 <!-- - geometric operations -->
 <!-- - This is also basically what Jakub was proposing, right?. Geometric operations also include reprojections. Then we could split the chapter again into vector and raster subsections. And the raster sections would include raster alignment, aggregations (change of resolution) and reprojections. -->
 <!-- geocoding? -->
-
-
 
 As stated in Chapter \@ref(crs-intro), it is important to understand which CRS you are working in when undertaking spatial operations.
 Many spatial operations assume that you are using a *projected* CRS (on a Euclidean grid with units of meters rather than a geographic 'lat/lon' grid with units of degrees).
@@ -144,29 +143,25 @@ Existing CRS are well suited for most purposes.
 <!-- examples -->
 In the same time, `proj4string` definitions are highly modifiable and allow for CRS customization.
 <!-- as we mentioned in section \@ref(crs-in-r). -->
+We can present that using selected world projections.
+The Mollweide projection is recommended when it is important to preserve areas [@jenny_guide_2017].
+To use this projection, we need to specify it using the `proj4string` element, `"+proj=moll"`, in the `st_transform` function:
 
-<!-- http://bl.ocks.org/vlandham/raw/9216751/ -->
+```{r}
+world_mollweide = st_transform(world, crs = "+proj=moll")
+plot(world_mollweide$geom)
+```
+<!-- plot(world_mollweide$geom, graticule = TRUE) -->
 
-<!-- show the results (e.g. two/three panels) -->
-<!-- show calculations? e.g area/distance? -->
+On the other hand, the goal for many visualization purposes is to have a map with minimized area, direction, and distance distortions.
+One of the most popular projection to achieve that is Winkel tripel.^[This projection is used, among others, by the National Geographic Society.]
+The `st_transform_proj` function allows for coordinates transformations to the Winkel tripel projection: 
 
-<!-- http://proj4.org/usage/index.html# -->
-<!-- ```{r} -->
-<!-- plot(world$geom) -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- world_2 = st_transform(world, crs = "+proj=robin") -->
-<!-- plot(world_2$geom) -->
-<!-- ``` -->
-
-<!-- https://github.com/r-spatial/lwgeom/issues/6 -->
-<!-- ```{r} -->
-<!-- # devtools::install_github("r-spatial/lwgeom") -->
-<!-- library(lwgeom) -->
-<!-- world_3 = st_transform_proj(world, crs = "+proj=wintri") -->
-<!-- plot(world_3$geom) -->
-<!-- ``` -->
+```{r}
+world_wintri = st_transform_proj(world, crs = "+proj=wintri")
+plot(world_wintri$geom)
+```
+<!-- plot(world_wintri$geom, graticule = TRUE) -->
 
 ```{block2 type='rmdnote'}
 There are two main functions for transformation of simple features coordinates - `sf::st_transfrom()` and `lwgeom::st_transform_proj()`. 
@@ -174,6 +169,16 @@ The `st_transfrom` function uses the GDAL interface to PROJ.4, while `st_transfr
 The first one is appropriate in most situations, and provides a set of the most often used parameters and well defined transformations.
 The second one allows for a greater customization of a projection, which includes cases when some of the PROJ.4 parameters (e.g. `+over`) or projection (`+proj=wintri`) is not available in `st_transform()`.
 ```
+
+<!-- http://proj4.org/usage/index.html# -->
+<!-- https://github.com/r-spatial/lwgeom/issues/6 -->
+<!-- ```{r} -->
+<!-- # devtools::install_github("r-spatial/lwgeom") -->
+<!-- library(lwgeom) -->
+<!-- world_3 = st_transform_proj(world, crs = "+proj=wintri") -->
+<!-- plot(world_3$geom) -->
+<!-- ``` -->
+<!-- http://bl.ocks.org/vlandham/raw/9216751/ -->
 
 ### Raster data
 
