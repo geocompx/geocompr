@@ -50,7 +50,12 @@ plot(st_geometry(ger_dis[weimar, ]), border = "steelblue2", lwd = 5)
 plot(st_geometry(ger_mun[ind, ]), border = "red3", add = TRUE)
 
 # show postal code problem
-plot(st_geometry(shp_pc[weimar, ]))  # pcs around Weimar
-plot(st_geometry(weimar), add = TRUE, border = "green")  # weimar district/municipality
+plot(st_geometry(shp_pc[weimar, ]), lwd = 3, border = "red3")  # pcs around Weimar
+plot(st_geometry(weimar), add = TRUE, border = "steelblue2", lwd = 2)  # weimar district/municipality
 # the same as, i.e., Weimar municipality is also a district
 # plot(st_geometry(filter(ger_mun, NAME_3 %in% "Weimar")), add = TRUE, border = "blue")
+png(filename = "figures/04_incongruence_example.png", width = 950, height = 555)
+# show postal code problem
+plot(st_geometry(shp_pc[weimar, ]), lwd = 3, border = "red3")  # pcs around Weimar
+plot(st_geometry(weimar), add = TRUE, border = "steelblue2", lwd = 2)  # weimar district/municipality
+dev.off()
