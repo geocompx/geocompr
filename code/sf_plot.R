@@ -116,6 +116,7 @@ p_geometrycollection_sf = ggplot() +
   )
 
 ## combine plot ------------
+png("figures/sf-classes.png", height = 600, width = 600)
 # Empty grob for spacing
 b = nullGrob() # per @baptiste's comment, use nullGrob() instead of rectGrob()
 
@@ -240,3 +241,4 @@ vp = viewport(
 pushViewport(vp)
 
 mygb(x = c(1, 0.6, 0.6, 0), y = c(1, 0.4, 0.4, 0))
+dev.off()
