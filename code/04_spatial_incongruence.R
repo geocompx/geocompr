@@ -33,7 +33,7 @@ ger_mun = getData(country = "DEU", level = 3)
 ger_dis = getData(country = "DEU", level = 2)
 ger_mun = st_as_sf(ger_mun)
 ger_dis = st_as_sf(ger_dis)
-save.image("C:/Users/pi37pat/Desktop/tmp/congruence.Rdata")
+save.image("congruence.Rdata")
 
 
 weimar = filter(ger_dis, NAME_2 %in% "Weimar")
