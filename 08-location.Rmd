@@ -166,7 +166,7 @@ names(reclass) = names(input)
 
 ## Define metropolitan areas
 
-We arbitrarily define a a pixel of 20 sq-km as metropolitan if more than half a million people lives in it.
+We arbitrarily define a pixel of 20 sq-km as metropolitan if more than half a million people lives in it.
 The `aggregate()` command helps to change the resolution from 1 to 20 sq-km while each output cell represents the sum of all 1 sq-km input cells (see section \@ref(aligning-rasters)).
 Next, we only keep cells with more than half a million inhabitants using a Boolean operation, and convert the resulting cells into spatial polygons of class `sf`.
 
@@ -179,7 +179,7 @@ polys = st_as_sf(polys)
 Plotting these polygons reveals eight metropolitan regions (Fig. \@ref(fig:metro-areas)).
 Each region consists of one ore more polygons (raster cells).
 It would be nice if we could join all polygons belonging to one region.
-One approach is to dissolve all polygons (see section \@ref(aggregating-or-dissolving)).
+One approach is to dissolve all polygons (see section \@ref(spatial-data-aggregation)).
 
 ```{r, eval = FALSE}
 polys = summarize(polys, pop = sum(layer))
@@ -301,8 +301,8 @@ However, if three attempts have already failed, this is a good indication that t
 Since it is our interest to be a good cyberspace citizen, we try not to overburden the server with too many queries within a short amount of time. 
 Instead we let the loop sleep between one and four seconds after each iteration before accessing the reverse geocoding API again.
 
-```{r, eval = FALSE}
-metro_names = plyr::ldply(1:nrow(coords), function(i) {
+```{r, eval = FALSE, warning = FALSE}
+metro_names = map_dfr(1:nrow(coords), function(i) {
   add = ggmap::revgeocode(coords[i, ], output = "more")
   x = 2
   while (is.na(add$address) & x > 0) {
@@ -325,14 +325,12 @@ Umlauts like `ü` might lead to trouble further on, for example when determing t
 ```{r, eval = FALSE}
 metro_names = 
   dplyr::select(metro_names, locality, administrative_area_level_2) %>%
-  mutate_all(as.character)
-metro_names = 
-  mutate(metro_names,
-         # replace Velbert
-         locality = ifelse(locality == "Velbert", administrative_area_level_2, locality),
+  mutate(# replace Velbert
+         locality = ifelse(locality == "Velbert", administrative_area_level_2, 
+                           locality),
          # replace umlaut ü
          locality = gsub("ü", "ue", locality)) %>%
-  select(locality) %>%
+  dplyr::select(locality) %>%
   pull
 ```
 
@@ -351,12 +349,10 @@ The `while`-loop increases the number of download trials to three.
 If then still no features can be downloaded, most likely there are none.
 Or it is an indication that another error has ocurred before. 
 For instance, the `opq()` function has retrieved a wrong or too small bounding box.
-In any case, is is highly unlikely that there are no shops in any of our defined metropolitan areas.
-The `if`-condition at the end of the following code chunk checks if there is at least one shop for each region.
 
 ```{r, eval = FALSE, message = FALSE}
 library(osmdata)
-shops = lapply(metro_names, function(x) {
+shops = map(metro_names, function(x) {
   message("Downloading shops of:", x, "\n")
   # give the server a bit time
   Sys.sleep(sample(seq(5, 10, 0.1), 1))
@@ -372,6 +368,13 @@ shops = lapply(metro_names, function(x) {
   points = points$osm_points
   points = st_set_crs(points, 4326)
   })
+```
+
+It is highly unlikely that there are no shops in any of our defined metropolitan areas.
+The following `if`-condition simply checks if there is at least one shop for each region.
+If not, we would try to download again the shops for this/these specific region/s.
+
+```{r, eval = FALSE}
 # checking if we have downloaded shops for each metropolitan area
 ind = sapply(shops, nrow) == 0
 if (any(ind)) {
@@ -380,15 +383,17 @@ if (any(ind)) {
 }
 ```
 
-To make sure that each list element (an sf data.frame) comes with the same columns, we only keep the `osm_id` and the `shop` columns with the help of another `lapply`-loop.
+To make sure that each list element (an sf data.frame) comes with the same columns, we only keep the `osm_id` and the `shop` columns with the help of another `map`-loop (`lapply()` would do exactly the same here).
 This is not a given since OSM contributors are not equally meticulous when collecting data.
 Finally, we `rbind` all shops into one large `sf`-object.
 
 ```{r, eval = FALSE}
 # select only specific columns and rbind all list elements
-shops = lapply(shops, select, osm_id, shop)
-shops = Reduce(rbind, shops)
+shops = map(shops, dplyr::select, osm_id, shop) %>%
+  reduce(rbind)
 ```
+
+It would have been easier to simply use `map_dfr()`. Unfortunately, so far it does not work in harmony with `sf` objects but it will most likely in the future.
 
 The only thing left to do is to convert the spatial point object into a raster.
 The `rasterize()` function does exactly this.
