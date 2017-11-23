@@ -33,9 +33,9 @@ tmap_mode("plot")
 m = qtm(rx, "value", borders = "black") + tm_facets(by = "layer", drop.units = TRUE, ncol = 2) +
   tm_shape(aggzones) +
   tm_borders(alpha = 0.6, lwd = 10) +
-  tm_layout(legend.show = FALSE)
+  tm_layout(legend.show = FALSE, scale = 0.7)
+save_tmap(m, "figures/04-congruence.png", width = 1000, height = 400)
 detach("package:tmap", unload = TRUE)
-save_tmap(m, "figures/04-congruence.png")
 # test visuals ----
 # tmap_mode("view")
 # qtm(aggzones, borders = "black") +
