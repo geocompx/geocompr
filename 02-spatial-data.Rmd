@@ -41,8 +41,6 @@ install.packages("spDataLarge") # after loading spData
 library(spDataLarge)   # load geographic data
 ```
 
-
-
 ```{block2, type='rmdnote'}
 On Mac and Linux a few requirements must be met to install **sf**.
 These are described in the package's README at [github.com/r-spatial/sf](https://github.com/r-spatial/sf).
@@ -337,8 +335,8 @@ par_old = par()
 par(mar=c(0, 0, 0, 0))
 world_centroids_largest = st_centroid(world_proj, of_largest_polygon = TRUE)
 plot(st_graticule(x = world_proj)[1], col = "grey", main = "\nCountry continents and populations")
-plot(world_proj["continent"], add = TRUE)
-plot(world_centroids_largest, add = TRUE, cex = sqrt(world$pop) / 10000, pch = 16, col = "red")
+plot(world_proj["continent"], add = TRUE, key.pos = NULL)
+plot(world_centroids_largest, add = TRUE, cex = sqrt(world$pop) / 10000, pch = 16, col = "red", key.pos = NULL)
 par(par_old)
 ```
 
@@ -405,7 +403,7 @@ By definition, a polygon has one exterior boundary (outer ring) and can have zer
 plot(st_as_sfc("POLYGON((1 5, 2 2, 4 1, 4 4, 1 5))"), col="gray", axes = TRUE, main = "POLYGON")
 ```
 
-- Polygon with one hole - `POLYGON ((1 5, 4 4, 4 1, 2 2, 1 5), (2 4, 3 4, 3 3, 2 3, 2 4))`
+- Polygon with one hole - `POLYGON ((1 5, 2 2, 4 1, 4 4, 1 5), (2 4, 3 4, 3 3, 2 3, 2 4))`
 
 ```{r polygon_hole, echo=FALSE}
 plot(st_as_sfc("POLYGON((1 5, 2 2, 4 1, 4 4, 1 5), (2 4, 3 4, 3 3, 2 3, 2 4))"), col="gray", axes = TRUE, main = "POLYGON with a hole")
@@ -688,7 +686,7 @@ This and map algebra makes raster processing much more efficient and faster than
 However, in contrast to vector data, a raster cell can only hold a single value.
 The value might be numeric or categorical (Figure  \@ref(fig:raster-intro-plot):C).
 
-```{r raster-intro-plot, echo=FALSE, fig.cap="Raster data: A - a grid representation; B - numbers of the cells; C - values of the cells; D - a final raster map."}
+```{r raster-intro-plot, echo = FALSE, fig.cap = "Raster data: A - cell IDs; B - cell values; C - a colored raster map."}
 knitr::include_graphics("figures/02_raster_intro_plot.png")
 ```
 
@@ -790,21 +788,21 @@ Similar to the **sf** package, **raster** also provides `plot()` methods for its
 plot(new_raster)
 ```
 
-Moreover, it is possible to plot a raster and overlay it with vector data.
-For this purpose, we need to read-in a vector dataset:
+<!-- Moreover, it is possible to plot a raster and overlay it with vector data. -->
+<!-- For this purpose, we need to read-in a vector dataset: -->
 
-```{r, message=FALSE, results='hide'}
-vector_filepath = system.file("vector/zion.gpkg", package="spDataLarge")
-new_vector = st_read(vector_filepath)
-```
+<!-- ```{r, message=FALSE, results='hide'} -->
+<!-- vector_filepath = system.file("vector/zion.gpkg", package="spDataLarge") -->
+<!-- new_vector = st_read(vector_filepath) -->
+<!-- ``` -->
 
-Our new object, `new_vector`, is a polygon representing the borders of Zion National Park (`?zion`).
-We can add the borders to the elevation map using the `add` argument of the `plot()`:
+<!-- Our new object, `new_vector`, is a polygon representing the borders of Zion National Park (`?zion`). -->
+<!-- We can add the borders to the elevation map using the `add` argument of the `plot()`: -->
 
-```{r basic-new-raster-vector-plot}
-plot(new_raster)
-plot(new_vector, add = TRUE)
-```
+<!-- ```{r basic-new-raster-vector-plot} -->
+<!-- plot(new_raster) -->
+<!-- plot(new_vector$geom, add = TRUE) -->
+<!-- ``` -->
 
 There are several different approaches to plot raster data in R:
 
@@ -990,7 +988,7 @@ Two main ways to describe CRS in R are an `epsg` code or a `proj4string` definit
 Both of these approaches have advantages and disadvantages. 
 An `epsg` code is usually shorter, and therefore easier to remember. 
 The code also refers to only one, well-defined coordinate reference system. 
-On the other hand, a `proj4string` definition allows you more flexibility when it comes to specifying different parameters such as the projection type, the datum and the ellipsoid. 
+On the other hand, a `proj4string` definition allows you more flexibility when it comes to specifying different parameters such as the projection type, the datum and the ellipsoid.^[Complete list of the `proj4string` parameters can be found at http://proj4.org/parameters.html#parameter-list.] 
 This way you can specify many different projections, and modify existing ones.
 This makes the `proj4string` approach also more complicated.
 <!-- ^[In the background, `sf` and `raster` use the [PROJ.4](http://proj4.org/) software, which enables transformations between different projections]. -->
@@ -1006,7 +1004,15 @@ crs_data = rgdal::make_EPSG()
 View(crs_data)
 ```
 
-In **sf** the CRS of an object can be retrieved using `st_crs()`:
+In **sf** the CRS of an object can be retrieved using `st_crs()`.
+For this purpose, we need to read-in a vector dataset:
+
+```{r, message=FALSE, results='hide'}
+vector_filepath = system.file("vector/zion.gpkg", package="spDataLarge")
+new_vector = st_read(vector_filepath)
+```
+
+Our new object, `new_vector`, is a polygon representing the borders of Zion National Park (`?zion`).
 
 ```{r}
 st_crs(new_vector) # get CRS
@@ -1042,6 +1048,9 @@ knitr::include_graphics("figures/02_raster_crs.png")
 ```
 
 More information on CRS and spatial tranformation is in chapter \@ref(transform).
+<!-- comparing projections? == -->
+<!-- - st_as_sf(x, coords = c("x","y")) -->
+<!-- - st_bbox -->
 
 ## Units
 
@@ -1138,6 +1147,6 @@ What kind of information can you get about the properties of this file?
 Assign random values between 0 and 10 to the new raster and plot it.
 <!-- crs exercises -->
 <!-- 1. pros and cons of the projection types -->
-<!-- 1. what's the difference between vector and raster transformation -->
+<!-- 1. pros and cons of epsg/proj4 -->
 <!-- units exercises -->
 <!-- 1. ?? -->
