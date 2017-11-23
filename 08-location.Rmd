@@ -2,14 +2,19 @@
 
 ## Prerequisites
 
+- This chapter requires following packages: 
+
 ```{r, message = FALSE} 
+library(classInt)
+library(ggmap)
+library(osmdata)
+library(raster)
 library(sf)
 library(sp)
-library(ggmap)
-library(raster)
-library(osmdata)
 library(tidyverse)
 ```
+
+- Required data will be downloaded in due course.
 
 ## Introduction
 
@@ -21,7 +26,7 @@ A good example is where to locate new health services [@tomintz_geography_2008].
 
 Geomarketing is focused on people and where they are likely to spend their time and other resources.
 However, it has several links with ecology:
-animals have needs which can be best met in optimal locations based on variables that change over space (called gradients in the ecological literature --- see chapter xx).
+animals and plants have needs which can be best met in optimal locations based on variables that change over space (called gradients in the ecological literature --- see e.g., @Muenchow_review_2017 and chapter xx).
 <!-- add reference!! -->
 
 Polar bears, for example, prefer northern latitudes where temperatures are lower and food (seals and sea lions) is plentiful.
@@ -39,28 +44,21 @@ To demonstrate how geocomputation can answer these questions the next section cr
 ## A case study
 
 Imagine your are launching a cycling company and would like to open shops across urban areas of Germany.
-Survey data reveals the target audience: males between 20-40 years old who live alone or with just one person (single households, not families) and there is sufficient capital to open a number of shops.
+Survey data reveals the target audience: males between 20-40 years old who live alone or with just one person (single households, not families), and there is sufficient capital to open a number of shops.
 But where should they be placed?
 
-Many store location analysis consultancies have developed to help people ask such questions, and they would happily charge high rates for their expertise.
-It is testament to the rate of technological development that this questioned can now be answered by informed citizens using free and open source software.
-The process of investigating it will demonstrate a number of geo-computational techniques learned during the first chapters of the book.
-The rest of the book will demonstrate common steps in geomarketing, to find suitable locations for the cycle stores.
-Note that although we have applied these steps to a specific case study, they could be generalised to many scenarios of store location or public service provision:
+Many store location analysis consultancies have developed to help people answer such questions, and they would happily charge high rates for their expertise.
+It is testament to the rate of technological development that this questions can now be answered by informed citizens using free and open source software.
+The here presented analysis will demonstrate a number of geo-computational techniques learned during the first chapters of the book.
+Additionally, this chapter will demonstrate common steps in geomarketing to find suitable locations for a specific shop type (here: cycle stores).
+The analysis includes following steps:
 
-<!-- just internal structure and brain storming -->
-- Demographic data access: download German census data and convert it into a raster (resolution: 1 km^2^).
-- Identify potential host cities: find metropolitan areas (resolution: 10 km^2^).
-- Access detailed geographic data for these areas: download OSM data for the potential host cities, identify existing cycle shops and other interesting points of interest and convert these to a raster grid.
-- restrict to metropolitan areas
-- weights:
-  - reclassify age raster: 16-40 weight = 2; all other weight = 1
-  - reclassify gender raster:
-  - reclassify household raster
-	- POIs: reclassify into 5 classes, the more POIs, the better
-	- finally map algebra: age + gender + POI raster will show the most favorable locations
-- Exercise: download the 100 m census inhabitant data and convert it into a raster (will be used in the chapter continuing location analysis)
-  
+- Retrieval of socio-demographic data by downloading download gridded German census data (section \@ref(create-census-rasters)).
+- Identification of areas of high population density (metropolitan areas; section \@ref(define-metropolitan-areas)).
+- Download detailed geographic data (OSM data) for these areas (section \@ref(points-of-interest)).
+- Make input rasters comparable by means of reclassifaction, and use map algebra to compute a final score where higher scores naturally indicate more favorable locations (section \ref(identifying-suitable-locations)).
+
+Note that although we have applied these steps to a specific case study, they could be generalized to many scenarios of store location or public service provision.
 
 ## Create census rasters
 
@@ -293,8 +291,8 @@ coords = st_centroid(metros_wgs) %>%
   round(., 4)
 ```
 
-Additionally, `ggmap::revgeocode()` only accepts one coordinate at a time, which is why we iterate over each coordinate of `coords` via a loop (`ldply()`).
-`ldply()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.^[To learn more about the split-apply-combine strategy for data analysis, we refer the reader to @wickham_split-apply-combine_2011.]
+Additionally, `ggmap::revgeocode()` only accepts one coordinate at a time, which is why we iterate over each coordinate of `coords` via a loop (`map_dfr()`).
+`map_dfr()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.^[To learn more about the split-apply-combine strategy for data analysis, we refer the reader to @wickham_split-apply-combine_2011.]
 Sometimes, the reverse geocoding API of Google is unable to find an address returning `NA`.
 Often enough trying the same coordinate again, returns an address at the second or third attempt (see `while()-loop`).
 However, if three attempts have already failed, this is a good indication that the requested information is indeed unavailable.
@@ -334,12 +332,12 @@ metro_names =
   pull
 ```
 
-## Points of interests
+## Points of interest
 
 The **osmdata** package provides a fantastic and easy-to-use interface to download OSM data (see also section \@ref(retrieving-data)).
 Instead of downloading all shops for the whole of Germany, we restrict the download to the defined metropolitan areas. 
 This relieves the OSM server resources, reduces download time and above all only gives back the shop locations we are interested in.
-The `lapply()` loop runs through all eight metropolitan names which subsequently define the bounding box in the `opq()` function (see section \@ref(retrieving-data)).
+The `map()` loop, the `lapply()` equivalent of **purrr**, runs through all eight metropolitan names which subsequently define the bounding box in the `opq()` function (see section \@ref(retrieving-data)).
 Alternatively, we could have provided the bounding box in the form of coordinates ourselves.
 Next, we indicate that we only would like to download `shop` features (see this [page](http://wiki.openstreetmap.org/wiki/Map_Features) for a full list of OpenStreetMap map features).
 `osmdata_sf()` returns a list with several spatial objects (points, lines, polygons, etc.).
@@ -348,7 +346,7 @@ As with Google's reverse geocode API, the OSM-download will once in a while not 
 The `while`-loop increases the number of download trials to three. 
 If then still no features can be downloaded, most likely there are none.
 Or it is an indication that another error has ocurred before. 
-For instance, the `opq()` function has retrieved a wrong or too small bounding box.
+For instance, the `opq()` function has retrieved a wrong bounding box.
 
 ```{r, eval = FALSE, message = FALSE}
 library(osmdata)
@@ -383,7 +381,7 @@ if (any(ind)) {
 }
 ```
 
-To make sure that each list element (an sf data.frame) comes with the same columns, we only keep the `osm_id` and the `shop` columns with the help of another `map`-loop (`lapply()` would do exactly the same here).
+To make sure that each list element (an `sf`- data frame) comes with the same columns, we only keep the `osm_id` and the `shop` columns with the help of another `map`-loop.
 This is not a given since OSM contributors are not equally meticulous when collecting data.
 Finally, we `rbind` all shops into one large `sf`-object.
 
@@ -433,7 +431,7 @@ poi = reclassify(poi, rcl = rcl_poi, right = NA)
 names(poi) = "poi"
 ```
 
-## Finding suitable locations
+## Identifying suitable locations
 
 As usual in (geo-)data science, the data retrieval and preprocessing represented the lion's share of the overall workload.
 The final workstep, the calculation of a final score by summing up all prepared rasters, is a simple one-liner.
@@ -489,7 +487,7 @@ We could continue the analysis as follows:
 
 - Find an optimal location based on number of inhabitants within a specific catchment area.
 For example, the shop should be reachable for as much people as possible within 15 minutes of traveling bike distance (catchment area routing).
-Thereby, we should account for the fact that the farther away the people are from the shop, the more unlikely it becomes that the actually visit it (distance decay function).
+Thereby, we should account for the fact that the farther away the people are from the shop, the more unlikely it becomes that they actually visit it (distance decay function).
 - Also it would be a good idea to take into account competitors. 
 That is, if there already is a bike shop in the vicinity of the chosen location, one has to distribute possible customers (or sales potential) between the competitors [@huff_probabilistic_1963; @wieland_market_2017].
 - We need to find suitable and affordable real estate (accessible, parking spots, frequency of passers-by, big windows, friendly staff, etc.).
