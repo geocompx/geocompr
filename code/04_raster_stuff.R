@@ -53,8 +53,8 @@ p_1 = spplot(r, xlim = c(-1.5, 2), ylim = c(-1.5, 1.5),
 
 # add another subsetting example (masking)
 r_mask = raster(nrow = 6, ncol = 6, res = 0.5, 
-             xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-             vals = sample(c(NA, TRUE), 36, replace = TRUE))
+                xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+                vals = sample(c(NA, TRUE), 36, replace = TRUE))
 masked = r[r_mask, drop = FALSE]
 p_2 = spplot(r_mask, col.regions = colfunc(2), colorkey = FALSE, 
              xlim = c(-1.5, 2),

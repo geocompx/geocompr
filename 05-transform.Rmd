@@ -1,0 +1,537 @@
+# Geometric operations {#transform}
+
+## Prerequisites {-}
+
+- This chapter requires the packages **tidyverse**, **sf**, **raster**:
+
+```{r, message=FALSE}
+library(tidyverse)
+library(sf)
+library(lwgeom)
+library(raster)
+```
+
+- It also relies on **spData** and **spDataLarge**, which load `cycle_hire_osm` dataset and provide external files:
+
+```{r, message=FALSE}
+library(spData)
+library(spDataLarge)
+```
+
+## Introduction
+
+<!-- Maybe the solution could be to have three chapters: -->
+
+<!-- - attribute operations -->
+<!-- - spatial operations -->
+<!-- - geometric operations -->
+<!-- - This is also basically what Jakub was proposing, right?. Geometric operations also include reprojections. Then we could split the chapter again into vector and raster subsections. And the raster sections would include raster alignment, aggregations (change of resolution) and reprojections. -->
+<!-- geocoding? -->
+
+As stated in Chapter \@ref(crs-intro), it is important to understand which CRS you are working in when undertaking spatial operations.
+Many spatial operations assume that you are using a *projected* CRS (on a Euclidean grid with units of meters rather than a geographic 'lat/lon' grid with units of degrees).
+The GEOS engine underlying most spatial operations in **sf**, for example, assumes your data is in a projected CRS.
+For this reason **sf** contains a function for checking if geometries have a geographic or projected CRS.
+This is illustrated below using the example of *London*:
+
+```{r}
+london = st_sf(geometry = st_sfc(st_point(c(-0.1, 51.5))))
+st_is_longlat(london)
+```
+
+The results show that when geographic data is created from scratch, or is loaded from a source that has no CRS metadata, the CRS is unspecified by default.
+CRS can be set with the `st_set_crs` function:^[CRS could be also added when creating the object with the following command: `st_sf(geometry = st_sfc(st_point(c(-0.1, 51.5))), crs = 4326)`]
+
+```{r}
+london = st_set_crs(london, 4326)
+st_is_longlat(london)
+```
+
+Spatial operations on objects without a CRS run on the implicit assumption that they are projected, even when in reality they are not.
+This can be seen by creating a buffer of one degree around the `london` point:
+
+```{r}
+london_buff = st_buffer(london, dist = 1)
+```
+
+Note the message warning users that the operation may not work correctly and because the distance is degrees (which is not really a measure of distance, unlike meters).
+The small step of setting the CRS may seem inconsequential but has important consequences, illustrated in Figure \@ref(fig:crs-buf).
+This shows how the buffer created in the geographic CRS is dramatically elongated in the north-south direction due to the thinning of the vertical lines of longitude towards the Earth's poles.  
+
+```{r crs-buf, fig.cap="Buffer on data with geographic CRS.", fig.asp=1}
+plot(london_buff, graticule = st_crs(4326), axes = TRUE)
+plot(london, add = TRUE)
+```
+
+This example does not mean that the CRS should not be set (it almost always should!) but that many spatial operations should be undertaken on projected geographic data.
+The following command creates a version of the `london` reprojected onto the British National Grid CRS (EPSG:27700):
+
+```{r}
+london_proj = st_transform(london, crs = 27700)
+```
+
+This projected CRS has units in meters. 
+One degree at the equator represents 111,320 meters and we can use this value to create our buffer:
+
+```{r}
+london_proj_buff = st_buffer(london_proj, 111320)
+```
+
+The result in Figure \@ref(fig:crs-buf-proj) shows that buffers based on a projected CRS are not distorted and we can expect the same distance from our point to every part of the buffer's border.
+
+```{r crs-buf-proj, fig.cap="Buffer on data with projected CRS.", fig.asp=1}
+plot(london_proj_buff, graticule = st_crs(27700), axes = TRUE)
+plot(london_proj, add = TRUE)
+```
+
+## Geometric operations on vector data
+
+### Reprojecting
+
+While CRSs can be set manually, it is more common in real world applications to *transform* a known CRS into another.
+CRS transformation could be vital to obtain proper results in many cases.
+A typical example is when geometry data is provided in a geographic CRS but you want to do spatial operations, which require it to be in a projected CRS.
+It includes distance measurements or area calculations.
+CRS also represent spatial relationship between datasets.
+Therefore, spatial operations on many datasets can only be correctly performed when all the data have the same CRS.
+The most common reason to unify the CRS is to combine different datasets or apply methods which need at least two objects.
+Let's use real-world examples to illustrate this.
+
+Vector data on the most basic level is represented by individual points, and points create more complex objects, such as lines and polygons.
+Spatial reprojection of vectors is a mathematical transformation of coordinates of these point.
+Depending on projections used, reprojection could be either lossy or lossless.
+For example, loss of spatial information could occur when the new CRS is only adequate for smaller area than input vector.
+The precision could be also lost when transformation is between coordinate systems that have different datum - in those situations approximations are used.
+However, in most cases CRS vector transformation is lossless.
+
+The dataset `cycle_hire_osm` represents all cycle hire locations across London, taken from OpenStreetMap (OSM).
+It is automatically loaded by the **spData** package, meaning we do not have to load it, and its CRS can be queried as follows:
+
+```{r}
+st_crs(cycle_hire_osm)
+```
+
+CRS in R can be described as an `epsg` code or a `proj4string` definition, as described in section \@ref(crs-in-r).
+Let's create a new version of `cycle_hire_osm` in a projected CRS, using the `epsg` number of 27700:
+
+```{r}
+cycle_hire_osm_projected = st_transform(cycle_hire_osm, 27700)
+st_crs(cycle_hire_osm_projected)
+```
+
+<!-- plot -->
+<!-- ```{r} -->
+<!-- par_old = par() -->
+<!-- par(mfrow = c(1, 2)) -->
+<!-- plot(cycle_hire_osm$geometry, axes = TRUE) -->
+<!-- plot(cycle_hire_osm_projected$geometry, axes = TRUE) -->
+<!-- par(par_old) -->
+<!-- ``` -->
+
+Note that the result shows that the `epsg` has been updated and that `proj4string` element of the CRS now contains, among other things `+proj=tmerc` (meaning it is a projected CRS using the [tranverse Mercator](https://en.wikipedia.org/wiki/Transverse_Mercator_projection) projection) and `+units=m` (meaning the units of the coordinates are meters).
+Another function, from the **rgdal** library, provides a note containing the name of the CRS:
+
+```{r}
+crs_codes = rgdal::make_EPSG()[1:2]
+dplyr::filter(crs_codes, code == 27700)
+```
+
+The result shows that the EPSG code 27700 represents the British National Grid, a result that could have been found by searching online for "[CRS 27700](https://www.google.com/search?q=CRS+27700)".
+The formula that converts a geographic point into a point on the surface of the Earth is provided by the `proj4string` element of the `crs` (see [proj4.org](http://proj4.org/) for further details):
+
+```{r}
+st_crs(27700)$proj4string
+```
+
+```{block2 type='rmdnote'}
+The EPSG code can be found inside the `crs` attribute of the object's geometry.
+It is hidden from view for most of the time except when the object is printed but can be can identified and set using the `st_crs` function, for example `st_crs(cycle_hire_osm)$epsg`.
+```
+
+Existing CRS are well suited for most purposes.
+<!-- examples -->
+In the same time, `proj4string` definitions are highly modifiable and allow for CRS customization.
+<!-- as we mentioned in section \@ref(crs-in-r). -->
+We can present that using selected world projections.
+The Mollweide projection is recommended when it is important to preserve areas [@jenny_guide_2017] (Figure \@ref(fig:mollproj)).
+To use this projection, we need to specify it using the `proj4string` element, `"+proj=moll"`, in the `st_transform` function:
+
+```{r}
+world_mollweide = st_transform(world, crs = "+proj=moll")
+```
+<!-- plot(world_mollweide$geom) -->
+<!-- plot(world_mollweide$geom, graticule = TRUE) -->
+
+```{r mollproj, echo=FALSE, fig.cap="Mollweide projection of the world", warning=FALSE}
+par_old = par()
+par(mar = c(0, 0, 1, 0))
+plot(world_mollweide$geom, graticule = TRUE, main = "the Mollweide projection")
+par(par_old)
+```
+
+On the other hand, the goal for many visualization purposes is to have a map with minimized area, direction, and distance distortions.
+One of the most popular projection to achieve that is Winkel tripel (Figure \@ref(fig:wintriproj)).^[This projection is used, among others, by the National Geographic Society.]
+The `st_transform_proj` function allows for coordinates transformations to the Winkel tripel projection: 
+
+```{r}
+world_wintri = st_transform_proj(world, crs = "+proj=wintri")
+```
+<!-- plot(world_wintri$geom) -->
+<!-- plot(world_wintri$geom, graticule = TRUE) -->
+
+```{r wintriproj, echo=FALSE, fig.cap="Winkel tripel projection of the world", warning=FALSE}
+world_wintri_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>% 
+  st_transform_proj(crs = "+proj=wintri")
+par_old = par()
+par(mar = c(0, 0, 1, 0))
+plot(world_wintri_gr$geometry, main = "the Winkel tripel projection", col = "grey")
+plot(world_wintri$geom, add = TRUE)
+par(par_old)
+```
+
+```{block2 type='rmdnote'}
+Two main functions for transformation of simple features coordinates are `sf::st_transform()` and `lwgeom::st_transform_proj()`. 
+The `st_transform` function uses the GDAL interface to PROJ.4, while `st_transform_proj()` uses the PROJ.4 API directly.
+The first one is appropriate in most situations, and provides a set of the most often used parameters and well defined transformations.
+The second one allows for a greater customization of a projection, which includes cases when some of the PROJ.4 parameters (e.g. `+over`) or projection (`+proj=wintri`) is not available in `st_transform()`.
+```
+
+Moreover, PROJ.4 parameters can be modified in most CRS definitions.
+The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on longitude and latitude of `0` (Figure \@ref(fig:laeaproj1)).
+
+```{r}
+world_laea1 = st_transform(world, crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_0=0")
+```
+<!-- plot(world_laea1$geom) -->
+<!-- plot(world_laea1$geom, graticule = TRUE) -->
+
+```{r laeaproj1, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on longitude and latitude of 0", warning=FALSE}
+par_old = par()
+par(mar = c(0, 0, 1, 0))
+plot(world_laea1$geom, graticule = TRUE, main = "the Lambert azimuthal equal-area projection")
+par(par_old)
+```
+
+We can change the PROJ.4 parameters, for example the center of the projection using the `+lon_0` and `+lat_0` parameters. 
+The code below gives the map centered on New York City (Figure \@ref(fig:laeaproj2)).
+
+```{r}
+world_laea2 = st_transform(world, crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40")
+```
+<!-- plot(world_laea2$geom) -->
+<!-- plot(world_laea2$geom, graticule = TRUE) -->
+
+```{r laeaproj2, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on New York City", warning=FALSE}
+par_old = par()
+par(mar = c(0, 0, 1, 0))
+plot(world_laea2$geom, graticule = TRUE, main = "the Lambert azimuthal equal-area projection")
+par(par_old)
+```
+
+More information about CRS modification can be found in the [Using PROJ.4](http://proj4.org/usage/index.html) documentation.
+
+<!-- https://github.com/r-spatial/lwgeom/issues/6 -->
+<!-- ```{r} -->
+<!-- # devtools::install_github("r-spatial/lwgeom") -->
+<!-- library(lwgeom) -->
+<!-- world_3 = st_transform_proj(world, crs = "+proj=wintri") -->
+<!-- plot(world_3$geom) -->
+<!-- ``` -->
+<!-- http://bl.ocks.org/vlandham/raw/9216751/ -->
+
+### Geometry transformation
+<!-- or ## Geometry processing -->
+<!-- Geometry transformations (e.g. clipping, buffers, centroids) -->
+<!-- (within which could go a small example showing affine transformations) -->
+
+#### Clipping 
+
+Spatial clipping is a form of spatial subsetting that involves changes to the `geometry` columns of at least some of the affected features.
+
+Clipping can only apply to features more complex than points: 
+lines, polygons and their 'multi' equivalents.
+To illustrate the concept we will start with a simple example:
+two overlapping circles with a center point one unit away from each other and radius of one:
+
+```{r points, fig.cap="Overlapping circles."}
+b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
+b = st_buffer(b, dist = 1) # convert points to circles
+l = c("x", "y")
+plot(b)
+text(x = c(-0.5, 1.5), y = 1, labels = l) # add text
+```
+
+Imagine you want to select not one circle or the other, but the space covered by both `x` *and* `y`.
+This can be done using the function `st_intersection()`, illustrated using objects named `x` and `y` which represent the left and right-hand circles:
+
+```{r}
+x = b[1]
+y = b[2]
+x_and_y = st_intersection(x, y)
+plot(b)
+plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
+```
+
+The subsequent code chunk demonstrate how this works for all combinations of the 'Venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book R for Data Science [@grolemund_r_2016].
+<!-- Todo: reference r4ds -->
+
+```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators.", warning=FALSE}
+old_par = par()
+par(mfrow = c(3, 3), mai = c(0.1, 0.1, 0.1, 0.1))
+plot(b)
+y_not_x = st_difference(y, x)
+plot(y_not_x, col = "grey", add = TRUE)
+text(x = 0.5, y = 1, "st_difference(y, x)")
+plot(b)
+plot(x, add = TRUE, col = "grey")
+text(x = 0.5, y = 1, "x")
+plot(b, add = TRUE)
+x_or_y = st_union(x, y)
+plot(x_or_y, col = "grey")
+text(x = 0.5, y = 1, "st_union(x, y)")
+x_and_y = st_intersection(x, y)
+plot(b)
+plot(x_and_y, col = "grey", add = TRUE) 
+text(x = 0.5, y = 1, "st_intersection(x, y)")
+# x_xor_y = st_difference(x_xor_y, x_and_y) # failing
+x_not_y = st_difference(x, y)
+x_xor_y = st_sym_difference(x, y)
+plot(x_xor_y, col = "grey")
+text(x = 0.5, y = 1, "st_sym_difference(x, y)")
+plot.new()
+plot(b)
+plot(x_not_y, col = "grey", add = TRUE)
+text(x = 0.5, y = 1, "st_difference(x, y)")
+plot(b)
+plot(y, col = "grey", add = TRUE)
+plot(b, add = TRUE)
+text(x = 0.5, y = 1, "y")
+par(old_par)
+```
+
+To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
+Some points will be inside just one circle, some will be inside both and some will be inside neither.
+
+There are two different ways to subset points that fit into combinations of the circles: via clipping and logical operators.
+But first we must generate some points.
+We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y`.
+To generate this points will use a function not yet covered in this book, `st_sample()`.
+Next we will generate the situation plotted in Figure \@ref(fig:venn-subset):
+
+```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y."}
+bb = st_bbox(st_union(x, y))
+pmat = matrix(c(bb[c(1, 2, 3, 2, 3, 4, 1, 4, 1, 2)]), ncol = 2, byrow = TRUE)
+box = st_polygon(list(pmat))
+set.seed(2017)
+p = st_sample(x = box, size = 10)
+plot(box)
+plot(x, add = TRUE)
+plot(y, add = TRUE)
+plot(p, add = TRUE)
+text(x = c(-0.5, 1.5), y = 1, labels = l)
+```
+
+```{r, echo=FALSE}
+# An alternative way to sample from the bb
+bb = st_bbox(st_union(x, y))
+pmulti = st_multipoint(pmat)
+box = st_convex_hull(pmulti)
+```
+
+#### Centroids
+
+```{r}
+nz_centroid = st_centroid(nz)
+```
+
+```{r}
+nz_pos = st_point_on_surface(nz)
+```
+
+```{r, warning=FALSE, echo=FALSE}
+par_old = par()
+par(mar = c(0, 0, 1, 0))
+plot(nz$geometry)
+plot(nz_centroid$geometry, add = TRUE)
+plot(nz_pos$geometry, add = TRUE, col = "red")
+par(par_old)
+```
+
+### Type transformation
+<!-- or Geometry cast -->
+<!-- Changing the geometry type while the fundamental data remains unchanged ('casting') -->
+<!-- I think vector/raster conversion could either be part of point 1 or something else -->
+<!-- I think the brick-raster-stack could be part of 1 - a type transformation... -->
+<!-- - raster to vector -->
+<!-- - vector to raster -->
+<!-- - st_cast -->
+<!-- st_point_on_surface -->
+<!-- st_centroid -->
+<!-- st_polygonize -->
+
+```{r}
+nz_points = st_cast(nz, "MULTIPOINT")
+```
+
+```{r, warning=FALSE, echo=FALSE}
+par_old = par()
+par(mar = c(0, 0, 1, 0))
+plot(nz$geometry)
+plot(nz_points$geometry, add = TRUE, cex = 0.75, col = "red")
+par(par_old)
+```
+
+<!-- ### Class conversion -->
+<!-- placeholder for: -->
+<!-- sf -> sp -->
+<!-- sp -> sf -->
+<!-- stars; https://github.com/r-spatial/stars/blob/master/vignettes/blog1.Rmd -->
+
+### Simplification
+<!-- - simplifications -->
+<!-- st_simplify -->
+<!-- line example -->
+<!-- rmapshaper -->
+<!-- polygon example -->
+
+### Rasterization
+
+## Geometric operations on raster data
+
+### Reprojecting
+
+The basic concepts of CRS apply to both vector and raster data model.
+However, there are important differences in reprojection of vectors and rasters.
+Transformation of CRS in vector data changes coordinates of each vertex. 
+This do not apply to raster data.
+Rasters are are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters).
+To preserve this property, it is impossible to transform coordinates of cells separately.
+This entails that a new raster could have a different number of columns and rows, and therefore different number of cells that the original one.
+Therefore, values of these new cells need to be estimated after a geometric operation is completed.
+The `projectRaster()` function's role is to reproject `Raster*` objects into a new object with another coordinate reference system. 
+Compared to `st_tranform()`, `projectRaster()` only accepts the `proj4string` definitions.
+
+```{block2 type='rmdnote'}
+It is possible to use a EPSG code in a `proj4string` definition with `"+init=epsg:MY_NUMBER"`.
+For example, one can use the `"+init=epsg:4326"` definition to set CRS to WGS84 (EPSG code of 4326).
+The PROJ.4 library automaticaly adds the rest of parameters and converts it into `"+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"`,
+```
+
+Let's take a look at two examples of raster transformation - using categorical and continuous data.
+Land cover data are usually represented by categorical maps.
+The `nlcd2011.tif` file provides information for a small area in Utah, USA obtained from [National Land Cover Database 2011](https://www.mrlc.gov/nlcd2011.php) in the NAD83 / UTM zone 12N CRS.
+
+```{r}
+cat_raster = raster(system.file("raster/nlcd2011.tif", package = "spDataLarge"))
+cat_raster
+```
+
+In this region, 14 land cover classes were distinguished^[Full list of NLCD2011 land cover classes can be found at https://www.mrlc.gov/nlcd11_leg.php]:
+
+```{r}
+unique(cat_raster)
+```
+
+When reprojecting categorical raster, we need to ensure that our new estimated values would still have values of our original classes.
+This could be done using the nearest neighbor method (`ngb`).
+In this method, value of the output cell is calculated based on the nearest cell center of the input raster.
+
+For example, we want to change the CRS to WGS 84.  
+It can be desired when we want to visualize a raster data on top of a web basemaps, such as the Google or OpenStreetMap map tiles.
+The first step is to obtain the proj4 definition of this CRS, which can be done using the [http://spatialreference.org](http://spatialreference.org/ref/epsg/wgs-84/) webpage. 
+The second and last step is to define the reprojection method in the `projectRaster()` function, which in case of categorical data is the nearest neighbor method (`ngb`):
+
+```{r}
+wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "ngb")
+cat_raster_wgs84
+```
+
+Many properties of the new object differs from the previous one, which include the number of columns and rows (and therefore number of cells), resolution (transformed from meters into degrees), and extent.
+In the same time, it keeps the same land cover classes - `unique(cat_raster_wgs84)`.
+<!-- freq(cat_raster_wgs84) -->
+<!-- freq(cat_raster) -->
+
+This process of reprojection is almost identical for continuous data.
+The `srtm.tif` file contains digital elevation model for the same area in Utah from [the Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/).
+Each value in this raster represents elevation measured in meters.
+
+```{r}
+con_raster = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
+con_raster
+```
+
+The nearest neighbor method should not be used for continuous raster data, as we want to preserve gradual changes in values.
+Alternatively, continuous data could be reprojected in the **raster** package using the bilinear method. 
+In this technique, value of the output cell is calculated based on four nearest cells in the original raster. 
+The new value is a weighted average of values from these four cells, adjusted for their distance from the center of the output cell. 
+This dataset has geographic CRS and we want to transform it into projected CRS.
+
+```{block2 type='rmdnote'}
+All the grid cells in equal-area projections have the same size.
+Therefore, these projections are recommended when performing many raster operations, such as distance calculations.
+```
+
+In the fist step we need to obtain the proj4 definition of the existing projected CRS appropriate for this area or create a new one using the [Projection Wizard](http://projectionwizard.org/) online tool [@savric_projection_2016].
+For this example, we used the Oblique Lambert azimuthal equal-area projection.
+The second step is to define the `bilinear` reprojection method:
+
+```{r}
+equalarea = "+proj=laea +lat_0=37.32 +lon_0=-113.04"
+con_raster_ea = projectRaster(con_raster, crs = equalarea, method = "bilinear")
+con_raster_ea
+```
+
+Reprojection of continuous rasters also changes spatial properties, such as the number of cells, resolution, and extent.
+Moreover, it slightly modifies values in the new raster, which can be seen by comparing the outputs of the `summary()` function between `con_raster` and `con_raster_ea`.
+
+```{r, eval=FALSE}
+summary(con_raster)
+summary(con_raster_ea)
+```
+
+<!-- why new na? -->
+
+<!-- res option in projectRaster? -->
+<!-- note1: in most of the cases reproject vector, not raster-->
+<!-- note2: equal area projections are the best for raster calculations -->
+<!-- q: should we mentioned gdal_transform? -->
+
+### Raster alignment
+
+### Aggregation
+
+### Polygonization
+
+## Exercises
+
+<!-- CRS CONVERSION -->
+<!-- 1. vector reprojection exercise (e.g. modification of proj4) -->
+1. Transform the `world` dataset to the transverse Mercator projection (`"+proj=tmerc"`) and plot the result.
+What has changed and why?
+Try to transform it back into WGS 84 and plot the new object.
+Why the new object differs from the original one?
+<!-- https://github.com/r-spatial/sf/issues/509 -->
+<!-- ```{r} -->
+<!-- world_tmerc = st_transform(world, "+proj=tmerc") -->
+<!-- plot(world_tmerc$geom) -->
+<!--  world_4326 = st_transform(world_tmerc, 4326) -->
+<!-- plot(world_4326$geom) -->
+<!-- ``` -->
+1. Try to transform the categorical raster (`cat_raster`) into WGS 84 using the bilinear interpolation method. 
+What has changed?
+How it influences the results?
+<!-- ```{r} -->
+<!-- wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" -->
+<!-- cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "bilinear") -->
+<!-- cat_raster_wgs84 -->
+<!-- ``` -->
+1. Try to transform the continuous raster (`cat_raster`) into WGS 84 using the nearest neighbor interpolation method. 
+What has changed?
+How it influences the results?
+<!-- ```{r} -->
+<!-- con_raster = raster(system.file("raster/srtm.tif", package="spDataLarge")) -->
+<!-- con_raster_wgs84 = projectRaster(con_raster, crs = wgs84, method = "ngb") -->
+<!-- con_raster_wgs84 -->
+<!-- ``` -->
+<!-- GEOMETRY TRANSFORMATION -->

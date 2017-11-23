@@ -13,20 +13,20 @@ library(raster)
 
 ## Introduction
 
-The previous chapters provided an overview of spatial data classes in R, with a focus on simple features and rasters.
-This chapter is about getting spatial data onto your computer and then, perhaps after processing it with techniques described in this book, back out to the world.
-Before we can even think about processing data, we need to retrieve it, i.e. we need to know which sources are at our disposal (section \@{#retrieving-data}).
-Having data, we need to know how we can import them in our software.
-<!-- so far, I haven't seen a discussion on the pros and cons -->
-Therefore, it is important to be aware of the most often used spatial file formats and their pros and cons (see section \@ref(file-formats)).
-For the same purposes knowing how to efficiently read and write spatial data is crucial (see sections \@ref(data-input) and \@ref(data-output)).
-We also include a section (\@ref(visual-outputs)) on visualization because outputting data in a human (not just computer) readable format enables non-programmers to benefit from your work.
+This chapter is about reading and writing geographic data.
+Geographic data *import* is an essential part of geocomputational software because without data real-world applications are impossible.
+The skills taught in this book will enable you to *add value* to data meaning that, for others to benefit from the results, data *output* is also vital.
+These two processes go hand-in-hand and are referred to as I/O --- short for input/output --- in Computer Science [@gillespie_efficient_2016].
+Hence the title of this chapter.
 
-I/O is short for "input/output" which means, in plain English, "reading and writing data".
-We use the acronym instead of plain English not to confuse you or to make chapter names short, but because that is the term used in computer science, and it is useful to think of data import and export from a computing perspective.^[
-Concepts such as computational efficiency, hard disk space and 'idempotence' are useful when thinking about reading and writing geographic datasets, which can become large and difficult to handle.
-Loading/saving data is yet another way of saying the same thing.
-]
+Geographic data I/O is almost always part of a wider process.
+It depends on knowing which datasets are *available*, where they can be *found* and how to *retrieve* them, topics covered in section \@ref(retrieving-data).
+This section demonstrates how to access open access *geoportals* which collectively contain many terrabytes of data.
+There is a wide range of geographic file formats, each of which has pros and cons.
+These are described in section \@ref(file-formats).
+The process of actually reading and writing such file formats efficiently is not covered until sections \@ref(data-input) and \@ref(data-output) respectively.
+The final section (\@ref(visual-outputs)) demonstrates methods for saving visual outputs (maps), in preparation for a subsequent chapter dedicated to visualization.
+<!-- Todo: Add reference to vis chapter (RL) -->
 
 ## Retrieving open data {#retrieving-data}
 
@@ -34,18 +34,17 @@ Nowadays, a vast amount of spatial data is available on the internet.
 Best of all, much of it is freely available.
 You just have to know where to look.
 While we cannot provide a comprehensive guide to all available geodata, we point to a few of the most important sources.
-Overall, geolibraries and geoportals facilitate the search and download of geodata.
-Geolibraries are a very useful data source but often only contain data for a specific locations.
-Then the might struggle to find the exact geolibrary matching his or her demands.
-Here, geolibraries come to the rescue bundling the information of a collection of geolibraries.
-If you are looking for data from all over the world, the [GEOSS portal](http://www.geoportal.org/) might be a good starting point.
-We also would like you to point to the [EarthExplorer](https://earthexplorer.usgs.gov/) and the [Copernicus Open Access Hub](https://scihub.copernicus.eu/) for a wide variety of global datasets including multispectral and radar images.
-European data is available from the Initiative for spatial information in the European Community ([INSPIRE][http://inspire-geoportal.ec.europa.eu/)).
-This [Wikipedia article](https://en.wikipedia.org/wiki/Geoportal) lists a few more interesting geoportals.
+Various 'geoportals' (web services providing geographic data such as the geospatial datasets in [Data.gov](https://catalog.data.gov/dataset?metadata_type=geospatial)) are a good place to start, providing a wide range of geographic data.
+Geoportals are a very useful data source but often only contain data for a specific locations (see the [Wikipedia page on geoportals](https://en.wikipedia.org/wiki/Geoportal) for a list of geoportals covering many areas of the world).
+
+To overcome this limitation some global geoportals have been developed.
+The [GEOSS portal](http://www.geoportal.org/), for example, provides global remote sensing data.
+Additional geoportals with global coverage and an emphasis on raster data include the [EarthExplorer](https://earthexplorer.usgs.gov/) and the [Copernicus Open Access Hub](https://scihub.copernicus.eu/).
+A wealth of European data is available from the [INSPIRE geoportal](http://inspire-geoportal.ec.europa.eu/).
 
 Typically, geoportals provide an interface that lets you query interactively the existing data (spatial and temporal extent, and product).
 However, in this book we encourage you to create reproducible workflows.
-Automated data downloads are often possible through simple download calls or specific APIs (e.g., have a look at the Sentinel API), which saves human working time, and allows to easily repeat and update this process in the future. 
+In many cases data downloads can be scripted via download calls to static URLs or APIs (see the [Sentinel API](https://scihub.copernicus.eu/twiki/do/view/SciHubWebPortal/APIHubDescription) for example), saving time, and enabling others to repeat and update the unglamorous data download process. 
 
 Traditionally, files have been stored on servers.
 <!-- that's probably not the best example - replace it with something better -->
@@ -62,7 +61,7 @@ unzip(zipfile = "USA_parks.zip")
 usa_parks = st_read("ne_10m_parks_and_protected_lands_area.shp")
 ```
 
-Specific R packages providing an interface to geolibraries or geoportals are even more user-friendly (Table \@ref(tab:datapackages)).
+Specific R packages providing an interface to spatial libraries or geoportals are even more user-friendly (Table \@ref(tab:datapackages)).
 
 <!-- add sentinel2 package as soon as it is published on CRAN https://github.com/IVFL-BOKU/sentinel2-->
 ```{r datapackages, echo=FALSE}
@@ -110,6 +109,21 @@ worldclim_prec = getData(name = "worldclim", var = "prec", res = 10)
 class(worldclim_prec)
 ```
 
+A third example uses the recently developed package **osmdata** [@R-osmdata] to find parks from the OpenStreetMap (OSM) database.
+As illustrated in the code-chunk below, queries begin with the function `opq()` (short for OpenStreetMap query), the first argument of which is bounding box, or text string representing a bounding box (the city of Leeds in this case).
+The result is passed to a function for selecting which OSM elements we're interested in (parks in this case), represented by *key-value pairs*, which in turn is passed to the function `osmdata_sf()` which does the work of downloading the data and converting it into a list of `sf` objects (see `vignette('osmdata')` for further details):
+
+```{r, eval=FALSE}
+library(osmdata)
+parks = opq(bbox = "leeds uk") %>% 
+  add_osm_feature(key = "leisure", value = "park") %>% 
+  osmdata_sf()
+```
+
+OpenStreetMap is a vast global database of crowd-sourced data and it is growing by the minute.
+Although the quality is not as spatially consistent as many official datasets, OSM data have many advantages: they are globally available free of charge and using crowd-source data can encourage 'citizen science' and contributions back to the digital commons.
+Have a look at sections \@ref(location) and \@ref(gis) for further examples of how to use **osmdata** in applied research.
+
 Finally, R packages might contain or just consist of spatial data (e.g., package **spData**).
 You can access such data with the `data()` function.
 For example, you can get a list of dataset in a package, `data(package = "spData")`.
@@ -126,12 +140,12 @@ Find more information on getting data using R packages in [section 5.5](https://
 
 ## File formats
 
-Spatial data is usually stored as files or in geodatabases. 
-File-based data formats can contain either vector or raster data, while geodatabases could store both.
+Spatial data is usually stored as files or in spatial databases. 
+File-based data formats can contain either vector or raster data, while spatial databases could store both.
 Historically, GIS file formats were developed by mapping agencies and software companies. <!--examples-->
 Exchanging spatial data between different software packages each coming with its own format was troublesome in the beginning.
 
-GDAL ^[prounounce "goo-dal", with the double o making a reference to object-orientation]put an end to these troubles by enabling reading and writing many raster and vector data formats.
+GDAL^[prounounce "goo-dal", with the double o making a reference to object-orientation] put an end to these troubles by enabling reading and writing many raster and vector data formats.
 Subsequently, many open and proprietary GIS software (e.g., GRASS, QGIS, ArcGIS, ENVI) were quick to incorporate it.
 <!-- GDAL (it's great - you can read, convert, and very often (though not always) write) -->
 <!-- GDAL info "it is possible to have smaller number of supported formats than there are on the GDAL webpage; you may need to recompile..." -->
@@ -168,6 +182,7 @@ file_formats = tibble::tribble(~Name, ~Extension, ~Info, ~Type, ~Model,
 knitr::kable(file_formats, caption = "Selected spatial file formats.")
 ```
 
+<!-- http://switchfromshapefile.org/ -->
 <!-- 3. JPEG - (possibly mention SAGA's sdat, Erdas Imagine) -->
 <!-- 1. SQLite/SpatialLite + mention GRASS (uses SQLite) -->
 <!-- 3. WKT/WKB for transfering and storing geometry data on databases. PostGIS (has even its own raster WKT (https://trac.osgeo.org/postgis/wiki/WKTRasterTutorial01); WKT also supported by Spatiallite, Oracle, MySQL, etc. (https://en.wikipedia.org/wiki/Well-known_text#RDBMS_Engines_that_provide_support) -->
@@ -185,11 +200,11 @@ All of them load the data into R or, more precisely, assign objects to your work
 Spatial vector data comes in a wide variety of file formats, most of which can be read-in via the **sf** function `st_read()`.
 Behind the scenes this calls GDAL.
 To find out which data formats **sf** supports, run `st_drivers()`. 
-Here, we show only the first two drivers (see Table \@ref(tab:drivers)):
+Here, we show only the first five drivers (see Table \@ref(tab:drivers)):
 
 ```{r, eval=FALSE}
 sf_drivers = st_drivers()
-head(sf_drivers, n = 2)
+head(sf_drivers, n = 5)
 ```
 
 ```{r drivers, echo=FALSE}
@@ -205,7 +220,6 @@ In most cases, as with the ESRI Shapefile (`.shp`) or the `GeoPackage` format (`
 `st_read()` guesses the driver based on the file extension, as illustrated for a `.gpkg` file below:
 
 ```{r}
-library(sf)
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
 world = st_read(vector_filepath)
 ```
@@ -248,14 +262,25 @@ In these situations, it is possible to add the missing information using the `st
 Please refer also to section \@ref(crs-intro) for more information.
 ```
 
+As a final example, we will show how `st_read()` also reads KML files.
+A KML file stores geographic information in XML format - a data format for the creation of web pages and the transfer of data in an application-independent way [@nolan_xml_2014].
+Here, we access a KML file from the web.
+This file contains more than one layer.
+`st_layers()` lists all available layers.
+We choose the first layer `Placemarks` and say so with the help of the `layer` parameter in `read_sf()`.
+
+```{r}
+url = "https://developers.google.com/kml/documentation/KML_Samples.kml"
+st_layers(url)
+kml = read_sf(url, layer = "Placemarks")
+```
+
 ### Raster data
 
 Similar to vector data, raster data comes in many file formats with some of them supporting even multilayer files.
 **raster**'s `raster()` command reads in a single layer.
 
 ```{r, message=FALSE}
-library(raster)
-library(spDataLarge)
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 single_layer = raster(raster_filepath)
 ```
@@ -276,6 +301,9 @@ multilayer_stack = stack(multilayer_filepath)
 ```
 
 Please refer to section \@ref(raster-classes) for information on the difference between raster stacks and bricks.
+
+<!-- ### Databases -->
+<!-- postgis input example -->
 
 ## Data output (O) {#data-output}
 
@@ -341,7 +369,6 @@ This can be done by specifying `GEOMETRY` inside of `layer_options`.
 It could be either `AS_XY` for simple point datasets (it creates two new columns for coordinates) or `AS_WKT` for more complex spatial data (one new column is created which contains the well-known-text representation of spatial objects).
 
 ```{r, eval=FALSE}
-library(spData)
 st_write(cycle_hire_xy, "cycle_hire_xy.csv", layer_options = "GEOMETRY=AS_XY")
 st_write(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
 ```
@@ -402,6 +429,9 @@ writeRaster(x = single_layer,
 
 Note that `writeFormats()` returns a list with all supported file formats on your computer.
 
+<!-- ### Databases -->
+<!-- postgis output example -->
+
 ## Visual outputs
 
 R supports many different static and interactive graphics formats.
@@ -432,14 +462,13 @@ save_tmap(tm  = tmap_obj, filename = "lifeExp_tmap.png")
 <!-- a = plot(world["lifeExp"]) -->
 <!-- ``` -->
 
-On the other hand, on can save interactive maps as an HTML file using the `saveWidget()` function from the `htmlwidgets` package:
+On the other hand, on can save interactive maps created in the `mapview` package as an HTML file or image using the `mapshot()` function:
 
 <!-- example doesn't work, problem with colors I guess -->
 ```{r, eval=FALSE}
 library(mapview)
-library(htmlwidgets)
 mapview_obj = mapview(world, zcol = "lifeExp", legend = TRUE)
-saveWidget(mapview_obj, file = "my_interactive_map.html")
+mapshot(mapview_obj, file = "my_interactive_map.html")
 ```
 
 ## Exercises

@@ -23,12 +23,14 @@
 - 2017-06-15 - enhancement - Add a support for `sf` objects - https://github.com/oswaldosantos/ggsn/issues/16
 - 2017-08-03 - bug - st_join with st_relate doesn't work - https://github.com/r-spatial/sf/issues/454
 - 2017-08-03 - bug - aggregate.sf does not return an object with the same length as by - https://github.com/r-spatial/sf/issues/452
+- 2017-05-29 - enhancement - a qgis style file creator (.qml) - https://github.com/jannes-m/RQGIS/issues/70
+- 2017-06-06 - enhancement - skim of `sf` objects - https://github.com/ropenscilabs/skimr/issues/88
+- 2017-11-15 - bug - Problem with st_transform_proj - https://github.com/r-spatial/lwgeom/issues/6
+- 2017-11-22 - bug - Minor bug in rmapshaper flagged and fixed - https://github.com/ateucher/rmapshaper/issues/64
 
 ## open
 
 - 2017-04-01 - enhancement - returnclass='sf' as default - https://github.com/ropenscilabs/rnaturalearth/issues/16
-- 2017-05-29 - enhancement - a qgis style file creator (.qml) - https://github.com/jannes-m/RQGIS/issues/70
-- 2017-06-06 - enhancement - skim of `sf` objects - https://github.com/ropenscilabs/skimr/issues/88
 - 2017-07-11 - bug - Problem with plots of the multipoint type - https://github.com/mtennekes/tmap/issues/126
 - 2017-07-31 - enhancement - Add a support for the `sf` objects - https://github.com/hunzikp/velox/issues/7
 - 2017-08-23 - bug - mapedit does not seem to save the end result after editing - https://github.com/r-spatial/mapedit/issues/63
@@ -40,3 +42,4 @@
 - 2017-07-24 - PR - improve documentation of aggregate.sf **sf**
 - 2017-07-12 - Pull request accepted to **sf** exporting and documenting `as_Spatial()` - https://github.com/r-spatial/sf/pull/445
 - 2017-08-28 - PR accepted into **sf** updating the behaviour of `aggregate.sf` - https://github.com/r-spatial/sf/pull/453
+- 2017-10-15 - Question on gdal-dev helped improving GPKG writing speed - https://github.com/r-spatial/sf/issues/470#issuecomment-336735578
