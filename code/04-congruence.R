@@ -5,27 +5,29 @@ library(tmap)
 library(ukboundaries)
 # data(package = "ukboundaries") # see datasets available
 sel_wetherby = grepl("001|002", msoa2011_lds$geo_label)
-aggzones = msoa2011_lds[sel_wetherby, ]
+aggzones = st_transform(msoa2011_lds[sel_wetherby, ], 27700)
 
 # find lsoas in the aggzones (there must be a neater way...)
-lsoa_touching = lsoa2011_lds[aggzones, ]
+lsoa_touching = st_transform(lsoa2011_lds, 27700)[aggzones, ]
 lsoa_cents = st_centroid(lsoa_touching)
 lsoa_cents = lsoa_cents[aggzones, ]
-congruent = lsoa2011_lds[lsoa_cents, ]
+congruent = lsoa_touching[lsoa_cents, ]
 
 # same for ed zones
-ed_touching = ed1981[aggzones, ]
+ed_touching = st_transform(ed1981, 27700)[aggzones, ]
 ed_cents = st_centroid(ed_touching)
 ed_cents = ed_cents[aggzones, ]
-incongruent = ed1981[ed_cents, ]
+incongruent = ed_touching[ed_cents, ]
 
 # Bind the two types of shape together
-congruent$layer = "Congruent"
-congruent = congruent["layer"]
-congruent$value = "blue"
 incongruent$layer = "Incongruent"
 incongruent = incongruent["layer"]
-incongruent$value = "yellow"
+set.seed(2017)
+incongruent$value = rnorm(nrow(incongruent), mean = 5)
+incongruent_cents = st_centroid(incongruent)
+congruent$layer = "Congruent"
+congruent = congruent["layer"]
+congruent$value = aggregate(incongruent_cents["value"], congruent, mean)$value
 rx = rbind(congruent, incongruent)
 tmap_mode("plot")
 m = qtm(rx, "value", borders = "black") + tm_facets(by = "layer", drop.units = TRUE, ncol = 2) +
