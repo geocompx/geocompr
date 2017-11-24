@@ -78,7 +78,15 @@ nms = unzip(file.path(tempdir(), "census.zip"), list = TRUE)
 base_name = grep(".csv$", nms$Name, value = TRUE)
 unzip(file.path(tempdir(), "census.zip"), files = base_name, exdir = tempdir())
 # read in the csv file
-input = readr::read_csv2(file.path(tempdir(), base_name))
+census = readr::read_csv2(file.path(tempdir(), base_name))
+```
+
+```{r, echo=FALSE, eval=FALSE}
+save(census, file = "extdata/census.rda")
+```
+
+```{r, echo=FALSE}
+load("extdata/census.rda")
 ```
 
 Next we select the variables we need: x and y coordinates, the number of inhabitants (population), mean age, proportion of women and the household size (Table \@ref(tab:census-desc)). 
@@ -108,9 +116,9 @@ knitr::kable(tab,
 
 Additionally, we set the values -1 and -9 to `NA` since these values are unknown.
 
-```{r, eval = FALSE}
+```{r}
 # pop = population, hh_size = household size
-input = dplyr::select(input, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
+input = dplyr::select(census, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D,
                       hh_size = HHGroesse_D)
 # set -1 and -9 to NA
@@ -130,14 +138,6 @@ proj4string(input) = CRS("+init=epsg:3035")
 gridded(input) = TRUE
 # convert into a raster stack
 input = stack(input)
-```
-
-```{r, echo=FALSE, eval=FALSE}
-save(input, file = "extdata/input.rda")
-```
-
-```{r, echo=FALSE}
-load("extdata/input.rda")
 ```
 
 ```{r census-stack, echo = FALSE, fig.cap = "Gridded German census data of 2011. See Table \\@ref(tab:census-desc) for a description of the classes."}
@@ -414,6 +414,14 @@ shops = map(shops, dplyr::select, osm_id, shop) %>%
   reduce(rbind)
 ```
 
+```{r, echo=FALSE, eval=FALSE}
+save(shops, file = "extdata/shops.rda")
+```
+
+```{r, echo=FALSE}
+load("extdata/shops.rda")
+```
+
 It would have been easier to simply use `map_dfr()`. 
 Unfortunately, so far it does not work in harmony with `sf` objects but it will most likely in the future.
 
@@ -427,20 +435,11 @@ But one has too be careful: had we used the `shop` instead of the `osm_id` colum
 This is because the `shop` column contains `NA` values, which the `count()` function omits when rasterizing vector objects.
 Naturally, the projection of the input raster and the input vector object have to match which is why we first have to reproject our shops to the CRS of the raster object.
 
-```{r, eval = FALSE, message = FALSE}
+```{r, message = FALSE}
 shops = st_transform(shops, proj4string(input$pop))
 shops = as(shops, "Spatial")
 # create poi raster
 poi = rasterize(x = shops, y = input$pop, field = "osm_id", fun = "count")
-```
-
-
-```{r, echo=FALSE, eval=FALSE}
-save(poi, file = "extdata/poi.rda")
-```
-
-```{r, echo=FALSE}
-load("extdata/poi.rda")
 ```
 
 As with the other rasters (population, women, mean age, household size) we would like to classify the `poi` raster into four classes (see section \@ref(create-census-rasters)). 
