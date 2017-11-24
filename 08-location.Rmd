@@ -139,7 +139,7 @@ We `reclassify()` the ordinal-scaled rasters in accordance with our survey (see 
 In the case of the population data we convert the classes into a numeric data type using class means. 
 This means we use 127 for class 1 (ranging from 3 to 250 inhabitants), 375 for class 2 (ranging from 250 to 500 inhabitants), etc. (Table \@ref(tab:census-desc)).
 We arbitrarily chose 8000 inhabitants for class 6 since it represents cells where more than 8000 people live.
-Of course, this is only a simple approximation of the true population number^[you can explore the introduced error in more detail in the exercises], however, the level of detail is good enough for the purpose of delineating metropolitan areas (see next section).
+Of course, this is only a simple approximation of the true population number^[You can explore the introduced error in more detail in the exercises.], however, the level of detail is good enough for the purpose of delineating metropolitan areas (see next section).
 By contrast, we convert the remaining input rasters into weight rasters whereas the highest weights are in correspondence with our survey.
 For instance, the women class 1 (0-40%) receives a weight of 3 since our clientele is predominantly male.
 Equally, the mean age class containing the youngest people receives the highest weight as well as the single households class.
@@ -172,7 +172,7 @@ reclass = map2(as.list(input), rcl, reclassify, right = NA) %>%
   stack()
 ```
 
-## Define metropolitan areas
+### Define metropolitan areas
 
 We arbitrarily define a pixel of 20 sq-km as metropolitan if more than half a million people lives in it.
 The `aggregate()` command helps to change the resolution from 1 to 20 sq-km while each output cell represents the sum of all 1 sq-km input cells (see section \@ref(aligning-rasters)).
@@ -187,7 +187,13 @@ polys = st_as_sf(polys)
 Plotting these polygons reveals eight metropolitan regions (Fig. \@ref(fig:metro-areas)).
 Each region consists of one ore more polygons (raster cells).
 It would be nice if we could join all polygons belonging to one region.
-One approach is to dissolve all polygons (see section \@ref(spatial-data-aggregation)).
+One approach is to union the polygons.
+<!-- add reference (see section \@ref(spatial-data-aggregation)). -->
+
+<!-- ```{r} -->
+<!-- metros = st_union(polys) %>%  -->
+<!--   st_cast("POLYGON")  -->
+<!-- ``` -->
 
 ```{r, eval = FALSE}
 polys = summarize(polys, pop = sum(layer))
@@ -283,7 +289,7 @@ One could assign it to the neighboring region using another dissolving procedure
 # find out about the offending polygon
 int = st_intersects(metros, metros)
 # polygons 5 and 9 share one border, delete polygon number 5
-metros_2 = metros[-5, ]
+metros_2 = metros[-5]
 ```
 
 The defined metropolitan areas suitable for bike shops are still missing a name.
@@ -297,7 +303,7 @@ The **ggmap** package makes use of the one provided by Google.^[Note that Google
 # reverse geocoding to find out the names of the metropolitan areas
 metros_wgs = st_transform(metros_2, 4326)
 coords = st_centroid(metros_wgs) %>%
-  st_coordinates %>%
+  st_coordinates() %>%
   round(., 4)
 ```
 
@@ -326,20 +332,18 @@ metro_names = map_dfr(1:nrow(coords), function(i) {
 ```
 
 Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
-Overall, we are satisfied with the `locality` column serving as metropolitan names (München, Nürnberg, Stuttgart, Frankfurt, Hamburg, Berlin, Leipzig) bar one exception, namely Velbert.
+Overall, we are satisfied with the `locality` column serving as metropolitan names (München, Nürnberg, Stuttgart, Frankfurt, Hamburg, Berlin, Leipzig) apart from one exception, namely Velbert.
 Hence, we replace Velbert with the corresponding name in the `administrative_area_level_2` column, that is Düsseldorf (Fig. \@ref(fig:metro-areas)).
 Umlauts like `ü` might lead to trouble further on, for example when determining the bounding box of a metropolitan area with `opq()` (see further below), which is why we replace them.
 
 ```{r, eval = FALSE}
 metro_names = 
   dplyr::select(metro_names, locality, administrative_area_level_2) %>%
-  mutate(# replace Velbert
-         locality = ifelse(locality == "Velbert", administrative_area_level_2, 
+  # replace Velbert and umlaut ü
+  mutate(locality = ifelse(locality == "Velbert", administrative_area_level_2, 
                            locality),
-         # replace umlaut ü
          locality = gsub("ü", "ue", locality)) %>%
-  dplyr::select(locality) %>%
-  pull
+  pull(locality)
 ```
 
 ## Points of interest
