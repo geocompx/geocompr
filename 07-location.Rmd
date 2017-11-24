@@ -122,7 +122,7 @@ First, we use the x- and y-coordinates to convert the `data.frame` into a `Spati
 `gridded()` converts a `SpatialPolygonsDataFrame` into a `SpatialPixelsDataFrame` which in turn can be used as an input for **raster**'s `stack()` function.
 The final raster stack consists of four layers: inhabitants, mean age, portion of women and household size (Fig. \@ref(fig:census-stack)).
 
-```{r, eval = FALSE}
+```{r}
 # convert table into a raster (x and y are cell midpoints)
 coordinates(input) =~ x + y
 # use the correct projection (see data description)
@@ -130,6 +130,14 @@ proj4string(input) = CRS("+init=epsg:3035")
 gridded(input) = TRUE
 # convert into a raster stack
 input = stack(input)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+save(input, file = "extdata/input.rda")
+```
+
+```{r, echo=FALSE}
+load("extdata/input.rda")
 ```
 
 ```{r census-stack, echo = FALSE, fig.cap = "Gridded German census data of 2011. See Table \\@ref(tab:census-desc) for a description of the classes."}
@@ -146,7 +154,7 @@ By contrast, we convert the remaining input rasters into weight rasters whereas 
 For instance, the women class 1 (0-40%) receives a weight of 3 since our clientele is predominantly male.
 Equally, the mean age class containing the youngest people receives the highest weight as well as the single households class.
 
-```{r, eval = FALSE}
+```{r}
 rcl_pop = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 
                    4, 4, 3000, 5, 5, 6000, 6, 6, 8000), 
                  ncol = 3, byrow = TRUE)
@@ -159,7 +167,7 @@ rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
 ```
 
 <!-- maybe a sentence or two of explanations could be important here -->
-```{r, eval = FALSE}
+```{r}
 reclass = input
 for (i in seq_len(nlayers(reclass))) {
   reclass[[i]] = reclassify(reclass[[i]], rcl = rcl[[i]], right = NA) 
@@ -180,7 +188,7 @@ We arbitrarily define a pixel of 20 sq-km as metropolitan if more than half a mi
 The `aggregate()` command helps to change the resolution from 1 to 20 sq-km while each output cell represents the sum of all 1 sq-km input cells (see section \@ref(aligning-rasters)).
 Next, we only keep cells with more than half a million inhabitants using a Boolean operation, and convert the resulting cells into spatial polygons of class `sf`.
 
-```{r, eval = FALSE}
+```{r}
 pop_agg = aggregate(reclass$pop, fact = 20000 / res(input)[1], fun = sum)
 polys = rasterToPolygons(pop_agg[pop_agg > 500000, drop = FALSE])
 polys = st_as_sf(polys)
@@ -197,14 +205,14 @@ One approach is to union the polygons.
 <!--   st_cast("POLYGON")  -->
 <!-- ``` -->
 
-```{r, eval = FALSE}
+```{r}
 polys = summarize(polys, pop = sum(layer))
 ```
 
 This returns one multipolygon feature with its elements corresponding to the metropolitan regions. 
 To extract these polygons from the multipolygon, we can use `st_cast()`.
 
-```{r, eval = FALSE}
+```{r}
 metros = st_cast(polys, "POLYGON")
 ``` 
 
@@ -287,7 +295,7 @@ knitr::include_graphics("figures/08_metro_areas.png")
 
 One could assign it to the neighboring region using another dissolving procedure, however, we leave this as an exercise to the reader, and simply delete the offending polygon.
 
-```{r, eval = FALSE}
+```{r}
 # find out about the offending polygon
 int = st_intersects(metros, metros)
 # polygons 5 and 9 share one border, delete polygon number 5
@@ -301,7 +309,7 @@ Consequently, extracting the centroid coordinate of each metropolitan area can s
 The **ggmap** package makes use of the one provided by Google.^[Note that Google allows each user to access its services on a free basis for a maximum of 2500 queries a day.]
 `ggmap::revgeocode()` only accepts geographical coordinates (latitude/longitude), therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system (chapter \@ref(transform)).
 
-```{r, eval = FALSE}
+```{r}
 # reverse geocoding to find out the names of the metropolitan areas
 metros_wgs = st_transform(metros_2, 4326)
 coords = st_centroid(metros_wgs) %>%
@@ -317,7 +325,7 @@ However, if three attempts have already failed, this is a good indication that t
 Since it is our interest to be a good cyberspace citizen, we try not to overburden the server with too many queries within a short amount of time. 
 Instead we let the loop sleep between one and four seconds after each iteration before accessing the reverse geocoding API again.
 
-```{r, eval = FALSE, warning = FALSE}
+```{r, warning = FALSE}
 metro_names = map_dfr(1:nrow(coords), function(i) {
   add = ggmap::revgeocode(coords[i, ], output = "more")
   x = 2
@@ -338,7 +346,7 @@ Overall, we are satisfied with the `locality` column serving as metropolitan nam
 Hence, we replace Velbert with the corresponding name in the `administrative_area_level_2` column, that is Düsseldorf (Fig. \@ref(fig:metro-areas)).
 Umlauts like `ü` might lead to trouble further on, for example when determining the bounding box of a metropolitan area with `opq()` (see further below), which is why we replace them.
 
-```{r, eval = FALSE}
+```{r}
 metro_names = 
   dplyr::select(metro_names, locality, administrative_area_level_2) %>%
   # replace Velbert and umlaut ü
@@ -426,13 +434,22 @@ shops = as(shops, "Spatial")
 poi = rasterize(x = shops, y = input$pop, field = "osm_id", fun = "count")
 ```
 
+
+```{r, echo=FALSE, eval=FALSE}
+save(poi, file = "extdata/poi.rda")
+```
+
+```{r, echo=FALSE}
+load("extdata/poi.rda")
+```
+
 As with the other rasters (population, women, mean age, household size) we would like to classify the `poi` raster into four classes (see section \@ref(create-census-rasters)). 
 Defining class intervals is an arbitrary undertaking to a certain degree.
 One can use equal breaks, quantile breaks, fixed values and many more.
 Here, we choose the Fisher-Jenks natural breaks approach which tries to minimize the within-class variance.
 Naturally, the identified breaks serve as input for the reclassification matrix.
 
-```{r, eval = FALSE, message = FALSE}
+```{r, message = FALSE}
 # construct reclassification matrix
 int = classInt::classIntervals(values(poi), n = 3, style = "fisher")
 int = round(int$brks)
@@ -454,7 +471,7 @@ First of all, we already have delineated metropolitan areas, that is areas where
 Secondly, though it is advantageous to have many potential customers within a specific catchment area, the sheer number alone might not actually represent the desired target group.
 For instance, residential tower blocks are areas with a high population density but not necessarily with a high purchasing power for luxurious bike components.
 
-```{r, eval = FALSE}
+```{r}
 # add poi raster
 reclass = addLayer(reclass, poi)
 # delete population raster
@@ -473,7 +490,7 @@ For instance, a score greater 10 might be a suitable threshold indicating raster
 
 ```{r bikeshop-berlin, echo = FALSE, fig.cap = "Suitable areas (i.e., raster cells with a score > 10) in accordance with our hypothetical survey for bike stores in Berlin."}
 library(leaflet)
-load("extdata/location.Rdata")
+# load("extdata/location.Rdata")
 # dismiss population raster
 reclass = dropLayer(reclass, "pop")
 # add poi raster
