@@ -450,11 +450,39 @@ reclass = dropLayer(reclass, "pop")
 result = sum(reclass)
 ```
 
+```{r, include = FALSE, eval = FALSE}
+save(result, shops, metro_names, poi, input, reclass, polys, metros, metros_2,
+     file = "extdata/location.Rdata")
+```
+
 The result is a score summing up the values of all input rasters.
 For instance, a score greater 10 might be a suitable threshold indicating raster cells where to place a bike shop (Figure \@ref(fig:bikeshop-berlin)).
 
 ```{r bikeshop-berlin, echo = FALSE, fig.cap = "Suitable areas (i.e., raster cells with a score > 10) in accordance with our hypothetical survey for bike stores in Berlin."}
-knitr::include_url("figures/08_bikeshops_berlin.html")
+library(leaflet)
+load("extdata/location.Rdata")
+# dismiss population raster
+reclass = dropLayer(reclass, "pop")
+# add poi raster
+reclass = addLayer(reclass, poi)
+# calculate the total score
+result = sum(reclass)
+# have a look at suitable bike shop locations in Berlin
+# polygons 5 and 9 share one border, delete polygon number 5
+metros_2$names = metro_names
+berlin = dplyr::filter(metros_2, names == "Berlin")
+berlin_raster = crop(result, as(berlin, "Spatial"))
+berlin_raster = berlin_raster > 10
+berlin_raster = berlin_raster == TRUE
+berlin_raster[berlin_raster == 0] = NA
+
+leaflet() %>% 
+  addTiles() %>%
+  addRasterImage(berlin_raster, colors = "darkgreen", opacity = 0.8)
+# 
+#   addLegend(pal = "darkgreen", values = values(berlin_raster),
+#             title = "sdf")
+
 ```
 
 ## Discussion and next steps

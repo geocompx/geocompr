@@ -164,6 +164,18 @@ metros_2$names = metro_names
 berlin = dplyr::filter(metros_2, names == "Berlin")
 berlin_raster = crop(result, as(berlin, "Spatial"))
 berlin_raster = ratify(berlin_raster > 10)
+berlin_raster = berlin_raster == TRUE
+berlin_raster[berlin_raster == 0] = NA
+
 m = mapview(berlin_raster, col.regions = c(NA, "darkgreen"),
             na.color = "transparent", legend = TRUE, map.type = "OpenStreetMap")
 mapshot(m, url = file.path(getwd(), "figures/08_bikeshops_berlin.html"))
+
+# using leaflet (instead of mapview)
+berlin_raster = crop(result, as(berlin, "Spatial"))
+berlin_raster = berlin_raster > 10
+berlin_raster[berlin_raster == TRUE] = 1
+berlin_raster[berlin_raster == 0] = NA
+leaflet() %>% 
+  addTiles() %>%
+  addRasterImage(berlin_raster, colors = "darkgreen", opacity = 0.8)
