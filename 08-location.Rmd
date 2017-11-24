@@ -346,7 +346,7 @@ metro_names =
   pull(locality)
 ```
 
-## Points of interest
+### Points of interest
 
 The **osmdata** package provides a fantastic and easy-to-use interface to download OSM data (see also section \@ref(retrieving-data)).
 Instead of downloading all shops for the whole of Germany, we restrict the download to the defined metropolitan areas. 
@@ -357,15 +357,14 @@ Next, we indicate that we only would like to download `shop` features (see this 
 `osmdata_sf()` returns a list with several spatial objects (points, lines, polygons, etc.).
 Here, we will only keep the point objects.
 As with Google's reverse geocode API, the OSM-download will once in a while not work at the first attempt.
-The `while`-loop increases the number of download trials to three. 
+The `while` loop increases the number of download trials to three. 
 If then still no features can be downloaded, most likely there are none.
 Or it is an indication that another error has occurred before. 
 For instance, the `opq()` function has retrieved a wrong bounding box.
 
 ```{r, eval = FALSE, message = FALSE}
-library(osmdata)
-shops = map(metro_names, function(x) {
-  message("Downloading shops of:", x, "\n")
+shop_download_osm = function(x){
+  message("Downloading shops of: ", x, "\n")
   # give the server a bit time
   Sys.sleep(sample(seq(5, 10, 0.1), 1))
   query = opq(x) %>%
@@ -377,27 +376,27 @@ shops = map(metro_names, function(x) {
     points = osmdata_sf(query)
     iter = iter - 1
   }
-  points = points$osm_points
-  points = st_set_crs(points, 4326)
-  })
+  points = st_set_crs(points$osm_points, 4326)
+}
+shops = map(metro_names, shop_download_osm)
 ```
 
 It is highly unlikely that there are no shops in any of our defined metropolitan areas.
-The following `if`-condition simply checks if there is at least one shop for each region.
+The following `if` condition simply checks if there is at least one shop for each region.
 If not, we would try to download again the shops for this/these specific region/s.
 
 ```{r, eval = FALSE}
 # checking if we have downloaded shops for each metropolitan area
-ind = sapply(shops, nrow) == 0
+ind = map(shops, nrow) == 0
 if (any(ind)) {
   message("There are/is still (a) metropolitan area/s without any features:\n",
-          paste(metro_names[ind], collapse = ", "), "\nPlease fix!")
+          paste(metro_names[ind], collapse = ", "), "\nPlease fix it!")
 }
 ```
 
-To make sure that each list element (an `sf`- data frame) comes with the same columns, we only keep the `osm_id` and the `shop` columns with the help of another `map`-loop.
+To make sure that each list element (an `sf`- data frame) comes with the same columns, we only keep the `osm_id` and the `shop` columns with the help of another `map` loop.
 This is not a given since OSM contributors are not equally meticulous when collecting data.
-Finally, we `rbind` all shops into one large `sf`-object.
+Finally, we `rbind` all shops into one large `sf` object.
 
 ```{r, eval = FALSE}
 # select only specific columns and rbind all list elements
@@ -405,13 +404,14 @@ shops = map(shops, dplyr::select, osm_id, shop) %>%
   reduce(rbind)
 ```
 
-It would have been easier to simply use `map_dfr()`. Unfortunately, so far it does not work in harmony with `sf` objects but it will most likely in the future.
+It would have been easier to simply use `map_dfr()`. 
+Unfortunately, so far it does not work in harmony with `sf` objects but it will most likely in the future.
 
 The only thing left to do is to convert the spatial point object into a raster.
 The `rasterize()` function does exactly this.
-As input it expects an `sp` vector object, here we use the spatial point object `shops`, and a raster object, here we use the population raster whose original values have been replaced by `NA`'s.
+As input it expects an `sp` vector object (here we use the spatial point object `shops`), and a raster object (here we use the population raster whose original values have been replaced by `NA`'s).
 A function defines how the values from the spatial vector object are transferred to the raster object. 
-`count` simply counts the number of spatial objects, here the shop points, falling into one raster cell, and returns this value as the output cell value.
+`count` simply counts the number of spatial objects falling into one raster cell, in this example the shop points, and returns this value as the output cell value.
 Hence, we end up with a shop density, namely the number of shops per square kilometer.
 But one has too be careful: had we used the `shop` instead of the `osm_id` column, we would have retrieved fewer shops per grid cell. 
 This is because the `shop` column contains `NA` values, which the `count()` function omits when rasterizing vector objects.
@@ -421,19 +421,16 @@ Naturally, the projection of the input raster and the input vector object have t
 shops = st_transform(shops, proj4string(input$pop))
 shops = as(shops, "Spatial")
 # create poi raster
-poi = input$pop
-poi[] = NA
-poi = rasterize(x = shops, y = poi, field = "osm_id", fun = "count")
+poi = rasterize(x = shops, y = input$pop, field = "osm_id", fun = "count")
 ```
 
 As with the other rasters (population, women, mean age, household size) we would like to classify the `poi` raster into four classes (see section \@ref(create-census-rasters)). 
-Defining class intervals is an arbitrary undertaking to a certain degree .
+Defining class intervals is an arbitrary undertaking to a certain degree.
 One can use equal breaks, quantile breaks, fixed values and many more.
 Here, we choose the Fisher-Jenks natural breaks approach which tries to minimize the within-class variance.
 Naturally, the identified breaks serve as input for the reclassification matrix.
 
 ```{r, eval = FALSE, message = FALSE}
-library(classInt)
 # construct reclassification matrix
 int = classInt::classIntervals(values(poi), n = 3, style = "fisher")
 int = round(int$brks)
@@ -445,7 +442,7 @@ poi = reclassify(poi, rcl = rcl_poi, right = NA)
 names(poi) = "poi"
 ```
 
-## Identifying suitable locations
+### Identifying suitable locations
 
 As usual in (geo-)data science, the data retrieval and preprocessing represented the lion's share of the overall workload.
 The final workstep, the calculation of a final score by summing up all prepared rasters, is a simple one-liner.
