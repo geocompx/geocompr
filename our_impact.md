@@ -28,6 +28,7 @@
 - 2017-11-15 - bug - Problem with st_transform_proj - https://github.com/r-spatial/lwgeom/issues/6
 - 2017-11-22 - bug - Minor bug in rmapshaper flagged and fixed - https://github.com/ateucher/rmapshaper/issues/64
 - 2017-07-31 - enhancement - Add a support for the `sf` objects - https://github.com/hunzikp/velox/issues/7
+- 2017-11-25 - bug - Added new output type for the osmdata function `getbb()`: https://github.com/ropensci/osmdata/issues/104
 
 ## open
 
