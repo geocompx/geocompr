@@ -48,8 +48,7 @@ The case study used for this chapter is a diverse city on the west of England, 3
 As with any case study it is worth taking some time to consider the local geography of the area, e.g. as dispayed in Figure 7.0 below.
 This shows the diversity of the city's transport network, with railways, motorways and cycle paths plotted.
 
-```{r, include=FALSE}
-# loaded here, to be explained later
+```{r, eval=FALSE, echo=FALSE}
 bb = getbb("bristol uk")
 ways_road = opq(bbox = bb) %>% 
   add_osm_feature(key = "highway", value = "motorway|cycle", value_exact = FALSE) %>% 
@@ -63,8 +62,20 @@ ways = c(ways_road, ways_rail)
 ways$osm_lines$highway = as.character(ways$osm_lines$highway)
 ways$osm_lines$highway[ways$osm_lines$railway == "rail"] = "rail"
 ways$osm_lines$highway[ways$osm_lines$highway == "motorway_link"] = "motorway"
-# saveRDS(ways, "ways.Rds") # save for future reference
+saveRDS(ways, "extdata/ways.Rds") # save for future reference
 ```
+
+The data used in this section was downloaded using **osmdata**.
+To avoid having to request the data from OSM repeadetly, we'll use a locally saved version of the data, which contains point and line data for the case study area:
+
+```{r}
+ways = readRDS("extdata/ways.Rds")
+summary(ways)[4:5, ]
+```
+
+The above code chunk loaded some key data and shows that way have a few dozen nodes and lines on the transport network: an easily manageable dataset size (transport datasets can get very large but it's best to learn with small ones).
+Before we make use of these datasets we need to load and take a look at one more type of input data: transport zones that represent residential areas that generate trips into the city centre and elsewhere.
+
 
 ```{r bristol, echo=FALSE, fig.cap="Overview map of the city of Bristol", message=FALSE}
 # library(leaflet)
@@ -81,14 +92,15 @@ ways$osm_lines$highway[ways$osm_lines$highway == "motorway_link"] = "motorway"
 knitr::include_graphics("figures/bristol.png")
 ```
 
-> Figure 7.0: Overview map of the city of Bristol. Code to generate this map is provided below
-
-
-
-
 ## Transport zones
 
 ## Nodes on the transport system
+
+```{r}
+stations = ways$osm_points %>% 
+  filter(railway == "station" | name == "Bristol Temple Meads")
+```
+
 
 ## Desire line analysis
 
