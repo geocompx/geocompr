@@ -1,6 +1,6 @@
 ---
 title: "Geocomputation with R - Exercises and Solutions"
-author: "Robin Lovelace, Jakub Nowosad"
+author: "Robin Lovelace, Jakub Nowosad, Jannes Muenchow"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -13,13 +13,14 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
+## Prerequisites {-}
+
+The solutions assume the following packages are loaded (other packages will be loaded when needed):
+
 ```{r packages, message=FALSE, warning=FALSE}
 library(sf)
 library(tidyverse)
 library(spData)
-data("world")
-data("us_states")
-data("us_states_df")
 ```
 
 # Chapter 1
@@ -42,21 +43,21 @@ data("us_states_df")
 
 # Chapter 2
 
+
+<!-- vector exercises -->
 1. What does the summary of the `geometry` column tell us about the `world` dataset, in terms of:
+    - The geometry type?
+    - How many countries there are?
+    - The coordinate reference system (CRS)?
 
-- The geometry type?
-- How many countries there are?
-- The coordinate reference system (CRS)?
+2. Using **sf**'s `plot()` command, create a map of Nigeria in context, building on the code that creates and plots Asia above (see Figure \@ref(fig:asia) for an example of what this could look like). 
+    - Hint: this used the `lwd`, `main` and `col` arguments of `plot()`. 
+    - Bonus: make the country boundaries a dotted grey line.
+    - Hint: `border` is an additional argument of `plot()` for **sf**  objects.
 
-2. Using **sf**'s `plot()` command, create a map of Nigeria in context, building on the code that creates and plots Asia above (see Figure \@ref(fig:nigeria) for an example of what this could look like). 
-
-- Hint: this used the `lwd`, `main` and `col` arguments of `plot()`. 
-- Bonus: make the country boundaries a dotted grey line.
-- Hint: `border` is an additional argument of `plot()` for **sf** objects.
-
-```{r nigeria, warning=FALSE, echo=FALSE, fig.cap="Map of Nigeria in context illustrating sf's plotting capabilities"}
-nigeria = world[world$name_long == "Nigeria",]
-africa = world[world$continent == "Africa",]
+```{r nigeria, warning=FALSE, fig.cap="Map of Nigeria in context illustrating sf's plotting capabilities"}
+nigeria = world[world$name_long == "Nigeria", ]
+africa = world[world$continent == "Africa", ]
 bb_africa = st_bbox(africa)
 plot(africa[2], col = "white", lwd = 3, main = "Nigeria in context", border = "lightgrey")
 # plot(world, lty = 3, add = TRUE, border = "grey")
@@ -66,6 +67,32 @@ ncentre = st_centroid(nigeria)
 ncentre_num = st_coordinates(ncentre)
 text(x = ncentre_num[1], y = ncentre_num[2], labels = "Nigeria")
 ```
+
+3. What does the `cex` argument do in the `plot()` function that generates Figure \@ref(fig:contpop)?
+    - Why was `cex` passed the `sqrt(world$pop) / 10000` instead of just the population directly?
+    - Bonus: what equivalent arguments to `cex` exist in the dedicated vizualisation package **tmap**?
+    
+4. Re-run the code that 'generated' Figure \@ref(fig:contpop) at the end of \@ref(base-args) and find 3 similarities and 3 differences between the plot produced on your computer and that in the book.
+    - What is similar?
+        - The map orientation (north is up), colors of the continents and sizes of the circles are the same, among other things.
+    - What has changed?
+        - The shape of the countries (an equal area projection has been used), the color of the points has changed (to red) and are now filled in (using the `pch` argument to change the point symbol), the plot has graticules and (most subtly) the points are now in the centroid of the largest polygon of each country, rather than in the area-weighted centroid across all polygons per country.
+    - Bonus: play around with and research base plotting arguments to make your version of Figure \@ref(fig:contpop) more attractive. Which arguments were most useful.
+        - This is a subjective question: have fun!
+    - Advanced: try to reproduce the map presented in Figure \@ref(base-args). Copy-and-pasting is prohibited!
+        - You can *look* at the code that generated the plot here: https://github.com/Robinlovelace/geocompr/blob/master/02-spatial-data.Rmd . If you memorise its important parts, and type them in your own script to reproduce the code that does not count as cheating. That will be a valuable learning experience.
+
+<!-- raster exercises -->
+5. Read the `raster/nlcd2011.tif` file from the **spDataLarge** package. 
+What kind of information can you get about the properties of this file?
+<!-- (crs, ncols, nrow, ncells, bbox, navalues) -->
+6. Create an empty `RasterLayer` object called `my_raster` with 10 columns and 10 rows, and resolution of 10 units.
+Assign random values between 0 and 10 to the new raster and plot it.
+<!-- crs exercises -->
+<!-- 1. pros and cons of the projection types -->
+<!-- 1. what's the difference between vector and raster transformation -->
+<!-- units exercises -->
+<!-- 1. ?? -->
 
 3. Exercise 3 <!--missing title-->
 
@@ -79,7 +106,7 @@ text(x = ncentre_num[1], y = ncentre_num[2], labels = "Nigeria")
 1. Select only the `NAME` column in `us_states` and create a new object called `us_states_name`. 
 What is the class of the new object? <!--why there is a "sf" part? -->
 ```{r}
-us_states_name = us_states %>% select(NAME)
+us_states_name = us_states %>% dplyr::select(NAME)
 class(us_states_name)
 ```
 2. Select columns which contain information about a total population.
@@ -189,6 +216,340 @@ us_states %>%
   as.character()
 ```
 
+14. Create a raster from scratch with nine rows and columns and a resolution of 0.5 decimal degrees (WGS84).
+Fill it with random numbers.
+Extract the values of the four corner cells. 
+```{r}
+library(raster)
+r = raster(nrow = 9, ncol = 9, res = 0.5, xmn = 0, xmx = 4.5,
+           ymn = 0, ymx = 4.5, vals = rnorm(81))
+# using cell IDs
+r[c(1, 9, 81 - 9, 81)]
+# using indexing
+r[c(1, nrow(r)), c(1, ncol(r))]
+# corresponds to [1, 1], [1, 9], [9, 1], [9, 9]
+```
+15. What is the most common class of our example raster `grain` (hint: `modal()`)?
+```{r}
+grain_size = c("clay", "silt", "sand")
+grain = raster(nrow = 6, ncol = 6, res = 0.5, 
+               xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+               vals = factor(sample(grain_size, 36, replace = TRUE), 
+                             levels = grain_size))
+cellStats(grain, modal) %>%
+  factorValues(grain, .)
+factorValues(grain, modal(values(grain)))
+```
+16. Plot the histogram and the boxplot of the `data(dem, package = "RQGIS")` raster. 
+```{r}
+data(dem, package = "RQGIS")
+par(mfrow = c(1, 2))
+hist(dem)
+boxplot(dem)
+```
+17. Now attach also `data(ndvi, package = "RQGIS")`. 
+Create a raster stack using `dem` and `ndvi`, and make a `pairs()` plot
+```{r}
+data(ndvi, package = "RQGIS")
+s = stack(dem, ndvi)
+pairs(s)
+```
+
 # Chapter 4
 
+4. Use `data(dem, package = "RQGIS")`, and reclassify the elevation in three classes: low, middle and high.
+Secondly, compute the NDVI (`data(ndvi, package = "RQGIS")`) and the mean elevation for each altitudinal class.
+```{r}
+library(classInt)
+data(dem, package = "RQGIS")
+summary(dem)
+# find quantile breaks
+brk = classIntervals(values(dem), n = 3)$brk
+# also try
+# breask = classIntervals(values(dem), n = 3, style = "fisher")
+# construct reclassification matrix
+rcl = matrix(c(brk[1] - 1, brk[2], 1, brk[2], brk[3], 2, brk[3], brk[4], 3), 
+             ncol = 3, byrow = TRUE)
+# reclassify altitudinal raster
+recl = reclassify(dem, rcl = rcl)
+# compute the mean dem and ndvi values for each class
+zonal(stack(dem, ndvi), recl, fun = "mean")
+```
+
+5. Apply a line detection filter to `data(dem, package = "RQGIS")`.
+```{r}
+# from the focal help page:
+# Laplacian filter: filter=matrix(c(0,1,0,1,-4,1,0,1,0), nrow=3)
+# Sobel filter: filter=matrix(c(1,2,1,0,0,0,-1,-2,-1) / 4, nrow=3)
+# compute the Sobel filter
+# check if there are NAs
+is.na(dem)  # just 0s, so no NAs
+sobel = focal(dem, w = matrix(c(1, 2, 1, 0, 0, 0, -1, -2, -1) / 4, nrow = 3))
+# CHECK IF THIS IS CORRECT
+```
+
+6. Calculate the NDVI of a Landsat image. 
+Use the Landsat image provided by the **spDataLarge** package (`system.file("raster/landsat.tif", package="spDataLarge")`).
+```{r}
+file = system.file("raster/landsat.tif", package="spDataLarge")
+r = stack(file)
+# compute NDVI manually
+ndvi = (r[["landsat.4"]] - r[["landsat.3"]]) / (r[["landsat.4"]] + r[["landsat.3"]])
+# compute NDVI with the help of RStoolbox
+library(RStoolbox)
+ndvi_rstoolbox = spectralIndices(r, red = 3, nir = 4, indices = "NDVI")
+all.equal(ndvi, ndvi_rstoolbox)
+```
+
+7. This [post](https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances) shows how to use `raster::distance()`.
+Extract Spain, calculate a distance raster and weight it with elevation.
+Finally, compute the difference between the raster using the euclidean distance and the raster weighted by elevation.
+(Hint: Have a look at `getData()` to retrieve a digital elevation model for Spain.)
+```{r}
+library(raster)
+# find out the ISO_3 code of Spain
+dplyr::filter(ccodes(), NAME %in% "Spain")
+# retrieve a dem of Spain
+dem = getData("alt", country = "ESP", mask = FALSE)
+# change the resolution to decrease computing time
+agg = aggregate(dem, fact = 5)
+poly = getData("GADM", country = "ESP", level = 1)
+plot(dem)
+plot(poly, add = TRUE)
+# visualize NAs
+plot(is.na(agg))
+# construct a distance input raster
+# we have to set the land cells to NA and the sea cells to an arbitrary value since 
+# raster::distance computes the distance to the nearest non-NA cell
+dist = is.na(agg)
+cellStats(dist, summary)
+# convert land cells into NAs and sea cells into 1s
+dist[dist == FALSE] = NA
+dist[dist == TRUE] = 1
+plot(dist)
+# compute distance to nearest non-NA cell
+dist = raster::distance(dist)
+# just keep Spain
+dist = mask(dist, poly)
+# convert distance into km
+dist = dist / 1000
+# now let's weight each 100 altitudinal meters by an additionaly distance of 10 km
+agg = mask(agg, poly)
+agg[agg < 0] = 0
+weight = dist + agg / 100 * 10
+plot(weight - dist)
+```
+
 # Chapter 5
+
+# Chapter 8 Location analysis
+
+1. Donwload the csv file containing inhabitant information for a 100 m cell resolution ( https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
+Please note that the unzipped file has a size of 1.23 GB.
+To read it into R you can use `readr::read_csv`.
+This takes 30 seconds on my machine (16 GB RAM)
+`data.table::fread()` might be even faster, and returns an object of class `data.table()`.
+Use `as.tibble()` to convert it into a tibble.
+Build an inhabitant raster, aggregate it to a cell resolution of 1 km, and compare the difference with the inhabitant raster (`inh`) we have created using class mean values.
+
+```{r, eval = FALSE}
+library(tidyverse)
+library(raster)
+library(sp)
+
+build_census_raster = function(url) {
+  download.file(url = url, destfile = file.path(tempdir(), "census.zip"),
+                method = "auto", mode = "wb")
+  # list the file names
+  nms = unzip(file.path(tempdir(), "census.zip"), list = TRUE)
+  # unzip only the csv file
+  base_name = grep(".csv$", nms$Name, value = TRUE)
+  unzip(file.path(tempdir(), "census.zip"), files = base_name, exdir = tempdir())
+  # read in the csv file
+  input = data.table::fread(file.path(tempdir(), base_name)) %>%
+    as.tibble
+  input = dplyr::select(input, x = starts_with("x_mp_1"), y = starts_with("y_mp_1"),
+                        inh = Einwohner)
+  # set -1 and -9 to NA
+  input = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
+  # convert table into a raster (x and y are cell midpoints)
+  coordinates(input) =~ x + y
+  # use the correct projection
+  proj4string(input) = CRS("+init=epsg:3035")
+  gridded(input) = TRUE
+  # convert into a raster stack
+  raster(input)
+}
+
+# download 1km resolution
+url = paste0("https://www.zensus2011.de/SharedDocs/Downloads/DE/", 
+             "Pressemitteilung/DemografischeGrunddaten/csv_Zensusatlas_", 
+             "klassierte_Werte_1km_Gitter.zip?__blob=publicationFile&v=8")
+inp_coarse = build_census_raster(url)
+# reclassify
+rcl = matrix(c(1, 1, 125, 2, 2, 375, 3, 3, 1250, 4, 4, 3000, 5, 5, 6000,
+               6, 6, 8000), ncol = 3, byrow = TRUE)
+inh_coarse = reclassify(inp_coarse, rcl = rcl, right = NA)
+
+# Download and build 1km inhabitant raster
+url = paste0("https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/",
+             "DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip", 
+             "?__blob=publicationFile&v=3")
+inh_fine = build_census_raster(url)
+inh_fine = aggregate(inh_fine, fact = 1000 / res(inp_fine)[1], fun = sum)
+inh_fine - inh_coarse  # origin has to be the same
+origin(inh_fine) = origin(inh_coarse)
+summary(inh_fine - inh_coarse)
+plot(inh_fine - inh_coarse)
+plot(abs(inh_fine - inh_coarse) > 1000)
+cellStats((abs(inh_fine - inh_coarse) > 1000), stat = "sum")
+cellStats((abs(inh_fine - inh_coarse) > 5000), stat = "sum")
+```
+
+# Chapter R-GIS bridges
+
+1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see chapter \@ref(spatial-class)). 
+Calculate the intersection using:
+
+- **RQGIS**, **RSAGA** and **rgrass7**
+- **sf**
+
+```{r, eval=FALSE}
+library(sf)
+library(RQGIS)
+# create two polygons
+coords_1 =  
+  matrix(data = c(0, 0, 1, 0, 1, 1, 0, 1, 0, 0),
+         ncol = 2, byrow = TRUE)
+coords_2 =
+  matrix(data = c(-0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 
+                  -0.5, 0.5, -0.5, -0.5),
+         ncol = 2, byrow = TRUE)
+
+# create the first polygon
+poly_1 = st_polygon(list((coords_1))) 
+# convert it into a simple feature collection 
+poly_1 = st_sfc(poly_1)
+poly_1 = st_sfc(poly_1, crs = 4326)
+# finally, convert it into an sf-object
+poly_1 = st_sf(geometry = poly_1, data = data.frame(id = 1))
+
+# create a second polygon
+poly_2 = st_polygon(list((coords_2))) %>%
+  st_sfc(., crs = 4326) %>%
+  st_sf(geometry = ., data = data.frame(id = 1))
+# visualize it
+plot(st_geometry(poly_1), xlim = c(-1, 1), ylim = c(-1, 1))
+plot(st_geometry(poly_2), add = TRUE)
+
+# INTERSECTION USING RQGIS
+#***************************
+# first of all, we need to find out which function might do this for us
+find_algorithms("intersec")
+open_help("qgis:intersection")
+get_usage("qgis:intersection")
+# using R named arguments#
+int_qgis = run_qgis("qgis:intersection", INPUT = poly_1, INPUT2 = poly_2,
+                    OUTPUT = "int_qgis.shp", load_output = TRUE)
+# visualize it
+plot(st_geometry(poly_1), xlim = c(-1, 1), ylim = c(-1, 1))
+plot(st_geometry(poly_2), add = TRUE)
+plot(int_qgis, col = "lightblue", add = TRUE)
+
+
+# INTERSECTION USING RSAGA
+#***************************
+# The RSAGA examples only work with SAGA < 2.3. We have informed the
+# package maintainer to update SAGA
+library(RSAGA)
+library(link2GI)
+linkSAGA()
+rsaga.env()
+# save shapefile layers
+write_sf(poly_1, file.path(tempdir(), "poly_1.shp"))
+write_sf(poly_2, file.path(tempdir(), "poly_2.shp"))
+# find out how to union shapefiles with the help of SAGA
+rsaga.get.modules(lib = "shapes_polygons")
+rsaga.get.usage(lib = "shapes_polygons", module = "Intersect")
+# create parameter-argument list for RSAGA
+params = list(A = file.path(tempdir(), "poly_1.shp"),
+              B = file.path(tempdir(), "poly_2.shp"),
+              RESULT = file.path(tempdir(), "int_saga.shp"))
+rsaga.geoprocessor(lib = "shapes_polygons", module = "Intersect", 
+                   param = params)
+int_saga = st_read(file.path(tempdir(), "int_saga.shp"))
+# visualize it
+plot(st_geometry(poly_1), xlim = c(-1, 1), ylim = c(-1, 1))
+plot(st_geometry(poly_2), add = TRUE)
+plot(st_geometry(int_saga), col = "lightblue", add = TRUE)
+
+# INTERSECTION USING rgrass7
+#***************************
+library(link2GI)
+library(rgrass7)
+link2GI::linkGRASS7(rbind(poly_1, poly_2), ver_select = TRUE)
+# let's have a look at the help of v.overlay via rgrass7
+execGRASS("g.manual", entry = "v.overlay")
+# RQGIS::open_help("grass7:v.overlay")
+writeVECT(as(poly_1, "Spatial"), vname = "poly_1")
+writeVECT(as(poly_2, "Spatial"), vname = "poly_2")
+execGRASS("v.overlay", ainput = "poly_1", binput = "poly_2",
+          output = "int_grass", operator = "and", flag = "overwrite")
+out_grass <- readVECT("int_grass")
+plot(st_geometry(poly_1), xlim = c(-1, 1), ylim = c(-1, 1))
+plot(st_geometry(poly_2), add = TRUE)
+plot(int_grass, add = TRUE, col = "lightblue")
+
+# INTERSECTION USING sf
+#***************************
+
+int_sf = st_intersection(poly_1, poly_2)
+plot(st_geometry(poly_1), xlim = c(-1, 1), ylim = c(-1, 1))
+plot(st_geometry(poly_2), add = TRUE)
+plot(int_sf, add = TRUE, col = "lightblue")
+```
+
+2. Run `data(dem, package = "RQGIS")` and `data(random_points, package = "RQGIS")`.
+Select randomly a point from `random_points` and find all `dem` pixels that can be seen from this point (hint: viewshed).
+Visualize your result.
+For example, plot a hillshade, and on top of it the digital elevation model, your viewshed output and the point.
+Additionally, give `mapview` a try.
+
+```{r, eval=FALSE}
+library(RQGIS)
+library(raster)
+data(dem, package = "RQGIS")
+data(random_points, package = "RQGIS")
+
+find_algorithms("viewshed")
+alg = "grass7:r.viewshed"
+get_usage(alg)
+open_help(alg)
+# let's find out about the default values
+get_args_man(alg)
+point = random_points[sample(1:nrow(random_points), 1), ]
+coord = paste(sf::st_coordinates(point), collapse = ",")
+out = run_qgis(alg, input = dem, coordinates = coord,
+               output = "out.tif", load_output = TRUE)
+
+# under Linux this might not work, in this case use rgrass7 directly
+library(rgrass7)
+link2GI::linkGRASS7(dem, ver_select = TRUE)
+writeRAST(as(dem, "SpatialGridDataFrame"), "dem")
+writeVECT(as(random_points, "Spatial"), vname = "points")
+execGRASS("r.viewshed", input = "dem", coordinates = sf::st_coordinates(point),
+          output = "view")
+out = raster(readRAST("view"))
+
+hs = hillShade(terrain(dem), terrain(dem, "aspect"), 40, 270)
+plot(hs, col = gray(0:100 / 100), legend = FALSE)
+plot(dem, add = TRUE, alpha = 0.5, legend = FALSE)
+plot(point, add = TRUE, col = "red", pch = 16)
+plot(out, add = TRUE, col = "lightgray", legend = FALSE)
+plot(point, add = TRUE, col = "red", pch = 16)
+
+# or using mapview
+library(mapview)
+mapview(out, col = "white", map.type = "Esri.WorldImagery") +
+  mapview(point)
+```
