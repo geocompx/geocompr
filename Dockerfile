@@ -1,2 +1,2 @@
 FROM rocker/ropensci
-RUN installGithub.r robinlovelace/geocompr
+RUN R -e "remotes::install_github('robinlovelace/geocompr')"
