@@ -1,2 +1,2 @@
-FROM rocker/geospatial:latest
+FROM rocker/ropensci
 RUN installGithub.r robinlovelace/geocompr
