@@ -1,0 +1,85 @@
+---
+title: "Geocomputation with R - Benchmark"
+author: "Robin Lovelace, Jakub Nowosad, Jannes Muenchow"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+# Reading vector data
+
+```{r, message=FALSE}
+library(sf)
+vector_filepath = system.file("shapes/world.gpkg", package = "spData")
+world = st_read(vector_filepath)
+```
+
+To demonstrate this, we will use a function to compare `st_read()` with its **sp** equivalent, `rgdal::readOGR()`:
+
+```{r}
+bench_read = function(file, n) {
+  m = microbenchmark(times = n,
+                     rgdal::readOGR(vector_filepath),
+                     st_read(vector_filepath)
+  )
+  mean(m$time[1:n]) / mean(m$time[(n + 1):(n * 2)])
+}
+```
+
+This function takes as arguments an input file (`file`) and a number of times to run each command (`n`) and returns how many times faster `st_read()` is than `readOGR()`.
+Let's run the benchmark for the `world.gpkg` file represented by the object `vector_filepath`:
+
+```{r, results='hide'}
+library(microbenchmark)
+read_world_gpkg = bench_read(file = vector_filepath, n = 5)
+```
+
+```{r}
+read_world_gpkg
+```
+
+The results demonstrate that **sf** was around `r round(read_world_gpkg)` times faster than **rgdal** at reading-in the world countries vector.
+The relative performance of `st_read()` compared with other functions will vary depending on file format and the nature of the data.
+To illustrate this point, we performed the same operation on a geojson file and found a greater speed saving:
+
+```{r, results='hide'}
+vector_filepath_gj = system.file("shapes/cycle_hire_osm.geojson", package = "spData")
+read_lnd_geojson = bench_read(file = vector_filepath_gj, n = 5)
+```
+
+```{r}
+read_lnd_geojson
+```
+
+In this case **sf** was around `r round(read_lnd_geojson)` times faster than **rgdal**.
+
+# Writing vector data
+
+```{r, message=FALSE}
+library(rgdal)
+world_sp = as(world, "Spatial")
+```
+
+
+```{r, warning=FALSE}
+system.time(writeOGR(world_sp, dsn = "world_sp.geojson", layer = "world_sp.geojson", driver = "GeoJSON"))
+system.time(writeOGR(world_sp, dsn = ".", layer = "world_sp", driver = "ESRI Shapefile")) 
+system.time(writeOGR(world_sp, dsn = "world_sp.gpkg", layer = "world_sp.gpkg", driver = "GPKG"))
+system.time(st_write(world, "world_sf.geojson", quiet = TRUE))
+system.time(st_write(world, "world_sf.shp", quiet = TRUE)) 
+system.time(st_write(world, "world_sf.gpkg", quiet = TRUE))
+```
+
+```{r, echo=FALSE, results='hide'}
+world_files = list.files(pattern = "world*")
+file.remove(world_files)
+```

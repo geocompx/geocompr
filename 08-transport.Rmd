@@ -1,0 +1,99 @@
+# Transport applications
+
+## Prerequisites {-}
+
+```{r, message=FALSE, results='hide'}
+library(osmdata)
+library(stplanr)
+library(dplyr)
+library(sf)
+```
+
+
+In no other sector is geographic space more tangible than transport.
+It is the effort of moving, particularly between places that are far apart, that led to the 'first law' of geography defined by Waldo Tobler in 1970 as follows [@miller_toblers_2004]: 
+
+> Everything  is related  to  everything  else,  but  near  things  are more  related  than  distant  things
+
+This 'law' applies to phenomena as diverse as friendship networks and ecological diversity and can be explained by the costs of transport --- in terms of time, energy and money.
+These costs are known as the 'friction of distance'.
+Thus transport technologies disrupt geographic relationships from the perspective of mobile humans and goods: "the purpose of transportation is to overcome space" [@rodrigue_geography_2013].
+
+Transport is an inherently geospatial activity.
+It involves traversing continuous geographic space between A and B, and infinite localities in between.
+It is therefore unsurprising that transport researchers have long turned to geocomputational methods to understand movement patterns and that transport problems are a motivator of geocomputational methods.
+
+This chapter provides an introduction to geographic analysis of transport systems.
+We will explore how movement patterns can be understood at multiple geographic levels, including:
+
+- Areal units: transport can be understood simply in terms of zonal aggregates such as the main mode and average distance of trips made people living in a particular zone.
+- Nodes: these are points in the transport system that can represent common origins and destinations (e.g. with one centroid per zone) and public transport stations such as bus stops and rail stations.
+- Desire lines: straight lines that represent 'origin-destination' data that records how many people travel (or could travel) between places (points or zones) in geographic space.
+- Routes: these are cirquitous (non-straight) routes, typically representing the 'optimal' path along the route network between origins and destinations along the desire lines defined in the previous bullet point.
+- Route networks: these represent the system of roads, paths and other linear features in an area. They can be represented as purely geographic entities or as a graph.
+Their features are segments which can be assigned values representing 'flow', the number of people expected to use a particular street or path.
+- Agents: these are the lowest-level but hardest to model entities in transport systems --- mobile entities like you and me.
+
+These six levels of analysis show that transport systems are highly complex, even before accounting for the innevitable fact that all of them are constantly evolving in continuous time.
+The purpose of geographic transport modelling can be interpretted as simplifying this complexity in a way that captures the essence of transport problems.
+
+Typically models are designed to solve a particular problem.
+For this reason this chapter is based around a policy scenario that asks:
+how to increase walking and cycling?
+We will use input data from Bristol, a coastal city in the West of England, described in the next section.
+
+## Input data: a case study of Bristol
+
+The case study used for this chapter is a diverse city on the west of England, 30 km east of the Welsh capital Cardiff.
+As with any case study it is worth taking some time to consider the local geography of the area, e.g. as dispayed in Figure 7.0 below.
+This shows the diversity of the city's transport network, with railways, motorways and cycle paths plotted.
+
+```{r, include=FALSE}
+# loaded here, to be explained later
+bb = getbb("bristol uk")
+ways_road = opq(bbox = bb) %>% 
+  add_osm_feature(key = "highway", value = "motorway|cycle", value_exact = FALSE) %>% 
+  osmdata_sf()
+
+ways_rail = opq(bbox = bb) %>% 
+  add_osm_feature(key = "railway", value = "rail") %>% 
+  osmdata_sf()
+
+ways = c(ways_road, ways_rail)
+ways$osm_lines$highway = as.character(ways$osm_lines$highway)
+ways$osm_lines$highway[ways$osm_lines$railway == "rail"] = "rail"
+ways$osm_lines$highway[ways$osm_lines$highway == "motorway_link"] = "motorway"
+# saveRDS(ways, "ways.Rds") # save for future reference
+```
+
+```{r bristol, echo=FALSE, fig.cap="Overview map of the city of Bristol", message=FALSE}
+# library(leaflet)
+# # not working
+# leaflet() %>%
+#   addProviderTiles("OpenStreetMap.BlackAndWhite") %>%
+#   addPolylines(data = ways$osm_lines, color = "black")
+
+# no caption - save screenshot then print
+# library(tmap)
+# tmap_mode("view")
+# qtm(ways$osm_lines, lines.col = "highway", lines.lwd = 3) +
+#   tm_scale_bar()
+knitr::include_graphics("figures/bristol.png")
+```
+
+> Figure 7.0: Overview map of the city of Bristol. Code to generate this map is provided below
+
+
+
+
+## Transport zones
+
+## Nodes on the transport system
+
+## Desire line analysis
+
+## Route analysis
+
+## Route networks
+
+## Agents in the transport system
