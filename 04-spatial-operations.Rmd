@@ -550,67 +550,9 @@ nz_avheight2 = st_join(nz, nz_height) %>%
   summarize(elevation = mean(elevation, na.rm = TRUE))
 ```
 
-Spatial aggregation can also be done in the **tidyverse**, using **dplyr** functions as follows:
-
-```{r, eval = FALSE}
-group_by(us_states, REGION) %>%
-  summarize(sum(pop = total_pop_15, na.rm = TRUE))
-```
-
-For attribute data aggregation the grouping variable is another variable, typically one with few unique values relative to the number of rows (see section \@ref(vector-attribute-aggregation)).
-What we did not cover in that section was that attribute data aggregation dissolves the geometries of touching polygons.
-The `REGION` variable in the `us_states` dataset is a good example:
-there are 49 states (excluding Hawaii and Alaska) which can be aggregated into four regions.
-This is demonstrated in the code chunk below, the results of which are illustrated in Figure \@ref(fig:us-regions):
-
-```{r}
-regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
-                    FUN = sum, na.rm = TRUE)
-```
-<!--
-show also tidyverse way, so what you are doing is basically a spatial join and a subsequent aggregation without a grouping variable. Didactically, it might be better to present a grouping variable.
--->
-
-```{r, echo=FALSE}
-# st_join(buff, africa[, "pop"]) %>%
-#   summarize(pop = sum(pop, na.rm = TRUE))
-# summarize(africa[buff, "pop"], pop = sum(pop, na.rm = TRUE))
-```
-
-```{r us-regions, fig.cap="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.", echo=FALSE, warning=FALSE, fig.asp=0.2, out.width="100%"}
-# # with base R ----
-# old_par = par()
-# breaks = c(1e5, 5e6, 1e7, 7e7, 2e8)
-# rdf = st_set_geometry(regions, NULL)
-# us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
-#                                   dplyr::select(rdf, Group.1, total_pop_15),
-#                                   by = c("REGION" = "Group.1")) %>% 
-#   pull(total_pop_15)
-# 
-# par(mfrow = c(1, 2))
-# plot(us_states[, "total_pop_15"], main = "US states", breaks = breaks, key.pos = NULL)
-# plot(regions[, "total_pop_15"], main = "US regions", breaks = breaks, key.pos = NULL)
-# par(old_par)
-# with tmap ----
-library(tmap)
-us_states_facet = dplyr::select(us_states, REGION, total_pop_15) %>%
-  mutate(Level = "State")
-regions_facet = rename(regions, REGION = Group.1) %>%
-  mutate(Level = "Region")
-us_facet = rbind(us_states_facet, regions_facet) %>% 
-  mutate(Level = factor(Level, levels = c("State", "Region")))
-
-qtm(us_facet, "total_pop_15") +
-  tm_facets(by = "Level", nrow = 1, drop.units = TRUE)
-```
-
-The equivalent result can be achieved using **tidyverse** functions as follows (result not shown):
-
-```{r, eval=FALSE}
-regions2 = us_states %>% 
-  group_by(REGION) %>%
-  summarize(sum(pop = total_pop_15, na.rm = TRUE))
-```
+The resulting `nz_avheight` objects have the same geometry as the aggregating object `nz` but with a a new column representing the mean average height of points within each region of New Zealand (other summary functions such as `median()` and `sd()` can be used in place of `mean()`).
+Note that regions containing no points have an associated `elevation` value of `NA`.
+For aggregating operations which also create new geometries, see section \@ref(geometry-unions-and-aggregation).
 
 #### Spatial congruence and areal interpolation
 
