@@ -109,24 +109,24 @@ knitr::kable(pkg_df)
 
 | Name           | Title                                                                         | version    |
 |:---------------|:------------------------------------------------------------------------------|:-----------|
-| bookdown       | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]       | 0.5.10     |
+| bookdown       | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]       | 0.5        |
 | dismo          | Species Distribution Modeling \[@R-dismo\]                                    | 1.1.4      |
 | ggmap          | Spatial Visualization with ggplot2 \[@R-ggmap\]                               | 2.6.1      |
 | gstat          | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction \[@R-gstat\] | 1.1.5      |
 | htmlwidgets    | HTML Widgets for R \[@R-htmlwidgets\]                                         | 0.9        |
 | knitr          | A General-Purpose Package for Dynamic Report Generation in R \[@R-knitr\]     | 1.17       |
-| leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' \[@R-leaflet\]      | 1.1.0.9000 |
+| leaflet        | Create Interactive Web Maps with the JavaScript 'Leaflet' \[@R-leaflet\]      | 1.1.0      |
 | link2GI        | Linking GIS, Remote Sensing and Other Command Line Tools \[@R-link2GI\]       | 0.1.0      |
 | lwgeom         | Bindings to Selected 'liblwgeom' Functions for Simple Features \[@R-lwgeom\]  | 0.1.1      |
 | mapview        | Interactive Viewing of Spatial Data in R \[@R-mapview\]                       | 2.2.0      |
 | microbenchmark | Accurate Timing Functions \[@R-microbenchmark\]                               | 1.4.2.1    |
-| osmdata        | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]      | 0.0.5.100  |
+| osmdata        | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]      | 0.0.5      |
 | raster         | Geographic Data Analysis and Modeling \[@R-raster\]                           | 2.6.7      |
 | rgdal          | Bindings for the 'Geospatial' Data Abstraction Library \[@R-rgdal\]           | 1.2.16     |
 | rgeos          | Interface to Geometry Engine - Open Source ('GEOS') \[@R-rgeos\]              | 0.3.26     |
 | rmarkdown      | Dynamic Documents for R \[@R-rmarkdown\]                                      | 1.8        |
 | rnaturalearth  | World Map Data from Natural Earth \[@R-rnaturalearth\]                        | 0.1.0      |
-| RQGIS          | Integrating R with QGIS \[@R-RQGIS\]                                          | 1.0.2      |
+| RQGIS          | Integrating R with QGIS \[@R-RQGIS\]                                          | 1.0.2.9000 |
 | RSAGA          | SAGA Geoprocessing and Terrain Analysis in R \[@R-RSAGA\]                     | 0.94.5     |
 | sf             | Simple Features for R \[@R-sf\]                                               | 0.5.6      |
 | sp             | Classes and Methods for Spatial Data \[@R-sp\]                                | 1.2.5      |
@@ -136,4 +136,4 @@ knitr::kable(pkg_df)
 | stplanr        | Sustainable Transport Planning \[@R-stplanr\]                                 | 0.2.1      |
 | tabularaster   | Tidy Tools for 'Raster' Data \[@R-tabularaster\]                              | 0.3.0      |
 | tidyverse      | Easily Install and Load the 'Tidyverse' \[@R-tidyverse\]                      | 1.2.1      |
-| tmap           | Thematic Maps \[@R-tmap\]                                                     | 1.11       |
+| tmap           | Thematic Maps \[@R-tmap\]                                                     | 2.0        |
