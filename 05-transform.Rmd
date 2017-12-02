@@ -77,13 +77,17 @@ london_proj = st_transform(london, crs = 27700)
 ```
 
 The result is a new object that is identical to `london`, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700) that has units of meters. 
-We can verify that the CRS has changed using `st_crs()` as follows (note the important components of the output `EPSG: 27700` and `+units=m`):
+We can verify that the CRS has changed using `st_crs()` as follows:
 
-```{r}
+```{r, eval=FALSE}
 st_crs(london_proj)
+#> Coordinate Reference System:
+#>   EPSG: 27700 
+#>   proj4string: "+proj=tmerc +lat_0=49 +lon_0=-2 ... +units=m +no_defs"
 ```
 
-Geometric operations on this projected version of the `london` dataset make sense.
+The most important components of the outputs are the EPSG code (`EPSG: 27700`), the origin (`+lat_0=49 +lon_0=-2`) and units (`+units=m`) (other details have been replaced by `...`).
+This CRS information tells us operations on this projected version of the `london` dataset will make sense.
 This can be verified by repeating the buffer operation, but with a meaningful measure of distance.
 Moving 1 degree at the equator means moving more than 100 km (111,320 meters):
 
@@ -91,12 +95,15 @@ Moving 1 degree at the equator means moving more than 100 km (111,320 meters):
 london_proj_buff = st_buffer(london_proj, 111320)
 ```
 
-The result in Figure \@ref(fig:crs-buf-proj) shows that buffers based on a projected CRS are not distorted and we can expect the same distance from our point to every part of the buffer's border.
+The result in Figure \@ref(fig:crs-buf-proj) shows that buffers based on a projected CRS are not distorted:
+it is the same distance from London to every part of the buffer's border.
 
 ```{r crs-buf-proj, fig.cap="Buffer on data with projected CRS.", fig.asp=1}
 plot(london_proj_buff, graticule = st_crs(27700), axes = TRUE)
 plot(london_proj, add = TRUE)
 ```
+
+
 
 ## Geometric operations on vector data {#geo-vec}
 
