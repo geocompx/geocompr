@@ -412,27 +412,45 @@ par(par_old)
 
 ### Type transformation
 
-Geometry casting is powerful operation which enable transformation of the geometry type <!--while the fundamental data remains unchanged-->.
-<!-- This could be done for one of two purposes, either simplification  -->
-<!-- (also called type transformation) is  -->
+Geometry casting is powerful operation which enable transformation of the geometry type<!--while the fundamental data remains unchanged-->.
+It is implemented in the `st_cast` function from the `sf` package.
+Importantly, `st_cast` behaves differently on single simple feature geometry (`sfg`) objects, and simple feature geometry column (`sfc`) and simple features objects.
+
+Let's create a multipoint to ilustrate how geometry casting works on simple feature geometry (`sfg`) objects:
+
+```{r}
+multipoint = st_multipoint(matrix(c(1, 3, 5, 1, 3, 1), ncol = 2))
+```
+
+In this case, `st_cast` can be useful to transform the new object into linestring or polygon (Figure \@ref(fig:single-cast)):
 
 <!-- a/ points -> lines -> polygons  -->
 ```{r}
-multipoint = st_multipoint(matrix(c(1, 3, 5, 1, 3, 1), ncol = 2))
 linestring = st_cast(multipoint, "LINESTRING")
 polyg = st_cast(multipoint, "POLYGON")
 ```
 
-```{r}
+```{r single-cast, echo = FALSE, fig.cap="Examples of linestring and polygon created based on multipoint using the `st_cast` function", warning=FALSE}
 par_old = par()
-par(mfrow = c(1, 3))
-plot(multipoint)
-plot(linestring)
-plot(polyg)
+par(mfrow = c(1, 3), mar = c(0, 0, 1, 0))
+plot(multipoint, main = "MULTIPOINT")
+plot(linestring, main = "LINESTRING")
+plot(polyg, col = "grey", main = "POLYGON")
 par(par_old)
 ```
 
+This process can be also reversed using `st_cast`:
+
+```{r}
+multipoint_2 = st_cast(linestring, "MULTIPOINT")
+multipoint_3 = st_cast(polyg, "MULTIPOINT")
+```
+
+```{block2 type='rmdnote'}
+For single simple feature geometries (`sfg`), `st_cast` provides also geometry casting from non-multi to multi types (e.g. `POINT` to `MULTIPOINT`) and from multi types to non-multi types.
+However, only the first element of the old object would remain in the second group of cases.
 <!-- note: beware of information lost (you will get a warning) -->
+```
 
 ```{r, include=FALSE}
 cast_all <- function(xg) {
@@ -442,6 +460,11 @@ cast_all <- function(xg) {
 t = cast_all(multipoint)
 t2 = cast_all(polyg)
 ```
+
+<!-- single geometries ()s behaviour differs depending on class of a data - -->
+<!-- There are two main types of geometry casting t -->
+<!-- This could be done for one of two purposes, either simplification  -->
+<!-- (also called type transformation) is  -->
 <!-- b/ multi ->  single -->
 <!-- real example?? -->
 
@@ -459,7 +482,7 @@ linestring_sf2 = st_cast(multilinestring_sf, "LINESTRING")
 dim(linestring_sf2)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, warning=FALSE}
 par_old = par()
 par(mfrow = c(1, 2))
 plot(multilinestring_sf$geom, col = "black")
