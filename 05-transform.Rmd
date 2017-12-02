@@ -103,14 +103,6 @@ plot(london_proj_buff, graticule = st_crs(27700), axes = TRUE)
 plot(london_proj, add = TRUE)
 ```
 
-
-
-## Geometric operations on vector data {#geo-vec}
-
-This section is about operations that in some way change the geometry of vector (`sf`) objects.
-It is more advanced than the spatial data operations presented in the previous Chapter (in section \@ref(spatial-operations-on-vector-data)) because here we drill down into the geometry:
-the functions discussed in this section work on objects of class `sfc` (simple feature geometry collections) in addition to objects of class `sf`.
-
 ### Reprojecting
 
 While CRSs can be set manually, it is more common in real world applications to *transform* a known CRS into another.
@@ -254,6 +246,111 @@ More information about CRS modification can be found in the [Using PROJ.4](http:
 <!-- plot(world_3$geom) -->
 <!-- ``` -->
 <!-- http://bl.ocks.org/vlandham/raw/9216751/ -->
+
+### Reprojecting
+
+The basic concepts of CRS apply to both vector and raster data model.
+However, there are important differences in reprojection of vectors and rasters.
+Transformation of CRS in vector data changes coordinates of each vertex. 
+This do not apply to raster data.
+Rasters are are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters).
+To preserve this property, it is impossible to transform coordinates of cells separately.
+This entails that a new raster could have a different number of columns and rows, and therefore different number of cells that the original one.
+Therefore, values of these new cells need to be estimated after a geometric operation is completed.
+The `projectRaster()` function's role is to reproject `Raster*` objects into a new object with another coordinate reference system. 
+Compared to `st_tranform()`, `projectRaster()` only accepts the `proj4string` definitions.
+
+```{block2 type='rmdnote'}
+It is possible to use a EPSG code in a `proj4string` definition with `"+init=epsg:MY_NUMBER"`.
+For example, one can use the `"+init=epsg:4326"` definition to set CRS to WGS84 (EPSG code of 4326).
+The PROJ.4 library automaticaly adds the rest of parameters and converts it into `"+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"`,
+```
+
+Let's take a look at two examples of raster transformation - using categorical and continuous data.
+Land cover data are usually represented by categorical maps.
+The `nlcd2011.tif` file provides information for a small area in Utah, USA obtained from [National Land Cover Database 2011](https://www.mrlc.gov/nlcd2011.php) in the NAD83 / UTM zone 12N CRS.
+
+```{r}
+cat_raster = raster(system.file("raster/nlcd2011.tif", package = "spDataLarge"))
+cat_raster
+```
+
+In this region, 14 land cover classes were distinguished^[Full list of NLCD2011 land cover classes can be found at https://www.mrlc.gov/nlcd11_leg.php]:
+
+```{r}
+unique(cat_raster)
+```
+
+When reprojecting categorical raster, we need to ensure that our new estimated values would still have values of our original classes.
+This could be done using the nearest neighbor method (`ngb`).
+In this method, value of the output cell is calculated based on the nearest cell center of the input raster.
+
+For example, we want to change the CRS to WGS 84.  
+It can be desired when we want to visualize a raster data on top of a web basemaps, such as the Google or OpenStreetMap map tiles.
+The first step is to obtain the proj4 definition of this CRS, which can be done using the [http://spatialreference.org](http://spatialreference.org/ref/epsg/wgs-84/) webpage. 
+The second and last step is to define the reprojection method in the `projectRaster()` function, which in case of categorical data is the nearest neighbor method (`ngb`):
+
+```{r}
+wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "ngb")
+cat_raster_wgs84
+```
+
+Many properties of the new object differs from the previous one, which include the number of columns and rows (and therefore number of cells), resolution (transformed from meters into degrees), and extent.
+In the same time, it keeps the same land cover classes - `unique(cat_raster_wgs84)`.
+<!-- freq(cat_raster_wgs84) -->
+<!-- freq(cat_raster) -->
+
+This process of reprojection is almost identical for continuous data.
+The `srtm.tif` file contains digital elevation model for the same area in Utah from [the Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/).
+Each value in this raster represents elevation measured in meters.
+
+```{r}
+con_raster = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
+con_raster
+```
+
+The nearest neighbor method should not be used for continuous raster data, as we want to preserve gradual changes in values.
+Alternatively, continuous data could be reprojected in the **raster** package using the bilinear method. 
+In this technique, value of the output cell is calculated based on four nearest cells in the original raster. 
+The new value is a weighted average of values from these four cells, adjusted for their distance from the center of the output cell. 
+This dataset has geographic CRS and we want to transform it into projected CRS.
+
+```{block2 type='rmdnote'}
+All the grid cells in equal-area projections have the same size.
+Therefore, these projections are recommended when performing many raster operations, such as distance calculations.
+```
+
+In the fist step we need to obtain the proj4 definition of the existing projected CRS appropriate for this area or create a new one using the [Projection Wizard](http://projectionwizard.org/) online tool [@savric_projection_2016].
+For this example, we used the Oblique Lambert azimuthal equal-area projection.
+The second step is to define the `bilinear` reprojection method:
+
+```{r}
+equalarea = "+proj=laea +lat_0=37.32 +lon_0=-113.04"
+con_raster_ea = projectRaster(con_raster, crs = equalarea, method = "bilinear")
+con_raster_ea
+```
+
+Reprojection of continuous rasters also changes spatial properties, such as the number of cells, resolution, and extent.
+Moreover, it slightly modifies values in the new raster, which can be seen by comparing the outputs of the `summary()` function between `con_raster` and `con_raster_ea`.
+
+```{r, eval=FALSE}
+summary(con_raster)
+summary(con_raster_ea)
+```
+
+<!-- why new na? -->
+
+<!-- res option in projectRaster? -->
+<!-- note1: in most of the cases reproject vector, not raster-->
+<!-- note2: equal area projections are the best for raster calculations -->
+<!-- q: should we mentioned gdal_transform? -->
+
+## Geometric operations on vector data {#geo-vec}
+
+This section is about operations that in some way change the geometry of vector (`sf`) objects.
+It is more advanced than the spatial data operations presented in the previous Chapter (in section \@ref(spatial-operations-on-vector-data)) because here we drill down into the geometry:
+the functions discussed in this section work on objects of class `sfc` (simple feature geometry collections) in addition to objects of class `sf`.
 
 ### Geometry unions and aggregation
 
@@ -558,105 +655,6 @@ par(par_old)
 <!-- - vector to raster -->
 
 ## Geometric operations on raster data {#geo-ras}
-
-### Reprojecting
-
-The basic concepts of CRS apply to both vector and raster data model.
-However, there are important differences in reprojection of vectors and rasters.
-Transformation of CRS in vector data changes coordinates of each vertex. 
-This do not apply to raster data.
-Rasters are are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters).
-To preserve this property, it is impossible to transform coordinates of cells separately.
-This entails that a new raster could have a different number of columns and rows, and therefore different number of cells that the original one.
-Therefore, values of these new cells need to be estimated after a geometric operation is completed.
-The `projectRaster()` function's role is to reproject `Raster*` objects into a new object with another coordinate reference system. 
-Compared to `st_tranform()`, `projectRaster()` only accepts the `proj4string` definitions.
-
-```{block2 type='rmdnote'}
-It is possible to use a EPSG code in a `proj4string` definition with `"+init=epsg:MY_NUMBER"`.
-For example, one can use the `"+init=epsg:4326"` definition to set CRS to WGS84 (EPSG code of 4326).
-The PROJ.4 library automaticaly adds the rest of parameters and converts it into `"+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"`,
-```
-
-Let's take a look at two examples of raster transformation - using categorical and continuous data.
-Land cover data are usually represented by categorical maps.
-The `nlcd2011.tif` file provides information for a small area in Utah, USA obtained from [National Land Cover Database 2011](https://www.mrlc.gov/nlcd2011.php) in the NAD83 / UTM zone 12N CRS.
-
-```{r}
-cat_raster = raster(system.file("raster/nlcd2011.tif", package = "spDataLarge"))
-cat_raster
-```
-
-In this region, 14 land cover classes were distinguished^[Full list of NLCD2011 land cover classes can be found at https://www.mrlc.gov/nlcd11_leg.php]:
-
-```{r}
-unique(cat_raster)
-```
-
-When reprojecting categorical raster, we need to ensure that our new estimated values would still have values of our original classes.
-This could be done using the nearest neighbor method (`ngb`).
-In this method, value of the output cell is calculated based on the nearest cell center of the input raster.
-
-For example, we want to change the CRS to WGS 84.  
-It can be desired when we want to visualize a raster data on top of a web basemaps, such as the Google or OpenStreetMap map tiles.
-The first step is to obtain the proj4 definition of this CRS, which can be done using the [http://spatialreference.org](http://spatialreference.org/ref/epsg/wgs-84/) webpage. 
-The second and last step is to define the reprojection method in the `projectRaster()` function, which in case of categorical data is the nearest neighbor method (`ngb`):
-
-```{r}
-wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "ngb")
-cat_raster_wgs84
-```
-
-Many properties of the new object differs from the previous one, which include the number of columns and rows (and therefore number of cells), resolution (transformed from meters into degrees), and extent.
-In the same time, it keeps the same land cover classes - `unique(cat_raster_wgs84)`.
-<!-- freq(cat_raster_wgs84) -->
-<!-- freq(cat_raster) -->
-
-This process of reprojection is almost identical for continuous data.
-The `srtm.tif` file contains digital elevation model for the same area in Utah from [the Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/).
-Each value in this raster represents elevation measured in meters.
-
-```{r}
-con_raster = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
-con_raster
-```
-
-The nearest neighbor method should not be used for continuous raster data, as we want to preserve gradual changes in values.
-Alternatively, continuous data could be reprojected in the **raster** package using the bilinear method. 
-In this technique, value of the output cell is calculated based on four nearest cells in the original raster. 
-The new value is a weighted average of values from these four cells, adjusted for their distance from the center of the output cell. 
-This dataset has geographic CRS and we want to transform it into projected CRS.
-
-```{block2 type='rmdnote'}
-All the grid cells in equal-area projections have the same size.
-Therefore, these projections are recommended when performing many raster operations, such as distance calculations.
-```
-
-In the fist step we need to obtain the proj4 definition of the existing projected CRS appropriate for this area or create a new one using the [Projection Wizard](http://projectionwizard.org/) online tool [@savric_projection_2016].
-For this example, we used the Oblique Lambert azimuthal equal-area projection.
-The second step is to define the `bilinear` reprojection method:
-
-```{r}
-equalarea = "+proj=laea +lat_0=37.32 +lon_0=-113.04"
-con_raster_ea = projectRaster(con_raster, crs = equalarea, method = "bilinear")
-con_raster_ea
-```
-
-Reprojection of continuous rasters also changes spatial properties, such as the number of cells, resolution, and extent.
-Moreover, it slightly modifies values in the new raster, which can be seen by comparing the outputs of the `summary()` function between `con_raster` and `con_raster_ea`.
-
-```{r, eval=FALSE}
-summary(con_raster)
-summary(con_raster_ea)
-```
-
-<!-- why new na? -->
-
-<!-- res option in projectRaster? -->
-<!-- note1: in most of the cases reproject vector, not raster-->
-<!-- note2: equal area projections are the best for raster calculations -->
-<!-- q: should we mentioned gdal_transform? -->
 
 ### Raster alignment
 
