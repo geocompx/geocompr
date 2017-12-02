@@ -2,12 +2,12 @@
 
 ## Prerequisites {-}
 
-- This chapter requires the packages **tidyverse**, **sf**, **raster**:
+- This chapter requires the following packages:^[**lwgeom** is also needed for a couple of more advanced transformations.]
 
 ```{r, message=FALSE}
-library(tidyverse)
 library(sf)
 library(raster)
+library(tidyverse)
 ```
 
 - It also relies on **spData** and **spDataLarge**, which load `cycle_hire_osm` dataset and provide external files:
@@ -18,13 +18,15 @@ library(spDataLarge)
 ```
 
 The previous three chapters have demonstrated how geographic datasets are structured in R (Chapter \@ref(spatial-class)) and how to manipulate them based on their non-geographic attributes (\@ref(attr)) and spatial properties (\@ref(spatial-data-operations)).
-This chapter goes a step further, by showing how to modify the *geometry* of the underlying spatial datasets.
+This chapter goes a step further, by showing how to modify the *geometry* underlying spatial datasets.
 
-Transforming vector geometries is covered in section \@ref(geo-vec).
-This includes geometric unions --- joining together shapes, the geometric side of attribute and spatial data aggregation --- and a range of operations that modify the geographic component of each feature in spatial datasets including simplifying, buffering, clipping and even shifting/scaling/rotating geometries using 'affine transformations'.
-Advanced tranformations of vector geometries include type transformations (e.g., from few multipolygons to many polygons) and 'rasterization', which sets-up the next section.
+Section \@ref(geo-vec) covers transforming vector geometries.
+This includes simplifying, buffering, clipping and even shifting/scaling/rotating geometries using 'affine transformations'.
+Geometry unions, which underlie spatial data aggregation, are covered in section \@ref(geometry-unions).
+Advanced transformations of vector geometries include type transformations (e.g. from few multipolygons to many polygons) and 'rasterization', which sets-up the next section.
 
-Section \@ref(geo-ras) covers geometric transformations that change the position and size of pixels underlying raster data.
+Section \@ref(geo-ras) covers geometric transformations on raster objects.
+This involves changing the size and number of the underlying pixels, and assigning them new values.
 It teaches how to change the resolution (also called raster aggregation and disaggregation), the extent and the origin of a raster.
 These operations are especially useful if one would like to align raster datasets from diverse sources (see section \@ref(raster-alignment)).
 Only making sure that these rasters share the same header information allows the jointly usage of map algebra operations (see section \@ref(map-algebra)). 
@@ -104,7 +106,7 @@ plot(london_proj_buff, graticule = st_crs(27700), axes = TRUE)
 plot(london_proj, add = TRUE)
 ```
 
-### Reprojecting
+### Reprojecting vector geometries
 
 While CRSs can be set manually, it is more common in real world applications to *transform* a known CRS into another.
 CRS transformation could be vital to obtain proper results in many cases.
@@ -180,17 +182,17 @@ par(par_old)
 
 On the other hand, the goal for many visualization purposes is to have a map with minimized area, direction, and distance distortions.
 One of the most popular projection to achieve that is Winkel tripel (Figure \@ref(fig:wintriproj)).^[This projection is used, among others, by the National Geographic Society.]
-The `st_transform_proj` function allows for coordinates transformations to the Winkel tripel projection: 
+`st_transform_proj()` from the **lwgeom** package allows for coordinates transformations to a wider range of CRSs, inluding the Winkel tripel projection: 
 
 ```{r}
-world_wintri = st_transform_proj(world, crs = "+proj=wintri")
+world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 ```
 <!-- plot(world_wintri$geom) -->
 <!-- plot(world_wintri$geom, graticule = TRUE) -->
 
 ```{r wintriproj, echo=FALSE, fig.cap="Winkel tripel projection of the world", warning=FALSE}
 world_wintri_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>% 
-  st_transform_proj(crs = "+proj=wintri")
+  lwgeom::st_transform_proj(crs = "+proj=wintri")
 par_old = par()
 par(mar = c(0, 0, 1, 0))
 plot(world_wintri_gr$geometry, main = "the Winkel tripel projection", col = "grey")
@@ -200,7 +202,7 @@ par(par_old)
 
 ```{block2 type='rmdnote'}
 Two main functions for transformation of simple features coordinates are `sf::st_transform()` and `sf::sf_project()`. 
-The `st_transform` function uses the GDAL interface to PROJ.4, while `sf_project()` uses the PROJ.4 API directly.
+The `st_transform` function uses the GDAL interface to PROJ.4, while `sf_project()` (which works on point data only) and `lwgeom::st_transform_proj()` use the PROJ.4 API directly.
 The first one is appropriate in most situations, and provides a set of the most often used parameters and well defined transformations.
 The second one allows for a greater customization of a projection, which includes cases when some of the PROJ.4 parameters (e.g. `+over`) or projection (`+proj=wintri`) is not available in `st_transform()`.
 ```
@@ -243,23 +245,23 @@ More information about CRS modification can be found in the [Using PROJ.4](http:
 <!-- ```{r} -->
 <!-- # devtools::install_github("r-spatial/lwgeom") -->
 <!-- library(lwgeom) -->
-<!-- world_3 = st_transform_proj(world, crs = "+proj=wintri") -->
+<!-- world_3 = lwgeom::st_transform_proj(world, crs = "+proj=wintri") -->
 <!-- plot(world_3$geom) -->
 <!-- ``` -->
 <!-- http://bl.ocks.org/vlandham/raw/9216751/ -->
 
-### Reprojecting
+### Reprojecting raster geometries
 
-The basic concepts of CRS apply to both vector and raster data model.
-However, there are important differences in reprojection of vectors and rasters.
-Transformation of CRS in vector data changes coordinates of each vertex. 
-This do not apply to raster data.
-Rasters are are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters).
-To preserve this property, it is impossible to transform coordinates of cells separately.
-This entails that a new raster could have a different number of columns and rows, and therefore different number of cells that the original one.
-Therefore, values of these new cells need to be estimated after a geometric operation is completed.
-The `projectRaster()` function's role is to reproject `Raster*` objects into a new object with another coordinate reference system. 
-Compared to `st_tranform()`, `projectRaster()` only accepts the `proj4string` definitions.
+The projection concepts described in the previous section apply equally to rasters objects.
+However, there are important differences in reprojection of vectors and rasters:
+transforming a vector object involves changing the coordinates of every vertex but this do not apply to raster data.
+Rasters are are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters), so it is impossible to transform coordinates of pixels separately.
+
+Raster reprojection involves creating a new raster object, often with a different number of columns and rows than the original.
+The attributes must subsequently be re-estimated, allowing the new pixels to be 'filled' with appropriate values.
+This two-stage process is done with `projectRaster()` from the **raster** package.
+Like the `st_transform()` function demonstrated in the previous section, `projectRaster()` takes a geographic object (a raster dataset in this case) and a `crs` argument.
+However, `projectRaster()` only accepts the lengthy `proj4string` definitions of a CRS rather than concise EPSG codes.
 
 ```{block2 type='rmdnote'}
 It is possible to use a EPSG code in a `proj4string` definition with `"+init=epsg:MY_NUMBER"`.
@@ -312,7 +314,7 @@ con_raster
 ```
 
 The nearest neighbor method should not be used for continuous raster data, as we want to preserve gradual changes in values.
-Alternatively, continuous data could be reprojected in the **raster** package using the bilinear method. 
+Alternatively, continuous data could be reprojected in the **raster** package using the bi-linear method. 
 In this technique, value of the output cell is calculated based on four nearest cells in the original raster. 
 The new value is a weighted average of values from these four cells, adjusted for their distance from the center of the output cell. 
 This dataset has geographic CRS and we want to transform it into projected CRS.
@@ -353,7 +355,7 @@ This section is about operations that in some way change the geometry of vector 
 It is more advanced than the spatial data operations presented in the previous Chapter (in section \@ref(spatial-operations-on-vector-data)) because here we drill down into the geometry:
 the functions discussed in this section work on objects of class `sfc` (simple feature geometry collections) in addition to objects of class `sf`.
 
-### Geometry unions and aggregation
+### Geometry unions
 
 Spatial aggregation can also be done in the **tidyverse**, using **dplyr** functions as follows:
 
@@ -543,7 +545,7 @@ Geometry casting is powerful operation which enable transformation of the geomet
 It is implemented in the `st_cast` function from the `sf` package.
 Importantly, `st_cast` behaves differently on single simple feature geometry (`sfg`) objects, and simple feature geometry column (`sfc`) and simple features objects.
 
-Let's create a multipoint to ilustrate how geometry casting works on simple feature geometry (`sfg`) objects:
+Let's create a multipoint to illustrate how geometry casting works on simple feature geometry (`sfg`) objects:
 
 ```{r}
 multipoint = st_multipoint(matrix(c(1, 3, 5, 1, 3, 1), ncol = 2))
@@ -765,7 +767,7 @@ Why the new object differs from the original one?
 <!--  world_4326 = st_transform(world_tmerc, 4326) -->
 <!-- plot(world_4326$geom) -->
 <!-- ``` -->
-1. Try to transform the categorical raster (`cat_raster`) into WGS 84 using the bilinear interpolation method. 
+1. Try to transform the categorical raster (`cat_raster`) into WGS 84 using the bi-linear interpolation method. 
 What has changed?
 How it influences the results?
 <!-- ```{r} -->
