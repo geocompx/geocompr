@@ -54,15 +54,15 @@ st_is_longlat(london)
 ```
 
 Spatial operations on objects without a CRS run on the implicit assumption that they are projected, even when in reality they are not.
-This can be seen by creating a buffer of one degree around the `london` point:
+This can lead to problems, as illustrated by the following code chunk, which creates a buffer of one degree around `london`:
 
 ```{r}
 london_buff = st_buffer(london, dist = 1)
 ```
 
-Note the message warning users that the operation may not work correctly and because the distance is degrees (which is not really a measure of distance, unlike meters).
-The small step of setting the CRS may seem inconsequential but has important consequences, illustrated in Figure \@ref(fig:crs-buf).
-This shows how the buffer created in the geographic CRS is dramatically elongated in the north-south direction due to the thinning of the vertical lines of longitude towards the Earth's poles.  
+Note the warning that informs us that the result has limited use because distances in geographic CRSs are in degrees, rather than meters or some other suitable measure of distance.
+The consequences of a failure to work on projected data are illustrated in Figure \@ref(fig:crs-buf):
+not how the buffer is dramatically elongated in the north-south direction due to the thinning of the vertical lines of longitude towards the Earth's poles.  
 
 ```{r crs-buf, fig.cap="Buffer on data with geographic CRS.", fig.asp=1}
 plot(london_buff, graticule = st_crs(4326), axes = TRUE)
@@ -70,14 +70,22 @@ plot(london, add = TRUE)
 ```
 
 This example does not mean that the CRS should not be set (it almost always should!) but that many spatial operations should be undertaken on projected geographic data.
-The following command creates a version of the `london` reprojected onto the British National Grid CRS (EPSG:27700):
+The solution is to *reproject* the data onto a projected CRS using the **sf** function `st_transform()`:
 
 ```{r}
 london_proj = st_transform(london, crs = 27700)
 ```
 
-This projected CRS has units in meters. 
-One degree at the equator represents 111,320 meters and we can use this value to create our buffer:
+The result is a new object that is identical to `london`, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700) that has units of meters. 
+We can verify that the CRS has changed using `st_crs()` as follows (note the important components of the output `EPSG: 27700` and `+units=m`):
+
+```{r}
+st_crs(london_proj)
+```
+
+Geometric operations on this projected version of the `london` dataset make sense.
+This can be verified by repeating the buffer operation, but with a meaningful measure of distance.
+Moving 1 degree at the equator means moving more than 100 km (111,320 meters):
 
 ```{r}
 london_proj_buff = st_buffer(london_proj, 111320)
