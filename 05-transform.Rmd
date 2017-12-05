@@ -430,69 +430,48 @@ plot(us_states_simp2$geometry, col = 8, main = "ms_simplify")
 par(par_old)
 ```
 
-### Geometry unions
+### Buffers and centroids
 
-Spatial aggregation can also be done in the **tidyverse**, using **dplyr** functions as follows:
+<!-- centroids intro -->
+There are two main functions that create single point representations of more complex vector objects - `st_centroid()` and `st_point_on_surface()`.
 
-```{r, eval = FALSE}
-group_by(us_states, REGION) %>%
-  summarize(sum(pop = total_pop_15, na.rm = TRUE))
-```
-
-For attribute data aggregation the grouping variable is another variable, typically one with few unique values relative to the number of rows (see section \@ref(vector-attribute-aggregation)).
-What we did not cover in that section was that attribute data aggregation dissolves the geometries of touching polygons.
-The `REGION` variable in the `us_states` dataset is a good example:
-there are 49 states (excluding Hawaii and Alaska) which can be aggregated into four regions.
-This is demonstrated in the code chunk below, the results of which are illustrated in Figure \@ref(fig:us-regions):
+<!-- The first one is `st_centroid()`  -->
+<!-- st_centroid -->
 
 ```{r}
-regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
-                    FUN = sum, na.rm = TRUE)
-```
-<!--
-show also tidyverse way, so what you are doing is basically a spatial join and a subsequent aggregation without a grouping variable. Didactically, it might be better to present a grouping variable.
--->
-
-```{r, echo=FALSE}
-# st_join(buff, africa[, "pop"]) %>%
-#   summarize(pop = sum(pop, na.rm = TRUE))
-# summarize(africa[buff, "pop"], pop = sum(pop, na.rm = TRUE))
+nz_centroid = st_centroid(nz)
 ```
 
-```{r us-regions, fig.cap="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.", echo=FALSE, warning=FALSE, fig.asp=0.2, out.width="100%"}
-# # with base R ----
-# old_par = par()
-# breaks = c(1e5, 5e6, 1e7, 7e7, 2e8)
-# rdf = st_set_geometry(regions, NULL)
-# us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
-#                                   dplyr::select(rdf, Group.1, total_pop_15),
-#                                   by = c("REGION" = "Group.1")) %>% 
-#   pull(total_pop_15)
-# 
-# par(mfrow = c(1, 2))
-# plot(us_states[, "total_pop_15"], main = "US states", breaks = breaks, key.pos = NULL)
-# plot(regions[, "total_pop_15"], main = "US regions", breaks = breaks, key.pos = NULL)
-# par(old_par)
-# with tmap ----
-library(tmap)
-us_states_facet = dplyr::select(us_states, REGION, total_pop_15) %>%
-  mutate(Level = "State")
-regions_facet = rename(regions, REGION = Group.1) %>%
-  mutate(Level = "Region")
-us_facet = rbind(us_states_facet, regions_facet) %>% 
-  mutate(Level = factor(Level, levels = c("State", "Region")))
+<!-- st_point_on_surface -->
+<!-- The second one -->
+<!-- add lines example -->
+<!-- note about computation time -->
 
-qtm(us_facet, "total_pop_15") +
-  tm_facets(by = "Level", nrow = 1, drop.units = TRUE)
+```{r}
+nz_pos = st_point_on_surface(nz)
 ```
 
-The equivalent result can be achieved using **tidyverse** functions as follows (result not shown):
-
-```{r, eval=FALSE}
-regions2 = us_states %>% 
-  group_by(REGION) %>%
-  summarize(sum(pop = total_pop_15, na.rm = TRUE))
+```{r}
+seine_centroid = st_centroid(seine)
 ```
+
+```{r}
+seine_pos = st_point_on_surface(seine)
+```
+
+```{r, warning=FALSE, echo=FALSE}
+par_old = par()
+par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
+plot(nz$geometry)
+plot(nz_centroid$geometry, add = TRUE)
+plot(nz_pos$geometry, add = TRUE, col = "red")
+plot(seine$geometry)
+plot(seine_centroid$geometry, add = TRUE)
+plot(seine_pos$geometry, add = TRUE, col = "red")
+par(par_old)
+```
+
+### Affine transformations
 
 ### Clipping 
 
@@ -588,50 +567,70 @@ pmulti = st_multipoint(pmat)
 box = st_convex_hull(pmulti)
 ```
 
-### Centroids
 
-<!-- centroids intro -->
-There are two main functions that create single point representations of more complex vector objects - `st_centroid()` and `st_point_on_surface()`.
+### Geometry unions
 
-<!-- The first one is `st_centroid()`  -->
-<!-- st_centroid -->
+Spatial aggregation can also be done in the **tidyverse**, using **dplyr** functions as follows:
+
+```{r, eval = FALSE}
+group_by(us_states, REGION) %>%
+  summarize(sum(pop = total_pop_15, na.rm = TRUE))
+```
+
+For attribute data aggregation the grouping variable is another variable, typically one with few unique values relative to the number of rows (see section \@ref(vector-attribute-aggregation)).
+What we did not cover in that section was that attribute data aggregation dissolves the geometries of touching polygons.
+The `REGION` variable in the `us_states` dataset is a good example:
+there are 49 states (excluding Hawaii and Alaska) which can be aggregated into four regions.
+This is demonstrated in the code chunk below, the results of which are illustrated in Figure \@ref(fig:us-regions):
 
 ```{r}
-nz_centroid = st_centroid(nz)
+regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
+                    FUN = sum, na.rm = TRUE)
+```
+<!--
+show also tidyverse way, so what you are doing is basically a spatial join and a subsequent aggregation without a grouping variable. Didactically, it might be better to present a grouping variable.
+-->
+
+```{r, echo=FALSE}
+# st_join(buff, africa[, "pop"]) %>%
+#   summarize(pop = sum(pop, na.rm = TRUE))
+# summarize(africa[buff, "pop"], pop = sum(pop, na.rm = TRUE))
 ```
 
-<!-- st_point_on_surface -->
-<!-- The second one -->
-<!-- add lines example -->
-<!-- note about computation time -->
+```{r us-regions, fig.cap="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.", echo=FALSE, warning=FALSE, fig.asp=0.2, out.width="100%"}
+# # with base R ----
+# old_par = par()
+# breaks = c(1e5, 5e6, 1e7, 7e7, 2e8)
+# rdf = st_set_geometry(regions, NULL)
+# us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
+#                                   dplyr::select(rdf, Group.1, total_pop_15),
+#                                   by = c("REGION" = "Group.1")) %>% 
+#   pull(total_pop_15)
+# 
+# par(mfrow = c(1, 2))
+# plot(us_states[, "total_pop_15"], main = "US states", breaks = breaks, key.pos = NULL)
+# plot(regions[, "total_pop_15"], main = "US regions", breaks = breaks, key.pos = NULL)
+# par(old_par)
+# with tmap ----
+library(tmap)
+us_states_facet = dplyr::select(us_states, REGION, total_pop_15) %>%
+  mutate(Level = "State")
+regions_facet = rename(regions, REGION = Group.1) %>%
+  mutate(Level = "Region")
+us_facet = rbind(us_states_facet, regions_facet) %>% 
+  mutate(Level = factor(Level, levels = c("State", "Region")))
 
-```{r}
-nz_pos = st_point_on_surface(nz)
+qtm(us_facet, "total_pop_15") +
+  tm_facets(by = "Level", nrow = 1, drop.units = TRUE)
 ```
 
-```{r}
-seine_centroid = st_centroid(seine)
+The equivalent result can be achieved using **tidyverse** functions as follows (result not shown):
+
+```{r, eval=FALSE}
+regions2 = us_states %>% 
+  group_by(REGION) %>%
+  summarize(sum(pop = total_pop_15, na.rm = TRUE))
 ```
-
-```{r}
-seine_pos = st_point_on_surface(seine)
-```
-
-```{r, warning=FALSE, echo=FALSE}
-par_old = par()
-par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
-plot(nz$geometry)
-plot(nz_centroid$geometry, add = TRUE)
-plot(nz_pos$geometry, add = TRUE, col = "red")
-plot(seine$geometry)
-plot(seine_centroid$geometry, add = TRUE)
-plot(seine_pos$geometry, add = TRUE, col = "red")
-par(par_old)
-```
-
-### Buffers
-
-### Affine transformations
 
 ### Type transformation
 
