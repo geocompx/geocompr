@@ -66,7 +66,7 @@ london_buff = st_buffer(london, dist = 1)
 Note the warning that informs us that the result has limited use because distances in geographic CRSs are in degrees, rather than meters or some other suitable measure of distance.
 The consequences of a failure to work on projected data are illustrated in Figure \@ref(fig:crs-buf):
 note how the buffer is elongated in the north-south direction.
-This because lines of longitude converge towards the Earth's poles.  
+This because lines of longitude are converge towards the Earth's poles making them closer together (lines of latitude by contrast have constant distance from each other).  
 
 ```{r crs-buf, fig.cap="Buffer on data with geographic CRS.", fig.asp=1}
 plot(london_buff, graticule = st_crs(4326), axes = TRUE)
@@ -114,16 +114,26 @@ plot(london_proj, add = TRUE)
 The importance of understanding an object's CRS (primarily whether it's projected or geographic), and reprojecting when appropriate, is illustrated above using a simple geographic vector object representing London.
 The subsequent two sections go into more depth on reprojections, exploring which CRS to use and providing details about the process of reprojecting vector and raster objects.
 
-### Reprojecting vector geometries
+### Which CRS to use?
 
-While CRSs can be set manually, it is more common in real world applications to *transform* a known CRS into another.
-CRS transformation could be vital to obtain proper results in many cases.
-A typical example is when geometry data is provided in a geographic CRS but you want to do spatial operations, which require it to be in a projected CRS.
-It includes distance measurements or area calculations.
-CRS also represent spatial relationship between datasets.
-Therefore, spatial operations on many datasets can only be correctly performed when all the data have the same CRS.
-The most common reason to unify the CRS is to combine different datasets or apply methods which need at least two objects.
-Let's use real-world examples to illustrate this.
+While CRSs can be set manually --- as illustrated in the previous section with `st_set_crs(london, 4326)` --- it is more common in real world applications for CRSs to be set automatically when data is read-in.
+The main task will be to *transform* objects provided in one CRS into another.
+But when should data be transformed? And into which CRS?
+Although there are no clear-cut answers to these questions, the contents of this section should help you decide on answers, on a case-by-case basis. 
+
+The question of **when to transform** is simpler to answer.
+Transformation from geographic to projected CRSs is vital in some cases:
+when distance measurements or area calculations are needed, for example.
+Another case when transformation is vital is when exploring the spatial relationships between two objects with different CRSs.
+As illustrated in the below code chunk, which attempts to find the distance between the projected and unprojected versions of the `london` objects, this results in an error telling you that either dataset must be transformed:
+
+```{r, eval=FALSE}
+st_distance(london, london_proj)
+# > Error: st_crs(x) == st_crs(y) is not TRUE
+```
+
+
+### Reprojecting vector geometries
 
 Vector data on the most basic level is represented by individual points, and points create more complex objects, such as lines and polygons.
 Spatial reprojection of vectors is a mathematical transformation of coordinates of these point.

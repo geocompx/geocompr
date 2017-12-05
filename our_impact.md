@@ -30,6 +30,7 @@
 - 2017-07-31 - enhancement - Add a support for the `sf` objects - https://github.com/hunzikp/velox/issues/7
 - 2017-11-25 - bug - Added new output type for the osmdata function `getbb()`: https://github.com/ropensci/osmdata/issues/104
 - 2017-11-30 - bug - tidyr::unite - wrong column name - https://github.com/r-spatial/sf/issues/576
+- 2017-12-05 - enhancement - add tmap to the rocker/geospatial Docker container - https://github.com/rocker-org/geospatial/issues/6
 
 ## open
 
