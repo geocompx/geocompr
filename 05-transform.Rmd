@@ -5,12 +5,13 @@
 - This chapter requires the following packages:^[**lwgeom** is also needed for a couple of more advanced transformations.]
 
 ```{r, message=FALSE}
+library(units)
 library(sf)
 library(raster)
 library(tidyverse)
 ```
 
-- It also relies on **spData** and **spDataLarge**, which load `cycle_hire_osm` dataset and provide external files:
+- It also relies on **spData** and **spDataLarge**, which load `cycle_hire_osm`, `nz`, `seine`, `world`, and `us_states` datasets and provide external files:
 
 ```{r, message=FALSE}
 library(spData)
@@ -35,7 +36,7 @@ Only making sure that these rasters share the same header information allows the
 A vital type of geometry transformation is *reprojecting* from one coordinate reference system (CRS) to another.
 Because of the importance of reprojection, introduced in Chapter \@ref(spatial-class) (see figure \@ref(fig:vectorplots) and section \@ref(crs-intro)), and the fact that it applies to raster and vector geometries alike, it is the topic of the first section in this chapter.
 
-## Reprojecting geographic data 
+## Reprojecting geographic data {#reproj-geo-data}
 
 <!-- So far this intro mainly shows examples how to reproject vector data, and a few exemplarily pitfalls.
 And though the pitfall examples are good, I wonder if we can keep them a bit more general (so far only related to vector data) or if at times a coding example is necessary, maybe only a figure would be sufficient.
@@ -429,47 +430,67 @@ the functions discussed in this section work on objects of class `sfc` (simple f
 
 ### Simplification
 
-<!-- \@ref(fig:seine-simp) -->
+Simplification is a process for generalization of vector objects (lines and polygons) usually for its use in smaller scale maps.
+Additional reason for simplification is reduction of the object size and therefore the size of a saved file.
+Therefore, data is often simplified before its use in interactive maps. 
+The **sf** package provides the `st_simplify()` function^[It uses the simplify algorithm from GEOS.]
+Level of generalization is controlled by the `dTolerance` argument, which expects a value in map units.
+As the result, all vertices in the simplified geometry will be within this value from the original ones.
+
+We can use data of the Seine, Marne and Yonne rivers (on the left in Figure \@ref(fig:seine-simp)) as an example of line vector data simplification:
 
 ```{r}
-seine_simp = st_simplify(seine, dTolerance = 2000)
+seine_simp = st_simplify(seine, dTolerance = 2000) #2000 m
 ```
+
+```{r seine-simp, echo=FALSE, fig.cap="Comparison of the original data of the Seine, Marne and Yonne rivers and its simplified version using `st_simplify`.", warning=FALSE}
+par_old = par()
+par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
+plot(seine$geometry, col = 1, main = "Original data")
+plot(seine_simp$geometry, col = 1, main = "st_simplify")
+par(par_old)
+```
+
+The new object, `seine_simp`, is not only visually generalized (on the right in Figure \@ref(fig:seine-simp)), but also has twice smaller size than the original object:
 
 ```{r}
 object.size(seine)
 object.size(seine_simp)
 ```
 
-```{r seine-simp, echo=FALSE, fig.cap="Comparision of original data of the contiguous United States and two simplified versions using `st_simplify` and `ms_simplify`.", warning=FALSE}
-par_old = par()
-par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
-plot(seine$geometry, col = 8, main = "Original data")
-plot(seine_simp$geometry, col = 8, main = "st_simplify")
-par(par_old)
-```
+Let's take a look at the second example of simplification.
+It will use, `us_states`, polygons representing the contiguous United States.
+As we showed in section \@ref(reproj-geo-data), GEOS assumes that the data is in a projected CRS and this could lead to unexpected results when using a geographic CRS.
+Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (epsg = 2163) (on the left in Figure \@ref(fig:us-simp)):
 
-<!-- \@ref(fig:us-simp) -->
-
-<!-- - simplifications -->
-<!-- st_simplify -->
 ```{r}
-us_states_simp1 = st_simplify(us_states, dTolerance = 1)
+us_states2163 = st_transform(us_states, 2163)
 ```
 
-<!-- line example -->
-<!-- maybe river or road network to spData?? -->
+The `st_simplify` function uses the standard Douglas-Peucker algorithm, which is realatively fast.
 
-<!-- rmapshaper -->
-<!-- polygon example -->
+```{r}
+us_states_simp1 = st_simplify(us_states2163, dTolerance = 100000) #100 km
+```
+
+On the other hand, this algorithm simplify objects on a per-geometry basis, and therefore does not preserve topology.
+This could be seen on the middle map in Figure \@ref(fig:us-simp), where polygons of single states are splitted creating holes or overlapping each other.
+An alternative simplification method can be used to solve this issue, such as the Visvalingam algorithm implemented in the **rmapshaper** package's function `ms_simplify()`.
+<!-- https://bost.ocks.org/mike/simplify/ -->
+In the below example, we would simplified the `us_states2163` object using only 0.1% of original data vertices (argument `keep`), and also assure that all of the original objects (states) would be be kept (argument `keep_shapes`).
+
 ```{r}
 # proportion of points to retain (0-1; default 0.05)
-us_states_simp2 = rmapshaper::ms_simplify(us_states, keep = 0.01, keep_shapes = TRUE)
+us_states_simp2 = rmapshaper::ms_simplify(us_states2163, keep = 0.005,
+                                          keep_shapes = TRUE)
 ```
 
-```{r us-simp, echo=FALSE, fig.cap="Comparision of original data of the contiguous United States and two simplified versions using `st_simplify` and `ms_simplify`.", warning=FALSE}
+Finally, the visual comparison of the original dataset and two simplified versions shows differences between the Douglas-Peucker (`st_simplify`) and Visvalingam (`ms_simplify`) algorithms outputs (Figure \@ref(fig:us-simp)):
+
+```{r us-simp, echo=FALSE, fig.cap="Comparison of the original data of the contiguous United States and two simplified versions using `st_simplify` and `ms_simplify`.", warning=FALSE}
 par_old = par()
 par(mfrow = c(1, 3), mar = c(0, 0, 1, 0))
-plot(us_states$geometry, col = 8, main = "Original data")
+plot(us_states2163$geometry, col = 8, main = "Original data")
 plot(us_states_simp1$geometry, col = 8, main = "st_simplify")
 plot(us_states_simp2$geometry, col = 8, main = "ms_simplify")
 par(par_old)
@@ -611,7 +632,6 @@ bb = st_bbox(st_union(x, y))
 pmulti = st_multipoint(pmat)
 box = st_convex_hull(pmulti)
 ```
-
 
 ### Geometry unions
 
