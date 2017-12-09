@@ -29,7 +29,6 @@ To ease reproducibility, this book is also a package. Installing it from GitHub 
 
 ``` r
 devtools::install_github("robinlovelace/geocompr")
-#> Warning in get(Info[i, 1], envir = env): internal error -3 in R_decompress1
 ```
 
 You need a recent version of the GDAL, GEOS, Proj.4 and UDUNITS libraries installed for this to work on Mac and Linux. See the **sf** package's [README](https://github.com/edzer/sfr) for information on that.
