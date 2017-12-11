@@ -26,7 +26,7 @@ library(raster)      # classes and functions for raster data
 library(sf)          # classes and functions for vector data
 ```
 
-The chapter also relies on two data packages: **spData** and **spDataLarge**, the latter of which must be installed after **spData** is loaded:^[**spDataLarge** can also be installed with the following command: `install.packages("spDataLarge", repos = "https://nowosad.github.io/drat/", type = "source")`]
+The chapter also relies on two data packages: **spData** and **spDataLarge**, the latter of which must be installed after **spData** is loaded:^[**spDataLarge** can also be installed with the following command: `install.packages("spDataLarge", repos = "https://nowosad.github.io/drat/", type = "source")`.]
 
 
 ```{r, results='hide'}
@@ -51,15 +51,14 @@ We will introduce the theory behind each data model and the disciplines in which
 <!-- Vector and raster models are vital to geospatial analysis [@longley_geographic_2015]. -->
 
 The *vector data model* represents the world using points, lines and polygons.
-This means, it supports data with discrete, well-defined borders.
-Generally, vector datasets have a high level of precision (but not necessarily accuracy as we will see in \@ref(units)).
-
-The *raster data model* is good at representing continuous phenomena such as elevation or rainfall with the help of grid cells that divide the surface up into a cells of constant size (*resolution*).
-Rasters aggregate spatially specific features to a given resolution, meaning that they are spatially consistent and scalable (many worldwide raster datasets are available).
+These have discrete, well-defined borders, meaning that vector datasets usually have a high level of precision (but not necessarily accuracy as we will see in \@ref(units)).
+The *raster data model*, by contrast, divides the surface up into a cells of constant size (*resolution*).
+It is ideal for representing continuous phenomena such as elevation or rainfall. 
+Rasters aggregate spatially specific features to a given resolution, meaning that they are consistent over space and scalable (many worldwide raster datasets are available).
 The downside of this is that small features can be blurred or lost.
 <!-- todo: add figure(s) showing raster data and blurring? -->
 
-The appropriate data model to use depends on the domain of application:
+Which should you use? It likely depends on your domain of application:
 
 - Vector data tends to dominate the social sciences because human settlements and boundaries have discrete borders.
 - By contrast, raster data often dominates the environmental sciences because these often use remotely sensed imagery. 
@@ -83,12 +82,17 @@ Points can represent self-standing features (e.g. the location of a bus stop) or
 Most point geometries contain only two dimension (3 dimensional CRSs contain an additional $z$ value, typically representing height above sea level).
 
 In this system London, for example, can be represented by the coordinates `c(-0.1, 51.5)`.
-This mean its location is -0.1 degrees east and 55.5 degrees north of the origin at 0 degrees longitude (the Prime Meridian) and 0 degree latitude (the Equator) in a geographic ('lon/lat') CRS (Figure \@ref(fig:vectorplots), left panel).
-The same point could also be approximated in a projected CRS with 'Easting/Northing' values of `c(530000, 180000)` in the British National Grid (BNG).
-In the vector data model this suggests that London is located 530 km *East* and 180 km *North* of the $origin$ of the CRS.
-This can be verified visually: slightly more than 5 'boxes' --- square areas bounded by the grey grid lines 100 km in width --- separate the point representing London from the origin in Figure \@ref(fig:vectorplots).
-This shows that the origin of the BNG is located in the sea to the southeast of the UK, ensuring that all locations in the UK can be represented with positive Easting and Northing values.
-CRSs are described in section \@ref(crs-intro).
+This means that its location is -0.1 degrees east and 55.5 degrees north of the origin.
+The origin in this case is at 0 degrees longitude (the Prime Meridian) and 0 degree latitude (the Equator) in a geographic ('lon/lat') CRS (Figure \@ref(fig:vectorplots), left panel).
+The same point could also be approximated in a projected CRS with 'Easting/Northing' values of `c(530000, 180000)` in the British National Grid ([BNG](https://en.wikipedia.org/wiki/Ordnance_Survey_National_Grid)), meaning that London is located 530 km *East* and 180 km *North* of the $origin$ of the CRS.
+This can be verified visually: slightly more than 5 'boxes' --- square areas bounded by the grey grid lines 100 km in width --- separate the point representing London from the origin (Figure \@ref(fig:vectorplots), right panel).
+
+The location of BNG's origin, in sea southwest of the South West Peninsular, did not arise by accident: it ensures that most locations in the UK have positive Easting and Northing values.^[
+The origin we are referring to, depicted in blue in Figure \@ref(fig:vectorplots), is in fact the 'false' origin.
+The 'true' origin, the location at which distortions are at a minimum, is located at 2° W and 49° N.
+This was selected by the [Ordnance Survey](https://www.ordnancesurvey.co.uk/support/the-national-grid.html) to be roughly in the centre of the British landmass longitudinally.
+]
+There is more to CRSs, as described in sections \@ref(crs-intro) and \@ref(reproj-geo-data) but, for the purposes of this section, it is sufficient to know that coordinates consist of two numbers representing distance from an origin, usually in $x$ then $y$ dimensions.
 
 ```{r, include=FALSE, eval = FALSE}
 library(globe)
@@ -124,7 +128,7 @@ abline(v = seq(0, 9e5, length.out = 10), col = "grey", lty = 3)
 dev.off()
 ```
 
-```{r vectorplots, fig.cap="Illustration of vector (point) data in R with the location of London (the red X) represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° Longitude and latitude. The right plot represents a projected CRS with an origin at -2° longitude and 49° latitude, and units of meters.", out.width="45%", fig.show='hold', echo=FALSE}
+```{r vectorplots, fig.cap="Illustration of vector (point) data in which location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° Longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.", out.width="49%", fig.show='hold', echo=FALSE}
 knitr::include_graphics(c("figures/vector_lonlat.png", "figures/vector_projected.png"))
 ```
 
@@ -271,7 +275,7 @@ plot(world["pop"])
 As with **sp**, you can add further layers to your maps using the `add = TRUE`-argument of the `plot()` function .^[In
 fact, when you `plot()` an **sf** object, R is calling `sf:::plot.sf()` behind the scenes.
 `plot()` is a generic method that behaves differently depending on the class of object being plotted.]
-To illustrate this, and prepare for content covered in chapters \@ref(attr) and \@ref(spatial-data-operations) on attribute and spatial data operations, we will subset and combine countries in the `world` object, which creates a single object representing Asia:
+To illustrate this, and prepare for content covered in chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, we will subset and combine countries in the `world` object, which creates a single object representing Asia:
 
 ```{r, warning=FALSE}
 asia = world[world$continent == "Asia", ]
@@ -307,7 +311,7 @@ plot(africa[0], lwd = 3, main = "Nigeria in context", border = "lightgrey")
 
 **sf** simplifies spatial data objects compared with **sp** and provides a near-direct interface to GDAL and GEOS C++ functions.
 In theory this should make **sf** faster than **sp**/**rgdal**/**rgeos**, something that is tested in Chapter 5 for data I/O.
-This section introduces **sf** classes in preparation for subsequent chapters which deal with vector data (in particular Chapter \@ref(spatial-data-operations)).
+This section introduces **sf** classes in preparation for subsequent chapters which deal with vector data (in particular Chapter \@ref(spatial-operations)).
 
 As a final exercise, we will see one way of how to do a spatial overlay in **sf**.
 First, we convert the countries of the world into centroids, and then subset those in Asia. Finally, the `summary`-command tells us how many centroids (countries) are part of Asia (43) and how many are not (134).
@@ -318,7 +322,7 @@ sel_asia = st_intersects(world_centroids, asia, sparse = FALSE)
 summary(sel_asia)
 ```
 
-Note: `st_intersects()` uses [GEOS](https://trac.osgeo.org/geos/) in the background for the spatial overlay operation (see also Chapter \@ref(spatial-data-operations)).
+Note: `st_intersects()` uses [GEOS](https://trac.osgeo.org/geos/) in the background for the spatial overlay operation (see also Chapter \@ref(spatial-operations)).
 
 Since **sf**'s `plot()` function builds on base plotting methods, you may also use its many optional arguments (see `?plot` and `?par`).
 This provides a powerful but not necessarily intuitive interface.
@@ -676,7 +680,7 @@ Simple features are, in essence, data frames with a spatial extension.
 
 ## Raster data
 
-The geographic raster data model consists of a raster header and a matrix (with rows and columns) representing equally spaced cells (often also called pixels; Figure \@ref(fig:raster-intro-plot):A).
+The geographic raster data model consists of a raster header^[Depending on the file format the header is part of the actual image data file, e.g., GeoTiff, or stored in an extra header or world file, e.g., ASCII grid formats] and a matrix (with rows and columns) representing equally spaced cells (often also called pixels; Figure \@ref(fig:raster-intro-plot):A).
 The raster header defines the coordinate reference system, the extent and the origin.
 The origin (or starting point) is frequently the coordinate of the lower-left corner of the matrix (the **raster** package, however, uses the upper left corner, by default (Figure  \@ref(fig:raster-intro-plot):B)).
 The header defines the extent via the number of columns, the number of rows and the cell size resolution.
@@ -917,48 +921,44 @@ Vector and raster spatial data types share concepts intrinsic to spatial data.
 Perhaps the most fundamental of these is the Coordinate Reference System (CRS), which defines how the spatial elements of the data relate to the surface of the Earth (or other bodies).
 <!-- Coordinates are meaningles without a CRS, as we don't know theirs units (meters, feets, degrees) or what's the origin -->
 <!-- (-12579102, 4439107) = (-113, 37) -->
-Coordinate system could be either geographic or projected (Figures \@ref(fig:vector-crs) and \@ref(fig:raster-crs)).
+CRSs are either geographic or projected, as introduced at the beginning of this chapter (see Figure (\@ref(fig:vectorplots)).
+This section will will explain each type, laying the foundations for section \@ref(reproj-geo-data) on CRS transformations.
 
 ### Geographic coordinate systems
 
-Geographic coordinate systems identify any location on the Earth's surface using two values - longitude and latitude. 
-The first one is an angle from the prime meridian plan and the second one is an angle from the equatorial plane to this location.
-Therefore, units of geographic coordinate systems are degrees.
-<!-- for example Los Angeles, Melbourne -->
+Geographic coordinate systems identify any location on the Earth's surface using two values --- longitude and latitude. 
+*Longitude* is location in the East-West direction in anglular distance from the Prime Meridian plane.
+*Latitude* is angular distance North or South of the equatorial plane.
+Distance in geographic CRSs is therefore measured not in metres but degrees.
+This has important consequences, as demonstrated in section \@ref(reproj-geo-data).
 
 The surface of the Earth in geographic coordinate systems is represented by a spherical or ellipsoidal surface.
-Spherical models represent the shape of the Earth of a specific radius, assuming that the Earth is a perfect sphere. 
-While it simplifies calculations and works well for small scale maps, it could not be sufficient for the work at a larger scale.
-More accurate measurements can be done with an ellipsoidal model.
-The shape of an ellipse is defined by either the equatorial radius (a) and the polar radius (b), or by a and the inverse flattening (rf), where:
-$$rf = 1/((a-b)/a)$$
-<!--fig?-->
-<!-- WGS84   a=6378137.0     rf=298.2572 -->
-<!-- 1/((a-b)/a) -->
-<!-- a - 1/rf * a = b -->
-Since the Earth is flattened at the poles, an equatorial radius is slightly longer than a polar axis.
-For example, the difference of the equatorial radius and polar radius in the WGS 84 ellipsoid is about 21.385 km.
-You can access a list of available ellipses and theirs properties using the `st_proj_info(type = "ellps")` function.
-<!-- ellipsoid example -->
+Spherical models assume that the Earth is a perfect sphere of a given radius.
+Spherical models have the advantage of simplicity but are rarely used because they are innacurate: the Earth is not a sphere!
+Ellipsoidal models are defined by two parameters: the equatorial radius (a) and the polar radius (b).
+These are suitable because the Earth is compressed: the equatorial radius is around 11.5 km longer than the polar radius [@maling_coordinate_1992].^[
+The degree of compression is often referred to as [*flattening*](https://en.wikipedia.org/wiki/Flattening), defined as $f = (a - b) / a$ but the terms *ellipticity* and *compression* can also be used [@maling_coordinate_1992].
+Because $f$ is a rather small value, digital ellipsoid models use the 'inverse flattening' ($rf = 1/f$) to define the Earth's compression.
+Values of $a$ and $rf$ used in a variety of ellipsoidal models can be seen be executing `st_proj_info(type = "ellps")`.
+]
 
-Additionally, a position and orientation of the spheroid relative to the center of the Earth needs to be defined using a datum.
-The Earth’s surface is irregular due to gravitational and surface feature variations.
-Therefore, datums were created to account for the local variations in establishing a coordinate system.
-There are two types of datums - local and geocentric.
-In local datums, the ellipsoid surface aligns closely to the Earth surface at a particular location.
-For example, NAD27 (North American Datum of 1927) is a local datum created for the United States area.
-Geocentric datums are aligned to the center of the Earth
-It includes WGS84 (World Geodetic System 1984) Datum.
-A list of datums supported in R could be obtain with `st_proj_info(type = "datum")`.
+Ellipsoids are part of a wider component of CRSs: the *datum*.
+This contains information on what ellipsoid to use (with the `ellps` parameter in the proj4 CRS library) and the precise relationship between the cartesian coodinates and location on the Earth's service.
+In R, these additional details are stored in the `towgs84` argument of  [proj4](http://proj4.org/parameters.html#towgs84-datum-transformation-to-wgs84) notation (see [proj4.org/parameters.html](http://proj4.org/parameters.html) for details).
+These allow local variations in Earth's surface, e.g. due to large mountain ranges, to be accounted for in a local CRS.
+There are two types of datums --- local and geocentric.
+In a *local datum* such as `NAD83` the ellipsoidal surface is shifted to align with the surface at a particular location.
+In a *geocentric datum*  such as `WGS84` the centre is the Earth's centre of gravity and the accuracy of projections is not optimised for a specific location.
+Available datum definitions can be seen by executing `st_proj_info(type = "datum")`.
 <!-- plots? -->
 <!-- plus maybe table (few examples) -->
 
 ### Projected coordinate systems 
 
 Projected coordinate systems are based on Cartesian coordinates (X, Y) and represent any area on a flat surface. 
-A projected coordinate system has an origin, x and y axes, and a linear unit of measure.
+A projected coordinate system have an origin, x and y axes, and a linear unit of measure.
 All projected coordinate systems are based on geographic coordinate systems.
-Maps projections are mathematical models for conversion of three-dimensional surface into a two-dimensional representation on a map.
+Map projections are mathematical models for conversion of three-dimensional surface into a two-dimensional representation on a map.
 This transition cannot be done without adding some distortion.
 Therefore, some properties of the Earth's surface are distorted in this process, such as area, direction, distance, and shape.
 A projected coordinate system can preserve only one or two of those properties.
