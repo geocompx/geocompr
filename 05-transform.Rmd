@@ -5,25 +5,27 @@
 - This chapter requires the following packages:^[**lwgeom** is also needed for a couple of more advanced transformations.]
 
 ```{r, message=FALSE}
+library(units)
 library(sf)
 library(raster)
 library(tidyverse)
 ```
 
-- It also relies on **spData** and **spDataLarge**, which load `cycle_hire_osm` dataset and provide external files:
+- It also relies on **spData** and **spDataLarge**, which load `cycle_hire_osm`, `nz`, `seine`, `world`, and `us_states` datasets and provide external files:
 
 ```{r, message=FALSE}
 library(spData)
 library(spDataLarge)
 ```
 
-The previous three chapters have demonstrated how geographic datasets are structured in R (Chapter \@ref(spatial-class)) and how to manipulate them based on their non-geographic attributes (\@ref(attr)) and spatial properties (\@ref(spatial-data-operations)).
+The previous three chapters have demonstrated how geographic datasets are structured in R (Chapter \@ref(spatial-class)) and how to manipulate them based on their non-geographic attributes (\@ref(attr)) and spatial properties (\@ref(spatial-operations)).
 This chapter goes a step further, by showing how to modify the *geometry* underlying spatial datasets.
 
 Section \@ref(geo-vec) covers transforming vector geometries.
-This includes simplifying, buffering, clipping and even shifting/scaling/rotating geometries using 'affine transformations'.
+This includes simplication, buffers and centroids and even shifting/scaling/rotating single geometries using 'affine transformations' (see sections \@ref(simplification) to \@ref(affine-transformations)).
+Vector geometries can also be modified by another spatial object with 'clipping' operations, demonstrated in section \@ref(clipping).
 Geometry unions, which underlie spatial data aggregation, are covered in section \@ref(geometry-unions).
-Advanced transformations of vector geometries include type transformations (e.g. from few multipolygons to many polygons) and 'rasterization', which sets-up the next section.
+Advanced transformations of vector geometries include type transformations (e.g. from few multipolygons to many polygons) and 'rasterization' are covered in sections \@ref(type-transformations) and \@ref(rasterization) respectively.
 
 Section \@ref(geo-ras) covers geometric transformations on raster objects.
 This involves changing the size and number of the underlying pixels, and assigning them new values.
@@ -34,16 +36,33 @@ Only making sure that these rasters share the same header information allows the
 A vital type of geometry transformation is *reprojecting* from one coordinate reference system (CRS) to another.
 Because of the importance of reprojection, introduced in Chapter \@ref(spatial-class) (see figure \@ref(fig:vectorplots) and section \@ref(crs-intro)), and the fact that it applies to raster and vector geometries alike, it is the topic of the first section in this chapter.
 
-## Reprojecting geographic data 
+## Reprojecting geographic data {#reproj-geo-data}
 
-Section \@ref(crs-intro) demonstrated the importance of understanding CRSs for geocomputation.
+<!-- So far this intro mainly shows examples how to reproject vector data, and a few exemplarily pitfalls.
+And though the pitfall examples are good, I wonder if we can keep them a bit more general (so far only related to vector data) or if at times a coding example is necessary, maybe only a figure would be sufficient.
+We should especially point out that since we project from 3D to 2D we can only keep two out of three spherical (real-world) properties: angle, length, area (-> could be also part of which CRS to use or even better we refer to this explanation in "which CRS to use").
+So a specific use case determines which projection to use. 
+In sea navigation we need angles and lengths, real estate is especially interested in correct areas, etc.
+
+Hence, maybe we should move parts from c2 to c5 since the stuff in c2 is already rather specific, and not a short intro to CRS anymore. 
+Another solution would be to leave the intro crs stuff in c2 (extended by when to use which CRS) and in c5 we don't have a joint vector-raster projection section but have a repojection section in the vector and raster section.
+(In the case of raster this would make perfectly sense since for reprojecting one needs all the geometric operations in section raster alignment (warp, shift, scale, aggregate, etc.).
+Maybe (not sure) a few figures would also help (conic, azimuthal projection; ellipsoids, etc.)
+-->
+
+Section \@ref(crs-intro) introduced coordinate reference systems (CRSs) and demonstrated their importance for geocomputation.
+This section goes further, by demonstrating some problems that can arise when using an inappropriate and how to *transform* geographic objects, from one CRS to another.
+
 Many spatial operations assume that you are using a *projected* CRS (on a Euclidean grid with units of meters rather than a geographic 'lat/lon' grid with units of degrees).
 The GEOS engine underlying most spatial operations in **sf**, for example, assumes your data is in a projected CRS.
 For this reason **sf** contains a function for checking if geometries have a geographic or projected CRS.
-This is illustrated below using the example of *London*:
+This is illustrated below using the example of London introduced in section \@ref(vector-data):
 
 ```{r}
-london = st_sf(geometry = st_sfc(st_point(c(-0.1, 51.5))))
+london = c(-0.1, 51.5) %>% 
+  st_point() %>% 
+  st_sfc() %>% 
+  st_sf()
 st_is_longlat(london)
 ```
 
@@ -66,7 +85,7 @@ london_buff = st_buffer(london, dist = 1)
 Note the warning that informs us that the result has limited use because distances in geographic CRSs are in degrees, rather than meters or some other suitable measure of distance.
 The consequences of a failure to work on projected data are illustrated in Figure \@ref(fig:crs-buf):
 note how the buffer is elongated in the north-south direction.
-This because lines of longitude converge towards the Earth's poles.  
+This because lines of longitude are converge towards the Earth's poles making them closer together (lines of latitude by contrast have constant distance from each other).  
 
 ```{r crs-buf, fig.cap="Buffer on data with geographic CRS.", fig.asp=1}
 plot(london_buff, graticule = st_crs(4326), axes = TRUE)
@@ -75,16 +94,19 @@ plot(london, add = TRUE)
 
 Do not interpret the warning about the geographic (`longitude/latitude`) CRS as "the CRS should not be set": it almost always should be!
 It is better understood as a suggestion to *reproject* the data onto a projected CRS.
-This suggestion does not always need to be heeded: performing spatial and geometric operations makes little or no difference some cases (e.g. spatial subsetting).
+This suggestion does not always need to be heeded: performing spatial and geometric operations makes little or no difference in some cases (e.g., spatial subsetting).
 But for operations involving distances such as buffering, the only way to ensure a good result is to create a projected copy of the data and run the operation on that.
-This is done in the command below, using the **sf** function `st_transform()`:
+This is done in the code chunk below:
 
 ```{r}
-london_proj = st_transform(london, crs = 27700)
+london_proj = c(530000, 180000) %>% 
+  st_point() %>% 
+  st_sfc() %>%
+  st_sf(crs = 27700)
 ```
 
 The result is a new object that is identical to `london`, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters. 
-We can verify that the CRS has changed using `st_crs()` as follows (only the most important components of the output are shown, other details have been replaced by `...`):
+We can verify that the CRS has changed using `st_crs()` as follows (some of the output has been replace by `...`):
 
 ```{r, eval=FALSE}
 st_crs(london_proj)
@@ -94,42 +116,115 @@ st_crs(london_proj)
 ```
 
 Notable components of this CRS description include the EPSG code (`EPSG: 27700`), the origin (`+lat_0=49 +lon_0=-2`) and units (`+units=m`).
-The fact that the units of the CRS are meters (rather than degrees) tells us that geometry operations on on `london_proj` will make sense (and not emit a warning).
-This can be verified by checking that it is no longer in a geographic CRS, that `st_is_longlat(london_proj)` returns `FALSE`.
-Now we can repeat the buffer operation with a meaningful measure of distance.
-Moving 1 degree at the equator means moving more than 100 km (111,320 meters), the new buffer distance:
+The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: geometry operations on `london_proj` will work without a warning, meaning buffers can be produced from it using proper units of distance.
+Moving 1 degree means moving 100+ km (111,320 meters) at the equator.
+This is used as the new buffer distance:
 
 ```{r}
 london_proj_buff = st_buffer(london_proj, 111320)
 ```
 
 The result in Figure \@ref(fig:crs-buf-proj) shows that buffers based on a projected CRS are not distorted:
-it is the same distance from London to every part of the buffer's border.
+every part of the buffer's border is equidistant to London.
 
 ```{r crs-buf-proj, fig.cap="Buffer on data with projected CRS.", fig.asp=1}
 plot(london_proj_buff, graticule = st_crs(27700), axes = TRUE)
 plot(london_proj, add = TRUE)
 ```
 
-The importance of understanding an object's CRS (primarily whether it's projected or geographic), and reprojecting when appropriate, is illustrated above using a simple geographic vector object representing London.
-The subsequent two sections go into more depth on reprojections, exploring which CRS to use and providing details about the process of reprojecting vector and raster objects.
+The importance of CRSs (primarily whether they are projected or geographic) has been demonstrated using the example of London.
+The subsequent sections go into more depth, exploring which CRS to use and the details of reprojecting vector and raster objects.
+
+### Which CRS to use?
+
+While CRSs can be set manually --- as illustrated in the previous section with `st_set_crs(london, 4326)` --- it is more common in real world applications for CRSs to be set automatically when data is read-in.
+The main task involving CRSs is often to *transform* objects provided in one CRS into another.
+But when should data be transformed? And into which CRS?
+There are no clear-cut answers to these questions and CRS selection always involves tradeoffs [@maling_coordinate_1992].
+However there are some general principles, provided in this section, that can help decide. 
+
+The question of **when to transform** is easier to answer.
+Transformation to a projected CRS may be vital, for instance when planned geometric operations --- those involving distance measurements or area calculations, for example --- require meaningful units of distance by the object has be provided with a geographic CRS.
+Conversely if the outputs of a project are to be published in an on-line map, it may be necessary to convert them to a geographic CRS.
+If the visualization phase of a project involves publishing results using [leaflet](https://github.com/Leaflet/Leaflet) via the common format [GeoJSON](http://geojson.org/) (a common scenario) projected data should probably be transformed to WGS84. 
+Another case is when two objects with different CRSs must be compared or combined: performing a geometric operation on two objects with different CRSs results in an error.
+This is demonstrated in the code chunk below, which attempts to find the distance between the projected and unprojected versions of `london`:
+
+```{r, eval=FALSE}
+st_distance(london, london_proj)
+# > Error: st_crs(x) == st_crs(y) is not TRUE
+```
+
+To make the `london` and `london_proj` objects geographically comparable one of them must be transformed into the CRS of the other.
+But which CRS to use?
+The answer is usually 'to the projected CRS', which in this case is the British National Grid (BNG, EPSG:267700):
+
+```{r}
+london2 = st_transform(london, 27700)
+```
+
+Now that a transformed version of `london` has been created, using the **sf** function `st_transform()`, the distance between the two representations of London can be found.
+It may come as a surprise that `london` and `london2` are just over 2 km apart!^[
+The difference in location between the two points is not due to imperfections in the transforming operation (which is in fact very accurate) but the low precision of the manually-created coordinates that created `london` and `london_proj`.
+Also surprising may be that the result is provided in a matrix with units of meters.
+This is because `st_distance()` can provide distances between many features and because the CRS has units of meters.
+Use `as.numeric()` to coerce the result into a regular number.]
+
+```{r}
+st_distance(london2, london_proj)
+```
+
+The question of *which CRS* is trickier to answer.
+"There exist no all-purpose projections, all involve distortion when far from the centre of the specified frame" [@bivand_applied_2013].
+For geographic CRSs the answer is often [WGS84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84), not only for web mapping (covered in the previous paragraph) but also because GPS datasets and thousands of raster and vector datasets are provided in this CRS by default.
+WGS84 is the most common CRS in the world so it is worth knowing it's EPSG code: 4326.
+This 'magic number' can be used to convert objects with unusual projected CRSs something that is widely understood with a sinle command, such as`st_transform(london_proj, 4326)`.
+
+What about when a projected CRS is required?
+In some cases it is not something that we are free to decide:
+"often the choice of projection is made by a public mapping agency" [@bivand_applied_2013].
+This means that when working with local data sources, it is likely preferable to work with the CRS in which the data was provided, to ensure compatibility, even if the 'official' CRS is not the most accurate.
+The example of London was easy to answer because a) the CRS 'BNG' (with its associated EPSG code 27700) is well-known and b) the original dataset (`london`) already had that CRS.
+
+What about when a projected CRS is needed but the study region lacks a well-known CRS?
+Again, although there is no universal answer there is a sensible default CRS: Universal Transverse Mercator ([UTM](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system)).
+UTM is not actually a single CRS but a system of CRSs that covers the entire world, and breaks it into 60 segments, each containing 6 lines of longitude.
+All UTM projections have the same datum (WGS84) and their EPSG codes run sequentially from 32601 to 32660.
+This makes it possible to create a function (we'll call it `lonlat2UTM`) to calculate the EPSG code associated with any point on the planet as follows:^[
+Thanks to Josh O'Brien who provided the basis for this function in an answer to a question on [stackoverflow](https://stackoverflow.com/questions/9186496).
+] 
+
+```{r}
+long2UTM = function(lonlat) {
+  utm = (floor((lonlat[1] + 180) / 6) %% 60) + 1
+  message(paste0("This is in UTM", utm))
+  utm + 32600
+}
+```
+
+Let's use this function to identify the UTM zone and associated EPSG code for London:
+
+```{r}
+epsg_utm = long2UTM(st_coordinates(london))
+st_crs(epsg_utm)
+```
+
+As expected by viewing a map of UTM zones (such as that provided by [dmap.co.uk](http://www.dmap.co.uk/utmworld.htm)), the EPSG code returned refers to UTM zone 30, which would represent a good projected CRS for England if the BNG did not exist.
+London can be transformed into this CRS as follows (result not shown):
+
+```{r}
+lnd_utm = st_transform(london, crs = epsg_utm)
+```
 
 ### Reprojecting vector geometries
 
-While CRSs can be set manually, it is more common in real world applications to *transform* a known CRS into another.
-CRS transformation could be vital to obtain proper results in many cases.
-A typical example is when geometry data is provided in a geographic CRS but you want to do spatial operations, which require it to be in a projected CRS.
-It includes distance measurements or area calculations.
-CRS also represent spatial relationship between datasets.
-Therefore, spatial operations on many datasets can only be correctly performed when all the data have the same CRS.
-The most common reason to unify the CRS is to combine different datasets or apply methods which need at least two objects.
-Let's use real-world examples to illustrate this.
-
 Vector data on the most basic level is represented by individual points, and points create more complex objects, such as lines and polygons.
-Spatial reprojection of vectors is a mathematical transformation of coordinates of these point.
+Spatial reprojection of vectors is a mathematical transformation of coordinates of these points.
 Depending on projections used, reprojection could be either lossy or lossless.
+<!-- I don't understand the following sentence -->
 For example, loss of spatial information could occur when the new CRS is only adequate for smaller area than input vector.
-The precision could be also lost when transformation is between coordinate systems that have different datum - in those situations approximations are used.
+<!-- Do you have an example for the next sentence? -->
+The precision could be also lost when transforming coordinate systems with different datums - in those situations approximations are used.
 However, in most cases CRS vector transformation is lossless.
 
 The dataset `cycle_hire_osm` represents all cycle hire locations across London, taken from OpenStreetMap (OSM).
@@ -189,8 +284,8 @@ par(par_old)
 ```
 
 On the other hand, the goal for many visualization purposes is to have a map with minimized area, direction, and distance distortions.
-One of the most popular projection to achieve that is Winkel tripel (Figure \@ref(fig:wintriproj)).^[This projection is used, among others, by the National Geographic Society.]
-`st_transform_proj()` from the **lwgeom** package allows for coordinates transformations to a wider range of CRSs, inluding the Winkel tripel projection: 
+One of the most popular projection to achieve that is the Winkel tripel projection (Figure \@ref(fig:wintriproj)).^[This projection is used, among others, by the National Geographic Society.]
+`st_transform_proj()` from the **lwgeom** package allows for coordinate transformations to a wide range of CRSs, inluding the Winkel tripel projection: 
 
 ```{r}
 world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
@@ -256,7 +351,7 @@ plot(world_laea2$geom, graticule = TRUE, main = "the Lambert azimuthal equal-are
 par(par_old)
 ```
 
-More information about CRS modification can be found in the [Using PROJ.4](http://proj4.org/usage/index.html) documentation.
+More information on CRS modifications can be found in the [Using PROJ.4](http://proj4.org/usage/index.html) documentation.
 
 <!-- https://github.com/r-spatial/lwgeom/issues/6 -->
 <!-- ```{r} -->
@@ -271,8 +366,8 @@ More information about CRS modification can be found in the [Using PROJ.4](http:
 
 The projection concepts described in the previous section apply equally to rasters.
 However, there are important differences in reprojection of vectors and rasters:
-transforming a vector object involves changing the coordinates of every vertex but this do not apply to raster data.
-Rasters are are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters), so it is impossible to transform coordinates of pixels separately.
+transforming a vector object involves changing the coordinates of every vertex but this does not apply to raster data.
+Rasters are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters), so it is impossible to transform coordinates of pixels separately.
 
 Raster reprojection involves creating a new raster object, often with a different number of columns and rows than the original.
 The attributes must subsequently be re-estimated, allowing the new pixels to be 'filled' with appropriate values.
@@ -330,17 +425,19 @@ con_raster = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
 con_raster
 ```
 
+This dataset has a geographic CRS and we want to transform it into a projected CRS.
 The nearest neighbor method should not be used for continuous raster data, as we want to preserve gradual changes in values.
-Alternatively, continuous data could be reprojected in the **raster** package using the bi-linear method. 
-In this technique, value of the output cell is calculated based on four nearest cells in the original raster. 
-The new value is a weighted average of values from these four cells, adjusted for their distance from the center of the output cell. 
-This dataset has geographic CRS and we want to transform it into projected CRS.
+Instead we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster. 
+<!-- Quadric and cubic polynomials are also popular nterpolation functions for resampling with more complexity and improved accuracy. @liu_essential_2009: 111-->
+The new value is the distance-weighted average of the values from these four cells, i.e., the closer the input cell is to the center of the output cell, the stronger is its weight.
 
+<!-- I am not really sure what the following note wants to tell the reader. -->
 ```{block2 type='rmdnote'}
 All the grid cells in equal-area projections have the same size.
 Therefore, these projections are recommended when performing many raster operations, such as distance calculations.
 ```
 
+<!-- unclear what is meant -->
 In the fist step we need to obtain the proj4 definition of the existing projected CRS appropriate for this area or create a new one using the [Projection Wizard](http://projectionwizard.org/) online tool [@savric_projection_2016].
 For this example, we used the Oblique Lambert azimuthal equal-area projection.
 The second step is to define the `bilinear` reprojection method:
@@ -351,7 +448,8 @@ con_raster_ea = projectRaster(con_raster, crs = equalarea, method = "bilinear")
 con_raster_ea
 ```
 
-Reprojection of continuous rasters also changes spatial properties, such as the number of cells, resolution, and extent.
+<!-- we have said so before, so maybe we can delete? -->
+Reprojecting (continuous) rasters also changes spatial properties, such as the number of cells, resolution, and extent.
 Moreover, it slightly modifies values in the new raster, which can be seen by comparing the outputs of the `summary()` function between `con_raster` and `con_raster_ea`.
 
 ```{r, eval=FALSE}
@@ -372,69 +470,114 @@ This section is about operations that in some way change the geometry of vector 
 It is more advanced than the spatial data operations presented in the previous Chapter (in section \@ref(spatial-operations-on-vector-data)) because here we drill down into the geometry:
 the functions discussed in this section work on objects of class `sfc` (simple feature geometry collections) in addition to objects of class `sf`.
 
-### Geometry unions
+### Simplification
 
-Spatial aggregation can also be done in the **tidyverse**, using **dplyr** functions as follows:
+Simplification is a process for generalization of vector objects (lines and polygons) usually for its use in smaller scale maps.
+Additional reason for simplification is reduction of the object size and therefore the size of a saved file.
+Therefore, data is often simplified before its use in interactive maps. 
+The **sf** package provides the `st_simplify()` function^[It uses the simplify algorithm from GEOS.]
+Level of generalization is controlled by the `dTolerance` argument, which expects a value in map units.
+As the result, all vertices in the simplified geometry will be within this value from the original ones.
 
-```{r, eval = FALSE}
-group_by(us_states, REGION) %>%
-  summarize(sum(pop = total_pop_15, na.rm = TRUE))
-```
-
-For attribute data aggregation the grouping variable is another variable, typically one with few unique values relative to the number of rows (see section \@ref(vector-attribute-aggregation)).
-What we did not cover in that section was that attribute data aggregation dissolves the geometries of touching polygons.
-The `REGION` variable in the `us_states` dataset is a good example:
-there are 49 states (excluding Hawaii and Alaska) which can be aggregated into four regions.
-This is demonstrated in the code chunk below, the results of which are illustrated in Figure \@ref(fig:us-regions):
+We can use data of the Seine, Marne and Yonne rivers (on the left in Figure \@ref(fig:seine-simp)) as an example of line vector data simplification:
 
 ```{r}
-regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
-                    FUN = sum, na.rm = TRUE)
-```
-<!--
-show also tidyverse way, so what you are doing is basically a spatial join and a subsequent aggregation without a grouping variable. Didactically, it might be better to present a grouping variable.
--->
-
-```{r, echo=FALSE}
-# st_join(buff, africa[, "pop"]) %>%
-#   summarize(pop = sum(pop, na.rm = TRUE))
-# summarize(africa[buff, "pop"], pop = sum(pop, na.rm = TRUE))
+seine_simp = st_simplify(seine, dTolerance = 2000) #2000 m
 ```
 
-```{r us-regions, fig.cap="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.", echo=FALSE, warning=FALSE, fig.asp=0.2, out.width="100%"}
-# # with base R ----
-# old_par = par()
-# breaks = c(1e5, 5e6, 1e7, 7e7, 2e8)
-# rdf = st_set_geometry(regions, NULL)
-# us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
-#                                   dplyr::select(rdf, Group.1, total_pop_15),
-#                                   by = c("REGION" = "Group.1")) %>% 
-#   pull(total_pop_15)
-# 
-# par(mfrow = c(1, 2))
-# plot(us_states[, "total_pop_15"], main = "US states", breaks = breaks, key.pos = NULL)
-# plot(regions[, "total_pop_15"], main = "US regions", breaks = breaks, key.pos = NULL)
-# par(old_par)
-# with tmap ----
-library(tmap)
-us_states_facet = dplyr::select(us_states, REGION, total_pop_15) %>%
-  mutate(Level = "State")
-regions_facet = rename(regions, REGION = Group.1) %>%
-  mutate(Level = "Region")
-us_facet = rbind(us_states_facet, regions_facet) %>% 
-  mutate(Level = factor(Level, levels = c("State", "Region")))
-
-qtm(us_facet, "total_pop_15") +
-  tm_facets(by = "Level", nrow = 1, drop.units = TRUE)
+```{r seine-simp, echo=FALSE, fig.cap="Comparison of the original data of the Seine, Marne and Yonne rivers and its simplified version using `st_simplify`.", warning=FALSE}
+par_old = par()
+par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
+plot(seine$geometry, col = 1, main = "Original data")
+plot(seine_simp$geometry, col = 1, main = "st_simplify")
+par(par_old)
 ```
 
-The equivalent result can be achieved using **tidyverse** functions as follows (result not shown):
+The new object, `seine_simp`, is not only visually generalized (on the right in Figure \@ref(fig:seine-simp)), but also has twice smaller size than the original object:
 
-```{r, eval=FALSE}
-regions2 = us_states %>% 
-  group_by(REGION) %>%
-  summarize(sum(pop = total_pop_15, na.rm = TRUE))
+```{r}
+object.size(seine)
+object.size(seine_simp)
 ```
+
+Let's take a look at the second example of simplification.
+It will use, `us_states`, polygons representing the contiguous United States.
+As we showed in section \@ref(reproj-geo-data), GEOS assumes that the data is in a projected CRS and this could lead to unexpected results when using a geographic CRS.
+Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (epsg = 2163) (on the left in Figure \@ref(fig:us-simp)):
+
+```{r}
+us_states2163 = st_transform(us_states, 2163)
+```
+
+The `st_simplify` function uses the standard Douglas-Peucker algorithm, which is realatively fast.
+
+```{r}
+us_states_simp1 = st_simplify(us_states2163, dTolerance = 100000) #100 km
+```
+
+On the other hand, this algorithm simplify objects on a per-geometry basis, and therefore does not preserve topology.
+This could be seen on the middle map in Figure \@ref(fig:us-simp), where polygons of single states are splitted creating holes or overlapping each other.
+An alternative simplification method can be used to solve this issue, such as the Visvalingam algorithm implemented in the **rmapshaper** package's function `ms_simplify()`.
+<!-- https://bost.ocks.org/mike/simplify/ -->
+In the below example, we would simplified the `us_states2163` object using only 0.1% of original data vertices (argument `keep`), and also assure that all of the original objects (states) would be be kept (argument `keep_shapes`).
+
+```{r}
+# proportion of points to retain (0-1; default 0.05)
+us_states_simp2 = rmapshaper::ms_simplify(us_states2163, keep = 0.005,
+                                          keep_shapes = TRUE)
+```
+
+Finally, the visual comparison of the original dataset and two simplified versions shows differences between the Douglas-Peucker (`st_simplify`) and Visvalingam (`ms_simplify`) algorithms outputs (Figure \@ref(fig:us-simp)):
+
+```{r us-simp, echo=FALSE, fig.cap="Comparison of the original data of the contiguous United States and two simplified versions using `st_simplify` and `ms_simplify`.", warning=FALSE}
+par_old = par()
+par(mfrow = c(1, 3), mar = c(0, 0, 1, 0))
+plot(us_states2163$geometry, col = 8, main = "Original data")
+plot(us_states_simp1$geometry, col = 8, main = "st_simplify")
+plot(us_states_simp2$geometry, col = 8, main = "ms_simplify")
+par(par_old)
+```
+
+### Centroids and buffers
+
+<!-- centroids intro -->
+There are two main functions that create single point representations of more complex vector objects - `st_centroid()` and `st_point_on_surface()`.
+
+The `st_centroid()` function calculates the geometric center of a geometry.
+We can create centroids for polygons, lines (see black points on Figure \@ref(fig:centr)) and multipoints:
+
+```{r}
+nz_centroid = st_centroid(nz)
+seine_centroid = st_centroid(seine)
+```
+
+Centroids could be useful to represent more complex objects - lines and polygons, for example to calculate distances between centers of polygons.
+They are also often used as places where polygons or lines labels are put. 
+However, it is important to know that centroids could be located outside of the given object, e.g. in cases of irregular shaped polygons or lines.
+Examples of this could be seen on the right plot on Figure \@ref(fig:centr).
+
+Alternatively, the `st_point_on_surface()` can be used.
+
+```{r}
+nz_pos = st_point_on_surface(nz)
+seine_pos = st_point_on_surface(seine)
+```
+
+It ensures that the created point lies on the given object (see red points on Figure \@ref(fig:centr)).
+
+```{r centr, warning=FALSE, echo=FALSE, fig.cap="Comparison between the outputs of `st_centroid()` (black points) and `st_point_on_surface()` (red points) on New Zeleand's regions (left) and the Seine, Marne and Yonne rivers (right)."}
+par_old = par()
+par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
+plot(nz$geometry)
+plot(nz_centroid$geometry, add = TRUE)
+plot(nz_pos$geometry, add = TRUE, col = "red")
+plot(seine$geometry)
+plot(seine_centroid$geometry, add = TRUE)
+plot(seine_pos$geometry, add = TRUE, col = "red")
+par(par_old)
+```
+
+### Affine transformations
 
 ### Clipping 
 
@@ -530,40 +673,71 @@ pmulti = st_multipoint(pmat)
 box = st_convex_hull(pmulti)
 ```
 
-### Centroids
+### Geometry unions
 
-<!-- centroids intro -->
-There are two main functions that create point representations of vector objects.
+Spatial aggregation can also be done in the **tidyverse**, using **dplyr** functions as follows:
 
-<!-- The first one is `st_centroid()`  -->
-<!-- st_centroid -->
+```{r, eval = FALSE}
+group_by(us_states, REGION) %>%
+  summarize(sum(pop = total_pop_15, na.rm = TRUE))
+```
+
+For attribute data aggregation the grouping variable is another variable, typically one with few unique values relative to the number of rows (see section \@ref(vector-attribute-aggregation)).
+What we did not cover in that section was that attribute data aggregation dissolves the geometries of touching polygons.
+The `REGION` variable in the `us_states` dataset is a good example:
+there are 49 states (excluding Hawaii and Alaska) which can be aggregated into four regions.
+This is demonstrated in the code chunk below, the results of which are illustrated in Figure \@ref(fig:us-regions):
 
 ```{r}
-nz_centroid = st_centroid(nz)
+regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
+                    FUN = sum, na.rm = TRUE)
+```
+<!--
+show also tidyverse way, so what you are doing is basically a spatial join and a subsequent aggregation without a grouping variable. Didactically, it might be better to present a grouping variable.
+-->
+
+```{r, echo=FALSE}
+# st_join(buff, africa[, "pop"]) %>%
+#   summarize(pop = sum(pop, na.rm = TRUE))
+# summarize(africa[buff, "pop"], pop = sum(pop, na.rm = TRUE))
 ```
 
-<!-- st_point_on_surface -->
-<!-- The second one -->
-<!-- add lines example -->
+```{r us-regions, fig.cap="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.", echo=FALSE, warning=FALSE, fig.asp=0.2, out.width="100%"}
+# # with base R ----
+# old_par = par()
+# breaks = c(1e5, 5e6, 1e7, 7e7, 2e8)
+# rdf = st_set_geometry(regions, NULL)
+# us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
+#                                   dplyr::select(rdf, Group.1, total_pop_15),
+#                                   by = c("REGION" = "Group.1")) %>% 
+#   pull(total_pop_15)
+# 
+# par(mfrow = c(1, 2))
+# plot(us_states[, "total_pop_15"], main = "US states", breaks = breaks, key.pos = NULL)
+# plot(regions[, "total_pop_15"], main = "US regions", breaks = breaks, key.pos = NULL)
+# par(old_par)
+# with tmap ----
+library(tmap)
+us_states_facet = dplyr::select(us_states, REGION, total_pop_15) %>%
+  mutate(Level = "State")
+regions_facet = rename(regions, REGION = Group.1) %>%
+  mutate(Level = "Region")
+us_facet = rbind(us_states_facet, regions_facet) %>% 
+  mutate(Level = factor(Level, levels = c("State", "Region")))
 
-```{r}
-nz_pos = st_point_on_surface(nz)
+qtm(us_facet, "total_pop_15") +
+  tm_facets(by = "Level", nrow = 1, drop.units = TRUE)
 ```
 
-```{r, warning=FALSE, echo=FALSE}
-par_old = par()
-par(mar = c(0, 0, 1, 0))
-plot(nz$geometry)
-plot(nz_centroid$geometry, add = TRUE)
-plot(nz_pos$geometry, add = TRUE, col = "red")
-par(par_old)
+The equivalent result can be achieved using **tidyverse** functions as follows (result not shown):
+
+```{r, eval=FALSE}
+regions2 = us_states %>% 
+  group_by(REGION) %>%
+  summarize(sum(pop = total_pop_15, na.rm = TRUE))
 ```
 
-### Buffers
-
-### Affine transformations
-
-### Type transformation
+### Type transformations
 
 Geometry casting is powerful operation which enable transformation of the geometry type.
 It is implemented in the `st_cast` function from the `sf` package.
@@ -640,7 +814,7 @@ linestring_sf2 = st_cast(multilinestring_sf, "LINESTRING")
 linestring_sf2
 ```
 
-```{r line-cast, echo=FALSE, fig.cap="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right)", warning=FALSE}
+```{r line-cast, echo=FALSE, fig.cap="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right).", warning=FALSE}
 par_old = par()
 par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
 plot(multilinestring_sf$geom, col = "black", main = "MULTILINESTRING")
@@ -662,37 +836,30 @@ linestring_sf2
 <!-- sp -> sf -->
 <!-- stars; https://github.com/r-spatial/stars/blob/master/vignettes/blog1.Rmd -->
 
-### Simplification
-
-<!-- - simplifications -->
-<!-- st_simplify -->
-```{r}
-us_states_simp1 = st_simplify(us_states, dTolerance = 1)
-```
-
-<!-- line example -->
-<!-- maybe river or road network to spData?? -->
-
-<!-- rmapshaper -->
-<!-- polygon example -->
-```{r}
-# proportion of points to retain (0-1; default 0.05)
-us_states_simp2 = rmapshaper::ms_simplify(us_states, keep = 0.01, keep_shapes = TRUE)
-```
-
-```{r, echo=FALSE, warning=FALSE}
-par_old = par()
-par(mfrow = c(1, 3), mar = c(0, 0, 1, 0))
-plot(us_states$geometry, col = "grey")
-plot(us_states_simp1$geometry, col = "grey")
-plot(us_states_simp2$geometry, col = "grey")
-par(par_old)
-```
-
 ### Rasterization
 <!-- - vector to raster -->
+<!-- rasterize() -->
+<!-- https://github.com/ecohealthalliance/fasterize -->
 
 ## Geometric operations on raster data {#geo-ras}
+
+<!-- two useful citations for into on geometric operations on raster:
+
+> Geometric operations include the shift, rotation and warping of images to a given shape or framework.
+In remote sensing applications, geometric operations are mainly used for the co-registration of images of the same scene acquired by different sensor systems or at different times or from different positions, and for rectifying an image to fit a particular coordinate system (geocoding).
+Image mosaic is a geometric operation that was commonly used in the early days of remote sensing image processing when computer power was inadequate for the massive demands of the geocoding process, but this is no longer the case.
+Once a set of adjacent images is accurately rectified to a map projection system, such as a UTM coordinate system (see Chapter 13 in Part Two for details) the images, though separate, are effectively in a mosaic.
+
+@liu_essential_2009: 105
+
+> Vector data store their coordinate information implicitly with each node position in real-world coordinates and these are used directly to plot positions and to re-project from one coordinate system to another.
+Raster data on the other hand have a regular local row and column number system for each pixel so that, internally, the geometry and position of a pixel’s location are implicit.
+Externally, however, a world geographic reference must be explicitly stated; this requires the geographic location of the image origin and the ground distance represented by each pixel.
+A transformation is then performed, which converts local image coordinates to realworld coordinates for each pixel location using the geometric operations described in Chapter 9. This transformation information is also stored explicitly.
+
+@liu_essential_2009: 173-74
+
+-->
 
 ### Raster alignment
 
@@ -786,6 +953,10 @@ Additionally, check out the *Multi-core functions* section in `vignette("functio
 ### Aggregation {#ras-agg}
 
 ### Vectorization
+
+<!-- e.g. landcover map to polygonss -->
+<!-- rasterToPolygons() -->
+<!-- rasterToContour() -->
 
 ## Exercises
 
