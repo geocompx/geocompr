@@ -216,6 +216,29 @@ London can be transformed into this CRS as follows (result not shown):
 lnd_utm = st_transform(london, crs = epsg_utm)
 ```
 
+Another approach to automatically selecting a projected CRS specific to a local dataset is to create an azimuthal equidistant (AEQD) projection for the centre-point of the study area.
+This involves creating a custom CRS (with no EPSG code) with units of meters based on the centrepoint of a dataset.
+This approach is used in the **stplanr** function `geo_select_crs()` which returns a CRS object that can be used in other functions (see `?stplanr::geo_select_aeq` for further details):
+
+```{r}
+stplanr::geo_select_aeq(london)
+```
+
+Another **stplanr** function, `geo_buffer()`, uses this behind the scenes to enable buffers to be created around objects with geographic CRSs with units of metres, and returns the result in the original CRS, as illustrated in the code chunk below:
+
+```{r}
+london_proj_buff2 = stplanr::geo_buffer(london, dist = 111320)
+```
+
+```{r, eval=FALSE, echo=FALSE}
+library(tmap)
+tmap_mode("view")
+qtm(st_transform(london_proj_buff, 4326), lwd = 5) +
+  qtm(london_proj_buff2, add = TRUE, col = "red") +
+  qtm(london_buff)
+```
+
+
 ### Reprojecting vector geometries
 
 Vector data on the most basic level is represented by individual points, and points create more complex objects, such as lines and polygons.
