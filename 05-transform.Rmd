@@ -156,7 +156,7 @@ st_distance(london, london_proj)
 
 To make the `london` and `london_proj` objects geographically comparable one of them must be transformed into the CRS of the other.
 But which CRS to use?
-The answer is usually 'to the projected CRS', which in this case is the British National Grid (BNG, EPSG:267700):
+The answer is usually 'to the projected CRS', which in this case is the British National Grid (BNG, EPSG:27700):
 
 ```{r}
 london2 = st_transform(london, 27700)
@@ -177,7 +177,7 @@ The question of *which CRS* is tricky, and there is often no 'right' answer:
 "There exist no all-purpose projections, all involve distortion when far from the centre of the specified frame" [@bivand_applied_2013].
 For geographic CRSs the answer is often [WGS84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84), not only for web mapping (covered in the previous paragraph) but also because GPS datasets and thousands of raster and vector datasets are provided in this CRS by default.
 WGS84 is the most common CRS in the world so it is worth knowing it's EPSG code: 4326.
-This 'magic number' can be used to convert objects with unusual projected CRSs something that is widely understood with a sinle command, such as`st_transform(london_proj, 4326)`.
+This 'magic number' can be used to convert objects with unusual projected CRSs something that is widely understood.
 
 What about when a projected CRS is required?
 In some cases it is not something that we are free to decide:
@@ -209,15 +209,18 @@ st_crs(epsg_utm)
 ```
 
 As expected by viewing a map of UTM zones (such as that provided by [dmap.co.uk](http://www.dmap.co.uk/utmworld.htm)), the EPSG code returned refers to UTM zone 30, which would represent a good projected CRS for England if the BNG did not exist.
-London can be transformed into this CRS as follows (result not shown):
+<!-- London can be transformed into this CRS as follows (result not shown): -->
 
-```{r}
-lnd_utm = st_transform(london, crs = epsg_utm)
-```
+<!-- ```{r} -->
+<!-- lnd_utm = st_transform(london, crs = epsg_utm) -->
+<!-- ``` -->
 
 Another approach to automatically selecting a projected CRS specific to a local dataset is to create an azimuthal equidistant ([AEQD](https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection)) projection for the centre-point of the study area.
 This involves creating a custom CRS (with no EPSG code) with units of meters based on the centrepoint of a dataset.
 This approach should be used with caution: no other datasets will be compatible with the custom CRS created and results may not be accurate when used on extensive datasets covering hundreds of kilomtres.
+
+Although we used vector datasets to illustrate the points outlined in this section, the principles apply equally to raster datasets.
+The subsequent sections explain features of CRS transformation that are unique to each geographic data model, continuing with vector data in section \@ref(reprojecting-vector-geometries) and moving-on to explain how raster transformation is different, in section \@ref(reprojecting-raster-geometries).
 
 <!-- This approach is used in the **stplanr** function `geo_select_crs()` which returns a CRS object that can be used in other functions (see `?stplanr::geo_select_aeq` for further details): -->
 
@@ -259,7 +262,8 @@ Its CRS can be queried as follows:
 st_crs(cycle_hire_osm)
 ```
 
-CRS in R can be described as an `epsg` code or a `proj4string` definition, as described in section \@ref(crs-in-r).
+CRSs in the **sf** package be using their `epsg` code or a `proj4string` definition (see section \@ref(crs-in-r)).
+
 Let's create a new version of `cycle_hire_osm` in a projected CRS, using the `epsg` number of 27700:
 
 ```{r}
