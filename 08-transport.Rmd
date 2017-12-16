@@ -3,11 +3,9 @@
 ## Prerequisites {-}
 
 ```{r, message=FALSE, results='hide'}
-library(dplyr)
-library(osmdata)
-library(stplanr)
 library(sf)
-library(tmap)
+library(stplanr)
+library(tidyverse)
 ```
 
 
@@ -48,10 +46,11 @@ We will use input data from Bristol, a coastal city in the West of England, desc
 ## Input data: a case study of Bristol
 
 The case study used for this chapter is a diverse city on the west of England, 30 km east of the Welsh capital Cardiff.
-As with any case study it is worth taking some time to consider the local geography of the area, e.g. as dispayed in Figure 7.0 below.
+As with any case study it is worth taking some time to consider the local geography of the area (see Figure \@ref(fig:bristol)).
 This shows the diversity of the city's transport network, with railways, motorways and cycle paths plotted.
 
 ```{r, eval=FALSE, echo=FALSE}
+library(osmdata)
 bb = getbb("bristol uk")
 ways_road = opq(bbox = bb) %>% 
   add_osm_feature(key = "highway", value = "motorway|cycle|primary|secondary", value_exact = FALSE) %>% 
@@ -61,12 +60,27 @@ ways_rail = opq(bbox = bb) %>%
   add_osm_feature(key = "railway", value = "rail") %>% 
   osmdata_sf()
 
-ways = c(ways_road, ways_rail)
-ways$osm_lines$highway = as.character(ways$osm_lines$highway)
-ways$osm_lines$highway[ways$osm_lines$railway == "rail"] = "rail"
-ways$osm_lines$highway = gsub("_link", "", x = ways$osm_lines$highway)
-ways$osm_lines$highway = gsub("primary|secondary", "road", x = ways$osm_lines$highway)
-saveRDS(ways, "extdata/ways.Rds") # save for future reference
+res = c(ways_road, ways_rail)
+
+rail_stations = res$osm_points %>% 
+  filter(railway == "station" | name == "Bristol Temple Meads")
+
+# most important vars:
+map_int(rail_stations, ~ sum(is.na(.))) %>% 
+  sort() %>% 
+  head()
+
+rail_stations = rail_stations %>% select(name)
+saveRDS(rail_stations, "extdata/rail_stations.Rds")
+
+res$osm_lines$highway = as.character(res$osm_lines$highway)
+res$osm_lines$highway[res$osm_lines$railway == "rail"] = "rail"
+res$osm_lines$highway = gsub("_link", "", x = res$osm_lines$highway)
+res$osm_lines$highway = gsub("primary|secondary", "road", x = res$osm_lines$highway)
+ways_bristol = res$osm_lines %>% 
+  select(highway, maxspeed, ref)
+ways_bristol$highway = as.factor(ways_bristol$highway)
+saveRDS(ways_bristol, "extdata/ways.Rds") # save for future reference
 ```
 
 The data used in this section was downloaded using **osmdata**.
@@ -74,25 +88,19 @@ To avoid having to request the data from OSM repeadetly, we'll use a locally sav
 
 ```{r}
 ways = readRDS("extdata/ways.Rds")
-summary(ways)[4:5, ]
+summary(ways)
 ```
 
-The above code chunk loaded some key data and shows that way have a few dozen nodes and lines on the transport network: an easily manageable dataset size (transport datasets can get very large but it's best to learn with small ones).
-Before we make use of these datasets we need to load and take a look at one more type of input data: transport zones that represent residential areas that generate trips into the city centre and elsewhere.
+The above code chunk loaded a few thousand lines, representing segments on the transport network.
+This an easily manageable dataset size (transport datasets be large but it's best to start small).
+Before we use these in our scenario (to boost active travel in the city) let's  one more type of input data: transport zones that represent residential areas that generate trips into the city centre and elsewhere.
 
 
 ```{r bristol, echo=FALSE, fig.cap="Overview map of the city of Bristol", message=FALSE}
-# library(leaflet)
-# # not working
-# leaflet() %>%
-#   addProviderTiles("OpenStreetMap.BlackAndWhite") %>%
-#   addPolylines(data = ways$osm_lines, color = "black")
-
-# no caption - save screenshot then print
-library(tmap)
-tmap_mode("view")
-qtm(ways$osm_lines, lines.col = "highway", lines.lwd = 3, lines.palette = c("green", "red", "black", "orange")) +
-  tm_scale_bar()
+# library(tmap)
+# tmap_mode("view")
+# qtm(ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("green", "red", "black", "orange")) +
+#   tm_scale_bar()
 knitr::include_graphics("figures/bristol.png")
 ```
 
@@ -132,7 +140,7 @@ library(ukboundaries)
 
 ```{r ttwa-bristol, fig.cap="Region definitions in Bristol"}
 region = readRDS("extdata/bristol-region.Rds")
-qtm(region)
+plot(region)
 ```
 
 
@@ -140,8 +148,7 @@ qtm(region)
 ## Nodes on the transport system
 
 ```{r}
-stations = ways$osm_points %>% 
-  filter(railway == "station" | name == "Bristol Temple Meads")
+rail_stations = readRDS("extdata/rail_stations.Rds")
 ```
 
 
