@@ -43,6 +43,8 @@ For this reason this chapter is based around a policy scenario that asks:
 how to increase walking and cycling?
 We will use input data from Bristol, a coastal city in the West of England, described in the next section.
 
+<!-- Idea: make it about reducing CO2 emissions instead. Thoughts? + Multi-model - more complex -->
+
 ## Input data: a case study of Bristol
 
 The case study used for this chapter is a diverse city on the west of England, 30 km east of the Welsh capital Cardiff.
@@ -52,7 +54,7 @@ This shows the diversity of the city's transport network, with railways, motorwa
 ```{r, eval=FALSE, echo=FALSE}
 bb = getbb("bristol uk")
 ways_road = opq(bbox = bb) %>% 
-  add_osm_feature(key = "highway", value = "motorway|cycle", value_exact = FALSE) %>% 
+  add_osm_feature(key = "highway", value = "motorway|cycle|primary|secondary", value_exact = FALSE) %>% 
   osmdata_sf()
 
 ways_rail = opq(bbox = bb) %>% 
@@ -62,7 +64,8 @@ ways_rail = opq(bbox = bb) %>%
 ways = c(ways_road, ways_rail)
 ways$osm_lines$highway = as.character(ways$osm_lines$highway)
 ways$osm_lines$highway[ways$osm_lines$railway == "rail"] = "rail"
-ways$osm_lines$highway[ways$osm_lines$highway == "motorway_link"] = "motorway"
+ways$osm_lines$highway = gsub("_link", "", x = ways$osm_lines$highway)
+ways$osm_lines$highway = gsub("primary|secondary", "road", x = ways$osm_lines$highway)
 saveRDS(ways, "extdata/ways.Rds") # save for future reference
 ```
 
@@ -86,10 +89,10 @@ Before we make use of these datasets we need to load and take a look at one more
 #   addPolylines(data = ways$osm_lines, color = "black")
 
 # no caption - save screenshot then print
-# library(tmap)
-# tmap_mode("view")
-# qtm(ways$osm_lines, lines.col = "highway", lines.lwd = 3) +
-#   tm_scale_bar()
+library(tmap)
+tmap_mode("view")
+qtm(ways$osm_lines, lines.col = "highway", lines.lwd = 3) +
+  tm_scale_bar()
 knitr::include_graphics("figures/bristol.png")
 ```
 
