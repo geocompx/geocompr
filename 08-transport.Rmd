@@ -154,12 +154,55 @@ region = getbb("Bristol", format_out = "sf_polygon") %>%
 saveRDS(region, "extdata/bristol-region.Rds")
 devtools::install_github("robinlovelace/ukboundaries")
 library(ukboundaries)
-# region_ttwa = ... wip
+region_ttwa = ttwa_simple %>% 
+  filter(grepl("Bristol", ttwa11nm)) %>% 
+  select(Name = ttwa11nm)
+saveRDS(region_ttwa, "extdata/bristol-ttwa.Rds")
+
+zones_cents = st_centroid(msoa2011_vsimple)[region_ttwa, ]
+plot(zones_cents$geometry)
+zones = msoa2011_vsimple[msoa2011_vsimple$msoa11cd %in% zones_cents$msoa11cd, ] %>% 
+  select(geo_code = msoa11cd, name = msoa11nm) %>% 
+  mutate_at(1:2, as.character)
+plot(zones$geometry, add = TRUE)
+# Add travel data to the zones
+u_pct = "https://github.com/npct/pct-outputs-national/raw/master/commute/msoa/l_all.Rds"
+download.file(u_pct, "extdata/l_all.Rds")
+od_all = readRDS("extdata/l_all.Rds")@data
+od = od_all %>% 
+  filter(geo_code1 %in% zones$geo_code & geo_code2 %in% zones$geo_code) %>% 
+  select(geo_code1, geo_code2, all, bicycle, foot, car_driver, train) %>% 
+  mutate_at(c("geo_code1", "geo_code2"), as.character)
+summary(zones$geo_code %in% od$geo_code1)
+zones = zones[zones$geo_code %in% od$geo_code1, ]
+saveRDS(zones, "extdata/bristol-zones.Rds")
+saveRDS(od, "extdata/bristol-od.Rds")
 ```
 
 ```{r ttwa-bristol, fig.cap="Region definitions in Bristol"}
 region = readRDS("extdata/bristol-region.Rds")
-plot(region)
+region_ttwa = readRDS("extdata/bristol-ttwa.Rds")
+plot(region_ttwa$geometry)
+plot(region$Bristol, add = TRUE)
+```
+
+```{r}
+zones = readRDS("extdata/bristol-zones.Rds")
+od = readRDS("extdata/bristol-od.Rds")
+zones_attr = od %>%
+  group_by(geo_code1) %>% 
+  summarise_if(is.numeric, sum) %>% 
+  rename(geo_code = geo_code1)
+```
+
+```{r}
+zones = left_join(zones, zones_attr)
+sum(zones$all)
+summary(zones)
+```
+
+```{r}
+plot(zones %>% select(bicycle, foot, car_driver, train))
 ```
 
 ## Nodes on the transport system
