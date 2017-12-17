@@ -74,7 +74,7 @@ map_int(rail_stations, ~ sum(is.na(.))) %>%
   head()
 
 rail_stations = rail_stations %>% select(name)
-saveRDS(rail_stations, "extdata/rail_stations.Rds")
+saveRDS(rail_stations, "extdata/rail_stations.rds")
 
 res$osm_lines$highway = as.character(res$osm_lines$highway)
 res$osm_lines$highway[res$osm_lines$railway == "rail"] = "rail"
@@ -83,7 +83,7 @@ res$osm_lines$highway = gsub("primary|secondary", "road", x = res$osm_lines$high
 ways_bristol = res$osm_lines %>% 
   select(highway, maxspeed, ref)
 ways_bristol$highway = as.factor(ways_bristol$highway)
-saveRDS(ways_bristol, "extdata/ways.Rds") # save for future reference
+saveRDS(ways_bristol, "extdata/ways.rds") # save for future reference
 ```
 
 ```{r bristol, echo=FALSE, fig.cap="Overview map of Bristol, with key parts of the transport network represented as colored lines for active (green), private motor (red lines and orange) and public (black) modes of travel.", message=FALSE}
@@ -154,13 +154,13 @@ devtools::install_github("ropensci/osmdata")
 library(osmdata)
 region = getbb("Bristol", format_out = "sf_polygon") %>% 
   st_set_crs(4326)
-saveRDS(region, "extdata/bristol-region.Rds")
+saveRDS(region, "extdata/bristol-region.rds")
 devtools::install_github("robinlovelace/ukboundaries")
 library(ukboundaries)
 region_ttwa = ttwa_simple %>% 
   filter(grepl("Bristol", ttwa11nm)) %>% 
   select(Name = ttwa11nm)
-saveRDS(region_ttwa, "extdata/bristol-ttwa.Rds")
+saveRDS(region_ttwa, "extdata/bristol-ttwa.rds")
 
 zones_cents = st_centroid(msoa2011_vsimple)[region_ttwa, ]
 plot(zones_cents$geometry)
@@ -170,8 +170,8 @@ zones = msoa2011_vsimple[msoa2011_vsimple$msoa11cd %in% zones_cents$msoa11cd, ] 
 plot(zones$geometry, add = TRUE)
 # Add travel data to the zones
 u_pct = "https://github.com/npct/pct-outputs-national/raw/master/commute/msoa/l_all.Rds"
-download.file(u_pct, "extdata/l_all.Rds")
-od_all = readRDS("extdata/l_all.Rds")@data
+download.file(u_pct, "extdata/l_all.rds")
+od_all = readRDS("extdata/l_all.rds")@data
 od = od_all %>% 
   filter(geo_code1 %in% zones$geo_code & geo_code2 %in% zones$geo_code) %>% 
   select(geo_code1, geo_code2, all, bicycle, foot, car_driver, train) %>% 
@@ -180,20 +180,20 @@ summary(zones$geo_code %in% od$geo_code1)
 zones = zones[zones$geo_code %in% od$geo_code1, ]
 od = od %>% 
   filter(geo_code1 %in% zones$geo_code & geo_code2 %in% zones$geo_code)
-saveRDS(zones, "extdata/bristol-zones.Rds")
-saveRDS(od, "extdata/bristol-od.Rds")
+saveRDS(zones, "extdata/bristol-zones.rds")
+saveRDS(od, "extdata/bristol-od.rds")
 ```
 
 ```{r ttwa-bristol, fig.cap="Region definitions in Bristol"}
-region = readRDS("extdata/bristol-region.Rds")
-region_ttwa = readRDS("extdata/bristol-ttwa.Rds")
+region = readRDS("extdata/bristol-region.rds")
+region_ttwa = readRDS("extdata/bristol-ttwa.rds")
 plot(region_ttwa$geometry)
 plot(region$Bristol, add = TRUE)
 ```
 
 ```{r}
-zones = readRDS("extdata/bristol-zones.Rds")
-od = readRDS("extdata/bristol-od.Rds")
+zones = readRDS("extdata/bristol-zones.rds")
+od = readRDS("extdata/bristol-od.rds")
 zones_attr = od %>%
   group_by(geo_code1) %>% 
   summarise_if(is.numeric, sum) %>% 
@@ -213,7 +213,7 @@ plot(zones %>% select(bicycle, foot, car_driver, train))
 ## Nodes on the transport system
 
 ```{r}
-rail_stations = readRDS("extdata/rail_stations.Rds")
+rail_stations = readRDS("extdata/rail_stations.rds")
 ```
 
 ## Desire line analysis
@@ -283,7 +283,7 @@ The data used in this section was downloaded using **osmdata**.
 To avoid having to request the data from OSM repeadetly, we'll use a locally saved version of the data, which contains point and line data for the case study area:
 
 ```{r}
-ways = readRDS("extdata/ways.Rds")
+ways = readRDS("extdata/ways.rds")
 summary(ways)
 ```
 
