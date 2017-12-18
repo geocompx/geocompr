@@ -53,9 +53,42 @@ As with any case study it is worth taking some time to consider the local geogra
 This shows the diversity of the city's transport network, with railways, tarmac roads (consisting of 'roads' which bicycles can use and motorways which are exclusively for motor vehicles) and cycle paths plotted.
 
 ```{r, eval=FALSE, echo=FALSE}
+# Aim: download, preprocess, save input data - todo: save as R script
+devtools::install_github("ropensci/osmdata")
 library(osmdata)
-bb = getbb("bristol uk")
-ways_road = opq(bbox = bb) %>% 
+region = getbb("Bristol", format_out = "sf_polygon") %>% 
+  st_set_crs(4326)
+saveRDS(region, "extdata/bristol-region.rds")
+devtools::install_github("robinlovelace/ukboundaries")
+library(ukboundaries)
+region_ttwa = ttwa_simple %>% 
+  filter(grepl("Bristol", ttwa11nm)) %>% 
+  select(Name = ttwa11nm)
+saveRDS(region_ttwa, "extdata/bristol-ttwa.rds")
+zones_cents = st_centroid(msoa2011_vsimple)[region_ttwa, ]
+plot(zones_cents$geometry)
+zones = msoa2011_vsimple[msoa2011_vsimple$msoa11cd %in% zones_cents$msoa11cd, ] %>% 
+  select(geo_code = msoa11cd, name = msoa11nm) %>% 
+  mutate_at(1:2, as.character)
+plot(zones$geometry, add = TRUE)
+# Add travel data to the zones
+if(!file.exists("extdata/l_all.rds")) {
+  u_pct = "https://github.com/npct/pct-outputs-national/raw/master/commute/msoa/l_all.Rds"
+  download.file(u_pct, "extdata/l_all.rds")
+}
+od_all = readRDS("extdata/l_all.rds")@data
+od = od_all %>% 
+  filter(geo_code1 %in% zones$geo_code & geo_code2 %in% zones$geo_code) %>% 
+  select(geo_code1, geo_code2, all, bicycle, foot, car_driver, train) %>% 
+  mutate_at(c("geo_code1", "geo_code2"), as.character)
+summary(zones$geo_code %in% od$geo_code1)
+zones = zones[zones$geo_code %in% od$geo_code1, ]
+od = od %>% 
+  filter(geo_code1 %in% zones$geo_code & geo_code2 %in% zones$geo_code)
+saveRDS(zones, "extdata/bristol-zones.rds")
+saveRDS(od, "extdata/bristol-od.rds")
+
+ways_road = opq(bbox = st_bbox(region_ttwa)) %>% 
   add_osm_feature(key = "highway", value = "motorway|cycle|primary|secondary", value_exact = FALSE) %>% 
   osmdata_sf()
 
@@ -83,6 +116,7 @@ res$osm_lines$highway = gsub("motorway|primary|secondary", "road", x = res$osm_l
 ways_bristol = res$osm_lines %>% 
   select(highway, maxspeed, ref)
 ways_bristol$highway = as.factor(ways_bristol$highway)
+ways_bristol = st_intersection(ways_bristol, region_ttwa)
 saveRDS(ways_bristol, "extdata/ways.rds") # save for future reference
 ```
 
@@ -152,42 +186,6 @@ More importantly, official administrative zones often do not relate to 'travel w
 To overcome this issue for transport data analysis in the UK, the Travel to Work Areas (TTWAs) were created.
 TTWAs are contiguous zones defined roughly as areas in which 75% of the population both live and work.
 Because Bristol is a major employer attracting travel from surrounding towns, its TTWA is substantially larger than its administratively defined area, as illustrated in Figure \@ref(fig:ttwa-bristol).
-
-```{r, eval=FALSE, echo=FALSE}
-# save region data + ttwa regions
-devtools::install_github("ropensci/osmdata")
-library(osmdata)
-region = getbb("Bristol", format_out = "sf_polygon") %>% 
-  st_set_crs(4326)
-saveRDS(region, "extdata/bristol-region.rds")
-devtools::install_github("robinlovelace/ukboundaries")
-library(ukboundaries)
-region_ttwa = ttwa_simple %>% 
-  filter(grepl("Bristol", ttwa11nm)) %>% 
-  select(Name = ttwa11nm)
-saveRDS(region_ttwa, "extdata/bristol-ttwa.rds")
-
-zones_cents = st_centroid(msoa2011_vsimple)[region_ttwa, ]
-plot(zones_cents$geometry)
-zones = msoa2011_vsimple[msoa2011_vsimple$msoa11cd %in% zones_cents$msoa11cd, ] %>% 
-  select(geo_code = msoa11cd, name = msoa11nm) %>% 
-  mutate_at(1:2, as.character)
-plot(zones$geometry, add = TRUE)
-# Add travel data to the zones
-u_pct = "https://github.com/npct/pct-outputs-national/raw/master/commute/msoa/l_all.Rds"
-download.file(u_pct, "extdata/l_all.rds")
-od_all = readRDS("extdata/l_all.rds")@data
-od = od_all %>% 
-  filter(geo_code1 %in% zones$geo_code & geo_code2 %in% zones$geo_code) %>% 
-  select(geo_code1, geo_code2, all, bicycle, foot, car_driver, train) %>% 
-  mutate_at(c("geo_code1", "geo_code2"), as.character)
-summary(zones$geo_code %in% od$geo_code1)
-zones = zones[zones$geo_code %in% od$geo_code1, ]
-od = od %>% 
-  filter(geo_code1 %in% zones$geo_code & geo_code2 %in% zones$geo_code)
-saveRDS(zones, "extdata/bristol-zones.rds")
-saveRDS(od, "extdata/bristol-od.rds")
-```
 
 ```{r ttwa-bristol, fig.cap="Region definitions in Bristol"}
 region = readRDS("extdata/bristol-region.rds")
