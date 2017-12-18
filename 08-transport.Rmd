@@ -166,17 +166,20 @@ These zone-level data are small but often vital for gaining a basic understandin
 
 ## Transport zones
 
-Although transport systems are inherently based on linear features and nodes --- the nodes and edges of the transport network --- it often makes sense to start with areal data.
+Although transport systems are primarily based on linear features and nodes --- including pathways and stations --- it often makes sense to start with areal data.
 Three types of zone will typically be of particular interest: the study region, origin zones (typically residential areas), and destination zones (which are often the same as the origin zones).
 
-The simplest definition of the study area is typically the first matching boundary returned by OpenStreetMap, which can be obtained using the **osmdata** package as follows:
+The simplest way to define a study area is often the first matching boundary returned by OpenStreetMap, which can be obtained using the **osmdata** package as follows:
 
 ```{r, eval=FALSE}
-region = getbb("Bristol", format_out = "polygon")[1]
+region_bb = osmdata::getbb("Bristol")
 ```
 
-OSM will will often contain valid depiction of the case study city or region of interest (in this case the result is the same as the officially defined area of the Local Authority District).
-However the approach is problematic because OSM data may not correspond to the most recent administrative areas over which transport planning authorities have control, meaning the analysis may be of limited interest to local transport planners.
+The result is a matrix representing the rectangular bounds of the largest matching city region^[
+In this case the command `getbb("Bristol", format_out = "sf_polygon")` would return the official Local Authority District boundary of Bristol, UK would returned but more commonly only rectangular bounding boxes are provided by OSM.
+In cases where the first match does not provide the right name, the country or region should be specified, for example `Bristol Tennessee`.
+]
+This approach may not always be appropriate, however: boundaries in OSM may not be the same as boundaries used by the local transport planning authority.
 More importantly, official administrative zones often do not relate to 'travel watersheds', areas that can are defined not by (often arbitrary) political decisions but by data on where people actually travel to.
 
 To overcome this issue for transport data analysis in the UK, the Travel to Work Areas (TTWAs) were created.
@@ -227,7 +230,6 @@ od_top5 = od %>%
   top_n(5, wt = all)
 ```
 
-
 ```{r od, echo=FALSE}
 od_top5 %>% 
   knitr::kable(caption = "Sample of the origin-destination data stored in the data frame object `od`. These represent the top 5 most common desire lines between zones in the study area.")
@@ -272,8 +274,6 @@ knitr::include_graphics(u_od)
 #   tm_lines(lwd = 20, col = "black") +
 #   tm_scale_bar()
 ```
-
-
 
 ## Route analysis
 
