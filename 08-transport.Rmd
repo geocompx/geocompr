@@ -74,19 +74,14 @@ zones = msoa2011_vsimple[msoa2011_vsimple$msoa11cd %in% zones_cents$msoa11cd, ] 
   mutate_at(1:2, as.character)
 plot(zones$geometry, add = TRUE)
 # Add travel data to the zones
-if(!file.exists("extdata/l_all.rds")) {
-  u_pct = "https://github.com/npct/pct-outputs-national/raw/master/commute/msoa/l_all.Rds"
-  download.file(u_pct, "extdata/l_all.rds")
-}
-od_all = readRDS("extdata/l_all.rds")@data
+# using wicid open data - see http://wicid.ukdataservice.ac.uk/
+unzip("~/Downloads/wu03ew_v2.zip")
+od_all = read_csv("wu03ew_v2.csv")
 od = od_all %>% 
-  filter(geo_code1 %in% zones$geo_code & geo_code2 %in% zones$geo_code) %>% 
-  select(geo_code1, geo_code2, all, bicycle, foot, car_driver, train) %>% 
-  mutate_at(c("geo_code1", "geo_code2"), as.character)
-summary(zones$geo_code %in% od$geo_code1)
-zones = zones[zones$geo_code %in% od$geo_code1, ]
-od = od %>% 
-  filter(geo_code1 %in% zones$geo_code & geo_code2 %in% zones$geo_code)
+  select(o = `Area of residence`, d = `Area of workplace`, all = `All categories: Method of travel to work`, bicycle = Bicycle, foot = `On foot`, car_driver = `Driving a car or van`, train = Train) %>%
+  filter(o %in% zones$geo_code & d %in% zones$geo_code, all > 19)
+summary(zones$geo_code %in% od$d)
+summary(zones$geo_code %in% od$o)
 saveRDS(zones, "extdata/bristol-zones.rds")
 saveRDS(od, "extdata/bristol-od.rds")
 bb = st_bbox(region_ttwa)
@@ -211,30 +206,23 @@ zones = readRDS("extdata/bristol-zones.rds")
 ```{r}
 od = readRDS("extdata/bristol-od.rds")
 zones_attr = od %>%
-  group_by(geo_code1) %>% 
+  group_by(o) %>% 
   summarise_if(is.numeric, sum) %>% 
-  rename(geo_code = geo_code1)
+  rename(geo_code = o)
 ```
 
 
 ```{r}
 zones = left_join(zones, zones_attr)
 sum(zones$all)
-summary(zones)
+summary(zones[c("all", "car_driver")])
 ```
 
 ```{r zones, echo=FALSE, fig.cap="Regional boundaries (the thick black line represents the Travel to Work Area, the thinner black boundary represents the OSM boundary) for Bristol and the percentage of inhabitants travelling by car (left) and bicycle (right).", message=FALSE}
-region_osm = readRDS("extdata/bristol-region.rds")
-region_all = rbind(region_ttwa, region_osm)
-zones$p_drive = zones$car_driver / zones$all * 100
-zones$p_cycle = zones$bicycle / zones$all * 100
-library(tmap)
-tmap_mode("plot")
-qtm(zones, c("p_drive", "p_cycle"), fill.breaks = c(0, 3, 6, 10, 30, 60, 100),
-    fill.palette = viridis::plasma(n = 6)) +
-  tm_shape(region_all) +
-  tm_borders(lwd = c(5, 2), col = "black")
+knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34133431-8514e494-e44c-11e7-93e2-819ff81ea5ca.png")
 ```
+
+
 
 ## Nodes on the transport system
 
