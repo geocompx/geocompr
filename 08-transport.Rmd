@@ -87,37 +87,33 @@ od = od %>%
   filter(geo_code1 %in% zones$geo_code & geo_code2 %in% zones$geo_code)
 saveRDS(zones, "extdata/bristol-zones.rds")
 saveRDS(od, "extdata/bristol-od.rds")
-
-ways_road = opq(bbox = st_bbox(region_ttwa)) %>% 
+bb = st_bbox(region_ttwa)
+ways_road = opq(bbox = bb) %>% 
   add_osm_feature(key = "highway", value = "motorway|cycle|primary|secondary", value_exact = FALSE) %>% 
   osmdata_sf()
-
 ways_rail = opq(bbox = bb) %>% 
   add_osm_feature(key = "railway", value = "rail") %>% 
   osmdata_sf()
-
 res = c(ways_road, ways_rail)
 
 rail_stations = res$osm_points %>% 
   filter(railway == "station" | name == "Bristol Temple Meads")
-
 # most important vars:
 map_int(rail_stations, ~ sum(is.na(.))) %>% 
   sort() %>% 
   head()
-
 rail_stations = rail_stations %>% select(name)
 saveRDS(rail_stations, "extdata/rail_stations.rds")
 
-res$osm_lines$highway = as.character(res$osm_lines$highway)
-res$osm_lines$highway[res$osm_lines$railway == "rail"] = "rail"
-res$osm_lines$highway = gsub("_link", "", x = res$osm_lines$highway)
-res$osm_lines$highway = gsub("motorway|primary|secondary", "road", x = res$osm_lines$highway)
-ways_bristol = res$osm_lines %>% 
+ways = st_intersection(res$osm_lines, region_ttwa)
+ways$highway = as.character(ways$highway)
+ways$highway[ways$railway == "rail"] = "rail"
+ways$highway = gsub("_link", "", x = ways$highway) %>% 
+  gsub("motorway|primary|secondary", "road", x = .) %>% 
+  as.factor()
+ways = ways %>% 
   select(highway, maxspeed, ref)
-ways_bristol$highway = as.factor(ways_bristol$highway)
-ways_bristol = st_intersection(ways_bristol, region_ttwa)
-saveRDS(ways_bristol, "extdata/ways.rds") # save for future reference
+saveRDS(ways, "extdata/ways.rds") # save for future reference
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
