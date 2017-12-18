@@ -79,18 +79,23 @@ saveRDS(rail_stations, "extdata/rail_stations.rds")
 res$osm_lines$highway = as.character(res$osm_lines$highway)
 res$osm_lines$highway[res$osm_lines$railway == "rail"] = "rail"
 res$osm_lines$highway = gsub("_link", "", x = res$osm_lines$highway)
-res$osm_lines$highway = gsub("primary|secondary", "road", x = res$osm_lines$highway)
+res$osm_lines$highway = gsub("motorway|primary|secondary", "road", x = res$osm_lines$highway)
 ways_bristol = res$osm_lines %>% 
   select(highway, maxspeed, ref)
 ways_bristol$highway = as.factor(ways_bristol$highway)
 saveRDS(ways_bristol, "extdata/ways.rds") # save for future reference
 ```
 
-```{r bristol, echo=FALSE, fig.cap="Overview map of Bristol, with key parts of the transport network represented as colored lines for active (green), private motor (red lines and orange) and public (black) modes of travel.", message=FALSE}
-# library(tmap)
-# tmap_mode("view")
-# qtm(ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("green", "red", "black", "orange")) +
-#   tm_scale_bar()
+```{r, echo=FALSE, eval=FALSE}
+ways = readRDS("extdata/ways.rds")
+library(tmap)
+tmap_mode("view")
+qtm(ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("green", "black", "red")) +
+  tm_scale_bar()
+```
+
+
+```{r bristol, echo=FALSE, fig.cap="Overview map of Bristol, with key parts of the transport network represented as colored lines for active (green), public (railways, black) and private motor (red) modes of travel.", message=FALSE}
 knitr::include_graphics("figures/bristol.png")
 ```
 
@@ -225,7 +230,7 @@ This subset of the data was using attribute operations described in Chatper \@re
 ```{r}
 od_top5 = od %>% 
   arrange(desc(all)) %>% 
-  top_n(5, all)
+  top_n(5, wt = all)
 ```
 
 
