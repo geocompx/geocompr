@@ -175,7 +175,7 @@ reclass
 ```
 
 <!-- 
-```{r}
+```{r, eval = FALSE, echo = FALSE}
 tmp = mapply(FUN = function(x, y) {
   reclassify(x = x, rcl = y, right = NA)
 }, x = as.list(input_ras), y = rcl)
@@ -188,6 +188,7 @@ names(reclass) = names(input_ras)
 ```
 -->
 
+
 ### Define metropolitan areas
 
 We define metropolitan areas as pixels of 20 km^2^ inhabited by more than 500,000 people.
@@ -196,7 +197,6 @@ The command below uses the argument `fact = 20` to reduce the resolution of the 
 
 ```{r}
 pop_agg = aggregate(reclass$pop, fact = 20, fun = sum)
-reclass
 ```
 
 The next stage is to keep only cells with more than half a million people, and convert the result cells into a vector object of class `sf`.
@@ -455,7 +455,6 @@ The result of the subsequent code chunk is therefore an estimate of shop density
 shops = st_transform(shops, proj4string(reclass))
 # create poi raster
 poi = rasterize(x = shops, y = reclass, field = "osm_id", fun = "count")
-reclass
 ```
 
 As with the other raster layers (population, women, mean age, household size) the `poi` raster is reclassified into four classes (see section \@ref(create-census-rasters)). 
@@ -489,7 +488,6 @@ This is achieved with the complimentary functions `addLayer()` and `dropLayer()`
 reclass = addLayer(reclass, poi)
 # delete population raster
 reclass = dropLayer(reclass, "pop")
-reclass
 ```
 
 In common with other data science projects, data retrieval and 'tidying' have consumed much of the overall workload so far.
@@ -498,7 +496,6 @@ With clean data the final step, calculating a final score by summing up all rast
 ```{r}
 # calculate the total score
 result = sum(reclass)
-result
 ```
 
 For instance, a score greater 9 might be a suitable threshold indicating raster cells where to place a bike shop (Figure \@ref(fig:bikeshop-berlin)).
@@ -509,10 +506,9 @@ library(sp)
 # have a look at suitable bike shop locations in Berlin
 berlin = metros_2[metro_names == "Berlin"]
 berlin_raster = raster::crop(result, as(berlin, "Spatial"))
-summary(berlin_raster)
-berlin_raster
+# summary(berlin_raster)
+# berlin_raster
 berlin_raster = berlin_raster > 9
-
 
 berlin_raster = berlin_raster == TRUE
 berlin_raster[berlin_raster == 0] = NA
