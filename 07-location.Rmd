@@ -9,7 +9,6 @@
 ```{r, message = FALSE} 
 library(osmdata)
 library(raster)
-library(sp)
 library(sf)
 library(tidyverse)
 ```
@@ -67,8 +66,9 @@ Although we have applied these steps to a specific case study, they could be gen
 The German government provides gridded census data at either 1 km or 100 m resolution.
 The following code chunk downloads, unzips and reads-in the 1 km data.
 
-```{r, eval=FALSE}
-download.file("https://tinyurl.com/ybtpkwxz", destfile = "census.zip")
+```{r, eval = FALSE}
+download.file("https://tinyurl.com/ybtpkwxz", 
+              destfile = "census.zip", mode = "wb")
 unzip("census.zip") # unzip the files
 census = readr::read_csv2(list.files(pattern = "Gitter.csv"))
 ```
@@ -399,7 +399,7 @@ shops = map(metro_names, function(x) {
     iter = iter - 1
   }
   points = st_set_crs(points$osm_points, 4326)
-}
+})
 ```
 
 It is highly unlikely that there are no shops in any of our defined metropolitan areas.
@@ -498,12 +498,14 @@ result = sum(reclass)
 
 For instance, a score greater 9 might be a suitable threshold indicating raster cells where to place a bike shop (Figure \@ref(fig:bikeshop-berlin)).
 
-```{r bikeshop-berlin, echo = FALSE, fig.cap = "Suitable areas (i.e., raster cells with a score > 9) in accordance with our hypothetical survey for bike stores in Berlin."}
+```{r bikeshop-berlin, echo = FALSE, eval = TRUE, fig.cap = "Suitable areas (i.e., raster cells with a score > 9) in accordance with our hypothetical survey for bike stores in Berlin."}
 library(leaflet)
 # have a look at suitable bike shop locations in Berlin
 berlin = metros_2[metro_names == "Berlin"]
-berlin_raster = crop(result, as(berlin, "Spatial"))
+berlin_raster = raster::crop(result, as(berlin, "Spatial"))
 berlin_raster = berlin_raster > 9
+berlin_raster
+
 berlin_raster = berlin_raster == TRUE
 berlin_raster[berlin_raster == 0] = NA
 
