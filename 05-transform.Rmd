@@ -984,25 +984,55 @@ Additionally, check out the *Multi-core functions* section in `vignette("functio
 ### Vectorization
 
 <!-- e.g. landcover map to polygonss -->
+<!-- how it's different from a vectorization in CS -->
 <!-- vectorization is used when we get raster data as an input (such as scanned map or satellite image) and we want to extract objects -->
 <!-- it could be also used when we want to add attributes -->
 <!-- rasterToPolygons() -->
 <!-- rasterToContour() -->
 
 ```{r}
-image(grain)
-```
-
-```{r}
 grain_poly = spex::polygonize(grain)
-plot(grain_poly)
 ```
 
 ```{r}
 grain_poly2 = grain_poly %>% 
   group_by(VALUE) %>%
   summarize()
-plot(grain_poly2)
+```
+
+```{r raster-vectorization, echo=FALSE, fig.cap=".", warning=FALSE, eval = FALSE}
+cols = c("clay" = "brown", "silt" = "sandybrown", "sand" = "rosybrown")
+
+library(tmap)
+p1 = tm_shape(grain) + 
+  tm_raster(legend.show = FALSE, palette = cols)
+
+p2 = ggplot() + 
+  geom_sf(data = grain_poly, aes(fill = VALUE)) + 
+  scale_x_continuous(expand = c(0,0)) +
+  scale_y_continuous(expand = c(0,0)) +
+  theme(line = element_blank(), 
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        legend.position = "none") +
+  scale_fill_manual(values = cols2)
+
+p3 = ggplot() + 
+  geom_sf(data = grain_poly2, aes(fill = VALUE)) + 
+  scale_x_continuous(expand = c(0,0)) + 
+  scale_y_continuous(expand = c(0,0)) +
+  theme(line = element_blank(), 
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        legend.position = "none") +
+  scale_fill_manual(values = cols2)
+
+par_old = par()
+par(mfrow = c(1, 3), mar = c(0, 0, 1, 0))
+p1
+p2
+p3
+par(par_old)
 ```
 
 <!-- ```{r} -->
