@@ -38,3 +38,7 @@ Leave a single empty line space before and after each code chunk.
 # Figures
 
 Names of the figures should contain a chapter number, e.g. `04-world_map.png` or `11-population_animation.gif`.
+
+# File names
+
+- Use `file-name.rds` not `file-name.Rds`
