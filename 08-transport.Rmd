@@ -48,54 +48,87 @@ We will use input data from Bristol, a coastal city in the West of England, desc
 
 ## A case study of Bristol {#bris-case}
 
-The case study used for this chapter is a diverse city on the west of England, 30 km east of the Welsh capital Cardiff.
-As with any case study it is worth taking some time to consider the local geography of the area (see Figure \@ref(fig:bristol)).
-This shows the diversity of the city's transport network, with railways, tarmac roads (consisting of 'roads' which bicycles can use and motorways which are exclusively for motor vehicles) and cycle paths plotted.
+The case study used for this chapter is a city on the west of England, around 30 km East of the Welsh capital Cardiff.
+The area's transport network is illustrated in Figure \@ref(fig:bristol), which shows that Bristol is provided by a diverse range transport infrastructure, for travelling by bicycle, train and private motor vehicle.
 
 ```{r, eval=FALSE, echo=FALSE}
+# Aim: download, preprocess, save input data - todo: save as R script
+devtools::install_github("ropensci/osmdata")
 library(osmdata)
-bb = getbb("bristol uk")
+region = getbb("Bristol", format_out = "sf_polygon") %>% 
+  st_set_crs(4326)
+region = st_sf(data.frame(Name = "Bristol (OSM)"), geometry = region$Bristol)
+saveRDS(region, "extdata/bristol-region.rds")
+devtools::install_github("robinlovelace/ukboundaries")
+library(ukboundaries)
+region_ttwa = ttwa_simple %>% 
+  filter(grepl("Bristol", ttwa11nm)) %>% 
+  select(Name = ttwa11nm)
+region_ttwa$Name = "Bristol (TTWA)"
+saveRDS(region_ttwa, "extdata/bristol-ttwa.rds")
+zones_cents = st_centroid(msoa2011_vsimple)[region_ttwa, ]
+plot(zones_cents$geometry)
+zones = msoa2011_vsimple[msoa2011_vsimple$msoa11cd %in% zones_cents$msoa11cd, ] %>% 
+  select(geo_code = msoa11cd, name = msoa11nm) %>% 
+  mutate_at(1:2, as.character)
+plot(zones$geometry, add = TRUE)
+# Add travel data to the zones
+# using wicid open data - see http://wicid.ukdataservice.ac.uk/
+unzip("~/Downloads/wu03ew_v2.zip")
+od_all = read_csv("wu03ew_v2.csv")
+file.remove("wu03ew_v2.csv")
+od = od_all %>% 
+  select(o = `Area of residence`, d = `Area of workplace`, all = `All categories: Method of travel to work`, bicycle = Bicycle, foot = `On foot`, car_driver = `Driving a car or van`, train = Train) %>%
+  filter(o %in% zones$geo_code & d %in% zones$geo_code, all > 19)
+summary(zones$geo_code %in% od$d)
+summary(zones$geo_code %in% od$o)
+saveRDS(zones, "extdata/bristol-zones.rds")
+saveRDS(od, "extdata/bristol-od.rds")
+bb = st_bbox(region_ttwa)
 ways_road = opq(bbox = bb) %>% 
   add_osm_feature(key = "highway", value = "motorway|cycle|primary|secondary", value_exact = FALSE) %>% 
   osmdata_sf()
-
 ways_rail = opq(bbox = bb) %>% 
   add_osm_feature(key = "railway", value = "rail") %>% 
   osmdata_sf()
-
 res = c(ways_road, ways_rail)
 
 rail_stations = res$osm_points %>% 
   filter(railway == "station" | name == "Bristol Temple Meads")
-
 # most important vars:
 map_int(rail_stations, ~ sum(is.na(.))) %>% 
   sort() %>% 
   head()
-
 rail_stations = rail_stations %>% select(name)
-saveRDS(rail_stations, "extdata/rail_stations.Rds")
+saveRDS(rail_stations, "extdata/rail_stations.rds")
 
-res$osm_lines$highway = as.character(res$osm_lines$highway)
-res$osm_lines$highway[res$osm_lines$railway == "rail"] = "rail"
-res$osm_lines$highway = gsub("_link", "", x = res$osm_lines$highway)
-res$osm_lines$highway = gsub("primary|secondary", "road", x = res$osm_lines$highway)
-ways_bristol = res$osm_lines %>% 
+ways = st_intersection(res$osm_lines, region_ttwa)
+ways$highway = as.character(ways$highway)
+ways$highway[ways$railway == "rail"] = "rail"
+ways$highway = gsub("_link", "", x = ways$highway) %>% 
+  gsub("motorway|primary|secondary", "road", x = .) %>% 
+  as.factor()
+ways = ways %>% 
   select(highway, maxspeed, ref)
-ways_bristol$highway = as.factor(ways_bristol$highway)
-saveRDS(ways_bristol, "extdata/ways.Rds") # save for future reference
+saveRDS(ways, "extdata/ways.rds") # save for future reference
 ```
 
-```{r bristol, echo=FALSE, fig.cap="Overview map of Bristol, with key parts of the transport network represented as colored lines for active (green), private motor (red lines and orange) and public (black) modes of travel.", message=FALSE}
-# library(tmap)
-# tmap_mode("view")
-# qtm(ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("green", "red", "black", "orange")) +
-#   tm_scale_bar()
-knitr::include_graphics("figures/bristol.png")
+```{r, echo=FALSE, eval=FALSE}
+ways = readRDS("extdata/ways.rds")
+library(tmap)
+tmap_mode("view")
+qtm(ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("green", "black", "red")) +
+  tm_scale_bar()
 ```
 
-Bristol is the 10^th^ largest city council in England, with a population of half a million people in the city bounds (Bristol's travel catchment area is larger though, as demonstrated in the next section).
-It has a vibrant economy with aerospace, media, financial service and tourism, alongside two major universities, contributing to a high average income per capita (although Bristol also has deprived, low income areas).
+
+```{r bristol, echo=FALSE, fig.cap="Overview map of Bristol, with key parts of the transport network represented as colored lines for active (green), public (railways, black) and private motor (red) modes of travel.", message=FALSE}
+knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34098583-b6daf054-e3d4-11e7-9fd6-7d71883f89e4.png")
+```
+
+Bristol is the 10^th^ largest city council in England, with a population of half a million people, although its travel catchment area is larger (see section \@ref(transport-zones)).
+It has a vibrant economy with aerospace, media, financial service and tourism, alongside two major universities.
+Bristol has high average income per capita but contains areas of severe deprivation [@bristol_city_council_deprivation_2015].
 
 In terms of transport, Bristol is well served by rail and road links, and has a relatively high level of active travel.
 19% of its citizens cycle and 88% walk at least once per month according to the [Active People Survey](https://www.gov.uk/government/statistical-data-sets/how-often-and-time-spent-walking-and-cycling-at-local-authority-level-cw010#table-cw0103) (the national average is 15% and 81% respectively).
@@ -131,118 +164,94 @@ These zone-level data are small but often vital for gaining a basic understandin
 
 ## Transport zones
 
-Although transport systems are inherently based on linear features and nodes --- the nodes and edges of the transport network --- it often makes sense to start with areal data.
+Although transport systems are primarily based on linear features and nodes --- including pathways and stations --- it often makes sense to start with areal data.
 Three types of zone will typically be of particular interest: the study region, origin zones (typically residential areas), and destination zones (which are often the same as the origin zones).
 
-The simplest definition of the study area is typically the first matching boundary returned by OpenStreetMap, which can be obtained using the **osmdata** package as follows:
+The simplest way to define a study area is often the first matching boundary returned by OpenStreetMap, which can be obtained using the **osmdata** package as follows:
 
 ```{r, eval=FALSE}
-region = getbb("Bristol", format_out = "polygon")[1]
+region_bb = osmdata::getbb("Bristol")
 ```
 
-OSM will will often contain valid depiction of the case study city or region of interest (in this case the result is the same as the officially defined area of the Local Authority District).
-However the approach is problematic because OSM data may not correspond to the most recent administrative areas over which transport planning authorities have control, meaning the analysis may be of limited interest to local transport planners.
-More importantly, official administrative zones often do not relate to 'travel watersheds', areas that can are defined not by (often arbitrary) political decisions but by data on where people actually travel to.
+The result is a matrix representing the rectangular bounds of the largest matching city region^[
+In this case the command `getbb("Bristol", format_out = "sf_polygon")` would return the official Local Authority District boundary of Bristol, UK would returned but more commonly only rectangular bounding boxes are provided by OSM.
+In cases where the first match does not provide the right name, the country or region should be specified, for example `Bristol Tennessee`.
+]
+This approach may not always be appropriate, however: boundaries in OSM may not be the same as boundaries used by the local transport planning authority.
+More importantly, official administrative zones seldom relate to where people in them travel.
 
-To overcome this issue for transport data analysis in the UK, the Travel to Work Areas (TTWAs) were created.
-TTWAs are contiguous zones defined roughly as areas in which 75% of the population both live and work.
-Because Bristol is a major employer attracting travel from surrounding towns, its TTWA is substantially larger than its administratively defined area, as illustrated in Figure \@ref(fig:ttwa-bristol).
+Travel to Work Areas (TTWAs) overcome this issue by creating a zoning system analogous to hydrological watersheds.
+TTWAs were first defined as contiguous zones within which 75% of the population travels work [@coombes_efficient_1986], and this is the definition used in this chapter.
+Because Bristol is a major employer attracting travel from surrounding towns, its TTWA --- loading in the command below --- is substantially larger than its administratively defined area (see Figure \@ref(fig:zones)).
 
-```{r, eval=FALSE, echo=FALSE}
-# save region data + ttwa regions
-devtools::install_github("ropensci/osmdata")
-library(osmdata)
-region = getbb("Bristol", format_out = "sf_polygon") %>% 
-  st_set_crs(4326)
-saveRDS(region, "extdata/bristol-region.Rds")
-devtools::install_github("robinlovelace/ukboundaries")
-library(ukboundaries)
-region_ttwa = ttwa_simple %>% 
-  filter(grepl("Bristol", ttwa11nm)) %>% 
-  select(Name = ttwa11nm)
-saveRDS(region_ttwa, "extdata/bristol-ttwa.Rds")
-
-zones_cents = st_centroid(msoa2011_vsimple)[region_ttwa, ]
-plot(zones_cents$geometry)
-zones = msoa2011_vsimple[msoa2011_vsimple$msoa11cd %in% zones_cents$msoa11cd, ] %>% 
-  select(geo_code = msoa11cd, name = msoa11nm) %>% 
-  mutate_at(1:2, as.character)
-plot(zones$geometry, add = TRUE)
-# Add travel data to the zones
-u_pct = "https://github.com/npct/pct-outputs-national/raw/master/commute/msoa/l_all.Rds"
-download.file(u_pct, "extdata/l_all.Rds")
-od_all = readRDS("extdata/l_all.Rds")@data
-od = od_all %>% 
-  filter(geo_code1 %in% zones$geo_code & geo_code2 %in% zones$geo_code) %>% 
-  select(geo_code1, geo_code2, all, bicycle, foot, car_driver, train) %>% 
-  mutate_at(c("geo_code1", "geo_code2"), as.character)
-summary(zones$geo_code %in% od$geo_code1)
-zones = zones[zones$geo_code %in% od$geo_code1, ]
-od = od %>% 
-  filter(geo_code1 %in% zones$geo_code & geo_code2 %in% zones$geo_code)
-saveRDS(zones, "extdata/bristol-zones.Rds")
-saveRDS(od, "extdata/bristol-od.Rds")
+```{r}
+region_ttwa = readRDS("extdata/bristol-ttwa.rds")
 ```
 
-```{r ttwa-bristol, fig.cap="Region definitions in Bristol"}
-region = readRDS("extdata/bristol-region.Rds")
-region_ttwa = readRDS("extdata/bristol-ttwa.Rds")
-plot(region_ttwa$geometry)
-plot(region$Bristol, add = TRUE)
+Areal data is the other key zonal dataset type.
+Where available, such administrative zones can provide vital context, with demographic, transport and other variables and their spatial distribution.
+The geographic resolution of these zones is important: small zones are usually preferable but if they are too small (their geographic resolution is too high) this can have consequences for processing time and data access:
+more socio-demographic variables are often available for large zones than small zones, due to rules preventing the disclosure of identifiable data.
+
+The zoning system illustrated in Figure \@ref(fig:zones) represents the areal units used in this chapter.
+These 102 zones, loaded in the next code chunk, are relatively large but provide sufficient resolution for the purposes of this chapter.
+
+```{r}
+zones = readRDS("extdata/bristol-zones.rds")
 ```
 
 ```{r}
-zones = readRDS("extdata/bristol-zones.Rds")
-od = readRDS("extdata/bristol-od.Rds")
+od = readRDS("extdata/bristol-od.rds")
 zones_attr = od %>%
-  group_by(geo_code1) %>% 
+  group_by(o) %>% 
   summarise_if(is.numeric, sum) %>% 
-  rename(geo_code = geo_code1)
+  rename(geo_code = o)
 ```
+
 
 ```{r}
 zones = left_join(zones, zones_attr)
 sum(zones$all)
-summary(zones)
+summary(zones[c("all", "car_driver")])
 ```
 
-```{r}
-plot(zones %>% select(bicycle, foot, car_driver, train))
+```{r zones, echo=FALSE, fig.cap="Regional boundaries (the thick black line represents the Travel to Work Area (TTWA), the thinner black boundary represents the OSM boundary) for Bristol and the number of people working in the (TTW) per zone.", message=FALSE}
+knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34133431-8514e494-e44c-11e7-93e2-819ff81ea5ca.png")
 ```
 
 ## Nodes on the transport system
 
 ```{r}
-rail_stations = readRDS("extdata/rail_stations.Rds")
+rail_stations = readRDS("extdata/rail_stations.rds")
 ```
 
-## Desire line analysis
+## Desire lines
 
 We have already loaded data representing desire lines in the dataset `od`.
-This origin-destination (OD) data frame object represents the number of people travelling between the zone represented in `geo_code1` and `geo_code2`, as illustrated in Table \@ref(tab:od).
+This origin-destination (OD) data frame object represents the number of people travelling between the zone represented in `o` and `d`, as illustrated in Table \@ref(tab:od).
 This subset of the data was using attribute operations described in Chatper \@ref(attr), to arrange the OD data by all trips and then filter-out only the top 5:
 
 ```{r}
 od_top5 = od %>% 
   arrange(desc(all)) %>% 
-  top_n(5, all)
+  top_n(5, wt = all)
 ```
-
 
 ```{r od, echo=FALSE}
 od_top5 %>% 
   knitr::kable(caption = "Sample of the origin-destination data stored in the data frame object `od`. These represent the top 5 most common desire lines between zones in the study area.")
 ```
 
-This table provides a snapshot of Bristolian travel patterns demonstrating, for example, that walking is the most popular mode of transport among the top 5 inter-zonal origin-destination pairs.
+This table provides a snapshot of Bristolian travel patterns demonstrating, for example, that walking is the most popular mode of transport among the top 5 inter-zonal origin-destination pairs and that zone `E02003043` is a popular destination.
 But from a policy perspective it's useless:
-aside from the fact that it contains only a tiny portion of the 4,148 OD pairs, there is no way of deciding *where* policy measures are needed to boost walking and cycling.
+aside from the fact that it contains only a tiny portion of the `r nrow(od)` OD pairs, there is no way of deciding *where* policy measures are needed to boost walking and cycling.
 What is needed is a way to plot this origin-destination data on the map.
 
 The solution is to convert the non-geographic `od` dataset into geographical desire lines that can be plotted on a map.
-This conversion is done in the code below which matches the IDs in the first two columns of Table \@ref(tab:od) to the `zone_code` ID column in the geographic `zones` object:^[
+The geographic representation of the data presented in Table \@ref(tab:od) are displayed as straight black lines in \@ref(fig:desire): these are clearly more useful from a policy perspective.
+The conversion from `data.frame` to `sf` class is done in the code below which matches the IDs in the first two columns of the `od` object to the `zone_code` ID column in the geographic `zones` object.^[
 Note that the operation emits a warning: this is because the **stplanr** function `od2line()` used to create the desire lines works by allocating the start and end points of each origin-destination pair to the *centroid* of its zone of origin and destination.
-This represents a straight line between the centroid of zone `E02003043` and the centroid of `E02003047` for the first origin-destination pair represented in Table \@ref(tab:od), for example.
+This represents a straight line between the centroid of zone `E02003047` and the centroid of `E02003043` for the second origin-destination pair represented in Table \@ref(tab:od), for example.
 For real-world use one would use centroid values generated from projected data or, preferably, use *population-weighted* centroids.
 <!-- Todo: add PCT reference (RL) -->
 ]
@@ -260,7 +269,7 @@ However, there are several peripheral sub-centres including Bradford Stoke to th
 plot(desire_lines$geometry)
 ```
 
-```{r desire, echo=FALSE, warning=FALSE, fig.cap="Desire lines representing the centrality of Bristol City Centre in the region's transport patterns."}
+```{r desire, echo=FALSE, warning=FALSE, fig.cap="Desire lines representing the centrality of Bristol City Centre in the region's transport patterns. The width of the red lines is proportional to commute trips between zones. The 5 black lines represent sample origin-destination data shown in Table 8.1."}
 u_od = "https://user-images.githubusercontent.com/1825120/34081176-74fd39c8-e341-11e7-9f3e-b98807cb113b.png"
 knitr::include_graphics(u_od)
 # library(tmap)
@@ -273,8 +282,6 @@ knitr::include_graphics(u_od)
 #   tm_scale_bar()
 ```
 
-
-
 ## Route analysis
 
 ## Route networks
@@ -283,7 +290,7 @@ The data used in this section was downloaded using **osmdata**.
 To avoid having to request the data from OSM repeadetly, we'll use a locally saved version of the data, which contains point and line data for the case study area:
 
 ```{r}
-ways = readRDS("extdata/ways.Rds")
+ways = readRDS("extdata/ways.rds")
 summary(ways)
 ```
 
