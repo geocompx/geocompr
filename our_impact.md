@@ -33,6 +33,7 @@
 - 2017-12-05 - enhancement - add tmap to the rocker/geospatial Docker container - https://github.com/rocker-org/geospatial/issues/6
 - 2017-12-03 - bug - Simplified polygons plotting - https://github.com/r-spatial/sf/issues/581
 - 2017-12-17 - bug - Polygons plotting error - https://github.com/mtennekes/tmap/issues/159
+- 2017-12-19 - bug - osmdata failed with an unhelpful message for some `getbb()` calls: https://github.com/ropensci/osmdata/issues/117
 
 ## open
 
