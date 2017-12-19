@@ -32,13 +32,13 @@
 - 2017-11-30 - bug - tidyr::unite - wrong column name - https://github.com/r-spatial/sf/issues/576
 - 2017-12-05 - enhancement - add tmap to the rocker/geospatial Docker container - https://github.com/rocker-org/geospatial/issues/6
 - 2017-12-03 - bug - Simplified polygons plotting - https://github.com/r-spatial/sf/issues/581
+- 2017-12-17 - bug - Polygons plotting error - https://github.com/mtennekes/tmap/issues/159
 
 ## open
 
 - 2017-04-01 - enhancement - returnclass='sf' as default - https://github.com/ropenscilabs/rnaturalearth/issues/16
 - 2017-07-11 - bug - Problem with plots of the multipoint type - https://github.com/mtennekes/tmap/issues/126
 - 2017-08-23 - bug - mapedit does not seem to save the end result after editing - https://github.com/r-spatial/mapedit/issues/63
-- 2017-12-17 - bug - Polygons plotting error - https://github.com/mtennekes/tmap/issues/159
 
 # Other
 
