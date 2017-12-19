@@ -178,31 +178,27 @@ In this case the command `getbb("Bristol", format_out = "sf_polygon")` would ret
 In cases where the first match does not provide the right name, the country or region should be specified, for example `Bristol Tennessee`.
 ]
 This approach may not always be appropriate, however: boundaries in OSM may not be the same as boundaries used by the local transport planning authority.
-More importantly, official administrative zones often do not relate to 'travel watersheds', areas that can are defined not by (often arbitrary) political decisions but by data on where people actually travel to.
+More importantly, official administrative zones seldom relate to where people in them travel.
 
-To overcome this issue for transport data analysis in the UK, the Travel to Work Areas (TTWAs) were created.
-TTWAs are contiguous zones defined roughly as areas in which 75% of the population both live and work [@coombes_efficient_1986].
-They are similar conceptually to hydrological watershed.
-Because Bristol is a major employer attracting travel from surrounding towns, its TTWA is substantially larger than its administratively defined area, as illustrated in Figure \@ref(fig:zones).
-The TTWA region is loaded in the following command:
+Travel to Work Areas (TTWAs) overcome this issue by creating a zoning system analogous to hydrological watersheds.
+TTWAs were first defined as contiguous zones within which 75% of the population travels work [@coombes_efficient_1986], and this is the definition used in this chapter.
+Because Bristol is a major employer attracting travel from surrounding towns, its TTWA --- loading in the command below --- is substantially larger than its administratively defined area (see Figure \@ref(fig:zones)).
 
 ```{r}
 region_ttwa = readRDS("extdata/bristol-ttwa.rds")
 ```
 
-Administrative zones are the other key zonal dataset to load.
-Where available, these zones can provide vital demographic, transport and other variables for the region, and how these change over space.
-The geographic resolution of these zones is important.
-Very small zones (which have a high level of geographic resolution) provide detailed spatial information but if they are too small this can have consequences for processing time.
-Furthermore, it is usually possible to access more socio-demographic variables for larger zones (which have a lower level of geographic resolution) due to rules preventing the disclosure of identifiable data.
+Areal data is the other key zonal dataset type.
+Where available, such administrative zones can provide vital context, with demographic, transport and other variables and their spatial distribution.
+The geographic resolution of these zones is important: small zones are usually preferable but if they are too small (their geographic resolution is too high) this can have consequences for processing time and data access:
+more socio-demographic variables are often available for large zones than small zones, due to rules preventing the disclosure of identifiable data.
 
-The zoning system represented in Figure \@ref(fig:zones) represents a suitable compromise given that the purpose of this chapter is educational rather than precision.
-The `zones` dataset, loaded in the next code chunk, contains 100 zones in Bristol.
+The zoning system illustrated in Figure \@ref(fig:zones) represents the areal units used in this chapter.
+These 102 zones, loaded in the next code chunk, are relatively large but provide sufficient resolution for the purposes of this chapter.
 
 ```{r}
 zones = readRDS("extdata/bristol-zones.rds")
 ```
-
 
 ```{r}
 od = readRDS("extdata/bristol-od.rds")
@@ -219,11 +215,9 @@ sum(zones$all)
 summary(zones[c("all", "car_driver")])
 ```
 
-```{r zones, echo=FALSE, fig.cap="Regional boundaries (the thick black line represents the Travel to Work Area, the thinner black boundary represents the OSM boundary) for Bristol and the percentage of inhabitants travelling by car (left) and bicycle (right).", message=FALSE}
+```{r zones, echo=FALSE, fig.cap="Regional boundaries (the thick black line represents the Travel to Work Area (TTWA), the thinner black boundary represents the OSM boundary) for Bristol and the number of people working in the (TTW) per zone.", message=FALSE}
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34133431-8514e494-e44c-11e7-93e2-819ff81ea5ca.png")
 ```
-
-
 
 ## Nodes on the transport system
 
@@ -234,7 +228,7 @@ rail_stations = readRDS("extdata/rail_stations.rds")
 ## Desire lines
 
 We have already loaded data representing desire lines in the dataset `od`.
-This origin-destination (OD) data frame object represents the number of people travelling between the zone represented in `geo_code1` and `geo_code2`, as illustrated in Table \@ref(tab:od).
+This origin-destination (OD) data frame object represents the number of people travelling between the zone represented in `o` and `d`, as illustrated in Table \@ref(tab:od).
 This subset of the data was using attribute operations described in Chatper \@ref(attr), to arrange the OD data by all trips and then filter-out only the top 5:
 
 ```{r}
@@ -248,16 +242,16 @@ od_top5 %>%
   knitr::kable(caption = "Sample of the origin-destination data stored in the data frame object `od`. These represent the top 5 most common desire lines between zones in the study area.")
 ```
 
-This table provides a snapshot of Bristolian travel patterns demonstrating, for example, that walking is the most popular mode of transport among the top 5 inter-zonal origin-destination pairs.
+This table provides a snapshot of Bristolian travel patterns demonstrating, for example, that walking is the most popular mode of transport among the top 5 inter-zonal origin-destination pairs and that zone `E02003043` is a popular destination.
 But from a policy perspective it's useless:
-aside from the fact that it contains only a tiny portion of the 4,148 OD pairs, there is no way of deciding *where* policy measures are needed to boost walking and cycling.
+aside from the fact that it contains only a tiny portion of the `r nrow(od)` OD pairs, there is no way of deciding *where* policy measures are needed to boost walking and cycling.
 What is needed is a way to plot this origin-destination data on the map.
 
 The solution is to convert the non-geographic `od` dataset into geographical desire lines that can be plotted on a map.
 The geographic representation of the data presented in Table \@ref(tab:od) are displayed as straight black lines in \@ref(fig:desire): these are clearly more useful from a policy perspective.
 The conversion from `data.frame` to `sf` class is done in the code below which matches the IDs in the first two columns of the `od` object to the `zone_code` ID column in the geographic `zones` object.^[
 Note that the operation emits a warning: this is because the **stplanr** function `od2line()` used to create the desire lines works by allocating the start and end points of each origin-destination pair to the *centroid* of its zone of origin and destination.
-This represents a straight line between the centroid of zone `E02003043` and the centroid of `E02003047` for the first origin-destination pair represented in Table \@ref(tab:od), for example.
+This represents a straight line between the centroid of zone `E02003047` and the centroid of `E02003043` for the second origin-destination pair represented in Table \@ref(tab:od), for example.
 For real-world use one would use centroid values generated from projected data or, preferably, use *population-weighted* centroids.
 <!-- Todo: add PCT reference (RL) -->
 ]
