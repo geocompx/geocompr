@@ -40,7 +40,7 @@ r = raster(nrow = 3, ncol = 3, res = 0.5,
 clip = raster(nrow = 3, ncol = 3, res = 0.3, xmn = 0.9, xmx = 1.8, 
              ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
 # create color scale
-colfunc <- colorRampPalette(c("lightyellow", "rosybrown"))
+colfunc = colorRampPalette(c("lightyellow", "rosybrown"))
 
 p_1 = spplot(r, xlim = c(-1.5, 2), ylim = c(-1.5, 1.5),
              col.regions = colfunc(36), colorkey = FALSE,
