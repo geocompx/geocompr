@@ -985,12 +985,24 @@ Additionally, check out the *Multi-core functions* section in `vignette("functio
 
 ### Vectorization
 
+Vectorization is a process of converting rasters into vectors^[This term should not be confused with a code vectorization.].
+The simplest form of vectorization is a conversion from a raster to points.
+The `rasterToPoints()` function creates point representations of raster grid cell centroids.
+
+```{r}
+grain_point = rasterToPoints(grain, spatial = TRUE)
+grain_point = st_as_sf(grain_point)
+plot(grain_point)
+```
+
+<!-- ref to rasterization -->
+
 <!-- e.g. landcover map to polygonss -->
 <!-- how it's different from a vectorization in CS -->
 <!-- vectorization is used when we get raster data as an input (such as scanned map or satellite image) and we want to extract objects -->
 <!-- it could be also used when we want to add attributes -->
 <!-- rasterToPolygons() -->
-<!-- rasterToContour() -->
+<!-- spex::polygonize -->
 
 ```{r}
 grain_poly = spex::polygonize(grain)
@@ -1002,6 +1014,7 @@ grain_poly2 = grain_poly %>%
   summarize()
 ```
 
+
 ```{r raster-vectorization, echo=FALSE, fig.cap=".", warning=FALSE}
 library(tmap)
 library(grid)
@@ -1012,22 +1025,33 @@ p1 = tm_shape(grain) +
   tm_layout(outer.margins = rep(0.01, 4), 
             inner.margins = rep(0, 4))
 
-p2 = tm_shape(grain_poly) + 
+p2 = tm_shape(grain_point) + 
+  tm_bubbles(col = "layer", legend.col.show = FALSE, palette = cols[c(1, 3, 2)]) +
+  tm_layout(outer.margins = rep(0.01, 4), 
+            inner.margins = rep(0.05, 4))
+
+p3 = tm_shape(grain_poly) + 
   tm_polygons("VALUE", legend.show = FALSE, palette = cols, lwd = 3) +
   tm_layout(outer.margins = rep(0.01, 4), 
             inner.margins = rep(0, 4))
 
-p3 = tm_shape(grain_poly2) + 
+p4 = tm_shape(grain_poly2) + 
   tm_polygons("VALUE", legend.show = FALSE, palette = cols, lwd = 3) +
   tm_layout(outer.margins = rep(0.01, 4), 
             inner.margins = rep(0, 4))
 
 grid.newpage()
-pushViewport(viewport(layout = grid.layout(1, 3)))
+pushViewport(viewport(layout = grid.layout(1, 4)))
 print(p1, vp=viewport(layout.pos.col = 1))
 print(p2, vp=viewport(layout.pos.col = 2))
 print(p3, vp=viewport(layout.pos.col = 3))
+print(p4, vp=viewport(layout.pos.col = 4))
 ```
+
+<!-- rasterToContour() -->
+
+
+
 
 <!-- ```{r} -->
 <!-- nlcd2011 = raster(system.file("raster/nlcd2011.tif", package = "spDataLarge")) -->
