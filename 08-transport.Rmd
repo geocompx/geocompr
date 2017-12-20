@@ -93,6 +93,8 @@ ways_rail = opq(bbox = bb) %>%
   osmdata_sf()
 res = c(ways_road, ways_rail)
 
+summary(res)
+
 rail_stations = res$osm_points %>% 
   filter(railway == "station" | name == "Bristol Temple Meads")
 # most important vars:
@@ -110,6 +112,9 @@ ways$highway = gsub("_link", "", x = ways$highway) %>%
   as.factor()
 ways = ways %>% 
   select(highway, maxspeed, ref)
+summary(st_geometry_type(ways))
+# convert to linestring
+ways = st_cast(ways, "LINESTRING")
 saveRDS(ways, "extdata/ways.rds") # save for future reference
 ```
 
@@ -267,8 +272,10 @@ zones = od %>%
 plot(zones["all_dest"])
 ```
 
-
 ## Nodes on the transport system
+
+Nodes in geographic transport data are zero dimensional features (points) among the predominantly one dimension features (lines) that comprise the network.
+From a mathematical perspective transport networks are simply large graphs: roads and other pathways are 'edges' that join together the nodes, making some quantifiably more central than others 
 
 ```{r}
 rail_stations = readRDS("extdata/rail_stations.rds")
@@ -345,5 +352,22 @@ summary(ways)
 
 The above code chunk loaded a simple feature object representing around 3,000 segments on the transport network.
 This an easily manageable dataset size (transport datasets be large but it's best to start small).
+
+```{r}
+ways_road = ways %>% filter(highway == "road") 
+ways_sln = SpatialLinesNetwork(as(ways_road, "Spatial"))
+summary(ways_sln)
+weightfield(ways_sln)
+# o_crds = geo_code("Lawrence Hill Bristol")
+# o_crds = geo_code("Park Street Bristol")
+# o_node = find_network_nodes(ways_sln, -2.618, 51.494)
+# d_node = find_network_nodes(ways_sln, -2.602, 51.455)
+path = sum_network_routes(ways_sln, 10, 20, "length")
+plot(ways_sln)
+plot(path, col = "red", lwd = 5, add = T)
+b = igraph::betweenness(ways_sln@g)
+length(b)
+```
+
 
 ## Agents in the transport system
