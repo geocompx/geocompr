@@ -15,7 +15,7 @@ library(tidyverse)
 library(raster)
 ```
 
-- It also relies on **spData**, which loads datasets used in examples in the chapter:
+- It also relies on **spData**, which loads datasets used in the code examples of this chapter:
 
 ```{r, results='hide'}
 library(spData)
@@ -26,17 +26,26 @@ library(spData)
 Spatial operations are a vital part of geocomputation.
 This chapter shows how spatial objects can be modified in a multitude of ways based on their location and shape.
 The content builds on the previous chapter because many spatial operations have a non-spatial (attribute) equivalent.
-Spatial operations on *vector* objects include spatial subsetting (covered in section \@ref(spatial-subsetting)) and spatial joining (section \@ref(spatial-joining)).
-This content builds on section \@ref(vector-attribute-manipulation) in the previous chapter.
-Spatial operations on *rasters* include merging and subsetting, covered in section \@ref(spatial-ras).
+This is especially true for *vector* operations: section \@ref(vector-attribute-manipulation) on vector attribute manipulation provides the basis for understanding its spatial counterpart, namely spatial subsetting (covered in section \@ref(spatial-subsetting)).
+Spatial joining (section \@ref(spatial-joining)) and aggregation (\@ref(spatial-data-aggregation)) also have non-spatial counterparts, covered in the previous chapter.
 
-The chapter also introduces new concepts that are unique to spatial data.
-A variety of *topological relations* can be used to subset/join vector geometries (by default **sf** uses the catch-all *intersects* but other relations such as *within* can be very useful), a topic that is explored in section \@ref(topological-relations).
-Spatial operations on raster datasets involve *map algebra* (covered in sections \@ref(map-algebra) to \@ref(global-operations-and-distances)) and raster merging (covered in sections \@ref(merging-rasters)).
+Spatial operations differ from non-spatial operations in some ways, however.
+To illustrate the point, imagine you are researching road safety.
+Spatial joins can be used to find road speed limits related with administrative zones, even when no zone ID is provided.
+<!-- This could be a really good example that - a candidate to replace the rather contrived asia example below. -->
+But this raises the question: should the road completely fall inside a zone for its values to be joined?
+Or is simply crossing or being within a certain distance sufficent?
+When posing such questions it becomes apparent that spatial operations differ substantially from attribute operations on data frames:
+the *type* of spatial relationship between objects must be considered.
+These are covered in section \@ref(topological-relations), on topological relations.
 
 Another unique aspect of spatial objects is distance.
-All spatial objects are related through space and distance calculations can be used to find the strength of this relationship between spatial entities.
-Distance operations are covered in sections \@ref(distance-relations) and \@ref(global-operations-and-distances) for vector and raster datasets respectively.
+All spatial objects are related through space and distance calculations, covered in section \@ref(distance-relations), can be used to explore the strength of this relationship.
+
+Naturally, we can also subset *rasters* based on location and coordinates (section \@ref(raster-subsetting)) and merge different raster tiles into one raster (covered in section \@ref(merging-rasters)). 
+The most important spatial operation on raster data, however, is *map algebra*. 
+Map algebra makes raster processing really elegant and fast (covered in sections \@ref(map-algebra) to \@ref(global-operations-and-distances)).
+Map algebra is also the prerequisite for distance calculations on rasters \@ref(global-operations-and-distances).
 
 ```{block2 type='rmdnote'}
 It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in \@ref(crs-intro) and which will be covered in more depth in Chapter 6.
@@ -60,17 +69,16 @@ canterbury = nz %>% filter(REGC2017_NAME == "Canterbury Region")
 canterbury_height = nz_height[canterbury, ]
 ```
 
-```{r nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing height points in New Zealand. The right-hand map contains only points in the Canterbury region (highlighted in grey). The points were subset with `nz_height[canterbury, ]`."}
-library(sf)
-library(spData)
-par_old = par()
-par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
+<!-- maybe we should add to the caption that many of the high points are close to each other which is why one gets the impression in NZ there were only ca. 15 high points, but nz_height contains 101 points -->
+
+```{r nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region. The right-hand map contains points, subset with the command `nz_height[canterbury, ]`, located in Canterbury (highlighted in grey)."}
+par_old = par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
 plot(nz$geometry, col = "white", bgc = "lightblue", main = "High points in New Zealand")
-plot(nz_height, add = TRUE, pch = 2, col = "red")
+plot(nz_height$geometry, add = TRUE, pch = 2, col = "red")
 par(mar=c(0, 0, 1, 0))
 plot(nz$geometry, col = "white", bgc = "lightblue", main = "High points in Canterbury")
 plot(canterbury$geometry, col = "grey", add = TRUE)
-plot(canterbury_height, add = TRUE, pch = 2, col = "red")
+plot(canterbury_height$geometry, add = TRUE, pch = 2, col = "red")
 par(par_old)
 ```
 
@@ -80,33 +88,38 @@ Instead of `y` being of class `logical` or `integer` --- a vector of `TRUE` and 
 Various *topological relations* can be used for spatial subsetting.
 These determine the type of spatial relationship that features in the target object must have with the subsetting object to be selected, including *touches*, *crosses* or *within* (see section \@ref(topological-relations)). 
 *Intersects* is the default spatial subsetting operator, a default that returns `TRUE` for many types of spatial relations, including *touches*, *crosses* and *is within*.
-These alternative spatial operators can be specified with the `op =` argument, as illustrated below (try plotting the result or skip to section \@ref(topological-relations) to find out what this does):
+These alternative spatial operators can be specified with the `op =` argument, a third argument that can be passed to the `[` operator for `sf` objects.
+This is demonstrated in the following command which returns the opposite of `st_intersect()`, points that do not intersect with Cantebury (see in section \@ref(topological-relations)):
 
 ```{r, eval=FALSE}
 nz_height[canterbury, , op = st_disjoint]
 ```
 
 ```{block2 type='rmdnote'}
+Note the empty argument --- donoted with `, ,` --- in the preceding code chunk is not necessary (`nz_height[canterbury, op = st_disjoint]` returns the same result) but is included to emphasise the fact that `op` is the third argument in `[` for `sf` objects, after arguments for subsetting rows and columns.
+`nz_height[canterbury, 2, op = st_disjoint]`, for example, returns the same rows but only includes the second attribute column.
 Interested readers can see this default value of `op` set in the first line of the function call by entering its long-form name into the console `` sf:::`[.sf` ``.
 The `?sf` help page documents this also.
 ```
 
-Another way of doing spatial subsetting relies on the ability of *topological operators* to return `logical` objects by setting the `sparse` argument to `FALSE`:
+For many applications this is all you'll need to know about spatial subsetting for vector data.
+If this is the case, you can safely skip to the next section (\@ref(topological-relations)).
+If you're interested in the details, including other ways of subsetting, read-on.
+
+Another way of doing spatial subsetting uses objects returned by *topological operators*.
+This is demonstrated in the first command below which uses the `sparse = FALSE` (meaning in English 'return a dense matrix not a sparse one') argument in the topological operator `st_intersects()` to ensure a `logical` result is returned:
 
 ```{r}
 sel = st_intersects(x = nz_height, y = canterbury, sparse = FALSE)
 canterbury_height2 = nz_height[sel, ]
 ```
 
-The preceding code chunk created an intermediary object named `sel`, short for selection, containing only `TRUE` and `FALSE` values.
-This 'selection object' also works with `filter()`, introduced in section \@ref(vector-attribute-subsetting):
+This creates `sel` (short for 'selection object') containing only `TRUE` and `FALSE` values, which are used in the second line of the pevious code chunk to create `canterbury_height2`, which is identical to `canterbury_height`.
+`sel` can also be used with `filter()`:
 
 ```{r}
 canterbury_height3 = nz_height %>% filter(sel)
 ```
-
-For many applications this is all you'll need to know about spatial subsetting and if this is the case, you can safely skip to the next section (\@ref(topological-relations)).
-If you're interested in the details --- specifically the differences between `canterbury_height3` and the other `canterbury_height` objects, and the nature of `sel` --- read-on.
 
 At this point there are three versions of `canterbury_height`, one created with spatial subsetting directly and the other two via the intermediary object `sel`.
 We can test whether they are identical as follows:
@@ -138,17 +151,24 @@ data, as illustrated in the code chunk below.
 For further discussion of this decision, and some controversy, see the (closed) issue [#366](https://github.com/tidyverse/dplyr/issues/366) in the package's issue tracker.
 ```
 
-But what is `sel`?
-It is not, as one might imagine, a `logical` vector.
-It is a `logical` two-dimensional object, a *matrix*.
-`sel` has one row per feature in the target object (`nz_height`) and a column per feature in the subsetting object (`canterbury`).
-Cell `sel[i, j]` is `TRUE` if the i^th^ feature in the target object intersects with the j^th^ feature in the subsetting object.
-If there is more than 1 feature in `y` the resulting selection `matrix` must be converted into a `vector` before it is used for subsetting, as illustrated below:
+`sel` is not, as one might imagine, a `logical` `vector` (although it behaves as one as it only has one column) but a `logical` `matrix`:
 
 ```{r}
-co = nz %>% filter(grepl("Cant|Otag", REGC2017_NAME))
-sel_matrix = st_intersects(nz_height, co, sparse = FALSE)
-sel_vector = rowSums(sel_matrix) > 0
+class(sel)
+typeof(sel)
+dim(sel)
+```
+
+The dimension of `sel` (returned by the base R command `dim()`) shows that has one row per feature in the target object (`nz_height`) and a column per feature in the subsetting object (`canterbury`).
+The general pattern here is that `sel[i, j]` is `TRUE` if the i^th^ feature in the target object intersects with the j^th^ feature in the subsetting object.
+If there is more than one feature in `y` the resulting selection `matrix` must be converted into a `vector` before it is used for subsetting, e.g. with `rowSums(sel_matrix) > 0`.
+Another solution is to convert the the default sparse matrix (`list`) output from `st_intersects()` to a `logical` vector using the function `lengths()`.
+This approach to spatial subsetting, which is recommended because it scales, and is used internally by **sf**, is illustrated in the code chunk below:
+
+```{r}
+co = filter(nz, grepl("Cant|Otag", REGC2017_NAME))
+sel_sparse = st_intersects(nz_height, co)
+sel_vector = lengths(sel_sparse) > 0
 heights_co = nz_height[sel_vector, ]
 ```
 
@@ -156,18 +176,9 @@ The above code chunk results in an object, `heights_co`, that represent the high
 It did this in four stages:
 
 1. Subset the regions of `nz` containing "Cant" or "Otago" in their names. This was done using the pattern matching function `grepl()` in combination with the `|` character, which means 'or', resulting in the subsetting object `co`.
-2. Create a selection matrix representing which features of `nz_height` intersect with the regions in `co`.
-3. Convert the selection matrix into a `logical` 'selection vector' by using `rowSums()` to find which features matched *any* features in `co`.
+2. Create a sparse geometry binary predicate `sgbp` object, a list representing which features of `nz_height` intersect with the regions in `co`.
+3. Convert the selection list into a `logical` 'selection vector'. `lengths()`  finds the features in `nz_height` matching *any* features in `co`.
 4. Use the result to subset `nz_heights`, creating a new object `heights_co`. 
-
-The nature of `sel_matrix` is verified below:
-
-```{r}
-class(sel_matrix)
-typeof(sel_matrix)
-dim(sel_matrix)
-```
-
 
 ### Topological relations
 
@@ -404,7 +415,7 @@ joined = st_join(x = asia, y = urb) %>%
   na.omit()
 ```
 
-
+<!-- The yellow point is hardly recognizable, maybe use also the border parameter? -->
 ```{r spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join: the populations of the world's 3 largest agglomerations joined onto their respective countries.", fig.asp=0.4, warning=FALSE}
 par(mfrow = c(1, 3), mar = c(0, 0, 1, 0))
 plot(urb$geometry, col = "white", main = "Target object")
@@ -471,7 +482,7 @@ leaflet() %>%
 
 Imagine that we need to join the `capacity` variable in `cycle_hire_osm` onto the official 'target' data contained in `cycle_hire`.
 This is when a non-overlapping join is needed.
-The simplest method is to use the topological operator `st_within_distance()` shown in section \@ref(topological-relations), using a treshold distance of 20 m.
+The simplest method is to use the topological operator `st_within_distance()` shown in section \@ref(topological-relations), using a threshold distance of 20 m.
 Note that before performing the relation both datasets must be transformed into a projected CRS, saved as new objects denoted by the affix `P` (for projected) below:
 
 ```{r}
@@ -520,11 +531,13 @@ plot(z["capacity"])
 <!--### Modifying geometry data; still need to change the corresponding cross-references-->
 
 The result of this join has used a spatial operation to change the attribute data associated with simple features but the geometry associated with each feature has remained unchanged.
+<!-- no longer true, that's why I would remove the sentence
 In the subsequent sections, we will present spatial operations that also act on and modify the underlying geometry, namely dissolving, aggregating and clipping operations.
+-->
 
 ### Spatial data aggregation
 
-Like attribute data aggregation, covered in section \@ref(vector-attribute-aggregation), spatial data aggregation (also known as dissolving polygons) can be a way of *condensing* data.
+Like attribute data aggregation, covered in section \@ref(vector-attribute-aggregation), spatial data aggregation can be a way of *condensing* data.
 Aggregated data show some statistic about a variable (typically average or total) in relation to some kind of *grouping variable*.
 Section \@ref(vector-attribute-aggregation) demonstrated how `aggregate()` and `group_by() %>% summarize()` condense data based on attribute variables.
 This section demonstrates how the same functions work using spatial grouping variables.
@@ -534,7 +547,7 @@ This is a good example of spatial aggregation: it is the geometry of the source 
 This is illustrated using the base `aggregate()` function below:
 
 ```{r}
-nz_avheight = aggregate(nz_height, nz, FUN = mean)
+nz_avheight = aggregate(x = nz_height, nz, FUN = mean)
 ```
 
 The result of the previous command is an `sf` object with the same geometry as the (spatial) aggregating object (`nz`).^[This can be verified with `identical(nz$geometry, nz_avheight$geometry)`.]
@@ -559,18 +572,20 @@ The resulting `nz_avheight` objects have the same geometry as the aggregating ob
 Note that regions containing no points have an associated `elevation` value of `NA`.
 For aggregating operations which also create new geometries, see section \@ref(geometry-unions).
 
+<!-- One should avoid to have a single subsection, here 4.2.5.1. I would delete the heading, then spatial congruence just becomes another paragraph of spatial aggregation -->
 #### Spatial congruence and areal interpolation
 
 Spatial congruence is an important concept related to spatial aggregation.
-An *aggregating object* object (which we will refer to as `y`, representing the buffer object in the previous section) is *congruent* with the target object (`x`, representing the countries in the previous section) if the two objects have shared borders.
-Often this is the case for administrative boundary data, whereby the larger units (e.g., Middle Layer Super Output Areas in the UK or districts in many other European countries) are composed of many smaller units (Output Areas in this case, see [ons.gov.uk](https://www.ons.gov.uk/methodology/geography/ukgeographies/censusgeography) for further details or municipalities in many other European countries).
+An *aggregating object* object (which we will refer to as `y`) is *congruent* with the target object (`x`) if the two objects have shared borders.
+Often this is the case for administrative boundary data, whereby the larger units (e.g., Middle Layer Super Output Areas in the UK or districts in many other European countries) are composed of many smaller units (Output Areas in the UK, see [ons.gov.uk](https://www.ons.gov.uk/methodology/geography/ukgeographies/censusgeography) for further details or municipalities in many other European countries).
 
 *Incongruent* aggregating objects, by contrast, do not share common borders with the target [@qiu_development_2012].
 This is problematic for spatial aggregation (and other spatial operations) illustrated in Figure \@ref(fig:areal-example).
 Areal interpolation can help to alleviate this issue.
 It helps to transfer data from one set of areal units to another.
-A number of algorithms have been developed for areal interpolation, including area weighted and pycnophylactic interpolation methods task [@tobler_smooth_1979].
+A number of algorithms have been developed for areal interpolation, including area weighted and pycnophylactic interpolation methods [@tobler_smooth_1979].
 
+<!-- somehow the incongruent borders are hardly to discern in the right figure, maybe increasing the figure size could help -->
 ```{r areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units.", out.width="100%"}
 # source("code/04-congruence.R")
 knitr::include_graphics("figures/04-congruence.png")
@@ -581,11 +596,11 @@ This is implemented in `st_interpolate_aw()`, as demonstrated in the code chunk 
 In this case values from the `incongruent` object are allocated to the `aggregating_zones` in proportion to the area:
 
 ```{r}
-agg_aw = st_interpolate_aw(incongruent["value"], aggregating_zones, extensive = FALSE)
+agg_aw = st_interpolate_aw(incongruent[, "value"], aggregating_zones, extensive = TRUE)
 ```
 
-Instead of simply taking the mean average of each area within each aggregating feature, `st_interpolate_aw` applies a weight to each value in proportion to its area in each aggregating zone (use `extensive = TRUE` for 'spatially extensive' variables such as population which should be summed rather than averaged).
-For instance, if the intersection of our buffer and a country is 100 000 km^^2^^ but the country has 1 mio square kilometers and 1 mio inhabitants, our result will obtain just a tenth of total population, in this case 100 000 inhabitants.
+Instead of simply taking the mean average of each area within each aggregating feature, `st_interpolate_aw` applies a weight to each value in proportion to its area in each aggregating zone (use `extensive = FALSE` for 'spatially intensive' variables such as population density which should be averaged rather than summed).
+For instance, if one intersection of `incongruent` and `aggregating_zones` is 0.5 km^^2^^ but the whole incongruent polygon in question has 1 km^^2^^ and 100  inhabitants, then the target aggregating zone will obtain half of the population, in this case 50 inhabitants.
 <!-- - `aggregate.sf()` - aggregate an sf object, possibly union-ing geometries -->
 <!-- - disaggregation?? `st_cast()` - https://github.com/edzer/sfr/wiki/migrating -->
 <!-- - `group_by()` + `summarise()` - potential errors -->
@@ -935,6 +950,7 @@ nz_height_combined %>%
   arrange(desc(count)) %>% 
   na.omit()
 ```
+<!-- something wrong with - topo 100 highest points? -->
 1. Generalizing the question to all regions: how many of New Zealand's 16 regions contain points in the topo 100 highest points in the country? Which regions?
     - Bonus: create a table listing these regions in order of the number of points and their name.
 <!-- Raster exercises-->
