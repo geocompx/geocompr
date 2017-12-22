@@ -313,7 +313,7 @@ group_by(world, continent) %>%
 ```
 
 This approach is flexible, allowing the resulting columns to be named.
-Further, omitting the grouping variable puts everything on in one group.
+Further, omitting the grouping variable puts everything in one group.
 This means `summarize()` can be used to calculate Earth's total population (~7 billion) and number of countries:
 
 ```{r, eval=FALSE}
@@ -327,7 +327,7 @@ world %>%
   summarize(pop = sum(pop, na.rm = TRUE), n_countries = n())
 ```
 
-The result is a spatial data frame of class `sf` (only the non-spatial results are shown): the aggregation procedure dissolves boundaries within continental land masses.
+The result is a spatial data frame of class `sf` (only the non-spatial results are shown): the aggregation procedure dissolves boundaries within continental land masses (explained in detail in section \@ref(geometry-unions)).
 In the previous code chunk `pop` and `n_countries` are column names in the result.
 `sum()` and `n()` were the aggregating functions.
 
@@ -516,9 +516,9 @@ world %>%
   transmute(pop_dens = pop / area_km2)
 ```
 
-Existing columns could be also paste together using `unite()`. 
-For example, we want to stick together `continent` and `region_un` columns into a new `con_reg` column.
-We could specify a separator to use between values and if input columns should be removed:
+`unite()` pastes together existing columns. 
+For example, we want to combine the `continent` and `region_un` columns into a new column named `con_reg`.
+Additionally, we can define a separator (here: a colon `:`) which defines how the values of the input columns should be joined, and if the original columns should be removed (here: `TRUE`):
 
 <!-- todo: set eval = TRUE when travis issue resolved -->
 
@@ -527,8 +527,7 @@ world_unite = world %>%
   unite("con_reg", continent:region_un, sep = ":", remove = TRUE)
 ```
 
-The `separate()` function is the complement of the `unite()` function.
-Its role is to split one column into multiple columns using either a regular expression or character position.
+The `separate()` function does the exact opposite of the `unite()` function, i.e., it splits one column into multiple columns using either a regular expression or character positions.
 
 ```{r, eval=FALSE}
 world_separate = world_unite %>% 
@@ -539,17 +538,16 @@ world_separate = world_unite %>%
 identical(world, world_separate)
 ```
 
-Two helper functions, `rename()` and `set_names` can be used to change columns names.
-The first one, `rename()` replace an old name with a new one.
-For example, we want to change a name of column from `name_long` to `name`:
+The two functions `rename()` and `set_names()` are useful for renaming columns.
+The first one, `rename()` replaces an old name with a new one.
+For example, to change a column name from `name_long` to `name`, we type:
 
 ```{r, eval=FALSE}
 world %>% 
   rename(name = name_long)
 ```
 
-`set_names` can be used to change names of many columns. 
-In this function, we do not need to provide old names: 
+`set_names()` changes all column names at once, which is why we only have to provide the new names in form of a vector: 
 
 ```{r, eval=FALSE}
 new_names = c("ISO_A2", "Name", "Continent", "Region", "Subregion", 
@@ -559,8 +557,8 @@ world %>%
   set_names(new_names)
 ```
 
-It is important to note that the attribute data operations preserve the geometry of the simple features.
-As mentioned at the outset of the chapter, however, it can be useful to remove the geometry.
+It is important to note that attribute data operations preserve the geometry of the simple features.
+As mentioned at the outset of the chapter, it can be useful to remove the geometry.
 Do do this, you have to explicitly remove it because `sf` explicitly makes the geometry column sticky.
 This behavior ensures that data frame operations do not accidentally remove the geometry column.
 Hence, an approach such as `select(world, -geom)` will be unsuccessful instead use `st_set_geometry()`^[Note that
