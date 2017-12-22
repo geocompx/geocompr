@@ -69,8 +69,6 @@ canterbury = nz %>% filter(REGC2017_NAME == "Canterbury Region")
 canterbury_height = nz_height[canterbury, ]
 ```
 
-<!-- maybe we should add to the caption that many of the high points are close to each other which is why one gets the impression in NZ there were only ca. 15 high points, but nz_height contains 101 points -->
-
 ```{r nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region. The right-hand map contains points, subset with the command `nz_height[canterbury, ]`, located in Canterbury (highlighted in grey)."}
 par_old = par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
 plot(nz$geometry, col = "white", bgc = "lightblue", main = "High points in New Zealand")
@@ -159,14 +157,14 @@ typeof(sel)
 dim(sel)
 ```
 
-The dimension of `sel` (returned by the base R command `dim()`) shows that has one row per feature in the target object (`nz_height`) and a column per feature in the subsetting object (`canterbury`).
+The dimensions of `sel` (returned by the base R command `dim()`) show one row per feature in the target object (`nz_height`) and a column per feature in the subsetting object (`canterbury`).
 The general pattern here is that `sel[i, j]` is `TRUE` if the i^th^ feature in the target object intersects with the j^th^ feature in the subsetting object.
 If there is more than one feature in `y` the resulting selection `matrix` must be converted into a `vector` before it is used for subsetting, e.g. with `rowSums(sel_matrix) > 0`.
-Another solution is to convert the the default sparse matrix (`list`) output from `st_intersects()` to a `logical` vector using the function `lengths()`.
-This approach to spatial subsetting, which is recommended because it scales, and is used internally by **sf**, is illustrated in the code chunk below:
+Another solution is to convert the default sparse matrix (`list`) output from `st_intersects()` to a `logical` vector using the function `lengths()`.
+This approach to spatial subsetting, used internally by **sf** (see the source code of `` sf:::`[.sf` ``), is illustrated in the code chunk below:
 
 ```{r}
-co = filter(nz, grepl("Cant|Otag", REGC2017_NAME))
+co = filter(nz, grepl("Canter|Otag", REGC2017_NAME))
 sel_sparse = st_intersects(nz_height, co)
 sel_vector = lengths(sel_sparse) > 0
 heights_co = nz_height[sel_vector, ]
@@ -175,7 +173,7 @@ heights_co = nz_height[sel_vector, ]
 The above code chunk results in an object, `heights_co`, that represent the high points that intersect with either Canterbury *or* Otago region (hence the object name `co`).
 It did this in four stages:
 
-1. Subset the regions of `nz` containing "Cant" or "Otago" in their names. This was done using the pattern matching function `grepl()` in combination with the `|` character, which means 'or', resulting in the subsetting object `co`.
+1. Subset the regions of `nz` containing "Canter" or "Otago" in their names. This was done using the pattern matching function `grepl()` in combination with the `|` character, which means 'or', resulting in the subsetting object `co`.
 2. Create a sparse geometry binary predicate `sgbp` object, a list representing which features of `nz_height` intersect with the regions in `co`.
 3. Convert the selection list into a `logical` 'selection vector'. `lengths()`  finds the features in `nz_height` matching *any* features in `co`.
 4. Use the result to subset `nz_heights`, creating a new object `heights_co`. 
@@ -415,20 +413,18 @@ joined = st_join(x = asia, y = urb) %>%
   na.omit()
 ```
 
-<!-- The yellow point is hardly recognizable, maybe use also the border parameter? -->
 ```{r spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join: the populations of the world's 3 largest agglomerations joined onto their respective countries.", fig.asp=0.4, warning=FALSE}
 par(mfrow = c(1, 3), mar = c(0, 0, 1, 0))
 plot(urb$geometry, col = "white", main = "Target object")
 plot(asia$geom, add = TRUE)
-par(mar = c(0, 0, 1, 0))
 plot(urb$geometry, col = "white", main = "Source object (points)")
-plot(urb["population_millions"], pch = 15, key.pos = NULL, add = TRUE)
+plot(urb["population_millions"], pch = 15, key.pos = NULL, add = TRUE, pal = rainbow)
 plot(asia$geom, border = "grey", add = TRUE)
 par(mar = c(0, 0, 1, 0))
 plot(urb$geometry, col = "white", main = "Result of spatial join")
-plot(urb["population_millions"], pch = 15, key.pos = NULL, add = TRUE)
+plot(urb["population_millions"], pch = 15, key.pos = NULL, add = TRUE, pal = rainbow)
 plot(asia$geom, add = TRUE)
-plot(joined["population_millions"], add = TRUE, key.pos = NULL)
+plot(joined["population_millions"], add = TRUE, key.pos = NULL, pal = rainbow)
 par(mfrow = c(1, 1))
 ```
 
@@ -513,7 +509,7 @@ z = z %>%
 nrow(z) == nrow(cycle_hire)
 ```
 
-The capacity of nearby stations can be verified by comparing a plot of the capacity of the source `cycle_hire_osm` data with the results in this new object (plots not show):
+The capacity of nearby stations can be verified by comparing a plot of the capacity of the source `cycle_hire_osm` data with the results in this new object (plots not shown):
 
 ```{r, eval=FALSE}
 plot(cycle_hire_osm["capacity"])
@@ -527,13 +523,7 @@ plot(z["capacity"])
 <!-- joining different types (e.g. points + polygons = geometry) -> save as GPKG? -->
 <!-- `merge()`; `st_interpolate_aw()` -->
 
-
-<!--### Modifying geometry data; still need to change the corresponding cross-references-->
-
 The result of this join has used a spatial operation to change the attribute data associated with simple features but the geometry associated with each feature has remained unchanged.
-<!-- no longer true, that's why I would remove the sentence
-In the subsequent sections, we will present spatial operations that also act on and modify the underlying geometry, namely dissolving, aggregating and clipping operations.
--->
 
 ### Spatial data aggregation {#spatial-aggr}
 
@@ -571,9 +561,6 @@ nz_avheight2 = st_join(nz, nz_height) %>%
 The resulting `nz_avheight` objects have the same geometry as the aggregating object `nz` but with a a new column representing the mean average height of points within each region of New Zealand (other summary functions such as `median()` and `sd()` can be used in place of `mean()`).
 Note that regions containing no points have an associated `elevation` value of `NA`.
 For aggregating operations which also create new geometries, see section \@ref(geometry-unions).
-
-<!-- One should avoid to have a single subsection, here 4.2.5.1. I would delete the heading, then spatial congruence just becomes another paragraph of spatial aggregation -->
-#### Spatial congruence and areal interpolation
 
 Spatial congruence is an important concept related to spatial aggregation.
 An *aggregating object* object (which we will refer to as `y`) is *congruent* with the target object (`x`) if the two objects have shared borders.
