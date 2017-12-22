@@ -611,6 +611,64 @@ par(par_old)
 
 ### Affine transformations
 
+<!-- \@ref(fig:affine-trans) -->
+<!-- affine transformation (shift, scale, rotate) -->
+
+```{r}
+nz_sfc = st_geometry(nz)
+nz_centroid_sfc = st_centroid(nz_sfc)
+```
+
+```{r}
+nz_shift = nz_sfc + 50000
+```
+
+```{r}
+nz_scale = (nz_sfc - nz_centroid_sfc) * 0.5 + nz_centroid_sfc
+```
+
+<!-- https://r-spatial.github.io/sf/articles/sf3.html#affine-transformations -->
+```{r}
+rot = function(a) matrix(c(cos(a), sin(a), -sin(a), cos(a)), 2, 2)
+nz_rotate = (nz_sfc - nz_centroid_sfc) * rot(pi / 8) + nz_centroid_sfc
+```
+
+<!-- add transparency -->
+```{r affine-trans, echo=FALSE, fig.cap="Ilustrations of affine transformations: shift, scale, and rotate.", warning=FALSE}
+library(tmap)
+library(grid)
+
+plot(nz_sfc)
+plot(nz_shift, add = TRUE, col = "red")
+
+plot(nz_sfc)
+plot(nz_scale, add = TRUE, col = "red")
+
+plot(nz_sfc)
+plot(nz_shift, add = TRUE, col = "red")
+
+p1a = tm_shape(nz_sfc) + 
+  tm_polygons() +
+  tm_shape(nz_shift) + 
+  tm_polygons(col = "red")
+ 
+p2a = tm_shape(nz_sfc) + 
+  tm_polygons() +
+  tm_shape(nz_scale) + 
+  tm_polygons(col = "red")
+
+p3a = tm_shape(nz_sfc) +
+  tm_polygons() +
+  tm_shape(nz_rotate) +
+  tm_polygons(col = "red")
+
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(1, 3)))
+print(p1a, vp=viewport(layout.pos.col = 1))
+print(p2a, vp=viewport(layout.pos.col = 2))
+print(p3a, vp=viewport(layout.pos.col = 3))
+```
+
 ### Clipping 
 
 Spatial clipping is a form of spatial subsetting that involves changes to the `geometry` columns of at least some of the affected features.
