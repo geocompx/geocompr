@@ -149,23 +149,18 @@ A more concise command, that omits the intermediary object, generates the same r
 small_countries = world[world$area_km2 < 10000, ]
 ```
 
-Another the base R function `subset()` provides yet another way to achieve the same result:
+The base R function `subset()` provides yet another way to achieve the same result:
 
 ```{r, eval=FALSE}
 small_countries = subset(world, area_km2 < 10000)
-```
-
-You can use the `$` operator to select a specific variable by its name. The result is a vector:
-
-```{r, eval=FALSE}
-world$name_long
 ```
 
 <!-- , after the package has been loaded: [or - it is a part of tidyverse] -->
 Base R functions are mature and widely used.
 However, the more recent **dplyr** approach has several advantages.
 It enables intuitive workflows.
-It's fast, due to its C++ backend and database integration, important when working with big data.
+It is fast, due to its C++ backend.
+This is especially useful when working with big data as well as **dplyr**'s database integration.
 The main **dplyr** subsetting functions are `select()`, `slice()`, `filter()` and `pull()`.
 
 ```{block type='rmdnote'}
@@ -174,7 +169,7 @@ To avoid this error message, and prevent ambiguity, we use the long-form functio
 ```
 
 `select()` selects columns by name or position.
-For example, you could select only two columns, `name_long` and `pop`, with the following command (note the `geom` column remains):
+For example, you could select only two columns, `name_long` and `pop`, with the following command (note the sticky `geom` column remains):
 
 ```{r}
 world1 = dplyr::select(world, name_long, pop)
@@ -211,6 +206,34 @@ names(world5)[names(world5) == "pop"] = "population" # rename column manually
 
 `select()` also works with 'helper functions' for advanced subsetting operations, including `contains()`, `starts_with()` and `num_range()` (see the help page with `?select` for details).
 
+All **dplyr** functions including `select()` always return a dataframe-like object. 
+To extract a single vector, one has to explicitly use the `pull()` command.
+By contrast, base R's subsetting operator `[()` (see ?`[`) always tries to coerce to the lowest possible dimension.
+This means selecting a single column returns a vector in base R.
+To turn off this behavior, set the `drop` argument to `FALSE`.
+
+```{r, eval=FALSE}
+# create throw-away dataframe
+d = data.frame(pop = 1:10, area = 1:10)
+# return dataframe object when selecting a single column
+d[, "pop", drop = FALSE]
+select(d, pop)
+# return a vector when selecting a single column
+d[, "pop"]
+pull(d, pop)
+```
+
+Due to the sticky geometry column, selecting a single attribute from an sf-object with the help of `[()` returns also a dataframe.
+Contrastingly, `pull()` and `$` will give back a vector.
+
+```{r, eval = FALSE}
+# dataframe object
+world[, "pop"]
+# vector objects
+world$pop
+pull(world, pop)
+```
+
 `slice()` is the row-equivalent of `select()`.
 The following code chunk, for example, selects the 3^rd^ to 5^th^ rows:
 
@@ -242,11 +265,7 @@ A benefit of **dplyr** is its compatibility with the *pipe* operator ` %>% `.
 This 'R pipe', which takes its name from the Unix pipe `|` and is part of the **magrittr** package, enables expressive code by 'piping' the output of a previous command into the first argument of the next function.
 This allows *chaining* data analysis commands, with the data frame being passed from one function to the next.
 
-```{block2 type='rmdnote'}
-The **dplyr** function `pull()` extracts a single variable as a vector.
-```
-
-This is illustrate below, in which the `world` dataset is subset by columns (`name_long` and `continent`) and the first five rows (result not shown).
+This is illustrated below, in which the `world` dataset is subset by columns (`name_long` and `continent`) and the first five rows (result not shown).
 
 ```{r}
 world7 = world %>%
