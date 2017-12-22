@@ -1020,25 +1020,24 @@ print(p1, vp = viewport(layout.pos.col = 1))
 print(p2, vp = viewport(layout.pos.col = 2))
 ```
 
-On the other hand, categorical rasters represent discrete features that could occupy areas larger than only one cell.
-
-<!-- e.g. landcover map to polygonss -->
-<!-- vectorization is used when we get raster data as an input (such as scanned map or satellite image) and we want to extract objects -->
+On the other hand, categorical rasters (such as scanned maps or satellite images) represent discrete features that could occupy areas larger than only one cell.
+The `rasterToPolygons()` function could be used to extract these features into a `SpatialPolygonsDataFrame` object.
+We can also convert the result into an object of class sf.^[The `spex::polygonize()` function could be used as a faster alternative. It returns an sf object a default.]
 <!-- it could be also used when we want to add attributes -->
-<!-- rasterToPolygons() -->
-<!-- spex::polygonize -->
-<!-- ref to aggregation section -->
 
 ```{r}
-grain_poly = spex::polygonize(grain)
+grain_poly = rasterToPolygons(grain) %>% 
+  st_as_sf()
 ```
+
+The output (central panel in Figure \@ref(fig:raster-vectorization1)) consists of many polygons representing grid cells from the original raster object (on the left in Figure \@ref(fig:raster-vectorization1)).
+They could be aggregated into irregular polygons having the same value (on the right in Figure \@ref(fig:raster-vectorization1)). ^[see section \@ref(spatial-aggr)]
 
 ```{r}
 grain_poly2 = grain_poly %>% 
-  group_by(VALUE) %>%
+  group_by(layer) %>%
   summarize()
 ```
-
 
 ```{r raster-vectorization2, echo=FALSE, fig.cap=".", warning=FALSE}
 library(tmap)
@@ -1046,19 +1045,19 @@ library(grid)
 cols = c("sand" = "rosybrown", "clay" = "brown", "silt" = "sandybrown")
 
 p1p = tm_shape(grain) + 
-  tm_raster(legend.show = FALSE, palette = cols[c(1, 3, 2)]) +
+  tm_raster(legend.show = FALSE, palette = cols) +
   tm_layout(outer.margins = rep(0.01, 4), 
             inner.margins = rep(0, 4),
             title = "raster")
 
 p2p = tm_shape(grain_poly) + 
-  tm_polygons("VALUE", legend.show = FALSE, palette = cols, lwd = 3) +
+  tm_polygons("layer", legend.show = FALSE, palette = cols, lwd = 3) +
   tm_layout(outer.margins = rep(0.01, 4), 
             inner.margins = rep(0, 4),
             title = "polygons")
 
 p3p = tm_shape(grain_poly2) + 
-  tm_polygons("VALUE", legend.show = FALSE, palette = cols, lwd = 3) +
+  tm_polygons("layer", legend.show = FALSE, palette = cols, lwd = 3) +
   tm_layout(outer.margins = rep(0.01, 4), 
             inner.margins = rep(0, 4),
             title = "aggregated polygons")
@@ -1071,9 +1070,7 @@ print(p3p, vp=viewport(layout.pos.col = 3))
 ```
 
 <!-- rasterToContour() -->
-
-
-
+<!-- e.g. landcover map to polygonss -->
 
 <!-- ```{r} -->
 <!-- nlcd2011 = raster(system.file("raster/nlcd2011.tif", package = "spDataLarge")) -->
