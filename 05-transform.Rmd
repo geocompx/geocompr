@@ -620,21 +620,31 @@ Affine transformations are essential part of geocomputation.
 Its application could be found when a vector dataset was created based on a distorted or wrongly projected map.
 It is also used in many regular GIS tasks, such as map display or datum changes.
 
-
-
+The **sf** package implements affine transformation for objects of classes `sfg` and `sfc`.
+<!-- stats sfc issue -->
 <!-- \@ref(fig:affine-trans) -->
 <!-- affine transformation (shift, scale, rotate) -->
 
 ```{r}
-nz_sfc = st_geometry(nz)
-nz_centroid_sfc = st_centroid(nz_sfc)
+nz_sfc = nz$geometry
 ```
+
+Shifting moves every point by the same distance in the map units.
+It could be done by adding a numerical vector to a vector object.
+For example, the code below keeps the x coordinates, while changing the y coordinates by 100,000 meters. 
 
 ```{r}
 nz_shift = nz_sfc + c(0, 100000)
 ```
 
+Scaling enlarges or shrinks objects by a scale factor.
+It could be applied either globally or locally. <!-- my terms - jn-->
+Global scaling increase or decrease all coordinates values while keeping all geometries topological relations intact.^[It can by done by subtraction or multiplication of a`sfg` or `sfc` object.]
+Local scaling treats geometries independently and it requires points around which geometries are going to be scaled, e.g. centroids.
+<!-- scaling by a two-elements vector -->
+
 ```{r}
+nz_centroid_sfc = st_centroid(nz_sfc)
 nz_scale = (nz_sfc - nz_centroid_sfc) * 0.5 + nz_centroid_sfc
 ```
 
@@ -644,7 +654,6 @@ rot = function(a) matrix(c(cos(a), sin(a), -sin(a), cos(a)), 2, 2)
 nz_rotate = (nz_sfc - nz_centroid_sfc) * rot(pi / 8) + nz_centroid_sfc
 ```
 
-<!-- add transparency -->
 ```{r affine-trans, echo=FALSE, fig.cap="Ilustrations of affine transformations: shift, scale and rotate.", warning=FALSE, eval=TRUE}
 par_old = par()
 par(mfrow = c(1, 3), mar = c(0, 0, 1, 0))
@@ -655,6 +664,7 @@ plot(nz_scale, add = TRUE, col = "red")
 plot(nz_sfc, main = "Rotate")
 plot(nz_rotate, add = TRUE, col = "red")
 par(par_old)
+# add transparency
 # library(tmap)
 # library(grid)
 # 
@@ -679,6 +689,8 @@ par(par_old)
 # print(p2a, vp=viewport(layout.pos.col = 2))
 # print(p3a, vp=viewport(layout.pos.col = 3))
 ```
+
+<!-- return to sf -->
 
 ### Clipping 
 
@@ -1194,6 +1206,7 @@ agg9$pop / sum(world$pop, na.rm = TRUE) # 1%
 1. Warning messages should have been produced during the working to find the answer to the previous questions. What do these warnings mean and how could they be stopped? 
     - Bonus: rewrite code that generated the answer to the previous question using a projected CRS (suggestion: UTM).
 <!-- AFFINE TRANSFORMATION -->
+<!-- e.g.reflections -->
 <!-- CLIPPING -->
 1. Write code that subsets points that are contained within `x` *and* `y` (illustrated by the plot in the 2^nd^ row and the 1^st^ column in Figure \@ref(fig:venn-clip)).
     - Create a randomly located point with the command `st_point()` (refer back to section \@ref(sfg) to see how to create spatial data 'from scratch').
