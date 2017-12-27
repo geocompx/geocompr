@@ -824,7 +824,7 @@ raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 new_raster = raster(raster_filepath)
 ```
 
-The **raster** package support numerous drivers with the help of **rgdal**.
+The **raster** package supports numerous drivers with the help of **rgdal**.
 To find out which drivers are available on your system, run `raster::writeFormats()` and `rgdal::gdalDrivers()`.
 
 Aside from reading in a raster, you can also create one from scratch.
@@ -888,7 +888,7 @@ nlayers(r_brick)
 ```
 
 A `RasterStack` is similar to a `RasterBrick` in the sense that it consists also of multiple layers.
-However, in contrast to `RasterBrick`, `RasterStack` allows to connect several raster objects stored in different files or multiply objects in memory.
+However, in contrast to `RasterBrick`, `RasterStack` allows you to connect several raster objects stored in different files or multiply objects in memory.
 More specifically, a `RasterStack` is a list of `RasterLayer` objects with the same extent and resolution. 
 Hence, one way to create it is with the help of spatial objects already existing in R's global environment. 
 And again, one can simply specify a path to a file stored on disk.
@@ -955,22 +955,22 @@ Available datum definitions can be seen by executing `st_proj_info(type = "datum
 
 ### Projected coordinate systems 
 
-Projected coordinate systems are based on Cartesian coordinates (X, Y) and represent any area on a flat surface. 
-A projected coordinate system have an origin, x and y axes, and a linear unit of measure.
-All projected coordinate systems are based on geographic coordinate systems.
-Map projections are mathematical models for conversion of three-dimensional surface into a two-dimensional representation on a map.
+Projected CRSs are based on Cartesian coordinates on an implicitly flat surface.
+They have an origin, x and y axes, and a linear unit of measurement such as meters.
+All projected CRSs are based on a geographic CRS, described in the previous section, and rely on map projections to convert the three-dimensional surface of the Earth into Easting and Northing (x and y) values in a projected CRS.
+
 This transition cannot be done without adding some distortion.
 Therefore, some properties of the Earth's surface are distorted in this process, such as area, direction, distance, and shape.
 A projected coordinate system can preserve only one or two of those properties.
 Projections are often named based on a property they preserve: equal-area preserves area, azimuthal preserve direction, equidistant preserve distance, and conformal preserve local shape.
 
 There are three main groups of projection types - conic, cylindrical, and planar.
-In a conic projection the Earth surface is projected onto a cone along a single line of tangency or two lines of tangency. 
+In a conic projection, the Earth's surface is projected onto a cone along a single line of tangency or two lines of tangency. 
 Distortions are minimized along the tangency lines and rise with the distance from those lines in this projection.
 Therefore, it is the best suited for maps of mid-latitude areas.
 A cylindrical projection maps the surface onto a cylinder.
-This projection also could be created by touching the Earth's surface along a single line of tangency or two lines of tangency. 
-Cylindrical projections are the most often used in mapping of the entire world.
+This projection could also be created by touching the Earth's surface along a single line of tangency or two lines of tangency. 
+Cylindrical projections are used most often when mapping the entire world.
 A planar projection projects data onto a flat surface touching the globe at a point or along a line of tangency. 
 It is typically used in mapping polar regions.
 <!-- other projections? -->
@@ -982,7 +982,7 @@ It is typically used in mapping polar regions.
 <!-- maybe a new section - how to pick the best projection? -->
 <!-- https://source.opennews.org/articles/choosing-right-map-projection/ -->
 
-### CRS in R
+### CRSs in R
 
 Two main ways to describe CRS in R are an `epsg` code or a `proj4string` definition.
 Both of these approaches have advantages and disadvantages. 
@@ -990,14 +990,14 @@ An `epsg` code is usually shorter, and therefore easier to remember.
 The code also refers to only one, well-defined coordinate reference system. 
 On the other hand, a `proj4string` definition allows you more flexibility when it comes to specifying different parameters such as the projection type, the datum and the ellipsoid.^[Complete list of the `proj4string` parameters can be found at http://proj4.org/parameters.html#parameter-list.] 
 This way you can specify many different projections, and modify existing ones.
-This makes the `proj4string` approach also more complicated.
+This also makes the `proj4string` approach more complicated.
 <!-- ^[In the background, `sf` and `raster` use the [PROJ.4](http://proj4.org/) software, which enables transformations between different projections]. -->
 `epsg` points to exactly one particular CRS.
 
-Spatial R packages support a wide range of CRSs they use long-establish [proj4](http://proj4.org/) library.
-Other than searching for EPSG codes on-line, another quick way to find-out about available CRSs is via the `rgdal::make_EPSG()` function, which outputs a data frame of available projections.
-Before going into more detail into these, it's worth learning how to view and filter them inside R, as this could save time trawling the internet.
-The following code will show available CRSs interactively, allowing filtering of ones of interest (try filtering for the OSGB CRSs for example):
+Spatial R packages support a wide range of CRSs and they use the long-established [proj4](http://proj4.org/) library.
+Other than searching for EPSG codes online, another quick way to find out about available CRSs is via the `rgdal::make_EPSG()` function, which outputs a data frame of available projections.
+Before going into more detail, it's worth learning how to view and filter them inside R, as this could save time trawling the internet.
+The following code will show available CRSs interactively, allowing you to filter ones of interest (try filtering for the OSGB CRSs for example):
 
 ```{r, eval=FALSE}
 crs_data = rgdal::make_EPSG()
@@ -1005,7 +1005,7 @@ View(crs_data)
 ```
 
 In **sf** the CRS of an object can be retrieved using `st_crs()`.
-For this purpose, we need to read-in a vector dataset:
+For this, we need to read-in a vector dataset:
 
 ```{r, message=FALSE, results='hide'}
 vector_filepath = system.file("vector/zion.gpkg", package="spDataLarge")
@@ -1024,20 +1024,20 @@ In cases when a coordinate reference system (CRS) is missing or the wrong CRS is
 new_vector = st_set_crs(new_vector, 26912) # set CRS
 ```
 
-The warning message informs that the `st_set_crs()` function do not transform data from one CRS to another.
+The warning message informs us that the `st_set_crs()` function does not transform data from one CRS to another.
 
 ```{r vector-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) and coordinate systems for a vector data type."}
 knitr::include_graphics("figures/02_vector_crs.png")
 ```
 
-The `projection()` function can be use to access a CRS information from the `Raster*` object: 
+The `projection()` function can be used to access CRS information from the `Raster*` object: 
 
 ```{r}
 projection(new_raster) # get CRS
 ```
 
 The same function, `projection()`, is used to set a CRS for raster objects.
-The main difference, comparing to vector data, is that raster objects accepts only `proj4` definitions:
+The main difference, comparing to vector data, is that raster objects accept only `proj4` definitions:
 
 ```{r}
 projection(new_raster) = "+proj=utm +zone=12 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs" # set CRS
@@ -1092,7 +1092,7 @@ units::set_units(st_area(nigeria), km^2)
 
 <!-- Is that right? I mean, the units DESCRIPTION says "Support for measurement units in R vectors, matrices and arrays". Since raster datasets are just matrices, units might be easily used with them?-->
 Units are of equal importance in the case of raster data.
-However, so far **sf** is the only spatial package that supports units, meaning that people working on raster data should approach changes in the units of analysis (e.g., converting pixel widths from imperial to decimal units) with care.
+However, so far **sf** is the only spatial package that supports units, meaning that people working on raster data should approach changes in the units of analysis (for example, converting pixel widths from imperial to decimal units) with care.
 The `new_raster` object (see above) uses a UTM projection with meters as units.
 Consequently, its resolution is also given in meters but you have to know it, since the `res()` function simply returns a numeric vector.
 
@@ -1128,18 +1128,18 @@ Again, the `res()` command gives back a numeric vector without any unit, forcing
     - Bonus: make the country boundaries a dotted grey line.
     - Hint: `border` is an additional argument of `plot()` for **sf**  objects.
 1. What does the `cex` argument do in the `plot()` function that generates Figure \@ref(fig:contpop)?
-    - Why was `cex` passed the `sqrt(world$pop) / 10000` instead of just the population directly?
+    - Why was `cex` set to the `sqrt(world$pop) / 10000` instead of just the population directly?
     - Bonus: what equivalent arguments to `cex` exist in the dedicated vizualisation package **tmap**?
 1. Re-run the code that 'generated' Figure \@ref(fig:contpop) at the end of \@ref(base-args) and find 3 similarities and 3 differences between the plot produced on your computer and that in the book.
     - What is similar?
     - What has changed?
-    - Bonus: play around with and research base plotting arguments to make your version of Figure \@ref(fig:contpop) more attractive. Which arguments were most useful.
+    - Bonus: play around with and research base plotting arguments to make your version of Figure \@ref(fig:contpop) more attractive. Which arguments were most useful?
     - Advanced: try to reproduce the map presented in Figure \@ref(base-args). Copy-and-pasting is prohibited!
 <!-- raster exercises -->
 1. Read the `raster/nlcd2011.tif` file from the **spDataLarge** package. 
 What kind of information can you get about the properties of this file?
 <!-- (crs, ncols, nrow, ncells, bbox, navalues) -->
-1. Create an empty `RasterLayer` object called `my_raster` with 10 columns and 10 rows, and resolution of 10 units.
+1. Create an empty `RasterLayer` object called `my_raster` with 10 columns and 10 rows and resolution of 10 units.
 Assign random values between 0 and 10 to the new raster and plot it.
 <!-- crs exercises -->
 <!-- 1. pros and cons of the projection types -->
