@@ -380,19 +380,21 @@ The output of the previous code chunk shows that `ways_sln` is a composite objec
 These include: the spatial component of the network (named `sl`), the graph component (`g`) and the 'weightfield', the edge variable used for shortest path calculation (by default segment distance).
 `ways_sln` is of class `sfNetwork`, defined by the S4 class system.
 This means that each component can be accessed using the `@` operator, which is used below to extract its graph component and process it using the **igraph** package, before plotting the results in geographic space.
+In the example below the 'edge betweeness' is calculated, with the results demonstrating that each graph edge represents a segment: the segments near the centre of the road network have the greatest betweeness scores.
 
 ```{r}
-m = igraph::clusters(ways_sln@g)$membership
-tm = table(m)
-groups_large = names(tm[order(tm, decreasing = TRUE)])[1:3]
-m[m %in% groups_large] = 4
-
+g = ways_sln@g
 e = igraph::edge_betweenness(ways_sln@g)
-plot(ways_sln, lwd = e / 500)
-points(igraph::graph_attr(ways_sln@g, name = "x"),
-       igraph::graph_attr(ways_sln@g, name = "y"),
-       col = m)
+plot(ways_sln@sl$geometry, lwd = e / 500)
 ```
+
+```{r, eval=FALSE, echo=FALSE}
+# not producing groups of routes so removing for now...
+m = igraph::clusters(g)
+igraph::V(g)$m = m$membership
+gdf = as_long_data_frame(g)
+```
+
 
 One can also find the shortest route between origins and destinations using this graph representation of the route network:
 
