@@ -57,7 +57,7 @@ devtools::install_github("ropensci/osmdata")
 library(osmdata)
 region = getbb("Bristol", format_out = "sf_polygon") %>% 
   st_set_crs(4326)
-region = st_sf(data.frame(Name = "Bristol (OSM)"), geometry = region$Bristol)
+region = st_sf(data.frame(Name = "Bristol (OSM)"), geometry = region$geometry)
 saveRDS(region, "extdata/bristol-region.rds")
 devtools::install_github("robinlovelace/ukboundaries")
 library(ukboundaries)
@@ -115,6 +115,7 @@ ways = ways %>%
 summary(st_geometry_type(ways))
 # convert to linestring
 ways = st_cast(ways, "LINESTRING")
+summary(st_geometry(ways))
 saveRDS(ways, "extdata/ways.rds") # save for future reference
 ```
 
@@ -275,11 +276,19 @@ plot(zones["all_dest"])
 ## Nodes on the transport system
 
 Nodes in geographic transport data are zero dimensional features (points) among the predominantly one dimension features (lines) that comprise the network.
-From a mathematical perspective transport networks are simply large graphs: roads and other pathways are 'edges' that join together the nodes, making some quantifiably more central than others 
+There are two types of transport nodes:
+
+1. Nodes not directly on the network such as zone centroids  --- covered in the next section --- or individual origins and destinations such as houses and workplaces.
+2. Nodes that are a part of transport networks, representing individual pathways, intersections between pathways (junctions) and points for entering or exiting a transport network such as bus stops and train stations.
+
+From a mathematical perspective transport networks are simply large graphs.
+The second type of nodes are nodes on this graph, each of which is connected by one or more straight 'edges' that represent individual segments on the network.
 
 ```{r}
 rail_stations = readRDS("extdata/rail_stations.rds")
 ```
+
+
 
 ## Desire lines
 
@@ -353,21 +362,46 @@ summary(ways)
 The above code chunk loaded a simple feature object representing around 3,000 segments on the transport network.
 This an easily manageable dataset size (transport datasets be large but it's best to start small).
 
+As mentioned, route networks can usefully be represented as mathematical graphs, with nodes on the network connected by edges.
+A number of R packages have been developed for dealing with such graphs, notably **igraph**.
+One can manually convert a route network into an `igraph` object, but that process risks loosing the geographic attributes.
+To overcome this issue `SpatialLinesNetwork()` was developed in the **stplanr** package to represent route networks simultaneously as graphs *and* a set of geographic lines.
+This function is demonstrated below using a subset of the `ways` object used in previous sections.
+
 ```{r}
-ways_road = ways %>% filter(highway == "road") 
-ways_sln = SpatialLinesNetwork(as(ways_road, "Spatial"))
-summary(ways_sln)
+ways_freeway = ways %>% filter(maxspeed == "70 mph") 
+ways_sln = SpatialLinesNetwork(ways_freeway)
+slotNames(ways_sln)
 weightfield(ways_sln)
-# o_crds = geo_code("Lawrence Hill Bristol")
-# o_crds = geo_code("Park Street Bristol")
-# o_node = find_network_nodes(ways_sln, -2.618, 51.494)
-# d_node = find_network_nodes(ways_sln, -2.602, 51.455)
-path = sum_network_routes(ways_sln, 10, 20, "length")
-plot(ways_sln)
-plot(path, col = "red", lwd = 5, add = T)
-b = igraph::betweenness(ways_sln@g)
-length(b)
+class(ways_sln@g)
 ```
+
+The output of the previous code chunk shows that `ways_sln` is a composite object with various 'slots'.
+These include: the spatial component of the network (named `sl`), the graph component (`g`) and the 'weightfield', the edge variable used for shortest path calculation (by default segment distance).
+`ways_sln` is of class `sfNetwork`, defined by the S4 class system.
+This means that each component can be accessed using the `@` operator, which is used below to extract its graph component and process it using the **igraph** package, before plotting the results in geographic space.
+
+```{r}
+m = igraph::clusters(ways_sln@g)$membership
+tm = table(m)
+groups_large = names(tm[order(tm, decreasing = TRUE)])[1:3]
+m[m %in% groups_large] = 4
+
+e = igraph::edge_betweenness(ways_sln@g)
+plot(ways_sln, lwd = e / 500)
+points(igraph::graph_attr(ways_sln@g, name = "x"),
+       igraph::graph_attr(ways_sln@g, name = "y"),
+       col = m)
+```
+
+One can also find the shortest route between origins and destinations using this graph representation of the route network:
+
+```{r}
+path = sum_network_routes(ways_sln, 1, 20, "length")
+plot(path$geometry, col = "red", lwd = 10)
+plot(ways_sln@sl$geometry, add = TRUE)
+```
+
 
 
 ## Agents in the transport system
