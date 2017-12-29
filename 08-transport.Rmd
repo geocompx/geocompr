@@ -223,28 +223,27 @@ names(zones)
 ```
 
 Chapter \@ref(attr) demonstrated how to join attribute data onto geographic variables.
-This is a common task in geographic data analysis.
-Usually a table containing data per zone would be joined directly via a shared key variable: the geographic zone code or name (see the [ons.gov.uk website](https://www.ons.gov.uk/help/localstatistics) to access attribute data at a range of geographic levels in the UK).
-For the purposes of this chapter an additional stage is needed because the input data is provided at the origin-destination level:
-before joining it to the zones we need to aggregate the OD data on mode of travel between zones in the `od` object to residential (origin) zones (the nature of this OD dataset is described in more detail in section \@ref(desire-lines)):
+This is a common task usually involved joining a table containing official zonal statistics to a geographic object via a shared key variable ([ons.gov.uk](https://www.ons.gov.uk/help/localstatistics) contains datasets at various geographic levels in the UK, for example).
+For this chapter an additional stage is needed:
+aggregation of the origin-destination (OD) data to the level of residential zones (the nature of this OD dataset is described in more detail in section \@ref(desire-lines)), as demonstrated below:
 
 ```{r}
 od = readRDS("extdata/bristol-od.rds")
-zones_attr = od %>%
-  group_by(o) %>% 
+zones_attr = group_by(od, o) %>% 
   summarise_if(is.numeric, sum) %>% 
   rename(geo_code = o)
 ```
 
-The above code chunk may seem complex long but the methods have already been covered, in Chapter \@ref(attr).
-The three main operations accomplished by chaining together **dplyr** commands in this way were:
+The preceding code chunk build-on techniques that have already been covered, in Chapter \@ref(attr).
+To consildate and extend this knowledge, it is worth outlining the three stages that the chained operation accomplished:
 
-- Grouping the OD pairs by the zone of origin (contained in the column `o`), ready to be summarized at this level
-- Summarizing variables in the `od` dataset *if they were numeric* to find the `sum()` total of people who live in each zone who travel by each mode of transport (the `_if` affix requires a `TRUE`/`FALSE` question to be asked of the variables, in this case 'is it numeric?' and only variables returning true are summarized)
-- Renaming the grouping variable `o` so its new name matches the ID column in the `zones` data
+- Grouping the data by zone of origin (contained in the column `o`).
+- Aggregation of the variables in the `od` dataset *if they were numeric*. This stage calculates the total number of people living in each zone by mode of transport.^[
+the `_if` affix requires a `TRUE`/`FALSE` question to be asked of the variables, in this case 'is it numeric?' and only variables returning true are summarized.
+]
+- Renaming the grouping variable `o` so it matches the ID column `geo_code` in the `zones` object.
 
-Beyond refreshing know-how learned in Part I and building on it by demonstrating how the `_if()` modifier works, the previous code chunk has generated a useful result:
-a data frame with rows representing zones and an ID variable that matches the IDs of the `zones` dataset (this is verified below):
+The resulting object `zones_attr` is a data frame with rows representing zones and an ID variable that matches the IDs of the `zones` dataset (this is verified below):
 
 ```{r}
 summary(zones_attr$geo_code %in% zones$geo_code)
