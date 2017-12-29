@@ -5,9 +5,9 @@
 - This chapter requires the following packages to be loaded (it also uses **osmdata**):
 
 ```{r, message=FALSE, results='hide'}
-library(tidyverse)
 library(sf)
 library(stplanr)
+library(tidyverse)
 ```
 
 ## Introduction
@@ -31,18 +31,24 @@ We will explore how movement patterns can be understood at multiple geographic l
 - **Areal units**: transport can be understood simply in terms of zonal aggregates such as the main mode and average distance of trips made people living in a particular zone.
 - **Nodes**: these are points in the transport system that can represent common origins and destinations (e.g. with one centroid per zone) and public transport stations such as bus stops and rail stations.
 - **Desire lines**: straight lines that represent 'origin-destination' data that records how many people travel (or could travel) between places (points or zones) in geographic space.
-- **Routes**: these are cirquitous (non-straight) routes, typically representing the 'optimal' path along the route network between origins and destinations along the desire lines defined in the previous bullet point.
+- **Routes**: these are circuitous (non-straight) routes, typically representing the 'optimal' path along the route network between origins and destinations along the desire lines defined in the previous bullet point.
 - **Route networks**: these represent the system of roads, paths and other linear features in an area. They can be represented as purely geographic entities or as a graph.
 Their features are segments which can be assigned values representing 'flow', the number of people expected to use a particular street or path.
 - **Agents**: these are the lowest-level but hardest to model entities in transport systems --- mobile entities like you and me.
 
-These six levels of analysis show that transport systems are highly complex, even before accounting for the innevitable fact that all of them are constantly evolving in continuous time.
-The purpose of geographic transport modelling can be interpretted as simplifying this complexity in a way that captures the essence of transport problems.
+Much transport research use on only a few of these because models involving all six levels, such as [MATSim](http://www.matsim.org/), are complex and computationally demanding [@horni_multi-agent_2016].
+Beyond geographic levels, the basic unit of analysis in most transport models is the 'trip', a single purpose journey from an groin 'A' to a destination 'B' [@hollander_transport_2016].
+Trips join-up the six geographic levels: they are usually represented as *desire lines* connecting *zone* centroids (*nodes*), they can be allocated onto the *route network* as *routes*, and are made by people who can be represented as *agents*.
+
+An addition complication is time.
+Although many trips are regular and predictable --- such as the daily commute to work --- transport systems are dynamic and constantly evolving at many levels of temporal resolution.
+The purpose of geographic transport modelling can be interpreted as simplifying this complexity in a way that captures the essence of transport problems.
+Selecting an appropriate level of geographic analysis can help simplify this complexity, to capture the essence of a transport system without loosing its most important features and variables [@hollander_transport_2016].
 
 Typically models are designed to solve a particular problem.
 For this reason this chapter is based around a policy scenario that asks:
-how to increase walking and cycling?
-We will use input data from Bristol, a coastal city in the West of England, described in the next section.
+how to increase walking and cycling in the city of Bristol?
+The case study city is a coastal settlement in the West of England, described in the next section.
 
 <!-- Idea: make it about reducing CO2 emissions instead. Thoughts? + Multi-model - more complex -->
 
@@ -133,7 +139,7 @@ knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34098
 ```
 
 Bristol is the 10^th^ largest city council in England, with a population of half a million people, although its travel catchment area is larger (see section \@ref(transport-zones)).
-It has a vibrant economy with aerospace, media, financial service and tourism, alongside two major universities.
+It has a vibrant economy with aerospace, media, financial service and tourism companies, alongside two major universities.
 Bristol has high average income per capita but contains areas of severe deprivation [@bristol_city_council_deprivation_2015].
 
 In terms of transport, Bristol is well served by rail and road links, and has a relatively high level of active travel.
@@ -165,7 +171,7 @@ This high-level aim will be met via the following objectives:
 - Analyse travel 'desire lines' in the city to identify those with greatest potential for modal shift.
 - Building on the desire-line level analysis, identify which routes would most benefit from having dedicated cycleways and improved provision for pedestrians. 
 
-To get the wheels rolling on the practical aspects of this chapter, we begin by loading zonal data on travel paterns.
+To get the wheels rolling on the practical aspects of this chapter, we begin by loading zonal data on travel patterns.
 These zone-level data are small but often vital for gaining a basic understanding of a settlement's overall transport system.
 
 ## Transport zones
@@ -173,9 +179,7 @@ These zone-level data are small but often vital for gaining a basic understandin
 Although transport systems are primarily based on linear features and nodes --- including pathways and stations --- it often makes sense to start with areal data.
 Three types of zone will typically be of particular interest: the study region, origin zones (typically residential areas), and destination zones (which are often the same as the origin zones).
 
-The simplest way to define a study area is often the first matching boundary returned by OpenStreetMap, which can be obtained using the development version of **osmdata** as follows:
-
-<!-- Todo: remove 'development version' when this goes on CRAN -->
+The simplest way to define a study area is often the first matching boundary returned by OpenStreetMap, which can be obtained using **osmdata** as follows:
 
 ```{r, eval=FALSE}
 region_bb = osmdata::getbb("Bristol", format_out = "sf_polygon")
@@ -187,7 +191,7 @@ Commonly only rectangular bounding boxes are provided by OSM.
 In cases where the first match does not provide the right name, the country or region should be specified, for example `Bristol Tennessee` for an America Bristol.
 ]
 This approach may not always be appropriate, however: boundaries in OSM may not be the same as boundaries used by the local transport planning authority.
-More importantly, official administrative zones seldom relate to where people in them travel.
+More importantly, official administrative zones seldom relate to where people travel.
 
 Travel to Work Areas (TTWAs) overcome this issue by creating a zoning system analogous to hydrological watersheds.
 TTWAs were first defined as contiguous zones within which 75% of the population travels work [@coombes_efficient_1986], and this is the definition used in this chapter.
@@ -199,7 +203,7 @@ region_ttwa = readRDS("extdata/bristol-ttwa.rds")
 
 The origin and destination zones used in this chapter are the same: officially defined zones of intermediate geographic resolution (their [official](https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/annualsmallareapopulationestimates/2014-10-23) name is Middle layer Super Output Areas or MSOAs).
 Each house around 8,000 people.
-Such administrative zones can provide vital context to transport analysis, such as the *type* of people who benefit (or loose out from) particular interventions.
+Such administrative zones can provide vital context to transport analysis, such as the type of people who benefit (or loose out from) particular interventions.
 
 The geographic resolution of these zones is important: small zones with high geographic resolution are usually preferable but their high number in large regions can have consequences for processing (especially for origin-destination analysis in which the number of possibilities increases as a non-linear function of the number of zones).
 Another issue with small zones is related to anonymity rules: more socio-demographic variables are often available for large zones.
@@ -219,35 +223,34 @@ names(zones)
 ```
 
 Chapter \@ref(attr) demonstrated how to join attribute data onto geographic variables.
-This is a common task in geographic data analysis.
-Usually a table containing data per zone would be joined directly via a shared key variable: the geographic zone code or name (see the [ons.gov.uk website](https://www.ons.gov.uk/help/localstatistics) to access attribute data at a range of geographic levels in the UK).
-For the perposes of this chapter an additional stage is needed because the input data is provided at the orgin-destination level:
-before joining it to the zones we need to aggregate the OD data on mode of travel between zones in the `od` object to residential (origin) zones (the nature of this OD dataset is described in more detail in section \@ref(desire-lines)):
+This is a common task usually involved joining a table containing official zonal statistics to a geographic object via a shared key variable ([ons.gov.uk](https://www.ons.gov.uk/help/localstatistics) contains datasets at various geographic levels in the UK, for example).
+For this chapter an additional stage is needed:
+aggregation of the origin-destination (OD) data to the level of residential zones (the nature of this OD dataset is described in more detail in section \@ref(desire-lines)), as demonstrated below:
 
 ```{r}
 od = readRDS("extdata/bristol-od.rds")
-zones_attr = od %>%
-  group_by(o) %>% 
+zones_attr = group_by(od, o) %>% 
   summarise_if(is.numeric, sum) %>% 
   rename(geo_code = o)
 ```
 
-The above code chunk may seem complex long but the methods have already been covered, in Chapter \@ref(attr).
-The three main operations accomplished by chaining together **dplyr** commands in this way were:
+The preceding code chunk build-on techniques that have already been covered, in Chapter \@ref(attr).
+To consildate and extend this knowledge, it is worth outlining the three stages that the chained operation accomplished:
 
-- Grouping the OD pairs by the zone of origin (contained in the column `o`), ready to be summarized at this level
-- Summarizing variables in the `od` dataset *if they were numeric* to find the `sum()` total of people who live in each zone who travel by each mode of transport (the `_if` affix requires a `TRUE`/`FALSE` question to be asked of the variables, in this case 'is it numeric?' and only variables returning true are summarized)
-- Renaming the grouping variable `o` so its new name matches the ID column in the `zones` data
+- Grouping the data by zone of origin (contained in the column `o`).
+- Aggregation of the variables in the `od` dataset *if they were numeric*. This stage calculates the total number of people living in each zone by mode of transport.^[
+the `_if` affix requires a `TRUE`/`FALSE` question to be asked of the variables, in this case 'is it numeric?' and only variables returning true are summarized.
+]
+- Renaming the grouping variable `o` so it matches the ID column `geo_code` in the `zones` object.
 
-Beyond refreshing know-how learned in Part I and building on it by demonstrating how the `_if()` modifier works, the previous code chunk has generated a useful result:
-a data frame with rows representing zones and an ID variable that matches the IDs of the `zones` dataset (this is verified below):
+The resulting object `zones_attr` is a data frame with rows representing zones and an ID variable that matches the IDs of the `zones` dataset (this is verified below):
 
 ```{r}
 summary(zones_attr$geo_code %in% zones$geo_code)
 ```
 
 After preprocessing the attribute data it is in a format that can be joined directly onto the zones.
-As illustrated in the summary of the resulting object, the result is a geographic object with useful attributes including population of travellers (almost 1/4 of a million) and their main mode of travel (by bicycle, foot, car and train):
+As illustrated in the summary of the resulting object, the result is a geographic object with useful attributes including population of travelers (almost 1/4 of a million) and their main mode of travel (by bicycle, foot, car and train):
 
 ```{r}
 zones = left_join(zones, zones_attr)
@@ -261,7 +264,7 @@ knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34133
 
 In the same way that OD datasets can be aggregated to the zone of origin, they can also be aggregated to provide information about destination zones.
 People tend to gravitate towards central places.
-This explains why the spatial distribution represented in Figure \@ref(fig:destzones) is relatively uneven, with the most common destination zones concentrated in Bristol city centre.
+This explains why the spatial distribution represented in Figure \@ref(fig:destzones) is relatively uneven, with the most common destination zones concentrated in Bristol city center.
 The map was created using the following code:
 
 ```{r destzones, fig.cap="Destination zones"}
@@ -294,7 +297,7 @@ rail_stations = readRDS("extdata/rail_stations.rds")
 
 We have already loaded data representing desire lines in the dataset `od`.
 This origin-destination (OD) data frame object represents the number of people travelling between the zone represented in `o` and `d`, as illustrated in Table \@ref(tab:od).
-This subset of the data was using attribute operations described in Chatper \@ref(attr), to arrange the OD data by all trips and then filter-out only the top 5:
+This subset of the data was using attribute operations described in Chapter \@ref(attr), to arrange the OD data by all trips and then filter-out only the top 5:
 
 ```{r}
 od_top5 = od %>% 
@@ -325,10 +328,10 @@ For real-world use one would use centroid values generated from projected data o
 desire_lines = od2line(od, zones)
 ```
 
-The above code generates a geographic object `desire_lines` (of class `sf`) that allows the `od` object to be plotted on the map and, vitally, used to inform geographically targetted transport policies.
+The above code generates a geographic object `desire_lines` (of class `sf`) that allows the `od` object to be plotted on the map and, vitally, used to inform geographically targeted transport policies.
 The `desire_lines` can now be plotted using plot commands such as that provided in the command below.
-The results, illustrated in Figure \@ref(fig:desire), demonstrate that Bristol city centre is by far the largest trip attractor in the region.
-However, there are several peripheral sub-centres including Bradford Stoke to the North and Portishead to the West.
+The results, illustrated in Figure \@ref(fig:desire), demonstrate that Bristol city center is by far the largest trip attractor in the region.
+However, there are several peripheral sub-centers including Bradford Stoke to the North and Portishead to the West.
 
 ```{r, eval=FALSE}
 plot(desire_lines$geometry)
@@ -352,7 +355,7 @@ knitr::include_graphics(u_od)
 ## Route networks
 
 The data used in this section was downloaded using **osmdata**.
-To avoid having to request the data from OSM repeadetly, we'll use a locally saved version of the data, which contains point and line data for the case study area:
+To avoid having to request the data from OSM repeatedly, we'll use a locally saved version of the data, which contains point and line data for the case study area:
 
 ```{r}
 ways = readRDS("extdata/ways.rds")
@@ -380,7 +383,7 @@ The output of the previous code chunk shows that `ways_sln` is a composite objec
 These include: the spatial component of the network (named `sl`), the graph component (`g`) and the 'weightfield', the edge variable used for shortest path calculation (by default segment distance).
 `ways_sln` is of class `sfNetwork`, defined by the S4 class system.
 This means that each component can be accessed using the `@` operator, which is used below to extract its graph component and process it using the **igraph** package, before plotting the results in geographic space.
-In the example below the 'edge betweeness' is calculated, with the results demonstrating that each graph edge represents a segment: the segments near the centre of the road network have the greatest betweeness scores.
+In the example below the 'edge betweeness' is calculated, with the results demonstrating that each graph edge represents a segment: the segments near the center of the road network have the greatest betweeness scores.
 
 ```{r}
 g = ways_sln@g
