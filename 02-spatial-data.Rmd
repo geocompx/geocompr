@@ -3,23 +3,27 @@
 ## Prerequisites {-}
 
 This is the first practical chapter of the book, and therefore it comes with some software requirements.
-We assume that you have installed on your computer a recent version of R and that you are comfortable using it at the command line, e.g., via an integrated development environment (IDE) such as RStudio (recommended).
-R/RStudio works on all major operating systems.
-You can install and set up both in a few minutes on most modern computers, as described in [section 2.3](https://csgillespie.github.io/efficientR/set-up.html#r-version) and [section 2.5](https://csgillespie.github.io/efficientR/set-up.html#rstudio) of @gillespie_efficient_2016.
+We assume that you have an up-to-date version of R installed and that you are comfortable using software with a command-line interface such as the integrated development environment (IDE) RStudio.[^1]
 
-If you are not a regular R user, we recommend that you familiarize yourself with the language before proceeding with this chapter.
-You can do so using resources such as @gillespie_efficient_2016, @grolemund_r_2016 as well as online interactive guides such as [DataCamp](https://www.datacamp.com/courses/free-introduction-to-r).
-We recommend organising your work as you learn, for example with the help of an RStudio '[project](https://csgillespie.github.io/efficientR/set-up.html#project-management)' called `geocomp-learning` or similar and a new script for each chapter.
+[^1]: 
 
-The code you type to help learn the content of this chapter, for example, could be placed in a script called `chapter-02.R`.
-Everyone learns in a different way so it is important that you structure your code in a way that makes sense to you and that you avoid copy-pasting to get used to typing code.
+    If you need to install R, we recommend reading [section 2.3](https://csgillespie.github.io/efficientR/set-up.html#r-version) and [section 2.5](https://csgillespie.github.io/efficientR/set-up.html#rstudio) of the freely available book *Efficient R Programming* @gillespie_efficient_2016.
+    Packages can be kept up-to-date with `update.packages()`.
+
+    If you are not a regular R user, we recommend that you familiarize yourself with the language before proceeding with this chapter.
+    You can do so using resources such as @gillespie_efficient_2016, @grolemund_r_2016 as well as online interactive guides such as [DataCamp](https://www.datacamp.com/courses/free-introduction-to-r).
+
+    We recommend organising your work as you learn, for example with the help of an RStudio '[project](https://csgillespie.github.io/efficientR/set-up.html#project-management)' called `geocomp-learning`.
+    Creating new script for each chapter or section of interest will help consolidate and extend the skills learned.
+    The code you type to help learn the content of this chapter could be placed in a file called `chapter-02.R`, for example.
+    Everyone learns in a different way; structure your work so it makes sense to you; and avoid copy-pasting to get used to typing code.
+
 <!-- Another option is to use the RStudio project provided in the root directory of the [`geocompr`](https://github.com/Robinlovelace/geocompr) GitHub repository. -->
 <!-- This will make it easier to run this book's worked examples on your computer. -->
 
-* * *
-
-After R/RStudio are installed and up-to-date --- use `update.packages()` to update packages --- the next step is to install and load the packages used in this chapter.
-This can be done with `install.packages("package_name")` (not shown) and `library(package_name)` functions:
+After you've checked you R installation and brushed-up on your R skills where appropriate, the next step is to install and load the packages used in this chapter.
+Packages are installed with `install.packages("package_name")`.
+We will use the two packages that provide functions for handling spatial data, loaded with `library(package_name)` as follows:
 
 ```{r, message=FALSE}
 library(raster)      # classes and functions for raster data
@@ -52,20 +56,21 @@ We will introduce the theory behind each data model and the disciplines in which
 
 The *vector data model* represents the world using points, lines and polygons.
 These have discrete, well-defined borders, meaning that vector datasets usually have a high level of precision (but not necessarily accuracy as we will see in \@ref(units)).
-The *raster data model*, by contrast, divides the surface up into a cells of constant size (*resolution*).
-It is ideal for representing continuous phenomena such as elevation or rainfall. 
+The *raster data model* divides the surface up into cells of constant size.
+Raster datasets are the basis of background images used in web-mapping and have been a vital source of geographic data since the origins of aerial photography and satellite-based remote sensing devices.
 Rasters aggregate spatially specific features to a given resolution, meaning that they are consistent over space and scalable (many worldwide raster datasets are available).
-The downside of this is that small features can be blurred or lost.
+<!-- The downside of this is that small features can be blurred or lost. (commented - too specific) -->
 <!-- todo: add figure(s) showing raster data and blurring? -->
 
-Which should you use? It likely depends on your domain of application:
+Which to use?
+The answer likely depends on your domain of application:
 
-- Vector data tends to dominate the social sciences because human settlements and boundaries have discrete borders.
-- By contrast, raster data often dominates the environmental sciences because these often use remotely sensed imagery. 
+- Vector data tends to dominate the social sciences because human settlements tend to have discrete borders.
+- Raster often dominates in environmental sciences because of the reliance on remote sensing data. 
 
-However, there is a substantial level of overlap:
+There is much overlap in some fields and raster and vector datasets can be used side-by-side:
 ecologists and demographers, for example, commonly use both vector and raster data.
-We, therefore, strongly recommend learning about each data model before proceeding to understand how to manipulate them in subsequent chapters.
+Whether your work involves more use of vector or raster datasets, it is worth understanding the underlying data model before using them, as discussed in subsequent chapters.
 This book uses **sf** and **raster** packages to work with vector data and raster datasets respectively.
 
 ## Vector data
@@ -87,10 +92,10 @@ The origin in this case is at 0 degrees longitude (the Prime Meridian) and 0 deg
 The same point could also be approximated in a projected CRS with 'Easting/Northing' values of `c(530000, 180000)` in the British National Grid ([BNG](https://en.wikipedia.org/wiki/Ordnance_Survey_National_Grid)), meaning that London is located 530 km *East* and 180 km *North* of the $origin$ of the CRS.
 This can be verified visually: slightly more than 5 'boxes' --- square areas bounded by the grey grid lines 100 km in width --- separate the point representing London from the origin (Figure \@ref(fig:vectorplots), right panel).
 
-The location of BNG's origin, in sea southwest of the South West Peninsular, did not arise by accident: it ensures that most locations in the UK have positive Easting and Northing values.^[
+The location of BNG's origin, in the sea beyond South West Peninsular, ensures that most locations in the UK have positive Easting and Northing values.^[
 The origin we are referring to, depicted in blue in Figure \@ref(fig:vectorplots), is in fact the 'false' origin.
 The 'true' origin, the location at which distortions are at a minimum, is located at 2° W and 49° N.
-This was selected by the [Ordnance Survey](https://www.ordnancesurvey.co.uk/support/the-national-grid.html) to be roughly in the centre of the British landmass longitudinally.
+This was selected by the [Ordnance Survey](https://www.ordnancesurvey.co.uk/support/the-national-grid.html) to be roughly in the center of the British landmass longitudinally.
 ]
 There is more to CRSs, as described in sections \@ref(crs-intro) and \@ref(reproj-geo-data) but, for the purposes of this section, it is sufficient to know that coordinates consist of two numbers representing distance from an origin, usually in $x$ then $y$ dimensions.
 
@@ -187,7 +192,7 @@ names(world)
 ```
 
 It is the contents of this modest-looking `geom` column that gives `sf` objects their spatial powers, a 'list-column' that contains all the coordinates.
-The **sf** package provides a `plot()` method for vizualising geographic data:
+The **sf** package provides a `plot()` method for visualizing geographic data:
 the follow command creates Figure \@ref(fig:world-all).
 
 ```{r world-all, fig.cap="A spatial plot of the world using the sf package, with a facet for each attribute."}
@@ -693,7 +698,7 @@ knitr::include_graphics("figures/02_raster_intro_plot.png")
 ```
 
 Raster maps usually represent continuous phenomena such as elevation, temperature, population density or spectral data (Figure \@ref(fig:raster-intro-plot2)).
-Of course, we can represent discrete features such as soil or landcover classes also with the help of a raster data model (Figure \@ref(fig:raster-intro-plot2)).
+Of course, we can represent discrete features such as soil or land-cover classes also with the help of a raster data model (Figure \@ref(fig:raster-intro-plot2)).
 Consequently, the discrete borders of these features become blurred, and depending on the spatial task a vector representation might be more suitable.
 
 ```{r raster-intro-plot2, echo=FALSE, fig.cap="Examples of continuous (left) and categorical (right) raster."}
@@ -834,7 +839,7 @@ Additionally, we define a resolution of 0.5, which here corresponds to 0.5 degre
 Finally, we set the values with the `vals` argument.
 Here, we just number the cells, that means we assign 1 to cell 1, 2 to cell 2, and finally 36 to cell 36.
 We know that there are 36 cells by multiplying six (rows) by six (columns).
-As we have seen above, setting raster values in R corresponds to a rowwise cell filling starting at the upper left corner.
+As we have seen above, setting raster values in R corresponds to a row-wise cell filling starting at the upper left corner.
 Consequently, the upper first row contains the values 1 to 6, the second row 7 to 12, and the last row 31 to 36.
 
 ```{r}
@@ -925,28 +930,28 @@ This section will will explain each type, laying the foundations for section \@r
 ### Geographic coordinate systems
 
 Geographic coordinate systems identify any location on the Earth's surface using two values --- longitude and latitude. 
-*Longitude* is location in the East-West direction in anglular distance from the Prime Meridian plane.
+*Longitude* is location in the East-West direction in angular distance from the Prime Meridian plane.
 *Latitude* is angular distance North or South of the equatorial plane.
-Distance in geographic CRSs is therefore measured not in metres but degrees.
+Distance in geographic CRSs are therefore not measured in meters.
 This has important consequences, as demonstrated in section \@ref(reproj-geo-data).
 
 The surface of the Earth in geographic coordinate systems is represented by a spherical or ellipsoidal surface.
 Spherical models assume that the Earth is a perfect sphere of a given radius.
-Spherical models have the advantage of simplicity but are rarely used because they are innacurate: the Earth is not a sphere!
-Ellipsoidal models are defined by two parameters: the equatorial radius (a) and the polar radius (b).
+Spherical models have the advantage of simplicity but are rarely used because they are inaccurate: the Earth is not a sphere!
+Ellipsoidal models are defined by two parameters: the equatorial radius and the polar radius.
 These are suitable because the Earth is compressed: the equatorial radius is around 11.5 km longer than the polar radius [@maling_coordinate_1992].^[
-The degree of compression is often referred to as [*flattening*](https://en.wikipedia.org/wiki/Flattening), defined as $f = (a - b) / a$ but the terms *ellipticity* and *compression* can also be used [@maling_coordinate_1992].
+The degree of compression is often referred to as [*flattening*](https://en.wikipedia.org/wiki/Flattening), defined in terms of the equitorial radius ($a$) and polar radius ($b$) as follows: $f = (a - b) / a$. The terms *ellipticity* and *compression* can also be used [@maling_coordinate_1992].
 Because $f$ is a rather small value, digital ellipsoid models use the 'inverse flattening' ($rf = 1/f$) to define the Earth's compression.
 Values of $a$ and $rf$ used in a variety of ellipsoidal models can be seen be executing `st_proj_info(type = "ellps")`.
 ]
 
 Ellipsoids are part of a wider component of CRSs: the *datum*.
-This contains information on what ellipsoid to use (with the `ellps` parameter in the proj4 CRS library) and the precise relationship between the cartesian coodinates and location on the Earth's service.
+This contains information on what ellipsoid to use (with the `ellps` parameter in the proj4 CRS library) and the precise relationship between the cartesian coordinates and location on the Earth's service.
 These additional details are stored in the `towgs84` argument of  [proj4](http://proj4.org/parameters.html#towgs84-datum-transformation-to-wgs84) notation (see [proj4.org/parameters.html](http://proj4.org/parameters.html) for details).
 These allow local variations in Earth's surface, e.g. due to large mountain ranges, to be accounted for in a local CRS.
-There are two types of datums --- local and geocentric.
+There are two types of datum --- local and geocentric.
 In a *local datum* such as `NAD83` the ellipsoidal surface is shifted to align with the surface at a particular location.
-In a *geocentric datum*  such as `WGS84` the centre is the Earth's centre of gravity and the accuracy of projections is not optimised for a specific location.
+In a *geocentric datum*  such as `WGS84` the center is the Earth's center of gravity and the accuracy of projections is not optimized for a specific location.
 Available datum definitions can be seen by executing `st_proj_info(type = "datum")`.
 <!-- plots? -->
 <!-- plus maybe table (few examples) -->
@@ -1045,7 +1050,7 @@ projection(new_raster) = "+proj=utm +zone=12 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0
 knitr::include_graphics("figures/02_raster_crs.png")
 ```
 
-More information on CRS and spatial tranformation is in chapter \@ref(transform).
+More information on CRS and spatial transformation is in chapter \@ref(transform).
 <!-- comparing projections? == -->
 <!-- - st_as_sf(x, coords = c("x","y")) -->
 <!-- - st_bbox -->
@@ -1127,7 +1132,7 @@ Again, the `res()` command gives back a numeric vector without any unit, forcing
     - Hint: `border` is an additional argument of `plot()` for **sf**  objects.
 1. What does the `cex` argument do in the `plot()` function that generates Figure \@ref(fig:contpop)?
     - Why was `cex` set to the `sqrt(world$pop) / 10000` instead of just the population directly?
-    - Bonus: what equivalent arguments to `cex` exist in the dedicated vizualisation package **tmap**?
+    - Bonus: what equivalent arguments to `cex` exist in the dedicated visualization package **tmap**?
 1. Re-run the code that 'generated' Figure \@ref(fig:contpop) at the end of \@ref(base-args) and find 3 similarities and 3 differences between the plot produced on your computer and that in the book.
     - What is similar?
     - What has changed?
