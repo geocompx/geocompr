@@ -55,7 +55,7 @@ The case study city is a coastal settlement in the West of England, described in
 ## A case study of Bristol {#bris-case}
 
 The case study used for this chapter is a city on the west of England, around 30 km East of the Welsh capital Cardiff.
-The area's transport network is illustrated in Figure \@ref(fig:bristol), which shows that Bristol is provided by a diverse range transport infrastructure, for travelling by bicycle, train and private motor vehicle.
+An overview of the region's transport network is illustrated in Figure \@ref(fig:bristol), which shows a diversity of transport infrastructure, for cycling, public transport, and private motor vehicle.
 
 ```{r, eval=FALSE, echo=FALSE}
 # Aim: download, preprocess, save input data - todo: save as R script
@@ -126,16 +126,22 @@ saveRDS(ways, "extdata/ways.rds") # save for future reference
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
+# create overview map
 ways = readRDS("extdata/ways.rds")
+region_ttwa = readRDS("extdata/bristol-ttwa.rds")
+region_bb = readRDS("extdata/bristol-region.rds")
+region_all = rbind(region_bb, region_ttwa)
 library(tmap)
 tmap_mode("view")
 qtm(ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("green", "black", "red")) +
-  tm_scale_bar()
+  tm_scale_bar() +
+  tm_shape(region_all) +
+  tm_borders(lwd = c(5, 7), col = "darkblue")
 ```
 
 
-```{r bristol, echo=FALSE, fig.cap="Overview map of Bristol, with key parts of the transport network represented as colored lines for active (green), public (railways, black) and private motor (red) modes of travel.", message=FALSE}
-knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34098583-b6daf054-e3d4-11e7-9fd6-7d71883f89e4.png")
+```{r bristol, echo=FALSE, fig.cap="Overview map of the case study region surrounding Bristol. The transport network is represented as colored lines for active (green), public (railways, black) and private motor (red) modes of travel. The blue borders represent the inner city boundary and the larger Travel To Work Area (TTWA)."}
+knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34452756-985267de-ed3e-11e7-9f59-fda1f3852253.png")
 ```
 
 Bristol is the 10^th^ largest city council in England, with a population of half a million people, although its travel catchment area is larger (see section \@ref(transport-zones)).
@@ -185,17 +191,16 @@ The simplest way to define a study area is often the first matching boundary ret
 region_bb = osmdata::getbb("Bristol", format_out = "sf_polygon")
 ```
 
-The result is an `sf` object representing the bounds of the largest matching city region, either a rectangular polygon of the bounding box or detailed polygonal boundary (see Figure \@ref(fig:zones)).^[
-In this case the command returns a detailed polygon representing official boundary of Bristol.
-Commonly only rectangular bounding boxes are provided by OSM.
+The result is an `sf` object representing the bounds of the largest matching city region, either a rectangular polygon of the bounding box or detailed polygonal boundary.^[
 In cases where the first match does not provide the right name, the country or region should be specified, for example `Bristol Tennessee` for an America Bristol.
 ]
-This approach may not always be appropriate, however: boundaries in OSM may not be the same as boundaries used by the local transport planning authority.
-More importantly, official administrative zones seldom relate to where people travel.
+In this case the command returns a detailed polygon representing official boundary of Bristol (see the inner blue boundary in Figure \@ref(fig:bristol)).
+This approach is not always appropriate, because boundaries in OSM often differ from boundaries used by local authorities.
+Furthermore, even official boundaries returned by OSM may not be appropriate for transport research because they bear little relation to where people travel.
 
 Travel to Work Areas (TTWAs) overcome this issue by creating a zoning system analogous to hydrological watersheds.
 TTWAs were first defined as contiguous zones within which 75% of the population travels work [@coombes_efficient_1986], and this is the definition used in this chapter.
-Because Bristol is a major employer attracting travel from surrounding towns, its TTWA --- loaded in the command below --- is substantially larger than its administratively defined area (see Figure \@ref(fig:zones)).
+Because Bristol is a major employer attracting travel from surrounding towns, its TTWA --- loaded in the command below --- is substantially larger than the city bounds (see Figure \@ref(fig:bristol)).
 
 ```{r}
 region_ttwa = readRDS("extdata/bristol-ttwa.rds")
@@ -203,7 +208,7 @@ region_ttwa = readRDS("extdata/bristol-ttwa.rds")
 
 The origin and destination zones used in this chapter are the same: officially defined zones of intermediate geographic resolution (their [official](https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/annualsmallareapopulationestimates/2014-10-23) name is Middle layer Super Output Areas or MSOAs).
 Each house around 8,000 people.
-Such administrative zones can provide vital context to transport analysis, such as the type of people who benefit (or loose out from) particular interventions.
+Such administrative zones can provide vital context to transport analysis, such as the type of people who benefit particular interventions.
 
 The geographic resolution of these zones is important: small zones with high geographic resolution are usually preferable but their high number in large regions can have consequences for processing (especially for origin-destination analysis in which the number of possibilities increases as a non-linear function of the number of zones).
 Another issue with small zones is related to anonymity rules: more socio-demographic variables are often available for large zones.
@@ -235,13 +240,13 @@ zones_attr = group_by(od, o) %>%
 ```
 
 What just happened?
-After the `od` dataset was read-in, the chained operation accomplished three operations:
+After the `od` dataset was read-in, the chained operation:
 
-- Grouping the data by zone of origin (contained in the column `o`).
-- Aggregation of the variables in the `od` dataset *if they were numeric*. This stage calculates the total number of people living in each zone by mode of transport.^[
+- Grouped the data by zone of origin (contained in the column `o`).
+- Aggregated the variables in the `od` dataset *if* they were numeric, to find the total number of people living in each zone by mode of transport.^[
 the `_if` affix requires a `TRUE`/`FALSE` question to be asked of the variables, in this case 'is it numeric?' and only variables returning true are summarized.
 ]
-- Renaming the grouping variable `o` so it matches the ID column `geo_code` in the `zones` object.
+- Renamed the grouping variable `o` so it matches the ID column `geo_code` in the `zones` object.
 
 The resulting object `zones_attr` is a data frame with rows representing zones and an ID variable.
 We can verify that the IDs match the zone dataset with the `%in%` operator as follows:
@@ -250,7 +255,8 @@ We can verify that the IDs match the zone dataset with the `%in%` operator as fo
 summary(zones_attr$geo_code %in% zones$geo_code)
 ```
 
-Now the attribute data has been aggregated, it is in a form that can be joined onto the zones using the joining function `left_join()`:
+The attribute data is now in a form that can be joined onto the zones.
+This is done using the joining function `left_join()`:
 
 ```{r}
 zones = left_join(zones, zones_attr)
@@ -259,28 +265,34 @@ names(zones)
 ```
 
 The result is an updated `zones` dataset that contains new columns representing the total number of trips originating in each zone in the study area (almost 1/4 of a million) and their mode of travel (by bicycle, foot, car and train).
-The geographic distribution of trip origins is illustrated with a choropleth map in Figure \@ref(fig:zones).
-This shows that between 0 and 5,000 trips originate from zones in the study area, with higher numbers of trips being made by people living near the centre of Bristol and fewer on the outskirts.
-Why is this? Remember that we are only dealing with *intra-regional* trips:
-the low trip numbers in the outskirts of the region can be explained by the fact that many people in these peripheral zones will travel to other regions.
-
-```{r zones, echo=FALSE, fig.cap="Regional boundaries (the thick black line represents the Travel to Work Area (TTWA), the thinner black boundary represents the OSM boundary) for Bristol and the number of people working in the (TTW) per zone.", message=FALSE}
-knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34133431-8514e494-e44c-11e7-93e2-819ff81ea5ca.png")
-```
+The geographic distribution of trip origins is illustrated in the left-hand map in Figure \@ref(fig:zones).
+This shows that most zones have between 0 and 4,000 trips originating from them in the study area.
+More trips are made by people living near the centre of Bristol and fewer on the outskirts.
+Why is this? Remember that we are only dealing trips within the study region:
+low trip numbers in the outskirts of the region can be explained by the fact that many people in these peripheral zones will travel to other regions.
 
 In the same way that OD datasets can be aggregated to the zone of origin, they can also be aggregated to provide information about destination zones.
 People tend to gravitate towards central places.
-This explains why the spatial distribution represented in Figure \@ref(fig:destzones) is relatively uneven, with the most common destination zones concentrated in Bristol city center.
+This explains why the spatial distribution represented in the right panel in Figure \@ref(fig:zones) is relatively uneven, with the most common destination zones concentrated in Bristol city center.
 The map was created using the following code:
 
-```{r destzones, fig.cap="Destination zones"}
+```{r}
 zones = od %>%
   group_by(d) %>% 
   summarise_if(is.numeric, sum) %>% 
   select(geo_code = d, all_dest = all) %>% 
   inner_join(zones, ., by = "geo_code")
-plot(zones["all_dest"])
 ```
+
+```{r zones, echo=FALSE, fig.cap="Number of trips (commuters) living and working in the region. The left map shows zone of origin of commute trips; the right map shows zone of destination.", message=FALSE, fig.show='hold', fig.height=9, out.width="50%"}
+library(tmap)
+tmap_mode("plot")
+qtm(zones, c("all", "all_dest"), fill.palette = viridis::plasma(5),
+    fill.breaks = c(0, 2000, 4000, 10000, 40000), fill.title = "Trips") +
+  tm_facets(free.scales = FALSE) +
+  tm_layout(panel.labels = c("Zone of origin", "Zone of destination"))
+```
+
 
 ## Nodes on the transport system
 
