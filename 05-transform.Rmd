@@ -1006,11 +1006,44 @@ The `rasterize()` function takes an `sp` of `sf` object and converts it into a r
 <!-- \@ref(reproj-vec-geom) -->
 <!-- point examples -->
 ```{r}
-raster_template = raster(extent(cycle_hire_osm_projected), resolution = 1000)
+raster_template = raster(extent(cycle_hire_osm_projected), resolution = 1000,
+                         crs = st_crs(cycle_hire_osm_projected)$proj4string)
+
 ch_raster1 = rasterize(cycle_hire_osm_projected, raster_template, field = 1)
-ch_raster2 = rasterize(cycle_hire_osm_projected, raster_template, fun = "count")
+ch_raster2 = rasterize(cycle_hire_osm_projected, raster_template, 
+                       field = "osm_id", fun = "count")
 ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template, 
                        field = "capacity", fun = sum)
+```
+
+```{r vector-rasterization1, echo=FALSE, fig.cap="", warning=FALSE}
+library(tmap)
+library(grid)
+
+r1p = tm_shape(ch_raster1) + 
+  tm_raster(legend.show = TRUE) +
+  tm_layout(outer.margins = rep(0.01, 4), 
+            inner.margins = rep(0, 4))
+
+r2p = tm_shape(ch_raster2) + 
+  tm_raster(legend.show = TRUE) +
+  tm_layout(outer.margins = rep(0.01, 4), 
+            inner.margins = rep(0, 4))
+
+r3p = tm_shape(ch_raster3) + 
+  tm_raster(legend.show = TRUE) +
+  tm_layout(outer.margins = rep(0.01, 4), 
+            inner.margins = rep(0, 4))
+
+
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2, 3, heights = unit(c(0.25, 5), "null"))))
+grid.text("Presence/absensce", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+grid.text("Count", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
+grid.text("Aggregated capacity", vp = viewport(layout.pos.row = 1, layout.pos.col = 3))
+print(r1p, vp=viewport(layout.pos.col = 1))
+print(r2p, vp=viewport(layout.pos.col = 2))
+print(r3p, vp=viewport(layout.pos.col = 3))
 ```
 
 `rasterize()` also takes a `fun` argument which specifies how attributes are transferred to the raster object.
