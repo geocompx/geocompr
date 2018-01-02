@@ -57,75 +57,9 @@ The case study city is a coastal settlement in the West of England, described in
 The case study used for this chapter is a city on the west of England, around 30 km East of the Welsh capital Cardiff.
 An overview of the region's transport network is illustrated in Figure \@ref(fig:bristol), which shows a diversity of transport infrastructure, for cycling, public transport, and private motor vehicle.
 
-```{r, eval=FALSE, echo=FALSE}
-# Aim: download, preprocess, save input data - todo: save as R script
-devtools::install_github("ropensci/osmdata")
-library(osmdata)
-region = getbb("Bristol", format_out = "sf_polygon") %>% 
-  st_set_crs(4326)
-region = st_sf(data.frame(Name = "Bristol (OSM)"), geometry = region$geometry)
-saveRDS(region, "extdata/bristol-region.rds")
-devtools::install_github("robinlovelace/ukboundaries")
-library(ukboundaries)
-region_ttwa = ttwa_simple %>% 
-  filter(grepl("Bristol", ttwa11nm)) %>% 
-  select(Name = ttwa11nm)
-region_ttwa$Name = "Bristol (TTWA)"
-saveRDS(region_ttwa, "extdata/bristol-ttwa.rds")
-zones_cents = st_centroid(msoa2011_vsimple)[region_ttwa, ]
-plot(zones_cents$geometry)
-zones = msoa2011_vsimple[msoa2011_vsimple$msoa11cd %in% zones_cents$msoa11cd, ] %>% 
-  select(geo_code = msoa11cd, name = msoa11nm) %>% 
-  mutate_at(1:2, as.character)
-plot(zones$geometry, add = TRUE)
-# Add travel data to the zones
-# using wicid open data - see http://wicid.ukdataservice.ac.uk/
-unzip("~/Downloads/wu03ew_v2.zip")
-od_all = read_csv("wu03ew_v2.csv")
-file.remove("wu03ew_v2.csv")
-od = od_all %>% 
-  select(o = `Area of residence`, d = `Area of workplace`, all = `All categories: Method of travel to work`, bicycle = Bicycle, foot = `On foot`, car_driver = `Driving a car or van`, train = Train) %>%
-  filter(o %in% zones$geo_code & d %in% zones$geo_code, all > 19)
-summary(zones$geo_code %in% od$d)
-summary(zones$geo_code %in% od$o)
-saveRDS(zones, "extdata/bristol-zones.rds")
-saveRDS(od, "extdata/bristol-od.rds")
-bb = st_bbox(region_ttwa)
-ways_road = opq(bbox = bb) %>% 
-  add_osm_feature(key = "highway", value = "motorway|cycle|primary|secondary", value_exact = FALSE) %>% 
-  osmdata_sf()
-ways_rail = opq(bbox = bb) %>% 
-  add_osm_feature(key = "railway", value = "rail") %>% 
-  osmdata_sf()
-res = c(ways_road, ways_rail)
-
-summary(res)
-
-rail_stations = res$osm_points %>% 
-  filter(railway == "station" | name == "Bristol Temple Meads")
-# most important vars:
-map_int(rail_stations, ~ sum(is.na(.))) %>% 
-  sort() %>% 
-  head()
-rail_stations = rail_stations %>% select(name)
-saveRDS(rail_stations, "extdata/rail_stations.rds")
-
-ways = st_intersection(res$osm_lines, region_ttwa)
-ways$highway = as.character(ways$highway)
-ways$highway[ways$railway == "rail"] = "rail"
-ways$highway = gsub("_link", "", x = ways$highway) %>% 
-  gsub("motorway|primary|secondary", "road", x = .) %>% 
-  as.factor()
-ways = ways %>% 
-  select(highway, maxspeed, ref)
-summary(st_geometry_type(ways))
-# convert to linestring
-ways = st_cast(ways, "LINESTRING")
-summary(st_geometry(ways))
-saveRDS(ways, "extdata/ways.rds") # save for future reference
-```
-
 ```{r, echo=FALSE, eval=FALSE}
+# warning - large script that relies on manually downloaded external data
+source("code/08-transport-data-gen.R") 
 # create overview map
 ways = readRDS("extdata/ways.rds")
 region_ttwa = readRDS("extdata/bristol-ttwa.rds")
@@ -302,8 +236,7 @@ This origin-destination (OD) data frame object represents the number of people t
 This subset of the data was using attribute operations described in Chapter \@ref(attr), to arrange the OD data by all trips and then filter-out only the top 5:
 
 ```{r}
-od_top5 = od %>% 
-  arrange(desc(all)) %>% 
+od_top5 = arrange(od, desc(all)) %>% 
   top_n(5, wt = all)
 ```
 
@@ -312,25 +245,29 @@ od_top5 %>%
   knitr::kable(caption = "Sample of the origin-destination data stored in the data frame object `od`. These represent the top 5 most common desire lines between zones in the study area.")
 ```
 
-This table provides a snapshot of Bristolian travel patterns demonstrating, for example, that walking is the most popular mode of transport among the top 5 inter-zonal origin-destination pairs and that zone `E02003043` is a popular destination.
-But from a policy perspective it's useless:
-aside from the fact that it contains only a tiny portion of the `r nrow(od)` OD pairs, there is no way of deciding *where* policy measures are needed to boost walking and cycling.
+This table provides a snapshot of Bristolian travel patterns.
+It demonstrates that walking is the most popular mode of transport among the top 5 origin-destination pairs, that zone `E02003043` is a popular destination (Bristol city centre, the destination of all the top 5 OD pairs), and that the *intrazonal* trips, from one part of zone `E02003043` to another, constitute the most travelled OD pair in the dataset.
+But from a policy perspective \@ref(tab:od) is of limited use:
+aside from the fact that it contains only a tiny portion of the `r nrow(od)` OD pairs, it tells us little about *where* policy measures are needed.
 What is needed is a way to plot this origin-destination data on the map.
 
 The solution is to convert the non-geographic `od` dataset into geographical desire lines that can be plotted on a map.
-The geographic representation of the data presented in Table \@ref(tab:od) are displayed as straight black lines in \@ref(fig:desire): these are clearly more useful from a policy perspective.
-The conversion from `data.frame` to `sf` class is done in the code below which matches the IDs in the first two columns of the `od` object to the `zone_code` ID column in the geographic `zones` object.^[
-Note that the operation emits a warning: this is because the **stplanr** function `od2line()` used to create the desire lines works by allocating the start and end points of each origin-destination pair to the *centroid* of its zone of origin and destination.
+The geographic representation of the *interzonal* OD pairs (in which the destination is different from the origin) presented in Table \@ref(tab:od) are displayed as straight black lines in \@ref(fig:desire).
+These are clearly more useful from a policy perspective.
+The conversion from `data.frame` to `sf` class is done by the **stplanr** function `od2line()`, which matches the IDs in the first two columns of the `od` object to the `zone_code` ID column in the geographic `zones` object.^[
+Note that the operation emits a warning: this is `od2line()` works by allocating the start and end points of each origin-destination pair to the *centroid* of its zone of origin and destination.
 This represents a straight line between the centroid of zone `E02003047` and the centroid of `E02003043` for the second origin-destination pair represented in Table \@ref(tab:od), for example.
 For real-world use one would use centroid values generated from projected data or, preferably, use *population-weighted* centroids.
 <!-- Todo: add PCT reference (RL) -->
 ]
 
 ```{r}
-desire_lines = od2line(od, zones)
+od_intra = filter(od, o == d)
+od_inter = filter(od, o != d)
+desire_lines = od2line(od_inter, zones)
 ```
 
-The above code generates a geographic object `desire_lines` (of class `sf`) that allows the `od` object to be plotted on the map and, vitally, used to inform geographically targeted transport policies.
+The above code generates a geographic object `desire_lines` (of class `sf`) that allows the interzone OD pairs, stored in `od_inter` to be plotted on the map and, vitally, used to inform geographically targeted transport policies.
 The `desire_lines` can now be plotted using plot commands such as that provided in the command below.
 The results, illustrated in Figure \@ref(fig:desire), demonstrate that Bristol city center is by far the largest trip attractor in the region.
 However, there are several peripheral sub-centers including Bradford Stoke to the North and Portishead to the West.
