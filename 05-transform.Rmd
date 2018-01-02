@@ -460,32 +460,36 @@ However, the algorithm makes sure to keep the same (land cover) classes as provi
 <!-- freq(cat_raster_wgs84) -->
 <!-- freq(cat_raster) -->
 
-Reprojecting continous data is almost identical.
-The `srtm.tif` file contains a digital elevation model for the same area in Utah from [the Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/).
-Each value in this raster represents elevation measured in meters.
+Reprojecting continous data follows an almost identical procedure.
+The `srtm.tif` file contains a digital elevation model from [the Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/), nad is located in the same area in Utah as the previoulsy used land cover dataset.
+Each srtm raster pixel represents elevation measured in meters.
 
 ```{r}
 con_raster = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
 con_raster
 ```
 
-This dataset has a geographic CRS and we want to transform it into a projected CRS.
+Here, we will reproject from the geographic CRS of the srtm dataset into a projected CRS.
 The nearest neighbor method should not be used for continuous raster data, as we want to preserve gradual changes in values.
-Instead we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster. 
-<!-- Quadric and cubic polynomials are also popular nterpolation functions for resampling with more complexity and improved accuracy. @liu_essential_2009: 111-->
+Instead we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster.
+<!--
+"Quadric and cubic polynomials are also popular interpolation functions for resampling with more complexity and improved accuracy" [@liu_essential_2009].
+However, these interpolation methods are still unavailable in the **raster** package.
+-->
 The new value is the distance-weighted average of the values from these four cells, i.e., the closer the input cell is to the center of the output cell, the stronger is its weight.
 
-<!-- I still don't know what the following note wants to tell the reader. Pls clarify -->
+<!-- I still don't know what the following note wants to tell the reader, and how it fits to the surrounding text. Pls clarify -->
 ```{block2 type='rmdnote'}
 All the grid cells in equal-area projections have the same size (represent the same area).
 Therefore, these projections are recommended when performing many raster operations, such as distance calculations.
 ```
 
+To use the `bilinear` method, we say so in the corresponding function argument of `projectRaster()`.
+Of course, we need to also specify a projection, here we will reproject into the Oblique Lambert azimuthal equal-area projection.
 
-<!-- unclear what is meant -->
-In the fist step we need to obtain the proj4 definition of the existing projected CRS appropriate for this area or create a new one using the [Projection Wizard](http://projectionwizard.org/) online tool [@savric_projection_2016].
-For this example, we used the Oblique Lambert azimuthal equal-area projection.
-The second step is to define the `bilinear` reprojection method:
+<!-- nice link, but does not fit into the text here in my opinion
+First, we need to obtain the proj4 definition of the existing projected CRS appropriate for this area or create a new one using the [Projection Wizard](http://projectionwizard.org/) online tool [@savric_projection_2016].
+-->
 
 ```{r}
 equalarea = "+proj=laea +lat_0=37.32 +lon_0=-113.04"
@@ -493,7 +497,6 @@ con_raster_ea = projectRaster(con_raster, crs = equalarea, method = "bilinear")
 con_raster_ea
 ```
 
-<!-- we have said so before, so maybe we can delete? -->
 Reprojecting (continuous) rasters also changes spatial properties, such as the number of cells, resolution, and extent.
 Moreover, it slightly modifies values in the new raster, which can be seen by comparing the outputs of the `summary()` function between `con_raster` and `con_raster_ea`.
 
