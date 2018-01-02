@@ -2,7 +2,7 @@
 
 ## Prerequisites {-}
 
-- This chapter requires the following packages to be loaded (it also uses **osmdata**):
+- This chapter requires the following packages to be loaded (it also uses **osmdata** and **nabor** although these do not need to be loaded):
 
 ```{r, message=FALSE, results='hide'}
 library(sf)
@@ -394,19 +394,29 @@ desire_rail = top_n(desire_lines, n = 3, wt = train)
 
 The challenge now is to 'break-up' each of these lines into three pieces, representing travel via public transport nodes.
 This can be done by converting multiline objects in which each feature contains 3 line geometries representing origin, public transport and destination legs of the trip.
-The first leg of the journey can be represented geographically as lines from origin zones to the nearest stations:
+The first stage is to create matrices of coordinates that will subsequently be used to create matrices representing each leg:
 
 ```{r}
-od_matrix = as.matrix(line2df(desire_rail))
+orig_matrix = as.matrix(line2df(desire_rail)[c("fx", "fy")])
+dest_matrix = as.matrix(line2df(desire_rail)[c("tx", "ty")])
 rail_matrix = st_coordinates(rail_stations)
-knn_orig = nabor::knn(rail_matrix, query = od_matrix[, c("fx", "fy")], k = 1)
-knn_dest = nabor::knn(rail_matrix, query = od_matrix[, c("tx", "ty")], k = 1)
+```
+
+The outputs are three matrices representing the starting points of the trips, their destinations and possible intermediary points at public transport nodes (named `orig`, `dest` and `rail` respectively).
+But how to identify *which* intermediary points to use for each desire line?
+The `knn()` function from the **nabor** package (which is used internally by **stplanr** so it should already be installed) solves this problem by finding *k nearest neighbors* between two sets of coordinates.
+The function can find any number of nearest neighbors by setting the `k` parameter, in this case to one:
+
+
+```{r}
+knn_orig = nabor::knn(rail_matrix, query = orig_matrix, k = 1)$nn.idx
+knn_dest = nabor::knn(rail_matrix, query = dest_matrix, k = 1)$nn.idx
 ```
 
 ```{r}
-leg_orig = cbind(od_matrix[, c("fx", "fy")], rail_matrix[knn_orig$nn.idx, ])
-leg_rail = cbind(rail_matrix[knn_orig$nn.idx, ], rail_matrix[knn_dest$nn.idx, ])
-leg_dest = cbind(od_matrix[, c("tx", "ty")], rail_matrix[knn_dest$nn.idx, ])
+leg_orig = cbind(orig_matrix, rail_matrix[knn_orig, ])
+leg_rail = cbind(rail_matrix[knn_orig, ], rail_matrix[knn_dest, ])
+leg_dest = cbind(dest_matrix, rail_matrix[knn_dest, ])
 ```
 
 ```{r}
