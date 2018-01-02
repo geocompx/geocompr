@@ -407,17 +407,33 @@ But how to identify *which* intermediary points to use for each desire line?
 The `knn()` function from the **nabor** package (which is used internally by **stplanr** so it should already be installed) solves this problem by finding *k nearest neighbors* between two sets of coordinates.
 The function can find any number of nearest neighbors by setting the `k` parameter, in this case to one:
 
-
 ```{r}
 knn_orig = nabor::knn(rail_matrix, query = orig_matrix, k = 1)$nn.idx
 knn_dest = nabor::knn(rail_matrix, query = dest_matrix, k = 1)$nn.idx
 ```
+
+This results not in matrices of coordinates, but row indices that can subsequently be used to subset the `rail_matrix`.
+It is worth taking a look at the results to ensure that the process has worked properly and explain what has happened:
+
+```{r}
+as.numeric(knn_orig)
+as.numeric(knn_dest)
+```
+
+The output demonstrates that each object contains three whole numbers (the number of rows in `desire_rail`) representing the rail station closest to the origin and destination of each desire line.
+Note that while each 'origin station' is different, the destination (station `30`) is the same for all desire lines.
+This is to be expected because rail travel in cities tends to converge on a single large station (in this case Bristol Temple Meads).
+The indices can now be used to create matrices representing each leg of the journey as follows:
 
 ```{r}
 leg_orig = cbind(orig_matrix, rail_matrix[knn_orig, ])
 leg_rail = cbind(rail_matrix[knn_orig, ], rail_matrix[knn_dest, ])
 leg_dest = cbind(dest_matrix, rail_matrix[knn_dest, ])
 ```
+
+The final stage is to convert these matrices into meaningful geographic objects, in this case 'multilinestrings' that capture the fact that each stage is a separate line, but part of the same overall trip which can be represented as a simple feature:
+
+<!-- Would the subsequent code chunck be better as `lapply()` or `map()` command? -->
 
 ```{r}
 multi = vector(mode = "list", length = nrow(desire_rail))
@@ -428,15 +444,17 @@ for(i in 1:nrow(desire_rail)) {
     rbind(leg_dest[i, 1:2], leg_dest[i, 3:4]) 
     ))
 }
-legs = st_sf(st_sfc(multi), crs = 4326)
-plot(desire_rail$geometry)
-plot(legs$st_sfc.multi., add = T, col = "red")
+legs = st_sf(geometry = st_sfc(multi), crs = 4326)
 ```
 
+Now we are in a position to visualize the results, in Figure \@ref(fig:stations):
+the three initial `desire_rail` lines have been converted into a new simple features object `legs` representing travel from home to the origin station, from there to the destination, and finally from the destination station to the destination.
+In this case the destination leg is very short (walking distance) but the origin legs may be sufficiently far to justify investment in cycling infrastructure to encourage people to cycle to the stations on the outward leg of peoples' journey to work in the residential areas surrounding the three origin stations in Figure \@ref(fig:stations).
 
-```{r stations, echo=FALSE}
+
+```{r stations, echo=FALSE, message=FALSE, fig.cap="Illustration of station nodes on the network (red dots) used as intermediary points that convert the straight desire lines into three desire lines representing origin, public transport and destination legs of a journey by public transport and other modes."}
 library(tmap)
-tmap_mode("view")
+tmap_mode("plot")
 qtm(rail_stations, basemaps = "https://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=feae177da543411c9efa64160305212d", dots.col = "red", symbols.size = 2) +
   tm_shape(desire_rail) +
   tm_lines(col = "black", lwd = 4) +
