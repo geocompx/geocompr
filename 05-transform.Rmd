@@ -1091,6 +1091,49 @@ grid.text("D. Aggregated capacity", vp = viewport(layout.pos.row = 3, layout.pos
 print(r3p, vp = viewport(layout.pos.row = 4, layout.pos.col = 2))
 ```
 
+
+```{r}
+california = filter(us_states, NAME == "California")
+raster_template2 = raster(extent(california), resolution = 0.5,
+                         crs = st_crs(california)$proj4string)
+```
+
+```{r}
+california_raster1 = rasterize(california, raster_template2)
+```
+
+```{r}
+california_raster2 = rasterize(california, raster_template2, getCover = TRUE)
+```
+
+```{r vector-rasterization2, echo=FALSE, fig.cap="Examples of polygon rasterization", warning=FALSE}
+library(tmap)
+library(grid)
+
+r1po = tm_shape(california_raster1) +
+  tm_raster(legend.show = TRUE, title = "Values: ") +
+  tm_shape(california) +
+  tm_borders() + 
+  tm_layout(outer.margins = rep(0.01, 4), 
+            inner.margins = rep(0, 4))
+
+r2po = tm_shape(california_raster2) + 
+  tm_raster(legend.show = TRUE, title = "Values: ") +
+  tm_shape(california) +
+  tm_borders() + 
+  tm_layout(outer.margins = rep(0.01, 4), 
+            inner.margins = rep(0, 4))
+
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(0.5, 5), "null"))))
+
+grid.text("A. ", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+print(r1po, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
+grid.text("B. ", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
+print(r2po, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
+```
+
+
 <!-- polygon rasterization is based on the position of the center of the pixel -->
 <!-- getCover? -->
 <!-- why? map tilling, simple analysis of terrain? -->
