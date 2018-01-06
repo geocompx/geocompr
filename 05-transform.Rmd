@@ -1035,7 +1035,7 @@ raster_template = raster(extent(cycle_hire_osm_projected), resolution = 1000,
 Rasterization is very flexible operation and depends not only on a template raster, but also on the type of an input vector (e.g. points, polygons) and given arguments.
 
 Let's try three different approaches to rasterize points - cycle hire locations across London (Figure \@ref(fig:vector-rasterization1):A).
-Decision about arguments used should depend on a rasterization purpose.
+<!-- Decision about arguments used should depend on a rasterization purpose. -->
 The simplest case is when we want to create a raster containing areas with cycle hire points (also known as a presence/absence raster).
 In this situation, `rasterize()` expects only three arguments - an input vector data, a raster template, and a value to be transferred to all non-empty cells (Figure \@ref(fig:vector-rasterization1):B).
 
@@ -1098,26 +1098,38 @@ grid.text("D. Aggregated capacity", vp = viewport(layout.pos.row = 3, layout.pos
 print(r3p, vp = viewport(layout.pos.row = 4, layout.pos.col = 2))
 ```
 
+<!-- Rasterization of lines and polygons is different than of points. -->
+We will ilustrate polygons and lines rasterizations using California's polygons (`california`) and borders (`california_borders`):
 <!-- polygon rasterization intro -->
 
 ```{r}
 california = filter(us_states, NAME == "California")
+california_borders = st_cast(california, "MULTILINESTRING")
 raster_template2 = raster(extent(california), resolution = 0.5,
                          crs = st_crs(california)$proj4string)
 ```
 
-<!-- polygon rasterization is based on the position of the center of the pixel -->
+All cells that are touched by a line get a value in a line rasterization (Figure \@ref(fig:vector-rasterization1):A).
 
 ```{r}
-california_raster1 = rasterize(california, raster_template2)
+california_raster1 = rasterize(california_borders, raster_template2)
 ```
 
+On the other hand, polygon rasterization is based on the positions of cells' centers (points on Figure \@ref(fig:vector-rasterization1):B).
+Values are only given when the center on the cell lies inside of the input polygon (Figure \@ref(fig:vector-rasterization1):B).
+
 ```{r}
-california_raster2 = rasterize(california, raster_template2, getCover = TRUE)
+california_raster2 = rasterize(california, raster_template2)
 ```
 
 <!-- getCover? -->
 <!-- the fraction of each grid cell that is covered by the polygons-->
+
+```{r, echo=FALSE, eval=FALSE}
+california_raster3 = rasterize(california, raster_template2, getCover = TRUE)
+```
+
+It is also possible to use the `field` or `fun` arguments for lines and polygons rasterizations.
 
 ```{r vector-rasterization2, echo=FALSE, fig.cap="Examples of polygon rasterization", warning=FALSE}
 library(tmap)
@@ -1134,20 +1146,32 @@ r1po = tm_shape(california_raster1) +
   tm_layout(outer.margins = rep(0.01, 4), 
             inner.margins = rep(0, 4))
 
-r2po = tm_shape(california_raster2) + 
-  tm_raster(legend.show = TRUE, title = "Values: ", style = "fixed", breaks = c(0, 1, 25, 50, 75, 100)) +
+r2po = tm_shape(california_raster2) +
+  tm_raster(legend.show = TRUE, title = "Values: ") +
+  tm_shape(california_raster_centr) + 
+  tm_dots() + 
   tm_shape(california) +
   tm_borders() + 
   tm_layout(outer.margins = rep(0.01, 4), 
             inner.margins = rep(0, 4))
 
+# r3po = tm_shape(california_raster3) + 
+#   tm_raster(legend.show = TRUE, title = "Values: ", style = "fixed", breaks = c(0, 1, 25, 50, 75, 100)) +
+#   tm_shape(california) +
+#   tm_borders() + 
+#   tm_layout(outer.margins = rep(0.01, 4), 
+#             inner.margins = rep(0, 4))
+
 grid.newpage()
+# pushViewport(viewport(layout = grid.layout(2, 3, heights = unit(c(0.5, 5), "null"))))
 pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(0.5, 5), "null"))))
 
 grid.text("A. ", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
 print(r1po, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
 grid.text("B. ", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
-print(r2po, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
+# print(r2po, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
+# grid.text("C. ", vp = viewport(layout.pos.row = 1, layout.pos.col = 3))
+# print(r3po, vp = viewport(layout.pos.row = 2, layout.pos.col = 3))
 ```
 
 <!-- Mention alternatives -->
