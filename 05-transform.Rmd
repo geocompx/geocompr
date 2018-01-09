@@ -1,3 +1,22 @@
+```{r include=FALSE, cache=FALSE}
+library(methods)
+
+knitr::opts_chunk$set(
+        comment = "#>",
+        collapse = TRUE,
+        cache = TRUE,
+        fig.pos = "t",
+        fig.path = "figures/",
+        fig.align = 'center',
+        fig.width = 6,
+        fig.asp = 0.618,  # 1 / phi
+        fig.show = "hold"
+)
+
+set.seed(2017)
+options(digits = 3)
+options(dplyr.print_min = 4, dplyr.print_max = 4)
+```
 # Geometric operations {#transform}
 
 ## Prerequisites {-}
@@ -809,37 +828,7 @@ The subsequent code chunk demonstrate how this works for all combinations of the
 <!-- Todo: reference r4ds -->
 
 ```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators.", warning=FALSE}
-old_par = par()
-par(mfrow = c(3, 3), mai = c(0.1, 0.1, 0.1, 0.1))
-plot(b)
-y_not_x = st_difference(y, x)
-plot(y_not_x, col = "grey", add = TRUE)
-text(x = 0.5, y = 1, "st_difference(y, x)")
-plot(b)
-plot(x, add = TRUE, col = "grey")
-text(x = 0.5, y = 1, "x")
-plot(b, add = TRUE)
-x_or_y = st_union(x, y)
-plot(x_or_y, col = "grey")
-text(x = 0.5, y = 1, "st_union(x, y)")
-x_and_y = st_intersection(x, y)
-plot(b)
-plot(x_and_y, col = "grey", add = TRUE) 
-text(x = 0.5, y = 1, "st_intersection(x, y)")
-# x_xor_y = st_difference(x_xor_y, x_and_y) # failing
-x_not_y = st_difference(x, y)
-x_xor_y = st_sym_difference(x, y)
-plot(x_xor_y, col = "grey")
-text(x = 0.5, y = 1, "st_sym_difference(x, y)")
-plot.new()
-plot(b)
-plot(x_not_y, col = "grey", add = TRUE)
-text(x = 0.5, y = 1, "st_difference(x, y)")
-plot(b)
-plot(y, col = "grey", add = TRUE)
-plot(b, add = TRUE)
-text(x = 0.5, y = 1, "y")
-par(old_par)
+source("code/05-venn-clip.R")
 ```
 
 To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
@@ -901,30 +890,7 @@ show also tidyverse way, so what you are doing is basically a spatial join and a
 ```
 
 ```{r us-regions, fig.cap="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.", echo=FALSE, warning=FALSE, fig.asp=0.2, out.width="100%"}
-# # with base R ----
-# old_par = par()
-# breaks = c(1e5, 5e6, 1e7, 7e7, 2e8)
-# rdf = st_set_geometry(regions, NULL)
-# us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
-#                                   dplyr::select(rdf, Group.1, total_pop_15),
-#                                   by = c("REGION" = "Group.1")) %>% 
-#   pull(total_pop_15)
-# 
-# par(mfrow = c(1, 2))
-# plot(us_states[, "total_pop_15"], main = "US states", breaks = breaks, key.pos = NULL)
-# plot(regions[, "total_pop_15"], main = "US regions", breaks = breaks, key.pos = NULL)
-# par(old_par)
-# with tmap ----
-library(tmap)
-us_states_facet = dplyr::select(us_states, REGION, total_pop_15) %>%
-  mutate(Level = "State")
-regions_facet = rename(regions, REGION = Group.1) %>%
-  mutate(Level = "Region")
-us_facet = rbind(us_states_facet, regions_facet) %>% 
-  mutate(Level = factor(Level, levels = c("State", "Region")))
-
-qtm(us_facet, "total_pop_15") +
-  tm_facets(by = "Level", nrow = 1, drop.units = TRUE)
+source("code/05-us-regions.R")
 ```
 
 The equivalent result can be achieved using **tidyverse** functions as follows (result not shown):
@@ -1078,40 +1044,7 @@ ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template,
 ```
 
 ```{r vector-rasterization1, echo=FALSE, fig.cap="Examples of point's rasterization", warning=FALSE}
-library(tmap)
-library(grid)
-
-r0p = tm_shape(cycle_hire_osm_projected) +
-  tm_bubbles(col = "capacity", title.col = "Capacity: ") + 
-  tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
-
-r1p = tm_shape(ch_raster1) + 
-  tm_raster(legend.show = TRUE, title = "Values: ") +
-  tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
-
-r2p = tm_shape(ch_raster2) + 
-  tm_raster(legend.show = TRUE, title = "Values: ") +
-  tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
-
-r3p = tm_shape(ch_raster3) + 
-  tm_raster(legend.show = TRUE, title = "Values: ") +
-  tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
-
-grid.newpage()
-pushViewport(viewport(layout = grid.layout(4, 2, heights = unit(rep(c(0.5, 5), 2), "null"))))
-
-grid.text("A. Points", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-print(r0p, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-grid.text("B. Presence/absensce", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
-print(r1p, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
-grid.text("C. Count", vp = viewport(layout.pos.row = 3, layout.pos.col = 1))
-print(r2p, vp = viewport(layout.pos.row = 4, layout.pos.col = 1))
-grid.text("D. Aggregated capacity", vp = viewport(layout.pos.row = 3, layout.pos.col = 2))
-print(r3p, vp = viewport(layout.pos.row = 4, layout.pos.col = 2))
+source("code/05-vector-rasterization1.R")
 ```
 
 Additionally, we will illustrate polygons and lines rasterizations using California's polygons (`california`) and borders (`california_borders`).
@@ -1152,36 +1085,7 @@ california_raster2 = rasterize(california, raster_template2)
 It is also possible to use the `field` or `fun` arguments for lines and polygons rasterizations.
 
 ```{r vector-rasterization2, echo=FALSE, fig.cap="Examples of line and polygon rasterizations", warning=FALSE}
-library(tmap)
-library(grid)
-
-california_raster_centr = rasterToPoints(raster_template2, spatial = TRUE)
-
-r1po = tm_shape(california_raster1) +
-  tm_raster(legend.show = TRUE, title = "Values: ") +
-  tm_shape(california_raster_centr) + 
-  tm_dots() + 
-  tm_shape(california) +
-  tm_borders() + 
-  tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
-
-r2po = tm_shape(california_raster2) +
-  tm_raster(legend.show = TRUE, title = "Values: ") +
-  tm_shape(california_raster_centr) + 
-  tm_dots() + 
-  tm_shape(california) +
-  tm_borders() + 
-  tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
-
-grid.newpage()
-pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(0.5, 5), "null"))))
-
-grid.text("A. Line rasterization", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-print(r1po, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-grid.text("B. Polygon rasterization", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
-print(r2po, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
+source("code/05-vector-rasterization2.R")
 ```
 
 While `rasterize` works well for most cases, it is not performance optimized. 
@@ -1319,26 +1223,7 @@ elev_point = rasterToPoints(elev, spatial = TRUE) %>%
 ```
 
 ```{r raster-vectorization1, echo=FALSE, fig.cap="Raster and point representation of the elev dataset.", warning=FALSE}
-library(tmap)
-library(grid)
-colfunc = colorRampPalette(c("lightyellow", "rosybrown"))
-
-p1 = tm_shape(elev) + 
-  tm_raster(legend.show = FALSE, palette = colfunc(36), n = 36) +
-  tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
-
-p2 = tm_shape(elev_point) + 
-  tm_bubbles(col = "layer", legend.col.show = FALSE, palette = colfunc(36), n = 36) +
-  tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0.05, 4))
-
-grid.newpage()
-pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(0.25, 5), "null"))))
-grid.text("raster", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-grid.text("points", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
-print(p1, vp = viewport(layout.pos.col = 1))
-print(p2, vp = viewport(layout.pos.col = 2))
+source("code/05-raster-vectorization1.R")
 ```
 
 On the other hand, categorical rasters (e.g. scanned maps or satellite images) represent discrete features that could occupy areas larger than only one cell.
@@ -1360,33 +1245,7 @@ grain_poly2 = grain_poly %>%
 ```
 
 ```{r raster-vectorization2, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).", warning=FALSE}
-library(tmap)
-library(grid)
-cols = c("sand" = "rosybrown", "clay" = "brown", "silt" = "sandybrown")
-
-p1p = tm_shape(grain) + 
-  tm_raster(legend.show = FALSE, palette = cols) +
-  tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
-
-p2p = tm_shape(grain_poly) + 
-  tm_polygons("layer", legend.show = FALSE, palette = cols, lwd = 3) +
-  tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
-
-p3p = tm_shape(grain_poly2) + 
-  tm_polygons("layer", legend.show = FALSE, palette = cols, lwd = 3) +
-  tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
-
-grid.newpage()
-pushViewport(viewport(layout = grid.layout(2, 3, heights = unit(c(0.25, 5), "null"))))
-grid.text("raster", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-grid.text("polygons", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
-grid.text("aggregated polygons", vp = viewport(layout.pos.row = 1, layout.pos.col = 3))
-print(p1p, vp=viewport(layout.pos.col = 1))
-print(p2p, vp=viewport(layout.pos.col = 2))
-print(p3p, vp=viewport(layout.pos.col = 3))
+source("code/05-raster-vectorization2.R")
 ```
 
 <!-- rasterToContour() -->
