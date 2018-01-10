@@ -119,7 +119,7 @@ knitr::kable(pkg_df)
 | link2GI           | Linking GIS, Remote Sensing and Other Command Line Tools \[@R-link2GI\]                   | 0.1.0      |
 | lwgeom            | Bindings to Selected 'liblwgeom' Functions for Simple Features \[@R-lwgeom\]              | 0.1.3      |
 | mapview           | Interactive Viewing of Spatial Data in R \[@R-mapview\]                                   | 2.2.0      |
-| microbenchmark    | Accurate Timing Functions \[@R-microbenchmark\]                                           | 1.4.2.1    |
+| microbenchmark    | Accurate Timing Functions \[@R-microbenchmark\]                                           | 1.4.3      |
 | osmdata           | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]                  | 0.0.5      |
 | raster            | Geographic Data Analysis and Modeling \[@R-raster\]                                       | 2.6.7      |
 | rgdal             | Bindings for the 'Geospatial' Data Abstraction Library \[@R-rgdal\]                       | 1.2.16     |
@@ -130,8 +130,8 @@ knitr::kable(pkg_df)
 | rnaturalearthdata | World Vector Map Data from Natural Earth Used in 'rnaturalearth' \[@R-rnaturalearthdata\] | 0.1.0      |
 | RQGIS             | Integrating R with QGIS \[@R-RQGIS\]                                                      | 1.0.2.9000 |
 | RSAGA             | SAGA Geoprocessing and Terrain Analysis in R \[@R-RSAGA\]                                 | 0.94.5     |
-| sf                | Simple Features for R \[@R-sf\]                                                           | 0.5.6      |
-| sp                | Classes and Methods for Spatial Data \[@R-sp\]                                            | 1.2.5      |
+| sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.1      |
+| sp                | Classes and Methods for Spatial Data \[@R-sp\]                                            | 1.2.6      |
 | spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.6.9    |
 | spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.3.2    |
 | stars             | Scalable, Spatiotemporal Tidy Arrays for R \[@R-stars\]                                   | 0.0        |
