@@ -539,8 +539,8 @@ This means that each component can be accessed using the `@` operator, which is 
 In the example below the 'edge betweeness', meaning the number of shortest paths passing through each edge, is calculated (see `?igraph::betweenness` for further details).
 The results demonstrating that each graph edge represents a segment: the segments near the center of the road network have the greatest betweeness scores.
 
-<!-- figure caption is missing -->
-```{r}
+<!-- Todo (optional): make this section use potential cycle routes around Stokes Bradley not freeway data (RL) -->
+```{r, fig.cap="Illustration of a small route network, with segment thickness proportional to its betweeness, generated using the **igraph** package and described in the text."}
 g = ways_sln@g
 e = igraph::edge_betweenness(ways_sln@g)
 plot(ways_sln@sl$geometry, lwd = e / 500)
@@ -553,19 +553,22 @@ igraph::V(g)$m = m$membership
 gdf = as_long_data_frame(g)
 ```
 
-One can also find the shortest route between origins and destinations using this graph representation of the route network:
+One can also find the shortest route between origins and destinations using this graph representation of the route network.
+This is can be done using the `sum_network_routes()` function from **stplanr**, which uses local route network data instead of the online routing service described in section \@ref(routes).
+This finds the shortest path between arbitrary nodes 1 and 20, on the network ---
+'shortest' with reference to the `weightfield` slot of `ways_sln` (route distance by default).^[
+To select nodes by geographic location the **stplanr** function `find_network_nodes()` can be used.
+]
+The result is a spatial linestring object that can be plotted using **sf** plotting methods (result not shown --- readers are encouraged to plot the result locally):
 
-<!-- 
-1. figure caption is missing 
-2. not really clear what you are doing here, what is sum_network_routes doing, why 1 and 20, what is length referring to?
-3. Since this is the local routing we should back-reference remote routing
-4. Why is there a section routes and a separate section route networks?
--->
 ```{r}
 path = sum_network_routes(ways_sln, 1, 20, "length")
+```
+```{r, eval=FALSE}
 plot(path$geometry, col = "red", lwd = 10)
 plot(ways_sln@sl$geometry, add = TRUE)
 ```
+
 
 ## Prioritizing new infrastructure
 
