@@ -45,3 +45,10 @@ Names of the figures should contain a chapter number, e.g. `04-world-map.png` or
 
 - Minimize capitalization: use `file-name.rds` not `file-name.Rds`
 - `-` not `_`: use `file-name.rds` not `file_name.rds`
+
+# References
+
+References are added using the markdown syntax [@refname] from the .bib files in this repo.
+The package **citr** can be used to automate citation search and entry.
+Use Zotero to add references to the geocompr at [zotero.org](https://www.zotero.org/groups/418217/energy-and-transport/items/collectionKey/9K6FRP6N/) rather than changing .bib files directly.
+The citation key format used is `[auth:lower]_[veryshorttitle:lower]_[year]` using [zotero-better-bibtex](https://github.com/retorquere/zotero-better-bibtex).
