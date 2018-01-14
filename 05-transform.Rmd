@@ -431,7 +431,7 @@ The `nlcd2011.tif` file provides information for a small area in Utah, USA obtai
 
 ```{r}
 cat_raster = raster(system.file("raster/nlcd2011.tif", package = "spDataLarge"))
-cat_raster
+crs(cat_raster)
 ```
 
 In this region, 14 land cover classes were distinguished^[Full list of NLCD2011 land cover classes can be found at https://www.mrlc.gov/nlcd11_leg.php]:
@@ -452,34 +452,41 @@ The second and last step is to define the reprojection method in the `projectRas
 ```{r}
 wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
 cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "ngb")
-cat_raster_wgs84
 ```
 
-Many properties of the new object differs from the previous one, which include the number of columns and rows (and therefore number of cells), resolution (transformed from meters into degrees), and extent.
-However, the algorithm makes sure to keep the same (land cover) classes as provided by the input raster - `unique(cat_raster_wgs84)`.
+Many properties of the new object differs from the previous one, which include the number of columns and rows (and therefore number of cells), resolution (transformed from meters into degrees), and extent, as illustrated in Table \@ref(tab:catraster) (note that the number of categories increases from 14 to 15 because of the addition of `NA` values, not because a new category has been created --- the land cover classes are preserved).
 <!-- freq(cat_raster_wgs84) -->
 <!-- freq(cat_raster) -->
 
-Reprojecting continuous data follows an almost identical procedure.
-The `srtm.tif` file contains a digital elevation model from [the Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/), nad is located in the same area in Utah as the previously used land cover dataset.
-Each SRTM raster pixel represents elevation measured in meters.
+```{r catraster, echo=FALSE}
+data_frame(
+  CRS = c("NAD83", "WGS84"),
+  nrow = c(nrow(cat_raster), nrow(cat_raster_wgs84)),
+  ncol = c(ncol(cat_raster), ncol(cat_raster_wgs84)),
+  ncell = c(ncell(cat_raster), ncell(cat_raster_wgs84)),
+  resolution = c(mean(res(cat_raster)), mean(res(cat_raster_wgs84), na.rm = TRUE)),
+  unique_categories = c(length(unique(values(cat_raster))), length(unique(values(cat_raster_wgs84))))
+) %>% knitr::kable(caption = "Key attributes original `cat_raster` and projected `cat_raster_wgs84` raster datasets.")
+```
+
+Reprojecting raster data with continuous (`numeric` or in this case `integer`) values follows an almost identical procedure.
+`srtm.tif` in **spDataLarge** contains a digital elevation model from [the Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/) representing height above sea level (elevation) in meters.
+Its CRS is WGS84:
 
 ```{r}
 con_raster = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
-con_raster
+crs(con_raster)
 ```
 
-Here, we will reproject from the geographic CRS of the SRTM dataset into a projected CRS.
-The nearest neighbor method should not be used for continuous raster data, as we want to preserve gradual changes in values.
+We will reproject this dataset into a projected CRS, but *not* with the nearest neighbor method which is appropriate for categorical data.
 Instead we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster.
 <!--
 "Quadric and cubic polynomials are also popular interpolation functions for resampling with more complexity and improved accuracy" [@liu_essential_2009].
 However, these interpolation methods are still unavailable in the **raster** package.
 -->
-The new value is the distance-weighted average of the values from these four cells, i.e., the closer the input cell is to the center of the output cell, the stronger is its weight.
-
-To use the `bilinear` method, we say so in the corresponding function argument of `projectRaster()`.
-Of course, we need to also specify a projection, here we will reproject into the Oblique Lambert azimuthal equal-area projection.
+The values in the projected dataset are the distance-weighted average of the values from these four cells:
+the closer the input cell is to the center of the output cell, the greater its weight.
+The following commands create a text string representing the Oblique Lambert azimuthal equal-area projection, and reproject the raster into this CRS, using the `bilinear` method:
 
 <!-- nice link, but does not fit into the text here in my opinion
 First, we need to obtain the proj4 definition of the existing projected CRS appropriate for this area or create a new one using the [Projection Wizard](http://projectionwizard.org/) online tool [@savric_projection_2016].
@@ -488,16 +495,27 @@ First, we need to obtain the proj4 definition of the existing projected CRS appr
 ```{r}
 equalarea = "+proj=laea +lat_0=37.32 +lon_0=-113.04"
 con_raster_ea = projectRaster(con_raster, crs = equalarea, method = "bilinear")
-con_raster_ea
+crs(con_raster_ea)
 ```
 
-Reprojecting (continuous) rasters also changes spatial properties, such as the number of cells, resolution, and extent.
-Moreover, it slightly modifies values in the new raster, which can be seen by comparing the outputs of the `summary()` function between `con_raster` and `con_raster_ea`.
+Raster reprojection on numeric variables also leads to small changes values and spatial properties, such as the number of cells, resolution, and extent.
+These changes small changes are demonstrated in Table \@ref(tab:rastercrs):^[
+Another minor change, that is not represented in Table \@ref(tab:rastercrs), is that the class of the values in the new projected raster dataset is `numeric`.
+This is because the `bilinear` method works with continuous data and the results are rarely coerced into whole integer values.
+This can have implications for file sizes when raster datasets are saved.
+]
 
-```{r, eval=FALSE}
-summary(con_raster)
-summary(con_raster_ea)
+```{r rastercrs, echo=FALSE}
+data_frame(
+  CRS = c("WGS84", "Equal-area"),
+  nrow = c(nrow(con_raster), nrow(con_raster_ea)),
+  ncol = c(ncol(con_raster), ncol(con_raster_ea)),
+  ncell = c(ncell(con_raster), ncell(con_raster_ea)),
+  resolution = c(mean(res(cat_raster)), mean(res(cat_raster_wgs84), na.rm = TRUE)),
+  mean = c(mean(values(con_raster)), mean(values(con_raster_ea), na.rm = TRUE))
+) %>% knitr::kable(caption = "Key attributes original `con_raster` and projected `con_raster_ea` raster datasets.")
 ```
+
 
 ```{block2 type='rmdnote'}
 Of course, the limitations of 2D Earth projections apply as much to vector as to raster data.
