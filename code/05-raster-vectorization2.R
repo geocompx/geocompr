@@ -1,6 +1,6 @@
 library(tmap)
 library(grid)
-cols = c("sand" = "rosybrown", "clay" = "brown", "silt" = "sandybrown")
+cols = c("clay" = "brown", "sand" = "rosybrown", "silt" = "sandybrown")
 
 p1p = tm_shape(grain) + 
   tm_raster(legend.show = FALSE, palette = cols) +
