@@ -270,30 +270,40 @@ The subsequent sections explain features of CRS transformation that are unique t
 
 Chapter \@ref(spatial-class) demonstrated how vector geometries are made-up of points, and how points form the basis of more complex objects such as lines and polygons.
 Reprojecting vectors thus consists of transforming the coordinates of these points.
-
 <!-- Depending on projections used, reprojection could be either lossy or lossless. -->
 <!-- I don't understand the following sentence -->
 <!-- For example, loss of spatial information could occur when the new CRS is only adequate for smaller area than input vector. -->
 <!-- Do you have an example for the next sentence? -->
 <!-- The precision could be also lost when transforming coordinate systems with different datums - in those situations approximations are used. -->
 <!-- However, in most cases CRS vector transformation is lossless. -->
-
-To illustrate this we will use the dataset `cycle_hire_osm` from **spData**, representing cycle hire locations across London.
-Its CRS can be queried as follows:
+This is illustrated by `cycle_hire_osm`, an `sf` object from **spData** that represents cycle hire locations across London.
+The previous section showed how the CRS of vector data can be queried with `st_crs()`.
+Although the output of this function is printed as a single entity, the result is in fact a named list of class `crs`, with names `proj4string` (which contains full details of the CRS) and `epsg` for its code.
+This is demonstrated below:
 
 ```{r}
-st_crs(cycle_hire_osm)
+crs_lnd = st_crs(cycle_hire_osm)
+class(crs_lnd)
+crs_lnd$epsg
 ```
 
-CRSs in the **sf** package can be defined using the corresponding `epsg` code or a `proj4string` definition (see section \@ref(crs-in-r)).
-The following command creates a projected version of `cycle_hire_osm`:
+This duality of CRS objects means that they can be set either using an EPSG code or a `proj4string`.
+This means that `st_crs("+proj=longlat +datum=WGS84 +no_defs")` is equivalent to `st_crs(4326)`, although not all `proj4string`s have an associated EPSG code.
+Both elements of the CRS are changed by transforming the object to a projected CRS:
+
+```{r, eval=FALSE, echo=FALSE}
+crs1 = st_crs("+proj=longlat +datum=WGS84")
+crs2 = st_crs("+datum=WGS84 +proj=longlat")
+crs3 = st_crs(4326)
+crs1 == crs2
+crs1 == crs3
+```
 
 ```{r}
 cycle_hire_osm_projected = st_transform(cycle_hire_osm, 27700)
 ```
 
-The resulting object has a new CRS with an EPSG code 27700, details of which can be seen by executing
-`st_crs(cycle_hire_osm_projected)`, and for `london_proj` in the previous section.
+The resulting object has a new CRS with an EPSG code 27700.
 But how to find out more details about this EPSG code, or any code?
 One option is to search for it online.
 Another option is to use a function from the **rgdal** package to find the name of the CRS:
@@ -303,11 +313,14 @@ crs_codes = rgdal::make_EPSG()[1:2]
 dplyr::filter(crs_codes, code == 27700)
 ```
 
-The result shows that the EPSG code 27700 represents the British National Grid, a result that could have been found by searching online for "[CRS 27700](https://www.google.com/search?q=CRS+27700)".
-The formula that converts a geographic point into a point on the surface of the Earth is provided by the `proj4string` element of the `crs` (see [proj4.org](http://proj4.org/) for further details):
+The result shows that the EPSG code 27700 represents the British National Grid, a result that could have been found by searching online for "[EPSG 27700](https://www.google.com/search?q=CRS+27700)".
+But what about the `proj4string` element?
+`proj4string`s are text strings in a particular format the describe the CRS.
+They can be seen as formulas for converting a projected point into a point on the surface of the Earth and can be accessed from `crs` objects as follows (see [proj4.org](http://proj4.org/) for further details of what the output means):
 
-```{r}
+```{r, eval=FALSE}
 st_crs(27700)$proj4string
+#> [1] "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 ...
 ```
 
 ```{block2 type='rmdnote'}
