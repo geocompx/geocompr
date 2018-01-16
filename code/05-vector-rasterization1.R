@@ -4,22 +4,26 @@ library(grid)
 r0p = tm_shape(cycle_hire_osm_projected) +
   tm_bubbles(col = "capacity", title.col = "Capacity: ") + 
   tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
+            inner.margins = rep(0, 4)) +
+  tm_layout(legend.position = c("right", "bottom"))
 
 r1p = tm_shape(ch_raster1) + 
   tm_raster(legend.show = TRUE, title = "Values: ") +
   tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
+            inner.margins = rep(0, 4)) +
+  tm_layout(legend.position = c("right", "bottom"))
 
 r2p = tm_shape(ch_raster2) + 
   tm_raster(legend.show = TRUE, title = "Values: ") +
   tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
+            inner.margins = rep(0, 4)) +
+  tm_layout(legend.position = c("right", "bottom"))
 
 r3p = tm_shape(ch_raster3) + 
   tm_raster(legend.show = TRUE, title = "Values: ") +
   tm_layout(outer.margins = rep(0.01, 4), 
-            inner.margins = rep(0, 4))
+            inner.margins = rep(0, 4)) +
+  tm_layout(legend.position = c("right", "bottom"))
 
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(4, 2, heights = unit(rep(c(0.5, 5), 2), "null"))))
