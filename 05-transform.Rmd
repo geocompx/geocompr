@@ -1341,7 +1341,7 @@ con_raster = raster(system.file("raster/srtm.tif", package="spDataLarge"))
 con_raster_wgs84 = projectRaster(con_raster, crs = wgs84, method = "ngb")
 con_raster_wgs84
 ```
-1. Try to transform the categorical raster (`cat_raster`) into WGS 84 using the bi-linear interpolation method.
+1. Try to transform the categorical raster (`cat_raster`) into WGS 84 using the bilinear interpolation method.
 What has changed?
 How it influences the results?
 ```{r, echo=FALSE, eval=FALSE}
@@ -1349,17 +1349,44 @@ wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
 cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "bilinear")
 cat_raster_wgs84
 ```
-<!-- SIMPLIFICATION-->
-<!-- new zeleand example -->
+1. Generate and plot simplified versions of the `nz` dataset.
+Experiment with different values of `keep` (ranging from 0.5 to 0.00005) for `ms_simplify()` and `dTolerance` (from 100 to 100,000) `st_simplify()` .
+    - At what value does the form of the result start to break-down for each method, making New Zealand unrecognizable?
+    - Advanced: What is different about the geometry type of the results from `st_simplify()` compared with the geometry type of `ms_simplify()`? What problems does this create and how can this be resolved? 
 ```{r, echo=FALSE, eval=FALSE}
-plot(rmapshaper::ms_simplify(world, keep = 0.5, keep_shapes = TRUE))
-plot(rmapshaper::ms_simplify(world, keep = 0.05, keep_shapes = TRUE))
-plot(rmapshaper::ms_simplify(world, keep = 0.005, keep_shapes = TRUE))
-plot(rmapshaper::ms_simplify(world, keep = 0.0005, keep_shapes = TRUE))
-plot(rmapshaper::ms_simplify(world, keep = 0.00005, keep_shapes = TRUE))
+plot(rmapshaper::ms_simplify(nz$geometry, keep = 1))
+plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.5))
+plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.05))
+# Starts to breakdown here at 0.5% of the points:
+plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.005))
+# At this point no further simplification changes the result
+plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.0005))
+plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.00005))
+plot(st_simplify(nz$geometry, dTolerance = 100))
+plot(st_simplify(nz$geometry, dTolerance = 1000))
+# Starts to breakdown at 10 km:
+plot(st_simplify(nz$geometry, dTolerance = 10000))
+plot(st_simplify(nz$geometry, dTolerance = 100000))
+plot(st_simplify(nz$geometry, dTolerance = 100000, preserveTopology = TRUE))
+
+plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.05))
+plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.05))
+
+# Problem: st_simplify returns POLYGON and MULTIPOLYGON results, affecting plotting
+# Cast into a single geometry type to resolve this
+nz_simple_poly = st_simplify(nz$geometry, dTolerance = 10000) %>% 
+  st_sfc() %>% 
+  st_cast("POLYGON")
+nz_simple_multipoly = st_simplify(nz$geometry, dTolerance = 10000) %>% 
+  st_sfc() %>% 
+  st_cast("MULTIPOLYGON")
+plot(nz_simple_poly)
+length(nz_simple_poly)
+nrow(nz)
 ```
-<!-- CENTROIDS AND BUFFERS-->
-<!-- AFFINE TRANSFORMATION -->1. Most of the world maps have a north-up orientation.
+1. Centroids and buffers
+1. Affine transformations
+1. Most world maps have a north-up orientation.
 A world map with a south-up orientation could be created by a reflection (one of affine transformations not mentioned in \@ref(affine-transformations)) of the `world` object's geometry.
 Write code to do so.
 Hint: you need to use a two-element vector for this transformation.
@@ -1386,7 +1413,7 @@ ggplot(data = us_states_sfc_mirror_sf) +
   geom_text_repel(data = us_states_sfc_mirror_labels, mapping = aes(X, Y, label = name), size = 3, min.segment.length = 0) +
   theme_void() 
 ```
-<!-- CLIPPING -->
+1. Clipping
 1. Write code that subsets points that are contained within `x` *and* `y` (illustrated by the plot in the 2^nd^ row and the 1^st^ column in Figure \@ref(fig:venn-clip)).
     - Create a randomly located point with the command `st_point()` (refer back to section \@ref(sfg) to see how to create spatial data 'from scratch').
 <!-- GEOMETRY UNIONS -->
@@ -1415,7 +1442,7 @@ us_states_bor$borders = st_length(us_states_bor)
 arrange(us_states_bor, borders)
 arrange(us_states_bor, -borders)
 ```
-<!-- RASTERIZATION-->
+1. Rasterization
 1. Subset points higher than 3100 meters a.s.l in New Zealand (the `nz_height` object). 
 Using the new object:
     - Count numbers of the highest points in grid cells of 3 km resolution.
