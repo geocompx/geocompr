@@ -32,7 +32,7 @@ Type transformations (from a polygon to a line, for example) are demonstrated in
 
 Section \@ref(geo-ras) covers geometric transformations on raster objects.
 This involves changing the size and number of the underlying pixels, and assigning them new values.
-It teaches how to change the resolution (also called raster aggregation and disaggregation  - see section \@ref(ras-agg)), the extent and the origin of a raster.
+It teaches how to change the resolution (also called raster aggregation and disaggregation, the extent and the origin of a raster.
 These operations are especially useful if one would like to align raster datasets from diverse sources (see section \@ref(raster-alignment)).
 Aligned raster objects share the same header information, allowing them to be processed using map algebra operations, described in section \@ref(map-algebra). 
 
@@ -1149,39 +1149,20 @@ Geolocating requires the rectification of the image, which includes one or sever
 
 - Georeferencing with ground control points
 - Orthorectification also georeferences an image but additionally takes into account local topography.
-- Image (co-)registration is the process of aligning one image with another (in terms of CRS and resolution). 
-Registration becomes necessary for images from the same scene but shot from different sensors or from different angles or at different points in time.
+- Image (co-)registration is the process of aligning one image with another (in terms of CRS and resolution). Registration becomes necessary for images from the same scene but shot from different sensors or from different angles or at different points in time.
 
-In this section we will exclusively deal with the co-registration (alignment) of images since only a matching resolution, projection and origin enables map algebra or the merging of raster images.
-Otherwise, how should we add the values of one raster with a resolution of 0.2 decimal degrees to a second with a resolution of 1 decimal degree?
-<!-- list raster operations: aggregation, origin, etc. and rename sections accordingly, i.e., dismiss section header raster alignment -->
+In this section we will mainly deal with the co-registration (alignment) of images including a matching resolution,  and origin.
+A matching projection is of course also required but has been covered already in section \@ref(reprojection-raster-geometries).
+Secondly, we will show how to convert raster images into the spatial vector model.
 
-<!-- two useful citations for intro on geometric operations on raster:
+### Image co-registration (image alignment) {#raster-alignment}
 
-> Geometric operations include the shift, rotation and warping of images to a given shape or framework.
-In remote sensing applications, geometric operations are mainly used for the co-registration of images of the same scene acquired by different sensor systems or at different times or from different positions, and for rectifying an image to fit a particular coordinate system (geocoding).
-Image mosaic is a geometric operation that was commonly used in the early days of remote sensing image processing when computer power was inadequate for the massive demands of the geocoding process, but this is no longer the case.
-Once a set of adjacent images is accurately rectified to a map projection system, such as a UTM coordinate system (see Chapter 13 in Part Two for details) the images, though separate, are effectively in a mosaic.
-
-@liu_essential_2009: 105
-
-> Vector data store their coordinate information implicitly with each node position in real-world coordinates and these are used directly to plot positions and to re-project from one coordinate system to another.
-Raster data on the other hand have a regular local row and column number system for each pixel so that, internally, the geometry and position of a pixel’s location are implicit.
-Externally, however, a world geographic reference must be explicitly stated; this requires the geographic location of the image origin and the ground distance represented by each pixel.
-A transformation is then performed, which converts local image coordinates to realworld coordinates for each pixel location using the geometric operations described in Chapter 9. This transformation information is also stored explicitly.
-
-@liu_essential_2009: 173-74
-
--->
-
-
-### Raster alignment
+When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent has to match. Otherwise, how should we add the values of one raster with a resolution of 0.2 decimal degrees to a second with a resolution of 1 decimal degree? The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions. We can deal with such mismatches by aligning the rasters.
 
 ```{r, echo=FALSE}
 library(spData)
 data(elev)
 ```
-
 
 This section uses the `elev` object from section \@ref(manipulating-raster-objects) and which is also available from the `spData` package.
 The `projectRaster()` function reprojects one raster to a desired projection, say from UTM to WGS84.
@@ -1264,7 +1245,7 @@ Additionally, check out the *Multi-core functions* section in `vignette("functio
 ### Vectorization
 
 <!-- ref to rasterization -->
-Vectorization is a process of converting rasters into vectors.^[This term should not be confused with a code vectorization.]
+Vectorization is the process of converting continuous raster data into discrete vector data, i.e., points, lines or polygons.^[This term should not be confused with code vectorization.]
 It is often used when we want to connect features extracted from raster data with an attribute table.
 The simplest form of vectorization is a conversion from a raster to points.
 The `rasterToPoints()` function creates point representations of every non-NA raster grid cell centroids and it is usually used for continuous data, such as elevation (Figure \@ref(fig:raster-vectorization1)).
@@ -1280,9 +1261,19 @@ elev_point = rasterToPoints(elev, spatial = TRUE) %>%
 source("code/05-raster-vectorization1.R")
 ```
 
-On the other hand, categorical rasters (e.g. scanned maps or satellite images) represent discrete features that could occupy areas larger than only one cell.
+Another common application is the representation of a digital elevation model as contour lines, hence, converting raster data into spatial lines. 
+Here, we will us a real-world DEM since our artificial raster `elev` produces parallel lines because when creating it we made the upper left corner the lowest and the lower right corner the highest value while increasing the value always by one from left to right (give it a try yourself).
+
+```{r}
+data(dem, package = "RQGIS")
+plot(dem)
+plot(rasterToContour(dem), add = TRUE)
+```
+
+
+On the other hand, categorical rasters (e.g., scanned maps or satellite images) represent discrete features that could occupy areas larger than only one cell.
 The `rasterToPolygons()` function could be used to extract these features into a `SpatialPolygonsDataFrame` object.
-We can also convert the result into an object of class `sf`.^[The `spex::polygonize()` function could be used as a faster alternative. It returns an `sf` object a default.]
+We can also convert the result into an object of class `sf`.^[The `spex::polygonize()` function could be used as a faster alternative. It returns an `sf` object as a default.]
 
 ```{r}
 grain_poly = rasterToPolygons(grain) %>% 
