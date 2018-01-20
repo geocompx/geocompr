@@ -41,18 +41,6 @@ Because of the importance of reprojection, introduced in Chapter \@ref(spatial-c
 
 ## Reprojecting geographic data {#reproj-geo-data}
 
-<!-- So far this intro mainly shows examples how to reproject vector data, and a few exemplarily pitfalls.
-And though the pitfall examples are good, I wonder if we can keep them a bit more general (so far only related to vector data) or if at times a coding example is necessary, maybe only a figure would be sufficient.
-We should especially point out that since we project from 3D to 2D we can only keep two out of three spherical (real-world) properties: angle, length, area (-> could be also part of which CRS to use or even better we refer to this explanation in "which CRS to use").
-So a specific use case determines which projection to use. 
-In sea navigation we need angles and lengths, real estate is especially interested in correct areas, etc.
-
-Hence, maybe we should move parts from c2 to c5 since the stuff in c2 is already rather specific, and not a short intro to CRS anymore. 
-Another solution would be to leave the intro crs stuff in c2 (extended by when to use which CRS) and in c5 we don't have a joint vector-raster projection section but have a repojection section in the vector and raster section.
-(In the case of raster this would make perfectly sense since for reprojecting one needs all the geometric operations in section raster alignment (warp, shift, scale, aggregate, etc.).
-Maybe (not sure) a few figures would also help (conic, azimuthal projection; ellipsoids, etc.)
--->
-
 Section \@ref(crs-intro) introduced coordinate reference systems (CRSs) and demonstrated their importance for geocomputation.
 This section goes further, by demonstrating some problems that can arise when using an inappropriate CRS and how to *transform* geometries from one CRS to another.
 
@@ -217,6 +205,7 @@ Thanks to Josh O'Brien who provided the basis for this function in an answer to 
 ] 
 
 <!-- Idea: create full function with message and flexibility in later chapter (RL) -->
+<!-- I think this code needs a short description (JM)-->
 ```{r}
 lonlat2UTM = function(lonlat) {
   utm = (floor((lonlat[1] + 180) / 6) %% 60) + 1
@@ -1149,10 +1138,10 @@ Geolocating requires the rectification of the image, which includes one or sever
 
 - Georeferencing with ground control points
 - Orthorectification also georeferences an image but additionally takes into account local topography.
-- Image (co-)registration is the process of aligning one image with another (in terms of CRS and resolution). Registration becomes necessary for images from the same scene but shot from different sensors or from different angles or at different points in time.
+- Image (co-)registration is the process of aligning one image with another (in terms of CRS, origin and resolution). Registration becomes necessary for images from the same scene but shot from different sensors or from different angles or at different points in time.
 
-In this section we will mainly deal with the co-registration (alignment) of images including a matching resolution,  and origin.
-A matching projection is of course also required but has been covered already in section \@ref(reprojection-raster-geometries).
+In this section we will mainly deal with the co-registration (alignment) of images including a matching resolution, extent and origin.
+A matching projection is of course also required but has been already covered  in section \@ref(reprojection-raster-geometries).
 Secondly, we will show how to convert raster images into the spatial vector model.
 
 ### Image co-registration (image alignment) {#raster-alignment}
@@ -1164,12 +1153,12 @@ library(spData)
 data(elev)
 ```
 
-This section uses the `elev` object from section \@ref(manipulating-raster-objects) and which is also available from the `spData` package.
-The `projectRaster()` function reprojects one raster to a desired projection, say from UTM to WGS84.
-Equally, map algebra operations require the same extent.
+In the simplest case, two images only differ in a mismatch in extent.
+<!--The `projectRaster()` function reprojects one raster to a desired projection, say from UTM to WGS84.-->
 Following code adds one row and two columns to each side of the raster while setting all new values to an elevation of 1000 meters (\@ref(fig:extend-example)).
 
 ```{r extend-example, fig.cap = "Original raster extended by 1 one row on each side (top, bottom) and two columns on each side (right, left)."}
+data(elev, package = "spData")
 elev_2 = extend(elev, c(1, 2), value = 1000)
 plot(elev_2)
 ```
@@ -1180,7 +1169,8 @@ Performing an algebraic operation on two objects with differing extents in R, th
 elev_3 = elev + elev_2
 ```
 
-However, we can also align the extent of two rasters with the `extend()` command.
+However, we can also align the extent of two rasters with `extend()`. 
+Instead of telling the function how many rows or columns should be added (as done before), we let it figure it out by itself using another raster object.
 Here, we extend the `elev` object to the extent of `elev_2`. 
 The newly added rows and column receive the default value of the `value` parameter, i.e., `NA`.
 
@@ -1188,8 +1178,8 @@ The newly added rows and column receive the default value of the `value` paramet
 elev_4 = extend(elev, elev_2)
 ```
 
-The `aggregate()` and `disaggregate()` functions help to change the cell size resolution of a raster.
-For instance, let us aggregate `elev` from a resolution of 0.5 to a resolution of 1, that means we aggregate by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
+Matching different resolutions is computationally more complicated, but functions `aggregate()` and `disaggregate()` help with that.
+For instance, let us aggregate `elev` from a resolution of 0.5 to a resolution of 1, that means aggregating by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
 Additionally, the output cell value should correspond to the mean of the input cells (but  one could use other functions as well such as `median()`, `sum()`, etc.):
 
 ```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."}
@@ -1242,12 +1232,18 @@ This is because **raster**:
 For more information have a look at the help pages of `beginCluster()` and `clusteR()`.
 Additionally, check out the *Multi-core functions* section in `vignette("functions", package = "raster")`.
 
-### Vectorization
+### Spatial vectorization
 
-<!-- ref to rasterization -->
-Vectorization is the process of converting continuous raster data into discrete vector data, i.e., points, lines or polygons.^[This term should not be confused with code vectorization.]
-It is often used when we want to connect features extracted from raster data with an attribute table.
-The simplest form of vectorization is a conversion from a raster to points.
+Spatial vectorization is the counterpart of rasterization \@ref(rasterization), and hence the process of converting continuous raster data into discrete vector data such as points, lines or polygons.
+
+```{block2 type="rmdnote"}
+Be careful with the wording!
+In R vectorization refers to the possibility of replacing `for`-loops and alike by doing things like `1:10 / 2` (see also @wickham_advanced_2014).
+```
+
+<!-- well, we should rephrase, the here described is extract values to points (JM)-->
+<!--Spatial vectorization is often used when we want to connect features extracted from raster data with an attribute table.-->
+The simplest form of vectorization is to convert a raster into points.
 The `rasterToPoints()` function creates point representations of every non-NA raster grid cell centroids and it is usually used for continuous data, such as elevation (Figure \@ref(fig:raster-vectorization1)).
 <!-- Spatial* class mentioned -->
 <!-- why? -->
