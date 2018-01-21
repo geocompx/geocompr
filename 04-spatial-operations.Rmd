@@ -22,7 +22,7 @@ Spatial joining (section \@ref(spatial-joining)) and aggregation (\@ref(spatial-
 Spatial operations differ from non-spatial operations in some ways, however.
 To illustrate the point, imagine you are researching road safety.
 Spatial joins can be used to find road speed limits related with administrative zones, even when no zone ID is provided.
-<!-- This could be a really good example that - a candidate to replace the rather contrived asia example below. -->
+<!-- This could be a good example that - a candidate to replace the rather contrived asia example below. -->
 But this raises the question: should the road completely fall inside a zone for its values to be joined?
 Or is simply crossing or being within a certain distance sufficent?
 When posing such questions it becomes apparent that spatial operations differ substantially from attribute operations on data frames:
@@ -34,7 +34,7 @@ All spatial objects are related through space and distance calculations, covered
 
 Naturally, we can also subset *rasters* based on location and coordinates (section \@ref(raster-subsetting)) and merge different raster tiles into one raster (covered in section \@ref(merging-rasters)). 
 The most important spatial operation on raster data, however, is *map algebra*. 
-Map algebra makes raster processing really elegant and fast (covered in sections \@ref(map-algebra) to \@ref(global-operations-and-distances)).
+Map algebra makes raster processing very elegant and fast (covered in sections \@ref(map-algebra) to \@ref(global-operations-and-distances)).
 Map algebra is also the prerequisite for distance calculations on rasters \@ref(global-operations-and-distances).
 
 ```{block2 type='rmdnote'}
@@ -70,7 +70,8 @@ plot(canterbury_height$geometry, add = TRUE, pch = 2, col = "red")
 par(par_old)
 ```
 
-Like attribute subsetting `x[y, ]` subsets features of *target* object `x` using the contents of a *source* object `y`.
+Like attribute subsetting `x[y, ]` subsets features of a *target* 
+`x` using the contents of a *source* object `y`.
 Instead of `y` being of class `logical` or `integer` --- a vector of `TRUE` and `FALSE` values or whole numbers --- for spatial subsetting it is another spatial (`sf`) object.
 
 Various *topological relations* can be used for spatial subsetting.
@@ -160,7 +161,7 @@ sel_vector = lengths(sel_sparse) > 0
 heights_co = nz_height[sel_vector, ]
 ```
 
-The above code chunk results in an object, `heights_co`, that represent the high points that intersect with either Canterbury *or* Otago region (hence the object name `co`).
+The above code chunk results in an object, `heights_co`, that represents the high points that intersect with either Canterbury *or* Otago region (hence the object name `co`).
 It did this in four stages:
 
 1. Subset the regions of `nz` containing "Canter" or "Otago" in their names. This was done using the pattern matching function `grepl()` in combination with the `|` character, which means 'or', resulting in the subsetting object `co`.
@@ -221,13 +222,13 @@ As we saw in the previous section a *dense matrix* consisting of `TRUE` or `FALS
 st_intersects(p, a, sparse = FALSE)
 ```
 
-The output is a matrix in which each row represents a feature in the target object and each column represents a feature in in the selecting object.
+The output is a matrix in which each row represents a feature in the target object and each column represents a feature in the selecting object.
 In this case only the first two features in `p` intersect with `a` and there is only one feature in `a` so the result has only one column.
 The result can be used for subsetting as we saw in section \@ref(spatial-subsetting).
 
 Note that `st_intersects()` returns `TRUE` for the second feature in the object `p` even though it just touches the polygon `a`: *intersects* is a 'catch-all' topological operation which identifies many types of spatial relation.
 
-The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (`[, 1]` ensures the output is a vector consuming one rather than four lines when printed):
+The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (`[, 1]` ensures the output is a vector consuming one rather than four lines when printed:
 
 ```{r}
 st_disjoint(p, a, sparse = FALSE)[, 1]
@@ -249,7 +250,7 @@ st_touches(p, a, sparse = FALSE)[, 1]
 
 What about features that do not touch, but *almost touch* the selection object?
 These can be selected using `st_is_within_distance()`, which has an additional `dist` argument.
-It can be used to set how close target object need to be before they are selected.
+It can be used to set how close target objects need to be before they are selected.
 Note that although point 4 is one unit of distance from the nearest node of `a` (at point 2 in Figure \@ref(fig:relation-objects)), it is still selected when the distance is set to 0.9.
 This is illustrated in the code chunk below, the second line of which converts the lengthy list output into a `logical` object:
 
@@ -385,7 +386,8 @@ plot(p, add = TRUE)
 
 Joining two non-spatial datasets relies on a shared 'key' variable, as described in section \@ref(vector-attribute-joining).
 Spatial data joining applies the same concept, but instead relies on shared areas of geographic space.
-As with attribute data joining adds a new column to the target object (the argument `x` in joining functions) from a source object (`y`).
+As with attribute data, joining adds a new column to the target object (the argument `x` in joining functions) from a source object (`y`).
+<!-- Think the last sentence needs a comma, but not sure where? -->
 
 The process is illustrated in Figure \@ref(fig:spatial-join), which shows a target object (the `asia` dataset, left) being joined to a source dataset (the three most populous cities of the world), resulting in a new attribute being added to the `joined` dataset (right).
 <!-- Idea: use random points over Earth's surface to allocate data to world countries. -->
@@ -428,7 +430,7 @@ plot(cycle_hire$geometry, col = "blue")
 plot(cycle_hire_osm$geometry, add = TRUE, pch = 3, col = "red")
 ```
 
-We can check if any points are the same `st_intersects()` as show below:
+We can check if any points are the same `st_intersects()` as shown below:
 
 ```{r, message=FALSE}
 any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
@@ -471,6 +473,7 @@ summary(lengths(sel) > 0)
 This shows that there are `r sum(lengths(sel) > 0)` points in the target object `cycle_hire_P` within the threshold distance of `cycle_hire_osm_P`.
 How to retrieve the *values* associated with the respective `cycle_hire_osm_P` points?
 The solution is again with `st_join()` although the additional dist argument must be specified:
+<!-- should 'dist' be in another font? -->
 
 ```{r}
 z = st_join(cycle_hire_P, cycle_hire_osm_P, st_is_within_distance, dist = 20)
@@ -508,7 +511,7 @@ The result of this join has used a spatial operation to change the attribute dat
 ### Spatial data aggregation {#spatial-aggr}
 
 Like attribute data aggregation, covered in section \@ref(vector-attribute-aggregation), spatial data aggregation can be a way of *condensing* data.
-Aggregated data show some statistic about a variable (typically average or total) in relation to some kind of *grouping variable*.
+Aggregated data show some statistics about a variable (typically average or total) in relation to some kind of *grouping variable*.
 Section \@ref(vector-attribute-aggregation) demonstrated how `aggregate()` and `group_by() %>% summarize()` condense data based on attribute variables.
 This section demonstrates how the same functions work using spatial grouping variables.
 
@@ -538,13 +541,13 @@ nz_avheight2 = st_join(nz, nz_height) %>%
   summarize(elevation = mean(elevation, na.rm = TRUE))
 ```
 
-The resulting `nz_avheight` objects have the same geometry as the aggregating object `nz` but with a a new column representing the mean average height of points within each region of New Zealand (other summary functions such as `median()` and `sd()` can be used in place of `mean()`).
+The resulting `nz_avheight` objects have the same geometry as the aggregating object `nz` but with a new column representing the mean average height of points within each region of New Zealand (other summary functions such as `median()` and `sd()` can be used in place of `mean()`).
 Note that regions containing no points have an associated `elevation` value of `NA`.
 For aggregating operations which also create new geometries, see section \@ref(geometry-unions).
 
 Spatial congruence is an important concept related to spatial aggregation.
-An *aggregating object* object (which we will refer to as `y`) is *congruent* with the target object (`x`) if the two objects have shared borders.
-Often this is the case for administrative boundary data, whereby the larger units (e.g., Middle Layer Super Output Areas in the UK or districts in many other European countries) are composed of many smaller units (Output Areas in the UK, see [ons.gov.uk](https://www.ons.gov.uk/methodology/geography/ukgeographies/censusgeography) for further details or municipalities in many other European countries).
+An *aggregating object* (which we will refer to as `y`) is *congruent* with the target object (`x`) if the two objects have shared borders.
+Often this is the case for administrative boundary data, whereby the larger units (e.g. Middle Layer Super Output Areas in the UK or districts in many other European countries) are composed of many smaller units (Output Areas in the UK, see [ons.gov.uk](https://www.ons.gov.uk/methodology/geography/ukgeographies/censusgeography) for further details or municipalities in many other European countries).
 
 *Incongruent* aggregating objects, by contrast, do not share common borders with the target [@qiu_development_2012].
 This is problematic for spatial aggregation (and other spatial operations) illustrated in Figure \@ref(fig:areal-example).
@@ -677,7 +680,7 @@ Map algebra makes raster processing really fast.
 This is because raster datasets only implicitly store coordinates.
 To derive the coordinate of a specific cell, we have to calculate it using its matrix position and the raster resolution and origin.
 For the processing, however, the geographic position of a cell is barely relevant as long as we make sure that the cell position is still the same after the processing (one-to-one locational correspondence).
-Additionally, if two or more raster datasets share the same extent, projection and the resolution, one could treat them as matrices for the processing.
+Additionally, if two or more raster datasets share the same extent, projection and resolution, one could treat them as matrices for the processing.
 This is exactly what map algebra is doing.
 First, it checks the headers of the rasters on which to perform any algebraic operation, and only if they correspondent to each other, the processing goes on.
 And secondly, map algebra retains the so-called one-to-one locational correspondence.
@@ -688,7 +691,8 @@ Map algebra (or cartographic modeling) divides raster operations into four subcl
 1. *Local* or per-cell operations.
 2. *Focal* or neighborhood operations.
 Most often the output cell value is the result of a 3 x 3 input cell block.
-3. *Zonal* operations are similar to focal operations but instead of a predefined neighborhood, classes, which can take on any, i.e., also an irregular size and shape, are the basis for calculations.
+3. *Zonal* operations are similar to focal operations but instead of a predefined neighborhood, classes, which can take on any, i.e. also an irregular size and shape, are the basis for calculations.
+<!-- sentence structure could be confusing in the sentence above -->
 4. *Global* or per-raster operations, that means the output cell derives its value potentially from one or several entire rasters.
 
 This classification scheme uses basically the number of cells involved in a processing step as distinguishing feature.
@@ -724,11 +728,11 @@ elev > 5
 
 Instead of arithmetic operators, one can also use the `calc()` and `overlay()` functions.
 These functions are more efficient, hence, they are preferable in the presence of large raster datasets. 
-Additionally, they allow to directly store an output file.
+Additionally, they allow you to directly store an output file.
 
 The calculation of the normalized difference vegetation index (NDVI) is one of the most famous local, i.e. pixel-by-pixel, raster operations.
 It ranges between - 1 and 1 with positive values indicating the presence of living plants (mostly > 0.2).
-To calculate the NDVI, one uses the red and near-infrared bands of remotely sensed imagery (e.g., Landsat or Sentinel imagery) exploiting the fact that vegetation absorbs light heavily in the visible light spectrum, and especially in the red channel, while reflecting it in the near-infrared spectrum.
+To calculate the NDVI, one uses the red and near-infrared bands of remotely sensed imagery (e.g. Landsat or Sentinel imagery) exploiting the fact that vegetation absorbs light heavily in the visible light spectrum, and especially in the red channel, while reflecting it in the near-infrared spectrum.
 
 $$
 \begin{split}
@@ -737,6 +741,7 @@ NDVI&= \frac{\text{NIR} - \text{Red}}{\text{NIR} + \text{Red}}\\
 $$
 where NIR = near infrared channel
       Red = red channel
+      <!-- better to separate with comma or put NIR and Red on separate lines? -->
 
 Predictive mapping is another interesting application of local raster operations.
 The response variable corresponds to measured or observed points in space, for example, species richness, the presence of landslides, tree disease or crop yield.
@@ -774,7 +779,7 @@ Low-pass or smoothing filters use the mean function to remove extremes.
 In the case of categorical data, we can replace the mean with the mode, which is the most common value.
 By contrast, high-pass filters accentuate features.
 The line detection Laplace and Sobel filters might serve as an example here.
-Check the `focal()` help page how to use them in R (will be used in the excercises at the end of this chapter).
+Check the `focal()` help page for how to use them in R (this will also be used in the excercises at the end of this chapter).
 
 Also, terrain processing uses heavily focal functions.
 Think, for instance, of the calculation of the slope, aspect and flow directions.
@@ -800,7 +805,7 @@ z = zonal(elev, grain, fun = "mean") %>%
 z
 ```
 
-This returns the statistics for each category, here the mean altitude for each grain size class and can be added to the attribute table of the ratified raster (see previous chapter).
+This returns the statistics for each category, here the mean altitude for each grain size class, and can be added to the attribute table of the ratified raster (see previous chapter).
 
 ### Global operations and distances
 
@@ -855,7 +860,7 @@ The `mosaic()` command lets you define a function for the overlapping area.
 For instance, we could compute the mean value. 
 This might smooth the clear border in the merged result but it will most likely not make it disappear.
 To do so, we need a more advanced approach. 
-Remote sensing scientist frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image.
+Remote sensing scientists frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image.
 The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`calcHistMatch()`) and **RStoolbox** (`histMatch()`, `pifMatch()`) provide the corresponding functions.
 
 <!-- ## Spatial data creation -->
@@ -927,7 +932,7 @@ Use the Landsat image provided by the **spDataLarge** package (`system.file("ras
 1. This [post](https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances) shows how to compute distances to the nearest coastline using `raster::distance()`.
 Retrieve a digital elevation model of Spain, and compute a raster which represents the distance to the coast.
 (Hint: Have a look at `getData()` to retrieve a digital elevation model and administrative boundaries for Spain.)
-Before, computing the distance raster, you might want to increase the resolution of the input dem raster, otherwise computing time might become too long. 
+Before computing the distance raster, you might want to increase the resolution of the input dem raster, otherwise computing time might become too long. 
 Secondly, weight the distance raster with elevation.
 Every 100 altitudinal meters should increase the distance to the coast by 10 km.
 Finally, compute the difference between the raster using the euclidean distance and the raster weighted by elevation.
