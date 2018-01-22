@@ -1259,12 +1259,13 @@ Here, we will us a real-world DEM since our artificial raster `elev` produces pa
 `rasterToContour()` is a wrapper around `contourLines()`, which is why we 
 
 ```{r, eval = FALSE}
+# not shown
 data(dem, package = "RQGIS")
 plot(dem, axes = FALSE)
 plot(rasterToContour(dem), add = TRUE)
 ```
 
-Use `contour()` or `rasterVis::contourplot()` if you want to add contour lines to a plot with (altitude) labels (Fig. \@ref(fig:contour)).
+Use `contour()` or `rasterVis::contourplot()` if you want to add contour lines to a plot with isoline labels (Fig. \@ref(fig:contour)).
 
 ```{r contour, echo=FALSE, message=FALSE, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines.", warning=FALSE}
 library(tmap)
@@ -1274,12 +1275,32 @@ hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
 # create contour
 cn = rasterToContour(dem)
 tm_shape(hs) +
-  tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE)+
+  tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
   tm_shape(dem) +
-  tm_raster(alpha = 0.5, palette = terrain.colors(25), n = 25, legend.show = FALSE) +
+  tm_raster(alpha = 0.5, palette = terrain.colors(25), n = 25,
+            legend.show = FALSE) +
+  tm_grid(col = "transparent", n.x = 3, n.y = 3, labels.inside.frame = FALSE,
+          labels.rot = c(0, 90)) +
+  # tm_ylab(text = "Latitude", rotation = 90) +
+  # tm_xlab(text = "Longitude") +
   tm_shape(cn) + 
   tm_lines(col = "white") +
-  tm_text("level")
+  tm_text("level", col = "white")
+
+# # rasterVis solution
+# library(rasterVis)
+# library(latticeExtra)
+# # create contourplot
+# cont = rasterVis::contourplot(dem, margin = FALSE, col = "white",
+#                               labels = list(col = "white", cex = 0.6))
+# # overlay hillshade with topo DEM and contourlines
+# spplot(dem, col.regions = terrain.colors(25), alpha.regions = 0.5,
+#        scales = list(tck = c(1, 0)),
+#        colorkey = FALSE) +
+#   # add hillshade
+#   as.layer(spplot(hs, col.regions = gray(0:100 / 100)), under = TRUE) +
+#   # add contour plot
+#   cont
 ```
 
 Finally, `rasterToPolygons()` converts each raster cell into one polygon consisting of five coordinates all of which need to be explicitly stored.
