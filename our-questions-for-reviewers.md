@@ -1,3 +1,9 @@
+## Questions - the second round of reviews
+
+- At present we have the 5.2 Reprojecting geographic data section containing four subsections. Alternatively, it is possible to move sections 5.2.2 Reprojecting vector geometries and 5.2.4 Reprojecting 5.4.4 into 5.3 and 5.4, respectively. We'd appreciate your feedback on the section's order. 
+
+## Questions - the first round of reviews
+
 - How best to represent the sf class system so students benefit most from the diagram in section 2.1? See discussion in this commit for at least 3 options of the best way forward: https://github.com/Robinlovelace/geocompr/commit/46f50e4c556c2252e372b69b2df1ad9eff09c709
 - Should we keep all the Exercises at the end of the chapters for consistency, or add additional Exercises before the end? (Latest thinking: have a main Excercises section at the end of each chapter but include some exercises mid-chapter where appropriate.)
 - How should we handle units? At present we describe them briefly in the context of simple features in Section [2.4](http://robinlovelace.net/geocompr/spatial-class.html#units) and then again in exercises [3.7](http://robinlovelace.net/geocompr/attr.html#exercises-2) but we were wondering if a more systematic coverage of this potentially tricky topic is needed
