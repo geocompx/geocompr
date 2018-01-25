@@ -1140,11 +1140,11 @@ Geolocating requires the rectification of the image, which includes one or sever
 - Orthorectification also georeferences an image but additionally takes into account local topography.
 - Image (co-)registration is the process of aligning one image with another (in terms of CRS, origin and resolution). Registration becomes necessary for images from the same scene but shot from different sensors or from different angles or at different points in time.
 
-In this section we will mainly deal with the co-registration (alignment) of images including a matching resolution, extent and origin.
+In this section we will mainly deal with the operations needed for co-registration (alignment) of images including a matching resolution, extent and origin.
 A matching projection is of course also required but has been already covered in section \@ref(reprojecting-raster-geometries).
 Secondly, we will show how to convert raster images into the spatial vector model.
 
-### Image co-registration (image alignment) {#raster-alignment}
+### Extending raster images
 
 When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent has to match. Otherwise, how should we add the values of one raster with a resolution of 0.2 decimal degrees to a second with a resolution of 1 decimal degree? The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions. We can deal with such mismatches by aligning the rasters.
 
@@ -1178,6 +1178,10 @@ The newly added rows and column receive the default value of the `value` paramet
 elev_4 = extend(elev, elev_2)
 ```
 
+
+### Aggregation and Disaggregation
+
+<!-- differentiate between spatial, spectral, temporal and radiometric resolution-->
 Raster datasets can also differ with regard to their resolution. 
 To match resolutions, one can either increase  (`aggregate()`) or decrease (`disaggregate()`) the resolution of one raster. 
 As an example, we here change the resolution of `elev` from 0.5 to 1 decimal degree, that means, we aggregate by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
@@ -1211,6 +1215,13 @@ origin(elev_agg) = c(0, 0)
 plot(elev_agg, add = TRUE)
 ```
 
+### Changing origin, extend and resolution simultaneously
+
+<!--In order to actually geometrically correct the original distorted image, a procedure called resampling is used to determine the digital values to place in the new pixel locations of the corrected output image. The resampling process calculates the new pixel values from the original digital pixel values in the uncorrected image. There are three common methods for resampling: nearest neighbour, bilinear interpolation, and cubic convolution. Nearest neighbour resampling uses the digital value from the pixel in the original image which is nearest to the new pixel location in the corrected image. This is the simplest method and does not alter the original values, but may result in some pixel values being duplicated while others are lost. This method also tends to result in a disjointed or blocky image appearance.
+http://www.nrcan.gc.ca/node/9403
+-->
+
+<!--Resampling = The process of interpolating new cell values when transforming rasters to a new coordinate space or cell size. (ESRI definition)--> 
 The `resample()` command lets you align several raster properties in one go, namely origin, extent and resolution.
 Let us resample an extended `elev_agg` to the properties of `elev` again.
 
@@ -1276,15 +1287,15 @@ hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
 # create contour
 cn = rasterToContour(dem)
 tm_shape(hs) +
+  tm_grid(col = "black", n.x = 2, n.y = 2, labels.inside.frame = FALSE,
+          labels.rot = c(0, 90)) +
   tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
   tm_shape(dem) +
-  tm_raster(alpha = 0.5, palette = terrain.colors(25), n = 25,
-            legend.show = FALSE) +
+  tm_raster(alpha = 0.5, palette = terrain.colors(25),
+            auto.palette.mapping = FALSE, legend.show = FALSE) +
   tm_shape(cn) + 
   tm_lines(col = "white") +
   tm_text("level", col = "white") +
-  tm_grid(col = "transparent", n.x = 3, n.y = 3, labels.inside.frame = FALSE,
-          labels.rot = c(0, 90)) +
   tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02))
     
 # # rasterVis solution
