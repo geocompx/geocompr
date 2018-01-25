@@ -1,3 +1,9 @@
+## Questions - the second round of reviews
+
+- At present, 5.2 Reprojecting geographic data section contains four subsections including those showing how to specifically reproject vector and raster data. But maybe it was better and more consistent if we moved sections 5.2.2 Reprojecting vector geometries and 5.2.4 Reprojecting raster into the sections specifically dealing with geometry operations on vector (5.3) and raster data (5.4), respectively. This way we cold give general recommendations regarding reprojections which are applicable to both raster and vector data in the beginning (5.2), while showing the specifics how to do so in the corresponding geometric operation sections. On the other hand, one could also argue that the current structure keeps everything regarding reprojections in one place. We would appreciate your feedback on how to order the sections. 
+
+## Questions - the first round of reviews
+
 - How best to represent the sf class system so students benefit most from the diagram in section 2.1? See discussion in this commit for at least 3 options of the best way forward: https://github.com/Robinlovelace/geocompr/commit/46f50e4c556c2252e372b69b2df1ad9eff09c709
 - Should we keep all the Exercises at the end of the chapters for consistency, or add additional Exercises before the end? (Latest thinking: have a main Excercises section at the end of each chapter but include some exercises mid-chapter where appropriate.)
 - How should we handle units? At present we describe them briefly in the context of simple features in Section [2.4](http://robinlovelace.net/geocompr/spatial-class.html#units) and then again in exercises [3.7](http://robinlovelace.net/geocompr/attr.html#exercises-2) but we were wondering if a more systematic coverage of this potentially tricky topic is needed
