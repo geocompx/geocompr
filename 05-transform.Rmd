@@ -552,8 +552,8 @@ the functions discussed in this section work on objects of class `sfc` in additi
 ### Simplification
 
 Simplification is a process for generalization of vector objects (lines and polygons) usually for use in smaller scale maps.
-An additional reason for simplification is reduction of the object size and therefore the size of a saved file.
-Therefore, data is often simplified before being used in interactive maps. 
+Another reason for simplifying objects is to reduce the amount of memory, disk space and network bandwidth they consume:
+it may be wise to simplify complex geometries before publishing them as interactive maps. 
 The **sf** package provides `st_simplify()`, which uses the GEOS implementation of the Douglas-Peucker algorithm to reduce the vertex count.
 `st_simplify()` uses the `dTolerance` to control the level of generalization in map units [see @douglas_algorithms_1973 for details].
 <!-- I have no idea what the next sentence means -->
@@ -868,9 +868,8 @@ Some points will be inside just one circle, some will be inside both and some wi
 
 There are two different ways to subset points that fit into combinations of the circles: via clipping and logical operators.
 But first we must generate some points.
-We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y`.
-To generate the points, we will use a function not yet covered in this book, `st_sample()`.
-?Then? we will generate the situation plotted in Figure \@ref(fig:venn-subset):
+We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y` using the **sf** function `st_sample()`.
+This generates objects plotted in Figure \@ref(fig:venn-subset):
 
 ```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y."}
 bb = st_bbox(st_union(x, y))
@@ -901,22 +900,13 @@ group_by(us_states, REGION) %>%
   summarize(sum(pop = total_pop_15, na.rm = TRUE))
 ```
 
-For attribute data aggregation the grouping variable is another variable, typically one with few unique values relative to the number of rows (see section \@ref(vector-attribute-aggregation)).
-What we did not cover in that section was that attribute data aggregation dissolves the geometries of touching polygons.
-<!--
-above setence could be phrased differently, maybe 'further to what was covered in section 3.2.2
--->
-The `REGION` variable in the `us_states` dataset is a good example:
-there are 49 states (excluding Hawaii and Alaska) which can be aggregated into four regions.
-This is demonstrated in the code chunk below, the results of which are illustrated in Figure \@ref(fig:us-regions):
+Further to what was covered in section \@ref(vector-attribute-aggregation), aggregation of polygons often silently dissolves the geometries of touching polygons in the same group.
+This is demonstrated in the code chunk below, in which the `REGION` variable in `us_states` is used to aggregate the states into four regions, illustrated in Figure \@ref(fig:us-regions):
 
 ```{r}
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
                     FUN = sum, na.rm = TRUE)
 ```
-<!--
-show also tidyverse way, so what you are doing is basically a spatial join and a subsequent aggregation without a grouping variable. Didactically, it might be better to present a grouping variable.
--->
 
 ```{r, echo=FALSE}
 # st_join(buff, africa[, "pop"]) %>%
@@ -1128,7 +1118,7 @@ source("code/05-vector-rasterization2.R")
 
 While `rasterize` works well for most cases, it is not performance optimized. 
 Fortunately, there are several alternatives, including the `fasterize::fasterize()`^[The **fasterize** package is available at https://github.com/ecohealthalliance/fasterize.] and `gdalUtils::gdal_rasterize()`. 
-The former is 100 times faster than `rasterize()`, however it is currently limited to polygon rasterization.
+The former is much (100 times+) faster than `rasterize()` but is currently limited to polygon rasterization.
 The latter is part of GDAL and therefore requires a vector file, instead of an `sf` object, as an input and rasterization parameters, instead of a `Raster*` template object.^[See more at http://www.gdal.org/gdal_rasterize.html.]
 
 ## Geometric operations on raster data {#geo-ras}
@@ -1257,7 +1247,7 @@ source("code/05-raster-vectorization1.R")
 
 Another common application is the representation of a digital elevation model as contour lines, hence, converting raster data into spatial lines. 
 Here, we will us a real-world DEM since our artificial raster `elev` produces parallel lines (give it a try yourself) because when creating it we made the upper left corner the lowest and the lower right corner the highest value while increasing cell values by one from left to right.
-`rasterToContour()` is a wrapper around `contourLines()`, which is why we (...)? 
+`rasterToContour()` is a wrapper around `contourLines()`.
 
 ```{r, eval = FALSE}
 # not shown
@@ -1506,8 +1496,8 @@ arrange(us_states_bor, -borders)
 ```
 1. Subset points higher than 3100 meters in New Zealand (the `nz_height` object). 
 Using the new object:
-    - Count numbers of the highest points in grid cells of 3km resolution.
-    - Find maximum elevation value for grid cells of 3km resolution.
+    - Count numbers of the highest points in grid cells with a resolution of 3 km.
+    - Find maximum elevation value for grid cells with a resolution of 3 km.
 ```{r, echo=FALSE, eval=FALSE}
 nz_height3100 = filter(nz_height, elevation > 3100)
 new_graticule = st_graticule(nz_height3100, datum = 2193)
