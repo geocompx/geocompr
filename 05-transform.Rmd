@@ -1135,7 +1135,7 @@ In this section we will mainly deal with the co-registration (alignment) of imag
 A matching projection is of course also required but is already covered in section \@ref(reprojecting-raster-geometries).
 Secondly, we will show how to convert raster images into the spatial vector model.
 
-### Image co-registration (image alignment) {#raster-alignment}
+### Extending raster images
 
 When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent has to match. Otherwise, how should we add the values of one raster with a resolution of 0.2 decimal degrees to a second with a resolution of 1 decimal degree? The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions. We can deal with such mismatches by aligning the rasters.
 
@@ -1169,8 +1169,12 @@ The newly added rows and column receive the default value of the `value` paramet
 elev_4 = extend(elev, elev_2)
 ```
 
-Matching different resolutions is computationally more complicated, but functions `aggregate()` and `disaggregate()` help with that.
-For instance, let us aggregate `elev` from a resolution of 0.5 to a resolution of 1, that means aggregating by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
+### Aggregation and Disaggregation
+
+<!-- differentiate between spatial, spectral, temporal and radiometric resolution-->
+Raster datasets can also differ with regard to their resolution. 
+To match resolutions, one can either increase  (`aggregate()`) or decrease (`disaggregate()`) the resolution of one raster. 
+As an example, we here change the resolution of `elev` from 0.5 to 1 decimal degree, that means, we aggregate by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
 Additionally, the output cell value should correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()` etc.):
 
 ```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."}
@@ -1181,6 +1185,7 @@ plot(elev_agg)
 ```
 
 Note that the origin of `elev_agg` has changed too.
+
 
 ```{r}
 origin(elev)
@@ -1201,6 +1206,13 @@ origin(elev_agg) = c(0, 0)
 plot(elev_agg, add = TRUE)
 ```
 
+### Changing origin, extend and resolution simultaneously
+
+<!--In order to actually geometrically correct the original distorted image, a procedure called resampling is used to determine the digital values to place in the new pixel locations of the corrected output image. The resampling process calculates the new pixel values from the original digital pixel values in the uncorrected image. There are three common methods for resampling: nearest neighbour, bilinear interpolation, and cubic convolution. Nearest neighbour resampling uses the digital value from the pixel in the original image which is nearest to the new pixel location in the corrected image. This is the simplest method and does not alter the original values, but may result in some pixel values being duplicated while others are lost. This method also tends to result in a disjointed or blocky image appearance.
+http://www.nrcan.gc.ca/node/9403
+-->
+
+<!--Resampling = The process of interpolating new cell values when transforming rasters to a new coordinate space or cell size. (ESRI definition)--> 
 The `resample()` command lets you align several raster properties in one go, namely origin, extent and resolution.
 Let us resample an extended `elev_agg` to the properties of `elev` again.
 
@@ -1210,7 +1222,7 @@ elev_agg = extend(elev_agg, 2)
 elev_disagg = resample(elev_agg, elev)
 ```
 
-Though our disaggregated `elev_disagg` retrieved back its original resolution, cell size and extent, its values differ. 
+Though our disaggregated `elev_disagg` retrieved back its original resolution, cell size and extent, its values differ from the original cell values. 
 However, this is to be expected, disaggregating **cannot** predict values at a finer resolution, it simply uses an interpolation algorithm.
 It is important to keep in mind that disaggregating results in a finer resolution, the corresponding values, however, are only as accurate as their lower resolution source.
 
@@ -1256,7 +1268,7 @@ plot(dem, axes = FALSE)
 plot(rasterToContour(dem), add = TRUE)
 ```
 
-Use `contour()` or `rasterVis::contourplot()` if you want to add contour lines to a plot with isoline labels (Fig. \@ref(fig:contour)).
+Use `contour()`, `rasterVis::contourplot()` or `tmap::tm_iso()` if you want to add contour lines to a plot with isoline labels (Fig. \@ref(fig:contour)).
 
 ```{r contour, echo=FALSE, message=FALSE, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines.", warning=FALSE}
 library(tmap)
@@ -1266,15 +1278,15 @@ hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
 # create contour
 cn = rasterToContour(dem)
 tm_shape(hs) +
+  tm_grid(col = "black", n.x = 2, n.y = 2, labels.inside.frame = FALSE,
+          labels.rot = c(0, 90)) +
   tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
   tm_shape(dem) +
-  tm_raster(alpha = 0.5, palette = terrain.colors(25), n = 25,
-            legend.show = FALSE) +
+  tm_raster(alpha = 0.5, palette = terrain.colors(25),
+            auto.palette.mapping = FALSE, legend.show = FALSE) +
   tm_shape(cn) + 
   tm_lines(col = "white") +
   tm_text("level", col = "white") +
-  tm_grid(col = "transparent", n.x = 3, n.y = 3, labels.inside.frame = FALSE,
-          labels.rot = c(0, 90)) +
   tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02))
     
 # # rasterVis solution
@@ -1511,9 +1523,11 @@ nz_raster2 = rasterize(nz_height3100, nz_template,
                        field = "elevation", fun = max)
 plot(nz_raster2)
 ```
-1. Aggregate the raster counting high points in New Zealand created in the previous exercise, reduce its geographic resolution by half (so cells are 6 by 6 km) and plot the result.
-    - Resample the lower resolution raster back to the 3 km resolution of the orginal. How have the results changed?
-    - Name two advantages and two disadvantages of reducing raster resolution in this way.
+
+1. Aggregate the raster counting high points in New Zealand (created in the previous exercise), reduce its geographic resolution by half (so cells are 6 by 6 km) and plot the result.
+    - Resample the lower resolution raster back to a resolution of 3 km. How have the results changed?
+    - Name two advantages and disadvantages of reducing raster resolution.
+
 ```{r, echo=FALSE, eval=FALSE}
 nz_raster_low = raster::aggregate(nz_raster, fact = 2, fun = sum)
 res(nz_raster_low)
@@ -1527,9 +1541,11 @@ plot(nz_raster)
 # disadvantage: removes geographic detail
 # disadvantage: another processing step
 ```
-1. Polygonize the `grain` dataset and filter-out all the squares representing clay.
-    - Name 2 advantages and 2 disadvantages of vector data over raster data.
-    - At which points would it be useful to convert rasters to vectors in your research?
+
+1. Polygonize the `grain` dataset and filter all squares representing clay.
+    - Name two advantages and disadvantages of vector data over raster data.
+    -  At which points would it be useful to convert rasters to vectors in your work?
+
 ```{r, echo=FALSE, eval=FALSE}
 grain_poly = rasterToPolygons(grain) %>% 
   st_as_sf()
