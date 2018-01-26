@@ -28,7 +28,7 @@ Type transformations (from a polygon to a line, for example) are demonstrated in
 Section \@ref(geo-ras) covers geometric transformations on raster objects.
 This involves changing the size and number of the underlying pixels, and assigning them new values.
 It teaches how to change the resolution (also called raster aggregation and disaggregation), the extent and the origin of a raster.
-These operations are especially useful if one would like to align raster datasets from diverse sources (see section \@ref(raster-alignment)).
+These operations are especially useful if one would like to align raster datasets from diverse sources.
 Aligned raster objects share the same header information, allowing them to be processed using map algebra operations, described in section \@ref(map-algebra). 
 
 A vital type of geometry transformation is *reprojecting* from one coordinate reference system (CRS) to another.
@@ -1124,20 +1124,27 @@ The latter is part of GDAL and therefore requires a vector file, instead of an `
 ## Geometric operations on raster data {#geo-ras}
 
 Geometric raster operations include the shift, flipping, mirroring, scaling, rotation or warping of images.
-These operations are necessary when geolocating a raster image.
-Geolocating requires the rectification of the image, which includes one or several of the following steps depending on the task at hand [see also @liu_essential_2009]:
+These operations are e.g. necessary when geolocating a raster image.
+In turn, geolocating requires the rectification of the image, which includes one or several of the following steps depending on the task at hand [see also @liu_essential_2009]:
 
 - Georeferencing with ground control points.
 - Orthorectification also georeferences an image but additionally takes into account local topography.
-- Image (co-)registration is the process of aligning one image with another (in terms of CRS, origin and resolution). Registration becomes necessary for images from the same scene but shot from different sensors or from different angles or at different points in time.
+- Image (co-)registration is the process of aligning one image with another (in terms of CRS, origin and resolution). 
+Registration becomes necessary for images from the same scene but shot from different sensors or from different angles or at different points in time.
 
-In this section we will mainly deal with the co-registration (alignment) of images including a matching resolution, extent and origin.
+In this section we will first show how to change the extent, the resolution and the origin of an image.
+As mentioned before, most of the times, we need these operations in order to align several images.
 A matching projection is of course also required but is already covered in section \@ref(reprojecting-raster-geometries).
-Secondly, we will show how to convert raster images into the spatial vector model.
+In any case, there are other reasons why to perform a geometric operation on a single raster image.
+For instance, in chapter \@ref(location) we define metropolitan areas in Germany as 20 km^2^ pixels with more than 500,000 inhabitants. 
+The original inhabitant raster, however, has a resolution of 1 km^2^ which is why we will decrease (aggregate) the resolution by a factor of 20 (see section \@ref(define-metropolitan-areas).
+Finally, we will show how to convert raster images into the spatial vector model.
 
 ### Extending raster images
 
-When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent has to match. Otherwise, how should we add the values of one raster with a resolution of 0.2 decimal degrees to a second with a resolution of 1 decimal degree? The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions. We can deal with such mismatches by aligning the rasters.
+When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent has to match. Otherwise, how should we add the values of one raster with a resolution of 0.2 decimal degrees to a second with a resolution of 1 decimal degree?
+The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions. 
+We can deal with such mismatches by aligning the rasters.
 
 ```{r, echo=FALSE}
 library(spData)
@@ -1169,12 +1176,12 @@ The newly added rows and column receive the default value of the `value` paramet
 elev_4 = extend(elev, elev_2)
 ```
 
-### Aggregation and Disaggregation
+### Aggregation and disaggregation
 
 <!-- differentiate between spatial, spectral, temporal and radiometric resolution-->
 Raster datasets can also differ with regard to their resolution. 
-To match resolutions, one can either increase  (`aggregate()`) or decrease (`disaggregate()`) the resolution of one raster. 
-As an example, we here change the resolution of `elev` from 0.5 to 1 decimal degree, that means, we aggregate by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
+To match resolutions, one can either decrease  (`aggregate()`) or increase (`disaggregate()`) the resolution of one raster.^[It is important to note that we here are solely referring to the spatial resolution but that in remote sensing the spectral (spectral bands), temporal (observations through time of the same area) and radiometric (color depth) resolution are equally important.]
+As an example, we here change the spatial resolution of `elev` from 0.5 to 1 decimal degree, that means, we aggregate by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
 Additionally, the output cell value should correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()` etc.):
 
 ```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."}
@@ -1184,15 +1191,14 @@ plot(elev)
 plot(elev_agg)
 ```
 
-Note that the origin of `elev_agg` has changed too.
-
+The origin is the point closest to (0, 0) if you moved towards it in steps of x and y resolution.
+Note that changing the resolution frequently also changes the origin as here is also the case with the `elev_agg` object.
 
 ```{r}
 origin(elev)
 origin(elev_agg)
 ```
 
-The origin is the point closest to (0, 0) if you moved towards it in steps of x and y resolution.
 If two rasters have different origins, their cells do not overlap completely which would make map algebra impossible.
 To change the origin , use `origin()`.^[If the origins of two raster datasets are just marginally apart, it sometimes is sufficient to simply increase the `tolerance` argument  of `raster::rasterOptions()`.]
 Looking at figure \@ref(fig:origin-example) reveals the effect of changing the origin.
@@ -1208,7 +1214,7 @@ plot(elev_agg, add = TRUE)
 
 ### Changing origin, extend and resolution simultaneously
 
-<!--In order to actually geometrically correct the original distorted image, a procedure called resampling is used to determine the digital values to place in the new pixel locations of the corrected output image. The resampling process calculates the new pixel values from the original digital pixel values in the uncorrected image. There are three common methods for resampling: nearest neighbour, bilinear interpolation, and cubic convolution. Nearest neighbour resampling uses the digital value from the pixel in the original image which is nearest to the new pixel location in the corrected image. This is the simplest method and does not alter the original values, but may result in some pixel values being duplicated while others are lost. This method also tends to result in a disjointed or blocky image appearance.
+<!-- In order to actually geometrically correct the original distorted image, a procedure called resampling is used to determine the digital values to place in the new pixel locations of the corrected output image. The resampling process calculates the new pixel values from the original digital pixel values in the uncorrected image. There are three common methods for resampling: nearest neighbour, bilinear interpolation, and cubic convolution. Nearest neighbour resampling uses the digital value from the pixel in the original image which is nearest to the new pixel location in the corrected image. This is the simplest method and does not alter the original values, but may result in some pixel values being duplicated while others are lost. This method also tends to result in a disjointed or blocky image appearance.
 http://www.nrcan.gc.ca/node/9403
 -->
 
