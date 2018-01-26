@@ -1140,7 +1140,7 @@ For instance, in chapter \@ref(location) we define metropolitan areas in Germany
 The original inhabitant raster, however, has a resolution of 1 km^2^ which is why we will decrease (aggregate) the resolution by a factor of 20 (see section \@ref(define-metropolitan-areas).
 Finally, we will show how to convert raster images into the spatial vector model.
 
-### Extending raster images
+### Extent and origin
 
 When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent has to match. Otherwise, how should we add the values of one raster with a resolution of 0.2 decimal degrees to a second with a resolution of 1 decimal degree?
 The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions. 
@@ -1176,23 +1176,7 @@ The newly added rows and column receive the default value of the `value` paramet
 elev_4 = extend(elev, elev_2)
 ```
 
-### Aggregation and disaggregation
-
-<!-- differentiate between spatial, spectral, temporal and radiometric resolution-->
-Raster datasets can also differ with regard to their resolution. 
-To match resolutions, one can either decrease  (`aggregate()`) or increase (`disaggregate()`) the resolution of one raster.^[It is important to note that we here are solely referring to the spatial resolution but that in remote sensing the spectral (spectral bands), temporal (observations through time of the same area) and radiometric (color depth) resolution are equally important.]
-As an example, we here change the spatial resolution of `elev` from 0.5 to 1 decimal degree, that means, we aggregate by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
-Additionally, the output cell value should correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()` etc.):
-
-```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."}
-elev_agg = aggregate(elev, fact = 2, fun = mean)
-par(mfrow = c(1, 2))
-plot(elev)
-plot(elev_agg)
-```
-
 The origin is the point closest to (0, 0) if you moved towards it in steps of x and y resolution.
-Note that changing the resolution frequently also changes the origin as here is also the case with the `elev_agg` object.
 
 ```{r}
 origin(elev)
@@ -1204,13 +1188,37 @@ To change the origin , use `origin()`.^[If the origins of two raster datasets ar
 Looking at figure \@ref(fig:origin-example) reveals the effect of changing the origin.
 
 ```{r origin-example, fig.cap = "Plotting rasters with the same values but different origins."}
-# plot the aggregated raster
-plot(elev_agg)
+plot(elev)
 # change the origin
-origin(elev_agg) = c(0, 0)
+origin(elev) = c(0.25, 0.25)
 # plot it again
-plot(elev_agg, add = TRUE)
+plot(elev, add = TRUE)
 ```
+
+Note that changing the resolution frequently (next section) also changes the origin.
+
+### Aggregation and disaggregation
+
+<!-- differentiate between spatial, spectral, temporal and radiometric resolution-->
+Raster datasets can also differ with regard to their resolution. 
+To match resolutions, one can either decrease  (`aggregate()`) or increase (`disaggregate()`) the resolution of one raster.^[It is important to note that we here are solely referring to the spatial resolution but that in remote sensing the spectral (spectral bands), temporal (observations through time of the same area) and radiometric (color depth) resolution are equally important.]
+As an example, we here change the spatial resolution of `elev` from 0.5 to 2 decimal degree, that means, we aggregate by a factor of 4 (Fig. \@ref(fig:aggregate-example)).
+Additionally, the output cell value should correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()` etc.):
+
+```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."}
+elev_agg = aggregate(elev, fact = 2, fun = sum)
+par(mfrow = c(1, 2))
+plot(elev)
+plot(elev_agg)
+```
+
+By contrast, the`disaggregate()` function increases the resolution.
+However, we have to specify a method how to fill the new cells, that means how we distribute the value of the input cell into the nine new cells.
+
+Though our disaggregated `elev_disagg` retrieved back its original resolution, cell size and extent, its values differ from the original cell values. 
+However, this is to be expected, disaggregating **cannot** interpolate values at a finer resolution, it simply uses an interpolation algorithm.
+It is important to keep in mind that disaggregating results in a finer resolution, the corresponding values, however, are only as accurate as their lower resolution source.
+
 
 ### Changing origin, extend and resolution simultaneously
 
@@ -1228,9 +1236,6 @@ elev_agg = extend(elev_agg, 2)
 elev_disagg = resample(elev_agg, elev)
 ```
 
-Though our disaggregated `elev_disagg` retrieved back its original resolution, cell size and extent, its values differ from the original cell values. 
-However, this is to be expected, disaggregating **cannot** predict values at a finer resolution, it simply uses an interpolation algorithm.
-It is important to keep in mind that disaggregating results in a finer resolution, the corresponding values, however, are only as accurate as their lower resolution source.
 
 Finally, in order to align many (possibly hundreds or thousands of) images stored on disk, you could use the `gdalUtils::align_rasters()` function.
 However, you may also use **raster** with very large datasets. 
