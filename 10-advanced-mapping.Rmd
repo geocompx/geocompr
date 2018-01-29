@@ -1,0 +1,147 @@
+# Advanced map making {#adv-map}
+
+## Prerequisites {-}
+
+```{r, include=FALSE}
+library(sf)
+library(raster)
+library(tidyverse)
+library(spData)
+library(tmap)
+```
+
+<!--
+- tmap
+- ggplot2/ggmap (geom_sf, coord_sf)
+- leaflet/mapview
+- rasterVis ?
+- shiny ?
+- mapview?
+-->
+
+## Static maps
+
+### Map styling
+
+<!-- 
+- lines widths, polygon lines vs polygon areas, etc.
+- alpha colors
+- joining points/lines/polygons
+- joining vector/raster data
+- titles, labels
+- satellite tiles in the background
+-->
+
+### Class intervals
+
+<!--
+- color palettes (viridis, etc.)
+- class intervals ("cat", "fixed", "sd", "equal", "pretty", "quantile", "kmeans", "hclust", "bclust", "fisher", and "jenks")
+- bicolor maps?
+-->
+
+### Facetted maps
+
+Facetted maps are a common and potentially effective way of visualizing spatial relationships that are more complex that a single relationship.
+The population of cities at one moment in time can be represented easily on a single map, for example by making the size of symbols variable for each city depending on population.
+However, to represent the populations of cities at multiple moments in time requires an *extra dimension*.
+This could be added by an additional *aesthetic* such as colour but this risks cluttering the map because it will involve multiple overlapping points (cities do not tend to move over time!).
+
+Facetted maps overcome this issue by creating 'small multiples' of spatial information.
+Typically, this will involve plotting the same geometry data multiple times, once for each variable present in the attribute data (this is the default plotting method for `sf` objects, as we saw in Chapter 2).
+However, facets can also represent shifting geometries, e.g. as the spatial distribution of a point pattern evolves over time.
+This use case of facetted plot is illustrated in Figure \@ref(fig:urban-facet).
+
+```{r urban-facet, fig.cap="Facetted map showing the top 30 largest 'urban agglomerations' from 1950 to 2030 based on population projects by the United Nations"}
+qtm(world) +
+  tm_shape(urban_agglomerations) +
+  tm_dots(size = "population_millions") +
+  tm_facets(by = "year")
+```
+
+### Inset maps
+
+<!--
++ maybe mix of maps and plots?
+-->
+
+## Animations
+
+Animated maps can be useful for communicating how spatial phenomena shift over time.
+An advantage of facetted plots are that they can be printed, but the approach has disadvantages:
+faceted maps can become very small with more than ~9 maps in one figure, and it can be hard to see the spatial relationships between each facet when each map is on a different part of the page!
+Furthermore, with the increasing proportion of communication that happens via digital screens, the disadvantage that animations cannot be printed is diminished.
+You can always link readers to a web-page containing an animated (or interactive) version of a printed map to help make it come alive.
+
+Figure \@ref(fig:urban-animated) is a simple example of the benefits of an animated map.
+Unlike the facetted plot presented in the previous section, it does not squeeze all 17 for them all to be displayed simultaneously (see the book's website for the animated version).
+
+```{r urban-animated, fig.cap="Animated map showing the top 30 largest 'urban agglomerations' from 1950 to 2030 based on population projects by the United Nations"}
+knitr::include_graphics("figures/urban-animated.gif")
+```
+
+```{r}
+m = tm_shape(world) + 
+  tm_polygons() +
+  tm_shape(urban_agglomerations) +
+  tm_dots(size = "population_millions") +
+  tm_facets(by = "year", nrow = 1, ncol = 1) 
+```
+
+```{r, echo=FALSE, eval=FALSE}
+m_save = world %>% filter(continent != "Antarctica") %>% 
+  tm_shape() + 
+  tm_polygons() +
+  tm_shape(urban_agglomerations) +
+  tm_dots(size = "population_millions", title.size = "Population (m)", alpha = 0.5, col = "red") +
+  tm_facets(by = "year", nrow = 1, ncol = 1) 
+geocompr:::save_print_quality(m = m_save, f = "/tmp/urban-animated-print.png")
+animation_tmap(tm = m_save, filename = "/tmp/urban-animated.gif", width = 1200, height = 800)
+```
+
+<!-- Robin, check the differences between by="year" and along="year" -->
+
+```{r ani_data_prep, eval=FALSE}
+options(scipen = 999)
+
+wb_data_create = function(indicator, our_name, year, ...){
+  df = wb(indicator = indicator, startdate = year, enddate = year, ...) %>%
+    as_data_frame() %>%
+    select(iso_a2=iso2c, value) %>%
+    mutate(indicator = our_name) %>%
+    spread(indicator, value)
+  return(df)
+}
+
+data_lifeExp = seq(1963, 2013, by=5) %>%
+  set_names(.) %>%
+  map_df(~wb_data_create(.x, indicator = "SP.DYN.LE00.IN",
+                   our_name = "lifeExp",
+                   country = "countries_only"), .id='year') %>%
+  spread(year, lifeExp)
+
+world_sf_temporal = ne_countries(returnclass = 'sf') %>%
+  left_join(., data_lifeExp, by = c('iso_a2')) %>%
+  mutate(area_km2 = set_units(st_area(.), km^2)) %>%
+  select(iso_a2, name_long, continent, region_un, subregion, type, area_km2, `1963`:`2013`) %>%
+  gather(year, lifeExp, `1963`:`2013`)
+```
+
+```{r animation1, eval=FALSE}
+m1 = tm_shape(world_sf_temporal) + 
+  tm_polygons("lifeExp") +
+  tm_facets(by = "year", nrow = 1, ncol = 1, drop.units = TRUE)
+
+animation_tmap(m1, filename = "figures/11-lifeExp_animation.gif", width = 2000, height = 600, delay = 40)
+```
+
+```{r animation2, eval=FALSE}
+world_sf_temporal2 = filter(world_sf_temporal, continent == "South America")
+m2 = tm_shape(world_sf_temporal2) +
+  tm_polygons("lifeExp", n = 12) +
+  tm_facets(by = "name_long", along = "year", drop.units = TRUE, free.coords = TRUE)
+animation_tmap(m2, filename = "figures/11-lifeExp_sa_animation.gif", width = 1600, height = 1000, delay = 40)
+```
+
+## Interactive maps
+
