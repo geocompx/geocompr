@@ -1,3 +1,5 @@
+# (PART) Basic applications {-}
+
 # Transport applications {#transport}
 
 ## Prerequisites {-}
@@ -56,7 +58,7 @@ The case study city is a coastal settlement in the West of England, described in
 
 ## A case study of Bristol {#bris-case}
 
-The case study used for this chapter is located in Bristol - a city in the west of England, around 30 km East of the Welsh capital Cardiff.
+The case study used for this chapter is located in Bristol, a city in the west of England, around 30 km East of the Welsh capital Cardiff.
 An overview of the region's transport network is illustrated in Figure \@ref(fig:bristol), which shows a diversity of transport infrastructure, for cycling, public transport, and private motor vehicles.
 
 ```{r, echo=FALSE, eval=FALSE}
@@ -216,7 +218,8 @@ This shows that most zones have between 0 and 4,000 trips originating from them 
 More trips are made by people living near the center of Bristol and fewer on the outskirts.
 Why is this? Remember that we are only dealing with trips within the study region:
 low trip numbers in the outskirts of the region can be explained by the fact that many people in these peripheral zones will travel to other regions outside of the study area.
-Trips outside the study region can be included in regional model by a special destination ID covering any trips that go to a zone not represented in the model, for example to a different travel region or a different country [@hollander_transport_2016], but are simply ignored in this chapter.
+Trips outside the study region can be included in regional model by a special destination ID covering any trips that go to a zone not represented in the model [@hollander_transport_2016].
+The data in `od`, however, simply ignores such trips: it is an 'intra-zonal' model.
 
 In the same way that OD datasets can be aggregated to the zone of origin, they can also be aggregated to provide information about destination zones.
 People tend to gravitate towards central places.
@@ -574,12 +577,17 @@ plot(ways_sln@sl$geometry, add = TRUE)
 ## Prioritizing new infrastructure
 
 This chapter's final practical section demonstrates the policy-relevance of geocomputation for transport applications by identifying locations where new transport infrastructure may be needed.
-Chapter \@ref(location) demonstrates methods for prioritising the location of new bike shops which may benefit from new cycling infrastructure, demonstrating an important feature of transport systems: they are closely linked to broader social, economic and land-use patterns.
+The next chapter (\@ref(location)) demonstrates another application:
+prioritising the location of new bike shops.
+Bike shops may benefit from new cycling infrastructure, demonstrating an important feature of transport systems: they are closely linked to broader social, economic and land-use patterns.
 This section ties-together the various strands that explored some geographic features of Bristol's transport system, covered in sections \@ref(transport-zones) to \@ref(route-networks).
 
-Geocomputational methods to prioritize cycling infrastructure have been demonstrated (these would be supplemented with other methods for assessing the social, economic and environmental impacts of different options for a real case study):
-short but car-dependent commuting routes (generated from desire lines) were created in section \@ref(routes); desire lines representing the first leg to public transport nodes were created in section \@ref(nodes); and the ability to analyze route networks using concepts from graph theory were demonstrated in the previous section.
-The final code chunk of this chapter combines car-dependent routes in `route_carshort` with a newly-created object, `route_rail`, and adds a new column representing the amount of travel along the centroid-to-centroid desire lines they represent:
+Clearly the types of analysis presented here would need to be extended and complimented by other methods to be used in real-world applications, as discussed in section \@ref(future-directions-of-travel).
+However each stage could be useful on its own, and feed-into wider analyses.
+To summarize, these were: identifying short but car-dependent commuting routes (generated from desire lines) were created (section \@ref(routes)); creating desire lines representing the first leg to public transport nodes were created in (section \@ref(nodes)); and analyzing transport systems at the route network using concepts from graph theory (section \@ref(route-networks)).
+
+The final code chunk of this chapter combines these strands of analysis.
+It adds the car-dependent routes in `route_carshort` with a newly-created object, `route_rail` and creates a new column representing the amount of travel along the centroid-to-centroid desire lines they represent:
 
 ```{r}
 route_rail = st_set_geometry(desire_rail, "leg_orig") %>% 
@@ -594,6 +602,8 @@ n_trips = route_cycleway$all / 100
 plot(route_cycleway["distance"], lwd = n_trips)
 ```
 
+The result of this code, visualized in Figure \@ref(fig:cycleways), identifies routes of interest terms of car dependency and key opportunities to invest in public transport-cycling integration.
+Although other routes between zones are likely to be used --- in reality people do not travel to zone centroids or always use the shortest route algorithm for a particular mode --- the results demonstrate routes along which cycle paths could be prioritized.
 
 ```{r cycleways, echo=FALSE, message=FALSE, fig.cap="Potential routes along which to prioritise cycle infrastructure in Bristol, based on access key rail stations (red dots) and routes with many short car journeys (north of Bristol surrounding Stoke Bradley. Line thickness is proportional to number of trips."}
 # library(leaflet)
@@ -614,43 +624,39 @@ m_leaflet = qtm(ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("l
 tmap::tmap_leaflet(m_leaflet)
 ```
 
-The result of this code, visualized in Figure \@ref(fig:cycleways), identifies routes of interest terms of car dependency and key opportunities to invest in public transport-cycling integration.
-Although other routes between zones are possible and likely --- in reality people do not travel to zone centroids or always use the shortest route algorithm for a particular mode --- the results demonstrate routes along which cycle paths could be prioritized.
-Clearly further work is needed to create a regional cycling and walking strategy in the Bristol region.
-However, the chapter demonstrates how geocomputational skills, combined with open access data and a strong policy motivation, can provide a powerful, transparent and reproducible evidence base for transport applications.
-
-The wider point is that transport systems are intimately linked to the wider economic and social context.
+<!-- Much more work is needed to create a realistic strategic cycle network but the analysis shows that R can be used to create a transparent and reproducible evidence base for transport applications. -->
+The results may look more attractive in an interactive map, but what do they mean?
+The routes highlighted in Figure \@ref(fig:cycleways) suggest that transport systems are intimately linked to the wider economic and social context.
 The example of Stokes Bradley is a case in point:
 its location, lack of public transport services and active travel infrastructure help explain why it is so highly car-dependent.
-Geocomputation has the potential to provide evidence to people in Stokes Bradley, Bristol and beyond about how to best intervene to encourage the uptake of sustainable transport.
-This work is part of an unfolding story about the transition away from fossil fuels in transport systems worldwide, from London to Delhi [@hickman_transitions_2011].
+The wider point is that car dependency has a spatial distribution which has implications for sustainable transport policies [@hickman_transitions_2011].
 
 ## Future directions of travel
 
-This chapter has provided a taster of the possibilities of using geocomputation for transport research.
-It has explored some of the geographic key features of the travel patterns in a major city using open data to identify where investment in sustainable transport options may be most urgently needed.
-More importantly, from a learning perspective, it has demonstrated how representing transport systems at multiple interacting geographical levels can lead to new insights about how they work, and how to change them.
-However, there is much more that could be done in this area.
-Geocomputation for transport applications is a small but rapidly growing field and space requirements mean that we have only scratched the surface of what is possible, while emphasizing the principles and key methods of implementation in R.
+This chapter provide a taster of the possibilities of using geocomputation for transport research.
+It has explored some key geographic elements that make-up a city's transport system using open data and reproducible code.
+The results could help plan where investment is needed.
 
-It is possible to build on the foundations presented in this chapter in many directions.
-Transport is the fastest growing source of greenhouse gas emissions in many countries, and is set to become according to become "the largest GHG emitting sector, especially in developed countries" according to a recent article in the online platform [EURACTIV](https://www.euractiv.com/section/agriculture-food/opinion/transport-needs-to-do-a-lot-more-to-fight-climate-change/).
+Transport systems operate at multiple interacting levels, meaning that geocomputational methods have great potential to generate insights into how they work.
+There is much more that could be done in this area: it would be possible to build on the foundations presented in this chapter in many directions.
+Transport is the fastest growing source of greenhouse gas emissions in many countries, and is set to become "the largest GHG emitting sector, especially in developed countries" (see  [EURACTIV.com](https://www.euractiv.com/section/agriculture-food/opinion/transport-needs-to-do-a-lot-more-to-fight-climate-change/)).
 Because of the highly unequal distribution of transport-related emissions across society, and the fact that transport (unlike food and heating) is not essential for well-being, there is great potential for the sector to rapidly decarbonize through demand reduction, electrification of the vehicle fleet and the uptake of active travel modes such as walking and cycling.
-Further exploration of such 'transport futures' represents a particularly promising future direction of travel from a policy perspective.
+Further exploration of such 'transport futures' at the local level represents promising direction of travel for transport-related geocomputational research.
 
-From a methods perspective there are also many further potential directions.
 <!-- Something on lines, routes, route networks (RL) -->
-Characteristics of the route such as speed limits, busyness and the provision of protected cycling and walking paths may be able to help explain differences in 'mode-split' (the proportion of trips made by different modes of transport).
-By aggregating OpenStreetMap data (downloaded using methods presented in Chapter \@ref(read-write)) using buffers and spatial data methods presented in Chapters \@ref(attr) and \@ref(spatial-operations), for example, it would be possible to detect the presence of green space in close proximity to parks.
-Using R's statistical modelling capabilities this could then be used to predict the current number of using a certain mode along particular desire lines, and how that may switch under scenarios of change.
-A similar approach was used to create the Propensity to Cycle Tool (PCT), a publicly accessible mapping tool developed in R to prioritize investment in cycling, available at [www.pct.bike](http://www.pct.bike/) [@lovelace_propensity_2017].
-Similar tools could be used to encourage evidence-based policies around other modes, not just cycling.
+Methodologically the foundations presented in this chapter could be extended by including more variables in the analysis.
+Characteristics of the route such as speed limits, busyness and the provision of protected cycling and walking paths could be linked to 'mode-split' (the proportion of trips made by different modes of transport).
+By aggregating OpenStreetMap data using buffers and spatial data methods presented in Chapters \@ref(attr) and \@ref(spatial-operations), for example, it would be possible to detect the presence of green space in close proximity to parks.
+Using R's statistical modelling capabilities this could then be used to predict current and future levels of cycling, for example.
 
-One growing area of interest surrounds the simulation of individual people and vehicles on the road network using techniques such as spatial microsimulation and agent-based modelling (ABM).
-R has the capability to model people in zones, and interface with ABM software such as NetLogo.
-Combined with its geographical capabilities, demonstrated in this book, R would seem an appropriate language for such developments to take place.
-Of course this should be done in ways that build-on and extend existing work in the area.
-R's 'ecological niche' in transport modelling software could be around the integration of detailed geographic and advanced statistical analysis methods with techniques already used in transport research.
+This type of analysis underlies the Propensity to Cycle Tool (PCT), a publicly accessible (see [www.pct.bike](http://www.pct.bike/)) mapping tool developed in R that is being used to prioritize investment in cycling accross England [@lovelace_propensity_2017].
+Similar tools could be used to encourage evidence-based transport policies related to other topics such as air polution and public transport access around the world.
+
+<!-- One growing area of interest surrounds the simulation of individual people and vehicles on the road network using techniques such as spatial microsimulation and agent-based modelling (ABM). -->
+<!-- R has the capability to model people in zones, and interface with ABM software such as NetLogo. -->
+<!-- Combined with its geographical capabilities, demonstrated in this book, R would seem an appropriate language for such developments to take place. -->
+<!-- Of course this should be done in ways that build-on and extend existing work in the area. -->
+<!-- R's 'ecological niche' in transport modelling software could be around the integration of detailed geographic and advanced statistical analysis methods with techniques already used in transport research. -->
 
 ## Exercises {#ex-transport}
 
@@ -671,7 +677,6 @@ sum(route_cycleway$all) / sum(desire_lines$all) # around 2%
 d_intersect = desire_lines[route_cycleway, , op = st_crosses]
 sum(d_intersect$all) / sum(desire_lines$all) # around 2%
 ```
-
 
 1. The analysis presented in this chapter is designed for teaching how geocomputation methods can be applied to transport research. If you were to do this 'for real' for local government or a transport consultancy what top 3 things would you do differently?
 <!-- Higher level of geographic resolution. -->

@@ -2,17 +2,12 @@
 
 ## Prerequisites {-}
 
-- This chapter requires the following packages (**lwgeom** is also used but does not need to loaded):
+- This chapter uses the same packages as Chapter \@ref(spatial-operations) but with the addition of **spDataLarge**, which was installed in Chapter \@ref(spatial-class) (**lwgeom** is also used, but does not need to be loaded):
 
 ```{r, message=FALSE}
 library(sf)
 library(raster)
 library(tidyverse)
-```
-
-- It also relies on **spData** and **spDataLarge**, which load datasets and provide external files used in the code examples of this chapter:
-
-```{r, message=FALSE}
 library(spData)
 library(spDataLarge)
 ```
@@ -20,7 +15,7 @@ library(spDataLarge)
 ## Introduction
 
 The previous three chapters have demonstrated how geographic datasets are structured in R (Chapter \@ref(spatial-class)) and how to manipulate them based on their non-geographic attributes (Chapter \@ref(attr)) and spatial properties (Chapter \@ref(spatial-operations)).
-This chapter builds on these contents by demonstrating how to modify the geometry underlying spatial datasets for vector and raster objects.
+This chapter extends these skills by demonstrating how to interact with a modify the geometry underlying spatial datasets.
 
 Section \@ref(geo-vec) covers transforming vector geometries with 'unary' and 'binary' operations.
 <!-- TODO: add something on n-ary ops (RL) -->
@@ -32,8 +27,8 @@ Type transformations (from a polygon to a line, for example) are demonstrated in
 
 Section \@ref(geo-ras) covers geometric transformations on raster objects.
 This involves changing the size and number of the underlying pixels, and assigning them new values.
-It teaches how to change the resolution (also called raster aggregation and disaggregation, the extent and the origin of a raster.
-These operations are especially useful if one would like to align raster datasets from diverse sources (see section \@ref(raster-alignment)).
+It teaches how to change the resolution (also called raster aggregation and disaggregation), the extent and the origin of a raster.
+These operations are especially useful if one would like to align raster datasets from diverse sources.
 Aligned raster objects share the same header information, allowing them to be processed using map algebra operations, described in section \@ref(map-algebra). 
 
 A vital type of geometry transformation is *reprojecting* from one coordinate reference system (CRS) to another.
@@ -71,7 +66,7 @@ This can lead to problems, as illustrated by the following code chunk, which cre
 london_buff = st_buffer(london, dist = 1)
 ```
 
-The message stating that `dist is assumed to be in decimal degrees` is useful: it warns that the result may be of limited use because it is in units of latitude and longitude, rather meters or some other suitable measure of distance.
+The message stating that `dist is assumed to be in decimal degrees` is useful: it warns that the result may be of limited use because it is in units of latitude and longitude, rather than meters or some other suitable measure of distance.
 The consequences of a failure to work on projected data are illustrated in Figure \@ref(fig:crs-buf) (left panel):
 the buffer is elongated in the north-south direction because lines of longitude converge towards the Earth's poles.
 
@@ -86,7 +81,7 @@ This is illustrated in Figures \@ref(fig:crs-buf) and \@ref(fig:wintriproj).
 
 Do not interpret the warning about the geographic (`longitude/latitude`) CRS as "the CRS should not be set": it almost always should be!
 It is better understood as a suggestion to *reproject* the data onto a projected CRS.
-This suggestion does not always need to be heeded: performing spatial and geometric operations makes little or no difference in some cases (e.g., spatial subsetting).
+This suggestion does not always need to be heeded: performing spatial and geometric operations makes little or no difference in some cases (e.g. spatial subsetting).
 But for operations involving distances such as buffering, the only way to ensure a good result is to create a projected copy of the data and run the operation on that.
 This is done in the code chunk below:
 
@@ -155,7 +150,7 @@ However there are some general principles, provided in this section, that can he
 The question of *when to transform* is easier to answer.
 In some cases transformation to a projected CRS is essential for geocomputational work.
 An example is when geometric operations involving distance measurements or area calculations are required.
-Conversely, if the outputs of a project are to be published in an on-line map, it may be necessary to convert them to a geographic CRS.
+Conversely, if the outputs of a project are to be published in an online map, it may be necessary to convert them to a geographic CRS.
 If the visualization phase of a project involves publishing results using [leaflet](https://github.com/Leaflet/Leaflet) via the common format [GeoJSON](http://geojson.org/) (a common scenario) projected data should probably be transformed to WGS84. 
 Another case is when two objects with different CRSs must be compared or combined: performing a geometric operation on two objects with different CRSs results in an error.
 This is demonstrated in the code chunk below, which attempts to find the distance between the projected and unprojected versions of `london`:
@@ -471,7 +466,7 @@ wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
 cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "ngb")
 ```
 
-Many properties of the new object differs from the previous one, which include the number of columns and rows (and therefore number of cells), resolution (transformed from meters into degrees), and extent, as illustrated in Table \@ref(tab:catraster) (note that the number of categories increases from 14 to 15 because of the addition of `NA` values, not because a new category has been created --- the land cover classes are preserved).
+Many properties of the new object differ from the previous one, which include the number of columns and rows (and therefore number of cells), resolution (transformed from meters into degrees), and extent, as illustrated in Table \@ref(tab:catraster) (note that the number of categories increases from 14 to 15 because of the addition of `NA` values, not because a new category has been created --- the land cover classes are preserved).
 <!-- freq(cat_raster_wgs84) -->
 <!-- freq(cat_raster) -->
 
@@ -516,7 +511,7 @@ crs(con_raster_ea)
 ```
 
 Raster reprojection on numeric variables also leads to small changes values and spatial properties, such as the number of cells, resolution, and extent.
-These changes small changes are demonstrated in Table \@ref(tab:rastercrs)^[
+These changes are demonstrated in Table \@ref(tab:rastercrs)^[
 Another minor change, that is not represented in Table \@ref(tab:rastercrs), is that the class of the values in the new projected raster dataset is `numeric`.
 This is because the `bilinear` method works with continuous data and the results are rarely coerced into whole integer values.
 This can have implications for file sizes when raster datasets are saved.
@@ -551,20 +546,20 @@ For instance, if we are interested in a density (points per grid cell or inhabit
 ## Geometric operations on vector data {#geo-vec}
 
 This section is about operations that in some way change the geometry of vector (`sf`) objects.
-It is more advanced than the spatial data operations presented in the previous Chapter (in section \@ref(spatial-vec)) because here we drill down into the geometry:
+It is more advanced than the spatial data operations presented in the previous chapter (in section \@ref(spatial-vec)) because here we drill down into the geometry:
 the functions discussed in this section work on objects of class `sfc` in addition to objects of class `sf`.
 
 ### Simplification
 
-Simplification is a process for generalization of vector objects (lines and polygons) usually for its use in smaller scale maps.
-Additional reason for simplification is reduction of the object size and therefore the size of a saved file.
-Therefore, data is often simplified before its use in interactive maps. 
-The **sf** package provides `st_simplify()`, which uses the GEOS implementation of the Douglas-Peucker algorithm, to reduce the vertex count.
+Simplification is a process for generalization of vector objects (lines and polygons) usually for use in smaller scale maps.
+Another reason for simplifying objects is to reduce the amount of memory, disk space and network bandwidth they consume:
+it may be wise to simplify complex geometries before publishing them as interactive maps. 
+The **sf** package provides `st_simplify()`, which uses the GEOS implementation of the Douglas-Peucker algorithm to reduce the vertex count.
 `st_simplify()` uses the `dTolerance` to control the level of generalization in map units [see @douglas_algorithms_1973 for details].
 <!-- I have no idea what the next sentence means -->
 <!-- As a result, all vertices in the simplified geometry will be within this value from the original ones. -->
 Figure \@ref(fig:seine-simp) illustrates simplification of a `LINESTRING` geometry representing the river Seine and tributaries.
-The simplified geometry was creating by the following command:
+The simplified geometry was created by the following command:
 
 ```{r}
 seine_simp = st_simplify(seine, dTolerance = 2000)  # 2000 m
@@ -642,7 +637,7 @@ seine_centroid = st_centroid(seine)
 Centroids could be useful to represent more complex objects - lines and polygons, for example to calculate distances between centers of polygons.
 They are also often used as places where polygons or lines labels are put. 
 However, it is important to know that centroids could be located outside of the given object, e.g. in cases of irregular shaped polygons or lines.
-Examples of this could be seen on the right plot on Figure \@ref(fig:centr).
+Examples of this can be seen on the right plot on Figure \@ref(fig:centr).
 
 Alternatively, the `st_point_on_surface()` can be used.
 
@@ -651,7 +646,7 @@ nz_pos = st_point_on_surface(nz)
 seine_pos = st_point_on_surface(seine)
 ```
 
-It ensures that the created point lies on the given object (see red points on Figure \@ref(fig:centr)).
+This ensures that the created point lies on the given object (see red points on Figure \@ref(fig:centr)).
 
 ```{r centr, warning=FALSE, echo=FALSE, fig.cap="Comparison between the outputs of `st_centroid()` (black points) and `st_point_on_surface()` (red points) on New Zeleand's regions (left) and the Seine, Marne and Yonne rivers (right)."}
 par_old = par()
@@ -667,7 +662,7 @@ par(par_old)
 
 ### Buffers
 
-Buffers are polygons representing the area within a given distance of a geometric features:
+Buffers are polygons representing the area within a given distance of a geometric feature:
 regardless of whether the input is a point, line or polygon, the output is polygon.
 Unlike simplification (which is often used for visualization and reducing file size) buffering tends to be used for geographic data analysis.
 How many points are within a given distance of this line?
@@ -713,10 +708,10 @@ plot(buff_single$geometry, add = T)
 Affine transformation is any transformation that preserves lines and parallelism.
 <!-- The midpoint of a line segment remains a midpoint and all points lying on a line initially still lie on a line after an affine transformation. -->
 However, angles or length are not necessarily preserved.
-Affine transformations include, among others, shifting (translation), scaling and rotation
+Affine transformations include, among others, shifting (translation), scaling and rotation.
 <!-- translation, scaling, homothety, similarity transformation, reflection, rotation, shear mapping -->
-Additionally, it is possible to use any combination of those.
-Affine transformations are an essential part of geocomputation, e.g., when reprojecting or when improving the geometry of a vector dataset that was created based on a distorted or wrongly projected map.
+Additionally, it is possible to use any combination of these.
+Affine transformations are an essential part of geocomputation, e.g. when reprojecting or when improving the geometry of a vector dataset that was created based on a distorted or wrongly projected map.
 
 The **sf** package implements affine transformation for objects of classes `sfg` and `sfc`.
 <!-- stats sfc issue -->
@@ -727,21 +722,21 @@ nz_sfc = nz$geometry
 
 Shifting moves every point by the same distance in map units.
 It could be done by adding a numerical vector to a vector object.
-For example, the code below shifts all y-coordinates by 100,000 meters to the north but leaves the x-coordinates untouchted (left panel on the Fig. \@ref(fig:affine-trans)). 
+For example, the code below shifts all y-coordinates by 100,000 meters to the north but leaves the x-coordinates untouched (left panel on the Fig. \@ref(fig:affine-trans)). 
 
 ```{r}
 nz_shift = nz_sfc + c(0, 100000)
 ```
 
 Scaling enlarges or shrinks objects by a factor.
-It could be applied either globally or locally. <!-- my terms - jn-->
-Global scaling increases or decreases all coordinates values in relation to the origin coordinates while keeping all geometries topological relations intact.
+It can be applied either globally or locally. <!-- my terms - jn-->
+Global scaling increases or decreases all coordinates values in relation to the origin coordinates, while keeping all geometries topological relations intact.
 It can by done by subtraction or multiplication of a`sfg` or `sfc` object.
 ```{r, echo=FALSE,eval=FALSE}
 nz_scale0 = nz_sfc * 0.5
 ```
-Local scaling treats geometries independently and it requires points around which geometries are going to be scaled, e.g. centroids.
-In the example below, each geometry is shrunk by a factor of two around theirs centroids (central panel on the Fig. \@ref(fig:affine-trans)).
+Local scaling treats geometries independently and requires points around which geometries are going to be scaled, e.g. centroids.
+In the example below, each geometry is shrunk by a factor of two around the centroids (central panel on the Fig. \@ref(fig:affine-trans)).
 <!-- scaling by a two-elements vector -->
 
 ```{r}
@@ -827,7 +822,7 @@ plot(nz_sfc)
 plot(nz_shear, add = TRUE, col = "red")
 ```
 
-Finally, the newly created geometries could replace the old ones with the `st_set_geometry()` function: 
+Finally, the newly created geometries can replace the old ones with the `st_set_geometry()` function: 
 
 ```{r}
 nz_scale_sf = st_set_geometry(nz, nz_scale)
@@ -840,7 +835,7 @@ Spatial clipping is a form of spatial subsetting that involves changes to the `g
 Clipping can only apply to features more complex than points: 
 lines, polygons and their 'multi' equivalents.
 To illustrate the concept we will start with a simple example:
-two overlapping circles with a center point one unit away from each other and radius of one:
+two overlapping circles with a center point one unit away from each other and a radius of one:
 
 ```{r points, fig.cap="Overlapping circles."}
 b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
@@ -861,7 +856,7 @@ plot(b)
 plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
 ```
 
-The subsequent code chunk demonstrate how this works for all combinations of the 'Venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book R for Data Science [@grolemund_r_2016].
+The subsequent code chunk demonstrates how this works for all combinations of the 'Venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book R for Data Science [@grolemund_r_2016].
 <!-- Todo: reference r4ds -->
 
 ```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators.", warning=FALSE}
@@ -873,9 +868,8 @@ Some points will be inside just one circle, some will be inside both and some wi
 
 There are two different ways to subset points that fit into combinations of the circles: via clipping and logical operators.
 But first we must generate some points.
-We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y`.
-To generate this points will use a function not yet covered in this book, `st_sample()`.
-Next we will generate the situation plotted in Figure \@ref(fig:venn-subset):
+We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y` using the **sf** function `st_sample()`.
+This generates objects plotted in Figure \@ref(fig:venn-subset):
 
 ```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y."}
 bb = st_bbox(st_union(x, y))
@@ -906,19 +900,13 @@ group_by(us_states, REGION) %>%
   summarize(sum(pop = total_pop_15, na.rm = TRUE))
 ```
 
-For attribute data aggregation the grouping variable is another variable, typically one with few unique values relative to the number of rows (see section \@ref(vector-attribute-aggregation)).
-What we did not cover in that section was that attribute data aggregation dissolves the geometries of touching polygons.
-The `REGION` variable in the `us_states` dataset is a good example:
-there are 49 states (excluding Hawaii and Alaska) which can be aggregated into four regions.
-This is demonstrated in the code chunk below, the results of which are illustrated in Figure \@ref(fig:us-regions):
+Further to what was covered in section \@ref(vector-attribute-aggregation), aggregation of polygons often silently dissolves the geometries of touching polygons in the same group.
+This is demonstrated in the code chunk below, in which the `REGION` variable in `us_states` is used to aggregate the states into four regions, illustrated in Figure \@ref(fig:us-regions):
 
 ```{r}
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
                     FUN = sum, na.rm = TRUE)
 ```
-<!--
-show also tidyverse way, so what you are doing is basically a spatial join and a subsequent aggregation without a grouping variable. Didactically, it might be better to present a grouping variable.
--->
 
 ```{r, echo=FALSE}
 # st_join(buff, africa[, "pop"]) %>%
@@ -940,9 +928,9 @@ regions2 = us_states %>%
 
 ### Type transformations {#type-trans}
 
-Geometry casting is powerful operation which enable transformation of the geometry type.
+Geometry casting is a powerful operation which enables transformation of the geometry type.
 It is implemented in the `st_cast` function from the `sf` package.
-Importantly, `st_cast` behaves differently on single simple feature geometry (`sfg`) objects, and simple feature geometry column (`sfc`) and simple features objects.
+Importantly, `st_cast` behaves differently on single simple feature geometry (`sfg`) objects, simple feature geometry column (`sfc`) and simple features objects.
 
 Let's create a multipoint to illustrate how geometry casting works on simple feature geometry (`sfg`) objects:
 
@@ -976,7 +964,7 @@ all.equal(multipoint, multipoint_2, multipoint_3)
 ```
 
 ```{block2 type='rmdnote'}
-For single simple feature geometries (`sfg`), `st_cast` provides also geometry casting from non-multi to multi types (e.g. `POINT` to `MULTIPOINT`) and from multi types to non-multi types.
+For single simple feature geometries (`sfg`), `st_cast` also provides geometry casting from non-multi to multi types (e.g. `POINT` to `MULTIPOINT`) and from multi types to non-multi types.
 However, only the first element of the old object would remain in the second group of cases.
 <!-- note: beware of information lost (you will get a warning) -->
 ```
@@ -990,7 +978,10 @@ t = cast_all(multipoint)
 t2 = cast_all(polyg)
 ```
 
-Geometry casting of simple feature geometry column (`sfc`) and simple features objects works the same as for single geometries in most of the cases. 
+Geometry casting of simple features geometry column (`sfc`) and simple features objects works the same as for single geometries in most of the cases. 
+<!--
+not sure about phrasing of above sentence
+-->
 One important difference is conversion between multi to non-multi types.
 As a result of this process, multi-objects are split into many non-multi objects.
 
@@ -1006,8 +997,8 @@ multilinestring_sf
 ```
 
 You can imagine it as a road or river network. 
-The new object has only one row that define all the lines.
-This restrict number of operation that could be done, for example it prevent adding names to each line segment or calculating lengths of single lines.
+The new object has only one row that defines all the lines.
+This restricts the number of operations that can be done, for example it prevents adding names to each line segment or calculating lengths of single lines.
 The `st_cast` function can be used in this situation, as it separates one mutlilinestring into three linestrings:
 
 ```{r}
@@ -1023,7 +1014,7 @@ plot(linestring_sf2$geom, col = c("red", "green", "blue"), main = "LINESTRING")
 par(par_old)
 ```
 
-The newel created object allows for attributes creation (see more in section \@ref(vec-attr-creation)) and length measurements:
+The newly created object allows for attributes creation (see more in section \@ref(vec-attr-creation)) and length measurements:
 
 ```{r}
 linestring_sf2$name = c("Riddle Rd", "Marshall Ave", "Foulke St")
@@ -1052,7 +1043,7 @@ raster_template = raster(extent(cycle_hire_osm_projected), resolution = 1000,
                          crs = st_crs(cycle_hire_osm_projected)$proj4string)
 ```
 
-Rasterization is very flexible operation and gives different results based not only on a template raster, but also on the type of an input vector (e.g. points, polygons) and given arguments.
+Rasterization is a very flexible operation and gives different results based not only on a template raster, but also on the type of input vector (e.g. points, polygons) and given arguments.
 
 Let's try three different approaches to rasterize points - cycle hire locations across London (Figure \@ref(fig:vector-rasterization1):A).
 The simplest case is when we want to create a raster containing areas with cycle hire points (also known as a presence/absence raster).
@@ -1073,7 +1064,7 @@ ch_raster2 = rasterize(cycle_hire_osm_projected, raster_template,
 The new output, `ch_raster2`, shows the number of cycle hire points in each grid cell.
 However, the cycle hire locations have different numbers of bicycles, which is described by the `capacity` variable.
 We need to select a field (`"capacity"`) and a function (`sum`) to determine a cycle hire capacity in each grid cell (Figure \@ref(fig:vector-rasterization1):D).
-In the same way another statistics could be calculated, such as an average capacity for each grid cell, etc.
+In the same way, another statistics could be calculated such as an average capacity for each grid cell, etc.
 
 ```{r}
 ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template, 
@@ -1101,7 +1092,7 @@ california_raster1 = rasterize(california_borders, raster_template2)
 ```
 
 On the other hand, polygon rasterization is based on the positions of cells' centers (points on Figure \@ref(fig:vector-rasterization2):B).
-Values are only given when the center on the cell lies inside of the input polygon (Figure \@ref(fig:vector-rasterization2):B).
+Values are only given when the center of the cell lies inside of the input polygon (Figure \@ref(fig:vector-rasterization2):B).
 
 ```{r}
 california_raster2 = rasterize(california, raster_template2)
@@ -1127,31 +1118,33 @@ source("code/05-vector-rasterization2.R")
 
 While `rasterize` works well for most cases, it is not performance optimized. 
 Fortunately, there are several alternatives, including the `fasterize::fasterize()`^[The **fasterize** package is available at https://github.com/ecohealthalliance/fasterize.] and `gdalUtils::gdal_rasterize()`. 
-The former is 100s times faster than `rasterize()`, however it is currently limited to polygon rasterization.
+The former is much (100 times+) faster than `rasterize()` but is currently limited to polygon rasterization.
 The latter is part of GDAL and therefore requires a vector file, instead of an `sf` object, as an input and rasterization parameters, instead of a `Raster*` template object.^[See more at http://www.gdal.org/gdal_rasterize.html.]
 
 ## Geometric operations on raster data {#geo-ras}
 
 Geometric raster operations include the shift, flipping, mirroring, scaling, rotation or warping of images.
-These operations are necessary when geolocating a raster image.
-Geolocating requires the rectification of the image, which includes one or several of the following steps depending on the task at hand [see also @liu_essential_2009]:
+These operations are e.g. necessary when geolocating a raster image.
+In turn, geolocating requires the rectification of the image, which includes one or several of the following steps depending on the task at hand [see also @liu_essential_2009]:
 
 - Georeferencing with ground control points.
 - Orthorectification also georeferences an image but additionally takes into account local topography.
-- Image (co-)registration is the process of aligning one image with another (in terms of CRS, origin and resolution). Registration becomes necessary for images from the same scene but shot from different sensors or from different angles or at different points in time.
+- Image (co-)registration is the process of aligning one image with another (in terms of CRS, origin and resolution). 
+Registration becomes necessary for images from the same scene but shot from different sensors or from different angles or at different points in time.
 
-In this section we will mainly deal with the co-registration (alignment) of images including a matching resolution, extent and origin.
-A matching projection is of course also required but has been already covered in section \@ref(reprojecting-raster-geometries).
-Secondly, we will show how to convert raster images into the spatial vector model.
+In this section we will first show how to change the extent, the resolution and the origin of an image.
+As mentioned before, most of the times, we need these operations in order to align several images.
+A matching projection is of course also required but is already covered in section \@ref(reprojecting-raster-geometries).
+In any case, there are other reasons why to perform a geometric operation on a single raster image.
+For instance, in chapter \@ref(location) we define metropolitan areas in Germany as 20 km^2^ pixels with more than 500,000 inhabitants. 
+The original inhabitant raster, however, has a resolution of 1 km^2^ which is why we will decrease (aggregate) the resolution by a factor of 20 (see section \@ref(define-metropolitan-areas).
+Finally, we will show how to convert raster images into the spatial vector model.
 
-### Image co-registration (image alignment) {#raster-alignment}
+### Extent and origin
 
-When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent has to match. Otherwise, how should we add the values of one raster with a resolution of 0.2 decimal degrees to a second with a resolution of 1 decimal degree? The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions. We can deal with such mismatches by aligning the rasters.
-
-```{r, echo=FALSE}
-library(spData)
-data(elev)
-```
+When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent has to match. Otherwise, how should we add the values of one raster with a resolution of 0.2 decimal degrees to a second with a resolution of 1 decimal degree?
+The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions. 
+We can deal with such mismatches by aligning the rasters.
 
 In the simplest case, two images only differ in a mismatch in extent.
 <!--The `projectRaster()` function reprojects one raster to a desired projection, say from UTM to WGS84.-->
@@ -1170,17 +1163,41 @@ elev_3 = elev + elev_2
 ```
 
 However, we can also align the extent of two rasters with `extend()`. 
-Instead of telling the function how many rows or columns should be added (as done before), we let it figure it out by itself using another raster object.
+Instead of telling the function how many rows or columns should be added (as done before), we allow it to figure it out by using another raster object.
 Here, we extend the `elev` object to the extent of `elev_2`. 
-The newly added rows and column receive the default value of the `value` parameter, i.e., `NA`.
+The newly added rows and column receive the default value of the `value` parameter, i.e. `NA`.
 
 ```{r}
 elev_4 = extend(elev, elev_2)
 ```
 
-Matching different resolutions is computationally more complicated, but functions `aggregate()` and `disaggregate()` help with that.
-For instance, let us aggregate `elev` from a resolution of 0.5 to a resolution of 1, that means aggregating by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
-Additionally, the output cell value should correspond to the mean of the input cells (but  one could use other functions as well such as `median()`, `sum()`, etc.):
+The origin is the point closest to (0, 0) if you moved towards it in steps of x and y resolution.
+
+```{r}
+origin(elev_4)
+```
+
+If two rasters have different origins, their cells do not overlap completely which would make map algebra impossible.
+To change the origin , use `origin()`.^[If the origins of two raster datasets are just marginally apart, it sometimes is sufficient to simply increase the `tolerance` argument  of `raster::rasterOptions()`.]
+Looking at figure \@ref(fig:origin-example) reveals the effect of changing the origin.
+
+```{r origin-example, fig.cap = "Plotting rasters with the same values but different origins."}
+# change the origin
+origin(elev_4) = c(0.25, 0.25)
+plot(elev_4)
+# and add the original raster
+plot(elev, add = TRUE)
+```
+
+Note that changing the resolution frequently (next section) also changes the origin.
+
+### Aggregation and disaggregation
+
+<!-- differentiate between spatial, spectral, temporal and radiometric resolution-->
+Raster datasets can also differ with regard to their resolution. 
+To match resolutions, one can either decrease  (`aggregate()`) or increase (`disaggregate()`) the resolution of one raster.^[It is important to note that we here are solely referring to the spatial resolution but that in remote sensing the spectral (spectral bands), temporal (observations through time of the same area) and radiometric (color depth) resolution are equally important.]
+As an example, we here change the spatial resolution of `elev` from 0.5 to 2 decimal degree, that means, we aggregate by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
+Additionally, the output cell value should correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()` etc.):
 
 ```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."}
 elev_agg = aggregate(elev, fact = 2, fun = mean)
@@ -1189,47 +1206,66 @@ plot(elev)
 plot(elev_agg)
 ```
 
-Note that the origin of `elev_agg` has changed, too.
+By contrast, the`disaggregate()` function increases the resolution.
+However, we have to specify a method how to fill the new cells.
+The `disaggregate()` function provides two methods.
+The first (nearest neighbor, `method = ""`) simply gives all output cells the value of the nearest input cell, and hence duplicates values which leads to a blocky output image.
+For example, the four cells building up the upper left cell of the aggregated raster (Fig. \@ref(fig:aggregate-example)) will retrieve all the same value, namely 4.5.
+
+The `bilinear` method, in turn, is an interpolation technique that uses the four nearest pixel centers of the input image (salmon colored points in Fig. \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Fig. \@ref(fig:bilinear) as the value of the output cell (square in the upper left corner in Fig. \@ref(fig:bilinear)).
 
 ```{r}
-origin(elev)
-origin(elev_agg)
+elev_disagg = disaggregate(elev_agg, fact = 2, method = "bilinear")
+all(values(elev) == values(elev_disagg))
 ```
 
-The origin is the point closest to (0, 0) if you moved towards it in steps of x and y resolution.
-If two rasters have different origins, their cells do not overlap completely which would make map algebra impossible.
-To change the origin , use `origin()`.^[If the origins of two raster datasets are just marginally apart, it sometimes is sufficient to simply increase the `tolerance` argument  of `raster::rasterOptions()`.]
-Looking at figure \@ref(fig:origin-example) reveals the effect of changing the origin.
+```{r bilinear, echo = FALSE, fig.width=8, fig.height=10, fig.cap="Illustration of the bilinear interpolation technique."}
+data(elev)
+elev_agg_2 = aggregate(elev, fact = 2, fun = mean)
+plot(extend(elev, 1, 0), col = NA, legend = FALSE)
+plot(elev_agg_2, add = TRUE)
+xy_1 = xyFromCell(elev, 1)
+xy_2 = xyFromCell(elev_agg, c(1, 2, 4, 5))
+arrows(xy_2[, 1], xy_2[, 2], xy_1[, 1], xy_1[, 2], length = 0.1)
+points(xy_1, pch = 16, col = "black")
+points(xy_2, pch = 21, bg = "salmon", col = "black")
+plot(rasterToPolygons(elev[1, drop = FALSE]), add = TRUE)
 
-```{r origin-example, fig.cap = "Plotting rasters with the same values but different origins."}
-# plot the aggregated raster
-plot(elev_agg)
-# change the origin
-origin(elev_agg) = c(0, 0)
-# plot it again
-plot(elev_agg, add = TRUE)
+# spplot(elev_agg, col.regions = rev(terrain.colors(9)),
+#        colorkey = FALSE, at = c(0, values(elev_agg + 1)), 
+#         sp.layout = list(
+#           list("sp.polygons", rasterToPolygons(elev[1, drop = FALSE]),
+#                first = FALSE),
+#           list("sp.points", SpatialPoints(xy_1), pch = 21, first = FALSE),
+#           list("sp.points", SpatialPoints(xy_2), pch = 21, bg = "salmon", 
+#                col = "black")
+#           ))
+
 ```
 
-The `resample()` command lets you align several raster properties in one go, namely origin, extent and resolution.
-Let us resample an extended `elev_agg` to the properties of `elev` again.
+Comparing the values of `elev` and `elev_disagg` tells us that both are identical (you can also use `compareRaster()` or `all.equal()`).
+Please note that the disaggregation only predicted correctly the values at a higher resolution due to our artificial input data set (`elev`) and the fact that we have used the mean for the aggregation (`elev_agg`).
+However, this is usually not to be expected, since disaggregating is a simple interpolation technique.
+It is important to keep in mind that disaggregating results in a finer resolution, the corresponding values, however, are only as accurate as their lower resolution source.
+
+The process of computing values for new pixel locations is also called resampling. 
+In fact, the **raster** package provides a `resample()` function.
+It lets you align several raster properties in one go, namely origin, extent and resolution.
+By default, it uses the `bilinear`-interpolation.
 
 ```{r}
 # add 2 rows and columns, i.e. change the extent
 elev_agg = extend(elev_agg, 2)
-elev_disagg = resample(elev_agg, elev)
+elev_disagg_2 = resample(elev_agg, elev)
 ```
 
-Though our disaggregated `elev_disagg` retrieved back its original resolution, cell size and extent, its values differ. 
-However, this is to be expected, disaggregating **cannot** predict values at a finer resolution, it simply uses an interpolation algorithm.
-It is important to keep in mind that disaggregating results in a finer resolution, the corresponding values, however, are only as accurate as their lower resolution source.
-
-Finally, if you want to align many (possibly hundreds or thousands of) images stored on disk, you might want to checkout the `gdalUtils::align_rasters()` function.
-Nevertheless, you may also use **raster** with very large datasets. 
+Finally, in order to align many (possibly hundreds or thousands of) images stored on disk, you could use the `gdalUtils::align_rasters()` function.
+However, you may also use **raster** with very large datasets. 
 This is because **raster**:
 
 1. Lets you work with raster datasets that are too large to fit into the main memory (RAM) by only processing chunks of it.
 2. Tries to facilitate parallel processing.
-For more information have a look at the help pages of `beginCluster()` and `clusteR()`.
+For more information see the help pages of `beginCluster()` and `clusteR()`.
 Additionally, check out the *Multi-core functions* section in `vignette("functions", package = "raster")`.
 
 ### Spatial vectorization
@@ -1256,7 +1292,7 @@ source("code/05-raster-vectorization1.R")
 
 Another common application is the representation of a digital elevation model as contour lines, hence, converting raster data into spatial lines. 
 Here, we will us a real-world DEM since our artificial raster `elev` produces parallel lines (give it a try yourself) because when creating it we made the upper left corner the lowest and the lower right corner the highest value while increasing cell values by one from left to right.
-`rasterToContour()` is a wrapper around `contourLines()`, which is why we 
+`rasterToContour()` is a wrapper around `contourLines()`.
 
 ```{r, eval = FALSE}
 # not shown
@@ -1265,7 +1301,7 @@ plot(dem, axes = FALSE)
 plot(rasterToContour(dem), add = TRUE)
 ```
 
-Use `contour()` or `rasterVis::contourplot()` if you want to add contour lines to a plot with isoline labels (Fig. \@ref(fig:contour)).
+Use `contour()`, `rasterVis::contourplot()` or `tmap::tm_iso()` if you want to add contour lines to a plot with isoline labels (Fig. \@ref(fig:contour)).
 
 ```{r contour, echo=FALSE, message=FALSE, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines.", warning=FALSE}
 library(tmap)
@@ -1274,17 +1310,21 @@ data("dem", package = "RQGIS")
 hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
 # create contour
 cn = rasterToContour(dem)
-tm_shape(hs) +
-  tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
-  tm_shape(dem) +
-  tm_raster(alpha = 0.5, palette = terrain.colors(25), n = 25,
-            legend.show = FALSE) +
-  tm_shape(cn) + 
-  tm_lines(col = "white") +
-  tm_text("level", col = "white") +
-  tm_grid(col = "transparent", n.x = 3, n.y = 3, labels.inside.frame = FALSE,
-          labels.rot = c(0, 90)) +
-  tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02))
+rect = tmaptools::bb_sp(hs)
+bbx = tmaptools::bb(hs, xlim = c(-.02, 1), ylim = c(-.02, 1), relative = TRUE)
+
+    tm_shape(hs, bbox = bbx) +
+	tm_grid(col = "black", n.x = 2, n.y = 2, labels.inside.frame = FALSE,
+	        labels.rot = c(0, 90)) +
+	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+	tm_shape(dem) +
+	tm_raster(alpha = 0.5, palette = terrain.colors(25),
+	          auto.palette.mapping = FALSE, legend.show = FALSE) +
+	tm_shape(cn) + 
+	tm_lines(col = "white") +
+	tm_text("level", col = "white") +
+	qtm(rect, fill = NULL) +
+	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
     
 # # rasterVis solution
 # library(rasterVis)
@@ -1303,7 +1343,7 @@ tm_shape(hs) +
 ```
 
 Finally, `rasterToPolygons()` converts each raster cell into one polygon consisting of five coordinates all of which need to be explicitly stored.
-Hence, be careful with this approach when using large raster datasets since you might run into memory problems.
+Be careful with this approach when using large raster datasets since you might run into memory problems.
 Here, we convert `grain` into polygons and subsequently dissolve the output in accordance with the grain size categories which `rasterToPolygons()` stored in an attribute named `layer` (see section \@ref(geometry-unions) and Figure \@ref(fig:raster-vectorization2)).
 A convenient alternative for converting rasters into polygons is `spex::polygonize()` which by default returns an `sf` object.
 
@@ -1371,7 +1411,7 @@ par(mfrow = c(1, 1))
 1. Transform the `world` dataset to the transverse Mercator projection (`"+proj=tmerc"`) and plot the result.
 What has changed and why?
 Try to transform it back into WGS 84 and plot the new object.
-Why the new object differs from the original one?
+Why does the new object differ from the original one?
 ```{r, echo=FALSE, eval=FALSE}
 # see https://github.com/r-spatial/sf/issues/509
 world_tmerc = st_transform(world, "+proj=tmerc")
@@ -1381,7 +1421,7 @@ plot(world_4326$geom)
 ```
 1. Transform the continuous raster (`cat_raster`) into WGS 84 using the nearest neighbor interpolation method. 
 What has changed?
-How it influences the results?
+How does it influence the results?
 ```{r, echo=FALSE, eval=FALSE}
 con_raster = raster(system.file("raster/srtm.tif", package="spDataLarge"))
 con_raster_wgs84 = projectRaster(con_raster, crs = wgs84, method = "ngb")
@@ -1389,7 +1429,7 @@ con_raster_wgs84
 ```
 1. Try to transform the categorical raster (`cat_raster`) into WGS 84 using the bilinear interpolation method.
 What has changed?
-How it influences the results?
+How does it influence the results?
 ```{r, echo=FALSE, eval=FALSE}
 wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
 cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "bilinear")
@@ -1444,7 +1484,7 @@ nz_centre = st_centroid(st_union(nz))
 st_distance(cant_cent, nz_centre) # 234 km
 ```
 1. Most world maps have a north-up orientation.
-A world map with a south-up orientation could be created by a reflection (one of affine transformations not mentioned in \@ref(affine-transformations)) of the `world` object's geometry.
+A world map with a south-up orientation could be created by a reflection (one of the affine transformations not mentioned in \@ref(affine-transformations)) of the `world` object's geometry.
 Write code to do so.
 Hint: you need to use a two-element vector for this transformation.
     - Bonus: create a upside down map of your country.
@@ -1470,16 +1510,16 @@ ggplot(data = us_states_sfc_mirror_sf) +
   geom_text_repel(data = us_states_sfc_mirror_labels, mapping = aes(X, Y, label = name), size = 3, min.segment.length = 0) +
   theme_void() 
 ```
-1. Subset the point in `p` that contained within `x` *and* `y` (see section \@ref(clipping) and Figure \@ref(fig:venn-clip)).
+1. Subset the point in `p` that is contained within `x` *and* `y` (see section \@ref(clipping) and Figure \@ref(fig:venn-clip)).
     - Using base subsetting operators.
-    - Using an intermediary object created with `st_intersection()`
+    - Using an intermediary object created with `st_intersection()`.
 ```{r, echo=FALSE, eval=FALSE}
 p_in_y = p[y]
 p_in_xy = p_in_y[x]
 x_and_y = st_intersection(x, y)
 p[x_and_y]
 ```
-1. Write code that uses functions `aggregate()` and `st_buffer()` to answers the following question: What proportion of the world's population lives in countries that intersect a circle with a 10 degree radius of the intersection between the equator and the [9^th^ meridian](https://en.wikipedia.org/wiki/9th_meridian_east)?
+1. Write code that uses the functions `aggregate()` and `st_buffer()` to answers the following question: what proportion of the world's population lives in countries that intersect a circle with a 10 degree radius of the intersection between the equator and the [9^th^ meridian](https://en.wikipedia.org/wiki/9th_meridian_east)?
 ```{r, echo=FALSE, eval=FALSE}
 center9 = st_sf(st_sfc(st_point(c(-9, 0)), crs = 4326))
 buff9 = st_buffer(center9, dist = 10)
@@ -1494,7 +1534,7 @@ interp9 = st_interpolate_aw(x = world["pop"], to = buff9, extensive = TRUE)
     - Bonus: rewrite code that generated the answer to the previous question using a projected CRS (suggestion: UTM).
 1. Advanced challenge: find the point with the highest number of people within a 10 degree radius.
 1. Calculate the length of the boundary lines of US states in meters.
-Which state has the longest border and which has the shorter border?
+Which state has the longest border and which has the shortest?
 Hint: The `st_length` function computes the length of a `LINESTRING` or `MULTILINESTRING` geometry.
 ```{r, echo=FALSE, eval=FALSE}
 us_states2163 = st_transform(us_states, 2163)
@@ -1505,8 +1545,8 @@ arrange(us_states_bor, -borders)
 ```
 1. Subset points higher than 3100 meters in New Zealand (the `nz_height` object). 
 Using the new object:
-    - Count numbers of the highest points in grid cells of 3 km resolution.
-    - Find maximum elevation value for grid cells of 3 km resolution.
+    - Count numbers of the highest points in grid cells with a resolution of 3 km.
+    - Find maximum elevation value for grid cells with a resolution of 3 km.
 ```{r, echo=FALSE, eval=FALSE}
 nz_height3100 = filter(nz_height, elevation > 3100)
 new_graticule = st_graticule(nz_height3100, datum = 2193)
@@ -1520,9 +1560,11 @@ nz_raster2 = rasterize(nz_height3100, nz_template,
                        field = "elevation", fun = max)
 plot(nz_raster2)
 ```
-1. Aggregate the raster counting high points in New Zealand created in the previous exercise reduce its geographic resolution by half (so cells are 6 by 6 km) and plot the result.
-    - Resample the lower resolution raster back to the 3 km resolution of the orginal. How have the results changed?
-    - Name two advantages and two disadvantages of reducing raster resolution in this way.
+
+1. Aggregate the raster counting high points in New Zealand (created in the previous exercise), reduce its geographic resolution by half (so cells are 6 by 6 km) and plot the result.
+    - Resample the lower resolution raster back to a resolution of 3 km. How have the results changed?
+    - Name two advantages and disadvantages of reducing raster resolution.
+
 ```{r, echo=FALSE, eval=FALSE}
 nz_raster_low = raster::aggregate(nz_raster, fact = 2, fun = sum)
 res(nz_raster_low)
@@ -1536,9 +1578,11 @@ plot(nz_raster)
 # disadvantage: removes geographic detail
 # disadvantage: another processing step
 ```
-1. Polygonize the the `grain` dataset and filter-out all the squares representing clay.
-    - Name 2 advantages and 2 disadvantages of vector data over raster data.
-    - At which points would it be useful to convert rasters to vectors in your research?
+
+1. Polygonize the `grain` dataset and filter all squares representing clay.
+    - Name two advantages and disadvantages of vector data over raster data.
+    -  At which points would it be useful to convert rasters to vectors in your work?
+
 ```{r, echo=FALSE, eval=FALSE}
 grain_poly = rasterToPolygons(grain) %>% 
   st_as_sf()
