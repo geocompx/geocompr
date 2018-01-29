@@ -1,6 +1,6 @@
 ## Questions - the second round of reviews
 
-- At present we have the 5.2 Reprojecting geographic data section containing four subsections. Alternatively, it is possible to move sections 5.2.2 Reprojecting vector geometries and 5.2.4 Reprojecting 5.4.4 into 5.3 and 5.4, respectively. We'd appreciate your feedback on the section's order. 
+- At present, 5.2 Reprojecting geographic data section contains four subsections including those showing how to specifically reproject vector and raster data. But maybe it was better and more consistent if we moved sections 5.2.2 Reprojecting vector geometries and 5.2.4 Reprojecting raster into the sections specifically dealing with geometry operations on vector (5.3) and raster data (5.4), respectively. This way we cold give general recommendations regarding reprojections which are applicable to both raster and vector data in the beginning (5.2), while showing the specifics how to do so in the corresponding geometric operation sections. On the other hand, one could also argue that the current structure keeps everything regarding reprojections in one place. We would appreciate your feedback on how to order the sections. 
 
 ## Questions - the first round of reviews
 
