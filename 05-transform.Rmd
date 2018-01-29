@@ -1146,11 +1146,6 @@ When merging or performing map algebra on rasters, their resolution, projection,
 The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions. 
 We can deal with such mismatches by aligning the rasters.
 
-```{r, echo=FALSE}
-library(spData)
-data(elev)
-```
-
 In the simplest case, two images only differ in a mismatch in extent.
 <!--The `projectRaster()` function reprojects one raster to a desired projection, say from UTM to WGS84.-->
 Following code adds one row and two columns to each side of the raster while setting all new values to an elevation of 1000 meters (\@ref(fig:extend-example)).
@@ -1179,8 +1174,7 @@ elev_4 = extend(elev, elev_2)
 The origin is the point closest to (0, 0) if you moved towards it in steps of x and y resolution.
 
 ```{r}
-origin(elev)
-origin(elev_agg)
+origin(elev_4)
 ```
 
 If two rasters have different origins, their cells do not overlap completely which would make map algebra impossible.
@@ -1188,10 +1182,10 @@ To change the origin , use `origin()`.^[If the origins of two raster datasets ar
 Looking at figure \@ref(fig:origin-example) reveals the effect of changing the origin.
 
 ```{r origin-example, fig.cap = "Plotting rasters with the same values but different origins."}
-plot(elev)
 # change the origin
-origin(elev) = c(0.25, 0.25)
-# plot it again
+origin(elev_4) = c(0.25, 0.25)
+plot(elev_4)
+# and add the original raster
 plot(elev, add = TRUE)
 ```
 
@@ -1202,40 +1196,68 @@ Note that changing the resolution frequently (next section) also changes the ori
 <!-- differentiate between spatial, spectral, temporal and radiometric resolution-->
 Raster datasets can also differ with regard to their resolution. 
 To match resolutions, one can either decrease  (`aggregate()`) or increase (`disaggregate()`) the resolution of one raster.^[It is important to note that we here are solely referring to the spatial resolution but that in remote sensing the spectral (spectral bands), temporal (observations through time of the same area) and radiometric (color depth) resolution are equally important.]
-As an example, we here change the spatial resolution of `elev` from 0.5 to 2 decimal degree, that means, we aggregate by a factor of 4 (Fig. \@ref(fig:aggregate-example)).
+As an example, we here change the spatial resolution of `elev` from 0.5 to 2 decimal degree, that means, we aggregate by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
 Additionally, the output cell value should correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()` etc.):
 
 ```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."}
-elev_agg = aggregate(elev, fact = 2, fun = sum)
+elev_agg = aggregate(elev, fact = 2, fun = mean)
 par(mfrow = c(1, 2))
 plot(elev)
 plot(elev_agg)
 ```
 
 By contrast, the`disaggregate()` function increases the resolution.
-However, we have to specify a method how to fill the new cells, that means how we distribute the value of the input cell into the nine new cells.
+However, we have to specify a method how to fill the new cells.
+The `disaggregate()` function provides two methods.
+The first (nearest neighbor, `method = ""`) simply gives all output cells the value of the nearest input cell, and hence duplicates values which leads to a blocky output image.
+For example, the four cells building up the upper left cell of the aggregated raster (Fig. \@ref(fig:aggregate-example)) will retrieve all the same value, namely 4.5.
 
-Though our disaggregated `elev_disagg` retrieved back its original resolution, cell size and extent, its values differ from the original cell values. 
-However, this is to be expected, disaggregating **cannot** interpolate values at a finer resolution, it simply uses an interpolation algorithm.
+The `bilinear` method, in turn, is an interpolation technique that uses the four nearest pixel centers of the input image (salmon colored points in Fig. \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Fig. \@ref(fig:bilinear) as the value of the output cell (square in the upper left corner in Fig. \@ref(fig:bilinear)).
+
+```{r}
+elev_disagg = disaggregate(elev_agg, fact = 2, method = "bilinear")
+all(values(elev) == values(elev_disagg))
+```
+
+```{r bilinear, echo = FALSE, fig.width=8, fig.height=10, fig.cap="Illustration of the bilinear interpolation technique."}
+data(elev)
+elev_agg_2 = aggregate(elev, fact = 2, fun = mean)
+plot(extend(elev, 1, 0), col = NA, legend = FALSE)
+plot(elev_agg_2, add = TRUE)
+xy_1 = xyFromCell(elev, 1)
+xy_2 = xyFromCell(elev_agg, c(1, 2, 4, 5))
+arrows(xy_2[, 1], xy_2[, 2], xy_1[, 1], xy_1[, 2], length = 0.1)
+points(xy_1, pch = 16, col = "black")
+points(xy_2, pch = 21, bg = "salmon", col = "black")
+plot(rasterToPolygons(elev[1, drop = FALSE]), add = TRUE)
+
+# spplot(elev_agg, col.regions = rev(terrain.colors(9)),
+#        colorkey = FALSE, at = c(0, values(elev_agg + 1)), 
+#         sp.layout = list(
+#           list("sp.polygons", rasterToPolygons(elev[1, drop = FALSE]),
+#                first = FALSE),
+#           list("sp.points", SpatialPoints(xy_1), pch = 21, first = FALSE),
+#           list("sp.points", SpatialPoints(xy_2), pch = 21, bg = "salmon", 
+#                col = "black")
+#           ))
+
+```
+
+Comparing the values of `elev` and `elev_disagg` tells us that both are identical (you can also use `compareRaster()` or `all.equal()`).
+Please note that the disaggregation only predicted correctly the values at a higher resolution due to our artificial input data set (`elev`) and the fact that we have used the mean for the aggregation (`elev_agg`).
+However, this is usually not to be expected, since disaggregating is a simple interpolation technique.
 It is important to keep in mind that disaggregating results in a finer resolution, the corresponding values, however, are only as accurate as their lower resolution source.
 
-
-### Changing origin, extend and resolution simultaneously
-
-<!-- In order to actually geometrically correct the original distorted image, a procedure called resampling is used to determine the digital values to place in the new pixel locations of the corrected output image. The resampling process calculates the new pixel values from the original digital pixel values in the uncorrected image. There are three common methods for resampling: nearest neighbour, bilinear interpolation, and cubic convolution. Nearest neighbour resampling uses the digital value from the pixel in the original image which is nearest to the new pixel location in the corrected image. This is the simplest method and does not alter the original values, but may result in some pixel values being duplicated while others are lost. This method also tends to result in a disjointed or blocky image appearance.
-http://www.nrcan.gc.ca/node/9403
--->
-
-<!--Resampling = The process of interpolating new cell values when transforming rasters to a new coordinate space or cell size. (ESRI definition)--> 
-The `resample()` command lets you align several raster properties in one go, namely origin, extent and resolution.
-Let us resample an extended `elev_agg` to the properties of `elev` again.
+The process of computing values for new pixel locations is also called resampling. 
+In fact, the **raster** package provides a `resample()` function.
+It lets you align several raster properties in one go, namely origin, extent and resolution.
+By default, it uses the `bilinear`-interpolation.
 
 ```{r}
 # add 2 rows and columns, i.e. change the extent
 elev_agg = extend(elev_agg, 2)
-elev_disagg = resample(elev_agg, elev)
+elev_disagg_2 = resample(elev_agg, elev)
 ```
-
 
 Finally, in order to align many (possibly hundreds or thousands of) images stored on disk, you could use the `gdalUtils::align_rasters()` function.
 However, you may also use **raster** with very large datasets. 
@@ -1288,17 +1310,21 @@ data("dem", package = "RQGIS")
 hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
 # create contour
 cn = rasterToContour(dem)
-tm_shape(hs) +
-  tm_grid(col = "black", n.x = 2, n.y = 2, labels.inside.frame = FALSE,
-          labels.rot = c(0, 90)) +
-  tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
-  tm_shape(dem) +
-  tm_raster(alpha = 0.5, palette = terrain.colors(25),
-            auto.palette.mapping = FALSE, legend.show = FALSE) +
-  tm_shape(cn) + 
-  tm_lines(col = "white") +
-  tm_text("level", col = "white") +
-  tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02))
+rect = tmaptools::bb_sp(hs)
+bbx = tmaptools::bb(hs, xlim = c(-.02, 1), ylim = c(-.02, 1), relative = TRUE)
+
+    tm_shape(hs, bbox = bbx) +
+	tm_grid(col = "black", n.x = 2, n.y = 2, labels.inside.frame = FALSE,
+	        labels.rot = c(0, 90)) +
+	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+	tm_shape(dem) +
+	tm_raster(alpha = 0.5, palette = terrain.colors(25),
+	          auto.palette.mapping = FALSE, legend.show = FALSE) +
+	tm_shape(cn) + 
+	tm_lines(col = "white") +
+	tm_text("level", col = "white") +
+	qtm(rect, fill = NULL) +
+	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
     
 # # rasterVis solution
 # library(rasterVis)
