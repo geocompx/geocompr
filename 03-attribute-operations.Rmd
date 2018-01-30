@@ -446,6 +446,33 @@ world_coffee_inner = inner_join(world, coffee_data)
 nrow(world_coffee_inner)
 ```
 
+Note that the result of `inner_join()` has only 44 rows compared with 47 in `coffee_data`.
+What happened to the remaining rows?
+We can identify the rows that did not match using the `setdiff()` function as follows:
+
+```{r}
+setdiff(coffee_data$name_long, world$name_long)
+```
+
+The result shows that 2 countries have not matched due to name discrepancies.
+These discrepancies can be fixed by updating identifying the value that they were expected to have in the `world` dataset and updating the names accordingly.
+In this case we will use string matching to find out what `Congo, Dem. Rep. of` and `Côte d'Ivoire` are called:
+
+```{r}
+str_subset(world$name_long, "Ivo|Cong")
+```
+
+From these results we can identify the matching names and update the names in `coffee_data` accordingly.
+As demonstrated below, `inner_join()`ing the updated data frame returns a result with all 46 coffee producing nations represented in the dataset:
+
+```{r}
+coffee_data_match = mutate_if(coffee_data, is.character, recode,
+            `Congo, Dem. Rep. of` = "Democratic Republic of the Congo",
+            `Côte d'Ivoire` = "Ivory Coast")
+world_coffee_match = inner_join(world, coffee_data_match)
+nrow(world_coffee_match)
+```
+
 
 ```{block2 type='rmdnote'}
 In most cases the geometry column is only useful in an `sf` object.
