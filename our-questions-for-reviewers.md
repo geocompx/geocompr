@@ -11,7 +11,7 @@ Would it be better and more consistent if we moved sections 5.2.2 (Reprojecting 
 
 - There is a step change in content between chapter 1 and 2, with the latter containing much code output. Thinking of readers new to the subject is this 'throwing people in at the deep end' good for ensuring that it's focussed on the code, or should we try to reduce the amount of code output in Chapter 2?
 
-- Chapter 8 currently contains no raster operations. One option would be to add a raster surface containing a transport-related variable (e.g. number of cycle parking places). Would that be wise from your perspective or is the chapter already sufficiently long?
+- Chapter 7 currently contains no raster operations. One option would be to add a raster surface containing a transport-related variable (e.g. number of cycle parking places). Would that be wise from your perspective or is the chapter already sufficiently long?
 
 - We have set-out a plan for Parts III and IV of the book here: https://github.com/Robinlovelace/geocompr/blob/master/our-chapters.md
     - Do the overall part names make sense?
