@@ -4,10 +4,10 @@
 1. spatial - jn
 1. transform - jn
 1. read-write - rl
-1. transport rl (**Part II: Applications**)
+1. transport rl (**Part II: Applications**) (or: **Geocomputation in action I**)
 1. location-analysis - jm
 1. land-use analysis - jn (optional)
-1. advanced-visualization - jn (**Part III: Methods for geocomputation**)
+1. advanced-visualization - jn (**Part III: Advanced methods for geocomputation**)
     - **Making maps with R** will demonstrate a range of map-making packages for static, interactive and animates maps.
 1. raster-vector - jn
     - This chapter will go beyond the content in chapter 5 by demonstrating methods for converting between raster and vector representations of the world. It will involve creating continuous surfaces from point data via voronoi polygons and spatial interpolation (including kriging)
