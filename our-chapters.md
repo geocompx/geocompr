@@ -17,7 +17,7 @@
 - **Part III: Advanced methods for geocomputation**
 
 1. advanced-visualization - jn 
-    - **Making maps with R** will demonstrate a range of map-making packages for static, interactive and animates maps.
+    - **Making maps with R** will demonstrate a range of map-making packages for static, interactive and animated maps.
 1. raster-vector - jn
     - This chapter will go beyond the content in chapter 5 by demonstrating methods for converting between raster and vector representations of the world. It will involve creating continuous surfaces from point data via voronoi polygons and spatial interpolation (including kriging)
 1. spatial-crossvalidation - jm
@@ -32,7 +32,7 @@
 - **Part IV: Geocomputation in action II**
 
 1. ecological - jm 
-    - This chapter will model and spatially predict the floristic composition of a fog oasis along an altitudinal gradient in northern Peru. The first axis of a NMDS-ordination will determine the floristic composition, and will be modelled spatially with the help of machine-learning while accounting for spatial cross-validation by means of spatial cross-validation.
+    - This chapter will model and spatially predict the floristic composition of a fog oasis along an altitudinal gradient in northern Peru. The first axis of a NMDS-ordination will determine the floristic composition, and will be modelled spatially with the help of a machine-learning approach (most likely random forest or support vector machine) while accounting for spatial cross-validation by means of spatial cross-validation.
 1. renewable energy (?)
 1. sea level rise (?)
 
