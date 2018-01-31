@@ -1,29 +1,30 @@
-- introduction - rl
+1. introduction - rl
 
-Foundations
+- Part I: Foundations
 
-- spatial-data - rl
-- attr - jn
-- spatial - jn
-- read-write - rl
-- transform - jn
+1. spatial-data - rl
+1. attr - jn
+1. spatial - jn
+1. transform - jn
+1. read-write - rl
 
-Applications
+- Part II: Applications
 
-- introductory transport rl
-- location-analysis - jm
-- land-use analysis - jn
+1. transport rl
+1. location-analysis - jm
+1. land-use analysis - jn (optional)
 
-Advanced methods
+- Part III: Methods for geocomputation
 
-- raster-vector - jn
-- spatial-crossvalidation - jm
-- advanced-visualization - jn
-- algorithms-functions - rl
-- gis - jm
+1. raster-vector - jn
+1. spatial-crossvalidation - jm
+1. advanced-visualization - jn
+1. algorithms-functions - rl
+1. gis-bridges - jm
+1. big-geodata - ? (optional)
 
-Advanced applications
-
+- Part IV: Geocomputation in action
+    
 - ecological - jm
 - renewable energy (?)
 - sea level rise (?)
