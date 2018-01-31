@@ -16,6 +16,8 @@
 
 - Part III: Methods for geocomputation
 
+1. advanced-visualization - jn
+    - **Making maps with R** will demonstrate a range of map-making packages for static, interactive and animates maps.
 1. raster-vector - jn
     - This chapter will go beyond the content in chapter 5 by demonstrating methods for converting between raster and vector representations of the world. It will involve creating continuous surfaces from point data via voronoi polygons and spatial interpolation (including kriging)
     
