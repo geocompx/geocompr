@@ -10,6 +10,7 @@
 library(sf)
 library(tidyverse)
 library(stplanr)
+library(spDataLarge)
 ```
 
 ## Introduction
@@ -62,16 +63,19 @@ The case study used for this chapter is located in Bristol, a city in the west o
 An overview of the region's transport network is illustrated in Figure \@ref(fig:bristol), which shows a diversity of transport infrastructure, for cycling, public transport, and private motor vehicles.
 
 ```{r, echo=FALSE, eval=FALSE}
-# warning - large script that relies on manually downloaded external data
-source("code/08-transport-data-gen.R") 
-# create overview map
-ways = readRDS("extdata/ways.rds")
+# code that generated the input data - see also ?bristol_ways
+# source("code/08-transport-data-gen.R") 
+# view input data
+summary(bristol_ways)
+summary(bristol_ttwa)
+summary(bristol_region)
+
 region_ttwa = readRDS("extdata/bristol-ttwa.rds")
-region_bb = readRDS("extdata/bristol-region.rds")
-region_all = rbind(region_bb, region_ttwa)
+bristol_region = readRDS("extdata/bristol-region.rds")
+region_all = rbind(bristol_region, bristol_ttwa)
 library(tmap)
 tmap_mode("view")
-qtm(ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("green", "black", "red")) +
+qtm(bristol_ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("green", "black", "red")) +
   tm_scale_bar() +
   tm_shape(region_all) +
   tm_borders(lwd = c(5, 7), col = "darkblue")
@@ -126,7 +130,7 @@ Often the geographic units of destinations are the geographic units that compris
 The simplest way to define a study area is often the first matching boundary returned by OpenStreetMap, which can be obtained using **osmdata** as follows:
 
 ```{r, eval=FALSE}
-region_bb = osmdata::getbb("Bristol", format_out = "sf_polygon")
+bristol_region = osmdata::getbb("Bristol", format_out = "sf_polygon")
 ```
 
 The result is an `sf` object representing the bounds of the largest matching city region, either a rectangular polygon of the bounding box or a detailed polygonal boundary.^[
@@ -515,8 +519,8 @@ The data used in this section was downloaded using **osmdata**.
 To avoid having to request the data from OSM repeatedly, we will use a locally saved version of the data, which contains point and line data for the case study area:
 
 ```{r}
-ways = readRDS("extdata/ways.rds")
-summary(ways)
+bristol_ways = readRDS("extdata/ways.rds")
+summary(bristol_ways)
 ```
 
 The above code chunk loaded a simple feature object representing around 3,000 segments on the transport network.
@@ -526,10 +530,10 @@ As mentioned, route networks can usefully be represented as mathematical graphs,
 A number of R packages have been developed for dealing with such graphs, notably **igraph**.
 One can manually convert a route network into an `igraph` object, but that process risks loosing the geographic attributes.
 To overcome this issue `SpatialLinesNetwork()` was developed in the **stplanr** package to represent route networks simultaneously as graphs *and* a set of geographic lines.
-This function is demonstrated below using a subset of the `ways` object used in previous sections.
+This function is demonstrated below using a subset of the `bristol_ways` object used in previous sections.
 
 ```{r}
-ways_freeway = ways %>% filter(maxspeed == "70 mph") 
+ways_freeway = bristol_ways %>% filter(maxspeed == "70 mph") 
 ways_sln = SpatialLinesNetwork(ways_freeway)
 slotNames(ways_sln)
 weightfield(ways_sln)
@@ -613,7 +617,7 @@ Although other routes between zones are likely to be used --- in reality people 
 library(tmap)
 tmap_mode("view")
 rail_stations_top = rail_stations[knn_orig, ]
-m_leaflet = qtm(ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("lightgreen", "grey", "pink")) +
+m_leaflet = qtm(bristol_ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("lightgreen", "grey", "pink")) +
   tm_scale_bar() +
   tm_shape(region_ttwa) +
   tm_borders(col = "darkblue") +
@@ -685,4 +689,4 @@ sum(d_intersect$all) / sum(desire_lines$all) # around 2%
 <!-- Include a higher proportion of trips in the analysis -->
 1. Clearly the routes identified in Figure \@ref(fig:cycleways) only provide part of the picture. How would you extend the analysis to incorporate more trips that could potentially be cycled?
 1. Imagine that you want to extend the scenario by creating key *areas* (not routes) for investment in place-based cycling policies such as car-free zones, cycle parking points and reduced car parking strategy. How could raster data assist with this work? 
-    - Bonus: develop a raster layer that divides the Bristol region into 100 cells (10 by 10) and provide a metric related to transport policy, such as number of people trips that pass through each cell by walking or the average speed limit of roads (from the `ways` dataset).
+    - Bonus: develop a raster layer that divides the Bristol region into 100 cells (10 by 10) and provide a metric related to transport policy, such as number of people trips that pass through each cell by walking or the average speed limit of roads (from the `bristol_ways` dataset).
