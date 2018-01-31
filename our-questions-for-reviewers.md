@@ -1,6 +1,15 @@
 ## Questions - the second round of reviews
 
-- At present, 5.2 Reprojecting geographic data section contains four subsections including those showing how to specifically reproject vector and raster data. But maybe it was better and more consistent if we moved sections 5.2.2 Reprojecting vector geometries and 5.2.4 Reprojecting raster into the sections specifically dealing with geometry operations on vector (5.3) and raster data (5.4), respectively. This way we cold give general recommendations regarding reprojections which are applicable to both raster and vector data in the beginning (5.2), while showing the specifics how to do so in the corresponding geometric operation sections. On the other hand, one could also argue that the current structure keeps everything regarding reprojections in one place. We would appreciate your feedback on how to order the sections. 
+- We delayed submission of this review by a month to ensure that Parts I and II were cohesive and essentially finished. Are there any important foundational topics that we have missed in Part 1? And if we decided to add a third chapter to Part II, what would you suggest? We chose chapters 7 (transport) and 8 (location analysis) by thinking about topics already been covered in existing R-Spatial resources and the desire to make this as useful to as many people as possible.
+
+- At present, 5.2 Reprojecting geographic data section contains four subsections including those showing how to specifically reproject vector and raster data.
+Would it be better and more consistent if we moved sections 5.2.2 (Reprojecting vector geometries) and 5.2.4 (Reprojecting raster into the sections specifically dealing with geometry operations) on vector (5.3) and raster data (5.4), respectively?
+    - An advantage of this is that we could provide general recommendations regarding reprojections which are applicable to both raster and vector data in the beginning (5.2), while showing the specifics how to do so in the corresponding geometric operation sections.
+    - A disadvantage is the current structure keeps everything regarding reprojections in one place and that the raster/vector sections are already large. We would appreciate your feedback on how to order the sections - see https://geocompr.robinlovelace.net/transform.html#reproj-geo-data for this.
+
+- There is a step change in content between chapter 1 and 2, with the latter containing much code output. Thinking of readers new to the subject is this 'throwing people in at the deep end' good for ensuring that it's focussed on the code, or should we try to reduce the amount of code output in Chapter 2?
+
+- Chapter 8 currently contains no raster operations. One option would be to add a raster surface containing a transport-related variable (e.g. number of cycle parking places). Would that be wise from your perspective or is the chapter already sufficiently long?
 
 ## Questions - the first round of reviews
 
