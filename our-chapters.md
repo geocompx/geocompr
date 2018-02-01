@@ -17,7 +17,7 @@
     - This chapter will demonstrate how algorithms work as a sequential list of operations to be performed many times. The ability to create new algorithms and place them in R functions will be demonstrated using examples, such as the creation of shapes representing probability of being between two points (using the concept of brownian bridges), automatic scenarios of infrastructure change (bulding on the Bristol example) and remote sensing algorithms to predict land use.
 1. gis-bridges - jm
     - This chapter will demonstrate how R can be used as an interface to established open-source desktop GIS programs (RQGIS, RSAGA, rgrass7).
-1. big-geodata - (optional)
+1. big-geodata/parallel processing - (optional)
     - This is a chapter we are considering, that would provide pointers on how to handle large geographic datasets with R.
 1. ecological - jm (**Geocomputation in Action** or **Geocomputation in Action II**)
     - This chapter will model and spatially predict the floristic composition of a fog oasis along an altitudinal gradient in northern Peru. The first axis of a NMDS-ordination will determine the floristic composition, and will be modelled spatially with the help of a machine-learning approach (most likely random forest or support vector machine) while accounting for spatial cross-validation by means of spatial cross-validation.
