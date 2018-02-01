@@ -136,8 +136,9 @@ The result is an `sf` object representing the bounds of the largest matching cit
 In cases where the first match does not provide the right name, the country or region should be specified, for example `Bristol Tennessee` for a Bristol located in America.
 ]
 In this case the command returns a detailed polygon representing the official boundary of Bristol (see the inner blue boundary in Figure \@ref(fig:bristol)).
-A word of warning: first, OSM boundaries as returned by OSM are not necessarily the official boundaries provided by local authorities.
-Secondly, even if OSM returns the official boundaries, these still may not be appropriate for transport research because they bear little relation to where people travel.
+There are a couple of issues associated with using OSM definitions of regions, however.
+First, the first OSM boundary returned by OSM may not be the official boundary used by local authorities.
+Second, even if OSM returns the official boundary, this may be inappropriate for transport research because they bear little relation to where people travel.
 
 Travel to Work Areas (TTWAs) overcome the second issue by creating a zoning system analogous to hydrological watersheds.
 TTWAs were first defined as contiguous zones within which 75% of the population travels to work [@coombes_efficient_1986], and this is the definition used in this chapter.
@@ -175,9 +176,11 @@ names(zones)
 ```
 
 Chapter \@ref(attr) demonstrated how to join attribute data onto geographic variables.
-This is a common task which usually involves joining a table containing official zonal statistics to a geographic object via a shared key variable ([ons.gov.uk](https://www.ons.gov.uk/help/localstatistics) contains datasets at various geographic levels in the UK, for example).
-For this chapter an additional stage is needed:
-aggregation of the origin-destination (OD) data to the level of residential zones (the nature of this OD dataset is described in more detail in section \@ref(desire-lines)), as demonstrated below:
+This is a common task which usually involves joining a table containing official zonal statistics to a geographic object via a shared key variable, as described in section \@ref(vector-attribute-joining).
+In this case we use data provided by [ons.gov.uk](https://www.ons.gov.uk/help/localstatistics), which maintains datasets at various geographic levels across the UK.
+
+Instead of accessing an area-level travel dataset directly, we will create zonal data by aggregating origin-destination (OD) by zone of origin and destination (the nature of this OD dataset is described in more detail in section \@ref(desire-lines)).
+This is demonstrated below:
 
 ```{r}
 od = readRDS("extdata/bristol-od.rds")
@@ -322,8 +325,9 @@ Routing is computationally intensive and might be slow on a local machine (depen
 In any case, local routing requires the route network to be stored on a local computer (we will see how in section \@ref(route-networks)).
 By contrast, remote routing services use a web API to receive queries about origin and destination points, run the routing on the route network on a powerful server and return just the results, the routes, to the user, the so-called client.
 There are many advantages of using remote routing services, including the fact that they can be up-to-date, have global coverage, and run on a set-up that was designed for the job, explaining this section's focus on online routing services.
-Before proceeding, however, you should be aware of the disadvantages of online routing services: they are slow or even inaccessible when accessed with a bad internet connection and can be expensive, i.e. not all services are free of charge.
-For instance, the Google routing API sets the limit to 2500 free queries per day.^[`ggmap::route()` lets you use Google's routing API through R and the **dodgr** package allows for rapid routing on locally stored route network data.]
+
+Before proceeding, there are couple of important disadvantages of online routing services to consider: they can be slow (because they rely on data transfer over the internet) and expensive.
+The Google routing API, for example, has a limit of 2500 free queries per day.^[`ggmap::route()` lets you use Google's routing API through R and the **dodgr** package allows for rapid routing on locally stored route network data.]
 <!-- Todo: add link to Mark's presentation on dodgr vs Google routing costs (RL) -->
 
 A popular and free routing service is the Open Source Routing Machine ([OSRM](http://project-osrm.org/)).^[Another popular OSM routing API is https://openrouteservice.org/.]
@@ -370,10 +374,7 @@ plot(st_centroid(zones)$geometry, add = TRUE)
 The results show that the short desire lines along which most people travel by car are geographically clustered.
 Plotting the results on an interactive map, for example, with `mapview::mapview(desire_carshort)`, reveals that these car trips take place in and around Bradley Stoke.
 According to [Wikipedia](https://en.wikipedia.org/wiki/Bradley_Stoke), Bradley Stoke is "Europe's largest new town built with private investment", which may help understand its high level of car dependency due to limited public transport provision.
-The proliferation of short car journeys in this area can also be understood in terms of the surrounding transport infrastructure:
-
-> Bradley Stoke housing development of 8500 homes constructed by volume house builders; and major transport nodes such as junctions on both the M4 and M5 motorways [@tallon_bristol_2007].
-<!-- check/change quote? -->
+The excessive number of short car journeys in this area can also be understood in terms of the car-orientated transport infrastructure surrounding this northern 'edge city' which includes "major transport nodes such as junctions on both the M4 and M5 motorways" [@tallon_bristol_2007].
 
 There are many benefits of converting travel desire lines into likely routes of travel from a policy perspective, primary among them the ability to understand what it is about the surrounding environment that makes people travel by a particular mode.
 We discuss future directions of research building on the routes in section \@ref(future-directions-of-travel).
@@ -588,7 +589,7 @@ This section ties-together the various strands that explored some geographic fea
 
 Clearly the types of analysis presented here would need to be extended and complimented by other methods to be used in real-world applications, as discussed in section \@ref(future-directions-of-travel).
 However each stage could be useful on its own, and feed-into wider analyses.
-To summarize, these were: identifying short but car-dependent commuting routes (generated from desire lines)in section \@ref(routes); creating desire lines representing the first leg to public transport nodes in section \@ref(nodes); and analyzing transport systems at the route network using concepts from graph theory in section \@ref(route-networks).
+To summarize, these were: identifying short but car-dependent commuting routes (generated from desire lines)in section \@ref(routes); creating desire lines representing trips to rail stations in section \@ref(nodes); and analysis of transport systems at the route network using graph theory in section \@ref(route-networks).
 
 The final code chunk of this chapter combines these strands of analysis.
 It adds the car-dependent routes in `route_carshort` with a newly-created object, `route_rail` and creates a new column representing the amount of travel along the centroid-to-centroid desire lines they represent:
