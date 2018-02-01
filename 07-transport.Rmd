@@ -69,8 +69,6 @@ summary(bristol_ways)
 summary(bristol_ttwa)
 summary(bristol_region)
 
-region_ttwa = readRDS("extdata/bristol-ttwa.rds")
-bristol_region = readRDS("extdata/bristol-region.rds")
 region_all = rbind(bristol_region, bristol_ttwa)
 library(tmap)
 tmap_mode("view")
@@ -142,11 +140,8 @@ Second, even if OSM returns the official boundary, this may be inappropriate for
 
 Travel to Work Areas (TTWAs) overcome the second issue by creating a zoning system analogous to hydrological watersheds.
 TTWAs were first defined as contiguous zones within which 75% of the population travels to work [@coombes_efficient_1986], and this is the definition used in this chapter.
-Because Bristol is a major employer attracting travel from surrounding towns, its TTWA --- loaded in the command below --- is substantially larger than the city bounds (see Figure \@ref(fig:bristol)).
-
-```{r}
-region_ttwa = readRDS("extdata/bristol-ttwa.rds")
-```
+Because Bristol is a major employer attracting travel from surrounding towns, its TTWA is substantially larger than the city bounds (see Figure \@ref(fig:bristol)).
+The polygon representing this transport-orientated boundary is stored in the object `bristol_ttwa`, provided by the **spDataLarge** package loaded at the beginning of this chapter.
 
 The origin and destination zones used in this chapter are the same: officially defined zones of intermediate geographic resolution (their [official](https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/annualsmallareapopulationestimates/2014-10-23) name is Middle layer Super Output Areas or MSOAs).
 Each house around 8,000 people.
@@ -162,17 +157,11 @@ Breakdowns of travel mode by age and sex, for example, are available at the Loca
 ```
 
 The 102 zones used are illustrated in Figure \@ref(fig:zones).
-These can be loaded from the `exdata` folder of the book:
-
-```{r}
-zones = readRDS("extdata/bristol-zones.rds")
-```
-
-This dataset provides a useful basis for dividing-up space into meaningful chunks, with each zone housing a similar number of people.
+These are stored in the `bristol_zones` object from the **spDataLarge** package, which divides-up space into sensible parcels, with each zone housing a similar number of people.
 However at present the dataset contains no attribute data, other than the zone name and zone code:
 
 ```{r}
-names(zones)
+names(bristol_zones)
 ```
 
 Chapter \@ref(attr) demonstrated how to join attribute data onto geographic variables.
@@ -197,23 +186,23 @@ Then the chained operation performed three main steps:
 - Aggregated the variables in the `od` dataset *if* they were numeric, to find the total number of people living in each zone by mode of transport.^[
 the `_if` affix requires a `TRUE`/`FALSE` question to be asked of the variables, in this case 'is it numeric?' and only variables returning true are summarized.
 ]
-- Renamed the grouping variable `o` so it matches the ID column `geo_code` in the `zones` object.
+- Renamed the grouping variable `o` so it matches the ID column `geo_code` in the `bristol_zones` object.
 
 The resulting object `zones_attr` is a data frame with rows representing zones and an ID variable.
 We can verify that the IDs match those in the `zones` dataset using `%in%` operator as follows:
 
 ```{r}
-summary(zones_attr$geo_code %in% zones$geo_code)
+summary(zones_attr$geo_code %in% bristol_zones$geo_code)
 ```
 
 The results show that all 102 zones are present in the new object and that `zone_attr` is in a form that can be joined onto the zones.^[
 It would also be important to check that IDs match in the opposite direction on real data.
-This could be done by reversing the order of the ID's in the commend --- `summary(zones$geo_code %in% zones_attr$geo_code)` --- or by using `setdiff()` as follows: `setdiff(zones$geo_code, zones_attr$geo_code)`.
+This could be done by reversing the order of the ID's in the commend --- `summary(bristol_zones$geo_code %in% zones_attr$geo_code)` --- or by using `setdiff()` as follows: `setdiff(bristol_zones$geo_code, zones_attr$geo_code)`.
 ]
 This is done using the joining function `left_join()` (note that `inner_join()` would produce here the same result):
 
 ```{r}
-zones = left_join(zones, zones_attr)
+zones = left_join(bristol_zones, zones_attr)
 sum(zones$all)
 names(zones)
 ```
@@ -620,7 +609,7 @@ tmap_mode("view")
 rail_stations_top = rail_stations[knn_orig, ]
 m_leaflet = qtm(bristol_ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("lightgreen", "grey", "pink")) +
   tm_scale_bar() +
-  tm_shape(region_ttwa) +
+  tm_shape(bristol_ttwa) +
   tm_borders(col = "darkblue") +
   tm_shape(route_cycleway) +
   tm_lines(col = "blue", lwd = "all", scale = 20, alpha = 0.6) +
