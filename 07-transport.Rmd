@@ -386,11 +386,7 @@ We will see how transport networks can be represented as mathematical graphs in 
 
 Public transport stops are particularly important nodes that can be represented as either type of node: a bus stop that is part of a road, or a large rail station that is represented by its pedestrian entry point hundreds of meters from railway tracks.
 We will use railway stations to illustrate public transport nodes, in relation to the research question of increasing cycling in Bristol.
-These stations are loaded as follows:
-
-```{r}
-rail_stations = readRDS("extdata/rail_stations.rds")
-```
+These stations are provided by **spDataLarge** in `bristol_stations`.
 
 A common barrier preventing people from switching away from cars for commuting to work is that the distance from home to work is too far to walk or cycle.
 Public transport can reduce this barrier by providing a fast and high-volume option for common routes into cities.
@@ -416,7 +412,7 @@ The first stage is to create matrices of coordinates that will subsequently be u
 ```{r}
 mat_orig = as.matrix(line2df(desire_rail)[c("fx", "fy")])
 mat_dest = as.matrix(line2df(desire_rail)[c("tx", "ty")])
-mat_rail = st_coordinates(rail_stations)
+mat_rail = st_coordinates(bristol_stations)
 ```
 
 The outputs are three matrices representing the starting points of the trips, their destinations and possible intermediary points at public transport nodes (named `orig`, `dest` and `rail` respectively).
@@ -490,12 +486,12 @@ zone_cents_rail = zone_cents[desire_rail,]
 plot(desire_rail$geometry, expandBB = c(.1, .1, .1, .1))
 plot(desire_rail$leg_orig, add = TRUE, col = "red", lwd = 3)
 plot(desire_rail$leg_rail, add = TRUE, col = "grey", lwd = 2)
-plot(rail_stations, add = TRUE, col = "red")
+plot(bristol_stations, add = TRUE, col = "red")
 plot(desire_rail$leg_dest, add = TRUE, col = "blue", lwd = 5)
 plot(zone_cents_rail, add = TRUE, col = "black")
 # library(tmap)
 # tmap_mode("plot")
-# qtm(rail_stations, basemaps = "https://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=feae177da543411c9efa64160305212d", dots.col = "red", symbols.size = 2) +
+# qtm(bristol_stations, basemaps = "https://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=feae177da543411c9efa64160305212d", dots.col = "red", symbols.size = 2) +
 #   tm_shape(desire_rail) +
 #   tm_lines(col = "black", lwd = 4) +
 #   tm_shape(legs) +
@@ -505,10 +501,9 @@ plot(zone_cents_rail, add = TRUE, col = "black")
 ## Route networks
 
 The data used in this section was downloaded using **osmdata**.
-To avoid having to request the data from OSM repeatedly, we will use a locally saved version of the data, which contains point and line data for the case study area:
+To avoid having to request the data from OSM repeatedly, we will use the `bristol_ways` object, which contains point and line data for the case study area (see `?bristol_ways`):
 
 ```{r}
-bristol_ways = readRDS("extdata/ways.rds")
 summary(bristol_ways)
 ```
 
@@ -605,14 +600,14 @@ Although other routes between zones are likely to be used --- in reality people 
   
 library(tmap)
 tmap_mode("view")
-rail_stations_top = rail_stations[knn_orig, ]
+bristol_stations_top = bristol_stations[knn_orig, ]
 m_leaflet = qtm(bristol_ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("lightgreen", "grey", "pink")) +
   tm_scale_bar() +
   tm_shape(bristol_ttwa) +
   tm_borders(col = "darkblue") +
   tm_shape(route_cycleway) +
   tm_lines(col = "blue", lwd = "all", scale = 20, alpha = 0.6) +
-  tm_shape(rail_stations_top) +
+  tm_shape(bristol_stations_top) +
   tm_dots(size = 0.3, col = "red")
 tmap::tmap_leaflet(m_leaflet)
 ```
