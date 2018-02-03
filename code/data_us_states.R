@@ -53,7 +53,8 @@ hawaii = us_states %>%
   mutate(REGION = factor(REGION, labels = c("West"))) %>% 
   mutate(AREA = units::set_units(st_area(.), km^2)) %>% 
   left_join(., total_pop_10, by = "GEOID") %>% 
-  left_join(., total_pop_15, by = "GEOID")
+  left_join(., total_pop_15, by = "GEOID") %>% 
+  st_transform("+proj=aea +lat_1=8 +lat_2=18 +lat_0=13 +lon_0=-157 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs ")
 
 save(hawaii, file = "data/hawaii.rda", compress = "bzip2")
 # alaska ------------------------------------------------------------------
@@ -66,7 +67,8 @@ alaska = us_states %>%
   mutate(REGION = factor(REGION, labels = c("West"))) %>% 
   mutate(AREA = units::set_units(st_area(.), km^2)) %>% 
   left_join(., total_pop_10, by = "GEOID") %>% 
-  left_join(., total_pop_15, by = "GEOID")
+  left_join(., total_pop_15, by = "GEOID") %>% 
+  st_transform(3467)
 
 save(alaska, file = "data/alaska.rda", compress = "bzip2")
 
