@@ -100,7 +100,7 @@ Note that it is optional to run `set_env` and `open_app` since all functions dep
 Before running **RQGIS** you have to make sure to have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS.
 To help you with the installation process, please follow the steps as detailed in `vignette("install_guide", package = "RQGIS")` for several platforms (Windows, Linux, MacOS).
 
-```{r qgis_setup}
+```{r qgis_setup, eval=FALSE}
 library(RQGIS)
 set_env()
 open_app()
@@ -113,8 +113,6 @@ We are now ready for some QGIS geoprocessing from within R! First of all, we loa
 
 ```{r}
 library(spData)
-data(cycle_hire)
-data(lnd)
 ```
 
 In chapter @ref(spatial-class), we already learned how to do a spatial overlay using the **sf**-package.
@@ -124,7 +122,7 @@ Here, we assume that the short description of the function contains first the wo
 If you have no clue at all what to look for you can leave the `search_term`-argument empty which will return a list of all available QGIS geoalgorithms.
 If you also want to have a short description for each geoalgorithm, set the `name_only`-parameter to FALSE.
 
-```{r}
+```{r, eval=FALSE}
 find_algorithms("points.*poly", name_only = TRUE)
 ```
 
@@ -132,12 +130,12 @@ Now that we know the name of the function ("qgis:countpointsinpolygon"), we wond
 `get_usage` returns all function parameters and default values. 
 `open_help` lets you access the corresponding online help.
 
-```{r}
+```{r, eval=FALSE}
 alg = "qgis:countpointsinpolygon"
 get_usage(alg)
 ```
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 open_help(alg)
 ```
 
@@ -148,7 +146,7 @@ But of course, you could also specify paths to shapefiles stored on disk.
 Setting the `load_output` to `TRUE` automatically loads the QGIS output into R.
 Since we only indicated the name of the output ("cycle.shp"), `run_qgis` saves the output to a temporary folder as returned by `tempdir()`, and loads it into R as an **sf**-object.
 
-```{r}
+```{r, eval=FALSE}
 bike_points = run_qgis(alg, POLYGONS = lnd, POINTS = cycle_hire, FIELD = "no_bikes", 
                        OUTPUT = "cycle.shp", load_output = TRUE)
 summary(bike_points$no_bikes)
@@ -158,7 +156,7 @@ sum(bike_points$no_bikes > 0)
 In case you leave some parameters of a geoalgorithm unspecified, `run_qgis` will automatically use the default values as arguments if available.
 To find out about the default values, run `get_args_man`.  
 
-```{r}
+```{r, eval=FALSE}
 get_args_man(alg)
 ```
 
@@ -188,7 +186,7 @@ First of all, we need to make sure that **RSAGA** will find SAGA on the computer
 For this, all **RSAGA** functions using SAGA in the background make use of `rsaga.env()`. 
 Usually, `rsaga.env()` will detect SAGA automatically by searching several likely directories (see its help for more information). However, we have 'hidden' SAGA in the OSGEO4W-installation, a location `rsaga.env()` does not search automatically. `linkSAGA` searches your computer for a valid SAGA installation. If it finds one, it adds it to the PATH environment variable thereby making sure that `rsaga.env` runs successfully.
 
-```{r, warning = FALSE, message = FALSE}
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library(RSAGA)
 library(link2GI)
 linkSAGA()
@@ -200,7 +198,7 @@ Note that calling `data(landslides)` attaches two object to the global environme
 
 <!-- The following examples only work with SAGA < 2.3. We have informed the package maintainer to update SAGA -->
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 data(landslides)
 write.sgrd(data = dem, file = file.path(tempdir(), "dem"), header = dem$header)
 ```
@@ -209,7 +207,7 @@ The organization of SAGA is modular.
 Libraries contain so-called modules, i.e., geoalgorithms.
 To find out which libraries are available, run:
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 tail(rsaga.get.libraries(), 10)
 ```
 
@@ -217,20 +215,20 @@ Instead of presenting all available libraries we have shown only the last ten.
 We choose the library 'ta_hydrology' (ta is the abbreviation for terrain analysis).
 Subsequently, we can access the available modules of a specific library (here: 'ta_hydrology') as follows:
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 rsaga.get.modules(libs = "ta_hydrology")
 ```
 
 Similarly to `RQGIS::get_usage()`, `rsaga.get.usage()` prints the function parameters of a specific geoalgorithm, e.g., the `SAGA Wetness Index`, to the console.
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 rsaga.get.usage(lib = "ta_hydrology", module = "SAGA Wetness Index")
 ```
 
 Finally, you can run SAGA from within R using **RSAGA**'s geoprocessing workhorse function `rsaga.geoprocessor()`. 
 The function expects a parameter-argument list in which you have specified all necessary parameters.
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 params = list(DEM = file.path(tempdir(), "dem.sgrd"),
               TWI = file.path(tempdir(), "twi.sdat"))
 rsaga.geoprocessor(lib = "ta_hydrology", module = "SAGA Wetness Index", 
@@ -240,14 +238,14 @@ rsaga.geoprocessor(lib = "ta_hydrology", module = "SAGA Wetness Index",
 To facilitate the access to the SAGA interface, RSAGA frequently provides user-friendly wrapper-functions with meaningful default values (see RSAGA documentation for examples, e.g., `?rsaga.wetness.index`).
 So the function call for calculating the 'SAGA Wetness Index' becomes as simple as:
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 rsaga.wetness.index(in.dem = file.path(tempdir(), "dem"), 
                     out.wetness.index = file.path(tempdir(), "twi"))
 ```
 
 Of course, we would like to inspect our result visually (Figure \@ref(fig:saga_twi)). To load and plot the SAGA output file, we use the **raster** package. 
 
-```{r saga_twi, fig.cap = "SAGA wetness index of Mount Mongón, Peru.", eval = FALSE}
+```{r saga_twi, fig.cap = "SAGA wetness index of Mount Mongón, Peru.", eval=FALSE}
 library(raster)
 twi = raster::raster(file.path(tempdir(), "twi.sdat"))
 plot(twi, col = RColorBrewer::brewer.pal(n = 9, name = "Blues"))
@@ -286,8 +284,8 @@ points = cycle_hire[1:25, ]
 
 <!--
 ```{r}
-plot(st_geometry(streets))
-plot(st_geometry(cycle_hire), col = "red", pch = 16, add = TRUE)
+# plot(st_geometry(streets))
+# plot(st_geometry(cycle_hire), col = "red", pch = 16, add = TRUE)
 ```
 -->
 
@@ -298,7 +296,7 @@ We constrain the download of the street network (in OSM language called highway)
 Here, we will only keep the line objects.
 To learn more about how to use the **osmdata**-package, please refer to [https://ropensci.github.io/osmdata/](https://ropensci.github.io/osmdata/).
 
-```{r}
+```{r, eval=FALSE}
 library(sf)
 library(osmdata)
 
@@ -342,7 +340,7 @@ Here, we will use a GRASS7 installation.
 If you have not installed GRASS7 on your computer, we recommend that you do so now.
 Assuming that we have found a working installation on your computer, we use the corresponding path in `initGRASS`. Additionally, we specify where to store the geodatabase (gisDbase), name the location `london`, and use the PERMANENT mapset.
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 library(rgrass7)
 # find a GRASS7 installation, and use the first one
 ind = grep("7", link$version)[1]
@@ -362,7 +360,7 @@ initGRASS(gisBase = grass_path,
 ```
 
 Subsequently, we define the projection, the extent and the resolution.
-```{r}
+```{r, eval=FALSE}
 execGRASS("g.proj", flags = c("c", "quiet"), 
           proj4 = sf::st_crs(streets)$proj4string)
 b_box = sf::st_bbox(streets) 
@@ -380,7 +378,7 @@ Since we have set `ver_select` to `TRUE`, we can interactively choose one of the
 If there is just one installation, the `linkGRASS7` automatically chooses this one.
 Secondly, `linkGRASS7` establishes a connection to GRASS7.
  
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 linkGRASS7(streets, ver_select = TRUE)
 ```
 
@@ -391,7 +389,7 @@ In our case we add the street and cycle hire point data while using only the fir
 
 <!-- in time we can also use sf- and raster-objects with rgrass7, Roger has already implemented this in the rgrass7 developer version -->
 
-```{r}
+```{r, eval=FALSE}
 writeVECT(as(streets[, 1], "Spatial"), vname = "streets")
 writeVECT(SDF = as(points[, 1], "Spatial"), vname = "points")
 ```
@@ -404,7 +402,7 @@ However, to find the shortest route between them, we need to connect them to the
 `v.net`'s connect-operator does exactly this. 
 We save its output in `streets_points_con`.
 
-```{r}
+```{r, eval=FALSE}
 execGRASS(cmd = "v.clean", input = "streets", output = "streets_clean",
           tool = "break", flags = "overwrite")
 execGRASS(cmd = "v.net", input = "streets_clean", output = "streets_points_con", 
@@ -418,7 +416,7 @@ This range represents the points for which a shortest route should be calculated
 Since we would like to calculate the route for all cycle stations, we set it to `1-25`.
 To access the GRASS help page of the traveling salesman algorithm, run `execGRASS("g.manual", entry = "v.net.salesman")`.
 
-```{r}
+```{r, eval=FALSE}
 execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
           output = "shortest_route", center_cats = paste0("1-", nrow(points)),
           flags = c("overwrite"))
@@ -426,7 +424,7 @@ execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
 
 To visualize our result, we import the output layer into R, and visualize it with the help of the **mapview** package (Figure \@ref(fig:grass_mapview)).
 
-```{r grass_mapview, fig.cap = "Shortest route between 25 cycle hire station on the OSM street network of London."}
+```{r grass_mapview, fig.cap = "Shortest route between 25 cycle hire station on the OSM street network of London.", eval=FALSE}
 library(mapview)
 route = readVECT("shortest_route")
 mapview(route) +
