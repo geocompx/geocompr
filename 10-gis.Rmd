@@ -113,8 +113,6 @@ We are now ready for some QGIS geoprocessing from within R! First of all, we loa
 
 ```{r}
 library(spData)
-data(cycle_hire)
-data(lnd)
 ```
 
 In chapter @ref(spatial-class), we already learned how to do a spatial overlay using the **sf**-package.
@@ -286,8 +284,8 @@ points = cycle_hire[1:25, ]
 
 <!--
 ```{r}
-plot(st_geometry(streets))
-plot(st_geometry(cycle_hire), col = "red", pch = 16, add = TRUE)
+# plot(st_geometry(streets))
+# plot(st_geometry(cycle_hire), col = "red", pch = 16, add = TRUE)
 ```
 -->
 
@@ -298,7 +296,7 @@ We constrain the download of the street network (in OSM language called highway)
 Here, we will only keep the line objects.
 To learn more about how to use the **osmdata**-package, please refer to [https://ropensci.github.io/osmdata/](https://ropensci.github.io/osmdata/).
 
-```{r}
+```{r, eval=FALSE}
 library(sf)
 library(osmdata)
 
@@ -362,7 +360,7 @@ initGRASS(gisBase = grass_path,
 ```
 
 Subsequently, we define the projection, the extent and the resolution.
-```{r}
+```{r, eval=FALSE}
 execGRASS("g.proj", flags = c("c", "quiet"), 
           proj4 = sf::st_crs(streets)$proj4string)
 b_box = sf::st_bbox(streets) 
@@ -380,7 +378,7 @@ Since we have set `ver_select` to `TRUE`, we can interactively choose one of the
 If there is just one installation, the `linkGRASS7` automatically chooses this one.
 Secondly, `linkGRASS7` establishes a connection to GRASS7.
  
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 linkGRASS7(streets, ver_select = TRUE)
 ```
 
@@ -391,7 +389,7 @@ In our case we add the street and cycle hire point data while using only the fir
 
 <!-- in time we can also use sf- and raster-objects with rgrass7, Roger has already implemented this in the rgrass7 developer version -->
 
-```{r}
+```{r, eval=FALSE}
 writeVECT(as(streets[, 1], "Spatial"), vname = "streets")
 writeVECT(SDF = as(points[, 1], "Spatial"), vname = "points")
 ```
@@ -404,7 +402,7 @@ However, to find the shortest route between them, we need to connect them to the
 `v.net`'s connect-operator does exactly this. 
 We save its output in `streets_points_con`.
 
-```{r}
+```{r, eval=FALSE}
 execGRASS(cmd = "v.clean", input = "streets", output = "streets_clean",
           tool = "break", flags = "overwrite")
 execGRASS(cmd = "v.net", input = "streets_clean", output = "streets_points_con", 
@@ -418,7 +416,7 @@ This range represents the points for which a shortest route should be calculated
 Since we would like to calculate the route for all cycle stations, we set it to `1-25`.
 To access the GRASS help page of the traveling salesman algorithm, run `execGRASS("g.manual", entry = "v.net.salesman")`.
 
-```{r}
+```{r, eval=FALSE}
 execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
           output = "shortest_route", center_cats = paste0("1-", nrow(points)),
           flags = c("overwrite"))
@@ -426,7 +424,7 @@ execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
 
 To visualize our result, we import the output layer into R, and visualize it with the help of the **mapview** package (Figure \@ref(fig:grass_mapview)).
 
-```{r grass_mapview, fig.cap = "Shortest route between 25 cycle hire station on the OSM street network of London."}
+```{r grass_mapview, fig.cap = "Shortest route between 25 cycle hire station on the OSM street network of London.", eval=FALSE}
 library(mapview)
 route = readVECT("shortest_route")
 mapview(route) +
