@@ -1,24 +1,18 @@
+# (PART) Advanced methods {-}
+
 # Advanced map making {#adv-map}
 
 ## Prerequisites {-}
 
 - This chapter requires the following packages:
 
-```{r, include=FALSE}
+```{r, message = FALSE} 
 library(sf)
 library(raster)
 library(tidyverse)
-library(spData)
 library(tmap)
+library(spData)
 ```
-
-<!--
-- ggplot2/ggmap (geom_sf, coord_sf)
-- leaflet/mapview
-- rasterVis ?
-- shiny ?
-- mapview?
--->
 
 ## Introduction
 
@@ -26,14 +20,13 @@ library(tmap)
 <!-- ref to previous chapters -->
 <!-- info about relation between efficiency and editability -->
 
-
 ## Static maps
 
 ### Basics
 
 <!-- I'm not sure if we can fill it all in the book, but it could be worth to try it all on the same problems -->
 <!-- base plots -->
-<!-- ggplots  -->
+<!-- ggplots  (geom_sf, coord_sf)-->
 <!-- tmap -->
 
 ### Map styling
@@ -72,7 +65,8 @@ However, facets can also represent shifting geometries, e.g. as the spatial dist
 This use case of facetted plot is illustrated in Figure \@ref(fig:urban-facet).
 
 ```{r urban-facet, fig.cap="Facetted map showing the top 30 largest 'urban agglomerations' from 1950 to 2030 based on population projects by the United Nations"}
-qtm(world) +
+tm_shape(world) +
+  tm_polygons() + 
   tm_shape(urban_agglomerations) +
   tm_dots(size = "population_millions") +
   tm_facets(by = "year")
@@ -80,8 +74,52 @@ qtm(world) +
 
 ### Inset maps
 
-<!-- example of us states + hawaii + alaska -->
-<!-- + maybe mix of maps and plots? -->
+The role of spatial visualizations is to provide an information in the most accessible form. 
+This is often done with the use of inset maps.
+They could be used to focus on a smaller area in more detail<!--fig ref1--> or to bring some non-contiguous regions closer to ease a comparision<!--fig ref2-->.
+
+<!-- intro  -->
+<!-- used when: a/ non-contigous regions, b/ focus on small region while showing the large one -->
+<!-- find the best distribution of insets -->
+
+<!-- example1: classic inset map -->
+
+<!-- example2: us states + hawaii + alaska -->
+
+
+<!-- find the best projection for each individual inset. -->
+
+<!-- reproj -->
+```{r}
+us_states_map = tm_shape(us_states, projection = 2163) +
+  tm_polygons() + 
+  tm_layout(frame = FALSE)
+```
+
+<!-- create separate maps -->
+```{r}
+hawaii_map = tm_shape(hawaii) +
+  tm_polygons() + 
+  tm_layout(title = "Hawaii", frame = FALSE, bg.color = NA, 
+            title.position = c("left", "bottom"))
+alaska_map = tm_shape(alaska) +
+  tm_polygons() + 
+  tm_layout(title = "Alaska", frame = FALSE, bg.color = NA)
+```
+
+<!-- create an inset map -->
+```{r}
+library(grid)
+us_states_map
+print(hawaii_map, vp = viewport(x = 0.4, y = 0.1, width = 0.2, height = 0.1))
+print(alaska_map, vp = viewport(x = 0.15, y = 0.15, width = 0.3, height = 0.3))
+```
+
+<!-- extended info about using tm_layout to show legend in main plot and remove it in the others -->
+
+<!-- example3: mix of maps and plots? -->
+<!-- of maybe only mention this -->
+<!-- https://gist.github.com/walkerke/93bfe80bb7735aa6265a61013eaed3fa -->
 
 ## Animations
 
@@ -173,3 +211,6 @@ animation_tmap(m2, filename = "figures/11-lifeExp_sa_animation.gif", width = 160
 <!-- geofacet -->
 <!-- e.g. population lines -->
 <!-- point maps -->
+<!-- hexbin -->
+<!-- cartogram - https://github.com/sjewo/cartogram -->
+<!-- shiny? -->
