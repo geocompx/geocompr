@@ -216,7 +216,7 @@ class: center, middle
 ### Spatial R 
 
 ```{r gdsl, echo=FALSE, message=FALSE, results="asis"}
-d = readr::read_csv("figs/gis-vs-gds-table.csv")
+d = readr::read_csv("../extdata/gis-vs-gds-table.csv")
 knitr::kable(x = d, caption = "Differences in emphasis between the fields of Geographic Information Systems (GIS) and Geographic Data Science (GDS)", format = "html")
 ```
 
@@ -255,17 +255,19 @@ library(sf)
 ### Reading spatial data
 
 ```{r}
-wrld = st_read("data/wrld.shp")
+f1 = system.file(package = "spData", "shapes/world.shp")
+wrld = st_read(f1)
 ```
 
 ```{r}
-ham = st_read("data/hamilton_county.gpkg")
+f2 = system.file(package = "spData", "shapes/world.gpkg")
+wrld_gpkg = st_read(f2)
 ```
 
 ---
 ### Reading spatial data - text files
 
-```{r}
+```{r, eval=FALSE}
 ham_cities_sf = st_read("data/hamiltion_cities.csv", 
                         options = c("X_POSSIBLE_NAMES=X",
                                     "Y_POSSIBLE_NAMES=Y",
@@ -280,15 +282,15 @@ file.remove(c("data/new_wrld.shp", "data/new_wrld.gpkg"))
 ```
 
 ```{r, warning=FALSE}
-st_write(wrld, "data/new_wrld.shp")
+st_write(wrld, "new_wrld.shp")
 ```
 
 ```{r, warning=FALSE}
-st_write(wrld, "data/new_wrld.gpkg")
+st_write(wrld, "new_wrld.gpkg")
 ```
 
 ```{r, warning=FALSE, results="hide", echo=FALSE}
-file.remove(c("data/new_wrld.shp", "data/new_wrld.gpkg"))
+file.remove(list.files(pattern = "wrld"))
 ```
 
 ---
@@ -440,7 +442,8 @@ library(raster)
 ### Reading
 
 ```{r}
-dem = raster("data/srtm.tif")
+raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
+dem = raster(raster_filepath)
 dem
 ```
 
@@ -452,17 +455,17 @@ file.remove(c("data/new_dem.tif", "data/new_dem2.tif"))
 ```
 
 ```{r}
-writeRaster(dem, "data/new_dem.tif")
+writeRaster(dem, "new_dem.tif")
 ```
 
 
 ```{r}
-writeRaster(dem, "data/new_dem2.tif", 
+writeRaster(dem, "new_dem2.tif", 
             datatype = "FLT4S", options=c("COMPRESS=DEFLATE"))
 ```
 
 ```{r, warning=FALSE, results="hide", echo=FALSE}
-file.remove(c("data/new_dem.tif", "data/new_dem2.tif"))
+file.remove(c("new_dem.tif", "new_dem2.tif"))
 ```
 
 ```{r}
@@ -549,7 +552,7 @@ dev.off()
 ### Extract
 
 ```{r}
-ham_cities_sp = as(ham_cities_sf, "Spatial")
+ham_cities_sp = as(ham_cities_sf, "Spatial")  
 raster::extract(dem, ham_cities_sp)
 ```
 
