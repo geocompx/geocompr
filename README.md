@@ -1,4 +1,5 @@
-<!-- README.md is generated from README.Rmd. Please edit that file - rmarkdown::render('README.Rmd', output_format = 'md_document', output_file = 'README.md') -->
+
+<!-- README.md is generated from README.Rmd. Please edit that file - rmarkdown::render('README.Rmd', output_format = 'github_document', output_file = 'README.md') -->
 Geocomputation with R
 =====================
 
@@ -48,11 +49,7 @@ To reduce the book's dependencies, scripts to be run infrequently to generate in
 The additional packages required for this can be installed as follows:
 
 ``` r
-pkgs = c("cranlogs", "diagram", "globe", "tidytext")
-to_install = !pkgs %in% installed.packages()
-if(any(to_install)) {
-  install.packages(pkgs[to_install])
-}
+source("code/extra-pkgs.R")
 ```
 
 With these additional dependencies installed, you should be able to run the following scripts, which create input figures for the book:
@@ -65,7 +62,7 @@ source("code/sf-revdep.R")
 Note: the `.Rproj` file is configured to build a website not a single page. To reproduce this [README](https://github.com/Robinlovelace/geocompr/blob/master/README.Rmd) use the following command:
 
 ``` r
-rmarkdown::render("README.Rmd", output_format = "md_document", output_file = "README.md")
+rmarkdown::render("README.Rmd", output_format = "github_document", output_file = "README.md")
 ```
 
 Book statistics
@@ -114,11 +111,12 @@ knitr::kable(pkg_df)
 | ggmap             | Spatial Visualization with ggplot2 \[@R-ggmap\]                                           | 2.6.1      |
 | gstat             | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction \[@R-gstat\]             | 1.1.5      |
 | htmlwidgets       | HTML Widgets for R \[@R-htmlwidgets\]                                                     | 1.0        |
+| kableExtra        | Construct Complex Table with 'kable' and Pipe Syntax \[@R-kableExtra\]                    | 0.7.0      |
 | knitr             | A General-Purpose Package for Dynamic Report Generation in R \[@R-knitr\]                 | 1.19       |
 | leaflet           | Create Interactive Web Maps with the JavaScript 'Leaflet' \[@R-leaflet\]                  | 1.1.0      |
 | link2GI           | Linking Geographic Information Systems, Remote Sensing and Other \[@R-link2GI\]           | 0.2.0      |
 | lwgeom            | Bindings to Selected 'liblwgeom' Functions for Simple Features \[@R-lwgeom\]              | 0.1.4      |
-| mapview           | Interactive Viewing of Spatial Data in R \[@R-mapview\]                                   | 2.2.0      |
+| mapview           | Interactive Viewing of Spatial Data in R \[@R-mapview\]                                   | 2.3.0      |
 | microbenchmark    | Accurate Timing Functions \[@R-microbenchmark\]                                           | 1.4.4      |
 | osmdata           | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]                  | 0.0.5      |
 | raster            | Geographic Data Analysis and Modeling \[@R-raster\]                                       | 2.6.7      |
@@ -132,9 +130,9 @@ knitr::kable(pkg_df)
 | RSAGA             | SAGA Geoprocessing and Terrain Analysis in R \[@R-RSAGA\]                                 | 0.94.5     |
 | sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.1      |
 | sp                | Classes and Methods for Spatial Data \[@R-sp\]                                            | 1.2.7      |
-| spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.7.0    |
-| spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.3.2    |
-| stars             | Scalable, Spatiotemporal Tidy Arrays for R \[@R-stars\]                                   | 0.0        |
+| spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.7.3    |
+| spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.5.0    |
+| stars             | Scalable, Spatiotemporal Tidy Arrays for R \[@R-stars\]                                   | 0.1.0      |
 | stplanr           | Sustainable Transport Planning \[@R-stplanr\]                                             | 0.2.2.9999 |
 | tabularaster      | Tidy Tools for 'Raster' Data \[@R-tabularaster\]                                          | 0.4.0      |
 | tidyverse         | Easily Install and Load the 'Tidyverse' \[@R-tidyverse\]                                  | 1.2.1      |
