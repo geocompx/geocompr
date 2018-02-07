@@ -9,7 +9,10 @@
 #**********************************************************
 #
 # 1. ATTACH PACKAGES AND DATA
-# 2. 
+# 2. DATA PREPROCESSING
+# 3. TERRAIN ATTRIBUTES
+# 4. MODELING 
+# 5. SPATIAL PREDICTION
 #
 #**********************************************************
 # 1 ATTACH PACKAGES AND DATA-------------------------------
@@ -90,6 +93,9 @@ names(log_carea) = "log_carea"
 ta = addLayer(x = ta, log_carea)
 # extract values to points, i.e., create predictors
 lsl[, names(ta)] = extract(ta, lsl)
+
+# save input data
+# save(dem, lsl, ta, file = "extdata/spatialcv.Rdata")
 
 #**********************************************************
 # 4 MODELING-----------------------------------------------
