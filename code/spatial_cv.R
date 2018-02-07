@@ -38,8 +38,8 @@ dem =
          xmx = dem$header$xllcorner + dem$header$ncols * dem$header$cellsize,
          ymn = dem$header$yllcorner,
          ymx = dem$header$yllcorner + dem$header$nrows * dem$header$cellsize)
-plot(dem)
-plot(dplyr::filter(lsl, lslpts == TRUE), add = TRUE, pch = 16)
+# plot(dem)
+# plot(dplyr::filter(lsl, lslpts == TRUE), add = TRUE, pch = 16)
 
 # # compare with SAGA version
 # dem$header
@@ -61,11 +61,20 @@ alg = "saga:slopeaspectcurvature"
 get_usage(alg)
 # terrain attributes (ta)
 out = run_qgis(alg, ELEVATION = dem, METHOD = 6, UNIT_SLOPE = "degree",
+               UNIT_ASPECT = "degree",
+               ASPECT = file.path(tempdir(), "aspect.tif"),
                SLOPE = file.path(tempdir(), "slope.tif"),
                C_PLAN = file.path(tempdir(), "cplan.tif"),
                C_PROF = file.path(tempdir(), "cprof.tif"),
                load_output = TRUE)
-ta = stack(out)
+# hillshade (needs radians)
+hs = hillShade(out$SLOPE * pi / 180, out$ASPECT * pi / 180, 40, 270)
+plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
+plot(dem, add = TRUE, alpha = 0.6)
+plot(dplyr::filter(lsl, lslpts == TRUE), add = TRUE, pch = 16)
+
+
+ta = stack(out[names(out) != "ASPECT"])
 names(ta) = c("slope", "cplan", "cprof")
 # catchment area
 find_algorithms("[Cc]atchment")
@@ -163,6 +172,9 @@ boxplot(spcv_glm$measures.test$auc,
 
 pred = raster::predict(object = ta, model = m_sp, fun = predict,
                        type = "response")
-plot(pred, col = RColorBrewer::brewer.pal("YlOrRd", n =  9))
-plot(pred, col = brewer.pal(name = "Reds", 9))
+plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
+# plot(pred, col = RColorBrewer::brewer.pal("YlOrRd", n =  9), add = TRUE, 
+#      alpha = 0.6)
+plot(pred, col = RColorBrewer::brewer.pal(name = "Reds", 9), add = TRUE, 
+     alpha = 0.6)
 vignette(package = "RSAGA")
