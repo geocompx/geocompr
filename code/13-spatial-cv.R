@@ -82,7 +82,8 @@ out = run_qgis(alg, ELEVATION = dem, METHOD = 6, UNIT_SLOPE = "degree",
 # plot(dplyr::filter(lsl, lslpts == TRUE), add = TRUE, pch = 16)
 
 
-ta = stack(out[names(out) != "ASPECT"])
+# use brick because then the layers will be in memory and not on disk
+ta = brick(out[names(out) != "ASPECT"])
 names(ta) = c("slope", "cplan", "cprof")
 # catchment area
 find_algorithms("[Cc]atchment")
@@ -100,7 +101,7 @@ ta = addLayer(x = ta, log_carea)
 lsl[, names(ta)] = raster::extract(ta, lsl[, c("x", "y")])
 
 # save input data
-# save(dem, lsl, ta, file = "extdata/spatialcv.Rdata")
+save(dem, lsl, ta, file = "extdata/spatialcv.Rdata")
 
 #**********************************************************
 # 4 MODELING-----------------------------------------------
