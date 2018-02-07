@@ -6,7 +6,7 @@ library(tidyverse)
 # exclude maps 
 dd = cranlogs::cran_downloads(packages = c("sp", "raster", "sf", "tmap", "spatstat", "leaflet", "ggmap"),
                               from = "2013-01-01", to = Sys.Date())
-dd$Downloads <- ave(
+dd$Downloads = ave(
   dd$count,
   dd$package,
   FUN = function(x)
@@ -15,7 +15,7 @@ dd$Downloads <- ave(
 top_pkgs = dd %>% 
   filter(date > (Sys.Date() - 30)) %>% 
   group_by(package) %>%
-  summarise(Downloads = mean(Downloads, na.rm = TRUE)) %>% 
+  dplyr::summarise(Downloads = mean(Downloads, na.rm = TRUE)) %>% 
   top_n(n = 5, wt = Downloads) %>% 
   pull(package)
 dd = dplyr::filter(dd, Downloads > 0, package %in% top_pkgs)
