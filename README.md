@@ -30,9 +30,6 @@ To ease reproducibility, this book is also a package. Installing it from GitHub 
 
 ``` r
 devtools::install_github("robinlovelace/geocompr")
-#> Warning in get(Info[i, 1], envir = env): internal error -3 in R_decompress1
-#> Warning in runHook(".onLoad", env, package.lib, package): internal error -3
-#> in R_decompress1
 ```
 
 You need a recent version of the GDAL, GEOS, Proj.4 and UDUNITS libraries installed for this to work on Mac and Linux. See the **sf** package's [README](https://github.com/edzer/sfr) for information on that.
@@ -121,6 +118,7 @@ knitr::kable(pkg_df)
 | lwgeom            | Bindings to Selected 'liblwgeom' Functions for Simple Features \[@R-lwgeom\]              | 0.1.4      |
 | mapview           | Interactive Viewing of Spatial Data in R \[@R-mapview\]                                   | 2.3.0      |
 | microbenchmark    | Accurate Timing Functions \[@R-microbenchmark\]                                           | 1.4.4      |
+| mlr               | Machine Learning in R \[@R-mlr\]                                                          | 2.11       |
 | osmdata           | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]                  | 0.0.5      |
 | raster            | Geographic Data Analysis and Modeling \[@R-raster\]                                       | 2.6.7      |
 | rgdal             | Bindings for the 'Geospatial' Data Abstraction Library \[@R-rgdal\]                       | 1.2.16     |
