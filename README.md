@@ -8,9 +8,9 @@ Geocomputation with R
 Introduction
 ============
 
-This repository hosts the code underlying Geocomputation with R, a book by [Robin Lovelace](http://robinlovelace.net/), [Jakub Nowosad](https://nowosad.github.io/), and [Jannes Muenchow](http://www.geographie.uni-jena.de/en/Muenchow.html).
+This repository hosts the code underlying Geocomputation with R, a book by [Robin Lovelace](https://www.robinlovelace.net/), [Jakub Nowosad](https://nowosad.github.io/), and [Jannes Muenchow](http://www.geographie.uni-jena.de/en/Muenchow.html).
 
-The online version of the book is developed at <http://geocompr.robinlovelace.net/>. We plan to publish the hard copy of the book with CRC Press in 2018.
+The online version of the book is developed at <https://geocompr.robinlovelace.net/>. We plan to publish the hard copy of the book with CRC Press in 2018.
 
 Contributing
 ------------
@@ -30,6 +30,9 @@ To ease reproducibility, this book is also a package. Installing it from GitHub 
 
 ``` r
 devtools::install_github("robinlovelace/geocompr")
+#> Warning in get(Info[i, 1], envir = env): internal error -3 in R_decompress1
+#> Warning in runHook(".onLoad", env, package.lib, package): internal error -3
+#> in R_decompress1
 ```
 
 You need a recent version of the GDAL, GEOS, Proj.4 and UDUNITS libraries installed for this to work on Mac and Linux. See the **sf** package's [README](https://github.com/edzer/sfr) for information on that.
@@ -114,7 +117,7 @@ knitr::kable(pkg_df)
 | kableExtra        | Construct Complex Table with 'kable' and Pipe Syntax \[@R-kableExtra\]                    | 0.7.0      |
 | knitr             | A General-Purpose Package for Dynamic Report Generation in R \[@R-knitr\]                 | 1.19       |
 | leaflet           | Create Interactive Web Maps with the JavaScript 'Leaflet' \[@R-leaflet\]                  | 1.1.0      |
-| link2GI           | Linking Geographic Information Systems, Remote Sensing and Other \[@R-link2GI\]           | 0.2.0      |
+| link2GI           | Linking Geographic Information Systems, Remote Sensing and Other \[@R-link2GI\]           | 0.2.1      |
 | lwgeom            | Bindings to Selected 'liblwgeom' Functions for Simple Features \[@R-lwgeom\]              | 0.1.4      |
 | mapview           | Interactive Viewing of Spatial Data in R \[@R-mapview\]                                   | 2.3.0      |
 | microbenchmark    | Accurate Timing Functions \[@R-microbenchmark\]                                           | 1.4.4      |
