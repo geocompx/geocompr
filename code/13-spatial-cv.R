@@ -33,10 +33,15 @@ data("landslides", package = "RSAGA")
 #**********************************************************
 
 # landslide points
-lsl = st_as_sf(landslides, coords = c("x", "y"), crs = 32717)
+non = landslides[landslides$lslpts == FALSE, ]
+ind = sample(1:nrow(non), nrow(landslides[landslides$lslpts == TRUE, ]) + 75)
+lsl = rbind(non[ind, ], landslides[landslides$lslpts == TRUE, ])
+# tmp = st_as_sf(landslides, coords = c("x", "y"), crs = 32717)
+
 # digital elevation model
 dem = 
-  raster(dem$data, crs = st_crs(lsl)$proj4string,
+  raster(dem$data, 
+         crs = "+proj=utm +zone=17 +south +datum=WGS84 +units=m +no_defs",
          xmn = dem$header$xllcorner, 
          xmx = dem$header$xllcorner + dem$header$ncols * dem$header$cellsize,
          ymn = dem$header$yllcorner,
@@ -71,10 +76,10 @@ out = run_qgis(alg, ELEVATION = dem, METHOD = 6, UNIT_SLOPE = "degree",
                C_PROF = file.path(tempdir(), "cprof.tif"),
                load_output = TRUE)
 # hillshade (needs radians)
-hs = hillShade(out$SLOPE * pi / 180, out$ASPECT * pi / 180, 40, 270)
-plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
-plot(dem, add = TRUE, alpha = 0.6)
-plot(dplyr::filter(lsl, lslpts == TRUE), add = TRUE, pch = 16)
+# hs = hillShade(out$SLOPE * pi / 180, out$ASPECT * pi / 180, 40, 270)
+# plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
+# plot(dem, add = TRUE, alpha = 0.6)
+# plot(dplyr::filter(lsl, lslpts == TRUE), add = TRUE, pch = 16)
 
 
 ta = stack(out[names(out) != "ASPECT"])
@@ -92,7 +97,7 @@ names(log_carea) = "log_carea"
 # add log_carea
 ta = addLayer(x = ta, log_carea)
 # extract values to points, i.e., create predictors
-lsl[, names(ta)] = extract(ta, lsl)
+lsl[, names(ta)] = raster::extract(ta, lsl[, c("x", "y")])
 
 # save input data
 # save(dem, lsl, ta, file = "extdata/spatialcv.Rdata")
@@ -101,10 +106,9 @@ lsl[, names(ta)] = extract(ta, lsl)
 # 4 MODELING-----------------------------------------------
 #**********************************************************
 
-data = lsl
-data[, c("x", "y")] = st_coordinates(data)
-data = st_set_geometry(data, NULL)
-data_nonspatial = dplyr::select(data, -x, -y)
+coords = lsl[, c("x", "y")]
+data = dplyr::select(lsl, -x, -y)
+# data_nonspatial = dplyr::select(data, -x, -y)
 
 # 3.1 create a mlr task====================================
 #**********************************************************
@@ -117,14 +121,13 @@ data_nonspatial = dplyr::select(data, -x, -y)
 task_spatial = makeClassifTask(id = "lsl_glm_spatial", data = data,
                                target = "lslpts", positive = "TRUE",
                                # default: spatial = FALSE for spatial important
-                               # that coordinates are named x and y
-                               spatial = TRUE)
+                               # that coordinates are named x and y,
+                               coordinates = coords)
 
 
 task_nonspatial = makeClassifTask(id = "lsl_glm_nonspatial", 
-                                  data = data_nonspatial,
-                                  target = "lslpts", positive = "TRUE",
-                                  spatial = FALSE)
+                                  data = data,
+                                  target = "lslpts", positive = "TRUE")
 
 # 3.2 Construct a learner and run the model================
 #**********************************************************
@@ -149,7 +152,7 @@ summary(m_nsp)
 # interesting, coefficients are just the same
 coefficients(m_sp)
 coefficients(m_nsp)
-# identical(coefficients(m_sp), coefficients(m_nsp))
+identical(coefficients(m_sp), coefficients(m_nsp))
 
 # 3.3 Spatial cross-validation=============================
 #**********************************************************
