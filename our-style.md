@@ -4,11 +4,43 @@ Code lives in the `code` directory in files named according to the chapter they 
 The code does not have to be self-standing: it can depend on code run previously in the chapter.
         
 - `library(package)` - library without quotes
-- `=` - assignment operator (open for debate)
+- `=` - assignment operator (instead of `<-`)
 - ` = ` , ` > `, etc. - spaces around operators
 - `"text"` - double quotes for character values
 - `for(i in 1:9) {print(i)}` - use space separation for curly brackets
 - When indenting your code, use two spaces (tab in RStudio)
+- code files should 
+  - feature a name, a date, a short description (to do) and a table of contents
+  - be sectioned with the help of `---`, `===`, and `###`
+The beginning of a code script could look like this:
+
+```
+# Filename: filename.R (2018-02-06)
+#
+# TO DO: What should the script achieve
+#
+# Author(s): Robin Lovelace, Jakub Nowosad, Jannes Muenchow
+#
+#**********************************************************
+# CONTENTS-------------------------------------------------
+#**********************************************************
+#
+# 1. ATTACH PACKAGES AND DATA
+# 2. DATA EXPLORATION
+#
+#**********************************************************
+# 1 ATTACH PACKAGES AND DATA-------------------------------
+#**********************************************************
+
+# attach packages
+library(sf)
+# attach data
+nc = st_read(system.file("shape/nc.shp", package = "sf"))
+
+#**********************************************************
+# 2 DATA EXPLORATION---------------------------------------
+#**********************************************************
+```
 
 # Comments
 
