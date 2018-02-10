@@ -22,6 +22,11 @@ regions_facet = rename(regions, REGION = Group.1) %>%
 us_facet = rbind(us_states_facet, regions_facet) %>% 
   mutate(Level = factor(Level, levels = c("State", "Region")))
 
+# tmap issue temporal fix
+us_facet = st_cast(us_facet, "MULTIPOLYGON")
+
 tm_shape(us_facet) + 
   tm_polygons("total_pop_15", title = "Total population:") +
   tm_facets(by = "Level", nrow = 1, drop.units = TRUE)
+
+
