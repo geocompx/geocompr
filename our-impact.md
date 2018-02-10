@@ -34,6 +34,7 @@
 - 2017-12-03 - bug - Simplified polygons plotting - https://github.com/r-spatial/sf/issues/581
 - 2017-12-17 - bug - Polygons plotting error - https://github.com/mtennekes/tmap/issues/159
 - 2017-12-19 - bug - osmdata failed with an unhelpful message for some `getbb()` calls: https://github.com/ropensci/osmdata/issues/117
+- 2018-01-19 - bug - sf failed silently when renaming the `sf_column` - https://github.com/r-spatial/sf/issues/622
 
 ## open
 
