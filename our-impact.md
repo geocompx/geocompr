@@ -35,13 +35,13 @@
 - 2017-12-17 - bug - Polygons plotting error - https://github.com/mtennekes/tmap/issues/159
 - 2017-12-19 - bug - osmdata failed with an unhelpful message for some `getbb()` calls: https://github.com/ropensci/osmdata/issues/117
 - 2018-01-19 - bug - sf failed silently when renaming the `sf_column` - https://github.com/r-spatial/sf/issues/622
+- 2018-02-10 - bug - tmap 2.0: tm_polygons error - https://github.com/mtennekes/tmap/issues/170
 
 ## open
 
 - 2017-04-01 - enhancement - returnclass='sf' as default - https://github.com/ropenscilabs/rnaturalearth/issues/16
 - 2017-07-11 - bug - Problem with plots of the multipoint type - https://github.com/mtennekes/tmap/issues/126
 - 2017-08-23 - bug - mapedit does not seem to save the end result after editing - https://github.com/r-spatial/mapedit/issues/63
-- 2018-02-10 - bug - tmap 2.0: tm_polygons error - https://github.com/mtennekes/tmap/issues/170
 
 # Other
 
