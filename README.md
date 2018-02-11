@@ -131,10 +131,11 @@ knitr::kable(pkg_df)
 | RSAGA             | SAGA Geoprocessing and Terrain Analysis in R \[@R-RSAGA\]                                 | 0.94.5     |
 | sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.1      |
 | sp                | Classes and Methods for Spatial Data \[@R-sp\]                                            | 1.2.7      |
-| spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.7.3    |
-| spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.5.0    |
+| spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.7.4    |
+| spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.5.1    |
 | stars             | Scalable, Spatiotemporal Tidy Arrays for R \[@R-stars\]                                   | 0.1.0      |
 | stplanr           | Sustainable Transport Planning \[@R-stplanr\]                                             | 0.2.2.9999 |
 | tabularaster      | Tidy Tools for 'Raster' Data \[@R-tabularaster\]                                          | 0.4.0      |
 | tidyverse         | Easily Install and Load the 'Tidyverse' \[@R-tidyverse\]                                  | 1.2.1      |
-| tmap              | Thematic Maps \[@R-tmap\]                                                                 | 1.11       |
+| tmap              | Thematic Maps \[@R-tmap\]                                                                 | 2.0        |
+| tmaptools         | Thematic Map Tools \[@R-tmaptools\]                                                       | 2.0        |
