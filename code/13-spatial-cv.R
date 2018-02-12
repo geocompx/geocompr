@@ -103,7 +103,7 @@ ta = addLayer(x = ta, dem, log_carea)
 lsl[, names(ta)] = raster::extract(ta, lsl[, c("x", "y")])
 
 # save input data
-save(dem, lsl, ta, file = "extdata/spatialcv.Rdata")
+save(lsl, ta, file = "extdata/spatialcv.Rdata")
 
 #**********************************************************
 # 4 MODELING-----------------------------------------------
