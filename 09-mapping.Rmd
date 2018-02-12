@@ -106,32 +106,48 @@ They could be used to focus on a smaller area in more detail (Figure \@ref(fig:i
 In this section we focus on a creation of inset maps, so to learn about map styling go to section \@ref(map-styling).
 
 <!-- example1: classic inset map -->
+Inset map usually covers an area with densely located phenomena that cannot be clearly visible at the original map scale.
+In the example below, we would create an inset map of the central part of the New Zealand's Southern Alps.
+The first step is to define the area of interest, which can be done by creating a new spatial object, `nz_region`.
+<!--# mapview::mapview(nz_height, native.crs = TRUE) or mapedit??-->
 
 ```{r}
-# mapview::mapview(nz_height, native.crs = TRUE)
 nz_region = st_bbox(c(xmin = 1340000, xmax = 1450000, ymin = 5130000, ymax = 5210000),
                     crs = st_crs(nz_height)) %>% 
   st_as_sfc() 
 ```
 
+In the second step, we create a base map showing a lager area. 
+It gives a context and helps to locate the area of interest. 
+Importantly, this map needs to clearly indicate the location of the inset map, for example by stating its borders.
+
+```{r}
+nz_map = tm_shape(nz) +
+  tm_polygons() +
+  tm_shape(nz_height) +
+  tm_symbols(shape = 2, col = "red") + 
+  tm_shape(nz_region) +
+  tm_borders(lwd = 3) + 
+  tm_layout(frame = FALSE)
+```
+
+The third step consists of the inset map creation. 
+<!--expand-->
+
 ```{r}
 nz_height_map = tm_shape(nz, bbox = tmaptools::bb(nz_region)) +
   tm_polygons() +
   tm_shape(nz_height) +
-  tm_dots()
+  tm_symbols(shape = 2, col = "red")
 ```
 
-```{r}
-nz_map = tm_shape(nz) +
-  tm_borders() + 
-  tm_shape(nz_region) +
-  tm_polygons(lwd = 2)
-```
+Finally, we combine the two maps together. 
+<!--expand-->
 
 ```{r insetmap1, fig.cap="Inset map showing the central part of the Southern Alps in New Zealand."}
 library(grid)
-nz_height_map
-print(nz_map, vp = viewport(x = 0.8, y = 0.25, width = 0.4, height = 0.4))
+nz_map
+print(nz_height_map, vp = viewport(x = 0.3, y = 0.7, width = 0.4, height = 0.4))
 ```
 
 <!-- example2: us states + hawaii + alaska -->
