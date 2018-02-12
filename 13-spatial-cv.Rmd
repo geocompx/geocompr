@@ -27,9 +27,9 @@ Spatial CV is an excellent example of using statistical methods to model spatial
 
 Statistical learning aims at understanding data by building models which disentangle underlying relationships.
 Statistical learning can be roughly grouped into supervised and unsupervised techniques, both of which are used throughout a vast range of disciplines such as economics, physics, medicine, biology, ecology and geography [@james_introduction_2013].
-In this chapter we will focus on supervised techniques, i.e., we have a response variable, in our case this will be a binary one (landslide vs. non-landslide) but could be also a numeric (pH value), an integer (species richness) or a categorical variable (land use).
+In this chapter we will focus on supervised techniques, i.e., we have a response variable, in our case this will be a binary one (landslide vs. non-landslide occurence) but could be also a numeric (pH value), an integer (species richness) or a categorical variable (land use).
 Supervised techniques such as regression and machine learning model the relationship between the response variable and various predictors.
-Using regression or machine learning models depends on the aim: statistical inference or prediction.
+Using either regression or machine learning techniques depends on the aim: statistical inference or prediction.
 Regression techniques are especially useful if the aim is statistical inference, i.e. if we are interested if a predictor significantly contributes to a model and how much.
 To trust the model outcomes we need to perform a thorough model validation testing if one or several of the underlying model assumptions (heterogeneity, independence, etc.) have been violated [@zuur_mixed_2009].
 By contrast, machine learning approaches are especially appealing due to their lack of assumptions.
@@ -39,18 +39,18 @@ Naturally, with the advent of big data, machine learning has even gained in popu
 Though prediction will be the aim of the modeling in this chapter, we will not use machine learning but a simple generalized linear model (GLM).^[Nevertheless, a generalized additive model or a machine learning approach would be more suitable for our dataset (see exercises).
 We will show in chapter \@ref(eco) how to use spatial cross-validation with a machine learning approach.]
 This is because we can use also regression techniques such as a GLM without having to worry too much about possible model misspecifications when the aim is prediction.
-Additionally, GLMs are probably familiar to most readers, and therefore instead of explaining in detail the model building we can focus on the speciality of geographic data in a modeling context and spatial cross-validation.^[Readers who are in need of refreshing their regression skills might have a look at @zuur_mixed_2009.]
+Additionally, GLMs are probably familiar to most readers, and therefore instead of explaining in detail the model building we can focus on the speciality of geographic data in a modeling context and spatial CV.^[Readers who are in need of refreshing their regression skills might have a look at @zuur_mixed_2009.]
 
-Cross-validation determines a model's ability to predict new data or differently put its ability to generalize.
-To achieve this, cross-validation splits a dataset into a test and a training dataset.
+CV determines a model's ability to predict new data or differently put its ability to generalize.
+To achieve this, CV splits a dataset into a test and a training dataset.
 It uses the training data to fit the model, and applies the learned relationship to the test data thereby checking if the model is able to predict the correct result.
 Basically, cross-validation helps to detect over-fitting since a model that fits too closely the training data and its specific peculiarities (noise, random fluctuations) will have a bad prediction performance on the test data.
 However, the basic requirement for this is, that the test data is independent of the training data.
-Cross-validation achieves this by splitting the data randomly into test and training sets. 
+CV achieves this by splitting the data randomly into test and training sets. 
 However, randomly splitting spatial data results in the fact that training points are frequently located next to test points.
 Since points close to each other are more similar compared to points further away, test and training datasets might not be independent.
 The consequence is that cross-validation would fail to detect overfitting in the presence of spatial autocorrelation.
-Here, spatial cross-validation will come to the rescue which will be the main topic of this chapter.
+Here, spatial CV will come to the rescue which will be the main topic of this chapter.
 
 ## Case study: landslide susceptibility {#case-study}
 
@@ -66,13 +66,13 @@ data("landslides", package = "RSAGA")
 `landslides` contains a boolean column `lslpts` where `TRUE` corresponds to an observed landslide initiation point and `FALSE` to points where no landsliding occurred. 
 Columns `x` and `y` contain the corresponding coordinates.
 The landslide initation point is located in the scarp of a landslide polygon.
-The coordinates for the non-landslide points were sampled randomly with the restriction to fall outside of the buffered landslide polygons.
+The coordinates for the non-landslide points were sampled randomly with the restriction to fall outside of the slightly buffered landslide polygons.
 `summary(landslides$lslpts)` tells us that 175 landslide points where observed while we have 1360 non-landslide points.
-To make the ratio between landslide and non-landslide points more balanced, we randomly sample 250 from the 1360 non-landslide points.
+To make the ratio between landslide and non-landslide points more balanced, we randomly sample 175 from the 1360 non-landslide points.
 
 ```{r, echo = FALSE}
 non = landslides[landslides$lslpts == FALSE, ]
-ind = sample(1:nrow(non), nrow(landslides[landslides$lslpts == TRUE, ]) + 75)
+ind = sample(1:nrow(non), nrow(landslides[landslides$lslpts == TRUE, ]))
 lsl = rbind(non[ind, ], landslides[landslides$lslpts == TRUE, ])
 ```
 
@@ -94,22 +94,21 @@ To model the probability for landslide occurrence, we need some predictors.
 Here, we use selected terrain attributes frequently associated with landsliding (add references), namely (units and column names in `lsl` are given in parentheses):
 
 - slope (°, `slope`)
-- plan curvature (rad m−1, `cplan`) expressing the convergence or divergence of a slope and thus water flow.
-- profile curvature (rad m-1, `cprof`) as a measure of flow acceleration, also known as downslope change in slope angle 
-- the decadic logarithm of the catchment area (log m2, `log_carea`) representing the amount of water flowing towards a location.
-- elevation (m a.s.l., `dem`) as the representation of different altitudinal zones of
-vegetation and precipitation in the study area.
+- plan curvature (rad m^−1^, `cplan`) expressing the convergence or divergence of a slope and thus water flow.
+- profile curvature (rad m^-1^, `cprof`) as a measure of flow acceleration, also known as downslope change in slope angle 
+- the decadic logarithm of the catchment area (log m^2^, `log_carea`) representing the amount of water flowing towards a location.
+- elevation (m a.s.l., `elev`) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
 
-We can derive all these predictors from the provided digital elevation model (`dem`) using R-GIS bridges (@ref(gis)).
-We leave it as an exercise to the reader to compute the terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe.
-The first six rows of the resulting dataframe (still named `lsl`) could look like this:
+We can derive all these predictors from the provided digital elevation model (`dem`) using R-GIS bridges (\@ref(gis)).
+We leave it as an exercise to the reader to compute the terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe (see also exercises).
+The first three rows of the resulting dataframe (still named `lsl`) could look like this:
 
 ```{r, echo = FALSE}
 load("extdata/spatialcv.Rdata")
 ```
 
 ```{r}
-head(lsl)
+head(lsl, 3)
 ```
 
 ```{r, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. Randomly selected test points are marked by a golden border. Projection: UTM zone 17S (EPSG: 32717)."}
