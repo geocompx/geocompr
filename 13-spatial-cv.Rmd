@@ -95,7 +95,12 @@ Here, we use selected terrain attributes frequently associated with landsliding 
 We leave it as an exercise to the reader to compute the terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe (see also exercises).
 The first three rows of the resulting dataframe (still named `lsl`) could look like this:
 
-```{r, echo = FALSE}
+<!-- has anybody an idea why I have to run the following code chunk two times to make it work when rendering the book with `bookdown::render_book()`?-->
+```{r, echo=FALSE}
+load("extdata/spatialcv.Rdata")
+```
+
+```{r, echo=FALSE}
 load("extdata/spatialcv.Rdata")
 ```
 
@@ -114,9 +119,8 @@ The added columns are:
 
 ```{r, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. Randomly selected test points are marked by a golden border. Projection: UTM zone 17S (EPSG: 32717)."}
 library(tmap)
-load("extdata/spatialcv.Rdata")
 lsl = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
-hs = hillShade(ta$slope * pi / 180, terrain(dem, opt = "aspect"))
+hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
 rect = tmaptools::bb_poly(hs)
 bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
 # random sample 20%
@@ -127,7 +131,7 @@ tm_shape(hs, bbox = bbx) +
 	tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
 	        labels.rot = c(0, 90)) +
 	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
-	tm_shape(dem) +
+	tm_shape(ta$elev) +
 	tm_raster(alpha = 0.5, palette = terrain.colors(10),
 	          auto.palette.mapping = FALSE, legend.show = FALSE) +
 	tm_shape(lsl) + 
