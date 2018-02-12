@@ -3,7 +3,7 @@
 ## Prerequisites {-}
 
 This chapter assumes you have a strong grasp of spatial data analysis and processing, covered in chapters 2-5.
-Additionally, we assume that you are familiar with linear regression and its generalized extensions [@zuur_mixed_2009].
+Additionally, we assume that you are familiar with linear regression and its generalized extensions [@zuur_mixed_2009;@james_introduction_2013].
 
 We will need following packages:
 
@@ -51,7 +51,63 @@ Here, spatial cross-validation will come to the rescue which will be the main to
 
 ## Case study: landslide susceptibility {#case-study}
 
-For more details please refer to @muenchow_geomorphic_2012.
+To introduce spatial CV by example, we will use a landslide dataset from Southern Ecuador.
+For a detailed description of the dataset and the study area please refer to @muenchow_geomorphic_2012.
+One can find a subset of the corresponding data in the **RSAGA** package.
+The following command loads two datasets, a `data.frame` named `landslides` and a `list` named `dem`.
+
+```{r, echo = FALSE}
+data("landslides", package = "RSAGA")
+```
+
+`landslides` contains a boolean column `lslpts` where `TRUE` corresponds to an observed landslide initiation point and `FALSE` to points where no landsliding occurred. 
+Columns `x` and `y` contain the corresponding coordinates.
+The landslide initation point is located in the scarp of a landslide polygon.
+The coordinates for the non-landslide points were sampled randomly with the restriction to fall outside of the buffered landslide polygons.
+`summary(landslides$lslpts)` tells us that 175 landslide points where observed while we have 1360 non-landslide points.
+To make the ratio between landslide and non-landslide points more balanced, we randomly sample 250 from the 1360 non-landslide points.
+
+```{r, echo = FALSE}
+non = landslides[landslides$lslpts == FALSE, ]
+ind = sample(1:nrow(non), nrow(landslides[landslides$lslpts == TRUE, ]) + 75)
+lsl = rbind(non[ind, ], landslides[landslides$lslpts == TRUE, ])
+```
+
+`dem` is in fact a digital elevation model and consists of two list elements with the first being a raster header and the second being a matrix with the altitudinal values.
+To transform the list into a `raster`, we can write:
+
+```{r, eval = FALSE}
+dem = 
+  raster(dem$data, 
+         crs = "+proj=utm +zone=17 +south +datum=WGS84 +units=m +no_defs",
+         xmn = dem$header$xllcorner, 
+         xmx = dem$header$xllcorner + dem$header$ncols * dem$header$cellsize,
+         ymn = dem$header$yllcorner,
+         ymx = dem$header$yllcorner + dem$header$nrows * dem$header$cellsize)
+
+```
+
+To model the probability for landslide occurrence, we need some predictors.
+Here, we use selected terrain attributes frequently associated with landsliding (add references), namely (units and column names in `lsl` are given in parentheses):
+
+- slope (°, `slope`)
+- plan curvature (rad m−1, `cplan`) expressing the convergence or divergence of a slope and thus water flow.
+- profile curvature (rad m-1, `cprof`) as a measure of flow acceleration, also known as downslope change in slope angle 
+- the decadic logarithm of the catchment area (log m2, `log_carea`) representing the amount of water flowing towards a location.
+- elevation (m a.s.l., `dem`) as the representation of different altitudinal zones of
+vegetation and precipitation in the study area.
+
+We can derive all these predictors from the provided digital elevation model (`dem`) using R-GIS bridges (@ref(gis)).
+We leave it as an exercise to the reader to compute the terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe.
+The first six rows of the resulting dataframe (still named `lsl`) could look like this:
+
+```{r, echo = FALSE}
+load("extdata/spatialcv.Rdata")
+```
+
+```{r}
+head(lsl)
+```
 
 ```{r, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. Randomly selected test points are marked by a golden border. Projection: UTM zone 17S (EPSG: 32717)."}
 library(tmap)
@@ -114,15 +170,9 @@ The first law of geography states that points close to each other tend to be, on
 This means these points are not independent.
 Hence, using this information in our modeling is like a sneak preview, i.e. using information that should be unavailable to the test dataset.
 
-<!--
-Usually people seek to accomplish one of the following aims when using supervised statistical learning techniques: 
-
-1. Spatial prediction of the response variable
-2. Inference about the relationship between response and predictors
-
-In the latter case, we need to make sure to comply with all model assumptions (normality, heterogeneity, independence).
-Spatial predictions are easier since we can argue that, the predictive performance of a model incorporating a (spatial) correlation structure is on average the same as for a model without a spatial correlation structure.
-This is the reason why machine learning techniques (no explicit model assumptions) are so popular when the goal is a good prediction.
--->
-
 ## Exercises
+
+1. Compute the terrain attributes slope, plan curvature, profile curvature and catchment area from `dem` (provided by `data("landslides", package = "RSAGA")`) with the help of R-GIS bridges, and extract the values from the corresponding output rasters to landslides/non-landslides dataframe.
+1. Use as a further predictor the squared slope.
+Repeat the modeling. 
+How has the spatially cross-validaded mean AUROC value changed compared to the model without the squared altitude predictor?
