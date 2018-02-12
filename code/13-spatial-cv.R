@@ -27,6 +27,7 @@ library(raster)
 
 # attach data
 data("landslides", package = "RSAGA")
+# data("ecuador", package = "sperrorest")
 
 #**********************************************************
 # 2 DATA PREPROCESSING-------------------------------------
@@ -34,7 +35,7 @@ data("landslides", package = "RSAGA")
 
 # landslide points
 non = landslides[landslides$lslpts == FALSE, ]
-ind = sample(1:nrow(non), nrow(landslides[landslides$lslpts == TRUE, ]) + 75)
+ind = sample(1:nrow(non), nrow(landslides[landslides$lslpts == TRUE, ]))
 lsl = rbind(non[ind, ], landslides[landslides$lslpts == TRUE, ])
 # tmp = st_as_sf(landslides, coords = c("x", "y"), crs = 32717)
 
@@ -95,8 +96,9 @@ carea = run_qgis(alg, ELEVATION = dem, METHOD = 4,
 # transform carea
 log_carea = log10(carea)
 names(log_carea) = "log_carea"
+names(dem) = "elev"
 # add log_carea
-ta = addLayer(x = ta, log_carea)
+ta = addLayer(x = ta, dem, log_carea)
 # extract values to points, i.e., create predictors
 lsl[, names(ta)] = raster::extract(ta, lsl[, c("x", "y")])
 
@@ -106,6 +108,10 @@ save(dem, lsl, ta, file = "extdata/spatialcv.Rdata")
 #**********************************************************
 # 4 MODELING-----------------------------------------------
 #**********************************************************
+
+# also possible
+# data("ecuador", package = "sperrorest")
+# lsl = ecuador[, c("slides", "x", "y", "dem", "slope", "hcurv", "vcurv", "log.carea")]
 
 coords = lsl[, c("x", "y")]
 data = dplyr::select(lsl, -x, -y)
@@ -182,6 +188,7 @@ boxplot(spcv_glm$measures.test$auc,
 
 pred = raster::predict(object = ta, model = m_sp, fun = predict,
                        type = "response")
+hs = hillShade(out$SLOPE * pi / 180, out$ASPECT * pi / 180, 40, 270)
 plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
 # plot(pred, col = RColorBrewer::brewer.pal("YlOrRd", n =  9), add = TRUE, 
 #      alpha = 0.6)
