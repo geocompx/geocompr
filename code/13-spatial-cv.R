@@ -127,8 +127,6 @@ data = dplyr::select(lsl, -x, -y)
 
 task_spatial = makeClassifTask(id = "lsl_glm_spatial", data = data,
                                target = "lslpts", positive = "TRUE",
-                               # default: spatial = FALSE for spatial important
-                               # that coordinates are named x and y,
                                coordinates = coords)
 
 
@@ -149,6 +147,8 @@ lrn_glm = makeLearner(cl = "classif.binomial",
                       fix.factors.prediction = TRUE)
 # training the model (percentage of test and training datasets?)
 model_spatial = train(learner = lrn_glm, task = task_spatial)
+# exactly the same as, and neeeded for model interpretation
+glm(lslpts ~ ., data = data, family = "binomial")
 model_nonspatial = train(learner = lrn_glm, task = task_nonspatial)
 # unpacking the model
 m_sp = getLearnerModel(model_spatial)
@@ -171,6 +171,8 @@ identical(coefficients(m_sp), coefficients(m_nsp))
 resampling_spatial = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 10)
 resampling_nsp = makeResampleDesc(method = "RepCV", folds = 5, reps = 10)
 # apply the reampling by calling the resample function
+# needed for using the same (randomly) selected folds/partitioning in different models
+# spatial vs. non-spatial or glm vs. GAM
 set.seed(12345)  # why do we have the seed again??
 spcv_glm = mlr::resample(learner = lrn_glm, task = task_spatial,
                     resampling = resampling_spatial,
