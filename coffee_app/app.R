@@ -5,9 +5,9 @@ library(spData)
 library(leaflet)
 library(tidyverse)
 world_coffee = left_join(world, coffee_data)
-pal <- colorNumeric(palette = "RdYlBu", domain = c(0, 4000))
+pal = colorNumeric(palette = "RdYlBu", domain = c(0, 4000))
 
-ui <- bootstrapPage(
+ui = bootstrapPage(
   tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
   leafletOutput("map", width = "100%", height = "100%"),
   absolutePanel(top = 10, right = 10,
@@ -20,20 +20,20 @@ ui <- bootstrapPage(
   )
 )
 
-server <- function(input, output, session) {
+server = function(input, output, session) {
   
   # This reactive expression returns a character string representing the selected variable
-  yr <- reactive({
+  yr = reactive({
     paste0("coffee_production_", input$year)
   })
   
   # Reactive expression for the data subsetted to what the user selected
-  filteredData <- reactive({
+  filteredData = reactive({
     world_coffee$Production = world_coffee[[yr()]]
     world_coffee[world_coffee$Production >= input$range[1] & world_coffee$Production <= input$range[2], ]
   })
   
-  output$map <- renderLeaflet({
+  output$map = renderLeaflet({
     # Things that do not change go here:
     leaflet() %>% addTiles()
   })
@@ -41,7 +41,7 @@ server <- function(input, output, session) {
   # Changes to the map performed in an observer.
   # Each thing that can change, without changing other things can have its own observer.
   observe({
-    proxy <- leafletProxy("map", data = filteredData()) %>% 
+    proxy = leafletProxy("map", data = filteredData()) %>% 
       clearShapes()
     # Show or hide legend
     proxy %>% clearControls() %>% addPolygons(fillColor = ~pal(Production))
