@@ -18,7 +18,7 @@ library(tidyverse)
 library(leaflet)
 library(tmap)
 # library(mapview)
-# library(shiny)
+library(shiny)
 ```
 
 ## Introduction
@@ -148,7 +148,7 @@ A viewport from the **grid** package can be used by stating a center location (`
 ```{r insetmap1, fig.cap="Inset map showing the central part of the Southern Alps in New Zealand."}
 library(grid)
 nz_map
-print(nz_height_map, vp = viewport(x = 0.3, y = 0.7, width = 0.4, height = 0.4))
+print(nz_height_map, vp = grid::viewport(0.3, 0.7, width = 0.4, height = 0.4))
 ```
 
 Inset map can be save to file either by using a graphic device (see section \@ref(visual-outputs)) or the `save_tmap()` function and its arguments - `insets_tm` and `insets_vp`.
@@ -313,32 +313,23 @@ The two can also be combined into single file, as illustrated by the small web m
 Before exploring the code in that file, it is worth creating a minimal example.
 The code below creates and executes a minimal **shiny** app:
 
-```{r}
-# ui = fluidPage(div(
-#   sliderInput("bins", "Bins", 0, 4000, value = 30),
-#       plotOutput(outputId = "distPlot")
-#     )
-#   )
-# # Define server logic required to draw a histogram ----
-# server = function(input, output) {
-#   output$distPlot = renderPlot({
-# 
-#     x    = coffee_data$coffee_production_2016 %>% na.omit()
-#     bins = seq(min(x), max(x), length.out = input$bins + 1)
-# 
-#     hist(x, breaks = bins, col = "#75AADB", border = "white",
-#          xlab = "Waiting time to next eruption (in mins)",
-#          main = "Histogram of waiting times")
-# 
-#     })
-# 
-# }
-# shinyApp(ui, server)
+```{r, eval=FALSE}
+ui = fluidPage(div(
+  sliderInput("life", "Life expectancy", 0, 80, value = 80),
+      leafletOutput(outputId = "map")
+    )
+  )
+server = function(input, output) {
+  output$map = renderLeaflet({
+    leaflet() %>% addProviderTiles("OpenStreetMap.BlackAndWhite") %>%
+      addPolygons(data = world[world$lifeExp > input$life, ])})
+}
+shinyApp(ui, server)
 ```
 
-
-, illustrated below:to understand the basics of a sh 
-
+```{r shiny, echo=FALSE, fig.cap="Minimal example of a web mapping application created with **shiny**."}
+knitr::include_app("https://bookdown.org/robinlovelace/coffeeapp/")
+```
 
 ## Exercises
 
