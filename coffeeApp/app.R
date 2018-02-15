@@ -1,4 +1,4 @@
-# influenced by: https://rstudio.github.io/leaflet/shiny.html
+# Credit: build on the exmaple in https://rstudio.github.io/leaflet/shiny.html
 library(sf)
 library(shiny)
 library(spData)
@@ -44,8 +44,7 @@ server = function(input, output, session) {
       setView(lng = map_centre[, "X"], map_centre[, "Y"], zoom = 2)
   })
   
-  # Changes to the map performed in an observer.
-  # Each thing that can change, without changing other things can have its own observer.
+  # Changes to the map performed in an observer
   observe({
     proxy = leafletProxy("map", data = filteredData()) %>% 
       clearShapes()
