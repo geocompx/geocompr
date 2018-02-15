@@ -290,27 +290,26 @@ But the web mapping approach to interactivity has limitations:
 - Additional layers of interactivity, such a graphs showing relationships between variables and 'dashboards' are difficult to create using the web-mapping approach.
 
 Overcoming these limitations involves going beyond static web mapping and towards geospatial frameworks and map servers.
-Products in this field include [GeoDango](https://docs.djangoproject.com/en/2.0/ref/contrib/gis/) (geospatial extension of the Django content management system), [MapGuide](https://www.osgeo.org/projects/mapguide-open-source/) (a framework for developing web applications) and [GeoServer](https://github.com/geoserver/geoserver) (a mature and powerful Java application for serving raster and vector datasets).
-Each of these has merits, especially in terms of scalability, enabling your maps serve to thousands of people daily (provided you have the hardware and software support, and sufficient interest in your maps from the public).
+Products in this field include [GeoDjango](https://docs.djangoproject.com/en/2.0/ref/contrib/gis/) (which extends the Django web framework and is written in [Python](https://github.com/django/django)), [MapGuide](https://www.osgeo.org/projects/mapguide-open-source/) (a framework for developing web applications, largely written in [C++](https://trac.osgeo.org/mapguide/wiki/MapGuideArchitecture)) and [GeoServer](http://geoserver.org/) (a mature and powerful map server written in [Java](https://github.com/geoserver/geoserver)).
+Each of these (particularly GeoServer) is scalable, enabling maps  to be served to thousands of people daily --- assuming there is sufficient public interest in your maps!
 The bad news is that such server-side solutions require much skilled developer time to set-up and maintain, often involving teams of people with roles such as a dedicated geospatial database administrator ([DBA](http://wiki.gis.com/wiki/index.php/Database_administrator)).
 
-The good news for R users is that web mapping applications can now be rapidly created using **shiny**, an R package developed for creating interactive web applications.
-As documented on the [Shiny integration](https://rstudio.github.io/leaflet/shiny.html) section of **leaflet**'s online documentation, **shiny** has dedicated functions such as `renderLeaflet()` for serving maps.
-Rather than duplicate the content of RStudio's excellent documentation, this section will teach the basics of **shiny** and demonstrate how to create a full-screen mapping application in less than 100 lines of code.
+The good news is that web mapping applications can now be rapidly created using **shiny**, a package for converting R code into interactive web applications.
+This is thanks to its support for interactive maps via `renderLeaflet()`, documented on the [Shiny integration](https://rstudio.github.io/leaflet/shiny.html) section of RStudio's **leaflet** website.
+Rather than duplicate this excellent documentation, this section teaches the basics of **shiny** from a web mapping perspective, culminating in a full-screen mapping application in less than 100 lines of code.
 
 The way **shiny** works is well documented at [shiny.rstudio.com](https://shiny.rstudio.com/).
 The two key elements of a **shiny** app reflect the duality common to most web application development: 'front end' (the bit the user sees) and 'back end' code.
 In **shiny** apps these are often split into `ui.R` (short for user interface) and `server.R` files, naming conventions used by [`shiny-server`](https://github.com/rstudio/shiny-server).
-The two can also be combined into single file, as illustrated by the small web mapping application stored in [`coffee_app/app.R`](https://github.com/Robinlovelace/geocompr/blob/master/coffee_app/app.R) in the book's GitHub repo.
+The two can also be combined into single file, as illustrated by the small web mapping application stored in [`coffeeApp/app.R`](https://github.com/Robinlovelace/geocompr/blob/master/coffeeApp/app.R) in the book's GitHub repo.
 
-Before exploring the code in that file, it is worth creating a minimal example.
-The code below creates and executes a minimal **shiny** app:
+Before exploring the code in that file, it is worth creating an example.
+The code below creates and launches --- with the command `shinyApp()` --- the minimal web mapping app illustrated in Figure \@ref(fig:shiny):
 
 ```{r, eval=FALSE}
-ui = fluidPage(div(
+ui = fluidPage(
   sliderInput("life", "Life expectancy", 0, 80, value = 80),
       leafletOutput(outputId = "map")
-    )
   )
 server = function(input, output) {
   output$map = renderLeaflet({
@@ -320,9 +319,13 @@ server = function(input, output) {
 shinyApp(ui, server)
 ```
 
-```{r shiny, echo=FALSE, fig.cap="Minimal example of a web mapping application created with **shiny**."}
-knitr::include_app("https://bookdown.org/robinlovelace/coffeeapp/")
-```
+In the code above the **user interface** is created by `fluidPage()` which contains input 'widgets' --- a `sliderInput()` in this case but many other `*Input()` functions are available --- and outputs, a `leafletOutput()` in this case.
+The **server side** is a function which populates the `output` with objects generated by `render*()` commands --- `renderLeaflet()` which generates `output$map` in this case --- with reference to inputs such as `input$life` defined by the `ui`.
+Armed with this basic example and knowing where to find help (see `?shiny`), the best way to learn how to create interactive web mapping applications with R is to stop reading and start programming!
+
+To that end we have provided a more involved example that we recommend you modify.
+**shiny** used in this way alongside makes prototyping flexible mapping applications faster and more accessible than ever before (deploying **shiny** apps is a separate topic beyond the scope of this chapter).
+With this in mind your prototype web applications should be limited not by technical considerations but your motivations for making maps interactive and your imagination.
 
 ## Exercises
 
