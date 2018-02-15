@@ -12,7 +12,7 @@ ui = bootstrapPage(
   leafletOutput("map", width = "100%", height = "100%"),
   absolutePanel(top = 10, right = 10,
                 sliderInput("range", "Coffee Production", 0, 4000,
-                            value = c(1000, 3000), step = 100
+                            value = c(1000, 4000), step = 100
                 ),
                 selectInput("year", "Year", c(2016, 2017)
                 ),
@@ -22,6 +22,9 @@ ui = bootstrapPage(
 
 server = function(input, output, session) {
   
+  map_centre = st_centroid(world %>% filter(name_long == "Brazil")) %>% 
+    st_coordinates()
+  
   # This reactive expression returns a character string representing the selected variable
   yr = reactive({
     paste0("coffee_production_", input$year)
@@ -30,12 +33,15 @@ server = function(input, output, session) {
   # Reactive expression for the data subsetted to what the user selected
   filteredData = reactive({
     world_coffee$Production = world_coffee[[yr()]]
-    world_coffee[world_coffee$Production >= input$range[1] & world_coffee$Production <= input$range[2], ]
+    sel = world_coffee$Production >= input$range[1] &
+      world_coffee$Production <= input$range[2]
+    world_coffee[sel, ]
   })
   
   output$map = renderLeaflet({
     # Things that do not change go here:
-    leaflet() %>% addTiles()
+    leaflet() %>% addTiles() %>%
+      setView(lng = map_centre[, "X"], map_centre[, "Y"], zoom = 2)
   })
   
   # Changes to the map performed in an observer.
@@ -49,7 +55,6 @@ server = function(input, output, session) {
       proxy %>% addLegend(position = "bottomright",
                           pal = pal, values = ~Production)
     }
-    
   })
 }
 
