@@ -27,7 +27,12 @@ library(raster)
 
 # attach data
 data("landslides", package = "RSAGA")
+# in sperrorest and mlr there is also landslide data available, however, this
+# corresponds to the year 2000 and uses another DEM
 # data("ecuador", package = "sperrorest")
+# or using the mlr package
+# slides = getTaskData(spatial.task)
+# coords = spatial.task$coordinates
 
 #**********************************************************
 # 2 DATA PREPROCESSING-------------------------------------
