@@ -118,13 +118,13 @@ The added columns are:
 
 ```{r, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. Randomly selected test points are marked by a golden border. Projection: UTM zone 17S (EPSG: 32717)."}
 library(tmap)
-lsl = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
+lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
 hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
 rect = tmaptools::bb_poly(hs)
 bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
 # random sample 20%
-ind = sample(1:nrow(lsl), round(nrow(lsl) * 0.2))
-sam = lsl[ind, ]
+ind = sample(1:nrow(lsl_sf), round(nrow(lsl_sf) * 0.2))
+sam = lsl_sf[ind, ]
 
 tm_shape(hs, bbox = bbx) +
 	tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
@@ -133,7 +133,7 @@ tm_shape(hs, bbox = bbx) +
 	tm_shape(ta$elev) +
 	tm_raster(alpha = 0.5, palette = terrain.colors(10),
 	          auto.palette.mapping = FALSE, legend.show = FALSE) +
-	tm_shape(lsl) + 
+	tm_shape(lsl_sf) + 
 	tm_bubbles("lslpts", size = 0.5, palette = "-RdYlBu") +
   tm_shape(sam) +
   tm_bubbles(border.col = "gold", border.lwd = 2, alpha = 0, size = 0.5) +
@@ -142,14 +142,15 @@ tm_shape(hs, bbox = bbx) +
 ```
 
 
-## Modeling and spatial CV
-
 ## Introduction to spatial CV
 
-## Modeling and spatial CV with `mlr`
+figure showing difference between spatial and non-spatial random sampling
+cross-reference **sperrorest** which has been integrated into **mlr**
+
+## Modeling and spatial CV with **mlr**
 In R there are literally hundreds of packages available for statistical learning (e.g., have a look at the [CRAN task machine learning](https://CRAN.R-project.org/view=MachineLearning)).
 Many of them come with their own interface which is why programmers frequently have to spend a lot of time to figure out the specifics of each of these packages or how to compare modeling results from different packages.
-The **mlr** package acts as a meta-package/umbrella-package providing a unified interface to all popular statistical learning techniques available in R including classification, regression, survival analysis and clustering.^[As pointed out in the beginning we will solely focus on supervised learning techniques in this chapter.]
+The **mlr** package acts as a meta- or umbrella-package providing a unified interface to all popular statistical learning techniques available in R including classification, regression, survival analysis and clustering.^[As pointed out in the beginning we will solely focus on supervised learning techniques in this chapter.]
 The standardized **mlr** interface is based on so-called basic building blocks (see \@ref(fig:building-blocks)).
 
 <!-- @Jakub: yes, I will ask if we me may use the figure -->
@@ -168,10 +169,10 @@ Type `?makeClassifTask` to find out about all available modeling tasks.
 First, we specifiy the data which will be used.
 The `target` parameter expects the response variable and the `positive` parameter determines which of the two factor levels of the response variable indicates the landslide initiation point.
 All other variables of the provided dataset will serve as predictors (check out with `getTaskFormula(task)`).
-As we will perform a spatial CV later on, we need to specify the coordinates which serve as input for the spatial partioning.
+As we will perform a spatial CV later on, we need to specify the coordinates which will form the basis of the spatial partioning.
 These have to be provided in an additional dataframe in `coordinates`. 
 
-```{r, eval = FALSE}
+```{r}
 # separate data to be modeled and coordinates
 coords = lsl[, c("x", "y")]
 data = dplyr::select(lsl, -x, -y)
@@ -180,6 +181,84 @@ task = makeClassifTask(data = data, target = "lslpts",
                        positive = "TRUE", coordinates = coords)
 ```
 
+`makeLearner()` determines the statistical learning method to use.
+All classification learners start with `classif.` and all regression learners with `regr.` (see `?makeLearners` for more details). 
+`listLearners()` helps to find out about all available learners and from which package **mlr** imports them. 
+For a specific task, we can run:
+
+```{r, warning=FALSE}
+lrns = listLearners(task)
+head(lrns[, 1:4])
+```
+
+This yields all learners able to model two-class problems (landslide yes or no).
+We opt for the binomial classification method from the **stats** package implemented in **mlr** as `classif.binomial`.
+Additionally, we have to specify the link-function.
+We choose the `logit` link which is also the default when using the `binomial` family in `glm`.
+`predict.type` determines the type of the prediction with
+<!--Setting it to `response` produces class labels as output, which would be in our case `TRUE` or `FALSE`.-->
+ `prob` resulting in a predicted probability for landslide occurrence between 0 and 1.^[Note that this corresponds to `type = response` in `predict.glm`.]
+
+```{r}
+lrn = makeLearner(cl = "classif.binomial",
+                  link = "logit",
+                  predict.type = "prob",
+                  fix.factors.prediction = TRUE)
+# run the following lines to find out from which package the learner is taken
+# and how to access the corresponding help file(s)
+# getLearnerPackages(learner)
+# helpLearner(learner)
+```
+
+Having specified a learner and a task, we can train our model. 
+
+
+```{r}
+mod = train(learner = lrn, task = task)
+mlr_fit = getLearnerModel(mod)
+```
+
+```{r, eval = FALSE, echo = FALSE}
+getTaskFormula(task)
+getTaskData(task)
+getLearnerModel(mod)
+mod$learner.model
+```
+
+`getLearnerModel()` extracts the used model which shows that **mlr** passed all specified parameters to the `glm` function in the background as also proved by following code:
+
+```{r}
+fit = glm(lslpts ~ ., family = binomial(link = "logit"), data = data)
+identical(fit$coefficients, mlr_fit$coefficients)
+```
+
+In the beginning, it might seem a bit tedious to learn the **mlr** interface for modeling.
+But remember that one only has to learn one single interface to run `r nrow(listLearners())` learners.
+Additionally, resampling in **mlr** is really easy and only requires two more steps.
+The first thing to to is specifying a resampling method.
+Spatial repeated cross-validation
+
+```{r}
+resampling = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 10)
+```
+
+Executing the resampling method and set the preferred performance measure.
+
+```{r, warning=FALSE, message=FALSE}
+set.seed(02192018)
+sp_cv = mlr::resample(learner = lrn, task = task, resampling = resampling, 
+                      measures = auc)
+sp_cv$measures.test$auc
+# the same as:
+mean(sp_cv$measures.test$auc)
+```
+
+To put it into perspective, we compare this result with that of a non-spatial cross-validation.
+
+```{r, echo=FALSE}
+# boxplots
+# find out if doing a non-spatial cv uses the same folds as the spatial cv...
+```
 
 i.e. the fact that points close to each other tend to share similarities compared to points further apart.
 Simply put, if it rains at one location it is pretty likely that it also rains if we moved 1 meter in any direction.
