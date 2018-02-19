@@ -23,7 +23,7 @@ Unary operations work on a single geometry in isolation.
 This includes simplification (of lines and polygons), the creation of buffers and centroids, and shifting/scaling/rotating single geometries using 'affine transformations' (sections \@ref(simplification) to \@ref(affine-transformations)).
 Binary transformations modify one geometry based on the shape of another.
 This includes clipping and geometry unions, covered in sections \@ref(clipping) and \@ref(geometry-unions) respectively.
-Type transformations (from a polygon to a line, for example) are demonstrated in section \@ref(type-trans) and 'rasterization' is covered in section \@ref(rasterization).
+Type transformations (from a polygon to a line, for example) are demonstrated in section \@ref(type-trans).
 
 Section \@ref(geo-ras) covers geometric transformations on raster objects.
 This involves changing the size and number of the underlying pixels, and assigning them new values.
@@ -702,7 +702,6 @@ buff_points = st_cast(buff_single, "POINT")
 plot(buff_single$geometry, add = T)
 ```
 
-
 ### Affine transformations
 
 Affine transformation is any transformation that preserves lines and parallelism.
@@ -1028,99 +1027,6 @@ linestring_sf2
 <!-- sp -> sf -->
 <!-- stars; https://github.com/r-spatial/stars/blob/master/vignettes/blog1.Rmd -->
 
-### Rasterization {#rasterization}
-
-Rasterization is a conversion from vector objects into rasters.
-Usually, the output raster is used for quantitative analysis (e.g. analysis of terrain) or modeling.
-
-The `rasterize()` function takes a vector object and converts it into a raster with extent, resolution and CRS determined by another raster object.
-Parameters of a template raster have big impact on rasterization output -- coarse resolution could not capture all of important spatial objects, while high resolution could increase computation times.
-However, there is no simple rules for parameters selection as it depends on the input data and rasterization purpose.
-For the first group of examples, we will use a template raster having the same extent and CRS as `cycle_hire_osm_projected` and spatial resolution of 1000 meters:
-
-```{r}
-raster_template = raster(extent(cycle_hire_osm_projected), resolution = 1000,
-                         crs = st_crs(cycle_hire_osm_projected)$proj4string)
-```
-
-Rasterization is a very flexible operation and gives different results based not only on a template raster, but also on the type of input vector (e.g. points, polygons) and given arguments.
-
-Let's try three different approaches to rasterize points - cycle hire locations across London (Figure \@ref(fig:vector-rasterization1):A).
-The simplest case is when we want to create a raster containing areas with cycle hire points (also known as a presence/absence raster).
-In this situation, `rasterize()` expects only three arguments - an input vector data, a raster template, and a value to be transferred to all non-empty cells (Figure \@ref(fig:vector-rasterization1):B).
-
-```{r}
-ch_raster1 = rasterize(cycle_hire_osm_projected, raster_template, field = 1)
-```
-
-`rasterize()` also could take a `fun` argument which specifies how attributes are transferred to the raster object.
-For example, the `fun = "count"` argument counts the number of points in each grid cell (Figure \@ref(fig:vector-rasterization1):C).
-
-```{r}
-ch_raster2 = rasterize(cycle_hire_osm_projected, raster_template, 
-                       field = 1, fun = "count")
-```
-
-The new output, `ch_raster2`, shows the number of cycle hire points in each grid cell.
-However, the cycle hire locations have different numbers of bicycles, which is described by the `capacity` variable.
-We need to select a field (`"capacity"`) and a function (`sum`) to determine a cycle hire capacity in each grid cell (Figure \@ref(fig:vector-rasterization1):D).
-In the same way, another statistics could be calculated such as an average capacity for each grid cell, etc.
-
-```{r}
-ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template, 
-                       field = "capacity", fun = sum)
-```
-
-```{r vector-rasterization1, echo=FALSE, fig.cap="Examples of point's rasterization.", warning=FALSE}
-source("code/05-vector-rasterization1.R")
-```
-
-Additionally, we will illustrate polygons and lines rasterizations using California's polygons (`california`) and borders (`california_borders`).
-A template raster here will have the resolution of a 0.5 degree:
-
-```{r}
-california = filter(us_states, NAME == "California")
-california_borders = st_cast(california, "MULTILINESTRING")
-raster_template2 = raster(extent(california), resolution = 0.5,
-                         crs = st_crs(california)$proj4string)
-```
-
-All cells that are touched by a line get a value in a line rasterization (Figure \@ref(fig:vector-rasterization2):A).
-
-```{r}
-california_raster1 = rasterize(california_borders, raster_template2)
-```
-
-On the other hand, polygon rasterization is based on the positions of cells' centers (points on Figure \@ref(fig:vector-rasterization2):B).
-Values are only given when the center of the cell lies inside of the input polygon (Figure \@ref(fig:vector-rasterization2):B).
-
-```{r}
-california_raster2 = rasterize(california, raster_template2)
-```
-
-<!-- getCover? -->
-<!-- the fraction of each grid cell that is covered by the polygons-->
-<!-- ```{r, echo=FALSE, eval=FALSE} -->
-<!-- california_raster3 = rasterize(california, raster_template2, getCover = TRUE) -->
-<!-- r3po = tm_shape(california_raster3) + -->
-<!--   tm_raster(legend.show = TRUE, title = "Values: ", style = "fixed", breaks = c(0, 1, 25, 50, 75, 100)) + -->
-<!--   tm_shape(california) + -->
-<!--   tm_borders() + -->
-<!--   tm_layout(outer.margins = rep(0.01, 4), -->
-<!--             inner.margins = rep(0, 4)) -->
-<!-- ``` -->
-
-It is also possible to use the `field` or `fun` arguments for lines and polygons rasterizations.
-
-```{r vector-rasterization2, echo=FALSE, fig.cap="Examples of line and polygon rasterizations.", warning=FALSE}
-source("code/05-vector-rasterization2.R")
-```
-
-While `rasterize` works well for most cases, it is not performance optimized. 
-Fortunately, there are several alternatives, including the `fasterize::fasterize()`^[The **fasterize** package is available at https://github.com/ecohealthalliance/fasterize.] and `gdalUtils::gdal_rasterize()`. 
-The former is much (100 times+) faster than `rasterize()` but is currently limited to polygon rasterization.
-The latter is part of GDAL and therefore requires a vector file, instead of an `sf` object, as an input and rasterization parameters, instead of a `Raster*` template object.^[See more at http://www.gdal.org/gdal_rasterize.html.]
-
 ## Geometric operations on raster data {#geo-ras}
 
 Geometric raster operations include the shift, flipping, mirroring, scaling, rotation or warping of images.
@@ -1267,103 +1173,6 @@ This is because **raster**:
 2. Tries to facilitate parallel processing.
 For more information see the help pages of `beginCluster()` and `clusteR()`.
 Additionally, check out the *Multi-core functions* section in `vignette("functions", package = "raster")`.
-
-### Spatial vectorization
-
-Spatial vectorization is the counterpart of rasterization \@ref(rasterization), and hence the process of converting continuous raster data into discrete vector data such as points, lines or polygons.
-
-```{block2 type="rmdnote"}
-Be careful with the wording!
-In R vectorization refers to the possibility of replacing `for`-loops and alike by doing things like `1:10 / 2` (see also @wickham_advanced_2014).
-```
-
-The simplest form of vectorization is to convert a raster into points by keeping the cell values and replacing the grid cells by its centroids.
-The `rasterToPoints()` does exactly this for all non-`NA` raster grid cells (Figure \@ref(fig:raster-vectorization1)).
-Setting the `spatial` parameter to `TRUE` makes sure that the output is a spatial object, otherwise a matrix is returned.
-
-```{r}
-elev_point = rasterToPoints(elev, spatial = TRUE) %>% 
-  st_as_sf()
-```
-
-```{r raster-vectorization1, echo=FALSE, fig.cap="Raster and point representation of `elev`.", warning=FALSE}
-source("code/05-raster-vectorization1.R")
-```
-
-Another common application is the representation of a digital elevation model as contour lines, hence, converting raster data into spatial lines. 
-Here, we will us a real-world DEM since our artificial raster `elev` produces parallel lines (give it a try yourself) because when creating it we made the upper left corner the lowest and the lower right corner the highest value while increasing cell values by one from left to right.
-`rasterToContour()` is a wrapper around `contourLines()`.
-
-```{r, eval = FALSE}
-# not shown
-data(dem, package = "RQGIS")
-plot(dem, axes = FALSE)
-plot(rasterToContour(dem), add = TRUE)
-```
-
-Use `contour()`, `rasterVis::contourplot()` or `tmap::tm_iso()` if you want to add contour lines to a plot with isoline labels (Fig. \@ref(fig:contour)).
-
-```{r contour, echo=FALSE, message=FALSE, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines.", warning=FALSE}
-library(tmap)
-data("dem", package = "RQGIS")
-# create hillshade
-hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
-# create contour
-cn = rasterToContour(dem)
-rect = tmaptools::bb_poly(hs)
-bbx = tmaptools::bb(hs, xlim = c(-.02, 1), ylim = c(-.02, 1), relative = TRUE)
-
-tm_shape(hs, bbox = rect) +
-	tm_grid(col = "black", n.x = 2, n.y = 2, labels.inside.frame = FALSE,
-	        labels.rot = c(0, 90)) +
-	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
-	tm_shape(dem) +
-	tm_raster(alpha = 0.5, palette = terrain.colors(25),
-	          auto.palette.mapping = FALSE, legend.show = FALSE) +
-	tm_shape(cn) + 
-	tm_lines(col = "white") +
-	tm_text("level", col = "white") +
-	qtm(rect, fill = NULL) +
-	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
-```
-
-Finally, `rasterToPolygons()` converts each raster cell into one polygon consisting of five coordinates all of which need to be explicitly stored.
-Be careful with this approach when using large raster datasets since you might run into memory problems.
-Here, we convert `grain` into polygons and subsequently dissolve the output in accordance with the grain size categories which `rasterToPolygons()` stored in an attribute named `layer` (see section \@ref(geometry-unions) and Figure \@ref(fig:raster-vectorization2)).
-A convenient alternative for converting rasters into polygons is `spex::polygonize()` which by default returns an `sf` object.
-
-```{r}
-grain_poly = rasterToPolygons(grain) %>% 
-  st_as_sf()
-grain_poly2 = grain_poly %>% 
-  group_by(layer) %>%
-  summarize()
-```
-
-```{r raster-vectorization2, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).", warning=FALSE}
-source("code/05-raster-vectorization2.R")
-```
-
-<!-- ```{r} -->
-<!-- nlcd2011 = raster(system.file("raster/nlcd2011.tif", package = "spDataLarge")) -->
-<!-- plot(nlcd2011) -->
-<!-- ``` -->
-
-<!-- it's slow - maybe it worth to use https://www.rdocumentation.org/packages/spex/versions/0.4.0 -->
-<!-- ```{r} -->
-<!-- nlcd2011_poly = rasterToPolygons(nlcd2011) -->
-<!-- plot(nlcd2011_poly) -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- system.time({nlcd2011_poly2 = polygonize(nlcd2011)}) -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- nlcd2011_cont = rasterToContour(nlcd2011) %>%  -->
-<!--   st_as_sf() -->
-<!-- plot(nlcd2011_cont) -->
-<!-- ``` -->
 
 ## Exercises
 
@@ -1514,24 +1323,6 @@ us_states_bor$borders = st_length(us_states_bor)
 arrange(us_states_bor, borders)
 arrange(us_states_bor, -borders)
 ```
-1. Subset points higher than 3100 meters in New Zealand (the `nz_height` object). 
-Using the new object:
-    - Count numbers of the highest points in grid cells with a resolution of 3 km.
-    - Find maximum elevation value for grid cells with a resolution of 3 km.
-```{r, echo=FALSE, eval=FALSE}
-nz_height3100 = filter(nz_height, elevation > 3100)
-new_graticule = st_graticule(nz_height3100, datum = 2193)
-plot(nz_height3100$geometry, graticule = new_graticule, axes = TRUE)
-nz_template = raster(extent(nz_height3100), resolution = 3000,
-                         crs = st_crs(nz_height3100)$proj4string)
-nz_raster = rasterize(nz_height3100, nz_template, 
-                       field = "elevation", fun = "count")
-plot(nz_raster)
-nz_raster2 = rasterize(nz_height3100, nz_template, 
-                       field = "elevation", fun = max)
-plot(nz_raster2)
-```
-
 1. Aggregate the raster counting high points in New Zealand (created in the previous exercise), reduce its geographic resolution by half (so cells are 6 by 6 km) and plot the result.
     - Resample the lower resolution raster back to a resolution of 3 km. How have the results changed?
     - Name two advantages and disadvantages of reducing raster resolution.
@@ -1549,20 +1340,4 @@ plot(nz_raster)
 # disadvantage: removes geographic detail
 # disadvantage: another processing step
 ```
-
-1. Polygonize the `grain` dataset and filter all squares representing clay.
-    - Name two advantages and disadvantages of vector data over raster data.
-    -  At which points would it be useful to convert rasters to vectors in your work?
-
-```{r, echo=FALSE, eval=FALSE}
-grain_poly = rasterToPolygons(grain) %>% 
-  st_as_sf()
-levels(grain)
-clay = filter(grain_poly, layer == 1)
-plot(clay)
-# advantages: can be used to subset other vector objects
-# can do affine transformations and use sf/dplyr verbs
-# disadvantages: better consistency, fast processing on some operations, functions developed for some domains
-```
-
 <!-- advances exercise - rotate nz as a whole - union new zeleand and rotate it around its centroid by 180 degrees -->
