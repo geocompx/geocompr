@@ -149,11 +149,14 @@ task_nonspatial = makeClassifTask(id = "lsl_glm_nonspatial",
 lrn_glm = makeLearner(cl = "classif.binomial",
                       link = "logit",
                       predict.type = "prob",
-                      fix.factors.prediction = TRUE)
+                      # I guess we don't need it, right?
+                      fix.factors.prediction = FALSE)
 # training the model (percentage of test and training datasets?)
 model_spatial = train(learner = lrn_glm, task = task_spatial)
-# exactly the same as, and neeeded for model interpretation
-glm(lslpts ~ ., data = data, family = "binomial")
+head(predict(model_spatial, task = task_spatial))
+# exactly the same as, and needed for model interpretation
+fit = glm(lslpts ~ ., data = data, family = "binomial")
+head(predict(fit, type = "response"))
 model_nonspatial = train(learner = lrn_glm, task = task_nonspatial)
 # unpacking the model
 m_sp = getLearnerModel(model_spatial)
