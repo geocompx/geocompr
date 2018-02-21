@@ -130,14 +130,14 @@ data = dplyr::select(lsl, -x, -y)
 # as predictors but as coordinates for kmeans clustering)
 # all variables in data will be used in the model
 
-task_spatial = makeClassifTask(id = "lsl_glm_spatial", data = data,
-                               target = "lslpts", positive = "TRUE",
-                               coordinates = coords)
+task_sp = makeClassifTask(id = "lsl_glm_spatial", data = data,
+                          target = "lslpts", positive = "TRUE",
+                          coordinates = coords)
 
 
-task_nonspatial = makeClassifTask(id = "lsl_glm_nonspatial", 
-                                  data = data,
-                                  target = "lslpts", positive = "TRUE")
+task_nsp = makeClassifTask(id = "lsl_glm_nonspatial", 
+                           data = data,
+                           target = "lslpts", positive = "TRUE")
 
 # 3.2 Construct a learner and run the model================
 #**********************************************************
@@ -146,22 +146,23 @@ task_nonspatial = makeClassifTask(id = "lsl_glm_nonspatial",
 # predict.type: probability
 # fix.factors.prediction: ?
 
-lrn_glm = makeLearner(cl = "classif.binomial",
-                      link = "logit",
-                      predict.type = "prob",
-                      # I guess we don't need it, right?
-                      fix.factors.prediction = FALSE)
+lrn = makeLearner(cl = "classif.binomial",
+                  link = "logit",
+                  predict.type = "prob",
+                  # I guess we don't need it, right?
+                  fix.factors.prediction = FALSE)
+
 # training the model (percentage of test and training datasets?)
-model_spatial = train(learner = lrn_glm, task = task_spatial)
-head(predict(model_spatial, task = task_spatial))
+mod_sp = train(learner = lrn, task = task_sp)
+head(predict(mod_sp, task = task_sp))
 # exactly the same as, and needed for model interpretation
 fit = glm(lslpts ~ ., data = data, family = "binomial")
 head(predict(fit, type = "response"))
-model_nonspatial = train(learner = lrn_glm, task = task_nonspatial)
+mod_nsp = train(learner = lrn, task = task_nsp)
 # unpacking the model
-m_sp = getLearnerModel(model_spatial)
+m_sp = getLearnerModel(mod_sp)
 summary(m_sp)
-m_nsp = getLearnerModel(model_nonspatial)
+m_nsp = getLearnerModel(mod_nsp)
 summary(m_nsp)
 
 # interesting, coefficients are just the same
@@ -176,16 +177,16 @@ identical(coefficients(m_sp), coefficients(m_nsp))
 # -> in each repetition dataset will be splitted into five folds (kmeans)
 # method: RepCV -> non-spatial partitioning
 # method: SpRepCV -> spatial partioning
-resampling_spatial = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 10)
+resampling_sp = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 10)
 resampling_nsp = makeResampleDesc(method = "RepCV", folds = 5, reps = 10)
 # apply the reampling by calling the resample function
 # needed for using the same (randomly) selected folds/partitioning in different models
 # spatial vs. non-spatial or glm vs. GAM
 set.seed(12345)  # why do we have the seed again??
-spcv_glm = mlr::resample(learner = lrn_glm, task = task_spatial,
-                    resampling = resampling_spatial,
+spcv_glm = mlr::resample(learner = lrn, task = task_sp,
+                    resampling = resampling_sp,
                     measures = list(auc))
-nspcv_glm = mlr::resample(learner = lrn_glm, task = task_nonspatial,
+nspcv_glm = mlr::resample(learner = lrn_glm, task = task_nsp,
                           resampling = resampling_nsp,
                           measures = list(auc))
 # Visualization of overfitting in the nsp-case
@@ -205,3 +206,17 @@ plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
 plot(pred, col = RColorBrewer::brewer.pal(name = "Reds", 9), add = TRUE, 
      alpha = 0.6)
 vignette(package = "RSAGA")
+
+# make the prediciton "manually"
+ta_2 = stack(ta)
+newdata = as.data.frame(as.matrix(ta_2))
+colSums(is.na(newdata))  # ok, there are NAs
+ind = rowSums(is.na(newdata)) == 0
+tmp = mlr::predictLearner(.learner = lrn, mod_sp, newdata[ind, ])
+newdata[ind, "pred"] = tmp[, 2]
+# check
+identical(values(pred), newdata$pred)
+pred_2 = ta$slope
+values(pred_2) = newdata$pred
+all.equal(pred, pred_2)
+plot(stack(pred, pred_2))
