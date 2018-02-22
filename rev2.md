@@ -9,11 +9,8 @@
 - In general, I am concerned that you are trying to do too much. The book would already be good if you ended with chapter 9 (which would be 10 if you followed by advice of splitting chapter 2 into two). The bridges to GIS software are but kind of 'sugar on top'. Yes, I very much agree that a big data chapter would be more valuable than the raster/vector interactions. Chapters 11-15 are too much. I fear that this will cost you a lot of time and by then you will have to rewrite parts of the other chapters again because the R world is spinning so fast. The stars package, for example will open a whole new world of n-dimensionality and working with non-local BIG data. Leave writing a GeoComp Applications book to others and get this one out fast! Then prepare for a second edition in 2019. ;)
 - In the thank-you note to Josh O'Brien on page 101, the URL to the discussion on stackoverflow is missing.
 - Please insert a code snippet that results in the table 5.2 - it is a bit tedious to look this up interactively. 
-- Besides: when I do (str(con_raster_ea)), then I get different results. [JN: I CANNOT CONFIRM THIS.]
-- The last line on page 111 ends with a colon but there is nothing to follow on the next page.
 - I love section 5.3 on clipping; here you do exactly what I am missing in part II of the book: you are providing the code that shows how to create the figures in each chapter.
 - Chapter 7. It would be nice if the code for generating figures would be inserted immediately before those figures show up in the text. I know, you promise to show how to do this in chapter 9 but this is really frustrating. So, please insert the code here and add a note that the detailed instructions will be expanded on in chapter 9.
-- The two code lines on top of page 162 require the lwgeom package. In chapter 5, this was properly noted but here in chapter 7, it is missing. 
 - The rail example on page 166 is not very convincing: lots of effort for very little outcome. 
 - The use of SpatialLinesNetwork on page 168 is incorrect; the code does not work as indicated.
 - Chapter 8. Location analysis and geomarketing are not the same! I like the comparison between (landscape) ecological analysis and location analysis though. 
@@ -31,6 +28,9 @@
 # UNCLEAR
 
 - Last (command) line on page 104: please add a line to plot(world_laea2). The result is much prettier than what is printed in the book. 
+- Besides: when I do (str(con_raster_ea)), then I get different results. [JN: I CANNOT CONFIRM THIS.]
+- The last line on page 111 ends with a colon but there is nothing to follow on the next page. [JN: I WAS UNABLE TO LOCATE IT.]
+- The two code lines on top of page 162 require the lwgeom package. In chapter 5, this was properly noted but here in chapter 7, it is missing. [JN: I AM UNABLE TO LOCATE USE OF LWGEOM IN CH7.]
 
 # FIXED
 
