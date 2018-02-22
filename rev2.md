@@ -1,7 +1,6 @@
 ## rev I
 
 - I would split chapter 6 into input versus output (visualization). The former, I would add to chapter 2, while the latter could be a little expanded by some of the material taught at Use R! conferences. Yes, I see that there is chapter 9 but data output is not limited to map making. Chapter 2 should then be split into two. 2a would be just about vector and raster data, and 2b about coordinate reference systems, units, data input.
-- not an error but an inconsistency is the switch from the assignment operator <- to the equal sign from section 2.3 onward
 - Unfortunately, the same (lucid and easy to read) cannot be said about the examples in part II. For example, the osmdata::getbb command on page 155 specifies an output format that is not known to the osmdata package, which in its latest version (as of Feb 2018) allows only for data.frame, matrix, string, or polygon.
 - No, I don't see any foundational parts missing here. After two Human geography examples, I am missing some physical geography in Part II. Please touch base with Edzer Pebesma and his group to see whether they would share an example or two.
 - I would leave these sections (5.2) where they are. The topic is important in and by itself and easier to find (even for lookup purposes if the book is used as a reference) if we leave it in section 5.2.
@@ -29,3 +28,5 @@
 # CANNOT FIND IT
 
 # FIXED
+
+- not an error but an inconsistency is the switch from the assignment operator <- to the equal sign from section 2.3 onward
