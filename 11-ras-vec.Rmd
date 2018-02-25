@@ -21,29 +21,42 @@ library(spDataLarge)
 <!-- - etc. -->
 <!-- and 'rasterization' is covered in section \@ref(rasterization) -->
 
-## Raster clipping
+## Raster cropping
+
+<!-- many cases when raster data extent is larger than area of interest -->
+<!-- two techniques could be used in this cases - raster cropping and masking-->
+<!-- this processes have many positive outcomes as they reduce the object (file) size and therefore decrese computational times of the next operations -->
+<!-- additionally, they are often use to create a map of the area of interest. -->
 
 <!-- replace with spDataLarge::elevation in the future? -->
-
-```{r}
-srtm = raster((system.file("raster/srtm.tif", package = "spDataLarge")))
-```
+<!-- we are going to ilustrate raster cropping and masking using the `srtm` object - raster representing elevation of the area in south west Utah and the `zion` object - vector of the Zion National Park area. -->
+<!-- ref a -->
+<!-- we also reprojected the Zion borders to fit the projection of the srtm object -->
 
 ```{r, results='hide'}
+srtm = raster((system.file("raster/srtm.tif", package = "spDataLarge")))
 zion = st_read((system.file("vector/zion.gpkg", package = "spDataLarge"))) %>% 
   st_transform(4326)
 ```
 
+<!-- the crop function is used to decreate the extent of a raster based on the oxtent of another spatial object -->
+<!-- ref b -->
+
 ```{r}
 srtm_cropped = crop(srtm, as(zion, "Spatial"))
 ```
+
+<!-- the role of the mask function is little bit different - it only keeps the raster values in the area of interest. -->
+<!-- values of the outsie of the area of interestt are set to NA -->
+<!-- this process can be also inversed (everything except...) -->
+<!-- ref c -->
 
 ```{r}
 srtm_masked = mask(srtm_cropped, zion)
 ```
 
 <!-- update the color palette in the future (+ the same in ch2) -->
-```{r cropmask, echo = FALSE}
+```{r cropmask, echo = FALSE, fig.cap="Illustration of raster cropping (center) and raster masking aggregation (right)."}
 library(tmap)
 library(grid)
 pz1 = tm_shape(srtm) + 
@@ -69,9 +82,9 @@ pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(0.5, 5), "null
 
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(2, 3, heights = unit(c(0.25, 5), "null"))))
-grid.text("Original", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-grid.text("Cropped", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
-grid.text("Masked", vp = viewport(layout.pos.row = 1, layout.pos.col = 3))
+grid.text("A. Original", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+grid.text("B. Cropped", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
+grid.text("C. Masked", vp = viewport(layout.pos.row = 1, layout.pos.col = 3))
 print(pz1, vp=viewport(layout.pos.col = 1))
 print(pz2, vp=viewport(layout.pos.col = 2))
 print(pz3, vp=viewport(layout.pos.col = 3))
