@@ -14,7 +14,7 @@ p2 = tm_shape(elev_point) +
 
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(0.25, 5), "null"))))
-grid.text("raster", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-grid.text("points", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
+grid.text("Raster", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+grid.text("Points", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
 print(p1, vp = viewport(layout.pos.col = 1))
 print(p2, vp = viewport(layout.pos.col = 2))
