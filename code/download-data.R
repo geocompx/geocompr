@@ -38,11 +38,11 @@ library(tidyverse)
 library(sf)
 library(viridis)
 
-# query_lifeexp <- wbsearch(pattern = "life expectancy")
-# query_gdp <- wbsearch("GDP")
+# query_lifeexp = wbsearch(pattern = "life expectancy")
+# query_gdp = wbsearch("GDP")
 
-wb_data_create <- function(indicator, our_name, year, ...){
-        df <- wb(indicator = indicator, startdate = year, enddate = year, ...) %>%
+wb_data_create = function(indicator, our_name, year, ...){
+        df = wb(indicator = indicator, startdate = year, enddate = year, ...) %>%
                 as_data_frame() %>%
                 select(iso_a2=iso2c, value) %>%
                 mutate(indicator = our_name) %>%
@@ -52,11 +52,11 @@ wb_data_create <- function(indicator, our_name, year, ...){
 
 ## IMPORTANT - repeat if a server is down
 
-data_pop <- wb_data_create(indicator = "SP.POP.TOTL", our_name = "pop", year = 2014, country = "countries_only")
-data_lifeexp <- wb_data_create(indicator = "SP.DYN.LE00.IN", our_name = "lifeExp", year = 2014, country = "countries_only")
-data_gdp <- wb_data_create("NY.GDP.PCAP.PP.KD", "gdpPercap", year = 2014, country = "countries_only")
+data_pop = wb_data_create(indicator = "SP.POP.TOTL", our_name = "pop", year = 2014, country = "countries_only")
+data_lifeexp = wb_data_create(indicator = "SP.DYN.LE00.IN", our_name = "lifeExp", year = 2014, country = "countries_only")
+data_gdp = wb_data_create("NY.GDP.PCAP.PP.KD", "gdpPercap", year = 2014, country = "countries_only")
 
-world_sf <- ne_countries(returnclass = 'sf') %>%
+world_sf = ne_countries(returnclass = 'sf') %>%
         left_join(., data_pop, by = c('iso_a2')) %>%
         left_join(., data_lifeexp, by = c('iso_a2')) %>%
         left_join(., data_gdp, by = c('iso_a2')) %>%
@@ -88,8 +88,8 @@ dir(path="data", pattern="nps_boundary.*", full.names = TRUE) %>%
 
 # landsat -------------------------------------------------------
 # https://aws.amazon.com/public-data-sets/landsat/
-download_landsat8 <- function(destination_filename, band){
-  filename <- paste0("http://landsat-pds.s3.amazonaws.com/L8/038/034/LC80380342015230LGN00/LC80380342015230LGN00_B", band, ".TIF")
+download_landsat8 = function(destination_filename, band){
+  filename = paste0("http://landsat-pds.s3.amazonaws.com/L8/038/034/LC80380342015230LGN00/LC80380342015230LGN00_B", band, ".TIF")
   download.file(filename, destination_filename, method='auto')
 }
 
@@ -100,13 +100,13 @@ download_landsat8('data/landsat_b5.tif', 5)
 
 # landsat crop
 library(raster)
-zion <- st_read('data/zion.gpkg') %>% 
+zion = st_read('data/zion.gpkg') %>% 
   st_buffer(., 500) %>% 
   as(., "Spatial") %>% 
   extent(.)
 
-zion_crop <- function(landsat_filename, zion){
-  new_name <- paste0(stringr::str_sub(landsat_filename, end=-5), '_zion.tif')
+zion_crop = function(landsat_filename, zion){
+  new_name = paste0(stringr::str_sub(landsat_filename, end=-5), '_zion.tif')
   landsat_filename %>% 
     raster(.) %>% 
     crop(., zion) %>% 
@@ -115,7 +115,7 @@ zion_crop <- function(landsat_filename, zion){
     file.remove(.)
 }
 
-zion_landsats <- c('data/landsat_b2.tif',
+zion_landsats = c('data/landsat_b2.tif',
                    'data/landsat_b3.tif',
                    'data/landsat_b4.tif',
                    'data/landsat_b5.tif')
@@ -141,11 +141,11 @@ wbsearch("literacy")
 wbsearch("education")
 # worldbank wiki
 
-# query_lifeexp <- wbsearch(pattern = "life expectancy")
-# query_gdp <- wbsearch("GDP")
+# query_lifeexp = wbsearch(pattern = "life expectancy")
+# query_gdp = wbsearch("GDP")
 
-wb_data_create <- function(indicator, our_name, year, ...){
-  df <- wb(indicator = indicator, startdate = year, enddate = year, ...) %>%
+wb_data_create = function(indicator, our_name, year, ...){
+  df = wb(indicator = indicator, startdate = year, enddate = year, ...) %>%
     as_data_frame() %>%
     select(iso_a2=iso2c, value) %>%
     mutate(indicator = our_name) %>%
@@ -155,18 +155,18 @@ wb_data_create <- function(indicator, our_name, year, ...){
 
 ## IMPORTANT - repeat if a server is down
 
-data_hdi <- wb_data_create(indicator = "UNDP.HDI.XD", our_name = "HDI", year = 2011, country = "countries_only")
-data_urbanpop <- wb_data_create(indicator = "SP.URB.TOTL", our_name = "urban_pop", year = 2014, country = "countries_only")
-data_unemployment <- wb_data_create(indicator = "SL.UEM.TOTL.NE.ZS", our_name = "unemployment", year = 2014, country = "countries_only")
-data_popgrowth <- wb_data_create(indicator = "SP.POP.GROW", our_name = "pop_growth", year = 2014, country = "countries_only")
-data_literacy <- wb_data_create(indicator = "SE.ADT.LITR.ZS", our_name = "literacy", year = 2014, country = "countries_only")
-# data_tertiary_edu_per_100000 <- wb_data_create(indicator = "UIS.TE_100000.56", our_name = "tertiary_edu_per_100000", year = 2014, country = "countries_only")
+data_hdi = wb_data_create(indicator = "UNDP.HDI.XD", our_name = "HDI", year = 2011, country = "countries_only")
+data_urbanpop = wb_data_create(indicator = "SP.URB.TOTL", our_name = "urban_pop", year = 2014, country = "countries_only")
+data_unemployment = wb_data_create(indicator = "SL.UEM.TOTL.NE.ZS", our_name = "unemployment", year = 2014, country = "countries_only")
+data_popgrowth = wb_data_create(indicator = "SP.POP.GROW", our_name = "pop_growth", year = 2014, country = "countries_only")
+data_literacy = wb_data_create(indicator = "SE.ADT.LITR.ZS", our_name = "literacy", year = 2014, country = "countries_only")
+# data_tertiary_edu_per_100000 = wb_data_create(indicator = "UIS.TE_100000.56", our_name = "tertiary_edu_per_100000", year = 2014, country = "countries_only")
 
-country_names <- ne_countries(returnclass = 'sf') %>%
+country_names = ne_countries(returnclass = 'sf') %>%
   select(name=name_long, iso_a2) %>% 
   st_set_geometry(., NULL)
   
-world_df <- data_hdi %>% 
+world_df = data_hdi %>% 
   full_join(., data_urbanpop, by = c('iso_a2')) %>%
   full_join(., data_unemployment, by = c('iso_a2')) %>%
   full_join(., data_popgrowth, by = c('iso_a2')) %>% 

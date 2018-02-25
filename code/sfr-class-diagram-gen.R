@@ -10,7 +10,7 @@ n = sort(n)[c(1, 4, 3, 5, 6, 2, 7)]
 # see https://davetang.org/muse/2017/03/31/creating-flowchart-using-r/
 png(filename = "figures/sf-classes.png", width = 600, height = 500)
 # openplotmat()
-pos <- coordinates(c(1, 3, 3))
+pos = coordinates(c(1, 3, 3))
 plot(pos, type = 'n')
 text(pos)
 par(mar = rep(1, 4))
@@ -31,7 +31,7 @@ dev.off()
 
 ## attempt with DiagrammR -----
 # nodes = create_node_df(n = length(n), label = n, shape = "rectangle", width = 3, )
-# graph_attrs <- c("layout = circo",
+# graph_attrs = c("layout = circo",
 #                  "overlap = false",
 #                  "fixedsize = true",
 #                  "ranksep = 3",
