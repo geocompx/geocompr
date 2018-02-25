@@ -100,25 +100,31 @@ print(pz3, vp=viewport(layout.pos.col = 3))
 <!-- extract to points -->
 <!-- mention buffer arg -->
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 set.seed(2018-02-21)
-zion_points = st_sample(zion, size = 30)
+zion_points = st_sample(zion, size = 30) %>% 
+  st_sf()
 ```
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 library(tmap)
 library(grid)
 
 rast_poly_point = tm_shape(srtm) +
-  tm_raster() + 
+  tm_raster(title = "Elevation (m)", style = "cont") + 
   tm_shape(zion) +
-  tm_borders() +
+  tm_borders(lwd = 2) + 
   tm_shape(zion_points) + 
-  tm_dots()
+  tm_symbols() + 
+  tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 rast_poly_point
 ```
 
 <!-- elevation to points (zion) -->
+
+```{r}
+zion_points$elevation = raster::extract(srtm, zion_points)
+```
 
 <!-- extract to line -->
 <!-- ? -->
@@ -133,7 +139,7 @@ rast_poly_point
 nlcd = raster((system.file("raster/nlcd2011.tif", package = "spDataLarge")))
 ```
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 nlcd_zion = raster::extract(nlcd, zion, df = TRUE)
 ```
 
