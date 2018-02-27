@@ -45,6 +45,7 @@
 - 2017-07-11 - bug - Problem with plots of the multipoint type - https://github.com/mtennekes/tmap/issues/126
 - 2017-08-23 - bug - mapedit does not seem to save the end result after editing - https://github.com/r-spatial/mapedit/issues/63
 - 2018-02-11 - enhancement - Function's names - idea - https://github.com/mtennekes/tmap/issues/171
+- 2018-02-26 - bug - Plotting error - tmap 2.0 - https://github.com/mtennekes/tmap/issues/177
 
 # Other
 
