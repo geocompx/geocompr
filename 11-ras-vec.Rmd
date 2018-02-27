@@ -79,9 +79,6 @@ pz3 = tm_shape(srtm_masked) +
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
 grid.newpage()
-pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(0.5, 5), "null"))))
-
-grid.newpage()
 pushViewport(viewport(layout = grid.layout(2, 3, heights = unit(c(0.25, 5), "null"))))
 grid.text("A. Original", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
 grid.text("B. Cropped", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
@@ -106,7 +103,44 @@ zion_points = st_sample(zion, size = 30) %>%
   st_sf()
 ```
 
-```{r, echo=FALSE}
+<!-- elevation to points (zion) -->
+
+```{r}
+zion_points$elevation = raster::extract(srtm, zion_points)
+```
+
+<!-- extract to line -->
+```{r}
+zion_transect = st_sfc(st_linestring(rbind(c(-113.2, 37.45), c(-112.9, 37.2)))) %>% 
+  st_sf()
+```
+
+```{r, echo=FALSE, eval=FALSE}
+# strange error
+raster::extract(srtm, zion_transect, along = TRUE,  df = TRUE)
+```
+
+```{r}
+transect_df = raster::extract(srtm, zion_transect, along = TRUE, cellnumbers = TRUE) %>%
+  data.frame()
+transect_coords = xyFromCell(srtm, transect_df$cell)
+transect_df = cbind(transect_df, transect_coords)
+library(geosphere)
+transect_df$dist = distm(transect_coords)[, 1]
+ggplot(transect_df, aes(dist, srtm)) + geom_line()
+```
+
+
+<!-- create a transect -->
+<!-- ```{r} -->
+<!-- ``` -->
+<!-- ? -->
+
+<!-- extract to polygons (or extents) -->
+<!-- calculate elevation stats for zion np -->
+<!-- ?? -->
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(tmap)
 library(grid)
 
@@ -117,25 +151,30 @@ rast_poly_point = tm_shape(srtm) +
   tm_shape(zion_points) + 
   tm_symbols() + 
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
-rast_poly_point
+
+zion_transect_points = st_cast(zion_transect, "POINT")
+zion_transect_points$name = c("start", "end")
+
+rast_poly_line = tm_shape(srtm) +
+  tm_raster(title = "Elevation (m)", style = "cont") + 
+  tm_shape(zion) +
+  tm_borders(lwd = 2) + 
+  tm_shape(zion_transect) + 
+  tm_lines(col = "black", lwd = 4) + 
+  tm_shape(zion_transect_points) +                                                                 
+  tm_symbols(size = 5, col = "white") +                                                                     
+  tm_text("name") +
+  tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
+
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2, 3, heights = unit(c(0.25, 5), "null"))))
+grid.text("A. Point extraction", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+grid.text("B. Line extraction", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
+# grid.text("C. Polygon extraction", vp = viewport(layout.pos.row = 1, layout.pos.col = 3))
+print(rast_poly_point, vp=viewport(layout.pos.col = 1))
+print(rast_poly_line, vp=viewport(layout.pos.col = 2))
+# print(pz3, vp=viewport(layout.pos.col = 3))
 ```
-
-<!-- elevation to points (zion) -->
-
-```{r}
-zion_points$elevation = raster::extract(srtm, zion_points)
-```
-
-<!-- extract to line -->
-<!-- create a transect -->
-<!-- ```{r} -->
-<!-- raster::extract(x, y, along = TRUE) -->
-<!-- ``` -->
-<!-- ? -->
-
-<!-- extract to polygons (or extents) -->
-<!-- calculate elevation stats for zion np -->
-<!-- ?? -->
 
 <!-- zonal stats -->
 <!-- land cover categories to polygon -->
