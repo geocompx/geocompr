@@ -216,31 +216,9 @@ lrn = makeLearner(cl = "classif.binomial",
 # helpLearner(learner)
 ```
 
-Having specified a learner and a task, we can train our model. 
-
-
-```{r}
-mod = train(learner = lrn, task = task)
-mlr_fit = getLearnerModel(mod)
-```
-
-```{r, eval = FALSE, echo = FALSE}
-getTaskFormula(task)
-getTaskData(task)
-getLearnerModel(mod)
-mod$learner.model
-```
-
-`getLearnerModel()` extracts the used model which shows that **mlr** passed all specified parameters to the `glm` function in the background as also proved by following code:
-
-```{r}
-fit = glm(lslpts ~ ., family = binomial(link = "logit"), data = data)
-identical(fit$coefficients, mlr_fit$coefficients)
-```
-
 In the beginning, it might seem a bit tedious to learn the **mlr** interface for modeling.
 But remember that one only has to learn one single interface to run `r nrow(listLearners())` learners.
-Additionally, resampling in **mlr** is really easy and only requires two more steps.^[Further advantages are the easy parallelization of resampling techniques and the tuning of machine learning hyperparameters in an inner fold.]
+Additionally, resampling in **mlr** is really easy and only requires two more steps.^[Further advantages are the easy parallelization of resampling techniques and the tuning of machine learning hyperparameters, also spatially, in an inner fold.]
 The first thing to to is specifying a resampling method.
 Spatial repeated cross-validation
 
@@ -265,6 +243,51 @@ To put it into perspective, we compare this result with that of a non-spatial cr
 # boxplots
 # find out if doing a non-spatial cv uses the same folds as the spatial cv...
 ```
+
+
+Having specified a learner and a task, we can train our model. 
+
+```{r}
+mod = train(learner = lrn, task = task)
+mlr_fit = getLearnerModel(mod)
+```
+
+```{r, eval = FALSE, echo = FALSE}
+getTaskFormula(task)
+getTaskData(task)
+getLearnerModel(mod)
+mod$learner.model
+```
+
+`getLearnerModel()` extracts the used model which shows that **mlr** passed all specified parameters to the `glm` function in the background as also proved by following code:
+
+```{r}
+fit = glm(lslpts ~ ., family = binomial(link = "logit"), data = data)
+identical(fit$coefficients, mlr_fit$coefficients)
+```
+
+Here, we neglect spatial autocorrelation when making predictions since we assume that on average predictive accuracies of parametric model remain the same with or without spatial autocorrelation structures.
+However, it is possible to include spatial autocorrelation structures.
+It is beyond the scope of this book to show how you could do so but instead we give you some pointers where to look it up:
+
+
+Kriging approaches
+1. Universal kriging (but only available for linear regression)  <!-- check -->, see also for a GAM example and how to do it manually, basically fitting a model and then using the residuals to interpolate the spatial component
+
+Incorporating spatial autocorrelation explicitly in the model structure
+1. GLS
+1. glmmPQL
+
+random intercept approaches
+
+1. random-effect modeling sometimes helps to account for spatial autocorrelation [@zuur_mixed_2009].
+"In the mixed modeling approach an extra residual term is added to the model that adds a dependency structure on the response variable.
+This is especially useful if we have different locations where we can assume that the individuals of each location are more similar to each other in comparison with individuals from other locations, e.g., bee hives, owl nests, vegetation transects, etc.
+Here, random intercepts are assumed to be normal and independent distributed.
+1. The mixed modeling approach can be extended by using a random intercept that is normal and spatially dependent.
+Most likely, you will have to resort to Bayesian modeling approaches for this since frequentist software tools are rather limited in this respect especially for more complex models [@blangiardo_spatial_2015; @zuur_beginners_2017]. 
+
+
 
 i.e. the fact that points close to each other tend to share similarities compared to points further apart.
 Simply put, if it rains at one location it is pretty likely that it also rains if we moved 1 meter in any direction.
