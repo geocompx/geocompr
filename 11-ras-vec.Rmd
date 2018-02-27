@@ -4,7 +4,7 @@
 
 - This chapter requires the following packages:
 
-```{r}
+```{r, message = FALSE} 
 library(sf)
 library(raster)
 library(tidyverse)
@@ -21,66 +21,180 @@ library(spDataLarge)
 <!-- - etc. -->
 <!-- and 'rasterization' is covered in section \@ref(rasterization) -->
 
-## Raster clipping
+## Raster cropping
 
-<!-- replace with spDataLarge::elevation in the future -->
+Many spatial analysis involve integrating data from many different sources, e.g. remote sensing images (rasters) and administrative boundaries (vectors).
+This often means that the extent of a raster is larger than the actual area of interest. 
+Two techniques, raster cropping and raster masking, are used to unify the analyzed area.
+They could be vital for many projects as they reduce an object size and therefore decrease computational times needed for the following calculations.
+Additionally, they are often used to prepare the data before creating maps.
 
-```{r}
+We are going to illustrate raster cropping and masking using the `srtm` object, a elevation raster of the Southwestern Utah, and the `zion` object, a vector representing the area of the Zion National Park (Figure \@ref(fig:cropmask):A).
+Both objects should have the same projection, therefore we need to transform `zion` to fit the projection of `srtm` before raster cropping or masking (see section \@ref(reproj-geo-data) to learn more about spatial data reprojection):
+
+```{r, results='hide'}
 srtm = raster((system.file("raster/srtm.tif", package = "spDataLarge")))
-```
-
-```{r}
 zion = st_read((system.file("vector/zion.gpkg", package = "spDataLarge"))) %>% 
   st_transform(4326)
 ```
+
+The role of the `crop` function is to decrease the extent of a raster based on the extent of another spatial object.
+It this example, we crop the elevation data to the extent of the Zion National Park area (Figure \@ref(fig:cropmask):B): 
 
 ```{r}
 srtm_cropped = crop(srtm, as(zion, "Spatial"))
 ```
 
+The goal of the `mask` function is a little bit different - it keeps the raster values only in the area of interest, while the values outside of the analyzed area are set to `NA`.
+The code below masks every cell outside of the the Zion National Park boundaries (Figure \@ref(fig:cropmask):C):
+
 ```{r}
 srtm_masked = mask(srtm_cropped, zion)
 ```
 
-```{r cropmask, echo = FALSE}
+The `mask` function also can be modified to give different results.
+For example a value of mask (`NA`) can be changed with the `maskvalue` argument and the `inverse` argument set to `TRUE` masks an area of interest keeping everything else intact.
+You can learn more in the function's help file - `?mask`.
+
+<!-- update the color palette in the future (+ the same in ch2) -->
+```{r cropmask, echo = FALSE, fig.cap="Illustration of raster cropping (center) and raster masking (right)."}
 library(tmap)
 library(grid)
 pz1 = tm_shape(srtm) + 
-  tm_raster() + 
+  tm_raster(title = "Elevation (m)", style = "cont") + 
   tm_shape(zion) +
-  tm_borders(lwd = 2)
+  tm_borders(lwd = 2) + 
+  tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
 pz2 = tm_shape(srtm_cropped) + 
-  tm_raster() + 
+  tm_raster(title = "Elevation (m)", style = "cont") + 
   tm_shape(zion) +
-  tm_borders(lwd = 2)
+  tm_borders(lwd = 2) + 
+  tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
 pz3 = tm_shape(srtm_masked) + 
-  tm_raster() + 
+  tm_raster(title = "Elevation (m)", style = "cont") + 
   tm_shape(zion) +
-  tm_borders(lwd = 2)
-
-grid.newpage()
-pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(0.5, 5), "null"))))
+  tm_borders(lwd = 2) + 
+  tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(2, 3, heights = unit(c(0.25, 5), "null"))))
-grid.text("Original", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-grid.text("Cropped", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
-grid.text("Masked", vp = viewport(layout.pos.row = 1, layout.pos.col = 3))
+grid.text("A. Original", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+grid.text("B. Cropped", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
+grid.text("C. Masked", vp = viewport(layout.pos.row = 1, layout.pos.col = 3))
 print(pz1, vp=viewport(layout.pos.col = 1))
 print(pz2, vp=viewport(layout.pos.col = 2))
 print(pz3, vp=viewport(layout.pos.col = 3))
 ```
 
-
 ## Raster extraction
 
+<!-- intro -->
+
 <!-- extract -->
+<!-- faster alternative to raster::extract?? -->
 <!-- extract to points -->
+<!-- mention buffer arg -->
+
+```{r, warning=FALSE, message=FALSE}
+set.seed(2018-02-21)
+zion_points = st_sample(zion, size = 30) %>% 
+  st_sf()
+```
+
+<!-- elevation to points (zion) -->
+
+```{r}
+zion_points$elevation = raster::extract(srtm, zion_points)
+```
+
 <!-- extract to line -->
+```{r}
+zion_transect = st_sfc(st_linestring(rbind(c(-113.2, 37.45), c(-112.9, 37.2)))) %>% 
+  st_sf()
+```
+
+```{r, echo=FALSE, eval=FALSE}
+# strange error
+raster::extract(srtm, zion_transect, along = TRUE,  df = TRUE)
+```
+
+```{r}
+transect_df = raster::extract(srtm, zion_transect, along = TRUE, cellnumbers = TRUE) %>%
+  data.frame()
+transect_coords = xyFromCell(srtm, transect_df$cell)
+transect_df = cbind(transect_df, transect_coords)
+library(geosphere)
+transect_df$dist = distm(transect_coords)[, 1]
+ggplot(transect_df, aes(dist, srtm)) + geom_line()
+```
+
 <!-- extract to polygons (or extents) -->
+<!-- mention raster::extract(srtm, zion) -->
+
+```{r}
+zion_srtm_df = c(min, mean, max) %>% 
+  map_dfr(~raster::extract(x = srtm, y = zion, fun = ., df = TRUE)) %>% 
+  mutate(stat = c("minimum", "mean", "maximum")) %>% 
+  spread(stat, srtm)
+zion_srtm_new = bind_cols(zion, zion_srtm_df)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(tmap)
+library(grid)
+
+rast_poly_point = tm_shape(srtm) +
+  tm_raster(title = "Elevation (m)", style = "cont") + 
+  tm_shape(zion) +
+  tm_borders(lwd = 2) + 
+  tm_shape(zion_points) + 
+  tm_symbols() + 
+  tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
+
+zion_transect_points = st_cast(zion_transect, "POINT")
+zion_transect_points$name = c("start", "end")
+
+rast_poly_line = tm_shape(srtm) +
+  tm_raster(title = "Elevation (m)", style = "cont") + 
+  tm_shape(zion) +
+  tm_borders(lwd = 2) + 
+  tm_shape(zion_transect) + 
+  tm_lines(col = "black", lwd = 4) + 
+  tm_shape(zion_transect_points) +                                                                 
+  tm_symbols(size = 5, col = "white") +                                                                     
+  tm_text("name") +
+  tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
+
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2, 3, heights = unit(c(0.25, 5), "null"))))
+grid.text("A. Point extraction", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+grid.text("B. Line extraction", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
+# grid.text("C. Polygon extraction", vp = viewport(layout.pos.row = 1, layout.pos.col = 3))
+print(rast_poly_point, vp=viewport(layout.pos.col = 1))
+print(rast_poly_line, vp=viewport(layout.pos.col = 2))
+# print(pz3, vp=viewport(layout.pos.col = 3))
+```
+
 <!-- zonal stats -->
+<!-- land cover categories to polygon -->
+
+```{r}
+nlcd = raster((system.file("raster/nlcd2011.tif", package = "spDataLarge")))
+```
+
+```{r, warning=FALSE, message=FALSE}
+zion_nlcd = raster::extract(nlcd, zion, df = TRUE)
+```
+
+```{r}
+zion_nlcd_df = nlcd_zion %>% 
+  group_by(ID, nlcd2011) %>% 
+  summarise(n = n()) %>% 
+  spread(nlcd2011, n)
+zion_nlcd_new = bind_cols(zion, zion_nlcd_df)
+```
 
 <!-- ## Spatial interpolation ?? -->
 <!-- http://mdsumner.github.io/guerrilla/articles/irreg2.html -->
