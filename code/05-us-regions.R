@@ -1,5 +1,5 @@
 # with base R ----
-old_par = par()
+# old_par = par()
 breaks = c(1e5, 5e6, 1e7, 7e7, 2e8)
 rdf = st_set_geometry(regions, NULL)
 us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
@@ -10,7 +10,7 @@ us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
 par(mfrow = c(1, 2))
 plot(us_states[, "total_pop_15"], main = "US states", breaks = breaks, key.pos = NULL)
 plot(regions[, "total_pop_15"], main = "US regions", breaks = breaks, key.pos = NULL)
-par(old_par)
+# par(old_par)
 # with tmap ----
 # library(tmap)
 # regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
