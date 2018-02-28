@@ -104,7 +104,6 @@ zion_points = st_sample(zion, size = 30) %>%
 ```
 
 <!-- elevation to points (zion) -->
-
 ```{r}
 zion_points$elevation = raster::extract(srtm, zion_points)
 ```
@@ -130,15 +129,18 @@ transect_df$dist = distm(transect_coords)[, 1]
 ggplot(transect_df, aes(dist, srtm)) + geom_line()
 ```
 
-
-<!-- create a transect -->
-<!-- ```{r} -->
-<!-- ``` -->
-<!-- ? -->
-
 <!-- extract to polygons (or extents) -->
-<!-- calculate elevation stats for zion np -->
-<!-- ?? -->
+```{r}
+zion_srtm_values = raster::extract(x = srtm, y = zion)
+```
+
+```{r}
+zion_srtm_df = c(min, mean, max) %>% 
+  map_dfr(~raster::extract(x = srtm, y = zion, fun = ., df = TRUE)) %>% 
+  mutate(stat = c("minimum", "mean", "maximum")) %>% 
+  spread(stat, srtm)
+zion_srtm_new = bind_cols(zion, zion_srtm_df)
+```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(tmap)
@@ -184,15 +186,15 @@ nlcd = raster((system.file("raster/nlcd2011.tif", package = "spDataLarge")))
 ```
 
 ```{r, warning=FALSE, message=FALSE}
-nlcd_zion = raster::extract(nlcd, zion, df = TRUE)
+zion_nlcd = raster::extract(nlcd, zion, df = TRUE)
 ```
 
 ```{r}
-nlcd_zion_df = nlcd_zion %>% 
+zion_nlcd_df = zion_nlcd %>% 
   group_by(ID, nlcd2011) %>% 
   summarise(n = n()) %>% 
   spread(nlcd2011, n)
-zion_new = bind_cols(zion, nlcd_zion_df)
+zion_nlcd_new = bind_cols(zion, zion_nlcd_df)
 ```
 
 <!-- ## Spatial interpolation ?? -->
