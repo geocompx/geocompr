@@ -57,9 +57,9 @@ Here, spatial CV will come to the rescue which will be the main topic of this ch
 To introduce spatial CV by example, we will use a landslide dataset from Southern Ecuador.
 For a detailed description of the dataset and the study area please refer to @muenchow_geomorphic_2012.
 One can find a subset of the corresponding data in the **RSAGA** package.
-The following command loads two datasets, a `data.frame` named `landslides` and a `list` named `dem`.
+The following command loads three datasets, a `data.frame` named `landslides`, a `list` named `dem`, and an `sf`-object named `study_area`.
 
-```{r, eval = FALSE}
+```{r}
 data("landslides", package = "RSAGA")
 ```
 
@@ -82,7 +82,7 @@ To transform this list into a `raster`, we can write:
 ```{r, eval = FALSE}
 dem = 
   raster(dem$data, 
-         crs = "+proj=utm +zone=17 +south +datum=WGS84 +units=m +no_defs",
+         crs = dem$header$proj4string,
          xmn = dem$header$xllcorner, 
          xmx = dem$header$xllcorner + dem$header$ncols * dem$header$cellsize,
          ymn = dem$header$yllcorner,
@@ -93,7 +93,6 @@ To model the probability for landslide occurrence, we need some predictors.
 Here, we use selected terrain attributes frequently associated with landsliding [@muenchow_geomorphic_2012], all of which can be computed from the provided digital elevation model (`dem`) using R-GIS bridges (see Chapter \@ref(gis)).
 We leave it as an exercise to the reader to compute the terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe (see also exercises).
 The first three rows of the resulting dataframe (still named `lsl`) could look like this:
-
 <!-- has anybody an idea why I have to run the following code chunk two times to make it work when rendering the book with `bookdown::render_book()`?-->
 ```{r, echo=FALSE}
 load("extdata/spatialcv.Rdata")
@@ -114,7 +113,6 @@ The added columns are:
 - `cprof`: profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle 
 - `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
 - `log_carea`: the decadic logarithm of the catchment area (log m^2^) representing the amount of water flowing towards a location.
-
 
 ```{r, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. Randomly selected test points are marked by a golden border. Projection: UTM zone 17S (EPSG: 32717)."}
 library(tmap)
@@ -161,7 +159,7 @@ fit
 
 Subsequently, we can use the estimated model coefficients for predictions.
 The generic `predict()` function does this for us automatically.
-The `response` option gives back the predicted probabilities for each of observation in `lsl`, i.e. the probability that a landslide has occurred (see `? predict.glm`).
+The `response` option gives back the predicted probabilities (of landslide occurrence) for each observation in `lsl` (see `? predict.glm`).
 
 
 ```{r, eval = FALSE}
@@ -174,18 +172,35 @@ This function also expects the fitted model as input as well as a raster stack c
 
 ```{r}
 pred = raster::predict(object = ta, model = fit, type = "response")
-plot(pred, col = RColorBrewer::brewer.pal(name = "Reds", 6))
 ```
 
-```{r, echo = FALSE}
-asp = terrain(ta$elev, opt = "aspect")
-hs = hillShade(ta$slope * pi / 180, asp, 40, 270)
-hs = mask(hs, study_area)
-plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
+\@ref(fig:lsl-susc)
+
+```{r lsl-susc, echo = FALSE, fig.cap="Spatial prediction of landslide susceptibility using a GLM.", warning=FALSE}
+# hs = mask(hs, study_area)
+# plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
 # plot(pred, col = RColorBrewer::brewer.pal("YlOrRd", n =  9), add = TRUE, 
 #      alpha = 0.6)
-plot(mask(pred, hs), col = RColorBrewer::brewer.pal(name = "Reds", 6), add = TRUE, 
-     alpha = 0.6)
+# plot(mask(pred, hs), col = RColorBrewer::brewer.pal(name = "Reds", 6), add = TRUE, 
+#      alpha = 0.6)
+
+
+# white raster to only plot the axis ticks, otherwise gridlines would be visible
+tm_shape(hs, bbox = bbx) +
+  tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
+          labels.rot = c(0, 90)) +
+  tm_raster(palette = "white", legend.show = FALSE) +
+  # hillshade
+  tm_shape(mask(hs, study_area), bbox = bbx) +
+	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+	# prediction raster
+  tm_shape(mask(pred, study_area)) +
+	tm_raster(alpha = 0.5, palette = RColorBrewer::brewer.pal(name = "Reds", 6),
+	          auto.palette.mapping = FALSE, legend.show = FALSE) +
+	# rectangle and outer margins
+  qtm(rect, fill = NULL) +
+	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
+
 ```
 
 Here, when making predictions we neglect spatial autocorrelation since we assume that on average predictive accuracies of parametric model remain the same with or without spatial autocorrelation structures.
@@ -203,7 +218,9 @@ This mixed modeling approach assumes normal and independent distributed random i
 This can even be extended by using a random intercept that is normal and spatially dependent.
 For this, however, you will have to resort most likely to Bayesian modeling approaches since frequentist software tools are rather limited in this respect especially for more complex models [@blangiardo_spatial_2015; @zuur_beginners_2017]. 
 
-
+Spatial predictions are one very interesting outcome of a model.
+Even more important is how good is our model, i.e. how good are its predictions.
+Therefore, we need a measure which tells us 
 
 
 AUROC: To assess the model's performance we use the AUROC.
