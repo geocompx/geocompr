@@ -54,12 +54,12 @@ Here, spatial CV will come to the rescue which will be the main topic of this ch
 
 ## Case study: landslide susceptibility {#case-study}
 
-To introduce spatial CV by example, we will use a landslide dataset from Southern Ecuador.
+To introduce spatial CV by example, we will use a landslide dataset from Southern Ecuador (Figure \@ref(fig:lsl-map)).
 For a detailed description of the dataset and the study area please refer to @muenchow_geomorphic_2012.
 One can find a subset of the corresponding data in the **RSAGA** package.
-The following command loads two datasets, a `data.frame` named `landslides` and a `list` named `dem`.
+The following command loads three datasets, a `data.frame` named `landslides`, a `list` named `dem`, and an `sf`-object named `study_area`.
 
-```{r, eval = FALSE}
+```{r}
 data("landslides", package = "RSAGA")
 ```
 
@@ -82,7 +82,7 @@ To transform this list into a `raster`, we can write:
 ```{r, eval = FALSE}
 dem = 
   raster(dem$data, 
-         crs = "+proj=utm +zone=17 +south +datum=WGS84 +units=m +no_defs",
+         crs = dem$header$proj4string,
          xmn = dem$header$xllcorner, 
          xmx = dem$header$xllcorner + dem$header$ncols * dem$header$cellsize,
          ymn = dem$header$yllcorner,
@@ -93,7 +93,6 @@ To model the probability for landslide occurrence, we need some predictors.
 Here, we use selected terrain attributes frequently associated with landsliding [@muenchow_geomorphic_2012], all of which can be computed from the provided digital elevation model (`dem`) using R-GIS bridges (see Chapter \@ref(gis)).
 We leave it as an exercise to the reader to compute the terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe (see also exercises).
 The first three rows of the resulting dataframe (still named `lsl`) could look like this:
-
 <!-- has anybody an idea why I have to run the following code chunk two times to make it work when rendering the book with `bookdown::render_book()`?-->
 ```{r, echo=FALSE}
 load("extdata/spatialcv.Rdata")
@@ -115,8 +114,7 @@ The added columns are:
 - `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
 - `log_carea`: the decadic logarithm of the catchment area (log m^2^) representing the amount of water flowing towards a location.
 
-
-```{r, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. Randomly selected test points are marked by a golden border. Projection: UTM zone 17S (EPSG: 32717)."}
+```{r lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. Randomly selected test points are marked by a golden border. CRS: UTM zone 17S (EPSG: 32717)."}
 library(tmap)
 lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
 hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
@@ -140,6 +138,82 @@ tm_shape(hs, bbox = bbx) +
 	qtm(rect, fill = NULL) +
 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
 ```
+
+
+## Conventional modeling approach in R
+Before diving into the **mlr** package it is worth to take a look at the conventional modeling interface in R.
+This way we introduce statistical supervised modeling in R which in turn will contribute to get a better grasp on the **mlr** approach introduced later on, and provides the required skillset for doing spatial CV.
+Usually, we model the response variable as a function of predictors. 
+Therefore, modeling functions in R such as `lm`, `glm` and many more use the so-called formula interface.
+Let's put this into practice by modeling the landslide occurence as a function of terrain attributes.
+Since our response (landslide occurence) belongs to the binary category, we use a binomial generalized linear model instead of a simple linear model which would expect a normally distributed numeric response variable.
+
+```{r, eval = TRUE}
+fit = glm(lslpts ~ slope + cplan + cprof + elev + log_carea, 
+          data = lsl, family = binomial())
+# the same as:
+# fit = glm(lslpts ~ ., data = select(lsl, -x, -y))
+fit
+```
+
+Subsequently, we can use the estimated model coefficients for predictions.
+The generic `predict()` function does this for us automatically.
+The `response` option gives back the predicted probabilities (of landslide occurrence) for each observation in `lsl` (see `? predict.glm`).
+
+
+```{r, eval = FALSE}
+head(predict(object = fit, type = "response"))
+```
+
+We can also predict spatially by applying the coefficients to our predictor rasters. 
+We could do this manually but can also use **raster**'s `predict()` function.
+This function also expects the fitted model as input as well as a raster stack containing the same predictors we have used in the model as raster objects (Figure \@ref(fig:lsl-susc)).
+
+```{r}
+pred = raster::predict(object = ta, model = fit, type = "response")
+```
+
+```{r lsl-susc, echo = FALSE, fig.cap="Spatial prediction of landslide susceptibility using a  GLM. CRS: UTM zone 17S (EPSG: 32717).", warning=FALSE}
+# white raster to only plot the axis ticks, otherwise gridlines would be visible
+tm_shape(hs, bbox = bbx) +
+  tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
+          labels.rot = c(0, 90)) +
+  tm_raster(palette = "white", legend.show = FALSE) +
+  # hillshade
+  tm_shape(mask(hs, study_area), bbox = bbx) +
+	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+	# prediction raster
+  tm_shape(mask(pred, study_area)) +
+	tm_raster(alpha = 0.5, palette = RColorBrewer::brewer.pal(name = "Reds", 6),
+	          auto.palette.mapping = FALSE, legend.show = FALSE) +
+	# rectangle and outer margins
+  qtm(rect, fill = NULL) +
+	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
+
+```
+
+Here, when making predictions we neglect spatial autocorrelation since we assume that on average predictive accuracies of parametric models remain the same with or without spatial autocorrelation structures.
+However, it is possible to include spatial autocorrelation structures into models as well as into the predictions.
+This is, however, beyond the scope of this book.
+Nevertheless, we give the interested reader some pointers where to look it up.
+There are three main directions:
+
+1. The predictions of universal kriging are the predictions of a simple linear model plus the kriged model's residuals, i.e. spatially interpolated residuals [@bivand_applied_2013]. 
+1. Adding a spatial correlation (dependency) structure to a generalized least squares model  [`nlme::gls()`; @zuur_mixed_2009; @zuur_beginners_2017].  ^[These correlation structures can also be included in `MASS::glmmPQL()` and `mgcv::gamm()`.]
+1. Finally, there are mixed-effect modeling approaches.
+Basically, a random effect imposes a dependency structure on the response variable which in turn allows for observations of once class to be more similar to each other than to those of another class [@zuur_mixed_2009]. 
+Classes can be for example bee hives, owl nests, vegetation transects or an altitudinal stratification.
+This mixed modeling approach assumes normal and independent distributed random intercepts.^[Note that for spatial predictions one would usually use the population intercept.]
+This can even be extended by using a random intercept that is normal and spatially dependent.
+For this, however, you will have to resort most likely to Bayesian modeling approaches since frequentist software tools are rather limited in this respect especially for more complex models [@blangiardo_spatial_2015; @zuur_beginners_2017]. 
+
+Spatial predictions are one very important outcome of a model.
+Even more important is how good the model is at making predictions.
+Therefore, we need a measure which tells us 
+
+
+AUROC: To assess the model's performance we use the AUROC.
+Add short explanation. 
 
 
 ## Introduction to spatial CV
@@ -216,31 +290,9 @@ lrn = makeLearner(cl = "classif.binomial",
 # helpLearner(learner)
 ```
 
-Having specified a learner and a task, we can train our model. 
-
-
-```{r}
-mod = train(learner = lrn, task = task)
-mlr_fit = getLearnerModel(mod)
-```
-
-```{r, eval = FALSE, echo = FALSE}
-getTaskFormula(task)
-getTaskData(task)
-getLearnerModel(mod)
-mod$learner.model
-```
-
-`getLearnerModel()` extracts the used model which shows that **mlr** passed all specified parameters to the `glm` function in the background as also proved by following code:
-
-```{r}
-fit = glm(lslpts ~ ., family = binomial(link = "logit"), data = data)
-identical(fit$coefficients, mlr_fit$coefficients)
-```
-
 In the beginning, it might seem a bit tedious to learn the **mlr** interface for modeling.
 But remember that one only has to learn one single interface to run `r nrow(listLearners())` learners.
-Additionally, resampling in **mlr** is really easy and only requires two more steps.^[Further advantages are the easy parallelization of resampling techniques and the tuning of machine learning hyperparameters in an inner fold.]
+Additionally, resampling in **mlr** is really easy and only requires two more steps.^[Further advantages are the easy parallelization of resampling techniques and the tuning of machine learning hyperparameters, also spatially, in an inner fold.]
 The first thing to to is specifying a resampling method.
 Spatial repeated cross-validation
 
@@ -265,6 +317,31 @@ To put it into perspective, we compare this result with that of a non-spatial cr
 # boxplots
 # find out if doing a non-spatial cv uses the same folds as the spatial cv...
 ```
+
+
+Having specified a learner and a task, we can train our model. 
+
+```{r}
+mod = train(learner = lrn, task = task)
+mlr_fit = getLearnerModel(mod)
+```
+
+```{r, eval = FALSE, echo = FALSE}
+getTaskFormula(task)
+getTaskData(task)
+getLearnerModel(mod)
+mod$learner.model
+```
+
+`getLearnerModel()` extracts the used model which shows that **mlr** passed all specified parameters to the `glm` function in the background as also proved by following code:
+
+```{r}
+fit = glm(lslpts ~ ., family = binomial(link = "logit"), data = data)
+identical(fit$coefficients, mlr_fit$coefficients)
+```
+
+
+
 
 i.e. the fact that points close to each other tend to share similarities compared to points further apart.
 Simply put, if it rains at one location it is pretty likely that it also rains if we moved 1 meter in any direction.
