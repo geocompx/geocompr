@@ -70,6 +70,7 @@ dem =
 #**********************************************************
 
 # slope, aspect, curvatures
+set_env(dev = FALSE)
 find_algorithms("curvature")
 alg = "saga:slopeaspectcurvature"
 get_usage(alg)
@@ -108,7 +109,7 @@ ta = addLayer(x = ta, dem, log_carea)
 lsl[, names(ta)] = raster::extract(ta, lsl[, c("x", "y")])
 
 # save input data
-save(lsl, ta, file = "extdata/spatialcv.Rdata")
+save(lsl, ta, study_area, file = "extdata/spatialcv.Rdata")
 
 #**********************************************************
 # 4 MODELING-----------------------------------------------
