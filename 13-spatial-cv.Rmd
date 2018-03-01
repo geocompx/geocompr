@@ -54,7 +54,7 @@ Here, spatial CV will come to the rescue which will be the main topic of this ch
 
 ## Case study: landslide susceptibility {#case-study}
 
-To introduce spatial CV by example, we will use a landslide dataset from Southern Ecuador.
+To introduce spatial CV by example, we will use a landslide dataset from Southern Ecuador (Figure \@ref(fig:lsl-map)).
 For a detailed description of the dataset and the study area please refer to @muenchow_geomorphic_2012.
 One can find a subset of the corresponding data in the **RSAGA** package.
 The following command loads three datasets, a `data.frame` named `landslides`, a `list` named `dem`, and an `sf`-object named `study_area`.
@@ -114,7 +114,7 @@ The added columns are:
 - `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
 - `log_carea`: the decadic logarithm of the catchment area (log m^2^) representing the amount of water flowing towards a location.
 
-```{r, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. Randomly selected test points are marked by a golden border. Projection: UTM zone 17S (EPSG: 32717)."}
+```{r lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. Randomly selected test points are marked by a golden border. CRS: UTM zone 17S (EPSG: 32717)."}
 library(tmap)
 lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
 hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
@@ -142,8 +142,7 @@ tm_shape(hs, bbox = bbx) +
 
 ## Conventional modeling approach in R
 Before diving into the **mlr** package it is worth to take a look at the conventional modeling interface in R.
-This way we introduce statistical supervised modeling in R. 
-Additionally, this will contribute to get a better grasp on the **mlr** approach introduced later on, and provides the required skillset for doing spatial CV.
+This way we introduce statistical supervised modeling in R which in turn will contribute to get a better grasp on the **mlr** approach introduced later on, and provides the required skillset for doing spatial CV.
 Usually, we model the response variable as a function of predictors. 
 Therefore, modeling functions in R such as `lm`, `glm` and many more use the so-called formula interface.
 Let's put this into practice by modeling the landslide occurence as a function of terrain attributes.
@@ -168,23 +167,13 @@ head(predict(object = fit, type = "response"))
 
 We can also predict spatially by applying the coefficients to our predictor rasters. 
 We could do this manually but can also use **raster**'s `predict()` function.
-This function also expects the fitted model as input as well as a raster stack containing the same predictors we have used in the model as raster objects.
+This function also expects the fitted model as input as well as a raster stack containing the same predictors we have used in the model as raster objects (Figure \@ref(fig:lsl-susc)).
 
 ```{r}
 pred = raster::predict(object = ta, model = fit, type = "response")
 ```
 
-\@ref(fig:lsl-susc)
-
-```{r lsl-susc, echo = FALSE, fig.cap="Spatial prediction of landslide susceptibility using a GLM.", warning=FALSE}
-# hs = mask(hs, study_area)
-# plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
-# plot(pred, col = RColorBrewer::brewer.pal("YlOrRd", n =  9), add = TRUE, 
-#      alpha = 0.6)
-# plot(mask(pred, hs), col = RColorBrewer::brewer.pal(name = "Reds", 6), add = TRUE, 
-#      alpha = 0.6)
-
-
+```{r lsl-susc, echo = FALSE, fig.cap="Spatial prediction of landslide susceptibility using a  GLM. CRS: UTM zone 17S (EPSG: 32717).", warning=FALSE}
 # white raster to only plot the axis ticks, otherwise gridlines would be visible
 tm_shape(hs, bbox = bbx) +
   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
@@ -203,23 +192,23 @@ tm_shape(hs, bbox = bbx) +
 
 ```
 
-Here, when making predictions we neglect spatial autocorrelation since we assume that on average predictive accuracies of parametric model remain the same with or without spatial autocorrelation structures.
+Here, when making predictions we neglect spatial autocorrelation since we assume that on average predictive accuracies of parametric models remain the same with or without spatial autocorrelation structures.
 However, it is possible to include spatial autocorrelation structures into models as well as into the predictions.
 This is, however, beyond the scope of this book.
 Nevertheless, we give the interested reader some pointers where to look it up.
 There are three main directions:
 
-1. The predictions of universal kriging are the predictions of a simple linear model plus the kriged model's residuals, i.e. interpolated residuals [@bivand_applied_2013]. 
+1. The predictions of universal kriging are the predictions of a simple linear model plus the kriged model's residuals, i.e. spatially interpolated residuals [@bivand_applied_2013]. 
 1. Adding a spatial correlation (dependency) structure to a generalized least squares model  [`nlme::gls()`; @zuur_mixed_2009; @zuur_beginners_2017].  ^[These correlation structures can also be included in `MASS::glmmPQL()` and `mgcv::gamm()`.]
-1. Mixed-effect modeling approaches
+1. Finally, there are mixed-effect modeling approaches.
 Basically, a random effect imposes a dependency structure on the response variable which in turn allows for observations of once class to be more similar to each other than to those of another class [@zuur_mixed_2009]. 
-Classes can be for example different bee hives, owl nests, vegetation transects or an altitudinal stratification.
-This mixed modeling approach assumes normal and independent distributed random intercepts.
+Classes can be for example bee hives, owl nests, vegetation transects or an altitudinal stratification.
+This mixed modeling approach assumes normal and independent distributed random intercepts.^[Note that for spatial predictions one would usually use the population intercept.]
 This can even be extended by using a random intercept that is normal and spatially dependent.
 For this, however, you will have to resort most likely to Bayesian modeling approaches since frequentist software tools are rather limited in this respect especially for more complex models [@blangiardo_spatial_2015; @zuur_beginners_2017]. 
 
-Spatial predictions are one very interesting outcome of a model.
-Even more important is how good is our model, i.e. how good are its predictions.
+Spatial predictions are one very important outcome of a model.
+Even more important is how good the model is at making predictions.
 Therefore, we need a measure which tells us 
 
 
