@@ -188,12 +188,12 @@ First of all, we need to make sure that **RSAGA** will find SAGA on the computer
 For this, all **RSAGA** functions using SAGA in the background make use of `rsaga.env()`. 
 Usually, `rsaga.env()` will detect SAGA automatically by searching several likely directories (see its help for more information). However, we have 'hidden' SAGA in the OSGEO4W-installation, a location `rsaga.env()` does not search automatically. 
 `linkSAGA` searches your computer for a valid SAGA installation. 
-If it finds one, it adds it to the PATH environment variable thereby making sure that `rsaga.env` runs successfully.
+If it finds one, it adds the newest version to the PATH environment variable thereby making sure that `rsaga.env` runs successfully.
 
 ```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library(RSAGA)
 library(link2GI)
-linkSAGA()
+saga <-linkSAGA()
 rsaga.env()
 ```
 
@@ -333,31 +333,21 @@ First of all, we need to find out if and where GRASS7 is installed on the comput
 
 ```{r}
 library(link2GI)
-if (Sys.info()["sysname"] == "Windows") {
-  link = link2GI::searchGRASSW()  
-} else {
-  link = link2GI::searchGRASSX()
-}
+link = link2GI::findGRASS() 
 ```
 
-`link` is a `data.frame` which contains in its rows the GRASS installations on your computer. 
+`link` is a `data.frame` which contains in its rows the GRASS 7 installations on your computer. 
 Here, we will use a GRASS7 installation.
 If you have not installed GRASS7 on your computer, we recommend that you do so now.
 Assuming that we have found a working installation on your computer, we use the corresponding path in `initGRASS`. 
 Additionally, we specify where to store the geodatabase (gisDbase), name the location `london`, and use the PERMANENT mapset.
 
 ```{r, eval=FALSE}
-library(rgrass7)
-# find a GRASS7 installation, and use the first one
-ind = grep("7", link$version)[1]
-# next line of code only necessary if we want to use GRASS as installed by 
-# OSGeo4W. Among others, this adds some paths to PATH, which are also needed
-# for running GRASS.
-link2GI::getparams_GRASS4W(link[ind, ])
+link2GI::setenvGRASSw(link[ind, ])
 grass_path = ifelse(!is.null(link$installation_type) && 
                       link$installation_type[ind] == "osgeo4W",
-                     file.path(link$instDir[ind], "apps/grass", link$version[ind]),
-                     link$instDir)
+                    file.path(link$instDir[ind], "apps/grass", link$version[ind]),
+                    link$instDir)
 initGRASS(gisBase = grass_path,
           # home parameter necessary under UNIX-based systems
           home = tempdir(),
@@ -385,7 +375,7 @@ If there is just one installation, the `linkGRASS7` automatically chooses this o
 Secondly, `linkGRASS7` establishes a connection to GRASS7.
  
 ```{r, eval=FALSE}
-linkGRASS7(streets, ver_select = TRUE)
+link2GI::linkGRASS7(streets, ver_select = TRUE)
 ```
 
 Before we can use GRASS geoalgorithms, we need to add data to GRASS's spatial database.
