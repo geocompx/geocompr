@@ -142,6 +142,74 @@ tm_shape(hs, bbox = bbx) +
 ```
 
 
+## Conventional modeling approach in R
+Before diving into the **mlr** package it is worth to take a look at the conventional modeling interface in R.
+This way we introduce statistical supervised modeling in R. 
+Additionally, this will contribute to get a better grasp on the **mlr** approach introduced later on, and provides the required skillset for doing spatial CV.
+Usually, we model the response variable as a function of predictors. 
+Therefore, modeling functions in R such as `lm`, `glm` and many more use the so-called formula interface.
+Let's put this into practice by modeling the landslide occurence as a function of terrain attributes.
+Since our response (landslide occurence) belongs to the binary category, we use a binomial generalized linear model instead of a simple linear model which would expect a normally distributed numeric response variable.
+
+```{r, eval = TRUE}
+fit = glm(lslpts ~ slope + cplan + cprof + elev + log_carea, 
+          data = lsl, family = binomial())
+# the same as:
+# fit = glm(lslpts ~ ., data = select(lsl, -x, -y))
+fit
+```
+
+Subsequently, we can use the estimated model coefficients for predictions.
+The generic `predict()` function does this for us automatically.
+The `response` option gives back the predicted probabilities for each of observation in `lsl`, i.e. the probability that a landslide has occurred (see `? predict.glm`).
+
+
+```{r, eval = FALSE}
+head(predict(object = fit, type = "response"))
+```
+
+We can also predict spatially by applying the coefficients to our predictor rasters. 
+We could do this manually but can also use **raster**'s `predict()` function.
+This function also expects the fitted model as input as well as a raster stack containing the same predictors we have used in the model as raster objects.
+
+```{r}
+pred = raster::predict(object = ta, model = fit, type = "response")
+plot(pred, col = RColorBrewer::brewer.pal(name = "Reds", 6))
+```
+
+```{r, echo = FALSE}
+asp = terrain(ta$elev, opt = "aspect")
+hs = hillShade(ta$slope * pi / 180, asp, 40, 270)
+hs = mask(hs, study_area)
+plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
+# plot(pred, col = RColorBrewer::brewer.pal("YlOrRd", n =  9), add = TRUE, 
+#      alpha = 0.6)
+plot(mask(pred, hs), col = RColorBrewer::brewer.pal(name = "Reds", 6), add = TRUE, 
+     alpha = 0.6)
+```
+
+Here, when making predictions we neglect spatial autocorrelation since we assume that on average predictive accuracies of parametric model remain the same with or without spatial autocorrelation structures.
+However, it is possible to include spatial autocorrelation structures into models as well as into the predictions.
+This is, however, beyond the scope of this book.
+Nevertheless, we give the interested reader some pointers where to look it up.
+There are three main directions:
+
+1. The predictions of universal kriging are the predictions of a simple linear model plus the kriged model's residuals, i.e. interpolated residuals [@bivand_applied_2013]. 
+1. Adding a spatial correlation (dependency) structure to a generalized least squares model  [`nlme::gls()`; @zuur_mixed_2009; @zuur_beginners_2017].  ^[These correlation structures can also be included in `MASS::glmmPQL()` and `mgcv::gamm()`.]
+1. Mixed-effect modeling approaches
+Basically, a random effect imposes a dependency structure on the response variable which in turn allows for observations of once class to be more similar to each other than to those of another class [@zuur_mixed_2009]. 
+Classes can be for example different bee hives, owl nests, vegetation transects or an altitudinal stratification.
+This mixed modeling approach assumes normal and independent distributed random intercepts.
+This can even be extended by using a random intercept that is normal and spatially dependent.
+For this, however, you will have to resort most likely to Bayesian modeling approaches since frequentist software tools are rather limited in this respect especially for more complex models [@blangiardo_spatial_2015; @zuur_beginners_2017]. 
+
+
+
+
+AUROC: To assess the model's performance we use the AUROC.
+Add short explanation. 
+
+
 ## Introduction to spatial CV
 
 "Resampling methods are an indispensable tool in modern statistics. They involve repeatedly drawing samples from a training set and refitting a model of interest on each sample in order to obtain additional information about the fitted model. For example, in order to estimate the variability of a linear regression fit, we can repeatedly draw different samples from the training data, fit a linear regression to each new sample, and then examine the extent to which the resulting fits differ. Such an approach may allow us to obtain information that would not be available from fitting the model only once using the original training sample.
@@ -266,26 +334,6 @@ fit = glm(lslpts ~ ., family = binomial(link = "logit"), data = data)
 identical(fit$coefficients, mlr_fit$coefficients)
 ```
 
-Here, we neglect spatial autocorrelation when making predictions since we assume that on average predictive accuracies of parametric model remain the same with or without spatial autocorrelation structures.
-However, it is possible to include spatial autocorrelation structures.
-It is beyond the scope of this book to show how you could do so but instead we give you some pointers where to look it up:
-
-
-Kriging approaches
-1. Universal kriging (but only available for linear regression)  <!-- check -->, see also for a GAM example and how to do it manually, basically fitting a model and then using the residuals to interpolate the spatial component
-
-Incorporating spatial autocorrelation explicitly in the model structure
-1. GLS
-1. glmmPQL
-
-random intercept approaches
-
-1. random-effect modeling sometimes helps to account for spatial autocorrelation [@zuur_mixed_2009].
-"In the mixed modeling approach an extra residual term is added to the model that adds a dependency structure on the response variable.
-This is especially useful if we have different locations where we can assume that the individuals of each location are more similar to each other in comparison with individuals from other locations, e.g., bee hives, owl nests, vegetation transects, etc.
-Here, random intercepts are assumed to be normal and independent distributed.
-1. The mixed modeling approach can be extended by using a random intercept that is normal and spatially dependent.
-Most likely, you will have to resort to Bayesian modeling approaches for this since frequentist software tools are rather limited in this respect especially for more complex models [@blangiardo_spatial_2015; @zuur_beginners_2017]. 
 
 
 
