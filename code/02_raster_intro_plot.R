@@ -85,13 +85,13 @@ terrain_colors = carto_pal(7, "TealRose")
 cla_raster = raster(system.file("raster/srtm.tif", package="spDataLarge"))
 cat_raster = nlcd
 
-rast_poly_srtm = tm_shape(cla_raster) +
+rast_srtm = tm_shape(cla_raster) +
   tm_raster(palette = terrain_colors, title = "Elevation (m)", 
             legend.show = TRUE, auto.palette.mapping = FALSE, style = "cont") + 
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
 landcover_cols = c("#476ba0", "#aa0000", "#b2ada3", "#68aa63", "#a58c30", "#c9c977", "#dbd83d", "#bad8ea")
-rast_poly_nlcd = tm_shape(cat_raster) +
+rast_nlcd = tm_shape(cat_raster) +
   tm_raster(palette = landcover_cols, style = "cat", title = "Land cover") + 
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
@@ -100,6 +100,6 @@ grid.newpage()
 pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(0.25, 5), "null"))))
 grid.text("A. Continuous data", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
 grid.text("B. Categorical data", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
-print(rast_poly_srtm, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-print(rast_poly_nlcd, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
+print(rast_srtm, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
+print(rast_nlcd, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
 dev.off()
