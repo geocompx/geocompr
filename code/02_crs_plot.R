@@ -13,23 +13,24 @@ vector_filepath = system.file("vector/zion.gpkg", package="spDataLarge")
 new_vector = st_read(vector_filepath)
 new_vector2 = st_transform(new_vector, 4326)
 
-p1 = ggplot() +
-  geom_sf(data = new_vector) +
-  coord_sf(datum = sf::st_crs("+proj=utm +zone=12 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")) +
-  theme(axis.text = element_text(size = 4))
-
-p2 = ggplot() + 
+p1 = ggplot() + 
   geom_sf(data = new_vector2) + 
   coord_sf(datum = sf::st_crs(4326)) +
-  theme(axis.text = element_text(size = 4))
+  theme(axis.text = element_text(size = 4)) +
+  labs(x = "Longitude", y = "Latitude")
 
-vector_crs = arrangeGrob(p2, p1, nrow = 1)
+p2 = ggplot() +
+  geom_sf(data = new_vector) +
+  coord_sf(datum = sf::st_crs("+proj=utm +zone=12 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")) +
+  theme(axis.text = element_text(size = 4)) +
+  labs(x = "x", y = "y")
+
+vector_crs = arrangeGrob(p1, p2, nrow = 1)
 
 ggsave(plot = vector_crs,
        filename = "figures/02_vector_crs.png",
        width = 5.1, height = 3.0,
        units = "in")
-
 
 ## raster plot ---------------------------------------------------------------
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
