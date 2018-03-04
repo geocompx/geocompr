@@ -27,8 +27,7 @@ colfunc = colorRampPalette(c("lightyellow", "rosybrown"))
 colfunc2 = c("clay" = "brown", "silt" = "sandybrown", "sand" = "rosybrown")
 
 p1 = tm_shape(elev) + 
-  tm_raster(legend.show = TRUE, palette = colfunc(36), n = 36,
-            title = "", style = "fixed", breaks = c(1, 9, 18, 27, 36)) +
+  tm_raster(legend.show = TRUE, palette = colfunc(36), style = "cont", title = "") +
   tm_layout(outer.margins = rep(0.01, 4), 
             inner.margins = rep(0, 4)) +
   tm_legend(bg.color = "white")
