@@ -76,35 +76,30 @@ ggsave(plot = raster_intro_plot, filename = "figures/02_raster_intro_plot.png",
        width = 6, height = 3, scale = 1.25)
 
 # second intro plot -----------------------------------------------------------
-library(rasterVis)
+library(tmap)
+library(grid)
+library(rcartocolor)
+library(spDataLarge)
+terrain_colors = carto_pal(7, "TealRose")
+
 cla_raster = raster(system.file("raster/srtm.tif", package="spDataLarge"))
-cat_raster = raster(system.file("raster/nlcd2011.tif", package="spDataLarge"))
+cat_raster = nlcd
 
-m = c(11, 11, 1, 21, 23, 2, 31, 31, 3, 41, 43, 4, 52, 52, 5, 71, 71, 6, 81, 82, 7, 90, 95, 8)
-rclmat = matrix(m, ncol=3, byrow=TRUE)
+rast_poly_srtm = tm_shape(cla_raster) +
+  tm_raster(palette = terrain_colors, title = "Elevation (m)", 
+            legend.show = TRUE, auto.palette.mapping = FALSE, style = "cont") + 
+  tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
-cat_raster = reclassify(cat_raster, rclmat, include.lowest = TRUE, right = NA) %>% 
-  ratify(.)
-
-landcover = data.frame(landcover = c("Water", "Developed", "Barren", "Forest", "Shrubland", "Herbaceous", "Cultivated", "Wetlands"))
-levels(cat_raster) = cbind(levels(cat_raster)[[1]], landcover) 
-
-landcover_col = c("#b2ada3", "#dbd83d", "#aa0000", "#68aa63", "#c9c977", "#a58c30", "#476ba0", "#bad8ea")
-
-## Key
-key_landcover = c("Barren", "Cultivated","Developed", "Forest", "Herbaceous", "Shrubland", "Water", "Wetlands")
-my_key = list(text=list(lab=key_landcover),
-              rectangles=list(col = landcover_col),
-              space = "inside",
-              columns = 1,
-              background = "white")
-
-p2 = levelplot(cat_raster, col.regions = landcover_col, 
-               colorkey = FALSE, key = my_key)
-
-p1 = levelplot(cla_raster, margin = FALSE, colorkey = FALSE)
+landcover_cols = c("#476ba0", "#aa0000", "#b2ada3", "#68aa63", "#a58c30", "#c9c977", "#dbd83d", "#bad8ea")
+rast_poly_nlcd = tm_shape(cat_raster) +
+  tm_raster(palette = landcover_cols, style = "cat", title = "Land cover") + 
+  tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
 png(filename = "figures/02_raster_intro_plot2.png", width = 950, height = 555)
-plot(p1, split=c(1, 1, 2, 1), more=TRUE)
-plot(p2, split=c(2, 1, 2, 1))
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(0.25, 5), "null"))))
+grid.text("A. Continuous data", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+grid.text("B. Categorical data", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
+print(rast_poly_srtm, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
+print(rast_poly_nlcd, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
 dev.off()
