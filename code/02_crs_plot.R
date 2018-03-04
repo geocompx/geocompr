@@ -5,7 +5,7 @@ library(gridExtra)
 library(raster)
 library(rasterVis)
 library(sfraster)
-
+library(rcartocolor)
 theme_set(theme_bw())
 
 ## vector plot ---------------------------------------------------------------
@@ -36,7 +36,8 @@ raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 new_raster = raster(raster_filepath) #%>% mask(., new_vector)
 new_raster2 = projectRaster(new_raster, crs = "+init=epsg:4326")
 
-pr1 = levelplot(new_raster, margin = FALSE, colorkey = FALSE)
+pr1 = levelplot(new_raster, margin = FALSE, colorkey = FALSE,
+                par.settings = rasterTheme(region = carto_pal(7, "TealRose")))
 pr2 = levelplot(new_raster2, margin = FALSE, colorkey = FALSE)
 
 png(filename = "figures/02_raster_crs.png", width = 950, height = 555)
