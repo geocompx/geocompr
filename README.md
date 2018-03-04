@@ -30,6 +30,7 @@ To ease reproducibility, this book is also a package. Installing it from GitHub 
 
 ``` r
 devtools::install_github("robinlovelace/geocompr")
+#> Warning in get(Info[i, 1], envir = env): internal error -3 in R_decompress1
 ```
 
 You need a recent version of the GDAL, GEOS, Proj.4 and UDUNITS libraries installed for this to work on Mac and Linux. See the **sf** package's [README](https://github.com/edzer/sfr) for information on that.
@@ -121,6 +122,7 @@ knitr::kable(pkg_df)
 | mlr               | Machine Learning in R \[@R-mlr\]                                                          | 2.12       |
 | osmdata           | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]                  | 0.0.6      |
 | raster            | Geographic Data Analysis and Modeling \[@R-raster\]                                       | 2.6.7      |
+| rcartocolor       | 'CARTOColors' Palettes \[@R-rcartocolor\]                                                 | 0.0.22     |
 | rgdal             | Bindings for the 'Geospatial' Data Abstraction Library \[@R-rgdal\]                       | 1.2.16     |
 | rgeos             | Interface to Geometry Engine - Open Source ('GEOS') \[@R-rgeos\]                          | 0.3.26     |
 | rmapshaper        | Client for 'mapshaper' for 'Geospatial' Operations \[@R-rmapshaper\]                      | 0.3.1      |
@@ -131,7 +133,7 @@ knitr::kable(pkg_df)
 | RSAGA             | SAGA Geoprocessing and Terrain Analysis \[@R-RSAGA\]                                      | 1.0.0      |
 | sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.1      |
 | sp                | Classes and Methods for Spatial Data \[@R-sp\]                                            | 1.2.7      |
-| spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.8.0    |
+| spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.8.1    |
 | spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.5.2    |
 | stars             | Scalable, Spatiotemporal Tidy Arrays for R \[@R-stars\]                                   | 0.1.0      |
 | stplanr           | Sustainable Transport Planning \[@R-stplanr\]                                             | 0.2.2.9999 |
