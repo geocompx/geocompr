@@ -92,7 +92,8 @@ rast_srtm = tm_shape(cla_raster) +
 
 landcover_cols = c("#476ba0", "#aa0000", "#b2ada3", "#68aa63", "#a58c30", "#c9c977", "#dbd83d", "#bad8ea")
 rast_nlcd = tm_shape(cat_raster) +
-  tm_raster(palette = landcover_cols, style = "cat", title = "Land cover") + 
+  tm_raster(palette = landcover_cols, style = "cat", title = "Land cover", 
+            legend.show = TRUE) + 
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
 png(filename = "figures/02_raster_intro_plot2.png", width = 950, height = 555)
