@@ -98,7 +98,7 @@ print(pz3, vp = viewport(layout.pos.row = 2, layout.pos.col = 3))
 Raster extraction is a process of pulling out values from rasters based on the locations of vector data.
 It behaves differently depending on the type of secondary data (points, lines or polygons) and selected arguments.
 We will present some of the most often use cases below using the `raster::extract()` function.
-<!-- faster alternative to raster::extract?? -->
+<!-- faster alternative to raster::extract??: tabularaster, stars? -->
 The reverse process of transferring vector data into rasters is usually done by rasterization (see section \@ref(rasterization)).
 
 The simplest example of raster extraction is when values of raster cells are extracted based on points coordinates.
@@ -111,7 +111,7 @@ zion_points$elevation = raster::extract(srtm, zion_points)
 ```
 
 In the `extract()` function it is also possible to provide the radius of a buffer (in meters) around each point.
-This allows for similar operations as in extraction by polygon (see examples below).
+This allows for similar operations to the extraction by polygon (see examples below).
 
 ```{r pointext, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Locations of points used for raster extraction."}
 library(tmap)
@@ -127,6 +127,9 @@ rast_poly_point = tm_shape(srtm) +
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 rast_poly_point
 ```
+
+The second example involves raster extraction along a line or lines.
+
 
 <!-- extract to line -->
 <!-- transect example and creation -->
@@ -153,7 +156,7 @@ transect_coords = xyFromCell(srtm, transect_df$cell)
 transect_df$dist = distm(transect_coords)[, 1]
 ```
 
-```{r lineext, echo=FALSE, message=FALSE, warning=FALSE}
+```{r lineext, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Location of a line used for raster extraction (left) and the elevation along this line (right)."}
 library(tmap)
 library(grid)
 
@@ -168,7 +171,6 @@ rast_poly_line = tm_shape(srtm) +
   tm_shape(zion_transect) + 
   tm_lines(col = "black", lwd = 4) + 
   tm_shape(zion_transect_points) +                                                 
-  # tm_symbols(size = 5, col = "white") +                                                                     
   tm_text("name", bg.color = "white", bg.alpha = 0.75, auto.placement = TRUE) +
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
@@ -180,7 +182,7 @@ plot_transect = ggplot(transect_df, aes(dist, srtm)) +
 grid.newpage()
 pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(0.25, 5), "null"))))
 grid.text("A. Line extraction", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-grid.text("B. Transect elevation", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
+grid.text("B. Elevation along the line", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
 print(rast_poly_line, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
 print(plot_transect, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
 ```
