@@ -102,7 +102,7 @@ We will present some of the most often use cases below using the `raster::extrac
 The reverse process of transferring vector data into rasters is usually done by rasterization (see section \@ref(rasterization)).
 
 The simplest example of raster extraction is when values of raster cells are extracted based on points coordinates.
-The `zion_points` dataset consists of 30 points located in the Zion National Park (Figure \@ref(fig:pointext)). 
+The `zion_points` dataset consists of 30 points located in the Zion National Park (Figure \@ref(fig:pointextr)). 
 We can think about them as places where soils properties were measured and we want to know what is the elevation of each point.
 In this case, we just need to add a new column (`elevation`) to the point dataset, which would store values extracted from the `srtm` object: 
 
@@ -113,7 +113,7 @@ zion_points$elevation = raster::extract(srtm, zion_points)
 In the `extract()` function it is also possible to provide the radius of a buffer (in meters) around each point.
 This allows for similar operations to the extraction by polygon (see examples below).
 
-```{r pointext, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Locations of points used for raster extraction."}
+```{r pointextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Locations of points used for raster extraction."}
 library(tmap)
 library(grid)
 
@@ -129,7 +129,7 @@ rast_poly_point
 ```
 
 The second example involves raster extraction along a line or lines.
-For this purpose, we will create a simple line going from northwest to southeast of the Zion National Park (\@ref(fig:lineext):A):
+For this purpose, we will create a simple line going from northwest to southeast of the Zion National Park (\@ref(fig:lineextr):A):
 
 ```{r}
 zion_transect = st_sfc(st_linestring(rbind(c(-113.2, 37.45), c(-112.9, 37.2)))) %>% 
@@ -159,9 +159,9 @@ transect_coords = xyFromCell(srtm, transect_df$cell)
 transect_df$dist = geosphere::distm(transect_coords)[, 1]
 ```
 
-The final `data.frame` can be used to create a plot in Figure \@ref(fig:lineext):B.
+The final `data.frame` can be used to create a plot in Figure \@ref(fig:lineextr):B.
 
-```{r lineext, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Location of a line used for raster extraction (left) and the elevation along this line (right)."}
+```{r lineextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Location of a line used for raster extraction (left) and the elevation along this line (right)."}
 library(tmap)
 library(grid)
 
@@ -192,14 +192,16 @@ print(rast_poly_line, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
 print(plot_transect, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
 ```
 
-<!-- extract to polygons (or extents) -->
-<!-- depends on the type of data (continuous or categorical) -->
-<!-- the simplest example is to extract all values into a list -->
+The last group of example is extraction of raster values that are covered by a polygon.
+Polygons are usually larger than a single cell, therefore this kind of extraction would return many raster values for each polygon.
+In the below output, `ID` represents a row number of a polygon and `srtm` is elevation value extracted from the raster:
+
 ```{r}
-zion_srtm_values = raster::extract(x = srtm, y = zion)
+zion_srtm_values = raster::extract(x = srtm, y = zion, df = TRUE)
 ```
 
-<!-- it can be used for more advanced examples, like calculating stats for each polygon -->
+Extract by polygon aslo allows for more complex analysis, such as calculating statistics of continuous raster's values in each polygon (\@ref(fig:polyextr):A) or count number of categories in a categorical raster (\@ref(fig:polyextr):B).
+
 <!-- summarized into some value of interest (e.g. mean, maximum, total). -->
 ```{r}
 zion_srtm_df = c(min, mean, max) %>% 
@@ -231,7 +233,7 @@ zion_nlcd_df = zion_nlcd %>%
 zion_nlcd_new = bind_cols(zion, zion_nlcd_df)
 ```
 
-```{r polyext, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Area used for continuous (left) and categorical (right) raster extraction."}
+```{r polyextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Area used for continuous (left) and categorical (right) raster extraction."}
 library(tmap)
 library(grid)
 
