@@ -102,7 +102,7 @@ We will present some of the most often use cases below using the `raster::extrac
 The reverse process of transferring vector data into rasters is usually done by rasterization (see section \@ref(rasterization)).
 
 The simplest example of raster extraction is when values of raster cells are extracted based on points coordinates.
-The `zion_points` dataset consists of 30 points located in the Zion National Park \@ref(fig:pointext)). 
+The `zion_points` dataset consists of 30 points located in the Zion National Park (\@ref(fig:pointext)). 
 We can think about them as places where soils properties were measured and we want to know what is the elevation of each point.
 In this case, we just need to add a new column (`elevation`) to the point dataset, which would store values extracted from the `srtm` object: 
 
@@ -129,10 +129,8 @@ rast_poly_point
 ```
 
 The second example involves raster extraction along a line or lines.
+For this purpose, we will create a simple line going from northwest to southeast of the Zion National Park (\@ref(fig:lineext):A):
 
-
-<!-- extract to line -->
-<!-- transect example and creation -->
 ```{r}
 zion_transect = st_sfc(st_linestring(rbind(c(-113.2, 37.45), c(-112.9, 37.2)))) %>% 
   st_sf()
@@ -143,18 +141,25 @@ zion_transect = st_sfc(st_linestring(rbind(c(-113.2, 37.45), c(-112.9, 37.2)))) 
 raster::extract(srtm, zion_transect, along = TRUE,  df = TRUE)
 ```
 
-<!-- extract elevation along transect (along arg) -->
+Importantly, it does not need to be a straight line.
+Try to imagine that you are planing to go on a hike - you can extract elevation along your proposed path.
+To extract a raster by line, the `along` argument needs to be set to `TRUE`. 
+We also want to add identifiers (`cellnumbers = TRUE`) and convert a new object to `data.frame`:
+
 ```{r}
 transect_df = raster::extract(srtm, zion_transect, along = TRUE, cellnumbers = TRUE) %>%
   data.frame()
 ```
 
-<!-- calculate distances along transect -->
+This would allow us to estimate the distances along measurements on the line.
+However, firstly we need to extract the coordinates of measurements and based on them we can calculate the distance using the `geosphere::distm()` function.
+
 ```{r}
-library(geosphere)
 transect_coords = xyFromCell(srtm, transect_df$cell)
-transect_df$dist = distm(transect_coords)[, 1]
+transect_df$dist = geosphere::distm(transect_coords)[, 1]
 ```
+
+The final `data.frame` can be used to create a plot in \@ref(fig:lineext):B.
 
 ```{r lineext, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Location of a line used for raster extraction (left) and the elevation along this line (right)."}
 library(tmap)
