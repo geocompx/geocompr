@@ -166,7 +166,7 @@ tmap_arrange(ma1, ma2, ma3, ma4, ma5, ma6)
 ```
 
 Like base R plots, arguments defining aesthetics can also receive values that vary.
-Unlike base R, **tmap** aesthetic arguments will not accept a vector of values, explaining why the first line in the code chunk works but the second fails (results not shown):
+Unlike the base R code below (which generates the left panel in Figure \@ref(fig:tmcol)), **tmap** aesthetic arguments will not accept a vector of values:
 
 ```{r, eval=FALSE}
 plot(nz$geometry, col = 1:nrow(nz))      # works
@@ -174,14 +174,33 @@ tm_shape(nz) + tm_fill(col = 1:nrow(nz)) # fails:
 #> Error: Fill argument neither colors nor valid variable name(s)
 ```
 
-Instead, you must enter a text string containing the name of an attribute name *contained within* the shape being plotted.
-This functionality is illustrated below, which demonstrates how fill color can be set to vary depending on the area of each region in New Zealand.
-The plot also illustrates how the number and palette of colors can be altered by passing integer and text values to the arguments `n` and `palette` respectively: 
+Instead `col` (and other aesthetics that can vary such as `lwd` for line layers and `size` for point layers) requires a character string naming an attribute associated with the geometry to be plotted.
+Thus one would acheive the desired (plotted in the right-hand panel of Figure \@ref(fig:tmcol)) result as follows:^[
+Figure \@ref(fig:tmcol) also demonstrates another benefit of **tmap**: it automatically converts numeric variables into sensible, graduated bins.
+]
 
-```{r, fig.cap="Illustration of a variable aesthetic: the color of each region is dependent on its area.", out.width="30%", fig.show='hold'}
-tm_shape(nz) + tm_fill(col = "AREA_SQ_KM")
-tm_shape(nz) + tm_fill(col = "AREA_SQ_KM", n = 3)
+```{r, fig.show='hide'}
+nz$col = 1:nrow(nz)
+tm_shape(nz) + tm_fill(col = "col")
+```
+
+```{r tmcol, fig.cap="Comparison of base (left) and tmap (right) handling of a numeric color field.", echo=FALSE, out.width="50%", fig.show='hold'}
+plot(nz$geometry, col = 1:nrow(nz))    
+tm_shape(nz) + tm_fill(col = "col")
+```
+
+Additional aesthetic settings are demonstrated in the code chunk below, which colors regions in New Zealand depending on their area which demonstrates this functionality.
+The plot also illustrates how the number and palette of colors can be altered by passing integer and text values to the arguments `n` and `palette` respectively:
+
+```{r, eval=FALSE}
+breaks = c(0, 3, 4, 5) * 1e4
+tm_shape(nz) + tm_fill(col = "AREA_SQ_KM", breaks = breaks)
+tm_shape(nz) + tm_fill(col = "AREA_SQ_KM", n = 2)
 tm_shape(nz) + tm_fill(col = "AREA_SQ_KM", palette = "RdBu")
+```
+
+```{r tmpal, fig.cap="Illustration of aesthetic settings using the example of a continuous variable (the area in square kilometers of regions in New Zealand) converted to color with different break palette arguments.", echo=FALSE}
+source("code/09-tmpal.R", print.eval = TRUE)
 ```
 
 
