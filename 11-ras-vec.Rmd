@@ -221,23 +221,21 @@ zion_srtm_new = bind_cols(zion, zion_srtm_df)
 ```
 
 Description of categorical rasters requires a different approach, as you cannot calculate the mean between category of "Forest" and "Water".
-However, it is possible to count a number of occurrences of each class. 
-We will use a land cover data, `nlcd`, to illustrate this (\@ref(fig:polyextr):B).
+However, it is possible to count the number of occurrences of each class. 
+To illustrate this, we will use a land cover data `nlcd`(\@ref(fig:polyextr):B).
 Firstly, we need to extract all of the values in our polygon to a new `data.frame`:
-<!-- land cover categories to polygon -->
-<!-- we can extract numbers of cells for each category in case of categorical raster -->
-<!-- extract categorical data -->
+
 ```{r, warning=FALSE, message=FALSE}
 data(nlcd)
 zion_nlcd = raster::extract(nlcd, zion, df = TRUE)
 ```
 
-<!-- reshape the data -->
+The new output, `zion_nlcd`, can be then use to count the number of occurrences of each class.
+Finally, we need to reshape the output to have one row per polygon and join the extracted information with the polygon dataset:
+
 ```{r}
-zion_nlcd_df = zion_nlcd %>% 
-  group_by(ID, layer) %>% 
-  summarise(n = n()) %>% 
-  spread(layer, n)
+zion_count = count(zion_nlcd, ID, layer)
+zion_nlcd_df = spread(zion_count, layer, n, fill = 0)
 zion_nlcd_new = bind_cols(zion, zion_nlcd_df)
 ```
 
@@ -268,9 +266,6 @@ grid.text("B. Categorical data extraction", vp = viewport(layout.pos.row = 1, la
 print(rast_poly_srtm, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
 print(rast_poly_nlcd, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
 ```
-
-<!-- ## Spatial interpolation ?? -->
-<!-- http://mdsumner.github.io/guerrilla/articles/irreg2.html -->
 
 ## Rasterization {#rasterization}
 
