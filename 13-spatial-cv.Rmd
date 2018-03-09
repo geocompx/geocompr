@@ -227,22 +227,23 @@ To derive an biased-reduced assessment we have to use cross-validation and in th
 ## Introduction to spatial CV
 
 Cross-validation belongs to the family of resampling methods [@james_introduction_2013].
-The basic idea is to split a dataset times into training and test sets whereby the training data is used to fit a model which then is applied to the test set.
-Comparing the predicted values with the known response values from the test set (using a performance measure such as the AUROC in the binomial case) gives an bias-reduced assessement of the model's capability to generalize the learned relationship to independent data.
-For example, to use a 10-repeated 5-fold cross-validation means to randomly split the data into five partitions (folds) with each fold using a 1/5 of the available data as test and 4/5 as training data (see upper row of Figure \@ref(fig:partitioning)). 
+The basic idea is to split (repeatedly) a dataset into training and test sets whereby the training data is used to fit a model which then is applied to the test set.
+Comparing the predicted values with the known response values from the test set (using a performance measure such as the AUROC in the binomial case) gives a bias-reduced assessement of the model's capability to generalize the learned relationship to independent data.
+For example, a 10-repeated 5-fold cross-validation means to randomly split the data into five partitions (folds) with each fold using a 1/5 of the available data as test and 4/5 as training data (see upper row of Figure \@ref(fig:partitioning)). 
 This guarantees that each observation is used in the test set, and requires the fitting of five models.
 Subsequently, this procedure is repeated 10 times.
 Of course, the data spliting will differ (though often only slightly) in each repetition.
 Overall, this amounts to fitting 50 models whereas the mean performance measure (AUROC) of all models is the model's overall prediction power.
 
 However, geographic data is special.
-Remember that the first law of geography states that points close to each other tend to be, on average, more similar compared to points further away.
-This means these points are not statistically independent.
-Hence, using this information in our modeling is like a sneak preview, i.e. using information that should be unavailable to the test dataset.
-To overcome this problem, we should make use of spatial partitioning which partitions the observations spatially using its coordinates as input for k-means clustering (second row of Figure \@ref(fig:partition); @brenning_spatial_2012).
-The partitioning strategy is the great difference between classical and spatial cross-validation.
-The package **sperrorest** implemented spatial cross-validation in R [@brenning_spatial_2012].
-In the meantime, it was integrated into the **mlr** package which is the reason why we will present it in more detail next.
+Remember that the first law of geography states that points close to each other tend to be, on average, more similar compared to points further away (Chapter \@ref(transportation); @miller_toblers_2004).
+This means these points are not statistically independent or put differently that training and test points in classical cross-validation are often too close to each other (see first row of \@ref(fig:partition)).
+Using this information in our modeling is like a sneak preview, i.e. using information that should be unavailable to the training dataset.
+To overcome this problem, we should make use of spatial partitioning which splits the observations spatially using its coordinates in a *k*-means clustering (second row of Figure \@ref(fig:partition); @brenning_spatial_2012).
+The partitioning strategy is **the** distinguishing feature between spatial and classical cross-validation, everything else remains the same.
+As a result spatial cv leads to a bias-reduced assessement of a model's predictive performance, and hence helps to avoid overfitting.
+We emphasize that spatial cv reduces the bias introduced by spatial autocorrelation but not completely removes it. 
+This is because there are still a few points in the test and training data which are still neighbors (see second row of \@ref(fig:partition)).
 
 ```{r partitioning, fig.cap="Spatial and random partitioning.", echo = FALSE}
 knitr::include_graphics("figures/13_partitioning.png")
@@ -314,6 +315,8 @@ lrn = makeLearner(cl = "classif.binomial",
 In the beginning, it might seem a bit tedious to learn the **mlr** interface for modeling.
 But remember that one only has to learn one single interface to run `r nrow(listLearners())` learners.
 Additionally, resampling in **mlr** is really easy and only requires two more steps.^[Further advantages are the easy parallelization of resampling techniques and the tuning of machine learning hyperparameters, also spatially, in an inner fold.]
+Please note that **sperrorest** initially implemented spatial cross-validation in R [@brenning_spatial_2012].
+In the meantime, it was integrated into the **mlr** package which is the reason why we are using **mlr** (and not for example **caret**).
 The first thing to to is specifying a resampling method.
 Spatial repeated cross-validation
 
