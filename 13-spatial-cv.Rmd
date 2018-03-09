@@ -222,34 +222,31 @@ auc(roc(lsl$lslpts, fitted(fit)))
 
 An AUROC of `r round(pROC::auc(pROC::roc(lsl$lslpts, fitted(fit))), 2)` represents a good fit.
 However, this is an overoptimistic estimation since we have computed it on the complete dataset. 
-To derive an unbiased assessment we have to use cross-validation and in the case of spatial data we will have to make use of spatial CV.
+To derive an biased-reduced assessment we have to use cross-validation and in the case of spatial data we will have to make use of spatial CV.
 
 ## Introduction to spatial CV
 
 Cross-validation belongs to the family of resampling methods [@james_introduction_2013].
-The basic idea is to repeatedly split a dataset into training and test sets (e.g., 100 times) whereby the training data is used to fit a model which then is applied to the test set.
-Comparing the predicted values with the known response values from the test set gives an unbiased assessement of the model's capability to generalize the learned relationship to independent data.
+The basic idea is to split a dataset times into training and test sets whereby the training data is used to fit a model which then is applied to the test set.
+Comparing the predicted values with the known response values from the test set (using a performance measure such as the AUROC in the binomial case) gives an bias-reduced assessement of the model's capability to generalize the learned relationship to independent data.
+For example, to use a 10-repeated 5-fold cross-validation means to randomly split the data into five partitions (folds) with each fold using a 1/5 of the available data as test and 4/5 as training data (see upper row of Figure \@ref(fig:partitioning)). 
+This guarantees that each observation is used in the test set, and requires the fitting of five models.
+Subsequently, this procedure is repeated 10 times.
+Of course, the data spliting will differ (though often only slightly) in each repetition.
+Overall, this amounts to fitting 50 models whereas the mean performance measure (AUROC) of all models is the model's overall prediction power.
+
+However, geographic data is special.
+Remember that the first law of geography states that points close to each other tend to be, on average, more similar compared to points further away.
+This means these points are not statistically independent.
+Hence, using this information in our modeling is like a sneak preview, i.e. using information that should be unavailable to the test dataset.
+To overcome this problem, we should make use of spatial partitioning which partitions the observations spatially using its coordinates as input for k-means clustering (second row of Figure \@ref(fig:partition); @brenning_spatial_2012).
+The partitioning strategy is the great difference between classical and spatial cross-validation.
+The package **sperrorest** implemented spatial cross-validation in R [@brenning_spatial_2012].
+In the meantime, it was integrated into the **mlr** package which is the reason why we will present it in more detail next.
 
 ```{r partitioning, fig.cap="Spatial and random partitioning.", echo = FALSE}
 knitr::include_graphics("figures/13_partitioning.png")
 ```
-
-Since AUROC values that are estimated on the training
-set are overoptimistic,we also performed cross-validation for AUROC estimation.
-In cross-validation, a data set is randomly partitioned into k
-subsets (here: k=5), using one partition at a time as a test set, and the
-others as training sets, yielding a bias-reduced assessment of the predictive
-performance (Efron and Gong, 1983). This procedure is repeated
-100 times in order to obtain estimates that are independent of a particular
-partitioning. This is referred to as (non-spatial) 100-repeated 5-fold
-cross-validation. Since spatially distributed samples are usually not statistically
-independent (Brenning, 2005; Atkinson and Massari, 2011),
-we furthermore used a spatial cross-validation in which the k=5 partitions
-were obtained by k-means clustering of sample coordinates (Ruß
-and Brenning, 2010).
-
-figure showing difference between spatial and non-spatial random sampling
-cross-reference **sperrorest** which has been integrated into **mlr**
 
 ## Modeling and spatial CV with **mlr**
 In R there are literally hundreds of packages available for statistical learning (e.g., have a look at the [CRAN task machine learning](https://CRAN.R-project.org/view=MachineLearning)).
