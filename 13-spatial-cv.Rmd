@@ -161,7 +161,7 @@ The generic `predict()` function does this for us automatically.
 The `response` option gives back the predicted probabilities (of landslide occurrence) for each observation in `lsl` (see `? predict.glm`).
 
 
-```{r, eval = FALSE}
+```{r}
 head(predict(object = fit, type = "response"))
 ```
 
@@ -201,28 +201,52 @@ There are three main directions:
 1. The predictions of universal kriging are the predictions of a simple linear model plus the kriged model's residuals, i.e. spatially interpolated residuals [@bivand_applied_2013]. 
 1. Adding a spatial correlation (dependency) structure to a generalized least squares model  [`nlme::gls()`; @zuur_mixed_2009; @zuur_beginners_2017].  ^[These correlation structures can also be included in `MASS::glmmPQL()` and `mgcv::gamm()`.]
 1. Finally, there are mixed-effect modeling approaches.
-Basically, a random effect imposes a dependency structure on the response variable which in turn allows for observations of once class to be more similar to each other than to those of another class [@zuur_mixed_2009]. 
+Basically, a random effect imposes a dependency structure on the response variable which in turn allows for observations of one class to be more similar to each other than to those of another class [@zuur_mixed_2009]. 
 Classes can be for example bee hives, owl nests, vegetation transects or an altitudinal stratification.
 This mixed modeling approach assumes normal and independent distributed random intercepts.^[Note that for spatial predictions one would usually use the population intercept.]
 This can even be extended by using a random intercept that is normal and spatially dependent.
 For this, however, you will have to resort most likely to Bayesian modeling approaches since frequentist software tools are rather limited in this respect especially for more complex models [@blangiardo_spatial_2015; @zuur_beginners_2017]. 
 
 Spatial predictions are one very important outcome of a model.
-Even more important is how good the model is at making predictions.
-Therefore, we need a measure which tells us 
+Even more important is how good the model is at making them since the most beautiful prediction map is useless if the model is bad.
+The most popular measure to assess the predictive performance of a binomial model is the Area Under the Receiver Operator Characteristic Curve (AUROC).
+This is a value between 0.5 and 1.0 with 0.5 indicating no and 1.0 indicating a perfect discrimination of the two classes. 
+Thus, the higher the AUROC the better is our model at making predictions.
+In the following we compute the receiver operator characteristic with the help of `roc()` by providing it with the response variable and the predicted values. 
+`auc()` returns the area under the curve.
 
+```{r, message=FALSE}
+library(pROC)
+auc(roc(lsl$lslpts, fitted(fit)))
+```
 
-AUROC: To assess the model's performance we use the AUROC.
-Add short explanation. 
-
+An AUROC of `r round(pROC::auc(pROC::roc(lsl$lslpts, fitted(fit))), 2)` represents a good fit.
+However, this is an overoptimistic estimation since we have computed it on the complete dataset. 
+To derive an unbiased assessment we have to use cross-validation and in the case of spatial data we will have to make use of spatial CV.
 
 ## Introduction to spatial CV
 
-"Resampling methods are an indispensable tool in modern statistics. They involve repeatedly drawing samples from a training set and refitting a model of interest on each sample in order to obtain additional information about the fitted model. For example, in order to estimate the variability of a linear regression fit, we can repeatedly draw different samples from the training data, fit a linear regression to each new sample, and then examine the extent to which the resulting fits differ. Such an approach may allow us to obtain information that would not be available from fitting the model only once using the original training sample.
-Resampling approaches can be computationally expensive, because they involve fitting the same statistical method multiple times using different subsets of the training data. However, due to recent advances in computing power, the computational requirements of resampling methods generally are not prohibitive. In this chapter, we discuss two of the most commonly used resampling methods, cross-validation and the bootstrap."
+Cross-validation belongs to the family of resampling methods [@james_introduction_2013].
+The basic idea is to repeatedly split a dataset into training and test sets (e.g., 100 times) whereby the training data is used to fit a model which then is applied to the test set.
+Comparing the predicted values with the known response values from the test set gives an unbiased assessement of the model's capability to generalize the learned relationship to independent data.
 
-Cross-validation belongs to the family of resampling methods.
-The basic idea is to repeatedly split a dataset into training and test sets whereby the first is used to fit a model which then is applied to the test set
+```{r partitioning, fig.cap="Spatial and random partitioning.", echo = FALSE}
+knitr::include_graphics("figures/13_partitioning.png")
+```
+
+Since AUROC values that are estimated on the training
+set are overoptimistic,we also performed cross-validation for AUROC estimation.
+In cross-validation, a data set is randomly partitioned into k
+subsets (here: k=5), using one partition at a time as a test set, and the
+others as training sets, yielding a bias-reduced assessment of the predictive
+performance (Efron and Gong, 1983). This procedure is repeated
+100 times in order to obtain estimates that are independent of a particular
+partitioning. This is referred to as (non-spatial) 100-repeated 5-fold
+cross-validation. Since spatially distributed samples are usually not statistically
+independent (Brenning, 2005; Atkinson and Massari, 2011),
+we furthermore used a spatial cross-validation in which the k=5 partitions
+were obtained by k-means clustering of sample coordinates (Ruß
+and Brenning, 2010).
 
 figure showing difference between spatial and non-spatial random sampling
 cross-reference **sperrorest** which has been integrated into **mlr**
@@ -267,7 +291,7 @@ All classification learners start with `classif.` and all regression learners wi
 For a specific task, we can run:
 
 ```{r, warning=FALSE}
-lrns = listLearners(task)
+lrns = mlr::listLearners(task)
 head(lrns[, 1:4])
 ```
 
@@ -305,7 +329,7 @@ Executing the resampling method and set the preferred performance measure.
 ```{r, warning=FALSE, message=FALSE}
 set.seed(02192018)
 sp_cv = mlr::resample(learner = lrn, task = task, resampling = resampling, 
-                      measures = auc)
+                      measures = mlr::auc)
 sp_cv$measures.test$auc
 # the same as:
 mean(sp_cv$measures.test$auc)
