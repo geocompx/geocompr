@@ -86,7 +86,7 @@ p_1 = xyplot(y ~ x | fold + mode, groups = factor(value), data = pp,
                            alternating = c(0, 1, 0, 0, 1),
                            y = list(rot = 90, cex = 0.7),
                            x = list(cex = 0.7)),
-             between = list(y = 0))
+             between = list(y = 0.5), as.table = TRUE)
 
 p_2 = useOuterStrips(
   p_1, 
