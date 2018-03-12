@@ -232,21 +232,22 @@ To derive an biased-reduced assessment we have to use cross-validation and in th
 Cross-validation belongs to the family of resampling methods [@james_introduction_2013].
 The basic idea is to split (repeatedly) a dataset into training and test sets whereby the training data is used to fit a model which then is applied to the test set.
 Comparing the predicted values with the known response values from the test set (using a performance measure such as the AUROC in the binomial case) gives a bias-reduced assessement of the model's capability to generalize the learned relationship to independent data.
-For example, a 100-repeated 5-fold cross-validation means to randomly split the data into five partitions (folds) with each fold being used once as test set (see upper row of Figure \@ref(fig:partitioning)). 
+For example, a 100-repeated 5-fold cross-validation means to randomly split the data into five partitions (folds) with each fold being used once as a test set (see upper row of Figure \@ref(fig:partitioning)). 
 This guarantees that each observation is used once in the test set, and requires the fitting of five models.
-Subsequently, this procedure is repeated 10 times.
+Subsequently, this procedure is repeated 100 times.
 Of course, the data spliting will differ (though often only slightly) in each repetition.
 Overall, this amounts to fitting 500 models whereas the mean performance measure (AUROC) of all models is the model's overall prediction power.
 
 However, geographic data is special.
 Remember that the first law of geography states that points close to each other tend to be, on average, more similar compared to points further away (@miller_toblers_2004; Chapter \@ref(transport)).
-This means these points are not statistically independent or put differently that training and test points in classical cross-validation are often too close to each other (see first row of \@ref(fig:partitioning)).
+This means these points are not statistically independent or put differently that training and test points in conventional cross-validation are often too close to each other (see first row of \@ref(fig:partitioning)).
 Using this information in our modeling is like a sneak preview, i.e. using information that should be unavailable to the training dataset.
 To overcome this problem, we should make use of spatial partitioning which splits the observations spatially using its coordinates in a *k*-means clustering (@brenning_spatial_2012; second row of Figure \@ref(fig:partitioning)).
-The partitioning strategy is **the** distinguishing feature between spatial and classical cross-validation, everything else remains the same.
-As a result spatial cv leads to a bias-reduced assessement of a model's predictive performance, and hence helps to avoid overfitting.
+The partitioning strategy is **the** distinguishing feature between spatial and classical cross-validation.
+Everything else remains exactly the same.
+As a result spatial CV leads to a bias-reduced assessement of a model's predictive performance, and hence helps to avoid overfitting.
 It is important to note that spatial CV reduces the bias introduced by spatial autocorrelation but does not completely remove it. 
-This is because there are still a few points in the test and training data which are still neighbors (see second row of \@ref(fig:partitioning)).
+This is because there are still a few points in the test and training data which are still neighbors (@brenning_spatial_2012; see second row of \@ref(fig:partitioning)).
 
 ```{r partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation in one repetition. Random (upper row) and spatial partitioning (lower row).", echo = FALSE}
 knitr::include_graphics("figures/13_partitioning.png")
@@ -256,9 +257,9 @@ knitr::include_graphics("figures/13_partitioning.png")
 In R there are literally hundreds of packages available for statistical learning (e.g., have a look at the [CRAN task machine learning](https://CRAN.R-project.org/view=MachineLearning)).
 In section \@ref(conventional-model) we used the **stats** package to fit a logistic regression using the `glm()` command.
 `glm()` uses the common R modeling interface: specify the response and predictor varilables via a formula object, build a model and make a prediction.
-However, many packages come with their own or a modified statistical learning interface which is why programmers frequently have to spend a lot of time to figure out the specifics of each of these packages or how to compare modeling results from different packages.
+However, many packages come with their own or a modified statistical learning interface which is why users frequently have to spend a lot of time to figure out the specifics of each of these packages or how to compare modeling results from different packages.
 The **mlr** package acts as a meta- or umbrella-package providing a unified interface to all popular statistical learning techniques available in R including classification, regression, survival analysis and clustering.^[As pointed out in the beginning we will solely focus on supervised learning techniques in this chapter.]
-The standardized **mlr** interface is based on so-called basic building blocks (see \@ref(fig:building-blocks)).
+The standardized **mlr** interface is based on so-called basic building blocks (Figure \@ref(fig:building-blocks)).
 
 <!-- @Jakub: yes, I will ask if we me may use the figure -->
 ```{r building-blocks, echo=FALSE,fig.cap="Basic building blocks of the **mlr** package. Source: [openml.github.io](http://openml.github.io/articles/slides/useR2017_tutorial/slides_tutorial_files/ml_abstraction-crop.png)."}
@@ -389,6 +390,14 @@ boxplot(sp_cv$measures.test$auc,
         conv_cv$measures.test$auc, col = c("lightblue2", "mistyrose2"),
         names = c("spatial CV", "conventional CV"), ylab = "AUROC")
 ```
+
+## Conclusions
+point out again that the main interest here was predictive performance!
+- point to machine learning: random forests, boosting techniques, knn, 
+- reference extensive online documentation and tutorials:
+https://mlr-org.github.io/mlr-tutorial/
+https://github.com/mlr-org/mlr/wiki/user-2015-tutorial
+
 
 ## Exercises
 
