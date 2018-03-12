@@ -286,18 +286,12 @@ task = makeClassifTask(data = data, target = "lslpts",
                        positive = "TRUE", coordinates = coords)
 ```
 
-```{r, echo = FALSE}
-# build a task for a classical CV approach
-task_nsp = makeClassifTask(data = data, target = "lslpts",
-                           positive = "TRUE")
-```
-
 `makeLearner()` determines the statistical learning method to use.
 All classification learners start with `classif.` and all regression learners with `regr.` (see `?makeLearners` for more details). 
 `listLearners()` helps to find out about all available learners and from which package **mlr** imports them. 
 For a specific task, we can run:
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 lrns = mlr::listLearners(task)
 head(lrns[, 1:4])
 ```
@@ -334,25 +328,20 @@ This ensures that a spatial partitioning with five partitions is chosen based on
 resampling = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
 ```
 
-```{r, echo=FALSE}
-# 100-repeated 5-fold non-spatial resampling strategy
-resampling_nsp = makeResampleDesc("RepCV", folds = 5, reps = 100)
-```
-
 To execute the spatial resampling, we run `resample()` using the specified learnter, task, resampling strategy and of course the performance measure, here the AUROC.
-
-```{r, echo=FALSE, message=FALSE}
-set.seed(012347)
-sp_cv = mlr::resample(learner = lrn, task = task, resampling = resampling, 
-                      measures = mlr::auc)
-conv_cv = mlr::resample(learner = lrn, task = task_nsp, 
-                        resampling = resampling_nsp, measures = mlr::auc)
-```
 
 
 ```{r, eval=FALSE}
+set.seed(012348)
 sp_cv = mlr::resample(learner = lrn, task = task, resampling = resampling, 
                       measures = mlr::auc)
+```
+
+<!-- sp_cv and conv_cv have been saved in spatialcv.Rdata. I needed to run the modeling outside of the book since knitr sets its own seed and I am not sure if this actually helps to make sure that the same partitions are used in the cv.
+I really don't understand why I have to load spatialcv.Rdata here a third time...-->
+
+```{r, echo=FALSE}
+load("extdata/spatialcv.Rdata")
 ```
 
 ```{r}
@@ -365,7 +354,7 @@ mean(sp_cv$measures.test$auc)
 As expected, the spatially cross-validated result yields a lower AUROC than 
 To put it into perspective, we compare this result with that of a non-spatial cross-validation.
 
-```{r boxplot-cv, echo=FALSE, fig.width=5, fig.height=8}
+```{r boxplot-cv, echo=FALSE, fig.width=6, fig.height=9, fig.cap="AUROC difference between spatial and conventional cross-validation."}
 # Visualization of overfitting in the nsp-case
 boxplot(sp_cv$measures.test$auc,
         conv_cv$measures.test$auc, col = c("lightblue", "mistyrose2"),
