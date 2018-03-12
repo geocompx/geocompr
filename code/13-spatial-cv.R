@@ -115,6 +115,7 @@ save(lsl, ta, study_area, file = "extdata/spatialcv.Rdata")
 # 4 MODELING-----------------------------------------------
 #**********************************************************
 
+load("extdata/spatialcv.Rdata")
 # also possible
 # data("ecuador", package = "sperrorest")
 # lsl = ecuador[, c("slides", "x", "y", "dem", "slope", "hcurv", "vcurv", "log.carea")]
@@ -131,9 +132,9 @@ data = dplyr::select(lsl, -x, -y)
 # as predictors but as coordinates for kmeans clustering)
 # all variables in data will be used in the model
 
-task_sp = makeClassifTask(id = "lsl_glm_spatial", data = data,
-                          target = "lslpts", positive = "TRUE",
-                          coordinates = coords)
+task = makeClassifTask(id = "lsl_glm_spatial", data = data,
+                       target = "lslpts", positive = "TRUE",
+                       coordinates = coords)
 
 
 task_nsp = makeClassifTask(id = "lsl_glm_nonspatial", 
@@ -154,8 +155,8 @@ lrn = makeLearner(cl = "classif.binomial",
                   fix.factors.prediction = FALSE)
 
 # training the model (percentage of test and training datasets?)
-mod_sp = train(learner = lrn, task = task_sp)
-head(predict(mod_sp, task = task_sp))
+mod_sp = train(learner = lrn, task = task)
+head(predict(mod_sp, task = task))
 # exactly the same as, and needed for model interpretation
 fit = glm(lslpts ~ ., data = data, family = "binomial")
 head(predict(fit, type = "response"))
@@ -178,21 +179,28 @@ identical(coefficients(m_sp), coefficients(m_nsp))
 # -> in each repetition dataset will be splitted into five folds (kmeans)
 # method: RepCV -> non-spatial partitioning
 # method: SpRepCV -> spatial partioning
-resampling_sp = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 10)
-resampling_nsp = makeResampleDesc(method = "RepCV", folds = 5, reps = 10)
-# apply the reampling by calling the resample function
-# needed for using the same (randomly) selected folds/partitioning in different models
-# spatial vs. non-spatial or glm vs. GAM
-set.seed(12345)  # why do we have the seed again??
-spcv_glm = mlr::resample(learner = lrn, task = task_sp,
-                    resampling = resampling_sp,
-                    measures = list(auc))
-nspcv_glm = mlr::resample(learner = lrn_glm, task = task_nsp,
-                          resampling = resampling_nsp,
-                          measures = list(auc))
+resampling = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
+resampling_nsp = makeResampleDesc(method = "RepCV", folds = 5, reps = 100)
+# apply the reampling by calling the resample function needed for using the same
+# (randomly) selected folds/partitioning in different models spatial vs.
+# non-spatial or glm vs. GAM 
+set.seed(012348)  # why do we have the seed again??
+# the seed is needed when we use also an inner fold, then we have to make sure
+# that always the same partions are used in the inner fold
+# of course, we could also use a seed to make sure that the people using the
+# book retrieve the same result
+sp_cv = mlr::resample(learner = lrn, task = task,
+                      resampling = resampling,
+                      measures = mlr::auc)
+conv_cv = mlr::resample(learner = lrn, task = task_nsp,
+                        resampling = resampling_nsp,
+                        measures = mlr::auc)
 # Visualization of overfitting in the nsp-case
-boxplot(spcv_glm$measures.test$auc,
-        nspcv_glm$measures.test$auc)
+boxplot(sp_cv$measures.test$auc,
+        conv_cv$measures.test$auc)
+
+# save your result
+save(lsl, ta, study_area, sp_cv, conv_cv, file = "extdata/spatialcv.Rdata")
 
 #**********************************************************
 # 4 SPATIAL PREDICTION-------------------------------------
