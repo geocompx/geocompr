@@ -33,7 +33,7 @@ Using either regression or machine learning techniques depends on the aim: stati
 Regression techniques are especially useful if the aim is statistical inference, i.e. if we are interested if a predictor significantly contributes to a model and how much.
 To trust the model outcomes we need to perform a thorough model validation testing if one or several of the underlying model assumptions (heterogeneity, independence, etc.) have been violated [@zuur_mixed_2009].
 By contrast, machine learning approaches are especially appealing due to their lack of assumptions.
-Though statistical inference is impossible [@james_introduction_2013], various studies have shown that machine learning outperform regression techniques with regard to predictive performance [@schratz_performance_nodate]. <!-- add one more source -->
+Though statistical inference is impossible [@james_introduction_2013], various studies have shown that machine learning  are at least at par with regression techniques regarding to predictive performance [e.g., @schratz_performance_nodate]. <!-- add one more source -->
 Naturally, with the advent of big data, machine learning has even gained in popularity since frequently the underlying relationship between variables is less important than the prediction such as future customer behavior.
 
 Though prediction will be the aim of the modeling in this chapter, we will not use machine learning but a simple generalized linear model (GLM).^[Nevertheless, a generalized additive model or a machine learning approach would be more suitable for our dataset (see exercises).
@@ -42,7 +42,7 @@ This is because we can use also regression techniques such as a GLM without havi
 Additionally, GLMs are probably familiar to most readers, and therefore instead of explaining in detail the model building we can focus on the speciality of geographic data in a modeling context and spatial CV.^[Readers who are in need of refreshing their regression skills might have a look at @zuur_mixed_2009 and @james_introduction_2013, respectively.]
 
 CV determines a model's ability to predict new data or differently put its ability to generalize.
-To achieve this, CV splits a dataset into a test and a training dataset.
+To achieve this, CV splits a dataset (repeatedly) into test and training data.
 It uses the training data to fit the model, and checks if the trained model is able to predict the correct results for the test data.
 Basically, cross-validation helps to detect over-fitting since a model that fits too closely the training data and its specific peculiarities (noise, random fluctuations) will have a bad prediction performance on the test data.
 However, the basic requirement for this is, that the test data is independent of the training data.
@@ -114,15 +114,15 @@ The added columns are:
 - `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
 - `log_carea`: the decadic logarithm of the catchment area (log m^2^) representing the amount of water flowing towards a location.
 
-```{r lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. Randomly selected test points are marked by a golden border. CRS: UTM zone 17S (EPSG: 32717)."}
+```{r lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. CRS: UTM zone 17S (EPSG: 32717)."}
 library(tmap)
 lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
 hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
 rect = tmaptools::bb_poly(hs)
 bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
-# random sample 20%
-ind = sample(1:nrow(lsl_sf), round(nrow(lsl_sf) * 0.2))
-sam = lsl_sf[ind, ]
+# randomly sample 20%
+# ind = sample(1:nrow(lsl_sf), round(nrow(lsl_sf) * 0.2))
+# sam = lsl_sf[ind, ]
 
 tm_shape(hs, bbox = bbx) +
 	tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
@@ -133,9 +133,9 @@ tm_shape(hs, bbox = bbx) +
 	          auto.palette.mapping = FALSE, legend.show = FALSE) +
 	tm_shape(lsl_sf) + 
 	tm_bubbles("lslpts", size = 0.5, palette = "-RdYlBu") +
-  tm_shape(sam) +
-  tm_bubbles(border.col = "gold", border.lwd = 2, alpha = 0, size = 0.5) +
-	qtm(rect, fill = NULL) +
+#   tm_shape(sam) +
+#   tm_bubbles(border.col = "gold", border.lwd = 2, alpha = 0, size = 0.5) +
+  qtm(rect, fill = NULL) +
 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
 ```
 
@@ -185,10 +185,13 @@ tm_shape(hs, bbox = bbx) +
 	# prediction raster
   tm_shape(mask(pred, study_area)) +
 	tm_raster(alpha = 0.5, palette = RColorBrewer::brewer.pal(name = "Reds", 6),
-	          auto.palette.mapping = FALSE, legend.show = FALSE) +
+	          auto.palette.mapping = FALSE, legend.show = TRUE,
+	          title = "Susceptibility\nprobability") +
 	# rectangle and outer margins
   qtm(rect, fill = NULL) +
-	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
+	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
+	          legend.position = c("left", "bottom"),
+	          legend.title.size = 0.9)
 
 ```
 
