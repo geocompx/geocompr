@@ -184,7 +184,7 @@ resampling_nsp = makeResampleDesc(method = "RepCV", folds = 5, reps = 100)
 # apply the reampling by calling the resample function needed for using the same
 # (randomly) selected folds/partitioning in different models spatial vs.
 # non-spatial or glm vs. GAM 
-set.seed(012348)  # why do we have the seed again??
+set.seed(012348)  # why do we need the seed?
 # the seed is needed when we use also an inner fold, then we have to make sure
 # that always the same partions are used in the inner fold
 # of course, we could also use a seed to make sure that the people using the
