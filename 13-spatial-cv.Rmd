@@ -1,0 +1,430 @@
+# Spatial cross-validation {#spatial-cv}
+
+## Prerequisites {-}
+
+This chapter requires a strong grasp of spatial data analysis and processing, covered in chapters \@ref(spatial-class) to \@ref(transform).
+You should also be familiar with linear regression and its generalized extensions [e.g. @zuur_mixed_2009;@james_introduction_2013].
+
+The chapter uses the following packages:
+
+```{r, message = FALSE} 
+library(sf)
+library(raster)
+library(RQGIS)
+library(RSAGA)
+library(mlr)
+```
+
+- Required data will be downloaded in due course.
+
+## Introduction
+
+Section \@ref(software-for-geocomputation) mentioned several programming languages suitable for command-line based geocomputation.
+The advantages of geocomputation with R were discussed, including its unparalleled statistical power.
+This chapter makes use of some of this statistical power, by demonstrating methods for predictive mapping by means of statistical learning [@james_introduction_2013].
+The focus is the use of spatial cross-validation (or 'spatial CV' for short, a term we will define shortly) to assess model performance and reduce spatial bias.
+Spatial CV is an excellent example of using statistical methods to model spatial data and, at the time of writing, the technique is better supported in R than any other language.
+
+Statistical learning aims at understanding data by building models which disentangle underlying relationships.
+Statistical learning can be roughly grouped into supervised and unsupervised techniques, both of which are used throughout a vast range of disciplines such as economics, physics, medicine, biology, ecology and geography [@james_introduction_2013].
+In this chapter we will focus on supervised techniques, i.e., we have a response variable, in our case this will be a binary one (landslide vs. non-landslide occurence) but could be also a numeric (pH value), an integer (species richness) or a categorical variable (land use).
+Supervised techniques such as regression and machine learning model the relationship between the response variable and various predictors.
+Using either regression or machine learning techniques depends on the aim: statistical inference or prediction.
+Regression techniques are especially useful if the aim is statistical inference, i.e. if we are interested if a predictor significantly contributes to a model and how much.
+To trust the model outcomes we need to perform a thorough model validation testing if one or several of the underlying model assumptions (heterogeneity, independence, etc.) have been violated [@zuur_mixed_2009].
+By contrast, machine learning approaches are especially appealing due to their lack of assumptions.
+Though statistical inference is impossible [@james_introduction_2013], various studies have shown that machine learning  are at least at par with regression techniques regarding to predictive performance [e.g., @schratz_performance_nodate]. <!-- add one more source -->
+Naturally, with the advent of big data, machine learning has even gained in popularity since frequently the underlying relationship between variables is less important than the prediction such as future customer behavior.
+
+Though prediction will be the aim of the modeling in this chapter, we will not use machine learning but a simple generalized linear model (GLM).^[Nevertheless, a generalized additive model or a machine learning approach would be more suitable for our dataset (see exercises).
+We will show in chapter \@ref(eco) how to use spatial cross-validation with a machine learning approach.]
+This is because we can use also regression techniques such as a GLM without having to worry too much about possible model misspecifications when the aim is prediction.
+Additionally, GLMs are probably familiar to most readers, and therefore instead of explaining in detail the model building we can focus on the speciality of geographic data in a modeling context and spatial CV.^[Readers who are in need of refreshing their regression skills might have a look at @zuur_mixed_2009 and @james_introduction_2013, respectively.]
+
+CV determines a model's ability to predict new data or differently put its ability to generalize.
+To achieve this, CV splits a dataset (repeatedly) into test and training data.
+It uses the training data to fit the model, and checks if the trained model is able to predict the correct results for the test data.
+Basically, cross-validation helps to detect over-fitting since a model that fits too closely the training data and its specific peculiarities (noise, random fluctuations) will have a bad prediction performance on the test data.
+However, the basic requirement for this is, that the test data is independent of the training data.
+CV achieves this by splitting the data randomly into test and training sets. 
+However, randomly splitting spatial data results in the fact that training points are frequently located next to test points.
+Since points close to each other are more similar compared to points further away, test and training datasets might not be independent.
+The consequence is that cross-validation would fail to detect overfitting in the presence of spatial autocorrelation.
+Here, spatial CV will come to the rescue which will be the main topic of this chapter.
+
+## Case study: landslide susceptibility
+
+To introduce spatial CV by example, we will use a landslide dataset from Southern Ecuador (Figure \@ref(fig:lsl-map)).
+For a detailed description of the dataset and the study area please refer to @muenchow_geomorphic_2012.
+One can find a subset of the corresponding data in the **RSAGA** package.
+The following command loads three datasets, a `data.frame` named `landslides`, a `list` named `dem`, and an `sf`-object named `study_area`.
+
+```{r}
+data("landslides", package = "RSAGA")
+```
+
+`landslides` contains a boolean column `lslpts` where `TRUE` corresponds to an observed landslide initiation point and `FALSE` to points where no landsliding occurred. 
+Columns `x` and `y` contain the corresponding coordinates.
+The landslide initation point is located in the scarp of a landslide polygon.
+The coordinates for the non-landslide points were sampled randomly with the restriction to fall outside of the slightly buffered landslide polygons.
+`summary(landslides$lslpts)` tells us that 175 landslide points where observed while we have 1360 non-landslide points.
+To make the ratio between landslide and non-landslide points more balanced, we randomly sample 175 from the 1360 non-landslide points.
+
+```{r, eval = FALSE}
+non = landslides[landslides$lslpts == FALSE, ]
+ind = sample(1:nrow(non), nrow(landslides[landslides$lslpts == TRUE, ]))
+lsl = rbind(non[ind, ], landslides[landslides$lslpts == TRUE, ])
+```
+
+`dem` is in fact a digital elevation model and consists of two list elements with the first being a raster header and the second being a matrix containing the altitudinal values.
+To transform this list into a `raster`, we can write:
+
+```{r, eval = FALSE}
+dem = 
+  raster(dem$data, 
+         crs = dem$header$proj4string,
+         xmn = dem$header$xllcorner, 
+         xmx = dem$header$xllcorner + dem$header$ncols * dem$header$cellsize,
+         ymn = dem$header$yllcorner,
+         ymx = dem$header$yllcorner + dem$header$nrows * dem$header$cellsize)
+```
+
+To model the probability for landslide occurrence, we need some predictors.
+Here, we use selected terrain attributes frequently associated with landsliding [@muenchow_geomorphic_2012], all of which can be computed from the provided digital elevation model (`dem`) using R-GIS bridges (see Chapter \@ref(gis)).
+We leave it as an exercise to the reader to compute the terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe (see also exercises).
+The first three rows of the resulting dataframe (still named `lsl`) could look like this:
+<!-- has anybody an idea why I have to run the following code chunk two times to make it work when rendering the book with `bookdown::render_book()`?-->
+```{r, echo=FALSE}
+load("extdata/spatialcv.Rdata")
+```
+
+```{r, echo=FALSE}
+load("extdata/spatialcv.Rdata")
+```
+
+```{r}
+head(lsl, 3)
+```
+
+The added columns are:
+
+- `slope`: slope angle (°)
+- `cplan`: plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow.
+- `cprof`: profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle 
+- `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
+- `log_carea`: the decadic logarithm of the catchment area (log m^2^) representing the amount of water flowing towards a location.
+
+```{r lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. CRS: UTM zone 17S (EPSG: 32717)."}
+library(tmap)
+lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
+hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
+rect = tmaptools::bb_poly(hs)
+bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
+# randomly sample 20%
+# ind = sample(1:nrow(lsl_sf), round(nrow(lsl_sf) * 0.2))
+# sam = lsl_sf[ind, ]
+
+tm_shape(hs, bbox = bbx) +
+	tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
+	        labels.rot = c(0, 90)) +
+	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+	tm_shape(ta$elev) +
+	tm_raster(alpha = 0.5, palette = terrain.colors(10),
+	          auto.palette.mapping = FALSE, legend.show = FALSE) +
+	tm_shape(lsl_sf) + 
+	tm_bubbles("lslpts", size = 0.5, palette = "-RdYlBu") +
+#   tm_shape(sam) +
+#   tm_bubbles(border.col = "gold", border.lwd = 2, alpha = 0, size = 0.5) +
+  qtm(rect, fill = NULL) +
+	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
+```
+
+
+## Conventional modeling approach in R {#conventional-model}
+Before diving into the **mlr** package it is worth to take a look at the conventional modeling interface in R.
+This way we introduce statistical supervised modeling in R which in turn will contribute to get a better grasp on the **mlr** approach introduced later on, and provides the required skillset for doing spatial CV.
+Usually, we model the response variable as a function of predictors. 
+Therefore, modeling functions in R such as `lm`, `glm` and many more use the so-called formula interface.
+Let's put this into practice by modeling the landslide occurence as a function of terrain attributes.
+Since our response (landslide occurence) belongs to the binary category, we use a binomial generalized linear model instead of a simple linear model which would expect a normally distributed numeric response variable.
+
+```{r, eval = TRUE}
+fit = glm(lslpts ~ slope + cplan + cprof + elev + log_carea, 
+          data = lsl, family = binomial())
+# the same as:
+# fit = glm(lslpts ~ ., data = select(lsl, -x, -y))
+fit
+```
+
+Subsequently, we can use the estimated model coefficients for predictions.
+The generic `predict()` function does this automatically for us.
+The `response` option gives back the predicted probabilities (of landslide occurrence) for each observation in `lsl` (see `? predict.glm`).
+
+
+```{r}
+head(predict(object = fit, type = "response"))
+```
+
+We can also predict spatially by applying the coefficients to our predictor rasters. 
+We could do this manually but can also use **raster**'s `predict()` function.
+This function also expects the fitted model as input as well as a raster stack with the predictors exactly named as in the fitted model (Figure \@ref(fig:lsl-susc)).
+
+```{r}
+pred = raster::predict(object = ta, model = fit, type = "response")
+```
+
+```{r lsl-susc, echo = FALSE, fig.cap="Spatial prediction of landslide susceptibility using a  GLM. CRS: UTM zone 17S (EPSG: 32717).", warning=FALSE}
+# white raster to only plot the axis ticks, otherwise gridlines would be visible
+tm_shape(hs, bbox = bbx) +
+  tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
+          labels.rot = c(0, 90)) +
+  tm_raster(palette = "white", legend.show = FALSE) +
+  # hillshade
+  tm_shape(mask(hs, study_area), bbox = bbx) +
+	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+	# prediction raster
+  tm_shape(mask(pred, study_area)) +
+	tm_raster(alpha = 0.5, palette = RColorBrewer::brewer.pal(name = "Reds", 6),
+	          auto.palette.mapping = FALSE, legend.show = TRUE,
+	          title = "Susceptibility\nprobability") +
+	# rectangle and outer margins
+  qtm(rect, fill = NULL) +
+	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
+	          legend.position = c("left", "bottom"),
+	          legend.title.size = 0.9)
+
+```
+
+Here, when making predictions we neglect spatial autocorrelation since we assume that on average predictive accuracies of parametric models remain the same with or without spatial autocorrelation structures.
+However, it is possible to include spatial autocorrelation structures into models as well as into the predictions.
+This is, however, beyond the scope of this book.
+Nevertheless, we give the interested reader some pointers where to look it up.
+There are three main directions:
+
+1. The predictions of universal kriging are the predictions of a simple linear model plus the kriged model's residuals, i.e. spatially interpolated residuals [@bivand_applied_2013]. 
+1. Adding a spatial correlation (dependency) structure to a generalized least squares model  [`nlme::gls()`; @zuur_mixed_2009; @zuur_beginners_2017].  ^[These correlation structures can also be included in `MASS::glmmPQL()` and `mgcv::gamm()`.]
+1. Finally, there are mixed-effect modeling approaches.
+Basically, a random effect imposes a dependency structure on the response variable which in turn allows for observations of one class to be more similar to each other than to those of another class [@zuur_mixed_2009]. 
+Classes can be for example bee hives, owl nests, vegetation transects or an altitudinal stratification.
+This mixed modeling approach assumes normal and independent distributed random intercepts.^[Note that for spatial predictions one would usually use the population intercept.]
+This can even be extended by using a random intercept that is normal and spatially dependent.
+For this, however, you will have to resort most likely to Bayesian modeling approaches since frequentist software tools are rather limited in this respect especially for more complex models [@blangiardo_spatial_2015; @zuur_beginners_2017]. 
+
+Spatial predictions are one very important outcome of a model.
+Even more important is how good the model is at making them since the most beautiful prediction map is useless if a model's predictive performance is bad.
+The most popular measure to assess the predictive performance of a binomial model is the Area Under the Receiver Operator Characteristic Curve (AUROC).
+This is a value between 0.5 and 1.0 with 0.5 indicating no and 1.0 indicating a perfect discrimination of the two classes. 
+Thus, the higher the AUROC the better is our model at making predictions.
+In the following we compute the receiver operator characteristic with the help of `roc()` by providing it with the response variable and the predicted values. 
+`auc()` returns the area under the curve.
+
+```{r, message=FALSE}
+library(pROC)
+auc(roc(lsl$lslpts, fitted(fit)))
+```
+
+An AUROC of `r round(pROC::auc(pROC::roc(lsl$lslpts, fitted(fit))), 2)` represents a good fit.
+However, this is an overoptimistic estimation since we have computed it on the complete dataset. 
+To derive an biased-reduced assessment we have to use cross-validation and in the case of spatial data we will have to make use of spatial CV.
+
+## Introduction to (spatial) cross-validation {#intro-cv} 
+
+Cross-validation belongs to the family of resampling methods [@james_introduction_2013].
+The basic idea is to split (repeatedly) a dataset into training and test sets whereby the training data is used to fit a model which then is applied to the test set.
+Comparing the predicted values with the known response values from the test set (using a performance measure such as the AUROC in the binomial case) gives a bias-reduced assessement of the model's capability to generalize the learned relationship to independent data.
+For example, a 100-repeated 5-fold cross-validation means to randomly split the data into five partitions (folds) with each fold being used once as a test set (see upper row of Figure \@ref(fig:partitioning)). 
+This guarantees that each observation is used once in the test set, and requires the fitting of five models.
+Subsequently, this procedure is repeated 100 times.
+Of course, the data spliting will differ (though often only slightly) in each repetition.
+Overall, this amounts to fitting 500 models whereas the mean performance measure (AUROC) of all models is the model's overall prediction power.
+
+However, geographic data is special.
+Remember that the first law of geography states that points close to each other tend to be, on average, more similar compared to points further away (@miller_toblers_2004; Chapter \@ref(transport)).
+This means these points are not statistically independent or put differently that training and test points in conventional cross-validation are often too close to each other (see first row of \@ref(fig:partitioning)).
+Using this information in our modeling is like a sneak preview, i.e. using information that should be unavailable to the training dataset.
+To overcome this problem, we should make use of spatial partitioning which splits the observations spatially using its coordinates in a *k*-means clustering (@brenning_spatial_2012; second row of Figure \@ref(fig:partitioning)).
+The partitioning strategy is **the** distinguishing feature between spatial and classical cross-validation.
+Everything else remains exactly the same.
+As a result spatial CV leads to a bias-reduced assessement of a model's predictive performance, and hence helps to avoid overfitting.
+It is important to note that spatial CV reduces the bias introduced by spatial autocorrelation but does not completely remove it. 
+This is because there are still a few points in the test and training data which are still neighbors (@brenning_spatial_2012; see second row of \@ref(fig:partitioning)).
+
+```{r partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation in one repetition. Random (upper row) and spatial partitioning (lower row).", echo = FALSE}
+knitr::include_graphics("figures/13_partitioning.png")
+```
+
+## Modeling and spatial CV with **mlr**
+In R there are literally hundreds of packages available for statistical learning (e.g., have a look at the [CRAN task machine learning](https://CRAN.R-project.org/view=MachineLearning)).
+In section \@ref(conventional-model) we used the **stats** package to fit a logistic regression using the `glm()` command.
+`glm()` uses the common R modeling interface: specify the response and predictor varilables via a formula object, build a model and make a prediction.
+However, many packages come with their own or a modified statistical learning interface which is why users frequently have to spend a lot of time to figure out the specifics of each of these packages or how to compare modeling results from different packages.
+The **mlr** package acts as a meta- or umbrella-package providing a unified interface to all popular statistical learning techniques available in R including classification, regression, survival analysis and clustering.^[As pointed out in the beginning we will solely focus on supervised learning techniques in this chapter.]
+The standardized **mlr** interface is based on so-called basic building blocks (Figure \@ref(fig:building-blocks)).
+
+<!-- @Jakub: yes, I will ask if we me may use the figure -->
+```{r building-blocks, echo=FALSE,fig.cap="Basic building blocks of the **mlr** package. Source: [openml.github.io](http://openml.github.io/articles/slides/useR2017_tutorial/slides_tutorial_files/ml_abstraction-crop.png)."}
+knitr::include_graphics("http://openml.github.io/articles/slides/useR2017_tutorial/slides_tutorial_files/ml_abstraction-crop.png")
+```
+
+First, we need to create a **task** containing the data, specifically the response and predictor variables, for the model and the model type (such as regression or classification).
+Secondly, a **learner** defines the specific model that models the task data or differently put learns a structure inherent in the provided data.
+Thirdly, we assess the predictive performance of the model, i.e. the model's ability to generalize the learned relationship to new data via a repetitive **resampling** approach (see also section \@ref(intro-cv)).
+
+To put this into practice, we create a **task** using our landslide data.
+Since we have a binary response, which is in fact a two-category variable, we will make use of the classification task, namely `makeClassifTask()`.^[In the case of a regression problem, we would use `makeRegrTask()`.
+Type `?makeClassifTask` to find out about all available modeling tasks.
+]
+First, we specifiy the data which will be used.
+The `target` parameter expects the response variable and the `positive` parameter determines which of the two factor levels of the response variable indicate the landslide initiation point.
+All other variables of the provided dataset will serve as predictors (check out with `getTaskFormula(task)`).
+As we will perform a spatial CV later on, we need to specify the coordinates which will form the basis of the spatial partioning (see section \@ref(intro-cv) and Figure \@ref(fig:partitioning)).
+These have to be provided as a dataframe in parameter `coordinates`. 
+
+```{r}
+# separate data to be modeled and coordinates
+coords = lsl[, c("x", "y")]
+data = dplyr::select(lsl, -x, -y)
+# create task
+task = makeClassifTask(data = data, target = "lslpts",
+                       positive = "TRUE", coordinates = coords)
+```
+
+`makeLearner()` determines the statistical learning method to use.
+All classification **learners** start with `classif.` and all regression learners with `regr.` (see `?makeLearners` for more details). 
+`listLearners()` helps to find out about all available learners and from which package **mlr** imports them. 
+For a specific task, we can run:
+
+<!-- no idea, why render_book() fails frequently because function listLearners() cannot be found...-->
+
+```{r, warning=FALSE, message=FALSE}
+lrns = mlr::listLearners(task)
+head(lrns[, 1:4])
+```
+
+This yields all learners able to model two-class problems (landslide yes or no).
+We opt for the binomial classification method from the **stats** package which we already have used in section \@ref(conventional-model) and which is implemented in **mlr** as `classif.binomial`.
+Additionally, we have to specify the link-function.
+We choose the `logit` link which is also the default when using the `binomial` family in `glm` (run `binomial()` to verify).
+`predict.type` determines the type of the prediction with
+<!-- Setting it to `response` produces class labels as output, which would be in our case `TRUE` or `FALSE`. -->
+ `prob` resulting in a predicted probability for landslide occurrence between 0 and 1.^[Note that this corresponds to `type = response` in `predict.glm`.]
+
+```{r}
+lrn = makeLearner(cl = "classif.binomial",
+                  link = "logit",
+                  predict.type = "prob",
+                  fix.factors.prediction = TRUE)
+# run the following lines to find out from which package the learner is taken
+# and how to access the corresponding help file(s)
+# getLearnerPackages(learner)
+# helpLearner(learner)
+```
+
+<!--
+Having specified a learner and a task, we can train our model which basically executes the `glm()` command in the background for our task. 
+
+```{r}
+mod = train(learner = lrn, task = task)
+mlr_fit = getLearnerModel(mod)
+```
+
+```{r, eval = FALSE, echo = FALSE}
+getTaskFormula(task)
+getTaskData(task)
+getLearnerModel(mod)
+mod$learner.model
+```
+
+`getLearnerModel()` extracts the used model which shows that **mlr** passed all specified parameters to the `glm` function in the background as also proved by following code:
+
+```{r}
+fit = glm(lslpts ~ ., family = binomial(link = "logit"), data = data)
+identical(fit$coefficients, mlr_fit$coefficients)
+```
+-->
+
+In the beginning, it might seem a bit tedious to learn the **mlr** interface for modeling.
+But remember that one only has to learn one single interface to run `r nrow(listLearners())` learners (**mlr** package version: `r packageVersion("mlr")`).
+Additionally, (spatial) resampling in **mlr** is really easy and only requires two more steps.^[Further advantages are the easy parallelization of resampling techniques and the tuning of machine learning hyperparameters, also spatially, in an inner fold.]
+Please note that package **sperrorest** initially implemented spatial cross-validation in R [@brenning_spatial_2012].
+In the meantime, its functionality was integrated into the **mlr** package which is the reason why we are using **mlr** (and not for example **caret**).
+The first thing to do is specifying a resampling method.
+We will use a 100-repeated 5-fold spatial CV.
+This ensures that a spatial partitioning with five partitions is chosen based on the provided coordinates in our `task` and that the partitioning is repeated 100 times.
+
+```{r}
+resampling = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
+```
+
+To execute the spatial resampling, we run `resample()` using the specified learner, task, resampling strategy and of course the performance measure, here the AUROC.
+This takes a short while because we ask R to compute the AUROC from 500 models. 
+
+
+```{r, eval=FALSE}
+set.seed(012348)
+sp_cv = mlr::resample(learner = lrn, task = task, resampling = resampling, 
+                      measures = mlr::auc)
+```
+
+<!-- sp_cv and conv_cv have been saved in spatialcv.Rdata. I needed to run the modeling outside of the book since knitr sets its own seed and I am not sure if this actually helps to make sure that the same partitions are used in the cv.
+I really don't understand why I have to load spatialcv.Rdata here a third time...-->
+
+```{r, echo=FALSE}
+load("extdata/spatialcv.Rdata")
+```
+
+The output is a bias-reduced assessment of the model's predictive performance. 
+
+```{r}
+# summary statistics of the 500 models
+summary(sp_cv$measures.test$auc)
+# mean AUROC of the 500 models
+mean(sp_cv$measures.test$auc)
+```
+
+To put it into perspective, we compare this result with that of a 100-repeated 5-fold non-spatial cross-validation (Figure \@ref(fig:boxplot-cv); the code for the non-spatial cross-validation is not shown here but will be explored in the exercise section).
+As expected, the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, and relates to the over-optimistic predictive performance due to spatial autocorrelation.
+
+```{r boxplot-cv, echo=FALSE, fig.width=6, fig.height=9, fig.cap="Boxplot showing the difference in AUROC values between spatial and conventional cross-validation (500 models)."}
+# Visualization of overfitting in the nsp-case
+boxplot(sp_cv$measures.test$auc,
+        conv_cv$measures.test$auc, col = c("lightblue2", "mistyrose2"),
+        names = c("spatial CV", "conventional CV"), ylab = "AUROC")
+```
+
+## Conclusions
+point out again that the main interest here was predictive performance!
+- point to machine learning: random forests, boosting techniques, knn, 
+- reference extensive online documentation and tutorials:
+https://mlr-org.github.io/mlr-tutorial/
+https://github.com/mlr-org/mlr/wiki/user-2015-tutorial
+
+
+## Exercises
+
+1. Compute the terrain attributes slope, plan curvature, profile curvature and catchment area from `dem` (provided by `data("landslides", package = "RSAGA")`) with the help of R-GIS bridges, and extract the values from the corresponding output rasters to landslides/non-landslides dataframe.
+1. Reproduce the spatial prediction with the derived terrain attribute rasters (see Figure \@ref(fig:lsl-susc)).
+1. Compute a non-spatial cross-validation and make boxplots to compare the AUROC from a spatial and a non-spatial cv (see Figure \@ref(fig:boxplot-cv)).
+Hint: You need to specify a non-spatial task and resampling strategy.
+1. Use the squared slope as a further predictor.
+Repeat the modeling. 
+How has the spatially cross-validaded mean AUROC value changed compared to the model without the squared altitude predictor?
+
+<!--
+spatial CV with 5-fold partioning repeated 100 times.
+This means we divide a dataset into 5 spatially disjoint folds.
+Each of these folds serves once as a test set.
+Hence, five models form one repetition.
+We repeat this 100 times.
+
+hyperparameter tuning:
+The training data is again partitioned into 5 folds but only once.
+Now each fold is used once as a test set, and the remaining training data is used to find the optimal hyperparameter tuning via a random search with 50 (or whatever number) iterations -> 250 iterations to find the optimal hyperparameter combination. 
+This combination serves as input for the model in the outer level.
+
+Hyperparameters are always tuned in mlr in an inner loop (I suppose). 
+But why do we need the inner tuning.
+Well, otherwise we would tune our hyperparameters on the test set of the outer loop, and this is like taking a sneak preview.
+-->
+
+

@@ -1,0 +1,106 @@
+---
+title: "Making inset maps of the USA"
+subtitle: "For [Geocomputation with R](https://github.com/Robinlovelace/geocompr)"
+author: "Robin Lovelace, Jakub Nowosad, Jannes Muenchow"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Prerequisites {-}
+
+The example below assume the following packages are loaded:
+
+```{r packages, message=FALSE, warning=FALSE}
+library(sf)
+library(spData)
+library(tidyverse)
+library(tmap)
+library(grid)
+```
+
+## Introduction
+
+This vignette provides a detailed description of inset map generation, building on the content in Chapter [9](http://geocompr.robinlovelace.net/adv-map.html#inset-maps) of the book Geocomputation with R.
+
+## Data preparation
+
+The first step is to decide on the best projection for each individual inset.
+For this case, we decided to use equal area projections for the maps of the contiguous 48 states, Hawaii, and Alaska.
+While the dataset of Hawaii and Alaska already have this type of projections, we still need to reproject the `us_states` object to US National Atlas Equal Area:
+
+```{r}
+us_states2163 = st_transform(us_states, 2163)
+```
+
+## Ratio calculation
+
+The second step is to calculate scale relations between the main map (the contiguous 48 states) and Hawaii, and between the main map and Alaska.
+To do so we can calculate areas of the bounding box of each object:
+
+```{r}
+us_states_area = st_area(st_as_sfc(st_bbox(us_states2163)))
+hawaii_area = st_area(st_as_sfc(st_bbox(hawaii)))
+alaska_area = st_area(st_as_sfc(st_bbox(alaska)))
+``` 
+
+Next, we can calculate the ratios between their areas:
+
+```{r}
+us_states_hawaii_ratio = as.numeric(hawaii_area/us_states_area)
+us_states_alaska_ratio = as.numeric(alaska_area/us_states_area)
+```
+
+## Single maps creation
+
+In the third step, we need to create single maps for each object.
+We can use the `tm_layout()` function to get rid of map frames and backgrounds or to add titles to our insets:
+
+```{r}
+us_states_map = tm_shape(us_states2163) +
+  tm_polygons() + 
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+hawaii_map = tm_shape(hawaii) +
+  tm_polygons() + 
+  tm_layout(title = "Hawaii", frame = FALSE, bg.color = NA, 
+            title.position = c("left", "BOTTOM")) 
+```
+
+```{r}
+alaska_map = tm_shape(alaska) +
+  tm_polygons() + 
+  tm_layout(title = "Alaska", frame = FALSE, bg.color = NA, 
+            title.position = c("left", "TOP")) 
+```
+
+## Map arrangement
+
+The final step is to arrange the map.
+One of the ways to achieve this goal is to use the **grid** package.
+In the code below, we create a new page and specify its layout with two rows - one smaller (for Alaska) and one larger (for the contiguous 48 states).
+Next, we populate the layout with maps of Alaska and the contiguous 48 states add a map of Hawaii to the bottom left of the map and specify its size.
+Lastly, we draw two dashed lines (`gp = gpar(lty = 2)`) to separate the contiguous 48 states from Alaska and Hawaii.
+
+```{r}
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2, 1, heights = unit(c(us_states_alaska_ratio, 1), "null"))))
+print(alaska_map, vp = viewport(layout.pos.row = 1))
+print(us_states_map, vp = viewport(layout.pos.row = 2))
+print(hawaii_map, vp = viewport(x = 0.25, y = 0.1,
+                                height = us_states_hawaii_ratio))
+grid.lines(x = c(0, 1), y = c(0.64, 0.64), gp = gpar(lty = 2))
+grid.lines(x = c(0, 0.5), y = c(0.32, 0), gp = gpar(lty = 2))
+```
+
+The result map is just an approximation, not a perfect representation, of relationships between the partial maps -- their location and size. 
+In the same time, it is an improvement upon a standard map of United States, which either shows only the contiguous 48 states or largely reduce the size of Hawaii and Alaska.
