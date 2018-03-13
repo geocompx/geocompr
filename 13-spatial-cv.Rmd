@@ -8,11 +8,11 @@ You should also be familiar with linear regression and its generalized extension
 The chapter uses the following packages:
 
 ```{r, message = FALSE} 
-library(sf)
-library(raster)
-library(RQGIS)
-library(RSAGA)
 library(mlr)
+library(pROC)
+library(raster)
+library(RSAGA)
+library(sf)
 ```
 
 - Required data will be downloaded in due course.
@@ -30,10 +30,10 @@ Statistical learning can be roughly grouped into supervised and unsupervised tec
 In this chapter we will focus on supervised techniques, i.e., we have a response variable, in our case this will be a binary one (landslide vs. non-landslide occurrence) but could be also a numeric (pH value), an integer (species richness) or a categorical variable (land use).
 Supervised techniques such as regression and machine learning model the relationship between the response variable and various predictors.
 Using either regression or machine learning techniques depends on the aim: statistical inference or prediction.
-Regression techniques are especially useful if the aim is statistical inference, i.e. if we are interested if a predictor significantly contributes to a model and how much.
+Regression techniques are especially useful if the aim is statistical inference, i.e. if we are interested in a predictor's significance or its contribution to a specific model.
 To trust the model outcomes we need to perform a thorough model validation testing if one or several of the underlying model assumptions (heterogeneity, independence, etc.) have been violated [@zuur_mixed_2009].
 By contrast, machine learning approaches are especially appealing due to their lack of assumptions.
-Though statistical inference is impossible [@james_introduction_2013], various studies have shown that machine learning  are at least at par with regression techniques regarding to predictive performance [e.g., @schratz_performance_nodate]. <!-- add one more source -->
+Though statistical inference is impossible [@james_introduction_2013], various studies have shown that machine learning are at least at par with regression techniques regarding predictive performance [e.g., @schratz_performance_nodate]. <!-- add one more source -->
 Naturally, with the advent of big data, machine learning has even gained in popularity since frequently the underlying relationship between variables is less important than the prediction such as future customer behavior.
 
 Though prediction will be the aim of the modeling in this chapter, we will not use machine learning but a simple generalized linear model (GLM).^[Nevertheless, a generalized additive model or a machine learning approach would be more suitable for our dataset (see exercises).
@@ -42,7 +42,7 @@ This is because we can use also regression techniques such as a GLM without havi
 Additionally, GLMs are probably familiar to most readers, and therefore instead of explaining in detail the model building we can focus on the specialty of geographic data in a modeling context and spatial CV.^[Readers who are in need of refreshing their regression skills might have a look at @zuur_mixed_2009 and @james_introduction_2013, respectively.]
 
 CV determines a model's ability to predict new data or differently put its ability to generalize.
-To achieve this, CV splits a dataset (repeatedly) into test and training data.
+To achieve this, CV splits a dataset (repeatedly) into test and training sets.
 It uses the training data to fit the model, and checks if the trained model is able to predict the correct results for the test data.
 Basically, cross-validation helps to detect over-fitting since a model that fits too closely the training data and its specific peculiarities (noise, random fluctuations) will have a bad prediction performance on the test data.
 However, the basic requirement for this is, that the test data is independent of the training data.
@@ -63,11 +63,11 @@ The following command loads three datasets, a `data.frame` named `landslides`, a
 data("landslides", package = "RSAGA")
 ```
 
-`landslides` contains a Boolean column `lslpts` where `TRUE` corresponds to an observed landslide initiation point and `FALSE` to points where no landsliding occurred. 
+`landslides` contains a factor column `lslpts` where `TRUE` corresponds to an observed landslide initiation point and `FALSE` to points where no landsliding occurred. 
 Columns `x` and `y` contain the corresponding coordinates.
 The landslide initiation point is located in the scarp of a landslide polygon.
 The coordinates for the non-landslide points were sampled randomly with the restriction to fall outside of the slightly buffered landslide polygons.
-`summary(landslides$lslpts)` tells us that 175 landslide points where observed while we have 1360 non-landslide points.
+`summary(landslides$lslpts)` tells us that 175 landslide points and 1360 non-landslide points are available.
 To make the ratio between landslide and non-landslide points more balanced, we randomly sample 175 from the 1360 non-landslide points.
 
 ```{r, eval = FALSE}
@@ -77,7 +77,7 @@ lsl = rbind(non[ind, ], landslides[landslides$lslpts == TRUE, ])
 ```
 
 `dem` is in fact a digital elevation model and consists of two list elements with the first being a raster header and the second being a matrix containing the altitudinal values.
-To transform this list into a `raster`, we can write:
+To transform this list into a `raster` object, we can write:
 
 ```{r, eval = FALSE}
 dem = 
@@ -90,7 +90,7 @@ dem =
 ```
 
 To model the probability for landslide occurrence, we need some predictors.
-Here, we use selected terrain attributes frequently associated with landsliding [@muenchow_geomorphic_2012], all of which can be computed from the provided digital elevation model (`dem`) using R-GIS bridges (see Chapter \@ref(gis)).
+We will use selected terrain attributes frequently associated with landsliding [@muenchow_geomorphic_2012], all of which can be computed from the provided digital elevation model (`dem`) using R-GIS bridges (see Chapter \@ref(gis)).
 We leave it as an exercise to the reader to compute the terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe (see also exercises).
 The first three rows of the resulting dataframe (still named `lsl`) could look like this:
 <!-- has anybody an idea why I have to run the following code chunk two times to make it work when rendering the book with `bookdown::render_book()`?-->
@@ -219,8 +219,7 @@ In the following we compute the receiver operator characteristic with the help o
 `auc()` returns the area under the curve.
 
 ```{r, message=FALSE}
-library(pROC)
-auc(roc(lsl$lslpts, fitted(fit)))
+pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
 ```
 
 An AUROC of `r round(pROC::auc(pROC::roc(lsl$lslpts, fitted(fit))), 2)` represents a good fit.
@@ -281,6 +280,7 @@ As we will perform a spatial CV later on, we need to specify the coordinates whi
 These have to be provided as a dataframe in parameter `coordinates`. 
 
 ```{r}
+library(mlr)
 # separate data to be modeled and coordinates
 coords = lsl[, c("x", "y")]
 data = dplyr::select(lsl, -x, -y)
@@ -383,9 +383,9 @@ mean(sp_cv$measures.test$auc)
 ```
 
 To put it into perspective, we compare this result with that of a 100-repeated 5-fold non-spatial cross-validation (Figure \@ref(fig:boxplot-cv); the code for the non-spatial cross-validation is not shown here but will be explored in the exercise section).
-As expected, the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, and relates to the over-optimistic predictive performance due to spatial autocorrelation.
+As expected, the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance due to spatial autocorrelation of the latter.
 
-```{r boxplot-cv, echo=FALSE, fig.width=6, fig.height=9, fig.cap="Boxplot showing the difference in AUROC values between spatial and conventional cross-validation (500 models)."}
+```{r boxplot-cv, echo=FALSE, fig.width=6, fig.height=9, fig.cap="Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation."}
 # Visualization of overfitting in the nsp-case
 boxplot(sp_cv$measures.test$auc,
         conv_cv$measures.test$auc, col = c("lightblue2", "mistyrose2"),
@@ -393,11 +393,11 @@ boxplot(sp_cv$measures.test$auc,
 ```
 
 ## Conclusions
-Resampling methods are a crucial part of a modern data scientist's toolbox. 
+Resampling methods are a crucial part of a modern data scientist's toolbox [@james_introduction_2013]. 
 In this chapter we used cross-validation to assess a model's predictive performance.
 Spatial data is statistically often not independent (spatial autocorrelation), which violates a fundamental assumption of cross-validation.
 Therefore, we introduced spatial CV, which reduces the bias introduced by spatial autocorrelation. 
-The **mlr** package makes it easy to use resampling techniques for many other statistical learning techniques including of course linear regression, semi-parametric models (e.g., generalized additive models) and machine learning techniques such as random forests, support vector machines or boosted regression trees [@bischl_mlr:_2013;@schratz_performance].
+The **mlr** package makes it easy to use resampling techniques for many other statistical learning techniques including of course linear regression, semi-parametric models (e.g., generalized additive models) and machine learning techniques such as random forests, support vector machines or boosted regression trees [@bischl_mlr:_2016;@schratz_performance_nodate].
 Please check out also the fantastic **mlr** online documentation:
 
 - https://mlr-org.github.io/mlr-tutorial/
@@ -409,7 +409,7 @@ Please check out also the fantastic **mlr** online documentation:
 1. Compute the terrain attributes slope, plan curvature, profile curvature and catchment area from `dem` (provided by `data("landslides", package = "RSAGA")`) with the help of R-GIS bridges, and extract the values from the corresponding output rasters to the `landslides` dataframe (`data(landslides, package = "RSAGA"`)).
 Keep all landslide initation points and 175 randomly selected non-landslide points (see section \@ref(case-landslide)).
 1. Reproduce the spatial prediction with the derived terrain attribute rasters (see Figure \@ref(fig:lsl-susc)).
-1. Compute a non-spatial cross-validation and make boxplots to compare the AUROC from a spatial and a non-spatial cv (see Figure \@ref(fig:boxplot-cv)).
+1. Compute a non-spatial cross-validation and make boxplots to compare the AUROC from a spatial and a non-spatial CV (see Figure \@ref(fig:boxplot-cv)).
 Hint: You need to specify a non-spatial task and a non-spatial resampling strategy.
 1. Use the squared slope as a further predictor.
 Repeat the resampling. 
