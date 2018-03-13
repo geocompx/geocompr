@@ -52,7 +52,7 @@ Since points close to each other are more similar compared to points further awa
 The consequence is that cross-validation would fail to detect over-fitting in the presence of spatial autocorrelation.
 Here, spatial CV will come to the rescue which will be the main topic of this chapter.
 
-## Case study: landslide susceptibility
+## Case study: landslide susceptibility {#case-landslide}
 
 To introduce spatial CV by example, we will use a landslide dataset from Southern Ecuador (Figure \@ref(fig:lsl-map)).
 For a detailed description of the dataset and the study area please refer to @muenchow_geomorphic_2012.
@@ -233,7 +233,7 @@ Cross-validation belongs to the family of resampling methods [@james_introductio
 The basic idea is to split (repeatedly) a dataset into training and test sets whereby the training data is used to fit a model which then is applied to the test set.
 Comparing the predicted values with the known response values from the test set (using a performance measure such as the AUROC in the binomial case) gives a bias-reduced assessment of the model's capability to generalize the learned relationship to independent data.
 For example, a 100-repeated 5-fold cross-validation means to randomly split the data into five partitions (folds) with each fold being used once as a test set (see upper row of Figure \@ref(fig:partitioning)). 
-This guarantees that each observation is used once in the test set, and requires the fitting of five models.
+This guarantees that each observation is used once as the test set, and requires the fitting of five models.
 Subsequently, this procedure is repeated 100 times.
 Of course, the data splitting will differ (though often only slightly) in each repetition.
 Overall, this amounts to fitting 500 models whereas the mean performance measure (AUROC) of all models is the model's overall prediction power.
@@ -242,7 +242,7 @@ However, geographic data is special.
 Remember that the first law of geography states that points close to each other tend to be, on average, more similar compared to points further away (@miller_toblers_2004; Chapter \@ref(transport)).
 This means these points are not statistically independent or put differently that training and test points in conventional cross-validation are often too close to each other (see first row of \@ref(fig:partitioning)).
 Using this information in our modeling is like a sneak preview, i.e. using information that should be unavailable to the training dataset.
-To overcome this problem, we should make use of spatial partitioning which splits the observations spatially using its coordinates in a *k*-means clustering (@brenning_spatial_2012; second row of Figure \@ref(fig:partitioning)).
+To overcome this problem, we should make use of spatial partitioning which splits the observations into spatially disjoint folds (using the observations' coordinates in a *k*-means clustering; @brenning_spatial_2012; second row of Figure \@ref(fig:partitioning)).
 The partitioning strategy is **the** distinguishing feature between spatial and classical cross-validation.
 Everything else remains exactly the same.
 As a result spatial CV leads to a bias-reduced assessment of a model's predictive performance, and hence helps to avoid over-fitting.
@@ -258,7 +258,7 @@ In R there are literally hundreds of packages available for statistical learning
 In section \@ref(conventional-model) we used the **stats** package to fit a logistic regression using the `glm()` command.
 `glm()` uses the common R modeling interface: specify the response and predictor variables via a formula object, build a model and make a prediction.
 However, many packages come with their own or a modified statistical learning interface which is why users frequently have to spend a lot of time to figure out the specifics of each of these packages or how to compare modeling results from different packages.
-The **mlr** package acts as a meta- or umbrella-package providing a unified interface to all popular statistical learning techniques available in R including classification, regression, survival analysis and clustering.^[As pointed out in the beginning we will solely focus on supervised learning techniques in this chapter.]
+The **mlr** package acts as a meta- or umbrella-package providing a unified interface to all popular statistical learning techniques available in R including classification, regression, survival analysis and clustering [@bischl_mlr:_2016].^[As pointed out in the beginning we will solely focus on supervised learning techniques in this chapter.]
 The standardized **mlr** interface is based on so-called basic building blocks (Figure \@ref(fig:building-blocks)).
 
 <!-- @Jakub: yes, I will ask if we me may use the figure -->
@@ -302,7 +302,7 @@ head(lrns[, 1:4])
 ```
 
 This yields all learners able to model two-class problems (landslide yes or no).
-We opt for the binomial classification method from the **stats** package which we already have used in section \@ref(conventional-model) and which is implemented in **mlr** as `classif.binomial`.
+We opt for the binomial classification method from the **stats** package which we already have used in section \@ref(conventional-model) and is implemented as `classif.binomial` in **mlr**.
 Additionally, we have to specify the link-function.
 We choose the `logit` link which is also the default when using the `binomial` family in `glm` (run `binomial()` to verify).
 `predict.type` determines the type of the prediction with
@@ -347,7 +347,7 @@ In the beginning, it might seem a bit tedious to learn the **mlr** interface for
 But remember that one only has to learn one single interface to run `r nrow(listLearners())` learners (**mlr** package version: `r packageVersion("mlr")`).
 Additionally, (spatial) resampling in **mlr** is really easy and only requires two more steps.^[Further advantages are the easy parallelization of resampling techniques and the tuning of machine learning hyperparameters, also spatially, in an inner fold.]
 Please note that package **sperrorest** initially implemented spatial cross-validation in R [@brenning_spatial_2012].
-In the meantime, its functionality was integrated into the **mlr** package which is the reason why we are using **mlr** (and not for example **caret**).
+In the meantime, its functionality was integrated into the **mlr** package which is the reason why we are using **mlr**.^[The **caret** package is another umbrella-package [@kuhn_applied_2013] for streamlined modeling in R, however, so far it does not provide spatial CV which is why we refrain from using it for spatial data.]
 The first thing to do is specifying a resampling method.
 We will use a 100-repeated 5-fold spatial CV.
 This ensures that a spatial partitioning with five partitions is chosen based on the provided coordinates in our `task` and that the partitioning is repeated 100 times.
@@ -393,30 +393,29 @@ boxplot(sp_cv$measures.test$auc,
 ```
 
 ## Conclusions
-point out again that the main interest here was predictive performance!
-- point to machine learning: random forests, boosting techniques, knn, 
-- reference extensive online documentation and tutorials:
-https://mlr-org.github.io/mlr-tutorial/
-https://github.com/mlr-org/mlr/wiki/user-2015-tutorial
+Resampling methods are a crucial part of a modern data scientist's toolbox. 
+In this chapter we used cross-validation to assess a model's predictive performance.
+Spatial data is statistically often not independent (spatial autocorrelation), which violates a fundamental assumption of cross-validation.
+Therefore, we introduced spatial CV, which reduces the bias introduced by spatial autocorrelation. 
+The **mlr** package makes it easy to use resampling techniques for many other statistical learning techniques including of course linear regression, semi-parametric models (e.g., generalized additive models) and machine learning techniques such as random forests, support vector machines or boosted regression trees [@bischl_mlr:_2013;@schratz_performance].
+Please check out also the fantastic **mlr** online documentation:
+
+- https://mlr-org.github.io/mlr-tutorial/
+- https://github.com/mlr-org/mlr/wiki/user-2015-tutorial
 
 
 ## Exercises
 
-1. Compute the terrain attributes slope, plan curvature, profile curvature and catchment area from `dem` (provided by `data("landslides", package = "RSAGA")`) with the help of R-GIS bridges, and extract the values from the corresponding output rasters to landslides/non-landslides dataframe.
+1. Compute the terrain attributes slope, plan curvature, profile curvature and catchment area from `dem` (provided by `data("landslides", package = "RSAGA")`) with the help of R-GIS bridges, and extract the values from the corresponding output rasters to the `landslides` dataframe (`data(landslides, package = "RSAGA"`)).
+Keep all landslide initation points and 175 randomly selected non-landslide points (see section \@ref(case-landslide)).
 1. Reproduce the spatial prediction with the derived terrain attribute rasters (see Figure \@ref(fig:lsl-susc)).
 1. Compute a non-spatial cross-validation and make boxplots to compare the AUROC from a spatial and a non-spatial cv (see Figure \@ref(fig:boxplot-cv)).
-Hint: You need to specify a non-spatial task and resampling strategy.
+Hint: You need to specify a non-spatial task and a non-spatial resampling strategy.
 1. Use the squared slope as a further predictor.
-Repeat the modeling. 
+Repeat the resampling. 
 How has the spatially cross-validated mean AUROC value changed compared to the model without the squared altitude predictor?
 
 <!--
-spatial CV with 5-fold partioning repeated 100 times.
-This means we divide a dataset into 5 spatially disjoint folds.
-Each of these folds serves once as a test set.
-Hence, five models form one repetition.
-We repeat this 100 times.
-
 hyperparameter tuning:
 The training data is again partitioned into 5 folds but only once.
 Now each fold is used once as a test set, and the remaining training data is used to find the optimal hyperparameter tuning via a random search with 50 (or whatever number) iterations -> 250 iterations to find the optimal hyperparameter combination. 
