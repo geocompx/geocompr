@@ -291,42 +291,48 @@ There are additional advantages of pipes from a communication perspective: they 
 
 ### Vector attribute aggregation
 
-Aggregation operations summarize datasets by a 'grouping variable' (typically an attribute column) or a spatial object.
-Imagine we would like to calculate the number of people per continent. 
-The `world` dataset contains the necessary ingredients, with the `pop` column containing the population per country and the grouping variable `continent`.
-Aggregation in this context finding the `sum()` of country populations for each continent.
-In base R this is done with `aggregate()` as follows:
+Aggregation operations summarize datasets by a 'grouping variable', typically an attribute column (spatial aggregation is covered in the next chapter).
+An example of attribute aggregation is calculating the number of people per continent based on country-level data (one row per country).
+The `world` dataset contains the necessary ingredients: the columns `pop` and `continent`, the population and the grouping variable respectively.
+The aim is to find the `sum()` of country populations for each continent.
+This can be done with the base R function `aggregate()` as follows:
 
-```{r, eval=FALSE}
-aggregate(pop ~ continent, FUN = sum, data = world, na.rm = TRUE)
+```{r}
+world_agg1 = aggregate(pop ~ continent, FUN = sum, data = world, na.rm = TRUE)
+class(world_agg1)
 ```
 
-The result is a non-spatial data frame with six rows, one per continent, and two columns (see Table \@ref(tab:continents) with results for the top 3 most populous continents).
+The result is a non-spatial data frame with six rows, one per continent, and two columns reporting the name and population of each continent (see Table \@ref(tab:continents) with results for the top 3 most populous continents).
 
-`summarize()` is the **dplyr** equivalent of `aggregate()`, which uses the function `group_by()` to create the grouping variable.
-The tidy equivalent of the `aggregate()` method is as follows:
+`aggregate()` is a generic function which means that it behaves differently depending on its inputs.
+**sf** provides a function that can be called directly with `sf:::aggregate()` that is activated when a `by` argument is provided, rather than using the `~` to refer to the grouping variable:
 
-```{r, eval=FALSE}
-group_by(world, continent) %>%
+```{r}
+world_agg2 = aggregate(world["pop"], by = list(world$continent),
+                       FUN = sum, na.rm = TRUE)
+class(world_agg2)
+```
+
+As illustrated above, an object of class `sf` is returned this time.
+`world_agg2` which is a spatial object containing 6 polygons representing the columns of the world.
+
+`summarize()` is the **dplyr** equivalent of `aggregate()`.
+It usually follows `group_by()`, which specifies the grouping variable, as illustrated below:
+
+```{r}
+world_agg3 = group_by(world, continent) %>%
   summarize(pop = sum(pop, na.rm = TRUE))
 ```
 
 This approach is flexible, allowing the resulting columns to be named.
-Further, omitting the grouping variable puts everything in one group.
-This means `summarize()` can be used to calculate the Earth's total population (~7 billion) and number of countries:
+`summarize()` can also be used to calculate the Earth's total population (~7 billion) and number of countries as you will see if execute the following command (result not shown):
 
 ```{r, eval=FALSE}
 world %>% 
   summarize(pop = sum(pop, na.rm = TRUE), n_countries = n())
 ```
 
-```{r, echo=FALSE}
-world %>% 
-  st_set_geometry(NULL) %>%
-  summarize(pop = sum(pop, na.rm = TRUE), n_countries = n())
-```
-
-The result is a spatial data frame of class `sf` (only the non-spatial results are shown): the aggregation procedure dissolves boundaries within continental land masses (explained in detail in section \@ref(geometry-unions)).
+Again, this returns spatial data frame of class `sf`: the aggregation procedure dissolves boundaries within continental land masses (explained in detail in section \@ref(geometry-unions)), resulting in a single feature representing the world.
 In the previous code chunk `pop` and `n_countries` are column names in the result.
 `sum()` and `n()` were the aggregating functions.
 
