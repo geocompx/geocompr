@@ -13,6 +13,7 @@ library(pROC)
 library(raster)
 library(RSAGA)
 library(sf)
+library(tidyverse)
 ```
 
 - Required data will be downloaded in due course.
@@ -71,9 +72,15 @@ The coordinates for the non-landslide points were sampled randomly with the rest
 To make the ratio between landslide and non-landslide points more balanced, we randomly sample 175 from the 1360 non-landslide points.
 
 ```{r, eval = FALSE}
-non = landslides[landslides$lslpts == FALSE, ]
-ind = sample(1:nrow(non), nrow(landslides[landslides$lslpts == TRUE, ]))
-lsl = rbind(non[ind, ], landslides[landslides$lslpts == TRUE, ])
+# select non-landslide points
+non = filter(landslides, lslpts == FALSE)
+# select landslide points
+lsl_pts = filter(landslides, lslpts == TRUE)
+# randomly select 175 non-landslide points
+ind = sample(1:nrow(non), nrow(lsl_pts))
+# rowbind randomly selected non-landslide points and 
+# landslide points
+lsl = rbind(non[ind, ], lsl_pts)
 ```
 
 `dem` is in fact a digital elevation model and consists of two list elements with the first being a raster header and the second being a matrix containing the altitudinal values.
@@ -84,15 +91,17 @@ dem =
   raster(dem$data, 
          crs = dem$header$proj4string,
          xmn = dem$header$xllcorner, 
-         xmx = dem$header$xllcorner + dem$header$ncols * dem$header$cellsize,
+         xmx = dem$header$xllcorner + 
+           dem$header$ncols * dem$header$cellsize,
          ymn = dem$header$yllcorner,
-         ymx = dem$header$yllcorner + dem$header$nrows * dem$header$cellsize)
+         ymx = dem$header$yllcorner + 
+           dem$header$nrows * dem$header$cellsize)
 ```
 
 To model the probability for landslide occurrence, we need some predictors.
 We will use selected terrain attributes frequently associated with landsliding [@muenchow_geomorphic_2012], all of which can be computed from the provided digital elevation model (`dem`) using R-GIS bridges (see Chapter \@ref(gis)).
 We leave it as an exercise to the reader to compute the terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe (see also exercises).
-The first three rows of the resulting dataframe (still named `lsl`) could look like this:
+The first three rows of the resulting dataframe (still named `lsl`) excluding the coordinates could look like this:
 <!-- has anybody an idea why I have to run the following code chunk two times to make it work when rendering the book with `bookdown::render_book()`?-->
 ```{r, echo=FALSE}
 load("extdata/spatialcv.Rdata")
@@ -103,7 +112,8 @@ load("extdata/spatialcv.Rdata")
 ```
 
 ```{r}
-head(lsl, 3)
+dplyr::select(lsl, -x, -y) %>%
+  head(., 3)
 ```
 
 The added columns are:
@@ -171,7 +181,8 @@ We could do this manually but can also use **raster**'s `predict()` function.
 This function also expects the fitted model as input as well as a raster stack with the predictors exactly named as in the fitted model (Figure \@ref(fig:lsl-susc)).
 
 ```{r}
-pred = raster::predict(object = ta, model = fit, type = "response")
+pred = raster::predict(object = ta, model = fit,
+                       type = "response")
 ```
 
 ```{r lsl-susc, echo = FALSE, fig.cap="Spatial prediction of landslide susceptibility using a  GLM. CRS: UTM zone 17S (EPSG: 32717).", warning=FALSE}
@@ -299,7 +310,8 @@ For a specific task, we can run:
 
 ```{r, warning=FALSE, message=FALSE}
 lrns = listLearners(task)
-head(lrns[, 1:4])
+dplyr::select(lrns, class, name, package) %>%
+  head
 ```
 
 This yields all learners able to model two-class problems (landslide yes or no).
@@ -315,8 +327,9 @@ lrn = makeLearner(cl = "classif.binomial",
                   link = "logit",
                   predict.type = "prob",
                   fix.factors.prediction = TRUE)
-# run the following lines to find out from which package the learner is taken
-# and how to access the corresponding help file(s)
+# run the following lines to find out from which package the
+# learner is taken and how to access the corresponding help 
+# file(s)
 # getLearnerPackages(learner)
 # helpLearner(learner)
 ```
@@ -354,7 +367,8 @@ We will use a 100-repeated 5-fold spatial CV.
 This ensures that a spatial partitioning with five partitions is chosen based on the provided coordinates in our `task` and that the partitioning is repeated 100 times.
 
 ```{r}
-resampling = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
+resampling = makeResampleDesc(method = "SpRepCV", folds = 5, 
+                              reps = 100)
 ```
 
 To execute the spatial resampling, we run `resample()` using the specified learner, task, resampling strategy and of course the performance measure, here the AUROC.
@@ -363,7 +377,8 @@ This takes a short while because we ask R to compute the AUROC from 500 models.
 
 ```{r, eval=FALSE}
 set.seed(012348)
-sp_cv = mlr::resample(learner = lrn, task = task, resampling = resampling, 
+sp_cv = mlr::resample(learner = lrn, task = task,
+                      resampling = resampling, 
                       measures = mlr::auc)
 ```
 
