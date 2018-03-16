@@ -188,12 +188,12 @@ First of all, we need to make sure that **RSAGA** will find SAGA on the computer
 For this, all **RSAGA** functions using SAGA in the background make use of `rsaga.env()`. 
 Usually, `rsaga.env()` will detect SAGA automatically by searching several likely directories (see its help for more information). However, we have 'hidden' SAGA in the OSGEO4W-installation, a location `rsaga.env()` does not search automatically. 
 `linkSAGA` searches your computer for a valid SAGA installation. 
-If it finds one, it adds it to the PATH environment variable thereby making sure that `rsaga.env` runs successfully.
+If it finds one, it adds the newest version to the PATH environment variable thereby making sure that `rsaga.env` runs successfully.
 
 ```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library(RSAGA)
 library(link2GI)
-linkSAGA()
+saga = linkSAGA()
 rsaga.env()
 ```
 
@@ -316,7 +316,7 @@ Now that we have the data, we can go on and initiate a GRASS session, i.e., we h
 The GRASS geodatabase system is based on SQLite.
 Consequently, different users can easily work on the same project, possibly with different read/write permissions.
 However, one has to set up this geodatabase (also from within R), and users used to a GIS GUI popping up by one click might find this process a bit intimidating in the beginning.
-First of all, the GRASS database requires its own directory, and contains a location (Figure \@ref(fig:grass-loc)).
+First of all, the GRASS database requires its own directory, and contains a location (see the [GRASS GIS Quickstart](https://grass.osgeo.org/grass72/manuals/helptext.html) document and [GRASS GIS Database](https://grass.osgeo.org/grass75/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass75/manuals/index.html) for further information).
 The location in turn simply contains the geodata for one project. 
 Within one location several mapsets can exist, and typically refer to different users. 
 PERMANENT is a mandatory mapset, and created automatically.
@@ -324,23 +324,15 @@ It stores the projection, the spatial extent and the default resolution for rast
 In order to share spatial data with all users of a project, the database owner can add spatial data to the PERMANENT mapset.
 Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass72/manuals/helptext.html) for more information on the GRASS geodatabase system.
 
-```{r grass-loc, fig.cap="Structure of the GRASS geodatabase system including locations and mapsets Figure was taken from https://grass.osgeo.org/grass72/manuals/help_loc_struct.png.", echo=FALSE}
-knitr::include_graphics("https://grass.osgeo.org/grass72/manuals/help_loc_struct.png")
-```
-
 You have to set up a location and a mapset if you want to use GRASS from within R.
 First of all, we need to find out if and where GRASS7 is installed on the computer.
 
 ```{r}
 library(link2GI)
-if (Sys.info()["sysname"] == "Windows") {
-  link = link2GI::searchGRASSW()  
-} else {
-  link = link2GI::searchGRASSX()
-}
+link = findGRASS() 
 ```
 
-`link` is a `data.frame` which contains in its rows the GRASS installations on your computer. 
+`link` is a `data.frame` which contains in its rows the GRASS 7 installations on your computer. 
 Here, we will use a GRASS7 installation.
 If you have not installed GRASS7 on your computer, we recommend that you do so now.
 Assuming that we have found a working installation on your computer, we use the corresponding path in `initGRASS`. 
@@ -353,16 +345,16 @@ ind = grep("7", link$version)[1]
 # next line of code only necessary if we want to use GRASS as installed by 
 # OSGeo4W. Among others, this adds some paths to PATH, which are also needed
 # for running GRASS.
-link2GI::getparams_GRASS4W(link[ind, ])
+link2GI::paramGRASSw(link[ind, ])
 grass_path = ifelse(!is.null(link$installation_type) && 
                       link$installation_type[ind] == "osgeo4W",
-                     file.path(link$instDir[ind], "apps/grass", link$version[ind]),
-                     link$instDir)
+                    file.path(link$instDir[ind], "apps/grass", link$version[ind]),
+                    link$instDir)
 initGRASS(gisBase = grass_path,
           # home parameter necessary under UNIX-based systems
           home = tempdir(),
           gisDbase = tempdir(), location = "london", 
-          mapset = "PERMANENT")
+          mapset = "PERMANENT", override = TRUE)
 ```
 
 Subsequently, we define the projection, the extent and the resolution.
@@ -385,7 +377,7 @@ If there is just one installation, the `linkGRASS7` automatically chooses this o
 Secondly, `linkGRASS7` establishes a connection to GRASS7.
  
 ```{r, eval=FALSE}
-linkGRASS7(streets, ver_select = TRUE)
+link2GI::linkGRASS7(streets, ver_select = TRUE)
 ```
 
 Before we can use GRASS geoalgorithms, we need to add data to GRASS's spatial database.

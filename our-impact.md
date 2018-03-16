@@ -37,7 +37,7 @@
 - 2018-01-19 - bug - sf failed silently when renaming the `sf_column` - https://github.com/r-spatial/sf/issues/622
 - 2018-02-10 - bug - tmap 2.0: tm_polygons error - https://github.com/mtennekes/tmap/issues/170
 - 2018-02-22 - bug - Mix of raster and points results in error - tmap 2.0 - https://github.com/mtennekes/tmap/issues/176
-
+- 2018-02-26 - bug - Plotting error - tmap 2.0 - https://github.com/mtennekes/tmap/issues/177
 
 ## open
 
@@ -54,3 +54,4 @@
 - 2017-07-12 - Pull request accepted to **sf** exporting and documenting `as_Spatial()` - https://github.com/r-spatial/sf/pull/445
 - 2017-08-28 - PR accepted into **sf** updating the behaviour of `aggregate.sf` - https://github.com/r-spatial/sf/pull/453
 - 2017-10-15 - Question on gdal-dev helped improving GPKG writing speed - https://github.com/r-spatial/sf/issues/470#issuecomment-336735578
+- 2018-03-14 - Updated documentation for aggregate.sf: https://github.com/r-spatial/sf/pull/671

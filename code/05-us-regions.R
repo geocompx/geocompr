@@ -1,10 +1,10 @@
-# # with base R ----
+# with base R ----
 # old_par = par()
 # breaks = c(1e5, 5e6, 1e7, 7e7, 2e8)
 # rdf = st_set_geometry(regions, NULL)
 # us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
 #                                   dplyr::select(rdf, Group.1, total_pop_15),
-#                                   by = c("REGION" = "Group.1")) %>% 
+#                                   by = c("REGION" = "Group.1")) %>%
 #   pull(total_pop_15)
 # 
 # par(mfrow = c(1, 2))
@@ -19,11 +19,11 @@ us_states_facet = dplyr::select(us_states, REGION, total_pop_15) %>%
   mutate(Level = "State")
 regions_facet = rename(regions, REGION = Group.1) %>%
   mutate(Level = "Region")
-us_facet = rbind(us_states_facet, regions_facet) %>% 
-  mutate(Level = factor(Level, levels = c("State", "Region"))) %>% 
+us_facet = rbind(us_states_facet, regions_facet) %>%
+  mutate(Level = factor(Level, levels = c("State", "Region"))) %>%
   st_cast("MULTIPOLYGON")
 
-tm_shape(us_facet) + 
+tm_shape(us_facet) +
   tm_polygons("total_pop_15", title = "Total population:") +
   tm_facets(by = "Level", nrow = 1, drop.units = TRUE)
 
