@@ -276,7 +276,7 @@ Instead of using just one CPU thread for the whole operation, vector objects cou
 Next, extraction would be performed independently for each group and the results would be combined.
 <!-- `?clusterR` + ref to big data chapter?? -->
 <!-- tabularaster (ref to the vignette - https://cran.r-project.org/web/packages/tabularaster/vignettes/tabularaster-usage.html)-->
-Secondly, the **velox** package (\@ref(hunziker_velox:_2017)) provides a fast method for extracting raster data that fits in the RAM memory.
+Secondly, the **velox** package [@hunziker_velox:_2017] provides a fast method for extracting raster data that fits in the RAM memory.
 This process is described in detail at https://hunzikp.github.io/velox/extract.html.
 <!-- Finally, it could be worthwhile to consider using R-GIS bridges. -->
 <!-- Methods similar to `raster::extract` can be found in GRASS GIS (e.g. v.rast.stats) -->
@@ -457,6 +457,49 @@ source("code/11-raster-vectorization2.R")
 <!-- ## distances? -->
 
 ## Exercises
+
+<!-- 1. -->
+<!-- info about the data (ndvi + random points) -->
+<!-- create a convex hull -->
+<!-- ex: crop by convex hull -->
+<!-- ex: mask by random points and mask by convex hull -->
+<!-- ex: compare the results -->
+<!-- 2. -->
+<!-- ex: extract nvdi by the random points with 90 meters buffer -->
+<!-- explain why -->
+```{r, echo=FALSE, eval=FALSE}
+library(RQGIS)
+library(sf)
+library(raster)
+data("dem")
+data("ndvi")
+data("random_points")
+
+ch = st_combine(random_points) %>% 
+  st_convex_hull()
+
+plot(ndvi)
+plot(st_geometry(random_points), add = TRUE)
+plot(ch, add = TRUE)
+
+ndvi_small = ndvi %>% 
+  crop(as(ch, "Spatial")) %>% 
+  mask(as(ch, "Spatial"))
+  
+plot(ndvi_small)
+plot(ch, add = TRUE)
+
+random_points_buf = st_buffer(random_points, dist = 90)
+
+plot(ndvi)
+plot(st_geometry(random_points_buf), add = TRUE)
+plot(ch, add = TRUE)
+
+random_points$ndvi = extract(ndvi, random_points, buffer = 90, fun = mean)
+random_points$ndvi2 = extract(ndvi, random_points)
+
+plot(random_points$ndvi, random_points$ndvi2)
+```
 1. Subset points higher than 3100 meters in New Zealand (the `nz_height` object). 
 Using the new object:
     - Count numbers of the highest points in grid cells with a resolution of 3 km.

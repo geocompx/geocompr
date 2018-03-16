@@ -54,3 +54,4 @@
 - 2017-07-12 - Pull request accepted to **sf** exporting and documenting `as_Spatial()` - https://github.com/r-spatial/sf/pull/445
 - 2017-08-28 - PR accepted into **sf** updating the behaviour of `aggregate.sf` - https://github.com/r-spatial/sf/pull/453
 - 2017-10-15 - Question on gdal-dev helped improving GPKG writing speed - https://github.com/r-spatial/sf/issues/470#issuecomment-336735578
+- 2018-03-14 - Updated documentation for aggregate.sf: https://github.com/r-spatial/sf/pull/671
