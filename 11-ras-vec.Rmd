@@ -458,46 +458,46 @@ source("code/11-raster-vectorization2.R")
 
 ## Exercises
 
-<!-- 1. -->
-<!-- info about the data (ndvi + random points) -->
-<!-- create a convex hull -->
-<!-- ex: crop by convex hull -->
-<!-- ex: mask by random points and mask by convex hull -->
-<!-- ex: compare the results -->
-<!-- 2. -->
-<!-- ex: extract nvdi by the random points with 90 meters buffer -->
-<!-- explain why -->
-```{r, echo=FALSE, eval=FALSE}
+1. The next two exercises will use a vector (`random_points`) and raster dataset (`ndvi`) from **RQGIS** package.
+We will also create a convex hull of the vector dataset (`ch`), which will represent an area of interest:
+```{r}
 library(RQGIS)
-library(sf)
-library(raster)
-data("dem")
-data("ndvi")
-data("random_points")
-
+data(random_points)
+data(ndvi)
 ch = st_combine(random_points) %>% 
   st_convex_hull()
-
+```
+Crop the `ndvi` raster using (1) the `random_points` dataset and (2) the `ch` dataset.
+Are there any difference in the output maps?
+Next, mask `ndvi` using these two datasets.
+Can you see any difference now?
+How can you explain that?
+```{r, echo=FALSE, eval=FALSE}
 plot(ndvi)
 plot(st_geometry(random_points), add = TRUE)
 plot(ch, add = TRUE)
 
-ndvi_small = ndvi %>% 
-  crop(as(ch, "Spatial")) %>% 
-  mask(as(ch, "Spatial"))
-  
-plot(ndvi_small)
-plot(ch, add = TRUE)
+ndvi_crop1 = crop(ndvi, as(random_points, "Spatial")) 
+ndvi_crop2 = crop(ndvi, as(ch, "Spatial")) 
+plot(ndvi_crop1)
+plot(ndvi_crop2)
 
+ndvi_mask1 = mask(ndvi, as(random_points, "Spatial")) 
+ndvi_mask2 = mask(ndvi, as(ch, "Spatial")) 
+plot(ndvi_mask1)
+plot(ndvi_mask2)
+```
+1. Firstly, extract values from `ndvi` using `random_points`.
+Next, extract average values of `ndvi` using 90 meters buffers around each point from `random_points`. 
+Compare these two sets of values. 
+When extract by buffer could be more suitable than an extract by point?
+```{r, echo=FALSE, eval=FALSE}
 random_points_buf = st_buffer(random_points, dist = 90)
-
 plot(ndvi)
 plot(st_geometry(random_points_buf), add = TRUE)
 plot(ch, add = TRUE)
-
 random_points$ndvi = extract(ndvi, random_points, buffer = 90, fun = mean)
 random_points$ndvi2 = extract(ndvi, random_points)
-
 plot(random_points$ndvi, random_points$ndvi2)
 ```
 1. Subset points higher than 3100 meters in New Zealand (the `nz_height` object). 
