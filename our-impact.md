@@ -46,6 +46,7 @@
 - 2017-08-23 - bug - mapedit does not seem to save the end result after editing - https://github.com/r-spatial/mapedit/issues/63
 - 2018-02-11 - enhancement - Function's names - idea - https://github.com/mtennekes/tmap/issues/171
 - 2018-03-17 - bug - v.rast.stats doesn't add a new column - https://github.com/jannes-m/RQGIS/issues/99
+- 2018-03-18 - bug - Extract values from raster objects using lines doesn't return data.frames - https://r-forge.r-project.org/tracker/index.php?func=detail&aid=6570&group_id=294&atid=1189
 
 # Other
 
