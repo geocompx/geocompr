@@ -16,9 +16,7 @@
 #**********************************************************
 
 # attach packages
-if(!require(gh)) {
-  install.packages("gh")
-}
+library(gh)
 library(tidyverse)
 
 #**********************************************************
@@ -32,5 +30,4 @@ name = gsub(pattern = "https://github.com/", "", link)
 commits = paste0("https://github.com/Robinlovelace/geocompr/commits?author=", name)
 out_df = data_frame(name, link)
 # remove book authors
-filter(out_df, !grepl("robin|jannes|jn|jakub|nowosad", name, TRUE)) %>% 
-  unique() 
+filter(out_df, !grepl("robin|jannes|jn|jakub|nowosad", name, TRUE)) 
