@@ -2,7 +2,7 @@
 #
 # TO DO: List all geocompr contributors
 #
-# Author(s): Jannes Muenchow
+# Author(s): Jannes Muenchow & Robin Lovelace
 #
 #**********************************************************
 # CONTENTS-------------------------------------------------
@@ -16,24 +16,18 @@
 #**********************************************************
 
 # attach packages
-library("dplyr")
-library("stringr")
+library(gh)
+library(tidyverse)
 
 #**********************************************************
 # 2 CONTRIBUTOR LIST---------------------------------------
 #**********************************************************
 
 # git has to be in PATH
-grepl("git", Sys.getenv("PATH"))
-# cmd = "git log | grep Author: | sort | uniq"
-# cmd = "git shortlog -sn -e"
-cmd = "git log"
-out = system(cmd, intern = TRUE)
-out = unique(grep("Author: ", out, value = TRUE))
-out = gsub("Author: ", "", out)
-email = stringr::str_extract_all(out, "<.*?>")
-name = gsub("<.*", "", out)
-out = data.frame(cbind(name, email))
+out_json = gh::gh(endpoint = "/repos/robinlovelace/geocompr/contributors")
+link = vapply(out_json, "[[", FUN.VALUE = "", "html_url")
+name = gsub(pattern = "https://github.com/", "", link)
+commits = paste0("https://github.com/Robinlovelace/geocompr/commits?author=", name)
+out_df = data_frame(name, link)
 # remove book authors
-out = dplyr::filter(out, !grepl("robin|jannes|jn|jakub|nowosad", tolower(name)))
-dplyr::filter(out, !duplicated(name))
+filter(out_df, !grepl("robin|jannes|jn|jakub|nowosad", name, TRUE)) 
