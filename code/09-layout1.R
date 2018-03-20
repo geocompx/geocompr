@@ -1,0 +1,5 @@
+l1 = map_nz + tm_layout(title = "New Zealand")
+l2 = map_nz + tm_layout(scale = 5)
+l3 = map_nz + tm_layout(bg.color = "lightblue")
+l4 = map_nz + tm_layout(frame = FALSE)
+tmap_arrange(l1, l2, l3, l4, nrow = 1)
