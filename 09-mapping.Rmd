@@ -425,7 +425,6 @@ knitr::include_graphics("figures/urban-animated.gif")
 <!-- 2/ by , nrow, ncol -->
 <!-- next, focus on `animation_tmap` -->
 
-
 ```{r}
 us_anim = tm_shape(world) + 
   tm_polygons() +
@@ -442,6 +441,9 @@ source("code/09-urban-animation.R")
 <!-- 4/ by and along -->
 
 ```{r ani_data_prep, eval=FALSE, echo=FALSE}
+library(wbstats)
+library(rnaturalearth)
+library(units)
 options(scipen = 999)
 
 wb_data_create = function(indicator, our_name, year, ...){
@@ -470,17 +472,24 @@ world_sf_temporal = ne_countries(returnclass = 'sf') %>%
 ```{r animation1, eval=FALSE, echo=FALSE}
 m1 = tm_shape(world_sf_temporal) + 
   tm_polygons("lifeExp") +
-  tm_facets(by = "year", nrow = 1, ncol = 1, drop.units = TRUE)
+  tm_facets(by = "year", nrow = 1, ncol = 1)
 
 animation_tmap(m1, filename = "figures/11-lifeExp_animation.gif", width = 2000, height = 600, delay = 40)
 ```
 
-```{r animation2, eval=FALSE, echo=FALSE}
-world_sf_temporal2 = filter(world_sf_temporal, continent == "South America")
-m2 = tm_shape(world_sf_temporal2) +
+```{r animation1, eval=FALSE, echo=FALSE}
+world_sf_sa = filter(world_sf_temporal, continent == "South America", year == 2013)
+m2 = tm_shape(world_sf_sa) +
   tm_polygons("lifeExp", n = 12) +
-  tm_facets(by = "name_long", along = "year", drop.units = TRUE, free.coords = TRUE)
-animation_tmap(m2, filename = "figures/11-lifeExp_sa_animation.gif", width = 1600, height = 1000, delay = 40)
+  tm_facets(along = "name_long")
+```
+
+```{r animation3, eval=FALSE, echo=FALSE}
+world_sf_temporal_sa = filter(world_sf_temporal, continent == "South America")
+m3 = tm_shape(world_sf_temporal_sa) +
+  tm_polygons("lifeExp", n = 12) +
+  tm_facets(by = "name_long", along = "year")
+animation_tmap(m3, filename = "figures/11-lifeExp_sa_animation.gif", width = 1600, height = 1000, delay = 40)
 ```
 
 <!-- add a new animation exercise -->
