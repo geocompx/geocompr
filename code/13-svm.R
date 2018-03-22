@@ -16,11 +16,13 @@
 #**********************************************************
 
 # attach packages
-library("raster")
-library("mlr")
-library("sf")
-library("tmap")
+library(raster)
+library(mlr)
+library(sf)
+library(tmap)
+library(parallelMap)
 
+# attach data
 load("extdata/spatialcv.Rdata")
 
 #**********************************************************
@@ -58,7 +60,7 @@ helpLearner(lrn_ksvm)
 # Outer resampling loop
 outer = makeResampleDesc("SpRepCV", folds = 5, reps = 100)
 
-# Tuning in inner resampling loop
+# Inner resampling loop for hyperparameter tuning
 ps = makeParamSet(
   makeNumericParam("C", lower = -12, upper = 15, trafo = function(x) 2^x),
   makeNumericParam("sigma", lower = -15, upper = 6, trafo = function(x) 2^x)
@@ -71,21 +73,37 @@ wrapper_ksvm = makeTuneWrapper(lrn_ksvm, resampling = inner, par.set = ps,
                                control = ctrl, show.info = FALSE,
                                measures = mlr::auc)
 
-# Linux
-library(parallelMap)
+#***************************************
+# SUBSEQUENT CODE ONLY WORKS UNDER LINUX
+#***************************************
+
 # check the number of cores
-parallel::detectCores()
-# only parallelize the tuning
-parallelStart(mode = "multicore", level = "mlr.tuneParams", cpus = 24,
+n = parallel::detectCores()
+# parallelize the tuning, i.e. the inner fold
+parallelStart(mode = "multicore", level = "mlr.tuneParams", 
+              cpus = round(n / 2),
               mc.set.seed = TRUE) 
 
 set.seed(12345)
-system.time(
-  {resa_svm_spatial = mlr::resample(wrapper_ksvm, task,
-                                   resampling = outer, extract = getTuneResult,
-                                   show.info = TRUE, measures = mlr::auc)}
-)
+resa_svm_spatial = mlr::resample(wrapper_ksvm, task,
+                                 resampling = outer, extract = getTuneResult,
+                                 show.info = TRUE, measures = mlr::auc)
 
+# Aggregated Result: auc.test.mean=0.7583375
 parallelStop()
-saveRDS(resa_svm_spatial, "extdata/svm_sp_sp_rbf_10it.rda")
-print("done")
+# save your result
+saveRDS(resa_svm_spatial, "extdata/svm_sp_sp_rbf_50it.rda")
+
+# Exploring the results
+# run time in minutes
+resa_svm_spatial$runtime / 60
+# final aggregated AUROC 
+resa_svm_spatial$aggr
+# same as
+mean(resa_svm_spatial$measures.test$auc)
+# used hyperparameters for the outer fold, i.e. the best combination out of 50 *
+# 5 models
+resa_svm_spatial$extract[[1]]
+# and here one can observe that the AUC of the tuning data is usually higher
+# than for the model on the outer fold
+resa_svm_spatial$measures.test[1, ]
