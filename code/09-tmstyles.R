@@ -1,0 +1,12 @@
+library(spData)
+library(tmap)
+legend_title = expression("Area (km"^2*")")
+map_nza = tm_shape(nz) +
+  tm_fill(col = "AREA_SQ_KM", title = legend_title) + tm_borders()
+s1 = map_nza + tm_style_albatross() + tm_layout("tm_style_albatross")
+s2 = map_nza + tm_style_cobalt() + tm_layout("tm_style_cobalt")
+s3 = map_nza + tm_style_col_blind() + tm_layout("tm_style_col_blind")
+s4 = map_nza + tm_style_grey() + tm_layout("tm_style_grey")
+s5 = map_nza + tm_style_natural() + tm_layout("tm_style_natural")
+s6 = map_nza + tm_style_white() + tm_layout("tm_style_white")
+tmap_arrange(s1, s2, s3, s4, s5, s6)
