@@ -103,21 +103,19 @@ map_nz = tm_shape(nz) + tm_fill() + tm_borders()
 class(map_nz)
 ```
 
-We can later use `map_nz` to plot its contents with `print(map_nz)`.
-Alternatively `tmap` objects can be used as the basis of other maps:
-in addition to new layers for a single shape, the `+` operator can be used to add new shapes to a map with an extra `+ tm_shape()`.
+`map_nz` can be plotted later, for example by adding additional layers (as we'll below) or simply running `map_nz` in the console, which is equivalent to `print(map_nz)`.
+To use `tmap` objects as the basis of other maps new layers or settings can be added with the `+` operator.
 
-All subsequent layer functions after a new shape will refer to the newly added shape, until a new shape is added, allowing one or more layers to be added for each shape.
-This is illustrated in the code chunk below which creates a new map object (called `map_nz1`) building on `map_nz`.
-`map_nz1` contains an additional layer representing high points in New Zealand, as illustrated in Figure \@ref(fig:tmlayers) (left).
+When another shape is added to a `tmap` object with `+ tm_shape()`, all subsequent aesthetic functions refer to the newly added shape, until another new shape is added.
+This syntax allows the creation of maps involving multiple shapes and one or more layers for each shape, as demonstrated in the code chunk below:
 
 ```{r, results='hide'}
 map_nz1 = map_nz +
   tm_shape(nz_height) + tm_bubbles()
 ```
 
-In turn, another layer can be added to the newly created map object `map_nz1`.
-This is illustrated in the code chunk below which first creates `nz_water`, representing New Zealand's [territorial waters](https://en.wikipedia.org/wiki/Territorial_waters) and then plots this on top of the pre-existing map object, saving the result as `map_nz2`:
+Building on the previously created `map_nz` object the preceding code creates a new map object `map_nz1` which contains another shape representing high points in New Zealand (see Figure \@ref(fig:tmlayers), left).
+More shapes and layers can be added, as illustrated in the code chunk below which creates `nz_water`, representing New Zealand's [territorial waters](https://en.wikipedia.org/wiki/Territorial_waters), and adds the resulting lines to an existing map object.
 
 ```{r}
 nz_water = st_union(nz) %>% st_buffer(22200) %>%
@@ -141,7 +139,8 @@ This is demonstrated in the code chunk below which plots `map_nz1` to `map_nz3`,
 tmap_arrange(map_nz1, map_nz2, map_nz3)
 ```
 
-Additional elements such as north arrows, scale bars and layout options can also be added using the `+` same notation as we'll see in subsequent sections.
+Additional elements such as north arrows, scale bars and layout options can also be added with the `+` operator.
+Aesthetic settings, however, are controlled by arguments to layer functions.
 
 ### Aesthetics
 
@@ -205,6 +204,18 @@ tm_shape(nz) + tm_fill(col = "AREA_SQ_KM", palette = "RdBu")
 source("code/09-tmpal.R", print.eval = TRUE)
 ```
 
+An important argument in functions defining aesthetic layers such as `tm_fill()` is `title`, which sets the title of the associated legend.
+The following code chunk demonstrates this functionality by providing a more attractive name than the variable name `AREA_SQ_KM` used in the previous figures (note the use of `expression()` for to create superscript text):
+
+```{r}
+legend_title = expression("Area (km"^2*")")
+map_nza = tm_shape(nz) +
+  tm_fill(col = "AREA_SQ_KM", title = legend_title) + tm_borders()
+```
+
+The resulting `tmap` object `map_nza` will be used alongside `map_nz` (created previously) to illustrate different layout settings in the next section.
+
+
 ### Map layouts
 
 Layout refers not to the map itself but to its wider surroundings.
@@ -222,7 +233,7 @@ source("code/09-layout1.R")
 ```
 
 The other arguments in `tm_layout()` provide control over many more aspects of the map in relation to the canvas on which it is placed.
-The most useful layout settings include (see `?tm_layout` for full list):
+Some most useful layout settings are listed below and illustrated in Figure \@ref(fig:layout2) (see `?tm_layout` for full list):
 
 - Default colors of aesthetic layers (`aes.color`), map attributes such as the frame (`attr.color`).
 - Color settings controlling `sepia.intensity` (how yellowy the map looks) and `saturation` (a color-greyscale).
@@ -231,18 +242,26 @@ The most useful layout settings include (see `?tm_layout` for full list):
 - Font settings, controlled by `fontface` and `fontfamily`.
 - Legend settings including binary options such as `legend.show` (whether or not to show the legend) `legend.only` (omit the map) and `legend.outside` (should the legend go outside the map?), as well as multiple choice settings such as `legend.position`.
 
+<!-- Todo: add more of these options to the figure (RL) -->
 
-```{r, eval=FALSE, echo=FALSE}
-map_nz + tm_layout(aes.color = c(fill = "red"))
-map_nz + tm_layout(attr.color = "red")
-map_nz + tm_layout(sepia.intensity = 0.9)
-map_nz + tm_layout(aes.color = c(fill = "red"), saturation = 0.5)
+```{r layout2, fig.cap="Illustration of selected color-related layout options."}
+source("code/09-layout2.R")
 ```
 
 Beyond this low-level control over layouts, **tmap** also offers high-level styles using `tm_style_` functions.
-Some styles such as `tm_style_cobalt()` result in stylized maps while others such as `tm_style_grey()` make more subtle changes.
+Some styles such as `tm_style_cobalt()` result in stylized maps while others such as `tm_style_grey()` make more subtle changes (see Figure \@ref(fig:tmstyles)).
 
-<!-- Todo: add maps showing styles -->
+```{r tmstyles, fig.cap="Selected tmap styles, illustrated with data on the area of New Zealand's regions."}
+source("code/09-tmstyles.R")
+```
+
+
+```{block2 styles, type='rmdnote'}
+A preview of predefined styles can be generated by executing `style_catalogue()`.
+This creates a folder called `tmap_style_previews` containing (in **tmap** 2.0) 10 images.
+Each image, from `tm_style_albatross.png` to `tm_style_white.png` shows a facetted map of Europe in the corresponding style.
+Note: `style_catalogue()` takes some time to run.
+```
 
 <!-- 
 - lines widths, polygon lines vs polygon areas, etc.
@@ -402,15 +421,15 @@ Unlike the faceted plot presented in section \@ref(faceted-maps), it does not sq
 knitr::include_graphics("figures/urban-animated.gif")
 ```
 
-<!-- desribe how to use `tm_facets` for animation -->
+<!-- 1/ desribe how to use `tm_facets` for animation -->
+<!-- 2/ by , nrow, ncol -->
 <!-- next, focus on `animation_tmap` -->
-<!-- add a new animation excersize -->
 
 ```{r}
-m = tm_shape(world) + 
+us_anim = tm_shape(world) + 
   tm_polygons() +
   tm_shape(urban_agglomerations) +
-  tm_dots(size = "population_millions", col = "red") +
+  tm_dots(size = "population_millions", col = "red", alpha = 0.5) +
   tm_facets(by = "year", nrow = 1, ncol = 1)
 ```
 
@@ -418,9 +437,13 @@ m = tm_shape(world) +
 source("code/09-urban-animation.R")
 ```
 
-<!-- Robin, check the differences between by="year" and along="year" -->
+<!-- 3/ along -->
+<!-- 4/ by and along -->
 
 ```{r ani_data_prep, eval=FALSE, echo=FALSE}
+library(wbstats)
+library(rnaturalearth)
+library(units)
 options(scipen = 999)
 
 wb_data_create = function(indicator, our_name, year, ...){
@@ -449,18 +472,27 @@ world_sf_temporal = ne_countries(returnclass = 'sf') %>%
 ```{r animation1, eval=FALSE, echo=FALSE}
 m1 = tm_shape(world_sf_temporal) + 
   tm_polygons("lifeExp") +
-  tm_facets(by = "year", nrow = 1, ncol = 1, drop.units = TRUE)
+  tm_facets(by = "year", nrow = 1, ncol = 1)
 
 animation_tmap(m1, filename = "figures/11-lifeExp_animation.gif", width = 2000, height = 600, delay = 40)
 ```
 
-```{r animation2, eval=FALSE, echo=FALSE}
-world_sf_temporal2 = filter(world_sf_temporal, continent == "South America")
-m2 = tm_shape(world_sf_temporal2) +
+```{r animation1, eval=FALSE, echo=FALSE}
+world_sf_sa = filter(world_sf_temporal, continent == "South America", year == 2013)
+m2 = tm_shape(world_sf_sa) +
   tm_polygons("lifeExp", n = 12) +
-  tm_facets(by = "name_long", along = "year", drop.units = TRUE, free.coords = TRUE)
-animation_tmap(m2, filename = "figures/11-lifeExp_sa_animation.gif", width = 1600, height = 1000, delay = 40)
+  tm_facets(along = "name_long")
 ```
+
+```{r animation3, eval=FALSE, echo=FALSE}
+world_sf_temporal_sa = filter(world_sf_temporal, continent == "South America")
+m3 = tm_shape(world_sf_temporal_sa) +
+  tm_polygons("lifeExp", n = 12) +
+  tm_facets(by = "name_long", along = "year")
+animation_tmap(m3, filename = "figures/11-lifeExp_sa_animation.gif", width = 1600, height = 1000, delay = 40)
+```
+
+<!-- add a new animation exercise -->
 
 ## Interactive maps
 
