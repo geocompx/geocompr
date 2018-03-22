@@ -1,6 +1,6 @@
 library(spData)
 library(tmap)
-map_nz = qtm(nz)
+map_nz = tm_shape(nz) + tm_fill() + tm_borders()
 l1 = map_nz + tm_layout(title = "New Zealand")
 l2 = map_nz + tm_layout(scale = 5)
 l3 = map_nz + tm_layout(bg.color = "lightblue")
