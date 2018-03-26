@@ -449,6 +449,7 @@ parallelization (conclusion -> server/remote modeling + mc.core.seed)
 http://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html
 
 SVM
+
 > The idea of finding a hyperplane that separates the data as well as possible, while allowing some violations to this separation, seemed distinctly different from classical approaches for classification, such as logistic regression and linear discriminant analysis. Moreover, the idea of using a kernel to expand the feature space in order to accommodate non-linear class boundaries appeared to be a unique and valuable characteristic.
 
 James et al., 2013
@@ -500,32 +501,29 @@ outer = makeResampleDesc("SpRepCV", folds = 5, reps = 100)
 ```
 
 However, we need to additionally tune the SVM hyperparameters.
-Doing this while using same data for the performance assessment would potentially lead to overoptimistic results.
+Using the same data for the performance assessment and for the tuning would potentially lead to overoptimistic results.
 To avoid this we will use a nested spatial CV.
-This means that we split each fold again into five spatially disjoint subfolds which are used to determine the optimal hyperparameters.
+This means that we split each fold again into five spatially disjoint subfolds which are used to determine the optimal hyperparameters (`inner` object in the code chunk below).
 
 ```{r, eval=FALSE}
+# five spatially disjoint partitions
 inner = makeResampleDesc("SpCV", iters = 5)
-```
-
-Next, we tell **mlr** to fit 50 models in each of these subfolds with randomly selected values for the hyperparameters.
-This implies that we ask R to fit 250 models to determine the optimal hyperparameters which are then used for the performance assessment in the first fold of the outer resampling loop.
-We have to repeat this five times for each fold in the outer fold which leads to 250 * 5 models for one repetition in the outer loop.
-Since we are requesting 100 repetitions this leads to a total of 125,000 models. 
-This is computationally quite demanding even with the small dataset used here.
-
-```{r, eval=FALSE}
+# use 50 randomly selected hyperparameters
 ctrl = makeTuneControlRandom(maxit = 50)
-```
-
-Finally, we restrict the search to tuning space to limits suggested in the literature [@schratz_performance_nodate].
-
-```{r, eval=FALSE}
+# define the outer limits of the randomly selected hyperparameters
 ps = makeParamSet(
   makeNumericParam("C", lower = -12, upper = 15, trafo = function(x) 2^x),
   makeNumericParam("sigma", lower = -15, upper = 6, trafo = function(x) 2^x)
   )
 ```
+
+Next, we tell **mlr** to fit 50 models in each of these subfolds while making use of randomly selected hyperparameter values (`ctrl` object in the above code chunk) within a predefined tuning space (`ps` object) in accordance with the literature [@schratz_performance_nodate].
+This implies that we ask R to fit 250 models to determine the optimal hyperparameters which are then used for the performance assessment in the first fold of the outer resampling loop.
+We have to repeat this five times for each fold in the outer fold which leads to 250 * 5 models for one repetition in the outer loop.
+Since we are requesting 100 repetitions this leads to a total of 125,000 models. 
+This is computationally quite demanding even with the small dataset used here.
+
+
 
 
 
