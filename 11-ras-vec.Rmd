@@ -14,12 +14,16 @@ library(spDataLarge)
 
 ## Introduction
 
-<!-- intro -->
+In this section we will focus on the interactions between a raster and vector model.
+It includes four main techniques.
+Raster cropping and masking using vector objects is covered in section \@ref(raster-cropping).
+In section \@ref(raster-extraction), we will describe how raster values can be extract using different types of vector data - points, lines and polygons.
+Finally, sections \@ref(rasterization) and \@ref(spatial-vectorization) show how to convert vectors into rasters and raster images into vectors.
 <!-- operations are not symmetrical, for example: -->
 <!-- - raster clipping - no vector counterpart -->
 <!-- - raster extraction is connected to some methods used in vectorization and rasterization -->
 <!-- - etc. -->
-<!-- and 'rasterization' is covered in section \@ref(rasterization) -->
+We will illustrate the above concepts and suggest when they can be useful.
 
 ## Raster cropping
 
@@ -133,11 +137,6 @@ For this purpose, we will create a simple line going from northwest to southeast
 ```{r}
 zion_transect = st_sfc(st_linestring(rbind(c(-113.2, 37.45), c(-112.9, 37.2)))) %>% 
   st_sf()
-```
-
-```{r, echo=FALSE, eval=FALSE}
-# strange error
-raster::extract(srtm, zion_transect2, along = TRUE,  df = TRUE)
 ```
 
 Importantly, it does not need to be a straight line.
@@ -274,15 +273,17 @@ There are several alternatives to consider in those cases.
 Firstly, raster extraction could be parallelized when many vector objects are used.
 Instead of using just one CPU thread for the whole operation, vector objects could be split into several groups.
 Next, extraction would be performed independently for each group and the results would be combined.
-<!-- `?clusterR` + ref to big data chapter?? -->
+See the `?raster::clusterR()` for more information.
 <!-- tabularaster (ref to the vignette - https://cran.r-project.org/web/packages/tabularaster/vignettes/tabularaster-usage.html)-->
-Secondly, the **velox** package (\@ref(hunziker_velox:_2017)) provides a fast method for extracting raster data that fits in the RAM memory.
+Secondly, the **velox** package [@hunziker_velox:_2017] provides a fast method for extracting raster data that fits in the RAM memory.
 This process is described in detail at https://hunzikp.github.io/velox/extract.html.
-<!-- Finally, it could be worthwhile to consider using R-GIS bridges. -->
+Finally, it could be worthwhile to consider using R-GIS bridges.
+For example, efficient calculation of polygon in raster statistics exist in SAGA and can be called using **RQGIS** (`saga:gridstatisticsforpolygons`).
 <!-- Methods similar to `raster::extract` can be found in GRASS GIS (e.g. v.rast.stats) -->
 <!-- https://grass.osgeo.org/grass74/manuals/v.rast.stats.html - test -->
-<!-- R-GIS bridges - investigate (REF to the chapter). -->
-<!-- RQGIS? -->
+To learn more visit chapter \@ref(gis).
+<!-- https://twitter.com/mdsumner/status/976978499402571776 -->
+<!-- https://gist.github.com/mdsumner/d0b26238321a5d2c2c2ba663ff684183 -->
 
 ## Rasterization {#rasterization}
 
@@ -374,9 +375,9 @@ source("code/11-vector-rasterization2.R")
 ```
 
 While `rasterize` works well for most cases, it is not performance optimized. 
-Fortunately, there are several alternatives, including the `fasterize::fasterize()`^[The **fasterize** package is available at https://github.com/ecohealthalliance/fasterize.] and `gdalUtils::gdal_rasterize()`. 
+Fortunately, there are several alternatives, including the `fasterize::fasterize()` and `gdalUtils::gdal_rasterize()`. 
 The former is much (100 times+) faster than `rasterize()` but is currently limited to polygon rasterization.
-The latter is part of GDAL and therefore requires a vector file, instead of an `sf` object, as an input and rasterization parameters, instead of a `Raster*` template object.^[See more at http://www.gdal.org/gdal_rasterize.html.]
+The latter is part of GDAL and therefore requires a vector file (instead of an `sf` object) and rasterization parameters (instead of a `Raster*` template object) as inputs.^[See more at http://www.gdal.org/gdal_rasterize.html.]
 
 ## Spatial vectorization
 
@@ -457,6 +458,49 @@ source("code/11-raster-vectorization2.R")
 <!-- ## distances? -->
 
 ## Exercises
+
+The next two exercises will use a vector (`random_points`) and raster dataset (`ndvi`) from **RQGIS** package.
+We will also create a convex hull of the vector dataset (`ch`), which will represent an area of interest:
+```{r, message=FALSE}
+library(RQGIS)
+data(random_points)
+data(ndvi)
+ch = st_combine(random_points) %>% 
+  st_convex_hull()
+```
+1. Crop the `ndvi` raster using (1) the `random_points` dataset and (2) the `ch` dataset.
+Are there any difference in the output maps?
+Next, mask `ndvi` using these two datasets.
+Can you see any difference now?
+How can you explain that?
+```{r, echo=FALSE, eval=FALSE}
+plot(ndvi)
+plot(st_geometry(random_points), add = TRUE)
+plot(ch, add = TRUE)
+
+ndvi_crop1 = crop(ndvi, as(random_points, "Spatial")) 
+ndvi_crop2 = crop(ndvi, as(ch, "Spatial")) 
+plot(ndvi_crop1)
+plot(ndvi_crop2)
+
+ndvi_mask1 = mask(ndvi, as(random_points, "Spatial")) 
+ndvi_mask2 = mask(ndvi, as(ch, "Spatial")) 
+plot(ndvi_mask1)
+plot(ndvi_mask2)
+```
+1. Firstly, extract values from `ndvi` using `random_points`.
+Next, extract average values of `ndvi` using 90 meters buffers around each point from `random_points`. 
+Compare these two sets of values. 
+When extract by buffer could be more suitable than an extract by point?
+```{r, echo=FALSE, eval=FALSE}
+random_points_buf = st_buffer(random_points, dist = 90)
+plot(ndvi)
+plot(st_geometry(random_points_buf), add = TRUE)
+plot(ch, add = TRUE)
+random_points$ndvi = extract(ndvi, random_points, buffer = 90, fun = mean)
+random_points$ndvi2 = extract(ndvi, random_points)
+plot(random_points$ndvi, random_points$ndvi2)
+```
 1. Subset points higher than 3100 meters in New Zealand (the `nz_height` object). 
 Using the new object:
     - Count numbers of the highest points in grid cells with a resolution of 3 km.

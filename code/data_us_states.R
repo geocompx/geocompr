@@ -17,38 +17,43 @@ census_api_key("YOUR API KEY") # http://api.census.gov/data/key_signup.html
 # v15 %>% select(concept) %>% unique() %>% View
 # B01003_001E - total pop
 
-total_pop_10 = get_acs(geography = "state", variables = "B01003_001E", endyear = 2010) %>% 
+total_pop_10 = get_acs(geography = "state", variables = "B01003_001E", year = 2010) %>% 
   select(GEOID, total_pop_10 = estimate)
-total_pop_15 = get_acs(geography = "state", variables = "B01003_001E", endyear = 2015) %>% 
+total_pop_15 = get_acs(geography = "state", variables = "B01003_001E", year = 2015) %>% 
   select(GEOID, total_pop_15 = estimate)
 
 ## groups - Census Bureau-designated regions
 
 # spatial data  -----------------------------------------------------------
-us_states = states() 
+us_states = states(cb = TRUE, resolution = '5m') 
+us_states_large = states()
+# extract regions ---------------------------------------------------------
+us_regions = us_states_large %>% 
+  filter(DIVISION != 0) %>%
+  filter(NAME != "Alaska", NAME != "Hawaii") %>% 
+  mutate(REGION = factor(REGION, labels = c("Norteast", "Midwest", "South", "West"))) %>% 
+  select(NAME, REGION) %>% 
+  st_set_geometry(NULL)
 
 # cont states -------------------------------------------------------------
 us_states49 = us_states %>% 
-  filter(DIVISION != 0) %>% 
   filter(NAME != "Alaska", NAME != "Hawaii") %>% 
-  ms_simplify(., keep=0.005) %>% 
+  inner_join(us_regions, by = "NAME") %>% 
+  ms_simplify(keep = 0.05) %>% 
   select(GEOID, NAME, REGION) %>%
-  mutate(REGION = factor(REGION, labels = c("Norteast", "Midwest", "South", "West"))) %>% 
   mutate(AREA = units::set_units(st_area(.), km^2)) %>% 
   left_join(., total_pop_10, by = "GEOID") %>% 
   left_join(., total_pop_15, by = "GEOID")
   
-# plot(us_states49["REGION"])
-
 us_states = us_states49
-save(us_states, file = "data/us_states.rda")
+save(us_states, file = "data/us_states.rda", compress = "bzip2")
 
 # hawaii ------------------------------------------------------------------
-hawaii = us_states %>% 
-  filter(DIVISION != 0) %>% 
+hawaii2 = us_states_large %>% 
+  filter(DIVISION != 0) %>%
   filter(NAME == "Hawaii") %>% 
-  ms_simplify(keep = 0.05, keep_shapes = TRUE, explode = TRUE) %>% 
-  aggregate(by = list(.$GEOID), first) %>% 
+  ms_simplify(keep = 0.05, keep_shapes = TRUE, explode = TRUE) %>%
+  aggregate(by = list(.$GEOID), first) %>%
   select(GEOID, NAME, REGION) %>%
   mutate(REGION = factor(REGION, labels = c("West"))) %>% 
   mutate(AREA = units::set_units(st_area(.), km^2)) %>% 
@@ -58,7 +63,7 @@ hawaii = us_states %>%
 
 save(hawaii, file = "data/hawaii.rda", compress = "bzip2")
 # alaska ------------------------------------------------------------------
-alaska = us_states %>% 
+alaska = us_states_large %>% 
   filter(DIVISION != 0) %>% 
   filter(NAME == "Alaska") %>% 
   ms_simplify(keep = 0.05, keep_shapes = TRUE, explode = TRUE) %>% 

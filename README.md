@@ -23,6 +23,8 @@ We encourage contributions on any part of the book, including:
 
 Please see [our\_style.md](https://github.com/Robinlovelace/geocompr/blob/master/our_style.md) for the book's style.
 
+Many thanks to all contributors to the book so far via GitHub (this list will update automatically): katygregg, rsbivand, gisma, ateucher, yutannihilation, richfitz, gregor-d, p-kono.
+
 Reproducing the book
 --------------------
 
@@ -89,11 +91,7 @@ This generates .bib and .csv files containing the packages. The current of packa
 pkg_df = readr::read_csv("extdata/package_list.csv")
 ```
 
-Other citations are stored online using Zotero and downloaded with:
-
-``` r
-geocompr:::dl_citations(f = "refs.bib", user = 418217, collection = "9K6FRP6N")
-```
+Other citations are stored online using Zotero.
 
 If you would like to add to the references, please use Zotero, join the [open group](https://www.zotero.org/groups/418217/energy-and-transport) add your citation to the open [geocompr library](https://www.zotero.org/groups/418217/energy-and-transport/items/collectionKey/9K6FRP6N).
 
@@ -119,23 +117,23 @@ knitr::kable(pkg_df)
 | lwgeom            | Bindings to Selected 'liblwgeom' Functions for Simple Features \[@R-lwgeom\]              | 0.1.5   |
 | mapview           | Interactive Viewing of Spatial Data in R \[@R-mapview\]                                   | 2.3.0   |
 | microbenchmark    | Accurate Timing Functions \[@R-microbenchmark\]                                           | 1.4.4   |
-| mlr               | Machine Learning in R \[@R-mlr\]                                                          | 2.12    |
+| mlr               | Machine Learning in R \[@R-mlr\]                                                          | 2.13    |
 | osmdata           | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]                  | 0.0.6   |
+| pROC              | Display and Analyze ROC Curves \[@R-pROC\]                                                | 1.10.0  |
 | raster            | Geographic Data Analysis and Modeling \[@R-raster\]                                       | 2.6.7   |
 | rcartocolor       | 'CARTOColors' Palettes \[@R-rcartocolor\]                                                 | 0.0.22  |
-| rgdal             | Bindings for the 'Geospatial' Data Abstraction Library \[@R-rgdal\]                       | 1.2.16  |
+| rgdal             | Bindings for the 'Geospatial' Data Abstraction Library \[@R-rgdal\]                       | 1.2.18  |
 | rgeos             | Interface to Geometry Engine - Open Source ('GEOS') \[@R-rgeos\]                          | 0.3.26  |
 | rmapshaper        | Client for 'mapshaper' for 'Geospatial' Operations \[@R-rmapshaper\]                      | 0.3.1   |
-| rmarkdown         | Dynamic Documents for R \[@R-rmarkdown\]                                                  | 1.8     |
+| rmarkdown         | Dynamic Documents for R \[@R-rmarkdown\]                                                  | 1.9     |
 | rnaturalearth     | World Map Data from Natural Earth \[@R-rnaturalearth\]                                    | 0.1.0   |
 | rnaturalearthdata | World Vector Map Data from Natural Earth Used in 'rnaturalearth' \[@R-rnaturalearthdata\] | 0.1.0   |
 | RQGIS             | Integrating R with QGIS \[@R-RQGIS\]                                                      | 1.0.3   |
 | RSAGA             | SAGA Geoprocessing and Terrain Analysis \[@R-RSAGA\]                                      | 1.0.0   |
 | sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.1   |
 | sp                | Classes and Methods for Spatial Data \[@R-sp\]                                            | 1.2.7   |
-| spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.8.1 |
+| spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.8.2 |
 | spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.6.0 |
-| stars             | Scalable, Spatiotemporal Tidy Arrays for R \[@R-stars\]                                   | 0.1.1   |
 | stplanr           | Sustainable Transport Planning \[@R-stplanr\]                                             | 0.2.3   |
 | tabularaster      | Tidy Tools for 'Raster' Data \[@R-tabularaster\]                                          | 0.4.0   |
 | tidyverse         | Easily Install and Load the 'Tidyverse' \[@R-tidyverse\]                                  | 1.2.1   |
