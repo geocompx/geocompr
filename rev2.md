@@ -5,8 +5,9 @@
 - 1.1 I would split chapter 6 into input versus output (visualization). The former, I would add to chapter 2, while the latter could be a little expanded by some of the material taught at Use R! conferences. Yes, I see that there is chapter 9 but data output is not limited to map making. Chapter 2 should then be split into two. 2a would be just about vector and raster data, and 2b about coordinate reference systems, units, data input.
 - 1.2 Unfortunately, the same (lucid and easy to read) cannot be said about the examples in part II. For example, the osmdata::getbb command on page 155 specifies an output format that is not known to the osmdata package, which in its latest version (as of Feb 2018) allows only for data.frame, matrix, string, or polygon. [RL]
 
-`osmdata::getbb()` was in the development version of **osmdata**. This will be fixed when the latest version is sent to CRAN.
-We will look into improving the other examples [RL]
+`osmdata::getbb()` was in the development version of **osmdata**. Was fixed on 2018-02-22 when the osmdata 0.0.6 was sent to CRAN - see https://cran.r-project.org/package=osmdata 
+
+Todo: We will look into improving the other examples [RL]
 
 - 1.3 After two Human geography examples, I am missing some physical geography in Part II. Please touch base with Edzer Pebesma and his group to see whether they would share an example or two. [RL, JN, JM - to discuss]
 - 1.4 [RL, JN, JM - to discuss] I would leave these sections (5.2) where they are. The topic is important in and by itself and easier to find (even for lookup purposes if the book is used as a reference) if we leave it in section 5.2.
