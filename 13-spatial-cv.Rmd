@@ -460,12 +460,6 @@ This is useful in the case of non-spatial data but of less use in the case of sp
 Therefore, we will make sure to replace automated by spatial hyperparameter tuning.
 Without going into too much detail SVM 
 
-Multicore processing is easier under Linux.
-Overall, cloud computing is done on Linux servers.
-What is more, setting a seed for each thread/core/cpu is only available for R/Linux (mc.core.seeds).
-Therefore, we will present how to do nested cross-validatation using R code only working under Linux. 
-We recommend Windows users to install a virtual machine on their system to reproduce the subsequent code.
-
 
 Setting up the **mlr** building blocks follows the exact same procedure introduced in the previous section, i.e. we define a task, a learner and a resampling strategy.
 The task remains the same, hence we can use the one already defined in the previous section, namely `task`.
@@ -500,7 +494,7 @@ outer = makeResampleDesc("SpRepCV", folds = 5, reps = 100)
 ```
 
 However, we need to additionally tune the SVM hyperparameters.
-Using the same data for the performance assessment and for the tuning would potentially lead to overoptimistic results.
+Using the same data for the performance assessment and for the tuning would potentially lead to overoptimistic results [@cawley_on_2010].
 To avoid this we will use a nested spatial CV.
 
 ```{r inner-outer, echo=FALSE, fig.cap="Visual representation of inner and outer folds in spatial and non-spatial cross-validation. Permission for reproducing the figure was kindly provided by Patrick Schratz [@schratz_performance_nodate]"}
@@ -521,13 +515,18 @@ ps = makeParamSet(
   )
 ```
 
-Next, we tell **mlr** to fit 50 models in each of these subfolds while making use of randomly selected hyperparameter values (`ctrl` object in the above code chunk) within a predefined tuning space (`ps` object) in accordance with the literature [@schratz_performance_nodate].
-This implies that we ask R to fit 250 models to determine the optimal hyperparameters which are then used for the performance assessment in the first fold of the outer resampling loop.
+Next, we tell **mlr** to fit 50 models in each of these subfolds while making use of randomly selected hyperparameter values (`ctrl` object in the above code chunk) within a predefined tuning space (`ps` object).
+The latter was chosen with values recommended in the literature [@schratz_performance_nodate].
+Overall, this set up implies that we ask R to fit 250 models to determine the optimal hyperparameters which are then used for the performance assessment in the first fold of the outer resampling loop.
 We have to repeat this five times for each fold in the outer fold which leads to 250 * 5 models for one repetition in the outer loop.
 Since we are requesting 100 repetitions this leads to a total of 125,000 models. 
 This is computationally quite demanding even with the small dataset used here.
 
-
+Multicore processing is easier under Linux.
+Overall, cloud computing is done on Linux servers.
+What is more, setting a seed for each thread/core/cpu is only available for R/Linux (mc.core.seeds).
+Therefore, we will present how to do nested cross-validatation using R code only working under Linux. 
+We recommend Windows users to install a virtual machine on their system to reproduce the subsequent code.
 
 
 
