@@ -288,6 +288,8 @@ First, we need to create a **task** containing the data, specifically the respon
 Secondly, a **learner** defines the specific model that models the task data or differently put learns a structure inherent in the provided data.
 Thirdly, we assess the predictive performance of the model, i.e. the model's ability to generalize the learned relationship to new data via a repetitive **resampling** approach (see also section \@ref(intro-cv)).
 
+### Generalized linear model
+
 To put this into practice, we create a **task** using our landslide data.
 Since we have a binary response, which is in fact a two-category variable, we will make use of the classification task, namely `makeClassifTask()`.^[In the case of a regression problem, we would use `makeRegrTask()`.
 Type `?makeClassifTask` to find out about all available modeling tasks.
@@ -425,7 +427,7 @@ boxplot(sp_cv$measures.test$auc,
         ylab = "AUROC")
 ```
 
-## (Spatial) Tuning of machine-learning hyperparameters
+### (Spatial) Tuning of machine-learning hyperparameters
 <!-- exercise: assess predictive performance without using an inner fold -->
 In the beginning we have already distinguished the field of statistics from the field of machine learning.
 As a reminder we define machine learning here again with the words of [Jason Brownlee](https://machinelearningmastery.com/linear-regression-for-machine-learning/):
@@ -487,7 +489,7 @@ outer = makeResampleDesc("SpRepCV", folds = 5, reps = 100)
 ```
 
 So far, this is exactly the same as we have done when using the GLM, however, now we need to additionally tune the SVM hyperparameters.
-Using the same data for the performance assessment and for the tuning would potentially lead to overoptimistic results [@cawley_on_2010].
+Using the same data for the performance assessment and the tuning would potentially lead to overoptimistic results [@cawley_on_2010].
 To avoid this we will use a nested spatial CV.
 
 ```{r inner-outer, echo=FALSE, fig.cap="Visual representation of inner and outer folds in spatial and non-spatial cross-validation. Permission for reproducing the figure was kindly granted by Patrick Schratz [@schratz_performance_nodate]."}
@@ -501,10 +503,12 @@ The latter was chosen with values recommended in the literature [@schratz_perfor
 
 <!--
 Questions Pat:
+- why not using e1071 svm -> inner hyperparameter tuning also possible I guess...
 - explanation correct?
 - trafo-function?
 - 125,000 models
-- mc.set.seed = TRUE -> make sure that the partitioning remains the same
+- mc.set.seed = TRUE -> make sure that the partitioning remains the same in each thread
+- can I compare the mean AUROC of the GLM and the SVM when using the same seed? Or is seeding not strictly necessary? I mean, ok, the partitions vary a bit but overall...
 -->
 
 ```{r, eval=FALSE}
@@ -551,7 +555,7 @@ This is quite handy since you really want to avoid that the processing stops aft
 configureMlr(on.learner.error = "warn", on.error.dump = TRUE)
 ```
 
-First, we set the `mode` to `multicore` which will use `mclapply()` in the background on a single machine.^[Check out `?parallelStart` for further modes and the **parallelMap** [github page](https://github.com/berndbischl/parallelMap) for more information on the unified interface to popular parallelization back-ends. Note also that `mclapply()´ only supports multicore processing on Linux-based machines.]
+First, we set the `mode` to `multicore` which will use `mclapply()` in the background on a single machine.^[Check out `?parallelStart` for further modes and the **parallelMap** [github page](https://github.com/berndbischl/parallelMap) for more information on the unified interface to popular parallelization back-ends. Note also that `mclapply()` only supports multicore processing on Linux-based machines.]
 `level` defines the level where to enable the parallelization with `mlr.tuneParams` determing that the inner resampling fold should be parallelized, i.e. the optimal hyperparameter tuning (see lower part of Figure \@ref(fig:inner-outer); and use parallelMap::parallelGetRegisteredLevels() for supported levels as well as the **mlr** [parallelization tutorial](https://mlr-org.github.io/mlr-tutorial/release/html/parallelization/index.html#parallelization-levels)).
 Probably we are not the only ones using the server, therefore we are friendly and will use only half of its cores which in our case corresponds to 24 (`cpus` parameter).
 To make sure that the same partitions are used in each parallelized thread, we set `mc.set.seed` to `TRUE`.
@@ -593,7 +597,7 @@ Running 125,000 models using 24 cores took more than 37 minutes.
 ```{r}
 # Exploring the results
 # run time in minutes
-round(result$runtime / 60)
+round(result$runtime / 60, 2)
 ```
 
 Naturally, even more important than the runtime is the final aggregated AUROC, i.e. the model's ability to discriminate the two classes. 
@@ -605,6 +609,7 @@ result$aggr
 mean(result$measures.test$auc)
 ```
 
+So it appears that the GLM is slightly better than the SVM in this specific case.
 Finally, we can have a look at the results of the found optimal hyperparameters for each outer loop iteration.
 Here, we just have a short glance at the optimal hyperparameters combination and the result which was obtained with them in the first iteration of the outer loop
 
