@@ -611,6 +611,9 @@ mean(result$measures.test$auc)
 ```
 
 So it appears that the GLM is slightly better than the SVM in this specific case.
+However, using 200 instead of 50 iterations would probably yield even better hyperparameter combinations [@schratz_performance_nodate] resulting in a better AUROC.
+On the other hand, this would increase the number of models to be fitted from 125,000 to 500,000.
+
 Finally, we can have a look at the results of the found optimal hyperparameters for each outer loop iteration.
 Here, we just have a short glance at the optimal hyperparameters combination and the result which was obtained with them in the first iteration of the outer loop
 
@@ -618,8 +621,8 @@ Here, we just have a short glance at the optimal hyperparameters combination and
 # used hyperparameters for the outer fold, i.e. the best combination out of 50 *
 # 5 models
 result$extract[[1]]
-# and here one can observe that the AUC of the tuning data is usually higher
-# than for the model on the outer fold
+# here one can observe that the AUROC of the tuning data is usually higher
+# than for the model in the outer fold
 result$measures.test[1, ]
 ```` 
 
@@ -628,9 +631,9 @@ Resampling methods are a crucial part of a modern data scientist's toolbox [@jam
 In this chapter we used cross-validation to assess a model's predictive performance.
 Spatial data is statistically often not independent due to spatial autocorrelation, which violates a fundamental assumption of cross-validation.
 Therefore, we introduced spatial CV, which reduces the bias introduced by spatial autocorrelation. 
-The **mlr** package makes it easy to use (spatial) resampling techniques with many other statistical learning techniques including, of course, linear regression, but also semi-parametric models (e.g., generalized additive models) and machine learning techniques such as random forests, support vector machines or boosted regression trees [@bischl_mlr:_2016;@schratz_performance_nodate].
+The **mlr** package makes it easy to use (spatial) resampling techniques in combination with the most popular statistical learning techniques including, of course, linear regression, but also semi-parametric models (e.g., generalized additive models) and machine learning techniques such as random forests, support vector machines or boosted regression trees [@bischl_mlr:_2016;@schratz_performance_nodate].
 Machine learning algorithms often require the tuning of so-called hyperparameters.
-Naturally, computation time additionally increases with the size of the input data.
+Finding an optimal set of hyperparameters requires the fitting of thousands of additional models which substantially increases computing time.^[Naturally, computation time additionally increases with the size of the input data.]
 To reduce computing time, **mlr** makes parallelization easy through various supported methods.
 
 Finally, for more details please check out also the fantastic **mlr** online documentation:
@@ -650,6 +653,14 @@ Before running the spatial cross-validation for both tasks set a seed to make su
 Assess the predictive performance (AUROC) of the QDA. 
 What is the a difference between the spatially cross-validated mean AUROC value of the QDA and the GLM?
 Hint: Before running the spatial cross-validation for both learners set a seed to make sure that both use the same partitions which in turn guarantees comparability.
+1. Run the SVM without tuning the hyperparameters.
+1. Model landslide susceptibility using a random forest model as implemented by the **ranger** package.
+Apply a nested spatial CV.
+Parallelize the tuning level.
+Use a random search with 50 iterations to find the optimal hyperparameter combination (here: `mtry` and `num.trees`).
+The tuning space limits are 1 and 4 for `mtry`, and 1 and 10,000 for `num.trees`.
+Warning: Depending on the number of cores you have available this might take a long time.
+
 
 <!--
 hyperparameter tuning:
