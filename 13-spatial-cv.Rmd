@@ -565,10 +565,10 @@ parallelStart(mode = "multicore",
               mc.set.seed = TRUE) 
 ```
 
-Finally, we are all set up for the resampling.
+Finally, we are all set up for conducting the nested spatial CV.
 Specifying the `resample()` parameters follows the exact same procedure as presented when using a GLM with the only difference that we tell it additionally to give back the hyperparameter tuning results (`extract` parameter).
-It is good practice to explicitly stop the parallelization which is exactly what `parallelStop()` is doing.
-Of course, after a possible long processing it is a good idea to save your results.
+After the processing, it is good practice to explicitly stop the parallelization which is exactly what `parallelStop()` is doing.
+Of course, after a long processing it is a good idea to save your results.
 
 ```{r, eval=FALSE}
 set.seed(12345)
@@ -578,10 +578,9 @@ result = mlr::resample(learner = wrapper_ksvm,
                        extract = getTuneResult,
                        measures = mlr::auc,
                        show.info = TRUE)
-
-# Aggregated Result: auc.test.mean=0.7583375
+# stop parallelization
 parallelStop()
-# save your result
+# save your result, e.g.:
 # saveRDS(resa_svm_spatial, "svm_sp_sp_rbf_50it.rda")
 ```
 
@@ -589,14 +588,27 @@ parallelStop()
 result = readRDS("extdata/svm_sp_sp_rbf_50it.rda")
 ```
 
+Running 125,000 models using 24 cores took more than 37 minutes.
+
 ```{r}
 # Exploring the results
 # run time in minutes
 round(result$runtime / 60)
+```
+
+Naturally, even more important than the runtime is the final aggregated AUROC, i.e. the model's ability to discriminate the two classes. 
+
+```{r}
 # final aggregated AUROC 
 result$aggr
 # same as
 mean(result$measures.test$auc)
+```
+
+Finally, we can have a look at the results of the found optimal hyperparameters for each outer loop iteration.
+Here, we just have a short glance at the optimal hyperparameters combination and the result which was obtained with them in the first iteration of the outer loop
+
+```{r}
 # used hyperparameters for the outer fold, i.e. the best combination out of 50 *
 # 5 models
 result$extract[[1]]
@@ -604,7 +616,6 @@ result$extract[[1]]
 # than for the model on the outer fold
 result$measures.test[1, ]
 ```` 
-
 
 ## Conclusions
 Resampling methods are a crucial part of a modern data scientist's toolbox [@james_introduction_2013]. 
