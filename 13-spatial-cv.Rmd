@@ -430,7 +430,6 @@ boxplot(sp_cv$measures.test$auc,
 ```
 
 ### (Spatial) Tuning of machine-learning hyperparameters {#svm}
-<!-- exercise: assess predictive performance without using an inner fold -->
 In the beginning we have already distinguished the field of statistics from the field of machine learning.
 As a reminder we define machine learning here again with the words of [Jason Brownlee](https://machinelearningmastery.com/linear-regression-for-machine-learning/):
 
@@ -438,25 +437,15 @@ As a reminder we define machine learning here again with the words of [Jason Bro
 
 In the previous section (section \@ref(glm)) we have used a GLM for predicting landslide susceptibility, in this section we will introduce the support vector machine (SVM) for the same purpose.
 
+Overall, machine-learning models differ from parametric models in that they optimize hyperparameters instead of finding coefficients.
 
-This means that parametric models such as (generalized) linear regression are also used in the field of machine learning when the aim is prediction.
-
-Machine-learning differs from parametric models in that 
-difference parameters and hyperparameters
-example: support vector machine and short intro what it is
-
-SVM
-
-> The idea of finding a hyperplane that separates the data as well as possible, while allowing some violations to this separation, seemed distinctly different from classical approaches for classification, such as logistic regression and linear discriminant analysis. Moreover, the idea of using a kernel to expand the feature space in order to accommodate non-linear class boundaries appeared to be a unique and valuable characteristic.
-
-[@James_introduction_2013]
-Support vector machines always require tuning to find the optimal hyperparameters.
-Some software packages/implementations come with an automated tuning.
-which is usually based on random sampling.
+It is beyond the scope of this book to explain exactly what a SVM is.
+In short, SVMs are trying to find the best possible hyperplanes to separate classes.
+Kernels with specific hyperparameters allow for non-linear boundaries between classes [@James_introduction_2013].
+Tuning is mandatory for finding the optimal hyperparameters for a specific dataset.
+Some SVM implementations come with an automated tuning which is usually based on random sampling (see upper row of Figure \ref(\@ref(fig:partitioning))) such as **kernlab**'s `ksvm()`.
 This is useful in the case of non-spatial data but of less use in the case of spatial data where spatial tuning should be preferred.
 Therefore, we will make sure to replace automated by spatial hyperparameter tuning.
-Without going into too much detail SVM 
-
 
 Setting up the **mlr** building blocks follows the exact same procedure introduced in the previous section (section \@ref(glm)), i.e. we define a task, a learner and a resampling strategy.
 The task remains the same, hence we can use the one already defined in the previous section (section \@ref(glm)), namely `task`.
@@ -525,7 +514,7 @@ ps = makeParamSet(
   )
 ```
 
-Finally, we modify our learner `lrn_ksvm` in accordance with all the parameters defining the inner hyperparameter through a wrapper function.
+Finally, we modify our learner `lrn_ksvm` in accordance with all the characteristics defining the hyperparameter tuning through a wrapper function.
 
 ```{r, eval=FALSE}
 wrapped_lrn_ksvm = makeTuneWrapper(learner = lrn_ksvm, 
@@ -574,7 +563,7 @@ parallelStart(mode = "multicore",
 Finally, we are all set up for conducting the nested spatial CV.
 Specifying the `resample()` parameters follows the exact same procedure as presented when using a GLM with the only difference that we additionally tell it to give back the hyperparameter tuning results (`extract` parameter).
 After the processing, it is good practice to explicitly stop the parallelization which is exactly what `parallelStop()` is doing.
-Of course, after a long processing it is a good idea to save your results.
+Of course, after a long processing it is a good idea to save the results.
 
 ```{r, eval=FALSE}
 set.seed(12345)
@@ -612,7 +601,7 @@ mean(result$measures.test$auc)
 
 So it appears that the GLM is slightly better than the SVM in this specific case.
 However, using 200 instead of 50 iterations would probably yield even better hyperparameter combinations [@schratz_performance_nodate] resulting in a better AUROC.
-On the other hand, this would increase the number of models to be fitted from 125,000 to 500,000.
+On the other hand, this would increase the number of models to be fitted from 125,000 to 500,000.^[Have also a look at @james_introduction_2013 for a short discussion on the simililarity of logistic regression and SVM.]
 
 Finally, we can have a look at the results of the found optimal hyperparameters for each outer loop iteration.
 Here, we just have a short glance at the optimal hyperparameters combination and the result which was obtained with them in the first iteration of the outer loop
@@ -654,6 +643,8 @@ Assess the predictive performance (AUROC) of the QDA.
 What is the a difference between the spatially cross-validated mean AUROC value of the QDA and the GLM?
 Hint: Before running the spatial cross-validation for both learners set a seed to make sure that both use the same partitions which in turn guarantees comparability.
 1. Run the SVM without tuning the hyperparameters.
+Use the `rbfdot` kernel with $\sigma$ = 1 and *C* = 1. 
+Leaving the hyperparameters unspecified in **kernlab**'s `ksvm()` would otherwise initialize an automatic non-spatial hyperparameter tuning.
 1. Model landslide susceptibility using a random forest model as implemented by the **ranger** package.
 Apply a nested spatial CV.
 Parallelize the tuning level.
