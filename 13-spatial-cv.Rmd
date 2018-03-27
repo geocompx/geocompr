@@ -290,7 +290,7 @@ Thirdly, we assess the predictive performance of the model, i.e. the model's abi
 
 ### Generalized linear model {#glm}
 
-To put this into practice, we create a **task** using our landslide data.
+To put the **mlr** approach into practice, we first create a **task** using our landslide data.
 Since we have a binary response, which is in fact a two-category variable, we will make use of the classification task, namely `makeClassifTask()`.^[In the case of a regression problem, we would use `makeRegrTask()`.
 Type `?makeClassifTask` to find out about all available modeling tasks.
 ]
@@ -298,7 +298,7 @@ First, we specify the data which will be used.
 The `target` parameter expects the response variable and the `positive` parameter determines which of the two factor levels of the response variable indicate the landslide initiation point.
 All other variables of the provided dataset will serve as predictors (check out with `getTaskFormula(task)`).
 As we will perform a spatial CV later on, we need to specify the coordinates which will form the basis of the spatial partitioning (see section \@ref(intro-cv) and Figure \@ref(fig:partitioning)).
-These have to be provided as a dataframe in parameter `coordinates`. 
+These have to be provided in a separate dataframe object in parameter `coordinates`. 
 
 ```{r}
 library(mlr)
@@ -376,12 +376,13 @@ identical(fit$coefficients, mlr_fit$coefficients)
 
 In the beginning, it might seem a bit tedious to learn the **mlr** interface for modeling.
 But remember that one only has to learn one single interface to run many learners (**mlr** package version: `r packageVersion("mlr")`).
-Additionally, (spatial) resampling in **mlr** is really easy and only requires two more steps.^[Further advantages are the easy parallelization of resampling techniques and the tuning of machine learning hyperparameters, also spatially, in an inner fold.]
-Please note that package **sperrorest** initially implemented spatial cross-validation in R [@brenning_spatial_2012].
-In the meantime, its functionality was integrated into the **mlr** package which is the reason why we are using **mlr**.^[The **caret** package is another umbrella-package [@kuhn_applied_2013] for streamlined modeling in R, however, so far it does not provide spatial CV which is why we refrain from using it for spatial data.]
+Further advantages are the easy parallelization of resampling techniques and the tuning of machine learning hyperparameters, also spatially, in an inner fold (see section \@ref(svm)).
+Most importantly, (spatial) resampling in **mlr** is really easy, and only requires two more steps
 The first thing to do is specifying a resampling method.
 We will use a 100-repeated 5-fold spatial CV.
 This ensures that a spatial partitioning with five partitions is chosen based on the provided coordinates in our `task` and that the partitioning is repeated 100 times.
+Please note that package **sperrorest** initially implemented spatial cross-validation in R [@brenning_spatial_2012].
+In the meantime, its functionality was integrated into the **mlr** package which is the reason why we are using **mlr**.^[The **caret** package is another umbrella-package [@kuhn_applied_2013] for streamlined modeling in R, however, so far it does not provide spatial CV which is why we refrain from using it for spatial data.]
 
 ```{r}
 resampling = makeResampleDesc(method = "SpRepCV", folds = 5, 
@@ -427,7 +428,7 @@ boxplot(sp_cv$measures.test$auc,
         ylab = "AUROC")
 ```
 
-### (Spatial) Tuning of machine-learning hyperparameters
+### (Spatial) Tuning of machine-learning hyperparameters {#svm}
 <!-- exercise: assess predictive performance without using an inner fold -->
 In the beginning we have already distinguished the field of statistics from the field of machine learning.
 As a reminder we define machine learning here again with the words of [Jason Brownlee](https://machinelearningmastery.com/linear-regression-for-machine-learning/):
@@ -580,8 +581,7 @@ result = mlr::resample(learner = wrapped_lrn_ksvm,
                        task = task,
                        resampling = outer,
                        extract = getTuneResult,
-                       measures = mlr::auc,
-                       show.info = TRUE)
+                       measures = mlr::auc)
 # stop parallelization
 parallelStop()
 # save your result, e.g.:
