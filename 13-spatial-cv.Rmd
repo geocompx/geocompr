@@ -240,7 +240,7 @@ pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
 
 An AUROC of `r round(pROC::auc(pROC::roc(lsl$lslpts, fitted(fit))), 2)` represents a good fit.
 However, this is an overoptimistic estimation since we have computed it on the complete dataset. 
-To derive an biased-reduced assessment we have to use cross-validation and in the case of spatial data we will have to make use of spatial CV.
+To derive a biased-reduced assessment we have to use cross-validation and in the case of spatial data we will have to make use of spatial CV.
 
 ## Introduction to (spatial) cross-validation {#intro-cv} 
 
@@ -248,7 +248,7 @@ Cross-validation belongs to the family of resampling methods [@james_introductio
 The basic idea is to split (repeatedly) a dataset into training and test sets whereby the training data is used to fit a model which then is applied to the test set.
 Comparing the predicted values with the known response values from the test set (using a performance measure such as the AUROC in the binomial case) gives a bias-reduced assessment of the model's capability to generalize the learned relationship to independent data.
 For example, a 100-repeated 5-fold cross-validation means to randomly split the data into five partitions (folds) with each fold being used once as a test set (see upper row of Figure \@ref(fig:partitioning)). 
-This guarantees that each observation is used once as the test set, and requires the fitting of five models.
+This guarantees that each observation is used once in one of the test set, and requires the fitting of five models.
 Subsequently, this procedure is repeated 100 times.
 Of course, the data splitting will differ (though often only slightly) in each repetition.
 Overall, this amounts to fitting 500 models whereas the mean performance measure (AUROC) of all models is the model's overall prediction power.
@@ -257,7 +257,7 @@ However, geographic data is special.
 Remember that the first law of geography states that points close to each other tend to be, on average, more similar compared to points further away (@miller_toblers_2004; Chapter \@ref(transport)).
 This means these points are not statistically independent or put differently that training and test points in conventional cross-validation are often too close to each other (see first row of \@ref(fig:partitioning)).
 Using this information in our modeling is like a sneak preview, i.e. using information that should be unavailable to the training dataset.
-To overcome this problem, we should make use of spatial partitioning which splits the observations into spatially disjoint folds (using the observations' coordinates in a *k*-means clustering; @brenning_spatial_2012; second row of Figure \@ref(fig:partitioning)).
+To alleviate this problem, we should make use of spatial partitioning which splits the observations into spatially disjoint folds (using the observations' coordinates in a *k*-means clustering; @brenning_spatial_2012; second row of Figure \@ref(fig:partitioning)).
 The partitioning strategy is **the** distinguishing feature between spatial and conventional cross-validation.
 Everything else remains exactly the same.
 As a result spatial CV leads to a bias-reduced assessment of a model's predictive performance, and hence helps to avoid over-fitting.
@@ -277,7 +277,7 @@ In section \@ref(conventional-model) we used the **stats** package to fit a logi
 2. build a model
 3. make a prediction.
 
-However, many packages come with their own or a modified statistical learning interface which is why users frequently have to spend a lot of time to figure out the specifics of each of these packages, how to carry out cross-valdiation and hyperparameter tuning or how to compare modeling results from different packages.
+However, many packages come with their own or a modified statistical learning interface which is why users frequently have to spend a lot of time to figure out the specifics of each of these packages, how to carry out cross-validation and hyperparameter tuning or how to compare modeling results from different packages.
 The **mlr** package acts as a meta- or umbrella-package providing a unified interface to the most popular statistical learning techniques available in R including classification, regression, survival analysis and clustering [@bischl_mlr:_2016].^[As pointed out in the beginning we will solely focus on supervised learning techniques in this chapter.]
 The standardized **mlr** interface is based on so-called basic building blocks (Figure \@ref(fig:building-blocks)).
 
@@ -321,7 +321,7 @@ For a specific task, we can run:
 I also have this issue (RL - so not running and hardcoding result)-->
 
 ```{r, eval=FALSE}
-lrns = mlr::listLearners(task)
+lrns = listLearners(task)
 dplyr::select(lrns, class, name, package) %>%
   head
 #>                 class                         name package
@@ -379,8 +379,7 @@ identical(fit$coefficients, mlr_fit$coefficients)
 In the beginning, it might seem a bit tedious to learn the **mlr** interface for modeling.
 But remember that one only has to learn one single interface to run 169 learners (**mlr** package version: `r packageVersion("mlr")`).
 Further advantages are the easy parallelization of resampling techniques and the tuning of machine learning hyperparameters, also spatially, in an inner fold (see section \@ref(svm)).
-Most importantly, (spatial) resampling in **mlr** is really easy, and only requires two more steps
-The first thing to do is specifying a resampling method.
+Most importantly, (spatial) resampling in **mlr** is really easy, and only requires two more steps: specifying a resampling method and running it.
 We will use a 100-repeated 5-fold spatial CV.
 This ensures that a spatial partitioning with five partitions is chosen based on the provided coordinates in our `task` and that the partitioning is repeated 100 times.
 Please note that package **sperrorest** initially implemented spatial cross-validation in R [@brenning_spatial_2012].
@@ -450,7 +449,7 @@ SVM
 
 > The idea of finding a hyperplane that separates the data as well as possible, while allowing some violations to this separation, seemed distinctly different from classical approaches for classification, such as logistic regression and linear discriminant analysis. Moreover, the idea of using a kernel to expand the feature space in order to accommodate non-linear class boundaries appeared to be a unique and valuable characteristic.
 
-[@James et al., 2013]
+[@James_introduction_2013]
 Support vector machines always require tuning to find the optimal hyperparameters.
 Some software packages/implementations come with an automated tuning.
 which is usually based on random sampling.
@@ -544,14 +543,14 @@ This is computationally quite demanding even with the small dataset used here.
 So before starting the actual resampling it would be wise to reduce runtime with the help of a parallelization approach. 
 In general, multicore processing is easier on Linux than on Windows systems.
 In fact, cloud computing is usually done and developed on Linux servers.
-Therefore, we will present how to do nested cross-validatation using a parallelization approach working only under Linux-based systems.^[Note also that the `mc.set.seeds` parameter used later on is only available for Linux machines].
+Therefore, we will present how to do nested cross-validation using a parallelization approach working only under Linux-based systems.^[Note also that the `mc.set.seeds` parameter used later on is only available for Linux machines].
 Windows users have at least two options:
 
 1. Run the resampling without parallelizing it though this might take a while.
 2. Install a virtual machine (e.g. [Oracle VirtualBox](https://www.virtualbox.org/)) to reproduce the parallelization code.
 
 Before starting the parallelization, we make sure that the processing continues even if one of the models throws an error by setting `on.learner.error` to `warn`.
-To inspect errored models after the processing has completed we dump them.
+To inspect the failed models after the processing has completed we dump them.
 This is quite handy since you really want to avoid that the processing stops after you have run a server at full capacity for several days just because one model cannot be fitted.
 
 ```{r, eval=FALSE}
@@ -559,7 +558,7 @@ configureMlr(on.learner.error = "warn", on.error.dump = TRUE)
 ```
 
 First, we set the `mode` to `multicore` which will use `mclapply()` in the background on a single machine.^[Check out `?parallelStart` for further modes and the **parallelMap** [github page](https://github.com/berndbischl/parallelMap) for more information on the unified interface to popular parallelization back-ends. Note also that `mclapply()` only supports multicore processing on Linux-based machines.]
-`level` defines the level where to enable the parallelization with `mlr.tuneParams` determing that the inner resampling fold should be parallelized, i.e. the optimal hyperparameter tuning (see lower part of Figure \@ref(fig:inner-outer); and use parallelMap::parallelGetRegisteredLevels() for supported levels as well as the **mlr** [parallelization tutorial](https://mlr-org.github.io/mlr-tutorial/release/html/parallelization/index.html#parallelization-levels)).
+`level` defines the level where to enable the parallelization with `mlr.tuneParams` determining that the inner resampling fold should be parallelized, i.e. the optimal hyperparameter tuning (see lower part of Figure \@ref(fig:inner-outer); and use `parallelMap::parallelGetRegisteredLevels()` for supported levels as well as the **mlr** [parallelization tutorial](https://mlr-org.github.io/mlr-tutorial/release/html/parallelization/index.html#parallelization-levels)).
 Probably we are not the only ones using the server, therefore we are friendly and will use only half of its cores which in our case corresponds to 24 (`cpus` parameter).
 To make sure that the same partitions are used in each parallelized thread, we set `mc.set.seed` to `TRUE`.
 
@@ -642,8 +641,8 @@ Finally, for more details please check out also the fantastic **mlr** online doc
 ## Exercises
 
 1. Compute the terrain attributes slope, plan curvature, profile curvature and catchment area from `dem` (provided by `data("landslides", package = "RSAGA")`) with the help of R-GIS bridges (see Chapter \@ref(gis)), and extract the values from the corresponding output rasters to the `landslides` dataframe (`data(landslides, package = "RSAGA"`)).
-Keep all landslide initation points and 175 randomly selected non-landslide points (see section \@ref(case-landslide)).
-1. Use the derived terrain attributs rasters in combination with a GLM to make a spatial prediction map similar to Figure \@ref(fig:lsl-susc).
+Keep all landslide initiation points and 175 randomly selected non-landslide points (see section \@ref(case-landslide)).
+1. Use the derived terrain attribute rasters in combination with a GLM to make a spatial prediction map similar to Figure \@ref(fig:lsl-susc).
 1. Compute a 100-repeated 5-fold non-spatial cross-validation and spatial CV based on the GLM learner and compare the AUROC values from both resampling strategies with the help of boxplots (see Figure \@ref(fig:boxplot-cv)).
 Hint: You need to specify a non-spatial task and a non-spatial resampling strategy.
 Before running the spatial cross-validation for both tasks set a seed to make sure that both use the same partitions which in turn guarantees comparability.
