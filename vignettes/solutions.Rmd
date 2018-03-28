@@ -629,7 +629,7 @@ library(raster)
 library(sf)
 library(tmap)
 # attach data (in case you have not computed the terrain attributes before)
-# load("extdata/spatialcv.Rdata")
+load("extdata/spatialcv.Rdata")
 
 # fit the model
 fit = glm(lslpts ~ slope + cplan + cprof + elev + log_carea, 
@@ -670,7 +670,7 @@ Before running the spatial cross-validation for both tasks set a seed to make su
 # attach packages
 library(mlr)
 # attach data (in case you have not computed the terrain attributes before)
-# load("extdata/spatialcv.Rdata")
+load("extdata/spatialcv.Rdata")
 
 # put the coordinates in an additional dataframe
 coords = lsl[, c("x", "y")]
@@ -729,7 +729,7 @@ Hint: Before running the spatial cross-validation for both learners set a seed t
 # attach packages
 library(mlr)
 # attach data (in case you have not computed the terrain attributes before)
-# load("extdata/spatialcv.Rdata")
+load("extdata/spatialcv.Rdata")
 
 # put the coordinates in an additional dataframe
 coords = lsl[, c("x", "y")]
@@ -782,4 +782,132 @@ sp_qda = mlr::resample(learner = lrn_qda, task = task_nsp,
 boxplot(sp_glm$measures.test$auc,
         sp_qda$measures.test$auc, col = c("lightblue2", "mistyrose2"),
         names = c("GLM", "QDA"), ylab = "AUROC")
+```
+
+5. Run the SVM without tuning the hyperparameters.
+Use the `rbfdot` kernel with $\sigma$ = 1 and *C* = 1. 
+Leaving the hyperparameters unspecified in **kernlab**'s `ksvm()` would otherwise initialize an automatic non-spatial hyperparameter tuning.
+
+```{r, eval=FALSE}
+# attach packages
+library(mlr)
+# attach data (in case you have not computed the terrain attributes before)
+load("extdata/spatialcv.Rdata")
+
+# put the coordinates in an additional dataframe
+coords = lsl[, c("x", "y")]
+data = dplyr::select(lsl, -x, -y)
+# data_nonspatial = dplyr::select(data, -x, -y)
+
+# CREATE TASK
+#*************
+
+# spatial task
+task = makeClassifTask(data = data, target = "lslpts", 
+                       positive = "TRUE", coordinates = coords)
+
+
+# CONSTRUCT LEARNER
+#******************
+lrn_ksvm = makeLearner("classif.ksvm",
+                       predict.type = "prob",
+                       kernel = "rbfdot",
+                       C = 1,
+                       sigma = 1)
+
+# RESAMPLING
+#***********
+# 100-repeated 5-fold spatial cross-validation without any hyperparameter 
+# tuning
+resampling = makeResampleDesc("SpRepCV", folds = 5, reps = 100)
+
+# parallel processing not really necessary (only 500 models)
+# library(parallelMap)
+# parallelStart(mode = "multicore", level = "mlr.resample", 
+#               cpus = parallel::detectCores() / 2)
+
+set.seed(28032018)
+resa_svm_spatial = mlr::resample(learner = lrn_ksvm, 
+                                 task = task,
+                                 resampling = resampling,
+                                 measures = mlr::auc,
+                                 show.info = TRUE)
+# Aggregated Result: auc.test.mean=0.7843021
+# parallelStop()
+```
+
+6. Model landslide susceptibility with the help of **mlr** using a random forest model as implemented by the **ranger** package.
+Apply a nested spatial CV.
+Parallelize the tuning level.
+Use a random search with 50 iterations to find the optimal hyperparameter combination (here: `mtry` and `num.trees`).
+The tuning space limits are 1 and 4 for `mtry`, and 1 and 10,000 for `num.trees`.
+Warning: This might take a long time.
+More cores substantially decrease computing time.
+
+```{r, eval=FALSE}
+# attach packages
+library(mlr)
+# attach data (in case you have not computed the terrain attributes before)
+load("extdata/spatialcv.Rdata")
+
+# put the coordinates in an additional dataframe
+coords = lsl[, c("x", "y")]
+data = dplyr::select(lsl, -x, -y)
+# data_nonspatial = dplyr::select(data, -x, -y)
+
+# CREATE TASKS
+#*************
+
+# spatial task
+task = makeClassifTask(data = data, target = "lslpts", 
+                       positive = "TRUE", coordinates = coords)
+
+# CONSTRUCT LEARNER
+#******************
+# possibly you have to run:
+# install.packages("ranger")
+lrns = listLearners(task)
+# look for the ranger package
+dplyr::filter(lrns, package %in% "ranger")
+# use random forest as implemented in the ranger package
+lrn_rf = makeLearner(cl = "classif.ranger",
+                     predict.type = "prob")
+
+# RESAMPLING
+#***********
+
+# Outer resampling loop
+outer = makeResampleDesc("SpRepCV", folds = 5, reps = 100)
+# Tuning of hyperparameters in inner resampling loop using a random search with
+# 50 iterations
+ctrl = makeTuneControlRandom(maxit = 50)
+inner = makeResampleDesc("SpCV", iters = 5)
+ps = makeParamSet(makeIntegerParam("mtry", lower = 1, upper = 11),
+                  makeIntegerParam("num.trees", lower = 10, upper = 10000))
+# wrap the learner
+wrapped_lrn_rf = makeTuneWrapper(learner = lrn_rf,
+                                 resampling = inner,
+                                 par.set = ps,
+                                 control = ctrl,
+                                 measures = mlr::auc,
+                                 show.info = TRUE)
+
+# parallelization
+library(parallelMap)
+
+configureMlr(on.learner.error = "warn", on.error.dump = TRUE)
+parallelStart(mode = "multicore", 
+              # only parallelize the tuning
+              level = "mlr.tuneParams", 
+              cpus = round(parallel::detectCores() / 2),
+              mc.set.seed = TRUE) 
+
+set.seed(280320181)
+resa_rf_spatial = mlr::resample(learner = wrapped_lrn_rf,
+                                task = task,
+                                resampling = outer,
+                                extract = getTuneResult,
+                                measures = mlr::auc,
+                                show.info = TRUE)
+parallelStop()
 ```
