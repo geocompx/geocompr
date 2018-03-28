@@ -530,19 +530,19 @@ This amounts to 250 * 5 models for one repetition
 Since we are requesting 100 repetitions this leads to a total of 125,000 models. 
 This is computationally quite demanding even with the small dataset used here.
 So before starting the actual resampling it would be wise to reduce runtime with the help of a parallelization approach. 
-In general, multicore processing is easier on Linux than on Windows systems.
+In general, multicore processing is easier on Unix-based systems than on Windows systems.
 In fact, cloud computing is usually done and developed on Linux servers.
-Therefore, we will present how to do nested cross-validation using a parallelization approach working only under Linux-based systems.^[Note also that the `mc.set.seeds` parameter used later on is only available on Unix-based systems].
+Therefore, we will present how to do nested cross-validation using a parallelization approach working only under Unix-based systems.^[Note also that the `mc.set.seeds` parameter used later on is only available on Unix-based systems].
 Windows users have at least three options:
 
-1. Run the resampling without parallelizing it though this might take a while.
+1. Run the resampling without parallelizing it though this will take most likely more than half a day.
 2. Install a virtual machine (e.g. [Oracle VirtualBox](https://www.virtualbox.org/)) to reproduce the parallelization code.
 3. Connect remotely to a Linux-Server (which is what we have done).
 Of course, this also implies that R and all related packages are installed on the server.
 
 Before starting the parallelization, we make sure that the processing continues even if one of the models throws an error by setting `on.learner.error` to `warn`.
-This is quite handy since you really want to avoid that the processing stops just because of one failed model after you have run a server at full capacity for several days.
-To inspect the failed models after the processing has completed we dump them.
+This is quite handy since we really want to avoid that the processing stops just because of one failed model after running a server at full capacity for several days.
+To inspect the failed models once the processing is completed, we dump them.
 
 ```{r, eval=FALSE}
 configureMlr(on.learner.error = "warn", on.error.dump = TRUE)
@@ -550,7 +550,7 @@ configureMlr(on.learner.error = "warn", on.error.dump = TRUE)
 
 To start the parallelization, we set the `mode` to `multicore` which will use `mclapply()` in the background on a single machine.^[Check out `?parallelStart` for further modes and the **parallelMap** [github page](https://github.com/berndbischl/parallelMap) for more information on the unified interface to popular parallelization back-ends.
 Note also that `mclapply()` only supports multicore processing on Unix-based systems.]
-`level` defines the level where to enable the parallelization with `mlr.tuneParams` determining that the inner resampling fold should be parallelized, i.e. the hyperparameter tuning (see lower left part of Figure \@ref(fig:inner-outer); and use `parallelMap::parallelGetRegisteredLevels()` for supported levels as well as the **mlr** [parallelization tutorial](https://mlr-org.github.io/mlr-tutorial/release/html/parallelization/index.html#parallelization-levels)).
+`level` defines the level where to enable the parallelization with `mlr.tuneParams` determining that the inner resampling fold should be parallelized, i.e. the hyperparameter tuning (see lower left part of Figure \@ref(fig:inner-outer); and have a look at `parallelMap::parallelGetRegisteredLevels()` for supported levels as well as at the **mlr** [parallelization tutorial](https://mlr-org.github.io/mlr-tutorial/release/html/parallelization/index.html#parallelization-levels)).
 Probably we are not the only ones using the server, therefore we are friendly and will use only half of its cores which in our case corresponds to 24 (`cpus` parameter).
 To make sure that the same partitions are used in each parallelized thread, we set `mc.set.seed` to `TRUE`.
 
@@ -578,7 +578,7 @@ result = mlr::resample(learner = wrapped_lrn_ksvm,
 # stop parallelization
 parallelStop()
 # save your result, e.g.:
-# saveRDS(resa_svm_spatial, "svm_sp_sp_rbf_50it.rda")
+# saveRDS(result, "svm_sp_sp_rbf_50it.rda")
 ```
 
 ```{r, include=FALSE}
@@ -602,7 +602,7 @@ result$aggr
 mean(result$measures.test$auc)
 ```
 
-So it appears that the GLM is slightly better than the SVM in this specific case.
+It appears that the GLM (aggregated AUROC was `r sp_cv$aggr`) is slightly better than the SVM in this specific case.
 However, using 200 instead of 50 iterations in the random search would probably yield even better hyperparameter combinations resulting in a better AUROC [@schratz_performance_nodate].
 On the other hand, this would increase the number of models to be fitted from 125,000 to 500,000.^[Have also a look at @james_introduction_2013 for a short discussion on the simililarity of logistic regression and SVM.]
 
