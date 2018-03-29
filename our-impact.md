@@ -48,6 +48,7 @@
 - 2018-03-17 - bug - v.rast.stats doesn't add a new column - https://github.com/jannes-m/RQGIS/issues/99
 - 2018-03-18 - bug - Extract values from raster objects using lines doesn't return data.frames - https://r-forge.r-project.org/tracker/index.php?func=detail&aid=6570&group_id=294&atid=1189
 - 2018-03-23 - bug - sf 0.6-1 (CRAN): plot error - https://github.com/r-spatial/sf/issues/685
+- 2018-03-29 - enhancement - The default value of `auto.palette.mapping` - question - https://github.com/mtennekes/tmap/issues/181
 
 # Other
 
