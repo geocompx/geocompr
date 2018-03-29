@@ -14,16 +14,20 @@ library(raster)
 library(RSAGA)
 library(sf)
 library(tidyverse)
+library(tibble)
 ```
 
+<!-- This sounds a bit strange. Also a single bullet point here looks a bit lost? -->
 - Required data will be downloaded in due course.
 
 ## Introduction
 
 Section \@ref(software-for-geocomputation) mentioned several programming languages suitable for command-line based geocomputation.
+<!-- unparalleled = outstanding?  -->
 The advantages of geocomputation with R were discussed, including its unparalleled statistical power.
 This chapter makes use of some of this statistical power, by demonstrating methods for predictive mapping by means of statistical learning [@james_introduction_2013].
-The main focus, however, is the use of spatial cross-validation (or 'spatial CV' for short, a term we will define shortly) to assess model performance and reduce spatial bias.
+The main focus, however, is the use of spatial cross-validation (or 'spatial CV' in short, a term we will define shortly) to assess model performance and reduce spatial bias.
+<!-- I think this is confusing as it sounds that you use spatial cv to model/predict something. However, its only purpose is performance estimation. "CV is an excellent method to get a robust estimate of the performance of an algorithm on a data set. At the time of writing, Cv approaches tailored to spatial data are best supported in R than any other language." -->
 Spatial CV is an excellent example of using statistical methods to model spatial data and, at the time of writing, the technique is better supported in R than any other language.
 
 Statistical learning comprises a large suite of techniques for understanding data.
@@ -31,31 +35,40 @@ Statistical learning can be roughly grouped into supervised and unsupervised tec
 In this chapter we will focus on supervised techniques, i.e., we have a response variable, in our case this will be a binary one (landslide vs. non-landslide occurrence) but could be also a numeric (pH value), an integer (species richness) or a categorical variable (land use).
 Supervised techniques model the relationship between the response variable and various predictors.
 For this we can use techniques from the field of statistics or from the field of machine learning.
+<!-- This sounds like that statistical models should not be used for prediction at all. Maybe write sth like "the possibility of conducting statistical inference or maximization of predictive accuracy" -->
 Which to use depends on the aim: statistical inference or prediction.
 (Semi-)Parametric regression techniques are especially useful if the aim is statistical inference, i.e. if we are interested in a predictor's significance, its importance for a specific model and to explain relationships between response and predictors.
 To trust the p-values and standard errors of such models we need to perform a thorough model validation testing if one or several of the underlying model assumptions (heterogeneity, independence, etc.) have been violated [@zuur_mixed_2009].
+<!-- This again sounds like statistical models are not aimed for prediction at all (because you use "by contrast")-->
 By contrast, machine learning aims at predictions and is especially appealing due its lack of assumptions.
-Though statistical inference is impossible [@james_introduction_2013], various studies have shown that machine learning is at least at par with regression techniques regarding predictive performance [e.g., @schratz_performance_nodate]. <!-- add one more source -->
+<!-- Usually ML > SL, so we would need to formulate it as "SL has the ability to be at least par with ML". I would not write about statistical inference and predictive performance in one sentence as they are unrelated here. Stay with one: "Although stat. inf. is impossible, some ML models provide the possibility to calcuilate variable importance" -->
+Though statistical inference is impossible [@james_introduction_2013], various studies have shown that machine learning is at least at par with regression techniques regarding predictive performance [e.g., @schratz_performance_nodate]. 
+<!-- machine learning has even gained in popularity "due to its ability to scale to large data and ignore the assumption of uncorrelated predictor variables" -->
 Naturally, with the advent of big data, machine learning has even gained in popularity since frequently the underlying relationship between variables is less important than the prediction.
-Think for instance of future customer behavior, recommendation services (music, movies, what to buy next), face recognition, autonomous driving, classifying e-mails as spam and predictive maintenance (infrastructure, industry) to name but a few.
+Think for instance of future customer behavior, recommendation services (music, movies, what to buy next), face recognition, autonomous driving, classifying e-mails as spam and predictive maintenance (infrastructure, industry) to name just a few.
+<!-- "borrow sounds wrong here since we do not borrow something, especially not from "statitics", This sounds like it would be a different 'site'? Simply something like "Fortunately, we can use machine-learning regression techniques to deal with such lrage data" -->
 Note that we can borrow regression techniques from statistics for machine learning when the aim is prediction.
 In this case we do not have too worry too much about possible model misspecifications since we explicitly do not want to do statistical inference.
-In fact, in this chapter the aim will be the (spatial) prediction of landslide susceptibility. 
-We will start out with a generalized linear model (GLM) which is probably familiar to most readers^[Readers who are in need of refreshing their regression skills might have a look at @zuur_mixed_2009 and @james_introduction_2013, respectively.], before moving on to using a typical machine learning algorithm, namely a support vector machine.
-Instead of explaining in detail the models we will focus on the specialty of geographic data in a modeling context and the models' predictive performance via spatial CV.
+In this chapter the aim will be the (spatial) prediction of landslide susceptibility. 
+<!-- Somethings missing after the GLM reference -->
+We will start out with a Generalized Linear Model (GLM) which is assumed to be familiar to most readers^[Readers who are in need of refreshing their regression skills might have a look at @zuur_mixed_2009 and @james_introduction_2013, respectively.], before moving on to using a machine-learning algorithm, in this case a support vector machine.
+Instead of focusing on model specifications we will tackle the speciality of geographic data in a modeling context, specifically on performance estimates received using (spatial) CV.
 
-CV determines a model's ability to predict new data or differently put its ability to generalize.
+CV determines a model's ability to generalize to new data.
 To achieve this, CV splits a dataset (repeatedly) into test and training sets.
-It uses the training data to fit the model, and checks if the trained model is able to predict the correct results for the test data.
-Basically, cross-validation helps to detect over-fitting since a model that fits too closely the training data and its specific peculiarities (noise, random fluctuations) will have a bad prediction performance on the test data.
-However, the basic requirement for this is, that the test data is independent of the training data.
-CV achieves this by splitting the data randomly into test and training sets. 
-However, randomly splitting spatial data results in the fact that training points are frequently located next to test points.
-Since points close to each other are more similar compared to points further away, test and training datasets might not be independent.
-The consequence is that cross-validation would fail to detect over-fitting in the presence of spatial autocorrelation.
-Here, spatial CV will come to the rescue which will be the main topic of this chapter.
+It uses the training data to fit the model, and checks its performance when predicting to the test data.
+Basically, cross-validation helps to detect overfitting since a model that fits the training data too closely (including the data's noise and random fluctuations) will have a bad prediction performance on the test data.
+The basic requirement for this is that the test data consists of observations that the model has not seen before.
+CV achieves this by splitting the data randomly into test and training set. 
+However, randomly splitting spatial data results in the fact that training points are directly located next to test points.
+<!-- This probably needs to be reformulated again -->
+Since points close to each other are more similar compared to points further away (this is called spatial autocorrelation), test and training datasets might be independent in theory but not in practice.
+Hence, many observations from the test set are highly similar to the training data.
+<!-- "overfitting" is only valid if the diff between train and test is high -->
+The consequence is that cross-validation cannot detect possible overfitting because the model will achieve a very good performanc e on the test set because its highly similar to the training data.
+Spatial CV is able to solve this problem and will be main topic of this chapter.
 
-## Case study: landslide susceptibility {#case-landslide}
+## Case study: Landslide susceptibility {#case-landslide}
 
 To introduce spatial CV by example, we will use a landslide dataset from Southern Ecuador (Figure \@ref(fig:lsl-map)).
 For a detailed description of the dataset and the study area please refer to @muenchow_geomorphic_2012.
@@ -115,8 +128,10 @@ load("extdata/spatialcv.Rdata")
 
 ```{r}
 dplyr::select(lsl, -x, -y) %>%
-  head(., 3)
+  head(3)
 ```
+
+<!-- reviewed until here -->
 
 The added columns are:
 
