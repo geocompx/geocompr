@@ -486,70 +486,8 @@ facet_anim = tm_shape(statepop_sf) + tm_fill(year_vars) + tm_facets(free.scales.
 animation_tmap(tm = facet_anim, filename = "figures/09-us_pop.gif")
 ```
 
-```{r}
+```{r, echo=FALSE}
 knitr::include_graphics("figures/09-us_pop.gif")
-```
-
-
-
- <!-- More description: it shows their creation using data arranged wit -->
-
-<!-- 1/ desribe how to use `tm_facets` for animation -->
-<!-- 2/ by , nrow, ncol -->
-<!-- next, focus on `animation_tmap` -->
-<!-- 3/ along -->
-<!-- 4/ by and along -->
-
-```{r ani_data_prep, eval=FALSE, echo=FALSE}
-library(wbstats)
-library(rnaturalearth)
-library(units)
-options(scipen = 999)
-
-wb_data_create = function(indicator, our_name, year, ...){
-  df = wb(indicator = indicator, startdate = year, enddate = year, ...) %>%
-    as_data_frame() %>%
-    select(iso_a2=iso2c, value) %>%
-    mutate(indicator = our_name) %>%
-    spread(indicator, value)
-  return(df)
-}
-
-data_lifeExp = seq(1963, 2013, by=5) %>%
-  set_names(.) %>%
-  map_df(~wb_data_create(.x, indicator = "SP.DYN.LE00.IN",
-                   our_name = "lifeExp",
-                   country = "countries_only"), .id='year') %>%
-  spread(year, lifeExp)
-
-world_sf_temporal = ne_countries(returnclass = 'sf') %>%
-  left_join(., data_lifeExp, by = c('iso_a2')) %>%
-  mutate(area_km2 = set_units(st_area(.), km^2)) %>%
-  select(iso_a2, name_long, continent, region_un, subregion, type, area_km2, `1963`:`2013`) %>%
-  gather(year, lifeExp, `1963`:`2013`)
-```
-
-```{r animation1, eval=FALSE, echo=FALSE}
-m1 = tm_shape(world_sf_temporal) + 
-  tm_polygons("lifeExp") +
-  tm_facets(by = "year", nrow = 1, ncol = 1)
-
-animation_tmap(m1, filename = "figures/11-lifeExp_animation.gif", width = 2000, height = 600, delay = 40)
-```
-
-```{r animation2, eval=FALSE, echo=FALSE}
-world_sf_sa = filter(world_sf_temporal, continent == "South America", year == 2013)
-m2 = tm_shape(world_sf_sa) +
-  tm_polygons("lifeExp", n = 12) +
-  tm_facets(along = "name_long")
-```
-
-```{r animation3, eval=FALSE, echo=FALSE}
-world_sf_temporal_sa = filter(world_sf_temporal, continent == "South America")
-m3 = tm_shape(world_sf_temporal_sa) +
-  tm_polygons("lifeExp", n = 12) +
-  tm_facets(by = "name_long", along = "year")
-animation_tmap(m3, filename = "figures/11-lifeExp_sa_animation.gif", width = 1600, height = 1000, delay = 40)
 ```
 
 <!-- add a new animation exercise -->
