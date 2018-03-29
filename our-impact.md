@@ -38,6 +38,7 @@
 - 2018-02-10 - bug - tmap 2.0: tm_polygons error - https://github.com/mtennekes/tmap/issues/170
 - 2018-02-22 - bug - Mix of raster and points results in error - tmap 2.0 - https://github.com/mtennekes/tmap/issues/176
 - 2018-02-26 - bug - Plotting error - tmap 2.0 - https://github.com/mtennekes/tmap/issues/177
+- 2018-03-23 - bug - sf 0.6-1 (CRAN): plot error - https://github.com/r-spatial/sf/issues/685
 
 ## open
 
@@ -47,7 +48,6 @@
 - 2018-02-11 - enhancement - Function's names - idea - https://github.com/mtennekes/tmap/issues/171
 - 2018-03-17 - bug - v.rast.stats doesn't add a new column - https://github.com/jannes-m/RQGIS/issues/99
 - 2018-03-18 - bug - Extract values from raster objects using lines doesn't return data.frames - https://r-forge.r-project.org/tracker/index.php?func=detail&aid=6570&group_id=294&atid=1189
-- 2018-03-23 - bug - sf 0.6-1 (CRAN): plot error - https://github.com/r-spatial/sf/issues/685
 - 2018-03-29 - enhancement - The default value of `auto.palette.mapping` - question - https://github.com/mtennekes/tmap/issues/181
 
 # Other
