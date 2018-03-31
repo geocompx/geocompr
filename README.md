@@ -119,12 +119,12 @@ knitr::kable(pkg_df)
 | microbenchmark    | Accurate Timing Functions \[@R-microbenchmark\]                                           | 1.4.4   |
 | mlr               | Machine Learning in R \[@R-mlr\]                                                          | 2.13    |
 | osmdata           | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]                  | 0.0.6   |
-| pROC              | Display and Analyze ROC Curves \[@R-pROC\]                                                | 1.10.0  |
+| pROC              | Display and Analyze ROC Curves \[@R-pROC\]                                                | 1.11.0  |
 | raster            | Geographic Data Analysis and Modeling \[@R-raster\]                                       | 2.6.7   |
 | rcartocolor       | 'CARTOColors' Palettes \[@R-rcartocolor\]                                                 | 0.0.22  |
 | rgdal             | Bindings for the 'Geospatial' Data Abstraction Library \[@R-rgdal\]                       | 1.2.18  |
 | rgeos             | Interface to Geometry Engine - Open Source ('GEOS') \[@R-rgeos\]                          | 0.3.26  |
-| rmapshaper        | Client for 'mapshaper' for 'Geospatial' Operations \[@R-rmapshaper\]                      | 0.3.1   |
+| rmapshaper        | Client for 'mapshaper' for 'Geospatial' Operations \[@R-rmapshaper\]                      | 0.4.0   |
 | rmarkdown         | Dynamic Documents for R \[@R-rmarkdown\]                                                  | 1.9     |
 | rnaturalearth     | World Map Data from Natural Earth \[@R-rnaturalearth\]                                    | 0.1.0   |
 | rnaturalearthdata | World Vector Map Data from Natural Earth Used in 'rnaturalearth' \[@R-rnaturalearthdata\] | 0.1.0   |
@@ -132,8 +132,8 @@ knitr::kable(pkg_df)
 | RSAGA             | SAGA Geoprocessing and Terrain Analysis \[@R-RSAGA\]                                      | 1.0.0   |
 | sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.1   |
 | sp                | Classes and Methods for Spatial Data \[@R-sp\]                                            | 1.2.7   |
-| spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.8.2 |
-| spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.6.0 |
+| spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.8.4 |
+| spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.6.1 |
 | stplanr           | Sustainable Transport Planning \[@R-stplanr\]                                             | 0.2.3   |
 | tabularaster      | Tidy Tools for 'Raster' Data \[@R-tabularaster\]                                          | 0.4.0   |
 | tidyverse         | Easily Install and Load the 'Tidyverse' \[@R-tidyverse\]                                  | 1.2.1   |
