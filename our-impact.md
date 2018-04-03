@@ -40,6 +40,7 @@
 - 2018-02-26 - bug - Plotting error - tmap 2.0 - https://github.com/mtennekes/tmap/issues/177
 - 2018-03-23 - bug - sf 0.6-1 (CRAN): plot error - https://github.com/r-spatial/sf/issues/685
 - 2018-02-11 - enhancement - Function's names - idea - https://github.com/mtennekes/tmap/issues/171
+- 2018-03-01 - enhancement - updating options in tmap - https://github.com/mtennekes/tmap/issues/178
 
 ## open
 
