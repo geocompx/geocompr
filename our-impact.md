@@ -39,16 +39,17 @@
 - 2018-02-22 - bug - Mix of raster and points results in error - tmap 2.0 - https://github.com/mtennekes/tmap/issues/176
 - 2018-02-26 - bug - Plotting error - tmap 2.0 - https://github.com/mtennekes/tmap/issues/177
 - 2018-03-23 - bug - sf 0.6-1 (CRAN): plot error - https://github.com/r-spatial/sf/issues/685
+- 2018-02-11 - enhancement - Function's names - idea - https://github.com/mtennekes/tmap/issues/171
 
 ## open
 
 - 2017-04-01 - enhancement - returnclass='sf' as default - https://github.com/ropenscilabs/rnaturalearth/issues/16
 - 2017-07-11 - bug - Problem with plots of the multipoint type - https://github.com/mtennekes/tmap/issues/126
 - 2017-08-23 - bug - mapedit does not seem to save the end result after editing - https://github.com/r-spatial/mapedit/issues/63
-- 2018-02-11 - enhancement - Function's names - idea - https://github.com/mtennekes/tmap/issues/171
 - 2018-03-17 - bug - v.rast.stats doesn't add a new column - https://github.com/jannes-m/RQGIS/issues/99
 - 2018-03-18 - bug - Extract values from raster objects using lines doesn't return data.frames - https://r-forge.r-project.org/tracker/index.php?func=detail&aid=6570&group_id=294&atid=1189
 - 2018-03-29 - enhancement - The default value of `auto.palette.mapping` - question - https://github.com/mtennekes/tmap/issues/181
+- 2018-04-02 - enhancement - The **sf** support - https://github.com/sjewo/cartogram/issues/8
 
 # Other
 
