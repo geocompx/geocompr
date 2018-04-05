@@ -51,6 +51,7 @@
 - 2018-03-18 - bug - Extract values from raster objects using lines doesn't return data.frames - https://r-forge.r-project.org/tracker/index.php?func=detail&aid=6570&group_id=294&atid=1189
 - 2018-03-29 - enhancement - The default value of `auto.palette.mapping` - question - https://github.com/mtennekes/tmap/issues/181
 - 2018-04-02 - enhancement - The **sf** support - https://github.com/sjewo/cartogram/issues/8
+- 2018-04-05 - bug - rmapshaper does not work when a column has the `units` class -  https://github.com/ateucher/rmapshaper/issues/75
 
 # Other
 
