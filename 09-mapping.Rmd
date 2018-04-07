@@ -500,7 +500,7 @@ The main goal of this section is to present how to generate and arrange inset ma
 The next step is to use the knowledge from the previous sections to improve the map style or to add another data layers.
 Moreover, the same skills can be applied to combine maps and plots.
 
-### Other static mapping packages
+## Other static mapping packages
 
 ```{r, eval=FALSE, echo=FALSE}
 library(globe)
@@ -540,13 +540,22 @@ Other notable features include the use of unquoted variable names encapsulated i
 
 ```{r nz-gg, fig.cap="Map of New Zealand created with ggplot2."}
 library(ggplot2)
-ggplot(nz) + geom_sf(aes(fill = col)) +
+g1 = ggplot(nz) + geom_sf(aes(fill = col)) +
   geom_sf(data = nz_height) +
   scale_x_continuous(breaks = c(170, 175))
+g1
 ```
 
 An advantage of **ggplot2** is that it has a strong user-community and many add-on packages.
 Good additional resources can be found in the [ggplot2-book](https://github.com/hadley/ggplot2-book) open source book on the subject, plus descriptions of the multitude of '**gg**packages' such as **ggrepel** and **tidygraph**.
+
+Another benefit of maps based on **ggplot2** is that they can easily be given a level of interactivity when printed using the function `ggplotly()` from the **plotly** package.
+Try `plotly::ggplotly(g1)` for example, and compare the result with other **plotly** mapping functions described at [blog.cpsievert.me](https://blog.cpsievert.me/2018/03/30/visualizing-geo-spatial-data-with-sf-and-plotly/).
+
+```{r, eval=FALSE, echo=FALSE}
+plotly::ggplotly(g1)
+```
+
 
 We have covered mapping with **sf**, **raster** and **ggplot2** packages first because these packages are highly flexible, allowing for the creation of a wide range of static maps.
 Many other static mapping packages are more specific.
@@ -554,8 +563,8 @@ Many other static mapping packages are more specific.
 Before we cover mapping packages for plotting a specific type of map (in the next paragraph), it is worth considering alternatives to the packages already covered for general-purpose static mapping.
 Table \@ref(tab:map-pkgs) illustrates some commonly used mapping packages, identified using the website [r-pkg.org](https://www.r-pkg.org/search.html?q=map) and visualised with the in-development GitHub package **packagemetrics**.
 
-```{r, eval=FALSE}
-libra
+```{r, echo=FALSE, fig.cap="Selected mapping packages, with associated metrics."}
+# readRDS("extdata/pkg_table.Rds")
 ```
 
 
@@ -603,11 +612,11 @@ The power of animated maps is illustrated in Figure \@ref(fig:animus), which sho
 ```{r, eval=FALSE}
 library(tmap)
 statepop = historydata::us_state_populations %>%
-  select(-GISJOIN) %>% rename(NAME = state)
+  dplyr::select(-GISJOIN) %>% rename(NAME = state)
 statepop_wide = spread(statepop, year, population, sep = "_")
 statepop_sf = left_join(spData::us_states, statepop_wide) %>% 
   st_transform(2163)
-map_dbl(statepop_sf, ~sum(is.na(.)))  # looks about right
+# map_dbl(statepop_sf, ~sum(is.na(.)))  # looks about right
 year_vars = names(statepop_sf)[grepl("year", names(statepop_sf))]
 facet_anim = tm_shape(statepop_sf) + tm_fill(year_vars) + tm_facets(free.scales.fill = FALSE, 
   ncol = 1, nrow = 1)
@@ -621,7 +630,7 @@ animation_tmap(tm = facet_anim, filename = "figures/09-us_pop.gif")
 # install.packages("USAboundaries")
 library(USAboundaries)
 dates = lubridate::as_date(unique(historydata::us_state_populations$year))
-USAboundaries::us_boundaries(map_date = dates[1])
+# USAboundaries::us_boundaries(map_date = dates[1])
 ```
 
 
