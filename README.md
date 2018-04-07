@@ -23,6 +23,16 @@ We encourage contributions on any part of the book, including:
 
 Please see [our\_style.md](https://github.com/Robinlovelace/geocompr/blob/master/our_style.md) for the book's style.
 
+    #> ── Attaching packages ─────────── tidyverse 1.2.1 ──
+    #> ✔ ggplot2 2.2.1.9000     ✔ purrr   0.2.4     
+    #> ✔ tibble  1.4.2          ✔ dplyr   0.7.4     
+    #> ✔ tidyr   0.8.0          ✔ stringr 1.3.0     
+    #> ✔ readr   1.1.1          ✔ forcats 0.3.0
+    #> ── Conflicts ────────────── tidyverse_conflicts() ──
+    #> ✖ dplyr::filter() masks stats::filter()
+    #> ✖ dplyr::lag()    masks stats::lag()
+    #> ✖ dplyr::vars()   masks ggplot2::vars()
+
 Many thanks to all contributors to the book so far via GitHub (this list will update automatically): katygregg, rsbivand, gisma, ateucher, yutannihilation, richfitz, gregor-d, p-kono.
 
 Reproducing the book
@@ -104,18 +114,19 @@ knitr::kable(pkg_df)
 
 | Name              | Title                                                                                     | version    |
 |:------------------|:------------------------------------------------------------------------------------------|:-----------|
-| bookdown          | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]                   | 0.7.7      |
+| bookdown          | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]                   | 0.7        |
 | dismo             | Species Distribution Modeling \[@R-dismo\]                                                | 1.1.4      |
 | geosphere         | Spherical Trigonometry \[@R-geosphere\]                                                   | 1.5.7      |
 | ggmap             | Spatial Visualization with ggplot2 \[@R-ggmap\]                                           | 2.6.1      |
+| ggplot2           | Create Elegant Data Visualisations Using the Grammar of Graphics \[@R-ggplot2\]           | 2.2.1.9000 |
 | gstat             | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction \[@R-gstat\]             | 1.1.6      |
 | historydata       | Data Sets for Historians \[@R-historydata\]                                               | 0.2.9001   |
 | htmlwidgets       | HTML Widgets for R \[@R-htmlwidgets\]                                                     | 1.0        |
-| kableExtra        | Construct Complex Table with 'kable' and Pipe Syntax \[@R-kableExtra\]                    | 0.7.0      |
+| kableExtra        | Construct Complex Table with 'kable' and Pipe Syntax \[@R-kableExtra\]                    | 0.8.0      |
 | knitr             | A General-Purpose Package for Dynamic Report Generation in R \[@R-knitr\]                 | 1.20       |
-| leaflet           | Create Interactive Web Maps with the JavaScript 'Leaflet' \[@R-leaflet\]                  | 2.0.0      |
+| leaflet           | Create Interactive Web Maps with the JavaScript 'Leaflet' \[@R-leaflet\]                  | 1.1.0      |
 | link2GI           | Linking Geographic Information Systems, Remote Sensing and Other \[@R-link2GI\]           | 0.3.0      |
-| lwgeom            | Bindings to Selected 'liblwgeom' Functions for Simple Features \[@R-lwgeom\]              | 0.1.5      |
+| lwgeom            | Bindings to Selected 'liblwgeom' Functions for Simple Features \[@R-lwgeom\]              | 0.1.4      |
 | mapview           | Interactive Viewing of Spatial Data in R \[@R-mapview\]                                   | 2.3.0      |
 | microbenchmark    | Accurate Timing Functions \[@R-microbenchmark\]                                           | 1.4.4      |
 | mlr               | Machine Learning in R \[@R-mlr\]                                                          | 2.13       |
@@ -129,9 +140,9 @@ knitr::kable(pkg_df)
 | rmarkdown         | Dynamic Documents for R \[@R-rmarkdown\]                                                  | 1.9        |
 | rnaturalearth     | World Map Data from Natural Earth \[@R-rnaturalearth\]                                    | 0.1.0      |
 | rnaturalearthdata | World Vector Map Data from Natural Earth Used in 'rnaturalearth' \[@R-rnaturalearthdata\] | 0.1.0      |
-| RQGIS             | Integrating R with QGIS \[@R-RQGIS\]                                                      | 1.0.3.9000 |
-| RSAGA             | SAGA Geoprocessing and Terrain Analysis \[@R-RSAGA\]                                      | 1.1.0      |
-| sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.2      |
+| RQGIS             | Integrating R with QGIS \[@R-RQGIS\]                                                      | 1.0.3      |
+| RSAGA             | SAGA Geoprocessing and Terrain Analysis \[@R-RSAGA\]                                      | 1.0.0      |
+| sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.1      |
 | sp                | Classes and Methods for Spatial Data \[@R-sp\]                                            | 1.2.7      |
 | spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.8.4    |
 | spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.6.1    |
