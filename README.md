@@ -23,16 +23,6 @@ We encourage contributions on any part of the book, including:
 
 Please see [our\_style.md](https://github.com/Robinlovelace/geocompr/blob/master/our_style.md) for the book's style.
 
-    #> ── Attaching packages ─────────── tidyverse 1.2.1 ──
-    #> ✔ ggplot2 2.2.1.9000     ✔ purrr   0.2.4     
-    #> ✔ tibble  1.4.2          ✔ dplyr   0.7.4     
-    #> ✔ tidyr   0.8.0          ✔ stringr 1.3.0     
-    #> ✔ readr   1.1.1          ✔ forcats 0.3.0
-    #> ── Conflicts ────────────── tidyverse_conflicts() ──
-    #> ✖ dplyr::filter() masks stats::filter()
-    #> ✖ dplyr::lag()    masks stats::lag()
-    #> ✖ dplyr::vars()   masks ggplot2::vars()
-
 Many thanks to all contributors to the book so far via GitHub (this list will update automatically): katygregg, rsbivand, gisma, ateucher, yutannihilation, richfitz, gregor-d, p-kono.
 
 Reproducing the book
