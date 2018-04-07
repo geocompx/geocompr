@@ -22,6 +22,7 @@
 
 library(tmap)
 library(grid)
+library(spData)
 library(sp)
 colfunc = colorRampPalette(c("lightyellow", "rosybrown"))
 colfunc2 = c("clay" = "brown", "silt" = "sandybrown", "sand" = "rosybrown")
