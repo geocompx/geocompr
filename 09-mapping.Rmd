@@ -329,14 +329,23 @@ Some useful layout settings are listed below (see Figure \@ref(fig:layout2) for 
 source("code/09-layout2.R")
 ```
 
-The impact of changing the color settings listed above is illustrated in Figure \@ref(fig:layout3) (see `?tm_layout` for full list):
+The impact of changing the color settings listed above is illustrated in Figure \@ref(fig:layout3) (see `?tm_layout` for full list).
 
 ```{r layout3, fig.cap="Illustration of selected color-related layout options.", echo=FALSE}
-# todo: add more useful settings to this plot
 source("code/09-layout3.R")
 ```
 
-Beyond this low-level control over layouts, **tmap** also offers high-level styles using `tm_style_` functions.
+The word 'style' has two different meanings in **tmap**.
+The first refers to the method by which continuous variables are broken into discrete bins for plotting on the map.
+The package offers many options for specifying bins, in addition to setting `breaks` manually, as we have already seen.
+Different binning methods are with `style` argument in functions that can convert numeric variables into colors such as `tm_fill()`.
+Some of the most useful binning methods are illustrated in Figure \@ref(fig:break-styles).
+
+```{r break-styles, fig.cap="Illustration of different binning methods set using the syle argument in tmap.", echo=FALSE}
+source("code/09-break-styles.R")
+```
+
+Beyond this low-level control over layouts and colors, **tmap** also offers high-level styles, using `tm_style_` functions (representing the second meaning of 'style' in the package).
 Some styles such as `tm_style_cobalt()` result in stylized maps while others such as `tm_style_grey()` make more subtle changes, as illustrated in Figure \@ref(fig:tmstyles), created using code below (see `09-tmstyles.R`):
 
 ```{r, eval=FALSE}
@@ -453,7 +462,7 @@ Inset map can be save to file either by using a graphic device (see section \@re
 
 Inset maps are also used to create one map of non-contiguous areas.
 Probably, the most often use example is a map of United States, which consists of the contiguous United States, Hawaii and Alaska.
-It is very important to find the best projection for each individual inset in this type of cases (see section \@ref(#reproj-geo-data) to learn more).
+It is very important to find the best projection for each individual inset in this type of cases (see section \@ref(reproj-geo-data) to learn more).
 We can use US National Atlas Equal Area for the map of the contiguous United States by putting its EPSG code in the `projection` argument of `tm_shape()`.
 
 ```{r}
@@ -496,7 +505,58 @@ Moreover, the same skills can be applied to combine maps and plots.
 library(globe)
 ```
 
-<!-- ggplot2 -->
+**tmap** provides a powerful interface for creating a wide range of static maps (section \@ref(interactive-maps) shows how **tmap** also supports interactive maps).
+But there are many other options for creating static maps.
+The aim of this section is to provide a taster of some of these and pointers for additional resources: map making is a surprisingly active area of R package development so there is more to learn than can be covered here.
+
+The most mature option is to use `plot()` methods provided by core spatial packages **sf** and **raster**, covered in sections \@ref(basic-map) and \@ref(basic-map-raster) respectively.
+What we didn't mention in those sections was that plot methods for raster and vector objects can be combined, as illustrated in the subsequent code chunk which generates Figure \@ref(fig:nz-plot).
+`plot()` has many options which can be explored by following links in the `?plot` help page and the **sf** vignette [`sf5`](https://cran.r-project.org/web/packages/sf/vignettes/sf5.html).
+
+```{r nz-plot, fig.cap="Map of New Zealand created with plot(). The legend to the left refers to elevation (1000 m above sea level)."}
+g = st_graticule(nz, lon = c(170, 175), lat = c(-45, -40, -35))
+plot(nz_water, graticule = g, axes = TRUE, col = "blue")
+raster::plot(nz_elev / 1000, add = TRUE)
+plot(nz$geometry, add = TRUE)
+```
+
+
+```{r, eval=FALSE, echo=FALSE}
+# RgoogleMaps example: not working
+nz_cent = st_union(nz) %>% st_centroid()
+bg_map = RgoogleMaps::GetMap(center = c(40, -176), zoom = 9)
+nz_wgs = st_transform(nz, 3857)
+plot(nz_wgs$geometry, bgMap = bg_map)
+```
+
+Since version 2.2.2, the **tidyverse** plotting package **ggplot2** has supported `sf` objects with `geom_sf()`.
+The syntax is similar to that used by **tmap**:
+an initial `ggplot()` call is followed by one or more layers, that are added with `+ geom_*()`, where `*` represents a layer type such as `geom_sf()` (for sf objects) or `geom_points()` (for points).
+
+**ggplot2** plots graticules by defult.
+The default settings for the graticules can be overridden using `scale_x_continuous()` and `scale_y_continuous()`.
+Other notable features include the use of unquoted variable names encapsulated in `aes()` to indicate which aesthetics vary and switching data sources using the `data` argument, as demonstrated in the code chunk below which creates Figure \@ref(fig:nz-gg):
+
+```{r nz-gg, fig.cap="Map of New Zealand created with ggplot2."}
+library(ggplot2)
+ggplot(nz) + geom_sf(aes(fill = col)) +
+  geom_sf(data = nz_height) +
+  scale_x_continuous(breaks = c(170, 175))
+```
+
+An advantage of **ggplot2** is that it has a strong user-community and many add-on packages.
+Good additional resources can be found in the [ggplot2-book](https://github.com/hadley/ggplot2-book) open source book on the subject, plus descriptions of the multitude of '**gg**packages' such as **ggrepel** and **tidygraph**.
+
+We have covered mapping with **sf**, **raster** and **ggplot2** packages first because these packages are highly flexible, allowing for the creation of a wide range of static maps.
+Many other static mapping packages are more specific.
+
+Before we cover mapping packages for plotting a specific type of map (in the next paragraph), it is worth considering alternatives to the packages already covered for general-purpose static mapping.
+Table \@ref(tab:map-pkgs) illustrates some commonly used mapping packages, identified using the website [r-pkg.org](https://www.r-pkg.org/search.html?q=map) and visualised with the in-development GitHub package **packagemetrics**.
+
+```{r}
+libra
+```
+
 
 ## Animated maps
 
