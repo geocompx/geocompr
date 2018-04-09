@@ -1,0 +1,10 @@
+library(spData)
+library(tmap)
+legend_title = expression("Area (km"^2*")")
+map_nza = tm_shape(nz) +
+  tm_fill(col = "AREA_SQ_KM", title = legend_title) + tm_borders()
+c1 = map_nza + tm_layout('aes.color = c(borders = "red")', aes.color = c(borders = "red")) 
+c2 = map_nza + tm_layout('attr.color = "red"', attr.color = "red")
+c3 = map_nza + tm_layout('sepia.intensity = 0.9', sepia.intensity = 0.9)
+c4 = map_nza + tm_layout('saturation = 0.5', saturation = 0.5)
+tmap_arrange(c1, c2, c3, c4, nrow = 1)
