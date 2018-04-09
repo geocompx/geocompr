@@ -556,17 +556,22 @@ Try `plotly::ggplotly(g1)` for example, and compare the result with other **plot
 plotly::ggplotly(g1)
 ```
 
-
 We have covered mapping with **sf**, **raster** and **ggplot2** packages first because these packages are highly flexible, allowing for the creation of a wide range of static maps.
 Many other static mapping packages are more specific.
 
 Before we cover mapping packages for plotting a specific type of map (in the next paragraph), it is worth considering alternatives to the packages already covered for general-purpose static mapping.
-Table \@ref(tab:map-pkgs) illustrates some commonly used mapping packages, identified using the website [r-pkg.org](https://www.r-pkg.org/search.html?q=map) and visualised with the in-development GitHub package **packagemetrics**.
+Table \@ref(tab:map-pkgs) illustrates metrics associated with some commonly used mapping packages, identified using the website [r-pkg.org](https://www.r-pkg.org/search.html?q=map) and accessed via **packagemetrics**.
 
-```{r, echo=FALSE, fig.cap="Selected mapping packages, with associated metrics."}
-# readRDS("extdata/pkg_table.Rds")
+```{r map-pkgs, echo=FALSE, message=FALSE}
+pkg_df = read_csv("extdata/map_pkgs.csv")
+map_pkgs_df = dplyr::select(pkg_df, package, title, latest_release = published)
+map_pkgs_df$title[map_pkgs_df$package == "leaflet"] =
+  "Create Interactive Web Maps with Leaflet"
+knitr::kable(map_pkgs_df, caption = "Selected mapping packages, with associated metrics.")
 ```
 
+Table \@ref(tab:map-pkgs) shows a range of mapping packages are available, and there are many others not listed in this table.
+Of note is **cartography**, which generates a range of unusual maps including choropleth, 'proportional symbol' and 'flow' maps, each of which is documented in the vignette [`cartography`](https://cran.r-project.org/web/packages/cartography/vignettes/cartography.html).
 
 ## Animated maps
 
@@ -577,8 +582,8 @@ Furthermore the fact that each facet is separated by space on the screen or page
 With an increasing proportion of communication happening via digital screens, animated maps are becoming more popular.
 Animated maps can even be useful for paper reports: you can always link readers to a web-page containing an animated (or interactive) version of a printed map to help make it come alive.
 
-Figure \@ref(fig:urban-animated) is a simple example of the benefits of an animated map.
-Unlike the faceted plot it does not squeeze all 17 for them all to be displayed simultaneously (see the book's website for the animated version).
+Figure \@ref(fig:urban-animated) is a simple example of an animated map.
+Unlike the faceted plot it does not squeeze multiple maps into a single screen and allows the reader to see how the spatial distribution of the worlds top 30 agglomerations evolves over time (see the book's website for the animated version).
 
 ```{r urban-animated, fig.cap="Animated map showing the top 30 largest 'urban agglomerations' from 1950 to 2030 based on population projects by the United Nations.", echo=FALSE}
 knitr::include_graphics("figures/urban-animated.gif")
@@ -588,47 +593,42 @@ knitr::include_graphics("figures/urban-animated.gif")
 source("code/09-urban-animation.R")
 ```
 
-Creation of this animated map is almost identical to the creation of faceted map presented in section \@ref(faceted-maps).
-We just need to add three new arguments to the `tm_facets()`.
-The first one, `free.coords = FALSE` maintains the same extend in all of the partial maps, while `nrow = 1` and `ncol = 1` forces to create only one facet per `"year"`.
+The animated map illustrated in Figure \@ref(fig:urban-animated) can be created using the same **tmap** techniques we have seen in subsequent sections.
+Animated maps can be created with the same code that generates faceted maps, demonstrated in section \@ref(faceted-maps).
+There are two differences, however, related to arguments in `tm_facets()`:
+
+- `free.coords = FALSE`, which maintains the map extent for each map iteration
+- `nrow = 1` and `ncol = 1` ensure only one facet is created per year
+
+These additional arguments are demonstrated in the subsequent code chunk:
 
 ```{r}
-us_anim = tm_shape(world) +
+urb_anim = tm_shape(world) +
   tm_polygons() + 
   tm_shape(urban_agglomerations) +
   tm_dots(size = "population_millions") +
   tm_facets(by = "year", free.coords = FALSE, nrow = 1, ncol = 1)
 ```
 
-The code above creates a set of separate maps for each year.
-Next, we combine them and save as an animation file with `tmap_animation()`:
-
-```{r, eval = FALSE}
-tmap_animation(us_anim, filename = "us_anim.gif", delay = 25)
-```
-
-The power of animated maps is illustrated in Figure \@ref(fig:animus), which shows the colonization of the United States progressively from the East to the West and then into the interior.
+The resulting `urb_anim` represents a set of separate maps for each year.
+The final stage is to combine them and save the result as a `.gif` file with `tmap_animation()`.
+The following command creates the animation illustrated in Figure \@ref(fig:urban-animated), with a few elements missing, that we will add-in during the exercises:
 
 ```{r, eval=FALSE}
-library(tmap)
-statepop = historydata::us_state_populations %>%
-  dplyr::select(-GISJOIN) %>% rename(NAME = state)
-statepop_wide = spread(statepop, year, population, sep = "_")
-statepop_sf = left_join(spData::us_states, statepop_wide) %>% 
-  st_transform(2163)
-# map_dbl(statepop_sf, ~sum(is.na(.)))  # looks about right
-year_vars = names(statepop_sf)[grepl("year", names(statepop_sf))]
-facet_anim = tm_shape(statepop_sf) + tm_fill(year_vars) + tm_facets(free.scales.fill = FALSE, 
-  ncol = 1, nrow = 1)
-animation_tmap(tm = facet_anim, filename = "figures/09-us_pop.gif")
+tmap_animation(urb_anim, filename = "urb_anim.gif", delay = 25)
 ```
+
+Another illustration of the power of animated maps is provided in Figure \@ref(fig:animus).
+This shows the colonization of the United States, which moved progressively from the East to the West and finally into the interior.
+Code to reproduce this map can be found in the script `09-usboundaries.R`.
 
 ```{r, echo=FALSE, eval=FALSE}
 source("code/09-usboundaries.R")
+source("code/09-uscolonize.R")
 ```
 
 
-```{r, echo=FALSE}
+```{r animus, echo=FALSE, fig.cap="Animated map showing population growth and colonization in the United States."}
 knitr::include_graphics("figures/09-us_pop.gif")
 ```
 

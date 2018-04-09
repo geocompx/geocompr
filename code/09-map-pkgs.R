@@ -2,19 +2,20 @@
 devtools::install_github("ropenscilabs/packagemetrics")
 map_pkgs = c(
   "cartography",
-  "ggmap",
+  "cartogram",
+  "ggplot2",
   "globe",
+  "leaflet",
   "maps",
   "mapmisc",
+  "mapview",
   "plotly",
+  "raster",
+  "rasterVis",
   "rworldmap",
   "sf",
   "tmap"
 )
-library(packagemetrics)
-library(tidyverse)
 map_pkgs = packagemetrics::package_list_metrics(map_pkgs)
 # pkg_table = packagemetrics::metrics_table(pkg_df)
-write_csv(map_pkgs, "extdata/map_pkgs.csv")
-map_pkgs_df = dplyr::select(pkg_df, package, title, published, dl_last_month)
-pkg_df
+readr::write_csv(map_pkgs, "extdata/map_pkgs.csv")
