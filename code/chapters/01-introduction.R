@@ -1,0 +1,29 @@
+## Reproducibility is a major advantage of command-line interfaces, but what does it mean in practice?
+
+## ----gdsl, echo=FALSE, message=FALSE-------------------------------------
+d = readr::read_csv("extdata/gis-vs-gds-table.csv")
+knitr::kable(x = d, caption = "Differences in emphasis between the fields of Geographic Information Systems (GIS) and Geographic Data Science (GDS).")
+
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## a = osmdata::getbb("Hereford")
+## b = osmdata::getbb("Bialystok")
+## rowMeans(a)
+## rowMeans(b)
+
+## ----interactive, fig.cap="Where the authors are from. The basemap is a tiled image of the Earth at Night provided by NASA. Interact with the online version at robinlovelace.net/geocompr, for example by zooming-in and clicking on the popups.", out.width="100%"----
+library(leaflet)
+popup = c("Robin", "Jakub", "Jannes")
+leaflet() %>%
+  addProviderTiles("NASAGIBS.ViirsEarthAtNight2012") %>% 
+  addAwesomeMarkers(lng = c(-3, 23, 11),
+                    lat = c(52, 53, 49), 
+                    popup = popup)
+
+## ----cranlogs, fig.cap="The popularity of spatial packages in R. The y-axis shows the average number of downloads, within a 30-day rolling window, of R's top 5 spatial packages, defined as those with the highest number of downloads within the last 30 days.", echo=FALSE----
+knitr::include_graphics("figures/spatial-package-growth.png")
+
+## ----revdep, echo=FALSE, message=FALSE-----------------------------------
+top_dls = readr::read_csv("extdata/top_dls.csv")
+knitr::kable(top_dls[1:5, 1:2], digits = 0, caption = paste0("The top 5 most downloaded packages that depend on sf, in terms of average number of downloads per day over the previous month. As of ", min(top_dls$date), " there are ", nrow(top_dls), " packages which import sf."))
+# cranlogs::cran_top_downloads(when = "last-month") # most downloaded pkgs
+
