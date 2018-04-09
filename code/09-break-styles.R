@@ -27,4 +27,4 @@ m_cont = tm_shape(nz) + tm_polygons(col = "AREA_SQ_KM", style = "cont") +
   # tm_layout(title = 'style = "order"', title.size = 0.7)
 m_cat = tm_shape(nz) + tm_polygons(col = "REGC2017_NAME", style = "cat") +                  
   tm_layout(title = 'style = "cat"', title.size = 0.7)          
-tmap_arrange(m_equal, m_pretty, m_quantile, m_jenks, m_cont, m_cat) 
+tmap_arrange(m_cont, m_equal, m_pretty, m_quantile, m_jenks, m_cat) 
