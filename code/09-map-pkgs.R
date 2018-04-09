@@ -7,6 +7,7 @@ map_pkgs = c(
   "maps",
   "mapmisc",
   "plotly",
+  "raster",
   "rworldmap",
   "sf",
   "tmap"
@@ -16,5 +17,3 @@ library(tidyverse)
 map_pkgs = packagemetrics::package_list_metrics(map_pkgs)
 # pkg_table = packagemetrics::metrics_table(pkg_df)
 write_csv(map_pkgs, "extdata/map_pkgs.csv")
-map_pkgs_df = dplyr::select(pkg_df, package, title, published, dl_last_month)
-pkg_df
