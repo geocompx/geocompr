@@ -3,17 +3,51 @@
 # link to script file that shows chaning state boundaries
 # install.packages("USAboundaries")
 library(USAboundaries)
-dates = lubridate::as_date(unique(historydata::us_state_populations$year))
-# USAboundaries::us_boundaries(map_date = dates[1])
-# ...
+library(tidyverse)
 library(tmap)
+library(sf)
+dates = paste(historydata::us_state_populations$year, "01", "01", sep = "-")
+dates_unique = unique(dates)
+usb1 = USAboundaries::us_boundaries(map_date = dates[1])
+usb1$year = lubridate::year(dates_unique[1])
+plot(usb1$geometry)
+usbl = map(dates, ~USAboundaries::us_boundaries(map_date = .))
+# usb = do.call(rbind, usbl)
 statepop = historydata::us_state_populations %>%
-  dplyr::select(-GISJOIN) %>% rename(NAME = state)
-statepop_wide = spread(statepop, year, population, sep = "_")
-statepop_sf = left_join(spData::us_states, statepop_wide) %>% 
+  dplyr::select(-GISJOIN) %>% rename(name = state) 
+sel = usb1$name %in% statepop$name
+summary(sel)
+usb1$name[!sel]
+usbj = left_join(usb1, statepop)
+plot(usbj["population"])
+i = 2
+dates_unique[length(dates_unique)] = "2000-12-31"
+for(i in 2:length(dates_unique)) {
+  usbi = USAboundaries::us_boundaries(map_date = dates_unique[i])
+  print(st_crs(usbi))
+  usbi$year = lubridate::year(dates_unique[i])
+  if(dates_unique[i] == "2000-12-31") usbi$year = 2010
+  plot(usbi$geometry)
+  usbji = left_join(usbi, statepop)
+  plot(usbji["population"])
+  usbj = rbind(usbj, usbji)
+}
+
+summary(usbj)
+usa_contig = usbji[!grepl(pattern = "Alaska|Haw", usbji$name), ]
+plot(usa_contig["population"])
+usa_union = st_union(usa_contig) %>% 
   st_transform(2163)
+plot(usa_union)
+bb_contig = st_bbox(usa_union)
+
 # map_dbl(statepop_sf, ~sum(is.na(.)))  # looks about right
-year_vars = names(statepop_sf)[grepl("year", names(statepop_sf))]
-facet_anim = tm_shape(statepop_sf) + tm_fill(year_vars) + tm_facets(free.scales.fill = FALSE, 
-                                                                    ncol = 1, nrow = 1)
-animation_tmap(tm = facet_anim, filename = "figures/09-us_pop.gif")
+# usbj = st_transform(usbj, 4269)
+pal = viridis::viridis(n = 7, direction = -1)
+pb = c(0, 1, 2, 5, 10, 20, 30, 40) * 1e6
+facet_anim = tm_shape(usbj, bbox = bb_contig, projection = 2163) +
+  tm_polygons("population", colorNA = NULL, palette = pal, breaks = pb) +
+  tm_facets(free.scales.fill = FALSE, ncol = 1, nrow = 1, along = "year") +
+  tm_shape(usa_union) + tm_borders(lwd = 2) +
+  tm_layout(legend.position = c("left", "bottom"))
+tmap_animation(tm = facet_anim, filename = "09-us_pop.gif")

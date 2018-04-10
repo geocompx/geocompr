@@ -235,7 +235,7 @@ The default color scheme can be changed using the `palette` argument.
 It expects a vector of colors or a new color palette name, which can be selected interactively with `tmaptools::palette_explorer()`.
 Decision about selected color palette should depend largely on the input data type and a map purpose.
 While this could be an uneasy decision to be made, we can give some advice.
-There are three main groups of color palettes - categorical, sequential and diverging, and each of them serve different purpose.
+There are three main groups of color palettes - categorical, sequential and diverging, and each of them serves a different purpose.
 Categorical palettes are used for categorical data without any particular order, for example names of states or land cover categories.
 Their colors need to be easy to distinguish and they should, if possible, reflect the most common color association.
 Therefore, for most cases you should not experiment with red rivers and green deserts.
@@ -257,8 +257,29 @@ These type of palettes are usually created by joining two single color sequentia
 <!-- Importantly, try to avoid using the rainbow color palette. -->
 <!-- ONE MORE SENTENCE ABOUT IT + REFERENCES -->
 <!-- Instead try to use colorblind friendly palettes as often as possible. -->
+<!-- how to reverse palettes with - -->
 
-<!-- FIGURE WITH COLORS - JUST PALETTES!! -->
+```{r colpal, echo=FALSE, fig.cap="Examples of categorical, sequential and diverging palletes."}
+library(RColorBrewer)
+many_palette_plotter = function(color_names, n, titles){
+  n_colors = length(color_names)
+  ylim = c(0, n_colors)
+  oldpar = par(mgp = c(2, 0.25, 0))
+  on.exit(par(oldpar))
+  plot(1, 1, xlim = c(0, max(n)), ylim = ylim,
+       type = "n", axes = FALSE, bty = "n", xlab = "", ylab = "")
+  
+  for(i in seq_len(n_colors)){
+    one_color = brewer.pal(n = n, name = color_names[i])
+    rect(xleft = 0:(n - 1), ybottom = i - 1, xright = 1:n, ytop = i - 0.2,
+         col = one_color, border = "light grey")
+    }
+  text(rep(-0.1, n_colors), (1: n_colors) - 0.6, labels = titles, xpd = TRUE, adj = 1)
+}
+
+many_palette_plotter(c("PRGn", "YlGn", "Set2"), 7, 
+                     titles = c("Diverging", "Sequential", "Categorical"))
+```
 
 <!-- Show and describe three groups of colors to be used on the map:  -->
 <!-- - categorical (+ info about automatic tmap option on factor/character, but also style = cat) -->
@@ -290,10 +311,13 @@ It is useful for ordinal data <!--examples--> and never produce empty classes.
 This style, however, could gather very different values in the same category.
 Natural breaks method, also called `jenks`, tries to identify groups of similar values in the data.
 Breaks between classes are created to maximize the differences between categories. 
-This method provides classes that reflect the values distribution, but in the same creates classes that could be only meaningful for only this dataset.
-<!-- cont -->
-<!-- it is usually used in cases ...-->
-<!-- cat -->
+This method provides classes that reflect the values distribution, but in the same creates classes that could be meaningful only for this dataset.
+Categorical legend could be not the most suitable when presenting a large number of objects (e.g. points or polygons) or continuous fields (e.g. continuous rasters).
+In this situations, `cont` or `order` can be used. 
+The former is appropriate for variables with evenly distributed values, while the latter works well when the distribution of values is skewed (for example, only a few raster cells have very large values).
+Finally, the `cat` style should be used to represent categorical values.
+It assures that unique values will be presented by its own category, ane therefore color.
+<!-- references for more info -->
 
 ### Layouts and styles
 
@@ -618,7 +642,8 @@ source("code/09-uscolonize.R")
 
 
 ```{r animus, echo=FALSE, fig.cap="Animated map showing population growth and colonization in the United States."}
-knitr::include_graphics("figures/09-us_pop.gif")
+u_animus = "https://user-images.githubusercontent.com/1825120/38543030-5794b6f0-3c9b-11e8-9da9-10ec1f3ea726.gif"
+knitr::include_graphics(u_animus)
 ```
 
 ## Interactive maps
