@@ -211,7 +211,6 @@ The resulting `tmap` object `map_nza` will be used, alongside `map_nz`, to illus
 
 Additional aesthetic settings are demonstrated in the code chunk below, which colors regions in New Zealand depending on their area.
 The results show how custom breaks can be set with the `breaks` argument (Figure \@ref(fig:tmpal) center).
-<!--explain when it is useful-->
 Additional palette options include `n` (which sets the number of bins into which numeric variables are categorized) and `palette` (which defines the color scheme --- which can be selected interactively with `tmaptools::palette_explorer()`).
 Results of changing values for these simultaneously are shown in Figure \@ref(fig:tmpal) (right):
 
@@ -227,14 +226,12 @@ tm_shape(nz) + tm_fill(col = "AREA_SQ_KM", palette = "RdBu")
 source("code/09-tmpal.R", print.eval = TRUE)
 ```
 
-<!-- intro to style and color -->
-
 A variable, which name is provided in the `col` argument, is represented by a color palette.
-<!-- As a default... DESCRIBE THE DEFAULTS! -->
-The default color scheme can be changed using the `palette` argument.
+The default color palette is specified in `tm_layout()`  (see section \@ref(layouts) to learn more), however it could be quickly changed using the `palette` argument.
 It expects a vector of colors or a new color palette name, which can be selected interactively with `tmaptools::palette_explorer()`.
 Decision about selected color palette should depend largely on the input data type and a map purpose.
 While this could be an uneasy decision to be made, we can give some advice.
+
 There are three main groups of color palettes - categorical, sequential and diverging (Figure \@ref(fig:colpal)), and each of them serves a different purpose.
 The first group is used for categorical data without any particular order, for example names of states or land cover categories.
 Their colors need to be easy to distinguish and they should, if possible, reflect the most common color association.
@@ -249,6 +246,8 @@ These type of palettes are usually created by joining two single color sequentia
 <!-- one more color example -->
 <!-- mention bivariate color maps -->
 <!-- is it possible to made them with tmap?? -->
+
+
 <!-- additional tips: -->
 <!-- Importantly, try to avoid using the rainbow color palette. -->
 <!-- ONE MORE SENTENCE ABOUT IT + REFERENCES -->
@@ -497,79 +496,6 @@ The main goal of this section is to present how to generate and arrange inset ma
 The next step is to use the knowledge from the previous sections to improve the map style or to add another data layers.
 Moreover, the same skills can be applied to combine maps and plots.
 
-## Other mapping packages
-
-```{r, eval=FALSE, echo=FALSE}
-library(globe)
-```
-
-**tmap** provides a powerful interface for creating a wide range of static maps (section \@ref(interactive-maps) shows how **tmap** also supports interactive maps).
-But there are many other options for creating static maps.
-The aim of this section is to provide a taster of some of these and pointers for additional resources: map making is a surprisingly active area of R package development so there is more to learn than can be covered here.
-
-The most mature option is to use `plot()` methods provided by core spatial packages **sf** and **raster**, covered in sections \@ref(basic-map) and \@ref(basic-map-raster) respectively.
-What we didn't mention in those sections was that plot methods for raster and vector objects can be combined, as illustrated in the subsequent code chunk which generates Figure \@ref(fig:nz-plot).
-`plot()` has many options which can be explored by following links in the `?plot` help page and the **sf** vignette [`sf5`](https://cran.r-project.org/web/packages/sf/vignettes/sf5.html).
-
-```{r nz-plot, fig.cap="Map of New Zealand created with plot(). The legend to the left refers to elevation (1000 m above sea level)."}
-g = st_graticule(nz, lon = c(170, 175), lat = c(-45, -40, -35))
-plot(nz_water, graticule = g, axes = TRUE, col = "blue")
-raster::plot(nz_elev / 1000, add = TRUE)
-plot(nz$geometry, add = TRUE)
-```
-
-
-```{r, eval=FALSE, echo=FALSE}
-# RgoogleMaps example: not working
-nz_cent = st_union(nz) %>% st_centroid()
-bg_map = RgoogleMaps::GetMap(center = c(40, -176), zoom = 9)
-nz_wgs = st_transform(nz, 3857)
-plot(nz_wgs$geometry, bgMap = bg_map)
-```
-
-Since version 2.2.2, the **tidyverse** plotting package **ggplot2** has supported `sf` objects with `geom_sf()`.
-The syntax is similar to that used by **tmap**:
-an initial `ggplot()` call is followed by one or more layers, that are added with `+ geom_*()`, where `*` represents a layer type such as `geom_sf()` (for sf objects) or `geom_points()` (for points).
-
-**ggplot2** plots graticules by defult.
-The default settings for the graticules can be overridden using `scale_x_continuous()` and `scale_y_continuous()`.
-Other notable features include the use of unquoted variable names encapsulated in `aes()` to indicate which aesthetics vary and switching data sources using the `data` argument, as demonstrated in the code chunk below which creates Figure \@ref(fig:nz-gg):
-
-```{r nz-gg, fig.cap="Map of New Zealand created with ggplot2."}
-library(ggplot2)
-g1 = ggplot(nz) + geom_sf(aes(fill = col)) +
-  geom_sf(data = nz_height) +
-  scale_x_continuous(breaks = c(170, 175))
-g1
-```
-
-An advantage of **ggplot2** is that it has a strong user-community and many add-on packages.
-Good additional resources can be found in the [ggplot2-book](https://github.com/hadley/ggplot2-book) open source book on the subject, plus descriptions of the multitude of '**gg**packages' such as **ggrepel** and **tidygraph**.
-
-Another benefit of maps based on **ggplot2** is that they can easily be given a level of interactivity when printed using the function `ggplotly()` from the **plotly** package.
-Try `plotly::ggplotly(g1)` for example, and compare the result with other **plotly** mapping functions described at [blog.cpsievert.me](https://blog.cpsievert.me/2018/03/30/visualizing-geo-spatial-data-with-sf-and-plotly/).
-
-```{r, eval=FALSE, echo=FALSE}
-plotly::ggplotly(g1)
-```
-
-We have covered mapping with **sf**, **raster** and **ggplot2** packages first because these packages are highly flexible, allowing for the creation of a wide range of static maps.
-Many other static mapping packages are more specific.
-
-Before we cover mapping packages for plotting a specific type of map (in the next paragraph), it is worth considering alternatives to the packages already covered for general-purpose static mapping.
-Table \@ref(tab:map-pkgs) illustrates metrics associated with some commonly used mapping packages, identified using the website [r-pkg.org](https://www.r-pkg.org/search.html?q=map) and accessed via **packagemetrics**.
-
-```{r map-pkgs, echo=FALSE, message=FALSE}
-pkg_df = read_csv("extdata/map_pkgs.csv")
-map_pkgs_df = dplyr::select(pkg_df, package, title, latest_release = published)
-map_pkgs_df$title[map_pkgs_df$package == "leaflet"] =
-  "Create Interactive Web Maps with Leaflet"
-knitr::kable(map_pkgs_df, caption = "Selected mapping packages, with associated metrics.")
-```
-
-Table \@ref(tab:map-pkgs) shows a range of mapping packages are available, and there are many others not listed in this table.
-Of note is **cartography**, which generates a range of unusual maps including choropleth, 'proportional symbol' and 'flow' maps, each of which is documented in the vignette [`cartography`](https://cran.r-project.org/web/packages/cartography/vignettes/cartography.html).
-
 ## Animated maps
 
 Faceted maps, described in \@ref(faceted-maps), provide a way of showing how spatial relationships vary but the approach has disadvantages.
@@ -738,6 +664,79 @@ This way your prototype web applications should be limited not by technical cons
 ```{r coffeeApp, echo=FALSE, fig.cap="coffeeApp, a simple web mapping application for exploring global coffee production in 2016 and 2017."}
 knitr::include_app("https://bookdown.org/robinlovelace/coffeeapp/")
 ```
+
+## Other mapping packages
+
+```{r, eval=FALSE, echo=FALSE}
+library(globe)
+```
+
+**tmap** provides a powerful interface for creating a wide range of static maps (section \@ref(interactive-maps) shows how **tmap** also supports interactive maps).
+But there are many other options for creating static maps.
+The aim of this section is to provide a taster of some of these and pointers for additional resources: map making is a surprisingly active area of R package development so there is more to learn than can be covered here.
+
+The most mature option is to use `plot()` methods provided by core spatial packages **sf** and **raster**, covered in sections \@ref(basic-map) and \@ref(basic-map-raster) respectively.
+What we didn't mention in those sections was that plot methods for raster and vector objects can be combined, as illustrated in the subsequent code chunk which generates Figure \@ref(fig:nz-plot).
+`plot()` has many options which can be explored by following links in the `?plot` help page and the **sf** vignette [`sf5`](https://cran.r-project.org/web/packages/sf/vignettes/sf5.html).
+
+```{r nz-plot, fig.cap="Map of New Zealand created with plot(). The legend to the left refers to elevation (1000 m above sea level)."}
+g = st_graticule(nz, lon = c(170, 175), lat = c(-45, -40, -35))
+plot(nz_water, graticule = g, axes = TRUE, col = "blue")
+raster::plot(nz_elev / 1000, add = TRUE)
+plot(nz$geometry, add = TRUE)
+```
+
+
+```{r, eval=FALSE, echo=FALSE}
+# RgoogleMaps example: not working
+nz_cent = st_union(nz) %>% st_centroid()
+bg_map = RgoogleMaps::GetMap(center = c(40, -176), zoom = 9)
+nz_wgs = st_transform(nz, 3857)
+plot(nz_wgs$geometry, bgMap = bg_map)
+```
+
+Since version 2.2.2, the **tidyverse** plotting package **ggplot2** has supported `sf` objects with `geom_sf()`.
+The syntax is similar to that used by **tmap**:
+an initial `ggplot()` call is followed by one or more layers, that are added with `+ geom_*()`, where `*` represents a layer type such as `geom_sf()` (for sf objects) or `geom_points()` (for points).
+
+**ggplot2** plots graticules by defult.
+The default settings for the graticules can be overridden using `scale_x_continuous()` and `scale_y_continuous()`.
+Other notable features include the use of unquoted variable names encapsulated in `aes()` to indicate which aesthetics vary and switching data sources using the `data` argument, as demonstrated in the code chunk below which creates Figure \@ref(fig:nz-gg):
+
+```{r nz-gg, fig.cap="Map of New Zealand created with ggplot2."}
+library(ggplot2)
+g1 = ggplot(nz) + geom_sf(aes(fill = col)) +
+  geom_sf(data = nz_height) +
+  scale_x_continuous(breaks = c(170, 175))
+g1
+```
+
+An advantage of **ggplot2** is that it has a strong user-community and many add-on packages.
+Good additional resources can be found in the [ggplot2-book](https://github.com/hadley/ggplot2-book) open source book on the subject, plus descriptions of the multitude of '**gg**packages' such as **ggrepel** and **tidygraph**.
+
+Another benefit of maps based on **ggplot2** is that they can easily be given a level of interactivity when printed using the function `ggplotly()` from the **plotly** package.
+Try `plotly::ggplotly(g1)` for example, and compare the result with other **plotly** mapping functions described at [blog.cpsievert.me](https://blog.cpsievert.me/2018/03/30/visualizing-geo-spatial-data-with-sf-and-plotly/).
+
+```{r, eval=FALSE, echo=FALSE}
+plotly::ggplotly(g1)
+```
+
+We have covered mapping with **sf**, **raster** and **ggplot2** packages first because these packages are highly flexible, allowing for the creation of a wide range of static maps.
+Many other static mapping packages are more specific.
+
+Before we cover mapping packages for plotting a specific type of map (in the next paragraph), it is worth considering alternatives to the packages already covered for general-purpose static mapping.
+Table \@ref(tab:map-pkgs) illustrates metrics associated with some commonly used mapping packages, identified using the website [r-pkg.org](https://www.r-pkg.org/search.html?q=map) and accessed via **packagemetrics**.
+
+```{r map-pkgs, echo=FALSE, message=FALSE}
+pkg_df = read_csv("extdata/map_pkgs.csv")
+map_pkgs_df = dplyr::select(pkg_df, package, title, latest_release = published)
+map_pkgs_df$title[map_pkgs_df$package == "leaflet"] =
+  "Create Interactive Web Maps with Leaflet"
+knitr::kable(map_pkgs_df, caption = "Selected mapping packages, with associated metrics.")
+```
+
+Table \@ref(tab:map-pkgs) shows a range of mapping packages are available, and there are many others not listed in this table.
+Of note is **cartography**, which generates a range of unusual maps including choropleth, 'proportional symbol' and 'flow' maps, each of which is documented in the vignette [`cartography`](https://cran.r-project.org/web/packages/cartography/vignettes/cartography.html).
 
 ## Exercises
 
