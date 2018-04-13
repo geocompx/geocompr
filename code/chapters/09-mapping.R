@@ -68,14 +68,9 @@ plot(nz["col"])
 tm_shape(nz) + tm_fill(col = "col")
 
 ## ------------------------------------------------------------------------
-nz$REGC2017_NAME = as.character(nz$REGC2017_NAME)
-nz_a = nz[1:9, ]
-
-## ------------------------------------------------------------------------
-tm_shape(nz_a) + tm_polygons(col = "AREA_SQ_KM")
-
-## ------------------------------------------------------------------------
-tm_shape(nz_a) + tm_polygons(col = "REGC2017_NAME")
+legend_title = expression("Area (km"^2*")")
+map_nza = tm_shape(nz) +
+  tm_fill(col = "AREA_SQ_KM", title = legend_title) + tm_borders()
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## breaks = c(0, 3, 4, 5) * 10000
@@ -87,10 +82,29 @@ tm_shape(nz_a) + tm_polygons(col = "REGC2017_NAME")
 ## ----tmpal, fig.cap="Illustration of settings that affect variable aesthetics. The result shows a continuous variable (the area in square kilometers of regions in New Zealand) converted to color with (from left to right): default settings, manual breaks, n breaks, and an alternative palette.", echo=FALSE----
 source("code/09-tmpal.R", print.eval = TRUE)
 
-## ------------------------------------------------------------------------
-legend_title = expression("Area (km"^2*")")
-map_nza = tm_shape(nz) +
-  tm_fill(col = "AREA_SQ_KM", title = legend_title) + tm_borders()
+## ----colpal, echo=FALSE, fig.cap="Examples of categorical, sequential and diverging palettes."----
+library(RColorBrewer)
+many_palette_plotter = function(color_names, n, titles){
+  n_colors = length(color_names)
+  ylim = c(0, n_colors)
+  oldpar = par(mgp = c(2, 0.25, 0))
+  on.exit(par(oldpar))
+  plot(1, 1, xlim = c(0, max(n)), ylim = ylim,
+       type = "n", axes = FALSE, bty = "n", xlab = "", ylab = "")
+  
+  for(i in seq_len(n_colors)){
+    one_color = brewer.pal(n = n, name = color_names[i])
+    rect(xleft = 0:(n - 1), ybottom = i - 1, xright = 1:n, ytop = i - 0.2,
+         col = one_color, border = "light grey")
+    }
+  text(rep(-0.1, n_colors), (1: n_colors) - 0.6, labels = titles, xpd = TRUE, adj = 1)
+}
+
+many_palette_plotter(c("PRGn", "YlGn", "Set2"), 7, 
+                     titles = c("Diverging", "Sequential", "Categorical"))
+
+## ----break-styles, fig.cap="Illustration of different binning methods set using the style argument in tmap.", echo=FALSE----
+source("code/09-break-styles.R")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## map_nz + tm_layout(title = "New Zealand")
@@ -107,9 +121,6 @@ source("code/09-layout2.R")
 
 ## ----layout3, fig.cap="Illustration of selected color-related layout options.", echo=FALSE----
 source("code/09-layout3.R")
-
-## ----break-styles, fig.cap="Illustration of different binning methods set using the syle argument in tmap.", echo=FALSE----
-source("code/09-break-styles.R")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## map_nza + tm_style_bw()
@@ -175,6 +186,52 @@ us_states_map
 print(hawaii_map, vp = viewport(x = 0.4, y = 0.1, width = 0.2, height = 0.1))
 print(alaska_map, vp = viewport(x = 0.15, y = 0.15, width = 0.3, height = 0.3))
 
+## ----urban-animated, fig.cap="Animated map showing the top 30 largest 'urban agglomerations' from 1950 to 2030 based on population projects by the United Nations.", echo=FALSE----
+knitr::include_graphics("figures/urban-animated.gif")
+
+## ---- echo=FALSE, eval=FALSE---------------------------------------------
+## source("code/09-urban-animation.R")
+
+## ------------------------------------------------------------------------
+urb_anim = tm_shape(world) +
+  tm_polygons() + 
+  tm_shape(urban_agglomerations) +
+  tm_dots(size = "population_millions") +
+  tm_facets(by = "year", free.coords = FALSE, nrow = 1, ncol = 1)
+
+## ---- eval=FALSE---------------------------------------------------------
+## tmap_animation(urb_anim, filename = "urb_anim.gif", delay = 25)
+
+## ---- echo=FALSE, eval=FALSE---------------------------------------------
+## source("code/09-usboundaries.R")
+## source("code/09-uscolonize.R")
+
+## ----animus, echo=FALSE, fig.cap="Animated map showing population growth and colonization in the United States."----
+u_animus = "https://user-images.githubusercontent.com/1825120/38543030-5794b6f0-3c9b-11e8-9da9-10ec1f3ea726.gif"
+knitr::include_graphics(u_animus)
+
+## In **shiny** apps these are often split into `ui.R` (short for user interface) and `server.R` files, naming conventions used by [`shiny-server`](https://github.com/rstudio/shiny-server), a server-side Linux application for serving shiny apps on public-facing websites
+
+## ---- eval=FALSE---------------------------------------------------------
+## ui = fluidPage(
+##   sliderInput(inputId = "life", "Life expectancy", 0, 80, value = 80),
+##       leafletOutput(outputId = "map")
+##   )
+## server = function(input, output) {
+##   output$map = renderLeaflet({
+##     leaflet() %>% addProviderTiles("OpenStreetMap.BlackAndWhite") %>%
+##       addPolygons(data = world[world$lifeExp > input$life, ])})
+## }
+## shinyApp(ui, server)
+
+## ----lifeApp, echo=FALSE, fig.cap="Minimal example of a web mapping application created with **shiny**."----
+knitr::include_app("https://bookdown.org/robinlovelace/lifeapp/")
+
+## There are a number of ways to run a **shiny** app.
+
+## ----coffeeApp, echo=FALSE, fig.cap="coffeeApp, a simple web mapping application for exploring global coffee production in 2016 and 2017."----
+knitr::include_app("https://bookdown.org/robinlovelace/coffeeapp/")
+
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## library(globe)
 
@@ -201,63 +258,10 @@ g1
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## plotly::ggplotly(g1)
 
-## ---- echo=FALSE, fig.cap="Selected mapping packages, with associated metrics."----
-# readRDS("extdata/pkg_table.Rds")
-
-## ----urban-animated, fig.cap="Animated map showing the top 30 largest 'urban agglomerations' from 1950 to 2030 based on population projects by the United Nations.", echo=FALSE----
-knitr::include_graphics("figures/urban-animated.gif")
-
-## ---- echo=FALSE, eval=FALSE---------------------------------------------
-## source("code/09-urban-animation.R")
-
-## ------------------------------------------------------------------------
-us_anim = tm_shape(world) +
-  tm_polygons() + 
-  tm_shape(urban_agglomerations) +
-  tm_dots(size = "population_millions") +
-  tm_facets(by = "year", free.coords = FALSE, nrow = 1, ncol = 1)
-
-## ---- eval = FALSE-------------------------------------------------------
-## tmap_animation(us_anim, filename = "us_anim.gif", delay = 25)
-
-## ---- eval=FALSE---------------------------------------------------------
-## library(tmap)
-## statepop = historydata::us_state_populations %>%
-##   dplyr::select(-GISJOIN) %>% rename(NAME = state)
-## statepop_wide = spread(statepop, year, population, sep = "_")
-## statepop_sf = left_join(spData::us_states, statepop_wide) %>%
-##   st_transform(2163)
-## # map_dbl(statepop_sf, ~sum(is.na(.)))  # looks about right
-## year_vars = names(statepop_sf)[grepl("year", names(statepop_sf))]
-## facet_anim = tm_shape(statepop_sf) + tm_fill(year_vars) + tm_facets(free.scales.fill = FALSE,
-##   ncol = 1, nrow = 1)
-## animation_tmap(tm = facet_anim, filename = "figures/09-us_pop.gif")
-
-## ---- echo=FALSE, eval=FALSE---------------------------------------------
-## source("code/09-usboundaries.R")
-
-## ---- echo=FALSE---------------------------------------------------------
-knitr::include_graphics("figures/09-us_pop.gif")
-
-## In **shiny** apps these are often split into `ui.R` (short for user interface) and `server.R` files, naming conventions used by [`shiny-server`](https://github.com/rstudio/shiny-server), a server-side Linux application for serving shiny apps on public-facing websites
-
-## ---- eval=FALSE---------------------------------------------------------
-## ui = fluidPage(
-##   sliderInput(inputId = "life", "Life expectancy", 0, 80, value = 80),
-##       leafletOutput(outputId = "map")
-##   )
-## server = function(input, output) {
-##   output$map = renderLeaflet({
-##     leaflet() %>% addProviderTiles("OpenStreetMap.BlackAndWhite") %>%
-##       addPolygons(data = world[world$lifeExp > input$life, ])})
-## }
-## shinyApp(ui, server)
-
-## ----lifeApp, echo=FALSE, fig.cap="Minimal example of a web mapping application created with **shiny**."----
-knitr::include_app("https://bookdown.org/robinlovelace/lifeapp/")
-
-## There are a number of ways to run a **shiny** app.
-
-## ----coffeeApp, echo=FALSE, fig.cap="coffeeApp, a simple web mapping application for exploring global coffee production in 2016 and 2017."----
-knitr::include_app("https://bookdown.org/robinlovelace/coffeeapp/")
+## ----map-pkgs, echo=FALSE, message=FALSE---------------------------------
+pkg_df = read_csv("extdata/map_pkgs.csv")
+map_pkgs_df = dplyr::select(pkg_df, package, title, latest_release = published)
+map_pkgs_df$title[map_pkgs_df$package == "leaflet"] =
+  "Create Interactive Web Maps with Leaflet"
+knitr::kable(map_pkgs_df, caption = "Selected mapping packages, with associated metrics.")
 
