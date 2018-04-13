@@ -1,4 +1,4 @@
-## ---- echo = FALSE-------------------------------------------------------
+## ----readme-setup, echo = FALSE------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -13,30 +13,35 @@ readr::write_csv(contributors, "extdata/contributors.csv")
 # table view:
 # knitr::kable(contributors, caption = "Contributors to Geocomputation with R")
 # text view
-contributors_text = paste0(contributors$name, collapse = ", ")
+c_txt = contributors$name
+c_url = contributors$link
+c_rmd = paste0("[", c_txt, "](", c_url, ")")
+contributors_text = paste0(c_rmd, collapse = ", ")
 
-## ---- eval=is_online, message=FALSE--------------------------------------
-devtools::install_github("robinlovelace/geocompr")
+## ---- eval=FALSE, message=FALSE------------------------------------------
+## devtools::install_github("robinlovelace/geocompr")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## bookdown::render_book("index.Rmd") # to build the book
 ## browseURL("_book/index.html") # to view it
 
-## ---- results='hide'-----------------------------------------------------
+## ----gen-code, results='hide'--------------------------------------------
 geocompr:::generate_chapter_code()
 
-## ------------------------------------------------------------------------
+## ----extra-pkgs----------------------------------------------------------
 source("code/extra-pkgs.R")
 
-## ----cranlogs, message=FALSE, warning=FALSE, fig.show='hide'-------------
+## ----source-readme, message=FALSE, warning=FALSE, fig.show='hide'--------
 source("code/cranlogs.R")
 source("code/sf-revdep.R")
-source("code/09-usboundaries.R")
+# source("code/09-usboundaries.R") # not working for some reason
+source("code/09-urban-animation.R")
+source("code/09-map-pkgs.R")
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----render-book, eval=FALSE---------------------------------------------
 ## rmarkdown::render("README.Rmd", output_format = "github_document", output_file = "README.md")
 
-## ---- echo=FALSE, message=FALSE, warning=FALSE---------------------------
+## ----gen-stats, echo=FALSE, message=FALSE, warning=FALSE-----------------
 source("R/generate-chapter-code.R")
 book_stats = readr::read_csv("extdata/word-count-time.csv",
                              col_types=('iiDd'))
@@ -63,10 +68,10 @@ ggplot(book_stats) +
                date_labels = "%b %Y") +
   coord_cartesian(ylim = c(0, 300))
 
-## ---- warning=FALSE------------------------------------------------------
+## ----gen-cite, warning=FALSE---------------------------------------------
 geocompr:::generate_citations()
 
-## ---- message=FALSE------------------------------------------------------
+## ----pkg_df, message=FALSE-----------------------------------------------
 pkg_df = readr::read_csv("extdata/package_list.csv")
 
 ## ------------------------------------------------------------------------

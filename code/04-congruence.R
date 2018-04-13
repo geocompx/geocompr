@@ -12,7 +12,7 @@ m = tm_shape(rx) +
   tm_borders(alpha = 0.4, lwd = 10, col = "blue") +
   tm_layout(legend.show = TRUE, scale = 0.3)
 m
-save_tmap(m, f, width = 1000, height = 400)
+tmap_save(m, f, width = 1000, height = 400)
 f = "figures/04-congruence.png"
 i = magick::image_read(f)
 i_trimmed = magick::image_trim(i)
