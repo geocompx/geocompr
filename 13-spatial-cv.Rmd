@@ -63,21 +63,21 @@ Spatial CV alleviates this problem and is a central theme in this chapter.
 
 ## Case study: Landslide susceptibility {#case-landslide}
 
-To introduce spatial CV by example, we will use a landslide dataset from Southern Ecuador (Figure \@ref(fig:lsl-map)).
-For a detailed description of the dataset and the study area please refer to @muenchow_geomorphic_2012.
-One can find a subset of the corresponding data in the **RSAGA** package.
-The following command loads three datasets, a `data.frame` named `landslides`, a `list` named `dem`, and an `sf`-object named `study_area`.
+The case study is based on a dataset of landslide locations Southern Ecuador, illustrated in Figure \@ref(fig:lsl-map) and described in detail in @muenchow_geomorphic_2012.
+A subset of the dataset used in that paper is provided in the **RSAGA** package, which can be loaded as follows:
 
 ```{r}
 data("landslides", package = "RSAGA")
 ```
 
-`landslides` contains a factor column `lslpts` where `TRUE` corresponds to an observed landslide initiation point and `FALSE` to points where no landsliding occurred. 
-Columns `x` and `y` contain the corresponding coordinates.
-The landslide initiation point is located in the scarp of a landslide polygon.
-The coordinates for the non-landslide points were sampled randomly with the restriction to fall outside of the slightly buffered landslide polygons.
-`summary(landslides$lslpts)` tells us that 175 landslide points and 1360 non-landslide points are available.
-To make the ratio between landslide and non-landslide points more balanced, we randomly sample 175 from the 1360 non-landslide points.
+This should load three objects: a `data.frame` named `landslides`, a `list` named `dem`, and an `sf` object named `study_area`.
+`landslides` contains a factor column `lslpts` where `TRUE` corresponds to an observed landslide 'initiation point', with the coordinates stored in columns `x` and `y`.^[
+The landslide initiation point is located in the scarp of a landslide polygon. See @muenchow_geomorphic_2012 for further details.
+]
+
+The coordinates for the non-landslide points were sampled randomly from the study area, with the restriction that they must fall outside a small buffer around the landslide polygons.
+There are 175 landslide points and 1360 non-landslide, as shown by `summary(landslides)`.
+To make number of landslide and non-landslide points equal, let's sample 175 from the 1360 non-landslide points.
 
 ```{r, eval = FALSE}
 # select non-landslide points
@@ -86,18 +86,19 @@ non_pts = filter(landslides, lslpts == FALSE)
 lsl_pts = filter(landslides, lslpts == TRUE)
 # randomly select 175 non-landslide points
 set.seed(11042018)
-non_ind = sample(1:nrow(non_pts), nrow(lsl_pts))
-# rowbind randomly selected non-landslide points and 
-# landslide points
-lsl = rbind(non_pts[non_ind, ], lsl_pts)
+non_pts_small = sample_n(non_pts, size = nrow(lsl_pts))
+# create smaller landslide dataset (lsl)
+lsl = bind_rows(non_pts_small, lsl_pts)
 ```
 
-`dem` is in fact a digital elevation model and consists of two list elements with the first being a raster header and the second being a matrix containing the altitudinal values.
-To transform this list into a `raster` object, we can write:
+`dem` is a digital elevation model consisting two elements:
+`dem$header`, a `list` which represents a raster 'header' (see section \@ref(raster-data)), and `dem$data`, a matrix with the altitudinal of each pixel.
+`dem` can be converted into a `raster` object with:
+
+<!-- Idea: could create a function to do this -->
 
 ```{r, eval = FALSE}
-dem = 
-  raster(dem$data, 
+dem = raster(dem$data, 
          crs = dem$header$proj4string,
          xmn = dem$header$xllcorner, 
          xmx = dem$header$xllcorner + 
