@@ -215,7 +215,7 @@ route_cycleway$all = c(desire_rail$all, desire_carshort$all)
 ## plot(route_cycleway["distance"], lwd = n_trips)
 
 ## ----cycleways, echo=FALSE, message=FALSE, fig.cap="Potential routes along which to prioritise cycle infrastructure in Bristol, based on access key rail stations (red dots) and routes with many short car journeys (north of Bristol surrounding Stoke Bradley). Line thickness is proportional to number of trips."----
-m_leaflet = source("code/07-cycleways.R")
+source("code/07-cycleways.R")
 tmap::tmap_leaflet(m_leaflet)
 
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------

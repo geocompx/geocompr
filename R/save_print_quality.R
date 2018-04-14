@@ -8,7 +8,7 @@
 save_print_quality = function(m = NULL, f, width = 2000, height = 2000) {
   if(!is.null(m)) {
     if(is(object = m, class2 = "tmap")) {
-      save_tmap(tm = m, filename = f, width = width, height = height)
+      tmap::tmap_save(tm = m, filename = f, width = width, height = height)
     }
   }
   i = magick::image_read(f)
