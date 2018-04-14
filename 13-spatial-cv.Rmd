@@ -109,26 +109,32 @@ dem = raster(dem$data,
 ```
 
 To model landslide susceptibility, we need some predictors.
-We will use selected terrain attributes frequently associated with landsliding [@muenchow_geomorphic_2012], all of which can be computed from the provided digital elevation model (`dem`) using R-GIS bridges (see Chapter \@ref(gis)).
-We leave it as an exercise to the reader to compute the terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe (see also exercises).
-The first three rows of the resulting dataframe (still named `lsl`) excluding the coordinates could look like this:
-<!-- has anybody an idea why I have to run the following code chunk two times to make it work when rendering the book with `bookdown::render_book()`?-->
-```{r, echo=FALSE}
-load("extdata/spatialcv.Rdata")
-```
-
-```{r, echo=FALSE}
-dplyr::select(lsl, -x, -y) %>%
-  head(3)
-```
-
-The added columns are:
+Terrain attributes are frequently associated with landsliding [@muenchow_geomorphic_2012], and these can be computed from the digital elevation model (`dem`) using R-GIS bridges (see Chapter \@ref(gis)).
+We leave it as an exercise to the reader to compute the following terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe (see exercises):
 
 - `slope`: slope angle (°).
 - `cplan`: plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow.
 - `cprof`: profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle.
 - `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
 - `log_carea`: the decadic logarithm of the catchment area (log m^2^) representing the amount of water flowing towards a location.
+
+The first three rows of the resulting data frame (still named `lsl`, which are stored in the file [`spatialcv.Rdata`](https://github.com/Robinlovelace/geocompr/blob/master/extdata/spatialcv.Rdata)) in the book's GitHub repo, should look like this (to two significant figures):
+<!-- has anybody an idea why I have to run the following code chunk two times to make it work when rendering the book with `bookdown::render_book()`?-->
+
+```{r, echo=FALSE}
+load("extdata/spatialcv.Rdata")
+```
+
+```{r, eval=FALSE}
+head(lsl, 3)
+```
+
+```{r, echo=FALSE}
+# head(lsl %>% dplyr::select(-x, -y), 3)
+lsl %>% mutate_if(is.numeric, funs(signif(., 2))) %>% 
+  head(2)
+```
+
 
 ```{r lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. CRS: UTM zone 17S (EPSG: 32717)."}
 library(tmap)
@@ -157,6 +163,7 @@ tm_shape(hs, bbox = bbx) +
 ```
 
 ## Conventional modeling approach in R {#conventional-model}
+
 Before introducing the **mlr** package, an umbrella-package providing a unified interface to a plethora of learning algorithms, it is worth taking a look at the conventional modeling interface in R.
 This way we introduce supervised modeling in R which provides the required skill set for doing spatial CV and additionally contributes to a better grasp on the **mlr** approach introduced later on.
 Usually, we model the response variable as a function of predictors. 
