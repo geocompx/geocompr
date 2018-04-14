@@ -55,7 +55,7 @@ These contain projected data on the 16 main regions and 101 highest points in Ne
 The following code chunk first creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region:
 
 ```{r}
-canterbury = nz %>% filter(REGC2017_NAME == "Canterbury Region")
+canterbury = nz %>% filter(Name == "Canterbury Region")
 canterbury_height = nz_height[canterbury, ]
 ```
 
@@ -155,7 +155,7 @@ Another solution is to convert the default sparse matrix (`list`) output from `s
 This approach to spatial subsetting, used internally by **sf** (see the source code of `` sf:::`[.sf` ``), is illustrated in the code chunk below:
 
 ```{r}
-co = filter(nz, grepl("Canter|Otag", REGC2017_NAME))
+co = filter(nz, grepl("Canter|Otag", Name))
 sel_sparse = st_intersects(nz_height, co)
 sel_vector = lengths(sel_sparse) > 0
 heights_co = nz_height[sel_vector, ]
@@ -533,10 +533,9 @@ tm_shape(nz_avheight) +
   tm_borders()
 ```
 
-
 ```{r}
 nz_avheight2 = st_join(nz, nz_height) %>%
-  group_by(REGC2017_NAME) %>%
+  group_by(Name) %>%
   summarize(elevation = mean(elevation, na.rm = TRUE))
 ```
 
@@ -905,7 +904,7 @@ The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`
 library(tmap)
 tmap_mode("view")
 qtm(nz) + qtm(nz_height)
-canterbury = nz %>% filter(REGC2017_NAME == "Canterbury Region")
+canterbury = nz %>% filter(Name == "Canterbury Region")
 canterbury_height = nz_height[canterbury, ]
 nrow(canterbury_height) # answer: 61
 ```
@@ -915,7 +914,7 @@ nz_height_count = aggregate(nz_height, nz, length)
 nz_height_combined = cbind(nz, count = nz_height_count$elevation)
 nz_height_combined %>% 
   st_set_geometry(NULL) %>% 
-  dplyr::select(REGC2017_NAME, count) %>% 
+  dplyr::select(Name, count) %>% 
   arrange(desc(count)) %>% 
   na.omit()
 ```
