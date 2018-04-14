@@ -2,7 +2,7 @@ library(spData)
 library(tmap)
 legend_title = expression("Area (km"^2*")")
 map_nza = tm_shape(nz) +
-  tm_fill(col = "AREA_SQ_KM", title = legend_title) + tm_borders()
+  tm_fill(col = "Land_area", title = legend_title) + tm_borders()
 s1 = map_nza + tm_style_bw() 
 # + tm_layout("tm_style_bw")
 s2 = map_nza + tm_style_classic()
