@@ -422,8 +422,8 @@ resampling = makeResampleDesc(method = "SpRepCV", folds = 5,
 ```
 
 To execute the spatial resampling, we run `resample()` using the specified learner, task, resampling strategy and of course the performance measure, here the AUROC.
-This takes a short while because we ask R to compute the AUROC from 500 models. 
-Setting a seed ensures that when re-running the code the same spatial partitions will be used, hence the same result will be reproduced.
+This takes a some time (around 10 seconds on a modern laptop) it computes the AUROC for 500 models. 
+Setting a seed ensures that when re-running the code the same spatial partitions will be used for reproducibility of results.
 
 <!-- I just thought it might be worth showing the differences between an error on the fold level and repetition level but aggregating to the rep levle is not a one-liner in mlr -->
 
@@ -433,6 +433,15 @@ set.seed(012348)
 sp_cv = mlr::resample(learner = lrn, task = task,
                       resampling = resampling, 
                       measures = mlr::auc)
+```
+
+```{r, eval=FALSE, echo=FALSE}
+system.time(
+  {set.seed(012348)
+    sp_cv = mlr::resample(learner = lrn, task = task,
+                          resampling = resampling, 
+                          measures = mlr::auc)}
+)
 ```
 
 <!-- sp_cv and conv_cv have been saved in spatialcv.Rdata. I needed to run the modeling outside of the book since knitr sets its own seed and I am not sure if this actually helps to make sure that the same partitions are used in the cv.
