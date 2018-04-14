@@ -21,7 +21,9 @@ usb1$name[!sel]
 usbj = left_join(usb1, statepop)
 plot(usbj["population"])
 i = 2
-dates_unique[length(dates_unique)] = "2000-12-31"
+
+dates_unique[dates_unique > "2000-12-31"] = "2000-12-31"
+
 for(i in 2:length(dates_unique)) {
   usbi = USAboundaries::us_boundaries(map_date = dates_unique[i])
   print(st_crs(usbi))

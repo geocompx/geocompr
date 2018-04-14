@@ -1,24 +1,26 @@
 ## ---- message = FALSE----------------------------------------------------
-library(mlr)
-library(pROC)
-library(raster)
-library(RSAGA)
 library(sf)
+library(raster)
 library(tidyverse)
+library(mlr)
+library(parallelMap)
+library(pROC)
+library(RSAGA)
 
 ## ------------------------------------------------------------------------
 data("landslides", package = "RSAGA")
 
 ## ---- eval = FALSE-------------------------------------------------------
 ## # select non-landslide points
-## non = filter(landslides, lslpts == FALSE)
+## non_pts = filter(landslides, lslpts == FALSE)
 ## # select landslide points
 ## lsl_pts = filter(landslides, lslpts == TRUE)
 ## # randomly select 175 non-landslide points
-## ind = sample(1:nrow(non), nrow(lsl_pts))
+## set.seed(11042018)
+## non_ind = sample(1:nrow(non_pts), nrow(lsl_pts))
 ## # rowbind randomly selected non-landslide points and
 ## # landslide points
-## lsl = rbind(non[ind, ], lsl_pts)
+## lsl = rbind(non_pts[non_ind, ], lsl_pts)
 
 ## ---- eval = FALSE-------------------------------------------------------
 ## dem =
@@ -35,11 +37,8 @@ data("landslides", package = "RSAGA")
 load("extdata/spatialcv.Rdata")
 
 ## ---- echo=FALSE---------------------------------------------------------
-load("extdata/spatialcv.Rdata")
-
-## ------------------------------------------------------------------------
 dplyr::select(lsl, -x, -y) %>%
-  head(., 3)
+  head(3)
 
 ## ----lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. CRS: UTM zone 17S (EPSG: 32717)."----
 library(tmap)
@@ -59,17 +58,16 @@ tm_shape(hs, bbox = bbx) +
 	tm_raster(alpha = 0.5, palette = terrain.colors(10),
 	          auto.palette.mapping = FALSE, legend.show = FALSE) +
 	tm_shape(lsl_sf) + 
-	tm_bubbles("lslpts", size = 0.5, palette = "-RdYlBu") +
+	tm_bubbles("lslpts", size = 0.5, palette = "-RdYlBu", title.col = "Landslide: ") +
 #   tm_shape(sam) +
 #   tm_bubbles(border.col = "gold", border.lwd = 2, alpha = 0, size = 0.5) +
   qtm(rect, fill = NULL) +
-	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
+	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) +
+  tm_legend(bg.color = "white")
 
 ## ---- eval = TRUE--------------------------------------------------------
 fit = glm(lslpts ~ slope + cplan + cprof + elev + log_carea, 
           data = lsl, family = binomial())
-# the same as:
-# fit = glm(lslpts ~ ., data = select(lsl, -x, -y))
 fit
 
 ## ------------------------------------------------------------------------
@@ -78,10 +76,11 @@ head(predict(object = fit, type = "response"))
 ## ------------------------------------------------------------------------
 # loading among others ta, a raster stack containing the predictors
 load("extdata/spatialcv.Rdata")
+# making the prediction
 pred = raster::predict(object = ta, model = fit,
                        type = "response")
 
-## ----lsl-susc, echo = FALSE, fig.cap="Spatial prediction of landslide susceptibility using a  GLM. CRS: UTM zone 17S (EPSG: 32717).", warning=FALSE----
+## ----lsl-susc, echo = FALSE, fig.cap="Spatial prediction of landslide susceptibility using a GLM. CRS: UTM zone 17S (EPSG: 32717).", warning=FALSE----
 # white raster to only plot the axis ticks, otherwise gridlines would be visible
 tm_shape(hs, bbox = bbx) +
   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
@@ -94,7 +93,7 @@ tm_shape(hs, bbox = bbx) +
   tm_shape(mask(pred, study_area)) +
 	tm_raster(alpha = 0.5, palette = RColorBrewer::brewer.pal(name = "Reds", 6),
 	          auto.palette.mapping = FALSE, legend.show = TRUE,
-	          title = "Susceptibility\nprobability") +
+	          title = "Susceptibility") +
 	# rectangle and outer margins
   qtm(rect, fill = NULL) +
 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
@@ -105,7 +104,7 @@ tm_shape(hs, bbox = bbx) +
 ## ---- message=FALSE------------------------------------------------------
 pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
 
-## ----partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation in one repetition. Random (upper row) and spatial partitioning (lower row).", echo = FALSE----
+## ----partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row).", echo = FALSE----
 knitr::include_graphics("figures/13_partitioning.png")
 
 ## ----building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the **mlr** package. Source: [openml.github.io](http://openml.github.io/articles/slides/useR2017_tutorial/slides_tutorial_files/ml_abstraction-crop.png)."----
@@ -113,35 +112,32 @@ knitr::include_graphics("figures/13_ml_abstraction_crop.png")
 
 ## ------------------------------------------------------------------------
 library(mlr)
-# separate data to be modeled and coordinates
+# coordinates needed for the spatial partitioning
 coords = lsl[, c("x", "y")]
+# select response and predictors to use in the modeling
 data = dplyr::select(lsl, -x, -y)
+coords = lsl[, c("x", "y")]
 # create task
 task = makeClassifTask(data = data, target = "lslpts",
                        positive = "TRUE", coordinates = coords)
 
 ## ---- eval=FALSE---------------------------------------------------------
-## lrns = listLearners(task)
-## dplyr::select(lrns, class, name, package) %>%
-##   head
-## #>                 class                         name package
-## #> 1    classif.binomial          Binomial Regression   stats
-## #> 2 classif.featureless       Featureless classifier     mlr
-## #> 3         classif.fnn     Fast k-Nearest Neighbour     FNN
-## #> 4         classif.knn           k-Nearest Neighbor   class
-## #> 5         classif.lda Linear Discriminant Analysis    MASS
-## #> 6      classif.logreg          Logistic Regression   stats
+## listLearners(task)
+
+## ----lrns, echo=FALSE----------------------------------------------------
+lrns_df = dplyr::select(listLearners(task, warn.missing.packages = FALSE), class, name, package) %>%
+  head
+knitr::kable(lrns_df, caption = "Sample of available learners in the **mlr** package.")
 
 ## ------------------------------------------------------------------------
 lrn = makeLearner(cl = "classif.binomial",
                   link = "logit",
                   predict.type = "prob",
                   fix.factors.prediction = TRUE)
-# run the following lines to find out from which package the
-# learner is taken and how to access the corresponding help 
-# file(s)
-# getLearnerPackages(learner)
-# helpLearner(learner)
+
+## ---- eval=FALSE---------------------------------------------------------
+## getLearnerPackages(lrn)
+## helpLearner(lrn)
 
 ## ------------------------------------------------------------------------
 mod = train(learner = lrn, task = task)
@@ -199,15 +195,15 @@ boxplot(sp_cv$measures.test$auc,
 ##                         kernel = "rbfdot")
 
 ## ---- eval = FALSE-------------------------------------------------------
-## # outer resampling loop
-## outer = makeResampleDesc("SpRepCV", folds = 5, reps = 100)
+## # performance estimation level
+## perf_level = makeResampleDesc("SpRepCV", folds = 5, reps = 100)
 
-## ----inner-outer, echo=FALSE, fig.cap="Visual representation of inner and outer folds in spatial and non-spatial cross-validation. Permission for reproducing the figure was kindly granted by Patrick Schratz [@schratz_performance_nodate]."----
+## ----inner-outer, echo=FALSE, fig.cap="Visual representation of the hyperparameter tuning and performance estimation levels in spatial and non-spatial cross-validation. Permission for reusing the figure was kindly granted by Patrick Schratz [@schratz_performance_nodate]."----
 knitr::include_graphics("figures/13_cv.png")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## # five spatially disjoint partitions
-## inner = makeResampleDesc("SpCV", iters = 5)
+## tune_level = makeResampleDesc("SpCV", iters = 5)
 ## # use 50 randomly selected hyperparameters
 ## ctrl = makeTuneControlRandom(maxit = 50)
 ## # define the outer limits of the randomly selected hyperparameters
@@ -218,7 +214,7 @@ knitr::include_graphics("figures/13_cv.png")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## wrapped_lrn_ksvm = makeTuneWrapper(learner = lrn_ksvm,
-##                                    resampling = inner,
+##                                    resampling = tune_level,
 ##                                    par.set = ps,
 ##                                    control = ctrl,
 ##                                    show.info = TRUE,
@@ -228,8 +224,9 @@ knitr::include_graphics("figures/13_cv.png")
 ## configureMlr(on.learner.error = "warn", on.error.dump = TRUE)
 
 ## ---- eval=FALSE---------------------------------------------------------
-## # parallelize the tuning, i.e. the inner fold
+## library(parallelMap)
 ## parallelStart(mode = "multicore",
+##               # parallelize the hyperparameter tuning level
 ##               level = "mlr.tuneParams",
 ##               # just use half of the available cores
 ##               cpus = round(parallel::detectCores() / 2),
@@ -239,20 +236,20 @@ knitr::include_graphics("figures/13_cv.png")
 ## set.seed(12345)
 ## result = mlr::resample(learner = wrapped_lrn_ksvm,
 ##                        task = task,
-##                        resampling = outer,
+##                        resampling = perf_level,
 ##                        extract = getTuneResult,
 ##                        measures = mlr::auc)
 ## # stop parallelization
 ## parallelStop()
 ## # save your result, e.g.:
-## # saveRDS(result, "svm_sp_sp_rbf_50it.rda")
+## # saveRDS(result, "svm_sp_sp_rbf_50it.rds")
 
 ## ---- include=FALSE------------------------------------------------------
-result = readRDS("extdata/svm_sp_sp_rbf_50it.rda")
+result = readRDS("extdata/svm_sp_sp_rbf_50it.rds")
 
 ## ------------------------------------------------------------------------
 # Exploring the results
-# run time in minutes
+# runtime in minutes
 round(result$runtime / 60, 2)
 
 ## ------------------------------------------------------------------------
@@ -262,10 +259,10 @@ result$aggr
 mean(result$measures.test$auc)
 
 ## ------------------------------------------------------------------------
-# used hyperparameters for the outer fold, i.e. the best combination out of 50 *
+# winning hyperparameters of tuning step, i.e. the best combination out of 50 *
 # 5 models
-result$extract[[1]]
-# here one can observe that the AUROC of the tuning data is usually higher
-# than for the model in the outer fold
+result$extract[[1]]$x
+
+## ------------------------------------------------------------------------
 result$measures.test[1, ]
 

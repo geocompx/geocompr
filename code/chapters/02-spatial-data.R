@@ -10,7 +10,7 @@ library(spDataLarge)   # load larger geographic data
 
 ## Take care when using the word 'vector' as it can have two meanings in this book:
 
-## ---- include=FALSE, eval=FALSE------------------------------------------
+## ----vectorplots-source, include=FALSE, eval=FALSE-----------------------
 ## source("code/02-vectorplots.R") # generate subsequent figure
 
 ## ----vectorplots, fig.cap="Illustration of vector (point) data in which location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.", out.width="49%", fig.show='hold', echo=FALSE----

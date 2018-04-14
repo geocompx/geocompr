@@ -170,7 +170,7 @@ knitr::kable(dT, caption = "Datatypes supported by the raster package.")
 ## library(tmap)
 ## tmap_obj = tm_shape(world) +
 ##   tm_polygons(col = "lifeExp")
-## save_tmap(tm  = tmap_obj, filename = "lifeExp_tmap.png")
+## tmap_save(tm  = tmap_obj, filename = "lifeExp_tmap.png")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## library(mapview)
