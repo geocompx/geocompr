@@ -24,7 +24,7 @@ library(parallelMap)
 Statistical learning is concerned with the use of statistical and computational models for identifying patterns in data and making predictions.
 As discussed in section \@ref(software-for-geocomputation), this is one of the main strengths of R.
 Statistical learning combines methods from statistics and machine learning.
-Both can be categorised into supervised and unsupervised techniques and are central to many disciplines including economics, physics, medicine, biology, ecology and geography [@james_introduction_2013].
+Both can be categorized into supervised and unsupervised techniques and are central to many disciplines including economics, physics, medicine, biology, ecology and geography [@james_introduction_2013].
 
 This chapter focuses on supervised techniques, as opposed to unsupervised techniques such as clustering.
 Response variables can be binary (such as landslide occurrence), categorical (land use), integer (species richness count) or numeric (soil acidity measured in pH).
@@ -55,10 +55,10 @@ The models' predictive performance will be assessed using spatial cross-validati
 
 CV determines a model's ability to generalize to new data, by splitting a dataset (repeatedly) into training and test sets.
 It uses the training data to fit the model, and checks its performance when predicting to the test data.
-CV helps to detect overfitting since models that predict the training data too closely, with noise, will tend to performance poorly on the test data.
+CV helps to detect over-fitting since models that predict the training data too closely, with noise, will tend to performance poorly on the test data.
 
 Randomly splitting spatial data can lead to training points that are neighbors in space with test points.
-Due to spatial autocorrelation, test and training datasets would not be independent in this scenario, with the consequence that CV fails to detect a possible overfitting.
+Due to spatial autocorrelation, test and training datasets would not be independent in this scenario, with the consequence that CV fails to detect a possible over-fitting.
 Spatial CV alleviates this problem and is a central theme in this chapter.
 
 ## Case study: Landslide susceptibility {#case-landslide}
@@ -92,7 +92,7 @@ lsl = bind_rows(non_pts_small, lsl_pts)
 ```
 
 `dem` is a digital elevation model consisting two elements:
-`dem$header`, a `list` which represents a raster 'header' (see section \@ref(raster-data)), and `dem$data`, a matrix with the altitudinal of each pixel.
+`dem$header`, a `list` which represents a raster 'header' (see section \@ref(raster-data)), and `dem$data`, a matrix with the altitude of each pixel.
 `dem` can be converted into a `raster` object with:
 
 <!-- Idea: could create a function to do this -->
@@ -110,7 +110,7 @@ dem = raster(dem$data,
 
 To model landslide susceptibility, we need some predictors.
 Terrain attributes are frequently associated with landsliding [@muenchow_geomorphic_2012], and these can be computed from the digital elevation model (`dem`) using R-GIS bridges (see Chapter \@ref(gis)).
-We leave it as an exercise to the reader to compute the following terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe (see exercises):
+We leave it as an exercise to the reader to compute the following terrain attribute rasters and extract the corresponding values to our landslide/non-landslide data frame (see exercises):
 
 - `slope`: slope angle (°).
 - `cplan`: plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow.
@@ -165,7 +165,7 @@ tm_shape(hs, bbox = bbx) +
 ## Conventional modeling approach in R {#conventional-model}
 
 In section \@ref(spatial-cv-with-mlr) we will use **mlr**, which provides a unified interface to many learning algorithms.
-First, it is worth demonstrating how spatial data can be modelled using the conventional modeling interface in 'base R'.^[
+First, it is worth demonstrating how spatial data can be modeled using the conventional modeling interface in 'base R'.^[
 Base R in this context refers to packages that are loaded by default when you start R.
 These include `stats`, a base R package that contains the function `glm()`.
 The following command provides a list of all packages that are base and 'recommended' --- installed but not loaded (source: [Stack Overflow](https://stackoverflow.com/questions/9700799)): `installed.packages() %>% .[ !is.na(.[ ,"Priority"]), c("Package", "Priority") ]`.
@@ -295,7 +295,7 @@ talk about this in person
 -->
 To alleviate this problem 'spatial partitioning' is used to split the observations into spatially disjointed subsets (using the observations' coordinates in a *k*-means clustering; @brenning_spatial_2012; second row of Figure \@ref(fig:partitioning)).
 This partitioning strategy is the **only** difference between spatial and conventional CV.
-As a result spatial CV leads to a bias-reduced assessment of a model's predictive performance, and hence helps to avoid overfitting.
+As a result spatial CV leads to a bias-reduced assessment of a model's predictive performance, and hence helps to avoid over-fitting.
 <!-- Alex suggested to remove this: 
 It is important to note that spatial CV reduces the bias introduced by spatial autocorrelation but does not completely remove it. 
 This is because there are still a few points in the test and training data which are still neighbors (@brenning_spatial_2012; see second row of \@ref(fig:partitioning)).
@@ -732,7 +732,7 @@ We thank Patrick Schratz (University of Jena) for fruitful discussions on **mlr*
     - plan curvature
     - profile curvature
     - catchment area
-1. Extract the values from the corresponding output rasters to the `landslides` dataframe (`data(landslides, package = "RSAGA"`) by adding new variables called `slope`, `cplan`, `cprof`, `elev` and `log_carea`. Keep all landslide initiation points and 175 randomly selected non-landslide points (see section \@ref(case-landslide) for details).
+1. Extract the values from the corresponding output rasters to the `landslides` data frame (`data(landslides, package = "RSAGA"`) by adding new variables called `slope`, `cplan`, `cprof`, `elev` and `log_carea`. Keep all landslide initiation points and 175 randomly selected non-landslide points (see section \@ref(case-landslide) for details).
 1. Use the derived terrain attribute rasters in combination with a GLM to make a spatial prediction map similar to that shown in Figure \@ref(fig:lsl-susc).
 1. Compute a 100-repeated 5-fold non-spatial cross-validation and spatial CV based on the GLM learner and compare the AUROC values from both resampling strategies with the help of boxplots (see Figure \@ref(fig:boxplot-cv)).
 Hint: You need to specify a non-spatial task and a non-spatial resampling strategy.
