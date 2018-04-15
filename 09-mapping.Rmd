@@ -26,22 +26,27 @@ library(tmap)    # for static and interactive maps
 
 A satisfying and important aspect of geographic research is producing and communicating the results in the form of maps.
 Map making --- the art of Cartography --- is an ancient skill that involves precision, consideration of the map-reader and often an element of creativity.
-Basic plotting of geographic data is straightforward in R with `plot()` (see section \@ref(basic-map)) which already allows the fabrication of quality maps.
-Advanced map-making even increases this quality and is a skill worth learning, since:
-a carefully crafted map can communicate results effectively and avoid time spent generating them going to waste due to poor presentation [@brewer_designing_2015]:
+Basic plotting of geographic data is straightforward in R with `plot()` (see section \@ref(basic-map)), and it is possible to create advanced maps using base R methods [@murrell_r_2016].
+
+This chapter focuses on dedicated map-making packages, especially **tmap**, for reasons that are explained in section \@ref(static-maps).
+There are a multitude of options but when learning a new skill (in this case map making), it makes sense to gain depth-of-knowledge in one package before branching out, a concept that also applies to the choice of programming language as we saw in Chapter \@ref(intro).
+It is worth developing advanced map making skills not only because it is a fun activity that can produce beautiful results. 
+Map making also has important practical applications.
+A carefully crafted map can help ensure that time spent in the analysis phases of geocomputational projects --- for example using methods covered in chapters \@ref(spatial-class) to \@ref(transform) --- are communicated effectively [@brewer_designing_2015]:
 
 > Amateur-looking maps can undermine your audience’s ability to understand important information and weaken the presentation of a professional data investigation.
 
 <!-- Todo: consider adding footnote saying it's good to focus on visualization early as in R4DS but that we cover it later because there's a risk of getting distracted by pretty pictures to the detriment of good analysis. -->
 
 Maps have been used for several thousand years for a wide variety of purposes.
-Historic examples include maps on buildings in Babylon and Ptolemy's world map in his masterpiece *Geography*.
-However, maps have historically been out of reach for everyday people [@talbert_ancient_2014].
+Historic examples include maps of buildings and land ownership in the Old Babylonian dynasty more than 3000 years ago and Ptolemy's world map in his masterpiece *Geography* nearly 2000 years ago [@talbert_ancient_2014].
+However, maps have historically been out of reach for everyday people.
+
 Modern computing has the potential to change this.
 Map making skills can also help meet research and public engagement objectives.
 From a research perspective clear maps are often be the best way to present the results of geocomputational research.
 From policy and 'citizen science' perspectives, attractive and engaging maps can help change peoples' minds, based on the evidence.
-Map making is therefore a critical part of geocomputation and its emphasis is not only describing, but also changing the world (see Chapter \@ref(intro)).
+Map making is therefore a critical part of geocomputation and its emphasis not only on describing, but also *changing* the world (see Chapter \@ref(intro)).
 
 <!-- info about relation between efficiency and editability -->
 <!-- intro to the chapter structure -->
@@ -56,15 +61,13 @@ The generic `plot()` function is often the fastest way to create static maps fro
 Sometimes the simplicity and speed of this approach is sufficient, especially during the development phase of a project:
 when using R interactively to understand a geographic dataset, you will likely be the only person who sees them.
 The base R approach is also extensible, as illustrated in Chapter [14](https://www.stat.auckland.ac.nz/~paul/RG2e/chapter14.html) of *R Graphics* [@murrell_r_2016], allowing detailed control over graphical parameters provided by `plot()` and the **grid** package.
-<!-- well, base R plotting and the grid package already allow for the making of high-quality maps suitable for publication. So the advantage of tmap is to do the same in with less and concise code? In any case, it would be good to emphasize the advantage the specific advantage of tmap compared to base plotting + grid. It would be also worth noting why tmap is the better option than ggplot2. Allows a wide variety of spatial formats -->
 The focus of this section, however, is map making publication-quality and engaging maps using minimal time and code with dedicated packages, particularly **tmap**.
-<!-- well, base R plotting and the grid package already allow for the making of high-quality maps suitable for publication. So the advantage of tmap is to do the same in with less and concise code? In any case, it would be good to emphasize the advantage the specific advantage of tmap compared to base plotting + grid. It would be also worth noting why tmap is the better option than ggplot2.
-Robin: tmap allows a wide variety of spatial formats especially raster objects (probably will also support stars?) -->
 
 Why **tmap**?
 It is a powerful and flexible map-making package with sensible defaults.
-It has a concise syntax that will be familiar to **ggplot2** users and has a unique capability to generate static and interactive maps using the same code via `tmap_mode()`.
-**tmap** is well documented in the vignettes [`tmap-nutshell`](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-nutshell.html) and [`tmap-modes`](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-modes.html).
+It has a concise syntax that allows for the creation of attractive maps with minimal code, that will be familiar to **ggplot2** users.
+Furthermore, **tmap** has a unique capability to generate static and interactive maps using the same code via `tmap_mode()`.
+It accepts a wider range of spatial classes (including `raster` objects) than alternatives such as **ggplot2**, as documented in vignettes [`tmap-nutshell`](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-nutshell.html) and [`tmap-modes`](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-modes.html).
 This section teaches how to make static maps with **tmap**, emphasizing the important aesthetic and layout options.
 
 ### tmap basics
@@ -128,15 +131,14 @@ class(map_nz)
 New *shapes* can be added with `+ tm_shape(new_obj)`.
 In this case `new_obj` represents a new spatial object to be plotted on top of preceding layers.
 When a new new shape is added in this way all subsequent aesthetic functions refer to it, until another new shape is added.
-This syntax allows the creation of maps with multiple shapes and layers:
+This syntax allows the creation of maps with multiple shapes and layers, as illustrated in the next code chunk which uses the function `tm_raster()` to plot a raster layer (with `alpha` set to make the layer semi-transparent):
 
 ```{r, results='hide'}
 map_nz1 = map_nz +
-  tm_shape(nz_height) + tm_bubbles()
+  tm_shape(nz_elev) + tm_raster(alpha = 0.7)
 ```
 
-Building on the previously created `map_nz` object the preceding code creates a new map object `map_nz1` which contains another shape (`nz_height`), representing high points (see Figure \@ref(fig:tmlayers), left).
-<!-- tm_bubbles explanation is missing -->
+Building on the previously created `map_nz` object the preceding code creates a new map object `map_nz1` which contains another shape (`nz_eleve`), representing average elevation across New Zealand (see Figure \@ref(fig:tmlayers), left).
 More shapes and layers can be added, as illustrated in the code chunk below which creates `nz_water`, representing New Zealand's [territorial waters](https://en.wikipedia.org/wiki/Territorial_waters), and adds the resulting lines to an existing map object.
 
 ```{r}
@@ -146,9 +148,10 @@ map_nz2 = map_nz1 +
   tm_shape(nz_water) + tm_lines()
 ```
 
-There is no limit to the number of layers or shapes.
-The same shape can even be used multiple times, as demonstrated by `map_nz3`.
-This map is created by adding another instance of the `nz_height` shape onto the previously created `map_nz2` object, as illustrated in the right-hand panel of Figure \@ref(fig:tmlayers):
+There is no limit to the number of layers or shapes that can be added to `tmap` objects.
+The same shape can even be used multiple times.
+The final map illustrated in Figure \@ref(fig:tmlayers) is created by adding a layer representing high points (stored in the object `nz_height`) onto the previously created `map_nz2` object with `tm_dots()` (see `?tm_dots` and `?tm_bubbles` for details on **tmap**'s point plotting functions).
+The resulting map, which has 5 layers, is illustrated in the right-hand panel of:
 
 ```{r}
 map_nz3 = map_nz2 +
@@ -169,7 +172,8 @@ Aesthetic settings, however, are controlled by arguments to layer functions.
 
 The plots in the previous section demonstrate **tmap**'s default aesthetic settings.
 Grey shades are used for `tm_fill()` and  `tm_bubbles()` layers and a continuous red line is used to represent lines created with `tm_lines()`.
-Of course, the user is provided with a fine-grained control over these default values, and other aesthetics.
+Of course, these default values and other aesthetics can be overridden.
+The purpose this section is to show how.
 
 There are two main types of map aesthetics: those that change with the data and those that are constant.
 Unlike **ggplot2** which uses the helper function `aes()` to represent the former, **tmap** layer functions accept aesthetic arguments that are either constant values *or* variable fields.
