@@ -4,7 +4,7 @@
 #' url_issue = "https://github.com/r-spatial/sf/issues/704"
 #' u = "https://github.com/Robinlovelace/geocompr/raw/master/our-impact.csv"
 #' our_impact = readr::read_csv(u)
-#' new_impact = c(url = u, add_impact(url_issue))
+#' new_impact = c(url = url_issue, add_impact(url_issue))
 #' names(our_impact)
 #' names(new_impact)
 #' names(new_impact) = names(our_impact)
