@@ -1,21 +1,29 @@
 # Aim: generate package metrics on common mapping packages
 devtools::install_github("ropenscilabs/packagemetrics")
-map_pkgs = c(
+
+# generic mapping packages ------------------------------------------------
+generic_map_pkgs = c(
   "cartography",
-  "cartogram",
   "ggplot2",
-  "globe",
   "leaflet",
-  "maps",
-  "mapmisc",
   "mapview",
   "plotly",
-  "raster",
   "rasterVis",
-  "rworldmap",
-  "sf",
   "tmap"
 )
-map_pkgs = packagemetrics::package_list_metrics(map_pkgs)
+generic_map_pkgs = packagemetrics::package_list_metrics(generic_map_pkgs)
 # pkg_table = packagemetrics::metrics_table(pkg_df)
-readr::write_csv(map_pkgs, "extdata/map_pkgs.csv")
+readr::write_csv(generic_map_pkgs, "extdata/generic_map_pkgs.csv")
+
+# specific purpose mapping packages ---------------------------------------
+specific_map_pkgs = c(
+  "cartogram",
+  "geogrid",
+  "geofacet",
+  "globe",
+  "linemap"
+)
+
+specific_map_pkgs = packagemetrics::package_list_metrics(specific_map_pkgs)
+# pkg_table = packagemetrics::metrics_table(pkg_df)
+readr::write_csv(specific_map_pkgs, "extdata/specific_map_pkgs.csv")
