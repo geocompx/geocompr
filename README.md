@@ -60,11 +60,6 @@ The additional packages required for this can be installed as follows:
 
 ``` r
 source("code/extra-pkgs.R")
-#> Using GitHub PAT from envvar GITHUB_PAT
-#> Skipping install of 'packagemetrics' from a github remote, the SHA1 (3e662cbc) has not changed since last install.
-#>   Use `force = TRUE` to force installation
-#> Skipping install of 'USAboundariesData' from a github remote, the SHA1 (5e34ba39) has not changed since last install.
-#>   Use `force = TRUE` to force installation
 ```
 
 With these additional dependencies installed, you should be able to run the following scripts, which create content for the book, that we've removed from the main book build to reduce package dependencies and the book's build time:
@@ -132,7 +127,7 @@ knitr::kable(pkg_df)
 
 | Name              | Title                                                                                     | version    |
 |:------------------|:------------------------------------------------------------------------------------------|:-----------|
-| bookdown          | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]                   | 0.7.7      |
+| bookdown          | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]                   | 0.7        |
 | dismo             | Species Distribution Modeling \[@R-dismo\]                                                | 1.1.4      |
 | geosphere         | Spherical Trigonometry \[@R-geosphere\]                                                   | 1.5.7      |
 | ggmap             | Spatial Visualization with ggplot2 \[@R-ggmap\]                                           | 2.6.1      |
@@ -142,13 +137,13 @@ knitr::kable(pkg_df)
 | htmlwidgets       | HTML Widgets for R \[@R-htmlwidgets\]                                                     | 1.0        |
 | kableExtra        | Construct Complex Table with 'kable' and Pipe Syntax \[@R-kableExtra\]                    | 0.8.0      |
 | knitr             | A General-Purpose Package for Dynamic Report Generation in R \[@R-knitr\]                 | 1.20       |
-| leaflet           | Create Interactive Web Maps with the JavaScript 'Leaflet' \[@R-leaflet\]                  | 2.0.0      |
+| leaflet           | Create Interactive Web Maps with the JavaScript 'Leaflet' \[@R-leaflet\]                  | 1.1.0      |
 | link2GI           | Linking Geographic Information Systems, Remote Sensing and Other \[@R-link2GI\]           | 0.3.0      |
 | lwgeom            | Bindings to Selected 'liblwgeom' Functions for Simple Features \[@R-lwgeom\]              | 0.1.5      |
 | mapview           | Interactive Viewing of Spatial Data in R \[@R-mapview\]                                   | 2.3.0      |
 | microbenchmark    | Accurate Timing Functions \[@R-microbenchmark\]                                           | 1.4.4      |
-| mlr               | Machine Learning in R \[@R-mlr\]                                                          | 2.12.1     |
-| osmdata           | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]                  | 0.0.6.1    |
+| mlr               | Machine Learning in R \[@R-mlr\]                                                          | 2.13       |
+| osmdata           | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]                  | 0.0.6      |
 | pROC              | Display and Analyze ROC Curves \[@R-pROC\]                                                | 1.11.0     |
 | raster            | Geographic Data Analysis and Modeling \[@R-raster\]                                       | 2.6.7      |
 | rcartocolor       | 'CARTOColors' Palettes \[@R-rcartocolor\]                                                 | 0.0.22     |
@@ -158,11 +153,11 @@ knitr::kable(pkg_df)
 | rmarkdown         | Dynamic Documents for R \[@R-rmarkdown\]                                                  | 1.9        |
 | rnaturalearth     | World Map Data from Natural Earth \[@R-rnaturalearth\]                                    | 0.1.0      |
 | rnaturalearthdata | World Vector Map Data from Natural Earth Used in 'rnaturalearth' \[@R-rnaturalearthdata\] | 0.1.0      |
-| RQGIS             | Integrating R with QGIS \[@R-RQGIS\]                                                      | 1.0.3.9000 |
-| RSAGA             | SAGA Geoprocessing and Terrain Analysis \[@R-RSAGA\]                                      | 1.1.0      |
-| sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.2      |
+| RQGIS             | Integrating R with QGIS \[@R-RQGIS\]                                                      | 1.0.3      |
+| RSAGA             | SAGA Geoprocessing and Terrain Analysis \[@R-RSAGA\]                                      | 1.0.0      |
+| sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.1      |
 | sp                | Classes and Methods for Spatial Data \[@R-sp\]                                            | 1.2.7      |
-| spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.8.4    |
+| spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.8.5    |
 | spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.6.1    |
 | stplanr           | Sustainable Transport Planning \[@R-stplanr\]                                             | 0.2.3.9000 |
 | tabularaster      | Tidy Tools for 'Raster' Data \[@R-tabularaster\]                                          | 0.4.0      |
