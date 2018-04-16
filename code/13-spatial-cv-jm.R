@@ -39,11 +39,14 @@ data("landslides", package = "RSAGA")
 #**********************************************************
 
 # landslide points
-non = landslides[landslides$lslpts == FALSE, ]
-ind = sample(1:nrow(non), nrow(landslides[landslides$lslpts == TRUE, ]))
-lsl = rbind(non[ind, ], landslides[landslides$lslpts == TRUE, ])
-# tmp = st_as_sf(landslides, coords = c("x", "y"), crs = 32717)
-
+non_pts = filter(landslides, lslpts == FALSE)
+# select landslide points
+lsl_pts = filter(landslides, lslpts == TRUE)
+# randomly select 175 non-landslide points
+set.seed(11042018)
+non_pts_sub = sample_n(non_pts, size = nrow(lsl_pts))
+# create smaller landslide dataset (lsl)
+lsl = bind_rows(non_pts_sub, lsl_pts)
 # digital elevation model
 dem = 
   raster(dem$data, 
@@ -100,11 +103,11 @@ carea = run_qgis(alg, ELEVATION = dem, METHOD = 4,
                  FLOW = file.path(tempdir(), "carea.tif"),
                  load_output = TRUE)
 # transform carea
-log_carea = log10(carea)
-names(log_carea) = "log_carea"
+log10_carea = log10(carea)
+names(log10_carea) = "log10_carea"
 names(dem) = "elev"
 # add log_carea
-ta = addLayer(x = ta, dem, log_carea)
+ta = addLayer(x = ta, dem, log10_carea)
 # extract values to points, i.e., create predictors
 lsl[, names(ta)] = raster::extract(ta, lsl[, c("x", "y")])
 
@@ -184,7 +187,8 @@ resampling_nsp = makeResampleDesc(method = "RepCV", folds = 5, reps = 100)
 # apply the reampling by calling the resample function needed for using the same
 # (randomly) selected folds/partitioning in different models spatial vs.
 # non-spatial or glm vs. GAM 
-set.seed(012348)  # why do we need the seed?
+set.seed(012348)  
+# why do we need the seed?
 # the seed is needed when we use also an inner fold, then we have to make sure
 # that always the same partions are used in the inner fold
 # of course, we could also use a seed to make sure that the people using the
