@@ -7,5 +7,5 @@ main = "\nCountry continents and populations"
 plot(st_geometry(world_proj), graticule = TRUE, reset = FALSE)
 plot(world_proj["continent"], add = TRUE)
 cex = sqrt(world$pop) / 10000
-plot(st_geometry(world_centroids_largest), add = TRUE, cex = cex, lwd = 5)
+plot(st_geometry(world_centroids_largest), add = TRUE, cex = cex, lwd = 2)
 par(mar = old_mar)
