@@ -1,3 +1,4 @@
+library(sf)
 library(spData)
 world_proj = st_transform(world, "+proj=eck4")
 old_mar = par()$mar
