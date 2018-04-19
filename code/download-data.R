@@ -166,13 +166,15 @@ country_names <- ne_countries(returnclass = 'sf') %>%
   select(name=name_long, iso_a2) %>% 
   st_set_geometry(., NULL)
   
-world_df <- data_hdi %>% 
+worldbank_df <- data_hdi %>% 
   full_join(., data_urbanpop, by = c('iso_a2')) %>%
   full_join(., data_unemployment, by = c('iso_a2')) %>%
   full_join(., data_popgrowth, by = c('iso_a2')) %>% 
   full_join(., data_literacy, by = c('iso_a2')) %>%
   # full_join(., data_tertiary_edu_per_100000, by = c('iso_a2')) %>% 
-  left_join(., country_names, by = c('iso_a2')) %>% 
-  select(name, everything())
+  right_join(., country_names, by = c('iso_a2')) %>% 
+  select(name, everything()) %>% 
+  mutate(name = stringi::stri_trans_general(name, "latin-ascii"))
 
-write_csv(world_df, 'data/worldbank_df.csv')
+write_csv(worldbank_df, 'data/worldbank_df.csv')
+save(worldbank_df, file = "data/worldbank_df.rda", compress = "bzip2")
