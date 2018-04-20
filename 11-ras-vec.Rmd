@@ -32,34 +32,42 @@ Often the extent of input raster datasets is larger than the area of interest.
 In this case raster **cropping** and **masking** are useful for unifying the spatial extent of input data.
 Both operations reduce object memory use and associated computational resources for subsequent analysis steps, and may be a necessary preprocessing step before creating attracive maps involving raster data.
 
-We are going to illustrate raster cropping and masking using the `srtm` object, a elevation raster of the Southwestern Utah, and the `zion` object, a vector representing the area of the Zion National Park (Figure \@ref(fig:cropmask):A).
-Both objects should have the same projection, therefore we need to transform `zion` to fit the projection of `srtm` before raster cropping or masking (see section \@ref(reproj-geo-data) to learn more about spatial data reprojection):
+We will use two objects to illustrate raster cropping:
+
+- A `raster` object `srtm` representing elevation (meters above sea level) in Southwestern Utah.
+- A vector (`sf`) object `zion` representing Zion National Park.
+
+Both target and cropping objects must have the same projection.
+The following code chunk therefore not only loads the datasets, from the **spDataLarge** package installed in Chapter \@ref(spatial-class).
+It also reprojects `zion` (see section \@ref(reproj-geo-data) for more on reprojection):
 
 ```{r, results='hide'}
-srtm = raster((system.file("raster/srtm.tif", package = "spDataLarge")))
-zion = st_read((system.file("vector/zion.gpkg", package = "spDataLarge"))) %>% 
-  st_transform(4326)
+srtm = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
+zion = read_sf(system.file("vector/zion.gpkg", package = "spDataLarge"))
+(crs_srtm = raster::crs(srtm)) 
+zion = st_transform(zion, crs_srtm@projargs)
 ```
 
-The role of the `crop` function is to decrease the extent of a raster based on the extent of another spatial object.
-It this example, we crop the elevation data to the extent of the Zion National Park area (Figure \@ref(fig:cropmask):B): 
+We will use `crop()` from the **raster** package to crop the `srtm` raster.
+`crop()` reduces the rectangular extent of the object passed to its first argument based on the extent of the object passed to its second argument, as demonstrated in the command below (which generates Figure \@ref(fig:cropmask):B --- note the smaller extent of the raster background):
 
 ```{r}
 srtm_cropped = crop(srtm, as(zion, "Spatial"))
 ```
 
-The goal of the `mask` function is a little bit different - it keeps the raster values only in the area of interest, while the values outside of the analyzed area are set to `NA`.
-The code below masks every cell outside of the the Zion National Park boundaries (Figure \@ref(fig:cropmask):C):
+Related to `crop()` is the **raster** function `mask()`, which sets values outside of the bounds a the object passed to its second argument to `NA`.
+The following command therefore masks every cell outside of the the Zion National Park boundaries (Figure \@ref(fig:cropmask):C):
 
 ```{r}
-srtm_masked = mask(srtm_cropped, zion)
+srtm_masked = mask(srtm, zion)
 ```
 
-The `mask` function also can be modified to give different results.
-For example a value of mask (`NA`) can be changed with the `maskvalue` argument and the `inverse` argument set to `TRUE` masks an area of interest keeping everything else intact.
-You can learn more in the function's help file - `?mask`.
+Changing the settings of `mask()` yields in different results.
+Setting `maskvalue = 0`, for example, would set all pixels outside the national park to 0.
+Setting `inverse = TRUE` would mask everything *inside* the bounds of the park (see `?mask` for details).
 
 ```{r cropmask, echo = FALSE, fig.cap="Illustration of raster cropping (center) and raster masking (right)."}
+# TODO: split into reproducible script, e.g. in code/09-cropmask.R
 library(tmap)
 library(grid)
 library(rcartocolor)
