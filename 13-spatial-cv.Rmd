@@ -127,7 +127,7 @@ lsl %>%
   head(3)
 ```
 
-As a convenience to the reader, `lsl` is also available in the **spDataLarge** package along with the corresponding terrain attributes raster brick (`data("ta", package = "spDataLarge")`).
+As a convenience to the reader, `lsl` is also available in the **spDataLarge** package along with the corresponding terrain attributes stored in a raster stack (`data("ta", package = "spDataLarge")`).
 
 ```{r lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador."}
 library(tmap)
@@ -205,13 +205,15 @@ pred = raster::predict(object = ta, model = fit,
 
 
 ```{r lsl-susc, echo=FALSE, fig.cap="Spatial prediction of landslide susceptibility using a GLM.", warning=FALSE}
+# attach study mask for the natural part of the study area
+data("study_mask", package = "spDataLarge")
 # white raster to only plot the axis ticks, otherwise gridlines would be visible
 tm_shape(hs, bbox = bbx) +
   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
           labels.rot = c(0, 90)) +
   tm_raster(palette = "white", legend.show = FALSE) +
   # hillshade
-  tm_shape(mask(hs, study_area), bbox = bbx) +
+  tm_shape(mask(hs, study_mask), bbox = bbx) +
 	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
 	# prediction raster
   tm_shape(mask(pred, study_area)) +
@@ -396,12 +398,8 @@ The set-up steps for modeling with **mlr** may seem tedious.
 But remember this single interface provides access to the 150+ learners shown by `listLearners()`; it would be far more tedious to learn the interface for each learner!
 Further advantages are simple parallelization of resampling techniques and the ability to tune machine learning hyperparameters (see section \@ref(svm)).
 Most importantly, (spatial) resampling in **mlr** is straightforward, requiring only two more steps: specifying a resampling method and running it.
-We will use a 100-repeated 5-fold spatial CV: five partitions will be chosen based on the provided coordinates in our `task` and the partitioning will be repeated 100 times:[^1]
-
-[^1]: 
-
-    Note that package **sperrorest** initially implemented spatial cross-validation in R [@brenning_spatial_2012].
-    In the meantime, its functionality was integrated into the **mlr** package which is the reason why we are using **mlr** [@schratz_performance_nodate].The **caret** package is another umbrella-package [@kuhn_applied_2013] for streamlined modeling in R, however, so far it does not provide spatial CV which is why we refrain from using it for spatial data.
+We will use a 100-repeated 5-fold spatial CV: five partitions will be chosen based on the provided coordinates in our `task` and the partitioning will be repeated 100 times:^[Note that package **sperrorest** initially implemented spatial cross-validation in R [@brenning_spatial_2012].
+    In the meantime, its functionality was integrated into the **mlr** package which is the reason why we are using **mlr** [@schratz_performance_nodate].The **caret** package is another umbrella-package [@kuhn_applied_2013] for streamlined modeling in R, however, so far it does not provide spatial CV which is why we refrain from using it for spatial data.]
 
 ```{r}
 resampling = makeResampleDesc(method = "SpRepCV", folds = 5, 
@@ -435,7 +433,8 @@ I really don't understand why I have to load spatialcv.Rdata here a third time..
 The output of the preceding code chunk is a bias-reduced assessment of the model's predictive performance, as illustrated in the following code chunk  (required input data is saved in the file `spatialcv.Rdata` in the book's GitHub repo):
 
 ```{r, echo=FALSE}
-load("extdata/spatialcv.Rdata")
+load("extdata/sp_cv.rds")
+load("extdata/conv_cv.rds")
 ```
 
 ```{r}
@@ -702,6 +701,7 @@ We recommend the following resources in this direction:
     - catchment area
 1. Extract the values from the corresponding output rasters to the `landslides` data frame (`data(landslides, package = "RSAGA"`) by adding new variables called `slope`, `cplan`, `cprof`, `elev` and `log_carea`. Keep all landslide initiation points and 175 randomly selected non-landslide points (see section \@ref(case-landslide) for details).
 1. Use the derived terrain attribute rasters in combination with a GLM to make a spatial prediction map similar to that shown in Figure \@ref(fig:lsl-susc).
+Running `data("study_mask", package = "spDataLarge")` attaches a mask of the study area.
 1. Compute a 100-repeated 5-fold non-spatial cross-validation and spatial CV based on the GLM learner and compare the AUROC values from both resampling strategies with the help of boxplots (see Figure \@ref(fig:boxplot-cv)).
 Hint: You need to specify a non-spatial task and a non-spatial resampling strategy.
 <!-- @Patrick: talk in person; but I think this step is not necessary since spatial and non-spatial partitions must be different -->
