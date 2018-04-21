@@ -120,6 +120,7 @@ lsl[, names(ta)] = raster::extract(ta, lsl[, c("x", "y")])
 # 4 MODELING-----------------------------------------------
 #**********************************************************
 
+# attach data
 # data("lsl", package = "spDataLarge")
 # data("ta", package = "spDataLarge")
 
@@ -201,8 +202,8 @@ boxplot(sp_cv$measures.test$auc,
         conv_cv$measures.test$auc)
 
 # save your result
-saveRDS(sp_cv, file = "extdata/sp_cv.rds")
-saveRDS(conv_cv, file = "extdata/conv_cv.rds")
+# saveRDS(sp_cv, file = "extdata/sp_cv.rds")
+# saveRDS(conv_cv, file = "extdata/conv_cv.rds")
 
 #**********************************************************
 # 4 SPATIAL PREDICTION-------------------------------------

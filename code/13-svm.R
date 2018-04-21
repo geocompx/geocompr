@@ -92,7 +92,7 @@ resa_svm_spatial = mlr::resample(wrapper_ksvm, task,
 # Aggregated Result: auc.test.mean=0.7583375
 parallelStop()
 # save your result
-saveRDS(resa_svm_spatial, "extdata/svm_sp_sp_rbf_50it.rda")
+saveRDS(resa_svm_spatial, "extdata/spatial_cv_result.rds")
 
 # Exploring the results
 # run time in minutes
