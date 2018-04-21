@@ -153,25 +153,24 @@ zion_transect = rbind(c(-113.2, 37.45), c(-112.9, 37.2)) %>%
   st_sf(.)
 ```
 
-Importantly, it does not need to be a straight line.
-Try to imagine that you are planing to go on a hike - you can extract elevation along your proposed path.
-To extract a raster by line, the `along` argument needs to be set to `TRUE`. 
-We also add identifiers (`cellnumbers = TRUE`) and convert a new object to `data.frame`:
+The utility of extracting heights from a linear selector is illustrated by imagining that you are planning a hike.
+The method demonstrated below provides an 'elevation profile' of the route (the line does not need to be straight), useful for estimating how long it will take due to long climbs:
 
 ```{r}
-transect_df = raster::extract(srtm, zion_transect, along = TRUE, cellnumbers = TRUE) %>%
-  data.frame()
+transect = raster::extract(srtm, zion_transect, along = TRUE, cellnumbers = TRUE)
 ```
 
-This would allow us to estimate the distances along measurements on the line.
-However, firstly we need to extract the coordinates of measurements and based on them we can calculate the distances using the `geosphere::distm()` function.
+Note the use of `along = TRUE` and `cellnumbers = TRUE` arguments to return cell IDs *along* the path. and convert a new object to `data.frame`:
+The result is a list containing a matrix of cell IDs in the first column and elevation values in the second.
+The subsequent code chunk first converts this tricky matrix-in-a-list object into a simple data frame, returns the coordinates associated with each extracted cell and finds the associated distances along the transect (see `?geosphere::distm()` for details):
 
 ```{r}
-transect_coords = xyFromCell(srtm, transect_df$cell)
+transect_df = as_data_frame(transect[[1]])
+transect_coords = xyFromCell(srtm, transect[[1]][, "cell"])
 transect_df$dist = geosphere::distm(transect_coords)[, 1]
 ```
 
-The final `data.frame` can be used to create a plot in Figure \@ref(fig:lineextr):B.
+The resulting `transect_df` can be used to create elevation profiles, as illustrated in Figure \@ref(fig:lineextr):B.
 
 ```{r lineextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Location of a line used for raster extraction (left) and the elevation along this line (right)."}
 library(tmap)
