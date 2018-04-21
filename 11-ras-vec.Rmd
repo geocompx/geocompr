@@ -289,13 +289,17 @@ If this is a problem it is useful to know about alternatives and work-arounds, t
 
 ## Rasterization {#rasterization}
 
-Rasterization is a conversion from vector objects into rasters.
+Rasterization is the conversion of vector objects into their representation in raster objects.
 Usually, the output raster is used for quantitative analysis (e.g. analysis of terrain) or modeling.
+As we saw in Chapter \@ref(spatial-class) the raster data model has some characteristics that make it conducive to certain methods.
+Furthermore, the process of rasterization can help simplify datasets because the resulting values all have the same spatial resolution: rasterization can be seen as a special type of geographic data aggregation.
 
-The `rasterize()` function takes a vector object and converts it into a raster with extent, resolution and CRS determined by another raster object.
-Parameters of a template raster have big impact on rasterization output -- coarse resolution could not capture all of important spatial objects, while high resolution could increase computation times.
-However, there is no simple rules for parameters selection as it depends on the input data and rasterization purpose.
-For the first group of examples, we will use a template raster having the same extent and CRS as `cycle_hire_osm_projected` and spatial resolution of 1000 meters:
+The **raster** package contains the function `rasterize()` for doing this work.
+Its first two arguments are `x`, vector object to be rasterized and `y`, a 'template raster' object defining the extent, resolution and CRS of the output.
+The geographic resolution of the input raster has a major impact on the results: if it is too low (cell size is too large) the result may miss the full geographic variability of the vector data; if it is too high computational times may be excessive.
+There are no simple rules to follow when deciding an appropriate geographic resolution, which is heavily dependent on the intended use of the results.
+
+To demonstrate rasterization in action, we will use a template raster that has the same extent and CRS as the input vector data `cycle_hire_osm_projected` (a dataset on cycle hire points in London illustrated in Figure \@ref(fig:vector-rasterization1):A) and spatial resolution of 1000 meters:
 
 ```{r}
 cycle_hire_osm_projected = st_transform(cycle_hire_osm, 27700)
@@ -303,18 +307,18 @@ raster_template = raster(extent(cycle_hire_osm_projected), resolution = 1000,
                          crs = st_crs(cycle_hire_osm_projected)$proj4string)
 ```
 
-Rasterization is a very flexible operation and gives different results based not only on a template raster, but also on the type of input vector (e.g. points, polygons) and given arguments.
+Rasterization is a very flexible operation: the results depend not only on the nature of the template raster, but also on the type of input vector (e.g. points, polygons) and a variety arguments taken by the `rasterize()` function.
 
-Let's try three different approaches to rasterize points - cycle hire locations across London (Figure \@ref(fig:vector-rasterization1):A).
-The simplest case is when we want to create a raster containing areas with cycle hire points (also known as a presence/absence raster).
-In this situation, `rasterize()` expects only three arguments - an input vector data, a raster template, and a value to be transferred to all non-empty cells (Figure \@ref(fig:vector-rasterization1):B).
+To illustrate this flexibility we will try three different approaches rasterization.
+First we create a raster representing the presence or absence of cycle hire points (known as presence/absence rasters).
+In this case `rasterize()` requires only one argument in addition to `x` and `y` (the aformentioned vector and raster objects): a value to be transferred to all non-empty cells specified by `field` (results illustrated Figure \@ref(fig:vector-rasterization1):B).
 
 ```{r}
 ch_raster1 = rasterize(cycle_hire_osm_projected, raster_template, field = 1)
 ```
 
-`rasterize()` also could take a `fun` argument which specifies how attributes are transferred to the raster object.
-For example, the `fun = "count"` argument counts the number of points in each grid cell (Figure \@ref(fig:vector-rasterization1):C).
+The `fun` argument specifies summary statistics used to covert multiple observations in close proximity into associate cells in the raster object.
+By default `fun = 'last` is used but other options such as `fun = "count"` can be used,  in this case to count the number of cycle hire points in each grid cell (the results of this operation are illustrated in Figure \@ref(fig:vector-rasterization1):C).
 
 ```{r}
 ch_raster2 = rasterize(cycle_hire_osm_projected, raster_template, 
