@@ -104,11 +104,11 @@ bestiso = bestisomap(vegdist(d, "altGower"))
 # geo distances
 geod = isomapdist(vegdist(d, "bray"), k = 69, ndim = 3)
 # Secondly, subject the geodesic distances to a multidimensional scaling, i.e. perform an isomap ordination
-iso <- cmdscale(geod, k = 3, eig = TRUE)
+iso = cmdscale(geod, k = 3, eig = TRUE)
 # cmdscale does not automatically provide species scores, a function of the BiodiversityR package does the trick
 library(BiodiversityR)
 # species scores
-isospec <- 
+isospec = 
   as.data.frame(add.spec.scores(iso, d, 
                                 method = "pcoa.scores", multi = 0.15,
                                 Rscale = TRUE)$cproj)

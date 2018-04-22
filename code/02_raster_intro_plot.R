@@ -14,10 +14,10 @@ set.seed(2017-04-01)
 
 small_ras = raster(matrix(1:16, 4, 4, byrow = TRUE))
 small_ras_val = raster(matrix(sample.int(100, 16), 4, 4, byrow =TRUE))
-# NAvalue(small_ras_val) <- NA
+# NAvalue(small_ras_val) = NA
 small_ras_val[c(7, 9)] = NA
-# small_ras_val_2 <- small_ras_val
-# small_ras_val_2[c(7, 9)] <- NA
+# small_ras_val_2 = small_ras_val
+# small_ras_val_2[c(7, 9)] = NA
 
 # empty_grid_plot = ggplot() +
 #   vr_geom_raster_seq(small_ras) +
