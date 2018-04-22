@@ -1,7 +1,7 @@
 library(tmap)
 library(spData)
 
-?tmap_style_save
+# ?tmap_style_save
 tmap_options(title.size = 0.7, title.position = c("right", "bottom"), legend.position = c("LEFT", "TOP"))
 # breaks = c(0, 3, 4, 5) * 10000
 # m_fixed = tm_shape(nz) +
