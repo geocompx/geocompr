@@ -386,16 +386,17 @@ The latter is part of GDAL and therefore requires a vector file (instead of an `
 
 ## Spatial vectorization
 
-Spatial vectorization is the counterpart of rasterization \@ref(rasterization), and hence the process of converting continuous raster data into discrete vector data such as points, lines or polygons.
+Spatial vectorization is the counterpart of rasterization \@ref(rasterization), but in the opposite direction.
+It involves converting spatially continuous raster data into spatially discrete vector data such as points, lines or polygons.
 
 ```{block2 type="rmdnote"}
 Be careful with the wording!
 In R vectorization refers to the possibility of replacing `for`-loops and alike by doing things like `1:10 / 2` (see also @wickham_advanced_2014).
 ```
 
-The simplest form of vectorization is to convert a raster into points by keeping the cell values and replacing the grid cells by its centroids.
-The `rasterToPoints()` does exactly this for all non-`NA` raster grid cells (Figure \@ref(fig:raster-vectorization1)).
-Setting the `spatial` parameter to `TRUE` makes sure that the output is a spatial object, otherwise a matrix is returned.
+The simplest form of vectorization is to convert the centroids of raster cells into points.
+`rasterToPoints()` does exactly this for all non-`NA` raster grid cells (Figure \@ref(fig:raster-vectorization1)).
+Setting the `spatial` parameter to `TRUE` ensures the output is a spatial object, not a matrix.
 
 ```{r}
 elev_point = rasterToPoints(elev, spatial = TRUE) %>% 
@@ -406,9 +407,10 @@ elev_point = rasterToPoints(elev, spatial = TRUE) %>%
 source("code/11-raster-vectorization1.R")
 ```
 
-Another common application is the representation of a digital elevation model as contour lines, hence, converting raster data into spatial lines. 
-Here, we will us a real-world DEM since our artificial raster `elev` produces parallel lines (give it a try yourself) because when creating it we made the upper left corner the lowest and the lower right corner the highest value while increasing cell values by one from left to right.
-`rasterToContour()` is a wrapper around `contourLines()`.
+Another common type of spatial vectorization is the creation of contour lines representing lines of continuous height or temperatures (isotherms) for example.
+We will use a real-world digital elevation model (DEM) because the artificial raster `elev` produces parallel lines (task: verify this and explain why this happens).
+<!-- because when creating it we made the upper left corner the lowest and the lower right corner the highest value while increasing cell values by one from left to right. -->
+Contour lines can be created with the **raster** function `rasterToContour()`, which is itself a wrapper around `contourLines()`, as demonstrated below:
 
 ```{r, eval = FALSE}
 # not shown
@@ -417,7 +419,8 @@ plot(dem, axes = FALSE)
 plot(rasterToContour(dem), add = TRUE)
 ```
 
-Use `contour()`, `rasterVis::contourplot()` or `tmap::tm_iso()` if you want to add contour lines to a plot with isoline labels (Fig. \@ref(fig:contour)).
+Contours can be added to existing plots with functions such as `contour()`, `rasterVis::contourplot()` or `tmap::tm_iso()`.
+As illustrated in Figure \@ref(fig:contour) (which was created using the **tmap** package described in Chapter \@ref(adv-map)), isolines can be labelled.
 
 ```{r contour, echo=FALSE, message=FALSE, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines.", warning=FALSE}
 library(tmap)
@@ -443,10 +446,12 @@ tm_shape(hs, bbox = rect) +
 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
 ```
 
-Finally, `rasterToPolygons()` converts each raster cell into one polygon consisting of five coordinates all of which need to be explicitly stored.
-Be careful with this approach when using large raster datasets since you might run into memory problems.
-Here, we convert `grain` into polygons and subsequently dissolve the output in accordance with the grain size categories which `rasterToPolygons()` stored in an attribute named `layer` (see section \@ref(geometry-unions) and Figure \@ref(fig:raster-vectorization2)).
-A convenient alternative for converting rasters into polygons is `spex::polygonize()` which by default returns an `sf` object.
+The final type of vectorisation involves conversion of rasters to polygons.
+This can be done with `raster::rasterToPolygons()`, wich converts each raster cell into a polygon consisting of five coordinates, all of which are stored in memory (explaining why rasters are often fast compared with vectors!)
+
+This is illustrated below by converting the `grain` object into polygons and subsequently dissolving borders between polygons with the same attribute values.
+Attributes in this case are stored in a collumn called `layer` (see section \@ref(geometry-unions) and Figure \@ref(fig:raster-vectorization2)).
+(Note: a convenient alternative for converting rasters into polygons is `spex::polygonize()` which by default returns an `sf` object.)
 
 ```{r}
 grain_poly = rasterToPolygons(grain) %>% 
