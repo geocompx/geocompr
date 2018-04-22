@@ -326,9 +326,8 @@ ch_raster2 = rasterize(cycle_hire_osm_projected, raster_template,
 ```
 
 The new output, `ch_raster2`, shows the number of cycle hire points in each grid cell.
-However, the cycle hire locations have different numbers of bicycles, which is described by the `capacity` variable.
-We need to select a field (`"capacity"`) and a function (`sum`) to determine a cycle hire capacity in each grid cell (Figure \@ref(fig:vector-rasterization1):D).
-In the same way, another statistics could be calculated such as an average capacity for each grid cell, etc.
+The cycle hire locations have different numbers of bicycles described by the `capacity` variable, raising the question, what's the capacity in each grid cell?
+To calculate that we must `sum` the field (`"capacity"`), resulting in output illustrated in Figure \@ref(fig:vector-rasterization1):D, calculated with the following command (other summary functions such as `mean` could be used):
 
 ```{r}
 ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template, 
@@ -339,8 +338,8 @@ ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template,
 source("code/11-vector-rasterization1.R")
 ```
 
-Additionally, we will illustrate polygons and lines rasterizations using California's polygons (`california`) and borders (`california_borders`).
-A template raster here will have the resolution of a 0.5 degree:
+Another dataset based on California's polygons and borders (created below) illustrates raterization of lines.
+After casting the polygon objects into a multilinestring, a template raster is created, with a resolution of a 0.5 degree:
 
 ```{r}
 california = dplyr::filter(us_states, NAME == "California")
@@ -349,14 +348,14 @@ raster_template2 = raster(extent(california), resolution = 0.5,
                          crs = st_crs(california)$proj4string)
 ```
 
-All cells that are touched by a line get a value in a line rasterization (Figure \@ref(fig:vector-rasterization2):A).
+Line rasterization is demonstrated in the code below.
+In the resulting raster, all cells that are touched by a line get a value, as illustrated in Figure \@ref(fig:vector-rasterization2):A.
 
 ```{r}
 california_raster1 = rasterize(california_borders, raster_template2)
 ```
 
-On the other hand, polygon rasterization is based on the positions of cells' centers (points on Figure \@ref(fig:vector-rasterization2):B).
-Values are only given when the center of the cell lies inside of the input polygon (Figure \@ref(fig:vector-rasterization2):B).
+Polygon rasterization, by contrast, selects only cells whose centroids are inside the selector polygon, as illustrated in Figure \@ref(fig:vector-rasterization2):B.
 
 ```{r}
 california_raster2 = rasterize(california, raster_template2)
@@ -374,13 +373,13 @@ california_raster2 = rasterize(california, raster_template2)
 <!--             inner.margins = rep(0, 4)) -->
 <!-- ``` -->
 
-It is also possible to use the `field` or `fun` arguments for lines and polygons rasterizations.
+<!-- It is also possible to use the `field` or `fun` arguments for lines and polygons rasterizations. -->
 
 ```{r vector-rasterization2, echo=FALSE, fig.cap="Examples of line and polygon rasterizations.", warning=FALSE}
 source("code/11-vector-rasterization2.R")
 ```
 
-While `rasterize` works well for most cases, it is not performance optimized. 
+As with `raster::extract()`,  `raster::rasterize()` works well for most cases but is not performance optimized. 
 Fortunately, there are several alternatives, including the `fasterize::fasterize()` and `gdalUtils::gdal_rasterize()`. 
 The former is much (100 times+) faster than `rasterize()` but is currently limited to polygon rasterization.
 The latter is part of GDAL and therefore requires a vector file (instead of an `sf` object) and rasterization parameters (instead of a `Raster*` template object) as inputs.^[See more at http://www.gdal.org/gdal_rasterize.html.]
