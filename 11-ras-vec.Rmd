@@ -218,6 +218,29 @@ The final type of geographic vector object for raster extraction is **polygons**
 Like lines and buffers, polygons tend to return many raster values per polygon.
 This is demonstrated in the command below, which results in a data frame with column names  `ID` (the row number of the polygon) and `srtm` (associated elevation values):
 
+```{r, eval=FALSE, echo=FALSE}
+# aim: create zion_many to test multi-polygon results
+n = 3
+zion_many = st_sample(x = zion, size = n) %>% 
+  st_buffer(dist = 0.01) %>% 
+  st_sf(data.frame(v = 1:n), geometry = .)
+plot(zion_many)
+
+# for continuous data:
+zion_srtm_values = raster::extract(x = srtm, y = zion_many, df = TRUE)
+group_by(zion_srtm_values, ID) %>% 
+  summarize_at(vars(srtm), funs(min, mean, max))
+
+# for categories
+zion_nlcd = raster::extract(nlcd, zion_many, df = TRUE, factors = TRUE)
+dplyr::select(zion_nlcd, ID, levels) %>% 
+  gather(key, value, -ID) %>%
+  group_by(ID, key, value) %>%
+  tally() %>% 
+  spread(value, n, fill = 0)
+```
+
+
 ```{r}
 zion_srtm_values = raster::extract(x = srtm, y = zion, df = TRUE)
 ```
