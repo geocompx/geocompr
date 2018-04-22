@@ -606,6 +606,7 @@ The result has only 1% of the vertices of the input (set using the argument `kee
 
 ```{r, warning=FALSE}
 # proportion of points to retain (0-1; default 0.05)
+us_states2163$AREA = as.numeric(us_states2163$AREA)    
 us_states_simp2 = rmapshaper::ms_simplify(us_states2163, keep = 0.01,
                                           keep_shapes = TRUE)
 ```
@@ -651,12 +652,12 @@ This ensures that the created point lies on the given object (see red points on 
 ```{r centr, warning=FALSE, echo=FALSE, fig.cap="Centroids (black points) and 'points on surface' (red points) of New Zeleand's regions (left) and the Seine (right) datasets."}
 par_old = par()
 par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
-plot(nz$geometry)
-plot(nz_centroid$geometry, add = TRUE)
-plot(nz_pos$geometry, add = TRUE, col = "red")
-plot(seine$geometry)
-plot(seine_centroid$geometry, add = TRUE)
-plot(seine_pos$geometry, add = TRUE, col = "red")
+plot(st_geometry(nz))
+plot(st_geometry(nz_centroid), add = TRUE)
+plot(st_geometry(nz_pos), add = TRUE, col = "red")
+plot(st_geometry(seine))
+plot(st_geometry(seine_centroid), add = TRUE)
+plot(st_geometry(seine_pos), add = TRUE, col = "red")
 par(par_old)
 ```
 
@@ -716,7 +717,7 @@ The **sf** package implements affine transformation for objects of classes `sfg`
 <!-- stats sfc issue -->
 
 ```{r}
-nz_sfc = nz$geometry
+nz_sfc = st_geometry(nz)
 ```
 
 Shifting moves every point by the same distance in map units.
@@ -1193,7 +1194,7 @@ st_bbox(nz_wgs)
 nz_wgs_NULL_crs = st_set_crs(nz_wgs, NA)
 nz_27700 = st_transform(nz_wgs, 27700)
 par(mfrow = c(1, 3))
-plot(nz$geometry)
+plot(st_geometry(nz))
 plot(nz_wgs$geometry)
 plot(nz_wgs_NULL_crs$geometry)
 # answer: it is fatter in the East-West direction
@@ -1217,30 +1218,30 @@ Experiment with different values of `keep` (ranging from 0.5 to 0.00005) for `ms
     - At what value does the form of the result start to break-down for each method, making New Zealand unrecognizable?
     - Advanced: What is different about the geometry type of the results from `st_simplify()` compared with the geometry type of `ms_simplify()`? What problems does this create and how can this be resolved?
 ```{r, echo=FALSE, eval=FALSE}
-plot(rmapshaper::ms_simplify(nz$geometry, keep = 1))
-plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.5))
-plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.05))
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 1))
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.5))
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.05))
 # Starts to breakdown here at 0.5% of the points:
-plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.005))
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.005))
 # At this point no further simplification changes the result
-plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.0005))
-plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.00005))
-plot(st_simplify(nz$geometry, dTolerance = 100))
-plot(st_simplify(nz$geometry, dTolerance = 1000))
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.0005))
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.00005))
+plot(st_simplify(st_geometry(nz), dTolerance = 100))
+plot(st_simplify(st_geometry(nz), dTolerance = 1000))
 # Starts to breakdown at 10 km:
-plot(st_simplify(nz$geometry, dTolerance = 10000))
-plot(st_simplify(nz$geometry, dTolerance = 100000))
-plot(st_simplify(nz$geometry, dTolerance = 100000, preserveTopology = TRUE))
+plot(st_simplify(st_geometry(nz), dTolerance = 10000))
+plot(st_simplify(st_geometry(nz), dTolerance = 100000))
+plot(st_simplify(st_geometry(nz), dTolerance = 100000, preserveTopology = TRUE))
 
-plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.05))
-plot(rmapshaper::ms_simplify(nz$geometry, keep = 0.05))
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.05))
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.05))
 
 # Problem: st_simplify returns POLYGON and MULTIPOLYGON results, affecting plotting
 # Cast into a single geometry type to resolve this
-nz_simple_poly = st_simplify(nz$geometry, dTolerance = 10000) %>% 
+nz_simple_poly = st_simplify(st_geometry(nz), dTolerance = 10000) %>% 
   st_sfc() %>% 
   st_cast("POLYGON")
-nz_simple_multipoly = st_simplify(nz$geometry, dTolerance = 10000) %>% 
+nz_simple_multipoly = st_simplify(st_geometry(nz), dTolerance = 10000) %>% 
   st_sfc() %>% 
   st_cast("MULTIPOLYGON")
 plot(nz_simple_poly)
@@ -1249,7 +1250,7 @@ nrow(nz)
 ```
 1. In the first exercise in Chapter \@ref(spatial-operations) it was established that Canterbury region had 61 of the 101 highest points in New Zealand. Using `st_buffer()`, how many points in `nz_height` are within 100 km of Canturbury?
 ```{r, eval=FALSE, echo=FALSE}
-canterbury = nz[nz$REGC2017_NAME == "Canterbury Region", ]
+canterbury = nz[nz$Name == "Canterbury Region", ]
 cant_buff = st_buffer(canterbury, 100)
 nz_height_near_cant = nz_height[cant_buff, ]
 nrow(nz_height_near_cant) # 66 - 5 more

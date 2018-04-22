@@ -24,6 +24,7 @@ library(RQGIS)
 library(sf)
 library(mlr)
 library(raster)
+library(dplyr)
 
 # attach data
 data("landslides", package = "RSAGA")
@@ -39,11 +40,14 @@ data("landslides", package = "RSAGA")
 #**********************************************************
 
 # landslide points
-non = landslides[landslides$lslpts == FALSE, ]
-ind = sample(1:nrow(non), nrow(landslides[landslides$lslpts == TRUE, ]))
-lsl = rbind(non[ind, ], landslides[landslides$lslpts == TRUE, ])
-# tmp = st_as_sf(landslides, coords = c("x", "y"), crs = 32717)
-
+non_pts = dplyr::filter(landslides, lslpts == FALSE)
+# select landslide points
+lsl_pts = dplyr::filter(landslides, lslpts == TRUE)
+# randomly select 175 non-landslide points
+set.seed(11042018)
+non_pts_sub = sample_n(non_pts, size = nrow(lsl_pts))
+# create smaller landslide dataset (lsl)
+lsl = bind_rows(non_pts_sub, lsl_pts)
 # digital elevation model
 dem = 
   raster(dem$data, 
@@ -100,29 +104,28 @@ carea = run_qgis(alg, ELEVATION = dem, METHOD = 4,
                  FLOW = file.path(tempdir(), "carea.tif"),
                  load_output = TRUE)
 # transform carea
-log_carea = log10(carea)
-names(log_carea) = "log_carea"
+log10_carea = log10(carea)
+names(log10_carea) = "log10_carea"
 names(dem) = "elev"
 # add log_carea
-ta = addLayer(x = ta, dem, log_carea)
+ta = addLayer(x = ta, dem, log10_carea)
 # extract values to points, i.e., create predictors
 lsl[, names(ta)] = raster::extract(ta, lsl[, c("x", "y")])
 
-# save input data
-save(lsl, ta, study_area, file = "extdata/spatialcv.Rdata")
+# corresponding data is available in spDataLarge
+# data("lsl", package = "spDataLarge")
+# data("ta", package = "spDataLarge")
 
 #**********************************************************
 # 4 MODELING-----------------------------------------------
 #**********************************************************
 
-load("extdata/spatialcv.Rdata")
-# also possible
-# data("ecuador", package = "sperrorest")
-# lsl = ecuador[, c("slides", "x", "y", "dem", "slope", "hcurv", "vcurv", "log.carea")]
+# attach data
+# data("lsl", package = "spDataLarge")
+# data("ta", package = "spDataLarge")
 
 coords = lsl[, c("x", "y")]
 data = dplyr::select(lsl, -x, -y)
-# data_nonspatial = dplyr::select(data, -x, -y)
 
 # 3.1 create a mlr task====================================
 #**********************************************************
@@ -167,7 +170,7 @@ summary(m_sp)
 m_nsp = getLearnerModel(mod_nsp)
 summary(m_nsp)
 
-# interesting, coefficients are just the same
+# coefficients are just the same
 coefficients(m_sp)
 coefficients(m_nsp)
 identical(coefficients(m_sp), coefficients(m_nsp))
@@ -184,11 +187,10 @@ resampling_nsp = makeResampleDesc(method = "RepCV", folds = 5, reps = 100)
 # apply the reampling by calling the resample function needed for using the same
 # (randomly) selected folds/partitioning in different models spatial vs.
 # non-spatial or glm vs. GAM 
-set.seed(012348)  # why do we need the seed?
-# the seed is needed when we use also an inner fold, then we have to make sure
-# that always the same partions are used in the inner fold
-# of course, we could also use a seed to make sure that the people using the
-# book retrieve the same result
+set.seed(012348)  
+# why do we need the seed?
+# the seed is needed when to make sure
+# that always the same spatial partitions are used when reruning the code
 sp_cv = mlr::resample(learner = lrn, task = task,
                       resampling = resampling,
                       measures = mlr::auc)
@@ -200,7 +202,8 @@ boxplot(sp_cv$measures.test$auc,
         conv_cv$measures.test$auc)
 
 # save your result
-save(lsl, ta, study_area, sp_cv, conv_cv, file = "extdata/spatialcv.Rdata")
+# saveRDS(sp_cv, file = "extdata/sp_cv.rds")
+# saveRDS(conv_cv, file = "extdata/conv_cv.rds")
 
 #**********************************************************
 # 4 SPATIAL PREDICTION-------------------------------------
