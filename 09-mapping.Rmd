@@ -946,18 +946,37 @@ tm_shape(eastern_africa) +
 1. Update the code in `coffeeApp/app.R` so that instead of centering on Brazil the user can select which country to focus on:
     - Using `textInput()`
     - Using `selectInput()`
-1. Reproduce Figure \@ref(fig:tmshape) and the 1st and 6th panel of Figure \@ref(break-styles) as closely as possible using the **ggplot2** package.
+1. Reproduce Figure \@ref(fig:tmshape) and the 1st and 6th panel of Figure \@ref(fig:break-styles) as closely as possible using the **ggplot2** package.
 ```{r, eval=FALSE, echo=FALSE}
 # fig 9.1 (\@ref(fig:tmshape))
 ggplot() + geom_sf(data = nz, color = NA) + coord_sf(crs = st_crs(nz), datum = NA) + theme_void()
 ggplot() + geom_sf(data = nz, fill = NA) + coord_sf(crs = st_crs(nz), datum = NA) + theme_void()
 ggplot() + geom_sf(data = nz) + coord_sf(crs = st_crs(nz), datum = NA) + theme_void()
-# fig 9.6 ( \@ref(break-styles))
+# fig 9.6 ( \@ref(fig:break-styles))
 ggplot() + geom_sf(data = nz, aes(fill = Median_income)) + coord_sf(crs = st_crs(nz), datum = NA) + scale_fill_distiller(palette = "Oranges", direction = 1) + theme_void()
 ggplot() + geom_sf(data = nz, aes(fill = Island)) + coord_sf(crs = st_crs(nz), datum = NA) + scale_fill_brewer(palette = "Set3") + theme_void()
 # fig 9.12 (\@ref(fig:urban-facet))
 # ggplot() + geom_sf(data = world) + geom_sf(data = urb_1970_2030, aes(size = population_millions)) + coord_sf(crs = st_crs(urb_1970_2030), datum = NA) + facet_wrap(~year, nrow = 2) + theme(panel.background = element_rect(fill = "white"))
 ```
+
+```{r}
+library(cartogram)
+# prepare the data
+us = st_transform(us, 2163)
+us = us_states %>% 
+  left_join(us_states_df, by = c("NAME" = "state"))
+# calculate a poverty rate
+us$poverty_rate = us$poverty_level_15 / us$total_pop_15
+# create a regular map
+ecm1 = tm_shape(us) + tm_polygons("poverty_rate")
+# create a cartogram
+us_carto = cartogram(us, "total_pop_15")
+ecm2 = tm_shape(us_carto) + tm_polygons("poverty_rate")
+# combine two maps
+tmap_arrange(ecm1, ecm2)
+```
+
+
 <!-- other mapping packages 2 -->
 <!-- cartogram example? -->
 <!-- add a note that one var can be used for changing the geometry and the other one for the color -->
