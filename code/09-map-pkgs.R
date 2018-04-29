@@ -5,6 +5,7 @@ devtools::install_github("ropenscilabs/packagemetrics")
 generic_map_pkgs = c(
   "cartography",
   "ggplot2",
+  "googleway",
   "leaflet",
   "mapview",
   "plotly",
