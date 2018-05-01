@@ -160,7 +160,7 @@ Aesthetic settings, however, are controlled by arguments to layer functions.
 ### Aesthetics
 
 The plots in the previous section demonstrate **tmap**'s default aesthetic settings.
-Grey shades are used for `tm_fill()` and  `tm_bubbles()` layers and a continuous red line is used to represent lines created with `tm_lines()`.
+Grey shades are used for `tm_fill()` and  `tm_bubbles()` layers and a continuous black line is used to represent lines created with `tm_lines()`.
 Of course, these default values and other aesthetics can be overridden.
 The purpose this section is to show how.
 
@@ -184,22 +184,21 @@ Like base R plots, arguments defining aesthetics can also receive values that va
 Unlike the base R code below (which generates the left panel in Figure \@ref(fig:tmcol)), **tmap** aesthetic arguments will not accept a numeric vector:
 
 ```{r, eval=FALSE}
-plot(st_geometry(nz), col = 1:nrow(nz))  # works
-tm_shape(nz) + tm_fill(col = 1:nrow(nz)) # fails
+plot(st_geometry(nz), col = nz$Land_area)  # works
+tm_shape(nz) + tm_fill(col = nz$Land_area) # fails
 #> Error: Fill argument neither colors nor valid variable name(s)
 ```
 
 Instead `col` (and other aesthetics that can vary such as `lwd` for line layers and `size` for point layers) requires a character string naming an attribute associated with the geometry to be plotted.
-Thus, one would achieve the desired (plotted in the right-hand panel of Figure \@ref(fig:tmcol)) result as follows:
+Thus, one would achieve the desired result as follows (plotted in the right-hand panel of Figure \@ref(fig:tmcol)):
 
 ```{r, fig.show='hide'}
-nz$col = 1:nrow(nz)
-tm_shape(nz) + tm_fill(col = "col")
+tm_shape(nz) + tm_fill(col = "Land_area")
 ```
 
 ```{r tmcol, fig.cap="Comparison of base (left) and tmap (right) handling of a numeric color field.", echo=FALSE, out.width="50%", fig.show='hold'}
-plot(nz["col"])    
-tm_shape(nz) + tm_fill(col = "col")
+plot(nz["Land_area"])    
+tm_shape(nz) + tm_fill(col = "Land_area")
 ```
 
 An important argument in functions defining aesthetic layers such as `tm_fill()` is `title`, which sets the title of the associated legend.
@@ -564,7 +563,8 @@ knitr::include_graphics(u_animus)
 
 ## Interactive maps
 
-If static and animated maps breathe life into geographic datasets, interactive maps allow them to take-on a life of their own.
+Static and animated maps can breathe life into geographic datasets.
+Interactive maps can take reader participation to a whole new level, providing results with a life of their own that can be explored in myriad ways.
 Interactivity can take many forms, including the appearance of popup messages when users click or mouse-over geographic features and maps dynamically linked to non-geographic plots.^[
 A good example of such a dynamically linked visualisation is a map of Nigeria linked to a bar chart of fertility rates by Kyle Walker, published on [Twitter](https://twitter.com/kyle_e_walker/status/985948444966768641) and (for the source code) as a GitHub [Gist](https://gist.github.com/walkerke/5fe9a198a30270e2fcb8120a7fc8242a).
 ]
@@ -586,7 +586,7 @@ Now that the interactive mode has been 'turned on', all maps produced with **tma
 Notable features of this interactive mode include the ability to specify the basemap using the `basemaps` argument in the function `tm_view()` (also see `?tm_basemap`):
 
 ```{r}
-basemap = leaflet::providers$SafeCast
+basemap = leaflet::providers$OpenTopoMap
 map_nz +
   tm_view(basemaps = basemap)
 ```
@@ -597,8 +597,7 @@ map_nz +
 tmap_mode("plot")
 ```
 
-
-The easiest way to create an interactive map to view spatial data in R is with the **mapview** package, as illustrated in the following 'one liner':
+If you are not already accostomed to **tmap**, probably the quickest way to create an interactive map to view spatial data in R is with the **mapview** package, as illustrated in the following 'one liner':
 
 ```{r, eval=FALSE}
 mapview::mapview(nz)
@@ -609,10 +608,18 @@ mv = mapview::mapview(nz)
 mv@map
 ```
 
-<!-- leaflet -->
-<!-- leaflet plugins -->
+**mapview** has a concise syntax yet is powerful.
+It offers advanced controls including the ability to 'burst' datasets into multiple layers and the addition of multiple layers with `+` followed by the name of a geographic object.
+For further information on **mapview** see the package's website at [r-spatial.github.io/mapview/](https://r-spatial.github.io/mapview/articles/).
 
-## Web mapping applications with shiny
+Another approach to web-mapping is provided by the **googleway** package.
+It's `google_map()` function provides an interactive map that is flexible and extensible.
+The command `google_map(key = key) %>% add_polygons(st_transform(nz, 4326))`, for example, plots an interactive map of New Zealand in the viewing console (assuming you have set-up a Google API key and saved it as `key`).
+Many other functions are provided by the package, providing an R interface to a wide range of mapping services including routing, traffic visualiztion and geocoding (see the [`googleway-vignette`](https://cran.r-project.org/web/packages/googleway/vignettes/googleway-vignette.html) for details).
+
+**tmap** and 
+
+## Mapping applications
 
 The interactive web maps demonstrated in section \@ref(interactive-maps) can go far.
 Careful selection of layers to display, base-maps and pop-ups can be used to communicate the main results of many projects involving geocomputation.
@@ -746,7 +753,7 @@ Other notable features include the use of unquoted variable names encapsulated i
 
 ```{r nz-gg, fig.cap="Map of New Zealand created with ggplot2."}
 library(ggplot2)
-g1 = ggplot() + geom_sf(data = nz, aes(fill = col)) +
+g1 = ggplot() + geom_sf(data = nz, aes(fill = Median_income)) +
   geom_sf(data = nz_height) +
   scale_x_continuous(breaks = c(170, 175))
 g1
