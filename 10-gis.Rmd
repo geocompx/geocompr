@@ -284,18 +284,18 @@ The term statistical geocomputation emphasizes the strength of combining R's dat
 
 ## GRASS through **rgrass7**
 
-The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the hybrid raster-vector Geographical Resources Analysis Support System (GRASS) [Table \@ref(tab:gis-comp); @neteler_open_2008] from 1982 to 1995. 
+The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the Geographical Resources Analysis Support System (GRASS) [Table \@ref(tab:gis-comp); @neteler_open_2008] from 1982 to 1995. 
 Academia continued this work since 1997.
-Similar to SAGA, GRASS focussed on raster processing in the beginning while only later, since GRASS 6.0, adding advanced vector functionality [@bivand_applied_2013].
+Similar to SAGA, GRASS focused on raster processing in the beginning while only later, since GRASS 6.0, adding advanced vector functionality [@bivand_applied_2013].
 
 We will introduce **rgrass7** with one of the most interesting problems in GIScience - the traveling salesman problem. 
 Suppose a traveling salesman would like to visit 24 customers while covering the shortest distance possible.
 Additionally, the salesman would like to set out his journey at home, and come back to it after having finished all customer visits.
 There is a single best solution to this problem, however, to find it, is even for modern computers (mostly) impossible [@longley_geographic_2015].
 In our case, the number of possible solution correspond to `(25 - 1)! / 2` possible solutions, i.e., the factorial of 24 divided by 2 (since we do not differentiate between forward or backward direction).
-Even if one iteration can be done in a nanosecond this still corresponds to `r (factorial(25 - 1) / (2 * 10^9 * 3600 * 24 * 365))` years. 
-Luckily, there are clever, almost optimal solutions which run in a tiny fraction of this inconceibable amount of time.
-GRASS GIS provides one of these solutions (for more details see [v.net.salesman](https://grass.osgeo.org/grass72/manuals/v.net.salesman.html)). 
+Even if one iteration can be done in a nanosecond this still corresponds to `r format(factorial(25 - 1) / (2 * 10^9 * 3600 * 24 * 365))` years. 
+Luckily, there are clever, almost optimal solutions which run in a tiny fraction of this inconceivable amount of time.
+GRASS GIS provides one of these solutions (for more details see [v.net.salesman](https://grass.osgeo.org/grass74/manuals/v.net.salesman.html)). 
 In our use case, we would like to find the shortest path between the first 25 bicycle stations (instead of customers) on London's streets.
 
 ```{r}
@@ -304,19 +304,12 @@ data(cycle_hire)
 points = cycle_hire[1:25, ]
 ```
 
-<!--
-```{r}
-# plot(st_geometry(streets))
-# plot(st_geometry(cycle_hire), col = "red", pch = 16, add = TRUE)
-```
--->
-
 Aside from the cycle hire points data, we will need the OpenStreetMap data of London.
 We download it with the help of the **osmdata** package (see also section \@ref(retrieving-data)).
-We constrain the download of the street network (in OSM language called highway) to  the bounding box of the cycle hire data, and attach the corresponding data as an `sf`-object.
+We constrain the download of the street network (in OSM language called "highway") to  the bounding box of the cycle hire data, and attach the corresponding data as an `sf`-object.
 `osmdata_sf` returns a list with several spatial objects (points, lines, polygons, etc.).
 Here, we will only keep the line objects.
-To learn more about how to use the **osmdata**-package, please refer to [https://ropensci.github.io/osmdata/](https://ropensci.github.io/osmdata/).
+<!-- To learn more about how to use the **osmdata**-package, please refer to [https://ropensci.github.io/osmdata/](https://ropensci.github.io/osmdata/). -->
 
 ```{r, eval=FALSE}
 library(sf)
@@ -333,13 +326,13 @@ Now that we have the data, we can go on and initiate a GRASS session, i.e., we h
 The GRASS geodatabase system is based on SQLite.
 Consequently, different users can easily work on the same project, possibly with different read/write permissions.
 However, one has to set up this geodatabase (also from within R), and users used to a GIS GUI popping up by one click might find this process a bit intimidating in the beginning.
-First of all, the GRASS database requires its own directory, and contains a location (see the [GRASS GIS Quickstart](https://grass.osgeo.org/grass72/manuals/helptext.html) document and [GRASS GIS Database](https://grass.osgeo.org/grass75/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass75/manuals/index.html) for further information).
+First of all, the GRASS database requires its own directory, and contains a location (see the [GRASS GIS Database](https://grass.osgeo.org/grass74/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass74/manuals/index.html) for further information).
 The location in turn simply contains the geodata for one project. 
 Within one location several mapsets can exist, and typically refer to different users. 
 PERMANENT is a mandatory mapset, and created automatically.
 It stores the projection, the spatial extent and the default resolution for raster data.
 In order to share spatial data with all users of a project, the database owner can add spatial data to the PERMANENT mapset.
-Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass72/manuals/helptext.html) for more information on the GRASS geodatabase system.
+Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass74/manuals/helptext.html) for more information on the GRASS geodatabase system.
 
 You have to set up a location and a mapset if you want to use GRASS from within R.
 First of all, we need to find out if and where GRASS7 is installed on the computer.
@@ -375,6 +368,7 @@ initGRASS(gisBase = grass_path,
 ```
 
 Subsequently, we define the projection, the extent and the resolution.
+
 ```{r, eval=FALSE}
 execGRASS("g.proj", flags = c("c", "quiet"), 
           proj4 = sf::st_crs(streets)$proj4string)
@@ -443,7 +437,6 @@ To visualize our result, we import the output layer into R, and visualize it wit
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39206067-544455c8-47f4-11e8-8725-e28299e01f52.png")
 ```
 
-
 ```{r, eval=FALSE}
 library(mapview)
 route = readVECT("shortest_route")
@@ -460,21 +453,22 @@ To find out which datasets are currently available, run `execGRASS("g.list", typ
 - Of course, we could have also accessed an already existing GRASS geodatabase from within R.
 Prior to importing data into R, you might want to perform some (spatial) subsetting.
 Use `v.select` and `v.extract` for vector data. 
-`db.select` lets you select subsets of the attribute table of a vector layer without returning the correponding geometry.
+`db.select` lets you select subsets of the attribute table of a vector layer without returning the corresponding geometry.
 - You can start R also from within a running GRASS session [for more information please refer to @bivand_applied_2013 and this [wiki](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7)].
-- Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass72/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm.
+- Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass74/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm.
 - If you would like to use GRASS 6 from within R, use the R package **spgrass6**.
 
 ## When to use what?
 
 To recommend a single R-GIS interface is hard since the usage depends on personal preferences, the tasks at hand and your familiarity with different GIS.
 The latter means if you have already preferred the GUI of a certain GIS, you are quite likely to use the corresponding interface.
-Certainly, **RQGIS** is an appropriate choice for most use cases.
+That being said, **RQGIS** is an appropriate choice for most use cases.
 Its main advantages are:
 
 - An unified access to several GIS, and therefore the provision of >1000 geoalgorithms.
 Of course, this includes duplicated functionality, e.g., you can perform overlay-operations using QGIS-, SAGA- or GRASS-geoalgorithms.
-- The automatic data format conversions. For instance, SAGA uses `.sdat` grid files and GRASS uses its own database format but QGIS will handle the corresponding conversions for you on the fly.
+- The automatic data format conversions. 
+For instance, SAGA uses `.sdat` grid files and GRASS uses its own database format but QGIS will handle the corresponding conversions for you on the fly.
 - **RQGIS** can also handle spatial objects residing in R as input for geoalgorithms, and loads QGIS output automatically back into R if desired.
 - Its convenience functions to support the access of the online help, R named arguments and automatic default value retrieval.
 Please note that **rgrass7** inspired the latter two features.
@@ -501,3 +495,4 @@ Select randomly a point from `random_points` and find all `dem` pixels that can 
 Visualize your result.
 For example, plot a hillshade, and on top of it the digital elevation model, your viewshed output and the point.
 Additionally, give `mapview` a try.
+
