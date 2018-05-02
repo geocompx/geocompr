@@ -413,43 +413,22 @@ In addition to their utility for showing changing spatial relationships, faceted
 ### Inset maps
 
 An inset map is a smaller map rendered within or next to the main map. 
-<!-- I would say inset maps are usually used for the opposite. This is we have a specific area, say a mountain somewhere in Peru, and the inset map shows were in Peru the mountain is located, see Figure 3 in https://journal.r-project.org/archive/2017/RJ-2017-067/RJ-2017-067.pdf
-and
-http://wiki.gis.com/wiki/index.php/Inset_Map
-So maybe it would be an idea to focus on the NZ Alps raster map as the main map and use NZ within the inset map.
-Maybe this section is also a bit too long. How about shortening it, and maybe use the US example as a challenge in the exercise section.
--->
-Inset maps usually cover an area with densely located phenomena that cannot be clearly visible at the original map scale.
-They could be used to focus on a smaller area in more detail (Figure \@ref(fig:insetmap1)) or to bring some non-contiguous regions closer to ease their comparison (Figure \@ref(fig:insetmap2)).
-<!-- find the best distribution of insets 
-In this section we focus on a creation of inset maps, so to learn about map styling go to section \@ref(aesthetics).
--->
+It could serve many different purposes, including providing a context (Figure \@ref(fig:insetmap1)) or bringing some non-contiguous regions closer to ease their comparison (Figure \@ref(fig:insetmap2)).
+They could be also used to focus on a smaller area in more detail or to cover the same area as the map but representing a different topic.
 
-In the example below, we create an inset map of the central part of the New Zealand's Southern Alps.
+In the example below, we create a map of the central part of the New Zealand's Southern Alps.
+Our inset map will show where the main map is in relation to the whole New Zealand.
 The first step is to define the area of interest, which can be done by creating a new spatial object, `nz_region`.
 <!--# mapview::mapview(nz_height, native.crs = TRUE) or mapedit??-->
 
 ```{r}
-nz_region = st_bbox(c(xmin = 1340000, xmax = 1450000, ymin = 5130000, ymax = 5210000)) %>% 
+nz_region = st_bbox(c(xmin = 1340000, xmax = 1450000,
+                      ymin = 5130000, ymax = 5210000)) %>% 
   st_as_sfc() %>% 
   st_set_crs(st_crs(nz_height))
 ```
 
-In the second step, we create a base map showing a lager area. 
-It gives a context and helps to locate the area of interest. 
-Importantly, this map needs to clearly indicate the location of the inset map, for example by stating its borders.
-
-```{r}
-nz_map = tm_shape(nz) +
-  tm_polygons() +
-  tm_shape(nz_height) +
-  tm_symbols(shape = 2, col = "red", size = 0.1) + 
-  tm_shape(nz_region) +
-  tm_borders(lwd = 3) + 
-  tm_layout(frame = FALSE)
-```
-
-The third step consists of the inset map creation. 
+In the second step, we create a base map showing the New Zealand's Southern Alps area. 
 This is a place where the most important message is stated. 
 
 ```{r}
@@ -457,16 +436,30 @@ nz_height_map = tm_shape(nz_elev, bbox = tmaptools::bb(nz_region)) +
   tm_raster(style = "cont", palette = "-Spectral",
             auto.palette.mapping = FALSE, legend.show = FALSE) +
   tm_shape(nz_height) +
-  tm_symbols(shape = 2, col = "red", size = 0.1)
+  tm_symbols(shape = 2, col = "red", size = 1) +
+  tm_scale_bar(position = c("left", "bottom"))
+```
+
+The third step consists of the inset map creation. 
+It gives a context and helps to locate the area of interest. 
+Importantly, this map needs to clearly indicate the location of the main map, for example by stating its borders.
+
+```{r}
+nz_map = tm_shape(nz) +
+  tm_polygons() +
+  tm_shape(nz_height) +
+  tm_symbols(shape = 2, col = "red", size = 0.1) + 
+  tm_shape(nz_region) +
+  tm_borders(lwd = 3) 
 ```
 
 Finally, we combine the two maps.
 A viewport from the **grid** package can be used by stating a center location (`x` and `y`) and a size (`width` and `height`) of the inset map.
 
-```{r insetmap1, fig.cap="Inset map showing the central part of the Southern Alps in New Zealand."}
+```{r insetmap1, fig.cap="Inset map providing a context - location of the central part of the Southern Alps in New Zealand."}
 library(grid)
-nz_map
-print(nz_height_map, vp = grid::viewport(0.3, 0.7, width = 0.4, height = 0.4))
+nz_height_map
+print(nz_map, vp = grid::viewport(0.8, 0.27, width = 0.5, height = 0.5))
 ```
 
 Inset map can be save to file either by using a graphic device (see section \@ref(visual-outputs)) or the `tmap_save()` function and its arguments - `insets_tm` and `insets_vp`.
