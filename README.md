@@ -23,7 +23,7 @@ We encourage contributions on any part of the book, including:
 
 Please see [our-style.md](https://github.com/Robinlovelace/geocompr/blob/master/our-style.md) for the book's style.
 
-Many thanks to all contributors to the book so far via GitHub (this list will update automatically): [katygregg](https://github.com/katygregg), [erstearns](https://github.com/erstearns), [rsbivand](https://github.com/rsbivand), [pat-s](https://github.com/pat-s), [gisma](https://github.com/gisma), [ateucher](https://github.com/ateucher), [gavinsimpson](https://github.com/gavinsimpson), [yutannihilation](https://github.com/yutannihilation), [richfitz](https://github.com/richfitz), [eyesofbambi](https://github.com/eyesofbambi), [gregor-d](https://github.com/gregor-d), [p-kono](https://github.com/p-kono), [pokyah](https://github.com/pokyah).
+Many thanks to all contributors to the book so far via GitHub (this list will update automatically): [katygregg](https://github.com/katygregg), [erstearns](https://github.com/erstearns), [eyesofbambi](https://github.com/eyesofbambi), [rsbivand](https://github.com/rsbivand), [pat-s](https://github.com/pat-s), [gisma](https://github.com/gisma), [ateucher](https://github.com/ateucher), [gavinsimpson](https://github.com/gavinsimpson), [yutannihilation](https://github.com/yutannihilation), [mvl22](https://github.com/mvl22), [richfitz](https://github.com/richfitz), [wdearden](https://github.com/wdearden), [gregor-d](https://github.com/gregor-d), [p-kono](https://github.com/p-kono), [pokyah](https://github.com/pokyah).
 
 During the project we aim to contribute 'upstream' to the packages that make geocomputation with R possible. This impact is recorded in [`our-impact.csv`](https://github.com/Robinlovelace/geocompr/blob/master/our-impact.csv).
 
@@ -50,6 +50,30 @@ The code associated with each chapter is saved in the `code/chapters/` folder. `
 ``` r
 # geocompr:::generate_chapter_code()
 ```
+
+Running the book in docker
+--------------------------
+
+To ease reproducibility we have set-up a docker image containing all the dependencies needed to reproduce the book. After you have [installed docker](https://www.docker.com/community-edition#/download) and set-it up on [your computer](https://docs.docker.com/install/linux/linux-postinstall/) you should be able to reproduce the entire book with the following steps (resulting in output shown below):
+
+``` bash
+# from a system terminal such as Windows Powershell or a Unix terminal
+git clone https://github.com/Robinlovelace/geocompr.git # download the repo
+cd .\geocompr\ # navigate into the repo
+docker run -d -p 8787:8787 -v ${pwd}:/data robinlovelace/geocompr
+```
+
+If it worked you should be able to open-up RStudio server by opening a browser and navigating to <http://localhost:8787/> resulting in an up-to-date version of R and RStudio running in a container:
+
+![](https://user-images.githubusercontent.com/1825120/39538109-9b50e7ac-4e33-11e8-93b3-e00e95a79294.png)
+
+geocompr in docker: Illustration of how it should look if it worked!
+
+From this point to *build* the book you need to navigate to the volume location on docker machine, by opening the project at `/data` from the project box in the top-right hand corner, illustrated in the figure below. From here open the file `index.Rmd` and hit the little `knit` button above the the RStudio script panel (above the `book` text on line 81 illustrated in the image above).
+
+![](https://user-images.githubusercontent.com/1825120/39538462-d4db2928-4e34-11e8-8612-add5188ed642.png)
+
+Opening the project: navigate to the volume folder in docker (or in another location on your computer)
 
 Reproducing this README
 -----------------------
@@ -116,6 +140,8 @@ This can be set from inside Zotero desktop with the Better Bibtex plugin install
 
 ![](figures/zotero-settings.png)
 
+Zotero settings: these are useful if you want to add references.
+
 We use Zotero because it is a powerful open source reference manager that integrates well with the **citr** package. As described in the GitHub repo [Robinlovelace/rmarkdown-citr-demo](https://github.com/Robinlovelace/rmarkdown-citr-demo).
 
 References
@@ -127,7 +153,7 @@ knitr::kable(pkg_df)
 
 | Name              | Title                                                                                     | version    |
 |:------------------|:------------------------------------------------------------------------------------------|:-----------|
-| bookdown          | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]                   | 0.7        |
+| bookdown          | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]                   | 0.7.8      |
 | cartogram         | Create Cartograms with R \[@R-cartogram\]                                                 | 0.0.3      |
 | dismo             | Species Distribution Modeling \[@R-dismo\]                                                | 1.1.4      |
 | geosphere         | Spherical Trigonometry \[@R-geosphere\]                                                   | 1.5.7      |
@@ -141,10 +167,10 @@ knitr::kable(pkg_df)
 | leaflet           | Create Interactive Web Maps with the JavaScript 'Leaflet' \[@R-leaflet\]                  | 2.0.0      |
 | link2GI           | Linking Geographic Information Systems, Remote Sensing and Other \[@R-link2GI\]           | 0.3.0      |
 | lwgeom            | Bindings to Selected 'liblwgeom' Functions for Simple Features \[@R-lwgeom\]              | 0.1.5      |
-| mapview           | Interactive Viewing of Spatial Data in R \[@R-mapview\]                                   | 2.3.0      |
+| mapview           | Interactive Viewing of Spatial Data in R \[@R-mapview\]                                   | 2.3.7      |
 | microbenchmark    | Accurate Timing Functions \[@R-microbenchmark\]                                           | 1.4.4      |
-| mlr               | Machine Learning in R \[@R-mlr\]                                                          | 2.13       |
-| osmdata           | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]                  | 0.0.6      |
+| mlr               | Machine Learning in R \[@R-mlr\]                                                          | 2.12.1     |
+| osmdata           | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]                  | 0.0.6.1    |
 | pROC              | Display and Analyze ROC Curves \[@R-pROC\]                                                | 1.11.0     |
 | raster            | Geographic Data Analysis and Modeling \[@R-raster\]                                       | 2.6.7      |
 | rcartocolor       | 'CARTOColors' Palettes \[@R-rcartocolor\]                                                 | 0.0.22     |
@@ -154,13 +180,13 @@ knitr::kable(pkg_df)
 | rmarkdown         | Dynamic Documents for R \[@R-rmarkdown\]                                                  | 1.9        |
 | rnaturalearth     | World Map Data from Natural Earth \[@R-rnaturalearth\]                                    | 0.1.0      |
 | rnaturalearthdata | World Vector Map Data from Natural Earth Used in 'rnaturalearth' \[@R-rnaturalearthdata\] | 0.1.0      |
-| RQGIS             | Integrating R with QGIS \[@R-RQGIS\]                                                      | 1.0.3      |
-| RSAGA             | SAGA Geoprocessing and Terrain Analysis \[@R-RSAGA\]                                      | 1.0.0      |
+| RQGIS             | Integrating R with QGIS \[@R-RQGIS\]                                                      | 1.0.3.9000 |
+| RSAGA             | SAGA Geoprocessing and Terrain Analysis \[@R-RSAGA\]                                      | 1.1.0      |
 | sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.3      |
 | sp                | Classes and Methods for Spatial Data \[@R-sp\]                                            | 1.2.7      |
 | spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.8.8    |
 | spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.6.3    |
-| stplanr           | Sustainable Transport Planning \[@R-stplanr\]                                             | 0.2.3.9000 |
+| stplanr           | Sustainable Transport Planning \[@R-stplanr\]                                             | 0.2.4      |
 | tabularaster      | Tidy Tools for 'Raster' Data \[@R-tabularaster\]                                          | 0.4.0      |
 | tidyverse         | Easily Install and Load the 'Tidyverse' \[@R-tidyverse\]                                  | 1.2.1      |
 | tmap              | Thematic Maps \[@R-tmap\]                                                                 | 2.0        |
