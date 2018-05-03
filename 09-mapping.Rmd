@@ -932,8 +932,9 @@ sm2 = tm_shape(africa) +
 tmap_arrange(sm2, sm1)
 ```
 1. Create a land cover map of the Zion National Park.
-Try to manually change the default colors to match your perception of the land cover categories.
-Finally, add and arrange a scale bar and north arrow.
+    - Change the default colors to match your perception of the land cover categories
+    - Add a scale bar and north arrow and change the position of both to improve the map's aesthetic appeal
+    - Bonus: Add an inset map of the Zion National Park's location in the context of the Utah state. (Hint: an object representing Utah can be subsetted from the `us_states` dataset.) 
 ```{r, eval=FALSE, echo=FALSE}
 lc_colors = c("#476ba0", "#aa0000", "#b2ada3", "#68aa63", "#a58c30",
               "#c9c977", "#dbd83d", "#bad8ea")
@@ -943,14 +944,8 @@ sm3 = tm_shape(nlcd) + tm_raster(palette = lc_colors, title = "Land cover") +
   tm_compass(type = "8star", position = c("RIGHT", "top")) + 
   tm_layout(legend.frame = TRUE, legend.position = c(0.6, "top"))
 sm3
-```
-1. Improve the map created in the previous example.
-Add an inset map of the Zion National Park's location in the context of the Utah state.
-(Hint: Border of Utah can be subsetted from the `us_states` dataset.) 
-```{r, eval=FALSE, echo=FALSE}
 utah = filter(us_states, NAME == "Utah")
 zion_bbox = st_as_sfc(st_bbox(nlcd))
-
 sm3_plus = sm3 +
   tm_layout(frame.lwd = 4)
 
@@ -965,15 +960,34 @@ library(grid)
 print(sm3_plus, vp = grid::viewport(0.5, 0.5, width = 0.95, height = 0.95))
 print(im, vp = grid::viewport(0.2, 0.4, width = 0.35, height = 0.35))
 ```
-1. Create a facet map of a population's growth for countries in Eastern Africa, representing only countries for which this data exists. <!-- animated map, interactive map -->
+1. Create facet maps of countries Eastern Africa:
+    - with one facet showing HDI and the other representing population growth (hint: using variables `HDI` and `pop_growth` respectively)
+    - with a 'small multiple' per country <!-- animated map, interactive map -->
 ```{r, eval=FALSE, echo=FALSE}
-# https://github.com/mtennekes/tmap/issues/190#issuecomment-384184801
 eastern_africa = filter(africa, subregion == "Eastern Africa")
+tm_shape(eastern_africa) +
+  tm_polygons(col = c("HDI", "pop_growth")) +
+  qtm(africa, fill = NULL)
+# https://github.com/mtennekes/tmap/issues/190#issuecomment-384184801
 tm_shape(eastern_africa) +
   tm_polygons("pop_growth", style = "jenks", palette = "BuPu") +
   tm_facets(by = "name", showNA = FALSE)
 ```
-1. Sketch out on paper ideas for a web mapping app that could be used to make transport or land-use policies more evidence based:
+1. Building on the previous facet map examples, create animated maps of East Africa:
+    - showing first the spatial distribution of HDI scores then population growth
+    - showing each country in order
+```{r, eval=FALSE, echo=FALSE}
+m = tm_shape(eastern_africa) +
+  tm_polygons(col = c("HDI", "pop_growth")) +
+  qtm(africa, fill = NULL)
+tmap_animation(m)
+```
+1. Create an interactive map of Africa:
+    - with **tmap**
+    - with **mapview**
+    - with **leaflet**
+    - bonus: for each approach add a legend (if not automatically provided) and a scale bar
+1. Sketch on paper ideas for a web mapping app that could be used to make transport or land-use policies more evidence based:
     - In the city you live in, for a couple of users per day
     - In the country you live in, for dozens of users per day
     - Worldwide for hundreds of users per day and large data serving requirements
