@@ -577,14 +577,20 @@ We will explore how to make slippy maps with **tmap** (the syntax of which we ha
 
 A unique feature of **tmap** mentioned in section \@ref(static-maps) is its ability to create static and interactive maps using the same code.
 Maps can be viewed interactively at any point by switching to view mode, using the command `tmap_mode("view")`.
-This is demonstrated in the code below, which creates an interactive map of New Zealand based on the `tmap` object `map_nza`, created in section \@ref(map-obj):
+This is demonstrated in the code below, which creates an interactive map of New Zealand based on the `tmap` object `map_nza`, created in section \@ref(map-obj), and illustrated in Figure \@ref(fig:tmview):
 
-```{r}
+```{r, eval=FALSE}
 tmap_mode("view")
 map_nz
 ```
 
-Now that the interactive mode has been 'turned on', all maps produced with **tmap** will launch in the Viewer tab in RStudio (or on the default web browser if you are running R from a terminal).
+```{r tmview, fig.cap="Interactive map of New Zealand created with tmap in view mode.", echo=FALSE}
+tmap_mode("view")
+m_tmview = map_nz
+tmap_leaflet(m_tmview)
+```
+
+Now that the interactive mode has been 'turned on', all maps produced with **tmap** will launch (another way to create interactive maps is with the `tmap_leaflet` function) .
 Notable features of this interactive mode include the ability to specify the basemap using the `basemaps` argument in the function `tm_view()` (also see `?tm_basemap`), as demonstrated below (the result, a map of New Zealand with an interactive topographic basemap, is not shown):
 
 ```{r, eval=FALSE}
@@ -600,20 +606,21 @@ The argument `sync` in `tm_facets()` can be used in this case to produce multipl
 world_coffee = left_join(world, coffee_data)
 facets = c("coffee_production_2016", "coffee_production_2017")
 qtm(world_coffee, facets) +
-  tm_facets(nrow = 1, sync = TRUE)
+  tm_facets(nrow = 1, sync = TRUE, free.scales = FALSE)
 ```
 
 ```{r sync, fig.cap="Facetted interactive maps of global coffee producing in 2016 and 2017 in 'sync', demonstrating tmap's view mode in action.", echo=FALSE}
-knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39561040-ee7ac544-4e9a-11e8-9b73-3b531e9b1f1d.png")
+knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39561412-4dbba7ba-4e9d-11e8-885c-7973b351006b.png")
 ```
 
-**tmap** can be returned to its default static mode with the same switch:
+Switch **tmap** back to plotting mode with the same switch:
 
 ```{r}
 tmap_mode("plot")
 ```
 
-If you are not already accostomed to **tmap**, probably the quickest way to create an interactive map to view spatial data in R is with the **mapview** package, as illustrated in the following 'one liner':
+If you are not proficient with **tmap**, the quickest way to create an interactive maps may be with **mapview**.
+The following 'one liner' is a reliable way to interactively explore a wide range of spatial data formats:
 
 ```{r, eval=FALSE}
 mapview::mapview(nz)
@@ -628,13 +635,28 @@ mv@map
 It offers advanced controls including the ability to 'burst' datasets into multiple layers and the addition of multiple layers with `+` followed by the name of a geographic object.
 For further information on **mapview** see the package's website at [r-spatial.github.io/mapview/](https://r-spatial.github.io/mapview/articles/).
 
-Another approach to web-mapping is provided by the **googleway** package.
-It's `google_map()` function provides an interactive map that is flexible and extensible.
-The command `google_map(key = key) %>% add_polygons(st_transform(nz, 4326))`, for example, plots an interactive map of New Zealand in the viewing console (assuming you have set-up a Google API key and saved it as `key`).
+There are other ways to create interactive maps with R not demonstrated here due to space constraints.
+The **googleway** package, for example, provides an interactive mapping interface that is flexible and extensible with `google_map()`.
+The command `google_map(key = key) %>% add_polygons(st_transform(nz, 4326))` plots an interactive map of New Zealand (it assumes a Google API key is saved as `key`).
 Many other functions are provided by the package, providing an R interface to a wide range of mapping services including routing, traffic visualiztion and geocoding (see the [`googleway-vignette`](https://cran.r-project.org/web/packages/googleway/vignettes/googleway-vignette.html) for details).
 
-Last but not least is **leaflet** which is probably the most mature interactive mapping package in R.
-**leaflet** and packages that extend it such as **leaflet.extras** offering a wide range of low-level controls that closely match the Jav
+Last but not least is **leaflet** which is the most mature and widely used interactive mapping package in R.
+**leaflet** provides a relatively low level interface to the Leaflet JavaScript library and many of its arguments can be understood by reading the documentation of the original JavaScript library (see [leafletjs.com](http://leafletjs.com/reference-1.3.0.html)).
+
+Leaflet maps are created with `leaflet()`, the result of which is a `leaflet` map object which can be piped to other **leaflet** functions.
+This allows multiple map layers and control settings to be added interactively, as demonstrated in the code below which generates Figure \@ref(fig:leaflet) (see [rstudio.github.io/leaflet/](https://rstudio.github.io/leaflet/) for details).
+
+```{r leaflet, fig.cap="The leaflet package in action, showing cycle hire points in London."}
+pal = colorNumeric("RdYlBu", domain = cycle_hire$nbikes)
+tiles = providers$Stamen.TonerLite
+leaflet(data = cycle_hire) %>% 
+  addProviderTiles(tiles) %>% 
+  addCircles(col = ~pal(nbikes), opacity = 0.9) %>% 
+  addPolygons(data = lnd, fill = FALSE) %>% 
+  addLegend(pal = pal, values = ~nbikes) %>% 
+  setView(lng = -0.1, 51.5, zoom = 12) %>% 
+  addMiniMap()
+```
 
 ## Mapping applications
 
