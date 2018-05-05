@@ -7,6 +7,7 @@ m_save = world %>% filter(continent != "Antarctica") %>%
   tm_polygons() +
   tm_shape(urban_agglomerations) +
   tm_dots(size = "population_millions", title.size = "Population (m)", alpha = 0.5, col = "red") +
-  tm_facets(by = "year", nrow = 1, ncol = 1) 
-geocompr:::save_print_quality(m = m_save, f = "/tmp/urban-animated-print.png")
+  tm_facets(by = "year", nrow = 1, ncol = 1, free.coords = FALSE)
+# geocompr:::save_print_quality(m = m_save, f = "/tmp/urban-animated-print.png")
 tmap::tmap_animation(tm = m_save, filename = "/tmp/urban-animated.gif", width = 1200, height = 800)
+magick::image_read("/tmp/urban-animated.gif")
