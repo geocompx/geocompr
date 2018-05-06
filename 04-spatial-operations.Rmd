@@ -62,7 +62,7 @@ canterbury_height = nz_height[canterbury, ]
 ```{r nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in grey, right)."}
 par_old = par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
 plot(st_geometry(nz), col = "white", bgc = "lightblue", main = "High points in New Zealand")
-plot(nz_height$geometry, add = TRUE, pch = 2, col = "red")
+plot(st_geometry(nz_height), add = TRUE, pch = 2, col = "red")
 par(mar=c(0, 0, 1, 0))
 plot(st_geometry(nz), col = "white", bgc = "lightblue", main = "High points in Canterbury")
 plot(st_geometry(canterbury), col = "grey", add = TRUE)
@@ -426,8 +426,8 @@ The datasets `cycle_hire` and `cycle_hire_osm`, already loaded in the **spData**
 Plotting them shows that they are often closely related but they do not touch, as shown in Figure \@ref(fig:cycle-hire), a base version of which is created with the following code below:
 
 ```{r, eval=FALSE}
-plot(cycle_hire$geometry, col = "blue")
-plot(cycle_hire_osm$geometry, add = TRUE, pch = 3, col = "red")
+plot(st_geometry(cycle_hire), col = "blue")
+plot(st_geometry(cycle_hire_osm), add = TRUE, pch = 3, col = "red")
 ```
 
 We can check if any points are the same `st_intersects()` as shown below:
@@ -438,7 +438,7 @@ any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
 
 ```{r, echo=FALSE, eval=FALSE}
 # included to show alternative ways of showing there's no overlap
-sum(cycle_hire$geometry %in% cycle_hire_osm$geometry)
+sum(st_geometry(cycle_hire) %in% st_geometry(cycle_hire_osm))
 sum(st_coordinates(cycle_hire)[, 1] %in% st_coordinates(cycle_hire_osm)[, 1])
 ```
 
@@ -522,7 +522,7 @@ This is illustrated using the base `aggregate()` function below:
 nz_avheight = aggregate(x = nz_height, nz, FUN = mean)
 ```
 
-The result of the previous command is an `sf` object with the same geometry as the (spatial) aggregating object (`nz`).^[This can be verified with `identical(st_geometry(nz), nz_avheight$geometry)`.]
+The result of the previous command is an `sf` object with the same geometry as the (spatial) aggregating object (`nz`).^[This can be verified with `identical(st_geometry(nz), st_geometry(nz_avheight))`.]
 The result of the previous operation is illustrated in Figure \@ref(fig:spatial-aggregation).
 The same result can also be generated using the 'tidy' functions `group_by()` and `summarize()` (used in combination with `st_join()`):
 
@@ -600,10 +600,9 @@ This demonstrates the fact that distances between points and polygons refer to t
 The second and third points in `nz_height` are *in* Otago, which can be verified by plotting them (result not shown):
 
 ```{r, eval=FALSE}
-plot(co$geometry[2])
-plot(nz_height$geometry[2:3], add = TRUE)
+plot(st_geometry(co)[2])
+plot(st_geometry(nz_height)[2:3], add = TRUE)
 ```
-
 
 ## Spatial operations on raster data {#spatial-ras}
 

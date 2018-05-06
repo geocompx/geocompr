@@ -128,12 +128,12 @@ uk = rnaturalearth::ne_countries(scale = 50) %>%
   filter(grepl(pattern = "United Kingdom|Ire", x = name_long))
 plot(london_buff, graticule = st_crs(4326), axes = TRUE)
 plot(london, add = TRUE)
-plot(uk$geometry, add = TRUE, border = "grey", lwd = 3)
+plot(st_geometry(uk), add = TRUE, border = "grey", lwd = 3)
 uk_proj = uk %>%
   st_transform(27700)
 plot(london_proj_buff, graticule = st_crs(27700), axes = TRUE)
 plot(london_proj, add = TRUE)
-plot(uk_proj$geometry, add = TRUE, border = "grey", lwd = 3)
+plot(st_geometry(uk_proj), add = TRUE, border = "grey", lwd = 3)
 ```
 
 The importance of CRSs (primarily whether they are projected or geographic) has been demonstrated using the example of London.
@@ -332,7 +332,7 @@ world_mollweide = st_transform(world, crs = "+proj=moll")
 ```{r mollproj, echo=FALSE, fig.cap="Mollweide projection of the world.", warning=FALSE}
 par_old = par()
 par(mar = c(0, 0, 1, 0))
-plot(world_mollweide$geom, graticule = TRUE, main = "the Mollweide projection")
+plot(st_geometry(world_mollweide), graticule = TRUE, main = "the Mollweide projection")
 par(par_old)
 ```
 
@@ -351,8 +351,8 @@ world_wintri_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
   lwgeom::st_transform_proj(crs = "+proj=wintri")
 par_old = par()
 par(mar = c(0, 0, 1, 0))
-plot(world_wintri_gr$geometry, main = "the Winkel tripel projection", col = "grey")
-plot(world_wintri$geom, add = TRUE)
+plot(st_geometry(world_wintri_gr), main = "the Winkel tripel projection", col = "grey")
+plot(st_geometry(world_wintri), add = TRUE)
 par(par_old)
 ```
 
@@ -383,7 +383,7 @@ world_laea1 = st_transform(world, crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_
 ```{r laeaproj1, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on longitude and latitude of 0.", warning=FALSE}
 par_old = par()
 par(mar = c(0, 0, 1, 0))
-plot(world_laea1$geom, graticule = TRUE, main = "the Lambert azimuthal equal-area projection")
+plot(st_geometry(world_laea1), graticule = TRUE, main = "the Lambert azimuthal equal-area projection")
 par(par_old)
 ```
 
@@ -403,7 +403,7 @@ world_laea2_g = st_graticule(ndiscr = 10000) %>%
 par_old = par()
 par(mar = c(0, 0, 1, 0))
 plot(world_laea2_g, main = "the Lambert azimuthal equal-area projection", col = "grey")
-plot(world_laea2$geom, add = TRUE)
+plot(st_geometry(world_laea2), add = TRUE)
 par(par_old)
 ```
 
@@ -568,8 +568,8 @@ seine_simp = st_simplify(seine, dTolerance = 2000)  # 2000 m
 ```{r seine-simp, echo=FALSE, fig.cap="Comparison of the original and simplified `seine` geometry.", warning=FALSE}
 par_old = par()
 par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
-plot(seine$geometry, col = 1, main = "Original data")
-plot(seine_simp$geometry, col = 1, main = "st_simplify")
+plot(st_geometry(seine), col = 1, main = "Original data")
+plot(st_geometry(seine_simp), col = 1, main = "st_simplify")
 par(par_old)
 ```
 
@@ -616,9 +616,9 @@ Finally, the visual comparison of the original dataset and the two simplified ve
 ```{r us-simp, echo=FALSE, fig.cap="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from **sf** (center) and **rmapshaper** (right) packages.", warning=FALSE}
 par_old = par()
 par(mfrow = c(1, 3), mar = c(0, 0, 1, 0))
-plot(us_states2163$geometry, col = 8, main = "Original data")
-plot(us_states_simp1$geometry, col = 8, main = "st_simplify")
-plot(us_states_simp2$geometry, col = 8, main = "ms_simplify")
+plot(st_geometry(us_states2163), col = 8, main = "Original data")
+plot(st_geometry(us_states_simp1), col = 8, main = "st_simplify")
+plot(st_geometry(us_states_simp2), col = 8, main = "ms_simplify")
 par(par_old)
 ```
 
@@ -696,11 +696,11 @@ Unusual cases where it may be useful include when the memory consumed by the out
 # Demonstrate nQuadSegs
 seine_buff_simple = st_buffer(seine, dist = 50000, nQuadSegs = 3)
 plot(seine_buff_simple, key.pos = NULL, main = "50 km buffer")
-plot(seine, key.pos = NULL, lwd = 3, pal = rainbow, add = T)
+plot(seine, key.pos = NULL, lwd = 3, pal = rainbow, add = TRUE)
 seine_points = st_cast(seine[1, ], "POINT")
 buff_single = st_buffer(seine_points[1, ], 50000, 2)
 buff_points = st_cast(buff_single, "POINT")
-plot(buff_single$geometry, add = T)
+plot(st_geometry(buff_single), add = TRUE)
 ```
 
 ### Affine transformations
@@ -1009,8 +1009,8 @@ linestring_sf2
 ```{r line-cast, echo=FALSE, fig.cap="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right).", warning=FALSE}
 par_old = par()
 par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
-plot(multilinestring_sf$geom, col = "black", main = "MULTILINESTRING")
-plot(linestring_sf2$geom, col = c("red", "green", "blue"), main = "LINESTRING")
+plot(st_geometry(multilinestring_sf), col = "black", main = "MULTILINESTRING")
+plot(st_geometry(linestring_sf2), col = c("red", "green", "blue"), main = "LINESTRING")
 par(par_old)
 ```
 
@@ -1195,11 +1195,11 @@ nz_wgs_NULL_crs = st_set_crs(nz_wgs, NA)
 nz_27700 = st_transform(nz_wgs, 27700)
 par(mfrow = c(1, 3))
 plot(st_geometry(nz))
-plot(nz_wgs$geometry)
-plot(nz_wgs_NULL_crs$geometry)
+plot(st_geometry(nz_wgs))
+plot(st_geometry(nz_wgs_NULL_crs))
 # answer: it is fatter in the East-West direction
 # because New Zealand is close to the South Pole and meridians converge there
-plot(nz_27700$geometry)
+plot(st_geometry(nz_27700))
 par(mfrow = c(1, 1))
 ```
 1. Transform the `world` dataset to the transverse Mercator projection (`"+proj=tmerc"`) and plot the result.
@@ -1209,9 +1209,9 @@ Why does the new object differ from the original one?
 ```{r, echo=FALSE, eval=FALSE}
 # see https://github.com/r-spatial/sf/issues/509
 world_tmerc = st_transform(world, "+proj=tmerc")
-plot(world_tmerc$geom)
+plot(st_geometry(world_tmerc))
 world_4326 = st_transform(world_tmerc, 4326)
-plot(world_4326$geom)
+plot(st_geometry(world_4326))
 ```
 1. Generate and plot simplified versions of the `nz` dataset.
 Experiment with different values of `keep` (ranging from 0.5 to 0.00005) for `ms_simplify()` and `dTolerance` (from 100 to 100,000) `st_simplify()` .
@@ -1267,12 +1267,12 @@ Write code to do so.
 Hint: you need to use a two-element vector for this transformation.
     - Bonus: create a upside down map of your country.
 ```{r, echo=FALSE, eval=FALSE}
-world_sfc = world$geom
+world_sfc = st_geometry(world)
 world_sfc_mirror = world_sfc * c(1, -1)
 plot(world_sfc)
 plot(world_sfc_mirror)
 
-us_states_sfc = us_states$geometry
+us_states_sfc = st_geometry(us_states)
 us_states_sfc_mirror = us_states_sfc * c(1, -1)
 plot(us_states_sfc)
 plot(us_states_sfc_mirror)
