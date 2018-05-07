@@ -1,7 +1,7 @@
 # Aim: download, preprocess, save input data - todo: save as R script
 devtools::install_github("ropensci/osmdata")
 library(osmdata)
-region = getbb("Bristol", format_out = "sf_polygon") %>% 
+region = getbb("Bristol", format_out = "sf_polygon") %>%
   st_set_crs(4326)
 region = st_sf(data.frame(Name = "Bristol (OSM)"), geometry = region$geometry)
 saveRDS(region, "extdata/bristol-region.rds")
