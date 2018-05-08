@@ -168,28 +168,14 @@ Note that we have to transform the raster brick into a list for the loop to work
 Finally, we convert the output list back into a raster stack. 
 
 ```{r}
-reclass = map2(as.list(input_ras), rcl, function(x, y) {
+our_reclassify = function(x, y){
   reclassify(x = x, rcl = y, right = NA)
-}) %>% 
-  stack
+}
+reclass = map2(as.list(input_ras), rcl, our_reclassify) %>% 
+  stack()
 names(reclass) = names(input_ras)
 reclass
 ```
-
-<!-- 
-```{r, eval = FALSE, echo = FALSE}
-tmp = mapply(FUN = function(x, y) {
-  reclassify(x = x, rcl = y, right = NA)
-}, x = as.list(input_ras), y = rcl)
-
-
-for (i in seq_len(nlayers(reclass))) {
-  reclass[[i]] = reclassify(reclass[[i]], rcl = rcl[[i]], right = NA) 
-}
-names(reclass) = names(input_ras)
-```
--->
-
 
 ## Define metropolitan areas
 
@@ -205,7 +191,7 @@ The next stage is to keep only cells with more than half a million people, and c
 
 ```{r}
 polys = rasterToPolygons(pop_agg[pop_agg > 500000, drop = FALSE]) %>% 
-  st_as_sf(polys)
+  st_as_sf()
 ```
 
 Plotting these polygons reveals eight metropolitan regions (Fig. \@ref(fig:metro-areas)).
@@ -308,7 +294,6 @@ st_centroid(metros) %>%
 knitr::include_graphics("figures/08_metro_areas.png")
 ```
 
-
 The defined metropolitan areas (Fig. \@ref(fig:metro-areas)) suitable for bike shops are still missing a name.
 A reverse geocoding approach can settle this problem.
 Given a coordinate, reverse geocoding finds the corresponding address.
@@ -320,7 +305,7 @@ The **ggmap** package makes use of the one provided by Google.^[Note that Google
 metros_wgs = st_transform(metros, 4326)
 coords = st_centroid(metros_wgs) %>%
   st_coordinates() %>%
-  round(., 4)
+  round(4)
 ```
 
 Additionally, `ggmap::revgeocode()` only accepts one coordinate at a time, which is why we iterate over each coordinate of `coords` via a loop (`map_dfr()`).
@@ -422,7 +407,6 @@ Finally, we `rbind` all shops into one large `sf` object.
 shops = map(shops, dplyr::select, osm_id, shop) %>%
   reduce(rbind)
 ```
-
 
 ```{r, echo = FALSE}
 # attach shops from spDataLarge
