@@ -124,23 +124,15 @@ Although transport systems are primarily based on linear features and nodes --- 
 Two zone types will typically be of particular interest: the study region and origin (typically residential areas) and destination (typically containing 'trip attractors' such as schools and shops) zones.
 Often the geographic units of destinations are the geographic units that comprise the origins, but a different zoning system, such as '[Workplace Zones](https://data.gov.uk/dataset/workplace-zones-a-new-geography-for-workplace-statistics3)', may be appropriate to represent the increased density of trip destinations in central areas [@office_for_national_statistics_workplace_2014].
 
-The simplest way to define a study area is often the first matching boundary returned by OpenStreetMap, which can be obtained using **osmdata** as follows:
-
-```{r, eval=FALSE}
-# requires the development version of osmdata
-# devtools::install_github("ropensci/osmdata")
-bristol_region = osmdata::getbb("Bristol", format_out = "sf_polygon")
-```
-
-The result is an `sf` object representing the bounds of the largest matching city region, either a rectangular polygon of the bounding box or a detailed polygonal boundary.^[
+The simplest way to define a study area is often the first matching boundary returned by OpenStreetMap, which can be obtained using **osmdata** with a command such as `bristol_region = osmdata::getbb("Bristol", format_out = "sf_polygon")`. This results in an `sf` object representing the bounds of the largest matching city region, either a rectangular polygon of the bounding box or a detailed polygonal boundary.^[
 In cases where the first match does not provide the right name, the country or region should be specified, for example `Bristol Tennessee` for a Bristol located in America.
 ]
-In this case the command returns a detailed polygon representing the official boundary of Bristol (see the inner blue boundary in Figure \@ref(fig:bristol)).
-There are a couple of issues associated with using OSM definitions of regions, however.
-First, the first OSM boundary returned by OSM may not be the official boundary used by local authorities.
-Second, even if OSM returns the official boundary, this may be inappropriate for transport research because they bear little relation to where people travel.
+For Bristol, UK a detailed polygon is returned, representing the official boundary of Bristol (see the inner blue boundary in Figure \@ref(fig:bristol)) but there are a couple of issues with this approach:
 
-Travel to Work Areas (TTWAs) overcome the second issue by creating a zoning system analogous to hydrological watersheds.
+- The first OSM boundary returned by OSM may not be the official boundary used by local authorities.
+- Even if OSM returns the official boundary, this may be inappropriate for transport research because they bear little relation to where people travel.
+
+Travel to Work Areas (TTWAs) address these issues by creating a zoning system analogous to hydrological watersheds.
 TTWAs were first defined as contiguous zones within which 75% of the population travels to work [@coombes_efficient_1986], and this is the definition used in this chapter.
 Because Bristol is a major employer attracting travel from surrounding towns, its TTWA is substantially larger than the city bounds (see Figure \@ref(fig:bristol)).
 The polygon representing this transport-orientated boundary is stored in the object `bristol_ttwa`, provided by the **spDataLarge** package loaded at the beginning of this chapter.
@@ -151,27 +143,32 @@ Such administrative zones can provide vital context to transport analysis, such 
 
 The geographic resolution of these zones is important: small zones with high geographic resolution are usually preferable but their high number in large regions can have consequences for processing (especially for origin-destination analysis in which the number of possibilities increases as a non-linear function of the number of zones) [@hollander_transport_2016].
 
-
 ```{block type='rmdnote'}
 Another issue with small zones is related to anonymity rules.
 To make it impossible to infer the identity of individuals in zones, detailed socio-demographic variables are often only available at low geographic resolution. 
 Breakdowns of travel mode by age and sex, for example, are available at the Local Authority level in the UK, but not at the much higher Output Area level, each of which contains around 100 households --- see [ons.gov.uk](https://www.ons.gov.uk/methodology/geography/ukgeographies/censusgeography) for further details.
 ```
 
-The 102 zones used are illustrated in Figure \@ref(fig:zones).
-These are stored in the `bristol_zones` object from the **spDataLarge** package, which divides-up space into sensible parcels, with each zone housing a similar number of people.
-However at present the dataset contains no attribute data, other than the zone name and zone code:
+The 102 zones used in this chapter are stored in `bristol_zones`, as illustrated in Figure \@ref(fig:zones).
+Note the zones get smaller in densly populated areas: each houses a similar number of people.
+`bristol_zones` contains no attribute data on transport, however, shown in the first two rows of the dataset:
 
 ```{r}
-names(bristol_zones)
+head(bristol_zones, 2)
 ```
 
-Chapter \@ref(attr) demonstrated how to join attribute data onto geographic variables.
-This is a common task which usually involves joining a table containing official zonal statistics to a geographic object via a shared key variable, as described in section \@ref(vector-attribute-joining).
-In this case we use data provided by [ons.gov.uk](https://www.ons.gov.uk/help/localstatistics), which maintains datasets at various geographic levels across the UK.
+To add travel data we will join a non geographic table on travel behavior to the zones, a common task described in section \@ref(vector-attribute-joining).
+We will use travel data stored in `bristol_od`, which was provided by the [ons.gov.uk](https://www.ons.gov.uk/help/localstatistics) data portal.
+`bristol_od` is an orgin-destination (OD) dataset representing travel to work between zones from the UK's 2011 Census (see section \@ref(desire-lines)).
+The first column is the ID of the zone of origin and the second column is the zone of destination.
+`bristol_od` is provided at higher geographic resolution than `bristol_zones`, as can be seen from the number of rows in each:
 
-Instead of accessing an area-level travel dataset directly, we will create zonal data by aggregating an object (`bristol_od` from **spDataLarge**) representing origin-destination (OD) data by zone of origin (exactly what this means and the nature of this OD dataset is described in more detail in section \@ref(desire-lines)).
-This is demonstrated below:
+```{r}
+nrow(bristol_od)
+nrow(bristol_zones)
+```
+
+The results of the previous code chunk shows that there are more than 10 OD pairs for every zone, meaning we will need to aggregate the origin-destination data before it is joined with `bristol_zones`, as illustrated below (origin-destination data is described in section \@ref(desire-lines)):
 
 ```{r}
 zones_attr = group_by(bristol_od, o) %>% 
@@ -179,9 +176,7 @@ zones_attr = group_by(bristol_od, o) %>%
   rename(geo_code = o)
 ```
 
-What just happened?
-The code first read-in data to create `bristol_od`, a data frame object representing travel to work between zones from the UK's 2011 Census in which the first column is the ID of the zone of origin and the second column is the zone of destination (`bristol_od` is described more fully in the next section).
-Then the chained operation performed three main steps:
+The preceding chunk performed three main steps:
 
 - Grouped the data by zone of origin (contained in the column `o`).
 - Aggregated the variables in the `bristol_od` dataset *if* they were numeric, to find the total number of people living in each zone by mode of transport.^[
