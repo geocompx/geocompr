@@ -98,8 +98,23 @@ Therefore to find the geographic centroid we need to take the *weighted mean* of
 This is still straightforward computationally, with the formula to calculate the area of a triangle being:
 
 $$
-
+\frac{Ax ( B y − C y ) + B x ( C y − A y ) + C x ( A y − B y )}
+{ 2 }
 $$
+
+Where $A$ to $C$ are the triangle's three points and $x$ and $y$ refer to the x and y dimensions.
+A translation of this formula into R code that works with the data in the matrix representation of a triangle `T1` is:
+
+```{r}
+
+T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
+  T1[2, 1] * (T1[3, 2] - T1[1, 2]) +
+  T1[3, 1] * (T1[1, 2] - T1[2, 2]) / 2
+```
+
+This code chunk works and outputs the correct result.^[
+as can be verified with the formula $A = B * H / 2$ )
+]
 
 The next triangle on the list must have the same origin and can be created as follows:
 
@@ -116,6 +131,15 @@ text(x = C1[1], y = C1[2], "C1", col = "blue")
 lines(T2, col = "red", lwd = 2)
 text(x = C2[1], y = C2[2], "C2", col = "red")
 ```
+
+```{r}
+i = 2:(nrow(poly_mat) - 1)
+Ti = purrr::map(I, ~rbind(O, poly_mat[.:(. + 1), ], O))
+A = purrr::map_dbl(Ti, .)
+
+
+```
+
 
 
 ```{r, echo=FALSE, eval=FALSE}
