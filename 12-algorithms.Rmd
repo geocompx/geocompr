@@ -106,16 +106,33 @@ Where $A$ to $C$ are the triangle's three points and $x$ and $y$ refer to the x 
 A translation of this formula into R code that works with the data in the matrix representation of a triangle `T1` is:
 
 ```{r}
-
 T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
   T1[2, 1] * (T1[3, 2] - T1[1, 2]) +
   T1[3, 1] * (T1[1, 2] - T1[2, 2]) / 2
 ```
 
 This code chunk works and outputs the correct result.^[
-as can be verified with the formula $A = B * H / 2$ )
+as can be verified with the formula for the area of a triangle whose base is horizontal: area equals half of the base width times its height --- $A = B * H / 2$ --- ($10 * 10 / 2$ in this case, as can be seen in Figure \@ref(fig:polycent)).
 ]
+The problem with the previous code chunk is that it is very verbose and difficult to re-run on another object with the same 'triangle matrix' format.
+To make the code more generalisable, let's convert the code into a function (something described in \@ref(functions)):
 
+```{r}
+t_area = function(x) {
+  x[1, 1] * (x[2, 2] - x[3, 2]) +
+  x[2, 1] * (x[3, 2] - x[1, 2]) +
+  x[3, 1] * (x[1, 2] - x[2, 2]) / 2
+}
+```
+
+The function `t_area` assumes an input with the same dimensions as the triangle represented in `T1`, with the first three rows and two columns representing coordinates of its edges.
+We can verify it works not only on the triangle matrix `T1` as follows:
+
+```{r}
+t_area(T1)
+```
+
+With this setup tested on the first triangle we can proceed to create many triangles.
 The next triangle on the list must have the same origin and can be created as follows:
 
 ```{r}
@@ -123,7 +140,7 @@ T2 = rbind(O, poly_mat[3:4, ], O)
 C2 = (T2[1, ] + T2[2, ] + T2[3, ]) / 3
 ```
 
-```{r}
+```{r polycent, fig.cap="Illustration of centroid calculation."}
 plot(poly_mat)
 lines(poly_mat)
 lines(T1, col = "blue", lwd = 2)
@@ -134,10 +151,8 @@ text(x = C2[1], y = C2[2], "C2", col = "red")
 
 ```{r}
 i = 2:(nrow(poly_mat) - 1)
-Ti = purrr::map(I, ~rbind(O, poly_mat[.:(. + 1), ], O))
-A = purrr::map_dbl(Ti, .)
-
-
+Ti = purrr::map(i, ~rbind(O, poly_mat[.:(. + 1), ], O))
+A = purrr::map_dbl(Ti, ~t_area(.))
 ```
 
 
