@@ -1,8 +1,10 @@
 if(!exists("route_cycleway")) {
   source("code/chapters/07-transport.R")
 } 
+tmap_mode("plot")
 bristol_stations_top = bristol_stations[knn_orig, ]
-m_leaflet = qtm(bristol_ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("lightgreen", "grey", "pink")) +
+m_leaflet = tm_shape(bristol_ways) +
+  tm_lines(col = "highway", lwd = 3, palette = c("lightgreen", "grey", "pink")) +
   tm_scale_bar() +
   tm_shape(bristol_ttwa) +
   tm_borders(col = "darkblue") +

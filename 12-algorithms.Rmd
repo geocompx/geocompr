@@ -67,28 +67,35 @@ Geoalgorithms (also referred to as *GIS Algorithms*, in a book of the same name)
 A simple example is an algorithm that finds the centroid of an object.
 This may sound like a simple task but in fact it involves some work, even for the simple case of single polygons containing no holes.
 The basic representation of a polygon object is in a matrix representing the vertices between which straight lines are drawn (the first and last points must be the same, something we'll touch on later).
-In this case we'll create a polygon with 19 vertices, following an example from *GIS Algorithms* (see [github.com/gisalgs](https://github.com/gisalgs/geom) for Python source code):
+In this case we'll create a polygon with 10 vertices, following an example from *GIS Algorithms* (see [github.com/gisalgs](https://github.com/gisalgs/geom) for Python source code):
+
+```{r, echo=FALSE, eval=FALSE}
+# show where the data came from:
+source("code/12-centroid-setup.R")
+```
 
 ```{r}
-poly_csv = "0,5,10,15,20,25,30,40,45,50,40,30,25,20,15,10,8,4,0
-            10,0,10,0,10,0,20,20,0,50,40,50,20,50,10,50,8,50,10"
+poly_csv = "0,5,10,15,20,25,30,40,45,50,0
+            10,0,10,0,10,0,20,20,0,50,10"
 poly_df = read.csv(text = poly_csv, header = FALSE)
 poly_mat = t(poly_df)
 ```
 
 As with many computational (or other) problems, it makes sense to break the problem into smaller chunks.
-With this in mind, let's find the centroid of the first triangle that can be identified within the polygon, which is simply $1/3(a + b + c)$ where $a$ to $c$ are coordinates representing the triangles vertices:
+With this in mind, the following commands create a new triangle (`T1`), the first that can be split-out from the polygon and finds its centroid based on the [formula](https://math.stackexchange.com/questions/1702595/proof-for-centroid-formula-for-a-polygon)
+$1/3(a + b + c)$ where $a$ to $c$ are coordinates representing the triangles vertices:
 
 ```{r}
-O = poly_mat[1, ]
-T1 = rbind(O, poly_mat[2:3, ], O)
-C1 = (T1[1, ] + T1[2, ] + T1[3, ]) / 3
+O = poly_mat[1, ] # create a point representing the origin
+T1 = rbind(O, poly_mat[2:3, ], O) # create 'triangle matrix'
+C1 = (T1[1, ] + T1[2, ] + T1[3, ]) / 3 # find centroid
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, echo=FALSE}
+# initial plot: can probably delete this:
 plot(poly_mat)
 lines(poly_mat)
-lines(triangle1, col = "blue", lwd = 5)
+lines(T1, col = "blue", lwd = 5)
 text(x = C1[1], y = C1[2], "C1")
 ```
 
@@ -98,30 +105,102 @@ Therefore to find the geographic centroid we need to take the *weighted mean* of
 This is still straightforward computationally, with the formula to calculate the area of a triangle being:
 
 $$
-
+\frac{Ax ( B y − C y ) + B x ( C y − A y ) + C x ( A y − B y )}
+{ 2 }
 $$
 
-The next triangle on the list must have the same origin and can be created as follows:
+Where $A$ to $C$ are the triangle's three points and $x$ and $y$ refer to the x and y dimensions.
+A translation of this formula into R code that works with the data in the matrix representation of a triangle `T1` is:
 
 ```{r}
+T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
+  T1[2, 1] * (T1[3, 2] - T1[1, 2]) +
+  T1[3, 1] * (T1[1, 2] - T1[2, 2]) / 2
+```
+
+This code chunk works and outputs the correct result.^[
+as can be verified with the formula for the area of a triangle whose base is horizontal: area equals half of the base width times its height --- $A = B * H / 2$ --- ($10 * 10 / 2$ in this case, as can be seen in Figure \@ref(fig:polycent)).
+]
+The problem with the previous code chunk is that it is very verbose and difficult to re-run on another object with the same 'triangle matrix' format.
+To make the code more generalizable, let's convert the code into a function (something described in \@ref(functions)):
+
+```{r}
+t_area = function(x) {
+  x[1, 1] * (x[2, 2] - x[3, 2]) +
+  x[2, 1] * (x[3, 2] - x[1, 2]) +
+  x[3, 1] * (x[1, 2] - x[2, 2]) / 2
+}
+```
+
+The function `t_area` generalizes the solution by taking any object `x`, assumed to have the same dimensions as the triangle represented in `T1`.
+We can verify it works not only on the triangle matrix `T1` as follows:
+
+```{r}
+t_area(T1)
+```
+
+Likewise we can create a function that find's the triangle's centroid:
+
+```{r}
+t_centroid = function(x) {
+  (x[1, ] + x[2, ] + x[3, ]) / 3
+}
+t_centroid(T1)
+```
+
+With these functions created and tested on the first triangle of the polygon, we can we can apply the solution to many triangles, which will be created with the **decido** package:
+
+```{r}
+ind = decido::earcut(poly_mat)
+decido::plot_ears(poly_mat, idx = ind)
+i = seq(1, length(ind), by = 3)
+i_list = purrr::map(i, ~c(.:(.+2), .))
+T_all = purrr::map(i_list, ~poly_mat[ind[.], ])
+```
+
+
+```{r, eval=FALSE, echo=FALSE}
+# Aim: show how to create more triangles - commented out in favor of decido solution
 T2 = rbind(O, poly_mat[3:4, ], O)
-C2 = (T2[1, ] + T2[2, ] + T2[3, ]) / 3
+A2 = t_area(T2)
+C2 = t_centroid(T2)
+```
+
+<!-- Following this pattern, we can use iteration to create all triangles representing the polygon. -->
+<!-- We could use a `for()` loop or `lapply()` for this work but have chosen `map()` from the **purrr** package because it allows concise code: -->
+<!-- the `.` in the commands below refer to 'each element of the object `i`' (see `?purrr::map` for details): -->
+
+```{r, eval=FALSE, echo=FALSE}
+# Aim: show how to create more triangles - commented out in favor of decido solution
+i = 2:(nrow(poly_mat) - 1)
+Ti = purrr::map(i, ~rbind(O, poly_mat[.:(. + 1), ], O))
+A = purrr::map_dbl(Ti, ~t_area(.))
+C = t(sapply(Ti, t_centroid))
+sum(A) / 6 * 
 ```
 
 ```{r}
+# Aim: show how to create more triangles - commented out in favor of decido solution
+A = purrr::map_dbl(T_all, ~t_area(.))
+C = t(sapply(T_all, t_centroid))
+```
+
+```{r polycent, fig.cap="Illustration of centroid calculation."}
 plot(poly_mat)
 lines(poly_mat)
 lines(T1, col = "blue", lwd = 2)
 text(x = C1[1], y = C1[2], "C1", col = "blue")
-lines(T2, col = "red", lwd = 2)
-text(x = C2[1], y = C2[2], "C2", col = "red")
+lines(T_all[[2]], col = "red", lwd = 2)
+text(x = C[2, 1], y = C[2, 2], "C2", col = "red")
 ```
 
 
-```{r, echo=FALSE, eval=FALSE}
-source("code/12-centroid-setup.R")
+```{r}
+library(sf)
+T_sf = list(poly_mat) %>% 
+  st_polygon()
+st_area(T_sf)
 ```
-
 
 ## Functions
 

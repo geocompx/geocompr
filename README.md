@@ -19,11 +19,11 @@ We encourage contributions on any part of the book, including:
 
 -   Improvements to the text, e.g. clarifying unclear sentences, fixing typos (see guidance from [Yihui Xie](https://yihui.name/en/2013/06/fix-typo-in-documentation/)).
 -   Changes to the code, e.g. to do things in a more efficient way.
--   Suggestions on content (see the project's [issue tracker](https://github.com/Robinlovelace/geocompr/issues) and the [work-in-progress](https://github.com/Robinlovelace/geocompr/tree/master/work-in-progress) folder for chapters in the pipeline).
+-   Suggestions on content (see the project's [issue tracker](https://github.com/Robinlovelace/geocompr/issues)).
 
 Please see [our-style.md](https://github.com/Robinlovelace/geocompr/blob/master/our-style.md) for the book's style.
 
-Many thanks to all contributors to the book so far via GitHub (this list will update automatically): [katygregg](https://github.com/katygregg), [erstearns](https://github.com/erstearns), [eyesofbambi](https://github.com/eyesofbambi), [rsbivand](https://github.com/rsbivand), [pat-s](https://github.com/pat-s), [gisma](https://github.com/gisma), [ateucher](https://github.com/ateucher), [gavinsimpson](https://github.com/gavinsimpson), [yutannihilation](https://github.com/yutannihilation), [mvl22](https://github.com/mvl22), [richfitz](https://github.com/richfitz), [wdearden](https://github.com/wdearden), [gregor-d](https://github.com/gregor-d), [p-kono](https://github.com/p-kono), [pokyah](https://github.com/pokyah).
+Many thanks to all contributors to the book so far via GitHub (this list will update automatically): [katygregg](https://github.com/katygregg), [erstearns](https://github.com/erstearns), [eyesofbambi](https://github.com/eyesofbambi), [rsbivand](https://github.com/rsbivand), [pat-s](https://github.com/pat-s), [gisma](https://github.com/gisma), [ateucher](https://github.com/ateucher), [gavinsimpson](https://github.com/gavinsimpson), [Himanshuteli](https://github.com/Himanshuteli), [yutannihilation](https://github.com/yutannihilation), [layik](https://github.com/layik), [mvl22](https://github.com/mvl22), [richfitz](https://github.com/richfitz), [wdearden](https://github.com/wdearden), [gregor-d](https://github.com/gregor-d), [p-kono](https://github.com/p-kono), [pokyah](https://github.com/pokyah).
 
 During the project we aim to contribute 'upstream' to the packages that make geocomputation with R possible. This impact is recorded in [`our-impact.csv`](https://github.com/Robinlovelace/geocompr/blob/master/our-impact.csv).
 
@@ -51,14 +51,16 @@ The code associated with each chapter is saved in the `code/chapters/` folder. `
 # geocompr:::generate_chapter_code()
 ```
 
-Running the book in docker
---------------------------
+Running geocompr code in docker
+-------------------------------
 
-To ease reproducibility we have set-up a docker image containing all the dependencies needed to reproduce the book. After you have [installed docker](https://www.docker.com/community-edition#/download) and set-it up on [your computer](https://docs.docker.com/install/linux/linux-postinstall/) you should be able to reproduce the entire book with the following steps (resulting in output shown below):
+To ease reproducibility we have set-up a docker image ([robinlovelace/geocompr](https://hub.docker.com/r/robinlovelace/geocompr/) on docker hub) containing all the dependencies needed to reproduce the book. After you have [installed docker](https://www.docker.com/community-edition#/download) and set-it up on [your computer](https://docs.docker.com/install/linux/linux-postinstall/) you should be able to reproduce the entire book with the following steps (resulting in output shown below):
 
 ``` bash
 # from a system terminal such as Windows Powershell or a Unix terminal
 git clone https://github.com/Robinlovelace/geocompr.git # download the repo
+# or download manually from here if you lack git:
+# https://github.com/Robinlovelace/geocompr/archive/master.zip
 cd .\geocompr\ # navigate into the repo
 docker run -d -p 8787:8787 -v ${pwd}:/data robinlovelace/geocompr
 ```
@@ -67,7 +69,7 @@ If it worked you should be able to open-up RStudio server by opening a browser a
 
 ![](https://user-images.githubusercontent.com/1825120/39538109-9b50e7ac-4e33-11e8-93b3-e00e95a79294.png)
 
-geocompr in docker: Illustration of how it should look if it worked!
+geocompr in docker: if you see something like this after following the steps above, congratulations: it worked!
 
 From this point to *build* the book you need to navigate to the volume location on docker machine, by opening the project at `/data` from the project box in the top-right hand corner, illustrated in the figure below. From here open the file `index.Rmd` and hit the little `knit` button above the the RStudio script panel (above the `book` text on line 81 illustrated in the image above).
 
@@ -155,13 +157,14 @@ knitr::kable(pkg_df)
 |:------------------|:------------------------------------------------------------------------------------------|:-----------|
 | bookdown          | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]                   | 0.7.8      |
 | cartogram         | Create Cartograms with R \[@R-cartogram\]                                                 | 0.0.3      |
+| decido            | Bindings for 'Mapbox' Ear Cutting Triangulation Library \[@R-decido\]                     | 0.1.0      |
 | dismo             | Species Distribution Modeling \[@R-dismo\]                                                | 1.1.4      |
 | geosphere         | Spherical Trigonometry \[@R-geosphere\]                                                   | 1.5.7      |
 | ggmap             | Spatial Visualization with ggplot2 \[@R-ggmap\]                                           | 2.6.1      |
 | ggplot2           | Create Elegant Data Visualisations Using the Grammar of Graphics \[@R-ggplot2\]           | 2.2.1.9000 |
 | gstat             | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction \[@R-gstat\]             | 1.1.6      |
 | historydata       | Data Sets for Historians \[@R-historydata\]                                               | 0.2.9001   |
-| htmlwidgets       | HTML Widgets for R \[@R-htmlwidgets\]                                                     | 1.2        |
+| htmlwidgets       | HTML Widgets for R \[@R-htmlwidgets\]                                                     | 0.8        |
 | kableExtra        | Construct Complex Table with 'kable' and Pipe Syntax \[@R-kableExtra\]                    | 0.8.0      |
 | knitr             | A General-Purpose Package for Dynamic Report Generation in R \[@R-knitr\]                 | 1.20       |
 | leaflet           | Create Interactive Web Maps with the JavaScript 'Leaflet' \[@R-leaflet\]                  | 2.0.0      |
