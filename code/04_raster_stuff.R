@@ -9,7 +9,7 @@
 #**********************************************************
 #
 # 1. ATTACH PACKAGES AND DATA
-# 2. EXAMPLE RASTER AND GRAIN SIZE
+# 2. SPATIAL SUBSETTING
 # 3. FOCAL EXAMPLE
 #
 #**********************************************************
