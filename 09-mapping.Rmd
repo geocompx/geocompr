@@ -620,18 +620,34 @@ mv@map
 ```
 
 **mapview** has a concise syntax yet is powerful. By default, it provides some standard GIS functionality such as mouse position information, attribute queries (via pop-ups), scale bar, zoom-to-layer buttons.
-It offers advanced controls including the ability to 'burst' datasets into multiple layers and the addition of multiple layers with `+` followed by the name of a geographic object. Additionlaly, it provides automatic coloring of attributes (via argument `zcol`). In essence, it can be considered a data-driven **leaflet** API (see below for more information about **leaflet**) which is highlighted by the following piece of code:
+It offers advanced controls including the ability to 'burst' datasets into multiple layers and the addition of multiple layers with `+` followed by the name of a geographic object. Additionlaly, it provides automatic coloring of attributes (via argument `zcol`). In essence, it can be considered a data-driven **leaflet** API (see below for more information about **leaflet**). Given that **mapview** always expects a spatial object (sf, sp, raster) as its first argument, it works well at the end of piped expressions. Consider the following example where **sf** is used to intersect lines and polygons and then visualised with **mapview**.
 
 ```{r, eval=FALSE}
 library(mapview)
+library(dplyr)
+library(sf)
 
-mapview(franconia, zcol = "district", burst = TRUE) + breweries
+trails %>%
+  st_transform(st_crs(franconia)) %>%
+  st_intersection(franconia[franconia$district == "Oberfranken", ]) %>%
+  st_collection_extract("LINE") %>%
+  mapview(color = "red", lwd = 3, layer.name = "trails") +
+  mapview(franconia, zcol = "district", burst = TRUE) +
+  breweries
 ```
 
-```{r, mapview2, fig.cap="Using zcol to color attributes and + to add layers in mapview.", echo=FALSE}
-mv2 = mapview(franconia, zcol = "district", burst = TRUE) + breweries
+```{r, mapview2, fig.cap="Using mapview at the end of a sf based pipe expression.", echo=FALSE}
+mv2 = trails %>%
+  st_transform(st_crs(franconia)) %>%
+  st_intersection(franconia[franconia$district == "Oberfranken", ]) %>%
+  st_collection_extract("LINE") %>%
+  mapview(color = "red", lwd = 3, layer.name = "trails") +
+  mapview(franconia, zcol = "district", burst = TRUE) +
+  breweries
 mv2@map
 ```
+
+One important thing to keep in mind is that **mapview** layers are added via the `+` operator (similar to **ggplot2**). This is a frequent [gotcha](https://en.wikipedia.org/wiki/Gotcha_(programming)) in piped workflows where the main binding operator is `%>%`.
 
 For further information on **mapview** see the package's website at [r-spatial.github.io/mapview/](https://r-spatial.github.io/mapview/articles/).
 
