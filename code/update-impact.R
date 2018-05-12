@@ -3,7 +3,7 @@ library(tidyverse)
 # ?`gh-package`
 # gh("/users/:username/starred", username = "hadley")
 our_impact = readr::read_csv("our-impact.csv")
-our_impact = select(our_impact, url, date, type, description)
+# our_impact = select(our_impact, url, date, type, description)
 v = grepl("/issues/", our_impact$url) # valid url
 # our_impact$creator = NA
 # our_impact$state = NA
