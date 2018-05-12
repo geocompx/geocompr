@@ -1,17 +1,12 @@
 #' Return details of issues, with input an GitHub issue URL
 #' 
 #' @examples \dontrun{
-#' url_issue = "https://github.com/r-spatial/sf/issues/704"
+#' url_issue = "https://github.com/mtennekes/tmap/issues/196"
+#' geocompr:::add_impact(url_issue)
 #' u = "https://github.com/Robinlovelace/geocompr/raw/master/our-impact.csv"
-#' our_impact = readr::read_csv(u)
-#' new_impact = c(url = url_issue, add_impact(url_issue))
-#' names(our_impact)
-#' names(new_impact)
-#' names(new_impact) = names(our_impact)
-#' our_impact_new = dplyr::bind_rows(our_impact, new_impact)
-#' readr::write_csv(our_impact_new, "our-impact.csv")
+#' geocompr:::add_impact(url_issue, url_old_impact = u)
 #' }
-add_impact = function(url_issue, vars = c("created_at", "type", "title", "comments", "state", "creator")) {
+add_impact = function(url_issue, vars = c("created_at", "type", "title", "comments", "state", "creator"), url_old_impact = NULL) {
   gh_issue_req = gsub("https://github.com/", "", url_issue)
   gh_issue_req = gsub("^", "GET /repos/", gh_issue_req)
   res_gh = gh::gh(gh_issue_req)
@@ -37,4 +32,21 @@ add_impact = function(url_issue, vars = c("created_at", "type", "title", "commen
   }
   res_all = c(res_easy, res_hard)
   res_df = data.frame(res_all[vars])
+  
+  if(!is.null(url_old_impact)) {
+    new_impact = c(url = url_issue, res_df)
+    u = "https://github.com/Robinlovelace/geocompr/raw/master/our-impact.csv"
+    our_impact = readr::read_csv(u)
+    names(our_impact)
+    names(new_impact)
+    names(new_impact) = names(our_impact)
+    suppressWarnings({
+      our_impact_new = dplyr::bind_rows(our_impact, new_impact)
+    })
+    readr::write_csv(our_impact_new, "our-impact.csv")
+    message(paste0("Wrote new impact to our-impact.csv:"))
+    message(write.csv(res_df))
+  } else {
+    res_df
+  }
 }
