@@ -1,3 +1,22 @@
+```{r include=FALSE, cache=FALSE}
+library(methods)
+
+knitr::opts_chunk$set(
+        comment = "#>",
+        collapse = TRUE,
+        cache = TRUE,
+        fig.pos = "t",
+        fig.path = "figures/",
+        fig.align = 'center',
+        fig.width = 6,
+        fig.asp = 0.618,  # 1 / phi
+        fig.show = "hold"
+)
+
+set.seed(2017)
+options(digits = 3)
+options(dplyr.print_min = 4, dplyr.print_max = 4)
+```
 # Spatial operations
 
 ## Prerequisites {-}
@@ -379,8 +398,6 @@ plot(p, add = TRUE)
 <!-- examples (lines/polygons) -->
 
 <!-- TODO? create a series of polygons distributed evenly over the surface of the Earth and clip them. -->
-
-<!-- ```{r} -->
 <!-- set.seed(2018) -->
 <!-- blob_points = st_sample(x = world, size = 2) -->
 <!-- blobs = st_buffer(x = blob_points, dist = 1) -->
@@ -389,32 +406,40 @@ plot(p, add = TRUE)
 ### Spatial joining 
 
 Joining two non-spatial datasets relies on a shared 'key' variable, as described in section \@ref(vector-attribute-joining).
-Spatial data joining applies the same concept, but instead relies on shared areas of geographic space.
-As with attribute data, joining adds a new column to the target object (the argument `x` in joining functions) from a source object (`y`).
-<!-- Think the last sentence needs a comma, but not sure where? -->
+Spatial data joining applies the same concept, but instead relies on shared areas of geographic space (it is also know as spatial overlay).
+As with attribute data, joining adds a new column to the target object (the argument `x` in joining functions), from a source object (`y`).
 
-The process is illustrated in Figure \@ref(fig:spatial-join), which shows a target object (the `asia` dataset, left) being joined to a source dataset (the three most populous cities of the world), resulting in a new attribute being added to the `joined` dataset (right).
-<!-- Idea: use random points over Earth's surface to allocate data to world countries. -->
-<!-- I'm not sure this is a good starting example to show how st_join works - thoughts? -->
+The process can be illustrated by an example.
+Imagine you have 10 points randomly distributed across the Earth's surface.
+Of the points that are on land, which countries are they in?
+Random points to demonstrate spatial joining are created as follows:
 
 ```{r}
-asia = world %>% 
-  filter(continent == "Asia")
-urb = urban_agglomerations %>% 
-  filter(year == 2020) %>% 
-  top_n(n = 3, wt = population_millions)
+set.seed(2018) # set seed for reproducibility
+(bb_world = st_bbox(world)) # the world's bounds
+random_df = tibble(
+  x = runif(n = 10, min = bb_world[1], max = bb_world[3]),
+  y = runif(n = 10, min = bb_world[2], max = bb_world[4])
+)
+random_points = st_as_sf(random_df, coords = c("x", "y")) %>% 
+  st_set_crs(4326) # generate points with geographic CRS
 ```
 
-```{r, message=FALSE}
-joined = st_join(x = asia, y = urb) %>% 
-  na.omit()
+<!-- This may seem a trivial question but if you consider being placed somewhere at random it would surely take some time to discover where you were and you'd probably have to ask someone. **comment - removed as it's too long-winded (RL)** -->
+The scenario is illustrated in Figure \@ref(fig:spatial-join).
+The `random_points` object (left) has no attribute data, while the `world` (middle) does.
+The spatial join operation is done by `st_join()`, which adds the `name_long` variable to the points, resulting in `random_joined` which is illustrated in Figure \@ref(fig:spatial-join) (right --- see [`04-spatial-join.R`](https://github.com/Robinlovelace/geocompr/blob/master/code/04-spatial-join.R)).
+
+```{r, message=FALSE, fig.asp=0.4}
+world_random = world[random_points, ]
+random_joined = st_join(random_points, world["name_long"])
 ```
 
-```{r spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join: the populations of the world's three largest agglomerations joined onto their respective countries.", fig.asp=0.4, warning=FALSE}
+```{r spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join: the names of the source world object are added to random points.", fig.asp=0.4, warning=FALSE}
 source("code/04-spatial-join.R")
+tmap_arrange(jm1, jm2, jm3, nrow = 1)
 ```
 
-This operation is also know as spatial overlay.
 By default, `st_join()` performs a left join (see section \@ref(vector-attribute-joining)), but it can also do inner joins by setting the argument `left = FALSE`.
 Like spatial subsetting, the default topological operator used by `st_join()` is `st_intersects()`.
 This can be changed with the `join` argument (see `?st_join` for details).
