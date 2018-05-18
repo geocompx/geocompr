@@ -314,6 +314,7 @@ Sometimes, Google's reverse geocoding API is unable to find an address returning
 Usually, trying the same coordinate again returns an address at the second or third attempt (see `while()-loop`).
 However, if three or four attempts have already failed, this is a good indication that the requested information is indeed unavailable.
 Since we aim to be good cyberspace citizens, we try not to overburden the server with too many queries within a short amount of time by letting the loop sleep between one and four seconds after each iteration before accessing the reverse geocoding API again.
+Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
 
 ```{r, eval = FALSE, warning = FALSE, message = FALSE}
 # reverse geocoding to find out the names of the metropolitan areas
@@ -335,13 +336,13 @@ metro_names = map_dfr(1:nrow(coords), function(i) {
 Though the `while`-loop helps to make the reverse geocoding more successful, it sometimes might still fail or even give back results slightly differing from those we here have produced here.
 Therefore, to make sure that the reader uses the exact same results, we have put them into **spDataLarge**:
 
-```{r}
+```{r metro-names}
 # attach metro_names from spDataLarge
 data("metro_names", package = "spDataLarge")
+knitr::kable(dplyr::select(metro_names, locality, country), caption = "Result of the reverse geocoding")
 ```
 
-Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
-Overall, we are satisfied with the `locality` column serving as metropolitan names (München, Nürnberg, Stuttgart, Frankfurt, Hamburg, Berlin, Leipzig) apart from one exception, namely Velbert.
+Overall, we are satisfied with the `locality` column serving as metropolitan names (\@ref(tab:metro-names)) apart from one exception, namely Velbert.
 Hence, we replace Velbert with the corresponding name in the `administrative_area_level_2` column, that is Düsseldorf (Fig. \@ref(fig:metro-areas)).
 Umlauts like `ü` might lead to trouble further on, for example when determining the bounding box of a metropolitan area with `opq()` (see further below), which is why we replace them.
 
