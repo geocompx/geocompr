@@ -1,4 +1,4 @@
-# Filename: 08-location-gm.R (2018-04-09)
+# Filename: 08-location-jm.R (2018-04-09)
 #
 # TO DO: Build figures for location chapter
 #
