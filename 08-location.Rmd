@@ -78,9 +78,19 @@ data("census_de")
 ```
 
 The `census_de` object is a data frame containing 13 variables for more than 300,000 grid cells across Germany.
-For our work we only need a subset of these: Easting and Northing, number of inhabitants (population), mean average age, proportion of women and average household size.
-These variables and selected and renamed in the code chunk below and summarized in Table \@ref(tab:census-desc). 
+For our work we only need a subset of these: Easting (`x`) and Northing (`y`), number of inhabitants (population; `pop`), mean average age (`mean_age`), proportion of women (`women`) and average household size (`hh_size`).
+These variables are selected and renamed from German into English in the code chunk below and summarized in Table \@ref(tab:census-desc). 
 Further, `mutate_all()` is used to convert values -1 and -9 (meaning unknown) to `NA`.
+
+```{r}
+# pop = population, hh_size = household size
+input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
+                      women = Frauen_A, mean_age = Alter_D,
+                      hh_size = HHGroesse_D)
+# set -1 and -9 to NA
+input_tidy = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
+```
+
 
 ```{r census-desc, echo = FALSE}
 tab = tribble(
@@ -103,16 +113,6 @@ knitr::kable(tab,
                            "women\\\n(%)", "mean age\\\n(years)",
                            "household size\\\n(number of people)"),
              caption = cap, align = "c", format = "html")
-```
-
-
-```{r}
-# pop = population, hh_size = household size
-input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
-                      women = Frauen_A, mean_age = Alter_D,
-                      hh_size = HHGroesse_D)
-# set -1 and -9 to NA
-input_tidy = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
 ```
 
 ## Create census rasters
