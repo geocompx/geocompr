@@ -1,4 +1,4 @@
-# Filename: 08-location-gm.R (2018-04-09)
+# Filename: 08-location-jm.R (2018-04-09)
 #
 # TO DO: Build figures for location chapter
 #
@@ -9,7 +9,9 @@
 #**********************************************************
 #
 # 1. ATTACH PACKAGES AND DATA
-# 2. FIGURES
+# 2. OVERVIEW RASTER FIGURE
+# 3. METRO RASTER FIGURE
+# 4. POTENTIAL LOCATIONS
 #
 #**********************************************************
 # 1 ATTACH PACKAGES AND DATA-------------------------------
@@ -25,28 +27,48 @@ library(grid)
 library(gridExtra)
 library(classInt)
 library(mapview)
+library(tidyverse)
+library(htmlwidgets)
+library(leaflet)
 
 # attach data
-# change when the data has been put into spDataLarge
-load("C:/Users/pi37pat/Desktop/tmp/test.Rdata")
+data("census_de", package = "spDataLarge")
+data("metro_names", package = "spDataLarge")
+data("shops", package = "spDataLarge")
+# download German border polygon
 ger = getData(country = "DEU", level = 0)
-ger = spTransform(ger, proj4string(input))
 
 #**********************************************************
-# 2 FIGURES------------------------------------------------
+# 2 CENSUS STACK FIGURE------------------------------------
 #**********************************************************
 
-# 2.1 Census stack figure==================================
+# 2.1 Data preparation=====================================
 #**********************************************************
+input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
+                      women = Frauen_A, mean_age = Alter_D,
+                      hh_size = HHGroesse_D)
+# set -1 and -9 to NA
+input_tidy = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
+input_ras = rasterFromXYZ(input_tidy, crs = st_crs(3035)$proj4string)
+
+# convert the brick into a stack, ratify and factor variables apparently only
+# work with a raster stack
+input_ras = stack(input_ras)
 # ratify rasters (factor variables)
-for (i in names(input)) {
-  input[[i]] = ratify(input[[i]])
-  values(input[[i]]) = as.factor(values(input[[i]]))
+for (i in names(input_ras)) {
+  input_ras[[i]] = ratify(input_ras[[i]])
+  values(input_ras[[i]]) = as.factor(values(input_ras[[i]]))
 }
+
+# reproject German outline
+ger = spTransform(ger, proj4string(input_ras))
+
+# 2.2 Create figure========================================
+#**********************************************************
 
 # find out about lattice settings
 # trellis.par.get()
-p_1 = spplot(input, col.regions = RColorBrewer::brewer.pal(6, "GnBu"), 
+p_1 = spplot(input_ras, col.regions = RColorBrewer::brewer.pal(6, "GnBu"), 
              main = list("Classes", cex = 0.5),
              layout = c(4, 1), 
              # Leave some space between the panels
@@ -55,7 +77,7 @@ p_1 = spplot(input, col.regions = RColorBrewer::brewer.pal(6, "GnBu"),
                              # make tick size smaller
                              tck = 0.5,
                              labels = list(cex = 0.4)),
-             strip = strip.custom(bg = 'white',
+             strip = strip.custom(bg = "white",
                                   par.strip.text = list(cex = 0.5),
                                   factor.levels = c("population", "women",
                                                     "mean age", 
@@ -69,21 +91,62 @@ ggplot2::ggsave(filename = "figures/08_census_stack.png",
                 width = 5.1, height = 3)
 
 
-# 2.2 Metropolitan area figure=============================
+#**********************************************************
+# 3 METROPOLITAN AREA FIGURE-------------------------------
 #**********************************************************
 
+# create reclassifcation matrices
+rcl_pop = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 
+                   4, 4, 3000, 5, 5, 6000, 6, 6, 8000), 
+                 ncol = 3, byrow = TRUE)
+rcl_women = matrix(c(1, 1, 3, 2, 2, 2, 3, 3, 1, 4, 5, 0), 
+                   ncol = 3, byrow = TRUE)
+rcl_age = matrix(c(1, 1, 3, 2, 2, 0, 3, 5, 0),
+                 ncol = 3, byrow = TRUE)
+rcl_hh = rcl_women
+rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
+# reclassify
+reclass = map2(as.list(input_ras), rcl, function(x, y) {
+  reclassify(x = x, rcl = y, right = NA)
+}) %>% 
+  stack
+names(reclass) = names(input_ras)
+# aggregate by a factor of 20
+pop_agg = aggregate(reclass$pop, fact = 20, fun = sum)
+# find most populous raster cells, convert them into polygons
+polys = rasterToPolygons(pop_agg[pop_agg > 500000, drop = FALSE]) %>% 
+  st_as_sf(polys)
+# union the single polygons into metropolitan areas
+polys = st_union(polys)  # one multi-polygon
+# now extract spatially disjoint metroplitan areas
+metros = st_cast(polys, "POLYGON")
+
+# find out about the offending polygon
+int = st_intersects(metros, metros)
+# polygons 5 and 9 share one border, delete polygon number 5
+metros_2 = metros[-5]
+
+# palette
 pal = RColorBrewer::brewer.pal(5, "GnBu")
 # cuts = c(0, 249000, 499000, 749000, 999000, 1249000)
 cuts = c(0, 250000, 500000, 750000, 1000000, 1250000)
-metros = st_cast(polys, "POLYGON")
 coords = st_centroid(metros) %>% st_coordinates
 # delete the fifth polygon (single cell of the Düsseldorf area)
 coords = coords[-5, ]
 # move all labels up except for Düsseldorf
+metro_names = 
+  dplyr::select(metro_names, locality, administrative_area_level_2) %>%
+  # replace Velbert and umlaut ü
+  mutate(locality = ifelse(locality == "Velbert", administrative_area_level_2, 
+                           locality),
+         locality = gsub("ü", "ue", locality)) %>%
+  pull(locality)
 ind = metro_names %in% c("Stuttgart", "Duesseldorf", "Berlin")
 coords[!ind, 2] = coords[!ind, 2] + 30000
 coords[ind, 2] = coords[ind, 2] + c(45000, 45000, 0)
 
+# 3.2 Create figure========================================
+#**********************************************************
 p_2 = 
   spplot(pop_agg, col.regions = pal, 
          main = list("Number of people in 1000", cex = 0.5),
@@ -109,49 +172,61 @@ p_2 =
            #      first = FALSE)
          ))
 
-
+# use shadow text
+# take care, latticeExtra::layer uses NSE, you need to use the data-argument!!!
+# See ?layer and:
+# browseURL(paste0("https://procomun.wordpress.com/2013/04/24/", 
+#                  "stamen-maps-with-spplot/))
+# browseURL(paste0("https://gist.github.com/oscarperpinan/",
+#                  "7482848#file-stamenpolywithlayerinfunction4-r"))
+# shadowtext by Barry Rowlingson
+# browseURL(paste0("http://blog.revolutionanalytics.com/2009/05/",
+#                  "make-text-stand-out-with-outlines.html"))
+# needs some adjustment for lattice, strwidth and strheight replace by
+# stringWidth and stringHeight (gridExtra), see
+# browseURL("https://stat.ethz.ch/pipermail/r-help/2004-November/061255.html")
 theta = seq(pi / 4, 2 * pi, length.out = 8)
 xy = xy.coords(coords)
 xo = 75 * convertWidth(stringWidth("A"), unitTo = "native", valueOnly = TRUE)
 yo = 75 * convertWidth(stringHeight("A"), unitTo = "native", valueOnly = TRUE)
 p_3 = p_2 + 
-  # take care, layer uses NSE, you need to use the data-argument!!!
-  # See ?layer and:
-  # browseURL(paste0("https://procomun.wordpress.com/2013/04/24/", 
-  #                  "stamen-maps-with-spplot/))
-  # browseURL(paste0("https://gist.github.com/oscarperpinan/",
-  #                  "7482848#file-stamenpolywithlayerinfunction4-r"))
-  # shadowtext by Barry Rowlingson
-  # browseURL(paste0("http://blog.revolutionanalytics.com/2009/05/", 
-  #                  "make-text-stand-out-with-outlines.html"))
-  # needs some adjustment for lattice, strwidth and strheight replace by
-  # stringWidth and stringHeight (gridExtra), see
-  # browseURL("https://stat.ethz.ch/pipermail/r-help/2004-November/061255.html")
-  layer(
+  latticeExtra::layer(
     for (i in theta) {
-      ltext(x = xy$x + cos(i) * xo, y=  xy$y + sin(i) * yo, 
+      ltext(x = xy$x + cos(i) * xo, y = xy$y + sin(i) * yo, 
             labels = metro_names, col = "white", font = 3, cex = 0.5)
     },
     data = list(xy = xy, metro_names = metro_names, theta = theta,
                 xo = xo, yo = yo)
   ) +
-  layer(
+  latticeExtra::layer(
     ltext(x = xy$x, y =  xy$y, labels = metro_names, col = "black", cex = 0.5, 
           font = 3),
     data = list(xy = xy, metro_names = metro_names)
   )
   
-
 # save the output
 ggplot2::ggsave(filename = "figures/08_metro_areas.png",
                 plot = arrangeGrob(p_3, ncol = 1),
                 width = 3, height = 4)
 
-# 2.3 POI figure===========================================
+#**********************************************************
+# 4 POTENTIAL LOCATIONS------------------------------------ 
 #**********************************************************
 
-library(mapview)
-library(htmlwidgets)
+# 4.1 Data preparation=====================================
+#**********************************************************
+shops = st_transform(shops, proj4string(reclass))
+# create poi raster
+poi = rasterize(x = shops, y = reclass, field = "osm_id", fun = "count")
+int = classInt::classIntervals(values(poi), n = 4, style = "fisher")
+int = round(int$brks)
+rcl_poi = matrix(c(int[1], rep(int[-c(1, length(int))], each = 2), 
+                   int[length(int)] + 1), ncol = 2, byrow = TRUE)
+rcl_poi = cbind(rcl_poi, 0:3)  
+# reclassify
+poi = reclassify(poi, rcl = rcl_poi, right = NA) 
+names(poi) = "poi"
+
 # dismiss population raster
 reclass = dropLayer(reclass, "pop")
 # add poi raster
@@ -160,13 +235,15 @@ reclass = addLayer(reclass, poi)
 result = sum(reclass)
 # have a look at suitable bike shop locations in Berlin
 # polygons 5 and 9 share one border, delete polygon number 5
-metros_2$names = metro_names
+metros_2 = st_sf(data.frame(names = metro_names), geometry = metros_2)
 berlin = dplyr::filter(metros_2, names == "Berlin")
 berlin_raster = crop(result, as(berlin, "Spatial"))
-berlin_raster = ratify(berlin_raster > 10)
+berlin_raster = ratify(berlin_raster > 9)
 berlin_raster = berlin_raster == TRUE
 berlin_raster[berlin_raster == 0] = NA
 
+# 4.2 Figure===============================================
+#**********************************************************
 m = mapview(berlin_raster, col.regions = c(NA, "darkgreen"),
             na.color = "transparent", legend = TRUE, map.type = "OpenStreetMap")
 mapshot(m, url = file.path(getwd(), "figures/08_bikeshops_berlin.html"))
