@@ -312,14 +312,14 @@ Additionally, `ggmap::revgeocode()` only accepts one coordinate at a time, which
 `map_dfr()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.^[To learn more about the split-apply-combine strategy for data analysis, we refer the reader to @wickham_split-apply-combine_2011.]
 Sometimes, Google's reverse geocoding API is unable to find an address returning `NA`.
 Usually, trying the same coordinate again returns an address at the second or third attempt (see `while()-loop`).
-However, if three attempts have already failed, this is a good indication that the requested information is indeed unavailable.
+However, if three or four attempts have already failed, this is a good indication that the requested information is indeed unavailable.
 Since we aim to be good cyberspace citizens, we try not to overburden the server with too many queries within a short amount of time by letting the loop sleep between one and four seconds after each iteration before accessing the reverse geocoding API again.
 
 ```{r, eval = FALSE, warning = FALSE, message = FALSE}
 # reverse geocoding to find out the names of the metropolitan areas
 metro_names = map_dfr(1:nrow(coords), function(i) {
   add = ggmap::revgeocode(coords[i, ], output = "more")
-  x = 2
+  x = 3
   while (is.na(add$address) & x > 0) {
     add = ggmap::revgeocode(coords[i, ], output = "more")
     # just try three times
@@ -332,8 +332,10 @@ metro_names = map_dfr(1:nrow(coords), function(i) {
 })
 ```
 
+Though the `while`-loop helps to make the reverse geocoding more successful, it sometimes might still fail or even give back results slightly differing from those we here have produced here.
+Therefore, to make sure that the reader uses the exact same results, we have put them into **spDataLarge**:
 
-```{r, echo = FALSE}
+```{r}
 # attach metro_names from spDataLarge
 data("metro_names", package = "spDataLarge")
 ```
