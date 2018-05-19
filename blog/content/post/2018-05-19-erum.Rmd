@@ -1,0 +1,135 @@
+---
+title: "Geocomputation with R workshop at eRum"
+author: "Robin, Jakub and Jannes"
+date: 2018-05-22
+categories: ["R, Geocomputation with R, eRum"]
+# tags: ["R Markdown", "plot", "regression"]
+---
+
+An open source book project is being developed with the aim of introducing geographic data in R and providing a solid foundation for developing scripts, functions and application for geographic work.
+We had an opportunity to demonstrate some contents of the in-progress *Geocomputation with R* at the eRum conference last week, where Jannes and Robin ran a [workshop](http://2018.erum.io/#talk-2-305) on the topic.
+In this post we provide provide links to teaching materials we produced for the workshop and provide a some information about the book.
+
+# Gecomp 'base' ics
+
+Like many open source projects R is evolving.
+Although 'base R' is conservative (as demonstrated in Roger Bivand's keynote, in which he did a live demo using a version of R from 1997 that still runs!), the 'ecosystem' of packages that extend its capabilities changes fast (video [here](https://www.youtube.com/watch?v=Luxllb_WAqY), slides at [rsbivand/eRum18](https://github.com/rsbivand/eRum18)).
+
+To clarify what we mean by 'base R', we can identify base packages with the following code (source: [stackoverflow](https://stackoverflow.com/questions/9700799/difference-between-r-base-and-r-recommended-packages)):
+
+```{r}
+x <- installed.packages()
+row.names(x)[!is.na(x[ ,"Priority"])]
+```
+
+The output shows there are 28 packages that are currently part of the base distribution (R Core makes "base R" as Martin Maechler [put it](http://stat.ethz.ch/~maechler/U/R/eRum_2018_ProgR-ALTREP.html#29) during another [keynote](http://stat.ethz.ch/~maechler/U/R/eRum_2018_ProgR-ALTREP.html#1)).
+These can be relied-on to change very little in terms of their API, although bug fixes and performance improvements happen continuously.
+
+The same cannot be said of contributed packages.
+Packages are created, die (or are 
+[abandoned]https://www.r-bloggers.com/a-story-of-life-and-death-on-cran-with-packages/)) and change, sometimes [dramatically](https://github.com/ropensci/stplanr/issues/210).
+And this applies as much (or more) to r-spatial as to any other part of R's ecosystem, as can be seen by looking at any one of R's [task views](https://github.com/ropensci/stplanr/issues/210).
+At the time of writing the [Spatial task view](https://cran.r-project.org/web/views/Spatial.html) alone listed 177 packages, many of them recently contributed and in-development.  
+
+In this context it helps to have an understanding of the history.
+Like in politics, knowing the past can help navigate the future.
+More specifically, knowing which packages are mature or up-and-coming can help decide which one to use!
+
+For this reason, after a [slide](https://geocompr.github.io/slides/01_basics.html#2) on set-up (which is described in detail in chapter [2](http://geocompr.robinlovelace.net/spatial-class.html#prerequisites) of the book), the workshop spent a decent amount of time talking about the history of spatial data in R, as illustrated in slide [20](https://geocompr.github.io/slides/01_basics.html#53).
+A more detailed account of the history of R-spatial is provided in section [1.5](http://geocompr.robinlovelace.net/intro.html#the-history-of-r-spatial) of the book.
+
+<!-- Idea: if iframe fails, add a screenshot. -->
+
+<iframe src="https://geocompr.github.io/slides/01_basics.html#1">
+  <p>Your browser does not support iframes.</p>
+</iframe>
+
+The slides outlining the basics of Geocomputation with R (which is roughly a synonym for R-Spatial) can be found here: https://geocompr.github.io/slides/01_basics.html
+
+# Vector data
+
+Vector data refers to anything that is represented by (relatively) precise coordinates, such as 'Budapest' (the city where eRum 2018 was held) which can be represented in the `sf` package as follows:
+
+```{r}
+budapest_df = data.frame(
+  name = "Budapest",
+  x = 19.0,
+  y = 47.5
+  )
+class(budapest_df)
+budapest_sf = sf::st_as_sf(budapest_df, coords = c("x", "y"))
+class(budapest_sf)
+```
+
+Why bother creating a new class if both objects contain the same essential data?
+It's what you can do with object that's important.
+The reason for using the `sf` class can be understood as follows: it gives the `budapest_sf` spatial superpowers.
+We can, for example, now identify what country the point is using a spatial function such as a [spatial join](http://geocompr.robinlovelace.net/spatial-operations.html#spatial-joining) implemented in the function `st_join()` (spatial subsetting would also do the trick, as covered in section [4.2.1](http://geocompr.robinlovelace.net/spatial-operations.html#spatial-subsetting)).
+First, we need to load the 'world' dataset and set the 'CRS' of the object:
+
+```{r}
+# set-up:
+library(spData)
+sf::st_crs(budapest_sf) = 4326
+
+# spatial join:
+sf::st_join(budapest_sf, world)
+```
+
+The slides describing vector data in R can be found here: https://geocompr.github.io/slides/02_vector.html#1
+
+# Raster data
+
+... Jannes / Jakub ...
+
+The slides associated with the raster data part of the workshop can be found at https://geocompr.github.io/slides/03_raster.html#1
+
+# Visualising spatial data
+
+The spatial powers mentioned previously have numerous advantages.
+One of the most attractive is that geographic data in a appropriate classes can be visualised on a map, the topic of [Chapter 9](http://geocompr.robinlovelace.net/adv-map.html) of the book.
+
+The workshop was an opportunity to expand on the contents of that chapter and ask:
+what's the purpose of maps in the first place?
+To answer that question we used an early data visualisation / infographic created by Alexander von Humboldt, illustrated below.
+The point of this is that it's not always the accuracy of a map that's most important (although that is important):
+the meaning that you wish to convey and the target audience should be central to the design of the map (in Humboldt's case the unity of nature to an audience of Enlightenment book readers!):
+
+```{r, echo=FALSE, out.width="80%"}
+knitr::include_graphics("https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Zentralbibliothek_Z%C3%BCrich_-_Ideen_zu_einer_Geographie_der_Pflanzen_nebst_einem_Naturgem%C3%A4lde_der_Tropenl%C3%A4nder_-_000012142.jpg/2560px-Zentralbibliothek_Z%C3%BCrich_-_Ideen_zu_einer_Geographie_der_Pflanzen_nebst_einem_Naturgem%C3%A4lde_der_Tropenl%C3%A4nder_-_000012142.jpg")
+```
+
+In the context of geographic data in R, it is easier than ever to create attractive maps to tell a story.
+The previously created point representing Budapest, for example, can be visualised using the **tmap** package as follows:
+
+```{r}
+library(tmap)
+tmap_mode("view")
+tm_shape(budapest_sf) +
+  tm_bubbles()
+```
+
+Range of mapping techniques were covered including the `plot()` method from the `sf` package that generates multiple maps from a single object by default, such as this one representing the `nz` (short for New Zealand) object from the **spData** package:
+
+![](https://geocompr.github.io/slides/04_viz_files/figure-html/unnamed-chunk-7-1.png)
+
+More advanced maps were demonstrated, including this animated map of the United States (for information on how to make animated maps with R, see section [9.3](http://geocompr.robinlovelace.net/adv-map.html#animated-maps)) of *Geocomputation with R*.
+
+![](https://user-images.githubusercontent.com/1825120/38543030-5794b6f0-3c9b-11e8-9da9-10ec1f3ea726.gif)
+
+The slides forming the basis of the visualisation part of the tutorial can be found here: https://geocompr.github.io/slides/04_viz.html#1
+
+# Last but not least was a section on GIS bridges
+
+... Jannes ...
+
+
+# Background on the book
+
+*Geocomputation with R* is a collaboration between three people who have been teaching and contributing to R's spatial ecosystem for some time.
+As described in a previous [article](https://nowosad.github.io/post/geocomputation-with-r-the-intermission/) by Jakub, we're making good progress towards finishing the book by the end of summer 2018, meaning *Geocomputation with R* will be published before the end of the year (could make a good Christmas present for geospatial enthusiasts).
+Since then we have progressed apace and have sent the set of chapters for peer review, a process that is vital to improving the quality of academic work, that has already greatly benefited the book (many thanks to the books reviewers so far).
+
+If you're interested in getting involved in this project, please see the project's GitHub repo: https://github.com/Robinlovelace/geocompr
+
+...
