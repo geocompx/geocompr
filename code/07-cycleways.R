@@ -2,7 +2,7 @@ if(!exists("route_cycleway")) {
   source("code/chapters/07-transport.R")
 } 
 tmap_mode("plot")
-bristol_stations_top = bristol_stations[knn_orig, ]
+bristol_stations_top = bristol_stations[desire_rail, , op = st_is_within_distance, dist = 500]
 m_leaflet = tm_shape(bristol_ways) +
   tm_lines(col = "highway", lwd = 3, palette = c("lightgreen", "grey", "pink")) +
   tm_scale_bar() +
