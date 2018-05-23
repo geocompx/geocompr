@@ -9,15 +9,14 @@ The code does not have to be self-standing: it can depend on code run previously
 - `"text"` - double quotes for character values
 - `for(i in 1:9) {print(i)}` - use space separation for curly brackets
 - When indenting your code, use two spaces (tab in RStudio)
-- code files should 
-  - feature a name, a date, a short description (to do) and a table of contents
-  - be sectioned with the help of `---`, `===`, and `###`
-The beginning of a code script could look like this:
+- When using pipes, pipe the first object (`x %>% fun() %>% ...` not `fun(x) %>% ...`)
+- Scripts should (see example below): 
+  - state their aim and (if appropriate) a date and a table of contents
+  - be sectioned with the help of `---`, `===`, and `###` e.g. as acheived by pressing `Ctl-Shift-R`
 
 ```
 # Filename: filename.R (2018-02-06)
-#
-# TO DO: What should the script achieve
+# Aim: What should the script achieve
 #
 # Author(s): Robin Lovelace, Jakub Nowosad, Jannes Muenchow
 #
