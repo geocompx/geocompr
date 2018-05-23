@@ -175,7 +175,8 @@ nrow(bristol_zones)
 The results of the previous code chunk shows that there are more than 10 OD pairs for every zone, meaning we will need to aggregate the origin-destination data before it is joined with `bristol_zones`, as illustrated below (origin-destination data is described in section \@ref(desire-lines)):
 
 ```{r}
-zones_attr = group_by(bristol_od, o) %>% 
+zones_attr = bristol_od %>% 
+  group_by(o) %>% 
   summarize_if(is.numeric, sum) %>% 
   rename(geo_code = o)
 ```
@@ -222,7 +223,8 @@ This explains why the spatial distribution represented in the right panel in Fig
 The result is `zones_od`, which contains a new column reporting the number of trip destinations by any mode, is created as follows:
 
 ```{r}
-zones_od = group_by(bristol_od, d) %>% 
+zones_od = bristol_od %>% 
+  group_by(d) %>% 
   summarize_if(is.numeric, sum) %>% 
   dplyr::select(geo_code = d, all_dest = all) %>% 
   inner_join(zones_joined, ., by = "geo_code")
@@ -249,7 +251,8 @@ This origin-destination (OD) data frame object represents the number of people t
 To arrange the OD data by all trips and then filter-out only the top 5, type (please refer to Chapter \@ref(attr) for a detailed description of non-spatial attribute operations):
 
 ```{r}
-od_top5 = arrange(bristol_od, desc(all)) %>% 
+od_top5 = bristol_od %>% 
+  arrange(desc(all)) %>% 
   top_n(5, wt = all)
 ```
 
@@ -516,7 +519,8 @@ The final code chunk of this chapter combines these strands of analysis.
 It adds the car-dependent routes in `route_carshort` with a newly-created object, `route_rail` and creates a new column representing the amount of travel along the centroid-to-centroid desire lines they represent:
 
 ```{r, eval=FALSE}
-route_rail = st_set_geometry(desire_rail, "leg_orig") %>% 
+route_rail = desire_rail %>% 
+  st_set_geometry("leg_orig") %>% 
   line2route(route_fun = route_osrm) %>% 
   st_set_crs(4326)
 ```

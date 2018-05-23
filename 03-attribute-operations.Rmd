@@ -260,10 +260,8 @@ knitr::kable(data_frame(Symbol = operators, Name = operators_exp), caption = "Ta
 <!-- add warning about = vs == -->
 <!-- add info about combination of &, |, ! -->
 
-A benefit of **dplyr** is its compatibility with the *pipe* operator ` %>% `.
-This 'R pipe', which takes its name from the Unix pipe `|` and is part of the **magrittr** package, enables expressive code by 'piping' the output of a previous command into the first argument of the next function.
-This allows *chaining* data analysis commands, with the data frame being passed from one function to the next.
-
+**dplyr** works well with the ['pipe'](http://r4ds.had.co.nz/pipes.html) operator `%>%`, which takes its name from the Unix pipe `|` [@grolemund_r_2016].
+It enables expressive code: the output of a previous becomes the first argument of the next function, enabling *chaining*.
 This is illustrated below, in which the `world` dataset is subset by columns (`name_long` and `continent`) and the first five rows (result not shown).
 
 ```{r}
@@ -275,7 +273,7 @@ world7 = world %>%
 
 The above chunk shows how the pipe operator allows commands to be written in a clear order:
 the above run from top to bottom (line-by-line) and left to right.
-Without `%>%` one would be forced to create intermediary objects or use nested function calls, e.g.:
+The alternative to `%>%` is nested function calls, which is harder to read:
 
 ```{r}
 world8 = slice(
@@ -285,9 +283,10 @@ world8 = slice(
   1:5)
 ```
 
-This generates the same result --- verify this with `identical(world7, world8)` --- in the same number of lines of code, but in a much more confusing way, starting with the function that is called last!
+<!-- I commented-this out as it's overly wordy (RL) -->
+<!-- This generates the same result --- verify this with `identical(world7, world8)` --- in the same number of lines of code, but in a much more confusing way, starting with the function that is called last! -->
 
-There are additional advantages of pipes from a communication perspective: they encourage adding comments to self-contained functions and allow single lines *commented-out* without breaking the code.
+<!-- There are additional advantages of pipes from a communication perspective: they encourage adding comments to self-contained functions and allow single lines *commented-out* without breaking the code. -->
 
 ### Vector attribute aggregation
 
@@ -320,24 +319,24 @@ As illustrated above, an object of class `sf` is returned this time.
 It usually follows `group_by()`, which specifies the grouping variable, as illustrated below:
 
 ```{r}
-world_agg3 = group_by(world, continent) %>%
+world_agg3 = world %>%
+  group_by(continent) %>%
   summarize(pop = sum(pop, na.rm = TRUE))
 ```
 
-This approach is flexible, allowing the resulting columns to be named.
-`summarize()` can also be used to calculate the Earth's total population (~7 billion) and number of countries as you will see if execute the following command (result not shown):
+This approach is flexible and gives control over the new column names.
+This is illustrated below: the command calculates the Earth's population (~7 billion) and number of countries (result not shown):
 
 ```{r, eval=FALSE}
 world %>% 
-  summarize(pop = sum(pop, na.rm = TRUE), n_countries = n())
+  summarize(pop = sum(pop, na.rm = TRUE), n = n())
 ```
 
-Again, this returns spatial data frame of class `sf`: the aggregation procedure dissolves boundaries within continental land masses (explained in detail in section \@ref(geometry-unions)), resulting in a single feature representing the world.
-In the previous code chunk `pop` and `n_countries` are column names in the result.
+In the previous code chunk `pop` and `n` are column names in the result.
 `sum()` and `n()` were the aggregating functions.
+The result is an `sf` object with a single row representing the world (this works thanks to the geometric operation 'union', as explained in section \@ref(geometry-unions)).
 
-Let's combine what we've learned so far about **dplyr** by chaining together functions to find the world's 3 most populous continents (with `dplyr::n()` ) and the number of countries they contain.
-The output of the following code is presented in Table \@ref(tab:continents)):
+Let's combine what we've learned so far about **dplyr** by chaining together functions to find the world's 3 most populous continents (with `dplyr::n()` ) and the number of countries they contain (the result of this command is presented in Table \@ref(tab:continents)):
 
 ```{r, eval=FALSE}
 world %>% 
