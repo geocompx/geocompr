@@ -24,21 +24,21 @@ terrain_colors = carto_pal(7, "TealRose")
 
 pz1 = tm_shape(srtm) + 
   tm_raster(palette = terrain_colors, title = "Elevation (m)", 
-            legend.show = TRUE, auto.palette.mapping = FALSE, style = "cont") + 
+            legend.show = TRUE, style = "cont") + 
   tm_shape(zion) +
   tm_borders(lwd = 2) + 
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
 pz2 = tm_shape(srtm_cropped) + 
   tm_raster(palette = terrain_colors, title = "Elevation (m)", 
-            legend.show = TRUE, auto.palette.mapping = FALSE, style = "cont") + 
+            legend.show = TRUE, style = "cont") + 
   tm_shape(zion) +
   tm_borders(lwd = 2) + 
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
 pz3 = tm_shape(srtm_masked) + 
   tm_raster(palette = terrain_colors, title = "Elevation (m)",
-            legend.show = TRUE, auto.palette.mapping = FALSE, style = "cont") + 
+            legend.show = TRUE, style = "cont") + 
   tm_shape(zion) +
   tm_borders(lwd = 2) + 
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
@@ -61,7 +61,7 @@ library(grid)
 
 rast_poly_point = tm_shape(srtm) +
   tm_raster(palette = terrain_colors, title = "Elevation (m)", 
-            legend.show = TRUE, auto.palette.mapping = FALSE, style = "cont") + 
+            legend.show = TRUE, style = "cont") + 
   tm_shape(zion) +
   tm_borders(lwd = 2) + 
   tm_shape(zion_points) + 
@@ -90,7 +90,7 @@ zion_transect_points$name = c("start", "end")
 
 rast_poly_line = tm_shape(srtm) +
   tm_raster(palette = terrain_colors, title = "Elevation (m)", 
-            legend.show = TRUE, auto.palette.mapping = FALSE, style = "cont") + 
+            legend.show = TRUE, style = "cont") + 
   tm_shape(zion) +
   tm_borders(lwd = 2) + 
   tm_shape(zion_transect) + 
@@ -140,7 +140,7 @@ library(grid)
 
 rast_poly_srtm = tm_shape(srtm) +
   tm_raster(palette = terrain_colors, title = "Elevation (m)", 
-            legend.show = TRUE, auto.palette.mapping = FALSE, style = "cont") + 
+            legend.show = TRUE, style = "cont") + 
   tm_shape(zion) +
   tm_borders(lwd = 2) +
   tm_layout(legend.frame = TRUE, legend.position = c("left", "bottom"))
