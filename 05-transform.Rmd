@@ -193,11 +193,29 @@ This means that when working with local data sources, it is likely preferable to
 The example of London was easy to answer because a) the CRS 'BNG' (with its associated EPSG code 27700) is well-known and b) the original dataset (`london`) already had that CRS.
 
 What about when a projected CRS is needed but the study region lacks a well-known CRS?
-Again, although there is no universal answer there is a sensible default CRS: Universal Transverse Mercator ([UTM](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system)).
-UTM is not actually a single CRS but a system of CRSs that covers the entire world, and breaks it into 60 segments, each containing 6 degrees of longitude.
-All UTM projections have the same datum (WGS84) and their EPSG codes run sequentially from 32601 to 32660.
-This makes it possible to create a function (we'll call it `lonlat2UTM`) to calculate the EPSG code associated with any point on the planet as follows:^[
-Thanks to Josh O'Brien who provided the basis for this function in an answer to a question on [stackoverflow](https://stackoverflow.com/a/9188972).
+Again there is no universal answer but a commonly used default:
+Universal Transverse Mercator ([UTM](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system)), a set of CRSs that divides the Earth into 60 longitudinal wedges and 20 latitudinal segments.
+This system gives gives everywhere on Earth a UTM code, such as "60H" which refers to northern New Zealand where R was invented.
+All UTM projections have the same datum (WGS84) and their EPSG codes run sequentially from 32601 to 32660 (for northern hemisphere locations) and 32701 to 32760 (southern hemisphere locations).
+
+```{r, eval=FALSE, echo=FALSE}
+utm_nums_n = 32601:32660
+utm_nums_s = 32701:32760
+crs_data = rgdal::make_EPSG()
+crs_data[grep(utm_nums_n[1], crs_data$code), ] # zone 1N
+crs_data[grep(utm_nums_n[60], crs_data$code), ] # zone 60N
+crs_data[grep(utm_nums_s[1], crs_data$code), ] 
+crs_data[grep(utm_nums_s[60], crs_data$code), ] 
+crs_data[grep("UTM zone 60N", crs_data$note), ] # many
+crs_data[grep("UTM zone 60S", crs_data$note), ] # many
+crs_data[grep("UTM zone 60S", crs_data$note), ] # many
+crs_utm = crs_data[grepl("utm", crs_data$prj4), ] # 1066
+crs_utm_zone = crs_utm[grepl("zone=", crs_utm$prj4), ]
+crs_utm_south = crs_utm[grepl("south", crs_utm$prj4), ]
+```
+
+To show how the system works let's create a function, `lonlat2UTM()` to calculate the EPSG code associated with any point on the planet as follows:^[
+Credit: Josh O'Brien's post on [stackoverflow](https://stackoverflow.com/a/9188972) inspired this function.
 ] 
 
 <!-- Idea: create full function with message and flexibility in later chapter (RL) -->
@@ -205,19 +223,28 @@ Thanks to Josh O'Brien who provided the basis for this function in an answer to 
 ```{r}
 lonlat2UTM = function(lonlat) {
   utm = (floor((lonlat[1] + 180) / 6) %% 60) + 1
-  utm + 32600
+  if(lonlat[2] > 0) utm + 32600 else
+    utm + 32700
 }
 ```
 
-The following command uses this function to identify the UTM zone and associated EPSG code for London:
+The following commands uses this function to identify the UTM zone and associated EPSG code for Auckland and London:
 
-```{r}
-(epsg_utm = lonlat2UTM(st_coordinates(london)))
-st_crs(epsg_utm)
+```{r, echo=FALSE, eval=FALSE}
+stplanr::geo_code("Auckland")
 ```
 
-As expected by viewing a map of UTM zones (such as that provided by [dmap.co.uk](http://www.dmap.co.uk/utmworld.htm)), the EPSG code returned refers to UTM zone 30, which would represent a good projected CRS for England if the BNG did not exist.
+
+```{r}
+epsg_utm_auk = lonlat2UTM(c(174.7, -36.9))
+epsg_utm_lnd = lonlat2UTM(st_coordinates(london))
+st_crs(epsg_utm_auk)$proj4string
+st_crs(epsg_utm_lnd)$proj4string
+```
+
+Maps of UTM zones such as that provided by [dmap.co.uk](http://www.dmap.co.uk/utmworld.htm) confirm: the London is in UTM zone 30U.
 <!-- London can be transformed into this CRS as follows (result not shown): -->
+<!-- idea: create figure showing UTM zones -->
 
 <!-- ```{r} -->
 <!-- lnd_utm = st_transform(london, crs = epsg_utm) -->
