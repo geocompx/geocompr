@@ -303,19 +303,25 @@ Next it would be interesting to have a look at the distribution of interzonal mo
 From a geographical perspective routes are desire lines that are no longer straight:
 the origin and destination points are the same, but the pathway to get from A to B is more complex.
 Desire lines contain only two vertices (their beginning and end points) but routes can contain hundreds of vertices if they cover a large distance or represent travel patterns on an intricate road network (routes on simple grid-based road networks require relatively few vertices).
+Routes are generated from desire lines --- or more commonly origin-destination pairs --- using routing services which either run locally or remotely.
 
-Routes are generated from desire lines --- or more commonly origin-destination pairs --- using routing algorithms.
-Routing algorithms can either run locally or remotely.
-Routing is computationally intensive and might be slow on a local machine (depending on the hardware).
-In any case, local routing requires the route network to be stored on a local computer (we will see how in section \@ref(route-networks)).
-By contrast, remote routing services use a web API to receive queries about origin and destination points, run the routing on the route network on a powerful server and return just the results, the routes, to the user, the so-called client.
-There are many advantages of using remote routing services, including the fact that they can be up-to-date, have global coverage, and run on a set-up that was designed for the job, explaining this section's focus on online routing services.
+**Local routing** can be advantageous in terms of speed of execution and control over the weighting profile for different modes of transport.
+Disadvantages include the difficulty of representing complex networks locally; temporal dynamics (e.g. due to traffic); and the need for specialized software such as 'pgRouting' and PostGIS (an issue that developers of packages **stplanr** and **dodgr** seek to resolve  see section \@ref(route-networks)).
 
-Before proceeding, there are couple of important disadvantages of online routing services to consider: they can be slow (because they rely on data transfer over the internet) and expensive.
-The Google routing API, for example, has a limit of 2500 free queries per day.^[`ggmap::route()` lets you use Google's routing API through R and the **dodgr** package allows for rapid routing on locally stored route network data.]
+**Remote routing** services, by contrast, use a web API to send queries about origins and destinations and return results generated on a powerful server running specialised software.
+This gives remote routing services various advantages, including that they usually:
+
+- update regularly
+- have global coverage
+- and run on specialist hardware and software set-up for the job
+
+<!-- , explaining this section's focus on online routing services. -->
+
+Disadvantages of remote routing services include speed (they rely on data transfer over the internet) and price (the Google routing API, for example, has a limit of 2500 free queries per day).
+The **googleway** package provides an interface to Google's routing API
 <!-- Todo: add link to Mark's presentation on dodgr vs Google routing costs (RL) -->
+Free (but rate limited) routing service include [OSRM](http://project-osrm.org/) and [openrouteservice.org](https://openrouteservice.org/).
 
-A popular and free routing service is the Open Source Routing Machine ([OSRM](http://project-osrm.org/)).^[Another popular OSM routing API is https://openrouteservice.org/.]
 Instead of routing *all* desire lines generated in the previous section, which would be time and memory-consuming, we will focus on the desire lines of policy interest.
 The benefits of cycling trips are greatest when they replace car trips.
 Clearly not all car trips can realistically be replaced by cycling, but 5 km Euclidean distance (or around 6-8 km of route distance) is easily accessible within 30 minutes for most people.
@@ -332,7 +338,6 @@ desire_carshort = dplyr::filter(desire_lines, car_driver > 300 & distance < 5000
 ```{r, eval=FALSE}
 route_carshort = line2route(desire_carshort, route_fun = route_osrm)
 ```
-
 
 `st_length()` determines the length of a linestring, and falls into the distance relations category (see also section \@ref(distance-relations)).
 Subsequently, we apply a simple attribute filter operation (see section \@ref(vector-attribute-subsetting)) before letting the OSRM service do the routing on a remote server.
