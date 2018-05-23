@@ -894,11 +894,7 @@ source("code/05-venn-clip.R")
 
 To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
 Some points will be inside just one circle, some will be inside both and some will be inside neither.
-
-There are two different ways to subset points that fit into combinations of the circles: via clipping and logical operators.
-But first we must generate some points.
-We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y` using the **sf** function `st_sample()`.
-This generates objects plotted in Figure \@ref(fig:venn-subset):
+`st_sample()` is used below to generate a *simple random* distribution of points within the extent of circles `x` and `y`, resulting in output illustrated in Figure \@ref(fig:venn-subset).
 
 ```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y."}
 bb = st_bbox(st_union(x, y))
@@ -913,7 +909,19 @@ plot(p, add = TRUE)
 text(x = c(-0.5, 1.5), y = 1, labels = l)
 ```
 
-```{r, echo=FALSE}
+The logical operator way would find the points inside both `x` and `y` using a spatial predicate such as `st_intersects()` whereas the intersection method simply finds the points inside the intersecting region created above as `x_and_y`.
+As demonstrated below the results are identical, but the method that uses the clipped polygon is more concise:
+
+```{r}
+sel_p_xy = st_intersects(p, x, sparse = FALSE)[, 1] &
+  st_intersects(p, y, sparse = FALSE)[, 1]
+p_xy1 = p[sel_p_xy]
+p_xy2 = p[x_and_y]
+identical(p_xy1, p_xy2)
+```
+
+
+```{r, echo=FALSE, eval=FALSE}
 # An alternative way to sample from the bb
 bb = st_bbox(st_union(x, y))
 pmulti = st_multipoint(pmat)
