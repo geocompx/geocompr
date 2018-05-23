@@ -930,19 +930,14 @@ box = st_convex_hull(pmulti)
 
 ### Geometry unions
 
-Spatial aggregation can also be done in the **tidyverse**, using **dplyr** functions as follows:
-
-```{r, eval = FALSE}
-group_by(us_states, REGION) %>%
-  summarize(sum(pop = total_pop_15, na.rm = TRUE))
-```
-
-Further to what was covered in section \@ref(vector-attribute-aggregation), aggregation of polygons often silently dissolves the geometries of touching polygons in the same group.
-This is demonstrated in the code chunk below, in which the `REGION` variable in `us_states` is used to aggregate the states into four regions, illustrated in Figure \@ref(fig:us-regions):
+As we saw in section \@ref(vector-attribute-aggregation), spatial aggregation can silently dissolve the geometries of touching polygons in the same group.
+This is demonstrated in the code chunk below in which 49 `us_states` are aggregated into 4 regions using base and **tidyverse** functions (see results in Figure \@ref(fig:us-regions)):
 
 ```{r}
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
                     FUN = sum, na.rm = TRUE)
+regions2 = us_states %>% group_by(REGION) %>%
+  summarize(pop = sum(total_pop_15, na.rm = TRUE))
 ```
 
 ```{r, echo=FALSE}
@@ -955,12 +950,27 @@ regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION)
 source("code/05-us-regions.R", print.eval = TRUE)
 ```
 
-The equivalent result can be achieved using **tidyverse** functions as follows (result not shown):
+What is going on in terms of the geometries?
+Behind the scenes, both `aggregate()` and `summarize()` combine the geometries and disolve the boundaries between them using `st_union()`.
+This is demonstrated in the code chunk below which creates a united western US: 
 
-```{r, eval=FALSE}
-regions2 = us_states %>% 
-  group_by(REGION) %>%
-  summarize(pop = sum(total_pop_15, na.rm = TRUE))
+```{r}
+us_west = us_states[us_states$REGION == "West", ]
+us_west_union = st_union(us_west)
+```
+
+The function can take two geometries and union them, as demonstrated in the code chunk below which creates a united western block incorporating Texas (challenge: reproduce and plot the result):
+
+```{r, message=FALSE}
+texas = us_states[us_states$NAME == "Texas", ]
+texas_union = st_union(us_west_union, texas)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+plot(texas_union)
+# aim: experiment with st_union
+us_south2 = st_union(us_west[1, ], us_west[6, ])
+plot(us_southhwest)
 ```
 
 ### Type transformations {#type-trans}
