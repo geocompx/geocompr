@@ -1153,11 +1153,12 @@ Note that changing the resolution frequently (next section) also changes the ori
 Raster datasets can also differ with regard to their resolution. 
 To match resolutions, one can either decrease  (`aggregate()`) or increase (`disaggregate()`) the resolution of one raster.^[It is important to note that we here are solely referring to the spatial resolution but that in remote sensing the spectral (spectral bands), temporal (observations through time of the same area) and radiometric (color depth) resolution are equally important.
 Check out the `stackApply()` example in the documentation for getting an idea how to do temporal raster aggregation.]
-As an example, we here change the spatial resolution of `elev` from 0.5 to 2 decimal degree, that means, we aggregate by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
+As an example, we here change the spatial resolution of `dem` (found in the **RQGIS** package) by a factor of 5 (Fig. \@ref(fig:aggregate-example)).
 Additionally, the output cell value should correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()` etc.):
 
 ```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."}
-elev_agg = aggregate(elev, fact = 2, fun = mean)
+data("dem", package = "RQGIS")
+dem_agg = aggregate(dem, fact = 5, fun = mean)
 par(mfrow = c(1, 2))
 plot(elev)
 plot(elev_agg)
@@ -1167,13 +1168,12 @@ By contrast, the`disaggregate()` function increases the resolution.
 However, we have to specify a method how to fill the new cells.
 The `disaggregate()` function provides two methods.
 The first (nearest neighbor, `method = ""`) simply gives all output cells the value of the nearest input cell, and hence duplicates values which leads to a blocky output image.
-For example, the four cells building up the upper left cell of the aggregated raster (Fig. \@ref(fig:aggregate-example)) will retrieve all the same value, namely 4.5.
 
 The `bilinear` method, in turn, is an interpolation technique that uses the four nearest pixel centers of the input image (salmon colored points in Fig. \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Fig. \@ref(fig:bilinear) as the value of the output cell - square in the upper left corner in Fig. \@ref(fig:bilinear)).
 
 ```{r}
-elev_disagg = disaggregate(elev_agg, fact = 2, method = "bilinear")
-all(values(elev) == values(elev_disagg))
+dem_disagg = disaggregate(dem_agg, fact = 5, method = "bilinear")
+identical(dem, dem_disagg)
 ```
 
 ```{r bilinear, echo = FALSE, fig.width=8, fig.height=10, fig.cap="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation."}
@@ -1200,9 +1200,8 @@ plot(rasterToPolygons(elev[1, drop = FALSE]), add = TRUE)
 
 ```
 
-Comparing the values of `elev` and `elev_disagg` tells us that both are identical (you can also use `compareRaster()` or `all.equal()`).
-Please note that the disaggregation only predicted correctly the values at a higher resolution due to our artificial input data set (`elev`) and the fact that we have used the mean for the aggregation (`elev_agg`).
-However, this is usually not to be expected, since disaggregating is a simple interpolation technique.
+Comparing the values of `dem` and `dem_disagg` tells us that they are not identical (you can also use `compareRaster()` or `all.equal()`).
+However, this was hardly to be expected, since disaggregating is a simple interpolation technique.
 It is important to keep in mind that disaggregating results in a finer resolution, the corresponding values, however, are only as accurate as their lower resolution source.
 
 The process of computing values for new pixel locations is also called resampling. 
@@ -1212,8 +1211,8 @@ By default, it uses the `bilinear`-interpolation.
 
 ```{r}
 # add 2 rows and columns, i.e. change the extent
-elev_agg = extend(elev_agg, 2)
-elev_disagg_2 = resample(elev_agg, elev)
+elev_agg = extend(dem_agg, 2)
+dem_disagg_2 = resample(elev_agg, dem)
 ```
 
 Finally, in order to align many (possibly hundreds or thousands of) images stored on disk, you could use the `gdalUtils::align_rasters()` function.
