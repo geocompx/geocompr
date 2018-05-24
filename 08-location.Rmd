@@ -4,7 +4,7 @@
 
 - This chapter requires the following packages (**ggmap** must also be installed):
 
-```{r, message = FALSE} 
+```{r, message=FALSE} 
 library(sf)
 library(raster)
 library(tidyverse)
@@ -66,7 +66,7 @@ Although we have applied these steps to a specific case study, they could be gen
 The German government provides gridded census data at either 1 km or 100 m resolution.
 The following code chunk downloads, unzips and reads-in the 1 km data.
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 download.file("https://tinyurl.com/ybtpkwxz", 
               destfile = "census.zip", mode = "wb")
 unzip("census.zip") # unzip the files
@@ -94,7 +94,7 @@ input_tidy = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
 ```
 
 
-```{r census-desc, echo = FALSE}
+```{r census-desc, echo=FALSE}
 tab = tribble(
   ~"class", ~"pop", ~"women", ~"age", ~"hh",
   1, "3-250", "0-40", "0-40", "1-2", 
@@ -136,7 +136,7 @@ Since we are using mainly densities such as the number of inhabitants or the por
 Be careful with geographic CRS where grid cell areas constantly decrease in poleward directions (see also sections \@ref(crs-intro) and \@ref(reproj-geo-data)). 
 ```
 
-```{r census-stack, echo = FALSE, fig.cap = "Gridded German census data of 2011. See Table \\@ref(tab:census-desc) for a description of the classes."}
+```{r census-stack, echo=FALSE, fig.cap="Gridded German census data of 2011. See Table \\@ref(tab:census-desc) for a description of the classes."}
 knitr::include_graphics("figures/08_census_stack.png")
 ```
 
@@ -206,7 +206,7 @@ It would be nice if we could join all cells belonging to one region.
 **raster**'s `clump()` command does exactly that.
 Subsequently, `rasterToPolygons()` converts the raster object into spatial polygons, and `st_as_sf()` converts it into an `sf`-object.
 
-```{r}
+```{r, warning=FALSE}
 polys = pop_agg %>% 
   clump %>%
   rasterToPolygons %>%
@@ -290,7 +290,7 @@ st_centroid(metros) %>%
 -->
 
 
-```{r metro-areas, echo = FALSE, fig.width = 1, fig.height = 1, fig.cap = "The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names."}
+```{r metro-areas, echo=FALSE, fig.width=1, fig.height=1, fig.cap="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names."}
 knitr::include_graphics("figures/08_metro_areas.png")
 ```
 
@@ -316,7 +316,7 @@ However, if ten attempts have already failed, this is a good indication that the
 Since we aim to be good cyberspace citizens, we try not to overburden the server with too many queries within a short amount of time by letting the loop sleep between one and four seconds after each iteration before accessing the reverse geocoding API again.
 Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
 
-```{r, eval = FALSE, warning = FALSE, message = FALSE}
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
 # reverse geocoding to find out the names of the metropolitan areas
 metro_names = map_dfr(1:nrow(coords), function(i) {
   add = ggmap::revgeocode(coords[i, ], output = "more")
@@ -379,7 +379,7 @@ If then still no features can be downloaded, it is likely that either there are 
 Before running the next code chunk, keep in mind that this will download almost 2GB of data. 
 As a convenience to the reader, we have put the further processed output into the **spDataLarge** package (`data("shops", package = "spDataLarge")`; see also further below).
 
-```{r, eval = FALSE, message = FALSE}
+```{r, eval=FALSE, message=FALSE}
 shops = map(metro_names, function(x) {
   message("Downloading shops of: ", x, "\n")
   # give the server a bit time
@@ -401,7 +401,7 @@ It is highly unlikely that there are no shops in any of our defined metropolitan
 The following `if` condition simply checks if there is at least one shop for each region.
 If not, we would try to download the shops again for this/these specific region/s.
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 # checking if we have downloaded shops for each metropolitan area
 ind = map(shops, nrow) == 0
 if (any(ind)) {
@@ -414,7 +414,7 @@ To make sure that each list element (an `sf` data frame) comes with the same col
 This is not a given since OSM contributors are not equally meticulous when collecting data.
 Finally, we `rbind` all shops into one large `sf` object.
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 # select only specific columns
 shops = map(shops, dplyr::select, osm_id, shop)
 # putting all list elements into a single dataframe
@@ -433,7 +433,7 @@ The only thing left to do is to convert the spatial point object into a raster (
 The `sf` object, `shops`, is converted into a raster having the same parameters (dimensions, resolution, CRS) as the `reclass` object.
 Importantly, the `count()` function is used here to calculate the number shops in each cell.
 
-```{block2 type = 'rmdnote'}
+```{block2 type='rmdnote'}
 If the `shop` column were used instead of the `osm_id` column, we would have retrieved fewer shops per grid cell. 
 This is because the `shop` column contains `NA` values, which the `count()` function omits when rasterizing vector objects.
 ```
@@ -441,7 +441,7 @@ This is because the `shop` column contains `NA` values, which the `count()` func
 The result of the subsequent code chunk is therefore an estimate of shop density (shops/km^2^).
 `st_transform()` is used before `rasterize()` to ensure the CRS of both inputs match.
 
-```{r, message = FALSE}
+```{r, message=FALSE}
 shops = st_transform(shops, proj4string(reclass))
 # create poi raster
 poi = rasterize(x = shops, y = reclass, field = "osm_id", fun = "count")
@@ -452,7 +452,7 @@ Defining class intervals is an arbitrary undertaking to a certain degree.
 One can use equal breaks, quantile breaks, fixed values or others.
 Here, we choose the Fisher-Jenks natural breaks approach which minimizes within-class variance, the result of which provides an input for the reclassification matrix.
 
-```{r, message = FALSE, warning = FALSE}
+```{r, message=FALSE, warning=FALSE}
 # construct reclassification matrix
 int = classInt::classIntervals(values(poi), n = 4, style = "fisher")
 int = round(int$brks)
@@ -490,11 +490,11 @@ result = sum(reclass)
 
 For instance, a score greater than 9 might be a suitable threshold indicating raster cells where a bike shop could be placed (Figure \@ref(fig:bikeshop-berlin); see also `code/08-location-jm.R`).
 
-```{r bikeshop-berlin, echo = FALSE, eval = TRUE, fig.cap = "Suitable areas (i.e. raster cells with a score > 9) in accordance with our hypothetical survey for bike stores in Berlin."}
+```{r bikeshop-berlin, echo=FALSE, eval=TRUE, fig.cap="Suitable areas (i.e. raster cells with a score > 9) in accordance with our hypothetical survey for bike stores in Berlin."}
 library(leaflet)
 library(sp)
 # have a look at suitable bike shop locations in Berlin
-berlin = metros_2[metro_names == "Berlin"]
+berlin = metros[metro_names == "Berlin"]
 berlin_raster = raster::crop(result, as(berlin, "Spatial"))
 # summary(berlin_raster)
 # berlin_raster
