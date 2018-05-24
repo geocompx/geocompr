@@ -212,14 +212,21 @@ It would be nice if we could join all cells belonging to one region.
 Subsequently, `rasterToPolygons()` converts the raster object into spatial polygons, and `st_as_sf()` converts it into an `sf`-object.
 
 ```{r}
-metros = pop_agg %>% 
+polys = pop_agg %>% 
   clump %>%
   rasterToPolygons %>%
   st_as_sf
 ```
 
-This results in eight metropolitan areas.
+`polys` now features a column named `clumps` which indicates to which metropolitan region each polygon belongs and which we will use to dissolve the polygons into coherent single regions (see also section \@ref(geometry-unions)):
 
+```{r}
+metros = metros %>%
+  group_by(clumps) %>%
+  summarize
+```
+
+Given no other column as input, `summarize()` only dissolves the geometry.
 
 <!-- maybe a good if advanced exercise
 This requires finding the nearest neighbors (`st_intersects()`), and some additional processing.
@@ -292,12 +299,12 @@ st_centroid(metros) %>%
 knitr::include_graphics("figures/08_metro_areas.png")
 ```
 
-The defined metropolitan areas (Fig. \@ref(fig:metro-areas); see also `code/08-location-jm.R`) suitable for bike shops are still missing a name.
+The resulting eight metropolitan areas suitable for bike shops (Fig. \@ref(fig:metro-areas); see also `code/08-location-jm.R` for creating the figure) are still missing a name.
 A reverse geocoding approach can settle this problem.
 Given a coordinate, reverse geocoding finds the corresponding address.
 Consequently, extracting the centroid coordinate of each metropolitan area can serve as an input for a reverse geocoding API.
 The **ggmap** package makes use of the one provided by Google.^[Note that Google allows each user to access its services on a free basis for a maximum of 2500 queries a day.]
-`ggmap::revgeocode()` only accepts geographical coordinates (latitude/longitude), therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system (chapter \@ref(transform)).
+`ggmap::revgeocode()` only accepts geographical coordinates (latitude/longitude), therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system (Chapter \@ref(transform)).
 
 ```{r}
 metros_wgs = st_transform(metros, 4326)
@@ -307,10 +314,10 @@ coords = st_centroid(metros_wgs) %>%
 ```
 
 Additionally, `ggmap::revgeocode()` only accepts one coordinate at a time, which is why we iterate over each coordinate of `coords` via a loop (`map_dfr()`).
-`map_dfr()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.^[To learn more about the split-apply-combine strategy for data analysis, we refer the reader to @wickham_split-apply-combine_2011.]
+`map_dfr()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.^[To learn more about `lapply()` please refer to @wickham_advanced_2014 and @grolemund_r_2016; for the split-apply-combine strategy for data analysis, we refer the reader to @wickham_split-apply-combine_2011.]
 Sometimes, Google's reverse geocoding API is unable to find an address returning `NA`.
 Usually, trying the same coordinate again returns an address at the second or third attempt (see `while()-loop`).
-However, if three or four attempts have already failed, this is a good indication that the requested information is indeed unavailable.
+However, if ten attempts have already failed, this is a good indication that the requested information is indeed unavailable.
 Since we aim to be good cyberspace citizens, we try not to overburden the server with too many queries within a short amount of time by letting the loop sleep between one and four seconds after each iteration before accessing the reverse geocoding API again.
 Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
 
@@ -318,7 +325,7 @@ Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame
 # reverse geocoding to find out the names of the metropolitan areas
 metro_names = map_dfr(1:nrow(coords), function(i) {
   add = ggmap::revgeocode(coords[i, ], output = "more")
-  x = 3
+  x = 9
   while (is.na(add$address) & x > 0) {
     add = ggmap::revgeocode(coords[i, ], output = "more")
     # just try three times
@@ -343,15 +350,15 @@ data("metro_names", package = "spDataLarge")
 knitr::kable(dplyr::select(metro_names, locality, country), caption = "Result of the reverse geocoding.")
 ```
 
-Overall, we are satisfied with the `locality` column serving as metropolitan names (Table \@ref(tab:metro-names)) apart from one exception, namely Velbert.
-Hence, we replace Velbert with the corresponding name in the `administrative_area_level_2` column, that is Düsseldorf (Fig. \@ref(fig:metro-areas)).
+Overall, we are satisfied with the `locality` column serving as metropolitan names (Table \@ref(tab:metro-names)) apart from one exception, namely Wülfrath.
+Hence, we replace Wülfrath with the corresponding name in the `administrative_area_level_2` column, that is Düsseldorf (Fig. \@ref(fig:metro-areas)).
 Umlauts like `ü` might lead to trouble further on, for example when determining the bounding box of a metropolitan area with `opq()` (see further below), which is why we replace them.
 
 ```{r}
 metro_names = 
   dplyr::select(metro_names, locality, administrative_area_level_2) %>%
-  # replace Velbert and umlaut ü
-  mutate(locality = ifelse(locality == "Velbert", administrative_area_level_2, 
+  # replace Wülfrath and umlaut ü
+  mutate(locality = ifelse(locality == "Wülfrath", administrative_area_level_2, 
                            locality),
          locality = gsub("ü", "ue", locality)) %>%
   pull(locality)
