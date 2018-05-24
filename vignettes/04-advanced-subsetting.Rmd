@@ -1,0 +1,93 @@
+# Advanced spatial subsetting
+
+This vignette demonstrates some subtleties of spatial subsetting of `sf` objects using base R and **tidyvers** methods.
+
+The starting point is to load necessary packages:
+
+```{r}
+library(sf)
+library(spData)
+library(tidyverse)
+```
+
+And subsetting canterbury and `nz_height` features in the region (as per Chapter 4 of the book):
+
+```{r}
+canterbury = nz %>% filter(Name == "Canterbury")
+canterbury_height = nz_height[canterbury, ]
+```
+
+We can see how to get a list representation for subsetting:
+
+```{r}
+sel_sgbp = st_intersects(x = nz_height, y = canterbury)
+class(sel_sgbp)
+sel_logical = lengths(sel_sgbp) > 0
+canterbury_height2 = nz_height[sel_logical, ]
+```
+
+And use the result with the tidyverse:
+
+````{r}
+canterbury_height3 = nz_height %>% filter(sel_logical)
+```
+
+We can test whether the subsetted objects are identical as follows:
+
+```{r}
+identical(x = canterbury_height, y = canterbury_height2)
+identical(x = canterbury_height, y = canterbury_height3)
+```
+
+What is different about `canterbury_height3`?
+The only difference is that `filter()` changed the row names:
+
+```{r}
+row.names(canterbury_height)[1:3]
+row.names(canterbury_height3)[1:3]
+```
+
+If the row names are re-set, the objects become identical:
+
+```{r}
+attr(canterbury_height3, "row.names") = attr(x = canterbury_height, "row.names")
+identical(canterbury_height, canterbury_height3)
+```
+
+```{block type='rmdnote'}
+This discarding of row names is not something that is specific to spatial
+data, as illustrated in the code chunk below.
+**dplyr** discards row names by design.
+For further discussion of this decision, and some controversy, see the (closed) issue [#366](https://github.com/tidyverse/dplyr/issues/366) in the package's issue tracker.
+```
+
+In the code below a dense matrix is created.
+`sel` is not, as one might imagine, a `logical` `vector` (although it behaves as one as it only has one column) but a `logical` `matrix`:
+
+```{r}
+sel = st_intersects(nz_height, canterbury, sparse = FALSE)
+class(sel)
+typeof(sel)
+dim(sel)
+```
+
+The dimensions of `sel` (returned by the base R command `dim()`) show one row per feature in the target object (`nz_height`) and a column per feature in the subsetting object (`canterbury`).
+The general pattern here is that `sel[i, j]` is `TRUE` if the i^th^ feature in the target object intersects with the j^th^ feature in the subsetting object.
+If there is more than one feature in `y` the resulting selection `matrix` must be converted into a `vector` before it is used for subsetting, e.g. with `rowSums(sel_matrix) > 0`.
+Another solution is to convert the default sparse matrix (`list`) output from `st_intersects()` to a `logical` vector using the function `lengths()`.
+This approach to spatial subsetting, used internally by **sf** (see the source code of `` sf:::`[.sf` ``), is illustrated in the code chunk below:
+
+```{r}
+co = filter(nz, grepl("Canter|Otag", Name))
+sel_sparse = st_intersects(nz_height, co)
+sel_vector = lengths(sel_sparse) > 0
+heights_co = nz_height[sel_vector, ]
+```
+
+The above code chunk results in an object, `heights_co`, that represents the high points that intersect with either Canterbury *or* Otago region (hence the object name `co`).
+It did this in four stages:
+
+1. Subset the regions of `nz` containing "Canter" or "Otago" in their names. This was done using the pattern matching function `grepl()` in combination with the `|` character, which means 'or', resulting in the subsetting object `co`.
+2. Create a sparse geometry binary predicate `sgbp` object, a list representing which features of `nz_height` intersect with the regions in `co`.
+3. Convert the selection list into a `logical` 'selection vector'. `lengths()`  finds the features in `nz_height` matching *any* features in `co`.
+4. Use the result to subset `nz_heights`, creating a new object `heights_co`. 

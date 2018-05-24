@@ -2,7 +2,7 @@
 
 ## Prerequisites {-}
 
-- This chapter uses the same packages as Chapter \@ref(spatial-operations) but with the addition of **spDataLarge**, which was installed in Chapter \@ref(spatial-class) (**lwgeom** is also used, but does not need to be loaded):
+- This chapter uses the same packages as Chapter \@ref(spatial-operations) but with the addition of **spDataLarge**, which was installed in Chapter \@ref(spatial-class) (**lwgeom** is also used, but does not need to be attached):
 
 ```{r, message=FALSE}
 library(sf)
@@ -76,7 +76,7 @@ The distance between two lines of longitude, called meridians, is around 111 km 
 This shrinks to zero at the poles.
 At the latitude of London, for example, meridians are less than 70 km apart (challenge: execute code that verifies this).
 <!-- `geosphere::distGeo(c(0, 51.5), c(1, 51.5))` -->
-Lines of latitude, by contrast, have are of constant distance from each other irrespective of latitude: they are always around 111 km apart, including at the equator and near the poles.
+Lines of latitude, by contrast, have constant distance from each other irrespective of latitude: they are always around 111 km apart, including at the equator and near the poles.
 This is illustrated in Figures \@ref(fig:crs-buf) and \@ref(fig:wintriproj).  
 ```
 
@@ -113,7 +113,7 @@ but 1 degree converted into m distance at the latitude of London:
 coords = st_coordinates(london)
 geosphere::alongTrackDistance(coords, coords + c(1, 0), coords + c(1, 0))
 -->
-As pointed out above, moving one degree means moving a bit more than 111 km at the equator (to be precise: 111,320 meters; to verify this, check out also `geosphere::alongTrackDistance(c(0, 0), c(1, 0), c(1, 0))`).
+As pointed out above, moving one degree means moving a bit more than 111 km at the equator (to be precise: 111,320 meters).
 This is used as the new buffer distance:
 
 ```{r}
@@ -123,18 +123,18 @@ london_proj_buff = st_buffer(london_proj, 111320)
 The result in Figure \@ref(fig:crs-buf) (right panel) shows that buffers based on a projected CRS are not distorted:
 every part of the buffer's border is equidistant to London.
 
-```{r crs-buf, fig.cap="Buffer on vector represenations of London with a geographic (left) and projected (right) CRS. The circular point represents London and the grey outline represents the outline of the UK.", fig.asp=1, fig.show='hold', out.width="45%", echo=FALSE}
+```{r crs-buf, fig.cap="Buffer on vector representations of London with a geographic (left) and projected (right) CRS. The circular point represents London and the grey outline represents the outline of the UK.", fig.asp=1, fig.show='hold', out.width="45%", echo=FALSE}
 uk = rnaturalearth::ne_countries(scale = 50) %>% 
   st_as_sf() %>% 
   filter(grepl(pattern = "United Kingdom|Ire", x = name_long))
 plot(london_buff, graticule = st_crs(4326), axes = TRUE)
 plot(london, add = TRUE)
-plot(uk$geometry, add = TRUE, border = "grey", lwd = 3)
+plot(st_geometry(uk), add = TRUE, border = "grey", lwd = 3)
 uk_proj = uk %>%
   st_transform(27700)
 plot(london_proj_buff, graticule = st_crs(27700), axes = TRUE)
 plot(london_proj, add = TRUE)
-plot(uk_proj$geometry, add = TRUE, border = "grey", lwd = 3)
+plot(st_geometry(uk_proj), add = TRUE, border = "grey", lwd = 3)
 ```
 
 The importance of CRSs (primarily whether they are projected or geographic) has been demonstrated using the example of London.
@@ -193,11 +193,29 @@ This means that when working with local data sources, it is likely preferable to
 The example of London was easy to answer because a) the CRS 'BNG' (with its associated EPSG code 27700) is well-known and b) the original dataset (`london`) already had that CRS.
 
 What about when a projected CRS is needed but the study region lacks a well-known CRS?
-Again, although there is no universal answer there is a sensible default CRS: Universal Transverse Mercator ([UTM](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system)).
-UTM is not actually a single CRS but a system of CRSs that covers the entire world, and breaks it into 60 segments, each containing 6 degrees of longitude.
-All UTM projections have the same datum (WGS84) and their EPSG codes run sequentially from 32601 to 32660.
-This makes it possible to create a function (we'll call it `lonlat2UTM`) to calculate the EPSG code associated with any point on the planet as follows:^[
-Thanks to Josh O'Brien who provided the basis for this function in an answer to a question on [stackoverflow](https://stackoverflow.com/a/9188972).
+Again there is no universal answer but a commonly used default:
+Universal Transverse Mercator ([UTM](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system)), a set of CRSs that divides the Earth into 60 longitudinal wedges and 20 latitudinal segments.
+This system gives gives everywhere on Earth a UTM code, such as "60H" which refers to northern New Zealand where R was invented.
+All UTM projections have the same datum (WGS84) and their EPSG codes run sequentially from 32601 to 32660 (for northern hemisphere locations) and 32701 to 32760 (southern hemisphere locations).
+
+```{r, eval=FALSE, echo=FALSE}
+utm_nums_n = 32601:32660
+utm_nums_s = 32701:32760
+crs_data = rgdal::make_EPSG()
+crs_data[grep(utm_nums_n[1], crs_data$code), ] # zone 1N
+crs_data[grep(utm_nums_n[60], crs_data$code), ] # zone 60N
+crs_data[grep(utm_nums_s[1], crs_data$code), ] 
+crs_data[grep(utm_nums_s[60], crs_data$code), ] 
+crs_data[grep("UTM zone 60N", crs_data$note), ] # many
+crs_data[grep("UTM zone 60S", crs_data$note), ] # many
+crs_data[grep("UTM zone 60S", crs_data$note), ] # many
+crs_utm = crs_data[grepl("utm", crs_data$prj4), ] # 1066
+crs_utm_zone = crs_utm[grepl("zone=", crs_utm$prj4), ]
+crs_utm_south = crs_utm[grepl("south", crs_utm$prj4), ]
+```
+
+To show how the system works let's create a function, `lonlat2UTM()` to calculate the EPSG code associated with any point on the planet as follows:^[
+Credit: Josh O'Brien's post on [stackoverflow](https://stackoverflow.com/a/9188972) inspired this function.
 ] 
 
 <!-- Idea: create full function with message and flexibility in later chapter (RL) -->
@@ -205,26 +223,35 @@ Thanks to Josh O'Brien who provided the basis for this function in an answer to 
 ```{r}
 lonlat2UTM = function(lonlat) {
   utm = (floor((lonlat[1] + 180) / 6) %% 60) + 1
-  utm + 32600
+  if(lonlat[2] > 0) utm + 32600 else
+    utm + 32700
 }
 ```
 
-The following command uses this function to identify the UTM zone and associated EPSG code for London:
+The following commands uses this function to identify the UTM zone and associated EPSG code for Auckland and London:
 
-```{r}
-(epsg_utm = lonlat2UTM(st_coordinates(london)))
-st_crs(epsg_utm)
+```{r, echo=FALSE, eval=FALSE}
+stplanr::geo_code("Auckland")
 ```
 
-As expected by viewing a map of UTM zones (such as that provided by [dmap.co.uk](http://www.dmap.co.uk/utmworld.htm)), the EPSG code returned refers to UTM zone 30, which would represent a good projected CRS for England if the BNG did not exist.
+
+```{r}
+epsg_utm_auk = lonlat2UTM(c(174.7, -36.9))
+epsg_utm_lnd = lonlat2UTM(st_coordinates(london))
+st_crs(epsg_utm_auk)$proj4string
+st_crs(epsg_utm_lnd)$proj4string
+```
+
+Maps of UTM zones such as that provided by [dmap.co.uk](http://www.dmap.co.uk/utmworld.htm) confirm: the London is in UTM zone 30U.
 <!-- London can be transformed into this CRS as follows (result not shown): -->
+<!-- idea: create figure showing UTM zones -->
 
 <!-- ```{r} -->
 <!-- lnd_utm = st_transform(london, crs = epsg_utm) -->
 <!-- ``` -->
 
 Another approach to automatically selecting a projected CRS specific to a local dataset is to create an azimuthal equidistant ([AEQD](https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection)) projection for the center-point of the study area.
-This involves creating a custom CRS (with no EPSG code) with units of meters based on the centrepoint of a dataset.
+This involves creating a custom CRS (with no EPSG code) with units of meters based on the centerpoint of a dataset.
 This approach should be used with caution: no other datasets will be compatible with the custom CRS created and results may not be accurate when used on extensive datasets covering hundreds of kilometers.
 
 Although we used vector datasets to illustrate the points outlined in this section, the principles apply equally to raster datasets.
@@ -320,7 +347,7 @@ However in some cases it is desirable to create a new CRS, using a custom `proj4
 This system allows a very wide range of projections to be created, as we'll see in some of the custom map projections in this section.
 <!-- as we mentioned in section \@ref(crs-in-r). -->
 
-A long and growing list of projections has been developed and many of these these can be set with the `+proj=` element of `proj4string`s.^[See the Wikepedia page '[List of map projections](https://en.wikipedia.org/wiki/List_of_map_projections)' for 70+ projections, and illustrations.]
+A long and growing list of projections has been developed and many of these these can be set with the `+proj=` element of `proj4string`s.^[See the Wikipedia page '[List of map projections](https://en.wikipedia.org/wiki/List_of_map_projections)' for 70+ projections, and illustrations.]
 When mapping the world while preserving areal relationships, the Mollweide projection is a good choice [@jenny_guide_2017] (Figure \@ref(fig:mollproj)).
 To use this projection, we need to specify it using the `proj4string` element, `"+proj=moll"`, in the `st_transform` function:
 
@@ -333,7 +360,7 @@ world_mollweide = st_transform(world, crs = "+proj=moll")
 ```{r mollproj, echo=FALSE, fig.cap="Mollweide projection of the world.", warning=FALSE}
 par_old = par()
 par(mar = c(0, 0, 1, 0))
-plot(world_mollweide$geom, graticule = TRUE, main = "the Mollweide projection")
+plot(st_geometry(world_mollweide), graticule = TRUE, main = "the Mollweide projection")
 par(par_old)
 ```
 
@@ -352,8 +379,8 @@ world_wintri_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
   lwgeom::st_transform_proj(crs = "+proj=wintri")
 par_old = par()
 par(mar = c(0, 0, 1, 0))
-plot(world_wintri_gr$geometry, main = "the Winkel tripel projection", col = "grey")
-plot(world_wintri$geom, add = TRUE)
+plot(st_geometry(world_wintri_gr), main = "the Winkel tripel projection", col = "grey")
+plot(st_geometry(world_wintri), add = TRUE)
 par(par_old)
 ```
 
@@ -384,7 +411,7 @@ world_laea1 = st_transform(world, crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_
 ```{r laeaproj1, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on longitude and latitude of 0.", warning=FALSE}
 par_old = par()
 par(mar = c(0, 0, 1, 0))
-plot(world_laea1$geom, graticule = TRUE, main = "the Lambert azimuthal equal-area projection")
+plot(st_geometry(world_laea1), graticule = TRUE, main = "the Lambert azimuthal equal-area projection")
 par(par_old)
 ```
 
@@ -404,7 +431,7 @@ world_laea2_g = st_graticule(ndiscr = 10000) %>%
 par_old = par()
 par(mar = c(0, 0, 1, 0))
 plot(world_laea2_g, main = "the Lambert azimuthal equal-area projection", col = "grey")
-plot(world_laea2$geom, add = TRUE)
+plot(st_geometry(world_laea2), add = TRUE)
 par(par_old)
 ```
 
@@ -425,10 +452,11 @@ The projection concepts described in the previous section apply equally to raste
 However, there are important differences in reprojection of vectors and rasters:
 transforming a vector object involves changing the coordinates of every vertex but this does not apply to raster data.
 Rasters are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters), so it is impossible to transform coordinates of pixels separately.
-
 Raster reprojection involves creating a new raster object, often with a different number of columns and rows than the original.
 The attributes must subsequently be re-estimated, allowing the new pixels to be 'filled' with appropriate values.
-This two-stage process is done with `projectRaster()` from the **raster** package.
+Thus in most cases when both raster and vector data are used, it is better to avoid reprojecting rasters and reproject vectors instead.
+
+The raster reprojection process is done with `projectRaster()` from the **raster** package.
 Like the `st_transform()` function demonstrated in the previous section, `projectRaster()` takes a geographic object (a raster dataset in this case) and a `crs` argument.
 However, `projectRaster()` only accepts the lengthy `proj4string` definitions of a CRS rather than concise EPSG codes.
 
@@ -479,7 +507,7 @@ data_frame(
   ncell = c(ncell(cat_raster), ncell(cat_raster_wgs84)),
   resolution = c(mean(res(cat_raster)), mean(res(cat_raster_wgs84), na.rm = TRUE)),
   unique_categories = c(length(unique(values(cat_raster))), length(unique(values(cat_raster_wgs84))))
-) %>% knitr::kable(caption = "Key attributes in the original and projected categorical raster datasets.", digits = 4)
+) %>% knitr::kable(caption = "Key attributes in the original ('cat_raster') and projected ('cat_raster_wgs84') categorical raster datasets.", digits = 4)
 ```
 
 Reprojecting raster data with continuous (`numeric` or in this case `integer`) values follows an almost identical procedure.
@@ -526,7 +554,7 @@ data_frame(
   ncell = c(ncell(con_raster), ncell(con_raster_ea)),
   resolution = c(mean(res(cat_raster)), mean(res(cat_raster_wgs84), na.rm = TRUE)),
   mean = c(mean(values(con_raster)), mean(values(con_raster_ea), na.rm = TRUE))
-) %>% knitr::kable(caption = "Key attributes original and projected continuous (numeric) raster datasets.", digits = 4)
+) %>% knitr::kable(caption = "Key attributes original ('con_raster') and projected ('con_raster') continuous raster datasets.", digits = 4)
 ```
 
 
@@ -569,8 +597,8 @@ seine_simp = st_simplify(seine, dTolerance = 2000)  # 2000 m
 ```{r seine-simp, echo=FALSE, fig.cap="Comparison of the original and simplified `seine` geometry.", warning=FALSE}
 par_old = par()
 par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
-plot(seine$geometry, col = 1, main = "Original data")
-plot(seine_simp$geometry, col = 1, main = "st_simplify")
+plot(st_geometry(seine), col = 1, main = "Original data")
+plot(st_geometry(seine_simp), col = 1, main = "st_simplify")
 par(par_old)
 ```
 
@@ -617,9 +645,9 @@ Finally, the visual comparison of the original dataset and the two simplified ve
 ```{r us-simp, echo=FALSE, fig.cap="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from **sf** (center) and **rmapshaper** (right) packages.", warning=FALSE}
 par_old = par()
 par(mfrow = c(1, 3), mar = c(0, 0, 1, 0))
-plot(us_states2163$geometry, col = 8, main = "Original data")
-plot(us_states_simp1$geometry, col = 8, main = "st_simplify")
-plot(us_states_simp2$geometry, col = 8, main = "ms_simplify")
+plot(st_geometry(us_states2163), col = 8, main = "Original data")
+plot(st_geometry(us_states_simp1), col = 8, main = "st_simplify")
+plot(st_geometry(us_states_simp2), col = 8, main = "ms_simplify")
 par(par_old)
 ```
 
@@ -648,7 +676,7 @@ nz_pos = st_point_on_surface(nz)
 seine_pos = st_point_on_surface(seine)
 ```
 
-This ensures that the created point lies on the given object (see red points on Figure \@ref(fig:centr)).
+This ensures that the created point lies on the given object (see red points on Figure \@ref(fig:centr)).^[Explanation of this algorithm can be found at https://gis.stackexchange.com/a/76563/20955.]
 
 ```{r centr, warning=FALSE, echo=FALSE, fig.cap="Centroids (black points) and 'points on surface' (red points) of New Zeleand's regions (left) and the Seine (right) datasets."}
 par_old = par()
@@ -672,7 +700,7 @@ Which demographic groups are within travel distance of this new shop?
 These kinds of questions can be answered and visualized by creating buffers around the geographic entities of interest.
 
 Figure \@ref(fig:buffs) illustrates buffers of different sizes (5 and 20 km) surrounding the river Seine and tributaries.
-These buffers were created with commands below, which show that the command `st_buffer()` requires at least two arguments: an input geometry and a distance:
+These buffers were created with commands below, which show that the command `st_buffer()` requires at least two arguments: an input geometry and a distance, provided in the units of the CRS (in this case meters):
 
 ```{r}
 seine_buff_5km = st_buffer(seine, dist = 5000)
@@ -697,11 +725,11 @@ Unusual cases where it may be useful include when the memory consumed by the out
 # Demonstrate nQuadSegs
 seine_buff_simple = st_buffer(seine, dist = 50000, nQuadSegs = 3)
 plot(seine_buff_simple, key.pos = NULL, main = "50 km buffer")
-plot(seine, key.pos = NULL, lwd = 3, pal = rainbow, add = T)
+plot(seine, key.pos = NULL, lwd = 3, pal = rainbow, add = TRUE)
 seine_points = st_cast(seine[1, ], "POINT")
 buff_single = st_buffer(seine_points[1, ], 50000, 2)
 buff_points = st_cast(buff_single, "POINT")
-plot(buff_single$geometry, add = T)
+plot(st_geometry(buff_single), add = TRUE)
 ```
 
 ### Affine transformations
@@ -866,11 +894,7 @@ source("code/05-venn-clip.R")
 
 To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
 Some points will be inside just one circle, some will be inside both and some will be inside neither.
-
-There are two different ways to subset points that fit into combinations of the circles: via clipping and logical operators.
-But first we must generate some points.
-We will use the *simple random* sampling strategy to sample from a box representing the extent of `x` and `y` using the **sf** function `st_sample()`.
-This generates objects plotted in Figure \@ref(fig:venn-subset):
+`st_sample()` is used below to generate a *simple random* distribution of points within the extent of circles `x` and `y`, resulting in output illustrated in Figure \@ref(fig:venn-subset).
 
 ```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y."}
 bb = st_bbox(st_union(x, y))
@@ -885,7 +909,19 @@ plot(p, add = TRUE)
 text(x = c(-0.5, 1.5), y = 1, labels = l)
 ```
 
-```{r, echo=FALSE}
+The logical operator way would find the points inside both `x` and `y` using a spatial predicate such as `st_intersects()` whereas the intersection method simply finds the points inside the intersecting region created above as `x_and_y`.
+As demonstrated below the results are identical, but the method that uses the clipped polygon is more concise:
+
+```{r}
+sel_p_xy = st_intersects(p, x, sparse = FALSE)[, 1] &
+  st_intersects(p, y, sparse = FALSE)[, 1]
+p_xy1 = p[sel_p_xy]
+p_xy2 = p[x_and_y]
+identical(p_xy1, p_xy2)
+```
+
+
+```{r, echo=FALSE, eval=FALSE}
 # An alternative way to sample from the bb
 bb = st_bbox(st_union(x, y))
 pmulti = st_multipoint(pmat)
@@ -894,19 +930,14 @@ box = st_convex_hull(pmulti)
 
 ### Geometry unions
 
-Spatial aggregation can also be done in the **tidyverse**, using **dplyr** functions as follows:
-
-```{r, eval = FALSE}
-group_by(us_states, REGION) %>%
-  summarize(sum(pop = total_pop_15, na.rm = TRUE))
-```
-
-Further to what was covered in section \@ref(vector-attribute-aggregation), aggregation of polygons often silently dissolves the geometries of touching polygons in the same group.
-This is demonstrated in the code chunk below, in which the `REGION` variable in `us_states` is used to aggregate the states into four regions, illustrated in Figure \@ref(fig:us-regions):
+As we saw in section \@ref(vector-attribute-aggregation), spatial aggregation can silently dissolve the geometries of touching polygons in the same group.
+This is demonstrated in the code chunk below in which 49 `us_states` are aggregated into 4 regions using base and **tidyverse** functions (see results in Figure \@ref(fig:us-regions)):
 
 ```{r}
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
                     FUN = sum, na.rm = TRUE)
+regions2 = us_states %>% group_by(REGION) %>%
+  summarize(pop = sum(total_pop_15, na.rm = TRUE))
 ```
 
 ```{r, echo=FALSE}
@@ -919,12 +950,27 @@ regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION)
 source("code/05-us-regions.R", print.eval = TRUE)
 ```
 
-The equivalent result can be achieved using **tidyverse** functions as follows (result not shown):
+What is going on in terms of the geometries?
+Behind the scenes, both `aggregate()` and `summarize()` combine the geometries and disolve the boundaries between them using `st_union()`.
+This is demonstrated in the code chunk below which creates a united western US: 
 
-```{r, eval=FALSE}
-regions2 = us_states %>% 
-  group_by(REGION) %>%
-  summarize(pop = sum(total_pop_15, na.rm = TRUE))
+```{r}
+us_west = us_states[us_states$REGION == "West", ]
+us_west_union = st_union(us_west)
+```
+
+The function can take two geometries and union them, as demonstrated in the code chunk below which creates a united western block incorporating Texas (challenge: reproduce and plot the result):
+
+```{r, message=FALSE}
+texas = us_states[us_states$NAME == "Texas", ]
+texas_union = st_union(us_west_union, texas)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+plot(texas_union)
+# aim: experiment with st_union
+us_south2 = st_union(us_west[1, ], us_west[6, ])
+plot(us_southhwest)
 ```
 
 ### Type transformations {#type-trans}
@@ -956,7 +1002,11 @@ plot(polyg, col = "grey", main = "POLYGON")
 par(par_old)
 ```
 
-This process can be also reversed using `st_cast`:
+Conversion from mulitpoint to linestring is a common operation that creates a line object from ordered point observations, such as GPS measurements or geotagged media.
+This allows spatial operations such as the length of the path traveled.
+Conversion from multipoint or linestring to polygon is often used to calculate an area, for example from the set of GPS measurements taken around a lake or from the corners of a building lot.
+
+The transformation process can be also reversed using `st_cast`:
 
 ```{r}
 multipoint_2 = st_cast(linestring, "MULTIPOINT")
@@ -1010,8 +1060,8 @@ linestring_sf2
 ```{r line-cast, echo=FALSE, fig.cap="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right).", warning=FALSE}
 par_old = par()
 par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
-plot(multilinestring_sf$geom, col = "black", main = "MULTILINESTRING")
-plot(linestring_sf2$geom, col = c("red", "green", "blue"), main = "LINESTRING")
+plot(st_geometry(multilinestring_sf), col = "black", main = "MULTILINESTRING")
+plot(st_geometry(linestring_sf2), col = c("red", "green", "blue"), main = "LINESTRING")
 par(par_old)
 ```
 
@@ -1023,29 +1073,45 @@ linestring_sf2$length = st_length(linestring_sf2)
 linestring_sf2
 ```
 
-<!-- ### Class conversion -->
-<!-- placeholder for: -->
-<!-- sf -> sp -->
-<!-- sp -> sf -->
-<!-- stars; https://github.com/r-spatial/stars/blob/master/vignettes/blog1.Rmd -->
+<!-- idea: example where a collection of points referring to different objects are combined to MULTIPOINT by object, then casted to LINESTRING geometries per object -->
 
 ## Geometric operations on raster data {#geo-ras}
 
 Geometric raster operations include the shift, flipping, mirroring, scaling, rotation or warping of images.
 These operations are e.g. necessary when geolocating a raster image.
-In turn, geolocating requires the rectification of the image, which includes one or several of the following steps depending on the task at hand [see also @liu_essential_2009]:
+In turn, geolocating requires the rectification of the image, which usually includes some manual intervention one or several of the following steps depending on the task at hand [see also @liu_essential_2009]:
 
 - Georeferencing with ground control points.
 - Orthorectification also georeferences an image but additionally takes into account local topography.
 - Image (co-)registration is the process of aligning one image with another (in terms of CRS, origin and resolution). 
 Registration becomes necessary for images from the same scene but shot from different sensors or from different angles or at different points in time.
 
-In this section we will first show how to change the extent, the resolution and the origin of an image.
-As mentioned before, most of the times, we need these operations in order to align several images.
+R is unsuitable for the first two points since these often require manual intervention which is why they are usually done with the help of a Desktop GIS (see also Chapter \@ref(gis)).
+On the other hand, aligning several images is possible in R and this section shows among other how to do so.
+This often includes changing the extent, the resolution and the origin of an image.
 A matching projection is of course also required but is already covered in section \@ref(reprojecting-raster-geometries).
 In any case, there are other reasons why to perform a geometric operation on a single raster image.
 For instance, in chapter \@ref(location) we define metropolitan areas in Germany as 20 km^2^ pixels with more than 500,000 inhabitants. 
 The original inhabitant raster, however, has a resolution of 1 km^2^ which is why we will decrease (aggregate) the resolution by a factor of 20 (see section \@ref(define-metropolitan-areas)).
+Another reason for aggregating a raster is simply to decrease runtime or save disk space.
+Of course, this is only possible if the task at hand allows a coarser resolution.
+Sometimes a coarser resolution is sufficient for the task at hand.
+
+### Geometric intersections
+
+In section \@ref(raster-subsetting) we have shown how to extract values from a raster overlaid by other spatial objects.
+To retrieve a spatial output, we can use almost the same subsetting syntax.
+The only difference is that we have to make clear that we would like to keep the matrix structure by setting the `drop`-parameter to `FALSE`.
+This will return a raster object containing the cells whose midpoints overlap with `clip`.
+
+```{r}
+data("elev", package = "spData")
+clip = raster(nrow = 3, ncol = 3, res = 0.3, xmn = 0.9, xmx = 1.8, 
+              ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
+elev[clip, drop = FALSE]
+```
+
+For the same operation we can also use the `intersect()` and `crop()` command.
 
 ### Extent and origin
 
@@ -1078,7 +1144,7 @@ The newly added rows and column receive the default value of the `value` paramet
 elev_4 = extend(elev, elev_2)
 ```
 
-The origin is the point closest to (0, 0) if you moved towards it in steps of x and y resolution.
+The origin is the point closest to (0, 0) if you moved towards it (starting from any given cell corner of the raster) in steps of x and y resolution.
 
 ```{r}
 origin(elev_4)
@@ -1100,37 +1166,37 @@ Note that changing the resolution frequently (next section) also changes the ori
 
 ### Aggregation and disaggregation
 
-<!-- differentiate between spatial, spectral, temporal and radiometric resolution-->
 Raster datasets can also differ with regard to their resolution. 
-To match resolutions, one can either decrease  (`aggregate()`) or increase (`disaggregate()`) the resolution of one raster.^[It is important to note that we here are solely referring to the spatial resolution but that in remote sensing the spectral (spectral bands), temporal (observations through time of the same area) and radiometric (color depth) resolution are equally important.]
-As an example, we here change the spatial resolution of `elev` from 0.5 to 2 decimal degree, that means, we aggregate by a factor of 2 (Fig. \@ref(fig:aggregate-example)).
+To match resolutions, one can either decrease  (`aggregate()`) or increase (`disaggregate()`) the resolution of one raster.^[It is important to note that we here are solely referring to the spatial resolution but that in remote sensing the spectral (spectral bands), temporal (observations through time of the same area) and radiometric (color depth) resolution are equally important.
+Check out the `stackApply()` example in the documentation for getting an idea how to do temporal raster aggregation.]
+As an example, we here change the spatial resolution of `dem` (found in the **RQGIS** package) by a factor of 5 (Fig. \@ref(fig:aggregate-example)).
 Additionally, the output cell value should correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()` etc.):
 
 ```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."}
-elev_agg = aggregate(elev, fact = 2, fun = mean)
+data("dem", package = "RQGIS")
+dem_agg = aggregate(dem, fact = 5, fun = mean)
 par(mfrow = c(1, 2))
-plot(elev)
-plot(elev_agg)
+plot(dem)
+plot(dem_agg)
 ```
 
 By contrast, the`disaggregate()` function increases the resolution.
 However, we have to specify a method how to fill the new cells.
 The `disaggregate()` function provides two methods.
 The first (nearest neighbor, `method = ""`) simply gives all output cells the value of the nearest input cell, and hence duplicates values which leads to a blocky output image.
-For example, the four cells building up the upper left cell of the aggregated raster (Fig. \@ref(fig:aggregate-example)) will retrieve all the same value, namely 4.5.
 
 The `bilinear` method, in turn, is an interpolation technique that uses the four nearest pixel centers of the input image (salmon colored points in Fig. \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Fig. \@ref(fig:bilinear) as the value of the output cell - square in the upper left corner in Fig. \@ref(fig:bilinear)).
 
 ```{r}
-elev_disagg = disaggregate(elev_agg, fact = 2, method = "bilinear")
-all(values(elev) == values(elev_disagg))
+dem_disagg = disaggregate(dem_agg, fact = 5, method = "bilinear")
+identical(dem, dem_disagg)
 ```
 
 ```{r bilinear, echo = FALSE, fig.width=8, fig.height=10, fig.cap="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation."}
-data(elev)
-elev_agg_2 = aggregate(elev, fact = 2, fun = mean)
+data(elev, package = "spData")
+elev_agg = aggregate(elev, fact = 2, fun = mean)
 plot(extend(elev, 1, 0), col = NA, legend = FALSE)
-plot(elev_agg_2, add = TRUE)
+plot(elev_agg, add = TRUE)
 xy_1 = xyFromCell(elev, 1)
 xy_2 = xyFromCell(elev_agg, c(1, 2, 4, 5))
 arrows(xy_2[, 1], xy_2[, 2], xy_1[, 1], xy_1[, 2], length = 0.1)
@@ -1150,9 +1216,8 @@ plot(rasterToPolygons(elev[1, drop = FALSE]), add = TRUE)
 
 ```
 
-Comparing the values of `elev` and `elev_disagg` tells us that both are identical (you can also use `compareRaster()` or `all.equal()`).
-Please note that the disaggregation only predicted correctly the values at a higher resolution due to our artificial input data set (`elev`) and the fact that we have used the mean for the aggregation (`elev_agg`).
-However, this is usually not to be expected, since disaggregating is a simple interpolation technique.
+Comparing the values of `dem` and `dem_disagg` tells us that they are not identical (you can also use `compareRaster()` or `all.equal()`).
+However, this was hardly to be expected, since disaggregating is a simple interpolation technique.
 It is important to keep in mind that disaggregating results in a finer resolution, the corresponding values, however, are only as accurate as their lower resolution source.
 
 The process of computing values for new pixel locations is also called resampling. 
@@ -1162,8 +1227,8 @@ By default, it uses the `bilinear`-interpolation.
 
 ```{r}
 # add 2 rows and columns, i.e. change the extent
-elev_agg = extend(elev_agg, 2)
-elev_disagg_2 = resample(elev_agg, elev)
+dem_agg = extend(dem_agg, 2)
+dem_disagg_2 = resample(dem_agg, dem)
 ```
 
 Finally, in order to align many (possibly hundreds or thousands of) images stored on disk, you could use the `gdalUtils::align_rasters()` function.
@@ -1196,11 +1261,11 @@ nz_wgs_NULL_crs = st_set_crs(nz_wgs, NA)
 nz_27700 = st_transform(nz_wgs, 27700)
 par(mfrow = c(1, 3))
 plot(st_geometry(nz))
-plot(nz_wgs$geometry)
-plot(nz_wgs_NULL_crs$geometry)
+plot(st_geometry(nz_wgs))
+plot(st_geometry(nz_wgs_NULL_crs))
 # answer: it is fatter in the East-West direction
 # because New Zealand is close to the South Pole and meridians converge there
-plot(nz_27700$geometry)
+plot(st_geometry(nz_27700))
 par(mfrow = c(1, 1))
 ```
 1. Transform the `world` dataset to the transverse Mercator projection (`"+proj=tmerc"`) and plot the result.
@@ -1210,9 +1275,9 @@ Why does the new object differ from the original one?
 ```{r, echo=FALSE, eval=FALSE}
 # see https://github.com/r-spatial/sf/issues/509
 world_tmerc = st_transform(world, "+proj=tmerc")
-plot(world_tmerc$geom)
+plot(st_geometry(world_tmerc))
 world_4326 = st_transform(world_tmerc, 4326)
-plot(world_4326$geom)
+plot(st_geometry(world_4326))
 ```
 1. Generate and plot simplified versions of the `nz` dataset.
 Experiment with different values of `keep` (ranging from 0.5 to 0.00005) for `ms_simplify()` and `dTolerance` (from 100 to 100,000) `st_simplify()` .
@@ -1268,12 +1333,12 @@ Write code to do so.
 Hint: you need to use a two-element vector for this transformation.
     - Bonus: create a upside down map of your country.
 ```{r, echo=FALSE, eval=FALSE}
-world_sfc = world$geom
+world_sfc = st_geometry(world)
 world_sfc_mirror = world_sfc * c(1, -1)
 plot(world_sfc)
 plot(world_sfc_mirror)
 
-us_states_sfc = us_states$geometry
+us_states_sfc = st_geometry(us_states)
 us_states_sfc_mirror = us_states_sfc * c(1, -1)
 plot(us_states_sfc)
 plot(us_states_sfc_mirror)

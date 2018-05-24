@@ -58,7 +58,7 @@ Related to `crop()` is the **raster** function `mask()`, which sets values outsi
 The following command therefore masks every cell outside of the the Zion National Park boundaries (Figure \@ref(fig:cropmask):C):
 
 ```{r}
-srtm_masked = mask(srtm, zion)
+srtm_masked = mask(srtm, as(zion, "Spatial"))
 ```
 
 Changing the settings of `mask()` yields in different results.
@@ -115,12 +115,12 @@ For this purpose we will use `zion_points`, which contain a sample of 30 locatio
 The following command extracts elevation values from `srtm` and assigns the resulting vector to a new column (`elevation`) in the `zion_points` dataset: 
 
 ```{r}
-zion_points$elevation = raster::extract(srtm, zion_points)
+zion_points$elevation = raster::extract(srtm, as(zion_points, "Spatial"))
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
 # Aim: demonstrate buffer arg in raster extract
-elev_b1 = raster::extract(srtm, zion_points, buffer = 1000)
+elev_b1 = raster::extract(srtm, as(zion_points, "Spatial"), buffer = 1000)
 ```
 
 The `buffer` argument can be used to specify a buffer radius (in meters) around each point.
@@ -152,7 +152,6 @@ zion_transect = cbind(c(-113.2, -112.9), c(37.45, 37.2)) %>%
   st_sf()
 ```
 
-
 ```{r, eval=FALSE, echo=FALSE}
 # Aim: show how extraction works with non-straight lines by
 # using this alternative line object:
@@ -166,7 +165,7 @@ The utility of extracting heights from a linear selector is illustrated by imagi
 The method demonstrated below provides an 'elevation profile' of the route (the line does not need to be straight), useful for estimating how long it will take due to long climbs:
 
 ```{r}
-transect = raster::extract(srtm, zion_transect, along = TRUE, cellnumbers = TRUE)
+transect = raster::extract(srtm, as(zion_transect, "Spatial"), along = TRUE, cellnumbers = TRUE)
 ```
 
 Note the use of `along = TRUE` and `cellnumbers = TRUE` arguments to return cell IDs *along* the path. 
@@ -241,7 +240,7 @@ dplyr::select(zion_nlcd, ID, levels) %>%
 
 
 ```{r}
-zion_srtm_values = raster::extract(x = srtm, y = zion, df = TRUE)
+zion_srtm_values = raster::extract(x = srtm, y = as(zion, "Spatial"), df = TRUE)
 ```
 
 Such results can be used to generate summary statistics for raster values per polygon, for example to  to characterize a single region or to compare many regions.
@@ -260,7 +259,7 @@ The same approach works for counting occurrences of categorical raster values wi
 This is illustrated with a land cover dataset (`nlcd`) from the **spDataLarge** package in \@ref(fig:polyextr):B and demonstrated in the code below:
 
 ```{r, warning=FALSE, message=FALSE}
-zion_nlcd = raster::extract(nlcd, zion, df = TRUE, factors = TRUE)
+zion_nlcd = raster::extract(nlcd, as(zion, "Spatial"), df = TRUE, factors = TRUE)
 dplyr::select(zion_nlcd, ID, levels) %>% 
   gather(key, value, -ID) %>%
   group_by(ID, key, value) %>%
@@ -528,8 +527,8 @@ random_points_buf = st_buffer(random_points, dist = 90)
 plot(ndvi)
 plot(st_geometry(random_points_buf), add = TRUE)
 plot(ch, add = TRUE)
-random_points$ndvi = extract(ndvi, random_points, buffer = 90, fun = mean)
-random_points$ndvi2 = extract(ndvi, random_points)
+random_points$ndvi = extract(ndvi, as(random_points, "Spatial"), buffer = 90, fun = mean)
+random_points$ndvi2 = extract(ndvi, as(random_points, "Spatial"))
 plot(random_points$ndvi, random_points$ndvi2)
 ```
 1. Subset points higher than 3100 meters in New Zealand (the `nz_height` object) and create a template raster with a resolution of 3km. 
@@ -539,7 +538,7 @@ Using these objects:
 ```{r, echo=FALSE, eval=FALSE}
 nz_height3100 = dplyr::filter(nz_height, elevation > 3100)
 new_graticule = st_graticule(nz_height3100, datum = 2193)
-plot(nz_height3100$geometry, graticule = new_graticule, axes = TRUE)
+plot(st_geometry(nz_height3100), graticule = new_graticule, axes = TRUE)
 nz_template = raster(extent(nz_height3100), resolution = 3000,
                          crs = st_crs(nz_height3100)$proj4string)
 nz_raster = rasterize(nz_height3100, nz_template, 

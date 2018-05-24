@@ -62,7 +62,7 @@ canterbury_height = nz_height[canterbury, ]
 ```{r nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in grey, right)."}
 par_old = par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
 plot(st_geometry(nz), col = "white", bgc = "lightblue", main = "High points in New Zealand")
-plot(nz_height$geometry, add = TRUE, pch = 2, col = "red")
+plot(st_geometry(nz_height), add = TRUE, pch = 2, col = "red")
 par(mar=c(0, 0, 1, 0))
 plot(st_geometry(nz), col = "white", bgc = "lightblue", main = "High points in Canterbury")
 plot(st_geometry(canterbury), col = "grey", add = TRUE)
@@ -84,89 +84,42 @@ nz_height[canterbury, , op = st_disjoint]
 ```
 
 ```{block2 type='rmdnote'}
-Note the empty argument --- donoted with `, ,` --- in the preceding code chunk is not necessary (`nz_height[canterbury, op = st_disjoint]` returns the same result) but is included to emphasise the fact that `op` is the third argument in `[` for `sf` objects, after arguments for subsetting rows and columns.
-`nz_height[canterbury, 2, op = st_disjoint]`, for example, returns the same rows but only includes the second attribute column.
-Interested readers can see this default value of `op` set in the first line of the function call by entering its long-form name into the console `` sf:::`[.sf` ``.
-The `?sf` help page documents this also.
+Note the empty argument --- donoted with `, ,` --- in the preceding code chunk is included to highlight `op`, the third argument in `[` for `sf` objects.
+One can use this to change the subsetting operation in many ways.
+`nz_height[canterbury, 2, op = st_disjoint]`, for example, returns the same rows but only includes the second attribute column (see `` sf:::`[.sf` `` and the `?sf` for details)
 ```
 
 For many applications this is all you'll need to know about spatial subsetting for vector data.
-If this is the case, you can safely skip to the next section (\@ref(topological-relations)).
+In this case, you can safely skip to the next section (\@ref(topological-relations)).
+
 If you're interested in the details, including other ways of subsetting, read-on.
-
 Another way of doing spatial subsetting uses objects returned by *topological operators*.
-This is demonstrated in the first command below which uses the `sparse = FALSE` (meaning in English 'return a dense matrix not a sparse one') argument in the topological operator `st_intersects()` to ensure a `logical` result is returned:
+This is demonstrated in the first command below:
 
 ```{r}
-sel = st_intersects(x = nz_height, y = canterbury, sparse = FALSE)
-canterbury_height2 = nz_height[sel, ]
+sel_sgbp = st_intersects(x = nz_height, y = canterbury)
+class(sel_sgbp)
+sel_logical = lengths(sel_sgbp) > 0
+canterbury_height2 = nz_height[sel_logical, ]
 ```
 
-This creates `sel` (short for 'selection object') containing only `TRUE` and `FALSE` values, which are used in the second line of the pevious code chunk to create `canterbury_height2`, which is identical to `canterbury_height`.
-`sel` can also be used with `filter()`:
+In the above code chunk an object of class `sgbp` (a sparse geometry binary predicate, a list of length `x` in the spatial operation) is created and then converted into a logical vector `sel_logical` (containing only `TRUE` and `FALSE` values).
+The function `lengths()` identifies which features in `nz_height` intersect with *any* objects in `y`.
+In this case 1 is the greatest possible value but for more complex operations one could use the method to subset only features that intersect with, for example, 2 or more features from the source object.
 
-```{r}
-canterbury_height3 = nz_height %>% filter(sel)
+```{block2 type='rmdnote'}
+Note: another way to return a logical output is by setting `sparse = FALSE` (meaning 'return a dense matrix not a sparse one') in operators such as `st_intersects()`. The command `st_intersects(x = nz_height, y = canterbury, sparse = FALSE)[, 1]`, for example, would return an output identical `sel_logical`.
+Note: the solution involving `sgbp` objects is more generalisable though, as it works for many-to-many operations and has lower memory requirements.
 ```
 
-At this point there are three versions of `canterbury_height`, one created with spatial subsetting directly and the other two via the intermediary object `sel`.
-We can test whether they are identical as follows:
+It should be noted that the logical selection object can also be used with `filter()` as follows:
 
-```{r}
-identical(x = canterbury_height, y = canterbury_height2)
-identical(x = canterbury_height, y = canterbury_height3)
+````{r}
+canterbury_height3 = nz_height %>% filter(sel_logical)
 ```
 
-What is different about `canterbury_height3`?
-The only difference is that `filter()` changed the row names:
-
-```{r}
-row.names(canterbury_height)[1:3]
-row.names(canterbury_height3)[1:3]
-```
-
-If the row names are re-set, the objects become identical:
-
-```{r}
-attr(canterbury_height3, "row.names") = attr(x = canterbury_height, "row.names")
-identical(canterbury_height, canterbury_height3)
-```
-
-```{block type='rmdnote'}
-This discarding of row names is not something that is specific to spatial
-data, as illustrated in the code chunk below.
-**dplyr** discards row names by design.
-For further discussion of this decision, and some controversy, see the (closed) issue [#366](https://github.com/tidyverse/dplyr/issues/366) in the package's issue tracker.
-```
-
-`sel` is not, as one might imagine, a `logical` `vector` (although it behaves as one as it only has one column) but a `logical` `matrix`:
-
-```{r}
-class(sel)
-typeof(sel)
-dim(sel)
-```
-
-The dimensions of `sel` (returned by the base R command `dim()`) show one row per feature in the target object (`nz_height`) and a column per feature in the subsetting object (`canterbury`).
-The general pattern here is that `sel[i, j]` is `TRUE` if the i^th^ feature in the target object intersects with the j^th^ feature in the subsetting object.
-If there is more than one feature in `y` the resulting selection `matrix` must be converted into a `vector` before it is used for subsetting, e.g. with `rowSums(sel_matrix) > 0`.
-Another solution is to convert the default sparse matrix (`list`) output from `st_intersects()` to a `logical` vector using the function `lengths()`.
-This approach to spatial subsetting, used internally by **sf** (see the source code of `` sf:::`[.sf` ``), is illustrated in the code chunk below:
-
-```{r}
-co = filter(nz, grepl("Canter|Otag", Name))
-sel_sparse = st_intersects(nz_height, co)
-sel_vector = lengths(sel_sparse) > 0
-heights_co = nz_height[sel_vector, ]
-```
-
-The above code chunk results in an object, `heights_co`, that represents the high points that intersect with either Canterbury *or* Otago region (hence the object name `co`).
-It did this in four stages:
-
-1. Subset the regions of `nz` containing "Canter" or "Otago" in their names. This was done using the pattern matching function `grepl()` in combination with the `|` character, which means 'or', resulting in the subsetting object `co`.
-2. Create a sparse geometry binary predicate `sgbp` object, a list representing which features of `nz_height` intersect with the regions in `co`.
-3. Convert the selection list into a `logical` 'selection vector'. `lengths()`  finds the features in `nz_height` matching *any* features in `co`.
-4. Use the result to subset `nz_heights`, creating a new object `heights_co`. 
+At this point there are three versions of `canterbury_height`, one created with spatial subsetting directly and the other two via intermediary selection objects.
+To explore these objects in more detail and understand spatial subsetting in more depth see the supplementary vignette [`09-advanced-subsetting.Rmd`](https://github.com/Robinlovelace/geocompr/blob/master/vignettes/09-advanced-subsetting.Rmd).
 
 ### Topological relations
 
@@ -235,7 +188,7 @@ st_disjoint(p, a, sparse = FALSE)[, 1]
 ```
 
 `st_within()` returns `TRUE` only for objects that are completely within the selecting object.
-This applies only to the second object, which is inside the triangular polygon, as illustrated below:
+This applies only to the first object, which is inside the triangular polygon, as illustrated below:
 
 ```{r}
 st_within(p, a, sparse = FALSE)[, 1]
@@ -402,8 +355,9 @@ random_df = tibble(
   x = runif(n = 10, min = bb_world[1], max = bb_world[3]),
   y = runif(n = 10, min = bb_world[2], max = bb_world[4])
 )
-random_points = st_as_sf(random_df, coords = c("x", "y")) %>% 
-  st_set_crs(4326) # generate points with geographic CRS
+random_points = random_df %>% 
+  st_as_sf(coords = c("x", "y")) %>% # set coordinates
+  st_set_crs(4326) # set geographic CRS
 ```
 
 <!-- This may seem a trivial question but if you consider being placed somewhere at random it would surely take some time to discover where you were and you'd probably have to ask someone. **comment - removed as it's too long-winded (RL)** -->
@@ -432,12 +386,12 @@ In our example we would have ended up with two polygons representing China.
 ### Non-overlapping joins
 
 Sometimes two geographic datasets do not touch but still have a strong geographic relationship enabling joins.
-The datasets `cycle_hire` and `cycle_hire_osm`, already loaded in the **spData** package, provide a good example.
+The datasets `cycle_hire` and `cycle_hire_osm`, already attached in the **spData** package, provide a good example.
 Plotting them shows that they are often closely related but they do not touch, as shown in Figure \@ref(fig:cycle-hire), a base version of which is created with the following code below:
 
 ```{r, eval=FALSE}
-plot(cycle_hire$geometry, col = "blue")
-plot(cycle_hire_osm$geometry, add = TRUE, pch = 3, col = "red")
+plot(st_geometry(cycle_hire), col = "blue")
+plot(st_geometry(cycle_hire_osm), add = TRUE, pch = 3, col = "red")
 ```
 
 We can check if any points are the same `st_intersects()` as shown below:
@@ -448,7 +402,7 @@ any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
 
 ```{r, echo=FALSE, eval=FALSE}
 # included to show alternative ways of showing there's no overlap
-sum(cycle_hire$geometry %in% cycle_hire_osm$geometry)
+sum(st_geometry(cycle_hire) %in% st_geometry(cycle_hire_osm))
 sum(st_coordinates(cycle_hire)[, 1] %in% st_coordinates(cycle_hire_osm)[, 1])
 ```
 
@@ -532,7 +486,7 @@ This is illustrated using the base `aggregate()` function below:
 nz_avheight = aggregate(x = nz_height, nz, FUN = mean)
 ```
 
-The result of the previous command is an `sf` object with the same geometry as the (spatial) aggregating object (`nz`).^[This can be verified with `identical(st_geometry(nz), nz_avheight$geometry)`.]
+The result of the previous command is an `sf` object with the same geometry as the (spatial) aggregating object (`nz`).^[This can be verified with `identical(st_geometry(nz), st_geometry(nz_avheight))`.]
 The result of the previous operation is illustrated in Figure \@ref(fig:spatial-aggregation).
 The same result can also be generated using the 'tidy' functions `group_by()` and `summarize()` (used in combination with `st_join()`):
 
@@ -544,7 +498,8 @@ tm_shape(nz_avheight) +
 ```
 
 ```{r}
-nz_avheight2 = st_join(nz, nz_height) %>%
+nz_avheight2 = nz %>%
+  st_join(nz_height) %>%
   group_by(Name) %>%
   summarize(elevation = mean(elevation, na.rm = TRUE))
 ```
@@ -597,11 +552,16 @@ canterbury_centroid = st_centroid(canterbury)
 st_distance(nz_heighest, canterbury_centroid)
 ```
 
-There are two potentially surprising things about the result: 1) it comes with a `units` attribute, so you know that it's just over 100,000 m (not 100,000 inches, or any other measure of distance!); and 2) it is returned as a matrix, even though the result only contains a single value.
+There are two potentially surprising things about the result:
+
+- It has `units`, telling us the distance is 100,000 meters, not 100,000 inches, or any other measure of distance.
+- It is returned as a matrix, even though the result only contains a single value.
+
 This second feature hints at another useful feature of `st_distance()`, its ability to return *distance matrices* between all combinations of features in objects `x` and `y`.
 This is illustrated in the command below, which finds the distances between the first three features in `nz_height` and the Otago and Canterbury regions of New Zealand represented by the object `co`.
 
 ```{r}
+co = filter(nz, grepl("Canter|Otag", Name))
 st_distance(nz_height[1:3, ], co)
 ```
 
@@ -610,10 +570,9 @@ This demonstrates the fact that distances between points and polygons refer to t
 The second and third points in `nz_height` are *in* Otago, which can be verified by plotting them (result not shown):
 
 ```{r, eval=FALSE}
-plot(co$geometry[2])
-plot(nz_height$geometry[2:3], add = TRUE)
+plot(st_geometry(co)[2])
+plot(st_geometry(nz_height)[2:3], add = TRUE)
 ```
-
 
 ## Spatial operations on raster data {#spatial-ras}
 
@@ -625,7 +584,7 @@ For the reader's convenience, these datasets can be also found in the **spData**
 The previous chapter (section \@ref(manipulating-raster-objects)) demonstrated how to subset raster datasets using cell IDs.
 Raster cell values can also be extracted by location (coordinates) and other spatial objects.
 To use coordinates for subsetting, one can 'translate' the coordinates into a cell ID with the **raster** function `cellFromXY()`.
-An alternative is to use `raster::extract()` (there is also a function called `extract()` in the **tidyverse**) to extract values.
+An alternative is to use `raster::extract()` (be careful, there is also a function called `extract()` in the **tidyverse**) to extract values.
 Both methods are demonstrated below to find the value of the cell that covers a point located 0.1 units from the origin.
 
 ```{r, eval = FALSE}
@@ -635,7 +594,7 @@ elev[id]
 raster::extract(elev, data.frame(x = 0.1, y = 0.1))
 ```
 
-It is convenient that both functions also accept objects of class `SpatialObjects` and `sf`.
+It is convenient that both functions also accept objects of class `Spatial* Objects`.
 Raster objects can also be subset with another raster object, as illustrated in Figure \@ref(fig:raster-subset) (left panel) and demonstrated in the code chunk below:
 
 ```{r}
@@ -647,22 +606,13 @@ elev[clip]
 ```
 
 Basically, this amounts to retrieving the values of the first raster (here: `elev`) falling within the extent of a second raster (here: `clip`).
-To retrieve a spatial output, we can tell R to keep the matrix structure.
-This will return the two output values as a raster object.
-
-```{r}
-elev[clip, drop = FALSE]
-```
-
-For the same operation we can also use the `intersect()` and `crop()` command.
 
 ```{r raster-subset, echo = FALSE, fig.cap = "Subsetting raster values with the help of another raster (left). Raster mask (middle). Output of masking a raster."}
 knitr::include_graphics("figures/04_raster_subset.png")
 ```
 
-Frequently, however, we have two rasters with the same extent and resolution where one raster object serves as a mask (Figure \@ref(fig:raster-subset) middle and right panel).
-In these cases `intersect()` and `crop()` are of little use.
-Instead we can use the `[` again or the `mask()` and `overlay()` commands:
+Another typical use case is having two rasters with the same extent and resolution where one raster object serves as a mask (Figure \@ref(fig:raster-subset) middle and right panel).
+In these case, we can use `[` or the `mask()` and `overlay()` commands:
 
 ```{r, eval = FALSE}
 rmask = raster(nrow = 6, ncol = 6, res = 0.5, 
@@ -671,9 +621,10 @@ rmask = raster(nrow = 6, ncol = 6, res = 0.5,
 elev[rmask, drop = FALSE]
 # using the mask command
 mask(elev, rmask, maskvalue = TRUE)
-# using overlay
+
+# or using overlay
 # first we replace FALSE by NA
-rmask[rmask == FALSE] = NA
+rmask[!rmask] = NA
 # then we retrieve the maximum values
 overlay(elev, rmask, fun = "max")
 ```

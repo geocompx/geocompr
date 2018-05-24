@@ -1,29 +1,31 @@
-# Location analysis {#location}
+# Geomarketing application {#location}
 
 ## Prerequisites {-}
 
 - This chapter requires the following packages (**ggmap** must also be installed):
 
-```{r, message = FALSE} 
+```{r, message=FALSE} 
 library(sf)
 library(raster)
 library(tidyverse)
 library(osmdata)
+library(spDataLarge)
 ```
 
 - Required data will be downloaded in due course.
+As a convenience to the reader and to ensure easy reproducibility we have made available the downloaded data in the **spDataLarge** package.
 
 ## Introduction
 
-This chapter demonstrates how the skills learned in Part I can be applied to a particular domain: location analysis (also called geomarketing).
-This is a broad field of research and commercial application, the aim of which is usually to decide the optimal location for new services.
+This chapter demonstrates how the skills learned in Part I can be applied to a particular domain: geomarketing (sometimes also referred to as location analysis or location intelligence).
+This is a broad field of research and commercial application.
 A typical example is where to locate a new shop.
 The aim here is to attract most visitors and, ultimately, make most profit.
 There are also many non-commercial applications that can use the technique for public benefit, for example where to locate new health services [@tomintz_geography_2008].
 
 People are fundamental to location analysis, in particular where they are likely to spend their time and other resources.
 Interestingly, ecological concepts and models are quite similar to those used for store location analysis.
-Animals and plants can best meet their needs in certain 'optimal' locations, based on variables that change over space (@muenchow_review_2018; see also chapter \@ref(eco)) .
+Animals and plants can best meet their needs in certain 'optimal' locations, based on variables that change over space (@muenchow_review_2018<!--; see also chapter \@ref(eco)-->) .
 This is one of the great strengths of geocomputation and GIScience in general.
 Concepts and methods are transferable to other fields.
 <!-- add reference!! -->
@@ -47,7 +49,7 @@ The stores should be placed in urban areas with as many potential customers as p
 Additionally, a survey^[This is a hypothetical survey, i.e. it never took place.] suggests that single young males (aged 20 to 40) are most likely to buy your products: this is the *target audience*.
 You are in the lucky position to have sufficient capital to open a number of shops.
 But where should they be placed?
-Consulting companies (employing location analysts) would happily charge high rates to answer such questions.
+Consulting companies (employing geomarketing analysts) would happily charge high rates to answer such questions.
 Luckily, we can do so ourselves with the help of open data and open source software.
 The following sections will demonstrate how the techniques learned during the first chapters of the book can be applied to undertake the following steps:
 
@@ -64,25 +66,35 @@ Although we have applied these steps to a specific case study, they could be gen
 The German government provides gridded census data at either 1 km or 100 m resolution.
 The following code chunk downloads, unzips and reads-in the 1 km data.
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 download.file("https://tinyurl.com/ybtpkwxz", 
               destfile = "census.zip", mode = "wb")
 unzip("census.zip") # unzip the files
 census_de = readr::read_csv2(list.files(pattern = "Gitter.csv"))
 ```
 
-```{r, echo = FALSE}
-# spDataLarge contains census_de, metro_names, and shops
-library(spDataLarge)
-data("census_de")
+As a convenience to the reader, the corresponding data has been put into **spDataLarge** and can be accessed as follows
+
+```{r}
+data("census_de", package = "spDataLarge")
 ```
 
 The `census_de` object is a data frame containing 13 variables for more than 300,000 grid cells across Germany.
-For our work we only need a subset of these: Easting and Northing, number of inhabitants (population), mean average age, proportion of women and average household size.
-These variables and selected and renamed in the code chunk below and summarized in Table \@ref(tab:census-desc). 
+For our work we only need a subset of these: Easting (`x`) and Northing (`y`), number of inhabitants (population; `pop`), mean average age (`mean_age`), proportion of women (`women`) and average household size (`hh_size`).
+These variables are selected and renamed from German into English in the code chunk below and summarized in Table \@ref(tab:census-desc). 
 Further, `mutate_all()` is used to convert values -1 and -9 (meaning unknown) to `NA`.
 
-```{r census-desc, echo = FALSE}
+```{r}
+# pop = population, hh_size = household size
+input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
+                      women = Frauen_A, mean_age = Alter_D,
+                      hh_size = HHGroesse_D)
+# set -1 and -9 to NA
+input_tidy = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
+```
+
+
+```{r census-desc, echo=FALSE}
 tab = tribble(
   ~"class", ~"pop", ~"women", ~"age", ~"hh",
   1, "3-250", "0-40", "0-40", "1-2", 
@@ -105,16 +117,6 @@ knitr::kable(tab,
              caption = cap, align = "c", format = "html")
 ```
 
-
-```{r}
-# pop = population, hh_size = household size
-input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
-                      women = Frauen_A, mean_age = Alter_D,
-                      hh_size = HHGroesse_D)
-# set -1 and -9 to NA
-input_tidy = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
-```
-
 ## Create census rasters
  
 After the preprocessing, the data can be converted into a raster stack or brick (see sections \@ref(raster-classes) and \@ref(raster-subsetting)).
@@ -134,7 +136,7 @@ Since we are using mainly densities such as the number of inhabitants or the por
 Be careful with geographic CRS where grid cell areas constantly decrease in poleward directions (see also sections \@ref(crs-intro) and \@ref(reproj-geo-data)). 
 ```
 
-```{r census-stack, echo = FALSE, fig.cap = "Gridded German census data of 2011. See Table \\@ref(tab:census-desc) for a description of the classes."}
+```{r census-stack, echo=FALSE, fig.cap="Gridded German census data of 2011. See Table \\@ref(tab:census-desc) for a description of the classes."}
 knitr::include_graphics("figures/08_census_stack.png")
 ```
 
@@ -163,33 +165,23 @@ rcl_hh = rcl_women
 rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
 ```
 
+<!--
 We can loop with `map2()`, the **purrr** version of base R's `mapply()`, in parallel over two vectors (here `lists`; for more information please refer to @wickham_advanced_2014 and @grolemund_r_2016).
-Note that we have to transform the raster brick into a list for the loop to work.
-Finally, we convert the output list back into a raster stack. 
+-->
+
+Note that we have made sure that the order of the reclassification matrices in the list is the same as for the elements of `input_ras`.
+For instance, the first element corresponds in both cases to the population.
+The `for`-loop runs in parallel through each of the elements and applies the reclassification to the corresponding raster layer.
+Finally, the code chunk below makes sure that the `reclass` layers have the same name as the layers of `input_ras`.
 
 ```{r}
-reclass = map2(as.list(input_ras), rcl, function(x, y) {
-  reclassify(x = x, rcl = y, right = NA)
-}) %>% 
-  stack
+reclass = input_ras
+for (i in 1:raster::nlayers(reclass)) {
+  reclass[[i]] = reclassify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
+}
 names(reclass) = names(input_ras)
 reclass
 ```
-
-<!-- 
-```{r, eval = FALSE, echo = FALSE}
-tmp = mapply(FUN = function(x, y) {
-  reclassify(x = x, rcl = y, right = NA)
-}, x = as.list(input_ras), y = rcl)
-
-
-for (i in seq_len(nlayers(reclass))) {
-  reclass[[i]] = reclassify(reclass[[i]], rcl = rcl[[i]], right = NA) 
-}
-names(reclass) = names(input_ras)
-```
--->
-
 
 ## Define metropolitan areas
 
@@ -197,45 +189,39 @@ We define metropolitan areas as pixels of 20 km^2^ inhabited by more than 500,00
 Pixels at this coarse resolution can rapidly be created using `aggregate()`, as introduced in section \@ref(aggregation-and-disaggregation).
 The command below uses the argument `fact = 20` to reduce the resolution of the result twenty-fold (recall the original raster resolution was 1 km^2^):
 
-```{r}
+```{r, warning=FALSE}
 pop_agg = aggregate(reclass$pop, fact = 20, fun = sum)
 ```
 
-The next stage is to keep only cells with more than half a million people, and convert the result cells into a vector object of class `sf`.
+The next stage is to keep only cells with more than half a million people.
 
-```{r}
-polys = rasterToPolygons(pop_agg[pop_agg > 500000, drop = FALSE]) %>% 
-  st_as_sf(polys)
+
+```{r, warning=FALSE}
+pop_agg = pop_agg[pop_agg > 500000, drop = FALSE] 
 ```
 
-Plotting these polygons reveals eight metropolitan regions (Fig. \@ref(fig:metro-areas)).
-Each region consists of one or more polygons (raster cells).
-It would be nice if we could join all polygons belonging to one region.
-One approach is to union the polygons (see section \@ref(clipping)).
+Plotting this reveals eight metropolitan regions (Fig. \@ref(fig:metro-areas)).
+Each region consists of one or more raster cells.
+It would be nice if we could join all cells belonging to one region.
+**raster**'s `clump()` command does exactly that.
+Subsequently, `rasterToPolygons()` converts the raster object into spatial polygons, and `st_as_sf()` converts it into an `sf`-object.
 
-```{r}
-polys = st_union(polys)
+```{r, warning=FALSE}
+polys = pop_agg %>% 
+  clump %>%
+  rasterToPolygons %>%
+  st_as_sf
 ```
 
-This returns one multipolygon feature with its elements corresponding to the metropolitan regions. 
-To extract these polygons from the multipolygon, we can use `st_cast()`.
+`polys` now features a column named `clumps` which indicates to which metropolitan region each polygon belongs and which we will use to dissolve the polygons into coherent single regions (see also section \@ref(geometry-unions)):
 
 ```{r}
-metros = st_cast(polys, "POLYGON")
-``` 
-
-However, visual inspection reveals eight metropolitan areas whereas the unioning-casting approach comes up with nine.
-This is because one polygon just touches the corner of another polygon (western Germany, Cologne/Düsseldorf area; Fig. \@ref(fig:metro-areas)).
-
-One could assign it to the neighboring region using a dissolving procedure, however, we leave this as an exercise to the reader, and simply delete the offending polygon.
-
-```{r}
-# find out about the offending polygon
-int = st_intersects(metros, metros)
-# polygons 5 and 9 share one border, delete polygon number 5
-metros_2 = metros[-5]
+metros = polys %>%
+  group_by(clumps) %>%
+  summarize
 ```
 
+Given no other column as input, `summarize()` only dissolves the geometry.
 
 <!-- maybe a good if advanced exercise
 This requires finding the nearest neighbors (`st_intersects()`), and some additional processing.
@@ -304,37 +290,37 @@ st_centroid(metros) %>%
 -->
 
 
-```{r metro-areas, echo = FALSE, fig.width = 1, fig.height = 1, fig.cap = "The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names."}
+```{r metro-areas, echo=FALSE, fig.width=1, fig.height=1, fig.cap="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names."}
 knitr::include_graphics("figures/08_metro_areas.png")
 ```
 
-
-The defined metropolitan areas (Fig. \@ref(fig:metro-areas); see also `code/08-location-jm.R`) suitable for bike shops are still missing a name.
+The resulting eight metropolitan areas suitable for bike shops (Fig. \@ref(fig:metro-areas); see also `code/08-location-jm.R` for creating the figure) are still missing a name.
 A reverse geocoding approach can settle this problem.
 Given a coordinate, reverse geocoding finds the corresponding address.
 Consequently, extracting the centroid coordinate of each metropolitan area can serve as an input for a reverse geocoding API.
 The **ggmap** package makes use of the one provided by Google.^[Note that Google allows each user to access its services on a free basis for a maximum of 2500 queries a day.]
-`ggmap::revgeocode()` only accepts geographical coordinates (latitude/longitude), therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system (chapter \@ref(transform)).
+`ggmap::revgeocode()` only accepts geographical coordinates (latitude/longitude), therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system (Chapter \@ref(transform)).
 
 ```{r}
 metros_wgs = st_transform(metros, 4326)
 coords = st_centroid(metros_wgs) %>%
   st_coordinates() %>%
-  round(., 4)
+  round(4)
 ```
 
 Additionally, `ggmap::revgeocode()` only accepts one coordinate at a time, which is why we iterate over each coordinate of `coords` via a loop (`map_dfr()`).
-`map_dfr()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.^[To learn more about the split-apply-combine strategy for data analysis, we refer the reader to @wickham_split-apply-combine_2011.]
+`map_dfr()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.^[To learn more about `lapply()` please refer to @wickham_advanced_2014 and @grolemund_r_2016; for the split-apply-combine strategy for data analysis, we refer the reader to @wickham_split-apply-combine_2011.]
 Sometimes, Google's reverse geocoding API is unable to find an address returning `NA`.
 Usually, trying the same coordinate again returns an address at the second or third attempt (see `while()-loop`).
-However, if three attempts have already failed, this is a good indication that the requested information is indeed unavailable.
+However, if ten attempts have already failed, this is a good indication that the requested information is indeed unavailable.
 Since we aim to be good cyberspace citizens, we try not to overburden the server with too many queries within a short amount of time by letting the loop sleep between one and four seconds after each iteration before accessing the reverse geocoding API again.
+Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
 
-```{r, eval = FALSE, warning = FALSE, message = FALSE}
+```{r, eval=FALSE, warning=FALSE, message=FALSE}
 # reverse geocoding to find out the names of the metropolitan areas
 metro_names = map_dfr(1:nrow(coords), function(i) {
   add = ggmap::revgeocode(coords[i, ], output = "more")
-  x = 2
+  x = 9
   while (is.na(add$address) & x > 0) {
     add = ggmap::revgeocode(coords[i, ], output = "more")
     # just try three times
@@ -347,22 +333,31 @@ metro_names = map_dfr(1:nrow(coords), function(i) {
 })
 ```
 
+Though the `while`-loop helps to make the reverse geocoding more successful, it sometimes might still fail or even give back results slightly differing from those we here have produced here.
+Therefore, to make sure that the reader uses the exact same results, we have put them into **spDataLarge**:
 
-```{r, echo = FALSE}
+```{r}
 # attach metro_names from spDataLarge
-data("metro_names")
+data("metro_names", package = "spDataLarge")
 ```
 
-Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
-Overall, we are satisfied with the `locality` column serving as metropolitan names (München, Nürnberg, Stuttgart, Frankfurt, Hamburg, Berlin, Leipzig) apart from one exception, namely Velbert.
-Hence, we replace Velbert with the corresponding name in the `administrative_area_level_2` column, that is Düsseldorf (Fig. \@ref(fig:metro-areas)).
+```{r metro-names, echo=FALSE}
+knitr::kable(dplyr::select(metro_names, locality, country), caption = "Result of the reverse geocoding.")
+```
+
+Overall, we are satisfied with the `locality` column serving as metropolitan names (Table \@ref(tab:metro-names)) apart from one exception, namely Wülfrath.
+Hence, we replace Wülfrath with the corresponding name in the `administrative_area_level_2` column, that is Düsseldorf (Fig. \@ref(fig:metro-areas)).
 Umlauts like `ü` might lead to trouble further on, for example when determining the bounding box of a metropolitan area with `opq()` (see further below), which is why we replace them.
 
 ```{r}
 metro_names = 
   dplyr::select(metro_names, locality, administrative_area_level_2) %>%
-  # replace Velbert and umlaut ü
-  mutate(locality = ifelse(locality == "Velbert", administrative_area_level_2, 
+  # replace Wülfrath and umlaut ü
+  # mutate(locality = ifelse(locality == "Wülfrath",
+  #                          administrative_area_level_2,
+  #                          locality),
+  mutate(locality = ifelse(locality == "Velbert",
+                           administrative_area_level_2,
                            locality),
          locality = gsub("ü", "ue", locality)) %>%
   pull(locality)
@@ -381,8 +376,10 @@ Here, we will only keep the point objects.
 As with Google's reverse geocode API, the OSM-download will sometimes fail at the first attempt.
 The `while` loop increases the number of download trials to three. 
 If then still no features can be downloaded, it is likely that either there are none available or that another error has occurred before (e.g. due to erroneous output from `opq()`).
+Before running the next code chunk, keep in mind that this will download almost 2GB of data. 
+As a convenience to the reader, we have put the further processed output into the **spDataLarge** package (`data("shops", package = "spDataLarge")`; see also further below).
 
-```{r, eval = FALSE, message = FALSE}
+```{r, eval=FALSE, message=FALSE}
 shops = map(metro_names, function(x) {
   message("Downloading shops of: ", x, "\n")
   # give the server a bit time
@@ -404,7 +401,7 @@ It is highly unlikely that there are no shops in any of our defined metropolitan
 The following `if` condition simply checks if there is at least one shop for each region.
 If not, we would try to download the shops again for this/these specific region/s.
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 # checking if we have downloaded shops for each metropolitan area
 ind = map(shops, nrow) == 0
 if (any(ind)) {
@@ -417,26 +414,26 @@ To make sure that each list element (an `sf` data frame) comes with the same col
 This is not a given since OSM contributors are not equally meticulous when collecting data.
 Finally, we `rbind` all shops into one large `sf` object.
 
-```{r, eval = FALSE}
-# select only specific columns and rbind all list elements
-shops = map(shops, dplyr::select, osm_id, shop) %>%
-  reduce(rbind)
-```
-
-
-```{r, echo = FALSE}
-# attach shops from spDataLarge
-data("shops", package = "spDataLarge")
+```{r, eval=FALSE}
+# select only specific columns
+shops = map(shops, dplyr::select, osm_id, shop)
+# putting all list elements into a single dataframe
+shops = do.call(shops, rbind)
 ```
 
 It would have been easier to simply use `map_dfr()`. 
 Unfortunately, so far it does not work in harmony with `sf` objects.
+Please note that the `shops` object is also available in the `spDataLarge` package:
+
+```{r}
+data("shops", package = "spDataLarge")
+```
 
 The only thing left to do is to convert the spatial point object into a raster (see section \@ref(rasterization)).
 The `sf` object, `shops`, is converted into a raster having the same parameters (dimensions, resolution, CRS) as the `reclass` object.
 Importantly, the `count()` function is used here to calculate the number shops in each cell.
 
-```{block2 type = 'rmdnote'}
+```{block2 type='rmdnote'}
 If the `shop` column were used instead of the `osm_id` column, we would have retrieved fewer shops per grid cell. 
 This is because the `shop` column contains `NA` values, which the `count()` function omits when rasterizing vector objects.
 ```
@@ -444,7 +441,7 @@ This is because the `shop` column contains `NA` values, which the `count()` func
 The result of the subsequent code chunk is therefore an estimate of shop density (shops/km^2^).
 `st_transform()` is used before `rasterize()` to ensure the CRS of both inputs match.
 
-```{r, message = FALSE}
+```{r, message=FALSE}
 shops = st_transform(shops, proj4string(reclass))
 # create poi raster
 poi = rasterize(x = shops, y = reclass, field = "osm_id", fun = "count")
@@ -455,7 +452,7 @@ Defining class intervals is an arbitrary undertaking to a certain degree.
 One can use equal breaks, quantile breaks, fixed values or others.
 Here, we choose the Fisher-Jenks natural breaks approach which minimizes within-class variance, the result of which provides an input for the reclassification matrix.
 
-```{r, message = FALSE, warning = FALSE}
+```{r, message=FALSE, warning=FALSE}
 # construct reclassification matrix
 int = classInt::classIntervals(values(poi), n = 4, style = "fisher")
 int = round(int$brks)
@@ -493,11 +490,13 @@ result = sum(reclass)
 
 For instance, a score greater than 9 might be a suitable threshold indicating raster cells where a bike shop could be placed (Figure \@ref(fig:bikeshop-berlin); see also `code/08-location-jm.R`).
 
-```{r bikeshop-berlin, echo = FALSE, eval = TRUE, fig.cap = "Suitable areas (i.e. raster cells with a score > 9) in accordance with our hypothetical survey for bike stores in Berlin."}
+```{r bikeshop-berlin, echo=FALSE, eval=TRUE, fig.cap="Suitable areas (i.e. raster cells with a score > 9) in accordance with our hypothetical survey for bike stores in Berlin."}
 library(leaflet)
 library(sp)
 # have a look at suitable bike shop locations in Berlin
-berlin = metros_2[metro_names == "Berlin"]
+# berlin = metros[metro_names == "Berlin", ]
+# change as soon as Jakub has accepted the spDataLarge PR
+berlin = metros[2, ]
 berlin_raster = raster::crop(result, as(berlin, "Spatial"))
 # summary(berlin_raster)
 # berlin_raster
@@ -535,7 +534,7 @@ The bike paths density might be another interesting variable as well as the purc
 However, to find out about such an interaction we would need customer data.
 
 In short, the presented analysis is far from perfect.
-Nevertheless, it should have given you a first impression and understanding of how to obtain, and deal with spatial data in R within a location analysis context.
+Nevertheless, it should have given you a first impression and understanding of how to obtain, and deal with spatial data in R within a geomarketing context.
 
 Finally, we have to point out that the presented analysis would be merely the first step of finding suitable locations.
 So far we have identified areas, 1 by 1 km in size, potentially suitable for a bike shop in accordance with our survey.
@@ -561,9 +560,6 @@ gridded(input) = TRUE
 # convert into a raster stack
 input = stack(input)
 -->
-
-1. In the text we have deleted one polygon of the `metros` object (polygon number 5) since it only touches the border of another polygon.
-Recreate the `metros` object and instead of deleting polygon number 5, make it part of the Cologne/Düsseldorf metropolitan region (hint: create a column named region_id, add polygon number 5 to the Cologne/Düsseldorf area and dissolve).
 
 1. Download the csv file containing inhabitant information for a 100 m cell resolution (https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
 Please note that the unzipped file has a size of 1.23 GB.
