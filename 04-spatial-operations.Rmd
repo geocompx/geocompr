@@ -584,7 +584,7 @@ For the reader's convenience, these datasets can be also found in the **spData**
 The previous chapter (section \@ref(manipulating-raster-objects)) demonstrated how to subset raster datasets using cell IDs.
 Raster cell values can also be extracted by location (coordinates) and other spatial objects.
 To use coordinates for subsetting, one can 'translate' the coordinates into a cell ID with the **raster** function `cellFromXY()`.
-An alternative is to use `raster::extract()` (there is also a function called `extract()` in the **tidyverse**) to extract values.
+An alternative is to use `raster::extract()` (be careful, there is also a function called `extract()` in the **tidyverse**) to extract values.
 Both methods are demonstrated below to find the value of the cell that covers a point located 0.1 units from the origin.
 
 ```{r, eval = FALSE}
@@ -594,7 +594,7 @@ elev[id]
 raster::extract(elev, data.frame(x = 0.1, y = 0.1))
 ```
 
-It is convenient that both functions also accept objects of class `SpatialObjects` and `sf`.
+It is convenient that both functions also accept objects of class `Spatial* Objects`.
 Raster objects can also be subset with another raster object, as illustrated in Figure \@ref(fig:raster-subset) (left panel) and demonstrated in the code chunk below:
 
 ```{r}
@@ -606,22 +606,13 @@ elev[clip]
 ```
 
 Basically, this amounts to retrieving the values of the first raster (here: `elev`) falling within the extent of a second raster (here: `clip`).
-To retrieve a spatial output, we can tell R to keep the matrix structure.
-This will return the two output values as a raster object.
-
-```{r}
-elev[clip, drop = FALSE]
-```
-
-For the same operation we can also use the `intersect()` and `crop()` command.
 
 ```{r raster-subset, echo = FALSE, fig.cap = "Subsetting raster values with the help of another raster (left). Raster mask (middle). Output of masking a raster."}
 knitr::include_graphics("figures/04_raster_subset.png")
 ```
 
-Frequently, however, we have two rasters with the same extent and resolution where one raster object serves as a mask (Figure \@ref(fig:raster-subset) middle and right panel).
-In these cases `intersect()` and `crop()` are of little use.
-Instead we can use the `[` again or the `mask()` and `overlay()` commands:
+Another typical use case is having two rasters with the same extent and resolution where one raster object serves as a mask (Figure \@ref(fig:raster-subset) middle and right panel).
+In these case, we can use `[` or the `mask()` and `overlay()` commands:
 
 ```{r, eval = FALSE}
 rmask = raster(nrow = 6, ncol = 6, res = 0.5, 
@@ -630,9 +621,10 @@ rmask = raster(nrow = 6, ncol = 6, res = 0.5,
 elev[rmask, drop = FALSE]
 # using the mask command
 mask(elev, rmask, maskvalue = TRUE)
-# using overlay
+
+# or using overlay
 # first we replace FALSE by NA
-rmask[rmask == FALSE] = NA
+rmask[!rmask] = NA
 # then we retrieve the maximum values
 overlay(elev, rmask, fun = "max")
 ```
