@@ -165,16 +165,20 @@ rcl_hh = rcl_women
 rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
 ```
 
+<!--
 We can loop with `map2()`, the **purrr** version of base R's `mapply()`, in parallel over two vectors (here `lists`; for more information please refer to @wickham_advanced_2014 and @grolemund_r_2016).
-Note that we have to transform the raster brick into a list for the loop to work.
-Finally, we convert the output list back into a raster stack. 
+-->
+
+Note that we have made sure that the order of the reclassification matrices in the list is the same as for the elements of `input_ras`.
+For instance, the first element corresponds in both cases to the population.
+The `for`-loop runs in parallel through each of the elements and applies the reclassification to the corresponding raster layer.
+Finally, the code chunk below makes sure that the `reclass` layers have the same name as the layers of `input_ras`.
 
 ```{r}
-our_reclassify = function(x, y){
-  reclassify(x = x, rcl = y, right = NA)
+reclass = input_ras
+for (i in 1:raster::nlayers(reclass)) {
+  reclass[[i]] = reclassify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
 }
-reclass = map2(as.list(input_ras), rcl, our_reclassify) %>% 
-  stack()
 names(reclass) = names(input_ras)
 reclass
 ```
