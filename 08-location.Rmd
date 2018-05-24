@@ -189,19 +189,14 @@ We define metropolitan areas as pixels of 20 km^2^ inhabited by more than 500,00
 Pixels at this coarse resolution can rapidly be created using `aggregate()`, as introduced in section \@ref(aggregation-and-disaggregation).
 The command below uses the argument `fact = 20` to reduce the resolution of the result twenty-fold (recall the original raster resolution was 1 km^2^):
 
-```{r}
+```{r, warning=FALSE}
 pop_agg = aggregate(reclass$pop, fact = 20, fun = sum)
 ```
 
-The next stage is to keep only cells with more than half a million people, and convert the result cells into a vector object of class `sf`.
-
-```{r}
-polys = rasterToPolygons(pop_agg[pop_agg > 500000, drop = FALSE]) %>% 
-  st_as_sf()
-```
+The next stage is to keep only cells with more than half a million people.
 
 
-```{r}
+```{r, warning=FALSE}
 pop_agg = pop_agg[pop_agg > 500000, drop = FALSE] 
 ```
 
@@ -221,7 +216,7 @@ polys = pop_agg %>%
 `polys` now features a column named `clumps` which indicates to which metropolitan region each polygon belongs and which we will use to dissolve the polygons into coherent single regions (see also section \@ref(geometry-unions)):
 
 ```{r}
-metros = metros %>%
+metros = polys %>%
   group_by(clumps) %>%
   summarize
 ```
