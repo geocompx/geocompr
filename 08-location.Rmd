@@ -200,33 +200,25 @@ polys = rasterToPolygons(pop_agg[pop_agg > 500000, drop = FALSE]) %>%
   st_as_sf()
 ```
 
-Plotting these polygons reveals eight metropolitan regions (Fig. \@ref(fig:metro-areas)).
-Each region consists of one or more polygons (raster cells).
-It would be nice if we could join all polygons belonging to one region.
-One approach is to union the polygons (see section \@ref(clipping)).
 
 ```{r}
-polys = st_union(polys)
+pop_agg = pop_agg[pop_agg > 500000, drop = FALSE] 
 ```
 
-This returns one multipolygon feature with its elements corresponding to the metropolitan regions. 
-To extract these polygons from the multipolygon, we can use `st_cast()`.
+Plotting this reveals eight metropolitan regions (Fig. \@ref(fig:metro-areas)).
+Each region consists of one or more raster cells.
+It would be nice if we could join all cells belonging to one region.
+**raster**'s `clump()` command does exactly that.
+Subsequently, `rasterToPolygons()` converts the raster object into spatial polygons, and `st_as_sf()` converts it into an `sf`-object.
 
 ```{r}
-metros = st_cast(polys, "POLYGON")
-``` 
-
-However, visual inspection reveals eight metropolitan areas whereas the unioning-casting approach comes up with nine.
-This is because one polygon just touches the corner of another polygon (western Germany, Cologne/Düsseldorf area; Fig. \@ref(fig:metro-areas)).
-
-One could assign it to the neighboring region using a dissolving procedure, however, we leave this as an exercise to the reader, and simply delete the offending polygon.
-
-```{r}
-# find out about the offending polygon
-int = st_intersects(metros, metros)
-# polygons 5 and 9 share one border, delete polygon number 5
-metros_2 = metros[-5]
+metros = pop_agg %>% 
+  clump %>%
+  rasterToPolygons %>%
+  st_as_sf
 ```
+
+This results in eight metropolitan areas.
 
 
 <!-- maybe a good if advanced exercise
@@ -559,9 +551,6 @@ gridded(input) = TRUE
 # convert into a raster stack
 input = stack(input)
 -->
-
-1. In the text we have deleted one polygon of the `metros` object (polygon number 5) since it only touches the border of another polygon.
-Recreate the `metros` object and instead of deleting polygon number 5, make it part of the Cologne/Düsseldorf metropolitan region (hint: create a column named region_id, add polygon number 5 to the Cologne/Düsseldorf area and dissolve).
 
 1. Download the csv file containing inhabitant information for a 100 m cell resolution (https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
 Please note that the unzipped file has a size of 1.23 GB.
