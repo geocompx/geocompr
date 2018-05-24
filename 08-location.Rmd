@@ -358,7 +358,11 @@ Umlauts like `ü` might lead to trouble further on, for example when determining
 metro_names = 
   dplyr::select(metro_names, locality, administrative_area_level_2) %>%
   # replace Wülfrath and umlaut ü
-  mutate(locality = ifelse(locality == "Wülfrath", administrative_area_level_2, 
+  # mutate(locality = ifelse(locality == "Wülfrath",
+  #                          administrative_area_level_2,
+  #                          locality),
+  mutate(locality = ifelse(locality == "Velbert",
+                           administrative_area_level_2,
                            locality),
          locality = gsub("ü", "ue", locality)) %>%
   pull(locality)
@@ -416,9 +420,10 @@ This is not a given since OSM contributors are not equally meticulous when colle
 Finally, we `rbind` all shops into one large `sf` object.
 
 ```{r, eval = FALSE}
-# select only specific columns and rbind all list elements
-shops = map(shops, dplyr::select, osm_id, shop) %>%
-  reduce(rbind)
+# select only specific columns
+shops = map(shops, dplyr::select, osm_id, shop)
+# putting all list elements into a single dataframe
+shops = do.call(shops, rbind)
 ```
 
 It would have been easier to simply use `map_dfr()`. 
