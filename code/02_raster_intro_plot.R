@@ -87,7 +87,7 @@ cat_raster = nlcd
 
 rast_srtm = tm_shape(cla_raster) +
   tm_raster(palette = terrain_colors, title = "Elevation (m)", 
-            legend.show = TRUE, auto.palette.mapping = FALSE, style = "cont") + 
+            legend.show = TRUE, style = "cont") + 
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
 landcover_cols = c("#476ba0", "#aa0000", "#b2ada3", "#68aa63", "#a58c30", "#c9c977", "#dbd83d", "#bad8ea")
