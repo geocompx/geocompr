@@ -653,30 +653,31 @@ par(par_old)
 
 ### Centroids
 
-<!-- centroids intro -->
-There are two main functions that create single point representations of more complex vector objects - `st_centroid()` and `st_point_on_surface()`.
+Centroid operations identify the center of geographic objects.
+Like statistical measures of central tendency (including mean and median definitions of 'average'), there are many ways to define the geographic center of an object.
+All of create single point representations of more complex vector objects.
 
-The `st_centroid()` function calculates the geometric center of a geometry.
-We can create centroids for polygons, lines (see black points on Figure \@ref(fig:centr)) and multipoints:
+The most commonly used centroid operation is the *geographic centroid*.
+This type of centroid operation (often referred to as 'the centoid') represents the centre of mass in a spatial object (think of balancing a plate on your finger).
+Geographic centroids have many uses, for example to create a simple point representation of complex geometries, or to estimate distances between polygons.
+They can be calculated with the **sf** function `st_centroid()` as demonstrated in the code below, which generates the geographic centroids of regions in New Zealand and tributaries to the River Seine, illustrated with black points in Figure \@ref(fig:centr).
 
-```{r}
+```{r, warning=FALSE}
 nz_centroid = st_centroid(nz)
 seine_centroid = st_centroid(seine)
 ```
 
-Centroids could be useful to represent more complex objects - lines and polygons, for example to calculate distances between centers of polygons.
-They are also often used as places where polygons or lines labels are put. 
-However, it is important to know that centroids could be located outside of the given object, e.g. in cases of irregular shaped polygons or lines.
-Examples of this can be seen on the right plot on Figure \@ref(fig:centr).
+Sometimes the geographic centroid falls outside the boundaries of their parent objects (think of a dohnut).
+In such cases *point on surface* operations can be used to guarantee the point will be in the parent object (e.g. for labelling irregular multipolygon objects such as island states), as illustrated by the red points in Figure \@ref(fig:centr).
+Notice that these red points always lie on their parent objects.
+They were created with `st_point_on_surface()` as follows:^[
+A description of how `st_point_on_surface()` works is provided at [gis.stackexchange.com/q/76498](https://gis.stackexchange.com/a/76563/20955).
+]
 
-Alternatively, the `st_point_on_surface()` can be used.
-
-```{r}
+```{r, warning=FALSE}
 nz_pos = st_point_on_surface(nz)
 seine_pos = st_point_on_surface(seine)
 ```
-
-This ensures that the created point lies on the given object (see red points on Figure \@ref(fig:centr)).^[Explanation of this algorithm can be found at https://gis.stackexchange.com/a/76563/20955.]
 
 ```{r centr, warning=FALSE, echo=FALSE, fig.cap="Centroids (black points) and 'points on surface' (red points) of New Zeleand's regions (left) and the Seine (right) datasets."}
 par_old = par()
@@ -689,6 +690,9 @@ plot(st_geometry(seine_centroid), add = TRUE)
 plot(st_geometry(seine_pos), add = TRUE, col = "red")
 par(par_old)
 ```
+
+Other types of centroid exist, including the *Chebyshev center* and the *visual center*.
+We will not explore these here but it is possible to calculate them using R, as we'll see Chapter \@ref(algorithms).
 
 ### Buffers
 
