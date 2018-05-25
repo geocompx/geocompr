@@ -165,10 +165,6 @@ rcl_hh = rcl_women
 rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
 ```
 
-<!--
-We can loop with `map2()`, the **purrr** version of base R's `mapply()`, in parallel over two vectors (here `lists`; for more information please refer to @wickham_advanced_2014 and @grolemund_r_2016).
--->
-
 Note that we have made sure that the order of the reclassification matrices in the list is the same as for the elements of `input_ras`.
 For instance, the first element corresponds in both cases to the population.
 The `for`-loop runs in parallel through each of the elements and applies the reclassification to the corresponding raster layer.
@@ -206,7 +202,7 @@ It would be nice if we could join all cells belonging to one region.
 **raster**'s `clump()` command does exactly that.
 Subsequently, `rasterToPolygons()` converts the raster object into spatial polygons, and `st_as_sf()` converts it into an `sf`-object.
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, message=FALSE}
 polys = pop_agg %>% 
   clump %>%
   rasterToPolygons %>%
@@ -353,10 +349,7 @@ Umlauts like `ü` might lead to trouble further on, for example when determining
 metro_names = 
   dplyr::select(metro_names, locality, administrative_area_level_2) %>%
   # replace Wülfrath and umlaut ü
-  # mutate(locality = ifelse(locality == "Wülfrath",
-  #                          administrative_area_level_2,
-  #                          locality),
-  mutate(locality = ifelse(locality == "Velbert",
+  mutate(locality = ifelse(locality == "Wülfrath",
                            administrative_area_level_2,
                            locality),
          locality = gsub("ü", "ue", locality)) %>%
@@ -494,9 +487,7 @@ For instance, a score greater than 9 might be a suitable threshold indicating ra
 library(leaflet)
 library(sp)
 # have a look at suitable bike shop locations in Berlin
-# berlin = metros[metro_names == "Berlin", ]
-# change as soon as Jakub has accepted the spDataLarge PR
-berlin = metros[2, ]
+berlin = metros[metro_names == "Berlin", ]
 berlin_raster = raster::crop(result, as(berlin, "Spatial"))
 # summary(berlin_raster)
 # berlin_raster
