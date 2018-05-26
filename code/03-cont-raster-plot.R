@@ -39,7 +39,4 @@ p2 = tm_shape(as(grain, "SpatialGridDataFrame")) +
             inner.margins = rep(0, 4)) +
   tm_legend(bg.color = "white")
 
-grid.newpage()
-pushViewport(viewport(layout = grid.layout(1, 2, heights = unit(c(0.25, 5), "null"))))
-print(p1, vp = viewport(layout.pos.col = 1))
-print(p2, vp = viewport(layout.pos.col = 2))
+tmap_arrange(p1, p2, nrow = 1)
