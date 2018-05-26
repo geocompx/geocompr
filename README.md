@@ -63,9 +63,9 @@ git clone https://github.com/Robinlovelace/geocompr.git # download the repo
 # https://github.com/Robinlovelace/geocompr/archive/master.zip
 cd .\geocompr\ # navigate into the repo
 # for linux and mac:
-docker run -d -p 8787:8787 -v $(pwd):/data robinlovelace/geocompr
+docker run -d -p 8787:8787 -v $(pwd):/home/rstudio/data robinlovelace/geocompr
 # for windows:
-docker run -d -p 8787:8787 -v ${pwd}:/data robinlovelace/geocompr
+docker run -d -p 8787:8787 -v ${pwd}:/home/rstudio/data robinlovelace/geocompr
 ```
 
 If it worked you should be able to open-up RStudio server by opening a browser and navigating to <http://localhost:8787/> resulting in an up-to-date version of R and RStudio running in a container (if it didn't you may have an issue with permissions - see [here](https://stackoverflow.com/questions/34031397/running-docker-on-ubuntu-mounted-host-volume-is-not-writable-from-container)):
@@ -74,11 +74,7 @@ If it worked you should be able to open-up RStudio server by opening a browser a
 
 geocompr in docker: if you see something like this after following the steps above, congratulations: it worked!
 
-From this point to *build* the book you need to navigate to the volume location on docker machine, by opening the project at `/data` from the project box in the top-right hand corner, illustrated in the figure below. From here open the file `index.Rmd` and hit the little `knit` button above the the RStudio script panel (above the `book` text on line 81 illustrated in the image above).
-
-![](https://user-images.githubusercontent.com/1825120/39538462-d4db2928-4e34-11e8-8612-add5188ed642.png)
-
-Opening the project: navigate to the volume folder in docker (or in another location on your computer)
+From this point to *build* the book you can open projects in the `data` directory from the project box in the top-right hand corner, and knit `index.Rmd` with the little `knit` button above the the RStudio script panel (`Ctl+Shift+B` should do the same job).
 
 Reproducing this README
 -----------------------
@@ -158,12 +154,12 @@ knitr::kable(pkg_df)
 
 | Name              | Title                                                                                     | version    |
 |:------------------|:------------------------------------------------------------------------------------------|:-----------|
-| bookdown          | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]                   | 0.7.10     |
+| bookdown          | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]                   | 0.7        |
 | cartogram         | Create Cartograms with R \[@R-cartogram\]                                                 | 0.0.3      |
 | decido            | Bindings for 'Mapbox' Ear Cutting Triangulation Library \[@R-decido\]                     | 0.1.0      |
 | dismo             | Species Distribution Modeling \[@R-dismo\]                                                | 1.1.4      |
 | geosphere         | Spherical Trigonometry \[@R-geosphere\]                                                   | 1.5.7      |
-| ggmap             | Spatial Visualization with ggplot2 \[@R-ggmap\]                                           | 2.6.1      |
+| ggmap             | Spatial Visualization with ggplot2 \[@R-ggmap\]                                           | 2.7.900    |
 | ggplot2           | Create Elegant Data Visualisations Using the Grammar of Graphics \[@R-ggplot2\]           | 2.2.1.9000 |
 | gstat             | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction \[@R-gstat\]             | 1.1.6      |
 | historydata       | Data Sets for Historians \[@R-historydata\]                                               | 0.2.9001   |
@@ -175,8 +171,8 @@ knitr::kable(pkg_df)
 | lwgeom            | Bindings to Selected 'liblwgeom' Functions for Simple Features \[@R-lwgeom\]              | 0.1.5      |
 | mapview           | Interactive Viewing of Spatial Data in R \[@R-mapview\]                                   | 2.4.0      |
 | microbenchmark    | Accurate Timing Functions \[@R-microbenchmark\]                                           | 1.4.4      |
-| mlr               | Machine Learning in R \[@R-mlr\]                                                          | 2.12.1     |
-| osmdata           | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]                  | 0.0.6.1    |
+| mlr               | Machine Learning in R \[@R-mlr\]                                                          | 2.13       |
+| osmdata           | Import 'OpenStreetMap' Data as Simple Features or Spatial \[@R-osmdata\]                  | 0.0.7.1    |
 | pROC              | Display and Analyze ROC Curves \[@R-pROC\]                                                | 1.12.1     |
 | raster            | Geographic Data Analysis and Modeling \[@R-raster\]                                       | 2.6.7      |
 | rcartocolor       | 'CARTOColors' Palettes \[@R-rcartocolor\]                                                 | 0.0.22     |
@@ -186,14 +182,14 @@ knitr::kable(pkg_df)
 | rmarkdown         | Dynamic Documents for R \[@R-rmarkdown\]                                                  | 1.9        |
 | rnaturalearth     | World Map Data from Natural Earth \[@R-rnaturalearth\]                                    | 0.1.0      |
 | rnaturalearthdata | World Vector Map Data from Natural Earth Used in 'rnaturalearth' \[@R-rnaturalearthdata\] | 0.1.0      |
-| RQGIS             | Integrating R with QGIS \[@R-RQGIS\]                                                      | 1.0.3.9000 |
+| RQGIS             | Integrating R with QGIS \[@R-RQGIS\]                                                      | 1.0.3      |
 | RSAGA             | SAGA Geoprocessing and Terrain Analysis \[@R-RSAGA\]                                      | 1.1.0      |
 | sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.4      |
 | sp                | Classes and Methods for Spatial Data \[@R-sp\]                                            | 1.2.7      |
 | spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.8.8    |
-| spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.6.3    |
+| spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.6.4    |
 | stplanr           | Sustainable Transport Planning \[@R-stplanr\]                                             | 0.2.4      |
 | tabularaster      | Tidy Tools for 'Raster' Data \[@R-tabularaster\]                                          | 0.4.0      |
-| tidyverse         | Easily Install and Load the 'Tidyverse' \[@R-tidyverse\]                                  | 1.2.1      |
+| tidyverse         | Easily Install and Load the 'Tidyverse' \[@R-tidyverse\]                                  | 1.2.1.9000 |
 | tmap              | Thematic Maps \[@R-tmap\]                                                                 | 2.0        |
 | tmaptools         | Thematic Map Tools \[@R-tmaptools\]                                                       | 2.0        |
