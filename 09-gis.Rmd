@@ -54,8 +54,6 @@ Note that there is also the new **mapedit** package but its intention is to allo
 - The built-in geodatabase management system often integrated in Desktop GIS (ArcGIS, GRASS GIS) and all related advantages such as object relational modeling, topology, fast (spatial) querying, etc.
 - Map production, in case you only want to create a beautiful map once. If you have to produce it over and over again, then maybe the CLI approach is better.
 - Zooming and dragging on WMS (though this is also possible with **mapview** and **leaflet**).
-<!-- any other points that we have missed so far? -->
-- ...
 
 This general overview already points out the differences between R's CLI and desktop GIS. 
 However, there is more: dedicated GIS software provides hundreds of geoalgorithms that are simply missing in R.
@@ -75,18 +73,29 @@ Instead of implementing existing GIS algorithms in R, it makes sense to avoid 'r
 Using compiled code for new geoprocessing functionality (particularly with the help of the excellent **Rcpp** package) could form the basis of new R packages, building on the success of **sf**  [@pebesma_simple_2018].
 However, there is already a wide range of algorithms that can be accessed via R's interfaces to dedicated GIS software.
 It makes sense to understand these before moving to develop your own optimized algorithms.
-For this reason this chapter focuses on 'bridges' to the mature GIS products [QGIS](http://qgis.org/) (via the package **RQGIS**), [SAGA](http://www.saga-gis.org/) (**RSAGA**) and [GRASS](https://grass.osgeo.org/) (**rgrass7**) from within R.
+For this reason this chapter focuses on 'bridges' to the mature GIS products [QGIS](http://qgis.org/) (via the package **RQGIS**), [SAGA](http://www.saga-gis.org/) (**RSAGA**) and [GRASS](https://grass.osgeo.org/) (**rgrass7**) from within R (\@ref(tab:gis-comp)).
 Obviously, we here focus on open-source software solutions, however, there is also a bridge to the commercial GIS leader [ArcGIS](https://www.arcgis.com) through the **RPyGeo** package.
 And the so-called [R-ArcGIS bridge](https://github.com/R-ArcGIS/r-bridge) allows to use R from within ArcGIS.
 As a final note, we would like to point out that aside from interfaces to desktop GIS there are also interfaces to geospatial libraries such as [GDAL](www.gdal.org) (**gdalUtils**, **rgdal**, **sf**) and [GEOS](https://trac.osgeo.org/geos/) (**rgeos**, **sf**). 
 By the end of the chapter you should have a working knowledge of the functionality such packages open up, and a more nuanced understanding of the  'CLI vs GUI' debate.
 As mentioned in chapter \@ref(intro), doing GIS at the command-line makes it more reproducible, in-line with the principles of Geographic Data Science.
 
+
+```{r gis-comp, echo=FALSE, message=FALSE}
+library(tidyverse)
+d = tibble("GIS" = c("GRASS", "QGIS", "SAGA"),
+            "first release" = c("1984", "2002", "2004"),
+            "no. functions" = c(">500", ">1000", ">600"),
+            "support" = c("hybrid", "hybrid", "hybrid"))
+knitr::kable(x = d, caption = "Comparison between three open-source GIS. Hybrid refers to the support of vector and raster operations.") %>%
+  kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see [http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/](http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/)), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
+```
+
 ## (R)SAGA
 
-Similar to QGIS, the System for Automated Geoscientific Analyses (SAGA; Table \@ref(tab:gis-comp)) provides the possibility to run SAGA modules from Python (SAGA Python API).
-In addition, there is also a command line interface (saga_cmd.exe) to execute SAGA modules (see also [https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/)).
-**RSAGA** uses the latter to run SAGA from within R.
+The System for Automated Geoscientific Analyses (SAGA; Table \@ref(tab:gis-comp)) provides the possibility to execute SAGA modules via the command line interface (saga_cmd.exe) (see also [https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/))
+In addition, there is a Python interface (SAGA Python API).
+**RSAGA** uses the former to run SAGA from within R.
 
 Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here particularly on digital elevation models (soil properties, terrain attributes, climate parameters). 
 Hence, SAGA is especially good at the fast processing of large (high-resolution) rasters datasets [@conrad_system_2015]. 
@@ -95,12 +104,18 @@ Specifically, we would like to compute the SAGA wetness index from a digital ele
 First of all, we need to make sure that **RSAGA** will find SAGA on the computer when called.
 For this, all **RSAGA** functions using SAGA in the background make use of `rsaga.env()`. 
 Usually, `rsaga.env()` will detect SAGA automatically by searching several likely directories (see its help for more information).
-However, it is possible to have 'hidden' SAGA in the OSGEO4W-installation, a location `rsaga.env()` does not search automatically. 
+
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
+library(RSAGA)
+saga = linkSAGA()
+rsaga.env()
+```
+
+However, it is possible to have 'hidden' SAGA in a location `rsaga.env()` does not search automatically. 
 `linkSAGA` searches your computer for a valid SAGA installation. 
 If it finds one, it adds the newest version to the PATH environment variable thereby making sure that `rsaga.env()` runs successfully.
 
 ```{r, warning=FALSE, message=FALSE, eval=FALSE}
-library(RSAGA)
 library(link2GI)
 saga = linkSAGA()
 rsaga.env()
@@ -131,7 +146,7 @@ Subsequently, we can access the available modules of a specific library (here: `
 rsaga.get.modules(libs = "ta_hydrology")
 ```
 
-Similarly to `RQGIS::get_usage()`, `rsaga.get.usage()` prints the function parameters of a specific geoalgorithm, e.g., the `SAGA Wetness Index`, to the console.
+`rsaga.get.usage()` prints the function parameters of a specific geoalgorithm, e.g., the `SAGA Wetness Index`, to the console.
 
 ```{r, eval=FALSE}
 rsaga.get.usage(lib = "ta_hydrology", module = "SAGA Wetness Index")
@@ -166,8 +181,8 @@ knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39205
 library(raster)
 twi = raster::raster(file.path(tempdir(), "twi.sdat"))
 plot(twi, col = RColorBrewer::brewer.pal(n = 9, name = "Blues"))
-
 ```
+
 ```{r, include=FALSE}
 # or using mapview
 # proj4string(twi) = paste0("+proj=utm +zone=17 +south +ellps=WGS84 +towgs84=", 
@@ -359,17 +374,6 @@ Use `v.select` and `v.extract` for vector data.
 ## (R)QGIS
 QGIS is one of the most popular open-source GIS [Table \@ref(tab:gis-comp); @graser_processing:_2015]. 
 Its main advantage lies in the fact that it provides a unified interface to several other open-source GIS.
-
-```{r gis-comp, echo=FALSE, message=FALSE}
-library(tidyverse)
-d = tibble("GIS" = c("GRASS", "QGIS", "SAGA"),
-            "first release" = c("1984", "2002", "2004"),
-            "no. functions" = c(">500", ">1000", ">600"),
-            "support" = c("hybrid", "hybrid", "hybrid"))
-knitr::kable(x = d, caption = "Comparison between three open-source GIS. Hybrid refers to the support of vector and raster operations.") %>%
-  kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see [http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/](http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/)), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
-```
-
 First and foremost, this means that you have access to GDAL/OGR, GRASS and SAGA through QGIS but also to other third-party providers such as [TauDEM](http://hydrology.usu.edu/taudem/taudem5/index.html), [Orfeo Toolbox](https://www.orfeo-toolbox.org/) and [Lastools](https://rapidlasso.com/lastools/) (tools for LiDAR data) [@graser_processing:_2015]. 
 To run all these geoalgorithms (frequently more than 1000 depending on your set up) outside of the QGIS GUI, QGIS provides a Python API.
 **RQGIS** establishes a tunnel to this Python API through the **reticulate** package. 
