@@ -206,7 +206,7 @@ We will introduce **rgrass7** with one of the most interesting problems in GISci
 Suppose a traveling salesman would like to visit 24 customers while covering the shortest distance possible.
 Additionally, the salesman would like to set out his journey at home, and come back to it after having finished all customer visits.
 There is a single best solution to this problem, however, to find it, is even for modern computers (mostly) impossible [@longley_geographic_2015].
-In our case, the number of possible solution correspond to `(25 - 1)! / 2` possible solutions, i.e., the factorial of 24 divided by 2 (since we do not differentiate between forward or backward direction).
+In our case, the number of possible solutions correspond to `(25 - 1)! / 2`, i.e., the factorial of 24 divided by 2 (since we do not differentiate between forward or backward direction).
 Even if one iteration can be done in a nanosecond this still corresponds to `r format(factorial(25 - 1) / (2 * 10^9 * 3600 * 24 * 365))` years. 
 Luckily, there are clever, almost optimal solutions which run in a tiny fraction of this inconceivable amount of time.
 GRASS GIS provides one of these solutions (for more details see [v.net.salesman](https://grass.osgeo.org/grass74/manuals/v.net.salesman.html)). 
@@ -235,6 +235,8 @@ streets = opq(b_box) %>%
   `[[`("osm_lines")
 ```
 
+<!-- put into spDataLarge as a convenience to the reader -->
+
 Now that we have the data, we can go on and initiate a GRASS session, i.e., we have to create a GRASS geodatabase.
 The GRASS geodatabase system is based on SQLite.
 Consequently, different users can easily work on the same project, possibly with different read/write permissions.
@@ -245,7 +247,7 @@ Within one location several mapsets can exist, and typically refer to different 
 PERMANENT is a mandatory mapset, and created automatically.
 It stores the projection, the spatial extent and the default resolution for raster data.
 In order to share spatial data with all users of a project, the database owner can add spatial data to the PERMANENT mapset.
-Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass74/manuals/helptext.html) for more information on the GRASS geodatabase system.
+Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass75/manuals/helptext.html) for more information on the GRASS geodatabase system.
 
 You have to set up a location and a mapset if you want to use GRASS from within R.
 First of all, we need to find out if and where GRASS7 is installed on the computer.
@@ -308,6 +310,8 @@ Before we can use GRASS geoalgorithms, we need to add data to GRASS's spatial da
 Luckily, the convenience function `writeVECT` does this for us.
 (Use `writeRast` in the case of raster data.)
 In our case we add the street and cycle hire point data while using only the first attribute column, and name them also `streets` and `points`. 
+Note that we are converting the **sf**-objects into objects of class `Spatial*`.
+In time, **rgrass7** will also work with **sf**-objects.
 
 <!-- in time we can also use sf- and raster-objects with rgrass7, Roger has already implemented this in the rgrass7 developer version -->
 
@@ -344,7 +348,7 @@ execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
           flags = c("overwrite"))
 ```
 
-To visualize our result, we import the output layer into R, and visualize it with the help of the **mapview** package (Figure \@ref(fig:grass-mapview)).
+To visualize our result, we import the output layer into R, convert it into an sf-object , just keep the geometry and visualize it with the help of the **mapview** package (Figure \@ref(fig:grass-mapview)).
 
 ```{r grass-mapview, fig.cap="Shortest route between 25 cycle hire station on the OSM street network of London.", echo=FALSE}
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39206067-544455c8-47f4-11e8-8725-e28299e01f52.png")
@@ -352,8 +356,10 @@ knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39206
 
 ```{r, eval=FALSE}
 library(mapview)
-route = readVECT("shortest_route")
-mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 9) +
+route = readVECT("shortest_route") %>%
+  st_as_sf %>%
+  st_geometry
+mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) +
   mapview(points)
 ```
 
@@ -368,7 +374,7 @@ Prior to importing data into R, you might want to perform some (spatial) subsett
 Use `v.select` and `v.extract` for vector data. 
 `db.select` lets you select subsets of the attribute table of a vector layer without returning the corresponding geometry.
 - You can start R also from within a running GRASS session [for more information please refer to @bivand_applied_2013 and this [wiki](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7)].
-- Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass74/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm.
+- Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass75/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm.
 - If you would like to use GRASS 6 from within R, use the R package **spgrass6**.
 
 ## (R)QGIS
