@@ -524,16 +524,25 @@ A number of algorithms have been developed for areal interpolation, including ar
 knitr::include_graphics("figures/04-congruence.png")
 ```
 
-The simplest useful method for spatial interpolation is *area weighted* spatial interpolation.
+The **spData** package contains a dataset named `incongruent` (colored polygons with black borders in the right panel of Figure \@ref(fig:areal-example)) and a dataset named aggregating_zones (the two polygons with the translucent blue border in the right panel of Figure \@ref(fig:areal-example)).
+Let us assume that the `value` column of `incongruent` refers to the total regional income in million Euros.
+How can we transfer the values of the underlying nine spatial polygons into the two polygons of `aggregating_zones`?
+The simplest useful method for this is *area weighted* spatial interpolation.
+In this case values from the `incongruent` object are allocated to the `aggregating_zones` in proportion to the area, i.e. the larger the spatial intersection  between input and output features, the larger the corresponding value. 
+For instance, if one intersection of `incongruent` and `aggregating_zones` is 1.5 km^^2^^ but the whole incongruent polygon in question has 2 km^^2^^ and a total income of 4 million Euros, then the target aggregating zone will obtain three quarters of the income, in this case 3 million Euros.
 This is implemented in `st_interpolate_aw()`, as demonstrated in the code chunk below.
-In this case values from the `incongruent` object are allocated to the `aggregating_zones` in proportion to the area:
 
 ```{r}
 agg_aw = st_interpolate_aw(incongruent[, "value"], aggregating_zones, extensive = TRUE)
+# show the aggregated result
+agg_aw$value
 ```
 
-Instead of simply taking the mean average of each area within each aggregating feature, `st_interpolate_aw` applies a weight to each value in proportion to its area in each aggregating zone (use `extensive = FALSE` for 'spatially intensive' variables such as population density which should be averaged rather than summed).
-For instance, if one intersection of `incongruent` and `aggregating_zones` is 0.5 km^^2^^ but the whole incongruent polygon in question has 1 km^^2^^ and 100  inhabitants, then the target aggregating zone will obtain half of the population, in this case 50 inhabitants.
+In our case it is meaningful to sum up the values of the intersections falling into the aggregating zones since total income is a so-called spatially extensive variable.
+This would be different for spatially intensive variables as for example income per head.
+In this case it is more meaningful to apply an average function when doing the aggregation instead of a sum function.
+To do so, one would only have to set the `extensive` parameter to `FALSE`.
+
 <!-- - `aggregate.sf()` - aggregate an sf object, possibly union-ing geometries -->
 <!-- - disaggregation?? `st_cast()` - https://github.com/edzer/sfr/wiki/migrating -->
 <!-- - `group_by()` + `summarise()` - potential errors -->
