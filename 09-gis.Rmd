@@ -72,7 +72,7 @@ This makes the breadth of R's geospatial capabilities astonishing to many who ar
 There are some domains where R can now outperform desktop GIS including spatial statistical modeling, online interactive visualization and the generation of animated or faceted maps.
 
 Instead of implementing existing GIS algorithms in R, it makes sense to avoid 'reinventing the wheel' by taking advantage of R's ability to interface with other languages (especially C++, which is used for much low-level and high-performance GIS work).
-Using compiled code for new geoprocessing functionality (particularly with the help of the excellent **Rcpp** package) could form the basis of new R packages, building on the success of **sf**.
+Using compiled code for new geoprocessing functionality (particularly with the help of the excellent **Rcpp** package) could form the basis of new R packages, building on the success of **sf** [@pebesma_simple_2018].
 However, there is already a wide range of algorithms that can be accessed via R's interfaces to dedicated GIS software.
 It makes sense to understand these before moving to develop your own optimized algorithms.
 For this reason this chapter focuses on 'bridges' to the mature GIS products [QGIS](http://qgis.org/) (via the package **RQGIS**), [SAGA](http://www.saga-gis.org/) (**RSAGA**) and [GRASS](https://grass.osgeo.org/) (**rgrass7**) from within R.
@@ -81,106 +81,6 @@ And the so-called [R-ArcGIS bridge](https://github.com/R-ArcGIS/r-bridge) allows
 As a final note, we would like to point out that aside from interfaces to desktop GIS there are also interfaces to geospatial libraries such as [GDAL](www.gdal.org) (**gdalUtils**, **rgdal**, **sf**) and [GEOS](https://trac.osgeo.org/geos/) (**rgeos**, **sf**). 
 By the end of the chapter you should have a working knowledge of the functionality such packages open up, and a more nuanced understanding of the  'CLI vs GUI' debate.
 As mentioned in chapter \@ref(intro), doing GIS at the command-line makes it more reproducible, in-line with the principles of Geographic Data Science.
-
-## (R)QGIS
-QGIS is one of the most popular open-source GIS [Table \@ref(tab:gis-comp); @graser_processing:_2015]. 
-Its main advantage lies in the fact that it provides a unified interface to several other open-source GIS.
-
-```{r gis-comp, echo=FALSE, message=FALSE}
-library(tidyverse)
-d = tibble("GIS" = c("GRASS", "QGIS", "SAGA"),
-            "first release" = c("1984", "2002", "2004"),
-            "no. functions" = c(">500", ">1000", ">600"),
-            "support" = c("hybrid", "hybrid", "hybrid"))
-knitr::kable(x = d, caption = "Comparison between three open-source GIS. Hybrid refers to the support of vector and raster operations.") %>%
-  kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see [http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/](http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/)), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
-```
-
-First and foremost, this means that you have access to GDAL/OGR, GRASS and SAGA through QGIS but also to other third-party providers such as [TauDEM](http://hydrology.usu.edu/taudem/taudem5/index.html), [Orfeo Toolbox](https://www.orfeo-toolbox.org/) and [Lastools](https://rapidlasso.com/lastools/) (tools for LiDAR data) [@graser_processing:_2015]. 
-To run all these geoalgorithms (frequently more than 1000 depending on your set up) outside of the QGIS GUI, QGIS provides a Python API.
-**RQGIS** establishes a tunnel to this Python API through the **reticulate** package. 
-Basically, functions `set_env` and `open_app` are doing this. 
-Note that it is optional to run `set_env` and `open_app` since all functions depending on their output will run them automatically if needed.
-Before running **RQGIS** you have to make sure to have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS.
-To help you with the installation process, please follow the steps as detailed in `vignette("install_guide", package = "RQGIS")` for several platforms (Windows, Linux, MacOS).
-
-```{r qgis_setup, eval=FALSE}
-library(RQGIS)
-set_env()
-open_app()
-```
-
-Leaving the `path`-argument of `set_env` unspecified will search the computer for a QGIS installation.
-Hence, it is faster to specify explicitly the path to your QGIS installation.
-Subsequently, `open_app` sets all paths necessary to run QGIS from within R, and finally creates a so-called QGIS custom application [http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications).
-We are now ready for some QGIS geoprocessing from within R! 
-First of all, we load some data from the **spData**-package, namely the boroughs of London (`lnd`) and cycle hire points in London (`cycle_hire`).
-
-```{r}
-library(spData)
-```
-
-In chapter \@ref(spatial-class), we already learned how to do a spatial overlay using the **sf**-package.
-Of course, any GIS is also able to perform spatial overlays. 
-Here, we would like to know how many cycle points we can find per borough.
-First of all, we need to come up with the name of the function in QGIS. `find_algorithms` lets you search all QGIS geoalgorithms with the help of regular expressions.
-Here, we assume that the short description of the function contains first the word "point" and secondly somewhere later also the word "poly".
-If you have no clue at all what to look for you can leave the `search_term`-argument empty which will return a list of all available QGIS geoalgorithms.
-If you also want to have a short description for each geoalgorithm, set the `name_only`-parameter to FALSE.
-
-```{r, eval=FALSE}
-find_algorithms("points.*poly", name_only = TRUE)
-```
-
-Now that we know the name of the function (`qgis:countpointsinpolygon`), we wonder how we can use it.
-`get_usage` returns all function parameters and default values. 
-`open_help` lets you access the corresponding online help.
-
-```{r, eval=FALSE}
-alg = "qgis:countpointsinpolygon"
-get_usage(alg)
-```
-
-```{r, eval=FALSE}
-open_help(alg)
-```
-
-Finally, we can let QGIS do the work.
-Note that the workhorse function `run_qgis` accepts R named arguments, i.e., you can specify the parameter names as returned by `get_usage` as you would do in any other regular R function.
-Note also that `run_qgis` accepts spatial objects residing in R's global environment as input (here: `lnd` and `cycle_hire`). 
-But of course, you could also specify paths to shapefiles stored on disk.
-<!-- only shapefiles or more general - spatial vectors? -->
-Setting the `load_output` to `TRUE` automatically loads the QGIS output into R.
-Since we only indicated the name of the output ("cycle.shp"), `run_qgis` saves the output to a temporary folder as returned by `tempdir()`, and loads it into R as an **sf**-object.
-
-```{r, eval=FALSE}
-bike_points = run_qgis(alg, POLYGONS = lnd, POINTS = cycle_hire, 
-                       FIELD = "no_bikes", OUTPUT = "cycle.shp",
-                       load_output = TRUE)
-summary(bike_points$no_bikes)
-sum(bike_points$no_bikes > 0)
-```
-
-In case you leave some parameters of a geoalgorithm unspecified, `run_qgis` will automatically use the default values as arguments if available.
-To find out about the default values, run `get_args_man`.  
-
-```{r, eval=FALSE}
-get_args_man(alg)
-```
-
-In this case the output tells us, had we left the `FIELDS`-parameter unspecified, our output (attribute) field would have been named "NUMPOINTS" (instead of "no_bikes").
-
-<!--
-"grass7:v.vect.stats" would achieve the same but is unavailable in QGIS
--->
-
-Other notes:
-
-- Leaving the output parameter(s) unspecified, saves the resulting QGIS output to a temporary folder created by QGIS.
-`run_qgis` prints these paths to the console after successfully running the QGIS engine.
-- If the output consists of multiple files and you have set `load_output` to `TRUE`, `run_qgis` will return a list with each element corresponding to one output file.
-
-To learn more about **RQGIS** please refer to @muenchow_rqgis:_2017. 
 
 ## (R)SAGA
 
@@ -455,6 +355,106 @@ Use `v.select` and `v.extract` for vector data.
 - You can start R also from within a running GRASS session [for more information please refer to @bivand_applied_2013 and this [wiki](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7)].
 - Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass74/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm.
 - If you would like to use GRASS 6 from within R, use the R package **spgrass6**.
+
+## (R)QGIS
+QGIS is one of the most popular open-source GIS [Table \@ref(tab:gis-comp); @graser_processing:_2015]. 
+Its main advantage lies in the fact that it provides a unified interface to several other open-source GIS.
+
+```{r gis-comp, echo=FALSE, message=FALSE}
+library(tidyverse)
+d = tibble("GIS" = c("GRASS", "QGIS", "SAGA"),
+            "first release" = c("1984", "2002", "2004"),
+            "no. functions" = c(">500", ">1000", ">600"),
+            "support" = c("hybrid", "hybrid", "hybrid"))
+knitr::kable(x = d, caption = "Comparison between three open-source GIS. Hybrid refers to the support of vector and raster operations.") %>%
+  kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see [http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/](http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/)), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
+```
+
+First and foremost, this means that you have access to GDAL/OGR, GRASS and SAGA through QGIS but also to other third-party providers such as [TauDEM](http://hydrology.usu.edu/taudem/taudem5/index.html), [Orfeo Toolbox](https://www.orfeo-toolbox.org/) and [Lastools](https://rapidlasso.com/lastools/) (tools for LiDAR data) [@graser_processing:_2015]. 
+To run all these geoalgorithms (frequently more than 1000 depending on your set up) outside of the QGIS GUI, QGIS provides a Python API.
+**RQGIS** establishes a tunnel to this Python API through the **reticulate** package. 
+Basically, functions `set_env` and `open_app` are doing this. 
+Note that it is optional to run `set_env` and `open_app` since all functions depending on their output will run them automatically if needed.
+Before running **RQGIS** you have to make sure to have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS.
+To help you with the installation process, please follow the steps as detailed in `vignette("install_guide", package = "RQGIS")` for several platforms (Windows, Linux, MacOS).
+
+```{r qgis_setup, eval=FALSE}
+library(RQGIS)
+set_env()
+open_app()
+```
+
+Leaving the `path`-argument of `set_env` unspecified will search the computer for a QGIS installation.
+Hence, it is faster to specify explicitly the path to your QGIS installation.
+Subsequently, `open_app` sets all paths necessary to run QGIS from within R, and finally creates a so-called QGIS custom application [http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications).
+We are now ready for some QGIS geoprocessing from within R! 
+First of all, we load some data from the **spData**-package, namely the boroughs of London (`lnd`) and cycle hire points in London (`cycle_hire`).
+
+```{r}
+library(spData)
+```
+
+In chapter \@ref(spatial-class), we already learned how to do a spatial overlay using the **sf**-package.
+Of course, any GIS is also able to perform spatial overlays. 
+Here, we would like to know how many cycle points we can find per borough.
+First of all, we need to come up with the name of the function in QGIS. `find_algorithms` lets you search all QGIS geoalgorithms with the help of regular expressions.
+Here, we assume that the short description of the function contains first the word "point" and secondly somewhere later also the word "poly".
+If you have no clue at all what to look for you can leave the `search_term`-argument empty which will return a list of all available QGIS geoalgorithms.
+If you also want to have a short description for each geoalgorithm, set the `name_only`-parameter to FALSE.
+
+```{r, eval=FALSE}
+find_algorithms("points.*poly", name_only = TRUE)
+```
+
+Now that we know the name of the function (`qgis:countpointsinpolygon`), we wonder how we can use it.
+`get_usage` returns all function parameters and default values. 
+`open_help` lets you access the corresponding online help.
+
+```{r, eval=FALSE}
+alg = "qgis:countpointsinpolygon"
+get_usage(alg)
+```
+
+```{r, eval=FALSE}
+open_help(alg)
+```
+
+Finally, we can let QGIS do the work.
+Note that the workhorse function `run_qgis` accepts R named arguments, i.e., you can specify the parameter names as returned by `get_usage` as you would do in any other regular R function.
+Note also that `run_qgis` accepts spatial objects residing in R's global environment as input (here: `lnd` and `cycle_hire`). 
+But of course, you could also specify paths to shapefiles stored on disk.
+<!-- only shapefiles or more general - spatial vectors? -->
+Setting the `load_output` to `TRUE` automatically loads the QGIS output into R.
+Since we only indicated the name of the output ("cycle.shp"), `run_qgis` saves the output to a temporary folder as returned by `tempdir()`, and loads it into R as an **sf**-object.
+
+```{r, eval=FALSE}
+bike_points = run_qgis(alg, POLYGONS = lnd, POINTS = cycle_hire, 
+                       FIELD = "no_bikes", OUTPUT = "cycle.shp",
+                       load_output = TRUE)
+summary(bike_points$no_bikes)
+sum(bike_points$no_bikes > 0)
+```
+
+In case you leave some parameters of a geoalgorithm unspecified, `run_qgis` will automatically use the default values as arguments if available.
+To find out about the default values, run `get_args_man`.  
+
+```{r, eval=FALSE}
+get_args_man(alg)
+```
+
+In this case the output tells us, had we left the `FIELDS`-parameter unspecified, our output (attribute) field would have been named "NUMPOINTS" (instead of "no_bikes").
+
+<!--
+"grass7:v.vect.stats" would achieve the same but is unavailable in QGIS
+-->
+
+Other notes:
+
+- Leaving the output parameter(s) unspecified, saves the resulting QGIS output to a temporary folder created by QGIS.
+`run_qgis` prints these paths to the console after successfully running the QGIS engine.
+- If the output consists of multiple files and you have set `load_output` to `TRUE`, `run_qgis` will return a list with each element corresponding to one output file.
+
+To learn more about **RQGIS** please refer to @muenchow_rqgis:_2017. 
 
 ## When to use what?
 
