@@ -1,4 +1,4 @@
-# Credit: build on the exmaple in https://rstudio.github.io/leaflet/shiny.html
+# Credit: build on the example in https://rstudio.github.io/leaflet/shiny.html
 library(sf)
 library(shiny)
 library(spData)
@@ -32,9 +32,8 @@ server = function(input, output, session) {
   # Reactive expression for the data subsetted to what the user selected
   filteredData = reactive({
     world_coffee$Production = world_coffee[[yr()]]
-    sel = world_coffee$Production >= input$range[1] &
-      world_coffee$Production <= input$range[2]
-    world_coffee[sel, ]
+    filter(world_coffee, Production >= input$range[1] &
+                         Production <= input$range[2])
   })
   
   output$map = renderLeaflet({
