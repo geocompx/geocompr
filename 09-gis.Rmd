@@ -107,7 +107,6 @@ Usually, `rsaga.env()` will detect SAGA automatically by searching several likel
 
 ```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library(RSAGA)
-saga = linkSAGA()
 rsaga.env()
 ```
 
@@ -223,25 +222,28 @@ We download it with the help of the **osmdata** package (see also section \@ref(
 We constrain the download of the street network (in OSM language called "highway") to  the bounding box of the cycle hire data, and attach the corresponding data as an `sf`-object.
 `osmdata_sf` returns a list with several spatial objects (points, lines, polygons, etc.).
 Here, we will only keep the line objects.
+OpenStreetMap objects come with a lot of columns, `streets` features almost 500.
+In fact, we are only interested the geometry column.
+Nevertheless, we are keeping one attribute column, otherwise we later on run into trouble when trying to provide `writeVECT()` only with a geometry object (see further below and `?writeVECT` for more details).
+Remember that the geometry column is sticky, hence, even though we are just selecting one attribute, the geometry column will be also returned (see section \@ref(intro-sf)).
 <!-- To learn more about how to use the **osmdata**-package, please refer to [https://ropensci.github.io/osmdata/](https://ropensci.github.io/osmdata/). -->
 
 ```{r, eval=FALSE}
 library(sf)
 library(osmdata)
 b_box = sf::st_bbox(cycle_hire)
-streets = opq(b_box) %>%
+london_streets = opq(b_box) %>%
   add_osm_feature(key = "highway") %>%
   osmdata_sf() %>%
   `[[`("osm_lines")
+london_streets = dplyr::select(london_streets, 1)
 ```
-
-<!-- put into spDataLarge as a convenience to the reader -->
 
 Now that we have the data, we can go on and initiate a GRASS session, i.e., we have to create a GRASS geodatabase.
 The GRASS geodatabase system is based on SQLite.
 Consequently, different users can easily work on the same project, possibly with different read/write permissions.
 However, one has to set up this geodatabase (also from within R), and users used to a GIS GUI popping up by one click might find this process a bit intimidating in the beginning.
-First of all, the GRASS database requires its own directory, and contains a location (see the [GRASS GIS Database](https://grass.osgeo.org/grass74/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass74/manuals/index.html) for further information).
+First of all, the GRASS database requires its own directory, and contains a location (see the [GRASS GIS Database](https://grass.osgeo.org/grass75/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass75/manuals/index.html) for further information).
 The location in turn simply contains the geodata for one project. 
 Within one location several mapsets can exist, and typically refer to different users. 
 PERMANENT is a mandatory mapset, and created automatically.
@@ -286,8 +288,8 @@ Subsequently, we define the projection, the extent and the resolution.
 
 ```{r, eval=FALSE}
 execGRASS("g.proj", flags = c("c", "quiet"), 
-          proj4 = sf::st_crs(streets)$proj4string)
-b_box = sf::st_bbox(streets) 
+          proj4 = sf::st_crs(london_streets)$proj4string)
+b_box = sf::st_bbox(london_streets) 
 execGRASS("g.region", flags = c("quiet"), 
           n = as.character(b_box["ymax"]), s = as.character(b_box["ymin"]), 
           e = as.character(b_box["xmax"]), w = as.character(b_box["xmin"]), 
@@ -303,20 +305,20 @@ If there is just one installation, the `linkGRASS7` automatically chooses this o
 Secondly, `linkGRASS7` establishes a connection to GRASS7.
  
 ```{r, eval=FALSE}
-link2GI::linkGRASS7(streets, ver_select = TRUE)
+link2GI::linkGRASS7(london_streets, ver_select = TRUE)
 ```
 
 Before we can use GRASS geoalgorithms, we need to add data to GRASS's spatial database.
 Luckily, the convenience function `writeVECT` does this for us.
 (Use `writeRast` in the case of raster data.)
-In our case we add the street and cycle hire point data while using only the first attribute column, and name them also `streets` and `points`. 
+In our case we add the street and cycle hire point data while using only the first attribute column, and name them also `london_streets` and `points`. 
 Note that we are converting the **sf**-objects into objects of class `Spatial*`.
 In time, **rgrass7** will also work with **sf**-objects.
 
 <!-- in time we can also use sf- and raster-objects with rgrass7, Roger has already implemented this in the rgrass7 developer version -->
 
 ```{r, eval=FALSE}
-writeVECT(as(streets[, 1], "Spatial"), vname = "streets")
+writeVECT(as(london_streets, "Spatial"), vname = "london_streets")
 writeVECT(SDF = as(points[, 1], "Spatial"), vname = "points")
 ```
 
@@ -329,7 +331,7 @@ However, to find the shortest route between them, we need to connect them to the
 We save its output in `streets_points_con`.
 
 ```{r, eval=FALSE}
-execGRASS(cmd = "v.clean", input = "streets", output = "streets_clean",
+execGRASS(cmd = "v.clean", input = "london_streets", output = "streets_clean",
           tool = "break", flags = "overwrite")
 execGRASS(cmd = "v.net", input = "streets_clean", output = "streets_points_con", 
           points = "points", operation = "connect", threshold = 0.001,
@@ -380,17 +382,18 @@ Use `v.select` and `v.extract` for vector data.
 ## (R)QGIS
 QGIS is one of the most popular open-source GIS [Table \@ref(tab:gis-comp); @graser_processing:_2015]. 
 Its main advantage lies in the fact that it provides a unified interface to several other open-source GIS.
-First and foremost, this means that you have access to GDAL/OGR, GRASS and SAGA through QGIS but also to other third-party providers such as [TauDEM](http://hydrology.usu.edu/taudem/taudem5/index.html), [Orfeo Toolbox](https://www.orfeo-toolbox.org/) and [Lastools](https://rapidlasso.com/lastools/) (tools for LiDAR data) [@graser_processing:_2015]. 
+This means that you have access to GDAL/OGR, GRASS and SAGA through QGIS [@graser_processing:_2015]. 
 To run all these geoalgorithms (frequently more than 1000 depending on your set up) outside of the QGIS GUI, QGIS provides a Python API.
 **RQGIS** establishes a tunnel to this Python API through the **reticulate** package. 
 Basically, functions `set_env` and `open_app` are doing this. 
 Note that it is optional to run `set_env` and `open_app` since all functions depending on their output will run them automatically if needed.
 Before running **RQGIS** you have to make sure to have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS.
 To help you with the installation process, please follow the steps as detailed in `vignette("install_guide", package = "RQGIS")` for several platforms (Windows, Linux, MacOS).
+In case you have run the GRASS example from the previous section before, please restart R before running the subsequent code chunk (RStudio shortcut: Crtl+Shift+F10).
 
 ```{r qgis_setup, eval=FALSE}
 library(RQGIS)
-set_env()
+set_env(dev = FALSE)
 open_app()
 ```
 
@@ -398,30 +401,34 @@ Leaving the `path`-argument of `set_env` unspecified will search the computer fo
 Hence, it is faster to specify explicitly the path to your QGIS installation.
 Subsequently, `open_app` sets all paths necessary to run QGIS from within R, and finally creates a so-called QGIS custom application [http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications).
 We are now ready for some QGIS geoprocessing from within R! 
-First of all, we load some data from the **spData**-package, namely the boroughs of London (`lnd`) and cycle hire points in London (`cycle_hire`).
+
+Unioning polygons often produces so-called sliver polygons.
+This is the case when the borders of the polygons to union do not overlap completely which is frequently the case when combining data from different sources.
+Here, we will reuse the incongruent polygons we have already encountered in section \@ref(spatial-aggr).
+Both polygon datasets are available in the **spData** package.
 
 ```{r}
-library(spData)
+data("incongruent", package = "spData")
+data("aggregating_zones", package = "spData")
 ```
 
-In chapter \@ref(spatial-class), we already learned how to do a spatial overlay using the **sf**-package.
-Of course, any GIS is also able to perform spatial overlays. 
-Here, we would like to know how many cycle points we can find per borough.
-First of all, we need to come up with the name of the function in QGIS. `find_algorithms` lets you search all QGIS geoalgorithms with the help of regular expressions.
-Here, we assume that the short description of the function contains first the word "point" and secondly somewhere later also the word "poly".
+First, we will union the polygons.
+For this, we need to come up with the name of the function in QGIS. 
+`find_algorithms` lets you search all QGIS geoalgorithms with the help of regular expressions.
+Here, we assume that the short description of the function contains the word "union".
 If you have no clue at all what to look for you can leave the `search_term`-argument empty which will return a list of all available QGIS geoalgorithms.
 If you also want to have a short description for each geoalgorithm, set the `name_only`-parameter to FALSE.
 
 ```{r, eval=FALSE}
-find_algorithms("points.*poly", name_only = TRUE)
+find_algorithms("union", name_only = TRUE)
 ```
 
-Now that we know the name of the function (`qgis:countpointsinpolygon`), we wonder how we can use it.
+Now that we know the name of the function (`qgis:union`), we wonder how we can use it.
 `get_usage` returns all function parameters and default values. 
 `open_help` lets you access the corresponding online help.
 
 ```{r, eval=FALSE}
-alg = "qgis:countpointsinpolygon"
+alg = "qgis:union"
 get_usage(alg)
 ```
 
@@ -431,20 +438,16 @@ open_help(alg)
 
 Finally, we can let QGIS do the work.
 Note that the workhorse function `run_qgis` accepts R named arguments, i.e., you can specify the parameter names as returned by `get_usage` as you would do in any other regular R function.
-Note also that `run_qgis` accepts spatial objects residing in R's global environment as input (here: `lnd` and `cycle_hire`). 
-But of course, you could also specify paths to shapefiles stored on disk.
-<!-- only shapefiles or more general - spatial vectors? -->
-Setting the `load_output` to `TRUE` automatically loads the QGIS output into R.
-Since we only indicated the name of the output ("cycle.shp"), `run_qgis` saves the output to a temporary folder as returned by `tempdir()`, and loads it into R as an **sf**-object.
+Note also that `run_qgis` accepts spatial objects residing in R's global environment as input (here: `aggregating_zones` and `incongruent`). 
+But of course, you could also specify paths to spatial vector files stored on disk.
+Setting the `load_output` to `TRUE` automatically loads the QGIS output as an **sf**-object into R.
 
 ```{r, eval=FALSE}
-bike_points = run_qgis(alg, POLYGONS = lnd, POINTS = cycle_hire, 
-                       FIELD = "no_bikes", OUTPUT = "cycle.shp",
-                       load_output = TRUE)
-summary(bike_points$no_bikes)
-sum(bike_points$no_bikes > 0)
+union = run_qgis(alg, INPUT = incongruent, INPUT2 = aggregating_zones, 
+                 OUTPUT = file.path(tempdir(), "cycle.shp"),
+                 load_output = TRUE)
 ```
-
+<!-- GO ON FROM HERE TOMORROW -->
 In case you leave some parameters of a geoalgorithm unspecified, `run_qgis` will automatically use the default values as arguments if available.
 To find out about the default values, run `get_args_man`.  
 
