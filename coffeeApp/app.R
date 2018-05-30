@@ -1,4 +1,4 @@
-# Credit: build on the example in https://rstudio.github.io/leaflet/shiny.html
+# Credit: build on the exmaple in https://rstudio.github.io/leaflet/shiny.html
 library(sf)
 library(shiny)
 library(spData)
@@ -7,16 +7,15 @@ library(tidyverse)
 world_coffee = left_join(world, coffee_data)
 pal = colorNumeric(palette = "RdYlBu", domain = c(0, 4000))
 
-ui = bootstrapPage(
-  tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-  leafletOutput("map", width = "100%", height = "100%"),
-  absolutePanel(top = 10, right = 10,
-                sliderInput("range", "Coffee Production", 0, 4000,
-                            value = c(1000, 4000), step = 100
-                ),
-                selectInput("year", "Year", c(2016, 2017)
-                ),
-                checkboxInput("legend", "Show legend", FALSE)
+ui = fluidPage(
+  sidebarPanel(
+    sliderInput("range", "Coffee Production", 0, 4000,
+                value = c(1000, 4000), step = 100),
+    selectInput("year", "Year", c(2016, 2017)),
+    checkboxInput("legend", "Show legend", FALSE)
+  ),
+  mainPanel(
+    leafletOutput("map")
   )
 )
 
@@ -33,8 +32,9 @@ server = function(input, output, session) {
   # Reactive expression for the data subsetted to what the user selected
   filteredData = reactive({
     world_coffee$Production = world_coffee[[yr()]]
-    filter(world_coffee, Production >= input$range[1] &
-                         Production <= input$range[2])
+    sel = world_coffee$Production >= input$range[1] &
+      world_coffee$Production <= input$range[2]
+    world_coffee[sel, ]
   })
   
   output$map = renderLeaflet({
