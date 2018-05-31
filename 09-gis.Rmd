@@ -91,6 +91,195 @@ knitr::kable(x = d, caption = "Comparison between three open-source GIS. Hybrid 
   kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see [http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/](http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world/)), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
 ```
 
+## (R)QGIS
+QGIS is one of the most popular open-source GIS [Table \@ref(tab:gis-comp); @graser_processing:_2015]. 
+Its main advantage lies in the fact that it provides a unified interface to several other open-source GIS.
+This means that you have access to GDAL/OGR, GRASS and SAGA through QGIS [@graser_processing:_2015]. 
+To run all these geoalgorithms (frequently more than 1000 depending on your set up) outside of the QGIS GUI, QGIS provides a Python API.
+**RQGIS** establishes a tunnel to this Python API through the **reticulate** package. 
+Basically, functions `set_env` and `open_app` are doing this. 
+Note that it is optional to run `set_env` and `open_app` since all functions depending on their output will run them automatically if needed.
+Before running **RQGIS** you have to make sure to have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS.
+To help you with the installation process, please follow the steps as detailed in `vignette("install_guide", package = "RQGIS")` for several platforms (Windows, Linux, MacOS).
+Please install the long-term release of QGIS, i.e. 2.18, since **RQGIS** so far does not support QGIS 3.
+
+```{r qgis_setup, eval=FALSE}
+# for the moment, please use the RQGIS developer version
+# devtools::install_github("jannes-m/RQGIS")
+library(RQGIS)
+set_env()
+
+#> $`root`
+#> [1] "C:/OSGeo4W64"
+#> 
+#> $qgis_prefix_path
+#> [1] "C:/OSGeo4W64/apps/qgis-ltr"
+#> 
+#> $python_plugins
+#> [1] "C:/OSGeo4W64/apps/qgis-ltr/python/plugins"
+```
+
+Leaving the `path`-argument of `set_env` unspecified will search the computer for a QGIS installation.
+Hence, it is faster to specify explicitly the path to your QGIS installation.
+Subsequently, `open_app` sets all paths necessary to run QGIS from within R, and finally creates a so-called QGIS custom application [http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications).
+
+```{r, eval=FALSE}
+open_app()
+```
+
+We are now ready for some QGIS geoprocessing from within R! 
+
+Unioning polygons often produces so-called sliver polygons.
+This is the case when the borders of the polygons to union do not overlap completely which is frequently the case when combining data from different sources.
+Here, we will reuse the incongruent polygons we have already encountered in section \@ref(spatial-aggr).
+Both polygon datasets are available in the **spData** package, and for both we would like to use a geographic CRS (see also Chapter \@ref(reproj-geo-data)).
+
+```{r}
+data("incongruent", package = "spData")
+data("aggregating_zones", package = "spData")
+incongruent = st_transform(incongruent, 4326)
+aggregating_zones = st_transform(aggregating_zones, 4326)
+```
+
+First, we will need a QGIS geoalgorithm that unions polygons.
+`find_algorithms` searches all QGIS geoalgorithms with the help of regular expressions.
+Assuming that the short description of the function contains the word "union", we can run:
+
+```{r, eval=FALSE}
+find_algorithms("union", name_only = TRUE)
+#> [1] "qgis:union"        "saga:fuzzyunionor" "saga:union"   
+```
+
+
+If you also want to have a short description for each geoalgorithm, set the `name_only`-parameter to `FALSE`.
+If one has no clue at all what the name of a geoalgorithm might be, one can leave the `search_term`-argument empty which will return a list of all available QGIS geoalgorithms.
+
+The next step is to find out how `qgis:union` can be used.
+`open_help` opens the online help of the geoalgorithm in question.
+`get_usage` returns all function parameters and default values. 
+
+
+```{r, eval=FALSE}
+alg = "qgis:union"
+open_help(alg)
+get_usage(alg)
+#>ALGORITHM: Union
+#>	INPUT <ParameterVector>
+#>	INPUT2 <ParameterVector>
+#>	OUTPUT <OutputVector>
+```
+
+Finally, we can let QGIS do the work.
+Note that the workhorse function `run_qgis` accepts R named arguments, i.e., you can specify the parameter names as returned by `get_usage` as you would do in any other regular R function.
+Note also that `run_qgis` accepts spatial objects residing in R's global environment as input (here: `aggregating_zones` and `incongruent`). 
+But of course, you could also specify paths to spatial vector files stored on disk.
+Setting the `load_output` to `TRUE` automatically loads the QGIS output as an **sf**-object into R.
+
+```{r, eval=FALSE}
+union = run_qgis(alg, INPUT = incongruent, INPUT2 = aggregating_zones, 
+                 OUTPUT = file.path(tempdir(), "union.shp"),
+                 load_output = TRUE)
+#> $`OUTPUT`
+#> [1] "C:/Users/pi37pat/AppData/Local/Temp/RtmpcJlnUx/union.shp"
+```
+
+Note that the QGIS union operation is an intersecting union, and not equivalent to `st_union(incongruent, aggregating_zones)`.
+The output contains empty geometries and multipart polygons.
+Empty geometries can be deleted.
+`st_dimension()` returns `NA` if a geometry is empty, and can therefore be used as a filter. 
+
+```{r, eval=FALSE}
+# getting rid of empty geometries
+union = union[!is.na(st_dimension(union)), ]
+```
+
+Secondly, we convert multipart polygons into single part polygons (also known as explode geometries or casting).
+This is necessary for the deletion of sliver polygons later on.
+
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+# multipart polygons to single polygons
+single = lapply(1:nrow(union), function(i) {
+  st_cast(union[i, ], "POLYGON")
+  })
+single = do.call(rbind, single)
+```
+
+One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^^2. 
+
+```{r}
+single$area = st_area(single)
+# find polygons which are smaller than 25000 m^2
+x = 25000
+units(x) = "m^2"
+sub = dplyr::filter(mp, area < x)
+plot(single$geometry, col = NA)
+plot(sub$geometry, add = TRUE, col = "blue", border = "blue", lwd = 1.5)
+```
+
+The next step is to find a function that makes the slivers disappear.
+Assuming the function or its short description contains the word "sliver", we can run:
+
+```{r, eval=FALSE}
+find_algorithms("sliver", name_only = TRUE)
+#> [1] "qgis:eliminatesliverpolygons"
+```
+
+This returns only one geoalgorithm whose parameters can be accessed with the help of `get_usage()` again.
+
+```{r, eval=FALSE}
+alg = "qgis:eliminatesliverpolygons"
+get_usage(alg)
+#>ALGORITHM: Eliminate sliver polygons
+#>	INPUT <ParameterVector>
+#>	KEEPSELECTION <ParameterBoolean>
+#>	ATTRIBUTE <parameters from INPUT>
+#>	COMPARISON <ParameterSelection>
+#>	COMPARISONVALUE <ParameterString>
+#>	MODE <ParameterSelection>
+#>	OUTPUT <OutputVector>
+
+#>COMPARISON(Comparison)
+#>	0 - ==
+#>	1 - !=
+#>	2 - >
+#>	3 - >=
+#>	4 - <
+#>	5 - <=
+#>	6 - begins with
+#>	7 - contains
+#>MODE(Merge selection with the neighbouring polygon with the)
+#>	0 - Largest area
+#>	1 - Smallest Area
+#>	2 - Largest common boundary
+```
+
+Conveniently, the user has not to specify each single parameter.
+In case a parameter is left unspecified, `run_qgis` will automatically use the corresponding default value as argument if available.
+To find out about the default values, run `get_args_man()`.  
+
+To finally get rid off the slivers, we specify that all polygons with an area less or equal to 25000 m^^2 should be joined to that neighboring polygon with the largest area.
+
+```{r, eval=FALSE}
+clean = run_qgis("qgis:eliminatesliverpolygons",
+                 INPUT = single,
+                 ATTRIBUTE = "area",
+                 COMPARISON = "<=",
+                 COMPARISONVALUE = 25000,
+                 OUTPUT = file.path(tempdir(), "clean.shp"),
+                 load_output = TRUE)
+#> $`OUTPUT`
+#> [1] "C:/Users/pi37pat/AppData/Local/Temp/RtmpcJlnUx/clean.shp"
+```
+
+Other notes:
+
+- Leaving the output parameter(s) unspecified, saves the resulting QGIS output to a temporary folder created by QGIS.
+`run_qgis` prints these paths to the console after successfully running the QGIS engine.
+- If the output consists of multiple files and you have set `load_output` to `TRUE`, `run_qgis` will return a list with each element corresponding to one output file.
+
+To learn more about **RQGIS** please refer to @muenchow_rqgis:_2017. 
+
+
 ## (R)SAGA
 
 The System for Automated Geoscientific Analyses (SAGA; Table \@ref(tab:gis-comp)) provides the possibility to execute SAGA modules via the command line interface (saga_cmd.exe) (see also [https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/))
@@ -378,96 +567,6 @@ Use `v.select` and `v.extract` for vector data.
 - You can start R also from within a running GRASS session [for more information please refer to @bivand_applied_2013 and this [wiki](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7)].
 - Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass75/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm.
 - If you would like to use GRASS 6 from within R, use the R package **spgrass6**.
-
-## (R)QGIS
-QGIS is one of the most popular open-source GIS [Table \@ref(tab:gis-comp); @graser_processing:_2015]. 
-Its main advantage lies in the fact that it provides a unified interface to several other open-source GIS.
-This means that you have access to GDAL/OGR, GRASS and SAGA through QGIS [@graser_processing:_2015]. 
-To run all these geoalgorithms (frequently more than 1000 depending on your set up) outside of the QGIS GUI, QGIS provides a Python API.
-**RQGIS** establishes a tunnel to this Python API through the **reticulate** package. 
-Basically, functions `set_env` and `open_app` are doing this. 
-Note that it is optional to run `set_env` and `open_app` since all functions depending on their output will run them automatically if needed.
-Before running **RQGIS** you have to make sure to have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS.
-To help you with the installation process, please follow the steps as detailed in `vignette("install_guide", package = "RQGIS")` for several platforms (Windows, Linux, MacOS).
-In case you have run the GRASS example from the previous section before, please restart R before running the subsequent code chunk (RStudio shortcut: Crtl+Shift+F10).
-
-```{r qgis_setup, eval=FALSE}
-library(RQGIS)
-set_env(dev = FALSE)
-open_app()
-```
-
-Leaving the `path`-argument of `set_env` unspecified will search the computer for a QGIS installation.
-Hence, it is faster to specify explicitly the path to your QGIS installation.
-Subsequently, `open_app` sets all paths necessary to run QGIS from within R, and finally creates a so-called QGIS custom application [http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications).
-We are now ready for some QGIS geoprocessing from within R! 
-
-Unioning polygons often produces so-called sliver polygons.
-This is the case when the borders of the polygons to union do not overlap completely which is frequently the case when combining data from different sources.
-Here, we will reuse the incongruent polygons we have already encountered in section \@ref(spatial-aggr).
-Both polygon datasets are available in the **spData** package.
-
-```{r}
-data("incongruent", package = "spData")
-data("aggregating_zones", package = "spData")
-```
-
-First, we will union the polygons.
-For this, we need to come up with the name of the function in QGIS. 
-`find_algorithms` lets you search all QGIS geoalgorithms with the help of regular expressions.
-Here, we assume that the short description of the function contains the word "union".
-If you have no clue at all what to look for you can leave the `search_term`-argument empty which will return a list of all available QGIS geoalgorithms.
-If you also want to have a short description for each geoalgorithm, set the `name_only`-parameter to FALSE.
-
-```{r, eval=FALSE}
-find_algorithms("union", name_only = TRUE)
-```
-
-Now that we know the name of the function (`qgis:union`), we wonder how we can use it.
-`get_usage` returns all function parameters and default values. 
-`open_help` lets you access the corresponding online help.
-
-```{r, eval=FALSE}
-alg = "qgis:union"
-get_usage(alg)
-```
-
-```{r, eval=FALSE}
-open_help(alg)
-```
-
-Finally, we can let QGIS do the work.
-Note that the workhorse function `run_qgis` accepts R named arguments, i.e., you can specify the parameter names as returned by `get_usage` as you would do in any other regular R function.
-Note also that `run_qgis` accepts spatial objects residing in R's global environment as input (here: `aggregating_zones` and `incongruent`). 
-But of course, you could also specify paths to spatial vector files stored on disk.
-Setting the `load_output` to `TRUE` automatically loads the QGIS output as an **sf**-object into R.
-
-```{r, eval=FALSE}
-union = run_qgis(alg, INPUT = incongruent, INPUT2 = aggregating_zones, 
-                 OUTPUT = file.path(tempdir(), "cycle.shp"),
-                 load_output = TRUE)
-```
-<!-- GO ON FROM HERE TOMORROW -->
-In case you leave some parameters of a geoalgorithm unspecified, `run_qgis` will automatically use the default values as arguments if available.
-To find out about the default values, run `get_args_man`.  
-
-```{r, eval=FALSE}
-get_args_man(alg)
-```
-
-In this case the output tells us, had we left the `FIELDS`-parameter unspecified, our output (attribute) field would have been named "NUMPOINTS" (instead of "no_bikes").
-
-<!--
-"grass7:v.vect.stats" would achieve the same but is unavailable in QGIS
--->
-
-Other notes:
-
-- Leaving the output parameter(s) unspecified, saves the resulting QGIS output to a temporary folder created by QGIS.
-`run_qgis` prints these paths to the console after successfully running the QGIS engine.
-- If the output consists of multiple files and you have set `load_output` to `TRUE`, `run_qgis` will return a list with each element corresponding to one output file.
-
-To learn more about **RQGIS** please refer to @muenchow_rqgis:_2017. 
 
 ## When to use what?
 
