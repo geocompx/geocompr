@@ -200,9 +200,9 @@ union = run_qgis(alg, INPUT = incongruent, INPUT2 = aggregating_zones,
 ```
 
 Note that the QGIS union operation merges the two input layers into one layer by using the intersection and the symmetrical difference of the two input layers (which by the way is also the default when doing a union operation in GRASS and SAGA).
-This is not the same as `st_union(incongruent, aggregating_zones)` (see Exercises)!
-The output contains empty geometries and multipart polygons.
-Empty geometries can be deleted.
+This is **not** the same as `st_union(incongruent, aggregating_zones)` (see Exercises)!
+The QGIS output contains empty geometries and multipart polygons.
+Empty geometries might lead to problems in subsequent geoprocessing tasks which is why they will be deleted.
 `st_dimension()` returns `NA` if a geometry is empty, and can therefore be used as a filter. 
 
 ```{r, eval=FALSE}
@@ -215,10 +215,8 @@ This is necessary for the deletion of sliver polygons later on.
 
 ```{r, eval=FALSE, message=FALSE, warning=FALSE}
 # multipart polygons to single polygons
-single = lapply(1:nrow(union), function(i) {
-  st_cast(union[i, ], "POLYGON")
-  })
-single = do.call(rbind, single)
+single = st_cast(union, "MULTIPOLYGON") %>%
+  st_cast("POLYGON")
 ```
 
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^^2. 
