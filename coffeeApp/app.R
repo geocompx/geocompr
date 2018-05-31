@@ -7,16 +7,15 @@ library(tidyverse)
 world_coffee = left_join(world, coffee_data)
 pal = colorNumeric(palette = "RdYlBu", domain = c(0, 4000))
 
-ui = bootstrapPage(
-  tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-  leafletOutput("map", width = "100%", height = "100%"),
-  absolutePanel(top = 10, right = 10,
-                sliderInput("range", "Coffee Production", 0, 4000,
-                            value = c(1000, 4000), step = 100
-                ),
-                selectInput("year", "Year", c(2016, 2017)
-                ),
-                checkboxInput("legend", "Show legend", FALSE)
+ui = fluidPage(
+  sidebarPanel(
+    sliderInput("range", "Coffee Production", 0, 4000,
+                value = c(1000, 4000), step = 100),
+    selectInput("year", "Year", c(2016, 2017)),
+    checkboxInput("legend", "Show legend", FALSE)
+  ),
+  mainPanel(
+    leafletOutput("map")
   )
 )
 
