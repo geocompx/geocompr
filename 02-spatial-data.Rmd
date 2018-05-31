@@ -116,6 +116,12 @@ source("code/02-vectorplots.R") # generate subsequent figure
 knitr::include_graphics(c("figures/vector_lonlat.png", "figures/vector_projected.png"))
 ```
 
+**sf** is a package providing a class system for geographic vector data.
+Not only does it supercede **sp** it also provides a consistent command-line interface to GEOS and GDAL, superceding **rgeos** and **rgdal** (described in section \@ref(the-history-of-r-spatial)).
+<!-- Really? not necessary so removed (RL) -->
+<!-- In theory this should make **sf** faster than **sp**/**rgdal**/**rgeos**. -->
+This section introduces **sf** classes in preparation for subsequent chapters (Chapters \@ref(geometric-operations) and \@ref(read-write) cover the GEOS and GDAL interface respectively).
+
 
 <!-- Commented out: not really necessary here - keeping as could be useful elsewhere: -->
 <!-- In mathematical notation these points are typically represented as numbers separated by commas and enclosed by a pair of brackets:  -->
@@ -249,17 +255,21 @@ world_sf = st_as_sf(world_sp, "sf")
 
 ### Basic map making {#basic-map}
 
-You can quickly create basic maps in **sf** with the base `plot()` function. By default, **sf** creates a multi-panel plot (like **sp**'s `spplot()`), one sub-plot for each variable (see left-hand image in Figure \@ref(fig:sfplot)). 
+Basic maps are created in **sf** with `plot()`.
+By default this creates a multi-panel plot (like **sp**'s `spplot()`), one sub-plot for each variable of the object, as illustrated in the left-hand panel in Figure \@ref(fig:sfplot).
+A legend or 'key' with a continuous color is produced if the object to be plotted has a single variable (see the right-hand panel).
+Colors can also be set with `col = `, although this will not create a continuous palette or a legend. 
 
 ```{r sfplot, fig.cap="Plotting with sf, with multiple variables (left) and a single variable (right).", out.width="49%", fig.show='hold', warning=FALSE}
 plot(world[3:4])
 plot(world["pop"])
 ```
 
-As with **sp**, you can add further layers to your maps using the `add = TRUE`-argument of the `plot()` function .^[In
-fact, when you `plot()` an **sf** object, R is calling `sf:::plot.sf()` behind the scenes.
-`plot()` is a generic method that behaves differently depending on the class of object being plotted.]
-To illustrate this, and prepare for content covered in chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, we will subset and combine countries in the `world` object, which creates a single object representing Asia:
+Plots are added as layers to existing images by setting `add = TRUE`.^[
+`plot()`ing of **sf** objects uses `sf:::plot.sf()` behind the scenes.
+`plot()` is a generic method that behaves differently depending on the class of object being plotted.
+]
+To demonstrate this, and to provide a taster of content covered in chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, the subsequent code chunk combines countries in Asia:
 
 ```{r, warning=FALSE}
 asia = world[world$continent == "Asia", ]
@@ -267,17 +277,17 @@ asia = st_union(asia)
 ```
 
 We can now plot the Asian continent over a map of the world.
-Note that this only works when the initial plot has only one facet and when `reset` (which resets plot settings) is set to `FALSE`:
+Note that the first plot must only have one facet for `add = TRUE` to work.
+If the first plot has a key, `reset = FALSE` must be used:
 
 ```{r asia, out.width='50%', fig.cap="A plot of Asia added as a layer on top of countries worldwide."}
 plot(world["pop"], reset = FALSE)
 plot(asia, add = TRUE, col = "red")
 ```
 
-This can be very useful for quickly checking the geographic correspondence between two or more layers: 
+Adding layers in this way can be used to verify the geographic correspondence between layers: 
 the `plot()` function is fast to execute and requires few lines of code, but does not create interactive maps with a wide range of options.
-For more advanced map making we recommend using a dedicated visualization package such as **tmap**, **ggplot2**, **mapview**, or **leaflet**.
-<!-- TODO: cross reference advanced mapping chapter -->
+For more advanced map making we recommend using dedicated visualization packages such as **tmap** (see Chapter \@ref(adv-map)).
 
 <!-- 
 - plot() function 
@@ -293,28 +303,10 @@ plot(africa[0], lwd = 3, main = "Nigeria in context", border = "lightgrey")
 
 ### Base plot arguments {#base-args}
 
-**sf** simplifies spatial data objects compared with **sp** and provides a near-direct interface to GDAL and GEOS C++ functions.
-In theory this should make **sf** faster than **sp**/**rgdal**/**rgeos**.
-This section introduces **sf** classes in preparation for subsequent chapters which deal with vector data (in particular Chapters \@ref(spatial-operations) and \@ref(reproj-geo-data)).
-
-As a final exercise, we will see one way of how to do a spatial overlay in **sf**.
-First, we convert the countries of the world into centroids, and then subset those in Asia. Finally, the `summary` command tells us how many centroids (countries) are part of Asia (43) and how many are not (134).
-
-```{r, warning=FALSE}
-world_centroids = st_centroid(world)
-sel_asia = st_intersects(world_centroids, asia, sparse = FALSE)
-```
-
-```{r}
-summary(sel_asia)
-```
-
-Note: `st_intersects()` uses [GEOS](https://trac.osgeo.org/geos/) in the background for the spatial overlay operation (see also Chapter \@ref(spatial-operations)).
-
-Since **sf**'s `plot()` function builds on base plotting methods, you may also use its many optional arguments (see `?graphics::plot` and `?par`).
-This provides many options, but may not be the most concise way to generate maps for publication (see Chapter \@ref(adv-map)).
+Since **sf**'s `plot()` function builds on base plotting methods, it has many optional arguments (see `?graphics::plot` and `?par`).
+This may not be the most concise way to generate maps for publication, as we will see in Chapter \@ref(adv-map), but it is worth learning some base plotting arguments for future reference.
 A simple illustration of the flexibility of `plot()` is provided in Figure \@ref(fig:contpop), which adds circles representing population size to a map of the world.
-A basic version of the map can be created with the following commands (see exercises in section \@ref(ex2) and the script [`02-contplot`](https://github.com/Robinlovelace/geocompr/blob/master/code/02-contpop.R) in the GitHub repo for further details):
+A basic version of the map can be created with the following commands (see exercises in section \@ref(ex2) [`02-contplot.R`](https://github.com/Robinlovelace/geocompr/blob/master/code/02-contpop.R) in the book's GitHub repo for details):
 
 ```{r, eval=FALSE}
 plot(world["continent"], reset = FALSE)
@@ -325,15 +317,6 @@ plot(st_geometry(world_centroids), add = TRUE, cex = cex)
 ```{r contpop, fig.cap="Country continents (represented by fill color) and 2015 populations (represented by points, with point area proportional to population) worldwide.", echo=FALSE, warning=FALSE}
 source("code/02-contpop.R")
 ```
-
-<!-- More appropriate for subsequent chapters. -->
-<!-- This shows that there are 43 countries in Asia -->
-<!-- We can check if they are the same countries as follows: -->
-
-<!-- ```{r} -->
-<!-- africa_centroids2 = world_centroids[sel_africa, ] -->
-<!-- identical(africa_centroids, africa_centroids2) -->
-<!-- ``` -->
 
 ### Simple feature classes {#sf-classes}
 
