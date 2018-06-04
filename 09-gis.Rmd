@@ -113,8 +113,8 @@ Its main advantage lies in the fact that it provides a unified interface to seve
 This means that you have access to GDAL/OGR, GRASS and SAGA through QGIS [@graser_processing:_2015]. 
 To run all these geoalgorithms (frequently more than 1000 depending on your set up) outside of the QGIS GUI, QGIS provides a Python API.
 **RQGIS** establishes a tunnel to this Python API through the **reticulate** package. 
-Basically, functions `set_env` and `open_app` are doing this. 
-Note that it is optional to run `set_env` and `open_app` since all functions depending on their output will run them automatically if needed.
+Basically, functions `set_env()` and `open_app()` are doing this. 
+Note that it is optional to run `set_env()` and `open_app()` since all functions depending on their output will run them automatically if needed.
 Before running **RQGIS** you have to make sure to have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS.
 To help you with the installation process, please follow the steps as detailed in `vignette("install_guide", package = "RQGIS")` for several platforms (Windows, Linux, MacOS).
 Please install the long-term release of QGIS, i.e. 2.18, since **RQGIS** so far does not support QGIS 3.
@@ -135,9 +135,9 @@ set_env()
 #> [1] "C:/OSGeo4W64/apps/qgis-ltr/python/plugins"
 ```
 
-Leaving the `path`-argument of `set_env` unspecified will search the computer for a QGIS installation.
+Leaving the `path`-argument of `set_env()` unspecified will search the computer for a QGIS installation.
 Hence, it is faster to specify explicitly the path to your QGIS installation.
-Subsequently, `open_app` sets all paths necessary to run QGIS from within R, and finally creates a so-called QGIS custom application [http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications).
+Subsequently, `open_app` sets all paths necessary to run QGIS from within R, and finally creates a so-called QGIS custom application (see [http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications)).
 
 ```{r, eval=FALSE}
 open_app()
@@ -158,7 +158,7 @@ aggregating_zones = st_transform(aggregating_zones, 4326)
 ```
 
 First, we will need a QGIS geoalgorithm that unions polygons.
-`find_algorithms` searches all QGIS geoalgorithms with the help of regular expressions.
+`find_algorithms()` searches all QGIS geoalgorithms with the help of regular expressions.
 Assuming that the short description of the function contains the word "union", we can run:
 
 ```{r, eval=FALSE}
@@ -171,8 +171,8 @@ If you also want to have a short description for each geoalgorithm, set the `nam
 If one has no clue at all what the name of a geoalgorithm might be, one can leave the `search_term`-argument empty which will return a list of all available QGIS geoalgorithms.
 
 The next step is to find out how `qgis:union` can be used.
-`open_help` opens the online help of the geoalgorithm in question.
-`get_usage` returns all function parameters and default values. 
+`open_help()` opens the online help of the geoalgorithm in question.
+`get_usage()` returns all function parameters and default values. 
 
 
 ```{r, eval=FALSE}
@@ -186,8 +186,8 @@ get_usage(alg)
 ```
 
 Finally, we can let QGIS do the work.
-Note that the workhorse function `run_qgis` accepts R named arguments, i.e., you can specify the parameter names as returned by `get_usage` as you would do in any other regular R function.
-Note also that `run_qgis` accepts spatial objects residing in R's global environment as input (here: `aggregating_zones` and `incongruent`). 
+Note that the workhorse function `run_qgis()` accepts R named arguments, i.e., you can specify the parameter names as returned by `get_usage()` in `run_qgis()` as you would do in any other regular R function.
+Note also that `run_qgis()` accepts spatial objects residing in R's global environment as input (here: `aggregating_zones` and `incongruent`). 
 But of course, you could also specify paths to spatial vector files stored on disk.
 Setting the `load_output` to `TRUE` automatically loads the QGIS output as an **sf**-object into R.
 
@@ -269,7 +269,7 @@ get_usage(alg)
 ```
 
 Conveniently, the user has not to specify each single parameter.
-In case a parameter is left unspecified, `run_qgis` will automatically use the corresponding default value as argument if available.
+In case a parameter is left unspecified, `run_qgis()` will automatically use the corresponding default value as argument if available.
 To find out about the default values, run `get_args_man()`.  
 
 To finally get rid off the slivers, we specify that all polygons with an area less or equal to 25000 m^2^ should be joined to that neighboring polygon with the largest area.
@@ -501,20 +501,20 @@ execGRASS("g.region", flags = c("quiet"),
 ```
 
 Once you are familiar how to set up the GRASS environment, it becomes tedious to do so over and over again.
-Luckily, `linkGRASS7` of the **link2GI** packages lets you do it with one line of code.
+Luckily, `linkGRASS7()` of the **link2GI** packages lets you do it with one line of code.
 The only thing you need to provide is a spatial object which determines the projection and the extent of the geodatabase.
-First, `linkGRASS7` finds all GRASS installations on your computer.
+First, `linkGRASS7()` finds all GRASS installations on your computer.
 Since we have set `ver_select` to `TRUE`, we can interactively choose one of the found GRASS-installations.
-If there is just one installation, the `linkGRASS7` automatically chooses this one.
-Secondly, `linkGRASS7` establishes a connection to GRASS7.
+If there is just one installation, the `linkGRASS7()` automatically chooses this one.
+Secondly, `linkGRASS7()` establishes a connection to GRASS7.
  
 ```{r, eval=FALSE}
 link2GI::linkGRASS7(london_streets, ver_select = TRUE)
 ```
 
 Before we can use GRASS geoalgorithms, we need to add data to GRASS's spatial database.
-Luckily, the convenience function `writeVECT` does this for us.
-(Use `writeRast` in the case of raster data.)
+Luckily, the convenience function `writeVECT()` does this for us.
+(Use `writeRast()` in the case of raster data.)
 In our case we add the street and cycle hire point data while using only the first attribute column, and name them also `london_streets` and `points`. 
 Note that we are converting the **sf**-objects into objects of class `Spatial*`.
 In time, **rgrass7** will also work with **sf**-objects.
