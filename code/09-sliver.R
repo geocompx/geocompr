@@ -9,16 +9,19 @@
 #**********************************************************
 #
 # 1. ATTACH PACKAGES AND DATA
-# 2. SLIVER POLYGONS
+# 2. ELIMINATE SLIVER POLYGONS
+# 3. FIGURES
 #
 #**********************************************************
 # 1 ATTACH PACKAGES AND DATA-------------------------------
 #**********************************************************
 
 # attach packages
-library("RQGIS")
-library("spData")
-library("sf")
+library(RQGIS)
+library(spData)
+library(sf)
+library(dplyr)
+library(tmap)
 
 # attach data
 data("incongruent", package = "spData")
@@ -27,7 +30,7 @@ incongruent = st_transform(incongruent, 4326)
 aggregating_zones = st_transform(aggregating_zones, 4326)
 
 #**********************************************************
-# 2 SLIVER POLYGONS----------------------------------------
+# 2 ELIMINATE SLIVER POLYGONS------------------------------
 #**********************************************************
 
 set_env(dev = FALSE)
@@ -48,18 +51,43 @@ single$area = st_area(single)
 x = 25000
 units(x) = "m^2"
 sub = dplyr::filter(single, area < x)
+# have a quick glance
 plot(single$geometry, col = NA)
 plot(sub$geometry, add = TRUE, col = "blue", border = "blue", lwd = 1.5)
-
 
 # eliminate sliver polygons
 get_usage("qgis:eliminatesliverpolygons")
 clean = run_qgis("qgis:eliminatesliverpolygons",
-                 INPUT = mp,
+                 INPUT = single,
                  ATTRIBUTE = "area",
                  COMPARISON = "<=",
                  COMPARISONVALUE = 25000,
-                 OUTPUT = file.path(tempdir(), "clean.gpkg"),
+                 OUTPUT = file.path(tempdir(), "clean.shp"),
                  load_output = TRUE)
-# plot cleaned polygons
+# have a quick glance
 plot(st_geometry(clean))
+
+#**********************************************************
+# 3 FIGURES------------------------------------------------
+#**********************************************************
+
+
+sliver_fig = tm_shape(single) + 
+  tm_borders() + 
+  tm_shape(sub) + 
+  tm_fill(col = "blue") + 
+  tm_borders(col = "blue", lwd = 1.5) + 
+  tm_layout(inner.margins = rep(0.01, 4))
+
+clean_fig = tm_shape(clean) + 
+  tm_borders() +
+  tm_layout(inner.margins = rep(0.01, 4))
+
+# save the output
+png(filename = "figures/09-sliver.png", width = 12, height = 5, units = "cm",
+    res = 300)
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(1, 2)))
+print(sliver_fig, vp = viewport(layout.pos.col = 1))
+print(clean_fig, vp = viewport(layout.pos.col = 2))
+dev.off()
