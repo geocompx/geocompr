@@ -7,11 +7,12 @@
 ```{r, message=FALSE}
 library(sf)
 library(raster)
-library(tidyverse)
+library(dplyr)
 library(spData)
 library(RQGIS)
 library(RSAGA)
 library(rgrass7)
+library(tmap)
 ```
 
 ## Introduction
@@ -219,7 +220,7 @@ single = st_cast(union, "MULTIPOLYGON") %>%
   st_cast("POLYGON")
 ```
 
-One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^. 
+One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^ (see left panel of Figure \@ref(fig:sliver-fig)). 
 
 ```{r, eval=FALSE}
 single$area = st_area(single)
@@ -227,8 +228,11 @@ single$area = st_area(single)
 x = 25000
 units(x) = "m^2"
 sub = dplyr::filter(single, area < x)
-plot(single$geometry, col = NA)
-plot(sub$geometry, add = TRUE, col = "blue", border = "blue", lwd = 1.5)
+tm_shape(single) + 
+  tm_borders() + 
+  tm_shape(sub) + 
+  tm_fill(col = "blue") + 
+  tm_borders(col = "blue", lwd = 1.5)
 ```
 
 The next step is to find a function that makes the slivers disappear.
@@ -272,7 +276,7 @@ Conveniently, the user has not to specify each single parameter.
 In case a parameter is left unspecified, `run_qgis()` will automatically use the corresponding default value as argument if available.
 To find out about the default values, run `get_args_man()`.  
 
-To finally get rid off the slivers, we specify that all polygons with an area less or equal to 25000 m^2^ should be joined to that neighboring polygon with the largest area.
+To finally get rid off the slivers, we specify that all polygons with an area less or equal to 25000 m^2^ should be joined to that neighboring polygon with the largest area (see right panel of Figure \@ref(fig:sliver-fig)).
 
 ```{r, eval=FALSE}
 clean = run_qgis("qgis:eliminatesliverpolygons",
@@ -284,6 +288,10 @@ clean = run_qgis("qgis:eliminatesliverpolygons",
                  load_output = TRUE)
 #> $`OUTPUT`
 #> [1] "C:/Users/pi37pat/AppData/Local/Temp/RtmpcJlnUx/clean.shp"
+```
+
+```{r sliver-fig, echo=FALSE, fig.cap="Sliver polygons (left panel). Cleaned polygons (right panel)."}
+knitr::include_graphics("figures/09-sliver.png")
 ```
 
 Other notes:
