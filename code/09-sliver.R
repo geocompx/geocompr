@@ -91,3 +91,7 @@ pushViewport(viewport(layout = grid.layout(1, 2)))
 print(sliver_fig, vp = viewport(layout.pos.col = 1))
 print(clean_fig, vp = viewport(layout.pos.col = 2))
 dev.off()
+
+# now also possible with tmap
+# tmap_save(tmap_arrange(sliver_fig, clean_fig, nrow = 1), 
+#           filename = "C:/Users/pi37pat/Desktop/test.png")
