@@ -82,14 +82,11 @@ bookdown::render_book("index.Rmd") # to build the book
 browseURL("_book/index.html") # to view it
 ```
 
-The code associated with each chapter is saved in the `code/chapters/`
-folder. `source("code/chapters/07-transport.R")` runs run the code
-chunks in chapter 7, for example. These R scripts are generated with the
-follow command which wraps `knitr::purl()`:
+<!-- The code associated with each chapter is saved in the `code/chapters/` folder. -->
 
-``` r
-# geocompr:::generate_chapter_code()
-```
+<!-- `source("code/chapters/07-transport.R")` runs run the code chunks in chapter 7, for example. -->
+
+<!-- These R scripts are generated with the follow command which wraps `knitr::purl()`: -->
 
 ## Running geocompr code in docker
 
@@ -232,7 +229,7 @@ knitr::kable(pkg_df)
 | dismo             | Species Distribution Modeling \[@R-dismo\]                                                | 1.1.4      |
 | geosphere         | Spherical Trigonometry \[@R-geosphere\]                                                   | 1.5.7      |
 | ggmap             | Spatial Visualization with ggplot2 \[@R-ggmap\]                                           | 2.6.1      |
-| ggplot2           | Create Elegant Data Visualisations Using the Grammar of Graphics \[@R-ggplot2\]           | 2.2.1.9000 |
+| ggplot2           | Create Elegant Data Visualisations Using the Grammar of Graphics \[@R-ggplot2\]           | 2.2.1      |
 | gstat             | Spatial and Spatio-Temporal Geostatistical Modelling, Prediction \[@R-gstat\]             | 1.1.6      |
 | historydata       | Datasets for Historians \[@R-historydata\]                                                | 0.2.9001   |
 | htmlwidgets       | HTML Widgets for R \[@R-htmlwidgets\]                                                     | 1.2        |
