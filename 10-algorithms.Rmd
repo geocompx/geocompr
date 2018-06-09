@@ -6,32 +6,28 @@ In chapter \@ref(intro) we promised to teach not only how to use existing tools 
 While reproducibility is central to the book, this chapter focusses on reproducibility and tool creation.
 
 We will consider example R scripts for geographic data and how to make them more reproducible in section \@ref(scripts).
-Algorithms (or 'geoalgorithms' for geographic processes) are recipes for modifying inputs using a series of steps, resulting in an output, as described in section \@ref(geographic-algorithms).
-To ease sharing and reproducibility algorithms can be placed into R function, which can then be distributed either in script files or as R packages, the building blocks of reproducible code.
+Algorithms are recipes for modifying inputs using a series of steps, resulting in an output, as described in section \@ref(geographic-algorithms).
+To ease sharing and reproducibility algorithms can be placed into functions, which can then be distributed either in script files or as R packages, the building blocks of reproducible code.
 That is the topic of section \@ref(functions).
 
-It should be noted at the outset that none of these topics are specific to geographic data.
-Although geoalgorithms do have a specific meaning originating in GIS software, most of the concepts apply in other domains.
-For that reason instead of going into detail, our approach in this chapter is to provide illustrative examples and direct the reader to established resources, to avoid reinventing the wheel.
-
-The approach taken in this chapter was partly inspired by @xiao_gis_2016, who advocates explanations that are neither highly theoretical (as many academic papers are)
+<!-- This chapter provides illustrative examples and directs the reader to established resources, to avoid reinventing the wheel. -->
+<!-- The approach taken in this chapter was partly inspired by @xiao_gis_2016, who advocates explanations that are neither highly theoretical (as many academic papers are) -->
 <!-- , with dozens of lines of non-reproducible psuedo-code and equations -->
-nor entirely focussed on implementations via a GUI or CLI in a particular sofware package (as the first part of this book is, with its focus on implementations in various R packages).
-Instead the focus is on understanding, using reproducible code and clear explanation.
-The methods demonstrated in *GIS Algorithms* (including finding the centroid of a polygon, an example used in this chapter) are readily available in GIS software.
+<!-- nor entirely focussed on implementations via a GUI or CLI in a particular sofware package (as the first part of this book is, with its focus on implementations in various R packages). -->
+<!-- The focus of this chapter is on understanding, using reproducible code and clear explanation. -->
+The algorithms developed (including finding the centroid of a polygon, an example used in this chapter) are readily available in GIS software.
 However, the aim is "not to duplicate what is available out there, but to show how things out there work" [@xiao_gis_2016].
 This chapter takes a similar approach and is therefore the most low-level and potentially advanced (in terms of the code, not application) so far.
 
 ## Scripts
 
 If packages are the building blocks of reproducible code, scripts are the glue that holds them together.
-There are no strict rules on what can and cannot go into script files.
-and nothing to prevent you from saving broken, non-reproducible code
+There are no strict rules on what can and cannot go into script files and nothing to prevent you from saving broken, non-reproducible code.
 There are, however, some rules of thumb and conventions worth following when writing R scipts, outlined below:
 
-- Write the script in order. Just like the script of a play, scripts should have a clear order such as 'setup', 'data processing' and 'save results' (roughly equivalent to 'beginning', 'middle' and 'end' in a film).
-- Make the script reproducible. Scripts will be of more use to you and others if they are self-contained and can be run by other people. This involves stating dependencies (loading required packages at the outset, like the 'Prerequisites' section), reading-in data from persistent sources (e.g. from a reliable website or API) and mentioning any code that must be run before running the script (e.g. with a comment `# run script0.R before this`).
-- Comment the script sufficiently for others (and your future self) to understand it but not so much that the comments themselves become hard to maintain. At a minimum a good script file should contain information on the purpose of the script (see Figure \@ref(fig:codecheck)) and division into chunks, perhaps by appending `----` to section headings, which allows 'folding' of R scripts in RStudio.
+- Write the script in order: just like the script of a play, scripts should have a clear order such as 'setup', 'data processing' and 'save results' (roughly equivalent to 'beginning', 'middle' and 'end' in a film).
+- Make the script reproducible: scripts will be of more use to you and others if they are self-contained and can be run by other people. This involves stating dependencies (loading required packages at the outset, like the 'Prerequisites' section), reading-in data from persistent sources (e.g. from a reliable website or API) and mentioning any code that must be run before running the script (e.g. with a comment `# run script0.R before this`).
+- Comment the script sufficiently for others (and your future self) to understand it but not so much that the comments themselves become hard to maintain: at a minimum a good script file should contain information on the purpose of the script (see Figure \@ref(fig:codecheck)) and division into chunks, perhaps by appending `----` to section headings, which allows 'folding' of R scripts in RStudio.
 
 Although there is no way to enforce reproducibility in R scripts, there are tools that can help.
 By default RStudio 'code-checks' R scripts and underlines faulty code with a red way line, as illustrated below:
@@ -49,8 +45,8 @@ See [reprex.tidyverse.org/](http://reprex.tidyverse.org/) for details.
 
 ## Geographic algorithms
 
-Algorithms can be understood as the computing equivalent of a cooking recipe.
-An algorithm is a series of instructions which, when taken on appropriate ingredients, results in an output that is more useful (or tasty) than the raw ingredients.
+Algorithms can be understood as the computing equivalent of a cooking recipe:
+a series of instructions which, when taken on appropriate ingredients, results in an output that is more useful (or tasty) than the raw ingredients.
 Before considering 'geoalgorithms', it is worth taking a brief detour around the history of the algorithms, to understand how they relate to scripts and functions which are covered next.
 
 The word algorithm comes from Baghdad when, in the 9^th^ Century AD, an early maths book was published called *Hisab al-jabr w’al-muqabala*.
@@ -58,8 +54,8 @@ The book was translated into Latin and became so popular that the author Muḥam
 The book's title was also influential, forming the basis of the word *algebra*.
 ]
 
-In the the computing age algorithm refers to a series of steps that take clearly defined input to produce an output.
-Algorithms are often first envisioned in flow charts and psuedocode showing the aim of the process before being implemented in a formal language such as R.
+In the computing age algorithm refers to a series of steps that take a clearly defined input to produce an output.
+Algorithms often start as in flow charts and psuedocode showing the aim of the process before being implemented in a formal language such as R.
 Because the same algorithm will be used many times on the different inputs it rarely makes sense to type out the entire algorithm each time: algorithms are most easily used when they are implemented inside functions (see section \@ref(functions)).
 
 Geoalgorithms are a special case: they take geographic data in and, generally, return geographic results.
@@ -75,10 +71,9 @@ source("code/10-centroid-setup.R")
 ```
 
 ```{r}
-poly_csv = "0,2,10,15,20,0
-            10,2,0,0,20,10"
-poly_df = read.csv(text = poly_csv, header = FALSE)
-poly_mat = t(poly_df)
+x_coords = c(10, 2, 0, 0, 20, 10)
+y_coords = c(0, 2, 10, 15, 20, 0)
+poly_mat = cbind(x_coords, y_coords)
 ```
 
 As with many computational (or other) problems, it makes sense to break the problem into smaller chunks.
@@ -92,7 +87,7 @@ T1 = rbind(O, poly_mat[2:3, ], O) # create 'triangle matrix'
 C1 = (T1[1, ] + T1[2, ] + T1[3, ]) / 3 # find centroid
 ```
 
-```{r, eval=FALSE, echo=FALSE}
+```{r, echo=FALSE, fig.cap="Illustration of polygon centroid calculation problem."}
 # initial plot: can probably delete this:
 plot(poly_mat)
 lines(poly_mat)
@@ -197,6 +192,7 @@ Is this right?
 We can verify the answer by converting `poly_mat` into a simple feature collection as follows:
 
 ```{r}
+library(sf)
 poly_sfc = st_polygon(list(poly_mat))
 st_area(poly_sfc)
 st_centroid(poly_sfc)
