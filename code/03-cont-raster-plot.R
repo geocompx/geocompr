@@ -17,4 +17,4 @@ p2 = tm_shape(as(grain, "SpatialGridDataFrame")) +
             inner.margins = rep(0, 4)) +
   tm_legend(bg.color = "white")
 
-tmap_arrange(p1, p2, nrow = 1)
+print(tmap_arrange(p1, p2, nrow = 1))
