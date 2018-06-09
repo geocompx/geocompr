@@ -117,14 +117,12 @@ geocompr_style = structure(
   style = "geocompr"
 )
 
+library(tmap)
 tmap_options(geocompr_style)
 
-
 # plot test --------------------------------------------------------------------
-library(cartogram)
 library(spData)
-nz_carto = cartogram(nz, "Median_income", itermax = 5)
-tm_shape(nz_carto) + 
+tm_shape(nz) + 
   tm_polygons("Median_income")
 
 # default values - reference ----------------------------------------------
