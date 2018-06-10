@@ -772,7 +772,6 @@ The simplest example is extracting the value of a raster cell at specific **poin
 For this purpose we will use `zion_points`, which contain a sample of 30 locations within the Zion National Park (Figure \@ref(fig:pointextr)). 
 <!-- They could represent places where soils properties were measured and we want to know what is the elevation of each point. -->
 The following command extracts elevation values from `srtm` and assigns the resulting vector to a new column (`elevation`) in the `zion_points` dataset: 
-
 ```{r}
 zion_points$elevation = raster::extract(srtm, as(zion_points, "Spatial"))
 ```
@@ -899,7 +898,6 @@ dplyr::select(zion_nlcd, ID, levels) %>%
   spread(value, n, fill = 0)
 ```
 
-
 ```{r}
 zion_srtm_values = raster::extract(x = srtm, y = as(zion, "Spatial"), df = TRUE)
 ```
@@ -929,31 +927,14 @@ dplyr::select(zion_nlcd, ID, levels) %>%
 ```
 
 ```{r polyextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Area used for continuous (left) and categorical (right) raster extraction."}
-library(tmap)
-library(grid)
-
-rast_poly_srtm = tm_shape(srtm) +
-  tm_raster(palette = terrain_colors, title = "Elevation (m)", 
-            legend.show = TRUE, style = "cont") + 
-  tm_shape(zion) +
-  tm_borders(lwd = 2) +
-  tm_layout(legend.frame = TRUE, legend.position = c("left", "bottom"))
-
+rast_poly_srtm = tm_shape(srtm) + tm_raster(palette = terrain_colors, title = "Elevation (m)", legend.show = TRUE, style = "cont") + 
+  tm_shape(zion) + tm_borders(lwd = 2) +
+  tm_layout(title = "A. Continuous data extraction", legend.frame = TRUE, legend.position = c("left", "bottom"))
 landcover_cols = c("#476ba0", "#aa0000", "#b2ada3", "#68aa63", "#a58c30", "#c9c977", "#dbd83d", "#bad8ea")
-
-rast_poly_nlcd = tm_shape(nlcd) +
-  tm_raster(palette = landcover_cols, style = "cat", title = "Land cover", 
-            legend.show = TRUE) + 
-  tm_shape(zion) +
-  tm_borders(lwd = 2) +
-  tm_layout(legend.frame = TRUE, legend.position = c("left", "bottom"))
-
-grid.newpage()
-pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(0.25, 5), "null"))))
-grid.text("A. Continuous data extraction", vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
-grid.text("B. Categorical data extraction", vp = viewport(layout.pos.row = 1, layout.pos.col = 2))
-print(rast_poly_srtm, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-print(rast_poly_nlcd, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
+rast_poly_nlcd = tm_shape(nlcd) + tm_raster(palette = landcover_cols, style = "cat", title = "Land cover", legend.show = TRUE) + 
+  tm_shape(zion) + tm_borders(lwd = 2) +
+  tm_layout(title = "B. Categorical data extraction", legend.frame = TRUE, legend.position = c("left", "bottom"))
+tmap_arrange(rast_poly_srtm, rast_poly_nlcd, ncol = 2)
 ```
 
 So far we have seen how `raster::extract()` is a flexible way of extracting raster cell values from a range of input geographic objects.
