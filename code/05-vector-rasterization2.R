@@ -12,4 +12,4 @@ r2po = tm_shape(california_raster2) + tm_raster(legend.show = TRUE, title = "Val
   tm_shape(california) + tm_borders() + 
   tm_layout(title = "B. Polygon rasterization", legend.show = FALSE)
 
-tmap_arrange(r1po, r2po, ncol = 2)
+print(tmap_arrange(r1po, r2po, ncol = 2))

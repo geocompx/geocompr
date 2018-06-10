@@ -9,4 +9,4 @@ r2p = tm_shape(ch_raster2) + tm_raster(legend.show = TRUE, title = "Values: ") +
 
 r3p = tm_shape(ch_raster3) + tm_raster(legend.show = TRUE, title = "Values: ") + tm_layout(title = "D. Aggregated capacity", legend.position = c("right", "bottom"))
 
-tmap_arrange(r0p, r1p, r2p, r3p, ncol = 2)
+print(tmap_arrange(r0p, r1p, r2p, r3p, ncol = 2))
