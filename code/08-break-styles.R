@@ -44,4 +44,4 @@ m_cat = tm_shape(nz) +
   tm_polygons(col = "Island", style = "cat") + 
   tm_layout(title = 'style = "cat"')          
 tmap_arrange(m_pretty, m_equal, m_quantile, m_jenks, m_cont, m_cat) 
-tmap_options_reset()
+suppressMessages(tmap_options_reset())
