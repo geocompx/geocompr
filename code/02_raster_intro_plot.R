@@ -1,7 +1,6 @@
 library(raster)
 library(gridExtra)
 library(spData)
-library(visualraster)
 # first intro plot -----------------------------------------------------------
 set.seed(2017-04-01)
 
