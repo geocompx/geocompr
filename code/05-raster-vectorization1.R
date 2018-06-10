@@ -1,4 +1,5 @@
 library(tmap)
+
 colfunc = colorRampPalette(c("lightyellow", "rosybrown"))
 
 p1 = tm_shape(elev) + tm_raster(legend.show = FALSE, palette = colfunc(36), n = 36) +

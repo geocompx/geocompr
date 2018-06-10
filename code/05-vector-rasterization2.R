@@ -1,5 +1,5 @@
 library(tmap)
-library(grid)
+
 california_raster_centr = rasterToPoints(raster_template2, spatial = TRUE)
 
 r1po = tm_shape(california_raster1) + tm_raster(legend.show = TRUE, title = "Values: ") +
