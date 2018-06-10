@@ -5,7 +5,7 @@ library(tmap)
 # names(world)
 # names(urban_agglomerations)
 # Question arising from the data:
-# what % of country populations lived in their largest agglomorations?
+# what % of country populations lived in their largest agglomerations?
 # explanation: we're joining the point data onto world
 
 if(!exists("random_joined")) {
@@ -22,11 +22,9 @@ if(!exists("random_joined")) {
   random_joined = st_join(random_points, world["name_long"])
   
 }
-jm0 = tm_shape(world) +
-  tm_borders()
+jm0 = tm_shape(world) + tm_borders() + tm_format("World")
 jm1 = jm0 +
-  tm_shape(shp = random_points, bbox = bb_world) +
-  tm_symbols(col = "black", shape = 4, border.lwd = 2) +
+  tm_shape(shp = random_points, bbox = bb_world) + tm_symbols(col = "black", shape = 4, border.lwd = 2) +
   tm_layout(scale = 1, legend.bg.color = "white", legend.bg.alpha = 0.3, legend.position = c("right", "bottom"))
 jm2 = jm0 +
   tm_shape(world_random, bbox = bb_world) +
