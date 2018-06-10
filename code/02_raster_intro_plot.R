@@ -1,7 +1,7 @@
 library(raster)
 library(gridExtra)
 library(spData)
-
+library(visualraster)
 # first intro plot -----------------------------------------------------------
 set.seed(2017-04-01)
 
@@ -35,9 +35,4 @@ p_3 = spplot(small_ras_val,
              colorkey = FALSE,
              main = "C. Colored cell values")
 
-raster_intro_plot = arrangeGrob(p_1, p_2, p_3, ncol = 3)
-
-plot(raster_intro_plot)
-# 
-# ggsave(plot = raster_intro_plot, filename = "figures/02_raster_intro_plot.png",
-#        width = 6, height = 3, scale = 1.25)
+grid.arrange(p_1, p_2, p_3, ncol = 3)
