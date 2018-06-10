@@ -189,7 +189,7 @@ p_2 = spplot(poly_focal, colorkey = FALSE, col = gray(0.5),
                     values(r_focal)) 
              ))
 
-png(filename = "figures/03_focal_example.png", width = 950, height = 555)
+png(filename = "figures/04_focal_example.png", width = 950, height = 555)
 grid.arrange(p_1, p_2, ncol = 2)
 grid.polyline(x = c(0.255, 0.59), y = c(0.685, 0.685), 
               arrow = arrow(length = unit(0.2, "inches")), 
