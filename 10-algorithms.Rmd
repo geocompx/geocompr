@@ -71,8 +71,8 @@ source("code/10-centroid-setup.R")
 ```
 
 ```{r}
-x_coords = c(10, 2, 0, 0, 20, 10)
-y_coords = c(0, 2, 10, 15, 20, 0)
+x_coords = c(10, 0, 0, 2, 20, 10)
+y_coords = c(0, 0, 10, 12, 15, 0)
 poly_mat = cbind(x_coords, y_coords)
 ```
 
@@ -106,23 +106,23 @@ $$
 $$
 
 Where $A$ to $C$ are the triangle's three points and $x$ and $y$ refer to the x and y dimensions.
-A translation of this formula into R code that works with the data in the matrix representation of a triangle `T1` is:
+A translation of this formula into R code that works with the data in the matrix representation of a triangle `T1` is as follows (the function `abs()` ensures a positive result):
 
 ```{r}
-T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
+abs(T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
   T1[2, 1] * (T1[3, 2] - T1[1, 2]) +
-  T1[3, 1] * (T1[1, 2] - T1[2, 2]) / 2
+  T1[3, 1] * (T1[1, 2] - T1[2, 2]) ) / 2
 ```
 
 This code chunk works and outputs the correct result.^[
 as can be verified with the formula for the area of a triangle whose base is horizontal: area equals half of the base width times its height --- $A = B * H / 2$ --- ($10 * 10 / 2$ in this case, as can be seen in Figure \@ref(fig:polycent)).
 ]
 The problem with the previous code chunk is that it is very verbose and difficult to re-run on another object with the same 'triangle matrix' format.
-To make the code more generalizable, let's convert the code into a function (something described in \@ref(functions)):
+To make the code more generalizable, let's convert the code into a function (something described in \@ref(functions)) that works with any matrix represenations of a triangle that we'll call `x`:
 
 ```{r}
 t_area = function(x) {
-  (
+  abs(
     x[1, 1] * (x[2, 2] - x[3, 2]) +
     x[2, 1] * (x[3, 2] - x[1, 2]) +
     x[3, 1] * (x[1, 2] - x[2, 2])
@@ -131,7 +131,7 @@ t_area = function(x) {
 ```
 
 The function `t_area` generalizes the solution by taking any object `x`, assumed to have the same dimensions as the triangle represented in `T1`.
-We can verify it works not only on the triangle matrix `T1` as follows:
+We can verify it works on the triangle matrix `T1` as follows:
 
 ```{r}
 t_area(T1)
@@ -158,7 +158,7 @@ T_all = purrr::map(i_list, ~poly_mat[ind[.], ])
 ```
 
 The next stage is to create the second triangle and calculate its area and centroid.
-This is done in the code chunk below, which binds the 3^rd^ and 4^th coordinates onto the 1^st^, and uses the same functions we created above to calculate its area and width:
+This is done in the code chunk below, which binds the 3^rd^ and 4^th^ coordinates onto the 1^st^, and uses the same functions we created above to calculate its area and width:
 
 ```{r}
 T2 = rbind(O, poly_mat[3:4, ], O)

@@ -109,6 +109,7 @@ knitr::kable(x = d, caption = "Comparison between three open-source GIS. Hybrid 
 ```
 
 ## (R)QGIS
+
 QGIS is one of the most popular open-source GIS [Table \@ref(tab:gis-comp); @graser_processing:_2015]. 
 Its main advantage lies in the fact that it provides a unified interface to several other open-source GIS.
 This means that you have access to GDAL/OGR, GRASS and SAGA through QGIS [@graser_processing:_2015]. 
@@ -117,21 +118,18 @@ To run all these geoalgorithms (frequently more than 1000 depending on your set 
 Basically, functions `set_env()` and `open_app()` are doing this. 
 Note that it is optional to run `set_env()` and `open_app()` since all functions depending on their output will run them automatically if needed.
 Before running **RQGIS** you have to make sure to have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS.
-To help you with the installation process, please follow the steps as detailed in `vignette("install_guide", package = "RQGIS")` for several platforms (Windows, Linux, MacOS).
+To install **RQGIS** a number of dependencies are required, as described in the [`install_guide`](https://cran.r-project.org/web/packages/RQGIS/vignettes/install_guide.html) vignette, which covers installation on Windows, Linux and Mac.
 Please install the long-term release of QGIS, i.e. 2.18, since **RQGIS** so far does not support QGIS 3.
 
 ```{r qgis_setup, eval=FALSE}
-# for the moment, please use the RQGIS developer version
-# devtools::install_github("jannes-m/RQGIS")
+devtools::install_github("jannes-m/RQGIS") # use dev version (for now)
 library(RQGIS)
 set_env()
 
 #> $`root`
 #> [1] "C:/OSGeo4W64"
-#> 
 #> $qgis_prefix_path
 #> [1] "C:/OSGeo4W64/apps/qgis-ltr"
-#> 
 #> $python_plugins
 #> [1] "C:/OSGeo4W64/apps/qgis-ltr/python/plugins"
 ```
@@ -152,9 +150,7 @@ Here, we will reuse the incongruent polygons we have already encountered in sect
 Both polygon datasets are available in the **spData** package, and for both we would like to use a geographic CRS (see also Chapter \@ref(reproj-geo-data)).
 
 ```{r}
-data("incongruent", package = "spData")
-data("aggregating_zones", package = "spData")
-incongruent = st_transform(incongruent, 4326)
+incongruent = st_transform(incongruent, 4326) # requires spData and sf
 aggregating_zones = st_transform(aggregating_zones, 4326)
 ```
 
@@ -207,11 +203,11 @@ Empty geometries might lead to problems in subsequent geoprocessing tasks which 
 `st_dimension()` returns `NA` if a geometry is empty, and can therefore be used as a filter. 
 
 ```{r, eval=FALSE}
-# getting rid of empty geometries
+# remove empty geometries
 union = union[!is.na(st_dimension(union)), ]
 ```
 
-Secondly, we convert multipart polygons into single part polygons (also known as explode geometries or casting).
+Next we convert multipart polygons into single part polygons (also known as explode geometries or casting).
 This is necessary for the deletion of sliver polygons later on.
 
 ```{r, eval=FALSE, message=FALSE, warning=FALSE}
@@ -256,20 +252,7 @@ get_usage(alg)
 #>	COMPARISONVALUE <ParameterString>
 #>	MODE <ParameterSelection>
 #>	OUTPUT <OutputVector>
-
-#>COMPARISON(Comparison)
-#>	0 - ==
-#>	1 - !=
-#>	2 - >
-#>	3 - >=
-#>	4 - <
-#>	5 - <=
-#>	6 - begins with
-#>	7 - contains
-#>MODE(Merge selection with the neighbouring polygon with the)
-#>	0 - Largest area
-#>	1 - Smallest Area
-#>	2 - Largest common boundary
+#>	...
 ```
 
 Conveniently, the user has not to specify each single parameter.
@@ -310,7 +293,7 @@ In addition, there is a Python interface (SAGA Python API).
 **RSAGA** uses the former to run SAGA from within R.
 
 Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here particularly on digital elevation models (soil properties, terrain attributes, climate parameters). 
-Hence, SAGA is especially good at the fast processing of large (high-resolution) rasters datasets [@conrad_system_2015]. 
+Hence, SAGA is especially good at the fast processing of large (high-resolution) raster datasets [@conrad_system_2015]. 
 Therefore, we will introduce **RSAGA** with a raster use case from @muenchow_geomorphic_2012.
 Specifically, we would like to compute the SAGA wetness index from a digital elevation model.
 First of all, we need to make sure that **RSAGA** will find SAGA on the computer when called.
