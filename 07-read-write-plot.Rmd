@@ -53,47 +53,53 @@ f = "temp/Current_Shapes/Data_Store/06-06-12_Posting/nps_boundary.shp"
 usa_parks = st_read(dsn = f)
 ```
 
-Specific R packages providing an interface to spatial libraries or geoportals are even more user-friendly (Table \@ref(tab:datapackages)).
+## Geographic data packages
+
+A multitude of R packages have been developed for accessing geographic data, some of which are presented in Table \@ref(tab:datapackages)).
+These provide interfaces to one or more spatial libraries or geoportals and aim make data access even quicker from the command line.
 
 <!-- add sentinel2 package as soon as it is published on CRAN https://github.com/IVFL-BOKU/sentinel2-->
 ```{r datapackages, echo=FALSE}
-datapackages = tibble::tribble(~`Package name`, ~Description,
-                               "getlandsat", "Provides access to Landsat 8 data.",
-                               "osmdata", "Download and import of OpenStreetMap data.",
-                               "raster", "The `getData()` function downloads and imports administrative country, SRTM/ASTER elevation, WorldClim data.",
-                               "rnaturalearth", "Functions to download Natural Earth vector and raster data, including world country borders.",
-                               "rnoaa", "An R interface to National Oceanic and Atmospheric Administration (NOAA) climate data.",
-                               "rWBclimate", "An access to the World Bank climate data."
+datapackages = tibble::tribble(
+  ~`Package name`, ~Description,
+  "getlandsat", "Provides access to Landsat 8 data.",
+  "osmdata", "Download and import of OpenStreetMap data.",
+  "raster", "The `getData()` function downloads and imports administrative country, SRTM/ASTER elevation, WorldClim data.",
+  "rnaturalearth", "Functions to download Natural Earth vector and raster data, including world country borders.",
+  "rnoaa", "An R interface to National Oceanic and Atmospheric Administration (NOAA) climate data.",
+  "rWBclimate", "An access to the World Bank climate data."
 )
 knitr::kable(datapackages, caption = "Selected R packages for spatial data retrieval.")
 ```
 
 <!-- https://cdn.rawgit.com/Nowosad/Intro_to_spatial_analysis/05676e29/Intro_to_spatial_analysis.html#39 -->
 <!-- Maybe add a section to Data I/O on where and how to retrieve data (with a focus on free data): osmdata (OpenStreetMap; maybe mention TomTom, HERE), Landsat (wrspathrow), Sentinel (mention Python API), AVHRR, RapidEye rgbif, letsR, etc. Of course, point to Transforming science through open data project (https://www.ropensci.org) -->
-<!-- https://github.com/ropensci/GSODR -->
 <!-- https://github.com/lbusett/MODIStsp -->
-<!-- https://github.com/walkerke/tigris -->
-<!-- https://github.com/ropensci/hddtools/ -->
 
-For example, you can get the borders of any country with the `ne_countries()` function from the **rnaturalearth** package:
+It should be emphasised that Table \@ref(tab:datapackages) represents only a small of available geographic data packages.
+Other notable packages include **GSODR**, which provides Global Summary Daily Weather Data in R (see the package's [README](https://github.com/ropensci/GSODR) for an overview of weather data sources);
+**tidycensus** and **tigris**, which provide socio-demographic vector data for the USA; and **hddtools**, which provides access to a range of hydrological datasets.
+
+Each data package has its own syntax for accessing data.
+This diversity is demonstrated in the subsequent code chunks, which show how to get data using three packages from Table \@ref(tab:datapackages).
+Country borders are often useful and these can be accessed with the `ne_countries()` function from the **rnaturalearth** package as follows:
+
 ```{r}
 library(rnaturalearth)
 usa = ne_countries(country = "United States of America") # United States borders
 class(usa)
-# you can do the same with raster::getData()
+# alternative way of accessing the data, with raster::getData()
 # getData("GADM", country = "USA", level = 0)
 ```
 
-As a default, **rnaturalearth** returns the output as a `Spatial*` class. 
-You can easily convert it to the `sf` class with `st_as_sf()`:
+By default **rnaturalearth** returns objects of class `Spatial`.
+The result can be converted into an `sf` objects with `st_as_sf()` as follows:
 
 ```{r}
 usa_sf = st_as_sf(usa)
 ```
 
-As a second example, we will download a raster dataset.
-The code below downloads a series of rasters that contains global monthly precipitation sums.
-The spatial resolution is ten minutes.
+A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution is ten minutes.
 The result is a multilayer object of class `RasterStack`.
 
 ```{r}
@@ -102,7 +108,7 @@ worldclim_prec = getData(name = "worldclim", var = "prec", res = 10)
 class(worldclim_prec)
 ```
 
-A third example uses the recently developed package **osmdata** [@R-osmdata] to find parks from the OpenStreetMap (OSM) database.
+A third example uses the **osmdata** package [@R-osmdata] to find parks from the OpenStreetMap (OSM) database.
 As illustrated in the code-chunk below, queries begin with the function `opq()` (short for OpenStreetMap query), the first argument of which is bounding box, or text string representing a bounding box (the city of Leeds in this case).
 The result is passed to a function for selecting which OSM elements we're interested in (parks in this case), represented by *key-value pairs*, which in turn is passed to the function `osmdata_sf()` which does the work of downloading the data and converting it into a list of `sf` objects (see `vignette('osmdata')` for further details):
 
@@ -113,7 +119,7 @@ parks = opq(bbox = "leeds uk") %>%
   osmdata_sf()
 ```
 
-OpenStreetMap is a vast global database of crowd-sourced data and it is growing by the minute.
+OpenStreetMap is a vast global database of crowd-sourced data and it is growing daily.
 Although the quality is not as spatially consistent as many official datasets, OSM data have many advantages: they are globally available free of charge and using crowd-source data can encourage 'citizen science' and contributions back to the digital commons.
 Further examples of **osmdata** in action are provided in Chapters \@ref(transport),  \@ref(location) and \@ref(gis).
 
