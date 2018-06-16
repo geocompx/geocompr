@@ -159,10 +159,10 @@ Breakdowns of travel mode by age and sex, for example, are available at the Loca
 
 The 102 zones used in this chapter are stored in `bristol_zones`, as illustrated in Figure \@ref(fig:zones).
 Note the zones get smaller in densly populated areas: each houses a similar number of people.
-`bristol_zones` contains no attribute data on transport, however, shown in the first two rows of the dataset:
+`bristol_zones` contains no attribute data on transport, however, only the name and code of each zone:
 
 ```{r}
-head(bristol_zones, 2)
+names(bristol_zones)
 ```
 
 To add travel data we will join a non geographic table on travel behavior to the zones, a common task described in section \@ref(vector-attribute-joining).
@@ -356,22 +356,24 @@ The following command makes use of the ability of simple features objects to con
 desire_carshort$geom_car = st_geometry(route_carshort)
 ```
 
-This allows plotting the desire lines along which many short car journeys take place alongside likely routes traveled by cars, with the width of the routes proportional to the number of car journeys that could potentially be replaced.
-The code below results in Figure \@ref(fig:routes), demonstrating along which routes people are driving short distances^[
-In this plot the origins of the red routes and black desire lines are not identical.
-This is because zone centroids rarely lie on the route network: instead the route originate from the transport network node nearest the centroid.
-Note also that routes are assumed to originate in the zone centroids, a simplifying assumption which is used in transport models to reduce the computational resources needed to calculate the shortest path between all combinations of possible origins and destinations [@hollander_transport_2016].
-]:
+This allows plotting the desire lines along which many short car journeys take place alongside likely routes traveled by cars by referring to each geometry column separately (`desire_carshort$geometry` and `desire_carshort$geom_car` in this case).
+Making the width of the routes proportional to the number of car journeys that could potentially be replaced provides an effective way to prioritize interventions on the road network [@lovelace_propensity_2017].
 
-```{r routes, warning=FALSE, fig.cap="Routes along which many (300+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots)."}
+<!-- The code below results in Figure \@ref(fig:routes), demonstrating along which routes people are driving short distances^[ -->
+<!-- In this plot the origins of the red routes and black desire lines are not identical. -->
+<!-- This is because zone centroids rarely lie on the route network: instead the route originate from the transport network node nearest the centroid. -->
+<!-- Note also that routes are assumed to originate in the zone centroids, a simplifying assumption which is used in transport models to reduce the computational resources needed to calculate the shortest path between all combinations of possible origins and destinations [@hollander_transport_2016]. -->
+<!-- ]: -->
+
+```{r routes, warning=FALSE, fig.cap="Routes along which many (300+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).", echo=FALSE, eval=FALSE}
+# commented-out as it adds little to the chapter (RL)
 plot(st_geometry(desire_carshort))
-plot(st_geometry(desire_carshort), col = "red", add = TRUE)
+plot(desire_carshort$geom_car, col = "red", add = TRUE)
 plot(st_geometry(st_centroid(zones_od)), add = TRUE)
 ```
 
-The results show that the short desire lines along which most people travel by car are geographically clustered.
-Plotting the results on an interactive map, for example, with `mapview::mapview(desire_carshort)`, reveals that these car trips take place in and around Bradley Stoke.
-According to [Wikipedia](https://en.wikipedia.org/wiki/Bradley_Stoke), Bradley Stoke is "Europe's largest new town built with private investment", which may help understand its high level of car dependency due to limited public transport provision.
+Plotting the results on an interactive map, with `mapview::mapview(desire_carshort)` for example, shows that many short car trips take place in and around Bradley Stoke.
+This should come as no surprise: according to its [Wikipedia](https://en.wikipedia.org/wiki/Bradley_Stoke), entry Bradley Stoke is "Europe's largest new town built with private investment", suggesting limited public transport provision.
 The excessive number of short car journeys in this area can also be understood in terms of the car-orientated transport infrastructure surrounding this northern 'edge city' which includes "major transport nodes such as junctions on both the M4 and M5 motorways" [@tallon_bristol_2007].
 
 There are many benefits of converting travel desire lines into likely routes of travel from a policy perspective, primary among them the ability to understand what it is about the surrounding environment that makes people travel by a particular mode.

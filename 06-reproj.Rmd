@@ -89,8 +89,10 @@ st_crs(london_proj)
 ```
 
 Notable components of this CRS description include the EPSG code (`EPSG: 27700`), the projection ([transverse Mercator](https://en.wikipedia.org/wiki/Transverse_Mercator_projection), `+proj=tmerc`), the origin (`+lat_0=49 +lon_0=-2`) and units (`+units=m`).^[
-For a short description of the most relevant projection parameters and related concepts, see the fourth lecture by Jochen Albrecht: [geography.hunter.cuny.edu/~jochen/GTECH361/lectures/](http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/lecture04/concepts/Map%20coordinate%20systems/Projection%20parameters.htm) as well as [http://proj4.org/parameters.html](http://proj4.org/parameters.html). 
-Another great resource on projection definitions is [http://spatialreference.org/](http://spatialreference.org/).
+For a short description of the most relevant projection parameters and related concepts, see the fourth lecture by Jochen Albrecht hosted at
+geography.hunter.cuny.edu/~jochen/GTECH361/lectures/ and information at proj4.org/parameters.html.
+<!-- [geography.hunter.cuny.edu/~jochen/GTECH361/lectures/](http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/lecture04/concepts/Map%20coordinate%20systems/Projection%20parameters.htm) as well as [http://proj4.org/parameters.html](http://proj4.org/parameters.html). -->
+Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj.
 ]
 The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: `st_is_longlat(london_proj)` now returns `FALSE` and geometry operations on `london_proj` will work without a warning, meaning buffers can be produced from it using proper units of distance.
 <!-- 
@@ -160,7 +162,8 @@ It may come as a surprise that `london` and `london2` are just over 2 km apart!^
 The difference in location between the two points is not due to imperfections in the transforming operation (which is in fact very accurate) but the low precision of the manually-created coordinates that created `london` and `london_proj`.
 Also surprising may be that the result is provided in a matrix with units of meters.
 This is because `st_distance()` can provide distances between many features and because the CRS has units of meters.
-Use `as.numeric()` to coerce the result into a regular number.]
+Use `as.numeric()` to coerce the result into a regular number.
+]
 
 ```{r}
 st_distance(london2, london_proj)
@@ -218,9 +221,7 @@ crs_utm_zone = crs_utm[grepl("zone=", crs_utm$prj4), ]
 crs_utm_south = crs_utm[grepl("south", crs_utm$prj4), ]
 ```
 
-To show how the system works let's create a function, `lonlat2UTM()` to calculate the EPSG code associated with any point on the planet as follows:^[
-Credit: Josh O'Brien's post on [stackoverflow](https://stackoverflow.com/a/9188972) inspired this function.
-] 
+To show how the system works let's create a function, `lonlat2UTM()` to calculate the EPSG code associated with any point on the planet as [follows](https://stackoverflow.com/a/9188972/): 
 
 <!-- Idea: create full function with message and flexibility in later chapter (RL) -->
 <!-- I think this code needs a short description (JM)-->
@@ -351,7 +352,9 @@ However in some cases it is desirable to create a new CRS, using a custom `proj4
 This system allows a very wide range of projections to be created, as we'll see in some of the custom map projections in this section.
 <!-- as we mentioned in section \@ref(crs-in-r). -->
 
-A long and growing list of projections has been developed and many of these these can be set with the `+proj=` element of `proj4string`s.^[See the Wikipedia page '[List of map projections](https://en.wikipedia.org/wiki/List_of_map_projections)' for 70+ projections, and illustrations.]
+A long and growing list of projections has been developed and many of these these can be set with the `+proj=` element of `proj4string`s.^[
+The Wikipedia page 'List of map projections' has 70+ projections and illustrations.
+]
 When mapping the world while preserving areal relationships, the Mollweide projection is a good choice [@jenny_guide_2017] (Figure \@ref(fig:mollproj)).
 To use this projection, we need to specify it using the `proj4string` element, `"+proj=moll"`, in the `st_transform` function:
 
@@ -369,7 +372,9 @@ par(par_old)
 ```
 
 On the other hand, when mapping the world, it is often desirable to have as little distortion as possible for all spatial properties (area, direction, distance).
-One of the most popular projections to achieve this is the Winkel tripel projection (Figure \@ref(fig:wintriproj)).^[This projection is used, among others, by the National Geographic Society.]
+One of the most popular projections to achieve this is the Winkel tripel projection (Figure \@ref(fig:wintriproj)).^[
+This projection is used, among others, by the National Geographic Society.
+]
 `st_transform_proj()` from the **lwgeom** package allows for coordinate transformations to a wide range of CRSs, including the Winkel tripel projection: 
 
 ```{r}
@@ -390,9 +395,9 @@ par(par_old)
 
 ```{block2 type='rmdnote'}
 The two main functions for transformation of simple features coordinates are `sf::st_transform()` and `sf::sf_project()`. 
-The `st_transform` function uses the GDAL interface to PROJ.4, while `sf_project()` (which works with two-column numeric matrices, representing points) and `lwgeom::st_transform_proj()` use the PROJ.4 API directly.
+The `st_transform` function uses the GDAL interface to PROJ, while `sf_project()` (which works with two-column numeric matrices, representing points) and `lwgeom::st_transform_proj()` use the PROJ API directly.
 The first one is appropriate for most situations, and provides a set of the most often used parameters and well defined transformations.
-The second one allows for greater customization of a projection, which includes cases when some of the PROJ.4 parameters (e.g., `+over`) or projection (`+proj=wintri`) is not available in `st_transform()`.
+The second one allows for greater customization of a projection, which includes cases when some of the PROJ parameters (e.g., `+over`) or projection (`+proj=wintri`) is not available in `st_transform()`.
 ```
 
 ```{r, eval=FALSE, echo=FALSE}
@@ -403,7 +408,7 @@ mat_projected = sf_project(from = st_crs(4326)$proj4string, to = st_crs(27700)$p
 plot(mat_projected)
 ```
 
-Moreover, PROJ.4 parameters can be modified in most CRS definitions.
+Moreover, PROJ parameters can be modified in most CRS definitions.
 The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on longitude and latitude of `0` (Figure \@ref(fig:laeaproj1)).
 
 ```{r}
@@ -419,7 +424,7 @@ plot(st_geometry(world_laea1), graticule = TRUE, main = "the Lambert azimuthal e
 par(par_old)
 ```
 
-We can change the PROJ.4 parameters, for example the center of the projection using the `+lon_0` and `+lat_0` parameters. 
+We can change the PROJ parameters, for example the center of the projection using the `+lon_0` and `+lat_0` parameters. 
 The code below gives the map centered on New York City (Figure \@ref(fig:laeaproj2)).
 
 ```{r}
@@ -439,7 +444,7 @@ plot(st_geometry(world_laea2), add = TRUE)
 par(par_old)
 ```
 
-More information on CRS modifications can be found in the [Using PROJ.4](http://proj4.org/usage/index.html) documentation.
+More information on CRS modifications can be found in the [Using PROJ](http://proj4.org/usage/index.html) documentation.
 
 <!-- https://github.com/r-spatial/lwgeom/issues/6 -->
 <!-- ```{r} -->
@@ -467,7 +472,7 @@ However, `projectRaster()` only accepts the lengthy `proj4string` definitions of
 ```{block2 type='rmdnote'}
 It is possible to use a EPSG code in a `proj4string` definition with `"+init=epsg:MY_NUMBER"`.
 For example, one can use the `"+init=epsg:4326"` definition to set CRS to WGS84 (EPSG code of 4326).
-The PROJ.4 library automatically adds the rest of parameters and converts it into `"+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"`,
+The PROJ library automatically adds the rest of parameters and converts it into `"+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"`,
 ```
 
 Let's take a look at two examples of raster transformation - using categorical and continuous data.
@@ -479,7 +484,7 @@ cat_raster = raster(system.file("raster/nlcd2011.tif", package = "spDataLarge"))
 crs(cat_raster)
 ```
 
-In this region, 14 land cover classes were distinguished^[Full list of NLCD2011 land cover classes can be found at https://www.mrlc.gov/nlcd11_leg.php]:
+In this region, 14 land cover classes were distinguished (a full list of NLCD2011 land cover classes can be found at [mrlc.gov](https://www.mrlc.gov/nlcd11_leg.php):
 
 ```{r}
 unique(cat_raster)
