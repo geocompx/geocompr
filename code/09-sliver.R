@@ -71,27 +71,17 @@ plot(st_geometry(clean))
 # 3 FIGURES------------------------------------------------
 #**********************************************************
 
-
 sliver_fig = tm_shape(single) + 
   tm_borders() + 
   tm_shape(sub) + 
   tm_fill(col = "blue") + 
-  tm_borders(col = "blue", lwd = 1.5) + 
-  tm_layout(inner.margins = rep(0.01, 4))
+  tm_borders(col = "blue", lwd = 1.5)
 
 clean_fig = tm_shape(clean) + 
-  tm_borders() +
-  tm_layout(inner.margins = rep(0.01, 4))
+  tm_borders()
+
+sc_maps = tmap_arrange(sliver_fig, clean_fig, ncol = 2) 
 
 # save the output
-png(filename = "figures/09-sliver.png", width = 12, height = 5, units = "cm",
-    res = 300)
-grid.newpage()
-pushViewport(viewport(layout = grid.layout(1, 2)))
-print(sliver_fig, vp = viewport(layout.pos.col = 1))
-print(clean_fig, vp = viewport(layout.pos.col = 2))
-dev.off()
-
-# now also possible with tmap
-# tmap_save(tmap_arrange(sliver_fig, clean_fig, nrow = 1), 
-#           filename = "C:/Users/pi37pat/Desktop/test.png")
+tmap_save(sc_maps, "figures/09-sliver.png",
+          width = 12, height = 5, units = "cm")
