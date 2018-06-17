@@ -24,7 +24,7 @@ This chapter takes a similar approach and is therefore the most low-level and po
 
 If packages are the building blocks of reproducible code, scripts are the glue that holds them together.
 There are no strict rules on what can and cannot go into script files and nothing to prevent you from saving broken, non-reproducible code.
-There are, however, some rules of thumb and conventions worth following when writing R scipts, outlined below:
+There are, however, some rules of thumb and conventions worth following when writing R scripts, outlined below:
 
 - Write the script in order: just like the script of a play, scripts should have a clear order such as 'setup', 'data processing' and 'save results' (roughly equivalent to 'beginning', 'middle' and 'end' in a film).
 - Make the script reproducible: scripts will be of more use to you and others if they are self-contained and can be run by other people. This involves stating dependencies (loading required packages at the outset, like the 'Prerequisites' section), reading-in data from persistent sources (e.g. from a reliable website or API) and mentioning any code that must be run before running the script (e.g. with a comment `# run script0.R before this`).
@@ -192,10 +192,9 @@ Is this right?
 We can verify the answer by converting `poly_mat` into a simple feature collection as follows:
 
 ```{r}
-library(sf)
-poly_sfc = st_polygon(list(poly_mat))
-st_area(poly_sfc)
-st_centroid(poly_sfc)
+poly_sfc = sf::st_polygon(list(poly_mat))
+sf::st_area(poly_sfc)
+sf::st_centroid(poly_sfc)
 ```
 
 
@@ -227,7 +226,7 @@ A useful feature of functions is that they are modular.
 Providing you know what the output will be, one function can be used as the building block of another.
 This is exactly what we will do in this section.
 Building on the content of the previous section, in which it was shown how the area of a polygon can be found by following a series of steps in order, this section will *create a function* to calculate the area of any polygon (with caveats that will become clear).
-This function, that we'll call `poly_centroid()` will mimick the behaviour of `st_centroid()` from the **sf** package, with a few additions to show how arguments work.
+This function, that we'll call `poly_centroid()` will mimick the behaviour of `sf::st_centroid()` from the **sf** package, with a few additions to show how arguments work.
 
 ```{r}
 poly_centroid = function(x, output = "matrix") {
@@ -249,20 +248,20 @@ poly_centroid(poly_mat, output = "area")
 ```
 
 Low-level function such as `poly_centroid()` can be built-on to provide different types of output.
-If a common need is to return the result as an object of class `sf`, for example, this can be done by creating a 'wrapper' function that modifies the output of `poly_centroid()` before returning the result:
+If a common need is to return the result as an object of class `sfg`, for example, this can be done by creating a 'wrapper' function that modifies the output of `poly_centroid()` before returning the result:
 
 ```{r}
-poly_centroid_sf = function(x) {
+poly_centroid_sfg = function(x) {
   centroid_coords = poly_centroid(x)
-  centroid_sf = st_point(centroid_coords)
-  centroid_sf
+  centroid_sfg = sf::st_point(centroid_coords)
+  centroid_sfg
 }
 ```
 
-We can verify that the output is the same as the output from `st_centroid()` as follows:
+We can verify that the output is the same as the output from `sf::st_centroid()` as follows:
 
 ```{r}
-identical(poly_centroid_sf(poly_mat), st_centroid(poly_sfc))
+identical(poly_centroid_sfg(poly_mat), sf::st_centroid(poly_sfc))
 ```
 
 An important concept to consider when developing your own function is *type stability*.
@@ -295,12 +294,27 @@ poly_centroid_type_stable(poly_mat3)
 ```
 
 
-<!-- ## Case study -->
+## Case study
 
 ## Exercises
 
-1. In section \@ref(geographic-algorithms) we created a function that finds the geographic centroid of a shape, which is implemented in the **sf** function `st_centroid()`.
+1. In section \@ref(geographic-algorithms) we created a function that finds the geographic centroid of a shape, which is implemented in the **sf** function `sf::st_centroid()`.
 Building on this example, write a function only using base R functions that can find the total length of linestrings represented in matrix form.
-
 <!-- Todo: add example of matrix representing a linestring, demonstrate code to verify the answer, suggest alternative functions to decompose as a bonus. -->
+1. In section \@ref(functions) we created a different versions of the `poly_centroid()` function that generated outputs of class `sfg` (`poly_centroid_sfg()`) and type-stable `matrix` outputs (`poly_centroid_type_stable()`). Further extend the function by creating a version (e.g. called `poly_centroid_sf()`) that is type stable (only accepts inputs of class `sf`) *and* returns `sf` objects (hint: you may need to convert the object `x` into a matrix with the command `sf::st_coordinates(x)`.
+    - Verify it works by running `poly_centroid_sf(sf::st_sf(sf::st_sfc(poly_sfc)))`
+    - What error message do you get when you try to run `poly_centroid_sf(poly_mat)`?
+    
+```{r, eval=FALSE, echo=FALSE}
+poly_centroid_sf = function(x) {
+  stopifnot(is(x, "sf"))
+  xcoords = sf::st_coordinates(x)
+  centroid_coords = poly_centroid(xcoords)
+  centroid_sf = sf::st_sf(geometry = sf::st_sfc(sf::st_point(centroid_coords)))
+  centroid_sf
+}
+poly_centroid_sf(sf::st_sf(sf::st_sfc(poly_sfc)))
+poly_centroid_sf(poly_sfc)
+poly_centroid_sf(poly_mat)
+```
 
