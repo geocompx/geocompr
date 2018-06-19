@@ -408,15 +408,10 @@ cellStats((abs(inh_fine - inh_coarse) > 5000), stat = "sum")
 
 # Chapter R-GIS bridges
 
-1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see chapter \@ref(spatial-class)). 
-Calculate the intersection using:
-
-- **RQGIS**, **RSAGA** and **rgrass7**
-- **sf**
+1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see Chapter 2).
 
 ```{r, eval=FALSE}
 library(sf)
-library(RQGIS)
 # create two polygons
 coords_1 =  
   matrix(data = c(0, 0, 1, 0, 1, 1, 0, 1, 0, 0),
@@ -441,6 +436,44 @@ poly_2 = st_polygon(list((coords_2))) %>%
 # visualize it
 plot(st_geometry(poly_1), xlim = c(-1, 1), ylim = c(-1, 1))
 plot(st_geometry(poly_2), add = TRUE)
+```
+
+2. Union `poly_1` and `poly_2` using `st_union()` and `qgis:union`.
+What is the difference between the two union operations? 
+How can we use the **sf** package to obtain the same result as QGIS?
+
+```{r, eval=FALSE}
+library("RQGIS")
+set_env(dev = FALSE)
+union_sf = st_union(poly_1, poly_2)
+union_qgis = run_qgis("qgis:union", INPUT = poly_1, INPUT2 = poly_2,
+                 OUTPUT = file.path(tempdir(), "union.shp"),
+                 load_output = TRUE)
+par(mfrow = c(1, 2))
+plot(st_geometry(union_sf), main = "st_union")
+plot(st_geometry(union_qgis), col = 1:3, main = "QGIS union")
+# achieve the QGIS result using sf
+int = st_intersection(poly_1, poly_2)
+# difference_1
+diff_1 = st_sym_difference(poly_1, poly_2) %>%
+  st_cast("POLYGON")
+# the same as:
+# diff_2 = st_difference(poly_1, poly_2)
+# diff_3 = st_difference(poly_2, poly_1)
+# rbind(diff_2, diff_3)
+union_sf_2 = rbind(int, diff_1)
+plot(st_geometry(union_sf_2), col = 1:3)
+```
+
+
+3. Calculate the intersection of `poly_1` and `poly_2` using:
+
+- **RQGIS**, **RSAGA** and **rgrass7**
+- **sf**
+
+```{r, eval=FALSE}
+library(sf)
+library(RQGIS)
 
 # INTERSECTION USING RQGIS
 #***************************
@@ -509,7 +542,7 @@ plot(st_geometry(poly_2), add = TRUE)
 plot(int_sf, add = TRUE, col = "lightblue")
 ```
 
-2. Run `data(dem, package = "RQGIS")` and `data(random_points, package = "RQGIS")`.
+4. Run `data(dem, package = "RQGIS")` and `data(random_points, package = "RQGIS")`.
 Select randomly a point from `random_points` and find all `dem` pixels that can be seen from this point (hint: viewshed).
 Visualize your result.
 For example, plot a hillshade, and on top of it the digital elevation model, your viewshed output and the point.
