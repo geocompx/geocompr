@@ -874,40 +874,45 @@ A cartogram is a map in which the geometry is proportionately distorted to repre
 Creation of this type of map is possible in R with **cartogram**, which allows for creating continuous and non-contigous area cartograms.
 It is not a mapping package per se, but it allows for construction of distorted spatial objects that could be plotted using any generic mapping package.
 
-The `cartogram()` function creates continuous area cartograms.
+The `cartogram_cont()` function creates continuous area cartograms.
 It accepts an `sf` object and name of the variable (column) as inputs.
 Additionally, it is possible to modify the `intermax` argument - maximum number of iterations for the cartogram transformation.
 For example, we could represent median income in New Zeleand's regions as a continuous cartogram (the right-hand panel of Figure \@ref(fig:cartomap1)) as follows:
 
 ```{r, fig.show='hide', message=FALSE}
 library(cartogram)
-nz_carto = cartogram(nz, "Median_income", itermax = 5)
+nz_carto = cartogram_cont(nz, "Median_income", itermax = 5)
 tm_shape(nz_carto) + tm_polygons("Median_income")
 ```
 
-```{r cartomap1, echo=FALSE, fig.cap="Comparison of regular map (left) and continuous area cartogram (right)."}
+```{r cartomap1, echo=FALSE, fig.cap="Comparison of standard map (left) and continuous area cartogram (right)."}
 carto_map1 = tm_shape(nz) + 
-  tm_polygons("Median_income", title = "Median income (NZD)", palette = "Greens")
+  tm_polygons("Median_income", title = "Median income (NZD)", palette = "Greens") +
+  tm_layout(title = "Standard map")
 carto_map2 = tm_shape(nz_carto) + 
-  tm_polygons("Median_income", title = "Median income (NZD)", palette = "Greens")
+  tm_polygons("Median_income", title = "Median income (NZD)", palette = "Greens") +
+  tm_layout(title = "Continuous area cartogram")
 tmap_arrange(carto_map1, carto_map2)
 ```
 
-**cartogram** also offers creation of non-contiguous area cartograms with the `nc_cartogram()` function.
-These cartograms are created by scaling down each region based on the provided weighting variable.
-The code chunk below demonstrates creation of a non-contiguous area cartogram of US states' population (the bottom panel of Figure \@ref(fig:cartomap2)):
+**cartogram** also offers creation of non-contiguous area cartograms using  `cartogram_ncont()` and Dorling cartograms using `cartogram_dorling()`.
+Non-contiguous area cartograms are created by scaling down each region based on the provided weighting variable.
+Dorling cartograms consist of circles with their area proportional to the weighting variable.
+The code chunk below demonstrates creation of non-contiguous area and Dorling cartograms of US states' population (Figure \@ref(fig:cartomap2)):
 
 ```{r, fig.show='hide', message=FALSE}
 us_states2163 = st_transform(us_states, 2163)
-us_states2163_nzcarto = nc_cartogram(us_states2163, "total_pop_15")
-tm_shape(us_states2163_nzcarto) + tm_polygons("total_pop_15")
+us_states2163_ncont = cartogram_ncont(us_states2163, "total_pop_15")
+us_states2163_dorling = cartogram_dorling(us_states2163, "total_pop_15")
 ```
 
-```{r cartomap2, echo=FALSE, fig.cap="Comparison of regular map (top) and non-continuous area cartogram (bottom)."}
-carto_map3 = tm_shape(us_states2163) + 
-  tm_polygons("total_pop_15", title = "Total population", palette = "BuPu")
-carto_map4 = tm_shape(us_states2163_nzcarto) + 
-  tm_polygons("total_pop_15", title = "Total population", palette = "BuPu")
+```{r cartomap2, echo=FALSE, fig.cap="Comparison of non-continuous area cartogram (top) and Dorling cartogram (bottom)."}
+carto_map3 = tm_shape(us_states2163_ncont) + 
+  tm_polygons("total_pop_15", title = "Total population", palette = "BuPu") +
+  tm_layout(title = "Non-continuous area cartogram")
+carto_map4 = tm_shape(us_states2163_dorling) + 
+  tm_polygons("total_pop_15", title = "Total population", palette = "BuPu") +
+  tm_layout(title = "Dorling cartogram")
 tmap_arrange(carto_map3, carto_map4, ncol = 1)
 ```
 
