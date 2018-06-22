@@ -197,16 +197,19 @@ C2 = t_centroid(T2)
 
 From this point it is not a big leap to see how to create the 3^rd^ and final triangle that constitutes the polygon represented by `poly_mat` (see exercises below).
 However, an aim of algorithms is often to *generalise* and *automate* the solution.
-In the name of automation (and to avoid creating individual triangles manually!) we use *iteration* to create all triangles representing the polygon in a single line.
+In the name of automation (and to avoid creating individual triangles manually!) we use *iteration* to create all triangles representing the polygon in a single line, as illustrated in Figure \@ref(polycent).
 We could use a `for()` loop or `lapply()` for this work but have chosen `map()` from the **purrr** package because it allows concise code:
 the `.` in the commands below refer to 'each element of the object `i`' (see `?purrr::map` for details):
 
 ```{r}
-# Aim: create all triangles representing a polygon
 i = 2:(nrow(poly_mat) - 2)
 Ti = purrr::map(i, ~rbind(O, poly_mat[.:(. + 1), ], O))
 A = purrr::map_dbl(Ti, ~t_area(.))
 C = t(sapply(Ti, t_centroid))
+```
+
+```{r polycent, fig.cap="Illustration of iterative centroid algorithm with triangles. The 'x' represents the area-weighted centroid in iterations 2 and 3.", echo=FALSE, fig.asp=0.3}
+source("code/10-polycent.R")
 ```
 
 We are now in a position to calculate the total area and geographic centroid of the polygon as follows:
@@ -225,9 +228,11 @@ sf::st_area(poly_sfc)
 sf::st_centroid(poly_sfc)
 ```
 
-```{r polycent, fig.cap="Illustration of iterative centroid calculation using triangles.", echo=FALSE, fig.asp=0.3}
-source("code/10-polycent.R")
-```
+The area and centroid calculated by `st_area()` and `st_centroid()` respectively are clearly the same as using the algorithm developed in code, showing that geographic operations *can* be done from scratch with base R.
+The exercise should also have shown that algorithm development is not easy:
+imagine if you had to develop such algorithms to replace more advanced functions such as `st_join()`.
+If you need completely new low-level functionality this section shows it can be built from the bottom-up, although base R may not be the best language to develop new algorithms in.
+Compiled languages such as C++ may be more appropriate, for reasons covered in section \@ref(software-for-geocomputation).
 
 ## Functions
 
