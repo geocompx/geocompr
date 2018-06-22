@@ -26,7 +26,7 @@ contributors_text = paste0(c_rmd, collapse = ", ")
 ## browseURL("_book/index.html") # to view it
 
 ## ----gen-code, results='hide', echo=FALSE--------------------------------
-geocompr:::generate_chapter_code()
+# geocompr:::generate_chapter_code()
 
 ## ----extra-pkgs, message=FALSE-------------------------------------------
 source("code/extra-pkgs.R")
@@ -43,7 +43,6 @@ source("code/08-map-pkgs.R")
 
 ## ----gen-stats, echo=FALSE, message=FALSE, warning=FALSE-----------------
 source("R/generate-chapter-code.R")
-
 book_stats = readr::read_csv("extdata/word-count-time.csv",
                              col_types=('iiDd'))
 

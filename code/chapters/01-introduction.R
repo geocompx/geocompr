@@ -5,10 +5,10 @@ knitr::kable(x = d, caption = "Differences in emphasis between software packages
 ## Reproducibility is a major advantage of command-line interfaces, but what does it mean in practice?
 
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------
-#> a = osmdata::getbb("Hereford")
-#> b = osmdata::getbb("Bialystok")
-#> rowMeans(a)
-#> rowMeans(b)
+## a = osmdata::getbb("Hereford")
+## b = osmdata::getbb("Bialystok")
+## rowMeans(a)
+## rowMeans(b)
 
 ## ----interactive, fig.cap="Where the authors are from. The basemap is a tiled image of the Earth at Night provided by NASA. Interact with the online version at robinlovelace.net/geocompr, for example by zooming-in and clicking on the popups.", out.width="100%"----
 library(leaflet)
