@@ -9,30 +9,52 @@ The chapter assumes you have an understanding of the geographic data classes int
 
 We will consider example R scripts for geographic data and how to make them more reproducible in section \@ref(scripts).
 Algorithms are recipes for modifying inputs using a series of steps, resulting in an output, as described in section \@ref(geographic-algorithms).
-To ease sharing and reproducibility algorithms can be placed into functions, which can then be distributed either in script files or as R packages, the building blocks of reproducible code.
-That is the topic of section \@ref(functions).
+To ease sharing and reproducibility algorithms can be placed into functions, the building blocks of generalizable code, the topic of section \@ref(functions).
 
 <!-- This chapter provides illustrative examples and directs the reader to established resources, to avoid reinventing the wheel. -->
 <!-- The approach taken in this chapter was partly inspired by @xiao_gis_2016, who advocates explanations that are neither highly theoretical (as many academic papers are) -->
 <!-- , with dozens of lines of non-reproducible psuedo-code and equations -->
 <!-- nor entirely focussed on implementations via a GUI or CLI in a particular sofware package (as the first part of this book is, with its focus on implementations in various R packages). -->
 <!-- The focus of this chapter is on understanding, using reproducible code and clear explanation. -->
-The algorithms developed (including finding the centroid of a polygon, an example used in this chapter) are readily available in GIS software.
-However, the aim is "not to duplicate what is available out there, but to show how things out there work" [@xiao_gis_2016].
-This chapter takes a similar approach and is therefore the most low-level and potentially advanced (in terms of the code, not application) so far.
+The example of finding the centroid of a polygon will be used to tie these concepts together.
+Of course, you already know how to do the with `st_centroid()` having read Chapter \@ref(geometric-operations).
+We use this example because it highlights how seemingly simple operations are the result of comparatively complex code, that can run to hundreds of lines if they are to deal with various 'edge cases'.
+The example also reflects a secondary aim of the chapter: "not to duplicate what is available out there, but to show how things out there work" [@xiao_gis_2016].
+<!-- This chapter takes a similar approach and is therefore the most low-level and potentially advanced (in terms of the code, not application) so far. -->
 
 ## Scripts
 
-If packages are the building blocks of reproducible code, scripts are the glue that holds them together.
-There are no strict rules on what can and cannot go into script files and nothing to prevent you from saving broken, non-reproducible code.
+If functions distributed in packages are the building blocks of R code, scripts are the glue that holds them together in order to create reproducible workflows.
+To programming novices scripts may sound intimidating but, they are simply plain text files, typically saved with an extension representing the language they contain.
+R scripts are generally saved with a `.R` extension and named to reflect what they do.
+A simple example is the script `10-hello.R` stored in the `code` folder of the book's repository, which contains the following two lines of code:
+
+
+```r
+# Aim: provide a minimal R script
+print("Hello geocompr")
+```
+
+The lines of code may not be particularly exciting but they demonstrate the point: scripts do not need to be complicated.
+Saved scripts can be called and executed in their entirety with `source()`, as demonstrated below which shows how the comment is ignored but the instruction is executed:
+
+```{r}
+source("code/10-hello.R")
+```
+
+There are no strict rules on what can and cannot go into script files and nothing to prevent you from saving broken, non-reproducible code.^[
+Lines of code that do not contain valid R should be commented to prevent errors, as with line 1 of the `10-hello.R` script.
+]
 There are, however, some rules of thumb and conventions worth following when writing R scripts, outlined below:
 
 - Write the script in order: just like the script of a play, scripts should have a clear order such as 'setup', 'data processing' and 'save results' (roughly equivalent to 'beginning', 'middle' and 'end' in a film).
-- Make the script reproducible: scripts will be of more use to you and others if they are self-contained and can be run by other people. This involves stating dependencies (loading required packages at the outset, like the 'Prerequisites' section), reading-in data from persistent sources (e.g. from a reliable website or API) and mentioning any code that must be run before running the script (e.g. with a comment `# run script0.R before this`).
-- Comment the script sufficiently for others (and your future self) to understand it but not so much that the comments themselves become hard to maintain: at a minimum a good script file should contain information on the purpose of the script (see Figure \@ref(fig:codecheck)) and division into chunks, perhaps by appending `----` to section headings, which allows 'folding' of R scripts in RStudio.
+- Comment the script sufficiently for others (and your future self) to understand it but not too much. At a minimum a comment should state the purpose of the script (see Figure \@ref(fig:codecheck)) and (for long scripts) divide it into sections (e.g. with `Ctl+Shift+R` in RStudio which creates comments ending in `----` that can be 'folded' in the editor).
+- Above all scripts should be reproducible: self-contained scripts that will work on any computer are more useful than scripts that only run on your computer, on a good day. This involves attaching required packages at the beginning, reading-in data from persistent sources (e.g. from a reliable website or API) and ensuring that previous steps have been taken.^[
+Prior steps can be referred to with a comment or with an if statement such as `if(!exists("x")) source("x.R")` (which would run the script file `x.R` if the object `x` is missing).
+]
 
-Although there is no way to enforce reproducibility in R scripts, there are tools that can help.
-By default RStudio 'code-checks' R scripts and underlines faulty code with a red way line, as illustrated below:
+It is hard to enforce reproducibility in R scripts, but there are tools that can help.
+By default RStudio 'code-checks' R scripts and underlines faulty code with a red wavy line, as illustrated below:
 
 ```{r codecheck, echo=FALSE, fig.cap="Illustration of 'code checking' in RStudio, which identifies the incorrect dublicate pipe operator at the outset of a script."}
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39698841-6e600584-51ee-11e8-9dd0-2c17b2836f79.png")
