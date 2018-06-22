@@ -33,11 +33,7 @@ class(world_df)
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## world[1:6, ] # subset rows by position
-
-## ---- eval=FALSE---------------------------------------------------------
 ## world[, 1:3] # subset columns by position
-
-## ---- eval=FALSE---------------------------------------------------------
 ## world[, c("name_long", "lifeExp")] # subset columns by name
 
 ## ------------------------------------------------------------------------
@@ -51,7 +47,7 @@ small_countries = world[world$area_km2 < 10000, ]
 ## ---- eval=FALSE---------------------------------------------------------
 ## small_countries = subset(world, area_km2 < 10000)
 
-## **raster** and **dplyr** packages have a function called `select()`. If both packages are loaded, this can generate error messages containing the text: `unable to find an inherited method for function ‘select’ for signature ‘"sf"’`.
+## **raster** and **dplyr** packages have a function called `select()`.
 
 ## ------------------------------------------------------------------------
 world1 = dplyr::select(world, name_long, pop)
@@ -125,12 +121,13 @@ world_agg2 = aggregate(world["pop"], by = list(world$continent),
 class(world_agg2)
 
 ## ------------------------------------------------------------------------
-world_agg3 = group_by(world, continent) %>%
+world_agg3 = world %>%
+  group_by(continent) %>%
   summarize(pop = sum(pop, na.rm = TRUE))
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## world %>%
-##   summarize(pop = sum(pop, na.rm = TRUE), n_countries = n())
+##   summarize(pop = sum(pop, na.rm = TRUE), n = n())
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## world %>%
@@ -141,6 +138,7 @@ world_agg3 = group_by(world, continent) %>%
 ##   st_set_geometry(value = NULL)
 
 ## ----continents, echo=FALSE----------------------------------------------
+options(scipen = 999)
 world %>% 
   dplyr::select(pop, continent) %>% 
   group_by(continent) %>% 
@@ -257,8 +255,7 @@ levels(grain)
 ## ------------------------------------------------------------------------
 factorValues(grain, grain[c(1, 11, 35)])
 
-## ----cont-cate-rasters, echo = FALSE, results = "hide", message = FALSE, fig.width = 7, fig.height = 3, fig.cap = "Raster datasets with numeric (left) and categorical values (right)."----
-# knitr::include_graphics("figures/03_cont_categ_rasters.png")
+## ----cont-raster, echo = FALSE, message = FALSE, fig.width = 7, fig.height = 3, fig.cap = "Raster datasets with numeric (left) and categorical values (right)."----
 source("code/03-cont-raster-plot.R")
 
 ## ---- eval = FALSE-------------------------------------------------------

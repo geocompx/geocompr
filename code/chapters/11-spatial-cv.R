@@ -1,98 +1,97 @@
-## ---- message = FALSE----------------------------------------------------
+## ---- message=FALSE------------------------------------------------------
 library(sf)
 library(raster)
-library(tidyverse)
 library(mlr)
+library(tidyverse)
 library(parallelMap)
-library(pROC)
-library(RSAGA)
 
 ## ------------------------------------------------------------------------
 data("landslides", package = "RSAGA")
 
-## ---- eval = FALSE-------------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## # select non-landslide points
 ## non_pts = filter(landslides, lslpts == FALSE)
 ## # select landslide points
 ## lsl_pts = filter(landslides, lslpts == TRUE)
 ## # randomly select 175 non-landslide points
 ## set.seed(11042018)
-## non_ind = sample(1:nrow(non_pts), nrow(lsl_pts))
-## # rowbind randomly selected non-landslide points and
-## # landslide points
-## lsl = rbind(non_pts[non_ind, ], lsl_pts)
+## non_pts_sub = sample_n(non_pts, size = nrow(lsl_pts))
+## # create smaller landslide dataset (lsl)
+## lsl = bind_rows(non_pts_sub, lsl_pts)
 
-## ---- eval = FALSE-------------------------------------------------------
-## dem =
-##   raster(dem$data,
-##          crs = dem$header$proj4string,
-##          xmn = dem$header$xllcorner,
-##          xmx = dem$header$xllcorner +
-##            dem$header$ncols * dem$header$cellsize,
-##          ymn = dem$header$yllcorner,
-##          ymx = dem$header$yllcorner +
-##            dem$header$nrows * dem$header$cellsize)
+## ---- eval=FALSE---------------------------------------------------------
+## dem = raster(
+##   dem$data,
+##   crs = dem$header$proj4string,
+##   xmn = dem$header$xllcorner,
+##   xmx = dem$header$xllcorner + dem$header$ncols * dem$header$cellsize,
+##   ymn = dem$header$yllcorner,
+##   ymx = dem$header$yllcorner + dem$header$nrows * dem$header$cellsize
+##   )
 
 ## ---- echo=FALSE---------------------------------------------------------
-load("extdata/spatialcv.Rdata")
-
-## ---- echo=FALSE---------------------------------------------------------
-dplyr::select(lsl, -x, -y) %>%
+data("lsl", package = "spDataLarge")
+lsl %>%
+  mutate_at(vars(-one_of("x", "y", "lslpts")), funs(signif(., 2))) %>%
   head(3)
 
-## ----lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador. CRS: UTM zone 17S (EPSG: 32717)."----
+## ----lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador."----
 library(tmap)
+data("ta", package = "spDataLarge")
 lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
 hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
 rect = tmaptools::bb_poly(hs)
 bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
-# randomly sample 20%
-# ind = sample(1:nrow(lsl_sf), round(nrow(lsl_sf) * 0.2))
-# sam = lsl_sf[ind, ]
 
 tm_shape(hs, bbox = bbx) +
 	tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
 	        labels.rot = c(0, 90)) +
 	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
 	tm_shape(ta$elev) +
-	tm_raster(alpha = 0.5, palette = terrain.colors(10),
-	          auto.palette.mapping = FALSE, legend.show = FALSE) +
+	tm_raster(alpha = 0.5, palette = terrain.colors(10), legend.show = FALSE) +
 	tm_shape(lsl_sf) + 
-	tm_bubbles("lslpts", size = 0.5, palette = "-RdYlBu", title.col = "Landslide: ") +
+	tm_bubbles("lslpts", size = 0.2, palette = "-RdYlBu", title.col = "Landslide: ") +
 #   tm_shape(sam) +
 #   tm_bubbles(border.col = "gold", border.lwd = 2, alpha = 0, size = 0.5) +
   qtm(rect, fill = NULL) +
 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) +
   tm_legend(bg.color = "white")
 
-## ---- eval = TRUE--------------------------------------------------------
-fit = glm(lslpts ~ slope + cplan + cprof + elev + log_carea, 
-          data = lsl, family = binomial())
+## ------------------------------------------------------------------------
+fit = glm(lslpts ~ slope + cplan + cprof + elev + log10_carea,
+          family = binomial(),
+          data = lsl)
+
+## ------------------------------------------------------------------------
+class(fit)
 fit
 
 ## ------------------------------------------------------------------------
-head(predict(object = fit, type = "response"))
+pred_glm = predict(object = fit, type = "response")
+head(pred_glm)
 
 ## ------------------------------------------------------------------------
-# loading among others ta, a raster stack containing the predictors
-load("extdata/spatialcv.Rdata")
+# attaching ta, a raster brick containing the predictors
+data("ta", package = "spDataLarge")
 # making the prediction
 pred = raster::predict(object = ta, model = fit,
                        type = "response")
 
-## ----lsl-susc, echo = FALSE, fig.cap="Spatial prediction of landslide susceptibility using a GLM. CRS: UTM zone 17S (EPSG: 32717).", warning=FALSE----
+## ----lsl-susc, echo=FALSE, fig.cap="Spatial prediction of landslide susceptibility using a GLM.", warning=FALSE----
+# attach study mask for the natural part of the study area
+data("study_mask", package = "spDataLarge")
 # white raster to only plot the axis ticks, otherwise gridlines would be visible
 tm_shape(hs, bbox = bbx) +
   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
           labels.rot = c(0, 90)) +
   tm_raster(palette = "white", legend.show = FALSE) +
   # hillshade
-  tm_shape(mask(hs, study_area), bbox = bbx) +
-	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+  tm_shape(mask(hs, study_mask), bbox = bbx) +
+	tm_raster(palette = gray(0:100 / 100), n = 100,
+	          legend.show = FALSE) +
 	# prediction raster
   tm_shape(mask(pred, study_area)) +
-	tm_raster(alpha = 0.5, palette = RColorBrewer::brewer.pal(name = "Reds", 6),
-	          auto.palette.mapping = FALSE, legend.show = TRUE,
+	tm_raster(alpha = 0.5, palette = "Reds", n = 6, legend.show = TRUE,
 	          title = "Susceptibility") +
 	# rectangle and outer margins
   qtm(rect, fill = NULL) +
@@ -104,10 +103,10 @@ tm_shape(hs, bbox = bbx) +
 ## ---- message=FALSE------------------------------------------------------
 pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
 
-## ----partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row).", echo = FALSE----
+## ----partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row).", echo=FALSE----
 knitr::include_graphics("figures/13_partitioning.png")
 
-## ----building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the **mlr** package. Source: [openml.github.io](http://openml.github.io/articles/slides/useR2017_tutorial/slides_tutorial_files/ml_abstraction-crop.png)."----
+## ----building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the **mlr** package. Source: [openml.github.io](http://openml.github.io/articles/slides/useR2017_tutorial/slides_tutorial_files/ml_abstraction-crop.png). Permission to reuse this figure was kindly granted."----
 knitr::include_graphics("figures/13_ml_abstraction_crop.png")
 
 ## ------------------------------------------------------------------------
@@ -122,12 +121,16 @@ task = makeClassifTask(data = data, target = "lslpts",
                        positive = "TRUE", coordinates = coords)
 
 ## ---- eval=FALSE---------------------------------------------------------
-## listLearners(task)
+## listLearners(task, warn.missing.packages = FALSE) %>%
+##   dplyr::select(class, name, short.name, package) %>%
+##   head
 
 ## ----lrns, echo=FALSE----------------------------------------------------
-lrns_df = dplyr::select(listLearners(task, warn.missing.packages = FALSE), class, name, package) %>%
+lrns_df = 
+  listLearners(task, warn.missing.packages = FALSE) %>%
+  dplyr::select(class, name, short.name, package) %>% 
   head
-knitr::kable(lrns_df, caption = "Sample of available learners in the **mlr** package.")
+knitr::kable(lrns_df, caption = "Sample of available learners for binomial tasks in the **mlr** package.")
 
 ## ------------------------------------------------------------------------
 lrn = makeLearner(cl = "classif.binomial",
@@ -143,7 +146,7 @@ lrn = makeLearner(cl = "classif.binomial",
 mod = train(learner = lrn, task = task)
 mlr_fit = getLearnerModel(mod)
 
-## ---- eval = FALSE, echo = FALSE-----------------------------------------
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## getTaskFormula(task)
 ## getTaskData(task)
 ## getLearnerModel(mod)
@@ -163,8 +166,15 @@ resampling = makeResampleDesc(method = "SpRepCV", folds = 5,
 ##                       resampling = resampling,
 ##                       measures = mlr::auc)
 
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## set.seed(012348)
+## sp_cv = mlr::resample(learner = lrn, task = task,
+##                           resampling = resampling,
+##                           measures = mlr::auc)
+
 ## ---- echo=FALSE---------------------------------------------------------
-load("extdata/spatialcv.Rdata")
+sp_cv = readRDS("extdata/sp_cv.rds")
+conv_cv = readRDS("extdata/conv_cv.rds")
 
 ## ------------------------------------------------------------------------
 # summary statistics of the 500 models
@@ -181,9 +191,9 @@ boxplot(sp_cv$measures.test$auc,
         ylab = "AUROC")
 
 ## ---- eval=FALSE---------------------------------------------------------
-## lrns = listLearners(task)
-## lrns[grep("svm", lrns$class), ]
-## dplyr::select(lrns, class, name, package)
+## lrns = listLearners(task, warn.missing.packages = FALSE)
+## filter(lrns, grepl("svm", class)) %>%
+##   dplyr::select(class, name, short.name, package)
 ## #>            class                                 name short.name package
 ## #> 6   classif.ksvm              Support Vector Machines       ksvm kernlab
 ## #> 9  classif.lssvm Least Squares Support Vector Machine      lssvm kernlab
@@ -194,7 +204,7 @@ boxplot(sp_cv$measures.test$auc,
 ##                         predict.type = "prob",
 ##                         kernel = "rbfdot")
 
-## ---- eval = FALSE-------------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## # performance estimation level
 ## perf_level = makeResampleDesc("SpRepCV", folds = 5, reps = 100)
 
@@ -225,12 +235,19 @@ knitr::include_graphics("figures/13_cv.png")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## library(parallelMap)
+## if (Sys.info()["sysname"] %in% c("Linux, Darwin")) {
 ## parallelStart(mode = "multicore",
 ##               # parallelize the hyperparameter tuning level
 ##               level = "mlr.tuneParams",
 ##               # just use half of the available cores
 ##               cpus = round(parallel::detectCores() / 2),
 ##               mc.set.seed = TRUE)
+## }
+## 
+## if (Sys.info()["sysname"] == "Windows") {
+##   parallelStartSocket(level = "mlr.tuneParams",
+##                       cpus =  round(parallel::detectCores() / 2))
+## }
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## set.seed(12345)
@@ -244,8 +261,8 @@ knitr::include_graphics("figures/13_cv.png")
 ## # save your result, e.g.:
 ## # saveRDS(result, "svm_sp_sp_rbf_50it.rds")
 
-## ---- include=FALSE------------------------------------------------------
-result = readRDS("extdata/svm_sp_sp_rbf_50it.rds")
+## ------------------------------------------------------------------------
+result = readRDS("extdata/spatial_cv_result.rds")
 
 ## ------------------------------------------------------------------------
 # Exploring the results

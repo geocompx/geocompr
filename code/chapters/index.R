@@ -9,3 +9,10 @@ devtools::install_github("robinlovelace/geocompr")
 ## bookdown::render_book("index.Rmd") # to build the book
 ## browseURL("_book/index.html") # to view it
 
+## ----contrib-preface, include=FALSE--------------------------------------
+contributors = readr::read_csv("extdata/contributors.csv")
+c_txt = contributors$name
+c_url = contributors$link
+c_rmd = paste0("[", c_txt, "](", c_url, ")")
+contributors_text = paste0(c_rmd, collapse = ", ")
+

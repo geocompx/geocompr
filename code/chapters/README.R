@@ -25,24 +25,25 @@ contributors_text = paste0(c_rmd, collapse = ", ")
 ## bookdown::render_book("index.Rmd") # to build the book
 ## browseURL("_book/index.html") # to view it
 
-## ----gen-code, results='hide'--------------------------------------------
+## ----gen-code, results='hide', echo=FALSE--------------------------------
 geocompr:::generate_chapter_code()
 
-## ----extra-pkgs----------------------------------------------------------
+## ----extra-pkgs, message=FALSE-------------------------------------------
 source("code/extra-pkgs.R")
 
 ## ----source-readme, message=FALSE, warning=FALSE, fig.show='hide'--------
 source("code/cranlogs.R")
 source("code/sf-revdep.R")
 # source("code/09-usboundaries.R") # not working for some reason
-source("code/09-urban-animation.R")
-source("code/09-map-pkgs.R")
+source("code/08-urban-animation.R")
+source("code/08-map-pkgs.R")
 
 ## ----render-book, eval=FALSE---------------------------------------------
 ## rmarkdown::render("README.Rmd", output_format = "github_document", output_file = "README.md")
 
 ## ----gen-stats, echo=FALSE, message=FALSE, warning=FALSE-----------------
 source("R/generate-chapter-code.R")
+
 book_stats = readr::read_csv("extdata/word-count-time.csv",
                              col_types=('iiDd'))
 
@@ -52,13 +53,13 @@ if(Sys.Date() > max(book_stats$date) + 5) {
   book_stats = bind_rows(book_stats, book_stats_new)
   readr::write_csv(book_stats, "extdata/word-count-time.csv")
 }
-book_stats = dplyr::filter(book_stats, chapter <= 13) 
+book_stats = dplyr::filter(book_stats, chapter <= 15) 
 library(ggplot2)
 book_stats$chapter = formatC(book_stats$chapter, width = 2, format = "d", flag = "0")
 book_stats$chapter = fct_rev(as.factor(book_stats$chapter))
 book_stats$n_pages = book_stats$n_words / 300
 
-## ----bookstats, warning=FALSE, echo=FALSE, fig.width=8, fig.height=4-----
+## ----bookstats, warning=FALSE, echo=FALSE, fig.width=8, fig.height=5-----
 ggplot(book_stats) +
   geom_area(aes(date, n_pages, fill = chapter), position = "stack") +
   ylab("Estimated number of pages") +
