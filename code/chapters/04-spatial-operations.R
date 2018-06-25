@@ -4,69 +4,50 @@ library(raster)
 library(tidyverse)
 library(spData)
 
-## It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in \@ref(crs-intro) and which will be covered in more depth in Chapter \@ref(transform).
+## It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in \@ref(crs-intro) and which will be covered in more depth in Chapter \@ref(reproj-geo-data).
 
 ## ------------------------------------------------------------------------
-canterbury = nz %>% filter(REGC2017_NAME == "Canterbury Region")
+canterbury = nz %>% filter(Name == "Canterbury")
 canterbury_height = nz_height[canterbury, ]
 
 ## ----nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in grey, right)."----
-par_old = par(mfrow = c(1, 2), mar = c(0, 0, 1, 0))
-plot(nz$geometry, col = "white", bgc = "lightblue", main = "High points in New Zealand")
-plot(nz_height$geometry, add = TRUE, pch = 2, col = "red")
-par(mar=c(0, 0, 1, 0))
-plot(nz$geometry, col = "white", bgc = "lightblue", main = "High points in Canterbury")
-plot(canterbury$geometry, col = "grey", add = TRUE)
-plot(canterbury_height$geometry, add = TRUE, pch = 2, col = "red")
-par(par_old)
+library(tmap)
+p_hpnz1 = tm_shape(nz) + tm_polygons(col = "white") +
+  tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 0.25) +
+  tm_layout(title = "High points in New Zealand", bg.color = "lightblue")
+p_hpnz2 = tm_shape(nz) + tm_polygons(col = "white") +
+  tm_shape(canterbury) + tm_fill(col = "grey") + 
+  tm_shape(canterbury_height) + tm_symbols(shape = 2, col = "red", size = 0.25) +
+  tm_layout(title = "High points in Canterbury", bg.color = "lightblue")
+tmap_arrange(p_hpnz1, p_hpnz2, ncol = 2)
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## nz_height[canterbury, , op = st_disjoint]
 
-## Note the empty argument --- donoted with `, ,` --- in the preceding code chunk is not necessary (`nz_height[canterbury, op = st_disjoint]` returns the same result) but is included to emphasise the fact that `op` is the third argument in `[` for `sf` objects, after arguments for subsetting rows and columns.
+## Note the empty argument --- donoted with `, ,` --- in the preceding code chunk is included to highlight `op`, the third argument in `[` for `sf` objects.
 
 ## ------------------------------------------------------------------------
-sel = st_intersects(x = nz_height, y = canterbury, sparse = FALSE)
-canterbury_height2 = nz_height[sel, ]
+sel_sgbp = st_intersects(x = nz_height, y = canterbury)
+class(sel_sgbp)
+sel_logical = lengths(sel_sgbp) > 0
+canterbury_height2 = nz_height[sel_logical, ]
+
+## Note: another way to return a logical output is by setting `sparse = FALSE` (meaning 'return a dense matrix not a sparse one') in operators such as `st_intersects()`. The command `st_intersects(x = nz_height, y = canterbury, sparse = FALSE)[, 1]`, for example, would return an output identical `sel_logical`.
 
 ## ------------------------------------------------------------------------
-canterbury_height3 = nz_height %>% filter(sel)
+canterbury_height3 = nz_height %>% filter(sel_logical)
 
 ## ------------------------------------------------------------------------
-identical(x = canterbury_height, y = canterbury_height2)
-identical(x = canterbury_height, y = canterbury_height3)
-
-## ------------------------------------------------------------------------
-row.names(canterbury_height)[1:3]
-row.names(canterbury_height3)[1:3]
-
-## ------------------------------------------------------------------------
-attr(canterbury_height3, "row.names") = attr(x = canterbury_height, "row.names")
-identical(canterbury_height, canterbury_height3)
-
-## This discarding of row names is not something that is specific to spatial
-
-## ------------------------------------------------------------------------
-class(sel)
-typeof(sel)
-dim(sel)
-
-## ------------------------------------------------------------------------
-co = filter(nz, grepl("Canter|Otag", REGC2017_NAME))
-sel_sparse = st_intersects(nz_height, co)
-sel_vector = lengths(sel_sparse) > 0
-heights_co = nz_height[sel_vector, ]
-
-## ------------------------------------------------------------------------
+# create a polygon
 a_poly = st_polygon(list(rbind(c(-1, -1), c(1, -1), c(1, 1), c(-1, -1))))
 a = st_sfc(a_poly)
-
-l_line = st_linestring(x = matrix(c(-1, -1, -0.5, 1), , 2))
+# create a line
+l_line = st_linestring(x = matrix(c(-1, -1, -0.5, 1), ncol = 2))
 l = st_sfc(l_line)
-
+# create points
 p_matrix = matrix(c(0.5, 1, -1, 0, 0, 1, 0.5, 1), ncol = 2)
 p_multi = st_multipoint(x = p_matrix)
-p = st_sf(st_cast(st_sfc(p_multi), "POINT"))
+p = st_cast(st_sfc(p_multi), "POINT")
 
 ## ----relation-objects, echo=FALSE, fig.cap="Points (p 1 to 4), line and polygon objects arranged to demonstrate spatial relations.",fig.asp=1----
 par(pty = "s")
@@ -93,6 +74,8 @@ st_touches(p, a, sparse = FALSE)[, 1]
 ## ------------------------------------------------------------------------
 sel = st_is_within_distance(p, a, dist = 0.9) # can only return a sparse matrix
 lengths(sel) > 0
+
+## Functions for calculating topological relations use spatial indices to largely speed up spatial query performance.
 
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## # other tests
@@ -125,29 +108,34 @@ lengths(sel) > 0
 ## plot(p, add = TRUE)
 
 ## ------------------------------------------------------------------------
-asia = world %>% 
-  filter(continent == "Asia")
-urb = urban_agglomerations %>% 
-  filter(year == 2020) %>% 
-  top_n(n = 3, wt = population_millions)
+set.seed(2018) # set seed for reproducibility
+(bb_world = st_bbox(world)) # the world's bounds
+random_df = tibble(
+  x = runif(n = 10, min = bb_world[1], max = bb_world[3]),
+  y = runif(n = 10, min = bb_world[2], max = bb_world[4])
+)
+random_points = random_df %>% 
+  st_as_sf(coords = c("x", "y")) %>% # set coordinates
+  st_set_crs(4326) # set geographic CRS
 
-## ---- message=FALSE------------------------------------------------------
-joined = st_join(x = asia, y = urb) %>% 
-  na.omit()
+## ---- message=FALSE, fig.asp=0.4-----------------------------------------
+world_random = world[random_points, ]
+random_joined = st_join(random_points, world["name_long"])
 
-## ----spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join: the populations of the world's three largest agglomerations joined onto their respective countries.", fig.asp=0.4, warning=FALSE----
+## ----spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join: the names of the source world object are added to random points.", fig.asp=0.4, warning=FALSE----
 source("code/04-spatial-join.R")
+tmap_arrange(jm1, jm2, jm3, ncol = 1)
 
 ## ---- eval=FALSE---------------------------------------------------------
-## plot(cycle_hire$geometry, col = "blue")
-## plot(cycle_hire_osm$geometry, add = TRUE, pch = 3, col = "red")
+## plot(st_geometry(cycle_hire), col = "blue")
+## plot(st_geometry(cycle_hire_osm), add = TRUE, pch = 3, col = "red")
 
 ## ---- message=FALSE------------------------------------------------------
 any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
 
 ## ---- echo=FALSE, eval=FALSE---------------------------------------------
 ## # included to show alternative ways of showing there's no overlap
-## sum(cycle_hire$geometry %in% cycle_hire_osm$geometry)
+## sum(st_geometry(cycle_hire) %in% st_geometry(cycle_hire_osm))
 ## sum(st_coordinates(cycle_hire)[, 1] %in% st_coordinates(cycle_hire_osm)[, 1])
 
 ## ----cycle-hire, fig.cap="The spatial distribution of cycle hire points in London based on official data (blue) and OpenStreetMap data (red).", echo=FALSE, warning=FALSE----
@@ -196,28 +184,32 @@ tm_shape(nz_avheight) +
   tm_borders()
 
 ## ------------------------------------------------------------------------
-nz_avheight2 = st_join(nz, nz_height) %>%
-  group_by(REGC2017_NAME) %>%
+nz_avheight2 = nz %>%
+  st_join(nz_height) %>%
+  group_by(Name) %>%
   summarize(elevation = mean(elevation, na.rm = TRUE))
 
 ## ----areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units with respect to larger aggregating zones (translucent blue borders).", out.width="100%"----
-# source("code/04-congruence.R")
-knitr::include_graphics("figures/04-congruence.png")
+source("code/04-areal-example.R")
+# knitr::include_graphics("figures/04-congruence.png")
 
 ## ------------------------------------------------------------------------
 agg_aw = st_interpolate_aw(incongruent[, "value"], aggregating_zones, extensive = TRUE)
+# show the aggregated result
+agg_aw$value
 
-## ------------------------------------------------------------------------
+## ---- warning=FALSE------------------------------------------------------
 nz_heighest = nz_height %>% top_n(n = 1, wt = elevation)
 canterbury_centroid = st_centroid(canterbury)
 st_distance(nz_heighest, canterbury_centroid)
 
 ## ------------------------------------------------------------------------
+co = filter(nz, grepl("Canter|Otag", Name))
 st_distance(nz_height[1:3, ], co)
 
 ## ---- eval=FALSE---------------------------------------------------------
-## plot(co$geometry[2])
-## plot(nz_height$geometry[2:3], add = TRUE)
+## plot(st_geometry(co)[2])
+## plot(st_geometry(nz_height)[2:3], add = TRUE)
 
 ## ---- eval = FALSE-------------------------------------------------------
 ## id = cellFromXY(elev, xy = c(0.1, 0.1))
@@ -232,10 +224,7 @@ elev[clip]
 # we can also use extract
 # extract(elev, extent(clip))
 
-## ------------------------------------------------------------------------
-elev[clip, drop = FALSE]
-
-## ----raster-subset, echo = FALSE, fig.cap = "Subsetting raster values with the help of another raster (left). Raster mask (middle). Output of masking a raster."----
+## ----raster-subset, echo = FALSE, fig.cap = "Subsetting raster values with the help of another raster (left). Raster mask (middle). Output of masking a raster (right)."----
 knitr::include_graphics("figures/04_raster_subset.png")
 
 ## ---- eval = FALSE-------------------------------------------------------
@@ -245,9 +234,10 @@ knitr::include_graphics("figures/04_raster_subset.png")
 ## elev[rmask, drop = FALSE]
 ## # using the mask command
 ## mask(elev, rmask, maskvalue = TRUE)
-## # using overlay
+## 
+## # or using overlay
 ## # first we replace FALSE by NA
-## rmask[rmask == FALSE] = NA
+## rmask[!rmask] = NA
 ## # then we retrieve the maximum values
 ## overlay(elev, rmask, fun = "max")
 
@@ -281,7 +271,7 @@ z
 ## library(tmap)
 ## tmap_mode("view")
 ## qtm(nz) + qtm(nz_height)
-## canterbury = nz %>% filter(REGC2017_NAME == "Canterbury Region")
+## canterbury = nz %>% filter(Name == "Canterbury Region")
 ## canterbury_height = nz_height[canterbury, ]
 ## nrow(canterbury_height) # answer: 61
 
@@ -290,7 +280,7 @@ z
 ## nz_height_combined = cbind(nz, count = nz_height_count$elevation)
 ## nz_height_combined %>%
 ##   st_set_geometry(NULL) %>%
-##   dplyr::select(REGC2017_NAME, count) %>%
+##   dplyr::select(Name, count) %>%
 ##   arrange(desc(count)) %>%
 ##   na.omit()
 

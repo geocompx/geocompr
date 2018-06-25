@@ -5,20 +5,21 @@ library(tidyverse)
 library(spData)
 
 ## ---- eval=FALSE---------------------------------------------------------
-## url = file.path("http://www.naturalearthdata.com/http//www.naturalearthdata.com",
-##                 "download/10m/cultural/ne_10m_parks_and_protected_lands.zip")
-## download.file(url = url,
-##               destfile = "USA_parks.zip")
-## unzip(zipfile = "USA_parks.zip")
-## usa_parks = st_read("ne_10m_parks_and_protected_lands_area.shp")
+## download.file(url = "http://nrdata.nps.gov/programs/lands/nps_boundary.zip",
+##               destfile = "nps_boundary.zip")
+## unzip(zipfile = "nps_boundary.zip")
+## f = "temp/Current_Shapes/Data_Store/06-06-12_Posting/nps_boundary.shp"
+## usa_parks = st_read(dsn = f)
 
 ## ----datapackages, echo=FALSE--------------------------------------------
-datapackages = tibble::tribble(~`Package name`, ~Description,
-                               "osmdata", "Download and import of OpenStreetMap data.",
-                               "raster", "The `getData()` function downloads and imports administrative country, SRTM/ASTER elevation, WorldClim data.",
-                               "rnaturalearth", "Functions to download Natural Earth vector and raster data, including world country borders.",
-                               "rnoaa", "An R interface to National Oceanic and Atmospheric Administration (NOAA) climate data.",
-                               "rWBclimate", "An access to the World Bank climate data."
+datapackages = tibble::tribble(
+  ~`Package name`, ~Description,
+  "getlandsat", "Provides access to Landsat 8 data.",
+  "osmdata", "Download and import of OpenStreetMap data.",
+  "raster", "The `getData()` function downloads and imports administrative country, SRTM/ASTER elevation, WorldClim data.",
+  "rnaturalearth", "Functions to download Natural Earth vector and raster data, including world country borders.",
+  "rnoaa", "An R interface to National Oceanic and Atmospheric Administration (NOAA) climate data.",
+  "rWBclimate", "An access to the World Bank climate data."
 )
 knitr::kable(datapackages, caption = "Selected R packages for spatial data retrieval.")
 
@@ -26,7 +27,7 @@ knitr::kable(datapackages, caption = "Selected R packages for spatial data retri
 library(rnaturalearth)
 usa = ne_countries(country = "United States of America") # United States borders
 class(usa)
-# you can do the same with raster::getData()
+# alternative way of accessing the data, with raster::getData()
 # getData("GADM", country = "USA", level = 0)
 
 ## ------------------------------------------------------------------------
@@ -43,9 +44,9 @@ class(worldclim_prec)
 ##   add_osm_feature(key = "leisure", value = "park") %>%
 ##   osmdata_sf()
 
-## ------------------------------------------------------------------------
-world_raw_filepath = system.file("shapes/world.gpkg", package = "spData")
-world_raw = st_read(world_raw_filepath)
+## ---- eval=FALSE---------------------------------------------------------
+## world2 = spData::world
+## world3 = st_read(system.file("shapes/world.gpkg", package = "spData"))
 
 ## ----formats, echo=FALSE-------------------------------------------------
 file_formats = tibble::tribble(~Name, ~Extension, ~Info, ~Type, ~Model, 
@@ -72,7 +73,8 @@ knitr::kable(file_formats, caption = "Selected spatial file formats.")
 ## head(sf_drivers, n = 5)
 
 ## ----drivers, echo=FALSE-------------------------------------------------
-sf_drivers = st_drivers() %>% dplyr::filter(name %in% c("ESRI Shapefile", "GeoJSON", "KML", "GPX", "GPKG"))
+sf_drivers = st_drivers() %>%
+  dplyr::filter(name %in% c("ESRI Shapefile", "GeoJSON", "KML", "GPX", "GPKG"))
 knitr::kable(head(sf_drivers, n = 5), caption = "Sample of available drivers for reading/writing vector data (it could vary between different GDAL versions).")
 
 ## ------------------------------------------------------------------------
@@ -136,7 +138,7 @@ write_sf(obj = world, dsn = "world.gpkg")
 
 ## ----datatypes, echo=FALSE-----------------------------------------------
 dT = tibble::tribble(
-               ~Datatype,      ~`Minimum value`,        ~`Maximum value`,
+               ~`Data type`,      ~`Minimum value`,        ~`Maximum value`,
                "LOG1S",             "FALSE (0)",              "TRUE (1)",
                "INT1S",                  "-127",                   "127",
                "INT1U",                     "0",                   "255",
@@ -147,7 +149,7 @@ dT = tibble::tribble(
                "FLT4S",              "-3.4e+38",               "3.4e+38",
                "FLT8S",             "-1.7e+308",              "1.7e+308"
   )
-knitr::kable(dT, caption = "Datatypes supported by the raster package.")
+knitr::kable(dT, caption = "Data types supported by the raster package.")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## writeRaster(x = single_layer,

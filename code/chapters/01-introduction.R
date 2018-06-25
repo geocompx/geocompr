@@ -1,8 +1,8 @@
-## Reproducibility is a major advantage of command-line interfaces, but what does it mean in practice?
-
 ## ----gdsl, echo=FALSE, message=FALSE-------------------------------------
 d = readr::read_csv("extdata/gis-vs-gds-table.csv")
-knitr::kable(x = d, caption = "Differences in emphasis between the fields of Geographic Information Systems (GIS) and Geographic Data Science (GDS).")
+knitr::kable(x = d, caption = "Differences in emphasis between software packages (Graphical User Interface (GUI) of Geographic Information Systems (GIS) and R).")
+
+## Reproducibility is a major advantage of command-line interfaces, but what does it mean in practice?
 
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## a = osmdata::getbb("Hereford")
@@ -14,12 +14,12 @@ knitr::kable(x = d, caption = "Differences in emphasis between the fields of Geo
 library(leaflet)
 popup = c("Robin", "Jakub", "Jannes")
 leaflet() %>%
-  addProviderTiles("NASAGIBS.ViirsEarthAtNight2012") %>% 
-  addAwesomeMarkers(lng = c(-3, 23, 11),
-                    lat = c(52, 53, 49), 
-                    popup = popup)
+  addProviderTiles("NASAGIBS.ViirsEarthAtNight2012") %>%
+  addMarkers(lng = c(-3, 23, 11),
+             lat = c(52, 53, 49), 
+             popup = popup)
 
-## ----cranlogs, fig.cap="The popularity of spatial packages in R. The y-axis shows the average number of downloads, within a 30-day rolling window, of R's top 5 spatial packages, defined as those with the highest number of downloads within the last 30 days.", echo=FALSE----
+## ----cranlogs, fig.cap="The popularity of spatial packages in R. The y-axis shows average number of downloads per day, within a 30-day rolling window, of prominent spatial packages.", echo=FALSE----
 knitr::include_graphics("figures/spatial-package-growth.png")
 
 ## ----revdep, echo=FALSE, message=FALSE-----------------------------------

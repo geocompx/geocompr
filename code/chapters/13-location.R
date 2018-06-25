@@ -1,21 +1,28 @@
-## ---- message = FALSE----------------------------------------------------
+## ---- message=FALSE------------------------------------------------------
 library(sf)
 library(raster)
 library(tidyverse)
 library(osmdata)
+library(spDataLarge)
 
-## ---- eval = FALSE-------------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## download.file("https://tinyurl.com/ybtpkwxz",
 ##               destfile = "census.zip", mode = "wb")
 ## unzip("census.zip") # unzip the files
 ## census_de = readr::read_csv2(list.files(pattern = "Gitter.csv"))
 
-## ---- echo = FALSE-------------------------------------------------------
-# spDataLarge contains census_de, metro_names, and shops
-library(spDataLarge)
-data("census_de")
+## ------------------------------------------------------------------------
+data("census_de", package = "spDataLarge")
 
-## ----census-desc, echo = FALSE-------------------------------------------
+## ------------------------------------------------------------------------
+# pop = population, hh_size = household size
+input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
+                      women = Frauen_A, mean_age = Alter_D,
+                      hh_size = HHGroesse_D)
+# set -1 and -9 to NA
+input_tidy = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
+
+## ----census-desc, echo=FALSE---------------------------------------------
 tab = tribble(
   ~"class", ~"pop", ~"women", ~"age", ~"hh",
   1, "3-250", "0-40", "0-40", "1-2", 
@@ -38,21 +45,13 @@ knitr::kable(tab,
              caption = cap, align = "c", format = "html")
 
 ## ------------------------------------------------------------------------
-# pop = population, hh_size = household size
-input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
-                      women = Frauen_A, mean_age = Alter_D,
-                      hh_size = HHGroesse_D)
-# set -1 and -9 to NA
-input_tidy = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
-
-## ------------------------------------------------------------------------
 input_ras = rasterFromXYZ(input_tidy, crs = st_crs(3035)$proj4string)
 # print the output to the console
 input_ras
 
 ## Note that we are using an equal-area projection (EPSG:3035; Lambert Equal Area Europe), i.e. a projected CRS where each grid cell has the same area, here 1000 x 1000 square meters.
 
-## ----census-stack, echo = FALSE, fig.cap = "Gridded German census data of 2011. See Table \\@ref(tab:census-desc) for a description of the classes."----
+## ----census-stack, echo=FALSE, fig.cap="Gridded German census data of 2011. See Table \\@ref(tab:census-desc) for a description of the classes."----
 knitr::include_graphics("figures/08_census_stack.png")
 
 ## ------------------------------------------------------------------------
@@ -67,42 +66,29 @@ rcl_hh = rcl_women
 rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
 
 ## ------------------------------------------------------------------------
-reclass = map2(as.list(input_ras), rcl, function(x, y) {
-  reclassify(x = x, rcl = y, right = NA)
-}) %>% 
-  stack
+reclass = input_ras
+for (i in 1:raster::nlayers(reclass)) {
+  reclass[[i]] = reclassify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
+}
 names(reclass) = names(input_ras)
 reclass
 
-## ---- eval = FALSE, echo = FALSE-----------------------------------------
-## tmp = mapply(FUN = function(x, y) {
-##   reclassify(x = x, rcl = y, right = NA)
-## }, x = as.list(input_ras), y = rcl)
-## 
-## 
-## for (i in seq_len(nlayers(reclass))) {
-##   reclass[[i]] = reclassify(reclass[[i]], rcl = rcl[[i]], right = NA)
-## }
-## names(reclass) = names(input_ras)
-
-## ------------------------------------------------------------------------
+## ---- warning=FALSE------------------------------------------------------
 pop_agg = aggregate(reclass$pop, fact = 20, fun = sum)
 
-## ------------------------------------------------------------------------
-polys = rasterToPolygons(pop_agg[pop_agg > 500000, drop = FALSE]) %>% 
-  st_as_sf(polys)
+## ---- warning=FALSE------------------------------------------------------
+pop_agg = pop_agg[pop_agg > 500000, drop = FALSE] 
+
+## ---- warning=FALSE, message=FALSE---------------------------------------
+polys = pop_agg %>% 
+  clump %>%
+  rasterToPolygons %>%
+  st_as_sf
 
 ## ------------------------------------------------------------------------
-polys = st_union(polys)
-
-## ------------------------------------------------------------------------
-metros = st_cast(polys, "POLYGON")
-
-## ------------------------------------------------------------------------
-# find out about the offending polygon
-int = st_intersects(metros, metros)
-# polygons 5 and 9 share one border, delete polygon number 5
-metros_2 = metros[-5]
+metros = polys %>%
+  group_by(clumps) %>%
+  summarize
 
 ## ---- eval = FALSE-------------------------------------------------------
 ## # dissolve on spatial neighborhood
@@ -160,20 +146,20 @@ metros_2 = metros[-5]
 ## st_centroid(metros) %>%
 ##   st_coordinates
 
-## ----metro-areas, echo = FALSE, fig.width = 1, fig.height = 1, fig.cap = "The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names."----
+## ----metro-areas, echo=FALSE, fig.width=1, fig.height=1, fig.cap="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names."----
 knitr::include_graphics("figures/08_metro_areas.png")
 
 ## ------------------------------------------------------------------------
 metros_wgs = st_transform(metros, 4326)
 coords = st_centroid(metros_wgs) %>%
   st_coordinates() %>%
-  round(., 4)
+  round(4)
 
-## ---- eval = FALSE, warning = FALSE, message = FALSE---------------------
+## ---- eval=FALSE, warning=FALSE, message=FALSE---------------------------
 ## # reverse geocoding to find out the names of the metropolitan areas
 ## metro_names = map_dfr(1:nrow(coords), function(i) {
 ##   add = ggmap::revgeocode(coords[i, ], output = "more")
-##   x = 2
+##   x = 9
 ##   while (is.na(add$address) & x > 0) {
 ##     add = ggmap::revgeocode(coords[i, ], output = "more")
 ##     # just try three times
@@ -185,20 +171,24 @@ coords = st_centroid(metros_wgs) %>%
 ##   add
 ## })
 
-## ---- echo = FALSE-------------------------------------------------------
+## ------------------------------------------------------------------------
 # attach metro_names from spDataLarge
-data("metro_names")
+data("metro_names", package = "spDataLarge")
+
+## ----metro-names, echo=FALSE---------------------------------------------
+knitr::kable(dplyr::select(metro_names, locality, country), caption = "Result of the reverse geocoding.")
 
 ## ------------------------------------------------------------------------
 metro_names = 
   dplyr::select(metro_names, locality, administrative_area_level_2) %>%
-  # replace Velbert and umlaut ü
-  mutate(locality = ifelse(locality == "Velbert", administrative_area_level_2, 
+  # replace Wülfrath and umlaut ü
+  mutate(locality = ifelse(locality == "Wülfrath",
+                           administrative_area_level_2,
                            locality),
          locality = gsub("ü", "ue", locality)) %>%
   pull(locality)
 
-## ---- eval = FALSE, message = FALSE--------------------------------------
+## ---- eval=FALSE, message=FALSE------------------------------------------
 ## shops = map(metro_names, function(x) {
 ##   message("Downloading shops of: ", x, "\n")
 ##   # give the server a bit time
@@ -215,7 +205,7 @@ metro_names =
 ##   points = st_set_crs(points$osm_points, 4326)
 ## })
 
-## ---- eval = FALSE-------------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## # checking if we have downloaded shops for each metropolitan area
 ## ind = map(shops, nrow) == 0
 ## if (any(ind)) {
@@ -223,23 +213,23 @@ metro_names =
 ##           paste(metro_names[ind], collapse = ", "), "\nPlease fix it!")
 ## }
 
-## ---- eval = FALSE-------------------------------------------------------
-## # select only specific columns and rbind all list elements
-## shops = map(shops, dplyr::select, osm_id, shop) %>%
-##   reduce(rbind)
+## ---- eval=FALSE---------------------------------------------------------
+## # select only specific columns
+## shops = map(shops, dplyr::select, osm_id, shop)
+## # putting all list elements into a single dataframe
+## shops = do.call(shops, rbind)
 
-## ---- echo = FALSE-------------------------------------------------------
-# attach shops from spDataLarge
-data("shops")
+## ------------------------------------------------------------------------
+data("shops", package = "spDataLarge")
 
 ## If the `shop` column were used instead of the `osm_id` column, we would have retrieved fewer shops per grid cell.
 
-## ---- message = FALSE----------------------------------------------------
+## ---- message=FALSE------------------------------------------------------
 shops = st_transform(shops, proj4string(reclass))
 # create poi raster
 poi = rasterize(x = shops, y = reclass, field = "osm_id", fun = "count")
 
-## ---- message = FALSE, warning = FALSE-----------------------------------
+## ---- message=FALSE, warning=FALSE---------------------------------------
 # construct reclassification matrix
 int = classInt::classIntervals(values(poi), n = 4, style = "fisher")
 int = round(int$brks)
@@ -260,11 +250,11 @@ reclass = dropLayer(reclass, "pop")
 # calculate the total score
 result = sum(reclass)
 
-## ----bikeshop-berlin, echo = FALSE, eval = TRUE, fig.cap = "Suitable areas (i.e. raster cells with a score > 9) in accordance with our hypothetical survey for bike stores in Berlin."----
+## ----bikeshop-berlin, echo=FALSE, eval=TRUE, fig.cap="Suitable areas (i.e. raster cells with a score > 9) in accordance with our hypothetical survey for bike stores in Berlin."----
 library(leaflet)
 library(sp)
 # have a look at suitable bike shop locations in Berlin
-berlin = metros_2[metro_names == "Berlin"]
+berlin = metros[metro_names == "Berlin", ]
 berlin_raster = raster::crop(result, as(berlin, "Spatial"))
 # summary(berlin_raster)
 # berlin_raster
