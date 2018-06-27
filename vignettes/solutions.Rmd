@@ -587,6 +587,34 @@ mapview(out, col = "white", map.type = "Esri.WorldImagery") +
   mapview(point)
 ```
 
+5. Use `gdalinfo` via a system call for a raster file stored on disk of your choice.
+
+```{r, eval=FALSE}
+link2GI::linkGDAL()
+data("dem", package = "RQGIS")
+file = file.path(tempdir(), "dem.tif")
+writeRaster(dem, filename = file, prj = TRUE, format = "GTiff")
+cmd = paste("gdalinfo", file)
+system(cmd)
+```
+
+6. Query all Californian highways from the PostgreSQL/PostGIS database living in the QGIS Cloud introduced in this chapter.
+
+```{r, eval=FALSE}
+library(RPostgreSQL)
+library(sf)
+conn = dbConnect(drv = PostgreSQL(), dbname = "rtafdf_zljbqm",
+                 host = "db.qgiscloud.com",
+                 port = "5432", user = "rtafdf_zljbqm", 
+                 password = "d3290ead")
+query = paste(
+  "SELECT *",
+  "FROM highways",
+  "WHERE state = 'CA';")
+ca_highways = st_read(conn, query = query, geom = "wkb_geometry")
+plot(st_geometry(ca_highways))
+```
+
 # Chapter Spatial cross-validation
 
 1. Compute the terrain attributes slope, plan curvature, profile curvature and catchment area from `dem` (provided by `data("landslides", package = "RSAGA")`) with the help of R-GIS bridges, and extract the values from the corresponding output rasters to the `landslides` dataframe (`data(landslides, package = "RSAGA"`)). Keep all landslide initation points and 175 randomly selected non-landslide points.
