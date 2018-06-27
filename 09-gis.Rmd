@@ -287,7 +287,7 @@ Other notes:
 
 To learn more about **RQGIS** please refer to @muenchow_rqgis:_2017. 
 
-## (R)SAGA
+## (R)SAGA {#rsaga}
 
 The System for Automated Geoscientific Analyses (SAGA; Table \@ref(tab:gis-comp)) provides the possibility to execute SAGA modules via the command line interface (saga_cmd.exe under Windows and just saga_cmd under Linux) (see also [https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/(https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/))
 In addition, there is a Python interface (SAGA Python API).
@@ -616,12 +616,19 @@ GRASS: excellent documentation, topology (network analysis) and topological rule
 Please note that there are a number of further GIS software packages that have a scripting interface but for which there is no dedicated R package that accesses these: gvSig, OpenJump, Orfeo Toolbox and TauDEM.
 
 ## A short note on further spatial APIs
-There are of course numerous interfaces to other spatial software packages aside from the interfaces to Desktop GIS software presented in detail in this chapter.
-This includes interfaces to spatial libraries, spatial databases and web mapping services (see also Chapter \@ref(adv-map)).
-This collection is by no means compreshensive, and in this section we will only have a short glance at a few selected examples.
-Hopefully, this will give you an impression of all the spatial power that is available on your fingertips.
+There are many further interfaces to other spatial software packages aside from the interfaces to Desktop GIS software presented in detail in this chapter.
+This includes interfaces to spatial libraries (section \@ref(gdal)), spatial databases (section \@ref(postgis)) and web mapping services (see section \@ref(adv-map)).
+In this section we will only have a short glance at two selected examples.
+Hopefully, this will give an impression of all the spatial power that is readily available on our fingertips.
 
-### GDAL as an example for a spatial library
+### Spatial library API - GDAL {#gdal}
+GDAL/OGR is especially known for its support for numerous spatial drivers (data formats).
+In fact, there is barely a geospatial software that is not using GDAL in the background for importing and exporting geographic data.
+But GDAL offers more than I/O functions, e.g., reprojection, mosaicking and SQL tools. <!-- -> hint to GDAL help pages.-->
+One can easily access these tools via the command line. 
+In the code chunk below `linkGDAL()` searches the computer for a working GDAL installation and adds the executable to the PATH variable. 
+This allows us to easily run GDAL/OGR via system calls.
+For example, `ogrinfo` gives back meta information of vector data.
 
 ```{r, eval=FALSE, message=FALSE}
 link2GI::linkGDAL()
@@ -660,21 +667,17 @@ system(cmd)
 #>NWBIR79: Real (24.15)
 ```
 
-This is of course a very simple example.
-Still, it shows how we can use GDAL via the command-line from within R, and nothing stops you from using much more advanced GDAL/OGR utilities.
-Note that **sf** automatically brings most of the power of GDAL, GEOS and proj.4 to R.
+This is of course a very simple example, and we could have achieved the same using `rgdal::ogrInfo()`.
+Still, it shows how we can use GDAL via the command-line from within R indepedently of other packages, and nothing stops you from using much more advanced GDAL/OGR utilities.
+Note also that the **RSAGA** package also uses the command line interface to use SAGA geoalgorithms from within R (see section \@ref(rsaga)). 
+Please keep in mind that the **sf** package already brings most of the power provided by GDAL, GEOS and proj.4 to R.
 Instead of using the command-line interface to access the functionality of these external dependencies, **sf** uses an **Rcpp** interface.
 This is an even better approach since it circumvents the command-line and allows a direct access to  GDAL/GEOS/Proj.4 all of which are written in either C++ or C.
 
-GDAL also supports SQL queries.
-But like R, GDAL is not a (spatial) database management system.
-However, one can easily access, modify and create data stored in databases from within R (see next subsection).
-
-### PostgreSQL/PostGIS as an example for a spatial database
-
-The most important open source spatial database is probably the combination of PostgreSQL with its spatial extension PostGIS [@obe_postgis_2015].^[SQlLite and its spatial extension SpatiaLite are certainly also important but implicitly we have already presented this approach since GRASS is using SQLite in the background.]
+### Spatial database API - PostgreSQL/PostGIS {#postgis}
+The most important open source spatial database is probably the combination of PostgreSQL with its spatial extension PostGIS [@obe_postgis_2015].^[SQlLite/SpatiaLite are certainly also important but implicitly we have already presented this approach since GRASS is using SQLite in the background.]
 PostgreSQL/PostGIS is a relational spatial database management system supporting multi-user access and topology.
-Spatial databases allow to store spatial and non-spatial data in a structured way (as opposed to loose collections of data somewhere stored on disk) and to relate tables (entities) to each other via unique identifiers (primary and foreign keys) and space (think for instance of a spatial join). 
+Spatial databases allow to store spatial and non-spatial data in a structured way (as opposed to loose collections of data somewhere stored on disk) and to relate tables (entities) to each other explicitly via unique identifiers (primary and foreign keys) and implicitly via space (think for instance of a spatial join). 
 Databases are especially useful if your data becomes big which tends to be the case quite quickly with geographic data.
 
 From within R, you can easily query the data you need for a specific analysis. 
