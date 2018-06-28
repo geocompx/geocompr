@@ -178,6 +178,8 @@ Programming](https://csgillespie.github.io/efficientR/):
 
 ``` r
 geocompr:::generate_citations()
+#> Installing package into '/home/jn/R/x86_64-redhat-linux-gnu-library/3.5'
+#> (as 'lib' is unspecified)
 ```
 
 This generates .bib and .csv files containing the packages. The current
@@ -252,6 +254,7 @@ knitr::kable(pkg_df)
 | rmarkdown         | Dynamic Documents for R \[@R-rmarkdown\]                                                  | 1.10       |
 | rnaturalearth     | World Map Data from Natural Earth \[@R-rnaturalearth\]                                    | 0.1.0      |
 | rnaturalearthdata | World Vector Map Data from Natural Earth Used in ‘rnaturalearth’ \[@R-rnaturalearthdata\] | 0.1.0      |
+| RPostgreSQL       | R Interface to the ‘PostgreSQL’ Database System \[@R-RPostgreSQL\]                        | 0.6.2      |
 | RQGIS             | Integrating R with QGIS \[@R-RQGIS\]                                                      | 1.0.3      |
 | RSAGA             | SAGA Geoprocessing and Terrain Analysis \[@R-RSAGA\]                                      | 1.1.0      |
 | sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.3      |
