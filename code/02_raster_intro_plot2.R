@@ -2,6 +2,7 @@
 library(tmap)
 library(rcartocolor)
 library(spDataLarge)
+library(raster)
 
 # data read ---------------------------------------------------------------
 cla_raster = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
@@ -18,4 +19,4 @@ rast_srtm = tm_shape(cla_raster) + tm_raster(palette = terrain_colors, title = "
 rast_nlcd = tm_shape(cat_raster) + tm_raster(col = "levels", palette = landcover_cols, style = "cat", title = "Land cover") + 
   tm_layout(title = "B. Categorical data", legend.frame = TRUE, legend.position = c("right", "bottom"))
 
-print(tmap_arrange(rast_srtm, rast_nlcd, ncol = 2))
+tmap_arrange(rast_srtm, rast_nlcd, ncol = 2)
