@@ -81,11 +81,6 @@ ggplot2::ggsave(filename = "figures/04_raster_subset.png",
                 plot = arrangeGrob(p_1, p_2, p_3, ncol = 3),
                 width = 7.5, height = 3)
 
-# png(filename = "figures/04_raster_subset.png", width = 800, 
-#     height = 300)
-# plot(arrangeGrob(p_1, p_2, p_3, ncol = 3))
-# dev.off()
-
 # Subsetting example II====================================
 #**********************************************************
 elev = raster(nrow = 6, ncol = 6, res = 0.5, 
@@ -135,8 +130,6 @@ plot(rasterToPolygons(elev_2), add = TRUE, border = gray(0.7))
 plot(extent(elev_2), add = TRUE)
 plot(rasterToPolygons(clip), add = TRUE, col = "lightgray")
 plot(extent(clip), lwd = 2, add = TRUE)
-
-
 
 #**********************************************************
 # 3 FOCAL EXAMPLE------------------------------------------

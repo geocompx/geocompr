@@ -1,5 +1,7 @@
 library(globe)
 library(dplyr)
+library(sf)
+
 london_lonlat = st_point(c(-0.1, 51.5)) %>%
   st_sfc() %>%
   st_sf(crs = 4326, geometry = .)

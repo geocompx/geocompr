@@ -3,7 +3,6 @@ library(tmap)
 legend_title = expression("Area (km"^2*")")
 map_nza = tm_shape(nz) +
   tm_fill(col = "Land_area", title = legend_title) + tm_borders()
-# map_nza + tm_layout(aes.color = c(borders = "red")) # see https://github.com/mtennekes/tmap/issues/211
 aes.color = c(borders = "red")
 aes.color.all = tmap_options()$aes.color
 aes.color.all[names(aes.color)] = aes.color

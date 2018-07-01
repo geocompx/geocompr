@@ -13,6 +13,10 @@
 # par(old_par)
 # with tmap ----
 library(tmap)
+library(spData)
+library(dplyr)
+library(sf)
+
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
                     FUN = sum, na.rm = TRUE)
 us_states_facet = dplyr::select(us_states, REGION, total_pop_15) %>%
@@ -26,5 +30,3 @@ us_facet = rbind(us_states_facet, regions_facet) %>%
 tm_shape(us_facet) +
   tm_polygons("total_pop_15", title = "Total population:") +
   tm_facets(by = "Level", nrow = 1, drop.units = TRUE)
-
-

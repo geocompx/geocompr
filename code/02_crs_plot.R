@@ -9,7 +9,7 @@ library(rcartocolor)
 theme_set(theme_bw())
 
 ## vector plot ---------------------------------------------------------------
-vector_filepath = system.file("vector/zion.gpkg", package="spDataLarge")
+vector_filepath = system.file("vector/zion.gpkg", package = "spDataLarge")
 new_vector = st_read(vector_filepath)
 new_vector2 = st_transform(new_vector, 4326)
 
@@ -29,7 +29,8 @@ vector_crs = arrangeGrob(p1, p2, nrow = 1)
 
 ggsave(plot = vector_crs,
        filename = "figures/02_vector_crs.png",
-       width = 5.1, height = 3.0,
+       width = 5.1,
+       height = 3.0,
        units = "in")
 
 ## raster plot ---------------------------------------------------------------
