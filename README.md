@@ -178,8 +178,6 @@ Programming](https://csgillespie.github.io/efficientR/):
 
 ``` r
 geocompr:::generate_citations()
-#> Installing package into '/home/jn/R/x86_64-redhat-linux-gnu-library/3.5'
-#> (as 'lib' is unspecified)
 ```
 
 This generates .bib and .csv files containing the packages. The current
@@ -247,7 +245,7 @@ knitr::kable(pkg_df)
 | pROC              | Display and Analyze ROC Curves \[@R-pROC\]                                                | 1.12.1     |
 | raster            | Geographic Data Analysis and Modeling \[@R-raster\]                                       | 2.6.7      |
 | rcartocolor       | ‘CARTOColors’ Palettes \[@R-rcartocolor\]                                                 | 0.0.22     |
-| rgdal             | Bindings for the ‘Geospatial’ Data Abstraction Library \[@R-rgdal\]                       | 1.2.20     |
+| rgdal             | Bindings for the ‘Geospatial’ Data Abstraction Library \[@R-rgdal\]                       | 1.3.3      |
 | rgeos             | Interface to Geometry Engine - Open Source (‘GEOS’) \[@R-rgeos\]                          | 0.3.28     |
 | rgrass7           | Interface Between GRASS 7 Geographical Information System and R \[@R-rgrass7\]            | 0.1.10     |
 | rmapshaper        | Client for ‘mapshaper’ for ‘Geospatial’ Operations \[@R-rmapshaper\]                      | 0.4.0      |
@@ -257,7 +255,7 @@ knitr::kable(pkg_df)
 | RPostgreSQL       | R Interface to the ‘PostgreSQL’ Database System \[@R-RPostgreSQL\]                        | 0.6.2      |
 | RQGIS             | Integrating R with QGIS \[@R-RQGIS\]                                                      | 1.0.3      |
 | RSAGA             | SAGA Geoprocessing and Terrain Analysis \[@R-RSAGA\]                                      | 1.1.0      |
-| sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.3      |
+| sf                | Simple Features for R \[@R-sf\]                                                           | 0.6.4      |
 | sp                | Classes and Methods for Spatial Data \[@R-sp\]                                            | 1.3.1      |
 | spData            | Datasets for Spatial Analysis \[@R-spData\]                                               | 0.2.9.0    |
 | spDataLarge       | Large datasets for spatial analysis \[@R-spDataLarge\]                                    | 0.2.6.5    |
