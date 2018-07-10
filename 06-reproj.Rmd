@@ -365,10 +365,12 @@ world_mollweide = st_transform(world, crs = "+proj=moll")
 <!-- plot(world_mollweide$geom, graticule = TRUE) -->
 
 ```{r mollproj, echo=FALSE, fig.cap="Mollweide projection of the world.", warning=FALSE}
-par_old = par()
-par(mar = c(0, 0, 1, 0))
-plot(st_geometry(world_mollweide), graticule = TRUE, main = "the Mollweide projection")
-par(par_old)
+library(tmap)
+world_mollweide_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
+  lwgeom::st_transform_proj(crs = "+proj=moll")
+tm_shape(world_mollweide_gr) + tm_lines(col = "grey") +
+  tm_shape(world_mollweide) + tm_borders(col = "black") +
+  tm_layout(main.title = "the Mollweide projection", main.title.size	= 1.15)
 ```
 
 On the other hand, when mapping the world, it is often desirable to have as little distortion as possible for all spatial properties (area, direction, distance).
@@ -418,10 +420,12 @@ world_laea1 = st_transform(world, crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_
 <!-- plot(world_laea1$geom, graticule = TRUE) -->
 
 ```{r laeaproj1, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on longitude and latitude of 0.", warning=FALSE}
-par_old = par()
-par(mar = c(0, 0, 1, 0))
-plot(st_geometry(world_laea1), graticule = TRUE, main = "the Lambert azimuthal equal-area projection")
-par(par_old)
+world_laea1_g = st_graticule(ndiscr = 10000) %>%
+  st_transform("+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_0=0") %>% 
+  st_geometry()
+tm_shape(world_laea1_g) + tm_lines(col = "grey") +
+  tm_shape(world_laea1) + tm_borders(col = "black") +
+  tm_layout(main.title = "the Lambert azimuthal equal-area projection", main.title.size	= 1.15)
 ```
 
 We can change the PROJ parameters, for example the center of the projection using the `+lon_0` and `+lat_0` parameters. 
@@ -437,11 +441,9 @@ world_laea2 = st_transform(world, crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +la
 world_laea2_g = st_graticule(ndiscr = 10000) %>%
   st_transform("+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40.1 +ellps=WGS84 +no_defs") %>% 
   st_geometry()
-par_old = par()
-par(mar = c(0, 0, 1, 0))
-plot(world_laea2_g, main = "the Lambert azimuthal equal-area projection", col = "grey")
-plot(st_geometry(world_laea2), add = TRUE)
-par(par_old)
+tm_shape(world_laea2_g) + tm_lines(col = "grey") +
+  tm_shape(world_laea2) + tm_borders(col = "black") +
+  tm_layout(main.title = "the Lambert azimuthal equal-area projection", main.title.size	= 1.15)
 ```
 
 More information on CRS modifications can be found in the [Using PROJ](http://proj4.org/usage/index.html) documentation.
