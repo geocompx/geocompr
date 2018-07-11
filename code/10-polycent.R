@@ -21,7 +21,8 @@ if(!exists("poly_mat")) {
   i = 2:(nrow(poly_mat) - 2)
   T_all = purrr::map(i, ~rbind(O, poly_mat[.:(. + 1), ], O))
   A = purrr::map_dbl(T_all, ~t_area(.))
-  C = t(sapply(T_all, t_centroid))
+  C_list = lapply(T_all, t_centroid)
+  C = do.call(rbind, C_list)
 }
 # plot(poly_mat)
 # lines(poly_mat)
