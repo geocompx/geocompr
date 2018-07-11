@@ -183,12 +183,13 @@ i = 2:(nrow(poly_mat) - 2)
 T_all = lapply(i, function(x) {
   rbind(O, poly_mat[x:(x + 1), ], O)
 })
-A = sapply(T_all, function(x) {
+A = vapply(T_all, function(x) {
   abs(x[1, 1] * (x[2, 2] - x[3, 2]) +
         x[2, 1] * (x[3, 2] - x[1, 2]) +
         x[3, 1] * (x[1, 2] - x[2, 2]) ) / 2
-  })
-C = t(sapply(T_all,  function(x) (x[1, ] + x[2, ] + x[3, ]) / 3))
+  }, FUN.VALUE = double(1))
+C_list = lapply(T_all,  function(x) (x[1, ] + x[2, ] + x[3, ]) / 3)
+C = do.call(rbind, C_list)
 ```
 
 ```{r polycent, fig.cap="Illustration of iterative centroid algorithm with triangles. The 'x' represents the area-weighted centroid in iterations 2 and 3.", echo=FALSE, fig.asp=0.3}
@@ -268,7 +269,8 @@ poly_centroid = function(x, output = "matrix") {
   i = 2:(nrow(x) - 2)
   T_all = purrr::map(i, ~rbind(O, x[.:(. + 1), ], O))
   A = purrr::map_dbl(T_all, ~t_area(.))
-  C = t(sapply(T_all, t_centroid))
+  C_list = lapply(T_all, t_centroid)
+  C = do.call(rbind, C_list)
   centroid_coords = c(weighted.mean(C[, 1], A), weighted.mean(C[, 2], A))
   if(output == "matrix") {
     return(centroid_coords)
