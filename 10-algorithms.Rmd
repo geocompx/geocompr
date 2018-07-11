@@ -164,27 +164,30 @@ abs(T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
   T1[3, 1] * (T1[1, 2] - T1[2, 2]) ) / 2
 ```
 
-This code chunk works and outputs the correct result.^[
-as can be verified with the formula for the area of a triangle whose base is horizontal: area equals half of the base width times its height --- $A = B * H / 2$ --- ($10 * 10 / 2$ in this case, as can be seen in Figure \@ref(fig:polycent)).
+This code chunk outputs the correct result.^[
+The result can be verified using the formula for the area of a triangle whose base is horizontal, as is the case for T1 (see Figure \@ref(fig:polycent)):
+area is half of the base width times its height or $A = B * H / 2$.
+In this case $10 * 10 / 2 = 50$.
 ]
 The problem is that code is clunky and must by re-typed we want to run it on another triangle matrix.
 To make the code more generalizable, we will see how it can be converted into a function in \@ref(functions).
 
 Step 4 requires steps 2 and 3 to be undertaken not just on one triangle (as demonstrated above) but on all triangles.
 This requires *iteration* to create all triangles representing the polygon, illustrated in Figure \@ref(fig:polycent).
-We use `lapply()` for this work because it is concise and is part of base R, but could have chosen `map()` from the **purrr** package or a `for()` loop (see Chapter \@ref(location)):
+`lapply()` is used here because it is a concise solution in base R;
+alternatives include `map()` from the **purrr** package or a `for()` loop (see Chapter \@ref(location)):
 
 ```{r}
 i = 2:(nrow(poly_mat) - 2)
-Ti = lapply(i, function(x) {
+T_all = lapply(i, function(x) {
   rbind(O, poly_mat[x:(x + 1), ], O)
 })
-A = sapply(Ti, function(x) {
+A = sapply(T_all, function(x) {
   abs(x[1, 1] * (x[2, 2] - x[3, 2]) +
         x[2, 1] * (x[3, 2] - x[1, 2]) +
         x[3, 1] * (x[1, 2] - x[2, 2]) ) / 2
   })
-C = t(sapply(Ti,  function(x) (x[1, ] + x[2, ] + x[3, ]) / 3))
+C = t(sapply(T_all,  function(x) (x[1, ] + x[2, ] + x[3, ]) / 3))
 ```
 
 ```{r polycent, fig.cap="Illustration of iterative centroid algorithm with triangles. The 'x' represents the area-weighted centroid in iterations 2 and 3.", echo=FALSE, fig.asp=0.3}
@@ -262,9 +265,9 @@ This function, that we'll call `poly_centroid()` will mimick the behaviour of `s
 ```{r}
 poly_centroid = function(x, output = "matrix") {
   i = 2:(nrow(x) - 2)
-  Ti = purrr::map(i, ~rbind(O, x[.:(. + 1), ], O))
-  A = purrr::map_dbl(Ti, ~t_area(.))
-  C = t(sapply(Ti, t_centroid))
+  T_all = purrr::map(i, ~rbind(O, x[.:(. + 1), ], O))
+  A = purrr::map_dbl(T_all, ~t_area(.))
+  C = t(sapply(T_all, t_centroid))
   centroid_coords = c(weighted.mean(C[, 1], A), weighted.mean(C[, 2], A))
   if(output == "matrix") {
     return(centroid_coords)
