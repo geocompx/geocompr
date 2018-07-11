@@ -1,5 +1,8 @@
-# Aim take a matrix representing a convex polygon, return its centroid
+# Aim take a matrix representing a convex polygon, return its centroid,
 # demonstrate how algorithms work
+# pre-requisite: an input object named poly_mat with 2 columns representing
+# vertices of a polygon, with 1st and last rows identical
+O = poly_mat[1, ] # create a point representing the origin
 i = 2:(nrow(poly_mat) - 2)
 T_all = lapply(i, function(x) {
   rbind(O, poly_mat[x:(x + 1), ], O)
