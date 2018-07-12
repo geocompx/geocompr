@@ -1,5 +1,6 @@
 library(tmap)
 library(spData)
+tmap_options(main.title.size = 1)
 
 cols = c("clay" = "brown", "sand" = "rosybrown", "silt" = "sandybrown")
 
