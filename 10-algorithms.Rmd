@@ -53,7 +53,7 @@ source("code/10-hello.R")
 There are no strict rules on what can and cannot go into script files and nothing to prevent you from saving broken, non-reproducible code.^[
 Lines of code that do not contain valid R should be commented to prevent errors, as with line 1 of the `10-hello.R` script.
 ]
-There are, however, some conventions worth following:
+There are, however, some best practice conventions worth following:
 
 - Write the script in order: just like the script of a film, scripts should have a clear order such as 'setup', 'data processing' and 'save results' (roughly equivalent to 'beginning', 'middle' and 'end' in a film).
 - Comment the script sufficiently for others (and your future self) to understand it but not too much. At a minimum a comment should state the purpose of the script (see Figure \@ref(fig:codecheck)) and (for long scripts) divide it into sections (e.g. with `Ctl+Shift+R` in RStudio which creates comments ending in `----` that can be 'folded' in the editor).
@@ -138,7 +138,7 @@ poly_mat = cbind(x_coords, y_coords)
 ```
 
 Now we have an example dataset we are ready to undertake step 1 outlined above.
-The code below shows how this can be done by creating of a single triangle (`T1`), that demonstrates the method; it also demonstrates step 2 by calculating its centroid based on the [formula](https://math.stackexchange.com/q/1702595/)
+The code below shows how this can be done by creating a single triangle (`T1`), that demonstrates the method; it also demonstrates step 2 by calculating its centroid based on the [formula](https://math.stackexchange.com/q/1702595/)
 $1/3(a + b + c)$ where $a$ to $c$ are coordinates representing the triangle's vertices:
 
 ```{r}
@@ -250,6 +250,9 @@ t_centroid = function(x) {
 
 The above example demonstrates two key components of [functions](http://adv-r.had.co.nz/Functions.html):
 1) the function *body*, the code inside the curly brackets that define what the function does with the inputs; and 2) the *formals*, the list of arguments the function works with --- `x` in this case (the third component, the environment, is beyond the scope of this section).
+By default, functions return the last object that has been calculated (the coordinates of the centroid in the case of `t_centroid()`).^[
+You can also explicitly set the output of a function by adding `return(output)` into the body of the function, where `output` is the result to be returned.
+]
 
 ```{r, eval=FALSE, echo=FALSE}
 body(t_centroid)
@@ -306,8 +309,7 @@ poly_centroid = function(x) {
   C_list = lapply(T_all, t_centroid)
   C = do.call(rbind, C_list)
   A = vapply(T_all, t_area, FUN.VALUE = double(1))
-  centroid_coords = c(weighted.mean(C[, 1], A), weighted.mean(C[, 2], A))
-  return(centroid_coords)
+  c(weighted.mean(C[, 1], A), weighted.mean(C[, 2], A))
 }
 ```
 
@@ -340,8 +342,7 @@ To return the result as an object of class `sfg`, for example, a 'wrapper' funct
 ```{r}
 poly_centroid_sfg = function(x) {
   centroid_coords = poly_centroid(x)
-  centroid_sfg = sf::st_point(centroid_coords)
-  return(centroid_sfg)
+  sf::st_point(centroid_coords)
 }
 ```
 
@@ -383,13 +384,16 @@ identical(poly_centroid_sfg(poly_mat), sf::st_centroid(poly_sfc))
 <!-- ``` -->
 
 
-## Case study
-
 ## Exercises {#ex-algorithms}
 
-1. Check-out the script `10-earthquakes.R` in the `code` folder of the book's GitHub [repo](https://github.com/Robinlovelace/geocompr/blob/master/code/10-earthquakes.R).
-    - Try to reproduce the results: how many significant earthquakes were there last month?
-    - Modify the script so that it provides a map with all earthquakes that happened in the past hour.
+1. Read the script `10-centroid-alg.R` in the `code` folder of the book's GitHub [repo](https://github.com/Robinlovelace/geocompr/blob/master/code/10-centroid-alg.R).
+    - Which of the best practices covered in section \@ref(scripts) does it follow?
+    - Create a version of the script on your computer in an IDE such as RStudio (preferably by typing-out the script line-by-line, in your own coding style and with your own comments, rather than copy-pasting --- this will help you learn how to type scripts) and, using the example of a square polygon (e.g. created with `poly_mat = cbind(x = c(0, 0, 9, 9, 0), y = c(0, 9, 9, 0, 0))`) execute the script line-by-line.
+    - What changes could be made to the script to make it more reproducible?
+    <!-- - Answer: The script could state that it needs a an object called `poly_mat` to be present and, if none is present, create an example dataset at the outset for testing. -->
+<!-- 1. Check-out the script `10-earthquakes.R` in the `code` folder of the book's GitHub [repo](https://github.com/Robinlovelace/geocompr/blob/master/code/10-earthquakes.R). -->
+<!--     - Try to reproduce the results: how many significant earthquakes were there last month? -->
+<!--     - Modify the script so that it provides a map with all earthquakes that happened in the past hour. -->
 <!-- change line 10 to: -->
 <!-- u = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_hour.geojson" -->
     - How could the documentation be improved?
