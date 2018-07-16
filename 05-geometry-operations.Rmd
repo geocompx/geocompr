@@ -60,9 +60,9 @@ seine_simp = st_simplify(seine, dTolerance = 2000)  # 2000 m
 ```{r seine-simp, echo=FALSE, fig.cap="Comparison of the original and simplified `seine` geometry.", warning=FALSE}
 library(tmap)
 p_simp1 = tm_shape(seine) + tm_lines() +
-  tm_layout(title = "Original data")
+  tm_layout(main.title = "Original data")
 p_simp2 = tm_shape(seine_simp) + tm_lines() +
-  tm_layout(title = "st_simplify")
+  tm_layout(main.title = "st_simplify")
 tmap_arrange(p_simp1, p_simp2, ncol = 2)
 ```
 
@@ -110,9 +110,9 @@ Finally, the visual comparison of the original dataset and the two simplified ve
 
 ```{r us-simp, echo=FALSE, fig.cap="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from **sf** (center) and **rmapshaper** (right) packages.", warning=FALSE}
 library(tmap)
-p_ussimp1 = tm_shape(us_states2163) + tm_polygons() + tm_layout(title = "Original data")
-p_ussimp2 = tm_shape(us_states_simp1) + tm_polygons() + tm_layout(title = "st_simplify")
-p_ussimp3 = tm_shape(us_states_simp2) + tm_polygons() + tm_layout(title = "ms_simplify")
+p_ussimp1 = tm_shape(us_states2163) + tm_polygons() + tm_layout(main.title = "Original data")
+p_ussimp2 = tm_shape(us_states_simp1) + tm_polygons() + tm_layout(main.title = "st_simplify")
+p_ussimp3 = tm_shape(us_states_simp2) + tm_polygons() + tm_layout(main.title = "ms_simplify")
 tmap_arrange(p_ussimp1, p_ussimp2, p_ussimp3, ncol = 3)
 ```
 
@@ -177,10 +177,10 @@ seine_buff_50km = st_buffer(seine, dist = 50000)
 ```{r buffs, echo=FALSE, fig.cap="Buffers around the `seine` datasets of 5km (left) and 50km (right). Note the colors, which reflect the fact that one buffer is created per geometry feature.", fig.show='hold', out.width="50%"}
 p_buffs1 = tm_shape(seine_buff_5km) + tm_polygons(col = "name") +
   tm_shape(seine) + tm_lines() +
-  tm_layout(title = "5 km buffer", legend.show = FALSE)
+  tm_layout(main.title = "5 km buffer", legend.show = FALSE)
 p_buffs2 = tm_shape(seine_buff_50km) + tm_polygons(col = "name") +
   tm_shape(seine) + tm_lines() +
-  tm_layout(title = "50 km buffer", legend.show = FALSE)
+  tm_layout(main.title = "50 km buffer", legend.show = FALSE)
 tmap_arrange(p_buffs1, p_buffs2, ncol = 2)
 ```
 
@@ -209,9 +209,8 @@ However, angles or length are not necessarily preserved.
 Affine transformations include, among others, shifting (translation), scaling and rotation.
 <!-- translation, scaling, homothety, similarity transformation, reflection, rotation, shear mapping -->
 Additionally, it is possible to use any combination of these.
-Affine transformations are an essential part of geocomputation, e.g. when reprojecting or when improving the geometry of a vector dataset that was created based on a distorted or wrongly projected map.
-<!-- For instance, two examples where shifting is needed is for labels placement and for shadow casting algorithms. -->
-
+Affine transformations are an essential part of geocomputation.
+For example, shifting is needed for labels placement, scaling is used in non-contiguous area cartograms (see Section \@ref(other-mapping-packages)), and many affine transformations are applied when reprojecting or improving the geometry that was created based on a distorted or wrongly projected map.
 The **sf** package implements affine transformation for objects of classes `sfg` and `sfc`.
 
 ```{r}
@@ -237,8 +236,9 @@ nz_scale0 = nz_sfc * 0.5
 
 Local scaling treats geometries independently and requires points around which geometries are going to be scaled, e.g. centroids.
 In the example below, each geometry is shrunk by a factor of two around the centroids (central panel on the Fig. \@ref(fig:affine-trans)).
-<!-- scaling by a two-elements vector -->
-<!-- JN explain "nz_sfc–nz_centroid_sfc" -->
+To achieve that, each object is firstly shifted in a way that its center has coordinates of `0, 0` (`(nz_sfc - nz_centroid_sfc)`). 
+Next, the sizes of the geometries are reduced by half (`* 0.5`).
+Finally, each object's centroid is moved back to the input data coordinates (`+ nz_centroid_sfc`). 
 
 ```{r}
 nz_centroid_sfc = st_centroid(nz_sfc)
@@ -260,7 +260,7 @@ The rotation matrix could be implemented in R as:
 <!-- https://r-spatial.github.io/sf/articles/sf3.html#affine-transformations -->
 ```{r}
 rotation = function(a){
-  r = a * pi/180 #degrees to radians
+  r = a * pi / 180 #degrees to radians
   matrix(c(cos(r), sin(r), -sin(r), cos(r)), nrow = 2, ncol = 2)
 } 
 ```
@@ -276,13 +276,13 @@ nz_rotate = (nz_sfc - nz_centroid_sfc) * rotation(30) + nz_centroid_sfc
 ```{r affine-trans, echo=FALSE, fig.cap="Illustrations of affine transformations: shift, scale and rotate.", warning=FALSE, eval=TRUE}
 p_at1 = tm_shape(nz_sfc) + tm_polygons() +
   tm_shape(nz_shift) + tm_polygons(col = "red") +
-  tm_layout(title = "Shift")
+  tm_layout(main.title = "Shift")
 p_at2 = tm_shape(nz_sfc) + tm_polygons() +
   tm_shape(nz_scale) + tm_polygons(col = "red") +
-  tm_layout(title = "Scale")
+  tm_layout(main.title = "Scale")
 p_at3 = tm_shape(nz_sfc) + tm_polygons() +
   tm_shape(nz_rotate) + tm_polygons(col = "red") +
-  tm_layout(title = "Rotate")
+  tm_layout(main.title = "Rotate")
 tmap_arrange(p_at1, p_at2, p_at3, ncol = 3)
 ```
 
@@ -444,11 +444,11 @@ polyg = st_cast(multipoint, "POLYGON")
 
 ```{r single-cast, echo = FALSE, fig.cap="Examples of linestring and polygon 'casted' from a multipoint geometry.", warning=FALSE}
 p_sc1 = tm_shape(st_sfc(multipoint)) + tm_symbols(shape = 1, col = "black", size = 0.5) +
-  tm_layout(title = "MULTIPOINT", inner.margins = c(0.05, 0.05, 0.05, 0.05))
+  tm_layout(main.title = "MULTIPOINT", inner.margins = c(0.05, 0.05, 0.05, 0.05))
 p_sc2 = tm_shape(st_sfc(linestring)) + tm_lines() +
-  tm_layout(title = "LINESTRING")
+  tm_layout(main.title = "LINESTRING")
 p_sc3 = tm_shape(st_sfc(polyg)) + tm_polygons(border.col = "black") +
-  tm_layout(title = "POLYGON")
+  tm_layout(main.title = "POLYGON")
 tmap_arrange(p_sc1, p_sc2, p_sc3, ncol = 3)
 ```
 
@@ -480,11 +480,17 @@ t2 = cast_all(polyg)
 ```
 
 Geometry casting of simple features geometry column (`sfc`) and simple features objects works the same as for single geometries in most of the cases. 
-<!--
-not sure about phrasing of above sentence
--->
 One important difference is conversion between multi to non-multi types.
 As a result of this process, multi-objects are split into many non-multi objects.
+
+<!-- add a short paragraph -->
+
+```{r sfs-st-cast, echo=FALSE}
+sfs_st_cast = read.csv("extdata/sfs-st-cast.csv") %>% 
+  select(X, POINT, MULTIPOINT, LINESTRING, MULTILINESTRING, POLYGON, MULTIPOLYGON, GEOMETRYCOLLECTION)
+names(sfs_st_cast)[1] = ""
+knitr::kable(sfs_st_cast, caption = "Geometry casting on simple features objects. The first column represents input objects (see Section 2.1.5.1). The next columns represent an output geometry type. NA indicates that geometry casting is impossible. A number of elements in each object is shown in parentheses.")
+```
 
 We would use a new object, `multilinestring_sf`, as an example (on the left in Figure \@ref(fig:line-cast)):
 
@@ -509,10 +515,10 @@ linestring_sf2
 
 ```{r line-cast, echo=FALSE, fig.cap="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right).", warning=FALSE}
 p_lc1 = tm_shape(multilinestring_sf) + tm_lines(lwd = 2) +
-  tm_layout(title = "MULTILINESTRING")
+  tm_layout(main.title = "MULTILINESTRING")
 linestring_sf2$name = c("Riddle Rd", "Marshall Ave", "Foulke St")
 p_lc2 = tm_shape(linestring_sf2) + tm_lines(lwd = 2, col = "name", palette = "Set2") +
-  tm_layout(title = "LINESTRING", legend.show = FALSE)
+  tm_layout(main.title = "LINESTRING", legend.show = FALSE)
 tmap_arrange(p_lc1, p_lc2, ncol = 2)
 ```
 
@@ -628,12 +634,17 @@ Check out the `stackApply()` example in the documentation for getting an idea ho
 As an example, we here change the spatial resolution of `dem` (found in the **RQGIS** package) by a factor of 5 (Fig. \@ref(fig:aggregate-example)).
 Additionally, the output cell value should correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()` etc.):
 
-```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."}
+```{r}
 data("dem", package = "RQGIS")
 dem_agg = aggregate(dem, fact = 5, fun = mean)
-par(mfrow = c(1, 2))
-plot(dem)
-plot(dem_agg)
+```
+
+```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."}
+p_ar1 = tm_shape(dem) + tm_raster(style = "cont", legend.show = FALSE) +
+  tm_layout(main.title = "Original")
+p_ar2 = tm_shape(dem_agg) + tm_raster(style = "cont", legend.show = FALSE) +
+  tm_layout(main.title = "Aggregated")
+tmap_arrange(p_ar1, p_ar2, ncol = 2)
 ```
 
 By contrast, the`disaggregate()` function increases the resolution.
@@ -758,19 +769,19 @@ srtm_inv_masked = mask(srtm, as(zion, "Spatial"), inverse = TRUE)
 library(tmap)
 library(rcartocolor)
 terrain_colors = carto_pal(7, "TealRose")
-pz1 = tm_shape(srtm) + tm_raster(palette = terrain_colors, title = "Elevation (m)", legend.show = TRUE, style = "cont") + 
+pz1 = tm_shape(srtm) + tm_raster(palette = terrain_colors, legend.show = FALSE, style = "cont") + 
   tm_shape(zion) + tm_borders(lwd = 2) + 
-  tm_layout(title = "A. Original", legend.frame = TRUE, legend.position = c("left", "bottom"))
-pz2 = tm_shape(srtm_cropped) + tm_raster(palette = terrain_colors, title = "Elevation (m)", legend.show = TRUE, style = "cont") + 
+  tm_layout(main.title = "A. Original")
+pz2 = tm_shape(srtm_cropped) + tm_raster(palette = terrain_colors, legend.show = FALSE, style = "cont") + 
   tm_shape(zion) + tm_borders(lwd = 2) + 
-  tm_layout(title = "B. Crop", legend.frame = TRUE, legend.position = c("left", "bottom"))
-pz3 = tm_shape(srtm_masked) + tm_raster(palette = terrain_colors, title = "Elevation (m)", legend.show = TRUE, style = "cont") + 
+  tm_layout(main.title = "B. Crop")
+pz3 = tm_shape(srtm_masked) + tm_raster(palette = terrain_colors, legend.show = FALSE, style = "cont") + 
   tm_shape(zion) + tm_borders(lwd = 2) + 
-  tm_layout(title = "C. Mask", legend.frame = TRUE, legend.position = c("left", "bottom"))
-pz4 = tm_shape(srtm_inv_masked) + tm_raster(palette = terrain_colors, title = "Elevation (m)", legend.show = TRUE, style = "cont") + 
+  tm_layout(main.title = "C. Mask")
+pz4 = tm_shape(srtm_inv_masked) + tm_raster(palette = terrain_colors, legend.show = FALSE, style = "cont") + 
   tm_shape(zion) + tm_borders(lwd = 2) + 
-  tm_layout(title = "D. Inverse\nmask", legend.frame = TRUE, legend.position = c("left", "bottom"))
-tmap_arrange(pz1, pz2, pz3, pz4, ncol = 4)
+  tm_layout(main.title = "D. Inverse mask")
+tmap_arrange(pz1, pz2, pz3, pz4, ncol = 2)
 ```
 
 ### Raster extraction
@@ -940,11 +951,11 @@ dplyr::select(zion_nlcd, ID, levels) %>%
 ```{r polyextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Area used for continuous (left) and categorical (right) raster extraction."}
 rast_poly_srtm = tm_shape(srtm) + tm_raster(palette = terrain_colors, title = "Elevation (m)", legend.show = TRUE, style = "cont") + 
   tm_shape(zion) + tm_borders(lwd = 2) +
-  tm_layout(title = "A. Continuous data extraction", legend.frame = TRUE, legend.position = c("left", "bottom"))
+  tm_layout(main.title = "A. Continuous data extraction", main.title.size = 1, legend.frame = TRUE, legend.position = c("left", "bottom"))
 landcover_cols = c("#476ba0", "#aa0000", "#b2ada3", "#68aa63", "#a58c30", "#c9c977", "#dbd83d", "#bad8ea")
 rast_poly_nlcd = tm_shape(nlcd) + tm_raster(col = "levels", palette = landcover_cols, style = "cat", title = "Land cover", legend.show = TRUE) + 
   tm_shape(zion) + tm_borders(lwd = 2) +
-  tm_layout(title = "B. Categorical data extraction", legend.frame = TRUE, legend.position = c("left", "bottom"))
+  tm_layout(main.title = "B. Categorical data extraction", main.title.size = 1, legend.frame = TRUE, legend.position = c("left", "bottom"))
 tmap_arrange(rast_poly_srtm, rast_poly_nlcd, ncol = 2)
 ```
 

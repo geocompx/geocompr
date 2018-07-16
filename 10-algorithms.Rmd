@@ -11,9 +11,10 @@ The aim of this chapter is to teach how to create these vital components of repr
 After reading it and completing the exercises at the end, you should be able to use methods for geocomputation to create reproducible workflows and --- for confident readers --- develop new tools, and have an understanding of the low level code underlying the 'geoalgorithms' we accessed in the previous chapter (\@ref(gis)).
 The chapter assumes you have an understanding of the geographic data classes introduced in Chapter \@ref(spatial-class), and have already imported the datasets needed for your work (see Chapter \@ref(read-write)).
 
-We will consider example R scripts for geographic data and how to make them more reproducible in section \@ref(scripts).
+We will consider an example script and how to make them more reproducible in section \@ref(scripts).
 Algorithms are recipes for modifying inputs using a series of steps, resulting in an output, as described in section \@ref(geographic-algorithms).
-To ease sharing and reproducibility algorithms can be placed into functions, the building blocks of generalizable code, the topic of section \@ref(functions).
+To ease sharing and reproducibility algorithms can be placed into functions.
+That is the topic of section \@ref(functions).
 
 <!-- This chapter provides illustrative examples and directs the reader to established resources, to avoid reinventing the wheel. -->
 <!-- The approach taken in this chapter was partly inspired by @xiao_gis_2016, who advocates explanations that are neither highly theoretical (as many academic papers are) -->
@@ -22,8 +23,11 @@ To ease sharing and reproducibility algorithms can be placed into functions, the
 <!-- The focus of this chapter is on understanding, using reproducible code and clear explanation. -->
 The example of finding the centroid of a polygon will be used to tie these concepts together.
 Of course, you already know how to do the with `st_centroid()` having read Chapter \@ref(geometric-operations).
-We use this example because it highlights how seemingly simple operations are the result of comparatively complex code, that can run to hundreds of lines if they are to deal with various 'edge cases'.
-The example also reflects a secondary aim of the chapter: "not to duplicate what is available out there, but to show how things out there work" [@xiao_gis_2016].
+We use this example because it highlights how seemingly simple operations are the result of comparatively complex code, affirming the following observation [@wise_gis_2001]:
+
+> One of the most intriguing things about spatial data problems is that things which appear to be trivially easy to a human being can be surprisingly difficult on a computer.
+
+The example also reflects a secondary aim of the chapter which, following @xiao_gis_2016, is "not to duplicate what is available out there, but to show how things out there work".
 <!-- This chapter takes a similar approach and is therefore the most low-level and potentially advanced (in terms of the code, not application) so far. -->
 
 ## Scripts
@@ -49,7 +53,7 @@ source("code/10-hello.R")
 There are no strict rules on what can and cannot go into script files and nothing to prevent you from saving broken, non-reproducible code.^[
 Lines of code that do not contain valid R should be commented to prevent errors, as with line 1 of the `10-hello.R` script.
 ]
-There are, however, some conventions worth following:
+There are, however, some best practice conventions worth following:
 
 - Write the script in order: just like the script of a film, scripts should have a clear order such as 'setup', 'data processing' and 'save results' (roughly equivalent to 'beginning', 'middle' and 'end' in a film).
 - Comment the script sufficiently for others (and your future self) to understand it but not too much. At a minimum a comment should state the purpose of the script (see Figure \@ref(fig:codecheck)) and (for long scripts) divide it into sections (e.g. with `Ctl+Shift+R` in RStudio which creates comments ending in `----` that can be 'folded' in the editor).
@@ -60,8 +64,8 @@ Prior steps can be referred to with a comment or with an if statement such as `i
 It is hard to enforce reproducibility in R scripts, but there are tools that can help.
 By default RStudio 'code-checks' R scripts and underlines faulty code with a red wavy line, as illustrated below:
 
-```{r codecheck, echo=FALSE, fig.cap="Illustration of 'code checking' in RStudio, which identifies the incorrect dublicate pipe operator at the outset of a script."}
-knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39698841-6e600584-51ee-11e8-9dd0-2c17b2836f79.png")
+```{r codecheck, echo=FALSE, fig.cap="Illustration of 'code checking' in RStudio. This example, from the script 10-centroid-alg.R, highlights an unclosed curly bracket on line 11."}
+knitr::include_graphics("figures/codecheck.png")
 ```
 
 
@@ -72,12 +76,21 @@ See [reprex.tidyverse.org/](http://reprex.tidyverse.org/) for details.
 ```
 
 The contents of this section apply to any type of R script.
-A particular consideration with scripts for geocomputation is that they tend to have external dependencies, such as the QGIS dependency to run code in Chapter \@ref(gis).
-Such dependencies should be mentioned as comments in the script or elsewhere in the project of which it is a part.
+A particular consideration with scripts for geocomputation is that they tend to have external dependencies, such as the QGIS dependency to run code in Chapter \@ref(gis), and require input data in a specific format.
+Such dependencies should be mentioned as comments in the script or elsewhere in the project of which it is a part, as illustrated in the script `10-centroid-alg.R`.
+To demonstrate a basic geographic data processing script in action, the final code chunk of this section finds the area and centroid of a square with sides 9 units in length (the meaning of this will become apparent in the next section):
+
+```{r}
+poly_mat = cbind(
+  x = c(0, 0, 9, 9, 0),
+  y = c(0, 9, 9, 0, 0)
+)
+source("code/10-centroid-alg.R")
+```
 
 ## Geographic algorithms
 
-Algorithms are, roughly speaking, the computing equivalent of a cooking recipe.
+Algorithms can be understood as the computing equivalent of a cooking recipe.
 They are a complete set of instructions which, when undertaken on the input (ingredients), result in useful (tasty) outputs.
 Before diving into a concrete case study, a brief history will show how they relate to scripts (covered in section \@ref(scripts)) and functions (which can be used to generalize algorithms, as we'll see in section \@ref(functions)).
 
@@ -89,22 +102,28 @@ became Alchoarismi, Algorismi and, eventually, algorithm" [@bellos_alex_2011].
 <!-- The book's title was also influential, forming the basis of the word *algebra*. -->
 <!-- ] -->
 In the computing age algorithm refers to a series of steps that solves a problem, resulting in a pre-defined output.
-Inputs must be formally defined: "the information for the problem is stored in a suitable data structure" [@wise_gis_2001].
+Inputs must be formally defined in a suitable data structure [@wise_gis_2001].
 Algorithms often start as flow charts or psuedocode showing the aim of the process before being implemented in code.
 To ease usability, common algorithms are often packaged inside functions, which may hide some or all of the steps taken (unless you look at the function's source code, see section \@ref(functions)).
 
-Geoalgorithms are a type of algorithm that take geographic data in and, generally, return geographic results.
-Also referred to as *GIS algorithms* and *geometric algorithms*, an entire academic field --- *Computational Geometry*, a branch of computer science --- is dedicated to their study and development [@berg_computational_2008].
-A simple example is an algorithm that finds the centroid of an object.
-As with many problems, it helps to break the overall task into chunks at the outset (these could be presented as a schematic diagram or pseudocode):
+Geoalgorithms such, as those we encountered in Chapter \@ref(gis), are algorithms that take geographic data in and, generally, return geographic results (alternative terms for the same thing include *GIS algorithms* and *geometric algorithms*).
+That may sound simple but it is a deep subject with an entire academic field --- *Computational Geometry*, a branch of computer science --- dedicated to their study [@berg_computational_2008].
+
+An example is an algorithm that finds the centroid of a polygon.
+There are many approaches to centroid calculation, some of which work only on specific types of [spatial data](https://en.wikipedia.org/wiki/Centroid).
+For the purposes of this section, we choose an approach that is easy to visualize: breaking the polygon into many triangles and finding the centroid of each of these, an approach discussed by @kaiser_algorithms_1993 alongside other centroid algorithms.
+It helps to further break-down this approach into discrete tasks before writing any code (subsequently referred to as step 1 to step 4, these could also be presented as a schematic diagram or pseudocode):
 
 1. Divide the polygon into contiguous triangles
 2. Find the centroid of each triangle
 3. Find the area of each triangle
 4. Find the area-weighted mean of triangle centroids
+<!-- 5. Return the result -->
 
-These steps may sound straightforward, but require some work, even for the simple case of convex polygons containing no holes that we will use.
-The basic representation of a polygon object is in a matrix representing the vertices between which straight lines are drawn (the first and last points must be the same).
+These steps may sound straightforward, but converting words into working code requires some work and plenty of trial-and-error, even when the inputs are constrained.^[
+The algorithm will only work for *convex polygons*, which contain no internal angles greater than 180° --- no star shapes allowed.
+]
+The simplest data structure of a polygon is a matrix of x and y coordinates in which each row represents a vertex tracing the polygon's border in order where the first and last rows are identical [@wise_gis_2001].
 In this case we'll create a polygon with 5 vertices in base R, building on an example from *GIS Algorithms* [@xiao_gis_2016 see [github.com/gisalgs](https://github.com/gisalgs/geom) for Python code], as illustrated in Figure \@ref(fig:polymat):
 
 ```{r centroid-setup, echo=FALSE, eval=FALSE}
@@ -114,13 +133,13 @@ source("code/10-centroid-setup.R")
 
 ```{r}
 x_coords = c(10, 0, 0, 12, 20, 10)
-y_coords = c(0, 0, 10, 14, 15, 0)
+y_coords = c(0, 0, 10, 20, 15, 0)
 poly_mat = cbind(x_coords, y_coords)
 ```
 
 Now we have an example dataset we are ready to undertake step 1 outlined above.
-The code below shows how this can be done by creating of a single triangle (`T1`), that demonstrates the method; it also demonstrates step 2 by calculating its centroid based on the [formula](https://math.stackexchange.com/q/1702595/)
-$1/3(a + b + c)$ where $a$ to $c$ are coordinates representing the triangles vertices:
+The code below shows how this can be done by creating a single triangle (`T1`), that demonstrates the method; it also demonstrates step 2 by calculating its centroid based on the [formula](https://math.stackexchange.com/q/1702595/)
+$1/3(a + b + c)$ where $a$ to $c$ are coordinates representing the triangle's vertices:
 
 ```{r}
 O = poly_mat[1, ] # create a point representing the origin
@@ -137,7 +156,7 @@ text(x = C1[1], y = C1[2], "C1")
 ```
 
 Step 3 is to find the area of each triangle, so a *weighted mean* accounting for the disproportionate impact of large triangles is accounted for. 
-The formula to calculate the area of a triangle is:
+The formula to calculate the area of a triangle is as follows [@kaiser_algorithms_1993]:
 
 $$
 \frac{Ax ( B y − C y ) + B x ( C y − A y ) + C x ( A y − B y )}
@@ -154,27 +173,37 @@ abs(T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
   T1[3, 1] * (T1[1, 2] - T1[2, 2]) ) / 2
 ```
 
-This code chunk works and outputs the correct result.^[
-as can be verified with the formula for the area of a triangle whose base is horizontal: area equals half of the base width times its height --- $A = B * H / 2$ --- ($10 * 10 / 2$ in this case, as can be seen in Figure \@ref(fig:polycent)).
+This code chunk outputs the correct result.^[
+The result can be verified using the formula for the area of a triangle whose base is horizontal, as is the case for T1 (see Figure \@ref(fig:polycent)):
+area is half of the base width times its height or $A = B * H / 2$.
+In this case $10 * 10 / 2 = 50$.
 ]
 The problem is that code is clunky and must by re-typed we want to run it on another triangle matrix.
-To make the code more generalizable, we will see how it can be converted into a function in \@ref(functions).
+To make the code more generalizable, we will see how it can be converted into a function in the next section (\@ref(functions)).
 
 Step 4 requires steps 2 and 3 to be undertaken not just on one triangle (as demonstrated above) but on all triangles.
 This requires *iteration* to create all triangles representing the polygon, illustrated in Figure \@ref(fig:polycent).
-We use `lapply()` for this work because it is concise and is part of base R, but could have chosen `map()` from the **purrr** package or a `for()` loop (see Chapter \@ref(location)):
+`lapply()` and `vapply()` are used to iterate over each triangle here because they provide a concise solution in base R:^[
+See `?lapply` for documentation.
+Alternative functions for iteration include `map()` from the **purrr** package or a `for()` loop (see Chapter \@ref(location)).
+`do.call()` is used in the code chunk as a base R equivalent of `dplyr::bind_rows()`:
+it coerces the list elements into a single matrix. 
+]
 
 ```{r}
 i = 2:(nrow(poly_mat) - 2)
-Ti = lapply(i, function(x) {
+T_all = lapply(i, function(x) {
   rbind(O, poly_mat[x:(x + 1), ], O)
 })
-A = sapply(Ti, function(x) {
+
+C_list = lapply(T_all,  function(x) (x[1, ] + x[2, ] + x[3, ]) / 3)
+C = do.call(rbind, C_list)
+
+A = vapply(T_all, function(x) {
   abs(x[1, 1] * (x[2, 2] - x[3, 2]) +
         x[2, 1] * (x[3, 2] - x[1, 2]) +
         x[3, 1] * (x[1, 2] - x[2, 2]) ) / 2
-  })
-C = t(sapply(Ti,  function(x) (x[1, ] + x[2, ] + x[3, ]) / 3))
+  }, FUN.VALUE = double(1))
 ```
 
 ```{r polycent, fig.cap="Illustration of iterative centroid algorithm with triangles. The 'x' represents the area-weighted centroid in iterations 2 and 3.", echo=FALSE, fig.asp=0.3}
@@ -182,9 +211,10 @@ C = t(sapply(Ti,  function(x) (x[1, ] + x[2, ] + x[3, ]) / 3))
 source("code/10-polycent.R")
 ```
 
-We are now in a position to complete step 4 to calculate the total area with `sum(A)` and the centroid coordinates of the polygon with `weighted.mean(C[, 1], A)` and `weighted.mean(C[, 2], A)`.
-To demonstrate how algorithms can be shared we have combined the components demonstrated in this section into the script `10-centroid-alg.R` in the `code` folder of the book's repo.
-Running the script with the `poly_mat` object loaded yields the following result (see exercises below to verify these results with reference to `st_centroid()`):
+We are now in a position to complete step 4 to calculate the total area with `sum(A)` and the centroid coordinates of the polygon with `weighted.mean(C[, 1], A)` and `weighted.mean(C[, 2], A)` (exercise for alert readers: verify these commands work).
+To demonstrate the link between algorithms and scripts the contents of this section have been condensed into `10-centroid-alg.R`.
+We saw at the end of section \@ref(scripts) how this script can calculate the centroid of a square.
+The great thing about *scripting* the algorithm is that it works on the new `poly_mat` object (see exercises below to verify these results with reference to `st_centroid()`):
 
 ```{r}
 source("code/10-centroid-alg.R")
@@ -192,23 +222,51 @@ source("code/10-centroid-alg.R")
 
 <!-- We have succefully duplicated a small part of **sf**'s functionality (with a major caveat mentioned in the next paragraph). -->
 The example above shows that low-level geographic operations *can* be developed from first principles with base R.
-It also shows that if a tried-and-tested solution already exists, it may not be worth re-inventing the wheel.
-Even in cases where a new algorithm is needed, compiled languages such as C++ may be more appropriate than base R for performant solutions (see section \@ref(software-for-geocomputation)).
+It also shows that if a tried-and-tested solution already exists, it may not be worth re-inventing the wheel:
+if our aim was simply to find the centroid of a polygon it would have been quicker to represent `poly_mat` as an **sf** object and use the pre-existing `sf::st_centroid()` function instead.
+However, the great benefit of writing algorithms from 1^st^ principles is that you will understand every step of the process, something that cannot be guaranteed when using other peoples' code.
+A further consideration is performance: R is slow compared with low level languages such as C++ for number crunching (see section \@ref(software-for-geocomputation)) and optimization is difficult.
+Still, if the aim is to develop new methods computational efficiency should not be a primary consideration, as encapsulated in the saying "premature optimization is the root of all evil (or at least most of it) in programming" [@knuth_computer_1974].
 
-Algorithm development is hard, especially if it involves learning a new language.
-The experience should, if nothing else, lead to a greater appreciation of low-level geographic libraries such as GEOS (which underlies `sf::st_centroid()`) and CGAL (the Computational Geometry Algorithms Library) and interest in their source code.^[
+Algorithm development is hard.
+This should be apparent from the amount of work that has gone into developing a centroid algorithm in base R that is just one, rather inefficient, approach to the problem with limited real-world applications (in the real world convex polygons are uncommon).
+The experience should lead to an appreciation of low-level geographic libraries such as GEOS (which underlies `sf::st_centroid()`) and CGAL (the Computational Geometry Algorithms Library) which not only run fast but work on a wide range of input geometry types.
+A great advantage of the open source nature of such libraries is that their source code is readily available for study, comprehension and (for those with the skills and confidence) modification.^[
 The CGAL function `CGAL::centroid()` is in fact composed of 7 sub-functions as described at https://doc.cgal.org/latest/Kernel_23/group__centroid__grp.html allowing it to work on a wide range of input data types, whereas the solution we created works only on a very specific input data type.
 The source code underlying GEOS function `Centroid::getCentroid()` can be found at https://github.com/libgeos/geos/search?q=getCentroid.
 ]
-It may be disapointing to learn that the algorithm we have developed works only for a very specific type of polygon: convex hulls (see exercises).
 
 ## Functions
 
 Like algorithms functions take an input and return an output.
-The difference is that functions are 'first class' objects in their own right.
-We have already seen the advantages of using functions in the previous section:
-the function `t_area()`, created in the code chunk below, *contains* the steps needed find the area of any 'triangle matrix' and can be called with a single line, whereas in the previous section it required 3 lines.
-Functions are thus a mechanism for *generalizing* code.
+The difference is that functions are 'first class' objects in R and are more flexible than scripts.
+We can, for example, create function that undertakes step 2 of our centroid generation algorithm as follows:
+
+```{r}
+t_centroid = function(x) {
+  (x[1, ] + x[2, ] + x[3, ]) / 3
+}
+```
+
+The above example demonstrates two key components of [functions](http://adv-r.had.co.nz/Functions.html):
+1) the function *body*, the code inside the curly brackets that define what the function does with the inputs; and 2) the *formals*, the list of arguments the function works with --- `x` in this case (the third component, the environment, is beyond the scope of this section).
+By default, functions return the last object that has been calculated (the coordinates of the centroid in the case of `t_centroid()`).^[
+You can also explicitly set the output of a function by adding `return(output)` into the body of the function, where `output` is the result to be returned.
+]
+
+```{r, eval=FALSE, echo=FALSE}
+body(t_centroid)
+formals(t_centroid)
+environment(t_centroid)
+```
+
+The function now works on any inputs you pass it, as illustrated in the below command which calculates the area of the 1^st^ triangle from the example polygon in the previous section (see Figure \@ref(fig:polycent)):
+
+```{r}
+t_centroid(T1)
+```
+
+We can also create a function to calculate a triangle's area, which we will name `t_area()`:
 <!-- We can use the function to find the area of a triangle with a base 3 units wide and a height of 1, for example, as follows: -->
 
 ```{r}
@@ -221,40 +279,51 @@ t_area = function(x) {
 }
 ```
 
-The function `t_area` generalizes the solution by taking any object `x`, assumed to have the same dimensions as the triangle represented in `T1`.
-We can verify it works on the triangle matrix `T1` as follows:
+Note that after the function's creation, a triangle's area can be calculated in a single line of code, avoiding duplication of verbose code:
+functions are a mechanism for *generalizing* code.
+The newly created function `t_area()` takes any object `x`, assumed to have the same dimensions as the 'triangle matrix' data structure we've been using, and returns its area, as illustrated on `T1` as follows:
 
 ```{r}
 t_area(T1)
 ```
 
-Likewise we can create a function that finds the triangle's centroid:
+We can test the generalizability of the function by using it to find the area of a new triangle matrix, which has a height of 1 and a base of 3:
 
 ```{r}
-t_centroid = function(x) {
-  (x[1, ] + x[2, ] + x[3, ]) / 3
-}
-t_centroid(T1)
-```
-
-
-```{r}
-t_new = matrix(c(0, 3, 3, 0, 0, 0, 1, 0), ncol = 2)
+t_new = cbind(x = c(0, 3, 3, 0),
+              y = c(0, 0, 1, 0))
 t_area(t_new)
 ```
 
 A useful feature of functions is that they are modular.
 Providing you know what the output will be, one function can be used as the building block of another.
-This is exactly what we will do in this section.
-Building on the content of the previous section, in which it was shown how the area of a polygon can be found by following a series of steps in order, this section will *create a function* to calculate the area of any polygon (with caveats that will become clear).
-This function, that we'll call `poly_centroid()` will mimick the behaviour of `sf::st_centroid()` from the **sf** package, with a few additions to show how arguments work.
+Thus, the functions `t_centroid()` and `t_area()` can be used as sub-components of a larger function to do the work of the script `10-centroid-alg.R`: calculate the area of any convex polygon.
+The code chunk below creates the function `poly_centroid()` to mimick the behaviour of `sf::st_centroid()`:
 
 ```{r}
+poly_centroid = function(x) {
+  i = 2:(nrow(x) - 2)
+  T_all = T_all = lapply(i, function(x) {
+    rbind(O, poly_mat[x:(x + 1), ], O)
+  })
+  C_list = lapply(T_all, t_centroid)
+  C = do.call(rbind, C_list)
+  A = vapply(T_all, t_area, FUN.VALUE = double(1))
+  c(weighted.mean(C[, 1], A), weighted.mean(C[, 2], A))
+}
+```
+
+
+```{r, echo=FALSE, eval=FALSE}
+# a slightly more complex version of the function with output set
 poly_centroid = function(x, output = "matrix") {
   i = 2:(nrow(x) - 2)
-  Ti = purrr::map(i, ~rbind(O, x[.:(. + 1), ], O))
-  A = purrr::map_dbl(Ti, ~t_area(.))
-  C = t(sapply(Ti, t_centroid))
+  T_all = T_all = lapply(i, function(x) {
+    rbind(O, poly_mat[x:(x + 1), ], O)
+  })
+  C_list = lapply(T_all, t_centroid)
+  C = do.call(rbind, C_list)
+  A = vapply(T_all, t_area, FUN.VALUE = double(1))
   centroid_coords = c(weighted.mean(C[, 1], A), weighted.mean(C[, 2], A))
   if(output == "matrix") {
     return(centroid_coords)
@@ -265,17 +334,15 @@ poly_centroid = function(x, output = "matrix") {
 
 ```{r}
 poly_centroid(poly_mat)
-poly_centroid(poly_mat, output = "area")
 ```
 
-Low-level function such as `poly_centroid()` can be built-on to provide different types of output.
-If a common need is to return the result as an object of class `sfg`, for example, this can be done by creating a 'wrapper' function that modifies the output of `poly_centroid()` before returning the result:
+Functions such as `poly_centroid()` can further be built-on to provide different types of output.
+To return the result as an object of class `sfg`, for example, a 'wrapper' function can be used to modify the output of `poly_centroid()` before returning the result:
 
 ```{r}
 poly_centroid_sfg = function(x) {
   centroid_coords = poly_centroid(x)
-  centroid_sfg = sf::st_point(centroid_coords)
-  centroid_sfg
+  sf::st_point(centroid_coords)
 }
 ```
 
@@ -286,43 +353,47 @@ poly_sfc = sf::st_polygon(list(poly_mat))
 identical(poly_centroid_sfg(poly_mat), sf::st_centroid(poly_sfc))
 ```
 
-An important concept to consider when developing your own function is *type stability*.
-Functions are type stable if they always return objects of the same class and, generally, this means returning objects of the same type as the input object.
-To illustrate this concept in practice we will create a type stable version `poly_centroid()` that always takes a matrix with 2 columns as an input and always returns a matrix with 2 columns representing x and y coordinates:
+<!-- RL: I've commented-out the rest of this section as I think it distracts from the core content -->
+<!-- An important concept to consider when developing your own function is *type stability*. -->
+<!-- Functions are type stable if they always return objects of the same class and, generally, this means returning objects of the same type as the input object. -->
+<!-- To illustrate this concept in practice we will create a type stable version `poly_centroid()` that always takes a matrix with 2 columns as an input and always returns a matrix with 2 columns representing x and y coordinates: -->
 
-```{r}
-poly_centroid_type_stable = function(x) {
-  stopifnot(is.matrix(x) & ncol(x) == 2)
-  centroid_coords = poly_centroid(x)
-  return(matrix(centroid_coords, ncol = 2))
-}
-```
+<!-- ```{r} -->
+<!-- poly_centroid_type_stable = function(x) { -->
+<!--   stopifnot(is.matrix(x) & ncol(x) == 2) -->
+<!--   centroid_coords = poly_centroid(x) -->
+<!--   return(matrix(centroid_coords, ncol = 2)) -->
+<!-- } -->
+<!-- ``` -->
 
-The first line of the function is an example of 'defensive programming':
-it checks the input is in the right format (a matrix with 2 columns) before proceeding.
-Such checks can ensure that the code is robust and does not silently fail.
-We can verify it works with `matrix(centroid_coords, ncol = 2)`.
-To see the input data type check working we can try running the function on a matrix with 3 columns:
+<!-- The first line of the function is an example of 'defensive programming': -->
+<!-- it checks the input is in the right format (a matrix with 2 columns) before proceeding. -->
+<!-- Such checks can ensure that the code is robust and does not silently fail. -->
+<!-- We can verify it works with `matrix(centroid_coords, ncol = 2)`. -->
+<!-- To see the input data type check working we can try running the function on a matrix with 3 columns: -->
 
-```{r, warning=FALSE}
-poly_mat3 = cbind(1:nrow(poly_mat), poly_mat)
-poly_centroid(poly_mat3)
-```
+<!-- ```{r, warning=FALSE} -->
+<!-- poly_mat3 = cbind(1:nrow(poly_mat), poly_mat) -->
+<!-- poly_centroid(poly_mat3) -->
+<!-- ``` -->
 
-```{r, eval=FALSE}
-poly_centroid_type_stable(poly_mat3)
-#> Error in poly_centroid_type_stable(poly_mat3) : 
-#>   is.matrix(x) & ncol(x) == 2 is not TRUE 
-```
+<!-- ```{r, eval=FALSE} -->
+<!-- poly_centroid_type_stable(poly_mat3) -->
+<!-- #> Error in poly_centroid_type_stable(poly_mat3) :  -->
+<!-- #>   is.matrix(x) & ncol(x) == 2 is not TRUE  -->
+<!-- ``` -->
 
-
-## Case study
 
 ## Exercises {#ex-algorithms}
 
-1. Check-out the script `10-earthquakes.R` in the `code` folder of the book's GitHub [repo](https://github.com/Robinlovelace/geocompr/blob/master/code/10-earthquakes.R).
-    - Try to reproduce the results: how many significant earthquakes were there last month?
-    - Modify the script so that it provides a map with all earthquakes that happened in the past hour.
+1. Read the script `10-centroid-alg.R` in the `code` folder of the book's GitHub [repo](https://github.com/Robinlovelace/geocompr/blob/master/code/10-centroid-alg.R).
+    - Which of the best practices covered in section \@ref(scripts) does it follow?
+    - Create a version of the script on your computer in an IDE such as RStudio (preferably by typing-out the script line-by-line, in your own coding style and with your own comments, rather than copy-pasting --- this will help you learn how to type scripts) and, using the example of a square polygon (e.g. created with `poly_mat = cbind(x = c(0, 0, 9, 9, 0), y = c(0, 9, 9, 0, 0))`) execute the script line-by-line.
+    - What changes could be made to the script to make it more reproducible?
+    <!-- - Answer: The script could state that it needs a an object called `poly_mat` to be present and, if none is present, create an example dataset at the outset for testing. -->
+<!-- 1. Check-out the script `10-earthquakes.R` in the `code` folder of the book's GitHub [repo](https://github.com/Robinlovelace/geocompr/blob/master/code/10-earthquakes.R). -->
+<!--     - Try to reproduce the results: how many significant earthquakes were there last month? -->
+<!--     - Modify the script so that it provides a map with all earthquakes that happened in the past hour. -->
 <!-- change line 10 to: -->
 <!-- u = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_hour.geojson" -->
     - How could the documentation be improved?

@@ -63,7 +63,7 @@ world_sf = ne_countries(returnclass = 'sf') %>%
         mutate(area_km2 = raster::area(as(., "Spatial")) / 1000000) %>%
         select(iso_a2, name_long, continent, region_un, subregion, type, area_km2, pop, lifeExp, gdpPercap)
 
-# world_sf %>% st_write(., 'data/wrld.gpkg')
+# world_sf %>% st_write(., 'wrld.gpkg')
 
 plot(world_sf)
 ggplot(world_sf, aes(fill=pop)) +
