@@ -6,6 +6,7 @@ generic_map_pkgs = c(
   "cartography",
   "ggplot2",
   "googleway",
+  "ggspatial",
   "leaflet",
   "mapview",
   "plotly",
