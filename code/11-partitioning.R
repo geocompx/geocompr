@@ -17,6 +17,7 @@
 # 1 ATTACH PACKAGES AND DATA-------------------------------
 #**********************************************************
 
+# attach packages
 library(grid)
 library(gridExtra)
 library(lattice)
@@ -25,7 +26,7 @@ library(sperrorest)
 library(reshape2)
 
 # attach data
-(load("extdata/spatialcv.Rdata"))
+data(lsl, package = "spDataLarge")
 
 #**********************************************************
 # 2 DATA PREPARATION---------------------------------------
