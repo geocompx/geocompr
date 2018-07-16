@@ -1104,13 +1104,25 @@ Contour lines can be created with the **raster** function `rasterToContour()`, w
 # not shown
 data(dem, package = "RQGIS")
 plot(dem, axes = FALSE)
-contour(dem, add = TRUE)
+cl = rasterToContour(dem)
+plot(cl, add = TRUE)
 ```
 
-Contours can be added to existing plots with functions such as `contour()`, `rasterVis::contourplot()` or `tmap::tm_iso()`.
-As illustrated in Figure \@ref(fig:contour) (which was created using the **tmap** package described in Chapter \@ref(adv-map)), isolines can be labelled.
+Contours can also be added to existing plots with functions such as `contour()`, `rasterVis::contourplot()` or `tmap::tm_iso()`.
+As illustrated in Figure \@ref(fig:contour), isolines can be labelled.
 
-```{r contour, echo=FALSE, message=FALSE, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines.", warning=FALSE}
+```{r contour, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines."}
+data("dem", package = "RQGIS")
+# create hillshade
+hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
+plot(hs, col = gray(0:100 / 100), legend = FALSE)
+# overlay with DEM
+plot(dem, terrain.colors(25), alpha = 0.5, legend = FALSE, add = TRUE)
+# add contour lines
+contour(dem, col = "white", add = TRUE)
+```
+
+```{r contour, echo=FALSE, eval=FALSE, message=FALSE, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines.", warning=FALSE}
 library(tmap)
 data("dem", package = "RQGIS")
 # create hillshade
@@ -1118,7 +1130,7 @@ hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
 # create contour
 cn = rasterToContour(dem)
 rect = tmaptools::bb_poly(hs)
-bbx = tmaptools::bb(hs, xlim = c(-.02, 1), ylim = c(-.02, 1), relative = TRUE)
+bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
 
 tm_shape(hs, bbox = rect) +
 	tm_grid(col = "black", n.x = 2, n.y = 2, labels.inside.frame = FALSE,
