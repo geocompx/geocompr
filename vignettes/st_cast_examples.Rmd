@@ -66,9 +66,9 @@ st_caster = function(x){
     mutate(input_type = st_type(x)) %>% 
     mutate(input_geom = paste0(input_geom, "(", input_geom_length, ")"),
            result_geom = paste0(result_geom, "(", result_geom_length, ")")) %>% 
-    select(input_geom, to, result_geom) %>% 
-    mutate(result_geom = if_else(result_geom == "NA(0)", NA_character_, result_geom)) %>% 
-    spread(to, result_geom)
+    select(input_geom, to, result_geom_length) %>% 
+    mutate(result_geom_length = if_else(result_geom_length == 0, NA_integer_, result_geom_length)) %>% 
+    spread(to, result_geom_length)
   
   geo_df
 }
@@ -182,6 +182,7 @@ knitr::kable(sfs_st_cast)
 ```
 
 ```{r, include=FALSE, eval=FALSE}
-names(sfs_st_cast)[1] = ""
+sfs_st_cast = sfs_st_cast %>% 
+  dplyr::select(input_geom, POINT, MULTIPOINT, LINESTRING, MULTILINESTRING, POLYGON, MULTIPOLYGON, GEOMETRYCOLLECTION)
 readr::write_csv(sfs_st_cast, "extdata/sfs-st-cast.csv")
 ```
