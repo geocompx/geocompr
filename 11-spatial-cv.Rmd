@@ -412,8 +412,7 @@ We will use a 100-repeated 5-fold spatial CV: five partitions will be chosen bas
 
 
 ```{r}
-resampling = makeResampleDesc(method = "SpRepCV", folds = 5, 
-                              reps = 100)
+perf_level = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
 ```
 
 To execute the spatial resampling, we run `resample()` using the specified learner, task, resampling strategy and of course the performance measure, here the AUROC.
@@ -426,15 +425,15 @@ Setting a seed ensures the reprocubility of the obtained result and will ensure 
 ```{r, eval=FALSE}
 set.seed(012348)
 sp_cv = mlr::resample(learner = lrn, task = task,
-                      resampling = resampling, 
+                      resampling = perf_level, 
                       measures = mlr::auc)
 ```
 
 ```{r, eval=FALSE, echo=FALSE}
 set.seed(012348)
 sp_cv = mlr::resample(learner = lrn, task = task,
-                          resampling = resampling, 
-                          measures = mlr::auc)
+                      resampling = perf_level, 
+                      measures = mlr::auc)
 ```
 
 <!-- sp_cv and conv_cv have been saved in spatialcv.Rdata. I needed to run the modeling outside of the book since knitr sets its own seed and I am not sure if this actually helps to make sure that the same partitions are used in the cv.
@@ -489,7 +488,7 @@ Some SVM implementations such as that provided by **kernlab** allow hyperparamet
 This works for non-spatial data but is of less use for spatial data where 'spatial tuning' should be undertaken.
 
 Before defining spatial tuning we will set-up the **mlr** building blocks, introduced in section \@ref(glm), for the SVM.
-The task remains the same as the `task` object created in section \@ref(glm).
+The classification task remains the same, hence we can simply resue the `task` object created in section \@ref(glm).
 Learners implementing SVM can be found using `listLearners()` as follows:
 
 ```{r, eval=FALSE}
@@ -512,17 +511,19 @@ lrn_ksvm = makeLearner("classif.ksvm",
 ```
 
 The next stage is to specify a resampling strategy.
-Again we will use a 100-repeated 5-fold spatial CV:
+Again we will use a 100-repeated 5-fold spatial CV.
 
 <!-- Instead of saying "outer resampling" we concluded to use "performance estimation level" and "tuning level" (inner) in our paper
 # this is also what is shown in the nested CV figure so it would be more consistent -->
 
 ```{r, eval=FALSE}
 # performance estimation level
-perf_level = makeResampleDesc("SpRepCV", folds = 5, reps = 100)
+perf_level = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
 ```
 
-So far, the process is identical to that described in section \@ref(glm).
+Note that this is the exact same code as used for the GLM in section \@ref(glm)), we have simply repeated it here as a reminder.
+
+So far, the process has been identical to that described in section \@ref(glm).
 The next step is new, however: to tune the hyperparameters.
 Using the same data for the performance assessment and the tuning would potentially lead to overoptimistic results [@cawley_overfitting_2010].
 This can be avoided using nested spatial CV.
