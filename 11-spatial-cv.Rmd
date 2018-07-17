@@ -532,9 +532,9 @@ knitr::include_graphics("figures/13_cv.png")
 ```
 
 This means that we split each fold again into five spatially disjoint subfolds which are used to determine the optimal hyperparameters (`tune_level` object in the code chunk below; see Figure \@ref(fig:inner-outer) for a visual representation).
-To find the optimal hyperparameter combination we here fit 50 models in each of these subfolds with randomly selected hyperparameter values (`ctrl` object in the code chunk below).
-Additionally, we restrict the randomly chosen values to a predefined tuning space (`ps` object).
-The latter was chosen with values recommended in the literature [@schratz_performance_nodate].
+To find the optimal hyperparameter combination we here fit 50 models (`ctrl` object in the code chunk below) in each of these subfolds with randomly selected values for the hyperparameters C and Sigma.
+The random selection of values C and Sigma is additionally restricted to a predefined tuning space (`ps` object).
+The range of the tuning space was chosen with values recommended in the literature [@schratz_performance_nodate].
 
 <!--
 Questions Pat:
@@ -579,6 +579,16 @@ The **mlr** is now set-up to fit 250 models to determine optimal hyperparameters
 Repeating this for each fold, we end up with 1250 (250 \* 5) models for each repetition.
 Repeated 100 times means fitting a total of 125,000 models to identify optimal hyperparameters (Figure \@ref(fig:partitioning)).
 These are used in the performance estimation, which requires the fitting of another 500 models (5 folds \* 100 repetitions; see Figure \@ref(fig:partitioning)). 
+To make the performance estimation processing chain even clearer, let us write down the commands we have given to the computer:
+
+1. Performance level (upper left part of Figure \@ref(fig:inner-outer)): split the dataset into five spatially disjoint (outer) subfolds.
+1. Tuning level (lower left part of Figure \@ref(fig:inner-outer)): For each of these folds, run the hyperparameter tuning, i.e. spatially split the performance fold again into five (inner) subfolds. 
+Use the 50 randomly selected hyperparameters in each of these inner subfolds, i.e. fit 250 models.
+1. Performance estimation: Use the best hyperparameter combination from the previous step (tuning level) in the performance level to estimate the performance (AUROC).
+1. Do all of the steps described above for the remaining four outer folds.
+1. Repeat a 100 times all the steps described above.
+
+
 
 The process of hyperparameter tuning and performance estimation is computationally intensive.
 Model runtime can be reduced with parallelization, which can be done in a number of ways, depending on the operating system.
