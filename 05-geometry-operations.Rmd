@@ -28,7 +28,7 @@ Type transformations (from a polygon to a line, for example) are demonstrated in
 
 Section \@ref(geo-ras) covers geometric transformations on raster objects.
 This involves changing the size and number of the underlying pixels, and assigning them new values.
-It teaches how to change the resolution (also called raster aggregation and disaggregation), the extent and the origin of a raster.
+It teaches how to change the resolution (also called raster aggregation and dis-aggregation), the extent and the origin of a raster.
 These operations are especially useful if one would like to align raster datasets from diverse sources.
 Aligned raster objects share a one-to-one correspondence between pixels, allowing them to be processed using map algebra operations, described in section \@ref(map-algebra). 
 
@@ -123,7 +123,7 @@ Like statistical measures of central tendency (including mean and median definit
 All of create single point representations of more complex vector objects.
 
 The most commonly used centroid operation is the *geographic centroid*.
-This type of centroid operation (often referred to as 'the centoid') represents the centre of mass in a spatial object (think of balancing a plate on your finger).
+This type of centroid operation (often referred to as 'the centroid') represents the center of mass in a spatial object (think of balancing a plate on your finger).
 Geographic centroids have many uses, for example to create a simple point representation of complex geometries, or to estimate distances between polygons.
 They can be calculated with the **sf** function `st_centroid()` as demonstrated in the code below, which generates the geographic centroids of regions in New Zealand and tributaries to the River Seine, illustrated with black points in Figure \@ref(fig:centr).
 
@@ -132,8 +132,8 @@ nz_centroid = st_centroid(nz)
 seine_centroid = st_centroid(seine)
 ```
 
-Sometimes the geographic centroid falls outside the boundaries of their parent objects (think of a dohnut).
-In such cases *point on surface* operations can be used to guarantee the point will be in the parent object (e.g. for labelling irregular multipolygon objects such as island states), as illustrated by the red points in Figure \@ref(fig:centr).
+Sometimes the geographic centroid falls outside the boundaries of their parent objects (think of a doughnut).
+In such cases *point on surface* operations can be used to guarantee the point will be in the parent object (e.g. for labeling irregular multipolygon objects such as island states), as illustrated by the red points in Figure \@ref(fig:centr).
 Notice that these red points always lie on their parent objects.
 They were created with `st_point_on_surface()` as follows:^[
 A description of how `st_point_on_surface()` works is provided at https://gis.stackexchange.com/q/76498.
@@ -400,7 +400,7 @@ source("code/05-us-regions.R", print.eval = TRUE)
 ```
 
 What is going on in terms of the geometries?
-Behind the scenes, both `aggregate()` and `summarize()` combine the geometries and disolve the boundaries between them using `st_union()`.
+Behind the scenes, both `aggregate()` and `summarize()` combine the geometries and dissolve the boundaries between them using `st_union()`.
 This is demonstrated in the code chunk below which creates a united western US: 
 
 ```{r}
@@ -467,7 +467,6 @@ all.equal(multipoint, multipoint_2, multipoint_3)
 ```{block2 type='rmdnote'}
 For single simple feature geometries (`sfg`), `st_cast` also provides geometry casting from non-multi to multi types (e.g. `POINT` to `MULTIPOINT`) and from multi types to non-multi types.
 However, only the first element of the old object would remain in the second group of cases.
-<!-- note: beware of information lost (you will get a warning) -->
 ```
 
 ```{r, include=FALSE}
@@ -483,18 +482,22 @@ Geometry casting of simple features geometry column (`sfc`) and simple features 
 One important difference is conversion between multi to non-multi types.
 As a result of this process, multi-objects are split into many non-multi objects.
 
-<!-- add a short paragraph -->
+Table \@ref(tab:sfs-st-cast) shows a possible geometry type transformations on simple feature objects.
+Each input simple feature object with only one element (first column) is transformed directly into another geometry type.
+Several of the transformations are not possible, for example, you cannot convert a single point into a multilinestring or a polygon.
+On the other hand, some of the transformations are splitting the single element input object into multi-element one.
+You can see that, for example, when you cast a multipoint consisting of five pairs of coordinated into a point.
 
 ```{r sfs-st-cast, echo=FALSE}
 sfs_st_cast = read.csv("extdata/sfs-st-cast.csv")
 names(sfs_st_cast)[1] = ""
-knitr::kable(sfs_st_cast, caption = "Geometry casting on simple feature geometries with input type by row and output type by column. Values such as (1) represent the number of features; NA means the operation is not possible.", format = "html") %>%
+knitr::kable(sfs_st_cast, caption = "Geometry casting on simple feature geometries (see section 2.1) with input type by row and output type by column. Values such as (1) represent the number of features; NA means the operation is not possible.", format = "html") %>%
   kableExtra::kable_styling(font_size = 7) %>% 
   kableExtra::kable_styling("striped", full_width = TRUE) #%>%
   #kableExtra::row_spec(0, angle = 90)
 ```
 
-We would use a new object, `multilinestring_sf`, as an example (on the left in Figure \@ref(fig:line-cast)):
+Let's try to apply geometry type transformations on a new object, `multilinestring_sf`, as an example (on the left in Figure \@ref(fig:line-cast)):
 
 ```{r}
 multilinestring_list = list(matrix(c(1, 4, 5, 3), ncol = 2), 
@@ -552,7 +555,7 @@ A matching projection is of course also required but is already covered in secti
 In any case, there are other reasons why to perform a geometric operation on a single raster image.
 For instance, in chapter \@ref(location) we define metropolitan areas in Germany as 20 km^2^ pixels with more than 500,000 inhabitants. 
 The original inhabitant raster, however, has a resolution of 1 km^2^ which is why we will decrease (aggregate) the resolution by a factor of 20 (see section \@ref(define-metropolitan-areas)).
-Another reason for aggregating a raster is simply to decrease runtime or save disk space.
+Another reason for aggregating a raster is simply to decrease run-time or save disk space.
 Of course, this is only possible if the task at hand allows a coarser resolution.
 Sometimes a coarser resolution is sufficient for the task at hand.
 
@@ -999,7 +1002,7 @@ Rasterization is a very flexible operation: the results depend not only on the n
 
 To illustrate this flexibility we will try three different approaches rasterization.
 First we create a raster representing the presence or absence of cycle hire points (known as presence/absence rasters).
-In this case `rasterize()` requires only one argument in addition to `x` and `y` (the aformentioned vector and raster objects): a value to be transferred to all non-empty cells specified by `field` (results illustrated Figure \@ref(fig:vector-rasterization1):B).
+In this case `rasterize()` requires only one argument in addition to `x` and `y` (the aforementioned vector and raster objects): a value to be transferred to all non-empty cells specified by `field` (results illustrated Figure \@ref(fig:vector-rasterization1):B).
 
 ```{r}
 ch_raster1 = rasterize(cycle_hire_osm_projected, raster_template, field = 1)
@@ -1148,11 +1151,11 @@ tm_shape(hs, bbox = rect) +
 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
 ```
 
-The final type of vectorisation involves conversion of rasters to polygons.
-This can be done with `raster::rasterToPolygons()`, wich converts each raster cell into a polygon consisting of five coordinates, all of which are stored in memory (explaining why rasters are often fast compared with vectors!).
+The final type of vectorization involves conversion of rasters to polygons.
+This can be done with `raster::rasterToPolygons()`, which converts each raster cell into a polygon consisting of five coordinates, all of which are stored in memory (explaining why rasters are often fast compared with vectors!).
 
 This is illustrated below by converting the `grain` object into polygons and subsequently dissolving borders between polygons with the same attribute values (also see the `dissolve` argument in `rasterToPolygons()`).
-Attributes in this case are stored in a collumn called `layer` (see section \@ref(geometry-unions) and Figure \@ref(fig:raster-vectorization2)).
+Attributes in this case are stored in a column called `layer` (see section \@ref(geometry-unions) and Figure \@ref(fig:raster-vectorization2)).
 (Note: a convenient alternative for converting rasters into polygons is `spex::polygonize()` which by default returns an `sf` object.)
 
 ```{r}
@@ -1215,7 +1218,7 @@ plot(nz_simple_poly)
 length(nz_simple_poly)
 nrow(nz)
 ```
-1. In the first exercise in Chapter \@ref(spatial-operations) it was established that Canterbury region had 61 of the 101 highest points in New Zealand. Using `st_buffer()`, how many points in `nz_height` are within 100 km of Canturbury?
+1. In the first exercise in Chapter \@ref(spatial-operations) it was established that Canterbury region had 61 of the 101 highest points in New Zealand. Using `st_buffer()`, how many points in `nz_height` are within 100 km of Canterbury?
 ```{r, eval=FALSE, echo=FALSE}
 canterbury = nz[nz$Name == "Canterbury Region", ]
 cant_buff = st_buffer(canterbury, 100)
