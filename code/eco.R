@@ -46,14 +46,14 @@ d = dplyr::select(d, -pnr)
 pa = decostand(d, "pa")
 
 # DCA
-dca = decorana(pa, iweigh = TRUE)
+dca = decorana(pa)
 # proportion of variance
 dca$evals / sum(dca$evals)                                      
 # cumulative proportion
 cumsum(dca$evals / sum(dca$evals))  # 45% and 69%
 
 # NMDS
-nmds = metaMDS(d, k = 4, try = 500)
+nmds = metaMDS(pa, k = 4, try = 500)
 # best approach:
 # pa, k = 4
 # stress: 8.8
@@ -87,6 +87,7 @@ text(rotnmds, labels = elev, cex = 0.8)
 plot(x = elev, y = scores(nmds)[, 1])
 # plot(elev, scores(nmds)[, 2])
 resp = scores(nmds)[, 1]
+resp = scores(rotnmds)[, 1]
 fit = gam(resp ~ s(elev))
 summary(fit)  # deviance explained unrotated: 80%; rotated: 77.9%
 plot(resp ~ elev)
