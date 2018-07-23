@@ -482,19 +482,34 @@ Geometry casting of simple features geometry column (`sfc`) and simple features 
 One important difference is conversion between multi to non-multi types.
 As a result of this process, multi-objects are split into many non-multi objects.
 
-Table \@ref(tab:sfs-st-cast) shows a possible geometry type transformations on simple feature objects.
+Table \@ref(tab:sfs-st-cast) shows possible geometry type transformations on simple feature objects.
+(Note the abbreviated geometry type names: POI, MPOI, LIN and GC for example refer to POINT, MULTIPOINT, LINESTRING and GEOMETRYCOLLECTION respectively.)
 Each input simple feature object with only one element (first column) is transformed directly into another geometry type.
-Several of the transformations are not possible, for example, you cannot convert a single point into a multilinestring or a polygon.
+Several of the transformations are not possible, for example, you cannot convert a single point into a multilinestring or a polygon (so the cells `[1, 4:5]` in the table are NA).
 On the other hand, some of the transformations are splitting the single element input object into multi-element one.
 You can see that, for example, when you cast a multipoint consisting of five pairs of coordinated into a point.
 
 ```{r sfs-st-cast, echo=FALSE}
 sfs_st_cast = read.csv("extdata/sfs-st-cast.csv")
+abbreviate_geomtypes = function(geomtypes) {
+  geomtypes_new = gsub(pattern = "POINT", replacement = "POI", x = geomtypes)
+  geomtypes_new = gsub(pattern = "POLYGON", replacement = "POL", x = geomtypes_new)
+  geomtypes_new = gsub(pattern = "LINESTRING", replacement = "LIN", x = geomtypes_new)
+  geomtypes_new = gsub(pattern = "MULTI", replacement = "M", x = geomtypes_new)
+  geomtypes_new = gsub(pattern = "GEOMETRYCOLLECTION", replacement = "GC", x = geomtypes_new)
+  geomtypes_new
+}
+sfs_st_cast$input_geom = abbreviate_geomtypes(sfs_st_cast$input_geom)
+names(sfs_st_cast) = abbreviate_geomtypes(names(sfs_st_cast))
 names(sfs_st_cast)[1] = ""
-knitr::kable(sfs_st_cast, caption = "Geometry casting on simple feature geometries (see section 2.1) with input type by row and output type by column. Values such as (1) represent the number of features; NA means the operation is not possible.", format = "html") %>%
-  kableExtra::kable_styling(font_size = 7) %>% 
-  kableExtra::kable_styling("striped", full_width = TRUE) #%>%
-  #kableExtra::row_spec(0, angle = 90)
+knitr::kable(sfs_st_cast, caption = "Geometry casting on simple feature geometries (see section 2.1, type names abbreviated) with input type by row and output type by column. Values like (1) represent the number of features; NA means the operation is not possible."
+             # commented out for abbriviated version:
+             # , format = "html" 
+             ) # %>%
+  # commented out for abbriviated version:
+  # kableExtra::kable_styling(font_size = 7) %>% 
+  # kableExtra::kable_styling("striped", full_width = TRUE) #%>%
+  # kableExtra::row_spec(0, angle = 90)
 ```
 
 Let's try to apply geometry type transformations on a new object, `multilinestring_sf`, as an example (on the left in Figure \@ref(fig:line-cast)):
