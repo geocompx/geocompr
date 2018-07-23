@@ -65,3 +65,25 @@ result = mlr::resample(learner = wrapped_lrn_rf,
                        resampling = perf_level,
                        extract = getTuneResult,
                        measures = mlr::rmse)
+
+#**********************************************************
+# 2 SPATIAL PREDICTION-------------------------------------
+#**********************************************************
+
+lrn_rf = makeLearner(cl = "regr.ranger",
+                     predict.type = "response",
+                     mtry = 1, num.trees = 3500)
+# train model
+model_rf = train(lrn_rf, task)
+# prediction
+new_d = data.frame(dem = values(dem))
+pred_rf <- predict(model_rf, newdata = new_d)
+pred_r = dem
+pred_r[] = pred_rf$data$response
+plot(pred_r)
+
+# just for comparison
+gam_1 = gam(sc ~ s(dem), data = d)
+names(dem) = "dem"
+pred = raster::predict(object = dem, model = gam_1)
+plot(pred)
