@@ -23,6 +23,7 @@ library(dplyr)
 library(RQGIS)
 library(raster)
 library(mgcv)
+library(sf)
 
 # define directories
 dir_main = file.path("D:/uni/science/projects/ecology/latin_america/peru/", 
@@ -32,7 +33,7 @@ d = read.table(file.path(dir_main, "tables/spec.txt"), header = TRUE,
                sep = ";")
 data(random_points)
 data(dem)
-random_points$dem = extract(dem, as(random_points, "Spatial"))
+random_points$dem = raster::extract(dem, as(random_points, "Spatial"))
 
 #**********************************************************
 # 2 ORDINATIONS--------------------------------------------
@@ -68,7 +69,7 @@ apply(scores(nmds), 2, sd)
 cor(vegdist(pa), dist(scores(nmds)[, 1:2]))^2  # 0.83 first two axes
 cor(vegdist(pa), dist(scores(nmds)[, 1]))^2  # 0.62 only the first axis
 
-elev = filter(random_points, id %in% rownames(d)) %>% 
+elev = dplyr::filter(random_points, id %in% rownames(d)) %>% 
   dplyr::pull(dem)
 plot(scores(nmds), type = "n", xlim = c(-1, 1))
 # text(scores(nmds), labels = rownames(pa))
