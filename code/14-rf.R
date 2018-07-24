@@ -35,15 +35,16 @@ tune_level = makeResampleDesc("SpCV", iters = 5)
 ctrl = makeTuneControlRandom(maxit = 50)
 # define the outer limits of the randomly selected hyperparameters
 ps = makeParamSet(
-  makeIntegerParam("mtry", lower = 1, upper = 11),
+  # as long as we are only using one predictor, we can only use mtry = 1
+  makeIntegerParam("mtry", lower = 1, upper = 1),
   makeIntegerParam("num.trees", lower = 10, upper = 10000))
 
 wrapped_lrn_rf = makeTuneWrapper(learner = lrn, 
-                                   resampling = tune_level,
-                                   par.set = ps,
-                                   control = ctrl, 
-                                   show.info = TRUE,
-                                   measures = mlr::rmse)
+                                 resampling = tune_level,
+                                 par.set = ps,
+                                 control = ctrl, 
+                                 show.info = TRUE,
+                                 measures = mlr::rmse)
 configureMlr(on.learner.error = "warn", on.error.dump = TRUE)
 
 library(parallelMap)
