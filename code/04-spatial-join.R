@@ -31,11 +31,19 @@ jm1 = jm0 +
 
 jm2 = jm0 +
   tm_shape(world_random, bbox = bb_world) +
-  tm_polygons(col = "name_long", border.col = "black", lwd = 2, palette = "Dark2") +
+  tm_fill(col = "name_long", palette = "Dark2") +
+  tm_layout(legend.show = FALSE)
   #tm_borders(col = "name_long", lwd = 4) + # issue with tmap: no variable border
-  tm_layout(scale = 1, legend.bg.color = "white", legend.bg.alpha = 0.3, legend.position = c("right", "bottom"))
+  # tm_layout(scale = 1, legend.bg.color = "white", legend.bg.alpha = 0.3, legend.position = c("right", "bottom"))
 
 jm3 = jm0 +
   tm_shape(shp = random_joined, bbox = bb_world) +
   tm_symbols(col = "name_long", shape = 4, border.lwd = 2, palette = "Dark2") +
-  tm_layout(scale = 1, legend.bg.color = "white", legend.bg.alpha = 0.3, legend.position = c("right", "bottom"))
+  tm_layout(legend.show = FALSE)
+# +
+#   tm_layout(scale = 1, legend.bg.color = "white", legend.bg.alpha = 0.3, legend.position = c("right", "bottom"))
+
+jm4 = jm0 +
+  tm_shape(shp = random_joined, bbox = bb_world) +
+  tm_symbols(col = "name_long", shape = 4, border.lwd = 2, palette = "Dark2", title.col = "LEGEND\nname_long") +
+  tm_layout(legend.only = TRUE)
