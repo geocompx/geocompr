@@ -168,6 +168,14 @@ ta$carea = log10(ta$carea)
 saveRDS(ta, "extdata/14-ta.rds")
 ```
 
+Finally, we can extract the terrain attributes to our field observations.
+
+```{r}
+data("random_points", package = "RQGIS")
+random_points[, names(ta)] = raster::extract(ta, random_points)
+```
+
+
 ### Performance estimation
 
 <!-- this should probably be only an exercise since everything has been covered in chapter spatial cv -->
@@ -195,10 +203,22 @@ In short, we tune the hyperparameters for a good spatial prediction on the compl
 <!-- If we used more than one repetition (say 2) we would retrieve multiple optimal tuned hyperparameter combinations (say 2) -->
 
 ```{r}
-# task
-task_sp = makeClassifTask(data = data,
-                          target = "sc",
-                          coordinates = coords)
+# construct response-prediction matrix
+d = data.frame(id = as.numeric(rownames(scores(rotnmds))),
+               sc = scores(rotnmds)[, 1])
+d = inner_join(random_points, d,  by = "id")
+
+# extract coordinates
+coords = sf::st_coordinates(d) %>% 
+  as.data.frame %>%
+  rename(x = X, y = Y)
+# only keep variables needed for the modeling
+d = dplyr::select(d, -id, -spri) %>%
+  st_set_geometry(NULL)
+
+# create task
+task = makeRegrTask(data = d, target = "sc", coordinates = coords)
+
 # learner
 lrn = makeLearner(cl = "regr.ranger", predict.type = "response")
 # spatial partitioning
@@ -230,5 +250,7 @@ getLearnerModel(mod_sp)
 ## Ecological context
 
 ## Exercises
+<!-- still, unrefined brain-storming -->
 1. Compute catchment area and catchment slope using **RSAGA**.
-1. Use profile and tangential curvature as additional predictors (hint: `grass7:r.slope.aspect`), and find out if this improves the prediction.
+1. Use profile and tangential curvature as additional predictors for the spatial prediction of the floristic gradient (hint: `grass7:r.slope.aspect`).
+1. Retrieve the bias-reduced RMSE using spatial cross-validation including the estimation of optimal hyperparameter combinations in an inner tuning loop.
