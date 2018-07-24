@@ -5,6 +5,17 @@
 This chapter assumes you have a strong grasp of spatial data analysis and processing, covered in chapters 2-5.
 In it you will make use of R's interfaces to dedicated GIS software, and spatial cross validation, topics covered in chapters \@ref(gis) and \@ref(spatial-cv) respectively.
 
+The chapter uses the following packages:
+
+```{r, message=FALSE} 
+library(sf)
+library(raster)
+library(RQGIS)
+library(mlr)
+library(parallelMap)
+library(dplyr)
+```
+
 ## Introduction
 
 keywords: species distribution modeling, floristic modeling, spatial cross-validation, spatial autocorrelation, ordination (NMDS, Isomap), predictive mapping
@@ -58,12 +69,7 @@ In this chapter we will try to model the first ordination axis, i.e., the floris
 The corresponding model will allow us to make spatial predictions of the floristic composition anywhere in the study area.
 When doing the spatial predictions, we will of course account for the likely presence of spatial autocorrelation with the help of spatial cross-validation (see chapter \@ref(spatial-cv)).
 
-## Predictor assessment
-Retrieving terrain attributes (NDVI, dem, slope, catchment area, etc.) -> exemplarily show how to compute catchment area, then advice to follow the steps found in RQGIS paper!!! + Exercise + provide corresponding output rasters!
-
-## Analysis
-
-### Reducing dimensionality
+## Reducing dimensionality
 
 Ordinations are a popular tool in vegetation science to extract the main information, frequently corresponding to ecological gradients, from large species-plot matrices mostly filled with 0s. 
 However, they are also used in remote sensing (spectral bands + hyperspectral), the soil sciences, geomarketing, etc.
@@ -81,6 +87,57 @@ Secondly, the joint absence of a species in two plots is often hardly an indicat
 Suppose a plant species is absent from the driest (e.g., an extreme desert) and the most moist locations (e.g., a tree savannah) of our sampling.
 Then we really should refrain from counting this as a simlilarity because it is very likely that the only thing these two completely different environmental settings have in common in terms of floristic composition is the shared absence of species (except for rare ubiquist species). 
 
+## Modeling
+
+### Predictor assessment
+
+We will use terrain attributes to model the floristic gradient extracted from the NDMS.
+The terrain attributes can be computed from a digital elevation model using R-GIS bridges (see Chapter \@ref(gis)).
+Specifically, we will compute catchment slope and catchment area.
+Curvatures might also represent valuable predictors, in the exercise section you can find out if they would improve the modeling result.
+
+To compute catchment area and catchment slope, we will make use of the `saga:sagawetnessindex` function.
+^[Admittedly, it is a bit unsatisfying, that the only way of knowing that `sagawetnessindex` computes the desired terrain attributes, is to be familiar with SAGA and/or google for "GIS catchment slope computation".]
+`get_usage()` returns all function parameters and default values of a specific geoalgorithm.
+
+```{r}
+get_usage("saga:sagawetnessindex")
+```
+
+Subsequently, we can specify the needed parameters using R named arguments (see section \@ref(rqgis)).
+Note that we can use a `RasterLayer` living in R's global environment to specify the input raster `DEM`.
+Specifying 1 as the `SLOPE_TYPE` makes sure that the algorithm will return the catchment slope.
+The resulting output rasters should be saved to a temporary folder.
+Setting `load_output` to `TRUE` ensures that the resulting rasters will be imported into R.
+
+```{r, eval=FALSE}
+ta = run_qgis(alg = "saga:sagawetnessindex",
+              DEM = dem,
+              SLOPE_TYPE = 1, 
+              SLOPE = file.path(tempdir(), "cslope.sdat"),
+              AREA = file.path(tempdir(), "carea.sdat"),
+              load_output = TRUE,
+              show_output_paths = FALSE)
+```
+
+This gives back a list with two elements named `AREA` and `SLOPE`.
+Let us convert the list into a raster stack and add two more rasters to it, namely `dem` containing the altitudinal values and `ndvi` representing the Normalized Difference Vegetation Index (NDVI).
+The latter was computed using the red and near-infrared channel of a Landsat scene [@muenchow_predictive_2013;@muenchow_rqgis:_2017], and is available through the **RQGIS** package as a `RasterLayer`.
+
+```{r}
+data("ndvi", package = "RQGIS")
+ta = c(dem, ndvi, ta) %>%
+  stack
+names(ta) = c("dem", "ndvi", "carea", "cslope")
+```
+
+Additionally, the curvature values are highly skewed to the right (`hist(ta$carea)`).
+A log10-transformation makes the distribution more normal.
+
+```{r}
+ta$carea = log10(ta$carea)
+```
+
 ### Performance estimation
 
 The following code largely follows the steps we have introduced in section \@ref(svm).
@@ -94,3 +151,5 @@ In the previous section we retrieved bias-reduces performance estimates
 ## Ecological context
 
 ## Exercises
+1. Compute catchment area and catchment slope using **RSAGA**.
+1. Use profile and tangential curvature as additional predictors (hint: `grass7:r.slope.aspect`), and find out if this improves the prediction.
