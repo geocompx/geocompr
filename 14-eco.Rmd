@@ -97,7 +97,7 @@ Specifically, we will compute catchment slope and catchment area.
 Curvatures might also represent valuable predictors, in the exercise section you can find out if they would improve the modeling result.
 
 To compute catchment area and catchment slope, we will make use of the `saga:sagawetnessindex` function.
-^[Admittedly, it is a bit unsatisfying, that the only way of knowing that `sagawetnessindex` computes the desired terrain attributes, is to be familiar with SAGA and/or google for "GIS catchment slope computation".]
+^[Admittedly, it is a bit unsatisfying, that the only way of knowing that `sagawetnessindex` computes the desired terrain attributes, is to be familiar with SAGA and/or google for "SAGA catchment slope".]
 `get_usage()` returns all function parameters and default values of a specific geoalgorithm.
 
 ```{r, eval=FALSE}
@@ -160,24 +160,72 @@ names(ta) = c("dem", "ndvi", "carea", "cslope")
 Additionally, the curvature values are highly skewed to the right (`hist(ta$carea)`).
 A log10-transformation makes the distribution more normal.
 
-```{r}
+```{r, eval=FALSE}
 ta$carea = log10(ta$carea)
+```
+
+```{r, eval=FALSE, echo=FALSE}
+saveRDS(ta, "extdata/14-ta.rds")
 ```
 
 ### Performance estimation
 
+<!-- this should probably be only an exercise since everything has been covered in chapter spatial cv -->
 The following code largely follows the steps we have introduced in section \@ref(svm).
 The only differences are:
 
 1. the response variable is numeric, hence a regression task will replace the classification task of section \@ref(svm).
-1. instead of the AUROC which can only be used for categorical response variables, we will use the root mean squared error as performance measure.
+1. instead of the AUROC which can only be used for categorical response variables, we will use the root mean squared error (RMSE) as performance measure.
 1. we use a random forest model instead of a support vector machine which naturally goes along with different hyperparameters.
 
 <!-- shortly introduce random forests --> 
 
 ### Spatial prediction
 
-In the previous section we retrieved bias-reduces performance estimates
+`r 50 * 5 * 5 * 100 + 500` models were necessary to retrieve bias-reduced performance estimates.
+In the hyperparameter tuning fold, we found the best hyperparameter combination which in turn was used in the outer performance loop for predicting the test data of a specific spatial partition. 
+This was done for five spatial partitions, and repeated a 100 times.
+Hence, we have 500 optimal hyperparameter combinations at our disposal.
+Which one should we use for making spatial predictions?
+The answer is simple, none at all. 
+Remember, the tuning was done to retrieve a bias-reduced performance estimate, not the best possible spatial prediction.
+For this, one estimates the best hyperparameter combination on the complete dataset.
+This mean, the inner hyperparameter tuning level is no longer needed which makes perfectly sense since we are applying our model to new data (unvisited field observations) for which the true outcomes are unavailable, hence testing is impossible. 
+In short, we tune the hyperparameters for a good spatial prediction on the complete dataset via a 5-fold spatial CV with one repetition.
+<!-- If we used more than one repetition (say 2) we would retrieve multiple optimal tuned hyperparameter combinations (say 2) -->
+
+```{r}
+# task
+task_sp = makeClassifTask(data = data,
+                          target = "sc",
+                          coordinates = coords)
+# learner
+lrn = makeLearner(cl = "regr.ranger", predict.type = "response")
+# spatial partitioning
+rdesc = makeResampleDesc("SpCV", iters = 5)
+# specifying the search space
+ctrl = makeTuneControlRandom(maxit = 50L)
+ps = makeParamSet(makeIntegerParam("mtry", lower = 1, upper = ncol(data)),
+                  makeIntegerParam("num.trees", lower = 10, upper = 1000))
+# hyperparamter tuning
+res = tuneParams(lrn, task = task_sp,
+                 resampling = rdesc,
+                 par.set = ps, control = ctrl, 
+                 measures = mlr::rmse)
+```
+
+This returns the best tuned hyperparameter per iteration (?) and then uses the best result from all iterations
+
+```{r}
+# create a learner using the optimal hyperparameters
+lrn = makeLearner(cl = "classif.ranger",
+                  predict.type = "prob",
+                  mtry = res$x$mtry, num.trees = res$x$num.trees)
+# build the model
+mod_sp = train(learner = lrn, task = task_sp)
+# ranger result which could be used with ranger.predict
+getLearnerModel(mod_sp)  
+```
 
 ## Ecological context
 
