@@ -45,5 +45,5 @@ jm3 = jm0 +
 
 jm4 = jm0 +
   tm_shape(shp = random_joined, bbox = bb_world) +
-  tm_symbols(col = "name_long", shape = 4, border.lwd = 2, palette = "Dark2", title.col = "LEGEND\nname_long") +
+  tm_symbols(col = "name_long", shape = 4, border.lwd = 2, palette = "Dark2") +
   tm_layout(legend.only = TRUE)
