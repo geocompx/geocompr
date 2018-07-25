@@ -8,12 +8,13 @@ In it you will make use of R's interfaces to dedicated GIS software, and spatial
 The chapter uses the following packages:
 
 ```{r, message=FALSE} 
-library(sf)
-library(raster)
-library(RQGIS)
+library(dplyr)
 library(mlr)
 library(parallelMap)
-library(dplyr)
+library(raster)
+library(RQGIS)
+library(sf)
+library(vegan)
 ```
 
 ## Introduction
@@ -69,32 +70,38 @@ In this chapter we will try to model the first ordination axis, i.e., the floris
 The corresponding model will allow us to make spatial predictions of the floristic composition anywhere in the study area.
 To retrieve bias-reduced performance estimates, we will of course account for the likely presence of spatial autocorrelation with the help of spatial cross-validation (see chapter \@ref(spatial-cv)).
 
-## Reducing dimensionality
+## Data and data preparation
+All the data needed for the subsequent analyses is available via the **RQGIS** package.
 
-Ordinations are a popular tool in vegetation science to extract the main information, frequently corresponding to ecological gradients, from large species-plot matrices mostly filled with 0s. 
-However, they are also used in remote sensing (spectral bands + hyperspectral), the soil sciences, geomarketing, etc.
-If you are unfamiliar with ordination techniques or in need of a refresher, have a look at Michael W. Palmers [webpage](http://ordination.okstate.edu/overview.htm) for a short introduction to popular ordination techniques in ecology and at @borcard_numerical_2011 for a deeper look how to apply these techniques in R. 
-**vegan**'s package documentation is also very helpful (`vignette(package = "vegan")`).
+```{r}
+data("random_points", "comm", "study_area", "dem", "ndvi")
+```
 
-Principal component analysis (PCA) is probably the most famous ordination technique. 
-It is a great tool to reduce dimensionality if one can expect linear relationships between variables, and if the joint absence of a variable (for example calcium) in two plots (observations) can be considered a similarity.
-This is barely the case with vegetation data.
+`study_area` is a sf polygon representing the outlines of the study area.
+`random_points` is an sf-object, and contains the 100 randomly chosen sites.
+`comm` is a community matrix where the rows represent the visited sites and the columns the observed species.
+^[In statistics this is also called a contingency or cross-table, and in data science we refer to this as the wide data format.]
+The values represent species cover per site, and was recorded as the area covered by a species in proportion to the site area in percentage points.
+The rownames of `comm` correspond in fact to the `id` column of `random_points`.
+Though `comm` only consists of 86 rows, we have in fact visited 100 sites in the fields, however, in 16 of them no species were found.
+`dem` is the digital elevation model for the study area, and `ndvi` is the normalized difference vegetation index computed from the red and near-infred channels of a Landsat scene (see also `?ndvi`).
+Visualizing the data helps to get more familiar with the data:
 
-For one, relationships are usually non-linear along environmental gradients.
-That means the presence of a plant usually follows a unimodal relationship along a gradient (e.g., humidity, temperature or salinity) with a peak at the most favorable conditions and declining ends towards the unfavarable conditions. 
+```{r}
+# create hillshade
+hs = hillShade(terrain(dem), terrain(dem, "aspect"))
+# plot the data
+plot(hs, col = gray(0:100 / 100), legend = FALSE)
+plot(dem, axes = FALSE, add = TRUE, alpha = 0.5, legend = FALSE)
+plot(st_geometry(random_points), add = TRUE)
+plot(st_geometry(study_area), add = TRUE)
+```
 
-Secondly, the joint absence of a species in two plots is often hardly an indication for similarity.
-Suppose a plant species is absent from the driest (e.g., an extreme desert) and the most moist locations (e.g., a tree savannah) of our sampling.
-Then we really should refrain from counting this as a simlilarity because it is very likely that the only thing these two completely different environmental settings have in common in terms of floristic composition is the shared absence of species (except for rare ubiquist species). 
+The next step is to compute variables which we will predominantly need for the modeling and predictive mapping (see section \@ref(predictive-mapping)) but also for aligning the NMDS axes with the main gradient, altitude and humidity, respectively, in the study area (see section \@ref(nmds)).
 
-## Modeling
-
-### Predictor assessment
-
-We will use terrain attributes to model the floristic gradient extracted from the NDMS.
 The terrain attributes can be computed from a digital elevation model using R-GIS bridges (see Chapter \@ref(gis)).
 Specifically, we will compute catchment slope and catchment area.
-Curvatures might also represent valuable predictors, in the exercise section you can find out if they would improve the modeling result.
+Curvatures might also represent valuable predictors, in the exercise section you can find out how they would change the modeling result.
 
 To compute catchment area and catchment slope, we will make use of the `saga:sagawetnessindex` function.
 ^[Admittedly, it is a bit unsatisfying, that the only way of knowing that `sagawetnessindex` computes the desired terrain attributes, is to be familiar with SAGA and/or google for "SAGA catchment slope".]
@@ -131,7 +138,7 @@ get_usage("saga:sagawetnessindex")
 ```
 
 Subsequently, we can specify the needed parameters using R named arguments (see section \@ref(rqgis)).
-Note that we can use a `RasterLayer` living in R's global environment to specify the input raster `DEM`.
+Remember that we can use a `RasterLayer` living in R's global environment to specify the input raster `DEM` (see section \@ref(rqgis)).
 Specifying 1 as the `SLOPE_TYPE` makes sure that the algorithm will return the catchment slope.
 The resulting output rasters should be saved to a temporary folder.
 Setting `load_output` to `TRUE` ensures that the resulting rasters will be imported into R.
@@ -140,24 +147,22 @@ Setting `load_output` to `TRUE` ensures that the resulting rasters will be impor
 ta = run_qgis(alg = "saga:sagawetnessindex",
               DEM = dem,
               SLOPE_TYPE = 1, 
-              SLOPE = file.path(tempdir(), "cslope.sdat"),
-              AREA = file.path(tempdir(), "carea.sdat"),
+              SLOPE = tempfile(fileext = ".sdat"),
+              AREA = tempfile(fileext = ".sdat"),
               load_output = TRUE,
               show_output_paths = FALSE)
 ```
 
 This gives back a list with two elements named `AREA` and `SLOPE`.
-Let us convert the list into a raster stack and add two more rasters to it, namely `dem` containing the altitudinal values and `ndvi` representing the Normalized Difference Vegetation Index (NDVI).
-The latter was computed using the red and near-infrared channel of a Landsat scene [@muenchow_predictive_2013;@muenchow_rqgis:_2017], and is available through the **RQGIS** package as a `RasterLayer`.
+Let us convert the list into a raster stack and add two more rasters to it (see section \@ref(raster-classes)), namely `dem` containing the altitudinal values and `ndvi` representing the Normalized Difference Vegetation Index (NDVI).
 
 ```{r}
-data("ndvi", package = "RQGIS")
 ta = c(dem, ndvi, ta) %>%
   stack
 names(ta) = c("dem", "ndvi", "carea", "cslope")
 ```
 
-Additionally, the curvature values are highly skewed to the right (`hist(ta$carea)`).
+Additionally, the catchment area values are highly skewed to the right (`hist(ta$carea)`).
 A log10-transformation makes the distribution more normal.
 
 ```{r, eval=FALSE}
@@ -165,15 +170,87 @@ ta$carea = log10(ta$carea)
 ```
 
 ```{r, eval=FALSE, echo=FALSE}
-saveRDS(ta, "extdata/14-ta.rds")
+saveRDS(brick(ta), "extdata/14-ta.rds")
+```
+
+```{r, echo=FALSE}
+ta = readRDS("extdata/14-ta.rds")
 ```
 
 Finally, we can extract the terrain attributes to our field observations.
 
 ```{r}
 data("random_points", package = "RQGIS")
-random_points[, names(ta)] = raster::extract(ta, random_points)
+random_points[, names(ta)] = raster::extract(ta, as(random_points, "Spatial"))
 ```
+
+
+## Reducing dimensionality {#nmds}
+
+Ordinations are a popular tool in vegetation science to extract the main information, frequently corresponding to ecological gradients, from large species-plot matrices mostly filled with 0s. 
+However, they are also used in remote sensing (spectral bands + hyperspectral), the soil sciences, geomarketing, etc.
+If you are unfamiliar with ordination techniques or in need of a refresher, have a look at Michael W. Palmers [webpage](http://ordination.okstate.edu/overview.htm) for a short introduction to popular ordination techniques in ecology and at @borcard_numerical_2011 for a deeper look how to apply these techniques in R. 
+**vegan**'s package documentation is also very helpful (`vignette(package = "vegan")`).
+
+Principal component analysis (PCA) is probably the most famous ordination technique. 
+It is a great tool to reduce dimensionality if one can expect linear relationships between variables, and if the joint absence of a variable (for example calcium) in two plots (observations) can be considered a similarity.
+This is barely the case with vegetation data.
+
+For one, relationships are usually non-linear along environmental gradients.
+That means the presence of a plant usually follows a unimodal relationship along a gradient (e.g., humidity, temperature or salinity) with a peak at the most favorable conditions and declining ends towards the unfavarable conditions. 
+
+Secondly, the joint absence of a species in two plots is often hardly an indication for similarity.
+Suppose a plant species is absent from the driest (e.g., an extreme desert) and the most moist locations (e.g., a tree savannah) of our sampling.
+Then we really should refrain from counting this as a simlilarity because it is very likely that the only thing these two completely different environmental settings have in common in terms of floristic composition is the shared absence of species (except for rare ubiquist species). 
+
+Non-metric multidimensional scaling (NMDS) is one popular dimension-reducing technique in ecology [@vonwehrden_pluralism_2009].
+NMDS reduces the rank-based differences between the distances between objects in the original matrix and distances between the ordinated objects. 
+The difference is expressed as stress. 
+The lower the stress value, the better the ordination, i.e. the low-dimensional representation of the original matrix.
+Stress values lower than 10 represent an excellent fit, stress values of around 15 are still good, and values greater than 20 represent a poor fit.
+In R, `metaMDS()` of the **vegan** package can execute a NMDS.
+As input it expects a community matrix with the sites as rows and the species as columns, e.g.:
+
+```{r}
+# sites 35 to 40 and corresponding species occurrences
+comm[35:40, 1:5]
+```
+
+Often ordinations using presence-absence data yield better results though the prize is, of course, a less informative input matrix (see also exercises).
+`decostand()` converts a numerical obervations into presences and absences with 1 indicating the occurence of a species and 0 the absence of a species.
+
+```{r}
+pa = decostand(comm, "pa")
+``` 
+
+The resulting output matrix serves as input for the NMDS.
+`k` specifies the number of output axes, here, set to 4.
+NMDS is an iterative procedure trying to make the ordinated space more similar to the input matrix in each step.
+To make sure that the algorithm converges, we set the number of steps to 500 (`try` parameter).
+
+```{r}
+nmds = metaMDS(comm = pa, k = 4, try = 500)
+nmds$stress
+```
+
+A stress value of 9 represents a very good result, which means that the reduced ordination space represents much of the variance of the input matrix.
+Overall, NMDS puts objects that are more similar (in terms of species composition) closer together in ordination space.
+However, as opposed to most other ordination techniques, the axes are arbitrary and not necessarily ordered by importance.
+However, we already know that humidity represents the main gradient in the study area [@muenchow_predictive_2013].
+Since humidity is highly correlated with elevation, we rotate the NMDS in accordance with elevation.
+
+
+```{r}
+
+elev = dplyr::filter(random_points, id %in% rownames(pa)) %>% 
+  dplyr::pull(dem)
+```
+
+NMDS is not an eigenvalue technique, and it does not maximize
+the variability associated with individual axes of the ordination. As a result,
+plots may arbitrarily be rotated, centred or inverted.
+
+## Modeling
 
 
 ### Performance estimation
@@ -188,7 +265,7 @@ The only differences are:
 
 <!-- shortly introduce random forests --> 
 
-### Spatial prediction
+### Predictive mapping
 
 `r 50 * 5 * 5 * 100 + 500` models were necessary to retrieve bias-reduced performance estimates.
 In the hyperparameter tuning fold, we found the best hyperparameter combination which in turn was used in the outer performance loop for predicting the test data of a specific spatial partition. 
@@ -251,6 +328,9 @@ getLearnerModel(mod_sp)
 
 ## Exercises
 <!-- still, unrefined brain-storming -->
+1. Run a NMDS using the percentage data of the community matrix. 
+Report the stress value and compare it to the stress value as retrieved from the NMDS using presence-absence data.
+What might explain the 
 1. Compute catchment area and catchment slope using **RSAGA**.
 1. Use profile and tangential curvature as additional predictors for the spatial prediction of the floristic gradient (hint: `grass7:r.slope.aspect`).
 1. Retrieve the bias-reduced RMSE using spatial cross-validation including the estimation of optimal hyperparameter combinations in an inner tuning loop.
