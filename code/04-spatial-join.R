@@ -23,7 +23,7 @@ if(!exists("random_joined")) {
   
 }
 
-jm0 = tm_shape(world) + tm_borders() + tm_format("World")
+jm0 = tm_shape(world) + tm_borders(lwd = 0.2) + tm_format("World")
 
 jm1 = jm0 +
   tm_shape(shp = random_points, bbox = bb_world) + tm_symbols(col = "black", shape = 4, border.lwd = 2) +
