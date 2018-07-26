@@ -104,11 +104,31 @@ tab = tribble(
   5, "4000-8000", ">60", ">47", ">3.5",
   6, ">8000", "", "", ""
 )
-cap = paste("Description of Census data from",
+# commented code to show the input data frame with factors (RL):
+# summary(input_tidy) # all integers
+# fct_pop = factor(input_tidy$pop, labels = tab$pop)
+# summary(fct_pop)
+# sum(is.na(input_tidy$pop))
+# fct_women = factor(input_tidy$women, labels = tab$women[1:5])
+# summary(fct_women)
+# sum(is.na(input_tidy$women))
+# fct_mean_age = factor(input_tidy$mean_age, labels = tab$age[1:5])
+# summary(fct_mean_age)
+# sum(is.na(input_tidy$mean_age))
+# fct_hh_size = factor(input_tidy$hh_size, labels = tab$hh[1:5])
+# summary(fct_hh_size)
+# sum(is.na(input_tidy$hh_size))
+# input_factor = bind_cols(
+#   select(input_tidy, 1:2),
+#   pop = fct_pop,
+#   women = fct_women,
+#   mean_age = fct_mean_age,
+#   hh_size = fct_hh_size,
+# )
+# summary(input_factor)
+cap = paste("Categories for each variable in Census data from",
              "'Datensatzbeschreibung...xlsx'", 
-             "located in the downloaded file census.zip.", 
-             "The classes -1 and -9 refer to", 
-             "areas for which there is no data.")
+             "located in the downloaded file census.zip.")
 knitr::kable(tab,
              col.names = c("class", "Population",
                            "% female", "Mean age",
@@ -128,13 +148,15 @@ input_ras = rasterFromXYZ(input_tidy, crs = st_crs(3035)$proj4string)
 ```
 
 ```{r, eval=FALSE}
-# print the output to the console
 input_ras
 #> class : RasterBrick
 #> dimensions : 868, 642, 557256, 4 (nrow, ncol, ncell, nlayers)
 #> resolution : 1000, 1000 (x, y)
 #> extent : 4031000, 4673000, 2684000, 3552000 (xmin, xmax, ymin, ymax)
-#> coord. ref. : +proj=laea +lat_0=52 +lon_0=10 ...
+#> coord. ref. : +proj=laea +lat_0=52 +lon_0=10
+#> names       :  pop, women, mean_age, hh_size 
+#> min values  :  127,     0,        0,       0 
+#> max values  : 8000,     3,        3,       3 
 ```
 
 ```{block2 type='rmdnote'}
@@ -177,7 +199,7 @@ rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
 Note that we have made sure that the order of the reclassification matrices in the list is the same as for the elements of `input_ras`.
 For instance, the first element corresponds in both cases to the population.
 Subsequently, the `for`-loop applies the reclassification matrix to the corresponding raster layer.
-Finally, the code chunk below makes sure that the `reclass` layers have the same name as the layers of `input_ras`.
+Finally, the code chunk below ensures the `reclass` layers have the same name as the layers of `input_ras`.
 
 ```{r}
 reclass = input_ras
@@ -185,8 +207,16 @@ for (i in 1:raster::nlayers(reclass)) {
   reclass[[i]] = reclassify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
 }
 names(reclass) = names(input_ras)
-reclass
 ```
+
+```{r, eval=FALSE}
+reclass
+#> ... (full output not shown)
+#> names       :  pop, women, mean_age, hh_size 
+#> min values  :  127,     0,        0,       0 
+#> max values  : 8000,     3,        3,       3
+```
+
 
 ## Define metropolitan areas
 
