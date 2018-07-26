@@ -1,4 +1,4 @@
-# Geocomputation for Ecology: A case study of fog oases {#eco}
+# Ecological use case {#eco}
 
 ## Prerequisites {-}
 
@@ -19,22 +19,6 @@ library(vegan)
 
 ## Introduction
 
-keywords: species distribution modeling, floristic modeling, spatial cross-validation, spatial autocorrelation, ordination (NMDS, Isomap), predictive mapping
-
-structure:
-
-1. intro ecological modeling and related applications beyond ecology
-2. introduce research question, shortly the dataset and the planned approach
-3. ordination
-4. retrieving predictors and quick data exploration
-5. modeling ordination scores most likely using machine-learning since we are mostly interested in spatial predictions, and because the mlr spatial cv approach is new, and finally because Alain Zuur's books cover statistical inference broadly
-6. predictive mapping of floristic composition including spatial cross-validation
-7. discussion: what could be done better or alternatives and again emphasizing that the methods shown
-finally, point to books on ecological modeling especially emphasizing Alain Zuur's books
-
-
-## Background
-
 Fog oases are one of the most fascinating vegetation formations I have ever encountered. 
 These formations, locally termed *lomas*, develop on mountains along the coastal deserts of Peru and Chile.
 The deserts' extreme conditions and remoteness provide the habitat for a unique ecosystem, including species endemic to the fog oases.
@@ -52,14 +36,14 @@ For example, most Peruvians live in the coastal desert, and *lomas* mountains ar
 In this chapter we will demonstrate ecological applications of some of the techniques learned in the previous chapters.
 This case study will involve analyzing the composition and the spatial distribution of the vascular plants on the southern slope of Mt. Mongón, a *lomas* mountain near Casma on the central northern coast of Peru (Fig. \@ref(fig:study-area-mongon)).
 
-```{r study-area-mongon, echo = FALSE, fig.cap = "The Mt. Mongón study area (taken from @muenchow_rqgis:_2017; Landsat image: path 9, row 67, acquisition date 09/22/2000; @usgs_u.s._2016)."}
+```{r study-area-mongon, echo=FALSE, fig.cap="The Mt. Mongón study area (taken from @muenchow_rqgis:_2017; Landsat image: path 9, row 67, acquisition date 09/22/2000; @usgs_geological_2016).", out.width="60%"}
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/38989956-6eae7c9a-43d0-11e8-8f25-3dd3594f7e74.png")
 ```
 
 During a field study to Mt. Mongón we recorded all vascular plants living in 100 randomly sampled 4x4 m^2^ plots in the austral winter of 2011 [@muenchow_predictive_2013].
 The sampling coincided with a strong La Niña event that year (see ENSO monitoring of the [NOASS Climate Prediction Center](http://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php)).
 This led to even higher levels of aridity than usual in the coastal desert.
-By contrast, it increased fog activity on the southern slopes of Peruvian *lomas* mountains.
+On the other hand, it also increased fog activity on the southern slopes of Peruvian *lomas* mountains.
 
 <!--
 The first hypothesis is that four plant belts will be found along the altitudinal gradient: a low-elevation *Tillandsia* belt, a herbaceous belt, a bromeliad belt, and an uppermost succulent belt [@muenchow_soil_2013].
@@ -68,7 +52,7 @@ The first hypothesis is that four plant belts will be found along the altitudina
 Ordinations are dimension-reducing techniques which allow the extraction of the main gradients from a (noisy) dataset, in our case the floristic gradient developing along the southern mountain slope.
 In this chapter we will try to model the first ordination axis, i.e., the floristic gradient, as a function of environmental predictors such as altitude, slope, catchment area and NDVI.
 The corresponding model will allow us to make spatial predictions of the floristic composition anywhere in the study area.
-To retrieve bias-reduced performance estimates, we will of course account for the likely presence of spatial autocorrelation with the help of spatial cross-validation (see chapter \@ref(spatial-cv)).
+To retrieve bias-reduced performance estimates, we will of course account for the likely presence of spatial autocorrelation with the help of spatial cross-validation (see Chapter \@ref(spatial-cv)).
 
 ## Data and data preparation
 All the data needed for the subsequent analyses is available via the **RQGIS** package.
@@ -77,25 +61,54 @@ All the data needed for the subsequent analyses is available via the **RQGIS** p
 data("random_points", "comm", "study_area", "dem", "ndvi")
 ```
 
-`study_area` is a sf polygon representing the outlines of the study area.
+`study_area` is an sf polygon representing the outlines of the study area.
 `random_points` is an sf-object, and contains the 100 randomly chosen sites.
 `comm` is a community matrix where the rows represent the visited sites and the columns the observed species.
 ^[In statistics this is also called a contingency or cross-table, and in data science we refer to this as the wide data format.]
-The values represent species cover per site, and was recorded as the area covered by a species in proportion to the site area in percentage points.
+The values represent species cover per site, and were recorded as the area covered by a species in proportion to the site area in percentage points.
 The rownames of `comm` correspond in fact to the `id` column of `random_points`.
-Though `comm` only consists of 86 rows, we have in fact visited 100 sites in the fields, however, in 16 of them no species were found.
-`dem` is the digital elevation model for the study area, and `ndvi` is the normalized difference vegetation index computed from the red and near-infred channels of a Landsat scene (see also `?ndvi`).
+Though `comm` only consists of 86 rows, we have in fact visited 100 sites in the field, however, in 16 of them no species were found.
+`dem` is the digital elevation model for the study area, and `ndvi` is the Normalized Difference Vegetation Index (NDVI) computed from the red and near-infred channels of a Landsat scene (see section \@ref(local-operations) and `?ndvi`).
 Visualizing the data helps to get more familiar with the data:
 
-```{r}
+```{r, eval=FALSE, echo=FALSE}
 # create hillshade
 hs = hillShade(terrain(dem), terrain(dem, "aspect"))
 # plot the data
-plot(hs, col = gray(0:100 / 100), legend = FALSE)
+par(mar = rep(1, 4))
+plot(hs, col = gray(0:100 / 100), legend = FALSE, axes = FALSE, box = FALSE)
 plot(dem, axes = FALSE, add = TRUE, alpha = 0.5, legend = FALSE)
+axis(1)
+axis(2)
 plot(st_geometry(random_points), add = TRUE)
 plot(st_geometry(study_area), add = TRUE)
+# white margins between axes and plot are too wide
 ```
+
+```{r, echo=FALSE, fig.cap="Location of the sampling sites in the study area, study mask and used DEM as a hillshade."}
+library("latticeExtra")
+library("grid")
+hs = hillShade(terrain(dem), terrain(dem, "aspect"))
+spplot(dem, col.regions = terrain.colors(50), alpha.regions = 0.5,
+       scales = list(draw = TRUE,
+                     tck = c(1, 0)),
+       colorkey = list(space = "right", title = "m asl",
+                               width = 0.5, height = 0.5,
+                       axis.line = list(col = "black")),
+       sp.layout = list(
+         list("sp.points", as(random_points, "Spatial"), pch = 16,
+              col = "black", cex = 0.8, first = FALSE),
+         list("sp.polygons", as(study_area, "Spatial"), 
+              col = "black", first = FALSE)
+       )
+       ) + 
+  latticeExtra::as.layer(spplot(hs, col.regions = gray(0:100 / 100)), 
+                         under = TRUE)
+grid.text("m asl", x = unit(0.8, "npc"), y = unit(0.75, "npc"), 
+          gp = gpar(cex = 0.8))
+
+```
+
 
 The next step is to compute variables which we will predominantly need for the modeling and predictive mapping (see section \@ref(predictive-mapping)) but also for aligning the NMDS axes with the main gradient, altitude and humidity, respectively, in the study area (see section \@ref(nmds)).
 
@@ -140,7 +153,7 @@ get_usage("saga:sagawetnessindex")
 Subsequently, we can specify the needed parameters using R named arguments (see section \@ref(rqgis)).
 Remember that we can use a `RasterLayer` living in R's global environment to specify the input raster `DEM` (see section \@ref(rqgis)).
 Specifying 1 as the `SLOPE_TYPE` makes sure that the algorithm will return the catchment slope.
-The resulting output rasters should be saved to a temporary folder.
+The resulting output rasters should be saved to temporary files with an `.sdat` extension which is a SAGA raster format.
 Setting `load_output` to `TRUE` ensures that the resulting rasters will be imported into R.
 
 ```{r, eval=FALSE}
@@ -154,9 +167,9 @@ ta = run_qgis(alg = "saga:sagawetnessindex",
 ```
 
 This gives back a list with two elements named `AREA` and `SLOPE`.
-Let us convert the list into a raster stack and add two more rasters to it (see section \@ref(raster-classes)), namely `dem` containing the altitudinal values and `ndvi` representing the Normalized Difference Vegetation Index (NDVI).
+Let us add to more raster elements to the list, namely `dem` and `ndvi`, and convert it into a raster stack (see section \@ref(raster-classes)), .
 
-```{r}
+```{r, eval=FALSE}
 ta = c(dem, ndvi, ta) %>%
   stack
 names(ta) = c("dem", "ndvi", "carea", "cslope")
@@ -216,7 +229,7 @@ comm[35:40, 1:5]
 ```
 
 Often ordinations using presence-absence data yield better results though the prize is, of course, a less informative input matrix (see also exercises).
-`decostand()` converts a numerical obervations into presences and absences with 1 indicating the occurence of a species and 0 the absence of a species.
+`decostand()` converts numerical obervations into presences and absences with 1 indicating the occurence of a species and 0 the absence of a species.
 
 ```{r}
 pa = decostand(comm, "pa")
@@ -264,12 +277,17 @@ elev = dplyr::filter(random_points, id %in% rownames(pa)) %>%
 rotnmds = MDSrotate(nmds, elev)
 # extracting the first two axes
 sc = scores(rotnmds, choices = 1:2)
+par(mfrow = c(1, 2))
+# plotting the first two dca axes
+plot(sc, type = "n", cex.lab = 0.7)
+text(sc, labels = elev, cex = 0.5)
 # plotting the first axis against altitude
-plot(y = sc[, 1], x = elev)
+plot(y = sc[, 1], x = elev, xlab = "elevation in m", 
+     ylab = "First NMDS axis", cex.lab = 0.7)
 ```
 
-The scores of the first NMDS axis represent the main floristic gradient along the slope of Mt. Mongón.
-Modeling them with the help of the previously created predictors is 
+The scores of the first NMDS axis represent the different vegetations formations appearing along the slope of Mt. Mongón.
+To spatially visualize them, we can model the NMDS scores with the previously created predictors, and use the resulting model for predictive mapping (see next section).
 
 ## Modeling
 
@@ -300,7 +318,7 @@ This mean, the inner hyperparameter tuning level is no longer needed which makes
 In short, we tune the hyperparameters for a good spatial prediction on the complete dataset via a 5-fold spatial CV with one repetition.
 <!-- If we used more than one repetition (say 2) we would retrieve multiple optimal tuned hyperparameter combinations (say 2) -->
 
-```{r}
+```{r, eval=FALSE}
 # construct response-prediction matrix
 d = data.frame(id = as.numeric(rownames(scores(rotnmds))),
                sc = scores(rotnmds)[, 1])
@@ -334,7 +352,7 @@ res = tuneParams(lrn, task = task,
 
 This returns the best tuned hyperparameter per iteration (?) and then uses the best result from all iterations
 
-```{r}
+```{r, eval=FALSE}
 lrn_rf = makeLearner(cl = "regr.ranger",
                      predict.type = "response",
                      mtry = res$x$mtry, num.trees = res$x$num.trees)
@@ -369,6 +387,9 @@ plot(pred_r, col = pal(50), alpha = 0.7, add = TRUE)
 ## Ecological context
 
 - we have used just one axis, it would be interesting to model also the second axis and finding an innovative way of visualizing the modeled scores of the first two axis
+- discussion: what could be done better or alternatives and again emphasizing that the methods shown
+finally, point to books on ecological modeling especially emphasizing Alain Zuur's books
+
 
 ## Exercises
 <!-- still, unrefined brain-storming -->
