@@ -184,7 +184,6 @@ data("random_points", package = "RQGIS")
 random_points[, names(ta)] = raster::extract(ta, as(random_points, "Spatial"))
 ```
 
-
 ## Reducing dimensionality {#nmds}
 
 Ordinations are a popular tool in vegetation science to extract the main information, frequently corresponding to ecological gradients, from large species-plot matrices mostly filled with 0s. 
@@ -228,27 +227,49 @@ The resulting output matrix serves as input for the NMDS.
 NMDS is an iterative procedure trying to make the ordinated space more similar to the input matrix in each step.
 To make sure that the algorithm converges, we set the number of steps to 500 (`try` parameter).
 
-```{r}
+```{r, eval=FALSE, message=FALSE}
+set.seed(25072018)
 nmds = metaMDS(comm = pa, k = 4, try = 500)
 nmds$stress
+#>...
+#>Run 498 stress 0.08834745 
+#>... Procrustes: rmse 0.004100446  max resid 0.03041186 
+#>Run 499 stress 0.08874805 
+#>... Procrustes: rmse 0.01822361  max resid 0.08054538 
+#>Run 500 stress 0.08863627 
+#>... Procrustes: rmse 0.01421176  max resid 0.04985418 
+#>*** Solution reached
+#>0.08831395
 ```
 
-A stress value of 9 represents a very good result, which means that the reduced ordination space represents much of the variance of the input matrix.
-Overall, NMDS puts objects that are more similar (in terms of species composition) closer together in ordination space.
-However, as opposed to most other ordination techniques, the axes are arbitrary and not necessarily ordered by importance.
-However, we already know that humidity represents the main gradient in the study area [@muenchow_predictive_2013].
-Since humidity is highly correlated with elevation, we rotate the NMDS in accordance with elevation.
+```{r, eval=FALSE, echo=FALSE}
+saveRDS(nmds, "extdata/14-nmds.rds")
+```
 
+```{r, include=FALSE}
+nmds = readRDS("extdata/14-nmds.rds")
+```
+
+A stress value of 9 represents a very good result, which means that the reduced ordination space represents the large majority of the variance of the input matrix.
+Overall, NMDS puts objects that are more similar (in terms of species composition) closer together in ordination space.
+However, as opposed to most other ordination techniques, the axes are arbitrary and not necessarily ordered by importance [@borcard_numerical_2011].
+However, we already know that humidity represents the main gradient in the study area [@muenchow_predictive_2013;@muenchow_rqgis:_2017].
+Since humidity is highly correlated with elevation, we rotate the NMDS in accordance with elevation.
+Plotting the result reveals that the first axis is, as intended, clearly associated with altitude.
 
 ```{r}
-
 elev = dplyr::filter(random_points, id %in% rownames(pa)) %>% 
   dplyr::pull(dem)
+# rotating NMDS in accordance with altitude (proxy for humidity)
+rotnmds = MDSrotate(nmds, elev)
+# extracting the first two axes
+sc = scores(rotnmds, choices = 1:2)
+# plotting the first axis against altitude
+plot(y = sc[, 1], x = elev)
 ```
 
-NMDS is not an eigenvalue technique, and it does not maximize
-the variability associated with individual axes of the ordination. As a result,
-plots may arbitrarily be rotated, centred or inverted.
+The scores of the first NMDS axis represent the main floristic gradient along the slope of Mt. Mongón.
+Modeling them with the help of the previously created predictors is 
 
 ## Modeling
 
@@ -302,10 +323,10 @@ lrn = makeLearner(cl = "regr.ranger", predict.type = "response")
 rdesc = makeResampleDesc("SpCV", iters = 5)
 # specifying the search space
 ctrl = makeTuneControlRandom(maxit = 50L)
-ps = makeParamSet(makeIntegerParam("mtry", lower = 1, upper = ncol(data)),
-                  makeIntegerParam("num.trees", lower = 10, upper = 1000))
+ps = makeParamSet(makeIntegerParam("mtry", lower = 1, upper = ncol(d) - 1),
+                  makeIntegerParam("num.trees", lower = 10, upper = 10000))
 # hyperparamter tuning
-res = tuneParams(lrn, task = task_sp,
+res = tuneParams(lrn, task = task,
                  resampling = rdesc,
                  par.set = ps, control = ctrl, 
                  measures = mlr::rmse)
@@ -314,17 +335,40 @@ res = tuneParams(lrn, task = task_sp,
 This returns the best tuned hyperparameter per iteration (?) and then uses the best result from all iterations
 
 ```{r}
-# create a learner using the optimal hyperparameters
-lrn = makeLearner(cl = "classif.ranger",
-                  predict.type = "prob",
-                  mtry = res$x$mtry, num.trees = res$x$num.trees)
-# build the model
-mod_sp = train(learner = lrn, task = task_sp)
-# ranger result which could be used with ranger.predict
-getLearnerModel(mod_sp)  
+lrn_rf = makeLearner(cl = "regr.ranger",
+                     predict.type = "response",
+                     mtry = res$x$mtry, num.trees = res$x$num.trees)
+# train model
+model_rf = train(lrn_rf, task)
+# prediction
+new_d = newdata = as.data.frame(as.matrix(ta))
+pred_rf = predict(model_rf, newdata = new_d)
+pred_r = dem
+pred_r[] = pred_rf$data$response
+# restrict prediction to your study area
+pred_r = mask(pred_r, study_area) %>%
+  trim
+blue = rgb(0, 0, 146, maxColorValue = 255)
+lightblue = rgb(0, 129, 255, maxColorValue = 255)
+turquoise = rgb(0, 233, 255, maxColorValue = 255)
+green = rgb(142, 255, 11, maxColorValue = 255)
+yellow = rgb(245, 255, 8, maxColorValue = 255)
+orange = rgb(255, 173, 0, maxColorValue = 255)
+lightred = rgb(255, 67, 0, maxColorValue = 255)
+red = rgb(170, 0, 0, maxColorValue = 255)
+pal = colorRampPalette(c(blue, lightblue, turquoise, green, yellow, 
+                         orange, lightred, red))
+plot(pred_r, col = pal(50))
+plot(pred_r, col = RColorBrewer::brewer.pal(6, "Spectral"))
+
+# well, this looks nice
+plot(trim(mask(hs, study_area)), col = gray(0:100 / 100), legend = FALSE)
+plot(pred_r, col = pal(50), alpha = 0.7, add = TRUE)
 ```
 
 ## Ecological context
+
+- we have used just one axis, it would be interesting to model also the second axis and finding an innovative way of visualizing the modeled scores of the first two axis
 
 ## Exercises
 <!-- still, unrefined brain-storming -->
