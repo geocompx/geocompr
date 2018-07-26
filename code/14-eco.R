@@ -25,36 +25,28 @@ library(raster)
 library(mgcv)
 library(sf)
 
-# define directories
-dir_main = file.path("D:/uni/science/projects/ecology/latin_america/peru/", 
-                     "lomas/Daten/R data/Mongon/")
 # attach data
-d = read.table(file.path(dir_main, "tables/spec.txt"), header = TRUE, 
-               sep = ";")
-data(random_points)
-data(dem)
-random_points$dem = raster::extract(dem, as(random_points, "Spatial"))
+data("random_points", "study_area", "comm", "dem", "ndvi")
+# add altitude to random_points
+random_points$dem = raster::extract(dem, random_points)
 
 #**********************************************************
 # 2 ORDINATIONS--------------------------------------------
 #**********************************************************
 
-which(rownames(d) != d$pnr)
-# ok, rename the rownames
-rownames(d) = d$pnr
-d = dplyr::select(d, -pnr)
 # presence absence matrix
-pa = decostand(d, "pa")
+pa = decostand(comm, "pa")
 
 # DCA
-dca = decorana(pa)
+dca = decorana(comm)
 # proportion of variance
 dca$evals / sum(dca$evals)                                      
 # cumulative proportion
-cumsum(dca$evals / sum(dca$evals))  # 45% and 69%
+cumsum(dca$evals / sum(dca$evals))  # 44% and 72%
 
 # NMDS
-nmds = metaMDS(pa, k = 4, try = 500)
+# nmds = metaMDS(comm, k = 3, try = 500)
+nmds = metaMDS(pa, k = 3, try = 500)
 # best approach:
 # pa, k = 4
 # stress: 8.8
@@ -69,7 +61,7 @@ apply(scores(nmds), 2, sd)
 cor(vegdist(pa), dist(scores(nmds)[, 1:2]))^2  # 0.83 first two axes
 cor(vegdist(pa), dist(scores(nmds)[, 1]))^2  # 0.62 only the first axis
 
-elev = dplyr::filter(random_points, id %in% rownames(d)) %>% 
+elev = dplyr::filter(random_points, id %in% rownames(pa)) %>% 
   dplyr::pull(dem)
 plot(scores(nmds), type = "n", xlim = c(-1, 1))
 # text(scores(nmds), labels = rownames(pa))
