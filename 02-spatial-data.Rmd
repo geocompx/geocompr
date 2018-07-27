@@ -300,20 +300,34 @@ plot(africa[0], lwd = 3, main = "Nigeria in context", border = "lightgrey")
 
 ### Base plot arguments {#base-args}
 
-Since **sf**'s `plot()` function builds on base plotting methods, it has many optional arguments (see `?graphics::plot` and `?par`).
-This may not be the most concise way to generate maps for publication, as we will see in Chapter \@ref(adv-map), but it is worth learning some base plotting arguments for future reference.
-A simple illustration of the flexibility of `plot()` is provided in Figure \@ref(fig:contpop), which adds circles representing population size to a map of the world.
+Advanced map making is covered in detail in Chapter \@ref(adv-map).
+However, it is worth knowing how to modify plots using the **sf** package for quick and flexible visualization.
+Because **sf** extends base R plotting methods `plot()`'s arguments such as `main =` --- which specifies the title of the map --- work with `sf` objects (see `?graphics::plot` and `?par`).^[
+Note: many plot arguments are ignored in facet maps, when more than one `sf` column is plotted.
+]
+
+```{r, echo=FALSE, eval=FALSE}
+# aim: show main
+plot(world$geom, main = "sf plot() method")
+```
+
+Figure \@ref(fig:contpop) illustrates this flexibility by overlaying circles, whose diameter (set with `cex =`) represent country populations, on a map of the world.
 A basic version of the map can be created with the following commands (see exercises in section \@ref(ex2) [`02-contplot.R`](https://github.com/Robinlovelace/geocompr/blob/master/code/02-contpop.R) in the book's GitHub repo for details):
 
 ```{r, eval=FALSE}
 plot(world["continent"], reset = FALSE)
 cex = sqrt(world$pop) / 10000
-plot(st_geometry(world_centroids), add = TRUE, cex = cex)
+world_cents = st_centroid(world, of_largest = TRUE)
+plot(st_geometry(world_cents), add = TRUE, cex = cex)
 ```
 
 ```{r contpop, fig.cap="Country continents (represented by fill color) and 2015 populations (represented by points, with point area proportional to population) worldwide.", echo=FALSE, warning=FALSE}
 source("code/02-contpop.R")
 ```
+
+The code above uses the function `st_centroid()` to convert one geometry type (polygon) to another (point).
+Here is not the place to explain how the function works (this is covered in Chapter \@ref(geometric-operations)).
+The point is that simple feature geometries can come in different forms, the topic of the next section.
 
 ### Simple feature classes {#sf-classes}
 
