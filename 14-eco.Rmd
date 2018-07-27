@@ -85,7 +85,7 @@ plot(st_geometry(study_area), add = TRUE)
 # white margins between axes and plot are too wide
 ```
 
-```{r, echo=FALSE, fig.cap="Location of the sampling sites in the study area, study mask and used DEM as a hillshade."}
+```{r, echo=FALSE, fig.cap="Study mask (polgyon), location of the sampling sites (black points) and DEM in the background."}
 library("latticeExtra")
 library("grid")
 hs = hillShade(terrain(dem), terrain(dem, "aspect"))
@@ -313,51 +313,91 @@ This yields in total 500 optimal hyperparameter combinations.
 Which one should we use for making spatial predictions?
 The answer is simple, none at all. 
 Remember, the tuning was done to retrieve a bias-reduced performance estimate, not the best possible spatial prediction.
-For this, one estimates the best hyperparameter combination on the complete dataset.
-This mean, the inner hyperparameter tuning level is no longer needed which makes perfectly sense since we are applying our model to new data (unvisited field observations) for which the true outcomes are unavailable, hence testing is impossible. 
+For the latter, one estimates the best hyperparameter combination on the complete dataset.
+This mean, the inner hyperparameter tuning level is no longer needed which makes perfectly sense since we are applying our model to new data (unvisited field observations) for which the true outcomes are unavailable, hence testing is impossible in any case. 
 In short, we tune the hyperparameters for a good spatial prediction on the complete dataset via a 5-fold spatial CV with one repetition.
 <!-- If we used more than one repetition (say 2) we would retrieve multiple optimal tuned hyperparameter combinations (say 2) -->
 
-```{r, eval=FALSE}
-# construct response-prediction matrix
+The preparation for the modeling using the **mlr** package includes the construction of a separate coordinate dataframe and the construction of the response-predictor matrix.
+
+```{r}
+# construct response-predictor matrix
+# id- and response variable
 d = data.frame(id = as.numeric(rownames(scores(rotnmds))),
                sc = scores(rotnmds)[, 1])
+# join the predictors (dem, ndvi and terrain attributes)
 d = inner_join(random_points, d,  by = "id")
 
-# extract coordinates
+# extract the coordinates into a separate dataframe
 coords = sf::st_coordinates(d) %>% 
   as.data.frame %>%
   rename(x = X, y = Y)
-# only keep variables needed for the modeling
+# only keep response and predictors which should be used for the modeling
 d = dplyr::select(d, -id, -spri) %>%
   st_set_geometry(NULL)
-
-# create task
-task = makeRegrTask(data = d, target = "sc", coordinates = coords)
-
-# learner
-lrn = makeLearner(cl = "regr.ranger", predict.type = "response")
-# spatial partitioning
-rdesc = makeResampleDesc("SpCV", iters = 5)
-# specifying the search space
-ctrl = makeTuneControlRandom(maxit = 50L)
-ps = makeParamSet(makeIntegerParam("mtry", lower = 1, upper = ncol(d) - 1),
-                  makeIntegerParam("num.trees", lower = 10, upper = 10000))
-# hyperparamter tuning
-res = tuneParams(lrn, task = task,
-                 resampling = rdesc,
-                 par.set = ps, control = ctrl, 
-                 measures = mlr::rmse)
 ```
 
-This returns the best tuned hyperparameter per iteration (?) and then uses the best result from all iterations
+
+Having constructed the input variables, we are all set for specifying the **mlr** building blocks (task, learner, and resampling).
+We will use a regression since the response variable is numeric.
+The learner is a random forest model from the **ranger** package.
+
+```{r}
+# create task
+task = makeRegrTask(data = d, target = "sc", coordinates = coords)
+# learner
+lrn_rf = makeLearner(cl = "regr.ranger", predict.type = "response")
+```
+
+To tune the hyperparameters we will use a five-fold spatial partitioning with only one repetition (`makeResampleDesc()`). 
+In each of these spatial partitions, we run 50 models (`makeTuneControlRandom`) to find the optimal hyperparameter combination.
+Hyperparameter combinations will be selected randomly but fall inside specific tuning limits (`makeParamSet()`), specifically `mtry` can range between 1 and the number of predictors (`r ncol(d) - 1`), and `num.trees` can range between 10 and 10,000.
+
+```{r}
+# spatial partitioning
+perf_level = makeResampleDesc("SpCV", iters = 5)
+# specifying the search space
+ctrl = makeTuneControlRandom(maxit = 50L)
+ps = makeParamSet(
+  makeIntegerParam("mtry", lower = 1, upper = ncol(d) - 1),
+  makeIntegerParam("num.trees", lower = 10, upper = 10000)
+  )
+```
+
+Finally, `tuneParams()` runs the hyperparameter tuning, i.e. will find the optimal hyperparameter combination for the specified parameters.
+The performance measure it the root mean squared error (RMSE).
 
 ```{r, eval=FALSE}
+# hyperparamter tuning
+set.seed(27072018)
+res = tuneParams(learner = lrn_rf, 
+                 task = task,
+                 resampling = perf_level,
+                 par.set = ps,
+                 control = ctrl, 
+                 measures = mlr::rmse)
+#>...
+#>[Tune-x] 49: mtry=2; num.trees=5221
+#>[Tune-y] 49: rmse.test.rmse=0.5896348; time: 0.0 min
+#>[Tune-x] 50: mtry=4; num.trees=5813
+#>[Tune-y] 50: rmse.test.rmse=0.5092251; time: 0.0 min
+#>[Tune] Result: mtry=4; num.trees=696 : rmse.test.rmse=0.4994471
+```
+
+An `mtry` of `r res$x$mtry` and a `num.trees` of `r res$x$num.trees` represent the best hyperparameter combination.
+A RMSE of `r res$y[attr(res$y, "names") == "rmse.test.rmse"]` is relatively good when considering the range of the response variable which is `r diff(range(d$sc))` (`diff(range(d$sc))`).
+The tuned hyperparameters can now be used for the prediction.
+We simply have to modify our learner accordingly, and run the corresponding model.
+
+```{r, eval=FALSE}
+# learning using the best hyperparameter combination
 lrn_rf = makeLearner(cl = "regr.ranger",
                      predict.type = "response",
                      mtry = res$x$mtry, num.trees = res$x$num.trees)
 # train model
 model_rf = train(lrn_rf, task)
+```
+
 # prediction
 new_d = newdata = as.data.frame(as.matrix(ta))
 pred_rf = predict(model_rf, newdata = new_d)
