@@ -38,7 +38,7 @@ random_points$dem = raster::extract(dem, random_points)
 pa = decostand(comm, "pa")
 
 # DCA
-dca = decorana(comm)
+dca = decorana(pa)
 # proportion of variance
 dca$evals / sum(dca$evals)                                      
 # cumulative proportion
@@ -72,6 +72,7 @@ text(scores(nmds), labels = elev)
 
 rotnmds = MDSrotate(nmds, elev)  # proxy for elevation
 cor(vegdist(pa), dist(scores(rotnmds)[, 1]))^2  # 0.59 only the first axis
+cor(vegdist(pa), dist(scores(rotnmds)[, 1:2]), method = "spearman")
 plot(rotnmds, type = "n", xlim = c(-1, 1))
 text(rotnmds, labels = elev, cex = 0.8)
 
