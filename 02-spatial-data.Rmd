@@ -490,11 +490,13 @@ multipolygon_list = list(list(rbind(c(1, 5), c(2, 2), c(4, 1), c(4, 4), c(1, 5))
 st_multipolygon(multipolygon_list)
 ```
 
-```{r}
+```{r, eval=FALSE}
 ## GEOMETRYCOLLECTION
 gemetrycollection_list = list(st_multipoint(multipoint_matrix),
                               st_linestring(linestring_matrix))
 st_geometrycollection(gemetrycollection_list)
+#> GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2),
+#>   LINESTRING (1 5, 4 4, 4 1, 2 2, 3 2))
 ```
 
 <!-- table -->
@@ -579,15 +581,20 @@ st_sfc(point1, point2, crs = "+proj=longlat +datum=WGS84 +no_defs")
 
 For example, we can set the UTM Zone 11N projection with `epsg` code `2955`:
 
-```{r}
+```{r, eval=FALSE}
 st_sfc(point1, point2, crs = 2955)
+#> ...
+#> epsg (SRID):    2955
+#> proj4string:    +proj=utm +zone=11 +ellps=GRS80 ... +units=m +no_defs
+#> POINT (5 2)
+#> POINT (1 3)
 ```
 
 As you can see above, the `proj4string` definition was automatically added.
-Now we can try to set the CRS using `proj4string`:
+The CRS can also be set with the full `proj4string` (result not shown):
 
-```{r}
-crs_utm = "+proj=utm +zone=11 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+```{r, eval=FALSE}
+p4s = "+proj=utm +zone=11 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
 st_sfc(point1, point2, crs = crs_utm)
 ```
 
@@ -832,15 +839,21 @@ Both can handle multiple layers, but differ regarding the number of supported fi
 
 A `RasterBrick` consists of multiple layers, which typically correspond to a single multispectral satellite file or a single multilayer object in memory. 
 The `brick()` function creates a `RasterBrick` object.
-Usually, you provide it with a filename to a multilayer raster file but might also use another raster object and other spatial objects (see its help page for all supported formats).
+Usually, you provide it with a filename to a multilayer raster file but might also use another raster object and other spatial objects (see `?brick` for all supported formats).
 
 ```{r}
-multilayer_raster_filepath = system.file("raster/landsat.tif", package = "spDataLarge")
-r_brick = brick(multilayer_raster_filepath)
+multi_raster_file = system.file("raster/landsat.tif", package = "spDataLarge")
+r_brick = brick(multi_raster_file)
 r_brick
+#> class       : RasterBrick 
+#> resolution  : 30, 30  (x, y)
+#> ...
+#> names       : landsat.1, landsat.2, landsat.3, landsat.4 
+#> min values  :      7550,      6404,      5678,      5252 
+#> max values  :     19071,     22051,     25780,     31961
 ```
 
-The `nlayers` function retrieves the number of layers stored in a `Raster*` object:
+`nlayers()` retrieves the number of layers stored in a `Raster*` object:
 
 ```{r}
 nlayers(r_brick)
@@ -862,9 +875,16 @@ values(raster_in_memory) = sample(seq_len(ncell(raster_in_memory)))
 crs(raster_in_memory) = crs(raster_on_disk)
 ```
 
-```{r}
+```{r, eval=FALSE}
 r_stack = stack(raster_in_memory, raster_on_disk)
 r_stack
+#> class : RasterStack
+#> dimensions : 1428, 1128, 1610784, 2
+#> resolution : 30, 30
+#> ...
+#> names       :   layer, landsat.1 
+#> min values  :       1,      7550 
+#> max values  : 1610784,     19071
 ```
 
 Another difference is that the processing time for `RasterBrick` objects is usually shorter than for `RasterStack` objects.
@@ -978,8 +998,11 @@ new_vector = st_read(vector_filepath)
 
 Our new object, `new_vector`, is a polygon representing the borders of Zion National Park (`?zion`).
 
-```{r}
+```{r, eval=FALSE}
 st_crs(new_vector) # get CRS
+#> Coordinate Reference System:
+#> No EPSG code
+#> proj4string: "+proj=utm +zone=12 +ellps=GRS80 ... +units=m +no_defs"
 ```
 
 In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used:
