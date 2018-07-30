@@ -47,22 +47,22 @@ The advantages of a good CLI such as that provided by R are numerous.
 Among others, a CLI:
 
 - Facilitates the automation of repetitive tasks. 
-- Ensures transparency and reproducibility (which also is the backbone of good scientific practice), and therefore is the preferred option for doing Geographic Data Science.
+- Ensures transparency and reproducibility (which is also the backbone of good scientific practice), and therefore is the preferred option for doing Geographic Data Science.
 - Encourages extending existing software by making it easy to modify, enhance and implement new functions.
-- Professional and advanced technical skills will certainly enhance your career prospects, and are in dire need across a wide range of disciplines.
+- Helps you to develop advanced technical skills which will certainly enhance your career prospects, and are in dire need across a wide range of disciplines.
 - Is fun, but admittedly that is a subjective argument.
 
 On the other hand, GUI-based GIS systems (particularly QGIS) are also advantageous.
 For instance, think of:
 
-- The really user-friendly graphical interface which spares the user from programming and facilitates interactive geographic data exploration and interactive map production.
+- The very user-friendly graphical interface which spares the user from programming and facilitates interactive geographic data exploration and interactive map production.
 - Digitizing and all related tools (trace, snap, topological rules, etc.).^[Note that there is also the **mapedit** package but its intention is to allow the quick editing of a few spatial features, and not professional, large-scale cartographic digitizing.]
 - Georeferencing with ground control points and orthorectification. 
 The process of locating control points, choosing the right transformation model, and evaluating the registration error are inherently interactive, and thus unsuitable to be done with R, or any other programming language.
 - Stereoscopic mapping (e.g., LiDAR and structure from motion).
 - The built-in geodatabase management system often integrated in Desktop GIS (ArcMap, GRASS GIS) and all related advantages such as object-oriented relational data modeling, topology, fast (spatial) querying, among others.
 
-Another advantage of GIS software is that they provide access to hundreds of 'geoalgorithms' (computational recipes to solve geographic problems --- see Chapter \@ref(algorithms)), many of which are unavailable from the R command line.
+Another advantage of dedicated GISs is that they provide access to hundreds of 'geoalgorithms' (computational recipes to solve geographic problems --- see Chapter \@ref(algorithms)), many of which are unavailable from the R command line.
 The good news is that such geoalgorithms can be accessed from the R command via 'GIS bridges', hence the title of (and motivation for) this chapter.^[
 An early use of the term 'bridge' referred the coupling of R with GRASS [@neteler_open_2008].
 Roger Bivand elaborated on this in his talk "Bridges between GIS and R", delivered at the 2016 GEOSTAT summer school (see slides at http://spatial.nhh.no/misc/).
@@ -77,13 +77,13 @@ There are some domains where R can now outperform desktop GIS including spatial 
 
 Instead of implementing existing GIS algorithms in R, it makes sense to avoid 'reinventing the wheel' by taking advantage of R's ability to interface with other languages (especially C++, which is used for much low-level and high-performance GIS work).
 Using compiled code for new geoprocessing functionality (particularly with the help of the excellent **Rcpp** package) could form the basis of new R packages, building on the success of **sf** [@pebesma_simple_2018].
-However, there is already a wide range of algorithms that can be accessed via R's interfaces to dedicated GIS software.
+However, there are already a wide range of algorithms that can be accessed via R's interfaces to dedicated GIS software.
 It makes sense to understand these before moving to develop your own optimized algorithms.
 For this reason this chapter focuses on 'bridges' to the mature GIS products [QGIS](http://qgis.org/) (via the package **RQGIS**), [SAGA](http://www.saga-gis.org/) (**RSAGA**) and [GRASS](https://grass.osgeo.org/) (**rgrass7**) from within R (Table \@ref(tab:gis-comp)).
-Obviously, we here focus on open-source software solutions, however, there is also a bridge to the commercial GIS leader [ArcGIS](https://www.arcgis.com) through the **RPyGeo** package.
-And the so-called [R-ArcGIS bridge](https://github.com/R-ArcGIS/r-bridge) allows to use R from within ArcGIS.
+Here we focus on open-source software solutions, however, there is also a bridge to the commercial GIS leader [ArcGIS](https://www.arcgis.com) through the **RPyGeo** package.
+And the so-called [R-ArcGIS bridge](https://github.com/R-ArcGIS/r-bridge) allows us to use R from within ArcGIS.
 As a final note, we would like to point out that aside from interfaces to desktop GIS there are also interfaces to geospatial libraries such as [GDAL](www.gdal.org) (**gdalUtils**, **rgdal**, **sf**) and [GEOS](https://trac.osgeo.org/geos/) (**rgeos**, **sf**). 
-By the end of the chapter you should have a working knowledge of the functionality such packages open up, and a more nuanced understanding of the  'CLI vs GUI' debate.
+By the end of the chapter you should have a working knowledge of the functionality such packages make possible, and a more nuanced understanding of the  'CLI vs GUI' debate.
 As mentioned in Chapter \@ref(intro), doing GIS at the command-line makes it more reproducible, in-line with the principles of Geographic Data Science.
 
 
@@ -106,7 +106,7 @@ To run all these geoalgorithms (frequently more than 1000 depending on your set 
 **RQGIS** establishes a tunnel to this Python API through the **reticulate** package. 
 Basically, functions `set_env()` and `open_app()` are doing this. 
 Note that it is optional to run `set_env()` and `open_app()` since all functions depending on their output will run them automatically if needed.
-Before running **RQGIS** you have to make sure to have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS.
+Before running **RQGIS** make sure you have installed QGIS and all its (third-party) dependencies such as SAGA and GRASS.
 To install **RQGIS** a number of dependencies are required, as described in the [`install_guide`](https://cran.r-project.org/web/packages/RQGIS/vignettes/install_guide.html) vignette, which covers installation on Windows, Linux and Mac.
 Please install the long-term release of QGIS, i.e. 2.18, since **RQGIS** so far does not support QGIS 3.
 
@@ -131,12 +131,11 @@ open_app()
 ```
 
 We are now ready for some QGIS geoprocessing from within R! 
-First, we will union polygons.
-Unfortunately, in our example this will produce so-called sliver polygons.
-These are tiny polygons that are the result when the input polygons slightly overlap which frequently occurs with real-world data.
-In a third step, we will get rid off the sliver polygons.
+The example below shows how to union polygons.
+Unfortunately, this will produce so-called slivers, tiny polygons resulting from overlaps between the inputs that frequently occur in real-world data.
+We will see how to remove them.
 
-For the uninion, we use again the incongruent polygons we have already encountered in section \@ref(spatial-aggr).
+For the union, we use again the incongruent polygons we have already encountered in section \@ref(spatial-aggr).
 Both polygon datasets are available in the **spData** package, and for both we would like to use a geographic CRS (see also Chapter \@ref(reproj-geo-data)).
 
 ```{r}
@@ -240,11 +239,11 @@ get_usage(alg)
 #>	...
 ```
 
-Conveniently, the user has not to specify each single parameter.
-In case a parameter is left unspecified, `run_qgis()` will automatically use the corresponding default value as argument if available.
+Conveniently, the user does not need to specify each single parameter.
+In case a parameter is left unspecified, `run_qgis()` will automatically use the corresponding default value as an argument if available.
 To find out about the default values, run `get_args_man()`.  
 
-To finally get rid off the slivers, we specify that all polygons with an area less or equal to 25000 m^2^ should be joined to that neighboring polygon with the largest area (see right panel of Figure \@ref(fig:sliver-fig)).
+To get rid off the slivers, we specify that all polygons with an area less or equal to 25000 m^2^ should be joined to the neighboring polygon with the largest area (see right panel of Figure \@ref(fig:sliver-fig)).
 
 ```{r, eval=FALSE}
 clean = run_qgis("qgis:eliminatesliverpolygons",
@@ -372,8 +371,7 @@ plot(twi, col = RColorBrewer::brewer.pal(n = 9, name = "Blues"))
 #                  length.out = 9))
 ```
 
-You can find a much more extended version of the presented example in the RSAGA vignette `vignette("RSAGA-landslides")`.
-This example includes statistical geocomputing, i.e., it uses a GIS to derive terrain attributes as predictors for a non-linear Generalized Additive Model (GAM) to predict spatially landslide susceptibility [@muenchow_geomorphic_2012].
+You can find an extended version of this example in `vignette("RSAGA-landslides")` which includes the use of statistical geocomputing to derive terrain attributes as predictors for a non-linear Generalized Additive Model (GAM) to predict spatially landslide susceptibility [@muenchow_geomorphic_2012].
 The term statistical geocomputation emphasizes the strength of combining R's data science power with the geoprocessing power of a GIS which is at the very heart of building a bridge from R to GIS.
 
 ## GRASS through **rgrass7**  {#rgrass}
@@ -404,7 +402,7 @@ We constrain the download of the street network (in OSM language called "highway
 Here, we will only keep the line objects.
 OpenStreetMap objects come with a lot of columns, `streets` features almost 500.
 In fact, we are only interested the geometry column.
-Nevertheless, we are keeping one attribute column, otherwise we later on run into trouble when trying to provide `writeVECT()` only with a geometry object (see further below and `?writeVECT` for more details).
+Nevertheless, we are keeping one attribute column, otherwise we will run into trouble when trying to provide `writeVECT()` only with a geometry object (see further below and `?writeVECT` for more details).
 Remember that the geometry column is sticky, hence, even though we are just selecting one attribute, the geometry column will be also returned (see section \@ref(intro-sf)).
 <!-- To learn more about how to use the **osmdata**-package, please refer to [https://ropensci.github.io/osmdata/](https://ropensci.github.io/osmdata/). -->
 
@@ -512,7 +510,7 @@ writeVECT(SDF = as(points[, 1], "Spatial"), vname = "points")
 To perform our network analysis, we need a topological clean street network.
 GRASS's `v.clean` takes care of the removal of duplicates, small angles and dangles, among others. 
 Here, we break lines at each intersection to ensure that the subsequent routing algorithm can actually turn right or left at an intersection, and save the output in a GRASS object named `streets_clean`.
-Probably a few of our cycling station points do not exactly lie on a street segment.
+It is likely that a few of our cycling station points will not lie exactly on a street segment.
 However, to find the shortest route between them, we need to connect them to the nearest streets segment.
 `v.net`'s connect-operator does exactly this. 
 We save its output in `streets_points_con`.
@@ -537,7 +535,7 @@ execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
           flags = c("overwrite"))
 ```
 
-To visualize our result, we import the output layer into R, convert it into an sf-object , just keep the geometry and visualize it with the help of the **mapview** package (Figure \@ref(fig:grass-mapview)).
+To visualize our result, we import the output layer into R, convert it into an sf-object keeping only the geometry and visualize it with the help of the **mapview** package (Figure \@ref(fig:grass-mapview)).
 
 ```{r grass-mapview, fig.cap="Shortest route between 24 cycle hire station on the OSM street network of London.", echo=FALSE}
 knitr::include_graphics("figures/09_shortest_route.png")
@@ -554,14 +552,14 @@ mapview::mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) +
 Further notes:
 
 - Please note that we have used GRASS's geodatabase (based on SQLite) which allows faster processing. 
-That means we have only exported spatial data in the beginning.
+That means we have only exported spatial data at the beginning.
 Then we created new objects but only imported the final result back into R.
 To find out which datasets are currently available, run `execGRASS("g.list", type = "vector,raster", flags = "p")`.
-- Of course, we could have also accessed an already existing GRASS geodatabase from within R.
+- We could have also accessed an already existing GRASS geodatabase from within R.
 Prior to importing data into R, you might want to perform some (spatial) subsetting.
 Use `v.select` and `v.extract` for vector data. 
 `db.select` lets you select subsets of the attribute table of a vector layer without returning the corresponding geometry.
-- You can start R also from within a running GRASS session [for more information please refer to @bivand_applied_2013 and this [wiki](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7)].
+- You can also start R from within a running GRASS session [for more information please refer to @bivand_applied_2013 and this [wiki](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7)].
 - Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass75/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm.
 - If you would like to use GRASS 6 from within R, use the R package **spgrass6**.
 
@@ -569,13 +567,13 @@ Use `v.select` and `v.extract` for vector data.
 
 To recommend a single R-GIS interface is hard since the usage depends on personal preferences, the tasks at hand and your familiarity with different GIS software packages which in turn probably depends on your field of study.
 As mentioned previously, SAGA is especially good at the fast processing of large (high-resolution) raster datasets, and frequently used by hydrologists, climatologists and soil scientists [@conrad_system_2015].
-GRASS GIS, on the other hand, is the only GIS presented here supporting a topologically based spatial database which is especially useful for network analyses but also simulation studies (see further below).
+GRASS GIS, on the other hand, is the only GIS presented here supporting a topologically based spatial database which is especially useful for network analyses but also simulation studies (see below).
 QGIS is much more user-friendly compared to GRASS- and SAGA-GIS, especially for first-time GIS users, and probably the most popular open-source GIS.
 Therefore, **RQGIS** is an appropriate choice for most use cases.
 Its main advantages are:
 
 - A unified access to several GIS, and therefore the provision of >1000 geoalgorithms (Table \@ref(tab:gis-comp)).
-Of course, this includes duplicated functionality, e.g., you can perform overlay-operations using QGIS-, SAGA- or GRASS-geoalgorithms.
+This includes duplicated functionality, e.g., you can perform overlay-operations using QGIS-, SAGA- or GRASS-geoalgorithms.
 - The automatic data format conversions. 
 For instance, SAGA uses `.sdat` grid files and GRASS uses its own database format but QGIS will handle the corresponding conversions for you on the fly.
 - **RQGIS** can also handle spatial objects residing in R as input for geoalgorithms, and loads QGIS output automatically back into R if desired.
@@ -585,7 +583,7 @@ Please note that **rgrass7** inspired the latter two features.
 By all means, there are use cases when you certainly should use one of the other R-GIS bridges.
 Though QGIS is the only GIS providing a unified interface to several GIS software packages, it only provides access to a subset of the corresponding third-party geoalgorithms (for more information please refer to @muenchow_rqgis:_2017).
 Therefore, to use the complete set of SAGA and GRASS functions, stick with **RSAGA** and **rgrass7**. 
-When doing so, make advantage of **RSAGA**'s numerous user-friendly functions.
+When doing so, take advantage of **RSAGA**'s numerous user-friendly functions.
 Note also, that **RSAGA** offers native R functions for geocomputation such as `multi.local.function`, `pick.from.grid` and many more.
 **RSAGA** supports much more SAGA versions than (R)QGIS.
 Finally, if you need topological correct data and/or geodatabase-management functionality such as multi-user access, we recommend the usage of GRASS. 
@@ -660,7 +658,7 @@ This is an even better approach since it circumvents the command-line and allows
 
 ### Spatial database API - PostgreSQL/PostGIS {#postgis}
 
-Spatial database management systems (spatial DBMS) allow to store spatial and non-spatial data in a structured way (as opposed to loose collections of data somewhere stored on disk) and to relate tables (entities) to each other explicitly via unique identifiers (primary and foreign keys) and implicitly via space (think for instance of a spatial join). 
+Spatial database management systems (spatial DBMS) allow us to store spatial and non-spatial data in a structured way (as opposed to loose collections of data somewhere stored on disk) and to relate tables (entities) to each other explicitly via unique identifiers (primary and foreign keys) and implicitly via space (think for instance of a spatial join). 
 Geographic data tends to become big quite quickly.
 Databases are especially useful for large data and querying it efficiently spatially and non-spatially.
 Additionally, spatial DBMS provide multi-user access and topology support.
@@ -702,7 +700,7 @@ dbListFields(conn, "highways")
 ```
 
 The first query will select `US Route 1` in Maryland (`MD`).
-Note that `st_read()` allows to read spatial data from a database if it is provided with an open connection to a database and a query.
+Note that `st_read()` allows us to read spatial data from a database if it is provided with an open connection to a database and a query.
 Additionally, `st_read()` needs to know which column represents the geometry (here: `wkb_geometry`).
 
 ```{r, eval=FALSE}
@@ -724,7 +722,7 @@ query = paste(
 buf = st_read(conn, query = query)
 ```
 
-Note that this was a spatial query using functions (`ST_Union()`, `ST_Buffer()`) you should be already familiar with since you find them also in the **sf**-package though here they are written in lowercase characters (`st_union()`, `st_buffer()`).
+Note that this was a spatial query using functions (`ST_Union()`, `ST_Buffer()`) you should be already familiar with since you find them also in the **sf**-package, though here they are written in lowercase characters (`st_union()`, `st_buffer()`).
 In fact, function names of the **sf** package largely follow the PostGIS naming conventions.^[By the way, the prefix `st` stands for space/time.]
 The last query will find all Hardee restaurants (`HDE`) within the buffer zone (Figure \@ref(fig:postgis)).
 
@@ -769,13 +767,13 @@ plot(st_geometry(hardees), pch = 21, cex = 1.5,
 Unlike PostGIS, **sf** only supports spatial vector data. 
 To query and manipulate raster data stored in a PostGIS database, use the **rpostgis** package [@bucklin_rpostgis_2018] and/or use command-line tools such as `rastertopgsql` which comes as part of the PostGIS installation. 
 
-Of course, this subsection was only a very brief introduction to PostgreSQL/PostGIS.
+This subsection is only a brief introduction to PostgreSQL/PostGIS.
 Nevertheless, we would like to encourage the practice of storing geographic and non-geographic data in a spatial DBMS while only attaching those subsets to R's global environment which are needed for further (geo-)statistical analysis.
-Please refer to @obe_postgis_2015 for a much more detailed description of the here presented SQL queries and a much more comprehensive introduction to PostgreSQL/PostGIS in general.
+Please refer to @obe_postgis_2015 for a more detailed description of the SQL queries presented and a more comprehensive introduction to PostgreSQL/PostGIS in general.
 PostgreSQL/PostGIS is a formidable choice as an open source spatial database.
 But the same is true for the lightweight SQLite/SpatiaLite database engine and GRASS which uses SQLite in the background (see section \@ref(rgrass)).
 
-As a final note, if your data is even getting to big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, then the logical next step is to use large-scale geographic querying on distributed computing systems, as for example, provided by GeoMesa (http://www.geomesa.org/) or GeoSpark [http://geospark.datasyslab.org/; @huang_geospark_2017].
+As a final note, if your data is getting too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, then the next logical step is to use large-scale geographic querying on distributed computing systems, as for example, provided by GeoMesa (http://www.geomesa.org/) or GeoSpark [http://geospark.datasyslab.org/; @huang_geospark_2017].
 
 ## Exercises
 
