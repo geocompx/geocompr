@@ -138,9 +138,9 @@ For the union, we use again the incongruent polygons we have already encountered
 Both polygon datasets are available in the **spData** package, and for both we would like to use a geographic CRS (see also Chapter \@ref(reproj-geo-data)).
 
 ```{r}
-data("incongruent", "aggregating_zones")
-incongruent = st_transform(incongruent, 4326)
-aggregating_zones = st_transform(aggregating_zones, 4326)
+data("incongruent", "aggregating_zones", package = "spData")
+incongr_wgs = st_transform(incongruent, 4326)
+aggzone_wgs = st_transform(aggregating_zones, 4326)
 ```
 
 Now we need a QGIS geoalgorithm that unions polygons.
@@ -173,12 +173,12 @@ get_usage(alg)
 
 Finally, we can let QGIS do the work.
 Note that the workhorse function `run_qgis()` accepts R named arguments, i.e., you can specify the parameter names as returned by `get_usage()` in `run_qgis()` as you would do in any other regular R function.
-Note also that `run_qgis()` accepts spatial objects residing in R's global environment as input (here: `aggregating_zones` and `incongruent`). 
+Note also that `run_qgis()` accepts spatial objects residing in R's global environment as input (here: `aggzone_wgs` and `incongr_wgs`). 
 But of course, you could also specify paths to spatial vector files stored on disk.
 Setting the `load_output` to `TRUE` automatically loads the QGIS output as an **sf**-object into R.
 
 ```{r, eval=FALSE}
-union = run_qgis(alg, INPUT = incongruent, INPUT2 = aggregating_zones, 
+union = run_qgis(alg, INPUT = incongr_wgs, INPUT2 = aggzone_wgs, 
                  OUTPUT = file.path(tempdir(), "union.shp"),
                  load_output = TRUE)
 #> $`OUTPUT`
@@ -186,7 +186,7 @@ union = run_qgis(alg, INPUT = incongruent, INPUT2 = aggregating_zones,
 ```
 
 Note that the QGIS union operation merges the two input layers into one layer by using the intersection and the symmetrical difference of the two input layers (which by the way is also the default when doing a union operation in GRASS and SAGA).
-This is **not** the same as `st_union(incongruent, aggregating_zones)` (see Exercises)!
+This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)!
 The QGIS output contains empty geometries and multipart polygons.
 Empty geometries might lead to problems in subsequent geoprocessing tasks which is why they will be deleted.
 `st_dimension()` returns `NA` if a geometry is empty, and can therefore be used as a filter. 
