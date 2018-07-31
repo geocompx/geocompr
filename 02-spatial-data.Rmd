@@ -516,11 +516,12 @@ This is important since `sfc` represents the geometry column in **sf** data fram
 # sfc POINT
 point1 = st_point(c(5, 2))
 point2 = st_point(c(1, 3))
-st_sfc(point1, point2)
+points_sfc = st_sfc(point1, point2)
+points_sfc
 ```
 
 In most cases, an `sfc` object contains objects of the same geometry type.
-Therefore, when we convert `sfg` objects of type polygon into a simple feature geometry column, we would also end up with an `sfc` object of type polygon. 
+Therefore, when we convert `sfg` objects of type polygon into a simple feature geometry column, we would also end up with an `sfc` object of type polygon, which can be verified with `st_geometry_type()`. 
 Equally, a geometry column of multilinestrings would result in an `sfc` object of type multilinestring:
 
 ```{r}
@@ -529,7 +530,8 @@ polygon_list1 = list(rbind(c(1, 5), c(2, 2), c(4, 1), c(4, 4), c(1, 5)))
 polygon1 = st_polygon(polygon_list1)
 polygon_list2 = list(rbind(c(0, 2), c(1, 2), c(1, 3), c(0, 3), c(0, 2)))
 polygon2 = st_polygon(polygon_list2)
-st_sfc(polygon1, polygon2)
+polygon_sfc = st_sfc(polygon1, polygon2)
+st_geometry_type(polygon_sfc)
 ```
 
 ```{r}
@@ -540,14 +542,16 @@ multilinestring1 = st_multilinestring((multilinestring_list1))
 multilinestring_list2 = list(rbind(c(2, 9), c(7, 9), c(5, 6), c(4, 7), c(2, 7)), 
                             rbind(c(1, 7), c(3, 8)))
 multilinestring2 = st_multilinestring((multilinestring_list2))
-st_sfc(multilinestring1, multilinestring2)
+multilinestring_sfc = st_sfc(multilinestring1, multilinestring2)
+st_geometry_type(multilinestring_sfc)
 ```
 
 It is also possible to create an `sfc` object from `sfg` objects with different geometry types:
 
 ```{r}
 # sfc GEOMETRY
-st_sfc(point1, multilinestring1)
+point_multilinestring_sfc = st_sfc(point1, multilinestring1)
+st_geometry_type(point_multilinestring_sfc)
 ```
 
 <!-- if you want to use it - st_cast() to a proper geometry type -->
@@ -558,60 +562,64 @@ st_sfc(point1, multilinestring1)
 As mentioned before, `sfc` objects can additionally store information on the coordinate reference systems (CRS).
 <!-- What's CRS -->
 To specify a certain CRS, we can use the `epsg (SRID)` or `proj4string` attributes of an `sfc` object.
-The default value of `epsg (SRID)` and `proj4string` is `NA` (*Not Available*):
+The default value of `epsg (SRID)` and `proj4string` is `NA` (*Not Available*), as can be verified with `st_crs()`:
 
 ```{r}
-st_sfc(point1, point2)
+st_crs(points_sfc)
 ```
 
-All geometries in an `sfc` object must have the same CRS. 
-
+All geometries in an `sfc` object must have the same CRS.
 We can add coordinate reference system as a `crs` argument of `st_sfc()`. 
-This argument accepts either an integer with the `epsg` code (for example, `4326`)  or a `proj4string` character string (for example, `"+proj=longlat +datum=WGS84 +no_defs"`) (see section \@ref(crs-intro)). 
+This argument accepts an integer with the `epsg` code such as `4326`, which automatically adds the 'proj4string' (see section \@ref(crs-intro)):
 
 ```{r}
 # EPSG definition
-st_sfc(point1, point2, crs = 4326)
+points_sfc_wgs = st_sfc(point1, point2, crs = 4326)
+st_crs(points_sfc_wgs)
 ```
 
-```{r}
+It also accepts a raw proj4string (result not shown):
+
+```{r, eval=FALSE}
 # PROJ4STRING definition
 st_sfc(point1, point2, crs = "+proj=longlat +datum=WGS84 +no_defs")
 ```
 
-For example, we can set the UTM Zone 11N projection with `epsg` code `2955`:
+<!-- For example, we can set the UTM Zone 11N projection with `epsg` code `2955`: -->
 
-```{r, eval=FALSE}
-st_sfc(point1, point2, crs = 2955)
-#> ...
-#> epsg (SRID):    2955
-#> proj4string:    +proj=utm +zone=11 +ellps=GRS80 ... +units=m +no_defs
-#> POINT (5 2)
-#> POINT (1 3)
+<!-- ```{r, eval=FALSE} -->
+<!-- st_sfc(point1, point2, crs = 2955) -->
+<!-- #> ... -->
+<!-- #> epsg (SRID):    2955 -->
+<!-- #> proj4string:    +proj=utm +zone=11 +ellps=GRS80 ... +units=m +no_defs -->
+<!-- #> POINT (5 2) -->
+<!-- #> POINT (1 3) -->
+<!-- ``` -->
+
+<!-- As you can see above, the `proj4string` definition was automatically added. -->
+<!-- The CRS can also be set with the full `proj4string` (result not shown): -->
+
+<!-- ```{r, eval=FALSE} -->
+<!-- p4s = "+proj=utm +zone=11 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs" -->
+<!-- st_sfc(point1, point2, crs = crs_utm) -->
+<!-- ``` -->
+
+```{block2 type='rmdnote'}
+Sometimes `st_crs()` will return a `proj4string` but not an `epsg` code. 
+This is because there is no general method to convert from `proj4string` to `epsg` (see Chapter \@ref(reproj-geo-data)).
 ```
-
-As you can see above, the `proj4string` definition was automatically added.
-The CRS can also be set with the full `proj4string` (result not shown):
-
-```{r, eval=FALSE}
-p4s = "+proj=utm +zone=11 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-st_sfc(point1, point2, crs = crs_utm)
-```
-
-However, the `epsg` string of our result remained empty. 
-This is because there is no general method to convert from `proj4string` to `epsg`.
 
 <!-- precision -->
 <!-- plots can be made -->
 
 ### The sf class {#sf}
 
-The previous sections (\@ref() to \@ref()) deal with purely geometric objects, 'sf geometry' and 'sf column' objects respectively.
+Sections \@ref(geometry) to \@ref(sfc) deal with purely geometric objects, 'sf geometry' and 'sf column' objects respectively.
 These are geographic building blocks of geographic vector data represented as simple features.
 The final building block is non-geographic attributes, representing the name of the feature or other attributes such as measured values, groups, and other things.
 
 To illustrate attributes, we will represent a temperature of 25°C in London on June 21^st^ 2017.
-This example contains a geometry (the coordinates), and three attributes with three different classes (place name, temperature and date).[
+This example contains a geometry (the coordinates), and three attributes with three different classes (place name, temperature and date).^[
 Other attributes might include a urbanity category (city or village), or a remark if the measurement was made using an automatic station.
 ]
 Objects of class `sf` represent such data by combining the attributes (`data.frame`) with the simple feature geometry column (`sfc`).
