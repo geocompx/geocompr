@@ -341,7 +341,7 @@ The code above uses the function `st_centroid()` to convert one geometry type (p
 Here is not the place to explain how the function works (this is covered in Chapter \@ref(geometric-operations)).
 The point is that simple feature geometries can come in different forms, the topic of the next sections.
 
-### Simple feature geometry types {#geometry}
+### Geometry types {#geometry}
 
 <!-- This section demonstrates how the full range of geometry types supported by the **sf** package can be created, combined and plotted. -->
 Geometries are the basic building blocks of simple features.
@@ -412,7 +412,7 @@ plot(st_as_sfc("GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2), LINESTRING 
      axes = TRUE, main = "GEOMETRYCOLLECTION", col = 1)
 ```
 
-### Simple feature geometry (sfg) objects {#sfg}
+### Simple feature geometries (sfg) {#sfg}
 
 The `sfg` class represents the different simple feature geometry types: point, linestring, polygon (and their 'multi' equivalents, such as multipoints) or geometry collection.
 
@@ -505,7 +505,7 @@ st_geometrycollection(gemetrycollection_list)
 <!-- lines could create mutlilines or polygons, etc. -->
 <!-- https://r-spatial.github.io/sf/articles/sf1.html -->
 
-### Simple feature geometry column {#sfc}
+### Simple feature columns (sfc) {#sfc}
 
 One `sfg` object contains only a single simple feature geometry. 
 A simple feature geometry column (`sfc`) is a list of `sfg` objects, which is additionally able to contain information about the coordinate reference system in use.
@@ -516,11 +516,12 @@ This is important since `sfc` represents the geometry column in **sf** data fram
 # sfc POINT
 point1 = st_point(c(5, 2))
 point2 = st_point(c(1, 3))
-st_sfc(point1, point2)
+points_sfc = st_sfc(point1, point2)
+points_sfc
 ```
 
 In most cases, an `sfc` object contains objects of the same geometry type.
-Therefore, when we convert `sfg` objects of type polygon into a simple feature geometry column, we would also end up with an `sfc` object of type polygon. 
+Therefore, when we convert `sfg` objects of type polygon into a simple feature geometry column, we would also end up with an `sfc` object of type polygon, which can be verified with `st_geometry_type()`. 
 Equally, a geometry column of multilinestrings would result in an `sfc` object of type multilinestring:
 
 ```{r}
@@ -529,7 +530,8 @@ polygon_list1 = list(rbind(c(1, 5), c(2, 2), c(4, 1), c(4, 4), c(1, 5)))
 polygon1 = st_polygon(polygon_list1)
 polygon_list2 = list(rbind(c(0, 2), c(1, 2), c(1, 3), c(0, 3), c(0, 2)))
 polygon2 = st_polygon(polygon_list2)
-st_sfc(polygon1, polygon2)
+polygon_sfc = st_sfc(polygon1, polygon2)
+st_geometry_type(polygon_sfc)
 ```
 
 ```{r}
@@ -540,14 +542,16 @@ multilinestring1 = st_multilinestring((multilinestring_list1))
 multilinestring_list2 = list(rbind(c(2, 9), c(7, 9), c(5, 6), c(4, 7), c(2, 7)), 
                             rbind(c(1, 7), c(3, 8)))
 multilinestring2 = st_multilinestring((multilinestring_list2))
-st_sfc(multilinestring1, multilinestring2)
+multilinestring_sfc = st_sfc(multilinestring1, multilinestring2)
+st_geometry_type(multilinestring_sfc)
 ```
 
 It is also possible to create an `sfc` object from `sfg` objects with different geometry types:
 
 ```{r}
 # sfc GEOMETRY
-st_sfc(point1, multilinestring1)
+point_multilinestring_sfc = st_sfc(point1, multilinestring1)
+st_geometry_type(point_multilinestring_sfc)
 ```
 
 <!-- if you want to use it - st_cast() to a proper geometry type -->
@@ -558,72 +562,110 @@ st_sfc(point1, multilinestring1)
 As mentioned before, `sfc` objects can additionally store information on the coordinate reference systems (CRS).
 <!-- What's CRS -->
 To specify a certain CRS, we can use the `epsg (SRID)` or `proj4string` attributes of an `sfc` object.
-The default value of `epsg (SRID)` and `proj4string` is `NA` (*Not Available*):
+The default value of `epsg (SRID)` and `proj4string` is `NA` (*Not Available*), as can be verified with `st_crs()`:
 
 ```{r}
-st_sfc(point1, point2)
+st_crs(points_sfc)
 ```
 
-All geometries in an `sfc` object must have the same CRS. 
-
+All geometries in an `sfc` object must have the same CRS.
 We can add coordinate reference system as a `crs` argument of `st_sfc()`. 
-This argument accepts either an integer with the `epsg` code (for example, `4326`)  or a `proj4string` character string (for example, `"+proj=longlat +datum=WGS84 +no_defs"`) (see section \@ref(crs-intro)). 
+This argument accepts an integer with the `epsg` code such as `4326`, which automatically adds the 'proj4string' (see section \@ref(crs-intro)):
 
 ```{r}
 # EPSG definition
-st_sfc(point1, point2, crs = 4326)
+points_sfc_wgs = st_sfc(point1, point2, crs = 4326)
+st_crs(points_sfc_wgs)
 ```
 
-```{r}
+It also accepts a raw proj4string (result not shown):
+
+```{r, eval=FALSE}
 # PROJ4STRING definition
 st_sfc(point1, point2, crs = "+proj=longlat +datum=WGS84 +no_defs")
 ```
 
-For example, we can set the UTM Zone 11N projection with `epsg` code `2955`:
+<!-- For example, we can set the UTM Zone 11N projection with `epsg` code `2955`: -->
 
-```{r, eval=FALSE}
-st_sfc(point1, point2, crs = 2955)
-#> ...
-#> epsg (SRID):    2955
-#> proj4string:    +proj=utm +zone=11 +ellps=GRS80 ... +units=m +no_defs
-#> POINT (5 2)
-#> POINT (1 3)
+<!-- ```{r, eval=FALSE} -->
+<!-- st_sfc(point1, point2, crs = 2955) -->
+<!-- #> ... -->
+<!-- #> epsg (SRID):    2955 -->
+<!-- #> proj4string:    +proj=utm +zone=11 +ellps=GRS80 ... +units=m +no_defs -->
+<!-- #> POINT (5 2) -->
+<!-- #> POINT (1 3) -->
+<!-- ``` -->
+
+<!-- As you can see above, the `proj4string` definition was automatically added. -->
+<!-- The CRS can also be set with the full `proj4string` (result not shown): -->
+
+<!-- ```{r, eval=FALSE} -->
+<!-- p4s = "+proj=utm +zone=11 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs" -->
+<!-- st_sfc(point1, point2, crs = crs_utm) -->
+<!-- ``` -->
+
+```{block2 type='rmdnote'}
+Sometimes `st_crs()` will return a `proj4string` but not an `epsg` code. 
+This is because there is no general method to convert from `proj4string` to `epsg` (see Chapter \@ref(reproj-geo-data)).
 ```
-
-As you can see above, the `proj4string` definition was automatically added.
-The CRS can also be set with the full `proj4string` (result not shown):
-
-```{r, eval=FALSE}
-p4s = "+proj=utm +zone=11 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-st_sfc(point1, point2, crs = crs_utm)
-```
-
-However, the `epsg` string of our result remained empty. 
-This is because there is no general method to convert from `proj4string` to `epsg`.
 
 <!-- precision -->
 <!-- plots can be made -->
 
-### Simple feature objects {#sf}
+### The sf class {#sf}
 
-So far, we have only dealt with the pure geometries.
-Most of the time, however, these geometries come with a set of attributes describing them. 
-These attributes could represent the name of the geometry, measured values, groups to which the geometry belongs, and many more.
-For example, we measured a temperature of 25°C on Trafalgar Square in London on June 21^st^ 2017. 
-Hence, we have a specific point in space (the coordinates), the name of the location (Trafalgar Square), a temperature value and the date of the measurement.
+Sections \@ref(geometry) to \@ref(sfc) deal with purely geometric objects, 'sf geometry' and 'sf column' objects respectively.
+These are geographic building blocks of geographic vector data represented as simple features.
+The final building block is non-geographic attributes, representing the name of the feature or other attributes such as measured values, groups, and other things.
+
+To illustrate attributes, we will represent a temperature of 25°C in London on June 21^st^ 2017.
+This example contains a geometry (the coordinates), and three attributes with three different classes (place name, temperature and date).^[
 Other attributes might include a urbanity category (city or village), or a remark if the measurement was made using an automatic station.
-
-The simple feature class, `sf`, is a combination of an attribute table (`data.frame`) and a simple feature geometry column (`sfc`).
-Simple features are created using the `st_sf()` function:
+]
+Objects of class `sf` represent such data by combining the attributes (`data.frame`) with the simple feature geometry column (`sfc`).
+They are created with `st_sf()` as illustrated below, which creates the London example described above:
 
 ```{r}
-# sfg objects
-london_point = st_point(c(0.1, 51.5))
+lnd_point = st_point(c(0.1, 51.5))                 # sfg object
+lnd_geom = st_sfc(lnd_point, crs = 4326)           # sfc object
+lnd_attrib = data.frame(                           # data.frame object
+  name = "London",
+  temperature = 25,
+  date = as.Date("2017-06-21")
+  )
+lnd_sf = st_sf(lnd_attrib, geometry = lnd_geom)    # sf object
+```
+
+What just happened? First, the coordinates were used to create the simple feature geometry (`sfg`).
+Second, the geometry was converted into a simple feature geometry column (`sfc`), with a CRS.
+Third, attributes were stored in a `data.frame`, which was combined with the `sfc` object with `st_sf()`.
+This results in an `sf` object, as demonstrated below (some output ommited):
+
+```{r, eval=FALSE}
+lnd_sf
+#> Simple feature collection with 1 features and 3 fields
+#> ...
+#>     name temperature       date         geometry
+#> 1 London          25 2017-06-21 POINT (0.1 51.5)
+```
+
+```{r}
+class(lnd_sf)
+```
+
+The result shows that `sf` objects actually have two classes, `sf` and `data.frame`.
+Simple features are simply data frames (square tables), but with spatial attributes (usually stored in a special `geom` list-column in the data frame).
+This duality is central to the concept of simple features:
+most of the time a `sf` can be treated as and behaves like a `data.frame`.
+Simple features are, in essence, data frames with a spatial extension.
+
+```{r, eval=FALSE, echo=FALSE}
 ruan_point = st_point(c(-9, 53))
 # sfc object
-our_geometry = st_sfc(london_point, ruan_point, crs = 4326)
+our_geometry = st_sfc(lnd_point, ruan_point, crs = 4326)
 # data.frame object
-our_attributes = data.frame(name = c("London", "Ruan"),
+our_attributes = data.frame(
+  name = c("London", "Ruan"),
                             temperature = c(25, 13),
                             date = c(as.Date("2017-06-21"), as.Date("2017-06-22")),
                             category = c("city", "village"),
@@ -632,30 +674,6 @@ our_attributes = data.frame(name = c("London", "Ruan"),
 sf_points = st_sf(our_attributes, geometry = our_geometry)
 ```
 
-The above example illustrates the components of `sf` objects. 
-Firstly, coordinates define the geometry of the simple feature geometry (`sfg`).
-Secondly, we can combine the geometries in a simple feature geometry column (`sfc`) which also stores the CRS.
-Subsequently, we store the attribute information on the geometries in a `data.frame`.
-Finally, the `st_sf()` function combines the attribute table and the `sfc` object in an `sf` object, as demonstrated below (some output ommited):
-
-```{r, eval=FALSE}
-sf_points
-#> Simple feature collection with 2 features and 5 fields
-#> ...
-#>     name temperature       date category automatic         geometry
-#> 1 London          25 2017-06-21     city     FALSE POINT (0.1 51.5)
-#> 2   Ruan          13 2017-06-22  village      TRUE    POINT (-9 53)
-```
-
-```{r}
-class(sf_points)
-```
-
-The resultshows that `sf` objects actually have two classes, `sf` and `data.frame`.
-Simple features are simply data frames (square tables), but with spatial attributes (usually stored in a special `geom` list-column in the data frame).
-This duality is central to the concept of simple features:
-most of the time a `sf` can be treated as and behaves like a `data.frame`.
-Simple features are, in essence, data frames with a spatial extension.
 
 <!-- https://r-spatial.github.io/sf/articles/sf1.html#how-attributes-relate-to-geometries -->
 
@@ -1054,31 +1072,31 @@ Likewise, it is important to formally specify the units in which the geometry da
 A novel feature of geometry data in `sf` objects is that they have *native support* for units.
 This means that distance, area and other geometric calculations in **sf** return values that come with a `units` attribute, defined by the **units** package [@pebesma_measurement_2016].
 This is advantageous because it prevents confusion caused by the fact that different CRSs use different units (most use meters, some use feet).
-Furthermore, it also provides information on dimensionality, as illustrated by the following calculation which reports the area of Nigeria:
+Furthermore, it also provides information on dimensionality, as illustrated by the following calculation which reports the area of Luxembourg:
 
 ```{r}
-nigeria = world[world$name_long == "Nigeria", ]
+luxembourg = world[world$name_long == "Luxembourg", ]
 ```
 
 ```{r}
-st_area(nigeria)
+st_area(luxembourg)
 ```
 
-The result is in units of square meters (m^2^), showing a) that the result represents two-dimensional space and b) and that Nigeria is a large country!
-This information, stored as an attribute (which interested readers can discover with `attributes(st_area(nigeria))`) is advantageous for many reasons, for example it could feed into subsequent calculations such as population density.
+The result is in units of square meters (m^2^), showing that the result represents two-dimensional space.
+This information, stored as an attribute (which interested readers can discover with `attributes(st_area(luxembourg))`) is advantageous for many reasons, for example it could feed into subsequent calculations such as population density.
 Reporting units prevents confusion.
-To take the Nigeria example, if the units remained unspecified, one could incorrectly assume that the units were in km^2^.
+To take the Luxembourg example, if the units remained unspecified, one could incorrectly assume that the units were in hectares.
 To translate the huge number into a more digestible size, it is tempting to divide the results by a million (the number of square meters in a square kilometer):
 
 ```{r}
-st_area(nigeria) / 1000000
+st_area(luxembourg) / 1000000
 ```
 
 However, the result is incorrectly given again as square meters.
 The solution is to set the correct units with the **units** package:
 
 ```{r}
-units::set_units(st_area(nigeria), km^2)
+units::set_units(st_area(luxembourg), km^2)
 ```
 
 <!-- Is that right? I mean, the units DESCRIPTION says "Support for measurement units in R vectors, matrices and arrays". Since raster datasets are just matrices, units might be easily used with them?-->
