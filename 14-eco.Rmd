@@ -293,7 +293,35 @@ Here, we shortly introduce decision trees and bagging, since they form the basis
 We refer the reader to @james_introduction_2013 for a more detailed description of random forests and related techniques.
 <!-- shortly introduce random forests --> 
 
-- introduce decision trees
+To introduce decision trees by example, we first construct a response-predictor matrix by joining the rotated NMDS scores to the field observations (`random_points`).
+We will also use the resulting dataframe for the **mlr** modeling later on.
+
+```{r}
+# construct response-predictor matrix
+# id- and response variable
+rp = data.frame(id = as.numeric(rownames(scores(rotnmds))),
+                sc = scores(rotnmds)[, 1])
+# join the predictors (dem, ndvi and terrain attributes)
+rp = inner_join(random_points, rp,  by = "id")
+```
+
+Decision trees split the predictor space into a number of regions.
+To illustrate this, we apply a decision tree to our data using the scores of the first NMDS axis as the response (`sc`) and altitude (`dem`) as the only predictor.
+
+```{r tree, fig.cap="Simple example of a decision tree with three internal nodes and four terminal nodes."}
+library("tree")
+tree_mo = tree(sc ~ dem, data = rp)
+plot(tree_mo)
+text(tree_mo, pretty = 0)
+```
+<!-- rounding is wrong in the online figure output, ok, save the figure as png and include it separately -->
+
+The resulting tree consists of three internal nodes and four terminal nodes (Figure \@ref(fig:tree)).
+The first internal node at the top of the tree assigns all observations which are below `r gsub("<", "", as.character(as.data.frame(tree_mo$fram$splits)[1, "cutleft"]))` m to the left and all other observations to the right branch.
+The observations falling into the left branch have a mean NMDS score of `r round(tree_mo$frame$yval[2], 3)`.
+Overall, we can interpret the tree as follows: the higher the elevation, the higher the NMDS score becomes.
+
+
 - shortly explain bagging
 - random forests, improves bagging by decorrelating trees
 - explain hyperparameters `mtry` and `num.trees`
@@ -327,16 +355,9 @@ This means, the inner hyperparameter tuning level is no longer needed which make
 In short, we tune the hyperparameters for a good spatial prediction on the complete dataset via a 5-fold spatial CV with one repetition.
 <!-- If we used more than one repetition (say 2) we would retrieve multiple optimal tuned hyperparameter combinations (say 2) -->
 
-The preparation for the modeling using the **mlr** package includes the construction of a separate coordinate dataframe and the construction of the response-predictor matrix.
+The preparation for the modeling using the **mlr** package includes the construction of a response-predictor matrix containing only variables which should be used in the modeling and the construction of a separate coordinate dataframe and t.
 
 ```{r}
-# construct response-predictor matrix
-# id- and response variable
-rp = data.frame(id = as.numeric(rownames(scores(rotnmds))),
-                sc = scores(rotnmds)[, 1])
-# join the predictors (dem, ndvi and terrain attributes)
-rp = inner_join(random_points, rp,  by = "id")
-
 # extract the coordinates into a separate dataframe
 coords = sf::st_coordinates(rp) %>% 
   as.data.frame %>%
@@ -500,7 +521,7 @@ The tuned hyperparameters served as input for the final model which in turn was 
 Things to further consider include:
 
 - If we were interested in interpreting the model in an ecological meaningful way, we should use (semi-)parametric models [@muenchow_predictive_2013;@zuur_mixed_2009;@zuur_beginners_2017].
-However, there are also approaches that help to quantify variable importance when using machine learning. 
+However, there are at least approaches that help to quantify variable importance when using machine learning learning algorithms such as random forests.
 - We have used just the first NMDS axis.
 It would be interesting to also model the second axis and to subsequently finding an innovative way of visualizing jointly the modeled scores of the two axes in one prediction map.
 
