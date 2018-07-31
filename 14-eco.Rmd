@@ -292,9 +292,20 @@ To spatially visualize them, we can model the NMDS scores with the previously cr
 ### Background
 <!-- shortly introduce random forests --> 
 
+- introduce desicion trees
+- shortly explain bagging
+- random forests, improves bagging by decorrelating trees
+- explain hyperparameters `mtry` and `num.trees`
+
+<!--
+Recall that bagging is simply a special case of a random forest with m = p. Therefore, the randomForest() function can random be used to perform both random forests and bagging. 
+The argument mtry=13 indicates that all 13 predictors should be considered
+for each split of the tree—in other words, that bagging should be done.
+-->
+@james_introduction_2013
+
 ### **mlr** building blocks
 
-<!-- this should probably be only an exercise since everything has been covered in chapter spatial cv -->
 The following code largely follows the steps we have introduced in section \@ref(svm).
 The only differences are:
 
@@ -304,14 +315,13 @@ The only differences are:
 1. we are leaving the assessment of a bias-reduced performance measure as an exercise to the reader (see exercises). 
 Instead we show how to tune hyperparameters for (spatial) predictions.
 
-`r 50 * 5 * 5 * 100 + 500` models were necessary to retrieve bias-reduced performance estimates.
+Remember that 125,500 models were necessary to retrieve bias-reduced performance estimates when using 100-repeated 5-fold spatial cross-validation and a random search of 50 iterations (see section \@ref(svm)).
 In the hyperparameter tuning fold, we found the best hyperparameter combination which in turn was used in the outer performance loop for predicting the test data of a specific spatial partition. 
-This was done for five spatial partitions, and repeated a 100 times.
-This yields in total 500 optimal hyperparameter combinations.
+This was done for five spatial partitions, and repeated a 100 times yielding in total 500 optimal hyperparameter combinations.
 Which one should we use for making spatial predictions?
 The answer is simple, none at all. 
-Remember, the tuning was done to retrieve a bias-reduced performance estimate, not the best possible spatial prediction.
-For the latter, one estimates the best hyperparameter combination on the complete dataset.
+Remember, the tuning was done to retrieve a bias-reduced performance estimate, not to do the best possible spatial prediction.
+For the latter, one estimates the best hyperparameter combination from the complete dataset.
 This means, the inner hyperparameter tuning level is no longer needed which makes perfectly sense since we are applying our model to new data (unvisited field observations) for which the true outcomes are unavailable, hence testing is impossible in any case. 
 In short, we tune the hyperparameters for a good spatial prediction on the complete dataset via a 5-fold spatial CV with one repetition.
 <!-- If we used more than one repetition (say 2) we would retrieve multiple optimal tuned hyperparameter combinations (say 2) -->
@@ -321,20 +331,19 @@ The preparation for the modeling using the **mlr** package includes the construc
 ```{r}
 # construct response-predictor matrix
 # id- and response variable
-d = data.frame(id = as.numeric(rownames(scores(rotnmds))),
-               sc = scores(rotnmds)[, 1])
+rp = data.frame(id = as.numeric(rownames(scores(rotnmds))),
+                sc = scores(rotnmds)[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
-d = inner_join(random_points, d,  by = "id")
+rp = inner_join(random_points, rp,  by = "id")
 
 # extract the coordinates into a separate dataframe
-coords = sf::st_coordinates(d) %>% 
+coords = sf::st_coordinates(rp) %>% 
   as.data.frame %>%
   rename(x = X, y = Y)
 # only keep response and predictors which should be used for the modeling
-d = dplyr::select(d, -id, -spri) %>%
+rp = dplyr::select(rp, -id, -spri) %>%
   st_set_geometry(NULL)
 ```
-
 
 Having constructed the input variables, we are all set for specifying the **mlr** building blocks (task, learner, and resampling).
 We will use a regression task since the response variable is numeric.
@@ -342,14 +351,15 @@ The learner is a random forest model from the **ranger** package.
 
 ```{r}
 # create task
-task = makeRegrTask(data = d, target = "sc", coordinates = coords)
+task = makeRegrTask(data = rp, target = "sc", coordinates = coords)
 # learner
 lrn_rf = makeLearner(cl = "regr.ranger", predict.type = "response")
 ```
 
 To tune the hyperparameters we will use a five-fold spatial partitioning with only one repetition (`makeResampleDesc()`). 
 In each of these spatial partitions, we run 50 models (`makeTuneControlRandom`) to find the optimal hyperparameter combination.
-Hyperparameter combinations will be selected randomly but fall inside specific tuning limits (`makeParamSet()`), specifically `mtry` can range between 1 and the number of predictors (`r ncol(d) - 1`), and `num.trees` can range between 10 and 10,000.
+Hyperparameter combinations will be selected randomly but should fall inside specific tuning limits (`makeParamSet()`).
+Specifically `mtry` should range between 1 and the number of predictors (`r ncol(rp) - 1`), and `num.trees` should range between 10 and 10,000.
 
 ```{r}
 # spatial partitioning
@@ -362,8 +372,8 @@ ps = makeParamSet(
   )
 ```
 
-Finally, `tuneParams()` runs the hyperparameter tuning, i.e. will find the optimal hyperparameter combination for the specified parameters.
-The performance measure it the root mean squared error (RMSE).
+Finally, `tuneParams()` runs the hyperparameter tuning, and will find the optimal hyperparameter combination for the specified parameters.
+The performance measure is the root mean squared error (RMSE).
 
 ```{r, eval=FALSE}
 # hyperparamter tuning
@@ -391,7 +401,7 @@ tune = readRDS("extdata/14-tune.rds")
 ```
 
 An `mtry` of `r tune$x$mtry` and a `num.trees` of `r tune$x$num.trees` represent the best hyperparameter combination.
-A RMSE of `r tune$y[attr(tune$y, "names") == "rmse.test.rmse"]` is relatively good when considering the range of the response variable which is `r diff(range(d$sc))` (`diff(range(d$sc))`).
+A RMSE of `r round(tune$y[attr(tune$y, "names") == "rmse.test.rmse"], 2)` is relatively good when considering the range of the response variable which is `r round(diff(range(rp$sc)), 2)` (`diff(range(rp$sc))`).
 
 ### Predictive mapping
 
@@ -412,13 +422,13 @@ model_rf = train(lrn_rf, task)
 ```
 
 The last step is to apply the model to the spatially available predictors, i.e. to the raster stack.
-So far, `raster::predict()` does not support `ranger()` models, hence, we will have to do so ourselves.
-First, we convert `ta` into a prediction dataframe which secondly serves as input for the `predict()` function.
-Thirdly, we put the predicted values back into a raster (Figure \@ref(fig:rf-pred)).
+So far, `raster::predict()` does not support the output of **ranger** models, hence, we will have to programm the predition ourselves.
+First, we convert `ep` into a prediction dataframe which secondly serves as input for the `predict.ranger()` function.
+Thirdly, we put the predicted values back into a `RasterLayer` (see section \@ref(raster-subsetting) and Figure \@ref(fig:rf-pred)).
 
 ```{r}
 # convert raster stack into a dataframe
-new_data = as.data.frame(as.matrix(ta))
+new_data = as.data.frame(as.matrix(ep))
 # apply the model to the dataframe
 pred_rf = predict(model_rf, newdata = new_data)
 # put the predicted values into a raster
@@ -471,20 +481,27 @@ grid.text("NMDS1", x = unit(0.75, "npc"), y = unit(0.75, "npc"),
 ```
 
 The predictive mapping clearly reveals distinct vegetation belts (Figure \@ref(fig:rf-pred)).
-The blue color tones represent the so-called *Tillandsia*-belt [@muenchow_soil_2013].
-`Tillandsia` is a highly adapted genus often found in high quantities at the sandy and quite desertic foot of *lomas* mountains.
+Please refer to @muenchow_soil_2013 for a detailed descriptions of vegetation belts on **lomas** mountains.
+The blue color tones represent the so-called *Tillandsia*-belt .
+`Tillandsia` is a highly adapted genus especially found in high quantities at the sandy and quite desertic foot of *lomas* mountains.
 The yellow color tones refer to a herbaceous vegetation belt with a much higher plant cover compared to the *Tillandsia*-belt.
 The orange colors represent the bromeliad belt, which features the highest species richness and plant cover.
 It can be found directly beneath the temperature inversion (ca. 750-850 m asl) where humidity due to fog is highest.
-Water availabilitly naturally decreases above the temperature inversion, and the landscape becomes desertic again only harboring a few succulent species (succulent belt; red colors).
+Water availabilitly naturally decreases above the temperature inversion, and the landscape becomes desertic again with only a few succulent species (succulent belt; red colors).
 Interestingly, the spatial prediction clearly reveals that the bromeliad belt is interrupted - a finding we would have not detected without the predictive mapping.
 
-## Ecological context
+## Conclusions
 
-- we have used just one axis, it would be interesting to model also the second axis and finding an innovative way of visualizing the modeled scores of the first two axis
-- discussion: what could be done better or alternatives and again emphasizing that the methods shown
-finally, point to books on ecological modeling especially emphasizing Alain Zuur's books
+In this chapter we have ordinated the community matrix of the **lomas** Mt. Mongón with the help of a NMDS (section \@ref(nmds)).
+The first axis, representing the main floristic gradient in the study area, was modeled as a function of environmental predictors which partly were derived through R-GIS bridges (section \@ref(data-and-data-preparation)).
+The **mlr** package provided the building blocks to spatially tune the hyperparameters `mtry` and `num.trees` (section \@ref(mlr-building-blocks).
+The tuned hyperparameters served as input for the final model which in turn was applied to the environmental predictors for a spatial representation of the floristic gradient (section \@ref(predictive-mapping)).
+Things to further consider include:
 
+- If we were interested in interpreting the model in an ecological meaningful way, we should use (semi-)parametric models [@muenchow_predictive_2013;@zuur_mixed_2009;@zuur_beginners_2017].
+However, there are also approaches that help to quantify variable importance when using machine learning. 
+- We have used just the first NMDS axis.
+It would be interesting to also model the second axis and to subsequently finding an innovative way of visualizing jointly the modeled scores of the two axis in one prediction map.
 
 ## Exercises
 <!-- still, unrefined brain-storming -->
@@ -493,4 +510,4 @@ Report the stress value and compare it to the stress value as retrieved from the
 What might explain the 
 1. Compute catchment area and catchment slope using **RSAGA**.
 1. Use profile and tangential curvature as additional predictors for the spatial prediction of the floristic gradient (hint: `grass7:r.slope.aspect`).
-1. Retrieve the bias-reduced RMSE using spatial cross-validation including the estimation of optimal hyperparameter combinations in an inner tuning loop.
+1. Retrieve the bias-reduced RMSE using spatial cross-validation including the estimation of optimal hyperparameter combinations in an inner tuning loop (see section \@ref(svm)).
