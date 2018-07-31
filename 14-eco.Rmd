@@ -57,7 +57,7 @@ To retrieve bias-reduced performance estimates, we will of course account for th
 All the data needed for the subsequent analyses is available via the **RQGIS** package.
 
 ```{r}
-data("random_points", "comm", "study_area", "dem", "ndvi")
+data("study_area", "random_points", "comm", "dem", "ndvi")
 ```
 
 `study_area` is an sf polygon representing the outlines of the study area.
@@ -111,8 +111,7 @@ grid.text("m asl", x = unit(0.8, "npc"), y = unit(0.75, "npc"),
 
 The next step is to compute variables which we will predominantly need for the modeling and predictive mapping (see section \@ref(predictive-mapping)) but also for aligning the NMDS axes with the main gradient, altitude and humidity, respectively, in the study area (see section \@ref(nmds)).
 
-The terrain attributes can be computed from a digital elevation model using R-GIS bridges (see Chapter \@ref(gis)).
-Specifically, we will compute catchment slope and catchment area.
+Specifically, we will compute catchment slope and catchment area from a digital elevation model using R-GIS bridges (see Chapter \@ref(gis)).
 Curvatures might also represent valuable predictors, in the exercise section you can find out how they would change the modeling result.
 
 To compute catchment area and catchment slope, we will make use of the `saga:sagawetnessindex` function.
@@ -156,7 +155,8 @@ The resulting output rasters should be saved to temporary files with an `.sdat` 
 Setting `load_output` to `TRUE` ensures that the resulting rasters will be imported into R.
 
 ```{r, eval=FALSE}
-ta = run_qgis(alg = "saga:sagawetnessindex",
+# environmental predictors: catchment slope and catchment area
+ep = run_qgis(alg = "saga:sagawetnessindex",
               DEM = dem,
               SLOPE_TYPE = 1, 
               SLOPE = tempfile(fileext = ".sdat"),
@@ -165,43 +165,43 @@ ta = run_qgis(alg = "saga:sagawetnessindex",
               show_output_paths = FALSE)
 ```
 
-This gives back a list with two elements named `AREA` and `SLOPE`.
+This gives back the list `ep` consisting of two elements named `AREA` and `SLOPE`.
 Let us add to more raster elements to the list, namely `dem` and `ndvi`, and convert it into a raster stack (see section \@ref(raster-classes)), .
 
 ```{r, eval=FALSE}
-ta = c(dem, ndvi, ta) %>%
+ep = c(dem, ndvi, ep) %>%
   stack
-names(ta) = c("dem", "ndvi", "carea", "cslope")
+names(ep) = c("dem", "ndvi", "carea", "cslope")
 ```
 
-Additionally, the catchment area values are highly skewed to the right (`hist(ta$carea)`).
+Additionally, the catchment area values are highly skewed to the right (`hist(ep$carea)`).
 A log10-transformation makes the distribution more normal.
 
 ```{r, eval=FALSE}
-ta$carea = log10(ta$carea)
+ep$carea = log10(ep$carea)
 ```
 
 ```{r, eval=FALSE, echo=FALSE}
-saveRDS(brick(ta), "extdata/14-ta.rds")
+saveRDS(brick(ep), "extdata/14-ep.rds")
 ```
 
 ```{r, echo=FALSE}
-ta = readRDS("extdata/14-ta.rds")
+ep = readRDS("extdata/14-ep.rds")
 ```
 
-Finally, we can extract the terrain attributes to our field observations.
+Finally, we can extract the terrain attributes to our field observations (see also section \@ref(raster-extraction)).
 
 ```{r}
 data("random_points", package = "RQGIS")
-random_points[, names(ta)] = raster::extract(ta, as(random_points, "Spatial"))
+random_points[, names(ep)] = raster::extract(ep, as(random_points, "Spatial"))
 ```
 
 ## Reducing dimensionality {#nmds}
 
 Ordinations are a popular tool in vegetation science to extract the main information, frequently corresponding to ecological gradients, from large species-plot matrices mostly filled with 0s. 
-However, they are also used in remote sensing (spectral bands + hyperspectral), the soil sciences, geomarketing, etc.
-If you are unfamiliar with ordination techniques or in need of a refresher, have a look at Michael W. Palmers [webpage](http://ordination.okstate.edu/overview.htm) for a short introduction to popular ordination techniques in ecology and at @borcard_numerical_2011 for a deeper look how to apply these techniques in R. 
-**vegan**'s package documentation is also very helpful (`vignette(package = "vegan")`).
+However, they are also used in remote sensing, the soil sciences, geomarketing and many other fields.
+If you are unfamiliar with ordination techniques or in need of a refresher, have a look at Michael W. Palmers [webpage](http://ordination.okstate.edu/overview.htm) for a short introduction to popular ordination techniques in ecology and at @borcard_numerical_2011 for a deeper look on how to apply these techniques in R. 
+**vegan**'s package documentation is also a very helpful resource (`vignette(package = "vegan")`).
 
 Principal component analysis (PCA) is probably the most famous ordination technique. 
 It is a great tool to reduce dimensionality if one can expect linear relationships between variables, and if the joint absence of a variable (for example calcium) in two plots (observations) can be considered a similarity.
@@ -223,7 +223,8 @@ In R, `metaMDS()` of the **vegan** package can execute a NMDS.
 As input it expects a community matrix with the sites as rows and the species as columns, e.g.:
 
 ```{r}
-# sites 35 to 40 and corresponding species occurrences
+# sites 35 to 40 and corresponding occurrences of the first five species in the
+# table
 comm[35:40, 1:5]
 ```
 
