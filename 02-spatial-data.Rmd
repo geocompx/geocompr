@@ -604,26 +604,60 @@ This is because there is no general method to convert from `proj4string` to `eps
 <!-- precision -->
 <!-- plots can be made -->
 
-### Simple features (sf) {#sf}
+### The sf class {#sf}
 
-So far, we have only dealt with the pure geometries.
-Most of the time, however, these geometries come with a set of attributes describing them. 
-These attributes could represent the name of the geometry, measured values, groups to which the geometry belongs, and many more.
-For example, we measured a temperature of 25°C on Trafalgar Square in London on June 21^st^ 2017. 
-Hence, we have a specific point in space (the coordinates), the name of the location (Trafalgar Square), a temperature value and the date of the measurement.
+The previous sections (\@ref() to \@ref()) deal with purely geometric objects, 'sf geometry' and 'sf column' objects respectively.
+These are geographic building blocks of geographic vector data represented as simple features.
+The final building block is non-geographic attributes, representing the name of the feature or other attributes such as measured values, groups, and other things.
+
+To illustrate attributes, we will represent a temperature of 25°C in London on June 21^st^ 2017.
+This example contains a geometry (the coordinates), and three attributes with three different classes (place name, temperature and date).[
 Other attributes might include a urbanity category (city or village), or a remark if the measurement was made using an automatic station.
-
-The simple feature class, `sf`, is a combination of an attribute table (`data.frame`) and a simple feature geometry column (`sfc`).
-Simple features are created using the `st_sf()` function:
+]
+Objects of class `sf` represent such data by combining the attributes (`data.frame`) with the simple feature geometry column (`sfc`).
+They are created with `st_sf()` as illustrated below, which creates the London example described above:
 
 ```{r}
-# sfg objects
-london_point = st_point(c(0.1, 51.5))
+lnd_point = st_point(c(0.1, 51.5))                 # sfg object
+lnd_geom = st_sfc(lnd_point, crs = 4326)           # sfc object
+lnd_attrib = data.frame(                           # data.frame object
+  name = "London",
+  temperature = 25,
+  date = as.Date("2017-06-21")
+  )
+lnd_sf = st_sf(lnd_attrib, geometry = lnd_geom)    # sf object
+```
+
+What just happened? First, the coordinates were used to create the simple feature geometry (`sfg`).
+Second, the geometry was converted into a simple feature geometry column (`sfc`), with a CRS.
+Third, attributes were stored in a `data.frame`, which was combined with the `sfc` object with `st_sf()`.
+This results in an `sf` object, as demonstrated below (some output ommited):
+
+```{r, eval=FALSE}
+lnd_sf
+#> Simple feature collection with 1 features and 3 fields
+#> ...
+#>     name temperature       date         geometry
+#> 1 London          25 2017-06-21 POINT (0.1 51.5)
+```
+
+```{r}
+class(lnd_sf)
+```
+
+The result shows that `sf` objects actually have two classes, `sf` and `data.frame`.
+Simple features are simply data frames (square tables), but with spatial attributes (usually stored in a special `geom` list-column in the data frame).
+This duality is central to the concept of simple features:
+most of the time a `sf` can be treated as and behaves like a `data.frame`.
+Simple features are, in essence, data frames with a spatial extension.
+
+```{r, eval=FALSE, echo=FALSE}
 ruan_point = st_point(c(-9, 53))
 # sfc object
-our_geometry = st_sfc(london_point, ruan_point, crs = 4326)
+our_geometry = st_sfc(lnd_point, ruan_point, crs = 4326)
 # data.frame object
-our_attributes = data.frame(name = c("London", "Ruan"),
+our_attributes = data.frame(
+  name = c("London", "Ruan"),
                             temperature = c(25, 13),
                             date = c(as.Date("2017-06-21"), as.Date("2017-06-22")),
                             category = c("city", "village"),
@@ -632,30 +666,6 @@ our_attributes = data.frame(name = c("London", "Ruan"),
 sf_points = st_sf(our_attributes, geometry = our_geometry)
 ```
 
-The above example illustrates the components of `sf` objects. 
-Firstly, coordinates define the geometry of the simple feature geometry (`sfg`).
-Secondly, we can combine the geometries in a simple feature geometry column (`sfc`) which also stores the CRS.
-Subsequently, we store the attribute information on the geometries in a `data.frame`.
-Finally, the `st_sf()` function combines the attribute table and the `sfc` object in an `sf` object, as demonstrated below (some output ommited):
-
-```{r, eval=FALSE}
-sf_points
-#> Simple feature collection with 2 features and 5 fields
-#> ...
-#>     name temperature       date category automatic         geometry
-#> 1 London          25 2017-06-21     city     FALSE POINT (0.1 51.5)
-#> 2   Ruan          13 2017-06-22  village      TRUE    POINT (-9 53)
-```
-
-```{r}
-class(sf_points)
-```
-
-The resultshows that `sf` objects actually have two classes, `sf` and `data.frame`.
-Simple features are simply data frames (square tables), but with spatial attributes (usually stored in a special `geom` list-column in the data frame).
-This duality is central to the concept of simple features:
-most of the time a `sf` can be treated as and behaves like a `data.frame`.
-Simple features are, in essence, data frames with a spatial extension.
 
 <!-- https://r-spatial.github.io/sf/articles/sf1.html#how-attributes-relate-to-geometries -->
 
