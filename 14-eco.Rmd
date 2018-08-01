@@ -270,6 +270,8 @@ However, we already know that humidity represents the main gradient in the study
 Since humidity is highly correlated with elevation, we rotate the NMDS in accordance with elevation.
 Plotting the result reveals that the first axis is, as intended, clearly associated with altitude.
 
+<!-- JM: add fig.caption!!! -->
+
 ```{r}
 elev = dplyr::filter(random_points, id %in% rownames(pa)) %>% 
   dplyr::pull(dem)
@@ -314,7 +316,7 @@ tree_mo = tree(sc ~ dem, data = rp)
 plot(tree_mo)
 text(tree_mo, pretty = 0)
 ```
-<!-- rounding is wrong in the online figure output, ok, save the figure as png and include it separately -->
+<!-- JM: rounding is wrong in the online figure output, ok, save the figure as png and include it separately -->
 
 The resulting tree consists of three internal nodes and four terminal nodes (Figure \@ref(fig:tree)).
 The first internal node at the top of the tree assigns all observations which are below `r gsub("<", "", as.character(as.data.frame(tree_mo$fram$splits)[1, "cutleft"]))` m to the left and all other observations to the right branch.
@@ -435,6 +437,9 @@ We simply have to modify our learner using the result of the hyperparameter tuni
 lrn_rf = makeLearner(cl = "regr.ranger",
                      predict.type = "response",
                      mtry = tune$x$mtry, num.trees = tune$x$num.trees)
+# doing the same using setHyperPars()
+# lrn_rf = setHyperPars(makeLearner("regr.ranger", predict.type = "response"),
+#                       par.vals = tune$x)
 # train model
 model_rf = train(lrn_rf, task)
 # to retrieve the ranger output, run:
