@@ -410,7 +410,7 @@ Remember that the geometry column is sticky, hence, even though we are just sele
 ```{r, eval=FALSE}
 library(sf)
 library(osmdata)
-b_box = sf::st_bbox(cycle_hire)
+b_box = sf::st_bbox(points)
 london_streets = opq(b_box) %>%
   add_osm_feature(key = "highway") %>%
   osmdata_sf() %>%
@@ -517,8 +517,10 @@ However, to find the shortest route between them, we need to connect them to the
 We save its output in `streets_points_con`.
 
 ```{r, eval=FALSE}
+# clean street network
 execGRASS(cmd = "v.clean", input = "london_streets", output = "streets_clean",
           tool = "break", flags = "overwrite")
+# connect points with street network
 execGRASS(cmd = "v.net", input = "streets_clean", output = "streets_points_con", 
           points = "points", operation = "connect", threshold = 0.001,
           flags = c("overwrite", "c"))
@@ -548,6 +550,16 @@ route = readVECT("shortest_route") %>%
   st_geometry()
 mapview::mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) +
   points
+```
+
+```{r, eval=FALSE, echo=FALSE}
+library("mapview")
+m_1 = mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) +
+  points
+mapview::mapshot(m_1, 
+                 file = file.path(getwd(), "figures/09_shortest_route.png"),
+                 remove_controls = c("homeButton", "layersControl",
+                                     "zoomControl"))
 ```
 
 Further notes:
