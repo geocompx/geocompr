@@ -293,7 +293,6 @@ To spatially visualize them, we can model the NMDS scores with the previously cr
 Random forest models are frequently used in environmental and ecological modeling, and often provide the best results in terms of predictive performance [@schratz_performance_nodate]. 
 Here, we shortly introduce decision trees and bagging, since they form the basis of random forests.
 We refer the reader to @james_introduction_2013 for a more detailed description of random forests and related techniques.
-<!-- shortly introduce random forests --> 
 
 To introduce decision trees by example, we first construct a response-predictor matrix by joining the rotated NMDS scores to the field observations (`random_points`).
 We will also use the resulting dataframe for the **mlr** modeling later on.
@@ -322,18 +321,23 @@ The resulting tree consists of three internal nodes and four terminal nodes (Fig
 The first internal node at the top of the tree assigns all observations which are below `r gsub("<", "", as.character(as.data.frame(tree_mo$fram$splits)[1, "cutleft"]))` m to the left and all other observations to the right branch.
 The observations falling into the left branch have a mean NMDS score of `r round(tree_mo$frame$yval[2], 3)`.
 Overall, we can interpret the tree as follows: the higher the elevation, the higher the NMDS score becomes.
+Decision trees have a tendency to overfit, that is they mirror too closely the input data including its noise which in turn leads to bad predictive performances [section \@ref(intro-cv); @james_introduction_2013].
+Bootstrap aggregation (bagging) is an ensemble technique and helps to overcome this problem.
+Ensemble techniques simply combine the predictions of multiple models.
+Bagging takes repeated samples from the same input data and averages the predictions.
+This reduces the variance and overfitting with the result of a much better predictive accuracy compared to a decision tree.
+Finally, random forests extend and improve bagging by decorrelating trees which is desirable since averaging the predictions of highly correlated trees shows a higher variance and thus lower reliability than averaging predictions of decorrelated trees [@james_introduction_2013].
+To achieve this, random forests use bagging but in contrast to the traditional bagging where each tree is allowed to use all available predictors, random forests only use a random sample of all available predictors.
 
 
-- shortly explain bagging
-- random forests, improves bagging by decorrelating trees
-- explain hyperparameters `mtry` and `num.trees`
+- explain hyperparameters `mtry`, `min.node.size`, `sample.fraction` and `num.trees`
 
 <!--
 Recall that bagging is simply a special case of a random forest with m = p. Therefore, the randomForest() function can be used to perform both random forests and bagging. 
 The argument mtry=13 indicates that all 13 predictors should be considered
 for each split of the tree—in other words, that bagging should be done.
--->
 @james_introduction_2013
+-->
 
 ### **mlr** building blocks
 
