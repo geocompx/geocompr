@@ -290,6 +290,7 @@ To spatially visualize them, we can model the NMDS scores with the previously cr
 
 ## Modeling the floristic gradient
 
+To predict the floristic gradient spatially, we will make use of a random forst model.
 Random forest models are frequently used in environmental and ecological modeling, and often provide the best results in terms of predictive performance [@schratz_performance_nodate]. 
 Here, we shortly introduce decision trees and bagging, since they form the basis of random forests.
 We refer the reader to @james_introduction_2013 for a more detailed description of random forests and related techniques.
@@ -329,9 +330,6 @@ This reduces the variance and overfitting with the result of a much better predi
 Finally, random forests extend and improve bagging by decorrelating trees which is desirable since averaging the predictions of highly correlated trees shows a higher variance and thus lower reliability than averaging predictions of decorrelated trees [@james_introduction_2013].
 To achieve this, random forests use bagging but in contrast to the traditional bagging where each tree is allowed to use all available predictors, random forests only use a random sample of all available predictors.
 
-
-- explain hyperparameters `mtry`, `min.node.size`, `sample.fraction` and `num.trees`
-
 <!--
 Recall that bagging is simply a special case of a random forest with m = p. Therefore, the randomForest() function can be used to perform both random forests and bagging. 
 The argument mtry=13 indicates that all 13 predictors should be considered
@@ -361,7 +359,7 @@ This means, the inner hyperparameter tuning level is no longer needed which make
 In short, we tune the hyperparameters for a good spatial prediction on the complete dataset via a 5-fold spatial CV with one repetition.
 <!-- If we used more than one repetition (say 2) we would retrieve multiple optimal tuned hyperparameter combinations (say 2) -->
 
-The preparation for the modeling using the **mlr** package includes the construction of a response-predictor matrix containing only variables which should be used in the modeling and the construction of a separate coordinate dataframe and t.
+The preparation for the modeling using the **mlr** package includes the construction of a response-predictor matrix containing only variables which should be used in the modeling and the construction of a separate coordinate dataframe.
 
 ```{r}
 # extract the coordinates into a separate dataframe
@@ -384,20 +382,36 @@ task = makeRegrTask(data = rp, target = "sc", coordinates = coords)
 lrn_rf = makeLearner(cl = "regr.ranger", predict.type = "response")
 ```
 
-To tune the hyperparameters we will use a five-fold spatial partitioning with only one repetition (`makeResampleDesc()`). 
+As opposed to for example support vector machines (see section \@ref(svm)), random forests often already show good performances when used with the default values of their hyperparameters (which may be one reason for their popularity).
+Still, tuning often moderately improves model results, and thus is worth the effort [@probst_hyperparameters_2018].
+Since we deal with geographic data, we will again make use of spatial cross-validation to tune the hyperparameters (see sections \@ref(intro-cv) and \@ref(spatial-cv-with-mlr)).
+Specifically, we will use a five-fold spatial partitioning with only one repetition (`makeResampleDesc()`). 
 In each of these spatial partitions, we run 50 models (`makeTuneControlRandom`) to find the optimal hyperparameter combination.
-Hyperparameter combinations will be selected randomly but should fall inside specific tuning limits (`makeParamSet()`).
-Specifically `mtry` should range between 1 and the number of predictors (`r ncol(rp) - 1`), and `num.trees` should range between 10 and 10,000.
 
 ```{r}
 # spatial partitioning
 perf_level = makeResampleDesc("SpCV", iters = 5)
-# specifying the search space
+# specifying random search
 ctrl = makeTuneControlRandom(maxit = 50L)
+```
+
+In random forests, the hyperparameters `mtry`, `min.node.size` and `sample.fraction` determine the degree of randomness, and should be tuned [@probst_hyperparameters_2018].
+`mtry` indicates how many predictor variables should be used in each tree. 
+If all predictors are used, then this corresponds in fact to bagging (see beginning of section \@ref(modeling-the-floristic-gradient)).
+The `sample.fraction` parameter specifies the fraction of observations to be used in each tree.
+Smaller fractions lead to greater diversity, and thus less correlated trees which often is desirable (see above).
+The `min.node.size` parameter indicates the number of observations a terminal node should at least have.
+Naturally, trees and computing time become larger, the lower the `min.node.size`.
+
+Hyperparameter combinations will be selected randomly but should fall inside specific tuning limits (`makeParamSet()`).
+`mtry` should range between 1 and the number of predictors (`r ncol(rp) - 1`), `sample.fraction` should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10.
+
+```{r}
+# specifying the search space
 ps = makeParamSet(
   makeIntegerParam("mtry", lower = 1, upper = ncol(rp) - 1),
-  makeIntegerParam("min.node.size", lower = 1, upper = 10),
-  makeNumericParam("sample.fraction", lower = 0.2, upper = 0.9)
+  makeNumericParam("sample.fraction", lower = 0.2, upper = 0.9),
+  makeIntegerParam("min.node.size", lower = 1, upper = 10)
 )
 ```
 
@@ -414,11 +428,12 @@ tune = tuneParams(learner = lrn_rf,
                   control = ctrl, 
                   measures = mlr::rmse)
 #>...
-#> [Tune-x] 49: mtry=3; min.node.size=5; sample.fraction=0.496
-#> [Tune-y] 49: rmse.test.rmse=0.5741569; time: 0.0 min
-#> [Tune-x] 50: mtry=1; min.node.size=7; sample.fraction=0.488
-#> [Tune-y] 50: rmse.test.rmse=0.6437727; time: 0.0 min
-#> [Tune] Result: mtry=4; min.node.size=1; sample.fraction=0.748 : rmse.test.rmse=0.5089390
+#> [Tune-x] 49: mtry=3; sample.fraction=0.533; min.node.size=5
+#> [Tune-y] 49: rmse.test.rmse=0.5636692; time: 0.0 min
+#> [Tune-x] 50: mtry=1; sample.fraction=0.68; min.node.size=5
+#> [Tune-y] 50: rmse.test.rmse=0.6314249; time: 0.0 min
+#> [Tune] Result: mtry=4; sample.fraction=0.887; min.node.size=10 :
+#> rmse.test.rmse=0.5104918
 ```
 
 ```{r, eval=FALSE, echo=FALSE}
@@ -429,9 +444,7 @@ saveRDS(tune, "extdata/14-tune.rds")
 tune = readRDS("extdata/14-tune.rds")
 ```
 
-<!-- mtry = 4; num.trees = 696 -->
-
-An `mtry` of `r tune$x$mtry` and a `num.trees` of `r tune$x$num.trees` represent the best hyperparameter combination.
+An `mtry` of `r tune$x$mtry`, a `sample.fraction` of `r tune$x$sample.fraction`, and a `min.node.size` of `r tune$x$min.node.size` represent the best hyperparameter combination.
 A RMSE of `r round(tune$y[attr(tune$y, "names") == "rmse.test.rmse"], 2)` is relatively good when considering the range of the response variable which is `r round(diff(range(rp$sc)), 2)` (`diff(range(rp$sc))`).
 
 ### Predictive mapping
@@ -444,9 +457,9 @@ We simply have to modify our learner using the result of the hyperparameter tuni
 lrn_rf = makeLearner(cl = "regr.ranger",
                      predict.type = "response",
                      mtry = tune$x$mtry, 
-                     min.node.size = tune$x$min.node.size,
-                     sample.fraction = tune$x$sample.fraction)
-# doing the same using setHyperPars()
+                     sample.fraction = tune$x$sample.fraction,
+                     min.node.size = tune$x$min.node.size)
+# doing the same more elegantly using setHyperPars()
 # lrn_rf = setHyperPars(makeLearner("regr.ranger", predict.type = "response"),
 #                       par.vals = tune$x)
 # train model
@@ -454,7 +467,10 @@ model_rf = train(lrn_rf, task)
 # to retrieve the ranger output, run:
 # mlr::getLearnerModel(model_rf)
 # which corresponds to:
-# ranger(sc ~ ., data = rp, mtry = tune$x$mtry, num.trees = tune$x$num.trees)
+# ranger(sc ~ ., data = rp, 
+#        mtry = tune$x$mtry, 
+#        sample.fraction = tune$x$sample.fraction,
+#        min.node.sie = tune$x$min.node.size)
 ```
 
 The last step is to apply the model to the spatially available predictors, i.e. to the raster stack.
@@ -544,7 +560,10 @@ However, there are at least approaches that help to interpret machine learning l
 <!-- still, unrefined brain-storming -->
 1. Run a NMDS using the percentage data of the community matrix. 
 Report the stress value and compare it to the stress value as retrieved from the NMDS using presence-absence data.
-What might explain the 
+What might explain the observed difference?
 1. Compute catchment area and catchment slope using **RSAGA**.
 1. Use profile and tangential curvature as additional predictors for the spatial prediction of the floristic gradient (hint: `grass7:r.slope.aspect`).
-1. Retrieve the bias-reduced RMSE using spatial cross-validation including the estimation of optimal hyperparameter combinations in an inner tuning loop (see section \@ref(svm)).
+1. Retrieve the bias-reduced RMSE using spatial cross-validation including the estimation of optimal hyperparameter combinations (random search with 50 iterations) in an inner tuning loop (see section \@ref(svm)).
+Parallelize the tuning level (see section \@ref(svm)).
+Report the mean RMSE and use a boxplot to visualize all retrieved RMSEs.
+
