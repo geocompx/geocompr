@@ -23,10 +23,14 @@ if(!exists("random_joined")) {
   
 }
 
+# summary(random_joined$name_long) # factors still there
+random_joined$name_long = as.character(random_joined$name_long)
+
 jm0 = tm_shape(world) + tm_borders(lwd = 0.2) + tm_format("World")
 
 jm1 = jm0 +
-  tm_shape(shp = random_points, bbox = bb_world) + tm_symbols(col = "black", shape = 4, border.lwd = 2) +
+  tm_shape(shp = random_points, bbox = bb_world) +
+  tm_symbols(col = "black", shape = 4, border.lwd = 2) +
   tm_layout(scale = 1, legend.bg.color = "white", legend.bg.alpha = 0.3, legend.position = c("right", "bottom"))
 
 jm2 = jm0 +
@@ -47,3 +51,6 @@ jm4 = jm0 +
   tm_shape(shp = random_joined, bbox = bb_world) +
   tm_symbols(col = "name_long", shape = 4, border.lwd = 2, palette = "Dark2") +
   tm_layout(legend.only = TRUE)
+
+# tmap_arrange(jm1, jm2, jm3, jm4, nrow = 2, ncol = 2)
+
