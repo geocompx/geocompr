@@ -24,7 +24,7 @@ Other 'command-lines' include terminals for interacting with Linux, Mac and Wind
 In fact, most early computers and GISs such had GRASS relied exclusively on CLIs, before the widespread uptake of computer mice and high resolution screens in the 1990s.
 ]
 In dedicated GIS packages, by contrast, the emphasis tends to be on the graphical user interface (GUI):
-you *can* interact with QGIS, SAGA and gvSIG with dockable CLIs, but 'pointing and clicking' is the norm.
+you *can* interact with GRASS (the longest-standing GIS program, which originated as a CLI), QGIS, SAGA and gvSIG with dockable CLIs, but 'pointing and clicking' is the norm.
 This means many GIS users miss-out on the advantages of the command-line according to Gary Sherman, creator of QGIS [@sherman_desktop_2008]:
 
 > With the advent of 'modern' GIS software, most people want to point and
@@ -286,7 +286,7 @@ To learn more about **RQGIS** please refer to @muenchow_rqgis:_2017.
 
 ## (R)SAGA {#rsaga}
 
-The System for Automated Geoscientific Analyses (SAGA; Table \@ref(tab:gis-comp)) provides the possibility to execute SAGA modules via the command line interface (saga_cmd.exe under Windows and just saga_cmd under Linux) (see also [https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/)).
+The System for Automated Geoscientific Analyses (SAGA; Table \@ref(tab:gis-comp)) provides the possibility to execute SAGA modules via the command line interface (`saga_cmd.exe` under Windows and just `saga_cmd` under Linux) (see the [Saga wiki on modules](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/)).
 In addition, there is a Python interface (SAGA Python API).
 **RSAGA** uses the former to run SAGA from within R.
 
@@ -618,87 +618,77 @@ In addition, if you would like to run simulations with the help of a geodatabase
 
 Please note that there are a number of further GIS software packages that have a scripting interface but for which there is no dedicated R package that accesses these: gvSig, OpenJump, Orfeo Toolbox and TauDEM.
 
-## A short note on further spatial APIs
+## Other bridges
 
-There are many further interfaces to other spatial software packages aside from the interfaces to Desktop GIS software presented in detail in this chapter.
-This includes interfaces to spatial libraries (section \@ref(gdal)), spatial databases (section \@ref(postgis)) and web mapping services (see chapter \@ref(adv-map)).
-In this section we will only have a short glance at two selected examples.
-Hopefully, this will give an impression of all the spatial power and flexibility that is readily available on our fingertips.
+The focus of this chapter is on R interfaces to Desktop GIS software.
+We emphasize these bridges because dedicated GIS software is well-known and a common 'way in' to understanding spatial data.
+They also provide access to many geoalgorithms.
 
-### Spatial library API - GDAL {#gdal}
+Other 'bridges' include interfaces to spatial libraries (section \@ref(gdal) shows how to access the GDAL CLI from R), spatial databases (see section \@ref(postgis)) and web mapping services (see chapter \@ref(adv-map)).
+This section provides only a snippet of what is possible.
+Thanks to R's flexibility, with its ability to call other programs from the system and integration with other languages (notably via **Rcpp** and **reticulate**), many other bridges are possible.
+The aim is not to be comprehensive, but to demonstrate other ways of accessing the 'flexibility and power' in the quote by @sherman_desktop_2008 at the beginning of the chapter.
 
-GDAL is especially known for its support for numerous spatial drivers (data formats).
-In fact, there is barely a geospatial software that is not using GDAL in the background for importing and exporting geographic data.
-But GDAL offers more than I/O functions, e.g., geoprocessing tools for vector and raster data (for an overview have a look at http://www.gdal.org/pages.html).
-One can easily access these tools via the command line. 
-In the code chunk below `linkGDAL()` searches the computer for a working GDAL installation and adds the path of the executable files to the PATH variable. 
-This allows us to easily run GDAL via system calls.
-For example, `ogrinfo` gives back meta information of vector data.
+### Bridges to GDAL {#gdal}
+
+As discussed in Chapter \@ref(read-write), GDAL is a low-level library that supports many spatial data formats.
+GDAL is so effective that most GIS programs use GDAL in the background for importing and exporting geographic data, rather than re-inventing the wheel and using bespoke read-write code.
+But GDAL offers more than data I/O.
+It has [geoprocessing tools](http://www.gdal.org/pages.html) for vector and raster data, functionality to create [tiles](https://www.gdal.org/gdal2tiles.html) for serving raster data online, and rapid [rasterization](https://www.gdal.org/gdal_rasterize.html) of vector data, all of which can be accessed via the system of R command line.
+
+The code chunk below demonstrates this functionality:
+`linkGDAL()` searches the computer for a working GDAL installation and adds the location of the executable files to the PATH variable, allowing GDAL to be called.
+In the example below `ogrinfo` provides metadata on a vector dataset:
 
 ```{r, eval=FALSE, message=FALSE}
 link2GI::linkGDAL()
-cmd = paste("ogrinfo -ro -so -al", 
-            system.file("shape/nc.shp", package = "sf"))
+cmd = paste("ogrinfo -ro -so -al", system.file("shape/nc.shp", package = "sf"))
 system(cmd)
-#>INFO: Open of `C:/Users/geocompr/Documents/R/win-library/3.5/sf/shape/nc.shp'
-#>    using driver `ESRI Shapefile' successful.
-#>
-#>Layer name: nc
-#>Metadata:
-#> DBF_DATE_LAST_UPDATE=2016-10-26
-#>Geometry: Polygon
-#>Feature Count: 100
-#>Extent: (-84.323853, 33.881992) - (-75.456978, 36.589649)
-#>Layer SRS WKT:
-#>GEOGCS["GCS_North_American_1927",
-#>    DATUM["North_American_Datum_1927",
-#>        SPHEROID["Clarke_1866",6378206.4,294.9786982]],
-#>    PRIMEM["Greenwich",0],
-#>    UNIT["Degree",0.017453292519943295],
-#>    AUTHORITY["EPSG","4267"]]
-#>AREA: Real (24.15)
-#>PERIMETER: Real (24.15)
-#>CNTY_: Real (24.15)
-#>CNTY_ID: Real (24.15)
-#>NAME: String (80.0)
-#>FIPS: String (80.0)
-#>FIPSNO: Real (24.15)
-#>CRESS_ID: Integer (9.0)
-#>BIR74: Real (24.15)
-#>SID74: Real (24.15)
-#>NWBIR74: Real (24.15)
-#>BIR79: Real (24.15)
-#>SID79: Real (24.15)
-#>NWBIR79: Real (24.15)
+#> INFO: Open of `C:/Users/geocompr/Documents/R/win-library/3.5/sf/shape/nc.shp'
+#>     using driver `ESRI Shapefile' successful.
+#> 
+#> Layer name: nc
+#> Metadata:
+#>  DBF_DATE_LAST_UPDATE=2016-10-26
+#> Geometry: Polygon
+#> Feature Count: 100
+#> Extent: (-84.323853, 33.881992) - (-75.456978, 36.589649)
+#> Layer SRS WKT:
+#> ...
 ```
 
-This is of course a very simple example, and we could have achieved the same using `rgdal::ogrInfo()`.
-Still, it shows how we can use GDAL via the command-line from within R independently of other packages, and nothing stops us from using more advanced and/or not already implemented GDAL utilities in R.
+This example --- which returns the same result as `rgdal::ogrInfo()` --- may be simple, but it shows how to use GDAL via the system command-line, independently of other packages.
+The 'link' to GDAL provided by **link2gi** could be used as a foundation for more doing more advanced GDAL work from the R or system CLI.^[
 Note also that the **RSAGA** package uses the command line interface to use SAGA geoalgorithms from within R (see section \@ref(rsaga)). 
-TauDEM (http://hydrology.usu.edu/taudem/taudem5/index.html) and the Orfeo Toolbox (https://www.orfeo-toolbox.org/) are further examples for offering a command line interface. 
+]
+TauDEM (http://hydrology.usu.edu/taudem/taudem5/index.html) and the Orfeo Toolbox (https://www.orfeo-toolbox.org/) are other spatial data processing libraries/programs offering a command line interface. 
 At the time of writing it appears that there is only a developer version of an R/TauDEM interface on R-Forge (https://r-forge.r-project.org/R/?group_id=956)).
-In any case, you now have the tools to build an interface yourself.
+In any case, the above example shows how to access low level libraries from the system command line, creating the possibility for new R bridges to these libraries to be created.
 
-Please keep in mind that the **sf** package already brings most of the power provided by GDAL, GEOS and PROJ to R.
-Instead of using the command-line interface to access the functionality of these external dependencies, **sf** uses an **Rcpp** interface.
-This is an even better approach since it circumvents the command-line and allows a direct access to GDAL/GEOS/PROJ all of which are written in either C++ or C.
+Before diving into a project to create a new bridge, however, it is important to be aware of the power of existing R packages and that `system()` calls may not be platform-independent (they may fail on some computers).
+Furthermore, **sf** brings most of the power provided by GDAL, GEOS and PROJ to R via the R/C++ interface provided by **Rcpp**, which avoids `system()` calls.
 
-### Spatial database API - PostgreSQL/PostGIS {#postgis}
+### Bridges to spatial databases {#postgis}
 
-Spatial database management systems (spatial DBMS) allow us to store spatial and non-spatial data in a structured way (as opposed to loose collections of data somewhere stored on disk) and to relate tables (entities) to each other explicitly via unique identifiers (primary and foreign keys) and implicitly via space (think for instance of a spatial join). 
-Geographic data tends to become big quite quickly.
-Databases are especially useful for large data and querying it efficiently spatially and non-spatially.
-Additionally, spatial DBMS provide multi-user access and topology support.
-The most important open source spatial database is probably the combination of PostgreSQL with its spatial extension PostGIS [@obe_postgis_2015].^[SQlLite/SpatiaLite are certainly also important but implicitly we have already introduced this approach since GRASS is using SQLite in the background (see section \@ref(rgrass)).]
+Spatial database management systems (spatial DBMS) store spatial and non-spatial data in a structured way.
+They can organise large collections of data into related tables (entities) via unique identifiers (primary and foreign keys) and implicitly via space (think for instance of a spatial join). 
+This is useful because geographic datasets tend to become big and messy quite quickly.
+Databases enable storing and querying large datasets efficiently based on spatial and non-spatial fields, and provide multi-user access and topology support.
 
-From within R, one can easily query data from a (spatial) DBMS which is needed for a specific analysis. 
-Hence, it is not necessary to attach several gigabyte of geographic data to R's global environment which most likely would crash the R session anyway.
-To give you an idea how to work with R and PostGIS in tandem, we present SQL queries from "1.4 Hello real word" of the book **PostGIS in Action, Second Edition** published with Manning [@obe_postgis_2015].^[We are thankful to Manning Publications and Regina Obe as well as Leo Hsu for giving us permission to reproduce their example here.]
+The most important open source spatial database is PostGIS [@obe_postgis_2015].^[
+SQlLite/SpatiaLite are certainly also important but implicitly we have already introduced this approach since GRASS is using SQLite in the background (see section \@ref(rgrass)).
+]
+R bridges to spatial DBMSs such as PostGIS are important, allowing access to huge data stores without loading several gigabytes of geographic data into RAM, and likely crashing the R session.
+The remainder of this section shows how PostGIS can be called from R, based on "Hello real word" from **PostGIS in Action, Second Edition** [@obe_postgis_2015].^[
+Thanks to Manning Publications, Regina Obe and Leo Hsu for permission to use this example.
+]
 
-The subsequent code requires a working internet connection since we are accessing a PostgreSQL/PostGIS database which is living in the [QGIS Cloud](https://qgiscloud.com/).^[QGIS Cloud lets you store geographic data and maps in the cloud. 
+The subsequent code requires a working internet connection since we are accessing a PostgreSQL/PostGIS database which is living in the [QGIS Cloud](https://qgiscloud.com/).^[
+QGIS Cloud lets you store geographic data and maps in the cloud. 
 In the background it uses QGIS Server and PostgreSQL/PostGIS.
 This way, the reader can follow the PostGIS example without the need to have PostgreSQL/PostGIS installed on a local machine.
-We are thankful to the QGIS Cloud team for hosting our PostGIS example.]
+Thanks to the QGIS Cloud team for hosting this example.
+]
 
 ```{r, eval=FALSE}
 library(RPostgreSQL)
@@ -708,12 +698,13 @@ conn = dbConnect(drv = PostgreSQL(), dbname = "rtafdf_zljbqm",
                  password = "d3290ead")
 ```
 
-The first thing to find out is which tables can be found in the database.
+Often the first question is 'which tables can be found in the database'?
+This can be asked as follows (the answer is 5 tables):
 
 ```{r, eval=FALSE}
 dbListTables(conn)
-#>[1] "spatial_ref_sys" "topology"        "layer"           "restaurants"    
-#>[5] "highways" 
+#> [1] "spatial_ref_sys" "topology"        "layer"           "restaurants"    
+#> [5] "highways" 
 ```
 
 We are only interested in the `restaurants` and the `highways` tables.
@@ -722,8 +713,8 @@ To find out about attributes available in a table, we can run:
 
 ```{r, eval=FALSE}
 dbListFields(conn, "highways")
-#>[1] "qc_id"        "wkb_geometry" "gid"          "feature"     
-#>[5] "name"         "state"   
+#> [1] "qc_id"        "wkb_geometry" "gid"          "feature"     
+#> [5] "name"         "state"   
 ```
 
 The first query will select `US Route 1` in Maryland (`MD`).
@@ -750,7 +741,9 @@ buf = st_read(conn, query = query)
 ```
 
 Note that this was a spatial query using functions (`ST_Union()`, `ST_Buffer()`) you should be already familiar with since you find them also in the **sf**-package, though here they are written in lowercase characters (`st_union()`, `st_buffer()`).
-In fact, function names of the **sf** package largely follow the PostGIS naming conventions.^[By the way, the prefix `st` stands for space/time.]
+In fact, function names of the **sf** package largely follow the PostGIS naming conventions.^[
+The prefix `st` stands for space/time.
+]
 The last query will find all Hardee restaurants (`HDE`) within the buffer zone (Figure \@ref(fig:postgis)).
 
 ```{r, eval=FALSE, warning=FALSE}
