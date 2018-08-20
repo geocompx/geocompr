@@ -403,7 +403,7 @@ one (`name_long`) containing the names of coffee-producing nations and the other
 We will use a 'left join' (meaning the left-hand dataset is kept intact) to merge this dataset with the pre-existing `world` dataset.
 The result of the code chunk below is a new `sf` object.
 
-```{r}
+```{r, warning=FALSE}
 world_coffee = left_join(world, coffee_data)
 class(world_coffee)
 ```
@@ -426,7 +426,7 @@ In the majority of cases where variable names are not the same you have two opti
 
 The latter approach is demonstrated below on a renamed version of `coffee_data`:
 
-```{r}
+```{r, warning=FALSE}
 coffee_renamed = rename(coffee_data, nm = name_long)
 world_coffee2 = left_join(world, coffee_renamed, by = c(name_long = "nm"))
 ```
@@ -444,12 +444,12 @@ rows in the original dataset with no match are assigned `NA` values for the new 
 What if we only want to keep countries that have a match in the key variable?
 In that case an inner join can be used:
 
-```{r}
+```{r, warning=FALSE}
 world_coffee_inner = inner_join(world, coffee_data)
 nrow(world_coffee_inner)
 ```
 
-Note that the result of `inner_join()` has only 44 rows compared with 47 in `coffee_data`.
+Note that the result of `inner_join()` has only 45 rows compared with 47 in `coffee_data`.
 What happened to the remaining rows?
 We can identify the rows that did not match using the `setdiff()` function as follows:
 
@@ -457,32 +457,37 @@ We can identify the rows that did not match using the `setdiff()` function as fo
 setdiff(coffee_data$name_long, world$name_long)
 ```
 
-The result shows that 2 countries have not matched due to name discrepancies.
-These discrepancies can be fixed by identifying the value that they were expected to have in the `world` dataset and updating the names accordingly.
-In this case we will use string matching to find out what `Congo, Dem. Rep. of` and `Côte d'Ivoire` are called:
+The result shows that `Others` accounts for one row not present in the `world` dataset and that the name of the `Democratic Republic of the Congo` accounts for the other:
+it has been abbreviated, causing the join to miss it.
+The following command uses string matching (regex) to confirm what `Congo, Dem. Rep. of` should be:
 
 ```{r}
-str_subset(world$name_long, "Ivo|Cong")
+str_subset(world$name_long, "Dem*.+Congo")
 ```
 
-From these results we can identify the matching names and update the names in `coffee_data` accordingly.
-As demonstrated below, `inner_join()`ing the updated data frame returns a result with all 46 coffee producing nations represented in the dataset:
+```{r, eval=FALSE, echo=FALSE}
+# aim: test names in coffee_data and world objects
+str_subset(coffee_data$name_long, "Ivo|Congo,")
+.Last.value %in% str_subset(world$name_long, "Ivo|Dem*.+Congo")
+```
 
-```{r}
-coffee_data_match = mutate_if(coffee_data, is.character, recode,
-            `Congo, Dem. Rep. of` = "Democratic Republic of the Congo",
-            `Côte d'Ivoire` = "Ivory Coast")
-world_coffee_match = inner_join(world, coffee_data_match)
+To fix this issue we will create a new version of `coffee_data` and update the name.
+`inner_join()`ing the updated data frame returns a result with all 46 coffee producing nations:
+
+```{r, warning=FALSE}
+coffee_data$name_long[grepl("Congo,", coffee_data$name_long)] = 
+  str_subset(world$name_long, "Dem*.+Congo")
+world_coffee_match = inner_join(world, coffee_data)
 nrow(world_coffee_match)
 ```
 
 It is also possible to join in the other direction: starting with a non-spatial dataset and adding variables from a simple features object.
-This is demonstrated below, which starts with the `coffee_data_match` object and adds variables from the original `world` dataset.
+This is demonstrated below, which starts with the `coffee_data` object and adds variables from the original `world` dataset.
 In contrast with the previous joins, the result is *not* another simple feature object, but a data frame in the form of a **tidyverse** tibble:
 the output of a join tends to match its first argument:
 
-```{r}
-coffee_world = left_join(coffee_data_match, world)
+```{r, warning=FALSE}
+coffee_world = left_join(coffee_data, world)
 class(coffee_world)
 ```
 

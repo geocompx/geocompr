@@ -48,6 +48,7 @@ will update automatically): [katygregg](https://github.com/katygregg),
 [nickbearman](https://github.com/nickbearman),
 [richfitz](https://github.com/richfitz),
 [wdearden](https://github.com/wdearden),
+[yihui](https://github.com/yihui),
 [chihinl](https://github.com/chihinl),
 [gregor-d](https://github.com/gregor-d),
 [p-kono](https://github.com/p-kono),
@@ -66,7 +67,8 @@ your computer (you need
 [**devtools**](https://github.com/hadley/devtools)):
 
 ``` r
-devtools::install_github("robinlovelace/geocompr")
+install.packages(devtools)
+devtools::install_github("geocompr/geocompkg")
 ```
 
 You need a recent version of the GDAL, GEOS, Proj.4 and UDUNITS
@@ -224,7 +226,6 @@ knitr::kable(pkg_df)
 | :---------------- | :---------------------------------------------------------------------------------------- | :--------- |
 | bookdown          | Authoring Books and Technical Documents with R Markdown \[@R-bookdown\]                   | 0.7        |
 | cartogram         | Create Cartograms with R \[@R-cartogram\]                                                 | 0.1.0      |
-| decido            | Bindings for ‘Mapbox’ Ear Cutting Triangulation Library \[@R-decido\]                     | 0.1.0      |
 | dismo             | Species Distribution Modeling \[@R-dismo\]                                                | 1.1.4      |
 | geosphere         | Spherical Trigonometry \[@R-geosphere\]                                                   | 1.5.7      |
 | ggmap             | Spatial Visualization with ggplot2 \[@R-ggmap\]                                           | 2.6.1      |
@@ -264,7 +265,7 @@ knitr::kable(pkg_df)
 | stplanr           | Sustainable Transport Planning \[@R-stplanr\]                                             | 0.2.4.9000 |
 | tabularaster      | Tidy Tools for ‘Raster’ Data \[@R-tabularaster\]                                          | 0.5.0      |
 | tidyverse         | Easily Install and Load the ‘Tidyverse’ \[@R-tidyverse\]                                  | 1.2.1      |
-| tmap              | Thematic Maps \[@R-tmap\]                                                                 | 2.0        |
-| tmaptools         | Thematic Map Tools \[@R-tmaptools\]                                                       | 2.0        |
+| tmap              | Thematic Maps \[@R-tmap\]                                                                 | 2.0.1      |
+| tmaptools         | Thematic Map Tools \[@R-tmaptools\]                                                       | 2.0.1      |
 | tree              | Classification and Regression Trees \[@R-tree\]                                           | 1.0.39     |
 | vegan             | Community Ecology Package \[@R-vegan\]                                                    | 2.5.2      |

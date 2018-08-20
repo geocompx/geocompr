@@ -35,7 +35,7 @@ For example, most Peruvians live in the coastal desert, and *lomas* mountains ar
 In this chapter we will demonstrate ecological applications of some of the techniques learned in the previous chapters.
 This case study will involve analyzing the composition and the spatial distribution of the vascular plants on the southern slope of Mt. Mongón, a *lomas* mountain near Casma on the central northern coast of Peru (Fig. \@ref(fig:study-area-mongon)).
 
-```{r study-area-mongon, echo=FALSE, fig.cap="The Mt. Mongón study area (taken from @muenchow_rqgis:_2017; Landsat image: path 9, row 67, acquisition date 09/22/2000; @usgs_geological_2016).", out.width="60%"}
+```{r study-area-mongon, echo=FALSE, fig.cap="The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017).", out.width="60%"}
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/38989956-6eae7c9a-43d0-11e8-8f25-3dd3594f7e74.png")
 ```
 
@@ -157,11 +157,11 @@ ep = run_qgis(alg = "saga:sagawetnessindex",
 ```
 
 This gives back the list `ep` consisting of two elements named `AREA` and `SLOPE`.
-Let us add to more raster elements to the list, namely `dem` and `ndvi`, and convert it into a raster stack (see section \@ref(raster-classes)), .
+Let us add two more raster objects to the list, namely `dem` and `ndvi`, and convert it into a raster stack (see section \@ref(raster-classes)), .
 
 ```{r, eval=FALSE}
 ep = c(dem, ndvi, ep) %>%
-  stack
+  stack()
 names(ep) = c("dem", "ndvi", "carea", "cslope")
 ```
 
@@ -292,7 +292,7 @@ We will also use the resulting dataframe for the **mlr** modeling later on.
 rp = data.frame(id = as.numeric(rownames(sc)),
                 sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
-rp = inner_join(random_points, rp,  by = "id")
+rp = inner_join(random_points, rp, by = "id")
 ```
 
 Decision trees split the predictor space into a number of regions.
@@ -330,10 +330,10 @@ for each split of the tree—in other words, that bagging should be done.
 The code in this section largely follows the steps we have introduced in section \@ref(svm).
 The only differences are:
 
-1. the response variable is numeric, hence a regression task will replace the classification task of section \@ref(svm).
-1. instead of the AUROC which can only be used for categorical response variables, we will use the root mean squared error (RMSE) as performance measure.
-1. we use a random forest model instead of a support vector machine which naturally goes along with different hyperparameters.
-1. we are leaving the assessment of a bias-reduced performance measure as an exercise to the reader (see exercises). 
+1. The response variable is numeric, hence a regression task will replace the classification task of section \@ref(svm).
+1. Instead of the AUROC which can only be used for categorical response variables, we will use the root mean squared error (RMSE) as performance measure.
+1. We use a random forest model instead of a support vector machine which naturally goes along with different hyperparameters.
+1. We are leaving the assessment of a bias-reduced performance measure as an exercise to the reader (see exercises). 
 Instead we show how to tune hyperparameters for (spatial) predictions.
 
 Remember that 125,500 models were necessary to retrieve bias-reduced performance estimates when using 100-repeated 5-fold spatial cross-validation and a random search of 50 iterations (see section \@ref(svm)).
@@ -352,7 +352,7 @@ The preparation for the modeling using the **mlr** package includes the construc
 ```{r}
 # extract the coordinates into a separate dataframe
 coords = sf::st_coordinates(rp) %>% 
-  as.data.frame %>%
+  as.data.frame() %>%
   rename(x = X, y = Y)
 # only keep response and predictors which should be used for the modeling
 rp = dplyr::select(rp, -id, -spri) %>%
@@ -361,7 +361,7 @@ rp = dplyr::select(rp, -id, -spri) %>%
 
 Having constructed the input variables, we are all set for specifying the **mlr** building blocks (task, learner, and resampling).
 We will use a regression task since the response variable is numeric.
-The learner is a random forest model from the **ranger** package.
+The learner is a random forest model implementation from the **ranger** package.
 
 ```{r}
 # create task
@@ -522,7 +522,7 @@ grid.text("NMDS1", x = unit(0.75, "npc"), y = unit(0.75, "npc"),
 
 The predictive mapping clearly reveals distinct vegetation belts (Figure \@ref(fig:rf-pred)).
 Please refer to @muenchow_soil_2013 for a detailed descriptions of vegetation belts on **lomas** mountains.
-The blue color tones represent the so-called *Tillandsia*-belt .
+The blue color tones represent the so-called *Tillandsia*-belt.
 `Tillandsia` is a highly adapted genus especially found in high quantities at the sandy and quite desertic foot of *lomas* mountains.
 The yellow color tones refer to a herbaceous vegetation belt with a much higher plant cover compared to the *Tillandsia*-belt.
 The orange colors represent the bromeliad belt, which features the highest species richness and plant cover.
