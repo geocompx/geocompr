@@ -12,7 +12,10 @@ Status](https://travis-ci.org/Robinlovelace/geocompr.svg?branch=master)](https:/
 This repository hosts the code underlying Geocomputation with R, a book
 by [Robin Lovelace](https://www.robinlovelace.net/), [Jakub
 Nowosad](https://nowosad.github.io/), and [Jannes
-Muenchow](http://www.geographie.uni-jena.de/en/Muenchow.html).
+Muenchow](http://www.geographie.uni-jena.de/en/Muenchow.html):
+
+> Lovelace, Robin, Jakub Nowosad and Jannes Muenchow (2018).
+> Geocomputation with R. The R Series. CRC Press.
 
 The online version of the book is developed at
 <https://geocompr.robinlovelace.net/>. We plan to publish the hard copy
@@ -40,6 +43,7 @@ will update automatically): [katygregg](https://github.com/katygregg),
 [rsbivand](https://github.com/rsbivand),
 [pat-s](https://github.com/pat-s), [gisma](https://github.com/gisma),
 [ateucher](https://github.com/ateucher),
+[annakrystalli](https://github.com/annakrystalli),
 [gavinsimpson](https://github.com/gavinsimpson),
 [Himanshuteli](https://github.com/Himanshuteli),
 [yutannihilation](https://github.com/yutannihilation),
@@ -178,7 +182,7 @@ To cite packages used in this book we use code from [Efficient R
 Programming](https://csgillespie.github.io/efficientR/):
 
 ``` r
-geocompr:::generate_citations()
+# geocompkg:::generate_citations()
 ```
 
 This generates .bib and .csv files containing the packages. The current
