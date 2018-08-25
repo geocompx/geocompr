@@ -657,6 +657,32 @@ mask(elev, rmask, maskvalue = TRUE) # with mask()
 overlay(elev, rmask, fun = "max")   # with overlay
 ```
 
+```{r, eval=FALSE, echo=FALSE}
+# aim: expand on previous code chunk to show how mask methods differ
+library(raster)
+elev = raster(nrow = 6, ncol = 6, res = 0.5, 
+               xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+               vals = 1:36)
+
+rmask = elev # create raster mask
+values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
+
+m1 = elev[rmask, drop = FALSE]           # with [ operator
+m2 = mask(elev, rmask, maskvalue = TRUE) # with mask()
+m3 = overlay(elev, rmask, fun = "max")   # with overlay
+
+identical(m1, m2)
+identical(m1, m3)
+identical(m3, m2)
+
+e2 = raster(nrows = 6, ncols = 6, res = 0.5, 
+           xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
+           vals = 1:36)
+
+identical(elev, e2)
+```
+
+
 In the code chunk above, we have created a mask object called `rmask` with values randomly assigned to `NA` and `TRUE`.
 Next we only want to keep those values of `elev` which are `TRUE` in `rmask`, or expressed differently, we want to mask `elev` with `rmask`.
 These operations are in fact Boolean local operations since we compare cell-wise two rasters.
