@@ -611,7 +611,7 @@ It is convenient that both functions also accept objects of class `Spatial* Obje
 Raster objects can also be subset with another raster object, as illustrated in Figure \@ref(fig:raster-subset) (left panel) and demonstrated in the code chunk below:
 
 ```{r}
-clip = raster(nrow = 3, ncol = 3, res = 0.3, xmn = 0.9, xmx = 1.8, 
+clip = raster(nrows = 3, ncols = 3, res = 0.3, xmn = 0.9, xmx = 1.8, 
               ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
 elev[clip]
 # we can also use extract
@@ -645,41 +645,32 @@ plot(x)
 ```
 
 
-Another common use case of spatial subsetting is when a raster with `logical` (or `NA`) values is used to mask another raster with the same extent and resolution, as illusrated in Figure \@ref(fig:raster-subset), middle and right panel.
+Another common use case of spatial subsetting is when a raster with `logical` (or `NA`) values is used to mask another raster with the same extent and resolution, as illustrated in Figure \@ref(fig:raster-subset), middle and right panel.
 In this case, the `[`, `mask()` and `overlay()` functions can be used (results not shown):
 
 ```{r, eval=FALSE}
-rmask = elev # create raster mask
+# create raster mask
+rmask = elev 
 values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
 
+# spatial subsetting
 elev[rmask, drop = FALSE]           # with [ operator
-mask(elev, rmask, maskvalue = TRUE) # with mask()
+mask(elev, rmask)                   # with mask()
 overlay(elev, rmask, fun = "max")   # with overlay
 ```
 
 ```{r, eval=FALSE, echo=FALSE}
 # aim: expand on previous code chunk to show how mask methods differ
-library(raster)
-elev = raster(nrow = 6, ncol = 6, res = 0.5, 
-               xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-               vals = 1:36)
-
 rmask = elev # create raster mask
 values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
 
 m1 = elev[rmask, drop = FALSE]           # with [ operator
-m2 = mask(elev, rmask, maskvalue = TRUE) # with mask()
+m2 = mask(elev, rmask)                   # with mask()
 m3 = overlay(elev, rmask, fun = "max")   # with overlay
 
-identical(m1, m2)
-identical(m1, m3)
-identical(m3, m2)
-
-e2 = raster(nrows = 6, ncols = 6, res = 0.5, 
-           xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-           vals = 1:36)
-
-identical(elev, e2)
+all.equal(m1, m2)
+all.equal(m1, m3)
+all.equal(m3, m2)
 ```
 
 
