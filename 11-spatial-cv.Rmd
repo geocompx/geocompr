@@ -56,7 +56,7 @@ Building on this the chapter implements a more typical machine learning algorith
 The models' **predictive performance** will be assessed using spatial cross-validation (CV), which accounts for the fact that geographic data is special.
 
 CV determines a model's ability to generalize to new data, by splitting a dataset (repeatedly) into training and test sets.
-It uses the training data to fit the model, and checks its performance when predicting to the test data.
+It uses the training data to fit the model, and checks its performance when predicting against the test data.
 CV helps to detect overfitting since models that predict the training data too closely (noise) will tend to perform poorly on the test data.
 
 Randomly splitting spatial data can lead to training points that are neighbors in space with test points.
@@ -65,7 +65,7 @@ Spatial CV alleviates this problem and is the **central** theme in this chapter.
 
 ## Case study: Landslide susceptibility {#case-landslide}
 
-The case study is based on a dataset of landslide locations in Southern Ecuador, illustrated in Figure \@ref(fig:lsl-map) and described in detail in @muenchow_geomorphic_2012.
+This case study is based on a dataset of landslide locations in Southern Ecuador, illustrated in Figure \@ref(fig:lsl-map) and described in detail in @muenchow_geomorphic_2012.
 A subset of the dataset used in that paper is provided in the **RSAGA** package, which can be loaded as follows:
 
 ```{r}
@@ -259,8 +259,8 @@ For this, however, you will have to resort most likely to Bayesian modeling appr
 Spatial prediction maps are one very important outcome of a model.
 Even more important is how good the underlying model is at making them since a prediction map is useless if the model's predictive performance is bad.
 The most popular measure to assess the predictive performance of a binomial model is the Area Under the Receiver Operator Characteristic Curve (AUROC).
-This is a value between 0.5 and 1.0 with 0.5 indicating no and 1.0 indicating a perfect discrimination of the two classes. 
-Thus, the higher the AUROC the better is our model at making predictions.
+This is a value between 0.5 and 1.0 with 0.5 indicating por model fit and 1.0 indicating a perfect discrimination of the two classes. 
+Thus, the higher the AUROC the better our model is at making predictions.
 In the following we compute the receiver operator characteristic with the help of `roc()` by providing it with the response variable and the predicted values. 
 `auc()` returns the area under the curve.
 
@@ -535,7 +535,7 @@ Again we will use a 100-repeated 5-fold spatial CV.
 perf_level = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
 ```
 
-Note that this is the exact same code as used for the GLM in section \@ref(glm)), we have simply repeated it here as a reminder.
+Note that this is the exact same code as used for the GLM in section \@ref(glm), we have simply repeated it here as a reminder.
 
 So far, the process has been identical to that described in section \@ref(glm).
 The next step is new, however: to tune the hyperparameters.
@@ -547,7 +547,7 @@ knitr::include_graphics("figures/13_cv.png")
 ```
 
 This means that we split each fold again into five spatially disjoint subfolds which are used to determine the optimal hyperparameters (`tune_level` object in the code chunk below; see Figure \@ref(fig:inner-outer) for a visual representation).
-To find the optimal hyperparameter combination we here fit 50 models (`ctrl` object in the code chunk below) in each of these subfolds with randomly selected values for the hyperparameters C and Sigma.
+To find the optimal hyperparameter combination we fit 50 models (`ctrl` object in the code chunk below) in each of these subfolds with randomly selected values for the hyperparameters C and Sigma.
 The random selection of values C and Sigma is additionally restricted to a predefined tuning space (`ps` object).
 The range of the tuning space was chosen with values recommended in the literature [@schratz_performance_nodate].
 
@@ -601,7 +601,7 @@ To make the performance estimation processing chain even clearer, let us write d
 Use the 50 randomly selected hyperparameters in each of these inner subfolds, i.e. fit 250 models.
 1. Performance estimation: Use the best hyperparameter combination from the previous step (tuning level) and apply it to the first outer fold in the performance level to estimate the performance (AUROC).
 1. Repeat steps 2 and 3 for the remaining four outer folds.
-1. Repeat a 100 times steps 2 to 4.
+1. Repeat steps 2 to 4 100 times.
 
 The process of hyperparameter tuning and performance estimation is computationally intensive.
 Model runtime can be reduced with parallelization, which can be done in a number of ways, depending on the operating system.
@@ -615,7 +615,7 @@ To inspect the failed models once the processing is completed, we dump them:
 configureMlr(on.learner.error = "warn", on.error.dump = TRUE)
 ```
 
-To start the parallelization, we set the `mode` to `multicore` which will use `mclapply()` in the background on a single machine in the case of a Unix-based operating system^[
+To start the parallelization, we set the `mode` to `multicore` which will use `mclapply()` in the background on a single machine in the case of a Unix-based operating system.^[
 See `?parallelStart` for further modes and github.com/berndbischl/parallelMap for more on the unified interface to popular parallelization back-ends.
 ]
 Equivalenty, `parallelStartSocket()` enables parallelization under Windows. 
@@ -643,7 +643,7 @@ if (Sys.info()["sysname"] == "Windows") {
 ```
 
 Now we are set-up for computing the nested spatial CV.
-Using a seed allows to recreate the exact same spatial partitions when re-running the code.
+Using a seed allows us to recreate the exact same spatial partitions when re-running the code.
 Specifying the `resample()` parameters follows the exact same procedure as presented when using a GLM, the only difference being the `extract` argument.
 This allows the extraction of the hyperparameter tuning results which is important if we plan follow-up analyses on the tuning.
 After the processing, it is good practice to explicitly stop the parallelization with `parallelStop()`.
@@ -692,7 +692,7 @@ mean(result$measures.test$auc)
 
 It appears that the GLM (aggregated AUROC was `r sp_cv$aggr`) is slightly better than the SVM in this specific case.
 However, using more than 50 iterations in the random search would probably yield hyperparameters that result in models with a better AUROC [@schratz_performance_nodate].
-On the other hand, increasing the number of random search iterations would also increase the total number of models and thus runtime
+On the other hand, increasing the number of random search iterations would also increase the total number of models and thus runtime.
 
 The estimated optimal hyperparameters for each fold at the performance estimation level can also be viewed.
 The following command shows the best hyperparameter combination of the first fold of the first iteration (recall this results from the first 5 \* 50 model runs):
