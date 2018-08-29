@@ -15,6 +15,6 @@ pr2 = levelplot(new_raster2, margin = FALSE, colorkey = FALSE,
                 xlab = "x", ylab = "y")
 
 # png(filename = "figures/02_raster_crs.png", width = 950, height = 551)
-# plot(pr1, split=c(1, 1, 2, 1), more=TRUE)
-# plot(pr2, split=c(2, 1, 2, 1))
+plot(pr1, split=c(1, 1, 2, 1), more=TRUE)
+plot(pr2, split=c(2, 1, 2, 1))
 # dev.off()
