@@ -1,6 +1,6 @@
 library(tmap)
 
-r0p = tm_shape(cycle_hire_osm_projected) + tm_symbols(col = "capacity", title.col = "Capacity: ", size = 0.25) + 
+r0p = tm_shape(cycle_hire_osm_projected) + tm_symbols(col = "capacity", title.col = "Capacity: ", size = 0.1) + 
   tm_layout(main.title = "A. Points", main.title.size = 1, legend.position = c("right", "bottom"))
 
 r1p = tm_shape(ch_raster1) + tm_raster(legend.show = TRUE, title = "Values: ") + tm_layout(main.title = "B. Presence/absence", main.title.size = 1, legend.position = c("right", "bottom"))
