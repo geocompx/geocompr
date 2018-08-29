@@ -34,7 +34,7 @@ if(!exists("poly_mat")) {
 # text(x = C[2, 1], y = C[2, 2], "C2", col = "red")
 
 # iterating solution:
-par(mfrow = c(1, 3)) # optional wide plot (alternative = animation)
+par(mfrow = c(1, 3), mar = c(0, 0, 0, 0), pty = "s") # optional wide plot (alternative = animation)
 i = 2
 cols = c("red", "blue", "darkgreen")
 for(i in rep(1:length(T_all), 2)) {
