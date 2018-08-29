@@ -20,3 +20,5 @@ p2 = ggplot() +
   coord_sf(datum = sf::st_crs("+proj=utm +zone=12 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")) +
   # theme(axis.text = element_text(size = 4)) +
   labs(x = "x", y = "y")
+
+grid.arrange(p1, p2, nrow = 1)
