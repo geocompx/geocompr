@@ -68,6 +68,11 @@ y = x^2 # square of x
 
 - Spelling: use `en-us`
 
+# Captions
+
+Captions should not contain any markdown characters, e.g. `*` or `*`. 
+References in captions also should be avoided.
+
 # Figures
 
 Names of the figures should contain a chapter number, e.g. `04-world-map.png` or `11-population-animation.gif`.
