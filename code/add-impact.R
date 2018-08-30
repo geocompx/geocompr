@@ -9,4 +9,4 @@ new_impact = c(url = url_issue, new_impact)
 # Add to our-impact.csv ---------------------------------------------------
 
 u = "https://github.com/Robinlovelace/geocompr/raw/master/our-impact.csv"
-geocompr:::add_impact(url_issue, url_old_impact = u)
+geocompkg:::add_impact(url_issue, url_old_impact = u)
