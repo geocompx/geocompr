@@ -10,14 +10,14 @@ library(spData)
 canterbury = nz %>% filter(Name == "Canterbury")
 canterbury_height = nz_height[canterbury, ]
 
-## ----nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in grey, right)."----
+## ----nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in gray, right)."----
 library(tmap)
 p_hpnz1 = tm_shape(nz) + tm_polygons(col = "white") +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 0.25) +
   tm_layout(main.title = "High points in New Zealand", main.title.size = 1,
             bg.color = "lightblue")
 p_hpnz2 = tm_shape(nz) + tm_polygons(col = "white") +
-  tm_shape(canterbury) + tm_fill(col = "grey") + 
+  tm_shape(canterbury) + tm_fill(col = "gray") + 
   tm_shape(canterbury_height) + tm_symbols(shape = 2, col = "red", size = 0.25) +
   tm_layout(main.title = "High points in Canterbury", main.title.size = 1,
             bg.color = "lightblue")
@@ -51,9 +51,9 @@ p_matrix = matrix(c(0.5, 1, -1, 0, 0, 1, 0.5, 1), ncol = 2)
 p_multi = st_multipoint(x = p_matrix)
 p = st_cast(st_sfc(p_multi), "POINT")
 
-## ----relation-objects, echo=FALSE, fig.cap="Points (p 1 to 4), line and polygon objects arranged to demonstrate spatial relations.", fig.asp=1, out.width="40%"----
+## ----relation-objects, echo=FALSE, fig.cap="Points (p 1 to 4), line and polygon objects arranged to demonstrate spatial relations.", fig.asp=1, out.width="50%"----
 par(pty = "s")
-plot(a, border = "red", col = "grey", axes = TRUE)
+plot(a, border = "red", col = "gray", axes = TRUE)
 plot(l, add = TRUE)
 plot(p, add = TRUE, lab = 1:4)
 text(p_matrix[, 1] + 0.04, p_matrix[, 2] - 0.06, 1:4, cex = 1.3)
@@ -152,7 +152,7 @@ any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
   # tm_scale_bar()
 library(leaflet)
 leaflet() %>%
-  addProviderTiles(providers$Esri.WorldGrayCanvas) %>%
+  addProviderTiles(providers$OpenStreetMap.BlackAndWhite) %>%
   addCircles(data = cycle_hire) %>%
   addCircles(data = cycle_hire_osm, col = "red")
 
@@ -180,7 +180,7 @@ nrow(z) == nrow(cycle_hire)
 ## ------------------------------------------------------------------------
 nz_avheight = aggregate(x = nz_height, nz, FUN = mean)
 
-## ----spatial-aggregation, echo=FALSE, fig.cap="Average height of the top 101 high points across the regions of New Zealand."----
+## ----spatial-aggregation, echo=FALSE, fig.cap="Average height of the top 101 high points across the regions of New Zealand.", fig.asp=1, message=FALSE, out.width="50%"----
 library(tmap)
 tm_shape(nz_avheight) +
   tm_fill("elevation", breaks = seq(27, 29, by = 0.5) * 1e2) +
@@ -192,11 +192,12 @@ nz_avheight2 = nz %>%
   group_by(Name) %>%
   summarize(elevation = mean(elevation, na.rm = TRUE))
 
-## ----areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units with respect to larger aggregating zones (translucent blue borders).", fig.asp=0.2----
+## ----areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units with respect to larger aggregating zones (translucent blue borders).", fig.asp=0.5, out.width="100%"----
 source("code/04-areal-example.R", print.eval = TRUE)
 
 ## ------------------------------------------------------------------------
-agg_aw = st_interpolate_aw(incongruent[, "value"], aggregating_zones, extensive = TRUE)
+agg_aw = st_interpolate_aw(incongruent[, "value"], aggregating_zones,
+                           extensive = TRUE)
 # show the aggregated result
 agg_aw$value
 
@@ -220,7 +221,7 @@ st_distance(nz_height[1:3, ], co)
 ## raster::extract(elev, data.frame(x = 0.1, y = 0.1))
 
 ## ------------------------------------------------------------------------
-clip = raster(nrow = 3, ncol = 3, res = 0.3, xmn = 0.9, xmx = 1.8, 
+clip = raster(nrows = 3, ncols = 3, res = 0.3, xmn = 0.9, xmx = 1.8, 
               ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
 elev[clip]
 # we can also use extract
@@ -229,19 +230,40 @@ elev[clip]
 ## ----raster-subset, echo = FALSE, fig.cap = "Subsetting raster values with the help of another raster (left). Raster mask (middle). Output of masking a raster (right)."----
 knitr::include_graphics("figures/04_raster_subset.png")
 
-## ---- eval = FALSE-------------------------------------------------------
-## rmask = raster(nrow = 6, ncol = 6, res = 0.5,
-##                xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-##                vals = sample(c(FALSE, TRUE), 36, replace = TRUE))
-## elev[rmask, drop = FALSE]
-## # using the mask command
-## mask(elev, rmask, maskvalue = TRUE)
+## ---- eval=FALSE---------------------------------------------------------
+## elev[1:2, drop = FALSE]    # spatial subsetting with cell IDs
+## elev[1, 1:2, drop = FALSE] # spatial subsetting by row,column indeces
+## #> class       : RasterLayer
+## #> dimensions  : 1, 2, 2  (nrow, ncol, ncell)
+## #> ...
+
+## ---- echo=FALSE, eval=FALSE---------------------------------------------
+## # aim: illustrate the result of previous spatial subsetting example
+## x = elev[1, 1:2, drop = FALSE]
+## plot(x)
+
+## ---- eval=FALSE---------------------------------------------------------
+## # create raster mask
+## rmask = elev
+## values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
 ## 
-## # or using overlay
-## # first we replace FALSE by NA
-## rmask[!rmask] = NA
-## # then we retrieve the maximum values
-## overlay(elev, rmask, fun = "max")
+## # spatial subsetting
+## elev[rmask, drop = FALSE]           # with [ operator
+## mask(elev, rmask)                   # with mask()
+## overlay(elev, rmask, fun = "max")   # with overlay
+
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## # aim: expand on previous code chunk to show how mask methods differ
+## rmask = elev # create raster mask
+## values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
+## 
+## m1 = elev[rmask, drop = FALSE]           # with [ operator
+## m2 = mask(elev, rmask)                   # with mask()
+## m3 = overlay(elev, rmask, fun = "max")   # with overlay
+## 
+## all.equal(m1, m2)
+## all.equal(m1, m3)
+## all.equal(m3, m2)
 
 ## ---- eval = FALSE-------------------------------------------------------
 ## rcl = matrix(c(0, 12, 1, 12, 24, 2, 24, 36, 3), ncol = 3, byrow = TRUE)

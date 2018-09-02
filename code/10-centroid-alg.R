@@ -2,7 +2,15 @@
 # demonstrate how algorithms work
 
 # Pre-requisite: an input object named poly_mat with 2 columns representing
-# vertices of a polygon, with 1st and last rows identical
+# vertices of a polygon, with 1st and last rows identical:
+
+if(!exists("poly_mat")) {
+  message("No poly_mat object provided, creating object representing a 9 by 9 square")
+  poly_mat = cbind(
+    x = c(0, 0, 9, 9, 0),
+    y = c(0, 9, 9, 0, 0)
+  )
+}
 
 # Step 1: create sub-triangles, set-up ------------------------------------
 

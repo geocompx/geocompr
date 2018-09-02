@@ -22,7 +22,7 @@ specific_map_pkgs = c(
   "cartogram",
   "geogrid",
   "geofacet",
-  # "globe",
+  "globe",
   "linemap"
 )
 

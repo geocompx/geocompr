@@ -33,18 +33,18 @@ london_proj = data.frame(x = 530000, y = 180000) %>%
 ## ------------------------------------------------------------------------
 london_proj_buff = st_buffer(london_proj, 111320)
 
-## ----crs-buf, fig.cap="Buffers around London with a geographic (left) and projected (right) CRS. The grey outline represents the UK coastline.", fig.asp=1, fig.show='hold', out.width="45%", echo=FALSE----
+## ----crs-buf, fig.cap="Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline.", fig.asp=1, fig.show='hold', out.width="45%", echo=FALSE----
 uk = rnaturalearth::ne_countries(scale = 50) %>% 
   st_as_sf() %>% 
   filter(grepl(pattern = "United Kingdom|Ire", x = name_long))
 plot(london_buff, graticule = st_crs(4326), axes = TRUE, reset = FALSE)
 plot(london_geo, add = TRUE)
-plot(st_geometry(uk), add = TRUE, border = "grey", lwd = 3)
+plot(st_geometry(uk), add = TRUE, border = "gray", lwd = 3)
 uk_proj = uk %>%
   st_transform(27700)
 plot(london_proj_buff, graticule = st_crs(27700), axes = TRUE, reset = FALSE)
 plot(london_proj, add = TRUE)
-plot(st_geometry(uk_proj), add = TRUE, border = "grey", lwd = 3)
+plot(st_geometry(uk_proj), add = TRUE, border = "gray", lwd = 3)
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## st_distance(london_geo, london_proj)
@@ -119,7 +119,7 @@ world_mollweide = st_transform(world, crs = "+proj=moll")
 library(tmap)
 world_mollweide_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
   lwgeom::st_transform_proj(crs = "+proj=moll")
-tm_shape(world_mollweide_gr) + tm_lines(col = "grey") +
+tm_shape(world_mollweide_gr) + tm_lines(col = "gray") +
   tm_shape(world_mollweide) + tm_borders(col = "black") +
   tm_layout(main.title = "the Mollweide projection", main.title.size = 1)
 
@@ -129,7 +129,7 @@ world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 ## ----wintriproj, echo=FALSE, fig.cap="Winkel tripel projection of the world.", error=TRUE----
 # world_wintri_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
 #   lwgeom::st_transform_proj(crs = "+proj=wintri")
-# m = tm_shape(world_wintri_gr) + tm_lines(col = "grey") +
+# m = tm_shape(world_wintri_gr) + tm_lines(col = "gray") +
 #   tm_shape(world_wintri) + tm_borders(col = "black") +
 #   tm_layout(main.title = "the Winkel tripel projection", main.title.size = 1)
 knitr::include_graphics("images/wintriproj-1.png")
@@ -150,7 +150,7 @@ world_laea1 = st_transform(world, crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_
 world_laea1_g = st_graticule(ndiscr = 10000) %>%
   st_transform("+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_0=0") %>% 
   st_geometry()
-tm_shape(world_laea1_g) + tm_lines(col = "grey") +
+tm_shape(world_laea1_g) + tm_lines(col = "gray") +
   tm_shape(world_laea1) + tm_borders(col = "black") +
   tm_layout(main.title = "the Lambert azimuthal equal-area projection", main.title.size	= 1)
 
@@ -161,7 +161,7 @@ world_laea2 = st_transform(world, crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +la
 world_laea2_g = st_graticule(ndiscr = 10000) %>%
   st_transform("+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40.1 +ellps=WGS84 +no_defs") %>% 
   st_geometry()
-tm_shape(world_laea2_g) + tm_lines(col = "grey") +
+tm_shape(world_laea2_g) + tm_lines(col = "gray") +
   tm_shape(world_laea2) + tm_borders(col = "black") +
   tm_layout(main.title = "the Lambert azimuthal equal-area projection", main.title.size	= 1)
 

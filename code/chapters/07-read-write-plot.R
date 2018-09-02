@@ -61,7 +61,8 @@ file_formats = tibble::tribble(~Name, ~Extension, ~Info, ~Type, ~Model,
                          "ESRI FileGDB", ".gdb", "Collection of spatial and nonspatial objects created in the ArcGIS software. It allows storage of multiple feature classes and enables use of topological definitions. Limited access to this format is provided by GDAL with the use of the OpenFileGDB and FileGDB drivers.", "Vector and raster", "Proprietary",
                          "GeoPackage", ".gpkg", "Lightweight database container based on SQLite allowing an easy and platform-independent exchange of geodata", "Vector and raster", "Open"
                          )
-knitr::kable(file_formats, caption = "Selected spatial file formats.")
+knitr::kable(file_formats, caption = "Selected spatial file formats.") %>%
+  kableExtra::column_spec(3, width = "15em")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## sf_drivers = st_drivers()

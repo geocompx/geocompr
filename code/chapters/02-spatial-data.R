@@ -93,19 +93,21 @@ par(old_par)
 ## ----polygon_hole, echo=FALSE, out.width="30%", eval=FALSE---------------
 ## # not printed - enough of these figures already (RL)
 ## par(pty = "s")
-## plot(st_as_sfc("POLYGON((1 5, 2 2, 4 1, 4 4, 1 5), (2 4, 3 4, 3 3, 2 3, 2 4))"), col="gray", axes = TRUE, main = "POLYGON with a hole")
+## plot(st_as_sfc("POLYGON((1 5, 2 2, 4 1, 4 4, 1 5), (2 4, 3 4, 3 3, 2 3, 2 4))"), col = "gray", axes = TRUE, main = "POLYGON with a hole")
 
 ## ----multis, echo=FALSE, fig.cap="Illustration of multipoint, mutlilinestring and multipolygon geometries."----
 old_par = par(mfrow = c(1, 3), pty = "s", mar = c(0, 3, 1, 0))
 plot(st_as_sfc("MULTIPOINT (5 2, 1 3, 3 4, 3 2)"), axes = TRUE, main = "MULTIPOINT")
 plot(st_as_sfc("MULTILINESTRING ((1 5, 4 4, 4 1, 2 2, 3 2), (1 2, 2 4))"), axes = TRUE, main = "MULTILINESTRING")
-plot(st_as_sfc("MULTIPOLYGON (((1 5, 2 2, 4 1, 4 4, 1 5), (0 2, 1 2, 1 3, 0 3, 0 2)))"), col="gray", axes = TRUE, main = "MULTIPOLYGON")
+plot(st_as_sfc("MULTIPOLYGON (((1 5, 2 2, 4 1, 4 4, 1 5), (0 2, 1 2, 1 3, 0 3, 0 2)))"), col = "gray", axes = TRUE, main = "MULTIPOLYGON")
 par(old_par)
 
-## ----geomcollection, echo=FALSE, out.width="30%", fig.cap="Illustration of geometry collection."----
+## ----geomcollection, echo=FALSE, fig.asp=1, fig.cap="Illustration of geometry collection.", out.width="33%"----
 # Plotted - it is referenced in ch5 (st_cast)
+old_par = par(pty = "s", mar = c(2, 3, 3, 0))
 plot(st_as_sfc("GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2), LINESTRING (1 5, 4 4, 4 1, 2 2, 3 2))"),
      axes = TRUE, main = "GEOMETRYCOLLECTION", col = 1)
+par(old_par)
 
 ## ------------------------------------------------------------------------
 # note that we use a numeric vector for points
@@ -278,7 +280,7 @@ raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 new_raster = raster(raster_filepath)
 
 ## ------------------------------------------------------------------------
-new_raster2 = raster(nrow = 6, ncol = 6, res = 0.5, 
+new_raster2 = raster(nrows = 6, ncols = 6, res = 0.5, 
                      xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
                      vals = 1:36)
 
@@ -335,7 +337,7 @@ crs(raster_in_memory) = crs(raster_on_disk)
 ## View(crs_data)
 
 ## ---- message=FALSE, results='hide'--------------------------------------
-vector_filepath = system.file("vector/zion.gpkg", package="spDataLarge")
+vector_filepath = system.file("vector/zion.gpkg", package = "spDataLarge")
 new_vector = st_read(vector_filepath)
 
 ## ---- eval=FALSE---------------------------------------------------------
@@ -347,8 +349,8 @@ new_vector = st_read(vector_filepath)
 ## ------------------------------------------------------------------------
 new_vector = st_set_crs(new_vector, 26912) # set CRS
 
-## ----vector-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) and coordinate systems for a vector data type."----
-knitr::include_graphics("figures/02_vector_crs.png")
+## ----vector-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) and coordinate systems for a vector data type.", message=FALSE, fig.asp=0.56----
+source("code/02-vector-crs.R")
 
 ## ------------------------------------------------------------------------
 projection(new_raster) # get CRS
@@ -357,8 +359,8 @@ projection(new_raster) # get CRS
 projection(new_raster) = "+proj=utm +zone=12 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 
                             +units=m +no_defs" # set CRS
 
-## ----raster-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) and coordinate systems for a raster data type"----
-knitr::include_graphics("figures/02_raster_crs.png")
+## ----raster-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) and coordinate systems for a raster data type.", message=FALSE, fig.asp=0.56----
+source("code/02-raster-crs.R")
 
 ## ------------------------------------------------------------------------
 luxembourg = world[world$name_long == "Luxembourg", ]

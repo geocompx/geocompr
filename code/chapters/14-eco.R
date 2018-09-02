@@ -25,7 +25,7 @@ data("study_area", "random_points", "comm", "dem", "ndvi")
 ## plot(st_geometry(study_area), add = TRUE)
 ## # white margins between axes and plot are too wide
 
-## ---- echo=FALSE, message=FALSE, fig.cap="Study mask (polgyon), location of the sampling sites (black points) and DEM in the background."----
+## ---- echo=FALSE, message=FALSE, fig.cap="Study mask (polygon), location of the sampling sites (black points) and DEM in the background."----
 library("latticeExtra")
 library("grid")
 hs = hillShade(terrain(dem), terrain(dem, "aspect"))
@@ -120,14 +120,13 @@ pa = decostand(comm, "pa")
 ## ---- include=FALSE------------------------------------------------------
 nmds = readRDS("extdata/14-nmds.rds")
 
-## ----xy-nmds, fig.cap="Plotting the first NMDS axis against altitude."----
+## ----xy-nmds, fig.cap="Plotting the first NMDS axis against altitude.", fig.asp=1, out.width="60%"----
 elev = dplyr::filter(random_points, id %in% rownames(pa)) %>% 
   dplyr::pull(dem)
 # rotating NMDS in accordance with altitude (proxy for humidity)
 rotnmds = MDSrotate(nmds, elev)
 # extracting the first two axes
 sc = scores(rotnmds, choices = 1:2)
-par(mfrow = c(1, 2))
 # plotting the first axis against altitude
 plot(y = sc[, 1], x = elev, xlab = "elevation in m", 
      ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8)

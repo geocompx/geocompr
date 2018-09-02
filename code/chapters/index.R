@@ -3,8 +3,6 @@ is_on_travis = identical(Sys.getenv("TRAVIS"), "true")
 is_online = curl::has_internet()
 
 ## ---- message=FALSE, eval=is_online--------------------------------------
-install.packages("spDataLarge", repos = "https://nowosad.github.io/drat/",
-                 type = "source")
 devtools::install_github("geocompr/geocompkg")
 
 ## ---- eval=FALSE---------------------------------------------------------

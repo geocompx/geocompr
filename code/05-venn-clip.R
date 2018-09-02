@@ -1,3 +1,13 @@
+if(!exists("b")) {
+  library(sf)
+  b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
+  b = st_buffer(b, dist = 1) # convert points to circles
+  l = c("x", "y")
+  x = b[1]
+  y = b[2]
+  x_and_y = st_intersection(x, y)
+}
+
 old_par = par()
 par(mfrow = c(3, 3), mai = c(0.1, 0.1, 0.1, 0.1))
 plot(b)

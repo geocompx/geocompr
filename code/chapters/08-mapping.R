@@ -23,7 +23,7 @@ library(shiny)   # for web applications
 ##   tm_fill() +
 ##   tm_borders()
 
-## ----tmshape, echo=FALSE, message=FALSE, fig.cap="New Zealand's shape plotted with fill (left), border (middle) and fill *and* border (right) layers added using **tmap** functions."----
+## ----tmshape, echo=FALSE, message=FALSE, fig.cap="New Zealand's shape plotted with fill (left), border (middle) and fill and border (right) layers added using tmap functions."----
 source("code/08-tmshape.R", print.eval = TRUE)
 
 ## `qtm()` is a handy function for **q**uickly creating **t**map **m**aps (hence the snappy name).
@@ -74,8 +74,8 @@ tmap_arrange(ma1, ma2, ma3, ma4, ma5, ma6)
 ## ---- fig.show='hide', message=FALSE-------------------------------------
 tm_shape(nz) + tm_fill(col = "Land_area")
 
-## ----tmcol, message=FALSE, fig.cap="Comparison of base (left) and tmap (right) handling of a numeric color field.", echo=FALSE, out.width="50%", fig.show='hold', warning=FALSE, message=FALSE----
-plot(nz["Land_area"])    
+## ----tmcol, message=FALSE, fig.cap="Comparison of base (left) and tmap (right) handling of a numeric color field.", echo=FALSE, out.width="45%", fig.show='hold', warning=FALSE, message=FALSE----
+plot(nz["Land_area"])
 tm_shape(nz) + tm_fill(col = "Land_area")
 
 ## ------------------------------------------------------------------------
@@ -90,7 +90,7 @@ map_nza = tm_shape(nz) +
 ## tm_shape(nz) + tm_polygons(col = "Median_income", n = 10)
 ## tm_shape(nz) + tm_polygons(col = "Median_income", palette = "RdBu")
 
-## ----tmpal, message=FALSE, fig.cap="Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette.", echo=FALSE----
+## ----tmpal, message=FALSE, fig.cap="Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette.", echo=FALSE, fig.asp=0.56----
 source("code/08-tmpal.R", print.eval = TRUE)
 
 ## ----break-styles, message=FALSE, fig.cap="Illustration of different binning methods set using the style argument in tmap.", echo=FALSE----
@@ -102,7 +102,7 @@ source("code/08-break-styles.R", print.eval = TRUE)
 ## tm_shape(nz) + tm_polygons("Population", palette = "Blues")
 ## tm_shape(nz) + tm_polygons("Population", palette = "YlOrBr")
 
-## ----colpal, echo=FALSE, message=FALSE, fig.cap="Examples of categorical, sequential and diverging palettes.", out.width="40%"----
+## ----colpal, echo=FALSE, message=FALSE, fig.cap="Examples of categorical, sequential and diverging palettes.", out.width="50%"----
 library(RColorBrewer)
 many_palette_plotter = function(color_names, n, titles){
   n_colors = length(color_names)
@@ -114,7 +114,7 @@ many_palette_plotter = function(color_names, n, titles){
   for(i in seq_len(n_colors)){
     one_color = brewer.pal(n = n, name = color_names[i])
     rect(xleft = 0:(n - 1), ybottom = i - 1, xright = 1:n, ytop = i - 0.2,
-         col = one_color, border = "light grey")
+         col = one_color, border = "light gray")
     }
   text(rep(-0.1, n_colors), (1: n_colors) - 0.6, labels = titles, xpd = TRUE, adj = 1)
 }
@@ -122,7 +122,7 @@ many_palette_plotter = function(color_names, n, titles){
 many_palette_plotter(c("PRGn", "YlGn", "Set2"), 7, 
                      titles = c("Diverging", "Sequential", "Categorical"))
 
-## ----na-sb, message=FALSE, fig.cap="Map with additional elements - a north arrow and scale bar."----
+## ----na-sb, message=FALSE, fig.cap="Map with additional elements - a north arrow and scale bar.", fig.asp=1----
 map_nz + 
   tm_compass(type = "8star", position = c("left", "top")) +
   tm_scale_bar(breaks = c(0, 100, 200), size = 1)
@@ -133,14 +133,14 @@ map_nz +
 ## map_nz + tm_layout(bg.color = "lightblue")
 ## map_nz + tm_layout(frame = FALSE)
 
-## ----layout1, message=FALSE, fig.cap="Layout options specified by (from left to right) title, scale, bg.color and frame arguments.", echo=FALSE----
+## ----layout1, message=FALSE, fig.cap="Layout options specified by (from left to right) title, scale, bg.color and frame arguments.", echo=FALSE, fig.asp=0.56----
 source("code/08-layout1.R", print.eval = TRUE)
 
-## ----layout2, message=FALSE, fig.cap="Illustration of selected layout options.", echo=FALSE----
+## ----layout2, message=FALSE, fig.cap="Illustration of selected layout options.", echo=FALSE, fig.asp=0.56----
 # todo: add more useful settings to this plot
 source("code/08-layout2.R", print.eval = TRUE)
 
-## ----layout3, message=FALSE, fig.cap="Illustration of selected color-related layout options.", echo=FALSE----
+## ----layout3, message=FALSE, fig.cap="Illustration of selected color-related layout options.", echo=FALSE, fig.asp=0.56----
 source("code/08-layout3.R", print.eval = TRUE)
 
 ## ---- eval=FALSE---------------------------------------------------------
@@ -149,12 +149,12 @@ source("code/08-layout3.R", print.eval = TRUE)
 ## map_nza + tm_style("cobalt")
 ## map_nza + tm_style("col_blind")
 
-## ----tmstyles, message=FALSE, fig.cap="Selected tmap styles: bw, classic, cobalt and col_blind (from left to right).", echo=FALSE----
+## ----tmstyles, message=FALSE, fig.cap="Selected tmap styles: bw, classic, cobalt and col_blind (from left to right).", echo=FALSE, fig.asp=0.56----
 source("code/08-tmstyles.R", print.eval = TRUE)
 
 ## A preview of predefined styles can be generated by executing `tmap_style_catalogue()`.
 
-## ----urban-facet, message=FALSE, fig.cap="Faceted map showing the top 30 largest 'urban agglomerations' from 1970 to 2030 based on population projects by the United Nations.", fig.asp=0.4----
+## ----urban-facet, message=FALSE, fig.cap="Faceted map showing the top 30 largest 'urban agglomerations' from 1970 to 2030 based on population projects by the United Nations.", fig.asp=0.5----
 urb_1970_2030 = urban_agglomerations %>% 
   filter(year %in% c(1970, 1990, 2010, 2030))
 tm_shape(world) + tm_polygons() + 
@@ -234,7 +234,7 @@ tmap_leaflet(m_tmview)
 ## ---- eval=FALSE---------------------------------------------------------
 ## basemap = leaflet::providers$OpenTopoMap
 ## map_nz +
-##   tm_view(basemaps = basemap)
+##   tm_basemap(server = basemap)
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## world_coffee = left_join(world, coffee_data, by = "name_long")
@@ -310,7 +310,7 @@ leaflet(data = cycle_hire) %>%
 ## }
 ## shinyApp(ui, server)
 
-## ----lifeApp, echo=FALSE, message=FALSE, fig.cap="Screenshot showing minimal example of a web mapping application created with **shiny**."----
+## ----lifeApp, echo=FALSE, message=FALSE, fig.cap="Screenshot showing minimal example of a web mapping application created with shiny."----
 # knitr::include_app("http://35.233.37.196/shiny/")
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39690606-8f9400c8-51d2-11e8-84d7-f4a66a477d2a.png")
 
@@ -366,16 +366,19 @@ us_states2163 = st_transform(us_states, 2163)
 us_states2163_ncont = cartogram_ncont(us_states2163, "total_pop_15")
 us_states2163_dorling = cartogram_dorling(us_states2163, "total_pop_15")
 
-## ----cartomap2, echo=FALSE, message=FALSE, fig.cap="Comparison of non-continuous area cartogram (top) and Dorling cartogram (bottom)."----
+## ----cartomap2, echo=FALSE, message=FALSE, fig.cap="Comparison of non-continuous area cartogram (top) and Dorling cartogram (bottom).", fig.asp=0.32----
 carto_map3 = tm_shape(us_states2163_ncont) + 
   tm_polygons("total_pop_15", title = "Total population", palette = "BuPu") +
-  tm_layout(main.title = "Non-continuous area cartogram", main.title.size = 1)
+  tm_layout(main.title = "Non-continuous area cartogram", main.title.size = 1, legend.show = FALSE)
 carto_map4 = tm_shape(us_states2163_dorling) + 
   tm_polygons("total_pop_15", title = "Total population", palette = "BuPu") +
-  tm_layout(main.title = "Dorling cartogram", main.title.size = 1)
-tmap_arrange(carto_map3, carto_map4, ncol = 1)
+  tm_layout(main.title = "Dorling cartogram", main.title.size = 1, legend.show = FALSE)
+carto_map_34legend = tm_shape(us_states2163_dorling) + 
+  tm_polygons("total_pop_15", title = "Total population", palette = "BuPu") +
+  tm_layout(legend.only = TRUE)
+tmap_arrange(carto_map3, carto_map4, carto_map_34legend, ncol = 3)
 
-## ------------------------------------------------------------------------
+## ---- warning=FALSE------------------------------------------------------
 africa = world %>% 
   filter(continent == "Africa", !is.na(iso_a2)) %>% 
   left_join(worldbank_df, by = "iso_a2") %>% 

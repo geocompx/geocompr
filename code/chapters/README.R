@@ -27,7 +27,7 @@ contributors_text = paste0(c_rmd, collapse = ", ")
 ## browseURL("_book/index.html") # to view it
 
 ## ----gen-code, results='hide', echo=FALSE--------------------------------
-# geocompr:::generate_chapter_code()
+# geocompkg:::generate_chapter_code()
 
 ## ----extra-pkgs, message=FALSE-------------------------------------------
 source("code/extra-pkgs.R")
@@ -41,8 +41,18 @@ source("code/08-map-pkgs.R")
 ## ----render-book, eval=FALSE---------------------------------------------
 ## rmarkdown::render("README.Rmd", output_format = "github_document", output_file = "README.md")
 
+## ---- eval=FALSE---------------------------------------------------------
+## # Aim: test reproducibility of scripts
+## script_names = list.files("code", full.names = T)
+## 
+## for(i in script_names[12:length(script_names)]) {
+##   print(i)
+##   source(i)
+## }
+## 
+
 ## ----gen-stats, echo=FALSE, message=FALSE, warning=FALSE-----------------
-source("R/generate-chapter-code.R")
+source("code/generate-chapter-code.R")
 book_stats = readr::read_csv("extdata/word-count-time.csv",
                              col_types=('iiDd'))
 
@@ -69,7 +79,7 @@ ggplot(book_stats) +
   coord_cartesian(ylim = c(0, 350))
 
 ## ----gen-cite, warning=FALSE---------------------------------------------
-geocompr:::generate_citations()
+# geocompkg:::generate_citations()
 
 ## ----pkg_df, message=FALSE-----------------------------------------------
 pkg_df = readr::read_csv("extdata/package_list.csv")

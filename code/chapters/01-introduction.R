@@ -1,8 +1,8 @@
+## Reproducibility is a major advantage of command-line interfaces, but what does it mean in practice?
+
 ## ----gdsl, echo=FALSE, message=FALSE-------------------------------------
 d = readr::read_csv("extdata/gis-vs-gds-table.csv")
 knitr::kable(x = d, caption = "Differences in emphasis between software packages (Graphical User Interface (GUI) of Geographic Information Systems (GIS) and R).")
-
-## Reproducibility is a major advantage of command-line interfaces, but what does it mean in practice?
 
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## a = osmdata::getbb("Hereford")

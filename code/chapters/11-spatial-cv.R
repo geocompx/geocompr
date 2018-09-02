@@ -111,7 +111,7 @@ pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
 ## ----partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row).", echo=FALSE----
 knitr::include_graphics("figures/13_partitioning.png")
 
-## ----building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the **mlr** package. Source: [openml.github.io](http://openml.github.io/articles/slides/useR2017_tutorial/slides_tutorial_files/ml_abstraction-crop.png). Permission to reuse this figure was kindly granted."----
+## ----building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the mlr package. Source: openml.github.io. Permission to reuse this figure was kindly granted."----
 knitr::include_graphics("figures/13_ml_abstraction_crop.png")
 
 ## ------------------------------------------------------------------------
@@ -135,7 +135,7 @@ lrns_df =
   listLearners(task, warn.missing.packages = FALSE) %>%
   dplyr::select(class, name, short.name, package) %>% 
   head
-knitr::kable(lrns_df, caption = "Sample of available learners for binomial tasks in the **mlr** package.")
+knitr::kable(lrns_df, caption = "Sample of available learners for binomial tasks in the mlr package.")
 
 ## ------------------------------------------------------------------------
 lrn = makeLearner(cl = "classif.binomial",

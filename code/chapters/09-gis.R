@@ -133,7 +133,7 @@ knitr::include_graphics("figures/09_sliver.png")
 ## rsaga.wetness.index(in.dem = file.path(tempdir(), "dem"),
 ##                     out.wetness.index = file.path(tempdir(), "twi"))
 
-## ----saga-twi, fig.cap="SAGA wetness index of Mount Mongón, Peru.", echo=FALSE, out.width="70%"----
+## ----saga-twi, fig.cap="SAGA wetness index of Mount Mongón, Peru.", echo=FALSE, out.width="50%"----
 knitr::include_graphics("figures/09_twi.png")
 
 ## ---- eval=FALSE---------------------------------------------------------
@@ -220,7 +220,7 @@ points = cycle_hire[1:25, ]
 ##           output = "shortest_route", center_cats = paste0("1-", nrow(points)),
 ##           flags = c("overwrite"))
 
-## ----grass-mapview, fig.cap="Shortest route between 24 cycle hire station on the OSM street network of London.", echo=FALSE----
+## ----grass-mapview, fig.cap="Shortest route between 24 cycle hire station on the OSM street network of London.", echo=FALSE, out.width="80%"----
 knitr::include_graphics("figures/09_shortest_route.png")
 
 ## ---- eval=FALSE---------------------------------------------------------
@@ -307,7 +307,7 @@ knitr::include_graphics("figures/09_shortest_route.png")
 ## ---- echo=FALSE---------------------------------------------------------
 load("extdata/postgis_data.Rdata")
 
-## ----postgis, echo=FALSE, fig.cap="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (lightblue points) within the buffer.", out.width="40%"----
+## ----postgis, echo=FALSE, fig.cap="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (lightblue points) within the buffer.", out.width="60%"----
 # plot the results of the queries
 par(mar = rep(0, 4))
 plot(buf$st_union, col = "lightyellow")

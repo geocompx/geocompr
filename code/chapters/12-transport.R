@@ -48,7 +48,7 @@ nrow(bristol_zones)
 zones_attr = bristol_od %>% 
   group_by(o) %>% 
   summarize_if(is.numeric, sum) %>% 
-  rename(geo_code = o)
+  dplyr::rename(geo_code = o)
 
 ## ------------------------------------------------------------------------
 summary(zones_attr$geo_code %in% bristol_zones$geo_code)
@@ -89,7 +89,7 @@ desire_lines = od2line(od_inter, zones_od)
 ## ---- eval=FALSE---------------------------------------------------------
 ## qtm(desire_lines, lines.lwd = "all")
 
-## ----desire, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Desire lines representing trip patterns in the Bristol Travel to Work Area. The four black lines represent the object the top 5 desire lines illustrated in Table 7.1."----
+## ----desire, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Desire lines representing trip patterns in the Bristol Travel to Work Area. The four black lines represent the object the top 5 desire lines illustrated in Table 7.1.", fig.asp=0.8----
 source("code/12-desire.R", print.eval = TRUE)
 
 ## ---- message=FALSE------------------------------------------------------
@@ -116,12 +116,12 @@ ncol(desire_rail)
 desire_rail = line_via(desire_rail, bristol_stations)
 ncol(desire_rail)
 
-## ----stations, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Station nodes (red dots) used as intermediary points that convert straight desire lines with high rail usage (black) into three legs: to the origin station (red) via public transport (grey) and to the destination (a very short blue line)."----
+## ----stations, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Station nodes (red dots) used as intermediary points that convert straight desire lines with high rail usage (black) into three legs: to the origin station (red) via public transport (gray) and to the destination (a very short blue line)."----
 zone_cents = st_centroid(zones_od)
 zone_cents_rail = zone_cents[desire_rail, ]
 plot(desire_rail$geometry, expandBB = c(.1, .1, .1, .1))
 plot(desire_rail$leg_orig, add = TRUE, col = "red", lwd = 3)
-plot(desire_rail$leg_via, add = TRUE, col = "grey", lwd = 2)
+plot(desire_rail$leg_via, add = TRUE, col = "gray", lwd = 2)
 plot(bristol_stations, add = TRUE, col = "red")
 plot(desire_rail$leg_dest, add = TRUE, col = "blue", lwd = 5)
 plot(zone_cents_rail, add = TRUE, col = "black")
@@ -143,7 +143,7 @@ slotNames(ways_sln)
 weightfield(ways_sln)
 class(ways_sln@g)
 
-## ---- fig.cap="Illustration of a small route network, with segment thickness proportional to its betweeness, generated using the **igraph** package and described in the text."----
+## ---- fig.cap="Illustration of a small route network, with segment thickness proportional to its betweeness, generated using the igraph package and described in the text.", fig.asp=0.8----
 g = ways_sln@g
 e = igraph::edge_betweenness(ways_sln@g)
 plot(ways_sln@sl$geometry, lwd = e / 500)
@@ -178,7 +178,7 @@ route_cycleway$all = c(desire_rail$all, desire_carshort$all)
 ## ---- eval=FALSE---------------------------------------------------------
 ## qtm(route_cycleway, lines.lwd = "all")
 
-## ----cycleways, echo=FALSE, message=FALSE, fig.cap="Potential routes along which to prioritise cycle infrastructure in Bristol, based on access key rail stations (red dots) and routes with many short car journeys (north of Bristol surrounding Stoke Bradley). Line thickness is proportional to number of trips."----
+## ----cycleways, echo=FALSE, message=FALSE, fig.cap="Potential routes along which to prioritise cycle infrastructure in Bristol, based on access key rail stations (red dots) and routes with many short car journeys (north of Bristol surrounding Stoke Bradley). Line thickness is proportional to number of trips.", fig.asp=0.8----
 source("code/12-cycleways.R")
 m_leaflet
 # tmap_leaflet(m_leaflet) # not working

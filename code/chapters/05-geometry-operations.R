@@ -32,7 +32,7 @@ us_states2163$AREA = as.numeric(us_states2163$AREA)
 us_states_simp2 = rmapshaper::ms_simplify(us_states2163, keep = 0.01,
                                           keep_shapes = TRUE)
 
-## ----us-simp, echo=FALSE, fig.cap="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from **sf** (center) and **rmapshaper** (right) packages.", warning=FALSE----
+## ----us-simp, echo=FALSE, fig.cap="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (center) and rmapshaper (right) packages.", warning=FALSE, fig.asp=0.3----
 library(tmap)
 p_ussimp1 = tm_shape(us_states2163) + tm_polygons() + tm_layout(main.title = "Original data")
 p_ussimp2 = tm_shape(us_states_simp1) + tm_polygons() + tm_layout(main.title = "st_simplify")
@@ -60,7 +60,7 @@ tmap_arrange(p_centr1, p_centr2, ncol = 2)
 seine_buff_5km = st_buffer(seine, dist = 5000)
 seine_buff_50km = st_buffer(seine, dist = 50000)
 
-## ----buffs, echo=FALSE, fig.cap="Buffers around the `seine` datasets of 5km (left) and 50km (right). Note the colors, which reflect the fact that one buffer is created per geometry feature.", fig.show='hold', out.width="50%"----
+## ----buffs, echo=FALSE, fig.cap="Buffers around the `seine` datasets of 5km (left) and 50km (right). Note the colors, which reflect the fact that one buffer is created per geometry feature.", fig.show='hold', out.width="75%"----
 p_buffs1 = tm_shape(seine_buff_5km) + tm_polygons(col = "name") +
   tm_shape(seine) + tm_lines() +
   tm_layout(main.title = "5 km buffer", legend.show = FALSE)
@@ -131,14 +131,14 @@ tmap_arrange(p_at1, p_at2, p_at3, ncol = 3)
 ## ------------------------------------------------------------------------
 nz_scale_sf = st_set_geometry(nz, nz_scale)
 
-## ----points, fig.cap="Overlapping circles."------------------------------
+## ----points, fig.cap="Overlapping circles.", fig.asp=1-------------------
 b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
 b = st_buffer(b, dist = 1) # convert points to circles
 l = c("x", "y")
 plot(b)
 text(x = c(-0.5, 1.5), y = 1, labels = l) # add text
 
-## ------------------------------------------------------------------------
+## ----circle-intersection, fig.cap="Overlapping circles with a gray color indicating intersection between them.", fig.asp=1----
 x = b[1]
 y = b[2]
 x_and_y = st_intersection(x, y)
@@ -148,7 +148,7 @@ plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
 ## ----venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators.", warning=FALSE----
 source("code/05-venn-clip.R")
 
-## ----venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y."----
+## ----venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y.", out.width="50%", fig.asp=1----
 bb = st_bbox(st_union(x, y))
 pmat = matrix(c(bb[c(1, 2, 3, 2, 3, 4, 1, 4, 1, 2)]), ncol = 2, byrow = TRUE)
 box = st_polygon(list(pmat))
@@ -208,7 +208,7 @@ multipoint = st_multipoint(matrix(c(1, 3, 5, 1, 3, 1), ncol = 2))
 linestring = st_cast(multipoint, "LINESTRING")
 polyg = st_cast(multipoint, "POLYGON")
 
-## ----single-cast, echo = FALSE, fig.cap="Examples of linestring and polygon 'casted' from a multipoint geometry.", warning=FALSE----
+## ----single-cast, echo = FALSE, fig.cap="Examples of linestring and polygon 'casted' from a multipoint geometry.", warning=FALSE, fig.asp=0.3----
 p_sc1 = tm_shape(st_sfc(multipoint)) + tm_symbols(shape = 1, col = "black", size = 0.5) +
   tm_layout(main.title = "MULTIPOINT", inner.margins = c(0.05, 0.05, 0.05, 0.05))
 p_sc2 = tm_shape(st_sfc(linestring)) + tm_lines() +
@@ -245,14 +245,7 @@ abbreviate_geomtypes = function(geomtypes) {
 sfs_st_cast$input_geom = abbreviate_geomtypes(sfs_st_cast$input_geom)
 names(sfs_st_cast) = abbreviate_geomtypes(names(sfs_st_cast))
 names(sfs_st_cast)[1] = ""
-knitr::kable(sfs_st_cast, caption = "Geometry casting on simple feature geometries (see section 2.1, type names abbreviated) with input type by row and output type by column. Values like (1) represent the number of features; NA means the operation is not possible."
-             # commented out for abbriviated version:
-             # , format = "html" 
-             ) # %>%
-  # commented out for abbriviated version:
-  # kableExtra::kable_styling(font_size = 7) %>% 
-  # kableExtra::kable_styling("striped", full_width = TRUE) #%>%
-  # kableExtra::row_spec(0, angle = 90)
+knitr::kable(sfs_st_cast, caption = "Geometry casting on simple feature geometries (see section 2.1, type names abbreviated) with input type by row and output type by column. Values like (1) represent the number of features; NA means the operation is not possible.")
 
 ## ------------------------------------------------------------------------
 multilinestring_list = list(matrix(c(1, 4, 5, 3), ncol = 2), 
@@ -267,10 +260,10 @@ linestring_sf2 = st_cast(multilinestring_sf, "LINESTRING")
 linestring_sf2
 
 ## ----line-cast, echo=FALSE, fig.cap="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right).", warning=FALSE----
-p_lc1 = tm_shape(multilinestring_sf) + tm_lines(lwd = 2) +
+p_lc1 = tm_shape(multilinestring_sf) + tm_lines(lwd = 3) +
   tm_layout(main.title = "MULTILINESTRING")
 linestring_sf2$name = c("Riddle Rd", "Marshall Ave", "Foulke St")
-p_lc2 = tm_shape(linestring_sf2) + tm_lines(lwd = 2, col = "name", palette = "Set2") +
+p_lc2 = tm_shape(linestring_sf2) + tm_lines(lwd = 3, col = "name", palette = "Set2") +
   tm_layout(main.title = "LINESTRING", legend.show = FALSE)
 tmap_arrange(p_lc1, p_lc2, ncol = 2)
 
@@ -312,9 +305,9 @@ dem_agg = aggregate(dem, fact = 5, fun = mean)
 
 ## ----aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."----
 p_ar1 = tm_shape(dem) + tm_raster(style = "cont", legend.show = FALSE) +
-  tm_layout(main.title = "Original")
+  tm_layout(main.title = "Original", frame = FALSE)
 p_ar2 = tm_shape(dem_agg) + tm_raster(style = "cont", legend.show = FALSE) +
-  tm_layout(main.title = "Aggregated")
+  tm_layout(main.title = "Aggregated", frame = FALSE)
 tmap_arrange(p_ar1, p_ar2, ncol = 2)
 
 ## ------------------------------------------------------------------------
@@ -363,7 +356,7 @@ srtm_masked = mask(srtm, as(zion, "Spatial"))
 ## ------------------------------------------------------------------------
 srtm_inv_masked = mask(srtm, as(zion, "Spatial"), inverse = TRUE)
 
-## ----cropmask, echo = FALSE, fig.cap="Illustration of raster cropping and raster masking."----
+## ----cropmask, echo = FALSE, fig.cap="Illustration of raster cropping and raster masking.", fig.asp=0.36, fig.width = 10----
 # TODO: split into reproducible script, e.g. in code/09-cropmask.R
 library(tmap)
 library(rcartocolor)
@@ -380,7 +373,7 @@ pz3 = tm_shape(srtm_masked) + tm_raster(palette = terrain_colors, legend.show = 
 pz4 = tm_shape(srtm_inv_masked) + tm_raster(palette = terrain_colors, legend.show = FALSE, style = "cont") + 
   tm_shape(zion) + tm_borders(lwd = 2) + 
   tm_layout(main.title = "D. Inverse mask")
-tmap_arrange(pz1, pz2, pz3, pz4, ncol = 2)
+tmap_arrange(pz1, pz2, pz3, pz4, ncol = 4)
 
 ## ------------------------------------------------------------------------
 zion_points$elevation = raster::extract(srtm, as(zion_points, "Spatial"))
@@ -389,7 +382,7 @@ zion_points$elevation = raster::extract(srtm, as(zion_points, "Spatial"))
 ## # Aim: demonstrate buffer arg in raster extract
 ## elev_b1 = raster::extract(srtm, as(zion_points, "Spatial"), buffer = 1000)
 
-## ----pointextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Locations of points used for raster extraction."----
+## ----pointextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Locations of points used for raster extraction.", fig.asp=0.57----
 library(tmap)
 library(grid)
 
@@ -553,38 +546,38 @@ source("code/05-raster-vectorization1.R", print.eval = TRUE)
 ## cl = rasterToContour(dem)
 ## plot(cl, add = TRUE)
 
-## ----contour, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines."----
-data("dem", package = "RQGIS")
-# create hillshade
-hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
-plot(hs, col = gray(0:100 / 100), legend = FALSE)
-# overlay with DEM
-plot(dem, terrain.colors(25), alpha = 0.5, legend = FALSE, add = TRUE)
-# add contour lines
-contour(dem, col = "white", add = TRUE)
-
-## ----contour_tmap, echo=FALSE, eval=FALSE, message=FALSE, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines.", warning=FALSE----
-## library(tmap)
+## ----contour, eval=FALSE, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines."----
 ## data("dem", package = "RQGIS")
 ## # create hillshade
 ## hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
-## # create contour
-## cn = rasterToContour(dem)
-## rect = tmaptools::bb_poly(hs)
-## bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
-## 
-## tm_shape(hs, bbox = rect) +
-## 	tm_grid(col = "black", n.x = 2, n.y = 2, labels.inside.frame = FALSE,
-## 	        labels.rot = c(0, 90)) +
-## 	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
-## 	tm_shape(dem) +
-## 	tm_raster(alpha = 0.5, palette = terrain.colors(25),
-## 	          legend.show = FALSE) +
-## 	tm_shape(cn) +
-## 	tm_lines(col = "white") +
-## 	tm_text("level", col = "white") +
-## 	qtm(rect, fill = NULL) +
-## 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
+## plot(hs, col = gray(0:100 / 100), legend = FALSE)
+## # overlay with DEM
+## plot(dem, col = terrain.colors(25), alpha = 0.5, legend = FALSE, add = TRUE)
+## # add contour lines
+## contour(dem, col = "white", add = TRUE)
+
+## ----contour-tmap, echo=FALSE, message=FALSE, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines.", warning=FALSE, fig.asp=0.56----
+library(tmap)
+data("dem", package = "RQGIS")
+# create hillshade
+hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
+# create contour
+cn = rasterToContour(dem)
+rect = tmaptools::bb_poly(hs)
+bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
+
+tm_shape(hs, bbox = rect) +
+	tm_grid(col = "black", n.x = 2, n.y = 2, labels.inside.frame = FALSE,
+	        labels.rot = c(0, 90)) +
+	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+	tm_shape(dem) +
+	tm_raster(alpha = 0.5, palette = terrain.colors(25),
+	          legend.show = FALSE) +
+	tm_shape(cn) + 
+	tm_lines(col = "white") +
+	tm_text("level", col = "white") +
+	qtm(rect, fill = NULL) +
+	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE)
 
 ## ------------------------------------------------------------------------
 grain_poly = rasterToPolygons(grain) %>% 
@@ -593,7 +586,7 @@ grain_poly2 = grain_poly %>%
   group_by(layer) %>%
   summarize()
 
-## ----raster-vectorization2, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).", warning=FALSE----
+## ----raster-vectorization2, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).", warning=FALSE, fig.asp=0.4----
 source("code/05-raster-vectorization2.R", print.eval = TRUE)
 
 ## ---- message=FALSE------------------------------------------------------

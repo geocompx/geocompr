@@ -211,7 +211,7 @@ coords = st_centroid(metros_wgs) %>%
 data("metro_names", package = "spDataLarge")
 
 ## ----metro-names, echo=FALSE---------------------------------------------
-knitr::kable(dplyr::select(metro_names, locality, country), caption = "Result of the reverse geocoding.")
+knitr::kable(dplyr::select(metro_names, locality, administrative_area_level_1), caption = "Result of the reverse geocoding.")
 
 ## ------------------------------------------------------------------------
 metro_names = 
