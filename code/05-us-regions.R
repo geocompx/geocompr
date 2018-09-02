@@ -21,8 +21,8 @@ regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION)
                     FUN = sum, na.rm = TRUE)
 us_states_facet = dplyr::select(us_states, REGION, total_pop_15) %>%
   mutate(Level = "State")
-# regions_facet = rename(regions, REGION = Group.1) %>%
-#   mutate(Level = "Region")
+regions_facet = dplyr::rename(regions, REGION = Group.1) %>%
+  mutate(Level = "Region")
 us_facet = rbind(us_states_facet, regions_facet) %>%
   mutate(Level = factor(Level, levels = c("State", "Region"))) %>%
   st_cast("MULTIPOLYGON")
