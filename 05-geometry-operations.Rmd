@@ -1181,8 +1181,8 @@ source("code/05-raster-vectorization2.R", print.eval = TRUE)
 
 ## Exercises
 
-Some of the exercises will use a vector (`random_points`) and raster dataset (`ndvi`) from the **RQGIS** package.
-It also uses a polygonal 'convex hull' derived from the vector dataset (`ch`) to represent the area of interest:
+Some of the exercises use a vector (`random_points`) and raster dataset (`ndvi`) from the **RQGIS** package.
+They also use a polygonal 'convex hull' derived from the vector dataset (`ch`) to represent the area of interest:
 ```{r, message=FALSE}
 library(RQGIS)
 data(random_points)
@@ -1195,7 +1195,6 @@ Experiment with different values of `keep` (ranging from 0.5 to 0.00005) for `ms
     - At what value does the form of the result start to break-down for each method, making New Zealand unrecognizable?
     - Advanced: What is different about the geometry type of the results from `st_simplify()` compared with the geometry type of `ms_simplify()`? What problems does this create and how can this be resolved?
 ```{r, echo=FALSE, eval=FALSE}
-plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 1))
 plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.5))
 plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.05))
 # Starts to breakdown here at 0.5% of the points:
@@ -1210,9 +1209,6 @@ plot(st_simplify(st_geometry(nz), dTolerance = 10000))
 plot(st_simplify(st_geometry(nz), dTolerance = 100000))
 plot(st_simplify(st_geometry(nz), dTolerance = 100000, preserveTopology = TRUE))
 
-plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.05))
-plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.05))
-
 # Problem: st_simplify returns POLYGON and MULTIPOLYGON results, affecting plotting
 # Cast into a single geometry type to resolve this
 nz_simple_poly = st_simplify(st_geometry(nz), dTolerance = 10000) %>% 
@@ -1225,14 +1221,16 @@ plot(nz_simple_poly)
 length(nz_simple_poly)
 nrow(nz)
 ```
-1. In the first exercise in Chapter \@ref(spatial-operations) it was established that Canterbury region had 61 of the 101 highest points in New Zealand. Using `st_buffer()`, how many points in `nz_height` are within 100 km of Canterbury?
+1. In the first exercise in Chapter \@ref(spatial-operations) it was established that Canterbury region had 70 of the 101 highest points in New Zealand. 
+Using `st_buffer()`, how many points in `nz_height` are within 100 km of Canterbury?
 ```{r, eval=FALSE, echo=FALSE}
-canterbury = nz[nz$Name == "Canterbury Region", ]
+canterbury = nz[nz$Name == "Canterbury", ]
 cant_buff = st_buffer(canterbury, 100)
 nz_height_near_cant = nz_height[cant_buff, ]
-nrow(nz_height_near_cant) # 66 - 5 more
+nrow(nz_height_near_cant) # 75 - 5 more
 ```
-1. Find the geographic centroid of New Zealand. How far is it from the geographic centroid of Canterbury?
+1. Find the geographic centroid of New Zealand. 
+How far is it from the geographic centroid of Canterbury?
 ```{r, eval=FALSE, echo=FALSE}
 cant_cent = st_centroid(canterbury)
 nz_centre = st_centroid(st_union(nz))
@@ -1284,22 +1282,6 @@ us_states_bor$borders = st_length(us_states_bor)
 arrange(us_states_bor, borders)
 arrange(us_states_bor, -borders)
 ```
-1. Aggregate the raster counting high points in New Zealand (created in the previous exercise), reduce its geographic resolution by half (so cells are 6 by 6 km) and plot the result.
-    - Resample the lower resolution raster back to a resolution of 3 km. How have the results changed?
-    - Name two advantages and disadvantages of reducing raster resolution.
-```{r, echo=FALSE, eval=FALSE}
-nz_raster_low = raster::aggregate(nz_raster, fact = 2, fun = sum)
-res(nz_raster_low)
-nz_resample = resample(nz_raster_low, nz_raster)
-plot(nz_raster_low)
-plot(nz_resample) # the results are spread over a greater area and there are border issues
-plot(nz_raster)
-# advantage: lower memory use
-# advantage: faster processing
-# advantage: good for viz in some cases
-# disadvantage: removes geographic detail
-# disadvantage: another processing step
-```
 1. Crop the `ndvi` raster using (1) the `random_points` dataset and (2) the `ch` dataset.
 Are there any difference in the output maps?
 Next, mask `ndvi` using these two datasets.
@@ -1348,6 +1330,22 @@ plot(nz_raster)
 nz_raster2 = rasterize(nz_height3100, nz_template, 
                        field = "elevation", fun = max)
 plot(nz_raster2)
+```
+1. Aggregate the raster counting high points in New Zealand (created in the previous exercise), reduce its geographic resolution by half (so cells are 6 by 6 km) and plot the result.
+    - Resample the lower resolution raster back to a resolution of 3 km. How have the results changed?
+    - Name two advantages and disadvantages of reducing raster resolution.
+```{r, echo=FALSE, eval=FALSE}
+nz_raster_low = raster::aggregate(nz_raster, fact = 2, fun = sum)
+res(nz_raster_low)
+nz_resample = resample(nz_raster_low, nz_raster)
+plot(nz_raster_low)
+plot(nz_resample) # the results are spread over a greater area and there are border issues
+plot(nz_raster)
+# advantage: lower memory use
+# advantage: faster processing
+# advantage: good for viz in some cases
+# disadvantage: removes geographic detail
+# disadvantage: another processing step
 ```
 1. Polygonize the `grain` dataset and filter all squares representing clay.
     - Name two advantages and disadvantages of vector data over raster data.
