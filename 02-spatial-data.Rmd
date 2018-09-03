@@ -284,8 +284,8 @@ Plots are added as layers to existing images by setting `add = TRUE`.^[
 To demonstrate this, and to provide a taster of content covered in chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, the subsequent code chunk combines countries in Asia:
 
 ```{r, warning=FALSE}
-asia = world[world$continent == "Asia", ]
-asia = st_union(asia)
+world_asia = world[world$continent == "Asia", ]
+asia = st_union(world_asia)
 ```
 
 We can now plot the Asian continent over a map of the world.
@@ -301,22 +301,9 @@ Adding layers in this way can be used to verify the geographic correspondence be
 the `plot()` function is fast to execute and requires few lines of code, but does not create interactive maps with a wide range of options.
 For more advanced map making we recommend using dedicated visualization packages such as **tmap** (see Chapter \@ref(adv-map)).
 
-<!-- 
-- plot() function 
-- map export 
--->
-
-<!-- Maybe show also somewhere that `world[0]` produces only a plot of the geometry which is rather useful if you do not want to plot a specific attribute. This way, you can for example dismiss the col = "white"-argument in your Nigeria example.
-Sorry for commenting on this again but just to clarify africa[0] selects zero columns but since the geometry column is sticky it won't be dismissed. Nevertheless, to be more explicit one should probably use plot(st_geometry(africa))-->
-
-```{r, eval=FALSE, echo=FALSE}
-plot(africa[0], lwd = 3, main = "Nigeria in context", border = "lightgrey")
-```
-
 ### Base plot arguments {#base-args}
 
-Advanced map making is covered in detail in Chapter \@ref(adv-map).
-However, it is worth knowing how to modify plots using the **sf** package for quick and flexible visualization.
+There are various ways to modify maps with **sf**'s `plot()` method.
 Because **sf** extends base R plotting methods `plot()`'s arguments such as `main =` --- which specifies the title of the map --- work with `sf` objects (see `?graphics::plot` and `?par`).^[
 Note: many plot arguments are ignored in facet maps, when more than one `sf` column is plotted.
 ]
@@ -340,9 +327,30 @@ plot(st_geometry(world_cents), add = TRUE, cex = cex)
 source("code/02-contpop.R")
 ```
 
-The code above uses the function `st_centroid()` to convert one geometry type (polygon) to another (point).
-Here is not the place to explain how the function works (this is covered in Chapter \@ref(geometric-operations)).
-The point is that simple feature geometries can come in different forms, the topic of the next sections.
+The code above uses the function `st_centroid()` to convert one geometry type (polygons) to another (points) (see Chapter \@ref(geometric-operations)), the aesthetics of which are varied with the `cex` argument.
+
+**sf**'s plot method also has arguments specific to geographic data. `expandBB`, for example, can be used plot an `sf` object in context:
+it takes a numeric vector of length 4 that expands the bounding box of the plot relative to zero in the following order: bottom, left, top, right.
+This is used to plot India in the context of its giant Asian neighbors, with an emphasis on China to the East, in the following code chunk (which generates Figure \@ref(fig:china)):
+
+```{r, eval=FALSE}
+india = world[world$name_long == "India", ]
+plot(st_geometry(india), expandBB = c(0, 0.2, 0.1, 1), col = "gray", lwd = 3)
+plot(world_asia[0], add = TRUE)
+```
+
+```{r china, fig.cap="India in context, demonstrating how the expandBB argument can be used to control zoom in static plots.", warning=FALSE, echo=FALSE}
+india = world[world$name_long == "India", ]
+indchi = world_asia[grepl("Indi|Chi", world_asia$name_long), ]
+indchi_points = st_centroid(indchi)
+indchi_coords = st_coordinates(indchi_points)
+plot(st_geometry(india), expandBB = c(0, 0.2, 0.1, 1), col = "gray", lwd = 3)
+plot(world_asia[0], add = TRUE)
+text(indchi_coords[, 1], indchi_coords[, 2], indchi$name_long)
+```
+
+Note the use of `[0]` to keep only the geometry column and `lwd` to emphasize India.
+See section \@ref(other-mapping-packages) for other visualization techniques for representing a range of geometry types, the subject of the next section.
 
 ### Geometry types {#geometry}
 
