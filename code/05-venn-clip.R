@@ -8,8 +8,7 @@ if(!exists("b")) {
   x_and_y = st_intersection(x, y)
 }
 
-old_par = par()
-par(mfrow = c(3, 3), mai = c(0.1, 0.1, 0.1, 0.1))
+old_par = par(mfrow = c(3, 3), mai = c(0.1, 0.1, 0.1, 0.1))
 plot(b)
 y_not_x = st_difference(y, x)
 plot(y_not_x, col = "grey", add = TRUE)
