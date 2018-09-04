@@ -40,8 +40,7 @@ C1 = (T1[1, ] + T1[2, ] + T1[3, ]) / 3 # find centroid
 
 ## ----polymat, echo=FALSE, fig.cap="Illustration of polygon centroid calculation problem.", fig.height="100", warning=FALSE----
 # initial plot: can probably delete this:
-old_par = par()
-par(pty = "s") 
+old_par = par(pty = "s") 
 plot(poly_mat)
 lines(poly_mat)
 lines(T1, col = "blue", lwd = 5)
