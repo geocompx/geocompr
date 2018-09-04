@@ -78,7 +78,7 @@ Further details can be found at [github.com/Robinlovelace/geocompr](https://gith
 
 # Preface {-}
 
-## Who this book is for
+## Who this book is for {-}
 
 This book is for people who want to analyse, visualize and model geographic data with open source software.
 It is based on R, a statistical programming language that has powerful data processing, visualisation and geospatial capabilities.
@@ -97,7 +97,7 @@ The book covers a wide range of topics and will be of interest to a wide range o
 The book is designed for intermediate-to-advanced R users interested in geocomputation and R beginners who have prior experience with geographic data.
 If you are new to both R and geographic data do not be discouraged: we provide links to further materials and describe the nature of spatial data from a beginner's perspective in Chapter \@ref(spatial-class) and in links provided below.
 
-## How to read this book
+## How to read this book {-}
 
 The book is divided into three parts:
 
@@ -122,7 +122,7 @@ We particularly recommend three tutorials:  [R for Data Science](http://r4ds.had
 A good interactive tutorial is DataCamp's [Introduction to R](https://www.datacamp.com/courses/free-introduction-to-r).
 <!-- and tutorials created with [**learnr**](https://rstudio.github.io/learnr/examples.html). -->
 
-## Why R?
+## Why R? {-}
 
 Although R has a steep learning curve the command-line approach advocated in this book can quickly pay-off.
 <!-- within a few months for most people, including programming novices. -->
@@ -143,7 +143,7 @@ Other languages such as Python, Java and C++ can be used for geocomputation  and
 None of these provide the unique combination of package ecosystem, statistical capabilities, visualization options, powerful IDEs offered by the R community.
 Furthermore, by teaching how to use one language (R) in depth, this book will equip you with the concepts and confidence needed to do geocomputation in other languages.
 
-## Real-world impact
+## Real-world impact {-}
 
 *Geocomputation with R* will equip you with knowledge and skills to tackle a wide range of issues, including those with scientific, societal and environmental implications, manifested in geographic data.
 As described in section \@ref(what-is-geocomputation), geocomputation is not only about using computers to process geographic data:
