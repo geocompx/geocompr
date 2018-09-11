@@ -5,7 +5,7 @@ library(tmap)
 tmap_mode("plot")
 desire_lines_top5 = od2line(od_top5, zones_od)
 tm_shape(desire_lines) +
-  tm_lines(lwd = "all", scale = 7, title.lwd = "Number of trips", alpha = 0.6) +
+  tm_lines(lwd = "all", scale = 7, title.lwd = "Number of trips", alpha = 0.6, col = "red") +
   tm_shape(desire_lines_top5) +
   tm_lines(lwd = 5, col = "black", alpha = 0.7) +
   tm_scale_bar()
