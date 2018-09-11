@@ -97,8 +97,10 @@ Furthermore R outperforms GISs in some areas of geocomputation, including intera
 <!-- However, there are already a wide range of algorithms that can be accessed via R's interfaces to dedicated GIS software. -->
 <!-- It makes sense to understand these before moving to develop your own optimized algorithms. -->
 This chapter focuses on 'bridges' to three mature open source GIS products (see Table \@ref(tab:gis-comp)): QGIS (via the package **RQGIS**; section \@ref(rqgis)), SAGA (via **RSAGA**; section \@ref(rsaga)) and GRASS (via **rgrass7**; section \@ref(rgrass)).
-Though not covered here, it is worth being aware of the interface to ArcGIS, a proprietary and very popular GIS software, via **RPyGeo**.
-<!-- The so-called [R-ArcGIS bridge](https://github.com/R-ArcGIS/r-bridge) allows R to be used from within ArcGIS (R can also be used from within QGIS). -->
+Though not covered here, it is worth being aware of the interface to ArcGIS, a proprietary and very popular GIS software, via **RPyGeo**.^[By the way, it is also possible to use R from within Desktop GIS software packages. 
+The so-called [R-ArcGIS bridge](https://github.com/R-ArcGIS/r-bridge) allows R to be used from within ArcGIS. 
+One can also use R scripts from within QGIS (see [R scripts in Processing]( https://docs.qgis.org/2.18/en/docs/training_manual/processing/r_intro.html)).
+Finally, it is also possible to use R from the [GRASS GIS command line](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7).]
 To complement the R-GIS bridges, the chapter ends with a very brief introduction to interfaces to spatial libraries (section \@ref(gdal)) and spatial databases (section \@ref(postgis)).
 
 <!-- The chapter's aim is to provide working knowledge of R's bridges to open source GISs. -->
