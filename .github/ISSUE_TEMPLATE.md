@@ -1,6 +1,10 @@
-Issues can be opened on the book's contents (see 1) its code (2) or general questions (3). 
+<!-- Issues can be opened on the book's contents (see 1) its code (2) or other (3).
 
-(1) If it's a problem with the book's content please link to the place in the book where you found the problem. This is section 1.2, for example:
+Please add details accordingly:
+
+(1) If it's a problem with the book's content please link to the place in the book where you found the problem.
+
+This is section 1.2, for example:
 
 http://geocompr.robinlovelace.net/intro.html#why-geocomputation-with-r
 
@@ -23,4 +27,4 @@ A brief description of the problem.
 
 If you have a general question, feel free to use this form. 
 However, you may get a better response from another site (e.g at <https://stackoverflow.com/>, http://gis.stackexchange.com/ or <https://community.rstudio.com/>):
-it may be quicker to check and post questions there.
+it may be quicker to check and post questions there. -->
