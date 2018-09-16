@@ -43,4 +43,7 @@ tm_shape(desire_lines) +
            alpha = 0.6,
            col = "Active",
            title = "Active travel (%)"
-  ) 
+  ) +
+  tm_legend(show = FALSE) +
+  tm_layout(frame = FALSE)
+
