@@ -32,21 +32,15 @@ if(!exists("desire_lines")) {
   desire_lines = od2line(od_inter, zones_od)
 }
 
-# u_od = "https://user-images.githubusercontent.com/1825120/34081176-74fd39c8-e341-11e7-9f3e-b98807cb113b.png"
-# knitr::include_graphics(u_od)
 tmap_mode("plot")
 desire_lines_top5 = od2line(od_top5, zones_od)
 # tmaptools::palette_explorer()
 tm_shape(desire_lines) +
   tm_lines(palette = "plasma", breaks = c(0, 5, 10, 20, 40, 100),
-    lwd = "all",
-    scale = 9,
-    title.lwd = "Number of trips",
-    alpha = 0.6,
-    col = "Active",
-    title = "Active travel (%)"
-  ) +
-  tm_shape(desire_lines_top5) +
-  tm_lines(lwd = 5, col = "black", alpha = 0.7) +
-  tm_scale_bar()
-
+           lwd = "all",
+           scale = 9,
+           title.lwd = "Number of trips",
+           alpha = 0.6,
+           col = "Active",
+           title = "Active travel (%)"
+  ) 
