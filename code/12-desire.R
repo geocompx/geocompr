@@ -1,4 +1,35 @@
-# tmap figure
+# Aim: generate tmap figure representing desire lines
+
+# load data if not already loaded:
+if(!exists("desire_lines")) {
+  library(sf)
+  library(tidyverse)
+  library(spDataLarge)
+  library(stplanr)
+  library(tmap)     
+  zones_attr = bristol_od %>% 
+    group_by(o) %>% 
+    summarize_if(is.numeric, sum) %>% 
+    dplyr::rename(geo_code = o)
+  
+  zones_joined = left_join(bristol_zones, zones_attr, by = "geo_code")
+  
+  zones_od = bristol_od %>% 
+    group_by(d) %>% 
+    summarize_if(is.numeric, sum) %>% 
+    dplyr::select(geo_code = d, all_dest = all) %>% 
+    inner_join(zones_joined, ., by = "geo_code")
+  
+  od_top5 = bristol_od %>% 
+    arrange(desc(all)) %>% 
+    top_n(5, wt = all)
+  
+  od_intra = filter(bristol_od, o == d)
+  od_inter = filter(bristol_od, o != d)
+  desire_lines = od2line(od_inter, zones_od)
+}
+
+
 # u_od = "https://user-images.githubusercontent.com/1825120/34081176-74fd39c8-e341-11e7-9f3e-b98807cb113b.png"
 # knitr::include_graphics(u_od)
 library(tmap)
