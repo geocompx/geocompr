@@ -25,4 +25,7 @@ p2 = ggplot() +
   scale_x_continuous(breaks = c(310000, 320000, 330000)) + 
   theme(panel.grid = element_line(size = 1, color = "black", linetype = 2))
 
+
+png(filename = "figures/02_vector_crs.png", width = 950, height = 532, res = 150)
 grid.arrange(p1, p2, nrow = 1)
+dev.off()
