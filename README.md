@@ -51,12 +51,14 @@ will update automatically): [katygregg](https://github.com/katygregg),
 [layik](https://github.com/layik), [mvl22](https://github.com/mvl22),
 [nickbearman](https://github.com/nickbearman),
 [richfitz](https://github.com/richfitz),
+[SymbolixAU](https://github.com/SymbolixAU),
 [wdearden](https://github.com/wdearden),
 [yihui](https://github.com/yihui),
 [chihinl](https://github.com/chihinl),
 [gregor-d](https://github.com/gregor-d),
 [p-kono](https://github.com/p-kono),
 [pokyah](https://github.com/pokyah),
+[schuetzingit](https://github.com/schuetzingit),
 [tim-salabim](https://github.com/tim-salabim).
 
 During the project we aim to contribute ‘upstream’ to the packages that
