@@ -356,9 +356,12 @@ Choosing `more` as `revgeo()`'s `output` option will give back a `data.frame` wi
 
 ```{r, eval=FALSE, warning=FALSE, message=FALSE}
 # reverse geocoding to find out the names of the metropolitan areas
-metro_names = map_dfr(1:nrow(coords), function(i) {
-  revgeo::revgeo(coords[1, 1], coords[1, 2])[[1]]
+metro_chars = map_chr(1:nrow(coords), function(i) {
+  revgeo::revgeo(coords[i, 1], coords[i, 2])[[1]]
 })
+locality = map_chr(metro_chars, ~stringr::str_split(., pattern = ", ")[[1]][2])
+administrative_area_level_1 = map_chr(metro_chars, ~stringr::str_split(., pattern = ", ")[[1]][3])
+metro_names = data.frame(locality, administrative_area_level_1)
 ```
 
 Though the `while`-loop helps to make the reverse geocoding more successful, it sometimes might still fail or even give back results slightly differing from those we here have produced here.
@@ -377,17 +380,6 @@ Overall, we are satisfied with the `locality` column serving as metropolitan nam
 Hence, we replace Wülfrath with the corresponding name in the `administrative_area_level_2` column, that is Düsseldorf (Fig. \@ref(fig:metro-areas)).
 Umlauts like `ü` might lead to trouble further on, for example when determining the bounding box of a metropolitan area with `opq()` (see further below), which is why we replace them.
 
-```{r}
-metro_names = 
-  dplyr::select(metro_names, locality, administrative_area_level_2) %>%
-  # replace Wülfrath and umlaut ü
-  mutate(locality = ifelse(locality == "Wülfrath",
-                           administrative_area_level_2,
-                           locality),
-         locality = gsub("ü", "ue", locality)) %>%
-  pull(locality)
-```
-
 ## Points of interest
 
 The **osmdata** package provides easy-to-use access to OSM data (see also section \@ref(retrieving-data)).
@@ -405,7 +397,7 @@ Before running this code: please consider it will download almost 2GB of data.
 To save time and resources we have output into **spDataLarge** and should already be available in your environment as an object called `shops`.
 
 ```{r, eval=FALSE, message=FALSE}
-shops = map(metro_names, function(x) {
+shops = map(locality, function(x) {
   message("Downloading shops of: ", x, "\n")
   # give the server a bit time
   Sys.sleep(sample(seq(5, 10, 0.1), 1))
