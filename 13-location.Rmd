@@ -2,7 +2,7 @@
 
 ## Prerequisites {-}
 
-- This chapter requires the following packages (**ggmap** must also be installed):
+- This chapter requires the following packages (**revgeo** must also be installed):
 
 ```{r, message=FALSE} 
 library(sf)
@@ -334,10 +334,8 @@ The resulting eight metropolitan areas suitable for bike shops (Fig. \@ref(fig:m
 A reverse geocoding approach can settle this problem.
 Given a coordinate, reverse geocoding finds the corresponding address.
 Consequently, extracting the centroid coordinate of each metropolitan area can serve as an input for a reverse geocoding API.
-The **ggmap** package makes use of the one provided by Google.^[
-Google allows each user to access its services on a free basis for a maximum of 2500 queries a day.
-]
-`ggmap::revgeocode()` only accepts geographical coordinates (latitude/longitude), therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system (Chapter \@ref(reproj-geo-data)).
+The **revgeo** package can use a range of services (photon by default).
+`revgeo::revgeo()` only accepts geographical coordinates (latitude/longitude), therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system (Chapter \@ref(reproj-geo-data)).
 
 ```{r}
 metros_wgs = st_transform(metros, 4326)
@@ -346,7 +344,7 @@ coords = st_centroid(metros_wgs) %>%
   round(4)
 ```
 
-Additionally, `ggmap::revgeocode()` only accepts one coordinate at a time, which is why we iterate over each coordinate of `coords` via a loop (`map_dfr()`).
+Additionally, `revgeo::revgeo()` only accepts one coordinate at a time, which is why we iterate over each coordinate of `coords` via a loop (`map_dfr()`).
 `map_dfr()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.^[
 For more on `lapply()` see @grolemund_r_2016 and @wickham_splitapplycombine_2011.
 ]
@@ -354,22 +352,12 @@ Sometimes, Google's reverse geocoding API is unable to find an address returning
 Usually, trying the same coordinate again returns an address at the second or third attempt (see `while()-loop`).
 However, if ten attempts have already failed, this is a good indication that the requested information is indeed unavailable.
 Since we aim to be good cyberspace citizens, we try not to overburden the server with too many queries within a short amount of time by letting the loop sleep between one and four seconds after each iteration before accessing the reverse geocoding API again.
-Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
+Choosing `more` as `revgeo()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
 
 ```{r, eval=FALSE, warning=FALSE, message=FALSE}
 # reverse geocoding to find out the names of the metropolitan areas
 metro_names = map_dfr(1:nrow(coords), function(i) {
-  add = ggmap::revgeocode(coords[i, ], output = "more")
-  x = 9
-  while (is.na(add$address) & x > 0) {
-    add = ggmap::revgeocode(coords[i, ], output = "more")
-    # just try three times
-    x = x - 1
-  }
-  # give the server a bit time
-  Sys.sleep(sample(seq(1, 4, 0.1), 1))
-  # return the result
-  add
+  revgeo::revgeo(coords[1, 1], coords[1, 2])[[1]]
 })
 ```
 
