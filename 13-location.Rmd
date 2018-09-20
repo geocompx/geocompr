@@ -2,7 +2,7 @@
 
 ## Prerequisites {-}
 
-- This chapter requires the following packages (**ggmap** must also be installed):
+- This chapter requires the following packages (**revgeo** must also be installed):
 
 ```{r, message=FALSE} 
 library(sf)
@@ -334,10 +334,8 @@ The resulting eight metropolitan areas suitable for bike shops (Fig. \@ref(fig:m
 A reverse geocoding approach can settle this problem.
 Given a coordinate, reverse geocoding finds the corresponding address.
 Consequently, extracting the centroid coordinate of each metropolitan area can serve as an input for a reverse geocoding API.
-The **ggmap** package makes use of the one provided by Google.^[
-Google allows each user to access its services on a free basis for a maximum of 2500 queries a day.
-]
-`ggmap::revgeocode()` only accepts geographical coordinates (latitude/longitude), therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system (Chapter \@ref(reproj-geo-data)).
+The **revgeo** package can use a range of services (photon by default).
+`revgeo::revgeo()` only accepts geographical coordinates (latitude/longitude), therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system (Chapter \@ref(reproj-geo-data)).
 
 ```{r}
 metros_wgs = st_transform(metros, 4326)
@@ -346,7 +344,7 @@ coords = st_centroid(metros_wgs) %>%
   round(4)
 ```
 
-Additionally, `ggmap::revgeocode()` only accepts one coordinate at a time, which is why we iterate over each coordinate of `coords` via a loop (`map_dfr()`).
+Additionally, `revgeo::revgeo()` only accepts one coordinate at a time, which is why we iterate over each coordinate of `coords` via a loop (`map_dfr()`).
 `map_dfr()` does exactly the same as `lapply()` except for returning a `data.frame` instead of a `list`.^[
 For more on `lapply()` see @grolemund_r_2016 and @wickham_splitapplycombine_2011.
 ]
@@ -354,23 +352,16 @@ Sometimes, Google's reverse geocoding API is unable to find an address returning
 Usually, trying the same coordinate again returns an address at the second or third attempt (see `while()-loop`).
 However, if ten attempts have already failed, this is a good indication that the requested information is indeed unavailable.
 Since we aim to be good cyberspace citizens, we try not to overburden the server with too many queries within a short amount of time by letting the loop sleep between one and four seconds after each iteration before accessing the reverse geocoding API again.
-Choosing `more` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
+Choosing `more` as `revgeo()`'s `output` option will give back a `data.frame` with several columns referring to the location including the address, locality and various administrative levels.
 
 ```{r, eval=FALSE, warning=FALSE, message=FALSE}
 # reverse geocoding to find out the names of the metropolitan areas
-metro_names = map_dfr(1:nrow(coords), function(i) {
-  add = ggmap::revgeocode(coords[i, ], output = "more")
-  x = 9
-  while (is.na(add$address) & x > 0) {
-    add = ggmap::revgeocode(coords[i, ], output = "more")
-    # just try three times
-    x = x - 1
-  }
-  # give the server a bit time
-  Sys.sleep(sample(seq(1, 4, 0.1), 1))
-  # return the result
-  add
+metro_chars = map_chr(1:nrow(coords), function(i) {
+  revgeo::revgeo(coords[i, 1], coords[i, 2])[[1]]
 })
+locality = map_chr(metro_chars, ~stringr::str_split(., pattern = ", ")[[1]][2])
+administrative_area_level_1 = map_chr(metro_chars, ~stringr::str_split(., pattern = ", ")[[1]][3])
+metro_names = data.frame(locality, administrative_area_level_1)
 ```
 
 Though the `while`-loop helps to make the reverse geocoding more successful, it sometimes might still fail or even give back results slightly differing from those we here have produced here.
@@ -389,17 +380,6 @@ Overall, we are satisfied with the `locality` column serving as metropolitan nam
 Hence, we replace Wülfrath with the corresponding name in the `administrative_area_level_2` column, that is Düsseldorf (Fig. \@ref(fig:metro-areas)).
 Umlauts like `ü` might lead to trouble further on, for example when determining the bounding box of a metropolitan area with `opq()` (see further below), which is why we replace them.
 
-```{r}
-metro_names = 
-  dplyr::select(metro_names, locality, administrative_area_level_2) %>%
-  # replace Wülfrath and umlaut ü
-  mutate(locality = ifelse(locality == "Wülfrath",
-                           administrative_area_level_2,
-                           locality),
-         locality = gsub("ü", "ue", locality)) %>%
-  pull(locality)
-```
-
 ## Points of interest
 
 The **osmdata** package provides easy-to-use access to OSM data (see also section \@ref(retrieving-data)).
@@ -417,7 +397,7 @@ Before running this code: please consider it will download almost 2GB of data.
 To save time and resources we have output into **spDataLarge** and should already be available in your environment as an object called `shops`.
 
 ```{r, eval=FALSE, message=FALSE}
-shops = map(metro_names, function(x) {
+shops = map(locality, function(x) {
   message("Downloading shops of: ", x, "\n")
   # give the server a bit time
   Sys.sleep(sample(seq(5, 10, 0.1), 1))
