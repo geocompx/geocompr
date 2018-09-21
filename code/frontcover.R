@@ -163,14 +163,14 @@ s_y = 0.9
 s_width = 1.55
 s_height = 1.55
 
-h5 = hexagon(fill = NA, color = "#000000") + geom_subview(
+h4 = hexagon(fill = NA, color = "#000000") + geom_subview(
   subview = p4,
   x = s_x,
   y = s_y,
   width = s_width,
   height = s_height
 )
-h5
+h4
 
 # geocompr map 1 plot -----------------------------------------------------
 us_states2163 = st_transform(us_states, 2163)
@@ -189,14 +189,14 @@ s_y = 0.95
 s_width = 1.5
 s_height = 1.5
 
-h6 = hexagon(fill = NA, color = "#000000") + geom_subview(
+h5 = hexagon(fill = NA, color = "#000000") + geom_subview(
   subview = p5,
   x = s_x,
   y = s_y,
   width = s_width,
   height = s_height
 )
-h6
+h5
 
 # geocompr map 2 plot -----------------------------------------------------
 srtm = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
@@ -204,7 +204,7 @@ zion = read_sf(system.file("vector/zion.gpkg", package = "spDataLarge"))
 zion = st_transform(zion, projection(srtm))
 srtm_masked = mask(srtm, as(zion, "Spatial"))
 
-p8 = gplot(srtm_masked) +
+p6 = gplot(srtm_masked) +
   geom_raster(aes(fill = value)) +
   scale_fill_carto_c(palette = 'TealRose', na.value = NA) +
   geom_sf(data = st_cast(zion, "LINESTRING"), inherit.aes = FALSE) +
@@ -217,73 +217,78 @@ s_y = 1
 s_width = 1.4
 s_height = 1.4
 
-h7 = hexagon(fill = NA, color = "#000000") + geom_subview(
-  subview = p8,
+h6 = hexagon(fill = NA, color = "#000000") + geom_subview(
+  subview = p6,
   x = s_x,
   y = s_y,
   width = s_width,
   height = s_height
 )
-h7
+h6
 
 
 # final plot arrangement  -------------------------------------------------
-ggplot() +
-  coord_equal(xlim = c(0, 30),
-              ylim = c(0, 30),
-              expand = c(0, 0)) +
-  
-  annotation_custom(
-    ggplotGrob(h1),
-    xmin = 0.5,
-    xmax = 8.5,
-    ymin = 21,
-    ymax = 29
-  ) +
-  
-  annotation_custom(
-    ggplotGrob(h7),
-    xmin = 3.8,
-    xmax = 11.8,
-    ymin = 15.2,
-    ymax = 23.2
-  ) +
-  
-  annotation_custom(
-    ggplotGrob(h3),
-    xmin = 7.2,
-    xmax = 15.2,
-    ymin = 21,
-    ymax = 29
-  ) +
-  
-  annotation_custom(
-    ggplotGrob(h5),
-    xmin = 10.5,
-    xmax = 18.5,
-    ymin = 15.2,
-    ymax = 23.2
-  ) +
-  
-  
-  annotation_custom(
-    ggplotGrob(h2),
-    xmin = 0.5,
-    xmax = 8.5,
-    ymin = 9.4,
-    ymax = 17.4
-  ) +
-  
-  
-  annotation_custom(
-    ggplotGrob(h6),
-    xmin = 7.2,
-    xmax = 15.2,
-    ymin = 9.4,
-    ymax = 17.4
-  ) +
-  
-  labs(x = NULL, y = NULL) +
-  theme_void()
+final_plot = function(hex1, hex2, hex3, hex4, hex5, hex6){
+  p = ggplot() +
+    coord_equal(xlim = c(0, 30),
+                ylim = c(0, 30),
+                expand = c(0, 0)) +
+    
+    annotation_custom(
+      ggplotGrob(hex1),
+      xmin = 0.5,
+      xmax = 8.5,
+      ymin = 21,
+      ymax = 29
+    ) +
+    
+    annotation_custom(
+      ggplotGrob(hex3),
+      xmin = 3.8,
+      xmax = 11.8,
+      ymin = 15.2,
+      ymax = 23.2
+    ) +
+    
+    annotation_custom(
+      ggplotGrob(hex2),
+      xmin = 7.2,
+      xmax = 15.2,
+      ymin = 21,
+      ymax = 29
+    ) +
+    
+    annotation_custom(
+      ggplotGrob(hex4),
+      xmin = 10.5,
+      xmax = 18.5,
+      ymin = 15.2,
+      ymax = 23.2
+    ) +
+    
+    
+    annotation_custom(
+      ggplotGrob(hex5),
+      xmin = 0.5,
+      xmax = 8.5,
+      ymin = 9.4,
+      ymax = 17.4
+    ) +
+    
+    
+    annotation_custom(
+      ggplotGrob(hex6),
+      xmin = 7.2,
+      xmax = 15.2,
+      ymin = 9.4,
+      ymax = 17.4
+    ) +
+    
+    labs(x = NULL, y = NULL) +
+    theme_void()
+  print(p)
+}
+
+final_plot(h6, h2, h1, h4, h5, h3)
 
 # ggsave("geocompr_cover.pdf", width=12, height=18)
