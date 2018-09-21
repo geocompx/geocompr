@@ -291,4 +291,5 @@ final_plot = function(hex1, hex2, hex3, hex4, hex5, hex6){
 
 final_plot(h6, h2, h1, h4, h5, h3)
 
-# ggsave("geocompr_cover.pdf", width=12, height=18)
+# ggsave("geocompr_cover.pdf", width = 12, height = 18)
+
