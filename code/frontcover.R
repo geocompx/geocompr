@@ -7,7 +7,6 @@ library(hexSticker)
 library(raster)
 library(rcartocolor)
 library(ggimage)
-library(emojifont)
 library(tidyverse)
 library(gridExtra)
 library(spex)
@@ -15,7 +14,6 @@ library(spDataLarge)
 library(stplanr)
 library(cartogram)
 library(rasterVis)
-
 
 # NZ map plot -------------------------------------------------------------
 data("world", "nz", package = "spData")
@@ -55,7 +53,6 @@ h1
 # console logo plot -------------------------------------------------------
 p2 = grid::textGrob("> geo::",
                     gp = grid::gpar(
-                      fontfamily = "EmojiOne",
                       col = "blue",
                       cex = 1
                     ))
@@ -290,6 +287,5 @@ final_plot = function(hex1, hex2, hex3, hex4, hex5, hex6){
 }
 
 final_plot(h6, h2, h1, h4, h5, h3)
-
 # ggsave("geocompr_cover.pdf", width = 12, height = 18)
 
