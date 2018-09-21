@@ -54,7 +54,7 @@ h1
 p2 = grid::textGrob("> geo::",
                     gp = grid::gpar(
                       col = "blue",
-                      cex = 1
+                      cex = 2.5
                     ))
 
 s_x = 1.0
@@ -287,5 +287,6 @@ final_plot = function(hex1, hex2, hex3, hex4, hex5, hex6){
 }
 
 final_plot(h6, h1, h2, h4, h5, h3)
-# ggsave("geocompr_cover.pdf", width = 12, height = 18)
+ggsave("geocompr_cover.pdf", width = 12, height = 18)
+browseURL("geocompr_cover.pdf")
 
