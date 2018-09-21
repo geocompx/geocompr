@@ -53,7 +53,7 @@ h1 = hexagon(fill = NA, color = "#000000") + geom_subview(
 h1
 
 # console logo plot -------------------------------------------------------
-p2 = grid::textGrob("> geo::|",
+p2 = grid::textGrob("> geo::",
                     gp = grid::gpar(
                       fontfamily = "EmojiOne",
                       col = "blue",
