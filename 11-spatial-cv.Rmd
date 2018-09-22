@@ -209,10 +209,9 @@ In addition to a model object (`fit`), this function also expects a raster stack
 
 ```{r}
 # attaching ta, a raster brick containing the predictors
-data("ta", package = "spDataLarge")
+data("ta", "lsl", package = "spDataLarge")
 # making the prediction
-pred = raster::predict(object = ta, model = fit,
-                       type = "response")
+pred = raster::predict(ta, model = fit, type = "response")
 ```
 
 
@@ -237,7 +236,6 @@ tm_shape(hs, bbox = bbx) +
 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
 	          legend.position = c("left", "bottom"),
 	          legend.title.size = 0.9)
-
 ```
 
 Here, when making predictions we neglect spatial autocorrelation since we assume that on average the predictive accuracy remains the same with or without spatial autocorrelation structures.
@@ -264,15 +262,19 @@ Thus, the higher the AUROC, the better the model's predictive power.
 The follow code chunk computes the AUROC of the model with `roc()`, which takes the response and the predicted values as inputs. 
 `auc()` returns the area under the curve.
 
-```{r, message=FALSE}
+```{r, message=FALSE, eval=FALSE}
 pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
+#> Area under the curve: 0.8264
 ```
 
-An AUROC of `r round(pROC::auc(pROC::roc(lsl$lslpts, fitted(fit))), 2)` represents a good fit.
+An AUROC of 0.83 
+<!-- `r #round(pROC::auc(pROC::roc(lsl$lslpts, fitted(fit))), 2)` -->
+represents a good fit.
 However, this is an overoptimistic estimation since we have computed it on the complete dataset. 
 To derive a biased-reduced assessment we have to use cross-validation and in the case of spatial data should make use of spatial CV.
 
 ## Introduction to (spatial) cross-validation {#intro-cv} 
+
 Cross-validation belongs to the family of resampling methods [@james_introduction_2013].
 The basic idea is to split (repeatedly) a dataset into training and test sets whereby the training data is used to fit a model which then is applied to the test set.
 Comparing the predicted values with the known response values from the test set (using a performance measure such as the AUROC in the binomial case) gives a bias-reduced assessment of the model's capability to generalize the learned relationship to independent data.
