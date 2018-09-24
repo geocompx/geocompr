@@ -223,10 +223,9 @@ Hence, we need to dismiss all sites in which no species were found.
 
 ```{r}
 # presence-absence matrix
-pa = decostand(comm, "pa")
+pa = decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
 pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
-
 ``` 
 
 The resulting output matrix serves as input for the NMDS.
@@ -278,7 +277,7 @@ plot(y = sc[, 1], x = elev, xlab = "elevation in m",
 
 ```{r, eval=FALSE, echo=FALSE}
 # scores and rotated scores in one figure                        
-p1 <- xyplot(scores(rotnmds)[, 2] ~ scores(rotnmds)[, 1], pch = 16, 
+p1 = xyplot(scores(rotnmds)[, 2] ~ scores(rotnmds)[, 1], pch = 16, 
              col = "lightblue", xlim = c(-3, 2), ylim = c(-2, 2),
              xlab = list("Dimension 1", cex = 0.8), 
              ylab = list("Dimension 2", cex = 0.8),
@@ -317,8 +316,9 @@ points(scores(rotnmds, choices = 1:2), col = "lightblue", pch = 16)
 sc = scores(nmds, choices = 1:2) %>% as.data.frame
 sc$id = rownames(sc) %>% as.numeric
 rp = inner_join(select(sc, id), st_set_geometry(random_points, NULL))
-fit_1 = envfit(nmds, rp)
-fit_2 = envfit(rotnmds, rp)
+fit_1 = envfit(nmds, select(rp, dem))
+fit_2 = envfit(rotnmds, select(rp, dem))
+par(mfrow = c(1, 2))
 plot(nmds, display = "sites")
 plot(fit_1)
 plot(rotnmds, display = "sites")
