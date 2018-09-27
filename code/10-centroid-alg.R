@@ -14,10 +14,10 @@ if(!exists("poly_mat")) {
 
 # Step 1: create sub-triangles, set-up ------------------------------------
 
-O = poly_mat[1, ] # create a point representing the origin
+Origin = poly_mat[1, ] # create a point representing the origin
 i = 2:(nrow(poly_mat) - 2)
 T_all = lapply(i, function(x) {
-  rbind(O, poly_mat[x:(x + 1), ], O)
+  rbind(Origin, poly_mat[x:(x + 1), ], Origin)
 })
 
 
