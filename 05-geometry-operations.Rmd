@@ -75,7 +75,7 @@ object.size(seine_simp)
 
 Simplification is also applicable for polygons.
 This is illustrated using `us_states`, representing the contiguous United States.
-As we showed in section \@ref(reproj-geo-data), GEOS assumes that the data is in a projected CRS and this could lead to unexpected results when using a geographic CRS.
+As we show in chapter \@ref(reproj-geo-data), GEOS assumes that the data is in a projected CRS and this could lead to unexpected results when using a geographic CRS.
 Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (epsg = 2163) (on the left in Figure \@ref(fig:us-simp)):
 
 ```{r}
@@ -119,7 +119,7 @@ tmap_arrange(p_ussimp1, p_ussimp2, p_ussimp3, ncol = 3)
 
 Centroid operations identify the center of geographic objects.
 Like statistical measures of central tendency (including mean and median definitions of 'average'), there are many ways to define the geographic center of an object.
-All of create single point representations of more complex vector objects.
+All of them create single point representations of more complex vector objects.
 
 The most commonly used centroid operation is the *geographic centroid*.
 This type of centroid operation (often referred to as 'the centroid') represents the center of mass in a spatial object (think of balancing a plate on your finger).
@@ -165,7 +165,7 @@ How many points are within a given distance of this line?
 Which demographic groups are within travel distance of this new shop?
 These kinds of questions can be answered and visualized by creating buffers around the geographic entities of interest.
 
-Figure \@ref(fig:buffs) illustrates buffers of different sizes (5 and 20 km) surrounding the river Seine and tributaries.
+Figure \@ref(fig:buffs) illustrates buffers of different sizes (5 and 50 km) surrounding the river Seine and tributaries.
 These buffers were created with commands below, which show that the command `st_buffer()` requires at least two arguments: an input geometry and a distance, provided in the units of the CRS (in this case meters):
 
 ```{r}
@@ -255,7 +255,7 @@ R =
 $$
 
 It rotates points in a counterclockwise direction.
-The rotation matrix could be implemented in R as:
+The rotation matrix can be implemented in R as:
 <!-- https://r-spatial.github.io/sf/articles/sf3.html#affine-transformations -->
 ```{r}
 rotation = function(a){
@@ -317,9 +317,8 @@ two overlapping circles with a center point one unit away from each other and a 
 ```{r points, fig.cap="Overlapping circles.", fig.asp=1}
 b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
 b = st_buffer(b, dist = 1) # convert points to circles
-l = c("x", "y")
 plot(b)
-text(x = c(-0.5, 1.5), y = 1, labels = l) # add text
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y")) # add text
 ```
 
 Imagine you want to select not one circle or the other, but the space covered by both `x` *and* `y`.
@@ -346,15 +345,14 @@ Some points will be inside just one circle, some will be inside both and some wi
 
 ```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y.", out.width="50%", fig.asp=1}
 bb = st_bbox(st_union(x, y))
-pmat = matrix(c(bb[c(1, 2, 3, 2, 3, 4, 1, 4, 1, 2)]), ncol = 2, byrow = TRUE)
-box = st_polygon(list(pmat))
+box = st_as_sfc(bb)
 set.seed(2017)
 p = st_sample(x = box, size = 10)
 plot(box)
 plot(x, add = TRUE)
 plot(y, add = TRUE)
 plot(p, add = TRUE)
-text(x = c(-0.5, 1.5), y = 1, labels = l)
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
 ```
 
 The logical operator way would find the points inside both `x` and `y` using a spatial predicate such as `st_intersects()` whereas the intersection method simply finds the points inside the intersecting region created above as `x_and_y`.
