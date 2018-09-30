@@ -113,7 +113,7 @@ london_proj_buff = st_buffer(london_proj, 111320)
 The result in Figure \@ref(fig:crs-buf) (right panel) shows that buffers based on a projected CRS are not distorted:
 every part of the buffer's border is equidistant to London.
 
-```{r crs-buf, fig.cap="Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline.", fig.asp=1, fig.show='hold', out.width="45%", echo=FALSE}
+```{r crs-buf, fig.cap="Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline.", fig.scap="Buffers around London with a geographic and projected CRS.",  fig.asp=1, fig.show='hold', out.width="45%", echo=FALSE}
 uk = rnaturalearth::ne_countries(scale = 50) %>% 
   st_as_sf() %>% 
   filter(grepl(pattern = "United Kingdom|Ire", x = name_long))
@@ -185,7 +185,7 @@ This means that when working with local data sources, it is likely preferable to
 The example of London was easy to answer because a) the CRS 'BNG' (with its associated EPSG code 27700) is well-known and b) the original dataset (`london`) already had that CRS.
 
 In cases where an appropriate CRS is not immediately clear, the choice of CRS should depend on the properties that are most important to preserve in the subsequent maps and analysis.
-All CRSs are either equal area, equi-distant, conformal (with shapes remaining unchanged), or some combination of compromises of those.
+All CRSs are either equal-area, equidistant, conformal (with shapes remaining unchanged), or some combination of compromises of those.
 Custom CRSs with local parameters can be created for a region of interest and multiple CRSs can be used in projects when no single CRS suits all tasks.
 'Geodesic calculations' can provide a fall-back if no CRSs are appropriate (see [proj4.org/geodesic.html](https://proj4.org/geodesic.html)).
 For any projected CRS the results may not be accurate when used on geometries covering hundreds of kilometers.
@@ -229,8 +229,11 @@ To show how the system works let's create a function, `lonlat2UTM()` to calculat
 ```{r}
 lonlat2UTM = function(lonlat) {
   utm = (floor((lonlat[1] + 180) / 6) %% 60) + 1
-  if(lonlat[2] > 0) utm + 32600 else
+  if(lonlat[2] > 0) {
+    utm + 32600
+  } else{
     utm + 32700
+  }
 }
 ```
 
@@ -396,10 +399,10 @@ knitr::include_graphics("images/wintriproj-1.png")
 ```
 
 ```{block2 type='rmdnote'}
-The two main functions for transformation of simple features coordinates are `sf::st_transform()` and `sf::sf_project()`. 
+The three main functions for transformation of simple features coordinates are `sf::st_transform()`, `sf::sf_project()`, and `lwgeom::st_transform_proj()`.
 The `st_transform` function uses the GDAL interface to PROJ, while `sf_project()` (which works with two-column numeric matrices, representing points) and `lwgeom::st_transform_proj()` use the PROJ API directly.
 The first one is appropriate for most situations, and provides a set of the most often used parameters and well defined transformations.
-The second one allows for greater customization of a projection, which includes cases when some of the PROJ parameters (e.g., `+over`) or projection (`+proj=wintri`) is not available in `st_transform()`.
+The next ones allows for greater customization of a projection, which includes cases when some of the PROJ parameters (e.g., `+over`) or projection (`+proj=wintri`) is not available in `st_transform()`.
 ```
 
 ```{r, eval=FALSE, echo=FALSE}
@@ -420,7 +423,7 @@ world_laea1 = st_transform(world,
 <!-- plot(world_laea1$geom) -->
 <!-- plot(world_laea1$geom, graticule = TRUE) -->
 
-```{r laeaproj1, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on longitude and latitude of 0.", warning=FALSE}
+```{r laeaproj1, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on longitude and latitude of 0.", fig.scap="Lambert azimuthal equal-area projection of the world", warning=FALSE}
 world_laea1_g = st_graticule(ndiscr = 10000) %>%
   st_transform("+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_0=0") %>% 
   st_geometry()
@@ -439,7 +442,7 @@ world_laea2 = st_transform(world,
 <!-- plot(world_laea2$geom) -->
 <!-- plot(world_laea2$geom, graticule = TRUE) -->
 
-```{r laeaproj2, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on New York City.", warning=FALSE}
+```{r laeaproj2, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on New York City.", fig.scap="Lambert azimuthal equal-area projection centered on New York City.", warning=FALSE}
 world_laea2_g = st_graticule(ndiscr = 10000) %>%
   st_transform("+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40.1 +ellps=WGS84 +no_defs") %>% 
   st_geometry()
@@ -477,7 +480,7 @@ However, `projectRaster()` only accepts the lengthy `proj4string` definitions of
 ```{block2 type='rmdnote'}
 It is possible to use a EPSG code in a `proj4string` definition with `"+init=epsg:MY_NUMBER"`.
 For example, one can use the `"+init=epsg:4326"` definition to set CRS to WGS84 (EPSG code of 4326).
-The PROJ library automatically adds the rest of parameters and converts it into `"+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"`,
+The PROJ library automatically adds the rest of parameters and converts it into `"+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"`.
 ```
 
 Let's take a look at two examples of raster transformation - using categorical and continuous data.
@@ -499,7 +502,7 @@ When reprojecting categorical rasters, the estimated values must be the same as 
 This could be done using the nearest neighbor method (`ngb`).
 This method assigns new cell values to the nearest cell center of the input raster.
 An example is reprojecting `cat_raster` to WGS84, a geographic CRS well suited for web mapping.
-The first step is to obtain the proj4 definition of this CRS, which can be done using the [http://spatialreference.org](http://spatialreference.org/ref/epsg/wgs-84/) webpage. 
+The first step is to obtain the PROJ definition of this CRS, which can be done using the [http://spatialreference.org](http://spatialreference.org/ref/epsg/wgs-84/) webpage. 
 The final step is to reproject the raster with the `projectRaster()` function which, in the case of categorical data, uses the nearest neighbor method (`ngb`):
 
 ```{r}

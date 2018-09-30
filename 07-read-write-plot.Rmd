@@ -2,7 +2,7 @@
 
 ## Prerequisites {-}
 
-- This chapter requires the following packages:
+This chapter requires the following packages:
 
 ```{r, message=FALSE}
 library(sf)
@@ -19,9 +19,12 @@ For others to benefit from the results of your work, data *output* is also vital
 Taken together, we refer to these processes as I/O, short for input/output.
 
 Geographic data I/O is almost always part of a wider process.
-It depends on knowing which datasets are *available*, where they can be *found* and how to *retrieve* them, topics covered in section \@ref(retrieving-data).
-This section demonstrates how to access open access *geoportals* which collectively contain many terabytes of data.
-There is a wide range of geographic file formats, each of which has pros and cons.
+It depends on knowing which datasets are *available*, where they can be *found* and how to *retrieve* them.
+These topics are covered in section \@ref(retrieving-data), which describes various *geoportals*, which collectively contain many terabytes of data, and how to use them.
+To further ease data access a number of packages for downloading geographic data have been developed.
+These are described in section \@ref(geographic-data-packages).
+
+There are many geographic file formats, each of which has pros and cons.
 These are described in section \@ref(file-formats).
 The process of actually reading and writing such file formats efficiently is not covered until sections \@ref(data-input) and \@ref(data-output) respectively.
 The final section (\@ref(visual-outputs)) demonstrates methods for saving visual outputs (maps), in preparation for Chapter \@ref(adv-map) on visualization.
@@ -29,14 +32,14 @@ The final section (\@ref(visual-outputs)) demonstrates methods for saving visual
 ## Retrieving open data {#retrieving-data}
 
 A vast and ever-increasing amount of spatial data is available on the internet, much of which is free to access and use (with appropriate credit given to its providers).
-In some ways there is now *too much* data in the sense that there are often multiple places to access the same dataset, some of which may be poor quality.
-In this context it vital know where to look.
-Instead of attempting to provide a comprehensive guide to this data deluge this section some of the most important sources.
+In some ways there is now *too much* data, in the sense that there are often multiple places to access the same dataset.
+Some datasets are of poor quality.
+In this context it vital know where to look, so the first section covers some of the most important sources.
 Various 'geoportals' (web services providing geospatial datasets such as [Data.gov](https://catalog.data.gov/dataset?metadata_type=geospatial)) are a good place to start, providing a wide range of data but often only for specific locations (as illustrated in the updated [Wikipedia page](https://en.wikipedia.org/wiki/Geoportal) on the topic).
 
 Some global geoportals overcome this issue.
 The [GEOSS portal](http://www.geoportal.org/) and the [Copernicus Open Access Hub](https://scihub.copernicus.eu/), for example, contain many raster datasets with global coverage.
-A wealth of vector datasets can be accessed from the National Space Agency (NASA) [SEDAC](http://sedac.ciesin.columbia.edu/) portal and the European Union's [INSPIRE geoportal](http://inspire-geoportal.ec.europa.eu/), with global and regional coverage.
+A wealth of vector datasets can be accessed from the National Space Agency (NASA), [SEDAC](http://sedac.ciesin.columbia.edu/) portal and the European Union's [INSPIRE geoportal](http://inspire-geoportal.ec.europa.eu/), with global and regional coverage.
 
 Most geoportals provide a graphical interface allowing datasets to be queried based on characteristics such spatial and temporal extent, the United States Geological Services' [EarthExplorer](https://earthexplorer.usgs.gov/) being a prime example.
 *Exploring* datasets interactively on a browser is an effective way of understanding available layers.
@@ -48,8 +51,7 @@ Files hosted on static URLs can be downloaded with `download.file()`, as illustr
 download.file(url = "http://nrdata.nps.gov/programs/lands/nps_boundary.zip",
               destfile = "nps_boundary.zip")
 unzip(zipfile = "nps_boundary.zip")
-f = "temp/Current_Shapes/Data_Store/06-06-12_Posting/nps_boundary.shp"
-usa_parks = st_read(dsn = f)
+usa_parks = st_read(dsn = "nps_boundary.shp")
 ```
 
 ## Geographic data packages
@@ -58,7 +60,7 @@ A multitude of R packages have been developed for accessing geographic data, som
 These provide interfaces to one or more spatial libraries or geoportals and aim make data access even quicker from the command line.
 
 <!-- add sentinel2 package as soon as it is published on CRAN https://github.com/IVFL-BOKU/sentinel2-->
-```{r datapackages, echo=FALSE}
+```{r datapackages, echo=FALSE, warning=FALSE}
 datapackages = tibble::tribble(
   ~`Package`, ~Description,
   "getlandsat", "Provides access to Landsat 8 data.",
@@ -110,7 +112,7 @@ class(worldclim_prec)
 
 A third example uses the **osmdata** package [@R-osmdata] to find parks from the OpenStreetMap (OSM) database.
 As illustrated in the code-chunk below, queries begin with the function `opq()` (short for OpenStreetMap query), the first argument of which is bounding box, or text string representing a bounding box (the city of Leeds in this case).
-The result is passed to a function for selecting which OSM elements we're interested in (parks in this case), represented by *key-value pairs*, which in turn is passed to the function `osmdata_sf()` which does the work of downloading the data and converting it into a list of `sf` objects (see `vignette('osmdata')` for further details):
+The result is passed to a function for selecting which OSM elements we're interested in (parks in this case), represented by *key-value pairs*. Next, they are passed to the function `osmdata_sf()` which does the work of downloading the data and converting it into a list of `sf` objects (see `vignette('osmdata')` for further details):
 
 ```{r, eval=FALSE}
 library(osmdata)
@@ -121,7 +123,7 @@ parks = opq(bbox = "leeds uk") %>%
 
 OpenStreetMap is a vast global database of crowd-sourced data and it is growing daily.
 Although the quality is not as spatially consistent as many official datasets, OSM data have many advantages: they are globally available free of charge and using crowd-source data can encourage 'citizen science' and contributions back to the digital commons.
-Further examples of **osmdata** in action are provided in Chapters \@ref(transport),  \@ref(location) and \@ref(gis).
+Further examples of **osmdata** in action are provided in Chapters \@ref(gis), \@ref(transport) and \@ref(location).
 
 Sometimes, packages come with inbuilt datasets.
 These can be accessed in four ways: by attaching the package (if the package uses 'lazy loading' as **spData** does), with `data(dataset)`, by referring to the dataset with `pkg::dataset` or with `system.file()` to access raw data files.
@@ -140,7 +142,7 @@ Spatial datasets are usually stored as files or in spatial databases.
 File formats can either store vector or raster data, while spatial databases such as [PostGIS](https://trac.osgeo.org/postgis/wiki/WKTRaster) can store both (see also section \@ref(postgis)).
 Today the variety of file formats may seem bewildering but there has been much consolidation and standardization since the beginnings of GIS software in the 1960s when the first widely distributed program ([SYMAP](https://news.harvard.edu/gazette/story/2011/10/the-invention-of-gis/)) for spatial analysis was created at Harvard University [@coppock_history_1991].
 
-GDAL (which should be pronounced "goo-dal", with the double o making a reference to object-orientation), the Geospatial Data Abstraction Library, has resolved many issues associated with incompatibility between geographic file formats since its release in 2000.
+GDAL (which should be pronounced "goo-dal", with the double "o" making a reference to object-orientation), the Geospatial Data Abstraction Library, has resolved many issues associated with incompatibility between geographic file formats since its release in 2000.
 GDAL provides a unified and high-performance interface for reading and writing of many raster and vector data formats.
 Many open and proprietary GIS programs, including GRASS, ArcGIS and QGIS, use GDAL behind their GUIs for doing the legwork of ingesting and spitting-out geographic data in appropriate formats.
 <!-- GDAL (it's great - you can read, convert, and very often (though not always) write) -->
@@ -174,14 +176,14 @@ An important development ensuring the standardization and open-sourcing of file 
 Beyond defining the simple features data model (see section \@ref(intro-sf)), the OGC also coordinates the development of open standards, for example as used in file formats such as KML and GeoPackage.
 Open file formats of the kind endorsed by the OGC have several advantages over proprietary formats: the standards are published, ensure transparency and open up the possibility for users to further develop and adjust the file formats to their specific needs.
 
-ESRI' Shapefile is the most popular vector data exchange format.
+ESRI Shapefile is the most popular vector data exchange format.
 However, it is not an open format (though its specification is open).
 It was developed in the early 1990s and has a number of limitations.
 First of all, it is a multi-file format, which consists of at least three files.
 It only supports 255 columns, column names are restricted to ten characters and the file size limit is to 2GB.
-Furthermore, Shapefile does not support all possible geometry types, for example, it is unable to distinguish between a polygon and a multipolygon.^[To learn more about ESRI Shapefile limitations and possible alternative file formats, visit http://switchfromshapefile.org/.]
+Furthermore, ESRI Shapefile does not support all possible geometry types, for example, it is unable to distinguish between a polygon and a multipolygon.^[To learn more about ESRI Shapefile limitations and possible alternative file formats, visit http://switchfromshapefile.org/.]
 Despite these limitations, a viable alternative had been missing for a long time. 
-In the meantime, [GeoPackage](https://www.geopackage.org/) emerged, and seems to be a more than suitable replacement candidate for ESRI's Shapefile.
+In the meantime, [GeoPackage](https://www.geopackage.org/) emerged, and seems to be a more than suitable replacement candidate for ESRI Shapefile.
 Geopackage is a format for exchanging geospatial information and an OGC standard. 
 The GeoPackage standard describes the rules how to store geospatial information in a tiny SQLite container.
 Hence, GeoPackage is a lightweight spatial database container, which allows the storage of vector and raster data but also of non-spatial data and extensions.
@@ -227,7 +229,7 @@ world = st_read(vector_filepath)
 For some drivers, `dsn` could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the `st_read()` help page for more details).
 
 Some vector driver formats can store multiple data layers.
-By default, `st_read` automatically reads the first layer of the file specified in `dsn`, however, using the `layer` argument you can specify any other layer.
+By default, `st_read()` automatically reads the first layer of the file specified in `dsn`, however, using the `layer` argument you can specify any other layer.
 
 Naturally, some options are specific to certain drivers.^[
 A list of supported vector formats and options can be found at http://gdal.org/ogr_formats.html.
@@ -276,6 +278,11 @@ url = "https://developers.google.com/kml/documentation/KML_Samples.kml"
 st_layers(url)
 kml = read_sf(url, layer = "Placemarks")
 ```
+
+All the examples presented in this section so far have used the **sf** package for geographic data import.
+It is fast and flexible but it may be worth looking at other packages for specific file formats.
+An example is the **geojsonsf** package.
+A [benchmark](https://github.com/ATFutures/geobench) suggests it is around 10 times faster than the **sf** package for reading `.geojson`.
 
 ### Raster data
 

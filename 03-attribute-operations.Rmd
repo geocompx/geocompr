@@ -24,11 +24,11 @@ The name is an *attribute* of the feature (to use Simple Features terminology) t
 <!-- idea: add an example of a bus stop (or modify a previous example so it represents a bus stop) in the previous chapter  -->
 
 Another example is the elevation value (attribute) for a specific grid cell in raster data.
-Unlike vector data, the raster data model stores the coordinate of the grid cell only indirectly:
-There is a less clear distinction between attribute and spatial information in raster data.
-Say, we are in the 3^rd^ row and the 4^th^ column of a raster matrix.
-To derive the corresponding coordinate, we have to move from the origin three cells in x-direction and four cells in y-direction with the cell resolution defining the distance for each x- and y-step.
-The raster header gives the matrix a spatial dimension which we need when plotting the raster or when we want to combine two rasters, think, for instance, of adding the values of one raster to another (see also next chapter).
+Unlike the vector data model, the raster data model stores the coordinate of the grid cell indirectly, meaning the distinction between attribute and spatial information is less clear.
+To illustrate the point, think of a pixel in the 3^rd^ row and the 4^th^ column of a raster matrix.
+It's spatial location is defined by its index in the matrix: move from the origin four cells in the x direction (typically east and right on maps) and three cells in the y direction (typically south and down).
+The raster's *resolution* defines the distance for each x- and y-step which is specified in a *header*.
+The header is a vital component of raster datasets which specifies how pixels relate to geographic coordinates (see also next chapter).
 <!-- should we somewhere add a table comparing advantages/disadvantages of using the vector or raster data model, would fit nicely into chapter 2 -->
 
 The focus of this chapter is manipulating geographic objects based on attributes such as the name of a bus stop and elevation.
@@ -68,7 +68,7 @@ attributes(methods(class = "sf"))$info %>%
 ```
 
 Many of these functions, including `rbind()` (for binding rows of data together) and `$<-` (for creating new columns) were developed for data frames.
-A key feature of `sf` objects is that they store spatial and non-spatial data in the same way, as columns in a `data.frame` (the geometry column is typically called `geometry`).
+A key feature of `sf` objects is that they store spatial and non-spatial data in the same way, as columns in a `data.frame`.
 
 ```{block2 type = 'rmdnote'}
 The geometry column of `sf` objects is typically called `geometry` but any name can be used.
@@ -264,7 +264,7 @@ knitr::kable(data_frame(Symbol = operators, Name = operators_exp), caption = "Ta
 
 **dplyr** works well with the ['pipe'](http://r4ds.had.co.nz/pipes.html) operator `%>%`, which takes its name from the Unix pipe `|` [@grolemund_r_2016].
 It enables expressive code: the output of a previous becomes the first argument of the next function, enabling *chaining*.
-This is illustrated below, in which the `world` dataset is subset by columns (`name_long` and `continent`) and the first five rows (result not shown).
+This is illustrated below, in which only countries from Asia are filtered from the `world` dataset, next the object is subset by columns (`name_long` and `continent`) and the first five rows (result not shown).
 
 ```{r}
 world7 = world %>%
@@ -400,22 +400,22 @@ These function names follow conventions used in the database language [SQL](http
 The result of data joins can be either an `sf` or `data.frame` object.
 The most common type of attribute join on spatial data takes an `sf` object as the first argument and adds columns to it from a `data.frame` specified as the second argument.
 
-To illustrate the utility of joins, imagine that you are researching global coffee production.
-You have managed to extract data hidden-away in a PDF document supplied by the International Coffee Organization (ICO).
-The results are stored in a data frame called `coffee_data` which has 3 columns:
-one (`name_long`) containing the names of coffee-producing nations and the other two reporting coffee production statistics for 2016 and 2017 (see `?coffee_data` for further information).
-We will use a 'left join' (meaning the left-hand dataset is kept intact) to merge this dataset with the pre-existing `world` dataset.
-The result of the code chunk below is a new `sf` object.
+To demonstrate joins, we will combine data on coffee production with the `world` dataset.
+The coffee data is in a data frame called `coffee_data` from the **spData** package (see `?coffee_data` for details).
+It has 3 columns:
+`name_long` names major coffee-producing nations and `coffee_production_2016` and `coffee_production_2017` contain estimated values for coffee production in units of 60 kg bags in each year.
+A 'left join', which preserves the first dataset, merges `world` with `coffee_data`:
 
 ```{r, warning=FALSE}
 world_coffee = left_join(world, coffee_data)
 class(world_coffee)
 ```
 
-The resulting simple features object is the same as the orignal `world` object but has two new variables (with column indeces 11 and 12) reporting coffee production by year.
+Because the input datasets share a 'key variable' (`name_long`) the join worked without using the `by` argument (see `?left_join` for details).
+The result is an `sf` object identical to the orignal `world` object but with two new variables (with column indices 11 and 12) on coffee production.
 This can be plotted as a map, as illustrated in Figure \@ref(fig:coffeemap), generated with the `plot()` function below:
 
-```{r coffeemap, fig.cap="World coffee production (thousand 60 kg bags) by country, 2017. Source: International Coffee Organization."}
+```{r coffeemap, fig.cap="World coffee production (thousand 60 kg bags) by country, 2017. Source: International Coffee Organization.", fig.scap="World coffee production by country."}
 names(world_coffee)
 plot(world_coffee["coffee_production_2017"])
 ```
@@ -594,7 +594,7 @@ class(world_data)
 ## Manipulating raster objects
 
 In contrast to the vector data model underlying simple features (which represents points, lines and polygons as discrete entities in space), raster data represent continuous surfaces.
-This section shows how raster objects work, by creating them *from scratch*, building on section \@ref(an-introduction-to-raster).
+This section shows how raster objects work by creating them *from scratch*, building on section \@ref(an-introduction-to-raster).
 Because of their unique structure, subsetting and other operations on raster datasets work in a different way, as demonstrated in section \@ref(raster-subsetting).
 
 The following code recreates the raster dataset used in section \@ref(raster-classes), the result of which is illustrated in Figure \@ref(fig:cont-raster).
@@ -644,13 +644,13 @@ levels(grain)
 ```
 
 This behavior demonstrates that raster cells can only possess one value, an identifier which can be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`).
-This is illustrated in command below, which returns the grain size and wetness of cell IDs 1, 11 and 35, we can run:
+This is illustrated in command below, which returns the grain size and wetness of cell IDs 1, 11 and 35:
 
 ```{r}
 factorValues(grain, grain[c(1, 11, 35)])
 ```
 
-```{r cont-raster, echo = FALSE, message = FALSE, fig.width = 7, fig.height = 2.5, fig.cap = "Raster datasets with numeric (left) and categorical values (right)."}
+```{r cont-raster, echo = FALSE, message = FALSE, fig.width = 7, fig.height = 2.5, fig.cap = "Raster datasets with numeric (left) and categorical values (right).", fig.scap="Raster datasets with numeric and categorical values."}
 source("code/03-cont-raster-plot.R", print.eval = TRUE)
 ```
 
@@ -719,7 +719,7 @@ cellStats(elev, sd)
 ```
 
 ```{block2 type='rmdnote'}
-If you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately, as can be illustrated by running: `summary(brick(elev, grain))`
+If you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately, as can be illustrated by running: `summary(brick(elev, grain))`.
 ```
 
 Raster value statistics can be visualized in a variety of ways.
