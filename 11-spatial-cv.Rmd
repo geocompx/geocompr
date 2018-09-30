@@ -113,34 +113,6 @@ dem = raster(
   )
 ```
 
-To model landslide susceptibility, we need some predictors.
-Terrain attributes are frequently associated with landsliding [@muenchow_geomorphic_2012], and these can be computed from the digital elevation model (`dem`) using R-GIS bridges (see Chapter \@ref(gis)).
-We leave it as an exercise to the reader to compute the following terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe (see exercises; we also provide the resulting dataframe via the **spDataLarge** package, see further below):
-
-- `slope`: slope angle (°).
-- `cplan`: plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow.
-- `cprof`: profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle.
-- `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
-- `log10_carea`: the decadic logarithm of the catchment area (log10 m^2^) representing the amount of water flowing towards a location.
-
-As a convenience to the reader, the dataframe containing the landslide points with the corresponding terrain attributes is also available in the **spDataLarge** package along with the a terrain attribute raster stack from which the values were extracted.
-Hence, if you have not computed the predictors yourself, attach the corresponding data before running the code of the remaining chapter:
-
-```{r}
-# attach landslide points with terrain attributes
-data("lsl", package = "spDataLarge")
-# attach terrain attribute raster stack
-data("ta", package = "spDataLarge")
-```
-
-The first three rows of `lsl` look like this (rounded to two significant digits):
-
-```{r}
-lsl %>%
-  mutate_at(vars(-one_of("x", "y", "lslpts")), funs(signif(., 2))) %>%
-  head(3)
-```
-
 
 ```{r lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador."}
 library(tmap)
@@ -163,6 +135,36 @@ tm_shape(hs, bbox = bbx) +
   qtm(rect, fill = NULL) +
 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) +
   tm_legend(bg.color = "white")
+```
+
+To model landslide susceptibility, we need some predictors.
+Terrain attributes are frequently associated with landsliding [@muenchow_geomorphic_2012], and these can be computed from the digital elevation model (`dem`) using R-GIS bridges (see Chapter \@ref(gis)).
+We leave it as an exercise to the reader to compute the following terrain attribute rasters and extract the corresponding values to our landslide/non-landslide dataframe (see exercises; we also provide the resulting dataframe via the **spDataLarge** package, see further below):
+
+- `slope`: slope angle (°).
+- `cplan`: plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow.
+- `cprof`: profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle.
+- `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
+- `log10_carea`: the decadic logarithm of the catchment area (log10 m^2^) representing the amount of water flowing towards a location.
+
+As a convenience to the reader, the dataframe containing the landslide points with the corresponding terrain attributes is also available in the **spDataLarge** package along with the a terrain attribute raster stack from which the values were extracted.
+Hence, if you have not computed the predictors yourself, attach the corresponding data before running the code of the remaining chapter:
+
+```{r}
+# attach landslide points with terrain attributes
+data("lsl", package = "spDataLarge")
+# attach terrain attribute raster stack
+data("ta", package = "spDataLarge")
+```
+
+The first three rows of `lsl`, rounded to two significant digits, look like this:
+
+```{r lslsummary, echo=FALSE, warning=FALSE}
+lsl_table = lsl %>%
+  mutate_at(vars(-one_of("x", "y", "lslpts")), funs(signif(., 2))) %>%
+  head(3)
+knitr::kable(lsl_table, caption = "Structure of the lsl dataset.", booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options="scale_down")
 ```
 
 ## Conventional modeling approach in R {#conventional-model}
