@@ -157,7 +157,7 @@ data("lsl", package = "spDataLarge")
 data("ta", package = "spDataLarge")
 ```
 
-The first three rows of `lsl`, rounded to two significant digits, look like this:
+The first three rows of `lsl`, rounded to two significant digits, look like this (Table \@ref(tab:lslsummary)):
 
 ```{r lslsummary, echo=FALSE, warning=FALSE}
 lsl_table = lsl %>%
@@ -210,12 +210,9 @@ This can be done manually or with `raster::predict()`.
 In addition to a model object (`fit`), this function also expects a raster stack with the predictors named as in the model's input dataframe (Figure \@ref(fig:lsl-susc)).
 
 ```{r}
-# attaching ta, a raster brick containing the predictors
-data("ta", "lsl", package = "spDataLarge")
 # making the prediction
 pred = raster::predict(ta, model = fit, type = "response")
 ```
-
 
 ```{r lsl-susc, echo=FALSE, fig.cap="Spatial prediction of landslide susceptibility using a GLM.", warning=FALSE}
 # attach study mask for the natural part of the study area
@@ -266,7 +263,6 @@ The follow code chunk computes the AUROC of the model with `roc()`, which takes 
 
 ```{r, message=FALSE}
 pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
-#> Area under the curve: 0.8264
 ```
 
 An AUROC of `r #round(pROC::auc(pROC::roc(lsl$lslpts, fitted(fit))), 2)` represents a good fit.
@@ -332,7 +328,7 @@ Third, the **resampling** approach assesses the predictive performance of the mo
 ### Generalized linear model {#glm}
 
 To implement a GLM in **mlr** we must create a **task** containing the landslide data.
-Since the response is binary (two-category variable) we create a classification task with `makeClassifTask()` (for regression tasks use `makeRegrTask()`, see `?makeClassifTask` for other task types).
+Since the response is binary (two-category variable) we create a classification task with `makeClassifTask()` (for regression tasks use `makeRegrTask()`, see `?makeRegrTask` for other task types).
 The first essential argument of these `make*()` functions is `data`.
 The `target` argument expects the name of a response variable and `positive` determines which of the two factor levels of the response variable indicate the landslide initiation point (in our case this is `TRUE`).
 All other variables of the `lsl` dataset will serve as predictors except for the coordinates (see the result of `getTaskFormula(task)` for the model formula).
@@ -344,7 +340,6 @@ library(mlr)
 coords = lsl[, c("x", "y")]
 # select response and predictors to use in the modeling
 data = dplyr::select(lsl, -x, -y)
-coords = lsl[, c("x", "y")]
 # create task
 task = makeClassifTask(data = data, target = "lslpts",
                        positive = "TRUE", coordinates = coords)
@@ -365,7 +360,7 @@ listLearners(task, warn.missing.packages = FALSE) %>%
 lrns_df = 
   listLearners(task, warn.missing.packages = FALSE) %>%
   dplyr::select(Class = class, Name = name, `Short name` = short.name, Package = package) %>% 
-  head
+  head()
 knitr::kable(lrns_df, caption = "Sample of available learners for binomial tasks in the mlr package.", booktabs = TRUE)
 ```
 
@@ -429,7 +424,7 @@ perf_level = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
 
 To execute the spatial resampling, we run `resample()` using the specified learner, task, resampling strategy and of course the performance measure, here the AUROC.
 This takes some time (around 10 seconds on a modern laptop) because it computes the AUROC for 500 models. 
-Setting a seed ensures the reprocubility of the obtained result and will ensure the same spatial partitioning when re-running the code.
+Setting a seed ensures the reproducibility of the obtained result and will ensure the same spatial partitioning when re-running the code.
 
 <!-- I just thought it might be worth showing the differences between an error on the fold level and repetition level but aggregating to the rep level is not a one-liner in mlr -->
 
@@ -700,8 +695,8 @@ The estimated optimal hyperparameters for each fold at the performance estimatio
 The following command shows the best hyperparameter combination of the first fold of the first iteration (recall this results from the first 5 \* 50 model runs):
 
 ```{r}
-# winning hyperparameters of tuning step, i.e. the best combination out of 50 *
-# 5 models
+# winning hyperparameters of tuning step, 
+# i.e. the best combination out of 50 * 5 models
 result$extract[[1]]$x
 ```
 
