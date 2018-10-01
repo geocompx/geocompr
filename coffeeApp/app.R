@@ -29,7 +29,7 @@ server = function(input, output, session) {
     paste0("coffee_production_", input$year)
   })
   
-  # Reactive expression for the data subsetted to what the user selected
+  # Reactive expression for the data subset to what the user selected
   filteredData = reactive({
     world_coffee$Production = world_coffee[[yr()]]
     filter(world_coffee, Production >= input$range[1] &
