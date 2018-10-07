@@ -87,7 +87,7 @@ Doing 'spatial' in R has also sought to be open to interaction with many branche
 
 R's wide range of spatial capabilities would never have evolved without people willing to share what they were creating or adapting. This might include teaching materials, software, research practices (reproducible research, open data), and combinations of these. R users have also benefitted greatly from 'upstream' open source geo libraries such as GDAL, GEOS and PROJ.
 
-This book is a clear example that, if you are curious and willing to join in, you can find things that need doing and that match your aptitudes. With advances in data representation and workflow alternatives, and ever increasing numbers of new users often without applied quantiative command-line exposure, a book of this kind has really been needed. Despite the effort involved, the authors have supported each other in pressing forward to publication.
+This book is a clear example that, if you are curious and willing to join in, you can find things that need doing and that match your aptitudes. With advances in data representation and workflow alternatives, and ever increasing numbers of new users often without applied quantitative command-line exposure, a book of this kind has really been needed. Despite the effort involved, the authors have supported each other in pressing forward to publication.
 
 So, this fresh book is ready to go; its authors have tried it out during many tutorials and workshops, so readers and instructors will be able to benefit from knowing that the contents have been and continue to be tried out on people like them. Engage with the authors and the wider R-spatial community, see value in having more choice in building your workflows, and most important: enjoy applying what you learn here to things you care about.
 
@@ -99,11 +99,11 @@ Bergen, September 2018
 
 ## Who this book is for {-}
 
-This book is for people who want to analyse, visualize and model geographic data with open source software.
-It is based on R, a statistical programming language that has powerful data processing, visualisation and geospatial capabilities.
+This book is for people who want to analyze, visualize and model geographic data with open source software.
+It is based on R, a statistical programming language that has powerful data processing, visualization and geospatial capabilities.
 <!-- as illustrated by the 100+ packages in the 'Spatial Task View' at [cran.r-project.org/web/views](https://cran.r-project.org/web/views/Spatial.html)). -->
 <!-- that runs on Linux, Windows and Mac. -->
-The book covers a wide range of topics and will be of interest to a wide range of people from many different backgrounds, expecially:
+The book covers a wide range of topics and will be of interest to a wide range of people from many different backgrounds, especially:
 
 - People who have learned spatial analysis skills using a desktop Geographic Information System (GIS) such as [QGIS](http://qgis.org/en/site/), [ArcMap](http://desktop.arcgis.com/en/arcmap/), [GRASS](https://grass.osgeo.org/) or [SAGA](http://www.saga-gis.org/en/index.html), who want access to a powerful (geo)statistical and visualization programming language and the benefits of a command-line approach [@sherman_desktop_2008]:
 
@@ -158,7 +158,7 @@ To ensure reproducibility in this book we have made its source code available at
 There you will find script files in the `code/` folder that generate figures:
 when code generating a figure is not provided in the main text of the book the name of the script file that generated it is provided in the caption (see for example the caption for Figure \@ref(fig:zones)).
 
-Other languages such as Python, Java and C++ can be used for geocomputation  and there are excellent resources for learning geocomputation *without R*, as discussed in section \@ref(software-for-geocomputation).
+Other languages such as Python, Java and C++ can be used for geocomputation and there are excellent resources for learning geocomputation *without R*, as discussed in section \@ref(software-for-geocomputation).
 None of these provide the unique combination of package ecosystem, statistical capabilities, visualization options, powerful IDEs offered by the R community.
 Furthermore, by teaching how to use one language (R) in depth, this book will equip you with the concepts and confidence needed to do geocomputation in other languages.
 
