@@ -136,6 +136,35 @@ world2 = spData::world
 world3 = st_read(system.file("shapes/world.gpkg", package = "spData"))
 ```
 
+## Geographic web services
+
+In an effort to standardise web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of specifications for web services (collectively known as [OWS](http://www.opengeospatial.org/standards/owc)).
+These specifications include the Web Feature Service (WFS), Web Map Service (WMS), Web Map Tile Service (WMTS), the Web Coverage Service (WCS) and even a Wep Processing Service (WPS).
+Server software products such as PostGIS have adopted these standards, meaning that any data provided by such server-side technology can be provided using the same query system which, like other web APIs, use a 'base URL' and a 'query string' proceeding a `?` to request data.
+An important request that any web service should be able to respond to is `getCapabilities`.
+
+The following example shows how we can get the capabilities of a WFS which serves open geographic data from the Netherlands:
+
+```{r, eval=FALSE}
+u = "http://geodata.nationaalgeoregister.nl/bag/wfs?"
+g = "GetCapabilities"
+res = httr::GET(url = u, query = list(request = g))
+txt = httr::content(res, "text")
+xml2::read_xml(txt)
+```
+
+```{r}
+#> [1] <ows:ServiceIdentification>\n  <ows:Title>BAG</o ...
+#> [2] <ows:ServiceProvider>\n  <ows:ProviderName>PDOK< ...
+#> [3] <ows:OperationsMetadata>\n  <ows:Operation name= ...
+#> [4] <FeatureTypeList>\n  <FeatureType>\n    <Name>ba ...
+#> [5] <fes:Filter_Capabilities>\n  <fes:Conformance>\n ...
+```
+
+In addition to sending requests with the **httr** package, the [**rwfs**](https://github.com/rOpenGov/rwfs) github package has been developed for working with WFS.
+The package's documentation, and a short tutorial on WFS in [QGIS](https://publicwiki.deltares.nl/display/OET/Add+filtered+WFS+to+QGIS) are recommended resources;
+other web services work in a similar way.
+
 ## File formats
 
 Spatial datasets are usually stored as files or in spatial databases.
