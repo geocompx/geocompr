@@ -138,22 +138,33 @@ world3 = st_read(system.file("shapes/world.gpkg", package = "spData"))
 
 ## Geographic web services
 
-In an effort to standardize web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of specifications for web services (collectively known as [OWS](http://www.opengeospatial.org/standards/owc)).
+In an effort to standardize web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of specifications for web services (collectively known as OWS, which is short for OGC Web Services).
 These specifications include the Web Feature Service (WFS), Web Map Service (WMS), Web Map Tile Service (WMTS), the Web Coverage Service (WCS) and even a Wep Processing Service (WPS).
-Server software products such as PostGIS have adopted these standards, meaning that any data provided by such server-side technology can be provided using the same query system which, like other web APIs, use a 'base URL' and a 'query string' proceeding a `?` to request data.
-An important request that any web service should be able to respond to is `getCapabilities`.
+Map servers such as PostGIS have adopted these protocals, leading to standardization of  queries:
+Like other web APIs, OWS APIs use a 'base URL' and a 'query string' proceeding a `?` to request data.
 
-The following example shows how we can get the capabilities of a WFS which serves open geographic data from the Netherlands:
+There are many requests that can be made to a OWS service.
+One of the most fundamental is `getCapabilities`, demonstrated with the **httr** package to show how API queries can be constructed and dispatched, in this case to discover the capabilities of a service providing Dutch open data:
 
 ```{r, eval=FALSE}
-u = "http://geodata.nationaalgeoregister.nl/bag/wfs?"
-g = "GetCapabilities"
-res = httr::GET(url = u, query = list(request = g))
+base_url = "http://geodata.nationaalgeoregister.nl/bag/wfs"
+q = list(request = "GetCapabilities")
+res = httr::GET(url = base_url, query = q)
+res$url
+```
+
+The above code chunk demonstrates how API requests can be constructed programmatically with the `GET()` function, which takes a base URL and a list of query parameters which can easily be extended.
+The result of the request is saved in the object `res`, an object of class `response` defined in the **httr** package, which is a list containing information of the request, including the URL.
+As can be seen by executing `browseURL(res$url)`), the results can also be read directly in a browser, although they are not designed to be human readable.
+The contents of the request can be extracted as follows:
+
+```{r, eval=FALSE}
 txt = httr::content(res, "text")
-xml2::read_xml(txt)[5]
+xml2::read_xml(txt)
 ```
 
 ```{r}
+#> {xml_document} ...
 #> [1] <ows:ServiceIdentification>\n  <ows:Title>BAG</o ...
 #> [2] <ows:ServiceProvider>\n  <ows:ProviderName>PDOK< ...
 #> [3] <ows:OperationsMetadata>\n  <ows:Operation name= ...
@@ -161,9 +172,25 @@ xml2::read_xml(txt)[5]
 #> [5] <fes:Filter_Capabilities>\n  <fes:Conformance>\n ...
 ```
 
-In addition to sending requests with the **httr** package, the [**rwfs**](https://github.com/rOpenGov/rwfs) github package has been developed for working with WFS.
-The package's documentation, and a short tutorial on WFS in [QGIS](https://publicwiki.deltares.nl/display/OET/Add+filtered+WFS+to+QGIS) are recommended resources;
-other web services work in a similar way.
+The previous example shows how to gain low-level access to web services using **httr**, which can be useful for understanding how web services work.
+For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose, as outlined below (an in-depth coverage of OWS services is beyond the scope of the book).
+
+Packages **ows4R**, **rwfs** and **sos4R** have been developed for working with OWS services in general, WFS and the sensor observation service (SOS) respectively.
+As of October 2018 all of them are still works in-progress and only one (**ows4R**) is on CRAN.
+Another way to access OWS is via the **leaflet** package, which provides the function `addWMSTiles()` for accessing WMTS data and visualising in an interactive map (see \@ref(adv-map) for more on web mapping).
+
+There is much more to learn about web services and much potential for development of R-OWS interfaces, an active area of development.
+For further information on the topic, we recommend examples from European Centre for Medium-Range Weather Forecasts (ECMWF) services at [github.com/OpenDataHack](https://github.com/OpenDataHack/data_service_catalogue) and reading-up on OCG Web Services at [opengeospatial.org](http://www.opengeospatial.org/standards/owc).
+
+```{r, eval=FALSE, echo=FALSE}
+# not included: couldn't get it to work (RL)
+library(ows4R)
+csw = WFSClient$new(base_url, serviceVersion = "1.0.0", logger = "INFO")
+csw$getCapabilities()
+csw$getClassName()
+records <- csw$getFeatures()
+ows4R::OWSCapabilities$new(url = res$url, service = "wfs")
+```
 
 ## File formats
 
