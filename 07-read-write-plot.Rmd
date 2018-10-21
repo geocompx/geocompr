@@ -157,13 +157,13 @@ res$url
 ```
 
 The above code chunk demonstrates how API requests can be constructed programmatically with the `GET()` function, which takes a base URL and a list of query parameters which can easily be extended.
-The result of the request is saved in the object `res`, an object of class `response` defined in the **httr** package, which is a list containing information of the request, including the URL.
+The result of the request is saved in `res`, an object of class `response` defined in the **httr** package, which is a list containing information of the request, including the URL.
 As can be seen by executing `browseURL(res$url)`), the results can also be read directly in a browser, although they are not designed to be human readable.
 The contents of the request can be extracted as follows:
 
 ```{r, eval=FALSE}
 txt = httr::content(res, "text")
-xml2::read_xml(txt)
+xml = xml2::read_xml(txt)
 ```
 
 ```{r}
@@ -173,29 +173,41 @@ xml2::read_xml(txt)
 #> ...
 ```
 
-This example shows how to gain low-level access to web services using **httr**, which can be useful for understanding how web services work.
-For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose, as outlined below (an in-depth coverage of OWS services is beyond the scope of the book).
+Data can be downloaded from WFS services using **httr** with the `GetFeature` request and a specific `typeName` (available names can be found by reading the output from `GetCapabilities`), as illustrated in the following code chunk:
 
 ```{r, eval=FALSE, echo=FALSE}
 q = list(request = "GetFeatures")
 httr::GET(url = base_url, query = q)
 ```
 
+```{r, eval=FALSE}
+qf = list(request = "GetFeature", typeName = "area:FAO_AREAS")
+httr::GET(url = base_url, query = q, httr::write_disk("f.gml"))
+fao_areas = sf::read_sf("f.gml")
+```
+
+Note the use of `write_disc()` to ensure that the results are written to disk rather than loaded into memory, allowing them to be imported with **sf**.
+This example shows how to gain low-level access to web services using **httr**, which can be useful for understanding how web services work.
+For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose.
 
 Packages **ows4R**, **rwfs** and **sos4R** have been developed for working with OWS services in general, WFS and the sensor observation service (SOS) respectively.
-As of October 2018 all of them are still works in-progress and only one (**ows4R**) is on CRAN.
-Another way to access OWS is via the **leaflet** package, which provides the function `addWMSTiles()` for accessing WMTS data and visualizing in an interactive map (see \@ref(adv-map) for more on web mapping).
-The code chunk below demonstrates how the **ows4R** package can be used to get all `FAO_AREAS` and a specific area using the `cql_filter` argument (results not shown):
+As of October 2018, only **ows4R** is on CRAN.
+The package's basic functionality is demonstrated below, in commands that get all `FAO_AREAS` as we did in the previous code chunk:^[
+To filter features on the server before downloading them, the argument `cql_filter` can be used. Adding `cql_filter = URLencode("F_CODE= '27'")` to the command, for example, would instruct the server to only return the feature with values in the `F_CODE` column equal to 27.
+]
 
 ```{r, eval=FALSE}
 library(ows4R)
 wfs = WFSClient$new("http://www.fao.org/figis/geoserver/wfs",
                       serviceVersion = "1.0.0", logger = "INFO")
-areas_all = wfs$getFeatures("area:FAO_AREAS")
+fao_areas = wfs$getFeatures("area:FAO_AREAS")
+```
+
+```{r, echo=FALSE, eval=FALSE}
+# not shown as too verbose an example already
 area_27 = wfs$getFeatures("area:FAO_AREAS",
                       cql_filter = URLencode("F_CODE= '27'"))
 ```
-
 
 There is much more to learn about web services and much potential for development of R-OWS interfaces, an active area of development.
 For further information on the topic, we recommend examples from European Centre for Medium-Range Weather Forecasts (ECMWF) services at [github.com/OpenDataHack](https://github.com/OpenDataHack/data_service_catalogue) and reading-up on OCG Web Services at [opengeospatial.org](http://www.opengeospatial.org/standards/owc).
