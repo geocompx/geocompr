@@ -147,10 +147,10 @@ Map servers such as PostGIS have adopted these protocals, leading to standardiza
 Like other web APIs, OWS APIs use a 'base URL' and a 'query string' proceeding a `?` to request data.
 
 There are many requests that can be made to a OWS service.
-One of the most fundamental is `getCapabilities`, demonstrated with the **httr** package to show how API queries can be constructed and dispatched, in this case to discover the capabilities of a service providing Dutch open data:
+One of the most fundamental is `getCapabilities`, demonstrated with the **httr** package to show how API queries can be constructed and dispatched, in this case to discover the capabilities of a service providing run by the Fisheries and Agriculture Organization of the United Nations (FAO):
 
-```{r, eval=FALSE}
-base_url = "http://geodata.nationaalgeoregister.nl/bag/wfs"
+```{r}
+base_url = "http://www.fao.org/figis/geoserver/wfs"
 q = list(request = "GetCapabilities")
 res = httr::GET(url = base_url, query = q)
 res$url
@@ -168,19 +168,34 @@ xml2::read_xml(txt)
 
 ```{r}
 #> {xml_document} ...
-#> [1] <ows:ServiceIdentification>\n  <ows:Title>BAG</o ...
-#> [2] <ows:ServiceProvider>\n  <ows:ProviderName>PDOK< ...
-#> [3] <ows:OperationsMetadata>\n  <ows:Operation name= ...
-#> [4] <FeatureTypeList>\n  <FeatureType>\n    <Name>ba ...
-#> [5] <fes:Filter_Capabilities>\n  <fes:Conformance>\n ...
+#> [1] <ows:ServiceIdentification>\n  <ows:Title>GeoServer WFS...
+#> [2] <ows:ServiceProvider>\n  <ows:ProviderName>Food and Agr...
+#> ...
 ```
 
-The previous example shows how to gain low-level access to web services using **httr**, which can be useful for understanding how web services work.
+This example shows how to gain low-level access to web services using **httr**, which can be useful for understanding how web services work.
 For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose, as outlined below (an in-depth coverage of OWS services is beyond the scope of the book).
+
+```{r}
+q = list(request = "GetFeatures")
+httr::GET(url = base_url, query = q)
+```
+
 
 Packages **ows4R**, **rwfs** and **sos4R** have been developed for working with OWS services in general, WFS and the sensor observation service (SOS) respectively.
 As of October 2018 all of them are still works in-progress and only one (**ows4R**) is on CRAN.
 Another way to access OWS is via the **leaflet** package, which provides the function `addWMSTiles()` for accessing WMTS data and visualizing in an interactive map (see \@ref(adv-map) for more on web mapping).
+The code chunk below demonstrates how the **ows4R** package can be used to get all `FAO_AREAS` and a specific area using the `cql_filter` argument (results not shown):
+
+```{r, eval=FALSE}
+library(ows4R)
+wfs = WFSClient$new("http://www.fao.org/figis/geoserver/wfs",
+                      serviceVersion = "1.0.0", logger = "INFO")
+areas_all = wfs$getFeatures("area:FAO_AREAS")
+area_27 = wfs$getFeatures("area:FAO_AREAS",
+                      cql_filter = URLencode("F_CODE= '27'"))
+```
+
 
 There is much more to learn about web services and much potential for development of R-OWS interfaces, an active area of development.
 For further information on the topic, we recommend examples from European Centre for Medium-Range Weather Forecasts (ECMWF) services at [github.com/OpenDataHack](https://github.com/OpenDataHack/data_service_catalogue) and reading-up on OCG Web Services at [opengeospatial.org](http://www.opengeospatial.org/standards/owc).
