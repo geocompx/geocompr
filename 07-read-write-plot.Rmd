@@ -173,12 +173,27 @@ xml = xml2::read_xml(txt)
 #> ...
 ```
 
-Data can be downloaded from WFS services using **httr** with the `GetFeature` request and a specific `typeName` (available names can be found by reading the output from `GetCapabilities`), as illustrated in the following code chunk:
+Data can be downloaded from WFS services with the `GetFeature` request and a specific `typeName` (as illustrated in the code chunk below).
 
-```{r, eval=FALSE, echo=FALSE}
-q = list(request = "GetFeatures")
-httr::GET(url = base_url, query = q)
+<!--@Robinlovelace fyi: In the fao example there are hundreds of typenames (maybe we should mention that in the text?). Here I just show one way how one can extract them using web technologies (but I guess this is beyond the scope of the book). -->
+
+```{r, echo=FALSE, eval=FALSE}
+library("XML")
+library("RCurl")
+library("httr")
+base_url = "http://www.fao.org/figis/geoserver/wfs"
+q = list(request = "GetCapabilities")
+res = httr::GET(url = base_url, query = q)
+doc = xmlParse(res)
+root = xmlRoot(doc)
+names(root)
+names(root[["FeatureTypeList"]])
+root[["FeatureTypeList"]][["FeatureType"]][["Name"]]
+tmp = xmlSApply(root[["FeatureTypeList"]], function(x) xmlValue(x[["Name"]]))
 ```
+
+Available names differ depending on the accessed web feature service.
+One can extract them programmatically using web technologies [@nolan_xml_2014] or scrolling manually through the contents of the `GetCapabilities` output in a browser.
 
 ```{r, eval=FALSE}
 qf = list(request = "GetFeature", typeName = "area:FAO_AREAS")
