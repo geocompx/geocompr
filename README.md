@@ -14,12 +14,12 @@ by [Robin Lovelace](https://www.robinlovelace.net/), [Jakub
 Nowosad](https://nowosad.github.io/), and [Jannes
 Muenchow](http://www.geographie.uni-jena.de/en/Muenchow.html):
 
-> Lovelace, Robin, Jakub Nowosad and Jannes Muenchow (2018).
+> Lovelace, Robin, Jakub Nowosad and Jannes Muenchow (2019).
 > Geocomputation with R. The R Series. CRC Press.
 
 The online version of the book is developed at
 <https://geocompr.robinlovelace.net/>. We plan to publish the hard copy
-of the book with CRC Press in 2018.
+of the book with CRC Press early 2019.
 
 ## Contributing
 
