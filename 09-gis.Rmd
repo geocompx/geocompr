@@ -86,7 +86,7 @@ CLIs can be augmented with IDEs such as RStudio for R, which provides code auto-
 
 
 R originated as an interface language.
-Its predecesor S provided access to statistical algorithms in other languages (particularly FORTRAN), but from an intuitive read-evaluate-print loop (REPL) [@chambers_extending_2016].
+Its predecessor S provided access to statistical algorithms in other languages (particularly FORTRAN), but from an intuitive read-evaluate-print loop (REPL) [@chambers_extending_2016].
 R continues this tradition with interfaces to numerous languages, notably C++, as described in Chapter \@ref(intro).
 R was not designed as a GIS.
 However, its ability to interface with dedicated GISs gives it astonishing geospatial capabilities.
