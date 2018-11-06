@@ -146,7 +146,7 @@ plot(tree_mo)
 text(tree_mo, pretty = 0)
 
 ## ------------------------------------------------------------------------
-# extract the coordinates into a separate dataframe
+# extract the coordinates into a separate data frame
 coords = sf::st_coordinates(rp) %>% 
   as.data.frame() %>%
   rename(x = X, y = Y)
@@ -218,9 +218,9 @@ model_rf = train(lrn_rf, task)
 #        min.node.sie = tune$x$min.node.size)
 
 ## ------------------------------------------------------------------------
-# convert raster stack into a dataframe
+# convert raster stack into a data frame
 new_data = as.data.frame(as.matrix(ep))
-# apply the model to the dataframe
+# apply the model to the data frame
 pred_rf = predict(model_rf, newdata = new_data)
 # put the predicted values into a raster
 pred = dem

@@ -251,7 +251,7 @@ metro_names =
 ## ---- eval=FALSE---------------------------------------------------------
 ## # select only specific columns
 ## shops = map(shops, dplyr::select, osm_id, shop)
-## # putting all list elements into a single dataframe
+## # putting all list elements into a single data frame
 ## shops = do.call(rbind, shops)
 
 ## ------------------------------------------------------------------------

@@ -29,7 +29,7 @@ data("lsl", package = "spDataLarge")
 # 2 MLR BUILDING BLOCKS------------------------------------
 #**********************************************************
 
-# put coordinates in an additional dataframe
+# put coordinates in an additional data frame
 coords = lsl[, c("x", "y")]
 data = dplyr::select(lsl, -x, -y)
 

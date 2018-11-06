@@ -70,9 +70,9 @@ names(world4)
 ## names(world5)[names(world5) == "pop"] = "population" # rename column manually
 
 ## ---- eval=FALSE---------------------------------------------------------
-## # create throw-away dataframe
+## # create throw-away data frame
 ## d = data.frame(pop = 1:10, area = 1:10)
-## # return dataframe object when selecting a single column
+## # return data frame object when selecting a single column
 ## d[, "pop", drop = FALSE]
 ## select(d, pop)
 ## # return a vector when selecting a single column
@@ -80,7 +80,7 @@ names(world4)
 ## pull(d, pop)
 
 ## ---- eval = FALSE-------------------------------------------------------
-## # dataframe object
+## # data frame object
 ## world[, "pop"]
 ## # vector objects
 ## world$pop

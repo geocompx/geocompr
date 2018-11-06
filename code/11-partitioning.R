@@ -47,7 +47,7 @@ spp[, paste("fold", 1:5)] = lapply(resamp_sp$`1`, function(x) {
   spp$fold = as.logical(spp$fold)
   spp$fold
 })
-# melt the dataframe
+# melt the data frame
 spp = reshape2::melt(spp, id.vars = c("x", "y"))
 names(spp) = c("x", "y", "fold", "value")
 xyplot(y ~ x | fold, groups = value, data = spp, layout = c(5, 1), asp = "iso",
@@ -62,7 +62,7 @@ rpp[, paste("fold", 1:5)] = lapply(resamp_nsp$`1`, function(x) {
   rpp$fold = as.logical(rpp$fold)
   rpp$fold
 })
-# melt the dataframe
+# melt the data frame
 rpp = reshape2::melt(rpp, id.vars = c("x", "y"))
 names(rpp) = c("x", "y", "fold", "value")
 xyplot(y ~ x | fold, groups = value, data = rpp, layout = c(5, 1), asp = "iso",
