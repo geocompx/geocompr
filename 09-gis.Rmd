@@ -9,7 +9,7 @@ Packages that have already been used including **spData**, **spDataLarge** and *
 ```{r, message=FALSE}
 library(sf)
 library(raster)
-library(RQGIS)
+library(RQGIS3)
 library(RSAGA)
 library(rgrass7)
 ```
@@ -137,7 +137,7 @@ At the time of writing (autumn 2018) RQGIS only supports the [Long Term Release]
 
 
 ```{r qgis_setup, eval=FALSE}
-library(RQGIS)
+library(RQGIS3)
 set_env(dev = FALSE)
 #> $`root`
 #> [1] "C:/OSGeo4W64"
@@ -146,7 +146,7 @@ set_env(dev = FALSE)
 
 Leaving the `path`-argument of `set_env()` unspecified will search the computer for a QGIS installation.
 Hence, it is faster to specify explicitly the path to your QGIS installation.
-Subsequently, `open_app` sets all paths necessary to run QGIS from within R, and finally creates a so-called QGIS custom application (see [http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications)).
+Subsequently, `open_app()` sets all paths necessary to run QGIS from within R, and finally creates a so-called QGIS custom application (see [http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications)).
 
 ```{r, eval=FALSE}
 open_app()
@@ -172,7 +172,7 @@ Assuming that the short description of the function contains the word "union", w
 
 ```{r, eval=FALSE}
 find_algorithms("union", name_only = TRUE)
-#> [1] "qgis:union"        "saga:fuzzyunionor" "saga:union"
+#> [1] "native:union"        "saga:fuzzyunionor" "saga:polygonunion"
 ```
 
 If you also want to have a short description for each geoalgorithm, set the `name_only`-parameter to `FALSE`.
@@ -185,13 +185,13 @@ The next step is to find out how `qgis:union` can be used.
 
 
 ```{r, eval=FALSE}
-alg = "qgis:union"
+alg = "native:union"
 open_help(alg)
 get_usage(alg)
-#>ALGORITHM: Union
-#>	INPUT <ParameterVector>
-#>	INPUT2 <ParameterVector>
-#>	OUTPUT <OutputVector>
+#>Union (native:union)
+#>
+#>This algorithm checks overlaps ...
+#>...
 ```
 
 Finally, we can let QGIS do the work.
@@ -201,11 +201,18 @@ But of course, you could also specify paths to spatial vector files stored on di
 Setting the `load_output` to `TRUE` automatically loads the QGIS output as an **sf**-object into R.
 
 ```{r, eval=FALSE}
-union = run_qgis(alg, INPUT = incongr_wgs, INPUT2 = aggzone_wgs, 
+union = run_qgis(alg, INPUT = incongr_wgs, OVERLAY = aggzone_wgs, 
                  OUTPUT = file.path(tempdir(), "union.shp"),
                  load_output = TRUE)
 #> $`OUTPUT`
 #> [1] "C:/Users/geocompr/AppData/Local/Temp/RtmpcJlnUx/union.shp"
+```
+
+```{r, eval=FALSE}
+single = run_qgis("native:multiparttosingleparts",
+         INPUT = file.path(tempdir(), "union.shp"),
+         OUTPUT = file.path(tempdir(), "single.shp"),
+         load_output = TRUE)
 ```
 
 Note that the QGIS union operation merges the two input layers into one layer by using the intersection and the symmetrical difference of the two input layers (which by the way is also the default when doing a union operation in GRASS and SAGA).
@@ -267,12 +274,12 @@ To find out about the default values, run `get_args_man()`.
 
 To remove the slivers, we specify that all polygons with an area less or equal to 25000 m^2^ should be joined to the neighboring polygon with the largest area (see right panel of Figure \@ref(fig:sliver-fig)).
 
+<!-- ok, this cannot work since one has to manually select the polygons which should be joined to other polygons... -->
+
 ```{r, eval=FALSE}
-clean = run_qgis("qgis:eliminatesliverpolygons",
-                 INPUT = single,
-                 ATTRIBUTE = "area",
-                 COMPARISON = "<=",
-                 COMPARISONVALUE = 25000,
+clean = run_qgis("qgis:eliminateselectedpolygons",
+                 INPUT = file.path(tempdir(), "single.shp"),
+                 MODE = 2,
                  OUTPUT = file.path(tempdir(), "clean.shp"),
                  load_output = TRUE)
 #> $`OUTPUT`
