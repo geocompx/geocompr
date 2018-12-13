@@ -22,7 +22,7 @@ Required data will be attached in due course.
 ## Introduction {#intro-cv1}
 
 Statistical learning is concerned with the use of statistical and computational models for identifying patterns in data and predicting from these patterns.
-Due to its origins, statistical learning is one of R's great strengths (see section \@ref(software-for-geocomputation)).^[
+Due to its origins, statistical learning is one of R's great strengths (see Section \@ref(software-for-geocomputation)).^[
 Applying statistical techniques to geographic data has been an active topic of research for many decades in the fields of Geostatistics, Spatial Statistics and point pattern analysis [@diggle_modelbased_2007; @gelfand_handbook_2010; @baddeley_spatial_2015].
 ]
 Statistical learning combines methods from statistics and machine learning and its methods can be categorized into supervised and unsupervised techniques.
@@ -96,7 +96,7 @@ lsl = bind_rows(non_pts_sub, lsl_pts)
 ```
 
 `dem` is a digital elevation model consisting of two elements:
-`dem$header`, a `list` which represents a raster 'header' (see section \@ref(raster-data)), and `dem$data`, a matrix with the altitude of each pixel.
+`dem$header`, a `list` which represents a raster 'header' (see Section \@ref(raster-data)), and `dem$data`, a matrix with the altitude of each pixel.
 `dem` can be converted into a `raster` object with:
 
 <!-- Idea: could create a function to do this -->
@@ -170,10 +170,10 @@ knitr::kable(lsl_table, caption = "Structure of the `lsl` dataset.",
 
 ## Conventional modeling approach in R {#conventional-model}
 
-Before introducing the **mlr** package, an umbrella-package providing a unified interface to dozens of learning algorithms (section \@ref(spatial-cv-with-mlr)), it is worth taking a look at the conventional modeling interface in R.
+Before introducing the **mlr** package, an umbrella-package providing a unified interface to dozens of learning algorithms (Section \@ref(spatial-cv-with-mlr)), it is worth taking a look at the conventional modeling interface in R.
 This introduction to supervised statistical learning provides the basis for doing spatial CV, and contributes to a better grasp on the **mlr** approach presented subsequently.
 
-Supervised learning involves predicting a response variable as a function of predictors (section \@ref(intro-cv)). 
+Supervised learning involves predicting a response variable as a function of predictors (Section \@ref(intro-cv)). 
 In R, modeling functions are usually specified using formulas (see `?formula` and the detailed [Formulas in R Tutorial](https://www.datacamp.com/community/tutorials/r-formula-tutorial) for details of R formulas).
 The following command specifies and runs a generalized linear model:
 
@@ -324,7 +324,7 @@ knitr::include_graphics("figures/13_ml_abstraction_crop.png")
 The **mlr** modeling process consists of three main stages.
 First, a **task** specifies the data (including response and predictor variables) and the model type (such as regression or classification).
 Second, a **learner** defines the specific learning algorithm that is applied to the created task.
-Third, the **resampling** approach assesses the predictive performance of the model, i.e. its ability to generalize to new data (see also section \@ref(intro-cv)).
+Third, the **resampling** approach assesses the predictive performance of the model, i.e. its ability to generalize to new data (see also Section \@ref(intro-cv)).
 
 ### Generalized linear model {#glm}
 
@@ -333,7 +333,7 @@ Since the response is binary (two-category variable) we create a classification 
 The first essential argument of these `make*()` functions is `data`.
 The `target` argument expects the name of a response variable and `positive` determines which of the two factor levels of the response variable indicate the landslide initiation point (in our case this is `TRUE`).
 All other variables of the `lsl` dataset will serve as predictors except for the coordinates (see the result of `getTaskFormula(task)` for the model formula).
-For spatial CV the `coordinates` parameter is used (see section \@ref(intro-cv) and Figure \@ref(fig:partitioning)) which expects the coordinates as a xy data frame.
+For spatial CV the `coordinates` parameter is used (see Section \@ref(intro-cv) and Figure \@ref(fig:partitioning)) which expects the coordinates as a xy data frame.
 
 ```{r}
 library(mlr)
@@ -369,7 +369,7 @@ knitr::kable(lrns_df,
 ```
 
 This yields all learners able to model two-class problems (landslide yes or no).
-We opt for the binomial classification method used in section \@ref(conventional-model) and implemented as `classif.binomial` in **mlr**.
+We opt for the binomial classification method used in Section \@ref(conventional-model) and implemented as `classif.binomial` in **mlr**.
 Additionally, we must specify the link-function, `logit` in this case, which is also the default of the `binomial()` function.
 `predict.type` determines the type of the prediction with `prob` resulting in the predicted probability for landslide occurrence between 0 and 1 (this corresponds to `type = response` in `predict.glm`).
 
@@ -412,7 +412,7 @@ identical(fit$coefficients, mlr_fit$coefficients)
 
 The set-up steps for modeling with **mlr** may seem tedious. 
 But remember this single interface provides access to the 150+ learners shown by `listLearners()`; it would be far more tedious to learn the interface for each learner!
-Further advantages are simple parallelization of resampling techniques and the ability to tune machine learning hyperparameters (see section \@ref(svm)).
+Further advantages are simple parallelization of resampling techniques and the ability to tune machine learning hyperparameters (see Section \@ref(svm)).
 Most importantly, (spatial) resampling in **mlr** is straightforward, requiring only two more steps: specifying a resampling method and running it.
 We will use a 100-repeated 5-fold spatial CV: five partitions will be chosen based on the provided coordinates in our `task` and the partitioning will be repeated 100 times:[^13]
 
@@ -484,7 +484,7 @@ To recap, we adhere to the following definition of machine learning by [Jason Br
 > Machine learning, more specifically the field of predictive modeling is primarily concerned with minimizing the error of a model or making the most accurate predictions possible, at the expense of explainability.
 In applied machine learning we will borrow, reuse and steal algorithms from many different fields, including statistics and use them towards these ends.
 
-In section \@ref(glm) a GLM was used to predict landslide susceptibility.
+In Section \@ref(glm) a GLM was used to predict landslide susceptibility.
 This section introduces support vector machines (SVM) for the same purpose.
 Random forest models might be more popular than SVMs, however, the positive effect of tuning hyperparameters on model performance is much more pronounced in the case of SVMs [@probst_hyperparameters_2018].
 Since (spatial) hyperparamter tuning is the major aim of this section, we will use a SVM.
@@ -502,8 +502,8 @@ This is called hyperparameter tuning.
 Some SVM implementations such as that provided by **kernlab** allow hyperparameters to be tuned automatically, usually based on random sampling (see upper row of Figure \@ref(fig:partitioning)).
 This works for non-spatial data but is of less use for spatial data where 'spatial tuning' should be undertaken.
 
-Before defining spatial tuning we will set-up the **mlr** building blocks, introduced in section \@ref(glm), for the SVM.
-The classification task remains the same, hence we can simply reuse the `task` object created in section \@ref(glm).
+Before defining spatial tuning we will set-up the **mlr** building blocks, introduced in Section \@ref(glm), for the SVM.
+The classification task remains the same, hence we can simply reuse the `task` object created in Section \@ref(glm).
 Learners implementing SVM can be found using `listLearners()` as follows:
 
 ```{r, eval=FALSE}
@@ -536,9 +536,9 @@ Again we will use a 100-repeated 5-fold spatial CV.
 perf_level = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
 ```
 
-Note that this is the exact same code as used for the GLM in section \@ref(glm), we have simply repeated it here as a reminder.
+Note that this is the exact same code as used for the GLM in Section \@ref(glm), we have simply repeated it here as a reminder.
 
-So far, the process has been identical to that described in section \@ref(glm).
+So far, the process has been identical to that described in Section \@ref(glm).
 The next step is new, however: to tune the hyperparameters.
 Using the same data for the performance assessment and the tuning would potentially lead to overoptimistic results [@cawley_overfitting_2010].
 This can be avoided using nested spatial CV.
@@ -720,7 +720,7 @@ This will be covered in Chapter \@ref(eco).
 
 Resampling methods are an important part of a data scientist's toolbox [@james_introduction_2013]. 
 This chapter used cross-validation to assess predictive performance of various models.
-As described in section \@ref(intro-cv), observations with spatial coordinates may not be statistically independent due to spatial autocorrelation, violating a fundamental assumption of cross-validation.
+As described in Section \@ref(intro-cv), observations with spatial coordinates may not be statistically independent due to spatial autocorrelation, violating a fundamental assumption of cross-validation.
 Spatial CV addresses this issue by reducing bias introduced by spatial autocorrelation. 
 
 The **mlr** package facilitates (spatial) resampling techniques in combination with the most popular statistical learning techniques including linear regression, semi-parametric models such as generalized additive models and machine learning techniques such as random forests, SVMs, and boosted regression trees [@bischl_mlr:_2016;@schratz_performance_nodate].
@@ -741,7 +741,7 @@ We recommend the following resources in this direction:
     - Plan curvature
     - Profile curvature
     - Catchment area
-1. Extract the values from the corresponding output rasters to the `landslides` data frame (`data(landslides, package = "RSAGA"`) by adding new variables called `slope`, `cplan`, `cprof`, `elev` and `log_carea`. Keep all landslide initiation points and 175 randomly selected non-landslide points (see section \@ref(case-landslide) for details).
+1. Extract the values from the corresponding output rasters to the `landslides` data frame (`data(landslides, package = "RSAGA"`) by adding new variables called `slope`, `cplan`, `cprof`, `elev` and `log_carea`. Keep all landslide initiation points and 175 randomly selected non-landslide points (see Section \@ref(case-landslide) for details).
 1. Use the derived terrain attribute rasters in combination with a GLM to make a spatial prediction map similar to that shown in Figure \@ref(fig:lsl-susc).
 Running `data("study_mask", package = "spDataLarge")` attaches a mask of the study area.
 1. Compute a 100-repeated 5-fold non-spatial cross-validation and spatial CV based on the GLM learner and compare the AUROC values from both resampling strategies with the help of boxplots (see Figure \@ref(fig:boxplot-cv)).
