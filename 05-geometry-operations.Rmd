@@ -29,9 +29,9 @@ Type transformations (from a polygon to a line, for example) are demonstrated in
 
 Section \@ref(geo-ras) covers geometric transformations on raster objects.
 This involves changing the size and number of the underlying pixels, and assigning them new values.
-It teaches how to change the resolution (also called raster aggregation and dis-aggregation), the extent and the origin of a raster.
+It teaches how to change the resolution (also called raster aggregation and disaggregation), the extent and the origin of a raster.
 These operations are especially useful if one would like to align raster datasets from diverse sources.
-Aligned raster objects share a one-to-one correspondence between pixels, allowing them to be processed using map algebra operations, described in Section \@ref(map-algebra). The final Section (\@ref(raster-vector)) connects vector and raster objects. 
+Aligned raster objects share a one-to-one correspondence between pixels, allowing them to be processed using map algebra operations, described in Section \@ref(map-algebra). The final Section \@ref(raster-vector) connects vector and raster objects. 
 It shows how raster values can be 'masked' and 'extracted' by vector geometries.
 Importantly it shows how to 'polygonize' rasters and 'rasterize' vector datasets, making the two data models more interchangeable.
 
@@ -144,7 +144,7 @@ nz_pos = st_point_on_surface(nz)
 seine_pos = st_point_on_surface(seine)
 ```
 
-```{r centr, warning=FALSE, echo=FALSE, fig.cap="Centroids (black points) and 'points on surface' (red points) of New Zeleand's regions (left) and the Seine (right) datasets.", fig.scap="Centroid vs point on surface operations."}
+```{r centr, warning=FALSE, echo=FALSE, fig.cap="Centroids (black points) and 'points on surface' (red points) of New Zealand's regions (left) and the Seine (right) datasets.", fig.scap="Centroid vs point on surface operations."}
 p_centr1 = tm_shape(nz) + tm_borders() +
   tm_shape(nz_centroid) + tm_symbols(shape = 1, col = "black", size = 0.5) +
   tm_shape(nz_pos) + tm_symbols(shape = 1, col = "red", size = 0.5)  
@@ -154,13 +154,13 @@ p_centr2 = tm_shape(seine) + tm_lines() +
 tmap_arrange(p_centr1, p_centr2, ncol = 2)
 ```
 
-Other types of centroid exist, including the *Chebyshev center* and the *visual center*.
-We will not explore these here but it is possible to calculate them using R, as we'll see Chapter \@ref(algorithms).
+Other types of centroids exist, including the *Chebyshev center* and the *visual center*.
+We will not explore these here but it is possible to calculate them using R, as we'll see in Chapter \@ref(algorithms).
 
 ### Buffers
 
 Buffers are polygons representing the area within a given distance of a geometric feature:
-regardless of whether the input is a point, line or polygon, the output is polygon.
+regardless of whether the input is a point, line or polygon, the output is a polygon.
 Unlike simplification (which is often used for visualization and reducing file size) buffering tends to be used for geographic data analysis.
 How many points are within a given distance of this line?
 Which demographic groups are within travel distance of this new shop?
@@ -174,7 +174,7 @@ seine_buff_5km = st_buffer(seine, dist = 5000)
 seine_buff_50km = st_buffer(seine, dist = 50000)
 ```
 
-```{r buffs, echo=FALSE, fig.cap="Buffers around the `seine` dataset of 5km (left) and 50km (right). Note the colors, which reflect the fact that one buffer is created per geometry feature.", fig.show='hold', out.width="75%", fig.scap="Buffers around the seine dataset."}
+```{r buffs, echo=FALSE, fig.cap="Buffers around the Seine dataset of 5 km (left) and 50 km (right). Note the colors, which reflect the fact that one buffer is created per geometry feature.", fig.show='hold', out.width="75%", fig.scap="Buffers around the seine dataset."}
 p_buffs1 = tm_shape(seine_buff_5km) + tm_polygons(col = "name") +
   tm_shape(seine) + tm_lines() +
   tm_layout(main.title = "5 km buffer", legend.show = FALSE)
@@ -186,7 +186,7 @@ tmap_arrange(p_buffs1, p_buffs2, ncol = 2)
 
 ```{block2 type = "rmdnote"}
 The third and final argument of `st_buffer()` is `nQuadSegs`, which means 'number of segments per quadrant' and is set by default to 30 (meaning circles created by buffers are composed of $4 \times 30 = 120$ lines).
-This argument rarely needs be set.
+This argument rarely needs to be set.
 Unusual cases where it may be useful include when the memory consumed by the output of a buffer operation is a major concern (in which case it should be reduced) or when very high precision is needed (in which case it should be increased).
 ```
 
@@ -219,7 +219,7 @@ nz_sfc = st_geometry(nz)
 
 Shifting moves every point by the same distance in map units.
 It could be done by adding a numerical vector to a vector object.
-For example, the code below shifts all y-coordinates by 100,000 meters to the north, but leaves the x-coordinates untouched (left panel on the Figure \@ref(fig:affine-trans)). 
+For example, the code below shifts all y-coordinates by 100,000 meters to the north, but leaves the x-coordinates untouched (left panel of Figure \@ref(fig:affine-trans)). 
 
 ```{r}
 nz_shift = nz_sfc + c(0, 100000)
@@ -228,14 +228,14 @@ nz_shift = nz_sfc + c(0, 100000)
 Scaling enlarges or shrinks objects by a factor.
 It can be applied either globally or locally. <!-- my terms - jn-->
 Global scaling increases or decreases all coordinates values in relation to the origin coordinates, while keeping all geometries topological relations intact.
-It can by done by subtraction or multiplication of a`sfg` or `sfc` object.
+It can be done by subtraction or multiplication of a`sfg` or `sfc` object.
 
 ```{r, echo=FALSE,eval=FALSE}
 nz_scale0 = nz_sfc * 0.5
 ```
 
 Local scaling treats geometries independently and requires points around which geometries are going to be scaled, e.g., centroids.
-In the example below, each geometry is shrunk by a factor of two around the centroids (central panel on the Figure \@ref(fig:affine-trans)).
+In the example below, each geometry is shrunk by a factor of two around the centroids (middle panel in Figure \@ref(fig:affine-trans)).
 To achieve that, each object is firstly shifted in a way that its center has coordinates of `0, 0` (`(nz_sfc - nz_centroid_sfc)`). 
 Next, the sizes of the geometries are reduced by half (`* 0.5`).
 Finally, each object's centroid is moved back to the input data coordinates (`+ nz_centroid_sfc`). 
@@ -266,7 +266,7 @@ rotation = function(a){
 ```
 
 The `rotation` function accepts one argument `a` - a rotation angle in degrees.
-Rotation could be done around selected points, such as centroids (right panel on the Figure \@ref(fig:affine-trans)).
+Rotation could be done around selected points, such as centroids (right panel of Figure \@ref(fig:affine-trans)).
 See `vignette("sf3")` for more examples.
 
 ```{r}
