@@ -167,7 +167,7 @@ C++ provides the basis for many GIS packages such as [QGIS](www.qgis.org), [GRAS
 <!-- even [ArcGIS](https://www.arcgis.com/)) relies in great parts on it. -->
 Well-written C++ is very fast, making it a good choice for performance-critical applications such as processing large geographic datasets, but is harder to learn than Python or R.
 C++ has become more accessible with the **Rcpp** package, which provides a good 'way in' to C programming for R users.
-Proficiency with such low level languages opens the possibility of creating new, high-performance 'geoalgorithms' and a better understanding of how GIS software works (see Chapter \@ref(algorithms)).
+Proficiency with such low-level languages opens the possibility of creating new, high-performance 'geoalgorithms' and a better understanding of how GIS software works (see Chapter \@ref(algorithms)).
 
 Java is another important and versatile language for geocomputation.
 GIS packages [gvSig](http://www.gvsig.com/en/products/gvsig-desktop), [OpenJump](http://openjump.org/) and [uDig](http://udig.refractions.net/) are all written in Java.
