@@ -32,6 +32,6 @@ p_2 = spplot(small_ras_val, colorkey = FALSE, col.regions = "white",
 p_3 = spplot(small_ras_val, 
              col.regions = colorRampPalette(c("#a50026", "#ffffbf", "#006837"))(16),
              colorkey = FALSE,
-             main = "C. Colored cell values")
+             main = "C. Colored values")
 
 grid.arrange(p_1, p_2, p_3, ncol = 3)
