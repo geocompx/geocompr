@@ -232,7 +232,7 @@ knitr::include_graphics("figures/04_raster_subset.png")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## elev[1:2, drop = FALSE]    # spatial subsetting with cell IDs
-## elev[1, 1:2, drop = FALSE] # spatial subsetting by row,column indeces
+## elev[1, 1:2, drop = FALSE] # spatial subsetting by row,column indices
 ## #> class       : RasterLayer
 ## #> dimensions  : 1, 2, 2  (nrow, ncol, ncell)
 ## #> ...
