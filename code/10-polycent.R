@@ -1,4 +1,4 @@
-# Aim: create visualisation showing steps in centroid algorithm
+# Aim: create visualization showing steps in centroid algorithm
 if(!exists("poly_mat")) {
   # source("code/chapters/10-algorithms.R")
   x_coords = c(10, 0, 0, 2, 20, 10)
