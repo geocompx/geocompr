@@ -2,7 +2,7 @@
 
 ## Prerequisites {-}
 
-This chapter assumes proficiency with geographic data analysis, for example gained by studying the contents and working-through the exercises in chapters \@ref(spatial-class) to \@ref(reproj-geo-data).
+This chapter assumes proficiency with geographic data analysis, for example gained by studying the contents and working-through the exercises in Chapters \@ref(spatial-class) to \@ref(reproj-geo-data).
 A familiarity with generalized linear regression and machine learning is highly recommended [for example from @zuur_mixed_2009;@james_introduction_2013].
 
 The chapter uses the following packages:^[
@@ -43,7 +43,7 @@ By contrast, statistical inference is impossible with machine learning [@james_i
 <!-- The primary aim of machine learning is to make good predictions, whereas the field of statistics is more focussed on the underlying theory [e.g. @zuur_mixed_2009] -->
 
 The primary aim of much machine learning research is to make good predictions, as opposed to statistical/Bayesian inference, which is good at helping to understand underlying mechanisms and uncertainties in the data [see @krainski_advanced_2018].
-Machine learning thrives in the age of 'big data' because its methods makes few assumptions about input variables and can handle huge datasets.
+Machine learning thrives in the age of 'big data' because its methods make few assumptions about input variables and can handle huge datasets.
 Machine learning is conducive to tasks such as the prediction of future customer behavior, recommendation services (music, movies, what to buy next), face recognition, autonomous driving, text classification and predictive maintenance (infrastructure, industry).
 
 <!-- ^[In this case we do not have too worry too much about possible model misspecifications since we explicitly do not want to do statistical inference.] -->
@@ -51,7 +51,7 @@ Machine learning is conducive to tasks such as the prediction of future customer
 This chapter is based on a case study: the (spatial) prediction of landslides.
 This application links to the applied nature of geocomputation, defined in Chapter \@ref(intro), and illustrates how machine learning borrows from the field of statistics when the sole aim is prediction.
 Therefore, this chapter first introduces modeling and cross-validation concepts with the help of a Generalized Linear Model [GLM; @zuur_mixed_2009].
-Building on this the chapter implements a more typical machine learning algorithm, namely a Support Vector Machine (SVM).
+Building on this, the chapter implements a more typical machine learning algorithm, namely a Support Vector Machine (SVM).
 The models' **predictive performance** will be assessed using spatial cross-validation (CV), which accounts for the fact that geographic data is special.
 
 CV determines a model's ability to generalize to new data, by splitting a dataset (repeatedly) into training and test sets.
@@ -80,7 +80,7 @@ There are 175 landslide points and 1360 non-landslide, as shown by `summary(land
 The 1360 non-landslide points were sampled randomly from the study area, with the restriction that they must fall outside a small buffer around the landslide polygons.
 
 To make the number of landslide and non-landslide points balanced, let us sample 175 from the 1360 non-landslide points.^[The `landslides` dataset has been used in classes and summer schools.
-To show how predictive performance of different algorithms changes with an unbalanced and highly spatially autocorrelated response variable, 1360 non-landslide points were randomly selected, i.e. much more absences than presences.
+To show how predictive performance of different algorithms changes with an unbalanced and highly spatially autocorrelated response variable, 1360 non-landslide points were randomly selected, i.e., many more absences than presences.
 However, especially a logistic regression with a log-link, as used in this chapter, expects roughly the same number of presences and absences in the response.]
 
 ```{r, eval=FALSE}
@@ -147,7 +147,7 @@ We leave it as an exercise to the reader to compute the following terrain attrib
 - `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
 - `log10_carea`: the decadic logarithm of the catchment area (log10 m^2^) representing the amount of water flowing towards a location.
 
-As a convenience to the reader, the data frame containing the landslide points with the corresponding terrain attributes is also available in the **spDataLarge** package along with the a terrain attribute raster stack from which the values were extracted.
+Data containing the landslide points, with the corresponding terrain attributes, is provided in the **spDataLarge** package, along with the terrain attribute raster stack from which the values were extracted.
 Hence, if you have not computed the predictors yourself, attach the corresponding data before running the code of the remaining chapter:
 
 ```{r}
@@ -157,13 +157,13 @@ data("lsl", package = "spDataLarge")
 data("ta", package = "spDataLarge")
 ```
 
-The first three rows of `lsl`, rounded to two significant digits, look like this (Table \@ref(tab:lslsummary)):
+The first three rows of `lsl`, rounded to two significant digits can be found in Table \@ref(tab:lslsummary).
 
 ```{r lslsummary, echo=FALSE, warning=FALSE}
 lsl_table = lsl %>%
   mutate_at(vars(-one_of("x", "y", "lslpts")), funs(signif(., 2))) %>%
   head(3)
-knitr::kable(lsl_table, caption = "Structure of the `lsl` dataset.",
+knitr::kable(lsl_table, caption = "Structure of the lsl dataset.",
              caption.short = "`lsl` dataset.", booktabs = TRUE) %>%
   kableExtra::kable_styling(latex_options="scale_down")
 ```
@@ -239,7 +239,7 @@ tm_shape(hs, bbox = bbx) +
 ```
 
 Here, when making predictions we neglect spatial autocorrelation since we assume that on average the predictive accuracy remains the same with or without spatial autocorrelation structures.
-However, it is possible to include spatial autocorrelation structures into models [@zuur_mixed_2009;@blangiardo_spatial_2015;@zuur_beginners_2017] as well as into predictions [kriging approaches,  see e.g., @goovaerts_geostatistics_1997;@hengl_practical_2007;@bivand_applied_2013].
+However, it is possible to include spatial autocorrelation structures into models [@zuur_mixed_2009;@blangiardo_spatial_2015;@zuur_beginners_2017] as well as into predictions [kriging approaches,  see, e.g., @goovaerts_geostatistics_1997;@hengl_practical_2007;@bivand_applied_2013].
 This is, however, beyond the scope of this book.
 <!--
 Nevertheless, we give the interested reader some pointers where to look it up:
@@ -259,16 +259,16 @@ Even more important is how good the underlying model is at making them since a p
 The most popular measure to assess the predictive performance of a binomial model is the Area Under the Receiver Operator Characteristic Curve (AUROC).
 This is a value between 0.5 and 1.0, with 0.5 indicating a model that is no better than random and 1.0 indicating perfect prediction of the two classes. 
 Thus, the higher the AUROC, the better the model's predictive power.
-The follow code chunk computes the AUROC of the model with `roc()`, which takes the response and the predicted values as inputs. 
+The following code chunk computes the AUROC value of the model with `roc()`, which takes the response and the predicted values as inputs. 
 `auc()` returns the area under the curve.
 
 ```{r, message=FALSE}
 pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
 ```
 
-An AUROC of `r #round(pROC::auc(pROC::roc(lsl$lslpts, fitted(fit))), 2)` represents a good fit.
+An AUROC value of `r round(pROC::auc(pROC::roc(lsl$lslpts, fitted(fit))), 2)` represents a good fit.
 However, this is an overoptimistic estimation since we have computed it on the complete dataset. 
-To derive a biased-reduced assessment we have to use cross-validation and in the case of spatial data should make use of spatial CV.
+To derive a biased-reduced assessment, we have to use cross-validation and in the case of spatial data should make use of spatial CV.
 
 ## Introduction to (spatial) cross-validation {#intro-cv} 
 
@@ -282,11 +282,11 @@ Of course, the data splitting will differ in each repetition.
 <!--if the error is calc. on the fold-level. most often its calc. on the repetition level. maybe worth noting.
 talk about this in person
 -->
-Overall, this sums up to 500 models whereas the mean performance measure (AUROC) of all models is the model's overall predictive power.
+Overall, this sums up to 500 models, whereas the mean performance measure (AUROC) of all models is the model's overall predictive power.
 
 However, geographic data is special.
 As we will see in Chapter \@ref(transport), the 'first law' of geography states that points close to each other are, generally, more similar than points further away [@miller_tobler_2004].
-This means these points are not statistically independent because training and test points in conventional CV are often too close to each other (see first row of \@ref(fig:partitioning)).
+This means these points are not statistically independent because training and test points in conventional CV are often too close to each other (see first row of Figure \@ref(fig:partitioning)).
 'Training' observations near the 'test' observations can provide a kind of 'sneak preview':
 information that should be unavailable to the training dataset.
 <!-- "folds" only for the repetition split, "partitions" or "subsets" for splitting within a fold
@@ -294,7 +294,7 @@ talk about this in person
 -->
 To alleviate this problem 'spatial partitioning' is used to split the observations into spatially disjointed subsets (using the observations' coordinates in a *k*-means clustering; @brenning_spatial_2012; second row of Figure \@ref(fig:partitioning)).
 This partitioning strategy is the **only** difference between spatial and conventional CV.
-As a result spatial CV leads to a bias-reduced assessment of a model's predictive performance, and hence helps to avoid overfitting.
+As a result, spatial CV leads to a bias-reduced assessment of a model's predictive performance, and hence helps to avoid overfitting.
 <!-- Alex suggested to remove this: 
 It is important to note that spatial CV reduces the bias introduced by spatial autocorrelation but does not completely remove it. 
 This is because there are still a few points in the test and training data which are still neighbors (@brenning_spatial_2012; see second row of \@ref(fig:partitioning)).
@@ -310,30 +310,30 @@ There are dozens of packages for statistical learning, as described for example 
 Getting acquainted with each of these packages, including how to undertake cross-validation and hyperparameter tuning, can be a time-consuming process.
 Comparing model results from different packages can be even more laborious.
 The **mlr** package was developed to address these issues.
-It acts as a 'meta-package', providing a unified interface to popular supervised statistical learning techniques including classification, regression, survival analysis and clustering [@bischl_mlr:_2016]
-<!-- .^[ -->
+It acts as a 'meta-package', providing a unified interface to popular supervised statistical learning techniques including classification, regression, survival analysis and clustering [@bischl_mlr:_2016].
+<!-- ^[ -->
 <!-- We will solely focus on supervised learning techniques in this chapter. -->
 <!-- ] -->
 The standardized **mlr** interface is based on eight 'building blocks'.
 As illustrated in Figure \@ref(fig:building-blocks), these have a clear order.
 
-```{r building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the mlr package. Source: http://bit.ly/2tcb2b7. Permission to reuse this figure was kindly granted.", fig.scap="Basic building blocks of the mlr package."}
+```{r building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the mlr package. Source: http://bit.ly/2tcb2b7. (Permission to reuse this figure was kindly granted.)", fig.scap="Basic building blocks of the mlr package."}
 knitr::include_graphics("figures/13_ml_abstraction_crop.png")
 ```
 
 The **mlr** modeling process consists of three main stages.
 First, a **task** specifies the data (including response and predictor variables) and the model type (such as regression or classification).
 Second, a **learner** defines the specific learning algorithm that is applied to the created task.
-Third, the **resampling** approach assesses the predictive performance of the model, i.e. its ability to generalize to new data (see also Section \@ref(intro-cv)).
+Third, the **resampling** approach assesses the predictive performance of the model, i.e., its ability to generalize to new data (see also Section \@ref(intro-cv)).
 
 ### Generalized linear model {#glm}
 
-To implement a GLM in **mlr** we must create a **task** containing the landslide data.
-Since the response is binary (two-category variable) we create a classification task with `makeClassifTask()` (for regression tasks use `makeRegrTask()`, see `?makeRegrTask` for other task types).
+To implement a GLM in **mlr**, we must create a **task** containing the landslide data.
+Since the response is binary (two-category variable), we create a classification task with `makeClassifTask()` (for regression tasks, use `makeRegrTask()`, see `?makeRegrTask` for other task types).
 The first essential argument of these `make*()` functions is `data`.
 The `target` argument expects the name of a response variable and `positive` determines which of the two factor levels of the response variable indicate the landslide initiation point (in our case this is `TRUE`).
 All other variables of the `lsl` dataset will serve as predictors except for the coordinates (see the result of `getTaskFormula(task)` for the model formula).
-For spatial CV the `coordinates` parameter is used (see Section \@ref(intro-cv) and Figure \@ref(fig:partitioning)) which expects the coordinates as a xy data frame.
+For spatial CV, the `coordinates` parameter is used (see Section \@ref(intro-cv) and Figure \@ref(fig:partitioning)) which expects the coordinates as a xy data frame.
 
 ```{r}
 library(mlr)
@@ -411,7 +411,7 @@ identical(fit$coefficients, mlr_fit$coefficients)
 -->
 
 The set-up steps for modeling with **mlr** may seem tedious. 
-But remember this single interface provides access to the 150+ learners shown by `listLearners()`; it would be far more tedious to learn the interface for each learner!
+But remember, this single interface provides access to the 150+ learners shown by `listLearners()`; it would be far more tedious to learn the interface for each learner!
 Further advantages are simple parallelization of resampling techniques and the ability to tune machine learning hyperparameters (see Section \@ref(svm)).
 Most importantly, (spatial) resampling in **mlr** is straightforward, requiring only two more steps: specifying a resampling method and running it.
 We will use a 100-repeated 5-fold spatial CV: five partitions will be chosen based on the provided coordinates in our `task` and the partitioning will be repeated 100 times:[^13]
@@ -419,7 +419,7 @@ We will use a 100-repeated 5-fold spatial CV: five partitions will be chosen bas
 [^13]: 
 
     Note that package **sperrorest** initially implemented spatial cross-validation in R [@brenning_spatial_2012].
-    In the meantime, its functionality was integrated into the **mlr** package which is the reason why we are using **mlr** [@schratz_performance_nodate].The **caret** package is another umbrella-package [@kuhn_applied_2013] for streamlined modeling in R, however, so far it does not provide spatial CV which is why we refrain from using it for spatial data.
+    In the meantime, its functionality was integrated into the **mlr** package which is the reason why we are using **mlr** [@schratz_performance_nodate].The **caret** package is another umbrella-package [@kuhn_applied_2013] for streamlined modeling in R; however, so far it does not provide spatial CV which is why we refrain from using it for spatial data.
 
 
 ```{r}
@@ -464,7 +464,7 @@ summary(sp_cv$measures.test$auc)
 mean(sp_cv$measures.test$auc)
 ```
 
-To put these results in perspective let us compare them with AUROC values from a 100-repeated 5-fold non-spatial cross-validation (Figure \@ref(fig:boxplot-cv); the code for the non-spatial cross-validation is not shown here but will be explored in the exercise section).
+To put these results in perspective, let us compare them with AUROC values from a 100-repeated 5-fold non-spatial cross-validation (Figure \@ref(fig:boxplot-cv); the code for the non-spatial cross-validation is not shown here but will be explored in the exercise section).
 As expected, the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance due to spatial autocorrelation of the latter.
 
 ```{r boxplot-cv, echo=FALSE, fig.width=6, fig.height=9, fig.cap="Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation.", fig.scap="Boxplot showing AUROC values."}
@@ -481,28 +481,28 @@ boxplot(sp_cv$measures.test$auc,
 Section \@ref(intro-cv) introduced machine learning as part of statistical learning.
 To recap, we adhere to the following definition of machine learning by [Jason Brownlee](https://machinelearningmastery.com/linear-regression-for-machine-learning/):
 
-> Machine learning, more specifically the field of predictive modeling is primarily concerned with minimizing the error of a model or making the most accurate predictions possible, at the expense of explainability.
+> Machine learning, more specifically the field of predictive modeling, is primarily concerned with minimizing the error of a model or making the most accurate predictions possible, at the expense of explainability.
 In applied machine learning we will borrow, reuse and steal algorithms from many different fields, including statistics and use them towards these ends.
 
 In Section \@ref(glm) a GLM was used to predict landslide susceptibility.
 This section introduces support vector machines (SVM) for the same purpose.
-Random forest models might be more popular than SVMs, however, the positive effect of tuning hyperparameters on model performance is much more pronounced in the case of SVMs [@probst_hyperparameters_2018].
-Since (spatial) hyperparamter tuning is the major aim of this section, we will use a SVM.
-For those wishing to apply a random forest model, we recommend to read this chapter, and then proceed to Chapter \@ref(eco) in which we will apply the here covered concepts and techniques to make spatial predictions based on a random forest model.
+Random forest models might be more popular than SVMs; however, the positive effect of tuning hyperparameters on model performance is much more pronounced in the case of SVMs [@probst_hyperparameters_2018].
+Since (spatial) hyperparameter tuning is the major aim of this section, we will use an SVM.
+For those wishing to apply a random forest model, we recommend to read this chapter, and then proceed to Chapter \@ref(eco) in which we will apply the currently covered concepts and techniques to make spatial predictions based on a random forest model.
 
 SVMs search for the best possible 'hyperplanes' to separate classes (in a classification case) and estimate 'kernels' with specific hyperparameters to allow for non-linear boundaries between classes [@james_introduction_2013].
 Hyperparameters should not be confused with coefficients of parametric models, which are sometimes also referred to as parameters.^[
 For a detailed description of the difference between coefficients and hyperparameters, see the 'machine mastery' blog post on the subject.
 <!-- For a more detailed description of the difference between coefficients and hyperparameters, see the [machine mastery blog](https://machinelearningmastery.com/difference-between-a-parameter-and-a-hyperparameter/). -->
 ]
-Coefficients can be estimated from the data while hyperparameters are set before the learning begins.
+Coefficients can be estimated from the data, while hyperparameters are set before the learning begins.
 Optimal hyperparameters are usually determined within a defined range with the help of cross-validation methods.
 This is called hyperparameter tuning.
 
 Some SVM implementations such as that provided by **kernlab** allow hyperparameters to be tuned automatically, usually based on random sampling (see upper row of Figure \@ref(fig:partitioning)).
 This works for non-spatial data but is of less use for spatial data where 'spatial tuning' should be undertaken.
 
-Before defining spatial tuning we will set-up the **mlr** building blocks, introduced in Section \@ref(glm), for the SVM.
+Before defining spatial tuning, we will set up the **mlr** building blocks, introduced in Section \@ref(glm), for the SVM.
 The classification task remains the same, hence we can simply reuse the `task` object created in Section \@ref(glm).
 Learners implementing SVM can be found using `listLearners()` as follows:
 
@@ -517,7 +517,7 @@ filter(lrns, grepl("svm", class)) %>%
 ```
 
 Of the options illustrated above, we will use `ksvm()` from the **kernlab** package [@karatzoglou_kernlab_2004].
-To allow for non-linear relationships we use the popular radial basis function (or Gaussian) kernel which is also the default of `ksvm()`.
+To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel which is also the default of `ksvm()`.
 
 ```{r, eval=FALSE}
 lrn_ksvm = makeLearner("classif.ksvm",
@@ -536,19 +536,19 @@ Again we will use a 100-repeated 5-fold spatial CV.
 perf_level = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
 ```
 
-Note that this is the exact same code as used for the GLM in Section \@ref(glm), we have simply repeated it here as a reminder.
+Note that this is the exact same code as used for the GLM in Section \@ref(glm); we have simply repeated it here as a reminder.
 
 So far, the process has been identical to that described in Section \@ref(glm).
 The next step is new, however: to tune the hyperparameters.
 Using the same data for the performance assessment and the tuning would potentially lead to overoptimistic results [@cawley_overfitting_2010].
 This can be avoided using nested spatial CV.
 
-```{r inner-outer, echo=FALSE, fig.cap="Schematic of hyperparameter tuning and performance estimation levels in CV. Figure was taken from Schratz et al. (2018). Permission to reuse it  was kindly granted.", fig.scap="Schematic of hyperparameter tuning."}
+```{r inner-outer, echo=FALSE, fig.cap="Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2018). Permission to reuse it  was kindly granted.)", fig.scap="Schematic of hyperparameter tuning."}
 knitr::include_graphics("figures/13_cv.png")
 ```
 
 This means that we split each fold again into five spatially disjoint subfolds which are used to determine the optimal hyperparameters (`tune_level` object in the code chunk below; see Figure \@ref(fig:inner-outer) for a visual representation).
-To find the optimal hyperparameter combination we fit 50 models (`ctrl` object in the code chunk below) in each of these subfolds with randomly selected values for the hyperparameters C and Sigma.
+To find the optimal hyperparameter combination, we fit 50 models (`ctrl` object in the code chunk below) in each of these subfolds with randomly selected values for the hyperparameters C and Sigma.
 The random selection of values C and Sigma is additionally restricted to a predefined tuning space (`ps` object).
 The range of the tuning space was chosen with values recommended in the literature [@schratz_performance_nodate].
 
@@ -599,10 +599,10 @@ To make the performance estimation processing chain even clearer, let us write d
 
 1. Performance level (upper left part of Figure \@ref(fig:inner-outer)): split the dataset into five spatially disjoint (outer) subfolds.
 1. Tuning level (lower left part of Figure \@ref(fig:inner-outer)): use the first fold of the performance level and split it again spatially into five (inner) subfolds for the hyperparameter tuning. 
-Use the 50 randomly selected hyperparameters in each of these inner subfolds, i.e. fit 250 models.
+Use the 50 randomly selected hyperparameters in each of these inner subfolds, i.e., fit 250 models.
 1. Performance estimation: Use the best hyperparameter combination from the previous step (tuning level) and apply it to the first outer fold in the performance level to estimate the performance (AUROC).
 1. Repeat steps 2 and 3 for the remaining four outer folds.
-1. Repeat steps 2 to 4 100 times.
+1. Repeat steps 2 to 4, 100 times.
 
 The process of hyperparameter tuning and performance estimation is computationally intensive.
 Model runtime can be reduced with parallelization, which can be done in a number of ways, depending on the operating system.
@@ -643,7 +643,7 @@ if (Sys.info()["sysname"] == "Windows") {
 }
 ```
 
-Now we are set-up for computing the nested spatial CV.
+Now we are set up for computing the nested spatial CV.
 Using a seed allows us to recreate the exact same spatial partitions when re-running the code.
 Specifying the `resample()` parameters follows the exact same procedure as presented when using a GLM, the only difference being the `extract` argument.
 This allows the extraction of the hyperparameter tuning results which is important if we plan follow-up analyses on the tuning.
@@ -752,8 +752,8 @@ Hint: You need to specify a non-spatial task and a non-spatial resampling strate
 Assess the predictive performance (AUROC) of the QDA. 
 What is the difference between the spatially cross-validated mean AUROC value of the QDA and the GLM?
 <!-- so I think, setting a seed here makes sure that the same spatial partitions are used for both models, right?-->
-Hint: Before running the spatial cross-validation for both learners set a seed to make sure that both use the same spatial partitions which in turn guarantees comparability.
+Hint: Before running the spatial cross-validation for both learners, set a seed to make sure that both use the same spatial partitions which in turn guarantees comparability.
 1. Run the SVM without tuning the hyperparameters.
 Use the `rbfdot` kernel with $\sigma$ = 1 and *C* = 1. 
 Leaving the hyperparameters unspecified in **kernlab**'s `ksvm()` would otherwise initialize an automatic non-spatial hyperparameter tuning.
-For a discussion on the need for (spatial) tuning of hyperparameters please refer to @schratz_performance_nodate.
+For a discussion on the need for (spatial) tuning of hyperparameters, please refer to @schratz_performance_nodate.
