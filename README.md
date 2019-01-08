@@ -44,12 +44,14 @@ will update automatically): [katygregg](https://github.com/katygregg),
 [eyesofbambi](https://github.com/eyesofbambi),
 [tyluRp](https://github.com/tyluRp),
 [marcosci](https://github.com/marcosci),
+[giocomai](https://github.com/giocomai),
 [mdsumner](https://github.com/mdsumner),
 [rsbivand](https://github.com/rsbivand),
 [pat-s](https://github.com/pat-s), [gisma](https://github.com/gisma),
 [ateucher](https://github.com/ateucher),
 [annakrystalli](https://github.com/annakrystalli),
 [gavinsimpson](https://github.com/gavinsimpson),
+[Henrik-P](https://github.com/Henrik-P),
 [Himanshuteli](https://github.com/Himanshuteli),
 [yutannihilation](https://github.com/yutannihilation),
 [katiejolly](https://github.com/katiejolly),
@@ -61,9 +63,7 @@ will update automatically): [katygregg](https://github.com/katygregg),
 [wdearden](https://github.com/wdearden),
 [yihui](https://github.com/yihui),
 [chihinl](https://github.com/chihinl),
-[gregor-d](https://github.com/gregor-d),
-[p-kono](https://github.com/p-kono),
-[pokyah](https://github.com/pokyah).
+[cshancock](https://github.com/cshancock).
 
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
@@ -113,27 +113,28 @@ should be able to reproduce the entire book with the following steps
 (resulting in output shown below):
 
 ``` bash
-# from a system terminal such as Windows Powershell or a Unix terminal
-git clone https://github.com/Robinlovelace/geocompr.git # download the repo
-# or download manually from here if you lack git:
+# download repo with Windows Powershell or a Unix terminal
+git clone https://github.com/Robinlovelace/geocompr.git 
+# or download manually from here:
 # https://github.com/Robinlovelace/geocompr/archive/master.zip
-cd .\geocompr\ # navigate into the repo
+cd geocompr # navigate into the repo
 # on linux and mac:
-docker run -d -p 8788:8787 -v $(pwd):/home/rstudio/data -e USERID=$UID robinlovelace/geocompr
+docker run -e USERID=$UID PASSWORD=spw -d -p 8788:8787 -v $(pwd):/home/rstudio/data  robinlovelace/geocompr
 # on windows:
-docker run -d -p 8787:8787 -v ${pwd}:/home/rstudio/data robinlovelace/geocompr
+docker run -e PASSWORD=safepassword -d -p 8787:8787 -v ${pwd}:/home/rstudio/data robinlovelace/geocompr
 ```
 
 If it worked you should be able to open-up RStudio server by opening a
 browser and navigating to <http://localhost:8787/> resulting in an
-up-to-date version of R and RStudio running in a container (if it didn’t
-you may have an issue with permissions - see
-[here](https://stackoverflow.com/questions/34031397/running-docker-on-ubuntu-mounted-host-volume-is-not-writable-from-container)):
+up-to-date version of R and RStudio running in a
+container.
 
 ![](https://user-images.githubusercontent.com/1825120/39538109-9b50e7ac-4e33-11e8-93b3-e00e95a79294.png)
 
-geocompr in docker: if you see something like this after following the
-steps above, congratulations: it worked\!
+If you see something like this after following the steps above,
+congratulations: it worked\! See
+[github.com/rocker-org](https://github.com/rocker-org/rocker/wiki/Using-the-RStudio-image#running-rstudio-server)
+for more info.
 
 From this point to *build* the book you can open projects in the `data`
 directory from the project box in the top-right hand corner, and knit
