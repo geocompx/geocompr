@@ -2,7 +2,7 @@
 library(sf)
 library(raster)
 library(mlr)
-library(tidyverse)
+library(dplyr)
 library(parallelMap)
 
 ## ------------------------------------------------------------------------
@@ -29,19 +29,9 @@ data("landslides", package = "RSAGA")
 ##   ymx = dem$header$yllcorner + dem$header$nrows * dem$header$cellsize
 ##   )
 
-## ------------------------------------------------------------------------
-# attach landslide points with terrain attributes
-data("lsl", package = "spDataLarge")
-# attach terrain attribute raster stack
-data("ta", package = "spDataLarge")
-
-## ------------------------------------------------------------------------
-lsl %>%
-  mutate_at(vars(-one_of("x", "y", "lslpts")), funs(signif(., 2))) %>%
-  head(3)
-
-## ----lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador."----
+## ----lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador.", fig.scap="Landslide initiation points."----
 library(tmap)
+data("lsl", package = "spDataLarge")
 data("ta", package = "spDataLarge")
 lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
 hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
@@ -63,6 +53,20 @@ tm_shape(hs, bbox = bbx) +
   tm_legend(bg.color = "white")
 
 ## ------------------------------------------------------------------------
+# attach landslide points with terrain attributes
+data("lsl", package = "spDataLarge")
+# attach terrain attribute raster stack
+data("ta", package = "spDataLarge")
+
+## ----lslsummary, echo=FALSE, warning=FALSE-------------------------------
+lsl_table = lsl %>%
+  mutate_at(vars(-one_of("x", "y", "lslpts")), funs(signif(., 2))) %>%
+  head(3)
+knitr::kable(lsl_table, caption = "Structure of the lsl dataset.",
+             caption.short = "`lsl` dataset.", booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options="scale_down")
+
+## ------------------------------------------------------------------------
 fit = glm(lslpts ~ slope + cplan + cprof + elev + log10_carea,
           family = binomial(),
           data = lsl)
@@ -76,13 +80,10 @@ pred_glm = predict(object = fit, type = "response")
 head(pred_glm)
 
 ## ------------------------------------------------------------------------
-# attaching ta, a raster brick containing the predictors
-data("ta", package = "spDataLarge")
 # making the prediction
-pred = raster::predict(object = ta, model = fit,
-                       type = "response")
+pred = raster::predict(ta, model = fit, type = "response")
 
-## ----lsl-susc, echo=FALSE, fig.cap="Spatial prediction of landslide susceptibility using a GLM.", warning=FALSE----
+## ----lsl-susc, echo=FALSE, fig.cap="Spatial prediction of landslide susceptibility using a GLM.", fig.scap = "Spatial prediction of landslide susceptibility.", warning=FALSE----
 # attach study mask for the natural part of the study area
 data("study_mask", package = "spDataLarge")
 # white raster to only plot the axis ticks, otherwise gridlines would be visible
@@ -104,14 +105,13 @@ tm_shape(hs, bbox = bbx) +
 	          legend.position = c("left", "bottom"),
 	          legend.title.size = 0.9)
 
-
 ## ---- message=FALSE------------------------------------------------------
 pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
 
-## ----partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row).", echo=FALSE----
+## ----partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row).", echo=FALSE, fig.scap="Spatial visualization of selected test and training observations."----
 knitr::include_graphics("figures/13_partitioning.png")
 
-## ----building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the mlr package. Source: openml.github.io. Permission to reuse this figure was kindly granted."----
+## ----building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the mlr package. Source: http://bit.ly/2tcb2b7. (Permission to reuse this figure was kindly granted.)", fig.scap="Basic building blocks of the mlr package."----
 knitr::include_graphics("figures/13_ml_abstraction_crop.png")
 
 ## ------------------------------------------------------------------------
@@ -120,7 +120,6 @@ library(mlr)
 coords = lsl[, c("x", "y")]
 # select response and predictors to use in the modeling
 data = dplyr::select(lsl, -x, -y)
-coords = lsl[, c("x", "y")]
 # create task
 task = makeClassifTask(data = data, target = "lslpts",
                        positive = "TRUE", coordinates = coords)
@@ -133,9 +132,12 @@ task = makeClassifTask(data = data, target = "lslpts",
 ## ----lrns, echo=FALSE----------------------------------------------------
 lrns_df = 
   listLearners(task, warn.missing.packages = FALSE) %>%
-  dplyr::select(class, name, short.name, package) %>% 
-  head
-knitr::kable(lrns_df, caption = "Sample of available learners for binomial tasks in the mlr package.")
+  dplyr::select(Class = class, Name = name, `Short name` = short.name, Package = package) %>% 
+  head()
+knitr::kable(lrns_df, 
+             caption = paste("Sample of available learners for binomial", 
+                             "tasks in the mlr package."), 
+             caption.short = "Sample of available learners.", booktabs = TRUE)
 
 ## ------------------------------------------------------------------------
 lrn = makeLearner(cl = "classif.binomial",
@@ -186,7 +188,7 @@ summary(sp_cv$measures.test$auc)
 # mean AUROC of the 500 models
 mean(sp_cv$measures.test$auc)
 
-## ----boxplot-cv, echo=FALSE, fig.width=6, fig.height=9, fig.cap="Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation."----
+## ----boxplot-cv, echo=FALSE, fig.width=6, fig.height=9, fig.cap="Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation.", fig.scap="Boxplot showing AUROC values."----
 # Visualization of non-spatial overfitting
 boxplot(sp_cv$measures.test$auc,
         conv_cv$measures.test$auc,
@@ -212,7 +214,7 @@ boxplot(sp_cv$measures.test$auc,
 ## # performance estimation level
 ## perf_level = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
 
-## ----inner-outer, echo=FALSE, fig.cap="Visual representation of the hyperparameter tuning and performance estimation levels in spatial and non-spatial cross-validation. Permission for reusing the figure was kindly granted by Patrick Schratz [@schratz_performance_nodate]."----
+## ----inner-outer, echo=FALSE, fig.cap="Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2018). Permission to reuse it  was kindly granted.)", fig.scap="Schematic of hyperparameter tuning."----
 knitr::include_graphics("figures/13_cv.png")
 
 ## ---- eval=FALSE---------------------------------------------------------
@@ -280,8 +282,8 @@ result$aggr
 mean(result$measures.test$auc)
 
 ## ------------------------------------------------------------------------
-# winning hyperparameters of tuning step, i.e. the best combination out of 50 *
-# 5 models
+# winning hyperparameters of tuning step, 
+# i.e. the best combination out of 50 * 5 models
 result$extract[[1]]$x
 
 ## ------------------------------------------------------------------------

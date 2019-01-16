@@ -1,14 +1,15 @@
 ## ---- message=FALSE------------------------------------------------------
 library(sf)
 library(raster)
-library(tidyverse)
+library(dplyr)
+
 library(spData)
 library(spDataLarge)
 
 ## ------------------------------------------------------------------------
 seine_simp = st_simplify(seine, dTolerance = 2000)  # 2000 m
 
-## ----seine-simp, echo=FALSE, fig.cap="Comparison of the original and simplified `seine` geometry.", warning=FALSE----
+## ----seine-simp, echo=FALSE, fig.cap="Comparison of the original and simplified `seine` geometry.", warning=FALSE, fig.scap="Simplification in action."----
 library(tmap)
 p_simp1 = tm_shape(seine) + tm_lines() +
   tm_layout(main.title = "Original data")
@@ -32,7 +33,7 @@ us_states2163$AREA = as.numeric(us_states2163$AREA)
 us_states_simp2 = rmapshaper::ms_simplify(us_states2163, keep = 0.01,
                                           keep_shapes = TRUE)
 
-## ----us-simp, echo=FALSE, fig.cap="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (center) and rmapshaper (right) packages.", warning=FALSE, fig.asp=0.3----
+## ----us-simp, echo=FALSE, fig.cap="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (center) and rmapshaper (right) packages.", warning=FALSE, fig.asp=0.3, fig.scap="Polygon simplification in action."----
 library(tmap)
 p_ussimp1 = tm_shape(us_states2163) + tm_polygons() + tm_layout(main.title = "Original data")
 p_ussimp2 = tm_shape(us_states_simp1) + tm_polygons() + tm_layout(main.title = "st_simplify")
@@ -47,7 +48,7 @@ seine_centroid = st_centroid(seine)
 nz_pos = st_point_on_surface(nz)
 seine_pos = st_point_on_surface(seine)
 
-## ----centr, warning=FALSE, echo=FALSE, fig.cap="Centroids (black points) and 'points on surface' (red points) of New Zeleand's regions (left) and the Seine (right) datasets."----
+## ----centr, warning=FALSE, echo=FALSE, fig.cap="Centroids (black points) and 'points on surface' (red points) of New Zealand's regions (left) and the Seine (right) datasets.", fig.scap="Centroid vs point on surface operations."----
 p_centr1 = tm_shape(nz) + tm_borders() +
   tm_shape(nz_centroid) + tm_symbols(shape = 1, col = "black", size = 0.5) +
   tm_shape(nz_pos) + tm_symbols(shape = 1, col = "red", size = 0.5)  
@@ -60,7 +61,7 @@ tmap_arrange(p_centr1, p_centr2, ncol = 2)
 seine_buff_5km = st_buffer(seine, dist = 5000)
 seine_buff_50km = st_buffer(seine, dist = 50000)
 
-## ----buffs, echo=FALSE, fig.cap="Buffers around the `seine` datasets of 5km (left) and 50km (right). Note the colors, which reflect the fact that one buffer is created per geometry feature.", fig.show='hold', out.width="75%"----
+## ----buffs, echo=FALSE, fig.cap="Buffers around the Seine dataset of 5 km (left) and 50 km (right). Note the colors, which reflect the fact that one buffer is created per geometry feature.", fig.show='hold', out.width="75%", fig.scap="Buffers around the seine dataset."----
 p_buffs1 = tm_shape(seine_buff_5km) + tm_polygons(col = "name") +
   tm_shape(seine) + tm_lines() +
   tm_layout(main.title = "5 km buffer", legend.show = FALSE)
@@ -103,7 +104,7 @@ rotation = function(a){
 ## ------------------------------------------------------------------------
 nz_rotate = (nz_sfc - nz_centroid_sfc) * rotation(30) + nz_centroid_sfc
 
-## ----affine-trans, echo=FALSE, fig.cap="Illustrations of affine transformations: shift, scale and rotate.", warning=FALSE, eval=TRUE----
+## ----affine-trans, echo=FALSE, fig.cap="Illustrations of affine transformations: shift, scale and rotate.", warning=FALSE, eval=TRUE, fig.scap="Illustrations of affine transformations."----
 p_at1 = tm_shape(nz_sfc) + tm_polygons() +
   tm_shape(nz_shift) + tm_polygons(col = "red") +
   tm_layout(main.title = "Shift")
@@ -134,11 +135,10 @@ nz_scale_sf = st_set_geometry(nz, nz_scale)
 ## ----points, fig.cap="Overlapping circles.", fig.asp=1-------------------
 b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
 b = st_buffer(b, dist = 1) # convert points to circles
-l = c("x", "y")
 plot(b)
-text(x = c(-0.5, 1.5), y = 1, labels = l) # add text
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y")) # add text
 
-## ----circle-intersection, fig.cap="Overlapping circles with a gray color indicating intersection between them.", fig.asp=1----
+## ----circle-intersection, fig.cap="Overlapping circles with a gray color indicating intersection between them.", fig.asp=1, fig.scap="Overlapping circles showing intersection types."----
 x = b[1]
 y = b[2]
 x_and_y = st_intersection(x, y)
@@ -148,17 +148,16 @@ plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
 ## ----venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators.", warning=FALSE----
 source("code/05-venn-clip.R")
 
-## ----venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y.", out.width="50%", fig.asp=1----
+## ----venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y.", out.width="50%", fig.asp=1, fig.scap="Randomly distributed points within the bounding box."----
 bb = st_bbox(st_union(x, y))
-pmat = matrix(c(bb[c(1, 2, 3, 2, 3, 4, 1, 4, 1, 2)]), ncol = 2, byrow = TRUE)
-box = st_polygon(list(pmat))
+box = st_as_sfc(bb)
 set.seed(2017)
 p = st_sample(x = box, size = 10)
 plot(box)
 plot(x, add = TRUE)
 plot(y, add = TRUE)
 plot(p, add = TRUE)
-text(x = c(-0.5, 1.5), y = 1, labels = l)
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
 
 ## ------------------------------------------------------------------------
 sel_p_xy = st_intersects(p, x, sparse = FALSE)[, 1] &
@@ -184,7 +183,7 @@ regions2 = us_states %>% group_by(REGION) %>%
 #   summarize(pop = sum(pop, na.rm = TRUE))
 # summarize(africa[buff, "pop"], pop = sum(pop, na.rm = TRUE))
 
-## ----us-regions, fig.cap="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.", echo=FALSE, warning=FALSE, fig.asp=0.2, out.width="100%"----
+## ----us-regions, fig.cap="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.", echo=FALSE, warning=FALSE, fig.asp=0.2, out.width="100%", fig.scap="Spatial aggregation on contiguous polygons."----
 source("code/05-us-regions.R", print.eval = TRUE)
 
 ## ------------------------------------------------------------------------
@@ -208,7 +207,7 @@ multipoint = st_multipoint(matrix(c(1, 3, 5, 1, 3, 1), ncol = 2))
 linestring = st_cast(multipoint, "LINESTRING")
 polyg = st_cast(multipoint, "POLYGON")
 
-## ----single-cast, echo = FALSE, fig.cap="Examples of linestring and polygon 'casted' from a multipoint geometry.", warning=FALSE, fig.asp=0.3----
+## ----single-cast, echo = FALSE, fig.cap="Examples of linestring and polygon casted from a multipoint geometry.", warning=FALSE, fig.asp=0.3, fig.scap="Examples of casting operations."----
 p_sc1 = tm_shape(st_sfc(multipoint)) + tm_symbols(shape = 1, col = "black", size = 0.5) +
   tm_layout(main.title = "MULTIPOINT", inner.margins = c(0.05, 0.05, 0.05, 0.05))
 p_sc2 = tm_shape(st_sfc(linestring)) + tm_lines() +
@@ -222,7 +221,7 @@ multipoint_2 = st_cast(linestring, "MULTIPOINT")
 multipoint_3 = st_cast(polyg, "MULTIPOINT")
 all.equal(multipoint, multipoint_2, multipoint_3)
 
-## For single simple feature geometries (`sfg`), `st_cast` also provides geometry casting from non-multi to multi types (e.g. `POINT` to `MULTIPOINT`) and from multi types to non-multi types.
+## For single simple feature geometries (`sfg`), `st_cast` also provides geometry casting from non-multi-types to multi-types (e.g., `POINT` to `MULTIPOINT`) and from multi-types to non-multi-types.
 
 ## ---- include=FALSE------------------------------------------------------
 cast_all = function(xg) {
@@ -245,7 +244,18 @@ abbreviate_geomtypes = function(geomtypes) {
 sfs_st_cast$input_geom = abbreviate_geomtypes(sfs_st_cast$input_geom)
 names(sfs_st_cast) = abbreviate_geomtypes(names(sfs_st_cast))
 names(sfs_st_cast)[1] = ""
-knitr::kable(sfs_st_cast, caption = "Geometry casting on simple feature geometries (see section 2.1, type names abbreviated) with input type by row and output type by column. Values like (1) represent the number of features; NA means the operation is not possible.")
+knitr::kable(sfs_st_cast, 
+             caption = paste("Geometry casting on simple feature geometries", 
+                             "(see Section 2.1) with input type by row and", 
+                             "output type by column. Values like (1) represent", 
+                             "the number of features; NA means the operation", 
+                             "is not possible.\nAbbreviations: POI, LIN, POL", 
+                             "and GC refer to POINT, LINESTRING, POLYGON and", 
+                             "GEOMETRYCOLLECTION. The MULTI version of these", 
+                             "geometry types is indicated by a preceding M,", 
+                             "e.g., MPOI is the acronym for MULTIPOINT."),
+             caption.short = "Geometry casting on simple feature geometries.",
+             booktabs = TRUE)
 
 ## ------------------------------------------------------------------------
 multilinestring_list = list(matrix(c(1, 4, 5, 3), ncol = 2), 
@@ -259,7 +269,7 @@ multilinestring_sf
 linestring_sf2 = st_cast(multilinestring_sf, "LINESTRING")
 linestring_sf2
 
-## ----line-cast, echo=FALSE, fig.cap="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right).", warning=FALSE----
+## ----line-cast, echo=FALSE, fig.cap="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right).", warning=FALSE, fig.scap="Examples of type casting."----
 p_lc1 = tm_shape(multilinestring_sf) + tm_lines(lwd = 3) +
   tm_layout(main.title = "MULTILINESTRING")
 linestring_sf2$name = c("Riddle Rd", "Marshall Ave", "Foulke St")
@@ -278,7 +288,7 @@ clip = raster(nrow = 3, ncol = 3, res = 0.3, xmn = 0.9, xmx = 1.8,
               ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
 elev[clip, drop = FALSE]
 
-## ----extend-example, fig.cap = "Original raster extended by 1 one row on each side (top, bottom) and two columns on each side (right, left)."----
+## ----extend-example, fig.cap = "Original raster extended by one row on each side (top, bottom) and two columns on each side (right, left).", fig.scap="Extending rasters."----
 data(elev, package = "spData")
 elev_2 = extend(elev, c(1, 2), value = 1000)
 plot(elev_2)
@@ -292,7 +302,7 @@ elev_4 = extend(elev, elev_2)
 ## ------------------------------------------------------------------------
 origin(elev_4)
 
-## ----origin-example, fig.cap = "Plotting rasters with the same values but different origins."----
+## ----origin-example, fig.cap="Rasters with identical values but different origins."----
 # change the origin
 origin(elev_4) = c(0.25, 0.25)
 plot(elev_4)
@@ -303,7 +313,7 @@ plot(elev, add = TRUE)
 data("dem", package = "RQGIS")
 dem_agg = aggregate(dem, fact = 5, fun = mean)
 
-## ----aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right)."----
+## ----aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right).", echo=FALSE----
 p_ar1 = tm_shape(dem) + tm_raster(style = "cont", legend.show = FALSE) +
   tm_layout(main.title = "Original", frame = FALSE)
 p_ar2 = tm_shape(dem_agg) + tm_raster(style = "cont", legend.show = FALSE) +
@@ -314,7 +324,7 @@ tmap_arrange(p_ar1, p_ar2, ncol = 2)
 dem_disagg = disaggregate(dem_agg, fact = 5, method = "bilinear")
 identical(dem, dem_disagg)
 
-## ----bilinear, echo = FALSE, fig.width=8, fig.height=10, fig.cap="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation."----
+## ----bilinear, echo = FALSE, fig.width=8, fig.height=10, fig.cap="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation.", fig.cap="Bilinear disaggregation in action."----
 data(elev, package = "spData")
 elev_agg = aggregate(elev, fact = 2, fun = mean)
 plot(extend(elev, 1, 0), col = NA, legend = FALSE)
@@ -344,7 +354,7 @@ dem_disagg_2 = resample(dem_agg, dem)
 
 ## ---- results='hide'-----------------------------------------------------
 srtm = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
-zion = read_sf(system.file("vector/zion.gpkg", package = "spDataLarge"))
+zion = st_read(system.file("vector/zion.gpkg", package = "spDataLarge"))
 zion = st_transform(zion, projection(srtm))
 
 ## ------------------------------------------------------------------------
@@ -415,13 +425,14 @@ transect = raster::extract(srtm, as(zion_transect, "Spatial"),
                            along = TRUE, cellnumbers = TRUE)
 
 ## ------------------------------------------------------------------------
-transect_df = map_dfr(transect, as_data_frame, .id = "ID")
+transect_df = purrr::map_dfr(transect, as_data_frame, .id = "ID")
 transect_coords = xyFromCell(srtm, transect_df$cell)
 transect_df$dist = c(0, cumsum(geosphere::distGeo(transect_coords)))    
 
-## ----lineextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Location of a line used for raster extraction (left) and the elevation along this line (right)."----
+## ----lineextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Location of a line used for raster extraction (left) and the elevation along this line (right).", fig.scap="Line-based raster extraction."----
 library(tmap)
 library(grid)
+library(ggplot2)
 
 zion_transect_points = st_cast(zion_transect, "POINT")[1:2, ]
 zion_transect_points$name = c("start", "end")
@@ -466,10 +477,10 @@ print(plot_transect, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
 ## # for categories
 ## zion_nlcd = raster::extract(nlcd, zion_many, df = TRUE, factors = TRUE)
 ## dplyr::select(zion_nlcd, ID, levels) %>%
-##   gather(key, value, -ID) %>%
+##   tidyr::gather(key, value, -ID) %>%
 ##   group_by(ID, key, value) %>%
 ##   tally() %>%
-##   spread(value, n, fill = 0)
+##   tidyr::spread(value, n, fill = 0)
 
 ## ------------------------------------------------------------------------
 zion_srtm_values = raster::extract(x = srtm, y = as(zion, "Spatial"), df = TRUE)
@@ -481,10 +492,10 @@ group_by(zion_srtm_values, ID) %>%
 ## ---- warning=FALSE, message=FALSE---------------------------------------
 zion_nlcd = raster::extract(nlcd, as(zion, "Spatial"), df = TRUE, factors = TRUE)
 dplyr::select(zion_nlcd, ID, levels) %>% 
-  gather(key, value, -ID) %>%
+  tidyr::gather(key, value, -ID) %>%
   group_by(ID, key, value) %>%
   tally() %>% 
-  spread(value, n, fill = 0)
+  tidyr::spread(value, n, fill = 0)
 
 ## ----polyextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Area used for continuous (left) and categorical (right) raster extraction."----
 rast_poly_srtm = tm_shape(srtm) + tm_raster(palette = terrain_colors, title = "Elevation (m)", legend.show = TRUE, style = "cont") + 
@@ -512,7 +523,7 @@ ch_raster2 = rasterize(cycle_hire_osm_projected, raster_template,
 ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template, 
                        field = "capacity", fun = sum)
 
-## ----vector-rasterization1, echo=FALSE, fig.cap="Examples of point's rasterization.", warning=FALSE----
+## ----vector-rasterization1, echo=FALSE, fig.cap="Examples of point rasterization.", warning=FALSE----
 source("code/05-vector-rasterization1.R", print.eval = TRUE)
 
 ## ------------------------------------------------------------------------
@@ -536,18 +547,16 @@ source("code/05-vector-rasterization2.R", print.eval = TRUE)
 elev_point = rasterToPoints(elev, spatial = TRUE) %>% 
   st_as_sf()
 
-## ----raster-vectorization1, echo=FALSE, fig.cap="Raster and point representation of `elev`.", warning=FALSE----
+## ----raster-vectorization1, echo=FALSE, fig.cap="Raster and point representation of the elev object.", warning=FALSE----
 source("code/05-raster-vectorization1.R", print.eval = TRUE)
 
 ## ---- eval = FALSE-------------------------------------------------------
-## # not shown
 ## data(dem, package = "RQGIS")
-## plot(dem, axes = FALSE)
 ## cl = rasterToContour(dem)
+## plot(dem, axes = FALSE)
 ## plot(cl, add = TRUE)
 
-## ----contour, eval=FALSE, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines."----
-## data("dem", package = "RQGIS")
+## ----contour, eval=FALSE, fig.cap="DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines.", fig.scap="DEM with hillshading."----
 ## # create hillshade
 ## hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
 ## plot(hs, col = gray(0:100 / 100), legend = FALSE)
@@ -556,7 +565,7 @@ source("code/05-raster-vectorization1.R", print.eval = TRUE)
 ## # add contour lines
 ## contour(dem, col = "white", add = TRUE)
 
-## ----contour-tmap, echo=FALSE, message=FALSE, fig.cap = "DEM hillshade of the southern flank of Mt. Mongón overlaid with contour lines.", warning=FALSE, fig.asp=0.56----
+## ----contour-tmap, echo=FALSE, message=FALSE, fig.cap="DEM hillshade of the southern flank of Mt. Mongón overlaid by contour lines.", warning=FALSE, fig.asp=0.56, fig.scap="Hillshade overlaid by contours."----
 library(tmap)
 data("dem", package = "RQGIS")
 # create hillshade
@@ -586,7 +595,7 @@ grain_poly2 = grain_poly %>%
   group_by(layer) %>%
   summarize()
 
-## ----raster-vectorization2, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).", warning=FALSE, fig.asp=0.4----
+## ----raster-vectorization2, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).", warning=FALSE, fig.asp=0.4, fig.scap="Illustration of vectorization."----
 source("code/05-raster-vectorization2.R", print.eval = TRUE)
 
 ## ---- message=FALSE------------------------------------------------------
@@ -597,7 +606,6 @@ ch = st_combine(random_points) %>%
   st_convex_hull()
 
 ## ---- echo=FALSE, eval=FALSE---------------------------------------------
-## plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 1))
 ## plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.5))
 ## plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.05))
 ## # Starts to breakdown here at 0.5% of the points:
@@ -612,9 +620,6 @@ ch = st_combine(random_points) %>%
 ## plot(st_simplify(st_geometry(nz), dTolerance = 100000))
 ## plot(st_simplify(st_geometry(nz), dTolerance = 100000, preserveTopology = TRUE))
 ## 
-## plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.05))
-## plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.05))
-## 
 ## # Problem: st_simplify returns POLYGON and MULTIPOLYGON results, affecting plotting
 ## # Cast into a single geometry type to resolve this
 ## nz_simple_poly = st_simplify(st_geometry(nz), dTolerance = 10000) %>%
@@ -628,10 +633,10 @@ ch = st_combine(random_points) %>%
 ## nrow(nz)
 
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------
-## canterbury = nz[nz$Name == "Canterbury Region", ]
+## canterbury = nz[nz$Name == "Canterbury", ]
 ## cant_buff = st_buffer(canterbury, 100)
 ## nz_height_near_cant = nz_height[cant_buff, ]
-## nrow(nz_height_near_cant) # 66 - 5 more
+## nrow(nz_height_near_cant) # 75 - 5 more
 
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## cant_cent = st_centroid(canterbury)
@@ -674,19 +679,6 @@ ch = st_combine(random_points) %>%
 ## arrange(us_states_bor, -borders)
 
 ## ---- echo=FALSE, eval=FALSE---------------------------------------------
-## nz_raster_low = raster::aggregate(nz_raster, fact = 2, fun = sum)
-## res(nz_raster_low)
-## nz_resample = resample(nz_raster_low, nz_raster)
-## plot(nz_raster_low)
-## plot(nz_resample) # the results are spread over a greater area and there are border issues
-## plot(nz_raster)
-## # advantage: lower memory use
-## # advantage: faster processing
-## # advantage: good for viz in some cases
-## # disadvantage: removes geographic detail
-## # disadvantage: another processing step
-
-## ---- echo=FALSE, eval=FALSE---------------------------------------------
 ## plot(ndvi)
 ## plot(st_geometry(random_points), add = TRUE)
 ## plot(ch, add = TRUE)
@@ -722,6 +714,19 @@ ch = st_combine(random_points) %>%
 ## nz_raster2 = rasterize(nz_height3100, nz_template,
 ##                        field = "elevation", fun = max)
 ## plot(nz_raster2)
+
+## ---- echo=FALSE, eval=FALSE---------------------------------------------
+## nz_raster_low = raster::aggregate(nz_raster, fact = 2, fun = sum)
+## res(nz_raster_low)
+## nz_resample = resample(nz_raster_low, nz_raster)
+## plot(nz_raster_low)
+## plot(nz_resample) # the results are spread over a greater area and there are border issues
+## plot(nz_raster)
+## # advantage: lower memory use
+## # advantage: faster processing
+## # advantage: good for viz in some cases
+## # disadvantage: removes geographic detail
+## # disadvantage: another processing step
 
 ## ---- echo=FALSE, eval=FALSE---------------------------------------------
 ## grain_poly = rasterToPolygons(grain) %>%

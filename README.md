@@ -54,6 +54,7 @@ will update automatically): [katygregg](https://github.com/katygregg),
 [Henrik-P](https://github.com/Henrik-P),
 [Himanshuteli](https://github.com/Himanshuteli),
 [yutannihilation](https://github.com/yutannihilation),
+[jbixon13](https://github.com/jbixon13),
 [katiejolly](https://github.com/katiejolly),
 [layik](https://github.com/layik), [mvl22](https://github.com/mvl22),
 [nickbearman](https://github.com/nickbearman),
@@ -62,8 +63,7 @@ will update automatically): [katygregg](https://github.com/katygregg),
 [SymbolixAU](https://github.com/SymbolixAU),
 [wdearden](https://github.com/wdearden),
 [yihui](https://github.com/yihui),
-[chihinl](https://github.com/chihinl),
-[cshancock](https://github.com/cshancock).
+[chihinl](https://github.com/chihinl).
 
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in

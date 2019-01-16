@@ -1,13 +1,10 @@
 ## ---- eval=FALSE---------------------------------------------------------
 ## install.packages("sf")
-
-## If you're running Mac or Linux the previous command to install **sf** may not workfirst time.
-
-## ---- eval=FALSE---------------------------------------------------------
 ## install.packages("raster")
 ## install.packages("spData")
-## install.packages("spDataLarge", repos = "https://nowosad.github.io/drat/",
-##                  type = "source")
+## devtools::install_github("Nowosad/spDataLarge")
+
+## If you're running Mac or Linux, the previous command to install **sf** may not work first time.
 
 ## ---- message=FALSE------------------------------------------------------
 library(sf)          # classes and functions for vector data
@@ -22,21 +19,28 @@ library(spDataLarge)   # load larger geographic data
 ## ----vectorplots-source, include=FALSE, eval=FALSE-----------------------
 ## source("code/02-vectorplots.R") # generate subsequent figure
 
-## ----vectorplots, fig.cap="Illustration of vector (point) data in which location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.", out.width="49%", fig.show='hold', echo=FALSE----
+## ----vectorplots, fig.cap="Illustration of vector (point) data in which location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.", out.width="49%", fig.show='hold', echo=FALSE, fig.scap="Illustration of vector (point) data."----
 knitr::include_graphics(c("figures/vector_lonlat.png", "figures/vector_projected.png"))
 
-## ----sf-ogc, fig.cap="The subset of the Simple Features class hierarchy supported by sf.", out.width="60%", echo=FALSE----
+## ----sf-ogc, fig.cap="Simple feature types fully supported by sf.", out.width="60%", echo=FALSE----
 knitr::include_graphics("figures/sf-classes.png")
 
+## ---- eval=FALSE---------------------------------------------------------
+## vignette(package = "sf") # see which vignettes are available
+## vignette("sf1")          # an introduction to the package
+
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------
-## vignette("sf1") # for an introduction to the package
-## vignette("sf2") # for reading, writing and converting Simple Features
-## vignette("sf3") # for manipulating Simple Features
+## vignette("sf1") # an introduction to the package
+## vignette("sf2") # reading, writing and converting simple features
+## vignette("sf3") # manipulating simple feature geometries
+## vignette("sf4") # manipulating simple features
+## vignette("sf5") # plotting simple features
+## vignette("sf6") # miscellneous long-form documentation
 
 ## ------------------------------------------------------------------------
 names(world)
 
-## ----world-all, fig.cap="A spatial plot of the world using the sf package, with a facet for each attribute.", warning=FALSE----
+## ----world-all, fig.cap="A spatial plot of the world using the sf package, with a facet for each attribute.", warning=FALSE, fig.scap="A spatial plot of the world using the sf package."----
 plot(world)
 
 ## ------------------------------------------------------------------------
@@ -45,7 +49,10 @@ summary(world["lifeExp"])
 ## The word `MULTIPOLYGON` in the summary output above refers to the geometry type of features (countries) in the `world` object.
 
 ## ------------------------------------------------------------------------
-world[1:2, 1:3]
+world_mini = world[1:2, 1:3]
+world_mini
+
+## The preceding code chunk uses `=` to create a new object called `world_mini` in the command `world_mini = world[1:2, 1:3]`.
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## library(sp)
@@ -55,20 +62,17 @@ world[1:2, 1:3]
 ## ---- eval=FALSE---------------------------------------------------------
 ## world_sf = st_as_sf(world_sp, "sf")
 
-## ----sfplot, fig.cap="Plotting with sf, with multiple variables (left) and a single variable (right).", out.width="49%", fig.show='hold', warning=FALSE----
+## ----sfplot, fig.cap="Plotting with sf, with multiple variables (left) and a single variable (right).", out.width="49%", fig.show='hold', warning=FALSE, fig.scap="Plotting with sf."----
 plot(world[3:6])
 plot(world["pop"])
 
 ## ---- warning=FALSE------------------------------------------------------
-asia = world[world$continent == "Asia", ]
-asia = st_union(asia)
+world_asia = world[world$continent == "Asia", ]
+asia = st_union(world_asia)
 
 ## ----asia, out.width='50%', fig.cap="A plot of Asia added as a layer on top of countries worldwide.", eval=FALSE----
 ## plot(world["pop"], reset = FALSE)
 ## plot(asia, add = TRUE, col = "red")
-
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
-## plot(africa[0], lwd = 3, main = "Nigeria in context", border = "lightgrey")
 
 ## ---- echo=FALSE, eval=FALSE---------------------------------------------
 ## # aim: show main
@@ -80,8 +84,24 @@ asia = st_union(asia)
 ## world_cents = st_centroid(world, of_largest = TRUE)
 ## plot(st_geometry(world_cents), add = TRUE, cex = cex)
 
-## ----contpop, fig.cap="Country continents (represented by fill color) and 2015 populations (represented by circles, with area proportional to population).", echo=FALSE, warning=FALSE----
+## ----contpop, fig.cap="Country continents (represented by fill color) and 2015 populations (represented by circles, with area proportional to population).", echo=FALSE, warning=FALSE, fig.scap="Country continents and 2015 populations."----
 source("code/02-contpop.R")
+
+## ---- eval=FALSE---------------------------------------------------------
+## india = world[world$name_long == "India", ]
+## plot(st_geometry(india), expandBB = c(0, 0.2, 0.1, 1), col = "gray", lwd = 3)
+## plot(world_asia[0], add = TRUE)
+
+## ----china, fig.cap="India in context, demonstrating the expandBB argument.", warning=FALSE, echo=FALSE, out.width="50%"----
+old_par = par(mar = rep(0, 4))
+india = world[world$name_long == "India", ]
+indchi = world_asia[grepl("Indi|Chi", world_asia$name_long), ]
+indchi_points = st_centroid(indchi)
+indchi_coords = st_coordinates(indchi_points)
+plot(st_geometry(india), expandBB = c(-0.2, 0.5, 0, 1), col = "gray", lwd = 3)
+plot(world_asia[0], add = TRUE)
+text(indchi_coords[, 1], indchi_coords[, 2], indchi$name_long)
+par(old_par)
 
 ## ----sfcs, echo=FALSE, fig.cap="Illustration of point, linestring and polygon geometries."----
 old_par = par(mfrow = c(1, 3), pty = "s", mar = c(0, 3, 1, 0))
@@ -95,14 +115,14 @@ par(old_par)
 ## par(pty = "s")
 ## plot(st_as_sfc("POLYGON((1 5, 2 2, 4 1, 4 4, 1 5), (2 4, 3 4, 3 3, 2 3, 2 4))"), col = "gray", axes = TRUE, main = "POLYGON with a hole")
 
-## ----multis, echo=FALSE, fig.cap="Illustration of multipoint, mutlilinestring and multipolygon geometries."----
+## ----multis, echo=FALSE, fig.cap="Illustration of multi* geometries."----
 old_par = par(mfrow = c(1, 3), pty = "s", mar = c(0, 3, 1, 0))
 plot(st_as_sfc("MULTIPOINT (5 2, 1 3, 3 4, 3 2)"), axes = TRUE, main = "MULTIPOINT")
 plot(st_as_sfc("MULTILINESTRING ((1 5, 4 4, 4 1, 2 2, 3 2), (1 2, 2 4))"), axes = TRUE, main = "MULTILINESTRING")
 plot(st_as_sfc("MULTIPOLYGON (((1 5, 2 2, 4 1, 4 4, 1 5), (0 2, 1 2, 1 3, 0 3, 0 2)))"), col = "gray", axes = TRUE, main = "MULTIPOLYGON")
 par(old_par)
 
-## ----geomcollection, echo=FALSE, fig.asp=1, fig.cap="Illustration of geometry collection.", out.width="33%"----
+## ----geomcollection, echo=FALSE, fig.asp=1, fig.cap="Illustration of a geometry collection.", out.width="33%"----
 # Plotted - it is referenced in ch5 (st_cast)
 old_par = par(pty = "s", mar = c(2, 3, 3, 0))
 plot(st_as_sfc("GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2), LINESTRING (1 5, 4 4, 4 1, 2 2, 3 2))"),
@@ -110,11 +130,10 @@ plot(st_as_sfc("GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2), LINESTRING 
 par(old_par)
 
 ## ------------------------------------------------------------------------
-# note that we use a numeric vector for points
-st_point(c(5, 2)) # XY point
-st_point(c(5, 2, 3)) # XYZ point
+st_point(c(5, 2))                 # XY point
+st_point(c(5, 2, 3))              # XYZ point
 st_point(c(5, 2, 1), dim = "XYM") # XYM point
-st_point(c(5, 2, 3, 1)) # XYZM point
+st_point(c(5, 2, 3, 1))           # XYZM point
 
 ## ------------------------------------------------------------------------
 # the rbind function simplifies the creation of matrices
@@ -237,10 +256,10 @@ class(lnd_sf)
 ## # sf object
 ## sf_points = st_sf(our_attributes, geometry = our_geometry)
 
-## ----raster-intro-plot, echo = FALSE, fig.cap = "Raster data: A - cell IDs; B - cell values; C - a colored raster map."----
+## ----raster-intro-plot, echo = FALSE, fig.cap = "Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map.", fig.scap="Raster data types."----
 source("code/02_raster_intro_plot.R")
 
-## ----raster-intro-plot2, echo=FALSE, fig.cap="Examples of continuous (left) and categorical (right) raster."----
+## ----raster-intro-plot2, echo=FALSE, fig.cap="Examples of continuous and categorical rasters."----
 source("code/02_raster_intro_plot2.R", print.eval = TRUE)
 
 ## ---- message=FALSE------------------------------------------------------
@@ -347,10 +366,11 @@ new_vector = st_read(vector_filepath)
 ## #> proj4string: "+proj=utm +zone=12 +ellps=GRS80 ... +units=m +no_defs"
 
 ## ------------------------------------------------------------------------
-new_vector = st_set_crs(new_vector, 26912) # set CRS
+new_vector = st_set_crs(new_vector, 4326) # set CRS
 
-## ----vector-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) and coordinate systems for a vector data type.", message=FALSE, fig.asp=0.56----
-source("code/02-vector-crs.R")
+## ----vector-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for a vector data type.", message=FALSE, fig.asp=0.56, fig.scap="Examples of geographic and projected CRSs (vector data)."----
+# source("code/02-vector-crs.R")
+knitr::include_graphics("figures/02_vector_crs.png")
 
 ## ------------------------------------------------------------------------
 projection(new_raster) # get CRS
@@ -359,8 +379,9 @@ projection(new_raster) # get CRS
 projection(new_raster) = "+proj=utm +zone=12 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 
                             +units=m +no_defs" # set CRS
 
-## ----raster-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) and coordinate systems for a raster data type.", message=FALSE, fig.asp=0.56----
-source("code/02-raster-crs.R")
+## ----raster-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for raster data.", message=FALSE, fig.asp=0.56, fig.scap="Examples of geographic and projected CRSs (raster data)."----
+# source("code/02-raster-crs.R")
+knitr::include_graphics("figures/02_raster_crs.png")
 
 ## ------------------------------------------------------------------------
 luxembourg = world[world$name_long == "Luxembourg", ]
@@ -378,6 +399,6 @@ units::set_units(st_area(luxembourg), km^2)
 res(new_raster)
 
 ## ---- warning=FALSE, message=FALSE---------------------------------------
-repr = projectRaster(new_raster, crs = "+init=epsg:4326")
+repr = projectRaster(new_raster, crs = "+init=epsg:26912")
 res(repr)
 

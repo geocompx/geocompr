@@ -1,7 +1,8 @@
 ## ---- message=FALSE------------------------------------------------------
 library(sf)
 library(raster)
-library(tidyverse)
+library(dplyr)
+library(stringr) # for working with strings (pattern matching)
 
 ## ---- results='hide'-----------------------------------------------------
 library(spData)
@@ -73,11 +74,16 @@ names(world4)
 ## # create throw-away data frame
 ## d = data.frame(pop = 1:10, area = 1:10)
 ## # return data frame object when selecting a single column
-## d[, "pop", drop = FALSE]
+## d[, "pop", drop = FALSE] # equivalent to d["pop"]
 ## select(d, pop)
 ## # return a vector when selecting a single column
 ## d[, "pop"]
 ## pull(d, pop)
+
+## ---- echo=FALSE, eval=FALSE---------------------------------------------
+## x1 = d[, "pop", drop = FALSE] # equivalent to d["pop"]
+## x2 = d["pop"]
+## identical(x1, x2)
 
 ## ---- eval = FALSE-------------------------------------------------------
 ## # data frame object
@@ -95,8 +101,14 @@ names(world4)
 
 ## ----operators, echo=FALSE-----------------------------------------------
 operators = c("`==`", "`!=`", "`>, <`", "`>=, <=`", "`&, |, !`")
-operators_exp = c("Equal to", "Not equal to", "Greater/Less than", "Greater/Less than or equal", "Logical operators: And, Or, Not")
-knitr::kable(data_frame(Symbol = operators, Name = operators_exp), caption = "Table of comparison operators that result in boolean (TRUE/FALSE) outputs.")
+operators_exp = c("Equal to", "Not equal to", "Greater/Less than",
+                  "Greater/Less than or equal", 
+                  "Logical operators: And, Or, Not")
+knitr::kable(data_frame(Symbol = operators, Name = operators_exp), 
+             caption = paste("Comparison operators that return Booleans",
+                             "(TRUE/FALSE)."),
+             caption.short = "Comparison operators that return Booleans.",
+             booktabs = TRUE)
 
 ## ------------------------------------------------------------------------
 world7 = world %>%
@@ -145,7 +157,10 @@ world %>%
   summarize(pop = sum(pop, na.rm = TRUE), n_countries = n()) %>% 
   top_n(n = 3, wt = pop) %>%
   st_set_geometry(value = NULL) %>% 
-  knitr::kable(caption = "The top 3 most populous continents, and the number of countries in each.")
+  knitr::kable(caption = paste("The top 3 most populous continents,", 
+                               "and the number of countries in each."),
+               caption.short = "Top 3 most populous continents.",
+               booktabs = TRUE)
 
 ## More details are provided in the help pages (which can be accessed via `?summarize` and `vignette(package = "dplyr")` and Chapter 5 of [R for Data Science](http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize).
 
@@ -153,7 +168,7 @@ world %>%
 world_coffee = left_join(world, coffee_data)
 class(world_coffee)
 
-## ----coffeemap, fig.cap="World coffee production (thousand 60 kg bags) by country, 2017. Source: International Coffee Organization."----
+## ----coffeemap, fig.cap="World coffee production (thousand 60-kg bags) by country, 2017. Source: International Coffee Organization.", fig.scap="World coffee production by country."----
 names(world_coffee)
 plot(world_coffee["coffee_production_2017"])
 
@@ -191,7 +206,7 @@ nrow(world_coffee_match)
 coffee_world = left_join(coffee_data, world)
 class(coffee_world)
 
-## In most cases the geometry column is only useful in an `sf` object.
+## In most cases, the geometry column is only useful in an `sf` object.
 
 ## ------------------------------------------------------------------------
 world_new = world # do not overwrite our original data
@@ -259,7 +274,7 @@ levels(grain)
 ## ------------------------------------------------------------------------
 factorValues(grain, grain[c(1, 11, 35)])
 
-## ----cont-raster, echo = FALSE, message = FALSE, fig.width = 7, fig.height = 2.5, fig.cap = "Raster datasets with numeric (left) and categorical values (right)."----
+## ----cont-raster, echo = FALSE, message = FALSE, fig.width = 7, fig.height = 2.5, fig.cap = "Raster datasets with numeric (left) and categorical values (right).", fig.scap="Raster datasets with numeric and categorical values."----
 source("code/03-cont-raster-plot.R", print.eval = TRUE)
 
 ## ---- eval = FALSE-------------------------------------------------------
@@ -286,12 +301,12 @@ elev[1, 1:2] = 0
 ## ---- eval = FALSE-------------------------------------------------------
 ## cellStats(elev, sd)
 
-## If you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately, as can be illustrated by running: `summary(brick(elev, grain))`
+## If you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately, as can be illustrated by running: `summary(brick(elev, grain))`.
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## hist(elev)
 
-## Some function names clash between packages (e.g. `select`, as discussed in a previous note).
+## Some function names clash between packages (e.g., `select`, as discussed in a previous note).
 
 ## ------------------------------------------------------------------------
 library(spData)

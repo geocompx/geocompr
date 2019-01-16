@@ -8,24 +8,25 @@ library(rgrass7)
 ## A command-line interface is a means of interacting with computer programs in which the user issues commands via successive lines of text (command lines).
 
 ## ----gis-comp, echo=FALSE, message=FALSE---------------------------------
-library(tidyverse)
+library(dplyr)
 d = tibble("GIS" = c("GRASS", "QGIS", "SAGA"),
-            "first release" = c("1984", "2002", "2004"),
-            "no. functions" = c(">500", ">1000", ">600"),
-            "support" = c("hybrid", "hybrid", "hybrid"))
-knitr::kable(x = d, caption = "Comparison between three open-source GIS. Hybrid refers to the support of vector and raster operations.") #%>%
+            "First release" = c("1984", "2002", "2004"),
+            "No. functions" = c(">500", ">1000", ">600"),
+            "Support" = c("hybrid", "hybrid", "hybrid"))
+knitr::kable(x = d, 
+             caption = paste("Comparison between three open-source GIS.", 
+                             "Hybrid refers to the support of vector and", 
+                             "raster operations."),
+             caption.short = "Comparison between three open-source GIS.", 
+             booktabs = TRUE) #%>%
   # kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
 
 ## ----qgis_setup, eval=FALSE----------------------------------------------
-## devtools::install_github("jannes-m/RQGIS") # use dev version (for now)
 ## library(RQGIS)
 ## set_env(dev = FALSE)
 ## #> $`root`
 ## #> [1] "C:/OSGeo4W64"
-## #> $qgis_prefix_path
-## #> [1] "C:/OSGeo4W64/apps/qgis-ltr"
-## #> $python_plugins
-## #> [1] "C:/OSGeo4W64/apps/qgis-ltr/python/plugins"
+## #> ...
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## open_app()
@@ -98,7 +99,7 @@ aggzone_wgs = st_transform(aggregating_zones, 4326)
 ## #> $`OUTPUT`
 ## #> [1] "C:/Users/geocompr/AppData/Local/Temp/RtmpcJlnUx/clean.shp"
 
-## ----sliver-fig, echo=FALSE, fig.cap="Sliver polygons colored in blue (left panel). Cleaned polygons (right panel)."----
+## ----sliver-fig, echo=FALSE, fig.cap="Sliver polygons colored in blue (left panel). Cleaned polygons (right panel).", fig.scap="Sliver (left panel) and cleaned (right panel) polygons."----
 knitr::include_graphics("figures/09_sliver.png")
 
 ## ---- warning=FALSE, message=FALSE, eval=FALSE---------------------------
@@ -133,14 +134,14 @@ knitr::include_graphics("figures/09_sliver.png")
 ## rsaga.wetness.index(in.dem = file.path(tempdir(), "dem"),
 ##                     out.wetness.index = file.path(tempdir(), "twi"))
 
-## ----saga-twi, fig.cap="SAGA wetness index of Mount Mongón, Peru.", echo=FALSE, out.width="50%"----
-knitr::include_graphics("figures/09_twi.png")
-
 ## ---- eval=FALSE---------------------------------------------------------
 ## library(raster)
 ## twi = raster::raster(file.path(tempdir(), "twi.sdat"))
 ## # shown is a version using tmap
 ## plot(twi, col = RColorBrewer::brewer.pal(n = 9, name = "Blues"))
+
+## ----saga-twi, fig.cap="SAGA wetness index of Mount Mongón, Peru.", echo=FALSE, out.width="50%"----
+knitr::include_graphics("figures/09_twi.png")
 
 ## ---- include=FALSE------------------------------------------------------
 # or using mapview
@@ -155,9 +156,8 @@ data("cycle_hire", package = "spData")
 points = cycle_hire[1:25, ]
 
 ## ---- eval=FALSE---------------------------------------------------------
-## library(sf)
 ## library(osmdata)
-## b_box = sf::st_bbox(points)
+## b_box = st_bbox(points)
 ## london_streets = opq(b_box) %>%
 ##   add_osm_feature(key = "highway") %>%
 ##   osmdata_sf() %>%
@@ -173,7 +173,7 @@ points = cycle_hire[1:25, ]
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## library(rgrass7)
-## # find a GRASS7 installation, and use the first one
+## # find a GRASS 7 installation, and use the first one
 ## ind = grep("7", link$version)[1]
 ## # next line of code only necessary if we want to use GRASS as installed by
 ## # OSGeo4W. Among others, this adds some paths to PATH, which are also needed
@@ -192,8 +192,8 @@ points = cycle_hire[1:25, ]
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## execGRASS("g.proj", flags = c("c", "quiet"),
-##           proj4 = sf::st_crs(london_streets)$proj4string)
-## b_box = sf::st_bbox(london_streets)
+##           proj4 = st_crs(london_streets)$proj4string)
+## b_box = st_bbox(london_streets)
 ## execGRASS("g.region", flags = c("quiet"),
 ##           n = as.character(b_box["ymax"]), s = as.character(b_box["ymin"]),
 ##           e = as.character(b_box["xmax"]), w = as.character(b_box["xmin"]),
@@ -220,7 +220,7 @@ points = cycle_hire[1:25, ]
 ##           output = "shortest_route", center_cats = paste0("1-", nrow(points)),
 ##           flags = c("overwrite"))
 
-## ----grass-mapview, fig.cap="Shortest route between 24 cycle hire station on the OSM street network of London.", echo=FALSE, out.width="80%"----
+## ----grass-mapview, fig.cap="Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London.", fig.scap="Shortest route between 24 cycle hire stations.", echo=FALSE, out.width="80%"----
 knitr::include_graphics("figures/09_shortest_route.png")
 
 ## ---- eval=FALSE---------------------------------------------------------
@@ -307,7 +307,7 @@ knitr::include_graphics("figures/09_shortest_route.png")
 ## ---- echo=FALSE---------------------------------------------------------
 load("extdata/postgis_data.Rdata")
 
-## ----postgis, echo=FALSE, fig.cap="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (lightblue points) within the buffer.", out.width="60%"----
+## ----postgis, echo=FALSE, fig.cap="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer.", fig.scap="Visualization of the output of previous PostGIS commands.", out.width="60%"----
 # plot the results of the queries
 par(mar = rep(0, 4))
 plot(buf$st_union, col = "lightyellow")

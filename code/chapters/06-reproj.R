@@ -1,7 +1,7 @@
 ## ---- message=FALSE------------------------------------------------------
 library(sf)
 library(raster)
-library(tidyverse)
+library(dplyr)
 library(spData)
 library(spDataLarge)
 
@@ -33,7 +33,7 @@ london_proj = data.frame(x = 530000, y = 180000) %>%
 ## ------------------------------------------------------------------------
 london_proj_buff = st_buffer(london_proj, 111320)
 
-## ----crs-buf, fig.cap="Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline.", fig.asp=1, fig.show='hold', out.width="45%", echo=FALSE----
+## ----crs-buf, fig.cap="Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline.", fig.scap="Buffers around London with a geographic and projected CRS.",  fig.asp=1, fig.show='hold', out.width="45%", echo=FALSE----
 uk = rnaturalearth::ne_countries(scale = 50) %>% 
   st_as_sf() %>% 
   filter(grepl(pattern = "United Kingdom|Ire", x = name_long))
@@ -74,8 +74,11 @@ st_distance(london2, london_proj)
 ## ------------------------------------------------------------------------
 lonlat2UTM = function(lonlat) {
   utm = (floor((lonlat[1] + 180) / 6) %% 60) + 1
-  if(lonlat[2] > 0) utm + 32600 else
+  if(lonlat[2] > 0) {
+    utm + 32600
+  } else{
     utm + 32700
+  }
 }
 
 ## ---- echo=FALSE, eval=FALSE---------------------------------------------
@@ -108,7 +111,7 @@ dplyr::filter(crs_codes, code == 27700)
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## st_crs(27700)$proj4string
-## #> [1] "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 ...
+## #> [1] "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 ...
 
 ## Printing a spatial object in the console, automatically returns its coordinate reference system.
 
@@ -120,8 +123,7 @@ library(tmap)
 world_mollweide_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
   lwgeom::st_transform_proj(crs = "+proj=moll")
 tm_shape(world_mollweide_gr) + tm_lines(col = "gray") +
-  tm_shape(world_mollweide) + tm_borders(col = "black") +
-  tm_layout(main.title = "the Mollweide projection", main.title.size = 1)
+  tm_shape(world_mollweide) + tm_borders(col = "black") 
 
 ## ------------------------------------------------------------------------
 world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
@@ -130,11 +132,11 @@ world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 # world_wintri_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
 #   lwgeom::st_transform_proj(crs = "+proj=wintri")
 # m = tm_shape(world_wintri_gr) + tm_lines(col = "gray") +
-#   tm_shape(world_wintri) + tm_borders(col = "black") +
-#   tm_layout(main.title = "the Winkel tripel projection", main.title.size = 1)
+#   tm_shape(world_wintri) + tm_borders(col = "black")
+# tmap_save(m, "images/wintriproj-1.png", width = 1152, height = 711, dpi = 150)
 knitr::include_graphics("images/wintriproj-1.png")
 
-## The two main functions for transformation of simple features coordinates are `sf::st_transform()` and `sf::sf_project()`.
+## The three main functions for transformation of simple features coordinates are `sf::st_transform()`, `sf::sf_project()`, and `lwgeom::st_transform_proj()`.
 
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## # demo of sf_project
@@ -144,26 +146,26 @@ knitr::include_graphics("images/wintriproj-1.png")
 ## plot(mat_projected)
 
 ## ------------------------------------------------------------------------
-world_laea1 = st_transform(world, crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_0=0")
+world_laea1 = st_transform(world, 
+                           crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_0=0")
 
-## ----laeaproj1, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on longitude and latitude of 0.", warning=FALSE----
+## ----laeaproj1, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on longitude and latitude of 0.", fig.scap="Lambert azimuthal equal-area projection of the world", warning=FALSE----
 world_laea1_g = st_graticule(ndiscr = 10000) %>%
   st_transform("+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_0=0") %>% 
   st_geometry()
 tm_shape(world_laea1_g) + tm_lines(col = "gray") +
-  tm_shape(world_laea1) + tm_borders(col = "black") +
-  tm_layout(main.title = "the Lambert azimuthal equal-area projection", main.title.size	= 1)
+  tm_shape(world_laea1) + tm_borders(col = "black")
 
 ## ------------------------------------------------------------------------
-world_laea2 = st_transform(world, crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40")
+world_laea2 = st_transform(world,
+                           crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40")
 
-## ----laeaproj2, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on New York City.", warning=FALSE----
+## ----laeaproj2, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on New York City.", fig.scap="Lambert azimuthal equal-area projection centered on New York City.", warning=FALSE----
 world_laea2_g = st_graticule(ndiscr = 10000) %>%
   st_transform("+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40.1 +ellps=WGS84 +no_defs") %>% 
   st_geometry()
 tm_shape(world_laea2_g) + tm_lines(col = "gray") +
-  tm_shape(world_laea2) + tm_borders(col = "black") +
-  tm_layout(main.title = "the Lambert azimuthal equal-area projection", main.title.size	= 1)
+  tm_shape(world_laea2) + tm_borders(col = "black")
 
 ## It is possible to use a EPSG code in a `proj4string` definition with `"+init=epsg:MY_NUMBER"`.
 
@@ -184,9 +186,16 @@ data_frame(
   nrow = c(nrow(cat_raster), nrow(cat_raster_wgs84)),
   ncol = c(ncol(cat_raster), ncol(cat_raster_wgs84)),
   ncell = c(ncell(cat_raster), ncell(cat_raster_wgs84)),
-  resolution = c(mean(res(cat_raster)), mean(res(cat_raster_wgs84), na.rm = TRUE)),
-  unique_categories = c(length(unique(values(cat_raster))), length(unique(values(cat_raster_wgs84))))
-) %>% knitr::kable(caption = "Key attributes in the original ('cat_raster') and projected ('cat_raster_wgs84') categorical raster datasets.", digits = 4)
+  resolution = c(mean(res(cat_raster)), mean(res(cat_raster_wgs84),
+                                             na.rm = TRUE)),
+  unique_categories = c(length(unique(values(cat_raster))),
+                        length(unique(values(cat_raster_wgs84))))) %>%
+  knitr::kable(caption = paste("Key attributes in the original ('cat_raster')", 
+                               "and projected ('cat_raster_wgs84')", 
+                               "categorical raster datasets."),
+               caption.short = paste("Key attributes in the original and", 
+                                     "projected raster datasets"),
+               digits = 4, booktabs = TRUE)
 
 ## ------------------------------------------------------------------------
 con_raster = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
@@ -210,9 +219,16 @@ data_frame(
   nrow = c(nrow(con_raster), nrow(con_raster_ea)),
   ncol = c(ncol(con_raster), ncol(con_raster_ea)),
   ncell = c(ncell(con_raster), ncell(con_raster_ea)),
-  resolution = c(mean(res(cat_raster)), mean(res(cat_raster_wgs84), na.rm = TRUE)),
-  mean = c(mean(values(con_raster)), mean(values(con_raster_ea), na.rm = TRUE))
-) %>% knitr::kable(caption = "Key attributes original ('con_raster') and projected ('con_raster') continuous raster datasets.", digits = 4)
+  resolution = c(mean(res(cat_raster)), mean(res(cat_raster_wgs84), 
+                                             na.rm = TRUE)),
+  mean = c(mean(values(con_raster)), mean(values(con_raster_ea), 
+                                          na.rm = TRUE))) %>%
+  knitr::kable(caption = paste("Key attributes in the original ('con_raster')", 
+                               "and projected ('con_raster') continuous raster", 
+                               "datasets."),
+               caption.short = paste("Key attributes in the original and", 
+                                     "projected raster datasets"),
+               digits = 4, booktabs = TRUE)
 
 ## Of course, the limitations of 2D Earth projections apply as much to vector as to raster data.
 
@@ -244,12 +260,20 @@ data_frame(
 ## plot(st_geometry(world_4326))
 
 ## ---- echo=FALSE, eval=FALSE---------------------------------------------
-## con_raster = raster(system.file("raster/srtm.tif", package="spDataLarge"))
-## con_raster_wgs84 = projectRaster(con_raster, crs = wgs84, method = "ngb")
-## con_raster_wgs84
+## con_raster = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
+## con_raster_utm12n = projectRaster(con_raster, crs = utm12n, method = "ngb")
+## con_raster_utm12n
 
 ## ---- echo=FALSE, eval=FALSE---------------------------------------------
 ## wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
 ## cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "bilinear")
 ## cat_raster_wgs84
+
+## ---- echo=FALSE, eval=FALSE---------------------------------------------
+## new_p4s = "+proj=laea +ellps=WGS84 +lon_0=-95 +lat_0=60 +units=m"
+## canada = dplyr::filter(world, name_long == "Canada")
+## new_canada = st_transform(canada, new_p4s)
+## par(mfrow = c(1, 2))
+## plot(st_geometry(canada), graticule = TRUE, axes = TRUE)
+## plot(st_geometry(new_canada), graticule = TRUE, axes = TRUE)
 

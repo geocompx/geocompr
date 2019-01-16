@@ -1,7 +1,7 @@
 ## ------------------------------------------------------------------------
 source("code/10-hello.R")
 
-## ----codecheck, echo=FALSE, fig.cap="Illustration of 'code checking' in RStudio. This example, from the script 10-centroid-alg.R, highlights an unclosed curly bracket on line 11."----
+## ----codecheck, echo=FALSE, fig.cap="Code checking in RStudio. This example, from the script 10-centroid-alg.R, highlights an unclosed curly bracket on line 19.", fig.scap="Illustration of 'code checking' in RStudio."----
 knitr::include_graphics("figures/codecheck.png")
 
 ## A useful tool for reproducibility is the **reprex** package.
@@ -29,14 +29,18 @@ if(curl::has_internet()) {
 ## source("code/10-centroid-setup.R")
 
 ## ------------------------------------------------------------------------
+# generate a simple matrix representation of a polygon:
 x_coords = c(10, 0, 0, 12, 20, 10)
 y_coords = c(0, 0, 10, 20, 15, 0)
 poly_mat = cbind(x_coords, y_coords)
 
 ## ------------------------------------------------------------------------
-O = poly_mat[1, ] # create a point representing the origin
-T1 = rbind(O, poly_mat[2:3, ], O) # create 'triangle matrix'
-C1 = (T1[1, ] + T1[2, ] + T1[3, ]) / 3 # find centroid
+# create a point representing the origin:
+Origin = poly_mat[1, ]
+# create 'triangle matrix':
+T1 = rbind(Origin, poly_mat[2:3, ], Origin) 
+# find centroid (drop = FALSE preserves classes, resulting in a matrix):
+C1 = (T1[1, , drop = FALSE] + T1[2, , drop = FALSE] + T1[3, , drop = FALSE]) / 3
 
 ## ----polymat, echo=FALSE, fig.cap="Illustration of polygon centroid calculation problem.", fig.height="100", warning=FALSE----
 # initial plot: can probably delete this:
@@ -44,10 +48,11 @@ old_par = par(pty = "s")
 plot(poly_mat)
 lines(poly_mat)
 lines(T1, col = "blue", lwd = 5)
-text(x = C1[1], y = C1[2], "C1")
+text(x = C1[ ,1], y = C1[, 2], "C1")
 par(old_par)
 
 ## ------------------------------------------------------------------------
+# calculate the area of the triangle represented by matrix T1:
 abs(T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
   T1[2, 1] * (T1[3, 2] - T1[1, 2]) +
   T1[3, 1] * (T1[1, 2] - T1[2, 2]) ) / 2
@@ -55,7 +60,7 @@ abs(T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
 ## ------------------------------------------------------------------------
 i = 2:(nrow(poly_mat) - 2)
 T_all = lapply(i, function(x) {
-  rbind(O, poly_mat[x:(x + 1), ], O)
+  rbind(Origin, poly_mat[x:(x + 1), ], Origin)
 })
 
 C_list = lapply(T_all,  function(x) (x[1, ] + x[2, ] + x[3, ]) / 3)
@@ -67,7 +72,7 @@ A = vapply(T_all, function(x) {
         x[3, 1] * (x[1, 2] - x[2, 2]) ) / 2
   }, FUN.VALUE = double(1))
 
-## ----polycent, fig.cap="Illustration of iterative centroid algorithm with triangles. The 'x' represents the area-weighted centroid in iterations 2 and 3.", echo=FALSE, fig.asp=0.3----
+## ----polycent, fig.cap="Illustration of iterative centroid algorithm with triangles. The 'x' represents the area-weighted centroid in iterations 2 and 3.", fig.scap="Illustration of iterative centroid algorithm with triangles.", echo=FALSE, fig.asp=0.3----
 # idea: show animated version on web version
 source("code/10-polycent.R")
 
@@ -107,8 +112,8 @@ t_area(t_new)
 ## ------------------------------------------------------------------------
 poly_centroid = function(x) {
   i = 2:(nrow(x) - 2)
-  T_all = T_all = lapply(i, function(x) {
-    rbind(O, poly_mat[x:(x + 1), ], O)
+  T_all = lapply(i, function(x) {
+    rbind(Origin, poly_mat[x:(x + 1), ], Origin)
   })
   C_list = lapply(T_all, t_centroid)
   C = do.call(rbind, C_list)
@@ -121,7 +126,7 @@ poly_centroid = function(x) {
 ## poly_centroid = function(x, output = "matrix") {
 ##   i = 2:(nrow(x) - 2)
 ##   T_all = T_all = lapply(i, function(x) {
-##     rbind(O, poly_mat[x:(x + 1), ], O)
+##     rbind(Origin, poly_mat[x:(x + 1), ], Origin)
 ##   })
 ##   C_list = lapply(T_all, t_centroid)
 ##   C = do.call(rbind, C_list)

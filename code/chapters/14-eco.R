@@ -6,11 +6,16 @@ library(mlr)
 library(dplyr)
 library(vegan)
 
-## ----study-area-mongon, echo=FALSE, fig.cap="The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017).", out.width="60%"----
+## ----study-area-mongon, echo=FALSE, fig.cap="The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017).", out.width="60%", fig.scap="The Mt. Mongón study area."----
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/38989956-6eae7c9a-43d0-11e8-8f25-3dd3594f7e74.png")
 
 ## ------------------------------------------------------------------------
-data("study_area", "random_points", "comm", "dem", "ndvi")
+data("study_area", "random_points", "comm", "dem", "ndvi", package = "RQGIS")
+
+## ------------------------------------------------------------------------
+# sites 35 to 40 and corresponding occurrences of the first five species in the
+# community matrix
+comm[35:40, 1:5]
 
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## # create hillshade
@@ -25,7 +30,7 @@ data("study_area", "random_points", "comm", "dem", "ndvi")
 ## plot(st_geometry(study_area), add = TRUE)
 ## # white margins between axes and plot are too wide
 
-## ---- echo=FALSE, message=FALSE, fig.cap="Study mask (polygon), location of the sampling sites (black points) and DEM in the background."----
+## ----sa-mongon, echo=FALSE, message=FALSE, fig.cap="Study mask (polygon), location of the sampling sites (black points) and DEM in the background.", fig.scap="Study mask, location of the sampling sites."----
 library("latticeExtra")
 library("grid")
 hs = hillShade(terrain(dem), terrain(dem, "aspect"))
@@ -76,29 +81,23 @@ grid.text("m asl", x = unit(0.8, "npc"), y = unit(0.75, "npc"),
 ##               show_output_paths = FALSE)
 
 ## ---- eval=FALSE---------------------------------------------------------
-## ep = c(dem, ndvi, ep) %>%
-##   stack()
+## ep = stack(c(dem, ndvi, ep))
 ## names(ep) = c("dem", "ndvi", "carea", "cslope")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## ep$carea = log10(ep$carea)
 
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
-## saveRDS(brick(ep), "extdata/14-ep.rds")
-
-## ---- echo=FALSE---------------------------------------------------------
-ep = readRDS("extdata/14-ep.rds")
+## ------------------------------------------------------------------------
+data("ep", package = "spDataLarge")
 
 ## ------------------------------------------------------------------------
 random_points[, names(ep)] = raster::extract(ep, as(random_points, "Spatial"))
 
 ## ------------------------------------------------------------------------
-# sites 35 to 40 and corresponding occurrences of the first five species in the
-# table
-comm[35:40, 1:5]
-
-## ------------------------------------------------------------------------
-pa = decostand(comm, "pa")
+# presence-absence matrix
+pa = decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
+# keep only sites in which at least one species was found
+pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
 
 ## ---- eval=FALSE, message=FALSE------------------------------------------
 ## set.seed(25072018)
@@ -120,7 +119,7 @@ pa = decostand(comm, "pa")
 ## ---- include=FALSE------------------------------------------------------
 nmds = readRDS("extdata/14-nmds.rds")
 
-## ----xy-nmds, fig.cap="Plotting the first NMDS axis against altitude.", fig.asp=1, out.width="60%"----
+## ----xy-nmds, fig.cap="Plotting the first NMDS axis against altitude.", fig.scap = "First NMDS axis against altitude plot.", fig.asp=1, out.width="60%"----
 elev = dplyr::filter(random_points, id %in% rownames(pa)) %>% 
   dplyr::pull(dem)
 # rotating NMDS in accordance with altitude (proxy for humidity)
@@ -131,19 +130,81 @@ sc = scores(rotnmds, choices = 1:2)
 plot(y = sc[, 1], x = elev, xlab = "elevation in m", 
      ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8)
 
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## # scores and rotated scores in one figure
+## p1 = xyplot(scores(rotnmds)[, 2] ~ scores(rotnmds)[, 1], pch = 16,
+##              col = "lightblue", xlim = c(-3, 2), ylim = c(-2, 2),
+##              xlab = list("Dimension 1", cex = 0.8),
+##              ylab = list("Dimension 2", cex = 0.8),
+##              scales = list(x = list(relation = "same", cex = 0.8),
+##                            y = list(relation = "same", cex = 0.8),
+##                            # ticks on top are suppressed
+##                            tck = c(1, 0),
+##                            # plots axes labels only in row and column 1 and 4
+##                            alternating = c(1, 0, 0, 1),
+##                            draw = TRUE),
+##              # we have to use the same colors in the legend as used for the plot
+##              # points
+##              par.settings = simpleTheme(col = c("lightblue", "salmon"),
+##                                         pch = 16, cex = 0.9),
+##              # also the legend point size should be somewhat smaller
+##              auto.key = list(x = 0.7, y = 0.9, text = c("unrotated", "rotated"),
+##                              between = 0.5, cex = 0.9),
+##              panel = function(x, y, ...) {
+##                            # Plot the points
+##                            panel.points(x, y, cex = 0.6, ...)
+##                            panel.points(x = scores(nmds)[, 1],
+##                                         y = scores(nmds)[, 2],
+##                                         col = "salmon", pch = 16, cex = 0.6)
+##                            panel.arrows(x0 = scores(nmds)[, 1],
+##                                         y0 = scores(nmds)[, 2],
+##                                         x1 = x,
+##                                         y1 = y,
+##                                         length = 0.04,
+##                                         lwd = 0.4)
+##             })
+## 
+## plot(scores(nmds, choices = 1:2))
+## points(scores(rotnmds, choices = 1:2), col = "lightblue", pch = 16)
+## 
+## 
+## sc = scores(nmds, choices = 1:2) %>% as.data.frame
+## sc$id = rownames(sc) %>% as.numeric
+## rp = inner_join(select(sc, id), st_set_geometry(random_points, NULL))
+## fit_1 = envfit(nmds, select(rp, dem))
+## fit_2 = envfit(rotnmds, select(rp, dem))
+## par(mfrow = c(1, 2))
+## plot(nmds, display = "sites")
+## plot(fit_1)
+## plot(rotnmds, display = "sites")
+## plot(fit_2)
+
 ## ------------------------------------------------------------------------
 # construct response-predictor matrix
 # id- and response variable
-rp = data.frame(id = as.numeric(rownames(sc)),
-                sc = sc[, 1])
+rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
 rp = inner_join(random_points, rp, by = "id")
 
-## ----tree, fig.cap="Simple example of a decision tree with three internal nodes and four terminal nodes."----
+## ---- eval=FALSE---------------------------------------------------------
+## library("tree")
+## tree_mo = tree(sc ~ dem, data = rp)
+## plot(tree_mo)
+## text(tree_mo, pretty = 0)
+
+## ---- echo=FALSE, eval=TRUE----------------------------------------------
 library("tree")
 tree_mo = tree(sc ~ dem, data = rp)
-plot(tree_mo)
-text(tree_mo, pretty = 0)
+
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## png("figures/14_tree.png", width = 1100, height = 700, units = "px", res = 300)
+## par(mar = rep(1, 4))
+## plot(tree_mo)
+## text(tree_mo, pretty = 0)
+## dev.off()
+
+## ----tree, echo=FALSE, fig.cap="Simple example of a decision tree with three internal nodes and four terminal nodes.", fig.scap="Simple example of a decision tree."----
+knitr::include_graphics("figures/14_tree.png")
 
 ## ------------------------------------------------------------------------
 # extract the coordinates into a separate data frame
@@ -227,7 +288,7 @@ pred = dem
 # replace altitudinal values by rf-prediction values
 pred[] = pred_rf$data$response
 
-## ----rf-pred, echo=FALSE, fig.cap="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.", fig.width = 10, fig.height = 10----
+## ----rf-pred, echo=FALSE, fig.cap="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.", fig.width = 10, fig.height = 10, fig.scap="Predictive mapping of the floristic gradient."----
 library("latticeExtra")
 library("grid")
 
