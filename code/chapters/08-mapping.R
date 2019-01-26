@@ -1,7 +1,7 @@
 ## ---- message=FALSE------------------------------------------------------
 library(sf)
 library(raster)
-library(tidyverse)
+library(dplyr)
 library(spData)
 library(spDataLarge)
 
@@ -9,6 +9,7 @@ library(spDataLarge)
 library(tmap)    # for static and interactive maps
 library(leaflet) # for interactive maps
 library(mapview) # for interactive maps
+library(ggplot2) # tidyverse vis package
 library(shiny)   # for web applications
 
 ## ---- eval=FALSE---------------------------------------------------------
@@ -23,8 +24,8 @@ library(shiny)   # for web applications
 ##   tm_fill() +
 ##   tm_borders()
 
-## ----tmshape, echo=FALSE, message=FALSE, fig.cap="New Zealand's shape plotted with fill (left), border (middle) and fill and border (right) layers added using tmap functions."----
-source("code/08-tmshape.R", print.eval = TRUE)
+## ----tmshape, echo=FALSE, message=FALSE, fig.cap="New Zealand's shape plotted with fill (left), border (middle) and fill and border (right) layers added using tmap functions.", fig.scap="New Zealand's shape plotted using tmap functions."----
+source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-tmshape.R", print.eval = TRUE)
 
 ## `qtm()` is a handy function for **q**uickly creating **t**map **m**aps (hence the snappy name).
 
@@ -46,10 +47,10 @@ map_nz2 = map_nz1 +
 map_nz3 = map_nz2 +
   tm_shape(nz_height) + tm_dots()
 
-## ----tmlayers, message=FALSE, fig.cap="Maps with additional layers added to the final map of Figure 9.1."----
+## ----tmlayers, message=FALSE, fig.cap="Maps with additional layers added to the final map of Figure 8.1.", fig.scap="Additional layers added to the output of Figure 8.1."----
 tmap_arrange(map_nz1, map_nz2, map_nz3)
 
-## ----tmstatic, message=FALSE, fig.cap="The impact of changing commonly used fill and border aesthetics to fixed values."----
+## ----tmstatic, message=FALSE, fig.cap="The impact of changing commonly used fill and border aesthetics to fixed values.", fig.scap="The impact of changing commonly used aesthetics."----
 ma1 = tm_shape(nz) + tm_fill(col = "red")
 ma2 = tm_shape(nz) + tm_fill(col = "red", alpha = 0.3)
 ma3 = tm_shape(nz) + tm_borders(col = "blue")
@@ -74,7 +75,7 @@ tmap_arrange(ma1, ma2, ma3, ma4, ma5, ma6)
 ## ---- fig.show='hide', message=FALSE-------------------------------------
 tm_shape(nz) + tm_fill(col = "Land_area")
 
-## ----tmcol, message=FALSE, fig.cap="Comparison of base (left) and tmap (right) handling of a numeric color field.", echo=FALSE, out.width="45%", fig.show='hold', warning=FALSE, message=FALSE----
+## ----tmcol, message=FALSE, fig.cap="Comparison of base (left) and tmap (right) handling of a numeric color field.", fig.scap="Comparison of base graphics and tmap", echo=FALSE, out.width="45%", fig.show='hold', warning=FALSE, message=FALSE----
 plot(nz["Land_area"])
 tm_shape(nz) + tm_fill(col = "Land_area")
 
@@ -84,19 +85,19 @@ map_nza = tm_shape(nz) +
   tm_fill(col = "Land_area", title = legend_title) + tm_borders()
 
 ## ---- eval=FALSE---------------------------------------------------------
-## breaks = c(0, 3, 4, 5) * 10000
 ## tm_shape(nz) + tm_polygons(col = "Median_income")
+## breaks = c(0, 3, 4, 5) * 10000
 ## tm_shape(nz) + tm_polygons(col = "Median_income", breaks = breaks)
 ## tm_shape(nz) + tm_polygons(col = "Median_income", n = 10)
-## tm_shape(nz) + tm_polygons(col = "Median_income", palette = "RdBu")
+## tm_shape(nz) + tm_polygons(col = "Median_income", palette = "BuGn")
 
-## ----tmpal, message=FALSE, fig.cap="Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette.", echo=FALSE, fig.asp=0.56----
-source("code/08-tmpal.R", print.eval = TRUE)
+## ----tmpal, message=FALSE, fig.cap="Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette.", fig.scap="Illustration of settings that affect color settings.", echo=FALSE, fig.asp=0.56----
+source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-tmpal.R", print.eval = TRUE)
 
-## ----break-styles, message=FALSE, fig.cap="Illustration of different binning methods set using the style argument in tmap.", echo=FALSE----
-source("code/08-break-styles.R", print.eval = TRUE)
+## ----break-styles, message=FALSE, fig.cap="Illustration of different binning methods set using the style argument in tmap.", , fig.scap="Illustration of different binning methods using tmap.", echo=FALSE----
+source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-break-styles.R", print.eval = TRUE)
 
-## Although `style` is an argument of **tmap** functions it in fact originates as an argument in `classInt::classIntervals()` --- see the help page of this function for details.
+## Although `style` is an argument of **tmap** functions, in fact it originates as an argument in `classInt::classIntervals()` --- see the help page of this function for details.
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## tm_shape(nz) + tm_polygons("Population", palette = "Blues")
@@ -122,7 +123,7 @@ many_palette_plotter = function(color_names, n, titles){
 many_palette_plotter(c("PRGn", "YlGn", "Set2"), 7, 
                      titles = c("Diverging", "Sequential", "Categorical"))
 
-## ----na-sb, message=FALSE, fig.cap="Map with additional elements - a north arrow and scale bar.", fig.asp=1----
+## ----na-sb, message=FALSE, fig.cap="Map with additional elements - a north arrow and scale bar.", fig.scap="Map with a north arrow and scale bar.", fig.asp=1----
 map_nz + 
   tm_compass(type = "8star", position = c("left", "top")) +
   tm_scale_bar(breaks = c(0, 100, 200), size = 1)
@@ -133,15 +134,15 @@ map_nz +
 ## map_nz + tm_layout(bg.color = "lightblue")
 ## map_nz + tm_layout(frame = FALSE)
 
-## ----layout1, message=FALSE, fig.cap="Layout options specified by (from left to right) title, scale, bg.color and frame arguments.", echo=FALSE, fig.asp=0.56----
-source("code/08-layout1.R", print.eval = TRUE)
+## ----layout1, message=FALSE, fig.cap="Layout options specified by (from left to right) title, scale, bg.color and frame arguments.", fig.scap="Layout options specified by the tmap arguments.", echo=FALSE, fig.asp=0.56----
+source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-layout1.R", print.eval = TRUE)
 
 ## ----layout2, message=FALSE, fig.cap="Illustration of selected layout options.", echo=FALSE, fig.asp=0.56----
 # todo: add more useful settings to this plot
-source("code/08-layout2.R", print.eval = TRUE)
+source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-layout2.R", print.eval = TRUE)
 
 ## ----layout3, message=FALSE, fig.cap="Illustration of selected color-related layout options.", echo=FALSE, fig.asp=0.56----
-source("code/08-layout3.R", print.eval = TRUE)
+source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-layout3.R", print.eval = TRUE)
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## map_nza + tm_style("bw")
@@ -149,12 +150,12 @@ source("code/08-layout3.R", print.eval = TRUE)
 ## map_nza + tm_style("cobalt")
 ## map_nza + tm_style("col_blind")
 
-## ----tmstyles, message=FALSE, fig.cap="Selected tmap styles: bw, classic, cobalt and col_blind (from left to right).", echo=FALSE, fig.asp=0.56----
-source("code/08-tmstyles.R", print.eval = TRUE)
+## ----tmstyles, message=FALSE, fig.cap="Selected tmap styles: bw, classic, cobalt and col_blind (from left to right).", fig.scap="Selected tmap styles: bw, classic, cobalt and col_blind.", echo=FALSE, fig.asp=0.56----
+source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-tmstyles.R", print.eval = TRUE)
 
 ## A preview of predefined styles can be generated by executing `tmap_style_catalogue()`.
 
-## ----urban-facet, message=FALSE, fig.cap="Faceted map showing the top 30 largest 'urban agglomerations' from 1970 to 2030 based on population projects by the United Nations.", fig.asp=0.5----
+## ----urban-facet, message=FALSE, fig.cap="Faceted map showing the top 30 largest urban agglomerations from 1970 to 2030 based on population projects by the United Nations.", fig.scap="Faceted map showing urban agglomerations.", fig.asp=0.5----
 urb_1970_2030 = urban_agglomerations %>% 
   filter(year %in% c(1970, 1990, 2010, 2030))
 tm_shape(world) + tm_polygons() + 
@@ -164,12 +165,12 @@ tm_shape(world) + tm_polygons() +
 
 ## ------------------------------------------------------------------------
 nz_region = st_bbox(c(xmin = 1340000, xmax = 1450000,
-                      ymin = 5130000, ymax = 5210000)) %>% 
-  st_as_sfc() %>% 
-  st_set_crs(st_crs(nz_height))
+                      ymin = 5130000, ymax = 5210000),
+                    crs = st_crs(nz_height)) %>% 
+  st_as_sfc()
 
 ## ------------------------------------------------------------------------
-nz_height_map = tm_shape(nz_elev, bbox = tmaptools::bb(nz_region)) +
+nz_height_map = tm_shape(nz_elev, bbox = nz_region) +
   tm_raster(style = "cont", palette = "YlGn", legend.show = TRUE) +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 1) +
   tm_scale_bar(position = c("left", "bottom"))
@@ -179,7 +180,7 @@ nz_map = tm_shape(nz) + tm_polygons() +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 0.1) + 
   tm_shape(nz_region) + tm_borders(lwd = 3) 
 
-## ----insetmap1, message=FALSE, fig.cap="Inset map providing a context - location of the central part of the Southern Alps in New Zealand."----
+## ----insetmap1, message=FALSE, fig.cap="Inset map providing a context - location of the central part of the Southern Alps in New Zealand.", fig.scap="Inset map providing a context."----
 library(grid)
 nz_height_map
 print(nz_map, vp = viewport(0.8, 0.27, width = 0.5, height = 0.5))
@@ -191,20 +192,20 @@ us_states_map = tm_shape(us_states, projection = 2163) + tm_polygons() +
 ## ------------------------------------------------------------------------
 hawaii_map = tm_shape(hawaii) + tm_polygons() + 
   tm_layout(title = "Hawaii", frame = FALSE, bg.color = NA, 
-            title.position = c("left", "bottom"))
+            title.position = c("LEFT", "BOTTOM"))
 alaska_map = tm_shape(alaska) + tm_polygons() + 
   tm_layout(title = "Alaska", frame = FALSE, bg.color = NA)
 
 ## ----insetmap2, message=FALSE, fig.cap="Map of the United States."-------
 us_states_map
-print(hawaii_map, vp = viewport(x = 0.4, y = 0.1, width = 0.2, height = 0.1))
+print(hawaii_map, vp = viewport(x = 0.35, y = 0.1, width = 0.2, height = 0.1))
 print(alaska_map, vp = viewport(x = 0.15, y = 0.15, width = 0.3, height = 0.3))
 
-## ----urban-animated, message=FALSE, fig.cap="Animated map showing the top 30 largest 'urban agglomerations' from 1950 to 2030 based on population projects by the United Nations.", echo=FALSE----
+## ----urban-animated, message=FALSE, fig.cap="Animated map showing the top 30 largest urban agglomerations from 1950 to 2030 based on population projects by the United Nations. Animated version available online at: geocompr.robinlovelace.net.", , fig.scap="Animated map showing the top 30 largest 'urban agglomerations'.", echo=FALSE----
 knitr::include_graphics("figures/urban-animated.gif")
 
 ## ---- echo=FALSE, eval=FALSE---------------------------------------------
-## source("code/08-urban-animation.R")
+## source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-urban-animation.R")
 
 ## ------------------------------------------------------------------------
 urb_anim = tm_shape(world) + tm_polygons() + 
@@ -215,10 +216,10 @@ urb_anim = tm_shape(world) + tm_polygons() +
 ## tmap_animation(urb_anim, filename = "urb_anim.gif", delay = 25)
 
 ## ---- echo=FALSE, eval=FALSE---------------------------------------------
-## source("code/08-usboundaries.R")
-## source("code/08-uscolonize.R")
+## source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-usboundaries.R")
+## source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-uscolonize.R")
 
-## ----animus, echo=FALSE, message=FALSE, fig.cap="Animated map showing population growth and state formation and boundary changes in the United States, 1790-2010."----
+## ----animus, echo=FALSE, message=FALSE, fig.cap="Animated map showing population growth, state formation and boundary changes in the United States, 1790-2010. Animated version available online at geocompr.robinlovelace.net.", fig.scap="Animated map showing boundary changes in the United States."----
 u_animus = "https://user-images.githubusercontent.com/1825120/38543030-5794b6f0-3c9b-11e8-9da9-10ec1f3ea726.gif"
 knitr::include_graphics(u_animus)
 
@@ -226,15 +227,13 @@ knitr::include_graphics(u_animus)
 ## tmap_mode("view")
 ## map_nz
 
-## ----tmview, message=FALSE, fig.cap="Interactive map of New Zealand created with tmap in view mode.", echo=FALSE----
+## ----tmview, message=FALSE, fig.cap="Interactive map of New Zealand created with tmap in view mode. Interactive version available online at: geocompr.robinlovelace.net.", fig.scap="Interactive map of New Zealand.", echo=FALSE----
 tmap_mode("view")
 m_tmview = map_nz
 tmap_leaflet(m_tmview)
 
 ## ---- eval=FALSE---------------------------------------------------------
-## basemap = leaflet::providers$OpenTopoMap
-## map_nz +
-##   tm_basemap(server = basemap)
+## map_nz + tm_basemap(server = "OpenTopoMap")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## world_coffee = left_join(world, coffee_data, by = "name_long")
@@ -242,7 +241,7 @@ tmap_leaflet(m_tmview)
 ## tm_shape(world_coffee) + tm_polygons(facets) +
 ##   tm_facets(nrow = 1, sync = TRUE)
 
-## ----sync, message=FALSE, fig.cap="Faceted interactive maps of global coffee producing in 2016 and 2017 in 'sync', demonstrating tmap's view mode in action.", echo=FALSE----
+## ----sync, message=FALSE, fig.cap="Faceted interactive maps of global coffee production in 2016 and 2017 in sync, demonstrating tmap's view mode in action.", fig.scap="Faceted interactive maps of global coffee production.", echo=FALSE----
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39561412-4dbba7ba-4e9d-11e8-885c-7973b351006b.png")
 
 ## ------------------------------------------------------------------------
@@ -265,7 +264,7 @@ knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39979
 ##   mapview(franconia, zcol = "district", burst = TRUE) +
 ##   breweries
 
-## ---- mapview2, message=FALSE, fig.cap="Using mapview at the end of a sf based pipe expression.", echo=FALSE, warning=FALSE----
+## ----mapview2, message=FALSE, fig.cap="Using mapview at the end of a sf-based pipe expression.", echo=FALSE, warning=FALSE----
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39979271-5f515256-573d-11e8-9ede-e472ca007d73.png")
 # commented out because interactive version not working
 # mv2 = trails %>%
@@ -277,13 +276,81 @@ knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39979
 #   breweries
 # mv2@map
 
-## ---- echo=FALSE, eval=FALSE---------------------------------------------
-## # Another recent web mapping package is **mapdeck** which uses the `Deck.gl` JavaScript library to enable efficient rendering in the browser allowing large datasets (up to millions of points) to be visualized interactively. A minimal reproducible example is demonstrated below (results not shown):
-## library(spData)
-## devtools::install_github("SymbolixAU/mapdeck")
-## mapdeck::add_polygon(nz)
+## Note that the following block assumes the access token is stored in your R environment as `MAPBOX=your_unique_key`.
 
-## ----leaflet, message=FALSE, fig.cap="The leaflet package in action, showing cycle hire points in London."----
+## https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv
+
+## ---- eval=FALSE---------------------------------------------------------
+## library(mapdeck)
+## set_token(Sys.getenv("MAPBOX"))
+## df = read.csv("https://git.io/geocompr-mapdeck")
+## ms = mapdeck_style("dark")
+## mapdeck(style = ms, pitch = 45, location = c(0, 52), zoom = 4) %>%
+## add_grid(data = df, lat = "lat", lon = "lng", cell_size = 1000,
+##          elevation_scale = 50, layer_id = "grid_layer",
+##          colour_range = viridisLite::plasma(5))
+
+## ----mapdeck, echo=FALSE, fig.cap="Map generated by mapdeck, representing road traffic casualties across the UK. Height of 1 km cells represents number of crashes.", fig.scap="Map generated by mapdeck."----
+knitr::include_graphics("figures/mapdeck-mini.png")
+
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## # duplicated elsewhere so not showing this code (RL)
+## df <- capitals
+## df$key <- 1L
+## df_arcs <- merge(
+##   df[df$country == "Australia", ]
+##   , df[df$country != "Australia", ]
+##   , by = "key"
+##   )
+## 
+## mapdeck(
+##   style = mapdeck_style('dark')
+##   , pitch = 45
+## ) %>%
+##   add_arc(
+##     data = df_arcs
+##     , origin = c("lon.x","lat.x")
+##     , destination = c("lon.y", "lat.y")
+##     , stroke_from = "country.x"
+##     , stroke_to = "country.y"
+##   ) %>%
+##   add_scatterplot(
+##     data = capitals
+##     , lon = "lon"
+##     , lat = "lat"
+##     , fill_colour = "country"
+##     , radius = 5000
+##   )
+## 
+
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## library(mapdeck)
+## set_token(Sys.getenv("MAPBOX"))
+## df = read.csv("https://git.io/geocompr-mapdeck")
+## ms = mapdeck_style('dark')
+## mapdeck(style = ms, pitch = 45, location = c(0, 52), zoom = 4) %>%
+## # add_grid(data = df, lat = "lat", lon = "lng", cell_size = 1000,
+## #          elevation_scale = 50, layer_id = "grid_layer",
+## #          colour_range = viridisLite::plasma(5)) %>%
+##   add_polygon(data = lnd, layer_id = "polygon_layer")
+
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## library(sf)
+## str(roads)
+## mapdeck(
+##   , style = mapdeck_style('dark')
+##   , location = c(145, -37.8)
+##   , zoom = 10
+##   ) %>%
+##   add_path(
+##     data = roads
+##     , stroke_colour = "RIGHT_LOC"
+##     , layer_id = "path_layer"
+##     , tooltip = "ROAD_NAME"
+##     , auto_highlight = TRUE
+##   )
+
+## ----leaflet, message=FALSE, fig.cap="The leaflet package in action, showing cycle hire points in London.", fig.scap="The leaflet package in action."----
 pal = colorNumeric("RdYlBu", domain = cycle_hire$nbikes)
 leaflet(data = cycle_hire) %>% 
   addProviderTiles(providers$Stamen.TonerLite) %>% 
@@ -293,7 +360,7 @@ leaflet(data = cycle_hire) %>%
   setView(lng = -0.1, 51.5, zoom = 12) %>% 
   addMiniMap()
 
-## In **shiny** apps these are often split into `ui.R` (short for user interface) and `server.R` files, naming conventions used by [`shiny-server`](https://github.com/rstudio/shiny-server), a server-side Linux application for serving shiny apps on public-facing websites.
+## In **shiny** apps these are often split into `ui.R` (short for user interface) and `server.R` files, naming conventions used by `shiny-server`, a server-side Linux application for serving shiny apps on public-facing websites.
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## library(shiny)    # for shiny apps
@@ -310,16 +377,16 @@ leaflet(data = cycle_hire) %>%
 ## }
 ## shinyApp(ui, server)
 
-## ----lifeApp, echo=FALSE, message=FALSE, fig.cap="Screenshot showing minimal example of a web mapping application created with shiny."----
+## ----lifeApp, echo=FALSE, message=FALSE, fig.cap="Screenshot showing minimal example of a web mapping application created with shiny.", fig.scap="Minimal example of a web mapping application."----
 # knitr::include_app("http://35.233.37.196/shiny/")
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39690606-8f9400c8-51d2-11e8-84d7-f4a66a477d2a.png")
 
 ## There are a number of ways to run a **shiny** app.
 
-## ----coffeeApp, echo=FALSE, message=FALSE, fig.cap="coffeeApp, a simple web mapping application for exploring global coffee production in 2016 and 2017."----
+## ----coffeeApp, echo=FALSE, message=FALSE, fig.cap="coffeeApp, a simple web mapping application for exploring global coffee production in 2016 and 2017. Interactive version available online at geocompr.robinlovelace.net.", fig.scap="coffeeApp, a simple web mapping application."----
 knitr::include_app("https://bookdown.org/robinlovelace/coffeeapp/")
 
-## ----nz-plot, message=FALSE, fig.cap="Map of New Zealand created with plot(). The legend to the right refers to elevation (1000 m above sea level)."----
+## ----nz-plot, message=FALSE, fig.cap="Map of New Zealand created with plot(). The legend to the right refers to elevation (1000 m above sea level).", fig.scap="Map of New Zealand created with plot()."----
 g = st_graticule(nz, lon = c(170, 175), lat = c(-45, -40, -35))
 plot(nz_water, graticule = g, axes = TRUE, col = "blue")
 raster::plot(nz_elev / 1000, add = TRUE)
@@ -335,30 +402,36 @@ g1
 ## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## plotly::ggplotly(g1)
 
-## ----map-gpkg, echo=FALSE, message=FALSE---------------------------------
-gpkg_df = read_csv("extdata/generic_map_pkgs.csv")
-map_gpkg_df = dplyr::select(gpkg_df, package, title)
-map_gpkg_df$title[map_gpkg_df$package == "leaflet"] =
+## ----map-gpkg, echo=FALSE, message=FALSE, warning=FALSE------------------
+gpkg_df = readr::read_csv("extdata/generic_map_pkgs.csv")
+map_gpkg_df = dplyr::select(gpkg_df, Package = package, Title = title)
+map_gpkg_df$Title[map_gpkg_df$Package == "leaflet"] =
   "Create Interactive Web Maps with Leaflet"
-knitr::kable(map_gpkg_df, caption = "Selected general-purpose mapping packages.")
+knitr::kable(map_gpkg_df, 
+             caption = "Selected general-purpose mapping packages.", 
+             caption.short = "Selected general-purpose mapping packages.", 
+             booktabs = TRUE) %>%
+  kableExtra::column_spec(2, width = "9cm")
 
 ## ----map-spkg, echo=FALSE, message=FALSE---------------------------------
-spkg_df = read_csv("extdata/specific_map_pkgs.csv")
-map_spkg_df = dplyr::select(spkg_df, package, title)
-knitr::kable(map_spkg_df, caption = "Selected specific-purpose mapping packages, with associated metrics.")
+spkg_df = readr::read_csv("extdata/specific_map_pkgs.csv")
+map_spkg_df = dplyr::select(spkg_df, Package = package, Title = title)
+knitr::kable(map_spkg_df, 
+             caption = paste("Selected specific-purpose mapping packages,", 
+                             "with associated metrics."),
+             caption.short = "Selected specific-purpose mapping packages.",
+             booktabs = TRUE)
 
 ## ---- fig.show='hide', message=FALSE-------------------------------------
 library(cartogram)
 nz_carto = cartogram_cont(nz, "Median_income", itermax = 5)
 tm_shape(nz_carto) + tm_polygons("Median_income")
 
-## ----cartomap1, echo=FALSE, message=FALSE, fig.cap="Comparison of standard map (left) and continuous area cartogram (right)."----
+## ----cartomap1, echo=FALSE, message=FALSE, fig.cap="Comparison of standard map (left) and continuous area cartogram (right).", fig.scap="Comparison of standard map and continuous area cartogram."----
 carto_map1 = tm_shape(nz) + 
-  tm_polygons("Median_income", title = "Median income (NZD)", palette = "Greens") +
-  tm_layout(main.title = "Standard map", main.title.size = 1)
+  tm_polygons("Median_income", title = "Median income (NZD)", palette = "Greens")
 carto_map2 = tm_shape(nz_carto) + 
-  tm_polygons("Median_income", title = "Median income (NZD)", palette = "Greens") +
-  tm_layout(main.title = "Continuous area cartogram", main.title.size = 1)
+  tm_polygons("Median_income", title = "Median income (NZD)", palette = "Greens")
 tmap_arrange(carto_map1, carto_map2)
 
 ## ---- fig.show='hide', message=FALSE-------------------------------------
@@ -366,13 +439,13 @@ us_states2163 = st_transform(us_states, 2163)
 us_states2163_ncont = cartogram_ncont(us_states2163, "total_pop_15")
 us_states2163_dorling = cartogram_dorling(us_states2163, "total_pop_15")
 
-## ----cartomap2, echo=FALSE, message=FALSE, fig.cap="Comparison of non-continuous area cartogram (top) and Dorling cartogram (bottom).", fig.asp=0.32----
+## ----cartomap2, echo=FALSE, message=FALSE, fig.cap="Comparison of non-continuous area cartogram (left) and Dorling cartogram (right).", fig.scap="Comparison of cartograms.", fig.asp=0.32----
 carto_map3 = tm_shape(us_states2163_ncont) + 
   tm_polygons("total_pop_15", title = "Total population", palette = "BuPu") +
-  tm_layout(main.title = "Non-continuous area cartogram", main.title.size = 1, legend.show = FALSE)
+  tm_layout(legend.show = FALSE)
 carto_map4 = tm_shape(us_states2163_dorling) + 
   tm_polygons("total_pop_15", title = "Total population", palette = "BuPu") +
-  tm_layout(main.title = "Dorling cartogram", main.title.size = 1, legend.show = FALSE)
+  tm_layout(legend.show = FALSE)
 carto_map_34legend = tm_shape(us_states2163_dorling) + 
   tm_polygons("total_pop_15", title = "Total population", palette = "BuPu") +
   tm_layout(legend.only = TRUE)
@@ -387,133 +460,5 @@ africa = world %>%
 
 ## ---- results='hide'-----------------------------------------------------
 zion = st_read((system.file("vector/zion.gpkg", package = "spDataLarge")))
-
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
-## # >0.8 - Very high human development
-## # >0.7 - High human development
-## # >0.55 - Medium human development
-## # <0.55 - Low human development
-## sm1 = tm_shape(africa) +
-##   tm_polygons(
-##   col = "HDI",
-##   title = "Human Development Index",
-##   breaks = c(0, 0.55, 0.7, 0.8),
-##   labels = c("Low", "Medium", "High"),
-##   palette = "YlGn"
-##   )
-
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
-## sm2 = tm_shape(africa) +
-##   tm_polygons(col = "subregion",
-##               title = "Subregion",
-##               palette = "Set2")
-## tmap_arrange(sm2, sm1)
-
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
-## lc_colors = c("#476ba0", "#aa0000", "#b2ada3", "#68aa63", "#a58c30",
-##               "#c9c977", "#dbd83d", "#bad8ea")
-## sm3 = tm_shape(nlcd) + tm_raster(palette = lc_colors, title = "Land cover") +
-##   tm_shape(zion) + tm_borders(lwd = 3) +
-##   tm_scale_bar(size = 1, position = "left") +
-##   tm_compass(type = "8star", position = c("RIGHT", "top")) +
-##   tm_layout(legend.frame = TRUE, legend.position = c(0.6, "top"))
-## sm3
-## utah = filter(us_states, NAME == "Utah")
-## zion_bbox = st_as_sfc(st_bbox(nlcd))
-## sm3_plus = sm3 +
-##   tm_layout(frame.lwd = 4)
-## 
-## im = tm_shape(utah) +
-##   tm_polygons(lwd = 3, border.col = "black") +
-##   tm_shape(zion_bbox) +
-##   tm_polygons(col = "green", lwd = 1) +
-##   tm_layout(title = "UTAH", title.size = 2, title.position = c("center", "center")) +
-##   tm_layout(frame = FALSE, bg.color = NA)
-## 
-## library(grid)
-## print(sm3_plus, vp = grid::viewport(0.5, 0.5, width = 0.95, height = 0.95))
-## print(im, vp = grid::viewport(0.2, 0.4, width = 0.35, height = 0.35))
-
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
-## eastern_africa = filter(africa, subregion == "Eastern Africa")
-## tm_shape(eastern_africa) +
-##   tm_polygons(col = c("HDI", "pop_growth")) +
-##   qtm(africa, fill = NULL)
-## # https://github.com/mtennekes/tmap/issues/190#issuecomment-384184801
-## tm_shape(eastern_africa) +
-##   tm_polygons("pop_growth", style = "jenks", palette = "BuPu") +
-##   tm_facets(by = "name", showNA = FALSE)
-
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
-## m = tm_shape(eastern_africa) +
-##   tm_polygons(col = c("HDI", "pop_growth")) +
-##   qtm(africa, fill = NULL) +
-##   tm_facets(ncol = 1, nrow = 1)
-## tmap_animation(m, filename = "m.gif")
-## browseURL("m.gif")
-## m = tm_shape(eastern_africa) +
-##   tm_polygons("pop_growth", style = "jenks", palette = "BuPu") +
-##   tm_facets(by = "name", showNA = FALSE, ncol = 1, nrow = 1)
-## tmap_animation(m, filename = "m.gif")
-## browseURL("m.gif")
-
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
-## # fig 9.1 (\@ref(fig:tmshape))
-## ggplot() +
-##   geom_sf(data = nz, color = NA) +
-##   coord_sf(crs = st_crs(nz), datum = NA) +
-##   theme_void()
-## ggplot() +
-##   geom_sf(data = nz, fill = NA) +
-##   coord_sf(crs = st_crs(nz), datum = NA) +
-##   theme_void()
-## ggplot() +
-##   geom_sf(data = nz) +
-##   coord_sf(crs = st_crs(nz), datum = NA) +
-##   theme_void()
-## # fig 9.7 ( \@ref(fig:break-styles))
-## ggplot() +
-##   geom_sf(data = nz, aes(fill = Median_income)) +
-##   coord_sf(crs = st_crs(nz), datum = NA) +
-##   scale_fill_distiller(palette = "Oranges", direction = 1) +
-##   theme_void()
-## ggplot() +
-##   geom_sf(data = nz, aes(fill = Island)) +
-##   coord_sf(crs = st_crs(nz), datum = NA) +
-##   scale_fill_brewer(palette = "Set3") +
-##   theme_void()
-## # fig 9.13 (\@ref(fig:urban-facet))
-## # ggplot() + geom_sf(data = world) + geom_sf(data = urb_1970_2030, aes(size = population_millions)) + coord_sf(crs = st_crs(urb_1970_2030), datum = NA) + facet_wrap(~year, nrow = 2) + theme(panel.background = element_rect(fill = "white"))
-
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
-## library(cartogram)
-## # prepare the data
-## us = st_transform(us_states, 2163)
-## us = us %>%
-##   left_join(us_states_df, by = c("NAME" = "state"))
-## # calculate a poverty rate
-## us$poverty_rate = us$poverty_level_15 / us$total_pop_15
-## # create a regular map
-## ecm1 = tm_shape(us) + tm_polygons("poverty_rate", title = "Poverty rate")
-## # create a cartogram
-## us_carto = cartogram(us, "total_pop_15")
-## ecm2 = tm_shape(us_carto) + tm_polygons("poverty_rate", title = "Poverty rate")
-## # combine two maps
-## tmap_arrange(ecm1, ecm2)
-
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
-## # devtools::install_github("jbaileyh/geogrid")
-## library(geogrid)
-## 
-## hex_cells = calculate_grid(africa, grid_type = "hexagonal", seed = 25, learning_rate = 0.03)
-## africa_hex = st_as_sf(assign_polygons(africa, hex_cells))
-## 
-## reg_cells = calculate_grid(africa, grid_type = "regular", seed = 25, learning_rate = 0.03)
-## africa_reg = st_as_sf(assign_polygons(africa, reg_cells))
-## 
-## tgg1 = tm_shape(africa) + tm_polygons("pop_growth", title = "Population's growth (annual %)")
-## tgg2 = tm_shape(africa_hex) + tm_polygons("pop_growth", title = "Population's growth (annual %)")
-## tgg3 = tm_shape(africa_reg) + tm_polygons("pop_growth", title = "Population's growth (annual %)")
-## 
-## tmap_arrange(tgg1, tgg2, tgg3)
+data(nlcd, package = "spDataLarge")
 

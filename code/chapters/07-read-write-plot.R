@@ -1,27 +1,30 @@
 ## ---- message=FALSE------------------------------------------------------
 library(sf)
 library(raster)
-library(tidyverse)
+library(dplyr)
 library(spData)
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## download.file(url = "http://nrdata.nps.gov/programs/lands/nps_boundary.zip",
 ##               destfile = "nps_boundary.zip")
 ## unzip(zipfile = "nps_boundary.zip")
-## f = "temp/Current_Shapes/Data_Store/06-06-12_Posting/nps_boundary.shp"
-## usa_parks = st_read(dsn = f)
+## usa_parks = st_read(dsn = "nps_boundary.shp")
 
-## ----datapackages, echo=FALSE--------------------------------------------
+## ----datapackages, echo=FALSE, warning=FALSE-----------------------------
 datapackages = tibble::tribble(
-  ~`Package name`, ~Description,
+  ~`Package`, ~Description,
   "getlandsat", "Provides access to Landsat 8 data.",
   "osmdata", "Download and import of OpenStreetMap data.",
-  "raster", "The `getData()` function downloads and imports administrative country, SRTM/ASTER elevation, WorldClim data.",
-  "rnaturalearth", "Functions to download Natural Earth vector and raster data, including world country borders.",
-  "rnoaa", "An R interface to National Oceanic and Atmospheric Administration (NOAA) climate data.",
-  "rWBclimate", "An access to the World Bank climate data."
+  "raster", "getData() imports administrative, elevation, WorldClim data.",
+  "rnaturalearth", "Access to Natural Earth vector and raster data.",
+  "rnoaa", "Imports National Oceanic and Atmospheric Administration (NOAA) climate data.",
+  "rWBclimate", "Access World Bank climate data."
 )
-knitr::kable(datapackages, caption = "Selected R packages for spatial data retrieval.")
+knitr::kable(datapackages, 
+             caption = "Selected R packages for geographic data retrieval.", 
+             caption.short = "Selected R packages for geographic data retrieval.",
+             booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options="scale_down")
 
 ## ------------------------------------------------------------------------
 library(rnaturalearth)
@@ -48,21 +51,131 @@ class(worldclim_prec)
 ## world2 = spData::world
 ## world3 = st_read(system.file("shapes/world.gpkg", package = "spData"))
 
+## ------------------------------------------------------------------------
+base_url = "http://www.fao.org/figis/geoserver/wfs"
+q = list(request = "GetCapabilities")
+res = httr::GET(url = base_url, query = q)
+res$url
+
+## ---- eval=FALSE---------------------------------------------------------
+## txt = httr::content(res, "text")
+## xml = xml2::read_xml(txt)
+
+## ------------------------------------------------------------------------
+#> {xml_document} ...
+#> [1] <ows:ServiceIdentification>\n  <ows:Title>GeoServer WFS...
+#> [2] <ows:ServiceProvider>\n  <ows:ProviderName>Food and Agr...
+#> ...
+
+## ---- echo=FALSE, eval=FALSE---------------------------------------------
+## library(XML)
+## library(RCurl)
+## library(httr)
+## base_url = "http://www.fao.org/figis/geoserver/wfs"
+## q = list(request = "GetCapabilities")
+## res = httr::GET(url = base_url, query = q)
+## doc = xmlParse(res)
+## root = xmlRoot(doc)
+## names(root)
+## names(root[["FeatureTypeList"]])
+## root[["FeatureTypeList"]][["FeatureType"]][["Name"]]
+## tmp = xmlSApply(root[["FeatureTypeList"]], function(x) xmlValue(x[["Name"]]))
+
+## ---- eval=FALSE---------------------------------------------------------
+## qf = list(request = "GetFeature", typeName = "area:FAO_AREAS")
+## file = tempfile(fileext = ".gml")
+## httr::GET(url = base_url, query = qf, httr::write_disk(file))
+## fao_areas = sf::read_sf(file)
+
+## ---- eval=FALSE---------------------------------------------------------
+## library(ows4R)
+## wfs = WFSClient$new("http://www.fao.org/figis/geoserver/wfs",
+##                       serviceVersion = "1.0.0", logger = "INFO")
+## fao_areas = wfs$getFeatures("area:FAO_AREAS")
+
+## ---- echo=FALSE, eval=FALSE---------------------------------------------
+## # not shown as too verbose an example already
+## area_27 = wfs$getFeatures("area:FAO_AREAS",
+##                           cql_filter = URLencode("F_CODE= '27'"))
+
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## # checking out WFS using German datasets
+## library(ows4R)
+## library(sf)
+## base_url = "http://www.lfu.bayern.de/gdi/wfs/naturschutz/schutzgebiete?"
+## wfs = WFSClient$new(base_url, "1.0.0", logger = "INFO")
+## # wfs$getUrl()
+## # wfs$getClassName()
+## 
+## caps = wfs$getCapabilities()
+## caps
+## tmp = caps$findFeatureTypeByName("")
+## # find out about the available feature types
+## sapply(tmp, function(x) x$getName())
+## # ok, let's download the national parcs of Bavaria
+## ft = caps$findFeatureTypeByName("lfu:nationalpark")
+## ft$getDescription()  # some problem here, I guess due to German spelling (umlaut, etc.). BTW the same happens when using the data from the Netherlands
+## ft$getBoundingBox()  # no bounding box
+## ft$getDefaultCRS()  # default CRS
+## nps = ft$getFeatures()
+## # this does not work properly, however, it downloads the data to the temporary
+## # directory, hence, we can load them into R ourselves
+## file = grep("gml", dir(tempdir()), value = TRUE)
+## file = file.path(tempdir(), file)
+## # assuming there is only one file
+## layer = read_sf(file)
+## plot(layer$geometry)
+
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## library(ows4R)
+## library(sf)
+## # data gathered from https://catalog.data.gov/dataset?res_format=WFS
+## # downloading US national parks
+## base_url = paste0("http://gstore.unm.edu/apps/rgis/datasets/",
+##                   "7bbe8af5-029b-4adf-b06c-134f0dd57226/services/ogc/wfs?")
+## # downloading public US airports
+## base_url = paste0("http://gstore.unm.edu/apps/rgis/datasets/",
+##                  "7387537d-dff6-48d1-9004-4f089f48dea1/services/ogc/wfs?")
+## # establish the connection
+## wfs = WFSClient$new(base_url, "1.0.0", logger = "INFO")
+## # wfs$getUrl()
+## # wfs$getClassName()
+## 
+## caps = wfs$getCapabilities()
+## caps
+## # find out about the available feature types
+## tmp = caps$findFeatureTypeByName("")
+## tmp$getName()
+## # ok, let's download all US national parcs
+## ft = caps$findFeatureTypeByName("nps_boundary")
+## # ft = caps$findFeatureTypeByName("tra2shp")  # airports
+## ft$getDescription()
+## ft$getBoundingBox()
+## ft$getDefaultCRS()
+## nps = ft$getFeatures()
+## # this returns an sf object
+## plot(nps$msGeometry)
+
 ## ----formats, echo=FALSE-------------------------------------------------
 file_formats = tibble::tribble(~Name, ~Extension, ~Info, ~Type, ~Model, 
-                         "ESRI Shapefile", ".shp (the main file)", "One of the most popular vector file formats. Consists of at least three files. The main files size cannot exceed 2 GB. It lacks support for mixed type. Column names are limited to 10 characters, and number of columns are limited at 255. It has poor support for Unicode standard. ", "Vector", "Partially open",
+                         "ESRI Shapefile", ".shp (the main file)", "Popular format consisting of at least three files. No support for: files > 2GB;  mixed types; names > 10 chars; cols > 255.", "Vector", "Partially open",
                          "GeoJSON", ".geojson", "Extends the JSON exchange format by including a subset of the simple feature representation.", "Vector", "Open",
                          "KML", ".kml", "XML-based format for spatial visualization, developed for use with Google Earth. Zipped KML file forms the KMZ format.", "Vector", "Open",
                          "GPX", ".gpx", "XML schema created for exchange of GPS data.", "Vector", "Open",
-                         "GeoTIFF", ".tiff", "GeoTIFF is one of the most popular raster formats. Its structure is similar to the regular `.tif` format, however, additionally stores  the raster header.", "Raster", "Open",
+                         "GeoTIFF", ".tiff", "Popular raster format similar to `.tif` format but stores raster header.", "Raster", "Open",
                          "Arc ASCII", ".asc", "Text format where the first six lines represent the raster header, followed by the raster cell values arranged in rows and columns.", "Raster", "Open",
                          "R-raster", ".gri, .grd", "Native raster format of the R-package raster.", "Raster", "Open",
-                         "SQLite/SpatiaLite", ".sqlite", "SQLite is a standalone, relational database management system. It is used as a default database driver in GRASS GIS 7. SpatiaLite is the spatial extension of SQLite providing support for simple features.", "Vector and raster", "Open",
-                         "ESRI FileGDB", ".gdb", "Collection of spatial and nonspatial objects created in the ArcGIS software. It allows storage of multiple feature classes and enables use of topological definitions. Limited access to this format is provided by GDAL with the use of the OpenFileGDB and FileGDB drivers.", "Vector and raster", "Proprietary",
+                         "SQLite/SpatiaLite", ".sqlite", "Standalone  relational database, SpatiaLite is the spatial extension of SQLite.", "Vector and raster", "Open",
+                         "ESRI FileGDB", ".gdb", "Spatial and nonspatial objects created by ArcGIS. Allows: multiple feature classes; topology. Limited support from GDAL.", "Vector and raster", "Proprietary",
                          "GeoPackage", ".gpkg", "Lightweight database container based on SQLite allowing an easy and platform-independent exchange of geodata", "Vector and raster", "Open"
                          )
-knitr::kable(file_formats, caption = "Selected spatial file formats.") %>%
-  kableExtra::column_spec(3, width = "15em")
+knitr::kable(file_formats, 
+             caption = "Selected spatial file formats.",
+             caption.short = "Selected spatial file formats.",
+             booktabs = TRUE) %>% 
+  kableExtra::column_spec(2, width = "7em") %>% 
+  kableExtra::column_spec(3, width = "14em") %>% 
+  kableExtra::column_spec(5, width = "7em")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## sf_drivers = st_drivers()
@@ -71,11 +184,28 @@ knitr::kable(file_formats, caption = "Selected spatial file formats.") %>%
 ## ----drivers, echo=FALSE-------------------------------------------------
 sf_drivers = st_drivers() %>%
   dplyr::filter(name %in% c("ESRI Shapefile", "GeoJSON", "KML", "GPX", "GPKG"))
-knitr::kable(head(sf_drivers, n = 5), caption = "Sample of available drivers for reading/writing vector data (it could vary between different GDAL versions).")
+knitr::kable(head(sf_drivers, n = 5),
+             caption = paste("Sample of available drivers for reading/writing", 
+                             "vector data (it could vary between different", 
+                             "GDAL versions)."),
+             caption.short = "Sample of available vector drivers.",
+             booktabs = TRUE) %>% 
+  kableExtra::column_spec(2, width = "7em")
 
-## ------------------------------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
+## vector_filepath = system.file("shapes/world.gpkg", package = "spData")
+## world = st_read(vector_filepath)
+## #> Reading layer `world' from data source `.../world.gpkg' using driver `GPKG'
+## #> Simple feature collection with 177 features and 10 fields
+## #> geometry type:  MULTIPOLYGON
+## #> dimension:      XY
+## #> bbox:           xmin: -180 ymin: -90 xmax: 180 ymax: 83.64513
+## #> epsg (SRID):    4326
+## #> proj4string:    +proj=longlat +datum=WGS84 +no_defs
+
+## ---- echo=FALSE---------------------------------------------------------
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
-world = st_read(vector_filepath)
+world = st_read(vector_filepath, quiet = TRUE)
 
 ## ---- results='hide'-----------------------------------------------------
 cycle_hire_txt = system.file("misc/cycle_hire_xy.csv", package = "spData")
@@ -92,9 +222,10 @@ world_wkt = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT",
 ## Not all of the supported vector file formats store information about their coordinate reference system.
 
 ## ------------------------------------------------------------------------
-url = "https://developers.google.com/kml/documentation/KML_Samples.kml"
-st_layers(url)
-kml = read_sf(url, layer = "Placemarks")
+u = "https://developers.google.com/kml/documentation/KML_Samples.kml"
+download.file(u, "KML_Samples.kml")
+st_layers("KML_Samples.kml")
+kml = read_sf("KML_Samples.kml", layer = "Placemarks")
 
 ## ---- message=FALSE------------------------------------------------------
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
@@ -105,7 +236,6 @@ multilayer_filepath = system.file("raster/landsat.tif", package = "spDataLarge")
 band3 = raster(multilayer_filepath, band = 3)
 
 ## ------------------------------------------------------------------------
-
 multilayer_brick = brick(multilayer_filepath)
 multilayer_stack = stack(multilayer_filepath)
 
@@ -116,8 +246,16 @@ file.remove(world_files)
 ## ------------------------------------------------------------------------
 st_write(obj = world, dsn = "world.gpkg")
 
-## ---- error=TRUE---------------------------------------------------------
-st_write(obj = world, dsn = "world.gpkg")
+## ---- eval=FALSE---------------------------------------------------------
+## st_write(obj = world, dsn = "world.gpkg")
+## #> Updating layer `world' to data source `world.gpkg' using driver `GPKG'
+## #> Creating layer world failed.
+## #> Error in CPL_write_ogr(obj, dsn, layer, driver, ...),  :
+## #>   Layer creation failed.
+## #> In addition: Warning message:
+## #> In CPL_write_ogr(obj, dsn, layer, driver, ...),  :
+## #>   GDAL Error 1: Layer world already exists, CreateLayer failed.
+## #> Use the layer creation option OVERWRITE=YES to replace it.
 
 ## ---- results='hide'-----------------------------------------------------
 st_write(obj = world, dsn = "world.gpkg", layer_options = "OVERWRITE=YES")
@@ -145,7 +283,9 @@ dT = tibble::tribble(
                "FLT4S",              "-3.4e+38",               "3.4e+38",
                "FLT8S",             "-1.7e+308",              "1.7e+308"
   )
-knitr::kable(dT, caption = "Data types supported by the raster package.")
+knitr::kable(dT, caption = "Data types supported by the raster package.",
+             caption.short = "Data types supported by the raster package.",
+             booktabs = TRUE)
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## writeRaster(x = single_layer,

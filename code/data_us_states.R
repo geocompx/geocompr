@@ -7,6 +7,7 @@ library(sf)
 library(tidyverse)
 library(units)
 library(rmapshaper)
+
 options(tigris_class = "sf")
 
 # census data -------------------------------------------------------------
@@ -60,6 +61,13 @@ hawaii2 = us_states_large %>%
   left_join(., total_pop_10, by = "GEOID") %>% 
   left_join(., total_pop_15, by = "GEOID") %>% 
   st_transform("+proj=aea +lat_1=8 +lat_2=18 +lat_0=13 +lon_0=-157 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs ")
+
+# removes island outside Hawaii
+hawaii_bbox = st_as_sfc(st_bbox(c(xmin = -450000, xmax = 235806.2, ymax = 1100000, ymin = 650905.7), crs = st_crs(hawaii2)))
+hawaii2 = hawaii2 %>% 
+  st_intersection(hawaii_bbox)
+
+hawaii = hawaii2
 
 save(hawaii, file = "data/hawaii.rda", compress = "bzip2")
 # alaska ------------------------------------------------------------------

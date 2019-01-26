@@ -41,15 +41,20 @@ source("code/08-map-pkgs.R")
 ## ----render-book, eval=FALSE---------------------------------------------
 ## rmarkdown::render("README.Rmd", output_format = "github_document", output_file = "README.md")
 
-## ---- eval=FALSE---------------------------------------------------------
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## # We aim to make every script in the `code` folder reproducible.
+## # To check they can all be reproduced run the following:
 ## # Aim: test reproducibility of scripts
 ## script_names = list.files("code", full.names = T)
-## 
-## for(i in script_names[12:length(script_names)]) {
-##   print(i)
+## avoid = "pkgs|anim|us|saga|sliver|tsp|parti|polycent|cv|svm|data|location|eco|rf|cran|hex"
+## dontrun = grepl(avoid, script_names)
+## script_names = script_names[!dontrun]
+## counter = 0
+## for(i in script_names[45:length(script_names)]) {
+##   counter = counter + 1
+##   print(paste0("Script number ", counter, ": ", i))
 ##   source(i)
 ## }
-## 
 
 ## ----gen-stats, echo=FALSE, message=FALSE, warning=FALSE-----------------
 source("code/generate-chapter-code.R")
@@ -74,7 +79,7 @@ ggplot(book_stats) +
   ylab("Estimated number of pages") +
   xlab("Date") + 
   scale_x_date(date_breaks = "2 month",
-               limits = c(min(book_stats$date), as.Date("2018-09-01")),
+               limits = c(min(book_stats$date), as.Date("2018-10-01")),
                date_labels = "%b %Y") +
   coord_cartesian(ylim = c(0, 350))
 

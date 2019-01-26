@@ -1,16 +1,16 @@
 ## ---- message=FALSE, results='hide'--------------------------------------
 library(sf)
 library(raster)
-library(tidyverse)
+library(dplyr)
 library(spData)
 
-## It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in \@ref(crs-intro) and which will be covered in more depth in Chapter \@ref(reproj-geo-data).
+## It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in Section \@ref(crs-intro) and which will be covered in more depth in Chapter \@ref(reproj-geo-data).
 
 ## ------------------------------------------------------------------------
 canterbury = nz %>% filter(Name == "Canterbury")
 canterbury_height = nz_height[canterbury, ]
 
-## ----nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in gray, right)."----
+## ----nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in gray, right).", fig.scap="Illustration of spatial subsetting."----
 library(tmap)
 p_hpnz1 = tm_shape(nz) + tm_polygons(col = "white") +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 0.25) +
@@ -26,7 +26,7 @@ tmap_arrange(p_hpnz1, p_hpnz2, ncol = 2)
 ## ---- eval=FALSE---------------------------------------------------------
 ## nz_height[canterbury, , op = st_disjoint]
 
-## Note the empty argument --- donoted with `, ,` --- in the preceding code chunk is included to highlight `op`, the third argument in `[` for `sf` objects.
+## Note the empty argument --- denoted with `, ,` --- in the preceding code chunk is included to highlight `op`, the third argument in `[` for `sf` objects.
 
 ## ------------------------------------------------------------------------
 sel_sgbp = st_intersects(x = nz_height, y = canterbury)
@@ -37,7 +37,8 @@ canterbury_height2 = nz_height[sel_logical, ]
 ## Note: another way to return a logical output is by setting `sparse = FALSE` (meaning 'return a dense matrix not a sparse one') in operators such as `st_intersects()`. The command `st_intersects(x = nz_height, y = canterbury, sparse = FALSE)[, 1]`, for example, would return an output identical `sel_logical`.
 
 ## ------------------------------------------------------------------------
-canterbury_height3 = nz_height %>% filter(sel_logical)
+canterbury_height3 = nz_height %>%
+  filter(st_intersects(x = ., y = canterbury, sparse = FALSE))
 
 ## ------------------------------------------------------------------------
 # create a polygon
@@ -51,15 +52,20 @@ p_matrix = matrix(c(0.5, 1, -1, 0, 0, 1, 0.5, 1), ncol = 2)
 p_multi = st_multipoint(x = p_matrix)
 p = st_cast(st_sfc(p_multi), "POINT")
 
-## ----relation-objects, echo=FALSE, fig.cap="Points (p 1 to 4), line and polygon objects arranged to demonstrate spatial relations.", fig.asp=1, out.width="50%"----
+## ----relation-objects, echo=FALSE, fig.cap="Points (p 1 to 4), line and polygon objects arranged to illustrate topological relations.", fig.asp=1, out.width="50%", fig.scap="Demonstration of topological relations."----
 par(pty = "s")
 plot(a, border = "red", col = "gray", axes = TRUE)
 plot(l, add = TRUE)
 plot(p, add = TRUE, lab = 1:4)
 text(p_matrix[, 1] + 0.04, p_matrix[, 2] - 0.06, 1:4, cex = 1.3)
 
-## ------------------------------------------------------------------------
-st_intersects(p, a)
+## ---- eval=FALSE---------------------------------------------------------
+## st_intersects(p, a)
+## #> Sparse geometry binary ..., where the predicate was `intersects'
+## #> 1: 1
+## #> 2: 1
+## #> 3: (empty)
+## #> 4: (empty)
 
 ## ------------------------------------------------------------------------
 st_intersects(p, a, sparse = FALSE)
@@ -121,12 +127,12 @@ random_points = random_df %>%
   st_set_crs(4326) # set geographic CRS
 
 ## ---- message=FALSE------------------------------------------------------
-world$name_long = as.character(world$name_long)
 world_random = world[random_points, ]
+nrow(world_random)
 random_joined = st_join(random_points, world["name_long"])
 
-## ----spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join. A new attribute variable is added to random points (top left) from source world object (top right) resulting the data represented in the final panel.", fig.asp=0.5, warning=FALSE, message=FALSE, out.width="100%"----
-source("code/04-spatial-join.R")
+## ----spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join. A new attribute variable is added to random points (top left) from source world object (top right) resulting in the data represented in the final panel.", fig.asp=0.5, warning=FALSE, message=FALSE, out.width="100%", fig.scap="Illustration of a spatial join."----
+source("https://github.com/Robinlovelace/geocompr/raw/master/code/04-spatial-join.R")
 tmap_arrange(jm1, jm2, jm3, jm4, nrow = 2, ncol = 2)
 
 ## ---- eval=FALSE---------------------------------------------------------
@@ -141,7 +147,7 @@ any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
 ## sum(st_geometry(cycle_hire) %in% st_geometry(cycle_hire_osm))
 ## sum(st_coordinates(cycle_hire)[, 1] %in% st_coordinates(cycle_hire_osm)[, 1])
 
-## ----cycle-hire, fig.cap="The spatial distribution of cycle hire points in London based on official data (blue) and OpenStreetMap data (red).", echo=FALSE, warning=FALSE----
+## ----cycle-hire, fig.cap="The spatial distribution of cycle hire points in London based on official data (blue) and OpenStreetMap data (red).", echo=FALSE, warning=FALSE, fig.scap="The spatial distribution of cycle hire points in London."----
 # library(tmap)
 # osm_tiles = tmaptools::read_osm(tmaptools::bb(cycle_hire, ext = 1.3), type = "https://korona.geog.uni-heidelberg.de/tiles/roadsg/x={x}&y={y}&z={z}")
 # qtm(osm_tiles) +
@@ -178,7 +184,7 @@ nrow(z) == nrow(cycle_hire)
 ## plot(z["capacity"])
 
 ## ------------------------------------------------------------------------
-nz_avheight = aggregate(x = nz_height, nz, FUN = mean)
+nz_avheight = aggregate(x = nz_height, by = nz, FUN = mean)
 
 ## ----spatial-aggregation, echo=FALSE, fig.cap="Average height of the top 101 high points across the regions of New Zealand.", fig.asp=1, message=FALSE, out.width="50%"----
 library(tmap)
@@ -192,8 +198,8 @@ nz_avheight2 = nz %>%
   group_by(Name) %>%
   summarize(elevation = mean(elevation, na.rm = TRUE))
 
-## ----areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units with respect to larger aggregating zones (translucent blue borders).", fig.asp=0.5, out.width="100%"----
-source("code/04-areal-example.R", print.eval = TRUE)
+## ----areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units with respect to larger aggregating zones (translucent blue borders).", fig.asp=0.5, out.width="100%", fig.scap="Illustration of congruent and incongruent areal units."----
+source("https://github.com/Robinlovelace/geocompr/raw/master/code/04-areal-example.R", print.eval = TRUE)
 
 ## ------------------------------------------------------------------------
 agg_aw = st_interpolate_aw(incongruent[, "value"], aggregating_zones,
@@ -227,12 +233,12 @@ elev[clip]
 # we can also use extract
 # extract(elev, extent(clip))
 
-## ----raster-subset, echo = FALSE, fig.cap = "Subsetting raster values with the help of another raster (left). Raster mask (middle). Output of masking a raster (right)."----
+## ----raster-subset, echo = FALSE, fig.cap = "Subsetting raster values with the help of another raster (left). Raster mask (middle). Output of masking a raster (right).", fig.scap="Subsetting raster values."----
 knitr::include_graphics("figures/04_raster_subset.png")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## elev[1:2, drop = FALSE]    # spatial subsetting with cell IDs
-## elev[1, 1:2, drop = FALSE] # spatial subsetting by row,column indeces
+## elev[1, 1:2, drop = FALSE] # spatial subsetting by row,column indices
 ## #> class       : RasterLayer
 ## #> dimensions  : 1, 2, 2  (nrow, ncol, ncell)
 ## #> ...
@@ -278,12 +284,12 @@ knitr::include_graphics("figures/04_raster_subset.png")
 ## ---- eval = FALSE-------------------------------------------------------
 ## r_focal = focal(elev, w = matrix(1, nrow = 3, ncol = 3), fun = min)
 
-## ----focal-example, echo = FALSE, fig.cap = "Input raster (left) and resulting output raster (right) due to a focal operation - summing up 3-by-3 windows."----
+## ----focal-example, echo = FALSE, fig.cap = "Input raster (left) and resulting output raster (right) due to a focal operation - summing up 3-by-3 windows.", fig.scap="Illustration of a focal operation."----
 knitr::include_graphics("figures/04_focal_example.png")
 
 ## ------------------------------------------------------------------------
 z = zonal(elev, grain, fun = "mean") %>%
-  as.data.frame
+  as.data.frame()
 z
 
 ## ---- eval = FALSE-------------------------------------------------------
@@ -295,9 +301,18 @@ z
 ## library(tmap)
 ## tmap_mode("view")
 ## qtm(nz) + qtm(nz_height)
-## canterbury = nz %>% filter(Name == "Canterbury Region")
+## canterbury = nz %>% filter(Name == "Canterbury")
 ## canterbury_height = nz_height[canterbury, ]
-## nrow(canterbury_height) # answer: 61
+## nrow(canterbury_height) # answer: 70
+
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## nz_height_count = aggregate(nz_height, nz, length)
+## nz_height_combined = cbind(nz, count = nz_height_count$elevation)
+## nz_height_combined %>%
+##   st_set_geometry(NULL) %>%
+##   dplyr::select(Name, count) %>%
+##   arrange(desc(count)) %>%
+##   slice(2)
 
 ## ---- echo=FALSE, eval=FALSE---------------------------------------------
 ## nz_height_count = aggregate(nz_height, nz, length)
