@@ -4,7 +4,7 @@
 
 - This chapter requires the following packages (**lwgeom** is also used, but does not need to be attached):
 
-```{r 06-reproj-1, message=FALSE}
+```{r, message=FALSE}
 library(sf)
 library(raster)
 library(dplyr)
@@ -24,7 +24,7 @@ Many geometry operations in **sf**, for example, assume their inputs have a proj
 To deal with this issue **sf** provides the function `st_is_longlat()` to check. 
 In some cases the CRS is unknown, as shown below using the example of London introduced in Section \@ref(vector-data):
 
-```{r 06-reproj-2}
+```{r}
 london = data.frame(lon = -0.1, lat = 51.5) %>% 
   st_as_sf(coords = c("lon", "lat"))
 st_is_longlat(london)
@@ -36,7 +36,7 @@ The CRS can also be added when creating `sf` objects with the `crs` argument (e.
 The same argument can also be used to set the CRS when creating raster datasets (e.g., `raster(crs = "+proj=longlat")`).
 ]
 
-```{r 06-reproj-3}
+```{r}
 london_geo = st_set_crs(london, 4326)
 st_is_longlat(london_geo)
 ```
@@ -44,7 +44,7 @@ st_is_longlat(london_geo)
 Datasets without a specified CRS can cause problems.
 An example is provided below, which creates a buffer of one unit around `london` and `london_geo` objects:
 
-```{r 06-reproj-4}
+```{r}
 london_buff_no_crs = st_buffer(london, dist = 1)
 london_buff = st_buffer(london_geo, dist = 1)
 ```
@@ -54,7 +54,7 @@ The warning message is useful, telling us that the result may be of limited use 
 The consequences of a failure to work on projected data are illustrated in Figure \@ref(fig:crs-buf) (left panel):
 the buffer is elongated in the north-south direction because lines of longitude converge towards the Earth's poles.
 
-```{block2 06-reproj-5, type="rmdnote"}
+```{block2 type="rmdnote"}
 The distance between two lines of longitude, called meridians, is around 111 km at the equator (execute `geosphere::distGeo(c(0, 0), c(1, 0))` to find the precise distance).
 This shrinks to zero at the poles.
 At the latitude of London, for example, meridians are less than 70 km apart (challenge: execute code that verifies this).
@@ -69,7 +69,7 @@ This suggestion does not always need to be heeded: performing spatial and geomet
 But for operations involving distances such as buffering, the only way to ensure a good result is to create a projected copy of the data and run the operation on that.
 This is done in the code chunk below:
 
-```{r 06-reproj-6}
+```{r}
 london_proj = data.frame(x = 530000, y = 180000) %>% 
   st_as_sf(coords = 1:2, crs = 27700)
 ```
@@ -77,7 +77,7 @@ london_proj = data.frame(x = 530000, y = 180000) %>%
 The result is a new object that is identical to `london`, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters. 
 We can verify that the CRS has changed using `st_crs()` as follows (some of the output has been replaced by `...`):
 
-```{r 06-reproj-7, eval=FALSE}
+```{r, eval=FALSE}
 st_crs(london_proj)
 #> Coordinate Reference System:
 #>   EPSG: 27700 
@@ -101,7 +101,7 @@ geosphere::alongTrackDistance(coords, coords + c(1, 0), coords + c(1, 0))
 As pointed out above, moving one degree means moving a bit more than 111 km at the equator (to be precise: 111,320 meters).
 This is used as the new buffer distance:
 
-```{r 06-reproj-8}
+```{r}
 london_proj_buff = st_buffer(london_proj, 111320)
 ```
 
@@ -139,7 +139,7 @@ In some cases transformation to a projected CRS is essential, such as when using
 Conversely, publishing data online with the **leaflet** package may require a geographic CRS.
 Another case is when two objects with different CRSs must be compared or combined, as shown when we try to find the distance between two objects with different CRSs:
 
-```{r 06-reproj-9, eval=FALSE}
+```{r, eval=FALSE}
 st_distance(london_geo, london_proj)
 # > Error: st_crs(x) == st_crs(y) is not TRUE
 ```
@@ -148,7 +148,7 @@ To make the `london` and `london_proj` objects geographically comparable one of 
 But which CRS to use?
 The answer is usually 'to the projected CRS', which in this case is the British National Grid (BNG, EPSG:27700):
 
-```{r 06-reproj-10}
+```{r}
 london2 = st_transform(london_geo, 27700)
 ```
 
@@ -160,7 +160,7 @@ This is because `st_distance()` can provide distances between many features and 
 Use `as.numeric()` to coerce the result into a regular number.
 ]
 
-```{r 06-reproj-11}
+```{r}
 st_distance(london2, london_proj)
 ```
 
@@ -200,7 +200,7 @@ Documentation from the GIS software Manifold therefore suggests restricting the 
 Almost every place on Earth has a UTM code, such as "60H" which refers to northern New Zealand where R was invented.
 All UTM projections have the same datum (WGS84) and their EPSG codes run sequentially from 32601 to 32660 (for northern hemisphere locations) and 32701 to 32760 (southern hemisphere locations).
 
-```{r 06-reproj-12, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 utm_nums_n = 32601:32660
 utm_nums_s = 32701:32760
 crs_data = rgdal::make_EPSG()
@@ -218,7 +218,7 @@ crs_utm_south = crs_utm[grepl("south", crs_utm$prj4), ]
 
 To show how the system works, let's create a function, `lonlat2UTM()` to calculate the EPSG code associated with any point on the planet as [follows](https://stackoverflow.com/a/9188972/): 
 
-```{r 06-reproj-13}
+```{r}
 lonlat2UTM = function(lonlat) {
   utm = (floor((lonlat[1] + 180) / 6) %% 60) + 1
   if(lonlat[2] > 0) {
@@ -231,11 +231,11 @@ lonlat2UTM = function(lonlat) {
 
 The following command uses this function to identify the UTM zone and associated EPSG code for Auckland and London:
 
-```{r 06-reproj-14, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 stplanr::geo_code("Auckland")
 ```
 
-```{r 06-reproj-15}
+```{r}
 epsg_utm_auk = lonlat2UTM(c(174.7, -36.9))
 epsg_utm_lnd = lonlat2UTM(st_coordinates(london))
 st_crs(epsg_utm_auk)$proj4string
@@ -260,7 +260,7 @@ The previous section showed how the CRS of vector data can be queried with `st_c
 Although the output of this function is printed as a single entity, the result is in fact a named list of class `crs`, with names `proj4string` (which contains full details of the CRS) and `epsg` for its code.
 This is demonstrated below:
 
-```{r 06-reproj-16}
+```{r}
 crs_lnd = st_crs(cycle_hire_osm)
 class(crs_lnd)
 crs_lnd$epsg
@@ -270,7 +270,7 @@ This duality of CRS objects means that they can be set either using an EPSG code
 This means that `st_crs("+proj=longlat +datum=WGS84 +no_defs")` is equivalent to `st_crs(4326)`, although not all `proj4string`s have an associated EPSG code.
 Both elements of the CRS are changed by transforming the object to a projected CRS:
 
-```{r 06-reproj-17, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 crs1 = st_crs("+proj=longlat +datum=WGS84")
 crs2 = st_crs("+datum=WGS84 +proj=longlat")
 crs3 = st_crs(4326)
@@ -278,7 +278,7 @@ crs1 == crs2
 crs1 == crs3
 ```
 
-```{r 06-reproj-18}
+```{r}
 cycle_hire_osm_projected = st_transform(cycle_hire_osm, 27700)
 ```
 
@@ -287,7 +287,7 @@ But how to find out more details about this EPSG code, or any code?
 One option is to search for it online.
 Another option is to use a function from the **rgdal** package to find the name of the CRS:
 
-```{r 06-reproj-19}
+```{r}
 crs_codes = rgdal::make_EPSG()[1:2]
 dplyr::filter(crs_codes, code == 27700)
 ```
@@ -297,12 +297,12 @@ But what about the `proj4string` element?
 `proj4string`s are text strings in a particular format the describe the CRS.
 They can be seen as formulas for converting a projected point into a point on the surface of the Earth and can be accessed from `crs` objects as follows (see [proj4.org](http://proj4.org/) for further details of what the output means):
 
-```{r 06-reproj-20, eval=FALSE}
+```{r, eval=FALSE}
 st_crs(27700)$proj4string
 #> [1] "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 ...
 ```
 
-```{block2 06-reproj-21, type='rmdnote'}
+```{block2 type='rmdnote'}
 Printing a spatial object in the console, automatically returns its coordinate reference system.
 To access and modify it explicitly, use the `st_crs` function, for example, `st_crs(cycle_hire_osm)`.
 ```
@@ -320,7 +320,7 @@ The Wikipedia page 'List of map projections' has 70+ projections and illustratio
 When mapping the world while preserving area relationships, the Mollweide projection is a good choice [@jenny_guide_2017] (Figure \@ref(fig:mollproj)).
 To use this projection, we need to specify it using the `proj4string` element, `"+proj=moll"`, in the `st_transform` function:
 
-```{r 06-reproj-22}
+```{r}
 world_mollweide = st_transform(world, crs = "+proj=moll")
 ```
 <!-- plot(world_mollweide$geom) -->
@@ -340,7 +340,7 @@ This projection is used, among others, by the National Geographic Society.
 ]
 `st_transform_proj()` from the **lwgeom** package which allows for coordinate transformations to a wide range of CRSs, including the Winkel tripel projection: 
 
-```{r 06-reproj-23}
+```{r}
 world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 ```
 <!-- plot(world_wintri$geom) -->
@@ -355,14 +355,14 @@ world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 knitr::include_graphics("images/wintriproj-1.png")
 ```
 
-```{block2 06-reproj-24, type='rmdnote'}
+```{block2 type='rmdnote'}
 The three main functions for transformation of simple features coordinates are `sf::st_transform()`, `sf::sf_project()`, and `lwgeom::st_transform_proj()`.
 The `st_transform` function uses the GDAL interface to PROJ, while `sf_project()` (which works with two-column numeric matrices, representing points) and `lwgeom::st_transform_proj()` use the PROJ API directly.
 The first one is appropriate for most situations, and provides a set of the most often used parameters and well-defined transformations.
 The next one allows for greater customization of a projection, which includes cases when some of the PROJ parameters (e.g., `+over`) or projection (`+proj=wintri`) is not available in `st_transform()`.
 ```
 
-```{r 06-reproj-25, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # demo of sf_project
 mat_lonlat = as.matrix(data.frame(x = 0:20, y = 50:70))
 plot(mat_lonlat)
@@ -373,7 +373,7 @@ plot(mat_projected)
 Moreover, PROJ parameters can be modified in most CRS definitions.
 The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on longitude and latitude of `0` (Figure \@ref(fig:laeaproj1)).
 
-```{r 06-reproj-26}
+```{r}
 world_laea1 = st_transform(world, 
                            crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_0=0")
 ```
@@ -391,7 +391,7 @@ tm_shape(world_laea1_g) + tm_lines(col = "gray") +
 We can change the PROJ parameters, for example the center of the projection, using the `+lon_0` and `+lat_0` parameters. 
 The code below gives the map centered on New York City (Figure \@ref(fig:laeaproj2)).
 
-```{r 06-reproj-27}
+```{r}
 world_laea2 = st_transform(world,
                            crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40")
 ```
@@ -432,7 +432,7 @@ The raster reprojection process is done with `projectRaster()` from the **raster
 Like the `st_transform()` function demonstrated in the previous section, `projectRaster()` takes a geographic object (a raster dataset in this case) and a `crs` argument.
 However, `projectRaster()` only accepts the lengthy `proj4string` definitions of a CRS rather than concise EPSG codes.
 
-```{block2 06-reproj-28, type='rmdnote'}
+```{block2 type='rmdnote'}
 It is possible to use a EPSG code in a `proj4string` definition with `"+init=epsg:MY_NUMBER"`.
 For example, one can use the `"+init=epsg:4326"` definition to set CRS to WGS84 (EPSG code of 4326).
 The PROJ library automatically adds the rest of the parameters and converts them into `"+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"`.
@@ -442,14 +442,14 @@ Let's take a look at two examples of raster transformation: using categorical an
 Land cover data are usually represented by categorical maps.
 The `nlcd2011.tif` file provides information for a small area in Utah, USA obtained from [National Land Cover Database 2011](https://www.mrlc.gov/nlcd2011.php) in the NAD83 / UTM zone 12N CRS.
 
-```{r 06-reproj-29}
+```{r}
 cat_raster = raster(system.file("raster/nlcd2011.tif", package = "spDataLarge"))
 crs(cat_raster)
 ```
 
 In this region, 14 land cover classes were distinguished (a full list of NLCD2011 land cover classes can be found at [mrlc.gov](https://www.mrlc.gov/nlcd11_leg.php)):
 
-```{r 06-reproj-30}
+```{r}
 unique(cat_raster)
 ```
 
@@ -460,7 +460,7 @@ An example is reprojecting `cat_raster` to WGS84, a geographic CRS well suited f
 The first step is to obtain the PROJ definition of this CRS, which can be done using the [http://spatialreference.org](http://spatialreference.org/ref/epsg/wgs-84/) webpage. 
 The final step is to reproject the raster with the `projectRaster()` function which, in the case of categorical data, uses the nearest neighbor method (`ngb`):
 
-```{r 06-reproj-31}
+```{r}
 wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
 cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "ngb")
 ```
@@ -488,12 +488,12 @@ data_frame(
 Reprojecting numeric rasters (with `numeric` or in this case `integer` values) follows an almost identical procedure.
 This is demonstrated below with `srtm.tif` in **spDataLarge** from [the Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/), which represents height in meters above sea level (elevation) with the WGS84 CRS:
 
-```{r 06-reproj-32}
+```{r}
 con_raster = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
 crs(con_raster)
 ```
 
-```{r 06-reproj-33, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 # aim: check class
 class(con_raster)
 class(values(con_raster))
@@ -511,7 +511,7 @@ The values in the projected dataset are the distance-weighted average of the val
 the closer the input cell is to the center of the output cell, the greater its weight.
 The following commands create a text string representing the Oblique Lambert azimuthal equal-area projection, and reproject the raster into this CRS, using the `bilinear` method:
 
-```{r 06-reproj-34}
+```{r}
 equalarea = "+proj=laea +lat_0=37.32 +lon_0=-113.04"
 con_raster_ea = projectRaster(con_raster, crs = equalarea, method = "bilinear")
 crs(con_raster_ea)
@@ -543,7 +543,7 @@ data_frame(
 ```
 
 
-```{block2 06-reproj-35, type='rmdnote'}
+```{block2 type='rmdnote'}
 Of course, the limitations of 2D Earth projections apply as much to vector as to raster data.
 At best we can comply with two out of three spatial properties (distance, area, direction).
 Therefore, the task at hand determines which projection to choose. 
@@ -562,7 +562,7 @@ Chapter 6 for this free online book is recommended reading --- see: [rspatial.or
     - Create an object of class `crs` for both and use this to query their CRSs.
     - With reference to the bounding box of each object, what units does each CRS use?
     - Remove the CRS from `nz_wgs` and plot the result: what is wrong with this map of New Zealand and why?
-```{r 06-reproj-36, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 st_crs(nz)
 nz_wgs = st_transform(nz, 4326)
 nz_crs = st_crs(nz)
@@ -586,7 +586,7 @@ par(mfrow = c(1, 1))
 What has changed and why?
 Try to transform it back into WGS 84 and plot the new object.
 Why does the new object differ from the original one?
-```{r 06-reproj-37, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 # see https://github.com/r-spatial/sf/issues/509
 world_tmerc = st_transform(world, "+proj=tmerc")
 plot(st_geometry(world_tmerc))
@@ -596,7 +596,7 @@ plot(st_geometry(world_4326))
 1. Transform the continuous raster (`cat_raster`) into WGS 84 using the nearest neighbor interpolation method. 
 What has changed?
 How does it influence the results?
-```{r 06-reproj-38, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 con_raster = raster(system.file("raster/srtm.tif", package = "spDataLarge"))
 con_raster_utm12n = projectRaster(con_raster, crs = utm12n, method = "ngb")
 con_raster_utm12n
@@ -604,7 +604,7 @@ con_raster_utm12n
 1. Transform the categorical raster (`cat_raster`) into WGS 84 using the bilinear interpolation method.
 What has changed?
 How does it influence the results?
-```{r 06-reproj-39, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 wgs84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
 cat_raster_wgs84 = projectRaster(cat_raster, crs = wgs84, method = "bilinear")
 cat_raster_wgs84
@@ -614,7 +614,7 @@ It should have the Lambert Azimuthal Equal Area (`laea`) projection, the WGS84 e
 Next, subset Canada from the `world` object and transform it into the new projection. 
 Plot and compare a map before and after the transformation.
 
-```{r 06-reproj-40, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 new_p4s = "+proj=laea +ellps=WGS84 +lon_0=-95 +lat_0=60 +units=m"
 canada = dplyr::filter(world, name_long == "Canada")
 new_canada = st_transform(canada, new_p4s)

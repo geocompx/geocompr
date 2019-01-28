@@ -1,4 +1,4 @@
-## ----09-gis-1, message=FALSE---------------------------------------------
+## ---- message=FALSE------------------------------------------------------
 library(sf)
 library(raster)
 library(RQGIS)
@@ -28,19 +28,19 @@ knitr::kable(x = d,
 ## #> [1] "C:/OSGeo4W64"
 ## #> ...
 
-## ----09-gis-3, eval=FALSE------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## open_app()
 
-## ----09-gis-4------------------------------------------------------------
+## ------------------------------------------------------------------------
 data("incongruent", "aggregating_zones", package = "spData")
 incongr_wgs = st_transform(incongruent, 4326)
 aggzone_wgs = st_transform(aggregating_zones, 4326)
 
-## ----09-gis-5, eval=FALSE------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## find_algorithms("union", name_only = TRUE)
 ## #> [1] "qgis:union"        "saga:fuzzyunionor" "saga:union"
 
-## ----09-gis-6, eval=FALSE------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## alg = "qgis:union"
 ## open_help(alg)
 ## get_usage(alg)
@@ -49,33 +49,33 @@ aggzone_wgs = st_transform(aggregating_zones, 4326)
 ## #>	INPUT2 <ParameterVector>
 ## #>	OUTPUT <OutputVector>
 
-## ----09-gis-7, eval=FALSE------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## union = run_qgis(alg, INPUT = incongr_wgs, INPUT2 = aggzone_wgs,
 ##                  OUTPUT = file.path(tempdir(), "union.shp"),
 ##                  load_output = TRUE)
 ## #> $`OUTPUT`
 ## #> [1] "C:/Users/geocompr/AppData/Local/Temp/RtmpcJlnUx/union.shp"
 
-## ----09-gis-8, eval=FALSE------------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## # remove empty geometries
 ## union = union[!is.na(st_dimension(union)), ]
 
-## ----09-gis-9, eval=FALSE, message=FALSE, warning=FALSE------------------
+## ---- eval=FALSE, message=FALSE, warning=FALSE---------------------------
 ## # multipart polygons to single polygons
 ## single = st_cast(union, "POLYGON")
 
-## ----09-gis-10, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## # find polygons which are smaller than 25000 m^2
 ## x = 25000
 ## units(x) = "m^2"
 ## single$area = st_area(single)
 ## sub = dplyr::filter(single, area < x)
 
-## ----09-gis-11, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## find_algorithms("sliver", name_only = TRUE)
 ## #> [1] "qgis:eliminatesliverpolygons"
 
-## ----09-gis-12, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## alg = "qgis:eliminatesliverpolygons"
 ## get_usage(alg)
 ## #>ALGORITHM: Eliminate sliver polygons
@@ -88,7 +88,7 @@ aggzone_wgs = st_transform(aggregating_zones, 4326)
 ## #>	OUTPUT <OutputVector>
 ## #>	...
 
-## ----09-gis-13, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## clean = run_qgis("qgis:eliminatesliverpolygons",
 ##                  INPUT = single,
 ##                  ATTRIBUTE = "area",
@@ -102,39 +102,39 @@ aggzone_wgs = st_transform(aggregating_zones, 4326)
 ## ----sliver-fig, echo=FALSE, fig.cap="Sliver polygons colored in blue (left panel). Cleaned polygons (right panel).", fig.scap="Sliver (left panel) and cleaned (right panel) polygons."----
 knitr::include_graphics("figures/09_sliver.png")
 
-## ----09-gis-14, warning=FALSE, message=FALSE, eval=FALSE-----------------
+## ---- warning=FALSE, message=FALSE, eval=FALSE---------------------------
 ## library(RSAGA)
 ## rsaga.env()
 
-## ----09-gis-15, warning=FALSE, message=FALSE, eval=FALSE-----------------
+## ---- warning=FALSE, message=FALSE, eval=FALSE---------------------------
 ## library(link2GI)
 ## saga = linkSAGA()
 ## rsaga.env()
 
-## ----09-gis-16, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## data(landslides)
 ## write.sgrd(data = dem, file = file.path(tempdir(), "dem"), header = dem$header)
 
-## ----09-gis-17, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## rsaga.get.libraries()
 
-## ----09-gis-18, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## rsaga.get.modules(libs = "ta_hydrology")
 
-## ----09-gis-19, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## rsaga.get.usage(lib = "ta_hydrology", module = "SAGA Wetness Index")
 
-## ----09-gis-20, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## params = list(DEM = file.path(tempdir(), "dem.sgrd"),
 ##               TWI = file.path(tempdir(), "twi.sdat"))
 ## rsaga.geoprocessor(lib = "ta_hydrology", module = "SAGA Wetness Index",
 ##                    param = params)
 
-## ----09-gis-21, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## rsaga.wetness.index(in.dem = file.path(tempdir(), "dem"),
 ##                     out.wetness.index = file.path(tempdir(), "twi"))
 
-## ----09-gis-22, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## library(raster)
 ## twi = raster::raster(file.path(tempdir(), "twi.sdat"))
 ## # shown is a version using tmap
@@ -143,7 +143,7 @@ knitr::include_graphics("figures/09_sliver.png")
 ## ----saga-twi, fig.cap="SAGA wetness index of Mount Mongón, Peru.", echo=FALSE, out.width="50%"----
 knitr::include_graphics("figures/09_twi.png")
 
-## ----09-gis-23, include=FALSE--------------------------------------------
+## ---- include=FALSE------------------------------------------------------
 # or using mapview
 # proj4string(twi) = paste0("+proj=utm +zone=17 +south +ellps=WGS84 +towgs84=", 
 #                           "0,0,0,0,0,0,0 +units=m +no_defs")
@@ -151,11 +151,11 @@ knitr::include_graphics("figures/09_twi.png")
 #         at = seq(cellStats(twi, "min") - 0.01, cellStats(twi, "max") + 0.01, 
 #                  length.out = 9))
 
-## ----09-gis-24-----------------------------------------------------------
+## ------------------------------------------------------------------------
 data("cycle_hire", package = "spData")
 points = cycle_hire[1:25, ]
 
-## ----09-gis-25, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## library(osmdata)
 ## b_box = st_bbox(points)
 ## london_streets = opq(b_box) %>%
@@ -164,14 +164,14 @@ points = cycle_hire[1:25, ]
 ##   `[[`("osm_lines")
 ## london_streets = dplyr::select(london_streets, osm_id)
 
-## ----09-gis-26, eval=FALSE, echo=FALSE-----------------------------------
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## data("london_streets", package = "spDataLarge")
 
-## ----09-gis-27, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## library(link2GI)
 ## link = findGRASS()
 
-## ----09-gis-28, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## library(rgrass7)
 ## # find a GRASS 7 installation, and use the first one
 ## ind = grep("7", link$version)[1]
@@ -190,7 +190,7 @@ points = cycle_hire[1:25, ]
 ##           gisDbase = tempdir(), location = "london",
 ##           mapset = "PERMANENT", override = TRUE)
 
-## ----09-gis-29, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## execGRASS("g.proj", flags = c("c", "quiet"),
 ##           proj4 = st_crs(london_streets)$proj4string)
 ## b_box = st_bbox(london_streets)
@@ -199,14 +199,14 @@ points = cycle_hire[1:25, ]
 ##           e = as.character(b_box["xmax"]), w = as.character(b_box["xmin"]),
 ##           res = "1")
 
-## ----09-gis-30, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## link2GI::linkGRASS7(london_streets, ver_select = TRUE)
 
-## ----09-gis-31, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## writeVECT(SDF = as(london_streets, "Spatial"), vname = "london_streets")
 ## writeVECT(SDF = as(points[, 1], "Spatial"), vname = "points")
 
-## ----09-gis-32, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## # clean street network
 ## execGRASS(cmd = "v.clean", input = "london_streets", output = "streets_clean",
 ##           tool = "break", flags = "overwrite")
@@ -215,7 +215,7 @@ points = cycle_hire[1:25, ]
 ##           points = "points", operation = "connect", threshold = 0.001,
 ##           flags = c("overwrite", "c"))
 
-## ----09-gis-33, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
 ##           output = "shortest_route", center_cats = paste0("1-", nrow(points)),
 ##           flags = c("overwrite"))
@@ -223,14 +223,14 @@ points = cycle_hire[1:25, ]
 ## ----grass-mapview, fig.cap="Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London.", fig.scap="Shortest route between 24 cycle hire stations.", echo=FALSE, out.width="80%"----
 knitr::include_graphics("figures/09_shortest_route.png")
 
-## ----09-gis-34, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## route = readVECT("shortest_route") %>%
 ##   st_as_sf() %>%
 ##   st_geometry()
 ## mapview::mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) +
 ##   points
 
-## ----09-gis-35, eval=FALSE, echo=FALSE-----------------------------------
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## library("mapview")
 ## m_1 = mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) +
 ##   points
@@ -239,7 +239,7 @@ knitr::include_graphics("figures/09_shortest_route.png")
 ##                  remove_controls = c("homeButton", "layersControl",
 ##                                      "zoomControl"))
 
-## ----09-gis-36, eval=FALSE, message=FALSE--------------------------------
+## ---- eval=FALSE, message=FALSE------------------------------------------
 ## link2GI::linkGDAL()
 ## cmd = paste("ogrinfo -ro -so -al", system.file("shape/nc.shp", package = "sf"))
 ## system(cmd)
@@ -255,38 +255,38 @@ knitr::include_graphics("figures/09_shortest_route.png")
 ## #> Layer SRS WKT:
 ## #> ...
 
-## ----09-gis-37, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## library(RPostgreSQL)
 ## conn = dbConnect(drv = PostgreSQL(), dbname = "rtafdf_zljbqm",
 ##                  host = "db.qgiscloud.com",
 ##                  port = "5432", user = "rtafdf_zljbqm",
 ##                  password = "d3290ead")
 
-## ----09-gis-38, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## dbListTables(conn)
 ## #> [1] "spatial_ref_sys" "topology"        "layer"           "restaurants"
 ## #> [5] "highways"
 
-## ----09-gis-39, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## dbListFields(conn, "highways")
 ## #> [1] "qc_id"        "wkb_geometry" "gid"          "feature"
 ## #> [5] "name"         "state"
 
-## ----09-gis-40, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## query = paste(
 ##   "SELECT *",
 ##   "FROM highways",
 ##   "WHERE name = 'US Route 1' AND state = 'MD';")
 ## us_route = st_read(conn, query = query, geom = "wkb_geometry")
 
-## ----09-gis-41, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## query = paste(
 ##   "SELECT ST_Union(ST_Buffer(wkb_geometry, 1609 * 20))::geometry",
 ##   "FROM highways",
 ##   "WHERE name = 'US Route 1' AND state = 'MD';")
 ## buf = st_read(conn, query = query)
 
-## ----09-gis-42, eval=FALSE, warning=FALSE--------------------------------
+## ---- eval=FALSE, warning=FALSE------------------------------------------
 ## query = paste(
 ##   "SELECT r.wkb_geometry",
 ##   "FROM restaurants r",
@@ -301,10 +301,10 @@ knitr::include_graphics("figures/09_shortest_route.png")
 ## )
 ## hardees = st_read(conn, query = query)
 
-## ----09-gis-43, eval=FALSE-----------------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## RPostgreSQL::postgresqlCloseConnection(conn)
 
-## ----09-gis-44, echo=FALSE-----------------------------------------------
+## ---- echo=FALSE---------------------------------------------------------
 load("extdata/postgis_data.Rdata")
 
 ## ----postgis, echo=FALSE, fig.cap="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer.", fig.scap="Visualization of the output of previous PostGIS commands.", out.width="60%"----

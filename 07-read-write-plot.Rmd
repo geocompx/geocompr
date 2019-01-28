@@ -4,7 +4,7 @@
 
 This chapter requires the following packages:
 
-```{r 07-read-write-plot-1, message=FALSE}
+```{r, message=FALSE}
 library(sf)
 library(raster)
 library(dplyr)
@@ -47,7 +47,7 @@ Most geoportals provide a graphical interface allowing datasets to be queried ba
 Downloads can be initiated from the command line using a variety of techniques, primarily via URLs and APIs (see the [Sentinel API](https://scihub.copernicus.eu/twiki/do/view/SciHubWebPortal/APIHubDescription) for example).
 Files hosted on static URLs can be downloaded with `download.file()`, as illustrated in the code chunk below which accesses US National Parks data from: [catalog.data.gov/dataset/national-parks](https://catalog.data.gov/dataset/national-parks):
 
-```{r 07-read-write-plot-2, eval=FALSE}
+```{r, eval=FALSE}
 download.file(url = "http://nrdata.nps.gov/programs/lands/nps_boundary.zip",
               destfile = "nps_boundary.zip")
 unzip(zipfile = "nps_boundary.zip")
@@ -85,7 +85,7 @@ Each data package has its own syntax for accessing data.
 This diversity is demonstrated in the subsequent code chunks, which show how to get data using three packages from Table \@ref(tab:datapackages).
 Country borders are often useful and these can be accessed with the `ne_countries()` function from the **rnaturalearth** package as follows:
 
-```{r 07-read-write-plot-3}
+```{r}
 library(rnaturalearth)
 usa = ne_countries(country = "United States of America") # United States borders
 class(usa)
@@ -96,14 +96,14 @@ class(usa)
 By default **rnaturalearth** returns objects of class `Spatial`.
 The result can be converted into an `sf` objects with `st_as_sf()` as follows:
 
-```{r 07-read-write-plot-4}
+```{r}
 usa_sf = st_as_sf(usa)
 ```
 
 A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of ten minutes.
 The result is a multilayer object of class `RasterStack`.
 
-```{r 07-read-write-plot-5}
+```{r}
 library(raster)
 worldclim_prec = getData(name = "worldclim", var = "prec", res = 10)
 class(worldclim_prec)
@@ -113,7 +113,7 @@ A third example uses the **osmdata** package [@R-osmdata] to find parks from the
 As illustrated in the code-chunk below, queries begin with the function `opq()` (short for OpenStreetMap query), the first argument of which is bounding box, or text string representing a bounding box (the city of Leeds in this case).
 The result is passed to a function for selecting which OSM elements we're interested in (parks in this case), represented by *key-value pairs*. Next, they are passed to the function `osmdata_sf()` which does the work of downloading the data and converting it into a list of `sf` objects (see `vignette('osmdata')` for further details):
 
-```{r 07-read-write-plot-6, eval=FALSE}
+```{r, eval=FALSE}
 library(osmdata)
 parks = opq(bbox = "leeds uk") %>% 
   add_osm_feature(key = "leisure", value = "park") %>% 
@@ -130,7 +130,7 @@ The following code chunk illustrates the latter two options using the `world` (a
 For more information on data import with R packages, see Sections 5.5 and 5.6 of @gillespie_efficient_2016.
 ]
 
-```{r 07-read-write-plot-7, eval=FALSE}
+```{r, eval=FALSE}
 world2 = spData::world
 world3 = st_read(system.file("shapes/world.gpkg", package = "spData"))
 ```
@@ -145,7 +145,7 @@ Like other web APIs, OWS APIs use a 'base URL' and a 'query string' proceding a 
 There are many requests that can be made to a OWS service.
 One of the most fundamental is `getCapabilities`, demonstrated with the **httr** package to show how API queries can be constructed and dispatched, in this case to discover the capabilities of a service providing run by the Food and Agriculture Organization of the United Nations (FAO):
 
-```{r 07-read-write-plot-8}
+```{r}
 base_url = "http://www.fao.org/figis/geoserver/wfs"
 q = list(request = "GetCapabilities")
 res = httr::GET(url = base_url, query = q)
@@ -157,12 +157,12 @@ The result of the request is saved in `res`, an object of class `response` defin
 As can be seen by executing `browseURL(res$url)`, the results can also be read directly in a browser.
 One way of extracting the contents of the request is as follows:
 
-```{r 07-read-write-plot-9, eval=FALSE}
+```{r, eval=FALSE}
 txt = httr::content(res, "text")
 xml = xml2::read_xml(txt)
 ```
 
-```{r 07-read-write-plot-10}
+```{r}
 #> {xml_document} ...
 #> [1] <ows:ServiceIdentification>\n  <ows:Title>GeoServer WFS...
 #> [2] <ows:ServiceProvider>\n  <ows:ProviderName>Food and Agr...
@@ -171,7 +171,7 @@ xml = xml2::read_xml(txt)
 
 Data can be downloaded from WFS services with the `GetFeature` request and a specific `typeName` (as illustrated in the code chunk below).
 
-```{r 07-read-write-plot-11, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 library(XML)
 library(RCurl)
 library(httr)
@@ -189,7 +189,7 @@ tmp = xmlSApply(root[["FeatureTypeList"]], function(x) xmlValue(x[["Name"]]))
 Available names differ depending on the accessed web feature service.
 One can extract them programmatically using web technologies [@nolan_xml_2014] or scrolling manually through the contents of the `GetCapabilities` output in a browser.
 
-```{r 07-read-write-plot-12, eval=FALSE}
+```{r, eval=FALSE}
 qf = list(request = "GetFeature", typeName = "area:FAO_AREAS")
 file = tempfile(fileext = ".gml")
 httr::GET(url = base_url, query = qf, httr::write_disk(file))
@@ -206,14 +206,14 @@ The package's basic functionality is demonstrated below, in commands that get al
 To filter features on the server before downloading them, the argument `cql_filter` can be used. Adding `cql_filter = URLencode("F_CODE= '27'")` to the command, for example, would instruct the server to only return the feature with values in the `F_CODE` column equal to 27.
 ]
 
-```{r 07-read-write-plot-13, eval=FALSE}
+```{r, eval=FALSE}
 library(ows4R)
 wfs = WFSClient$new("http://www.fao.org/figis/geoserver/wfs",
                       serviceVersion = "1.0.0", logger = "INFO")
 fao_areas = wfs$getFeatures("area:FAO_AREAS")
 ```
 
-```{r 07-read-write-plot-14, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 # not shown as too verbose an example already
 area_27 = wfs$getFeatures("area:FAO_AREAS",
                           cql_filter = URLencode("F_CODE= '27'"))
@@ -222,7 +222,7 @@ area_27 = wfs$getFeatures("area:FAO_AREAS",
 There is much more to learn about web services and much potential for development of R-OWS interfaces, an active area of development.
 For further information on the topic, we recommend examples from European Centre for Medium-Range Weather Forecasts (ECMWF) services at [github.com/OpenDataHack](https://github.com/OpenDataHack/data_service_catalogue) and reading-up on OCG Web Services at [opengeospatial.org](http://www.opengeospatial.org/standards).
 
-```{r 07-read-write-plot-15, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # checking out WFS using German datasets
 library(ows4R)
 library(sf)
@@ -251,7 +251,7 @@ layer = read_sf(file)
 plot(layer$geometry)
 ```
 
-```{r 07-read-write-plot-16, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 library(ows4R)
 library(sf)
 # data gathered from https://catalog.data.gov/dataset?res_format=WFS
@@ -347,7 +347,7 @@ Behind the scenes this calls GDAL.
 To find out which data formats **sf** supports, run `st_drivers()`. 
 Here, we show only the first five drivers (see Table \@ref(tab:drivers)):
 
-```{r 07-read-write-plot-17, eval=FALSE}
+```{r, eval=FALSE}
 sf_drivers = st_drivers()
 head(sf_drivers, n = 5)
 ```
@@ -371,7 +371,7 @@ The content of a text string could vary between different drivers.
 In most cases, as with the ESRI Shapefile (`.shp`) or the `GeoPackage` format (`.gpkg`), the `dsn` would be a file name.
 `st_read()` guesses the driver based on the file extension, as illustrated for a `.gpkg` file below:
 
-```{r 07-read-write-plot-18, eval=FALSE}
+```{r, eval=FALSE}
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
 world = st_read(vector_filepath)
 #> Reading layer `world' from data source `.../world.gpkg' using driver `GPKG'
@@ -382,7 +382,7 @@ world = st_read(vector_filepath)
 #> epsg (SRID):    4326
 #> proj4string:    +proj=longlat +datum=WGS84 +no_defs
 ```
-```{r 07-read-write-plot-19, echo=FALSE}
+```{r, echo=FALSE}
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
 world = st_read(vector_filepath, quiet = TRUE)
 ```
@@ -401,7 +401,7 @@ We can do this with the help of the `options` parameter.
 To find out about possible options, please refer to the 'Open Options' section of the corresponding GDAL driver description.
 For the comma-separated value (csv) format, visit http://www.gdal.org/drv_csv.html.
 
-```{r 07-read-write-plot-20, results='hide'}
+```{r, results='hide'}
 cycle_hire_txt = system.file("misc/cycle_hire_xy.csv", package = "spData")
 cycle_hire_xy = st_read(cycle_hire_txt, options = c("X_POSSIBLE_NAMES=X",
                                                     "Y_POSSIBLE_NAMES=Y"))
@@ -413,7 +413,7 @@ For instance, the `world_wkt.csv` file has a column named `WKT` representing pol
 We will again use the `options` parameter to indicate this.
 Here, we will use `read_sf()` which does exactly the same as `st_read()` except it does not print the driver name to the console and stores strings as characters instead of factors.
 
-```{r 07-read-write-plot-21, results='hide'}
+```{r, results='hide'}
 world_txt = system.file("misc/world_wkt.csv", package = "spData")
 world_wkt = read_sf(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT")
 # the same as
@@ -421,7 +421,7 @@ world_wkt = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT",
                     quiet = TRUE, stringsAsFactors = FALSE)
 ```
 
-```{block2 07-read-write-plot-22, type='rmdnote'}
+```{block2 type='rmdnote'}
 Not all of the supported vector file formats store information about their coordinate reference system.
 In these situations, it is possible to add the missing information using the `st_set_crs()` function.
 Please refer also to Section \@ref(crs-intro) for more information.
@@ -434,7 +434,7 @@ This file contains more than one layer.
 `st_layers()` lists all available layers.
 We choose the first layer `Placemarks` and say so with the help of the `layer` parameter in `read_sf()`.
 
-```{r 07-read-write-plot-23}
+```{r}
 u = "https://developers.google.com/kml/documentation/KML_Samples.kml"
 download.file(u, "KML_Samples.kml")
 st_layers("KML_Samples.kml")
@@ -451,21 +451,21 @@ A [benchmark](https://github.com/ATFutures/geobench) suggests it is around 10 ti
 Similar to vector data, raster data comes in many file formats with some of them supporting even multilayer files.
 **raster**'s `raster()` command reads in a single layer.
 
-```{r 07-read-write-plot-24, message=FALSE}
+```{r, message=FALSE}
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 single_layer = raster(raster_filepath)
 ```
 
 In case you want to read in a single band from a multilayer file, use the `band` parameter to indicate a specific layer.
 
-```{r 07-read-write-plot-25}
+```{r}
 multilayer_filepath = system.file("raster/landsat.tif", package = "spDataLarge")
 band3 = raster(multilayer_filepath, band = 3)
 ```
 
 If you want to read in all bands, use `brick()` or `stack()`.
 
-```{r 07-read-write-plot-26}
+```{r}
 multilayer_brick = brick(multilayer_filepath)
 multilayer_stack = stack(multilayer_filepath)
 ```
@@ -483,7 +483,7 @@ The next two sections will demonstrate how to do this.
 
 ### Vector data
 
-```{r 07-read-write-plot-27, echo=FALSE, results='hide'}
+```{r, echo=FALSE, results='hide'}
 world_files = list.files(pattern = "world\\.")
 file.remove(world_files)
 ```
@@ -493,13 +493,13 @@ It allows you to write **sf** objects to a wide range of geographic vector file 
 Based on the file name, `st_write()` decides automatically which driver to use. 
 The speed of the writing process depends also on the driver.
 
-```{r 07-read-write-plot-28}
+```{r}
 st_write(obj = world, dsn = "world.gpkg")
 ```
 
 **Note**: if you try to write to the same data source again, the function will fail:
 
-```{r 07-read-write-plot-29, eval=FALSE}
+```{r, eval=FALSE}
 st_write(obj = world, dsn = "world.gpkg")
 #> Updating layer `world' to data source `world.gpkg' using driver `GPKG'
 #> Creating layer world failed.
@@ -517,19 +517,19 @@ Additionally, the suggestion to use `OVERWRITE=YES` provides a clue about how to
 However, this is not a `st_write()` argument, it is a GDAL option.
 Luckily, `st_write` provides a `layer_options` argument through which we can pass driver-dependent options:
 
-```{r 07-read-write-plot-30, results='hide'}
+```{r, results='hide'}
 st_write(obj = world, dsn = "world.gpkg", layer_options = "OVERWRITE=YES")
 ```
 
 Another solution is to use the `st_write()` argument `delete_layer`. Setting it to `TRUE` deletes already existing layers in the data source before the function attempts to write (note there is also a `delete_dsn` argument):
 
-```{r 07-read-write-plot-31, results='hide'}
+```{r, results='hide'}
 st_write(obj = world, dsn = "world.gpkg", delete_layer = TRUE)
 ```
 
 You can achieve the same with `write_sf()` since it is equivalent to (technically an *alias* for) `st_write()`, except that its defaults for `delete_layer` and `quiet` is `TRUE`.
 
-```{r 07-read-write-plot-32}
+```{r}
 write_sf(obj = world, dsn = "world.gpkg")
 ```
 
@@ -538,7 +538,7 @@ One of them is to write spatial data to a text file.
 This can be done by specifying `GEOMETRY` inside of `layer_options`. 
 It could be either `AS_XY` for simple point datasets (it creates two new columns for coordinates) or `AS_WKT` for more complex spatial data (one new column is created which contains the well-known-text representation of spatial objects).
 
-```{r 07-read-write-plot-33, eval=FALSE}
+```{r, eval=FALSE}
 st_write(cycle_hire_xy, "cycle_hire_xy.csv", layer_options = "GEOMETRY=AS_XY")
 st_write(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
 ```
@@ -581,7 +581,7 @@ knitr::kable(dT, caption = "Data types supported by the raster package.",
 The file extension determines the output file when saving a `Raster*` object to disk.
 For example, the `.tif` extension will create a GeoTIFF file:
 
-```{r 07-read-write-plot-34, eval=FALSE}
+```{r, eval=FALSE}
 writeRaster(x = single_layer,
             filename = "my_raster.tif",
             datatype = "INT2U")
@@ -594,7 +594,7 @@ GeoTIFF files, for example, can be compressed using `COMPRESS`:
 <!-- GeoTIFF files, for example, can be compressed using the `COMPRESS` option^[Find out about GeoTIFF options under http://www.gdal.org/frmt_gtiff.html.]: -->
 
 
-```{r 07-read-write-plot-35, eval=FALSE}
+```{r, eval=FALSE}
 writeRaster(x = single_layer,
             filename = "my_raster.tif",
             datatype = "INT2U",
@@ -612,7 +612,7 @@ Note that `writeFormats()` returns a list with all supported file formats on you
 R supports many different static and interactive graphics formats.
 The most general method to save a static plot is to open a graphic device, create a plot, and close it, for example:
 
-```{r 07-read-write-plot-36, eval=FALSE}
+```{r, eval=FALSE}
 png(filename = "lifeExp.png", width = 500, height = 350)
 plot(world["lifeExp"])
 dev.off()
@@ -625,7 +625,7 @@ Additionally, several graphic packages provide their own functions to save a gra
 For example, the **tmap** package has the `tmap_save()` function.
 You can save a `tmap` object to different graphic formats by specifying the object name and a file path to a new graphic file.
 
-```{r 07-read-write-plot-37, eval=FALSE}
+```{r, eval=FALSE}
 library(tmap)
 tmap_obj = tm_shape(world) +
   tm_polygons(col = "lifeExp")
@@ -640,7 +640,7 @@ tmap_save(tm  = tmap_obj, filename = "lifeExp_tmap.png")
 On the other hand, you can save interactive maps created in the `mapview` package as an HTML file or image using the `mapshot()` function:
 
 <!-- example doesn't work, problem with colors I guess -->
-```{r 07-read-write-plot-38, eval=FALSE}
+```{r, eval=FALSE}
 library(mapview)
 mapview_obj = mapview(world, zcol = "lifeExp", legend = TRUE)
 mapshot(mapview_obj, file = "my_interactive_map.html")

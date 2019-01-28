@@ -1,10 +1,10 @@
-## ----07-read-write-plot-1, message=FALSE---------------------------------
+## ---- message=FALSE------------------------------------------------------
 library(sf)
 library(raster)
 library(dplyr)
 library(spData)
 
-## ----07-read-write-plot-2, eval=FALSE------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## download.file(url = "http://nrdata.nps.gov/programs/lands/nps_boundary.zip",
 ##               destfile = "nps_boundary.zip")
 ## unzip(zipfile = "nps_boundary.zip")
@@ -26,48 +26,48 @@ knitr::kable(datapackages,
              booktabs = TRUE) %>%
   kableExtra::kable_styling(latex_options="scale_down")
 
-## ----07-read-write-plot-3------------------------------------------------
+## ------------------------------------------------------------------------
 library(rnaturalearth)
 usa = ne_countries(country = "United States of America") # United States borders
 class(usa)
 # alternative way of accessing the data, with raster::getData()
 # getData("GADM", country = "USA", level = 0)
 
-## ----07-read-write-plot-4------------------------------------------------
+## ------------------------------------------------------------------------
 usa_sf = st_as_sf(usa)
 
-## ----07-read-write-plot-5------------------------------------------------
+## ------------------------------------------------------------------------
 library(raster)
 worldclim_prec = getData(name = "worldclim", var = "prec", res = 10)
 class(worldclim_prec)
 
-## ----07-read-write-plot-6, eval=FALSE------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## library(osmdata)
 ## parks = opq(bbox = "leeds uk") %>%
 ##   add_osm_feature(key = "leisure", value = "park") %>%
 ##   osmdata_sf()
 
-## ----07-read-write-plot-7, eval=FALSE------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## world2 = spData::world
 ## world3 = st_read(system.file("shapes/world.gpkg", package = "spData"))
 
-## ----07-read-write-plot-8------------------------------------------------
+## ------------------------------------------------------------------------
 base_url = "http://www.fao.org/figis/geoserver/wfs"
 q = list(request = "GetCapabilities")
 res = httr::GET(url = base_url, query = q)
 res$url
 
-## ----07-read-write-plot-9, eval=FALSE------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## txt = httr::content(res, "text")
 ## xml = xml2::read_xml(txt)
 
-## ----07-read-write-plot-10-----------------------------------------------
+## ------------------------------------------------------------------------
 #> {xml_document} ...
 #> [1] <ows:ServiceIdentification>\n  <ows:Title>GeoServer WFS...
 #> [2] <ows:ServiceProvider>\n  <ows:ProviderName>Food and Agr...
 #> ...
 
-## ----07-read-write-plot-11, echo=FALSE, eval=FALSE-----------------------
+## ---- echo=FALSE, eval=FALSE---------------------------------------------
 ## library(XML)
 ## library(RCurl)
 ## library(httr)
@@ -81,24 +81,24 @@ res$url
 ## root[["FeatureTypeList"]][["FeatureType"]][["Name"]]
 ## tmp = xmlSApply(root[["FeatureTypeList"]], function(x) xmlValue(x[["Name"]]))
 
-## ----07-read-write-plot-12, eval=FALSE-----------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## qf = list(request = "GetFeature", typeName = "area:FAO_AREAS")
 ## file = tempfile(fileext = ".gml")
 ## httr::GET(url = base_url, query = qf, httr::write_disk(file))
 ## fao_areas = sf::read_sf(file)
 
-## ----07-read-write-plot-13, eval=FALSE-----------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## library(ows4R)
 ## wfs = WFSClient$new("http://www.fao.org/figis/geoserver/wfs",
 ##                       serviceVersion = "1.0.0", logger = "INFO")
 ## fao_areas = wfs$getFeatures("area:FAO_AREAS")
 
-## ----07-read-write-plot-14, echo=FALSE, eval=FALSE-----------------------
+## ---- echo=FALSE, eval=FALSE---------------------------------------------
 ## # not shown as too verbose an example already
 ## area_27 = wfs$getFeatures("area:FAO_AREAS",
 ##                           cql_filter = URLencode("F_CODE= '27'"))
 
-## ----07-read-write-plot-15, eval=FALSE, echo=FALSE-----------------------
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## # checking out WFS using German datasets
 ## library(ows4R)
 ## library(sf)
@@ -126,7 +126,7 @@ res$url
 ## layer = read_sf(file)
 ## plot(layer$geometry)
 
-## ----07-read-write-plot-16, eval=FALSE, echo=FALSE-----------------------
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## library(ows4R)
 ## library(sf)
 ## # data gathered from https://catalog.data.gov/dataset?res_format=WFS
@@ -177,7 +177,7 @@ knitr::kable(file_formats,
   kableExtra::column_spec(3, width = "14em") %>% 
   kableExtra::column_spec(5, width = "7em")
 
-## ----07-read-write-plot-17, eval=FALSE-----------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## sf_drivers = st_drivers()
 ## head(sf_drivers, n = 5)
 
@@ -192,7 +192,7 @@ knitr::kable(head(sf_drivers, n = 5),
              booktabs = TRUE) %>% 
   kableExtra::column_spec(2, width = "7em")
 
-## ----07-read-write-plot-18, eval=FALSE-----------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## vector_filepath = system.file("shapes/world.gpkg", package = "spData")
 ## world = st_read(vector_filepath)
 ## #> Reading layer `world' from data source `.../world.gpkg' using driver `GPKG'
@@ -203,16 +203,16 @@ knitr::kable(head(sf_drivers, n = 5),
 ## #> epsg (SRID):    4326
 ## #> proj4string:    +proj=longlat +datum=WGS84 +no_defs
 
-## ----07-read-write-plot-19, echo=FALSE-----------------------------------
+## ---- echo=FALSE---------------------------------------------------------
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
 world = st_read(vector_filepath, quiet = TRUE)
 
-## ----07-read-write-plot-20, results='hide'-------------------------------
+## ---- results='hide'-----------------------------------------------------
 cycle_hire_txt = system.file("misc/cycle_hire_xy.csv", package = "spData")
 cycle_hire_xy = st_read(cycle_hire_txt, options = c("X_POSSIBLE_NAMES=X",
                                                     "Y_POSSIBLE_NAMES=Y"))
 
-## ----07-read-write-plot-21, results='hide'-------------------------------
+## ---- results='hide'-----------------------------------------------------
 world_txt = system.file("misc/world_wkt.csv", package = "spData")
 world_wkt = read_sf(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT")
 # the same as
@@ -221,32 +221,32 @@ world_wkt = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT",
 
 ## Not all of the supported vector file formats store information about their coordinate reference system.
 
-## ----07-read-write-plot-23-----------------------------------------------
+## ------------------------------------------------------------------------
 u = "https://developers.google.com/kml/documentation/KML_Samples.kml"
 download.file(u, "KML_Samples.kml")
 st_layers("KML_Samples.kml")
 kml = read_sf("KML_Samples.kml", layer = "Placemarks")
 
-## ----07-read-write-plot-24, message=FALSE--------------------------------
+## ---- message=FALSE------------------------------------------------------
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 single_layer = raster(raster_filepath)
 
-## ----07-read-write-plot-25-----------------------------------------------
+## ------------------------------------------------------------------------
 multilayer_filepath = system.file("raster/landsat.tif", package = "spDataLarge")
 band3 = raster(multilayer_filepath, band = 3)
 
-## ----07-read-write-plot-26-----------------------------------------------
+## ------------------------------------------------------------------------
 multilayer_brick = brick(multilayer_filepath)
 multilayer_stack = stack(multilayer_filepath)
 
-## ----07-read-write-plot-27, echo=FALSE, results='hide'-------------------
+## ---- echo=FALSE, results='hide'-----------------------------------------
 world_files = list.files(pattern = "world\\.")
 file.remove(world_files)
 
-## ----07-read-write-plot-28-----------------------------------------------
+## ------------------------------------------------------------------------
 st_write(obj = world, dsn = "world.gpkg")
 
-## ----07-read-write-plot-29, eval=FALSE-----------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## st_write(obj = world, dsn = "world.gpkg")
 ## #> Updating layer `world' to data source `world.gpkg' using driver `GPKG'
 ## #> Creating layer world failed.
@@ -257,16 +257,16 @@ st_write(obj = world, dsn = "world.gpkg")
 ## #>   GDAL Error 1: Layer world already exists, CreateLayer failed.
 ## #> Use the layer creation option OVERWRITE=YES to replace it.
 
-## ----07-read-write-plot-30, results='hide'-------------------------------
+## ---- results='hide'-----------------------------------------------------
 st_write(obj = world, dsn = "world.gpkg", layer_options = "OVERWRITE=YES")
 
-## ----07-read-write-plot-31, results='hide'-------------------------------
+## ---- results='hide'-----------------------------------------------------
 st_write(obj = world, dsn = "world.gpkg", delete_layer = TRUE)
 
-## ----07-read-write-plot-32-----------------------------------------------
+## ------------------------------------------------------------------------
 write_sf(obj = world, dsn = "world.gpkg")
 
-## ----07-read-write-plot-33, eval=FALSE-----------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## st_write(cycle_hire_xy, "cycle_hire_xy.csv", layer_options = "GEOMETRY=AS_XY")
 ## st_write(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
 
@@ -287,30 +287,30 @@ knitr::kable(dT, caption = "Data types supported by the raster package.",
              caption.short = "Data types supported by the raster package.",
              booktabs = TRUE)
 
-## ----07-read-write-plot-34, eval=FALSE-----------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## writeRaster(x = single_layer,
 ##             filename = "my_raster.tif",
 ##             datatype = "INT2U")
 
-## ----07-read-write-plot-35, eval=FALSE-----------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## writeRaster(x = single_layer,
 ##             filename = "my_raster.tif",
 ##             datatype = "INT2U",
 ##             options = c("COMPRESS=DEFLATE"),
 ##             overwrite = TRUE)
 
-## ----07-read-write-plot-36, eval=FALSE-----------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## png(filename = "lifeExp.png", width = 500, height = 350)
 ## plot(world["lifeExp"])
 ## dev.off()
 
-## ----07-read-write-plot-37, eval=FALSE-----------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## library(tmap)
 ## tmap_obj = tm_shape(world) +
 ##   tm_polygons(col = "lifeExp")
 ## tmap_save(tm  = tmap_obj, filename = "lifeExp_tmap.png")
 
-## ----07-read-write-plot-38, eval=FALSE-----------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## library(mapview)
 ## mapview_obj = mapview(world, zcol = "lifeExp", legend = TRUE)
 ## mapshot(mapview_obj, file = "my_interactive_map.html")

@@ -24,14 +24,14 @@ The packages used in this chapter can be installed with the following commands:^
 <!-- In case the installation fails, for example if you do not have rights to install non CRAN packages on your organisation's computers, the data in **spDataLarge** can be loaded by running the script [`spData.R`](https://github.com/Robinlovelace/geocompr/blob/master/code/spData.R) from the `code` folder in the book's GitHub repo at [github.com/Robinlovelace/geocompr](https://github.com/Robinlovelace/geocompr). -->
 ]
 
-```{r 02-spatial-data-1, eval=FALSE}
+```{r, eval=FALSE}
 install.packages("sf")
 install.packages("raster")
 install.packages("spData")
 devtools::install_github("Nowosad/spDataLarge")
 ```
 
-```{block2 02-spatial-data-2, type='rmdnote'}
+```{block2, type='rmdnote'}
 If you're running Mac or Linux, the previous command to install **sf** may not work first time.
 These operating systems (OSs) have 'systems requirements' that are described in the package's [README](https://github.com/r-spatial/sf).
 Various OS-specific instructions can be found online, such as the article *Installation of R 3.5 on Ubuntu 18.04* on the blog [rtask.thinkr.fr](https://rtask.thinkr.fr/blog/installation-of-r-3-5-on-ubuntu-18-04-lts-and-tips-for-spatial-packages/).
@@ -40,14 +40,14 @@ Various OS-specific instructions can be found online, such as the article *Insta
 All the packages needed to reproduce the contents of the book can be installed with the following command: `devtools::install_github("geocompr/geocompkg")`.
 The necessary packages can be 'loaded' (technically they are attached) with the `library()` function as follows:
 
-```{r 02-spatial-data-3, message=FALSE}
+```{r, message=FALSE}
 library(sf)          # classes and functions for vector data
 library(raster)      # classes and functions for raster data
 ```
 
 The other packages that were installed contain data that will be used in the book:
 
-```{r 02-spatial-data-4, results='hide'}
+```{r, results='hide'}
 library(spData)        # load geographic data
 library(spDataLarge)   # load larger geographic data
 ```
@@ -80,7 +80,7 @@ This book uses **sf** and **raster** packages to work with vector data and raste
 
 ## Vector data
 
-```{block2 02-spatial-data-5, type="rmdnote"}
+```{block2 type="rmdnote"}
 Take care when using the word 'vector' as it can have two meanings in this book:
 geographic vector data and the `vector` class (note the `monospace` font) in R.
 The former is a data model, the latter is an R class just like `data.frame` and `matrix`.
@@ -158,12 +158,12 @@ knitr::include_graphics("figures/sf-classes.png")
 **sf** largely supersedes the **sp** ecosystem, which comprises **sp** [@R-sp], **rgdal** for data read/write [@R-rgdal] and **rgeos** for spatial operations [@R-rgeos].
 The package is well documented, as can be seen on its website and in 6 vignettes, which can be loaded as follows:
 
-```{r sfvig1, eval=FALSE}
+```{r, eval=FALSE}
 vignette(package = "sf") # see which vignettes are available
 vignette("sf1")          # an introduction to the package
 ```
 
-```{r sfvig2, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 vignette("sf1") # an introduction to the package
 vignette("sf2") # reading, writing and converting simple features
 vignette("sf3") # manipulating simple feature geometries
@@ -176,7 +176,7 @@ As the first vignette explains, simple feature objects in R are stored in a data
 We will use the `world` dataset provided by the **spData**, loaded at the beginning of this chapter (see [nowosad.github.io/spData](https://nowosad.github.io/spData/) for a list of datasets loaded by the package).
 `world` is a spatial object containing spatial and attribute columns, the names of which are returned by the function `names()` (the last column contains the geographic information):
 
-```{r 02-spatial-data-6}
+```{r}
 names(world)
 ```
 
@@ -194,7 +194,7 @@ This behavior can be useful for exploring the spatial distribution of different 
 Being able to treat spatial objects as regular data frames with spatial powers has many advantages, especially if you are already used to working with data frames.
 The commonly used `summary()` function, for example, provides a useful overview of the variables within the `world` object.
 
-```{r 02-spatial-data-7}
+```{r}
 summary(world["lifeExp"])
 ```
 
@@ -202,7 +202,7 @@ Although we have only selected one variable for the `summary` command, it also o
 This demonstrates the 'sticky' behavior of the geometry columns of **sf** objects, meaning the geometry is kept unless the user deliberately removes them, as we'll see in Section \@ref(vector-attribute-manipulation).
 The result provides a quick summary of both the non-spatial and spatial data contained in `world`: the mean average life expectancy is 71 years (ranging from less than 51 to more than 83 years with a median of 73 years) across all countries.
 
-```{block2 02-spatial-data-8, type='rmdnote'}
+```{block2 type='rmdnote'}
 The word `MULTIPOLYGON` in the summary output above refers to the geometry type of features (countries) in the `world` object.
 This representation is necessary for countries with islands such as Indonesia and Greece.
 Other geometry types are described in Section \@ref(geometry).
@@ -215,7 +215,7 @@ It is worth taking a deeper look at the basic behavior and contents of this simp
 The code below shows its first two rows and three columns.
 The output shows two major differences compared with a regular `data.frame`: the inclusion of additional geographic data (`geometry type`, `dimension`, `bbox` and CRS information - `epsg (SRID)`, `proj4string`), and the presence of a `geometry` column, here named `geom`:
 
-```{r 02-spatial-data-9}
+```{r}
 world_mini = world[1:2, 1:3]
 world_mini
 ```
@@ -263,7 +263,7 @@ Due to such advantages, some spatial packages (including **tmap**, **mapview** a
 However, it will take many years for most packages to transition and some will never switch.
 Fortunately, these can still be used in a workflow based on `sf` objects, by converting them to the `Spatial` class used in **sp**: 
 
-```{r 02-spatial-data-10, eval=FALSE}
+```{r, eval=FALSE}
 library(sp)
 world_sp = as(world, Class = "Spatial")
 # sp functions ...
@@ -271,7 +271,7 @@ world_sp = as(world, Class = "Spatial")
 
 `Spatial` objects can be converted back to `sf` in the same way or with `st_as_sf()`:
 
-```{r 02-spatial-data-11, eval=FALSE}
+```{r, eval=FALSE}
 world_sf = st_as_sf(world_sp, "sf")
 ```
 
@@ -293,7 +293,7 @@ Plots are added as layers to existing images by setting `add = TRUE`.^[
 ]
 To demonstrate this, and to provide a taster of content covered in Chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, the subsequent code chunk combines countries in Asia:
 
-```{r 02-spatial-data-12, warning=FALSE}
+```{r, warning=FALSE}
 world_asia = world[world$continent == "Asia", ]
 asia = st_union(world_asia)
 ```
@@ -318,7 +318,7 @@ Because **sf** extends base R plotting methods `plot()`'s arguments such as `mai
 Note: many plot arguments are ignored in facet maps, when more than one `sf` column is plotted.
 ]
 
-```{r 02-spatial-data-13, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 # aim: show main
 plot(world$geom, main = "sf plot() method")
 ```
@@ -326,7 +326,7 @@ plot(world$geom, main = "sf plot() method")
 Figure \@ref(fig:contpop) illustrates this flexibility by overlaying circles, whose diameters (set with `cex =`) represent country populations, on a map of the world.
 A basic version of the map can be created with the following commands (see exercises at the end of this chapter and the script [`02-contplot.R`](https://github.com/Robinlovelace/geocompr/blob/master/code/02-contpop.R) to create Figure \@ref(fig:contpop)):
 
-```{r 02-spatial-data-14, eval=FALSE}
+```{r, eval=FALSE}
 plot(world["continent"], reset = FALSE)
 cex = sqrt(world$pop) / 10000
 world_cents = st_centroid(world, of_largest = TRUE)
@@ -343,7 +343,7 @@ The code above uses the function `st_centroid()` to convert one geometry type (p
 it takes a numeric vector of length four that expands the bounding box of the plot relative to zero in the following order: bottom, left, top, right.
 This is used to plot India in the context of its giant Asian neighbors, with an emphasis on China to the east, in the following code chunk, which generates Figure \@ref(fig:china) (see exercises below on adding text to plots):
 
-```{r 02-spatial-data-15, eval=FALSE}
+```{r, eval=FALSE}
 india = world[world$name_long == "India", ]
 plot(st_geometry(india), expandBB = c(0, 0.2, 0.1, 1), col = "gray", lwd = 3)
 plot(world_asia[0], add = TRUE)
@@ -461,7 +461,7 @@ The names of these functions are simple and consistent, as they all start with t
 
 The function `st_point()` creates single points from numeric vectors:
 
-```{r 02-spatial-data-16}
+```{r}
 st_point(c(5, 2))                 # XY point
 st_point(c(5, 2, 3))              # XYZ point
 st_point(c(5, 2, 1), dim = "XYM") # XYM point
@@ -474,7 +474,7 @@ The XYM type must be specified using the `dim` argument (which is short for dime
 
 By contrast, use matrices in the case of multipoint (`st_multipoint()`) and linestring (`st_linestring()`) objects:
 
-```{r 02-spatial-data-17}
+```{r}
 # the rbind function simplifies the creation of matrices
 ## MULTIPOINT
 multipoint_matrix = rbind(c(5, 2), c(1, 3), c(3, 4), c(3, 2))
@@ -486,13 +486,13 @@ st_linestring(linestring_matrix)
 
 Finally, use lists for the creation of multilinestrings, (multi-)polygons and geometry collections:
 
-```{r 02-spatial-data-18}
+```{r}
 ## POLYGON
 polygon_list = list(rbind(c(1, 5), c(2, 2), c(4, 1), c(4, 4), c(1, 5)))
 st_polygon(polygon_list)
 ```
 
-```{r 02-spatial-data-19}
+```{r}
 ## POLYGON with a hole
 polygon_border = rbind(c(1, 5), c(2, 2), c(4, 1), c(4, 4), c(1, 5))
 polygon_hole = rbind(c(2, 4), c(3, 4), c(3, 3), c(2, 3), c(2, 4))
@@ -500,21 +500,21 @@ polygon_with_hole_list = list(polygon_border, polygon_hole)
 st_polygon(polygon_with_hole_list)
 ```
 
-```{r 02-spatial-data-20}
+```{r}
 ## MULTILINESTRING
 multilinestring_list = list(rbind(c(1, 5), c(4, 4), c(4, 1), c(2, 2), c(3, 2)), 
                             rbind(c(1, 2), c(2, 4)))
 st_multilinestring((multilinestring_list))
 ```
 
-```{r 02-spatial-data-21}
+```{r}
 ## MULTIPOLYGON
 multipolygon_list = list(list(rbind(c(1, 5), c(2, 2), c(4, 1), c(4, 4), c(1, 5))),
                          list(rbind(c(0, 2), c(1, 2), c(1, 3), c(0, 3), c(0, 2))))
 st_multipolygon(multipolygon_list)
 ```
 
-```{r 02-spatial-data-22, eval=FALSE}
+```{r, eval=FALSE}
 ## GEOMETRYCOLLECTION
 gemetrycollection_list = list(st_multipoint(multipoint_matrix),
                               st_linestring(linestring_matrix))
@@ -536,7 +536,7 @@ A simple feature geometry column (`sfc`) is a list of `sfg` objects, which is ad
 For instance, to combine two simple features into one object with two features, we can use the `st_sfc()` function. 
 This is important since `sfc` represents the geometry column in **sf** data frames:
 
-```{r 02-spatial-data-23}
+```{r}
 # sfc POINT
 point1 = st_point(c(5, 2))
 point2 = st_point(c(1, 3))
@@ -548,7 +548,7 @@ In most cases, an `sfc` object contains objects of the same geometry type.
 Therefore, when we convert `sfg` objects of type polygon into a simple feature geometry column, we would also end up with an `sfc` object of type polygon, which can be verified with `st_geometry_type()`. 
 Equally, a geometry column of multilinestrings would result in an `sfc` object of type multilinestring:
 
-```{r 02-spatial-data-24}
+```{r}
 # sfc POLYGON
 polygon_list1 = list(rbind(c(1, 5), c(2, 2), c(4, 1), c(4, 4), c(1, 5)))
 polygon1 = st_polygon(polygon_list1)
@@ -558,7 +558,7 @@ polygon_sfc = st_sfc(polygon1, polygon2)
 st_geometry_type(polygon_sfc)
 ```
 
-```{r 02-spatial-data-25}
+```{r}
 # sfc MULTILINESTRING
 multilinestring_list1 = list(rbind(c(1, 5), c(4, 4), c(4, 1), c(2, 2), c(3, 2)), 
                             rbind(c(1, 2), c(2, 4)))
@@ -572,7 +572,7 @@ st_geometry_type(multilinestring_sfc)
 
 It is also possible to create an `sfc` object from `sfg` objects with different geometry types:
 
-```{r 02-spatial-data-26}
+```{r}
 # sfc GEOMETRY
 point_multilinestring_sfc = st_sfc(point1, multilinestring1)
 st_geometry_type(point_multilinestring_sfc)
@@ -588,7 +588,7 @@ As mentioned before, `sfc` objects can additionally store information on the coo
 To specify a certain CRS, we can use the `epsg (SRID)` or `proj4string` attributes of an `sfc` object.
 The default value of `epsg (SRID)` and `proj4string` is `NA` (*Not Available*), as can be verified with `st_crs()`:
 
-```{r 02-spatial-data-27}
+```{r}
 st_crs(points_sfc)
 ```
 
@@ -596,7 +596,7 @@ All geometries in an `sfc` object must have the same CRS.
 We can add coordinate reference system as a `crs` argument of `st_sfc()`. 
 This argument accepts an integer with the `epsg` code such as `4326`, which automatically adds the 'proj4string' (see Section \@ref(crs-intro)):
 
-```{r 02-spatial-data-28}
+```{r}
 # EPSG definition
 points_sfc_wgs = st_sfc(point1, point2, crs = 4326)
 st_crs(points_sfc_wgs)
@@ -604,7 +604,7 @@ st_crs(points_sfc_wgs)
 
 It also accepts a raw proj4string (result not shown):
 
-```{r 02-spatial-data-29, eval=FALSE}
+```{r, eval=FALSE}
 # PROJ4STRING definition
 st_sfc(point1, point2, crs = "+proj=longlat +datum=WGS84 +no_defs")
 ```
@@ -628,7 +628,7 @@ st_sfc(point1, point2, crs = "+proj=longlat +datum=WGS84 +no_defs")
 <!-- st_sfc(point1, point2, crs = crs_utm) -->
 <!-- ``` -->
 
-```{block2 02-spatial-data-30, type='rmdnote'}
+```{block2 type='rmdnote'}
 Sometimes `st_crs()` will return a `proj4string` but not an `epsg` code. 
 This is because there is no general method to convert from `proj4string` to `epsg` (see Chapter \@ref(reproj-geo-data)).
 ```
@@ -649,7 +649,7 @@ Other attributes might include an urbanity category (city or village), or a rema
 Objects of class `sf` represent such data by combining the attributes (`data.frame`) with the simple feature geometry column (`sfc`).
 They are created with `st_sf()` as illustrated below, which creates the London example described above:
 
-```{r 02-spatial-data-31}
+```{r}
 lnd_point = st_point(c(0.1, 51.5))                 # sfg object
 lnd_geom = st_sfc(lnd_point, crs = 4326)           # sfc object
 lnd_attrib = data.frame(                           # data.frame object
@@ -665,7 +665,7 @@ Second, the geometry was converted into a simple feature geometry column (`sfc`)
 Third, attributes were stored in a `data.frame`, which was combined with the `sfc` object with `st_sf()`.
 This results in an `sf` object, as demonstrated below (some output is ommited):
 
-```{r 02-spatial-data-32, eval=FALSE}
+```{r, eval=FALSE}
 lnd_sf
 #> Simple feature collection with 1 features and 3 fields
 #> ...
@@ -673,7 +673,7 @@ lnd_sf
 #> 1 London          25 2017-06-21 POINT (0.1 51.5)
 ```
 
-```{r 02-spatial-data-33}
+```{r}
 class(lnd_sf)
 ```
 
@@ -683,7 +683,7 @@ This duality is central to the concept of simple features:
 most of the time a `sf` can be treated as and behaves like a `data.frame`.
 Simple features are, in essence, data frames with a spatial extension.
 
-```{r 02-spatial-data-34, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 ruan_point = st_point(c(-9, 53))
 # sfc object
 our_geometry = st_sfc(lnd_point, ruan_point, crs = 4326)
@@ -742,14 +742,14 @@ It consists of a few raster objects and one vector object covering an area of th
 For example, `srtm.tif` is a digital elevation model of this area (for more details, see its documentation `?srtm`).
 First, let's create a `RasterLayer` object named `new_raster`:
 
-```{r 02-spatial-data-35, message=FALSE}
+```{r, message=FALSE}
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 new_raster = raster(raster_filepath)
 ```
 
 Typing the name of the raster into the console, will print out the raster header (extent, dimensions, resolution, CRS) and some additional information (class, data source name, summary of the raster values): 
 
-```{r 02-spatial-data-36, eval=FALSE}
+```{r, eval=FALSE}
 new_raster
 #> class       : RasterLayer 
 #> dimensions  : 457, 465, 212505  (nrow, ncol, ncell)
@@ -770,7 +770,7 @@ Dedicated functions report each component: `dim(new_raster)` returns the number 
 <!--
 You can also summarize and plot raster cell values in a non-spatial fashion using base R functions such as `summary()` and `hist()`.
 
-```{r 02-spatial-data-37}
+```{r}
 # numerical summary of the data
 summary(new_raster)
 ```
@@ -783,7 +783,7 @@ hist(new_raster)
 `getValues()` extracts the values of a raster as a numerical vector.
 To only select specific rows, use the `row` parameter.
 
-```{r 02-spatial-data-38}
+```{r}
 new_raster_values = getValues(new_raster)
 head(new_raster_values)
 ```
@@ -792,6 +792,11 @@ The new vector, `new_raster_values`, can serve as input for subsequent statistic
 -->
 
 `help("raster-package")` returns a full list of all available **raster** functions.
+
+```{block2 type='rmdnote'}
+The current version of **raster** (2.6.7) is not fully compatible with `sf` objects.
+We therefore suggest converting `sf` objects to an intermediate `Spatial` class (from the **sp** package) for compatibility between raster and vector data, for example `crop(raster_obj, as(sf_object, "Spatial")` (see Section \@ref(raster-vector)).
+```
 
 ### Basic map making {#basic-map-raster}
 
@@ -827,7 +832,7 @@ There are several other approaches for plotting raster data in R that are outsid
 The `RasterLayer` class represents the simplest form of a raster object, and consists of only one layer.
 The easiest way to create a raster object in R is to read-in a raster file from disk or from a server.
 
-```{r 02-spatial-data-39}
+```{r}
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 new_raster = raster(raster_filepath)
 ```
@@ -843,7 +848,7 @@ This means the unit of the resolution is in degrees which we set to 0.5 (`res`).
 Values (`vals`) are assigned to each cell: 1 to cell 1, 2 to cell 2, and so on.
 Remember: `raster()` fills cells row-wise (unlike `matrix()`) starting at the upper left corner, meaning the top row contains the values 1 to 6, the second 7 to 12, etc.
 
-```{r 02-spatial-data-40}
+```{r}
 new_raster2 = raster(nrows = 6, ncols = 6, res = 0.5, 
                      xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
                      vals = 1:36)
@@ -854,7 +859,7 @@ For other ways of creating raster objects, see `?raster`.
 There are several ways to add new values to the `Raster*` objects.
 Values for the whole object could be add with `setValues()`:
 
-```{r 02-spatial-data-41, eval=FALSE}
+```{r, eval=FALSE}
 # adding random values to the raster object
 new_random_values = sample(seq_len(ncell(new_raster4)))
 setValues(new_raster4, new_random_values)
@@ -863,7 +868,7 @@ setValues(new_raster4, new_random_values)
 
 It is also possible to replace cell values by specifying cell numbers, or row and column numbers:
 
-```{r 02-spatial-data-42, eval=FALSE}
+```{r, eval=FALSE}
 # change the value of 15th cell to 826
 new_raster4[15] = 826
 # change the value of the cell in the second row and forth column to 826
@@ -878,12 +883,12 @@ A `RasterBrick` consists of multiple layers, which typically correspond to a sin
 The `brick()` function creates a `RasterBrick` object.
 Usually, you provide it with a filename to a multilayer raster file but might also use another raster object and other spatial objects (see `?brick` for all supported formats).
 
-```{r 02-spatial-data-43}
+```{r}
 multi_raster_file = system.file("raster/landsat.tif", package = "spDataLarge")
 r_brick = brick(multi_raster_file)
 ```
 
-```{r 02-spatial-data-44, eval=FALSE}
+```{r, eval=FALSE}
 r_brick
 #> class       : RasterBrick 
 #> resolution  : 30, 30  (x, y)
@@ -895,7 +900,7 @@ r_brick
 
 `nlayers()` retrieves the number of layers stored in a `Raster*` object:
 
-```{r 02-spatial-data-45}
+```{r}
 nlayers(r_brick)
 ```
 
@@ -906,7 +911,7 @@ Hence, one way to create it is with the help of spatial objects already existing
 And again, one can simply specify a path to a file stored on disk.
 <!-- The possibility to create a `RasterStack` from a file stored on disk and an object residing in R's global environment is one of the main differences compared to a `RasterBrick`. -->
 
-```{r 02-spatial-data-46}
+```{r}
 raster_on_disk = raster(r_brick, layer = 1)
 raster_in_memory = raster(xmn = 301905, xmx = 335745,
                           ymn = 4111245, ymx = 4154085, 
@@ -915,7 +920,7 @@ values(raster_in_memory) = sample(seq_len(ncell(raster_in_memory)))
 crs(raster_in_memory) = crs(raster_on_disk)
 ```
 
-```{r 02-spatial-data-47, eval=FALSE}
+```{r, eval=FALSE}
 r_stack = stack(raster_in_memory, raster_on_disk)
 r_stack
 #> class : RasterStack
@@ -932,7 +937,7 @@ Another difference is that the processing time for `RasterBrick` objects is usua
 Decision on which `Raster*` class should be used depends mostly on a character of input data. 
 Processing of a single mulitilayer file or object is the most effective with `RasterBrick`, while `RasterStack` allows calculations based on many files, many `Raster*` objects, or both.
 
-```{block2 02-spatial-data-48, type='rmdnote'}
+```{block2 type='rmdnote'}
 Operations on `RasterBrick` and `RasterStack` objects will typically return a `RasterBrick`.
 ```
 
@@ -1023,7 +1028,7 @@ Other than searching for EPSG codes online, another quick way to find out about 
 Before going into more detail, it's worth learning how to view and filter them inside R, as this could save time trawling the internet.
 The following code will show available CRSs interactively, allowing you to filter ones of interest (try filtering for the OSGB CRSs for example):
 
-```{r 02-spatial-data-49, eval=FALSE}
+```{r, eval=FALSE}
 crs_data = rgdal::make_EPSG()
 View(crs_data)
 ```
@@ -1031,14 +1036,14 @@ View(crs_data)
 In **sf** the CRS of an object can be retrieved using `st_crs()`.
 For this, we need to read-in a vector dataset:
 
-```{r 02-spatial-data-50, message=FALSE, results='hide'}
+```{r, message=FALSE, results='hide'}
 vector_filepath = system.file("vector/zion.gpkg", package = "spDataLarge")
 new_vector = st_read(vector_filepath)
 ```
 
 Our new object, `new_vector`, is a polygon representing the borders of Zion National Park (`?zion`).
 
-```{r 02-spatial-data-51, eval=FALSE}
+```{r, eval=FALSE}
 st_crs(new_vector) # get CRS
 #> Coordinate Reference System:
 #> No EPSG code
@@ -1047,7 +1052,7 @@ st_crs(new_vector) # get CRS
 
 In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used:
 
-```{r 02-spatial-data-52}
+```{r}
 new_vector = st_set_crs(new_vector, 4326) # set CRS
 ```
 
@@ -1060,14 +1065,14 @@ knitr::include_graphics("figures/02_vector_crs.png")
 
 The `projection()` function can be used to access CRS information from a `Raster*` object: 
 
-```{r 02-spatial-data-53}
+```{r}
 projection(new_raster) # get CRS
 ```
 
 The same function, `projection()`, is used to set a CRS for raster objects.
 The main difference, compared to vector data, is that raster objects only accept `proj4` definitions:
 
-```{r 02-spatial-data-54}
+```{r}
 projection(new_raster) = "+proj=utm +zone=12 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 
                             +units=m +no_defs" # set CRS
 ```
@@ -1095,11 +1100,11 @@ This means that distance, area and other geometric calculations in **sf** return
 This is advantageous, preventing confusion caused by different units (most CRSs use meters, some use feet) and providing information on dimensionality.
 This is demonstrated in the code chunk below, which calculates the area of Luxembourg:
 
-```{r 02-spatial-data-55}
+```{r}
 luxembourg = world[world$name_long == "Luxembourg", ]
 ```
 
-```{r 02-spatial-data-56}
+```{r}
 st_area(luxembourg)
 ```
 
@@ -1109,14 +1114,14 @@ Reporting units prevents confusion.
 To take the Luxembourg example, if the units remained unspecified, one could incorrectly assume that the units were in hectares.
 To translate the huge number into a more digestible size, it is tempting to divide the results by a million (the number of square meters in a square kilometer):
 
-```{r 02-spatial-data-57}
+```{r}
 st_area(luxembourg) / 1000000
 ```
 
 However, the result is incorrectly given again as square meters.
 The solution is to set the correct units with the **units** package:
 
-```{r 02-spatial-data-58}
+```{r}
 units::set_units(st_area(luxembourg), km^2)
 ```
 
@@ -1126,13 +1131,13 @@ However, so far **sf** is the only spatial package that supports units, meaning 
 The `new_raster` object (see above) uses a WGS84 projection with decimal degrees as units.
 Consequently, its resolution is also given in decimal degrees but you have to know it, since the `res()` function simply returns a numeric vector.
 
-```{r 02-spatial-data-59}
+```{r}
 res(new_raster)
 ```
 
 If we used the UTM projection, the units would change.
 
-```{r 02-spatial-data-60, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE}
 repr = projectRaster(new_raster, crs = "+init=epsg:26912")
 res(repr)
 ```

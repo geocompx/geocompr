@@ -1,14 +1,14 @@
-## ----11-spatial-cv-1, message=FALSE--------------------------------------
+## ---- message=FALSE------------------------------------------------------
 library(sf)
 library(raster)
 library(mlr)
 library(dplyr)
 library(parallelMap)
 
-## ----11-spatial-cv-2-----------------------------------------------------
+## ------------------------------------------------------------------------
 data("landslides", package = "RSAGA")
 
-## ----11-spatial-cv-3, eval=FALSE-----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## # select non-landslide points
 ## non_pts = filter(landslides, lslpts == FALSE)
 ## # select landslide points
@@ -19,7 +19,7 @@ data("landslides", package = "RSAGA")
 ## # create smaller landslide dataset (lsl)
 ## lsl = bind_rows(non_pts_sub, lsl_pts)
 
-## ----11-spatial-cv-4, eval=FALSE-----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## dem = raster(
 ##   dem$data,
 ##   crs = dem$header$proj4string,
@@ -52,7 +52,7 @@ tm_shape(hs, bbox = bbx) +
 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) +
   tm_legend(bg.color = "white")
 
-## ----11-spatial-cv-5-----------------------------------------------------
+## ------------------------------------------------------------------------
 # attach landslide points with terrain attributes
 data("lsl", package = "spDataLarge")
 # attach terrain attribute raster stack
@@ -66,20 +66,20 @@ knitr::kable(lsl_table, caption = "Structure of the lsl dataset.",
              caption.short = "`lsl` dataset.", booktabs = TRUE) %>%
   kableExtra::kable_styling(latex_options="scale_down")
 
-## ----11-spatial-cv-6-----------------------------------------------------
+## ------------------------------------------------------------------------
 fit = glm(lslpts ~ slope + cplan + cprof + elev + log10_carea,
           family = binomial(),
           data = lsl)
 
-## ----11-spatial-cv-7-----------------------------------------------------
+## ------------------------------------------------------------------------
 class(fit)
 fit
 
-## ----11-spatial-cv-8-----------------------------------------------------
+## ------------------------------------------------------------------------
 pred_glm = predict(object = fit, type = "response")
 head(pred_glm)
 
-## ----11-spatial-cv-9-----------------------------------------------------
+## ------------------------------------------------------------------------
 # making the prediction
 pred = raster::predict(ta, model = fit, type = "response")
 
@@ -105,7 +105,7 @@ tm_shape(hs, bbox = bbx) +
 	          legend.position = c("left", "bottom"),
 	          legend.title.size = 0.9)
 
-## ----11-spatial-cv-10, message=FALSE-------------------------------------
+## ---- message=FALSE------------------------------------------------------
 pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
 
 ## ----partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row).", echo=FALSE, fig.scap="Spatial visualization of selected test and training observations."----
@@ -114,7 +114,7 @@ knitr::include_graphics("figures/13_partitioning.png")
 ## ----building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the mlr package. Source: http://bit.ly/2tcb2b7. (Permission to reuse this figure was kindly granted.)", fig.scap="Basic building blocks of the mlr package."----
 knitr::include_graphics("figures/13_ml_abstraction_crop.png")
 
-## ----11-spatial-cv-11----------------------------------------------------
+## ------------------------------------------------------------------------
 library(mlr)
 # coordinates needed for the spatial partitioning
 coords = lsl[, c("x", "y")]
@@ -124,7 +124,7 @@ data = dplyr::select(lsl, -x, -y)
 task = makeClassifTask(data = data, target = "lslpts",
                        positive = "TRUE", coordinates = coords)
 
-## ----11-spatial-cv-12, eval=FALSE----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## listLearners(task, warn.missing.packages = FALSE) %>%
 ##   dplyr::select(class, name, short.name, package) %>%
 ##   head
@@ -139,50 +139,50 @@ knitr::kable(lrns_df,
                              "tasks in the mlr package."), 
              caption.short = "Sample of available learners.", booktabs = TRUE)
 
-## ----11-spatial-cv-13----------------------------------------------------
+## ------------------------------------------------------------------------
 lrn = makeLearner(cl = "classif.binomial",
                   link = "logit",
                   predict.type = "prob",
                   fix.factors.prediction = TRUE)
 
-## ----11-spatial-cv-14, eval=FALSE----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## getLearnerPackages(lrn)
 ## helpLearner(lrn)
 
-## ----11-spatial-cv-15----------------------------------------------------
+## ------------------------------------------------------------------------
 mod = train(learner = lrn, task = task)
 mlr_fit = getLearnerModel(mod)
 
-## ----11-spatial-cv-16, eval=FALSE, echo=FALSE----------------------------
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## getTaskFormula(task)
 ## getTaskData(task)
 ## getLearnerModel(mod)
 ## mod$learner.model
 
-## ----11-spatial-cv-17----------------------------------------------------
+## ------------------------------------------------------------------------
 fit = glm(lslpts ~ ., family = binomial(link = "logit"), data = data)
 identical(fit$coefficients, mlr_fit$coefficients)
 
-## ----11-spatial-cv-18----------------------------------------------------
+## ------------------------------------------------------------------------
 perf_level = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
 
-## ----11-spatial-cv-19, eval=FALSE----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## set.seed(012348)
 ## sp_cv = mlr::resample(learner = lrn, task = task,
 ##                       resampling = perf_level,
 ##                       measures = mlr::auc)
 
-## ----11-spatial-cv-20, eval=FALSE, echo=FALSE----------------------------
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
 ## set.seed(012348)
 ## sp_cv = mlr::resample(learner = lrn, task = task,
 ##                       resampling = perf_level,
 ##                       measures = mlr::auc)
 
-## ----11-spatial-cv-21, echo=FALSE----------------------------------------
+## ---- echo=FALSE---------------------------------------------------------
 sp_cv = readRDS("extdata/sp_cv.rds")
 conv_cv = readRDS("extdata/conv_cv.rds")
 
-## ----11-spatial-cv-22----------------------------------------------------
+## ------------------------------------------------------------------------
 # summary statistics of the 500 models
 summary(sp_cv$measures.test$auc)
 # mean AUROC of the 500 models
@@ -196,7 +196,7 @@ boxplot(sp_cv$measures.test$auc,
         names = c("spatial CV", "conventional CV"), 
         ylab = "AUROC")
 
-## ----11-spatial-cv-23, eval=FALSE----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## lrns = listLearners(task, warn.missing.packages = FALSE)
 ## filter(lrns, grepl("svm", class)) %>%
 ##   dplyr::select(class, name, short.name, package)
@@ -205,19 +205,19 @@ boxplot(sp_cv$measures.test$auc,
 ## #> 9  classif.lssvm Least Squares Support Vector Machine      lssvm kernlab
 ## #> 17   classif.svm     Support Vector Machines (libsvm)        svm   e1071
 
-## ----11-spatial-cv-24, eval=FALSE----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## lrn_ksvm = makeLearner("classif.ksvm",
 ##                         predict.type = "prob",
 ##                         kernel = "rbfdot")
 
-## ----11-spatial-cv-25, eval=FALSE----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## # performance estimation level
 ## perf_level = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
 
 ## ----inner-outer, echo=FALSE, fig.cap="Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2018). Permission to reuse it  was kindly granted.)", fig.scap="Schematic of hyperparameter tuning."----
 knitr::include_graphics("figures/13_cv.png")
 
-## ----11-spatial-cv-26, eval=FALSE----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## # five spatially disjoint partitions
 ## tune_level = makeResampleDesc("SpCV", iters = 5)
 ## # use 50 randomly selected hyperparameters
@@ -228,7 +228,7 @@ knitr::include_graphics("figures/13_cv.png")
 ##   makeNumericParam("sigma", lower = -15, upper = 6, trafo = function(x) 2^x)
 ##   )
 
-## ----11-spatial-cv-27, eval=FALSE----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## wrapped_lrn_ksvm = makeTuneWrapper(learner = lrn_ksvm,
 ##                                    resampling = tune_level,
 ##                                    par.set = ps,
@@ -236,10 +236,10 @@ knitr::include_graphics("figures/13_cv.png")
 ##                                    show.info = TRUE,
 ##                                    measures = mlr::auc)
 
-## ----11-spatial-cv-28, eval=FALSE----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## configureMlr(on.learner.error = "warn", on.error.dump = TRUE)
 
-## ----11-spatial-cv-29, eval=FALSE----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## library(parallelMap)
 ## if (Sys.info()["sysname"] %in% c("Linux", "Darwin")) {
 ## parallelStart(mode = "multicore",
@@ -255,7 +255,7 @@ knitr::include_graphics("figures/13_cv.png")
 ##                       cpus =  round(parallel::detectCores() / 2))
 ## }
 
-## ----11-spatial-cv-30, eval=FALSE----------------------------------------
+## ---- eval=FALSE---------------------------------------------------------
 ## set.seed(12345)
 ## result = mlr::resample(learner = wrapped_lrn_ksvm,
 ##                        task = task,
@@ -267,25 +267,25 @@ knitr::include_graphics("figures/13_cv.png")
 ## # save your result, e.g.:
 ## # saveRDS(result, "svm_sp_sp_rbf_50it.rds")
 
-## ----11-spatial-cv-31----------------------------------------------------
+## ------------------------------------------------------------------------
 result = readRDS("extdata/spatial_cv_result.rds")
 
-## ----11-spatial-cv-32----------------------------------------------------
+## ------------------------------------------------------------------------
 # Exploring the results
 # runtime in minutes
 round(result$runtime / 60, 2)
 
-## ----11-spatial-cv-33----------------------------------------------------
+## ------------------------------------------------------------------------
 # final aggregated AUROC 
 result$aggr
 # same as
 mean(result$measures.test$auc)
 
-## ----11-spatial-cv-34----------------------------------------------------
+## ------------------------------------------------------------------------
 # winning hyperparameters of tuning step, 
 # i.e. the best combination out of 50 * 5 models
 result$extract[[1]]$x
 
-## ----11-spatial-cv-35----------------------------------------------------
+## ------------------------------------------------------------------------
 result$measures.test[1, ]
 

@@ -4,7 +4,7 @@
 
 - This chapter requires the following packages (**revgeo** must also be installed):
 
-```{r 13-location-1, message=FALSE }
+```{r, message=FALSE} 
 library(sf)
 library(dplyr)
 library(purrr)
@@ -67,7 +67,7 @@ Although we have applied these steps to a specific case study, they could be gen
 The German government provides gridded census data at either 1 km or 100 m resolution.
 The following code chunk downloads, unzips and reads in the 1 km data.
 
-```{r 13-location-2, eval=FALSE}
+```{r, eval=FALSE}
 download.file("https://tinyurl.com/ybtpkwxz", 
               destfile = "census.zip", mode = "wb")
 unzip("census.zip") # unzip the files
@@ -76,7 +76,7 @@ census_de = readr::read_csv2(list.files(pattern = "Gitter.csv"))
 
 As a convenience to the reader, the corresponding data has been put into **spDataLarge** and can be accessed as follows
 
-```{r 13-location-3}
+```{r}
 data("census_de", package = "spDataLarge")
 ```
 
@@ -85,7 +85,7 @@ For our work, we only need a subset of these: Easting (`x`) and Northing (`y`), 
 These variables are selected and renamed from German into English in the code chunk below and summarized in Table \@ref(tab:census-desc). 
 Further, `mutate_all()` is used to convert values -1 and -9 (meaning unknown) to `NA`.
 
-```{r 13-location-4}
+```{r}
 # pop = population, hh_size = household size
 input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D,
@@ -146,11 +146,11 @@ After the preprocessing, the data can be converted into a raster stack or brick 
 It requires an input data frame where the first two columns represent coordinates on a regular grid.
 All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as input for the raster brick layers (Figure \@ref(fig:census-stack); see also `code/13-location-jm.R` in our github repository).
 
-```{r 13-location-5}
+```{r}
 input_ras = rasterFromXYZ(input_tidy, crs = st_crs(3035)$proj4string)
 ```
 
-```{r 13-location-6, eval=FALSE}
+```{r, eval=FALSE}
 input_ras
 #> class : RasterBrick
 #> dimensions : 868, 642, 557256, 4 (nrow, ncol, ncell, nlayers)
@@ -162,7 +162,7 @@ input_ras
 #> max values  : 8000,     3,        3,       3 
 ```
 
-```{block2 13-location-7, type='rmdnote'}
+```{block2 type='rmdnote'}
 Note that we are using an equal-area projection (EPSG:3035; Lambert Equal Area Europe), i.e., a projected CRS where each grid cell has the same area, here 1000 x 1000 square meters. 
 Since we are using mainly densities such as the number of inhabitants or the portion of women per grid cell, it is of utmost importance that the area of each grid cell is the same to avoid 'comparing apples and oranges'.
 Be careful with geographic CRS where grid cell areas constantly decrease in poleward directions (see also Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)). 
@@ -187,7 +187,7 @@ Class 1 in the variable `women`, for instance, represents areas in which 0 to 40
 these are reclassified with a comparatively high weight of 3 because the target demographic is predominantly male.
 Similarly, the classes containing the youngest people and highest proportion of single households are reclassified to have high weights.
 
-```{r 13-location-8}
+```{r}
 rcl_pop = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 
                    4, 4, 3000, 5, 5, 6000, 6, 6, 8000), 
                  ncol = 3, byrow = TRUE)
@@ -204,7 +204,7 @@ For instance, the first element corresponds in both cases to the population.
 Subsequently, the `for`-loop applies the reclassification matrix to the corresponding raster layer.
 Finally, the code chunk below ensures the `reclass` layers have the same name as the layers of `input_ras`.
 
-```{r 13-location-9}
+```{r}
 reclass = input_ras
 for (i in seq_len(nlayers(reclass))) {
   reclass[[i]] = reclassify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
@@ -212,7 +212,7 @@ for (i in seq_len(nlayers(reclass))) {
 names(reclass) = names(input_ras)
 ```
 
-```{r 13-location-10, eval=FALSE}
+```{r, eval=FALSE}
 reclass
 #> ... (full output not shown)
 #> names       :  pop, women, mean_age, hh_size 
@@ -227,13 +227,13 @@ We define metropolitan areas as pixels of 20 km^2^ inhabited by more than 500,00
 Pixels at this coarse resolution can rapidly be created using `aggregate()`, as introduced in Section \@ref(aggregation-and-disaggregation).
 The command below uses the argument `fact = 20` to reduce the resolution of the result twenty-fold (recall the original raster resolution was 1 km^2^):
 
-```{r 13-location-11, warning=FALSE}
+```{r, warning=FALSE}
 pop_agg = aggregate(reclass$pop, fact = 20, fun = sum)
 ```
 
 The next stage is to keep only cells with more than half a million people.
 
-```{r 13-location-12, warning=FALSE}
+```{r, warning=FALSE}
 pop_agg = pop_agg[pop_agg > 500000, drop = FALSE] 
 ```
 
@@ -243,7 +243,7 @@ It would be nice if we could join all cells belonging to one region.
 **raster**'s `clump()` command does exactly that.
 Subsequently, `rasterToPolygons()` converts the raster object into spatial polygons, and `st_as_sf()` converts it into an `sf`-object.
 
-```{r 13-location-13, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE}
 polys = pop_agg %>% 
   clump() %>%
   rasterToPolygons() %>%
@@ -252,7 +252,7 @@ polys = pop_agg %>%
 
 `polys` now features a column named `clumps` which indicates to which metropolitan region each polygon belongs and which we will use to dissolve the polygons into coherent single regions (see also Section \@ref(geometry-unions)):
 
-```{r 13-location-14}
+```{r}
 metros = polys %>%
   group_by(clumps) %>%
   summarize()
@@ -268,7 +268,7 @@ Nevertheless, it finds all pixels belonging to one region in a generic way.
 We use this information to assign each polygon (pixel) to a region.
 Subsequently, we can use the region information to dissolve the pixels into region polygons.
 
-```{r 13-location-15, eval = FALSE}
+```{r, eval = FALSE}
 # dissolve on spatial neighborhood
 nbs = st_intersects(polys, polys)
 # nbs = over(polys, polys, returnList = TRUE)
@@ -339,7 +339,7 @@ The **revgeo** package provides access to the open source Photon geocoder for Op
 By default, it uses the Photon API.
 `revgeo::revgeo()` only accepts geographical coordinates (latitude/longitude); therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system (Chapter \@ref(reproj-geo-data)).
 
-```{r 13-location-16, warning=FALSE}
+```{r, warning=FALSE}
 metros_wgs = st_transform(metros, 4326)
 coords = st_centroid(metros_wgs) %>%
   st_coordinates() %>%
@@ -349,7 +349,7 @@ coords = st_centroid(metros_wgs) %>%
 <!-- It is a great feature of `revgeo::revgeo()` that it accepts also more than one coordinate pair as input (parameters `longitude` and `latitude`), which spares us the need for writing a loop. -->
 Choosing `frame` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the street name, house number and city.
 
-```{r 13-location-17, eval=FALSE}
+```{r, eval=FALSE}
 library(revgeo)
 metro_names = revgeo(longitude = coords[, 1], latitude = coords[, 2], 
                      output = "frame")
@@ -357,7 +357,7 @@ metro_names = revgeo(longitude = coords[, 1], latitude = coords[, 2],
 
 To make sure that the reader uses the exact same results, we have put them into **spDataLarge**:
 
-```{r 13-location-18}
+```{r}
 # attach metro_names from spDataLarge
 data("metro_names", package = "spDataLarge")
 ```
@@ -373,7 +373,7 @@ Overall, we are satisfied with the `city` column serving as metropolitan names (
 Hence, we replace Wülfrath with Düsseldorf (Figure \@ref(fig:metro-areas)).
 Umlauts like `ü` might lead to trouble further on, for example when determining the bounding box of a metropolitan area with `opq()` (see further below), which is why we avoid them.
 
-```{r 13-location-19}
+```{r}
 metro_names = dplyr::pull(metro_names, city) %>% 
   as.character() %>% 
   ifelse(. == "Wülfrath", "Duesseldorf", .)
@@ -396,7 +396,7 @@ As with Google's reverse geocode API, the OSM-download will sometimes fail at th
 Before running this code: please consider it will download almost 2GB of data.
 To save time and resources, we have output into **spDataLarge** and should already be available in your environment as an object called `shops`.
 
-```{r 13-location-20, eval=FALSE, message=FALSE}
+```{r, eval=FALSE, message=FALSE}
 shops = map(metro_names, function(x) {
   message("Downloading shops of: ", x, "\n")
   # give the server a bit time
@@ -418,7 +418,7 @@ It is highly unlikely that there are no shops in any of our defined metropolitan
 The following `if` condition simply checks if there is at least one shop for each region.
 If not, we would try to download the shops again for this/these specific region/s.
 
-```{r 13-location-21, eval=FALSE}
+```{r, eval=FALSE}
 # checking if we have downloaded shops for each metropolitan area
 ind = map(shops, nrow) == 0
 if (any(ind)) {
@@ -431,7 +431,7 @@ To make sure that each list element (an `sf` data frame) comes with the same col
 This is not a given since OSM contributors are not equally meticulous when collecting data.
 Finally, we `rbind` all shops into one large `sf` object.
 
-```{r 13-location-22, eval=FALSE}
+```{r, eval=FALSE}
 # select only specific columns
 shops = map(shops, dplyr::select, osm_id, shop)
 # putting all list elements into a single data frame
@@ -442,7 +442,7 @@ It would have been easier to simply use `map_dfr()`.
 Unfortunately, so far it does not work in harmony with `sf` objects.
 Please note that the `shops` object is also available in the `spDataLarge` package:
 
-```{r 13-location-23}
+```{r}
 data("shops", package = "spDataLarge")
 ```
 
@@ -450,7 +450,7 @@ The only thing left to do is to convert the spatial point object into a raster (
 The `sf` object, `shops`, is converted into a raster having the same parameters (dimensions, resolution, CRS) as the `reclass` object.
 Importantly, the `count()` function is used here to calculate the number of shops in each cell.
 
-```{block2 13-location-24, type='rmdnote'}
+```{block2 type='rmdnote'}
 If the `shop` column were used instead of the `osm_id` column, we would have retrieved fewer shops per grid cell. 
 This is because the `shop` column contains `NA` values, which the `count()` function omits when rasterizing vector objects.
 ```
@@ -458,7 +458,7 @@ This is because the `shop` column contains `NA` values, which the `count()` func
 The result of the subsequent code chunk is therefore an estimate of shop density (shops/km^2^).
 `st_transform()` is used before `rasterize()` to ensure the CRS of both inputs match.
 
-```{r 13-location-25, message=FALSE}
+```{r, message=FALSE}
 shops = st_transform(shops, proj4string(reclass))
 # create poi raster
 poi = rasterize(x = shops, y = reclass, field = "osm_id", fun = "count")
@@ -469,7 +469,7 @@ Defining class intervals is an arbitrary undertaking to a certain degree.
 One can use equal breaks, quantile breaks, fixed values or others.
 Here, we choose the Fisher-Jenks natural breaks approach which minimizes within-class variance, the result of which provides an input for the reclassification matrix.
 
-```{r 13-location-26, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE}
 # construct reclassification matrix
 int = classInt::classIntervals(values(poi), n = 4, style = "fisher")
 int = round(int$brks)
@@ -490,7 +490,7 @@ Second, though it is advantageous to have many potential customers within a spec
 For instance, residential tower blocks are areas with a high population density but not necessarily with a high purchasing power for expensive cycle components.
 This is achieved with the complementary functions `addLayer()` and `dropLayer()`:
 
-```{r 13-location-27}
+```{r}
 # add poi raster
 reclass = addLayer(reclass, poi)
 # delete population raster
@@ -500,7 +500,7 @@ reclass = dropLayer(reclass, "pop")
 In common with other data science projects, data retrieval and 'tidying' have consumed much of the overall workload so far.
 With clean data, the final step --- calculating a final score by summing all raster layers --- can be accomplished in a single line of code.
 
-```{r 13-location-28}
+```{r}
 # calculate the total score
 result = sum(reclass)
 ```
@@ -512,7 +512,7 @@ library(leaflet)
 library(sp)
 # have a look at suitable bike shop locations in Berlin
 berlin = metros[metro_names == "Berlin", ]
-berlin_raster = raster::crop(result, berlin)
+berlin_raster = raster::crop(result, as(berlin, "Spatial"))
 # summary(berlin_raster)
 # berlin_raster
 berlin_raster = berlin_raster > 9

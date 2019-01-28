@@ -6,7 +6,7 @@
 Packages that have already been used including **spData**, **spDataLarge** and **dplyr** also need to be installed. 
 ]
 
-```{r 09-gis-1, message=FALSE}
+```{r, message=FALSE}
 library(sf)
 library(raster)
 library(RQGIS)
@@ -77,7 +77,7 @@ Roger Bivand elaborated on this in his talk, "Bridges between GIS and R", delive
 <!-- `geostat_talk16.zip`. -->
 ]
 
-```{block2 09-gis-2, type="rmdnote"}
+```{block2, type="rmdnote"}
 A command-line interface is a means of interacting with computer programs in which the user issues commands via successive lines of text (command lines).
 `bash` in Linux and `PowerShell` in Windows are common examples.
 CLIs can be augmented with IDEs such as RStudio for R, which provides code auto-completion and other features to improve the user experience.
@@ -147,7 +147,7 @@ Leaving the `path`-argument of `set_env()` unspecified will search the computer 
 Hence, it is faster to specify explicitly the path to your QGIS installation.
 Subsequently, `open_app()` sets all paths necessary to run QGIS from within R, and finally creates a so-called QGIS custom application (see [http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications](http://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html#using-pyqgis-in-custom-applications)).
 
-```{r 09-gis-3, eval=FALSE}
+```{r, eval=FALSE}
 open_app()
 ```
 
@@ -159,7 +159,7 @@ We will see how to remove them.
 For the union, we use again the incongruent polygons we have already encountered in Section \@ref(spatial-aggr).
 Both polygon datasets are available in the **spData** package, and for both we would like to use a geographic CRS (see also Chapter \@ref(reproj-geo-data)).
 
-```{r 09-gis-4}
+```{r}
 data("incongruent", "aggregating_zones", package = "spData")
 incongr_wgs = st_transform(incongruent, 4326)
 aggzone_wgs = st_transform(aggregating_zones, 4326)
@@ -169,7 +169,7 @@ Now we need a QGIS geoalgorithm that unions polygons.
 `find_algorithms()` searches all QGIS geoalgorithms with the help of regular expressions.
 Assuming that the short description of the function contains the word "union", we can run:
 
-```{r 09-gis-5, eval=FALSE}
+```{r, eval=FALSE}
 find_algorithms("union", name_only = TRUE)
 #> [1] "qgis:union"        "saga:fuzzyunionor" "saga:union"
 ```
@@ -183,7 +183,7 @@ The next step is to find out how `qgis:union` can be used.
 `get_usage()` returns all function parameters and default values. 
 
 
-```{r 09-gis-6, eval=FALSE}
+```{r, eval=FALSE}
 alg = "qgis:union"
 open_help(alg)
 get_usage(alg)
@@ -199,7 +199,7 @@ Note also that `run_qgis()` accepts spatial objects residing in R's global envir
 But of course, you could also specify paths to spatial vector files stored on disk.
 Setting the `load_output` to `TRUE` automatically loads the QGIS output as an **sf**-object into R.
 
-```{r 09-gis-7, eval=FALSE}
+```{r, eval=FALSE}
 union = run_qgis(alg, INPUT = incongr_wgs, INPUT2 = aggzone_wgs, 
                  OUTPUT = file.path(tempdir(), "union.shp"),
                  load_output = TRUE)
@@ -213,7 +213,7 @@ The QGIS output contains empty geometries and multipart polygons.
 Empty geometries might lead to problems in subsequent geoprocessing tasks which is why they will be deleted.
 `st_dimension()` returns `NA` if a geometry is empty, and can therefore be used as a filter. 
 
-```{r 09-gis-8, eval=FALSE}
+```{r, eval=FALSE}
 # remove empty geometries
 union = union[!is.na(st_dimension(union)), ]
 ```
@@ -221,14 +221,14 @@ union = union[!is.na(st_dimension(union)), ]
 Next we convert multipart polygons into single-part polygons (also known as explode geometries or casting).
 This is necessary for the deletion of sliver polygons later on.
 
-```{r 09-gis-9, eval=FALSE, message=FALSE, warning=FALSE}
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
 # multipart polygons to single polygons
 single = st_cast(union, "POLYGON")
 ```
 
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^ (see blue colored polygons in the left panel of Figure \@ref(fig:sliver-fig)). 
 
-```{r 09-gis-10, eval=FALSE}
+```{r, eval=FALSE}
 # find polygons which are smaller than 25000 m^2
 x = 25000
 units(x) = "m^2"
@@ -239,14 +239,14 @@ sub = dplyr::filter(single, area < x)
 The next step is to find a function that makes the slivers disappear.
 Assuming the function or its short description contains the word "sliver", we can run:
 
-```{r 09-gis-11, eval=FALSE}
+```{r, eval=FALSE}
 find_algorithms("sliver", name_only = TRUE)
 #> [1] "qgis:eliminatesliverpolygons"
 ```
 
 This returns only one geoalgorithm whose parameters can be accessed with the help of `get_usage()` again.
 
-```{r 09-gis-12, eval=FALSE}
+```{r, eval=FALSE}
 alg = "qgis:eliminatesliverpolygons"
 get_usage(alg)
 #>ALGORITHM: Eliminate sliver polygons
@@ -266,7 +266,7 @@ To find out about the default values, run `get_args_man()`.
 
 To remove the slivers, we specify that all polygons with an area less or equal to 25000 m^2^ should be joined to the neighboring polygon with the largest area (see right panel of Figure \@ref(fig:sliver-fig)).
 
-```{r 09-gis-13, eval=FALSE}
+```{r, eval=FALSE}
 clean = run_qgis("qgis:eliminatesliverpolygons",
                  INPUT = single,
                  ATTRIBUTE = "area",
@@ -304,7 +304,7 @@ First of all, we need to make sure that **RSAGA** will find SAGA on the computer
 For this, all **RSAGA** functions using SAGA in the background make use of `rsaga.env()`. 
 Usually, `rsaga.env()` will detect SAGA automatically by searching several likely directories (see its help for more information).
 
-```{r 09-gis-14, warning=FALSE, message=FALSE, eval=FALSE}
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library(RSAGA)
 rsaga.env()
 ```
@@ -314,7 +314,7 @@ However, it is possible to have 'hidden' SAGA in a location `rsaga.env()` does n
 If it finds one, it adds the newest version to the PATH environment variable thereby making sure that `rsaga.env()` runs successfully.
 It is only necessary to run the next code chunk if `rsaga.env()` was unsuccessful (see previous code chunk).
 
-```{r 09-gis-15, warning=FALSE, message=FALSE, eval=FALSE}
+```{r, warning=FALSE, message=FALSE, eval=FALSE}
 library(link2GI)
 saga = linkSAGA()
 rsaga.env()
@@ -325,7 +325,7 @@ Note that calling `data(landslides)` attaches two objects to the global environm
 
 <!-- The following examples only work with SAGA < 2.3. We have informed the package maintainer to update SAGA -->
 
-```{r 09-gis-16, eval=FALSE}
+```{r, eval=FALSE}
 data(landslides)
 write.sgrd(data = dem, file = file.path(tempdir(), "dem"), header = dem$header)
 ```
@@ -334,27 +334,27 @@ The organization of SAGA is modular.
 Libraries contain so-called modules, i.e., geoalgorithms.
 To find out which libraries are available, run:
 
-```{r 09-gis-17, eval=FALSE}
+```{r, eval=FALSE}
 rsaga.get.libraries()
 ```
 
 We choose the library `ta_hydrology` (`ta` is the abbreviation for terrain analysis).
 Subsequently, we can access the available modules of a specific library (here: `ta_hydrology`) as follows:
 
-```{r 09-gis-18, eval=FALSE}
+```{r, eval=FALSE}
 rsaga.get.modules(libs = "ta_hydrology")
 ```
 
 `rsaga.get.usage()` prints the function parameters of a specific geoalgorithm, e.g., the `SAGA Wetness Index`, to the console.
 
-```{r 09-gis-19, eval=FALSE}
+```{r, eval=FALSE}
 rsaga.get.usage(lib = "ta_hydrology", module = "SAGA Wetness Index")
 ```
 
 Finally, you can run SAGA from within R using **RSAGA**'s geoprocessing workhorse function `rsaga.geoprocessor()`. 
 The function expects a parameter-argument list in which you have specified all necessary parameters.
 
-```{r 09-gis-20, eval=FALSE}
+```{r, eval=FALSE}
 params = list(DEM = file.path(tempdir(), "dem.sgrd"),
               TWI = file.path(tempdir(), "twi.sdat"))
 rsaga.geoprocessor(lib = "ta_hydrology", module = "SAGA Wetness Index", 
@@ -364,7 +364,7 @@ rsaga.geoprocessor(lib = "ta_hydrology", module = "SAGA Wetness Index",
 To facilitate the access to the SAGA interface, **RSAGA** frequently provides user-friendly wrapper-functions with meaningful default values (see **RSAGA** documentation for examples, e.g., `?rsaga.wetness.index`).
 So the function call for calculating the 'SAGA Wetness Index' becomes as simple as:
 
-```{r 09-gis-21, eval=FALSE}
+```{r, eval=FALSE}
 rsaga.wetness.index(in.dem = file.path(tempdir(), "dem"), 
                     out.wetness.index = file.path(tempdir(), "twi"))
 ```
@@ -372,7 +372,7 @@ rsaga.wetness.index(in.dem = file.path(tempdir(), "dem"),
 Of course, we would like to inspect our result visually (Figure \@ref(fig:saga-twi)). 
 To load and plot the SAGA output file, we use the **raster** package. 
 
-```{r 09-gis-22, eval=FALSE}
+```{r, eval=FALSE}
 library(raster)
 twi = raster::raster(file.path(tempdir(), "twi.sdat"))
 # shown is a version using tmap
@@ -383,7 +383,7 @@ plot(twi, col = RColorBrewer::brewer.pal(n = 9, name = "Blues"))
 knitr::include_graphics("figures/09_twi.png")
 ```
 
-```{r 09-gis-23, include=FALSE}
+```{r, include=FALSE}
 # or using mapview
 # proj4string(twi) = paste0("+proj=utm +zone=17 +south +ellps=WGS84 +towgs84=", 
 #                           "0,0,0,0,0,0,0 +units=m +no_defs")
@@ -411,7 +411,7 @@ Luckily, there are clever, almost optimal solutions which run in a tiny fraction
 GRASS GIS provides one of these solutions (for more details, see [v.net.salesman](https://grass.osgeo.org/grass77/manuals/v.net.salesman.html)). 
 In our use case, we would like to find the shortest path between the first 25 bicycle stations (instead of customers) on London's streets (and we simply assume that the first bike station corresponds to the home of our traveling salesman).
 
-```{r 09-gis-24}
+```{r}
 data("cycle_hire", package = "spData")
 points = cycle_hire[1:25, ]
 ```
@@ -427,7 +427,7 @@ Nevertheless, we are keeping one attribute column; otherwise, we will run into t
 Remember that the geometry column is sticky, hence, even though we are just selecting one attribute, the geometry column will be also returned (see Section \@ref(intro-sf)).
 <!-- To learn more about how to use the **osmdata**-package, please refer to [https://ropensci.github.io/osmdata/](https://ropensci.github.io/osmdata/). -->
 
-```{r 09-gis-25, eval=FALSE}
+```{r, eval=FALSE}
 library(osmdata)
 b_box = st_bbox(points)
 london_streets = opq(b_box) %>%
@@ -439,7 +439,7 @@ london_streets = dplyr::select(london_streets, osm_id)
 
 As a convenience to the reader, one can attach `london_streets` to the global environment using `data("london_streets", package = "spDataLarge")`. 
 
-```{r 09-gis-26, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 data("london_streets", package = "spDataLarge")
 ```
 
@@ -458,7 +458,7 @@ Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass
 You have to set up a location and a mapset if you want to use GRASS from within R.
 First of all, we need to find out if and where GRASS 7 is installed on the computer.
 
-```{r 09-gis-27, eval=FALSE}
+```{r, eval=FALSE}
 library(link2GI)
 link = findGRASS() 
 ```
@@ -469,7 +469,7 @@ If you have not installed GRASS 7 on your computer, we recommend that you do so 
 Assuming that we have found a working installation on your computer, we use the corresponding path in `initGRASS`. 
 Additionally, we specify where to store the geodatabase (gisDbase), name the location `london`, and use the PERMANENT mapset.
 
-```{r 09-gis-28, eval=FALSE}
+```{r, eval=FALSE}
 library(rgrass7)
 # find a GRASS 7 installation, and use the first one
 ind = grep("7", link$version)[1]
@@ -491,7 +491,7 @@ initGRASS(gisBase = grass_path,
 
 Subsequently, we define the projection, the extent and the resolution.
 
-```{r 09-gis-29, eval=FALSE}
+```{r, eval=FALSE}
 execGRASS("g.proj", flags = c("c", "quiet"), 
           proj4 = st_crs(london_streets)$proj4string)
 b_box = st_bbox(london_streets) 
@@ -509,7 +509,7 @@ Since we have set `ver_select` to `TRUE`, we can interactively choose one of the
 If there is just one installation, the `linkGRASS7()` automatically chooses this one.
 Second, `linkGRASS7()` establishes a connection to GRASS 7.
  
-```{r 09-gis-30, eval=FALSE}
+```{r, eval=FALSE}
 link2GI::linkGRASS7(london_streets, ver_select = TRUE)
 ```
 
@@ -522,7 +522,7 @@ In time, **rgrass7** will also work with **sf**-objects.
 
 <!-- in time we can also use sf- and raster-objects with rgrass7, Roger has already implemented this in the rgrass7 developer version -->
 
-```{r 09-gis-31, eval=FALSE}
+```{r, eval=FALSE}
 writeVECT(SDF = as(london_streets, "Spatial"), vname = "london_streets")
 writeVECT(SDF = as(points[, 1], "Spatial"), vname = "points")
 ```
@@ -535,7 +535,7 @@ However, to find the shortest route between them, we need to connect them to the
 `v.net`'s connect-operator does exactly this. 
 We save its output in `streets_points_con`.
 
-```{r 09-gis-32, eval=FALSE}
+```{r, eval=FALSE}
 # clean street network
 execGRASS(cmd = "v.clean", input = "london_streets", output = "streets_clean",
           tool = "break", flags = "overwrite")
@@ -551,7 +551,7 @@ This range represents the points for which a shortest route should be calculated
 Since we would like to calculate the route for all cycle stations, we set it to `1-25`.
 To access the GRASS help page of the traveling salesman algorithm, run `execGRASS("g.manual", entry = "v.net.salesman")`.
 
-```{r 09-gis-33, eval=FALSE}
+```{r, eval=FALSE}
 execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
           output = "shortest_route", center_cats = paste0("1-", nrow(points)),
           flags = c("overwrite"))
@@ -563,7 +563,7 @@ To visualize our result, we import the output layer into R, convert it into an s
 knitr::include_graphics("figures/09_shortest_route.png")
 ```
 
-```{r 09-gis-34, eval=FALSE}
+```{r, eval=FALSE}
 route = readVECT("shortest_route") %>%
   st_as_sf() %>%
   st_geometry()
@@ -571,7 +571,7 @@ mapview::mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) +
   points
 ```
 
-```{r 09-gis-35, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 library("mapview")
 m_1 = mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) +
   points
@@ -645,7 +645,7 @@ The code chunk below demonstrates this functionality:
 `linkGDAL()` searches the computer for a working GDAL installation and adds the location of the executable files to the PATH variable, allowing GDAL to be called.
 In the example below `ogrinfo` provides metadata on a vector dataset:
 
-```{r 09-gis-36, eval=FALSE, message=FALSE}
+```{r, eval=FALSE, message=FALSE}
 link2GI::linkGDAL()
 cmd = paste("ogrinfo -ro -so -al", system.file("shape/nc.shp", package = "sf"))
 system(cmd)
@@ -696,7 +696,7 @@ This way, the reader can follow the PostGIS example without the need to have Pos
 Thanks to the QGIS Cloud team for hosting this example.
 ]
 
-```{r 09-gis-37, eval=FALSE}
+```{r, eval=FALSE}
 library(RPostgreSQL)
 conn = dbConnect(drv = PostgreSQL(), dbname = "rtafdf_zljbqm",
                  host = "db.qgiscloud.com",
@@ -707,7 +707,7 @@ conn = dbConnect(drv = PostgreSQL(), dbname = "rtafdf_zljbqm",
 Often the first question is, 'which tables can be found in the database'.
 This can be asked as follows (the answer is 5 tables):
 
-```{r 09-gis-38, eval=FALSE}
+```{r, eval=FALSE}
 dbListTables(conn)
 #> [1] "spatial_ref_sys" "topology"        "layer"           "restaurants"    
 #> [5] "highways" 
@@ -717,7 +717,7 @@ We are only interested in the `restaurants` and the `highways` tables.
 The former represents the locations of fast-food restaurants in the US, and the latter are principal US highways.
 To find out about attributes available in a table, we can run:
 
-```{r 09-gis-39, eval=FALSE}
+```{r, eval=FALSE}
 dbListFields(conn, "highways")
 #> [1] "qc_id"        "wkb_geometry" "gid"          "feature"     
 #> [5] "name"         "state"   
@@ -727,7 +727,7 @@ The first query will select `US Route 1` in Maryland (`MD`).
 Note that `st_read()` allows us to read geographic data from a database if it is provided with an open connection to a database and a query.
 Additionally, `st_read()` needs to know which column represents the geometry (here: `wkb_geometry`).
 
-```{r 09-gis-40, eval=FALSE}
+```{r, eval=FALSE}
 query = paste(
   "SELECT *",
   "FROM highways",
@@ -738,7 +738,7 @@ us_route = st_read(conn, query = query, geom = "wkb_geometry")
 This results in an **sf**-object named `us_route` of type `sfc_MULTILINESTRING`.
 The next step is to add a 20-mile buffer (corresponds to 1609 meters times 20) around the selected highway (Figure \@ref(fig:postgis)).
 
-```{r 09-gis-41, eval=FALSE}
+```{r, eval=FALSE}
 query = paste(
   "SELECT ST_Union(ST_Buffer(wkb_geometry, 1609 * 20))::geometry",
   "FROM highways",
@@ -752,7 +752,7 @@ The prefix `st` stands for space/time.
 ]
 The last query will find all Hardee restaurants (`HDE`) within the buffer zone (Figure \@ref(fig:postgis)).
 
-```{r 09-gis-42, eval=FALSE, warning=FALSE}
+```{r, eval=FALSE, warning=FALSE}
 query = paste(
   "SELECT r.wkb_geometry",
   "FROM restaurants r",
@@ -773,11 +773,11 @@ Finally, it is good practice to close the database connection as follows:^[
 It is important to close the connection here because QGIS Cloud (free version) allows only ten concurrent connections.
 ]
 
-```{r 09-gis-43, eval=FALSE}
+```{r, eval=FALSE}
 RPostgreSQL::postgresqlCloseConnection(conn)
 ```
 
-```{r 09-gis-44, echo=FALSE}
+```{r, echo=FALSE}
 load("extdata/postgis_data.Rdata")
 ```
 

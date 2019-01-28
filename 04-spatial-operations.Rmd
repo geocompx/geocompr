@@ -4,7 +4,7 @@
 
 - This chapter requires the same packages used in Chapter \@ref(attr): 
 
-```{r 04-spatial-operations-1, message=FALSE, results='hide'}
+```{r, message=FALSE, results='hide'}
 library(sf)
 library(raster)
 library(dplyr)
@@ -36,7 +36,7 @@ Spatial subsetting of raster objects is covered in Section \@ref(spatial-raster-
 For many applications, the most important spatial operation on raster objects is *map algebra*, as we will see in Sections \@ref(map-algebra) to \@ref(global-operations-and-distances).
 Map algebra is also the prerequisite for distance calculations on rasters, a technique which is covered in Section \@ref(global-operations-and-distances).
 
-```{block2 04-spatial-operations-2, type='rmdnote'}
+```{block2 type='rmdnote'}
 It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in Section \@ref(crs-intro) and which will be covered in more depth in Chapter \@ref(reproj-geo-data).
 ```
 
@@ -53,7 +53,7 @@ An example of spatial subsetting is provided by the `nz` and `nz_height` dataset
 These contain projected data on the 16 main regions and 101 highest points in New Zealand, respectively (Figure \@ref(fig:nz-subset)).
 The following code chunk first creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region:
 
-```{r 04-spatial-operations-3}
+```{r}
 canterbury = nz %>% filter(Name == "Canterbury")
 canterbury_height = nz_height[canterbury, ]
 ```
@@ -81,11 +81,11 @@ These determine the type of spatial relationship that features in the target obj
 These alternative spatial operators can be specified with the `op =` argument, a third argument that can be passed to the `[` operator for `sf` objects.
 This is demonstrated in the following command which returns the opposite of `st_intersect()`, points that do not intersect with Canterbury (see Section \@ref(topological-relations)):
 
-```{r 04-spatial-operations-4, eval=FALSE}
+```{r, eval=FALSE}
 nz_height[canterbury, , op = st_disjoint]
 ```
 
-```{block2 04-spatial-operations-5, type='rmdnote'}
+```{block2 type='rmdnote'}
 Note the empty argument --- denoted with `, ,` --- in the preceding code chunk is included to highlight `op`, the third argument in `[` for `sf` objects.
 One can use this to change the subsetting operation in many ways.
 `nz_height[canterbury, 2, op = st_disjoint]`, for example, returns the same rows but only includes the second attribute column (see `` sf:::`[.sf` `` and the `?sf` for details).
@@ -98,7 +98,7 @@ If you're interested in the details, including other ways of subsetting, read on
 Another way of doing spatial subsetting uses objects returned by *topological operators*.
 This is demonstrated in the first command below:
 
-```{r 04-spatial-operations-6}
+```{r}
 sel_sgbp = st_intersects(x = nz_height, y = canterbury)
 class(sel_sgbp)
 sel_logical = lengths(sel_sgbp) > 0
@@ -109,7 +109,7 @@ In the above code chunk, an object of class `sgbp` (a sparse geometry binary pre
 The function `lengths()` identifies which features in `nz_height` intersect with *any* objects in `y`.
 In this case 1 is the greatest possible value but for more complex operations one could use the method to subset only features that intersect with, for example, 2 or more features from the source object.
 
-```{block2 04-spatial-operations-7, type='rmdnote'}
+```{block2 type='rmdnote'}
 Note: another way to return a logical output is by setting `sparse = FALSE` (meaning 'return a dense matrix not a sparse one') in operators such as `st_intersects()`. The command `st_intersects(x = nz_height, y = canterbury, sparse = FALSE)[, 1]`, for example, would return an output identical `sel_logical`.
 Note: the solution involving `sgbp` objects is more generalisable though, as it works for many-to-many operations and has lower memory requirements.
 ```
@@ -139,7 +139,7 @@ Topological relations describe the spatial relationships between objects.
 To understand them, it helps to have some simple test data to work with.
 Figure \@ref(fig:relation-objects) contains a polygon (`a`), a line (`l`) and some points (`p`), which are created in the code below.
 
-```{r 04-spatial-operations-8}
+```{r}
 # create a polygon
 a_poly = st_polygon(list(rbind(c(-1, -1), c(1, -1), c(1, 1), c(-1, -1))))
 a = st_sfc(a_poly)
@@ -165,7 +165,7 @@ The question can be answered by inspection (points 1 and 2 are over or touch the
 It can also be answered by using a *spatial predicate* such as *do the objects intersect*?
 This is implemented in **sf** as follows:
 
-```{r 04-spatial-operations-9, eval=FALSE}
+```{r, eval=FALSE}
 st_intersects(p, a)
 #> Sparse geometry binary ..., where the predicate was `intersects'
 #> 1: 1
@@ -180,7 +180,7 @@ What may be unexpected is that the result comes in the form of a list of vectors
 This *sparse matrix* output only registers a relation if one exists, reducing the memory requirements of topological operations on multi-feature objects.
 As we saw in the previous section, a *dense matrix* consisting of `TRUE` or `FALSE` values for each combination of features can also be returned when `sparse = FALSE`:
 
-```{r 04-spatial-operations-10}
+```{r}
 st_intersects(p, a, sparse = FALSE)
 ```
 
@@ -192,21 +192,21 @@ Note that `st_intersects()` returns `TRUE` for the second feature in the object 
 
 The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (note `[, 1]` converts the result into a vector):
 
-```{r 04-spatial-operations-11}
+```{r}
 st_disjoint(p, a, sparse = FALSE)[, 1]
 ```
 
 `st_within()` returns `TRUE` only for objects that are completely within the selecting object.
 This applies only to the first object, which is inside the triangular polygon, as illustrated below:
 
-```{r 04-spatial-operations-12}
+```{r}
 st_within(p, a, sparse = FALSE)[, 1]
 ```
 
 Note that although the first point is *within* the triangle, it does not *touch* any part of its border.
 For this reason `st_touches()` only returns `TRUE` for the second point:
 
-```{r 04-spatial-operations-13}
+```{r}
 st_touches(p, a, sparse = FALSE)[, 1]
 ```
 
@@ -216,31 +216,31 @@ It can be used to set how close target objects need to be before they are select
 Note that although point 4 is one unit of distance from the nearest node of `a` (at point 2 in Figure \@ref(fig:relation-objects)), it is still selected when the distance is set to 0.9.
 This is illustrated in the code chunk below, the second line of which converts the lengthy list output into a `logical` object:
 
-```{r 04-spatial-operations-14}
+```{r}
 sel = st_is_within_distance(p, a, dist = 0.9) # can only return a sparse matrix
 lengths(sel) > 0
 ```
 
 
-```{block2 04-spatial-operations-15, type='rmdnote'}
+```{block2 type='rmdnote'}
 Functions for calculating topological relations use spatial indices to largely speed up spatial query performance.
 They achieve that using the Sort-Tile-Recursive (STR) algorithm.
 The `st_join` function, mentioned in the next section, also uses the spatial indexing. 
 You can learn more at https://www.r-spatial.org/r/2017/06/22/spatial-index.html.
 ```
 
-```{r 04-spatial-operations-16, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # other tests
 st_overlaps(p, a, sparse = FALSE)
 st_covers(p, a, sparse = FALSE)
 st_covered_by(p, a, sparse = FALSE)
 ```
 
-```{r 04-spatial-operations-17, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 st_contains(a, p[2, ], sparse = TRUE)
 ```
 
-```{r 04-spatial-operations-18, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # starting simpler so commented
 a1 = st_polygon(list(rbind(c(-1, -1), c(1, -1), c(1, 1), c(-1, -1))))
 a2 = st_polygon(list(rbind(c(2, 0), c(2, 2), c(3, 2), c(3, 0), c(2, 0))))
@@ -357,7 +357,7 @@ Imagine you have ten points randomly distributed across the Earth's surface.
 Of the points that are on land, which countries are they in?
 Random points to demonstrate spatial joining are created as follows:
 
-```{r 04-spatial-operations-19}
+```{r}
 set.seed(2018) # set seed for reproducibility
 (bb_world = st_bbox(world)) # the world's bounds
 random_df = tibble(
@@ -375,7 +375,7 @@ The `random_points` object (top left) has no attribute data, while the `world` (
 The spatial join operation is done by `st_join()`, which adds the `name_long` variable to the points, resulting in `random_joined` which is illustrated in Figure \@ref(fig:spatial-join) (bottom left --- see [`04-spatial-join.R`](https://github.com/Robinlovelace/geocompr/blob/master/code/04-spatial-join.R)).
 Before creating the joined dataset, we use spatial subsetting to create `world_random`, which contains only countries that contain random points, to verify the number of country names returned in the joined dataset should be four (see the top right panel of Figure \@ref(fig:spatial-join)).
 
-```{r 04-spatial-operations-20, message=FALSE}
+```{r, message=FALSE}
 world_random = world[random_points, ]
 nrow(world_random)
 random_joined = st_join(random_points, world["name_long"])
@@ -400,18 +400,18 @@ Sometimes two geographic datasets do not touch but still have a strong geographi
 The datasets `cycle_hire` and `cycle_hire_osm`, already attached in the **spData** package, provide a good example.
 Plotting them shows that they are often closely related but they do not touch, as shown in Figure \@ref(fig:cycle-hire), a base version of which is created with the following code below:
 
-```{r 04-spatial-operations-21, eval=FALSE}
+```{r, eval=FALSE}
 plot(st_geometry(cycle_hire), col = "blue")
 plot(st_geometry(cycle_hire_osm), add = TRUE, pch = 3, col = "red")
 ```
 
 We can check if any points are the same `st_intersects()` as shown below:
 
-```{r 04-spatial-operations-22, message=FALSE}
+```{r, message=FALSE}
 any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
 ```
 
-```{r 04-spatial-operations-23, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 # included to show alternative ways of showing there's no overlap
 sum(st_geometry(cycle_hire) %in% st_geometry(cycle_hire_osm))
 sum(st_coordinates(cycle_hire)[, 1] %in% st_coordinates(cycle_hire_osm)[, 1])
@@ -439,7 +439,7 @@ The simplest method is to use the topological operator `st_is_within_distance()`
 Note that, before performing the relation, both objects are transformed into a projected CRS.
 These projected objects are created below (note the affix `_P`, short for projected):
 
-```{r 04-spatial-operations-24}
+```{r}
 cycle_hire_P = st_transform(cycle_hire, 27700)
 cycle_hire_osm_P = st_transform(cycle_hire_osm, 27700)
 sel = st_is_within_distance(cycle_hire_P, cycle_hire_osm_P, dist = 20)
@@ -450,7 +450,7 @@ This shows that there are `r sum(lengths(sel) > 0)` points in the target object 
 How to retrieve the *values* associated with the respective `cycle_hire_osm_P` points?
 The solution is again with `st_join()`, but with an addition `dist` argument (set to 20 m below):
 
-```{r 04-spatial-operations-25}
+```{r}
 z = st_join(cycle_hire_P, cycle_hire_osm_P, st_is_within_distance, dist = 20)
 nrow(cycle_hire)
 nrow(z)
@@ -460,7 +460,7 @@ Note that the number of rows in the joined result is greater than the target.
 This is because some cycle hire stations in `cycle_hire_P` have multiple matches in `cycle_hire_osm_P`.
 To aggregate the values for the overlapping points and return the mean, we can use the aggregation methods learned in Chapter \@ref(attr), resulting in an object with the same number of rows as the target:
 
-```{r 04-spatial-operations-26}
+```{r}
 z = z %>% 
   group_by(id) %>% 
   summarize(capacity = mean(capacity))
@@ -469,7 +469,7 @@ nrow(z) == nrow(cycle_hire)
 
 The capacity of nearby stations can be verified by comparing a plot of the capacity of the source `cycle_hire_osm` data with the results in this new object (plots not shown):
 
-```{r 04-spatial-operations-27, eval=FALSE}
+```{r, eval=FALSE}
 plot(cycle_hire_osm["capacity"])
 plot(z["capacity"])
 ```
@@ -494,7 +494,7 @@ Returning to the example of New Zealand, imagine you want to find out the averag
 This is a good example of spatial aggregation: it is the geometry of the source (`y` or `nz` in this case) that defines how values in the target object (`x` or `nz_height`) are grouped.
 This is illustrated using the base `aggregate()` function below:
 
-```{r 04-spatial-operations-28}
+```{r}
 nz_avheight = aggregate(x = nz_height, by = nz, FUN = mean)
 ```
 
@@ -511,7 +511,7 @@ tm_shape(nz_avheight) +
   tm_borders()
 ```
 
-```{r 04-spatial-operations-29}
+```{r}
 nz_avheight2 = nz %>%
   st_join(nz_height) %>%
   group_by(Name) %>%
@@ -544,7 +544,7 @@ In this case values from the `incongruent` object are allocated to the `aggregat
 For instance, if one intersection of `incongruent` and `aggregating_zones` is 1.5 km^2^ but the whole incongruent polygon in question has 2 km^2^ and a total income of 4 million Euros, then the target aggregating zone will obtain three quarters of the income, in this case 3 million Euros.
 This is implemented in `st_interpolate_aw()`, as demonstrated in the code chunk below.
 
-```{r 04-spatial-operations-30}
+```{r}
 agg_aw = st_interpolate_aw(incongruent[, "value"], aggregating_zones,
                            extensive = TRUE)
 # show the aggregated result
@@ -568,7 +568,7 @@ While topological relations are binary --- a feature either intersects with anot
 The distance between two objects is calculated with the `st_distance()` function.
 This is illustrated in the code chunk below, which finds the distance between the highest point in New Zealand and the geographic centroid of the Canterbury region, created in Section \@ref(spatial-subsetting):
 
-```{r 04-spatial-operations-31, warning=FALSE}
+```{r, warning=FALSE}
 nz_heighest = nz_height %>% top_n(n = 1, wt = elevation)
 canterbury_centroid = st_centroid(canterbury)
 st_distance(nz_heighest, canterbury_centroid)
@@ -582,7 +582,7 @@ There are two potentially surprising things about the result:
 This second feature hints at another useful feature of `st_distance()`, its ability to return *distance matrices* between all combinations of features in objects `x` and `y`.
 This is illustrated in the command below, which finds the distances between the first three features in `nz_height` and the Otago and Canterbury regions of New Zealand represented by the object `co`.
 
-```{r 04-spatial-operations-32}
+```{r}
 co = filter(nz, grepl("Canter|Otag", Name))
 st_distance(nz_height[1:3, ], co)
 ```
@@ -591,7 +591,7 @@ Note that the distance between the second and third features in `nz_height` and 
 This demonstrates the fact that distances between points and polygons refer to the distance to *any part of the polygon*:
 The second and third points in `nz_height` are *in* Otago, which can be verified by plotting them (result not shown):
 
-```{r 04-spatial-operations-33, eval=FALSE}
+```{r, eval=FALSE}
 plot(st_geometry(co)[2])
 plot(st_geometry(nz_height)[2:3], add = TRUE)
 ```
@@ -609,7 +609,7 @@ To use coordinates for subsetting, one can 'translate' the coordinates into a ce
 An alternative is to use `raster::extract()` (be careful, there is also a function called `extract()` in the **tidyverse**) to extract values.
 Both methods are demonstrated below to find the value of the cell that covers a point located 0.1 units from the origin.
 
-```{r 04-spatial-operations-34, eval = FALSE}
+```{r, eval = FALSE}
 id = cellFromXY(elev, xy = c(0.1, 0.1))
 elev[id]
 # the same as
@@ -619,9 +619,9 @@ raster::extract(elev, data.frame(x = 0.1, y = 0.1))
 It is convenient that both functions also accept objects of class `Spatial* Objects`.
 Raster objects can also be subset with another raster object, as illustrated in Figure \@ref(fig:raster-subset) (left panel) and demonstrated in the code chunk below:
 
-```{r 04-spatial-operations-35}
-clip = raster(xmn = 0.9, xmx = 1.8, ymn = -0.45, ymx = 0.45,
-              res = 0.3, vals = rep(1, 9))
+```{r}
+clip = raster(nrows = 3, ncols = 3, res = 0.3, xmn = 0.9, xmx = 1.8, 
+              ymn = -0.45, ymx = 0.45, vals = rep(1, 9))
 elev[clip]
 # we can also use extract
 # extract(elev, extent(clip))
@@ -639,7 +639,7 @@ To illustrate this, we retrieve the first two cells of `elev` as an individual r
 As mentioned in Section \@ref(manipulating-raster-objects), the `[` operator accepts various inputs to subset rasters and returns a raster object when `drop = FALSE`.
 The code chunk below subsets the `elev` raster by cell ID and row-column index with identical results: the first two cells on the top row (only the first 2 lines of the output is shown):
 
-```{r 04-spatial-operations-36, eval=FALSE}
+```{r, eval=FALSE}
 elev[1:2, drop = FALSE]    # spatial subsetting with cell IDs
 elev[1, 1:2, drop = FALSE] # spatial subsetting by row,column indices
 #> class       : RasterLayer 
@@ -647,7 +647,7 @@ elev[1, 1:2, drop = FALSE] # spatial subsetting by row,column indices
 #> ...
 ```
 
-```{r 04-spatial-operations-37, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 # aim: illustrate the result of previous spatial subsetting example
 x = elev[1, 1:2, drop = FALSE]
 plot(x)
@@ -657,7 +657,7 @@ plot(x)
 Another common use case of spatial subsetting is when a raster with `logical` (or `NA`) values is used to mask another raster with the same extent and resolution, as illustrated in Figure \@ref(fig:raster-subset), middle and right panel.
 In this case, the `[`, `mask()` and `overlay()` functions can be used (results not shown):
 
-```{r 04-spatial-operations-38, eval=FALSE}
+```{r, eval=FALSE}
 # create raster mask
 rmask = elev 
 values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
@@ -668,7 +668,7 @@ mask(elev, rmask)                   # with mask()
 overlay(elev, rmask, fun = "max")   # with overlay
 ```
 
-```{r 04-spatial-operations-39, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # aim: expand on previous code chunk to show how mask methods differ
 rmask = elev # create raster mask
 values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
@@ -725,7 +725,7 @@ Using the `reclassify()` command, we need first to construct a reclassification 
 The third column represents the new value for the specified ranges in column one and two.
 Here, we assign the raster values in the ranges 0--12, 12--24 and 24--36 are *reclassified* to take values 1, 2 and 3, respectively.
 
-```{r 04-spatial-operations-40, eval = FALSE}
+```{r, eval = FALSE}
 rcl = matrix(c(0, 12, 1, 12, 24, 2, 24, 36, 3), ncol = 3, byrow = TRUE)
 recl = reclassify(elev, rcl = rcl)
 ```
@@ -737,7 +737,7 @@ This includes adding, subtracting and squaring two rasters.
 Raster algebra also allows logical operations such as finding all raster cells that are greater than a specific value (5 in our example below).
 The **raster** package supports all these operations and more, as described in `vignette("Raster")` and demonstrated below (results not show):
 
-```{r 04-spatial-operations-41, eval = FALSE}
+```{r, eval = FALSE}
 elev + elev
 elev^2
 log(elev)
@@ -777,7 +777,7 @@ We define the shape of the moving window with a `matrix` whose values correspond
 Secondly, the `fun` parameter lets us specify the function we wish to apply to this neighborhood.
 Here, we choose the minimum, but any other summary function, including `sum()`, `mean()`, or `var()` can be used.
 
-```{r 04-spatial-operations-42, eval = FALSE}
+```{r, eval = FALSE}
 r_focal = focal(elev, w = matrix(1, nrow = 3, ncol = 3), fun = min)
 ```
 
@@ -810,7 +810,7 @@ Our grain size raster is a good example (Figure \@ref(fig:cont-raster)) because 
 To find the mean elevation for each grain size class, we can use the `zonal()` command.
 This kind of operation is also known as *zonal statistics* in the GIS world. 
 
-```{r 04-spatial-operations-43}
+```{r}
 z = zonal(elev, grain, fun = "mean") %>%
   as.data.frame()
 z
@@ -854,7 +854,7 @@ This is possible with digital elevation data (SRTM, ASTER).
 In the following code chunk we first download the SRTM elevation data for Austria and Switzerland (for the country codes, see the **raster** function `ccodes()`).
 In a second step, we merge the two rasters into one.
 
-```{r 04-spatial-operations-44, eval = FALSE}
+```{r, eval = FALSE}
 aut = getData("alt", country = "AUT", mask = TRUE)
 ch = getData("alt", country = "CHE", mask = TRUE)
 aut_ch = merge(aut, ch)
@@ -915,7 +915,7 @@ For a more detailed introduction on how to use R for remote sensing, we refer th
 
 1. It was established in Section \@ref(spatial-vec) that Canterbury was the region of New Zealand containing most of the 100 highest points in the country.
 How many of these high points does the Canterbury region contain?
-```{r 04-spatial-operations-45, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 library(tmap)
 tmap_mode("view")
 qtm(nz) + qtm(nz_height)
@@ -924,7 +924,7 @@ canterbury_height = nz_height[canterbury, ]
 nrow(canterbury_height) # answer: 70
 ```
 1. Which region has the second highest number of `nz_height` points in, and how many does it have?
-```{r 04-spatial-operations-46, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 nz_height_count = aggregate(nz_height, nz, length)
 nz_height_combined = cbind(nz, count = nz_height_count$elevation)
 nz_height_combined %>% 
@@ -935,7 +935,7 @@ nz_height_combined %>%
 ```
 1. Generalizing the question to all regions: how many of New Zealand's 16 regions contain points which belong to the top 100 highest points in the country? Which regions?
     - Bonus: create a table listing these regions in order of the number of points and their name.
-```{r 04-spatial-operations-47, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 nz_height_count = aggregate(nz_height, nz, length)
 nz_height_combined = cbind(nz, count = nz_height_count$elevation)
 nz_height_combined %>% 

@@ -4,7 +4,7 @@
 
 - This chapter requires the following packages to be installed and attached: 
 
-```{r 03-attribute-operations-1, message=FALSE}
+```{r, message=FALSE}
 library(sf)
 library(raster)
 library(dplyr)
@@ -13,7 +13,7 @@ library(stringr) # for working with strings (pattern matching)
 
 - It also relies on **spData**, which loads datasets used in the code examples of this chapter:
 
-```{r 03-attribute-operations-2, results='hide'}
+```{r, results='hide'}
 library(spData)
 ```
 
@@ -50,18 +50,18 @@ The `geometry` column is special because it is a *list-column*, which can contai
 In Chapter \@ref(spatial-class) we saw how to perform *generic methods* such as `plot()` and `summary()` on `sf` objects.
 **sf** also provides methods that allow `sf` objects to behave like regular data frames:
 
-```{r 03-attribute-operations-3, eval=FALSE}
+```{r, eval=FALSE}
 methods(class = "sf") # methods for sf objects, first 12 shown
 ```
 
-```{r 03-attribute-operations-4}
+```{r}
 #>  [1] aggregate             cbind                 coerce               
 #>  [4] initialize            merge                 plot                 
 #>  [7] print                 rbind                 [                    
 #> [10] [[<-                  $<-                   show                 
 ```
 
-```{r 03-attribute-operations-5, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # Another way to show sf methods:
 attributes(methods(class = "sf"))$info %>% 
   filter(!visible)
@@ -70,7 +70,7 @@ attributes(methods(class = "sf"))$info %>%
 Many of these functions, including `rbind()` (for binding rows of data together) and `$<-` (for creating new columns) were developed for data frames.
 A key feature of `sf` objects is that they store spatial and non-spatial data in the same way, as columns in a `data.frame`.
 
-```{block2 03-attribute-operations-6, type = 'rmdnote'}
+```{block2 type = 'rmdnote'}
 The geometry column of `sf` objects is typically called `geometry` but any name can be used.
 The following command, for example, creates a geometry column named g:
   
@@ -84,7 +84,7 @@ Thus **sf** enables the full power of R's data analysis capabilities to be unlea
 Before using these capabilities it is worth re-capping how to discover the basic properties of vector data objects.
 Let's start by using base R functions to get a measure of the `world` dataset:
 
-```{r 03-attribute-operations-7}
+```{r}
 dim(world) # it is a 2 dimensional object, with rows and columns
 nrow(world) # how many rows?
 ncol(world) # how many columns?
@@ -93,7 +93,7 @@ ncol(world) # how many columns?
 Our dataset contains ten non-geographic columns (and one geometry list-column) with almost 200 rows representing the world's countries.
 Extracting the attribute data of an `sf` object is the same as removing its geometry:
 
-```{r 03-attribute-operations-8}
+```{r}
 world_df = st_set_geometry(world, NULL)
 class(world_df)
 ```
@@ -119,7 +119,7 @@ Leaving `i` or `j` empty returns all rows or columns, so `world[1:5, ]` returns 
 The examples below demonstrate subsetting with base R.
 The results are not shown; check the results on your own computer:
 
-```{r 03-attribute-operations-9, eval=FALSE}
+```{r, eval=FALSE}
 world[1:6, ] # subset rows by position
 world[, 1:3] # subset columns by position
 world[, c("name_long", "lifeExp")] # subset columns by name
@@ -128,7 +128,7 @@ world[, c("name_long", "lifeExp")] # subset columns by name
 A demonstration of the utility of using `logical` vectors for subsetting is shown in the code chunk below.
 This creates a new object, `small_countries`, containing nations whose surface area is smaller than 10,000 km^2^:
 
-```{r 03-attribute-operations-10}
+```{r}
 sel_area = world$area_km2 < 10000
 summary(sel_area) # a logical vector
 small_countries = world[sel_area, ]
@@ -137,13 +137,13 @@ small_countries = world[sel_area, ]
 The intermediary `sel_area` is a logical vector that shows that only seven countries match the query.
 A more concise command, which omits the intermediary object, generates the same result:
 
-```{r 03-attribute-operations-11}
+```{r}
 small_countries = world[world$area_km2 < 10000, ]
 ```
 
 The base R function `subset()` provides yet another way to achieve the same result:
 
-```{r 03-attribute-operations-12, eval=FALSE}
+```{r, eval=FALSE}
 small_countries = subset(world, area_km2 < 10000)
 ```
 
@@ -155,7 +155,7 @@ It is fast, due to its C++ backend.
 This is especially useful when working with big data as well as **dplyr**'s database integration.
 The main **dplyr** subsetting functions are `select()`, `slice()`, `filter()` and `pull()`.
 
-```{block 03-attribute-operations-13, type='rmdnote'}
+```{block type='rmdnote'}
 **raster** and **dplyr** packages have a function called `select()`.
 When using both packages, the function in the most recently attached package will be used, 'masking' the incumbent function.
 This can generate error messages containing text like: `unable to find an inherited method for function ‘select’ for signature ‘"sf"’`.
@@ -165,35 +165,35 @@ To avoid this error message, and prevent ambiguity, we use the long-form functio
 `select()` selects columns by name or position.
 For example, you could select only two columns, `name_long` and `pop`, with the following command (note the sticky `geom` column remains):
 
-```{r 03-attribute-operations-14}
+```{r}
 world1 = dplyr::select(world, name_long, pop)
 names(world1)
 ```
 
 `select()` also allows subsetting of a range of columns with the help of the `:` operator: 
 
-```{r 03-attribute-operations-15}
+```{r}
 # all columns between name_long and pop (inclusive)
 world2 = dplyr::select(world, name_long:pop)
 ```
 
 Omit specific columns with the `-` operator:
 
-```{r 03-attribute-operations-16}
+```{r}
 # all columns except subregion and area_km2 (inclusive)
 world3 = dplyr::select(world, -subregion, -area_km2)
 ```
 
 Conveniently, `select()` lets you subset and rename columns at the same time, for example:
 
-```{r 03-attribute-operations-17}
+```{r}
 world4 = dplyr::select(world, name_long, population = pop)
 names(world4)
 ```
 
 This is more concise than the base R equivalent:
 
-```{r 03-attribute-operations-18, eval=FALSE}
+```{r, eval=FALSE}
 world5 = world[, c("name_long", "pop")] # subset columns by name
 names(world5)[names(world5) == "pop"] = "population" # rename column manually
 ```
@@ -206,7 +206,7 @@ The subsetting operator in base R (see `?[`), by contrast, tries to return objec
 This means selecting a single column returns a vector in base R.
 To turn off this behavior, set the `drop` argument to `FALSE`.
 
-```{r 03-attribute-operations-19, eval=FALSE}
+```{r, eval=FALSE}
 # create throw-away data frame
 d = data.frame(pop = 1:10, area = 1:10)
 # return data frame object when selecting a single column
@@ -217,7 +217,7 @@ d[, "pop"]
 pull(d, pop)
 ```
 
-```{r 03-attribute-operations-20, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 x1 = d[, "pop", drop = FALSE] # equivalent to d["pop"]
 x2 = d["pop"]
 identical(x1, x2)
@@ -226,7 +226,7 @@ identical(x1, x2)
 Due to the sticky geometry column, selecting a single attribute from an sf-object with the help of `[()` returns also a data frame.
 Contrastingly, `pull()` and `$` will give back a vector.
 
-```{r 03-attribute-operations-21, eval = FALSE}
+```{r, eval = FALSE}
 # data frame object
 world[, "pop"]
 # vector objects
@@ -237,14 +237,14 @@ pull(world, pop)
 `slice()` is the row-equivalent of `select()`.
 The following code chunk, for example, selects the 3^rd^ to 5^th^ rows:
 
-```{r 03-attribute-operations-22, eval=FALSE}
+```{r, eval=FALSE}
 slice(world, 3:5)
 ```
 
 `filter()` is **dplyr**'s equivalent of base R's `subset()` function.
 It keeps only rows matching given criteria, e.g., only countries with a very high average of life expectancy:
 
-```{r 03-attribute-operations-23, eval=FALSE}
+```{r, eval=FALSE}
 # Countries with a life expectancy longer than 82 years
 world6 = filter(world, lifeExp > 82)
 ```
@@ -256,7 +256,7 @@ operators = c("`==`", "`!=`", "`>, <`", "`>=, <=`", "`&, |, !`")
 operators_exp = c("Equal to", "Not equal to", "Greater/Less than",
                   "Greater/Less than or equal", 
                   "Logical operators: And, Or, Not")
-knitr::kable(tibble(Symbol = operators, Name = operators_exp), 
+knitr::kable(data_frame(Symbol = operators, Name = operators_exp), 
              caption = paste("Comparison operators that return Booleans",
                              "(TRUE/FALSE)."),
              caption.short = "Comparison operators that return Booleans.",
@@ -267,7 +267,7 @@ knitr::kable(tibble(Symbol = operators, Name = operators_exp),
 It enables expressive code: the output of a previous function becomes the first argument of the next function, enabling *chaining*.
 This is illustrated below, in which only countries from Asia are filtered from the `world` dataset, next the object is subset by columns (`name_long` and `continent`) and the first five rows (result not shown).
 
-```{r 03-attribute-operations-24}
+```{r}
 world7 = world %>%
   filter(continent == "Asia") %>%
   dplyr::select(name_long, continent) %>%
@@ -278,7 +278,7 @@ The above chunk shows how the pipe operator allows commands to be written in a c
 the above run from top to bottom (line-by-line) and left to right.
 The alternative to `%>%` is nested function calls, which is harder to read:
 
-```{r 03-attribute-operations-25}
+```{r}
 world8 = slice(
   dplyr::select(
     filter(world, continent == "Asia"),
@@ -294,7 +294,7 @@ The `world` dataset contains the necessary ingredients: the columns `pop` and `c
 The aim is to find the `sum()` of country populations for each continent.
 This can be done with the base R function `aggregate()` as follows:
 
-```{r 03-attribute-operations-26}
+```{r}
 world_agg1 = aggregate(pop ~ continent, FUN = sum, data = world, na.rm = TRUE)
 class(world_agg1)
 ```
@@ -304,7 +304,7 @@ The result is a non-spatial data frame with six rows, one per continent, and two
 `aggregate()` is a generic function which means that it behaves differently depending on its inputs.
 **sf** provides a function that can be called directly with `sf:::aggregate()` that is activated when a `by` argument is provided, rather than using the `~` to refer to the grouping variable:
 
-```{r 03-attribute-operations-27}
+```{r}
 world_agg2 = aggregate(world["pop"], by = list(world$continent),
                        FUN = sum, na.rm = TRUE)
 class(world_agg2)
@@ -316,7 +316,7 @@ As illustrated above, an object of class `sf` is returned this time.
 `summarize()` is the **dplyr** equivalent of `aggregate()`.
 It usually follows `group_by()`, which specifies the grouping variable, as illustrated below:
 
-```{r 03-attribute-operations-28}
+```{r}
 world_agg3 = world %>%
   group_by(continent) %>%
   summarize(pop = sum(pop, na.rm = TRUE))
@@ -325,7 +325,7 @@ world_agg3 = world %>%
 This approach is flexible and gives control over the new column names.
 This is illustrated below: the command calculates the Earth's population (~7 billion) and number of countries (result not shown):
 
-```{r 03-attribute-operations-29, eval=FALSE}
+```{r, eval=FALSE}
 world %>% 
   summarize(pop = sum(pop, na.rm = TRUE), n = n())
 ```
@@ -336,7 +336,7 @@ The result is an `sf` object with a single row representing the world (this work
 
 Let's combine what we have learned so far about **dplyr** by chaining together functions to find the world's 3 most populous continents (with `dplyr::n()` ) and the number of countries they contain (the result of this command is presented in Table \@ref(tab:continents)):
 
-```{r 03-attribute-operations-30, eval=FALSE}
+```{r, eval=FALSE}
 world %>% 
   dplyr::select(pop, continent) %>% 
   group_by(continent) %>% 
@@ -359,7 +359,7 @@ world %>%
                booktabs = TRUE)
 ```
 
-```{block2 03-attribute-operations-31, type='rmdnote'}
+```{block2 type='rmdnote'}
 More details are provided in the help pages (which can be accessed via `?summarize` and `vignette(package = "dplyr")` and Chapter 5 of [R for Data Science](http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize). 
 ```
 
@@ -383,7 +383,7 @@ It has 3 columns:
 `name_long` names major coffee-producing nations and `coffee_production_2016` and `coffee_production_2017` contain estimated values for coffee production in units of 60-kg bags in each year.
 A 'left join', which preserves the first dataset, merges `world` with `coffee_data`:
 
-```{r 03-attribute-operations-32, warning=FALSE}
+```{r, warning=FALSE}
 world_coffee = left_join(world, coffee_data)
 class(world_coffee)
 ```
@@ -407,12 +407,12 @@ In the majority of cases where variable names are not the same, you have two opt
 
 The latter approach is demonstrated below on a renamed version of `coffee_data`:
 
-```{r 03-attribute-operations-33, warning=FALSE}
+```{r, warning=FALSE}
 coffee_renamed = rename(coffee_data, nm = name_long)
 world_coffee2 = left_join(world, coffee_renamed, by = c(name_long = "nm"))
 ```
 
-```{r 03-attribute-operations-34, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 identical(world_coffee, world_coffee2)
 nrow(world)
 nrow(world_coffee)
@@ -425,7 +425,7 @@ rows in the original dataset with no match are assigned `NA` values for the new 
 What if we only want to keep countries that have a match in the key variable?
 In that case an inner join can be used:
 
-```{r 03-attribute-operations-35, warning=FALSE}
+```{r, warning=FALSE}
 world_coffee_inner = inner_join(world, coffee_data)
 nrow(world_coffee_inner)
 ```
@@ -434,7 +434,7 @@ Note that the result of `inner_join()` has only 45 rows compared with 47 in `cof
 What happened to the remaining rows?
 We can identify the rows that did not match using the `setdiff()` function as follows:
 
-```{r 03-attribute-operations-36}
+```{r}
 setdiff(coffee_data$name_long, world$name_long)
 ```
 
@@ -442,11 +442,11 @@ The result shows that `Others` accounts for one row not present in the `world` d
 it has been abbreviated, causing the join to miss it.
 The following command uses a string matching (regex) function from the **stringr** package to confirm what `Congo, Dem. Rep. of` should be:
 
-```{r 03-attribute-operations-37}
+```{r}
 str_subset(world$name_long, "Dem*.+Congo")
 ```
 
-```{r 03-attribute-operations-38, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 # aim: test names in coffee_data and world objects
 str_subset(coffee_data$name_long, "Ivo|Congo,")
 .Last.value %in% str_subset(world$name_long, "Ivo|Dem*.+Congo")
@@ -455,7 +455,7 @@ str_subset(coffee_data$name_long, "Ivo|Congo,")
 To fix this issue, we will create a new version of `coffee_data` and update the name.
 `inner_join()`ing the updated data frame returns a result with all 46 coffee-producing nations:
 
-```{r 03-attribute-operations-39, warning=FALSE}
+```{r, warning=FALSE}
 coffee_data$name_long[grepl("Congo,", coffee_data$name_long)] = 
   str_subset(world$name_long, "Dem*.+Congo")
 world_coffee_match = inner_join(world, coffee_data)
@@ -467,12 +467,12 @@ This is demonstrated below, which starts with the `coffee_data` object and adds 
 In contrast with the previous joins, the result is *not* another simple feature object, but a data frame in the form of a **tidyverse** tibble:
 the output of a join tends to match its first argument:
 
-```{r 03-attribute-operations-40, warning=FALSE}
+```{r, warning=FALSE}
 coffee_world = left_join(coffee_data, world)
 class(coffee_world)
 ```
 
-```{block2 03-attribute-operations-41, type='rmdnote'}
+```{block2 type='rmdnote'}
 In most cases, the geometry column is only useful in an `sf` object.
 The geometry column can only be used for creating maps and spatial operations if R 'knows' it is a spatial object, defined by a spatial package such as **sf**.
 Fortunately, non-spatial data frames with a geometry list column (like `coffee_world`) can be coerced into an `sf` object as follows: `st_as_sf(coffee_world)`. 
@@ -492,7 +492,7 @@ For example, we want to calculate population density for each country.
 For this we need to divide a population column, here `pop`, by an area column, here `area_km2` with unit area in square kilometers.
 Using base R, we can type:
 
-```{r 03-attribute-operations-42}
+```{r}
 world_new = world # do not overwrite our original data
 world_new$pop_dens = world_new$pop / world_new$area_km2
 ```
@@ -500,14 +500,14 @@ world_new$pop_dens = world_new$pop / world_new$area_km2
 Alternatively, we can use one of **dplyr** functions - `mutate()` or `transmute()`.
 `mutate()` adds new columns at the penultimate position in the `sf` object (the last one is reserved for the geometry):
 
-```{r 03-attribute-operations-43, eval=FALSE}
+```{r, eval=FALSE}
 world %>% 
   mutate(pop_dens = pop / area_km2)
 ```
 
 The difference between `mutate()` and `transmute()` is that the latter skips all other existing columns (except for the sticky geometry column):
 
-```{r 03-attribute-operations-44, eval=FALSE}
+```{r, eval=FALSE}
 world %>% 
   transmute(pop_dens = pop / area_km2)
 ```
@@ -516,19 +516,19 @@ world %>%
 For example, we want to combine the `continent` and `region_un` columns into a new column named `con_reg`.
 Additionally, we can define a separator (here: a colon `:`) which defines how the values of the input columns should be joined, and if the original columns should be removed (here: `TRUE`):
 
-```{r 03-attribute-operations-45, eval=FALSE}
+```{r, eval=FALSE}
 world_unite = world %>%
   unite("con_reg", continent:region_un, sep = ":", remove = TRUE)
 ```
 
 The `separate()` function does the opposite of `unite()`: it splits one column into multiple columns using either a regular expression or character positions.
 
-```{r 03-attribute-operations-46, eval=FALSE}
+```{r, eval=FALSE}
 world_separate = world_unite %>% 
   separate(con_reg, c("continent", "region_un"), sep = ":")
 ```
 
-```{r 03-attribute-operations-47, echo=FALSE, eval=FALSE}
+```{r, echo=FALSE, eval=FALSE}
 identical(world, world_separate)
 ```
 
@@ -536,7 +536,7 @@ The two functions `rename()` and `set_names()` are useful for renaming columns.
 The first replaces an old name with a new one.
 The following command, for example, renames the lengthy `name_long` column to simply `name`:
 
-```{r 03-attribute-operations-48, eval=FALSE}
+```{r, eval=FALSE}
 world %>% 
   rename(name = name_long)
 ```
@@ -544,11 +544,11 @@ world %>%
 `set_names()` changes all column names at once, and requires a character vector with a name matching each column.
 This is illustrated below, which outputs the same `world` object, but with very short names: 
 
-```{r 03-attribute-operations-49, eval=FALSE, echo=FALSE}
+```{r, eval=FALSE, echo=FALSE}
 abbreviate(names(world), minlength = 1) %>% dput()
 ```
 
-```{r 03-attribute-operations-50, eval=FALSE}
+```{r, eval=FALSE}
 new_names = c("i", "n", "c", "r", "s", "t", "a", "p", "l", "gP", "geom")
 world %>% 
   set_names(new_names)
@@ -562,7 +562,7 @@ Hence, an approach such as `select(world, -geom)` will be unsuccessful and you s
 `st_geometry(world_st) = NULL` also works to remove the geometry from `world`, but overwrites the original object.
 ]
 
-```{r 03-attribute-operations-51}
+```{r}
 world_data = world %>% st_set_geometry(NULL)
 class(world_data)
 ```
@@ -576,7 +576,7 @@ Because of their unique structure, subsetting and other operations on raster dat
 The following code recreates the raster dataset used in Section \@ref(raster-classes), the result of which is illustrated in Figure \@ref(fig:cont-raster).
 This demonstrates how the `raster()` function works to create an example raster named `elev` (representing elevations).
 
-```{r 03-attribute-operations-52, message=FALSE, eval = FALSE}
+```{r, message=FALSE, eval = FALSE}
 elev = raster(nrows = 6, ncols = 6, res = 0.5,
               xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
               vals = 1:36)
@@ -587,7 +587,7 @@ The `vals` argument sets the values that each cell contains: numeric data rangin
 Raster objects can also contain categorical values of class `logical` or `factor` variables in R.
 The following code creates a raster representing grain sizes (Figure \@ref(fig:cont-raster)):
 
-```{r 03-attribute-operations-53, eval = FALSE}
+```{r, eval = FALSE}
 grain_order = c("clay", "silt", "sand")
 grain_char = sample(grain_order, 36, replace = TRUE)
 grain_fact = factor(grain_char, levels = grain_order)
@@ -596,13 +596,13 @@ grain = raster(nrows = 6, ncols = 6, res = 0.5,
                vals = grain_fact)
 ```
 
-```{r 03-attribute-operations-54, include = FALSE}
+```{r, include = FALSE}
 library(spData)
 data("elev")
 data("grain")
 ```
 
-```{block2 03-attribute-operations-55, type='rmdnote'}
+```{block2 type='rmdnote'}
 `raster` objects can contain values of class `numeric`, `integer`, `logical` or `factor`, but not `character`.
 To use character values, they must first be converted into an appropriate class, for example using the function `factor()`. 
 The `levels` argument was used in the preceding code chunk to create an ordered factor:
@@ -614,7 +614,7 @@ See the Data structures chapter of @wickham_advanced_2014 for further details on
 The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes`, which can be viewed with `ratify(grain)` (see `?ratify()` for more information).
 Use the function `levels()` for retrieving and adding new factor levels to the attribute table:
 
-```{r 03-attribute-operations-56}
+```{r}
 levels(grain)[[1]] = cbind(levels(grain)[[1]], wetness = c("wet", "moist", "dry"))
 levels(grain)
 ```
@@ -622,7 +622,7 @@ levels(grain)
 This behavior demonstrates that raster cells can only possess one value, an identifier which can be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`).
 This is illustrated in command below, which returns the grain size and wetness of cell IDs 1, 11 and 35:
 
-```{r 03-attribute-operations-57}
+```{r}
 factorValues(grain, grain[c(1, 11, 35)])
 ```
 
@@ -646,7 +646,7 @@ Therefore, the latter two options will be shown in the next chapter (see Section
 The first two subsetting options are demonstrated in the commands below ---
 both return the value of the top left pixel in the raster object `elev` (results not shown):
 
-```{r 03-attribute-operations-58, eval = FALSE}
+```{r, eval = FALSE}
 # row 1, column 1
 elev[1, 1]
 # cell ID 1
@@ -658,7 +658,7 @@ For multi-layered raster objects `stack` or `brick`, this will return the cell v
 For example, `stack(elev, grain)[1]` returns a matrix with one row and two columns --- one for each layer.
 For multi-layer raster objects another way to subset is with `raster::subset()`, which extracts layers from a raster stack or brick. The `[[` and `$` operators can also be used:
 
-```{r 03-attribute-operations-59, eval = FALSE}
+```{r, eval = FALSE}
 r_stack = stack(elev, grain)
 names(r_stack) = c("elev", "grain")
 # three ways to extract a layer of a stack
@@ -670,7 +670,7 @@ r_stack$elev
 Cell values can be modified by overwriting existing values in conjunction with a subsetting operation.
 The following code chunk, for example, sets the upper left cell of `elev` to 0:
 
-```{r 03-attribute-operations-60}
+```{r}
 elev[1, 1] = 0
 elev[]
 ```
@@ -678,7 +678,7 @@ elev[]
 Leaving the square brackets empty is a shortcut version of `values()` for retrieving all values of a raster.
 Multiple cells can also be modified in this way:
 
-```{r 03-attribute-operations-61}
+```{r}
 elev[1, 1:2] = 0
 ```
 
@@ -689,18 +689,18 @@ Printing a raster object to the console by typing its name returns minimum and m
 `summary()` provides common descriptive statistics (minimum, maximum, interquartile range and number of `NA`s).
 Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with `cellStats()`. 
 
-```{r 03-attribute-operations-62, eval = FALSE}
+```{r, eval = FALSE}
 cellStats(elev, sd)
 ```
 
-```{block2 03-attribute-operations-63, type='rmdnote'}
+```{block2 type='rmdnote'}
 If you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately, as can be illustrated by running: `summary(brick(elev, grain))`.
 ```
 
 Raster value statistics can be visualized in a variety of ways.
 Specific functions such as `boxplot()`, `density()`, `hist()` and `pairs()` work also with raster objects, as demonstrated in the histogram created with the command below (not shown):
 
-```{r 03-attribute-operations-64, eval=FALSE}
+```{r, eval=FALSE}
 hist(elev)
 ```
 
@@ -709,7 +709,7 @@ In case a visualization function does not work with raster objects, one can extr
 Descriptive raster statistics belong to the so-called global raster operations.
 These and other typical raster processing operations are part of the map algebra scheme, which are covered in the next chapter (Section \@ref(map-algebra)).
 
-```{block 03-attribute-operations-65, type='rmdnote'}
+```{block type='rmdnote'}
 Some function names clash between packages (e.g., `select()`, as discussed in a previous note).
 In addition to not loading packages by referring to functions verbosely (e.g., `dplyr::select()`), another way to prevent function names clashes is by unloading the offending package with `detach()`.
 The following command, for example, unloads the **raster** package (this can also be done in the *package* tab which resides by default in the right-bottom pane in RStudio): `detach("package:raster", unload = TRUE, force = TRUE)`.
@@ -721,7 +721,7 @@ This, however, may lead to a restricted usability of packages depending on the d
 
 For these exercises we will use the `us_states` and `us_states_df` datasets from the **spData** package:
 
-```{r 03-attribute-operations-66}
+```{r}
 library(spData)
 data(us_states)
 data(us_states_df)
