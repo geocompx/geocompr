@@ -1,4 +1,4 @@
-## ---- message=FALSE------------------------------------------------------
+## ----14-eco-1, message=FALSE---------------------------------------------
 library(sf)
 library(raster)
 library(RQGIS)
@@ -9,15 +9,15 @@ library(vegan)
 ## ----study-area-mongon, echo=FALSE, fig.cap="The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017).", out.width="60%", fig.scap="The Mt. Mongón study area."----
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/38989956-6eae7c9a-43d0-11e8-8f25-3dd3594f7e74.png")
 
-## ------------------------------------------------------------------------
+## ----14-eco-2------------------------------------------------------------
 data("study_area", "random_points", "comm", "dem", "ndvi", package = "RQGIS")
 
-## ------------------------------------------------------------------------
+## ----14-eco-3------------------------------------------------------------
 # sites 35 to 40 and corresponding occurrences of the first five species in the
 # community matrix
 comm[35:40, 1:5]
 
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## ----14-eco-4, eval=FALSE, echo=FALSE------------------------------------
 ## # create hillshade
 ## hs = hillShade(terrain(dem), terrain(dem, "aspect"))
 ## # plot the data
@@ -53,7 +53,7 @@ grid.text("m asl", x = unit(0.8, "npc"), y = unit(0.75, "npc"),
           gp = gpar(cex = 0.8))
 
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----14-eco-5, eval=FALSE------------------------------------------------
 ## get_usage("saga:sagawetnessindex")
 ## #>ALGORITHM: Saga wetness index
 ## #>	DEM <ParameterRaster>
@@ -70,7 +70,7 @@ grid.text("m asl", x = unit(0.8, "npc"), y = unit(0.75, "npc"),
 ## #>	1 - [1] catchment slope
 ## #> ...
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----14-eco-6, eval=FALSE------------------------------------------------
 ## # environmental predictors: catchment slope and catchment area
 ## ep = run_qgis(alg = "saga:sagawetnessindex",
 ##               DEM = dem,
@@ -80,26 +80,26 @@ grid.text("m asl", x = unit(0.8, "npc"), y = unit(0.75, "npc"),
 ##               load_output = TRUE,
 ##               show_output_paths = FALSE)
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----14-eco-7, eval=FALSE------------------------------------------------
 ## ep = stack(c(dem, ndvi, ep))
 ## names(ep) = c("dem", "ndvi", "carea", "cslope")
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----14-eco-8, eval=FALSE------------------------------------------------
 ## ep$carea = log10(ep$carea)
 
-## ------------------------------------------------------------------------
+## ----14-eco-9------------------------------------------------------------
 data("ep", package = "spDataLarge")
 
-## ------------------------------------------------------------------------
-random_points[, names(ep)] = raster::extract(ep, as(random_points, "Spatial"))
+## ----14-eco-10-----------------------------------------------------------
+random_points[, names(ep)] = raster::extract(ep, random_points)
 
-## ------------------------------------------------------------------------
+## ----14-eco-11-----------------------------------------------------------
 # presence-absence matrix
 pa = decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
 pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
 
-## ---- eval=FALSE, message=FALSE------------------------------------------
+## ----14-eco-12, eval=FALSE, message=FALSE--------------------------------
 ## set.seed(25072018)
 ## nmds = metaMDS(comm = pa, k = 4, try = 500)
 ## nmds$stress
@@ -113,10 +113,10 @@ pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
 ## #> *** Solution reached
 ## #> 0.08831395
 
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## ----14-eco-13, eval=FALSE, echo=FALSE-----------------------------------
 ## saveRDS(nmds, "extdata/14-nmds.rds")
 
-## ---- include=FALSE------------------------------------------------------
+## ----14-eco-14, include=FALSE--------------------------------------------
 nmds = readRDS("extdata/14-nmds.rds")
 
 ## ----xy-nmds, fig.cap="Plotting the first NMDS axis against altitude.", fig.scap = "First NMDS axis against altitude plot.", fig.asp=1, out.width="60%"----
@@ -130,7 +130,7 @@ sc = scores(rotnmds, choices = 1:2)
 plot(y = sc[, 1], x = elev, xlab = "elevation in m", 
      ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8)
 
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## ----14-eco-15, eval=FALSE, echo=FALSE-----------------------------------
 ## # scores and rotated scores in one figure
 ## p1 = xyplot(scores(rotnmds)[, 2] ~ scores(rotnmds)[, 1], pch = 16,
 ##              col = "lightblue", xlim = c(-3, 2), ylim = c(-2, 2),
@@ -179,24 +179,24 @@ plot(y = sc[, 1], x = elev, xlab = "elevation in m",
 ## plot(rotnmds, display = "sites")
 ## plot(fit_2)
 
-## ------------------------------------------------------------------------
+## ----14-eco-16-----------------------------------------------------------
 # construct response-predictor matrix
 # id- and response variable
 rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
 rp = inner_join(random_points, rp, by = "id")
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----14-eco-17, eval=FALSE-----------------------------------------------
 ## library("tree")
 ## tree_mo = tree(sc ~ dem, data = rp)
 ## plot(tree_mo)
 ## text(tree_mo, pretty = 0)
 
-## ---- echo=FALSE, eval=TRUE----------------------------------------------
+## ----14-eco-18, echo=FALSE, eval=TRUE------------------------------------
 library("tree")
 tree_mo = tree(sc ~ dem, data = rp)
 
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## ----14-eco-19, eval=FALSE, echo=FALSE-----------------------------------
 ## png("figures/14_tree.png", width = 1100, height = 700, units = "px", res = 300)
 ## par(mar = rep(1, 4))
 ## plot(tree_mo)
@@ -206,7 +206,7 @@ tree_mo = tree(sc ~ dem, data = rp)
 ## ----tree, echo=FALSE, fig.cap="Simple example of a decision tree with three internal nodes and four terminal nodes.", fig.scap="Simple example of a decision tree."----
 knitr::include_graphics("figures/14_tree.png")
 
-## ------------------------------------------------------------------------
+## ----14-eco-20-----------------------------------------------------------
 # extract the coordinates into a separate data frame
 coords = sf::st_coordinates(rp) %>% 
   as.data.frame() %>%
@@ -215,19 +215,19 @@ coords = sf::st_coordinates(rp) %>%
 rp = dplyr::select(rp, -id, -spri) %>%
   st_set_geometry(NULL)
 
-## ------------------------------------------------------------------------
+## ----14-eco-21-----------------------------------------------------------
 # create task
 task = makeRegrTask(data = rp, target = "sc", coordinates = coords)
 # learner
 lrn_rf = makeLearner(cl = "regr.ranger", predict.type = "response")
 
-## ------------------------------------------------------------------------
+## ----14-eco-22-----------------------------------------------------------
 # spatial partitioning
 perf_level = makeResampleDesc("SpCV", iters = 5)
 # specifying random search
 ctrl = makeTuneControlRandom(maxit = 50L)
 
-## ------------------------------------------------------------------------
+## ----14-eco-23-----------------------------------------------------------
 # specifying the search space
 ps = makeParamSet(
   makeIntegerParam("mtry", lower = 1, upper = ncol(rp) - 1),
@@ -235,7 +235,7 @@ ps = makeParamSet(
   makeIntegerParam("min.node.size", lower = 1, upper = 10)
 )
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----14-eco-24, eval=FALSE-----------------------------------------------
 ## # hyperparamter tuning
 ## set.seed(02082018)
 ## tune = tuneParams(learner = lrn_rf,
@@ -252,13 +252,13 @@ ps = makeParamSet(
 ## #> [Tune] Result: mtry=4; sample.fraction=0.887; min.node.size=10 :
 ## #> rmse.test.rmse=0.5104918
 
-## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## ----14-eco-25, eval=FALSE, echo=FALSE-----------------------------------
 ## saveRDS(tune, "extdata/14-tune.rds")
 
-## ---- echo=FALSE---------------------------------------------------------
+## ----14-eco-26, echo=FALSE-----------------------------------------------
 tune = readRDS("extdata/14-tune.rds")
 
-## ------------------------------------------------------------------------
+## ----14-eco-27-----------------------------------------------------------
 # learning using the best hyperparameter combination
 lrn_rf = makeLearner(cl = "regr.ranger",
                      predict.type = "response",
@@ -278,7 +278,7 @@ model_rf = train(lrn_rf, task)
 #        sample.fraction = tune$x$sample.fraction,
 #        min.node.sie = tune$x$min.node.size)
 
-## ------------------------------------------------------------------------
+## ----14-eco-28-----------------------------------------------------------
 # convert raster stack into a data frame
 new_data = as.data.frame(as.matrix(ep))
 # apply the model to the data frame

@@ -1,4 +1,4 @@
-## ---- message=FALSE------------------------------------------------------
+## ----13-location-1, message=FALSE----------------------------------------
 library(sf)
 library(dplyr)
 library(purrr)
@@ -6,16 +6,16 @@ library(raster)
 library(osmdata)
 library(spDataLarge)
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----13-location-2, eval=FALSE-------------------------------------------
 ## download.file("https://tinyurl.com/ybtpkwxz",
 ##               destfile = "census.zip", mode = "wb")
 ## unzip("census.zip") # unzip the files
 ## census_de = readr::read_csv2(list.files(pattern = "Gitter.csv"))
 
-## ------------------------------------------------------------------------
+## ----13-location-3-------------------------------------------------------
 data("census_de", package = "spDataLarge")
 
-## ------------------------------------------------------------------------
+## ----13-location-4-------------------------------------------------------
 # pop = population, hh_size = household size
 input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D,
@@ -66,10 +66,10 @@ knitr::kable(tab,
              caption.short = "Categories for each variable in census data.",
              align = "c", booktabs = TRUE)
 
-## ------------------------------------------------------------------------
+## ----13-location-5-------------------------------------------------------
 input_ras = rasterFromXYZ(input_tidy, crs = st_crs(3035)$proj4string)
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----13-location-6, eval=FALSE-------------------------------------------
 ## input_ras
 ## #> class : RasterBrick
 ## #> dimensions : 868, 642, 557256, 4 (nrow, ncol, ncell, nlayers)
@@ -85,7 +85,7 @@ input_ras = rasterFromXYZ(input_tidy, crs = st_crs(3035)$proj4string)
 ## ----census-stack, echo=FALSE, fig.cap="Gridded German census data of 2011 (see Table 13.1 for a description of the classes).", fig.scap="Gridded German census data."----
 knitr::include_graphics("figures/08_census_stack.png")
 
-## ------------------------------------------------------------------------
+## ----13-location-8-------------------------------------------------------
 rcl_pop = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 
                    4, 4, 3000, 5, 5, 6000, 6, 6, 8000), 
                  ncol = 3, byrow = TRUE)
@@ -96,38 +96,38 @@ rcl_age = matrix(c(1, 1, 3, 2, 2, 0, 3, 5, 0),
 rcl_hh = rcl_women
 rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
 
-## ------------------------------------------------------------------------
+## ----13-location-9-------------------------------------------------------
 reclass = input_ras
 for (i in seq_len(nlayers(reclass))) {
   reclass[[i]] = reclassify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
 }
 names(reclass) = names(input_ras)
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----13-location-10, eval=FALSE------------------------------------------
 ## reclass
 ## #> ... (full output not shown)
 ## #> names       :  pop, women, mean_age, hh_size
 ## #> min values  :  127,     0,        0,       0
 ## #> max values  : 8000,     3,        3,       3
 
-## ---- warning=FALSE------------------------------------------------------
+## ----13-location-11, warning=FALSE---------------------------------------
 pop_agg = aggregate(reclass$pop, fact = 20, fun = sum)
 
-## ---- warning=FALSE------------------------------------------------------
+## ----13-location-12, warning=FALSE---------------------------------------
 pop_agg = pop_agg[pop_agg > 500000, drop = FALSE] 
 
-## ---- warning=FALSE, message=FALSE---------------------------------------
+## ----13-location-13, warning=FALSE, message=FALSE------------------------
 polys = pop_agg %>% 
   clump() %>%
   rasterToPolygons() %>%
   st_as_sf()
 
-## ------------------------------------------------------------------------
+## ----13-location-14------------------------------------------------------
 metros = polys %>%
   group_by(clumps) %>%
   summarize()
 
-## ---- eval = FALSE-------------------------------------------------------
+## ----13-location-15, eval = FALSE----------------------------------------
 ## # dissolve on spatial neighborhood
 ## nbs = st_intersects(polys, polys)
 ## # nbs = over(polys, polys, returnList = TRUE)
@@ -186,18 +186,18 @@ metros = polys %>%
 ## ----metro-areas, echo=FALSE, fig.width=1, fig.height=1, fig.cap="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names.", fig.scap="The aggregated population raster."----
 knitr::include_graphics("figures/08_metro_areas.png")
 
-## ---- warning=FALSE------------------------------------------------------
+## ----13-location-16, warning=FALSE---------------------------------------
 metros_wgs = st_transform(metros, 4326)
 coords = st_centroid(metros_wgs) %>%
   st_coordinates() %>%
   round(4)
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----13-location-17, eval=FALSE------------------------------------------
 ## library(revgeo)
 ## metro_names = revgeo(longitude = coords[, 1], latitude = coords[, 2],
 ##                      output = "frame")
 
-## ------------------------------------------------------------------------
+## ----13-location-18------------------------------------------------------
 # attach metro_names from spDataLarge
 data("metro_names", package = "spDataLarge")
 
@@ -207,12 +207,12 @@ knitr::kable(dplyr::select(metro_names, city, state),
              caption.short = "Result of the reverse geocoding.", 
              booktabs = TRUE)
 
-## ------------------------------------------------------------------------
+## ----13-location-19------------------------------------------------------
 metro_names = dplyr::pull(metro_names, city) %>% 
   as.character() %>% 
   ifelse(. == "Wülfrath", "Duesseldorf", .)
 
-## ---- eval=FALSE, message=FALSE------------------------------------------
+## ----13-location-20, eval=FALSE, message=FALSE---------------------------
 ## shops = map(metro_names, function(x) {
 ##   message("Downloading shops of: ", x, "\n")
 ##   # give the server a bit time
@@ -229,7 +229,7 @@ metro_names = dplyr::pull(metro_names, city) %>%
 ##   points = st_set_crs(points$osm_points, 4326)
 ## })
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----13-location-21, eval=FALSE------------------------------------------
 ## # checking if we have downloaded shops for each metropolitan area
 ## ind = map(shops, nrow) == 0
 ## if (any(ind)) {
@@ -237,23 +237,23 @@ metro_names = dplyr::pull(metro_names, city) %>%
 ##           paste(metro_names[ind], collapse = ", "), "\nPlease fix it!")
 ## }
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----13-location-22, eval=FALSE------------------------------------------
 ## # select only specific columns
 ## shops = map(shops, dplyr::select, osm_id, shop)
 ## # putting all list elements into a single data frame
 ## shops = do.call(rbind, shops)
 
-## ------------------------------------------------------------------------
+## ----13-location-23------------------------------------------------------
 data("shops", package = "spDataLarge")
 
 ## If the `shop` column were used instead of the `osm_id` column, we would have retrieved fewer shops per grid cell.
 
-## ---- message=FALSE------------------------------------------------------
+## ----13-location-25, message=FALSE---------------------------------------
 shops = st_transform(shops, proj4string(reclass))
 # create poi raster
 poi = rasterize(x = shops, y = reclass, field = "osm_id", fun = "count")
 
-## ---- message=FALSE, warning=FALSE---------------------------------------
+## ----13-location-26, message=FALSE, warning=FALSE------------------------
 # construct reclassification matrix
 int = classInt::classIntervals(values(poi), n = 4, style = "fisher")
 int = round(int$brks)
@@ -264,13 +264,13 @@ rcl_poi = cbind(rcl_poi, 0:3)
 poi = reclassify(poi, rcl = rcl_poi, right = NA) 
 names(poi) = "poi"
 
-## ------------------------------------------------------------------------
+## ----13-location-27------------------------------------------------------
 # add poi raster
 reclass = addLayer(reclass, poi)
 # delete population raster
 reclass = dropLayer(reclass, "pop")
 
-## ------------------------------------------------------------------------
+## ----13-location-28------------------------------------------------------
 # calculate the total score
 result = sum(reclass)
 
@@ -279,7 +279,7 @@ library(leaflet)
 library(sp)
 # have a look at suitable bike shop locations in Berlin
 berlin = metros[metro_names == "Berlin", ]
-berlin_raster = raster::crop(result, as(berlin, "Spatial"))
+berlin_raster = raster::crop(result, berlin)
 # summary(berlin_raster)
 # berlin_raster
 berlin_raster = berlin_raster > 9
