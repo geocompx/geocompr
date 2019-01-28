@@ -7,7 +7,7 @@ In it you will also make use of R's interfaces to dedicated GIS software, and sp
 
 The chapter uses the following packages:
 
-```{r, message=FALSE} 
+```{r 14-eco-1, message=FALSE }
 library(sf)
 library(raster)
 library(RQGIS)
@@ -62,7 +62,7 @@ To guarantee an optimal prediction, it is advisable to tune beforehand the hyper
 
 All the data needed for the subsequent analyses is available via the **RQGIS** package.
 
-```{r}
+```{r 14-eco-2}
 data("study_area", "random_points", "comm", "dem", "ndvi", package = "RQGIS")
 ```
 
@@ -70,7 +70,7 @@ data("study_area", "random_points", "comm", "dem", "ndvi", package = "RQGIS")
 `random_points` is an `sf` object, and contains the 100 randomly chosen sites.
 `comm` is a community matrix of the wide data format [@wickham_tidy_2014] where the rows represent the visited sites in the field and the columns the observed species.^[In statistics, this is also called a contingency table or cross-table.]
 
-```{r}
+```{r 14-eco-3}
 # sites 35 to 40 and corresponding occurrences of the first five species in the
 # community matrix
 comm[35:40, 1:5]
@@ -81,7 +81,7 @@ The rownames of `comm` correspond to the `id` column of `random_points`.
 `dem` is the digital elevation model (DEM) for the study area, and `ndvi` is the Normalized Difference Vegetation Index (NDVI) computed from the red and near-infrared channels of a Landsat scene (see Section \@ref(local-operations) and `?ndvi`).
 Visualizing the data helps to get more familiar with it, as shown in Figure \@ref(fig:sa-mongon) where the `dem` is overplotted by the `random_points` and the `study_area`.
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 14-eco-4, eval=FALSE, echo=FALSE}
 # create hillshade
 hs = hillShade(terrain(dem), terrain(dem, "aspect"))
 # plot the data
@@ -128,7 +128,7 @@ To compute catchment area and catchment slope, we will make use of the `saga:sag
 `get_usage()` returns all function parameters and default values of a specific geoalgorithm.
 Here, we present only a selection of the complete output.
 
-```{r, eval=FALSE}
+```{r 14-eco-5, eval=FALSE}
 get_usage("saga:sagawetnessindex")
 #>ALGORITHM: Saga wetness index
 #>	DEM <ParameterRaster>
@@ -152,7 +152,7 @@ Specifying 1 as the `SLOPE_TYPE` makes sure that the algorithm will return the c
 The resulting output rasters should be saved to temporary files with an `.sdat` extension which is a SAGA raster format.
 Setting `load_output` to `TRUE` ensures that the resulting rasters will be imported into R.
 
-```{r, eval=FALSE}
+```{r 14-eco-6, eval=FALSE}
 # environmental predictors: catchment slope and catchment area
 ep = run_qgis(alg = "saga:sagawetnessindex",
               DEM = dem,
@@ -166,7 +166,7 @@ ep = run_qgis(alg = "saga:sagawetnessindex",
 This returns a list named `ep` consisting of two elements: `AREA` and `SLOPE`.
 Let us add two more raster objects to the list, namely `dem` and `ndvi`, and convert it into a raster stack (see Section \@ref(raster-classes)).
 
-```{r, eval=FALSE}
+```{r 14-eco-7, eval=FALSE}
 ep = stack(c(dem, ndvi, ep))
 names(ep) = c("dem", "ndvi", "carea", "cslope")
 ```
@@ -174,19 +174,19 @@ names(ep) = c("dem", "ndvi", "carea", "cslope")
 Additionally, the catchment area values are highly skewed to the right (`hist(ep$carea)`).
 A log10-transformation makes the distribution more normal.
 
-```{r, eval=FALSE}
+```{r 14-eco-8, eval=FALSE}
 ep$carea = log10(ep$carea)
 ```
 
 As a convenience to the reader, we have added `ep` to **spDataLarge**:
 
-```{r}
+```{r 14-eco-9}
 data("ep", package = "spDataLarge")
 ```
 
 Finally, we can extract the terrain attributes to our field observations (see also Section \@ref(raster-extraction)).
 
-```{r}
+```{r 14-eco-10}
 random_points[, names(ep)] = raster::extract(ep, random_points)
 ```
 
@@ -220,7 +220,7 @@ Often ordinations using presence-absence data yield better results (in terms of 
 Ordination techniques such as NMDS require at least one observation per site.
 Hence, we need to dismiss all sites in which no species were found.
 
-```{r}
+```{r 14-eco-11}
 # presence-absence matrix
 pa = decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
@@ -232,7 +232,7 @@ The resulting output matrix serves as input for the NMDS.
 NMDS is an iterative procedure trying to make the ordinated space more similar to the input matrix in each step.
 To make sure that the algorithm converges, we set the number of steps to 500 (`try` parameter).
 
-```{r, eval=FALSE, message=FALSE}
+```{r 14-eco-12, eval=FALSE, message=FALSE}
 set.seed(25072018)
 nmds = metaMDS(comm = pa, k = 4, try = 500)
 nmds$stress
@@ -247,11 +247,11 @@ nmds$stress
 #> 0.08831395
 ```
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 14-eco-13, eval=FALSE, echo=FALSE}
 saveRDS(nmds, "extdata/14-nmds.rds")
 ```
 
-```{r, include=FALSE}
+```{r 14-eco-14, include=FALSE}
 nmds = readRDS("extdata/14-nmds.rds")
 ```
 
@@ -274,7 +274,7 @@ plot(y = sc[, 1], x = elev, xlab = "elevation in m",
      ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8)
 ```
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 14-eco-15, eval=FALSE, echo=FALSE}
 # scores and rotated scores in one figure                        
 p1 = xyplot(scores(rotnmds)[, 2] ~ scores(rotnmds)[, 1], pch = 16, 
              col = "lightblue", xlim = c(-3, 2), ylim = c(-2, 2),
@@ -337,7 +337,7 @@ We refer the reader to @james_introduction_2013 for a more detailed description 
 To introduce decision trees by example, we first construct a response-predictor matrix by joining the rotated NMDS scores to the field observations (`random_points`).
 We will also use the resulting data frame for the **mlr** modeling later on.
 
-```{r}
+```{r 14-eco-16}
 # construct response-predictor matrix
 # id- and response variable
 rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
@@ -348,19 +348,19 @@ rp = inner_join(random_points, rp, by = "id")
 Decision trees split the predictor space into a number of regions.
 To illustrate this, we apply a decision tree to our data using the scores of the first NMDS axis as the response (`sc`) and altitude (`dem`) as the only predictor.
 
-```{r, eval=FALSE}
+```{r 14-eco-17, eval=FALSE}
 library("tree")
 tree_mo = tree(sc ~ dem, data = rp)
 plot(tree_mo)
 text(tree_mo, pretty = 0)
 ```
 
-```{r, echo=FALSE, eval=TRUE}
+```{r 14-eco-18, echo=FALSE, eval=TRUE}
 library("tree")
 tree_mo = tree(sc ~ dem, data = rp)
 ```
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 14-eco-19, eval=FALSE, echo=FALSE}
 png("figures/14_tree.png", width = 1100, height = 700, units = "px", res = 300)
 par(mar = rep(1, 4))
 plot(tree_mo)
@@ -415,7 +415,7 @@ Therefore, we tune the hyperparameters for a good spatial prediction on the comp
 
 The preparation for the modeling using the **mlr** package includes the construction of a response-predictor matrix containing only variables which should be used in the modeling and the construction of a separate coordinate data frame.
 
-```{r}
+```{r 14-eco-20}
 # extract the coordinates into a separate data frame
 coords = sf::st_coordinates(rp) %>% 
   as.data.frame() %>%
@@ -429,7 +429,7 @@ Having constructed the input variables, we are all set for specifying the **mlr*
 We will use a regression task since the response variable is numeric.
 The learner is a random forest model implementation from the **ranger** package.
 
-```{r}
+```{r 14-eco-21}
 # create task
 task = makeRegrTask(data = rp, target = "sc", coordinates = coords)
 # learner
@@ -442,7 +442,7 @@ Since we deal with geographic data, we will again make use of spatial cross-vali
 Specifically, we will use a five-fold spatial partitioning with only one repetition (`makeResampleDesc()`). 
 In each of these spatial partitions, we run 50 models (`makeTuneControlRandom()`) to find the optimal hyperparameter combination.
 
-```{r}
+```{r 14-eco-22}
 # spatial partitioning
 perf_level = makeResampleDesc("SpCV", iters = 5)
 # specifying random search
@@ -460,7 +460,7 @@ Naturally, as trees and computing time become larger, the lower the `min.node.si
 Hyperparameter combinations will be selected randomly but should fall inside specific tuning limits (`makeParamSet()`).
 `mtry` should range between 1 and the number of predictors (`r ncol(rp) - 1`), `sample.fraction` should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10.
 
-```{r}
+```{r 14-eco-23}
 # specifying the search space
 ps = makeParamSet(
   makeIntegerParam("mtry", lower = 1, upper = ncol(rp) - 1),
@@ -472,7 +472,7 @@ ps = makeParamSet(
 Finally, `tuneParams()` runs the hyperparameter tuning, and will find the optimal hyperparameter combination for the specified parameters.
 The performance measure is the root mean squared error (RMSE).
 
-```{r, eval=FALSE}
+```{r 14-eco-24, eval=FALSE}
 # hyperparamter tuning
 set.seed(02082018)
 tune = tuneParams(learner = lrn_rf, 
@@ -490,11 +490,11 @@ tune = tuneParams(learner = lrn_rf,
 #> rmse.test.rmse=0.5104918
 ```
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 14-eco-25, eval=FALSE, echo=FALSE}
 saveRDS(tune, "extdata/14-tune.rds")
 ```
 
-```{r, echo=FALSE}
+```{r 14-eco-26, echo=FALSE}
 tune = readRDS("extdata/14-tune.rds")
 ```
 
@@ -506,7 +506,7 @@ A RMSE of `r round(tune$y[attr(tune$y, "names") == "rmse.test.rmse"], 2)` is rel
 The tuned hyperparameters can now be used for the prediction.
 We simply have to modify our learner using the result of the hyperparameter tuning, and run the corresponding model.
 
-```{r}
+```{r 14-eco-27}
 # learning using the best hyperparameter combination
 lrn_rf = makeLearner(cl = "regr.ranger",
                      predict.type = "response",
@@ -532,7 +532,7 @@ So far, `raster::predict()` does not support the output of **ranger** models, he
 First, we convert `ep` into a prediction data frame which secondly serves as input for the `predict.ranger()` function.
 Thirdly, we put the predicted values back into a `RasterLayer` (see Section \@ref(raster-subsetting) and Figure \@ref(fig:rf-pred)).
 
-```{r}
+```{r 14-eco-28}
 # convert raster stack into a data frame
 new_data = as.data.frame(as.matrix(ep))
 # apply the model to the data frame
