@@ -56,7 +56,7 @@ print("Hello geocompr")
 The lines of code may not be particularly exciting but they demonstrate the point: scripts do not need to be complicated.
 Saved scripts can be called and executed in their entirety with `source()`, as demonstrated below which shows how the comment is ignored but the instruction is executed:
 
-```{r}
+```{r 10-algorithms-1}
 source("code/10-hello.R")
 ```
 
@@ -94,7 +94,7 @@ This example shows that `source()` works with URLs (a shortened version is used 
 If you do not, the same script can be called with `source("code/10-centroid-alg.R")`, assuming you are running R from the root directory of the `geocompr` folder, which can be downloaded from https://github.com/Robinlovelace/geocompr.
 ]
 
-```{r, eval=FALSE}
+```{r 10-algorithms-2, eval=FALSE}
 poly_mat = cbind(
   x = c(0, 0, 9, 9, 0),
   y = c(0, 9, 9, 0, 0)
@@ -102,7 +102,7 @@ poly_mat = cbind(
 source("https://git.io/10-centroid-alg.R") # short url
 ```
 
-```{r, echo=FALSE}
+```{r 10-algorithms-3, echo=FALSE}
 poly_mat = cbind(
   x = c(0, 0, 9, 9, 0),
   y = c(0, 9, 9, 0, 0)
@@ -159,7 +159,7 @@ In this case, we'll create a polygon with five vertices in base R, building on a
 source("code/10-centroid-setup.R")
 ```
 
-```{r}
+```{r 10-algorithms-4}
 # generate a simple matrix representation of a polygon:
 x_coords = c(10, 0, 0, 12, 20, 10)
 y_coords = c(0, 0, 10, 20, 15, 0)
@@ -169,7 +169,7 @@ poly_mat = cbind(x_coords, y_coords)
 Now that we have an example dataset, we are ready to undertake step 1 outlined above.
 The code below shows how this can be done by creating a single triangle (`T1`), that demonstrates the method; it also demonstrates step 2 by calculating its centroid based on the [formula](https://math.stackexchange.com/q/1702595/) $1/3(a + b + c)$ where $a$ to $c$ are coordinates representing the triangle's vertices:
 
-```{r}
+```{r 10-algorithms-5}
 # create a point representing the origin:
 Origin = poly_mat[1, ]
 # create 'triangle matrix':
@@ -200,7 +200,7 @@ Where $A$ to $C$ are the triangle's three points and $x$ and $y$ refer to the x 
 A translation of this formula into R code that works with the data in the matrix representation of a triangle `T1` is as follows (the function `abs()` ensures a positive result):
 <!-- Note: we could replace this code chunk with the function definition if space is an issue (RL) -->
 
-```{r}
+```{r 10-algorithms-6}
 # calculate the area of the triangle represented by matrix T1:
 abs(T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
   T1[2, 1] * (T1[3, 2] - T1[1, 2]) +
@@ -221,7 +221,7 @@ This requires *iteration* to create all triangles representing the polygon, illu
 See `?lapply` for documentation and Chapter \@ref(location) for more on iteration.
 ]
 
-```{r}
+```{r 10-algorithms-7}
 i = 2:(nrow(poly_mat) - 2)
 T_all = lapply(i, function(x) {
   rbind(Origin, poly_mat[x:(x + 1), ], Origin)
@@ -247,7 +247,7 @@ To demonstrate the link between algorithms and scripts, the contents of this sec
 We saw at the end of Section \@ref(scripts) how this script can calculate the centroid of a square.
 The great thing about *scripting* the algorithm is that it works on the new `poly_mat` object (see exercises below to verify these results with reference to `st_centroid()`):
 
-```{r}
+```{r 10-algorithms-8}
 source("code/10-centroid-alg.R")
 ```
 
@@ -275,7 +275,7 @@ Functions, however, refer to the implementation in a particular programming lang
 In R, functions are objects in their own right, that can be created and joined together in a modular fashion.
 We can, for example, create a function that undertakes step 2 of our centroid generation algorithm as follows:
 
-```{r}
+```{r 10-algorithms-9}
 t_centroid = function(x) {
   (x[1, ] + x[2, ] + x[3, ]) / 3
 }
@@ -287,7 +287,7 @@ By default, functions return the last object that has been calculated (the coord
 You can also explicitly set the output of a function by adding `return(output)` into the body of the function, where `output` is the result to be returned.
 ]
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 10-algorithms-10, eval=FALSE, echo=FALSE}
 body(t_centroid)
 formals(t_centroid)
 environment(t_centroid)
@@ -295,14 +295,14 @@ environment(t_centroid)
 
 The function now works on any inputs you pass it, as illustrated in the below command which calculates the area of the 1^st^ triangle from the example polygon in the previous section (see Figure \@ref(fig:polycent)):
 
-```{r}
+```{r 10-algorithms-11}
 t_centroid(T1)
 ```
 
 We can also create a function to calculate a triangle's area, which we will name `t_area()`:
 <!-- We can use the function to find the area of a triangle with a base 3 units wide and a height of 1, for example, as follows: -->
 
-```{r}
+```{r 10-algorithms-12}
 t_area = function(x) {
   abs(
     x[1, 1] * (x[2, 2] - x[3, 2]) +
@@ -316,13 +316,13 @@ Note that after the function's creation, a triangle's area can be calculated in 
 functions are a mechanism for *generalizing* code.
 The newly created function `t_area()` takes any object `x`, assumed to have the same dimensions as the 'triangle matrix' data structure we've been using, and returns its area, as illustrated on `T1` as follows:
 
-```{r}
+```{r 10-algorithms-13}
 t_area(T1)
 ```
 
 We can test the generalizability of the function by using it to find the area of a new triangle matrix, which has a height of 1 and a base of 3:
 
-```{r}
+```{r 10-algorithms-14}
 t_new = cbind(x = c(0, 3, 3, 0),
               y = c(0, 0, 1, 0))
 t_area(t_new)
@@ -335,7 +335,7 @@ The code chunk below creates the function `poly_centroid()` to mimic the behavio
 Note that the functions we created are called iteratively in `lapply()` and `vapply()` function calls.
 ]
 
-```{r}
+```{r 10-algorithms-15}
 poly_centroid = function(x) {
   i = 2:(nrow(x) - 2)
   T_all = lapply(i, function(x) {
@@ -349,7 +349,7 @@ poly_centroid = function(x) {
 ```
 
 
-```{r, echo=FALSE, eval=FALSE}
+```{r 10-algorithms-16, echo=FALSE, eval=FALSE}
 # a slightly more complex version of the function with output set
 poly_centroid = function(x, output = "matrix") {
   i = 2:(nrow(x) - 2)
@@ -367,14 +367,14 @@ poly_centroid = function(x, output = "matrix") {
 }
 ```
 
-```{r}
+```{r 10-algorithms-17}
 poly_centroid(poly_mat)
 ```
 
 Functions such as `poly_centroid()` can further be extended to provide different types of output.
 To return the result as an object of class `sfg`, for example, a 'wrapper' function can be used to modify the output of `poly_centroid()` before returning the result:
 
-```{r}
+```{r 10-algorithms-18}
 poly_centroid_sfg = function(x) {
   centroid_coords = poly_centroid(x)
   sf::st_point(centroid_coords)
@@ -383,7 +383,7 @@ poly_centroid_sfg = function(x) {
 
 We can verify that the output is the same as the output from `sf::st_centroid()` as follows:
 
-```{r}
+```{r 10-algorithms-19}
 poly_sfc = sf::st_polygon(list(poly_mat))
 identical(poly_centroid_sfg(poly_mat), sf::st_centroid(poly_sfc))
 ```
@@ -469,7 +469,7 @@ First steps towards programming can be slow (the exercises below should not be r
     <!-- Todo: add link to that script file (RL) -->
     - Are the results correct? Verify them by converting `poly_mat` into an `sfc` object (named `poly_sfc`) with `st_polygon()` (hint: this function takes objects of class `list()`) and then using `st_area()` and `st_centroid()`.
 <!-- We can verify the answer by converting `poly_mat` into a simple feature collection as follows, which shows the calculations match: -->
-```{r, eval=FALSE, echo=FALSE}
+```{r 10-algorithms-20, eval=FALSE, echo=FALSE}
 poly_sfc = sf::st_polygon(list(poly_mat))
 sf::st_area(poly_sfc)
 sf::st_centroid(poly_sfc)
@@ -483,7 +483,7 @@ sf::st_centroid(poly_sfc)
     - Verify it works by running `poly_centroid_sf(sf::st_sf(sf::st_sfc(poly_sfc)))`
     - What error message do you get when you try to run `poly_centroid_sf(poly_mat)`?
     
-```{r, eval=FALSE, echo=FALSE}
+```{r 10-algorithms-21, eval=FALSE, echo=FALSE}
 poly_centroid_sf = function(x) {
   stopifnot(is(x, "sf"))
   xcoords = sf::st_coordinates(x)

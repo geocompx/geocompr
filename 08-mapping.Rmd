@@ -6,7 +6,7 @@
 
 - This chapter requires the following packages that we have already been using:
 
-```{r, message=FALSE} 
+```{r 08-mapping-1, message=FALSE }
 library(sf)
 library(raster)
 library(dplyr)
@@ -16,7 +16,7 @@ library(spDataLarge)
 
 - In addition, it uses the following visualization packages:
 
-```{r, message=FALSE}
+```{r 08-mapping-2, message=FALSE}
 library(tmap)    # for static and interactive maps
 library(leaflet) # for interactive maps
 library(mapview) # for interactive maps
@@ -80,7 +80,7 @@ This involves a separation between the input data and the aesthetics (how data a
 The basic building block is `tm_shape()` (which defines input data, raster and vector objects), followed by one or more layer elements such as `tm_fill()` and `tm_dots()`.
 This layering is demonstrated in the chunk below, which generates the maps presented in Figure \@ref(fig:tmshape):
 
-```{r, eval=FALSE}
+```{r 08-mapping-3, eval=FALSE}
 # Add fill layer to nz shape
 tm_shape(nz) +
   tm_fill() 
@@ -118,7 +118,7 @@ The disadvantage is that it makes aesthetics of individual layers harder to cont
 A useful feature of **tmap** is its ability to store *objects* representing maps.
 The code chunk below demonstrates this by saving the last plot in Figure \@ref(fig:tmshape) as an object of class `tmap` (note the use of `tm_polygons()` which condenses `tm_fill()  + tm_borders()` into a single function):
 
-```{r}
+```{r 08-mapping-4}
 map_nz = tm_shape(nz) + tm_polygons()
 class(map_nz)
 ```
@@ -130,7 +130,7 @@ In this case `new_obj` represents a new spatial object to be plotted on top of p
 When a new shape is added in this way, all subsequent aesthetic functions refer to it, until another new shape is added.
 This syntax allows the creation of maps with multiple shapes and layers, as illustrated in the next code chunk which uses the function `tm_raster()` to plot a raster layer (with `alpha` set to make the layer semi-transparent):
 
-```{r, results='hide'}
+```{r 08-mapping-5, results='hide'}
 map_nz1 = map_nz +
   tm_shape(nz_elev) + tm_raster(alpha = 0.7)
 ```
@@ -138,7 +138,7 @@ map_nz1 = map_nz +
 Building on the previously created `map_nz` object, the preceding code creates a new map object `map_nz1` that contains another shape (`nz_elev`) representing average elevation across New Zealand (see Figure \@ref(fig:tmlayers), left).
 More shapes and layers can be added, as illustrated in the code chunk below which creates `nz_water`, representing New Zealand's [territorial waters](https://en.wikipedia.org/wiki/Territorial_waters), and adds the resulting lines to an existing map object.
 
-```{r}
+```{r 08-mapping-6}
 nz_water = st_union(nz) %>% st_buffer(22200) %>% 
   st_cast(to = "LINESTRING")
 map_nz2 = map_nz1 +
@@ -150,7 +150,7 @@ The same shape can even be used multiple times.
 The final map illustrated in Figure \@ref(fig:tmlayers) is created by adding a layer representing high points (stored in the object `nz_height`) onto the previously created `map_nz2` object with `tm_dots()` (see `?tm_dots` and `?tm_bubbles` for details on **tmap**'s point plotting functions).
 The resulting map, which has four layers, is illustrated in the right-hand panel of Figure \@ref(fig:tmlayers):
 
-```{r}
+```{r 08-mapping-7}
 map_nz3 = map_nz2 +
   tm_shape(nz_height) + tm_dots()
 ```
@@ -190,7 +190,7 @@ ma6 = tm_shape(nz) + tm_fill(col = "red", alpha = 0.3) +
 tmap_arrange(ma1, ma2, ma3, ma4, ma5, ma6)
 ```
 
-```{r, echo=FALSE, eval=FALSE}
+```{r 08-mapping-8, echo=FALSE, eval=FALSE}
 # aim: show what happpens when names clash
 library(tmap)
 library(spData)
@@ -201,7 +201,7 @@ qtm(nz, "red")
 Like base R plots, arguments defining aesthetics can also receive values that vary.
 Unlike the base R code below (which generates the left panel in Figure \@ref(fig:tmcol)), **tmap** aesthetic arguments will not accept a numeric vector:
 
-```{r, eval=FALSE}
+```{r 08-mapping-9, eval=FALSE}
 plot(st_geometry(nz), col = nz$Land_area)  # works
 tm_shape(nz) + tm_fill(col = nz$Land_area) # fails
 #> Error: Fill argument neither colors nor valid variable name(s)
@@ -210,7 +210,7 @@ tm_shape(nz) + tm_fill(col = nz$Land_area) # fails
 Instead `col` (and other aesthetics that can vary such as `lwd` for line layers and `size` for point layers) requires a character string naming an attribute associated with the geometry to be plotted.
 Thus, one would achieve the desired result as follows (plotted in the right-hand panel of Figure \@ref(fig:tmcol)):
 
-```{r, fig.show='hide', message=FALSE}
+```{r 08-mapping-10, fig.show='hide', message=FALSE}
 tm_shape(nz) + tm_fill(col = "Land_area")
 ```
 
@@ -222,7 +222,7 @@ tm_shape(nz) + tm_fill(col = "Land_area")
 An important argument in functions defining aesthetic layers such as `tm_fill()` is `title`, which sets the title of the associated legend.
 The following code chunk demonstrates this functionality by providing a more attractive name than the variable name `Land_area` (note the use of `expression()` to create superscript text):
 
-```{r}
+```{r 08-mapping-11}
 legend_title = expression("Area (km"^2*")")
 map_nza = tm_shape(nz) +
   tm_fill(col = "Land_area", title = legend_title) + tm_borders()
@@ -239,7 +239,7 @@ This shows four ways of coloring regions in New Zealand depending on median inco
 - `n` sets the number of bins into which numeric variables are categorized.
 - `palette` defines the color scheme, for example `BuGn`.
 
-```{r, eval=FALSE}
+```{r 08-mapping-12, eval=FALSE}
 tm_shape(nz) + tm_polygons(col = "Median_income")
 breaks = c(0, 3, 4, 5) * 10000
 tm_shape(nz) + tm_polygons(col = "Median_income", breaks = breaks)
@@ -286,7 +286,7 @@ The second group is sequential palettes.
 These follow a gradient, for example from light to dark colors (light colors tend to represent lower values), and are appropriate for continuous (numeric) variables.
 Sequential palettes can be single (`Blues` go from light to dark blue, for example) or multi-color/hue (`YlOrBr` is gradient from light yellow to brown via orange, for example), as demonstrated in the code chunk below --- output not shown, run the code yourself to see the results!
 
-```{r, eval=FALSE}
+```{r 08-mapping-13, eval=FALSE}
 tm_shape(nz) + tm_polygons("Population", palette = "Blues")
 tm_shape(nz) + tm_polygons("Population", palette = "YlOrBr")
 ```
@@ -343,7 +343,7 @@ map_nz +
 
 **tmap** also allows a wide variety of layout settings to be changed, some of which are illustrated in Figure \@ref(fig:layout1), produced using the following code (see `args(tm_layout)` or `?tm_layout` for a full list):
 
-```{r, eval=FALSE}
+```{r 08-mapping-14, eval=FALSE}
 map_nz + tm_layout(title = "New Zealand")
 map_nz + tm_layout(scale = 5)
 map_nz + tm_layout(bg.color = "lightblue")
@@ -378,7 +378,7 @@ source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-layout3.R",
 Beyond the low-level control over layouts and colors, **tmap** also offers high-level styles, using the `tm_style()` function (representing the second meaning of 'style' in the package).
 Some styles such as `tm_style("cobalt")` result in stylized maps, while others such as `tm_style("gray")` make more subtle changes, as illustrated in Figure \@ref(fig:tmstyles), created using code below (see `08-tmstyles.R`):
 
-```{r, eval=FALSE}
+```{r 08-mapping-15, eval=FALSE}
 map_nza + tm_style("bw")
 map_nza + tm_style("classic")
 map_nza + tm_style("cobalt")
@@ -438,7 +438,7 @@ In the example below, we create a map of the central part of New Zealand's South
 Our inset map will show where the main map is in relation to the whole New Zealand.
 The first step is to define the area of interest, which can be done by creating a new spatial object, `nz_region`.
 
-```{r}
+```{r 08-mapping-16}
 nz_region = st_bbox(c(xmin = 1340000, xmax = 1450000,
                       ymin = 5130000, ymax = 5210000),
                     crs = st_crs(nz_height)) %>% 
@@ -448,7 +448,7 @@ nz_region = st_bbox(c(xmin = 1340000, xmax = 1450000,
 In the second step, we create a base map showing the New Zealand's Southern Alps area. 
 This is a place where the most important message is stated. 
 
-```{r}
+```{r 08-mapping-17}
 nz_height_map = tm_shape(nz_elev, bbox = nz_region) +
   tm_raster(style = "cont", palette = "YlGn", legend.show = TRUE) +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 1) +
@@ -459,7 +459,7 @@ The third step consists of the inset map creation.
 It gives a context and helps to locate the area of interest. 
 Importantly, this map needs to clearly indicate the location of the main map, for example by stating its borders.
 
-```{r}
+```{r 08-mapping-18}
 nz_map = tm_shape(nz) + tm_polygons() +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 0.1) + 
   tm_shape(nz_region) + tm_borders(lwd = 3) 
@@ -481,14 +481,14 @@ Probably, the most often used example is a map of the United States, which consi
 It is very important to find the best projection for each individual inset in these types of cases (see Chapter \@ref(reproj-geo-data) to learn more).
 We can use US National Atlas Equal Area for the map of the contiguous United States by putting its EPSG code in the `projection` argument of `tm_shape()`.
 
-```{r}
+```{r 08-mapping-19}
 us_states_map = tm_shape(us_states, projection = 2163) + tm_polygons() + 
   tm_layout(frame = FALSE)
 ```
 
 The rest of our objects, `hawaii` and `alaska`, already have proper projections; therefore, we just need to create two separate maps:
 
-```{r}
+```{r 08-mapping-20}
 hawaii_map = tm_shape(hawaii) + tm_polygons() + 
   tm_layout(title = "Hawaii", frame = FALSE, bg.color = NA, 
             title.position = c("LEFT", "BOTTOM"))
@@ -526,7 +526,7 @@ Unlike the faceted plot, it does not squeeze multiple maps into a single screen 
 knitr::include_graphics("figures/urban-animated.gif")
 ```
 
-```{r, echo=FALSE, eval=FALSE}
+```{r 08-mapping-21, echo=FALSE, eval=FALSE}
 source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-urban-animation.R")
 ```
 
@@ -538,7 +538,7 @@ There are two differences, however, related to arguments in `tm_facets()`:
 
 These additional arguments are demonstrated in the subsequent code chunk:
 
-```{r}
+```{r 08-mapping-22}
 urb_anim = tm_shape(world) + tm_polygons() + 
   tm_shape(urban_agglomerations) + tm_dots(size = "population_millions") +
   tm_facets(along = "year", free.coords = FALSE)
@@ -548,7 +548,7 @@ The resulting `urb_anim` represents a set of separate maps for each year.
 The final stage is to combine them and save the result as a `.gif` file with `tmap_animation()`.
 The following command creates the animation illustrated in Figure \@ref(fig:urban-animated), with a few elements missing, that we will add in during the exercises:
 
-```{r, eval=FALSE}
+```{r 08-mapping-23, eval=FALSE}
 tmap_animation(urb_anim, filename = "urb_anim.gif", delay = 25)
 ```
 
@@ -556,7 +556,7 @@ Another illustration of the power of animated maps is provided in Figure \@ref(f
 This shows the development of states in the United States, which first formed in the east and then incrementally to the west and finally into the interior.
 Code to reproduce this map can be found in the script `08-usboundaries.R`.
 
-```{r, echo=FALSE, eval=FALSE}
+```{r 08-mapping-24, echo=FALSE, eval=FALSE}
 source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-usboundaries.R")
 source("https://github.com/Robinlovelace/geocompr/raw/master/code/08-uscolonize.R")
 ```
@@ -582,7 +582,7 @@ A unique feature of **tmap** mentioned in Section \@ref(static-maps) is its abil
 Maps can be viewed interactively at any point by switching to view mode, using the command `tmap_mode("view")`.
 This is demonstrated in the code below, which creates an interactive map of New Zealand based on the `tmap` object `map_nz`, created in Section \@ref(map-obj), and illustrated in Figure \@ref(fig:tmview):
 
-```{r, eval=FALSE}
+```{r 08-mapping-25, eval=FALSE}
 tmap_mode("view")
 map_nz
 ```
@@ -596,14 +596,14 @@ tmap_leaflet(m_tmview)
 Now that the interactive mode has been 'turned on', all maps produced with **tmap** will launch (another way to create interactive maps is with the `tmap_leaflet` function).
 Notable features of this interactive mode include the ability to specify the basemap  with `tm_basemap()` (or `tmap_options()`) as demonstrated below (result not shown):
 
-```{r, eval=FALSE}
+```{r 08-mapping-26, eval=FALSE}
 map_nz + tm_basemap(server = "OpenTopoMap")
 ```
 
 An impressive and little-known feature of **tmap**'s view mode is that it also works with faceted plots.
 The argument `sync` in `tm_facets()` can be used in this case to produce multiple maps with synchronized zoom and pan settings, as illustrated in Figure \@ref(fig:sync), which was produced by the following code:
 
-```{r, eval=FALSE}
+```{r 08-mapping-27, eval=FALSE}
 world_coffee = left_join(world, coffee_data, by = "name_long")
 facets = c("coffee_production_2016", "coffee_production_2017")
 tm_shape(world_coffee) + tm_polygons(facets) + 
@@ -616,14 +616,14 @@ knitr::include_graphics("https://user-images.githubusercontent.com/1825120/39561
 
 Switch **tmap** back to plotting mode with the same function:
 
-```{r}
+```{r 08-mapping-28}
 tmap_mode("plot")
 ```
 
 If you are not proficient with **tmap**, the quickest way to create interactive maps may be with **mapview**.
 The following 'one liner' is a reliable way to interactively explore a wide range of geographic data formats:
 
-```{r, eval=FALSE}
+```{r 08-mapping-29, eval=FALSE}
 mapview::mapview(nz)
 ```
 
@@ -640,7 +640,7 @@ In essence, it can be considered a data-driven **leaflet** API (see below for mo
 Given that **mapview** always expects a spatial object (`sf`, `Spatial*`, `Raster*`) as its first argument, it works well at the end of piped expressions. 
 Consider the following example where **sf** is used to intersect lines and polygons and then is visualised with **mapview** (Figure \@ref(fig:mapview2)).
 
-```{r, eval=FALSE}
+```{r 08-mapping-30, eval=FALSE}
 trails %>%
   st_transform(st_crs(franconia)) %>%
   st_intersection(franconia[franconia$district == "Oberfranken", ]) %>%
@@ -673,7 +673,7 @@ Another approach by the same author is **[mapdeck](https://github.com/SymbolixAU
 Its use of WebGL enables it to interactively visualize large datasets (up to millions of points).
 The package uses Mapbox [access tokens](https://www.mapbox.com/help/how-access-tokens-work/), which you must register for before using the package.
 
-```{block2, type='rmdnote'}
+```{block2 08-mapping-31, type='rmdnote'}
 Note that the following block assumes the access token is stored in your R environment as `MAPBOX=your_unique_key`.
 This can be added with `edit_r_environ()` from the **usethis** package.
 ```
@@ -682,13 +682,13 @@ A unique feature of **mapdeck** is its provision of interactive '2.5d' perspecti
 This means you can can pan, zoom and rotate around the maps, and view the data 'extruded' from the map.
 Figure \@ref(fig:mapdeck), generated by the following code chunk, visualizes road traffic crashes in the UK, with bar height respresenting casualties per area.
 
-```{r, engine='zsh', echo=FALSE, eval=FALSE}
+```{r 08-mapping-32, engine='zsh', echo=FALSE, eval=FALSE}
 https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv
 curl -i https://git.io -F "url=https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv" \
     -F "code=geocompr-mapdeck"
 ```
 
-```{r, eval=FALSE}
+```{r 08-mapping-33, eval=FALSE}
 library(mapdeck)
 set_token(Sys.getenv("MAPBOX"))
 df = read.csv("https://git.io/geocompr-mapdeck")
@@ -706,7 +706,7 @@ knitr::include_graphics("figures/mapdeck-mini.png")
 In the browser you can zoom and drag, in addition to rotating and tilting the map when pressing `Cmd`/`Ctrl`.
 Multiple layers can be added with the `%>%` operator, as demonstrated in the [`mapdeck` vignette](https://cran.r-project.org/web/packages/mapdeck/vignettes/mapdeck.html). 
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 08-mapping-34, eval=FALSE, echo=FALSE}
 # duplicated elsewhere so not showing this code (RL)
 df <- capitals
 df$key <- 1L
@@ -739,7 +739,7 @@ mapdeck(
 
 Mapdeck also supports `sf` objects, as can be seen by replacing the `add_grid()` function call in the preceding code chunk with `add_polygon(data = lnd, layer_id = "polygon_layer")`, to add polygons representing London to an interactive tilted map.
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 08-mapping-35, eval=FALSE, echo=FALSE}
 library(mapdeck)
 set_token(Sys.getenv("MAPBOX"))
 df = read.csv("https://git.io/geocompr-mapdeck")
@@ -752,7 +752,7 @@ mapdeck(style = ms, pitch = 45, location = c(0, 52), zoom = 4) %>%
 ```
 
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 08-mapping-36, eval=FALSE, echo=FALSE}
 library(sf)
 str(roads)
 mapdeck(
@@ -821,7 +821,7 @@ The word 'app' in this context refers to 'web application' and should not be con
 ]
 The code below defines and launches --- with the command `shinyApp()` --- a lifeApp, which provides an interactive slider allowing users to make countries appear with progressively lower levels of life expectancy (see Figure \@ref(fig:lifeApp)):
 
-```{r, eval=FALSE}
+```{r 08-mapping-37, eval=FALSE}
 library(shiny)    # for shiny apps
 library(leaflet)  # renderLeaflet function
 library(spData)   # loads the world dataset 
@@ -927,7 +927,7 @@ Good additional resources can be found in the open source [ggplot2 book](https:/
 Another benefit of maps based on **ggplot2** is that they can easily be given a level of interactivity when printed using the function `ggplotly()` from the **plotly** package.
 Try `plotly::ggplotly(g1)`, for example, and compare the result with other **plotly** mapping functions described at: [blog.cpsievert.me](https://blog.cpsievert.me/2018/03/30/visualizing-geo-spatial-data-with-sf-and-plotly/).
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 08-mapping-38, eval=FALSE, echo=FALSE}
 plotly::ggplotly(g1)
 ```
 
@@ -980,7 +980,7 @@ It accepts an `sf` object and name of the variable (column) as inputs.
 Additionally, it is possible to modify the `intermax` argument - maximum number of iterations for the cartogram transformation.
 For example, we could represent median income in New Zeleand's regions as a continuous cartogram (the right-hand panel of Figure \@ref(fig:cartomap1)) as follows:
 
-```{r, fig.show='hide', message=FALSE}
+```{r 08-mapping-39, fig.show='hide', message=FALSE}
 library(cartogram)
 nz_carto = cartogram_cont(nz, "Median_income", itermax = 5)
 tm_shape(nz_carto) + tm_polygons("Median_income")
@@ -999,7 +999,7 @@ Non-contiguous area cartograms are created by scaling down each region based on 
 Dorling cartograms consist of circles with their area proportional to the weighting variable.
 The code chunk below demonstrates creation of non-contiguous area and Dorling cartograms of US states' population (Figure \@ref(fig:cartomap2)):
 
-```{r, fig.show='hide', message=FALSE}
+```{r 08-mapping-40, fig.show='hide', message=FALSE}
 us_states2163 = st_transform(us_states, 2163)
 us_states2163_ncont = cartogram_ncont(us_states2163, "total_pop_15")
 us_states2163_dorling = cartogram_dorling(us_states2163, "total_pop_15")
@@ -1028,7 +1028,7 @@ In terms of interactive mapping, **leaflet.extras** contains many functions for 
 These exercises rely on a new object, `africa`.
 Create it using the `world` and `worldbank_df` datasets from the **spData** package as follows (see Chapter \@ref(attr)):
 
-```{r, warning=FALSE}
+```{r 08-mapping-41, warning=FALSE}
 africa = world %>% 
   filter(continent == "Africa", !is.na(iso_a2)) %>% 
   left_join(worldbank_df, by = "iso_a2") %>% 
@@ -1038,7 +1038,7 @@ africa = world %>%
 
 We will also use `zion` and `nlcd` datasets from **spDataLarge**:
 
-```{r, results='hide'}
+```{r 08-mapping-42, results='hide'}
 zion = st_read((system.file("vector/zion.gpkg", package = "spDataLarge")))
 data(nlcd, package = "spDataLarge")
 ```

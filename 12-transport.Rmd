@@ -8,7 +8,7 @@
 **osmdata** and **nabor** must also be installed, although these packages do not need to be attached.
 ]
 
-```{r, message=FALSE, results='hide'}
+```{r 12-transport-1, message=FALSE, results='hide'}
 library(sf)
 library(dplyr)
 library(spDataLarge)
@@ -63,7 +63,7 @@ There is a link between the chapters because bike shops may benefit from new cyc
 The case study used for this chapter is located in Bristol, a city in the west of England, around 30 km east of the Welsh capital Cardiff.
 An overview of the region's transport network is illustrated in Figure \@ref(fig:bristol), which shows a diversity of transport infrastructure, for cycling, public transport, and private motor vehicles.
 
-```{r, echo=FALSE, eval=FALSE}
+```{r 12-transport-2, echo=FALSE, eval=FALSE}
 # code that generated the input data - see also ?bristol_ways
 # source("https://github.com/Robinlovelace/geocompr/raw/master/code/12-transport-data-gen.R") 
 # view input data
@@ -92,7 +92,7 @@ In terms of transport, Bristol is well served by rail and road links, and has a 
 19% of its citizens cycle and 88% walk at least once per month according to the [Active People Survey](https://www.gov.uk/government/statistical-data-sets/how-often-and-time-spent-walking-and-cycling-at-local-authority-level-cw010#table-cw0103) (the national average is 15% and 81%, respectively).
 8% of the population said they cycled work in the 2011 census, compared with only 3% nationwide.
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 12-transport-3, eval=FALSE, echo=FALSE}
 if(!require(readODS)) {
   install.packages("readODS")
 }
@@ -147,7 +147,7 @@ Such administrative zones can provide vital context to transport analysis, such 
 The geographic resolution of these zones is important: small zones with high geographic resolution are usually preferable but their high number in large regions can have consequences for processing (especially for origin-destination analysis in which the number of possibilities increases as a non-linear function of the number of zones) [@hollander_transport_2016].
 
 
-```{block type='rmdnote'}
+```{block 12-transport-4, type='rmdnote'}
 Another issue with small zones is related to anonymity rules.
 To make it impossible to infer the identity of individuals in zones, detailed socio-demographic variables are often only available at low geographic resolution. 
 Breakdowns of travel mode by age and sex, for example, are available at the Local Authority level in the UK, but not at the much higher Output Area level, each of which contains around 100 households.
@@ -158,7 +158,7 @@ The 102 zones used in this chapter are stored in `bristol_zones`, as illustrated
 Note the zones get smaller in densely populated areas: each houses a similar number of people.
 `bristol_zones` contains no attribute data on transport, however, only the name and code of each zone:
 
-```{r}
+```{r 12-transport-5}
 names(bristol_zones)
 ```
 
@@ -168,14 +168,14 @@ We will use travel data from the UK's 2011 census question on travel to work, da
 The first column is the ID of the zone of origin and the second column is the zone of destination.
 `bristol_od` has more rows than `bristol_zones`, representing travel *between* zones rather than the zones themselves:
 
-```{r}
+```{r 12-transport-6}
 nrow(bristol_od)
 nrow(bristol_zones)
 ```
 
 The results of the previous code chunk shows that there are more than 10 OD pairs for every zone, meaning we will need to aggregate the origin-destination data before it is joined with `bristol_zones`, as illustrated below (origin-destination data is described in Section \@ref(desire-lines)):
 
-```{r}
+```{r 12-transport-7}
 zones_attr = bristol_od %>% 
   group_by(o) %>% 
   summarize_if(is.numeric, sum) %>% 
@@ -193,7 +193,7 @@ the `_if` affix requires a `TRUE`/`FALSE` question to be asked of the variables,
 The resulting object `zones_attr` is a data frame with rows representing zones and an ID variable.
 We can verify that the IDs match those in the `zones` dataset using `%in%` operator as follows:
 
-```{r}
+```{r 12-transport-8}
 summary(zones_attr$geo_code %in% bristol_zones$geo_code)
 ```
 
@@ -203,7 +203,7 @@ This could be done by reversing the order of the ID's in the commend --- `summar
 ]
 This is done using the joining function `left_join()` (note that `inner_join()` would produce here the same result):
 
-```{r}
+```{r 12-transport-9}
 zones_joined = left_join(bristol_zones, zones_attr, by = "geo_code")
 sum(zones_joined$all)
 names(zones_joined)
@@ -223,7 +223,7 @@ People tend to gravitate towards central places.
 This explains why the spatial distribution represented in the right panel in Figure \@ref(fig:zones) is relatively uneven, with the most common destination zones concentrated in Bristol city center.
 The result is `zones_od`, which contains a new column reporting the number of trip destinations by any mode, is created as follows:
 
-```{r}
+```{r 12-transport-10}
 zones_od = bristol_od %>% 
   group_by(d) %>% 
   summarize_if(is.numeric, sum) %>% 
@@ -233,7 +233,7 @@ zones_od = bristol_od %>%
 
 A simplified version of Figure \@ref(fig:zones) is created with the code below (see `12-zones.R` in the [`code`](https://github.com/Robinlovelace/geocompr/tree/master/code) folder of the book's GitHub repo to reproduce the figure and Section \@ref(faceted-maps) for details on faceted maps with **tmap**):
 
-```{r, eval=FALSE}
+```{r 12-transport-11, eval=FALSE}
 qtm(zones_od, c("all", "all_dest")) +
   tm_layout(panel.labels = c("Origin", "Destination"))
 ```
@@ -251,7 +251,7 @@ We have already loaded data representing desire lines in the dataset `bristol_od
 This origin-destination (OD) data frame object represents the number of people traveling between the zone represented in `o` and `d`, as illustrated in Table \@ref(tab:od).
 To arrange the OD data by all trips and then filter-out only the top 5, type (please refer to Chapter \@ref(attr) for a detailed description of non-spatial attribute operations):
 
-```{r}
+```{r 12-transport-12}
 od_top5 = bristol_od %>% 
   arrange(desc(all)) %>% 
   top_n(5, wt = all)
@@ -273,7 +273,7 @@ But from a policy perspective, the raw data presented in Table \@ref(tab:od) is 
 aside from the fact that it contains only a tiny portion of the 2,910 OD pairs, it tells us little about *where* policy measures are needed, or *what proportion* of trips are made by walking and cycling.
 The following command calculates the percentage of each desire line that is made by these active modes:
 
-```{r}
+```{r 12-transport-13}
 bristol_od$Active = (bristol_od$bicycle + bristol_od$foot) /
   bristol_od$all * 100
 ```
@@ -285,7 +285,7 @@ Intrazonal OD pairs represent travel within the same zone (see the top row of Ta
 The following code chunk splits `od_bristol` into these two types:
 <!-- displayed as straight black lines in \@ref(fig:desire). -->
 
-```{r}
+```{r 12-transport-14}
 od_intra = filter(bristol_od, o == d)
 od_inter = filter(bristol_od, o != d)
 ```
@@ -297,13 +297,13 @@ Note that the operation emits a warning because `od2line()` works by allocating 
 For real-world use one would use centroid values generated from projected data or, preferably, use *population-weighted* centroids [@lovelace_propensity_2017].
 ]
 
-```{r, warning=FALSE}
+```{r 12-transport-15, warning=FALSE}
 desire_lines = od2line(od_inter, zones_od)
 ```
 
 An illustration of the results is presented in Figure \@ref(fig:desire), a simplified version of which is created with the following command (see the code in `12-desire.R` to reproduce the figure exactly and Chapter \@ref(adv-map) for details on visualization with **tmap**):
 
-```{r, eval=FALSE}
+```{r 12-transport-16, eval=FALSE}
 qtm(desire_lines, lines.lwd = "all")
 ```
 
@@ -346,12 +346,12 @@ However, 5 km Euclidean distance (or around 6-8 km of route distance) can realis
 We will therefore only route desire lines along which a high (300+) number of car trips take place that are up to 5 km in distance.
 This routing is done by the **stplanr** function `line2route()` which takes straight lines in `Spatial` or `sf` objects, and returns 'bendy' lines representing routes on the transport network in the same class as the input.
 
-```{r, message=FALSE}
+```{r 12-transport-17, message=FALSE}
 desire_lines$distance = as.numeric(st_length(desire_lines))
 desire_carshort = dplyr::filter(desire_lines, car_driver > 300 & distance < 5000)
 ```
 
-```{r, eval=FALSE}
+```{r 12-transport-18, eval=FALSE}
 route_carshort = line2route(desire_carshort, route_fun = route_osrm)
 ```
 
@@ -364,7 +364,7 @@ The new route dataset contains `distance` (referring to route distance this time
 However, for the purposes of this chapter, we are only interested in the geometry, from which route distance can be calculated.
 The following command makes use of the ability of simple features objects to contain multiple geographic columns:
 
-```{r}
+```{r 12-transport-19}
 desire_carshort$geom_car = st_geometry(route_carshort)
 ```
 
@@ -426,7 +426,7 @@ Building on the analysis conducted in Section \@ref(desire-lines), public transp
 The first stage is to identify the desire lines with most public transport travel, which in our case is easy because our previously created dataset `desire_lines` already contains a variable describing the number of trips by train (the public transport potential could also be estimated using public transport routing services such as [OpenTripPlanner](http://www.opentripplanner.org/)).
 To make the approach easier to follow, we will select only the top three desire lines in terms of rails use:
 
-```{r}
+```{r 12-transport-20}
 desire_rail = top_n(desire_lines, n = 3, wt = train)
 ```
 
@@ -437,7 +437,7 @@ These are undertaken by `line_via()`.
 This **stplanr** function takes input lines and points and returns a copy of the desire lines --- see the [Desire Lines Extended](https://geocompr.github.io/geocompkg/articles/linevia.html) vignette on the geocompr.github.io website and `?line_via` for details on how this works.
 The output is the same as the input line, except it has new geometry columns representing the journey via public transport nodes, as demonstrated below:
 
-```{r}
+```{r 12-transport-21}
 ncol(desire_rail)
 desire_rail = line_via(desire_rail, bristol_stations)
 ncol(desire_rail)
@@ -469,7 +469,7 @@ plot(zone_cents_rail, add = TRUE, col = "black")
 The data used in this section was downloaded using **osmdata**.
 To avoid having to request the data from OSM repeatedly, we will use the `bristol_ways` object, which contains point and line data for the case study area (see `?bristol_ways`):
 
-```{r}
+```{r 12-transport-22}
 summary(bristol_ways)
 ```
 
@@ -482,7 +482,7 @@ One can manually convert a route network into an `igraph` object, but the geogra
 To overcome this issue `SpatialLinesNetwork()` was developed in the **stplanr** package to represent route networks simultaneously as graphs *and* a set of geographic lines.
 This function is demonstrated below using a subset of the `bristol_ways` object used in previous sections.
 
-```{r}
+```{r 12-transport-23}
 ways_freeway = bristol_ways %>% filter(maxspeed == "70 mph") 
 ways_sln = SpatialLinesNetwork(ways_freeway)
 slotNames(ways_sln)
@@ -503,7 +503,7 @@ e = igraph::edge_betweenness(ways_sln@g)
 plot(ways_sln@sl$geometry, lwd = e / 500)
 ```
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 12-transport-24, eval=FALSE, echo=FALSE}
 # not producing groups of routes so removing for now...
 m = igraph::clusters(ways_sln@g)
 igraph::V(ways_sln@g)$m = m$membership
@@ -537,7 +537,7 @@ To summarize, these were: identifying short but car-dependent commuting routes (
 The final code chunk of this chapter combines these strands of analysis.
 It adds the car-dependent routes in `route_carshort` with a newly-created object, `route_rail` and creates a new column representing the amount of travel along the centroid-to-centroid desire lines they represent:
 
-```{r, eval=FALSE}
+```{r 12-transport-25, eval=FALSE}
 route_rail = desire_rail %>% 
   st_set_geometry("leg_orig") %>% 
   line2route(route_fun = route_osrm) %>% 
@@ -545,12 +545,12 @@ route_rail = desire_rail %>%
 ```
 
 
-```{r}
+```{r 12-transport-26}
 route_cycleway = rbind(route_rail, route_carshort)
 route_cycleway$all = c(desire_rail$all, desire_carshort$all)
 ```
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 12-transport-27, eval=FALSE, echo=FALSE}
 n_trips = route_cycleway$all / 100
 plot(route_cycleway["distance"], lwd = n_trips)
 ```
@@ -559,7 +559,7 @@ The results of the preceding code are visualized in Figure \@ref(fig:cycleways),
 The method has some limitations: in reality, people do not travel to zone centroids or always use the shortest route algorithm for a particular mode.
 However, the results demonstrate routes along which cycle paths could be prioritized from car dependency and public transport perspectives.
 
-```{r, eval=FALSE}
+```{r 12-transport-28, eval=FALSE}
 qtm(route_cycleway, lines.lwd = "all")
 ```
 
@@ -610,7 +610,7 @@ Similar tools could be used to encourage evidence-based transport policies relat
 1. What is the total distance of cycleways that would be constructed if all the routes presented in Figure \@ref(fig:cycleways) were to be constructed?
     - Bonus: find two ways of arriving at the same answer.
 
-```{r, eval=FALSE, echo=FALSE}
+```{r 12-transport-29, eval=FALSE, echo=FALSE}
 sum(route_cycleway$distance)
 sum(st_length(route_cycleway))
 ```
@@ -619,7 +619,7 @@ sum(st_length(route_cycleway))
     - Bonus: what proportion of trips cross the proposed routes?
     - Advanced: write code that would increase this proportion.
 
-```{r, echo=FALSE, eval=FALSE}
+```{r 12-transport-30, echo=FALSE, eval=FALSE}
 sum(route_cycleway$all) / sum(desire_lines$all) # around 2%
 d_intersect = desire_lines[route_cycleway, , op = st_crosses]
 sum(d_intersect$all) / sum(desire_lines$all) # around 2%
