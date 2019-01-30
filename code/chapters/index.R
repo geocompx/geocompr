@@ -1,13 +1,13 @@
-## ---- echo=FALSE---------------------------------------------------------
+## ----index-1, echo=FALSE-------------------------------------------------
 is_on_travis = identical(Sys.getenv("TRAVIS"), "true")
 is_online = curl::has_internet()
 
 ## **Note**: This book has now been published by CRC Press in the [R Series](https://www.crcpress.com/Chapman--HallCRC-The-R-Series/book-series/CRCTHERSER).
 
-## ---- message=FALSE, eval=is_online--------------------------------------
+## ----index-3, message=FALSE, eval=is_online------------------------------
 devtools::install_github("geocompr/geocompkg")
 
-## ---- eval=FALSE---------------------------------------------------------
+## ----index-4, eval=FALSE-------------------------------------------------
 ## bookdown::render_book("index.Rmd") # to build the book
 ## browseURL("_book/index.html") # to view it
 
