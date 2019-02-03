@@ -163,8 +163,8 @@ data_literacy = wb_data_create(indicator = "SE.ADT.LITR.ZS", our_name = "literac
 # data_tertiary_edu_per_100000 = wb_data_create(indicator = "UIS.TE_100000.56", our_name = "tertiary_edu_per_100000", year = 2014, country = "countries_only")
 
 country_names = ne_countries(returnclass = 'sf') %>%
-  select(name=name_long, iso_a2) %>% 
-  st_set_geometry(., NULL)
+  select(name = name_long, iso_a2) %>%
+  st_drop_geometry()
   
 world_df = data_hdi %>% 
   full_join(., data_urbanpop, by = c('iso_a2')) %>%

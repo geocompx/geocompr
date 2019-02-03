@@ -14,7 +14,7 @@ coords = sf::st_coordinates(d) %>%
   as.data.frame %>%
   rename(x = X, y = Y)
 d = dplyr::select(d, sc, dem) %>%
-  st_set_geometry(NULL)
+  st_drop_geometry()
 # create task
 task = makeRegrTask(data = d, target = "sc", coordinates = coords)
 

@@ -1,7 +1,7 @@
 # with base R ----
 # old_par = par()
 # breaks = c(1e5, 5e6, 1e7, 7e7, 2e8)
-# rdf = st_set_geometry(regions, NULL)
+# rdf = st_drop_geometry(regions)
 # us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
 #                                   dplyr::select(rdf, Group.1, total_pop_15),
 #                                   by = c("REGION" = "Group.1")) %>%

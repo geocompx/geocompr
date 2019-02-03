@@ -34,7 +34,7 @@ us_regions = us_states_large %>%
   filter(NAME != "Alaska", NAME != "Hawaii") %>% 
   mutate(REGION = factor(REGION, labels = c("Norteast", "Midwest", "South", "West"))) %>% 
   select(NAME, REGION) %>% 
-  st_set_geometry(NULL)
+  st_drop_geometry()
 
 # cont states -------------------------------------------------------------
 us_states49 = us_states %>% 
