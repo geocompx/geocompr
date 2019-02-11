@@ -67,7 +67,7 @@ The **mapedit** package allows the quick editing of a few spatial features but n
 - Enables georeferencing (matching raster images to existing maps) with ground control points and orthorectification.
 <!-- The process of locating control points, choosing the right transformation model, and evaluating the registration error are inherently interactive, and thus unsuitable to be done with R, or any other programming language. -->
 - Supports stereoscopic mapping (e.g., LiDAR and structure from motion).
-- Provides access to geodatabase management systems with object-oriented relational data models, topology and fast (spatial) querying.
+- Provides access to spatial database management systems with object-oriented relational data models, topology and fast (spatial) querying.
 
 Another advantage of dedicated GISs is that they provide access to hundreds of 'geoalgorithms' (computational recipes to solve geographic problems --- see Chapter \@ref(algorithms)).
 Many of these are unavailable from the R command line, except via 'GIS bridges', the topic of (and motivation for) this chapter.^[
@@ -441,17 +441,17 @@ As a convenience to the reader, one can attach `london_streets` to the global en
 data("london_streets", package = "spDataLarge")
 ```
 
-Now that we have the data, we can go on and initiate a GRASS session, i.e., we have to create a GRASS geodatabase.
-The GRASS geodatabase system is based on SQLite.
+Now that we have the data, we can go on and initiate a GRASS session, i.e., we have to create a GRASS spatial database.
+The GRASS spatial database system is based on SQLite.
 Consequently, different users can easily work on the same project, possibly with different read/write permissions.
-However, one has to set up this geodatabase (also from within R), and users used to a GIS GUI popping up by one click might find this process a bit intimidating in the beginning.
+However, one has to set up this spatial database (also from within R), and users used to a GIS GUI popping up by one click might find this process a bit intimidating in the beginning.
 First of all, the GRASS database requires its own directory, and contains a location (see the [GRASS GIS Database](https://grass.osgeo.org/grass77/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass77/manuals/index.html) for further information).
 The location in turn simply contains the geodata for one project. 
 Within one location, several mapsets can exist and typically refer to different users. 
 PERMANENT is a mandatory mapset and is created automatically.
 It stores the projection, the spatial extent and the default resolution for raster data.
 In order to share geographic data with all users of a project, the database owner can add spatial data to the PERMANENT mapset.
-Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass77/manuals/helptext.html) for more information on the GRASS geodatabase system.
+Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass77/manuals/helptext.html) for more information on the GRASS spatial database system.
 
 You have to set up a location and a mapset if you want to use GRASS from within R.
 First of all, we need to find out if and where GRASS 7 is installed on the computer.
@@ -465,7 +465,7 @@ link = findGRASS()
 Here, we will use a GRASS 7 installation.
 If you have not installed GRASS 7 on your computer, we recommend that you do so now.
 Assuming that we have found a working installation on your computer, we use the corresponding path in `initGRASS`. 
-Additionally, we specify where to store the geodatabase (gisDbase), name the location `london`, and use the PERMANENT mapset.
+Additionally, we specify where to store the spatial database (gisDbase), name the location `london`, and use the PERMANENT mapset.
 
 ```{r 09-gis-28, eval=FALSE}
 library(rgrass7)
@@ -501,7 +501,7 @@ execGRASS("g.region", flags = c("quiet"),
 
 Once you are familiar with how to set up the GRASS environment, it becomes tedious to do so over and over again.
 Luckily, `linkGRASS7()` of the **link2GI** packages lets you do it with one line of code.
-The only thing you need to provide is a spatial object which determines the projection and the extent of the geodatabase.
+The only thing you need to provide is a spatial object which determines the projection and the extent of the spatial database.
 First, `linkGRASS7()` finds all GRASS installations on your computer.
 Since we have set `ver_select` to `TRUE`, we can interactively choose one of the found GRASS-installations.
 If there is just one installation, the `linkGRASS7()` automatically chooses this one.
@@ -581,11 +581,11 @@ mapview::mapshot(m_1,
 
 Further notes
 
-- Please note that we have used GRASS's geodatabase (based on SQLite) which allows faster processing. 
+- Please note that we have used GRASS's spatial database (based on SQLite) which allows faster processing. 
 That means we have only exported geographic data at the beginning.
 Then we created new objects but only imported the final result back into R.
 To find out which datasets are currently available, run `execGRASS("g.list", type = "vector,raster", flags = "p")`.
-- We could have also accessed an already existing GRASS geodatabase from within R.
+- We could have also accessed an already existing GRASS spatial database from within R.
 Prior to importing data into R, you might want to perform some (spatial) subsetting.
 Use `v.select` and `v.extract` for vector data. 
 `db.select` lets you select subsets of the attribute table of a vector layer without returning the corresponding geometry.
@@ -616,8 +616,8 @@ Therefore, to use the complete set of SAGA and GRASS functions, stick with **RSA
 When doing so, take advantage of **RSAGA**'s numerous user-friendly functions.
 Note also, that **RSAGA** offers native R functions for geocomputation such as `multi.local.function()`, `pick.from.points()` and many more.
 **RSAGA** supports much more SAGA versions than (R)QGIS.
-Finally, if you need topological correct data and/or geodatabase-management functionality such as multi-user access, we recommend the usage of GRASS. 
-In addition, if you would like to run simulations with the help of a geodatabase [@krug_clearing_2010], use **rgrass7** directly since **RQGIS** always starts a new GRASS session for each call.
+Finally, if you need topological correct data and/or spatial database management functionality such as multi-user access, we recommend the usage of GRASS. 
+In addition, if you would like to run simulations with the help of a spatial database [@krug_clearing_2010], use **rgrass7** directly since **RQGIS** always starts a new GRASS session for each call.
 
 Please note that there are a number of further GIS software packages that have a scripting interface but for which there is no dedicated R package that accesses these: gvSig, OpenJump, Orfeo Toolbox and TauDEM.
 
