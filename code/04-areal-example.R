@@ -13,5 +13,5 @@ m = tm_shape(rx) +
 
 m1 = m +
   tm_layout(legend.show = FALSE, scale = 1)
-# m1
+m1
 # tmap_save(m1, "figures/04-congruence.png", width = 800, height = 400)
