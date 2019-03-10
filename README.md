@@ -159,10 +159,10 @@ removed from the main book build to reduce package dependencies and the
 book’s build time:
 
 ``` r
-source("code/cranlogs.R")
-source("code/sf-revdep.R")
-source("code/08-urban-animation.R")
-source("code/08-map-pkgs.R")
+# source("code/cranlogs.R")
+# source("code/sf-revdep.R")
+# source("code/08-urban-animation.R")
+# source("code/08-map-pkgs.R")
 ```
 
 Note: the `.Rproj` file is configured to build a website not a single
