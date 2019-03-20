@@ -65,6 +65,8 @@ will update automatically): [katygregg](https://github.com/katygregg),
 [yihui](https://github.com/yihui),
 [chihinl](https://github.com/chihinl).
 
+
+
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
 [`our-impact.csv`](https://github.com/Robinlovelace/geocompr/blob/master/our-impact.csv).
