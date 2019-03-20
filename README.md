@@ -65,6 +65,8 @@ will update automatically): [katygregg](https://github.com/katygregg),
 [yihui](https://github.com/yihui),
 [chihinl](https://github.com/chihinl).
 
+
+
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
 [`our-impact.csv`](https://github.com/Robinlovelace/geocompr/blob/master/our-impact.csv).
@@ -159,10 +161,10 @@ removed from the main book build to reduce package dependencies and the
 book’s build time:
 
 ``` r
-source("code/cranlogs.R")
-source("code/sf-revdep.R")
-source("code/08-urban-animation.R")
-source("code/08-map-pkgs.R")
+# source("code/cranlogs.R")
+# source("code/sf-revdep.R")
+# source("code/08-urban-animation.R")
+# source("code/08-map-pkgs.R")
 ```
 
 Note: the `.Rproj` file is configured to build a website not a single
