@@ -869,8 +869,8 @@ The utility of extracting heights from a linear selector is illustrated by imagi
 The method demonstrated below provides an 'elevation profile' of the route (the line does not need to be straight), useful for estimating how long it will take due to long climbs:
 
 ```{r 05-geometry-operations-51}
- transect = raster::extract(srtm, zion_transect, 
-                            along = TRUE, cellnumbers = TRUE)
+transect = raster::extract(srtm, zion_transect, 
+                           along = TRUE, cellnumbers = TRUE)
 ```
 
 Note the use of `along = TRUE` and `cellnumbers = TRUE` arguments to return cell IDs *along* the path. 
@@ -881,7 +881,8 @@ The subsequent code chunk first converts this tricky matrix-in-a-list object int
 ```{r 05-geometry-operations-52}
 transect_df = purrr::map_dfr(transect, as_data_frame, .id = "ID")
 transect_coords = xyFromCell(srtm, transect_df$cell)
-transect_df$dist = c(0, cumsum(geosphere::distGeo(transect_coords)))    
+pair_dist = geosphere::distGeo(transect_coords)[-nrow(transect_coords)]
+transect_df$dist = c(0, cumsum(pair_dist)) 
 ```
 
 The resulting `transect_df` can be used to create elevation profiles, as illustrated in Figure \@ref(fig:lineextr)(B).
