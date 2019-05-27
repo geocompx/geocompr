@@ -40,6 +40,8 @@ for the book’s style.
 
 Many thanks to all contributors to the book so far via GitHub (this list
 will update automatically): [katygregg](https://github.com/katygregg),
+[florisvdh](https://github.com/florisvdh),
+[prosoitos](https://github.com/prosoitos),
 [erstearns](https://github.com/erstearns),
 [eyesofbambi](https://github.com/eyesofbambi),
 [tyluRp](https://github.com/tyluRp),
@@ -61,11 +63,7 @@ will update automatically): [katygregg](https://github.com/katygregg),
 [ganes1410](https://github.com/ganes1410),
 [richfitz](https://github.com/richfitz),
 [SymbolixAU](https://github.com/SymbolixAU),
-[wdearden](https://github.com/wdearden),
-[yihui](https://github.com/yihui),
-[chihinl](https://github.com/chihinl).
-
-
+[wdearden](https://github.com/wdearden).
 
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
@@ -76,11 +74,11 @@ make geocomputation with R possible. This impact is recorded in
 To ease reproducibility, this book is also a package. Installing it from
 GitHub will ensure all dependencies to build the book are available on
 your computer (you need
-[**devtools**](https://github.com/hadley/devtools)):
+[**remotes**](https://github.com/r-lib/remotes/)):
 
 ``` r
-install.packages(devtools)
-devtools::install_github("geocompr/geocompkg")
+install.packages("remotes")
+remotes::install_github("geocompr/geocompkg")
 ```
 
 You need a recent version of the GDAL, GEOS, Proj.4 and UDUNITS
