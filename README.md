@@ -81,7 +81,7 @@ install.packages("remotes")
 remotes::install_github("geocompr/geocompkg")
 ```
 
-You need a recent version of the GDAL, GEOS, Proj.4 and UDUNITS
+You need a recent version of the GDAL, GEOS, PROJ and UDUNITS
 libraries installed for this to work on Mac and Linux. See the **sf**
 package’s [README](https://github.com/r-spatial/sf) for information on
 that.
