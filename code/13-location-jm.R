@@ -1,4 +1,4 @@
-# Filename: 13-location-jm.R (2018-04-09)
+# Filename: 13-location-jm.R (2019-04-22)
 #
 # TO DO: Build figures for location chapter
 #
@@ -32,9 +32,7 @@ library(htmlwidgets)
 library(leaflet)
 
 # attach data
-data("census_de", package = "spDataLarge")
-data("metro_names", package = "spDataLarge")
-data("shops", package = "spDataLarge")
+data("census_de", "metro_names", "shops", package = "spDataLarge")
 # download German border polygon
 ger = getData(country = "DEU", level = 0)
 
@@ -48,7 +46,7 @@ input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D,
                       hh_size = HHGroesse_D)
 # set -1 and -9 to NA
-input_tidy = mutate_all(input, funs(ifelse(. %in% c(-1, -9), NA, .)))
+input_tidy = mutate_all(input, list(~ifelse(. %in% c(-1, -9), NA, .)))
 input_ras = rasterFromXYZ(input_tidy, crs = st_crs(3035)$proj4string)
 
 # convert the brick into a stack, ratify and factor variables apparently only
@@ -113,37 +111,31 @@ reclass = map2(as.list(input_ras), rcl, function(x, y) {
 names(reclass) = names(input_ras)
 # aggregate by a factor of 20
 pop_agg = aggregate(reclass$pop, fact = 20, fun = sum)
-# find most populous raster cells, convert them into polygons
-polys = rasterToPolygons(pop_agg[pop_agg > 500000, drop = FALSE]) %>% 
-  st_as_sf(polys)
-# union the single polygons into metropolitan areas
-polys = st_union(polys)  # one multi-polygon
-# now extract spatially disjoint metroplitan areas
-metros = st_cast(polys, "POLYGON")
-
-# find out about the offending polygon
-int = st_intersects(metros, metros)
-# polygons 5 and 9 share one border, delete polygon number 5
-metros_2 = metros[-5]
+# just keep raster cells with more than 500,000 inhabitants
+polys = pop_agg[pop_agg > 500000, drop = FALSE] 
+# convert all cells belonging to one region ino polygons
+polys = polys %>% 
+  clump() %>%
+  rasterToPolygons() %>%
+  st_as_sf()
+# dissolve
+metros = polys %>%
+  group_by(clumps) %>%
+  summarize()
 
 # palette
 pal = RColorBrewer::brewer.pal(5, "GnBu")
 # cuts = c(0, 249000, 499000, 749000, 999000, 1249000)
 cuts = c(0, 250000, 500000, 750000, 1000000, 1250000)
-coords = st_centroid(metros) %>% st_coordinates
-# delete the fifth polygon (single cell of the Düsseldorf area)
-coords = coords[-5, ]
+coords = st_centroid(metros) %>%
+  st_coordinates() %>%
+  round(4)
 # move all labels up except for Düsseldorf
-metro_names = 
-  dplyr::select(metro_names, locality, administrative_area_level_2) %>%
-  # replace Velbert and umlaut ü
-  mutate(locality = ifelse(locality == "Velbert", administrative_area_level_2, 
-                           locality),
-         locality = gsub("ü", "ue", locality)) %>%
-  pull(locality)
-ind = metro_names %in% c("Stuttgart", "Duesseldorf", "Berlin")
+metro_names = dplyr::pull(metro_names, city) %>% 
+  as.character() %>% 
+  ifelse(. == "Wülfrath", "Duesseldorf", .)
+ind = metro_names %in% "Duesseldorf"
 coords[!ind, 2] = coords[!ind, 2] + 30000
-coords[ind, 2] = coords[ind, 2] + c(45000, 45000, 0)
 
 # 3.2 Create figure========================================
 #**********************************************************
@@ -166,7 +158,7 @@ p_2 =
          # overlay with further spatial objects
          sp.layout = list(
            list("sp.polygons", ger, col = gray(0.5), first = FALSE),
-           list("sp.polygons", as(polys, "Spatial"), col = "gold",
+           list("sp.polygons", as(metros, "Spatial"), col = "gold",
                 lwd = 2, first = FALSE)
            # list("sp.text", coords, txt = metro_names, cex = 0.7, font = 3,
            #      first = FALSE)
@@ -234,13 +226,8 @@ reclass = addLayer(reclass, poi)
 # calculate the total score
 result = sum(reclass)
 # have a look at suitable bike shop locations in Berlin
-# polygons 5 and 9 share one border, delete polygon number 5
-metros_2 = st_sf(data.frame(names = metro_names), geometry = metros_2)
-berlin = dplyr::filter(metros_2, names == "Berlin")
-berlin_raster = crop(result, as(berlin, "Spatial"))
-berlin_raster = ratify(berlin_raster > 9)
-berlin_raster = berlin_raster == TRUE
-berlin_raster[berlin_raster == 0] = NA
+berlin = metros[metro_names == "Berlin", ]
+berlin_raster = raster::crop(result, berlin) 
 
 # 4.2 Figure===============================================
 #**********************************************************
@@ -249,10 +236,12 @@ m = mapview(berlin_raster, col.regions = c(NA, "darkgreen"),
 mapshot(m, url = file.path(getwd(), "figures/08_bikeshops_berlin.html"))
 
 # using leaflet (instead of mapview)
-berlin_raster = crop(result, as(berlin, "Spatial"))
-berlin_raster = berlin_raster > 10
-berlin_raster[berlin_raster == TRUE] = 1
+berlin_raster = berlin_raster > 9
+berlin_raster = berlin_raster == TRUE
 berlin_raster[berlin_raster == 0] = NA
+
 leaflet() %>% 
   addTiles() %>%
-  addRasterImage(berlin_raster, colors = "darkgreen", opacity = 0.8)
+  addRasterImage(berlin_raster, colors = "darkgreen", opacity = 0.8) %>%
+  addLegend("bottomright", colors = c("darkgreen"), 
+            labels = c("potential locations"), title = "Legend")

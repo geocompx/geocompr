@@ -41,7 +41,7 @@ Some global geoportals overcome this issue.
 The [GEOSS portal](http://www.geoportal.org/) and the [Copernicus Open Access Hub](https://scihub.copernicus.eu/), for example, contain many raster datasets with global coverage.
 A wealth of vector datasets can be accessed from the National Aeronautics and Space Administration agency (NASA), [SEDAC](http://sedac.ciesin.columbia.edu/) portal and the European Union's [INSPIRE geoportal](http://inspire-geoportal.ec.europa.eu/), with global and regional coverage.
 
-Most geoportals provide a graphical interface allowing datasets to be queried based on characteristics such spatial and temporal extent, the United States Geological Services' [EarthExplorer](https://earthexplorer.usgs.gov/) being a prime example.
+Most geoportals provide a graphical interface allowing datasets to be queried based on characteristics such as spatial and temporal extent, the United States Geological Services' [EarthExplorer](https://earthexplorer.usgs.gov/) being a prime example.
 *Exploring* datasets interactively on a browser is an effective way of understanding available layers.
 *Downloading* data is best done with code, however, from reproducibility and efficiency perspectives.
 Downloads can be initiated from the command line using a variety of techniques, primarily via URLs and APIs (see the [Sentinel API](https://scihub.copernicus.eu/twiki/do/view/SciHubWebPortal/APIHubDescription) for example).
@@ -411,14 +411,14 @@ Instead of columns describing xy-coordinates, a single column can also contain t
 Well-known text (WKT), well-known binary (WKB), and the GeoJSON formats are examples of this.
 For instance, the `world_wkt.csv` file has a column named `WKT` representing polygons of the world's countries.
 We will again use the `options` parameter to indicate this.
-Here, we will use `read_sf()` which does exactly the same as `st_read()` except it does not print the driver name to the console and stores strings as characters instead of factors.
+Here, we will use `read_sf()`, the tidyverse-flavoured version of `st_read()`: strings are parsed as characters instead of factors and the resulting data frame is a [tibble](https://r4ds.had.co.nz/tibbles.html). The driver name is also not printed to the console.
 
 ```{r 07-read-write-plot-21, results='hide'}
 world_txt = system.file("misc/world_wkt.csv", package = "spData")
 world_wkt = read_sf(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT")
 # the same as
 world_wkt = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT", 
-                    quiet = TRUE, stringsAsFactors = FALSE)
+                    quiet = TRUE, stringsAsFactors = FALSE, as_tibble = TRUE)
 ```
 
 ```{block2 07-read-write-plot-22, type='rmdnote'}
@@ -618,7 +618,7 @@ plot(world["lifeExp"])
 dev.off()
 ```
 
-Other available graphic devices include `pdf()`, `bmp()`, `jpeg()`, `png()`, and `tiff()`. 
+Other available graphic devices include `pdf()`, `bmp()`, `jpeg()`, and `tiff()`. 
 You can specify several properties of the output plot, including width, height and resolution.
 
 Additionally, several graphic packages provide their own functions to save a graphical output.
@@ -627,9 +627,8 @@ You can save a `tmap` object to different graphic formats by specifying the obje
 
 ```{r 07-read-write-plot-37, eval=FALSE}
 library(tmap)
-tmap_obj = tm_shape(world) +
-  tm_polygons(col = "lifeExp")
-tmap_save(tm  = tmap_obj, filename = "lifeExp_tmap.png")
+tmap_obj = tm_shape(world) + tm_polygons(col = "lifeExp")
+tmap_save(tm = tmap_obj, filename = "lifeExp_tmap.png")
 ```
 
 <!-- Note about that the `plot` function do not create an object -->
