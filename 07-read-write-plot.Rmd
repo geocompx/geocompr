@@ -140,15 +140,17 @@ world3 = st_read(system.file("shapes/world.gpkg", package = "spData"))
 In an effort to standardize web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of specifications for web services (collectively known as OWS, which is short for OGC Web Services).
 These specifications include the Web Feature Service (WFS), Web Map Service (WMS), Web Map Tile Service (WMTS), the Web Coverage Service (WCS) and even a Wep Processing Service (WPS).
 Map servers such as PostGIS have adopted these protocols, leading to standardization of queries.
-Like other web APIs, OWS APIs use a 'base URL' and a 'query string' proceding a `?` to request data.
+Like other web APIs, OWS APIs use a 'base URL', an 'endpoint' and 'URL query arguments' proceding a `?` to request data (see the [`best-practices-api-packages`](https://httr.r-lib.org/articles/api-packages.html) vignette in the **httr** package).
 
 There are many requests that can be made to a OWS service.
-One of the most fundamental is `getCapabilities`, demonstrated with the **httr** package to show how API queries can be constructed and dispatched, in this case to discover the capabilities of a service providing run by the Food and Agriculture Organization of the United Nations (FAO):
+One of the most fundamental is `getCapabilities`, demonstrated with **httr** below.
+The code chunk demonstrates how API queries can be constructed and dispatched, in this case to discover the capabilities of a service run by the Food and Agriculture Organization of the United Nations (FAO):
 
 ```{r 07-read-write-plot-8}
-base_url = "http://www.fao.org/figis/geoserver/wfs"
+base_url = "http://www.fao.org"
+endpoint = "/figis/geoserver/wfs"
 q = list(request = "GetCapabilities")
-res = httr::GET(url = base_url, query = q)
+res = httr::GET(url = httr::modify_url(base_url, path = endpoint), query = q)
 res$url
 ```
 
@@ -162,7 +164,8 @@ txt = httr::content(res, "text")
 xml = xml2::read_xml(txt)
 ```
 
-```{r 07-read-write-plot-10}
+```{r 07-read-write-plot-10, eval=FALSE}
+xml
 #> {xml_document} ...
 #> [1] <ows:ServiceIdentification>\n  <ows:Title>GeoServer WFS...
 #> [2] <ows:ServiceProvider>\n  <ows:ProviderName>Food and Agr...
