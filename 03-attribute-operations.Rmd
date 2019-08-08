@@ -21,7 +21,7 @@ library(spData)
 
 Attribute data is non-spatial information associated with geographic (geometry) data.
 A bus stop provides a simple example: its position would typically be represented by latitude and longitude coordinates (geometry data), in addition to its name.
-The name is an *attribute* of the feature (to use Simple Features terminology) that bears no relation to its geometry.
+The name is an *attribute*\index{attribute} of the feature (to use Simple Features terminology) that bears no relation to its geometry.
 <!-- idea: add an example of a bus stop (or modify a previous example so it represents a bus stop) in the previous chapter  -->
 
 Another example is the elevation value (attribute) for a specific grid cell in raster data.
@@ -79,8 +79,9 @@ The following command, for example, creates a geometry column named g:
 This enables geometries imported from spatial databases to have a variety of names such as `wkb_geometry` and `the_geom`.
 ```
 
-`sf` objects also support `tibble` and `tbl` classes used in the tidyverse, allowing 'tidy' data analysis workflows for spatial data.
+`sf` objects also support `tibble` and `tbl` classes used in the tidyverse\index{tidyverse (package)}, allowing 'tidy' data analysis workflows for spatial data.
 Thus **sf** enables the full power of R's data analysis capabilities to be unleashed on geographic data.
+\index{tibble}
 Before using these capabilities it is worth re-capping how to discover the basic properties of vector data objects.
 Let's start by using base R functions to get a measure of the `world` dataset:
 
@@ -102,7 +103,7 @@ This can be useful if the geometry column causes problems, e.g., by occupying la
 For most cases, however, there is no harm in keeping the geometry column because non-spatial data operations on `sf` objects only change an object's geometry when appropriate (e.g., by dissolving borders between adjacent polygons following aggregation).
 This means that proficiency with attribute data in `sf` objects equates to proficiency with data frames in R.
 
-For many applications, the tidyverse package **dplyr** offers the most effective and intuitive approach for working with data frames.
+For many applications, the tidyverse\index{tidyverse (package)} package **dplyr** offers the most effective and intuitive approach for working with data frames.
 Tidyverse compatibility is an advantage of **sf** over its predecessor **sp**, but there are some pitfalls to avoid (see the supplementary `tidyverse-pitfalls` vignette at [geocompr.github.io](https://geocompr.github.io/geocompkg/articles/tidyverse-pitfalls.html) for details).
 <!-- (see [Section 6.7](https://csgillespie.github.io/efficientR/data-carpentry.html#data-processing-with-data.table) of @gillespie_efficient_2016),  -->
 
@@ -111,6 +112,7 @@ Tidyverse compatibility is an advantage of **sf** over its predecessor **sp**, b
 Base R subsetting functions include `[`, `subset()` and  `$`.
 **dplyr** subsetting functions include `select()`, `filter()`, and `pull()`.
 Both sets of functions preserve the spatial components of attribute data in `sf` objects.
+\index{attribute!subsetting}
 
 The `[` operator can subset both rows and columns. 
 You use indices to specify the elements you wish to extract from an object, e.g., `object[i, j]`, with `i` and `j` typically being numbers or logical vectors --- `TRUE`s and `FALSE`s --- representing rows and columns (they can also be character strings, indicating row or column names).
@@ -151,7 +153,7 @@ small_countries = subset(world, area_km2 < 10000)
 Base R functions are mature and widely used.
 However, the more recent **dplyr** approach has several advantages.
 It enables intuitive workflows.
-It is fast, due to its C++ backend.
+It is fast, due to its C++\index{C++} backend.
 This is especially useful when working with big data as well as **dplyr**'s database integration.
 The main **dplyr** subsetting functions are `select()`, `slice()`, `filter()` and `pull()`.
 
@@ -288,6 +290,8 @@ world8 = slice(
 
 ### Vector attribute aggregation
 
+\index{attribute!aggregation}
+\index{aggregation}
 Aggregation operations summarize datasets by a 'grouping variable', typically an attribute column (spatial aggregation is covered in the next chapter).
 An example of attribute aggregation is calculating the number of people per continent based on country-level data (one row per country).
 The `world` dataset contains the necessary ingredients: the columns `pop` and `continent`, the population and the grouping variable, respectively.
@@ -379,6 +383,8 @@ These function names follow conventions used in the database language [SQL](http
 **dplyr** join functions work the same on data frames and `sf` objects, the only important difference being the `geometry` list column.
 The result of data joins can be either an `sf` or `data.frame` object.
 The most common type of attribute join on spatial data takes an `sf` object as the first argument and adds columns to it from a `data.frame` specified as the second argument.
+\index{join}
+\index{attribute!join}
 
 To demonstrate joins, we will combine data on coffee production with the `world` dataset.
 The coffee data is in a data frame called `coffee_data` from the **spData** package (see `?coffee_data` for details).
@@ -575,6 +581,7 @@ class(world_data)
 In contrast to the vector data model underlying simple features (which represents points, lines and polygons as discrete entities in space), raster data represent continuous surfaces.
 This section shows how raster objects work by creating them *from scratch*, building on Section \@ref(an-introduction-to-raster).
 Because of their unique structure, subsetting and other operations on raster datasets work in a different way, as demonstrated in Section \@ref(raster-subsetting).
+\index{raster!manipulation}
 
 The following code recreates the raster dataset used in Section \@ref(raster-classes), the result of which is illustrated in Figure \@ref(fig:cont-raster).
 This demonstrates how the `raster()` function works to create an example raster named `elev` (representing elevations).
@@ -636,6 +643,7 @@ source("https://github.com/Robinlovelace/geocompr/raw/master/code/03-cont-raster
 ### Raster subsetting
 
 Raster subsetting is done with the base R operator `[`, which accepts a variety of inputs:
+\index{raster!subsetting}
 
 - Row-column indexing
 - Cell IDs
@@ -687,10 +695,11 @@ elev[1, 1:2] = 0
 
 ### Summarizing raster objects
 
-**raster** contains functions for extracting descriptive statistics for entire rasters.
+**raster** contains functions for extracting descriptive statistics\index{statistics} for entire rasters.
 Printing a raster object to the console by typing its name returns minimum and maximum values of a raster.
-`summary()` provides common descriptive statistics (minimum, maximum, quartiles and number of `NA`s).
+`summary()` provides common descriptive statistics\index{statistics} (minimum, maximum, quartiles and number of `NA`s).
 Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with `cellStats()`. 
+\index{raster!summarizing}
 
 ```{r 03-attribute-operations-62, eval = FALSE}
 cellStats(elev, sd)
@@ -708,6 +717,7 @@ hist(elev)
 ```
 
 In case a visualization function does not work with raster objects, one can extract the raster data to be plotted with the help of `values()` or `getValues()`.
+\index{raster!values}
 
 Descriptive raster statistics belong to the so-called global raster operations.
 These and other typical raster processing operations are part of the map algebra scheme, which are covered in the next chapter (Section \@ref(map-algebra)).

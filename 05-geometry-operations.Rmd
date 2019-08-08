@@ -23,7 +23,7 @@ Section \@ref(geo-vec) covers transforming vector geometries with 'unary' and 'b
 Unary operations work on a single geometry in isolation.
 This includes simplification (of lines and polygons), the creation of buffers and centroids, and shifting/scaling/rotating single geometries using 'affine transformations' (Sections \@ref(simplification) to \@ref(affine-transformations)).
 Binary transformations modify one geometry based on the shape of another.
-This includes clipping and geometry unions, covered in Sections \@ref(clipping) and \@ref(geometry-unions), respectively.
+This includes clipping and geometry unions\index{vector!union}, covered in Sections \@ref(clipping) and \@ref(geometry-unions), respectively.
 Type transformations (from a polygon to a line, for example) are demonstrated in Section \@ref(type-trans).
 
 Section \@ref(geo-ras) covers geometric transformations on raster objects.
@@ -42,6 +42,7 @@ the functions discussed in this section work on objects of class `sfc` in additi
 
 ### Simplification
 
+\index{vector!simplification} 
 Simplification is a process for generalization of vector objects (lines and polygons) usually for use in smaller scale maps.
 Another reason for simplifying objects is to reduce the amount of memory, disk space and network bandwidth they consume:
 it may be wise to simplify complex geometries before publishing them as interactive maps. 
@@ -117,6 +118,7 @@ tmap_arrange(p_ussimp1, p_ussimp2, p_ussimp3, ncol = 3)
 
 ### Centroids
 
+\index{vector!centroids} 
 Centroid operations identify the center of geographic objects.
 Like statistical measures of central tendency (including mean and median definitions of 'average'), there are many ways to define the geographic center of an object.
 All of them create single point representations of more complex vector objects.
@@ -158,6 +160,7 @@ We will not explore these here but it is possible to calculate them using R, as 
 
 ### Buffers
 
+\index{vector!buffers} 
 Buffers are polygons representing the area within a given distance of a geometric feature:
 regardless of whether the input is a point, line or polygon, the output is a polygon.
 Unlike simplification (which is often used for visualization and reducing file size) buffering tends to be used for geographic data analysis.
@@ -202,13 +205,14 @@ plot(st_geometry(buff_single), add = TRUE)
 
 ### Affine transformations
 
+\index{vector!affine transformation} 
 Affine transformation is any transformation that preserves lines and parallelism.
 <!-- The midpoint of a line segment remains a midpoint and all points lying on a line initially still lie on a line after an affine transformation. -->
 However, angles or length are not necessarily preserved.
 Affine transformations include, among others, shifting (translation), scaling and rotation.
 <!-- translation, scaling, homothety, similarity transformation, reflection, rotation, shear mapping -->
 Additionally, it is possible to use any combination of these.
-Affine transformations are an essential part of geocomputation.  
+Affine transformations are an essential part of geocomputation.
 For example, shifting is needed for labels placement, scaling is used in non-contiguous area cartograms (see Section \@ref(other-mapping-packages)), and many affine transformations are applied when reprojecting or improving the geometry that was created based on a distorted or wrongly projected map.
 The **sf** package implements affine transformation for objects of classes `sfg` and `sfc`.
 
@@ -307,6 +311,8 @@ nz_scale_sf = st_set_geometry(nz, nz_scale)
 
 ### Clipping {#clipping}
 
+\index{vector!clipping} 
+\index{spatial!subsetting} 
 Spatial clipping is a form of spatial subsetting that involves changes to the `geometry` columns of at least some of the affected features.
 
 Clipping can only apply to features more complex than points: 
@@ -314,7 +320,7 @@ lines, polygons and their 'multi' equivalents.
 To illustrate the concept we will start with a simple example:
 two overlapping circles with a center point one unit away from each other and a radius of one (Figure \@ref(fig:points)).
 
-```{r points, fig.cap="Overlapping circles.", fig.asp=1}
+```{r points, fig.cap="Overlapping circles.", fig.asp=1, out.width="50%"}
 b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
 b = st_buffer(b, dist = 1) # convert points to circles
 plot(b)
@@ -322,9 +328,9 @@ text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y")) # add text
 ```
 
 Imagine you want to select not one circle or the other, but the space covered by both `x` *and* `y`.
-This can be done using the function `st_intersection()`, illustrated using objects named `x` and `y` which represent the left- and right-hand circles (Figure \@ref(fig:circle-intersection)).
+This can be done using the function `st_intersection()`\index{vector!intersection}, illustrated using objects named `x` and `y` which represent the left- and right-hand circles (Figure \@ref(fig:circle-intersection)).
 
-```{r circle-intersection, fig.cap="Overlapping circles with a gray color indicating intersection between them.", fig.asp=1, fig.scap="Overlapping circles showing intersection types."}
+```{r circle-intersection, fig.cap="Overlapping circles with a gray color indicating intersection between them.", fig.asp=1, out.width="50%", , fig.scap="Overlapping circles showing intersection types."}
 x = b[1]
 y = b[2]
 x_and_y = st_intersection(x, y)
@@ -355,7 +361,7 @@ plot(p, add = TRUE)
 text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
 ```
 
-The logical operator way would find the points inside both `x` and `y` using a spatial predicate such as `st_intersects()`, whereas the intersection method simply finds the points inside the intersecting region created above as `x_and_y`.
+The logical operator way would find the points inside both `x` and `y` using a spatial predicate such as `st_intersects()`, whereas the intersection\index{vector!intersection} method simply finds the points inside the intersecting region created above as `x_and_y`.
 As demonstrated below the results are identical, but the method that uses the clipped polygon is more concise:
 
 ```{r 05-geometry-operations-21}
@@ -376,8 +382,10 @@ box = st_convex_hull(pmulti)
 
 ### Geometry unions
 
+\index{vector!union} 
+\index{aggregation!spatial} 
 As we saw in Section \@ref(vector-attribute-aggregation), spatial aggregation can silently dissolve the geometries of touching polygons in the same group.
-This is demonstrated in the code chunk below in which 49 `us_states` are aggregated into 4 regions using base and **tidyverse** functions (see results in Figure \@ref(fig:us-regions)):
+This is demonstrated in the code chunk below in which 49 `us_states` are aggregated into 4 regions using base and **tidyverse**\index{tidyverse (package)} functions (see results in Figure \@ref(fig:us-regions)):
 
 ```{r 05-geometry-operations-23}
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
@@ -421,6 +429,7 @@ plot(us_southhwest)
 
 ### Type transformations {#type-trans}
 
+\index{vector!geometry casting} 
 Geometry casting is a powerful operation that enables transformation of the geometry type.
 It is implemented in the `st_cast` function from the **sf** package.
 Importantly, `st_cast` behaves differently on single simple feature geometry (`sfg`) objects, simple feature geometry column (`sfc`) and simple features objects.
@@ -499,17 +508,12 @@ sfs_st_cast$input_geom = abbreviate_geomtypes(sfs_st_cast$input_geom)
 names(sfs_st_cast) = abbreviate_geomtypes(names(sfs_st_cast))
 names(sfs_st_cast)[1] = ""
 knitr::kable(sfs_st_cast, 
-             caption = paste("Geometry casting on simple feature objects", 
-                             "(see Section 2.2) with input type by row and", 
-                             "output type by column. Values like (1) represent", 
-                             "the number of features; NA means the operation", 
-                             "is not possible.\nAbbreviations: POI, LIN, POL", 
-                             "and GC refer to POINT, LINESTRING, POLYGON and", 
-                             "GEOMETRYCOLLECTION. The MULTI version of these", 
-                             "geometry types is indicated by a preceding M,", 
-                             "e.g., MPOI is the acronym for MULTIPOINT."),
+             caption = paste("Geometry casting on simple feature geometries", 
+                             "(see Section 2.1) with input type by row and", 
+                             "output type by column"),
              caption.short = "Geometry casting on simple feature geometries.",
-             booktabs = TRUE)
+             booktabs = TRUE) %>% 
+  kableExtra::add_footnote("Note: Values like (1) represent the number of features; NA means the operation is not possible. Abbreviations: POI, LIN, POL and GC refer to POINT, LINESTRING, POLYGON and GEOMETRYCOLLECTION. The MULTI version of these geometry types is indicated by a preceding M, e.g., MPOI is the acronym for MULTIPOINT.", notation = "none")
 ```
 
 Let's try to apply geometry type transformations on a new object, `multilinestring_sf`, as an example (on the left in Figure \@ref(fig:line-cast)):
@@ -554,6 +558,7 @@ linestring_sf2
 
 ## Geometric operations on raster data {#geo-ras}
 
+\index{raster!manipulation} 
 Geometric raster operations include the shift, flipping, mirroring, scaling, rotation or warping of images.
 These operations are necessary for a variety of applications including georeferencing, used to allow images to be overlaid on an accurate map with a known CRS [@liu_essential_2009].
 A variety of georeferencing techniques exist, including:
@@ -576,6 +581,7 @@ Sometimes a coarser resolution is sufficient for the task at hand.
 
 ### Geometric intersections
 
+\index{raster!intersection} 
 In Section \@ref(spatial-raster-subsetting) we have shown how to extract values from a raster overlaid by other spatial objects.
 To retrieve a spatial output, we can use almost the same subsetting syntax.
 The only difference is that we have to make clear that we would like to keep the matrix structure by setting the `drop`-parameter to `FALSE`.
@@ -592,6 +598,7 @@ For the same operation we can also use the `intersect()` and `crop()` command.
 
 ### Extent and origin
 
+\index{raster!merging} 
 When merging or performing map algebra on rasters, their resolution, projection, origin and/or extent have to match. Otherwise, how should we add the values of one raster with a resolution of 0.2 decimal degrees to a second raster with a resolution of 1 decimal degree?
 The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions. 
 We can deal with such mismatches by aligning the rasters.
@@ -606,7 +613,7 @@ elev_2 = extend(elev, c(1, 2), value = 1000)
 plot(elev_2)
 ```
 
-Performing an algebraic operation on two objects with differing extents in R, the **raster** package returns the result for the intersection, and says so in a warning.
+Performing an algebraic operation on two objects with differing extents in R, the **raster** package returns the result for the intersection\index{raster!intersection}, and says so in a warning.
 
 ```{r 05-geometry-operations-37}
 elev_3 = elev + elev_2
@@ -647,6 +654,9 @@ Note that changing the resolution frequently (next section) also changes the ori
 
 ### Aggregation and disaggregation
 
+\index{raster!aggregation} 
+\index{raster!disaggregation} 
+\index{raster!resampling}
 Raster datasets can also differ with regard to their resolution. 
 To match resolutions, one can either decrease  (`aggregate()`) or increase (`disaggregate()`) the resolution of one raster.^[
 Here we refer to spatial resolution.
@@ -731,6 +741,7 @@ Additionally, check out the *Multi-core functions* section in `vignette("functio
 
 ## Raster-vector interactions {#raster-vector}
 
+\index{raster-vector!interactions} 
 This section focuses on interactions between raster and vector geographic data models, introduced in Chapter \@ref(spatial-class).
 It includes four main techniques:
 raster cropping and masking using vector objects (Section \@ref(raster-cropping));
@@ -744,6 +755,7 @@ The above concepts are demonstrated using data used in previous chapters to unde
 
 ### Raster cropping
 
+\index{raster-vector!raster cropping} 
 Many geographic data projects involve integrating data from many different sources, such as remote sensing images (rasters) and administrative boundaries (vectors).
 Often the extent of input raster datasets is larger than the area of interest.
 In this case raster **cropping** and **masking** are useful for unifying the spatial extent of input data.
@@ -771,6 +783,7 @@ We will use `crop()` from the **raster** package to crop the `srtm` raster.
 srtm_cropped = crop(srtm, zion)
 ```
 
+\index{raster-vector!raster masking} 
 Related to `crop()` is the **raster** function `mask()`, which sets values outside of the bounds of the object passed to its second argument to `NA`.
 The following command therefore masks every cell outside of the Zion National Park boundaries (Figure \@ref(fig:cropmask)(C)):
 
@@ -808,6 +821,7 @@ tmap_arrange(pz1, pz2, pz3, pz4, ncol = 4)
 
 ### Raster extraction
 
+\index{raster-vector!raster extraction} 
 Raster extraction is the process of identifying and returning the values associated with a 'target' raster at specific locations, based on a (typically vector) geographic 'selector' object.
 The results depend on the type of selector used (points, lines or polygons) and arguments passed to the `raster::extract()` function, which we use to demonstrate raster extraction.
 The reverse of raster extraction --- assigning raster cell values based on vector objects --- is rasterization, described in Section \@ref(rasterization).
@@ -831,7 +845,7 @@ The `buffer` argument can be used to specify a buffer radius (in meters) around 
 The result of `raster::extract(srtm, zion_points, buffer = 1000)`, for example, is a list of vectors, each of which representing the values of cells inside the buffer associated with each point.
 In practice, this example is a special case of extraction with a polygon selector, described below.
 
-```{r pointextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Locations of points used for raster extraction.", fig.asp=0.57}
+```{r pointextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Locations of points used for raster extraction.", out.width="60%", fig.asp=0.57}
 library(tmap)
 library(grid)
 
@@ -958,7 +972,7 @@ group_by(zion_srtm_values, ID) %>%
   summarize_at(vars(srtm), list(~min(.), ~mean(.), ~max(.)))
 ```
 
-The preceding code chunk used the **tidyverse** to provide summary statistics for cell values per polygon ID, as described in Chapter \@ref(attr).
+The preceding code chunk used the **tidyverse**\index{tidyverse (package)} to provide summary statistics for cell values per polygon ID, as described in Chapter \@ref(attr).
 The results provide useful summaries, for example that the maximum height in the park is around 2,661 meters (other summary statistics, such as standard deviation, can also be calculated in this way).
 Because there is only one polygon in the example a data frame with a single row is returned; however, the method works when multiple selector polygons are used.
 
@@ -1000,6 +1014,7 @@ If this is a problem, it is useful to know about alternatives and work-arounds, 
 
 ### Rasterization {#rasterization}
 
+\index{raster-vector!rasterization} 
 Rasterization is the conversion of vector objects into their representation in raster objects.
 Usually, the output raster is used for quantitative analysis (e.g., analysis of terrain) or modeling.
 As we saw in Chapter \@ref(spatial-class) the raster data model has some characteristics that make it conducive to certain methods.
@@ -1094,12 +1109,13 @@ source("https://github.com/Robinlovelace/geocompr/raw/master/code/05-vector-rast
 As with `raster::extract()`,  `raster::rasterize()` works well for most cases but is not performance optimized. 
 Fortunately, there are several alternatives, including the `fasterize::fasterize()` and `gdalUtils::gdal_rasterize()`. 
 The former is much (100 times+) faster than `rasterize()`, but is currently limited to polygon rasterization.
-The latter is part of GDAL and therefore requires a vector file (instead of an `sf` object) and rasterization parameters (instead of a `Raster*` template object) as inputs.^[
+The latter is part of GDAL\index{GDAL} and therefore requires a vector file (instead of an `sf` object) and rasterization parameters (instead of a `Raster*` template object) as inputs.^[
 See more at http://gdal.org/gdal_rasterize.html.
 ]
 
 ### Spatial vectorization
 
+\index{raster-vector!spatial vectorization} 
 Spatial vectorization is the counterpart of rasterization (Section \@ref(rasterization)), but in the opposite direction.
 It involves converting spatially continuous raster data into spatially discrete vector data such as points, lines or polygons.
 
@@ -1145,6 +1161,8 @@ plot(dem, col = terrain.colors(25), alpha = 0.5, legend = FALSE, add = TRUE)
 # add contour lines
 contour(dem, col = "white", add = TRUE)
 ```
+
+\index{hillshade}
 
 ```{r contour-tmap, echo=FALSE, message=FALSE, fig.cap="DEM hillshade of the southern flank of Mt. Mongón overlaid by contour lines.", warning=FALSE, fig.asp=0.56, fig.scap="Hillshade overlaid by contours."}
 library(tmap)
@@ -1277,7 +1295,7 @@ ggplot(data = us_states_sfc_mirror_sf) +
 ```
 1. Subset the point in `p` that is contained within `x` *and* `y` (see Section \@ref(clipping) and Figure \@ref(fig:venn-clip)).
     - Using base subsetting operators.
-    - Using an intermediary object created with `st_intersection()`.
+    - Using an intermediary object created with `st_intersection()`\index{vector!intersection}.
 ```{r 05-geometry-operations-73, echo=FALSE, eval=FALSE}
 p_in_y = p[y]
 p_in_xy = p_in_y[x]
