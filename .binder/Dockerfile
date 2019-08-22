@@ -7,6 +7,6 @@ USER ${NB_USER}
 
 
 
-RUN wget https://github.com/robinlovelace/geocompr/raw/master/DESCRIPTION && R -e "options(repos = list(CRAN = 'http://mran.revolutionanalytics.com/snapshot/2019-08-22/')); devtools::install_deps()"
+RUN wget https://github.com/robinlovelace/geocompr/raw/master/DESCRIPTION && R -e "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl'); devtools::install_deps()"
 
 RUN rm DESCRIPTION.1
