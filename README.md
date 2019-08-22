@@ -3,6 +3,8 @@
 
 # Geocomputation with R
 
+[![Launch Rstudio
+Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/master?urlpath=rstudio)
 [![Build
 Status](https://travis-ci.org/Robinlovelace/geocompr.svg?branch=master)](https://travis-ci.org/Robinlovelace/geocompr)
 [![](https://img.shields.io/docker/automated/robinlovelace/geocompr.svg)](https://hub.docker.com/r/robinlovelace/geocompr/builds/)
@@ -39,9 +41,9 @@ Please see
 for the book’s style.
 
 Many thanks to all contributors to the book so far via GitHub (this list
-will update automatically): [katygregg](https://github.com/katygregg),
+will update automatically): [prosoitos](https://github.com/prosoitos),
 [florisvdh](https://github.com/florisvdh),
-[prosoitos](https://github.com/prosoitos),
+[katygregg](https://github.com/katygregg),
 [erstearns](https://github.com/erstearns),
 [eyesofbambi](https://github.com/eyesofbambi),
 [tyluRp](https://github.com/tyluRp),
@@ -52,6 +54,7 @@ will update automatically): [katygregg](https://github.com/katygregg),
 [pat-s](https://github.com/pat-s), [gisma](https://github.com/gisma),
 [ateucher](https://github.com/ateucher),
 [annakrystalli](https://github.com/annakrystalli),
+[kant](https://github.com/kant),
 [gavinsimpson](https://github.com/gavinsimpson),
 [Henrik-P](https://github.com/Henrik-P),
 [Himanshuteli](https://github.com/Himanshuteli),
@@ -62,8 +65,7 @@ will update automatically): [katygregg](https://github.com/katygregg),
 [nickbearman](https://github.com/nickbearman),
 [ganes1410](https://github.com/ganes1410),
 [richfitz](https://github.com/richfitz),
-[SymbolixAU](https://github.com/SymbolixAU),
-[wdearden](https://github.com/wdearden).
+[SymbolixAU](https://github.com/SymbolixAU).
 
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
@@ -81,10 +83,9 @@ install.packages("remotes")
 remotes::install_github("geocompr/geocompkg")
 ```
 
-You need a recent version of the GDAL, GEOS, PROJ and UDUNITS
-libraries installed for this to work on Mac and Linux. See the **sf**
-package’s [README](https://github.com/r-spatial/sf) for information on
-that.
+You need a recent version of the GDAL, GEOS, PROJ and UDUNITS libraries
+installed for this to work on Mac and Linux. See the **sf** package’s
+[README](https://github.com/r-spatial/sf) for information on that.
 
 Once the dependencies have been installed you should be able to build
 and view a local version the book with:
