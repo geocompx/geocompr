@@ -30,6 +30,7 @@ RUN apt-get update && \
   xvfb && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*  && \
+  echo "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site \
   # install virtual display for Python
   pip3 install pyvirtualdisplay
   
