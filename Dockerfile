@@ -34,6 +34,6 @@ RUN apt-get update && \
   # install virtual display for Python
   pip3 install pyvirtualdisplay
   
-RUN git clone --progress https://github.com/Robinlovelace/geocompr /home/rstudio/geocompr
+RUN git clone --progress https://github.com/Robinlovelace/geocompr /home/rstudio
 WORKDIR /home/rstudio/geocompr
 
