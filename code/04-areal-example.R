@@ -4,7 +4,7 @@ library(spData)
 rx = rbind(congruent, incongruent)
 # tmap_mode("plot")
 m = tm_shape(rx) +
-  tm_fill("value", breaks = seq(4, 6, by = 0.5)) +
+  tm_fill("value", breaks = seq(3.5, 7, by = 0.5)) +
   tm_borders(lwd = 1, col = "black", lty = 1) +
   tm_facets(by = "level", drop.units = TRUE, ncol = 2) +
   tm_shape(aggregating_zones) +
