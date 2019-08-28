@@ -110,7 +110,24 @@ book. After you have [installed
 docker](https://www.docker.com/community-edition#/download) and set-it
 up on [your
 computer](https://docs.docker.com/install/linux/linux-postinstall/) you
-should be able to reproduce the entire book with the following steps
+can start a rocker-docker RStudio Server version by running:
+
+``` sh
+docker run -p 8787:8787 -e DISABLE_AUTH=TRUE robinlovelace/geocompr
+```
+
+If it worked you should be able to open-up RStudio server by opening a
+browser and navigating to <http://localhost:8787/> resulting in an
+up-to-date version of R and RStudio running in a container.
+
+On the other hand, you could also start a plain R session running:
+
+``` sh
+docker run -it robinlovelace/geocompr R
+```
+
+To reproduce the entire book in the docker container, you will also need
+to mount your local geocompr repository with the following steps
 (resulting in output shown below):
 
 ``` bash
@@ -120,16 +137,10 @@ git clone https://github.com/Robinlovelace/geocompr.git
 # https://github.com/Robinlovelace/geocompr/archive/master.zip
 cd geocompr # navigate into the repo
 # on linux and mac:
-docker run -d -p 8788:8787 -v $(pwd):/home/rstudio/data -e USERID=$UID -e PASSWORD=pickASafePassWord --name rstudio robinlovelace/geocompr
-
+docker run -d -p 8787:8787 -e DISABLE_AUTH=TRUE -v $(pwd):/home/rstudio/geocompr  robinlovelace/geocompr
 # on windows:
-docker run -d -p 8787:8787 -v ${pwd}:/home/rstudio/data -e PASSWORD=safepassword robinlovelace/geocompr
+docker run -d -p 8787:8787 -v ${pwd}:/home/rstudio/data -e DISABLE_AUTH=TRUE robinlovelace/geocompr
 ```
-
-If it worked you should be able to open-up RStudio server by opening a
-browser and navigating to <http://localhost:8787/> resulting in an
-up-to-date version of R and RStudio running in a
-container.
 
 ![](https://user-images.githubusercontent.com/1825120/39538109-9b50e7ac-4e33-11e8-93b3-e00e95a79294.png)
 
@@ -138,10 +149,10 @@ congratulations: it worked\! See
 [github.com/rocker-org](https://github.com/rocker-org/rocker/wiki/Using-the-RStudio-image#running-rstudio-server)
 for more info.
 
-From this point to *build* the book you can open projects in the `data`
-directory from the project box in the top-right hand corner, and knit
-`index.Rmd` with the little `knit` button above the the RStudio script
-panel (`Ctl+Shift+B` should do the same job).
+From this point to *build* the book you can open projects in the
+`geocompr` directory from the project box in the top-right hand corner,
+and knit `index.Rmd` with the little `knit` button above the the RStudio
+script panel (`Ctl+Shift+B` should do the same job).
 
 ## Reproducing this README
 
@@ -169,8 +180,7 @@ book’s build time:
 Note: the `.Rproj` file is configured to build a website not a single
 page. To reproduce this
 [README](https://github.com/Robinlovelace/geocompr/blob/master/README.Rmd)
-use the following
-command:
+use the following command:
 
 ``` r
 rmarkdown::render("README.Rmd", output_format = "github_document", output_file = "README.md")
