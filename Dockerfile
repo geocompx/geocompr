@@ -2,7 +2,7 @@ FROM rocker/geospatial
 RUN R -e "remotes::install_github('r-spatial/lwgeom')"
 RUN R -e "remotes::install_github('geocompr/geocompkg')"
 # install RQGIS3 from github
-RUN R -e "remotes::install_github('jannes-m/RQGIS3')"
+RUN R -e "remotes::install_github('r-spatial/RQGIS3')"
 RUN apt-get update && \
   # software-properties-common contains add-apt-repository needed for ubuntugis
   # apt-get install -y gpg software-properties-common && \
