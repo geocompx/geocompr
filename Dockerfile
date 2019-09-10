@@ -42,3 +42,4 @@ RUN apt-get update && \
   ldconfig /usr/local/lib && \
   echo "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site && \
   pip3 install pyvirtualdisplay # install virtual display for Python
+RUN R -e "remotes::install_cran('magick')"
