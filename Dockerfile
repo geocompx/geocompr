@@ -43,3 +43,5 @@ RUN apt-get update && \
   echo "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site && \
   pip3 install pyvirtualdisplay # install virtual display for Python
 RUN R -e "remotes::install_cran('magick')"
+# make Python3 default for reticulate/RStudio
+RUN echo "RETICULATE_PYTHON=/usr/bin/python3" >> /usr/local/lib/R/etc/Renviron 
