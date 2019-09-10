@@ -32,6 +32,13 @@ RUN apt-get update && \
   xvfb && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*  && \
+  # ImageMagik for animated maps - see https://www.tecmint.com/install-imagemagick-on-debian-ubuntu/
+  wget https://github.com/ImageMagick/ImageMagick/archive/7.0.8-64.tar.gz && \
+  tar xvzf 7.0.8-64.tar.gz && \
+  cd ImageMagick-7.0.8-64/ && \
+  ./configure && \ 
+  make && \
+  make install && \ 
+  ldconfig /usr/local/lib && \
   echo "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site && \
-  # install virtual display for Python
-  pip3 install pyvirtualdisplay
+  pip3 install pyvirtualdisplay # install virtual display for Python
