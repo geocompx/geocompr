@@ -6,6 +6,10 @@ RUN R -e "remotes::install_github('r-spatial/RQGIS3')"
 RUN apt-get update && \
   # set repos to CRAN to allow package updates
     echo "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site && \
+  # RStudio set-up preferences
+    echo '{' >> /etc/rstudio/rstudio-prefs.json && \
+    echo '    "rmd_chunk_output_inline": false' >> /etc/rstudio/rstudio-prefs.json && \
+    echo '}' >> /etc/rstudio/rstudio-prefs.json && \
   # software-properties-common contains add-apt-repository needed for ubuntugis
   # apt-get install -y gpg software-properties-common && \
   apt-get install -y gpg && \
