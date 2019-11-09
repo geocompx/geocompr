@@ -41,7 +41,7 @@ RUN apt-get update && \
   apt-get clean && \
   # clean up a bit
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-  rm -rf ImageMagick-7.0.8-64/
+  rm -rf ImageMagick-7.0.8-64/ && \
   echo "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site && \
   pip3 install pyvirtualdisplay # install virtual display for Python
 RUN R -e "remotes::install_cran('magick')"
