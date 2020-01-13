@@ -1,4 +1,4 @@
-FROM robinlovelace:geocompr:qgis-base
+FROM robinlovelace/geocompr:qgis-base
 RUN R -e "remotes::install_github('r-spatial/lwgeom')"
 RUN R -e "remotes::install_github('geocompr/geocompkg')"
 # install RQGIS3 from github
