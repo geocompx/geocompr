@@ -137,7 +137,7 @@ At the time of writing (autumn 2018) RQGIS only supports the [Long Term Release]
 
 
 ```{r qgis_setup, eval=FALSE}
-library(RQGIS)
+library(RQGIS3)
 set_env(dev = FALSE)
 #> $`root`
 #> [1] "C:/OSGeo4W64"
@@ -170,7 +170,7 @@ Assuming that the short description of the function contains the word "union"\in
 
 ```{r 09-gis-5, eval=FALSE}
 find_algorithms("union", name_only = TRUE)
-#> [1] "qgis:union"        "saga:fuzzyunionor" "saga:union"
+#> [1] "qgis:union"
 ```
 
 Short descriptions for each geoalgorithm\index{geoalgorithm} can also be provided, by setting `name_only = FALSE`.
@@ -183,13 +183,22 @@ The next step is to find out how `qgis:union` can be used.
 
 
 ```{r 09-gis-6, eval=FALSE}
-alg = "qgis:union"
+alg = "native:union"
 open_help(alg)
 get_usage(alg)
-#>ALGORITHM: Union
-#>	INPUT <ParameterVector>
-#>	INPUT2 <ParameterVector>
-#>	OUTPUT <OutputVector>
+#> Union (native:union)
+#> ...
+#> ----------------
+#> Input parameters
+#> ----------------
+#> 
+#> INPUT: Input layer
+#> 
+#> 	Parameter type:	QgsProcessingParameterFeatureSource
+#> ...
+#> OVERLAY: Overlay layer
+#> ...
+#> 	OUTPUT:  <QgsProcessingOutputVectorLayer>
 ```
 
 Finally, we can let QGIS\index{QGIS} do the work.
@@ -199,7 +208,7 @@ But of course, you could also specify paths to spatial vector files stored on di
 Setting the `load_output` to `TRUE` automatically loads the QGIS output as an **sf**-object\index{sf} into R.
 
 ```{r 09-gis-7, eval=FALSE}
-union = run_qgis(alg, INPUT = incongr_wgs, INPUT2 = aggzone_wgs, 
+union = run_qgis("native:union", INPUT = incongr_wgs, OVERLAY = aggzone_wgs, 
                  OUTPUT = file.path(tempdir(), "union.shp"),
                  load_output = TRUE)
 #> $`OUTPUT`
