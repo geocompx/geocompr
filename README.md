@@ -10,7 +10,7 @@ Status](https://travis-ci.org/Robinlovelace/geocompr.svg?branch=master)](https:/
 [![Docker](https://img.shields.io/docker/automated/robinlovelace/geocompr.svg)](https://hub.docker.com/r/robinlovelace/geocompr/builds/)
 [![DOI](https://zenodo.org/badge/84222786.svg)](https://zenodo.org/badge/latestdoi/84222786)
 
-# Introduction
+## Introduction
 
 This repository hosts the code underlying Geocomputation with R, a book
 by [Robin Lovelace](https://www.robinlovelace.net/), [Jakub
@@ -30,14 +30,14 @@ The online version of this book is free to read at
 
 We encourage contributions on any part of the book, including:
 
-  - Improvements to the text, e.g. clarifying unclear sentences, fixing
+  - improvements to the text, e.g. clarifying unclear sentences, fixing
     typos (see guidance from [Yihui
-    Xie](https://yihui.name/en/2013/06/fix-typo-in-documentation/)).
-  - Changes to the code, e.g. to do things in a more efficient way.
-  - Suggestions on content (see the project’s [issue
+    Xie](https://yihui.name/en/2013/06/fix-typo-in-documentation/));
+  - changes to the code, e.g. to do things in a more efficient way; and
+  - suggestions on content (see the project’s [issue
     tracker](https://github.com/Robinlovelace/geocompr/issues)).
 
-Please see
+See
 [our-style.md](https://github.com/Robinlovelace/geocompr/blob/master/our-style.md)
 for the book’s style.
 
@@ -47,6 +47,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [katygregg](https://github.com/katygregg),
 [erstearns](https://github.com/erstearns),
 [eyesofbambi](https://github.com/eyesofbambi),
+[nickbearman](https://github.com/nickbearman),
 [tyluRp](https://github.com/tyluRp),
 [marcosci](https://github.com/marcosci),
 [giocomai](https://github.com/giocomai),
@@ -63,10 +64,8 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [jbixon13](https://github.com/jbixon13),
 [katiejolly](https://github.com/katiejolly),
 [layik](https://github.com/layik), [mvl22](https://github.com/mvl22),
-[nickbearman](https://github.com/nickbearman),
 [ganes1410](https://github.com/ganes1410),
-[richfitz](https://github.com/richfitz),
-[SymbolixAU](https://github.com/SymbolixAU).
+[richfitz](https://github.com/richfitz).
 
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
@@ -102,7 +101,19 @@ browseURL("_book/index.html") # to view it
 
 <!-- These R scripts are generated with the follow command which wraps `knitr::purl()`: -->
 
-## Running geocompr code in docker
+## Geocompr in binder
+
+The simplest way to get started with Geocomputation with R is in your
+web browser via Binder. To see an interactive RStudio Server instance
+click on the following button, which will open
+[mybinder.org](https://mybinder.org/v2/gh/robinlovelace/geocompr/master?urlpath=rstudio)
+with an R installation that has all the dependencies needed to reproduce
+the book:
+
+[![Launch Rstudio
+Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/master?urlpath=rstudio)
+
+## Geocompr code in docker
 
 To ease reproducibility we have set-up a docker image
 ([robinlovelace/geocompr](https://hub.docker.com/r/robinlovelace/geocompr/)
@@ -111,7 +122,8 @@ book. After you have [installed
 docker](https://www.docker.com/community-edition#/download) and set-it
 up on [your
 computer](https://docs.docker.com/install/linux/linux-postinstall/) you
-can start a rocker-docker RStudio Server version by running:
+can start RStudio Server without a password (see below for code to add a
+password, essential for public-facing servers):
 
 ``` sh
 docker run -p 8787:8787 -e DISABLE_AUTH=TRUE robinlovelace/geocompr
@@ -137,9 +149,11 @@ git clone https://github.com/Robinlovelace/geocompr.git
 # or download manually from here:
 # https://github.com/Robinlovelace/geocompr/archive/master.zip
 cd geocompr # navigate into the repo
-# on linux and mac:
+# on linux and mac with password:
+docker run -d -p 8788:8787 -v $(pwd):/home/rstudio/data -e USERID=$UID -e PASSWORD=pickASafePassWord --name rstudio robinlovelace/geocompr
+# on linux and mac without password:
 docker run -d -p 8787:8787 -e DISABLE_AUTH=TRUE -v $(pwd):/home/rstudio/geocompr  robinlovelace/geocompr
-# on windows:
+# on windows without a password:
 docker run -d -p 8787:8787 -v ${pwd}:/home/rstudio/data -e DISABLE_AUTH=TRUE robinlovelace/geocompr
 ```
 
@@ -181,7 +195,8 @@ book’s build time:
 Note: the `.Rproj` file is configured to build a website not a single
 page. To reproduce this
 [README](https://github.com/Robinlovelace/geocompr/blob/master/README.Rmd)
-use the following command:
+use the following
+command:
 
 ``` r
 rmarkdown::render("README.Rmd", output_format = "github_document", output_file = "README.md")
