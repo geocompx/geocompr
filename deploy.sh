@@ -13,7 +13,7 @@ update_website() {
   git checkout gh-pages
   
   cp -fvr $BASE_REPO/_book/* .
-  git add *.html libs/ figures images/ *.json *_files/
+  git add *.html libs/ figures images/ *.json *_files/ style.css
   git commit -a -m "Updating book (${TRAVIS_BUILD_NUMBER})"
   git status
   git push 2>err.txt
