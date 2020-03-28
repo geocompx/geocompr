@@ -18,9 +18,11 @@ RUN apt-get update \
 		vim-tiny \
 		wget \
 		ca-certificates \
-        && add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu eoan-cran35/' \
-	&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
-	&& add-apt-repository --enable-source --yes "ppa:marutter/c2d4u3.5" 
+        && add-apt-repository ppa:marutter/rrutter3.5
+	# && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
+	# && gpg --keyserver keyserver.ubuntu.com --recv-key E298A3A825C0D65DFD57CBB651716619E084DAB9 \
+	# && gpg -a --export E298A3A825C0D65DFD57CBB651716619E084DAB9 | sudo apt-key add - \
+	# && add-apt-repository --enable-source --yes "ppa:marutter/c2d4u3.5" 
 
 ## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
@@ -42,7 +44,7 @@ RUN apt-get update \
  		 r-base \
  		 r-base-dev \
  		 r-recommended \
- 		 r-cran-sf r-cran-raster r-cran-tmap \
+ 		 r-cran-sf r-cran-raster r-cran-rjava \
   	&& ln -s /usr/lib/R/site-library/littler/examples/install.r /usr/local/bin/install.r \
  	&& ln -s /usr/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r \
  	&& ln -s /usr/lib/R/site-library/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
