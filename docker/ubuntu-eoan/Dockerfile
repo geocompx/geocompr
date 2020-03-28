@@ -45,6 +45,7 @@ RUN apt-get update \
  		 r-base-dev \
  		 r-recommended \
  		 r-cran-sf r-cran-raster r-cran-rjava \
+ 		 libudunits2-dev libgdal-dev libgeos-dev libproj-dev \
   	&& ln -s /usr/lib/R/site-library/littler/examples/install.r /usr/local/bin/install.r \
  	&& ln -s /usr/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r \
  	&& ln -s /usr/lib/R/site-library/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
