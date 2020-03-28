@@ -1,5 +1,5 @@
 # taken from: https://github.com/rocker-org/rocker/blob/master/r-ubuntu/Dockerfile
-FROM ubuntu:bionic
+FROM ubuntu:eoan
 
 ## Set a default user. Available via runtime flag `--user docker` 
 ## Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
