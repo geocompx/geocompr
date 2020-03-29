@@ -40,12 +40,13 @@ ENV DEBIAN_FRONTEND noninteractive
 # r-cran-docopt is not currently in c2d4u so we install from source
 RUN apt-get update \
         && apt-get install -y --no-install-recommends \
+ 		 libfontconfig1-dev \
+ 		 libudunits2-dev libgdal-dev libgeos-dev libproj-dev \
                  littler \
  		 r-base \
  		 r-base-dev \
  		 r-recommended \
  		 r-cran-sf r-cran-raster r-cran-rjava \
- 		 libudunits2-dev libgdal-dev libgeos-dev libproj-dev \
   	&& ln -s /usr/lib/R/site-library/littler/examples/install.r /usr/local/bin/install.r \
  	&& ln -s /usr/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r \
  	&& ln -s /usr/lib/R/site-library/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
@@ -55,7 +56,6 @@ RUN apt-get update \
  	&& rm -rf /var/lib/apt/lists/*
 
 RUN install2.r --error \
-    mapview \
     tmap    
 
 CMD ["bash"]
