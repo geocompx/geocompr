@@ -19,7 +19,8 @@ RUN apt-get update \
 		wget \
 		ca-certificates \
         && add-apt-repository --enable-source --yes "ppa:marutter/rrutter3.5" \
-	&& add-apt-repository --enable-source --yes "ppa:marutter/c2d4u3.5" 
+	&& add-apt-repository --enable-source --yes "ppa:marutter/c2d4u3.5" \ 
+	&& add-apt-repository --enable-source --yes "ppa:ubuntugis/ubuntugis-unstable" 
 
 ## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
@@ -37,6 +38,7 @@ ENV DEBIAN_FRONTEND noninteractive
 # r-cran-docopt is not currently in c2d4u so we install from source
 RUN apt-get update \
         && apt-get install -y --no-install-recommends \
+ 		 libudunits2-dev libgdal-dev libgeos-dev libproj-dev liblwgeom-dev \
                  littler \
  		 r-base \
  		 r-base-dev \
@@ -48,5 +50,8 @@ RUN apt-get update \
  	&& install.r docopt \
  	&& rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
  	&& rm -rf /var/lib/apt/lists/*
-
+RUN install2.r --error \
+    sf \
+    raster \
+    tmap
 CMD ["bash"]
