@@ -14,6 +14,7 @@ library(dplyr)
 library(spDataLarge)
 library(stplanr)      # geographic transport data package
 library(tmap)         # visualization package (see Chapter 8)
+library(osrm)         # routing package
 ```
 
 ## Introduction
@@ -354,8 +355,7 @@ desire_lines$distance = as.numeric(st_length(desire_lines))
 desire_carshort = dplyr::filter(desire_lines, car_driver > 300 & distance < 5000)
 ```
 
-```{r 12-transport-18, eval=FALSE}
-library(osrm)
+```{r 12-transport-18, message=FALSE}
 route_carshort = route(
   l = desire_carshort,
   route_fun = osrmRoute,
@@ -546,11 +546,11 @@ To summarize, these were: identifying short but car-dependent commuting routes (
 The final code chunk of this chapter combines these strands of analysis.
 It adds the car-dependent routes in `route_carshort` with a newly created object, `route_rail` and creates a new column representing the amount of travel along the centroid-to-centroid\index{centroid} desire lines they represent:
 
-```{r 12-transport-25, eval=FALSE}
-route_rail = desire_rail %>% 
+```{r 12-transport-25}
+route_rail = desire_rail %>%
   st_set_geometry("leg_orig") %>% 
-  line2route(route_fun = route_osrm) %>% 
-  st_set_crs(4326)
+  route(l = ., route_fun = osrmRoute, returnclass = "sf") %>% 
+  select(names(route_carshort))
 ```
 
 
