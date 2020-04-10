@@ -3,12 +3,17 @@
 
 # Geocomputation with R
 
+<!-- badges: start -->
+
 [![Launch Rstudio
 Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/master?urlpath=rstudio)
+[![R build
+status](https://github.com/Robinlovelace/geocompr/workflows/master/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
 [![Build
 Status](https://travis-ci.org/Robinlovelace/geocompr.svg?branch=master)](https://travis-ci.org/Robinlovelace/geocompr)
 [![Docker](https://img.shields.io/docker/automated/robinlovelace/geocompr.svg)](https://hub.docker.com/r/robinlovelace/geocompr/builds/)
 [![DOI](https://zenodo.org/badge/84222786.svg)](https://zenodo.org/badge/latestdoi/84222786)
+<!-- badges: end -->
 
 ## Introduction
 
@@ -195,8 +200,7 @@ book’s build time:
 Note: the `.Rproj` file is configured to build a website not a single
 page. To reproduce this
 [README](https://github.com/Robinlovelace/geocompr/blob/master/README.Rmd)
-use the following
-command:
+use the following command:
 
 ``` r
 rmarkdown::render("README.Rmd", output_format = "github_document", output_file = "README.md")
