@@ -1,0 +1,68 @@
+on: pull_request
+  
+name: PR-workflow
+
+jobs:
+  bookdown:
+    name: Render Book
+    runs-on: macOS-latest
+    steps:
+      - name: Is this a fork
+        run: |
+          fork=$(jq --raw-output .pull_request.head.repo.fork "${GITHUB_EVENT_PATH}");echo "::set-env name=fork::$fork"
+            
+      
+      - uses: actions/checkout@v1
+        
+      - uses: r-lib/actions/setup-r@v1
+      
+      - uses: r-lib/actions/setup-pandoc@v1
+      
+      - name: Query dependencies
+        run:
+          Rscript -e "install.packages('remotes')" -e "saveRDS(remotes::dev_package_deps(dependencies = TRUE), 'depends.Rds', version = 2)"
+
+      - name: Cache R packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-r-${{ hashFiles('depends.Rds') }}
+          restore-keys: ${{ runner.os }}-r-
+
+      - name: Install dependencies
+        run:
+          Rscript -e "library(remotes)" -e "deps <- readRDS('depends.Rds')" -e "deps[['installed']] <- vapply(deps[['package']], remotes:::local_sha, character(1))" -e "update(deps)"
+
+      - name: Render Book
+        run: Rscript -e 'bookdown::render_book("index.Rmd")'
+        
+      - uses: actions/setup-node@v1
+        if: env.fork == 'false'
+        with:
+          node-version: "12.x"
+          
+      - name: Install Netlify CLI
+        if: env.fork == 'false'
+        run: npm install netlify-cli -g
+        
+      - name: Deploy to Netlify (test)
+        if: env.fork == 'false'
+        run: DEPLOY_URL=$(netlify deploy --site ${{ secrets.NETLIFY_SITE_ID }} --auth ${{ secrets.NETLIFY_AUTH_TOKEN }} --dir=docs --json | jq '.deploy_url' --raw-output);echo "::set-env name=DEPLOY_URL::$DEPLOY_URL"
+                
+      - name: Create check
+        if: env.fork == 'false'
+        run: |
+          curl --request POST \
+          --url https://api.github.com/repos/${{ github.repository }}/check-runs \
+          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+          --header 'Accept: application/vnd.github.antiope-preview+json' \
+          --header 'content-type: application/json' \
+          --data '{
+            "name": "Preview Book",
+            "head_sha": "${{ github.event.pull_request.head.sha }}",
+            "conclusion": "success",
+            "output": {
+                "title": "Preview link",
+                "summary": "[Preview link](${{ env.DEPLOY_URL }}) :rocket:"
+            }
+            }'
