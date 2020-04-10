@@ -25,15 +25,19 @@ jobs:
         run: |
           fork=$(jq --raw-output .pull_request.head.repo.fork "${GITHUB_EVENT_PATH}");echo "::set-env name=fork::$fork"
             
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
         
-      - uses: r-lib/actions/setup-r@v1
+      - uses: r-lib/actions/setup-r@master
+        with:
+          r-version: 'release'
       
-      - uses: r-lib/actions/setup-pandoc@v1
+      - uses: r-lib/actions/setup-pandoc@master
       
       - name: Query dependencies
-        run:
-          Rscript -e "install.packages('remotes')" -e "saveRDS(remotes::dev_package_deps(dependencies = TRUE), 'depends.Rds', version = 2)"
+        run: |
+          install.packages('remotes')
+          saveRDS(remotes::dev_package_deps(dependencies = TRUE), "depends.Rds", version = 2)
+        shell: Rscript {0}
 
       - name: Cache R packages
         uses: actions/cache@v1
@@ -66,8 +70,13 @@ jobs:
           sudo apt-get -y install postgresql-client-12
 
       - name: Install dependencies
-        run:
-          Rscript -e "library(remotes)" -e "deps <- readRDS('depends.Rds')" -e "deps[['installed']] <- vapply(deps[['package']], remotes:::local_sha, character(1))" -e "update(deps)"
+        run: |
+          library(remotes)
+          deps <- readRDS("depends.Rds")
+          deps[["installed"]] <- vapply(deps[["package"]], remotes:::local_sha, character(1))
+          update(deps)
+          remotes::install_cran("rcmdcheck")
+        shell: Rscript {0}
 
       - name: Render Book
         run: Rscript -e 'bookdown::render_book("index.Rmd")'
