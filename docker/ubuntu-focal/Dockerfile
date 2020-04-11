@@ -42,7 +42,7 @@ RUN apt-get update \
         && apt-get install -y --no-install-recommends \
  		 libfontconfig1-dev \
  		 libudunits2-dev libgdal-dev libgeos-dev libproj-dev \
-                 littler \
+     littler \
  		 r-base \
  		 r-base-dev \
  		 r-recommended \
