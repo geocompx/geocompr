@@ -1,5 +1,5 @@
 ## ----index-1, echo=FALSE-------------------------------------------------
-is_on_travis = identical(Sys.getenv("TRAVIS"), "true")
+is_on_ghactions = identical(Sys.getenv("TRAVIS"), "true")
 is_online = curl::has_internet()
 
 ## **Note**: This book has now been published by CRC Press in the [R Series](https://www.crcpress.com/Chapman--HallCRC-The-R-Series/book-series/CRCTHERSER).
