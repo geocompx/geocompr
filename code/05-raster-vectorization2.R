@@ -4,7 +4,7 @@ tmap_options(main.title.size = 1)
 
 cols = c("clay" = "brown", "sand" = "rosybrown", "silt" = "sandybrown")
 
-p1p = tm_shape(grain) + tm_raster(legend.show = FALSE, palette = cols) +
+p1p = tm_shape(as(grain, "SpatialGridDataFrame")) + tm_raster(legend.show = FALSE, palette = cols) +
   tm_layout(main.title = "Raster", frame = FALSE)
 
 if(!exists("grain_poly")) {
