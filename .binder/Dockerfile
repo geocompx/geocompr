@@ -32,13 +32,14 @@ RUN su rstudio && \
 RUN chown -Rv rstudio /home/rstudio/geocompr 
 # RUN unzip master.zip \
 #   && cp -Rv rocker-versioned2-master/scripts /rocker_scripts
+# Next lines aim to install RStudio Server preview - commented out as Binder fails to launch with these lines in there
 # RUN /rocker_scripts/install_rstudio.sh RSTUDIO_VERSION=preview
-RUN wget https://s3.amazonaws.com/rstudio-ide-build/server/bionic/amd64/rstudio-server-1.3.938-amd64.deb
-RUN dpkg -i rstudio-server-*-amd64.deb
-RUN rm rstudio-server-*-amd64.deb
-RUN echo '{' >> /etc/rstudio/rstudio-prefs.json
-RUN echo '    "rmd_chunk_output_inline": false' >> /etc/rstudio/rstudio-prefs.json
-RUN echo '}' >> /etc/rstudio/rstudio-prefs.json
+# RUN wget https://s3.amazonaws.com/rstudio-ide-build/server/bionic/amd64/rstudio-server-1.3.938-amd64.deb
+# RUN dpkg -i rstudio-server-*-amd64.deb
+# RUN rm rstudio-server-*-amd64.deb
+# RUN echo '{' >> /etc/rstudio/rstudio-prefs.json
+# RUN echo '    "rmd_chunk_output_inline": false' >> /etc/rstudio/rstudio-prefs.json
+# RUN echo '}' >> /etc/rstudio/rstudio-prefs.json
 
 
 
