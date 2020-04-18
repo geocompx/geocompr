@@ -8,7 +8,6 @@
 [![Launch Rstudio
 Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/master?urlpath=rstudio)
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render-Book-from-master/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
-<!-- [![Build Status](https://travis-ci.org/Robinlovelace/geocompr.svg?branch=master)](https://travis-ci.org/Robinlovelace/geocompr)  -->
 [![Docker](https://img.shields.io/docker/automated/robinlovelace/geocompr.svg)](https://hub.docker.com/r/robinlovelace/geocompr/builds/)
 [![DOI](https://zenodo.org/badge/84222786.svg)](https://zenodo.org/badge/latestdoi/84222786)
 <!-- badges: end -->
@@ -66,6 +65,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [yutannihilation](https://github.com/yutannihilation),
 [jbixon13](https://github.com/jbixon13),
 [katiejolly](https://github.com/katiejolly),
+[KHwong12](https://github.com/KHwong12),
 [layik](https://github.com/layik), [mvl22](https://github.com/mvl22),
 [ganes1410](https://github.com/ganes1410),
 [richfitz](https://github.com/richfitz).
