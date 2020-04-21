@@ -20,7 +20,7 @@ contributors_text = paste0(c_rmd, collapse = ", ")
 
 ## ---- eval=FALSE, message=FALSE------------------------------------------
 ## install.packages(devtools)
-## devtools::install_github("geocompr/geocompkg")
+## remotes::install_github("geocompr/geocompkg")
 
 ## ---- eval=FALSE---------------------------------------------------------
 ## bookdown::render_book("index.Rmd") # to build the book

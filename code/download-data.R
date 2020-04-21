@@ -31,7 +31,7 @@ devtools::use_data(cycle_hire)
 
 # worldbank  ---------------------------------------------------
 # install.packages("wbstats")
-# devtools::install_github("ropenscilabs/rnaturalearth")
+# remotes::install_github("ropenscilabs/rnaturalearth")
 library(wbstats)
 library(rnaturalearth)
 library(tidyverse)
