@@ -2,7 +2,7 @@
 
 # set-up ------------------------------------------------------------------
 
-devtools::install_github("ropensci/osmdata")
+remotes::install_github("ropensci/osmdata")
 library(osmdata)
 
 # get region data ---------------------------------------------------------
@@ -11,7 +11,7 @@ region = getbb("Bristol", format_out = "sf_polygon") %>%
   st_set_crs(4326)
 region = st_sf(data.frame(Name = "Bristol (OSM)"), geometry = region$geometry)
 saveRDS(region, "extdata/bristol-region.rds")
-devtools::install_github("robinlovelace/ukboundaries")
+remotes::install_github("robinlovelace/ukboundaries")
 library(ukboundaries)
 region_ttwa = ttwa_simple %>% 
   filter(grepl("Bristol", ttwa11nm)) %>% 

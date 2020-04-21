@@ -108,7 +108,7 @@ dev.off()
 #**********************************************************
 
 # attach packages
-# devtools::install_github("pat-s/mlr@plot_spatial_partitions")
+# remotes::install_github("pat-s/mlr@plot_spatial_partitions")
 # library(mlr)
 # rdesc = makeResampleDesc("SpRepCV", folds = 5, reps = 4)
 # r = resample(makeLearner("classif.qda"), spatial.task, rdesc)

@@ -2,7 +2,7 @@
 #> install.packages("sf")
 #> install.packages("raster")
 #> install.packages("spData")
-#> devtools::install_github("Nowosad/spDataLarge")
+#> remotes::install_github("Nowosad/spDataLarge")
 
 ## If you're running Mac or Linux, the previous command to install **sf** may not work first time.
 

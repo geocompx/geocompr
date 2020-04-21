@@ -1,5 +1,5 @@
 # Aim: generate package metrics on common mapping packages
-devtools::install_github("ropenscilabs/packagemetrics")
+remotes::install_github("ropenscilabs/packagemetrics")
 
 # generic mapping packages ------------------------------------------------
 generic_map_pkgs = c(
