@@ -31,10 +31,11 @@ jobs:
           r-version: 'release'
 
       - uses: r-lib/actions/setup-pandoc@master
+
       - name: Query dependencies
         run: |
           install.packages('remotes')
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), "depends.Rds", version = 2)
+          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
         shell: Rscript {0}
 
       - name: Cache R packages
@@ -73,13 +74,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          library(remotes)
-          deps <- readRDS("depends.Rds")
-          deps[["installed"]] <- vapply(deps[["package"]], remotes:::local_sha, character(1))
-          update(deps)
-          remotes::install_cran("rcmdcheck")
+          install.packages(remotes)
           remotes::install_github("rstudio/bookdown")
           remotes::install_github("mtennekes/tmaptools")
+          remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
 
       - name: Render Book
