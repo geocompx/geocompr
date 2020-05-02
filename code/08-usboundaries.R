@@ -8,10 +8,14 @@ library(tmap)
 library(sf)
 dates = paste(historydata::us_state_populations$year, "01", "01", sep = "-")
 dates_unique = unique(dates)
-usb1 = USAboundaries::us_boundaries(map_date = dates[1])
+# select all dates earlier than 2000 after this error:
+#   Error in us_states(map_date, resolution, states) : 
+#   map_date <= as.Date("2000-12-31") is not TRUE
+dates_unique = dates_unique[dates_unique <= "2000-12-31"]
+usb1 = USAboundaries::us_boundaries(map_date = dates_unique[1])
 usb1$year = lubridate::year(dates_unique[1])
 plot(usb1$geometry)
-usbl = map(dates, ~USAboundaries::us_boundaries(map_date = .))
+usbl = map(dates_unique, ~USAboundaries::us_boundaries(map_date = .))
 # usb = do.call(rbind, usbl)
 statepop = historydata::us_state_populations %>%
   dplyr::select(-GISJOIN) %>% rename(name = state) 
@@ -52,4 +56,5 @@ facet_anim = tm_shape(usbj, bbox = bb_contig, projection = 2163) +
   tm_facets(free.scales.fill = FALSE, ncol = 1, nrow = 1, along = "year") +
   tm_shape(usa_union) + tm_borders(lwd = 2) +
   tm_layout(legend.position = c("left", "bottom"))
-tmap_animation(tm = facet_anim, filename = "09-us_pop.gif")
+tmap_animation(tm = facet_anim, filename = "09-us_pop.gif", width = 800, height = 600)
+browseURL("09-us_pop.gif")
