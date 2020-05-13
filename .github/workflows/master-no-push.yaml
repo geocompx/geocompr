@@ -1,0 +1,85 @@
+on:
+  push:
+    branches:
+      master
+  
+name: Build
+
+jobs:
+  bookdown:
+    name: Render-Book
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: kartoza/postgis
+        ports:
+        - 5432:5432
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: postgis
+          POSTGRES_MULTIPLE_EXTENSIONS: postgis,hstore,postgis_topology
+          DEFAULT_ENCODING: "UTF8"
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+  
+    steps:
+      - uses: actions/checkout@v2
+      
+      - uses: r-lib/actions/setup-r@master
+        with:
+          r-version: 'release'
+
+      - uses: r-lib/actions/setup-pandoc@master
+
+      - name: Query dependencies
+        run: |
+          install.packages('remotes')
+          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
+        shell: Rscript {0}
+
+      - name: Cache R packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-r-2-${{ hashFiles('depends.Rds') }}
+          restore-keys: ${{ runner.os }}-r-2-
+
+      - name: Install system dependencies
+        #if: runner.os == 'Linux'
+        #env:
+        #  RHUB_PLATFORM: linux-x86_64-ubuntu-gcc
+        run: |
+          #Rscript -e "remotes::install_github('r-hub/sysreqs')"
+          #sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION'))")
+          #sudo -s eval "$sysreqs"
+          # install spatial dependencies
+          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+          sudo apt update
+          sudo apt install \
+            libudunits2-dev \
+            libgdal-dev \
+            libgeos-dev \
+            libproj-dev \
+            libv8-dev \
+            libjq-dev \
+            libprotobuf-dev \
+            protobuf-compiler
+          # install database dependencies
+          sudo apt-get -y install bash-completion wget
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get -y install postgresql-client-12
+
+      - name: Install dependencies
+        run: |
+          install.packages("remotes")
+          remotes::install_github("rstudio/bookdown")
+          remotes::install_github("mtennekes/tmaptools")
+          remotes::install_deps(dependencies = TRUE)
+        shell: Rscript {0}
+
+      - name: Render Book
+        run: Rscript -e 'bookdown::render_book("index.Rmd")'
+        
