@@ -114,27 +114,28 @@ dem = raster(
 
 
 ```{r lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador.", fig.scap="Landslide initiation points."}
-library(tmap)
-data("lsl", package = "spDataLarge")
-data("ta", package = "spDataLarge")
-lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
-hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
-rect = tmaptools::bb_poly(hs)
-bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
-
-tm_shape(hs, bbox = bbx) +
-	tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
-	        labels.rot = c(0, 90)) +
-	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
-	tm_shape(ta$elev) +
-	tm_raster(alpha = 0.5, palette = terrain.colors(10), legend.show = FALSE) +
-	tm_shape(lsl_sf) + 
-	tm_bubbles("lslpts", size = 0.2, palette = "-RdYlBu", title.col = "Landslide: ") +
-#   tm_shape(sam) +
-#   tm_bubbles(border.col = "gold", border.lwd = 2, alpha = 0, size = 0.5) +
-  qtm(rect, fill = NULL) +
-	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) +
-  tm_legend(bg.color = "white")
+# library(tmap)
+# data("lsl", package = "spDataLarge")
+# data("ta", package = "spDataLarge")
+# lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
+# hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
+# rect = tmaptools::bb_poly(hs)
+# bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
+# 
+# tm_shape(hs, bbox = bbx) +
+# 	tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
+# 	        labels.rot = c(0, 90)) +
+# 	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+# 	tm_shape(ta$elev) +
+# 	tm_raster(alpha = 0.5, palette = terrain.colors(10), legend.show = FALSE) +
+# 	tm_shape(lsl_sf) + 
+# 	tm_bubbles("lslpts", size = 0.2, palette = "-RdYlBu", title.col = "Landslide: ") +
+# #   tm_shape(sam) +
+# #   tm_bubbles(border.col = "gold", border.lwd = 2, alpha = 0, size = 0.5) +
+#   qtm(rect, fill = NULL) +
+# 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) +
+#   tm_legend(bg.color = "white")
+knitr::include_graphics("figures/lsl-map-1.png")
 ```
 \index{hillshade}
 
@@ -340,7 +341,7 @@ The `target` argument expects the name of a response variable and `positive` det
 All other variables of the `lsl` dataset will serve as predictors except for the coordinates (see the result of `getTaskFormula(task)` for the model formula).
 For spatial CV, the `coordinates` parameter is used (see Section \@ref(intro-cv) and Figure \@ref(fig:partitioning)) which expects the coordinates as a xy data frame.
 
-```{r 11-spatial-cv-11}
+```{r 11-spatial-cv-11, eval=FALSE}
 library(mlr)
 # coordinates needed for the spatial partitioning
 coords = lsl[, c("x", "y")]
@@ -386,7 +387,7 @@ We opt for the binomial classification\index{classification} method used in Sect
 Additionally, we must specify the link-function, `logit` in this case, which is also the default of the `binomial()` function.
 `predict.type` determines the type of the prediction with `prob` resulting in the predicted probability for landslide occurrence between 0 and 1 (this corresponds to `type = response` in `predict.glm`).
 
-```{r 11-spatial-cv-13}
+```{r 11-spatial-cv-13, eval=FALSE}
 lrn = makeLearner(cl = "classif.binomial",
                   link = "logit",
                   predict.type = "prob",
@@ -435,7 +436,7 @@ We will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatial CV}:
     In the meantime, its functionality was integrated into the **mlr** package which is the reason why we are using **mlr** [@schratz_performance_nodate].The **caret** package is another umbrella-package [@kuhn_applied_2013] for streamlined modeling in R; however, so far it does not provide spatial CV which is why we refrain from using it for spatial data.
 
 
-```{r 11-spatial-cv-18}
+```{r 11-spatial-cv-18, eval=FALSE}
 perf_level = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
 ```
 
