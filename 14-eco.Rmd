@@ -7,7 +7,7 @@ In it you will also make use of R's\index{R} interfaces to dedicated GIS\index{G
 
 The chapter uses the following packages:
 
-```{r 14-eco-1, message=FALSE }
+```{r 14-eco-1, message=FALSE, eval=FALSE}
 library(sf)
 library(raster)
 library(RQGIS)
@@ -63,7 +63,7 @@ To guarantee an optimal prediction, it is advisable to tune beforehand the hyper
 
 All the data needed for the subsequent analyses is available via the **RQGIS**\index{RQGIS (package)} package.
 
-```{r 14-eco-2}
+```{r 14-eco-2, eval=FALSE}
 data("study_area", "random_points", "comm", "dem", "ndvi", package = "RQGIS")
 ```
 
@@ -71,10 +71,17 @@ data("study_area", "random_points", "comm", "dem", "ndvi", package = "RQGIS")
 `random_points` is an `sf` object, and contains the 100 randomly chosen sites.
 `comm` is a community matrix of the wide data format [@wickham_tidy_2014] where the rows represent the visited sites in the field and the columns the observed species.^[In statistics, this is also called a contingency table or cross-table.]
 
-```{r 14-eco-3}
+```{r 14-eco-3, eval=FALSE}
 # sites 35 to 40 and corresponding occurrences of the first five species in the
 # community matrix
 comm[35:40, 1:5]
+#>    Alon_meri Alst_line Alte_hali Alte_porr Anth_eccr
+#> 35         0         0         0       0.0     1.000
+#> 36         0         0         1       0.0     0.500
+#> 37         0         0         0       0.0     0.125
+#> 38         0         0         0       0.0     3.000
+#> 39         0         0         0       0.0     2.000
+#> 40         0         0         0       0.2     0.125
 ```
 
 The values represent species cover per site, and were recorded as the area covered by a species in proportion to the site area in percentage points (%; please note that one site can have >100% due to overlapping cover between individual plants).
@@ -99,27 +106,27 @@ plot(st_geometry(study_area), add = TRUE)
 \index{hillshade}
 
 ```{r sa-mongon, echo=FALSE, message=FALSE, fig.cap="Study mask (polygon), location of the sampling sites (black points) and DEM in the background.", fig.scap="Study mask, location of the sampling sites."}
-library("latticeExtra")
-library("grid")
-hs = hillShade(terrain(dem), terrain(dem, "aspect"))
-spplot(dem, col.regions = terrain.colors(50), alpha.regions = 0.5,
-       scales = list(draw = TRUE,
-                     tck = c(1, 0)),
-       colorkey = list(space = "right", title = "m asl",
-                               width = 0.5, height = 0.5,
-                       axis.line = list(col = "black")),
-       sp.layout = list(
-         list("sp.points", as(random_points, "Spatial"), pch = 16,
-              col = "black", cex = 0.8, first = FALSE),
-         list("sp.polygons", as(study_area, "Spatial"), 
-              col = "black", first = FALSE)
-       )
-       ) + 
-  latticeExtra::as.layer(spplot(hs, col.regions = gray(0:100 / 100)), 
-                         under = TRUE)
-grid.text("m asl", x = unit(0.8, "npc"), y = unit(0.75, "npc"), 
-          gp = gpar(cex = 0.8))
-
+# library("latticeExtra")
+# library("grid")
+# hs = hillShade(terrain(dem), terrain(dem, "aspect"))
+# spplot(dem, col.regions = terrain.colors(50), alpha.regions = 0.5,
+#        scales = list(draw = TRUE,
+#                      tck = c(1, 0)),
+#        colorkey = list(space = "right", title = "m asl",
+#                                width = 0.5, height = 0.5,
+#                        axis.line = list(col = "black")),
+#        sp.layout = list(
+#          list("sp.points", as(random_points, "Spatial"), pch = 16,
+#               col = "black", cex = 0.8, first = FALSE),
+#          list("sp.polygons", as(study_area, "Spatial"), 
+#               col = "black", first = FALSE)
+#        )
+#        ) + 
+#   latticeExtra::as.layer(spplot(hs, col.regions = gray(0:100 / 100)), 
+#                          under = TRUE)
+# grid.text("m asl", x = unit(0.8, "npc"), y = unit(0.75, "npc"), 
+#           gp = gpar(cex = 0.8))
+knitr::include_graphics("figures/sa-mongon-1.png")
 ```
 
 The next step is to compute variables which we will not only need for the modeling and predictive mapping (see Section \@ref(predictive-mapping)) but also for aligning the Non-metric multidimensional scaling (NMDS)\index{NMDS} axes with the main gradient in the study area, altitude and humidity, respectively (see Section \@ref(nmds)).
@@ -183,13 +190,13 @@ ep$carea = log10(ep$carea)
 
 As a convenience to the reader, we have added `ep` to **spDataLarge**:
 
-```{r 14-eco-9}
+```{r 14-eco-9, eval=FALSE}
 data("ep", package = "spDataLarge")
 ```
 
 Finally, we can extract the terrain attributes to our field observations (see also Section \@ref(raster-extraction)).
 
-```{r 14-eco-10}
+```{r 14-eco-10, eval=FALSE}
 random_points[, names(ep)] = raster::extract(ep, random_points)
 ```
 
@@ -223,7 +230,7 @@ Often ordinations\index{ordination} using presence-absence data yield better res
 Ordination techniques such as NMDS\index{NMDS} require at least one observation per site.
 Hence, we need to dismiss all sites in which no species were found.
 
-```{r 14-eco-11}
+```{r 14-eco-11, eval=FALSE}
 # presence-absence matrix
 pa = decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
@@ -254,7 +261,7 @@ nmds$stress
 saveRDS(nmds, "extdata/14-nmds.rds")
 ```
 
-```{r 14-eco-14, include=FALSE}
+```{r 14-eco-14, include=FALSE, eval=FALSE}
 nmds = readRDS("extdata/14-nmds.rds")
 ```
 
@@ -265,7 +272,7 @@ However, we already know that humidity represents the main gradient in the study
 Since humidity is highly correlated with elevation, we rotate the NMDS axes\index{NMDS} in accordance with elevation (see also `?MDSrotate` for more details on rotating NMDS axes).
 Plotting the result reveals that the first axis is, as intended, clearly associated with altitude (Figure \@ref(fig:xy-nmds)).
 
-```{r xy-nmds, fig.cap="Plotting the first NMDS axis against altitude.", fig.scap = "First NMDS axis against altitude plot.", fig.asp=1, out.width="60%"}
+```{r xy-nmds-code, fig.cap="Plotting the first NMDS axis against altitude.", fig.scap = "First NMDS axis against altitude plot.", fig.asp=1, out.width="60%", eval=FALSE}
 elev = dplyr::filter(random_points, id %in% rownames(pa)) %>% 
   dplyr::pull(dem)
 # rotating NMDS in accordance with altitude (proxy for humidity)
@@ -275,6 +282,10 @@ sc = scores(rotnmds, choices = 1:2)
 # plotting the first axis against altitude
 plot(y = sc[, 1], x = elev, xlab = "elevation in m", 
      ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8)
+```
+
+```{r xy-nmds, fig.cap="Plotting the first NMDS axis against altitude.", fig.scap = "First NMDS axis against altitude plot.", fig.asp=1, out.width="60%"}
+knitr::include_graphics("figures/xy-nmds-1.png")
 ```
 
 ```{r 14-eco-15, eval=FALSE, echo=FALSE}
@@ -340,7 +351,7 @@ We refer the reader to @james_introduction_2013 for a more detailed description 
 To introduce decision trees by example, we first construct a response-predictor matrix by joining the rotated NMDS\index{NMDS} scores to the field observations (`random_points`).
 We will also use the resulting data frame for the **mlr**\index{mlr (package)} modeling later on.
 
-```{r 14-eco-16}
+```{r 14-eco-16, eval=FALSE}
 # construct response-predictor matrix
 # id- and response variable
 rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
@@ -497,19 +508,19 @@ tune = tuneParams(learner = lrn_rf,
 saveRDS(tune, "extdata/14-tune.rds")
 ```
 
-```{r 14-eco-26, echo=FALSE}
+```{r 14-eco-26, echo=FALSE, eval=FALSE}
 tune = readRDS("extdata/14-tune.rds")
 ```
 
-An `mtry` of `r tune$x$mtry`, a `sample.fraction` of `r tune$x$sample.fraction`, and a `min.node.size` of `r tune$x$min.node.size` represent the best hyperparameter\index{hyperparameter} combination.
-A RMSE\index{RMSE} of `r round(tune$y[attr(tune$y, "names") == "rmse.test.rmse"], 2)` is relatively good when considering the range of the response variable which is `r round(diff(range(rp$sc)), 2)` (`diff(range(rp$sc))`).
+An `mtry` of 4, a `sample.fraction` of 0.887, and a `min.node.size` of 10 represent the best hyperparameter\index{hyperparameter} combination.
+A RMSE\index{RMSE} of 0.51 is relatively good when considering the range of the response variable which is 3.04 (`diff(range(rp$sc))`).
 
 ### Predictive mapping
 
 The tuned hyperparameters\index{hyperparameter} can now be used for the prediction.
 We simply have to modify our learner using the result of the hyperparameter tuning, and run the corresponding model.
 
-```{r 14-eco-27}
+```{r 14-eco-27, eval=FALSE}
 # learning using the best hyperparameter combination
 lrn_rf = makeLearner(cl = "regr.ranger",
                      predict.type = "response",
@@ -535,7 +546,7 @@ So far, `raster::predict()` does not support the output of **ranger** models, he
 First, we convert `ep` into a prediction data frame which secondly serves as input for the `predict.ranger()` function.
 Thirdly, we put the predicted values back into a `RasterLayer`\index{raster} (see Section \@ref(raster-subsetting) and Figure \@ref(fig:rf-pred)).
 
-```{r 14-eco-28}
+```{r 14-eco-28, eval=FALSE}
 # convert raster stack into a data frame
 new_data = as.data.frame(as.matrix(ep))
 # apply the model to the data frame
@@ -547,44 +558,45 @@ pred[] = pred_rf$data$response
 ```
 
 ```{r rf-pred, echo=FALSE, fig.cap="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.", fig.width = 10, fig.height = 10, fig.scap="Predictive mapping of the floristic gradient."}
-library("latticeExtra")
-library("grid")
-
-# create a color palette
-blue = rgb(0, 0, 146, maxColorValue = 255)
-lightblue = rgb(0, 129, 255, maxColorValue = 255)
-turquoise = rgb(0, 233, 255, maxColorValue = 255)
-green = rgb(142, 255, 11, maxColorValue = 255)
-yellow = rgb(245, 255, 8, maxColorValue = 255)
-orange = rgb(255, 173, 0, maxColorValue = 255)
-lightred = rgb(255, 67, 0, maxColorValue = 255)
-red = rgb(170, 0, 0, maxColorValue = 255)
-pal = colorRampPalette(c(blue, lightblue, turquoise, green, yellow, 
-                         orange, lightred, red))
-
-# restrict the prediction to your study area
-pred = mask(pred, study_area) %>%
-  trim
-# create a hillshade
-hs = hillShade(terrain(dem), terrain(dem, "aspect")) %>%
-  mask(., study_area) 
-spplot(extend(pred, 2), col.regions = pal(50), alpha.regions = 0.7,
-       scales = list(draw = TRUE,
-                     tck = c(1, 0), 
-                     cex = 0.8),
-       colorkey = list(space = "right", width = 0.5, height = 0.5,
-                       axis.line = list(col = "black")),
-       sp.layout = list(
-         # list("sp.points", as(random_points, "Spatial"), pch = 16,
-         #      col = "black", cex = 0.8, first = FALSE),
-         list("sp.polygons", as(study_area, "Spatial"), 
-              col = "black", first = FALSE, lwd = 3)
-       )
-       ) + 
-  latticeExtra::as.layer(spplot(hs, col.regions = gray(0:100 / 100)), 
-                         under = TRUE)
-grid.text("NMDS1", x = unit(0.75, "npc"), y = unit(0.75, "npc"), 
-          gp = gpar(cex = 0.8))
+# library("latticeExtra")
+# library("grid")
+# 
+# # create a color palette
+# blue = rgb(0, 0, 146, maxColorValue = 255)
+# lightblue = rgb(0, 129, 255, maxColorValue = 255)
+# turquoise = rgb(0, 233, 255, maxColorValue = 255)
+# green = rgb(142, 255, 11, maxColorValue = 255)
+# yellow = rgb(245, 255, 8, maxColorValue = 255)
+# orange = rgb(255, 173, 0, maxColorValue = 255)
+# lightred = rgb(255, 67, 0, maxColorValue = 255)
+# red = rgb(170, 0, 0, maxColorValue = 255)
+# pal = colorRampPalette(c(blue, lightblue, turquoise, green, yellow, 
+#                          orange, lightred, red))
+# 
+# # restrict the prediction to your study area
+# pred = mask(pred, study_area) %>%
+#   trim
+# # create a hillshade
+# hs = hillShade(terrain(dem), terrain(dem, "aspect")) %>%
+#   mask(., study_area) 
+# spplot(extend(pred, 2), col.regions = pal(50), alpha.regions = 0.7,
+#        scales = list(draw = TRUE,
+#                      tck = c(1, 0), 
+#                      cex = 0.8),
+#        colorkey = list(space = "right", width = 0.5, height = 0.5,
+#                        axis.line = list(col = "black")),
+#        sp.layout = list(
+#          # list("sp.points", as(random_points, "Spatial"), pch = 16,
+#          #      col = "black", cex = 0.8, first = FALSE),
+#          list("sp.polygons", as(study_area, "Spatial"), 
+#               col = "black", first = FALSE, lwd = 3)
+#        )
+#        ) + 
+#   latticeExtra::as.layer(spplot(hs, col.regions = gray(0:100 / 100)), 
+#                          under = TRUE)
+# grid.text("NMDS1", x = unit(0.75, "npc"), y = unit(0.75, "npc"), 
+#           gp = gpar(cex = 0.8))
+knitr::include_graphics("figures/rf-pred-1.png")
 ```
 
 The predictive mapping clearly reveals distinct vegetation belts (Figure \@ref(fig:rf-pred)).
