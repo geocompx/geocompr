@@ -443,7 +443,7 @@ Having constructed the input variables, we are all set for specifying the **mlr*
 We will use a regression\index{regression} task since the response variable is numeric.
 The learner is a random forest\index{random forest} model implementation from the **ranger** package.
 
-```{r 14-eco-21}
+```{r 14-eco-21, eval=FALSE}
 # create task
 task = makeRegrTask(data = rp, target = "sc", coordinates = coords)
 # learner
@@ -456,7 +456,7 @@ Since we deal with geographic data, we will again make use of spatial cross-vali
 Specifically, we will use a five-fold spatial partitioning with only one repetition (`makeResampleDesc()`). 
 In each of these spatial partitions, we run 50 models (`makeTuneControlRandom()`) to find the optimal hyperparameter\index{hyperparameter} combination.
 
-```{r 14-eco-22}
+```{r 14-eco-22, eval=FALSE}
 # spatial partitioning
 perf_level = makeResampleDesc("SpCV", iters = 5)
 # specifying random search
@@ -474,7 +474,7 @@ Naturally, as trees and computing time become larger, the lower the `min.node.si
 Hyperparameter\index{hyperparameter} combinations will be selected randomly but should fall inside specific tuning limits (`makeParamSet()`).
 `mtry` should range between 1 and the number of predictors (`r ncol(rp) - 1`), `sample.fraction` should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10.
 
-```{r 14-eco-23}
+```{r 14-eco-23, eval=FALSE}
 # specifying the search space
 ps = makeParamSet(
   makeIntegerParam("mtry", lower = 1, upper = ncol(rp) - 1),
@@ -513,7 +513,13 @@ tune = readRDS("extdata/14-tune.rds")
 ```
 
 An `mtry` of 4, a `sample.fraction` of 0.887, and a `min.node.size` of 10 represent the best hyperparameter\index{hyperparameter} combination.
-A RMSE\index{RMSE} of 0.51 is relatively good when considering the range of the response variable which is 3.04 (`diff(range(rp$sc))`).
+An RMSE\index{RMSE} of
+<!-- `r # round(tune$y[attr(tune$y, "names") == "rmse.test.rmse"], 2)` -->
+0.51
+is relatively good when considering the range of the response variable which is
+<!-- `r # round(diff(range(rp$sc)), 2)` -->
+3.04
+(`diff(range(rp$sc))`).
 
 ### Predictive mapping
 
