@@ -1,12 +1,12 @@
-on: pull_request
-
-name: PR-workflow
+on: [push, pull_request]
+  
+name: Test-dev-sf
 
 jobs:
   bookdown:
-    name: Render Book
+    name: Render-Book
     runs-on: ubuntu-latest
-
+    
     services:
       postgres:
         image: kartoza/postgis
@@ -19,20 +19,16 @@ jobs:
           POSTGRES_MULTIPLE_EXTENSIONS: postgis,hstore,postgis_topology
           DEFAULT_ENCODING: "UTF8"
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
- 
+  
     steps:
-      - name: Is this a fork
-        run: |
-          fork=$(jq --raw-output .pull_request.head.repo.fork "${GITHUB_EVENT_PATH}");echo "::set-env name=fork::$fork"
-            
       - uses: actions/checkout@v2
-        
+      
       - uses: r-lib/actions/setup-r@master
         with:
           r-version: 'release'
-      
+
       - uses: r-lib/actions/setup-pandoc@master
-      
+
       - name: Query dependencies
         run: |
           install.packages('remotes')
@@ -43,8 +39,8 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-r-${{ hashFiles('depends.Rds') }}
-          restore-keys: ${{ runner.os }}-r-
+          key: ${{ runner.os }}-r-2-${{ hashFiles('depends.Rds') }}
+          restore-keys: ${{ runner.os }}-r-2-
 
       - name: Install system dependencies
         #if: runner.os == 'Linux'
@@ -77,9 +73,11 @@ jobs:
         run: |
           install.packages("remotes")
           remotes::install_github("mtennekes/tmaptools")
+          remotes::install_github("r-spatial/sf")
           remotes::install_deps()
         shell: Rscript {0}
 
       - name: Render Book
         run: Rscript -e 'bookdown::render_book("index.Rmd")'
         
+  
