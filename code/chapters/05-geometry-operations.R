@@ -309,7 +309,7 @@ plot(elev_4)
 plot(elev, add = TRUE)
 
 ## ----05-geometry-operations-40-------------------------------------------
-data("dem", package = "RQGIS")
+data("dem", package = "spDataLarge")
 dem_agg = aggregate(dem, fact = 5, fun = mean)
 
 ## ----aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right).", echo=FALSE----
@@ -551,7 +551,7 @@ elev_point = rasterToPoints(elev, spatial = TRUE) %>%
 source("https://github.com/Robinlovelace/geocompr/raw/master/code/05-raster-vectorization1.R", print.eval = TRUE)
 
 ## ----05-geometry-operations-66, eval = FALSE-----------------------------
-## data(dem, package = "RQGIS")
+## data(dem, package = "spDataLarge")
 ## cl = rasterToContour(dem)
 ## plot(dem, axes = FALSE)
 ## plot(cl, add = TRUE)
@@ -567,7 +567,7 @@ source("https://github.com/Robinlovelace/geocompr/raw/master/code/05-raster-vect
 
 ## ----contour-tmap, echo=FALSE, message=FALSE, fig.cap="DEM hillshade of the southern flank of Mt. Mongón overlaid by contour lines.", warning=FALSE, fig.asp=0.56, fig.scap="Hillshade overlaid by contours."----
 library(tmap)
-data("dem", package = "RQGIS")
+data("dem", package = "spDataLarge")
 # create hillshade
 hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
 # create contour

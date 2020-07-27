@@ -10,7 +10,7 @@ library(vegan)
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/38989956-6eae7c9a-43d0-11e8-8f25-3dd3594f7e74.png")
 
 ## ----14-eco-2------------------------------------------------------------
-data("study_area", "random_points", "comm", "dem", "ndvi", package = "RQGIS")
+data("study_area", "random_points", "comm", "dem", "ndvi", package = "spDataLarge")
 
 ## ----14-eco-3------------------------------------------------------------
 # sites 35 to 40 and corresponding occurrences of the first five species in the
