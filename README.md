@@ -4,6 +4,7 @@
 # Geocomputation with R
 
 <!-- badges: start -->
+
 [![Launch Rstudio
 Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/master?urlpath=rstudio)
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render-Book-from-master/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
@@ -52,6 +53,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [tyluRp](https://github.com/tyluRp),
 [marcosci](https://github.com/marcosci),
 [giocomai](https://github.com/giocomai),
+[LaurieLBaker](https://github.com/LaurieLBaker),
 [mdsumner](https://github.com/mdsumner),
 [rsbivand](https://github.com/rsbivand),
 [pat-s](https://github.com/pat-s), [gisma](https://github.com/gisma),
@@ -63,11 +65,11 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [Himanshuteli](https://github.com/Himanshuteli),
 [yutannihilation](https://github.com/yutannihilation),
 [jbixon13](https://github.com/jbixon13),
+[yvkschaefer](https://github.com/yvkschaefer),
 [katiejolly](https://github.com/katiejolly),
 [KHwong12](https://github.com/KHwong12),
-[layik](https://github.com/layik), [mvl22](https://github.com/mvl22),
-[ganes1410](https://github.com/ganes1410),
-[richfitz](https://github.com/richfitz).
+[layik](https://github.com/layik),
+[mtennekes](https://github.com/mtennekes).
 
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
