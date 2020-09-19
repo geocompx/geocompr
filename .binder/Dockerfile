@@ -15,7 +15,7 @@ USER root
 RUN chown -R ${NB_USER} ${HOME}
 
 ## Run an install.R script, if it exists.
-# RUN R -e "remotes::install_github('geocompr/geocompkg')"
+RUN R -e "remotes::install_github('geocompr/geocompkg')"
 
 RUN wget https://github.com/robinlovelace/geocompr/archive/master.zip
 RUN unzip master.zip
