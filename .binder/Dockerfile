@@ -21,8 +21,8 @@ RUN R -e "remotes::install_github('geocompr/geocompkg')"
 RUN wget https://github.com/robinlovelace/geocompr/archive/master.zip
 RUN unzip master.zip
 # COPY * /home/rstudio
-RUN cp -Rv geocompr-master /home/rstudio/geocompr
-RUN chown -Rv rstudio /home/rstudio
+RUN cp -Rv geocompr-master /home/jovyan/geocompr
+RUN chown -Rv jovyan /home/jovyan
 USER ${NB_USER}
 
 
