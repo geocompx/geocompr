@@ -1,29 +1,24 @@
-FROM rocker/binder
-LABEL maintainer='Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
+## Use a tag instead of "latest" for reproducibility
+FROM rocker/binder:3.6.3
+
+## Declares build arguments
+ARG NB_USER
+ARG NB_UID
+
+## Copies your repo files into the Docker Container
 USER root
-# RUN mkdir /var/lib/apt/lists/partial
+COPY . ${HOME}
+## Enable this to copy files from the binder subdirectory
+## to the home, overriding any existing files.
+## Useful to create a setup on binder that is different from a
+## clone of your repository
+## COPY binder ${HOME}
+RUN chown -R ${NB_USER} ${HOME}
 
-# RUN wget https://github.com/geocompr/geocompkg/raw/master/DESCRIPTION
-# Auto-get sysreqs
-# RUN Rscript -e "remotes::install_github('r-hub/sysreqs')" \
-  # && sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION', 'linux-x86_64-ubuntu-gcc'))") \
-  # && sudo -s eval "$sysreqs"
-# manually selected list of installs without huge QGIS dependencies:
-RUN export DEBIAN_FRONTEND=noninteractive; apt-get -y update && apt-get install -y pandoc pandoc-citeproc libxml2-dev libgmp-dev libglpk-dev make libgeos-dev libgeos++-dev jags gdal-bin libgdal-dev libgsl-dev libglu1-mesa-dev unixodbc-dev libproj-dev libpq-dev imagemagick libpng-dev libudunits2-dev zlib1g-dev libssl-dev libcurl4-openssl-dev libv8-dev default-jre-headless libssh2-1-dev libjq-dev libcairo2-dev protobuf-compiler libprotoc-dev libprotobuf-dev
-
-# RUN apt install -y r-cran-tidyverse r-cran-bh
-# install the r-spatial stack
-RUN R -e "install.packages(c('sf', 'lwgeom', 'rgdal', 'sp', 'stars', 'tmap'))"
-RUN R -e "remotes::install_github('nowosad/spData')"
-RUN R -e "remotes::install_github('nowosad/spDataLarge')"
-RUN R -e "remotes::install_github('mtennekes/tmaptools')"
-RUN R -e "remotes::install_github('geocompr/geocompkg')"
-RUN wget https://github.com/robinlovelace/geocompr/archive/master.zip
-RUN unzip master.zip
-# COPY * /home/rstudio
-RUN cp -Rv geocompr-master /home/jovyan/geocompr
-RUN chown -Rv jovyan /home/jovyan
+## Become normal user again
 USER ${NB_USER}
 
+## Run an install.R script, if it exists.
+RUN R -e "remotes::install_github('geocompr/geocompkg')"
 
-
+RUN if [ -f install.R ]; then R --quiet -f install.R; fi
