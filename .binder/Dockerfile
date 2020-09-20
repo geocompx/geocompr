@@ -28,3 +28,9 @@ USER ${NB_USER}
 
 RUN if [ -f install.R ]; then R --quiet -f install.R; fi
 
+# Set RStudio preferences
+# No inline code:
+RUN echo '{' >> /etc/rstudio/rstudio-prefs.json
+RUN echo '    "rmd_chunk_output_inline": false' >> /etc/rstudio/rstudio-prefs.json
+RUN echo '}' >> /etc/rstudio/rstudio-prefs.json
+
