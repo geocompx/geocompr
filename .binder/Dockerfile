@@ -23,14 +23,16 @@ RUN mv geocompr-master /home/rstudio/geocompr
 # COPY * /home/rstudio
 RUN chown -Rv ${NB_USER} /home/rstudio
 
-## Become normal user again
-USER ${NB_USER}
-
-RUN if [ -f install.R ]; then R --quiet -f install.R; fi
-
 # Set RStudio preferences
 # No inline code:
 RUN echo '{' >> /etc/rstudio/rstudio-prefs.json
 RUN echo '    "rmd_chunk_output_inline": false' >> /etc/rstudio/rstudio-prefs.json
 RUN echo '}' >> /etc/rstudio/rstudio-prefs.json
+
+## Become normal user again
+USER ${NB_USER}
+
+RUN if [ -f install.R ]; then R --quiet -f install.R; fi
+
+
 
