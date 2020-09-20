@@ -135,7 +135,7 @@ Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlov
 ## Geocomputation with R in a Docker container
 
 To ease reproducibility we have made Docker images available, at
-[geocompr/geocompr](https://hub.docker.com/r/robinlovelace/geocompr/) on
+[geocompr/geocompr](https://hub.docker.com/r/geocompr/geocompr/) on
 DockerHub. These images allow you to explore Geocomputation with R in a
 virtual machine that has up-to-date dependencies.
 
@@ -143,8 +143,10 @@ After you have [installed
 docker](https://www.docker.com/community-edition#/download) and set-it
 up on [your
 computer](https://docs.docker.com/install/linux/linux-postinstall/) you
-can start RStudio Server without a password (see below for code to add a
-password, essential for public-facing servers):
+can start RStudio Server without a password (see the [Rocker
+project](https://www.rocker-project.org/use/managing_users/) for info on
+how to add a password and other security steps for public-facing
+servers):
 
 ``` sh
 docker run -p 8787:8787 -e DISABLE_AUTH=TRUE geocompr/geocompr
