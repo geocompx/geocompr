@@ -1,6 +1,4 @@
-FROM geocompr/geocompr:rstudio_preview
-RUN R -e "remotes::install_cran('tinytest')"
-# install the r-spatial stack linking to new OSGeo pkgs
+FROM geocompr/geocompr
 RUN su rstudio && \
   cd /home/rstudio && \
   wget https://github.com/Robinlovelace/geocompr/archive/master.zip && \
