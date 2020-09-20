@@ -21,7 +21,7 @@ RUN wget https://github.com/robinlovelace/geocompr/archive/master.zip
 RUN unzip master.zip
 RUN mv geocompr-master /home/rstudio/geocompr
 # COPY * /home/rstudio
-RUN chown -Rv rstudio /home/rstudio
+RUN chown -Rv ${NB_USER} /home/rstudio
 
 ## Become normal user again
 USER ${NB_USER}
