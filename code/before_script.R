@@ -16,4 +16,4 @@ knitr::opts_chunk$set(
 
 set.seed(2017)
 options(digits = 3)
-options(dplyr.print_min = 4, dplyr.print_max = 4)
+options(dplyr.print_min = 4, dplyr.print_max = 4, crayon.enabled = NULL)
