@@ -1,5 +1,8 @@
-## Use a tag instead of "latest" for reproducibility
-FROM rocker/binder
+# define build arguments
+ARG BASE_IMAGE=rocker/binder
+
+# define base images
+FROM $BASE_IMAGE
 
 ## Declares build arguments
 ARG NB_USER
@@ -7,12 +10,11 @@ ARG NB_UID
 
 ## Copies your repo files into the Docker Container
 USER root
-## Enable this to copy files from the binder subdirectory
-## to the home, overriding any existing files.
-## Useful to create a setup on binder that is different from a
-## clone of your repository
-## COPY binder ${HOME}
-RUN chown -R ${NB_USER} ${HOME}
+
+
+# pin the version of RStudio
+ENV RSTUDIO_VERSION 1.2.5042
+RUN /rocker_scripts/install_rstudio.sh
 
 ## Run an install.R script, if it exists.
 RUN R -e "remotes::install_github('geocompr/geocompkg')"
