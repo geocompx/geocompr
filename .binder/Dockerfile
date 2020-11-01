@@ -39,9 +39,6 @@ RUN echo '}' >> /etc/rstudio/rstudio-prefs.json
 USER ${NB_USER}
 
 ## Run an install.R script, if it exists.
-# RUN R -e "remotes::install_github('geocompr/geocompkg')"
+RUN R -e "remotes::install_github('geocompr/geocompkg')"
 
 RUN if [ -f install.R ]; then R --quiet -f install.R; fi
-
-
-
