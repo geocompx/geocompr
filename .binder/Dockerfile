@@ -1,24 +1,28 @@
 # define build arguments
-ARG BASE_IMAGE=rocker/binder
+# based partly on https://github.com/SwissDataScienceCenter/renkulab-docker/blob/e9a1941c7b125eadf878ccdef23f962b6b0a3ebf/docker/r/Dockerfile
+ARG BASE_IMAGE=rocker/geospatial
 
 # define base images
 FROM $BASE_IMAGE
 
 ## Declares build arguments
-ARG NB_USER
+ENV NB_USER=jovyan
 ARG NB_UID
-
-## Copies your repo files into the Docker Container
-USER root
 
 
 # pin the version of RStudio
+ENV NB_USER rstudio
+ENV NB_UID 1000
+ENV NB_GID 1000
 ENV RSTUDIO_VERSION 1.2.5042
 RUN /rocker_scripts/install_rstudio.sh
+RUN /rocker_scripts/install_python.sh
+RUN /rocker_scripts/install_binder.sh
+CMD jupyter notebook --ip 0.0.0.0
 
-## Run an install.R script, if it exists.
-RUN R -e "remotes::install_github('geocompr/geocompkg')"
+USER root
 
+## Copies your repo files into the Docker Container
 RUN wget https://github.com/robinlovelace/geocompr/archive/master.zip
 RUN unzip master.zip
 RUN mv geocompr-master /home/rstudio/geocompr
@@ -33,6 +37,9 @@ RUN echo '}' >> /etc/rstudio/rstudio-prefs.json
 
 ## Become normal user again
 USER ${NB_USER}
+
+## Run an install.R script, if it exists.
+# RUN R -e "remotes::install_github('geocompr/geocompkg')"
 
 RUN if [ -f install.R ]; then R --quiet -f install.R; fi
 
