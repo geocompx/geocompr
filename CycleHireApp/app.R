@@ -2,8 +2,8 @@
 # Author - Kiranmayi Vadlamudi
 #25th Dec 2020
 
-library(pacman)
-p_load(sf, shiny, spData, leaflet, tidyverse, spDataLarge, units)
+pkgs = c("sf", "shiny", "spData", "leaflet", "tidyverse", "spDataLarge", "units")
+invisible(lapply(pkgs, library, character.only = TRUE))
 
 # Based on input coordinates finding the nearest bicycle points
 ui <- fluidPage(
