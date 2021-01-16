@@ -50,7 +50,9 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [florisvdh](https://github.com/florisvdh),
 [katygregg](https://github.com/katygregg),
 [rsbivand](https://github.com/rsbivand),
+[KiranmayiV](https://github.com/KiranmayiV),
 [erstearns](https://github.com/erstearns),
+[zmbc](https://github.com/zmbc),
 [eyesofbambi](https://github.com/eyesofbambi),
 [nickbearman](https://github.com/nickbearman),
 [tyluRp](https://github.com/tyluRp),
@@ -60,7 +62,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [pat-s](https://github.com/pat-s), [gisma](https://github.com/gisma),
 [ateucher](https://github.com/ateucher),
 [annakrystalli](https://github.com/annakrystalli),
-[Darrellc1991](https://github.com/Darrellc1991),
+[DarrellCarvalho](https://github.com/DarrellCarvalho),
 [kant](https://github.com/kant),
 [gavinsimpson](https://github.com/gavinsimpson),
 [Henrik-P](https://github.com/Henrik-P),
@@ -86,7 +88,8 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [pokyah](https://github.com/pokyah),
 [schuetzingit](https://github.com/schuetzingit),
 [sdesabbata](https://github.com/sdesabbata),
-[tim-salabim](https://github.com/tim-salabim).
+[tim-salabim](https://github.com/tim-salabim),
+[tszberkowitz](https://github.com/tszberkowitz).
 
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
