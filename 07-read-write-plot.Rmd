@@ -106,9 +106,27 @@ usa_sf = st_as_sf(usa)
 A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of ten minutes.
 The result is a multilayer object of class `RasterStack`.
 
+```{r, eval=FALSE, echo=FALSE}
+# in case the raster server is down
+# library(raster)
+# if this fails:
+# worldclim_prec = getData(name = "worldclim", var = "prec", res = 10)
+if(!file.exists("prec_10m_bil.zip")) {
+  u = "https://github.com/Robinlovelace/geocompr/releases/download/1.2/prec_10m_bil.zip"
+  download.file(u, "prec_10m_bil.zip")
+  unzip("prec_10m_bil.zip", exdir = "prec")
+}
+worldclim_prec = stack(list.files("prec", pattern = "bil", full.names = TRUE))
+saveRDS(worldclim_prec, "worldclim_prec.Rds")
+piggyback::pb_upload("worldclim_prec.Rds")
+piggyback::pb_download_url("worldclim_prec.Rds")
+```
+
+
 ```{r 07-read-write-plot-5}
 library(raster)
-worldclim_prec = getData(name = "worldclim", var = "prec", res = 10)
+u = "https://github.com/Robinlovelace/geocompr/releases/download/1.2/worldclim_prec.Rds"
+worldclim_prec = readRDS(url(u))
 class(worldclim_prec)
 ```
 
