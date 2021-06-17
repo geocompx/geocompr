@@ -17,3 +17,4 @@ knitr::opts_chunk$set(
 set.seed(2017)
 options(digits = 3)
 options(dplyr.print_min = 4, dplyr.print_max = 4)
+options("rgdal_show_exportToProj4_warnings"="none") #hides proj4 warnings
