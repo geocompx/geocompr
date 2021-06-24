@@ -5,5 +5,5 @@ RUN su rstudio && \
   unzip master.zip && \
   mv geocompr-master /home/rstudio/geocompr && \
   cd geocompr && \
-  make html
+  Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::gitbook", clean = FALSE)'
 RUN chown -Rv rstudio /home/rstudio/geocompr 
