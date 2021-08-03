@@ -5,6 +5,9 @@ library("sf")
 library("mlr3spatiotempcv")
 library("mlr3verse")
 
+# use 11-spatial-cv-jm.R as a template
+# replace RQGIS code by qgisprocess code
+
 # just use lsl and ta from spDataLarge, do no longer refer to RSAGA since it is
 # deprecated and it is also not that interesting for the reader to construct the
 # landslide points and the terrain attributes
