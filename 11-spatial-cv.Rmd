@@ -6,7 +6,7 @@ This chapter assumes proficiency with geographic data analysis\index{geographic 
 A familiarity with generalized linear models (GLM)\index{GLM} and machine learning\index{machine learning} is highly recommended [for example from @zuur_mixed_2009;@james_introduction_2013].
 
 The chapter uses the following packages:^[
-Package **kernlab**, **pROC**, **RSAGA**\index{RSAGA (package)} and **spDataLarge** must also be installed although these do not need to be attached.
+Packages **kernlab**, **pROC**, **ml3measures** and **spDataLarge** must also be installed although these do not need to be attached.
 ]
 
 ```{r 11-spatial-cv-1, message=FALSE }
@@ -16,8 +16,10 @@ library(dplyr)
 ```
 
 ```{r 11-spatial-cv-1-2, eval=FALSE}
-library(mlr)
-library(parallelMap)
+library(lgr)
+library(future)
+library(mlr3)
+library(ml3spatiotempcv)
 ```
 
 
@@ -69,53 +71,18 @@ Spatial CV\index{cross-validation!spatial CV} alleviates this problem and is the
 ## Case study: Landslide susceptibility {#case-landslide}
 
 This case study is based on a dataset of landslide locations in Southern Ecuador, illustrated in Figure \@ref(fig:lsl-map) and described in detail in @muenchow_geomorphic_2012.
-A subset of the dataset used in that paper is provided in the **RSAGA**\index{RSAGA (package)} package, which can be loaded as follows:
+A subset of the dataset used in that paper is provided in the **spDataLarge**\index{spDataLarge (package)} package, which can be loaded as follows:
 
 ```{r 11-spatial-cv-2, eval=FALSE}
-data("landslides", package = "RSAGA")
+data("lsl", "ta", "study_area", package = "spDataLarge")
 ```
 
-This should load three objects: a `data.frame` named `landslides`, a `list` named `dem`, and an `sf` object named `study_area`.
-`landslides` contains a factor column `lslpts` where `TRUE` corresponds to an observed landslide 'initiation point', with the coordinates stored in columns `x` and `y`.^[
+This should load three objects: a `data.frame` named `lsl`, a `RasterStack` (see section \@ref(raster-classes)) named `ta` containing terrain attribute rasters, and an `sf` object named `study_area`.
+`lsl` contains a factor column `lslpts` where `TRUE` corresponds to an observed landslide 'initiation point', with the coordinates stored in columns `x` and `y`.^[
 The landslide initiation point is located in the scarp of a landslide polygon. See @muenchow_geomorphic_2012 for further details.
 ]
-
-There are 175 landslide points and 1360 non-landslide, as shown by `summary(landslides)`.
-The 1360 non-landslide points were sampled randomly from the study area, with the restriction that they must fall outside a small buffer around the landslide polygons.
-
-To make the number of landslide and non-landslide points balanced, let us sample 175 from the 1360 non-landslide points.^[The `landslides` dataset has been used in classes and summer schools.
-To show how predictive performance of different algorithms changes with an unbalanced and highly spatially autocorrelated response variable, 1360 non-landslide points were randomly selected, i.e., many more absences than presences.
-However, especially a logistic regression\index{regression!logistic} with a log-link, as used in this chapter, expects roughly the same number of presences and absences in the response.]
-
-```{r 11-spatial-cv-3, eval=FALSE}
-# select non-landslide points
-non_pts = filter(landslides, lslpts == FALSE)
-# select landslide points
-lsl_pts = filter(landslides, lslpts == TRUE)
-# randomly select 175 non-landslide points
-set.seed(11042018)
-non_pts_sub = sample_n(non_pts, size = nrow(lsl_pts))
-# create smaller landslide dataset (lsl)
-lsl = bind_rows(non_pts_sub, lsl_pts)
-```
-
-`dem` is a digital elevation model\index{digital elevation model} consisting of two elements:
-`dem$header`, a `list` which represents a raster 'header'\index{raster!header} (see Section \@ref(raster-data)), and `dem$data`, a matrix with the altitude of each pixel.
-`dem` can be converted into a `raster` object with:
-
-<!-- Idea: could create a function to do this -->
-
-```{r 11-spatial-cv-4, eval=FALSE}
-dem = raster(
-  dem$data, 
-  crs = dem$header$proj4string,
-  xmn = dem$header$xllcorner, 
-  xmx = dem$header$xllcorner + dem$header$ncols * dem$header$cellsize,
-  ymn = dem$header$yllcorner,
-  ymx = dem$header$yllcorner + dem$header$nrows * dem$header$cellsize
-  )
-```
-
+There are 175 landslide and 175 non-landslide points, as shown by `summary(lsl$lslpts)`.
+The 175 non-landslide points were sampled randomly from the study area, with the restriction that they must fall outside a small buffer around the landslide polygons.
 
 ```{r lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador.", fig.scap="Landslide initiation points."}
 # library(tmap)
@@ -143,26 +110,6 @@ knitr::include_graphics("figures/lsl-map-1.png")
 ```
 \index{hillshade}
 
-To model landslide susceptibility, we need some predictors.
-Terrain attributes are frequently associated with landsliding [@muenchow_geomorphic_2012], and these can be computed from the digital elevation model (`dem`) using R-GIS bridges (see Chapter \@ref(gis)).
-We leave it as an exercise to the reader to compute the following terrain attribute rasters and extract the corresponding values to our landslide/non-landslide data frame (see exercises; we also provide the resulting data frame via the **spDataLarge** package, see further below):
-
-- `slope`: slope angle (°).
-- `cplan`: plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow.
-- `cprof`: profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle.
-- `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
-- `log10_carea`: the decadic logarithm of the catchment area (log10 m^2^) representing the amount of water flowing towards a location.
-
-Data containing the landslide points, with the corresponding terrain attributes, is provided in the **spDataLarge** package, along with the terrain attribute raster stack from which the values were extracted.
-Hence, if you have not computed the predictors yourself, attach the corresponding data before running the code of the remaining chapter:
-
-```{r 11-spatial-cv-5}
-# attach landslide points with terrain attributes
-data("lsl", package = "spDataLarge")
-# attach terrain attribute raster stack
-data("ta", package = "spDataLarge")
-```
-
 The first three rows of `lsl`, rounded to two significant digits, can be found in Table \@ref(tab:lslsummary).
 
 ```{r lslsummary, echo=FALSE, warning=FALSE}
@@ -173,6 +120,17 @@ knitr::kable(lsl_table, caption = "Structure of the lsl dataset.",
              caption.short = "`lsl` dataset.", booktabs = TRUE) %>%
   kableExtra::kable_styling(latex_options="scale_down")
 ```
+
+To model landslide susceptibility, we need some predictors.
+Since terrain attributes are frequently associated with landsliding [@muenchow_geomorphic_2012], we have already extracted following following terrain attributes from `ta` to `lsl`:
+
+- `slope`: slope angle (°).
+- `cplan`: plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow.
+- `cprof`: profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle.
+- `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
+- `log10_carea`: the decadic logarithm of the catchment area (log10 m^2^) representing the amount of water flowing towards a location.
+
+Computing these terrain attribute rasters from the digital elevation model (`ta$elev`) with the help of R-GIS bridges (see Chapter \@ref(gis)) and extracting the corresponding values to our landslide/non-landslide data frame might be a nice exercise for the interested reader (see exercises).
 
 ## Conventional modeling approach in R {#conventional-model}
 
