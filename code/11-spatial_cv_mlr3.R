@@ -3,13 +3,19 @@ library("mlr3")
 # library("mlr3proba")
 library("sf")
 library("mlr3spatiotempcv")
-library("mlr3verse")
+library("mlr3learners")
+library("mlr3extralearners")
+# library("mlr3verse")
 
 # use 11-spatial-cv-jm.R as a template
-# replace RQGIS code by qgisprocess code
+# update study_area with CRS=32717 in spDataLarge
+# replace RQGIS code by qgisprocess code (not the most important point...)
+# shortly introduce R6 and/or cross-reference adv-r
 # use benchmark_grid for comparing nsp with sp cv
 # be more consistent with the naming, spatial CV is an umbrella term for many different strategies, here, we are just using the k-means approach
 # in the conclusions say that there are other spatial CV methods available -> cross-reference Patrick's upcoming paper
+# update excercises in geocompkg
+
 
 # just use lsl and ta from spDataLarge, do no longer refer to RSAGA since it is
 # deprecated and it is also not that interesting for the reader to construct the
@@ -48,6 +54,10 @@ task = TaskClassifST$new(
 #   dplyr::select(class, name, short.name, package) %>%
 #   head()
 as.data.table(mlr_learners)
+mlr3extralearners::list_mlr3learners()
+mlr3extralearners::list_mlr3learners(
+  filter = list(class = "classif", properties = "twoclass"), 
+  select = c("id", "mlr3_package", "required_packages"))
 
 # lrn = makeLearner(cl = "classif.binomial",
 #                   link = "logit",
@@ -66,6 +76,8 @@ perf_level = rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 #                       resampling = perf_level, 
 #                       measures = mlr::auc)
 
+# reduce verbosity
+lgr::get_logger("mlr3")$set_threshold("warn")
 rr = resample(task = task,
               learner = learner,
               resampling = perf_level,
