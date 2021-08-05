@@ -6,7 +6,7 @@ This chapter assumes proficiency with geographic data analysis\index{geographic 
 A familiarity with generalized linear models (GLM)\index{GLM} and machine learning\index{machine learning} is highly recommended [for example from @zuur_mixed_2009;@james_introduction_2013].
 
 The chapter uses the following packages:^[
-Packages **lgr**, **kernlab**, **pROC**, **ml3measures** and **spDataLarge** must also be installed although these do not need to be attached.
+Packages **lgr**, **kernlab**, **ml3measures**, **paradox**, **pROC**, and **spDataLarge** must also be installed although these do not need to be attached.
 ]
 
 ```{r 11-spatial-cv-1, message=FALSE }
@@ -18,6 +18,8 @@ library(dplyr)
 ```{r 11-spatial-cv-1-2, eval=FALSE}
 library(future)
 library(mlr3)
+library(mlr3learners)
+library(mlr3extralearners)
 library(ml3spatiotempcv)
 ```
 
@@ -308,6 +310,7 @@ library(mlr3)
 library(mlr3spatiotempcv)
 # create task
 task = TaskClassifST$new(
+  id = "ecuador_lsl",
   backend = mlr3::as_data_backend(lsl), target = "lslpts", positive = "TRUE",
   extra_args = list(
     coordinate_names = c("x", "y"),
@@ -329,30 +332,32 @@ autoplot(task, type = "duo")
 autoplot(task, type = "pairs")
 ```
 
-`makeLearner()` determines the statistical learning\index{statistical learning} method to use.
-All classification\index{classification} **learners** start with `classif.` and all regression\index{regression} learners with `regr.` (see `?makeLearners` for details). 
-`listLearners()` helps to find out about all available learners and from which package **mlr** imports them (Table \@ref(tab:lrns)). 
-For a specific task, we can run:
+Having created a task, we need to choose a **learner** that determines the statistical learning\index{statistical learning} method to use.
+All classification\index{classification} **learners** start with `classif.` and all regression\index{regression} learners with `regr.` (see `?Learner` for details). 
+`mlr3extralearners::list_mlr3learners()` lists all available learners and from which package **mlr3** imports them (Table \@ref(tab:lrns)). 
+To find out about learners that are able to model a binary response variable, we can run:
 
 ```{r 11-spatial-cv-12, eval=FALSE}
-listLearners(task, warn.missing.packages = FALSE) %>%
-  dplyr::select(class, name, short.name, package) %>%
+library(mlr3extralearners)
+list_mlr3learners(
+  filter = list(class = "classif", properties = "twoclass"), 
+  select = c("id", "mlr3_package", "required_packages")) |>
   head()
 ```
 
 ```{r lrns, echo=FALSE}
-# lrns_df = 
-#   listLearners(task, warn.missing.packages = FALSE) %>%
-#   dplyr::select(Class = class, Name = name, `Short name` = short.name, Package = package) %>% 
-#   head()
+lrns_df = list_mlr3learners(
+  filter = list(class = "classif", properties = "twoclass"), 
+  select = c("id", "mlr3_package", "required_packages")) |>
+  head()
 # dput(lrns_df)
-lrns_df = structure(list(Class = c("classif.adaboostm1", "classif.binomial", 
-"classif.featureless", "classif.fnn", "classif.gausspr", "classif.IBk"
-), Name = c("ada Boosting M1", "Binomial Regression", "Featureless classifier", 
-"Fast k-Nearest Neighbour", "Gaussian Processes", "k-Nearest Neighbours"
-), `Short name` = c("adaboostm1", "binomial", "featureless", 
-"fnn", "gausspr", "ibk"), Package = c("RWeka", "stats", "mlr", 
-"FNN", "kernlab", "RWeka")), row.names = c(NA, 6L), class = "data.frame")
+# lrns_df = structure(list(Class = c("classif.adaboostm1", "classif.binomial", 
+# "classif.featureless", "classif.fnn", "classif.gausspr", "classif.IBk"
+# ), Name = c("ada Boosting M1", "Binomial Regression", "Featureless classifier", 
+# "Fast k-Nearest Neighbour", "Gaussian Processes", "k-Nearest Neighbours"
+# ), `Short name` = c("adaboostm1", "binomial", "featureless", 
+# "fnn", "gausspr", "ibk"), Package = c("RWeka", "stats", "mlr", 
+# "FNN", "kernlab", "RWeka")), row.names = c(NA, 6L), class = "data.frame")
 knitr::kable(lrns_df, 
              caption = paste("Sample of available learners for binomial", 
                              "tasks in the mlr package."), 
@@ -360,21 +365,17 @@ knitr::kable(lrns_df,
 ```
 
 This yields all learners able to model two-class problems (landslide yes or no).
-We opt for the binomial classification\index{classification} method used in Section \@ref(conventional-model) and implemented as `classif.binomial` in **mlr**.
-Additionally, we must specify the link-function, `logit` in this case, which is also the default of the `binomial()` function.
-`predict.type` determines the type of the prediction with `prob` resulting in the predicted probability for landslide occurrence between 0 and 1 (this corresponds to `type = response` in `predict.glm`).
+We opt for the binomial classification\index{classification} method used in Section \@ref(conventional-model) and implemented as `classif.log_reg` in **mlr3learners**.
+Additionally, we need to specify the `predict.type` which determines the type of the prediction with `prob` resulting in the predicted probability for landslide occurrence between 0 and 1 (this corresponds to `type = response` in `predict.glm`).
 
 ```{r 11-spatial-cv-13, eval=FALSE}
-lrn = makeLearner(cl = "classif.binomial",
-                  link = "logit",
-                  predict.type = "prob",
-                  fix.factors.prediction = TRUE)
+library(mlr3learners)
+learner = lrn("classif.log_reg", predict_type = "prob")
 ```
 
-To find out from which package the specified learner is taken and how to access the corresponding help pages, we can run:
+To access the help page of the learner and find out from which package it was taken, we can run:
 
 ```{r 11-spatial-cv-14, eval=FALSE}
-getLearnerPackages(lrn)
 helpLearner(lrn)
 ```
 
@@ -382,77 +383,72 @@ helpLearner(lrn)
 Having specified a learner and a task, we can train our model which basically executes the `glm()` command in the background for our task. 
 
 ```{r 11-spatial-cv-15, eval=FALSE}
-mod = train(learner = lrn, task = task)
-mlr_fit = getLearnerModel(mod)
+learner$train(task)
+learner$model
 ```
 
 ```{r 11-spatial-cv-16, eval=FALSE, echo=FALSE}
-getTaskFormula(task)
-getTaskData(task)
-getLearnerModel(mod)
-mod$learner.model
+learner$model$formula
+task$data()
+learner$model
 ```
 
 `getLearnerModel()` extracts the used model which shows that **mlr** passed all specified parameters to the `glm` function in the background as also proved by following code:
 
 ```{r 11-spatial-cv-17, eval=FALSE}
-fit = glm(lslpts ~ ., family = binomial(link = "logit"), data = data)
-identical(fit$coefficients, mlr_fit$coefficients)
+fit = glm(lslpts ~ ., family = binomial(link = "logit"), 
+          data = dplyr::select(lsl, -x, -y))
+identical(fit$coefficients, learner$model$coefficients)
 ```
 -->
 
-The set-up steps for modeling with **mlr**\index{mlr (package)} may seem tedious. 
-But remember, this single interface provides access to the 150+ learners shown by `listLearners()`; it would be far more tedious to learn the interface for each learner!
+The set-up steps for modeling with **mlr3**\index{mlr3 (package)} may seem tedious. 
+But remember, this single interface provides access to the 130+ learners shown by `mlr3extralearners::list_mlr3learners()`; it would be far more tedious to learn the interface for each learner!
 Further advantages are simple parallelization of resampling techniques and the ability to tune machine learning hyperparameters\index{hyperparameter} (see Section \@ref(svm)).
-Most importantly, (spatial) resampling in **mlr** is straightforward, requiring only two more steps: specifying a resampling method and running it.
+Most importantly, (spatial) resampling in **mlr3spatiotempc** is straightforward, requiring only two more steps: specifying a resampling method and running it.
 We will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatial CV}: five partitions will be chosen based on the provided coordinates in our `task` and the partitioning will be repeated 100 times:[^13]
 
 [^13]: 
 
     Note that package **sperrorest** initially implemented spatial cross-validation in R [@brenning_spatial_2012].
-    In the meantime, its functionality was integrated into the **mlr3** ecosystem which is the reason why we are using **mlr3** [@schratz_hyperparameter_2019].The **caret** package is another umbrella-package [@kuhn_applied_2013] for streamlined modeling in R; however, so far it does not provide spatial CV which is why we refrain from using it for spatial data.
+    In the meantime, its functionality was integrated into the **mlr3** ecosystem which is the reason why we are using **mlr3** [@schratz_hyperparameter_2019]. The **tidymodels** framework is another umbrella-package for streamlined modeling in R; however, it only recently integrated support for spatial cross validation via **spatialsample** which so far only supports one spatial resampling method.
 
 
 ```{r 11-spatial-cv-18, eval=FALSE}
-perf_level = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 100)
+perf_level = rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 ```
 
-To execute the spatial resampling, we run `resample()` using the specified learner, task, resampling strategy and of course the performance measure, here the AUROC\index{AUROC}.
-This takes some time (around 10 seconds on a modern laptop) because it computes the AUROC for 500 models. 
+To execute the spatial resampling, we run `resample()` using the previously specified task, learner, and resampling strategy.
+This takes some time (around 16 seconds on a modern laptop) because it computes the performance measure for 500 models. 
 Setting a seed ensures the reproducibility\index{reproducibility} of the obtained result and will ensure the same spatial partitioning when re-running the code.
-
-<!-- I just thought it might be worth showing the differences between an error on the fold level and repetition level but aggregating to the rep level is not a one-liner in mlr -->
-
 
 ```{r 11-spatial-cv-19, eval=FALSE}
 set.seed(012348)
-sp_cv = mlr::resample(learner = lrn, task = task,
-                      resampling = perf_level, 
-                      measures = mlr::auc)
+# reduce verbosity
+lgr::get_logger("mlr3")$set_threshold("warn")
+# run spatial cross-validation
+sp_cv = resample(task = task,
+                 learner = learner,
+                 resampling = perf_level,
+                 store_models = TRUE)
 ```
 
-```{r 11-spatial-cv-20, eval=FALSE, echo=FALSE}
-set.seed(012348)
-sp_cv = mlr::resample(learner = lrn, task = task,
-                      resampling = perf_level, 
-                      measures = mlr::auc)
-```
 
 <!-- sp_cv and conv_cv have been saved in spatialcv.Rdata. I needed to run the modeling outside of the book since knitr sets its own seed and I am not sure if this actually helps to make sure that the same partitions are used in the cv.
 I really don't understand why I have to load spatialcv.Rdata here a third time...-->
 
-The output of the preceding code chunk is a bias-reduced assessment of the model's predictive performance, as illustrated in the following code chunk  (required input data is saved in the file `spatialcv.Rdata` in the book's GitHub repo):
+The output of the preceding code chunk is a bias-reduced assessment of the model's predictive performance (here given as AUROC), as illustrated in the following code chunk (required input data is saved in the file `11-sp_cv.rds` in the book's GitHub repo):
 
 ```{r 11-spatial-cv-21, echo=FALSE}
-sp_cv = readRDS("extdata/sp_cv.rds")
-conv_cv = readRDS("extdata/conv_cv.rds")
+sp_cv = readRDS("extdata/11-sp_cv.rds")
+conv_cv = readRDS("extdata/11-conv_cv.rds")
 ```
 
 ```{r 11-spatial-cv-22}
 # summary statistics of the 500 models
-summary(sp_cv$measures.test$auc)
+sp_cv$score(measures = msr("classif.auc"))[, summary(classif.auc)]
 # mean AUROC of the 500 models
-mean(sp_cv$measures.test$auc)
+sp_cv$agg(measures = msr("classif.auc"))
 ```
 
 To put these results in perspective, let us compare them with AUROC\index{AUROC} values from a 100-repeated 5-fold non-spatial cross-validation (Figure \@ref(fig:boxplot-cv); the code for the non-spatial cross-validation\index{cross-validation} is not shown here but will be explored in the exercise section).
@@ -460,7 +456,7 @@ As expected, the spatially cross-validated result yields lower AUROC values on a
 
 ```{r boxplot-cv, echo=FALSE, fig.width=6, fig.height=9, fig.cap="Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation.", fig.scap="Boxplot showing AUROC values."}
 # Visualization of non-spatial overfitting
-boxplot(sp_cv$measures.test$auc,
+boxplot(sp_cv$score(measures = msr("classif.auc"))[["classif.auc"]],
         conv_cv$measures.test$auc,
         col = c("lightblue2", "mistyrose2"),
         names = c("spatial CV", "conventional CV"), 
