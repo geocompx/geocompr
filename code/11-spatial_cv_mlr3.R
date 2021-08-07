@@ -4,6 +4,7 @@ library("mlr3")
 library("sf")
 library("mlr3spatiotempcv")
 library("mlr3learners")
+# remotes::install_github("mlr-org/mlr3extralearners")
 library("mlr3extralearners")
 # library("mlr3verse")
 
@@ -144,14 +145,26 @@ at_ksvm = AutoTuner$new(
 lgr::get_logger("mlr3")$set_threshold("warn")
 # future::plan("multiprocess", workers = 4)
 # this will fit 125,500 models, so this might take a while
+
+# Run the outer loop sequentially and the inner loop in parallel
+future::plan(list("sequential", "multisession"),
+             workers = parallel::detectCores() / 2)
+
+# New argument `encapsulate` for `resample()` and `benchmark()` to conveniently
+# enable encapsulation and also set the fallback learner to the respective
+# featureless learner. This is simply for convenience, configuring each learner
+# individually is still possible and allows a more fine-grained control
 progressr::with_progress(expr = {
   rr = resample(task = task,
                 learner = at_ksvm,
                 # outer resampling (performance level)
                 resampling = rsmp("repeated_spcv_coords", folds = 5,
                                   repeats = 100),
-                store_models = TRUE)
+                store_models = TRUE,
+                encapsulate = "evaluate")
 })
+# store_models = TRUE needed when doing nested cv!!
+# To save the tuned learners in our resampling result by setting store_model = TRUE, i.e., that we are able to inspect them later on
 
 # Advantages mlr3
 # - create benchmark grid, i.e., combine all tasks, learners and resampling
