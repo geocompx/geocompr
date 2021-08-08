@@ -591,8 +591,19 @@ Use the 50 randomly selected hyperparameters\index{hyperparameter} in each of th
 1. Repeat steps 2 to 4, 100 times.
 
 The process of hyperparameter tuning and performance estimation is computationally intensive.
-Model runtime can be reduced with parallelization, which can be done in a number of ways, depending on the operating system.
-<!-- "cloud development is done on linux servers" is somehow a strange read that I cannot relate really. Maybe sth like: "Parallelilaztion and cloud-computing are most often done on Linux operating systems nowadays. This has some reasons, one of them that directly affects us is that only on Linux systems we can set a parallel seed in R that makes the parallel processes reproducible [this is still an assumption, I will check on that!]"-->
+To decrease model runtime, **mlr3** offers the possibility to use parallelization\index{parallelization} with the help of the **future** package.
+Since we are about to run a nested cross-validation, we can decide if we would like to parallelize the inner or the outer loop.
+Since the former will run 125,000 models, whereas the latter only runs 500, it is quite obvious that we should parallelize the inner loop.
+To set up the parallelization of the inner loop, we run:
+
+```{r future, eval=FALSE}
+library(future)
+# execute the outer loop sequentially and parallelize the inner loop
+future::plan(list("sequential", "multisession"), 
+             workers = floor(availableCores() / 2))
+```
+
+Additionally, we instructed **future** to only use half instead of all available cores (default).
 
 Before starting the parallelization\index{parallelization}, we ensure that the processing continues even if one of the models throws an error by setting `on.learner.error` to `warn`.
 This avoids the process stopping just because of one failed model, which is desirable on large model runs.
