@@ -6,7 +6,7 @@ This chapter assumes proficiency with geographic data analysis\index{geographic 
 A familiarity with generalized linear models (GLM)\index{GLM} and machine learning\index{machine learning} is highly recommended [for example from @zuur_mixed_2009;@james_introduction_2013].
 
 The chapter uses the following packages:^[
-Packages **GGally**, **lgr**, **kernlab**, **ml3measures**, **paradox**, **pROC**, and **spDataLarge** must also be installed although these do not need to be attached.
+Packages **GGally**, **lgr**, **kernlab**, **ml3measures**, **paradox**, **pROC**, **progressr** and **spDataLarge** must also be installed although these do not need to be attached.
 ]
 
 ```{r 11-spatial-cv-1, message=FALSE }
@@ -183,8 +183,12 @@ pred = raster::predict(ta, model = fit, type = "response")
 
 ```{r lsl-susc, echo=FALSE, fig.cap="Spatial prediction of landslide susceptibility using a GLM.", fig.scap = "Spatial prediction of landslide susceptibility.", warning=FALSE}
 # attach study mask for the natural part of the study area
-# data("study_mask", package = "spDataLarge")
+# data("ta", "lsl", study_mask", package = "spDataLarge")
 # # white raster to only plot the axis ticks, otherwise gridlines would be visible
+# lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
+# hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
+# rect = tmaptools::bb_poly(hs)
+# bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
 # tm_shape(hs, bbox = bbx) +
 #   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
 #           labels.rot = c(0, 90)) +
@@ -430,8 +434,7 @@ lgr::get_logger("mlr3")$set_threshold("warn")
 # run spatial cross-validation
 sp_cv = resample(task = task,
                  learner = learner,
-                 resampling = perf_level,
-                 store_models = FALSE)
+                 resampling = perf_level)
 ```
 
 
@@ -444,25 +447,34 @@ As performance measure, we again choose the AUROC.
 ```{r 11-spatial-cv-21, echo=FALSE}
 sp_cv = readRDS("extdata/11-sp_cv.rds")
 conv_cv = readRDS("extdata/11-conv_cv.rds")
+bm_agg = readRDS("extdata/11-sp_conv_cv.rds")
+sp_cv = bm_agg$resample_result[[1]]
 ```
 
 ```{r 11-spatial-cv-22}
 # summary statistics of the 500 models
 sp_cv$score(measures = msr("classif.auc"))[, summary(classif.auc)]
 # mean AUROC of the 500 models
-sp_cv$agg(measures = msr("classif.auc"))
+sp_cv$aggregate(measures = msr("classif.auc"))
 ```
 
 To put these results in perspective, let us compare them with AUROC\index{AUROC} values from a 100-repeated 5-fold non-spatial cross-validation (Figure \@ref(fig:boxplot-cv); the code for the non-spatial cross-validation\index{cross-validation} is not shown here but will be explored in the exercise section).
 As expected, the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance due to spatial autocorrelation\index{autocorrelation!spatial} of the latter.
 
 ```{r boxplot-cv, echo=FALSE, fig.width=6, fig.height=9, fig.cap="Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation.", fig.scap="Boxplot showing AUROC values."}
-# Visualization of non-spatial overfitting
-boxplot(sp_cv$score(measures = msr("classif.auc"))[["classif.auc"]],
-        conv_cv$measures.test$auc,
-        col = c("lightblue2", "mistyrose2"),
-        names = c("spatial CV", "conventional CV"), 
-        ylab = "AUROC")
+library(ggplot2)
+# extract the AUROC values and put them into one data.table
+d = purrr::map_dfr(agg$resample_result, ~ .$score(msr("classif.auc")))
+# rename the levels of resampling_id
+d[, resampling_id := as.factor(resampling_id) |>
+    forcats::fct_recode("conventional CV" = "repeated_cv", 
+                        "spatial CV" = "repeated_spcv_coords") |> 
+    forcats::fct_rev()]
+# create the boxplot
+ggplot2::ggplot(data = d, mapping = aes(x = resampling_id, y = classif.auc)) +
+  geom_boxplot(fill = c("lightblue2", "mistyrose2")) +
+  theme_bw() +
+  labs(y = "AUROC", x = "")
 ```
 
 ### Spatial tuning of machine-learning hyperparameters {#svm}
@@ -525,7 +537,7 @@ The next step is new, however: to tune the hyperparameters\index{hyperparameter}
 Using the same data for the performance assessment and the tuning would potentially lead to overoptimistic results [@cawley_overfitting_2010].
 This can be avoided using nested spatial CV\index{cross-validation!spatial CV}.
 
-```{r inner-outer, echo=FALSE, fig.cap="Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2019). Permission to reuse it  was kindly granted.)", fig.scap="Schematic of hyperparameter tuning."}
+```{r inner-outer, echo=FALSE, fig.cap="Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2019). Permission to reuse it was kindly granted.)", fig.scap="Schematic of hyperparameter tuning."}
 knitr::include_graphics("figures/13_cv.png")
 ```
 
@@ -592,7 +604,7 @@ Use the 50 randomly selected hyperparameters\index{hyperparameter} in each of th
 
 The process of hyperparameter tuning and performance estimation is computationally intensive.
 To decrease model runtime, **mlr3** offers the possibility to use parallelization\index{parallelization} with the help of the **future** package.
-Since we are about to run a nested cross-validation, we can decide if we would like to parallelize the inner or the outer loop.
+Since we are about to run a nested cross-validation, we can decide if we would like to parallelize the inner or the outer loop (see lower left part of Figure \@ref(fig:inner-outer)).
 Since the former will run 125,000 models, whereas the latter only runs 500, it is quite obvious that we should parallelize the inner loop.
 To set up the parallelization of the inner loop, we run:
 
@@ -603,61 +615,33 @@ future::plan(list("sequential", "multisession"),
              workers = floor(availableCores() / 2))
 ```
 
-Additionally, we instructed **future** to only use half instead of all available cores (default).
-
-Before starting the parallelization\index{parallelization}, we ensure that the processing continues even if one of the models throws an error by setting `on.learner.error` to `warn`.
-This avoids the process stopping just because of one failed model, which is desirable on large model runs.
-To inspect the failed models once the processing is completed, we dump them:
-
-```{r 11-spatial-cv-28, eval=FALSE}
-configureMlr(on.learner.error = "warn", on.error.dump = TRUE)
-```
-
-To start the parallelization\index{parallelization}, we set the `mode` to `multicore` which will use `mclapply()` in the background on a single machine in the case of a Unix-based operating system.^[
-See `?parallelStart` for further modes and github.com/berndbischl/parallelMap for more on the unified interface to popular parallelization back-ends.
-]
-Equivalenty, `parallelStartSocket()` enables parallelization under Windows. 
-`level` defines the level at which to enable parallelization, with `mlr.tuneParams` determining that the hyperparameter tuning level should be parallelized (see lower left part of Figure \@ref(fig:inner-outer), `?parallelGetRegisteredLevels`, and the **mlr** [parallelization tutorial](https://mlr-org.github.io/mlr-tutorial/release/html/parallelization/index.html#parallelization-levels) for details).
-We will use half of the available cores (set with the `cpus` parameter), a setting that allows possible other users to work on the same high performance computing cluster in case one is used (which was the case when we ran the code).
-<!-- the partitions are created before the parallelization by the normal set.seed() call. mc.set.seed makes sure that the randomly chosen hyperparameters for the tuning are reproducible. These will first set within the parallelization.-->
-Setting `mc.set.seed` to `TRUE` ensures that the randomly chosen hyperparameters\index{hyperparameter} during the tuning can be reproduced when running the code again.
-Unfortunately, `mc.set.seed` is only available under Unix-based systems.
-
-```{r 11-spatial-cv-29, eval=FALSE}
-library(parallelMap)
-if (Sys.info()["sysname"] %in% c("Linux", "Darwin")) {
-parallelStart(mode = "multicore", 
-              # parallelize the hyperparameter tuning level
-              level = "mlr.tuneParams", 
-              # just use half of the available cores
-              cpus = round(parallel::detectCores() / 2),
-              mc.set.seed = TRUE)
-}
-
-if (Sys.info()["sysname"] == "Windows") {
-  parallelStartSocket(level = "mlr.tuneParams",
-                      cpus =  round(parallel::detectCores() / 2))
-}
-```
+Additionally, we instructed **future** to only use half instead of all available cores (default), a setting that allows possible other users to work on the same high performance computing cluster in case one is used.
 
 Now we are set up for computing the nested spatial CV.
 Using a seed allows us to recreate the exact same spatial partitions when re-running the code.
-Specifying the `resample()` parameters follows the exact same procedure as presented when using a GLM\index{GLM}, the only difference being the `extract` argument.
-This allows the extraction of the hyperparameter\index{hyperparameter} tuning results which is important if we plan follow-up analyses on the tuning.
-After the processing, it is good practice to explicitly stop the parallelization\index{parallelization} with `parallelStop()`.
+Specifying the `resample()` parameters follows the exact same procedure as presented when using a GLM\index{GLM}, the only difference being the `store_models` and `encapsulate` arguments.
+The former allows the extraction of the hyperparameter\index{hyperparameter} tuning results which is important if we plan follow-up analyses on the tuning.
+The latter ensures that the processing continues even if one of the models throws an error.
+This avoids the process stopping just because of one failed model, which is desirable on large model runs.
+Once the processing is completed, one can have a look at the failed models.
+After the processing, it is good practice to explicitly stop the parallelization\index{parallelization} with `future:::ClusterRegistry("stop")`.
 Finally, we save the output object (`result`) to disk in case we would like to use it another R session.
 Before running the subsequent code, be aware that it is time-consuming:
 the 125,500 models took ~1/2hr on a server using 24 cores (see below).
 
 ```{r 11-spatial-cv-30, eval=FALSE}
 set.seed(12345)
-result = mlr::resample(learner = wrapped_lrn_ksvm, 
-                       task = task,
-                       resampling = perf_level,
-                       extract = getTuneResult,
-                       measures = mlr::auc)
+progressr::with_progress(expr = {
+  rr = resample(task = task,
+                learner = at_ksvm,
+                # outer resampling (performance level)
+                resampling = perf_level,
+                store_models = TRUE,
+                encapsulate = "evaluate")
+})
+
 # stop parallelization
-parallelStop()
+future:::ClusterRegistry("stop")
 # save your result, e.g.:
 # saveRDS(result, "svm_sp_sp_rbf_50it.rds")
 ```
