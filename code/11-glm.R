@@ -9,10 +9,8 @@
 #**********************************************************
 #
 # 1 attach packages and data
-# 2 data preprocessing
-# 3 terrain attributes
-# 4 modeling 
-# 5 spatial prediction
+# 2 modeling 
+# 3 spatial prediction
 #
 #**********************************************************
 # 1 attach packages and data----
