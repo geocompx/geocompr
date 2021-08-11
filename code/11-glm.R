@@ -115,9 +115,7 @@ ggplot2::ggplot(data = d, mapping = aes(x = resampling_id, y = classif.auc)) +
   labs(y = "AUROC", x = "")
 
 # save your result
-saveRDS(agg, file = "extdata/11-sp-conv-cv.rds")
-# saveRDS(sp_cv, file = "extdata/sp_cv.rds")
-# saveRDS(conv_cv, file = "extdata/conv_cv.rds")
+saveRDS(agg, file = "extdata/11-sp_conv_cv.rds")
 
 #**********************************************************
 # 3 spatial prediction----
