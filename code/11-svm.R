@@ -1,4 +1,4 @@
-# Filename: 13-svm.R (2018-03-22)
+# Filename: 11-svm.R (2021-08-11)
 #
 # TO DO: Spatial cross-validation of SVM
 #
@@ -16,40 +16,39 @@
 #**********************************************************
 
 # attach packages
+library(future)
+library(mlr3)
+library(mlr3extralearners)
+library(mlr3learners)
+library(mlr3spatiotempcv)
+library(mlr3tuning)
 library(raster)
-library(mlr)
 library(sf)
 library(tmap)
-library(parallelMap)
 
 # attach data
-data("lsl", package = "spDataLarge")
+data("lsl", "ta", "study_mask", package = "spDataLarge")
 
 #**********************************************************
-# 2 MLR BUILDING BLOCKS------------------------------------
+# 2 mlr building blocks----
 #**********************************************************
 
-# put coordinates in an additional data frame
-coords = lsl[, c("x", "y")]
-data = dplyr::select(lsl, -x, -y)
-
-# 2.1 Create MLR task======================================
+# 2.1 create mlr3 task====
 #**********************************************************
-task = makeClassifTask(data = data,
-                       target = "lslpts", 
-                       positive = "TRUE",
-                       coordinates = coords)
-# find out about possible learners for our task
-listLearners(task)
+task = TaskClassifST$new(
+  id = "ecuador_lsl",
+  backend = mlr3::as_data_backend(lsl), target = "lslpts", positive = "TRUE",
+  extra_args = list(
+    coordinate_names = c("x", "y"),
+    coords_as_features = FALSE,
+    crs = 32717)
+)
 
 # 2.2 Specify learner======================================
 #**********************************************************
 # construct SVM learner (using ksvm function from the kernlab package)
-lrn_ksvm = makeLearner("classif.ksvm",
-                        predict.type = "prob",
-                        kernel = "rbfdot")
-getLearnerPackages(lrn_ksvm)
-helpLearner(lrn_ksvm)
+
+lrn_ksvm = lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot")
 # rbfdot Radial Basis kernel "Gaussian" 
 # the list of hyper-parameters (kernel parameters). This is a list which
 # contains the parameters to be used with the kernel function. For valid
@@ -62,60 +61,53 @@ helpLearner(lrn_ksvm)
 # 2.3 Specify resampling strategy==========================
 #**********************************************************
 # performance level (outer resampling loop)
-perf_level = makeResampleDesc("SpRepCV", folds = 5, reps = 100)
+perf_level = rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 
-# tuning level (inner reseampling loop)
-tune_level = makeResampleDesc("SpCV", iters = 5)
-# hyperparameter tuning in the inner resampling loop
-# use 50 randomly selected hyperparameter combinations...
-ctrl = makeTuneControlRandom(maxit = 50)
-# ... and restrict them to the following tuning space
-ps = makeParamSet(
-  makeNumericParam("C", lower = -12, upper = 15, trafo = function(x) 2^x),
-  makeNumericParam("sigma", lower = -15, upper = 6, trafo = function(x) 2^x)
-  )
+# five spatially disjoint partitions
+tune_level = rsmp("spcv_coords", folds = 5)
+# use 50 randomly selected hyperparameters
+terminator = trm("evals", n_evals = 50)
+tuner = tnr("random_search")
+# define the outer limits of the randomly selected hyperparameters
+ps = ps(
+  C = p_dbl(lower = -12, upper = 15, trafo = function(x) 2^x),
+  sigma = p_dbl(lower = -15, upper = 6, trafo = function(x) 2^x)
+)
 
-wrapper_ksvm = makeTuneWrapper(learner = lrn_ksvm,
-                               resampling = tune_level,
-                               par.set = ps,
-                               control = ctrl,
-                               show.info = FALSE,
-                               measures = mlr::auc)
+at_ksvm = AutoTuner$new(
+  learner = lrn_ksvm,
+  resampling = tune_level,
+  measure = msr("classif.auc"),
+  search_space = ps,
+  terminator = terminator,
+  tuner = tuner
+)
 
-# 2.4 Run the resampling (spatial cv)======================
+
+# 2.4 run the resampling (spatial cv)====
 #**********************************************************
-# before starting the parallelization, make sure that failed models will be 
-# accessible after the processing (and does not lead to the interruption of the 
-# cv)
-configureMlr(on.learner.error = "warn", on.error.dump = TRUE)
-# initialize the parallelization
-if (Sys.info()["sysname"] %in% c("Linux, Darwin")) {
-  parallelStart(mode = "multicore", 
-                # parallelize the hyperparameter tuning level
-                level = "mlr.tuneParams", 
-                # just use half of the available cores
-                cpus = round(parallel::detectCores() / 2),
-                mc.set.seed = TRUE)
-}
-
-if (Sys.info()["sysname"] == "Windows") {
-  parallelStartSocket(level = "mlr.tuneParams",
-                      cpus =  round(parallel::detectCores() / 2))
-}
+# execute the outer loop sequentially and parallelize the inner loop
+future::plan(list("sequential", "multisession"), 
+             workers = floor(availableCores() / 2))
 
 # run the resampling
 set.seed(12345)
-resa_svm_spatial = mlr::resample(learner = wrapper_ksvm, 
-                                 task = task,
-                                 resampling = perf_level,
-                                 extract = getTuneResult,
-                                 show.info = TRUE,
-                                 measures = mlr::auc)
-
-# Aggregated Result: auc.test.mean=0.7583375
-parallelStop()
-# save your result
-saveRDS(resa_svm_spatial, "extdata/spatial_cv_result.rds")
+# reduce verbosity
+lgr::get_logger("mlr3")$set_threshold("warn")
+tic()
+progressr::with_progress(expr = {
+  rr = resample(task = task,
+                learner = at_ksvm,
+                # outer resampling (performance level)
+                resampling = perf_level,
+                store_models = TRUE,
+                encapsulate = "evaluate")
+})
+toc()
+# stop parallelization
+future:::ClusterRegistry("stop")
+# save your result, e.g.:
+saveRDS(rr, "11-svm_sp_sp_rbf_50it.rds")
 
 # Exploring the results
 # run time in minutes
