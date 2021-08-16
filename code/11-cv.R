@@ -159,12 +159,12 @@ saveRDS(agg, file = "extdata/11-sp_conv_cv.rds")
 #**********************************************************
 
 #**********************************************************
-# 3.1 make the prediction====
+# 3.1 make the prediction using the glm====
 #**********************************************************
 
-learner$train(task)
+lrn_glm$train(task)
 fit = learner$model
-# according to learner$help() the default for predictions was adjusted to FALSE,
+# according to lrn_glm$help() the default for predictions was adjusted to FALSE,
 # since we would like to have TRUE predictions, we have to change back
 fit$coefficients = fit$coefficients * -1
 
