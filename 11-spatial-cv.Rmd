@@ -437,10 +437,6 @@ sp_cv = resample(task = task,
                  resampling = perf_level)
 ```
 
-
-<!-- sp_cv and conv_cv have been saved in spatialcv.Rdata. I needed to run the modeling outside of the book since knitr sets its own seed and I am not sure if this actually helps to make sure that the same partitions are used in the cv.
-I really don't understand why I have to load spatialcv.Rdata here a third time...-->
-
 The output of the preceding code chunk is a bias-reduced assessment of the model's predictive performance, as illustrated in the following code chunk (required input data is saved in the file `11-sp_cv.rds` in the book's GitHub repo).
 As performance measure, we again choose the AUROC.
 
@@ -623,19 +619,19 @@ The latter ensures that the processing continues even if one of the models throw
 This avoids the process stopping just because of one failed model, which is desirable on large model runs.
 Once the processing is completed, one can have a look at the failed models.
 After the processing, it is good practice to explicitly stop the parallelization\index{parallelization} with `future:::ClusterRegistry("stop")`.
-Finally, we save the output object (`result`) to disk in case we would like to use it another R session.
-Before running the subsequent code, be aware that it is time-consuming:
-the 125,500 models took ~1/2hr on a server using 24 cores (see below).
+Finally, we save the output object (`result`) to disk in case we would like to use it in another R session.
+Before running the subsequent code, be aware that it is time-consuming since it will run the spatial cross-validation with 125,500 models.
+Note that runtime depends on many aspects: CPU speed, the selected algorithm, the selected number of cores and the dataset.
 
 ```{r 11-spatial-cv-30, eval=FALSE}
 set.seed(12345)
 progressr::with_progress(expr = {
-  rr = resample(task = task,
-                learner = at_ksvm,
-                # outer resampling (performance level)
-                resampling = perf_level,
-                store_models = TRUE,
-                encapsulate = "evaluate")
+  result = resample(task = task,
+                    learner = at_ksvm, 
+                    # outer resampling (performance level)
+                    resampling = perf_level,
+                    store_models = TRUE,
+                    encapsulate = "evaluate")
 })
 
 # stop parallelization
@@ -651,17 +647,7 @@ They can be loaded as follows:
 result = readRDS("extdata/spatial_cv_result.rds")
 ```
 
-Note that runtime depends on many aspects: CPU speed, the selected algorithm, the selected number of cores and the dataset.
-
-```{r 11-spatial-cv-32}
-# Exploring the results
-# runtime in minutes
-round(result$runtime / 60, 2)
-```
-
-<!-- interestingly, running the code with 4 cores takes 41.67 minutes -->
-
-Even more important than the runtime is the final aggregated AUROC\index{AUROC}: the model's ability to discriminate the two classes. 
+Let us have a look at the final AUROC\index{AUROC}: the model's ability to discriminate the two classes. 
 
 ```{r 11-spatial-cv-33}
 # final aggregated AUROC 
@@ -724,14 +710,13 @@ We recommend the following resources in this direction:
 1. Use the derived terrain attribute rasters in combination with a GLM to make a spatial prediction map similar to that shown in Figure \@ref(fig:lsl-susc).
 Running `data("study_mask", package = "spDataLarge")` attaches a mask of the study area.
 1. Compute a 100-repeated 5-fold non-spatial cross-validation and spatial CV based on the GLM learner and compare the AUROC values from both resampling\index{resampling} strategies with the help of boxplots (see Figure \@ref(fig:boxplot-cv)).
-Hint: You need to specify a non-spatial task and a non-spatial resampling\index{resampling} strategy.
+Hint: You need to specify a non-spatial resampling\index{resampling} strategy.
 <!-- @Patrick: talk in person; but I think this step is not necessary since spatial and non-spatial partitions must be different -->
 <!-- Before running the spatial cross-validation for both tasks set a seed to make sure that both use the same partitions which in turn guarantees comparability.-->
 1. Model landslide susceptibility using a quadratic discriminant analysis [QDA, @james_introduction_2013].
 Assess the predictive performance (AUROC) of the QDA. 
 What is the difference between the spatially cross-validated mean AUROC value of the QDA and the GLM?
 <!-- so I think, setting a seed here makes sure that the same spatial partitions are used for both models, right?-->
-Hint: Before running the spatial cross-validation for both learners, set a seed to make sure that both use the same spatial partitions which in turn guarantees comparability.
 1. Run the SVM without tuning the hyperparameters.
 Use the `rbfdot` kernel with $\sigma$ = 1 and *C* = 1. 
 Leaving the hyperparameters unspecified in **kernlab**'s `ksvm()` would otherwise initialize an automatic non-spatial hyperparameter tuning.
