@@ -56,7 +56,42 @@ task = TaskClassifST$new(
 
 # 2.2 construct a learner and run the model====
 #**********************************************************
-learner = lrn("classif.log_reg", predict_type = "prob")
+
+# glm learner
+lrn_glm = lrn("classif.log_reg", predict_type = "prob")
+
+# construct SVM learner (using ksvm function from the kernlab package)
+lrn_ksvm = lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot",
+               type = "C-svc")
+# rbfdot Radial Basis kernel "Gaussian" 
+# the list of hyper-parameters (kernel parameters). This is a list which
+# contains the parameters to be used with the kernel function. For valid
+# parameters for existing kernels are :
+# sigma inverse kernel width for the Radial Basis kernel function "rbfdot" and
+# the Laplacian kernel "laplacedot".
+# C cost of constraints violation (default: 1) this is the ‘C’-constant of the
+# regularization term in the Lagrange formulation.
+
+# specify nested resampling and adjust learner accordingly
+# five spatially disjoint partitions
+tune_level = rsmp("spcv_coords", folds = 5)
+# use 50 randomly selected hyperparameters
+terminator = trm("evals", n_evals = 50)
+tuner = tnr("random_search")
+# define the outer limits of the randomly selected hyperparameters
+ps = ps(
+  C = p_dbl(lower = -12, upper = 15, trafo = function(x) 2^x),
+  sigma = p_dbl(lower = -15, upper = 6, trafo = function(x) 2^x)
+)
+
+at_ksvm = AutoTuner$new(
+  learner = lrn_ksvm,
+  resampling = tune_level,
+  measure = msr("classif.auc"),
+  search_space = ps,
+  terminator = terminator,
+  tuner = tuner
+)
 
 # 2.3 cross-validation====
 #**********************************************************
@@ -68,26 +103,30 @@ learner = lrn("classif.log_reg", predict_type = "prob")
 rsmp_sp = rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 rsmp_nsp = rsmp("repeated_cv", folds = 5, repeats = 100)
 
-# why do we need the seed?
-# the seed is needed when to make sure
-# that always the same spatial partitions are used when re-running the code
-set.seed(012348)  
-bm = benchmark_grid(tasks = list(task_sp, task_nsp), 
-                    learners = learner,
-                    resamplings = list(rsmp_sp, rsmp_nsp))
-
 # create your design
-grid = benchmark_grid(tasks = task_sp, 
-                      learners = learner,
-                      resamplings = list(rsmp_sp, rsmp_nsp))
-print(grid)
+design_grid = benchmark_grid(
+  tasks = task,
+  learners = list(lrn_glm, at_ksvm),
+  resamplings = list(rsmp_sp, rsmp_nsp))
+print(design_grid)
+# run the cross-validations (spatial and conventional)
+# execute the outer loop sequentially and parallelize the inner loop
+future::plan(list("sequential", "multisession"), 
+             workers = floor(future::availableCores()))
+
 # why do we need the seed?
 # the seed is needed when to make sure
 # that always the same spatial partitions are used when re-running the code
 set.seed(012348)
-# run the cross-validations (spatial and conventional)
-bmr = benchmark(grid, store_backends = FALSE)
-
+# reduce verbosity
+lgr::get_logger("mlr3")$set_threshold("warn")
+lgr::get_logger("bbotk")$set_threshold("info")
+progressr::with_progress(expr = {
+  bmr = benchmark(design_grid, 
+                  encapsulate = "evaluate",
+                  store_backends = FALSE,
+                  store_models = TRUE)
+})
 # plot your result
 # library(mlr3viz)
 # p1 = autoplot(bmr, measure = msr("classif.auc"))
