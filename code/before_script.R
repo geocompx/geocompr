@@ -1,6 +1,6 @@
 library(methods)
-
-knitr::opts_chunk$set(
+library(knitr)
+opts_chunk$set(
         background = "#FCFCFC", # code chunk color in latex
         comment = "#>",
         collapse = TRUE,
@@ -14,12 +14,6 @@ knitr::opts_chunk$set(
         out.width = "100%",
         dpi = 105 # this creates 2*105 dpi at 6in, which is 300 dpi at 4.2in, see the  EmilHvitfeldt/smltar repo
 )
-
-set.seed(2017)
-options(digits = 3)
-options(dplyr.print_min = 4, dplyr.print_max = 4)
-options("rgdal_show_exportToProj4_warnings"="none") #hides proj4 warnings
-
 # https://github.com/EmilHvitfeldt/smltar/issues/114
 hook_output = knit_hooks$get('output')
 knit_hooks$set(output = function(x, options) {
@@ -32,3 +26,8 @@ knit_hooks$set(output = function(x, options) {
         }
         hook_output(x, options)
 })
+
+set.seed(2017)
+options(digits = 3)
+options(dplyr.print_min = 4, dplyr.print_max = 4)
+options("rgdal_show_exportToProj4_warnings"="none") #hides proj4 warnings
