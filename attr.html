@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 3 Attribute data operations | Geocomputation with R</title>
+  <meta name="description" content="Chapter 3 Attribute data operations | Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data." />
+  <meta name="generator" content="bookdown 0.23 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 3 Attribute data operations | Geocomputation with R" />
+  <meta property="og:type" content="book" />
+  <meta property="og:url" content="https://geocompr.robinlovelace.net/" />
+  <meta property="og:image" content="https://geocompr.robinlovelace.net//images/cover.png" />
+  <meta property="og:description" content="Chapter 3 Attribute data operations | Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data." />
+  <meta name="github-repo" content="Robinlovelace/geocompr" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 3 Attribute data operations | Geocomputation with R" />
+  
+  <meta name="twitter:description" content="Chapter 3 Attribute data operations | Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data." />
+  <meta name="twitter:image" content="https://geocompr.robinlovelace.net//images/cover.png" />
+
+<meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow" />
+
+
+<meta name="date" content="2021-08-23" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="spatial-class.html"/>
+<link rel="next" href="spatial-operations.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-binding-2.0.4.1/leaflet.js"></script>
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-99618359-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+<style type="text/css">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<link rel="stylesheet" href="css/style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Geocomputation with R</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Welcome</a><ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#how-to-contribute"><i class="fa fa-check"></i>How to contribute?</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#reproducibility"><i class="fa fa-check"></i>Reproducibility</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#supporting-the-project"><i class="fa fa-check"></i>Supporting the project</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="foreword.html"><a href="foreword.html"><i class="fa fa-check"></i>Foreword</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html"><i class="fa fa-check"></i>Preface</a><ul>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#who-this-book-is-for"><i class="fa fa-check"></i>Who this book is for</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#how-to-read-this-book"><i class="fa fa-check"></i>How to read this book</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#why-r"><i class="fa fa-check"></i>Why R?</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#real-world-impact"><i class="fa fa-check"></i>Real-world impact</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#what-is-geocomputation"><i class="fa fa-check"></i><b>1.1</b> What is geocomputation?</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#why-use-r-for-geocomputation"><i class="fa fa-check"></i><b>1.2</b> Why use R for geocomputation?</a></li>
+<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#software-for-geocomputation"><i class="fa fa-check"></i><b>1.3</b> Software for geocomputation</a></li>
+<li class="chapter" data-level="1.4" data-path="intro.html"><a href="intro.html#rs-spatial-ecosystem"><i class="fa fa-check"></i><b>1.4</b> R’s spatial ecosystem</a></li>
+<li class="chapter" data-level="1.5" data-path="intro.html"><a href="intro.html#the-history-of-r-spatial"><i class="fa fa-check"></i><b>1.5</b> The history of R-spatial</a></li>
+<li class="chapter" data-level="1.6" data-path="intro.html"><a href="intro.html#exercises"><i class="fa fa-check"></i><b>1.6</b> Exercises</a></li>
+</ul></li>
+<li class="part"><span><b>I Foundations</b></span></li>
+<li class="chapter" data-level="2" data-path="spatial-class.html"><a href="spatial-class.html"><i class="fa fa-check"></i><b>2</b> Geographic data in R</a><ul>
+<li class="chapter" data-level="" data-path="spatial-class.html"><a href="spatial-class.html#prerequisites"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="2.1" data-path="spatial-class.html"><a href="spatial-class.html#intro-spatial-class"><i class="fa fa-check"></i><b>2.1</b> Introduction</a></li>
+<li class="chapter" data-level="2.2" data-path="spatial-class.html"><a href="spatial-class.html#vector-data"><i class="fa fa-check"></i><b>2.2</b> Vector data</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="spatial-class.html"><a href="spatial-class.html#intro-sf"><i class="fa fa-check"></i><b>2.2.1</b> An introduction to simple features</a></li>
+<li class="chapter" data-level="2.2.2" data-path="spatial-class.html"><a href="spatial-class.html#why-simple-features"><i class="fa fa-check"></i><b>2.2.2</b> Why simple features?</a></li>
+<li class="chapter" data-level="2.2.3" data-path="spatial-class.html"><a href="spatial-class.html#basic-map"><i class="fa fa-check"></i><b>2.2.3</b> Basic map making</a></li>
+<li class="chapter" data-level="2.2.4" data-path="spatial-class.html"><a href="spatial-class.html#base-args"><i class="fa fa-check"></i><b>2.2.4</b> Base plot arguments</a></li>
+<li class="chapter" data-level="2.2.5" data-path="spatial-class.html"><a href="spatial-class.html#geometry"><i class="fa fa-check"></i><b>2.2.5</b> Geometry types</a></li>
+<li class="chapter" data-level="2.2.6" data-path="spatial-class.html"><a href="spatial-class.html#sfg"><i class="fa fa-check"></i><b>2.2.6</b> Simple feature geometries (sfg)</a></li>
+<li class="chapter" data-level="2.2.7" data-path="spatial-class.html"><a href="spatial-class.html#sfc"><i class="fa fa-check"></i><b>2.2.7</b> Simple feature columns (sfc)</a></li>
+<li class="chapter" data-level="2.2.8" data-path="spatial-class.html"><a href="spatial-class.html#sf"><i class="fa fa-check"></i><b>2.2.8</b> The sf class</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="spatial-class.html"><a href="spatial-class.html#raster-data"><i class="fa fa-check"></i><b>2.3</b> Raster data</a><ul>
+<li class="chapter" data-level="2.3.1" data-path="spatial-class.html"><a href="spatial-class.html#an-introduction-to-raster"><i class="fa fa-check"></i><b>2.3.1</b> An introduction to raster</a></li>
+<li class="chapter" data-level="2.3.2" data-path="spatial-class.html"><a href="spatial-class.html#basic-map-raster"><i class="fa fa-check"></i><b>2.3.2</b> Basic map making</a></li>
+<li class="chapter" data-level="2.3.3" data-path="spatial-class.html"><a href="spatial-class.html#raster-classes"><i class="fa fa-check"></i><b>2.3.3</b> Raster classes</a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="spatial-class.html"><a href="spatial-class.html#crs-intro"><i class="fa fa-check"></i><b>2.4</b> Coordinate Reference Systems</a><ul>
+<li class="chapter" data-level="2.4.1" data-path="spatial-class.html"><a href="spatial-class.html#geographic-coordinate-systems"><i class="fa fa-check"></i><b>2.4.1</b> Geographic coordinate systems</a></li>
+<li class="chapter" data-level="2.4.2" data-path="spatial-class.html"><a href="spatial-class.html#projected-coordinate-reference-systems"><i class="fa fa-check"></i><b>2.4.2</b> Projected coordinate reference systems</a></li>
+<li class="chapter" data-level="2.4.3" data-path="spatial-class.html"><a href="spatial-class.html#crs-in-r"><i class="fa fa-check"></i><b>2.4.3</b> CRSs in R</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="spatial-class.html"><a href="spatial-class.html#units"><i class="fa fa-check"></i><b>2.5</b> Units</a></li>
+<li class="chapter" data-level="2.6" data-path="spatial-class.html"><a href="spatial-class.html#ex2"><i class="fa fa-check"></i><b>2.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="attr.html"><a href="attr.html"><i class="fa fa-check"></i><b>3</b> Attribute data operations</a><ul>
+<li class="chapter" data-level="" data-path="attr.html"><a href="attr.html#prerequisites-1"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="3.1" data-path="attr.html"><a href="attr.html#introduction"><i class="fa fa-check"></i><b>3.1</b> Introduction</a></li>
+<li class="chapter" data-level="3.2" data-path="attr.html"><a href="attr.html#vector-attribute-manipulation"><i class="fa fa-check"></i><b>3.2</b> Vector attribute manipulation</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="attr.html"><a href="attr.html#vector-attribute-subsetting"><i class="fa fa-check"></i><b>3.2.1</b> Vector attribute subsetting</a></li>
+<li class="chapter" data-level="3.2.2" data-path="attr.html"><a href="attr.html#vector-attribute-aggregation"><i class="fa fa-check"></i><b>3.2.2</b> Vector attribute aggregation</a></li>
+<li class="chapter" data-level="3.2.3" data-path="attr.html"><a href="attr.html#vector-attribute-joining"><i class="fa fa-check"></i><b>3.2.3</b> Vector attribute joining</a></li>
+<li class="chapter" data-level="3.2.4" data-path="attr.html"><a href="attr.html#vec-attr-creation"><i class="fa fa-check"></i><b>3.2.4</b> Creating attributes and removing spatial information</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="attr.html"><a href="attr.html#manipulating-raster-objects"><i class="fa fa-check"></i><b>3.3</b> Manipulating raster objects</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="attr.html"><a href="attr.html#raster-subsetting"><i class="fa fa-check"></i><b>3.3.1</b> Raster subsetting</a></li>
+<li class="chapter" data-level="3.3.2" data-path="attr.html"><a href="attr.html#summarizing-raster-objects"><i class="fa fa-check"></i><b>3.3.2</b> Summarizing raster objects</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="attr.html"><a href="attr.html#exercises-1"><i class="fa fa-check"></i><b>3.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="spatial-operations.html"><a href="spatial-operations.html"><i class="fa fa-check"></i><b>4</b> Spatial data operations</a><ul>
+<li class="chapter" data-level="" data-path="spatial-operations.html"><a href="spatial-operations.html#prerequisites-2"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="4.1" data-path="spatial-operations.html"><a href="spatial-operations.html#introduction-1"><i class="fa fa-check"></i><b>4.1</b> Introduction</a></li>
+<li class="chapter" data-level="4.2" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-vec"><i class="fa fa-check"></i><b>4.2</b> Spatial operations on vector data</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-subsetting"><i class="fa fa-check"></i><b>4.2.1</b> Spatial subsetting</a></li>
+<li class="chapter" data-level="4.2.2" data-path="spatial-operations.html"><a href="spatial-operations.html#topological-relations"><i class="fa fa-check"></i><b>4.2.2</b> Topological relations</a></li>
+<li class="chapter" data-level="4.2.3" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-joining"><i class="fa fa-check"></i><b>4.2.3</b> Spatial joining</a></li>
+<li class="chapter" data-level="4.2.4" data-path="spatial-operations.html"><a href="spatial-operations.html#non-overlapping-joins"><i class="fa fa-check"></i><b>4.2.4</b> Non-overlapping joins</a></li>
+<li class="chapter" data-level="4.2.5" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-aggr"><i class="fa fa-check"></i><b>4.2.5</b> Spatial data aggregation</a></li>
+<li class="chapter" data-level="4.2.6" data-path="spatial-operations.html"><a href="spatial-operations.html#distance-relations"><i class="fa fa-check"></i><b>4.2.6</b> Distance relations</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-ras"><i class="fa fa-check"></i><b>4.3</b> Spatial operations on raster data</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-raster-subsetting"><i class="fa fa-check"></i><b>4.3.1</b> Spatial subsetting</a></li>
+<li class="chapter" data-level="4.3.2" data-path="spatial-operations.html"><a href="spatial-operations.html#map-algebra"><i class="fa fa-check"></i><b>4.3.2</b> Map algebra</a></li>
+<li class="chapter" data-level="4.3.3" data-path="spatial-operations.html"><a href="spatial-operations.html#local-operations"><i class="fa fa-check"></i><b>4.3.3</b> Local operations</a></li>
+<li class="chapter" data-level="4.3.4" data-path="spatial-operations.html"><a href="spatial-operations.html#focal-operations"><i class="fa fa-check"></i><b>4.3.4</b> Focal operations</a></li>
+<li class="chapter" data-level="4.3.5" data-path="spatial-operations.html"><a href="spatial-operations.html#zonal-operations"><i class="fa fa-check"></i><b>4.3.5</b> Zonal operations</a></li>
+<li class="chapter" data-level="4.3.6" data-path="spatial-operations.html"><a href="spatial-operations.html#global-operations-and-distances"><i class="fa fa-check"></i><b>4.3.6</b> Global operations and distances</a></li>
+<li class="chapter" data-level="4.3.7" data-path="spatial-operations.html"><a href="spatial-operations.html#map-algebra-counterparts-in-vector-processing"><i class="fa fa-check"></i><b>4.3.7</b> Map algebra counterparts in vector processing</a></li>
+<li class="chapter" data-level="4.3.8" data-path="spatial-operations.html"><a href="spatial-operations.html#merging-rasters"><i class="fa fa-check"></i><b>4.3.8</b> Merging rasters</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="spatial-operations.html"><a href="spatial-operations.html#exercises-2"><i class="fa fa-check"></i><b>4.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="geometric-operations.html"><a href="geometric-operations.html"><i class="fa fa-check"></i><b>5</b> Geometry operations</a><ul>
+<li class="chapter" data-level="" data-path="geometric-operations.html"><a href="geometric-operations.html#prerequisites-3"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="5.1" data-path="geometric-operations.html"><a href="geometric-operations.html#introduction-2"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="geometric-operations.html"><a href="geometric-operations.html#geo-vec"><i class="fa fa-check"></i><b>5.2</b> Geometric operations on vector data</a><ul>
+<li class="chapter" data-level="5.2.1" data-path="geometric-operations.html"><a href="geometric-operations.html#simplification"><i class="fa fa-check"></i><b>5.2.1</b> Simplification</a></li>
+<li class="chapter" data-level="5.2.2" data-path="geometric-operations.html"><a href="geometric-operations.html#centroids"><i class="fa fa-check"></i><b>5.2.2</b> Centroids</a></li>
+<li class="chapter" data-level="5.2.3" data-path="geometric-operations.html"><a href="geometric-operations.html#buffers"><i class="fa fa-check"></i><b>5.2.3</b> Buffers</a></li>
+<li class="chapter" data-level="5.2.4" data-path="geometric-operations.html"><a href="geometric-operations.html#affine-transformations"><i class="fa fa-check"></i><b>5.2.4</b> Affine transformations</a></li>
+<li class="chapter" data-level="5.2.5" data-path="geometric-operations.html"><a href="geometric-operations.html#clipping"><i class="fa fa-check"></i><b>5.2.5</b> Clipping</a></li>
+<li class="chapter" data-level="5.2.6" data-path="geometric-operations.html"><a href="geometric-operations.html#geometry-unions"><i class="fa fa-check"></i><b>5.2.6</b> Geometry unions</a></li>
+<li class="chapter" data-level="5.2.7" data-path="geometric-operations.html"><a href="geometric-operations.html#type-trans"><i class="fa fa-check"></i><b>5.2.7</b> Type transformations</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="geometric-operations.html"><a href="geometric-operations.html#geo-ras"><i class="fa fa-check"></i><b>5.3</b> Geometric operations on raster data</a><ul>
+<li class="chapter" data-level="5.3.1" data-path="geometric-operations.html"><a href="geometric-operations.html#geometric-intersections"><i class="fa fa-check"></i><b>5.3.1</b> Geometric intersections</a></li>
+<li class="chapter" data-level="5.3.2" data-path="geometric-operations.html"><a href="geometric-operations.html#extent-and-origin"><i class="fa fa-check"></i><b>5.3.2</b> Extent and origin</a></li>
+<li class="chapter" data-level="5.3.3" data-path="geometric-operations.html"><a href="geometric-operations.html#aggregation-and-disaggregation"><i class="fa fa-check"></i><b>5.3.3</b> Aggregation and disaggregation</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="geometric-operations.html"><a href="geometric-operations.html#raster-vector"><i class="fa fa-check"></i><b>5.4</b> Raster-vector interactions</a><ul>
+<li class="chapter" data-level="5.4.1" data-path="geometric-operations.html"><a href="geometric-operations.html#raster-cropping"><i class="fa fa-check"></i><b>5.4.1</b> Raster cropping</a></li>
+<li class="chapter" data-level="5.4.2" data-path="geometric-operations.html"><a href="geometric-operations.html#raster-extraction"><i class="fa fa-check"></i><b>5.4.2</b> Raster extraction</a></li>
+<li class="chapter" data-level="5.4.3" data-path="geometric-operations.html"><a href="geometric-operations.html#rasterization"><i class="fa fa-check"></i><b>5.4.3</b> Rasterization</a></li>
+<li class="chapter" data-level="5.4.4" data-path="geometric-operations.html"><a href="geometric-operations.html#spatial-vectorization"><i class="fa fa-check"></i><b>5.4.4</b> Spatial vectorization</a></li>
+</ul></li>
+<li class="chapter" data-level="5.5" data-path="geometric-operations.html"><a href="geometric-operations.html#exercises-3"><i class="fa fa-check"></i><b>5.5</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html"><i class="fa fa-check"></i><b>6</b> Reprojecting geographic data</a><ul>
+<li class="chapter" data-level="" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#prerequisites-4"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="6.1" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#introduction-3"><i class="fa fa-check"></i><b>6.1</b> Introduction</a></li>
+<li class="chapter" data-level="6.2" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#when-to-reproject"><i class="fa fa-check"></i><b>6.2</b> When to reproject?</a></li>
+<li class="chapter" data-level="6.3" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#which-crs-to-use"><i class="fa fa-check"></i><b>6.3</b> Which CRS to use?</a></li>
+<li class="chapter" data-level="6.4" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#reproj-vec-geom"><i class="fa fa-check"></i><b>6.4</b> Reprojecting vector geometries</a></li>
+<li class="chapter" data-level="6.5" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#modifying-map-projections"><i class="fa fa-check"></i><b>6.5</b> Modifying map projections</a></li>
+<li class="chapter" data-level="6.6" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#reprojecting-raster-geometries"><i class="fa fa-check"></i><b>6.6</b> Reprojecting raster geometries</a></li>
+<li class="chapter" data-level="6.7" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#exercises-4"><i class="fa fa-check"></i><b>6.7</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="read-write.html"><a href="read-write.html"><i class="fa fa-check"></i><b>7</b> Geographic data I/O</a><ul>
+<li class="chapter" data-level="" data-path="read-write.html"><a href="read-write.html#prerequisites-5"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="7.1" data-path="read-write.html"><a href="read-write.html#introduction-4"><i class="fa fa-check"></i><b>7.1</b> Introduction</a></li>
+<li class="chapter" data-level="7.2" data-path="read-write.html"><a href="read-write.html#retrieving-data"><i class="fa fa-check"></i><b>7.2</b> Retrieving open data</a></li>
+<li class="chapter" data-level="7.3" data-path="read-write.html"><a href="read-write.html#geographic-data-packages"><i class="fa fa-check"></i><b>7.3</b> Geographic data packages</a></li>
+<li class="chapter" data-level="7.4" data-path="read-write.html"><a href="read-write.html#geographic-web-services"><i class="fa fa-check"></i><b>7.4</b> Geographic web services</a></li>
+<li class="chapter" data-level="7.5" data-path="read-write.html"><a href="read-write.html#file-formats"><i class="fa fa-check"></i><b>7.5</b> File formats</a></li>
+<li class="chapter" data-level="7.6" data-path="read-write.html"><a href="read-write.html#data-input"><i class="fa fa-check"></i><b>7.6</b> Data input (I)</a><ul>
+<li class="chapter" data-level="7.6.1" data-path="read-write.html"><a href="read-write.html#vector-data-1"><i class="fa fa-check"></i><b>7.6.1</b> Vector data</a></li>
+<li class="chapter" data-level="7.6.2" data-path="read-write.html"><a href="read-write.html#raster-data-1"><i class="fa fa-check"></i><b>7.6.2</b> Raster data</a></li>
+</ul></li>
+<li class="chapter" data-level="7.7" data-path="read-write.html"><a href="read-write.html#data-output"><i class="fa fa-check"></i><b>7.7</b> Data output (O)</a><ul>
+<li class="chapter" data-level="7.7.1" data-path="read-write.html"><a href="read-write.html#vector-data-2"><i class="fa fa-check"></i><b>7.7.1</b> Vector data</a></li>
+<li class="chapter" data-level="7.7.2" data-path="read-write.html"><a href="read-write.html#raster-data-2"><i class="fa fa-check"></i><b>7.7.2</b> Raster data</a></li>
+</ul></li>
+<li class="chapter" data-level="7.8" data-path="read-write.html"><a href="read-write.html#visual-outputs"><i class="fa fa-check"></i><b>7.8</b> Visual outputs</a></li>
+<li class="chapter" data-level="7.9" data-path="read-write.html"><a href="read-write.html#exercises-5"><i class="fa fa-check"></i><b>7.9</b> Exercises</a></li>
+</ul></li>
+<li class="part"><span><b>II Extensions</b></span></li>
+<li class="chapter" data-level="8" data-path="adv-map.html"><a href="adv-map.html"><i class="fa fa-check"></i><b>8</b> Making maps with R</a><ul>
+<li class="chapter" data-level="" data-path="adv-map.html"><a href="adv-map.html#prerequisites-6"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="8.1" data-path="adv-map.html"><a href="adv-map.html#introduction-5"><i class="fa fa-check"></i><b>8.1</b> Introduction</a></li>
+<li class="chapter" data-level="8.2" data-path="adv-map.html"><a href="adv-map.html#static-maps"><i class="fa fa-check"></i><b>8.2</b> Static maps</a><ul>
+<li class="chapter" data-level="8.2.1" data-path="adv-map.html"><a href="adv-map.html#tmap-basics"><i class="fa fa-check"></i><b>8.2.1</b> tmap basics</a></li>
+<li class="chapter" data-level="8.2.2" data-path="adv-map.html"><a href="adv-map.html#map-obj"><i class="fa fa-check"></i><b>8.2.2</b> Map objects</a></li>
+<li class="chapter" data-level="8.2.3" data-path="adv-map.html"><a href="adv-map.html#aesthetics"><i class="fa fa-check"></i><b>8.2.3</b> Aesthetics</a></li>
+<li class="chapter" data-level="8.2.4" data-path="adv-map.html"><a href="adv-map.html#color-settings"><i class="fa fa-check"></i><b>8.2.4</b> Color settings</a></li>
+<li class="chapter" data-level="8.2.5" data-path="adv-map.html"><a href="adv-map.html#layouts"><i class="fa fa-check"></i><b>8.2.5</b> Layouts</a></li>
+<li class="chapter" data-level="8.2.6" data-path="adv-map.html"><a href="adv-map.html#faceted-maps"><i class="fa fa-check"></i><b>8.2.6</b> Faceted maps</a></li>
+<li class="chapter" data-level="8.2.7" data-path="adv-map.html"><a href="adv-map.html#inset-maps"><i class="fa fa-check"></i><b>8.2.7</b> Inset maps</a></li>
+</ul></li>
+<li class="chapter" data-level="8.3" data-path="adv-map.html"><a href="adv-map.html#animated-maps"><i class="fa fa-check"></i><b>8.3</b> Animated maps</a></li>
+<li class="chapter" data-level="8.4" data-path="adv-map.html"><a href="adv-map.html#interactive-maps"><i class="fa fa-check"></i><b>8.4</b> Interactive maps</a></li>
+<li class="chapter" data-level="8.5" data-path="adv-map.html"><a href="adv-map.html#mapping-applications"><i class="fa fa-check"></i><b>8.5</b> Mapping applications</a></li>
+<li class="chapter" data-level="8.6" data-path="adv-map.html"><a href="adv-map.html#other-mapping-packages"><i class="fa fa-check"></i><b>8.6</b> Other mapping packages</a></li>
+<li class="chapter" data-level="8.7" data-path="adv-map.html"><a href="adv-map.html#exercises-6"><i class="fa fa-check"></i><b>8.7</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="gis.html"><a href="gis.html"><i class="fa fa-check"></i><b>9</b> Bridges to GIS software</a><ul>
+<li class="chapter" data-level="" data-path="gis.html"><a href="gis.html#prerequisites-7"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="9.1" data-path="gis.html"><a href="gis.html#introduction-6"><i class="fa fa-check"></i><b>9.1</b> Introduction</a></li>
+<li class="chapter" data-level="9.2" data-path="gis.html"><a href="gis.html#rqgis"><i class="fa fa-check"></i><b>9.2</b> (R)QGIS</a></li>
+<li class="chapter" data-level="9.3" data-path="gis.html"><a href="gis.html#rsaga"><i class="fa fa-check"></i><b>9.3</b> (R)SAGA</a></li>
+<li class="chapter" data-level="9.4" data-path="gis.html"><a href="gis.html#rgrass"><i class="fa fa-check"></i><b>9.4</b> GRASS through <strong>rgrass7</strong></a></li>
+<li class="chapter" data-level="9.5" data-path="gis.html"><a href="gis.html#when-to-use-what"><i class="fa fa-check"></i><b>9.5</b> When to use what?</a></li>
+<li class="chapter" data-level="9.6" data-path="gis.html"><a href="gis.html#other-bridges"><i class="fa fa-check"></i><b>9.6</b> Other bridges</a><ul>
+<li class="chapter" data-level="9.6.1" data-path="gis.html"><a href="gis.html#gdal"><i class="fa fa-check"></i><b>9.6.1</b> Bridges to GDAL</a></li>
+<li class="chapter" data-level="9.6.2" data-path="gis.html"><a href="gis.html#postgis"><i class="fa fa-check"></i><b>9.6.2</b> Bridges to spatial databases</a></li>
+</ul></li>
+<li class="chapter" data-level="9.7" data-path="gis.html"><a href="gis.html#exercises-7"><i class="fa fa-check"></i><b>9.7</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="algorithms.html"><a href="algorithms.html"><i class="fa fa-check"></i><b>10</b> Scripts, algorithms and functions</a><ul>
+<li class="chapter" data-level="" data-path="algorithms.html"><a href="algorithms.html#prerequisites-8"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="10.1" data-path="algorithms.html"><a href="algorithms.html#intro-algorithms"><i class="fa fa-check"></i><b>10.1</b> Introduction</a></li>
+<li class="chapter" data-level="10.2" data-path="algorithms.html"><a href="algorithms.html#scripts"><i class="fa fa-check"></i><b>10.2</b> Scripts</a></li>
+<li class="chapter" data-level="10.3" data-path="algorithms.html"><a href="algorithms.html#geometric-algorithms"><i class="fa fa-check"></i><b>10.3</b> Geometric algorithms</a></li>
+<li class="chapter" data-level="10.4" data-path="algorithms.html"><a href="algorithms.html#functions"><i class="fa fa-check"></i><b>10.4</b> Functions</a></li>
+<li class="chapter" data-level="10.5" data-path="algorithms.html"><a href="algorithms.html#programming"><i class="fa fa-check"></i><b>10.5</b> Programming</a></li>
+<li class="chapter" data-level="10.6" data-path="algorithms.html"><a href="algorithms.html#ex-algorithms"><i class="fa fa-check"></i><b>10.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="spatial-cv.html"><a href="spatial-cv.html"><i class="fa fa-check"></i><b>11</b> Statistical learning</a><ul>
+<li class="chapter" data-level="" data-path="spatial-cv.html"><a href="spatial-cv.html#prerequisites-9"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="11.1" data-path="spatial-cv.html"><a href="spatial-cv.html#intro-cv1"><i class="fa fa-check"></i><b>11.1</b> Introduction</a></li>
+<li class="chapter" data-level="11.2" data-path="spatial-cv.html"><a href="spatial-cv.html#case-landslide"><i class="fa fa-check"></i><b>11.2</b> Case study: Landslide susceptibility</a></li>
+<li class="chapter" data-level="11.3" data-path="spatial-cv.html"><a href="spatial-cv.html#conventional-model"><i class="fa fa-check"></i><b>11.3</b> Conventional modeling approach in R</a></li>
+<li class="chapter" data-level="11.4" data-path="spatial-cv.html"><a href="spatial-cv.html#intro-cv"><i class="fa fa-check"></i><b>11.4</b> Introduction to (spatial) cross-validation</a></li>
+<li class="chapter" data-level="11.5" data-path="spatial-cv.html"><a href="spatial-cv.html#spatial-cv-with-mlr"><i class="fa fa-check"></i><b>11.5</b> Spatial CV with <strong>mlr</strong></a><ul>
+<li class="chapter" data-level="11.5.1" data-path="spatial-cv.html"><a href="spatial-cv.html#glm"><i class="fa fa-check"></i><b>11.5.1</b> Generalized linear model</a></li>
+<li class="chapter" data-level="11.5.2" data-path="spatial-cv.html"><a href="spatial-cv.html#svm"><i class="fa fa-check"></i><b>11.5.2</b> Spatial tuning of machine-learning hyperparameters</a></li>
+</ul></li>
+<li class="chapter" data-level="11.6" data-path="spatial-cv.html"><a href="spatial-cv.html#conclusions"><i class="fa fa-check"></i><b>11.6</b> Conclusions</a></li>
+<li class="chapter" data-level="11.7" data-path="spatial-cv.html"><a href="spatial-cv.html#exercises-8"><i class="fa fa-check"></i><b>11.7</b> Exercises</a></li>
+</ul></li>
+<li class="part"><span><b>III Applications</b></span></li>
+<li class="chapter" data-level="12" data-path="transport.html"><a href="transport.html"><i class="fa fa-check"></i><b>12</b> Transportation</a><ul>
+<li class="chapter" data-level="" data-path="transport.html"><a href="transport.html#prerequisites-10"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="12.1" data-path="transport.html"><a href="transport.html#introduction-7"><i class="fa fa-check"></i><b>12.1</b> Introduction</a></li>
+<li class="chapter" data-level="12.2" data-path="transport.html"><a href="transport.html#bris-case"><i class="fa fa-check"></i><b>12.2</b> A case study of Bristol</a></li>
+<li class="chapter" data-level="12.3" data-path="transport.html"><a href="transport.html#transport-zones"><i class="fa fa-check"></i><b>12.3</b> Transport zones</a></li>
+<li class="chapter" data-level="12.4" data-path="transport.html"><a href="transport.html#desire-lines"><i class="fa fa-check"></i><b>12.4</b> Desire lines</a></li>
+<li class="chapter" data-level="12.5" data-path="transport.html"><a href="transport.html#routes"><i class="fa fa-check"></i><b>12.5</b> Routes</a></li>
+<li class="chapter" data-level="12.6" data-path="transport.html"><a href="transport.html#nodes"><i class="fa fa-check"></i><b>12.6</b> Nodes</a></li>
+<li class="chapter" data-level="12.7" data-path="transport.html"><a href="transport.html#route-networks"><i class="fa fa-check"></i><b>12.7</b> Route networks</a></li>
+<li class="chapter" data-level="12.8" data-path="transport.html"><a href="transport.html#prioritizing-new-infrastructure"><i class="fa fa-check"></i><b>12.8</b> Prioritizing new infrastructure</a></li>
+<li class="chapter" data-level="12.9" data-path="transport.html"><a href="transport.html#future-directions-of-travel"><i class="fa fa-check"></i><b>12.9</b> Future directions of travel</a></li>
+<li class="chapter" data-level="12.10" data-path="transport.html"><a href="transport.html#ex-transport"><i class="fa fa-check"></i><b>12.10</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="location.html"><a href="location.html"><i class="fa fa-check"></i><b>13</b> Geomarketing</a><ul>
+<li class="chapter" data-level="" data-path="location.html"><a href="location.html#prerequisites-11"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="13.1" data-path="location.html"><a href="location.html#introduction-8"><i class="fa fa-check"></i><b>13.1</b> Introduction</a></li>
+<li class="chapter" data-level="13.2" data-path="location.html"><a href="location.html#case-study"><i class="fa fa-check"></i><b>13.2</b> Case study: bike shops in Germany</a></li>
+<li class="chapter" data-level="13.3" data-path="location.html"><a href="location.html#tidy-the-input-data"><i class="fa fa-check"></i><b>13.3</b> Tidy the input data</a></li>
+<li class="chapter" data-level="13.4" data-path="location.html"><a href="location.html#create-census-rasters"><i class="fa fa-check"></i><b>13.4</b> Create census rasters</a></li>
+<li class="chapter" data-level="13.5" data-path="location.html"><a href="location.html#define-metropolitan-areas"><i class="fa fa-check"></i><b>13.5</b> Define metropolitan areas</a></li>
+<li class="chapter" data-level="13.6" data-path="location.html"><a href="location.html#points-of-interest"><i class="fa fa-check"></i><b>13.6</b> Points of interest</a></li>
+<li class="chapter" data-level="13.7" data-path="location.html"><a href="location.html#identifying-suitable-locations"><i class="fa fa-check"></i><b>13.7</b> Identifying suitable locations</a></li>
+<li class="chapter" data-level="13.8" data-path="location.html"><a href="location.html#discussion-and-next-steps"><i class="fa fa-check"></i><b>13.8</b> Discussion and next steps</a></li>
+<li class="chapter" data-level="13.9" data-path="location.html"><a href="location.html#exercises-9"><i class="fa fa-check"></i><b>13.9</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="eco.html"><a href="eco.html"><i class="fa fa-check"></i><b>14</b> Ecology</a><ul>
+<li class="chapter" data-level="" data-path="eco.html"><a href="eco.html#prerequisites-12"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="14.1" data-path="eco.html"><a href="eco.html#introduction-9"><i class="fa fa-check"></i><b>14.1</b> Introduction</a></li>
+<li class="chapter" data-level="14.2" data-path="eco.html"><a href="eco.html#data-and-data-preparation"><i class="fa fa-check"></i><b>14.2</b> Data and data preparation</a></li>
+<li class="chapter" data-level="14.3" data-path="eco.html"><a href="eco.html#nmds"><i class="fa fa-check"></i><b>14.3</b> Reducing dimensionality</a></li>
+<li class="chapter" data-level="14.4" data-path="eco.html"><a href="eco.html#modeling-the-floristic-gradient"><i class="fa fa-check"></i><b>14.4</b> Modeling the floristic gradient</a><ul>
+<li class="chapter" data-level="14.4.1" data-path="eco.html"><a href="eco.html#mlr-building-blocks"><i class="fa fa-check"></i><b>14.4.1</b> <strong>mlr</strong> building blocks</a></li>
+<li class="chapter" data-level="14.4.2" data-path="eco.html"><a href="eco.html#predictive-mapping"><i class="fa fa-check"></i><b>14.4.2</b> Predictive mapping</a></li>
+</ul></li>
+<li class="chapter" data-level="14.5" data-path="eco.html"><a href="eco.html#conclusions-1"><i class="fa fa-check"></i><b>14.5</b> Conclusions</a></li>
+<li class="chapter" data-level="14.6" data-path="eco.html"><a href="eco.html#exercises-10"><i class="fa fa-check"></i><b>14.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i><b>15</b> Conclusion</a><ul>
+<li class="chapter" data-level="" data-path="conclusion.html"><a href="conclusion.html#prerequisites-13"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="15.1" data-path="conclusion.html"><a href="conclusion.html#introduction-10"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
+<li class="chapter" data-level="15.2" data-path="conclusion.html"><a href="conclusion.html#package-choice"><i class="fa fa-check"></i><b>15.2</b> Package choice</a></li>
+<li class="chapter" data-level="15.3" data-path="conclusion.html"><a href="conclusion.html#gaps"><i class="fa fa-check"></i><b>15.3</b> Gaps and overlaps</a></li>
+<li class="chapter" data-level="15.4" data-path="conclusion.html"><a href="conclusion.html#next"><i class="fa fa-check"></i><b>15.4</b> Where to go next?</a></li>
+<li class="chapter" data-level="15.5" data-path="conclusion.html"><a href="conclusion.html#benefit"><i class="fa fa-check"></i><b>15.5</b> The open source approach</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://robinlovelace.net/">Robin Lovelace</a></li>
+<li><a href="https://nowosad.github.io/">Jakub Nowosad</a></li>
+<li><a href="https://github.com/jannes-m/">Jannes Muenchow</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Geocomputation with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="attr" class="section level1">
+<h1><span class="header-section-number">Chapter 3</span> Attribute data operations</h1>
+<div id="prerequisites-1" class="section level2 unnumbered">
+<h2>Prerequisites</h2>
+<ul>
+<li>This chapter requires the following packages to be installed and attached:</li>
+</ul>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="attr.html#cb59-1"></a><span class="kw">library</span>(sf)</span>
+<span id="cb59-2"><a href="attr.html#cb59-2"></a><span class="kw">library</span>(raster)</span>
+<span id="cb59-3"><a href="attr.html#cb59-3"></a><span class="kw">library</span>(dplyr)</span>
+<span id="cb59-4"><a href="attr.html#cb59-4"></a><span class="kw">library</span>(stringr) <span class="co"># for working with strings (pattern matching)</span></span>
+<span id="cb59-5"><a href="attr.html#cb59-5"></a><span class="kw">library</span>(tidyr)   <span class="co"># for unite() and separate()</span></span></code></pre></div>
+<ul>
+<li>It also relies on <strong>spData</strong>, which loads datasets used in the code examples of this chapter:</li>
+</ul>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="attr.html#cb60-1"></a><span class="kw">library</span>(spData)</span></code></pre></div>
+</div>
+<div id="introduction" class="section level2">
+<h2><span class="header-section-number">3.1</span> Introduction</h2>
+<p>Attribute data is non-spatial information associated with geographic (geometry) data.
+A bus stop provides a simple example: its position would typically be represented by latitude and longitude coordinates (geometry data), in addition to its name.
+The name is an <em>attribute</em> of the feature (to use Simple Features terminology) that bears no relation to its geometry.
+<!-- idea: add an example of a bus stop (or modify a previous example so it represents a bus stop) in the previous chapter  --></p>
+<p>Another example is the elevation value (attribute) for a specific grid cell in raster data.
+Unlike the vector data model, the raster data model stores the coordinate of the grid cell indirectly, meaning the distinction between attribute and spatial information is less clear.
+To illustrate the point, think of a pixel in the 3<sup>rd</sup> row and the 4<sup>th</sup> column of a raster matrix.
+Its spatial location is defined by its index in the matrix: move from the origin four cells in the x direction (typically east and right on maps) and three cells in the y direction (typically south and down).
+The raster’s <em>resolution</em> defines the distance for each x- and y-step which is specified in a <em>header</em>.
+The header is a vital component of raster datasets which specifies how pixels relate to geographic coordinates (see also Chapter <a href="spatial-operations.html#spatial-operations">4</a>).</p>
+<p>The focus of this chapter is manipulating geographic objects based on attributes such as the name of a bus stop and elevation.
+For vector data, this means operations such as subsetting and aggregation (see Sections <a href="attr.html#vector-attribute-subsetting">3.2.1</a> and <a href="attr.html#vector-attribute-aggregation">3.2.2</a>).
+These non-spatial operations have spatial equivalents:
+the <code>[</code> operator in base R, for example, works equally for subsetting objects based on their attribute and spatial objects, as we will see in Chapter <a href="spatial-operations.html#spatial-operations">4</a>.
+This is good news: skills developed here are cross-transferable, meaning that this chapter lays the foundation for Chapter <a href="spatial-operations.html#spatial-operations">4</a>, which extends the methods presented here to the spatial world.
+Sections <a href="attr.html#vector-attribute-joining">3.2.3</a> and <a href="attr.html#vec-attr-creation">3.2.4</a> demonstrate how to join data onto simple feature objects using a shared ID and how to create new variables, respectively.</p>
+<p>Raster attribute data operations are covered in Section <a href="attr.html#manipulating-raster-objects">3.3</a>, which covers creating continuous and categorical raster layers and extracting cell values from one layer and multiple layers (raster subsetting).
+Section <a href="attr.html#summarizing-raster-objects">3.3.2</a> provides an overview of ‘global’ raster operations which can be used to characterize entire raster datasets.</p>
+</div>
+<div id="vector-attribute-manipulation" class="section level2">
+<h2><span class="header-section-number">3.2</span> Vector attribute manipulation</h2>
+<p>Geographic vector data in R are well supported by <code>sf</code>, a class which extends the <code>data.frame</code>.
+Thus <code>sf</code> objects have one column per attribute variable (such as ‘name’) and one row per observation, or <em>feature</em> (e.g., per bus station).
+<code>sf</code> objects also have a special column to contain geometry data, usually named <code>geometry</code>.
+The <code>geometry</code> column is special because it is a <em>list column</em>, which can contain multiple geographic entities (points, lines, polygons) per row.
+This was described in Chapter <a href="spatial-class.html#spatial-class">2</a>, which demonstrated how <em>generic methods</em> such as <code>plot()</code> and <code>summary()</code> work on <code>sf</code> objects.
+<strong>sf</strong> also provides methods that allow <code>sf</code> objects to behave like regular data frames, as illustrated by other <code>sf</code>-specific methods that were originally developed for data frames:</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="attr.html#cb61-1"></a><span class="kw">methods</span>(<span class="dt">class =</span> <span class="st">&quot;sf&quot;</span>) <span class="co"># methods for sf objects, first 12 shown</span></span></code></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="attr.html#cb62-1"></a><span class="co">#&gt;  [1] aggregate             cbind                 coerce               </span></span>
+<span id="cb62-2"><a href="attr.html#cb62-2"></a><span class="co">#&gt;  [4] initialize            merge                 plot                 </span></span>
+<span id="cb62-3"><a href="attr.html#cb62-3"></a><span class="co">#&gt;  [7] print                 rbind                 [                    </span></span>
+<span id="cb62-4"><a href="attr.html#cb62-4"></a><span class="co">#&gt; [10] [[&lt;-                  $&lt;-                   show                 </span></span></code></pre></div>
+<p>Many of these functions, including <code>rbind()</code> (for binding rows of data together) and <code>$&lt;-</code> (for creating new columns) were developed for data frames.
+A key feature of <code>sf</code> objects is that they store spatial and non-spatial data in the same way, as columns in a <code>data.frame</code>.</p>
+
+<div class="rmdnote">
+<p>The geometry column of <code>sf</code> objects is typically called <code>geometry</code> but any name can be used.
+The following command, for example, creates a geometry column named g:</p>
+<p><code>st_sf(data.frame(n = world$name_long), g = world$geom)</code></p>
+This enables geometries imported from spatial databases to have a variety of names such as <code>wkb_geometry</code> and <code>the_geom</code>.
+</div>
+
+<p><code>sf</code> objects also support <code>tibble</code> and <code>tbl</code> classes used in the tidyverse, allowing ‘tidy’ data analysis workflows for spatial data.
+Thus <strong>sf</strong> enables the full power of R’s data analysis capabilities to be unleashed on geographic data.
+
+Before using these capabilities it is worth re-capping how to discover the basic properties of vector data objects.
+Let’s start by using base R functions to get a measure of the <code>world</code> dataset:</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="attr.html#cb63-1"></a><span class="kw">dim</span>(world) <span class="co"># it is a 2 dimensional object, with rows and columns</span></span>
+<span id="cb63-2"><a href="attr.html#cb63-2"></a><span class="co">#&gt; [1] 177  11</span></span>
+<span id="cb63-3"><a href="attr.html#cb63-3"></a><span class="kw">nrow</span>(world) <span class="co"># how many rows?</span></span>
+<span id="cb63-4"><a href="attr.html#cb63-4"></a><span class="co">#&gt; [1] 177</span></span>
+<span id="cb63-5"><a href="attr.html#cb63-5"></a><span class="kw">ncol</span>(world) <span class="co"># how many columns?</span></span>
+<span id="cb63-6"><a href="attr.html#cb63-6"></a><span class="co">#&gt; [1] 11</span></span></code></pre></div>
+<p>Our dataset contains ten non-geographic columns (and one geometry list column) with almost 200 rows representing the world’s countries.
+Extracting the attribute data of an <code>sf</code> object is the same as removing its geometry:</p>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="attr.html#cb64-1"></a>world_df =<span class="st"> </span><span class="kw">st_drop_geometry</span>(world)</span>
+<span id="cb64-2"><a href="attr.html#cb64-2"></a><span class="kw">class</span>(world_df)</span>
+<span id="cb64-3"><a href="attr.html#cb64-3"></a><span class="co">#&gt; [1] &quot;tbl_df&quot;     &quot;tbl&quot;        &quot;data.frame&quot;</span></span></code></pre></div>
+<p>This can be useful if the geometry column causes problems, e.g., by occupying large amounts of RAM, or to focus the attention on the attribute data.
+For most cases, however, there is no harm in keeping the geometry column because non-spatial data operations on <code>sf</code> objects only change an object’s geometry when appropriate (e.g., by dissolving borders between adjacent polygons following aggregation).
+This means that proficiency with attribute data in <code>sf</code> objects equates to proficiency with data frames in R.</p>
+<p>For many applications, the tidyverse package <strong>dplyr</strong> offers the most effective and intuitive approach for working with data frames.
+Tidyverse compatibility is an advantage of <strong>sf</strong> over its predecessor <strong>sp</strong>, but there are some pitfalls to avoid (see the supplementary <code>tidyverse-pitfalls</code> vignette at <a href="https://geocompr.github.io/geocompkg/articles/tidyverse-pitfalls.html">geocompr.github.io</a> for details).
+<!-- (see [Section 6.7](https://csgillespie.github.io/efficientR/data-carpentry.html#data-processing-with-data.table) of @gillespie_efficient_2016),  --></p>
+<div id="vector-attribute-subsetting" class="section level3">
+<h3><span class="header-section-number">3.2.1</span> Vector attribute subsetting</h3>
+<p>Base R subsetting functions include <code>[</code>, <code>subset()</code> and <code>$</code>.
+<strong>dplyr</strong> subsetting functions include <code>select()</code>, <code>filter()</code>, and <code>pull()</code>.
+Both sets of functions preserve the spatial components of attribute data in <code>sf</code> objects.
+</p>
+<p>The <code>[</code> operator can subset both rows and columns.
+You use indices to specify the elements you wish to extract from an object, e.g., <code>object[i, j]</code>, with <code>i</code> and <code>j</code> typically being numbers or logical vectors — <code>TRUE</code>s and <code>FALSE</code>s — representing rows and columns (they can also be character strings, indicating row or column names).
+<!-- you can also use `[`(world, 1:6, 1) -->
+Leaving <code>i</code> or <code>j</code> empty returns all rows or columns, so <code>world[1:5, ]</code> returns the first five rows and all columns.
+The examples below demonstrate subsetting with base R.
+The results are not shown; check the results on your own computer:</p>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="attr.html#cb65-1"></a>world[<span class="dv">1</span><span class="op">:</span><span class="dv">6</span>, ] <span class="co"># subset rows by position</span></span>
+<span id="cb65-2"><a href="attr.html#cb65-2"></a>world[, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>] <span class="co"># subset columns by position</span></span>
+<span id="cb65-3"><a href="attr.html#cb65-3"></a>world[, <span class="kw">c</span>(<span class="st">&quot;name_long&quot;</span>, <span class="st">&quot;lifeExp&quot;</span>)] <span class="co"># subset columns by name</span></span></code></pre></div>
+<p>A demonstration of the utility of using <code>logical</code> vectors for subsetting is shown in the code chunk below.
+This creates a new object, <code>small_countries</code>, containing nations whose surface area is smaller than 10,000 km<sup>2</sup>:</p>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="attr.html#cb66-1"></a>sel_area =<span class="st"> </span>world<span class="op">$</span>area_km2 <span class="op">&lt;</span><span class="st"> </span><span class="dv">10000</span></span>
+<span id="cb66-2"><a href="attr.html#cb66-2"></a><span class="kw">summary</span>(sel_area) <span class="co"># a logical vector</span></span>
+<span id="cb66-3"><a href="attr.html#cb66-3"></a><span class="co">#&gt;    Mode   FALSE    TRUE </span></span>
+<span id="cb66-4"><a href="attr.html#cb66-4"></a><span class="co">#&gt; logical     170       7</span></span>
+<span id="cb66-5"><a href="attr.html#cb66-5"></a>small_countries =<span class="st"> </span>world[sel_area, ]</span></code></pre></div>
+<p>The intermediary <code>sel_area</code> is a logical vector that shows that only seven countries match the query.
+A more concise command, which omits the intermediary object, generates the same result:</p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="attr.html#cb67-1"></a>small_countries =<span class="st"> </span>world[world<span class="op">$</span>area_km2 <span class="op">&lt;</span><span class="st"> </span><span class="dv">10000</span>, ]</span></code></pre></div>
+<p>The base R function <code>subset()</code> provides yet another way to achieve the same result:</p>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="attr.html#cb68-1"></a>small_countries =<span class="st"> </span><span class="kw">subset</span>(world, area_km2 <span class="op">&lt;</span><span class="st"> </span><span class="dv">10000</span>)</span></code></pre></div>
+<!-- , after the package has been loaded: [or - it is a part of tidyverse] -->
+<p>Base R functions are mature and widely used.
+However, the more recent <strong>dplyr</strong> approach has several advantages.
+It enables intuitive workflows.
+It is fast, due to its C++ backend.
+This is especially useful when working with big data as well as <strong>dplyr</strong>’s database integration.
+The main <strong>dplyr</strong> subsetting functions are <code>select()</code>, <code>slice()</code>, <code>filter()</code> and <code>pull()</code>.</p>
+<div class="rmdnote">
+<p>
+<strong>raster</strong> and <strong>dplyr</strong> packages have a function called <code>select()</code>. When using both packages, the function in the most recently attached package will be used, ‘masking’ the incumbent function. This can generate error messages containing text like: <code>unable to find an inherited method for function ‘select’ for signature ‘“sf”’</code>. To avoid this error message, and prevent ambiguity, we use the long-form function name, prefixed by the package name and two colons (usually omitted from R scripts for concise code): <code>dplyr::select()</code>.
+</p>
+</div>
+<p><code>select()</code> selects columns by name or position.
+For example, you could select only two columns, <code>name_long</code> and <code>pop</code>, with the following command (note the sticky <code>geom</code> column remains):</p>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="attr.html#cb69-1"></a>world1 =<span class="st"> </span>dplyr<span class="op">::</span><span class="kw">select</span>(world, name_long, pop)</span>
+<span id="cb69-2"><a href="attr.html#cb69-2"></a><span class="kw">names</span>(world1)</span>
+<span id="cb69-3"><a href="attr.html#cb69-3"></a><span class="co">#&gt; [1] &quot;name_long&quot; &quot;pop&quot;       &quot;geom&quot;</span></span></code></pre></div>
+<p><code>select()</code> also allows subsetting of a range of columns with the help of the <code>:</code> operator:</p>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="attr.html#cb70-1"></a><span class="co"># all columns between name_long and pop (inclusive)</span></span>
+<span id="cb70-2"><a href="attr.html#cb70-2"></a>world2 =<span class="st"> </span>dplyr<span class="op">::</span><span class="kw">select</span>(world, name_long<span class="op">:</span>pop)</span></code></pre></div>
+<p>Omit specific columns with the <code>-</code> operator:</p>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="attr.html#cb71-1"></a><span class="co"># all columns except subregion and area_km2 (inclusive)</span></span>
+<span id="cb71-2"><a href="attr.html#cb71-2"></a>world3 =<span class="st"> </span>dplyr<span class="op">::</span><span class="kw">select</span>(world, <span class="op">-</span>subregion, <span class="op">-</span>area_km2)</span></code></pre></div>
+<p>Conveniently, <code>select()</code> lets you subset and rename columns at the same time, for example:</p>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="attr.html#cb72-1"></a>world4 =<span class="st"> </span>dplyr<span class="op">::</span><span class="kw">select</span>(world, name_long, <span class="dt">population =</span> pop)</span>
+<span id="cb72-2"><a href="attr.html#cb72-2"></a><span class="kw">names</span>(world4)</span>
+<span id="cb72-3"><a href="attr.html#cb72-3"></a><span class="co">#&gt; [1] &quot;name_long&quot;  &quot;population&quot; &quot;geom&quot;</span></span></code></pre></div>
+<p>This is more concise than the base R equivalent:</p>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="attr.html#cb73-1"></a>world5 =<span class="st"> </span>world[, <span class="kw">c</span>(<span class="st">&quot;name_long&quot;</span>, <span class="st">&quot;pop&quot;</span>)] <span class="co"># subset columns by name</span></span>
+<span id="cb73-2"><a href="attr.html#cb73-2"></a><span class="kw">names</span>(world5)[<span class="kw">names</span>(world5) <span class="op">==</span><span class="st"> &quot;pop&quot;</span>] =<span class="st"> &quot;population&quot;</span> <span class="co"># rename column manually</span></span></code></pre></div>
+<p><code>select()</code> also works with ‘helper functions’ for advanced subsetting operations, including <code>contains()</code>, <code>starts_with()</code> and <code>num_range()</code> (see the help page with <code>?select</code> for details).</p>
+<p>Most <strong>dplyr</strong> verbs return a data frame.
+To extract a single vector, one has to explicitly use the <code>pull()</code> command.
+The subsetting operator in base R (see <code>?[</code>), by contrast, tries to return objects in the lowest possible dimension.
+This means selecting a single column returns a vector in base R.
+To turn off this behavior, set the <code>drop</code> argument to <code>FALSE</code>.</p>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="attr.html#cb74-1"></a><span class="co"># create throw-away data frame</span></span>
+<span id="cb74-2"><a href="attr.html#cb74-2"></a>d =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">pop =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="dt">area =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</span>
+<span id="cb74-3"><a href="attr.html#cb74-3"></a><span class="co"># return data frame object when selecting a single column</span></span>
+<span id="cb74-4"><a href="attr.html#cb74-4"></a>d[, <span class="st">&quot;pop&quot;</span>, drop =<span class="st"> </span><span class="ot">FALSE</span>] <span class="co"># equivalent to d[&quot;pop&quot;]</span></span>
+<span id="cb74-5"><a href="attr.html#cb74-5"></a><span class="kw">select</span>(d, pop)</span>
+<span id="cb74-6"><a href="attr.html#cb74-6"></a><span class="co"># return a vector when selecting a single column</span></span>
+<span id="cb74-7"><a href="attr.html#cb74-7"></a>d[, <span class="st">&quot;pop&quot;</span>]</span>
+<span id="cb74-8"><a href="attr.html#cb74-8"></a><span class="kw">pull</span>(d, pop)</span></code></pre></div>
+<p>Due to the sticky geometry column, selecting a single attribute from an sf-object with the help of <code>[()</code> returns also a data frame.
+Contrastingly, <code>pull()</code> and <code>$</code> will give back a vector.</p>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="attr.html#cb75-1"></a><span class="co"># data frame object</span></span>
+<span id="cb75-2"><a href="attr.html#cb75-2"></a>world[, <span class="st">&quot;pop&quot;</span>]</span>
+<span id="cb75-3"><a href="attr.html#cb75-3"></a><span class="co"># vector objects</span></span>
+<span id="cb75-4"><a href="attr.html#cb75-4"></a>world<span class="op">$</span>pop</span>
+<span id="cb75-5"><a href="attr.html#cb75-5"></a><span class="kw">pull</span>(world, pop)</span></code></pre></div>
+<p><code>slice()</code> is the row-equivalent of <code>select()</code>.
+The following code chunk, for example, selects the 3<sup>rd</sup> to 5<sup>th</sup> rows:</p>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="attr.html#cb76-1"></a><span class="kw">slice</span>(world, <span class="dv">3</span><span class="op">:</span><span class="dv">5</span>)</span></code></pre></div>
+<p><code>filter()</code> is <strong>dplyr</strong>’s equivalent of base R’s <code>subset()</code> function.
+It keeps only rows matching given criteria, e.g., only countries with a very high average of life expectancy:</p>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="attr.html#cb77-1"></a><span class="co"># Countries with a life expectancy longer than 82 years</span></span>
+<span id="cb77-2"><a href="attr.html#cb77-2"></a>world6 =<span class="st"> </span><span class="kw">filter</span>(world, lifeExp <span class="op">&gt;</span><span class="st"> </span><span class="dv">82</span>)</span></code></pre></div>
+<p>The standard set of comparison operators can be used in the <code>filter()</code> function, as illustrated in Table <a href="attr.html#tab:operators">3.1</a>:</p>
+<table>
+<caption><span id="tab:operators">TABLE 3.1: </span>Comparison operators that return Booleans (TRUE/FALSE).</caption>
+<thead>
+<tr class="header">
+<th align="left">Symbol</th>
+<th align="left">Name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>==</code></td>
+<td align="left">Equal to</td>
+</tr>
+<tr class="even">
+<td align="left"><code>!=</code></td>
+<td align="left">Not equal to</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>&gt;</code>, <code>&lt;</code></td>
+<td align="left">Greater/Less than</td>
+</tr>
+<tr class="even">
+<td align="left"><code>&gt;=</code>, <code>&lt;=</code></td>
+<td align="left">Greater/Less than or equal</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>&amp;</code>, <code>&amp;#124;</code>, <code>!</code></td>
+<td align="left">Logical operators: And, Or, Not</td>
+</tr>
+</tbody>
+</table>
+<p><strong>dplyr</strong> works well with the <a href="http://r4ds.had.co.nz/pipes.html">‘pipe’</a> operator <code>%&gt;%</code>, which takes its name from the Unix pipe <code>|</code> <span class="citation">(Grolemund and Wickham <a href="#ref-grolemund_r_2016" role="doc-biblioref">2016</a>)</span>.
+It enables expressive code: the output of a previous function becomes the first argument of the next function, enabling <em>chaining</em>.
+This is illustrated below, in which only countries from Asia are filtered from the <code>world</code> dataset, next the object is subset by columns (<code>name_long</code> and <code>continent</code>) and the first five rows (result not shown).</p>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="attr.html#cb78-1"></a>world7 =<span class="st"> </span>world <span class="op">%&gt;%</span></span>
+<span id="cb78-2"><a href="attr.html#cb78-2"></a><span class="st">  </span><span class="kw">filter</span>(continent <span class="op">==</span><span class="st"> &quot;Asia&quot;</span>) <span class="op">%&gt;%</span></span>
+<span id="cb78-3"><a href="attr.html#cb78-3"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(name_long, continent) <span class="op">%&gt;%</span></span>
+<span id="cb78-4"><a href="attr.html#cb78-4"></a><span class="st">  </span><span class="kw">slice</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>)</span></code></pre></div>
+<p>The above chunk shows how the pipe operator allows commands to be written in a clear order:
+the above run from top to bottom (line-by-line) and left to right.
+The alternative to <code>%&gt;%</code> is nested function calls, which is harder to read:</p>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="attr.html#cb79-1"></a>world8 =<span class="st"> </span><span class="kw">slice</span>(</span>
+<span id="cb79-2"><a href="attr.html#cb79-2"></a>  dplyr<span class="op">::</span><span class="kw">select</span>(</span>
+<span id="cb79-3"><a href="attr.html#cb79-3"></a>    <span class="kw">filter</span>(world, continent <span class="op">==</span><span class="st"> &quot;Asia&quot;</span>),</span>
+<span id="cb79-4"><a href="attr.html#cb79-4"></a>    name_long, continent),</span>
+<span id="cb79-5"><a href="attr.html#cb79-5"></a>  <span class="dv">1</span><span class="op">:</span><span class="dv">5</span>)</span></code></pre></div>
+</div>
+<div id="vector-attribute-aggregation" class="section level3">
+<h3><span class="header-section-number">3.2.2</span> Vector attribute aggregation</h3>
+<p>
+
+Aggregation operations summarize datasets by a ‘grouping variable’, typically an attribute column (spatial aggregation is covered in the next chapter).
+An example of attribute aggregation is calculating the number of people per continent based on country-level data (one row per country).
+The <code>world</code> dataset contains the necessary ingredients: the columns <code>pop</code> and <code>continent</code>, the population and the grouping variable, respectively.
+The aim is to find the <code>sum()</code> of country populations for each continent.
+This can be done with the base R function <code>aggregate()</code> as follows:</p>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="attr.html#cb80-1"></a>world_agg1 =<span class="st"> </span><span class="kw">aggregate</span>(pop <span class="op">~</span><span class="st"> </span>continent, <span class="dt">FUN =</span> sum, <span class="dt">data =</span> world, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb80-2"><a href="attr.html#cb80-2"></a><span class="kw">class</span>(world_agg1)</span>
+<span id="cb80-3"><a href="attr.html#cb80-3"></a><span class="co">#&gt; [1] &quot;data.frame&quot;</span></span></code></pre></div>
+<p>The result is a non-spatial data frame with six rows, one per continent, and two columns reporting the name and population of each continent (see Table <a href="attr.html#tab:continents">3.2</a> with results for the top 3 most populous continents).</p>
+<p><code>aggregate()</code> is a <a href="https://adv-r.hadley.nz/s3.html#s3-methods">generic function</a> which means that it behaves differently depending on its inputs.
+<strong>sf</strong> provides the method <code>aggregate.sf()</code> which is activated automatically when <code>x</code> is an <code>sf</code> object and a <code>by</code> argument is provided:</p>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb81-1"><a href="attr.html#cb81-1"></a>world_agg2 =<span class="st"> </span><span class="kw">aggregate</span>(world[<span class="st">&quot;pop&quot;</span>], <span class="dt">by =</span> <span class="kw">list</span>(world<span class="op">$</span>continent),</span>
+<span id="cb81-2"><a href="attr.html#cb81-2"></a>                       <span class="dt">FUN =</span> sum, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb81-3"><a href="attr.html#cb81-3"></a><span class="kw">class</span>(world_agg2)</span>
+<span id="cb81-4"><a href="attr.html#cb81-4"></a><span class="co">#&gt; [1] &quot;sf&quot;         &quot;data.frame&quot;</span></span></code></pre></div>
+<p>As illustrated above, an object of class <code>sf</code> is returned this time.
+<code>world_agg2</code> which is a spatial object containing 6 polygons representing the continents of the world.</p>
+<p><code>summarize()</code> is the <strong>dplyr</strong> equivalent of <code>aggregate()</code>.
+It usually follows <code>group_by()</code>, which specifies the grouping variable, as illustrated below:</p>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="attr.html#cb82-1"></a>world_agg3 =<span class="st"> </span>world <span class="op">%&gt;%</span></span>
+<span id="cb82-2"><a href="attr.html#cb82-2"></a><span class="st">  </span><span class="kw">group_by</span>(continent) <span class="op">%&gt;%</span></span>
+<span id="cb82-3"><a href="attr.html#cb82-3"></a><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">pop =</span> <span class="kw">sum</span>(pop, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>))</span></code></pre></div>
+<p>This approach is flexible and gives control over the new column names.
+This is illustrated below: the command calculates the Earth’s population (~7 billion) and number of countries (result not shown):</p>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="attr.html#cb83-1"></a>world <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb83-2"><a href="attr.html#cb83-2"></a><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">pop =</span> <span class="kw">sum</span>(pop, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>), <span class="dt">n =</span> <span class="kw">n</span>())</span></code></pre></div>
+<p>In the previous code chunk <code>pop</code> and <code>n</code> are column names in the result.
+<code>sum()</code> and <code>n()</code> were the aggregating functions.
+The result is an <code>sf</code> object with a single row representing the world (this works thanks to the geometric operation ‘union’, as explained in Section <a href="geometric-operations.html#geometry-unions">5.2.6</a>).</p>
+<p>Let’s combine what we have learned so far about <strong>dplyr</strong> by chaining together functions to find the world’s 3 most populous continents (with <code>dplyr::top_n()</code>) and the number of countries they contain.
+We can order the continents (rows) by decreasing population size for easier readability with <code>dplyr::arrange()</code> (the result of this command is presented in Table <a href="attr.html#tab:continents">3.2</a>):</p>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="attr.html#cb84-1"></a>world <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb84-2"><a href="attr.html#cb84-2"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(pop, continent) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb84-3"><a href="attr.html#cb84-3"></a><span class="st">  </span><span class="kw">group_by</span>(continent) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb84-4"><a href="attr.html#cb84-4"></a><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">pop =</span> <span class="kw">sum</span>(pop, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>), <span class="dt">n_countries =</span> <span class="kw">n</span>()) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb84-5"><a href="attr.html#cb84-5"></a><span class="st">  </span><span class="kw">top_n</span>(<span class="dt">n =</span> <span class="dv">3</span>, <span class="dt">wt =</span> pop) <span class="op">%&gt;%</span></span>
+<span id="cb84-6"><a href="attr.html#cb84-6"></a><span class="st">  </span><span class="kw">arrange</span>(<span class="kw">desc</span>(pop)) <span class="op">%&gt;%</span></span>
+<span id="cb84-7"><a href="attr.html#cb84-7"></a><span class="st">  </span><span class="kw">st_drop_geometry</span>()</span></code></pre></div>
+<table>
+<caption><span id="tab:continents">TABLE 3.2: </span>The top 3 most populous continents, and the number of countries in each.</caption>
+<thead>
+<tr class="header">
+<th align="left">continent</th>
+<th align="right">pop</th>
+<th align="right">n_countries</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Asia</td>
+<td align="right">4311408059</td>
+<td align="right">47</td>
+</tr>
+<tr class="even">
+<td align="left">Africa</td>
+<td align="right">1154946633</td>
+<td align="right">51</td>
+</tr>
+<tr class="odd">
+<td align="left">Europe</td>
+<td align="right">669036256</td>
+<td align="right">39</td>
+</tr>
+</tbody>
+</table>
+
+<div class="rmdnote">
+More details are provided in the help pages (which can be accessed via <code>?summarize</code> and <code>vignette(package = "dplyr")</code> and Chapter 5 of <a href="http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize">R for Data Science</a>.
+</div>
+
+</div>
+<div id="vector-attribute-joining" class="section level3">
+<h3><span class="header-section-number">3.2.3</span> Vector attribute joining</h3>
+<!-- https://github.com/dgrtwo/fuzzyjoin -->
+<!-- http://r4ds.had.co.nz/relational-data.html -->
+<!-- non-unique keys -->
+<p>Combining data from different sources is a common task in data preparation.
+Joins do this by combining tables based on a shared ‘key’ variable.
+<strong>dplyr</strong> has multiple join functions including <code>left_join()</code> and <code>inner_join()</code> — see <code>vignette("two-table")</code> for a full list.
+These function names follow conventions used in the database language <a href="http://r4ds.had.co.nz/relational-data.html">SQL</a> <span class="citation">(Grolemund and Wickham <a href="#ref-grolemund_r_2016" role="doc-biblioref">2016</a>, Chapter 13)</span>; using them to join non-spatial datasets to <code>sf</code> objects is the focus of this section.
+<strong>dplyr</strong> join functions work the same on data frames and <code>sf</code> objects, the only important difference being the <code>geometry</code> list column.
+The result of data joins can be either an <code>sf</code> or <code>data.frame</code> object.
+The most common type of attribute join on spatial data takes an <code>sf</code> object as the first argument and adds columns to it from a <code>data.frame</code> specified as the second argument.
+
+</p>
+<p>To demonstrate joins, we will combine data on coffee production with the <code>world</code> dataset.
+The coffee data is in a data frame called <code>coffee_data</code> from the <strong>spData</strong> package (see <code>?coffee_data</code> for details).
+It has 3 columns:
+<code>name_long</code> names major coffee-producing nations and <code>coffee_production_2016</code> and <code>coffee_production_2017</code> contain estimated values for coffee production in units of 60-kg bags in each year.
+A ‘left join’, which preserves the first dataset, merges <code>world</code> with <code>coffee_data</code>:</p>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="attr.html#cb85-1"></a>world_coffee =<span class="st"> </span><span class="kw">left_join</span>(world, coffee_data)</span>
+<span id="cb85-2"><a href="attr.html#cb85-2"></a><span class="co">#&gt; Joining, by = &quot;name_long&quot;</span></span>
+<span id="cb85-3"><a href="attr.html#cb85-3"></a><span class="kw">class</span>(world_coffee)</span>
+<span id="cb85-4"><a href="attr.html#cb85-4"></a><span class="co">#&gt; [1] &quot;sf&quot;         &quot;tbl_df&quot;     &quot;tbl&quot;        &quot;data.frame&quot;</span></span></code></pre></div>
+<p>Because the input datasets share a ‘key variable’ (<code>name_long</code>) the join worked without using the <code>by</code> argument (see <code>?left_join</code> for details).
+The result is an <code>sf</code> object identical to the original <code>world</code> object but with two new variables (with column indices 11 and 12) on coffee production.
+This can be plotted as a map, as illustrated in Figure <a href="attr.html#fig:coffeemap">3.1</a>, generated with the <code>plot()</code> function below:</p>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="attr.html#cb86-1"></a><span class="kw">names</span>(world_coffee)</span>
+<span id="cb86-2"><a href="attr.html#cb86-2"></a><span class="co">#&gt;  [1] &quot;iso_a2&quot;                 &quot;name_long&quot;              &quot;continent&quot;             </span></span>
+<span id="cb86-3"><a href="attr.html#cb86-3"></a><span class="co">#&gt;  [4] &quot;region_un&quot;              &quot;subregion&quot;              &quot;type&quot;                  </span></span>
+<span id="cb86-4"><a href="attr.html#cb86-4"></a><span class="co">#&gt;  [7] &quot;area_km2&quot;               &quot;pop&quot;                    &quot;lifeExp&quot;               </span></span>
+<span id="cb86-5"><a href="attr.html#cb86-5"></a><span class="co">#&gt; [10] &quot;gdpPercap&quot;              &quot;geom&quot;                   &quot;coffee_production_2016&quot;</span></span>
+<span id="cb86-6"><a href="attr.html#cb86-6"></a><span class="co">#&gt; [13] &quot;coffee_production_2017&quot;</span></span>
+<span id="cb86-7"><a href="attr.html#cb86-7"></a><span class="kw">plot</span>(world_coffee[<span class="st">&quot;coffee_production_2017&quot;</span>])</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:coffeemap"></span>
+<img src="03-attribute-operations_files/figure-html/coffeemap-1.png" alt="World coffee production (thousand 60-kg bags) by country, 2017. Source: International Coffee Organization." width="100%" />
+<p class="caption">
+FIGURE 3.1: World coffee production (thousand 60-kg bags) by country, 2017. Source: International Coffee Organization.
+</p>
+</div>
+<p>For joining to work, a ‘key variable’ must be supplied in both datasets.
+By default <strong>dplyr</strong> uses all variables with matching names.
+In this case, both <code>world_coffee</code> and <code>world</code> objects contained a variable called <code>name_long</code>, explaining the message <code>Joining, by = "name_long"</code>.
+In the majority of cases where variable names are not the same, you have two options:</p>
+<ol style="list-style-type: decimal">
+<li>Rename the key variable in one of the objects so they match.</li>
+<li>Use the <code>by</code> argument to specify the joining variables.</li>
+</ol>
+<p>The latter approach is demonstrated below on a renamed version of <code>coffee_data</code>:</p>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="attr.html#cb87-1"></a>coffee_renamed =<span class="st"> </span><span class="kw">rename</span>(coffee_data, <span class="dt">nm =</span> name_long)</span>
+<span id="cb87-2"><a href="attr.html#cb87-2"></a>world_coffee2 =<span class="st"> </span><span class="kw">left_join</span>(world, coffee_renamed, <span class="dt">by =</span> <span class="kw">c</span>(<span class="dt">name_long =</span> <span class="st">&quot;nm&quot;</span>))</span></code></pre></div>
+<p>Note that the name in the original object is kept, meaning that <code>world_coffee</code> and the new object <code>world_coffee2</code> are identical.
+Another feature of the result is that it has the same number of rows as the original dataset.
+Although there are only 47 rows of data in <code>coffee_data</code>, all 177 country records are kept intact in <code>world_coffee</code> and <code>world_coffee2</code>:
+rows in the original dataset with no match are assigned <code>NA</code> values for the new coffee production variables.
+What if we only want to keep countries that have a match in the key variable?
+In that case an inner join can be used:</p>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="attr.html#cb88-1"></a>world_coffee_inner =<span class="st"> </span><span class="kw">inner_join</span>(world, coffee_data)</span>
+<span id="cb88-2"><a href="attr.html#cb88-2"></a><span class="co">#&gt; Joining, by = &quot;name_long&quot;</span></span>
+<span id="cb88-3"><a href="attr.html#cb88-3"></a><span class="kw">nrow</span>(world_coffee_inner)</span>
+<span id="cb88-4"><a href="attr.html#cb88-4"></a><span class="co">#&gt; [1] 45</span></span></code></pre></div>
+<p>Note that the result of <code>inner_join()</code> has only 45 rows compared with 47 in <code>coffee_data</code>.
+What happened to the remaining rows?
+We can identify the rows that did not match using the <code>setdiff()</code> function as follows:</p>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="attr.html#cb89-1"></a><span class="kw">setdiff</span>(coffee_data<span class="op">$</span>name_long, world<span class="op">$</span>name_long)</span>
+<span id="cb89-2"><a href="attr.html#cb89-2"></a><span class="co">#&gt; [1] &quot;Congo, Dem. Rep. of&quot; &quot;Others&quot;</span></span></code></pre></div>
+<p>The result shows that <code>Others</code> accounts for one row not present in the <code>world</code> dataset and that the name of the <code>Democratic Republic of the Congo</code> accounts for the other:
+it has been abbreviated, causing the join to miss it.
+The following command uses a string matching (regex) function from the <strong>stringr</strong> package to confirm what <code>Congo, Dem. Rep. of</code> should be:</p>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="attr.html#cb90-1"></a><span class="kw">str_subset</span>(world<span class="op">$</span>name_long, <span class="st">&quot;Dem*.+Congo&quot;</span>)</span>
+<span id="cb90-2"><a href="attr.html#cb90-2"></a><span class="co">#&gt; [1] &quot;Democratic Republic of the Congo&quot;</span></span></code></pre></div>
+<p>To fix this issue, we will create a new version of <code>coffee_data</code> and update the name.
+<code>inner_join()</code>ing the updated data frame returns a result with all 46 coffee-producing nations:</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="attr.html#cb91-1"></a>coffee_data<span class="op">$</span>name_long[<span class="kw">grepl</span>(<span class="st">&quot;Congo,&quot;</span>, coffee_data<span class="op">$</span>name_long)] =<span class="st"> </span></span>
+<span id="cb91-2"><a href="attr.html#cb91-2"></a><span class="st">  </span><span class="kw">str_subset</span>(world<span class="op">$</span>name_long, <span class="st">&quot;Dem*.+Congo&quot;</span>)</span>
+<span id="cb91-3"><a href="attr.html#cb91-3"></a>world_coffee_match =<span class="st"> </span><span class="kw">inner_join</span>(world, coffee_data)</span>
+<span id="cb91-4"><a href="attr.html#cb91-4"></a><span class="co">#&gt; Joining, by = &quot;name_long&quot;</span></span>
+<span id="cb91-5"><a href="attr.html#cb91-5"></a><span class="kw">nrow</span>(world_coffee_match)</span>
+<span id="cb91-6"><a href="attr.html#cb91-6"></a><span class="co">#&gt; [1] 46</span></span></code></pre></div>
+<p>It is also possible to join in the other direction: starting with a non-spatial dataset and adding variables from a simple features object.
+This is demonstrated below, which starts with the <code>coffee_data</code> object and adds variables from the original <code>world</code> dataset.
+In contrast with the previous joins, the result is <em>not</em> another simple feature object, but a data frame in the form of a <strong>tidyverse</strong> tibble:
+the output of a join tends to match its first argument:</p>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="attr.html#cb92-1"></a>coffee_world =<span class="st"> </span><span class="kw">left_join</span>(coffee_data, world)</span>
+<span id="cb92-2"><a href="attr.html#cb92-2"></a><span class="co">#&gt; Joining, by = &quot;name_long&quot;</span></span>
+<span id="cb92-3"><a href="attr.html#cb92-3"></a><span class="kw">class</span>(coffee_world)</span>
+<span id="cb92-4"><a href="attr.html#cb92-4"></a><span class="co">#&gt; [1] &quot;tbl_df&quot;     &quot;tbl&quot;        &quot;data.frame&quot;</span></span></code></pre></div>
+
+<div class="rmdnote">
+In most cases, the geometry column is only useful in an <code>sf</code> object.
+The geometry column can only be used for creating maps and spatial operations if R ‘knows’ it is a spatial object, defined by a spatial package such as <strong>sf</strong>.
+Fortunately, non-spatial data frames with a geometry list column (like <code>coffee_world</code>) can be coerced into an <code>sf</code> object as follows: <code>st_as_sf(coffee_world)</code>.
+</div>
+
+<p>This section covers the majority of joining use cases.
+For more information, we recommend <span class="citation">Grolemund and Wickham (<a href="#ref-grolemund_r_2016" role="doc-biblioref">2016</a>)</span>, the <a href="https://geocompr.github.io/geocompkg/articles/join.html">join vignette</a> in the <strong>geocompkg</strong> package that accompanies this book, and documentation of the <strong>data.table</strong> package.<a href="#fn15" class="footnote-ref" id="fnref15"><sup>15</sup></a>
+Another type of join is a spatial join, covered in the next chapter (Section <a href="spatial-operations.html#spatial-joining">4.2.3</a>).</p>
+</div>
+<div id="vec-attr-creation" class="section level3">
+<h3><span class="header-section-number">3.2.4</span> Creating attributes and removing spatial information</h3>
+<p>Often, we would like to create a new column based on already existing columns.
+For example, we want to calculate population density for each country.
+For this we need to divide a population column, here <code>pop</code>, by an area column, here <code>area_km2</code> with unit area in square kilometers.
+Using base R, we can type:</p>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="attr.html#cb93-1"></a>world_new =<span class="st"> </span>world <span class="co"># do not overwrite our original data</span></span>
+<span id="cb93-2"><a href="attr.html#cb93-2"></a>world_new<span class="op">$</span>pop_dens =<span class="st"> </span>world_new<span class="op">$</span>pop <span class="op">/</span><span class="st"> </span>world_new<span class="op">$</span>area_km2</span></code></pre></div>
+<p>Alternatively, we can use one of <strong>dplyr</strong> functions - <code>mutate()</code> or <code>transmute()</code>.
+<code>mutate()</code> adds new columns at the penultimate position in the <code>sf</code> object (the last one is reserved for the geometry):</p>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="attr.html#cb94-1"></a>world <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb94-2"><a href="attr.html#cb94-2"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">pop_dens =</span> pop <span class="op">/</span><span class="st"> </span>area_km2)</span></code></pre></div>
+<p>The difference between <code>mutate()</code> and <code>transmute()</code> is that the latter drops all other existing columns (except for the sticky geometry column):</p>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="attr.html#cb95-1"></a>world <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb95-2"><a href="attr.html#cb95-2"></a><span class="st">  </span><span class="kw">transmute</span>(<span class="dt">pop_dens =</span> pop <span class="op">/</span><span class="st"> </span>area_km2)</span></code></pre></div>
+<p><code>unite()</code> from the <strong>tidyr</strong> package pastes together existing columns.
+For example, we want to combine the <code>continent</code> and <code>region_un</code> columns into a new column named <code>con_reg</code>.
+Additionally, we can define a separator (here: a colon <code>:</code>) which defines how the values of the input columns should be joined, and if the original columns should be removed (here: <code>TRUE</code>):</p>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="attr.html#cb96-1"></a>world_unite =<span class="st"> </span>world <span class="op">%&gt;%</span></span>
+<span id="cb96-2"><a href="attr.html#cb96-2"></a><span class="st">  </span><span class="kw">unite</span>(<span class="st">&quot;con_reg&quot;</span>, continent<span class="op">:</span>region_un, <span class="dt">sep =</span> <span class="st">&quot;:&quot;</span>, <span class="dt">remove =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+<p>The <code>separate()</code> function does the opposite of <code>unite()</code>: it splits one column into multiple columns using either a regular expression or character positions.
+This function also comes from the <strong>tidyr</strong> package.</p>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="attr.html#cb97-1"></a>world_separate =<span class="st"> </span>world_unite <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb97-2"><a href="attr.html#cb97-2"></a><span class="st">  </span><span class="kw">separate</span>(con_reg, <span class="kw">c</span>(<span class="st">&quot;continent&quot;</span>, <span class="st">&quot;region_un&quot;</span>), <span class="dt">sep =</span> <span class="st">&quot;:&quot;</span>)</span></code></pre></div>
+<p>The <strong>dplyr</strong> function <code>rename()</code> and the base R function <code>setNames()</code> are useful for renaming columns.
+The first replaces an old name with a new one.
+The following command, for example, renames the lengthy <code>name_long</code> column to simply <code>name</code>:</p>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="attr.html#cb98-1"></a>world <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb98-2"><a href="attr.html#cb98-2"></a><span class="st">  </span><span class="kw">rename</span>(<span class="dt">name =</span> name_long)</span></code></pre></div>
+<p><code>setNames()</code> changes all column names at once, and requires a character vector with a name matching each column.
+This is illustrated below, which outputs the same <code>world</code> object, but with very short names:</p>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="attr.html#cb99-1"></a>new_names =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;i&quot;</span>, <span class="st">&quot;n&quot;</span>, <span class="st">&quot;c&quot;</span>, <span class="st">&quot;r&quot;</span>, <span class="st">&quot;s&quot;</span>, <span class="st">&quot;t&quot;</span>, <span class="st">&quot;a&quot;</span>, <span class="st">&quot;p&quot;</span>, <span class="st">&quot;l&quot;</span>, <span class="st">&quot;gP&quot;</span>, <span class="st">&quot;geom&quot;</span>)</span>
+<span id="cb99-2"><a href="attr.html#cb99-2"></a>world <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb99-3"><a href="attr.html#cb99-3"></a><span class="st">  </span><span class="kw">setNames</span>(new_names)</span></code></pre></div>
+<p>It is important to note that attribute data operations preserve the geometry of the simple features.
+As mentioned at the outset of the chapter, it can be useful to remove the geometry.
+To do this, you have to explicitly remove it because <code>sf</code> explicitly makes the geometry column sticky.
+This behavior ensures that data frame operations do not accidentally remove the geometry column.
+Hence, an approach such as <code>select(world, -geom)</code> will be unsuccessful and you should instead use <code>st_drop_geometry()</code>.<a href="#fn16" class="footnote-ref" id="fnref16"><sup>16</sup></a></p>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="attr.html#cb100-1"></a>world_data =<span class="st"> </span>world <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">st_drop_geometry</span>()</span>
+<span id="cb100-2"><a href="attr.html#cb100-2"></a><span class="kw">class</span>(world_data)</span>
+<span id="cb100-3"><a href="attr.html#cb100-3"></a><span class="co">#&gt; [1] &quot;tbl_df&quot;     &quot;tbl&quot;        &quot;data.frame&quot;</span></span></code></pre></div>
+</div>
+</div>
+<div id="manipulating-raster-objects" class="section level2">
+<h2><span class="header-section-number">3.3</span> Manipulating raster objects</h2>
+<p>In contrast to the vector data model underlying simple features (which represents points, lines and polygons as discrete entities in space), raster data represent continuous surfaces.
+This section shows how raster objects work by creating them <em>from scratch</em>, building on Section <a href="spatial-class.html#an-introduction-to-raster">2.3.1</a>.
+Because of their unique structure, subsetting and other operations on raster datasets work in a different way, as demonstrated in Section <a href="attr.html#raster-subsetting">3.3.1</a>.
+</p>
+<p>The following code recreates the raster dataset used in Section <a href="spatial-class.html#raster-classes">2.3.3</a>, the result of which is illustrated in Figure <a href="attr.html#fig:cont-raster">3.2</a>.
+This demonstrates how the <code>raster()</code> function works to create an example raster named <code>elev</code> (representing elevations).</p>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="attr.html#cb101-1"></a>elev =<span class="st"> </span><span class="kw">raster</span>(<span class="dt">nrows =</span> <span class="dv">6</span>, <span class="dt">ncols =</span> <span class="dv">6</span>, <span class="dt">res =</span> <span class="fl">0.5</span>,</span>
+<span id="cb101-2"><a href="attr.html#cb101-2"></a>              <span class="dt">xmn =</span> <span class="fl">-1.5</span>, <span class="dt">xmx =</span> <span class="fl">1.5</span>, <span class="dt">ymn =</span> <span class="fl">-1.5</span>, <span class="dt">ymx =</span> <span class="fl">1.5</span>,</span>
+<span id="cb101-3"><a href="attr.html#cb101-3"></a>              <span class="dt">vals =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">36</span>)</span></code></pre></div>
+<p>The result is a raster object with 6 rows and 6 columns (specified by the <code>nrow</code> and <code>ncol</code> arguments), and a minimum and maximum spatial extent in x and y direction (<code>xmn</code>, <code>xmx</code>, <code>ymn</code>, <code>ymax</code>).
+The <code>vals</code> argument sets the values that each cell contains: numeric data ranging from 1 to 36 in this case.
+Raster objects can also contain categorical values of class <code>logical</code> or <code>factor</code> variables in R.
+The following code creates a raster representing grain sizes (Figure <a href="attr.html#fig:cont-raster">3.2</a>):</p>
+<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb102-1"><a href="attr.html#cb102-1"></a>grain_order =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;clay&quot;</span>, <span class="st">&quot;silt&quot;</span>, <span class="st">&quot;sand&quot;</span>)</span>
+<span id="cb102-2"><a href="attr.html#cb102-2"></a>grain_char =<span class="st"> </span><span class="kw">sample</span>(grain_order, <span class="dv">36</span>, <span class="dt">replace =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb102-3"><a href="attr.html#cb102-3"></a>grain_fact =<span class="st"> </span><span class="kw">factor</span>(grain_char, <span class="dt">levels =</span> grain_order)</span>
+<span id="cb102-4"><a href="attr.html#cb102-4"></a>grain =<span class="st"> </span><span class="kw">raster</span>(<span class="dt">nrows =</span> <span class="dv">6</span>, <span class="dt">ncols =</span> <span class="dv">6</span>, <span class="dt">res =</span> <span class="fl">0.5</span>, </span>
+<span id="cb102-5"><a href="attr.html#cb102-5"></a>               <span class="dt">xmn =</span> <span class="fl">-1.5</span>, <span class="dt">xmx =</span> <span class="fl">1.5</span>, <span class="dt">ymn =</span> <span class="fl">-1.5</span>, <span class="dt">ymx =</span> <span class="fl">1.5</span>,</span>
+<span id="cb102-6"><a href="attr.html#cb102-6"></a>               <span class="dt">vals =</span> grain_fact)</span></code></pre></div>
+
+<div class="rmdnote">
+<code>raster</code> objects can contain values of class <code>numeric</code>, <code>integer</code>, <code>logical</code> or <code>factor</code>, but not <code>character</code>.
+To use character values, they must first be converted into an appropriate class, for example using the function <code>factor()</code>.
+The <code>levels</code> argument was used in the preceding code chunk to create an ordered factor:
+clay &lt; silt &lt; sand in terms of grain size.
+See the Data structures chapter of <span class="citation">Wickham (<a href="#ref-wickham_advanced_2014" role="doc-biblioref">2014</a><a href="#ref-wickham_advanced_2014" role="doc-biblioref">a</a>)</span> for further details on classes.
+</div>
+
+<p><code>raster</code> objects represent categorical variables as integers, so <code>grain[1, 1]</code> returns a number that represents a unique identifier, rather than “clay”, “silt” or “sand”.
+The raster object stores the corresponding look-up table or “Raster Attribute Table” (RAT) as a data frame in a new slot named <code>attributes</code>, which can be viewed with <code>ratify(grain)</code> (see <code>?ratify()</code> for more information).
+Use the function <code>levels()</code> for retrieving and adding new factor levels to the attribute table:</p>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="attr.html#cb103-1"></a><span class="kw">levels</span>(grain)[[<span class="dv">1</span>]] =<span class="st"> </span><span class="kw">cbind</span>(<span class="kw">levels</span>(grain)[[<span class="dv">1</span>]], <span class="dt">wetness =</span> <span class="kw">c</span>(<span class="st">&quot;wet&quot;</span>, <span class="st">&quot;moist&quot;</span>, <span class="st">&quot;dry&quot;</span>))</span>
+<span id="cb103-2"><a href="attr.html#cb103-2"></a><span class="kw">levels</span>(grain)</span>
+<span id="cb103-3"><a href="attr.html#cb103-3"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb103-4"><a href="attr.html#cb103-4"></a><span class="co">#&gt;   ID VALUE wetness</span></span>
+<span id="cb103-5"><a href="attr.html#cb103-5"></a><span class="co">#&gt; 1  1  clay     wet</span></span>
+<span id="cb103-6"><a href="attr.html#cb103-6"></a><span class="co">#&gt; 2  2  silt   moist</span></span>
+<span id="cb103-7"><a href="attr.html#cb103-7"></a><span class="co">#&gt; 3  3  sand     dry</span></span></code></pre></div>
+<p>This behavior demonstrates that raster cells can only possess one value, an identifier which can be used to look up the attributes in the corresponding attribute table (stored in a slot named <code>attributes</code>).
+This is illustrated by the command below, which returns the grain size and wetness of cell IDs 1, 11 and 35:</p>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="attr.html#cb104-1"></a><span class="kw">factorValues</span>(grain, grain[<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">11</span>, <span class="dv">35</span>)])</span>
+<span id="cb104-2"><a href="attr.html#cb104-2"></a><span class="co">#&gt;   VALUE wetness</span></span>
+<span id="cb104-3"><a href="attr.html#cb104-3"></a><span class="co">#&gt; 1  sand     dry</span></span>
+<span id="cb104-4"><a href="attr.html#cb104-4"></a><span class="co">#&gt; 2  silt   moist</span></span>
+<span id="cb104-5"><a href="attr.html#cb104-5"></a><span class="co">#&gt; 3  clay     wet</span></span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:cont-raster"></span>
+<img src="03-attribute-operations_files/figure-html/cont-raster-1.png" alt="Raster datasets with numeric (left) and categorical values (right)." width="100%" />
+<p class="caption">
+FIGURE 3.2: Raster datasets with numeric (left) and categorical values (right).
+</p>
+</div>
+<div id="raster-subsetting" class="section level3">
+<h3><span class="header-section-number">3.3.1</span> Raster subsetting</h3>
+<p>Raster subsetting is done with the base R operator <code>[</code>, which accepts a variety of inputs:
+</p>
+<ul>
+<li>Row-column indexing</li>
+<li>Cell IDs</li>
+<li>Coordinates (see Section <a href="spatial-operations.html#spatial-raster-subsetting">4.3.1</a>)</li>
+<li>Another spatial object (see Section <a href="spatial-operations.html#spatial-raster-subsetting">4.3.1</a>)</li>
+</ul>
+<p>Here, we only show the first two options since these can be considered non-spatial operations.
+If we need a spatial object to subset another or the output is a spatial object, we refer to this as spatial subsetting.
+Therefore, the latter two options will be shown in the next chapter (see Section <a href="spatial-operations.html#spatial-raster-subsetting">4.3.1</a>).</p>
+<p>The first two subsetting options are demonstrated in the commands below —
+both return the value of the top left pixel in the raster object <code>elev</code> (results not shown):</p>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="attr.html#cb105-1"></a><span class="co"># row 1, column 1</span></span>
+<span id="cb105-2"><a href="attr.html#cb105-2"></a>elev[<span class="dv">1</span>, <span class="dv">1</span>]</span>
+<span id="cb105-3"><a href="attr.html#cb105-3"></a><span class="co"># cell ID 1</span></span>
+<span id="cb105-4"><a href="attr.html#cb105-4"></a>elev[<span class="dv">1</span>]</span></code></pre></div>
+<p>To extract all values or complete rows, you can use <code>values()</code> and <code>getValues()</code>.
+For multi-layered raster objects <code>stack</code> or <code>brick</code>, this will return the cell value(s) for each layer.
+For example, <code>stack(elev, grain)[1]</code> returns a matrix with one row and two columns — one for each layer.
+For multi-layer raster objects another way to subset is with <code>raster::subset()</code>, which extracts layers from a raster stack or brick. The <code>[[</code> and <code>$</code> operators can also be used:</p>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="attr.html#cb106-1"></a>r_stack =<span class="st"> </span><span class="kw">stack</span>(elev, grain)</span>
+<span id="cb106-2"><a href="attr.html#cb106-2"></a><span class="kw">names</span>(r_stack) =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;elev&quot;</span>, <span class="st">&quot;grain&quot;</span>)</span>
+<span id="cb106-3"><a href="attr.html#cb106-3"></a><span class="co"># three ways to extract a layer of a stack</span></span>
+<span id="cb106-4"><a href="attr.html#cb106-4"></a>raster<span class="op">::</span><span class="kw">subset</span>(r_stack, <span class="st">&quot;elev&quot;</span>)</span>
+<span id="cb106-5"><a href="attr.html#cb106-5"></a>r_stack[[<span class="st">&quot;elev&quot;</span>]]</span>
+<span id="cb106-6"><a href="attr.html#cb106-6"></a>r_stack<span class="op">$</span>elev</span></code></pre></div>
+<p>Cell values can be modified by overwriting existing values in conjunction with a subsetting operation.
+The following code chunk, for example, sets the upper left cell of <code>elev</code> to 0:</p>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="attr.html#cb107-1"></a>elev[<span class="dv">1</span>, <span class="dv">1</span>] =<span class="st"> </span><span class="dv">0</span></span>
+<span id="cb107-2"><a href="attr.html#cb107-2"></a>elev[]</span>
+<span id="cb107-3"><a href="attr.html#cb107-3"></a><span class="co">#&gt;  [1]  0  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25</span></span>
+<span id="cb107-4"><a href="attr.html#cb107-4"></a><span class="co">#&gt; [26] 26 27 28 29 30 31 32 33 34 35 36</span></span></code></pre></div>
+<p>Leaving the square brackets empty is a shortcut version of <code>values()</code> for retrieving all values of a raster.
+Multiple cells can also be modified in this way:</p>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="attr.html#cb108-1"></a>elev[<span class="dv">1</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>] =<span class="st"> </span><span class="dv">0</span></span></code></pre></div>
+</div>
+<div id="summarizing-raster-objects" class="section level3">
+<h3><span class="header-section-number">3.3.2</span> Summarizing raster objects</h3>
+<p><strong>raster</strong> contains functions for extracting descriptive statistics for entire rasters.
+Printing a raster object to the console by typing its name returns minimum and maximum values of a raster.
+<code>summary()</code> provides common descriptive statistics (minimum, maximum, quartiles and number of <code>NA</code>s).
+Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with <code>cellStats()</code>.
+</p>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="attr.html#cb109-1"></a><span class="kw">cellStats</span>(elev, sd)</span></code></pre></div>
+
+<div class="rmdnote">
+If you provide the <code>summary()</code> and <code>cellStats()</code> functions with a raster stack or brick object, they will summarize each layer separately, as can be illustrated by running: <code>summary(brick(elev, grain))</code>.
+</div>
+
+<p>Raster value statistics can be visualized in a variety of ways.
+Specific functions such as <code>boxplot()</code>, <code>density()</code>, <code>hist()</code> and <code>pairs()</code> work also with raster objects, as demonstrated in the histogram created with the command below (not shown):</p>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="attr.html#cb110-1"></a><span class="kw">hist</span>(elev)</span></code></pre></div>
+<p>In case a visualization function does not work with raster objects, one can extract the raster data to be plotted with the help of <code>values()</code> or <code>getValues()</code>.
+</p>
+<p>Descriptive raster statistics belong to the so-called global raster operations.
+These and other typical raster processing operations are part of the map algebra scheme, which are covered in the next chapter (Section <a href="spatial-operations.html#map-algebra">4.3.2</a>).</p>
+<div class="rmdnote">
+<p>
+Some function names clash between packages (e.g., <code>select()</code>, as discussed in a previous note). In addition to not loading packages by referring to functions verbosely (e.g., <code>dplyr::select()</code>), another way to prevent function names clashes is by unloading the offending package with <code>detach()</code>. The following command, for example, unloads the <strong>raster</strong> package (this can also be done in the <em>package</em> tab which resides by default in the right-bottom pane in RStudio): <code>detach(“package:raster”, unload = TRUE, force = TRUE)</code>. The <code>force</code> argument makes sure that the package will be detached even if other packages depend on it. This, however, may lead to a restricted usability of packages depending on the detached package, and is therefore not recommended.
+</p>
+</div>
+</div>
+</div>
+<div id="exercises-1" class="section level2">
+<h2><span class="header-section-number">3.4</span> Exercises</h2>
+<p>For these exercises we will use the <code>us_states</code> and <code>us_states_df</code> datasets from the <strong>spData</strong> package:</p>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="attr.html#cb111-1"></a><span class="kw">library</span>(spData)</span>
+<span id="cb111-2"><a href="attr.html#cb111-2"></a><span class="kw">data</span>(us_states)</span>
+<span id="cb111-3"><a href="attr.html#cb111-3"></a><span class="kw">data</span>(us_states_df)</span></code></pre></div>
+<p><code>us_states</code> is a spatial object (of class <code>sf</code>), containing geometry and a few attributes (including name, region, area, and population) of states within the contiguous United States.
+<code>us_states_df</code> is a data frame (of class <code>data.frame</code>) containing the name and additional variables (including median income and poverty level, for the years 2010 and 2015) of US states, including Alaska, Hawaii and Puerto Rico.
+The data comes from the United States Census Bureau, and is documented in <code>?us_states</code> and <code>?us_states_df</code>.</p>
+<!-- Attribute subsetting -->
+<ol style="list-style-type: decimal">
+<li>Create a new object called <code>us_states_name</code> that contains only the <code>NAME</code> column from the <code>us_states</code> object.
+What is the class of the new object and what makes it geographic? <!--why there is a "sf" part? --></li>
+<li>Select columns from the <code>us_states</code> object which contain population data.
+Obtain the same result using a different command (bonus: try to find three ways of obtaining the same result).
+Hint: try to use helper functions, such as <code>contains</code> or <code>starts_with</code> from <strong>dplyr</strong> (see <code>?contains</code>).</li>
+<li>Find all states with the following characteristics (bonus find <em>and</em> plot them):
+<ul>
+<li>Belong to the Midwest region.</li>
+<li>Belong to the West region, have an area below 250,000 km<sup>2</sup> <em>and</em> in 2015 a population greater than 5,000,000 residents (hint: you may need to use the function <code>units::set_units()</code> or <code>as.numeric()</code>).</li>
+<li>Belong to the South region, had an area larger than 150,000 km<sup>2</sup> or a total population in 2015 larger than 7,000,000 residents.
+<!-- Attribute aggregation --></li>
+</ul></li>
+<li>What was the total population in 2015 in the <code>us_states</code> dataset?
+What was the minimum and maximum total population in 2015?</li>
+<li>How many states are there in each region?</li>
+<li>What was the minimum and maximum total population in 2015 in each region?
+What was the total population in 2015 in each region?
+<!-- Attribute joining --></li>
+<li>Add variables from <code>us_states_df</code> to <code>us_states</code>, and create a new object called <code>us_states_stats</code>.
+What function did you use and why?
+Which variable is the key in both datasets?
+What is the class of the new object?</li>
+<li><code>us_states_df</code> has two more rows than <code>us_states</code>.
+How can you find them? (hint: try to use the <code>dplyr::anti_join()</code> function)
+<!-- Attribute creation --></li>
+<li>What was the population density in 2015 in each state?
+What was the population density in 2010 in each state?</li>
+<li>How much has population density changed between 2010 and 2015 in each state?
+Calculate the change in percentages and map them.</li>
+<li>Change the columns’ names in <code>us_states</code> to lowercase. (Hint: helper functions - <code>tolower()</code> and <code>colnames()</code> may help.)
+<!-- Mixed exercises -->
+<!-- combination of use of select, mutate, group_by, summarize, etc  --></li>
+<li>Using <code>us_states</code> and <code>us_states_df</code> create a new object called <code>us_states_sel</code>.
+The new object should have only two variables - <code>median_income_15</code> and <code>geometry</code>.
+Change the name of the <code>median_income_15</code> column to <code>Income</code>.</li>
+<li>Calculate the change in the number of residents living below the poverty level between 2010 and 2015 for each state. (Hint: See ?us_states_df for documentation on the poverty level columns.)
+Bonus: Calculate the change in the <em>percentage</em> of residents living below the poverty level in each state.</li>
+<li>What was the minimum, average and maximum state’s number of people living below the poverty line in 2015 for each region?
+Bonus: What is the region with the largest increase in people living below the poverty line?
+<!-- Raster exercises --></li>
+<li>Create a raster from scratch with nine rows and columns and a resolution of 0.5 decimal degrees (WGS84).
+Fill it with random numbers.
+Extract the values of the four corner cells.</li>
+<li>What is the most common class of our example raster <code>grain</code> (hint: <code>modal()</code>)?</li>
+<li>Plot the histogram and the boxplot of the <code>data(dem, package = "spDataLarge")</code> raster.
+<!-- 1. Now attach also `data(ndvi, package = "spDataLarge")`.  -->
+<!-- Create a raster stack using `dem` and `ndvi`, and make a `pairs()` plot. --></li>
+</ol>
+
+</div>
+</div>
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-grolemund_r_2016">
+<p>Grolemund, Garrett, and Hadley Wickham. 2016. <em>R for Data Science</em>. O’Reilly Media.</p>
+</div>
+<div id="ref-wickham_advanced_2014">
+<p>Wickham, Hadley. 2014a. <em>Advanced R</em>. CRC Press.</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol start="15">
+<li id="fn15"><p>
+<strong>data.table</strong> is a high-performance data processing package.
+Its application to geographic data is covered in a blog post hosted at r-spatial.org/r/2017/11/13/perp-performance.html.<a href="attr.html#fnref15" class="footnote-back">↩︎</a></p></li>
+<li id="fn16"><p>
+<code>st_geometry(world_st) = NULL</code> also works to remove the geometry from <code>world</code>, but overwrites the original object.<a href="attr.html#fnref16" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+<script>
+/*
+Sorts the references alphabetically.
+Modified from code by Yvonne Aburrow.
+*/
+$(function(){
+    var elems = $('#refs').children('div').remove();
+    elems.sort(function (a, b) {
+        return $(b).children('p').html().toUpperCase() > $(a).children('p').html().toUpperCase() ? -1 : 1;
+    });
+    $('#refs').append(elems);
+})
+</script>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="spatial-class.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="spatial-operations.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": null,
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/Robinlovelace/geocompr/edit/master/03-attribute-operations.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "lunr",
+"options": null
+},
+"toc": {
+"collapse": "section"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 11 Statistical learning | Geocomputation with R</title>
+  <meta name="description" content="Chapter 11 Statistical learning | Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data." />
+  <meta name="generator" content="bookdown 0.23 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 11 Statistical learning | Geocomputation with R" />
+  <meta property="og:type" content="book" />
+  <meta property="og:url" content="https://geocompr.robinlovelace.net/" />
+  <meta property="og:image" content="https://geocompr.robinlovelace.net//images/cover.png" />
+  <meta property="og:description" content="Chapter 11 Statistical learning | Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data." />
+  <meta name="github-repo" content="Robinlovelace/geocompr" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 11 Statistical learning | Geocomputation with R" />
+  
+  <meta name="twitter:description" content="Chapter 11 Statistical learning | Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data." />
+  <meta name="twitter:image" content="https://geocompr.robinlovelace.net//images/cover.png" />
+
+<meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow" />
+
+
+<meta name="date" content="2021-08-23" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="algorithms.html"/>
+<link rel="next" href="transport.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-binding-2.0.4.1/leaflet.js"></script>
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-99618359-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
+
+<style type="text/css">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<link rel="stylesheet" href="css/style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Geocomputation with R</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Welcome</a><ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#how-to-contribute"><i class="fa fa-check"></i>How to contribute?</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#reproducibility"><i class="fa fa-check"></i>Reproducibility</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#supporting-the-project"><i class="fa fa-check"></i>Supporting the project</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="foreword.html"><a href="foreword.html"><i class="fa fa-check"></i>Foreword</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html"><i class="fa fa-check"></i>Preface</a><ul>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#who-this-book-is-for"><i class="fa fa-check"></i>Who this book is for</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#how-to-read-this-book"><i class="fa fa-check"></i>How to read this book</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#why-r"><i class="fa fa-check"></i>Why R?</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#real-world-impact"><i class="fa fa-check"></i>Real-world impact</a></li>
+<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#what-is-geocomputation"><i class="fa fa-check"></i><b>1.1</b> What is geocomputation?</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#why-use-r-for-geocomputation"><i class="fa fa-check"></i><b>1.2</b> Why use R for geocomputation?</a></li>
+<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#software-for-geocomputation"><i class="fa fa-check"></i><b>1.3</b> Software for geocomputation</a></li>
+<li class="chapter" data-level="1.4" data-path="intro.html"><a href="intro.html#rs-spatial-ecosystem"><i class="fa fa-check"></i><b>1.4</b> R’s spatial ecosystem</a></li>
+<li class="chapter" data-level="1.5" data-path="intro.html"><a href="intro.html#the-history-of-r-spatial"><i class="fa fa-check"></i><b>1.5</b> The history of R-spatial</a></li>
+<li class="chapter" data-level="1.6" data-path="intro.html"><a href="intro.html#exercises"><i class="fa fa-check"></i><b>1.6</b> Exercises</a></li>
+</ul></li>
+<li class="part"><span><b>I Foundations</b></span></li>
+<li class="chapter" data-level="2" data-path="spatial-class.html"><a href="spatial-class.html"><i class="fa fa-check"></i><b>2</b> Geographic data in R</a><ul>
+<li class="chapter" data-level="" data-path="spatial-class.html"><a href="spatial-class.html#prerequisites"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="2.1" data-path="spatial-class.html"><a href="spatial-class.html#intro-spatial-class"><i class="fa fa-check"></i><b>2.1</b> Introduction</a></li>
+<li class="chapter" data-level="2.2" data-path="spatial-class.html"><a href="spatial-class.html#vector-data"><i class="fa fa-check"></i><b>2.2</b> Vector data</a><ul>
+<li class="chapter" data-level="2.2.1" data-path="spatial-class.html"><a href="spatial-class.html#intro-sf"><i class="fa fa-check"></i><b>2.2.1</b> An introduction to simple features</a></li>
+<li class="chapter" data-level="2.2.2" data-path="spatial-class.html"><a href="spatial-class.html#why-simple-features"><i class="fa fa-check"></i><b>2.2.2</b> Why simple features?</a></li>
+<li class="chapter" data-level="2.2.3" data-path="spatial-class.html"><a href="spatial-class.html#basic-map"><i class="fa fa-check"></i><b>2.2.3</b> Basic map making</a></li>
+<li class="chapter" data-level="2.2.4" data-path="spatial-class.html"><a href="spatial-class.html#base-args"><i class="fa fa-check"></i><b>2.2.4</b> Base plot arguments</a></li>
+<li class="chapter" data-level="2.2.5" data-path="spatial-class.html"><a href="spatial-class.html#geometry"><i class="fa fa-check"></i><b>2.2.5</b> Geometry types</a></li>
+<li class="chapter" data-level="2.2.6" data-path="spatial-class.html"><a href="spatial-class.html#sfg"><i class="fa fa-check"></i><b>2.2.6</b> Simple feature geometries (sfg)</a></li>
+<li class="chapter" data-level="2.2.7" data-path="spatial-class.html"><a href="spatial-class.html#sfc"><i class="fa fa-check"></i><b>2.2.7</b> Simple feature columns (sfc)</a></li>
+<li class="chapter" data-level="2.2.8" data-path="spatial-class.html"><a href="spatial-class.html#sf"><i class="fa fa-check"></i><b>2.2.8</b> The sf class</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="spatial-class.html"><a href="spatial-class.html#raster-data"><i class="fa fa-check"></i><b>2.3</b> Raster data</a><ul>
+<li class="chapter" data-level="2.3.1" data-path="spatial-class.html"><a href="spatial-class.html#an-introduction-to-raster"><i class="fa fa-check"></i><b>2.3.1</b> An introduction to raster</a></li>
+<li class="chapter" data-level="2.3.2" data-path="spatial-class.html"><a href="spatial-class.html#basic-map-raster"><i class="fa fa-check"></i><b>2.3.2</b> Basic map making</a></li>
+<li class="chapter" data-level="2.3.3" data-path="spatial-class.html"><a href="spatial-class.html#raster-classes"><i class="fa fa-check"></i><b>2.3.3</b> Raster classes</a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="spatial-class.html"><a href="spatial-class.html#crs-intro"><i class="fa fa-check"></i><b>2.4</b> Coordinate Reference Systems</a><ul>
+<li class="chapter" data-level="2.4.1" data-path="spatial-class.html"><a href="spatial-class.html#geographic-coordinate-systems"><i class="fa fa-check"></i><b>2.4.1</b> Geographic coordinate systems</a></li>
+<li class="chapter" data-level="2.4.2" data-path="spatial-class.html"><a href="spatial-class.html#projected-coordinate-reference-systems"><i class="fa fa-check"></i><b>2.4.2</b> Projected coordinate reference systems</a></li>
+<li class="chapter" data-level="2.4.3" data-path="spatial-class.html"><a href="spatial-class.html#crs-in-r"><i class="fa fa-check"></i><b>2.4.3</b> CRSs in R</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="spatial-class.html"><a href="spatial-class.html#units"><i class="fa fa-check"></i><b>2.5</b> Units</a></li>
+<li class="chapter" data-level="2.6" data-path="spatial-class.html"><a href="spatial-class.html#ex2"><i class="fa fa-check"></i><b>2.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="attr.html"><a href="attr.html"><i class="fa fa-check"></i><b>3</b> Attribute data operations</a><ul>
+<li class="chapter" data-level="" data-path="attr.html"><a href="attr.html#prerequisites-1"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="3.1" data-path="attr.html"><a href="attr.html#introduction"><i class="fa fa-check"></i><b>3.1</b> Introduction</a></li>
+<li class="chapter" data-level="3.2" data-path="attr.html"><a href="attr.html#vector-attribute-manipulation"><i class="fa fa-check"></i><b>3.2</b> Vector attribute manipulation</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="attr.html"><a href="attr.html#vector-attribute-subsetting"><i class="fa fa-check"></i><b>3.2.1</b> Vector attribute subsetting</a></li>
+<li class="chapter" data-level="3.2.2" data-path="attr.html"><a href="attr.html#vector-attribute-aggregation"><i class="fa fa-check"></i><b>3.2.2</b> Vector attribute aggregation</a></li>
+<li class="chapter" data-level="3.2.3" data-path="attr.html"><a href="attr.html#vector-attribute-joining"><i class="fa fa-check"></i><b>3.2.3</b> Vector attribute joining</a></li>
+<li class="chapter" data-level="3.2.4" data-path="attr.html"><a href="attr.html#vec-attr-creation"><i class="fa fa-check"></i><b>3.2.4</b> Creating attributes and removing spatial information</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="attr.html"><a href="attr.html#manipulating-raster-objects"><i class="fa fa-check"></i><b>3.3</b> Manipulating raster objects</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="attr.html"><a href="attr.html#raster-subsetting"><i class="fa fa-check"></i><b>3.3.1</b> Raster subsetting</a></li>
+<li class="chapter" data-level="3.3.2" data-path="attr.html"><a href="attr.html#summarizing-raster-objects"><i class="fa fa-check"></i><b>3.3.2</b> Summarizing raster objects</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="attr.html"><a href="attr.html#exercises-1"><i class="fa fa-check"></i><b>3.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="spatial-operations.html"><a href="spatial-operations.html"><i class="fa fa-check"></i><b>4</b> Spatial data operations</a><ul>
+<li class="chapter" data-level="" data-path="spatial-operations.html"><a href="spatial-operations.html#prerequisites-2"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="4.1" data-path="spatial-operations.html"><a href="spatial-operations.html#introduction-1"><i class="fa fa-check"></i><b>4.1</b> Introduction</a></li>
+<li class="chapter" data-level="4.2" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-vec"><i class="fa fa-check"></i><b>4.2</b> Spatial operations on vector data</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-subsetting"><i class="fa fa-check"></i><b>4.2.1</b> Spatial subsetting</a></li>
+<li class="chapter" data-level="4.2.2" data-path="spatial-operations.html"><a href="spatial-operations.html#topological-relations"><i class="fa fa-check"></i><b>4.2.2</b> Topological relations</a></li>
+<li class="chapter" data-level="4.2.3" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-joining"><i class="fa fa-check"></i><b>4.2.3</b> Spatial joining</a></li>
+<li class="chapter" data-level="4.2.4" data-path="spatial-operations.html"><a href="spatial-operations.html#non-overlapping-joins"><i class="fa fa-check"></i><b>4.2.4</b> Non-overlapping joins</a></li>
+<li class="chapter" data-level="4.2.5" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-aggr"><i class="fa fa-check"></i><b>4.2.5</b> Spatial data aggregation</a></li>
+<li class="chapter" data-level="4.2.6" data-path="spatial-operations.html"><a href="spatial-operations.html#distance-relations"><i class="fa fa-check"></i><b>4.2.6</b> Distance relations</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-ras"><i class="fa fa-check"></i><b>4.3</b> Spatial operations on raster data</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-raster-subsetting"><i class="fa fa-check"></i><b>4.3.1</b> Spatial subsetting</a></li>
+<li class="chapter" data-level="4.3.2" data-path="spatial-operations.html"><a href="spatial-operations.html#map-algebra"><i class="fa fa-check"></i><b>4.3.2</b> Map algebra</a></li>
+<li class="chapter" data-level="4.3.3" data-path="spatial-operations.html"><a href="spatial-operations.html#local-operations"><i class="fa fa-check"></i><b>4.3.3</b> Local operations</a></li>
+<li class="chapter" data-level="4.3.4" data-path="spatial-operations.html"><a href="spatial-operations.html#focal-operations"><i class="fa fa-check"></i><b>4.3.4</b> Focal operations</a></li>
+<li class="chapter" data-level="4.3.5" data-path="spatial-operations.html"><a href="spatial-operations.html#zonal-operations"><i class="fa fa-check"></i><b>4.3.5</b> Zonal operations</a></li>
+<li class="chapter" data-level="4.3.6" data-path="spatial-operations.html"><a href="spatial-operations.html#global-operations-and-distances"><i class="fa fa-check"></i><b>4.3.6</b> Global operations and distances</a></li>
+<li class="chapter" data-level="4.3.7" data-path="spatial-operations.html"><a href="spatial-operations.html#map-algebra-counterparts-in-vector-processing"><i class="fa fa-check"></i><b>4.3.7</b> Map algebra counterparts in vector processing</a></li>
+<li class="chapter" data-level="4.3.8" data-path="spatial-operations.html"><a href="spatial-operations.html#merging-rasters"><i class="fa fa-check"></i><b>4.3.8</b> Merging rasters</a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="spatial-operations.html"><a href="spatial-operations.html#exercises-2"><i class="fa fa-check"></i><b>4.4</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="geometric-operations.html"><a href="geometric-operations.html"><i class="fa fa-check"></i><b>5</b> Geometry operations</a><ul>
+<li class="chapter" data-level="" data-path="geometric-operations.html"><a href="geometric-operations.html#prerequisites-3"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="5.1" data-path="geometric-operations.html"><a href="geometric-operations.html#introduction-2"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
+<li class="chapter" data-level="5.2" data-path="geometric-operations.html"><a href="geometric-operations.html#geo-vec"><i class="fa fa-check"></i><b>5.2</b> Geometric operations on vector data</a><ul>
+<li class="chapter" data-level="5.2.1" data-path="geometric-operations.html"><a href="geometric-operations.html#simplification"><i class="fa fa-check"></i><b>5.2.1</b> Simplification</a></li>
+<li class="chapter" data-level="5.2.2" data-path="geometric-operations.html"><a href="geometric-operations.html#centroids"><i class="fa fa-check"></i><b>5.2.2</b> Centroids</a></li>
+<li class="chapter" data-level="5.2.3" data-path="geometric-operations.html"><a href="geometric-operations.html#buffers"><i class="fa fa-check"></i><b>5.2.3</b> Buffers</a></li>
+<li class="chapter" data-level="5.2.4" data-path="geometric-operations.html"><a href="geometric-operations.html#affine-transformations"><i class="fa fa-check"></i><b>5.2.4</b> Affine transformations</a></li>
+<li class="chapter" data-level="5.2.5" data-path="geometric-operations.html"><a href="geometric-operations.html#clipping"><i class="fa fa-check"></i><b>5.2.5</b> Clipping</a></li>
+<li class="chapter" data-level="5.2.6" data-path="geometric-operations.html"><a href="geometric-operations.html#geometry-unions"><i class="fa fa-check"></i><b>5.2.6</b> Geometry unions</a></li>
+<li class="chapter" data-level="5.2.7" data-path="geometric-operations.html"><a href="geometric-operations.html#type-trans"><i class="fa fa-check"></i><b>5.2.7</b> Type transformations</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="geometric-operations.html"><a href="geometric-operations.html#geo-ras"><i class="fa fa-check"></i><b>5.3</b> Geometric operations on raster data</a><ul>
+<li class="chapter" data-level="5.3.1" data-path="geometric-operations.html"><a href="geometric-operations.html#geometric-intersections"><i class="fa fa-check"></i><b>5.3.1</b> Geometric intersections</a></li>
+<li class="chapter" data-level="5.3.2" data-path="geometric-operations.html"><a href="geometric-operations.html#extent-and-origin"><i class="fa fa-check"></i><b>5.3.2</b> Extent and origin</a></li>
+<li class="chapter" data-level="5.3.3" data-path="geometric-operations.html"><a href="geometric-operations.html#aggregation-and-disaggregation"><i class="fa fa-check"></i><b>5.3.3</b> Aggregation and disaggregation</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="geometric-operations.html"><a href="geometric-operations.html#raster-vector"><i class="fa fa-check"></i><b>5.4</b> Raster-vector interactions</a><ul>
+<li class="chapter" data-level="5.4.1" data-path="geometric-operations.html"><a href="geometric-operations.html#raster-cropping"><i class="fa fa-check"></i><b>5.4.1</b> Raster cropping</a></li>
+<li class="chapter" data-level="5.4.2" data-path="geometric-operations.html"><a href="geometric-operations.html#raster-extraction"><i class="fa fa-check"></i><b>5.4.2</b> Raster extraction</a></li>
+<li class="chapter" data-level="5.4.3" data-path="geometric-operations.html"><a href="geometric-operations.html#rasterization"><i class="fa fa-check"></i><b>5.4.3</b> Rasterization</a></li>
+<li class="chapter" data-level="5.4.4" data-path="geometric-operations.html"><a href="geometric-operations.html#spatial-vectorization"><i class="fa fa-check"></i><b>5.4.4</b> Spatial vectorization</a></li>
+</ul></li>
+<li class="chapter" data-level="5.5" data-path="geometric-operations.html"><a href="geometric-operations.html#exercises-3"><i class="fa fa-check"></i><b>5.5</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html"><i class="fa fa-check"></i><b>6</b> Reprojecting geographic data</a><ul>
+<li class="chapter" data-level="" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#prerequisites-4"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="6.1" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#introduction-3"><i class="fa fa-check"></i><b>6.1</b> Introduction</a></li>
+<li class="chapter" data-level="6.2" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#when-to-reproject"><i class="fa fa-check"></i><b>6.2</b> When to reproject?</a></li>
+<li class="chapter" data-level="6.3" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#which-crs-to-use"><i class="fa fa-check"></i><b>6.3</b> Which CRS to use?</a></li>
+<li class="chapter" data-level="6.4" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#reproj-vec-geom"><i class="fa fa-check"></i><b>6.4</b> Reprojecting vector geometries</a></li>
+<li class="chapter" data-level="6.5" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#modifying-map-projections"><i class="fa fa-check"></i><b>6.5</b> Modifying map projections</a></li>
+<li class="chapter" data-level="6.6" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#reprojecting-raster-geometries"><i class="fa fa-check"></i><b>6.6</b> Reprojecting raster geometries</a></li>
+<li class="chapter" data-level="6.7" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#exercises-4"><i class="fa fa-check"></i><b>6.7</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="read-write.html"><a href="read-write.html"><i class="fa fa-check"></i><b>7</b> Geographic data I/O</a><ul>
+<li class="chapter" data-level="" data-path="read-write.html"><a href="read-write.html#prerequisites-5"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="7.1" data-path="read-write.html"><a href="read-write.html#introduction-4"><i class="fa fa-check"></i><b>7.1</b> Introduction</a></li>
+<li class="chapter" data-level="7.2" data-path="read-write.html"><a href="read-write.html#retrieving-data"><i class="fa fa-check"></i><b>7.2</b> Retrieving open data</a></li>
+<li class="chapter" data-level="7.3" data-path="read-write.html"><a href="read-write.html#geographic-data-packages"><i class="fa fa-check"></i><b>7.3</b> Geographic data packages</a></li>
+<li class="chapter" data-level="7.4" data-path="read-write.html"><a href="read-write.html#geographic-web-services"><i class="fa fa-check"></i><b>7.4</b> Geographic web services</a></li>
+<li class="chapter" data-level="7.5" data-path="read-write.html"><a href="read-write.html#file-formats"><i class="fa fa-check"></i><b>7.5</b> File formats</a></li>
+<li class="chapter" data-level="7.6" data-path="read-write.html"><a href="read-write.html#data-input"><i class="fa fa-check"></i><b>7.6</b> Data input (I)</a><ul>
+<li class="chapter" data-level="7.6.1" data-path="read-write.html"><a href="read-write.html#vector-data-1"><i class="fa fa-check"></i><b>7.6.1</b> Vector data</a></li>
+<li class="chapter" data-level="7.6.2" data-path="read-write.html"><a href="read-write.html#raster-data-1"><i class="fa fa-check"></i><b>7.6.2</b> Raster data</a></li>
+</ul></li>
+<li class="chapter" data-level="7.7" data-path="read-write.html"><a href="read-write.html#data-output"><i class="fa fa-check"></i><b>7.7</b> Data output (O)</a><ul>
+<li class="chapter" data-level="7.7.1" data-path="read-write.html"><a href="read-write.html#vector-data-2"><i class="fa fa-check"></i><b>7.7.1</b> Vector data</a></li>
+<li class="chapter" data-level="7.7.2" data-path="read-write.html"><a href="read-write.html#raster-data-2"><i class="fa fa-check"></i><b>7.7.2</b> Raster data</a></li>
+</ul></li>
+<li class="chapter" data-level="7.8" data-path="read-write.html"><a href="read-write.html#visual-outputs"><i class="fa fa-check"></i><b>7.8</b> Visual outputs</a></li>
+<li class="chapter" data-level="7.9" data-path="read-write.html"><a href="read-write.html#exercises-5"><i class="fa fa-check"></i><b>7.9</b> Exercises</a></li>
+</ul></li>
+<li class="part"><span><b>II Extensions</b></span></li>
+<li class="chapter" data-level="8" data-path="adv-map.html"><a href="adv-map.html"><i class="fa fa-check"></i><b>8</b> Making maps with R</a><ul>
+<li class="chapter" data-level="" data-path="adv-map.html"><a href="adv-map.html#prerequisites-6"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="8.1" data-path="adv-map.html"><a href="adv-map.html#introduction-5"><i class="fa fa-check"></i><b>8.1</b> Introduction</a></li>
+<li class="chapter" data-level="8.2" data-path="adv-map.html"><a href="adv-map.html#static-maps"><i class="fa fa-check"></i><b>8.2</b> Static maps</a><ul>
+<li class="chapter" data-level="8.2.1" data-path="adv-map.html"><a href="adv-map.html#tmap-basics"><i class="fa fa-check"></i><b>8.2.1</b> tmap basics</a></li>
+<li class="chapter" data-level="8.2.2" data-path="adv-map.html"><a href="adv-map.html#map-obj"><i class="fa fa-check"></i><b>8.2.2</b> Map objects</a></li>
+<li class="chapter" data-level="8.2.3" data-path="adv-map.html"><a href="adv-map.html#aesthetics"><i class="fa fa-check"></i><b>8.2.3</b> Aesthetics</a></li>
+<li class="chapter" data-level="8.2.4" data-path="adv-map.html"><a href="adv-map.html#color-settings"><i class="fa fa-check"></i><b>8.2.4</b> Color settings</a></li>
+<li class="chapter" data-level="8.2.5" data-path="adv-map.html"><a href="adv-map.html#layouts"><i class="fa fa-check"></i><b>8.2.5</b> Layouts</a></li>
+<li class="chapter" data-level="8.2.6" data-path="adv-map.html"><a href="adv-map.html#faceted-maps"><i class="fa fa-check"></i><b>8.2.6</b> Faceted maps</a></li>
+<li class="chapter" data-level="8.2.7" data-path="adv-map.html"><a href="adv-map.html#inset-maps"><i class="fa fa-check"></i><b>8.2.7</b> Inset maps</a></li>
+</ul></li>
+<li class="chapter" data-level="8.3" data-path="adv-map.html"><a href="adv-map.html#animated-maps"><i class="fa fa-check"></i><b>8.3</b> Animated maps</a></li>
+<li class="chapter" data-level="8.4" data-path="adv-map.html"><a href="adv-map.html#interactive-maps"><i class="fa fa-check"></i><b>8.4</b> Interactive maps</a></li>
+<li class="chapter" data-level="8.5" data-path="adv-map.html"><a href="adv-map.html#mapping-applications"><i class="fa fa-check"></i><b>8.5</b> Mapping applications</a></li>
+<li class="chapter" data-level="8.6" data-path="adv-map.html"><a href="adv-map.html#other-mapping-packages"><i class="fa fa-check"></i><b>8.6</b> Other mapping packages</a></li>
+<li class="chapter" data-level="8.7" data-path="adv-map.html"><a href="adv-map.html#exercises-6"><i class="fa fa-check"></i><b>8.7</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="gis.html"><a href="gis.html"><i class="fa fa-check"></i><b>9</b> Bridges to GIS software</a><ul>
+<li class="chapter" data-level="" data-path="gis.html"><a href="gis.html#prerequisites-7"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="9.1" data-path="gis.html"><a href="gis.html#introduction-6"><i class="fa fa-check"></i><b>9.1</b> Introduction</a></li>
+<li class="chapter" data-level="9.2" data-path="gis.html"><a href="gis.html#rqgis"><i class="fa fa-check"></i><b>9.2</b> (R)QGIS</a></li>
+<li class="chapter" data-level="9.3" data-path="gis.html"><a href="gis.html#rsaga"><i class="fa fa-check"></i><b>9.3</b> (R)SAGA</a></li>
+<li class="chapter" data-level="9.4" data-path="gis.html"><a href="gis.html#rgrass"><i class="fa fa-check"></i><b>9.4</b> GRASS through <strong>rgrass7</strong></a></li>
+<li class="chapter" data-level="9.5" data-path="gis.html"><a href="gis.html#when-to-use-what"><i class="fa fa-check"></i><b>9.5</b> When to use what?</a></li>
+<li class="chapter" data-level="9.6" data-path="gis.html"><a href="gis.html#other-bridges"><i class="fa fa-check"></i><b>9.6</b> Other bridges</a><ul>
+<li class="chapter" data-level="9.6.1" data-path="gis.html"><a href="gis.html#gdal"><i class="fa fa-check"></i><b>9.6.1</b> Bridges to GDAL</a></li>
+<li class="chapter" data-level="9.6.2" data-path="gis.html"><a href="gis.html#postgis"><i class="fa fa-check"></i><b>9.6.2</b> Bridges to spatial databases</a></li>
+</ul></li>
+<li class="chapter" data-level="9.7" data-path="gis.html"><a href="gis.html#exercises-7"><i class="fa fa-check"></i><b>9.7</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="algorithms.html"><a href="algorithms.html"><i class="fa fa-check"></i><b>10</b> Scripts, algorithms and functions</a><ul>
+<li class="chapter" data-level="" data-path="algorithms.html"><a href="algorithms.html#prerequisites-8"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="10.1" data-path="algorithms.html"><a href="algorithms.html#intro-algorithms"><i class="fa fa-check"></i><b>10.1</b> Introduction</a></li>
+<li class="chapter" data-level="10.2" data-path="algorithms.html"><a href="algorithms.html#scripts"><i class="fa fa-check"></i><b>10.2</b> Scripts</a></li>
+<li class="chapter" data-level="10.3" data-path="algorithms.html"><a href="algorithms.html#geometric-algorithms"><i class="fa fa-check"></i><b>10.3</b> Geometric algorithms</a></li>
+<li class="chapter" data-level="10.4" data-path="algorithms.html"><a href="algorithms.html#functions"><i class="fa fa-check"></i><b>10.4</b> Functions</a></li>
+<li class="chapter" data-level="10.5" data-path="algorithms.html"><a href="algorithms.html#programming"><i class="fa fa-check"></i><b>10.5</b> Programming</a></li>
+<li class="chapter" data-level="10.6" data-path="algorithms.html"><a href="algorithms.html#ex-algorithms"><i class="fa fa-check"></i><b>10.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="spatial-cv.html"><a href="spatial-cv.html"><i class="fa fa-check"></i><b>11</b> Statistical learning</a><ul>
+<li class="chapter" data-level="" data-path="spatial-cv.html"><a href="spatial-cv.html#prerequisites-9"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="11.1" data-path="spatial-cv.html"><a href="spatial-cv.html#intro-cv1"><i class="fa fa-check"></i><b>11.1</b> Introduction</a></li>
+<li class="chapter" data-level="11.2" data-path="spatial-cv.html"><a href="spatial-cv.html#case-landslide"><i class="fa fa-check"></i><b>11.2</b> Case study: Landslide susceptibility</a></li>
+<li class="chapter" data-level="11.3" data-path="spatial-cv.html"><a href="spatial-cv.html#conventional-model"><i class="fa fa-check"></i><b>11.3</b> Conventional modeling approach in R</a></li>
+<li class="chapter" data-level="11.4" data-path="spatial-cv.html"><a href="spatial-cv.html#intro-cv"><i class="fa fa-check"></i><b>11.4</b> Introduction to (spatial) cross-validation</a></li>
+<li class="chapter" data-level="11.5" data-path="spatial-cv.html"><a href="spatial-cv.html#spatial-cv-with-mlr"><i class="fa fa-check"></i><b>11.5</b> Spatial CV with <strong>mlr</strong></a><ul>
+<li class="chapter" data-level="11.5.1" data-path="spatial-cv.html"><a href="spatial-cv.html#glm"><i class="fa fa-check"></i><b>11.5.1</b> Generalized linear model</a></li>
+<li class="chapter" data-level="11.5.2" data-path="spatial-cv.html"><a href="spatial-cv.html#svm"><i class="fa fa-check"></i><b>11.5.2</b> Spatial tuning of machine-learning hyperparameters</a></li>
+</ul></li>
+<li class="chapter" data-level="11.6" data-path="spatial-cv.html"><a href="spatial-cv.html#conclusions"><i class="fa fa-check"></i><b>11.6</b> Conclusions</a></li>
+<li class="chapter" data-level="11.7" data-path="spatial-cv.html"><a href="spatial-cv.html#exercises-8"><i class="fa fa-check"></i><b>11.7</b> Exercises</a></li>
+</ul></li>
+<li class="part"><span><b>III Applications</b></span></li>
+<li class="chapter" data-level="12" data-path="transport.html"><a href="transport.html"><i class="fa fa-check"></i><b>12</b> Transportation</a><ul>
+<li class="chapter" data-level="" data-path="transport.html"><a href="transport.html#prerequisites-10"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="12.1" data-path="transport.html"><a href="transport.html#introduction-7"><i class="fa fa-check"></i><b>12.1</b> Introduction</a></li>
+<li class="chapter" data-level="12.2" data-path="transport.html"><a href="transport.html#bris-case"><i class="fa fa-check"></i><b>12.2</b> A case study of Bristol</a></li>
+<li class="chapter" data-level="12.3" data-path="transport.html"><a href="transport.html#transport-zones"><i class="fa fa-check"></i><b>12.3</b> Transport zones</a></li>
+<li class="chapter" data-level="12.4" data-path="transport.html"><a href="transport.html#desire-lines"><i class="fa fa-check"></i><b>12.4</b> Desire lines</a></li>
+<li class="chapter" data-level="12.5" data-path="transport.html"><a href="transport.html#routes"><i class="fa fa-check"></i><b>12.5</b> Routes</a></li>
+<li class="chapter" data-level="12.6" data-path="transport.html"><a href="transport.html#nodes"><i class="fa fa-check"></i><b>12.6</b> Nodes</a></li>
+<li class="chapter" data-level="12.7" data-path="transport.html"><a href="transport.html#route-networks"><i class="fa fa-check"></i><b>12.7</b> Route networks</a></li>
+<li class="chapter" data-level="12.8" data-path="transport.html"><a href="transport.html#prioritizing-new-infrastructure"><i class="fa fa-check"></i><b>12.8</b> Prioritizing new infrastructure</a></li>
+<li class="chapter" data-level="12.9" data-path="transport.html"><a href="transport.html#future-directions-of-travel"><i class="fa fa-check"></i><b>12.9</b> Future directions of travel</a></li>
+<li class="chapter" data-level="12.10" data-path="transport.html"><a href="transport.html#ex-transport"><i class="fa fa-check"></i><b>12.10</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="location.html"><a href="location.html"><i class="fa fa-check"></i><b>13</b> Geomarketing</a><ul>
+<li class="chapter" data-level="" data-path="location.html"><a href="location.html#prerequisites-11"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="13.1" data-path="location.html"><a href="location.html#introduction-8"><i class="fa fa-check"></i><b>13.1</b> Introduction</a></li>
+<li class="chapter" data-level="13.2" data-path="location.html"><a href="location.html#case-study"><i class="fa fa-check"></i><b>13.2</b> Case study: bike shops in Germany</a></li>
+<li class="chapter" data-level="13.3" data-path="location.html"><a href="location.html#tidy-the-input-data"><i class="fa fa-check"></i><b>13.3</b> Tidy the input data</a></li>
+<li class="chapter" data-level="13.4" data-path="location.html"><a href="location.html#create-census-rasters"><i class="fa fa-check"></i><b>13.4</b> Create census rasters</a></li>
+<li class="chapter" data-level="13.5" data-path="location.html"><a href="location.html#define-metropolitan-areas"><i class="fa fa-check"></i><b>13.5</b> Define metropolitan areas</a></li>
+<li class="chapter" data-level="13.6" data-path="location.html"><a href="location.html#points-of-interest"><i class="fa fa-check"></i><b>13.6</b> Points of interest</a></li>
+<li class="chapter" data-level="13.7" data-path="location.html"><a href="location.html#identifying-suitable-locations"><i class="fa fa-check"></i><b>13.7</b> Identifying suitable locations</a></li>
+<li class="chapter" data-level="13.8" data-path="location.html"><a href="location.html#discussion-and-next-steps"><i class="fa fa-check"></i><b>13.8</b> Discussion and next steps</a></li>
+<li class="chapter" data-level="13.9" data-path="location.html"><a href="location.html#exercises-9"><i class="fa fa-check"></i><b>13.9</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="eco.html"><a href="eco.html"><i class="fa fa-check"></i><b>14</b> Ecology</a><ul>
+<li class="chapter" data-level="" data-path="eco.html"><a href="eco.html#prerequisites-12"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="14.1" data-path="eco.html"><a href="eco.html#introduction-9"><i class="fa fa-check"></i><b>14.1</b> Introduction</a></li>
+<li class="chapter" data-level="14.2" data-path="eco.html"><a href="eco.html#data-and-data-preparation"><i class="fa fa-check"></i><b>14.2</b> Data and data preparation</a></li>
+<li class="chapter" data-level="14.3" data-path="eco.html"><a href="eco.html#nmds"><i class="fa fa-check"></i><b>14.3</b> Reducing dimensionality</a></li>
+<li class="chapter" data-level="14.4" data-path="eco.html"><a href="eco.html#modeling-the-floristic-gradient"><i class="fa fa-check"></i><b>14.4</b> Modeling the floristic gradient</a><ul>
+<li class="chapter" data-level="14.4.1" data-path="eco.html"><a href="eco.html#mlr-building-blocks"><i class="fa fa-check"></i><b>14.4.1</b> <strong>mlr</strong> building blocks</a></li>
+<li class="chapter" data-level="14.4.2" data-path="eco.html"><a href="eco.html#predictive-mapping"><i class="fa fa-check"></i><b>14.4.2</b> Predictive mapping</a></li>
+</ul></li>
+<li class="chapter" data-level="14.5" data-path="eco.html"><a href="eco.html#conclusions-1"><i class="fa fa-check"></i><b>14.5</b> Conclusions</a></li>
+<li class="chapter" data-level="14.6" data-path="eco.html"><a href="eco.html#exercises-10"><i class="fa fa-check"></i><b>14.6</b> Exercises</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i><b>15</b> Conclusion</a><ul>
+<li class="chapter" data-level="" data-path="conclusion.html"><a href="conclusion.html#prerequisites-13"><i class="fa fa-check"></i>Prerequisites</a></li>
+<li class="chapter" data-level="15.1" data-path="conclusion.html"><a href="conclusion.html#introduction-10"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
+<li class="chapter" data-level="15.2" data-path="conclusion.html"><a href="conclusion.html#package-choice"><i class="fa fa-check"></i><b>15.2</b> Package choice</a></li>
+<li class="chapter" data-level="15.3" data-path="conclusion.html"><a href="conclusion.html#gaps"><i class="fa fa-check"></i><b>15.3</b> Gaps and overlaps</a></li>
+<li class="chapter" data-level="15.4" data-path="conclusion.html"><a href="conclusion.html#next"><i class="fa fa-check"></i><b>15.4</b> Where to go next?</a></li>
+<li class="chapter" data-level="15.5" data-path="conclusion.html"><a href="conclusion.html#benefit"><i class="fa fa-check"></i><b>15.5</b> The open source approach</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://robinlovelace.net/">Robin Lovelace</a></li>
+<li><a href="https://nowosad.github.io/">Jakub Nowosad</a></li>
+<li><a href="https://github.com/jannes-m/">Jannes Muenchow</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Geocomputation with R</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="spatial-cv" class="section level1">
+<h1><span class="header-section-number">Chapter 11</span> Statistical learning</h1>
+<div id="prerequisites-9" class="section level2 unnumbered">
+<h2>Prerequisites</h2>
+<p>This chapter assumes proficiency with geographic data analysis, for example gained by studying the contents and working-through the exercises in Chapters <a href="spatial-class.html#spatial-class">2</a> to <a href="reproj-geo-data.html#reproj-geo-data">6</a>.
+A familiarity with generalized linear models (GLM) and machine learning is highly recommended <span class="citation">(for example from Zuur et al. <a href="#ref-zuur_mixed_2009" role="doc-biblioref">2009</a>; James et al. <a href="#ref-james_introduction_2013" role="doc-biblioref">2013</a>)</span>.</p>
+<p>The chapter uses the following packages:<a href="#fn61" class="footnote-ref" id="fnref61"><sup>61</sup></a></p>
+<div class="sourceCode" id="cb365"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb365-1"><a href="spatial-cv.html#cb365-1"></a><span class="kw">library</span>(sf)</span>
+<span id="cb365-2"><a href="spatial-cv.html#cb365-2"></a><span class="kw">library</span>(raster)</span>
+<span id="cb365-3"><a href="spatial-cv.html#cb365-3"></a><span class="kw">library</span>(dplyr)</span></code></pre></div>
+<div class="sourceCode" id="cb366"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb366-1"><a href="spatial-cv.html#cb366-1"></a><span class="kw">library</span>(mlr)</span>
+<span id="cb366-2"><a href="spatial-cv.html#cb366-2"></a><span class="kw">library</span>(parallelMap)</span></code></pre></div>
+<p>Required data will be attached in due course.</p>
+</div>
+<div id="intro-cv1" class="section level2">
+<h2><span class="header-section-number">11.1</span> Introduction</h2>
+<p>Statistical learning is concerned with the use of statistical and computational models for identifying patterns in data and predicting from these patterns.
+Due to its origins, statistical learning is one of R’s great strengths (see Section <a href="intro.html#software-for-geocomputation">1.3</a>).<a href="#fn62" class="footnote-ref" id="fnref62"><sup>62</sup></a>
+Statistical learning combines methods from statistics and machine learning and its methods can be categorized into supervised and unsupervised techniques.
+Both are increasingly used in disciplines ranging from physics, biology and ecology to geography and economics <span class="citation">(James et al. <a href="#ref-james_introduction_2013" role="doc-biblioref">2013</a>)</span>.</p>
+<p>This chapter focuses on supervised techniques in which there is a training dataset, as opposed to unsupervised techniques such as clustering.
+Response variables can be binary (such as landslide occurrence), categorical (land use), integer (species richness count) or numeric (soil acidity measured in pH).
+Supervised techniques model the relationship between such responses — which are known for a sample of observations — and one or more predictors.</p>
+<!-- For this we can use techniques from the field of statistics or from the field of machine learning.
+Which to use depends on the primary aim: statistical inference or prediction.
+Statistical regression techniques are especially useful if the aim is statistical inference.
+These techniques also allow predictions of unseen data points but this is usually only of secondary interest to statisticians.
+Statistical inference, on the other hand, refers among others to a predictor's significance, its importance for a specific model, its relationship with the response and the uncertainties associated with the estimated coefficients.
+To trust the p-values and standard errors of such models we need to perform a thorough model validation testing if one or several of the underlying model assumptions (heterogeneity, independence, etc.) have been violated [@zuur_mixed_2009].
+By contrast, statistical inference is impossible with machine learning [@james_introduction_2013].
+-->
+<!-- The primary aim of machine learning is to make good predictions, whereas the field of statistics is more focussed on the underlying theory [e.g. @zuur_mixed_2009] -->
+<p>The primary aim of much machine learning research is to make good predictions, as opposed to statistical/Bayesian inference, which is good at helping to understand underlying mechanisms and uncertainties in the data <span class="citation">(see Krainski et al. <a href="#ref-krainski_advanced_2018" role="doc-biblioref">2018</a>)</span>.
+Machine learning thrives in the age of ‘big data’ because its methods make few assumptions about input variables and can handle huge datasets.
+Machine learning is conducive to tasks such as the prediction of future customer behavior, recommendation services (music, movies, what to buy next), face recognition, autonomous driving, text classification and predictive maintenance (infrastructure, industry).</p>
+<!-- ^[In this case we do not have too worry too much about possible model misspecifications since we explicitly do not want to do statistical inference.] -->
+<p>This chapter is based on a case study: the (spatial) prediction of landslides.
+This application links to the applied nature of geocomputation, defined in Chapter <a href="intro.html#intro">1</a>, and illustrates how machine learning borrows from the field of statistics when the sole aim is prediction.
+Therefore, this chapter first introduces modeling and cross-validation concepts with the help of a Generalized Linear Model  <span class="citation">(Zuur et al. <a href="#ref-zuur_mixed_2009" role="doc-biblioref">2009</a>)</span>.
+Building on this, the chapter implements a more typical machine learning algorithm, namely a Support Vector Machine (SVM).
+The models’ <strong>predictive performance</strong> will be assessed using spatial cross-validation (CV), which accounts for the fact that geographic data is special.</p>
+<p>CV determines a model’s ability to generalize to new data, by splitting a dataset (repeatedly) into training and test sets.
+It uses the training data to fit the model, and checks its performance when predicting against the test data.
+CV helps to detect overfitting since models that predict the training data too closely (noise) will tend to perform poorly on the test data.</p>
+<p>Randomly splitting spatial data can lead to training points that are neighbors in space with test points.
+Due to spatial autocorrelation, test and training datasets would not be independent in this scenario, with the consequence that CV fails to detect a possible overfitting.
+Spatial CV alleviates this problem and is the <strong>central</strong> theme in this chapter.</p>
+</div>
+<div id="case-landslide" class="section level2">
+<h2><span class="header-section-number">11.2</span> Case study: Landslide susceptibility</h2>
+<p>This case study is based on a dataset of landslide locations in Southern Ecuador, illustrated in Figure <a href="spatial-cv.html#fig:lsl-map">11.1</a> and described in detail in <span class="citation">Muenchow, Brenning, and Richter (<a href="#ref-muenchow_geomorphic_2012" role="doc-biblioref">2012</a>)</span>.
+A subset of the dataset used in that paper is provided in the <strong>RSAGA</strong> package, which can be loaded as follows:</p>
+<div class="sourceCode" id="cb367"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb367-1"><a href="spatial-cv.html#cb367-1"></a><span class="kw">data</span>(<span class="st">&quot;landslides&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;RSAGA&quot;</span>)</span></code></pre></div>
+<p>This should load three objects: a <code>data.frame</code> named <code>landslides</code>, a <code>list</code> named <code>dem</code>, and an <code>sf</code> object named <code>study_area</code>.
+<code>landslides</code> contains a factor column <code>lslpts</code> where <code>TRUE</code> corresponds to an observed landslide ‘initiation point’, with the coordinates stored in columns <code>x</code> and <code>y</code>.<a href="#fn63" class="footnote-ref" id="fnref63"><sup>63</sup></a></p>
+<p>There are 175 landslide points and 1360 non-landslide, as shown by <code>summary(landslides)</code>.
+The 1360 non-landslide points were sampled randomly from the study area, with the restriction that they must fall outside a small buffer around the landslide polygons.</p>
+<p>To make the number of landslide and non-landslide points balanced, let us sample 175 from the 1360 non-landslide points.<a href="#fn64" class="footnote-ref" id="fnref64"><sup>64</sup></a></p>
+<div class="sourceCode" id="cb368"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb368-1"><a href="spatial-cv.html#cb368-1"></a><span class="co"># select non-landslide points</span></span>
+<span id="cb368-2"><a href="spatial-cv.html#cb368-2"></a>non_pts =<span class="st"> </span><span class="kw">filter</span>(landslides, lslpts <span class="op">==</span><span class="st"> </span><span class="ot">FALSE</span>)</span>
+<span id="cb368-3"><a href="spatial-cv.html#cb368-3"></a><span class="co"># select landslide points</span></span>
+<span id="cb368-4"><a href="spatial-cv.html#cb368-4"></a>lsl_pts =<span class="st"> </span><span class="kw">filter</span>(landslides, lslpts <span class="op">==</span><span class="st"> </span><span class="ot">TRUE</span>)</span>
+<span id="cb368-5"><a href="spatial-cv.html#cb368-5"></a><span class="co"># randomly select 175 non-landslide points</span></span>
+<span id="cb368-6"><a href="spatial-cv.html#cb368-6"></a><span class="kw">set.seed</span>(<span class="dv">11042018</span>)</span>
+<span id="cb368-7"><a href="spatial-cv.html#cb368-7"></a>non_pts_sub =<span class="st"> </span><span class="kw">sample_n</span>(non_pts, <span class="dt">size =</span> <span class="kw">nrow</span>(lsl_pts))</span>
+<span id="cb368-8"><a href="spatial-cv.html#cb368-8"></a><span class="co"># create smaller landslide dataset (lsl)</span></span>
+<span id="cb368-9"><a href="spatial-cv.html#cb368-9"></a>lsl =<span class="st"> </span><span class="kw">bind_rows</span>(non_pts_sub, lsl_pts)</span></code></pre></div>
+<p><code>dem</code> is a digital elevation model consisting of two elements:
+<code>dem$header</code>, a <code>list</code> which represents a raster ‘header’ (see Section <a href="spatial-class.html#raster-data">2.3</a>), and <code>dem$data</code>, a matrix with the altitude of each pixel.
+<code>dem</code> can be converted into a <code>raster</code> object with:</p>
+<!-- Idea: could create a function to do this -->
+<div class="sourceCode" id="cb369"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb369-1"><a href="spatial-cv.html#cb369-1"></a>dem =<span class="st"> </span><span class="kw">raster</span>(</span>
+<span id="cb369-2"><a href="spatial-cv.html#cb369-2"></a>  dem<span class="op">$</span>data, </span>
+<span id="cb369-3"><a href="spatial-cv.html#cb369-3"></a>  <span class="dt">crs =</span> dem<span class="op">$</span>header<span class="op">$</span>proj4string,</span>
+<span id="cb369-4"><a href="spatial-cv.html#cb369-4"></a>  <span class="dt">xmn =</span> dem<span class="op">$</span>header<span class="op">$</span>xllcorner, </span>
+<span id="cb369-5"><a href="spatial-cv.html#cb369-5"></a>  <span class="dt">xmx =</span> dem<span class="op">$</span>header<span class="op">$</span>xllcorner <span class="op">+</span><span class="st"> </span>dem<span class="op">$</span>header<span class="op">$</span>ncols <span class="op">*</span><span class="st"> </span>dem<span class="op">$</span>header<span class="op">$</span>cellsize,</span>
+<span id="cb369-6"><a href="spatial-cv.html#cb369-6"></a>  <span class="dt">ymn =</span> dem<span class="op">$</span>header<span class="op">$</span>yllcorner,</span>
+<span id="cb369-7"><a href="spatial-cv.html#cb369-7"></a>  <span class="dt">ymx =</span> dem<span class="op">$</span>header<span class="op">$</span>yllcorner <span class="op">+</span><span class="st"> </span>dem<span class="op">$</span>header<span class="op">$</span>nrows <span class="op">*</span><span class="st"> </span>dem<span class="op">$</span>header<span class="op">$</span>cellsize</span>
+<span id="cb369-8"><a href="spatial-cv.html#cb369-8"></a>  )</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:lsl-map"></span>
+<img src="figures/lsl-map-1.png" alt="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador." width="100%" />
+<p class="caption">
+FIGURE 11.1: Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador.
+</p>
+</div>
+<p></p>
+<p>To model landslide susceptibility, we need some predictors.
+Terrain attributes are frequently associated with landsliding <span class="citation">(Muenchow, Brenning, and Richter <a href="#ref-muenchow_geomorphic_2012" role="doc-biblioref">2012</a>)</span>, and these can be computed from the digital elevation model (<code>dem</code>) using R-GIS bridges (see Chapter <a href="gis.html#gis">9</a>).
+We leave it as an exercise to the reader to compute the following terrain attribute rasters and extract the corresponding values to our landslide/non-landslide data frame (see exercises; we also provide the resulting data frame via the <strong>spDataLarge</strong> package, see further below):</p>
+<ul>
+<li><code>slope</code>: slope angle (°).</li>
+<li><code>cplan</code>: plan curvature (rad m<sup>−1</sup>) expressing the convergence or divergence of a slope and thus water flow.</li>
+<li><code>cprof</code>: profile curvature (rad m<sup>-1</sup>) as a measure of flow acceleration, also known as downslope change in slope angle.</li>
+<li><code>elev</code>: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.</li>
+<li><code>log10_carea</code>: the decadic logarithm of the catchment area (log10 m<sup>2</sup>) representing the amount of water flowing towards a location.</li>
+</ul>
+<p>Data containing the landslide points, with the corresponding terrain attributes, is provided in the <strong>spDataLarge</strong> package, along with the terrain attribute raster stack from which the values were extracted.
+Hence, if you have not computed the predictors yourself, attach the corresponding data before running the code of the remaining chapter:</p>
+<div class="sourceCode" id="cb370"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb370-1"><a href="spatial-cv.html#cb370-1"></a><span class="co"># attach landslide points with terrain attributes</span></span>
+<span id="cb370-2"><a href="spatial-cv.html#cb370-2"></a><span class="kw">data</span>(<span class="st">&quot;lsl&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;spDataLarge&quot;</span>)</span>
+<span id="cb370-3"><a href="spatial-cv.html#cb370-3"></a><span class="co"># attach terrain attribute raster stack</span></span>
+<span id="cb370-4"><a href="spatial-cv.html#cb370-4"></a><span class="kw">data</span>(<span class="st">&quot;ta&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;spDataLarge&quot;</span>)</span></code></pre></div>
+<p>The first three rows of <code>lsl</code>, rounded to two significant digits, can be found in Table <a href="spatial-cv.html#tab:lslsummary">11.1</a>.</p>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:lslsummary">TABLE 11.1: </span>Structure of the lsl dataset.
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+x
+</th>
+<th style="text-align:right;">
+y
+</th>
+<th style="text-align:left;">
+lslpts
+</th>
+<th style="text-align:right;">
+slope
+</th>
+<th style="text-align:right;">
+cplan
+</th>
+<th style="text-align:right;">
+cprof
+</th>
+<th style="text-align:right;">
+elev
+</th>
+<th style="text-align:right;">
+log10_carea
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+715078
+</td>
+<td style="text-align:right;">
+9558647
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:right;">
+37
+</td>
+<td style="text-align:right;">
+0.021
+</td>
+<td style="text-align:right;">
+0.009
+</td>
+<td style="text-align:right;">
+2500
+</td>
+<td style="text-align:right;">
+2.6
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+713748
+</td>
+<td style="text-align:right;">
+9558047
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:right;">
+42
+</td>
+<td style="text-align:right;">
+-0.024
+</td>
+<td style="text-align:right;">
+0.007
+</td>
+<td style="text-align:right;">
+2500
+</td>
+<td style="text-align:right;">
+3.1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+712508
+</td>
+<td style="text-align:right;">
+9558887
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+0.039
+</td>
+<td style="text-align:right;">
+0.015
+</td>
+<td style="text-align:right;">
+2100
+</td>
+<td style="text-align:right;">
+2.3
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="conventional-model" class="section level2">
+<h2><span class="header-section-number">11.3</span> Conventional modeling approach in R</h2>
+<p>Before introducing the <strong>mlr</strong> package, an umbrella-package providing a unified interface to dozens of learning algorithms (Section <a href="spatial-cv.html#spatial-cv-with-mlr">11.5</a>), it is worth taking a look at the conventional modeling interface in R.
+This introduction to supervised statistical learning provides the basis for doing spatial CV, and contributes to a better grasp on the <strong>mlr</strong> approach presented subsequently.</p>
+<p>Supervised learning involves predicting a response variable as a function of predictors (Section <a href="spatial-cv.html#intro-cv">11.4</a>).
+In R, modeling functions are usually specified using formulas (see <code>?formula</code> and the detailed <a href="https://www.datacamp.com/community/tutorials/r-formula-tutorial">Formulas in R Tutorial</a> for details of R formulas).
+The following command specifies and runs a generalized linear model:</p>
+<div class="sourceCode" id="cb371"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb371-1"><a href="spatial-cv.html#cb371-1"></a>fit =<span class="st"> </span><span class="kw">glm</span>(lslpts <span class="op">~</span><span class="st"> </span>slope <span class="op">+</span><span class="st"> </span>cplan <span class="op">+</span><span class="st"> </span>cprof <span class="op">+</span><span class="st"> </span>elev <span class="op">+</span><span class="st"> </span>log10_carea,</span>
+<span id="cb371-2"><a href="spatial-cv.html#cb371-2"></a>          <span class="dt">family =</span> <span class="kw">binomial</span>(),</span>
+<span id="cb371-3"><a href="spatial-cv.html#cb371-3"></a>          <span class="dt">data =</span> lsl)</span></code></pre></div>
+<p>It is worth understanding each of the three input arguments:</p>
+<ul>
+<li>A formula, which specifies landslide occurrence (<code>lslpts</code>) as a function of the predictors</li>
+<li>A family, which specifies the type of model, in this case <code>binomial</code> because the response is binary (see <code>?family</code>)</li>
+<li>The data frame which contains the response and the predictors</li>
+</ul>
+<p>The results of this model can be printed as follows (<code>summary(fit)</code> provides a more detailed account of the results):</p>
+<div class="sourceCode" id="cb372"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb372-1"><a href="spatial-cv.html#cb372-1"></a><span class="kw">class</span>(fit)</span>
+<span id="cb372-2"><a href="spatial-cv.html#cb372-2"></a><span class="co">#&gt; [1] &quot;glm&quot; &quot;lm&quot;</span></span>
+<span id="cb372-3"><a href="spatial-cv.html#cb372-3"></a>fit</span>
+<span id="cb372-4"><a href="spatial-cv.html#cb372-4"></a><span class="co">#&gt; </span></span>
+<span id="cb372-5"><a href="spatial-cv.html#cb372-5"></a><span class="co">#&gt; Call:  glm(formula = lslpts ~ slope + cplan + cprof + elev + log10_carea, </span></span>
+<span id="cb372-6"><a href="spatial-cv.html#cb372-6"></a><span class="co">#&gt;     family = binomial(), data = lsl)</span></span>
+<span id="cb372-7"><a href="spatial-cv.html#cb372-7"></a><span class="co">#&gt; </span></span>
+<span id="cb372-8"><a href="spatial-cv.html#cb372-8"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb372-9"><a href="spatial-cv.html#cb372-9"></a><span class="co">#&gt; (Intercept)        slope        cplan        cprof         elev  log10_carea  </span></span>
+<span id="cb372-10"><a href="spatial-cv.html#cb372-10"></a><span class="co">#&gt;    1.97e+00     9.30e-02    -2.57e+01    -1.43e+01     2.41e-05    -2.12e+00  </span></span>
+<span id="cb372-11"><a href="spatial-cv.html#cb372-11"></a><span class="co">#&gt; </span></span>
+<span id="cb372-12"><a href="spatial-cv.html#cb372-12"></a><span class="co">#&gt; Degrees of Freedom: 349 Total (i.e. Null);  344 Residual</span></span>
+<span id="cb372-13"><a href="spatial-cv.html#cb372-13"></a><span class="co">#&gt; Null Deviance:       485 </span></span>
+<span id="cb372-14"><a href="spatial-cv.html#cb372-14"></a><span class="co">#&gt; Residual Deviance: 361   AIC: 373</span></span></code></pre></div>
+<p>The model object <code>fit</code>, of class <code>glm</code>, contains the coefficients defining the fitted relationship between response and predictors.
+It can also be used for prediction.
+This is done with the generic <code>predict()</code> method, which in this case calls the function <code>predict.glm()</code>.
+Setting <code>type</code> to <code>response</code> returns the predicted probabilities (of landslide occurrence) for each observation in <code>lsl</code>, as illustrated below (see <code>?predict.glm</code>):</p>
+<div class="sourceCode" id="cb373"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb373-1"><a href="spatial-cv.html#cb373-1"></a>pred_glm =<span class="st"> </span><span class="kw">predict</span>(<span class="dt">object =</span> fit, <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb373-2"><a href="spatial-cv.html#cb373-2"></a><span class="kw">head</span>(pred_glm)</span>
+<span id="cb373-3"><a href="spatial-cv.html#cb373-3"></a><span class="co">#&gt;      1      2      3      4      5      6 </span></span>
+<span id="cb373-4"><a href="spatial-cv.html#cb373-4"></a><span class="co">#&gt; 0.3327 0.4755 0.0995 0.1480 0.3486 0.6766</span></span></code></pre></div>
+<p>Spatial predictions can be made by applying the coefficients to the predictor rasters.
+This can be done manually or with <code>raster::predict()</code>.
+In addition to a model object (<code>fit</code>), this function also expects a raster stack with the predictors named as in the model’s input data frame (Figure <a href="spatial-cv.html#fig:lsl-susc">11.2</a>).</p>
+<div class="sourceCode" id="cb374"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb374-1"><a href="spatial-cv.html#cb374-1"></a><span class="co"># making the prediction</span></span>
+<span id="cb374-2"><a href="spatial-cv.html#cb374-2"></a>pred =<span class="st"> </span>raster<span class="op">::</span><span class="kw">predict</span>(ta, <span class="dt">model =</span> fit, <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:lsl-susc"></span>
+<img src="figures/lsl-susc-1.png" alt="Spatial prediction of landslide susceptibility using a GLM." width="100%" />
+<p class="caption">
+FIGURE 11.2: Spatial prediction of landslide susceptibility using a GLM.
+</p>
+</div>
+<p>Here, when making predictions we neglect spatial autocorrelation since we assume that on average the predictive accuracy remains the same with or without spatial autocorrelation structures.
+However, it is possible to include spatial autocorrelation structures into models <span class="citation">(Zuur et al. <a href="#ref-zuur_mixed_2009" role="doc-biblioref">2009</a>, <a href="#ref-zuur_beginners_2017" role="doc-biblioref">2017</a>; Blangiardo and Cameletti <a href="#ref-blangiardo_spatial_2015" role="doc-biblioref">2015</a>)</span> as well as into predictions <span class="citation">(kriging approaches, see, e.g., Goovaerts <a href="#ref-goovaerts_geostatistics_1997" role="doc-biblioref">1997</a>; Hengl <a href="#ref-hengl_practical_2007" role="doc-biblioref">2007</a>; Bivand, Pebesma, and Gómez-Rubio <a href="#ref-bivand_applied_2013" role="doc-biblioref">2013</a>)</span>.
+This is, however, beyond the scope of this book.
+<!--
+Nevertheless, we give the interested reader some pointers where to look it up:
+
+1. The predictions of regression kriging combines the predictions of a regression with the kriging of the regression's residuals [@bivand_applied_2013]. 
+2. One can also add a spatial correlation (dependency) structure to a generalized least squares model  [`nlme::gls()`; @zuur_mixed_2009; @zuur_beginners_2017].  
+3. Finally, there are mixed-effect modeling approaches.
+Basically, a random effect imposes a dependency structure on the response variable which in turn allows for observations of one class to be more similar to each other than to those of another class [@zuur_mixed_2009]. 
+Classes can be, for example, bee hives, owl nests, vegetation transects or an altitudinal stratification.
+This mixed modeling approach assumes normal and independent distributed random intercepts.^[Note that for spatial predictions one would usually use the population intercept.]
+This can even be extended by using a random intercept that is normal and spatially dependent.
+For this, however, you will have to resort most likely to Bayesian modeling approaches since frequentist software tools are rather limited in this respect especially for more complex models [@blangiardo_spatial_2015; @zuur_beginners_2017]. 
+--></p>
+<p>Spatial prediction maps are one very important outcome of a model.
+Even more important is how good the underlying model is at making them since a prediction map is useless if the model’s predictive performance is bad.
+The most popular measure to assess the predictive performance of a binomial model is the Area Under the Receiver Operator Characteristic Curve (AUROC).
+This is a value between 0.5 and 1.0, with 0.5 indicating a model that is no better than random and 1.0 indicating perfect prediction of the two classes.
+Thus, the higher the AUROC, the better the model’s predictive power.
+The following code chunk computes the AUROC value of the model with <code>roc()</code>, which takes the response and the predicted values as inputs.
+<code>auc()</code> returns the area under the curve.</p>
+<div class="sourceCode" id="cb375"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb375-1"><a href="spatial-cv.html#cb375-1"></a>pROC<span class="op">::</span><span class="kw">auc</span>(pROC<span class="op">::</span><span class="kw">roc</span>(lsl<span class="op">$</span>lslpts, <span class="kw">fitted</span>(fit)))</span>
+<span id="cb375-2"><a href="spatial-cv.html#cb375-2"></a><span class="co">#&gt; Area under the curve: 0.826</span></span></code></pre></div>
+<p>An AUROC value of
+<!--  -->
+0.83
+represents a good fit.
+However, this is an overoptimistic estimation since we have computed it on the complete dataset.
+To derive a biased-reduced assessment, we have to use cross-validation and in the case of spatial data should make use of spatial CV.</p>
+</div>
+<div id="intro-cv" class="section level2">
+<h2><span class="header-section-number">11.4</span> Introduction to (spatial) cross-validation</h2>
+<p>Cross-validation belongs to the family of resampling methods <span class="citation">(James et al. <a href="#ref-james_introduction_2013" role="doc-biblioref">2013</a>)</span>.
+The basic idea is to split (repeatedly) a dataset into training and test sets whereby the training data is used to fit a model which then is applied to the test set.
+Comparing the predicted values with the known response values from the test set (using a performance measure such as the AUROC in the binomial case) gives a bias-reduced assessment of the model’s capability to generalize the learned relationship to independent data.
+For example, a 100-repeated 5-fold cross-validation means to randomly split the data into five partitions (folds) with each fold being used once as a test set (see upper row of Figure <a href="spatial-cv.html#fig:partitioning">11.3</a>).
+This guarantees that each observation is used once in one of the test sets, and requires the fitting of five models.
+Subsequently, this procedure is repeated 100 times.
+Of course, the data splitting will differ in each repetition.
+<!--if the error is calc. on the fold-level. most often its calc. on the repetition level. maybe worth noting.
+talk about this in person
+-->
+Overall, this sums up to 500 models, whereas the mean performance measure (AUROC) of all models is the model’s overall predictive power.</p>
+<p>However, geographic data is special.
+As we will see in Chapter <a href="transport.html#transport">12</a>, the ‘first law’ of geography states that points close to each other are, generally, more similar than points further away <span class="citation">(Miller <a href="#ref-miller_tobler_2004" role="doc-biblioref">2004</a>)</span>.
+This means these points are not statistically independent because training and test points in conventional CV are often too close to each other (see first row of Figure <a href="spatial-cv.html#fig:partitioning">11.3</a>).
+‘Training’ observations near the ‘test’ observations can provide a kind of ‘sneak preview’:
+information that should be unavailable to the training dataset.
+<!-- "folds" only for the repetition split, "partitions" or "subsets" for splitting within a fold
+talk about this in person
+-->
+To alleviate this problem ‘spatial partitioning’ is used to split the observations into spatially disjointed subsets (using the observations’ coordinates in a <em>k</em>-means clustering; <span class="citation">A. Brenning (<a href="#ref-brenning_spatial_2012" role="doc-biblioref">2012</a><a href="#ref-brenning_spatial_2012" role="doc-biblioref">b</a>)</span>; second row of Figure <a href="spatial-cv.html#fig:partitioning">11.3</a>).
+This partitioning strategy is the <strong>only</strong> difference between spatial and conventional CV.
+As a result, spatial CV leads to a bias-reduced assessment of a model’s predictive performance, and hence helps to avoid overfitting.
+<!-- Alex suggested to remove this: 
+It is important to note that spatial CV reduces the bias introduced by spatial autocorrelation but does not completely remove it. 
+This is because there are still a few points in the test and training data which are still neighbors (@brenning_spatial_2012; see second row of \@ref(fig:partitioning)).
+--></p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:partitioning"></span>
+<img src="figures/13_partitioning.png" alt="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row)." width="100%" />
+<p class="caption">
+FIGURE 11.3: Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row).
+</p>
+</div>
+</div>
+<div id="spatial-cv-with-mlr" class="section level2">
+<h2><span class="header-section-number">11.5</span> Spatial CV with <strong>mlr</strong></h2>
+<p>
+There are dozens of packages for statistical learning, as described for example in the <a href="https://CRAN.R-project.org/view=MachineLearning">CRAN machine learning task view</a>.
+Getting acquainted with each of these packages, including how to undertake cross-validation and hyperparameter tuning, can be a time-consuming process.
+Comparing model results from different packages can be even more laborious.
+The <strong>mlr</strong> package was developed to address these issues.
+It acts as a ‘meta-package’, providing a unified interface to popular supervised and unsupervised statistical learning techniques including classification, regression, survival analysis and clustering <span class="citation">(Bischl et al. <a href="#ref-bischl_mlr:_2016" role="doc-biblioref">2016</a>)</span>.
+<!-- ^[ -->
+<!-- We will solely focus on supervised learning techniques in this chapter. -->
+<!-- ] -->
+The standardized <strong>mlr</strong> interface is based on eight ‘building blocks’.
+As illustrated in Figure <a href="spatial-cv.html#fig:building-blocks">11.4</a>, these have a clear order.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:building-blocks"></span>
+<img src="figures/13_ml_abstraction_crop.png" alt="Basic building blocks of the mlr package. Source: http://bit.ly/2tcb2b7. (Permission to reuse this figure was kindly granted.)" width="100%" />
+<p class="caption">
+FIGURE 11.4: Basic building blocks of the mlr package. Source: <a href="http://bit.ly/2tcb2b7" class="uri">http://bit.ly/2tcb2b7</a>. (Permission to reuse this figure was kindly granted.)
+</p>
+</div>
+<p>The <strong>mlr</strong> modeling process consists of three main stages.
+First, a <strong>task</strong> specifies the data (including response and predictor variables) and the model type (such as regression or classification).
+Second, a <strong>learner</strong> defines the specific learning algorithm that is applied to the created task.
+Third, the <strong>resampling</strong> approach assesses the predictive performance of the model, i.e., its ability to generalize to new data (see also Section <a href="spatial-cv.html#intro-cv">11.4</a>).</p>
+<div id="glm" class="section level3">
+<h3><span class="header-section-number">11.5.1</span> Generalized linear model</h3>
+<p>To implement a GLM in <strong>mlr</strong>, we must create a <strong>task</strong> containing the landslide data.
+Since the response is binary (two-category variable), we create a classification task with <code>makeClassifTask()</code> (for regression tasks, use <code>makeRegrTask()</code>, see <code>?makeRegrTask</code> for other task types).
+The first essential argument of these <code>make*()</code> functions is <code>data</code>.
+The <code>target</code> argument expects the name of a response variable and <code>positive</code> determines which of the two factor levels of the response variable indicate the landslide initiation point (in our case this is <code>TRUE</code>).
+All other variables of the <code>lsl</code> dataset will serve as predictors except for the coordinates (see the result of <code>getTaskFormula(task)</code> for the model formula).
+For spatial CV, the <code>coordinates</code> parameter is used (see Section <a href="spatial-cv.html#intro-cv">11.4</a> and Figure <a href="spatial-cv.html#fig:partitioning">11.3</a>) which expects the coordinates as a xy data frame.</p>
+<div class="sourceCode" id="cb376"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb376-1"><a href="spatial-cv.html#cb376-1"></a><span class="kw">library</span>(mlr)</span>
+<span id="cb376-2"><a href="spatial-cv.html#cb376-2"></a><span class="co"># coordinates needed for the spatial partitioning</span></span>
+<span id="cb376-3"><a href="spatial-cv.html#cb376-3"></a>coords =<span class="st"> </span>lsl[, <span class="kw">c</span>(<span class="st">&quot;x&quot;</span>, <span class="st">&quot;y&quot;</span>)]</span>
+<span id="cb376-4"><a href="spatial-cv.html#cb376-4"></a><span class="co"># select response and predictors to use in the modeling</span></span>
+<span id="cb376-5"><a href="spatial-cv.html#cb376-5"></a>data =<span class="st"> </span>dplyr<span class="op">::</span><span class="kw">select</span>(lsl, <span class="op">-</span>x, <span class="op">-</span>y)</span>
+<span id="cb376-6"><a href="spatial-cv.html#cb376-6"></a><span class="co"># create task</span></span>
+<span id="cb376-7"><a href="spatial-cv.html#cb376-7"></a>task =<span class="st"> </span><span class="kw">makeClassifTask</span>(<span class="dt">data =</span> data, <span class="dt">target =</span> <span class="st">&quot;lslpts&quot;</span>,</span>
+<span id="cb376-8"><a href="spatial-cv.html#cb376-8"></a>                       <span class="dt">positive =</span> <span class="st">&quot;TRUE&quot;</span>, <span class="dt">coordinates =</span> coords)</span></code></pre></div>
+<p><code>makeLearner()</code> determines the statistical learning method to use.
+All classification <strong>learners</strong> start with <code>classif.</code> and all regression learners with <code>regr.</code> (see <code>?makeLearners</code> for details).
+<code>listLearners()</code> helps to find out about all available learners and from which package <strong>mlr</strong> imports them (Table <a href="spatial-cv.html#tab:lrns">11.2</a>).
+For a specific task, we can run:</p>
+<div class="sourceCode" id="cb377"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb377-1"><a href="spatial-cv.html#cb377-1"></a><span class="kw">listLearners</span>(task, <span class="dt">warn.missing.packages =</span> <span class="ot">FALSE</span>) <span class="op">%&gt;%</span></span>
+<span id="cb377-2"><a href="spatial-cv.html#cb377-2"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(class, name, short.name, package) <span class="op">%&gt;%</span></span>
+<span id="cb377-3"><a href="spatial-cv.html#cb377-3"></a><span class="st">  </span><span class="kw">head</span>()</span></code></pre></div>
+<table>
+<caption>
+<span id="tab:lrns">TABLE 11.2: </span>Sample of available learners for binomial tasks in the mlr package.
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Class
+</th>
+<th style="text-align:left;">
+Name
+</th>
+<th style="text-align:left;">
+Short name
+</th>
+<th style="text-align:left;">
+Package
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+classif.adaboostm1
+</td>
+<td style="text-align:left;">
+ada Boosting M1
+</td>
+<td style="text-align:left;">
+adaboostm1
+</td>
+<td style="text-align:left;">
+RWeka
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.binomial
+</td>
+<td style="text-align:left;">
+Binomial Regression
+</td>
+<td style="text-align:left;">
+binomial
+</td>
+<td style="text-align:left;">
+stats
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.featureless
+</td>
+<td style="text-align:left;">
+Featureless classifier
+</td>
+<td style="text-align:left;">
+featureless
+</td>
+<td style="text-align:left;">
+mlr
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.fnn
+</td>
+<td style="text-align:left;">
+Fast k-Nearest Neighbour
+</td>
+<td style="text-align:left;">
+fnn
+</td>
+<td style="text-align:left;">
+FNN
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.gausspr
+</td>
+<td style="text-align:left;">
+Gaussian Processes
+</td>
+<td style="text-align:left;">
+gausspr
+</td>
+<td style="text-align:left;">
+kernlab
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+classif.IBk
+</td>
+<td style="text-align:left;">
+k-Nearest Neighbours
+</td>
+<td style="text-align:left;">
+ibk
+</td>
+<td style="text-align:left;">
+RWeka
+</td>
+</tr>
+</tbody>
+</table>
+<p>This yields all learners able to model two-class problems (landslide yes or no).
+We opt for the binomial classification method used in Section <a href="spatial-cv.html#conventional-model">11.3</a> and implemented as <code>classif.binomial</code> in <strong>mlr</strong>.
+Additionally, we must specify the link-function, <code>logit</code> in this case, which is also the default of the <code>binomial()</code> function.
+<code>predict.type</code> determines the type of the prediction with <code>prob</code> resulting in the predicted probability for landslide occurrence between 0 and 1 (this corresponds to <code>type = response</code> in <code>predict.glm</code>).</p>
+<div class="sourceCode" id="cb378"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb378-1"><a href="spatial-cv.html#cb378-1"></a>lrn =<span class="st"> </span><span class="kw">makeLearner</span>(<span class="dt">cl =</span> <span class="st">&quot;classif.binomial&quot;</span>,</span>
+<span id="cb378-2"><a href="spatial-cv.html#cb378-2"></a>                  <span class="dt">link =</span> <span class="st">&quot;logit&quot;</span>,</span>
+<span id="cb378-3"><a href="spatial-cv.html#cb378-3"></a>                  <span class="dt">predict.type =</span> <span class="st">&quot;prob&quot;</span>,</span>
+<span id="cb378-4"><a href="spatial-cv.html#cb378-4"></a>                  <span class="dt">fix.factors.prediction =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+<p>To find out from which package the specified learner is taken and how to access the corresponding help pages, we can run:</p>
+<div class="sourceCode" id="cb379"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb379-1"><a href="spatial-cv.html#cb379-1"></a><span class="kw">getLearnerPackages</span>(lrn)</span>
+<span id="cb379-2"><a href="spatial-cv.html#cb379-2"></a><span class="kw">helpLearner</span>(lrn)</span></code></pre></div>
+<!--
+Having specified a learner and a task, we can train our model which basically executes the `glm()` command in the background for our task. 
+
+
+```r
+mod = train(learner = lrn, task = task)
+mlr_fit = getLearnerModel(mod)
+```
+
+
+
+`getLearnerModel()` extracts the used model which shows that **mlr** passed all specified parameters to the `glm` function in the background as also proved by following code:
+
+
+```r
+fit = glm(lslpts ~ ., family = binomial(link = "logit"), data = data)
+identical(fit$coefficients, mlr_fit$coefficients)
+```
+-->
+<p>The set-up steps for modeling with <strong>mlr</strong> may seem tedious.
+But remember, this single interface provides access to the 150+ learners shown by <code>listLearners()</code>; it would be far more tedious to learn the interface for each learner!
+Further advantages are simple parallelization of resampling techniques and the ability to tune machine learning hyperparameters (see Section <a href="spatial-cv.html#svm">11.5.2</a>).
+Most importantly, (spatial) resampling in <strong>mlr</strong> is straightforward, requiring only two more steps: specifying a resampling method and running it.
+We will use a 100-repeated 5-fold spatial CV: five partitions will be chosen based on the provided coordinates in our <code>task</code> and the partitioning will be repeated 100 times:<a href="#fn65" class="footnote-ref" id="fnref65"><sup>65</sup></a></p>
+<div class="sourceCode" id="cb380"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb380-1"><a href="spatial-cv.html#cb380-1"></a>perf_level =<span class="st"> </span><span class="kw">makeResampleDesc</span>(<span class="dt">method =</span> <span class="st">&quot;SpRepCV&quot;</span>, <span class="dt">folds =</span> <span class="dv">5</span>, <span class="dt">reps =</span> <span class="dv">100</span>)</span></code></pre></div>
+<p>To execute the spatial resampling, we run <code>resample()</code> using the specified learner, task, resampling strategy and of course the performance measure, here the AUROC.
+This takes some time (around 10 seconds on a modern laptop) because it computes the AUROC for 500 models.
+Setting a seed ensures the reproducibility of the obtained result and will ensure the same spatial partitioning when re-running the code.</p>
+<!-- I just thought it might be worth showing the differences between an error on the fold level and repetition level but aggregating to the rep level is not a one-liner in mlr -->
+<div class="sourceCode" id="cb381"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb381-1"><a href="spatial-cv.html#cb381-1"></a><span class="kw">set.seed</span>(<span class="dv">012348</span>)</span>
+<span id="cb381-2"><a href="spatial-cv.html#cb381-2"></a>sp_cv =<span class="st"> </span>mlr<span class="op">::</span><span class="kw">resample</span>(<span class="dt">learner =</span> lrn, <span class="dt">task =</span> task,</span>
+<span id="cb381-3"><a href="spatial-cv.html#cb381-3"></a>                      <span class="dt">resampling =</span> perf_level, </span>
+<span id="cb381-4"><a href="spatial-cv.html#cb381-4"></a>                      <span class="dt">measures =</span> mlr<span class="op">::</span>auc)</span></code></pre></div>
+<!-- sp_cv and conv_cv have been saved in spatialcv.Rdata. I needed to run the modeling outside of the book since knitr sets its own seed and I am not sure if this actually helps to make sure that the same partitions are used in the cv.
+I really don't understand why I have to load spatialcv.Rdata here a third time...-->
+<p>The output of the preceding code chunk is a bias-reduced assessment of the model’s predictive performance, as illustrated in the following code chunk (required input data is saved in the file <code>spatialcv.Rdata</code> in the book’s GitHub repo):</p>
+<div class="sourceCode" id="cb382"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb382-1"><a href="spatial-cv.html#cb382-1"></a><span class="co"># summary statistics of the 500 models</span></span>
+<span id="cb382-2"><a href="spatial-cv.html#cb382-2"></a><span class="kw">summary</span>(sp_cv<span class="op">$</span>measures.test<span class="op">$</span>auc)</span>
+<span id="cb382-3"><a href="spatial-cv.html#cb382-3"></a><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span id="cb382-4"><a href="spatial-cv.html#cb382-4"></a><span class="co">#&gt;   0.686   0.757   0.789   0.780   0.795   0.861</span></span>
+<span id="cb382-5"><a href="spatial-cv.html#cb382-5"></a><span class="co"># mean AUROC of the 500 models</span></span>
+<span id="cb382-6"><a href="spatial-cv.html#cb382-6"></a><span class="kw">mean</span>(sp_cv<span class="op">$</span>measures.test<span class="op">$</span>auc)</span>
+<span id="cb382-7"><a href="spatial-cv.html#cb382-7"></a><span class="co">#&gt; [1] 0.78</span></span></code></pre></div>
+<p>To put these results in perspective, let us compare them with AUROC values from a 100-repeated 5-fold non-spatial cross-validation (Figure <a href="spatial-cv.html#fig:boxplot-cv">11.5</a>; the code for the non-spatial cross-validation is not shown here but will be explored in the exercise section).
+As expected, the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance due to spatial autocorrelation of the latter.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:boxplot-cv"></span>
+<img src="11-spatial-cv_files/figure-html/boxplot-cv-1.png" alt="Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation." width="100%" />
+<p class="caption">
+FIGURE 11.5: Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation.
+</p>
+</div>
+</div>
+<div id="svm" class="section level3">
+<h3><span class="header-section-number">11.5.2</span> Spatial tuning of machine-learning hyperparameters</h3>
+<p>Section <a href="spatial-cv.html#intro-cv">11.4</a> introduced machine learning as part of statistical learning.
+To recap, we adhere to the following definition of machine learning by <a href="https://machinelearningmastery.com/linear-regression-for-machine-learning/">Jason Brownlee</a>:</p>
+<blockquote>
+<p>Machine learning, more specifically the field of predictive modeling, is primarily concerned with minimizing the error of a model or making the most accurate predictions possible, at the expense of explainability.
+In applied machine learning we will borrow, reuse and steal algorithms from many different fields, including statistics and use them towards these ends.</p>
+</blockquote>
+<p>In Section <a href="spatial-cv.html#glm">11.5.1</a> a GLM was used to predict landslide susceptibility.
+This section introduces support vector machines (SVM) for the same purpose.
+Random forest models might be more popular than SVMs; however, the positive effect of tuning hyperparameters on model performance is much more pronounced in the case of SVMs <span class="citation">(Probst, Wright, and Boulesteix <a href="#ref-probst_hyperparameters_2018" role="doc-biblioref">2018</a>)</span>.
+Since (spatial) hyperparameter tuning is the major aim of this section, we will use an SVM.
+For those wishing to apply a random forest model, we recommend to read this chapter, and then proceed to Chapter <a href="eco.html#eco">14</a> in which we will apply the currently covered concepts and techniques to make spatial predictions based on a random forest model.</p>
+<p>SVMs search for the best possible ‘hyperplanes’ to separate classes (in a classification case) and estimate ‘kernels’ with specific hyperparameters to allow for non-linear boundaries between classes <span class="citation">(James et al. <a href="#ref-james_introduction_2013" role="doc-biblioref">2013</a>)</span>.
+Hyperparameters should not be confused with coefficients of parametric models, which are sometimes also referred to as parameters.<a href="#fn66" class="footnote-ref" id="fnref66"><sup>66</sup></a>
+Coefficients can be estimated from the data, while hyperparameters are set before the learning begins.
+Optimal hyperparameters are usually determined within a defined range with the help of cross-validation methods.
+This is called hyperparameter tuning.</p>
+<p>Some SVM implementations such as that provided by <strong>kernlab</strong> allow hyperparameters to be tuned automatically, usually based on random sampling (see upper row of Figure <a href="spatial-cv.html#fig:partitioning">11.3</a>).
+This works for non-spatial data but is of less use for spatial data where ‘spatial tuning’ should be undertaken.</p>
+<p>Before defining spatial tuning, we will set up the <strong>mlr</strong> building blocks, introduced in Section <a href="spatial-cv.html#glm">11.5.1</a>, for the SVM.
+The classification task remains the same, hence we can simply reuse the <code>task</code> object created in Section <a href="spatial-cv.html#glm">11.5.1</a>.
+Learners implementing SVM can be found using <code>listLearners()</code> as follows:</p>
+<div class="sourceCode" id="cb383"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb383-1"><a href="spatial-cv.html#cb383-1"></a>lrns =<span class="st"> </span><span class="kw">listLearners</span>(task, <span class="dt">warn.missing.packages =</span> <span class="ot">FALSE</span>)</span>
+<span id="cb383-2"><a href="spatial-cv.html#cb383-2"></a><span class="kw">filter</span>(lrns, <span class="kw">grepl</span>(<span class="st">&quot;svm&quot;</span>, class)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb383-3"><a href="spatial-cv.html#cb383-3"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(class, name, short.name, package)</span>
+<span id="cb383-4"><a href="spatial-cv.html#cb383-4"></a><span class="co">#&gt;            class                                 name short.name package</span></span>
+<span id="cb383-5"><a href="spatial-cv.html#cb383-5"></a><span class="co">#&gt; 6   classif.ksvm              Support Vector Machines       ksvm kernlab</span></span>
+<span id="cb383-6"><a href="spatial-cv.html#cb383-6"></a><span class="co">#&gt; 9  classif.lssvm Least Squares Support Vector Machine      lssvm kernlab</span></span>
+<span id="cb383-7"><a href="spatial-cv.html#cb383-7"></a><span class="co">#&gt; 17   classif.svm     Support Vector Machines (libsvm)        svm   e1071</span></span></code></pre></div>
+<p>Of the options illustrated above, we will use <code>ksvm()</code> from the <strong>kernlab</strong> package <span class="citation">(Karatzoglou et al. <a href="#ref-karatzoglou_kernlab_2004" role="doc-biblioref">2004</a>)</span>.
+To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel which is also the default of <code>ksvm()</code>.</p>
+<div class="sourceCode" id="cb384"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb384-1"><a href="spatial-cv.html#cb384-1"></a>lrn_ksvm =<span class="st"> </span><span class="kw">makeLearner</span>(<span class="st">&quot;classif.ksvm&quot;</span>,</span>
+<span id="cb384-2"><a href="spatial-cv.html#cb384-2"></a>                        <span class="dt">predict.type =</span> <span class="st">&quot;prob&quot;</span>,</span>
+<span id="cb384-3"><a href="spatial-cv.html#cb384-3"></a>                        <span class="dt">kernel =</span> <span class="st">&quot;rbfdot&quot;</span>)</span></code></pre></div>
+<p>The next stage is to specify a resampling strategy.
+Again we will use a 100-repeated 5-fold spatial CV.</p>
+<!-- Instead of saying "outer resampling" we concluded to use "performance estimation level" and "tuning level" (inner) in our paper
+# this is also what is shown in the nested CV figure so it would be more consistent -->
+<div class="sourceCode" id="cb385"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb385-1"><a href="spatial-cv.html#cb385-1"></a><span class="co"># performance estimation level</span></span>
+<span id="cb385-2"><a href="spatial-cv.html#cb385-2"></a>perf_level =<span class="st"> </span><span class="kw">makeResampleDesc</span>(<span class="dt">method =</span> <span class="st">&quot;SpRepCV&quot;</span>, <span class="dt">folds =</span> <span class="dv">5</span>, <span class="dt">reps =</span> <span class="dv">100</span>)</span></code></pre></div>
+<p>Note that this is the exact same code as used for the GLM in Section <a href="spatial-cv.html#glm">11.5.1</a>; we have simply repeated it here as a reminder.</p>
+<p>So far, the process has been identical to that described in Section <a href="spatial-cv.html#glm">11.5.1</a>.
+The next step is new, however: to tune the hyperparameters.
+Using the same data for the performance assessment and the tuning would potentially lead to overoptimistic results <span class="citation">(Cawley and Talbot <a href="#ref-cawley_overfitting_2010" role="doc-biblioref">2010</a>)</span>.
+This can be avoided using nested spatial CV.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:inner-outer"></span>
+<img src="figures/13_cv.png" alt="Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2018). Permission to reuse it  was kindly granted.)" width="100%" />
+<p class="caption">
+FIGURE 11.6: Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2018). Permission to reuse it was kindly granted.)
+</p>
+</div>
+<p>This means that we split each fold again into five spatially disjoint subfolds which are used to determine the optimal hyperparameters (<code>tune_level</code> object in the code chunk below; see Figure <a href="spatial-cv.html#fig:inner-outer">11.6</a> for a visual representation).
+To find the optimal hyperparameter combination, we fit 50 models (<code>ctrl</code> object in the code chunk below) in each of these subfolds with randomly selected values for the hyperparameters C and Sigma.
+The random selection of values C and Sigma is additionally restricted to a predefined tuning space (<code>ps</code> object).
+The range of the tuning space was chosen with values recommended in the literature <span class="citation">(Schratz et al. <a href="#ref-schratz_performance_nodate" role="doc-biblioref">2018</a>)</span>.</p>
+<!--
+Questions Pat:
+- why not using e1071 svm -> inner hyperparameter tuning also possible I guess...
+## Because kernlab has more kernel options. Other than that there is no argument
+- explanation correct?
+## If you mean the paragraph above, yes
+- trafo-function?
+## is just a different approach of writing the limits. You could also directly write 2^{-15}. Makes it easier to see the limits at the first glance. Personal preference though
+- 125,000 models
+-->
+<!--
+talk in person (see also exercises):
+- can I compare the mean AUROC of the GLM and the SVM when using the same seed? Or is seeding not strictly necessary? I mean, ok, the partitions vary a bit but overall...
+-->
+<div class="sourceCode" id="cb386"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb386-1"><a href="spatial-cv.html#cb386-1"></a><span class="co"># five spatially disjoint partitions</span></span>
+<span id="cb386-2"><a href="spatial-cv.html#cb386-2"></a>tune_level =<span class="st"> </span><span class="kw">makeResampleDesc</span>(<span class="st">&quot;SpCV&quot;</span>, <span class="dt">iters =</span> <span class="dv">5</span>)</span>
+<span id="cb386-3"><a href="spatial-cv.html#cb386-3"></a><span class="co"># use 50 randomly selected hyperparameters</span></span>
+<span id="cb386-4"><a href="spatial-cv.html#cb386-4"></a>ctrl =<span class="st"> </span><span class="kw">makeTuneControlRandom</span>(<span class="dt">maxit =</span> <span class="dv">50</span>)</span>
+<span id="cb386-5"><a href="spatial-cv.html#cb386-5"></a><span class="co"># define the outer limits of the randomly selected hyperparameters</span></span>
+<span id="cb386-6"><a href="spatial-cv.html#cb386-6"></a>ps =<span class="st"> </span><span class="kw">makeParamSet</span>(</span>
+<span id="cb386-7"><a href="spatial-cv.html#cb386-7"></a>  <span class="kw">makeNumericParam</span>(<span class="st">&quot;C&quot;</span>, <span class="dt">lower =</span> <span class="dv">-12</span>, <span class="dt">upper =</span> <span class="dv">15</span>, <span class="dt">trafo =</span> <span class="cf">function</span>(x) <span class="dv">2</span><span class="op">^</span>x),</span>
+<span id="cb386-8"><a href="spatial-cv.html#cb386-8"></a>  <span class="kw">makeNumericParam</span>(<span class="st">&quot;sigma&quot;</span>, <span class="dt">lower =</span> <span class="dv">-15</span>, <span class="dt">upper =</span> <span class="dv">6</span>, <span class="dt">trafo =</span> <span class="cf">function</span>(x) <span class="dv">2</span><span class="op">^</span>x)</span>
+<span id="cb386-9"><a href="spatial-cv.html#cb386-9"></a>  )</span></code></pre></div>
+<p>The next stage is to modify the learner <code>lrn_ksvm</code> in accordance with all the characteristics defining the hyperparameter tuning with <code>makeTuneWrapper()</code>.</p>
+<div class="sourceCode" id="cb387"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb387-1"><a href="spatial-cv.html#cb387-1"></a>wrapped_lrn_ksvm =<span class="st"> </span><span class="kw">makeTuneWrapper</span>(<span class="dt">learner =</span> lrn_ksvm, </span>
+<span id="cb387-2"><a href="spatial-cv.html#cb387-2"></a>                                   <span class="dt">resampling =</span> tune_level,</span>
+<span id="cb387-3"><a href="spatial-cv.html#cb387-3"></a>                                   <span class="dt">par.set =</span> ps,</span>
+<span id="cb387-4"><a href="spatial-cv.html#cb387-4"></a>                                   <span class="dt">control =</span> ctrl, </span>
+<span id="cb387-5"><a href="spatial-cv.html#cb387-5"></a>                                   <span class="dt">show.info =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb387-6"><a href="spatial-cv.html#cb387-6"></a>                                   <span class="dt">measures =</span> mlr<span class="op">::</span>auc)</span></code></pre></div>
+<p>The <strong>mlr</strong> is now set-up to fit 250 models to determine optimal hyperparameters for one fold.
+Repeating this for each fold, we end up with 1250 (250 * 5) models for each repetition.
+Repeated 100 times means fitting a total of 125,000 models to identify optimal hyperparameters (Figure <a href="spatial-cv.html#fig:partitioning">11.3</a>).
+These are used in the performance estimation, which requires the fitting of another 500 models (5 folds * 100 repetitions; see Figure <a href="spatial-cv.html#fig:partitioning">11.3</a>).
+To make the performance estimation processing chain even clearer, let us write down the commands we have given to the computer:</p>
+<ol style="list-style-type: decimal">
+<li>Performance level (upper left part of Figure <a href="spatial-cv.html#fig:inner-outer">11.6</a>): split the dataset into five spatially disjoint (outer) subfolds.</li>
+<li>Tuning level (lower left part of Figure <a href="spatial-cv.html#fig:inner-outer">11.6</a>): use the first fold of the performance level and split it again spatially into five (inner) subfolds for the hyperparameter tuning.
+Use the 50 randomly selected hyperparameters in each of these inner subfolds, i.e., fit 250 models.</li>
+<li>Performance estimation: Use the best hyperparameter combination from the previous step (tuning level) and apply it to the first outer fold in the performance level to estimate the performance (AUROC).</li>
+<li>Repeat steps 2 and 3 for the remaining four outer folds.</li>
+<li>Repeat steps 2 to 4, 100 times.</li>
+</ol>
+<p>The process of hyperparameter tuning and performance estimation is computationally intensive.
+Model runtime can be reduced with parallelization, which can be done in a number of ways, depending on the operating system.
+<!-- "cloud development is done on linux servers" is somehow a strange read that I cannot relate really. Maybe sth like: "Parallelilaztion and cloud-computing are most often done on Linux operating systems nowadays. This has some reasons, one of them that directly affects us is that only on Linux systems we can set a parallel seed in R that makes the parallel processes reproducible [this is still an assumption, I will check on that!]"--></p>
+<p>Before starting the parallelization, we ensure that the processing continues even if one of the models throws an error by setting <code>on.learner.error</code> to <code>warn</code>.
+This avoids the process stopping just because of one failed model, which is desirable on large model runs.
+To inspect the failed models once the processing is completed, we dump them:</p>
+<div class="sourceCode" id="cb388"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb388-1"><a href="spatial-cv.html#cb388-1"></a><span class="kw">configureMlr</span>(<span class="dt">on.learner.error =</span> <span class="st">&quot;warn&quot;</span>, <span class="dt">on.error.dump =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+<p>To start the parallelization, we set the <code>mode</code> to <code>multicore</code> which will use <code>mclapply()</code> in the background on a single machine in the case of a Unix-based operating system.<a href="#fn67" class="footnote-ref" id="fnref67"><sup>67</sup></a>
+Equivalenty, <code>parallelStartSocket()</code> enables parallelization under Windows.
+<code>level</code> defines the level at which to enable parallelization, with <code>mlr.tuneParams</code> determining that the hyperparameter tuning level should be parallelized (see lower left part of Figure <a href="spatial-cv.html#fig:inner-outer">11.6</a>, <code>?parallelGetRegisteredLevels</code>, and the <strong>mlr</strong> <a href="https://mlr-org.github.io/mlr-tutorial/release/html/parallelization/index.html#parallelization-levels">parallelization tutorial</a> for details).
+We will use half of the available cores (set with the <code>cpus</code> parameter), a setting that allows possible other users to work on the same high performance computing cluster in case one is used (which was the case when we ran the code).
+<!-- the partitions are created before the parallelization by the normal set.seed() call. mc.set.seed makes sure that the randomly chosen hyperparameters for the tuning are reproducible. These will first set within the parallelization.-->
+Setting <code>mc.set.seed</code> to <code>TRUE</code> ensures that the randomly chosen hyperparameters during the tuning can be reproduced when running the code again.
+Unfortunately, <code>mc.set.seed</code> is only available under Unix-based systems.</p>
+<div class="sourceCode" id="cb389"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb389-1"><a href="spatial-cv.html#cb389-1"></a><span class="kw">library</span>(parallelMap)</span>
+<span id="cb389-2"><a href="spatial-cv.html#cb389-2"></a><span class="cf">if</span> (<span class="kw">Sys.info</span>()[<span class="st">&quot;sysname&quot;</span>] <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Linux&quot;</span>, <span class="st">&quot;Darwin&quot;</span>)) {</span>
+<span id="cb389-3"><a href="spatial-cv.html#cb389-3"></a><span class="kw">parallelStart</span>(<span class="dt">mode =</span> <span class="st">&quot;multicore&quot;</span>, </span>
+<span id="cb389-4"><a href="spatial-cv.html#cb389-4"></a>              <span class="co"># parallelize the hyperparameter tuning level</span></span>
+<span id="cb389-5"><a href="spatial-cv.html#cb389-5"></a>              <span class="dt">level =</span> <span class="st">&quot;mlr.tuneParams&quot;</span>, </span>
+<span id="cb389-6"><a href="spatial-cv.html#cb389-6"></a>              <span class="co"># just use half of the available cores</span></span>
+<span id="cb389-7"><a href="spatial-cv.html#cb389-7"></a>              <span class="dt">cpus =</span> <span class="kw">round</span>(parallel<span class="op">::</span><span class="kw">detectCores</span>() <span class="op">/</span><span class="st"> </span><span class="dv">2</span>),</span>
+<span id="cb389-8"><a href="spatial-cv.html#cb389-8"></a>              <span class="dt">mc.set.seed =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb389-9"><a href="spatial-cv.html#cb389-9"></a>}</span>
+<span id="cb389-10"><a href="spatial-cv.html#cb389-10"></a></span>
+<span id="cb389-11"><a href="spatial-cv.html#cb389-11"></a><span class="cf">if</span> (<span class="kw">Sys.info</span>()[<span class="st">&quot;sysname&quot;</span>] <span class="op">==</span><span class="st"> &quot;Windows&quot;</span>) {</span>
+<span id="cb389-12"><a href="spatial-cv.html#cb389-12"></a>  <span class="kw">parallelStartSocket</span>(<span class="dt">level =</span> <span class="st">&quot;mlr.tuneParams&quot;</span>,</span>
+<span id="cb389-13"><a href="spatial-cv.html#cb389-13"></a>                      <span class="dt">cpus =</span>  <span class="kw">round</span>(parallel<span class="op">::</span><span class="kw">detectCores</span>() <span class="op">/</span><span class="st"> </span><span class="dv">2</span>))</span>
+<span id="cb389-14"><a href="spatial-cv.html#cb389-14"></a>}</span></code></pre></div>
+<p>Now we are set up for computing the nested spatial CV.
+Using a seed allows us to recreate the exact same spatial partitions when re-running the code.
+Specifying the <code>resample()</code> parameters follows the exact same procedure as presented when using a GLM, the only difference being the <code>extract</code> argument.
+This allows the extraction of the hyperparameter tuning results which is important if we plan follow-up analyses on the tuning.
+After the processing, it is good practice to explicitly stop the parallelization with <code>parallelStop()</code>.
+Finally, we save the output object (<code>result</code>) to disk in case we would like to use it another R session.
+Before running the subsequent code, be aware that it is time-consuming:
+the 125,500 models took ~1/2hr on a server using 24 cores (see below).</p>
+<div class="sourceCode" id="cb390"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb390-1"><a href="spatial-cv.html#cb390-1"></a><span class="kw">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb390-2"><a href="spatial-cv.html#cb390-2"></a>result =<span class="st"> </span>mlr<span class="op">::</span><span class="kw">resample</span>(<span class="dt">learner =</span> wrapped_lrn_ksvm, </span>
+<span id="cb390-3"><a href="spatial-cv.html#cb390-3"></a>                       <span class="dt">task =</span> task,</span>
+<span id="cb390-4"><a href="spatial-cv.html#cb390-4"></a>                       <span class="dt">resampling =</span> perf_level,</span>
+<span id="cb390-5"><a href="spatial-cv.html#cb390-5"></a>                       <span class="dt">extract =</span> getTuneResult,</span>
+<span id="cb390-6"><a href="spatial-cv.html#cb390-6"></a>                       <span class="dt">measures =</span> mlr<span class="op">::</span>auc)</span>
+<span id="cb390-7"><a href="spatial-cv.html#cb390-7"></a><span class="co"># stop parallelization</span></span>
+<span id="cb390-8"><a href="spatial-cv.html#cb390-8"></a><span class="kw">parallelStop</span>()</span>
+<span id="cb390-9"><a href="spatial-cv.html#cb390-9"></a><span class="co"># save your result, e.g.:</span></span>
+<span id="cb390-10"><a href="spatial-cv.html#cb390-10"></a><span class="co"># saveRDS(result, &quot;svm_sp_sp_rbf_50it.rds&quot;)</span></span></code></pre></div>
+<p>In case you do not want to run the code locally, we have saved a subset of the <a href="https://github.com/Robinlovelace/geocompr/blob/master/extdata/spatial_cv_result.rds">results</a> in the book’s GitHub repo.
+They can be loaded as follows:</p>
+<div class="sourceCode" id="cb391"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb391-1"><a href="spatial-cv.html#cb391-1"></a>result =<span class="st"> </span><span class="kw">readRDS</span>(<span class="st">&quot;extdata/spatial_cv_result.rds&quot;</span>)</span></code></pre></div>
+<p>Note that runtime depends on many aspects: CPU speed, the selected algorithm, the selected number of cores and the dataset.</p>
+<div class="sourceCode" id="cb392"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb392-1"><a href="spatial-cv.html#cb392-1"></a><span class="co"># Exploring the results</span></span>
+<span id="cb392-2"><a href="spatial-cv.html#cb392-2"></a><span class="co"># runtime in minutes</span></span>
+<span id="cb392-3"><a href="spatial-cv.html#cb392-3"></a><span class="kw">round</span>(result<span class="op">$</span>runtime <span class="op">/</span><span class="st"> </span><span class="dv">60</span>, <span class="dv">2</span>)</span>
+<span id="cb392-4"><a href="spatial-cv.html#cb392-4"></a><span class="co">#&gt; [1] 37.4</span></span></code></pre></div>
+<!-- interestingly, running the code with 4 cores takes 41.67 minutes -->
+<p>Even more important than the runtime is the final aggregated AUROC: the model’s ability to discriminate the two classes.</p>
+<div class="sourceCode" id="cb393"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb393-1"><a href="spatial-cv.html#cb393-1"></a><span class="co"># final aggregated AUROC </span></span>
+<span id="cb393-2"><a href="spatial-cv.html#cb393-2"></a>result<span class="op">$</span>aggr</span>
+<span id="cb393-3"><a href="spatial-cv.html#cb393-3"></a><span class="co">#&gt; auc.test.mean </span></span>
+<span id="cb393-4"><a href="spatial-cv.html#cb393-4"></a><span class="co">#&gt;         0.758</span></span>
+<span id="cb393-5"><a href="spatial-cv.html#cb393-5"></a><span class="co"># same as</span></span>
+<span id="cb393-6"><a href="spatial-cv.html#cb393-6"></a><span class="kw">mean</span>(result<span class="op">$</span>measures.test<span class="op">$</span>auc)</span>
+<span id="cb393-7"><a href="spatial-cv.html#cb393-7"></a><span class="co">#&gt; [1] 0.758</span></span></code></pre></div>
+<p>It appears that the GLM (aggregated AUROC was 0.78) is slightly better than the SVM in this specific case.
+However, using more than 50 iterations in the random search would probably yield hyperparameters that result in models with a better AUROC <span class="citation">(Schratz et al. <a href="#ref-schratz_performance_nodate" role="doc-biblioref">2018</a>)</span>.
+On the other hand, increasing the number of random search iterations would also increase the total number of models and thus runtime.</p>
+<p>The estimated optimal hyperparameters for each fold at the performance estimation level can also be viewed.
+The following command shows the best hyperparameter combination of the first fold of the first iteration (recall this results from the first 5 * 50 model runs):</p>
+<div class="sourceCode" id="cb394"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb394-1"><a href="spatial-cv.html#cb394-1"></a><span class="co"># winning hyperparameters of tuning step, </span></span>
+<span id="cb394-2"><a href="spatial-cv.html#cb394-2"></a><span class="co"># i.e. the best combination out of 50 * 5 models</span></span>
+<span id="cb394-3"><a href="spatial-cv.html#cb394-3"></a>result<span class="op">$</span>extract[[<span class="dv">1</span>]]<span class="op">$</span>x</span>
+<span id="cb394-4"><a href="spatial-cv.html#cb394-4"></a><span class="co">#&gt; $C</span></span>
+<span id="cb394-5"><a href="spatial-cv.html#cb394-5"></a><span class="co">#&gt; [1] 0.458</span></span>
+<span id="cb394-6"><a href="spatial-cv.html#cb394-6"></a><span class="co">#&gt; </span></span>
+<span id="cb394-7"><a href="spatial-cv.html#cb394-7"></a><span class="co">#&gt; $sigma</span></span>
+<span id="cb394-8"><a href="spatial-cv.html#cb394-8"></a><span class="co">#&gt; [1] 0.023</span></span></code></pre></div>
+<p>The estimated hyperparameters have been used for the first fold in the first iteration of the performance estimation level which resulted in the following AUROC value:</p>
+<div class="sourceCode" id="cb395"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb395-1"><a href="spatial-cv.html#cb395-1"></a>result<span class="op">$</span>measures.test[<span class="dv">1</span>, ]</span>
+<span id="cb395-2"><a href="spatial-cv.html#cb395-2"></a><span class="co">#&gt;   iter   auc</span></span>
+<span id="cb395-3"><a href="spatial-cv.html#cb395-3"></a><span class="co">#&gt; 1    1 0.799</span></span></code></pre></div>
+<!-- # maybe add a figure (boxplot) showing the differences between tuning and no tuning?-->
+<p>So far spatial CV has been used to assess the ability of learning algorithms to generalize to unseen data.
+For spatial predictions, one would tune the hyperparameters on the complete dataset.
+This will be covered in Chapter <a href="eco.html#eco">14</a>.</p>
+</div>
+</div>
+<div id="conclusions" class="section level2">
+<h2><span class="header-section-number">11.6</span> Conclusions</h2>
+<p>Resampling methods are an important part of a data scientist’s toolbox <span class="citation">(James et al. <a href="#ref-james_introduction_2013" role="doc-biblioref">2013</a>)</span>.
+This chapter used cross-validation to assess predictive performance of various models.
+As described in Section <a href="spatial-cv.html#intro-cv">11.4</a>, observations with spatial coordinates may not be statistically independent due to spatial autocorrelation, violating a fundamental assumption of cross-validation.
+Spatial CV addresses this issue by reducing bias introduced by spatial autocorrelation.</p>
+<p>The <strong>mlr</strong> package facilitates (spatial) resampling techniques in combination with the most popular statistical learning techniques including linear regression, semi-parametric models such as generalized additive models and machine learning techniques such as random forests, SVMs, and boosted regression trees <span class="citation">(Bischl et al. <a href="#ref-bischl_mlr:_2016" role="doc-biblioref">2016</a>; Schratz et al. <a href="#ref-schratz_performance_nodate" role="doc-biblioref">2018</a>)</span>.
+Machine learning algorithms often require hyperparameter inputs, the optimal ‘tuning’ of which can require thousands of model runs which require large computational resources, consuming much time, RAM and/or cores.
+<strong>mlr</strong> tackles this issue by enabling parallelization.</p>
+<p>Machine learning overall, and its use to understand spatial data, is a large field and this chapter has provided the basics, but there is more to learn.
+We recommend the following resources in this direction:</p>
+<ul>
+<li>The <strong>mlr</strong> tutorials on <a href="https://mlr-org.github.io/mlr-tutorial/release/html/">Machine Learning in R</a> and <a href="https://mlr-org.github.io/mlr-tutorial/release/html/handling_of_spatial_data/index.html">Handling of spatial Data</a></li>
+<li>An academic paper on hyperparameter tuning <span class="citation">(Schratz et al. <a href="#ref-schratz_performance_nodate" role="doc-biblioref">2018</a>)</span></li>
+<li>In case of spatio-temporal data, one should account for spatial and temporal autocorrelation when doing CV <span class="citation">(Meyer et al. <a href="#ref-meyer_improving_2018" role="doc-biblioref">2018</a>)</span></li>
+</ul>
+</div>
+<div id="exercises-8" class="section level2">
+<h2><span class="header-section-number">11.7</span> Exercises</h2>
+<ol style="list-style-type: decimal">
+<li>Compute the following terrain attributes from the <code>dem</code> datasets loaded with <code>data("landslides", package = "RSAGA")</code> with the help of R-GIS bridges (see Chapter <a href="gis.html#gis">9</a>):
+<ul>
+<li>Slope</li>
+<li>Plan curvature</li>
+<li>Profile curvature</li>
+<li>Catchment area</li>
+</ul></li>
+<li>Extract the values from the corresponding output rasters to the <code>landslides</code> data frame (<code>data(landslides, package = "RSAGA"</code>) by adding new variables called <code>slope</code>, <code>cplan</code>, <code>cprof</code>, <code>elev</code> and <code>log_carea</code>. Keep all landslide initiation points and 175 randomly selected non-landslide points (see Section <a href="spatial-cv.html#case-landslide">11.2</a> for details).</li>
+<li>Use the derived terrain attribute rasters in combination with a GLM to make a spatial prediction map similar to that shown in Figure <a href="spatial-cv.html#fig:lsl-susc">11.2</a>.
+Running <code>data("study_mask", package = "spDataLarge")</code> attaches a mask of the study area.</li>
+<li>Compute a 100-repeated 5-fold non-spatial cross-validation and spatial CV based on the GLM learner and compare the AUROC values from both resampling strategies with the help of boxplots (see Figure <a href="spatial-cv.html#fig:boxplot-cv">11.5</a>).
+Hint: You need to specify a non-spatial task and a non-spatial resampling strategy.
+<!-- @Patrick: talk in person; but I think this step is not necessary since spatial and non-spatial partitions must be different -->
+<!-- Before running the spatial cross-validation for both tasks set a seed to make sure that both use the same partitions which in turn guarantees comparability.--></li>
+<li>Model landslide susceptibility using a quadratic discriminant analysis <span class="citation">(QDA, James et al. <a href="#ref-james_introduction_2013" role="doc-biblioref">2013</a>)</span>.
+Assess the predictive performance (AUROC) of the QDA.
+What is the difference between the spatially cross-validated mean AUROC value of the QDA and the GLM?
+<!-- so I think, setting a seed here makes sure that the same spatial partitions are used for both models, right?-->
+Hint: Before running the spatial cross-validation for both learners, set a seed to make sure that both use the same spatial partitions which in turn guarantees comparability.</li>
+<li>Run the SVM without tuning the hyperparameters.
+Use the <code>rbfdot</code> kernel with <span class="math inline">\(\sigma\)</span> = 1 and <em>C</em> = 1.
+Leaving the hyperparameters unspecified in <strong>kernlab</strong>’s <code>ksvm()</code> would otherwise initialize an automatic non-spatial hyperparameter tuning.
+For a discussion on the need for (spatial) tuning of hyperparameters, please refer to <span class="citation">Schratz et al. (<a href="#ref-schratz_performance_nodate" role="doc-biblioref">2018</a>)</span>.</li>
+</ol>
+
+</div>
+</div>
+
+
+
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-baddeley_spatial_2015">
+<p>Baddeley, Adrian, Ege Rubak, and Rolf Turner. 2015. <em>Spatial Point Patterns: Methodology and Applications with R</em>. CRC Press.</p>
+</div>
+<div id="ref-bischl_mlr:_2016">
+<p>Bischl, Bernd, Michel Lang, Lars Kotthoff, Julia Schiffner, Jakob Richter, Erich Studerus, Giuseppe Casalicchio, and Zachary M. Jones. 2016. “Mlr: Machine Learning in R.” <em>Journal of Machine Learning Research</em> 17 (170): 1–5.</p>
+</div>
+<div id="ref-bivand_applied_2013">
+<p>Bivand, Roger, Edzer J Pebesma, and Virgilio Gómez-Rubio. 2013. <em>Applied Spatial Data Analysis with R</em>. Vol. 747248717. Springer.</p>
+</div>
+<div id="ref-blangiardo_spatial_2015">
+<p>Blangiardo, Marta, and Michela Cameletti. 2015. <em>Spatial and Spatio-Temporal Bayesian Models with R-INLA</em>. Chichester, UK: John Wiley &amp; Sons, Ltd. <a href="https://doi.org/10.1002/9781118950203">https://doi.org/10.1002/9781118950203</a>.</p>
+</div>
+<div id="ref-brenning_spatial_2012">
+<p>Brenning, Alexander. 2012b. “Spatial Cross-Validation and Bootstrap for the Assessment of Prediction Rules in Remote Sensing: The R Package Sperrorest.” In, 5372–5. IEEE. <a href="https://doi.org/10.1109/IGARSS.2012.6352393">https://doi.org/10.1109/IGARSS.2012.6352393</a>.</p>
+</div>
+<div id="ref-cawley_overfitting_2010">
+<p>Cawley, Gavin C., and Nicola LC Talbot. 2010. “On over-Fitting in Model Selection and Subsequent Selection Bias in Performance Evaluation.” <em>Journal of Machine Learning Research</em> 11 (Jul): 2079–2107.</p>
+</div>
+<div id="ref-diggle_modelbased_2007">
+<p>Diggle, Peter, and Paulo Justiniano Ribeiro. 2007. <em>Model-Based Geostatistics</em>. Springer.</p>
+</div>
+<div id="ref-gelfand_handbook_2010">
+<p>Gelfand, Alan E, Peter Diggle, Peter Guttorp, and Montserrat Fuentes. 2010. <em>Handbook of Spatial Statistics</em>. CRC press.</p>
+</div>
+<div id="ref-goovaerts_geostatistics_1997">
+<p>Goovaerts, Pierre. 1997. <em>Geostatistics for Natural Resources Evaluation</em>. Applied Geostatistics Series. New York: Oxford University Press.</p>
+</div>
+<div id="ref-hengl_practical_2007">
+<p>Hengl, Tomislav. 2007. <em>A Practical Guide to Geostatistical Mapping of Environmental Variables</em>. Luxembourg: Publications Office.</p>
+</div>
+<div id="ref-james_introduction_2013">
+<p>James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani, eds. 2013. <em>An Introduction to Statistical Learning: With Applications in R</em>. Springer Texts in Statistics 103. New York: Springer.</p>
+</div>
+<div id="ref-karatzoglou_kernlab_2004">
+<p>Karatzoglou, Alexandros, Alex Smola, Kurt Hornik, and Achim Zeileis. 2004. “Kernlab - an S4 Package for Kernel Methods in R.” <em>Journal of Statistical Software</em> 11 (9). <a href="https://doi.org/10.18637/jss.v011.i09">https://doi.org/10.18637/jss.v011.i09</a>.</p>
+</div>
+<div id="ref-krainski_advanced_2018">
+<p>Krainski, Elias, Virgilio Gómez Rubio, Haakon Bakka, Amanda Lenzi, Daniela Castro-Camilo, Daniel Simpson, Finn Lindgren, and Håvard Rue. 2018. <em>Advanced Spatial Modeling with Stochastic Partial Differential Equations Using R and INLA</em>.</p>
+</div>
+<div id="ref-kuhn_applied_2013">
+<p>Kuhn, Max, and Kjell Johnson. 2013. <em>Applied Predictive Modeling</em>. New York: Springer.</p>
+</div>
+<div id="ref-meyer_improving_2018">
+<p>Meyer, Hanna, Christoph Reudenbach, Tomislav Hengl, Marwan Katurji, and Thomas Nauss. 2018. “Improving Performance of Spatio-Temporal Machine Learning Models Using Forward Feature Selection and Target-Oriented Validation.” <em>Environmental Modelling &amp; Software</em> 101 (March): 1–9. <a href="https://doi.org/10.1016/j.envsoft.2017.12.001">https://doi.org/10.1016/j.envsoft.2017.12.001</a>.</p>
+</div>
+<div id="ref-miller_tobler_2004">
+<p>Miller, Harvey J. 2004. “Tobler’s First Law and Spatial Analysis.” <em>Annals of the Association of American Geographers</em> 94 (2).</p>
+</div>
+<div id="ref-muenchow_geomorphic_2012">
+<p>Muenchow, Jannes, Alexander Brenning, and Michael Richter. 2012. “Geomorphic Process Rates of Landslides Along a Humidity Gradient in the Tropical Andes.” <em>Geomorphology</em> 139-140 (February): 271–84. <a href="https://doi.org/10.1016/j.geomorph.2011.10.029">https://doi.org/10.1016/j.geomorph.2011.10.029</a>.</p>
+</div>
+<div id="ref-probst_hyperparameters_2018">
+<p>Probst, Philipp, Marvin Wright, and Anne-Laure Boulesteix. 2018. “Hyperparameters and Tuning Strategies for Random Forest.” <em>arXiv:1804.03515 [Cs, Stat]</em>, April. <a href="http://arxiv.org/abs/1804.03515">http://arxiv.org/abs/1804.03515</a>.</p>
+</div>
+<div id="ref-schratz_performance_nodate">
+<p>Schratz, Patrick, J. Muenchow, Eugenia Iturritxa, Jakob Richter, and A. Brenning. 2018. “Performance Evaluation and Hyperparameter Tuning of Statistical and Machine-Learning Models Using Spatial Data.”</p>
+</div>
+<div id="ref-zuur_beginners_2017">
+<p>Zuur, Alain F., Elena N. Ieno, Anatoly A. Saveliev, and Alain F. Zuur. 2017. <em>Beginner’s Guide to Spatial, Temporal and Spatial-Temporal Ecological Data Analysis with R-INLA</em>. Vol. 1. Newburgh, United Kingdom: Highland Statistics Ltd.</p>
+</div>
+<div id="ref-zuur_mixed_2009">
+<p>Zuur, Alain, Elena N. Ieno, Neil Walker, Anatoly A. Saveliev, and Graham M. Smith. 2009. <em>Mixed Effects Models and Extensions in Ecology with R</em>. Statistics for Biology and Health. New York: Springer-Verlag.</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol start="61">
+<li id="fn61"><p>
+Package <strong>kernlab</strong>, <strong>pROC</strong>, <strong>RSAGA</strong> and <strong>spDataLarge</strong> must also be installed although these do not need to be attached.<a href="spatial-cv.html#fnref61" class="footnote-back">↩︎</a></p></li>
+<li id="fn62"><p>
+Applying statistical techniques to geographic data has been an active topic of research for many decades in the fields of Geostatistics, Spatial Statistics and point pattern analysis <span class="citation">(Diggle and Ribeiro <a href="#ref-diggle_modelbased_2007" role="doc-biblioref">2007</a>; Gelfand et al. <a href="#ref-gelfand_handbook_2010" role="doc-biblioref">2010</a>; Baddeley, Rubak, and Turner <a href="#ref-baddeley_spatial_2015" role="doc-biblioref">2015</a>)</span>.<a href="spatial-cv.html#fnref62" class="footnote-back">↩︎</a></p></li>
+<li id="fn63"><p>
+The landslide initiation point is located in the scarp of a landslide polygon. See <span class="citation">Muenchow, Brenning, and Richter (<a href="#ref-muenchow_geomorphic_2012" role="doc-biblioref">2012</a>)</span> for further details.<a href="spatial-cv.html#fnref63" class="footnote-back">↩︎</a></p></li>
+<li id="fn64"><p>The <code>landslides</code> dataset has been used in classes and summer schools.
+To show how predictive performance of different algorithms changes with an unbalanced and highly spatially autocorrelated response variable, 1360 non-landslide points were randomly selected, i.e., many more absences than presences.
+However, especially a logistic regression with a log-link, as used in this chapter, expects roughly the same number of presences and absences in the response.<a href="spatial-cv.html#fnref64" class="footnote-back">↩︎</a></p></li>
+<li id="fn65"><p>Note that package <strong>sperrorest</strong> initially implemented spatial cross-validation in R <span class="citation">(A. Brenning <a href="#ref-brenning_spatial_2012" role="doc-biblioref">2012</a><a href="#ref-brenning_spatial_2012" role="doc-biblioref">b</a>)</span>.
+In the meantime, its functionality was integrated into the <strong>mlr</strong> package which is the reason why we are using <strong>mlr</strong> <span class="citation">(Schratz et al. <a href="#ref-schratz_performance_nodate" role="doc-biblioref">2018</a>)</span>.The <strong>caret</strong> package is another umbrella-package <span class="citation">(Kuhn and Johnson <a href="#ref-kuhn_applied_2013" role="doc-biblioref">2013</a>)</span> for streamlined modeling in R; however, so far it does not provide spatial CV which is why we refrain from using it for spatial data.<a href="spatial-cv.html#fnref65" class="footnote-back">↩︎</a></p></li>
+<li id="fn66"><p>
+For a detailed description of the difference between coefficients and hyperparameters, see the ‘machine mastery’ blog post on the subject.
+<!-- For a more detailed description of the difference between coefficients and hyperparameters, see the [machine mastery blog](https://machinelearningmastery.com/difference-between-a-parameter-and-a-hyperparameter/). --><a href="spatial-cv.html#fnref66" class="footnote-back">↩︎</a></p></li>
+<li id="fn67"><p>
+See <code>?parallelStart</code> for further modes and github.com/berndbischl/parallelMap for more on the unified interface to popular parallelization back-ends.<a href="spatial-cv.html#fnref67" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+<script>
+/*
+Sorts the references alphabetically.
+Modified from code by Yvonne Aburrow.
+*/
+$(function(){
+    var elems = $('#refs').children('div').remove();
+    elems.sort(function (a, b) {
+        return $(b).children('p').html().toUpperCase() > $(a).children('p').html().toUpperCase() ? -1 : 1;
+    });
+    $('#refs').append(elems);
+})
+</script>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="algorithms.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="transport.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": null,
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/Robinlovelace/geocompr/edit/master/11-spatial-cv.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "lunr",
+"options": null
+},
+"toc": {
+"collapse": "section"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
