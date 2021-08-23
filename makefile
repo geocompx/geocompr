@@ -1,4 +1,10 @@
 html:
+	Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::bs4_book", clean = FALSE)'
+	cp -fvr style/style.css _book/
+	# cp -fvr images _book/
+	cp -fvr _main* _book/
+
+html2:
 	Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::gitbook", clean = FALSE)'
 	cp -fvr style/style.css _book/
 	# cp -fvr images _book/
