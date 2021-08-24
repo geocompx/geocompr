@@ -88,17 +88,9 @@ st_crs(london_proj)
 Notable components of this CRS description include the EPSG code (`EPSG: 27700`), the projection ([transverse Mercator](https://en.wikipedia.org/wiki/Transverse_Mercator_projection), `+proj=tmerc`), the origin (`+lat_0=49 +lon_0=-2`) and units (`+units=m`).^[
 For a short description of the most relevant projection parameters and related concepts, see the fourth lecture by Jochen Albrecht hosted at
 http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/ and information at https://proj.org/usage/projections.html.
-<!-- [geography.hunter.cuny.edu/~jochen/GTECH361/lectures/](http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/lecture04/concepts/Map%20coordinate%20systems/Projection%20parameters.htm) as well as [http://proj4.org/parameters.html](http://proj4.org/parameters.html). -->
 Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj.
 ]
 The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: `st_is_longlat(london_proj)` now returns `FALSE` and geometry operations on `london_proj` will work without a warning, meaning buffers can be produced from it using proper units of distance.
-<!-- 
-1 degree distance (great circle distance) at the equator:
-geosphere::alongTrackDistance(c(0, 0), c(0, 1), c(0, 1)) 
-but 1 degree converted into m distance at the latitude of London:
-coords = st_coordinates(london)
-geosphere::alongTrackDistance(coords, coords + c(1, 0), coords + c(1, 0))
--->
 As pointed out above, moving one degree means moving a bit more than 111 km at the equator (to be precise: 111,320 meters).
 This is used as the new buffer distance:
 
@@ -327,7 +319,6 @@ To access and modify it explicitly, use the `st_crs` function, for example, `st_
 Established CRSs captured by EPSG codes are well-suited for many applications.
 However in some cases it is desirable to create a new CRS, using a custom `proj4string`.
 This system allows a very wide range of projections to be created, as we'll see in some of the custom map projections in this section.
-<!-- as we mentioned in Section \@ref(crs-in-r). -->
 
 A long and growing list of projections has been developed and many of these can be set with the `+proj=` element of `proj4string`s.^[
 The Wikipedia page 'List of map projections' has 70+ projections and illustrations.
@@ -339,8 +330,6 @@ To use this projection, we need to specify it using the `proj4string` element, `
 ```{r 06-reproj-22}
 world_mollweide = st_transform(world, crs = "+proj=moll")
 ```
-<!-- plot(world_mollweide$geom) -->
-<!-- plot(world_mollweide$geom, graticule = TRUE) -->
 
 ```{r mollproj, echo=FALSE, fig.cap="Mollweide projection of the world.", warning=FALSE}
 library(tmap)
@@ -359,8 +348,6 @@ This projection is used, among others, by the National Geographic Society.
 ```{r 06-reproj-23}
 world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 ```
-<!-- plot(world_wintri$geom) -->
-<!-- plot(world_wintri$geom, graticule = TRUE) -->
 
 ```{r wintriproj, echo=FALSE, fig.cap="Winkel tripel projection of the world.", error=TRUE}
 # world_wintri_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
@@ -416,8 +403,6 @@ The code below gives the map centered on New York City (Figure \@ref(fig:laeapro
 world_laea2 = st_transform(world,
                            crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40")
 ```
-<!-- plot(world_laea2$geom) -->
-<!-- plot(world_laea2$geom, graticule = TRUE) -->
 
 ```{r laeaproj2, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on New York City.", fig.scap="Lambert azimuthal equal-area projection centered on New York City.", warning=FALSE}
 # Currently fails, see https://github.com/Robinlovelace/geocompr/issues/460
@@ -430,15 +415,6 @@ tm_shape(world_laea2_g) + tm_lines(col = "gray") +
 ```
 
 More information on CRS modifications can be found in the [Using PROJ](https://proj.org/usage/index.html) documentation.
-
-<!-- https://github.com/r-spatial/lwgeom/issues/6 -->
-<!-- ```{r} -->
-<!-- # remotes::install_github("r-spatial/lwgeom") -->
-<!-- library(lwgeom) -->
-<!-- world_3 = lwgeom::st_transform_proj(world, crs = "+proj=wintri") -->
-<!-- plot(world_3$geom) -->
-<!-- ``` -->
-<!-- http://bl.ocks.org/vlandham/raw/9216751/ -->
 
 ## Reprojecting raster geometries
 
