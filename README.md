@@ -44,7 +44,7 @@ We encourage contributions on any part of the book, including:
     tracker](https://github.com/Robinlovelace/geocompr/issues)).
 
 See
-[our-style.md](https://github.com/Robinlovelace/geocompr/blob/master/misc/our-style.md)
+[our-style.md](https://github.com/Robinlovelace/geocompr/blob/main/misc/our-style.md)
 for the book’s style.
 
 Many thanks to all contributors to the book so far via GitHub (this list
@@ -98,7 +98,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
-[`our-impact.csv`](https://github.com/Robinlovelace/geocompr/blob/master/misc/our-impact.csv).
+[`our-impact.csv`](https://github.com/Robinlovelace/geocompr/blob/main/misc/our-impact.csv).
 
 ## Reproducing the book
 
@@ -208,7 +208,7 @@ source("code/08-map-pkgs.R")
 
 Note: the `.Rproj` file is configured to build a website not a single
 page. To reproduce this
-[README](https://github.com/Robinlovelace/geocompr/blob/master/README.Rmd)
+[README](https://github.com/Robinlovelace/geocompr/blob/main/README.Rmd)
 use the following command:
 
 ``` r
