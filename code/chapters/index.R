@@ -81,7 +81,7 @@ is_html = knitr::is_html_output()
 
 ## - Communicating about the book in digital media e.g. via the [#geocompr hashtag](https://twitter.com/hashtag/geocompr) on Twitter (see our [Guestbook at geocompr.github.io](https://geocompr.github.io/guestbook/)) or by letting us know of [courses](https://github.com/geocompr/geocompr.github.io/edit/source/content/guestbook/index.md) using the book
 
-## - [Citing](https://github.com/Robinlovelace/geocompr/raw/master/cite-geocompr.bib) or [linking-to](https://geocompr.robinlovelace.net/) it
+## - [Citing](https://github.com/Robinlovelace/geocompr/raw/main/cite-geocompr.bib) or [linking-to](https://geocompr.robinlovelace.net/) it
 
 ## - '[Starring](https://help.github.com/articles/about-stars/)' the [geocompr GitHub repository](https://github.com/robinlovelace/geocompr)
 

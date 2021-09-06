@@ -17,7 +17,7 @@ library(spDataLarge)   # load larger geographic data
 ## Take care when using the word 'vector' as it can have two meanings in this book:
 
 ## ----vectorplots-source, include=FALSE, eval=FALSE-----------------------
-#> source("https://github.com/Robinlovelace/geocompr/raw/master/code/02-vectorplots.R") # generate subsequent figure
+#> source("https://github.com/Robinlovelace/geocompr/raw/main/code/02-vectorplots.R") # generate subsequent figure
 
 ## ----vectorplots, fig.cap="Illustration of vector (point) data in which location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.", out.width="49%", fig.show='hold', echo=FALSE, fig.scap="Illustration of vector (point) data."----
 knitr::include_graphics(c("figures/vector_lonlat.png", "figures/vector_projected.png"))
@@ -85,7 +85,7 @@ asia = st_union(world_asia)
 #> plot(st_geometry(world_cents), add = TRUE, cex = cex)
 
 ## ----contpop, fig.cap="Country continents (represented by fill color) and 2015 populations (represented by circles, with area proportional to population).", echo=FALSE, warning=FALSE, fig.scap="Country continents and 2015 populations."----
-source("https://github.com/Robinlovelace/geocompr/raw/master/code/02-contpop.R")
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/02-contpop.R")
 
 ## ----02-spatial-data-17, eval=FALSE--------------------------------------
 #> india = world[world$name_long == "India", ]
@@ -257,10 +257,10 @@ class(lnd_sf)
 #> sf_points = st_sf(our_attributes, geometry = our_geometry)
 
 ## ----raster-intro-plot, echo = FALSE, fig.cap = "Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map.", fig.scap="Raster data types."----
-source("https://github.com/Robinlovelace/geocompr/raw/master/code/02_raster_intro_plot.R")
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/02_raster_intro_plot.R")
 
 ## ----raster-intro-plot2, echo=FALSE, fig.cap="Examples of continuous and categorical rasters."----
-source("https://github.com/Robinlovelace/geocompr/raw/master/code/02_raster_intro_plot2.R", print.eval = TRUE)
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/02_raster_intro_plot2.R", print.eval = TRUE)
 
 ## ----02-spatial-data-37, message=FALSE-----------------------------------
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
@@ -367,7 +367,7 @@ new_vector = st_read(vector_filepath)
 new_vector = st_set_crs(new_vector, 4326) # set CRS
 
 ## ----vector-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for a vector data type.", message=FALSE, fig.asp=0.56, fig.scap="Examples of geographic and projected CRSs (vector data)."----
-# source("https://github.com/Robinlovelace/geocompr/raw/master/code/02-vector-crs.R")
+# source("https://github.com/Robinlovelace/geocompr/raw/main/code/02-vector-crs.R")
 knitr::include_graphics("figures/02_vector_crs.png")
 
 ## ----02-spatial-data-55--------------------------------------------------
@@ -378,7 +378,7 @@ projection(new_raster) = "+proj=utm +zone=12 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0
                             +units=m +no_defs" # set CRS
 
 ## ----raster-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for raster data.", message=FALSE, fig.asp=0.56, fig.scap="Examples of geographic and projected CRSs (raster data)."----
-# source("https://github.com/Robinlovelace/geocompr/raw/master/code/02-raster-crs.R")
+# source("https://github.com/Robinlovelace/geocompr/raw/main/code/02-raster-crs.R")
 knitr::include_graphics("figures/02_raster_crs.png")
 
 ## ----02-spatial-data-57--------------------------------------------------

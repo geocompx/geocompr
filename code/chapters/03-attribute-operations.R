@@ -275,7 +275,7 @@ levels(grain)
 factorValues(grain, grain[c(1, 11, 35)])
 
 ## ----cont-raster, echo = FALSE, message = FALSE, fig.width = 7, fig.height = 2.5, fig.cap = "Raster datasets with numeric (left) and categorical values (right).", fig.scap="Raster datasets with numeric and categorical values."----
-source("https://github.com/Robinlovelace/geocompr/raw/master/code/03-cont-raster-plot.R", print.eval = TRUE)
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/03-cont-raster-plot.R", print.eval = TRUE)
 
 ## ----03-attribute-operations-58, eval = FALSE----------------------------
 #> # row 1, column 1
