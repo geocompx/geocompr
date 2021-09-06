@@ -132,7 +132,7 @@ nrow(world_random)
 random_joined = st_join(random_points, world["name_long"])
 
 ## ----spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join. A new attribute variable is added to random points (top left) from source world object (top right) resulting in the data represented in the final panel.", fig.asp=0.5, warning=FALSE, message=FALSE, out.width="100%", fig.scap="Illustration of a spatial join."----
-source("https://github.com/Robinlovelace/geocompr/raw/master/code/04-spatial-join.R")
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/04-spatial-join.R")
 tmap_arrange(jm1, jm2, jm3, jm4, nrow = 2, ncol = 2)
 
 ## ----04-spatial-operations-21, eval=FALSE--------------------------------
@@ -199,7 +199,7 @@ nz_avheight2 = nz %>%
   summarize(elevation = mean(elevation, na.rm = TRUE))
 
 ## ----areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units with respect to larger aggregating zones (translucent blue borders).", fig.asp=0.5, out.width="100%", fig.scap="Illustration of congruent and incongruent areal units."----
-source("https://github.com/Robinlovelace/geocompr/raw/master/code/04-areal-example.R", print.eval = TRUE)
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/04-areal-example.R", print.eval = TRUE)
 
 ## ----04-spatial-operations-30--------------------------------------------
 agg_aw = st_interpolate_aw(incongruent[, "value"], aggregating_zones,
