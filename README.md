@@ -6,7 +6,7 @@
 <!-- badges: start -->
 
 [![Launch Rstudio
-Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/master?urlpath=rstudio)
+Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/main?urlpath=rstudio)
 [![Launch Rstudio
 Cloud](images/cloud.png)](https://rstudio.cloud/project/1642300)
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
@@ -134,12 +134,12 @@ browseURL("_book/index.html") # to view it
 For many people the quickest way to get started with Geocomputation with
 R is in your web browser via Binder. To see an interactive RStudio
 Server instance click on the following button, which will open
-[mybinder.org](https://mybinder.org/v2/gh/robinlovelace/geocompr/master?urlpath=rstudio)
+[mybinder.org](https://mybinder.org/v2/gh/robinlovelace/geocompr/main?urlpath=rstudio)
 with an R installation that has all the dependencies needed to reproduce
 the book:
 
 [![Launch Rstudio
-Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/master?urlpath=rstudio)
+Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/main?urlpath=rstudio)
 
 You can also have a play with the repo in RStudio Cloud by clicking on
 this link (requires log-in):
