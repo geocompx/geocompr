@@ -63,7 +63,7 @@ is_html = knitr::is_html_output()
 
 
 
-## To build the book locally, clone or [download](https://github.com/Robinlovelace/geocompr/archive/master.zip) the [geocompr repo](https://github.com/Robinlovelace/geocompr/), load R in root directory (e.g. by opening [geocompr.Rproj](https://github.com/Robinlovelace/geocompr/blob/main/geocompr.Rproj) in RStudio) and run the following lines:
+## To build the book locally, clone or [download](https://github.com/Robinlovelace/geocompr/archive/main.zip) the [geocompr repo](https://github.com/Robinlovelace/geocompr/), load R in root directory (e.g. by opening [geocompr.Rproj](https://github.com/Robinlovelace/geocompr/blob/main/geocompr.Rproj) in RStudio) and run the following lines:
 
 
 ## ----index-4, eval=FALSE, echo=is_html----------------------------------------------------------------
