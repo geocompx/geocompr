@@ -44,7 +44,7 @@ is_html = knitr::is_html_output()
 ## This will take you to an editable version of the the source [R Markdown](http://rmarkdown.rstudio.com/) file that generated the page you're on:
 
 ## 
-## [![](figures/editme.png)](https://github.com/Robinlovelace/geocompr/edit/master/index.Rmd)
+## [![](figures/editme.png)](https://github.com/Robinlovelace/geocompr/edit/main/index.Rmd)
 
 ## 
 ## To raise an issue about the book's content (e.g. code not running) or make a feature request, check-out the [issue tracker](https://github.com/Robinlovelace/geocompr/issues).
