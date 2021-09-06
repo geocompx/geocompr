@@ -20,7 +20,6 @@ This chapter extends these skills.
 After reading it --- and attempting the exercises at the end --- you should understand and have control over the geometry column in `sf` objects and the geographic location of pixels represented in rasters.
 
 Section \@ref(geo-vec) covers transforming vector geometries with 'unary' and 'binary' operations.
-<!-- TODO: add something on n-ary ops (RL) -->
 Unary operations work on a single geometry in isolation.
 This includes simplification (of lines and polygons), the creation of buffers and centroids, and shifting/scaling/rotating single geometries using 'affine transformations' (Sections \@ref(simplification) to \@ref(affine-transformations)).
 Binary transformations modify one geometry based on the shape of another.
@@ -49,8 +48,6 @@ Another reason for simplifying objects is to reduce the amount of memory, disk s
 it may be wise to simplify complex geometries before publishing them as interactive maps. 
 The **sf** package provides `st_simplify()`, which uses the GEOS implementation of the Douglas-Peucker algorithm to reduce the vertex count.
 `st_simplify()` uses the `dTolerance` to control the level of generalization in map units [see @douglas_algorithms_1973 for details].
-<!-- I have no idea what the next sentence means -->
-<!-- As a result, all vertices in the simplified geometry will be within this value from the original ones. -->
 Figure \@ref(fig:seine-simp) illustrates simplification of a `LINESTRING` geometry representing the river Seine and tributaries.
 The simplified geometry was created by the following command:
 
@@ -190,10 +187,8 @@ Unusual cases where it may be useful include when the memory consumed by the out
 
 \index{vector!affine transformation} 
 Affine transformation is any transformation that preserves lines and parallelism.
-<!-- The midpoint of a line segment remains a midpoint and all points lying on a line initially still lie on a line after an affine transformation. -->
 However, angles or length are not necessarily preserved.
 Affine transformations include, among others, shifting (translation), scaling and rotation.
-<!-- translation, scaling, homothety, similarity transformation, reflection, rotation, shear mapping -->
 Additionally, it is possible to use any combination of these.
 Affine transformations are an essential part of geocomputation.
 For example, shifting is needed for labels placement, scaling is used in non-contiguous area cartograms (see Section \@ref(other-mapping-packages)), and many affine transformations are applied when reprojecting or improving the geometry that was created based on a distorted or wrongly projected map.
@@ -214,7 +209,7 @@ nz_shift = nz_sfc + c(0, 100000)
 ```
 
 Scaling enlarges or shrinks objects by a factor.
-It can be applied either globally or locally. <!-- my terms - jn-->
+It can be applied either globally or locally.
 Global scaling increases or decreases all coordinates values in relation to the origin coordinates, while keeping all geometries topological relations intact.
 It can be done by subtraction or multiplication of a`sfg` or `sfc` object.
 
@@ -244,7 +239,7 @@ $$
 
 It rotates points in a clockwise direction.
 The rotation matrix can be implemented in R as:
-<!-- https://r-spatial.github.io/sf/articles/sf3.html#affine-transformations -->
+
 
 ```r
 rotation = function(a){
@@ -320,7 +315,6 @@ plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
 </div>
 
 The subsequent code chunk demonstrates how this works for all combinations of the 'Venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book *R for Data Science* [@grolemund_r_2016].
-<!-- Todo: reference r4ds -->
 
 <div class="figure" style="text-align: center">
 <img src="05-geometry-operations_files/figure-html/venn-clip-1.png" alt="Spatial equivalents of logical operators." width="100%" />
@@ -423,7 +417,6 @@ multipoint = st_multipoint(matrix(c(1, 3, 5, 1, 3, 1), ncol = 2))
 
 In this case, `st_cast` can be useful to transform the new object into linestring or polygon (Figure \@ref(fig:single-cast)):
 
-<!-- a/ points -> lines -> polygons  -->
 
 ```r
 linestring = st_cast(multipoint, "LINESTRING")
@@ -619,8 +612,6 @@ linestring_sf2
 #> 3 LINESTRING (2 2, 4 2)    Foulke St   2.00
 ```
 
-<!-- idea: example where a collection of points referring to different objects are combined to MULTIPOINT by object, then casted to LINESTRING geometries per object -->
-
 ## Geometric operations on raster data {#geo-ras}
 
 \index{raster!manipulation} 
@@ -677,7 +668,6 @@ The same problem arises when we would like to merge satellite imagery from diffe
 We can deal with such mismatches by aligning the rasters.
 
 In the simplest case, two images only differ with regard to their extent.
-<!--The `projectRaster()` function reprojects one raster to a desired projection, say from UTM to WGS84.-->
 Following code adds one row and two columns to each side of the raster while setting all new values to an elevation of 1000 meters (Figure \@ref(fig:extend-example)).
 
 
@@ -820,10 +810,6 @@ It includes four main techniques:
 raster cropping and masking using vector objects (Section \@ref(raster-cropping));
 extracting raster values using different types of vector data (Section \@ref(raster-extraction));
 and raster-vector conversion (Sections \@ref(rasterization) and \@ref(spatial-vectorization)).
-<!-- operations are not symmetrical, for example: -->
-<!-- - raster clipping - no vector counterpart -->
-<!-- - raster extraction is connected to some methods used in vectorization and rasterization -->
-<!-- - etc. -->
 The above concepts are demonstrated using data used in previous chapters to understand their potential real-world applications.
 
 ### Raster cropping
@@ -890,7 +876,6 @@ The reverse of raster extraction --- assigning raster cell values based on vecto
 
 The simplest example is extracting the value of a raster cell at specific **points**.
 For this purpose, we will use `zion_points`, which contain a sample of 30 locations within the Zion National Park (Figure \@ref(fig:pointextr)). 
-<!-- They could represent places where soils properties were measured and we want to know what is the elevation of each point. -->
 The following command extracts elevation values from `srtm` and assigns the resulting vector to a new column (`elevation`) in the `zion_points` dataset: 
 
 
@@ -1011,13 +996,8 @@ An issue with the function, however, is that it is relatively slow.
 If this is a problem, it is useful to know about alternatives and work-arounds, three of which are presented below.
 
 - **Parallelization**: this approach works when using many geographic vector selector objects by splitting them into groups and extracting cell values independently for each group (see `?raster::clusterR()` for details of this approach)
-<!-- tabularaster (ref to the vignette - https://cran.r-project.org/web/packages/tabularaster/vignettes/tabularaster-usage.html)-->
 - Use the **velox** package [@hunziker_velox:_2017], which provides a fast method for extracting raster data that fits in memory (see the package's [`extract`](https://hunzikp.github.io/velox/extract.html) vignette for details)
 - Using **R-GIS bridges** (see Chapter \@ref(gis)): efficient calculation of raster statistics from polygons can be found in the SAGA function `saga:gridstatisticsforpolygons`, for example, which can be accessed via **RQGIS**
-<!-- Methods similar to `raster::extract` can be found in GRASS GIS (e.g. v.rast.stats) -->
-<!-- https://grass.osgeo.org/grass74/manuals/v.rast.stats.html - test -->
-<!-- https://twitter.com/mdsumner/status/976978499402571776 -->
-<!-- https://gist.github.com/mdsumner/d0b26238321a5d2c2c2ba663ff684183 -->
 
 ### Rasterization {#rasterization}
 
@@ -1103,20 +1083,6 @@ Polygon rasterization, by contrast, selects only cells whose centroids are insid
 california_raster2 = rasterize(california, raster_template2) 
 ```
 
-<!-- getCover? -->
-<!-- the fraction of each grid cell that is covered by the polygons-->
-<!-- ```{r, echo=FALSE, eval=FALSE} -->
-<!-- california_raster3 = rasterize(california, raster_template2, getCover = TRUE) -->
-<!-- r3po = tm_shape(california_raster3) + -->
-<!--   tm_raster(legend.show = TRUE, title = "Values: ", style = "fixed", breaks = c(0, 1, 25, 50, 75, 100)) + -->
-<!--   tm_shape(california) + -->
-<!--   tm_borders() + -->
-<!--   tm_layout(outer.margins = rep(0.01, 4), -->
-<!--             inner.margins = rep(0, 4)) -->
-<!-- ``` -->
-
-<!-- It is also possible to use the `field` or `fun` arguments for lines and polygons rasterizations. -->
-
 <div class="figure" style="text-align: center">
 <img src="05-geometry-operations_files/figure-html/vector-rasterization2-1.png" alt="Examples of line and polygon rasterizations." width="100%" />
 <p class="caption">(\#fig:vector-rasterization2)Examples of line and polygon rasterizations.</p>
@@ -1155,7 +1121,6 @@ elev_point = rasterToPoints(elev, spatial = TRUE) %>%
 
 Another common type of spatial vectorization is the creation of contour lines representing lines of continuous height or temperatures (isotherms) for example.
 We will use a real-world digital elevation model (DEM) because the artificial raster `elev` produces parallel lines (task: verify this and explain why this happens).
-<!-- because when creating it we made the upper left corner the lowest and the lower right corner the highest value while increasing cell values by one from left to right. -->
 Contour lines can be created with the **raster** function `rasterToContour()`, which is itself a wrapper around `contourLines()`, as demonstrated below (not shown):
 
 
@@ -1208,19 +1173,17 @@ grain_poly2 = grain_poly %>%
 <p class="caption">(\#fig:raster-vectorization2)Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).</p>
 </div>
 
-<!-- ## distances? -->
-
 ## Exercises
 
 Some of the exercises use a vector (`random_points`) and raster dataset (`ndvi`) from the **RQGIS** package.
 They also use a polygonal 'convex hull' derived from the vector dataset (`ch`) to represent the area of interest:
 
 ```r
-library(RQGIS)
-data(random_points)
-data(ndvi)
-ch = st_combine(random_points) %>% 
-  st_convex_hull()
+# library(RQGIS)
+# data(random_points)
+# data(ndvi)
+# ch = st_combine(random_points) %>% 
+#   st_convex_hull()
 ```
 1. Generate and plot simplified versions of the `nz` dataset.
 Experiment with different values of `keep` (ranging from 0.5 to 0.00005) for `ms_simplify()` and `dTolerance` (from 100 to 100,000) `st_simplify()` .

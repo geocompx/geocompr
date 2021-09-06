@@ -11,7 +11,7 @@ The chapter uses the following packages:
 ```r
 library(sf)
 library(raster)
-library(RQGIS)
+# library(RQGIS)
 library(mlr)
 library(dplyr)
 library(vegan)
@@ -62,7 +62,7 @@ To guarantee an optimal prediction, it is advisable to tune beforehand the hyper
 
 ## Data and data preparation
 
-All the data needed for the subsequent analyses is available via the **RQGIS**\index{RQGIS (package)} package.
+All the data needed for the subsequent analyses is available via the **spDataLarge** package.
 
 
 ```r

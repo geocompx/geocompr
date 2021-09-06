@@ -1,439 +1,104 @@
 <!DOCTYPE html>
-<html lang="" xml:lang="">
+<html lang="en">
 <head>
-
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 6 Reprojecting geographic data | Geocomputation with R</title>
-  <meta name="description" content="Chapter 6 Reprojecting geographic data | Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data." />
-  <meta name="generator" content="bookdown 0.23 and GitBook 2.6.7" />
-
-  <meta property="og:title" content="Chapter 6 Reprojecting geographic data | Geocomputation with R" />
-  <meta property="og:type" content="book" />
-  <meta property="og:url" content="https://geocompr.robinlovelace.net/" />
-  <meta property="og:image" content="https://geocompr.robinlovelace.net//images/cover.png" />
-  <meta property="og:description" content="Chapter 6 Reprojecting geographic data | Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data." />
-  <meta name="github-repo" content="Robinlovelace/geocompr" />
-
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 6 Reprojecting geographic data | Geocomputation with R" />
-  
-  <meta name="twitter:description" content="Chapter 6 Reprojecting geographic data | Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data." />
-  <meta name="twitter:image" content="https://geocompr.robinlovelace.net//images/cover.png" />
-
-<meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow" />
-
-
-<meta name="date" content="2021-08-23" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-  
-  
-<link rel="prev" href="geometric-operations.html"/>
-<link rel="next" href="read-write.html"/>
-<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
-<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
-<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
-<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
-<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
-<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
-<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
-<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
-
-
-
-
-
-
-
-
-
-<script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
-<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
-<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
-<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
-<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
-<script src="libs/leaflet-1.3.1/leaflet.js"></script>
-<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
-<script src="libs/proj4-2.6.2/proj4.min.js"></script>
-<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
-<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
-<script src="libs/leaflet-binding-2.0.4.1/leaflet.js"></script>
-<script src="libs/kePrint-0.0.1/kePrint.js"></script>
-<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-99618359-1', 'auto');
-  ga('send', 'pageview');
-
-</script>
-
-
-<style type="text/css">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-</style>
-
-
-<link rel="stylesheet" href="css/style.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Chapter 6 Reprojecting geographic data | Geocomputation with R</title>
+<meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow">
+<meta name="description" content="Prerequisites This chapter requires the following packages (lwgeom is also used, but does not need to be attached): library(sf) library(raster) library(dplyr) library(spData) library(spDataLarge) ...">
+<meta name="generator" content="bookdown 0.24 with bs4_book()">
+<meta property="og:title" content="Chapter 6 Reprojecting geographic data | Geocomputation with R">
+<meta property="og:type" content="book">
+<meta property="og:url" content="https://geocompr.robinlovelace.net/reproj-geo-data.html">
+<meta property="og:image" content="https://geocompr.robinlovelace.net/images/cover.png">
+<meta property="og:description" content="Prerequisites This chapter requires the following packages (lwgeom is also used, but does not need to be attached): library(sf) library(raster) library(dplyr) library(spData) library(spDataLarge) ...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chapter 6 Reprojecting geographic data | Geocomputation with R">
+<meta name="twitter:description" content="Prerequisites This chapter requires the following packages (lwgeom is also used, but does not need to be attached): library(sf) library(raster) library(dplyr) library(spData) library(spDataLarge) ...">
+<meta name="twitter:image" content="https://geocompr.robinlovelace.net/images/cover.png">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><link href="libs/_Lato-0.4.0/font.css" rel="stylesheet">
+<link href="libs/_Roboto%20Mono-0.4.0/font.css" rel="stylesheet">
+<link href="libs/_Montserrat-0.4.0/font.css" rel="stylesheet">
+<script src="libs/bs3compat-0.3.0/transition.js"></script><script src="libs/bs3compat-0.3.0/tabs.js"></script><script src="libs/bs3compat-0.3.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script><script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
+<script src="libs/leaflet-1.3.1/leaflet.js"></script><link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
+<script src="libs/proj4-2.6.2/proj4.min.js"></script><script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script><link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
+<script src="libs/leaflet-binding-2.0.4.1/leaflet.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS -->
 </head>
+<body data-spy="scroll" data-target="#toc">
 
-<body>
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
 
-
-
-  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
-
-    <div class="book-summary">
-      <nav role="navigation">
-
-<ul class="summary">
-<li><a href="./">Geocomputation with R</a></li>
-
-<li class="divider"></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Welcome</a><ul>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html#how-to-contribute"><i class="fa fa-check"></i>How to contribute?</a></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html#reproducibility"><i class="fa fa-check"></i>Reproducibility</a></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html#supporting-the-project"><i class="fa fa-check"></i>Supporting the project</a></li>
-</ul></li>
-<li class="chapter" data-level="" data-path="foreword.html"><a href="foreword.html"><i class="fa fa-check"></i>Foreword</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html"><i class="fa fa-check"></i>Preface</a><ul>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#who-this-book-is-for"><i class="fa fa-check"></i>Who this book is for</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#how-to-read-this-book"><i class="fa fa-check"></i>How to read this book</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#why-r"><i class="fa fa-check"></i>Why R?</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#real-world-impact"><i class="fa fa-check"></i>Real-world impact</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
-</ul></li>
-<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
-<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#what-is-geocomputation"><i class="fa fa-check"></i><b>1.1</b> What is geocomputation?</a></li>
-<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#why-use-r-for-geocomputation"><i class="fa fa-check"></i><b>1.2</b> Why use R for geocomputation?</a></li>
-<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#software-for-geocomputation"><i class="fa fa-check"></i><b>1.3</b> Software for geocomputation</a></li>
-<li class="chapter" data-level="1.4" data-path="intro.html"><a href="intro.html#rs-spatial-ecosystem"><i class="fa fa-check"></i><b>1.4</b> R’s spatial ecosystem</a></li>
-<li class="chapter" data-level="1.5" data-path="intro.html"><a href="intro.html#the-history-of-r-spatial"><i class="fa fa-check"></i><b>1.5</b> The history of R-spatial</a></li>
-<li class="chapter" data-level="1.6" data-path="intro.html"><a href="intro.html#exercises"><i class="fa fa-check"></i><b>1.6</b> Exercises</a></li>
-</ul></li>
-<li class="part"><span><b>I Foundations</b></span></li>
-<li class="chapter" data-level="2" data-path="spatial-class.html"><a href="spatial-class.html"><i class="fa fa-check"></i><b>2</b> Geographic data in R</a><ul>
-<li class="chapter" data-level="" data-path="spatial-class.html"><a href="spatial-class.html#prerequisites"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="2.1" data-path="spatial-class.html"><a href="spatial-class.html#intro-spatial-class"><i class="fa fa-check"></i><b>2.1</b> Introduction</a></li>
-<li class="chapter" data-level="2.2" data-path="spatial-class.html"><a href="spatial-class.html#vector-data"><i class="fa fa-check"></i><b>2.2</b> Vector data</a><ul>
-<li class="chapter" data-level="2.2.1" data-path="spatial-class.html"><a href="spatial-class.html#intro-sf"><i class="fa fa-check"></i><b>2.2.1</b> An introduction to simple features</a></li>
-<li class="chapter" data-level="2.2.2" data-path="spatial-class.html"><a href="spatial-class.html#why-simple-features"><i class="fa fa-check"></i><b>2.2.2</b> Why simple features?</a></li>
-<li class="chapter" data-level="2.2.3" data-path="spatial-class.html"><a href="spatial-class.html#basic-map"><i class="fa fa-check"></i><b>2.2.3</b> Basic map making</a></li>
-<li class="chapter" data-level="2.2.4" data-path="spatial-class.html"><a href="spatial-class.html#base-args"><i class="fa fa-check"></i><b>2.2.4</b> Base plot arguments</a></li>
-<li class="chapter" data-level="2.2.5" data-path="spatial-class.html"><a href="spatial-class.html#geometry"><i class="fa fa-check"></i><b>2.2.5</b> Geometry types</a></li>
-<li class="chapter" data-level="2.2.6" data-path="spatial-class.html"><a href="spatial-class.html#sfg"><i class="fa fa-check"></i><b>2.2.6</b> Simple feature geometries (sfg)</a></li>
-<li class="chapter" data-level="2.2.7" data-path="spatial-class.html"><a href="spatial-class.html#sfc"><i class="fa fa-check"></i><b>2.2.7</b> Simple feature columns (sfc)</a></li>
-<li class="chapter" data-level="2.2.8" data-path="spatial-class.html"><a href="spatial-class.html#sf"><i class="fa fa-check"></i><b>2.2.8</b> The sf class</a></li>
-</ul></li>
-<li class="chapter" data-level="2.3" data-path="spatial-class.html"><a href="spatial-class.html#raster-data"><i class="fa fa-check"></i><b>2.3</b> Raster data</a><ul>
-<li class="chapter" data-level="2.3.1" data-path="spatial-class.html"><a href="spatial-class.html#an-introduction-to-raster"><i class="fa fa-check"></i><b>2.3.1</b> An introduction to raster</a></li>
-<li class="chapter" data-level="2.3.2" data-path="spatial-class.html"><a href="spatial-class.html#basic-map-raster"><i class="fa fa-check"></i><b>2.3.2</b> Basic map making</a></li>
-<li class="chapter" data-level="2.3.3" data-path="spatial-class.html"><a href="spatial-class.html#raster-classes"><i class="fa fa-check"></i><b>2.3.3</b> Raster classes</a></li>
-</ul></li>
-<li class="chapter" data-level="2.4" data-path="spatial-class.html"><a href="spatial-class.html#crs-intro"><i class="fa fa-check"></i><b>2.4</b> Coordinate Reference Systems</a><ul>
-<li class="chapter" data-level="2.4.1" data-path="spatial-class.html"><a href="spatial-class.html#geographic-coordinate-systems"><i class="fa fa-check"></i><b>2.4.1</b> Geographic coordinate systems</a></li>
-<li class="chapter" data-level="2.4.2" data-path="spatial-class.html"><a href="spatial-class.html#projected-coordinate-reference-systems"><i class="fa fa-check"></i><b>2.4.2</b> Projected coordinate reference systems</a></li>
-<li class="chapter" data-level="2.4.3" data-path="spatial-class.html"><a href="spatial-class.html#crs-in-r"><i class="fa fa-check"></i><b>2.4.3</b> CRSs in R</a></li>
-</ul></li>
-<li class="chapter" data-level="2.5" data-path="spatial-class.html"><a href="spatial-class.html#units"><i class="fa fa-check"></i><b>2.5</b> Units</a></li>
-<li class="chapter" data-level="2.6" data-path="spatial-class.html"><a href="spatial-class.html#ex2"><i class="fa fa-check"></i><b>2.6</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="3" data-path="attr.html"><a href="attr.html"><i class="fa fa-check"></i><b>3</b> Attribute data operations</a><ul>
-<li class="chapter" data-level="" data-path="attr.html"><a href="attr.html#prerequisites-1"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="3.1" data-path="attr.html"><a href="attr.html#introduction"><i class="fa fa-check"></i><b>3.1</b> Introduction</a></li>
-<li class="chapter" data-level="3.2" data-path="attr.html"><a href="attr.html#vector-attribute-manipulation"><i class="fa fa-check"></i><b>3.2</b> Vector attribute manipulation</a><ul>
-<li class="chapter" data-level="3.2.1" data-path="attr.html"><a href="attr.html#vector-attribute-subsetting"><i class="fa fa-check"></i><b>3.2.1</b> Vector attribute subsetting</a></li>
-<li class="chapter" data-level="3.2.2" data-path="attr.html"><a href="attr.html#vector-attribute-aggregation"><i class="fa fa-check"></i><b>3.2.2</b> Vector attribute aggregation</a></li>
-<li class="chapter" data-level="3.2.3" data-path="attr.html"><a href="attr.html#vector-attribute-joining"><i class="fa fa-check"></i><b>3.2.3</b> Vector attribute joining</a></li>
-<li class="chapter" data-level="3.2.4" data-path="attr.html"><a href="attr.html#vec-attr-creation"><i class="fa fa-check"></i><b>3.2.4</b> Creating attributes and removing spatial information</a></li>
-</ul></li>
-<li class="chapter" data-level="3.3" data-path="attr.html"><a href="attr.html#manipulating-raster-objects"><i class="fa fa-check"></i><b>3.3</b> Manipulating raster objects</a><ul>
-<li class="chapter" data-level="3.3.1" data-path="attr.html"><a href="attr.html#raster-subsetting"><i class="fa fa-check"></i><b>3.3.1</b> Raster subsetting</a></li>
-<li class="chapter" data-level="3.3.2" data-path="attr.html"><a href="attr.html#summarizing-raster-objects"><i class="fa fa-check"></i><b>3.3.2</b> Summarizing raster objects</a></li>
-</ul></li>
-<li class="chapter" data-level="3.4" data-path="attr.html"><a href="attr.html#exercises-1"><i class="fa fa-check"></i><b>3.4</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="4" data-path="spatial-operations.html"><a href="spatial-operations.html"><i class="fa fa-check"></i><b>4</b> Spatial data operations</a><ul>
-<li class="chapter" data-level="" data-path="spatial-operations.html"><a href="spatial-operations.html#prerequisites-2"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="4.1" data-path="spatial-operations.html"><a href="spatial-operations.html#introduction-1"><i class="fa fa-check"></i><b>4.1</b> Introduction</a></li>
-<li class="chapter" data-level="4.2" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-vec"><i class="fa fa-check"></i><b>4.2</b> Spatial operations on vector data</a><ul>
-<li class="chapter" data-level="4.2.1" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-subsetting"><i class="fa fa-check"></i><b>4.2.1</b> Spatial subsetting</a></li>
-<li class="chapter" data-level="4.2.2" data-path="spatial-operations.html"><a href="spatial-operations.html#topological-relations"><i class="fa fa-check"></i><b>4.2.2</b> Topological relations</a></li>
-<li class="chapter" data-level="4.2.3" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-joining"><i class="fa fa-check"></i><b>4.2.3</b> Spatial joining</a></li>
-<li class="chapter" data-level="4.2.4" data-path="spatial-operations.html"><a href="spatial-operations.html#non-overlapping-joins"><i class="fa fa-check"></i><b>4.2.4</b> Non-overlapping joins</a></li>
-<li class="chapter" data-level="4.2.5" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-aggr"><i class="fa fa-check"></i><b>4.2.5</b> Spatial data aggregation</a></li>
-<li class="chapter" data-level="4.2.6" data-path="spatial-operations.html"><a href="spatial-operations.html#distance-relations"><i class="fa fa-check"></i><b>4.2.6</b> Distance relations</a></li>
-</ul></li>
-<li class="chapter" data-level="4.3" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-ras"><i class="fa fa-check"></i><b>4.3</b> Spatial operations on raster data</a><ul>
-<li class="chapter" data-level="4.3.1" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-raster-subsetting"><i class="fa fa-check"></i><b>4.3.1</b> Spatial subsetting</a></li>
-<li class="chapter" data-level="4.3.2" data-path="spatial-operations.html"><a href="spatial-operations.html#map-algebra"><i class="fa fa-check"></i><b>4.3.2</b> Map algebra</a></li>
-<li class="chapter" data-level="4.3.3" data-path="spatial-operations.html"><a href="spatial-operations.html#local-operations"><i class="fa fa-check"></i><b>4.3.3</b> Local operations</a></li>
-<li class="chapter" data-level="4.3.4" data-path="spatial-operations.html"><a href="spatial-operations.html#focal-operations"><i class="fa fa-check"></i><b>4.3.4</b> Focal operations</a></li>
-<li class="chapter" data-level="4.3.5" data-path="spatial-operations.html"><a href="spatial-operations.html#zonal-operations"><i class="fa fa-check"></i><b>4.3.5</b> Zonal operations</a></li>
-<li class="chapter" data-level="4.3.6" data-path="spatial-operations.html"><a href="spatial-operations.html#global-operations-and-distances"><i class="fa fa-check"></i><b>4.3.6</b> Global operations and distances</a></li>
-<li class="chapter" data-level="4.3.7" data-path="spatial-operations.html"><a href="spatial-operations.html#map-algebra-counterparts-in-vector-processing"><i class="fa fa-check"></i><b>4.3.7</b> Map algebra counterparts in vector processing</a></li>
-<li class="chapter" data-level="4.3.8" data-path="spatial-operations.html"><a href="spatial-operations.html#merging-rasters"><i class="fa fa-check"></i><b>4.3.8</b> Merging rasters</a></li>
-</ul></li>
-<li class="chapter" data-level="4.4" data-path="spatial-operations.html"><a href="spatial-operations.html#exercises-2"><i class="fa fa-check"></i><b>4.4</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="5" data-path="geometric-operations.html"><a href="geometric-operations.html"><i class="fa fa-check"></i><b>5</b> Geometry operations</a><ul>
-<li class="chapter" data-level="" data-path="geometric-operations.html"><a href="geometric-operations.html#prerequisites-3"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="5.1" data-path="geometric-operations.html"><a href="geometric-operations.html#introduction-2"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
-<li class="chapter" data-level="5.2" data-path="geometric-operations.html"><a href="geometric-operations.html#geo-vec"><i class="fa fa-check"></i><b>5.2</b> Geometric operations on vector data</a><ul>
-<li class="chapter" data-level="5.2.1" data-path="geometric-operations.html"><a href="geometric-operations.html#simplification"><i class="fa fa-check"></i><b>5.2.1</b> Simplification</a></li>
-<li class="chapter" data-level="5.2.2" data-path="geometric-operations.html"><a href="geometric-operations.html#centroids"><i class="fa fa-check"></i><b>5.2.2</b> Centroids</a></li>
-<li class="chapter" data-level="5.2.3" data-path="geometric-operations.html"><a href="geometric-operations.html#buffers"><i class="fa fa-check"></i><b>5.2.3</b> Buffers</a></li>
-<li class="chapter" data-level="5.2.4" data-path="geometric-operations.html"><a href="geometric-operations.html#affine-transformations"><i class="fa fa-check"></i><b>5.2.4</b> Affine transformations</a></li>
-<li class="chapter" data-level="5.2.5" data-path="geometric-operations.html"><a href="geometric-operations.html#clipping"><i class="fa fa-check"></i><b>5.2.5</b> Clipping</a></li>
-<li class="chapter" data-level="5.2.6" data-path="geometric-operations.html"><a href="geometric-operations.html#geometry-unions"><i class="fa fa-check"></i><b>5.2.6</b> Geometry unions</a></li>
-<li class="chapter" data-level="5.2.7" data-path="geometric-operations.html"><a href="geometric-operations.html#type-trans"><i class="fa fa-check"></i><b>5.2.7</b> Type transformations</a></li>
-</ul></li>
-<li class="chapter" data-level="5.3" data-path="geometric-operations.html"><a href="geometric-operations.html#geo-ras"><i class="fa fa-check"></i><b>5.3</b> Geometric operations on raster data</a><ul>
-<li class="chapter" data-level="5.3.1" data-path="geometric-operations.html"><a href="geometric-operations.html#geometric-intersections"><i class="fa fa-check"></i><b>5.3.1</b> Geometric intersections</a></li>
-<li class="chapter" data-level="5.3.2" data-path="geometric-operations.html"><a href="geometric-operations.html#extent-and-origin"><i class="fa fa-check"></i><b>5.3.2</b> Extent and origin</a></li>
-<li class="chapter" data-level="5.3.3" data-path="geometric-operations.html"><a href="geometric-operations.html#aggregation-and-disaggregation"><i class="fa fa-check"></i><b>5.3.3</b> Aggregation and disaggregation</a></li>
-</ul></li>
-<li class="chapter" data-level="5.4" data-path="geometric-operations.html"><a href="geometric-operations.html#raster-vector"><i class="fa fa-check"></i><b>5.4</b> Raster-vector interactions</a><ul>
-<li class="chapter" data-level="5.4.1" data-path="geometric-operations.html"><a href="geometric-operations.html#raster-cropping"><i class="fa fa-check"></i><b>5.4.1</b> Raster cropping</a></li>
-<li class="chapter" data-level="5.4.2" data-path="geometric-operations.html"><a href="geometric-operations.html#raster-extraction"><i class="fa fa-check"></i><b>5.4.2</b> Raster extraction</a></li>
-<li class="chapter" data-level="5.4.3" data-path="geometric-operations.html"><a href="geometric-operations.html#rasterization"><i class="fa fa-check"></i><b>5.4.3</b> Rasterization</a></li>
-<li class="chapter" data-level="5.4.4" data-path="geometric-operations.html"><a href="geometric-operations.html#spatial-vectorization"><i class="fa fa-check"></i><b>5.4.4</b> Spatial vectorization</a></li>
-</ul></li>
-<li class="chapter" data-level="5.5" data-path="geometric-operations.html"><a href="geometric-operations.html#exercises-3"><i class="fa fa-check"></i><b>5.5</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="6" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html"><i class="fa fa-check"></i><b>6</b> Reprojecting geographic data</a><ul>
-<li class="chapter" data-level="" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#prerequisites-4"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="6.1" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#introduction-3"><i class="fa fa-check"></i><b>6.1</b> Introduction</a></li>
-<li class="chapter" data-level="6.2" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#when-to-reproject"><i class="fa fa-check"></i><b>6.2</b> When to reproject?</a></li>
-<li class="chapter" data-level="6.3" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#which-crs-to-use"><i class="fa fa-check"></i><b>6.3</b> Which CRS to use?</a></li>
-<li class="chapter" data-level="6.4" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#reproj-vec-geom"><i class="fa fa-check"></i><b>6.4</b> Reprojecting vector geometries</a></li>
-<li class="chapter" data-level="6.5" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#modifying-map-projections"><i class="fa fa-check"></i><b>6.5</b> Modifying map projections</a></li>
-<li class="chapter" data-level="6.6" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#reprojecting-raster-geometries"><i class="fa fa-check"></i><b>6.6</b> Reprojecting raster geometries</a></li>
-<li class="chapter" data-level="6.7" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#exercises-4"><i class="fa fa-check"></i><b>6.7</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="7" data-path="read-write.html"><a href="read-write.html"><i class="fa fa-check"></i><b>7</b> Geographic data I/O</a><ul>
-<li class="chapter" data-level="" data-path="read-write.html"><a href="read-write.html#prerequisites-5"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="7.1" data-path="read-write.html"><a href="read-write.html#introduction-4"><i class="fa fa-check"></i><b>7.1</b> Introduction</a></li>
-<li class="chapter" data-level="7.2" data-path="read-write.html"><a href="read-write.html#retrieving-data"><i class="fa fa-check"></i><b>7.2</b> Retrieving open data</a></li>
-<li class="chapter" data-level="7.3" data-path="read-write.html"><a href="read-write.html#geographic-data-packages"><i class="fa fa-check"></i><b>7.3</b> Geographic data packages</a></li>
-<li class="chapter" data-level="7.4" data-path="read-write.html"><a href="read-write.html#geographic-web-services"><i class="fa fa-check"></i><b>7.4</b> Geographic web services</a></li>
-<li class="chapter" data-level="7.5" data-path="read-write.html"><a href="read-write.html#file-formats"><i class="fa fa-check"></i><b>7.5</b> File formats</a></li>
-<li class="chapter" data-level="7.6" data-path="read-write.html"><a href="read-write.html#data-input"><i class="fa fa-check"></i><b>7.6</b> Data input (I)</a><ul>
-<li class="chapter" data-level="7.6.1" data-path="read-write.html"><a href="read-write.html#vector-data-1"><i class="fa fa-check"></i><b>7.6.1</b> Vector data</a></li>
-<li class="chapter" data-level="7.6.2" data-path="read-write.html"><a href="read-write.html#raster-data-1"><i class="fa fa-check"></i><b>7.6.2</b> Raster data</a></li>
-</ul></li>
-<li class="chapter" data-level="7.7" data-path="read-write.html"><a href="read-write.html#data-output"><i class="fa fa-check"></i><b>7.7</b> Data output (O)</a><ul>
-<li class="chapter" data-level="7.7.1" data-path="read-write.html"><a href="read-write.html#vector-data-2"><i class="fa fa-check"></i><b>7.7.1</b> Vector data</a></li>
-<li class="chapter" data-level="7.7.2" data-path="read-write.html"><a href="read-write.html#raster-data-2"><i class="fa fa-check"></i><b>7.7.2</b> Raster data</a></li>
-</ul></li>
-<li class="chapter" data-level="7.8" data-path="read-write.html"><a href="read-write.html#visual-outputs"><i class="fa fa-check"></i><b>7.8</b> Visual outputs</a></li>
-<li class="chapter" data-level="7.9" data-path="read-write.html"><a href="read-write.html#exercises-5"><i class="fa fa-check"></i><b>7.9</b> Exercises</a></li>
-</ul></li>
-<li class="part"><span><b>II Extensions</b></span></li>
-<li class="chapter" data-level="8" data-path="adv-map.html"><a href="adv-map.html"><i class="fa fa-check"></i><b>8</b> Making maps with R</a><ul>
-<li class="chapter" data-level="" data-path="adv-map.html"><a href="adv-map.html#prerequisites-6"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="8.1" data-path="adv-map.html"><a href="adv-map.html#introduction-5"><i class="fa fa-check"></i><b>8.1</b> Introduction</a></li>
-<li class="chapter" data-level="8.2" data-path="adv-map.html"><a href="adv-map.html#static-maps"><i class="fa fa-check"></i><b>8.2</b> Static maps</a><ul>
-<li class="chapter" data-level="8.2.1" data-path="adv-map.html"><a href="adv-map.html#tmap-basics"><i class="fa fa-check"></i><b>8.2.1</b> tmap basics</a></li>
-<li class="chapter" data-level="8.2.2" data-path="adv-map.html"><a href="adv-map.html#map-obj"><i class="fa fa-check"></i><b>8.2.2</b> Map objects</a></li>
-<li class="chapter" data-level="8.2.3" data-path="adv-map.html"><a href="adv-map.html#aesthetics"><i class="fa fa-check"></i><b>8.2.3</b> Aesthetics</a></li>
-<li class="chapter" data-level="8.2.4" data-path="adv-map.html"><a href="adv-map.html#color-settings"><i class="fa fa-check"></i><b>8.2.4</b> Color settings</a></li>
-<li class="chapter" data-level="8.2.5" data-path="adv-map.html"><a href="adv-map.html#layouts"><i class="fa fa-check"></i><b>8.2.5</b> Layouts</a></li>
-<li class="chapter" data-level="8.2.6" data-path="adv-map.html"><a href="adv-map.html#faceted-maps"><i class="fa fa-check"></i><b>8.2.6</b> Faceted maps</a></li>
-<li class="chapter" data-level="8.2.7" data-path="adv-map.html"><a href="adv-map.html#inset-maps"><i class="fa fa-check"></i><b>8.2.7</b> Inset maps</a></li>
-</ul></li>
-<li class="chapter" data-level="8.3" data-path="adv-map.html"><a href="adv-map.html#animated-maps"><i class="fa fa-check"></i><b>8.3</b> Animated maps</a></li>
-<li class="chapter" data-level="8.4" data-path="adv-map.html"><a href="adv-map.html#interactive-maps"><i class="fa fa-check"></i><b>8.4</b> Interactive maps</a></li>
-<li class="chapter" data-level="8.5" data-path="adv-map.html"><a href="adv-map.html#mapping-applications"><i class="fa fa-check"></i><b>8.5</b> Mapping applications</a></li>
-<li class="chapter" data-level="8.6" data-path="adv-map.html"><a href="adv-map.html#other-mapping-packages"><i class="fa fa-check"></i><b>8.6</b> Other mapping packages</a></li>
-<li class="chapter" data-level="8.7" data-path="adv-map.html"><a href="adv-map.html#exercises-6"><i class="fa fa-check"></i><b>8.7</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="9" data-path="gis.html"><a href="gis.html"><i class="fa fa-check"></i><b>9</b> Bridges to GIS software</a><ul>
-<li class="chapter" data-level="" data-path="gis.html"><a href="gis.html#prerequisites-7"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="9.1" data-path="gis.html"><a href="gis.html#introduction-6"><i class="fa fa-check"></i><b>9.1</b> Introduction</a></li>
-<li class="chapter" data-level="9.2" data-path="gis.html"><a href="gis.html#rqgis"><i class="fa fa-check"></i><b>9.2</b> (R)QGIS</a></li>
-<li class="chapter" data-level="9.3" data-path="gis.html"><a href="gis.html#rsaga"><i class="fa fa-check"></i><b>9.3</b> (R)SAGA</a></li>
-<li class="chapter" data-level="9.4" data-path="gis.html"><a href="gis.html#rgrass"><i class="fa fa-check"></i><b>9.4</b> GRASS through <strong>rgrass7</strong></a></li>
-<li class="chapter" data-level="9.5" data-path="gis.html"><a href="gis.html#when-to-use-what"><i class="fa fa-check"></i><b>9.5</b> When to use what?</a></li>
-<li class="chapter" data-level="9.6" data-path="gis.html"><a href="gis.html#other-bridges"><i class="fa fa-check"></i><b>9.6</b> Other bridges</a><ul>
-<li class="chapter" data-level="9.6.1" data-path="gis.html"><a href="gis.html#gdal"><i class="fa fa-check"></i><b>9.6.1</b> Bridges to GDAL</a></li>
-<li class="chapter" data-level="9.6.2" data-path="gis.html"><a href="gis.html#postgis"><i class="fa fa-check"></i><b>9.6.2</b> Bridges to spatial databases</a></li>
-</ul></li>
-<li class="chapter" data-level="9.7" data-path="gis.html"><a href="gis.html#exercises-7"><i class="fa fa-check"></i><b>9.7</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="10" data-path="algorithms.html"><a href="algorithms.html"><i class="fa fa-check"></i><b>10</b> Scripts, algorithms and functions</a><ul>
-<li class="chapter" data-level="" data-path="algorithms.html"><a href="algorithms.html#prerequisites-8"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="10.1" data-path="algorithms.html"><a href="algorithms.html#intro-algorithms"><i class="fa fa-check"></i><b>10.1</b> Introduction</a></li>
-<li class="chapter" data-level="10.2" data-path="algorithms.html"><a href="algorithms.html#scripts"><i class="fa fa-check"></i><b>10.2</b> Scripts</a></li>
-<li class="chapter" data-level="10.3" data-path="algorithms.html"><a href="algorithms.html#geometric-algorithms"><i class="fa fa-check"></i><b>10.3</b> Geometric algorithms</a></li>
-<li class="chapter" data-level="10.4" data-path="algorithms.html"><a href="algorithms.html#functions"><i class="fa fa-check"></i><b>10.4</b> Functions</a></li>
-<li class="chapter" data-level="10.5" data-path="algorithms.html"><a href="algorithms.html#programming"><i class="fa fa-check"></i><b>10.5</b> Programming</a></li>
-<li class="chapter" data-level="10.6" data-path="algorithms.html"><a href="algorithms.html#ex-algorithms"><i class="fa fa-check"></i><b>10.6</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="11" data-path="spatial-cv.html"><a href="spatial-cv.html"><i class="fa fa-check"></i><b>11</b> Statistical learning</a><ul>
-<li class="chapter" data-level="" data-path="spatial-cv.html"><a href="spatial-cv.html#prerequisites-9"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="11.1" data-path="spatial-cv.html"><a href="spatial-cv.html#intro-cv1"><i class="fa fa-check"></i><b>11.1</b> Introduction</a></li>
-<li class="chapter" data-level="11.2" data-path="spatial-cv.html"><a href="spatial-cv.html#case-landslide"><i class="fa fa-check"></i><b>11.2</b> Case study: Landslide susceptibility</a></li>
-<li class="chapter" data-level="11.3" data-path="spatial-cv.html"><a href="spatial-cv.html#conventional-model"><i class="fa fa-check"></i><b>11.3</b> Conventional modeling approach in R</a></li>
-<li class="chapter" data-level="11.4" data-path="spatial-cv.html"><a href="spatial-cv.html#intro-cv"><i class="fa fa-check"></i><b>11.4</b> Introduction to (spatial) cross-validation</a></li>
-<li class="chapter" data-level="11.5" data-path="spatial-cv.html"><a href="spatial-cv.html#spatial-cv-with-mlr"><i class="fa fa-check"></i><b>11.5</b> Spatial CV with <strong>mlr</strong></a><ul>
-<li class="chapter" data-level="11.5.1" data-path="spatial-cv.html"><a href="spatial-cv.html#glm"><i class="fa fa-check"></i><b>11.5.1</b> Generalized linear model</a></li>
-<li class="chapter" data-level="11.5.2" data-path="spatial-cv.html"><a href="spatial-cv.html#svm"><i class="fa fa-check"></i><b>11.5.2</b> Spatial tuning of machine-learning hyperparameters</a></li>
-</ul></li>
-<li class="chapter" data-level="11.6" data-path="spatial-cv.html"><a href="spatial-cv.html#conclusions"><i class="fa fa-check"></i><b>11.6</b> Conclusions</a></li>
-<li class="chapter" data-level="11.7" data-path="spatial-cv.html"><a href="spatial-cv.html#exercises-8"><i class="fa fa-check"></i><b>11.7</b> Exercises</a></li>
-</ul></li>
-<li class="part"><span><b>III Applications</b></span></li>
-<li class="chapter" data-level="12" data-path="transport.html"><a href="transport.html"><i class="fa fa-check"></i><b>12</b> Transportation</a><ul>
-<li class="chapter" data-level="" data-path="transport.html"><a href="transport.html#prerequisites-10"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="12.1" data-path="transport.html"><a href="transport.html#introduction-7"><i class="fa fa-check"></i><b>12.1</b> Introduction</a></li>
-<li class="chapter" data-level="12.2" data-path="transport.html"><a href="transport.html#bris-case"><i class="fa fa-check"></i><b>12.2</b> A case study of Bristol</a></li>
-<li class="chapter" data-level="12.3" data-path="transport.html"><a href="transport.html#transport-zones"><i class="fa fa-check"></i><b>12.3</b> Transport zones</a></li>
-<li class="chapter" data-level="12.4" data-path="transport.html"><a href="transport.html#desire-lines"><i class="fa fa-check"></i><b>12.4</b> Desire lines</a></li>
-<li class="chapter" data-level="12.5" data-path="transport.html"><a href="transport.html#routes"><i class="fa fa-check"></i><b>12.5</b> Routes</a></li>
-<li class="chapter" data-level="12.6" data-path="transport.html"><a href="transport.html#nodes"><i class="fa fa-check"></i><b>12.6</b> Nodes</a></li>
-<li class="chapter" data-level="12.7" data-path="transport.html"><a href="transport.html#route-networks"><i class="fa fa-check"></i><b>12.7</b> Route networks</a></li>
-<li class="chapter" data-level="12.8" data-path="transport.html"><a href="transport.html#prioritizing-new-infrastructure"><i class="fa fa-check"></i><b>12.8</b> Prioritizing new infrastructure</a></li>
-<li class="chapter" data-level="12.9" data-path="transport.html"><a href="transport.html#future-directions-of-travel"><i class="fa fa-check"></i><b>12.9</b> Future directions of travel</a></li>
-<li class="chapter" data-level="12.10" data-path="transport.html"><a href="transport.html#ex-transport"><i class="fa fa-check"></i><b>12.10</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="13" data-path="location.html"><a href="location.html"><i class="fa fa-check"></i><b>13</b> Geomarketing</a><ul>
-<li class="chapter" data-level="" data-path="location.html"><a href="location.html#prerequisites-11"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="13.1" data-path="location.html"><a href="location.html#introduction-8"><i class="fa fa-check"></i><b>13.1</b> Introduction</a></li>
-<li class="chapter" data-level="13.2" data-path="location.html"><a href="location.html#case-study"><i class="fa fa-check"></i><b>13.2</b> Case study: bike shops in Germany</a></li>
-<li class="chapter" data-level="13.3" data-path="location.html"><a href="location.html#tidy-the-input-data"><i class="fa fa-check"></i><b>13.3</b> Tidy the input data</a></li>
-<li class="chapter" data-level="13.4" data-path="location.html"><a href="location.html#create-census-rasters"><i class="fa fa-check"></i><b>13.4</b> Create census rasters</a></li>
-<li class="chapter" data-level="13.5" data-path="location.html"><a href="location.html#define-metropolitan-areas"><i class="fa fa-check"></i><b>13.5</b> Define metropolitan areas</a></li>
-<li class="chapter" data-level="13.6" data-path="location.html"><a href="location.html#points-of-interest"><i class="fa fa-check"></i><b>13.6</b> Points of interest</a></li>
-<li class="chapter" data-level="13.7" data-path="location.html"><a href="location.html#identifying-suitable-locations"><i class="fa fa-check"></i><b>13.7</b> Identifying suitable locations</a></li>
-<li class="chapter" data-level="13.8" data-path="location.html"><a href="location.html#discussion-and-next-steps"><i class="fa fa-check"></i><b>13.8</b> Discussion and next steps</a></li>
-<li class="chapter" data-level="13.9" data-path="location.html"><a href="location.html#exercises-9"><i class="fa fa-check"></i><b>13.9</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="14" data-path="eco.html"><a href="eco.html"><i class="fa fa-check"></i><b>14</b> Ecology</a><ul>
-<li class="chapter" data-level="" data-path="eco.html"><a href="eco.html#prerequisites-12"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="14.1" data-path="eco.html"><a href="eco.html#introduction-9"><i class="fa fa-check"></i><b>14.1</b> Introduction</a></li>
-<li class="chapter" data-level="14.2" data-path="eco.html"><a href="eco.html#data-and-data-preparation"><i class="fa fa-check"></i><b>14.2</b> Data and data preparation</a></li>
-<li class="chapter" data-level="14.3" data-path="eco.html"><a href="eco.html#nmds"><i class="fa fa-check"></i><b>14.3</b> Reducing dimensionality</a></li>
-<li class="chapter" data-level="14.4" data-path="eco.html"><a href="eco.html#modeling-the-floristic-gradient"><i class="fa fa-check"></i><b>14.4</b> Modeling the floristic gradient</a><ul>
-<li class="chapter" data-level="14.4.1" data-path="eco.html"><a href="eco.html#mlr-building-blocks"><i class="fa fa-check"></i><b>14.4.1</b> <strong>mlr</strong> building blocks</a></li>
-<li class="chapter" data-level="14.4.2" data-path="eco.html"><a href="eco.html#predictive-mapping"><i class="fa fa-check"></i><b>14.4.2</b> Predictive mapping</a></li>
-</ul></li>
-<li class="chapter" data-level="14.5" data-path="eco.html"><a href="eco.html#conclusions-1"><i class="fa fa-check"></i><b>14.5</b> Conclusions</a></li>
-<li class="chapter" data-level="14.6" data-path="eco.html"><a href="eco.html#exercises-10"><i class="fa fa-check"></i><b>14.6</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="15" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i><b>15</b> Conclusion</a><ul>
-<li class="chapter" data-level="" data-path="conclusion.html"><a href="conclusion.html#prerequisites-13"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="15.1" data-path="conclusion.html"><a href="conclusion.html#introduction-10"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
-<li class="chapter" data-level="15.2" data-path="conclusion.html"><a href="conclusion.html#package-choice"><i class="fa fa-check"></i><b>15.2</b> Package choice</a></li>
-<li class="chapter" data-level="15.3" data-path="conclusion.html"><a href="conclusion.html#gaps"><i class="fa fa-check"></i><b>15.3</b> Gaps and overlaps</a></li>
-<li class="chapter" data-level="15.4" data-path="conclusion.html"><a href="conclusion.html#next"><i class="fa fa-check"></i><b>15.4</b> Where to go next?</a></li>
-<li class="chapter" data-level="15.5" data-path="conclusion.html"><a href="conclusion.html#benefit"><i class="fa fa-check"></i><b>15.5</b> The open source approach</a></li>
-</ul></li>
-<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
-<li class="divider"></li>
-<li><a href="https://robinlovelace.net/">Robin Lovelace</a></li>
-<li><a href="https://nowosad.github.io/">Jakub Nowosad</a></li>
-<li><a href="https://github.com/jannes-m/">Jannes Muenchow</a></li>
-
-</ul>
-
-      </nav>
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">Geocomputation with R</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
     </div>
 
-    <div class="book-body">
-      <div class="body-inner">
-        <div class="book-header" role="navigation">
-          <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Geocomputation with R</a>
-          </h1>
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html">Welcome</a></li>
+<li><a class="" href="foreword.html">Foreword</a></li>
+<li><a class="" href="preface.html">Preface</a></li>
+<li><a class="" href="intro.html"><span class="header-section-number">1</span> Introduction</a></li>
+<li class="book-part">Foundations</li>
+<li><a class="" href="spatial-class.html"><span class="header-section-number">2</span> Geographic data in R</a></li>
+<li><a class="" href="attr.html"><span class="header-section-number">3</span> Attribute data operations</a></li>
+<li><a class="" href="spatial-operations.html"><span class="header-section-number">4</span> Spatial data operations</a></li>
+<li><a class="" href="geometric-operations.html"><span class="header-section-number">5</span> Geometry operations</a></li>
+<li><a class="active" href="reproj-geo-data.html"><span class="header-section-number">6</span> Reprojecting geographic data</a></li>
+<li><a class="" href="read-write.html"><span class="header-section-number">7</span> Geographic data I/O</a></li>
+<li class="book-part">Extensions</li>
+<li><a class="" href="adv-map.html"><span class="header-section-number">8</span> Making maps with R</a></li>
+<li><a class="" href="gis.html"><span class="header-section-number">9</span> Bridges to GIS software</a></li>
+<li><a class="" href="algorithms.html"><span class="header-section-number">10</span> Scripts, algorithms and functions</a></li>
+<li><a class="" href="spatial-cv.html"><span class="header-section-number">11</span> Statistical learning</a></li>
+<li class="book-part">Applications</li>
+<li><a class="" href="transport.html"><span class="header-section-number">12</span> Transportation</a></li>
+<li><a class="" href="location.html"><span class="header-section-number">13</span> Geomarketing</a></li>
+<li><a class="" href="eco.html"><span class="header-section-number">14</span> Ecology</a></li>
+<li><a class="" href="conclusion.html"><span class="header-section-number">15</span> Conclusion</a></li>
+<li><a class="" href="references.html">References</a></li>
+</ul>
+
+        <div class="book-extra">
+          
         </div>
-
-        <div class="page-wrapper" tabindex="-1" role="main">
-          <div class="page-inner">
-
-            <section class="normal" id="section-">
-<div id="reproj-geo-data" class="section level1">
-<h1><span class="header-section-number">Chapter 6</span> Reprojecting geographic data</h1>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="reproj-geo-data" class="section level1">
+<h1>
+<span class="header-section-number">6</span> Reprojecting geographic data<a class="anchor" aria-label="anchor" href="#reproj-geo-data"><i class="fas fa-link"></i></a>
+</h1>
 <div id="prerequisites-4" class="section level2 unnumbered">
-<h2>Prerequisites</h2>
+<h2>Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites-4"><i class="fas fa-link"></i></a>
+</h2>
 <ul>
 <li>This chapter requires the following packages (<strong>lwgeom</strong> is also used, but does not need to be attached):</li>
 </ul>
-<div class="sourceCode" id="cb207"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb207-1"><a href="reproj-geo-data.html#cb207-1"></a><span class="kw">library</span>(sf)</span>
-<span id="cb207-2"><a href="reproj-geo-data.html#cb207-2"></a><span class="kw">library</span>(raster)</span>
-<span id="cb207-3"><a href="reproj-geo-data.html#cb207-3"></a><span class="kw">library</span>(dplyr)</span>
-<span id="cb207-4"><a href="reproj-geo-data.html#cb207-4"></a><span class="kw">library</span>(spData)</span>
-<span id="cb207-5"><a href="reproj-geo-data.html#cb207-5"></a><span class="kw">library</span>(spDataLarge)</span></code></pre></div>
+<div class="sourceCode" id="cb207"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster">raster</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://nowosad.github.io/spData/">spData</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Nowosad/spData">spDataLarge</a></span><span class="op">)</span></code></pre></div>
 </div>
 <div id="introduction-3" class="section level2">
-<h2><span class="header-section-number">6.1</span> Introduction</h2>
+<h2>
+<span class="header-section-number">6.1</span> Introduction<a class="anchor" aria-label="anchor" href="#introduction-3"><i class="fas fa-link"></i></a>
+</h2>
 <p>Section <a href="spatial-class.html#crs-intro">2.4</a> introduced coordinate reference systems (CRSs) and demonstrated their importance.
 This chapter goes further.
 It highlights issues that can arise when using inappropriate CRSs and how to <em>transform</em> data from one CRS to another.</p>
@@ -442,28 +107,33 @@ It highlights issues that can arise when using inappropriate CRSs and how to <em
 As illustrated in Figure <a href="spatial-class.html#fig:vectorplots">2.1</a>, there are two types of CRSs: <em>geographic</em> (‘lon/lat’, with units in degrees longitude and latitude) and <em>projected</em> (typically with units of meters from a datum).
 This has consequences.
 Many geometry operations in <strong>sf</strong>, for example, assume their inputs have a projected CRS, because the GEOS functions they are based on assume projected data.
-To deal with this issue <strong>sf</strong> provides the function <code>st_is_longlat()</code> to check.
+To deal with this issue <strong>sf</strong> provides the function <code><a href="https://r-spatial.github.io/sf/reference/st_is_longlat.html">st_is_longlat()</a></code> to check.
 In some cases the CRS is unknown, as shown below using the example of London introduced in Section <a href="spatial-class.html#vector-data">2.2</a>:</p>
-<div class="sourceCode" id="cb208"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb208-1"><a href="reproj-geo-data.html#cb208-1"></a>london =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">lon =</span> <span class="fl">-0.1</span>, <span class="dt">lat =</span> <span class="fl">51.5</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb208-2"><a href="reproj-geo-data.html#cb208-2"></a><span class="st">  </span><span class="kw">st_as_sf</span>(<span class="dt">coords =</span> <span class="kw">c</span>(<span class="st">&quot;lon&quot;</span>, <span class="st">&quot;lat&quot;</span>))</span>
-<span id="cb208-3"><a href="reproj-geo-data.html#cb208-3"></a><span class="kw">st_is_longlat</span>(london)</span>
-<span id="cb208-4"><a href="reproj-geo-data.html#cb208-4"></a><span class="co">#&gt; [1] NA</span></span></code></pre></div>
+<div class="sourceCode" id="cb208"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">london</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>lon <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span>, lat <span class="op">=</span> <span class="fl">51.5</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"lon"</span>, <span class="st">"lat"</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_is_longlat.html">st_is_longlat</a></span><span class="op">(</span><span class="va">london</span><span class="op">)</span>
+<span class="co">#&gt; [1] NA</span></code></pre></div>
 <p>This shows that unless a CRS is manually specified or is loaded from a source that has CRS metadata, the CRS is <code>NA</code>.
-A CRS can be added to <code>sf</code> objects with <code>st_set_crs()</code> as follows:<a href="#fn24" class="footnote-ref" id="fnref24"><sup>24</sup></a></p>
-<div class="sourceCode" id="cb209"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb209-1"><a href="reproj-geo-data.html#cb209-1"></a>london_geo =<span class="st"> </span><span class="kw">st_set_crs</span>(london, <span class="dv">4326</span>)</span>
-<span id="cb209-2"><a href="reproj-geo-data.html#cb209-2"></a><span class="kw">st_is_longlat</span>(london_geo)</span>
-<span id="cb209-3"><a href="reproj-geo-data.html#cb209-3"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+A CRS can be added to <code>sf</code> objects with <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs()</a></code> as follows:<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
+The CRS can also be added when creating &lt;code&gt;sf&lt;/code&gt; objects with the &lt;code&gt;crs&lt;/code&gt; argument (e.g., &lt;code&gt;st_sf(geometry = st_sfc(st_point(c(-0.1, 51.5))), crs = 4326)&lt;/code&gt;).
+The same argument can also be used to set the CRS when creating raster datasets (e.g., &lt;code&gt;raster(crs = "+proj=longlat")&lt;/code&gt;).&lt;/p&gt;'><sup>24</sup></a></p>
+<div class="sourceCode" id="cb209"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">london_geo</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs</a></span><span class="op">(</span><span class="va">london</span>, <span class="fl">4326</span><span class="op">)</span>
+<span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_is_longlat.html">st_is_longlat</a></span><span class="op">(</span><span class="va">london_geo</span><span class="op">)</span>
+<span class="co">#&gt; [1] TRUE</span></code></pre></div>
 <p>Datasets without a specified CRS can cause problems.
 An example is provided below, which creates a buffer of one unit around <code>london</code> and <code>london_geo</code> objects:</p>
-<div class="sourceCode" id="cb210"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb210-1"><a href="reproj-geo-data.html#cb210-1"></a>london_buff_no_crs =<span class="st"> </span><span class="kw">st_buffer</span>(london, <span class="dt">dist =</span> <span class="dv">1</span>)</span>
-<span id="cb210-2"><a href="reproj-geo-data.html#cb210-2"></a>london_buff =<span class="st"> </span><span class="kw">st_buffer</span>(london_geo, <span class="dt">dist =</span> <span class="dv">1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb210"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">london_buff_no_crs</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london</span>, dist <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
+<span class="va">london_buff</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_geo</span>, dist <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></code></pre></div>
 <p>Only the second operation generates a warning.
-The warning message is useful, telling us that the result may be of limited use because it is in units of latitude and longitude, rather than meters or some other suitable measure of distance assumed by <code>st_buffer()</code>.
+The warning message is useful, telling us that the result may be of limited use because it is in units of latitude and longitude, rather than meters or some other suitable measure of distance assumed by <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>.
 The consequences of a failure to work on projected data are illustrated in Figure <a href="reproj-geo-data.html#fig:crs-buf">6.1</a> (left panel):
 the buffer is elongated in the north-south direction because lines of longitude converge towards the Earth’s poles.</p>
 
 <div class="rmdnote">
-The distance between two lines of longitude, called meridians, is around 111 km at the equator (execute <code>geosphere::distGeo(c(0, 0), c(1, 0))</code> to find the precise distance).
+The distance between two lines of longitude, called meridians, is around 111 km at the equator (execute <code><a href="https://rdrr.io/pkg/geosphere/man/distGeo.html">geosphere::distGeo(c(0, 0), c(1, 0))</a></code> to find the precise distance).
 This shrinks to zero at the poles.
 At the latitude of London, for example, meridians are less than 70 km apart (challenge: execute code that verifies this).
 <!-- `geosphere::distGeo(c(0, 51.5), c(1, 51.5))` -->
@@ -475,31 +145,30 @@ It is better understood as a suggestion to <em>reproject</em> the data onto a pr
 This suggestion does not always need to be heeded: performing spatial and geometric operations makes little or no difference in some cases (e.g., spatial subsetting).
 But for operations involving distances such as buffering, the only way to ensure a good result is to create a projected copy of the data and run the operation on that.
 This is done in the code chunk below:</p>
-<div class="sourceCode" id="cb211"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb211-1"><a href="reproj-geo-data.html#cb211-1"></a>london_proj =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x =</span> <span class="dv">530000</span>, <span class="dt">y =</span> <span class="dv">180000</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb211-2"><a href="reproj-geo-data.html#cb211-2"></a><span class="st">  </span><span class="kw">st_as_sf</span>(<span class="dt">coords =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="dt">crs =</span> <span class="dv">27700</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb211"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">london_proj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">530000</span>, y <span class="op">=</span> <span class="fl">180000</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, crs <span class="op">=</span> <span class="fl">27700</span><span class="op">)</span></code></pre></div>
 <p>The result is a new object that is identical to <code>london</code>, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters.
-We can verify that the CRS has changed using <code>st_crs()</code> as follows (some of the output has been replaced by <code>...</code>):</p>
-<div class="sourceCode" id="cb212"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb212-1"><a href="reproj-geo-data.html#cb212-1"></a><span class="kw">st_crs</span>(london_proj)</span>
-<span id="cb212-2"><a href="reproj-geo-data.html#cb212-2"></a><span class="co">#&gt; Coordinate Reference System:</span></span>
-<span id="cb212-3"><a href="reproj-geo-data.html#cb212-3"></a><span class="co">#&gt;   EPSG: 27700 </span></span>
-<span id="cb212-4"><a href="reproj-geo-data.html#cb212-4"></a><span class="co">#&gt;   proj4string: &quot;+proj=tmerc +lat_0=49 +lon_0=-2 ... +units=m +no_defs&quot;</span></span></code></pre></div>
-<p>Notable components of this CRS description include the EPSG code (<code>EPSG: 27700</code>), the projection (<a href="https://en.wikipedia.org/wiki/Transverse_Mercator_projection">transverse Mercator</a>, <code>+proj=tmerc</code>), the origin (<code>+lat_0=49 +lon_0=-2</code>) and units (<code>+units=m</code>).<a href="#fn25" class="footnote-ref" id="fnref25"><sup>25</sup></a>
-The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: <code>st_is_longlat(london_proj)</code> now returns <code>FALSE</code> and geometry operations on <code>london_proj</code> will work without a warning, meaning buffers can be produced from it using proper units of distance.
-<!-- 
-1 degree distance (great circle distance) at the equator:
-geosphere::alongTrackDistance(c(0, 0), c(0, 1), c(0, 1)) 
-but 1 degree converted into m distance at the latitude of London:
-coords = st_coordinates(london)
-geosphere::alongTrackDistance(coords, coords + c(1, 0), coords + c(1, 0))
--->
+We can verify that the CRS has changed using <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code> as follows (some of the output has been replaced by <code>...</code>):</p>
+<div class="sourceCode" id="cb212"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">london_proj</span><span class="op">)</span>
+<span class="co">#&gt; Coordinate Reference System:</span>
+<span class="co">#&gt;   EPSG: 27700 </span>
+<span class="co">#&gt;   proj4string: "+proj=tmerc +lat_0=49 +lon_0=-2 ... +units=m +no_defs"</span></code></pre></div>
+<p>Notable components of this CRS description include the EPSG code (<code>EPSG: 27700</code>), the projection (<a href="https://en.wikipedia.org/wiki/Transverse_Mercator_projection">transverse Mercator</a>, <code>+proj=tmerc</code>), the origin (<code>+lat_0=49 +lon_0=-2</code>) and units (<code>+units=m</code>).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
+For a short description of the most relevant projection parameters and related concepts, see the fourth lecture by Jochen Albrecht hosted at
+&lt;a href="http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/" class="uri"&gt;http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/&lt;/a&gt; and information at &lt;a href="https://proj.org/usage/projections.html" class="uri"&gt;https://proj.org/usage/projections.html&lt;/a&gt;.
+Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj.&lt;/p&gt;'><sup>25</sup></a>
+The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: <code><a href="https://r-spatial.github.io/sf/reference/st_is_longlat.html">st_is_longlat(london_proj)</a></code> now returns <code>FALSE</code> and geometry operations on <code>london_proj</code> will work without a warning, meaning buffers can be produced from it using proper units of distance.
 As pointed out above, moving one degree means moving a bit more than 111 km at the equator (to be precise: 111,320 meters).
 This is used as the new buffer distance:</p>
-<div class="sourceCode" id="cb213"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb213-1"><a href="reproj-geo-data.html#cb213-1"></a>london_proj_buff =<span class="st"> </span><span class="kw">st_buffer</span>(london_proj, <span class="dv">111320</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb213"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">london_proj_buff</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_proj</span>, <span class="fl">111320</span><span class="op">)</span></code></pre></div>
 <p>The result in Figure <a href="reproj-geo-data.html#fig:crs-buf">6.1</a> (right panel) shows that buffers based on a projected CRS are not distorted:
 every part of the buffer’s border is equidistant to London.</p>
-<div class="figure" style="text-align: center"><span style="display:block;" id="fig:crs-buf"></span>
-<img src="06-reproj_files/figure-html/crs-buf-1.png" alt="Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline." width="45%" /><img src="06-reproj_files/figure-html/crs-buf-2.png" alt="Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline." width="45%" />
-<p class="caption">
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:crs-buf"></span>
+<img src="06-reproj_files/figure-html/crs-buf-1.png" alt="Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline." width="45%"><img src="06-reproj_files/figure-html/crs-buf-2.png" alt="Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline." width="45%"><p class="caption">
 FIGURE 6.1: Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline.
 </p>
 </div>
@@ -507,43 +176,54 @@ FIGURE 6.1: Buffers around London with a geographic (left) and projected (right)
 The subsequent sections go into more depth, exploring which CRS to use and the details of reprojecting vector and raster objects.</p>
 </div>
 <div id="when-to-reproject" class="section level2">
-<h2><span class="header-section-number">6.2</span> When to reproject?</h2>
+<h2>
+<span class="header-section-number">6.2</span> When to reproject?<a class="anchor" aria-label="anchor" href="#when-to-reproject"><i class="fas fa-link"></i></a>
+</h2>
 <p>
-The previous section showed how to set the CRS manually, with <code>st_set_crs(london, 4326)</code>.
+The previous section showed how to set the CRS manually, with <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs(london, 4326)</a></code>.
 In real world applications, however, CRSs are usually set automatically when data is read-in.
 The main task involving CRSs is often to <em>transform</em> objects, from one CRS into another.
 But when should data be transformed? And into which CRS?
-There are no clear-cut answers to these questions and CRS selection always involves trade-offs <span class="citation">(Maling <a href="#ref-maling_coordinate_1992" role="doc-biblioref">1992</a>)</span>.
+There are no clear-cut answers to these questions and CRS selection always involves trade-offs <span class="citation">(Maling <a href="references.html#ref-maling_coordinate_1992" role="doc-biblioref">1992</a>)</span>.
 However, there are some general principles provided in this section that can help you decide.</p>
 <p>First it’s worth considering <em>when to transform</em>.
-In some cases transformation to a projected CRS is essential, such as when using geometric functions such as <code>st_buffer()</code>, as Figure <a href="reproj-geo-data.html#fig:crs-buf">6.1</a> showed.
+In some cases transformation to a projected CRS is essential, such as when using geometric functions such as <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>, as Figure <a href="reproj-geo-data.html#fig:crs-buf">6.1</a> showed.
 Conversely, publishing data online with the <strong>leaflet</strong> package may require a geographic CRS.
 Another case is when two objects with different CRSs must be compared or combined, as shown when we try to find the distance between two objects with different CRSs:</p>
-<div class="sourceCode" id="cb214"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb214-1"><a href="reproj-geo-data.html#cb214-1"></a><span class="kw">st_distance</span>(london_geo, london_proj)</span>
-<span id="cb214-2"><a href="reproj-geo-data.html#cb214-2"></a><span class="co"># &gt; Error: st_crs(x) == st_crs(y) is not TRUE</span></span></code></pre></div>
+<div class="sourceCode" id="cb214"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">london_geo</span>, <span class="va">london_proj</span><span class="op">)</span>
+<span class="co"># &gt; Error: st_crs(x) == st_crs(y) is not TRUE</span></code></pre></div>
 <p>To make the <code>london</code> and <code>london_proj</code> objects geographically comparable one of them must be transformed into the CRS of the other.
 But which CRS to use?
 The answer is usually ‘to the projected CRS’, which in this case is the British National Grid (EPSG:27700):</p>
-<div class="sourceCode" id="cb215"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb215-1"><a href="reproj-geo-data.html#cb215-1"></a>london2 =<span class="st"> </span><span class="kw">st_transform</span>(london_geo, <span class="dv">27700</span>)</span></code></pre></div>
-<p>Now that a transformed version of <code>london</code> has been created, using the <strong>sf</strong> function <code>st_transform()</code>, the distance between the two representations of London can be found.
-It may come as a surprise that <code>london</code> and <code>london2</code> are just over 2 km apart!<a href="#fn26" class="footnote-ref" id="fnref26"><sup>26</sup></a></p>
-<div class="sourceCode" id="cb216"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb216-1"><a href="reproj-geo-data.html#cb216-1"></a><span class="kw">st_distance</span>(london2, london_proj)</span>
-<span id="cb216-2"><a href="reproj-geo-data.html#cb216-2"></a><span class="co">#&gt; Units: [m]</span></span>
-<span id="cb216-3"><a href="reproj-geo-data.html#cb216-3"></a><span class="co">#&gt;      [,1]</span></span>
-<span id="cb216-4"><a href="reproj-geo-data.html#cb216-4"></a><span class="co">#&gt; [1,] 2018</span></span></code></pre></div>
+<div class="sourceCode" id="cb215"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">london2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">london_geo</span>, <span class="fl">27700</span><span class="op">)</span></code></pre></div>
+<p>Now that a transformed version of <code>london</code> has been created, using the <strong>sf</strong> function <code><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform()</a></code>, the distance between the two representations of London can be found.
+It may come as a surprise that <code>london</code> and <code>london2</code> are just over 2 km apart!<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
+The difference in location between the two points is not due to imperfections in the transforming operation (which is in fact very accurate) but the low precision of the manually-created coordinates that created &lt;code&gt;london&lt;/code&gt; and &lt;code&gt;london_proj&lt;/code&gt;.
+Also surprising may be that the result is provided in a matrix with units of meters.
+This is because &lt;code&gt;st_distance()&lt;/code&gt; can provide distances between many features and because the CRS has units of meters.
+Use &lt;code&gt;as.numeric()&lt;/code&gt; to coerce the result into a regular number.&lt;/p&gt;"><sup>26</sup></a></p>
+<div class="sourceCode" id="cb216"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">london2</span>, <span class="va">london_proj</span><span class="op">)</span>
+<span class="co">#&gt; Units: [m]</span>
+<span class="co">#&gt;      [,1]</span>
+<span class="co">#&gt; [1,] 2018</span></code></pre></div>
 </div>
 <div id="which-crs-to-use" class="section level2">
-<h2><span class="header-section-number">6.3</span> Which CRS to use?</h2>
+<h2>
+<span class="header-section-number">6.3</span> Which CRS to use?<a class="anchor" aria-label="anchor" href="#which-crs-to-use"><i class="fas fa-link"></i></a>
+</h2>
 <p>
 
 The question of <em>which CRS</em> is tricky, and there is rarely a ‘right’ answer:
-“There exist no all-purpose projections, all involve distortion when far from the center of the specified frame” <span class="citation">(Bivand, Pebesma, and Gómez-Rubio <a href="#ref-bivand_applied_2013" role="doc-biblioref">2013</a>)</span>.</p>
+“There exist no all-purpose projections, all involve distortion when far from the center of the specified frame” <span class="citation">(Bivand, Pebesma, and Gómez-Rubio <a href="references.html#ref-bivand_applied_2013" role="doc-biblioref">2013</a>)</span>.</p>
 <p>For <strong>geographic CRSs</strong>, the answer is often <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84">WGS84</a>, not only for web mapping, but also because GPS datasets and thousands of raster and vector datasets are provided in this CRS by default.
 WGS84 is the most common CRS in the world, so it is worth knowing its EPSG code: 4326.
 This ‘magic number’ can be used to convert objects with unusual projected CRSs into something that is widely understood.</p>
 <p>What about when a <strong>projected CRS</strong> is required?
 In some cases, it is not something that we are free to decide:
-“often the choice of projection is made by a public mapping agency” <span class="citation">(Bivand, Pebesma, and Gómez-Rubio <a href="#ref-bivand_applied_2013" role="doc-biblioref">2013</a>)</span>.
+“often the choice of projection is made by a public mapping agency” <span class="citation">(Bivand, Pebesma, and Gómez-Rubio <a href="references.html#ref-bivand_applied_2013" role="doc-biblioref">2013</a>)</span>.
 This means that when working with local data sources, it is likely preferable to work with the CRS in which the data was provided, to ensure compatibility, even if the official CRS is not the most accurate.
 The example of London was easy to answer because (a) the British National Grid (with its associated EPSG code 27700) is well known and (b) the original dataset (<code>london</code>) already had that CRS.</p>
 <p>In cases where an appropriate CRS is not immediately clear, the choice of CRS should depend on the properties that are most important to preserve in the subsequent maps and analysis.
@@ -551,7 +231,8 @@ All CRSs are either equal-area, equidistant, conformal (with shapes remaining un
 Custom CRSs with local parameters can be created for a region of interest and multiple CRSs can be used in projects when no single CRS suits all tasks.
 ‘Geodesic calculations’ can provide a fall-back if no CRSs are appropriate (see <a href="https://proj.org/geodesic.html">proj.org/geodesic.html</a>).
 Regardless of the projected CRS used, the results may not be accurate for geometries covering hundreds of kilometers.</p>
-<p>When deciding on a custom CRS, we recommend the following:<a href="#fn27" class="footnote-ref" id="fnref27"><sup>27</sup></a></p>
+<p>When deciding on a custom CRS, we recommend the following:<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
+Many thanks to an anonymous reviewer whose comments formed the basis of this advice.&lt;/p&gt;"><sup>27</sup></a></p>
 <p>
 
 
@@ -569,21 +250,23 @@ Documentation from the GIS software Manifold therefore suggests restricting the 
 <p>Almost every place on Earth has a UTM code, such as “60H” which refers to northern New Zealand where R was invented.
 UTM EPSG codes run sequentially from 32601 to 32660 for northern hemisphere locations and from 32701 to 32760 for southern hemisphere locations.</p>
 <p>To show how the system works, let’s create a function, <code>lonlat2UTM()</code> to calculate the EPSG code associated with any point on the planet as <a href="https://stackoverflow.com/a/9188972/">follows</a>:</p>
-<div class="sourceCode" id="cb217"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb217-1"><a href="reproj-geo-data.html#cb217-1"></a>lonlat2UTM =<span class="st"> </span><span class="cf">function</span>(lonlat) {</span>
-<span id="cb217-2"><a href="reproj-geo-data.html#cb217-2"></a>  utm =<span class="st"> </span>(<span class="kw">floor</span>((lonlat[<span class="dv">1</span>] <span class="op">+</span><span class="st"> </span><span class="dv">180</span>) <span class="op">/</span><span class="st"> </span><span class="dv">6</span>) <span class="op">%%</span><span class="st"> </span><span class="dv">60</span>) <span class="op">+</span><span class="st"> </span><span class="dv">1</span></span>
-<span id="cb217-3"><a href="reproj-geo-data.html#cb217-3"></a>  <span class="cf">if</span>(lonlat[<span class="dv">2</span>] <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) {</span>
-<span id="cb217-4"><a href="reproj-geo-data.html#cb217-4"></a>    utm <span class="op">+</span><span class="st"> </span><span class="dv">32600</span></span>
-<span id="cb217-5"><a href="reproj-geo-data.html#cb217-5"></a>  } <span class="cf">else</span>{</span>
-<span id="cb217-6"><a href="reproj-geo-data.html#cb217-6"></a>    utm <span class="op">+</span><span class="st"> </span><span class="dv">32700</span></span>
-<span id="cb217-7"><a href="reproj-geo-data.html#cb217-7"></a>  }</span>
-<span id="cb217-8"><a href="reproj-geo-data.html#cb217-8"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb217"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">lonlat2UTM</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">lonlat</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">utm</span> <span class="op">=</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">floor</a></span><span class="op">(</span><span class="op">(</span><span class="va">lonlat</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fl">180</span><span class="op">)</span> <span class="op">/</span> <span class="fl">6</span><span class="op">)</span> <span class="op">%%</span> <span class="fl">60</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span>
+  <span class="kw">if</span><span class="op">(</span><span class="va">lonlat</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span>
+    <span class="va">utm</span> <span class="op">+</span> <span class="fl">32600</span>
+  <span class="op">}</span> <span class="kw">else</span><span class="op">{</span>
+    <span class="va">utm</span> <span class="op">+</span> <span class="fl">32700</span>
+  <span class="op">}</span>
+<span class="op">}</span></code></pre></div>
 <p>The following command uses this function to identify the UTM zone and associated EPSG code for Auckland and London:</p>
-<div class="sourceCode" id="cb218"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb218-1"><a href="reproj-geo-data.html#cb218-1"></a>epsg_utm_auk =<span class="st"> </span><span class="kw">lonlat2UTM</span>(<span class="kw">c</span>(<span class="fl">174.7</span>, <span class="fl">-36.9</span>))</span>
-<span id="cb218-2"><a href="reproj-geo-data.html#cb218-2"></a>epsg_utm_lnd =<span class="st"> </span><span class="kw">lonlat2UTM</span>(<span class="kw">st_coordinates</span>(london))</span>
-<span id="cb218-3"><a href="reproj-geo-data.html#cb218-3"></a><span class="kw">st_crs</span>(epsg_utm_auk)<span class="op">$</span>proj4string</span>
-<span id="cb218-4"><a href="reproj-geo-data.html#cb218-4"></a><span class="co">#&gt; [1] &quot;+proj=utm +zone=60 +south +datum=WGS84 +units=m +no_defs&quot;</span></span>
-<span id="cb218-5"><a href="reproj-geo-data.html#cb218-5"></a><span class="kw">st_crs</span>(epsg_utm_lnd)<span class="op">$</span>proj4string</span>
-<span id="cb218-6"><a href="reproj-geo-data.html#cb218-6"></a><span class="co">#&gt; [1] &quot;+proj=utm +zone=30 +datum=WGS84 +units=m +no_defs&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb218"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">epsg_utm_auk</span> <span class="op">=</span> <span class="fu">lonlat2UTM</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">174.7</span>, <span class="op">-</span><span class="fl">36.9</span><span class="op">)</span><span class="op">)</span>
+<span class="va">epsg_utm_lnd</span> <span class="op">=</span> <span class="fu">lonlat2UTM</span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html">st_coordinates</a></span><span class="op">(</span><span class="va">london</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">epsg_utm_auk</span><span class="op">)</span><span class="op">$</span><span class="va">proj4string</span>
+<span class="co">#&gt; [1] "+proj=utm +zone=60 +south +datum=WGS84 +units=m +no_defs"</span>
+<span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">epsg_utm_lnd</span><span class="op">)</span><span class="op">$</span><span class="va">proj4string</span>
+<span class="co">#&gt; [1] "+proj=utm +zone=30 +datum=WGS84 +units=m +no_defs"</span></code></pre></div>
 <p>Maps of UTM zones such as that provided by <a href="http://www.dmap.co.uk/utmworld.htm">dmap.co.uk</a> confirm that London is in UTM zone 30U.</p>
 <p>Another approach to automatically select a projected CRS specific to a local dataset is to create an azimuthal equidistant (<a href="https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection">AEQD</a>) projection for the center-point of the study area.
 This involves creating a custom CRS (with no EPSG code) with units of meters based on the centerpoint of a dataset.
@@ -593,120 +276,121 @@ Some features of CRS transformation however are unique to each geographic data m
 We will cover the particularities of vector data transformation in Section <a href="reproj-geo-data.html#reproj-vec-geom">6.4</a> and those of raster transformation in Section <a href="reproj-geo-data.html#reprojecting-raster-geometries">6.6</a>.</p>
 </div>
 <div id="reproj-vec-geom" class="section level2">
-<h2><span class="header-section-number">6.4</span> Reprojecting vector geometries</h2>
+<h2>
+<span class="header-section-number">6.4</span> Reprojecting vector geometries<a class="anchor" aria-label="anchor" href="#reproj-vec-geom"><i class="fas fa-link"></i></a>
+</h2>
 <p>
 
 Chapter <a href="spatial-class.html#spatial-class">2</a> demonstrated how vector geometries are made-up of points, and how points form the basis of more complex objects such as lines and polygons.
 Reprojecting vectors thus consists of transforming the coordinates of these points.
 This is illustrated by <code>cycle_hire_osm</code>, an <code>sf</code> object from <strong>spData</strong> that represents cycle hire locations across London.
-The previous section showed how the CRS of vector data can be queried with <code>st_crs()</code>.
+The previous section showed how the CRS of vector data can be queried with <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>.
 Although the output of this function is printed as a single entity, the result is in fact a named list of class <code>crs</code>, with names <code>proj4string</code> (which contains full details of the CRS) and <code>epsg</code> for its code.
 This is demonstrated below:</p>
-<div class="sourceCode" id="cb219"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb219-1"><a href="reproj-geo-data.html#cb219-1"></a>crs_lnd =<span class="st"> </span><span class="kw">st_crs</span>(cycle_hire_osm)</span>
-<span id="cb219-2"><a href="reproj-geo-data.html#cb219-2"></a><span class="kw">class</span>(crs_lnd)</span>
-<span id="cb219-3"><a href="reproj-geo-data.html#cb219-3"></a><span class="co">#&gt; [1] &quot;crs&quot;</span></span>
-<span id="cb219-4"><a href="reproj-geo-data.html#cb219-4"></a>crs_lnd<span class="op">$</span>epsg</span>
-<span id="cb219-5"><a href="reproj-geo-data.html#cb219-5"></a><span class="co">#&gt; [1] 4326</span></span></code></pre></div>
+<div class="sourceCode" id="cb219"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">crs_lnd</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">cycle_hire_osm</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">crs_lnd</span><span class="op">)</span>
+<span class="co">#&gt; [1] "crs"</span>
+<span class="va">crs_lnd</span><span class="op">$</span><span class="va">epsg</span>
+<span class="co">#&gt; [1] 4326</span></code></pre></div>
 <p>This duality of CRS objects means that they can be set either using an EPSG code or a <code>proj4string</code>.
-This means that <code>st_crs("+proj=longlat +datum=WGS84 +no_defs")</code> is equivalent to <code>st_crs(4326)</code>, although not all <code>proj4string</code>s have an associated EPSG code.
+This means that <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs("+proj=longlat +datum=WGS84 +no_defs")</a></code> is equivalent to <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs(4326)</a></code>, although not all <code>proj4string</code>s have an associated EPSG code.
 Both elements of the CRS are changed by transforming the object to a projected CRS:</p>
-<div class="sourceCode" id="cb220"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb220-1"><a href="reproj-geo-data.html#cb220-1"></a>cycle_hire_osm_projected =<span class="st"> </span><span class="kw">st_transform</span>(cycle_hire_osm, <span class="dv">27700</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb220"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cycle_hire_osm_projected</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">cycle_hire_osm</span>, <span class="fl">27700</span><span class="op">)</span></code></pre></div>
 <p>The resulting object has a new CRS with an EPSG code 27700.
 But how to find out more details about this EPSG code, or any code?
 One option is to search for it online.
 Another option is to use a function from the <strong>rgdal</strong> package to find the name of the CRS:</p>
-<div class="sourceCode" id="cb221"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb221-1"><a href="reproj-geo-data.html#cb221-1"></a>crs_codes =<span class="st"> </span>rgdal<span class="op">::</span><span class="kw">make_EPSG</span>()[<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>]</span>
-<span id="cb221-2"><a href="reproj-geo-data.html#cb221-2"></a>dplyr<span class="op">::</span><span class="kw">filter</span>(crs_codes, code <span class="op">==</span><span class="st"> </span><span class="dv">27700</span>)</span>
-<span id="cb221-3"><a href="reproj-geo-data.html#cb221-3"></a><span class="co">#&gt;    code                              note</span></span>
-<span id="cb221-4"><a href="reproj-geo-data.html#cb221-4"></a><span class="co">#&gt; 1 27700 OSGB 1936 / British National Grid</span></span></code></pre></div>
+<div class="sourceCode" id="cb221"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">crs_codes</span> <span class="op">=</span> <span class="fu">rgdal</span><span class="fu">::</span><span class="fu"><a href="http://rgdal.r-forge.r-project.org/reference/make_EPSG.html">make_EPSG</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span>
+<span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">crs_codes</span>, <span class="va">code</span> <span class="op">==</span> <span class="fl">27700</span><span class="op">)</span>
+<span class="co">#&gt;    code                              note</span>
+<span class="co">#&gt; 1 27700 OSGB 1936 / British National Grid</span></code></pre></div>
 <p>The result shows that the EPSG code 27700 represents the British National Grid, a result that could have been found by searching online for “<a href="https://www.google.com/search?q=CRS+27700">EPSG 27700</a>”.
 But what about the <code>proj4string</code> element?
 <code>proj4string</code>s are text strings that describe the CRS.
 They can be seen as formulas for converting a projected point into a point on the surface of the Earth and can be accessed from <code>crs</code> objects as follows (see <a href="https://proj.org/">proj.org/</a> for further details of what the output means):</p>
-<div class="sourceCode" id="cb222"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb222-1"><a href="reproj-geo-data.html#cb222-1"></a><span class="kw">st_crs</span>(<span class="dv">27700</span>)<span class="op">$</span>proj4string</span>
-<span id="cb222-2"><a href="reproj-geo-data.html#cb222-2"></a><span class="co">#&gt; [1] &quot;+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 ...</span></span></code></pre></div>
+<div class="sourceCode" id="cb222"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="fl">27700</span><span class="op">)</span><span class="op">$</span><span class="va">proj4string</span>
+<span class="co">#&gt; [1] "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 ...</span></code></pre></div>
 
 <div class="rmdnote">
 Printing a spatial object in the console automatically returns its coordinate reference system.
-To access and modify it explicitly, use the <code>st_crs</code> function, for example, <code>st_crs(cycle_hire_osm)</code>.
+To access and modify it explicitly, use the <code>st_crs</code> function, for example, <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs(cycle_hire_osm)</a></code>.
 </div>
 
 </div>
 <div id="modifying-map-projections" class="section level2">
-<h2><span class="header-section-number">6.5</span> Modifying map projections</h2>
+<h2>
+<span class="header-section-number">6.5</span> Modifying map projections<a class="anchor" aria-label="anchor" href="#modifying-map-projections"><i class="fas fa-link"></i></a>
+</h2>
 <p>
 Established CRSs captured by EPSG codes are well-suited for many applications.
 However in some cases it is desirable to create a new CRS, using a custom <code>proj4string</code>.
-This system allows a very wide range of projections to be created, as we’ll see in some of the custom map projections in this section.
-<!-- as we mentioned in Section \@ref(crs-in-r). --></p>
-<p>A long and growing list of projections has been developed and many of these can be set with the <code>+proj=</code> element of <code>proj4string</code>s.<a href="#fn28" class="footnote-ref" id="fnref28"><sup>28</sup></a></p>
-<p>When mapping the world while preserving area relationships, the Mollweide projection is a good choice <span class="citation">(Jenny et al. <a href="#ref-jenny_guide_2017" role="doc-biblioref">2017</a>)</span> (Figure <a href="reproj-geo-data.html#fig:mollproj">6.2</a>).
+This system allows a very wide range of projections to be created, as we’ll see in some of the custom map projections in this section.</p>
+<p>A long and growing list of projections has been developed and many of these can be set with the <code>+proj=</code> element of <code>proj4string</code>s.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
+The Wikipedia page ‘List of map projections’ has 70+ projections and illustrations.&lt;/p&gt;"><sup>28</sup></a></p>
+<p>When mapping the world while preserving area relationships, the Mollweide projection is a good choice <span class="citation">(Jenny et al. <a href="references.html#ref-jenny_guide_2017" role="doc-biblioref">2017</a>)</span> (Figure <a href="reproj-geo-data.html#fig:mollproj">6.2</a>).
 To use this projection, we need to specify it using the <code>proj4string</code> element, <code>"+proj=moll"</code>, in the <code>st_transform</code> function:</p>
-<div class="sourceCode" id="cb223"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb223-1"><a href="reproj-geo-data.html#cb223-1"></a>world_mollweide =<span class="st"> </span><span class="kw">st_transform</span>(world, <span class="dt">crs =</span> <span class="st">&quot;+proj=moll&quot;</span>)</span></code></pre></div>
-<!-- plot(world_mollweide$geom) -->
-<!-- plot(world_mollweide$geom, graticule = TRUE) -->
-<div class="figure" style="text-align: center"><span style="display:block;" id="fig:mollproj"></span>
-<img src="06-reproj_files/figure-html/mollproj-1.png" alt="Mollweide projection of the world." width="100%" />
-<p class="caption">
+<div class="sourceCode" id="cb223"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">world_mollweide</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">world</span>, crs <span class="op">=</span> <span class="st">"+proj=moll"</span><span class="op">)</span></code></pre></div>
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:mollproj"></span>
+<img src="06-reproj_files/figure-html/mollproj-1.png" alt="Mollweide projection of the world." width="100%"><p class="caption">
 FIGURE 6.2: Mollweide projection of the world.
 </p>
 </div>
 <p>On the other hand, when mapping the world, it is often desirable to have as little distortion as possible for all spatial properties (area, direction, distance).
-One of the most popular projections to achieve this is the Winkel tripel projection (Figure <a href="reproj-geo-data.html#fig:wintriproj">6.3</a>).<a href="#fn29" class="footnote-ref" id="fnref29"><sup>29</sup></a>
+One of the most popular projections to achieve this is the Winkel tripel projection (Figure <a href="reproj-geo-data.html#fig:wintriproj">6.3</a>).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
+This projection is used, among others, by the National Geographic Society.&lt;/p&gt;"><sup>29</sup></a>
 <code>st_transform_proj()</code> from the <strong>lwgeom</strong> package allows for coordinate transformations to a wide range of CRSs, including the Winkel tripel projection:</p>
-<div class="sourceCode" id="cb224"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb224-1"><a href="reproj-geo-data.html#cb224-1"></a>world_wintri =<span class="st"> </span>lwgeom<span class="op">::</span><span class="kw">st_transform_proj</span>(world, <span class="dt">crs =</span> <span class="st">&quot;+proj=wintri&quot;</span>)</span></code></pre></div>
-<!-- plot(world_wintri$geom) -->
-<!-- plot(world_wintri$geom, graticule = TRUE) -->
-<div class="figure" style="text-align: center"><span style="display:block;" id="fig:wintriproj"></span>
-<img src="images/wintriproj-1.png" alt="Winkel tripel projection of the world." width="100%" />
-<p class="caption">
+<div class="sourceCode" id="cb224"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">world_wintri</span> <span class="op">=</span> <span class="fu">lwgeom</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lwgeom/man/st_transform_proj.html">st_transform_proj</a></span><span class="op">(</span><span class="va">world</span>, crs <span class="op">=</span> <span class="st">"+proj=wintri"</span><span class="op">)</span></code></pre></div>
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:wintriproj"></span>
+<img src="images/wintriproj-1.png" alt="Winkel tripel projection of the world." width="100%"><p class="caption">
 FIGURE 6.3: Winkel tripel projection of the world.
 </p>
 </div>
 
 <div class="rmdnote">
-The three main functions for transformation of simple features coordinates are <code>sf::st_transform()</code>, <code>sf::sf_project()</code>, and <code>lwgeom::st_transform_proj()</code>.
-The <code>st_transform</code> function uses the GDAL interface to PROJ, while <code>sf_project()</code> (which works with two-column numeric matrices, representing points) and <code>lwgeom::st_transform_proj()</code> use the PROJ API directly.
+The three main functions for transformation of simple features coordinates are <code><a href="https://r-spatial.github.io/sf/reference/st_transform.html">sf::st_transform()</a></code>, <code><a href="https://r-spatial.github.io/sf/reference/sf_project.html">sf::sf_project()</a></code>, and <code><a href="https://rdrr.io/pkg/lwgeom/man/st_transform_proj.html">lwgeom::st_transform_proj()</a></code>.
+The <code>st_transform</code> function uses the GDAL interface to PROJ, while <code><a href="https://r-spatial.github.io/sf/reference/sf_project.html">sf_project()</a></code> (which works with two-column numeric matrices, representing points) and <code><a href="https://rdrr.io/pkg/lwgeom/man/st_transform_proj.html">lwgeom::st_transform_proj()</a></code> use the PROJ API directly.
 The first one is appropriate for most situations, and provides a set of the most often used parameters and well-defined transformations.
-The next one allows for greater customization of a projection, which includes cases when some of the PROJ parameters (e.g., <code>+over</code>) or projection (<code>+proj=wintri</code>) is not available in <code>st_transform()</code>.
+The next one allows for greater customization of a projection, which includes cases when some of the PROJ parameters (e.g., <code>+over</code>) or projection (<code>+proj=wintri</code>) is not available in <code><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform()</a></code>.
 </div>
 
 <p>Moreover, PROJ parameters can be modified in most CRS definitions.
 The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on longitude and latitude of <code>0</code> (Figure <a href="reproj-geo-data.html#fig:laeaproj1">6.4</a>).</p>
-<div class="sourceCode" id="cb225"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb225-1"><a href="reproj-geo-data.html#cb225-1"></a>world_laea1 =<span class="st"> </span><span class="kw">st_transform</span>(world, </span>
-<span id="cb225-2"><a href="reproj-geo-data.html#cb225-2"></a>                           <span class="dt">crs =</span> <span class="st">&quot;+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_0=0&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb225"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">world_laea1</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">world</span>, 
+                           crs <span class="op">=</span> <span class="st">"+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_0=0"</span><span class="op">)</span></code></pre></div>
 <!-- plot(world_laea1$geom) -->
 <!-- plot(world_laea1$geom, graticule = TRUE) -->
-<div class="figure" style="text-align: center"><span style="display:block;" id="fig:laeaproj1"></span>
-<img src="06-reproj_files/figure-html/laeaproj1-1.png" alt="Lambert azimuthal equal-area projection centered on longitude and latitude of 0." width="100%" />
-<p class="caption">
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:laeaproj1"></span>
+<img src="06-reproj_files/figure-html/laeaproj1-1.png" alt="Lambert azimuthal equal-area projection centered on longitude and latitude of 0." width="100%"><p class="caption">
 FIGURE 6.4: Lambert azimuthal equal-area projection centered on longitude and latitude of 0.
 </p>
 </div>
 <p>We can change the PROJ parameters, for example the center of the projection, using the <code>+lon_0</code> and <code>+lat_0</code> parameters.
 The code below gives the map centered on New York City (Figure <a href="reproj-geo-data.html#fig:laeaproj2">6.5</a>).</p>
-<div class="sourceCode" id="cb226"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb226-1"><a href="reproj-geo-data.html#cb226-1"></a>world_laea2 =<span class="st"> </span><span class="kw">st_transform</span>(world,</span>
-<span id="cb226-2"><a href="reproj-geo-data.html#cb226-2"></a>                           <span class="dt">crs =</span> <span class="st">&quot;+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40&quot;</span>)</span></code></pre></div>
-<!-- plot(world_laea2$geom) -->
-<!-- plot(world_laea2$geom, graticule = TRUE) -->
-<div class="figure" style="text-align: center"><span style="display:block;" id="fig:laeaproj2"></span>
-<img src="06-reproj_files/figure-html/laeaproj2-1.png" alt="Lambert azimuthal equal-area projection of the world centered on New York City." width="100%" />
-<p class="caption">
+<div class="sourceCode" id="cb226"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">world_laea2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">world</span>,
+                           crs <span class="op">=</span> <span class="st">"+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40"</span><span class="op">)</span></code></pre></div>
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:laeaproj2"></span>
+<img src="06-reproj_files/figure-html/laeaproj2-1.png" alt="Lambert azimuthal equal-area projection of the world centered on New York City." width="100%"><p class="caption">
 FIGURE 6.5: Lambert azimuthal equal-area projection of the world centered on New York City.
 </p>
 </div>
 <p>More information on CRS modifications can be found in the <a href="https://proj.org/usage/index.html">Using PROJ</a> documentation.</p>
-<!-- https://github.com/r-spatial/lwgeom/issues/6 -->
-<!-- ```{r} -->
-<!-- # remotes::install_github("r-spatial/lwgeom") -->
-<!-- library(lwgeom) -->
-<!-- world_3 = lwgeom::st_transform_proj(world, crs = "+proj=wintri") -->
-<!-- plot(world_3$geom) -->
-<!-- ``` -->
-<!-- http://bl.ocks.org/vlandham/raw/9216751/ -->
 </div>
 <div id="reprojecting-raster-geometries" class="section level2">
-<h2><span class="header-section-number">6.6</span> Reprojecting raster geometries</h2>
+<h2>
+<span class="header-section-number">6.6</span> Reprojecting raster geometries<a class="anchor" aria-label="anchor" href="#reprojecting-raster-geometries"><i class="fas fa-link"></i></a>
+</h2>
 <p>
 The projection concepts described in the previous section apply equally to rasters.
 However, there are important differences in reprojection of vectors and rasters:
@@ -716,9 +400,9 @@ Raster reprojection involves creating a new raster object, often with a differen
 The attributes must subsequently be re-estimated, allowing the new pixels to be ‘filled’ with appropriate values.
 In other words, raster reprojection can be thought of as two separate spatial operations: a vector reprojection of cell centroids to another CRS (Section <a href="reproj-geo-data.html#reproj-vec-geom">6.4</a>), and computation of new pixel values through resampling (Section <a href="geometric-operations.html#aggregation-and-disaggregation">5.3.3</a>).
 Thus in most cases when both raster and vector data are used, it is better to avoid reprojecting rasters and reproject vectors instead.</p>
-<p>The raster reprojection process is done with <code>projectRaster()</code> from the <strong>raster</strong> package.
-Like the <code>st_transform()</code> function demonstrated in the previous section, <code>projectRaster()</code> takes a geographic object (a raster dataset in this case) and a <code>crs</code> argument.
-However, <code>projectRaster()</code> only accepts the lengthy <code>proj4string</code> definitions of a CRS rather than concise EPSG codes.</p>
+<p>The raster reprojection process is done with <code><a href="https://rdrr.io/pkg/raster/man/projectRaster.html">projectRaster()</a></code> from the <strong>raster</strong> package.
+Like the <code><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform()</a></code> function demonstrated in the previous section, <code><a href="https://rdrr.io/pkg/raster/man/projectRaster.html">projectRaster()</a></code> takes a geographic object (a raster dataset in this case) and a <code>crs</code> argument.
+However, <code><a href="https://rdrr.io/pkg/raster/man/projectRaster.html">projectRaster()</a></code> only accepts the lengthy <code>proj4string</code> definitions of a CRS rather than concise EPSG codes.</p>
 
 <div class="rmdnote">
 It is possible to use a EPSG code in a <code>proj4string</code> definition with <code>"+init=epsg:MY_NUMBER"</code>.
@@ -729,34 +413,36 @@ The PROJ library automatically adds the rest of the parameters and converts them
 <p>Let’s take a look at two examples of raster transformation: using categorical and continuous data.
 Land cover data are usually represented by categorical maps.
 The <code>nlcd2011.tif</code> file provides information for a small area in Utah, USA obtained from <a href="https://www.mrlc.gov/nlcd2011.php">National Land Cover Database 2011</a> in the NAD83 / UTM zone 12N CRS.</p>
-<div class="sourceCode" id="cb227"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb227-1"><a href="reproj-geo-data.html#cb227-1"></a>cat_raster =<span class="st"> </span><span class="kw">raster</span>(<span class="kw">system.file</span>(<span class="st">&quot;raster/nlcd2011.tif&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;spDataLarge&quot;</span>))</span>
-<span id="cb227-2"><a href="reproj-geo-data.html#cb227-2"></a><span class="kw">crs</span>(cat_raster)</span>
-<span id="cb227-3"><a href="reproj-geo-data.html#cb227-3"></a><span class="co">#&gt; CRS arguments:</span></span>
-<span id="cb227-4"><a href="reproj-geo-data.html#cb227-4"></a><span class="co">#&gt;  +proj=utm +zone=12 +ellps=GRS80 +units=m +no_defs</span></span></code></pre></div>
+<div class="sourceCode" id="cb227"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cat_raster</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/nlcd2011.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/projection.html">crs</a></span><span class="op">(</span><span class="va">cat_raster</span><span class="op">)</span>
+<span class="co">#&gt; CRS arguments:</span>
+<span class="co">#&gt;  +proj=utm +zone=12 +ellps=GRS80 +units=m +no_defs</span></code></pre></div>
 <p>In this region, 14 land cover classes were distinguished (a full list of NLCD2011 land cover classes can be found at <a href="https://www.mrlc.gov/nlcd11_leg.php">mrlc.gov</a>):</p>
-<div class="sourceCode" id="cb228"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb228-1"><a href="reproj-geo-data.html#cb228-1"></a><span class="kw">unique</span>(cat_raster)</span>
-<span id="cb228-2"><a href="reproj-geo-data.html#cb228-2"></a><span class="co">#&gt;  [1] 11 21 22 23 31 41 42 43 52 71 81 82 90 95</span></span></code></pre></div>
+<div class="sourceCode" id="cb228"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/unique.html">unique</a></span><span class="op">(</span><span class="va">cat_raster</span><span class="op">)</span>
+<span class="co">#&gt;  [1] 11 21 22 23 31 41 42 43 52 71 81 82 90 95</span></code></pre></div>
 <p>When reprojecting categorical rasters, the estimated values must be the same as those of the original.
 This could be done using the nearest neighbor method (<code>ngb</code>).
 This method sets each new cell value to the value of the nearest cell (center) of the input raster.
 An example is reprojecting <code>cat_raster</code> to WGS84, a geographic CRS well suited for web mapping.
 The first step is to obtain the PROJ definition of this CRS, which can be done using the <a href="http://spatialreference.org/ref/epsg/wgs-84/">http://spatialreference.org</a> webpage.
-The final step is to reproject the raster with the <code>projectRaster()</code> function which, in the case of categorical data, uses the nearest neighbor method (<code>ngb</code>):</p>
-<div class="sourceCode" id="cb229"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb229-1"><a href="reproj-geo-data.html#cb229-1"></a>wgs84 =<span class="st"> &quot;+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs&quot;</span></span>
-<span id="cb229-2"><a href="reproj-geo-data.html#cb229-2"></a>cat_raster_wgs84 =<span class="st"> </span><span class="kw">projectRaster</span>(cat_raster, <span class="dt">crs =</span> wgs84, <span class="dt">method =</span> <span class="st">&quot;ngb&quot;</span>)</span></code></pre></div>
+The final step is to reproject the raster with the <code><a href="https://rdrr.io/pkg/raster/man/projectRaster.html">projectRaster()</a></code> function which, in the case of categorical data, uses the nearest neighbor method (<code>ngb</code>):</p>
+<div class="sourceCode" id="cb229"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">wgs84</span> <span class="op">=</span> <span class="st">"+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"</span>
+<span class="va">cat_raster_wgs84</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/projectRaster.html">projectRaster</a></span><span class="op">(</span><span class="va">cat_raster</span>, crs <span class="op">=</span> <span class="va">wgs84</span>, method <span class="op">=</span> <span class="st">"ngb"</span><span class="op">)</span></code></pre></div>
 <p>Many properties of the new object differ from the previous one, including the number of columns and rows (and therefore number of cells), resolution (transformed from meters into degrees), and extent, as illustrated in Table <a href="reproj-geo-data.html#tab:catraster">6.1</a> (note that the number of categories increases from 14 to 15 because of the addition of <code>NA</code> values, not because a new category has been created — the land cover classes are preserved).</p>
-<table>
-<caption><span id="tab:catraster">TABLE 6.1: </span>Key attributes in the original (‘cat_raster’) and projected (‘cat_raster_wgs84’) categorical raster datasets.</caption>
-<thead>
-<tr class="header">
+<div class="inline-table"><table class="table table-sm">
+<caption>
+<span id="tab:catraster">TABLE 6.1: </span>Key attributes in the original (‘cat_raster’) and projected (‘cat_raster_wgs84’) categorical raster datasets.</caption>
+<thead><tr class="header">
 <th align="left">CRS</th>
 <th align="right">nrow</th>
 <th align="right">ncol</th>
 <th align="right">ncell</th>
 <th align="right">resolution</th>
 <th align="right">unique_categories</th>
-</tr>
-</thead>
+</tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">NAD83</td>
@@ -775,12 +461,13 @@ The final step is to reproject the raster with the <code>projectRaster()</code> 
 <td align="right">15</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Reprojecting numeric rasters (with <code>numeric</code> or in this case <code>integer</code> values) follows an almost identical procedure.
 This is demonstrated below with <code>srtm.tif</code> in <strong>spDataLarge</strong> from <a href="https://www2.jpl.nasa.gov/srtm/">the Shuttle Radar Topography Mission (SRTM)</a>, which represents height in meters above sea level (elevation) with the WGS84 CRS:</p>
-<div class="sourceCode" id="cb230"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb230-1"><a href="reproj-geo-data.html#cb230-1"></a>con_raster =<span class="st"> </span><span class="kw">raster</span>(<span class="kw">system.file</span>(<span class="st">&quot;raster/srtm.tif&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;spDataLarge&quot;</span>))</span>
-<span id="cb230-2"><a href="reproj-geo-data.html#cb230-2"></a><span class="kw">crs</span>(con_raster)</span>
-<span id="cb230-3"><a href="reproj-geo-data.html#cb230-3"></a><span class="co">#&gt; CRS arguments: +proj=longlat +datum=WGS84 +no_defs</span></span></code></pre></div>
+<div class="sourceCode" id="cb230"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">con_raster</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/srtm.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/projection.html">crs</a></span><span class="op">(</span><span class="va">con_raster</span><span class="op">)</span>
+<span class="co">#&gt; CRS arguments: +proj=longlat +datum=WGS84 +no_defs</span></code></pre></div>
 <p>We will reproject this dataset into a projected CRS, but <em>not</em> with the nearest neighbor method which is appropriate for categorical data.
 Instead, we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster.
 <!--
@@ -790,26 +477,29 @@ However, these interpolation methods are still unavailable in the **raster** pac
 The values in the projected dataset are the distance-weighted average of the values from these four cells:
 the closer the input cell is to the center of the output cell, the greater its weight.
 The following commands create a text string representing the Oblique Lambert azimuthal equal-area projection, and reproject the raster into this CRS, using the <code>bilinear</code> method:</p>
-<div class="sourceCode" id="cb231"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb231-1"><a href="reproj-geo-data.html#cb231-1"></a>equalarea =<span class="st"> &quot;+proj=laea +lat_0=37.32 +lon_0=-113.04&quot;</span></span>
-<span id="cb231-2"><a href="reproj-geo-data.html#cb231-2"></a>con_raster_ea =<span class="st"> </span><span class="kw">projectRaster</span>(con_raster, <span class="dt">crs =</span> equalarea, <span class="dt">method =</span> <span class="st">&quot;bilinear&quot;</span>)</span>
-<span id="cb231-3"><a href="reproj-geo-data.html#cb231-3"></a><span class="kw">crs</span>(con_raster_ea)</span>
-<span id="cb231-4"><a href="reproj-geo-data.html#cb231-4"></a><span class="co">#&gt; CRS arguments:</span></span>
-<span id="cb231-5"><a href="reproj-geo-data.html#cb231-5"></a><span class="co">#&gt;  +proj=laea +lat_0=37.32 +lon_0=-113.04 +x_0=0 +y_0=0 +datum=WGS84</span></span>
-<span id="cb231-6"><a href="reproj-geo-data.html#cb231-6"></a><span class="co">#&gt; +units=m +no_defs</span></span></code></pre></div>
+<div class="sourceCode" id="cb231"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">equalarea</span> <span class="op">=</span> <span class="st">"+proj=laea +lat_0=37.32 +lon_0=-113.04"</span>
+<span class="va">con_raster_ea</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/projectRaster.html">projectRaster</a></span><span class="op">(</span><span class="va">con_raster</span>, crs <span class="op">=</span> <span class="va">equalarea</span>, method <span class="op">=</span> <span class="st">"bilinear"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/projection.html">crs</a></span><span class="op">(</span><span class="va">con_raster_ea</span><span class="op">)</span>
+<span class="co">#&gt; CRS arguments:</span>
+<span class="co">#&gt;  +proj=laea +lat_0=37.32 +lon_0=-113.04 +x_0=0 +y_0=0 +datum=WGS84</span>
+<span class="co">#&gt; +units=m +no_defs</span></code></pre></div>
 <p>Raster reprojection on numeric variables also leads to small changes to values and spatial properties, such as the number of cells, resolution, and extent.
-These changes are demonstrated in Table <a href="reproj-geo-data.html#tab:rastercrs">6.2</a><a href="#fn30" class="footnote-ref" id="fnref30"><sup>30</sup></a>:</p>
-<table>
-<caption><span id="tab:rastercrs">TABLE 6.2: </span>Key attributes in the original (‘con_raster’) and projected (‘con_raster_ea’) continuous raster datasets.</caption>
-<thead>
-<tr class="header">
+These changes are demonstrated in Table <a href="reproj-geo-data.html#tab:rastercrs">6.2</a><a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
+Another minor change, that is not represented in Table &lt;a href="reproj-geo-data.html#tab:rastercrs"&gt;6.2&lt;/a&gt;, is that the class of the values in the new projected raster dataset is &lt;code&gt;numeric&lt;/code&gt;.
+This is because the &lt;code&gt;bilinear&lt;/code&gt; method works with continuous data and the results are rarely coerced into whole integer values.
+This can have implications for file sizes when raster datasets are saved.&lt;/p&gt;'><sup>30</sup></a>:</p>
+<div class="inline-table"><table class="table table-sm">
+<caption>
+<span id="tab:rastercrs">TABLE 6.2: </span>Key attributes in the original (‘con_raster’) and projected (‘con_raster_ea’) continuous raster datasets.</caption>
+<thead><tr class="header">
 <th align="left">CRS</th>
 <th align="right">nrow</th>
 <th align="right">ncol</th>
 <th align="right">ncell</th>
 <th align="right">resolution</th>
 <th align="right">mean</th>
-</tr>
-</thead>
+</tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">WGS84</td>
@@ -828,8 +518,7 @@ These changes are demonstrated in Table <a href="reproj-geo-data.html#tab:raster
 <td align="right">1842</td>
 </tr>
 </tbody>
-</table>
-
+</table></div>
 <div class="rmdnote">
 Of course, the limitations of 2D Earth projections apply as much to vector as to raster data.
 At best we can comply with two out of three spatial properties (distance, area, direction).
@@ -842,16 +531,20 @@ An excellent resource in this area, also implemented in R, is the website R Spat
 Chapter 6 for this free online book is recommended reading — see: <a href="http://rspatial.org/spatial/6-crs.html">rspatial.org/spatial/6-crs.html</a></p>
 </div>
 <div id="exercises-4" class="section level2">
-<h2><span class="header-section-number">6.7</span> Exercises</h2>
+<h2>
+<span class="header-section-number">6.7</span> Exercises<a class="anchor" aria-label="anchor" href="#exercises-4"><i class="fas fa-link"></i></a>
+</h2>
 <!-- CRS CONVERSION -->
 <!-- 1. vector reprojection exercise (e.g. modification of proj4) -->
 <ol style="list-style-type: decimal">
-<li><p>Create a new object called <code>nz_wgs</code> by transforming <code>nz</code> object into the WGS84 CRS.</p>
+<li>
+<p>Create a new object called <code>nz_wgs</code> by transforming <code>nz</code> object into the WGS84 CRS.</p>
 <ul>
 <li>Create an object of class <code>crs</code> for both and use this to query their CRSs.</li>
 <li>With reference to the bounding box of each object, what units does each CRS use?</li>
 <li>Remove the CRS from <code>nz_wgs</code> and plot the result: what is wrong with this map of New Zealand and why?</li>
-</ul></li>
+</ul>
+</li>
 <li><p>Transform the <code>world</code> dataset to the transverse Mercator projection (<code>"+proj=tmerc"</code>) and plot the result.
 What has changed and why?
 Try to transform it back into WGS 84 and plot the new object.
@@ -867,115 +560,49 @@ It should have the Lambert Azimuthal Equal Area (<code>laea</code>) projection, 
 Next, subset Canada from the <code>world</code> object and transform it into the new projection.
 Plot and compare a map before and after the transformation.</p></li>
 </ol>
+</div>
+</div>
+
+  <div class="chapter-nav">
+<div class="prev"><a href="geometric-operations.html"><span class="header-section-number">5</span> Geometry operations</a></div>
+<div class="next"><a href="read-write.html"><span class="header-section-number">7</span> Geographic data I/O</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#reproj-geo-data"><span class="header-section-number">6</span> Reprojecting geographic data</a></li>
+<li><a class="nav-link" href="#prerequisites-4">Prerequisites</a></li>
+<li><a class="nav-link" href="#introduction-3"><span class="header-section-number">6.1</span> Introduction</a></li>
+<li><a class="nav-link" href="#when-to-reproject"><span class="header-section-number">6.2</span> When to reproject?</a></li>
+<li><a class="nav-link" href="#which-crs-to-use"><span class="header-section-number">6.3</span> Which CRS to use?</a></li>
+<li><a class="nav-link" href="#reproj-vec-geom"><span class="header-section-number">6.4</span> Reprojecting vector geometries</a></li>
+<li><a class="nav-link" href="#modifying-map-projections"><span class="header-section-number">6.5</span> Modifying map projections</a></li>
+<li><a class="nav-link" href="#reprojecting-raster-geometries"><span class="header-section-number">6.6</span> Reprojecting raster geometries</a></li>
+<li><a class="nav-link" href="#exercises-4"><span class="header-section-number">6.7</span> Exercises</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+          
+        </ul>
+</div>
+    </nav>
+</div>
 
 </div>
-</div>
-<h3>References</h3>
-<div id="refs" class="references">
-<div id="ref-bivand_applied_2013">
-<p>Bivand, Roger, Edzer J Pebesma, and Virgilio Gómez-Rubio. 2013. <em>Applied Spatial Data Analysis with R</em>. Vol. 747248717. Springer.</p>
-</div>
-<div id="ref-jenny_guide_2017">
-<p>Jenny, Bernhard, Bojan Šavrič, Nicholas D Arnold, Brooke E Marston, and Charles A Preppernau. 2017. “A Guide to Selecting Map Projections for World and Hemisphere Maps.” In <em>Choosing a Map Projection</em>, edited by Miljenko Lapaine and Lynn Usery, 213–28. Springer.</p>
-</div>
-<div id="ref-maling_coordinate_1992">
-<p>Maling, D. H. 1992. <em>Coordinate Systems and Map Projections</em>. Second. Oxford ; New York: Pergamon Press.</p>
-</div>
-</div>
-<div class="footnotes">
-<hr />
-<ol start="24">
-<li id="fn24"><p>
-The CRS can also be added when creating <code>sf</code> objects with the <code>crs</code> argument (e.g., <code>st_sf(geometry = st_sfc(st_point(c(-0.1, 51.5))), crs = 4326)</code>).
-The same argument can also be used to set the CRS when creating raster datasets (e.g., <code>raster(crs = "+proj=longlat")</code>).<a href="reproj-geo-data.html#fnref24" class="footnote-back">↩︎</a></p></li>
-<li id="fn25"><p>
-For a short description of the most relevant projection parameters and related concepts, see the fourth lecture by Jochen Albrecht hosted at
-<a href="http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/" class="uri">http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/</a> and information at <a href="https://proj.org/usage/projections.html" class="uri">https://proj.org/usage/projections.html</a>.
-<!-- [geography.hunter.cuny.edu/~jochen/GTECH361/lectures/](http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/lecture04/concepts/Map%20coordinate%20systems/Projection%20parameters.htm) as well as [http://proj4.org/parameters.html](http://proj4.org/parameters.html). -->
-Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj.<a href="reproj-geo-data.html#fnref25" class="footnote-back">↩︎</a></p></li>
-<li id="fn26"><p>
-The difference in location between the two points is not due to imperfections in the transforming operation (which is in fact very accurate) but the low precision of the manually-created coordinates that created <code>london</code> and <code>london_proj</code>.
-Also surprising may be that the result is provided in a matrix with units of meters.
-This is because <code>st_distance()</code> can provide distances between many features and because the CRS has units of meters.
-Use <code>as.numeric()</code> to coerce the result into a regular number.<a href="reproj-geo-data.html#fnref26" class="footnote-back">↩︎</a></p></li>
-<li id="fn27"><p>
-Many thanks to an anonymous reviewer whose comments formed the basis of this advice.<a href="reproj-geo-data.html#fnref27" class="footnote-back">↩︎</a></p></li>
-<li id="fn28"><p>
-The Wikipedia page ‘List of map projections’ has 70+ projections and illustrations.<a href="reproj-geo-data.html#fnref28" class="footnote-back">↩︎</a></p></li>
-<li id="fn29"><p>
-This projection is used, among others, by the National Geographic Society.<a href="reproj-geo-data.html#fnref29" class="footnote-back">↩︎</a></p></li>
-<li id="fn30"><p>
-Another minor change, that is not represented in Table <a href="reproj-geo-data.html#tab:rastercrs">6.2</a>, is that the class of the values in the new projected raster dataset is <code>numeric</code>.
-This is because the <code>bilinear</code> method works with continuous data and the results are rarely coerced into whole integer values.
-This can have implications for file sizes when raster datasets are saved.<a href="reproj-geo-data.html#fnref30" class="footnote-back">↩︎</a></p></li>
-</ol>
-</div>
-<script>
-/*
-Sorts the references alphabetically.
-Modified from code by Yvonne Aburrow.
-*/
-$(function(){
-    var elems = $('#refs').children('div').remove();
-    elems.sort(function (a, b) {
-        return $(b).children('p').html().toUpperCase() > $(a).children('p').html().toUpperCase() ? -1 : 1;
-    });
-    $('#refs').append(elems);
-})
-</script>
-            </section>
+</div> <!-- .container -->
 
-          </div>
-        </div>
-      </div>
-<a href="geometric-operations.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="read-write.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
-    </div>
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-09-06.</p>
   </div>
-<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
-<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
-<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
-<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
-<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
-<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
-<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
-<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
-<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
-<script>
-gitbook.require(["gitbook"], function(gitbook) {
-gitbook.start({
-"sharing": null,
-"fontsettings": {
-"theme": "white",
-"family": "sans",
-"size": 2
-},
-"edit": {
-"link": "https://github.com/Robinlovelace/geocompr/edit/master/06-reproj.Rmd",
-"text": "Edit"
-},
-"history": {
-"link": null,
-"text": null
-},
-"view": {
-"link": null,
-"text": null
-},
-"download": null,
-"search": {
-"engine": "lunr",
-"options": null
-},
-"toc": {
-"collapse": "section"
-}
-});
-});
-</script>
 
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
@@ -987,7 +614,22 @@ gitbook.start({
     script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
 </script>
 </body>
-
 </html>

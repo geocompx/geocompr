@@ -64,7 +64,6 @@ usa_parks = st_read(dsn = "nps_boundary.shp")
 A multitude of R packages have been developed for accessing geographic data, some of which are presented in Table \@ref(tab:datapackages).
 These provide interfaces to one or more spatial libraries or geoportals and aim to make data access even quicker from the command line.
 
-<!-- add sentinel2 package as soon as it is published on CRAN https://github.com/IVFL-BOKU/sentinel2-->
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>(\#tab:datapackages)Selected R packages for geographic data retrieval.</caption>
  <thead>
@@ -558,6 +557,9 @@ It is fast and flexible but it may be worth looking at other packages for specif
 An example is the **geojsonsf** package.
 A [benchmark](https://github.com/ATFutures/geobench) suggests it is around 10 times faster than the **sf** package for reading `.geojson`.
 
+
+
+
 ### Raster data
 
 \index{raster!data input}
@@ -658,6 +660,8 @@ It could be either `AS_XY` for simple point datasets (it creates two new columns
 st_write(cycle_hire_xy, "cycle_hire_xy.csv", layer_options = "GEOMETRY=AS_XY")
 st_write(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
 ```
+
+
 
 ### Raster data
 
@@ -761,9 +765,6 @@ writeRaster(x = single_layer,
 
 Note that `writeFormats()` returns a list with all supported file formats on your computer.
 
-<!-- ### Databases -->
-<!-- postgis output example -->
-
 ## Visual outputs
 
 \index{map making!outputs}
@@ -791,14 +792,8 @@ tmap_obj = tm_shape(world) + tm_polygons(col = "lifeExp")
 tmap_save(tm = tmap_obj, filename = "lifeExp_tmap.png")
 ```
 
-<!-- Note about that the `plot` function do not create an object -->
-<!-- ```{r} -->
-<!-- a = plot(world["lifeExp"]) -->
-<!-- ``` -->
-
 On the other hand, you can save interactive maps created in the `mapview` package as an HTML file or image using the `mapshot()` function:
 
-<!-- example doesn't work, problem with colors I guess -->
 
 ```r
 library(mapview)

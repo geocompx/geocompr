@@ -31,7 +31,6 @@ Interestingly, ecological concepts and models are quite similar to those used fo
 Animals and plants can best meet their needs in certain 'optimal' locations, based on variables that change over space (@muenchow_review_2018; see also chapter \@ref(eco)).
 This is one of the great strengths of geocomputation and GIScience in general.
 Concepts and methods are transferable to other fields.
-<!-- add reference!! -->
 Polar bears, for example, prefer northern latitudes where temperatures are lower and food (seals and sea lions) is plentiful.
 Similarly, humans tend to congregate in certain places, creating economic niches (and high land prices) analogous to the ecological niche of the Arctic.
 The main task of location analysis is to find out where such 'optimal locations' are for specific services, based on available data.
@@ -69,7 +68,6 @@ Although we have applied these steps to a specific case study, they could be gen
 The German government provides gridded census data at either 1 km or 100 m resolution.
 The following code chunk downloads, unzips and reads in the 1 km data.
 Please note that `census_de` is also available from the **spDataLarge** package (`data("census_de", package = "spDataLarge"`).
-
 
 
 ```r
@@ -141,7 +139,6 @@ Be careful with geographic CRS\index{CRS!geographic} where grid cell areas const
 <p class="caption">(\#fig:census-stack)Gridded German census data of 2011 (see Table 13.1 for a description of the classes).</p>
 </div>
 
-<!-- find out about new lines in headings + blank cells-->
 The next stage is to reclassify the values of the rasters stored in `input_ras` in accordance with the survey mentioned in Section \@ref(case-study), using the **raster** function `reclassify()`, which was introduced in Section \@ref(local-operations)\index{map algebra!local operations}.
 In the case of the population data, we convert the classes into a numeric data type using class means. 
 Raster cells are assumed to have a population of 127 if they have a value of 1 (cells in 'class 1' contain between 3 and 250 inhabitants) and 375 if they have a value of 2 (containing 250 to 500 inhabitants), and so on (see Table \@ref(tab:census-desc)).
@@ -244,74 +241,6 @@ metros = polys %>%
 
 Given no other column as input, `summarize()` only dissolves the geometry.
 
-<!-- maybe a good if advanced exercise
-This requires finding the nearest neighbors (`st_intersects()`), and some additional processing.
-Do not worry too much about the following code.
-There is probably a better way to do it. 
-Nevertheless, it finds all pixels belonging to one region in a generic way.
-We use this information to assign each polygon (pixel) to a region.
-Subsequently, we can use the region information to dissolve the pixels into region polygons.
-
-
-```r
-# dissolve on spatial neighborhood
-nbs = st_intersects(polys, polys)
-# nbs = over(polys, polys, returnList = TRUE)
-
-fun = function(x, y) {
-  tmp = lapply(y, function(i) {
-  if (any(x %in% i)) {
-   union(x, i)
-  } else {
-   x
-    }
-  })
-  Reduce(union, tmp)
-}
-# call function recursively
-fun_2 = function(x, y) {
-  out = fun(x, y)
-  while (length(out) < length(fun(out, y))) {
-    out = fun(out, y)
-  }
-  out
-}
-
-cluster = map(nbs, ~ fun_2(., nbs) %>% sort)
-# just keep unique clusters
-cluster = cluster[!duplicated(cluster)]
-# assign the cluster classes to each pixel
-for (i in seq_along(cluster)) {
-  polys[cluster[[i]], "region_id"] = i
-}
-# dissolve pixels based on the the region id
-polys = group_by(polys, region_id) %>%
-  summarize(pop = sum(layer, na.rm = TRUE))
-# polys_2 = aggregate(polys, list(polys$region_id), sum)
-plot(polys[, "region_id"])
-
-# Another approach, can be also be part of an excercise
-
-coords = st_coordinates(polys_3) %>% 
-  as.data.frame
-ls = split(coords, f = coords$L2)
-ls = lapply(ls, function(x) {
-  dplyr::select(x, X, Y) %>%
-    as.matrix %>%
-    list %>%
-    st_polygon
-})
-metros = do.call(st_sfc, ls)
-metros = st_set_crs(metros, 3035)
-metros = st_sf(data.frame(region_id = 1:9), geometry = metros)
-st_intersects(metros, metros)
-plot(metros[-5,])
-st_centroid(metros) %>%
-  st_coordinates
-```
--->
-
-
 <div class="figure" style="text-align: center">
 <img src="figures/08_metro_areas.png" alt="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names." width="100%" />
 <p class="caption">(\#fig:metro-areas)The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names.</p>
@@ -333,7 +262,6 @@ coords = st_centroid(metros_wgs) %>%
   round(4)
 ```
 
-<!-- It is a great feature of `revgeo::revgeo()` that it accepts also more than one coordinate pair as input (parameters `longitude` and `latitude`), which spares us the need for writing a loop. -->
 Choosing `frame` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the street name, house number and city.
 
 
@@ -370,15 +298,14 @@ metro_names = dplyr::pull(metro_names, city) %>%
   ifelse(. == "Wülfrath", "Duesseldorf", .)
 ```
 
-
 ## Points of interest
+
 \index{point of interest}
 The **osmdata**\index{osmdata (package)} package provides easy-to-use access to OSM\index{OpenStreetMap} data (see also Section \@ref(retrieving-data)).
 Instead of downloading shops for the whole of Germany, we restrict the query to the defined metropolitan areas, reducing computational load and providing shop locations only in areas of interest.
 The subsequent code chunk does this using a number of functions including:
 
 - `map()`\index{loop!map} (the **tidyverse** equivalent of `lapply()`\index{loop!lapply}), which iterates through all eight metropolitan names which subsequently define the bounding box\index{bounding box} in the OSM\index{OpenStreetMap} query function `opq()` (see Section \@ref(retrieving-data)).
-<!-- Alternatively, we could have provided the bounding box in the form of coordinates ourselves. -->
 - `add_osm_feature()` to specify OSM\index{OpenStreetMap} elements with a key value of `shop` (see [wiki.openstreetmap.org](http://wiki.openstreetmap.org/wiki/Map_Features) for a list of common key:value pairs).
 - `osmdata_sf()`, which converts the OSM\index{OpenStreetMap} data into spatial objects (of class `sf`).
 - `while()`\index{loop!while}, which tries repeatedly (three times in this case) to download the data if it fails the first time.^[The OSM-download will sometimes fail at the first attempt.
@@ -521,7 +448,6 @@ A number of changes to the approach could improve the analysis:
 - Data at a higher resolution may improve the output (see exercises)
 - We have used only a limited set of variables and data from other sources, such as the [INSPIRE geoportal](http://inspire-geoportal.ec.europa.eu/discovery/) or data on cycle paths from OpenStreetMap, may enrich the analysis (see also Section \@ref(retrieving-data))
 - Interactions remained unconsidered, such as a possible relationships between the portion of men and single households
-<!-- However, to find out about such an interaction we would need customer data. -->
 
 In short, the analysis could be extended in multiple directions.
 Nevertheless, it should have given you a first impression and understanding of how to obtain and deal with spatial data in R\index{R} within a geomarketing\index{geomarketing} context.

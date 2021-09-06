@@ -54,7 +54,6 @@ Selecting an appropriate level of geographic analysis can help simplify this com
 Typically, models are designed to solve a particular problem.
 For this reason, this chapter is based around a policy scenario, introduced in the next section, that asks:
 how to increase cycling in the city of Bristol?
-<!-- Both policies aim to prevent traffic jams, reduce carbon emissions, and promote a healthier life style, all of which makes the city greener and thus more attractive and enjoyable to live in. -->
 Chapter \@ref(location) demonstrates another application of geocomputation:
 prioritising the location of new bike shops.
 There is a link between the chapters because bike shops may benefit from new cycling infrastructure, demonstrating an important feature of transport systems: they are closely linked to broader social, economic and land-use patterns.
@@ -122,7 +121,6 @@ Each houses around 8,000 people.
 Such administrative zones can provide vital context to transport analysis, such as the type of people who might benefit most from particular interventions [e.g., @moreno-monroy_public_2017].
 
 The geographic resolution of these zones is important: small zones with high geographic resolution are usually preferable but their high number in large regions can have consequences for processing (especially for origin-destination analysis in which the number of possibilities increases as a non-linear function of the number of zones) [@hollander_transport_2016].
-
 
 <div class="rmdnote">
 <p>Another issue with small zones is related to anonymity rules. To make it impossible to infer the identity of individuals in zones, detailed socio-demographic variables are often only available at a low geographic resolution. Breakdowns of travel mode by age and sex, for example, are available at the Local Authority level in the UK, but not at the much higher Output Area level, each of which contains around 100 households. For further details, see www.ons.gov.uk/methodology/geography.</p>
@@ -221,7 +219,7 @@ zones_od = bristol_od %>%
   inner_join(zones_joined, ., by = "geo_code")
 ```
 
-A simplified version of Figure \@ref(fig:zones) is created with the code below (see `12-zones.R` in the [`code`](https://github.com/Robinlovelace/geocompr/tree/master/code) folder of the book's GitHub repo to reproduce the figure and Section \@ref(faceted-maps) for details on faceted maps with **tmap**\index{tmap (package)}):
+A simplified version of Figure \@ref(fig:zones) is created with the code below (see `12-zones.R` in the [`code`](https://github.com/Robinlovelace/geocompr/tree/main/code) folder of the book's GitHub repo to reproduce the figure and Section \@ref(faceted-maps) for details on faceted maps with **tmap**\index{tmap (package)}):
 
 
 ```r
@@ -278,7 +276,6 @@ There are two main types of OD pair:
 Interzonal OD pairs represent travel between zones in which the destination is different from the origin.
 Intrazonal OD pairs represent travel within the same zone (see the top row of Table \@ref(tab:od)).
 The following code chunk splits `od_bristol` into these two types:
-<!-- displayed as straight black lines in \@ref(fig:desire). -->
 
 
 ```r
@@ -289,7 +286,6 @@ od_inter = filter(bristol_od, o != d)
 The next step is to convert the interzonal OD pairs into an `sf` object representing desire lines that can be plotted on a map with the **stplanr**\index{stplanr (package)} function `od2line()`.^[
 `od2line()` works by matching the IDs in the first two columns of the `bristol_od` object to the `zone_code` ID column in the geographic `zones_od` object.
 Note that the operation emits a warning because `od2line()` works by allocating the start and end points of each origin-destination pair to the *centroid*\index{centroid} of its zone of origin and destination.
-<!-- This represents a straight line between the centroid of zone `E02003047` and the centroid of `E02003043` for the second origin-destination pair represented in Table \@ref(tab:od), for example. -->
 For real-world use one would use centroid values generated from projected data or, preferably, use *population-weighted* centroids [@lovelace_propensity_2017].
 ]
 
@@ -312,8 +308,7 @@ qtm(desire_lines, lines.lwd = "all")
 </div>
 
 The map shows that the city center dominates transport patterns in the region, suggesting policies should be prioritized there, although a number of peripheral sub-centers can also be seen.
-Next it would be interesting to have a look at the distribution of interzonal modes, e.g. between which zones is cycling the least or the most common means of transport. <!-- maybe an idea for an exercise? -->
-<!-- These include Bradley Stoke to the North and Portishead to the West. -->
+Next it would be interesting to have a look at the distribution of interzonal modes, e.g. between which zones is cycling the least or the most common means of transport.
 
 ## Routes
 
@@ -332,11 +327,8 @@ This gives remote routing\index{routing} services various advantages, including 
 - are update regularly; and
 - run on specialist hardware and software set-up for the job.
 
-<!-- , explaining this section's focus on online routing services. -->
-
 Disadvantages of remote routing\index{routing} services include speed (they rely on data transfer over the internet) and price (the Google routing API, for example, limits the number of free queries).
 The **googleway** package provides an interface to Google's routing API\index{API}.
-<!-- Todo: add link to Mark's presentation on dodgr vs Google routing costs (RL) -->
 Free (but rate limited) routing service include [OSRM](http://project-osrm.org/) and [openrouteservice.org](https://openrouteservice.org/).
 
 Instead of routing\index{routing} *all* desire lines generated in the previous section, which would be time and memory-consuming, we will focus on the desire lines\index{desire lines} of policy interest.
@@ -431,7 +423,6 @@ A common barrier preventing people from switching away from cars for commuting t
 Public transport can reduce this barrier by providing a fast and high-volume option for common routes into cities.
 From an active travel perspective, public transport 'legs' of longer journeys divide trips into three: 
 
-<!-- Add image to show this if needs be (RL) -->
 - The origin leg, typically from residential areas to public transport stations
 - The public transport leg, which typically goes from the station nearest a trip's origin to the station nearest its destination
 - The destination leg, from the station of alighting to the destination
@@ -533,20 +524,6 @@ plot(ways_sln@sl$geometry, lwd = e / 500)
 
 One can also find the shortest route\index{shortest route} between origins and destinations using this graph\index{graph} representation of the route network\index{network}.
 This can be done with functions such as `sum_network_routes()` from **stplanr**\index{stplanr (package)}, which undertakes 'local routing'\index{routing} (see Section \@ref(routes)).
-<!-- The code below finds the shortest path between two nodes on the network --- -->
-<!-- 'shortest' with reference to the `weightfield` slot of `ways_sln` (route distance by default -->
-<!-- --- and returns a linestring (plot not shown):^[ -->
-<!-- To select nodes by geographic location the **stplanr** function `find_network_nodes()` can be used. -->
-<!-- ] -->
-
-<!-- ```{r} -->
-<!-- path = sum_network_routes(ways_sln, 1, 20, "length") -->
-<!-- ``` -->
-
-<!-- ```{r, eval=FALSE} -->
-<!-- plot(st_geometry(path), col = "red", lwd = 10) -->
-<!-- plot(ways_sln@sl$geometry, add = TRUE) -->
-<!-- ``` -->
 
 ## Prioritizing new infrastructure
 
@@ -592,7 +569,6 @@ qtm(route_cycleway, lines.lwd = "all")
 <p class="caption">(\#fig:cycleways)Potential routes along which to prioritise cycle infrastructure in Bristol, based on access key rail stations (red dots) and routes with many short car journeys (north of Bristol surrounding Stoke Bradley). Line thickness is proportional to number of trips.</p>
 </div>
 
-<!-- Much more work is needed to create a realistic strategic cycle network but the analysis shows that R can be used to create a transparent and reproducible evidence base for transport applications. -->
 The results may look more attractive in an interactive map, but what do they mean?
 The routes highlighted in Figure \@ref(fig:cycleways) suggest that transport systems are intimately linked to the wider economic and social context.
 The example of Stoke Bradley is a case in point:
@@ -611,7 +587,6 @@ Transport is the fastest growing source of greenhouse gas emissions in many coun
 Because of the highly unequal distribution of transport-related emissions across society, and the fact that transport (unlike food and heating) is not essential for well-being, there is great potential for the sector to rapidly decarbonize through demand reduction, electrification of the vehicle fleet and the uptake of active travel modes such as walking and cycling.
 Further exploration of such 'transport futures' at the local level represents promising direction of travel for transport-related geocomputational research.
 
-<!-- Something on lines, routes, route networks (RL) -->
 Methodologically, the foundations presented in this chapter could be extended by including more variables in the analysis.
 Characteristics of the route such as speed limits, busyness and the provision of protected cycling and walking paths could be linked to 'mode-split' (the proportion of trips made by different modes of transport).
 By aggregating OpenStreetMap\index{OpenStreetMap} data using buffers and geographic data methods presented in Chapters \@ref(attr) and \@ref(spatial-operations), for example, it would be possible to detect the presence of green space in close proximity to transport routes.
@@ -619,12 +594,6 @@ Using R's\index{R} statistical modeling capabilities, this could then be used to
 
 This type of analysis underlies the Propensity to Cycle Tool (PCT), a publicly accessible (see [www.pct.bike](http://www.pct.bike/)) mapping tool developed in R\index{R} that is being used to prioritize investment in cycling across England [@lovelace_propensity_2017].
 Similar tools could be used to encourage evidence-based transport policies related to other topics such as air pollution and public transport access around the world.
-
-<!-- One growing area of interest surrounds the simulation of individual people and vehicles on the road network using techniques such as spatial microsimulation and agent-based modeling (ABM). -->
-<!-- R has the capability to model people in zones, and interface with ABM software such as NetLogo. -->
-<!-- Combined with its geographical capabilities, demonstrated in this book, R would seem an appropriate language for such developments to take place. -->
-<!-- Of course this should be done in ways that build-on and extend existing work in the area. -->
-<!-- R's 'ecological niche' in transport modeling software could be around the integration of detailed geographic and advanced statistical analysis methods with techniques already used in transport research. -->
 
 ## Exercises {#ex-transport}
 

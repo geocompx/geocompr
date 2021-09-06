@@ -1,436 +1,101 @@
 <!DOCTYPE html>
-<html lang="" xml:lang="">
+<html lang="en">
 <head>
-
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 7 Geographic data I/O | Geocomputation with R</title>
-  <meta name="description" content="Chapter 7 Geographic data I/O | Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data." />
-  <meta name="generator" content="bookdown 0.23 and GitBook 2.6.7" />
-
-  <meta property="og:title" content="Chapter 7 Geographic data I/O | Geocomputation with R" />
-  <meta property="og:type" content="book" />
-  <meta property="og:url" content="https://geocompr.robinlovelace.net/" />
-  <meta property="og:image" content="https://geocompr.robinlovelace.net//images/cover.png" />
-  <meta property="og:description" content="Chapter 7 Geographic data I/O | Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data." />
-  <meta name="github-repo" content="Robinlovelace/geocompr" />
-
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 7 Geographic data I/O | Geocomputation with R" />
-  
-  <meta name="twitter:description" content="Chapter 7 Geographic data I/O | Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data." />
-  <meta name="twitter:image" content="https://geocompr.robinlovelace.net//images/cover.png" />
-
-<meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow" />
-
-
-<meta name="date" content="2021-08-23" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-  
-  
-<link rel="prev" href="reproj-geo-data.html"/>
-<link rel="next" href="adv-map.html"/>
-<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
-<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
-<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
-<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
-<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
-<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
-<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
-<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
-
-
-
-
-
-
-
-
-
-<script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
-<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
-<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
-<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
-<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
-<script src="libs/leaflet-1.3.1/leaflet.js"></script>
-<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
-<script src="libs/proj4-2.6.2/proj4.min.js"></script>
-<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
-<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
-<script src="libs/leaflet-binding-2.0.4.1/leaflet.js"></script>
-<script src="libs/kePrint-0.0.1/kePrint.js"></script>
-<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-99618359-1', 'auto');
-  ga('send', 'pageview');
-
-</script>
-
-
-<style type="text/css">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-</style>
-
-
-<link rel="stylesheet" href="css/style.css" type="text/css" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Chapter 7 Geographic data I/O | Geocomputation with R</title>
+<meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow">
+<meta name="description" content="Prerequisites This chapter requires the following packages: library(sf) library(raster) library(dplyr) library(spData)  7.1 Introduction This chapter is about reading and writing geographic data....">
+<meta name="generator" content="bookdown 0.24 with bs4_book()">
+<meta property="og:title" content="Chapter 7 Geographic data I/O | Geocomputation with R">
+<meta property="og:type" content="book">
+<meta property="og:url" content="https://geocompr.robinlovelace.net/read-write.html">
+<meta property="og:image" content="https://geocompr.robinlovelace.net/images/cover.png">
+<meta property="og:description" content="Prerequisites This chapter requires the following packages: library(sf) library(raster) library(dplyr) library(spData)  7.1 Introduction This chapter is about reading and writing geographic data....">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chapter 7 Geographic data I/O | Geocomputation with R">
+<meta name="twitter:description" content="Prerequisites This chapter requires the following packages: library(sf) library(raster) library(dplyr) library(spData)  7.1 Introduction This chapter is about reading and writing geographic data....">
+<meta name="twitter:image" content="https://geocompr.robinlovelace.net/images/cover.png">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><link href="libs/_Lato-0.4.0/font.css" rel="stylesheet">
+<link href="libs/_Roboto%20Mono-0.4.0/font.css" rel="stylesheet">
+<link href="libs/_Montserrat-0.4.0/font.css" rel="stylesheet">
+<script src="libs/bs3compat-0.3.0/transition.js"></script><script src="libs/bs3compat-0.3.0/tabs.js"></script><script src="libs/bs3compat-0.3.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script><script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
+<script src="libs/leaflet-1.3.1/leaflet.js"></script><link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
+<script src="libs/proj4-2.6.2/proj4.min.js"></script><script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script><link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
+<script src="libs/leaflet-binding-2.0.4.1/leaflet.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS -->
 </head>
+<body data-spy="scroll" data-target="#toc">
 
-<body>
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
 
-
-
-  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
-
-    <div class="book-summary">
-      <nav role="navigation">
-
-<ul class="summary">
-<li><a href="./">Geocomputation with R</a></li>
-
-<li class="divider"></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Welcome</a><ul>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html#how-to-contribute"><i class="fa fa-check"></i>How to contribute?</a></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html#reproducibility"><i class="fa fa-check"></i>Reproducibility</a></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html#supporting-the-project"><i class="fa fa-check"></i>Supporting the project</a></li>
-</ul></li>
-<li class="chapter" data-level="" data-path="foreword.html"><a href="foreword.html"><i class="fa fa-check"></i>Foreword</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html"><i class="fa fa-check"></i>Preface</a><ul>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#who-this-book-is-for"><i class="fa fa-check"></i>Who this book is for</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#how-to-read-this-book"><i class="fa fa-check"></i>How to read this book</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#why-r"><i class="fa fa-check"></i>Why R?</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#real-world-impact"><i class="fa fa-check"></i>Real-world impact</a></li>
-<li class="chapter" data-level="" data-path="preface.html"><a href="preface.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
-</ul></li>
-<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
-<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#what-is-geocomputation"><i class="fa fa-check"></i><b>1.1</b> What is geocomputation?</a></li>
-<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#why-use-r-for-geocomputation"><i class="fa fa-check"></i><b>1.2</b> Why use R for geocomputation?</a></li>
-<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#software-for-geocomputation"><i class="fa fa-check"></i><b>1.3</b> Software for geocomputation</a></li>
-<li class="chapter" data-level="1.4" data-path="intro.html"><a href="intro.html#rs-spatial-ecosystem"><i class="fa fa-check"></i><b>1.4</b> R’s spatial ecosystem</a></li>
-<li class="chapter" data-level="1.5" data-path="intro.html"><a href="intro.html#the-history-of-r-spatial"><i class="fa fa-check"></i><b>1.5</b> The history of R-spatial</a></li>
-<li class="chapter" data-level="1.6" data-path="intro.html"><a href="intro.html#exercises"><i class="fa fa-check"></i><b>1.6</b> Exercises</a></li>
-</ul></li>
-<li class="part"><span><b>I Foundations</b></span></li>
-<li class="chapter" data-level="2" data-path="spatial-class.html"><a href="spatial-class.html"><i class="fa fa-check"></i><b>2</b> Geographic data in R</a><ul>
-<li class="chapter" data-level="" data-path="spatial-class.html"><a href="spatial-class.html#prerequisites"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="2.1" data-path="spatial-class.html"><a href="spatial-class.html#intro-spatial-class"><i class="fa fa-check"></i><b>2.1</b> Introduction</a></li>
-<li class="chapter" data-level="2.2" data-path="spatial-class.html"><a href="spatial-class.html#vector-data"><i class="fa fa-check"></i><b>2.2</b> Vector data</a><ul>
-<li class="chapter" data-level="2.2.1" data-path="spatial-class.html"><a href="spatial-class.html#intro-sf"><i class="fa fa-check"></i><b>2.2.1</b> An introduction to simple features</a></li>
-<li class="chapter" data-level="2.2.2" data-path="spatial-class.html"><a href="spatial-class.html#why-simple-features"><i class="fa fa-check"></i><b>2.2.2</b> Why simple features?</a></li>
-<li class="chapter" data-level="2.2.3" data-path="spatial-class.html"><a href="spatial-class.html#basic-map"><i class="fa fa-check"></i><b>2.2.3</b> Basic map making</a></li>
-<li class="chapter" data-level="2.2.4" data-path="spatial-class.html"><a href="spatial-class.html#base-args"><i class="fa fa-check"></i><b>2.2.4</b> Base plot arguments</a></li>
-<li class="chapter" data-level="2.2.5" data-path="spatial-class.html"><a href="spatial-class.html#geometry"><i class="fa fa-check"></i><b>2.2.5</b> Geometry types</a></li>
-<li class="chapter" data-level="2.2.6" data-path="spatial-class.html"><a href="spatial-class.html#sfg"><i class="fa fa-check"></i><b>2.2.6</b> Simple feature geometries (sfg)</a></li>
-<li class="chapter" data-level="2.2.7" data-path="spatial-class.html"><a href="spatial-class.html#sfc"><i class="fa fa-check"></i><b>2.2.7</b> Simple feature columns (sfc)</a></li>
-<li class="chapter" data-level="2.2.8" data-path="spatial-class.html"><a href="spatial-class.html#sf"><i class="fa fa-check"></i><b>2.2.8</b> The sf class</a></li>
-</ul></li>
-<li class="chapter" data-level="2.3" data-path="spatial-class.html"><a href="spatial-class.html#raster-data"><i class="fa fa-check"></i><b>2.3</b> Raster data</a><ul>
-<li class="chapter" data-level="2.3.1" data-path="spatial-class.html"><a href="spatial-class.html#an-introduction-to-raster"><i class="fa fa-check"></i><b>2.3.1</b> An introduction to raster</a></li>
-<li class="chapter" data-level="2.3.2" data-path="spatial-class.html"><a href="spatial-class.html#basic-map-raster"><i class="fa fa-check"></i><b>2.3.2</b> Basic map making</a></li>
-<li class="chapter" data-level="2.3.3" data-path="spatial-class.html"><a href="spatial-class.html#raster-classes"><i class="fa fa-check"></i><b>2.3.3</b> Raster classes</a></li>
-</ul></li>
-<li class="chapter" data-level="2.4" data-path="spatial-class.html"><a href="spatial-class.html#crs-intro"><i class="fa fa-check"></i><b>2.4</b> Coordinate Reference Systems</a><ul>
-<li class="chapter" data-level="2.4.1" data-path="spatial-class.html"><a href="spatial-class.html#geographic-coordinate-systems"><i class="fa fa-check"></i><b>2.4.1</b> Geographic coordinate systems</a></li>
-<li class="chapter" data-level="2.4.2" data-path="spatial-class.html"><a href="spatial-class.html#projected-coordinate-reference-systems"><i class="fa fa-check"></i><b>2.4.2</b> Projected coordinate reference systems</a></li>
-<li class="chapter" data-level="2.4.3" data-path="spatial-class.html"><a href="spatial-class.html#crs-in-r"><i class="fa fa-check"></i><b>2.4.3</b> CRSs in R</a></li>
-</ul></li>
-<li class="chapter" data-level="2.5" data-path="spatial-class.html"><a href="spatial-class.html#units"><i class="fa fa-check"></i><b>2.5</b> Units</a></li>
-<li class="chapter" data-level="2.6" data-path="spatial-class.html"><a href="spatial-class.html#ex2"><i class="fa fa-check"></i><b>2.6</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="3" data-path="attr.html"><a href="attr.html"><i class="fa fa-check"></i><b>3</b> Attribute data operations</a><ul>
-<li class="chapter" data-level="" data-path="attr.html"><a href="attr.html#prerequisites-1"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="3.1" data-path="attr.html"><a href="attr.html#introduction"><i class="fa fa-check"></i><b>3.1</b> Introduction</a></li>
-<li class="chapter" data-level="3.2" data-path="attr.html"><a href="attr.html#vector-attribute-manipulation"><i class="fa fa-check"></i><b>3.2</b> Vector attribute manipulation</a><ul>
-<li class="chapter" data-level="3.2.1" data-path="attr.html"><a href="attr.html#vector-attribute-subsetting"><i class="fa fa-check"></i><b>3.2.1</b> Vector attribute subsetting</a></li>
-<li class="chapter" data-level="3.2.2" data-path="attr.html"><a href="attr.html#vector-attribute-aggregation"><i class="fa fa-check"></i><b>3.2.2</b> Vector attribute aggregation</a></li>
-<li class="chapter" data-level="3.2.3" data-path="attr.html"><a href="attr.html#vector-attribute-joining"><i class="fa fa-check"></i><b>3.2.3</b> Vector attribute joining</a></li>
-<li class="chapter" data-level="3.2.4" data-path="attr.html"><a href="attr.html#vec-attr-creation"><i class="fa fa-check"></i><b>3.2.4</b> Creating attributes and removing spatial information</a></li>
-</ul></li>
-<li class="chapter" data-level="3.3" data-path="attr.html"><a href="attr.html#manipulating-raster-objects"><i class="fa fa-check"></i><b>3.3</b> Manipulating raster objects</a><ul>
-<li class="chapter" data-level="3.3.1" data-path="attr.html"><a href="attr.html#raster-subsetting"><i class="fa fa-check"></i><b>3.3.1</b> Raster subsetting</a></li>
-<li class="chapter" data-level="3.3.2" data-path="attr.html"><a href="attr.html#summarizing-raster-objects"><i class="fa fa-check"></i><b>3.3.2</b> Summarizing raster objects</a></li>
-</ul></li>
-<li class="chapter" data-level="3.4" data-path="attr.html"><a href="attr.html#exercises-1"><i class="fa fa-check"></i><b>3.4</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="4" data-path="spatial-operations.html"><a href="spatial-operations.html"><i class="fa fa-check"></i><b>4</b> Spatial data operations</a><ul>
-<li class="chapter" data-level="" data-path="spatial-operations.html"><a href="spatial-operations.html#prerequisites-2"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="4.1" data-path="spatial-operations.html"><a href="spatial-operations.html#introduction-1"><i class="fa fa-check"></i><b>4.1</b> Introduction</a></li>
-<li class="chapter" data-level="4.2" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-vec"><i class="fa fa-check"></i><b>4.2</b> Spatial operations on vector data</a><ul>
-<li class="chapter" data-level="4.2.1" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-subsetting"><i class="fa fa-check"></i><b>4.2.1</b> Spatial subsetting</a></li>
-<li class="chapter" data-level="4.2.2" data-path="spatial-operations.html"><a href="spatial-operations.html#topological-relations"><i class="fa fa-check"></i><b>4.2.2</b> Topological relations</a></li>
-<li class="chapter" data-level="4.2.3" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-joining"><i class="fa fa-check"></i><b>4.2.3</b> Spatial joining</a></li>
-<li class="chapter" data-level="4.2.4" data-path="spatial-operations.html"><a href="spatial-operations.html#non-overlapping-joins"><i class="fa fa-check"></i><b>4.2.4</b> Non-overlapping joins</a></li>
-<li class="chapter" data-level="4.2.5" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-aggr"><i class="fa fa-check"></i><b>4.2.5</b> Spatial data aggregation</a></li>
-<li class="chapter" data-level="4.2.6" data-path="spatial-operations.html"><a href="spatial-operations.html#distance-relations"><i class="fa fa-check"></i><b>4.2.6</b> Distance relations</a></li>
-</ul></li>
-<li class="chapter" data-level="4.3" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-ras"><i class="fa fa-check"></i><b>4.3</b> Spatial operations on raster data</a><ul>
-<li class="chapter" data-level="4.3.1" data-path="spatial-operations.html"><a href="spatial-operations.html#spatial-raster-subsetting"><i class="fa fa-check"></i><b>4.3.1</b> Spatial subsetting</a></li>
-<li class="chapter" data-level="4.3.2" data-path="spatial-operations.html"><a href="spatial-operations.html#map-algebra"><i class="fa fa-check"></i><b>4.3.2</b> Map algebra</a></li>
-<li class="chapter" data-level="4.3.3" data-path="spatial-operations.html"><a href="spatial-operations.html#local-operations"><i class="fa fa-check"></i><b>4.3.3</b> Local operations</a></li>
-<li class="chapter" data-level="4.3.4" data-path="spatial-operations.html"><a href="spatial-operations.html#focal-operations"><i class="fa fa-check"></i><b>4.3.4</b> Focal operations</a></li>
-<li class="chapter" data-level="4.3.5" data-path="spatial-operations.html"><a href="spatial-operations.html#zonal-operations"><i class="fa fa-check"></i><b>4.3.5</b> Zonal operations</a></li>
-<li class="chapter" data-level="4.3.6" data-path="spatial-operations.html"><a href="spatial-operations.html#global-operations-and-distances"><i class="fa fa-check"></i><b>4.3.6</b> Global operations and distances</a></li>
-<li class="chapter" data-level="4.3.7" data-path="spatial-operations.html"><a href="spatial-operations.html#map-algebra-counterparts-in-vector-processing"><i class="fa fa-check"></i><b>4.3.7</b> Map algebra counterparts in vector processing</a></li>
-<li class="chapter" data-level="4.3.8" data-path="spatial-operations.html"><a href="spatial-operations.html#merging-rasters"><i class="fa fa-check"></i><b>4.3.8</b> Merging rasters</a></li>
-</ul></li>
-<li class="chapter" data-level="4.4" data-path="spatial-operations.html"><a href="spatial-operations.html#exercises-2"><i class="fa fa-check"></i><b>4.4</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="5" data-path="geometric-operations.html"><a href="geometric-operations.html"><i class="fa fa-check"></i><b>5</b> Geometry operations</a><ul>
-<li class="chapter" data-level="" data-path="geometric-operations.html"><a href="geometric-operations.html#prerequisites-3"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="5.1" data-path="geometric-operations.html"><a href="geometric-operations.html#introduction-2"><i class="fa fa-check"></i><b>5.1</b> Introduction</a></li>
-<li class="chapter" data-level="5.2" data-path="geometric-operations.html"><a href="geometric-operations.html#geo-vec"><i class="fa fa-check"></i><b>5.2</b> Geometric operations on vector data</a><ul>
-<li class="chapter" data-level="5.2.1" data-path="geometric-operations.html"><a href="geometric-operations.html#simplification"><i class="fa fa-check"></i><b>5.2.1</b> Simplification</a></li>
-<li class="chapter" data-level="5.2.2" data-path="geometric-operations.html"><a href="geometric-operations.html#centroids"><i class="fa fa-check"></i><b>5.2.2</b> Centroids</a></li>
-<li class="chapter" data-level="5.2.3" data-path="geometric-operations.html"><a href="geometric-operations.html#buffers"><i class="fa fa-check"></i><b>5.2.3</b> Buffers</a></li>
-<li class="chapter" data-level="5.2.4" data-path="geometric-operations.html"><a href="geometric-operations.html#affine-transformations"><i class="fa fa-check"></i><b>5.2.4</b> Affine transformations</a></li>
-<li class="chapter" data-level="5.2.5" data-path="geometric-operations.html"><a href="geometric-operations.html#clipping"><i class="fa fa-check"></i><b>5.2.5</b> Clipping</a></li>
-<li class="chapter" data-level="5.2.6" data-path="geometric-operations.html"><a href="geometric-operations.html#geometry-unions"><i class="fa fa-check"></i><b>5.2.6</b> Geometry unions</a></li>
-<li class="chapter" data-level="5.2.7" data-path="geometric-operations.html"><a href="geometric-operations.html#type-trans"><i class="fa fa-check"></i><b>5.2.7</b> Type transformations</a></li>
-</ul></li>
-<li class="chapter" data-level="5.3" data-path="geometric-operations.html"><a href="geometric-operations.html#geo-ras"><i class="fa fa-check"></i><b>5.3</b> Geometric operations on raster data</a><ul>
-<li class="chapter" data-level="5.3.1" data-path="geometric-operations.html"><a href="geometric-operations.html#geometric-intersections"><i class="fa fa-check"></i><b>5.3.1</b> Geometric intersections</a></li>
-<li class="chapter" data-level="5.3.2" data-path="geometric-operations.html"><a href="geometric-operations.html#extent-and-origin"><i class="fa fa-check"></i><b>5.3.2</b> Extent and origin</a></li>
-<li class="chapter" data-level="5.3.3" data-path="geometric-operations.html"><a href="geometric-operations.html#aggregation-and-disaggregation"><i class="fa fa-check"></i><b>5.3.3</b> Aggregation and disaggregation</a></li>
-</ul></li>
-<li class="chapter" data-level="5.4" data-path="geometric-operations.html"><a href="geometric-operations.html#raster-vector"><i class="fa fa-check"></i><b>5.4</b> Raster-vector interactions</a><ul>
-<li class="chapter" data-level="5.4.1" data-path="geometric-operations.html"><a href="geometric-operations.html#raster-cropping"><i class="fa fa-check"></i><b>5.4.1</b> Raster cropping</a></li>
-<li class="chapter" data-level="5.4.2" data-path="geometric-operations.html"><a href="geometric-operations.html#raster-extraction"><i class="fa fa-check"></i><b>5.4.2</b> Raster extraction</a></li>
-<li class="chapter" data-level="5.4.3" data-path="geometric-operations.html"><a href="geometric-operations.html#rasterization"><i class="fa fa-check"></i><b>5.4.3</b> Rasterization</a></li>
-<li class="chapter" data-level="5.4.4" data-path="geometric-operations.html"><a href="geometric-operations.html#spatial-vectorization"><i class="fa fa-check"></i><b>5.4.4</b> Spatial vectorization</a></li>
-</ul></li>
-<li class="chapter" data-level="5.5" data-path="geometric-operations.html"><a href="geometric-operations.html#exercises-3"><i class="fa fa-check"></i><b>5.5</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="6" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html"><i class="fa fa-check"></i><b>6</b> Reprojecting geographic data</a><ul>
-<li class="chapter" data-level="" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#prerequisites-4"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="6.1" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#introduction-3"><i class="fa fa-check"></i><b>6.1</b> Introduction</a></li>
-<li class="chapter" data-level="6.2" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#when-to-reproject"><i class="fa fa-check"></i><b>6.2</b> When to reproject?</a></li>
-<li class="chapter" data-level="6.3" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#which-crs-to-use"><i class="fa fa-check"></i><b>6.3</b> Which CRS to use?</a></li>
-<li class="chapter" data-level="6.4" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#reproj-vec-geom"><i class="fa fa-check"></i><b>6.4</b> Reprojecting vector geometries</a></li>
-<li class="chapter" data-level="6.5" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#modifying-map-projections"><i class="fa fa-check"></i><b>6.5</b> Modifying map projections</a></li>
-<li class="chapter" data-level="6.6" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#reprojecting-raster-geometries"><i class="fa fa-check"></i><b>6.6</b> Reprojecting raster geometries</a></li>
-<li class="chapter" data-level="6.7" data-path="reproj-geo-data.html"><a href="reproj-geo-data.html#exercises-4"><i class="fa fa-check"></i><b>6.7</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="7" data-path="read-write.html"><a href="read-write.html"><i class="fa fa-check"></i><b>7</b> Geographic data I/O</a><ul>
-<li class="chapter" data-level="" data-path="read-write.html"><a href="read-write.html#prerequisites-5"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="7.1" data-path="read-write.html"><a href="read-write.html#introduction-4"><i class="fa fa-check"></i><b>7.1</b> Introduction</a></li>
-<li class="chapter" data-level="7.2" data-path="read-write.html"><a href="read-write.html#retrieving-data"><i class="fa fa-check"></i><b>7.2</b> Retrieving open data</a></li>
-<li class="chapter" data-level="7.3" data-path="read-write.html"><a href="read-write.html#geographic-data-packages"><i class="fa fa-check"></i><b>7.3</b> Geographic data packages</a></li>
-<li class="chapter" data-level="7.4" data-path="read-write.html"><a href="read-write.html#geographic-web-services"><i class="fa fa-check"></i><b>7.4</b> Geographic web services</a></li>
-<li class="chapter" data-level="7.5" data-path="read-write.html"><a href="read-write.html#file-formats"><i class="fa fa-check"></i><b>7.5</b> File formats</a></li>
-<li class="chapter" data-level="7.6" data-path="read-write.html"><a href="read-write.html#data-input"><i class="fa fa-check"></i><b>7.6</b> Data input (I)</a><ul>
-<li class="chapter" data-level="7.6.1" data-path="read-write.html"><a href="read-write.html#vector-data-1"><i class="fa fa-check"></i><b>7.6.1</b> Vector data</a></li>
-<li class="chapter" data-level="7.6.2" data-path="read-write.html"><a href="read-write.html#raster-data-1"><i class="fa fa-check"></i><b>7.6.2</b> Raster data</a></li>
-</ul></li>
-<li class="chapter" data-level="7.7" data-path="read-write.html"><a href="read-write.html#data-output"><i class="fa fa-check"></i><b>7.7</b> Data output (O)</a><ul>
-<li class="chapter" data-level="7.7.1" data-path="read-write.html"><a href="read-write.html#vector-data-2"><i class="fa fa-check"></i><b>7.7.1</b> Vector data</a></li>
-<li class="chapter" data-level="7.7.2" data-path="read-write.html"><a href="read-write.html#raster-data-2"><i class="fa fa-check"></i><b>7.7.2</b> Raster data</a></li>
-</ul></li>
-<li class="chapter" data-level="7.8" data-path="read-write.html"><a href="read-write.html#visual-outputs"><i class="fa fa-check"></i><b>7.8</b> Visual outputs</a></li>
-<li class="chapter" data-level="7.9" data-path="read-write.html"><a href="read-write.html#exercises-5"><i class="fa fa-check"></i><b>7.9</b> Exercises</a></li>
-</ul></li>
-<li class="part"><span><b>II Extensions</b></span></li>
-<li class="chapter" data-level="8" data-path="adv-map.html"><a href="adv-map.html"><i class="fa fa-check"></i><b>8</b> Making maps with R</a><ul>
-<li class="chapter" data-level="" data-path="adv-map.html"><a href="adv-map.html#prerequisites-6"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="8.1" data-path="adv-map.html"><a href="adv-map.html#introduction-5"><i class="fa fa-check"></i><b>8.1</b> Introduction</a></li>
-<li class="chapter" data-level="8.2" data-path="adv-map.html"><a href="adv-map.html#static-maps"><i class="fa fa-check"></i><b>8.2</b> Static maps</a><ul>
-<li class="chapter" data-level="8.2.1" data-path="adv-map.html"><a href="adv-map.html#tmap-basics"><i class="fa fa-check"></i><b>8.2.1</b> tmap basics</a></li>
-<li class="chapter" data-level="8.2.2" data-path="adv-map.html"><a href="adv-map.html#map-obj"><i class="fa fa-check"></i><b>8.2.2</b> Map objects</a></li>
-<li class="chapter" data-level="8.2.3" data-path="adv-map.html"><a href="adv-map.html#aesthetics"><i class="fa fa-check"></i><b>8.2.3</b> Aesthetics</a></li>
-<li class="chapter" data-level="8.2.4" data-path="adv-map.html"><a href="adv-map.html#color-settings"><i class="fa fa-check"></i><b>8.2.4</b> Color settings</a></li>
-<li class="chapter" data-level="8.2.5" data-path="adv-map.html"><a href="adv-map.html#layouts"><i class="fa fa-check"></i><b>8.2.5</b> Layouts</a></li>
-<li class="chapter" data-level="8.2.6" data-path="adv-map.html"><a href="adv-map.html#faceted-maps"><i class="fa fa-check"></i><b>8.2.6</b> Faceted maps</a></li>
-<li class="chapter" data-level="8.2.7" data-path="adv-map.html"><a href="adv-map.html#inset-maps"><i class="fa fa-check"></i><b>8.2.7</b> Inset maps</a></li>
-</ul></li>
-<li class="chapter" data-level="8.3" data-path="adv-map.html"><a href="adv-map.html#animated-maps"><i class="fa fa-check"></i><b>8.3</b> Animated maps</a></li>
-<li class="chapter" data-level="8.4" data-path="adv-map.html"><a href="adv-map.html#interactive-maps"><i class="fa fa-check"></i><b>8.4</b> Interactive maps</a></li>
-<li class="chapter" data-level="8.5" data-path="adv-map.html"><a href="adv-map.html#mapping-applications"><i class="fa fa-check"></i><b>8.5</b> Mapping applications</a></li>
-<li class="chapter" data-level="8.6" data-path="adv-map.html"><a href="adv-map.html#other-mapping-packages"><i class="fa fa-check"></i><b>8.6</b> Other mapping packages</a></li>
-<li class="chapter" data-level="8.7" data-path="adv-map.html"><a href="adv-map.html#exercises-6"><i class="fa fa-check"></i><b>8.7</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="9" data-path="gis.html"><a href="gis.html"><i class="fa fa-check"></i><b>9</b> Bridges to GIS software</a><ul>
-<li class="chapter" data-level="" data-path="gis.html"><a href="gis.html#prerequisites-7"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="9.1" data-path="gis.html"><a href="gis.html#introduction-6"><i class="fa fa-check"></i><b>9.1</b> Introduction</a></li>
-<li class="chapter" data-level="9.2" data-path="gis.html"><a href="gis.html#rqgis"><i class="fa fa-check"></i><b>9.2</b> (R)QGIS</a></li>
-<li class="chapter" data-level="9.3" data-path="gis.html"><a href="gis.html#rsaga"><i class="fa fa-check"></i><b>9.3</b> (R)SAGA</a></li>
-<li class="chapter" data-level="9.4" data-path="gis.html"><a href="gis.html#rgrass"><i class="fa fa-check"></i><b>9.4</b> GRASS through <strong>rgrass7</strong></a></li>
-<li class="chapter" data-level="9.5" data-path="gis.html"><a href="gis.html#when-to-use-what"><i class="fa fa-check"></i><b>9.5</b> When to use what?</a></li>
-<li class="chapter" data-level="9.6" data-path="gis.html"><a href="gis.html#other-bridges"><i class="fa fa-check"></i><b>9.6</b> Other bridges</a><ul>
-<li class="chapter" data-level="9.6.1" data-path="gis.html"><a href="gis.html#gdal"><i class="fa fa-check"></i><b>9.6.1</b> Bridges to GDAL</a></li>
-<li class="chapter" data-level="9.6.2" data-path="gis.html"><a href="gis.html#postgis"><i class="fa fa-check"></i><b>9.6.2</b> Bridges to spatial databases</a></li>
-</ul></li>
-<li class="chapter" data-level="9.7" data-path="gis.html"><a href="gis.html#exercises-7"><i class="fa fa-check"></i><b>9.7</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="10" data-path="algorithms.html"><a href="algorithms.html"><i class="fa fa-check"></i><b>10</b> Scripts, algorithms and functions</a><ul>
-<li class="chapter" data-level="" data-path="algorithms.html"><a href="algorithms.html#prerequisites-8"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="10.1" data-path="algorithms.html"><a href="algorithms.html#intro-algorithms"><i class="fa fa-check"></i><b>10.1</b> Introduction</a></li>
-<li class="chapter" data-level="10.2" data-path="algorithms.html"><a href="algorithms.html#scripts"><i class="fa fa-check"></i><b>10.2</b> Scripts</a></li>
-<li class="chapter" data-level="10.3" data-path="algorithms.html"><a href="algorithms.html#geometric-algorithms"><i class="fa fa-check"></i><b>10.3</b> Geometric algorithms</a></li>
-<li class="chapter" data-level="10.4" data-path="algorithms.html"><a href="algorithms.html#functions"><i class="fa fa-check"></i><b>10.4</b> Functions</a></li>
-<li class="chapter" data-level="10.5" data-path="algorithms.html"><a href="algorithms.html#programming"><i class="fa fa-check"></i><b>10.5</b> Programming</a></li>
-<li class="chapter" data-level="10.6" data-path="algorithms.html"><a href="algorithms.html#ex-algorithms"><i class="fa fa-check"></i><b>10.6</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="11" data-path="spatial-cv.html"><a href="spatial-cv.html"><i class="fa fa-check"></i><b>11</b> Statistical learning</a><ul>
-<li class="chapter" data-level="" data-path="spatial-cv.html"><a href="spatial-cv.html#prerequisites-9"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="11.1" data-path="spatial-cv.html"><a href="spatial-cv.html#intro-cv1"><i class="fa fa-check"></i><b>11.1</b> Introduction</a></li>
-<li class="chapter" data-level="11.2" data-path="spatial-cv.html"><a href="spatial-cv.html#case-landslide"><i class="fa fa-check"></i><b>11.2</b> Case study: Landslide susceptibility</a></li>
-<li class="chapter" data-level="11.3" data-path="spatial-cv.html"><a href="spatial-cv.html#conventional-model"><i class="fa fa-check"></i><b>11.3</b> Conventional modeling approach in R</a></li>
-<li class="chapter" data-level="11.4" data-path="spatial-cv.html"><a href="spatial-cv.html#intro-cv"><i class="fa fa-check"></i><b>11.4</b> Introduction to (spatial) cross-validation</a></li>
-<li class="chapter" data-level="11.5" data-path="spatial-cv.html"><a href="spatial-cv.html#spatial-cv-with-mlr"><i class="fa fa-check"></i><b>11.5</b> Spatial CV with <strong>mlr</strong></a><ul>
-<li class="chapter" data-level="11.5.1" data-path="spatial-cv.html"><a href="spatial-cv.html#glm"><i class="fa fa-check"></i><b>11.5.1</b> Generalized linear model</a></li>
-<li class="chapter" data-level="11.5.2" data-path="spatial-cv.html"><a href="spatial-cv.html#svm"><i class="fa fa-check"></i><b>11.5.2</b> Spatial tuning of machine-learning hyperparameters</a></li>
-</ul></li>
-<li class="chapter" data-level="11.6" data-path="spatial-cv.html"><a href="spatial-cv.html#conclusions"><i class="fa fa-check"></i><b>11.6</b> Conclusions</a></li>
-<li class="chapter" data-level="11.7" data-path="spatial-cv.html"><a href="spatial-cv.html#exercises-8"><i class="fa fa-check"></i><b>11.7</b> Exercises</a></li>
-</ul></li>
-<li class="part"><span><b>III Applications</b></span></li>
-<li class="chapter" data-level="12" data-path="transport.html"><a href="transport.html"><i class="fa fa-check"></i><b>12</b> Transportation</a><ul>
-<li class="chapter" data-level="" data-path="transport.html"><a href="transport.html#prerequisites-10"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="12.1" data-path="transport.html"><a href="transport.html#introduction-7"><i class="fa fa-check"></i><b>12.1</b> Introduction</a></li>
-<li class="chapter" data-level="12.2" data-path="transport.html"><a href="transport.html#bris-case"><i class="fa fa-check"></i><b>12.2</b> A case study of Bristol</a></li>
-<li class="chapter" data-level="12.3" data-path="transport.html"><a href="transport.html#transport-zones"><i class="fa fa-check"></i><b>12.3</b> Transport zones</a></li>
-<li class="chapter" data-level="12.4" data-path="transport.html"><a href="transport.html#desire-lines"><i class="fa fa-check"></i><b>12.4</b> Desire lines</a></li>
-<li class="chapter" data-level="12.5" data-path="transport.html"><a href="transport.html#routes"><i class="fa fa-check"></i><b>12.5</b> Routes</a></li>
-<li class="chapter" data-level="12.6" data-path="transport.html"><a href="transport.html#nodes"><i class="fa fa-check"></i><b>12.6</b> Nodes</a></li>
-<li class="chapter" data-level="12.7" data-path="transport.html"><a href="transport.html#route-networks"><i class="fa fa-check"></i><b>12.7</b> Route networks</a></li>
-<li class="chapter" data-level="12.8" data-path="transport.html"><a href="transport.html#prioritizing-new-infrastructure"><i class="fa fa-check"></i><b>12.8</b> Prioritizing new infrastructure</a></li>
-<li class="chapter" data-level="12.9" data-path="transport.html"><a href="transport.html#future-directions-of-travel"><i class="fa fa-check"></i><b>12.9</b> Future directions of travel</a></li>
-<li class="chapter" data-level="12.10" data-path="transport.html"><a href="transport.html#ex-transport"><i class="fa fa-check"></i><b>12.10</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="13" data-path="location.html"><a href="location.html"><i class="fa fa-check"></i><b>13</b> Geomarketing</a><ul>
-<li class="chapter" data-level="" data-path="location.html"><a href="location.html#prerequisites-11"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="13.1" data-path="location.html"><a href="location.html#introduction-8"><i class="fa fa-check"></i><b>13.1</b> Introduction</a></li>
-<li class="chapter" data-level="13.2" data-path="location.html"><a href="location.html#case-study"><i class="fa fa-check"></i><b>13.2</b> Case study: bike shops in Germany</a></li>
-<li class="chapter" data-level="13.3" data-path="location.html"><a href="location.html#tidy-the-input-data"><i class="fa fa-check"></i><b>13.3</b> Tidy the input data</a></li>
-<li class="chapter" data-level="13.4" data-path="location.html"><a href="location.html#create-census-rasters"><i class="fa fa-check"></i><b>13.4</b> Create census rasters</a></li>
-<li class="chapter" data-level="13.5" data-path="location.html"><a href="location.html#define-metropolitan-areas"><i class="fa fa-check"></i><b>13.5</b> Define metropolitan areas</a></li>
-<li class="chapter" data-level="13.6" data-path="location.html"><a href="location.html#points-of-interest"><i class="fa fa-check"></i><b>13.6</b> Points of interest</a></li>
-<li class="chapter" data-level="13.7" data-path="location.html"><a href="location.html#identifying-suitable-locations"><i class="fa fa-check"></i><b>13.7</b> Identifying suitable locations</a></li>
-<li class="chapter" data-level="13.8" data-path="location.html"><a href="location.html#discussion-and-next-steps"><i class="fa fa-check"></i><b>13.8</b> Discussion and next steps</a></li>
-<li class="chapter" data-level="13.9" data-path="location.html"><a href="location.html#exercises-9"><i class="fa fa-check"></i><b>13.9</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="14" data-path="eco.html"><a href="eco.html"><i class="fa fa-check"></i><b>14</b> Ecology</a><ul>
-<li class="chapter" data-level="" data-path="eco.html"><a href="eco.html#prerequisites-12"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="14.1" data-path="eco.html"><a href="eco.html#introduction-9"><i class="fa fa-check"></i><b>14.1</b> Introduction</a></li>
-<li class="chapter" data-level="14.2" data-path="eco.html"><a href="eco.html#data-and-data-preparation"><i class="fa fa-check"></i><b>14.2</b> Data and data preparation</a></li>
-<li class="chapter" data-level="14.3" data-path="eco.html"><a href="eco.html#nmds"><i class="fa fa-check"></i><b>14.3</b> Reducing dimensionality</a></li>
-<li class="chapter" data-level="14.4" data-path="eco.html"><a href="eco.html#modeling-the-floristic-gradient"><i class="fa fa-check"></i><b>14.4</b> Modeling the floristic gradient</a><ul>
-<li class="chapter" data-level="14.4.1" data-path="eco.html"><a href="eco.html#mlr-building-blocks"><i class="fa fa-check"></i><b>14.4.1</b> <strong>mlr</strong> building blocks</a></li>
-<li class="chapter" data-level="14.4.2" data-path="eco.html"><a href="eco.html#predictive-mapping"><i class="fa fa-check"></i><b>14.4.2</b> Predictive mapping</a></li>
-</ul></li>
-<li class="chapter" data-level="14.5" data-path="eco.html"><a href="eco.html#conclusions-1"><i class="fa fa-check"></i><b>14.5</b> Conclusions</a></li>
-<li class="chapter" data-level="14.6" data-path="eco.html"><a href="eco.html#exercises-10"><i class="fa fa-check"></i><b>14.6</b> Exercises</a></li>
-</ul></li>
-<li class="chapter" data-level="15" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i><b>15</b> Conclusion</a><ul>
-<li class="chapter" data-level="" data-path="conclusion.html"><a href="conclusion.html#prerequisites-13"><i class="fa fa-check"></i>Prerequisites</a></li>
-<li class="chapter" data-level="15.1" data-path="conclusion.html"><a href="conclusion.html#introduction-10"><i class="fa fa-check"></i><b>15.1</b> Introduction</a></li>
-<li class="chapter" data-level="15.2" data-path="conclusion.html"><a href="conclusion.html#package-choice"><i class="fa fa-check"></i><b>15.2</b> Package choice</a></li>
-<li class="chapter" data-level="15.3" data-path="conclusion.html"><a href="conclusion.html#gaps"><i class="fa fa-check"></i><b>15.3</b> Gaps and overlaps</a></li>
-<li class="chapter" data-level="15.4" data-path="conclusion.html"><a href="conclusion.html#next"><i class="fa fa-check"></i><b>15.4</b> Where to go next?</a></li>
-<li class="chapter" data-level="15.5" data-path="conclusion.html"><a href="conclusion.html#benefit"><i class="fa fa-check"></i><b>15.5</b> The open source approach</a></li>
-</ul></li>
-<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
-<li class="divider"></li>
-<li><a href="https://robinlovelace.net/">Robin Lovelace</a></li>
-<li><a href="https://nowosad.github.io/">Jakub Nowosad</a></li>
-<li><a href="https://github.com/jannes-m/">Jannes Muenchow</a></li>
-
-</ul>
-
-      </nav>
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">Geocomputation with R</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
     </div>
 
-    <div class="book-body">
-      <div class="body-inner">
-        <div class="book-header" role="navigation">
-          <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Geocomputation with R</a>
-          </h1>
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled">
+<li><a class="" href="index.html">Welcome</a></li>
+<li><a class="" href="foreword.html">Foreword</a></li>
+<li><a class="" href="preface.html">Preface</a></li>
+<li><a class="" href="intro.html"><span class="header-section-number">1</span> Introduction</a></li>
+<li class="book-part">Foundations</li>
+<li><a class="" href="spatial-class.html"><span class="header-section-number">2</span> Geographic data in R</a></li>
+<li><a class="" href="attr.html"><span class="header-section-number">3</span> Attribute data operations</a></li>
+<li><a class="" href="spatial-operations.html"><span class="header-section-number">4</span> Spatial data operations</a></li>
+<li><a class="" href="geometric-operations.html"><span class="header-section-number">5</span> Geometry operations</a></li>
+<li><a class="" href="reproj-geo-data.html"><span class="header-section-number">6</span> Reprojecting geographic data</a></li>
+<li><a class="active" href="read-write.html"><span class="header-section-number">7</span> Geographic data I/O</a></li>
+<li class="book-part">Extensions</li>
+<li><a class="" href="adv-map.html"><span class="header-section-number">8</span> Making maps with R</a></li>
+<li><a class="" href="gis.html"><span class="header-section-number">9</span> Bridges to GIS software</a></li>
+<li><a class="" href="algorithms.html"><span class="header-section-number">10</span> Scripts, algorithms and functions</a></li>
+<li><a class="" href="spatial-cv.html"><span class="header-section-number">11</span> Statistical learning</a></li>
+<li class="book-part">Applications</li>
+<li><a class="" href="transport.html"><span class="header-section-number">12</span> Transportation</a></li>
+<li><a class="" href="location.html"><span class="header-section-number">13</span> Geomarketing</a></li>
+<li><a class="" href="eco.html"><span class="header-section-number">14</span> Ecology</a></li>
+<li><a class="" href="conclusion.html"><span class="header-section-number">15</span> Conclusion</a></li>
+<li><a class="" href="references.html">References</a></li>
+</ul>
+
+        <div class="book-extra">
+          
         </div>
-
-        <div class="page-wrapper" tabindex="-1" role="main">
-          <div class="page-inner">
-
-            <section class="normal" id="section-">
-<div id="read-write" class="section level1">
-<h1><span class="header-section-number">Chapter 7</span> Geographic data I/O</h1>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="read-write" class="section level1">
+<h1>
+<span class="header-section-number">7</span> Geographic data I/O<a class="anchor" aria-label="anchor" href="#read-write"><i class="fas fa-link"></i></a>
+</h1>
 <div id="prerequisites-5" class="section level2 unnumbered">
-<h2>Prerequisites</h2>
+<h2>Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites-5"><i class="fas fa-link"></i></a>
+</h2>
 <p>This chapter requires the following packages:</p>
-<div class="sourceCode" id="cb232"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb232-1"><a href="read-write.html#cb232-1"></a><span class="kw">library</span>(sf)</span>
-<span id="cb232-2"><a href="read-write.html#cb232-2"></a><span class="kw">library</span>(raster)</span>
-<span id="cb232-3"><a href="read-write.html#cb232-3"></a><span class="kw">library</span>(dplyr)</span>
-<span id="cb232-4"><a href="read-write.html#cb232-4"></a><span class="kw">library</span>(spData)</span></code></pre></div>
+<div class="sourceCode" id="cb232"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster">raster</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://nowosad.github.io/spData/">spData</a></span><span class="op">)</span></code></pre></div>
 </div>
 <div id="introduction-4" class="section level2">
-<h2><span class="header-section-number">7.1</span> Introduction</h2>
+<h2>
+<span class="header-section-number">7.1</span> Introduction<a class="anchor" aria-label="anchor" href="#introduction-4"><i class="fas fa-link"></i></a>
+</h2>
 <p>This chapter is about reading and writing geographic data.
 Geographic data <em>import</em> is essential for geocomputation: real-world applications are impossible without data.
 For others to benefit from the results of your work, data <em>output</em> is also vital.
@@ -446,7 +111,9 @@ The process of actually reading and writing such file formats efficiently is not
 The final Section <a href="read-write.html#visual-outputs">7.8</a> demonstrates methods for saving visual outputs (maps), in preparation for Chapter <a href="adv-map.html#adv-map">8</a> on visualization.</p>
 </div>
 <div id="retrieving-data" class="section level2">
-<h2><span class="header-section-number">7.2</span> Retrieving open data</h2>
+<h2>
+<span class="header-section-number">7.2</span> Retrieving open data<a class="anchor" aria-label="anchor" href="#retrieving-data"><i class="fas fa-link"></i></a>
+</h2>
 <p>
 A vast and ever-increasing amount of geographic data is available on the internet, much of which is free to access and use (with appropriate credit given to its providers).
 In some ways there is now <em>too much</em> data, in the sense that there are often multiple places to access the same dataset.
@@ -461,32 +128,32 @@ A wealth of vector datasets can be accessed from the National Aeronautics and Sp
 <em>Exploring</em> datasets interactively on a browser is an effective way of understanding available layers.
 <em>Downloading</em> data is best done with code, however, from reproducibility and efficiency perspectives.
 Downloads can be initiated from the command line using a variety of techniques, primarily via URLs and APIs (see the <a href="https://scihub.copernicus.eu/twiki/do/view/SciHubWebPortal/APIHubDescription">Sentinel API</a> for example).
-Files hosted on static URLs can be downloaded with <code>download.file()</code>, as illustrated in the code chunk below which accesses US National Parks data from: <a href="https://catalog.data.gov/dataset/national-parks">catalog.data.gov/dataset/national-parks</a>:</p>
-<div class="sourceCode" id="cb233"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb233-1"><a href="read-write.html#cb233-1"></a><span class="kw">download.file</span>(<span class="dt">url =</span> <span class="st">&quot;http://nrdata.nps.gov/programs/lands/nps_boundary.zip&quot;</span>,</span>
-<span id="cb233-2"><a href="read-write.html#cb233-2"></a>              <span class="dt">destfile =</span> <span class="st">&quot;nps_boundary.zip&quot;</span>)</span>
-<span id="cb233-3"><a href="read-write.html#cb233-3"></a><span class="kw">unzip</span>(<span class="dt">zipfile =</span> <span class="st">&quot;nps_boundary.zip&quot;</span>)</span>
-<span id="cb233-4"><a href="read-write.html#cb233-4"></a>usa_parks =<span class="st"> </span><span class="kw">st_read</span>(<span class="dt">dsn =</span> <span class="st">&quot;nps_boundary.shp&quot;</span>)</span></code></pre></div>
+Files hosted on static URLs can be downloaded with <code><a href="https://rdrr.io/r/utils/download.file.html">download.file()</a></code>, as illustrated in the code chunk below which accesses US National Parks data from: <a href="https://catalog.data.gov/dataset/national-parks">catalog.data.gov/dataset/national-parks</a>:</p>
+<div class="sourceCode" id="cb233"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span><span class="op">(</span>url <span class="op">=</span> <span class="st">"http://nrdata.nps.gov/programs/lands/nps_boundary.zip"</span>,
+              destfile <span class="op">=</span> <span class="st">"nps_boundary.zip"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/unzip.html">unzip</a></span><span class="op">(</span>zipfile <span class="op">=</span> <span class="st">"nps_boundary.zip"</span><span class="op">)</span>
+<span class="va">usa_parks</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span>dsn <span class="op">=</span> <span class="st">"nps_boundary.shp"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="geographic-data-packages" class="section level2">
-<h2><span class="header-section-number">7.3</span> Geographic data packages</h2>
+<h2>
+<span class="header-section-number">7.3</span> Geographic data packages<a class="anchor" aria-label="anchor" href="#geographic-data-packages"><i class="fas fa-link"></i></a>
+</h2>
 <p>
 A multitude of R packages have been developed for accessing geographic data, some of which are presented in Table <a href="read-write.html#tab:datapackages">7.1</a>.
 These provide interfaces to one or more spatial libraries or geoportals and aim to make data access even quicker from the command line.</p>
-<!-- add sentinel2 package as soon as it is published on CRAN https://github.com/IVFL-BOKU/sentinel2-->
-<table class="table" style="margin-left: auto; margin-right: auto;">
+<div class="inline-table"><table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>
 <span id="tab:datapackages">TABLE 7.1: </span>Selected R packages for geographic data retrieval.
 </caption>
-<thead>
-<tr>
+<thead><tr>
 <th style="text-align:left;">
 Package
 </th>
 <th style="text-align:left;">
 Description
 </th>
-</tr>
-</thead>
+</tr></thead>
 <tbody>
 <tr>
 <td style="text-align:left;">
@@ -537,114 +204,129 @@ Access World Bank climate data.
 </td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>It should be emphasised that Table <a href="read-write.html#tab:datapackages">7.1</a> represents only a small number of available geographic data packages.
 Other notable packages include <strong>GSODR</strong>, which provides Global Summary Daily Weather Data in R (see the package’s <a href="https://github.com/ropensci/GSODR">README</a> for an overview of weather data sources);
 <strong>tidycensus</strong> and <strong>tigris</strong>, which provide socio-demographic vector data for the USA; and <strong>hddtools</strong>, which provides access to a range of hydrological datasets.</p>
 <p>Each data package has its own syntax for accessing data.
 This diversity is demonstrated in the subsequent code chunks, which show how to get data using three packages from Table <a href="read-write.html#tab:datapackages">7.1</a>.
-Country borders are often useful and these can be accessed with the <code>ne_countries()</code> function from the <strong>rnaturalearth</strong> package as follows:</p>
-<div class="sourceCode" id="cb234"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb234-1"><a href="read-write.html#cb234-1"></a><span class="kw">library</span>(rnaturalearth)</span>
-<span id="cb234-2"><a href="read-write.html#cb234-2"></a>usa =<span class="st"> </span><span class="kw">ne_countries</span>(<span class="dt">country =</span> <span class="st">&quot;United States of America&quot;</span>) <span class="co"># United States borders</span></span>
-<span id="cb234-3"><a href="read-write.html#cb234-3"></a><span class="kw">class</span>(usa)</span>
-<span id="cb234-4"><a href="read-write.html#cb234-4"></a><span class="co">#&gt; [1] &quot;SpatialPolygonsDataFrame&quot;</span></span>
-<span id="cb234-5"><a href="read-write.html#cb234-5"></a><span class="co">#&gt; attr(,&quot;package&quot;)</span></span>
-<span id="cb234-6"><a href="read-write.html#cb234-6"></a><span class="co">#&gt; [1] &quot;sp&quot;</span></span>
-<span id="cb234-7"><a href="read-write.html#cb234-7"></a><span class="co"># alternative way of accessing the data, with raster::getData()</span></span>
-<span id="cb234-8"><a href="read-write.html#cb234-8"></a><span class="co"># getData(&quot;GADM&quot;, country = &quot;USA&quot;, level = 0)</span></span></code></pre></div>
+Country borders are often useful and these can be accessed with the <code><a href="https://rdrr.io/pkg/rnaturalearth/man/ne_countries.html">ne_countries()</a></code> function from the <strong>rnaturalearth</strong> package as follows:</p>
+<div class="sourceCode" id="cb234"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ropenscilabs/rnaturalearth">rnaturalearth</a></span><span class="op">)</span>
+<span class="va">usa</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/rnaturalearth/man/ne_countries.html">ne_countries</a></span><span class="op">(</span>country <span class="op">=</span> <span class="st">"United States of America"</span><span class="op">)</span> <span class="co"># United States borders</span>
+<span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">usa</span><span class="op">)</span>
+<span class="co">#&gt; [1] "SpatialPolygonsDataFrame"</span>
+<span class="co">#&gt; attr(,"package")</span>
+<span class="co">#&gt; [1] "sp"</span>
+<span class="co"># alternative way of accessing the data, with raster::getData()</span>
+<span class="co"># getData("GADM", country = "USA", level = 0)</span></code></pre></div>
 <p>By default <strong>rnaturalearth</strong> returns objects of class <code>Spatial</code>.
-The result can be converted into an <code>sf</code> objects with <code>st_as_sf()</code> as follows:</p>
-<div class="sourceCode" id="cb235"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb235-1"><a href="read-write.html#cb235-1"></a>usa_sf =<span class="st"> </span><span class="kw">st_as_sf</span>(usa)</span></code></pre></div>
+The result can be converted into an <code>sf</code> objects with <code><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf()</a></code> as follows:</p>
+<div class="sourceCode" id="cb235"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">usa_sf</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="va">usa</span><span class="op">)</span></code></pre></div>
 <p>A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of ten minutes.
 The result is a multilayer object of class <code>RasterStack</code>.</p>
-<div class="sourceCode" id="cb236"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb236-1"><a href="read-write.html#cb236-1"></a><span class="kw">library</span>(raster)</span>
-<span id="cb236-2"><a href="read-write.html#cb236-2"></a>u =<span class="st"> &quot;https://github.com/Robinlovelace/geocompr/releases/download/1.2/worldclim_prec.Rds&quot;</span></span>
-<span id="cb236-3"><a href="read-write.html#cb236-3"></a>worldclim_prec =<span class="st"> </span><span class="kw">readRDS</span>(<span class="kw">url</span>(u))</span>
-<span id="cb236-4"><a href="read-write.html#cb236-4"></a><span class="kw">class</span>(worldclim_prec)</span>
-<span id="cb236-5"><a href="read-write.html#cb236-5"></a><span class="co">#&gt; [1] &quot;RasterStack&quot;</span></span>
-<span id="cb236-6"><a href="read-write.html#cb236-6"></a><span class="co">#&gt; attr(,&quot;package&quot;)</span></span>
-<span id="cb236-7"><a href="read-write.html#cb236-7"></a><span class="co">#&gt; [1] &quot;raster&quot;</span></span></code></pre></div>
-<p>A third example uses the <strong>osmdata</strong> package <span class="citation">(Padgham et al. <a href="#ref-R-osmdata" role="doc-biblioref">2018</a>)</span> to find parks from the OpenStreetMap (OSM) database.
-As illustrated in the code-chunk below, queries begin with the function <code>opq()</code> (short for OpenStreetMap query), the first argument of which is bounding box, or text string representing a bounding box (the city of Leeds in this case).
-The result is passed to a function for selecting which OSM elements we’re interested in (parks in this case), represented by <em>key-value pairs</em>. Next, they are passed to the function <code>osmdata_sf()</code> which does the work of downloading the data and converting it into a list of <code>sf</code> objects (see <code>vignette('osmdata')</code> for further details):</p>
-<div class="sourceCode" id="cb237"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb237-1"><a href="read-write.html#cb237-1"></a><span class="kw">library</span>(osmdata)</span>
-<span id="cb237-2"><a href="read-write.html#cb237-2"></a>parks =<span class="st"> </span><span class="kw">opq</span>(<span class="dt">bbox =</span> <span class="st">&quot;leeds uk&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb237-3"><a href="read-write.html#cb237-3"></a><span class="st">  </span><span class="kw">add_osm_feature</span>(<span class="dt">key =</span> <span class="st">&quot;leisure&quot;</span>, <span class="dt">value =</span> <span class="st">&quot;park&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb237-4"><a href="read-write.html#cb237-4"></a><span class="st">  </span><span class="kw">osmdata_sf</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb236"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster">raster</a></span><span class="op">)</span>
+<span class="va">u</span> <span class="op">=</span> <span class="st">"https://github.com/Robinlovelace/geocompr/releases/download/1.2/worldclim_prec.Rds"</span>
+<span class="va">worldclim_prec</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/connections.html">url</a></span><span class="op">(</span><span class="va">u</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">worldclim_prec</span><span class="op">)</span>
+<span class="co">#&gt; [1] "RasterStack"</span>
+<span class="co">#&gt; attr(,"package")</span>
+<span class="co">#&gt; [1] "raster"</span></code></pre></div>
+<p>A third example uses the <strong>osmdata</strong> package <span class="citation">(Padgham et al. <a href="references.html#ref-R-osmdata" role="doc-biblioref">2018</a>)</span> to find parks from the OpenStreetMap (OSM) database.
+As illustrated in the code-chunk below, queries begin with the function <code><a href="https://docs.ropensci.org/osmdata/reference/opq.html">opq()</a></code> (short for OpenStreetMap query), the first argument of which is bounding box, or text string representing a bounding box (the city of Leeds in this case).
+The result is passed to a function for selecting which OSM elements we’re interested in (parks in this case), represented by <em>key-value pairs</em>. Next, they are passed to the function <code><a href="https://docs.ropensci.org/osmdata/reference/osmdata_sf.html">osmdata_sf()</a></code> which does the work of downloading the data and converting it into a list of <code>sf</code> objects (see <code><a href="https://docs.ropensci.org/osmdata/articles/osmdata.html">vignette('osmdata')</a></code> for further details):</p>
+<div class="sourceCode" id="cb237"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/osmdata/">osmdata</a></span><span class="op">)</span>
+<span class="va">parks</span> <span class="op">=</span> <span class="fu"><a href="https://docs.ropensci.org/osmdata/reference/opq.html">opq</a></span><span class="op">(</span>bbox <span class="op">=</span> <span class="st">"leeds uk"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://docs.ropensci.org/osmdata/reference/add_osm_feature.html">add_osm_feature</a></span><span class="op">(</span>key <span class="op">=</span> <span class="st">"leisure"</span>, value <span class="op">=</span> <span class="st">"park"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://docs.ropensci.org/osmdata/reference/osmdata_sf.html">osmdata_sf</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p>OpenStreetMap is a vast global database of crowd-sourced data and it is growing daily.
 Although the quality is not as spatially consistent as many official datasets, OSM data have many advantages: they are globally available free of charge and using crowd-source data can encourage ‘citizen science’ and contributions back to the digital commons.
 Further examples of <strong>osmdata</strong> in action are provided in Chapters <a href="gis.html#gis">9</a>, <a href="transport.html#transport">12</a> and <a href="location.html#location">13</a>.</p>
 <p>Sometimes, packages come with inbuilt datasets.
-These can be accessed in four ways: by attaching the package (if the package uses ‘lazy loading’ as <strong>spData</strong> does), with <code>data(dataset)</code>, by referring to the dataset with <code>pkg::dataset</code> or with <code>system.file()</code> to access raw data files.
-The following code chunk illustrates the latter two options using the <code>world</code> dataset (already loaded by attaching its parent package with <code>library(spData)</code>):<a href="#fn31" class="footnote-ref" id="fnref31"><sup>31</sup></a></p>
-<div class="sourceCode" id="cb238"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb238-1"><a href="read-write.html#cb238-1"></a>world2 =<span class="st"> </span>spData<span class="op">::</span>world</span>
-<span id="cb238-2"><a href="read-write.html#cb238-2"></a>world3 =<span class="st"> </span><span class="kw">st_read</span>(<span class="kw">system.file</span>(<span class="st">&quot;shapes/world.gpkg&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;spData&quot;</span>))</span></code></pre></div>
+These can be accessed in four ways: by attaching the package (if the package uses ‘lazy loading’ as <strong>spData</strong> does), with <code><a href="https://rdrr.io/r/utils/data.html">data(dataset)</a></code>, by referring to the dataset with <code>pkg::dataset</code> or with <code><a href="https://rdrr.io/r/base/system.file.html">system.file()</a></code> to access raw data files.
+The following code chunk illustrates the latter two options using the <code>world</code> dataset (already loaded by attaching its parent package with <code><a href="https://nowosad.github.io/spData/">library(spData)</a></code>):<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
+For more information on data import with R packages, see Sections 5.5 and 5.6 of &lt;span class="citation"&gt;Gillespie and Lovelace (&lt;a href="references.html#ref-gillespie_efficient_2016" role="doc-biblioref"&gt;2016&lt;/a&gt;)&lt;/span&gt;.&lt;/p&gt;'><sup>31</sup></a></p>
+<div class="sourceCode" id="cb238"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">world2</span> <span class="op">=</span> <span class="fu">spData</span><span class="fu">::</span><span class="va"><a href="https://nowosad.github.io/spData/reference/world.html">world</a></span>
+<span class="va">world3</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shapes/world.gpkg"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="geographic-web-services" class="section level2">
-<h2><span class="header-section-number">7.4</span> Geographic web services</h2>
+<h2>
+<span class="header-section-number">7.4</span> Geographic web services<a class="anchor" aria-label="anchor" href="#geographic-web-services"><i class="fas fa-link"></i></a>
+</h2>
 <p>
 In an effort to standardize web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of specifications for web services (collectively known as OWS, which is short for OGC Web Services).
 These specifications include the Web Feature Service (WFS), Web Map Service (WMS), Web Map Tile Service (WMTS), the Web Coverage Service (WCS) and even a Web Processing Service (WPS).
 Map servers such as PostGIS have adopted these protocols, leading to standardization of queries.
-Like other web APIs, OWS APIs use a ‘base URL’, an ‘endpoint’ and ‘URL query arguments’ following a <code>?</code> to request data (see the <a href="https://httr.r-lib.org/articles/api-packages.html"><code>best-practices-api-packages</code></a> vignette in the <strong>httr</strong> package).</p>
+Like other web APIs, OWS APIs use a ‘base URL’, an ‘endpoint’ and ‘URL query arguments’ following a <code><a href="https://rdrr.io/r/utils/Question.html">?</a></code> to request data (see the <a href="https://httr.r-lib.org/articles/api-packages.html"><code>best-practices-api-packages</code></a> vignette in the <strong>httr</strong> package).</p>
 <p>There are many requests that can be made to a OWS service.
 One of the most fundamental is <code>getCapabilities</code>, demonstrated with <strong>httr</strong> below.
 The code chunk demonstrates how API queries can be constructed and dispatched, in this case to discover the capabilities of a service run by the Food and Agriculture Organization of the United Nations (FAO):</p>
-<div class="sourceCode" id="cb239"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb239-1"><a href="read-write.html#cb239-1"></a>base_url =<span class="st"> &quot;http://www.fao.org&quot;</span></span>
-<span id="cb239-2"><a href="read-write.html#cb239-2"></a>endpoint =<span class="st"> &quot;/figis/geoserver/wfs&quot;</span></span>
-<span id="cb239-3"><a href="read-write.html#cb239-3"></a>q =<span class="st"> </span><span class="kw">list</span>(<span class="dt">request =</span> <span class="st">&quot;GetCapabilities&quot;</span>)</span>
-<span id="cb239-4"><a href="read-write.html#cb239-4"></a>res =<span class="st"> </span>httr<span class="op">::</span><span class="kw">GET</span>(<span class="dt">url =</span> httr<span class="op">::</span><span class="kw">modify_url</span>(base_url, <span class="dt">path =</span> endpoint), <span class="dt">query =</span> q)</span>
-<span id="cb239-5"><a href="read-write.html#cb239-5"></a>res<span class="op">$</span>url</span>
-<span id="cb239-6"><a href="read-write.html#cb239-6"></a><span class="co">#&gt; [1] &quot;http://www.fao.org/figis/geoserver/wfs?request=GetCapabilities&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb239"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">base_url</span> <span class="op">=</span> <span class="st">"http://www.fao.org"</span>
+<span class="va">endpoint</span> <span class="op">=</span> <span class="st">"/figis/geoserver/wfs"</span>
+<span class="va">q</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>request <span class="op">=</span> <span class="st">"GetCapabilities"</span><span class="op">)</span>
+<span class="va">res</span> <span class="op">=</span> <span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/GET.html">GET</a></span><span class="op">(</span>url <span class="op">=</span> <span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/modify_url.html">modify_url</a></span><span class="op">(</span><span class="va">base_url</span>, path <span class="op">=</span> <span class="va">endpoint</span><span class="op">)</span>, query <span class="op">=</span> <span class="va">q</span><span class="op">)</span>
+<span class="va">res</span><span class="op">$</span><span class="va">url</span>
+<span class="co">#&gt; [1] "http://www.fao.org/figis/geoserver/wfs?request=GetCapabilities"</span></code></pre></div>
 <p>The above code chunk demonstrates how API requests can be constructed programmatically with the <code>GET()</code> function, which takes a base URL and a list of query parameters which can easily be extended.
 The result of the request is saved in <code>res</code>, an object of class <code>response</code> defined in the <strong>httr</strong> package, which is a list containing information of the request, including the URL.
-As can be seen by executing <code>browseURL(res$url)</code>, the results can also be read directly in a browser.
+As can be seen by executing <code><a href="https://rdrr.io/r/utils/browseURL.html">browseURL(res$url)</a></code>, the results can also be read directly in a browser.
 One way of extracting the contents of the request is as follows:</p>
-<div class="sourceCode" id="cb240"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb240-1"><a href="read-write.html#cb240-1"></a>txt =<span class="st"> </span>httr<span class="op">::</span><span class="kw">content</span>(res, <span class="st">&quot;text&quot;</span>)</span>
-<span id="cb240-2"><a href="read-write.html#cb240-2"></a>xml =<span class="st"> </span>xml2<span class="op">::</span><span class="kw">read_xml</span>(txt)</span></code></pre></div>
-<div class="sourceCode" id="cb241"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb241-1"><a href="read-write.html#cb241-1"></a>xml</span>
-<span id="cb241-2"><a href="read-write.html#cb241-2"></a><span class="co">#&gt; {xml_document} ...</span></span>
-<span id="cb241-3"><a href="read-write.html#cb241-3"></a><span class="co">#&gt; [1] &lt;ows:ServiceIdentification&gt;\n  &lt;ows:Title&gt;GeoServer WFS...</span></span>
-<span id="cb241-4"><a href="read-write.html#cb241-4"></a><span class="co">#&gt; [2] &lt;ows:ServiceProvider&gt;\n  &lt;ows:ProviderName&gt;Food and Agr...</span></span>
-<span id="cb241-5"><a href="read-write.html#cb241-5"></a><span class="co">#&gt; ...</span></span></code></pre></div>
+<div class="sourceCode" id="cb240"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">txt</span> <span class="op">=</span> <span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/content.html">content</a></span><span class="op">(</span><span class="va">res</span>, <span class="st">"text"</span><span class="op">)</span>
+<span class="va">xml</span> <span class="op">=</span> <span class="fu">xml2</span><span class="fu">::</span><span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_xml</a></span><span class="op">(</span><span class="va">txt</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb241"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">xml</span>
+<span class="co">#&gt; {xml_document} ...</span>
+<span class="co">#&gt; [1] &lt;ows:ServiceIdentification&gt;\n  &lt;ows:Title&gt;GeoServer WFS...</span>
+<span class="co">#&gt; [2] &lt;ows:ServiceProvider&gt;\n  &lt;ows:ProviderName&gt;Food and Agr...</span>
+<span class="co">#&gt; ...</span></code></pre></div>
 <p>Data can be downloaded from WFS services with the <code>GetFeature</code> request and a specific <code>typeName</code> (as illustrated in the code chunk below).</p>
 <p>Available names differ depending on the accessed web feature service.
-One can extract them programmatically using web technologies <span class="citation">(Nolan and Lang <a href="#ref-nolan_xml_2014" role="doc-biblioref">2014</a>)</span> or scrolling manually through the contents of the <code>GetCapabilities</code> output in a browser.</p>
-<div class="sourceCode" id="cb242"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb242-1"><a href="read-write.html#cb242-1"></a>qf =<span class="st"> </span><span class="kw">list</span>(<span class="dt">request =</span> <span class="st">&quot;GetFeature&quot;</span>, <span class="dt">typeName =</span> <span class="st">&quot;area:FAO_AREAS&quot;</span>)</span>
-<span id="cb242-2"><a href="read-write.html#cb242-2"></a>file =<span class="st"> </span><span class="kw">tempfile</span>(<span class="dt">fileext =</span> <span class="st">&quot;.gml&quot;</span>)</span>
-<span id="cb242-3"><a href="read-write.html#cb242-3"></a>httr<span class="op">::</span><span class="kw">GET</span>(<span class="dt">url =</span> base_url, <span class="dt">path =</span> endpoint, <span class="dt">query =</span> qf, httr<span class="op">::</span><span class="kw">write_disk</span>(file))</span>
-<span id="cb242-4"><a href="read-write.html#cb242-4"></a>fao_areas =<span class="st"> </span>sf<span class="op">::</span><span class="kw">read_sf</span>(file)</span></code></pre></div>
+One can extract them programmatically using web technologies <span class="citation">(Nolan and Lang <a href="references.html#ref-nolan_xml_2014" role="doc-biblioref">2014</a>)</span> or scrolling manually through the contents of the <code>GetCapabilities</code> output in a browser.</p>
+<div class="sourceCode" id="cb242"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">qf</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>request <span class="op">=</span> <span class="st">"GetFeature"</span>, typeName <span class="op">=</span> <span class="st">"area:FAO_AREAS"</span><span class="op">)</span>
+<span class="va">file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".gml"</span><span class="op">)</span>
+<span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/GET.html">GET</a></span><span class="op">(</span>url <span class="op">=</span> <span class="va">base_url</span>, path <span class="op">=</span> <span class="va">endpoint</span>, query <span class="op">=</span> <span class="va">qf</span>, <span class="fu">httr</span><span class="fu">::</span><span class="fu"><a href="https://httr.r-lib.org/reference/write_disk.html">write_disk</a></span><span class="op">(</span><span class="va">file</span><span class="op">)</span><span class="op">)</span>
+<span class="va">fao_areas</span> <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">file</span><span class="op">)</span></code></pre></div>
 <p>Note the use of <code>write_disk()</code> to ensure that the results are written to disk rather than loaded into memory, allowing them to be imported with <strong>sf</strong>.
 This example shows how to gain low-level access to web services using <strong>httr</strong>, which can be useful for understanding how web services work.
 For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose.</p>
 <p>Packages <strong>ows4R</strong>, <strong>rwfs</strong> and <strong>sos4R</strong> have been developed for working with OWS services in general, WFS and the sensor observation service (SOS) respectively.
 As of October 2018, only <strong>ows4R</strong> is on CRAN.
-The package’s basic functionality is demonstrated below, in commands that get all <code>FAO_AREAS</code> as we did in the previous code chunk:<a href="#fn32" class="footnote-ref" id="fnref32"><sup>32</sup></a></p>
-<div class="sourceCode" id="cb243"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb243-1"><a href="read-write.html#cb243-1"></a><span class="kw">library</span>(ows4R)</span>
-<span id="cb243-2"><a href="read-write.html#cb243-2"></a>wfs =<span class="st"> </span>WFSClient<span class="op">$</span><span class="kw">new</span>(<span class="st">&quot;http://www.fao.org/figis/geoserver/wfs&quot;</span>,</span>
-<span id="cb243-3"><a href="read-write.html#cb243-3"></a>                      <span class="dt">serviceVersion =</span> <span class="st">&quot;1.0.0&quot;</span>, <span class="dt">logger =</span> <span class="st">&quot;INFO&quot;</span>)</span>
-<span id="cb243-4"><a href="read-write.html#cb243-4"></a>fao_areas =<span class="st"> </span>wfs<span class="op">$</span><span class="kw">getFeatures</span>(<span class="st">&quot;area:FAO_AREAS&quot;</span>)</span></code></pre></div>
+The package’s basic functionality is demonstrated below, in commands that get all <code>FAO_AREAS</code> as we did in the previous code chunk:<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
+To filter features on the server before downloading them, the argument &lt;code&gt;cql_filter&lt;/code&gt; can be used. Adding &lt;code&gt;cql_filter = URLencode(&quot;F_CODE= '27'&quot;)&lt;/code&gt; to the command, for example, would instruct the server to only return the feature with values in the &lt;code&gt;F_CODE&lt;/code&gt; column equal to 27.&lt;/p&gt;"><sup>32</sup></a></p>
+<div class="sourceCode" id="cb243"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/eblondel/ows4R">ows4R</a></span><span class="op">)</span>
+<span class="va">wfs</span> <span class="op">=</span> <span class="va"><a href="https://rdrr.io/pkg/ows4R/man/WFSClient.html">WFSClient</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="st">"http://www.fao.org/figis/geoserver/wfs"</span>,
+                      serviceVersion <span class="op">=</span> <span class="st">"1.0.0"</span>, logger <span class="op">=</span> <span class="st">"INFO"</span><span class="op">)</span>
+<span class="va">fao_areas</span> <span class="op">=</span> <span class="va">wfs</span><span class="op">$</span><span class="fu">getFeatures</span><span class="op">(</span><span class="st">"area:FAO_AREAS"</span><span class="op">)</span></code></pre></div>
 <p>There is much more to learn about web services and much potential for development of R-OWS interfaces, an active area of development.
 For further information on the topic, we recommend examples from European Centre for Medium-Range Weather Forecasts (ECMWF) services at <a href="https://github.com/OpenDataHack/data_service_catalogue">github.com/OpenDataHack</a> and reading-up on OCG Web Services at <a href="http://www.opengeospatial.org/standards">opengeospatial.org</a>.</p>
 </div>
 <div id="file-formats" class="section level2">
-<h2><span class="header-section-number">7.5</span> File formats</h2>
+<h2>
+<span class="header-section-number">7.5</span> File formats<a class="anchor" aria-label="anchor" href="#file-formats"><i class="fas fa-link"></i></a>
+</h2>
 <p>
 Geographic datasets are usually stored as files or in spatial databases.
 File formats can either store vector or raster data, while spatial databases such as <a href="https://trac.osgeo.org/postgis/wiki/WKTRaster">PostGIS</a> can store both (see also Section <a href="gis.html#postgis">9.6.2</a>).
-Today the variety of file formats may seem bewildering but there has been much consolidation and standardization since the beginnings of GIS software in the 1960s when the first widely distributed program (<a href="https://news.harvard.edu/gazette/story/2011/10/the-invention-of-gis/">SYMAP</a>) for spatial analysis was created at Harvard University <span class="citation">(Coppock and Rhind <a href="#ref-coppock_history_1991" role="doc-biblioref">1991</a>)</span>.</p>
+Today the variety of file formats may seem bewildering but there has been much consolidation and standardization since the beginnings of GIS software in the 1960s when the first widely distributed program (<a href="https://news.harvard.edu/gazette/story/2011/10/the-invention-of-gis/">SYMAP</a>) for spatial analysis was created at Harvard University <span class="citation">(Coppock and Rhind <a href="references.html#ref-coppock_history_1991" role="doc-biblioref">1991</a>)</span>.</p>
 <p>
 GDAL (which should be pronounced “goo-dal”, with the double “o” making a reference to object-orientation), the Geospatial Data Abstraction Library, has resolved many issues associated with incompatibility between geographic file formats since its release in 2000.
 GDAL provides a unified and high-performance interface for reading and writing of many raster and vector data formats.
 Many open and proprietary GIS programs, including GRASS, ArcGIS and QGIS, use GDAL behind their GUIs for doing the legwork of ingesting and spitting out geographic data in appropriate formats.</p>
 <p>GDAL provides access to more than 200 vector and raster data formats.
 Table <a href="read-write.html#tab:formats">7.2</a> presents some basic information about selected and often used spatial file formats.</p>
-<table>
+<div class="inline-table"><table class="table table-sm">
 <caption>
 <span id="tab:formats">TABLE 7.2: </span>Selected spatial file formats.
 </caption>
-<thead>
-<tr>
+<thead><tr>
 <th style="text-align:left;">
 Name
 </th>
@@ -660,8 +342,7 @@ Type
 <th style="text-align:left;">
 Model
 </th>
-</tr>
-</thead>
+</tr></thead>
 <tbody>
 <tr>
 <td style="text-align:left;">
@@ -834,7 +515,7 @@ Open
 </td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p></p>
 <p>An important development ensuring the standardization and open-sourcing of file formats was the founding of the Open Geospatial Consortium (<a href="http://www.opengeospatial.org/">OGC</a>) in 1994.
 Beyond defining the simple features data model (see Section <a href="spatial-class.html#intro-sf">2.2.1</a>), the OGC also coordinates the development of open standards, for example as used in file formats such as KML and GeoPackage.
@@ -844,7 +525,7 @@ However, it is not an open format (though its specification is open).
 It was developed in the early 1990s and has a number of limitations.
 First of all, it is a multi-file format, which consists of at least three files.
 It only supports 255 columns, column names are restricted to ten characters and the file size limit is 2 GB.
-Furthermore, ESRI Shapefile does not support all possible geometry types, for example, it is unable to distinguish between a polygon and a multipolygon.<a href="#fn33" class="footnote-ref" id="fnref33"><sup>33</sup></a>
+Furthermore, ESRI Shapefile does not support all possible geometry types, for example, it is unable to distinguish between a polygon and a multipolygon.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;To learn more about ESRI Shapefile limitations and possible alternative file formats, visit &lt;a href="http://switchfromshapefile.org/" class="uri"&gt;http://switchfromshapefile.org/&lt;/a&gt;.&lt;/p&gt;'><sup>33</sup></a>
 Despite these limitations, a viable alternative had been missing for a long time.
 In the meantime, <a href="https://www.geopackage.org/">GeoPackage</a> emerged, and seems to be a more than suitable replacement candidate for ESRI Shapefile.
 Geopackage is a format for exchanging geospatial information and an OGC standard.
@@ -853,25 +534,29 @@ Hence, GeoPackage is a lightweight spatial database container, which allows the 
 Aside from GeoPackage, there are other geospatial data exchange formats worth checking out (Table <a href="read-write.html#tab:formats">7.2</a>).</p>
 </div>
 <div id="data-input" class="section level2">
-<h2><span class="header-section-number">7.6</span> Data input (I)</h2>
-<p>Executing commands such as <code>sf::st_read()</code> (the main function we use for loading vector data) or <code>raster::raster()</code> (the main function used for loading raster data) silently sets off a chain of events that reads data from files.
+<h2>
+<span class="header-section-number">7.6</span> Data input (I)<a class="anchor" aria-label="anchor" href="#data-input"><i class="fas fa-link"></i></a>
+</h2>
+<p>Executing commands such as <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">sf::st_read()</a></code> (the main function we use for loading vector data) or <code><a href="https://rdrr.io/pkg/raster/man/raster.html">raster::raster()</a></code> (the main function used for loading raster data) silently sets off a chain of events that reads data from files.
 Moreover, there are many R packages containing a wide range of geographic data or providing simple access to different data sources.
 All of them load the data into R or, more precisely, assign objects to your workspace, stored in RAM accessible from the <a href="http://adv-r.had.co.nz/Environments.html"><code>.GlobalEnv</code></a> of the R session.</p>
 <div id="vector-data-1" class="section level3">
-<h3><span class="header-section-number">7.6.1</span> Vector data</h3>
+<h3>
+<span class="header-section-number">7.6.1</span> Vector data<a class="anchor" aria-label="anchor" href="#vector-data-1"><i class="fas fa-link"></i></a>
+</h3>
 <p>
-Spatial vector data comes in a wide variety of file formats, most of which can be read-in via the <strong>sf</strong> function <code>st_read()</code>.
+Spatial vector data comes in a wide variety of file formats, most of which can be read-in via the <strong>sf</strong> function <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code>.
 Behind the scenes this calls GDAL.
-To find out which data formats <strong>sf</strong> supports, run <code>st_drivers()</code>.
+To find out which data formats <strong>sf</strong> supports, run <code><a href="https://r-spatial.github.io/sf/reference/st_drivers.html">st_drivers()</a></code>.
 Here, we show only the first five drivers (see Table <a href="read-write.html#tab:drivers">7.3</a>):</p>
-<div class="sourceCode" id="cb244"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb244-1"><a href="read-write.html#cb244-1"></a>sf_drivers =<span class="st"> </span><span class="kw">st_drivers</span>()</span>
-<span id="cb244-2"><a href="read-write.html#cb244-2"></a><span class="kw">head</span>(sf_drivers, <span class="dt">n =</span> <span class="dv">5</span>)</span></code></pre></div>
-<table>
+<div class="sourceCode" id="cb244"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">sf_drivers</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_drivers.html">st_drivers</a></span><span class="op">(</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html">head</a></span><span class="op">(</span><span class="va">sf_drivers</span>, n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></code></pre></div>
+<div class="inline-table"><table class="table table-sm">
 <caption>
 <span id="tab:drivers">TABLE 7.3: </span>Sample of available drivers for reading/writing vector data (it could vary between different GDAL versions).
 </caption>
-<thead>
-<tr>
+<thead><tr>
 <th style="text-align:left;">
 </th>
 <th style="text-align:left;">
@@ -895,8 +580,7 @@ is_vector
 <th style="text-align:left;">
 vsi
 </th>
-</tr>
-</thead>
+</tr></thead>
 <tbody>
 <tr>
 <td style="text-align:left;">
@@ -1029,154 +713,174 @@ TRUE
 </td>
 </tr>
 </tbody>
-</table>
-<!-- One of the major advantages of **sf** is that it is fast. -->
-<!-- reference to the vignette -->
-<p>The first argument of <code>st_read()</code> is <code>dsn</code>, which should be a text string or an object containing a single text string.
+</table></div>
+<!-- One of the major advantages of **sf** is that it is fast. --><!-- reference to the vignette --><p>The first argument of <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code> is <code>dsn</code>, which should be a text string or an object containing a single text string.
 The content of a text string could vary between different drivers.
 In most cases, as with the ESRI Shapefile (<code>.shp</code>) or the <code>GeoPackage</code> format (<code>.gpkg</code>), the <code>dsn</code> would be a file name.
-<code>st_read()</code> guesses the driver based on the file extension, as illustrated for a <code>.gpkg</code> file below:</p>
-<div class="sourceCode" id="cb245"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb245-1"><a href="read-write.html#cb245-1"></a>vector_filepath =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;shapes/world.gpkg&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;spData&quot;</span>)</span>
-<span id="cb245-2"><a href="read-write.html#cb245-2"></a>world =<span class="st"> </span><span class="kw">st_read</span>(vector_filepath)</span>
-<span id="cb245-3"><a href="read-write.html#cb245-3"></a><span class="co">#&gt; Reading layer `world&#39; from data source `.../world.gpkg&#39; using driver `GPKG&#39;</span></span>
-<span id="cb245-4"><a href="read-write.html#cb245-4"></a><span class="co">#&gt; Simple feature collection with 177 features and 10 fields</span></span>
-<span id="cb245-5"><a href="read-write.html#cb245-5"></a><span class="co">#&gt; geometry type:  MULTIPOLYGON</span></span>
-<span id="cb245-6"><a href="read-write.html#cb245-6"></a><span class="co">#&gt; dimension:      XY</span></span>
-<span id="cb245-7"><a href="read-write.html#cb245-7"></a><span class="co">#&gt; bbox:           xmin: -180 ymin: -90 xmax: 180 ymax: 83.64513</span></span>
-<span id="cb245-8"><a href="read-write.html#cb245-8"></a><span class="co">#&gt; epsg (SRID):    4326</span></span>
-<span id="cb245-9"><a href="read-write.html#cb245-9"></a><span class="co">#&gt; proj4string:    +proj=longlat +datum=WGS84 +no_defs</span></span></code></pre></div>
-<p>For some drivers, <code>dsn</code> could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the <code>st_read()</code> help page for more details).</p>
+<code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code> guesses the driver based on the file extension, as illustrated for a <code>.gpkg</code> file below:</p>
+<div class="sourceCode" id="cb245"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">vector_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shapes/world.gpkg"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
+<span class="va">world</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">vector_filepath</span><span class="op">)</span>
+<span class="co">#&gt; Reading layer `world' from data source `.../world.gpkg' using driver `GPKG'</span>
+<span class="co">#&gt; Simple feature collection with 177 features and 10 fields</span>
+<span class="co">#&gt; geometry type:  MULTIPOLYGON</span>
+<span class="co">#&gt; dimension:      XY</span>
+<span class="co">#&gt; bbox:           xmin: -180 ymin: -90 xmax: 180 ymax: 83.64513</span>
+<span class="co">#&gt; epsg (SRID):    4326</span>
+<span class="co">#&gt; proj4string:    +proj=longlat +datum=WGS84 +no_defs</span></code></pre></div>
+<p>For some drivers, <code>dsn</code> could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code> help page for more details).</p>
 <p>Some vector driver formats can store multiple data layers.
-By default, <code>st_read()</code> automatically reads the first layer of the file specified in <code>dsn</code>; however, using the <code>layer</code> argument you can specify any other layer.</p>
-<p>Naturally, some options are specific to certain drivers.<a href="#fn34" class="footnote-ref" id="fnref34"><sup>34</sup></a>
+By default, <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code> automatically reads the first layer of the file specified in <code>dsn</code>; however, using the <code>layer</code> argument you can specify any other layer.</p>
+<p>Naturally, some options are specific to certain drivers.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
+A list of supported vector formats and options can be found at &lt;a href="http://gdal.org/ogr_formats.html" class="uri"&gt;http://gdal.org/ogr_formats.html&lt;/a&gt;.&lt;/p&gt;'><sup>34</sup></a>
 For example, think of coordinates stored in a spreadsheet format (<code>.csv</code>).
 To read in such files as spatial objects, we naturally have to specify the names of the columns (<code>X</code> and <code>Y</code> in our example below) representing the coordinates.
 We can do this with the help of the <code>options</code> parameter.
 To find out about possible options, please refer to the ‘Open Options’ section of the corresponding GDAL driver description.
 For the comma-separated value (csv) format, visit <a href="http://www.gdal.org/drv_csv.html" class="uri">http://www.gdal.org/drv_csv.html</a>.</p>
-<div class="sourceCode" id="cb246"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb246-1"><a href="read-write.html#cb246-1"></a>cycle_hire_txt =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;misc/cycle_hire_xy.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;spData&quot;</span>)</span>
-<span id="cb246-2"><a href="read-write.html#cb246-2"></a>cycle_hire_xy =<span class="st"> </span><span class="kw">st_read</span>(cycle_hire_txt, <span class="dt">options =</span> <span class="kw">c</span>(<span class="st">&quot;X_POSSIBLE_NAMES=X&quot;</span>,</span>
-<span id="cb246-3"><a href="read-write.html#cb246-3"></a>                                                    <span class="st">&quot;Y_POSSIBLE_NAMES=Y&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb246"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cycle_hire_txt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"misc/cycle_hire_xy.csv"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
+<span class="va">cycle_hire_xy</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">cycle_hire_txt</span>, options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"X_POSSIBLE_NAMES=X"</span>,
+                                                    <span class="st">"Y_POSSIBLE_NAMES=Y"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Instead of columns describing xy-coordinates, a single column can also contain the geometry information.
 Well-known text (WKT), well-known binary (WKB), and the GeoJSON formats are examples of this.
 For instance, the <code>world_wkt.csv</code> file has a column named <code>WKT</code> representing polygons of the world’s countries.
 We will again use the <code>options</code> parameter to indicate this.
-Here, we will use <code>read_sf()</code>, the tidyverse-flavoured version of <code>st_read()</code>: strings are parsed as characters instead of factors and the resulting data frame is a <a href="https://r4ds.had.co.nz/tibbles.html">tibble</a>. The driver name is also not printed to the console.</p>
-<div class="sourceCode" id="cb247"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb247-1"><a href="read-write.html#cb247-1"></a>world_txt =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;misc/world_wkt.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;spData&quot;</span>)</span>
-<span id="cb247-2"><a href="read-write.html#cb247-2"></a>world_wkt =<span class="st"> </span><span class="kw">read_sf</span>(world_txt, <span class="dt">options =</span> <span class="st">&quot;GEOM_POSSIBLE_NAMES=WKT&quot;</span>)</span>
-<span id="cb247-3"><a href="read-write.html#cb247-3"></a><span class="co"># the same as</span></span>
-<span id="cb247-4"><a href="read-write.html#cb247-4"></a>world_wkt =<span class="st"> </span><span class="kw">st_read</span>(world_txt, <span class="dt">options =</span> <span class="st">&quot;GEOM_POSSIBLE_NAMES=WKT&quot;</span>, </span>
-<span id="cb247-5"><a href="read-write.html#cb247-5"></a>                    <span class="dt">quiet =</span> <span class="ot">TRUE</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>, <span class="dt">as_tibble =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+Here, we will use <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code>, the tidyverse-flavoured version of <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code>: strings are parsed as characters instead of factors and the resulting data frame is a <a href="https://r4ds.had.co.nz/tibbles.html">tibble</a>. The driver name is also not printed to the console.</p>
+<div class="sourceCode" id="cb247"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">world_txt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"misc/world_wkt.csv"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
+<span class="va">world_wkt</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">world_txt</span>, options <span class="op">=</span> <span class="st">"GEOM_POSSIBLE_NAMES=WKT"</span><span class="op">)</span>
+<span class="co"># the same as</span>
+<span class="va">world_wkt</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">world_txt</span>, options <span class="op">=</span> <span class="st">"GEOM_POSSIBLE_NAMES=WKT"</span>, 
+                    quiet <span class="op">=</span> <span class="cn">TRUE</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span>, as_tibble <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 
 <div class="rmdnote">
 Not all of the supported vector file formats store information about their coordinate reference system.
-In these situations, it is possible to add the missing information using the <code>st_set_crs()</code> function.
+In these situations, it is possible to add the missing information using the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs()</a></code> function.
 Please refer also to Section <a href="spatial-class.html#crs-intro">2.4</a> for more information.
 </div>
 
-<p>As a final example, we will show how <code>st_read()</code> also reads KML files.
-A KML file stores geographic information in XML format - a data format for the creation of web pages and the transfer of data in an application-independent way <span class="citation">(Nolan and Lang <a href="#ref-nolan_xml_2014" role="doc-biblioref">2014</a>)</span>.
+<p>As a final example, we will show how <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code> also reads KML files.
+A KML file stores geographic information in XML format - a data format for the creation of web pages and the transfer of data in an application-independent way <span class="citation">(Nolan and Lang <a href="references.html#ref-nolan_xml_2014" role="doc-biblioref">2014</a>)</span>.
 Here, we access a KML file from the web.
 This file contains more than one layer.
-<code>st_layers()</code> lists all available layers.
-We choose the first layer <code>Placemarks</code> and say so with the help of the <code>layer</code> parameter in <code>read_sf()</code>.</p>
-<div class="sourceCode" id="cb248"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb248-1"><a href="read-write.html#cb248-1"></a>u =<span class="st"> &quot;https://developers.google.com/kml/documentation/KML_Samples.kml&quot;</span></span>
-<span id="cb248-2"><a href="read-write.html#cb248-2"></a><span class="kw">download.file</span>(u, <span class="st">&quot;KML_Samples.kml&quot;</span>)</span>
-<span id="cb248-3"><a href="read-write.html#cb248-3"></a><span class="kw">st_layers</span>(<span class="st">&quot;KML_Samples.kml&quot;</span>)</span>
-<span id="cb248-4"><a href="read-write.html#cb248-4"></a><span class="co">#&gt; Driver: LIBKML </span></span>
-<span id="cb248-5"><a href="read-write.html#cb248-5"></a><span class="co">#&gt; Available layers:</span></span>
-<span id="cb248-6"><a href="read-write.html#cb248-6"></a><span class="co">#&gt;               layer_name geometry_type features fields</span></span>
-<span id="cb248-7"><a href="read-write.html#cb248-7"></a><span class="co">#&gt; 1             Placemarks                      3     11</span></span>
-<span id="cb248-8"><a href="read-write.html#cb248-8"></a><span class="co">#&gt; 2      Styles and Markup                      1     11</span></span>
-<span id="cb248-9"><a href="read-write.html#cb248-9"></a><span class="co">#&gt; 3       Highlighted Icon                      1     11</span></span>
-<span id="cb248-10"><a href="read-write.html#cb248-10"></a><span class="co">#&gt; 4        Ground Overlays                      1     11</span></span>
-<span id="cb248-11"><a href="read-write.html#cb248-11"></a><span class="co">#&gt; 5        Screen Overlays                      0     11</span></span>
-<span id="cb248-12"><a href="read-write.html#cb248-12"></a><span class="co">#&gt; 6                  Paths                      6     11</span></span>
-<span id="cb248-13"><a href="read-write.html#cb248-13"></a><span class="co">#&gt; 7               Polygons                      0     11</span></span>
-<span id="cb248-14"><a href="read-write.html#cb248-14"></a><span class="co">#&gt; 8          Google Campus                      4     11</span></span>
-<span id="cb248-15"><a href="read-write.html#cb248-15"></a><span class="co">#&gt; 9       Extruded Polygon                      1     11</span></span>
-<span id="cb248-16"><a href="read-write.html#cb248-16"></a><span class="co">#&gt; 10 Absolute and Relative                      4     11</span></span>
-<span id="cb248-17"><a href="read-write.html#cb248-17"></a>kml =<span class="st"> </span><span class="kw">read_sf</span>(<span class="st">&quot;KML_Samples.kml&quot;</span>, <span class="dt">layer =</span> <span class="st">&quot;Placemarks&quot;</span>)</span></code></pre></div>
+<code><a href="https://r-spatial.github.io/sf/reference/st_layers.html">st_layers()</a></code> lists all available layers.
+We choose the first layer <code>Placemarks</code> and say so with the help of the <code>layer</code> parameter in <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code>.</p>
+<div class="sourceCode" id="cb248"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">u</span> <span class="op">=</span> <span class="st">"https://developers.google.com/kml/documentation/KML_Samples.kml"</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span><span class="op">(</span><span class="va">u</span>, <span class="st">"KML_Samples.kml"</span><span class="op">)</span>
+<span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_layers.html">st_layers</a></span><span class="op">(</span><span class="st">"KML_Samples.kml"</span><span class="op">)</span>
+<span class="co">#&gt; Driver: LIBKML </span>
+<span class="co">#&gt; Available layers:</span>
+<span class="co">#&gt;               layer_name geometry_type features fields</span>
+<span class="co">#&gt; 1             Placemarks                      3     11</span>
+<span class="co">#&gt; 2      Styles and Markup                      1     11</span>
+<span class="co">#&gt; 3       Highlighted Icon                      1     11</span>
+<span class="co">#&gt; 4        Ground Overlays                      1     11</span>
+<span class="co">#&gt; 5        Screen Overlays                      0     11</span>
+<span class="co">#&gt; 6                  Paths                      6     11</span>
+<span class="co">#&gt; 7               Polygons                      0     11</span>
+<span class="co">#&gt; 8          Google Campus                      4     11</span>
+<span class="co">#&gt; 9       Extruded Polygon                      1     11</span>
+<span class="co">#&gt; 10 Absolute and Relative                      4     11</span>
+<span class="va">kml</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="st">"KML_Samples.kml"</span>, layer <span class="op">=</span> <span class="st">"Placemarks"</span><span class="op">)</span></code></pre></div>
 <p>All the examples presented in this section so far have used the <strong>sf</strong> package for geographic data import.
 It is fast and flexible but it may be worth looking at other packages for specific file formats.
 An example is the <strong>geojsonsf</strong> package.
 A <a href="https://github.com/ATFutures/geobench">benchmark</a> suggests it is around 10 times faster than the <strong>sf</strong> package for reading <code>.geojson</code>.</p>
 </div>
 <div id="raster-data-1" class="section level3">
-<h3><span class="header-section-number">7.6.2</span> Raster data</h3>
+<h3>
+<span class="header-section-number">7.6.2</span> Raster data<a class="anchor" aria-label="anchor" href="#raster-data-1"><i class="fas fa-link"></i></a>
+</h3>
 <p>
 Similar to vector data, raster data comes in many file formats with some of them supporting even multilayer files.
-<strong>raster</strong>’s <code>raster()</code> command reads in a single layer.</p>
-<div class="sourceCode" id="cb249"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb249-1"><a href="read-write.html#cb249-1"></a>raster_filepath =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;raster/srtm.tif&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;spDataLarge&quot;</span>)</span>
-<span id="cb249-2"><a href="read-write.html#cb249-2"></a>single_layer =<span class="st"> </span><span class="kw">raster</span>(raster_filepath)</span></code></pre></div>
+<strong>raster</strong>’s <code><a href="https://rdrr.io/pkg/raster/man/raster.html">raster()</a></code> command reads in a single layer.</p>
+<div class="sourceCode" id="cb249"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">raster_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/srtm.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
+<span class="va">single_layer</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span><span class="va">raster_filepath</span><span class="op">)</span></code></pre></div>
 <p>In case you want to read in a single band from a multilayer file, use the <code>band</code> parameter to indicate a specific layer.</p>
-<div class="sourceCode" id="cb250"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb250-1"><a href="read-write.html#cb250-1"></a>multilayer_filepath =<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;raster/landsat.tif&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;spDataLarge&quot;</span>)</span>
-<span id="cb250-2"><a href="read-write.html#cb250-2"></a>band3 =<span class="st"> </span><span class="kw">raster</span>(multilayer_filepath, <span class="dt">band =</span> <span class="dv">3</span>)</span></code></pre></div>
-<p>If you want to read in all bands, use <code>brick()</code> or <code>stack()</code>.</p>
-<div class="sourceCode" id="cb251"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb251-1"><a href="read-write.html#cb251-1"></a>multilayer_brick =<span class="st"> </span><span class="kw">brick</span>(multilayer_filepath)</span>
-<span id="cb251-2"><a href="read-write.html#cb251-2"></a>multilayer_stack =<span class="st"> </span><span class="kw">stack</span>(multilayer_filepath)</span></code></pre></div>
+<div class="sourceCode" id="cb250"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">multilayer_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/landsat.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
+<span class="va">band3</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span><span class="va">multilayer_filepath</span>, band <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></code></pre></div>
+<p>If you want to read in all bands, use <code><a href="https://rdrr.io/pkg/raster/man/brick.html">brick()</a></code> or <code><a href="https://rdrr.io/pkg/raster/man/stack.html">stack()</a></code>.</p>
+<div class="sourceCode" id="cb251"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">multilayer_brick</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/brick.html">brick</a></span><span class="op">(</span><span class="va">multilayer_filepath</span><span class="op">)</span>
+<span class="va">multilayer_stack</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/stack.html">stack</a></span><span class="op">(</span><span class="va">multilayer_filepath</span><span class="op">)</span></code></pre></div>
 <p>Please refer to Section <a href="spatial-class.html#raster-classes">2.3.3</a> for information on the difference between raster stacks and bricks.</p>
 <!-- ### Databases -->
 <!-- postgis input example -->
 </div>
 </div>
 <div id="data-output" class="section level2">
-<h2><span class="header-section-number">7.7</span> Data output (O)</h2>
+<h2>
+<span class="header-section-number">7.7</span> Data output (O)<a class="anchor" aria-label="anchor" href="#data-output"><i class="fas fa-link"></i></a>
+</h2>
 <p>Writing geographic data allows you to convert from one format to another and to save newly created objects.
 Depending on the data type (vector or raster), object class (e.g., <code>multipoint</code> or <code>RasterLayer</code>), and type and amount of stored information (e.g., object size, range of values), it is important to know how to store spatial files in the most efficient way.
 The next two sections will demonstrate how to do this.</p>
 <div id="vector-data-2" class="section level3">
-<h3><span class="header-section-number">7.7.1</span> Vector data</h3>
+<h3>
+<span class="header-section-number">7.7.1</span> Vector data<a class="anchor" aria-label="anchor" href="#vector-data-2"><i class="fas fa-link"></i></a>
+</h3>
 <p></p>
-<p>The counterpart of <code>st_read()</code> is <code>st_write()</code>.
+<p>The counterpart of <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code> is <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write()</a></code>.
 It allows you to write <strong>sf</strong> objects to a wide range of geographic vector file formats, including the most common such as <code>.geojson</code>, <code>.shp</code> and <code>.gpkg</code>.
-Based on the file name, <code>st_write()</code> decides automatically which driver to use.
+Based on the file name, <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write()</a></code> decides automatically which driver to use.
 The speed of the writing process depends also on the driver.</p>
-<div class="sourceCode" id="cb252"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb252-1"><a href="read-write.html#cb252-1"></a><span class="kw">st_write</span>(<span class="dt">obj =</span> world, <span class="dt">dsn =</span> <span class="st">&quot;world.gpkg&quot;</span>)</span>
-<span id="cb252-2"><a href="read-write.html#cb252-2"></a><span class="co">#&gt; Writing layer `world&#39; to data source `world.gpkg&#39; using driver `GPKG&#39;</span></span>
-<span id="cb252-3"><a href="read-write.html#cb252-3"></a><span class="co">#&gt; Writing 177 features with 10 fields and geometry type Multi Polygon.</span></span></code></pre></div>
+<div class="sourceCode" id="cb252"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span><span class="op">)</span>
+<span class="co">#&gt; Writing layer `world' to data source `world.gpkg' using driver `GPKG'</span>
+<span class="co">#&gt; Writing 177 features with 10 fields and geometry type Multi Polygon.</span></code></pre></div>
 <p><strong>Note</strong>: if you try to write to the same data source again, the function will fail:</p>
-<div class="sourceCode" id="cb253"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb253-1"><a href="read-write.html#cb253-1"></a><span class="kw">st_write</span>(<span class="dt">obj =</span> world, <span class="dt">dsn =</span> <span class="st">&quot;world.gpkg&quot;</span>)</span>
-<span id="cb253-2"><a href="read-write.html#cb253-2"></a><span class="co">#&gt; Layer world in dataset world.gpkg already exists:</span></span>
-<span id="cb253-3"><a href="read-write.html#cb253-3"></a><span class="co">#&gt; use either append=TRUE to append to layer or append=FALSE to overwrite layer</span></span>
-<span id="cb253-4"><a href="read-write.html#cb253-4"></a><span class="co">#&gt; Error in CPL_write_ogr(obj, dsn, layer, driver, as.character(dataset_options), : Dataset already exists.</span></span></code></pre></div>
+<div class="sourceCode" id="cb253"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span><span class="op">)</span>
+<span class="co">#&gt; Layer world in dataset world.gpkg already exists:</span>
+<span class="co">#&gt; use either append=TRUE to append to layer or append=FALSE to overwrite layer</span>
+<span class="co">#&gt; Error in CPL_write_ogr(obj, dsn, layer, driver, as.character(dataset_options), : Dataset already exists.</span></code></pre></div>
 <p>The error message tells us why the function failed:
 <code>world.gpkg</code> already contains a layer called <code>world</code>.
 To fix this problem, use the <code>append</code> argument.
 When this argument is set to <code>TRUE</code>, the old layer is kept and the <code>world</code> object is added as a second new layer:</p>
-<div class="sourceCode" id="cb254"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb254-1"><a href="read-write.html#cb254-1"></a><span class="kw">st_write</span>(<span class="dt">obj =</span> world, <span class="dt">dsn =</span> <span class="st">&quot;world.gpkg&quot;</span>, <span class="dt">append =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb254"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span>, append <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>Alternatively with <code>append = FALSE</code>, existing layers are deleted before the function attempts to write our object to a file:</p>
-<div class="sourceCode" id="cb255"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb255-1"><a href="read-write.html#cb255-1"></a><span class="kw">st_write</span>(<span class="dt">obj =</span> world, <span class="dt">dsn =</span> <span class="st">&quot;world.gpkg&quot;</span>, <span class="dt">append =</span> <span class="ot">FALSE</span>)</span></code></pre></div>
-<p>You can achieve the same with <code>write_sf()</code> since it is equivalent to (technically an <em>alias</em> for) <code>st_write()</code>, except that its defaults for <code>append</code> is <code>FALSE</code> and <code>quiet</code> is <code>TRUE</code>.</p>
-<div class="sourceCode" id="cb256"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb256-1"><a href="read-write.html#cb256-1"></a><span class="kw">write_sf</span>(<span class="dt">obj =</span> world, <span class="dt">dsn =</span> <span class="st">&quot;world.gpkg&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb255"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span>, append <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<p>You can achieve the same with <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf()</a></code> since it is equivalent to (technically an <em>alias</em> for) <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write()</a></code>, except that its defaults for <code>append</code> is <code>FALSE</code> and <code>quiet</code> is <code>TRUE</code>.</p>
+<div class="sourceCode" id="cb256"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span><span class="op">)</span></code></pre></div>
 <p>The <code>layer_options</code> argument could be also used for many different purposes.
 One of them is to write spatial data to a text file.
 This can be done by specifying <code>GEOMETRY</code> inside of <code>layer_options</code>.
 It could be either <code>AS_XY</code> for simple point datasets (it creates two new columns for coordinates) or <code>AS_WKT</code> for more complex spatial data (one new column is created which contains the well-known text representation of spatial objects).</p>
-<div class="sourceCode" id="cb257"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb257-1"><a href="read-write.html#cb257-1"></a><span class="kw">st_write</span>(cycle_hire_xy, <span class="st">&quot;cycle_hire_xy.csv&quot;</span>, <span class="dt">layer_options =</span> <span class="st">&quot;GEOMETRY=AS_XY&quot;</span>)</span>
-<span id="cb257-2"><a href="read-write.html#cb257-2"></a><span class="kw">st_write</span>(world_wkt, <span class="st">&quot;world_wkt.csv&quot;</span>, <span class="dt">layer_options =</span> <span class="st">&quot;GEOMETRY=AS_WKT&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb257"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span><span class="va">cycle_hire_xy</span>, <span class="st">"cycle_hire_xy.csv"</span>, layer_options <span class="op">=</span> <span class="st">"GEOMETRY=AS_XY"</span><span class="op">)</span>
+<span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span><span class="va">world_wkt</span>, <span class="st">"world_wkt.csv"</span>, layer_options <span class="op">=</span> <span class="st">"GEOMETRY=AS_WKT"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="raster-data-2" class="section level3">
-<h3><span class="header-section-number">7.7.2</span> Raster data</h3>
+<h3>
+<span class="header-section-number">7.7.2</span> Raster data<a class="anchor" aria-label="anchor" href="#raster-data-2"><i class="fas fa-link"></i></a>
+</h3>
 <p>
-The <code>writeRaster()</code> function saves <code>Raster*</code> objects to files on disk.
-The function expects input regarding output data type and file format, but also accepts GDAL options specific to a selected file format (see <code>?writeRaster</code> for more details).</p>
+The <code><a href="https://rdrr.io/pkg/raster/man/writeRaster.html">writeRaster()</a></code> function saves <code>Raster*</code> objects to files on disk.
+The function expects input regarding output data type and file format, but also accepts GDAL options specific to a selected file format (see <code><a href="https://rdrr.io/pkg/raster/man/writeRaster.html">?writeRaster</a></code> for more details).</p>
 <p>
-The <strong>raster</strong> package offers nine data types when saving a raster: LOG1S, INT1S, INT1U, INT2S, INT2U, INT4S, INT4U, FLT4S, and FLT8S.<a href="#fn35" class="footnote-ref" id="fnref35"><sup>35</sup></a>
+The <strong>raster</strong> package offers nine data types when saving a raster: LOG1S, INT1S, INT1U, INT2S, INT2U, INT4S, INT4U, FLT4S, and FLT8S.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
+Using INT4U is not recommended as R does not support 32-bit unsigned integers.&lt;/p&gt;"><sup>35</sup></a>
 The data type determines the bit representation of the raster object written to disk (Table <a href="read-write.html#tab:datatypes">7.4</a>).
 Which data type to use depends on the range of the values of your raster object.
 The more values a data type can represent, the larger the file will get on disk.
 Commonly, one would use LOG1S for bitmap (binary) rasters.
 Unsigned integers (INT1U, INT2U, INT4U) are suitable for categorical data, while float numbers (FLT4S and FLT8S) usually represent continuous data.
-<code>writeRaster()</code> uses FLT4S as the default.
+<code><a href="https://rdrr.io/pkg/raster/man/writeRaster.html">writeRaster()</a></code> uses FLT4S as the default.
 While this works in most cases, the size of the output file will be unnecessarily large if you save binary or categorical data.
-Therefore, we would recommend to use the data type that needs the least storage space, but is still able to represent all values (check the range of values with the <code>summary()</code> function).</p>
-<table>
+Therefore, we would recommend to use the data type that needs the least storage space, but is still able to represent all values (check the range of values with the <code><a href="https://rdrr.io/r/base/summary.html">summary()</a></code> function).</p>
+<div class="inline-table"><table class="table table-sm">
 <caption>
 <span id="tab:datatypes">TABLE 7.4: </span>Data types supported by the raster package.
 </caption>
-<thead>
-<tr>
+<thead><tr>
 <th style="text-align:left;">
 Data type
 </th>
@@ -1186,8 +890,7 @@ Minimum value
 <th style="text-align:left;">
 Maximum value
 </th>
-</tr>
-</thead>
+</tr></thead>
 <tbody>
 <tr>
 <td style="text-align:left;">
@@ -1289,166 +992,125 @@ FLT8S
 </td>
 </tr>
 </tbody>
-</table>
-<p>By default, <code>writeRaster()</code> saves outputs in its native format as <code>.grd</code> files, when a file extension is invalid or missing.
+</table></div>
+<p>By default, <code><a href="https://rdrr.io/pkg/raster/man/writeRaster.html">writeRaster()</a></code> saves outputs in its native format as <code>.grd</code> files, when a file extension is invalid or missing.
 Other file formats can be specified by changing the extension of the output file name.
 Naming a file <code>*.tif</code> will create a GeoTIFF file, as demonstrated below:</p>
-<div class="sourceCode" id="cb258"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb258-1"><a href="read-write.html#cb258-1"></a><span class="kw">writeRaster</span>(single_layer, <span class="dt">filename =</span> <span class="st">&quot;my_raster.tif&quot;</span>, <span class="dt">datatype =</span> <span class="st">&quot;INT2U&quot;</span>)</span></code></pre></div>
-<p>Some raster file formats have additional options, that can be set by providing <a href="http://www.gdal.org/formats_list.html">GDAL parameters</a> to the <code>options</code> argument of <code>writeRaster()</code>.
+<div class="sourceCode" id="cb258"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/writeRaster.html">writeRaster</a></span><span class="op">(</span><span class="va">single_layer</span>, filename <span class="op">=</span> <span class="st">"my_raster.tif"</span>, datatype <span class="op">=</span> <span class="st">"INT2U"</span><span class="op">)</span></code></pre></div>
+<p>Some raster file formats have additional options, that can be set by providing <a href="http://www.gdal.org/formats_list.html">GDAL parameters</a> to the <code>options</code> argument of <code><a href="https://rdrr.io/pkg/raster/man/writeRaster.html">writeRaster()</a></code>.
 GeoTIFF files, for example, can be compressed using <code>COMPRESS</code>:
 <!-- GeoTIFF files, for example, can be compressed using the `COMPRESS` option^[Find out about GeoTIFF options under http://www.gdal.org/frmt_gtiff.html.]: --></p>
-<div class="sourceCode" id="cb259"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb259-1"><a href="read-write.html#cb259-1"></a><span class="kw">writeRaster</span>(<span class="dt">x =</span> single_layer,</span>
-<span id="cb259-2"><a href="read-write.html#cb259-2"></a>            <span class="dt">filename =</span> <span class="st">&quot;my_raster.tif&quot;</span>,</span>
-<span id="cb259-3"><a href="read-write.html#cb259-3"></a>            <span class="dt">datatype =</span> <span class="st">&quot;INT2U&quot;</span>,</span>
-<span id="cb259-4"><a href="read-write.html#cb259-4"></a>            <span class="dt">options =</span> <span class="kw">c</span>(<span class="st">&quot;COMPRESS=DEFLATE&quot;</span>),</span>
-<span id="cb259-5"><a href="read-write.html#cb259-5"></a>            <span class="dt">overwrite =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
-<p>Note that <code>writeFormats()</code> returns a list with all supported file formats on your computer.</p>
-<!-- ### Databases -->
-<!-- postgis output example -->
+<div class="sourceCode" id="cb259"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/writeRaster.html">writeRaster</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">single_layer</span>,
+            filename <span class="op">=</span> <span class="st">"my_raster.tif"</span>,
+            datatype <span class="op">=</span> <span class="st">"INT2U"</span>,
+            options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"COMPRESS=DEFLATE"</span><span class="op">)</span>,
+            overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<p>Note that <code><a href="https://rdrr.io/pkg/raster/man/writeFormats.html">writeFormats()</a></code> returns a list with all supported file formats on your computer.</p>
 </div>
 </div>
 <div id="visual-outputs" class="section level2">
-<h2><span class="header-section-number">7.8</span> Visual outputs</h2>
+<h2>
+<span class="header-section-number">7.8</span> Visual outputs<a class="anchor" aria-label="anchor" href="#visual-outputs"><i class="fas fa-link"></i></a>
+</h2>
 <p>
 R supports many different static and interactive graphics formats.
 The most general method to save a static plot is to open a graphic device, create a plot, and close it, for example:</p>
-<div class="sourceCode" id="cb260"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb260-1"><a href="read-write.html#cb260-1"></a><span class="kw">png</span>(<span class="dt">filename =</span> <span class="st">&quot;lifeExp.png&quot;</span>, <span class="dt">width =</span> <span class="dv">500</span>, <span class="dt">height =</span> <span class="dv">350</span>)</span>
-<span id="cb260-2"><a href="read-write.html#cb260-2"></a><span class="kw">plot</span>(world[<span class="st">&quot;lifeExp&quot;</span>])</span>
-<span id="cb260-3"><a href="read-write.html#cb260-3"></a><span class="kw">dev.off</span>()</span></code></pre></div>
-<p>Other available graphic devices include <code>pdf()</code>, <code>bmp()</code>, <code>jpeg()</code>, and <code>tiff()</code>.
+<div class="sourceCode" id="cb260"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/grDevices/png.html">png</a></span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"lifeExp.png"</span>, width <span class="op">=</span> <span class="fl">500</span>, height <span class="op">=</span> <span class="fl">350</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/raster/man/plot.html">plot</a></span><span class="op">(</span><span class="va">world</span><span class="op">[</span><span class="st">"lifeExp"</span><span class="op">]</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html">dev.off</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p>Other available graphic devices include <code><a href="https://rdrr.io/r/grDevices/pdf.html">pdf()</a></code>, <code><a href="https://rdrr.io/r/grDevices/png.html">bmp()</a></code>, <code><a href="https://rdrr.io/r/grDevices/png.html">jpeg()</a></code>, and <code><a href="https://rdrr.io/r/grDevices/png.html">tiff()</a></code>.
 You can specify several properties of the output plot, including width, height and resolution.</p>
 <p>Additionally, several graphic packages provide their own functions to save a graphical output.
-For example, the <strong>tmap</strong> package has the <code>tmap_save()</code> function.
+For example, the <strong>tmap</strong> package has the <code><a href="https://rdrr.io/pkg/tmap/man/tmap_save.html">tmap_save()</a></code> function.
 You can save a <code>tmap</code> object to different graphic formats by specifying the object name and a file path to a new graphic file.</p>
-<div class="sourceCode" id="cb261"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb261-1"><a href="read-write.html#cb261-1"></a><span class="kw">library</span>(tmap)</span>
-<span id="cb261-2"><a href="read-write.html#cb261-2"></a>tmap_obj =<span class="st"> </span><span class="kw">tm_shape</span>(world) <span class="op">+</span><span class="st"> </span><span class="kw">tm_polygons</span>(<span class="dt">col =</span> <span class="st">&quot;lifeExp&quot;</span>)</span>
-<span id="cb261-3"><a href="read-write.html#cb261-3"></a><span class="kw">tmap_save</span>(<span class="dt">tm =</span> tmap_obj, <span class="dt">filename =</span> <span class="st">&quot;lifeExp_tmap.png&quot;</span>)</span></code></pre></div>
-<!-- Note about that the `plot` function do not create an object -->
-<!-- ```{r} -->
-<!-- a = plot(world["lifeExp"]) -->
-<!-- ``` -->
-<p>On the other hand, you can save interactive maps created in the <code>mapview</code> package as an HTML file or image using the <code>mapshot()</code> function:</p>
-<!-- example doesn't work, problem with colors I guess -->
-<div class="sourceCode" id="cb262"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb262-1"><a href="read-write.html#cb262-1"></a><span class="kw">library</span>(mapview)</span>
-<span id="cb262-2"><a href="read-write.html#cb262-2"></a>mapview_obj =<span class="st"> </span><span class="kw">mapview</span>(world, <span class="dt">zcol =</span> <span class="st">&quot;lifeExp&quot;</span>, <span class="dt">legend =</span> <span class="ot">TRUE</span>)</span>
-<span id="cb262-3"><a href="read-write.html#cb262-3"></a><span class="kw">mapshot</span>(mapview_obj, <span class="dt">file =</span> <span class="st">&quot;my_interactive_map.html&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb261"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mtennekes/tmap">tmap</a></span><span class="op">)</span>
+<span class="va">tmap_obj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_shape.html">tm_shape</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_polygons.html">tm_polygons</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"lifeExp"</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tmap_save.html">tmap_save</a></span><span class="op">(</span>tm <span class="op">=</span> <span class="va">tmap_obj</span>, filename <span class="op">=</span> <span class="st">"lifeExp_tmap.png"</span><span class="op">)</span></code></pre></div>
+<p>On the other hand, you can save interactive maps created in the <code>mapview</code> package as an HTML file or image using the <code><a href="https://rdrr.io/pkg/mapview/man/mapshot.html">mapshot()</a></code> function:</p>
+<div class="sourceCode" id="cb262"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/mapview">mapview</a></span><span class="op">)</span>
+<span class="va">mapview_obj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mapview/man/mapView.html">mapview</a></span><span class="op">(</span><span class="va">world</span>, zcol <span class="op">=</span> <span class="st">"lifeExp"</span>, legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/mapview/man/mapshot.html">mapshot</a></span><span class="op">(</span><span class="va">mapview_obj</span>, file <span class="op">=</span> <span class="st">"my_interactive_map.html"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="exercises-5" class="section level2">
-<h2><span class="header-section-number">7.9</span> Exercises</h2>
+<h2>
+<span class="header-section-number">7.9</span> Exercises<a class="anchor" aria-label="anchor" href="#exercises-5"><i class="fas fa-link"></i></a>
+</h2>
 <ol style="list-style-type: decimal">
 <li><p>List and describe three types of vector, raster, and geodatabase formats.</p></li>
-<li><p>Name at least two differences between <code>read_sf()</code> and the more well-known function <code>st_read()</code>.</p></li>
+<li><p>Name at least two differences between <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> and the more well-known function <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code>.</p></li>
 <li><p>Read the <code>cycle_hire_xy.csv</code> file from the <strong>spData</strong> package as a spatial object (Hint: it is located in the <code>misc\</code> folder).
 What is a geometry type of the loaded object?</p></li>
 <li><p>Download the borders of Germany using <strong>rnaturalearth</strong>, and create a new object called <code>germany_borders</code>.
 Write this new object to a file of the GeoPackage format.</p></li>
 <li><p>Download the global monthly minimum temperature with a spatial resolution of five minutes using the <strong>raster</strong> package.
-Extract the June values, and save them to a file named <code>tmin_june.tif</code> file (hint: use <code>raster::subset()</code>).</p></li>
+Extract the June values, and save them to a file named <code>tmin_june.tif</code> file (hint: use <code><a href="https://rdrr.io/pkg/raster/man/subset.html">raster::subset()</a></code>).</p></li>
 <li><p>Create a static map of Germany’s borders, and save it to a PNG file.</p></li>
 <li><p>Create an interactive map using data from the <code>cycle_hire_xy.csv</code> file.
 Export this map to a file called <code>cycle_hire.html</code>.</p></li>
 </ol>
-
 </div>
 </div>
 
 
 
-<h3>References</h3>
-<div id="refs" class="references">
-<div id="ref-coppock_history_1991">
-<p>Coppock, J Terry, and David W Rhind. 1991. “The History of GIS.” <em>Geographical Information Systems: Principles and Applications, Vol. 1.</em> 1 (1): 21–43.</p>
-</div>
-<div id="ref-gillespie_efficient_2016">
-<p>Gillespie, Colin, and Robin Lovelace. 2016. <em>Efficient R Programming: A Practical Guide to Smarter Programming</em>. O’Reilly Media.</p>
-</div>
-<div id="ref-nolan_xml_2014">
-<p>Nolan, Deborah, and Duncan Temple Lang. 2014. <em>XML and Web Technologies for Data Sciences with R</em>. Use R! New York, NY: Springer.</p>
-</div>
-<div id="ref-R-osmdata">
-<p>Padgham, Mark, Bob Rudis, Robin Lovelace, and Maëlle Salmon. 2018. <em>Osmdata: Import ’Openstreetmap’ Data as Simple Features or Spatial Objects</em>. <a href="https://CRAN.R-project.org/package=osmdata">https://CRAN.R-project.org/package=osmdata</a>.</p>
-</div>
-</div>
-<div class="footnotes">
-<hr />
-<ol start="31">
-<li id="fn31"><p>
-For more information on data import with R packages, see Sections 5.5 and 5.6 of <span class="citation">Gillespie and Lovelace (<a href="#ref-gillespie_efficient_2016" role="doc-biblioref">2016</a>)</span>.<a href="read-write.html#fnref31" class="footnote-back">↩︎</a></p></li>
-<li id="fn32"><p>
-To filter features on the server before downloading them, the argument <code>cql_filter</code> can be used. Adding <code>cql_filter = URLencode("F_CODE= '27'")</code> to the command, for example, would instruct the server to only return the feature with values in the <code>F_CODE</code> column equal to 27.<a href="read-write.html#fnref32" class="footnote-back">↩︎</a></p></li>
-<li id="fn33"><p>To learn more about ESRI Shapefile limitations and possible alternative file formats, visit <a href="http://switchfromshapefile.org/" class="uri">http://switchfromshapefile.org/</a>.<a href="read-write.html#fnref33" class="footnote-back">↩︎</a></p></li>
-<li id="fn34"><p>
-A list of supported vector formats and options can be found at <a href="http://gdal.org/ogr_formats.html" class="uri">http://gdal.org/ogr_formats.html</a>.<a href="read-write.html#fnref34" class="footnote-back">↩︎</a></p></li>
-<li id="fn35"><p>
-Using INT4U is not recommended as R does not support 32-bit unsigned integers.<a href="read-write.html#fnref35" class="footnote-back">↩︎</a></p></li>
-</ol>
-</div>
-<script>
-/*
-Sorts the references alphabetically.
-Modified from code by Yvonne Aburrow.
-*/
-$(function(){
-    var elems = $('#refs').children('div').remove();
-    elems.sort(function (a, b) {
-        return $(b).children('p').html().toUpperCase() > $(a).children('p').html().toUpperCase() ? -1 : 1;
-    });
-    $('#refs').append(elems);
-})
-</script>
-            </section>
 
-          </div>
-        </div>
-      </div>
-<a href="reproj-geo-data.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="adv-map.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
-    </div>
+  <div class="chapter-nav">
+<div class="prev"><a href="reproj-geo-data.html"><span class="header-section-number">6</span> Reprojecting geographic data</a></div>
+<div class="next"><a href="adv-map.html"><span class="header-section-number">8</span> Making maps with R</a></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <ul class="nav navbar-nav">
+<li><a class="nav-link" href="#read-write"><span class="header-section-number">7</span> Geographic data I/O</a></li>
+<li><a class="nav-link" href="#prerequisites-5">Prerequisites</a></li>
+<li><a class="nav-link" href="#introduction-4"><span class="header-section-number">7.1</span> Introduction</a></li>
+<li><a class="nav-link" href="#retrieving-data"><span class="header-section-number">7.2</span> Retrieving open data</a></li>
+<li><a class="nav-link" href="#geographic-data-packages"><span class="header-section-number">7.3</span> Geographic data packages</a></li>
+<li><a class="nav-link" href="#geographic-web-services"><span class="header-section-number">7.4</span> Geographic web services</a></li>
+<li><a class="nav-link" href="#file-formats"><span class="header-section-number">7.5</span> File formats</a></li>
+<li>
+<a class="nav-link" href="#data-input"><span class="header-section-number">7.6</span> Data input (I)</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#vector-data-1"><span class="header-section-number">7.6.1</span> Vector data</a></li>
+<li><a class="nav-link" href="#raster-data-1"><span class="header-section-number">7.6.2</span> Raster data</a></li>
+</ul>
+</li>
+<li>
+<a class="nav-link" href="#data-output"><span class="header-section-number">7.7</span> Data output (O)</a><ul class="nav navbar-nav">
+<li><a class="nav-link" href="#vector-data-2"><span class="header-section-number">7.7.1</span> Vector data</a></li>
+<li><a class="nav-link" href="#raster-data-2"><span class="header-section-number">7.7.2</span> Raster data</a></li>
+</ul>
+</li>
+<li><a class="nav-link" href="#visual-outputs"><span class="header-section-number">7.8</span> Visual outputs</a></li>
+<li><a class="nav-link" href="#exercises-5"><span class="header-section-number">7.9</span> Exercises</a></li>
+</ul>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+          
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-09-06.</p>
   </div>
-<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
-<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
-<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
-<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
-<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
-<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
-<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
-<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
-<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
-<script>
-gitbook.require(["gitbook"], function(gitbook) {
-gitbook.start({
-"sharing": null,
-"fontsettings": {
-"theme": "white",
-"family": "sans",
-"size": 2
-},
-"edit": {
-"link": "https://github.com/Robinlovelace/geocompr/edit/master/07-read-write-plot.Rmd",
-"text": "Edit"
-},
-"history": {
-"link": null,
-"text": null
-},
-"view": {
-"link": null,
-"text": null
-},
-"download": null,
-"search": {
-"engine": "lunr",
-"options": null
-},
-"toc": {
-"collapse": "section"
-}
-});
-});
-</script>
 
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer><!-- dynamically load mathjax for compatibility with self-contained --><script>
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
@@ -1460,7 +1122,22 @@ gitbook.start({
     script.src = src;
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
+</script><script type="text/x-mathjax-config">const popovers = document.querySelectorAll('a.footnote-ref[data-toggle="popover"]');
+for (let popover of popovers) {
+  const div = document.createElement('div');
+  div.setAttribute('style', 'position: absolute; top: 0, left:0; width:0, height:0, overflow: hidden; visibility: hidden;');
+  div.innerHTML = popover.getAttribute('data-content');
+
+  var has_math = div.querySelector("span.math");
+  if (has_math) {
+    document.body.appendChild(div);
+    MathJax.Hub.Queue(["Typeset", MathJax.Hub, div]);
+    MathJax.Hub.Queue(function() {
+      popover.setAttribute('data-content', div.innerHTML);
+      document.body.removeChild(div);
+    })
+  }
+}
 </script>
 </body>
-
 </html>

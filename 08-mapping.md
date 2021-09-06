@@ -28,12 +28,16 @@ library(ggplot2) # tidyverse data visualization package
 
 A satisfying and important aspect of geographic research is communicating the results.
 Map making --- the art of cartography --- is an ancient skill that involves communication, intuition, and an element of creativity.
-Static mapping is straightforward with `plot()`, as we saw in Section \@ref(basic-map).
-It is possible to create advanced maps using base R methods [@murrell_r_2016], but this chapter focuses on dedicated map-making packages.
+Static mapping in R is straightforward with the `plot()` function, as we saw in Section \@ref(basic-map).
+It is possible to create advanced maps using base R methods [@murrell_r_2016].
+The focus of this chapter, however, is cartography with dedicated map-making packages.
 When learning a new skill, it makes sense to gain depth-of-knowledge in one area before branching out.
 Map making is no exception, hence this chapter's coverage of one package (**tmap**) in depth rather than many superficially.
+
 In addition to being fun and creative, cartography also has important practical applications.
-A carefully crafted map is vital for effectively communicating the results of your work [@brewer_designing_2015]:
+A carefully crafted map can be the best way of communicating the results of your work, but poorly designed maps can leave a bad impression.
+Common design issues include poor placement, size and readability of text and careless selection of colors, as outlined in the style [guide](https://www.tandf.co.uk//journals/authors/style/TJOM-suppmaterial-quick-guide.pdf) of the Journal of Maps.
+Furthermore, poor map making can hinder the communication of results [@brewer_designing_2015]:
 
 > Amateur-looking maps can undermine your audience’s ability to understand important information and weaken the presentation of a professional data investigation.
 
@@ -423,8 +427,6 @@ Typically all individual facets in a faceted map contain the same geometry data 
 However, facets can also represent shifting geometries such as the evolution of a point pattern over time.
 This use case of faceted plot is illustrated in Figure \@ref(fig:urban-facet).
 
-<!-- todo: describe data type (long) and nrow vs ncol -->
-
 
 ```r
 urb_1970_2030 = urban_agglomerations %>% 
@@ -797,7 +799,7 @@ This section gives some context, teaches the basics of **shiny** from a web mapp
 The way **shiny** works is well documented at [shiny.rstudio.com](https://shiny.rstudio.com/).
 The two key elements of a **shiny** app reflect the duality common to most web application development: 'front end' (the bit the user sees) and 'back end' code.
 In **shiny** apps, these elements are typically created in objects named `ui` and `server` within an R script named `app.R`, which lives in an 'app folder'.
-This allows web mapping applications to be represented in a single file, such as the [`coffeeApp/app.R`](https://github.com/Robinlovelace/geocompr/blob/master/coffeeApp/app.R) file in the book's GitHub repo.
+This allows web mapping applications to be represented in a single file, such as the [`coffeeApp/app.R`](https://github.com/Robinlovelace/geocompr/blob/main/apps/coffeeApp/app.R) file in the book's GitHub repo.
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">In **shiny** apps these are often split into `ui.R` (short for user interface) and `server.R` files, naming conventions used by `shiny-server`, a server-side Linux application for serving shiny apps on public-facing websites.
 `shiny-server` also serves apps defined by a single `app.R` file in an 'app folder'.
@@ -842,7 +844,7 @@ The function `shinyApp()` combines both the `ui` and `server` elements and serve
 When you move the slider in the map shown in Figure \@ref(fig:lifeApp), you are actually causing R code to re-run, although this is hidden from view in the user interface.
 
 Building on this basic example and knowing where to find help (see `?shiny`), the best way forward now may be to stop reading and start programming!
-The recommended next step is to open the previously mentioned [`CycleHireApp/app.R`](https://github.com/Robinlovelace/geocompr/blob/master/CycleHireApp/app.R) script in an IDE of choice, modify it and re-run it repeatedly.
+The recommended next step is to open the previously mentioned [`CycleHireApp/app.R`](https://github.com/Robinlovelace/geocompr/blob/main/apps/CycleHireApp/app.R) script in an IDE of choice, modify it and re-run it repeatedly.
 The example contains some of the components of a web mapping application implemented in **shiny** and should 'shine' a light on how they behave.
 
 The `CycleHireApp/app.R` script contains **shiny** functions that go beyond those demonstrated in the simple 'lifeApp' example.
@@ -936,7 +938,6 @@ The `geom_sf()` function is not always able to create a desired legend to use fr
 Raster objects are also not natively supported in **ggplot2** and need to be converted into a data frame before plotting.
 
 We have covered mapping with **sf**, **raster** and **ggplot2** packages first because these packages are highly flexible, allowing for the creation of a wide range of static maps.
-<!-- Many other static mapping packages are more specific. -->
 Before we cover mapping packages for plotting a specific type of map (in the next paragraph), it is worth considering alternatives to the packages already covered for general-purpose mapping (Table \@ref(tab:map-gpkg)).
 
 <table>

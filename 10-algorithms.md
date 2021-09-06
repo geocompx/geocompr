@@ -27,18 +27,12 @@ Scripts are the basis of reproducible R code, a topic covered in Section \@ref(s
 Algorithms are recipes for modifying inputs using a series of steps, resulting in an output, as described in Section \@ref(geometric-algorithms).
 To ease sharing and reproducibility, algorithms can be placed into functions.
 That is the topic of Section \@ref(functions).
-<!-- This chapter provides illustrative examples and directs the reader to established resources, to avoid reinventing the wheel. -->
-<!-- The approach taken in this chapter was partly inspired by @xiao_gis_2016, who advocates explanations that are neither highly theoretical (as many academic papers are) -->
-<!-- , with dozens of lines of non-reproducible pseudocode and equations -->
-<!-- nor entirely focused on implementations via a GUI or CLI in a particular sofware package (as the first part of this book is, with its focus on implementations in various R packages). -->
-<!-- The focus of this chapter is on understanding, using reproducible code and clear explanation. -->
 The example of finding the centroid\index{centroid} of a polygon will be used to tie these concepts together.
 Chapter \@ref(geometric-operations) already introduced a centroid\index{centroid} function `st_centroid()`, but this example highlights how seemingly simple operations are the result of comparatively complex code, affirming the following observation [@wise_gis_2001]:
 
 > One of the most intriguing things about spatial data problems is that things which appear to be trivially easy to a human being can be surprisingly difficult on a computer.
 
 The example also reflects a secondary aim of the chapter which, following @xiao_gis_2016, is "not to duplicate what is available out there, but to show how things out there work".
-<!-- This chapter takes a similar approach and is therefore the most low-level and potentially advanced (in terms of the code, not application) so far. -->
 
 ## Scripts
 
@@ -46,7 +40,6 @@ If functions distributed in packages are the building blocks of R code, scripts 
 To programming novices scripts may sound intimidating but they are simply plain text files, typically saved with an extension representing the language they contain.
 R scripts are generally saved with a `.R` extension and named to reflect what they do.
 An example is `10-hello.R`, a script file stored in the `code` folder of the book's repository, which contains the following two lines of code:
-
 
 ```r
 # Aim: provide a minimal R script
@@ -83,7 +76,6 @@ By default, RStudio \index{RStudio} 'code-checks' R scripts and underlines fault
 <p class="caption">(\#fig:codecheck)Code checking in RStudio. This example, from the script 10-centroid-alg.R, highlights an unclosed curly bracket on line 19.</p>
 </div>
 
-
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">A useful tool for reproducibility is the **reprex** package.
 Its main function `reprex()` tests lines of R code to check if they are reproducible, and provides markdown output to facilitate communication on sites such as GitHub.
 See the web page reprex.tidyverse.org for details.</div>\EndKnitrBlock{rmdnote}
@@ -92,7 +84,7 @@ See the web page reprex.tidyverse.org for details.</div>\EndKnitrBlock{rmdnote}
 
 The contents of this section apply to any type of R script.
 A particular consideration with scripts for geocomputation is that they tend to have external dependencies, such as the QGIS\index{QGIS} dependency to run code in Chapter \@ref(gis), and require input data in a specific format.
-Such dependencies should be mentioned as comments in the script or elsewhere in the project of which it is a part, as illustrated in the script [`10-centroid-alg.R`](https://github.com/Robinlovelace/geocompr/blob/master/code/10-centroid-alg.R).
+Such dependencies should be mentioned as comments in the script or elsewhere in the project of which it is a part, as illustrated in the script [`10-centroid-alg.R`](https://github.com/Robinlovelace/geocompr/blob/main/code/10-centroid-alg.R).
 The work undertaken by this script is demonstrated in the reproducible example below, which works on a pre-requisite object named `poly_mat`, a square with sides 9 units in length (the meaning of this will become apparent in the next section):^[
 This example shows that `source()` works with URLs (a shortened version is used here), assuming you have an internet connection.
 If you do not, the same script can be called with `source("code/10-centroid-alg.R")`, assuming you are running R from the root directory of the `geocompr` folder, which can be downloaded from https://github.com/Robinlovelace/geocompr.
@@ -113,7 +105,6 @@ source("https://git.io/10-centroid-alg.R") # short url
 #> [1] "The coordinates of the centroid are: 4.5, 4.5"
 ```
 
-
 ## Geometric algorithms
 
 Algorithms\index{algorithm} can be understood as the computing equivalent of a cooking recipe.
@@ -122,11 +113,7 @@ Before diving into a concrete case study, a brief history will show how algorith
 
 The word "algorithm"\index{algorithm} originated in 9^th^ century Baghdad with the publication of *Hisab al-jabr w’al-muqabala*, an early math textbook.
 The book was translated into Latin and became so popular that the author's last name, [al-Khwārizmī](https://en.wikipedia.org/wiki/Muhammad_ibn_Musa_al-Khwarizmi), "was immortalized as a scientific term: Al-Khwarizmi
-<!-- [sic] -->
 became Alchoarismi, Algorismi and, eventually, algorithm" [@bellos_alex_2011].
-<!-- ^[ -->
-<!-- The book's title was also influential, forming the basis of the word *algebra*. -->
-<!-- ] -->
 In the computing age, algorithm\index{algorithm} refers to a series of steps that solves a problem, resulting in a pre-defined output.
 Inputs must be formally defined in a suitable data structure [@wise_gis_2001].
 Algorithms\index{algorithm} often start as flow charts or pseudocode\index{pseudocode} showing the aim of the process before being implemented in code.
@@ -145,7 +132,6 @@ It helps to further break down this approach into discrete tasks before writing 
 2. Find the centroid\index{centroid} of each triangle.
 3. Find the area of each triangle.
 4. Find the area-weighted mean of triangle centroids\index{centroid}.
-<!-- 5. Return the result -->
 
 These steps may sound straightforward, but converting words into working code requires some work and plenty of trial-and-error, even when the inputs are constrained:
 The algorithm will only work for *convex polygons*, which contain no internal angles greater than 180°, no star shapes allowed (packages **decido** and **sfdct** can triangulate non-convex polygons using external libraries, as shown in the [algorithm](https://geocompr.github.io/geocompkg/articles/algorithm.html) vignette at geocompr.github.io). 
@@ -191,7 +177,6 @@ $$
 
 Where $A$ to $C$ are the triangle's three points and $x$ and $y$ refer to the x and y dimensions.
 A translation of this formula into R code that works with the data in the matrix representation of a triangle `T1` is as follows (the function `abs()` ensures a positive result):
-<!-- Note: we could replace this code chunk with the function definition if space is an issue (RL) -->
 
 
 ```r
@@ -250,7 +235,6 @@ source("code/10-centroid-alg.R")
 #> [1] "The coordinates of the centroid are: 8.83, 9.22"
 ```
 
-<!-- We have successfully duplicated a small part of **sf**'s functionality (with a major caveat mentioned in the next paragraph). -->
 The example above shows that low-level geographic operations *can* be developed from first principles with base R.
 It also shows that if a tried-and-tested solution already exists, it may not be worth re-inventing the wheel:
 if we aimed only to find the centroid\index{centroid} of a polygon, it would have been quicker to represent `poly_mat` as an **sf** object and use the pre-existing `sf::st_centroid()` function instead.
@@ -299,7 +283,6 @@ t_centroid(T1)
 ```
 
 We can also create a function\index{function} to calculate a triangle's area, which we will name `t_area()`:
-<!-- We can use the function to find the area of a triangle with a base 3 units wide and a height of 1, for example, as follows: -->
 
 
 ```r
@@ -384,8 +367,6 @@ identical(poly_centroid_sfg(poly_mat), sf::st_centroid(poly_sfc))
 #> [1] TRUE
 ```
 
-<!-- RL: I've commented-out the rest of this section as I think it distracts from the core content -->
-
 ## Programming
 
 In this chapter we have moved quickly, from scripts to functions via the tricky topic of algorithms\index{algorithm}.
@@ -416,36 +397,6 @@ We cannot guarantee that, having read this chapter, you will be able to rapidly 
 But we are confident that its contents will help you decide when is an appropriate time to try (when no other existing functions solve the problem, when the programming task is within your capabilities and when the benefits of the solution are likely to outweigh the time costs of developing it).
 First steps towards programming can be slow (the exercises below should not be rushed) but the long-term rewards can be large.
 
-<!-- An important concept to consider when developing your own function is *type stability*. -->
-<!-- Functions are type stable if they always return objects of the same class and, generally, this means returning objects of the same type as the input object. -->
-<!-- To illustrate this concept in practice we will create a type stable version `poly_centroid()` that always takes a matrix with 2 columns as an input and always returns a matrix with 2 columns representing x and y coordinates: -->
-
-<!-- ```{r} -->
-<!-- poly_centroid_type_stable = function(x) { -->
-<!--   stopifnot(is.matrix(x) & ncol(x) == 2) -->
-<!--   centroid_coords = poly_centroid(x) -->
-<!--   return(matrix(centroid_coords, ncol = 2)) -->
-<!-- } -->
-<!-- ``` -->
-
-<!-- The first line of the function is an example of 'defensive programming': -->
-<!-- it checks the input is in the right format (a matrix with 2 columns) before proceeding. -->
-<!-- Such checks can ensure that the code is robust and does not silently fail. -->
-<!-- We can verify it works with `matrix(centroid_coords, ncol = 2)`. -->
-<!-- To see the input data type check working we can try running the function on a matrix with 3 columns: -->
-
-<!-- ```{r, warning=FALSE} -->
-<!-- poly_mat3 = cbind(1:nrow(poly_mat), poly_mat) -->
-<!-- poly_centroid(poly_mat3) -->
-<!-- ``` -->
-
-<!-- ```{r, eval=FALSE} -->
-<!-- poly_centroid_type_stable(poly_mat3) -->
-<!-- #> Error in poly_centroid_type_stable(poly_mat3) :  -->
-<!-- #>   is.matrix(x) & ncol(x) == 2 is not TRUE  -->
-<!-- ``` -->
-
-
 ## Exercises {#ex-algorithms}
 
 1. Read the script `10-centroid-alg.R` in the `code` folder of the book's GitHub repo.
@@ -453,7 +404,7 @@ First steps towards programming can be slow (the exercises below should not be r
     - Create a version of the script on your computer in an IDE\index{IDE} such as RStudio\index{RStudio} (preferably by typing-out the script line-by-line, in your own coding style and with your own comments, rather than copy-pasting --- this will help you learn how to type scripts). Using the example of a square polygon (e.g., created with `poly_mat = cbind(x = c(0, 0, 9, 9, 0), y = c(0, 9, 9, 0, 0))`) execute the script line-by-line.
     - What changes could be made to the script to make it more reproducible?
     <!-- - Answer: The script could state that it needs a an object called `poly_mat` to be present and, if none is present, create an example dataset at the outset for testing. -->
-<!-- 1. Check-out the script `10-earthquakes.R` in the `code` folder of the book's GitHub [repo](https://github.com/Robinlovelace/geocompr/blob/master/code/10-earthquakes.R). -->
+<!-- 1. Check-out the script `10-earthquakes.R` in the `code` folder of the book's GitHub [repo](https://github.com/Robinlovelace/geocompr/blob/main/code/10-earthquakes.R). -->
 <!--     - Try to reproduce the results: how many significant earthquakes were there last month? -->
 <!--     - Modify the script so that it provides a map with all earthquakes that happened in the past hour. -->
 <!-- change line 10 to: -->
