@@ -44,9 +44,9 @@ This version of the book was built on GH Actions on 2021-09-07.
 
 **bookdown** makes editing a book as easy as editing a wiki, provided you have a GitHub account ([sign-up at github.com](https://github.com/join)).
 Once logged-in to GitHub, click on the 'Edit this page' icon in the right panel of the book website.
-This will take you to an editable version of the the source [R Markdown](http://rmarkdown.rstudio.com/) file that generated the page you're on:
+This will take you to an editable version of the the source [R Markdown](http://rmarkdown.rstudio.com/) file that generated the page you're on.
 
-[![](figures/editme.png)](https://github.com/Robinlovelace/geocompr/edit/main/index.Rmd)
+<!--[![](figures/editme.png)](https://github.com/Robinlovelace/geocompr/edit/main/index.Rmd)-->
 
 To raise an issue about the book's content (e.g. code not running) or make a feature request, check-out the [issue tracker](https://github.com/Robinlovelace/geocompr/issues).
 
