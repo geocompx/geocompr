@@ -35,19 +35,33 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@master
 
-      - name: Query dependencies
+      # - name: Query dependencies
+      #   run: |
+      #     install.packages(c('remotes', 'rcmdcheck'))
+      #     saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
+      #     writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+      #   shell: Rscript {0}
+        
+      - name: Install pak and query dependencies
         run: |
-          install.packages(c('remotes', 'rcmdcheck'))
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+          install.packages("pak", repos = "https://r-lib.github.io/p/pak/dev/")
+          saveRDS(pak::local_dev_deps_tree(), ".github/r-depends.rds")
         shell: Rscript {0}
-
-      - name: Cache R packages
-        uses: actions/cache@v1
+        
+      - name: Restore R package cache
+        uses: actions/cache@v2
         with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-r-2-${{ hashFiles('depends.Rds') }}
-          restore-keys: ${{ runner.os }}-r-2-
+          path: |
+            ${{ env.R_LIBS_USER }}
+            !${{ env.R_LIBS_USER }}/pak
+          key: ${{ runner.os }}-${{ steps.get-r-version.outputs.version }}-4-
+
+      # - name: Cache R packages
+      #   uses: actions/cache@v1
+      #   with:
+      #     path: ${{ env.R_LIBS_USER }}
+      #     key: ${{ runner.os }}-r-2-${{ hashFiles('depends.Rds') }}
+      #     restore-keys: ${{ runner.os }}-r-2-
 
       - name: Install system dependencies
         #if: runner.os == 'Linux'
@@ -76,11 +90,16 @@ jobs:
           sudo apt-get update
           sudo apt-get -y install postgresql-client-12
 
+      # - name: Install dependencies
+      #   run: |
+      #     install.packages("remotes")
+      #     remotes::install_github("geocompr/geocompkg", dependencies = TRUE)
+      #     remotes::install_deps()
+      #   shell: Rscript {0}
+        
       - name: Install dependencies
         run: |
-          install.packages("remotes")
-          remotes::install_github("geocompr/geocompkg", dependencies = TRUE)
-          remotes::install_deps()
+          pak::local_install_dev_deps(upgrade = TRUE)
         shell: Rscript {0}
 
       - name: Render Book
