@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2021-09-06'
+date: '2021-09-07'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -26,10 +26,10 @@ url: https://geocompr.robinlovelace.net/
 
 This is the online home of *Geocomputation with R*, a book on geographic data analysis, visualization and modeling.
 
-<a href="https://www.crcpress.com/9781138304512"><img src="images/cover.png" width="250" height="375" alt="The geocompr book cover" align="right" style="margin: 0 1em 0 1em" /></a>
+<a href="https://www.routledge.com/9781138304512"><img src="images/cover.png" width="250" height="375" alt="The geocompr book cover" align="right" style="margin: 0 1em 0 1em" /></a>
   
-**Note**: The first edition of the book has been published by CRC Press in the [R Series](https://www.crcpress.com/Chapman--HallCRC-The-R-Series/book-series/CRCTHERSER).
-You can buy the book from [CRC Press](https://www.crcpress.com/9781138304512), or [Amazon](https://www.amazon.com/Geocomputation-Chapman-Hall-Robin-Lovelace/dp/1138304514/).
+**Note**: The first edition of the book has been published by CRC Press in the [R Series](https://www.routledge.com/Chapman--HallCRC-The-R-Series/book-series/CRCTHERSER).
+You can buy the book from [CRC Press](https://www.routledge.com/9781138304512), or [Amazon](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577/).
 
 Inspired by [**bookdown**](https://github.com/rstudio/bookdown) and the Free and Open Source Software for Geospatial ([FOSS4G](https://foss4g.org/)) movement, this book is open source.
 This ensures its contents are reproducible and publicly accessible for people worldwide.
@@ -38,12 +38,12 @@ The online version of the book is hosted at [geocompr.robinlovelace.net](https:/
 
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
 
-This version of the book was built on GH Actions on 2021-09-06.
+This version of the book was built on GH Actions on 2021-09-07.
 
 ## How to contribute? {-}
 
-**bookdown** makes editing a book as easy as editing a wiki, provided you have a GitHub account ([sign-up at github.com](https://github.com/)).
-Once logged-in to GitHub, click on the 'edit me' icon highlighted with a red ellipse in the image below.
+**bookdown** makes editing a book as easy as editing a wiki, provided you have a GitHub account ([sign-up at github.com](https://github.com/join)).
+Once logged-in to GitHub, click on the 'Edit this page' icon highlighted with a red ellipse in the image below.
 This will take you to an editable version of the the source [R Markdown](http://rmarkdown.rstudio.com/) file that generated the page you're on:
 
 [![](figures/editme.png)](https://github.com/Robinlovelace/geocompr/edit/main/index.Rmd)
