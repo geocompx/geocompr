@@ -692,21 +692,13 @@ First, let's create a `RasterLayer` object named `new_raster`:
 
 ```{r 02-spatial-data-37, message=FALSE}
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
-new_raster = raster(raster_filepath)
+new_raster = rast(raster_filepath)
 ```
 
 Typing the name of the raster into the console, will print out the raster header (extent, dimensions, resolution, CRS) and some additional information (class, data source name, summary of the raster values): 
 
-```{r 02-spatial-data-38, eval=FALSE}
+```{r 02-spatial-data-38}
 new_raster
-#> class       : RasterLayer 
-#> dimensions  : 457, 465, 212505  (nrow, ncol, ncell)
-#> resolution  : 0.000833, 0.000833  (x, y)
-#> extent      : -113, -113, 37.1, 37.5  (xmin, xmax, ymin, ymax)
-#> coord. ref. : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
-#> data source : /home/robin/R/x86_64-pc-linux../3.5/spDataLarge/raster/srtm.tif 
-#> names       : srtm 
-#> values      : 1024, 2892  (min, max)
 ```
 
 Dedicated functions report each component: `dim(new_raster)` returns the number of rows, columns and layers; the `ncell()` function the number of cells (pixels); `res()` the raster's spatial resolution; `extent()` its spatial extent; and `crs()` its coordinate reference system (raster reprojection is covered in Section \@ref(reprojecting-raster-geometries)).
@@ -736,7 +728,7 @@ The easiest way to create a raster object in R is to read-in a raster file from 
 
 ```{r 02-spatial-data-41}
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
-new_raster = raster(raster_filepath)
+new_raster = rast(raster_filepath)
 ```
 
 The **raster** package supports numerous drivers with the help of **rgdal**.
@@ -751,9 +743,9 @@ Values (`vals`) are assigned to each cell: 1 to cell 1, 2 to cell 2, and so on.
 Remember: `raster()` fills cells row-wise (unlike `matrix()`) starting at the upper left corner, meaning the top row contains the values 1 to 6, the second 7 to 12, etc.
 
 ```{r 02-spatial-data-42}
-new_raster2 = raster(nrows = 6, ncols = 6, res = 0.5, 
-                     xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-                     vals = 1:36)
+new_raster2 = rast(nrows = 6, ncols = 6, res = 0.5, 
+                   xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
+                   vals = 1:36)
 ```
 
 For other ways of creating raster objects, see `?raster`.
@@ -767,53 +759,47 @@ Usually, you provide it with a filename to a multilayer raster file but might al
 
 ```{r 02-spatial-data-45}
 multi_raster_file = system.file("raster/landsat.tif", package = "spDataLarge")
-r_brick = brick(multi_raster_file)
+r_brick = rast(multi_raster_file)
 ```
 
-```{r 02-spatial-data-46, eval=FALSE}
+```{r 02-spatial-data-46}
 r_brick
-#> class       : RasterBrick 
-#> resolution  : 30, 30  (x, y)
-#> ...
-#> names       : landsat.1, landsat.2, landsat.3, landsat.4 
-#> min values  :      7550,      6404,      5678,      5252 
-#> max values  :     19071,     22051,     25780,     31961
 ```
 
 `nlayers()` retrieves the number of layers stored in a `Raster*` object:
 
 ```{r 02-spatial-data-47}
-nlayers(r_brick)
+nlyr(r_brick)
 ```
 
-A `RasterStack` is similar to a `RasterBrick` in the sense that it consists also of multiple layers.
-However, in contrast to `RasterBrick`, `RasterStack` allows you to connect several raster objects stored in different files or multiple objects in memory.
-More specifically, a `RasterStack` is a list of `RasterLayer` objects with the same extent and resolution. 
-Hence, one way to create it is with the help of spatial objects already existing in R's global environment. 
-And again, one can simply specify a path to a file stored on disk.
+<!-- A `RasterStack` is similar to a `RasterBrick` in the sense that it consists also of multiple layers. -->
+<!-- However, in contrast to `RasterBrick`, `RasterStack` allows you to connect several raster objects stored in different files or multiple objects in memory. -->
+<!-- More specifically, a `RasterStack` is a list of `RasterLayer` objects with the same extent and resolution.  -->
+<!-- Hence, one way to create it is with the help of spatial objects already existing in R's global environment.  -->
+<!-- And again, one can simply specify a path to a file stored on disk. -->
 
-```{r 02-spatial-data-48}
-raster_on_disk = raster(r_brick, layer = 1)
-raster_in_memory = raster(xmn = 301905, xmx = 335745,
-                          ymn = 4111245, ymx = 4154085, 
-                          res = 30)
-values(raster_in_memory) = sample(seq_len(ncell(raster_in_memory)))
-crs(raster_in_memory) = crs(raster_on_disk)
-```
+<!-- ```{r 02-spatial-data-48} -->
+<!-- raster_on_disk = raster(r_brick, layer = 1) -->
+<!-- raster_in_memory = raster(xmn = 301905, xmx = 335745, -->
+<!--                           ymn = 4111245, ymx = 4154085,  -->
+<!--                           res = 30) -->
+<!-- values(raster_in_memory) = sample(seq_len(ncell(raster_in_memory))) -->
+<!-- crs(raster_in_memory) = crs(raster_on_disk) -->
+<!-- ``` -->
 
-```{r 02-spatial-data-49, eval=FALSE}
-r_stack = stack(raster_in_memory, raster_on_disk)
-r_stack
-#> class : RasterStack
-#> dimensions : 1428, 1128, 1610784, 2
-#> resolution : 30, 30
-#> ...
-#> names       :   layer, landsat.1 
-#> min values  :       1,      7550 
-#> max values  : 1610784,     19071
-```
+<!-- ```{r 02-spatial-data-49, eval=FALSE} -->
+<!-- r_stack = stack(raster_in_memory, raster_on_disk) -->
+<!-- r_stack -->
+<!-- #> class : RasterStack -->
+<!-- #> dimensions : 1428, 1128, 1610784, 2 -->
+<!-- #> resolution : 30, 30 -->
+<!-- #> ... -->
+<!-- #> names       :   layer, landsat.1  -->
+<!-- #> min values  :       1,      7550  -->
+<!-- #> max values  : 1610784,     19071 -->
+<!-- ``` -->
 
-Another difference is that the processing time for `RasterBrick` objects is usually shorter than for `RasterStack` objects.
+<!-- Another difference is that the processing time for `RasterBrick` objects is usually shorter than for `RasterStack` objects. -->
 
 Decision on which `Raster*` class should be used depends mostly on the character of input data. 
 Processing of a single mulitilayer file or object is the most effective with `RasterBrick`, while `RasterStack` allows calculations based on many files, many `Raster*` objects, or both.
