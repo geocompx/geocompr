@@ -1,37 +1,32 @@
-library(raster)
-library(gridExtra)
-library(spData)
 # first intro plot -----------------------------------------------------------
-set.seed(2017-04-01)
+library(terra)
+library(sf)
+library(tmap)
+library(spData)
+set.seed(2021-09-09)
+small_ras = rast(matrix(1:16, 4, 4, byrow = TRUE))
+crs(small_ras) = "EPSG:4326"
+polys = st_as_sf(as.polygons(small_ras, na.rm = FALSE))
+polys$vals = sample.int(100, 16)
+polys$vals[c(7, 9)] = "NA"
+polys$valsn = as.numeric(polys$vals)
 
-small_ras = raster(matrix(1:16, 4, 4, byrow = TRUE))
-small_ras_val = raster(matrix(sample.int(100, 16), 4, 4, byrow = TRUE))
-small_ras_val[c(7, 9)] = NA
+tm1 = tm_shape(polys) +
+  tm_borders(col = "black") +
+  tm_text(text = "lyr.1") +
+  tm_layout(frame = FALSE, 
+            main.title = "A. Cell IDs")
 
-polys = rasterToPolygons(small_ras, na.rm = FALSE)
-# cell IDs
-p_1 = spplot(small_ras, colorkey = FALSE, col.regions = "white",
-             main = "A. Cell IDs",
-             sp.layout = list(
-               list("sp.polygons", polys, first = FALSE),
-               list("sp.text", xyFromCell(small_ras_val, 1:ncell(small_ras)),
-                    1:ncell(small_ras))
-             )
-)
-# cell values
-p_2 = spplot(small_ras_val, colorkey = FALSE, col.regions = "white",
-             main = "B. Cell values",
-             sp.layout = list(
-               list("sp.polygons", polys, first = FALSE),
-               list("sp.text", xyFromCell(small_ras_val,
-                                          1:ncell(small_ras_val)),
-                    values(small_ras_val))
-             )
-)
-# color map
-p_3 = spplot(small_ras_val, 
-             col.regions = colorRampPalette(c("#a50026", "#ffffbf", "#006837"))(16),
-             colorkey = FALSE,
-             main = "C. Colored values")
+tm2 = tm_shape(polys) +
+  tm_borders(col = "black") +
+  tm_text(text = "vals") +
+  tm_layout(frame = FALSE, 
+            main.title = "B. Cell values")
 
-grid.arrange(p_1, p_2, p_3, ncol = 3)
+tm3 = tm_shape(polys) +
+  tm_fill(col = "valsn", colorNA = "white", 
+          legend.show = FALSE, palette = "RdBu") +
+  tm_layout(frame = FALSE, 
+            main.title = "C. Colored values")
+
+tmap_arrange(tm1, tm2, tm3, nrow = 1)
