@@ -9,7 +9,7 @@ crs(small_ras) = "EPSG:4326"
 polys = st_as_sf(as.polygons(small_ras, na.rm = FALSE))
 polys$vals = sample.int(100, 16)
 polys$vals[c(7, 9)] = "NA"
-suppressWarnings(polys$valsn = as.numeric(polys$vals))
+suppressWarnings({polys$valsn = as.numeric(polys$vals)})
 
 tm1 = tm_shape(polys) +
   tm_borders(col = "black") +
