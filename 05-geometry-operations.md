@@ -928,6 +928,8 @@ transect_df = purrr::map_dfr(transect, as_data_frame, .id = "ID")
 #> Warning: `as_data_frame()` was deprecated in tibble 2.0.0.
 #> Please use `as_tibble()` instead.
 #> The signature and semantics have changed, see `?as_tibble`.
+#> This warning is displayed once every 8 hours.
+#> Call `lifecycle::last_warnings()` to see where this warning was generated.
 transect_coords = xyFromCell(srtm, transect_df$cell)
 pair_dist = geosphere::distGeo(transect_coords)[-nrow(transect_coords)]
 transect_df$dist = c(0, cumsum(pair_dist)) 
