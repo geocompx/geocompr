@@ -1070,13 +1070,13 @@ units::set_units(st_area(luxembourg), km^2)
 
 Units are of equal importance in the case of raster data.
 However, so far **sf** is the only spatial package that supports units, meaning that people working on raster data should approach changes in the units of analysis (for example, converting pixel widths from imperial to decimal units) with care.
-The `new_raster` object (see above) uses a WGS84 projection with decimal degrees as units.
+The `my_rast` object (see above) uses a WGS84 projection with decimal degrees as units.
 Consequently, its resolution is also given in decimal degrees but you have to know it, since the `res()` function simply returns a numeric vector.
 
 
 ```r
-res(new_raster)
-#> [1] 0.5 0.5
+res(my_rast)
+#> [1] 0.000833 0.000833
 ```
 
 If we used the UTM projection, the units would change.
@@ -1085,7 +1085,7 @@ If we used the UTM projection, the units would change.
 <!--set eval=TRUE later-->
 
 ```r
-repr = project(new_raster, "ESPG:26912")
+repr = project(my_rast, "ESPG:26912")
 res(repr)
 ```
 
