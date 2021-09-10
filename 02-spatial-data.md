@@ -895,7 +895,7 @@ This has important consequences, as demonstrated in Section \@ref(reproj-geo-dat
 
 The surface of the Earth in geographic coordinate systems is represented by a spherical or ellipsoidal surface.
 Spherical models assume that the Earth is a perfect sphere of a given radius.
-Spherical models have the advantage of simplicity but are rarely used because they are inaccurate: the Earth is not a sphere!
+Spherical models have the advantage of simplicity but, at the same time, they are inaccurate: the Earth is not a sphere!
 Ellipsoidal models are defined by two parameters: the equatorial radius and the polar radius.
 These are suitable because the Earth is compressed: the equatorial radius is around 11.5 km longer than the polar radius [@maling_coordinate_1992].^[
 The degree of compression is often referred to as *flattening*, defined in terms of the equatorial radius ($a$) and polar radius ($b$) as follows: $f = (a - b) / a$. The terms *ellipticity* and *compression* can also be used.
@@ -903,25 +903,39 @@ Because $f$ is a rather small value, digital ellipsoid models use the 'inverse f
 Values of $a$ and $rf$ in various ellipsoidal models can be seen by executing `sf_proj_info(type = "ellps")`.
 ]
 
+<!--jn:toDo-->
+<!-- consider adding a new graphic with ellipsoid (left panel) -->
+<!-- and two datums on an ellipsoid (right panel) -->
+
 Ellipsoids are part of a wider component of CRSs: the *datum*.
-This contains information on what ellipsoid to use (with the `ellps` parameter in the PROJ CRS library) and the precise relationship between the Cartesian coordinates and location on the Earth's surface.
-These additional details are stored in the `towgs84` argument of [proj4string](https://proj.org/operations/conversions/latlon.html) notation (see [proj.org/usage/projections.html](https://proj.org/usage/projections.html) for details).
-These allow local variations in Earth's surface, for example due to large mountain ranges, to be accounted for in a local CRS.
-There are two types of datum --- local and geocentric.
-In a *local datum* such as `NAD83` the ellipsoidal surface is shifted to align with the surface at a particular location.
-In a *geocentric datum*  such as `WGS84` the center is the Earth's center of gravity and the accuracy of projections is not optimized for a specific location.
+This contains information on what ellipsoid to use and the precise relationship between the Cartesian coordinates and location on the Earth's surface.
+<!-- These additional details are stored in the `towgs84` argument of [proj4string](https://proj.org/operations/conversions/latlon.html) notation (see [proj.org/usage/projections.html](https://proj.org/usage/projections.html) for details). -->
+<!-- These allow local variations in Earth's surface, for example due to large mountain ranges, to be accounted for in a local CRS. -->
+There are two types of datum --- geocentric and local.
+In a *geocentric datum*,  such as `WGS84`, the center is the Earth's center of gravity and the accuracy of projections is not optimized for a specific location.
+In a *local datum*, such as `NAD83`, the ellipsoidal surface is shifted to align with the surface at a particular location.
+<!--jn:toDo-->
+<!--expand-->
 
 ### Projected coordinate reference systems 
+
+<!--jn:toDo-->
+<!--reorder the below par-->
 
 \index{CRS!projected}
 Projected CRSs are based on Cartesian coordinates on an implicitly flat surface (right panels of Figures \@ref(fig:vector-crs) and \@ref(fig:raster-crs)).
 They have an origin, x and y axes, and a linear unit of measurement such as meters.
 All projected CRSs are based on a geographic CRS, described in the previous section, and rely on map projections to convert the three-dimensional surface of the Earth into Easting and Northing (x and y) values in a projected CRS.
 
-This transition cannot be done without adding some distortion.
+This transition cannot be done without adding some deformations.
 Therefore, some properties of the Earth's surface are distorted in this process, such as area, direction, distance, and shape.
 A projected coordinate system can preserve only one or two of those properties.
 Projections are often named based on a property they preserve: equal-area preserves area, azimuthal preserve direction, equidistant preserve distance, and conformal preserve local shape.
+<!--jn:toDo-->
+<!--add info about projections trying to minimize all distortions-->
+
+<!--jn:toDo-->
+<!--consider adding new figure showing three main projection types-->
 
 There are three main groups of projection types - conic, cylindrical, and planar.
 In a conic projection, the Earth's surface is projected onto a cone along a single line of tangency or two lines of tangency. 
@@ -932,7 +946,7 @@ This projection could also be created by touching the Earth's surface along a si
 Cylindrical projections are used most often when mapping the entire world.
 A planar projection projects data onto a flat surface touching the globe at a point or along a line of tangency. 
 It is typically used in mapping polar regions.
-`st_proj_info(type = "proj")` gives a list of the available projections supported by the PROJ library.
+`sf_proj_info(type = "proj")` gives a list of the available projections supported by the PROJ library.
 
 <div class="figure" style="text-align: center">
 <img src="figures/02_vector_crs.png" alt="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for a vector data type." width="100%" />
@@ -947,28 +961,41 @@ It is typically used in mapping polar regions.
 ### CRSs in R {#crs-in-r}
 
 \index{CRS!EPSG}
+\index{CRS!WKT2}
 \index{CRS!proj4string}
-Two main ways to describe CRS in R are an `epsg` code or a `proj4string` definition.
+Two recommend ways to describe CRSs in R are (a) Spatial Reference System Identifier (SRID) or (b) a `WKT2` definition.
 Both of these approaches have advantages and disadvantages. 
+
+<!--jn:toDo-->
+<!-- rephrase the following paragraph from `epsg` into SRID -->
 An `epsg` code is usually shorter, and therefore easier to remember. 
 The code also refers to only one, well-defined coordinate reference system. 
-On the other hand, a `proj4string` definition allows you more flexibility when it comes to specifying different parameters such as the projection type, the datum and the ellipsoid.^[
-A complete list of the `proj4string` parameters can be found at https://proj.org.
-] 
-This way you can specify many different projections, and modify existing ones.
-This also makes the `proj4string` approach more complicated.
-`epsg` points to exactly one particular CRS.
+
+
+<!--jn:toDo-->
+<!--add WKT2 paragraph-->
+
+<!--jn:toDo-->
+<!--add proj4string paragraph-->
+
+<!-- On the other hand, a `proj4string` definition allows you more flexibility when it comes to specifying different parameters such as the projection type, the datum and the ellipsoid.^[ -->
+<!-- A complete list of the `proj4string` parameters can be found at https://proj.org. -->
+<!-- ]  -->
+<!-- This way you can specify many different projections, and modify existing ones. -->
+<!-- This also makes the `proj4string` approach more complicated. -->
+<!-- `epsg` points to exactly one particular CRS. -->
 
 Spatial R packages support a wide range of CRSs and they use the long-established [PROJ](https://proj.org) library.
-Other than searching for EPSG codes online, another quick way to find out about available CRSs is via the `rgdal::make_EPSG()` function, which outputs a data frame of available projections.
-Before going into more detail, it's worth learning how to view and filter them inside R, as this could save time trawling the internet.
-The following code will show available CRSs interactively, allowing you to filter ones of interest (try filtering for the OSGB CRSs for example):
+<!--jn:toDo-->
+<!--mention websites and the crssuggest package-->
+<!-- Other than searching for EPSG codes online, another quick way to find out about available CRSs is via the `rgdal::make_EPSG()` function, which outputs a data frame of available projections. -->
+<!-- Before going into more detail, it is worth learning how to view and filter them inside R, as this could save time trawling the internet. -->
+<!-- The following code will show available CRSs interactively, allowing you to filter ones of interest (try filtering for the OSGB CRSs for example): -->
 
-
-```r
-crs_data = rgdal::make_EPSG()
-View(crs_data)
-```
+<!-- ```{r 02-spatial-data-51, eval=FALSE} -->
+<!-- crs_data = rgdal::make_EPSG() -->
+<!-- View(crs_data) -->
+<!-- ``` -->
 
 In **sf** the CRS of an object can be retrieved using `st_crs()`.
 For this, we need to read-in a vector dataset:
@@ -985,22 +1012,90 @@ Our new object, `new_vector`, is a polygon representing the borders of Zion Nati
 ```r
 st_crs(new_vector) # get CRS
 #> Coordinate Reference System:
-#> No EPSG code
-#> proj4string: "+proj=utm +zone=12 +ellps=GRS80 ... +units=m +no_defs"
+#>   User input: UTM Zone 12, Northern Hemisphere 
+#>   wkt:
+#> BOUNDCRS[
+#>     SOURCECRS[
+#>         PROJCRS["UTM Zone 12, Northern Hemisphere",
+#>             BASEGEOGCRS["GRS 1980(IUGG, 1980)",
+#>                 DATUM["unknown",
+#>                     ELLIPSOID["GRS80",6378137,298.257222101,
+#>                         LENGTHUNIT["metre",1,
+#>                             ID["EPSG",9001]]]],
+#>                 PRIMEM["Greenwich",0,
+#>                     ANGLEUNIT["degree",0.0174532925199433]]],
+#>             CONVERSION["UTM zone 12N",
+#>                 METHOD["Transverse Mercator",
+#>                     ID["EPSG",9807]],
+#>                 PARAMETER["Latitude of natural origin",0,
+#>                     ANGLEUNIT["degree",0.0174532925199433],
+#>                     ID["EPSG",8801]],
+#>                 PARAMETER["Longitude of natural origin",-111,
+#>                     ANGLEUNIT["degree",0.0174532925199433],
+#>                     ID["EPSG",8802]],
+#>                 PARAMETER["Scale factor at natural origin",0.9996,
+#>                     SCALEUNIT["unity",1],
+#>                     ID["EPSG",8805]],
+#>                 PARAMETER["False easting",500000,
+#>                     LENGTHUNIT["Meter",1],
+#>                     ID["EPSG",8806]],
+#>                 PARAMETER["False northing",0,
+#>                     LENGTHUNIT["Meter",1],
+#>                     ID["EPSG",8807]],
+#>                 ID["EPSG",16012]],
+#>             CS[Cartesian,2],
+#>                 AXIS["(E)",east,
+#>                     ORDER[1],
+#>                     LENGTHUNIT["Meter",1]],
+#>                 AXIS["(N)",north,
+#>                     ORDER[2],
+#>                     LENGTHUNIT["Meter",1]]]],
+#>     TARGETCRS[
+#>         GEOGCRS["WGS 84",
+#>             DATUM["World Geodetic System 1984",
+#>                 ELLIPSOID["WGS 84",6378137,298.257223563,
+#>                     LENGTHUNIT["metre",1]]],
+#>             PRIMEM["Greenwich",0,
+#>                 ANGLEUNIT["degree",0.0174532925199433]],
+#>             CS[ellipsoidal,2],
+#>                 AXIS["latitude",north,
+#>                     ORDER[1],
+#>                     ANGLEUNIT["degree",0.0174532925199433]],
+#>                 AXIS["longitude",east,
+#>                     ORDER[2],
+#>                     ANGLEUNIT["degree",0.0174532925199433]],
+#>             ID["EPSG",4326]]],
+#>     ABRIDGEDTRANSFORMATION["Transformation from GRS 1980(IUGG, 1980) to WGS84",
+#>         METHOD["Position Vector transformation (geog2D domain)",
+#>             ID["EPSG",9606]],
+#>         PARAMETER["X-axis translation",0,
+#>             ID["EPSG",8605]],
+#>         PARAMETER["Y-axis translation",0,
+#>             ID["EPSG",8606]],
+#>         PARAMETER["Z-axis translation",0,
+#>             ID["EPSG",8607]],
+#>         PARAMETER["X-axis rotation",0,
+#>             ID["EPSG",8608]],
+#>         PARAMETER["Y-axis rotation",0,
+#>             ID["EPSG",8609]],
+#>         PARAMETER["Z-axis rotation",0,
+#>             ID["EPSG",8610]],
+#>         PARAMETER["Scale difference",1,
+#>             ID["EPSG",8611]]]]
 ```
 
 In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used:
 
 
 ```r
-new_vector = st_set_crs(new_vector, 4326) # set CRS
+new_vector = st_set_crs(new_vector, "EPSG:26912") # set CRS
 #> Warning: st_crs<- : replacing crs does not reproject data; use st_transform for
 #> that
 ```
 
 The warning message informs us that the `st_set_crs()` function does not transform data from one CRS to another.
 
-The `crs()` function can be used to access CRS information from a `Raster*` object: 
+The `crs()` function can be used to access CRS information from a `SpatRaster` object: 
 
 
 ```r
@@ -1009,7 +1104,6 @@ crs(my_rast) # get CRS
 ```
 
 The same function, `crs()`, is used to set a CRS for raster objects.
-The main difference, compared to vector data, is that raster objects only accept `proj4` definitions:
 
 
 ```r
@@ -1026,8 +1120,8 @@ We will expand on CRSs and explain how to project from one CRS to another in Cha
 <!-- https://cran.r-project.org/web/packages/units/vignettes/measurement_units_in_R.html -->
 An important feature of CRSs is that they contain information about spatial units.
 Clearly, it is vital to know whether a house's measurements are in feet or meters, and the same applies to maps.
-It is good cartographic practice to add a *scale bar* onto maps to demonstrate the relationship between distances on the page or screen and distances on the ground.
-Likewise, it is important to formally specify the units in which the geometry data or pixels are measured to provide context, and ensure that subsequent calculations are done in context.
+It is good cartographic practice to add a *scale bar* or some other distance indicator onto maps to demonstrate the relationship between distances on the page or screen and distances on the ground.
+Likewise, it is important to formally specify the units in which the geometry data or cells are measured to provide context, and ensure that subsequent calculations are done in context.
 
 A novel feature of geometry data in `sf` objects is that they have *native support* for units.
 This means that distance, area and other geometric calculations in **sf** return values that come with a `units` attribute, defined by the **units** package [@pebesma_measurement_2016].
@@ -1085,13 +1179,15 @@ If we used the UTM projection, the units would change.
 <!--set eval=TRUE later-->
 
 ```r
-repr = project(my_rast, "ESPG:26912")
+repr = project(my_rast, "EPSG:26912")
 res(repr)
 ```
 
 Again, the `res()` command gives back a numeric vector without any unit, forcing us to know that the unit of the UTM projection is meters.
 
 ## Exercises {#ex2}
+
+
 
 <!-- vector exercises -->
 1. Use `summary()` on the geometry column of the `world` data object. What does the output tell us about:
