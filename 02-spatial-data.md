@@ -1188,6 +1188,17 @@ Again, the `res()` command gives back a numeric vector without any unit, forcing
 ## Exercises {#ex2}
 
 
+<style>
+body
+  { counter-reset: source-line 0; }
+pre.numberSource code
+  { counter-reset: none; }
+</style>
+
+
+
+
+
 1. Use `summary()` on the geometry column of the `world` data object. What does the output tell us about:
     - Its geometry type?
     - The number of countries?
