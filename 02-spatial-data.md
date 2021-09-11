@@ -1200,7 +1200,11 @@ Find two similarities and two differences between the image on your computer and
 1. Use `plot()` to create maps of Nigeria in context (see Section \@ref(base-args)).
     - Adjust the `lwd`, `col` and `expandBB` arguments of `plot()`. 
     - Challenge: read the documentation of `text()` and annotate the map.
-1. Create an empty `RasterLayer` object called `my_raster` with 10 columns and 10 rows.
+1. Create an empty `SpatRaster` object called `my_raster` with 10 columns and 10 rows.
 Assign random values between 0 and 10 to the new raster and plot it.
+
+
+
+
 1. Read-in the `raster/nlcd.tif` file from the **spDataLarge** package. 
 What kind of information can you get about the properties of this file?
