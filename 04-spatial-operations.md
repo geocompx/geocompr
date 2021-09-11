@@ -788,6 +788,7 @@ For a more detailed introduction on how to use R for remote sensing, we refer th
 
 ## Exercises
 
+
 1. It was established in Section \@ref(spatial-vec) that Canterbury was the region of New Zealand containing most of the 100 highest points in the country.
 How many of these high points does the Canterbury region contain?
 

@@ -1177,16 +1177,10 @@ grain_poly2 = grain_poly %>%
 
 ## Exercises
 
+
 Some of the exercises use a vector (`random_points`) and raster dataset (`ndvi`) from the **RQGIS** package.
 They also use a polygonal 'convex hull' derived from the vector dataset (`ch`) to represent the area of interest:
 
-```r
-# library(RQGIS)
-# data(random_points)
-# data(ndvi)
-# ch = st_combine(random_points) %>% 
-#   st_convex_hull()
-```
 1. Generate and plot simplified versions of the `nz` dataset.
 Experiment with different values of `keep` (ranging from 0.5 to 0.00005) for `ms_simplify()` and `dTolerance` (from 100 to 100,000) `st_simplify()` .
     - At what value does the form of the result start to break down for each method, making New Zealand unrecognizable?
@@ -1234,5 +1228,3 @@ Using these objects:
 1. Polygonize the `grain` dataset and filter all squares representing clay.
     - Name two advantages and disadvantages of vector data over raster data.
     -  At which points would it be useful to convert rasters to vectors in your work?
-
-

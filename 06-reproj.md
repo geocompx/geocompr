@@ -506,6 +506,7 @@ Chapter 6 for this free online book is recommended reading --- see: [rspatial.or
 
 ## Exercises
 
+
 <!-- CRS CONVERSION -->
 <!-- 1. vector reprojection exercise (e.g. modification of proj4) -->
 1. Create a new object called `nz_wgs` by transforming `nz` object into the WGS84 CRS.
@@ -530,6 +531,3 @@ How does it influence the results?
 It should have the Lambert Azimuthal Equal Area (`laea`) projection, the WGS84 ellipsoid, the longitude of projection center of 95 degrees west, the latitude of projection center of 60 degrees north, and its units should be in meters.
 Next, subset Canada from the `world` object and transform it into the new projection. 
 Plot and compare a map before and after the transformation.
-
-
-
