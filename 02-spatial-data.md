@@ -19,7 +19,7 @@ The packages used in this chapter can be installed with the following commands:^
 
 ```r
 install.packages("sf")
-install.packages("raster")
+install.packages("terra")
 install.packages("spData")
 install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
 ```
@@ -1192,17 +1192,24 @@ Again, the `res()` command gives back a numeric vector without any unit, forcing
     - Its geometry type?
     - The number of countries?
     - Its coordinate reference system (CRS)?
-1. Run the code that 'generated' the map of the world in Figure \@ref(fig:contpop) at the end of Section \@ref(base-args).
+    
+
+
+1. Run the code that 'generated' the map of the world in Section 2.2.4 Base plot arguments.
 Find two similarities and two differences between the image on your computer and that in the book.
     - What does the `cex` argument do (see `?plot`)?
     - Why was `cex` set to the `sqrt(world$pop) / 10000`?
     - Bonus: experiment with different ways to visualize the global population.
-1. Use `plot()` to create maps of Nigeria in context (see Section \@ref(base-args)).
+
+    
+1. Use `plot()` to create maps of Nigeria in context (see Section 2.2.4 Base plot arguments).
     - Adjust the `lwd`, `col` and `expandBB` arguments of `plot()`. 
     - Challenge: read the documentation of `text()` and annotate the map.
+
+
+
 1. Create an empty `SpatRaster` object called `my_raster` with 10 columns and 10 rows.
 Assign random values between 0 and 10 to the new raster and plot it.
-
 
 
 
