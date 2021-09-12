@@ -6,9 +6,11 @@
 
 ```{r 04-spatial-operations-1, message=FALSE, results='hide'}
 library(sf)
-library(raster)
+library(terra)
 library(dplyr)
 library(spData)
+elev = rast(system.file("raster/elev.tif", package = "spData"))
+grain = rast(system.file("raster/grain.tif", package = "spData"))
 ```
 
 ## Introduction
@@ -513,28 +515,34 @@ For the reader's convenience, these datasets can be also found in the **spData**
 
 The previous chapter (Section \@ref(manipulating-raster-objects)) demonstrated how to retrieve values associated with specific cell IDs or row and column combinations.
 Raster objects can also be extracted by location (coordinates) and other spatial objects.
-To use coordinates for subsetting, one can 'translate' the coordinates into a cell ID with the **raster** function `cellFromXY()`.
-An alternative is to use `raster::extract()` (be careful, there is also a function called `extract()` in the **tidyverse**\index{tidyverse (package)}) to extract values.
+To use coordinates for subsetting, one can 'translate' the coordinates into a cell ID with the **terra** function `cellFromXY()`.
+An alternative is to use `terra::extract()` (be careful, there is also a function called `extract()` in the **tidyverse**\index{tidyverse (package)}) to extract values.
 Both methods are demonstrated below to find the value of the cell that covers a point located 0.1 units from the origin.
 \index{raster!subsetting}
 \index{spatial!subsetting}
 
 ```{r 04-spatial-operations-34, eval = FALSE}
-id = cellFromXY(elev, xy = c(0.1, 0.1))
+id = cellFromXY(elev, xy = matrix(c(0.1, 0.1), ncol = 2))
 elev[id]
 # the same as
-raster::extract(elev, data.frame(x = 0.1, y = 0.1))
+terra::extract(elev, matrix(c(0.1, 0.1), ncol = 2))
 ```
 
-It is convenient that both functions also accept objects of class `Spatial* Objects`.
+<!--jn:toDo-->
+<!-- to update -->
+<!-- It is convenient that both functions also accept objects of class `Spatial* Objects`. -->
 Raster objects can also be subset with another raster object, as illustrated in Figure \@ref(fig:raster-subset) (left panel) and demonstrated in the code chunk below:
 
+<!--jn:toDo-->
+<!--https://github.com/rspatial/terra/issues/325 - to update -->
+<!--the same applies to the rest of this section!!!-->
+
 ```{r 04-spatial-operations-35}
-clip = raster(xmn = 0.9, xmx = 1.8, ymn = -0.45, ymx = 0.45,
-              res = 0.3, vals = rep(1, 9))
+clip = rast(xmin = 0.9, xmax = 1.8, ymin = -0.45, ymax = 0.45,
+            resolution = 0.3, vals = rep(1, 9))
 elev[clip]
 # we can also use extract
-# extract(elev, extent(clip))
+# terra::extract(elev, ext(clip))
 ```
 
 Basically, this amounts to retrieving the values of the first raster (here: `elev`) falling within the extent of a second raster (here: `clip`).
@@ -563,9 +571,8 @@ x = elev[1, 1:2, drop = FALSE]
 plot(x)
 ```
 
-
 Another common use case of spatial subsetting is when a raster with `logical` (or `NA`) values is used to mask another raster with the same extent and resolution, as illustrated in Figure \@ref(fig:raster-subset), middle and right panel.
-In this case, the `[`, `mask()` and `overlay()` functions can be used (results not shown):
+In this case, the `[` and `mask()` functions can be used (results not shown):
 
 ```{r 04-spatial-operations-38, eval=FALSE}
 # create raster mask
@@ -575,7 +582,6 @@ values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
 # spatial subsetting
 elev[rmask, drop = FALSE]           # with [ operator
 mask(elev, rmask)                   # with mask()
-overlay(elev, rmask, fun = "max")   # with overlay
 ```
 
 ```{r 04-spatial-operations-39, eval=FALSE, echo=FALSE}
