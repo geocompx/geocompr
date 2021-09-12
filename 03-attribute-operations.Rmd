@@ -6,7 +6,7 @@
 
 ```{r 03-attribute-operations-1, message=FALSE}
 library(sf)
-library(raster)
+library(terra)
 library(dplyr)
 library(stringr) # for working with strings (pattern matching)
 library(tidyr)   # for unite() and separate()
@@ -155,6 +155,8 @@ This is especially useful when working with big data as well as **dplyr**'s data
 The main **dplyr** subsetting functions are `select()`, `slice()`, `filter()` and `pull()`.
 
 ```{block 03-attribute-operations-13, type='rmdnote'}
+<!--jn:toDo-->
+<!-- improve it!! -->
 **raster** and **dplyr** packages have a function called `select()`.
 When using both packages, the function in the most recently attached package will be used, 'masking' the incumbent function.
 This can generate error messages containing text like: `unable to find an inherited method for function ‘select’ for signature ‘"sf"’`.
@@ -585,63 +587,71 @@ Because of their unique structure, subsetting and other operations on raster dat
 \index{raster!manipulation}
 
 The following code recreates the raster dataset used in Section \@ref(raster-classes), the result of which is illustrated in Figure \@ref(fig:cont-raster).
-This demonstrates how the `raster()` function works to create an example raster named `elev` (representing elevations).
+This demonstrates how the `rast()` function works to create an example raster named `elev` (representing elevations).
 
 ```{r 03-attribute-operations-52, message=FALSE, eval = FALSE}
-elev = raster(nrows = 6, ncols = 6, res = 0.5,
-              xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-              vals = 1:36)
+elev = rast(nrows = 6, ncols = 6, resolution = 0.5, 
+            xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
+            vals = 1:36)
 ```
 
-The result is a raster object with 6 rows and 6 columns (specified by the `nrow` and `ncol` arguments), and a minimum and maximum spatial extent in x and y direction (`xmn`, `xmx`, `ymn`, `ymax`).
+The result is a raster object with 6 rows and 6 columns (specified by the `nrow` and `ncol` arguments), and a minimum and maximum spatial extent in x and y direction (`xmin`, `xmax`, `ymin`, `ymax`).
 The `vals` argument sets the values that each cell contains: numeric data ranging from 1 to 36 in this case.
 Raster objects can also contain categorical values of class `logical` or `factor` variables in R.
 The following code creates a raster representing grain sizes (Figure \@ref(fig:cont-raster)):
 
 ```{r 03-attribute-operations-53, eval = FALSE}
-grain_order = c("clay", "silt", "sand")
 grain_char = sample(grain_order, 36, replace = TRUE)
-grain_fact = factor(grain_char, levels = grain_order)
-grain = raster(nrows = 6, ncols = 6, res = 0.5, 
-               xmn = -1.5, xmx = 1.5, ymn = -1.5, ymx = 1.5,
-               vals = grain_fact)
+grain_fact = factor(grain_char, levels = c("clay", "silt", "sand"))
+grain = rast(nrows = 6, ncols = 6, resolution = 0.5, 
+             xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
+             vals = grain_fact)
 ```
 
+<!--jn:toDo-->
+<!-- update after spData update to read from files -->
 ```{r 03-attribute-operations-54, include = FALSE}
 library(spData)
 data("elev")
+elev = rast(elev)
 data("grain")
+grain = rast(grain)
 ```
 
 ```{block2 03-attribute-operations-55, type='rmdnote'}
-`raster` objects can contain values of class `numeric`, `integer`, `logical` or `factor`, but not `character`.
-To use character values, they must first be converted into an appropriate class, for example using the function `factor()`. 
+`SpatRaster` objects can contain values of class `numeric`, `integer`, `logical` or `factor`, but not `character`.
+To use character values, they are first be converted into an appropriate class, for example using the function `factor()`. 
 The `levels` argument was used in the preceding code chunk to create an ordered factor:
 clay < silt < sand in terms of grain size.
 See the Data structures chapter of @wickham_advanced_2014 for further details on classes.
 ```
 
-`raster` objects represent categorical variables as integers, so `grain[1, 1]` returns a number that represents a unique identifier, rather than "clay", "silt" or "sand". 
-The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes`, which can be viewed with `ratify(grain)` (see `?ratify()` for more information).
-Use the function `levels()` for retrieving and adding new factor levels to the attribute table:
+<!--jn:toDo-->
+<!-- fix the next paragraph -->
+<!-- `SpatRaster` objects represent categorical variables as integers, so `grain[1, 1]` returns a number that represents a unique identifier, rather than "clay", "silt" or "sand".  -->
+<!-- The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes`, which can be viewed with `ratify(grain)` (see `?ratify()` for more information). -->
+<!-- Use the function `levels()` for retrieving and adding new factor levels to the attribute table: -->
 
-```{r 03-attribute-operations-56}
-levels(grain)[[1]] = cbind(levels(grain)[[1]], wetness = c("wet", "moist", "dry"))
-levels(grain)
-```
+<!-- ```{r 03-attribute-operations-56} -->
+<!-- levels(grain)[[1]] = cbind(levels(grain)[[1]], wetness = c("wet", "moist", "dry")) -->
+<!-- levels(grain) -->
+<!-- ``` -->
 
-This behavior demonstrates that raster cells can only possess one value, an identifier which can be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`).
-This is illustrated by the command below, which returns the grain size and wetness of cell IDs 1, 11 and 35:
+<!-- This behavior demonstrates that raster cells can only possess one value, an identifier which can be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`). -->
+<!-- This is illustrated by the command below, which returns the grain size and wetness of cell IDs 1, 11 and 35: -->
 
-```{r 03-attribute-operations-57}
-factorValues(grain, grain[c(1, 11, 35)])
-```
+<!-- ```{r 03-attribute-operations-57} -->
+<!-- factorValues(grain, grain[c(1, 11, 35)]) -->
+<!-- ``` -->
 
-```{r cont-raster, echo = FALSE, message = FALSE, fig.width = 7, fig.height = 2.5, fig.cap = "Raster datasets with numeric (left) and categorical values (right).", fig.scap="Raster datasets with numeric and categorical values."}
+```{r cont-raster, echo = FALSE, message = FALSE, fig.asp=0.5, fig.cap = "Raster datasets with numeric (left) and categorical values (right).", fig.scap="Raster datasets with numeric and categorical values."}
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/03-cont-raster-plot.R", print.eval = TRUE)
 ```
 
 ### Raster subsetting
+
+<!--jn:toDo-->
+<!--reread and improve text-->
 
 Raster subsetting is done with the base R operator `[`, which accepts a variety of inputs:
 \index{raster!subsetting}
@@ -665,18 +675,17 @@ elev[1, 1]
 elev[1]
 ```
 
-To extract all values or complete rows, you can use `values()` and `getValues()`.
-For multi-layered raster objects `stack` or `brick`, this will return the cell value(s) for each layer.
-For example, `stack(elev, grain)[1]` returns a matrix with one row and two columns --- one for each layer.
-For multi-layer raster objects another way to subset is with `raster::subset()`, which extracts layers from a raster stack or brick. The `[[` and `$` operators can also be used:
+To extract all values or complete rows, you can use `values()`.
+For multi-layered raster objects, this will return the cell value(s) for each layer.
+For example, `c(elev, grain)[1]` returns a data frame with one row and two columns --- one for each layer.
+For multi-layer raster objects another way to subset is with `terra::subset()`, which extracts layers from a raster stack or brick. The `[[` and `$` operators can also be used:
 
 ```{r 03-attribute-operations-59, eval = FALSE}
-r_stack = stack(elev, grain)
-names(r_stack) = c("elev", "grain")
+r_multi = c(elev, grain)
 # three ways to extract a layer of a stack
-raster::subset(r_stack, "elev")
-r_stack[["elev"]]
-r_stack$elev
+terra::subset(r_multi, "elev")
+r_multi[["elev"]]
+r_multi$elev
 ``` 
 
 Cell values can be modified by overwriting existing values in conjunction with a subsetting operation.
@@ -694,20 +703,23 @@ Multiple cells can also be modified in this way:
 elev[1, 1:2] = 0
 ```
 
+<!--jn:toDo-->
+<!--show how to add/replace NAs-->
+
 ### Summarizing raster objects
 
-**raster** contains functions for extracting descriptive statistics\index{statistics} for entire rasters.
+**terra** contains functions for extracting descriptive statistics\index{statistics} for entire rasters.
 Printing a raster object to the console by typing its name returns minimum and maximum values of a raster.
 `summary()` provides common descriptive statistics\index{statistics} (minimum, maximum, quartiles and number of `NA`s).
-Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with `cellStats()`. 
+Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with `global()`. 
 \index{raster!summarizing}
 
 ```{r 03-attribute-operations-62, eval = FALSE}
-cellStats(elev, sd)
+global(elev, sd)
 ```
 
 ```{block2 03-attribute-operations-63, type='rmdnote'}
-If you provide the `summary()` and `cellStats()` functions with a raster stack or brick object, they will summarize each layer separately, as can be illustrated by running: `summary(brick(elev, grain))`.
+If you provide the `summary()` and `global()` functions with a mulit-layered raster object, they will summarize each layer separately, as can be illustrated by running: `summary(c(elev, grain))`.
 ```
 
 Raster value statistics can be visualized in a variety of ways.
@@ -717,11 +729,14 @@ Specific functions such as `boxplot()`, `density()`, `hist()` and `pairs()` work
 hist(elev)
 ```
 
-In case a visualization function does not work with raster objects, one can extract the raster data to be plotted with the help of `values()` or `getValues()`.
+In case a visualization function does not work with raster objects, one can extract the raster data to be plotted with the help of `values()`.
 \index{raster!values}
 
 Descriptive raster statistics belong to the so-called global raster operations.
 These and other typical raster processing operations are part of the map algebra scheme, which are covered in the next chapter (Section \@ref(map-algebra)).
+
+<!--jn:toDo-->
+<!--think about updating the below block, as the select function is not longer a part of terra-->
 
 ```{block 03-attribute-operations-65, type='rmdnote'}
 Some function names clash between packages (e.g., `select()`, as discussed in a previous note).
