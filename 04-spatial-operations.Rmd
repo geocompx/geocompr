@@ -631,13 +631,18 @@ The following sections explain how each type of map algebra operations can be us
 \index{map algebra!local operations}
 **Local** operations comprise all cell-by-cell operations in one or several layers.
 A good example is the classification of intervals of numeric values into groups such as grouping a digital elevation model into low (class 1), middle (class 2) and high elevations (class 3).
-Using the `reclassify()` command, we need first to construct a reclassification matrix, where the first column corresponds to the lower and the second column to the upper end of the class.
+Using the `classify()` command, we need first to construct a reclassification matrix, where the first column corresponds to the lower and the second column to the upper end of the class.
 The third column represents the new value for the specified ranges in column one and two.
+
+```{r 04-spatial-operations-40}
+rcl = matrix(c(0, 12, 1, 12, 24, 2, 24, 36, 3), ncol = 3, byrow = TRUE)
+rcl
+```
+
 Here, we assign the raster values in the ranges 0--12, 12--24 and 24--36 are *reclassified* to take values 1, 2 and 3, respectively.
 
-```{r 04-spatial-operations-40, eval = FALSE}
-rcl = matrix(c(0, 12, 1, 12, 24, 2, 24, 36, 3), ncol = 3, byrow = TRUE)
-recl = reclassify(elev, rcl = rcl)
+```{r 04-spatial-operations-40b, eval = FALSE}
+recl = classify(elev, rcl = rcl)
 ```
 
 We will perform several reclassifactions in Chapter \@ref(location).
@@ -645,7 +650,11 @@ We will perform several reclassifactions in Chapter \@ref(location).
 Raster algebra is another classical use case of local operations.
 This includes adding, subtracting and squaring two rasters.
 Raster algebra also allows logical operations such as finding all raster cells that are greater than a specific value (5 in our example below).
-The **raster** package supports all these operations and more, as described in `vignette("Raster")` and demonstrated below (results not shown):
+The **terra** package supports all these operations and more, as demonstrated below (results not shown):
+
+<!--jn:toDo-->
+<!--consider describing the below examples-->
+<!--and maybe add a figure-->
 
 ```{r 04-spatial-operations-41, eval = FALSE}
 elev + elev
@@ -654,7 +663,9 @@ log(elev)
 elev > 5
 ```
 
-Instead of arithmetic operators, one can also use the `calc()` and `overlay()` functions.
+<!--jn:toDo-->
+<!-- check if we are describing app and lapp somewhere -->
+Instead of arithmetic operators, one can also use the `app()` and `lapp()` functions.
 These functions are more efficient, hence, they are preferable in the presence of large raster datasets. 
 Additionally, they allow you to directly store an output file.
 
@@ -669,10 +680,13 @@ NDVI&= \frac{\text{NIR} - \text{Red}}{\text{NIR} + \text{Red}}\\
 \end{split}
 $$
 
+<!--jn:toDo-->
+<!--add NDVI example!!-->
+
 Predictive mapping is another interesting application of local raster operations.
 The response variable corresponds to measured or observed points in space, for example, species richness, the presence of landslides, tree disease or crop yield.
 Consequently, we can easily retrieve space- or airborne predictor variables from various rasters (elevation, pH, precipitation, temperature, landcover, soil class, etc.).
-Subsequently, we model our response as a function of our predictors using `lm`, `glm`, `gam` or a machine-learning technique. 
+Subsequently, we model our response as a function of our predictors using `lm()`, `glm()`, `gam()` or a machine-learning technique. 
 Spatial predictions on raster objects can therefore be made by applying estimated coefficients to the predictor raster values, and summing the output raster values (see Chapter \@ref(eco)).
 
 ### Focal operations
@@ -692,6 +706,9 @@ Here, we choose the minimum, but any other summary function, including `sum()`, 
 r_focal = focal(elev, w = matrix(1, nrow = 3, ncol = 3), fun = min)
 ```
 
+<!--jn:toDo-->
+<!-- , na.rm=TRUE vs , na.rm=FALSE -->
+
 ```{r focal-example, echo = FALSE, fig.cap = "Input raster (left) and resulting output raster (right) due to a focal operation - finding the minimum value in 3-by-3 moving windows.", fig.scap="Illustration of a focal operation."}
 knitr::include_graphics("figures/04_focal_example.png")
 ```
@@ -708,7 +725,7 @@ The line detection Laplace and Sobel filters might serve as an example here.
 Check the `focal()` help page for how to use them in R (this will also be used in the exercises at the end of this chapter).
 
 Terrain processing, the calculation of topographic characteristics such as slope, aspect and flow directions, relies on focal functions.
-`terrain()` can be used to calculate these metrics, although some terrain algorithms, including the Zevenbergen and Thorne method to compute slope, are not implemented in this **raster** function.
+`terrain()` can be used to calculate these metrics, although some terrain algorithms, including the Zevenbergen and Thorne method to compute slope, are not implemented in this **terra** function.
 Many other algorithms --- including curvatures, contributing areas and wetness indices --- are implemented in open source desktop geographic information system (GIS) software.
 Chapter \@ref(gis) shows how to access such GIS functionality from within R.
 
@@ -725,8 +742,7 @@ This is in contrast to focal operations which return a raster object (see previo
 For example, to find the mean elevation for each grain size class (Figure \@ref(fig:cont-raster)), we use the `zonal()` function.
 
 ```{r 04-spatial-operations-43}
-z = zonal(elev, grain, fun = "mean") %>%
-  as.data.frame()
+z = zonal(elev, grain, fun = "mean")
 z
 ```
 
@@ -738,10 +754,13 @@ This returns the statistics\index{statistics} for each category, here the mean a
 The most common global operations are descriptive statistics\index{statistics} for the entire raster dataset such as the minimum or maximum (see Section \@ref(summarizing-raster-objects)).
 Aside from that, global operations are also useful for the computation of distance and weight rasters.
 In the first case, one can calculate the distance from each cell to a specific target cell.
-For example, one might want to compute the distance to the nearest coast (see also `raster::distance()`).
+For example, one might want to compute the distance to the nearest coast (see also `terra::distance()`).
 We might also want to consider topography, that means, we are not only interested in the pure distance but would like also to avoid the crossing of mountain ranges when going to the coast.
 To do so, we can weight the distance with elevation so that each additional altitudinal meter 'prolongs' the Euclidean distance.
 Visibility and viewshed computations also belong to the family of global operations (in the exercises of Chapter \@ref(gis), you will compute a viewshed raster).
+
+<!--jn:toDo-->
+<!-- consider expanding this part -->
 
 ### Map algebra counterparts in vector processing
 
@@ -768,17 +787,22 @@ Frequently, a study area covers more than one scene.
 In these cases we would like to merge the scenes covered by our study area. 
 In the easiest case, we can just merge these scenes, that is put them side by side.
 This is possible with digital elevation data (SRTM, ASTER).
-In the following code chunk we first download the SRTM elevation data for Austria and Switzerland (for the country codes, see the **raster** function `ccodes()`).
+In the following code chunk we first download the SRTM elevation data for Austria and Switzerland (for the country codes, see the **geodata** function `country_codes()`).
 In a second step, we merge the two rasters into one.
 
+<!--jn:toDo-->
+<!-- mention geodata -->
+
 ```{r 04-spatial-operations-44, eval = FALSE}
-aut = getData("alt", country = "AUT", mask = TRUE)
-ch = getData("alt", country = "CHE", mask = TRUE)
+aut = geodata::elevation_30s(country = "AUT", path = tempdir())
+ch = geodata::elevation_30s(country = "CHE", path = tempdir())
 aut_ch = merge(aut, ch)
 ```
 
-**Raster**'s `merge()` command combines two images, and in case they overlap, it uses the value of the first raster.
-You can do exactly the same with `gdalUtils::mosaic_rasters()` which is faster, and therefore recommended if you have to merge a multitude of large rasters stored on disk.
+**Terra**'s `merge()` command combines two images, and in case they overlap, it uses the value of the first raster.
+<!--jn:toDo-->
+<!-- some benchmarks could be needed -->
+<!-- You can do exactly the same with `gdalUtils::mosaic_rasters()` which is faster, and therefore recommended if you have to merge a multitude of large rasters stored on disk. -->
 
 The merging approach is of little use when the overlapping values do not correspond to each other.
 This is frequently the case when you want to combine spectral imagery from scenes that were taken on different dates.
@@ -788,6 +812,8 @@ For instance, we could compute the mean value.
 This might smooth the clear border in the merged result but it will most likely not make it disappear.
 To do so, we need a more advanced approach. 
 Remote sensing scientists frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image.
+<!--jn:toDo-->
+<!-- review the below advice -->
 The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`calcHistMatch()`) and **RStoolbox** (`histMatch()`, `pifMatch()`) provide the corresponding functions.
 For a more detailed introduction on how to use R for remote sensing, we refer the reader to @wegmann_remote_2016.
 
