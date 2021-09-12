@@ -713,7 +713,7 @@ Simple features are, in essence, data frames with a spatial extension.
 
 <!--jn:toDo-->
 <!-- one overall paragraph about raster data model +  -->
-<!-- mention that we are focussing on basic, regular rasters -->
+<!-- mention that we are focusing on basic, regular rasters -->
 
 The geographic raster data model usually consists of a raster header\index{raster!header}
 and a matrix (with rows and columns) representing equally spaced cells (often also called pixels; Figure \@ref(fig:raster-intro-plot):A).^[

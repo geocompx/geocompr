@@ -6,16 +6,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Chapter 3 Attribute data operations | Geocomputation with R</title>
 <meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow">
-<meta name="description" content="Prerequisites This chapter requires the following packages to be installed and attached: library(sf) library(raster) library(dplyr) library(stringr) # for working with strings (pattern matching)...">
+<meta name="description" content="Prerequisites This chapter requires the following packages to be installed and attached: library(sf) library(terra) library(dplyr) library(stringr) # for working with strings (pattern matching)...">
 <meta name="generator" content="bookdown 0.24 with bs4_book()">
 <meta property="og:title" content="Chapter 3 Attribute data operations | Geocomputation with R">
 <meta property="og:type" content="book">
 <meta property="og:url" content="https://geocompr.robinlovelace.net/attr.html">
 <meta property="og:image" content="https://geocompr.robinlovelace.net/images/cover.png">
-<meta property="og:description" content="Prerequisites This chapter requires the following packages to be installed and attached: library(sf) library(raster) library(dplyr) library(stringr) # for working with strings (pattern matching)...">
+<meta property="og:description" content="Prerequisites This chapter requires the following packages to be installed and attached: library(sf) library(terra) library(dplyr) library(stringr) # for working with strings (pattern matching)...">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Chapter 3 Attribute data operations | Geocomputation with R">
-<meta name="twitter:description" content="Prerequisites This chapter requires the following packages to be installed and attached: library(sf) library(raster) library(dplyr) library(stringr) # for working with strings (pattern matching)...">
+<meta name="twitter:description" content="Prerequisites This chapter requires the following packages to be installed and attached: library(sf) library(terra) library(dplyr) library(stringr) # for working with strings (pattern matching)...">
 <meta name="twitter:image" content="https://geocompr.robinlovelace.net/images/cover.png">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
@@ -99,7 +99,7 @@
 </ul>
 <div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster">raster</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/terra/">terra</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://stringr.tidyverse.org">stringr</a></span><span class="op">)</span> <span class="co"># for working with strings (pattern matching)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span>   <span class="co"># for unite() and separate()</span></code></pre></div>
@@ -164,11 +164,11 @@ Thus <strong>sf</strong> enables the full power of R’s data analysis capabilit
 Before using these capabilities it is worth re-capping how to discover the basic properties of vector data objects.
 Let’s start by using base R functions to get a measure of the <code>world</code> dataset:</p>
 <div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/dimensions.html">dim</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span> <span class="co"># it is a 2 dimensional object, with rows and columns</span>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">dim</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span> <span class="co"># it is a 2 dimensional object, with rows and columns</span>
 <span class="co">#&gt; [1] 177  11</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span> <span class="co"># how many rows?</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span> <span class="co"># how many rows?</span>
 <span class="co">#&gt; [1] 177</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">ncol</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span> <span class="co"># how many columns?</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">ncol</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span> <span class="co"># how many columns?</span>
 <span class="co">#&gt; [1] 11</span></code></pre></div>
 <p>Our dataset contains ten non-geographic columns (and one geometry list column) with almost 200 rows representing the world’s countries.
 Extracting the attribute data of an <code>sf</code> object is the same as removing its geometry:</p>
@@ -185,8 +185,8 @@ Tidyverse compatibility is an advantage of <strong>sf</strong> over its predeces
 <h3>
 <span class="header-section-number">3.2.1</span> Vector attribute subsetting<a class="anchor" aria-label="anchor" href="#vector-attribute-subsetting"><i class="fas fa-link"></i></a>
 </h3>
-<p>Base R subsetting functions include <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code>, <code><a href="https://rdrr.io/pkg/raster/man/subset.html">subset()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/replace-vector.html">$</a></code>.
-<strong>dplyr</strong> subsetting functions include <code><a href="https://rdrr.io/pkg/raster/man/select.html">select()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code>, and <code><a href="https://dplyr.tidyverse.org/reference/pull.html">pull()</a></code>.
+<p>Base R subsetting functions include <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code>, <code><a href="https://rdrr.io/pkg/terra/man/subset.html">subset()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/replace-vector.html">$</a></code>.
+<strong>dplyr</strong> subsetting functions include <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code>, and <code><a href="https://dplyr.tidyverse.org/reference/pull.html">pull()</a></code>.
 Both sets of functions preserve the spatial components of attribute data in <code>sf</code> objects.
 </p>
 <p>The <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code> operator can subset both rows and columns.
@@ -210,27 +210,29 @@ This creates a new object, <code>small_countries</code>, containing nations whos
 A more concise command, which omits the intermediary object, generates the same result:</p>
 <div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">small_countries</span> <span class="op">=</span> <span class="va">world</span><span class="op">[</span><span class="va">world</span><span class="op">$</span><span class="va">area_km2</span> <span class="op">&lt;</span> <span class="fl">10000</span>, <span class="op">]</span></code></pre></div>
-<p>The base R function <code><a href="https://rdrr.io/pkg/raster/man/subset.html">subset()</a></code> provides yet another way to achieve the same result:</p>
+<p>The base R function <code><a href="https://rdrr.io/pkg/terra/man/subset.html">subset()</a></code> provides yet another way to achieve the same result:</p>
 <div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">small_countries</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/subset.html">subset</a></span><span class="op">(</span><span class="va">world</span>, <span class="va">area_km2</span> <span class="op">&lt;</span> <span class="fl">10000</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">small_countries</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/subset.html">subset</a></span><span class="op">(</span><span class="va">world</span>, <span class="va">area_km2</span> <span class="op">&lt;</span> <span class="fl">10000</span><span class="op">)</span></code></pre></div>
 <p>Base R functions are mature and widely used.
 However, the more recent <strong>dplyr</strong> approach has several advantages.
 It enables intuitive workflows.
 It is fast, due to its C++ backend.
 This is especially useful when working with big data as well as <strong>dplyr</strong>’s database integration.
-The main <strong>dplyr</strong> subsetting functions are <code><a href="https://rdrr.io/pkg/raster/man/select.html">select()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html">slice()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/pull.html">pull()</a></code>.</p>
+The main <strong>dplyr</strong> subsetting functions are <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/slice.html">slice()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/pull.html">pull()</a></code>.</p>
 <div class="rmdnote">
+<!--jn:toDo-->
+<!-- improve it!! -->
 <p>
-<strong>raster</strong> and <strong>dplyr</strong> packages have a function called <code><a href="https://rdrr.io/pkg/raster/man/select.html">select()</a></code>. When using both packages, the function in the most recently attached package will be used, ‘masking’ the incumbent function. This can generate error messages containing text like: <code>unable to find an inherited method for function ‘select’ for signature ‘“sf”’</code>. To avoid this error message, and prevent ambiguity, we use the long-form function name, prefixed by the package name and two colons (usually omitted from R scripts for concise code): <code><a href="https://dplyr.tidyverse.org/reference/select.html">dplyr::select()</a></code>.
+<strong>raster</strong> and <strong>dplyr</strong> packages have a function called <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code>. When using both packages, the function in the most recently attached package will be used, ‘masking’ the incumbent function. This can generate error messages containing text like: <code>unable to find an inherited method for function ‘select’ for signature ‘“sf”’</code>. To avoid this error message, and prevent ambiguity, we use the long-form function name, prefixed by the package name and two colons (usually omitted from R scripts for concise code): <code><a href="https://dplyr.tidyverse.org/reference/select.html">dplyr::select()</a></code>.
 </p>
 </div>
-<p><code><a href="https://rdrr.io/pkg/raster/man/select.html">select()</a></code> selects columns by name or position.
+<p><code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> selects columns by name or position.
 For example, you could select only two columns, <code>name_long</code> and <code>pop</code>, with the following command (note the sticky <code>geom</code> column remains):</p>
 <div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world1</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">world</span>, <span class="va">name_long</span>, <span class="va">pop</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html">names</a></span><span class="op">(</span><span class="va">world1</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html">names</a></span><span class="op">(</span><span class="va">world1</span><span class="op">)</span>
 <span class="co">#&gt; [1] "name_long" "pop"       "geom"</span></code></pre></div>
-<p><code><a href="https://rdrr.io/pkg/raster/man/select.html">select()</a></code> also allows subsetting of a range of columns with the help of the <code><a href="https://rdrr.io/r/base/Colon.html">:</a></code> operator:</p>
+<p><code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> also allows subsetting of a range of columns with the help of the <code><a href="https://rdrr.io/r/base/Colon.html">:</a></code> operator:</p>
 <div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># all columns between name_long and pop (inclusive)</span>
 <span class="va">world2</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">world</span>, <span class="va">name_long</span><span class="op">:</span><span class="va">pop</span><span class="op">)</span></code></pre></div>
@@ -238,16 +240,16 @@ For example, you could select only two columns, <code>name_long</code> and <code
 <div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># all columns except subregion and area_km2 (inclusive)</span>
 <span class="va">world3</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">world</span>, <span class="op">-</span><span class="va">subregion</span>, <span class="op">-</span><span class="va">area_km2</span><span class="op">)</span></code></pre></div>
-<p>Conveniently, <code><a href="https://rdrr.io/pkg/raster/man/select.html">select()</a></code> lets you subset and rename columns at the same time, for example:</p>
+<p>Conveniently, <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> lets you subset and rename columns at the same time, for example:</p>
 <div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world4</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">world</span>, <span class="va">name_long</span>, population <span class="op">=</span> <span class="va">pop</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html">names</a></span><span class="op">(</span><span class="va">world4</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html">names</a></span><span class="op">(</span><span class="va">world4</span><span class="op">)</span>
 <span class="co">#&gt; [1] "name_long"  "population" "geom"</span></code></pre></div>
 <p>This is more concise than the base R equivalent:</p>
 <div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world5</span> <span class="op">=</span> <span class="va">world</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"name_long"</span>, <span class="st">"pop"</span><span class="op">)</span><span class="op">]</span> <span class="co"># subset columns by name</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html">names</a></span><span class="op">(</span><span class="va">world5</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html">names</a></span><span class="op">(</span><span class="va">world5</span><span class="op">)</span> <span class="op">==</span> <span class="st">"pop"</span><span class="op">]</span> <span class="op">=</span> <span class="st">"population"</span> <span class="co"># rename column manually</span></code></pre></div>
-<p><code><a href="https://rdrr.io/pkg/raster/man/select.html">select()</a></code> also works with ‘helper functions’ for advanced subsetting operations, including <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">contains()</a></code>, <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with()</a></code> and <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">num_range()</a></code> (see the help page with <code><a href="https://rdrr.io/pkg/raster/man/select.html">?select</a></code> for details).</p>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html">names</a></span><span class="op">(</span><span class="va">world5</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html">names</a></span><span class="op">(</span><span class="va">world5</span><span class="op">)</span> <span class="op">==</span> <span class="st">"pop"</span><span class="op">]</span> <span class="op">=</span> <span class="st">"population"</span> <span class="co"># rename column manually</span></code></pre></div>
+<p><code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> also works with ‘helper functions’ for advanced subsetting operations, including <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">contains()</a></code>, <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with()</a></code> and <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">num_range()</a></code> (see the help page with <code><a href="https://dplyr.tidyverse.org/reference/select.html">?select</a></code> for details).</p>
 <p>Most <strong>dplyr</strong> verbs return a data frame.
 To extract a single vector, one has to explicitly use the <code><a href="https://dplyr.tidyverse.org/reference/pull.html">pull()</a></code> command.
 The subsetting operator in base R (see <code>?[</code>), by contrast, tries to return objects in the lowest possible dimension.
@@ -258,7 +260,7 @@ To turn off this behavior, set the <code>drop</code> argument to <code>FALSE</co
 <span class="va">d</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>pop <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, area <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span>
 <span class="co"># return data frame object when selecting a single column</span>
 <span class="va">d</span><span class="op">[</span>, <span class="st">"pop"</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span> <span class="co"># equivalent to d["pop"]</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/select.html">select</a></span><span class="op">(</span><span class="va">d</span>, <span class="va">pop</span><span class="op">)</span>
+<span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">d</span>, <span class="va">pop</span><span class="op">)</span>
 <span class="co"># return a vector when selecting a single column</span>
 <span class="va">d</span><span class="op">[</span>, <span class="st">"pop"</span><span class="op">]</span>
 <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">d</span>, <span class="va">pop</span><span class="op">)</span></code></pre></div>
@@ -270,11 +272,11 @@ Contrastingly, <code><a href="https://dplyr.tidyverse.org/reference/pull.html">p
 <span class="co"># vector objects</span>
 <span class="va">world</span><span class="op">$</span><span class="va">pop</span>
 <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">world</span>, <span class="va">pop</span><span class="op">)</span></code></pre></div>
-<p><code><a href="https://dplyr.tidyverse.org/reference/slice.html">slice()</a></code> is the row-equivalent of <code><a href="https://rdrr.io/pkg/raster/man/select.html">select()</a></code>.
+<p><code><a href="https://dplyr.tidyverse.org/reference/slice.html">slice()</a></code> is the row-equivalent of <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code>.
 The following code chunk, for example, selects the 3<sup>rd</sup> to 5<sup>th</sup> rows:</p>
 <div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html">slice</a></span><span class="op">(</span><span class="va">world</span>, <span class="fl">3</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></code></pre></div>
-<p><code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> is <strong>dplyr</strong>’s equivalent of base R’s <code><a href="https://rdrr.io/pkg/raster/man/subset.html">subset()</a></code> function.
+<p><code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> is <strong>dplyr</strong>’s equivalent of base R’s <code><a href="https://rdrr.io/pkg/terra/man/subset.html">subset()</a></code> function.
 It keeps only rows matching given criteria, e.g., only countries with a very high average of life expectancy:</p>
 <div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Countries with a life expectancy longer than 82 years</span>
@@ -441,7 +443,7 @@ A ‘left join’, which preserves the first dataset, merges <code>world</code> 
 The result is an <code>sf</code> object identical to the original <code>world</code> object but with two new variables (with column indices 11 and 12) on coffee production.
 This can be plotted as a map, as illustrated in Figure <a href="attr.html#fig:coffeemap">3.1</a>, generated with the <code><a href="https://r-spatial.github.io/sf/reference/plot.html">plot()</a></code> function below:</p>
 <div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html">names</a></span><span class="op">(</span><span class="va">world_coffee</span><span class="op">)</span>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/names.html">names</a></span><span class="op">(</span><span class="va">world_coffee</span><span class="op">)</span>
 <span class="co">#&gt;  [1] "iso_a2"                 "name_long"              "continent"             </span>
 <span class="co">#&gt;  [4] "region_un"              "subregion"              "type"                  </span>
 <span class="co">#&gt;  [7] "area_km2"               "pop"                    "lifeExp"               </span>
@@ -475,7 +477,7 @@ In that case an inner join can be used:</p>
 <div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_coffee_inner</span> <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">inner_join</a></span><span class="op">(</span><span class="va">world</span>, <span class="va">coffee_data</span><span class="op">)</span>
 <span class="co">#&gt; Joining, by = "name_long"</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">world_coffee_inner</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">world_coffee_inner</span><span class="op">)</span>
 <span class="co">#&gt; [1] 45</span></code></pre></div>
 <p>Note that the result of <code><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">inner_join()</a></code> has only 45 rows compared with 47 in <code>coffee_data</code>.
 What happened to the remaining rows?
@@ -496,7 +498,7 @@ The following command uses a string matching (regex) function from the <strong>s
   <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_subset.html">str_subset</a></span><span class="op">(</span><span class="va">world</span><span class="op">$</span><span class="va">name_long</span>, <span class="st">"Dem*.+Congo"</span><span class="op">)</span>
 <span class="va">world_coffee_match</span> <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">inner_join</a></span><span class="op">(</span><span class="va">world</span>, <span class="va">coffee_data</span><span class="op">)</span>
 <span class="co">#&gt; Joining, by = "name_long"</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">world_coffee_match</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">world_coffee_match</span><span class="op">)</span>
 <span class="co">#&gt; [1] 46</span></code></pre></div>
 <p>It is also possible to join in the other direction: starting with a non-spatial dataset and adding variables from a simple features object.
 This is demonstrated below, which starts with the <code>coffee_data</code> object and adds variables from the original <code>world</code> dataset.
@@ -567,7 +569,7 @@ This is illustrated below, which outputs the same <code>world</code> object, but
 As mentioned at the outset of the chapter, it can be useful to remove the geometry.
 To do this, you have to explicitly remove it because <code>sf</code> explicitly makes the geometry column sticky.
 This behavior ensures that data frame operations do not accidentally remove the geometry column.
-Hence, an approach such as <code><a href="https://rdrr.io/pkg/raster/man/select.html">select(world, -geom)</a></code> will be unsuccessful and you should instead use <code><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_drop_geometry()</a></code>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
+Hence, an approach such as <code><a href="https://dplyr.tidyverse.org/reference/select.html">select(world, -geom)</a></code> will be unsuccessful and you should instead use <code><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_drop_geometry()</a></code>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 &lt;code&gt;st_geometry(world_st) = NULL&lt;/code&gt; also works to remove the geometry from &lt;code&gt;world&lt;/code&gt;, but overwrites the original object.&lt;/p&gt;"><sup>15</sup></a></p>
 <div class="sourceCode" id="cb97"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_data</span> <span class="op">=</span> <span class="va">world</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_drop_geometry</a></span><span class="op">(</span><span class="op">)</span>
@@ -584,50 +586,48 @@ This section shows how raster objects work by creating them <em>from scratch</em
 Because of their unique structure, subsetting and other operations on raster datasets work in a different way, as demonstrated in Section <a href="attr.html#raster-subsetting">3.3.1</a>.
 </p>
 <p>The following code recreates the raster dataset used in Section <a href="spatial-class.html#raster-classes">2.3.3</a>, the result of which is illustrated in Figure <a href="attr.html#fig:cont-raster">3.2</a>.
-This demonstrates how the <code><a href="https://rdrr.io/pkg/raster/man/raster.html">raster()</a></code> function works to create an example raster named <code>elev</code> (representing elevations).</p>
+This demonstrates how the <code><a href="https://rdrr.io/pkg/terra/man/rast.html">rast()</a></code> function works to create an example raster named <code>elev</code> (representing elevations).</p>
 <div class="sourceCode" id="cb98"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">elev</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span>nrows <span class="op">=</span> <span class="fl">6</span>, ncols <span class="op">=</span> <span class="fl">6</span>, res <span class="op">=</span> <span class="fl">0.5</span>,
-              xmn <span class="op">=</span> <span class="op">-</span><span class="fl">1.5</span>, xmx <span class="op">=</span> <span class="fl">1.5</span>, ymn <span class="op">=</span> <span class="op">-</span><span class="fl">1.5</span>, ymx <span class="op">=</span> <span class="fl">1.5</span>,
-              vals <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">36</span><span class="op">)</span></code></pre></div>
-<p>The result is a raster object with 6 rows and 6 columns (specified by the <code>nrow</code> and <code>ncol</code> arguments), and a minimum and maximum spatial extent in x and y direction (<code>xmn</code>, <code>xmx</code>, <code>ymn</code>, <code>ymax</code>).
+<code class="sourceCode R"><span class="va">elev</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span>nrows <span class="op">=</span> <span class="fl">6</span>, ncols <span class="op">=</span> <span class="fl">6</span>, resolution <span class="op">=</span> <span class="fl">0.5</span>, 
+            xmin <span class="op">=</span> <span class="op">-</span><span class="fl">1.5</span>, xmax <span class="op">=</span> <span class="fl">1.5</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="fl">1.5</span>, ymax <span class="op">=</span> <span class="fl">1.5</span>,
+            vals <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">36</span><span class="op">)</span></code></pre></div>
+<p>The result is a raster object with 6 rows and 6 columns (specified by the <code>nrow</code> and <code>ncol</code> arguments), and a minimum and maximum spatial extent in x and y direction (<code>xmin</code>, <code>xmax</code>, <code>ymin</code>, <code>ymax</code>).
 The <code>vals</code> argument sets the values that each cell contains: numeric data ranging from 1 to 36 in this case.
 Raster objects can also contain categorical values of class <code>logical</code> or <code>factor</code> variables in R.
 The following code creates a raster representing grain sizes (Figure <a href="attr.html#fig:cont-raster">3.2</a>):</p>
 <div class="sourceCode" id="cb99"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">grain_order</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"clay"</span>, <span class="st">"silt"</span>, <span class="st">"sand"</span><span class="op">)</span>
-<span class="va">grain_char</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">grain_order</span>, <span class="fl">36</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">grain_fact</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">grain_char</span>, levels <span class="op">=</span> <span class="va">grain_order</span><span class="op">)</span>
-<span class="va">grain</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span>nrows <span class="op">=</span> <span class="fl">6</span>, ncols <span class="op">=</span> <span class="fl">6</span>, res <span class="op">=</span> <span class="fl">0.5</span>, 
-               xmn <span class="op">=</span> <span class="op">-</span><span class="fl">1.5</span>, xmx <span class="op">=</span> <span class="fl">1.5</span>, ymn <span class="op">=</span> <span class="op">-</span><span class="fl">1.5</span>, ymx <span class="op">=</span> <span class="fl">1.5</span>,
-               vals <span class="op">=</span> <span class="va">grain_fact</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">grain_char</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">grain_order</span>, <span class="fl">36</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="va">grain_fact</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">grain_char</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"clay"</span>, <span class="st">"silt"</span>, <span class="st">"sand"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">grain</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span>nrows <span class="op">=</span> <span class="fl">6</span>, ncols <span class="op">=</span> <span class="fl">6</span>, resolution <span class="op">=</span> <span class="fl">0.5</span>, 
+             xmin <span class="op">=</span> <span class="op">-</span><span class="fl">1.5</span>, xmax <span class="op">=</span> <span class="fl">1.5</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="fl">1.5</span>, ymax <span class="op">=</span> <span class="fl">1.5</span>,
+             vals <span class="op">=</span> <span class="va">grain_fact</span><span class="op">)</span></code></pre></div>
+<!--jn:toDo-->
+<!-- update after spData update to read from files -->
 
 <div class="rmdnote">
-<code>raster</code> objects can contain values of class <code>numeric</code>, <code>integer</code>, <code>logical</code> or <code>factor</code>, but not <code>character</code>.
-To use character values, they must first be converted into an appropriate class, for example using the function <code><a href="https://rdrr.io/r/base/factor.html">factor()</a></code>.
+<code>SpatRaster</code> objects can contain values of class <code>numeric</code>, <code>integer</code>, <code>logical</code> or <code>factor</code>, but not <code>character</code>.
+To use character values, they are first be converted into an appropriate class, for example using the function <code><a href="https://rdrr.io/r/base/factor.html">factor()</a></code>.
 The <code>levels</code> argument was used in the preceding code chunk to create an ordered factor:
 clay &lt; silt &lt; sand in terms of grain size.
 See the Data structures chapter of <span class="citation">Wickham (<a href="references.html#ref-wickham_advanced_2014" role="doc-biblioref">2014</a><a href="references.html#ref-wickham_advanced_2014" role="doc-biblioref">a</a>)</span> for further details on classes.
 </div>
 
-<p><code>raster</code> objects represent categorical variables as integers, so <code>grain[1, 1]</code> returns a number that represents a unique identifier, rather than “clay”, “silt” or “sand”.
-The raster object stores the corresponding look-up table or “Raster Attribute Table” (RAT) as a data frame in a new slot named <code>attributes</code>, which can be viewed with <code><a href="https://rdrr.io/pkg/raster/man/factor.html">ratify(grain)</a></code> (see <code>?ratify()</code> for more information).
-Use the function <code><a href="https://rdrr.io/pkg/raster/man/factor.html">levels()</a></code> for retrieving and adding new factor levels to the attribute table:</p>
-<div class="sourceCode" id="cb100"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/factor.html">levels</a></span><span class="op">(</span><span class="va">grain</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/factor.html">levels</a></span><span class="op">(</span><span class="va">grain</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, wetness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"wet"</span>, <span class="st">"moist"</span>, <span class="st">"dry"</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/factor.html">levels</a></span><span class="op">(</span><span class="va">grain</span><span class="op">)</span>
-<span class="co">#&gt; [[1]]</span>
-<span class="co">#&gt;   ID VALUE wetness</span>
-<span class="co">#&gt; 1  1  clay     wet</span>
-<span class="co">#&gt; 2  2  silt   moist</span>
-<span class="co">#&gt; 3  3  sand     dry</span></code></pre></div>
-<p>This behavior demonstrates that raster cells can only possess one value, an identifier which can be used to look up the attributes in the corresponding attribute table (stored in a slot named <code>attributes</code>).
-This is illustrated by the command below, which returns the grain size and wetness of cell IDs 1, 11 and 35:</p>
-<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/factor.html">factorValues</a></span><span class="op">(</span><span class="va">grain</span>, <span class="va">grain</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">11</span>, <span class="fl">35</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
-<span class="co">#&gt;   VALUE wetness</span>
-<span class="co">#&gt; 1  sand     dry</span>
-<span class="co">#&gt; 2  silt   moist</span>
-<span class="co">#&gt; 3  clay     wet</span></code></pre></div>
+<!--jn:toDo-->
+<!-- fix the next paragraph -->
+<!-- `SpatRaster` objects represent categorical variables as integers, so `grain[1, 1]` returns a number that represents a unique identifier, rather than "clay", "silt" or "sand".  -->
+<!-- The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes`, which can be viewed with `ratify(grain)` (see `?ratify()` for more information). -->
+<!-- Use the function `levels()` for retrieving and adding new factor levels to the attribute table: -->
+<!-- ```{r 03-attribute-operations-56} -->
+<!-- levels(grain)[[1]] = cbind(levels(grain)[[1]], wetness = c("wet", "moist", "dry")) -->
+<!-- levels(grain) -->
+<!-- ``` -->
+<!-- This behavior demonstrates that raster cells can only possess one value, an identifier which can be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`). -->
+<!-- This is illustrated by the command below, which returns the grain size and wetness of cell IDs 1, 11 and 35: -->
+<!-- ```{r 03-attribute-operations-57} -->
+<!-- factorValues(grain, grain[c(1, 11, 35)]) -->
+<!-- ``` -->
+<pre><code>#&gt; Warning in read_stars(file, ...): categorical data values starting at 0 are
+#&gt; shifted with one to start at 1</code></pre>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:cont-raster"></span>
 <img src="03-attribute-operations_files/figure-html/cont-raster-1.png" alt="Raster datasets with numeric (left) and categorical values (right)." width="100%"><p class="caption">
@@ -638,6 +638,8 @@ FIGURE 3.2: Raster datasets with numeric (left) and categorical values (right).
 <h3>
 <span class="header-section-number">3.3.1</span> Raster subsetting<a class="anchor" aria-label="anchor" href="#raster-subsetting"><i class="fas fa-link"></i></a>
 </h3>
+<!--jn:toDo-->
+<!--reread and improve text-->
 <p>Raster subsetting is done with the base R operator <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code>, which accepts a variety of inputs:
 </p>
 <ul>
@@ -651,61 +653,99 @@ If we need a spatial object to subset another or the output is a spatial object,
 Therefore, the latter two options will be shown in the next chapter (see Section <a href="spatial-operations.html#spatial-raster-subsetting">4.3.1</a>).</p>
 <p>The first two subsetting options are demonstrated in the commands below —
 both return the value of the top left pixel in the raster object <code>elev</code> (results not shown):</p>
-<div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># row 1, column 1</span>
 <span class="va">elev</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">]</span>
 <span class="co"># cell ID 1</span>
 <span class="va">elev</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></code></pre></div>
-<p>To extract all values or complete rows, you can use <code><a href="https://rdrr.io/pkg/raster/man/getValues.html">values()</a></code> and <code><a href="https://rdrr.io/pkg/raster/man/getValues.html">getValues()</a></code>.
-For multi-layered raster objects <code>stack</code> or <code>brick</code>, this will return the cell value(s) for each layer.
-For example, <code>stack(elev, grain)[1]</code> returns a matrix with one row and two columns — one for each layer.
-For multi-layer raster objects another way to subset is with <code><a href="https://rdrr.io/pkg/raster/man/subset.html">raster::subset()</a></code>, which extracts layers from a raster stack or brick. The <code><a href="https://rdrr.io/r/base/Extract.html">[[</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/replace-vector.html">$</a></code> operators can also be used:</p>
-<div class="sourceCode" id="cb103"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">r_stack</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/stack.html">stack</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">grain</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html">names</a></span><span class="op">(</span><span class="va">r_stack</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"elev"</span>, <span class="st">"grain"</span><span class="op">)</span>
+<p>To extract all values or complete rows, you can use <code><a href="https://rdrr.io/pkg/terra/man/values.html">values()</a></code>.
+For multi-layered raster objects, this will return the cell value(s) for each layer.
+For example, <code>c(elev, grain)[1]</code> returns a data frame with one row and two columns — one for each layer.
+For multi-layer raster objects another way to subset is with <code><a href="https://rdrr.io/pkg/terra/man/subset.html">terra::subset()</a></code>, which extracts layers from a raster stack or brick. The <code><a href="https://rdrr.io/r/base/Extract.html">[[</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/replace-vector.html">$</a></code> operators can also be used:</p>
+<div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">r_multi</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">grain</span><span class="op">)</span>
 <span class="co"># three ways to extract a layer of a stack</span>
-<span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/subset.html">subset</a></span><span class="op">(</span><span class="va">r_stack</span>, <span class="st">"elev"</span><span class="op">)</span>
-<span class="va">r_stack</span><span class="op">[[</span><span class="st">"elev"</span><span class="op">]</span><span class="op">]</span>
-<span class="va">r_stack</span><span class="op">$</span><span class="va">elev</span></code></pre></div>
+<span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/subset.html">subset</a></span><span class="op">(</span><span class="va">r_multi</span>, <span class="st">"elev"</span><span class="op">)</span>
+<span class="va">r_multi</span><span class="op">[[</span><span class="st">"elev"</span><span class="op">]</span><span class="op">]</span>
+<span class="va">r_multi</span><span class="op">$</span><span class="va">elev</span></code></pre></div>
 <p>Cell values can be modified by overwriting existing values in conjunction with a subsetting operation.
 The following code chunk, for example, sets the upper left cell of <code>elev</code> to 0:</p>
-<div class="sourceCode" id="cb104"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb103"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">elev</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span>
 <span class="va">elev</span><span class="op">[</span><span class="op">]</span>
-<span class="co">#&gt;  [1]  0  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25</span>
-<span class="co">#&gt; [26] 26 27 28 29 30 31 32 33 34 35 36</span></code></pre></div>
-<p>Leaving the square brackets empty is a shortcut version of <code><a href="https://rdrr.io/pkg/raster/man/getValues.html">values()</a></code> for retrieving all values of a raster.
+<span class="co">#&gt;       elev</span>
+<span class="co">#&gt;  [1,]    0</span>
+<span class="co">#&gt;  [2,]    2</span>
+<span class="co">#&gt;  [3,]    3</span>
+<span class="co">#&gt;  [4,]    4</span>
+<span class="co">#&gt;  [5,]    5</span>
+<span class="co">#&gt;  [6,]    6</span>
+<span class="co">#&gt;  [7,]    7</span>
+<span class="co">#&gt;  [8,]    8</span>
+<span class="co">#&gt;  [9,]    9</span>
+<span class="co">#&gt; [10,]   10</span>
+<span class="co">#&gt; [11,]   11</span>
+<span class="co">#&gt; [12,]   12</span>
+<span class="co">#&gt; [13,]   13</span>
+<span class="co">#&gt; [14,]   14</span>
+<span class="co">#&gt; [15,]   15</span>
+<span class="co">#&gt; [16,]   16</span>
+<span class="co">#&gt; [17,]   17</span>
+<span class="co">#&gt; [18,]   18</span>
+<span class="co">#&gt; [19,]   19</span>
+<span class="co">#&gt; [20,]   20</span>
+<span class="co">#&gt; [21,]   21</span>
+<span class="co">#&gt; [22,]   22</span>
+<span class="co">#&gt; [23,]   23</span>
+<span class="co">#&gt; [24,]   24</span>
+<span class="co">#&gt; [25,]   25</span>
+<span class="co">#&gt; [26,]   26</span>
+<span class="co">#&gt; [27,]   27</span>
+<span class="co">#&gt; [28,]   28</span>
+<span class="co">#&gt; [29,]   29</span>
+<span class="co">#&gt; [30,]   30</span>
+<span class="co">#&gt; [31,]   31</span>
+<span class="co">#&gt; [32,]   32</span>
+<span class="co">#&gt; [33,]   33</span>
+<span class="co">#&gt; [34,]   34</span>
+<span class="co">#&gt; [35,]   35</span>
+<span class="co">#&gt; [36,]   36</span></code></pre></div>
+<p>Leaving the square brackets empty is a shortcut version of <code><a href="https://rdrr.io/pkg/terra/man/values.html">values()</a></code> for retrieving all values of a raster.
 Multiple cells can also be modified in this way:</p>
-<div class="sourceCode" id="cb105"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb104"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">elev</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></code></pre></div>
+<!--jn:toDo-->
+<!--show how to add/replace NAs-->
 </div>
 <div id="summarizing-raster-objects" class="section level3">
 <h3>
 <span class="header-section-number">3.3.2</span> Summarizing raster objects<a class="anchor" aria-label="anchor" href="#summarizing-raster-objects"><i class="fas fa-link"></i></a>
 </h3>
-<p><strong>raster</strong> contains functions for extracting descriptive statistics for entire rasters.
+<p><strong>terra</strong> contains functions for extracting descriptive statistics for entire rasters.
 Printing a raster object to the console by typing its name returns minimum and maximum values of a raster.
 <code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary()</a></code> provides common descriptive statistics (minimum, maximum, quartiles and number of <code>NA</code>s).
-Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with <code><a href="https://rdrr.io/pkg/raster/man/cellStats.html">cellStats()</a></code>.
+Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with <code><a href="https://rdrr.io/pkg/terra/man/global.html">global()</a></code>.
 </p>
-<div class="sourceCode" id="cb106"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/cellStats.html">cellStats</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">sd</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb105"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/global.html">global</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">sd</span><span class="op">)</span></code></pre></div>
 
 <div class="rmdnote">
-If you provide the <code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary()</a></code> and <code><a href="https://rdrr.io/pkg/raster/man/cellStats.html">cellStats()</a></code> functions with a raster stack or brick object, they will summarize each layer separately, as can be illustrated by running: <code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary(brick(elev, grain))</a></code>.
+If you provide the <code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/global.html">global()</a></code> functions with a mulit-layered raster object, they will summarize each layer separately, as can be illustrated by running: <code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary(c(elev, grain))</a></code>.
 </div>
 
 <p>Raster value statistics can be visualized in a variety of ways.
-Specific functions such as <code><a href="https://rdrr.io/pkg/raster/man/boxplot.html">boxplot()</a></code>, <code><a href="https://rdrr.io/pkg/raster/man/density.html">density()</a></code>, <code><a href="https://rdrr.io/pkg/raster/man/hist.html">hist()</a></code> and <code><a href="https://rdrr.io/pkg/raster/man/pairs.html">pairs()</a></code> work also with raster objects, as demonstrated in the histogram created with the command below (not shown):</p>
-<div class="sourceCode" id="cb107"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/raster/man/hist.html">hist</a></span><span class="op">(</span><span class="va">elev</span><span class="op">)</span></code></pre></div>
-<p>In case a visualization function does not work with raster objects, one can extract the raster data to be plotted with the help of <code><a href="https://rdrr.io/pkg/raster/man/getValues.html">values()</a></code> or <code><a href="https://rdrr.io/pkg/raster/man/getValues.html">getValues()</a></code>.
+Specific functions such as <code><a href="https://rdrr.io/pkg/terra/man/boxplot.html">boxplot()</a></code>, <code><a href="https://rdrr.io/pkg/terra/man/density.html">density()</a></code>, <code><a href="https://rdrr.io/pkg/terra/man/hist.html">hist()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/pairs.html">pairs()</a></code> work also with raster objects, as demonstrated in the histogram created with the command below (not shown):</p>
+<div class="sourceCode" id="cb106"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/hist.html">hist</a></span><span class="op">(</span><span class="va">elev</span><span class="op">)</span></code></pre></div>
+<p>In case a visualization function does not work with raster objects, one can extract the raster data to be plotted with the help of <code><a href="https://rdrr.io/pkg/terra/man/values.html">values()</a></code>.
 </p>
 <p>Descriptive raster statistics belong to the so-called global raster operations.
 These and other typical raster processing operations are part of the map algebra scheme, which are covered in the next chapter (Section <a href="spatial-operations.html#map-algebra">4.3.2</a>).</p>
+<!--jn:toDo-->
+<!--think about updating the below block, as the select function is not longer a part of terra-->
 <div class="rmdnote">
 <p>
-Some function names clash between packages (e.g., <code><a href="https://rdrr.io/pkg/raster/man/select.html">select()</a></code>, as discussed in a previous note). In addition to not loading packages by referring to functions verbosely (e.g., <code><a href="https://dplyr.tidyverse.org/reference/select.html">dplyr::select()</a></code>), another way to prevent function names clashes is by unloading the offending package with <code><a href="https://rdrr.io/r/base/detach.html">detach()</a></code>. The following command, for example, unloads the <strong>raster</strong> package (this can also be done in the <em>package</em> tab which resides by default in the right-bottom pane in RStudio): <code>detach(“package:raster”, unload = TRUE, force = TRUE)</code>. The <code>force</code> argument makes sure that the package will be detached even if other packages depend on it. This, however, may lead to a restricted usability of packages depending on the detached package, and is therefore not recommended.
+Some function names clash between packages (e.g., <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code>, as discussed in a previous note). In addition to not loading packages by referring to functions verbosely (e.g., <code><a href="https://dplyr.tidyverse.org/reference/select.html">dplyr::select()</a></code>), another way to prevent function names clashes is by unloading the offending package with <code><a href="https://rdrr.io/r/base/detach.html">detach()</a></code>. The following command, for example, unloads the <strong>raster</strong> package (this can also be done in the <em>package</em> tab which resides by default in the right-bottom pane in RStudio): <code>detach(“package:raster”, unload = TRUE, force = TRUE)</code>. The <code>force</code> argument makes sure that the package will be detached even if other packages depend on it. This, however, may lead to a restricted usability of packages depending on the detached package, and is therefore not recommended.
 </p>
 </div>
 </div>
@@ -718,65 +758,46 @@ Some function names clash between packages (e.g., <code><a href="https://rdrr.io
 <p><code>us_states</code> is a spatial object (of class <code>sf</code>), containing geometry and a few attributes (including name, region, area, and population) of states within the contiguous United States.
 <code>us_states_df</code> is a data frame (of class <code>data.frame</code>) containing the name and additional variables (including median income and poverty level, for the years 2010 and 2015) of US states, including Alaska, Hawaii and Puerto Rico.
 The data comes from the United States Census Bureau, and is documented in <code><a href="https://nowosad.github.io/spData/reference/us_states.html">?us_states</a></code> and <code><a href="https://nowosad.github.io/spData/reference/us_states_df.html">?us_states_df</a></code>.</p>
-<!-- Attribute subsetting -->
-<ol style="list-style-type: decimal">
-<li>Create a new object called <code>us_states_name</code> that contains only the <code>NAME</code> column from the <code>us_states</code> object.
-What is the class of the new object and what makes it geographic? <!--why there is a "sf" part? -->
-</li>
-<li>Select columns from the <code>us_states</code> object which contain population data.
+<p>E1. Create a new object called <code>us_states_name</code> that contains only the <code>NAME</code> column from the <code>us_states</code> object.
+What is the class of the new object and what makes it geographic?</p>
+<p>E2. Select columns from the <code>us_states</code> object which contain population data.
 Obtain the same result using a different command (bonus: try to find three ways of obtaining the same result).
-Hint: try to use helper functions, such as <code>contains</code> or <code>starts_with</code> from <strong>dplyr</strong> (see <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">?contains</a></code>).</li>
-<li>Find all states with the following characteristics (bonus find <em>and</em> plot them):
+Hint: try to use helper functions, such as <code>contains</code> or <code>starts_with</code> from <strong>dplyr</strong> (see <code><a href="https://tidyselect.r-lib.org/reference/starts_with.html">?contains</a></code>).</p>
+<p>E3. Find all states with the following characteristics (bonus find <em>and</em> plot them):</p>
 <ul>
 <li>Belong to the Midwest region.</li>
 <li>Belong to the West region, have an area below 250,000 km<sup>2</sup><em>and</em> in 2015 a population greater than 5,000,000 residents (hint: you may need to use the function <code><a href="https://rdrr.io/pkg/units/man/units.html">units::set_units()</a></code> or <code><a href="https://rdrr.io/pkg/terra/man/catalyze.html">as.numeric()</a></code>).</li>
-<li>Belong to the South region, had an area larger than 150,000 km<sup>2</sup> or a total population in 2015 larger than 7,000,000 residents.
-<!-- Attribute aggregation -->
-</li>
+<li>Belong to the South region, had an area larger than 150,000 km<sup>2</sup> or a total population in 2015 larger than 7,000,000 residents.</li>
 </ul>
-</li>
-<li>What was the total population in 2015 in the <code>us_states</code> dataset?
-What was the minimum and maximum total population in 2015?</li>
-<li>How many states are there in each region?</li>
-<li>What was the minimum and maximum total population in 2015 in each region?
-What was the total population in 2015 in each region?
-<!-- Attribute joining -->
-</li>
-<li>Add variables from <code>us_states_df</code> to <code>us_states</code>, and create a new object called <code>us_states_stats</code>.
+<p>E4. What was the total population in 2015 in the <code>us_states</code> dataset?
+What was the minimum and maximum total population in 2015?</p>
+<p>E5. How many states are there in each region?</p>
+<p>E6. What was the minimum and maximum total population in 2015 in each region?
+What was the total population in 2015 in each region?</p>
+<p>E7. Add variables from <code>us_states_df</code> to <code>us_states</code>, and create a new object called <code>us_states_stats</code>.
 What function did you use and why?
 Which variable is the key in both datasets?
-What is the class of the new object?</li>
-<li>
-<code>us_states_df</code> has two more rows than <code>us_states</code>.
-How can you find them? (hint: try to use the <code><a href="https://dplyr.tidyverse.org/reference/filter-joins.html">dplyr::anti_join()</a></code> function)
-<!-- Attribute creation -->
-</li>
-<li>What was the population density in 2015 in each state?
-What was the population density in 2010 in each state?</li>
-<li>How much has population density changed between 2010 and 2015 in each state?
-Calculate the change in percentages and map them.</li>
-<li>Change the columns’ names in <code>us_states</code> to lowercase. (Hint: helper functions - <code><a href="https://rdrr.io/r/base/chartr.html">tolower()</a></code> and <code><a href="https://rdrr.io/r/base/colnames.html">colnames()</a></code> may help.)
-<!-- Mixed exercises -->
-<!-- combination of use of select, mutate, group_by, summarize, etc  -->
-</li>
-<li>Using <code>us_states</code> and <code>us_states_df</code> create a new object called <code>us_states_sel</code>.
+What is the class of the new object?</p>
+<p>E8. <code>us_states_df</code> has two more rows than <code>us_states</code>.
+How can you find them? (hint: try to use the <code><a href="https://dplyr.tidyverse.org/reference/filter-joins.html">dplyr::anti_join()</a></code> function)</p>
+<p>E9. What was the population density in 2015 in each state?
+What was the population density in 2010 in each state?</p>
+<p>E10. How much has population density changed between 2010 and 2015 in each state?
+Calculate the change in percentages and map them.</p>
+<p>E11. Change the columns’ names in <code>us_states</code> to lowercase. (Hint: helper functions - <code><a href="https://rdrr.io/r/base/chartr.html">tolower()</a></code> and <code><a href="https://rdrr.io/r/base/colnames.html">colnames()</a></code> may help.)</p>
+<p>E12. Using <code>us_states</code> and <code>us_states_df</code> create a new object called <code>us_states_sel</code>.
 The new object should have only two variables - <code>median_income_15</code> and <code>geometry</code>.
-Change the name of the <code>median_income_15</code> column to <code>Income</code>.</li>
-<li>Calculate the change in the number of residents living below the poverty level between 2010 and 2015 for each state. (Hint: See ?us_states_df for documentation on the poverty level columns.)
-Bonus: Calculate the change in the <em>percentage</em> of residents living below the poverty level in each state.</li>
-<li>What was the minimum, average and maximum state’s number of people living below the poverty line in 2015 for each region?
-Bonus: What is the region with the largest increase in people living below the poverty line?
-<!-- Raster exercises -->
-</li>
-<li>Create a raster from scratch with nine rows and columns and a resolution of 0.5 decimal degrees (WGS84).
+Change the name of the <code>median_income_15</code> column to <code>Income</code>.</p>
+<p>E13. Calculate the change in the number of residents living below the poverty level between 2010 and 2015 for each state. (Hint: See ?us_states_df for documentation on the poverty level columns.)
+Bonus: Calculate the change in the <em>percentage</em> of residents living below the poverty level in each state.</p>
+<p>E14. What was the minimum, average and maximum state’s number of people living below the poverty line in 2015 for each region?
+Bonus: What is the region with the largest increase in people living below the poverty line?</p>
+<p>E15. Create a raster from scratch with nine rows and columns and a resolution of 0.5 decimal degrees (WGS84).
 Fill it with random numbers.
-Extract the values of the four corner cells.</li>
-<li>What is the most common class of our example raster <code>grain</code> (hint: <code><a href="https://rdrr.io/pkg/raster/man/modal.html">modal()</a></code>)?</li>
-<li>Plot the histogram and the boxplot of the <code><a href="https://rdrr.io/r/utils/data.html">data(dem, package = "spDataLarge")</a></code> raster.
-<!-- 1. Now attach also `data(ndvi, package = "spDataLarge")`.  -->
-<!-- Create a raster stack using `dem` and `ndvi`, and make a `pairs()` plot. -->
-</li>
-</ol>
+Extract the values of the four corner cells.</p>
+<p>E16. What is the most common class of our example raster <code>grain</code> (hint: <code><a href="https://rdrr.io/pkg/terra/man/modal.html">modal()</a></code>)?</p>
+<p>E17. Plot the histogram and the boxplot of the <code><a href="https://rdrr.io/r/utils/data.html">data(dem, package = "spDataLarge")</a></code> raster.</p>
+
 </div>
 </div>
 
@@ -821,7 +842,7 @@ Extract the values of the four corner cells.</li>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-09-11.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-09-12.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

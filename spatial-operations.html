@@ -6,16 +6,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Chapter 4 Spatial data operations | Geocomputation with R</title>
 <meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow">
-<meta name="description" content="Prerequisites This chapter requires the same packages used in Chapter 3: library(sf) library(raster) library(dplyr) library(spData)  4.1 Introduction Spatial operations are a vital part of...">
+<meta name="description" content='Prerequisites This chapter requires the same packages used in Chapter 3: library(sf) library(terra) library(dplyr) library(spData) elev = rast(system.file("raster/elev.tif", package = "spData"))...'>
 <meta name="generator" content="bookdown 0.24 with bs4_book()">
 <meta property="og:title" content="Chapter 4 Spatial data operations | Geocomputation with R">
 <meta property="og:type" content="book">
 <meta property="og:url" content="https://geocompr.robinlovelace.net/spatial-operations.html">
 <meta property="og:image" content="https://geocompr.robinlovelace.net/images/cover.png">
-<meta property="og:description" content="Prerequisites This chapter requires the same packages used in Chapter 3: library(sf) library(raster) library(dplyr) library(spData)  4.1 Introduction Spatial operations are a vital part of...">
+<meta property="og:description" content='Prerequisites This chapter requires the same packages used in Chapter 3: library(sf) library(terra) library(dplyr) library(spData) elev = rast(system.file("raster/elev.tif", package = "spData"))...'>
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Chapter 4 Spatial data operations | Geocomputation with R">
-<meta name="twitter:description" content="Prerequisites This chapter requires the same packages used in Chapter 3: library(sf) library(raster) library(dplyr) library(spData)  4.1 Introduction Spatial operations are a vital part of...">
+<meta name="twitter:description" content='Prerequisites This chapter requires the same packages used in Chapter 3: library(sf) library(terra) library(dplyr) library(spData) elev = rast(system.file("raster/elev.tif", package = "spData"))...'>
 <meta name="twitter:image" content="https://geocompr.robinlovelace.net/images/cover.png">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
@@ -97,11 +97,13 @@
 <ul>
 <li>This chapter requires the same packages used in Chapter <a href="attr.html#attr">3</a>:</li>
 </ul>
-<div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb107"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster">raster</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/terra/">terra</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://nowosad.github.io/spData/">spData</a></span><span class="op">)</span></code></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://nowosad.github.io/spData/">spData</a></span><span class="op">)</span>
+<span class="va">elev</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/elev.tif"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">grain</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/grain.tif"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="introduction-1" class="section level2">
 <h2>
@@ -149,7 +151,7 @@ It is analogous to <em>attribute subsetting</em> (covered in Section <a href="at
 <p>An example of spatial subsetting is provided by the <code>nz</code> and <code>nz_height</code> datasets in <strong>spData</strong>.
 These contain projected data on the 16 main regions and 101 highest points in New Zealand, respectively (Figure <a href="spatial-operations.html#fig:nz-subset">4.1</a>).
 The following code chunk first creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region:</p>
-<div class="sourceCode" id="cb109"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">canterbury</span> <span class="op">=</span> <span class="va">nz</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">Name</span> <span class="op">==</span> <span class="st">"Canterbury"</span><span class="op">)</span>
 <span class="va">canterbury_height</span> <span class="op">=</span> <span class="va">nz_height</span><span class="op">[</span><span class="va">canterbury</span>, <span class="op">]</span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -165,7 +167,7 @@ These determine the type of spatial relationship that features in the target obj
 <em>Intersects</em> is the default spatial subsetting operator, a default that returns <code>TRUE</code> for many types of spatial relations, including <em>touches</em>, <em>crosses</em> and <em>is within</em>.
 These alternative spatial operators can be specified with the <code>op =</code> argument, a third argument that can be passed to the <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code> operator for <code>sf</code> objects.
 This is demonstrated in the following command which returns the opposite of <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects()</a></code>, points that do not intersect with Canterbury (see Section <a href="spatial-operations.html#topological-relations">4.2.2</a>):</p>
-<div class="sourceCode" id="cb110"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb109"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nz_height</span><span class="op">[</span><span class="va">canterbury</span>, , op <span class="op">=</span> <span class="va">st_disjoint</span><span class="op">]</span></code></pre></div>
 
 <div class="rmdnote">
@@ -179,7 +181,7 @@ In this case, you can safely skip to Section <a href="spatial-operations.html#to
 <p>If you’re interested in the details, including other ways of subsetting, read on.
 Another way of doing spatial subsetting uses objects returned by <em>topological operators</em>.
 This is demonstrated in the first command below:</p>
-<div class="sourceCode" id="cb111"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb110"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sel_sgbp</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">nz_height</span>, y <span class="op">=</span> <span class="va">canterbury</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">sel_sgbp</span><span class="op">)</span>
 <span class="co">#&gt; [1] "sgbp" "list"</span>
@@ -196,7 +198,7 @@ Note: the solution involving <code>sgbp</code> objects is more generalisable tho
 </div>
 
 <p>It should be noted that a logical can also be used with <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> as follows (<code>sparse = FALSE</code> is explained in Section <a href="spatial-operations.html#topological-relations">4.2.2</a>):</p>
-<div class="sourceCode" id="cb112"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb111"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">canterbury_height3</span> <span class="op">=</span> <span class="va">nz_height</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.</span>, y <span class="op">=</span> <span class="va">canterbury</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>At this point, there are three versions of <code>canterbury_height</code>, one created with spatial subsetting directly and the other two via intermediary selection objects.
@@ -210,7 +212,7 @@ To explore these objects and spatial subsetting in more detail, see the suppleme
 To understand them, it helps to have some simple test data to work with.
 Figure <a href="spatial-operations.html#fig:relation-objects">4.2</a> contains a polygon (<code>a</code>), a line (<code>l</code>) and some points (<code>p</code>), which are created in the code below.
 </p>
-<div class="sourceCode" id="cb113"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb112"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># create a polygon</span>
 <span class="va">a_poly</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_polygon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="va">a</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="va">a_poly</span><span class="op">)</span>
@@ -231,7 +233,7 @@ FIGURE 4.2: Points (p 1 to 4), line and polygon objects arranged to illustrate t
 The question can be answered by inspection (points 1 and 2 are over or touch the triangle).
 It can also be answered by using a <em>spatial predicate</em> such as <em>do the objects intersect</em>?
 This is implemented in <strong>sf</strong> as follows:</p>
-<div class="sourceCode" id="cb114"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb113"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">a</span><span class="op">)</span>
 <span class="co">#&gt; Sparse geometry binary ..., where the predicate was `intersects'</span>
 <span class="co">#&gt; 1: 1</span>
@@ -243,7 +245,7 @@ the function returns a positive (<code>1</code>) result for the first two points
 What may be unexpected is that the result comes in the form of a list of vectors.
 This <em>sparse matrix</em> output only registers a relation if one exists, reducing the memory requirements of topological operations on multi-feature objects.
 As we saw in the previous section, a <em>dense matrix</em> consisting of <code>TRUE</code> or <code>FALSE</code> values for each combination of features can also be returned when <code>sparse = FALSE</code>:</p>
-<div class="sourceCode" id="cb115"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb114"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">a</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="co">#&gt;       [,1]</span>
 <span class="co">#&gt; [1,]  TRUE</span>
@@ -255,17 +257,17 @@ In this case, only the first two features in <code>p</code> intersect with <code
 The result can be used for subsetting as we saw in Section <a href="spatial-operations.html#spatial-subsetting">4.2.1</a>.</p>
 <p>Note that <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects()</a></code> returns <code>TRUE</code> for the second feature in the object <code>p</code> even though it just touches the polygon <code>a</code>: <em>intersects</em> is a ‘catch-all’ topological operation which identifies many types of spatial relation.</p>
 <p>The opposite of <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects()</a></code> is <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_disjoint()</a></code>, which returns only objects that do not spatially relate in any way to the selecting object (note <code>[, 1]</code> converts the result into a vector):</p>
-<div class="sourceCode" id="cb116"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb115"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_disjoint</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">a</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>
 <span class="co">#&gt; [1] FALSE FALSE  TRUE  TRUE</span></code></pre></div>
 <p><code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_within()</a></code> returns <code>TRUE</code> only for objects that are completely within the selecting object.
 This applies only to the first object, which is inside the triangular polygon, as illustrated below:</p>
-<div class="sourceCode" id="cb117"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb116"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_within</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">a</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>
 <span class="co">#&gt; [1]  TRUE FALSE FALSE FALSE</span></code></pre></div>
 <p>Note that although the first point is <em>within</em> the triangle, it does not <em>touch</em> any part of its border.
 For this reason <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_touches()</a></code> only returns <code>TRUE</code> for the second point:</p>
-<div class="sourceCode" id="cb118"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb117"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_touches</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">a</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>
 <span class="co">#&gt; [1] FALSE  TRUE FALSE FALSE</span></code></pre></div>
 <p>What about features that do not touch, but <em>almost touch</em> the selection object?
@@ -273,7 +275,7 @@ These can be selected using <code><a href="https://r-spatial.github.io/sf/refere
 It can be used to set how close target objects need to be before they are selected.
 Note that although point 4 is one unit of distance from the nearest node of <code>a</code> (at point 2 in Figure <a href="spatial-operations.html#fig:relation-objects">4.2</a>), it is still selected when the distance is set to 0.9.
 This is illustrated in the code chunk below, the second line of which converts the lengthy list output into a <code>logical</code> object:</p>
-<div class="sourceCode" id="cb119"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb118"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sel</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_is_within_distance</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">a</span>, dist <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="co"># can only return a sparse matrix</span>
 <span class="fu"><a href="https://rdrr.io/r/base/lengths.html">lengths</a></span><span class="op">(</span><span class="va">sel</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>
 <span class="co">#&gt; [1]  TRUE  TRUE FALSE  TRUE</span></code></pre></div>
@@ -299,7 +301,7 @@ As with attribute data, joining adds a new column to the target object (the argu
 Imagine you have ten points randomly distributed across the Earth’s surface.
 Of the points that are on land, which countries are they in?
 Random points to demonstrate spatial joining are created as follows:</p>
-<div class="sourceCode" id="cb120"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb119"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">2018</span><span class="op">)</span> <span class="co"># set seed for reproducibility</span>
 <span class="op">(</span><span class="va">bb_world</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html">st_bbox</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span><span class="op">)</span> <span class="co"># the world's bounds</span>
 <span class="co">#&gt;   xmin   ymin   xmax   ymax </span>
@@ -315,9 +317,9 @@ Random points to demonstrate spatial joining are created as follows:</p>
 The <code>random_points</code> object (top left) has no attribute data, while the <code>world</code> (top right) does.
 The spatial join operation is done by <code><a href="https://r-spatial.github.io/sf/reference/st_join.html">st_join()</a></code>, which adds the <code>name_long</code> variable to the points, resulting in <code>random_joined</code> which is illustrated in Figure <a href="spatial-operations.html#fig:spatial-join">4.3</a> (bottom left — see <a href="https://github.com/Robinlovelace/geocompr/blob/main/code/04-spatial-join.R"><code>04-spatial-join.R</code></a>).
 Before creating the joined dataset, we use spatial subsetting to create <code>world_random</code>, which contains only countries that contain random points, to verify the number of country names returned in the joined dataset should be four (see the top right panel of Figure <a href="spatial-operations.html#fig:spatial-join">4.3</a>).</p>
-<div class="sourceCode" id="cb121"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb120"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_random</span> <span class="op">=</span> <span class="va">world</span><span class="op">[</span><span class="va">random_points</span>, <span class="op">]</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">world_random</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">world_random</span><span class="op">)</span>
 <span class="co">#&gt; [1] 4</span>
 <span class="va">random_joined</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_join.html">st_join</a></span><span class="op">(</span><span class="va">random_points</span>, <span class="va">world</span><span class="op">[</span><span class="st">"name_long"</span><span class="op">]</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -342,11 +344,11 @@ In such a case <code><a href="https://r-spatial.github.io/sf/reference/st_join.h
 The datasets <code>cycle_hire</code> and <code>cycle_hire_osm</code>, already attached in the <strong>spData</strong> package, provide a good example.
 Plotting them shows that they are often closely related but they do not touch, as shown in Figure <a href="spatial-operations.html#fig:cycle-hire">4.4</a>, a base version of which is created with the following code below:
 </p>
-<div class="sourceCode" id="cb122"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb121"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">cycle_hire</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">cycle_hire_osm</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span>, pch <span class="op">=</span> <span class="fl">3</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></code></pre></div>
 <p>We can check if any points are the same <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects()</a></code> as shown below:</p>
-<div class="sourceCode" id="cb123"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb122"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_touches</a></span><span class="op">(</span><span class="va">cycle_hire</span>, <span class="va">cycle_hire_osm</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; [1] FALSE</span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -361,7 +363,7 @@ This is when a non-overlapping join is needed.
 The simplest method is to use the topological operator <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_is_within_distance()</a></code> shown in Section <a href="spatial-operations.html#topological-relations">4.2.2</a>, using a threshold distance of 20 m.
 Note that, before performing the relation, both objects are transformed into a projected CRS.
 These projected objects are created below (note the affix <code>_P</code>, short for projected):</p>
-<div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb123"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cycle_hire_P</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">cycle_hire</span>, <span class="fl">27700</span><span class="op">)</span>
 <span class="va">cycle_hire_osm_P</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">cycle_hire_osm</span>, <span class="fl">27700</span><span class="op">)</span>
 <span class="va">sel</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_is_within_distance</a></span><span class="op">(</span><span class="va">cycle_hire_P</span>, <span class="va">cycle_hire_osm_P</span>, dist <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>
@@ -371,24 +373,24 @@ These projected objects are created below (note the affix <code>_P</code>, short
 <p>This shows that there are 438 points in the target object <code>cycle_hire_P</code> within the threshold distance of <code>cycle_hire_osm_P</code>.
 How to retrieve the <em>values</em> associated with the respective <code>cycle_hire_osm_P</code> points?
 The solution is again with <code><a href="https://r-spatial.github.io/sf/reference/st_join.html">st_join()</a></code>, but with an addition <code>dist</code> argument (set to 20 m below):</p>
-<div class="sourceCode" id="cb125"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_join.html">st_join</a></span><span class="op">(</span><span class="va">cycle_hire_P</span>, <span class="va">cycle_hire_osm_P</span>,
             join <span class="op">=</span> <span class="va">st_is_within_distance</span>, dist <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">cycle_hire</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">cycle_hire</span><span class="op">)</span>
 <span class="co">#&gt; [1] 742</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span>
 <span class="co">#&gt; [1] 762</span></code></pre></div>
 <p>Note that the number of rows in the joined result is greater than the target.
 This is because some cycle hire stations in <code>cycle_hire_P</code> have multiple matches in <code>cycle_hire_osm_P</code>.
 To aggregate the values for the overlapping points and return the mean, we can use the aggregation methods learned in Chapter <a href="attr.html#attr">3</a>, resulting in an object with the same number of rows as the target:</p>
-<div class="sourceCode" id="cb126"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb125"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">z</span> <span class="op">=</span> <span class="va">z</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span><span class="op">(</span>capacity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html">mean</a></span><span class="op">(</span><span class="va">capacity</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">cycle_hire</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">cycle_hire</span><span class="op">)</span>
 <span class="co">#&gt; [1] TRUE</span></code></pre></div>
 <p>The capacity of nearby stations can be verified by comparing a plot of the capacity of the source <code>cycle_hire_osm</code> data with the results in this new object (plots not shown):</p>
-<div class="sourceCode" id="cb127"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb126"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/plot.html">plot</a></span><span class="op">(</span><span class="va">cycle_hire_osm</span><span class="op">[</span><span class="st">"capacity"</span><span class="op">]</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/plot.html">plot</a></span><span class="op">(</span><span class="va">z</span><span class="op">[</span><span class="st">"capacity"</span><span class="op">]</span><span class="op">)</span></code></pre></div>
 <p>The result of this join has used a spatial operation to change the attribute data associated with simple features; the geometry associated with each feature has remained unchanged.</p>
@@ -405,7 +407,7 @@ This section demonstrates how the same functions work using spatial grouping var
 <p>Returning to the example of New Zealand, imagine you want to find out the average height of high points in each region.
 This is a good example of spatial aggregation: it is the geometry of the source (<code>y</code> or <code>nz</code> in this case) that defines how values in the target object (<code>x</code> or <code>nz_height</code>) are grouped.
 This is illustrated using the base <code><a href="https://r-spatial.github.io/sf/reference/aggregate.sf.html">aggregate()</a></code> function below:</p>
-<div class="sourceCode" id="cb128"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb127"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nz_avheight</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/aggregate.sf.html">aggregate</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">nz_height</span>, by <span class="op">=</span> <span class="va">nz</span>, FUN <span class="op">=</span> <span class="va">mean</span><span class="op">)</span></code></pre></div>
 <p>The result of the previous command is an <code>sf</code> object with the same geometry as the (spatial) aggregating object (<code>nz</code>).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 This can be verified with &lt;code&gt;identical(st_geometry(nz), st_geometry(nz_avheight))&lt;/code&gt;.&lt;/p&gt;"><sup>16</sup></a>
@@ -417,7 +419,7 @@ The same result can also be generated using the ‘tidy’ functions <code><a hr
 FIGURE 4.5: Average height of the top 101 high points across the regions of New Zealand.
 </p>
 </div>
-<div class="sourceCode" id="cb129"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb128"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nz_avheight2</span> <span class="op">=</span> <span class="va">nz</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_join.html">st_join</a></span><span class="op">(</span><span class="va">nz_height</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">Name</span><span class="op">)</span> <span class="op">%&gt;%</span>
@@ -445,7 +447,7 @@ How can we transfer the values of the underlying nine spatial polygons into the 
 In this case values from the <code>incongruent</code> object are allocated to the <code>aggregating_zones</code> in proportion to area; the larger the spatial intersection between input and output features, the larger the corresponding value.
 For instance, if one intersection of <code>incongruent</code> and <code>aggregating_zones</code> is 1.5 km<sup>2</sup> but the whole incongruent polygon in question has 2 km<sup>2</sup> and a total income of 4 million Euros, then the target aggregating zone will obtain three quarters of the income, in this case 3 million Euros.
 This is implemented in <code><a href="https://r-spatial.github.io/sf/reference/interpolate_aw.html">st_interpolate_aw()</a></code>, as demonstrated in the code chunk below.</p>
-<div class="sourceCode" id="cb130"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb129"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">agg_aw</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/interpolate_aw.html">st_interpolate_aw</a></span><span class="op">(</span><span class="va">incongruent</span><span class="op">[</span>, <span class="st">"value"</span><span class="op">]</span>, <span class="va">aggregating_zones</span>,
                            extensive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="co">#&gt; Warning in st_interpolate_aw.sf(incongruent[, "value"], aggregating_zones, :</span>
@@ -466,7 +468,7 @@ To do so, one would only have to set the <code>extensive</code> parameter to <co
 The distance between two objects is calculated with the <code><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance()</a></code> function.
 This is illustrated in the code chunk below, which finds the distance between the highest point in New Zealand and the geographic centroid of the Canterbury region, created in Section <a href="spatial-operations.html#spatial-subsetting">4.2.1</a>:
 </p>
-<div class="sourceCode" id="cb131"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb130"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">nz_heighest</span> <span class="op">=</span> <span class="va">nz_height</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/top_n.html">top_n</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span>, wt <span class="op">=</span> <span class="va">elevation</span><span class="op">)</span>
 <span class="va">canterbury_centroid</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid</a></span><span class="op">(</span><span class="va">canterbury</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">nz_heighest</span>, <span class="va">canterbury_centroid</span><span class="op">)</span>
@@ -480,7 +482,7 @@ This is illustrated in the code chunk below, which finds the distance between th
 </ul>
 <p>This second feature hints at another useful feature of <code><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance()</a></code>, its ability to return <em>distance matrices</em> between all combinations of features in objects <code>x</code> and <code>y</code>.
 This is illustrated in the command below, which finds the distances between the first three features in <code>nz_height</code> and the Otago and Canterbury regions of New Zealand represented by the object <code>co</code>.</p>
-<div class="sourceCode" id="cb132"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb131"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">co</span> <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">nz</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"Canter|Otag"</span>, <span class="va">Name</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">nz_height</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span>, <span class="va">co</span><span class="op">)</span>
 <span class="co">#&gt; Units: [m]</span>
@@ -491,7 +493,7 @@ This is illustrated in the command below, which finds the distances between the 
 <p>Note that the distance between the second and third features in <code>nz_height</code> and the second feature in <code>co</code> is zero.
 This demonstrates the fact that distances between points and polygons refer to the distance to <em>any part of the polygon</em>:
 The second and third points in <code>nz_height</code> are <em>in</em> Otago, which can be verified by plotting them (result not shown):</p>
-<div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb132"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">co</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">nz_height</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 </div>
@@ -508,25 +510,66 @@ For the reader’s convenience, these datasets can be also found in the <strong>
 </h3>
 <p>The previous chapter (Section <a href="attr.html#manipulating-raster-objects">3.3</a>) demonstrated how to retrieve values associated with specific cell IDs or row and column combinations.
 Raster objects can also be extracted by location (coordinates) and other spatial objects.
-To use coordinates for subsetting, one can ‘translate’ the coordinates into a cell ID with the <strong>raster</strong> function <code><a href="https://rdrr.io/pkg/raster/man/cellFrom.html">cellFromXY()</a></code>.
-An alternative is to use <code><a href="https://rdrr.io/pkg/raster/man/extract.html">raster::extract()</a></code> (be careful, there is also a function called <code><a href="https://rdrr.io/pkg/raster/man/extract.html">extract()</a></code> in the <strong>tidyverse</strong>) to extract values.
+To use coordinates for subsetting, one can ‘translate’ the coordinates into a cell ID with the <strong>terra</strong> function <code><a href="https://rdrr.io/pkg/terra/man/xyCellFrom.html">cellFromXY()</a></code>.
+An alternative is to use <code><a href="https://rdrr.io/pkg/terra/man/extract.html">terra::extract()</a></code> (be careful, there is also a function called <code><a href="https://rdrr.io/pkg/terra/man/extract.html">extract()</a></code> in the <strong>tidyverse</strong>) to extract values.
 Both methods are demonstrated below to find the value of the cell that covers a point located 0.1 units from the origin.
 
 </p>
-<div class="sourceCode" id="cb134"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">id</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/cellFrom.html">cellFromXY</a></span><span class="op">(</span><span class="va">elev</span>, xy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span>
+<div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">id</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/xyCellFrom.html">cellFromXY</a></span><span class="op">(</span><span class="va">elev</span>, xy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span>
 <span class="va">elev</span><span class="op">[</span><span class="va">id</span><span class="op">]</span>
 <span class="co"># the same as</span>
-<span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/extract.html">extract</a></span><span class="op">(</span><span class="va">elev</span>, <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">0.1</span>, y <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>It is convenient that both functions also accept objects of class <code>Spatial* Objects</code>.
-Raster objects can also be subset with another raster object, as illustrated in Figure <a href="spatial-operations.html#fig:raster-subset">4.7</a> (left panel) and demonstrated in the code chunk below:</p>
-<div class="sourceCode" id="cb135"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">clip</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span>xmn <span class="op">=</span> <span class="fl">0.9</span>, xmx <span class="op">=</span> <span class="fl">1.8</span>, ymn <span class="op">=</span> <span class="op">-</span><span class="fl">0.45</span>, ymx <span class="op">=</span> <span class="fl">0.45</span>,
-              res <span class="op">=</span> <span class="fl">0.3</span>, vals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">9</span><span class="op">)</span><span class="op">)</span>
+<span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">elev</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.1</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<!--jn:toDo-->
+<!-- to update -->
+<!-- It is convenient that both functions also accept objects of class `Spatial* Objects`. -->
+<p>Raster objects can also be subset with another raster object, as illustrated in Figure <a href="spatial-operations.html#fig:raster-subset">4.7</a> (left panel) and demonstrated in the code chunk below:</p>
+<!--jn:toDo-->
+<!--https://github.com/rspatial/terra/issues/325 - to update -->
+<!--the same applies to the rest of this section!!!-->
+<div class="sourceCode" id="cb134"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">clip</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="fl">0.9</span>, xmax <span class="op">=</span> <span class="fl">1.8</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="fl">0.45</span>, ymax <span class="op">=</span> <span class="fl">0.45</span>,
+            resolution <span class="op">=</span> <span class="fl">0.3</span>, vals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">9</span><span class="op">)</span><span class="op">)</span>
 <span class="va">elev</span><span class="op">[</span><span class="va">clip</span><span class="op">]</span>
-<span class="co">#&gt; [1] 18 24</span>
+<span class="co">#&gt;    elev</span>
+<span class="co">#&gt; 1     1</span>
+<span class="co">#&gt; 2     2</span>
+<span class="co">#&gt; 3     3</span>
+<span class="co">#&gt; 4     4</span>
+<span class="co">#&gt; 5     5</span>
+<span class="co">#&gt; 6     6</span>
+<span class="co">#&gt; 7     7</span>
+<span class="co">#&gt; 8     8</span>
+<span class="co">#&gt; 9     9</span>
+<span class="co">#&gt; 10   10</span>
+<span class="co">#&gt; 11   11</span>
+<span class="co">#&gt; 12   12</span>
+<span class="co">#&gt; 13   13</span>
+<span class="co">#&gt; 14   14</span>
+<span class="co">#&gt; 15   15</span>
+<span class="co">#&gt; 16   16</span>
+<span class="co">#&gt; 17   17</span>
+<span class="co">#&gt; 18   18</span>
+<span class="co">#&gt; 19   19</span>
+<span class="co">#&gt; 20   20</span>
+<span class="co">#&gt; 21   21</span>
+<span class="co">#&gt; 22   22</span>
+<span class="co">#&gt; 23   23</span>
+<span class="co">#&gt; 24   24</span>
+<span class="co">#&gt; 25   25</span>
+<span class="co">#&gt; 26   26</span>
+<span class="co">#&gt; 27   27</span>
+<span class="co">#&gt; 28   28</span>
+<span class="co">#&gt; 29   29</span>
+<span class="co">#&gt; 30   30</span>
+<span class="co">#&gt; 31   31</span>
+<span class="co">#&gt; 32   32</span>
+<span class="co">#&gt; 33   33</span>
+<span class="co">#&gt; 34   34</span>
+<span class="co">#&gt; 35   35</span>
+<span class="co">#&gt; 36   36</span>
 <span class="co"># we can also use extract</span>
-<span class="co"># extract(elev, extent(clip))</span></code></pre></div>
+<span class="co"># terra::extract(elev, ext(clip))</span></code></pre></div>
 <p>Basically, this amounts to retrieving the values of the first raster (here: <code>elev</code>) falling within the extent of a second raster (here: <code>clip</code>).</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:raster-subset"></span>
@@ -539,23 +582,22 @@ To do this, we can use again the <code><a href="https://rdrr.io/r/base/Extract.h
 To illustrate this, we retrieve the first two cells of <code>elev</code> as an individual raster object.
 As mentioned in Section <a href="attr.html#manipulating-raster-objects">3.3</a>, the <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code> operator accepts various inputs to subset rasters and returns a raster object when <code>drop = FALSE</code>.
 The code chunk below subsets the <code>elev</code> raster by cell ID and row-column index with identical results: the first two cells on the top row (only the first 2 lines of the output is shown):</p>
-<div class="sourceCode" id="cb136"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb135"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">elev</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>    <span class="co"># spatial subsetting with cell IDs</span>
 <span class="va">elev</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span> <span class="co"># spatial subsetting by row,column indices</span>
 <span class="co">#&gt; class       : RasterLayer </span>
 <span class="co">#&gt; dimensions  : 1, 2, 2  (nrow, ncol, ncell)</span>
 <span class="co">#&gt; ...</span></code></pre></div>
 <p>Another common use case of spatial subsetting is when a raster with <code>logical</code> (or <code>NA</code>) values is used to mask another raster with the same extent and resolution, as illustrated in Figure <a href="spatial-operations.html#fig:raster-subset">4.7</a>, middle and right panel.
-In this case, the <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code>, <code><a href="https://rdrr.io/pkg/raster/man/mask.html">mask()</a></code> and <code><a href="https://rdrr.io/pkg/raster/man/overlay.html">overlay()</a></code> functions can be used (results not shown):</p>
-<div class="sourceCode" id="cb137"><pre class="downlit sourceCode r">
+In this case, the <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/mask.html">mask()</a></code> functions can be used (results not shown):</p>
+<div class="sourceCode" id="cb136"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># create raster mask</span>
 <span class="va">rmask</span> <span class="op">=</span> <span class="va">elev</span> 
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/getValues.html">values</a></span><span class="op">(</span><span class="va">rmask</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">36</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/values.html">values</a></span><span class="op">(</span><span class="va">rmask</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">36</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="co"># spatial subsetting</span>
 <span class="va">elev</span><span class="op">[</span><span class="va">rmask</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>           <span class="co"># with [ operator</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/mask.html">mask</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">rmask</span><span class="op">)</span>                   <span class="co"># with mask()</span>
-<span class="fu"><a href="https://rdrr.io/pkg/raster/man/overlay.html">overlay</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">rmask</span>, fun <span class="op">=</span> <span class="st">"max"</span><span class="op">)</span>   <span class="co"># with overlay</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/mask.html">mask</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">rmask</span><span class="op">)</span>                   <span class="co"># with mask()</span></code></pre></div>
 <p>In the code chunk above, we have created a mask object called <code>rmask</code> with values randomly assigned to <code>NA</code> and <code>TRUE</code>.
 Next, we want to keep those values of <code>elev</code> which are <code>TRUE</code> in <code>rmask</code>.
 In other words, we want to mask <code>elev</code> with <code>rmask</code>.
@@ -573,9 +615,7 @@ To derive the coordinate of a specific cell, we have to calculate it using its m
 For the processing, however, the geographic position of a cell is barely relevant as long as we make sure that the cell position is still the same after the processing (one-to-one locational correspondence).
 Additionally, if two or more raster datasets share the same extent, projection and resolution, one could treat them as matrices for the processing.
 This is exactly what map algebra is doing in R.
-First, the <strong>raster</strong> package checks the headers of the rasters on which to perform any algebraic operation, and only if they are correspondent to each other, the processing goes on.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
-Map algebra operations are also possible with headerless rasters; in this case the user has to make sure that in fact there exists a one-to-one locational correspondence.
-An example showing how to import a headerless raster into R is provided in a post at &lt;a href="https://stat.ethz.ch/pipermail/r-sig-geo/2013-May/018278.html" class="uri"&gt;https://stat.ethz.ch/pipermail/r-sig-geo/2013-May/018278.html&lt;/a&gt;.&lt;/p&gt;'><sup>17</sup></a>
+First, the <strong>terra</strong> package checks the headers of the rasters on which to perform any algebraic operation, and only if they are correspondent to each other, the processing goes on.
 And secondly, map algebra retains the so-called one-to-one locational correspondence.
 This is where it substantially differs from matrix algebra which changes positions when for example multiplying or dividing matrices.</p>
 <p>Map algebra (or cartographic modeling) divides raster operations into four subclasses <span class="citation">(Tomlin <a href="references.html#ref-tomlin_geographic_1990" role="doc-biblioref">1990</a>)</span>, with each working on one or several grids simultaneously:</p>
@@ -592,7 +632,7 @@ Most often the output cell value is the result of a 3 x 3 input cell block.</li>
 </ol>
 <p>This typology classifies map algebra operations by the number/shape of cells used for each pixel processing step.
 For the sake of completeness, we should mention that raster operations can also be classified by discipline such as terrain, hydrological analysis or image classification.
-The following sections explain how each type of map algebra operations can be used, with reference to worked examples (also see <code>vignette("Raster")</code> for a technical description of map algebra).</p>
+The following sections explain how each type of map algebra operations can be used, with reference to worked examples.</p>
 </div>
 <div id="local-operations" class="section level3">
 <h3>
@@ -601,23 +641,34 @@ The following sections explain how each type of map algebra operations can be us
 <p>
 <strong>Local</strong> operations comprise all cell-by-cell operations in one or several layers.
 A good example is the classification of intervals of numeric values into groups such as grouping a digital elevation model into low (class 1), middle (class 2) and high elevations (class 3).
-Using the <code><a href="https://rdrr.io/pkg/raster/man/reclassify.html">reclassify()</a></code> command, we need first to construct a reclassification matrix, where the first column corresponds to the lower and the second column to the upper end of the class.
-The third column represents the new value for the specified ranges in column one and two.
-Here, we assign the raster values in the ranges 0–12, 12–24 and 24–36 are <em>reclassified</em> to take values 1, 2 and 3, respectively.</p>
-<div class="sourceCode" id="cb138"><pre class="downlit sourceCode r">
+Using the <code><a href="https://rdrr.io/pkg/terra/man/classify.html">classify()</a></code> command, we need first to construct a reclassification matrix, where the first column corresponds to the lower and the second column to the upper end of the class.
+The third column represents the new value for the specified ranges in column one and two.</p>
+<div class="sourceCode" id="cb137"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">rcl</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">12</span>, <span class="fl">1</span>, <span class="fl">12</span>, <span class="fl">24</span>, <span class="fl">2</span>, <span class="fl">24</span>, <span class="fl">36</span>, <span class="fl">3</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">3</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">recl</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/reclassify.html">reclassify</a></span><span class="op">(</span><span class="va">elev</span>, rcl <span class="op">=</span> <span class="va">rcl</span><span class="op">)</span></code></pre></div>
+<span class="va">rcl</span>
+<span class="co">#&gt;      [,1] [,2] [,3]</span>
+<span class="co">#&gt; [1,]    0   12    1</span>
+<span class="co">#&gt; [2,]   12   24    2</span>
+<span class="co">#&gt; [3,]   24   36    3</span></code></pre></div>
+<p>Here, we assign the raster values in the ranges 0–12, 12–24 and 24–36 are <em>reclassified</em> to take values 1, 2 and 3, respectively.</p>
+<div class="sourceCode" id="cb138"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">recl</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/classify.html">classify</a></span><span class="op">(</span><span class="va">elev</span>, rcl <span class="op">=</span> <span class="va">rcl</span><span class="op">)</span></code></pre></div>
 <p>We will perform several reclassifactions in Chapter <a href="location.html#location">13</a>.</p>
 <p>Raster algebra is another classical use case of local operations.
 This includes adding, subtracting and squaring two rasters.
 Raster algebra also allows logical operations such as finding all raster cells that are greater than a specific value (5 in our example below).
-The <strong>raster</strong> package supports all these operations and more, as described in <code>vignette("Raster")</code> and demonstrated below (results not shown):</p>
+The <strong>terra</strong> package supports all these operations and more, as demonstrated below (results not shown):</p>
+<!--jn:toDo-->
+<!--consider describing the below examples-->
+<!--and maybe add a figure-->
 <div class="sourceCode" id="cb139"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">elev</span> <span class="op">+</span> <span class="va">elev</span>
 <span class="va">elev</span><span class="op">^</span><span class="fl">2</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/math.html">log</a></span><span class="op">(</span><span class="va">elev</span><span class="op">)</span>
 <span class="va">elev</span> <span class="op">&gt;</span> <span class="fl">5</span></code></pre></div>
-<p>Instead of arithmetic operators, one can also use the <code><a href="https://rdrr.io/pkg/raster/man/calc.html">calc()</a></code> and <code><a href="https://rdrr.io/pkg/raster/man/overlay.html">overlay()</a></code> functions.
+<!--jn:toDo-->
+<!-- check if we are describing app and lapp somewhere -->
+<p>Instead of arithmetic operators, one can also use the <code><a href="https://rdrr.io/pkg/terra/man/app.html">app()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/lapp.html">lapp()</a></code> functions.
 These functions are more efficient, hence, they are preferable in the presence of large raster datasets.
 Additionally, they allow you to directly store an output file.</p>
 <p>The calculation of the normalized difference vegetation index (NDVI) is a well-known local (pixel-by-pixel) raster operation.
@@ -629,10 +680,12 @@ Vegetation absorbs light heavily in the visible light spectrum, and especially i
 NDVI&amp;= \frac{\text{NIR} - \text{Red}}{\text{NIR} + \text{Red}}\\
 \end{split}
 \]</span></p>
+<!--jn:toDo-->
+<!--add NDVI example!!-->
 <p>Predictive mapping is another interesting application of local raster operations.
 The response variable corresponds to measured or observed points in space, for example, species richness, the presence of landslides, tree disease or crop yield.
 Consequently, we can easily retrieve space- or airborne predictor variables from various rasters (elevation, pH, precipitation, temperature, landcover, soil class, etc.).
-Subsequently, we model our response as a function of our predictors using <code>lm</code>, <code>glm</code>, <code>gam</code> or a machine-learning technique.
+Subsequently, we model our response as a function of our predictors using <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code>, <code><a href="https://rdrr.io/r/stats/glm.html">glm()</a></code>, <code>gam()</code> or a machine-learning technique.
 Spatial predictions on raster objects can therefore be made by applying estimated coefficients to the predictor raster values, and summing the output raster values (see Chapter <a href="eco.html#eco">14</a>).</p>
 </div>
 <div id="focal-operations" class="section level3">
@@ -644,12 +697,14 @@ While local functions operate on one cell, though possibly from multiple layers,
 The neighborhood (also named kernel, filter or moving window) under consideration is typically of size 3-by-3 cells (that is the central cell and its eight surrounding neighbors), but can take on any other (not necessarily rectangular) shape as defined by the user.
 A focal operation applies an aggregation function to all cells within the specified neighborhood, uses the corresponding output as the new value for the the central cell, and moves on to the next central cell (Figure <a href="spatial-operations.html#fig:focal-example">4.8</a>).
 Other names for this operation are spatial filtering and convolution <span class="citation">(Burrough, McDonnell, and Lloyd <a href="references.html#ref-burrough_principles_2015" role="doc-biblioref">2015</a>)</span>.</p>
-<p>In R, we can use the <code><a href="https://rdrr.io/pkg/raster/man/focal.html">focal()</a></code> function to perform spatial filtering.
+<p>In R, we can use the <code><a href="https://rdrr.io/pkg/terra/man/focal.html">focal()</a></code> function to perform spatial filtering.
 We define the shape of the moving window with a <code>matrix</code> whose values correspond to weights (see <code>w</code> parameter in the code chunk below).
 Secondly, the <code>fun</code> parameter lets us specify the function we wish to apply to this neighborhood.
 Here, we choose the minimum, but any other summary function, including <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code>, <code><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html">mean()</a></code>, or <code><a href="https://rdrr.io/r/stats/cor.html">var()</a></code> can be used.</p>
 <div class="sourceCode" id="cb140"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">r_focal</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/focal.html">focal</a></span><span class="op">(</span><span class="va">elev</span>, w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fl">1</span>, nrow <span class="op">=</span> <span class="fl">3</span>, ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, fun <span class="op">=</span> <span class="va">min</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">r_focal</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/focal.html">focal</a></span><span class="op">(</span><span class="va">elev</span>, w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fl">1</span>, nrow <span class="op">=</span> <span class="fl">3</span>, ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, fun <span class="op">=</span> <span class="va">min</span><span class="op">)</span></code></pre></div>
+<!--jn:toDo-->
+<!-- , na.rm=TRUE vs , na.rm=FALSE -->
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:focal-example"></span>
 <img src="figures/04_focal_example.png" alt="Input raster (left) and resulting output raster (right) due to a focal operation - finding the minimum value in 3-by-3 moving windows." width="100%"><p class="caption">
@@ -664,9 +719,9 @@ Low-pass or smoothing filters use the mean function to remove extremes.
 In the case of categorical data, we can replace the mean with the mode, which is the most common value.
 By contrast, high-pass filters accentuate features.
 The line detection Laplace and Sobel filters might serve as an example here.
-Check the <code><a href="https://rdrr.io/pkg/raster/man/focal.html">focal()</a></code> help page for how to use them in R (this will also be used in the exercises at the end of this chapter).</p>
+Check the <code><a href="https://rdrr.io/pkg/terra/man/focal.html">focal()</a></code> help page for how to use them in R (this will also be used in the exercises at the end of this chapter).</p>
 <p>Terrain processing, the calculation of topographic characteristics such as slope, aspect and flow directions, relies on focal functions.
-<code><a href="https://rdrr.io/pkg/raster/man/terrain.html">terrain()</a></code> can be used to calculate these metrics, although some terrain algorithms, including the Zevenbergen and Thorne method to compute slope, are not implemented in this <strong>raster</strong> function.
+<code><a href="https://rdrr.io/pkg/terra/man/terrain.html">terrain()</a></code> can be used to calculate these metrics, although some terrain algorithms, including the Zevenbergen and Thorne method to compute slope, are not implemented in this <strong>terra</strong> function.
 Many other algorithms — including curvatures, contributing areas and wetness indices — are implemented in open source desktop geographic information system (GIS) software.
 Chapter <a href="gis.html#gis">9</a> shows how to access such GIS functionality from within R.</p>
 </div>
@@ -681,15 +736,14 @@ Consequently, the raster cells defining the zonal filter do not necessarily have
 Our grain size raster is a good example (right panel of Figure <a href="attr.html#fig:cont-raster">3.2</a>) because the different grain sizes are spread in an irregular fashion throughout the raster.
 Finally, the result of a zonal operation is a summary table grouped by zone which is why this operation is also known as <em>zonal statistics</em> in the GIS world.
 This is in contrast to focal operations which return a raster object (see previous Section).</p>
-<p>For example, to find the mean elevation for each grain size class (Figure <a href="attr.html#fig:cont-raster">3.2</a>), we use the <code><a href="https://rdrr.io/pkg/raster/man/zonal.html">zonal()</a></code> function.</p>
+<p>For example, to find the mean elevation for each grain size class (Figure <a href="attr.html#fig:cont-raster">3.2</a>), we use the <code><a href="https://rdrr.io/pkg/terra/man/zonal.html">zonal()</a></code> function.</p>
 <div class="sourceCode" id="cb141"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/zonal.html">zonal</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">grain</span>, fun <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://rdrr.io/pkg/raster/man/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/zonal.html">zonal</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">grain</span>, fun <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span>
 <span class="va">z</span>
-<span class="co">#&gt;   zone mean</span>
-<span class="co">#&gt; 1    1 17.8</span>
-<span class="co">#&gt; 2    2 18.5</span>
-<span class="co">#&gt; 3    3 19.2</span></code></pre></div>
+<span class="co">#&gt;   grain elev</span>
+<span class="co">#&gt; 1  clay 14.8</span>
+<span class="co">#&gt; 2  silt 21.2</span>
+<span class="co">#&gt; 3  sand 18.7</span></code></pre></div>
 <p>This returns the statistics for each category, here the mean altitude for each grain size class, and can be added to the attribute table of the ratified raster (see previous chapter).</p>
 </div>
 <div id="global-operations-and-distances" class="section level3">
@@ -700,10 +754,12 @@ This is in contrast to focal operations which return a raster object (see previo
 The most common global operations are descriptive statistics for the entire raster dataset such as the minimum or maximum (see Section <a href="attr.html#summarizing-raster-objects">3.3.2</a>).
 Aside from that, global operations are also useful for the computation of distance and weight rasters.
 In the first case, one can calculate the distance from each cell to a specific target cell.
-For example, one might want to compute the distance to the nearest coast (see also <code><a href="https://rdrr.io/pkg/raster/man/distance.html">raster::distance()</a></code>).
+For example, one might want to compute the distance to the nearest coast (see also <code><a href="https://rdrr.io/pkg/terra/man/distance.html">terra::distance()</a></code>).
 We might also want to consider topography, that means, we are not only interested in the pure distance but would like also to avoid the crossing of mountain ranges when going to the coast.
 To do so, we can weight the distance with elevation so that each additional altitudinal meter ‘prolongs’ the Euclidean distance.
 Visibility and viewshed computations also belong to the family of global operations (in the exercises of Chapter <a href="gis.html#gis">9</a>, you will compute a viewshed raster).</p>
+<!--jn:toDo-->
+<!-- consider expanding this part -->
 </div>
 <div id="map-algebra-counterparts-in-vector-processing" class="section level3">
 <h3>
@@ -734,22 +790,28 @@ Frequently, a study area covers more than one scene.
 In these cases we would like to merge the scenes covered by our study area.
 In the easiest case, we can just merge these scenes, that is put them side by side.
 This is possible with digital elevation data (SRTM, ASTER).
-In the following code chunk we first download the SRTM elevation data for Austria and Switzerland (for the country codes, see the <strong>raster</strong> function <code><a href="https://rdrr.io/pkg/raster/man/getData.html">ccodes()</a></code>).
+In the following code chunk we first download the SRTM elevation data for Austria and Switzerland (for the country codes, see the <strong>geodata</strong> function <code>country_codes()</code>).
 In a second step, we merge the two rasters into one.</p>
+<!--jn:toDo-->
+<!-- mention geodata -->
 <div class="sourceCode" id="cb142"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">aut</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/getData.html">getData</a></span><span class="op">(</span><span class="st">"alt"</span>, country <span class="op">=</span> <span class="st">"AUT"</span>, mask <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">ch</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/getData.html">getData</a></span><span class="op">(</span><span class="st">"alt"</span>, country <span class="op">=</span> <span class="st">"CHE"</span>, mask <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">aut_ch</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/merge.html">merge</a></span><span class="op">(</span><span class="va">aut</span>, <span class="va">ch</span><span class="op">)</span></code></pre></div>
-<p><strong>Raster</strong>’s <code><a href="https://rdrr.io/pkg/raster/man/merge.html">merge()</a></code> command combines two images, and in case they overlap, it uses the value of the first raster.
-You can do exactly the same with <code>gdalUtils::mosaic_rasters()</code> which is faster, and therefore recommended if you have to merge a multitude of large rasters stored on disk.</p>
+<code class="sourceCode R"><span class="va">aut</span> <span class="op">=</span> <span class="fu">geodata</span><span class="fu">::</span><span class="fu">elevation_30s</span><span class="op">(</span>country <span class="op">=</span> <span class="st">"AUT"</span>, path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="va">ch</span> <span class="op">=</span> <span class="fu">geodata</span><span class="fu">::</span><span class="fu">elevation_30s</span><span class="op">(</span>country <span class="op">=</span> <span class="st">"CHE"</span>, path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="va">aut_ch</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/merge.html">merge</a></span><span class="op">(</span><span class="va">aut</span>, <span class="va">ch</span><span class="op">)</span></code></pre></div>
+<p><strong>Terra</strong>’s <code><a href="https://rdrr.io/pkg/terra/man/merge.html">merge()</a></code> command combines two images, and in case they overlap, it uses the value of the first raster.
+<!--jn:toDo-->
+<!-- some benchmarks could be needed -->
+<!-- You can do exactly the same with `gdalUtils::mosaic_rasters()` which is faster, and therefore recommended if you have to merge a multitude of large rasters stored on disk. --></p>
 <p>The merging approach is of little use when the overlapping values do not correspond to each other.
 This is frequently the case when you want to combine spectral imagery from scenes that were taken on different dates.
-The <code><a href="https://rdrr.io/pkg/raster/man/merge.html">merge()</a></code> command will still work but you will see a clear border in the resulting image.
-The <code><a href="https://rdrr.io/pkg/raster/man/mosaic.html">mosaic()</a></code> command lets you define a function for the overlapping area.
+The <code><a href="https://rdrr.io/pkg/terra/man/merge.html">merge()</a></code> command will still work but you will see a clear border in the resulting image.
+The <code><a href="https://rdrr.io/pkg/terra/man/mosaic.html">mosaic()</a></code> command lets you define a function for the overlapping area.
 For instance, we could compute the mean value.
 This might smooth the clear border in the merged result but it will most likely not make it disappear.
 To do so, we need a more advanced approach.
 Remote sensing scientists frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image.
+<!--jn:toDo-->
+<!-- review the below advice -->
 The packages <strong>landsat</strong> (<code>histmatch()</code>, <code>relnorm()</code>, <code>PIF()</code>), <strong>satellite</strong> (<code>calcHistMatch()</code>) and <strong>RStoolbox</strong> (<code>histMatch()</code>, <code>pifMatch()</code>) provide the corresponding functions.
 For a more detailed introduction on how to use R for remote sensing, we refer the reader to <span class="citation">Wegmann, Leutner, and Dech (<a href="references.html#ref-wegmann_remote_2016" role="doc-biblioref">2016</a>)</span>.</p>
 </div>
@@ -758,29 +820,26 @@ For a more detailed introduction on how to use R for remote sensing, we refer th
 <h2>
 <span class="header-section-number">4.4</span> Exercises<a class="anchor" aria-label="anchor" href="#exercises-2"><i class="fas fa-link"></i></a>
 </h2>
-<ol style="list-style-type: decimal">
-<li><p>It was established in Section <a href="spatial-operations.html#spatial-vec">4.2</a> that Canterbury was the region of New Zealand containing most of the 100 highest points in the country.
-How many of these high points does the Canterbury region contain?</p></li>
-<li><p>Which region has the second highest number of <code>nz_height</code> points in, and how many does it have?</p></li>
-<li>
-<p>Generalizing the question to all regions: how many of New Zealand’s 16 regions contain points which belong to the top 100 highest points in the country? Which regions?</p>
+<p>E1. It was established in Section <a href="spatial-operations.html#spatial-vec">4.2</a> that Canterbury was the region of New Zealand containing most of the 100 highest points in the country.
+How many of these high points does the Canterbury region contain?</p>
+<p>E2. Which region has the second highest number of <code>nz_height</code> points in, and how many does it have?</p>
+<p>E3. Generalizing the question to all regions: how many of New Zealand’s 16 regions contain points which belong to the top 100 highest points in the country? Which regions?</p>
 <ul>
 <li>Bonus: create a table listing these regions in order of the number of points and their name.</li>
 </ul>
-</li>
-<li><p>Use <code><a href="https://rdrr.io/r/utils/data.html">data(dem, package = "spDataLarge")</a></code>, and reclassify the elevation in three classes: low, medium and high.
-Secondly, attach the NDVI raster (<code><a href="https://rdrr.io/r/utils/data.html">data(ndvi, package = "spDataLarge")</a></code>) and compute the mean NDVI and the mean elevation for each altitudinal class.</p></li>
-<li><p>Apply a line detection filter to <code><a href="https://rdrr.io/pkg/raster/man/raster.html">raster(system.file("external/rlogo.grd", package = "raster"))</a></code>.
+<p>E4. Use <code><a href="https://rdrr.io/r/utils/data.html">data(dem, package = "spDataLarge")</a></code>, and reclassify the elevation in three classes: low, medium and high.
+Secondly, attach the NDVI raster (<code><a href="https://rdrr.io/r/utils/data.html">data(ndvi, package = "spDataLarge")</a></code>) and compute the mean NDVI and the mean elevation for each altitudinal class.</p>
+<p>E5. Apply a line detection filter to <code>raster(system.file("external/rlogo.grd", package = "raster"))</code>.
 Plot the result.
-Hint: Read <code>?raster::focal()</code>.</p></li>
-<li><p>Calculate the NDVI of a Landsat image.
-Use the Landsat image provided by the <strong>spDataLarge</strong> package (<code><a href="https://rdrr.io/r/base/system.file.html">system.file("raster/landsat.tif", package="spDataLarge")</a></code>).</p></li>
-<li><p>A StackOverflow <a href="https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances">post</a> shows how to compute distances to the nearest coastline using <code><a href="https://rdrr.io/pkg/raster/man/distance.html">raster::distance()</a></code>.
-Retrieve a digital elevation model of Spain, and compute a raster which represents distances to the coast across the country (hint: use <code><a href="https://rdrr.io/pkg/raster/man/getData.html">getData()</a></code>).
+Hint: Read <code>?raster::focal()</code>.</p>
+<p>E6. Calculate the NDVI of a Landsat image.
+Use the Landsat image provided by the <strong>spDataLarge</strong> package (<code><a href="https://rdrr.io/r/base/system.file.html">system.file("raster/landsat.tif", package = "spDataLarge")</a></code>).</p>
+<p>E7. A StackOverflow <a href="https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances">post</a> shows how to compute distances to the nearest coastline using <code><a href="https://rdrr.io/pkg/raster/man/distance.html">raster::distance()</a></code>.
+Retrieve a digital elevation model of Spain, and compute a raster which represents distances to the coast across the country (hint: use <code>getData()</code>).
 Second, use a simple approach to weight the distance raster with elevation (other weighting approaches are possible, include flow direction and steepness); every 100 altitudinal meters should increase the distance to the coast by 10 km.
 Finally, compute the difference between the raster using the Euclidean distance and the raster weighted by elevation.
-Note: it may be wise to increase the cell size of the input raster to reduce compute time during this operation.</p></li>
-</ol>
+Note: it may be wise to increase the cell size of the input raster to reduce compute time during this operation.</p>
+
 </div>
 </div>
 
@@ -833,7 +892,7 @@ Note: it may be wise to increase the cell size of the input raster to reduce com
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-09-11.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-09-12.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

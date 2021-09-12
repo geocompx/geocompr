@@ -207,8 +207,11 @@ The package **sf**\index{sf} (covered in Chapter \@ref(spatial-class)), for exam
 
 A surge in development time (and interest) in 'R-spatial\index{R-spatial}' has followed the award of a grant by the R Consortium for the development of support for Simple Features, an open-source standard and model to store and access vector geometries. 
 This resulted in the **sf** package (covered in Section \@ref(intro-sf)).
-Multiple places reflect the immense interest in **sf**. This is especially true for the [R-sig-Geo Archives](https://stat.ethz.ch/pipermail/r-sig-geo/), a long-standing open access email list containing much R-spatial wisdom accumulated over the years.
+Multiple places reflect the immense interest in **sf**. 
+This is especially true for the [R-sig-Geo Archives](https://stat.ethz.ch/pipermail/r-sig-geo/), a long-standing open access email list containing much R-spatial wisdom accumulated over the years.
 
+<!--jn:toDo-->
+<!-- consider updating this figure -->
 <div class="figure" style="text-align: center">
 <img src="figures/spatial-package-growth.png" alt="The popularity of spatial packages in R. The y-axis shows average number of downloads per day, within a 30-day rolling window, of prominent spatial packages." width="100%" />
 <p class="caption">(\#fig:cranlogs)The popularity of spatial packages in R. The y-axis shows average number of downloads per day, within a 30-day rolling window, of prominent spatial packages.</p>
@@ -221,6 +224,8 @@ This has led to a demand for 'tidy geographic data' which has been partly met by
 An obvious feature of the **tidyverse** is the tendency for packages to work in harmony.
 There is no equivalent **geoverse**, but there are attempts at harmonization between packages hosted in the [r-spatial](https://github.com/r-spatial/discuss/issues/11) organization and a growing number of packages use **sf**\index{sf} (Table \@ref(tab:revdep)). 
 
+<!--jn:toDo-->
+<!-- consider updating this table -->
 
 Table: (\#tab:revdep)The top 5 most downloaded packages that depend on sf, in terms of average number of downloads per day over the previous month. As of 2021-08-22  there are  383  packages which import sf.
 
@@ -233,6 +238,9 @@ Table: (\#tab:revdep)The top 5 most downloaded packages that depend on sf, in te
 |raster   |      3732|
 
 ## The history of R-spatial
+
+<!--jn:toDo-->
+<!--update the history-->
 
 There are many benefits of using recent spatial packages such as **sf**, but it also important to be aware of the history of R's spatial capabilities: many functions, use-cases and teaching material are contained in older packages.
 These can still be useful today, provided you know where to look.
@@ -307,6 +315,13 @@ Though **ggmap** facilitated map-making with **ggplot2**, its utility was limite
 While this works well for points it is computationally inefficient for lines and polygons, since each coordinate (vertex) is converted into a row, leading to huge data frames to represent complex geometries.
 Although geographic visualization tended to focus on vector data, raster visualization is supported in **raster** and received a boost with the release of **rasterVis**, which is described in a book on the subject of spatial and temporal data visualization [@lamigueiro_displaying_2018].
 As of 2018 map making in R is a hot topic with dedicated packages such as **tmap**, **leaflet** and **mapview** all supporting the class system provided by **sf**, the focus of the next chapter (see Chapter \@ref(adv-map) for more on visualization).
+
+<!--jn:toDo-->
+<!-- add rayshader + ggspatial to the above viz list -->
+<!--add stars and gdalcubes, rgee-->
+<!-- add terra -->
+<!-- qgisprocess  -->
+<!-- add info about specialized packages - sfnetworks, landscapemetrics, etc. -->
 
 ## Exercises
 
