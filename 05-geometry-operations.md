@@ -652,43 +652,15 @@ elev = rast(system.file("raster/elev.tif", package = "spData"))
 clip = rast(xmin = 0.9, xmax = 1.8, ymin = -0.45, ymax = 0.45,
             resolution = 0.3, vals = rep(1, 9))
 elev[clip, drop = FALSE]
-#>    elev
-#> 1     1
-#> 2     2
-#> 3     3
-#> 4     4
-#> 5     5
-#> 6     6
-#> 7     7
-#> 8     8
-#> 9     9
-#> 10   10
-#> 11   11
-#> 12   12
-#> 13   13
-#> 14   14
-#> 15   15
-#> 16   16
-#> 17   17
-#> 18   18
-#> 19   19
-#> 20   20
-#> 21   21
-#> 22   22
-#> 23   23
-#> 24   24
-#> 25   25
-#> 26   26
-#> 27   27
-#> 28   28
-#> 29   29
-#> 30   30
-#> 31   31
-#> 32   32
-#> 33   33
-#> 34   34
-#> 35   35
-#> 36   36
+#> class       : SpatRaster 
+#> dimensions  : 2, 1, 1  (nrow, ncol, nlyr)
+#> resolution  : 0.5, 0.5  (x, y)
+#> extent      : 1, 1.5, -0.5, 0.5  (xmin, xmax, ymin, ymax)
+#> coord. ref. : +proj=longlat +datum=WGS84 +no_defs 
+#> source      : memory 
+#> name        : elev 
+#> min value   :   18 
+#> max value   :   24
 ```
 
 For the same operation we can also use the `intersect()` and `crop()` command.
