@@ -1175,9 +1175,6 @@ plot(cl, add = TRUE)
 Contours can also be added to existing plots with functions such as `contour()`, `rasterVis::contourplot()` or `tmap::tm_iso()`.
 As illustrated in Figure \@ref(fig:contour-tmap), isolines can be labelled.
 
-<!--jn:toDo-->
-<!-- to be fixed = https://github.com/rspatial/terra/issues/327 -->
-
 
 ```r
 # create hillshade

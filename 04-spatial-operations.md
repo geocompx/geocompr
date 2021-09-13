@@ -528,10 +528,6 @@ terra::extract(elev, matrix(c(0.1, 0.1), ncol = 2))
 <!-- It is convenient that both functions also accept objects of class `Spatial* Objects`. -->
 Raster objects can also be subset with another raster object, as illustrated in Figure \@ref(fig:raster-subset) (left panel) and demonstrated in the code chunk below:
 
-<!--jn:toDo-->
-<!--https://github.com/rspatial/terra/issues/325 - to update -->
-<!--the same applies to the rest of this section!!!-->
-
 
 ```r
 clip = rast(xmin = 0.9, xmax = 1.8, ymin = -0.45, ymax = 0.45,
@@ -556,6 +552,10 @@ To do this, we can use again the `[` when we additionally set the `drop` paramet
 To illustrate this, we retrieve the first two cells of `elev` as an individual raster object. 
 As mentioned in Section \@ref(manipulating-raster-objects), the `[` operator accepts various inputs to subset rasters and returns a raster object when `drop = FALSE`.
 The code chunk below subsets the `elev` raster by cell ID and row-column index with identical results: the first two cells on the top row (only the first 2 lines of the output is shown):
+
+<!--jn:toDo-->
+<!--https://github.com/rspatial/terra/issues/325 - to update -->
+<!--the same applies to the rest of this section!!!-->
 
 
 ```r
