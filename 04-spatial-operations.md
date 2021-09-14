@@ -553,16 +553,12 @@ To illustrate this, we retrieve the first two cells of `elev` as an individual r
 As mentioned in Section \@ref(manipulating-raster-objects), the `[` operator accepts various inputs to subset rasters and returns a raster object when `drop = FALSE`.
 The code chunk below subsets the `elev` raster by cell ID and row-column index with identical results: the first two cells on the top row (only the first 2 lines of the output is shown):
 
-<!--jn:toDo-->
-<!--https://github.com/rspatial/terra/issues/325 - to update -->
-<!--the same applies to the rest of this section!!!-->
-
 
 ```r
 elev[1:2, drop = FALSE]    # spatial subsetting with cell IDs
 elev[1, 1:2, drop = FALSE] # spatial subsetting by row,column indices
-#> class       : RasterLayer 
-#> dimensions  : 1, 2, 2  (nrow, ncol, ncell)
+#> class       : SpatRaster 
+#> dimensions  : 1, 2, 1  (nrow, ncol, nlyr)
 #> ...
 ```
 
@@ -570,6 +566,10 @@ elev[1, 1:2, drop = FALSE] # spatial subsetting by row,column indices
 
 Another common use case of spatial subsetting is when a raster with `logical` (or `NA`) values is used to mask another raster with the same extent and resolution, as illustrated in Figure \@ref(fig:raster-subset), middle and right panel.
 In this case, the `[` and `mask()` functions can be used (results not shown):
+
+<!--jn:toDo-->
+<!--https://github.com/rspatial/terra/issues/325 - to update -->
+<!--the same applies to the rest of this section!!!-->
 
 
 ```r
