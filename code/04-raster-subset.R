@@ -23,3 +23,15 @@ r_mask = rast(nrow = 6, ncol = 6, resolution = 0.5,
               vals = sample(c(NA, TRUE), 36, replace = TRUE))
 masked = elev[r_mask, drop = FALSE]
 
+r_mask_poly = st_as_sf(as.polygons(r_mask, dissolve = FALSE))
+masked_poly = st_as_sf(as.polygons(masked))
+
+tm2 = tm_shape(r_mask_poly) +
+  tm_polygons(lwd = 0.5) +
+  tm_layout(frame = FALSE, legend.show = FALSE,
+            inner.margins = c(0, 0, 0, 0.1))
+
+tm3 = tm_shape(masked_poly) +
+  tm_polygons(col = "elev", lwd = 0.5) +
+  tm_layout(frame = FALSE, legend.show = FALSE,
+            inner.margins = c(0, 0, 0, 0.1))
