@@ -341,7 +341,7 @@ world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="images/wintriproj-1.png" alt="Winkel tripel projection of the world." width="100%" />
+<img src="06-reproj_files/figure-html/wintriproj-1.png" alt="Winkel tripel projection of the world." width="100%" />
 <p class="caption">(\#fig:wintriproj)Winkel tripel projection of the world.</p>
 </div>
 

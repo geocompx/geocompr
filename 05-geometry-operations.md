@@ -687,7 +687,7 @@ plot(elev_2)
 <p class="caption">(\#fig:extend-example)Original raster extended by one row on each side (top, bottom) and two columns on each side (right, left).</p>
 </div>
 
-Performing an algebraic operation on two objects with differing extents in R, the **terra** package returns the result for the intersection\index{raster!intersection}, and says so in a warning.
+Performing an algebraic operation on two objects with differing extents in R, the **terra** package returns an error.
 
 
 ```r
@@ -695,7 +695,7 @@ elev_3 = elev + elev_2
 #> Error: [+] extents do not match
 ```
 
-However, we can also align the extent of two rasters with `extend()`. 
+However, we can align the extent of two rasters with `extend()`. 
 Instead of telling the function how many rows or columns should be added (as done before), we allow it to figure it out by using another raster object.
 Here, we extend the `elev` object to the extent of `elev_2`. 
 The newly added rows and column receive the default value of the `value` parameter, i.e., `NA`.
@@ -898,7 +898,7 @@ srtm_inv_masked = mask(srtm, vect(zion), inverse = TRUE)
 
 \index{raster-vector!raster extraction} 
 Raster extraction is the process of identifying and returning the values associated with a 'target' raster at specific locations, based on a (typically vector) geographic 'selector' object.
-The results depend on the type of selector used (points, lines or polygons) and arguments passed to the `raster::extract()` function, which we use to demonstrate raster extraction.
+The results depend on the type of selector used (points, lines or polygons) and arguments passed to the `terra::extract()` function, which we use to demonstrate raster extraction.
 The reverse of raster extraction --- assigning raster cell values based on vector objects --- is rasterization, described in Section \@ref(rasterization).
 
 The simplest example is extracting the value of a raster cell at specific **points**.
@@ -909,7 +909,7 @@ Now, we can add the resulting object to our  `zion_points` dataset with the `cbi
 
 ```r
 data("zion_points", package = "spDataLarge")
-elevation = raster::extract(srtm, vect(zion_points))
+elevation = terra::extract(srtm, vect(zion_points))
 zion_points = cbind(zion_points, elevation)
 ```
 
