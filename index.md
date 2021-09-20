@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2021-09-14'
+date: '2021-09-20'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -38,7 +38,7 @@ The online version of the book is hosted at [geocompr.robinlovelace.net](https:/
 
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
 
-This version of the book was built on GH Actions on 2021-09-14.
+This version of the book was built on GH Actions on 2021-09-20.
 
 ## How to contribute? {-}
 
@@ -94,7 +94,7 @@ Further details can be found at [github.com/Robinlovelace/geocompr](https://gith
 
 
 
-# Foreword {-}
+# Foreword (1st Edition) {-}
 
 Doing 'spatial' in R has always been about being broad, seeking to provide and integrate tools from geography, geoinformatics, geocomputation and spatial statistics for anyone interested in joining in: joining in asking interesting questions, contributing fruitful research questions, and writing and improving code.
 That is, doing 'spatial' in R has always included open source code, open data and reproducibility.

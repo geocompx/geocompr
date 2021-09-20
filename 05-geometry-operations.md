@@ -1053,7 +1053,7 @@ To demonstrate rasterization in action, we will use a template raster that has t
 ```r
 cycle_hire_osm_projected = st_transform(cycle_hire_osm, "EPSG:27700")
 raster_template = rast(ext(cycle_hire_osm_projected), resolution = 1000,
-                       crs = crs(cycle_hire_osm_projected))
+                       crs = st_crs(cycle_hire_osm_projected)$wkt)
 ```
 
 Rasterization is a very flexible operation: the results depend not only on the nature of the template raster, but also on the type of input vector (e.g., points, polygons) and a variety of arguments taken by the `rasterize()` function.
@@ -1101,7 +1101,7 @@ After casting the polygon objects into a multilinestring, a template raster is c
 california = dplyr::filter(us_states, NAME == "California")
 california_borders = st_cast(california, "MULTILINESTRING")
 raster_template2 = rast(ext(california), resolution = 0.5,
-                        crs = crs(california))
+                        crs = st_crs(california)$wkt)
 ```
 
 Line rasterization is demonstrated in the code below.

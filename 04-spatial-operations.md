@@ -567,14 +567,10 @@ elev[1, 1:2, drop = FALSE] # spatial subsetting by row,column indices
 Another common use case of spatial subsetting is when a raster with `logical` (or `NA`) values is used to mask another raster with the same extent and resolution, as illustrated in Figure \@ref(fig:raster-subset), middle and right panel.
 In this case, the `[` and `mask()` functions can be used (results not shown):
 
-<!--jn:toDo-->
-<!--https://github.com/rspatial/terra/issues/325 - to update -->
-<!--the same applies to the rest of this section!!!-->
-
 
 ```r
 # create raster mask
-rmask = elev 
+rmask = elev
 values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
 
 # spatial subsetting

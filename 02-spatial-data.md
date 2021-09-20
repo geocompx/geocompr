@@ -711,11 +711,11 @@ Simple features are, in essence, data frames with a spatial extension.
 
 ## Raster data
 
-<!--jn:toDo-->
-<!-- one overall paragraph about raster data model +  -->
-<!-- mention that we are focusing on basic, regular rasters -->
+The spatial raster data model represents the world with the continuous grid of cells (often also called pixels; Figure \@ref(fig:raster-intro-plot):A).
+This data model often refers to so-called regular grids, in which each cell has the same, constant size -- and we will focus on the regular grids in this book only.
+However, several other types of grids exist, including rotated, sheared, rectilinear, and curvilinear grids (see Chapter 1 of @pebesma_spatial_2022 or Chapter 2 of @tennekes_elegant_2022).
 
-The geographic raster data model usually consists of a raster header\index{raster!header}
+The raster data model usually consists of a raster header\index{raster!header}
 and a matrix (with rows and columns) representing equally spaced cells (often also called pixels; Figure \@ref(fig:raster-intro-plot):A).^[
 Depending on the file format the header is part of the actual image data file, e.g., GeoTIFF, or stored in an extra header or world file, e.g., ASCII grid formats. 
 There is also the headerless (flat) binary raster format which should facilitate the import into various software programs.]
@@ -744,8 +744,13 @@ Consequently, the discrete borders of these features become blurred, and dependi
 <p class="caption">(\#fig:raster-intro-plot2)Examples of continuous and categorical rasters.</p>
 </div>
 
-\BeginKnitrBlock{rmdnote}<div class="rmdnote"><!--jn:toDo-->
-<!--a few sentences about other types of rasters--></div>\EndKnitrBlock{rmdnote}
+### R packages for raster data handling
+
+<!--jn:toDo - update:-->
+<!-- one intro paragraph about terra + stars -->
+<!-- maybe also add comparison table -->
+
+
 
 ### An introduction to terra
 
@@ -784,8 +789,7 @@ my_rast
 ```
 
 Dedicated functions report each component: `dim(my_rast)` returns the number of rows, columns and layers; `ncell()` the number of cells (pixels); `res()` the spatial resolution; `ext()` its spatial extent; and `crs()` its coordinate reference system (raster reprojection is covered in Section \@ref(reprojecting-raster-geometries)).
-<!--jn:toDo - update:-->
-<!-- `inMemory()` reports whether the raster data is stored in memory (the default) or on disk. -->
+`inMemory()` reports whether the raster data is stored in memory or on disk.
 
 `help("terra-package")` returns a full list of all available **terra** functions.
 
