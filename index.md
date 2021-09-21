@@ -74,14 +74,6 @@ remotes::install_github("mtennekes/tmap")
 
 See the project's [GitHub repo](https://github.com/robinlovelace/geocompr#reproducing-the-book) for details on reproducing the book.
 
-
-```r
-bookdown::render_book("index.Rmd") # to build the book
-browseURL("_book/index.html") # to view it
-```
-
-<!-- suggested content on if you find the book useful but this intro is already quite long (RL)-->
-
 ## Supporting the project {-}
 
 If you find the book useful, please support it by:
