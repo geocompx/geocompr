@@ -60,6 +60,10 @@ These can be installed with the following command (which requires [**remotes**](
 
 ```r
 remotes::install_github("geocompr/geocompkg")
+remotes::install_github("rspatial/terra")
+remotes::install_github("mtennekes/tmap")
+remotes::install_github("nowosad/spData")
+remotes::install_github("nowosad/spDataLarge")
 ```
 
 

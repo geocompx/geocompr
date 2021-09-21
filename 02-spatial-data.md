@@ -888,8 +888,8 @@ multi_rast34 = c(multi_rast3, multi_rast4)
 ```
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Most `SpatRaster` objects do not store raster values, but rather a pointer to the file itself.
-This has a significant side-effect -- they cannot be directly saved to `".rds"` or `".rda" files or used in cluster computing.
-In these cases, there are two possible solutions: (1) use of the `wrap()` function that creates a special kind of temporary object that can be saved as an R object or using in cluster computing, or (2) save the object as a regular raster with `writeRaster()`..</div>\EndKnitrBlock{rmdnote}
+This has a significant side-effect -- they cannot be directly saved to `".rds"` or `".rda"` files or used in cluster computing.
+In these cases, there are two possible solutions: (1) use of the `wrap()` function that creates a special kind of temporary object that can be saved as an R object or using in cluster computing, or (2) save the object as a regular raster with `writeRaster()`.</div>\EndKnitrBlock{rmdnote}
 
 ## Coordinate Reference Systems {#crs-intro}
 
