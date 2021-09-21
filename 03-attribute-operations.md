@@ -706,16 +706,6 @@ elev[1]
 To extract all values or complete rows, you can use `values()`.
 For multi-layered raster objects, this will return the cell value(s) for each layer.
 For example, `c(elev, grain)[1]` returns a data frame with one row and two columns --- one for each layer.
-For multi-layer raster objects another way to subset is with `terra::subset()`, which extracts layers from a raster stack or brick. The `[[` and `$` operators can also be used:
-
-
-```r
-r_multi = c(elev, grain)
-# three ways to extract a layer of a stack
-terra::subset(r_multi, "elev")
-r_multi[["elev"]]
-r_multi$elev
-```
 
 Cell values can be modified by overwriting existing values in conjunction with a subsetting operation.
 The following code chunk, for example, sets the upper left cell of `elev` to 0 (results not shown):
@@ -736,6 +726,9 @@ elev[1, 1:2] = 0
 
 <!--jn:toDo-->
 <!--show how to add/replace NAs-->
+
+<!-- jn:toDo -->
+<!-- how to replace values in a multilayered raster? -->
 
 ### Summarizing raster objects
 

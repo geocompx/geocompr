@@ -851,10 +851,6 @@ The `SpatRaster` class also handles multiple layers, which typically correspond 
 ```r
 multi_raster_file = system.file("raster/landsat.tif", package = "spDataLarge")
 multi_rast = rast(multi_raster_file)
-```
-
-
-```r
 multi_rast
 #> class       : SpatRaster 
 #> dimensions  : 1428, 1128, 4  (nrow, ncol, nlyr)
@@ -875,10 +871,25 @@ nlyr(multi_rast)
 #> [1] 4
 ```
 
-<!--jn:toDo-->
-<!-- what else can be add here? -->
-<!-- pointers? reading from urls? -->
-<!-- combining or subseting layers? -->
+For multi-layer raster objects, layers can be selected with `terra::subset()`.^[The `[[` and `$` operators can also be used for layers' selection.]
+It accepts a layer number or its name as the second argument:
+
+
+```r
+multi_rast3 = subset(multi_rast, 3)
+multi_rast4 = subset(multi_rast, 4)
+```
+
+The opposite operation, combining several `SpatRaster` objects into one, can be done using the `c` function:
+
+
+```r
+multi_rast34 = c(multi_rast3, multi_rast4)
+```
+
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">Most `SpatRaster` objects do not store raster values, but rather a pointer to the file itself.
+This has a significant side-effect -- they cannot be directly saved to `".rds"` or `".rda" files or used in cluster computing.
+In these cases, there are two possible solutions: (1) use of the `wrap()` function that creates a special kind of temporary object that can be saved as an R object or using in cluster computing, or (2) save the object as a regular raster with `writeRaster()`..</div>\EndKnitrBlock{rmdnote}
 
 ## Coordinate Reference Systems {#crs-intro}
 
