@@ -55,20 +55,24 @@ Maintainers and contributors must follow this repository’s [CODE OF CONDUCT](h
 ## Reproducibility {-}
 
 To reproduce the code in the book, you need a recent version of [R](https://cran.r-project.org/) and up-to-date packages.
-These can be installed with the following command (which requires [**remotes**](https://github.com/r-lib/remotes)):
+These can be installed with the following command (which requires [**remotes**](https://github.com/r-lib/remotes) to be installed):
 
 
 ```r
+install.packages("remotes")
 remotes::install_github("geocompr/geocompkg")
-remotes::install_github("rspatial/terra")
-remotes::install_github("mtennekes/tmap")
 remotes::install_github("nowosad/spData")
 remotes::install_github("nowosad/spDataLarge")
+
+# During development work on the 2nd edition you may also need dev versions of
+# other packages to build the book, e.g.:
+remotes::install_github("rspatial/terra")
+remotes::install_github("mtennekes/tmap")
 ```
 
 
 
-To build the book locally, clone or [download](https://github.com/Robinlovelace/geocompr/archive/main.zip) the [geocompr repo](https://github.com/Robinlovelace/geocompr/), load R in root directory (e.g., by opening [geocompr.Rproj](https://github.com/Robinlovelace/geocompr/blob/main/geocompr.Rproj) in RStudio) and run the following lines:
+See the project's [GitHub repo](https://github.com/robinlovelace/geocompr#reproducing-the-book) for details on reproducing the book.
 
 
 ```r
@@ -194,7 +198,7 @@ If you are interested in the wider context and motivations behind this book, rea
 
 
 
-Many thanks to everyone who contributed directly and indirectly via the code hosting and collaboration site GitHub, including the following people who contributed direct via pull requests: prosoitos, florisvdh, katygregg, rsbivand, KiranmayiV, zmbc, erstearns, MikeJohnPage, eyesofbambi, nickbearman, tyluRp, marcosci, giocomai, KHwong12, LaurieLBaker, MarHer90, mdsumner, pat-s, gisma, ateucher, annakrystalli, DarrellCarvalho, kant, gavinsimpson, Henrik-P, Himanshuteli, yutannihilation, jbixon13, yvkschaefer, katiejolly, layik, mpaulacaldas, mtennekes, mvl22, ganes1410, richfitz, wdearden, yihui, chihinl, cshancock, gregor-d, jasongrahn, p-kono, pokyah, schuetzingit, sdesabbata, tim-salabim, tszberkowitz.
+Many thanks to everyone who contributed directly and indirectly via the code hosting and collaboration site GitHub, including the following people who contributed direct via pull requests: prosoitos, florisvdh, katygregg, rsbivand, KiranmayiV, zmbc, erstearns, MikeJohnPage, eyesofbambi, nickbearman, tyluRp, marcosci, giocomai, KHwong12, LaurieLBaker, MarHer90, mdsumner, pat-s, gisma, ateucher, annakrystalli, DarrellCarvalho, kant, gavinsimpson, Henrik-P, Himanshuteli, yutannihilation, jbixon13, olyerickson, yvkschaefer, katiejolly, layik, mpaulacaldas, mtennekes, mvl22, ganes1410, richfitz, wdearden, yihui, chihinl, cshancock, gregor-d, jasongrahn, p-kono, pokyah, schuetzingit, sdesabbata, tim-salabim, tszberkowitz.
 Special thanks to Marco Sciaini, who not only created the front cover image, but also published the code that generated it (see `code/frontcover.R` in the book's GitHub repo). 
 Dozens more people contributed online, by raising and commenting on issues, and by providing feedback via social media.
 The `#geocompr` hashtag will live on!
