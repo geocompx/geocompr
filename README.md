@@ -75,6 +75,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [Himanshuteli](https://github.com/Himanshuteli),
 [yutannihilation](https://github.com/yutannihilation),
 [jbixon13](https://github.com/jbixon13),
+[olyerickson](https://github.com/olyerickson),
 [yvkschaefer](https://github.com/yvkschaefer),
 [katiejolly](https://github.com/katiejolly),
 [layik](https://github.com/layik),
@@ -104,13 +105,29 @@ make geocomputation with R possible. This impact is recorded in
 
 To ease reproducibility, we created the `geocompkg` package. Installing
 it from GitHub will install all the R packages needed build the book
-(you will a computer with necessary [system
+(you will need a computer with necessary [system
 dependencies](https://github.com/r-spatial/sf#installing) and the
 [**remotes**](https://github.com/r-lib/remotes/) package installed):
 
 ``` r
 install.packages("remotes")
 remotes::install_github("geocompr/geocompkg")
+remotes::install_github("nowosad/spData")
+remotes::install_github("nowosad/spDataLarge")
+
+# During development work on the 2nd edition you may also need dev versions of
+# other packages to build the book, e.g.:
+remotes::install_github("rspatial/terra")
+remotes::install_github("mtennekes/tmap")
+```
+
+Running the commands above should install the packages needed to run
+most parts of the book. To install and build the book in its entirety,
+run the following command (which installs additional ‘Suggests’
+packages):
+
+``` r
+remotes::install_github("geocompr/geocompkg", dependencies = "Suggests")
 ```
 
 You need a recent version of the GDAL, GEOS, PROJ and UDUNITS libraries
