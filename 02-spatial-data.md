@@ -726,9 +726,9 @@ The origin (or starting point) is frequently the coordinate of the lower-left co
 The header defines the extent via the number of columns, the number of rows and the cell size resolution.
 Hence, starting from the origin, we can easily access and modify each single cell by either using the ID of a cell (Figure  \@ref(fig:raster-intro-plot):B) or by explicitly specifying the rows and columns.
 This matrix representation avoids storing explicitly the coordinates for the four corner points (in fact it only stores one coordinate, namely the origin) of each cell corner as would be the case for rectangular vector polygons.
-This and map algebra (Section \ref(map-algebra)) makes raster processing much more efficient and faster than vector data processing.
+This and map algebra (Section \@ref(map-algebra)) makes raster processing much more efficient and faster than vector data processing.
 However, in contrast to vector data, the cell of one raster layer can only hold a single value.
-The value might be numeric or categorical (Figure  \@ref(fig:raster-intro-plot):C).
+The value might be numeric or categorical (Figure \@ref(fig:raster-intro-plot):C).
 
 <div class="figure" style="text-align: center">
 <img src="02-spatial-data_files/figure-html/raster-intro-plot-1.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%" />
