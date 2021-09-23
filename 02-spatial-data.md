@@ -902,7 +902,7 @@ This section will explain each type, laying the foundations for Section \@ref(re
 ### Geographic coordinate systems
 
 \index{CRS!geographic}
-Geographic coordinate systems identify any location on the Earth's surface using two values --- longitude and latitude (see left panels of Figures \@ref(fig:vector-crs) and \@ref(fig:raster-crs)). 
+Geographic coordinate systems identify any location on the Earth's surface using two values --- longitude and latitude (see left panel of Figure \@ref(fig:vector-crs)). 
 *Longitude* is location in the East-West direction in angular distance from the Prime Meridian plane.
 *Latitude* is angular distance North or South of the equatorial plane.
 Distances in geographic CRSs are therefore not measured in meters.
@@ -938,7 +938,7 @@ Both datums in Figure \@ref(fig:datum-fig) are put on top of a geoid - a model o
 
 \index{CRS!projected}
 All projected CRSs are based on a geographic CRS, described in the previous section, and rely on map projections to convert the three-dimensional surface of the Earth into Easting and Northing (x and y) values in a projected CRS.
-Projected CRSs are based on Cartesian coordinates on an implicitly flat surface (right panels of Figures \@ref(fig:vector-crs) and \@ref(fig:raster-crs)).
+Projected CRSs are based on Cartesian coordinates on an implicitly flat surface (right panel of Figure \@ref(fig:vector-crs)).
 They have an origin, x and y axes, and a linear unit of measurement such as meters.
 
 This transition cannot be done without adding some deformations.
@@ -964,24 +964,20 @@ A quick summary of different projections, their types, properties, and suitabili
 <p class="caption">(\#fig:vector-crs)Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for a vector data type.</p>
 </div>
 
-<div class="figure" style="text-align: center">
-<img src="figures/02_raster_crs.png" alt="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for raster data." width="100%" />
-<p class="caption">(\#fig:raster-crs)Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for raster data.</p>
-</div>
-
 ### CRSs in R {#crs-in-r}
 
 \index{CRS!EPSG}
 \index{CRS!WKT2}
 \index{CRS!proj4string}
-Two recommend ways to describe CRSs in R are (a) Spatial Reference System Identifiers (SRID) or (b) `WKT2` definitions.
+Spatial R packages support a wide range of CRSs and they use the long-established [PROJ](https://proj.org) library.
+Two recommend ways to describe CRSs in R are (a) Spatial Reference System Identifiers (SRID) or (b) well-known text (WKT2^[<!--why 2?-->]) definitions.
 Both of these approaches have advantages and disadvantages. 
 
 A Spatial Reference System Identifier (SRID) is a unique value used to identify coordinate reference system definitions.
 The most popular registry of SRIDs is *EPSG*, however, other registries, such as *ESRI* or *OGR*, exist.
 For example, *EPSG:4326* represents the latitude/longitude WGS84 CRS, and *ESRI:54030* - Robinson projection.
 SRIDs are usually short and therefore easier to remember. 
-Each SRID is associated with a well-known text (WKT2^[<!--why 2?-->]) definition of the coordinate reference system. 
+Each SRID is associated with a well-known text (WKT2) definition of the coordinate reference system. 
 
 <!--jn:toDo-->
 <!--add WKT2 paragraph-->
@@ -996,7 +992,7 @@ Each SRID is associated with a well-known text (WKT2^[<!--why 2?-->]) definition
 <!-- This also makes the `proj4string` approach more complicated. -->
 <!-- `epsg` points to exactly one particular CRS. -->
 
-Spatial R packages support a wide range of CRSs and they use the long-established [PROJ](https://proj.org) library.
+
 <!--jn:toDo-->
 <!--mention websites and the crssuggest package-->
 <!-- https://epsg.org/home.html -->
@@ -1009,100 +1005,52 @@ Spatial R packages support a wide range of CRSs and they use the long-establishe
 <!-- View(crs_data) -->
 <!-- ``` -->
 
-In **sf** the CRS of an object can be retrieved using `st_crs()`.
+Let's look at how CRSs are stored in R spatial objects.
 For this, we need to read-in a vector dataset:
 
 
 ```r
-vector_filepath = system.file("vector/zion.gpkg", package = "spDataLarge")
-new_vector = st_read(vector_filepath)
+vector_filepath = system.file("shapes/world.gpkg", package = "spData")
+new_vector = read_sf(vector_filepath)
 ```
 
 Our new object, `new_vector`, is a polygon representing the borders of Zion National Park (`?zion`).
+In **sf** the CRS of an object can be retrieved using `st_crs()`.
 
 
 ```r
 st_crs(new_vector) # get CRS
 #> Coordinate Reference System:
-#>   User input: UTM Zone 12, Northern Hemisphere 
+#>   User input: WGS 84 
 #>   wkt:
-#> BOUNDCRS[
-#>     SOURCECRS[
-#>         PROJCRS["UTM Zone 12, Northern Hemisphere",
-#>             BASEGEOGCRS["GRS 1980(IUGG, 1980)",
-#>                 DATUM["unknown",
-#>                     ELLIPSOID["GRS80",6378137,298.257222101,
-#>                         LENGTHUNIT["metre",1,
-#>                             ID["EPSG",9001]]]],
-#>                 PRIMEM["Greenwich",0,
-#>                     ANGLEUNIT["degree",0.0174532925199433]]],
-#>             CONVERSION["UTM zone 12N",
-#>                 METHOD["Transverse Mercator",
-#>                     ID["EPSG",9807]],
-#>                 PARAMETER["Latitude of natural origin",0,
-#>                     ANGLEUNIT["degree",0.0174532925199433],
-#>                     ID["EPSG",8801]],
-#>                 PARAMETER["Longitude of natural origin",-111,
-#>                     ANGLEUNIT["degree",0.0174532925199433],
-#>                     ID["EPSG",8802]],
-#>                 PARAMETER["Scale factor at natural origin",0.9996,
-#>                     SCALEUNIT["unity",1],
-#>                     ID["EPSG",8805]],
-#>                 PARAMETER["False easting",500000,
-#>                     LENGTHUNIT["Meter",1],
-#>                     ID["EPSG",8806]],
-#>                 PARAMETER["False northing",0,
-#>                     LENGTHUNIT["Meter",1],
-#>                     ID["EPSG",8807]],
-#>                 ID["EPSG",16012]],
-#>             CS[Cartesian,2],
-#>                 AXIS["(E)",east,
-#>                     ORDER[1],
-#>                     LENGTHUNIT["Meter",1]],
-#>                 AXIS["(N)",north,
-#>                     ORDER[2],
-#>                     LENGTHUNIT["Meter",1]]]],
-#>     TARGETCRS[
-#>         GEOGCRS["WGS 84",
-#>             DATUM["World Geodetic System 1984",
-#>                 ELLIPSOID["WGS 84",6378137,298.257223563,
-#>                     LENGTHUNIT["metre",1]]],
-#>             PRIMEM["Greenwich",0,
-#>                 ANGLEUNIT["degree",0.0174532925199433]],
-#>             CS[ellipsoidal,2],
-#>                 AXIS["latitude",north,
-#>                     ORDER[1],
-#>                     ANGLEUNIT["degree",0.0174532925199433]],
-#>                 AXIS["longitude",east,
-#>                     ORDER[2],
-#>                     ANGLEUNIT["degree",0.0174532925199433]],
-#>             ID["EPSG",4326]]],
-#>     ABRIDGEDTRANSFORMATION["Transformation from GRS 1980(IUGG, 1980) to WGS84",
-#>         METHOD["Position Vector transformation (geog2D domain)",
-#>             ID["EPSG",9606]],
-#>         PARAMETER["X-axis translation",0,
-#>             ID["EPSG",8605]],
-#>         PARAMETER["Y-axis translation",0,
-#>             ID["EPSG",8606]],
-#>         PARAMETER["Z-axis translation",0,
-#>             ID["EPSG",8607]],
-#>         PARAMETER["X-axis rotation",0,
-#>             ID["EPSG",8608]],
-#>         PARAMETER["Y-axis rotation",0,
-#>             ID["EPSG",8609]],
-#>         PARAMETER["Z-axis rotation",0,
-#>             ID["EPSG",8610]],
-#>         PARAMETER["Scale difference",1,
-#>             ID["EPSG",8611]]]]
+#> GEOGCRS["WGS 84",
+#>     DATUM["World Geodetic System 1984",
+#>         ELLIPSOID["WGS 84",6378137,298.257223563,
+#>             LENGTHUNIT["metre",1]]],
+#>     PRIMEM["Greenwich",0,
+#>         ANGLEUNIT["degree",0.0174532925199433]],
+#>     CS[ellipsoidal,2],
+#>         AXIS["geodetic latitude (Lat)",north,
+#>             ORDER[1],
+#>             ANGLEUNIT["degree",0.0174532925199433]],
+#>         AXIS["geodetic longitude (Lon)",east,
+#>             ORDER[2],
+#>             ANGLEUNIT["degree",0.0174532925199433]],
+#>     USAGE[
+#>         SCOPE["Horizontal component of 3D system."],
+#>         AREA["World."],
+#>         BBOX[-90,-180,90,180]],
+#>     ID["EPSG",4326]]
 ```
+
+<!--jn:toDo-->
+<!--explain the above result-->
 
 In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used:
 
 
 ```r
-new_vector = st_set_crs(new_vector, "EPSG:26912") # set CRS
-#> Warning: st_crs<- : replacing crs does not reproject data; use st_transform for
-#> that
+new_vector = st_set_crs(new_vector, "EPSG:4326") # set CRS
 ```
 
 The warning message informs us that the `st_set_crs()` function does not transform data from one CRS to another.
