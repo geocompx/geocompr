@@ -936,25 +936,17 @@ Both datums in Figure \@ref(fig:datum-fig) are put on top of a geoid - a model o
 
 ### Projected coordinate reference systems 
 
-<!--jn:toDo-->
-<!--reorder the below par-->
-
 \index{CRS!projected}
+All projected CRSs are based on a geographic CRS, described in the previous section, and rely on map projections to convert the three-dimensional surface of the Earth into Easting and Northing (x and y) values in a projected CRS.
 Projected CRSs are based on Cartesian coordinates on an implicitly flat surface (right panels of Figures \@ref(fig:vector-crs) and \@ref(fig:raster-crs)).
 They have an origin, x and y axes, and a linear unit of measurement such as meters.
-All projected CRSs are based on a geographic CRS, described in the previous section, and rely on map projections to convert the three-dimensional surface of the Earth into Easting and Northing (x and y) values in a projected CRS.
 
 This transition cannot be done without adding some deformations.
 Therefore, some properties of the Earth's surface are distorted in this process, such as area, direction, distance, and shape.
 A projected coordinate system can preserve only one or two of those properties.
 Projections are often named based on a property they preserve: equal-area preserves area, azimuthal preserve direction, equidistant preserve distance, and conformal preserve local shape.
-<!--jn:toDo-->
-<!--add info about projections trying to minimize all distortions-->
 
-<!--jn:toDo-->
-<!--consider adding new figure showing three main projection types-->
-
-There are three main groups of projection types - conic, cylindrical, and planar.
+There are three main groups of projection types - conic, cylindrical, and planar (azimuthal).
 In a conic projection, the Earth's surface is projected onto a cone along a single line of tangency or two lines of tangency. 
 Distortions are minimized along the tangency lines and rise with the distance from those lines in this projection.
 Therefore, it is the best suited for maps of mid-latitude areas.
@@ -964,6 +956,8 @@ Cylindrical projections are used most often when mapping the entire world.
 A planar projection projects data onto a flat surface touching the globe at a point or along a line of tangency. 
 It is typically used in mapping polar regions.
 `sf_proj_info(type = "proj")` gives a list of the available projections supported by the PROJ library.
+
+A quick summary of different projections, their types, properties, and suitability can be found in @_map_1993.
 
 <div class="figure" style="text-align: center">
 <img src="figures/02_vector_crs.png" alt="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for a vector data type." width="100%" />
@@ -980,14 +974,14 @@ It is typically used in mapping polar regions.
 \index{CRS!EPSG}
 \index{CRS!WKT2}
 \index{CRS!proj4string}
-Two recommend ways to describe CRSs in R are (a) Spatial Reference System Identifier (SRID) or (b) a `WKT2` definition.
+Two recommend ways to describe CRSs in R are (a) Spatial Reference System Identifiers (SRID) or (b) `WKT2` definitions.
 Both of these approaches have advantages and disadvantages. 
 
-<!--jn:toDo-->
-<!-- rephrase the following paragraph from `epsg` into SRID -->
-An `epsg` code is usually shorter, and therefore easier to remember. 
-The code also refers to only one, well-defined coordinate reference system. 
-
+A Spatial Reference System Identifier (SRID) is a unique value used to identify coordinate reference system definitions.
+The most popular registry of SRIDs is *EPSG*, however, other registries, such as *ESRI* or *OGR*, exist.
+For example, *EPSG:4326* represents the latitude/longitude WGS84 CRS, and *ESRI:54030* - Robinson projection.
+SRIDs are usually short and therefore easier to remember. 
+Each SRID is associated with a well-known text (WKT2^[<!--why 2?-->]) definition of the coordinate reference system. 
 
 <!--jn:toDo-->
 <!--add WKT2 paragraph-->
@@ -1005,6 +999,7 @@ The code also refers to only one, well-defined coordinate reference system.
 Spatial R packages support a wide range of CRSs and they use the long-established [PROJ](https://proj.org) library.
 <!--jn:toDo-->
 <!--mention websites and the crssuggest package-->
+<!-- https://epsg.org/home.html -->
 <!-- Other than searching for EPSG codes online, another quick way to find out about available CRSs is via the `rgdal::make_EPSG()` function, which outputs a data frame of available projections. -->
 <!-- Before going into more detail, it is worth learning how to view and filter them inside R, as this could save time trawling the internet. -->
 <!-- The following code will show available CRSs interactively, allowing you to filter ones of interest (try filtering for the OSGB CRSs for example): -->
