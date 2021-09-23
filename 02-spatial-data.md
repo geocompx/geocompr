@@ -909,8 +909,7 @@ Distances in geographic CRSs are therefore not measured in meters.
 This has important consequences, as demonstrated in Section \@ref(reproj-geo-data).
 
 The surface of the Earth in geographic coordinate systems is represented by a spherical or ellipsoidal surface.
-Spherical models assume that the Earth is a perfect sphere of a given radius.
-Spherical models have the advantage of simplicity but, at the same time, they are inaccurate: the Earth is not a sphere!
+Spherical models assume that the Earth is a perfect sphere of a given radius -- they have the advantage of simplicity but, at the same time, they are inaccurate: the Earth is not a sphere!
 Ellipsoidal models are defined by two parameters: the equatorial radius and the polar radius.
 These are suitable because the Earth is compressed: the equatorial radius is around 11.5 km longer than the polar radius [@maling_coordinate_1992].^[
 The degree of compression is often referred to as *flattening*, defined in terms of the equatorial radius ($a$) and polar radius ($b$) as follows: $f = (a - b) / a$. The terms *ellipticity* and *compression* can also be used.
@@ -918,19 +917,22 @@ Because $f$ is a rather small value, digital ellipsoid models use the 'inverse f
 Values of $a$ and $rf$ in various ellipsoidal models can be seen by executing `sf_proj_info(type = "ellps")`.
 ]
 
-<!--jn:toDo-->
-<!-- consider adding a new graphic with ellipsoid (left panel) -->
-<!-- and two datums on an ellipsoid (right panel) -->
-
 Ellipsoids are part of a wider component of CRSs: the *datum*.
 This contains information on what ellipsoid to use and the precise relationship between the Cartesian coordinates and location on the Earth's surface.
-<!-- These additional details are stored in the `towgs84` argument of [proj4string](https://proj.org/operations/conversions/latlon.html) notation (see [proj.org/usage/projections.html](https://proj.org/usage/projections.html) for details). -->
-<!-- These allow local variations in Earth's surface, for example due to large mountain ranges, to be accounted for in a local CRS. -->
-There are two types of datum --- geocentric and local.
-In a *geocentric datum*,  such as `WGS84`, the center is the Earth's center of gravity and the accuracy of projections is not optimized for a specific location.
-In a *local datum*, such as `NAD83`, the ellipsoidal surface is shifted to align with the surface at a particular location.
-<!--jn:toDo-->
-<!--expand-->
+There are two types of datum --- geocentric (such as `WGS84`) and local (such as `NAD83`).
+You can see examples of these two types of datums in Figure \@ref(fig:datum-fig).
+Black lines represent a *geocentric datum*, which center is located in the Earth's center of gravity and is not optimized for a specific location.
+In a *local datum*, shown as a purple dashed line, the ellipsoidal surface is shifted to align with the surface at a particular location.
+These allow local variations in Earth's surface, for example due to large mountain ranges, to be accounted for in a local CRS.
+This can be seen in Figure \@ref(fig:datum-fig), where the local datum is fitted to the area of Philippines, but is misaligned with most of the rest of the planet's surface. 
+Both datums in Figure \@ref(fig:datum-fig) are put on top of a geoid - a model of global mean sea level.^[Please note that the geoid on the Figure exaggerates the bumpy surface of the geoid by a factor of 10,000 to highlight the irregular shape of the planet.]
+
+(ref:datum-fig) Geocentric and local geodetic datums shown on top of a geoid (in false color and the vertical exaggeration by 10,000 scale factor). Image of the geoid is adapted from the work of @essd-11-647-2019.
+
+<div class="figure" style="text-align: center">
+<img src="figures/02_datum_fig.png" alt="(ref:datum-fig)" width="100%" />
+<p class="caption">(\#fig:datum-fig)(ref:datum-fig)</p>
+</div>
 
 ### Projected coordinate reference systems 
 
