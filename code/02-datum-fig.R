@@ -22,7 +22,7 @@ gg_geo = ggplot() +
            curvature = -0.3, arrow = arrow(length = unit(2, "mm")),
            color = pals[1]) +
   annotate(geom = "text", x = -0.31, y = 1.4,
-           label = "Earth-centered\ndatum", hjust = "right",
+           label = "Geocentric\ndatum", hjust = "right",
            color = pals[1]) +
   coord_equal(clip = "off") +
   theme_void()
