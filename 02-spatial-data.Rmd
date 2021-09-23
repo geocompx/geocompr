@@ -881,14 +881,15 @@ knitr::include_graphics("figures/02_vector_crs.png")
 \index{CRS!EPSG}
 \index{CRS!WKT2}
 \index{CRS!proj4string}
-Two recommend ways to describe CRSs in R are (a) Spatial Reference System Identifiers (SRID) or (b) `WKT2` definitions.
+Spatial R packages support a wide range of CRSs and they use the long-established [PROJ](https://proj.org) library.
+Two recommend ways to describe CRSs in R are (a) Spatial Reference System Identifiers (SRID) or (b) well-known text (WKT2^[<!--why 2?-->]) definitions.
 Both of these approaches have advantages and disadvantages. 
 
 A Spatial Reference System Identifier (SRID) is a unique value used to identify coordinate reference system definitions.
 The most popular registry of SRIDs is *EPSG*, however, other registries, such as *ESRI* or *OGR*, exist.
 For example, *EPSG:4326* represents the latitude/longitude WGS84 CRS, and *ESRI:54030* - Robinson projection.
 SRIDs are usually short and therefore easier to remember. 
-Each SRID is associated with a well-known text (WKT2^[<!--why 2?-->]) definition of the coordinate reference system. 
+Each SRID is associated with a well-known text (WKT2) definition of the coordinate reference system. 
 
 <!--jn:toDo-->
 <!--add WKT2 paragraph-->
@@ -903,7 +904,7 @@ Each SRID is associated with a well-known text (WKT2^[<!--why 2?-->]) definition
 <!-- This also makes the `proj4string` approach more complicated. -->
 <!-- `epsg` points to exactly one particular CRS. -->
 
-Spatial R packages support a wide range of CRSs and they use the long-established [PROJ](https://proj.org) library.
+
 <!--jn:toDo-->
 <!--mention websites and the crssuggest package-->
 <!-- https://epsg.org/home.html -->
@@ -916,24 +917,28 @@ Spatial R packages support a wide range of CRSs and they use the long-establishe
 <!-- View(crs_data) -->
 <!-- ``` -->
 
-In **sf** the CRS of an object can be retrieved using `st_crs()`.
+Let's look at how CRSs are stored in R spatial objects.
 For this, we need to read-in a vector dataset:
 
 ```{r 02-spatial-data-52, message=FALSE, results='hide'}
-vector_filepath = system.file("vector/zion.gpkg", package = "spDataLarge")
-new_vector = st_read(vector_filepath)
+vector_filepath = system.file("shapes/world.gpkg", package = "spData")
+new_vector = read_sf(vector_filepath)
 ```
 
 Our new object, `new_vector`, is a polygon representing the borders of Zion National Park (`?zion`).
+In **sf** the CRS of an object can be retrieved using `st_crs()`.
 
-```{r 02-spatial-data-53, eval=TRUE}
+```{r 02-spatial-data-53}
 st_crs(new_vector) # get CRS
 ```
+
+<!--jn:toDo-->
+<!--explain the above result-->
 
 In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used:
 
 ```{r 02-spatial-data-54}
-new_vector = st_set_crs(new_vector, "EPSG:26912") # set CRS
+new_vector = st_set_crs(new_vector, "EPSG:4326") # set CRS
 ```
 
 The warning message informs us that the `st_set_crs()` function does not transform data from one CRS to another.
