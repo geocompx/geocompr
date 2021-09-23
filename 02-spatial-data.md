@@ -891,6 +891,10 @@ multi_rast34 = c(multi_rast3, multi_rast4)
 This has a significant side-effect -- they cannot be directly saved to `".rds"` or `".rda"` files or used in cluster computing.
 In these cases, there are two possible solutions: (1) use of the `wrap()` function that creates a special kind of temporary object that can be saved as an R object or using in cluster computing, or (2) save the object as a regular raster with `writeRaster()`.</div>\EndKnitrBlock{rmdnote}
 
+<!--jn:toDo-->
+<!--consider new section with other data models-->
+<!-- e.g. point clouds, data cubes, meshes, etc. -->
+
 ## Coordinate Reference Systems {#crs-intro}
 
 \index{CRS!introduction}
