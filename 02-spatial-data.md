@@ -1014,7 +1014,7 @@ vector_filepath = system.file("shapes/world.gpkg", package = "spData")
 new_vector = read_sf(vector_filepath)
 ```
 
-Our new object, `new_vector`, is a polygon representing the borders of Zion National Park (`?zion`).
+Our new object, `new_vector`, is a polygon representing a world map data (`?spData::world`).
 In **sf** the CRS of an object can be retrieved using `st_crs()`.
 
 
@@ -1053,7 +1053,8 @@ In cases when a coordinate reference system (CRS) is missing or the wrong CRS is
 new_vector = st_set_crs(new_vector, "EPSG:4326") # set CRS
 ```
 
-The warning message informs us that the `st_set_crs()` function does not transform data from one CRS to another.
+<!--jn:toDo-->
+<!--explain ways to set the new crs-->
 
 The `crs()` function can be used to access CRS information from a `SpatRaster` object: 
 
@@ -1063,12 +1064,15 @@ crs(my_rast) # get CRS
 #> [1] "GEOGCRS[\"WGS 84\",\n    DATUM[\"World Geodetic System 1984\",\n        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n            LENGTHUNIT[\"metre\",1]]],\n    PRIMEM[\"Greenwich\",0,\n        ANGLEUNIT[\"degree\",0.0174532925199433]],\n    CS[ellipsoidal,2],\n        AXIS[\"geodetic latitude (Lat)\",north,\n            ORDER[1],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        AXIS[\"geodetic longitude (Lon)\",east,\n            ORDER[2],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n    ID[\"EPSG\",4326]]"
 ```
 
+<!--jn:toDo-->
+<!--explain the above result-->
+<!-- consider opening a new terra issue -->
+
 The same function, `crs()`, is used to set a CRS for raster objects.
 
 
 ```r
-my_rast2 = my_rast
-crs(my_rast2) = "EPSG:26912" # set CRS
+crs(my_rast) = "EPSG:26912" # set CRS
 ```
 
 Importantly, the `st_crs()` and `crs()` functions do not alter coordinates' values or geometries.
