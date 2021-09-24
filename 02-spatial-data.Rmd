@@ -908,25 +908,7 @@ PROJ version 6 and further still allows to use `proj4string`s to define coordina
 Importantly, `proj4string`s are not used to store CRSs anymore.
 Longer explanations on the recent changes in the PROJ library and why `proj4string` was replaced by `WKT2` can be found in @bivand_progress_2020a, Chapter 2 of @pebesma_spatial_2022, and [blog post by Floris Vanderhaeghe](https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/).
 
-<!--jn:toDo-->
-<!--mention websites and the crssuggest package-->
-<!-- https://epsg.org/home.html -->
-
-<!--     Custom CRSs are also ideally specified as WKT2 -->
-<!--     https://epsg.io/ -->
-<!--     https://spatialreference.org/ref/epsg/ -->
-<!--     https://epsg.org/home.html -->
-
-<!-- Other than searching for EPSG codes online, another quick way to find out about available CRSs is via the `rgdal::make_EPSG()` function, which outputs a data frame of available projections. -->
-<!-- Before going into more detail, it is worth learning how to view and filter them inside R, as this could save time trawling the internet. -->
-<!-- The following code will show available CRSs interactively, allowing you to filter ones of interest (try filtering for the OSGB CRSs for example): -->
-
-<!-- ```{r 02-spatial-data-51, eval=FALSE} -->
-<!-- crs_data = rgdal::make_EPSG() -->
-<!-- View(crs_data) -->
-<!-- ``` -->
-
-Let's look at how CRSs are stored in R spatial objects.
+Let's look at how CRSs are stored in R spatial objects and how they can be set.
 For this, we need to read-in a vector dataset:
 
 ```{r 02-spatial-data-52, message=FALSE, results='hide'}
@@ -941,8 +923,14 @@ In **sf** the CRS of an object can be retrieved using `st_crs()`.
 st_crs(new_vector) # get CRS
 ```
 
+CRS in the `sf` objects is a list of two elements - `input` and `wkt`.
+The `input` element is quite flexible, and depending on the input file or user input, can contain SRID representation (e.g., `"EPSG:4326"`), CRS's name (e.g., `"WGS84"`), or even `proj4string` definition.
+The `wkt` element stores the WKT2 representation, which is used when saving the object to a file or doing any coordinate operations.
+Above, we can see that the `new_vector` object has the WGS84 ellipsoid, uses the Greenwich prime meridian, and the latitude and longitude axis order.
+In this case, we also have some additional elements, such as `USAGE` explaining the area suitable for the use of this CRS, and `ID` pointing to the CRS's SRID - `"EPSG:4326"`.
+
 <!--jn:toDo-->
-<!--explain the above result-->
+<!--st_crs()$-->
 
 In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used:
 
@@ -972,6 +960,24 @@ crs(my_rast) = "EPSG:26912" # set CRS
 Importantly, the `st_crs()` and `crs()` functions do not alter coordinates' values or geometries.
 Their role is only to set a metadata information about the object CRS.
 We will expand on CRSs and explain how to project from one CRS to another in Chapter \@ref(reproj-geo-data).
+
+<!--jn:toDo-->
+<!--mention websites and the crssuggest package-->
+<!-- https://epsg.org/home.html -->
+
+<!--     Custom CRSs are also ideally specified as WKT2 -->
+<!--     https://epsg.io/ -->
+<!--     https://spatialreference.org/ref/epsg/ -->
+<!--     https://epsg.org/home.html -->
+
+<!-- Other than searching for EPSG codes online, another quick way to find out about available CRSs is via the `rgdal::make_EPSG()` function, which outputs a data frame of available projections. -->
+<!-- Before going into more detail, it is worth learning how to view and filter them inside R, as this could save time trawling the internet. -->
+<!-- The following code will show available CRSs interactively, allowing you to filter ones of interest (try filtering for the OSGB CRSs for example): -->
+
+<!-- ```{r 02-spatial-data-51, eval=FALSE} -->
+<!-- crs_data = rgdal::make_EPSG() -->
+<!-- View(crs_data) -->
+<!-- ``` -->
 
 ## Units
 
