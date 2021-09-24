@@ -9,10 +9,6 @@ dir.create(path = Sys.getenv("R_LIBS_USER"), showWarnings = FALSE, recursive = T
 update.packages(ask = FALSE, instlib = Sys.getenv("R_LIBS_USER"))
 
 # install the usual suspects
-install.packages(c("rmd", "tidyverse", "addinslist"), dependencies=TRUE)
+install.packages(c("remotes"), dependencies=TRUE)
 
-# helpers
-install.packages("formatR", dependencies=TRUE) # knitr uses this to format code; see https://yihui.org/knitr/
-
-# the rest
-install.packages(c("revealjs", "tufte", "distill", "DiagrammeR", "DiagrammeRsvg", "rsvg"), dependencies=TRUE)
+remotes::install_github("geocompr/geocompkg")
