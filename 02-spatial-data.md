@@ -974,32 +974,37 @@ A quick summary of different projections, their types, properties, and suitabili
 \index{CRS!WKT2}
 \index{CRS!proj4string}
 Spatial R packages support a wide range of CRSs and they use the long-established [PROJ](https://proj.org) library.
-Two recommend ways to describe CRSs in R are (a) Spatial Reference System Identifiers (SRID) or (b) well-known text (WKT2^[<!--why 2?-->]) definitions.
+Two recommend ways to describe CRSs in R are (a) Spatial Reference System Identifier (SRID) or (b) well-known text (known as WKT2^[
+Several WKT dialects were created to describe CRSs, including ESRI WKT, GDAL WKT1, and the current WKT2:2018 [@lott_geographic_2015]]) definitions.
 Both of these approaches have advantages and disadvantages. 
 
-A Spatial Reference System Identifier (SRID) is a unique value used to identify coordinate reference system definitions.
+A SRID is a unique value used to identify coordinate reference system definitions in a form of *AUTHORITY:CODE*.
 The most popular registry of SRIDs is *EPSG*, however, other registries, such as *ESRI* or *OGR*, exist.
 For example, *EPSG:4326* represents the latitude/longitude WGS84 CRS, and *ESRI:54030* - Robinson projection.
 SRIDs are usually short and therefore easier to remember. 
 Each SRID is associated with a well-known text (WKT2) definition of the coordinate reference system. 
 
-<!--jn:toDo-->
-<!--add WKT2 paragraph-->
+A WKT2 describes coordinate reference systems (CRSs) and coordinates operations between them in the form of well-known text strings.
+It is exhaustive, detailed, and precise (as you can see later in this section), allowing for unambiguous CRSs storage and transformations.
+It consists of all information about any given CRS, including its datum and ellipsoid, prime meridian, projection, units, etc.
+This feature also makes the WKT2 approach more complicated
+and usually too complex to be manually defined.
 
-<!--jn:toDo-->
-<!--add proj4string paragraph-->
-
-<!-- On the other hand, a `proj4string` definition allows you more flexibility when it comes to specifying different parameters such as the projection type, the datum and the ellipsoid.^[ -->
-<!-- A complete list of the `proj4string` parameters can be found at https://proj.org. -->
-<!-- ]  -->
-<!-- This way you can specify many different projections, and modify existing ones. -->
-<!-- This also makes the `proj4string` approach more complicated. -->
-<!-- `epsg` points to exactly one particular CRS. -->
-
+In the past, the `proj4string` definitions, was the standard way to specify coordinate operations and store CRSs.
+These string representations, built on a key=value form (e.g, `+proj=longlat +datum=WGS84 +no_defs`), are, however, currently discouraged in most cases.
+PROJ version 6 and further still allows to use `proj4string`s to define coordinate operations, but some `proj4string` keys are no longer supported or are not advisable to use (e.g., `+nadgrids`, `+towgs84`, `+k`, `+init=epsg:`) and only three datums (i.e., WGS84, NAD83, and NAD27) can be directly set in `proj4string`.
+Importantly, `proj4string`s are not used to store CRSs anymore.
+Longer explanations on the recent changes in the PROJ library and why `proj4string` was replaced by `WKT2` can be found in @bivand_progress_2020a, Chapter 2 of @pebesma_spatial_2022, and [blog post by Floris Vanderhaeghe](https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/).
 
 <!--jn:toDo-->
 <!--mention websites and the crssuggest package-->
 <!-- https://epsg.org/home.html -->
+
+<!--     Custom CRSs are also ideally specified as WKT2 -->
+<!--     https://epsg.io/ -->
+<!--     https://spatialreference.org/ref/epsg/ -->
+<!--     https://epsg.org/home.html -->
+
 <!-- Other than searching for EPSG codes online, another quick way to find out about available CRSs is via the `rgdal::make_EPSG()` function, which outputs a data frame of available projections. -->
 <!-- Before going into more detail, it is worth learning how to view and filter them inside R, as this could save time trawling the internet. -->
 <!-- The following code will show available CRSs interactively, allowing you to filter ones of interest (try filtering for the OSGB CRSs for example): -->

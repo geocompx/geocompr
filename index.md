@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2021-09-23'
+date: '2021-09-24'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -38,7 +38,7 @@ The online version of the book is hosted at [geocompr.robinlovelace.net](https:/
 
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
 
-This version of the book was built on GH Actions on 2021-09-23.
+This version of the book was built on GH Actions on 2021-09-24.
 
 ## How to contribute? {-}
 
