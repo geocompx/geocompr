@@ -9,6 +9,6 @@ dir.create(path = Sys.getenv("R_LIBS_USER"), showWarnings = FALSE, recursive = T
 update.packages(ask = FALSE, instlib = Sys.getenv("R_LIBS_USER"))
 
 # install the usual suspects
-install.packages(c("remotes", "sf"))
+install.packages(c("remotes"))
 
-# remotes::install_github("geocompr/geocompkg")
+remotes::install_github("geocompr/geocompkg")
