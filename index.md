@@ -8,7 +8,7 @@ documentclass: krantz
 monofont: "Source Code Pro"
 monofontoptions: "Scale=0.7"
 bibliography:
-  - refs.bib
+  - geocompr.bib
   - packages.bib
 biblio-style: apalike
 link-citations: yes
