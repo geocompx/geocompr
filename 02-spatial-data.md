@@ -1045,6 +1045,7 @@ For example, try to run `st_crs(new_vector)$IsGeographic` to check is the CRS is
 Moreover, `st_crs(new_vector)$epsg` can extract the EPSG code and `st_crs(new_vector)$proj4string` - a `proj4string` representation.
 <!--jn:toDo-->
 <!--st_crs("OGC:CRS84")$epsg - sf issue-->
+<!-- https://github.com/r-spatial/sf/issues/1804 -->
 
 In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used:
 
@@ -1066,7 +1067,7 @@ crs(my_rast) # get CRS
 
 <!--jn:toDo-->
 <!--explain the above result-->
-<!-- consider opening a new terra issue -->
+<!-- https://github.com/rspatial/terra/issues/344 -->
 
 The same function, `crs()`, is used to set a CRS for raster objects.
 
