@@ -5,10 +5,8 @@
 
 <!-- badges: start -->
 
-[![Launch Rstudio
-Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/main?urlpath=rstudio)
-[![Launch Rstudio
-Cloud](images/cloud.png)](https://rstudio.cloud/project/1642300)
+[![Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/main?urlpath=rstudio)
+[![RstudioCloud](images/cloud.png)](https://rstudio.cloud/project/1642300)
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
 [![Docker](https://img.shields.io/docker/automated/robinlovelace/geocompr.svg)](https://hub.docker.com/r/robinlovelace/geocompr/builds/)
 [![discord](https://img.shields.io/discord/878051191374876683?label=discord&logo=Discord&color=blue)](https://discord.gg/Te3gWeDwmf)
