@@ -54,8 +54,24 @@ Maintainers and contributors must follow this repository’s [CODE OF CONDUCT](h
 
 ## Reproducibility {-}
 
-To reproduce the code in the book, you need a recent version of [R](https://cran.r-project.org/) and up-to-date packages.
-These can be installed with the following command (which requires [**remotes**](https://github.com/r-lib/remotes) to be installed):
+The quickest way to reproduce the contents of the book if you're new to geographic data in R may be in the web browser, thanks to [Binder](https://mybinder.org/).
+Clicking on the link below should open a new window containing RStudio Server in your web browser, enabling you to open chapter files and running code chunks to test that the code is reproducible.
+
+[![Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/main?urlpath=rstudio)
+
+If you see something like the image below, congratulations, it's worked and you can start exploring Geocomputation with R in a cloud-based environment (while being aware of [mybinder.org user guidelines](https://mybinder.readthedocs.io/en/latest/about/user-guidelines.html)):
+
+<!-- ![](https://user-images.githubusercontent.com/1825120/134802314-6dd368c7-f5eb-4cd7-b8ff-428dfa93954c.png) -->
+
+
+<div class="figure" style="text-align: center">
+<img src="https://user-images.githubusercontent.com/1825120/134802314-6dd368c7-f5eb-4cd7-b8ff-428dfa93954c.png" alt="Screenshot of reproducible code contained in Geocomputation with R running in RStudio Server on a browser served by Binder" width="100%" />
+<p class="caption">(\#fig:index-2-4)Screenshot of reproducible code contained in Geocomputation with R running in RStudio Server on a browser served by Binder</p>
+</div>
+
+
+To reproduce the code in the book on your own computer, you need a recent version of [R](https://cran.r-project.org/) and up-to-date packages.
+These can be installed using the [**remotes**](https://github.com/r-lib/remotes) package.
 
 
 ```r
@@ -68,6 +84,14 @@ remotes::install_github("nowosad/spDataLarge")
 # other packages to build the book, e.g.:
 remotes::install_github("rspatial/terra")
 remotes::install_github("mtennekes/tmap")
+```
+
+After installing the book's dependencies, you should be able to reproduce code chunks in each of the book's chapters.
+If you clone the book's repo and navigate into the `geocompr` folder, you should be able to reproduce the contents with the following command:
+
+
+```r
+bookdown::serve_book()
 ```
 
 
