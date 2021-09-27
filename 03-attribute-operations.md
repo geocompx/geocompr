@@ -612,9 +612,10 @@ class(world_data)
 ```
 
 ## Manipulating raster objects
+<!--jn-->
 
 In contrast to the vector data model underlying simple features (which represents points, lines and polygons as discrete entities in space), raster data represent continuous surfaces.
-This section shows how raster objects work by creating them *from scratch*, building on Section \@ref(an-introduction-to-raster).
+This section shows how raster objects work by creating them *from scratch*, building on Section \@ref(an-introduction-to-terra).
 Because of their unique structure, subsetting and other operations on raster datasets work in a different way, as demonstrated in Section \@ref(raster-subsetting).
 \index{raster!manipulation}
 
@@ -642,15 +643,7 @@ grain = rast(nrows = 6, ncols = 6, resolution = 0.5,
              vals = grain_fact)
 ```
 
-<!--jn:toDo-->
-<!-- update after spData update to read from files -->
 
-
-\BeginKnitrBlock{rmdnote}<div class="rmdnote">`SpatRaster` objects can contain values of class `numeric`, `integer`, `logical` or `factor`, but not `character`.
-To use character values, they are first be converted into an appropriate class, for example using the function `factor()`. 
-The `levels` argument was used in the preceding code chunk to create an ordered factor:
-clay < silt < sand in terms of grain size.
-See the Data structures chapter of @wickham_advanced_2014 for further details on classes.</div>\EndKnitrBlock{rmdnote}
 
 <!--jn:toDo-->
 <!-- fix the next paragraph -->
@@ -759,11 +752,8 @@ In case a visualization function does not work with raster objects, one can extr
 Descriptive raster statistics belong to the so-called global raster operations.
 These and other typical raster processing operations are part of the map algebra scheme, which are covered in the next chapter (Section \@ref(map-algebra)).
 
-<!--jn:toDo-->
-<!--think about updating the below block, as the select function is not longer a part of terra-->
-
 <div class="rmdnote">
-<p>Some function names clash between packages (e.g., <code>select()</code>, as discussed in a previous note). In addition to not loading packages by referring to functions verbosely (e.g., <code>dplyr::select()</code>), another way to prevent function names clashes is by unloading the offending package with <code>detach()</code>. The following command, for example, unloads the <strong>raster</strong> package (this can also be done in the <em>package</em> tab which resides by default in the right-bottom pane in RStudio): <code>detach("package:raster", unload = TRUE, force = TRUE)</code>. The <code>force</code> argument makes sure that the package will be detached even if other packages depend on it. This, however, may lead to a restricted usability of packages depending on the detached package, and is therefore not recommended.</p>
+<p>Some function names clash between packages (e.g., a function with the name <code>extract()</code> exist in both <strong>terra</strong> and <strong>tidyr</strong> packages). In addition to not loading packages by referring to functions verbosely (e.g., <code>tidyr::extract()</code>), another way to prevent function names clashes is by unloading the offending package with <code>detach()</code>. The following command, for example, unloads the <strong>terra</strong> package (this can also be done in the <em>package</em> tab which resides by default in the right-bottom pane in RStudio): <code>detach("package:terra", unload = TRUE, force = TRUE)</code>. The <code>force</code> argument makes sure that the package will be detached even if other packages depend on it. This, however, may lead to a restricted usability of packages depending on the detached package, and is therefore not recommended.</p>
 </div>
 
 ## Exercises
