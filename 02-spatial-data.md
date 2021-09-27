@@ -1041,8 +1041,12 @@ Above, we can see that the `new_vector` object has the WGS84 ellipsoid, uses the
 In this case, we also have some additional elements, such as `USAGE` explaining the area suitable for the use of this CRS, and `ID` pointing to the CRS's SRID - `"EPSG:4326"`.
 
 The `st_crs` function also has one helpful feature -- we can retrieve some additional information about the used CRS. 
-For example, try to run `st_crs(new_vector)$IsGeographic` to check is the CRS is geographic or not, or  `st_crs(new_vector)$units_gdal` to find out the CRS units.
-Moreover, `st_crs(new_vector)$srid` can extract its SRID (when available) and `st_crs(new_vector)$proj4string` - the `proj4string` representation.
+For example, try to run:
+
+- `st_crs(new_vector)$IsGeographic` to check is the CRS is geographic or not
+- `st_crs(new_vector)$units_gdal` to find out the CRS units
+- `st_crs(new_vector)$srid` extracts its SRID (when available)
+- `st_crs(new_vector)$proj4string` extracts the `proj4string` representation
 
 In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used:
 
@@ -1062,11 +1066,8 @@ crs(my_rast) # get CRS
 ```
 
 The output is the WKT2 representation of CRS. 
-<!--jn:toDo-->
-<!--explain the above result-->
-<!-- https://github.com/rspatial/terra/issues/344 -->
 
-The same function, `crs()`, is used to set a CRS for raster objects.
+The same function, `crs()`, is can be also used to set a CRS for raster objects.
 
 
 ```r
@@ -1080,6 +1081,7 @@ Their role is only to set a metadata information about the object CRS.
 We will expand on CRSs and explain how to project from one CRS to another in Chapter \@ref(reproj-geo-data).
 
 ## Units
+<!--rl-->
 
 <!-- https://cran.r-project.org/web/packages/units/vignettes/measurement_units_in_R.html -->
 An important feature of CRSs is that they contain information about spatial units.
