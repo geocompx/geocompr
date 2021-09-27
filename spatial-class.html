@@ -996,42 +996,26 @@ Above, we can see that the <code>new_vector</code> object has the WGS84 ellipsoi
 In this case, we also have some additional elements, such as <code>USAGE</code> explaining the area suitable for the use of this CRS, and <code>ID</code> pointing to the CRS’s SRID - <code>"EPSG:4326"</code>.</p>
 <p>The <code>st_crs</code> function also has one helpful feature – we can retrieve some additional information about the used CRS.
 For example, try to run <code>st_crs(new_vector)$IsGeographic</code> to check is the CRS is geographic or not, or <code>st_crs(new_vector)$units_gdal</code> to find out the CRS units.
-Moreover, <code>st_crs(new_vector)$epsg</code> can extract the EPSG code and <code>st_crs(new_vector)$proj4string</code> - a <code>proj4string</code> representation.
-<!--jn:toDo-->
-<!--st_crs("OGC:CRS84")$epsg - sf issue-->
-<!-- https://github.com/r-spatial/sf/issues/1804 --></p>
+Moreover, <code>st_crs(new_vector)$srid</code> can extract its SRID (when available) and <code>st_crs(new_vector)$proj4string</code> - the <code>proj4string</code> representation.</p>
 <p>In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs()</a></code> function can be used:</p>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">new_vector</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs</a></span><span class="op">(</span><span class="va">new_vector</span>, <span class="st">"EPSG:4326"</span><span class="op">)</span> <span class="co"># set CRS</span></code></pre></div>
-<!--jn:toDo-->
-<!--explain ways to set the new crs-->
+<p>The second argument in the above function could be either SRID (<code>"EPSG:4326"</code> in the example), complete WKT2 representation, <code>proj4string</code>, or CRS extracted from the existing object with <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>.</p>
 <p>The <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> function can be used to access CRS information from a <code>SpatRaster</code> object:</p>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span> <span class="co"># get CRS</span>
 <span class="co">#&gt; [1] "GEOGCRS[\"WGS 84\",\n    DATUM[\"World Geodetic System 1984\",\n        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n            LENGTHUNIT[\"metre\",1]]],\n    PRIMEM[\"Greenwich\",0,\n        ANGLEUNIT[\"degree\",0.0174532925199433]],\n    CS[ellipsoidal,2],\n        AXIS[\"geodetic latitude (Lat)\",north,\n            ORDER[1],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        AXIS[\"geodetic longitude (Lon)\",east,\n            ORDER[2],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n    ID[\"EPSG\",4326]]"</span></code></pre></div>
+<p>The output is the WKT2 representation of CRS.
 <!--jn:toDo-->
 <!--explain the above result-->
-<!-- https://github.com/rspatial/terra/issues/344 -->
+<!-- https://github.com/rspatial/terra/issues/344 --></p>
 <p>The same function, <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code>, is used to set a CRS for raster objects.</p>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span> <span class="op">=</span> <span class="st">"EPSG:26912"</span> <span class="co"># set CRS</span></code></pre></div>
+<p>Here, we can use either SRID, complete WKT2 representation, <code>proj4string</code>, or CRS extracted from other existing object with <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code>.</p>
 <p>Importantly, the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> functions do not alter coordinates’ values or geometries.
 Their role is only to set a metadata information about the object CRS.
 We will expand on CRSs and explain how to project from one CRS to another in Chapter <a href="reproj-geo-data.html#reproj-geo-data">6</a>.</p>
-<!--jn:toDo-->
-<!--mention websites and the crssuggest package-->
-<!-- https://epsg.org/home.html -->
-<!--     Custom CRSs are also ideally specified as WKT2 -->
-<!--     https://epsg.io/ -->
-<!--     https://spatialreference.org/ref/epsg/ -->
-<!--     https://epsg.org/home.html -->
-<!-- Other than searching for EPSG codes online, another quick way to find out about available CRSs is via the `rgdal::make_EPSG()` function, which outputs a data frame of available projections. -->
-<!-- Before going into more detail, it is worth learning how to view and filter them inside R, as this could save time trawling the internet. -->
-<!-- The following code will show available CRSs interactively, allowing you to filter ones of interest (try filtering for the OSGB CRSs for example): -->
-<!-- ```{r 02-spatial-data-51, eval=FALSE} -->
-<!-- crs_data = rgdal::make_EPSG() -->
-<!-- View(crs_data) -->
-<!-- ``` -->
 </div>
 </div>
 <div id="units" class="section level2">
@@ -1176,7 +1160,7 @@ What kind of information can you get about the properties of this file?</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-09-26.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-09-27.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

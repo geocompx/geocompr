@@ -164,6 +164,15 @@ st_distance(london2, london_proj)
 
 ## Which CRS to use?
 
+<!--jn:toDo-->
+<!--mention websites and the crssuggest package-->
+<!-- https://epsg.org/home.html -->
+
+<!--     Custom CRSs are also ideally specified as WKT2 -->
+<!--     https://epsg.io/ -->
+<!--     https://spatialreference.org/ref/epsg/ -->
+<!--     https://epsg.org/home.html -->
+
 \index{CRS!reprojection} 
 \index{projection!World Geodetic System}
 The question of *which CRS* is tricky, and there is rarely a 'right' answer:

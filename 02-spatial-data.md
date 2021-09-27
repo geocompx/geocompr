@@ -1042,10 +1042,7 @@ In this case, we also have some additional elements, such as `USAGE` explaining 
 
 The `st_crs` function also has one helpful feature -- we can retrieve some additional information about the used CRS. 
 For example, try to run `st_crs(new_vector)$IsGeographic` to check is the CRS is geographic or not, or  `st_crs(new_vector)$units_gdal` to find out the CRS units.
-Moreover, `st_crs(new_vector)$epsg` can extract the EPSG code and `st_crs(new_vector)$proj4string` - a `proj4string` representation.
-<!--jn:toDo-->
-<!--st_crs("OGC:CRS84")$epsg - sf issue-->
-<!-- https://github.com/r-spatial/sf/issues/1804 -->
+Moreover, `st_crs(new_vector)$srid` can extract its SRID (when available) and `st_crs(new_vector)$proj4string` - the `proj4string` representation.
 
 In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used:
 
@@ -1054,8 +1051,7 @@ In cases when a coordinate reference system (CRS) is missing or the wrong CRS is
 new_vector = st_set_crs(new_vector, "EPSG:4326") # set CRS
 ```
 
-<!--jn:toDo-->
-<!--explain ways to set the new crs-->
+The second argument in the above function could be either SRID (`"EPSG:4326"` in the example), complete WKT2 representation, `proj4string`, or CRS extracted from the existing object with `st_crs()`.
 
 The `crs()` function can be used to access CRS information from a `SpatRaster` object: 
 
@@ -1065,6 +1061,7 @@ crs(my_rast) # get CRS
 #> [1] "GEOGCRS[\"WGS 84\",\n    DATUM[\"World Geodetic System 1984\",\n        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n            LENGTHUNIT[\"metre\",1]]],\n    PRIMEM[\"Greenwich\",0,\n        ANGLEUNIT[\"degree\",0.0174532925199433]],\n    CS[ellipsoidal,2],\n        AXIS[\"geodetic latitude (Lat)\",north,\n            ORDER[1],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        AXIS[\"geodetic longitude (Lon)\",east,\n            ORDER[2],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n    ID[\"EPSG\",4326]]"
 ```
 
+The output is the WKT2 representation of CRS. 
 <!--jn:toDo-->
 <!--explain the above result-->
 <!-- https://github.com/rspatial/terra/issues/344 -->
@@ -1076,27 +1073,11 @@ The same function, `crs()`, is used to set a CRS for raster objects.
 crs(my_rast) = "EPSG:26912" # set CRS
 ```
 
+Here, we can use either SRID, complete WKT2 representation, `proj4string`, or CRS extracted from other existing object with `crs()`.
+
 Importantly, the `st_crs()` and `crs()` functions do not alter coordinates' values or geometries.
 Their role is only to set a metadata information about the object CRS.
 We will expand on CRSs and explain how to project from one CRS to another in Chapter \@ref(reproj-geo-data).
-
-<!--jn:toDo-->
-<!--mention websites and the crssuggest package-->
-<!-- https://epsg.org/home.html -->
-
-<!--     Custom CRSs are also ideally specified as WKT2 -->
-<!--     https://epsg.io/ -->
-<!--     https://spatialreference.org/ref/epsg/ -->
-<!--     https://epsg.org/home.html -->
-
-<!-- Other than searching for EPSG codes online, another quick way to find out about available CRSs is via the `rgdal::make_EPSG()` function, which outputs a data frame of available projections. -->
-<!-- Before going into more detail, it is worth learning how to view and filter them inside R, as this could save time trawling the internet. -->
-<!-- The following code will show available CRSs interactively, allowing you to filter ones of interest (try filtering for the OSGB CRSs for example): -->
-
-<!-- ```{r 02-spatial-data-51, eval=FALSE} -->
-<!-- crs_data = rgdal::make_EPSG() -->
-<!-- View(crs_data) -->
-<!-- ``` -->
 
 ## Units
 
