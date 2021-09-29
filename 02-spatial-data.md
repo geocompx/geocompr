@@ -35,7 +35,7 @@ The necessary packages can be 'loaded' (technically they are attached) with the 
 
 ```r
 library(sf)          # classes and functions for vector data
-#> Linking to GEOS 3.9.0, GDAL 3.2.1, PROJ 7.2.1
+#> Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1
 ```
 
 The output from `library(sf)` reports which versions of key geographic libraries such as GEOS the package is using, as outlined in Section \@ref(intro-sf).
@@ -638,8 +638,8 @@ st_crs(points_sfc_wgs)
 #>             ORDER[2],
 #>             ANGLEUNIT["degree",0.0174532925199433]],
 #>     USAGE[
-#>         SCOPE["Horizontal component of 3D system."],
-#>         AREA["World."],
+#>         SCOPE["unknown"],
+#>         AREA["World"],
 #>         BBOX[-90,-180,90,180]],
 #>     ID["EPSG",4326]]
 ```
@@ -1028,8 +1028,8 @@ st_crs(new_vector) # get CRS
 #>             ORDER[2],
 #>             ANGLEUNIT["degree",0.0174532925199433]],
 #>     USAGE[
-#>         SCOPE["Horizontal component of 3D system."],
-#>         AREA["World."],
+#>         SCOPE["unknown"],
+#>         AREA["World"],
 #>         BBOX[-90,-180,90,180]],
 #>     ID["EPSG",4326]]
 ```

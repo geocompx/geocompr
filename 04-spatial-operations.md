@@ -112,8 +112,7 @@ Note: the solution involving `sgbp` objects is more generalisable though, as it 
 
 It should be noted that a logical  can also be used with `filter()` as follows (`sparse = FALSE` is explained in Section \@ref(topological-relations)):
 
-
-```r
+````r
 canterbury_height3 = nz_height %>%
   filter(st_intersects(x = ., y = canterbury, sparse = FALSE))
 ```
