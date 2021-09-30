@@ -781,7 +781,7 @@ my_rast
 #> dimensions  : 457, 465, 1  (nrow, ncol, nlyr)
 #> resolution  : 0.000833, 0.000833  (x, y)
 #> extent      : -113, -113, 37.1, 37.5  (xmin, xmax, ymin, ymax)
-#> coord. ref. : +proj=longlat +datum=WGS84 +no_defs 
+#> coord. ref. : lon/lat WGS 84 (EPSG:4326) 
 #> source      : srtm.tif 
 #> name        : srtm 
 #> min value   : 1024 
@@ -856,7 +856,7 @@ multi_rast
 #> dimensions  : 1428, 1128, 4  (nrow, ncol, nlyr)
 #> resolution  : 30, 30  (x, y)
 #> extent      : 301905, 335745, 4111245, 4154085  (xmin, xmax, ymin, ymax)
-#> coord. ref. : +proj=utm +zone=12 +datum=WGS84 +units=m +no_defs 
+#> coord. ref. : WGS 84 / UTM zone 12N (EPSG:32612) 
 #> source      : landsat.tif 
 #> names       : lan_1, lan_2, lan_3, lan_4 
 #> min values  :  7550,  6404,  5678,  5252 
@@ -1057,7 +1057,7 @@ new_vector = st_set_crs(new_vector, "EPSG:4326") # set CRS
 
 The second argument in the above function could be either SRID (`"EPSG:4326"` in the example), complete WKT2 representation, `proj4string`, or CRS extracted from the existing object with `st_crs()`.
 
-The `crs()` function can be used to access CRS information from a `SpatRaster` object: 
+The `crs()` function can be used to access CRS information from a `SpatRaster` object^[Use the `cat()` (e.g., `cat(crs(my_rast))`) function to print it nicely.]: 
 
 
 ```r

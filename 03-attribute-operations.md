@@ -636,8 +636,9 @@ The following code creates a raster representing grain sizes (Figure \@ref(fig:c
 
 
 ```r
+grain_order = c("clay", "silt", "sand")
 grain_char = sample(grain_order, 36, replace = TRUE)
-grain_fact = factor(grain_char, levels = c("clay", "silt", "sand"))
+grain_fact = factor(grain_char, levels = grain_order)
 grain = rast(nrows = 6, ncols = 6, resolution = 0.5, 
              xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
              vals = grain_fact)
