@@ -646,23 +646,34 @@ grain = rast(nrows = 6, ncols = 6, resolution = 0.5,
 
 
 
-<!--jn:toDo-->
-<!-- fix the next paragraph -->
-<!-- `SpatRaster` objects represent categorical variables as integers, so `grain[1, 1]` returns a number that represents a unique identifier, rather than "clay", "silt" or "sand".  -->
-<!-- The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a data frame in a new slot named `attributes`, which can be viewed with `ratify(grain)` (see `?ratify()` for more information). -->
-<!-- Use the function `levels()` for retrieving and adding new factor levels to the attribute table: -->
+The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a list of data frames, which can be viewed with `cats(grain)` (see `?cats()` for more information).
+It is also possible to use the function `levels()` for retrieving and adding or replacing new factor levels:
 
-<!-- ```{r 03-attribute-operations-56} -->
-<!-- levels(grain)[[1]] = cbind(levels(grain)[[1]], wetness = c("wet", "moist", "dry")) -->
-<!-- levels(grain) -->
-<!-- ``` -->
 
-<!-- This behavior demonstrates that raster cells can only possess one value, an identifier which can be used to look up the attributes in the corresponding attribute table (stored in a slot named `attributes`). -->
-<!-- This is illustrated by the command below, which returns the grain size and wetness of cell IDs 1, 11 and 35: -->
+```r
+levels(grain)[[1]] = c(levels(grain)[[1]], wetness = c("wet", "moist", "dry"))
+levels(grain)
+#> [[1]]
+#> [1] "clay"  "silt"  "sand"  "wet"   "moist" "dry"
+```
 
-<!-- ```{r 03-attribute-operations-57} -->
-<!-- factorValues(grain, grain[c(1, 11, 35)]) -->
-<!-- ``` -->
+<!--
+
+```r
+coltab(grain)
+#> [[1]]
+#> NULL
+coltb <- data.frame(t(col2rgb(rainbow(6, end=.9), alpha=TRUE)))
+coltb
+#>   red green blue alpha
+#> 1 255     0    0   255
+#> 2 235   255    0   255
+#> 3   0   255   41   255
+#> 4   0   194  255   255
+#> 5  82     0  255   255
+#> 6 255     0  153   255
+```
+-->
 
 <div class="figure" style="text-align: center">
 <img src="03-attribute-operations_files/figure-html/cont-raster-1.png" alt="Raster datasets with numeric (left) and categorical values (right)." width="100%" />
