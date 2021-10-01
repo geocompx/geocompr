@@ -12,8 +12,8 @@ clip_poly = st_as_sf(as.polygons(clip, dissolve = FALSE))
 
 tm1 = tm_shape(elev_poly) +
   tm_polygons(col = "elev", lwd = 0.5) +
-  tm_shape(clip_poly) +
-  tm_borders(lwd = 2, col = "black") +
+  # tm_shape(clip_poly) +
+  # tm_borders(lwd = 2, col = "black") +
   tm_layout(frame = FALSE, legend.show = FALSE,
             inner.margins = c(0, 0, 0, 0.1))
 
@@ -35,3 +35,8 @@ tm3 = tm_shape(masked_poly) +
   tm_polygons(col = "elev", lwd = 0.5) +
   tm_layout(frame = FALSE, legend.show = FALSE,
             inner.margins = c(0, 0, 0, 0.1))
+
+tma = tmap_arrange(tm1, tm2, tm3, nrow = 1)
+
+tmap_save(tma, "figures/04_raster_subset.png", 
+          width = 7.5, height = 3, dpi = 300)
