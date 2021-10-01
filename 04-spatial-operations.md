@@ -626,11 +626,7 @@ The following sections explain how each type of map algebra operations can be us
 **Local** operations comprise all cell-by-cell operations in one or several layers.
 Raster algebra is a classical use case of local operations -- this includes adding or subtracting values from a raster, squaring and multipling rasters.
 Raster algebra also allows logical operations such as finding all raster cells that are greater than a specific value (5 in our example below).
-The **terra** package supports all these operations and more, as demonstrated below (results not shown):
-
-<!--jn:toDo-->
-<!--consider describing the below examples-->
-<!--and maybe add a figure-->
+The **terra** package supports all these operations and more, as demonstrated below (Figure \@ref(fig:04-local-operations)):
 
 
 ```r
@@ -641,10 +637,9 @@ elev > 5
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/04-local-operations.png" alt="tbd" width="100%" />
-<p class="caption">(\#fig:04-local-operations)tbd</p>
+<img src="figures/04-local-operations.png" alt="Examples of different local operations of the elev raster object: adding two rasters, squaring, applying logarithmic transformation, and performing a logical operation." width="100%" />
+<p class="caption">(\#fig:04-local-operations)Examples of different local operations of the elev raster object: adding two rasters, squaring, applying logarithmic transformation, and performing a logical operation.</p>
 </div>
-
 
 Another good example of local operations is the classification of intervals of numeric values into groups such as grouping a digital elevation model into low (class 1), middle (class 2) and high elevations (class 3).
 Using the `classify()` command, we need first to construct a reclassification matrix, where the first column corresponds to the lower and the second column to the upper end of the class.
