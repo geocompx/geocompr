@@ -629,12 +629,14 @@ The third column represents the new value for the specified ranges in column one
 <p>Here, we assign the raster values in the ranges 0–12, 12–24 and 24–36 are <em>reclassified</em> to take values 1, 2 and 3, respectively.</p>
 <div class="sourceCode" id="cb142"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">recl</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/classify.html">classify</a></span><span class="op">(</span><span class="va">elev</span>, rcl <span class="op">=</span> <span class="va">rcl</span><span class="op">)</span></code></pre></div>
-<p>We will perform several reclassifications in Chapter <a href="location.html#location">13</a>.</p>
-<!--jn:toDo-->
-<!-- check if we are describing app and lapp somewhere -->
-<p>Instead of arithmetic operators, one can also use the <code><a href="https://rdrr.io/pkg/terra/man/app.html">app()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/lapp.html">lapp()</a></code> functions.
-These functions are more efficient, hence, they are preferable in the presence of large raster datasets.
-Additionally, they allow you to directly store an output file.</p>
+<p>The <code><a href="https://rdrr.io/pkg/terra/man/classify.html">classify()</a></code> function can be also used when we want to reduce the number of classes in our categorical rasters.
+We will perform several additional reclassifications in Chapter <a href="location.html#location">13</a>.</p>
+<p>Apart of arithmetic operators, one can also use the <code><a href="https://rdrr.io/pkg/terra/man/app.html">app()</a></code>, <code><a href="https://rdrr.io/pkg/terra/man/tapp.html">tapp()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/lapp.html">lapp()</a></code> functions.
+They are more efficient, hence, they are preferable in the presence of large raster datasets.
+Additionally, they allow you to save an output file directly.
+The <code><a href="https://rdrr.io/pkg/terra/man/app.html">app()</a></code> function applies a function to each cell of a raster and is used to summarize (e.g., calculating the sum) the values of multiple layers into one layer.
+<code><a href="https://rdrr.io/pkg/terra/man/tapp.html">tapp()</a></code> is an extension of <code><a href="https://rdrr.io/pkg/terra/man/app.html">app()</a></code>, allowing us to select a subset of layers (see the <code>index</code> argument) for which we want to perform a certain operation.
+Finally, the <code><a href="https://rdrr.io/pkg/terra/man/lapp.html">lapp()</a></code> function allows to apply a function to each cell using layers as arguments – an application of <code><a href="https://rdrr.io/pkg/terra/man/lapp.html">lapp()</a></code> is presented below.</p>
 <p>The calculation of the normalized difference vegetation index (NDVI) is a well-known local (pixel-by-pixel) raster operation.
 It returns a raster with values between -1 and 1; positive values indicate the presence of living plants (mostly &gt; 0.2).
 NDVI is calculated from red and near-infrared (NIR) bands of remotely sensed imagery, typically from satellite systems such as Landsat or Sentinel.
@@ -644,8 +646,16 @@ Vegetation absorbs light heavily in the visible light spectrum, and especially i
 NDVI&amp;= \frac{\text{NIR} - \text{Red}}{\text{NIR} + \text{Red}}\\
 \end{split}
 \]</span></p>
-<!--jn:toDo-->
-<!--add NDVI example!!-->
+<div class="sourceCode" id="cb143"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">multi_raster_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/landsat.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
+<span class="va">multi_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">multi_raster_file</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb144"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">ndvi_fun</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">nir</span>, <span class="va">red</span><span class="op">)</span><span class="op">{</span>
+  <span class="op">(</span><span class="va">nir</span> <span class="op">-</span> <span class="va">red</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">nir</span> <span class="op">+</span> <span class="va">red</span><span class="op">)</span>
+<span class="op">}</span></code></pre></div>
+<div class="sourceCode" id="cb145"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">ndvi_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/lapp.html">lapp</a></span><span class="op">(</span><span class="va">multi_rast</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">)</span><span class="op">]</span><span class="op">]</span>, fun <span class="op">=</span> <span class="va">ndvi_fun</span><span class="op">)</span></code></pre></div>
+<div class="inline-figure"><img src="figures/04-ndvi.png" width="100%" style="display: block; margin: auto;"></div>
 <p>Predictive mapping is another interesting application of local raster operations.
 The response variable corresponds to measured or observed points in space, for example, species richness, the presence of landslides, tree disease or crop yield.
 Consequently, we can easily retrieve space- or airborne predictor variables from various rasters (elevation, pH, precipitation, temperature, landcover, soil class, etc.).
@@ -665,7 +675,7 @@ Other names for this operation are spatial filtering and convolution <span class
 We define the shape of the moving window with a <code>matrix</code> whose values correspond to weights (see <code>w</code> parameter in the code chunk below).
 Secondly, the <code>fun</code> parameter lets us specify the function we wish to apply to this neighborhood.
 Here, we choose the minimum, but any other summary function, including <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code>, <code><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html">mean()</a></code>, or <code><a href="https://rdrr.io/r/stats/cor.html">var()</a></code> can be used.</p>
-<div class="sourceCode" id="cb143"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb146"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">r_focal</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/focal.html">focal</a></span><span class="op">(</span><span class="va">elev</span>, w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fl">1</span>, nrow <span class="op">=</span> <span class="fl">3</span>, ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, fun <span class="op">=</span> <span class="va">min</span><span class="op">)</span></code></pre></div>
 <!--jn:toDo-->
 <!-- , na.rm=TRUE vs , na.rm=FALSE -->
@@ -701,7 +711,7 @@ Our grain size raster is a good example (right panel of Figure <a href="attr.htm
 Finally, the result of a zonal operation is a summary table grouped by zone which is why this operation is also known as <em>zonal statistics</em> in the GIS world.
 This is in contrast to focal operations which return a raster object (see previous Section).</p>
 <p>For example, to find the mean elevation for each grain size class (Figure <a href="attr.html#fig:cont-raster">3.2</a>), we use the <code><a href="https://rdrr.io/pkg/terra/man/zonal.html">zonal()</a></code> function.</p>
-<div class="sourceCode" id="cb144"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb147"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/zonal.html">zonal</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">grain</span>, fun <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span>
 <span class="va">z</span>
 <span class="co">#&gt;   grain elev</span>
@@ -758,7 +768,7 @@ In the following code chunk we first download the SRTM elevation data for Austri
 In a second step, we merge the two rasters into one.</p>
 <!--jn:toDo-->
 <!-- mention geodata -->
-<div class="sourceCode" id="cb145"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb148"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">aut</span> <span class="op">=</span> <span class="fu">geodata</span><span class="fu">::</span><span class="fu">elevation_30s</span><span class="op">(</span>country <span class="op">=</span> <span class="st">"AUT"</span>, path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 <span class="va">ch</span> <span class="op">=</span> <span class="fu">geodata</span><span class="fu">::</span><span class="fu">elevation_30s</span><span class="op">(</span>country <span class="op">=</span> <span class="st">"CHE"</span>, path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 <span class="va">aut_ch</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/merge.html">merge</a></span><span class="op">(</span><span class="va">aut</span>, <span class="va">ch</span><span class="op">)</span></code></pre></div>
