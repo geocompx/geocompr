@@ -29,4 +29,4 @@ tm5 = tm_shape(elev_poly5) +
   tm_layout(frame = FALSE, legend.width = 1, legend.outside = TRUE, legend.outside.position = "bottom",
             main.title = "elev > 5")
 tma = tmap_arrange(tm2, tm3, tm4, tm5, nrow = 1)
-tmap_save(tma, "figures/04-local-operations.png", height = 300)
+tmap_save(tma, "figures/04-local-operations.png", height = 700, width = 2000)
