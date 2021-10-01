@@ -14,6 +14,6 @@ tm1 = tm_shape(multi_rast2[[3:1]]) +
 tm2 = tm_shape(ndvi_rast) +
   tm_raster(style = "cont", title = "") +
   tm_layout(frame = FALSE, main.title = "NDVI",
-            legend.frame = TRUE, legend.position = c("right", "bottom"))
+            legend.frame = TRUE, legend.position = c("left", "bottom"))
 tma = tmap_arrange(tm1, tm2, nrow = 1)
-tmap_save(tma, "figures/04-ndvi.png", height = 700, width = 1000)
+tmap_save(tma, "figures/04-ndvi.png", height = 800, width = 1100)
