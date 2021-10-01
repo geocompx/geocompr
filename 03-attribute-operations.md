@@ -647,7 +647,8 @@ grain = rast(nrows = 6, ncols = 6, resolution = 0.5,
 
 
 The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a list of data frames, which can be viewed with `cats(grain)` (see `?cats()` for more information).
-It is also possible to use the function `levels()` for retrieving and adding or replacing new factor levels:
+Each element of this list is a layer of the raster.
+It is also possible to use the function `levels()` for retrieving and adding new or replacing existing factor levels:
 
 
 ```r
@@ -657,28 +658,15 @@ levels(grain)
 #> [1] "clay"  "silt"  "sand"  "wet"   "moist" "dry"
 ```
 
-<!--
-
-```r
-coltab(grain)
-#> [[1]]
-#> NULL
-coltb <- data.frame(t(col2rgb(rainbow(6, end=.9), alpha=TRUE)))
-coltb
-#>   red green blue alpha
-#> 1 255     0    0   255
-#> 2 235   255    0   255
-#> 3   0   255   41   255
-#> 4   0   194  255   255
-#> 5  82     0  255   255
-#> 6 255     0  153   255
-```
--->
-
 <div class="figure" style="text-align: center">
 <img src="03-attribute-operations_files/figure-html/cont-raster-1.png" alt="Raster datasets with numeric (left) and categorical values (right)." width="100%" />
 <p class="caption">(\#fig:cont-raster)Raster datasets with numeric (left) and categorical values (right).</p>
 </div>
+
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">Categorical raster objects can also store information about the colors associated with each value using a color table.
+The color table is a data frame with three (red, green, blue) or four (alpha) columns, where each row relates to one value.
+Color tables in **terra** can be viewed or set with the `coltab()` function (see `?coltab`).
+Importantly, saving a raster object with a color table to a file (e.g., GeoTIFF) will also save the color information.</div>\EndKnitrBlock{rmdnote}
 
 ### Raster subsetting
 
