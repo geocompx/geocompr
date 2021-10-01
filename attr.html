@@ -625,8 +625,6 @@ Importantly, saving a raster object with a color table to a file (e.g., GeoTIFF)
 <h3>
 <span class="header-section-number">3.3.1</span> Raster subsetting<a class="anchor" aria-label="anchor" href="#raster-subsetting"><i class="fas fa-link"></i></a>
 </h3>
-<!--jn:toDo-->
-<!--reread and improve text-->
 <p>Raster subsetting is done with the base R operator <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code>, which accepts a variety of inputs:
 </p>
 <ul>
@@ -645,9 +643,9 @@ both return the value of the top left pixel in the raster object <code>elev</cod
 <span class="va">elev</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">]</span>
 <span class="co"># cell ID 1</span>
 <span class="va">elev</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></code></pre></div>
-<p>To extract all values or complete rows, you can use <code><a href="https://rdrr.io/pkg/terra/man/values.html">values()</a></code>.
-For multi-layered raster objects, this will return the cell value(s) for each layer.
-For example, <code>c(elev, grain)[1]</code> returns a data frame with one row and two columns — one for each layer.</p>
+<p>Subsetting of multi-layered raster objects will return the cell value(s) for each layer.
+For example, <code>c(elev, grain)[1]</code> returns a data frame with one row and two columns — one for each layer.
+To extract all values or complete rows, you can also use <code><a href="https://rdrr.io/pkg/terra/man/values.html">values()</a></code>.</p>
 <p>Cell values can be modified by overwriting existing values in conjunction with a subsetting operation.
 The following code chunk, for example, sets the upper left cell of <code>elev</code> to 0 (results not shown):</p>
 <div class="sourceCode" id="cb103"><pre class="downlit sourceCode r">
@@ -656,11 +654,12 @@ The following code chunk, for example, sets the upper left cell of <code>elev</c
 <p>Leaving the square brackets empty is a shortcut version of <code><a href="https://rdrr.io/pkg/terra/man/values.html">values()</a></code> for retrieving all values of a raster.
 Multiple cells can also be modified in this way:</p>
 <div class="sourceCode" id="cb104"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">elev</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></code></pre></div>
-<!--jn:toDo-->
-<!--show how to add/replace NAs-->
-<!-- jn:toDo -->
-<!-- how to replace values in a multilayered raster? -->
+<code class="sourceCode R"><span class="va">elev</span><span class="op">[</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></code></pre></div>
+<p>Replacing values of multilayered rasters can be done with a matrix with as many columns as layers and rows as replaceable cells (results not shown):</p>
+<div class="sourceCode" id="cb105"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">two_layers</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="va">grain</span>, <span class="va">elev</span><span class="op">)</span> 
+<span class="va">two_layers</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span>
+<span class="va">two_layers</span><span class="op">[</span><span class="op">]</span></code></pre></div>
 </div>
 <div id="summarizing-raster-objects" class="section level3" number="3.3.2">
 <h3>
@@ -668,20 +667,21 @@ Multiple cells can also be modified in this way:</p>
 </h3>
 <p><strong>terra</strong> contains functions for extracting descriptive statistics for entire rasters.
 Printing a raster object to the console by typing its name returns minimum and maximum values of a raster.
-<code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary()</a></code> provides common descriptive statistics (minimum, maximum, quartiles and number of <code>NA</code>s).
+<code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary()</a></code> provides common descriptive statistics – minimum, maximum, quartiles and number of <code>NA</code>s for continuous rasters and a number of cells of each class for categorical rasters.
 Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with <code><a href="https://rdrr.io/pkg/terra/man/global.html">global()</a></code>.
 </p>
-<div class="sourceCode" id="cb105"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb106"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/global.html">global</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">sd</span><span class="op">)</span></code></pre></div>
 
 <div class="rmdnote">
-If you provide the <code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/global.html">global()</a></code> functions with a mulit-layered raster object, they will summarize each layer separately, as can be illustrated by running: <code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary(c(elev, grain))</a></code>.
+If you provide the <code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/global.html">global()</a></code> functions with a multi-layered raster object, they will summarize each layer separately, as can be illustrated by running: <code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary(c(elev, grain))</a></code>.
 </div>
+<p>Additionally, the <code><a href="https://rdrr.io/pkg/terra/man/freq.html">freq()</a></code> function allows to get the frequency table of categorical values.</p>
 <p>Raster value statistics can be visualized in a variety of ways.
 Specific functions such as <code><a href="https://rdrr.io/pkg/terra/man/boxplot.html">boxplot()</a></code>, <code><a href="https://rdrr.io/pkg/terra/man/density.html">density()</a></code>, <code><a href="https://rdrr.io/pkg/terra/man/hist.html">hist()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/pairs.html">pairs()</a></code> work also with raster objects, as demonstrated in the histogram created with the command below (not shown):</p>
-<div class="sourceCode" id="cb106"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb107"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/hist.html">hist</a></span><span class="op">(</span><span class="va">elev</span><span class="op">)</span></code></pre></div>
-<p>In case a visualization function does not work with raster objects, one can extract the raster data to be plotted with the help of <code><a href="https://rdrr.io/pkg/terra/man/values.html">values()</a></code>.
+<p>In case the desired visualization function does not work with raster objects, one can extract the raster data to be plotted with the help of <code><a href="https://rdrr.io/pkg/terra/man/values.html">values()</a></code> (Section <a href="attr.html#raster-subsetting">3.3.1</a>).
 </p>
 <p>Descriptive raster statistics belong to the so-called global raster operations.
 These and other typical raster processing operations are part of the map algebra scheme, which are covered in the next chapter (Section <a href="spatial-operations.html#map-algebra">4.3.2</a>).</p>

@@ -670,9 +670,6 @@ Importantly, saving a raster object with a color table to a file (e.g., GeoTIFF)
 
 ### Raster subsetting
 
-<!--jn:toDo-->
-<!--reread and improve text-->
-
 Raster subsetting is done with the base R operator `[`, which accepts a variety of inputs:
 \index{raster!subsetting}
 
@@ -696,9 +693,9 @@ elev[1, 1]
 elev[1]
 ```
 
-To extract all values or complete rows, you can use `values()`.
-For multi-layered raster objects, this will return the cell value(s) for each layer.
+Subsetting of multi-layered raster objects will return the cell value(s) for each layer.
 For example, `c(elev, grain)[1]` returns a data frame with one row and two columns --- one for each layer.
+To extract all values or complete rows, you can also use `values()`.
 
 Cell values can be modified by overwriting existing values in conjunction with a subsetting operation.
 The following code chunk, for example, sets the upper left cell of `elev` to 0 (results not shown):
@@ -714,20 +711,23 @@ Multiple cells can also be modified in this way:
 
 
 ```r
-elev[1, 1:2] = 0
+elev[1, c(1, 2)] = 0
 ```
 
-<!--jn:toDo-->
-<!--show how to add/replace NAs-->
+Replacing values of multilayered rasters can be done with a matrix with as many columns as layers and rows as replaceable cells (results not shown):
 
-<!-- jn:toDo -->
-<!-- how to replace values in a multilayered raster? -->
+
+```r
+two_layers = c(grain, elev) 
+two_layers[1] = cbind(c(0), c(4))
+two_layers[]
+```
 
 ### Summarizing raster objects
 
 **terra** contains functions for extracting descriptive statistics\index{statistics} for entire rasters.
 Printing a raster object to the console by typing its name returns minimum and maximum values of a raster.
-`summary()` provides common descriptive statistics\index{statistics} (minimum, maximum, quartiles and number of `NA`s).
+`summary()` provides common descriptive statistics\index{statistics} -- minimum, maximum, quartiles and number of `NA`s for continuous rasters and a number of cells of each class for categorical rasters.
 Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with `global()`. 
 \index{raster!summarizing}
 
@@ -736,7 +736,9 @@ Further summary operations such as the standard deviation (see below) or custom 
 global(elev, sd)
 ```
 
-\BeginKnitrBlock{rmdnote}<div class="rmdnote">If you provide the `summary()` and `global()` functions with a mulit-layered raster object, they will summarize each layer separately, as can be illustrated by running: `summary(c(elev, grain))`.</div>\EndKnitrBlock{rmdnote}
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">If you provide the `summary()` and `global()` functions with a multi-layered raster object, they will summarize each layer separately, as can be illustrated by running: `summary(c(elev, grain))`.</div>\EndKnitrBlock{rmdnote}
+
+Additionally, the `freq()` function allows to get the frequency table of categorical values.
 
 Raster value statistics can be visualized in a variety of ways.
 Specific functions such as `boxplot()`, `density()`, `hist()` and `pairs()` work also with raster objects, as demonstrated in the histogram created with the command below (not shown):
@@ -746,7 +748,7 @@ Specific functions such as `boxplot()`, `density()`, `hist()` and `pairs()` work
 hist(elev)
 ```
 
-In case a visualization function does not work with raster objects, one can extract the raster data to be plotted with the help of `values()`.
+In case the desired visualization function does not work with raster objects, one can extract the raster data to be plotted with the help of `values()` (Section \@ref(raster-subsetting)).
 \index{raster!values}
 
 Descriptive raster statistics belong to the so-called global raster operations.

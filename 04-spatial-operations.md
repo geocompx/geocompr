@@ -586,6 +586,18 @@ In other words, we want to mask `elev` with `rmask`.
 These operations are in fact Boolean local operations since we compare cell-wise two rasters.
 The next subsection explores these and related operations in more detail.
 
+<!--jn:toDo-->
+<!--show how to add/replace NAs-->
+<!--
+Overwriting raster values is often done to replace some values with NA.
+For example, 
+
+
+```r
+elev[1, c(1, 2)] = 0
+```
+-->
+
 ### Map algebra
 
 \index{map algebra}
@@ -740,8 +752,8 @@ For example, to find the mean elevation for each grain size class (Figure \@ref(
 z = zonal(elev, grain, fun = "mean")
 z
 #>   grain elev
-#> 1  clay 14.8
-#> 2  silt 21.2
+#> 1  clay 14.6
+#> 2  silt 21.1
 #> 3  sand 18.7
 ```
 
