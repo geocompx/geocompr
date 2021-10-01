@@ -517,7 +517,7 @@ The previous chapter (Section \@ref(manipulating-raster-objects)) demonstrated h
 Raster objects can also be extracted by location (coordinates) and other spatial objects.
 To use coordinates for subsetting, one can 'translate' the coordinates into a cell ID with the **terra** function `cellFromXY()`.
 An alternative is to use `terra::extract()` (be careful, there is also a function called `extract()` in the **tidyverse**\index{tidyverse (package)}) to extract values.
-Both methods are demonstrated below to find the value of the cell that covers a point located 0.1 units from the origin.
+Both methods are demonstrated below to find the value of the cell that covers a point located at coordinates of 0.1, 0.1.
 \index{raster!subsetting}
 \index{spatial!subsetting}
 
@@ -529,7 +529,7 @@ terra::extract(elev, matrix(c(0.1, 0.1), ncol = 2))
 ```
 
 <!--jn:toDo-->
-<!-- to update -->
+<!-- to update? -->
 <!-- It is convenient that both functions also accept objects of class `Spatial* Objects`. -->
 Raster objects can also be subset with another raster object, as illustrated in Figure \@ref(fig:raster-subset) (left panel) and demonstrated in the code chunk below:
 
@@ -549,7 +549,7 @@ knitr::include_graphics("figures/04_raster_subset.png")
 
 So far, the subsetting returned the values of specific cells, however, when doing spatial subsetting, one often also expects a spatial object as an output.
 To do this, we can use again the `[` when we additionally set the `drop` parameter to `FALSE`.
-To illustrate this, we retrieve the first two cells of `elev` as an individual raster object. 
+Let's illustrate this by retrieving the first two cells of `elev` as an individual raster object. 
 As mentioned in Section \@ref(manipulating-raster-objects), the `[` operator accepts various inputs to subset rasters and returns a raster object when `drop = FALSE`.
 The code chunk below subsets the `elev` raster by cell ID and row-column index with identical results: the first two cells on the top row (only the first 2 lines of the output is shown):
 
@@ -574,39 +574,26 @@ In this case, the `[` and `mask()` functions can be used (results not shown):
 # create raster mask
 rmask = elev
 values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
-
-# spatial subsetting
-elev[rmask, drop = FALSE]           # with [ operator
-mask(elev, rmask)                   # with mask()
-```
-
-```{r 04-spatial-operations-39, eval=FALSE, echo=FALSE}
-# aim: expand on previous code chunk to show how mask methods differ
-rmask = elev # create raster mask
-values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
-
-m1 = elev[rmask, drop = FALSE]           # with [ operator
-m2 = mask(elev, rmask)                   # with mask()
-
-all.equal(m1, m2)
 ```
 
 In the code chunk above, we have created a mask object called `rmask` with values randomly assigned to `NA` and `TRUE`.
 Next, we want to keep those values of `elev` which are `TRUE` in `rmask`.
 In other words, we want to mask `elev` with `rmask`.
+
+```{r 04-spatial-operations-38b, eval=FALSE}
+# spatial subsetting
+elev[rmask, drop = FALSE]           # with [ operator
+mask(elev, rmask)                   # with mask()
+```
+
+The above approach can be also used to replace some values (e.g., expected to be wrong) with NA. 
+
+```{r 04-spatial-operations-38c, eval=FALSE}
+elev[elev < 20] = NA
+```
+
 These operations are in fact Boolean local operations since we compare cell-wise two rasters.
 The next subsection explores these and related operations in more detail.
-
-<!--jn:toDo-->
-<!--show how to add/replace NAs-->
-<!--
-Overwriting raster values is often done to replace some values with NA.
-For example, 
-
-```{r 03-attribute-operations-62}
-elev[1, c(1, 2)] = 0
-```
--->
 
 ### Map algebra
 
