@@ -787,7 +787,7 @@ Visibility and viewshed computations also belong to the family of global operati
 ### Map algebra counterparts in vector processing
 
 Many map algebra operations have a counterpart in vector processing [@liu_essential_2009].
-Computing a distance raster (zonal operation) while only considering a maximum distance (logical focal operation) is the equivalent to a vector buffer operation (Section \@ref(clipping)).
+Computing a distance raster (global operation) while only considering a maximum distance (logical focal operation) is the equivalent to a vector buffer operation (Section \@ref(clipping)).
 Reclassifying raster data (either local or zonal function depending on the input) is equivalent to dissolving vector data (Section \@ref(spatial-joining)). 
 Overlaying two rasters (local operation), where one contains `NULL` or `NA` values representing a mask, is similar to vector clipping (Section \@ref(clipping)).
 Quite similar to spatial clipping is intersecting two layers (Section \@ref(spatial-subsetting)). 
@@ -803,17 +803,13 @@ Zonal operations can dissolve the cells of one raster in accordance with the zon
 
 \index{raster!merge}
 Suppose we would like to compute the NDVI (see Section \@ref(local-operations)), and additionally want to compute terrain attributes from elevation data for observations within a study area.
-Such computations rely on remotely sensed information.
-The corresponding imagery is often divided into scenes covering a specific spatial extent.
-Frequently, a study area covers more than one scene.
-In these cases we would like to merge the scenes covered by our study area. 
+Such computations rely on remotely sensed information. 
+The corresponding imagery is often divided into scenes covering a specific spatial extent, and frequently, a study area covers more than one scene.
+Then, we would need to merge the scenes covered by our study area. 
 In the easiest case, we can just merge these scenes, that is put them side by side.
-This is possible with digital elevation data (SRTM, ASTER).
+This is possible, for example, with digital elevation data (SRTM, ASTER).
 In the following code chunk we first download the SRTM elevation data for Austria and Switzerland (for the country codes, see the **geodata** function `country_codes()`).
 In a second step, we merge the two rasters into one.
-
-<!--jn:toDo-->
-<!-- mention geodata -->
 
 ```{r 04-spatial-operations-44, eval = FALSE}
 aut = geodata::elevation_30s(country = "AUT", path = tempdir())
@@ -821,7 +817,7 @@ ch = geodata::elevation_30s(country = "CHE", path = tempdir())
 aut_ch = merge(aut, ch)
 ```
 
-**Terra**'s `merge()` command combines two images, and in case they overlap, it uses the value of the first raster.
+**terra**'s `merge()` command combines two images, and in case they overlap, it uses the value of the first raster.
 <!--jn:toDo-->
 <!-- some benchmarks could be needed -->
 <!-- You can do exactly the same with `gdalUtils::mosaic_rasters()` which is faster, and therefore recommended if you have to merge a multitude of large rasters stored on disk. -->
@@ -829,15 +825,14 @@ aut_ch = merge(aut, ch)
 The merging approach is of little use when the overlapping values do not correspond to each other.
 This is frequently the case when you want to combine spectral imagery from scenes that were taken on different dates.
 The `merge()` command will still work but you will see a clear border in the resulting image.
-The `mosaic()` command lets you define a function for the overlapping area. 
-For instance, we could compute the mean value. 
-This might smooth the clear border in the merged result but it will most likely not make it disappear.
+On the other hand, the `mosaic()` command lets you define a function for the overlapping area. 
+For instance, we could compute the mean value -- this might smooth the clear border in the merged result but it will most likely not make it disappear.
 To do so, we need a more advanced approach. 
 Remote sensing scientists frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image.
-<!--jn:toDo-->
-<!-- review the below advice -->
-The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`calcHistMatch()`) and **RStoolbox** (`histMatch()`, `pifMatch()`) provide the corresponding functions.
+The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`calcHistMatch()`) and **RStoolbox** (`histMatch()`, `pifMatch()`) provide the corresponding functions for the **raster**'s package objects.
 For a more detailed introduction on how to use R for remote sensing, we refer the reader to @wegmann_remote_2016.
+<!--jn:toDo-->
+<!--update the above reference to the 2nd edition-->
 
 ## Exercises
 
