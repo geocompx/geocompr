@@ -675,10 +675,15 @@ NDVI&= \frac{\text{NIR} - \text{Red}}{\text{NIR} + \text{Red}}\\
 \end{split}
 $$
 
+Let's calculate NDVI for the multispectral satellite file of the Zion National Park.
+
 ```{r}
 multi_raster_file = system.file("raster/landsat.tif", package = "spDataLarge")
 multi_rast = rast(multi_raster_file)
 ```
+
+The raster object has four satellite bands - blue, green, red, and near-infrared (NIR).
+Our next step should be to implement the NDVI formula into an R function:
 
 ```{r}
 ndvi_fun = function(nir, red){
@@ -686,11 +691,19 @@ ndvi_fun = function(nir, red){
 }
 ```
 
+This function accepts two numerical arguments, `nir` and `red`, and returns a numerical vector with NDVI values.
+It can be used as the `fun` argument of `lapp()`.
+We just need to remember that our function just needs two bands (not four from the original raster), and they need to be in the NIR, red order.
+That is why we subset the input raster with `multi_rast[[c(4, 3)]]` before doing any calculations.
+
 ```{r}
 ndvi_rast = lapp(multi_rast[[c(4, 3)]], fun = ndvi_fun)
 ```
 
-```{r 04-ndvi, echo=FALSE, fig.cap=""}
+The result, shown on the right panel in Figure \@ref(fig:04-ndvi), can be compared to the RGB image of the same area (left panel of the same Figure).
+It allows us to see that the largest NDVI values are connected to areas of dense forest in the northern parts of the area, while the lowest values are related to the lake in the north and snowy mountain ridges.
+
+```{r 04-ndvi, echo=FALSE, fig.cap="RGB image (left) and NDVI values (right) calculated for the example satellite file of the Zion National Park"}
 knitr::include_graphics("figures/04-ndvi.png")
 ```
 
