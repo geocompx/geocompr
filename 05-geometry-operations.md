@@ -644,8 +644,6 @@ To retrieve a spatial output, we can use almost the same subsetting syntax.
 The only difference is that we have to make clear that we would like to keep the matrix structure by setting the `drop`-parameter to `FALSE`.
 This will return a raster object containing the cells whose midpoints overlap with `clip`.
 
-<!--jn:toDo-->
-<!-- the below code in terra works differntly than in raster -->
 
 ```r
 elev = rast(system.file("raster/elev.tif", package = "spData"))

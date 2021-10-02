@@ -646,16 +646,30 @@ Vegetation absorbs light heavily in the visible light spectrum, and especially i
 NDVI&amp;= \frac{\text{NIR} - \text{Red}}{\text{NIR} + \text{Red}}\\
 \end{split}
 \]</span></p>
+<p>Let’s calculate NDVI for the multispectral satellite file of the Zion National Park.</p>
 <div class="sourceCode" id="cb143"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">multi_raster_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/landsat.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
 <span class="va">multi_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">multi_raster_file</span><span class="op">)</span></code></pre></div>
+<p>The raster object has four satellite bands - blue, green, red, and near-infrared (NIR).
+Our next step should be to implement the NDVI formula into an R function:</p>
 <div class="sourceCode" id="cb144"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ndvi_fun</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">nir</span>, <span class="va">red</span><span class="op">)</span><span class="op">{</span>
   <span class="op">(</span><span class="va">nir</span> <span class="op">-</span> <span class="va">red</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">nir</span> <span class="op">+</span> <span class="va">red</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
+<p>This function accepts two numerical arguments, <code>nir</code> and <code>red</code>, and returns a numerical vector with NDVI values.
+It can be used as the <code>fun</code> argument of <code><a href="https://rdrr.io/pkg/terra/man/lapp.html">lapp()</a></code>.
+We just need to remember that our function just needs two bands (not four from the original raster), and they need to be in the NIR, red order.
+That is why we subset the input raster with <code>multi_rast[[c(4, 3)]]</code> before doing any calculations.</p>
 <div class="sourceCode" id="cb145"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ndvi_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/lapp.html">lapp</a></span><span class="op">(</span><span class="va">multi_rast</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">)</span><span class="op">]</span><span class="op">]</span>, fun <span class="op">=</span> <span class="va">ndvi_fun</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="figures/04-ndvi.png" width="100%" style="display: block; margin: auto;"></div>
+<p>The result, shown on the right panel in Figure <a href="spatial-operations.html#fig:04-ndvi">4.9</a>, can be compared to the RGB image of the same area (left panel of the same Figure).
+It allows us to see that the largest NDVI values are connected to areas of dense forest in the northern parts of the area, while the lowest values are related to the lake in the north and snowy mountain ridges.</p>
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:04-ndvi"></span>
+<img src="figures/04-ndvi.png" alt="RGB image (left) and NDVI values (right) calculated for the example satellite file of the Zion National Park" width="100%"><p class="caption">
+FIGURE 4.9: RGB image (left) and NDVI values (right) calculated for the example satellite file of the Zion National Park
+</p>
+</div>
 <p>Predictive mapping is another interesting application of local raster operations.
 The response variable corresponds to measured or observed points in space, for example, species richness, the presence of landslides, tree disease or crop yield.
 Consequently, we can easily retrieve space- or airborne predictor variables from various rasters (elevation, pH, precipitation, temperature, landcover, soil class, etc.).
@@ -667,9 +681,9 @@ Spatial predictions on raster objects can therefore be made by applying estimate
 <span class="header-section-number">4.3.4</span> Focal operations<a class="anchor" aria-label="anchor" href="#focal-operations"><i class="fas fa-link"></i></a>
 </h3>
 <p>
-While local functions operate on one cell, though possibly from multiple layers, <strong>focal</strong> operations take into account a central cell and its neighbors.
+While local functions operate on one cell, though possibly from multiple layers, <strong>focal</strong> operations take into account a central (focal) cell and its neighbors.
 The neighborhood (also named kernel, filter or moving window) under consideration is typically of size 3-by-3 cells (that is the central cell and its eight surrounding neighbors), but can take on any other (not necessarily rectangular) shape as defined by the user.
-A focal operation applies an aggregation function to all cells within the specified neighborhood, uses the corresponding output as the new value for the the central cell, and moves on to the next central cell (Figure <a href="spatial-operations.html#fig:focal-example">4.9</a>).
+A focal operation applies an aggregation function to all cells within the specified neighborhood, uses the corresponding output as the new value for the the central cell, and moves on to the next central cell (Figure <a href="spatial-operations.html#fig:focal-example">4.10</a>).
 Other names for this operation are spatial filtering and convolution <span class="citation">(<a href="references.html#ref-burrough_principles_2015" role="doc-biblioref">Burrough, McDonnell, and Lloyd 2015</a>)</span>.</p>
 <p>In R, we can use the <code><a href="https://rdrr.io/pkg/terra/man/focal.html">focal()</a></code> function to perform spatial filtering.
 We define the shape of the moving window with a <code>matrix</code> whose values correspond to weights (see <code>w</code> parameter in the code chunk below).
@@ -682,7 +696,7 @@ Here, we choose the minimum, but any other summary function, including <code><a 
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:focal-example"></span>
 <img src="figures/04_focal_example.png" alt="Input raster (left) and resulting output raster (right) due to a focal operation - finding the minimum value in 3-by-3 moving windows." width="100%"><p class="caption">
-FIGURE 4.9: Input raster (left) and resulting output raster (right) due to a focal operation - finding the minimum value in 3-by-3 moving windows.
+FIGURE 4.10: Input raster (left) and resulting output raster (right) due to a focal operation - finding the minimum value in 3-by-3 moving windows.
 </p>
 </div>
 <p>We can quickly check if the output meets our expectations.
@@ -718,29 +732,27 @@ This is in contrast to focal operations which return a raster object (see previo
 <span class="co">#&gt; 1  clay 14.8</span>
 <span class="co">#&gt; 2  silt 21.2</span>
 <span class="co">#&gt; 3  sand 18.7</span></code></pre></div>
-<p>This returns the statistics for each category, here the mean altitude for each grain size class, and can be added to the attribute table of the ratified raster (see previous chapter).</p>
+<p>This returns the statistics for each category, here the mean altitude for each grain size class.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;It is also possible to get a raster with calculated statistics for each zone by setting the &lt;code&gt;as.raster&lt;/code&gt; argument to &lt;code&gt;TRUE&lt;/code&gt;.&lt;/p&gt;"><sup>21</sup></a></p>
 </div>
 <div id="global-operations-and-distances" class="section level3" number="4.3.6">
 <h3>
 <span class="header-section-number">4.3.6</span> Global operations and distances<a class="anchor" aria-label="anchor" href="#global-operations-and-distances"><i class="fas fa-link"></i></a>
 </h3>
 <p><em>Global</em> operations are a special case of zonal operations with the entire raster dataset representing a single zone.
-The most common global operations are descriptive statistics for the entire raster dataset such as the minimum or maximum (see Section <a href="attr.html#summarizing-raster-objects">3.3.2</a>).
-Aside from that, global operations are also useful for the computation of distance and weight rasters.
+The most common global operations are descriptive statistics for the entire raster dataset such as the minimum or maximum – we already discussed those in Section <a href="attr.html#summarizing-raster-objects">3.3.2</a>.</p>
+<p>Aside from that, global operations are also useful for the computation of distance and weight rasters.
 In the first case, one can calculate the distance from each cell to a specific target cell.
 For example, one might want to compute the distance to the nearest coast (see also <code><a href="https://rdrr.io/pkg/terra/man/distance.html">terra::distance()</a></code>).
 We might also want to consider topography, that means, we are not only interested in the pure distance but would like also to avoid the crossing of mountain ranges when going to the coast.
 To do so, we can weight the distance with elevation so that each additional altitudinal meter ‘prolongs’ the Euclidean distance.
 Visibility and viewshed computations also belong to the family of global operations (in the exercises of Chapter <a href="gis.html#gis">9</a>, you will compute a viewshed raster).</p>
-<!--jn:toDo-->
-<!-- consider expanding this part -->
 </div>
 <div id="map-algebra-counterparts-in-vector-processing" class="section level3" number="4.3.7">
 <h3>
 <span class="header-section-number">4.3.7</span> Map algebra counterparts in vector processing<a class="anchor" aria-label="anchor" href="#map-algebra-counterparts-in-vector-processing"><i class="fas fa-link"></i></a>
 </h3>
 <p>Many map algebra operations have a counterpart in vector processing <span class="citation">(<a href="references.html#ref-liu_essential_2009" role="doc-biblioref">Liu and Mason 2009</a>)</span>.
-Computing a distance raster (zonal operation) while only considering a maximum distance (logical focal operation) is the equivalent to a vector buffer operation (Section <a href="geometric-operations.html#clipping">5.2.5</a>).
+Computing a distance raster (global operation) while only considering a maximum distance (logical focal operation) is the equivalent to a vector buffer operation (Section <a href="geometric-operations.html#clipping">5.2.5</a>).
 Reclassifying raster data (either local or zonal function depending on the input) is equivalent to dissolving vector data (Section <a href="spatial-operations.html#spatial-joining">4.2.3</a>).
 Overlaying two rasters (local operation), where one contains <code>NULL</code> or <code>NA</code> values representing a mask, is similar to vector clipping (Section <a href="geometric-operations.html#clipping">5.2.5</a>).
 Quite similar to spatial clipping is intersecting two layers (Section <a href="spatial-operations.html#spatial-subsetting">4.2.1</a>).
@@ -759,35 +771,31 @@ Zonal operations can dissolve the cells of one raster in accordance with the zon
 <p>
 Suppose we would like to compute the NDVI (see Section <a href="spatial-operations.html#local-operations">4.3.3</a>), and additionally want to compute terrain attributes from elevation data for observations within a study area.
 Such computations rely on remotely sensed information.
-The corresponding imagery is often divided into scenes covering a specific spatial extent.
-Frequently, a study area covers more than one scene.
-In these cases we would like to merge the scenes covered by our study area.
+The corresponding imagery is often divided into scenes covering a specific spatial extent, and frequently, a study area covers more than one scene.
+Then, we would need to merge the scenes covered by our study area.
 In the easiest case, we can just merge these scenes, that is put them side by side.
-This is possible with digital elevation data (SRTM, ASTER).
+This is possible, for example, with digital elevation data (SRTM, ASTER).
 In the following code chunk we first download the SRTM elevation data for Austria and Switzerland (for the country codes, see the <strong>geodata</strong> function <code>country_codes()</code>).
 In a second step, we merge the two rasters into one.</p>
-<!--jn:toDo-->
-<!-- mention geodata -->
 <div class="sourceCode" id="cb148"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">aut</span> <span class="op">=</span> <span class="fu">geodata</span><span class="fu">::</span><span class="fu">elevation_30s</span><span class="op">(</span>country <span class="op">=</span> <span class="st">"AUT"</span>, path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 <span class="va">ch</span> <span class="op">=</span> <span class="fu">geodata</span><span class="fu">::</span><span class="fu">elevation_30s</span><span class="op">(</span>country <span class="op">=</span> <span class="st">"CHE"</span>, path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 <span class="va">aut_ch</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/merge.html">merge</a></span><span class="op">(</span><span class="va">aut</span>, <span class="va">ch</span><span class="op">)</span></code></pre></div>
-<p><strong>Terra</strong>’s <code><a href="https://rdrr.io/pkg/terra/man/merge.html">merge()</a></code> command combines two images, and in case they overlap, it uses the value of the first raster.
+<p><strong>terra</strong>’s <code><a href="https://rdrr.io/pkg/terra/man/merge.html">merge()</a></code> command combines two images, and in case they overlap, it uses the value of the first raster.
 <!--jn:toDo-->
 <!-- some benchmarks could be needed -->
 <!-- You can do exactly the same with `gdalUtils::mosaic_rasters()` which is faster, and therefore recommended if you have to merge a multitude of large rasters stored on disk. --></p>
 <p>The merging approach is of little use when the overlapping values do not correspond to each other.
 This is frequently the case when you want to combine spectral imagery from scenes that were taken on different dates.
 The <code><a href="https://rdrr.io/pkg/terra/man/merge.html">merge()</a></code> command will still work but you will see a clear border in the resulting image.
-The <code><a href="https://rdrr.io/pkg/terra/man/mosaic.html">mosaic()</a></code> command lets you define a function for the overlapping area.
-For instance, we could compute the mean value.
-This might smooth the clear border in the merged result but it will most likely not make it disappear.
+On the other hand, the <code><a href="https://rdrr.io/pkg/terra/man/mosaic.html">mosaic()</a></code> command lets you define a function for the overlapping area.
+For instance, we could compute the mean value – this might smooth the clear border in the merged result but it will most likely not make it disappear.
 To do so, we need a more advanced approach.
 Remote sensing scientists frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image.
+The packages <strong>landsat</strong> (<code>histmatch()</code>, <code>relnorm()</code>, <code>PIF()</code>), <strong>satellite</strong> (<code>calcHistMatch()</code>) and <strong>RStoolbox</strong> (<code>histMatch()</code>, <code>pifMatch()</code>) provide the corresponding functions for the <strong>raster</strong>’s package objects.
+For a more detailed introduction on how to use R for remote sensing, we refer the reader to <span class="citation"><a href="references.html#ref-wegmann_remote_2016" role="doc-biblioref">Wegmann, Leutner, and Dech</a> (<a href="references.html#ref-wegmann_remote_2016" role="doc-biblioref">2016</a>)</span>.
 <!--jn:toDo-->
-<!-- review the below advice -->
-The packages <strong>landsat</strong> (<code>histmatch()</code>, <code>relnorm()</code>, <code>PIF()</code>), <strong>satellite</strong> (<code>calcHistMatch()</code>) and <strong>RStoolbox</strong> (<code>histMatch()</code>, <code>pifMatch()</code>) provide the corresponding functions.
-For a more detailed introduction on how to use R for remote sensing, we refer the reader to <span class="citation"><a href="references.html#ref-wegmann_remote_2016" role="doc-biblioref">Wegmann, Leutner, and Dech</a> (<a href="references.html#ref-wegmann_remote_2016" role="doc-biblioref">2016</a>)</span>.</p>
+<!--update the above reference to the 2nd edition--></p>
 </div>
 </div>
 <div id="exercises-2" class="section level2" number="4.4">
@@ -875,7 +883,7 @@ Note: it may be wise to increase the cell size of the input raster to reduce com
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-10-01.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-10-02.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
