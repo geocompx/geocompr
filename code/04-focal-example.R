@@ -1,6 +1,7 @@
 library(tmap)
 library(sf)
 library(terra)
+library(grid)
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 elev[1, 1] = 0
 
@@ -21,7 +22,7 @@ r_focal = focal(elev, w = matrix(1, nrow = 3, ncol = 3), fun = min)
 poly_focal = st_as_sf(terra::as.polygons(r_focal, na.rm = FALSE, dissolve = FALSE))
 
 tm1 = tm_shape(polys) +
-  tm_polygons(col = "elev", style = "cont", lwd = 0.5) +
+  tm_polygons(col = "elev", style = "cont", lwd = 0.5, breaks = 0:36) +
   tm_text(text = "elev") +
   tm_shape(poly_target) +
   tm_borders(lwd = 3, col = "orange") +
@@ -31,7 +32,7 @@ tm1 = tm_shape(polys) +
             legend.show = FALSE)
 
 tm2 = tm_shape(poly_focal) +
-  tm_polygons(col = "elev", style = "cont", lwd = 0.5) +
+  tm_polygons(col = "elev", style = "cont", lwd = 0.5, breaks = 0:36) +
   tm_text(text = "elev") +
   tm_shape(poly_target) +
   tm_borders(lwd = 3, col = "orange") +
