@@ -678,11 +678,6 @@ elev = rast(system.file("raster/elev.tif", package = "spData"))
 elev_2 = extend(elev, c(1, 2))
 ```
 
-
-```r
-source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-extend-example.R", print.eval = TRUE)
-```
-
 <div class="figure" style="text-align: center">
 <img src="05-geometry-operations_files/figure-html/extend-example-1.png" alt="Original raster (left) and the same raster (right) extended by one row on the top and bottom and two columns on the left and right." width="100%" />
 <p class="caption">(\#fig:extend-example)Original raster (left) and the same raster (right) extended by one row on the top and bottom and two columns on the left and right.</p>
