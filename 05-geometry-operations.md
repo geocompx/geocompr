@@ -727,8 +727,7 @@ Looking at Figure \@ref(fig:origin-example) reveals the effect of changing the o
 # change the origin
 origin(elev_4) = c(0.25, 0.25)
 plot(elev_4)
-# and add the original raster
-plot(elev, add = TRUE)
+plot(elev, add = TRUE) # and add the original raster
 ```
 
 <div class="figure" style="text-align: center">
