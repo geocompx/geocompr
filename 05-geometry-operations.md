@@ -613,22 +613,21 @@ linestring_sf2
 ```
 
 ## Geometric operations on raster data {#geo-ras}
-<!--jn:toDo-->
-<!-- reread and rethink this section -->
 
 \index{raster!manipulation} 
 Geometric raster operations include the shift, flipping, mirroring, scaling, rotation or warping of images.
 These operations are necessary for a variety of applications including georeferencing, used to allow images to be overlaid on an accurate map with a known CRS [@liu_essential_2009].
-A variety of georeferencing techniques exist, including
+A variety of georeferencing techniques exist, including:
 
-- georectification based on known [ground control points](http://www.qgistutorials.com/en/docs/georeferencing_basics.html); 
-- orthorectification, which also accounts for local topography; and
-- image [registration](https://en.wikipedia.org/wiki/Image_registration) is used to combine images of the same thing but shot from different sensors the process of aligning one image with another (in terms of coordinate system, and resolution). 
+- Georectification based on known [ground control points](https://www.qgistutorials.com/en/docs/3/georeferencing_basics.html);
+- Orthorectification, which also accounts for local topography
+- Image [registration](https://en.wikipedia.org/wiki/Image_registration) is used to combine images of the same thing but shot from different sensors the process of aligning one image with another (in terms of coordinate system, and resolution)
 
-R is unsuitable for the first two points since these often require manual intervention which is why they are usually done with the help of dedicated GIS software (see also Chapter \@ref(gis)).
+R is rather unsuitable for the first two points since these often require manual intervention which is why they are usually done with the help of dedicated GIS software (see also Chapter \@ref(gis)).
 On the other hand, aligning several images is possible in R and this section shows among others how to do so.
 This often includes changing the extent, the resolution and the origin of an image.
 A matching projection is of course also required but is already covered in Section \@ref(reprojecting-raster-geometries).
+
 In any case, there are other reasons to perform a geometric operation on a single raster image.
 For instance, in Chapter \@ref(location) we define metropolitan areas in Germany as 20 km^2^ pixels with more than 500,000 inhabitants. 
 The original inhabitant raster, however, has a resolution of 1 km^2^ which is why we will decrease (aggregate) the resolution by a factor of 20 (see Section \@ref(define-metropolitan-areas)).
@@ -641,7 +640,7 @@ Sometimes a coarser resolution is sufficient for the task at hand.
 \index{raster!intersection} 
 In Section \@ref(spatial-raster-subsetting) we have shown how to extract values from a raster overlaid by other spatial objects.
 To retrieve a spatial output, we can use almost the same subsetting syntax.
-The only difference is that we have to make clear that we would like to keep the matrix structure by setting the `drop`-parameter to `FALSE`.
+The only difference is that we have to make clear that we would like to keep the matrix structure by setting the `drop` argument to `FALSE`.
 This will return a raster object containing the cells whose midpoints overlap with `clip`.
 
 
@@ -677,12 +676,16 @@ Following code adds one row and two columns to each side of the raster while set
 ```r
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 elev_2 = extend(elev, c(1, 2))
-plot(elev_2)
+```
+
+
+```r
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-extend-example.R", print.eval = TRUE)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/extend-example-1.png" alt="Original raster extended by one row on each side (top, bottom) and two columns on each side (right, left)." width="100%" />
-<p class="caption">(\#fig:extend-example)Original raster extended by one row on each side (top, bottom) and two columns on each side (right, left).</p>
+<img src="05-geometry-operations_files/figure-html/extend-example-1.png" alt="Original raster (left) and the same raster (right) extended by one row on the top and bottom and two columns on the left and right." width="100%" />
+<p class="caption">(\#fig:extend-example)Original raster (left) and the same raster (right) extended by one row on the top and bottom and two columns on the left and right.</p>
 </div>
 
 Performing an algebraic operation on two objects with differing extents in R, the **terra** package returns an error.
@@ -735,10 +738,9 @@ plot(elev, add = TRUE)
 
 Note that changing the resolution (next section) frequently also changes the origin.
 
-### Aggregation and disaggregation
+### Aggregation, disaggregation and resampling
 
 <!--jn:toDo-->
-<!-- add a paragraph or two about resampling -->
 <!-- plus revise the following section -->
 
 \index{raster!aggregation} 
@@ -800,7 +802,6 @@ By default, it uses the `bilinear`-interpolation.
 dem_agg = extend(dem_agg, 2)
 dem_disagg_2 = resample(dem_agg, dem)
 ```
-
 
 <!--jn:toDo-->
 <!-- update the advice -->
