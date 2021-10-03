@@ -610,11 +610,11 @@ This is where it substantially differs from matrix algebra which changes positio
 
 Map algebra (or cartographic modeling) divides raster operations into four subclasses [@tomlin_geographic_1990], with each working on one or several grids simultaneously:
 
-1. *Local* or per-cell operations.
+1. *Local* or per-cell operations
 2. *Focal* or neighborhood operations.
-Most often the output cell value is the result of a 3 x 3 input cell block.
-3. *Zonal* operations are similar to focal operations, but the surrounding pixel grid on which new values are computed can have irregular sizes and shapes.
-4. *Global* or per-raster operations; that means the output cell derives its value potentially from one or several entire rasters.
+Most often the output cell value is the result of a 3 x 3 input cell block
+3. *Zonal* operations are similar to focal operations, but the surrounding pixel grid on which new values are computed can have irregular sizes and shapes
+4. *Global* or per-raster operations; that means the output cell derives its value potentially from one or several entire rasters
 
 This typology classifies map algebra operations by the number of cells used for each pixel processing step and the type of the output.
 For the sake of completeness, we should mention that raster operations can also be classified by discipline such as terrain, hydrological analysis, or image classification.
