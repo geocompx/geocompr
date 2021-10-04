@@ -835,24 +835,34 @@ tmap_arrange(pz1, pz2, pz3, pz4, ncol = 4, asp = NA)
 <!-- 1. explain the need of the use of `vect()` -->
 <!-- 2. wait for https://github.com/rspatial/terra/issues/89 -->
 
-<!--jn:toDo-->
-<!-- add info about exact = TRUE -->
-
 \index{raster-vector!raster extraction} 
 Raster extraction is the process of identifying and returning the values associated with a 'target' raster at specific locations, based on a (typically vector) geographic 'selector' object.
 The results depend on the type of selector used (points, lines or polygons) and arguments passed to the `terra::extract()` function, which we use to demonstrate raster extraction.
 The reverse of raster extraction --- assigning raster cell values based on vector objects --- is rasterization, described in Section \@ref(rasterization).
 
-The simplest example is extracting the value of a raster cell at specific **points**.
+The basic example is of extracting the value of a raster cell at specific **points**.
 For this purpose, we will use `zion_points`, which contain a sample of 30 locations within the Zion National Park (Figure \@ref(fig:pointextr)). 
-The following command extracts elevation values from `srtm` and creates a data frame with cells' IDs and related `srtm` values for each point.
-Now, we can add the resulting object to our  `zion_points` dataset with the `cbind` function: 
+The following command extracts elevation values from `srtm` and creates a data frame with points' IDs (one value per vector's row) and related `srtm` values for each point.
+Now, we can add the resulting object to our `zion_points` dataset with the `cbind()` function: 
 
 ```{r 05-geometry-operations-47}
 data("zion_points", package = "spDataLarge")
 elevation = terra::extract(srtm, vect(zion_points))
 zion_points = cbind(zion_points, elevation)
 ```
+
+<!--jn:toDo-->
+<!-- https://github.com/rspatial/terra/issues/351 -->
+<!-- MULTIPOINT extraction crash -->
+```{r, echo=FALSE, eval=FALSE}
+library(dplyr)
+zion_points2 = zion_points
+zion_points2$a = 1
+zion_points2 = zion_points2 %>% group_by(a) %>% summarise()
+elevation = terra::extract(srtm, vect(zion_points2))
+zion_points = cbind(zion_points, elevation)
+```
+
 
 ```{r 05-geometry-operations-48, echo=FALSE, eval=FALSE}
 # Aim: demonstrate buffer arg in raster extract
@@ -1029,6 +1039,11 @@ tmap_arrange(rast_poly_srtm, rast_poly_nlcd, ncol = 2)
 <!-- - **Parallelization**: this approach works when using many geographic vector selector objects by splitting them into groups and extracting cell values independently for each group (see `?raster::clusterR()` for details of this approach) -->
 <!-- - Use the **velox** package [@hunziker_velox:_2017], which provides a fast method for extracting raster data that fits in memory (see the package's [`extract`](https://hunzikp.github.io/velox/extract.html) vignette for details) -->
 <!-- - Using **R-GIS bridges** (see Chapter \@ref(gis)): efficient calculation of raster statistics from polygons can be found in the SAGA function `saga:gridstatisticsforpolygons`, for example, which can be accessed via **RQGIS** -->
+
+
+<!--jn:toDo-->
+<!-- add info about exact = TRUE -->
+<!-- block2 -->
 
 ### Rasterization {#rasterization}
 
