@@ -852,7 +852,7 @@ It reduces the rectangular extent of the object passed to its first argument bas
 
 
 ```r
-srtm_cropped = crop(srtm, zion)
+srtm_cropped = crop(srtm, vect(zion))
 ```
 
 \index{raster-vector!raster masking} 
@@ -864,8 +864,14 @@ The following command therefore masks every cell outside of the Zion National Pa
 srtm_masked = mask(srtm, vect(zion))
 ```
 
-<!--jn:toDo-->
-<!-- mention that crop + mask are most often used together -->
+Importantly, we want to use both `crop()` and `mask()` together in most cases. 
+This combination of functions would (a) limit the raster's extent to our area of interest and then (b) replace all of the values outside of the area to NA.
+
+
+```r
+srtm_cropped = crop(srtm, vect(zion))
+srtm_final = mask(srtm_cropped, vect(zion))
+```
 
 Changing the settings of `mask()` yields different results.
 Setting `updatevalue = 0`, for example, will set all pixels outside the national park to 0.
