@@ -838,8 +838,7 @@ We will use two objects to illustrate raster cropping:
 - A vector (`sf`) object `zion` representing Zion National Park.
 
 Both target and cropping objects must have the same projection.
-The following code chunk therefore not only loads the datasets, from the **spDataLarge** package installed in Chapter \@ref(spatial-class),
-it also reprojects `zion` (see Section \@ref(reproj-geo-data) for more on reprojection):
+The following code chunk therefore not only reads the datasets from the **spDataLarge** package9 installed in Chapter \@ref(spatial-class)), it also reprojects `zion` (see Section \@ref(reproj-geo-data) for more on reprojection):
 
 
 ```r
@@ -849,7 +848,7 @@ zion = st_transform(zion, crs(srtm))
 ```
 
 We will use `crop()` from the **terra** package to crop the `srtm` raster.
-`crop()` reduces the rectangular extent of the object passed to its first argument based on the extent of the object passed to its second argument, as demonstrated in the command below (which generates Figure \@ref(fig:cropmask)(B) --- note the smaller extent of the raster background):
+It reduces the rectangular extent of the object passed to its first argument based on the extent of the object passed to its second argument, as demonstrated in the command below (which generates Figure \@ref(fig:cropmask)(B) --- note the smaller extent of the raster background):
 
 
 ```r
