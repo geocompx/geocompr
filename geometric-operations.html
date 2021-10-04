@@ -961,20 +961,21 @@ FIGURE 5.17: Illustration of raster cropping and raster masking.
 <!-- two possibilities: -->
 <!-- 1. explain the need of the use of `vect()` -->
 <!-- 2. wait for https://github.com/rspatial/terra/issues/89 -->
-<!--jn:toDo-->
-<!-- add info about exact = TRUE -->
 <p>
 Raster extraction is the process of identifying and returning the values associated with a ‘target’ raster at specific locations, based on a (typically vector) geographic ‘selector’ object.
 The results depend on the type of selector used (points, lines or polygons) and arguments passed to the <code><a href="https://rdrr.io/pkg/terra/man/extract.html">terra::extract()</a></code> function, which we use to demonstrate raster extraction.
 The reverse of raster extraction — assigning raster cell values based on vector objects — is rasterization, described in Section <a href="geometric-operations.html#rasterization">5.4.3</a>.</p>
-<p>The simplest example is extracting the value of a raster cell at specific <strong>points</strong>.
+<p>The basic example is of extracting the value of a raster cell at specific <strong>points</strong>.
 For this purpose, we will use <code>zion_points</code>, which contain a sample of 30 locations within the Zion National Park (Figure <a href="geometric-operations.html#fig:pointextr">5.18</a>).
-The following command extracts elevation values from <code>srtm</code> and creates a data frame with cells’ IDs and related <code>srtm</code> values for each point.
-Now, we can add the resulting object to our <code>zion_points</code> dataset with the <code>cbind</code> function:</p>
+The following command extracts elevation values from <code>srtm</code> and creates a data frame with points’ IDs (one value per vector’s row) and related <code>srtm</code> values for each point.
+Now, we can add the resulting object to our <code>zion_points</code> dataset with the <code><a href="https://rdrr.io/r/base/cbind.html">cbind()</a></code> function:</p>
 <div class="sourceCode" id="cb191"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"zion_points"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
 <span class="va">elevation</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">zion_points</span><span class="op">)</span><span class="op">)</span>
 <span class="va">zion_points</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">zion_points</span>, <span class="va">elevation</span><span class="op">)</span></code></pre></div>
+<!--jn:toDo-->
+<!-- https://github.com/rspatial/terra/issues/351 -->
+<!-- MULTIPOINT extraction crash -->
 <p>The <code>buffer</code> argument can be used to specify a buffer radius (in meters) around each point.
 The result of <code><a href="https://rdrr.io/pkg/terra/man/extract.html">terra::extract(srtm, vect(zion_points), buffer = 1000)</a></code>, for example, is a list of vectors, each of which representing the values of cells inside the buffer associated with each point.
 In practice, this example is a special case of extraction with a polygon selector, described below.</p>
@@ -1061,6 +1062,9 @@ FIGURE 5.20: Area used for continuous (left) and categorical (right) raster extr
 <!-- - **Parallelization**: this approach works when using many geographic vector selector objects by splitting them into groups and extracting cell values independently for each group (see `?raster::clusterR()` for details of this approach) -->
 <!-- - Use the **velox** package [@hunziker_velox:_2017], which provides a fast method for extracting raster data that fits in memory (see the package's [`extract`](https://hunzikp.github.io/velox/extract.html) vignette for details) -->
 <!-- - Using **R-GIS bridges** (see Chapter \@ref(gis)): efficient calculation of raster statistics from polygons can be found in the SAGA function `saga:gridstatisticsforpolygons`, for example, which can be accessed via **RQGIS** -->
+<!--jn:toDo-->
+<!-- add info about exact = TRUE -->
+<!-- block2 -->
 </div>
 <div id="rasterization" class="section level3" number="5.4.3">
 <h3>
