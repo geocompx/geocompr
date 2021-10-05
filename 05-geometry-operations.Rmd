@@ -877,10 +877,11 @@ zion_transect = cbind(c(-113.2, -112.9), c(37.45, 37.2)) %>%
 ```{r 05-geometry-operations-50, eval=FALSE, echo=FALSE}
 # Aim: show how extraction works with non-straight lines by
 # using this alternative line object:
-zion_transect = cbind(c(-113.2, -112.9, -113.2), c(37.45, 37.2, 37.5)) %>%
+zion_transect2 = cbind(c(-113.2, -112.9, -113.2), c(37.45, 37.2, 37.5)) %>%
   st_linestring() %>% 
   st_sfc(crs = crs(srtm)) %>% 
   st_sf()
+zion_transect = rbind(zion_transect, zion_transect2)
 ```
 
 The utility of extracting heights from a linear selector is illustrated by imagining that you are planning a hike.
@@ -893,10 +894,11 @@ transect = terra::extract(srtm, vect(zion_transect), cells = TRUE)
 Note the use of `cells = TRUE` arguments to return cell IDs *along* the path. 
 The result is a list containing a matrix of cell IDs in the first column and elevation values in the second.
 The number of list elements is equal to the number of lines or polygons from which we are extracting values.
-The subsequent code chunk first converts this tricky matrix-in-a-list object into a simple data frame, returns the coordinates associated with each extracted cell, and finds the associated distances along the transect (see `?geosphere::distGeo()` for details):
+The subsequent code chunk first returns the coordinates associated with each extracted cell, finds the distances between cells along the transect (see `?geosphere::distGeo()` for details), and calculates their cumulative sum:
 
 <!--jn:toDo-->
 <!-- rethink this code -->
+<!-- it must work for many lines! -->
 
 ```{r 05-geometry-operations-52}
 transect_coords = xyFromCell(srtm, transect$cell)
@@ -904,7 +906,7 @@ pair_dist = geosphere::distGeo(transect_coords)[-nrow(transect_coords)]
 transect$dist = c(0, cumsum(pair_dist)) 
 ```
 
-The resulting `transect_df` can be used to create elevation profiles, as illustrated in Figure \@ref(fig:lineextr)(B).
+The resulting `transect` can be used to create elevation profiles, as illustrated in Figure \@ref(fig:lineextr)(B).
 
 ```{r lineextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Location of a line used for raster extraction (left) and the elevation along this line (right).", fig.scap="Line-based raster extraction."}
 library(tmap)
