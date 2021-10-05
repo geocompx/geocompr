@@ -943,7 +943,7 @@ print(plot_transect, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
 
 The final type of geographic vector object for raster extraction is **polygons**.
 Like lines and buffers, polygons tend to return many raster values per polygon.
-This is demonstrated in the command below, which results in a data frame with column names  `ID` (the row number of the polygon) and `srtm` (associated elevation values):
+This is demonstrated in the command below, which results in a data frame with column names `ID` (the row number of the polygon) and `srtm` (associated elevation values):
 
 ```{r 05-geometry-operations-53, eval=FALSE, echo=FALSE}
 # aim: create zion_many to test multi-polygon results
@@ -977,11 +977,15 @@ group_by(zion_srtm_values, ID) %>%
   summarize(across(srtm, list(min = min, mean = mean, max = max)))
 ```
 
+<!--jn:toDo -->
+<!--should we use the tidyverse name or dplyr here?-->
+<!--btw we could also add reference to the tidyverse paper somewhere in the book-->
+
 The preceding code chunk used the **tidyverse**\index{tidyverse (package)} to provide summary statistics for cell values per polygon ID, as described in Chapter \@ref(attr).
-The results provide useful summaries, for example that the maximum height in the park is around 2,661 meters (other summary statistics, such as standard deviation, can also be calculated in this way).
+The results provide useful summaries, for example that the maximum height in the park is around 2,661 meters above see level (other summary statistics, such as standard deviation, can also be calculated in this way).
 Because there is only one polygon in the example a data frame with a single row is returned; however, the method works when multiple selector polygons are used.
 
-The same approach works for counting occurrences of categorical raster values within polygons.
+The similar approach works for counting occurrences of categorical raster values within polygons.
 This is illustrated with a land cover dataset (`nlcd`) from the **spDataLarge** package in Figure \@ref(fig:polyextr)(B), and demonstrated in the code below:
 
 ```{r 05-geometry-operations-56, warning=FALSE, message=FALSE}
@@ -995,17 +999,20 @@ zion_nlcd %>%
 
 ```{r polyextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Area used for continuous (left) and categorical (right) raster extraction."}
 rast_poly_srtm = tm_shape(srtm) + 
-  tm_raster(palette = terrain_colors, title = "Elevation (m)", legend.show = TRUE, style = "cont") + 
+  tm_raster(palette = terrain_colors, title = "Elevation (m)",
+            legend.show = TRUE, style = "cont") + 
   tm_shape(zion) +
   tm_borders(lwd = 2) +
   tm_layout(main.title = "A. Continuous data extraction",
-            main.title.size = 1, legend.frame = TRUE, legend.position = c("left", "bottom"))
+            main.title.size = 1, legend.frame = TRUE,
+            legend.position = c("left", "bottom"))
 rast_poly_nlcd = tm_shape(nlcd) +
   tm_raster(title = "Land cover", legend.show = TRUE) + 
   tm_shape(zion) +
   tm_borders(lwd = 2) +
   tm_layout(main.title = "B. Categorical data extraction", 
-            main.title.size = 1, legend.frame = TRUE, legend.position = c("left", "bottom"))
+            main.title.size = 1, legend.frame = TRUE, 
+            legend.position = c("left", "bottom"))
 tmap_arrange(rast_poly_srtm, rast_poly_nlcd, ncol = 2)
 ```
 
