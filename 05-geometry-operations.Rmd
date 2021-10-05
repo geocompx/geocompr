@@ -1061,17 +1061,16 @@ First, we create a raster representing the presence or absence of cycle hire poi
 In this case `rasterize()` requires only one argument in addition to `x` and `y` (the aforementioned vector and raster objects): a value to be transferred to all non-empty cells specified by `field` (results illustrated Figure \@ref(fig:vector-rasterization1)(B)).
 
 ```{r 05-geometry-operations-58}
-ch_raster1 = rasterize(vect(cycle_hire_osm_projected), raster_template, field = 1)
+ch_raster1 = rasterize(vect(cycle_hire_osm_projected), raster_template,
+                       field = 1)
 ```
 
 The `fun` argument specifies summary statistics used to convert multiple observations in close proximity into associate cells in the raster object.
-<!--jn:toDo-->
-<!-- check the default -->
 By default `fun = "last"` is used but other options such as `fun = "length"` can be used, in this case to count the number of cycle hire points in each grid cell (the results of this operation are illustrated in Figure \@ref(fig:vector-rasterization1)(C)).
 
 ```{r 05-geometry-operations-59}
 ch_raster2 = rasterize(vect(cycle_hire_osm_projected), raster_template, 
-                       field = 1, fun = "length")
+                       fun = "length")
 ```
 
 The new output, `ch_raster2`, shows the number of cycle hire points in each grid cell.
@@ -1097,17 +1096,16 @@ raster_template2 = rast(ext(california), resolution = 0.5,
                         crs = st_crs(california)$wkt)
 ```
 
-Line rasterization is demonstrated in the code below.
-In the resulting raster, all cells that are touched by a line get a value, as illustrated in Figure \@ref(fig:vector-rasterization2)(A).
-<!--jn:toDo-->
-<!-- explain touches = TRUE -->
+When considering line or polygon rasterization, one useful additional argument is `touches`.
+By default it is `FALSE`, but when changed to `TRUE` -- all cells that are touched by a line or polygon border get a value.
+Line rasterization with `touches = TRUE` is demonstrated in the code below (Figure \@ref(fig:vector-rasterization2)(A)).
 
 ```{r 05-geometry-operations-62}
 california_raster1 = rasterize(vect(california_borders), raster_template2,
                                touches = TRUE)
 ```
 
-Polygon rasterization, by contrast, selects only cells whose centroids are inside the selector polygon, as illustrated in Figure \@ref(fig:vector-rasterization2)(B).
+Compare it to a polygon rasterization, with `touches = FALSE` by default, which selects only cells whose centroids are inside the selector polygon, as illustrated in Figure \@ref(fig:vector-rasterization2)(B).
 
 ```{r 05-geometry-operations-63}
 california_raster2 = rasterize(vect(california), raster_template2) 
