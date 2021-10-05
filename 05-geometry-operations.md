@@ -911,21 +911,23 @@ elevation = terra::extract(srtm, vect(zion_points))
 zion_points = cbind(zion_points, elevation)
 ```
 
-<!--jn:toDo-->
-<!-- https://github.com/rspatial/terra/issues/351 -->
-<!-- MULTIPOINT extraction crash -->
 
 
 
-
-
-The `buffer` argument can be used to specify a buffer radius (in meters) around each point.
-The result of `terra::extract(srtm, vect(zion_points), buffer = 1000)`, for example, is a list of vectors, each of which representing the values of cells inside the buffer associated with each point.
-In practice, this example is a special case of extraction with a polygon selector, described below.
+```
+#> Reading layer `zion' from data source 
+#>   `/usr/local/lib/R/site-library/spDataLarge/vector/zion.gpkg' 
+#>   using driver `GPKG'
+#> Simple feature collection with 1 feature and 11 fields
+#> Geometry type: POLYGON
+#> Dimension:     XY
+#> Bounding box:  xmin: 303000 ymin: 4110000 xmax: 335000 ymax: 4150000
+#> Projected CRS: UTM Zone 12, Northern Hemisphere
+```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/pointextr-1.png" alt="Locations of points used for raster extraction." width="60%" />
-<p class="caption">(\#fig:pointextr)Locations of points used for raster extraction.</p>
+<img src="05-geometry-operations_files/figure-html/pointextr-1.png" alt="Locations of points used for raster extraction (left) and their 1km buffers (right)." width="100%" />
+<p class="caption">(\#fig:pointextr)Locations of points used for raster extraction (left) and their 1km buffers (right).</p>
 </div>
 
 Raster extraction also works with **line** selectors.
@@ -952,10 +954,11 @@ transect = terra::extract(srtm, vect(zion_transect), cells = TRUE)
 Note the use of `cells = TRUE` arguments to return cell IDs *along* the path. 
 The result is a list containing a matrix of cell IDs in the first column and elevation values in the second.
 The number of list elements is equal to the number of lines or polygons from which we are extracting values.
-The subsequent code chunk first converts this tricky matrix-in-a-list object into a simple data frame, returns the coordinates associated with each extracted cell, and finds the associated distances along the transect (see `?geosphere::distGeo()` for details):
+The subsequent code chunk first returns the coordinates associated with each extracted cell, finds the distances between cells along the transect (see `?geosphere::distGeo()` for details), and calculates their cumulative sum:
 
 <!--jn:toDo-->
 <!-- rethink this code -->
+<!-- it must work for many lines! -->
 
 
 ```r
@@ -964,7 +967,7 @@ pair_dist = geosphere::distGeo(transect_coords)[-nrow(transect_coords)]
 transect$dist = c(0, cumsum(pair_dist)) 
 ```
 
-The resulting `transect_df` can be used to create elevation profiles, as illustrated in Figure \@ref(fig:lineextr)(B).
+The resulting `transect` can be used to create elevation profiles, as illustrated in Figure \@ref(fig:lineextr)(B).
 
 <div class="figure" style="text-align: center">
 <img src="05-geometry-operations_files/figure-html/lineextr-1.png" alt="Location of a line used for raster extraction (left) and the elevation along this line (right)." width="100%" />
@@ -973,7 +976,7 @@ The resulting `transect_df` can be used to create elevation profiles, as illustr
 
 The final type of geographic vector object for raster extraction is **polygons**.
 Like lines and buffers, polygons tend to return many raster values per polygon.
-This is demonstrated in the command below, which results in a data frame with column names  `ID` (the row number of the polygon) and `srtm` (associated elevation values):
+This is demonstrated in the command below, which results in a data frame with column names `ID` (the row number of the polygon) and `srtm` (associated elevation values):
 
 
 
@@ -995,11 +998,15 @@ group_by(zion_srtm_values, ID) %>%
 #> 1     1     1122     1818.     2661
 ```
 
+<!--jn:toDo -->
+<!--should we use the tidyverse name or dplyr here?-->
+<!--btw we could also add reference to the tidyverse paper somewhere in the book-->
+
 The preceding code chunk used the **tidyverse**\index{tidyverse (package)} to provide summary statistics for cell values per polygon ID, as described in Chapter \@ref(attr).
-The results provide useful summaries, for example that the maximum height in the park is around 2,661 meters (other summary statistics, such as standard deviation, can also be calculated in this way).
+The results provide useful summaries, for example that the maximum height in the park is around 2,661 meters above see level (other summary statistics, such as standard deviation, can also be calculated in this way).
 Because there is only one polygon in the example a data frame with a single row is returned; however, the method works when multiple selector polygons are used.
 
-The same approach works for counting occurrences of categorical raster values within polygons.
+The similar approach works for counting occurrences of categorical raster values within polygons.
 This is illustrated with a land cover dataset (`nlcd`) from the **spDataLarge** package in Figure \@ref(fig:polyextr)(B), and demonstrated in the code below:
 
 
@@ -1073,18 +1080,17 @@ In this case `rasterize()` requires only one argument in addition to `x` and `y`
 
 
 ```r
-ch_raster1 = rasterize(vect(cycle_hire_osm_projected), raster_template, field = 1)
+ch_raster1 = rasterize(vect(cycle_hire_osm_projected), raster_template,
+                       field = 1)
 ```
 
 The `fun` argument specifies summary statistics used to convert multiple observations in close proximity into associate cells in the raster object.
-<!--jn:toDo-->
-<!-- check the default -->
 By default `fun = "last"` is used but other options such as `fun = "length"` can be used, in this case to count the number of cycle hire points in each grid cell (the results of this operation are illustrated in Figure \@ref(fig:vector-rasterization1)(C)).
 
 
 ```r
 ch_raster2 = rasterize(vect(cycle_hire_osm_projected), raster_template, 
-                       field = 1, fun = "length")
+                       fun = "length")
 ```
 
 The new output, `ch_raster2`, shows the number of cycle hire points in each grid cell.
@@ -1113,10 +1119,9 @@ raster_template2 = rast(ext(california), resolution = 0.5,
                         crs = st_crs(california)$wkt)
 ```
 
-Line rasterization is demonstrated in the code below.
-In the resulting raster, all cells that are touched by a line get a value, as illustrated in Figure \@ref(fig:vector-rasterization2)(A).
-<!--jn:toDo-->
-<!-- explain touches = TRUE -->
+When considering line or polygon rasterization, one useful additional argument is `touches`.
+By default it is `FALSE`, but when changed to `TRUE` -- all cells that are touched by a line or polygon border get a value.
+Line rasterization with `touches = TRUE` is demonstrated in the code below (Figure \@ref(fig:vector-rasterization2)(A)).
 
 
 ```r
@@ -1124,7 +1129,7 @@ california_raster1 = rasterize(vect(california_borders), raster_template2,
                                touches = TRUE)
 ```
 
-Polygon rasterization, by contrast, selects only cells whose centroids are inside the selector polygon, as illustrated in Figure \@ref(fig:vector-rasterization2)(B).
+Compare it to a polygon rasterization, with `touches = FALSE` by default, which selects only cells whose centroids are inside the selector polygon, as illustrated in Figure \@ref(fig:vector-rasterization2)(B).
 
 
 ```r
@@ -1157,6 +1162,7 @@ In R, vectorization refers to the possibility of replacing `for`-loops and alike
 
 The simplest form of vectorization is to convert the centroids of raster cells into points.
 `as.points()` does exactly this for all non-`NA` raster grid cells (Figure \@ref(fig:raster-vectorization1)).
+Note, here we also used `st_as_sf()` to convert the resulting object to the `sf` class.
 
 
 ```r
@@ -1207,10 +1213,6 @@ The final type of vectorization involves conversion of rasters to polygons.
 This can be done with `raster::as.polygons()`, which converts each raster cell into a polygon consisting of five coordinates, all of which are stored in memory (explaining why rasters are often fast compared with vectors!).
 
 This is illustrated below by converting the `grain` object into polygons and subsequently dissolving borders between polygons with the same attribute values (also see the `dissolve` argument in `as.polygons()`).
-<!--jn:toDo-->
-<!-- think about the next par -->
-<!-- Attributes in this case are stored in a column called `layer` (see Section \@ref(geometry-unions) and Figure \@ref(fig:raster-vectorization2)). -->
-<!-- (Note: a convenient alternative for converting rasters into polygons is `spex::polygonize()` which by default returns an `sf` object.) -->
 
 
 ```r
