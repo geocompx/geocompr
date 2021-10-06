@@ -741,7 +741,7 @@ Note that changing the resolution (next section) frequently also changes the ori
 \index{raster!disaggregation} 
 \index{raster!resampling}
 Raster datasets can also differ with regard to their resolution. 
-To match resolutions, one can either decrease  (`aggregate()`) or increase (`disaggregate()`) the resolution of one raster.^[
+To match resolutions, one can either decrease  (`aggregate()`) or increase (`disagg()`) the resolution of one raster.^[
 Here we refer to spatial resolution.
 In remote sensing the spectral (spectral bands), temporal (observations through time of the same area) and radiometric (color depth) resolution are also important.
 Check out the `tapp()` example in the documentation for getting an idea on how to do temporal raster aggregation.
@@ -760,16 +760,16 @@ dem_agg = aggregate(dem, fact = 5, fun = mean)
 <p class="caption">(\#fig:aggregate-example)Original raster (left). Aggregated raster (right).</p>
 </div>
 
-By contrast, the `disaggregate()` function increases the resolution.
+By contrast, the `disagg()` function increases the resolution.
 However, we have to specify a method on how to fill the new cells.
-The `disaggregate()` function provides two methods.
+The `disagg()` function provides two methods.
 The default one (`method = "near"`) simply gives all output cells the value of the input cell, and hence duplicates values which leads to a blocky output image.
 
 The `bilinear` method, in turn, is an interpolation technique that uses the four nearest pixel centers of the input image (salmon colored points in Figure \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Figure \@ref(fig:bilinear) as the value of the output cell - square in the upper left corner in Figure \@ref(fig:bilinear)).
 
 
 ```r
-dem_disagg = disaggregate(dem_agg, fact = 5, method = "bilinear")
+dem_disagg = disagg(dem_agg, fact = 5, method = "bilinear")
 identical(dem, dem_disagg)
 #> [1] FALSE
 ```

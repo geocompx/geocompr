@@ -61,7 +61,7 @@ usa_parks = st_read(dsn = "nps_boundary.shp")
 ## Geographic data packages
 
 \index{data packages}
-A multitude of R packages have been developed for accessing geographic data, some of which are presented in Table \@ref(tab:datapackages).
+Many R packages have been developed for accessing geographic data, some of which are presented in Table \@ref(tab:datapackages).
 These provide interfaces to one or more spatial libraries or geoportals and aim to make data access even quicker from the command line.
 
 <table class="table" style="margin-left: auto; margin-right: auto;">
@@ -79,7 +79,11 @@ These provide interfaces to one or more spatial libraries or geoportals and aim 
   </tr>
   <tr>
    <td style="text-align:left;"> osmdata </td>
-   <td style="text-align:left;"> Download and import of OpenStreetMap data. </td>
+   <td style="text-align:left;"> Download and import small OpenStreetMap datasets. </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> osmextract </td>
+   <td style="text-align:left;"> Download and import large OpenStreetMap datasets. </td>
   </tr>
   <tr>
    <td style="text-align:left;"> raster </td>
@@ -139,11 +143,6 @@ The result is a multilayer object of class `RasterStack`.
 library(raster)
 #> Loading required package: sp
 #> 
-#> Attaching package: 'sp'
-#> The following objects are masked from 'package:terra':
-#> 
-#>     bbox, disaggregate
-#> 
 #> Attaching package: 'raster'
 #> The following object is masked from 'package:dplyr':
 #> 
@@ -182,9 +181,14 @@ parks = opq(bbox = "leeds uk") %>%
   osmdata_sf()
 ```
 
-OpenStreetMap is a vast global database of crowd-sourced data and it is growing daily.
-Although the quality is not as spatially consistent as many official datasets, OSM data have many advantages: they are globally available free of charge and using crowd-source data can encourage 'citizen science' and contributions back to the digital commons.
-Further examples of **osmdata** in action are provided in Chapters \@ref(gis), \@ref(transport) and \@ref(location).
+A limitation with the **osmdata** package is that it is *rate limited*, meaning that it cannot download large OSM datasets (e.g. all the OSM data for a large city).
+To overcome this limitation, the **osmextract** package was developed, which can be used to download and import binary `.pbf` files containing compressed versions of the OSM database for pre-defined regions.
+<!--todo: add proper citation-->
+
+OpenStreetMap is a vast global database of crowd-sourced data, is growing daily, and has a wider ecosystem of tools enabling easy access to the data, from the [Overpass turbo](https://overpass-turbo.eu/) web service for rapid development and testing of OSM queries to [osm2pgsql](https://osm2pgsql.org/) for importing the data into a PostGIS database.
+Although the quality of datasets derived from OSM varies, the data source and wider OSM ecosystems have many advantages: they provide datasets that are available globally, free of charge, and constantly improving thanks to an army of volunteers.
+Using OSM encourages 'citizen science' and contributions back to the digital commons (you can start editing data representing a part of the world you know well at [www.openstreetmap.org](https://www.openstreetmap.org)).
+Further examples of OSM data in action are provided in Chapters \@ref(gis), \@ref(transport) and \@ref(location).
 
 Sometimes, packages come with inbuilt datasets.
 These can be accessed in four ways: by attaching the package (if the package uses 'lazy loading' as **spData** does), with `data(dataset)`, by referring to the dataset with `pkg::dataset` or with `system.file()` to access raw data files.
