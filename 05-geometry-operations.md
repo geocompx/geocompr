@@ -795,9 +795,10 @@ It includes:
 
 <!--jn:toDo-->
 <!--explain the below methods-->
+<!-- explain when select each of them -->
 
-- Nearest neighbor
-- Bilinear interpolation
+- Nearest neighbor - assigns the value of the nearest cell of the original raster to the cell of the target one
+- Bilinear interpolation - assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure \@ref(fig:bilinear))
 - Cubic interpolation
 - Cubic spline interpolation
 - Lanczos windowed sinc resampling
