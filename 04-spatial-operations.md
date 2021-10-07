@@ -839,7 +839,10 @@ aut_ch = merge(aut, ch)
 
 **terra**'s `merge()` command combines two images, and in case they overlap, it uses the value of the first raster.
 <!--jn:toDo-->
-<!-- some benchmarks could be needed -->
+<!-- gdalUtils is slower (for this files): -->
+<!-- two_rast = c(terra::sources(aut)$source, terra::sources(ch)$source) -->
+<!-- tf = tempfile(fileext = ".tif") -->
+<!-- bench::mark({gdalUtils::mosaic_rasters(two_rast, tf)}) -->
 <!-- You can do exactly the same with `gdalUtils::mosaic_rasters()` which is faster, and therefore recommended if you have to merge a multitude of large rasters stored on disk. -->
 
 The merging approach is of little use when the overlapping values do not correspond to each other.

@@ -732,14 +732,13 @@ plot(elev, add = TRUE) # and add the original raster
 
 Note that changing the resolution (next section) frequently also changes the origin.
 
-### Aggregation, disaggregation and resampling
+### Aggregation, disaggregation
 
 <!--jn:toDo-->
 <!-- plus revise the following section -->
 
 \index{raster!aggregation} 
 \index{raster!disaggregation} 
-\index{raster!resampling}
 Raster datasets can also differ with regard to their resolution. 
 To match resolutions, one can either decrease  (`aggregate()`) or increase (`disagg()`) the resolution of one raster.^[
 Here we refer to spatial resolution.
@@ -783,19 +782,44 @@ Comparing the values of `dem` and `dem_disagg` tells us that they are not identi
 However, this was hardly to be expected, since disaggregating is a simple interpolation technique.
 It is important to keep in mind that disaggregating results in a finer resolution; the corresponding values, however, are only as accurate as their lower resolution source.
 
+### Resampling
+
+\index{raster!resampling}
+The above methods of aggregation and disaggregation are only suitable when we what to change the resolution of our raster by the aggregation/disaggregation factor. 
+However, what to do when we have two or more rasters with different resolutions and origins?
+This is the role of resampling -- a process of computing values for new pixel locations.
+In short, this process takes the values of our original raster and recalculates them into a grid of the resolution and origin of the target raster.
+
+Several methods for recalculating (estimating) values for a grid with different resolutions/origins exist.
+It includes:
+
 <!--jn:toDo-->
-<!-- add a paragraph or two about resampling -->
-The process of computing values for new pixel locations is also called resampling. 
-In fact, the **terra** package provides a `resample()` function.
-It lets you align several raster properties in one go, namely origin, extent and resolution.
-By default, it uses the `bilinear`-interpolation.
+<!--explain the below methods-->
+
+- Nearest neighbor
+- Bilinear interpolation
+- Cubic interpolation
+- Cubic spline interpolation
+- Lanczos windowed sinc resampling
+
+To apply resampling, the **terra** package provides a `resample()` function.
+It accepts an input raster (`x`), raster with target spatial properties (`y`), and a resampling method (`method`).
 
 
 ```r
-# add 2 rows and columns, i.e. change the extent
-dem_agg = extend(dem_agg, 2)
-dem_disagg_2 = resample(dem_agg, dem)
+target_rast = rast(xmin = 794600, xmax = 798200, 
+                   ymin = 8931800, ymax = 8935400,
+                   resolution = 150, crs = "EPSG:32717")
 ```
+
+
+```r
+dem_resampl = resample(dem, target_rast, method = "bilinear")
+```
+
+<img src="05-geometry-operations_files/figure-html/unnamed-chunk-1-1.png" width="100%" style="display: block; margin: auto;" />
+
+As you will see in section \@ref(reprojecting-raster-geometries), raster reprojection is a special case of resampling when our target grid has a different CRS than the original raster.
 
 <!--jn:toDo-->
 <!-- update the advice -->
