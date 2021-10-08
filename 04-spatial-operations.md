@@ -63,6 +63,14 @@ canterbury = nz %>% filter(Name == "Canterbury")
 canterbury_height = nz_height[canterbury, ]
 ```
 
+
+```
+#> Registered S3 methods overwritten by 'stars':
+#>   method             from
+#>   st_bbox.SpatRaster sf  
+#>   st_crs.SpatRaster  sf
+```
+
 <div class="figure" style="text-align: center">
 <img src="04-spatial-operations_files/figure-html/nz-subset-1.png" alt="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in gray, right)." width="100%" />
 <p class="caption">(\#fig:nz-subset)Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in gray, right).</p>

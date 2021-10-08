@@ -797,11 +797,14 @@ It includes:
 <!--explain the below methods-->
 <!-- explain when select each of them -->
 
-- Nearest neighbor - assigns the value of the nearest cell of the original raster to the cell of the target one
-- Bilinear interpolation - assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure \@ref(fig:bilinear))
-- Cubic interpolation
-- Cubic spline interpolation
-- Lanczos windowed sinc resampling
+- Nearest neighbor - assigns the value of the nearest cell of the original raster to the cell of the target one.
+It is fast and usually suitable for categorical rasters
+- Bilinear interpolation - assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure \@ref(fig:bilinear)). The fastest method for continuous rasters
+- Cubic interpolation - uses the values of 16 nearest cells of the original raster to determine the output cell value.  Used for continuous rasters. It results in less smoothed surface than the bilinear interpolation, but is also more computationally demanding
+- Cubic spline interpolation - also uses the values of 16 nearest cells of the original raster to determine the output cell value. Used for continuous rasters
+- Lanczos windowed sinc resampling - uses the values of 36 nearest cells of the original raster to determine the output cell value. Used for continuous rasters
+
+https://gis.stackexchange.com/a/14361/20955
 
 To apply resampling, the **terra** package provides a `resample()` function.
 It accepts an input raster (`x`), raster with target spatial properties (`y`), and a resampling method (`method`).
