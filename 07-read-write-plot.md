@@ -221,7 +221,7 @@ endpoint = "/figis/geoserver/wfs"
 q = list(request = "GetCapabilities")
 res = httr::GET(url = httr::modify_url(base_url, path = endpoint), query = q)
 res$url
-#> [1] "http://www.fao.org/figis/geoserver/wfs?request=GetCapabilities"
+#> [1] "https://www.fao.org/figis/geoserver/wfs?request=GetCapabilities"
 ```
 
 The above code chunk demonstrates how API\index{API} requests can be constructed programmatically with the `GET()` function, which takes a base URL and a list of query parameters which can easily be extended.
