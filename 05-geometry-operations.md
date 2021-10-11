@@ -806,6 +806,9 @@ Additionally, each successive method requires more processing time.
 To apply resampling, the **terra** package provides a `resample()` function.
 It accepts an input raster (`x`), raster with target spatial properties (`y`), and a resampling method (`method`).
 
+We need to have a raster with target spatial properties to see how the `resample()` function works.
+For this example, we can create one, `target_rast`, but this could often be another existing raster object.
+
 
 ```r
 target_rast = rast(xmin = 794600, xmax = 798200, 
@@ -813,9 +816,11 @@ target_rast = rast(xmin = 794600, xmax = 798200,
                    resolution = 150, crs = "EPSG:32717")
 ```
 
+Next, we need to provide our two raster objects as the first two arguments and one of the resampling methods described above.
+
 
 ```r
-dem_resampl = resample(dem, target_rast, method = "bilinear")
+dem_resampl = resample(dem, y = target_rast, method = "bilinear")
 ```
 
 Figure \@ref(fig:resampl) shows a comparison of different resampling methods on the `dem` object.
@@ -826,18 +831,6 @@ Figure \@ref(fig:resampl) shows a comparison of different resampling methods on 
 </div>
 
 As you will see in section \@ref(reprojecting-raster-geometries), raster reprojection is a special case of resampling when our target grid has a different CRS than the original raster.
-
-<!--jn:toDo-->
-<!-- update the advice -->
-
-<!-- Finally, in order to align many (possibly hundreds or thousands of) images stored on disk, you could use the `gdalUtils::align_rasters()` function. -->
-<!-- However, you may also use **raster** with very large datasets.  -->
-<!-- This is because **raster**: -->
-
-<!-- 1. Lets you work with raster datasets that are too large to fit into the main memory (RAM) by only processing chunks of it. -->
-<!-- 2. Tries to facilitate parallel processing. -->
-<!-- For more information, see the help pages of `beginCluster()` and `clusteR()`. -->
-<!-- Additionally, check out the *Multi-core functions* section in `vignette("functions", package = "raster")`. -->
 
 ## Raster-vector interactions {#raster-vector}
 
