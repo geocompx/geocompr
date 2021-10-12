@@ -954,6 +954,11 @@ zion_transect = cbind(c(-113.2, -112.9), c(37.45, 37.2)) %>%
 
 
 
+<!--jn:toDo -->
+<!--improve the below code -->
+
+
+
 The utility of extracting heights from a linear selector is illustrated by imagining that you are planning a hike.
 The method demonstrated below provides an 'elevation profile' of the route (the line does not need to be straight), useful for estimating how long it will take due to long climbs:
 
