@@ -995,14 +995,6 @@ Now, we can add the resulting object to our <code>zion_points</code> dataset wit
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"zion_points"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
 <span class="va">elevation</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">zion_points</span><span class="op">)</span><span class="op">)</span>
 <span class="va">zion_points</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">zion_points</span>, <span class="va">elevation</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt; Reading layer `zion' from data source 
-#&gt;   `/usr/local/lib/R/site-library/spDataLarge/vector/zion.gpkg' 
-#&gt;   using driver `GPKG'
-#&gt; Simple feature collection with 1 feature and 11 fields
-#&gt; Geometry type: POLYGON
-#&gt; Dimension:     XY
-#&gt; Bounding box:  xmin: 303000 ymin: 4110000 xmax: 335000 ymax: 4150000
-#&gt; Projected CRS: UTM Zone 12, Northern Hemisphere</code></pre>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:pointextr"></span>
 <img src="05-geometry-operations_files/figure-html/pointextr-1.png" alt="Locations of points used for raster extraction (left) and their 1km buffers (right)." width="100%"><p class="caption">
@@ -1011,26 +1003,28 @@ FIGURE 5.19: Locations of points used for raster extraction (left) and their 1km
 </div>
 <p>Raster extraction also works with <strong>line</strong> selectors.
 To demonstrate this, the code below creates <code>zion_transect</code>, a straight line going from northwest to southeast of the Zion National Park, illustrated in Figure <a href="geometric-operations.html#fig:lineextr">5.20</a>(A) (see Section <a href="spatial-class.html#vector-data">2.2</a> for a recap on the vector data model):</p>
-<div class="sourceCode" id="cb196"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb195"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">zion_transect</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">113.2</span>, <span class="op">-</span><span class="fl">112.9</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">37.45</span>, <span class="fl">37.2</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_linestring</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span>crs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">srtm</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html">st_sf</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p>The utility of extracting heights from a linear selector is illustrated by imagining that you are planning a hike.
 The method demonstrated below provides an ‘elevation profile’ of the route (the line does not need to be straight), useful for estimating how long it will take due to long climbs:</p>
-<div class="sourceCode" id="cb197"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb196"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">transect</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">zion_transect</span><span class="op">)</span>, cells <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>Note the use of <code>cells = TRUE</code> arguments to return cell IDs <em>along</em> the path.
-The result is a list containing a matrix of cell IDs in the first column and elevation values in the second.
-The number of list elements is equal to the number of lines or polygons from which we are extracting values.
-The subsequent code chunk first returns the coordinates associated with each extracted cell, finds the distances between cells along the transect (see <code>?geosphere::distGeo()</code> for details), and calculates their cumulative sum:</p>
-<!--jn:toDo-->
-<!-- rethink this code -->
-<!-- it must work for many lines! -->
-<div class="sourceCode" id="cb198"><pre class="downlit sourceCode r">
+The result is a data frame containing vector data ID, elevation values in the second, and cell IDs in the third column.
+The vector data ID has one value for each row in our spatial vector object – in other words, one value per a line or a polygon.
+The subsequent code chunk first returns the coordinates associated with each extracted cell and finds the distances between cells along the transect (see <code>?geosphere::distGeo()</code> for details):</p>
+<div class="sourceCode" id="cb197"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">transect_coords</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/xyCellFrom.html">xyFromCell</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">transect</span><span class="op">$</span><span class="va">cell</span><span class="op">)</span>
-<span class="va">pair_dist</span> <span class="op">=</span> <span class="fu">geosphere</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geosphere/man/distGeo.html">distGeo</a></span><span class="op">(</span><span class="va">transect_coords</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">transect_coords</span><span class="op">)</span><span class="op">]</span>
-<span class="va">transect</span><span class="op">$</span><span class="va">dist</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html">cumsum</a></span><span class="op">(</span><span class="va">pair_dist</span><span class="op">)</span><span class="op">)</span> </code></pre></div>
+<span class="va">transect</span><span class="op">$</span><span class="va">pair_dist</span> <span class="op">=</span> <span class="fu">geosphere</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geosphere/man/distGeo.html">distGeo</a></span><span class="op">(</span><span class="va">transect_coords</span><span class="op">)</span></code></pre></div>
+<p>Now, the last step is to calculate cumulative sum of the distances for each transect (unique <code>ID</code>).
+In this case, we only have one, but the code, in principle, should work on any number of transects:</p>
+<div class="sourceCode" id="cb198"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">transect</span> <span class="op">=</span> <span class="va">transect</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">ID</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>dist <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html">lag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html">cumsum</a></span><span class="op">(</span><span class="va">pair_dist</span><span class="op">)</span>, default <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>The resulting <code>transect</code> can be used to create elevation profiles, as illustrated in Figure <a href="geometric-operations.html#fig:lineextr">5.20</a>(B).</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:lineextr"></span>
@@ -1360,7 +1354,7 @@ Using these objects:</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-10-11.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-10-12.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

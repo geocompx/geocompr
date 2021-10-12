@@ -936,18 +936,6 @@ zion_points = cbind(zion_points, elevation)
 
 
 
-
-```
-#> Reading layer `zion' from data source 
-#>   `/usr/local/lib/R/site-library/spDataLarge/vector/zion.gpkg' 
-#>   using driver `GPKG'
-#> Simple feature collection with 1 feature and 11 fields
-#> Geometry type: POLYGON
-#> Dimension:     XY
-#> Bounding box:  xmin: 303000 ymin: 4110000 xmax: 335000 ymax: 4150000
-#> Projected CRS: UTM Zone 12, Northern Hemisphere
-```
-
 <div class="figure" style="text-align: center">
 <img src="05-geometry-operations_files/figure-html/pointextr-1.png" alt="Locations of points used for raster extraction (left) and their 1km buffers (right)." width="100%" />
 <p class="caption">(\#fig:pointextr)Locations of points used for raster extraction (left) and their 1km buffers (right).</p>
@@ -975,19 +963,24 @@ transect = terra::extract(srtm, vect(zion_transect), cells = TRUE)
 ```
 
 Note the use of `cells = TRUE` arguments to return cell IDs *along* the path. 
-The result is a list containing a matrix of cell IDs in the first column and elevation values in the second.
-The number of list elements is equal to the number of lines or polygons from which we are extracting values.
-The subsequent code chunk first returns the coordinates associated with each extracted cell, finds the distances between cells along the transect (see `?geosphere::distGeo()` for details), and calculates their cumulative sum:
-
-<!--jn:toDo-->
-<!-- rethink this code -->
-<!-- it must work for many lines! -->
+The result is a data frame containing vector data ID, elevation values in the second, and cell IDs in the third column.
+The vector data ID has one value for each row in our spatial vector object -- in other words, one value per a line or a polygon.
+The subsequent code chunk first returns the coordinates associated with each extracted cell and finds the distances between cells along the transect (see `?geosphere::distGeo()` for details):
 
 
 ```r
 transect_coords = xyFromCell(srtm, transect$cell)
-pair_dist = geosphere::distGeo(transect_coords)[-nrow(transect_coords)]
-transect$dist = c(0, cumsum(pair_dist)) 
+transect$pair_dist = geosphere::distGeo(transect_coords)
+```
+
+Now, the last step is to calculate cumulative sum of the distances for each transect (unique `ID`).
+In this case, we only have one, but the code, in principle, should work on any number of transects:
+
+
+```r
+transect = transect %>% 
+  group_by(ID) %>% 
+  mutate(dist = lag(cumsum(pair_dist), default = 0))
 ```
 
 The resulting `transect` can be used to create elevation profiles, as illustrated in Figure \@ref(fig:lineextr)(B).
