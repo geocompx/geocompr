@@ -147,20 +147,6 @@ library(raster)
 #> The following object is masked from 'package:dplyr':
 #> 
 #>     select
-#> The following objects are masked from 'package:terra':
-#> 
-#>     adjacent, animate, area, boundaries, buffer, cellFromRowCol,
-#>     cellFromRowColCombine, cellFromXY, clamp, click, colFromCell,
-#>     colFromX, cover, crop, crosstab, crs, crs<-, distance, erase,
-#>     extend, extract, flip, focal, freq, geom, hasValues, init,
-#>     inMemory, interpolate, mask, modal, mosaic, ncell, ncol<-, nrow<-,
-#>     origin, origin<-, plotRGB, rasterize, readStart, readStop, rectify,
-#>     res, res<-, resample, RGB, rotate, rowColFromCell, rowFromCell,
-#>     rowFromY, setMinMax, setValues, shift, stretch, symdif, terrain,
-#>     trim, values, values<-, writeRaster, writeStart, writeStop,
-#>     writeValues, xFromCell, xFromCol, xmax, xmax<-, xmin, xmin<-, xres,
-#>     xyFromCell, yFromCell, yFromRow, ymax, ymax<-, ymin, ymin<-, yres,
-#>     zonal, zoom
 u = "https://github.com/Robinlovelace/geocompr/releases/download/1.2/worldclim_prec.Rds"
 worldclim_prec = readRDS(url(u))
 class(worldclim_prec)
