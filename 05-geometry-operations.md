@@ -996,7 +996,7 @@ The resulting `transect` can be used to create elevation profiles, as illustrate
 </div>
 
 The final type of geographic vector object for raster extraction is **polygons**.
-Like lines and buffers, polygons tend to return many raster values per polygon.
+Like lines, polygons tend to return many raster values per polygon.
 This is demonstrated in the command below, which results in a data frame with column names `ID` (the row number of the polygon) and `srtm` (associated elevation values):
 
 
@@ -1055,6 +1055,19 @@ zion_nlcd %>%
 </div>
 
 <!--jn:toDo-->
+<!-- add info about exact = TRUE -->
+<!-- block2 -->
+
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">Polygons usually have irregular shapes, and therefore, a polygon can overlap only some parts of a raster's cells. 
+To get more detailed results, the `extract()` function has an argument called `exact`. 
+With `exact = TRUE`, we get one more column `fraction` in the output data frame, which contains a fraction of each cell that is covered by the polygon.
+This could be useful to calculate a weighted mean for continuous rasters or more precise coverage for categorical rasters.
+By default, it is `FALSE` as this operation requires more computations.</div>\EndKnitrBlock{rmdnote}
+
+
+
+
+<!--jn:toDo-->
 <!-- revise the next part -->
 
 <!-- So far, we have seen how `terra::extract()` is a flexible way of extracting raster cell values from a range of input geographic objects. -->
@@ -1064,11 +1077,6 @@ zion_nlcd %>%
 <!-- - **Parallelization**: this approach works when using many geographic vector selector objects by splitting them into groups and extracting cell values independently for each group (see `?raster::clusterR()` for details of this approach) -->
 <!-- - Use the **velox** package [@hunziker_velox:_2017], which provides a fast method for extracting raster data that fits in memory (see the package's [`extract`](https://hunzikp.github.io/velox/extract.html) vignette for details) -->
 <!-- - Using **R-GIS bridges** (see Chapter \@ref(gis)): efficient calculation of raster statistics from polygons can be found in the SAGA function `saga:gridstatisticsforpolygons`, for example, which can be accessed via **RQGIS** -->
-
-
-<!--jn:toDo-->
-<!-- add info about exact = TRUE -->
-<!-- block2 -->
 
 ### Rasterization {#rasterization}
 
