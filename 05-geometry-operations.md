@@ -832,6 +832,9 @@ Figure \@ref(fig:resampl) shows a comparison of different resampling methods on 
 
 As you will see in section \@ref(reprojecting-raster-geometries), raster reprojection is a special case of resampling when our target grid has a different CRS than the original raster.
 
+<!--jn:toDo-->
+<!-- resampling in terra vs gdal note -->
+
 ## Raster-vector interactions {#raster-vector}
 
 \index{raster-vector!interactions} 

@@ -48,6 +48,9 @@ This section provides an overview of spatial operations on vector geographic dat
 
 ### Spatial subsetting
 
+<!--jn:toDo-->
+<!--consider adding st_filter explanation-->
+
 Spatial subsetting is the process of selecting features of a spatial object based on whether or not they in some way *relate* in space to another object.
 It is analogous to *attribute subsetting* (covered in Section \@ref(vector-attribute-subsetting)) and can be done with the base R square bracket (`[`) operator or with the `filter()` function from the **tidyverse**\index{tidyverse (package)}.
 \index{vector!subsetting}
@@ -61,14 +64,6 @@ The following code chunk first creates an object representing Canterbury, then u
 ```r
 canterbury = nz %>% filter(Name == "Canterbury")
 canterbury_height = nz_height[canterbury, ]
-```
-
-
-```
-#> Registered S3 methods overwritten by 'stars':
-#>   method             from
-#>   st_bbox.SpatRaster sf  
-#>   st_crs.SpatRaster  sf
 ```
 
 <div class="figure" style="text-align: center">
