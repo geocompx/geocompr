@@ -942,6 +942,10 @@ zion_points = cbind(zion_points, elevation)
 </div>
 
 Raster extraction also works with **line** selectors.
+Then, it extracts one value for each raster cell touched by a line.
+However, the line extraction approach is not recommended to obtain values along the transects as it is hard to get the correct distance between each pair of extracted raster values.
+
+In this case, a better approach is to split the line into many points and then extract the values for these points.
 To demonstrate this, the code below creates `zion_transect`, a straight line going from northwest to southeast of the Zion National Park, illustrated in Figure \@ref(fig:lineextr)(A) (see Section \@ref(vector-data) for a recap on the vector data model):
 
 
@@ -954,41 +958,38 @@ zion_transect = cbind(c(-113.2, -112.9), c(37.45, 37.2)) %>%
 
 
 
-<!--jn:toDo -->
-<!--improve the below code -->
-
-
-
 The utility of extracting heights from a linear selector is illustrated by imagining that you are planning a hike.
-The method demonstrated below provides an 'elevation profile' of the route (the line does not need to be straight), useful for estimating how long it will take due to long climbs:
+The method demonstrated below provides an 'elevation profile' of the route (the line does not need to be straight), useful for estimating how long it will take due to long climbs.
+
+The first step is to add a unique `id` for each transect.
+Next, with the `st_segmentize()` function we can add points along our line(s) with a provided density (`dfMaxLength`) and convert them into points with `st_cast()`.
 
 
 ```r
-transect = terra::extract(srtm, vect(zion_transect), cells = TRUE)
+zion_transect$id = 1:nrow(zion_transect)
+zion_transect = st_segmentize(zion_transect, dfMaxLength = 250)
+zion_transect = st_cast(zion_transect, "POINT")
 ```
 
-Note the use of `cells = TRUE` arguments to return cell IDs *along* the path. 
-The result is a data frame containing vector data ID, elevation values in the second, and cell IDs in the third column.
-The vector data ID has one value for each row in our spatial vector object -- in other words, one value per a line or a polygon.
-The subsequent code chunk first returns the coordinates associated with each extracted cell and finds the distances between cells along the transect (see `?geosphere::distGeo()` for details):
+Now, we have a large set of points, and we want to derive a distance between the first point in our transects and each of the subsequent points. 
+In this case, we only have one transect, but the code, in principle, should work on any number of transects:
 
 
 ```r
-transect_coords = xyFromCell(srtm, transect$cell)
-transect$pair_dist = geosphere::distGeo(transect_coords)
+zion_transect = zion_transect %>% 
+  group_by(id) %>% 
+  mutate(dist = st_distance(geometry)[, 1]) 
 ```
 
-Now, the last step is to calculate cumulative sum of the distances for each transect (unique `ID`).
-In this case, we only have one, but the code, in principle, should work on any number of transects:
+Finally, we can extract elevation values for each point in our transects and combine this information with our main object.
 
 
 ```r
-transect = transect %>% 
-  group_by(ID) %>% 
-  mutate(dist = lag(cumsum(pair_dist), default = 0))
+zion_elev = terra::extract(srtm, vect(zion_transect))
+zion_transect = cbind(zion_transect, zion_elev)
 ```
 
-The resulting `transect` can be used to create elevation profiles, as illustrated in Figure \@ref(fig:lineextr)(B).
+The resulting `zion_transect` can be used to create elevation profiles, as illustrated in Figure \@ref(fig:lineextr)(B).
 
 <div class="figure" style="text-align: center">
 <img src="05-geometry-operations_files/figure-html/lineextr-1.png" alt="Location of a line used for raster extraction (left) and the elevation along this line (right)." width="100%" />
