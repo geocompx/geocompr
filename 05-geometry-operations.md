@@ -785,29 +785,29 @@ It is important to keep in mind that disaggregating results in a finer resolutio
 ### Resampling
 
 \index{raster!resampling}
-The above methods of aggregation and disaggregation are only suitable when we what to change the resolution of our raster by the aggregation/disaggregation factor. 
+The above methods of aggregation and disaggregation are only suitable when we want to change the resolution of our raster by the aggregation/disaggregation factor. 
 However, what to do when we have two or more rasters with different resolutions and origins?
 This is the role of resampling -- a process of computing values for new pixel locations.
-In short, this process takes the values of our original raster and recalculates them into a grid of the resolution and origin of the target raster.
+In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin.
 
-Several methods for recalculating (estimating) values for a grid with different resolutions/origins exist (Figure \@ref(fig:resampl)).
+Several methods for recalculating (estimating) values for a raster with different resolutions/origins exist (Figure \@ref(fig:resampl)).
 It includes:
 
 - Nearest neighbor - assigns the value of the nearest cell of the original raster to the cell of the target one.
-It is fast and usually suitable for categorical rasters
-- Bilinear interpolation - assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure \@ref(fig:bilinear)). The fastest method for continuous rasters
-- Cubic interpolation - uses values of 16 nearest cells of the original raster to determine the output cell value. Used for continuous rasters. It results in more smoothed surface than the bilinear interpolation, but is also more computationally demanding
-- Cubic spline interpolation - also uses values of 16 nearest cells of the original raster to determine the output cell value, but applies splines (polynomial functions) to derive the results. Used for continuous rasters
-- Lanczos windowed sinc resampling - uses values of 36 nearest cells of the original raster to determine the output cell value. Used for continuous rasters^[More detailed explanation of this method can be found at https://gis.stackexchange.com/a/14361/20955.]
+It is fast and usually suitable for categorical rasters.
+- Bilinear interpolation - assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure \@ref(fig:bilinear)). The fastest method for continuous rasters.
+- Cubic interpolation - uses values of 16 nearest cells of the original raster to determine the output cell value, applying third-order polynomial functions. Used for continuous rasters. It results in a more smoothed surface than the bilinear interpolation, but is also more computationally demanding.
+- Cubic spline interpolation - also uses values of 16 nearest cells of the original raster to determine the output cell value, but applies cubic splines (piecewise third-order polynomial functions) to derive the results. Used for continuous rasters.
+- Lanczos windowed sinc resampling - uses values of 36 nearest cells of the original raster to determine the output cell value. Used for continuous rasters.^[More detailed explanation of this method can be found at https://gis.stackexchange.com/a/14361/20955.]
 
 As you can find in the above explanation, only *nearest neighbor* is suitable for categorical rasters, while all the methods can be used (with different outcomes) for the continuous rasters.
 Additionally, each successive method requires more processing time.
 
 To apply resampling, the **terra** package provides a `resample()` function.
-It accepts an input raster (`x`), raster with target spatial properties (`y`), and a resampling method (`method`).
+It accepts an input raster (`x`), a raster with target spatial properties (`y`), and a resampling method (`method`).
 
-We need to have a raster with target spatial properties to see how the `resample()` function works.
-For this example, we can create one, `target_rast`, but this could often be another existing raster object.
+We need a raster with target spatial properties to see how the `resample()` function works.
+For this example, we create `target_rast`, but you would often use an already existing raster object.
 
 
 ```r
@@ -830,7 +830,7 @@ Figure \@ref(fig:resampl) shows a comparison of different resampling methods on 
 <p class="caption">(\#fig:resampl)Visual comparison of the original raster and five different resampling methods.</p>
 </div>
 
-As you will see in section \@ref(reprojecting-raster-geometries), raster reprojection is a special case of resampling when our target grid has a different CRS than the original raster.
+As you will see in section \@ref(reprojecting-raster-geometries), raster reprojection is a special case of resampling when our target raster has a different CRS than the original raster.
 
 <!--jn:toDo-->
 <!-- resampling in terra vs gdal note -->
