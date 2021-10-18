@@ -1,14 +1,14 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2021-10-15'
+date: '2021-10-18'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
 monofont: "Source Code Pro"
 monofontoptions: "Scale=0.7"
 bibliography:
-  - geocompr.json
+  - geocompr.bib
   - packages.bib
 biblio-style: apalike
 link-citations: yes
@@ -38,7 +38,7 @@ The online version of the book is hosted at [geocompr.robinlovelace.net](https:/
 
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
 
-This version of the book was built on GH Actions on 2021-10-15.
+This version of the book was built on GH Actions on 2021-10-18.
 
 ## How to contribute? {-}
 
@@ -111,6 +111,8 @@ If you find the book useful, please support it by:
 - [Buying](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577) a copy
 
 Further details can be found at [github.com/Robinlovelace/geocompr](https://github.com/Robinlovelace/geocompr#geocomputation-with-r).
+
+The globe icon used in this book was created by [Jean-Marc Viglino](https://github.com/Viglino) and is licensed under [CC-BY 4.0 International](https://github.com/Viglino/font-gis/blob/main/LICENSE-CC-BY.md).
 
 <a href="https://www.netlify.com"><img src="https://www.netlify.com/img/global/badges/netlify-color-accent.svg"/></a>
 
