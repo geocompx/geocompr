@@ -833,7 +833,27 @@ Figure \@ref(fig:resampl) shows a comparison of different resampling methods on 
 As you will see in section \@ref(reprojecting-raster-geometries), raster reprojection is a special case of resampling when our target raster has a different CRS than the original raster.
 
 <!--jn:toDo-->
+<!-- decide -->
+<!-- should we mention gdalUtils or gdalUtilities? -->
+<!-- gdalUtils - https://cran.r-project.org/web/packages/gdalUtils/index.html - we mentioned it in geocompr 1; however it seems abandoned -->
+<!-- gdalUtilities - https://cran.r-project.org/web/packages/gdalUtilities/index.html -->
+
 <!-- resampling in terra vs gdal note -->
+
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">Most geometry operations in **terra** are user-friendly, rather fast, and work on large raster objects.
+However, there could be some cases, when **terra** is not the most performant either for extensive rasters or many raster files, and some alternatives should be considered.
+
+The most established alternatives come with the GDAL library.
+It contains several utility functions, including:
+- `gdal_rasterize` - 
+- `gdal_translate` - 
+- `gdalwarp` - 
+- `gdalinfo` - 
+
+All of the above functions are written in C++, but can be called in R using the **gdalUtilities** package.
+Importantly, all of these functions expect a raster file path as an input and often return their output as a raster file.
+This is very different from the usual **terra** approach, which expects `SpatRaster` objects as inputs.</div>\EndKnitrBlock{rmdnote}
+
 
 ## Raster-vector interactions {#raster-vector}
 
