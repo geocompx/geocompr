@@ -8,8 +8,6 @@
 library(sf)      # vector data package introduced in Chapter 2
 library(terra)   # raster data package introduced in Chapter 2
 library(dplyr)   # tidyverse package for data frame manipulation
-library(stringr) # tidyverse package for character manipulation
-library(tidyr)   # tidyverse package tidying data frames
 ```
 
 - It also relies on **spData**, which loads datasets used in the code examples of this chapter:
@@ -454,8 +452,13 @@ it has been abbreviated, causing the join to miss it.
 The following command uses a string matching (regex) function from the **stringr** package to confirm what `Congo, Dem. Rep. of` should be:
 
 ```{r 03-attribute-operations-37}
-str_subset(world$name_long, "Dem*.+Congo")
+(drc = stringr::str_subset(world$name_long, "Dem*.+Congo"))
 ```
+
+```{r, echo=FALSE, eval=FALSE}
+world$name_long[grepl(pattern = "Dem*.+Congo", world$name_long)] # base R
+```
+
 
 ```{r 03-attribute-operations-38, eval=FALSE, echo=FALSE}
 # aim: test names in coffee_data and world objects
@@ -467,8 +470,7 @@ To fix this issue, we will create a new version of `coffee_data` and update the 
 `inner_join()`ing the updated data frame returns a result with all 46 coffee-producing nations:
 
 ```{r 03-attribute-operations-39, warning=FALSE}
-coffee_data$name_long[grepl("Congo,", coffee_data$name_long)] = 
-  str_subset(world$name_long, "Dem*.+Congo")
+coffee_data$name_long[grepl("Congo,", coffee_data$name_long)] = drc
 world_coffee_match = inner_join(world, coffee_data)
 nrow(world_coffee_match)
 ```
