@@ -734,9 +734,6 @@ Note that changing the resolution (next section) frequently also changes the ori
 
 ### Aggregation, disaggregation
 
-<!--jn:toDo-->
-<!-- plus revise the following section -->
-
 \index{raster!aggregation} 
 \index{raster!disaggregation} 
 Raster datasets can also differ with regard to their resolution. 
@@ -837,8 +834,7 @@ As you will see in section \@ref(reprojecting-raster-geometries), raster reproje
 <!-- should we mention gdalUtils or gdalUtilities? -->
 <!-- gdalUtils - https://cran.r-project.org/web/packages/gdalUtils/index.html - we mentioned it in geocompr 1; however it seems abandoned -->
 <!-- gdalUtilities - https://cran.r-project.org/web/packages/gdalUtilities/index.html -->
-
-<!-- resampling in terra vs gdal note -->
+<!-- also - add some reference to GDAL functions! -->
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Most geometry operations in **terra** are user-friendly, rather fast, and work on large raster objects.
 However, there could be some cases, when **terra** is not the most performant either for extensive rasters or many raster files, and some alternatives should be considered.
@@ -854,7 +850,6 @@ It contains several utility functions, including:
 All of the above functions are written in C++, but can be called in R using the **gdalUtilities** package.
 Importantly, all of these functions expect a raster file path as an input and often return their output as a raster file (for example, `gdalUtilities::gdal_translate("my_file.tif", "new_file.tif", t_srs = "EPSG:4326")`)
 This is very different from the usual **terra** approach, which expects `SpatRaster` objects as inputs.</div>\EndKnitrBlock{rmdnote}
-
 
 ## Raster-vector interactions {#raster-vector}
 
@@ -1079,10 +1074,6 @@ zion_nlcd %>%
 <p class="caption">(\#fig:polyextr)Area used for continuous (left) and categorical (right) raster extraction.</p>
 </div>
 
-<!--jn:toDo-->
-<!-- add info about exact = TRUE -->
-<!-- block2 -->
-
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Polygons usually have irregular shapes, and therefore, a polygon can overlap only some parts of a raster's cells. 
 To get more detailed results, the `extract()` function has an argument called `exact`. 
 With `exact = TRUE`, we get one more column `fraction` in the output data frame, which contains a fraction of each cell that is covered by the polygon.
@@ -1090,18 +1081,6 @@ This could be useful to calculate a weighted mean for continuous rasters or more
 By default, it is `FALSE` as this operation requires more computations.</div>\EndKnitrBlock{rmdnote}
 
 
-
-
-<!--jn:toDo-->
-<!-- revise the next part -->
-
-<!-- So far, we have seen how `terra::extract()` is a flexible way of extracting raster cell values from a range of input geographic objects. -->
-<!-- An issue with the function, however, is that it is relatively slow. -->
-<!-- If this is a problem, it is useful to know about alternatives and work-arounds, three of which are presented below. -->
-
-<!-- - **Parallelization**: this approach works when using many geographic vector selector objects by splitting them into groups and extracting cell values independently for each group (see `?raster::clusterR()` for details of this approach) -->
-<!-- - Use the **velox** package [@hunziker_velox:_2017], which provides a fast method for extracting raster data that fits in memory (see the package's [`extract`](https://hunzikp.github.io/velox/extract.html) vignette for details) -->
-<!-- - Using **R-GIS bridges** (see Chapter \@ref(gis)): efficient calculation of raster statistics from polygons can be found in the SAGA function `saga:gridstatisticsforpolygons`, for example, which can be accessed via **RQGIS** -->
 
 ### Rasterization {#rasterization}
 
@@ -1194,16 +1173,6 @@ california_raster2 = rasterize(vect(california), raster_template2)
 <img src="05-geometry-operations_files/figure-html/vector-rasterization2-1.png" alt="Examples of line and polygon rasterizations." width="100%" />
 <p class="caption">(\#fig:vector-rasterization2)Examples of line and polygon rasterizations.</p>
 </div>
-
-<!--jn:toDo-->
-<!-- revise the next part -->
-
-<!-- As with `terra::extract()`, `terra::rasterize()` works well for most cases but is not performance optimized.  -->
-<!-- Fortunately, there are several alternatives, including the `fasterize::fasterize()` and `gdalUtils::gdal_rasterize()`.  -->
-<!-- The former is much (100 times+) faster than `rasterize()`, but is currently limited to polygon rasterization. -->
-<!-- The latter is part of GDAL\index{GDAL} and therefore requires a vector file (instead of an `sf` object) and rasterization parameters (instead of a `Raster*` template object) as inputs.^[ -->
-<!-- See more at http://gdal.org/gdal_rasterize.html. -->
-<!-- ] -->
 
 ### Spatial vectorization
 
