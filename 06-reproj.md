@@ -401,9 +401,13 @@ The projection concepts described in the previous section apply equally to raste
 However, there are important differences in reprojection of vectors and rasters:
 transforming a vector object involves changing the coordinates of every vertex but this does not apply to raster data.
 Rasters are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters), so it is impossible to transform coordinates of pixels separately.
+<!--jn:toDo-->
+<!-- mention transformation vs warping in stars-->
 Raster reprojection involves creating a new raster object, often with a different number of columns and rows than the original.
 The attributes must subsequently be re-estimated, allowing the new pixels to be 'filled' with appropriate values.
 In other words, raster reprojection can be thought of as two separate spatial operations: a vector reprojection of cell centroids to another CRS (Section \@ref(reproj-vec-geom)), and computation of new pixel values through resampling (Section \@ref(aggregation-and-disaggregation)).
+<!--jn:toDo-->
+<!--check-->
 Thus in most cases when both raster and vector data are used, it is better to avoid reprojecting rasters and reproject vectors instead.
 
 The raster reprojection process is done with `project()` from the **terra** package.
@@ -520,6 +524,8 @@ For instance, if we are interested in a density (points per grid cell or inhabit
 There is more to learn about CRSs.
 An excellent resource in this area, also implemented in R, is the website R Spatial.
 Chapter 6 for this free online book is recommended reading --- see: [rspatial.org/terra/spatial/6-crs.html](https://rspatial.org/terra/spatial/6-crs.html)
+
+
 
 ## Exercises
 
