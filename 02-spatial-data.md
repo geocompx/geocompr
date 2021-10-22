@@ -730,14 +730,6 @@ This and map algebra (Section \@ref(map-algebra)) makes raster processing much m
 However, in contrast to vector data, the cell of one raster layer can only hold a single value.
 The value might be numeric or categorical (Figure \@ref(fig:raster-intro-plot):C).
 
-
-```
-#> Registered S3 methods overwritten by 'stars':
-#>   method             from
-#>   st_bbox.SpatRaster sf  
-#>   st_crs.SpatRaster  sf
-```
-
 <div class="figure" style="text-align: center">
 <img src="02-spatial-data_files/figure-html/raster-intro-plot-1.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%" />
 <p class="caption">(\#fig:raster-intro-plot)Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map.</p>

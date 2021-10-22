@@ -397,29 +397,33 @@ More information on CRS modifications can be found in the [Using PROJ](https://p
 ## Reprojecting raster geometries
 
 \index{raster!reprojection} 
+\index{raster!warping} 
+\index{raster!transformation} 
+\index{raster!resampling} 
 The projection concepts described in the previous section apply equally to rasters.
 However, there are important differences in reprojection of vectors and rasters:
 transforming a vector object involves changing the coordinates of every vertex but this does not apply to raster data.
-Rasters are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters), so it is impossible to transform coordinates of pixels separately.
-<!--jn:toDo-->
-<!-- mention transformation vs warping in stars-->
+Rasters are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters), so it is usually impracticable to transform coordinates of pixels separately.
 Raster reprojection involves creating a new raster object, often with a different number of columns and rows than the original.
 The attributes must subsequently be re-estimated, allowing the new pixels to be 'filled' with appropriate values.
-In other words, raster reprojection can be thought of as two separate spatial operations: a vector reprojection of cell centroids to another CRS (Section \@ref(reproj-vec-geom)), and computation of new pixel values through resampling (Section \@ref(aggregation-and-disaggregation)).
-<!--jn:toDo-->
-<!--check-->
+In other words, raster reprojection can be thought of as two separate spatial operations: a vector reprojection of the raster extent to another CRS (Section \@ref(reproj-vec-geom)), and computation of new pixel values through resampling (Section \@ref(resampling)).
 Thus in most cases when both raster and vector data are used, it is better to avoid reprojecting rasters and reproject vectors instead.
+
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">Reprojection of the regular rasters is also known as warping. 
+Additionally, there is a second similar operation called "transformation".
+Instead of resampling all of the values, it leaves all values intact but recomputes new coordinates for every raster cell, changing the grid geometry.
+For example, it could convert the input raster (a regular grid) into a curvilinear grid.
+The transformation operation can be performed in R using [the **stars** package](https://r-spatial.github.io/stars/articles/stars5.html).</div>\EndKnitrBlock{rmdnote}
+
+
 
 The raster reprojection process is done with `project()` from the **terra** package.
 Like the `st_transform()` function demonstrated in the previous section, `project()` takes a geographic object (a raster dataset in this case) and some CRS representation as the second argument.
-
-<!--jn:toDo-->
-<!-- add new developments in terra -->
-<!-- https://github.com/rspatial/terra/pull/355/files -->
+On a side note -- the second argument can also be an existing raster object with a different CRS.
 
 Let's take a look at two examples of raster transformation: using categorical and continuous data.
 Land cover data are usually represented by categorical maps.
-The `nlcd.tif` file provides information for a small area in Utah, USA obtained from [National Land Cover Database 2011](https://www.mrlc.gov/nlcd2011.php) in the NAD83 / UTM zone 12N CRS.
+The `nlcd.tif` file provides information for a small area in Utah, USA obtained from [National Land Cover Database 2011](https://www.mrlc.gov/data/nlcd-2011-land-cover-conus) in the NAD83 / UTM zone 12N CRS.
 
 
 ```r
@@ -428,7 +432,7 @@ crs(cat_raster)
 #> [1] "PROJCRS[\"NAD83 / UTM zone 12N\",\n    BASEGEOGCRS[\"NAD83\",\n        DATUM[\"North American Datum 1983\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4269]],\n    CONVERSION[\"UTM zone 12N\",\n        METHOD[\"Transverse Mercator\",\n            ID[\"EPSG\",9807]],\n        PARAMETER[\"Latitude of natural origin\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8801]],\n        PARAMETER[\"Longitude of natural origin\",-111,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8802]],\n        PARAMETER[\"Scale factor at natural origin\",0.9996,\n            SCALEUNIT[\"unity\",1],\n            ID[\"EPSG\",8805]],\n        PARAMETER[\"False easting\",500000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8806]],\n        PARAMETER[\"False northing\",0,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8807]]],\n    CS[Cartesian,2],\n        AXIS[\"(E)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"(N)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"North America - 114°W to 108°W and NAD83 by country\"],\n        BBOX[31.33,-114,84,-108]],\n    ID[\"EPSG\",26912]]"
 ```
 
-In this region, 8 land cover classes were distinguished (a full list of NLCD2011 land cover classes can be found at [mrlc.gov](https://www.mrlc.gov/nlcd11_leg.php)):
+In this region, 8 land cover classes were distinguished (a full list of NLCD2011 land cover classes can be found at [mrlc.gov](https://www.mrlc.gov/data/legends/national-land-cover-database-2011-nlcd2011-legend)):
 
 
 ```r
@@ -444,13 +448,10 @@ unique(cat_raster)
 #> 8      8
 ```
 
-<!--jn:toDo-->
-<!-- add a reference to the new resampling part -->
 When reprojecting categorical rasters, the estimated values must be the same as those of the original.
-This could be done using the nearest neighbor method (`near`).
-This method sets each new cell value to the value of the nearest cell (center) of the input raster.
+This could be done using the nearest neighbor method (`near`), which sets each new cell value to the value of the nearest cell (center) of the input raster.
 An example is reprojecting `cat_raster` to WGS84, a geographic CRS well suited for web mapping.
-The first step is to obtain the PROJ definition of this CRS, which can be done using the [http://spatialreference.org](http://spatialreference.org/ref/epsg/wgs-84/) webpage. 
+The first step is to obtain the PROJ definition of this CRS, which can be done, for example using the [http://spatialreference.org](http://spatialreference.org/ref/epsg/wgs-84/) webpage. 
 The final step is to reproject the raster with the `project()` function which, in the case of categorical data, uses the nearest neighbor method (`near`):
 
 
@@ -479,13 +480,7 @@ crs(con_raster)
 ```
 
 We will reproject this dataset into a projected CRS, but *not* with the nearest neighbor method which is appropriate for categorical data.
-Instead, we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster.
-<!--jn:toDo-->
-<!-- mention other methods -->
-<!--
-"Quadric and cubic polynomials are also popular interpolation functions for resampling with more complexity and improved accuracy" [@liu_essential_2009].
-However, these interpolation methods are still unavailable in the **raster** package.
--->
+Instead, we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster.^[Other methods mentioned in Section \@ref(resampling) also can be used here.]
 The values in the projected dataset are the distance-weighted average of the values from these four cells:
 the closer the input cell is to the center of the output cell, the greater its weight.
 The following commands create a text string representing WGS 84 / UTM zone 12N, and reproject the raster into this CRS, using the `bilinear` method:
@@ -512,20 +507,14 @@ Table: (\#tab:rastercrs)Key attributes in the original ('con\_raster') and proje
 |WGS84        |  457|  465| 212505|     0.0008| 1843|
 |UTM zone 12N |  515|  422| 217330|    83.5334| 1842|
 
-<!--jn:toDo-->
-<!-- update this block later and relate to the second chapter -->
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Of course, the limitations of 2D Earth projections apply as much to vector as to raster data.
 At best we can comply with two out of three spatial properties (distance, area, direction).
 Therefore, the task at hand determines which projection to choose. 
 For instance, if we are interested in a density (points per grid cell or inhabitants per grid cell) we should use an equal-area projection (see also Chapter \@ref(location)).</div>\EndKnitrBlock{rmdnote}
 
-<!--jn:toDo-->
-<!-- add more references -->
 There is more to learn about CRSs.
 An excellent resource in this area, also implemented in R, is the website R Spatial.
 Chapter 6 for this free online book is recommended reading --- see: [rspatial.org/terra/spatial/6-crs.html](https://rspatial.org/terra/spatial/6-crs.html)
-
-
 
 ## Exercises
 
