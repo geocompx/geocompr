@@ -20,7 +20,24 @@ library(spData)  # spatial data package introduced in Chapter 2
 
 Attribute data is non-spatial information associated with geographic (geometry) data.
 A bus stop provides a simple example: its position would typically be represented by latitude and longitude coordinates (geometry data), in addition to its name.
-The name is an *attribute*\index{attribute} of the feature (to use Simple Features terminology) that bears no relation to its geometry.
+The [Elephant & Castle / New Kent Road](https://www.openstreetmap.org/relation/6610626) stop in London, for example has coordinates of -0.098 degrees longitude and 51.495 degrees latitude which can be represented as `POINT (-0.098 51.495)` in the `sfc` representation described in Chapter \@ref(#spatial-class).
+Attributes such as the name *attribute*\index{attribute} of the POINT feature (to use Simple Features terminology) are the topic of this chapter.
+
+```{r, eval=FALSE, echo=FALSE}
+# Aim: find a bus stop in central London
+library(osmdata)
+london_coords = c(-0.1, 51.5)
+london_bb = c(-0.11, 51.49, -0.09, 51.51)
+bb = tmaptools::bb(london_bb)
+osm_data = opq(bbox = london_bb) %>% 
+  add_osm_feature(key = "highway", value = "bus_stop") %>% 
+  osmdata_sf()
+osm_data_points = osm_data$osm_points
+osm_data_points[4, ]
+point_vector = round(sf::st_coordinates(osm_data_points[4, ]), 3)
+point_df = data.frame(name = "London bus stop", point_vector)
+point_sf = sf::st_as_sf(point_df, coords = c("X", "Y"))
+```
 
 Another example is the elevation value (attribute) for a specific grid cell in raster data.
 Unlike the vector data model, the raster data model stores the coordinate of the grid cell indirectly, meaning the distinction between attribute and spatial information is less clear.
@@ -29,12 +46,13 @@ Its spatial location is defined by its index in the matrix: move from the origin
 The raster's *resolution* defines the distance for each x- and y-step which is specified in a *header*.
 The header is a vital component of raster datasets which specifies how pixels relate to geographic coordinates (see also Chapter \@ref(spatial-operations)).
 
-The focus of this chapter is manipulating geographic objects based on attributes such as the name of a bus stop and elevation.
-For vector data, this means operations such as subsetting and aggregation (see Sections \@ref(vector-attribute-subsetting) and \@ref(vector-attribute-aggregation)).
-These non-spatial operations have spatial equivalents:
-the `[` operator in base R, for example, works equally for subsetting objects based on their attribute and spatial objects, as we will see in Chapter \@ref(spatial-operations).
-This is good news: skills developed here are cross-transferable, meaning that this chapter lays the foundation for Chapter \@ref(spatial-operations), which extends the methods presented here to the spatial world.
+This chapter describes how to manipulate geographic objects based on attributes such as the names of bus stops and elevations of pixels in a raster dataset.
+For vector data, this means techniques such as subsetting and aggregation (see Sections \@ref(vector-attribute-subsetting) and \@ref(vector-attribute-aggregation))
 Sections \@ref(vector-attribute-joining) and \@ref(vec-attr-creation) demonstrate how to join data onto simple feature objects using a shared ID and how to create new variables, respectively.
+Each of these operations which has a spatial equivalent:
+the `[` operator in base R, for example, works equally for subsetting objects based on their attribute and spatial objects, and you can also attributes using spatial joins.
+This is good news: skills developed in this chapter are cross-transferable.
+Chapter \@ref(spatial-operations) extends the methods presented here to the spatial world.
 
 Raster attribute data operations are covered in Section \@ref(manipulating-raster-objects), which covers creating continuous and categorical raster layers and extracting cell values from one layer and multiple layers (raster subsetting). 
 Section \@ref(summarizing-raster-objects) provides an overview of 'global' raster operations which can be used to characterize entire raster datasets.
