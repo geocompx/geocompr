@@ -128,7 +128,7 @@ Tidyverse compatibility is an advantage of **sf** over its predecessor **sp**, b
 ### Vector attribute subsetting
 
 Base R subsetting methods include the operator `[` and the function `subset()`.
-The key **dplyr** subsetting functions are  `filter()` for subsetting rows, and `select()` for subsetting columns.
+The key **dplyr** subsetting functions are  `filter()` and `slice()` for subsetting rows, and `select()` for subsetting columns.
 Both approaches preserve the spatial components of attribute data in `sf` objects, while using the operator `$` or the **dplyr** function `pull()` to return a single attribute column as a vector will lose the attribute data.
 \index{attribute!subsetting}
 
@@ -158,12 +158,12 @@ A demonstration of the utility of using `logical` vectors for subsetting is show
 This creates a new object, `small_countries`, containing nations whose surface area is smaller than 10,000 km^2^:
 
 ```{r 03-attribute-operations-10}
-sel_area = world$area_km2 < 10000
-summary(sel_area) # a logical vector
-small_countries = world[sel_area, ]
+i_small = world$area_km2 < 10000
+summary(i_small) # a logical vector
+small_countries = world[i_small, ]
 ```
 
-The intermediary `sel_area` is a logical vector that shows that only seven countries match the query.
+The intermediary `i_small` is a logical vector that can be used as indeces to subset the seven smallest countries in the `world` by surface area.
 A more concise command, which omits the intermediary object, generates the same result:
 
 ```{r 03-attribute-operations-11}
@@ -176,12 +176,31 @@ The base R function `subset()` provides yet another way to achieve the same resu
 small_countries = subset(world, area_km2 < 10000)
 ```
 
-Base R functions are mature and widely used.
-However, the more recent **dplyr** approach has several advantages.
-It enables intuitive workflows.
-It is fast, due to its C++\index{C++} backend.
-This is especially useful when working with big data as well as **dplyr**'s database integration.
-The main **dplyr** subsetting functions are `select()`, `slice()`, `filter()` and `pull()`.
+Base R functions are mature, stable and widely used, making them a rock solid choice, especially in contexts where reproducibility and reliability are key.
+**dplyr** functions enable 'tidy' workflows which some people (the authors of this book included) find intuitive and productive for interactive data analysis, especially when combined with code editors such as RStudio that enable [auto-completion](https://support.rstudio.com/hc/en-us/articles/205273297-Code-Completion-in-the-RStudio-IDE) of column names.
+Key functions for subsetting data frames (including `sf` data frames) are demonstrated below.
+<!-- The sentence below seems to be untrue based on the benchmark below. -->
+<!-- `dplyr` is also faster than base R for some operations, due to its C++\index{C++} backend. -->
+<!-- Something on dbplyr? I've never seen anyone use it regularly for spatial data 'in the wild' so leaving out the bit on integration with dbs for now (RL 2021-10) -->
+<!-- The main **dplyr** subsetting functions are `select()`, `slice()`, `filter()` and `pull()`. -->
+
+```{r, echo=FALSE, eval=FALSE}
+# Aim: benchmark base vs dplyr subsetting
+# Could move elsewhere? 
+i = sample(nrow(world), size = 10)
+benchmark_subset = bench::mark(
+  world[i, ],
+  world %>% slice(i)
+)
+benchmark_subset[c("expression", "itr/sec", "mem_alloc")]
+# # October 2021 on laptop with CRAN version of dplyr:
+# # A tibble: 2 × 3
+#   expression         `itr/sec` mem_alloc
+#   <bch:expr>             <dbl> <bch:byt>
+# 1 world[i, ]             1744.    5.55KB
+# 2 world %>% slice(i)      671.    4.45KB
+```
+
 
 ```{block 03-attribute-operations-13, type='rmdnote'}
 <!--jn:toDo-->
