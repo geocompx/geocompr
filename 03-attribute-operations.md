@@ -119,23 +119,29 @@ Tidyverse compatibility is an advantage of **sf** over its predecessor **sp**, b
 
 ### Vector attribute subsetting
 
-Base R subsetting functions include `[`, `subset()` and  `$`.
-**dplyr** subsetting functions include `select()`, `filter()`, and `pull()`.
-Both sets of functions preserve the spatial components of attribute data in `sf` objects.
+Base R subsetting methods include the operator `[` and the function `subset()`.
+The key **dplyr** subsetting functions are  `filter()` for subsetting rows, and `select()` for subsetting columns.
+Both approaches preserve the spatial components of attribute data in `sf` objects, while using the operator `$` or the **dplyr** function `pull()` to return a single attribute column as a vector will lose the attribute data.
 \index{attribute!subsetting}
 
 The `[` operator can subset both rows and columns. 
-You use indices to specify the elements you wish to extract from an object, e.g., `object[i, j]`, with `i` and `j` typically being numbers or logical vectors --- `TRUE`s and `FALSE`s --- representing rows and columns (they can also be character strings, indicating row or column names).
-Leaving `i` or `j` empty returns all rows or columns, so `world[1:5, ]` returns the first five rows and all columns.
+Indices placed inside square brackets placed directly after a data frame object name specify the elements to keep.
+The command `object[i, j]` means 'return the rows represented by `i` and the columns represented by `j`, where `i` and `j` typically contain integers or `TRUE`s and `FALSE`s (indices can also be character strings, indicating row or column names).
+`object[5, 1:3]`, for example, means 'return data containing the 5th row and columns 1 to 3: the result should be a data frame with only 1 row and 3 columns, and a fourth geometry column if it's an `sf` object.
+Leaving `i` or `j` empty returns all rows or columns, so `world[1:5, ]` returns the first five rows and all 11 columns.
 The examples below demonstrate subsetting with base R.
-The results are not shown; check the results on your own computer:
+The results are not shown; guess the number of rows and columns returned by each command and check the results on your own computer (see the end of the chapter for more exercises):
 
 
 ```r
 world[1:6, ] # subset rows by position
 world[, 1:3] # subset columns by position
 world[, c("name_long", "lifeExp")] # subset columns by name
+world[c(1, 5), c(T, T, F, F, F, F, F, T, T, F, F)] # logical indices
+world[, 888] # an index representing a non-existent column
 ```
+
+
 
 A demonstration of the utility of using `logical` vectors for subsetting is shown in the code chunk below.
 This creates a new object, `small_countries`, containing nations whose surface area is smaller than 10,000 km^2^:

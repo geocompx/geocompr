@@ -191,19 +191,23 @@ Tidyverse compatibility is an advantage of <strong>sf</strong> over its predeces
 <h3>
 <span class="header-section-number">3.2.1</span> Vector attribute subsetting<a class="anchor" aria-label="anchor" href="#vector-attribute-subsetting"><i class="fas fa-link"></i></a>
 </h3>
-<p>Base R subsetting functions include <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code>, <code><a href="https://rdrr.io/pkg/terra/man/subset.html">subset()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/replace-vector.html">$</a></code>.
-<strong>dplyr</strong> subsetting functions include <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code>, and <code><a href="https://dplyr.tidyverse.org/reference/pull.html">pull()</a></code>.
-Both sets of functions preserve the spatial components of attribute data in <code>sf</code> objects.
+<p>Base R subsetting methods include the operator <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code> and the function <code><a href="https://rdrr.io/pkg/terra/man/subset.html">subset()</a></code>.
+The key <strong>dplyr</strong> subsetting functions are <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> for subsetting rows, and <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> for subsetting columns.
+Both approaches preserve the spatial components of attribute data in <code>sf</code> objects, while using the operator <code><a href="https://rdrr.io/pkg/terra/man/replace-vector.html">$</a></code> or the <strong>dplyr</strong> function <code><a href="https://dplyr.tidyverse.org/reference/pull.html">pull()</a></code> to return a single attribute column as a vector will lose the attribute data.
 </p>
 <p>The <code><a href="https://rdrr.io/r/base/Extract.html">[</a></code> operator can subset both rows and columns.
-You use indices to specify the elements you wish to extract from an object, e.g., <code>object[i, j]</code>, with <code>i</code> and <code>j</code> typically being numbers or logical vectors — <code>TRUE</code>s and <code>FALSE</code>s — representing rows and columns (they can also be character strings, indicating row or column names).
-Leaving <code>i</code> or <code>j</code> empty returns all rows or columns, so <code>world[1:5, ]</code> returns the first five rows and all columns.
+Indices placed inside square brackets placed directly after a data frame object name specify the elements to keep.
+The command <code>object[i, j]</code> means ’return the rows represented by <code>i</code> and the columns represented by <code>j</code>, where <code>i</code> and <code>j</code> typically contain integers or <code>TRUE</code>s and <code>FALSE</code>s (indices can also be character strings, indicating row or column names).
+<code>object[5, 1:3]</code>, for example, means ’return data containing the 5th row and columns 1 to 3: the result should be a data frame with only 1 row and 3 columns, and a fourth geometry column if it’s an <code>sf</code> object.
+Leaving <code>i</code> or <code>j</code> empty returns all rows or columns, so <code>world[1:5, ]</code> returns the first five rows and all 11 columns.
 The examples below demonstrate subsetting with base R.
-The results are not shown; check the results on your own computer:</p>
+The results are not shown; guess the number of rows and columns returned by each command and check the results on your own computer (see the end of the chapter for more exercises):</p>
 <div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, <span class="op">]</span> <span class="co"># subset rows by position</span>
 <span class="va">world</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="co"># subset columns by position</span>
-<span class="va">world</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"name_long"</span>, <span class="st">"lifeExp"</span><span class="op">)</span><span class="op">]</span> <span class="co"># subset columns by name</span></code></pre></div>
+<span class="va">world</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"name_long"</span>, <span class="st">"lifeExp"</span><span class="op">)</span><span class="op">]</span> <span class="co"># subset columns by name</span>
+<span class="va">world</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="cn">T</span>, <span class="cn">T</span>, <span class="cn">F</span>, <span class="cn">F</span>, <span class="cn">F</span>, <span class="cn">F</span>, <span class="cn">F</span>, <span class="cn">T</span>, <span class="cn">T</span>, <span class="cn">F</span>, <span class="cn">F</span><span class="op">)</span><span class="op">]</span> <span class="co"># logical indices</span>
+<span class="va">world</span><span class="op">[</span>, <span class="fl">888</span><span class="op">]</span> <span class="co"># an index representing a non-existent column</span></code></pre></div>
 <p>A demonstration of the utility of using <code>logical</code> vectors for subsetting is shown in the code chunk below.
 This creates a new object, <code>small_countries</code>, containing nations whose surface area is smaller than 10,000 km<sup>2</sup>:</p>
 <div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
