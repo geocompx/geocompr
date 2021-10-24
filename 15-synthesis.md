@@ -28,6 +28,8 @@ The code chunk below illustrates this by using three functions, covered in Chapt
 
 ```r
 library(spData)
+#> Warning: no function found corresponding to methods exports from 'raster' for:
+#> 'area'
 nz_u1 = sf::st_union(nz)
 nz_u2 = aggregate(nz["Population"], list(rep(1, nrow(nz))), sum)
 nz_u3 = dplyr::summarise(nz, t = sum(Population))

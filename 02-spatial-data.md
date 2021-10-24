@@ -50,6 +50,8 @@ The other packages that were installed contain data that will be used in the boo
 
 ```r
 library(spData)        # load geographic data
+#> Warning: no function found corresponding to methods exports from 'raster' for:
+#> 'area'
 library(spDataLarge)   # load larger geographic data
 ```
 

@@ -10,6 +10,8 @@ Packages that have already been used including **spData**, **spDataLarge** and *
 ```r
 library(sf)
 library(raster)
+#> Warning: no function found corresponding to methods exports from 'raster' for:
+#> 'area'
 ```
 
 

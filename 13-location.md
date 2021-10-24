@@ -10,6 +10,8 @@ library(sf)
 library(dplyr)
 library(purrr)
 library(raster)
+#> Warning: no function found corresponding to methods exports from 'raster' for:
+#> 'area'
 library(osmdata)
 library(spDataLarge)
 ```
@@ -460,7 +462,7 @@ Subsequent steps in the analysis could be taken:
 For example, the shop should be reachable for as many people as possible within 15 minutes of traveling bike distance (catchment area\index{catchment area} routing\index{routing}).
 Thereby, we should account for the fact that the further away the people are from the shop, the more unlikely it becomes that they actually visit it (distance decay function).
 - Also it would be a good idea to take into account competitors. 
-That is, if there already is a bike shop in the vicinity of the chosen location, one has to distribute possible customers (or sales potential) between the competitors [@huff_probabilistic_1963; @wieland_market_2017].
+That is, if there already is a bike shop in the vicinity of the chosen location, possible customers (or sales potential) should be distributed between the competitors [@huff_probabilistic_1963; @wieland_market_2017].
 - We need to find suitable and affordable real estate, e.g., in terms of accessibility, availability of parking spots, desired frequency of passers-by, having big windows, etc.
 
 ## Exercises

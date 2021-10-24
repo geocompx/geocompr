@@ -6,25 +6,28 @@
 
 
 ```r
-library(sf)
-library(terra)
-library(dplyr)
-library(stringr) # for working with strings (pattern matching)
-library(tidyr)   # for unite() and separate()
+library(sf)      # vector data package introduced in Chapter 2
+library(terra)   # raster data package introduced in Chapter 2
+library(dplyr)   # tidyverse package for data frame manipulation
 ```
 
 - It also relies on **spData**, which loads datasets used in the code examples of this chapter:
 
 
 ```r
-library(spData)
+library(spData)  # spatial data package introduced in Chapter 2
+#> Warning: no function found corresponding to methods exports from 'raster' for:
+#> 'area'
 ```
 
 ## Introduction
 
 Attribute data is non-spatial information associated with geographic (geometry) data.
 A bus stop provides a simple example: its position would typically be represented by latitude and longitude coordinates (geometry data), in addition to its name.
-The name is an *attribute*\index{attribute} of the feature (to use Simple Features terminology) that bears no relation to its geometry.
+The [Elephant & Castle / New Kent Road](https://www.openstreetmap.org/relation/6610626) stop in London, for example has coordinates of -0.098 degrees longitude and 51.495 degrees latitude which can be represented as `POINT (-0.098 51.495)` in the `sfc` representation described in Chapter \@ref(#spatial-class).
+Attributes such as the name *attribute*\index{attribute} of the POINT feature (to use Simple Features terminology) are the topic of this chapter.
+
+
 
 Another example is the elevation value (attribute) for a specific grid cell in raster data.
 Unlike the vector data model, the raster data model stores the coordinate of the grid cell indirectly, meaning the distinction between attribute and spatial information is less clear.
@@ -33,24 +36,24 @@ Its spatial location is defined by its index in the matrix: move from the origin
 The raster's *resolution* defines the distance for each x- and y-step which is specified in a *header*.
 The header is a vital component of raster datasets which specifies how pixels relate to geographic coordinates (see also Chapter \@ref(spatial-operations)).
 
-The focus of this chapter is manipulating geographic objects based on attributes such as the name of a bus stop and elevation.
-For vector data, this means operations such as subsetting and aggregation (see Sections \@ref(vector-attribute-subsetting) and \@ref(vector-attribute-aggregation)).
-These non-spatial operations have spatial equivalents:
-the `[` operator in base R, for example, works equally for subsetting objects based on their attribute and spatial objects, as we will see in Chapter \@ref(spatial-operations).
-This is good news: skills developed here are cross-transferable, meaning that this chapter lays the foundation for Chapter \@ref(spatial-operations), which extends the methods presented here to the spatial world.
+This teaches how to manipulate geographic objects based on attributes such as the names of bus stops in a vector dataset and elevations of pixels in a raster dataset.
+For vector data, this means techniques such as subsetting and aggregation (see Sections \@ref(vector-attribute-subsetting) and \@ref(vector-attribute-aggregation)).
 Sections \@ref(vector-attribute-joining) and \@ref(vec-attr-creation) demonstrate how to join data onto simple feature objects using a shared ID and how to create new variables, respectively.
+Each of these operations which has a spatial equivalent:
+the `[` operator in base R, for example, works equally for subsetting objects based on their attribute and spatial objects; you can also join attributes in two geographic datasets using spatial joins.
+This is good news: skills developed in this chapter are cross-transferable.
+Chapter \@ref(spatial-operations) extends the methods presented here to the spatial world.
 
-Raster attribute data operations are covered in Section \@ref(manipulating-raster-objects), which covers creating continuous and categorical raster layers and extracting cell values from one layer and multiple layers (raster subsetting). 
-Section \@ref(summarizing-raster-objects) provides an overview of 'global' raster operations which can be used to characterize entire raster datasets.
+After a deep dive into various types of *vector* attribute operations in the next section, *raster* attribute data operations are covered in Section \@ref(manipulating-raster-objects), which demonstrates how to create raster layers containing continuous and categorical attributes and extracting cell values from one or more layer (raster subsetting). 
+Section \@ref(summarizing-raster-objects) provides an overview of 'global' raster operations which can be used to summarize entire raster datasets.
 
 ## Vector attribute manipulation
 
-Geographic vector data in R are well supported by `sf`, a class which extends the `data.frame`.
-Thus `sf` objects have one column per attribute variable (such as 'name') and one row per observation, or *feature* (e.g., per bus station).
-`sf` objects also have a special column to contain geometry data, usually named `geometry`.
-The `geometry` column is special because it is a *list column*, which can contain multiple geographic entities (points, lines, polygons) per row.
-This was described in Chapter \@ref(spatial-class), which demonstrated how *generic methods* such as `plot()` and `summary()` work on `sf` objects.
-**sf** also provides methods that allow `sf` objects to behave like regular data frames, as illustrated by other `sf`-specific methods that were originally developed for data frames:
+Geographic vector datasets are well supported in R thanks to the `sf` class, which extends base the `data.frame` a foundation for data analysis in base R.
+Like data frames, `sf` objects have one column per attribute variable (such as 'name') and one row per observation or *feature* (e.g., per bus station).
+`sf` objects differ from basic data frames because they have a `geometry` column of class `sfc` which can contain a range of geographic entities (single and 'multi' point, line, and polygon features) per row.
+This was described in Chapter \@ref(spatial-class), which demonstrated how *generic methods* such as `plot()` and `summary()` work with `sf` objects.
+**sf** also provides generics that allow `sf` objects to behave like regular data frames, as shown by printing the class's methods:
 
 
 ```r
@@ -67,19 +70,22 @@ methods(class = "sf") # methods for sf objects, first 12 shown
 
 
 
-Many of these functions, including `rbind()` (for binding rows of data together) and `$<-` (for creating new columns) were developed for data frames.
+Many of these functions (`aggregate()`, `cbind()`, `merge()`, `rbind()` and `[`) are for manipulating data frames.
+`rbind()`, for example, is binds rows two data frames together, one 'on top' of the other.
+`$<-` creates new columns. 
 A key feature of `sf` objects is that they store spatial and non-spatial data in the same way, as columns in a `data.frame`.
 
-\BeginKnitrBlock{rmdnote}<div class="rmdnote">The geometry column of `sf` objects is typically called `geometry` but any name can be used.
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">The geometry column of `sf` objects is typically called `geometry` or `geom` but any name can be used.
 The following command, for example, creates a geometry column named g:
   
 `st_sf(data.frame(n = world$name_long), g = world$geom)`
 
 This enables geometries imported from spatial databases to have a variety of names such as `wkb_geometry` and `the_geom`.</div>\EndKnitrBlock{rmdnote}
 
-`sf` objects also support `tibble` and `tbl` classes used in the tidyverse\index{tidyverse (package)}, allowing 'tidy' data analysis workflows for spatial data.
-Thus **sf** enables the full power of R's data analysis capabilities to be unleashed on geographic data.
+`sf` objects can also extend `tibble` and `tbl` classes, which are extensions of the `data.frame` used tidyverse\index{tidyverse (package)}.
+Thus **sf** enables the full power of R's data analysis capabilities to be unleashed on geographic data, whether you use base R or tidyverse functions for data analysis.
 \index{tibble}
+(See [`Rdatatable/data.table#2273`](https://github.com/Rdatatable/data.table/issues/2273) for discussion of compatibility between `sf` objects and the fast `data.table` package.)
 Before using these capabilities it is worth re-capping how to discover the basic properties of vector data objects.
 Let's start by using base R functions to get a measure of the `world` dataset:
 
@@ -216,7 +222,7 @@ names(world5)[names(world5) == "pop"] = "population" # rename column manually
 `select()` also works with 'helper functions' for advanced subsetting operations, including `contains()`, `starts_with()` and `num_range()` (see the help page with `?select` for details).
 
 Most **dplyr** verbs return a data frame. 
-To extract a single vector, one has to explicitly use the `pull()` command.
+To extract a single vector, explicitly use the `pull()` command.
 The subsetting operator in base R (see `?[`), by contrast, tries to return objects in the lowest possible dimension.
 This means selecting a single column returns a vector in base R.
 To turn off this behavior, set the `drop` argument to `FALSE`.
@@ -480,9 +486,12 @@ The following command uses a string matching (regex) function from the **stringr
 
 
 ```r
-str_subset(world$name_long, "Dem*.+Congo")
+(drc = stringr::str_subset(world$name_long, "Dem*.+Congo"))
 #> [1] "Democratic Republic of the Congo"
 ```
+
+
+
 
 
 
@@ -491,8 +500,7 @@ To fix this issue, we will create a new version of `coffee_data` and update the 
 
 
 ```r
-coffee_data$name_long[grepl("Congo,", coffee_data$name_long)] = 
-  str_subset(world$name_long, "Dem*.+Congo")
+coffee_data$name_long[grepl("Congo,", coffee_data$name_long)] = drc
 world_coffee_match = inner_join(world, coffee_data)
 #> Joining, by = "name_long"
 nrow(world_coffee_match)

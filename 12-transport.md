@@ -13,6 +13,8 @@ The **nabor** package must also be installed, although it does not need to be at
 library(sf)
 library(dplyr)
 library(spDataLarge)
+#> Warning: no function found corresponding to methods exports from 'raster' for:
+#> 'area'
 library(stplanr)      # geographic transport data package
 library(tmap)         # visualization package (see Chapter 8)
 ```
