@@ -349,10 +349,10 @@ world8 = slice(
 
 \index{attribute!aggregation}
 \index{aggregation}
-Aggregation operations summarize datasets by a 'grouping variable', typically an attribute column (spatial aggregation is covered in the next chapter).
+Aggregation involves summarizing data with one or more 'grouping variables', typically from columns in the data frame to be aggregated (geographic aggregation is covered in the next chapter).
 An example of attribute aggregation is calculating the number of people per continent based on country-level data (one row per country).
 The `world` dataset contains the necessary ingredients: the columns `pop` and `continent`, the population and the grouping variable, respectively.
-The aim is to find the `sum()` of country populations for each continent.
+The aim is to find the `sum()` of country populations for each continent, resulting in a smaller data frame (aggregation is a form of data reduction and can be a useful early step when working with large datasets).
 This can be done with the base R function `aggregate()` as follows:
 
 ```{r 03-attribute-operations-26}
@@ -366,16 +366,13 @@ The result is a non-spatial data frame with six rows, one per continent, and two
 **sf** provides the method `aggregate.sf()` which is activated automatically when `x` is an `sf` object and a `by` argument is provided:
 
 ```{r 03-attribute-operations-27}
-world_agg2 = aggregate(world["pop"], by = list(world$continent),
-                       FUN = sum, na.rm = TRUE)
+world_agg2 = aggregate(world["pop"], list(world$continent), FUN = sum, na.rm = TRUE)
 class(world_agg2)
+nrow(world_agg2)
 ```
 
-As illustrated above, an object of class `sf` is returned this time.
-`world_agg2` which is a spatial object containing 6 polygons representing the continents of the world.
-
-`summarize()` is the **dplyr** equivalent of `aggregate()`.
-It usually follows `group_by()`, which specifies the grouping variable, as illustrated below:
+The resulting `world_agg2` object is a spatial object containing 8 features representing the continents of the world (and the open ocean).
+`group_by() %>% summarize()` is the **dplyr** equivalent of `aggregate()`, with the variable name provided in the `group_by()` function specifying the grouping variable and information on what is to be summarized passed to the `summarize()` function, as shown below:
 
 ```{r 03-attribute-operations-28}
 world_agg3 = world %>%
@@ -383,17 +380,23 @@ world_agg3 = world %>%
   summarize(pop = sum(pop, na.rm = TRUE))
 ```
 
-This approach is flexible and gives control over the new column names.
-This is illustrated below: the command calculates the Earth's population (~7 billion) and number of countries (result not shown):
+The approach may seem more complex but it has benefits: flexibility, readability, and control over the new column names.
+This flexibility is illustrated in the command below, which calculates not only the population but also the area and number of countries in each continent, resulting in Table \@ref(tab:continents):
 
-```{r 03-attribute-operations-29, eval=FALSE}
-world %>% 
-  summarize(pop = sum(pop, na.rm = TRUE), n = n())
+```{r 03-attribute-operations-29}
+world_agg4  = world %>% 
+  group_by(continent) %>%
+  summarize(pop = sum(pop, na.rm = TRUE), `area (sqkm)` = sum(area_km2), n = n())
 ```
 
-In the previous code chunk `pop` and `n` are column names in the result.
-`sum()` and `n()` were the aggregating functions.
-The result is an `sf` object with a single row representing the world (this works thanks to the geometric operation 'union', as explained in Section \@ref(geometry-unions)).
+```{r 03-attribute-operations-29-2, echo=FALSE}
+world_agg4 %>% 
+  st_drop_geometry() %>% 
+  knitr::kable()
+```
+
+In the previous code chunk `pop`, `area (sqkm)` and `n` are column names in the result, and `sum()` and `n()` were the aggregating functions.
+These aggregating functions return `sf` objects with rows representing continents and geometries containing the multiple polygons representing each land mass and associated islands (this works thanks to the geometric operation 'union', as explained in Section \@ref(geometry-unions)).
 
 Let's combine what we have learned so far about **dplyr** by chaining together functions to find the world's 3 most populous continents (with `dplyr::top_n()`) and the number of countries they contain.
 We can order the continents (rows) by decreasing population size for easier readability with `dplyr::arrange()` (the result of this command is presented in Table \@ref(tab:continents)):
@@ -511,7 +514,6 @@ The following command uses a string matching (regex) function from the **stringr
 ```{r, echo=FALSE, eval=FALSE}
 world$name_long[grepl(pattern = "Dem*.+Congo", world$name_long)] # base R
 ```
-
 
 ```{r 03-attribute-operations-38, eval=FALSE, echo=FALSE}
 # aim: test names in coffee_data and world objects
