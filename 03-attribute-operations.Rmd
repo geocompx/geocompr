@@ -129,8 +129,9 @@ Tidyverse compatibility is an advantage of **sf** over its predecessor **sp**, b
 
 Base R subsetting methods include the operator `[` and the function `subset()`.
 The key **dplyr** subsetting functions are  `filter()` and `slice()` for subsetting rows, and `select()` for subsetting columns.
-Both approaches preserve the spatial components of attribute data in `sf` objects, while using the operator `$` or the **dplyr** function `pull()` to return a single attribute column as a vector will lose the attribute data.
+Both approaches preserve the spatial components of attribute data in `sf` objects, while using the operator `$` or the **dplyr** function `pull()` to return a single attribute column as a vector will lose the attribute data, as we will see.
 \index{attribute!subsetting}
+This section focuses on subsetting `sf` data frames; for further details on subsetting vectors and non-geographic data frames we recommend reading section section [2.7](https://cran.r-project.org/doc/manuals/r-release/R-intro.html#Index-vectors) of An Introduction to R [@rcoreteam_2021_introduction] and Chapter [4](https://adv-r.hadley.nz/subsetting.html) of Advanced R Programming [@wickham_advanced_2014], respectively.
 
 The `[` operator can subset both rows and columns. 
 Indices placed inside square brackets placed directly after a data frame object name specify the elements to keep.
@@ -214,50 +215,59 @@ To prevent ambiguity, we use the long-form function name, prefixed by the packag
 ```
 
 `select()` selects columns by name or position.
-For example, you could select only two columns, `name_long` and `pop`, with the following command (note the sticky `geom` column remains):
+For example, you could select only two columns, `name_long` and `pop`, with the following command:
 
 ```{r 03-attribute-operations-14}
 world1 = dplyr::select(world, name_long, pop)
 names(world1)
 ```
 
-`select()` also allows subsetting of a range of columns with the help of the `:` operator: 
+Note: as with the equivalent command in base R (`world[, c("name_long", "pop")]`), the sticky `geom` column remains.
+`select()` also allows selecting a range of columns with the help of the `:` operator: 
 
 ```{r 03-attribute-operations-15}
 # all columns between name_long and pop (inclusive)
 world2 = dplyr::select(world, name_long:pop)
 ```
 
-Omit specific columns with the `-` operator:
+You can remove specific columns with the `-` operator:
 
 ```{r 03-attribute-operations-16}
 # all columns except subregion and area_km2 (inclusive)
 world3 = dplyr::select(world, -subregion, -area_km2)
 ```
 
-Conveniently, `select()` lets you subset and rename columns at the same time, for example:
+Subset and rename columns at the same time with the `new_name = old_name` syntax:
 
 ```{r 03-attribute-operations-17}
 world4 = dplyr::select(world, name_long, population = pop)
-names(world4)
 ```
 
-This is more concise than the base R equivalent:
+It is worth noting that the command above is more concise than base R equivalent, which requires two lines of code:
 
 ```{r 03-attribute-operations-18, eval=FALSE}
 world5 = world[, c("name_long", "pop")] # subset columns by name
 names(world5)[names(world5) == "pop"] = "population" # rename column manually
 ```
 
-`select()` also works with 'helper functions' for advanced subsetting operations, including `contains()`, `starts_with()` and `num_range()` (see the help page with `?select` for details).
+`select()` also works with 'helper functions' for more advanced subsetting operations, including `contains()`, `starts_with()` and `num_range()` (see the help page with `?select` for details).
 
-Most **dplyr** verbs return a data frame. 
-To extract a single vector, explicitly use the `pull()` command.
-The subsetting operator in base R (see `?[`), by contrast, tries to return objects in the lowest possible dimension.
-This means selecting a single column returns a vector in base R.
-To turn off this behavior, set the `drop` argument to `FALSE`.
+Most **dplyr** verbs return a data frame, but you can extract a single column as a vector with `pull()`.
+<!-- Note: I have commented out the statement below because it is not true for `sf` objects, it's a bit confusing that the behaviour differs between data frames and `sf` objects. -->
+<!-- The subsetting operator in base R (see `?[`), by contrast, tries to return objects in the lowest possible dimension. -->
+<!-- This means selecting a single column returns a vector in base R as demonstrated in code chunk below which returns a numeric vector representing the population of countries in the `world`: -->
+You can get the same result in base R with the list subsetting operators `$` and `[[`, the three following commands return the same numeric vector:
 
-```{r 03-attribute-operations-19, eval=FALSE}
+```{r 03-attribute-operations-21, eval = FALSE}
+pull(world, pop)
+world$pop
+world[["pop"]]
+```
+
+<!-- Commenting out the following because it's confusing and covered better in other places (RL, 2021-10) -->
+<!-- To turn off this behavior, set the `drop` argument to `FALSE`,  -->
+
+```{r 03-attribute-operations-19, eval=FALSE, echo=FALSE}
 # create throw-away data frame
 d = data.frame(pop = 1:10, area = 1:10)
 # return data frame object when selecting a single column
@@ -274,30 +284,19 @@ x2 = d["pop"]
 identical(x1, x2)
 ```
 
-Due to the sticky geometry column, selecting a single attribute from an sf-object with the help of `[()` returns also a data frame.
-Contrastingly, `pull()` and `$` will give back a vector.
-
-```{r 03-attribute-operations-21, eval = FALSE}
-# data frame object
-world[, "pop"]
-# vector objects
-world$pop
-pull(world, pop)
-```
-
 `slice()` is the row-equivalent of `select()`.
-The following code chunk, for example, selects the 3^rd^ to 5^th^ rows:
+The following code chunk, for example, selects rows 1 to 6:
 
 ```{r 03-attribute-operations-22, eval=FALSE}
 slice(world, 3:5)
 ```
 
 `filter()` is **dplyr**'s equivalent of base R's `subset()` function.
-It keeps only rows matching given criteria, e.g., only countries with a very high average of life expectancy:
+It keeps only rows matching given criteria, e.g., only countries with and area below a certain threshold, or with a high average of life expectancy, as shown in the following examples:
 
 ```{r 03-attribute-operations-23, eval=FALSE}
-# Countries with a life expectancy longer than 82 years
-world6 = filter(world, lifeExp > 82)
+world7 = filter(world,  area_km2 < 10000) # countries with a small area
+world7 = filter(world, lifeExp > 82)      # with high life expectancy
 ```
 
 The standard set of comparison operators can be used in the `filter()` function, as illustrated in Table \@ref(tab:operators): 
@@ -321,8 +320,8 @@ knitr::kable(tibble(Symbol = operators, Name = operators_exp),
              booktabs = TRUE)
 ```
 
-**dplyr** works well with the ['pipe'](http://r4ds.had.co.nz/pipes.html) operator `%>%`, which takes its name from the Unix pipe `|` [@grolemund_r_2016].
-It enables expressive code: the output of a previous function becomes the first argument of the next function, enabling *chaining*.
+Key to workflows using **dplyr** functions is the ['pipe'](http://r4ds.had.co.nz/pipes.html) operator `%>%`, which takes its name from the Unix pipe `|` [@grolemund_r_2016].
+Pipes enable expressive code: the output of a previous function becomes the first argument of the next function, enabling *chaining*.
 This is illustrated below, in which only countries from Asia are filtered from the `world` dataset, next the object is subset by columns (`name_long` and `continent`) and the first five rows (result not shown).
 
 ```{r 03-attribute-operations-24}
