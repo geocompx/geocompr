@@ -18,7 +18,7 @@ Programming is hard and requires plenty of practice [@abelson_structure_1996]:
 
 There are strong reasons for moving in that direction, however.^[
 This chapter does not teach programming itself.
-For more on programming, we recommend @wickham_advanced_2014, @gillespie_efficient_2016, and @xiao_gis_2016. 
+For more on programming, we recommend @wickham_advanced_2019, @gillespie_efficient_2016, and @xiao_gis_2016. 
 ]
 The advantages of reproducibility\index{reproducibility} go beyond allowing others to replicate your work:
 reproducible code is often better in every way than code written to be run only once, including in terms of computational efficiency, scalability and ease of adapting and maintaining it.
