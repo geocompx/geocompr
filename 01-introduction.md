@@ -217,8 +217,8 @@ This is especially true for the [R-sig-Geo Archives](https://stat.ethz.ch/piperm
 <!--jn:toDo-->
 <!--https://github.com/Robinlovelace/geocompr/issues/639 -->
 <div class="figure" style="text-align: center">
-<img src="figures/01-cranlogs.png" alt="Downloads of selected R packages for working with geographic data. The y-axis shows average number of downloads per day, within a 30-day rolling window." width="100%" />
-<p class="caption">(\#fig:cranlogs)Downloads of selected R packages for working with geographic data. The y-axis shows average number of downloads per day, within a 30-day rolling window.</p>
+<img src="figures/01-cranlogs.png" alt="Downloads of selected R packages for working with geographic data. The y-axis shows average number of downloads per day, within a 91-day rolling window." width="100%" />
+<p class="caption">(\#fig:cranlogs)Downloads of selected R packages for working with geographic data. The y-axis shows average number of downloads per day, within a 91-day rolling window.</p>
 </div>
 
 It is noteworthy that shifts in the wider R community, as exemplified by the data processing package **dplyr** (released in [2014](https://cran.r-project.org/src/contrib/Archive/dplyr/)) influenced shifts in R's spatial ecosystem. 
