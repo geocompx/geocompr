@@ -134,11 +134,11 @@ Guess the number of rows and columns in the `sf` data frames returned by each co
 
 
 ```r
-world[1:6, ] # subset rows by position
-world[, 1:3] # subset columns by position
+world[1:6, ]    # subset rows by position
+world[, 1:3]    # subset columns by position
 world[1:6, 1:3] # subset rows and columns by position
-world[, c("name_long", "pop")] # subset columns by name
-world[, c(T, T, F, F, F, F, F, T, T, F, F)] # subset columns by logical indices
+world[, c("name_long", "pop")] # columns by name
+world[, c(T, T, F, F, F, F, F, T, T, F, F)] # by logical indices
 world[, 888] # an index representing a non-existent column
 ```
 
