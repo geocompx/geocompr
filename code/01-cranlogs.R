@@ -9,25 +9,13 @@ library(tidyverse)
 library(ggplot2)
 
 # which packages to track:
-pkgs = c("sp", "raster", "sf", "terra", 
-         "raster", "stars")
+pkgs = c("sp", "raster", "sf", "terra", "stars")
 
 # read packages downloads -------------------------------------------------
-# and calculate rolling mean
-dd = cran_downloads(packages = pkgs, from = "2013-01-01", to = Sys.Date()) %>% 
+# and calculate rolling median
+dd_top = cran_downloads(packages = pkgs, from = "2013-01-01", to = Sys.Date()) %>% 
   group_by(package) %>% 
-  mutate(Downloads = zoo::rollmean(count, k = 30, na.pad = TRUE))
-
-# extract names of the top 5 packages -------------------------------------
-top_pkgs = dd %>% 
-  filter(date > (Sys.Date() - 30)) %>% 
-  group_by(package) %>%
-  dplyr::summarise(Downloads = mean(Downloads, na.rm = TRUE)) %>% 
-  top_n(n = 8, wt = Downloads) %>% 
-  pull(package)
-
-# filter only the top 5 packages ------------------------------------------
-dd_top = dplyr::filter(dd, Downloads > 0, package %in% top_pkgs)
+  mutate(Downloads = zoo::rollmedian(count, k = 91, na.pad = TRUE))
 
 # plot and save -----------------------------------------------------------
 ggfig = ggplot(data = dd_top, mapping = aes(date, Downloads, color = package)) +
@@ -37,5 +25,5 @@ ggfig = ggplot(data = dd_top, mapping = aes(date, Downloads, color = package)) +
   theme_bw() +
   scale_y_log10(limits = c(10, NA))
 ggfig
-ggsave("figures/spatial-package-growth.png", ggfig, width = 6, height = 3, dpi = 150)
+ggsave("figures/01-cranlogs.png", ggfig, width = 6, height = 3, dpi = 150)
 # magick::image_read("figures/spatial-package-growth.png")
