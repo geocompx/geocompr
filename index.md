@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2021-10-24'
+date: '2021-10-28'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -38,7 +38,7 @@ The online version of the book is hosted at [geocompr.robinlovelace.net](https:/
 
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
 
-This version of the book was built on GH Actions on 2021-10-24.
+This version of the book was built on GH Actions on 2021-10-28.
 
 ## How to contribute? {-}
 
@@ -95,6 +95,10 @@ bookdown::serve_book()
 ```
 
 
+```
+#> geocompkg not installed, run
+#> remotes::install_github("geocompr/geocompkg") # to install it
+```
 
 See the project's [GitHub repo](https://github.com/robinlovelace/geocompr#reproducing-the-book) for details on reproducing the book.
 
@@ -183,7 +187,7 @@ Impatient readers are welcome to dive straight into the practical examples, star
 However, we recommend reading about the wider context of *Geocomputation with R* in Chapter \@ref(intro) first.
 If you are new to R, we also recommend learning more about the language before attempting to run the code chunks provided in each chapter (unless you're reading the book for an understanding of the concepts).
 Fortunately for R beginners R has a supportive community that has developed a wealth of resources that can help.
-We particularly recommend three tutorials:  [R for Data Science](http://r4ds.had.co.nz/) [@grolemund_r_2016] and [Efficient R Programming](https://csgillespie.github.io/efficientR/) [@gillespie_efficient_2016], especially [Chapter 2](https://csgillespie.github.io/efficientR/set-up.html#r-version) (on installing and setting-up R/RStudio) and [Chapter 10](https://csgillespie.github.io/efficientR/learning.html) (on learning to learn), and  [An introduction to R](http://colinfay.me/intro-to-r/) [@venables_introduction_2017].
+We particularly recommend three tutorials:  [R for Data Science](http://r4ds.had.co.nz/) [@grolemund_r_2016] and [Efficient R Programming](https://csgillespie.github.io/efficientR/) [@gillespie_efficient_2016], especially [Chapter 2](https://csgillespie.github.io/efficientR/set-up.html#r-version) (on installing and setting-up R/RStudio) and [Chapter 10](https://csgillespie.github.io/efficientR/learning.html) (on learning to learn), and  [An introduction to R](http://colinfay.me/intro-to-r/) [@rcoreteam_introduction_2021].
 
 ## Why R? {-}
 

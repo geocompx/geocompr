@@ -16,15 +16,13 @@ library(dplyr)   # tidyverse package for data frame manipulation
 
 ```r
 library(spData)  # spatial data package introduced in Chapter 2
-#> Warning: no function found corresponding to methods exports from 'raster' for:
-#> 'area'
 ```
 
 ## Introduction
 
 Attribute data is non-spatial information associated with geographic (geometry) data.
 A bus stop provides a simple example: its position would typically be represented by latitude and longitude coordinates (geometry data), in addition to its name.
-The [Elephant & Castle / New Kent Road](https://www.openstreetmap.org/relation/6610626) stop in London, for example has coordinates of -0.098 degrees longitude and 51.495 degrees latitude which can be represented as `POINT (-0.098 51.495)` in the `sfc` representation described in Chapter \@ref(#spatial-class).
+The [Elephant & Castle / New Kent Road](https://www.openstreetmap.org/relation/6610626) stop in London, for example has coordinates of -0.098 degrees longitude and 51.495 degrees latitude which can be represented as `POINT (-0.098 51.495)` in the `sfc` representation described in Chapter \@ref(spatial-class).
 Attributes such as the name *attribute*\index{attribute} of the POINT feature (to use Simple Features terminology) are the topic of this chapter.
 
 
@@ -39,7 +37,7 @@ The header is a vital component of raster datasets which specifies how pixels re
 This teaches how to manipulate geographic objects based on attributes such as the names of bus stops in a vector dataset and elevations of pixels in a raster dataset.
 For vector data, this means techniques such as subsetting and aggregation (see Sections \@ref(vector-attribute-subsetting) and \@ref(vector-attribute-aggregation)).
 Sections \@ref(vector-attribute-joining) and \@ref(vec-attr-creation) demonstrate how to join data onto simple feature objects using a shared ID and how to create new variables, respectively.
-Each of these operations which has a spatial equivalent:
+Each of these operations has a spatial equivalent:
 the `[` operator in base R, for example, works equally for subsetting objects based on their attribute and spatial objects; you can also join attributes in two geographic datasets using spatial joins.
 This is good news: skills developed in this chapter are cross-transferable.
 Chapter \@ref(spatial-operations) extends the methods presented here to the spatial world.
@@ -49,7 +47,7 @@ Section \@ref(summarizing-raster-objects) provides an overview of 'global' raste
 
 ## Vector attribute manipulation
 
-Geographic vector datasets are well supported in R thanks to the `sf` class, which extends base the `data.frame` a foundation for data analysis in base R.
+Geographic vector datasets are well supported in R thanks to the `sf` class, which extends base R's `data.frame`.
 Like data frames, `sf` objects have one column per attribute variable (such as 'name') and one row per observation or *feature* (e.g., per bus station).
 `sf` objects differ from basic data frames because they have a `geometry` column of class `sfc` which can contain a range of geographic entities (single and 'multi' point, line, and polygon features) per row.
 This was described in Chapter \@ref(spatial-class), which demonstrated how *generic methods* such as `plot()` and `summary()` work with `sf` objects.
@@ -70,7 +68,7 @@ methods(class = "sf") # methods for sf objects, first 12 shown
 
 
 
-Many of these functions (`aggregate()`, `cbind()`, `merge()`, `rbind()` and `[`) are for manipulating data frames.
+Many of these (`aggregate()`, `cbind()`, `merge()`, `rbind()` and `[`) are for manipulating data frames.
 `rbind()`, for example, is binds rows two data frames together, one 'on top' of the other.
 `$<-` creates new columns. 
 A key feature of `sf` objects is that they store spatial and non-spatial data in the same way, as columns in a `data.frame`.
@@ -82,7 +80,8 @@ The following command, for example, creates a geometry column named g:
 
 This enables geometries imported from spatial databases to have a variety of names such as `wkb_geometry` and `the_geom`.</div>\EndKnitrBlock{rmdnote}
 
-`sf` objects can also extend `tibble` and `tbl` classes, which are extensions of the `data.frame` used tidyverse\index{tidyverse (package)}.
+`sf` objects can also extend the `tidyverse` classes for data frames, `tibble` and `tbl`.
+\index{tidyverse (package)}.
 Thus **sf** enables the full power of R's data analysis capabilities to be unleashed on geographic data, whether you use base R or tidyverse functions for data analysis.
 \index{tibble}
 (See [`Rdatatable/data.table#2273`](https://github.com/Rdatatable/data.table/issues/2273) for discussion of compatibility between `sf` objects and the fast `data.table` package.)
@@ -109,8 +108,8 @@ ncol(world_df)
 #> [1] 10
 ```
 
-Dropping the geometry column before working with attribute data can be useful, e.g. to speed-up data manipulation processes when computational efficiency is important or to focus exclusively the attribute data.
-For most cases, however, it makes sense to the geometry column.
+Dropping the geometry column before working with attribute data can be useful; data manipulation processes can run faster when they work only on the attribute data and geometry columns are not always needed.
+For most cases, however, it makes sense to keep the geometry column, explaining why the column is 'sticky' (it remains after most attribute operations unless specifically dropped).
 Non-spatial data operations on `sf` objects only change an object's geometry when appropriate (e.g., by dissolving borders between adjacent polygons following aggregation).
 Becoming skilled at geographic attribute data manipulation means becoming skilled at manipulating data frames.
 
@@ -120,9 +119,10 @@ Tidyverse compatibility is an advantage of **sf** over its predecessor **sp**, b
 ### Vector attribute subsetting
 
 Base R subsetting methods include the operator `[` and the function `subset()`.
-The key **dplyr** subsetting functions are  `filter()` for subsetting rows, and `select()` for subsetting columns.
-Both approaches preserve the spatial components of attribute data in `sf` objects, while using the operator `$` or the **dplyr** function `pull()` to return a single attribute column as a vector will lose the attribute data.
+The key **dplyr** subsetting functions are  `filter()` and `slice()` for subsetting rows, and `select()` for subsetting columns.
+Both approaches preserve the spatial components of attribute data in `sf` objects, while using the operator `$` or the **dplyr** function `pull()` to return a single attribute column as a vector will lose the attribute data, as we will see.
 \index{attribute!subsetting}
+This section focuses on subsetting `sf` data frames; for further details on subsetting vectors and non-geographic data frames we recommend reading section section [2.7](https://cran.r-project.org/doc/manuals/r-release/R-intro.html#Index-vectors) of An Introduction to R [@rcoreteam_introduction_2021] and Chapter [4](https://adv-r.hadley.nz/subsetting.html) of Advanced R Programming [@wickham_advanced_2019], respectively.
 
 The `[` operator can subset both rows and columns. 
 Indices placed inside square brackets placed directly after a data frame object name specify the elements to keep.
@@ -130,14 +130,15 @@ The command `object[i, j]` means 'return the rows represented by `i` and the col
 `object[5, 1:3]`, for example, means 'return data containing the 5th row and columns 1 to 3: the result should be a data frame with only 1 row and 3 columns, and a fourth geometry column if it's an `sf` object.
 Leaving `i` or `j` empty returns all rows or columns, so `world[1:5, ]` returns the first five rows and all 11 columns.
 The examples below demonstrate subsetting with base R.
-The results are not shown; guess the number of rows and columns returned by each command and check the results on your own computer (see the end of the chapter for more exercises):
+Guess the number of rows and columns in the `sf` data frames returned by each command and check the results on your own computer (see the end of the chapter for more exercises):
 
 
 ```r
 world[1:6, ] # subset rows by position
 world[, 1:3] # subset columns by position
-world[, c("name_long", "lifeExp")] # subset columns by name
-world[c(1, 5), c(T, T, F, F, F, F, F, T, T, F, F)] # logical indices
+world[1:6, 1:3] # subset rows and columns by position
+world[, c("name_long", "pop")] # subset columns by name
+world[, c(T, T, F, F, F, F, F, T, T, F, F)] # subset columns by logical indices
 world[, 888] # an index representing a non-existent column
 ```
 
@@ -148,14 +149,14 @@ This creates a new object, `small_countries`, containing nations whose surface a
 
 
 ```r
-sel_area = world$area_km2 < 10000
-summary(sel_area) # a logical vector
+i_small = world$area_km2 < 10000
+summary(i_small) # a logical vector
 #>    Mode   FALSE    TRUE 
 #> logical     170       7
-small_countries = world[sel_area, ]
+small_countries = world[i_small, ]
 ```
 
-The intermediary `sel_area` is a logical vector that shows that only seven countries match the query.
+The intermediary `i_small` (short for index representing small countries) is a logical vector that can be used to subset the seven smallest countries in the `world` by surface area.
 A more concise command, which omits the intermediary object, generates the same result:
 
 
@@ -163,28 +164,25 @@ A more concise command, which omits the intermediary object, generates the same 
 small_countries = world[world$area_km2 < 10000, ]
 ```
 
-The base R function `subset()` provides yet another way to achieve the same result:
+The base R function `subset()` provides another way to achieve the same result:
 
 
 ```r
 small_countries = subset(world, area_km2 < 10000)
 ```
 
-Base R functions are mature and widely used.
-However, the more recent **dplyr** approach has several advantages.
-It enables intuitive workflows.
-It is fast, due to its C++\index{C++} backend.
-This is especially useful when working with big data as well as **dplyr**'s database integration.
-The main **dplyr** subsetting functions are `select()`, `slice()`, `filter()` and `pull()`.
+Base R functions are mature, stable and widely used, making them a rock solid choice, especially in contexts where reproducibility and reliability are key.
+**dplyr** functions enable 'tidy' workflows which some people (the authors of this book included) find intuitive and productive for interactive data analysis, especially when combined with code editors such as RStudio that enable [auto-completion](https://support.rstudio.com/hc/en-us/articles/205273297-Code-Completion-in-the-RStudio-IDE) of column names.
+Key functions for subsetting data frames (including `sf` data frames) with **dplyr** functions are demonstrated below.
+<!-- The sentence below seems to be untrue based on the benchmark below. -->
+<!-- `dplyr` is also faster than base R for some operations, due to its C++\index{C++} backend. -->
+<!-- Something on dbplyr? I've never seen anyone use it regularly for spatial data 'in the wild' so leaving out the bit on integration with dbs for now (RL 2021-10) -->
+<!-- The main **dplyr** subsetting functions are `select()`, `slice()`, `filter()` and `pull()`. -->
 
-<div class="rmdnote">
-<!--jn:toDo-->
-<!-- improve it!! -->
-<p><strong>raster</strong> and <strong>dplyr</strong> packages have a function called <code>select()</code>. When using both packages, the function in the most recently attached package will be used, ‘masking’ the incumbent function. This can generate error messages containing text like: <code>unable to find an inherited method for function ‘select’ for signature ‘"sf"’</code>. To avoid this error message, and prevent ambiguity, we use the long-form function name, prefixed by the package name and two colons (usually omitted from R scripts for concise code): <code>dplyr::select()</code>.</p>
-</div>
+
 
 `select()` selects columns by name or position.
-For example, you could select only two columns, `name_long` and `pop`, with the following command (note the sticky `geom` column remains):
+For example, you could select only two columns, `name_long` and `pop`, with the following command:
 
 
 ```r
@@ -193,7 +191,8 @@ names(world1)
 #> [1] "name_long" "pop"       "geom"
 ```
 
-`select()` also allows subsetting of a range of columns with the help of the `:` operator: 
+Note: as with the equivalent command in base R (`world[, c("name_long", "pop")]`), the sticky `geom` column remains.
+`select()` also allows selecting a range of columns with the help of the `:` operator: 
 
 
 ```r
@@ -201,7 +200,7 @@ names(world1)
 world2 = dplyr::select(world, name_long:pop)
 ```
 
-Omit specific columns with the `-` operator:
+You can remove specific columns with the `-` operator:
 
 
 ```r
@@ -209,16 +208,14 @@ Omit specific columns with the `-` operator:
 world3 = dplyr::select(world, -subregion, -area_km2)
 ```
 
-Conveniently, `select()` lets you subset and rename columns at the same time, for example:
+Subset and rename columns at the same time with the `new_name = old_name` syntax:
 
 
 ```r
 world4 = dplyr::select(world, name_long, population = pop)
-names(world4)
-#> [1] "name_long"  "population" "geom"
 ```
 
-This is more concise than the base R equivalent:
+It is worth noting that the command above is more concise than base R equivalent, which requires two lines of code:
 
 
 ```r
@@ -226,55 +223,43 @@ world5 = world[, c("name_long", "pop")] # subset columns by name
 names(world5)[names(world5) == "pop"] = "population" # rename column manually
 ```
 
-`select()` also works with 'helper functions' for advanced subsetting operations, including `contains()`, `starts_with()` and `num_range()` (see the help page with `?select` for details).
+`select()` also works with 'helper functions' for more advanced subsetting operations, including `contains()`, `starts_with()` and `num_range()` (see the help page with `?select` for details).
 
-Most **dplyr** verbs return a data frame. 
-To extract a single vector, explicitly use the `pull()` command.
-The subsetting operator in base R (see `?[`), by contrast, tries to return objects in the lowest possible dimension.
-This means selecting a single column returns a vector in base R.
-To turn off this behavior, set the `drop` argument to `FALSE`.
-
-
-```r
-# create throw-away data frame
-d = data.frame(pop = 1:10, area = 1:10)
-# return data frame object when selecting a single column
-d[, "pop", drop = FALSE] # equivalent to d["pop"]
-select(d, pop)
-# return a vector when selecting a single column
-d[, "pop"]
-pull(d, pop)
-```
-
-
-
-Due to the sticky geometry column, selecting a single attribute from an sf-object with the help of `[()` returns also a data frame.
-Contrastingly, `pull()` and `$` will give back a vector.
+Most **dplyr** verbs return a data frame, but you can extract a single column as a vector with `pull()`.
+<!-- Note: I have commented out the statement below because it is not true for `sf` objects, it's a bit confusing that the behaviour differs between data frames and `sf` objects. -->
+<!-- The subsetting operator in base R (see `?[`), by contrast, tries to return objects in the lowest possible dimension. -->
+<!-- This means selecting a single column returns a vector in base R as demonstrated in code chunk below which returns a numeric vector representing the population of countries in the `world`: -->
+You can get the same result in base R with the list subsetting operators `$` and `[[`, the three following commands return the same numeric vector:
 
 
 ```r
-# data frame object
-world[, "pop"]
-# vector objects
-world$pop
 pull(world, pop)
+world$pop
+world[["pop"]]
 ```
+
+<!-- Commenting out the following because it's confusing and covered better in other places (RL, 2021-10) -->
+<!-- To turn off this behavior, set the `drop` argument to `FALSE`,  -->
+
+
+
+
 
 `slice()` is the row-equivalent of `select()`.
-The following code chunk, for example, selects the 3^rd^ to 5^th^ rows:
+The following code chunk, for example, selects rows 1 to 6:
 
 
 ```r
-slice(world, 3:5)
+slice(world, 1:6)
 ```
 
 `filter()` is **dplyr**'s equivalent of base R's `subset()` function.
-It keeps only rows matching given criteria, e.g., only countries with a very high average of life expectancy:
+It keeps only rows matching given criteria, e.g., only countries with and area below a certain threshold, or with a high average of life expectancy, as shown in the following examples:
 
 
 ```r
-# Countries with a life expectancy longer than 82 years
-world6 = filter(world, lifeExp > 82)
+world7 = filter(world ,area_km2 < 10000) # countries with a small area
+world7 = filter(world, lifeExp > 82)      # with high life expectancy
 ```
 
 The standard set of comparison operators can be used in the `filter()` function, as illustrated in Table \@ref(tab:operators): 
@@ -292,8 +277,10 @@ Table: (\#tab:operators)Comparison operators that return Booleans (TRUE/FALSE).
 |`>=`, `<=`                    |Greater/Less than or equal      |
 |`&`, <code>&#124;</code>, `!` |Logical operators: And, Or, Not |
 
-**dplyr** works well with the ['pipe'](http://r4ds.had.co.nz/pipes.html) operator `%>%`, which takes its name from the Unix pipe `|` [@grolemund_r_2016].
-It enables expressive code: the output of a previous function becomes the first argument of the next function, enabling *chaining*.
+### Chaining commands with pipes
+
+Key to workflows using **dplyr** functions is the ['pipe'](http://r4ds.had.co.nz/pipes.html) operator `%>%` (and since R `4.1.0` the native pipe `|>`), which takes its name from the Unix pipe `|` [@grolemund_r_2016].
+Pipes enable expressive code: the output of a previous function becomes the first argument of the next function, enabling *chaining*.
 This is illustrated below, in which only countries from Asia are filtered from the `world` dataset, next the object is subset by columns (`name_long` and `continent`) and the first five rows (result not shown).
 
 
@@ -321,10 +308,10 @@ world8 = slice(
 
 \index{attribute!aggregation}
 \index{aggregation}
-Aggregation operations summarize datasets by a 'grouping variable', typically an attribute column (spatial aggregation is covered in the next chapter).
+Aggregation involves summarizing data with one or more 'grouping variables', typically from columns in the data frame to be aggregated (geographic aggregation is covered in the next chapter).
 An example of attribute aggregation is calculating the number of people per continent based on country-level data (one row per country).
 The `world` dataset contains the necessary ingredients: the columns `pop` and `continent`, the population and the grouping variable, respectively.
-The aim is to find the `sum()` of country populations for each continent.
+The aim is to find the `sum()` of country populations for each continent, resulting in a smaller data frame (aggregation is a form of data reduction and can be a useful early step when working with large datasets).
 This can be done with the base R function `aggregate()` as follows:
 
 
@@ -341,17 +328,15 @@ The result is a non-spatial data frame with six rows, one per continent, and two
 
 
 ```r
-world_agg2 = aggregate(world["pop"], by = list(world$continent),
-                       FUN = sum, na.rm = TRUE)
+world_agg2 = aggregate(world["pop"], list(world$continent), FUN = sum, na.rm = TRUE)
 class(world_agg2)
 #> [1] "sf"         "data.frame"
+nrow(world_agg2)
+#> [1] 8
 ```
 
-As illustrated above, an object of class `sf` is returned this time.
-`world_agg2` which is a spatial object containing 6 polygons representing the continents of the world.
-
-`summarize()` is the **dplyr** equivalent of `aggregate()`.
-It usually follows `group_by()`, which specifies the grouping variable, as illustrated below:
+The resulting `world_agg2` object is a spatial object containing 8 features representing the continents of the world (and the open ocean).
+`group_by() %>% summarize()` is the **dplyr** equivalent of `aggregate()`, with the variable name provided in the `group_by()` function specifying the grouping variable and information on what is to be summarized passed to the `summarize()` function, as shown below:
 
 
 ```r
@@ -360,41 +345,42 @@ world_agg3 = world %>%
   summarize(pop = sum(pop, na.rm = TRUE))
 ```
 
-This approach is flexible and gives control over the new column names.
-This is illustrated below: the command calculates the Earth's population (~7 billion) and number of countries (result not shown):
+The approach may seem more complex but it has benefits: flexibility, readability, and control over the new column names.
+This flexibility is illustrated in the command below, which calculates not only the population but also the area and number of countries in each continent:
 
 
 ```r
-world %>% 
-  summarize(pop = sum(pop, na.rm = TRUE), n = n())
+world_agg4  = world %>% 
+  group_by(continent) %>%
+  summarize(pop = sum(pop, na.rm = TRUE), `area (sqkm)` = sum(area_km2), n = n())
 ```
 
-In the previous code chunk `pop` and `n` are column names in the result.
-`sum()` and `n()` were the aggregating functions.
-The result is an `sf` object with a single row representing the world (this works thanks to the geometric operation 'union', as explained in Section \@ref(geometry-unions)).
+In the previous code chunk `pop`, `area (sqkm)` and `n` are column names in the result, and `sum()` and `n()` were the aggregating functions.
+These aggregating functions return `sf` objects with rows representing continents and geometries containing the multiple polygons representing each land mass and associated islands (this works thanks to the geometric operation 'union', as explained in Section \@ref(geometry-unions)).
 
-Let's combine what we have learned so far about **dplyr** by chaining together functions to find the world's 3 most populous continents (with `dplyr::top_n()`) and the number of countries they contain.
-We can order the continents (rows) by decreasing population size for easier readability with `dplyr::arrange()` (the result of this command is presented in Table \@ref(tab:continents)):
+Let's combine what we have learned so far about **dplyr** functions, by chaining multiple commands to summarize attribute data about countries worldwide by continent.
+The following command calculates population density (with `mutate()`), arranges continents by the number countries they contain (with `dplyr::arrange()`), and keeps only the 3 most populous continents (with `top_n()`), the result of which is presented in Table \@ref(tab:continents)):
 
 
 ```r
-world %>% 
-  dplyr::select(pop, continent) %>% 
-  group_by(continent) %>% 
-  summarize(pop = sum(pop, na.rm = TRUE), n_countries = n()) %>% 
-  top_n(n = 3, wt = pop) %>%
-  arrange(desc(pop)) %>%
-  st_drop_geometry()
+world_agg5 = world %>% 
+  st_drop_geometry() %>%                      # drop the geometry for speed
+  dplyr::select(pop, continent, area_km2) %>% # subset the columns of interest  
+  group_by(continent) %>%                     # group by continent and summarize:
+  summarize(Pop = sum(pop, na.rm = TRUE), Area = sum(area_km2), N = n()) %>%
+  mutate(Density = round(Pop / Area)) %>%     # calculate population density
+  top_n(n = 3, wt = Pop) %>%                  # keep only the top 3
+  arrange(desc(N))                            # arrange in order of n. countries
 ```
 
 
-Table: (\#tab:continents)The top 3 most populous continents, and the number of countries in each.
+Table: (\#tab:continents)The top 3 most populous continents ordered by population density (people per square km).
 
-|continent |        pop| n_countries|
-|:---------|----------:|-----------:|
-|Asia      | 4311408059|          47|
-|Africa    | 1154946633|          51|
-|Europe    |  669036256|          39|
+|continent |        Pop|     Area|  N| Density|
+|:---------|----------:|--------:|--:|-------:|
+|Africa    | 1154946633| 29946198| 51|      39|
+|Asia      | 4311408059| 31252459| 47|     138|
+|Europe    |  669036256| 23065219| 39|      29|
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">More details are provided in the help pages (which can be accessed via `?summarize` and `vignette(package = "dplyr")` and Chapter 5 of [R for Data Science](http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize). </div>\EndKnitrBlock{rmdnote}
 
@@ -501,7 +487,6 @@ The following command uses a string matching (regex) function from the **stringr
 
 
 
-
 To fix this issue, we will create a new version of `coffee_data` and update the name.
 `inner_join()`ing the updated data frame returns a result with all 46 coffee-producing nations:
 
@@ -568,7 +553,7 @@ world %>%
   transmute(pop_dens = pop / area_km2)
 ```
 
-`unite()` from the **tidyr** package pastes together existing columns.
+`unite()` from the **tidyr** package (which provides many useful functions for reshaping datasets, including `pivot_longer()`) pastes together existing columns.
 For example, we want to combine the `continent` and `region_un` columns into a new column named `con_reg`.
 Additionally, we can define a separator (here: a colon `:`) which defines how the values of the input columns should be joined, and if the original columns should be removed (here: `TRUE`):
 
@@ -613,8 +598,7 @@ world %>%
 
 It is important to note that attribute data operations preserve the geometry of the simple features.
 As mentioned at the outset of the chapter, it can be useful to remove the geometry.
-To do this, you have to explicitly remove it because `sf` explicitly makes the geometry column sticky.
-This behavior ensures that data frame operations do not accidentally remove the geometry column.
+To do this, you have to explicitly remove it.
 Hence, an approach such as `select(world, -geom)` will be unsuccessful and you should instead use `st_drop_geometry()`.^[
 `st_geometry(world_st) = NULL` also works to remove the geometry from `world`, but overwrites the original object.
 ]

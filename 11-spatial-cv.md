@@ -13,8 +13,6 @@ Package **kernlab**, **pROC**, **RSAGA**\index{RSAGA (package)} and **spDataLarg
 ```r
 library(sf)
 library(raster)
-#> Warning: no function found corresponding to methods exports from 'raster' for:
-#> 'area'
 library(dplyr)
 ```
 

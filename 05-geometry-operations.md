@@ -10,8 +10,6 @@ library(sf)
 library(terra)
 library(dplyr)
 library(spData)
-#> Warning: no function found corresponding to methods exports from 'raster' for:
-#> 'area'
 library(spDataLarge)
 ```
 
@@ -837,7 +835,7 @@ As you will see in section \@ref(reprojecting-raster-geometries), raster reproje
 <!-- gdalUtils - https://cran.r-project.org/web/packages/gdalUtils/index.html - we mentioned it in geocompr 1; however it seems abandoned -->
 <!-- gdalUtilities - https://cran.r-project.org/web/packages/gdalUtilities/index.html -->
 <!-- also - add some reference to GDAL functions! -->
-
+\index{GDAL}
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Most geometry operations in **terra** are user-friendly, rather fast, and work on large raster objects.
 However, there could be some cases, when **terra** is not the most performant either for extensive rasters or many raster files, and some alternatives should be considered.
 
@@ -1183,7 +1181,7 @@ Spatial vectorization is the counterpart of rasterization (Section \@ref(rasteri
 It involves converting spatially continuous raster data into spatially discrete vector data such as points, lines or polygons.
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Be careful with the wording!
-In R, vectorization refers to the possibility of replacing `for`-loops and alike by doing things like `1:10 / 2` (see also @wickham_advanced_2014).</div>\EndKnitrBlock{rmdnote}
+In R, vectorization refers to the possibility of replacing `for`-loops and alike by doing things like `1:10 / 2` (see also @wickham_advanced_2019).</div>\EndKnitrBlock{rmdnote}
 
 The simplest form of vectorization is to convert the centroids of raster cells into points.
 `as.points()` does exactly this for all non-`NA` raster grid cells (Figure \@ref(fig:raster-vectorization1)).

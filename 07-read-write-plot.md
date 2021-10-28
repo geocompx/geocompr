@@ -10,11 +10,12 @@ library(sf)
 library(terra)
 library(dplyr)
 library(spData)
-#> Warning: no function found corresponding to methods exports from 'raster' for:
-#> 'area'
 ```
 
 ## Introduction
+
+<!--toDo:RL-->
+<!--revise and update the following section-->
 
 This chapter is about reading and writing geographic data.
 Geographic data *import* is essential for geocomputation\index{geocomputation}: real-world applications are impossible without data.
@@ -33,6 +34,9 @@ The process of actually reading and writing such file formats efficiently is not
 The final Section \@ref(visual-outputs) demonstrates methods for saving visual outputs (maps), in preparation for Chapter \@ref(adv-map) on visualization.
 
 ## Retrieving open data {#retrieving-data}
+
+<!--toDo:RL-->
+<!--revise and update the following section-->
 
 \index{open data}
 A vast and ever-increasing amount of geographic data is available on the internet, much of which is free to access and use (with appropriate credit given to its providers).
@@ -61,6 +65,10 @@ usa_parks = st_read(dsn = "nps_boundary.shp")
 ```
 
 ## Geographic data packages
+
+<!--toDo:RL-->
+<!--toDo:JN-->
+<!--revise and update the following section-->
 
 \index{data packages}
 Many R packages have been developed for accessing geographic data, some of which are presented in Table \@ref(tab:datapackages).
@@ -134,27 +142,17 @@ The result can be converted into an `sf` objects with `st_as_sf()` as follows:
 usa_sf = st_as_sf(usa)
 ```
 
-A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of ten minutes.
-The result is a multilayer object of class `RasterStack`.
-
-
-
+A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of ten minutes using the **geodata** package.
+The result is a multilayer object of class `SpatRaster`.
 
 
 ```r
-library(raster)
-#> Loading required package: sp
-#> 
-#> Attaching package: 'raster'
-#> The following object is masked from 'package:dplyr':
-#> 
-#>     select
-u = "https://github.com/Robinlovelace/geocompr/releases/download/1.2/worldclim_prec.Rds"
-worldclim_prec = readRDS(url(u))
+library(geodata)
+worldclim_prec = worldclim_global("prec", res = 10, path = tempdir())
 class(worldclim_prec)
-#> [1] "RasterStack"
+#> [1] "SpatRaster"
 #> attr(,"package")
-#> [1] "raster"
+#> [1] "terra"
 ```
 
 A third example uses the **osmdata** package [@R-osmdata] to find parks from the OpenStreetMap (OSM) database\index{OpenStreetMap}.
@@ -191,6 +189,9 @@ world3 = st_read(system.file("shapes/world.gpkg", package = "spData"))
 ```
 
 ## Geographic web services
+
+<!--toDo:RL-->
+<!--revise and update the following section-->
 
 \index{geographic web services}
 In an effort to standardize web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of specifications for web services (collectively known as OWS, which is short for OGC Web Services).
@@ -283,12 +284,8 @@ Today the variety of file formats may seem bewildering but there has been much c
 
 \index{GDAL}
 GDAL (which should be pronounced "goo-dal", with the double "o" making a reference to object-orientation), the Geospatial Data Abstraction Library, has resolved many issues associated with incompatibility between geographic file formats since its release in 2000.
-GDAL provides a unified and high-performance interface for reading and writing of many raster and vector data formats.
+GDAL provides a unified and high-performance interface for reading and writing of many raster and vector data formats.^[As we mentioned in Chapter \@ref(geometric-operations), GDAL also contains a set of utility functions allowing for raster mosaicing, resampling, cropping, and reprojecting, etc.]
 Many open and proprietary GIS programs, including GRASS, ArcGIS\index{ArcGIS} and QGIS\index{QGIS}, use GDAL\index{GDAL} behind their GUIs\index{graphical user interface} for doing the legwork of ingesting and spitting out geographic data in appropriate formats.
-
-<!--jn:toDo-->
-<!-- mention cloud tiffs -->
-<!-- mention https://github.com/flatgeobuf/flatgeobuf -->
 
 GDAL\index{GDAL} provides access to more than 200 vector and raster data formats.
 Table \@ref(tab:formats) presents some basic information about selected and often used spatial file formats.
@@ -330,6 +327,13 @@ Table \@ref(tab:formats) presents some basic information about selected and ofte
    <td style="text-align:left;"> GPX </td>
    <td style="text-align:left;width: 7em; "> .gpx </td>
    <td style="text-align:left;width: 14em; "> XML schema created for exchange of GPS data. </td>
+   <td style="text-align:left;"> Vector </td>
+   <td style="text-align:left;width: 7em; "> Open </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> FlatGeobuf </td>
+   <td style="text-align:left;width: 7em; "> .fgb </td>
+   <td style="text-align:left;width: 14em; "> Single file format allowing for quick reading and writing of vector data. Has streaming capabilities. </td>
    <td style="text-align:left;"> Vector </td>
    <td style="text-align:left;width: 7em; "> Open </td>
   </tr>
@@ -378,13 +382,13 @@ Table \@ref(tab:formats) presents some basic information about selected and ofte
 </tbody>
 </table>
 \index{Shapefile}
+\index{GeoPackage}
 
 An important development ensuring the standardization and open-sourcing of file formats was the founding of the Open Geospatial Consortium ([OGC](http://www.opengeospatial.org/)) in 1994.
 Beyond defining the simple features data model (see Section \@ref(intro-sf)), the OGC also coordinates the development of open standards, for example as used in file formats such as KML\index{KML} and GeoPackage\index{GeoPackage}.
 Open file formats of the kind endorsed by the OGC have several advantages over proprietary formats: the standards are published, ensure transparency and open up the possibility for users to further develop and adjust the file formats to their specific needs.
 
-ESRI Shapefile\index{Shapefile} is the most popular vector data exchange format.
-However, it is not an open format (though its specification is open).
+ESRI Shapefile\index{Shapefile} is the most popular vector data exchange format; however, it is not an open format (though its specification is open).
 It was developed in the early 1990s and has a number of limitations.
 First of all, it is a multi-file format, which consists of at least three files.
 It only supports 255 columns, column names are restricted to ten characters and the file size limit is 2 GB.
@@ -396,6 +400,14 @@ The GeoPackage standard describes the rules on how to store geospatial informati
 Hence, GeoPackage is a lightweight spatial database container, which allows the storage of vector and raster data but also of non-spatial data and extensions.
 Aside from GeoPackage, there are other geospatial data exchange formats worth checking out (Table \@ref(tab:formats)).
 
+\index{GeoTIFF}
+The GeoTIFF format seems to be the most prominent raster data format.
+It allows spatial information, such as CRS, to be embedded within a TIFF file. 
+Similar to ESRI Shapefile, this format was firstly developed in the 1990s, but as an open format.
+Additionally, GeoTIFF is still being expanded and improved.
+One of the most significant recent addition to the GeoTIFF format is its variant called COG (*Cloud Optimized GeoTIFF*).
+Raster objects saved as COGs can be hosted on HTTP servers, so other people can read only parts of the file without downloading the whole file.
+
 ## Data input (I) {#data-input}
 
 Executing commands such as `sf::st_read()` (the main function we use for loading vector data) or `terra::rast()` (the main function used for loading raster data) silently sets off a chain of events that reads data from files.
@@ -404,16 +416,19 @@ All of them load the data into R or, more precisely, assign objects to your work
 
 ### Vector data
 
+<!--toDo:RL-->
+<!--st_read vs read_sf-->
+
 \index{vector!data input}
 Spatial vector data comes in a wide variety of file formats, most of which can be read-in via the **sf** function `st_read()`.
 Behind the scenes this calls GDAL\index{GDAL}.
 To find out which data formats **sf** supports, run `st_drivers()`. 
-Here, we show only the first five drivers (see Table \@ref(tab:drivers)):
+Here, we show only the first six drivers (see Table \@ref(tab:drivers)):
 
 
 ```r
 sf_drivers = st_drivers()
-head(sf_drivers, n = 5)
+head(sf_drivers)
 ```
 
 <table>
@@ -580,11 +595,10 @@ A [benchmark](https://github.com/ATFutures/geobench) suggests it is around 10 ti
 
 
 
-
 ### Raster data
 
 \index{raster!data input}
-Similar to vector data, raster data comes in many file formats with some of them supporting even multilayer files.
+Similar to vector data, raster data comes in many file formats with some of them supporting multilayer files.
 **terra**'s `rast()` command reads in a single layer when a file with just one layer is provided.
 
 
@@ -601,6 +615,8 @@ multilayer_filepath = system.file("raster/landsat.tif", package = "spDataLarge")
 multilayer_rast = rast(multilayer_filepath)
 ```
 
+<!-- COG example?? -->
+
 <!-- ### Databases -->
 <!-- postgis input example -->
 
@@ -611,6 +627,9 @@ Depending on the data type (vector or raster), object class (e.g., `sf` or `Spat
 The next two sections will demonstrate how to do this.
 
 ### Vector data
+
+<!--toDo:RL-->
+<!--st_write vs write_sf-->
 
 \index{vector!data output}
 
@@ -689,8 +708,6 @@ Which data type to use depends on the range of the values of your raster object.
 The more values a data type can represent, the larger the file will get on disk.
 Commonly, one would use LOG1S for bitmap (binary) rasters.
 Unsigned integers (INT1U, INT2U, INT4U) are suitable for categorical data, while float numbers (FLT4S and FLT8S) usually represent continuous data.
-<!--jn:toDo-->
-<!-- check defaults -->
 `writeRaster()` uses FLT4S as the default.
 While this works in most cases, the size of the output file will be unnecessarily large if you save binary or categorical data.
 Therefore, we would recommend to use the data type that needs the least storage space, but is still able to represent all values (check the range of values with the `summary()` function).
@@ -762,19 +779,16 @@ writeRaster(single_layer, filename = "my_raster.tif", datatype = "INT2U")
 ```
 
 Some raster file formats have additional options, that can be set by providing [GDAL parameters](http://www.gdal.org/formats_list.html) to the `options` argument of `writeRaster()`.
-<!-- GeoTIFF files, for example, can be compressed using the `COMPRESS` option^[Find out about GeoTIFF options under http://www.gdal.org/frmt_gtiff.html.]: -->
 GeoTIFF files are written in **terra**, by default, with the LZW compression `gdal = c("COMPRESS=LZW")`.
-To change or disable the compression, we need to modify this argument:
-
-<!--jn:toDo-->
-<!-- , "of=COG"? -->
+To change or disable the compression, we need to modify this argument.
+Additionally, we can save our raster object as COG (*Cloud Optimized GeoTIFF*, Section \@ref(file-formats)) with the `"of=COG"` option.
 
 
 ```r
 writeRaster(x = single_layer,
             filename = "my_raster.tif",
             datatype = "INT2U",
-            gdal = c("COMPRESS=NONE"),
+            gdal = c("COMPRESS=NONE", "of=COG"),
             overwrite = TRUE)
 ```
 

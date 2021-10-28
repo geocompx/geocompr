@@ -102,7 +102,7 @@ Remote sensing\index{remote sensing} data from satellites has become too large t
 This 'geodata revolution' drives demand for high performance computer hardware and efficient, scalable software to handle and extract signal from the noise, to understand and perhaps change the world.
 Spatial databases\index{spatial database} enable storage and generation of manageable subsets from the vast geographic data stores, making interfaces for gaining knowledge from them vital tools for the future.
 R is one such tool, with advanced analysis, modeling and visualization capabilities.
-In this context the focus of the book is not on the language itself [see @wickham_advanced_2014].
+In this context the focus of the book is not on the language itself [see @wickham_advanced_2019].
 Instead we use R as a 'tool for the trade' for understanding the world, similar to Humboldt's\index{von Humboldt} use of tools to gain a deep understanding of nature in all its complexity and interconnections [see @wulf_invention_2015].
 Although programming can seem like a reductionist activity, the aim is to teach geocomputation\index{geocomputation} with R not only for fun, but for understanding the world.
 
@@ -111,7 +111,7 @@ With a wide range of packages, R also supports advanced geospatial statistics\in
 \index{R!language}
 New integrated development environments (IDEs\index{IDE}) such as RStudio\index{RStudio} have made R more user-friendly for many, easing map making with a panel dedicated to interactive visualization.
 
-At its core, R is an object-oriented, [functional programming language](http://adv-r.had.co.nz/Functional-programming.html) [@wickham_advanced_2014], and was specifically designed as an interactive interface to other software [@chambers_extending_2016]. 
+At its core, R is an object-oriented, [functional programming language](http://adv-r.had.co.nz/Functional-programming.html) [@wickham_advanced_2019], and was specifically designed as an interactive interface to other software [@chambers_extending_2016]. 
 The latter also includes many 'bridges' to a treasure trove of GIS\index{GIS} software, 'geolibraries' and functions (see Chapter \@ref(gis)).
 It is thus ideal for quickly creating 'geo-tools', without needing to master lower level languages (compared to R) such as C\index{C}, FORTRAN\index{FORTRAN} or Java\index{Java} (see Section \@ref(software-for-geocomputation)). 
 \index{R}
@@ -198,7 +198,6 @@ This does not mean you must choose either R or Python: Python\index{Python} supp
 Like R, Python also supports geographic data analysis and manipulation with packages such as **osgeo**, **Shapely**, **NumPy** and **PyGeoProcessing** [@garrard_geoprocessing_2016].
 
 ## R's spatial ecosystem
-<!--jn-->
 
 There are many ways to handle geographic data in R, with dozens of packages\index{R-spatial} in the area.^[
 An overview of R's spatial ecosystem can be found in the CRAN\index{CRAN} Task View on the Analysis of Spatial Data
@@ -216,21 +215,21 @@ Multiple places reflect the immense interest in **sf**.
 This is especially true for the [R-sig-Geo Archives](https://stat.ethz.ch/pipermail/r-sig-geo/), a long-standing open access email list containing much R-spatial wisdom accumulated over the years.
 
 <!--jn:toDo-->
-<!-- consider updating this figure -->
+<!--https://github.com/Robinlovelace/geocompr/issues/639 -->
 <div class="figure" style="text-align: center">
-<img src="figures/spatial-package-growth.png" alt="Downloads of selected R packages for working with geographic data. The y-axis shows average number of downloads per day, within a 30-day rolling window." width="100%" />
+<img src="figures/01-cranlogs.png" alt="Downloads of selected R packages for working with geographic data. The y-axis shows average number of downloads per day, within a 30-day rolling window." width="100%" />
 <p class="caption">(\#fig:cranlogs)Downloads of selected R packages for working with geographic data. The y-axis shows average number of downloads per day, within a 30-day rolling window.</p>
 </div>
 
 It is noteworthy that shifts in the wider R community, as exemplified by the data processing package **dplyr** (released in [2014](https://cran.r-project.org/src/contrib/Archive/dplyr/)) influenced shifts in R's spatial ecosystem. 
 Alongside other packages that have a shared style and emphasis on 'tidy data' (including, e.g., **ggplot2**), **dplyr** was placed in the **tidyverse** 'metapackage'\index{tidyverse (package)} in late [2016](https://cran.r-project.org/src/contrib/Archive/tidyverse/).
 The **tidyverse**\index{tidyverse (package)} approach, with its focus on long-form data and fast intuitively named functions, has become immensely popular.
-This has led to a demand for 'tidy geographic data' which has been partly met by **sf** and other approaches such as **tabularaster**.
+This has led to a demand for 'tidy geographic data' which has been partly met by **sf**.
 An obvious feature of the **tidyverse** is the tendency for packages to work in harmony.
+<!--rl:toDo-->
+<!--is the next sentence still valid? -->
 There is no equivalent **geoverse**, but there are attempts at harmonization between packages hosted in the [r-spatial](https://github.com/r-spatial/discuss/issues/11) organization and a growing number of packages use **sf**\index{sf} (Table \@ref(tab:revdep)). 
 
-<!--jn:toDo-->
-<!-- consider updating this table -->
 
 Table: (\#tab:revdep)The top 5 most downloaded packages that depend on sf, in terms of average number of downloads per day over the previous month. As of 2021-08-22  there are  383  packages which import sf.
 
@@ -242,10 +241,10 @@ Table: (\#tab:revdep)The top 5 most downloaded packages that depend on sf, in te
 |plotly   |      6426|
 |raster   |      3732|
 
-## The history of R-spatial
-
 <!--jn:toDo-->
-<!--update the history-->
+<!--add terra paragraph-->
+
+## The history of R-spatial
 
 There are many benefits of using recent spatial packages such as **sf**, but it also important to be aware of the history of R's spatial capabilities: many functions, use-cases and teaching material are contained in older packages.
 These can still be useful today, provided you know where to look.
@@ -282,14 +281,8 @@ interfaces to GDAL\index{GDAL} and PROJ\index{PROJ}, for example, still power R'
 The initial release supported only raster drivers but subsequent enhancements provided support for coordinate reference systems (via the PROJ library), reprojections and import of vector file formats (see Chapter \@ref(read-write) for more on file formats). 
 Many of these additional capabilities were developed by Barry Rowlingson and released in the **rgdal** codebase in 2006 [see @rowlingson_rasp:_2003 and the [R-help](https://stat.ethz.ch/pipermail/r-help/2003-January/028413.html) email list for context].
 
-<!-- ^[ -->
-<!-- A presentation at the 2003 DSC conference in Vienna gives the background as he saw it then [@rowlingson_rasp:_2003]; see also his announcement of the **Rmap** package on [R-help](https://stat.ethz.ch/pipermail/r-help/2003-January/028413.html) in early 2003.] -->
-
 **sp**, released in 2005, overcame R's inability to distinguish spatial and non-spatial objects [@pebesma_classes_2005].
-<!-- It grew from a [workshop](http://spatial.nhh.no/meetings/vienna/index.html) before, and a session at the 2003 DSC conference in Vienna, gathering input from most interested package developers.  -->
 **sp** grew from a [workshop](http://spatial.nhh.no/meetings/vienna/index.html) in Vienna in 2003 and was hosted at sourceforge before migrating to [R-Forge](https://r-forge.r-project.org).
-<!-- removed: r-sig-geo is mentioned elsewhere -->
-<!-- five years later) and the [R-sig-geo mailing list](https://stat.ethz.ch/mailman/listinfo/r-sig-geo) was started. -->
 Prior to 2005, geographic coordinates were generally treated like any other number. 
 **sp** changed this with its classes and generic methods supporting points, lines, polygons and grids, and attribute data.
 
@@ -304,7 +297,7 @@ While **rgdal** and **sp** solved many spatial issues, R still lacked the abilit
 Colin Rundel addressed this issue by developing **rgeos**, an R interface to  the open-source geometry library (GEOS\index{GEOS}) during a Google Summer of Code project in 2010 [@R-rgeos].
 **rgeos** enabled GEOS\index{GEOS} to manipulate **sp** objects, with functions such as `gIntersection()`.
 
-Another limitation of **sp** --- its limited support for raster data --- was overcome by **raster**\index{raster}, first released in 2010 [@R-raster].
+Another limitation of **sp** --- its restricted support for raster data --- was overcome by **raster**\index{raster}, first released in 2010 [@R-raster].
 Its class system and functions support a range of raster operations as outlined in Section \@ref(raster-data).
 A key feature of **raster** is its ability to work with datasets that are too large to fit into RAM (R's interface to PostGIS\index{PostGIS} supports off-disc operations on vector geographic data).
 **raster** also supports map algebra (see Section \@ref(map-algebra)).
@@ -312,6 +305,7 @@ A key feature of **raster** is its ability to work with datasets that are too la
 In parallel with these developments of class systems and methods came the support for R as an interface to dedicated GIS software.
 **GRASS** [@bivand_using_2000] and follow-on packages **spgrass6** and **rgrass7** (for GRASS\index{GRASS} GIS 6 and 7, respectively) were prominent examples in this direction [@bivand_rgrass7_2016;@bivand_spgrass6_2016].
 Other examples of bridges between R and GIS include **RSAGA** [@R-RSAGA, first published in 2008]\index{RSAGA (package)}, **RPyGeo** [@brenning_arcgis_2012, first published in 2008], and **RQGIS** [@muenchow_rqgis:_2017, first published in 2016]\index{RQGIS (package)} (see Chapter \@ref(gis)).
+<!-- rqgisprocess -->
 
 Visualization was not a focus initially, with the bulk of R-spatial development focused on analysis and geographic operations.
 **sp** provided methods for map making using both the base and lattice plotting system but demand was growing for advanced map making capabilities, especially after the release of **ggplot2** in 2007.
@@ -320,13 +314,15 @@ Though **ggmap** facilitated map-making with **ggplot2**, its utility was limite
 While this works well for points it is computationally inefficient for lines and polygons, since each coordinate (vertex) is converted into a row, leading to huge data frames to represent complex geometries.
 Although geographic visualization tended to focus on vector data, raster visualization is supported in **raster** and received a boost with the release of **rasterVis**, which is described in a book on the subject of spatial and temporal data visualization [@lamigueiro_displaying_2018].
 As of 2018 map making in R is a hot topic with dedicated packages such as **tmap**, **leaflet** and **mapview** all supporting the class system provided by **sf**, the focus of the next chapter (see Chapter \@ref(adv-map) for more on visualization).
-
-<!--jn:toDo-->
 <!-- add rayshader + ggspatial to the above viz list -->
+<!-- add mapsf -->
+<!-- mention tmap4 -->
+
 <!--add stars and gdalcubes, rgee-->
 <!-- add terra -->
-<!-- qgisprocess  -->
+
 <!-- add info about specialized packages - sfnetworks, landscapemetrics, etc. -->
+<!-- interoperbility? -->
 
 ## Exercises
 

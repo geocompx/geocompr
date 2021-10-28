@@ -10,8 +10,6 @@
 ```r
 library(sf)
 library(raster)
-#> Warning: no function found corresponding to methods exports from 'raster' for:
-#> 'area'
 library(dplyr)
 library(spData)
 library(spDataLarge)

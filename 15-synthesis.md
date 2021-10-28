@@ -28,8 +28,6 @@ The code chunk below illustrates this by using three functions, covered in Chapt
 
 ```r
 library(spData)
-#> Warning: no function found corresponding to methods exports from 'raster' for:
-#> 'area'
 nz_u1 = sf::st_union(nz)
 nz_u2 = aggregate(nz["Population"], list(rep(1, nrow(nz))), sum)
 nz_u3 = dplyr::summarise(nz, t = sum(Population))
@@ -142,7 +140,7 @@ This section expands on this general advice by suggesting specific 'next steps',
 
 In addition to learning about further geographic methods and applications with R\index{R}, for example with reference to the work cited in the previous section, deepening your understanding of **R itself** is a logical next step.
 R's fundamental classes such as `data.frame` and `matrix` are the foundation of `sf` and `raster` classes, so studying them will improve your understanding of geographic data.
-This can be done with reference to documents that are part of R, and which can be found with the command `help.start()` and additional resources on the subject such as those by @wickham_advanced_2014 and @chambers_extending_2016.
+This can be done with reference to documents that are part of R, and which can be found with the command `help.start()` and additional resources on the subject such as those by @wickham_advanced_2019 and @chambers_extending_2016.
 
 Another software-related direction for future learning is **discovering geocomputation with other languages**.
 There are good reasons for learning R as a language for geocomputation, as described in Chapter \@ref(intro), but it is not the only option.^[
