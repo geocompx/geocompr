@@ -324,6 +324,8 @@ As of 2018 map making in R is a hot topic with dedicated packages such as **tmap
 <!-- add info about specialized packages - sfnetworks, landscapemetrics, etc. -->
 <!-- interoperbility? -->
 
+<!-- check https://twitter.com/jakub_nowosad/status/1453722281264377865 -->
+
 ## Exercises
 
 
