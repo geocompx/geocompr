@@ -121,7 +121,7 @@ Many geometry operations in <strong>sf</strong>, for example, assume their input
 To deal with this issue <strong>sf</strong> provides the function <code><a href="https://r-spatial.github.io/sf/reference/st_is_longlat.html">st_is_longlat()</a></code> to check.
 In some cases the CRS is unknown, as shown below using the example of London introduced in Section <a href="spatial-class.html#vector-data">2.2</a>:</p>
 <div class="sourceCode" id="cb212"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">london</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>lon <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span>, lat <span class="op">=</span> <span class="fl">51.5</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<code class="sourceCode R"><span class="va">london</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>lon <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span>, lat <span class="op">=</span> <span class="fl">51.5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"lon"</span>, <span class="st">"lat"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_is_longlat.html">st_is_longlat</a></span><span class="op">(</span><span class="va">london</span><span class="op">)</span>
 <span class="co">#&gt; [1] NA</span></code></pre></div>
@@ -144,7 +144,7 @@ The consequences of a failure to work on projected data are illustrated in Figur
 the buffer is elongated in the north-south direction because lines of longitude converge towards the Earth’s poles.</p>
 
 <div class="rmdnote">
-The distance between two lines of longitude, called meridians, is around 111 km at the equator (execute <code><a href="https://rdrr.io/pkg/geosphere/man/distGeo.html">geosphere::distGeo(c(0, 0), c(1, 0))</a></code> to find the precise distance).
+The distance between two lines of longitude, called meridians, is around 111 km at the equator (execute <code>geosphere::distGeo(c(0, 0), c(1, 0))</code> to find the precise distance).
 This shrinks to zero at the poles.
 At the latitude of London, for example, meridians are less than 70 km apart (challenge: execute code that verifies this).
 <!-- `geosphere::distGeo(c(0, 51.5), c(1, 51.5))` -->
@@ -156,7 +156,7 @@ This suggestion does not always need to be heeded: performing spatial and geomet
 But for operations involving distances such as buffering, the only way to ensure a good result is to create a projected copy of the data and run the operation on that.
 This is done in the code chunk below:</p>
 <div class="sourceCode" id="cb215"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">london_proj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">530000</span>, y <span class="op">=</span> <span class="fl">180000</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<code class="sourceCode R"><span class="va">london_proj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">530000</span>, y <span class="op">=</span> <span class="fl">180000</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, crs <span class="op">=</span> <span class="fl">27700</span><span class="op">)</span></code></pre></div>
 <p>The result is a new object that is identical to <code>london</code>, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters.
 We can verify that the CRS has changed using <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code> as follows (some of the output has been replaced by <code>...</code>):</p>
@@ -169,7 +169,7 @@ We can verify that the CRS has changed using <code><a href="https://r-spatial.gi
 For a short description of the most relevant projection parameters and related concepts, see the fourth lecture by Jochen Albrecht hosted at
 &lt;a href="http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/" class="uri"&gt;http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/&lt;/a&gt; and information at &lt;a href="https://proj.org/usage/projections.html" class="uri"&gt;https://proj.org/usage/projections.html&lt;/a&gt;.
 Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj.&lt;/p&gt;'><sup>28</sup></a>
-The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: <code><a href="https://r-spatial.github.io/sf/reference/st_is_longlat.html">st_is_longlat(london_proj)</a></code> now returns <code>FALSE</code> and geometry operations on <code>london_proj</code> will work without a warning, meaning buffers can be produced from it using proper units of distance.
+The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: <code>st_is_longlat(london_proj)</code> now returns <code>FALSE</code> and geometry operations on <code>london_proj</code> will work without a warning, meaning buffers can be produced from it using proper units of distance.
 As pointed out above, moving one degree means moving a bit more than 111 km at the equator (to be precise: 111,320 meters).
 This is used as the new buffer distance:</p>
 <div class="sourceCode" id="cb217"><pre class="downlit sourceCode r">
@@ -190,7 +190,7 @@ The subsequent sections go into more depth, exploring which CRS to use and the d
 <span class="header-section-number">6.2</span> When to reproject?<a class="anchor" aria-label="anchor" href="#when-to-reproject"><i class="fas fa-link"></i></a>
 </h2>
 <p>
-The previous section showed how to set the CRS manually, with <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs(london, 4326)</a></code>.
+The previous section showed how to set the CRS manually, with <code>st_set_crs(london, 4326)</code>.
 In real world applications, however, CRSs are usually set automatically when data is read-in.
 The main task involving CRSs is often to <em>transform</em> objects, from one CRS into another.
 But when should data be transformed? And into which CRS?
@@ -270,7 +270,7 @@ UTM EPSG codes run sequentially from 32601 to 32660 for northern hemisphere loca
 <p>To show how the system works, let’s create a function, <code>lonlat2UTM()</code> to calculate the EPSG code associated with any point on the planet as <a href="https://stackoverflow.com/a/9188972/">follows</a>:</p>
 <div class="sourceCode" id="cb221"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">lonlat2UTM</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">lonlat</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">utm</span> <span class="op">=</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">floor</a></span><span class="op">(</span><span class="op">(</span><span class="va">lonlat</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fl">180</span><span class="op">)</span> <span class="op">/</span> <span class="fl">6</span><span class="op">)</span> <span class="op">%%</span> <span class="fl">60</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span>
+  <span class="va">utm</span> <span class="op">=</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">floor</a></span><span class="op">(</span><span class="op">(</span><span class="va">lonlat</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fl">180</span><span class="op">)</span> <span class="op">/</span> <span class="fl">6</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html">%%</a></span> <span class="fl">60</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span>
   <span class="kw">if</span><span class="op">(</span><span class="va">lonlat</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span>
     <span class="va">utm</span> <span class="op">+</span> <span class="fl">32600</span>
   <span class="op">}</span> <span class="kw">else</span><span class="op">{</span>
@@ -312,7 +312,7 @@ This is demonstrated below:</p>
 <span class="va">crs_lnd</span><span class="op">$</span><span class="va">epsg</span>
 <span class="co">#&gt; [1] 4326</span></code></pre></div>
 <p>This duality of CRS objects means that they can be set either using an EPSG code or a <code>proj4string</code>.
-This means that <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs("+proj=longlat +datum=WGS84 +no_defs")</a></code> is equivalent to <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs(4326)</a></code>, although not all <code>proj4string</code>s have an associated EPSG code.
+This means that <code>st_crs("+proj=longlat +datum=WGS84 +no_defs")</code> is equivalent to <code>st_crs(4326)</code>, although not all <code>proj4string</code>s have an associated EPSG code.
 Both elements of the CRS are changed by transforming the object to a projected CRS:</p>
 <div class="sourceCode" id="cb224"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cycle_hire_osm_projected</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">cycle_hire_osm</span>, <span class="fl">27700</span><span class="op">)</span></code></pre></div>
@@ -335,7 +335,7 @@ They can be seen as formulas for converting a projected point into a point on th
 
 <div class="rmdnote">
 Printing a spatial object in the console automatically returns its coordinate reference system.
-To access and modify it explicitly, use the <code>st_crs</code> function, for example, <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs(cycle_hire_osm)</a></code>.
+To access and modify it explicitly, use the <code>st_crs</code> function, for example, <code>st_crs(cycle_hire_osm)</code>.
 </div>
 </div>
 <div id="modifying-map-projections" class="section level2" number="6.5">
@@ -616,7 +616,7 @@ Plot and compare a map before and after the transformation.</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-10-29.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-11-04.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
