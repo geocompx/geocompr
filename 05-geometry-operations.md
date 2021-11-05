@@ -770,6 +770,13 @@ identical(dem, dem_disagg)
 #> [1] FALSE
 ```
 
+
+```
+#> Warning in min(x, na.rm = na.rm): no non-missing arguments to min; returning Inf
+#> Warning in max(x, na.rm = na.rm): no non-missing arguments to max; returning
+#> -Inf
+```
+
 <div class="figure" style="text-align: center">
 <img src="05-geometry-operations_files/figure-html/bilinear-1.png" alt="Bilinear disaggregation in action." width="100%" />
 <p class="caption">(\#fig:bilinear)Bilinear disaggregation in action.</p>
