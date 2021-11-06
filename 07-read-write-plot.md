@@ -424,7 +424,7 @@ Spatial vector data comes in a wide variety of file formats.
 Most popular representations such as `.geojson` and `.gpkg` files can be imported directly into R with the **sf** function `st_read()` (or the 'tidy' equivalent `read_sf()`), which uses [GDAL's vector drivers](https://gdal.org/drivers/vector/index.html)\index{GDAL} behind the scenes.
 `st_drivers()` returns a data frame containing `name` and `long_name` in the first two columns, and features of each driver available to GDAL (and therefore **sf**), including ability to write data and store raster data in the subsequent columns, as illustrated for key file formats in Table \@ref(tab:drivers).  
 The following commands show the first three drivers reported the computer's GDAL installation (results can vary depending on the GDAL version installed) and a summary of the their features.
-Note that the majority of drivers can write data (51 out of 87) while only 16 formats can efficiently represent vector data:
+Note that the majority of drivers can write data (51 out of 87) while only 16 formats can efficiently represent raster data in addition to vector data (see `?st_drivers()` for details):
 
 
 ```r
