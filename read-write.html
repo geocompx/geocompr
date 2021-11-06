@@ -595,27 +595,27 @@ Raster objects saved as COGs can be hosted on HTTP servers, so other people can 
 <p>Executing commands such as <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">sf::st_read()</a></code> (the main function we use for loading vector data) or <code><a href="https://rdrr.io/pkg/terra/man/rast.html">terra::rast()</a></code> (the main function used for loading raster data) silently sets off a chain of events that reads data from files.
 Moreover, there are many R packages containing a wide range of geographic data or providing simple access to different data sources.
 All of them load the data into R or, more precisely, assign objects to your workspace, stored in RAM accessible from the <a href="http://adv-r.had.co.nz/Environments.html"><code>.GlobalEnv</code></a> of the R session.</p>
-<div id="vector-data-1" class="section level3" number="7.6.1">
+<div id="iovec" class="section level3" number="7.6.1">
 <h3>
-<span class="header-section-number">7.6.1</span> Vector data<a class="anchor" aria-label="anchor" href="#vector-data-1"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.6.1</span> Vector data<a class="anchor" aria-label="anchor" href="#iovec"><i class="fas fa-link"></i></a>
 </h3>
 <!--toDo:RL-->
 <!--st_read vs read_sf-->
 <p>
-Spatial vector data comes in a wide variety of file formats, most of which can be read-in via the <strong>sf</strong> function <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code>.
-Behind the scenes this calls GDAL.
-To find out which data formats <strong>sf</strong> supports, run <code><a href="https://r-spatial.github.io/sf/reference/st_drivers.html">st_drivers()</a></code>.
-Here, we show only the first six drivers (see Table <a href="read-write.html#tab:drivers">7.3</a>):</p>
+Spatial vector data comes in a wide variety of file formats.
+Most popular representations such as <code>.geojson</code> and <code>.gpkg</code> files can be imported directly into R with the <strong>sf</strong> function <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code> (or the ‘tidy’ equivalent <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code>), which uses <a href="https://gdal.org/drivers/vector/index.html">GDAL’s vector drivers</a> behind the scenes.
+<code><a href="https://r-spatial.github.io/sf/reference/st_drivers.html">st_drivers()</a></code> returns a data frame containing <code>name</code> and <code>long_name</code> in the first two columns, and features of each driver available to GDAL (and therefore <strong>sf</strong>), including ability to write data and store raster data in the subsequent columns, as illustrated for key file formats in Table <a href="read-write.html#tab:drivers">7.3</a>.<br>
+The following commands show the first three drivers reported the computer’s GDAL installation (results can vary depending on the GDAL version installed) and a summary of the their features.
+Note that the majority of drivers can write data (51 out of 87) while only 16 formats can efficiently represent vector data:</p>
 <div class="sourceCode" id="cb250"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">sf_drivers</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_drivers.html">st_drivers</a></span><span class="op">(</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html">head</a></span><span class="op">(</span><span class="va">sf_drivers</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html">head</a></span><span class="op">(</span><span class="va">sf_drivers</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/summary.html">summary</a></span><span class="op">(</span><span class="va">sf_drivers</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></code></pre></div>
 <div class="inline-table"><table class="table table-sm">
 <caption>
-<span id="tab:drivers">TABLE 7.3: </span>Sample of available drivers for reading/writing vector data (it could vary between different GDAL versions).
+<span id="tab:drivers">TABLE 7.3: </span>Popular drivers/formats for reading/writing vector data.
 </caption>
 <thead><tr>
-<th style="text-align:left;">
-</th>
 <th style="text-align:left;">
 name
 </th>
@@ -647,9 +647,6 @@ ESRI Shapefile
 ESRI Shapefile
 </td>
 <td style="text-align:left;">
-ESRI Shapefile
-</td>
-<td style="text-align:left;">
 TRUE
 </td>
 <td style="text-align:left;">
@@ -673,9 +670,6 @@ GPX
 GPX
 </td>
 <td style="text-align:left;">
-GPX
-</td>
-<td style="text-align:left;">
 TRUE
 </td>
 <td style="text-align:left;">
@@ -696,9 +690,6 @@ TRUE
 KML
 </td>
 <td style="text-align:left;width: 7em; ">
-KML
-</td>
-<td style="text-align:left;">
 Keyhole Markup Language (KML)
 </td>
 <td style="text-align:left;">
@@ -725,9 +716,6 @@ GeoJSON
 GeoJSON
 </td>
 <td style="text-align:left;">
-GeoJSON
-</td>
-<td style="text-align:left;">
 TRUE
 </td>
 <td style="text-align:left;">
@@ -748,9 +736,6 @@ TRUE
 GPKG
 </td>
 <td style="text-align:left;width: 7em; ">
-GPKG
-</td>
-<td style="text-align:left;">
 GeoPackage
 </td>
 <td style="text-align:left;">
@@ -808,7 +793,7 @@ Here, we will use <code><a href="https://r-spatial.github.io/sf/reference/st_rea
 <code class="sourceCode R"><span class="va">world_txt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"misc/world_wkt.csv"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
 <span class="va">world_wkt</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">world_txt</span>, options <span class="op">=</span> <span class="st">"GEOM_POSSIBLE_NAMES=WKT"</span><span class="op">)</span>
 <span class="co"># the same as</span>
-<span class="va">world_wkt</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">world_txt</span>, options <span class="op">=</span> <span class="st">"GEOM_POSSIBLE_NAMES=WKT"</span>, 
+<span class="va">world_wkt2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">world_txt</span>, options <span class="op">=</span> <span class="st">"GEOM_POSSIBLE_NAMES=WKT"</span>, 
                     quiet <span class="op">=</span> <span class="cn">TRUE</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span>, as_tibble <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 
 <div class="rmdnote">
@@ -871,9 +856,9 @@ Similar to vector data, raster data comes in many file formats with some of them
 <p>Writing geographic data allows you to convert from one format to another and to save newly created objects.
 Depending on the data type (vector or raster), object class (e.g., <code>sf</code> or <code>SpatRaster</code>), and type and amount of stored information (e.g., object size, range of values), it is important to know how to store spatial files in the most efficient way.
 The next two sections will demonstrate how to do this.</p>
-<div id="vector-data-2" class="section level3" number="7.7.1">
+<div id="vector-data-1" class="section level3" number="7.7.1">
 <h3>
-<span class="header-section-number">7.7.1</span> Vector data<a class="anchor" aria-label="anchor" href="#vector-data-2"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.7.1</span> Vector data<a class="anchor" aria-label="anchor" href="#vector-data-1"><i class="fas fa-link"></i></a>
 </h3>
 <!--toDo:RL-->
 <!--st_write vs write_sf-->
@@ -1135,13 +1120,13 @@ Export this map to a file called <code>cycle_hire.html</code>.</p>
 <li><a class="nav-link" href="#file-formats"><span class="header-section-number">7.5</span> File formats</a></li>
 <li>
 <a class="nav-link" href="#data-input"><span class="header-section-number">7.6</span> Data input (I)</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#vector-data-1"><span class="header-section-number">7.6.1</span> Vector data</a></li>
+<li><a class="nav-link" href="#iovec"><span class="header-section-number">7.6.1</span> Vector data</a></li>
 <li><a class="nav-link" href="#raster-data-1"><span class="header-section-number">7.6.2</span> Raster data</a></li>
 </ul>
 </li>
 <li>
 <a class="nav-link" href="#data-output"><span class="header-section-number">7.7</span> Data output (O)</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#vector-data-2"><span class="header-section-number">7.7.1</span> Vector data</a></li>
+<li><a class="nav-link" href="#vector-data-1"><span class="header-section-number">7.7.1</span> Vector data</a></li>
 <li><a class="nav-link" href="#raster-data-2"><span class="header-section-number">7.7.2</span> Raster data</a></li>
 </ul>
 </li>

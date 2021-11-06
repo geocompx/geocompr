@@ -414,28 +414,29 @@ Executing commands such as `sf::st_read()` (the main function we use for loading
 Moreover, there are many R packages containing a wide range of geographic data or providing simple access to different data sources.
 All of them load the data into R or, more precisely, assign objects to your workspace, stored in RAM accessible from the [`.GlobalEnv`](http://adv-r.had.co.nz/Environments.html) of the R session.
 
-### Vector data
+### Vector data {#iovec}
 
 <!--toDo:RL-->
 <!--st_read vs read_sf-->
 
 \index{vector!data input}
-Spatial vector data comes in a wide variety of file formats, most of which can be read-in via the **sf** function `st_read()`.
-Behind the scenes this calls GDAL\index{GDAL}.
-To find out which data formats **sf** supports, run `st_drivers()`. 
-Here, we show only the first six drivers (see Table \@ref(tab:drivers)):
+Spatial vector data comes in a wide variety of file formats.
+Most popular representations such as `.geojson` and `.gpkg` files can be imported directly into R with the **sf** function `st_read()` (or the 'tidy' equivalent `read_sf()`), which uses [GDAL's vector drivers](https://gdal.org/drivers/vector/index.html)\index{GDAL} behind the scenes.
+`st_drivers()` returns a data frame containing `name` and `long_name` in the first two columns, and features of each driver available to GDAL (and therefore **sf**), including ability to write data and store raster data in the subsequent columns, as illustrated for key file formats in Table \@ref(tab:drivers).  
+The following commands show the first three drivers reported the computer's GDAL installation (results can vary depending on the GDAL version installed) and a summary of the their features.
+Note that the majority of drivers can write data (51 out of 87) while only 16 formats can efficiently represent vector data:
 
 
 ```r
 sf_drivers = st_drivers()
-head(sf_drivers)
+head(sf_drivers, n = 3)
+summary(sf_drivers[-c(1:2)])
 ```
 
 <table>
-<caption>(\#tab:drivers)Sample of available drivers for reading/writing vector data (it could vary between different GDAL versions).</caption>
+<caption>(\#tab:drivers)Popular drivers/formats for reading/writing vector data.</caption>
  <thead>
   <tr>
-   <th style="text-align:left;">   </th>
    <th style="text-align:left;"> name </th>
    <th style="text-align:left;"> long_name </th>
    <th style="text-align:left;"> write </th>
@@ -449,7 +450,6 @@ head(sf_drivers)
   <tr>
    <td style="text-align:left;"> ESRI Shapefile </td>
    <td style="text-align:left;width: 7em; "> ESRI Shapefile </td>
-   <td style="text-align:left;"> ESRI Shapefile </td>
    <td style="text-align:left;"> TRUE </td>
    <td style="text-align:left;"> FALSE </td>
    <td style="text-align:left;"> FALSE </td>
@@ -459,7 +459,6 @@ head(sf_drivers)
   <tr>
    <td style="text-align:left;"> GPX </td>
    <td style="text-align:left;width: 7em; "> GPX </td>
-   <td style="text-align:left;"> GPX </td>
    <td style="text-align:left;"> TRUE </td>
    <td style="text-align:left;"> FALSE </td>
    <td style="text-align:left;"> FALSE </td>
@@ -468,8 +467,7 @@ head(sf_drivers)
   </tr>
   <tr>
    <td style="text-align:left;"> KML </td>
-   <td style="text-align:left;width: 7em; "> KML </td>
-   <td style="text-align:left;"> Keyhole Markup Language (KML) </td>
+   <td style="text-align:left;width: 7em; "> Keyhole Markup Language (KML) </td>
    <td style="text-align:left;"> TRUE </td>
    <td style="text-align:left;"> FALSE </td>
    <td style="text-align:left;"> FALSE </td>
@@ -479,7 +477,6 @@ head(sf_drivers)
   <tr>
    <td style="text-align:left;"> GeoJSON </td>
    <td style="text-align:left;width: 7em; "> GeoJSON </td>
-   <td style="text-align:left;"> GeoJSON </td>
    <td style="text-align:left;"> TRUE </td>
    <td style="text-align:left;"> FALSE </td>
    <td style="text-align:left;"> FALSE </td>
@@ -488,8 +485,7 @@ head(sf_drivers)
   </tr>
   <tr>
    <td style="text-align:left;"> GPKG </td>
-   <td style="text-align:left;width: 7em; "> GPKG </td>
-   <td style="text-align:left;"> GeoPackage </td>
+   <td style="text-align:left;width: 7em; "> GeoPackage </td>
    <td style="text-align:left;"> TRUE </td>
    <td style="text-align:left;"> TRUE </td>
    <td style="text-align:left;"> TRUE </td>
@@ -552,9 +548,11 @@ Here, we will use `read_sf()`, the tidyverse-flavoured version of `st_read()`: s
 world_txt = system.file("misc/world_wkt.csv", package = "spData")
 world_wkt = read_sf(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT")
 # the same as
-world_wkt = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT", 
+world_wkt2 = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT", 
                     quiet = TRUE, stringsAsFactors = FALSE, as_tibble = TRUE)
 ```
+
+
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Not all of the supported vector file formats store information about their coordinate reference system.
 In these situations, it is possible to add the missing information using the `st_set_crs()` function.
