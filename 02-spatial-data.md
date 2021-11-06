@@ -145,8 +145,9 @@ We will discuss **s2** in subsequent chapters.
 <!-- Todo: link to them, e.g. (RL 2021-11) -->
 <!-- See sections \@ref(s2) and \@ref(buffers) for further details. -->
 
-**sf**'s ability to integrate multiple powerful libraries for geocomputation into a single framework is a notable achievement that reduces 'barriers to entry' into the world of reproducible geographic data analysis high-performance geographic libraries.
-Documenation on **sf** can be found on its website and in 6 vignettes, which can be loaded as follows:
+**sf**'s ability to integrate multiple powerful libraries for geocomputation into a single framework is a notable achievement that reduces 'barriers to entry' into the world of reproducible geographic data analysis with high-performance libraries.
+**sf**'s functionality is well documented on its website at [r-spatial.github.io/sf/](https://r-spatial.github.io/sf/index.html) which contains 7 vignettes.
+These can be viewed offline as follows:
 
 
 ```r
@@ -157,11 +158,13 @@ vignette("sf1")          # an introduction to the package
 
 
 As the first vignette explains, simple feature objects in R are stored in a data frame, with geographic data occupying a special column, usually named 'geom' or 'geometry'.
-We will use the `world` dataset provided by the **spData**, loaded at the beginning of this chapter (see [nowosad.github.io/spData](https://nowosad.github.io/spData/) for a list of datasets loaded by the package).
-`world` is a spatial object containing spatial and attribute columns, the names of which are returned by the function `names()` (the last column contains the geographic information):
+We will use the `world` dataset provided by **spData**, loaded at the beginning of this chapter, to show what `sf` objects and how they work.
+`world` is an '`sf` data frame' containing spatial and attribute columns, the names of which are returned by the function `names()` (the last column in this example contains the geographic information):
 
 
 ```r
+class(world)
+#> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
 names(world)
 #>  [1] "iso_a2"    "name_long" "continent" "region_un" "subregion" "type"     
 #>  [7] "area_km2"  "pop"       "lifeExp"   "gdpPercap" "geom"
