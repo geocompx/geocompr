@@ -377,29 +377,31 @@ Executing commands such as `sf::st_read()` (the main function we use for loading
 Moreover, there are many R packages containing a wide range of geographic data or providing simple access to different data sources.
 All of them load the data into R or, more precisely, assign objects to your workspace, stored in RAM accessible from the [`.GlobalEnv`](http://adv-r.had.co.nz/Environments.html) of the R session.
 
-### Vector data
+### Vector data {#iovec}
 
 <!--toDo:RL-->
 <!--st_read vs read_sf-->
 
 \index{vector!data input}
-Spatial vector data comes in a wide variety of file formats, most of which can be read-in via the **sf** function `st_read()`.
-Behind the scenes this calls GDAL\index{GDAL}.
-To find out which data formats **sf** supports, run `st_drivers()`. 
-Here, we show only the first six drivers (see Table \@ref(tab:drivers)):
+Spatial vector data comes in a wide variety of file formats.
+Most popular representations such as `.geojson` and `.gpkg` files can be imported directly into R with the **sf** function `st_read()` (or the 'tidy' equivalent `read_sf()`), which uses GDAL's vector drivers\index{GDAL} behind the scenes.
+`st_drivers()` returns a data frame containing `name` and `long_name` in the first two columns, and features of each driver available to GDAL (and therefore **sf**), including ability to write data and store raster data in the subsequent columns, as illustrated for key file formats in Table \@ref(tab:drivers).  
+The following commands show the first three drivers reported the computer's GDAL installation (results can vary depending on the GDAL version installed) and a summary of the their features.
+Note that the majority of drivers can write data (51 out of 87) while only 16 formats can efficiently represent vector data:
 
 ```{r 07-read-write-plot-17, eval=FALSE}
 sf_drivers = st_drivers()
-head(sf_drivers)
+head(sf_drivers, n = 3)
+summary(sf_drivers[-c(1:2)])
 ```
 
 ```{r drivers, echo=FALSE}
 sf_drivers = st_drivers() %>%
-  dplyr::filter(name %in% c("ESRI Shapefile", "GeoJSON", "KML", "GPX", "GPKG", "FlatGeobuf"))
+  dplyr::filter(name %in% c("ESRI Shapefile", "GeoJSON", "KML", "GPX", "GPKG", "FlatGeobuf")) %>% 
+  tibble::as_tibble() # remove unhelpful row names
 knitr::kable(head(sf_drivers, n = 6),
-             caption = paste("Sample of available drivers for reading/writing", 
-                             "vector data (it could vary between different", 
-                             "GDAL versions)."),
+             caption = paste("Popular drivers/formats for reading/writing", 
+                             "vector data."),
              caption.short = "Sample of available vector drivers.",
              booktabs = TRUE) %>% 
   kableExtra::column_spec(2, width = "7em")
@@ -458,8 +460,12 @@ Here, we will use `read_sf()`, the tidyverse-flavoured version of `st_read()`: s
 world_txt = system.file("misc/world_wkt.csv", package = "spData")
 world_wkt = read_sf(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT")
 # the same as
-world_wkt = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT", 
+world_wkt2 = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT", 
                     quiet = TRUE, stringsAsFactors = FALSE, as_tibble = TRUE)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+identical(world_wkt, world_wkt2)
 ```
 
 ```{block2 07-read-write-plot-22, type='rmdnote'}
