@@ -329,8 +329,6 @@ As of 2018 map making in R is a hot topic with dedicated packages such as **tmap
 ## Exercises
 
 
-1. Think about the terms 'GIS'\index{GIS}, 'GDS' and 'geocomputation' described above. Which (if any) best describes the work you would like to do using geo* methods and software and why?
 
-1. Provide three reasons for using a scriptable language such as R for geocomputation instead of using a graphical user interface (GUI) based GIS such as QGIS\index{QGIS}.
 
-1. Name two advantages and two disadvantages of using mature vs recent packages for geographic data analysis\index{geographic data analysis} (for example **sp** vs **sf**\index{sf}).
+
