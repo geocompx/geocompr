@@ -760,79 +760,6 @@ These and other typical raster processing operations are part of the map algebra
 ## Exercises
 
 
-```
-#> 
-#> 
-#> processing file: ./_05-ex.Rmd
-```
-
-  |                                                                              |                                                                      |   0%  |                                                                              |...                                                                   |   4%
-  ordinary text without R code
-
-  |                                                                              |......                                                                |   8%
-label: 05-geometry-operations-68 (with options) 
-List of 2
- $ message: logi FALSE
- $ include: logi TRUE
-
-  |                                                                              |.........                                                             |  12%
-  ordinary text without R code
-
-  |                                                                              |............                                                          |  17%
-label: 05-geometry-operations-69
-  |                                                                              |...............                                                       |  21%
-  ordinary text without R code
-
-  |                                                                              |..................                                                    |  25%
-label: 05-geometry-operations-70
-  |                                                                              |....................                                                  |  29%
-  ordinary text without R code
-
-  |                                                                              |.......................                                               |  33%
-label: 05-geometry-operations-71
-  |                                                                              |..........................                                            |  38%
-  ordinary text without R code
-
-  |                                                                              |.............................                                         |  42%
-label: 05-geometry-operations-72
-  |                                                                              |................................                                      |  46%
-  ordinary text without R code
-
-  |                                                                              |...................................                                   |  50%
-label: 05-geometry-operations-73
-  |                                                                              |......................................                                |  54%
-  ordinary text without R code
-
-  |                                                                              |.........................................                             |  58%
-label: 05-geometry-operations-74
-  |                                                                              |............................................                          |  62%
-  ordinary text without R code
-
-  |                                                                              |...............................................                       |  67%
-label: 05-geometry-operations-75
-  |                                                                              |..................................................                    |  71%
-  ordinary text without R code
-
-  |                                                                              |....................................................                  |  75%
-label: 05-geometry-operations-76
-  |                                                                              |.......................................................               |  79%
-  ordinary text without R code
-
-  |                                                                              |..........................................................            |  83%
-label: 05-geometry-operations-77
-  |                                                                              |.............................................................         |  88%
-  ordinary text without R code
-
-  |                                                                              |................................................................      |  92%
-label: 05-geometry-operations-78
-  |                                                                              |...................................................................   |  96%
-  ordinary text without R code
-
-  |                                                                              |......................................................................| 100%
-label: 05-geometry-operations-79
-
-
-
 Some of the exercises use a vector (`zion_points`) and raster dataset (`srtm`) from the **spDataLarge** package.
 They also use a polygonal 'convex hull' derived from the vector dataset (`ch`) to represent the area of interest:
 

@@ -1155,53 +1155,6 @@ Again, the `res()` command gives back a numeric vector without any unit, forcing
 ## Exercises {#ex2}
 
 
-```
-#> 
-#> 
-#> processing file: ./_02-ex.Rmd
-```
-
-  |                                                                              |                                                                      |   0%  |                                                                              |......                                                                |   8%
-  ordinary text without R code
-
-  |                                                                              |............                                                          |  17%
-label: unnamed-chunk-5
-  |                                                                              |..................                                                    |  25%
-  ordinary text without R code
-
-  |                                                                              |.......................                                               |  33%
-label: unnamed-chunk-6
-  |                                                                              |.............................                                         |  42%
-  ordinary text without R code
-
-  |                                                                              |...................................                                   |  50%
-label: unnamed-chunk-7
-  |                                                                              |.........................................                             |  58%
-  ordinary text without R code
-
-  |                                                                              |...............................................                       |  67%
-label: unnamed-chunk-8
-  |                                                                              |....................................................                  |  75%
-  ordinary text without R code
-
-  |                                                                              |..........................................................            |  83%
-label: unnamed-chunk-9 (with options) 
-List of 1
- $ message: logi FALSE
-
-  |                                                                              |................................................................      |  92%
-  ordinary text without R code
-
-  |                                                                              |......................................................................| 100%
-label: unnamed-chunk-10 (with options) 
-List of 1
- $ message: logi FALSE
-
-
-
-
-
-
 E1. Use `summary()` on the geometry column of the `world` data object. What does the output tell us about:
 
 - Its geometry type?

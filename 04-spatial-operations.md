@@ -864,33 +864,6 @@ For a more detailed introduction on how to use R for remote sensing, we refer th
 
 
 
-```
-#> 
-#> 
-#> processing file: ./_04-ex.Rmd
-```
-
-  |                                                                              |                                                                      |   0%  |                                                                              |..........                                                            |  14%
-  ordinary text without R code
-
-  |                                                                              |....................                                                  |  29%
-label: 04-spatial-operations-45
-  |                                                                              |..............................                                        |  43%
-  ordinary text without R code
-
-  |                                                                              |........................................                              |  57%
-label: 04-spatial-operations-46
-  |                                                                              |..................................................                    |  71%
-  ordinary text without R code
-
-  |                                                                              |............................................................          |  86%
-label: 04-spatial-operations-47
-  |                                                                              |......................................................................| 100%
-  ordinary text without R code
-
-
-
-
 E1. It was established in Section \@ref(spatial-vec) that Canterbury was the region of New Zealand containing most of the 100 highest points in the country.
 How many of these high points does the Canterbury region contain?
 

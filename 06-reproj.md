@@ -519,43 +519,6 @@ Chapter 6 for this free online book is recommended reading --- see: [rspatial.or
 ## Exercises
 
 
-```
-#> 
-#> 
-#> processing file: ./_06-ex.Rmd
-```
-
-  |                                                                              |                                                                      |   0%  |                                                                              |......                                                                |   9%
-  ordinary text without R code
-
-  |                                                                              |.............                                                         |  18%
-label: 06-reproj-36
-  |                                                                              |...................                                                   |  27%
-  ordinary text without R code
-
-  |                                                                              |.........................                                             |  36%
-label: 06-reproj-37
-  |                                                                              |................................                                      |  45%
-  ordinary text without R code
-
-  |                                                                              |......................................                                |  55%
-label: 06-reproj-38
-  |                                                                              |.............................................                         |  64%
-  ordinary text without R code
-
-  |                                                                              |...................................................                   |  73%
-label: 06-reproj-39
-  |                                                                              |.........................................................             |  82%
-  ordinary text without R code
-
-  |                                                                              |................................................................      |  91%
-label: 06-reproj-40
-  |                                                                              |......................................................................| 100%
-  ordinary text without R code
-
-
-
-
 E1. Create a new object called `nz_wgs` by transforming `nz` object into the WGS84 CRS.
 
 - Create an object of class `crs` for both and use this to query their CRSs.

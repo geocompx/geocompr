@@ -831,18 +831,6 @@ mapshot(mapview_obj, file = "my_interactive_map.html")
 ## Exercises
 
 
-```
-#> 
-#> 
-#> processing file: ./_07-ex.Rmd
-```
-
-  |                                                                              |                                                                      |   0%  |                                                                              |......................................................................| 100%
-  ordinary text without R code
-
-
-
-
 E1. List and describe three types of vector, raster, and geodatabase formats.
 
 E2. Name at least two differences between `read_sf()` and the more well-known function `st_read()`.
