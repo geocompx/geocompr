@@ -732,7 +732,7 @@ plot(elev, add = TRUE) # and add the original raster
 
 Note that changing the resolution (next section) frequently also changes the origin.
 
-### Aggregation, disaggregation
+### Aggregation and disaggregation
 
 \index{raster!aggregation} 
 \index{raster!disaggregation} 
