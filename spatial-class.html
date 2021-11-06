@@ -244,9 +244,9 @@ the following command creates Figure <a href="spatial-class.html#fig:world-all">
 FIGURE 2.3: A spatial plot of the world using the sf package, with a facet for each attribute.
 </p>
 </div>
-<p>Note that instead of creating a single map, as most GIS programs would, the <code><a href="https://rdrr.io/pkg/terra/man/plot.html">plot()</a></code> command has created multiple maps, one for each variable in the <code>world</code> datasets.
-This behavior can be useful for exploring the spatial distribution of different variables and is discussed further in Section <a href="spatial-class.html#basic-map">2.2.3</a> below.</p>
-<p>Being able to treat spatial objects as regular data frames with spatial powers has many advantages, especially if you are already used to working with data frames.
+<p>Note that instead of creating a single map by default for geographic objects, as most GIS programs do, <code><a href="https://rdrr.io/pkg/terra/man/plot.html">plot()</a></code>ing <code>sf</code> objects results in a map for each variable in the datasets.
+This behavior can be useful for exploring the spatial distribution of different variables and is discussed further in Section <a href="spatial-class.html#basic-map">2.2.3</a>.</p>
+<p>More broadly, treating geographic objects as regular data frames with spatial powers has many advantages, especially if you are already used to working with data frames.
 The commonly used <code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary()</a></code> function, for example, provides a useful overview of the variables within the <code>world</code> object.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/summary.html">summary</a></span><span class="op">(</span><span class="va">world</span><span class="op">[</span><span class="st">"lifeExp"</span><span class="op">]</span><span class="op">)</span>
@@ -258,7 +258,7 @@ The commonly used <code><a href="https://rdrr.io/pkg/terra/man/summary.html">sum
 <span class="co">#&gt;  3rd Qu.:76.8                      </span>
 <span class="co">#&gt;  Max.   :83.6                      </span>
 <span class="co">#&gt;  NA's   :10</span></code></pre></div>
-<p>Although we have only selected one variable for the <code>summary</code> command, it also outputs a report on the geometry.
+<p>Although we have only selected one variable for the <code><a href="https://rdrr.io/pkg/terra/man/summary.html">summary()</a></code> command, it also outputs a report on the geometry.
 This demonstrates the ‘sticky’ behavior of the geometry columns of <strong>sf</strong> objects, meaning the geometry is kept unless the user deliberately removes them, as we’ll see in Section <a href="attr.html#vector-attribute-manipulation">3.2</a>.
 The result provides a quick summary of both the non-spatial and spatial data contained in <code>world</code>: the mean average life expectancy is 71 years (ranging from less than 51 to more than 83 years with a median of 73 years) across all countries.</p>
 
@@ -319,19 +319,34 @@ There are many reasons (linked to the advantages of the simple features model):<
 <li>
 <strong>sf</strong> objects can be treated as data frames in most operations</li>
 <li>
-<strong>sf</strong> functions can be combined using <code>%&gt;%</code> operator and works well with the <a href="http://tidyverse.org/">tidyverse</a> collection of R packages.</li>
-<li>
 <strong>sf</strong> function names are relatively consistent and intuitive (all begin with <code>st_</code>)</li>
+<li>
+<strong>sf</strong> functions can be combined using <code>%&gt;%</code> operator and works well with the <a href="http://tidyverse.org/">tidyverse</a> collection of R packages.</li>
 </ul>
-<p>Due to such advantages, some spatial packages (including <strong>tmap</strong>, <strong>mapview</strong> and <strong>tidycensus</strong>) have added support for <strong>sf</strong>.
+<p><strong>sf</strong>’s support for <strong>tidyverse</strong> packages is exemplified by the provision of two functions for reading in data, <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code> and <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> which store attributes in base R <code>data.frame</code> and <strong>tidyverse</strong> <code>tibble</code> classes respectively, as demonstrated below (see Chapter <a href="attr.html#attr">3</a> for more on manipulating geographic data with <strong>tidyverse</strong> functions and Section <a href="read-write.html#iovec">7.6.1</a> for further details on reading and writing geographic vector data with R):</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">nc_dfr</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shape/nc.shp"</span>, package<span class="op">=</span><span class="st">"sf"</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; Reading layer `nc' from data source </span>
+<span class="co">#&gt;   `/usr/local/lib/R/site-library/sf/shape/nc.shp' using driver `ESRI Shapefile'</span>
+<span class="co">#&gt; Simple feature collection with 100 features and 14 fields</span>
+<span class="co">#&gt; Geometry type: MULTIPOLYGON</span>
+<span class="co">#&gt; Dimension:     XY</span>
+<span class="co">#&gt; Bounding box:  xmin: -84.3 ymin: 33.9 xmax: -75.5 ymax: 36.6</span>
+<span class="co">#&gt; Geodetic CRS:  NAD27</span>
+<span class="va">nc_tbl</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shape/nc.shp"</span>, package<span class="op">=</span><span class="st">"sf"</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">nc_dfr</span><span class="op">)</span>
+<span class="co">#&gt; [1] "sf"         "data.frame"</span>
+<span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">nc_tbl</span><span class="op">)</span>
+<span class="co">#&gt; [1] "sf"         "tbl_df"     "tbl"        "data.frame"</span></code></pre></div>
+<p><strong>sf</strong> is now the go-to package for analysis of spatial vector data in R (not withstanding the <strong>spatstat</strong> package ecosystem which provides numerous functions for spatial statistics) now import <strong>sf</strong> and make use of its class system.
 However, it will take many years for most packages to transition and some will never switch.
 Fortunately, these can still be used in a workflow based on <code>sf</code> objects, by converting them to the <code>Spatial</code> class used in <strong>sp</strong>:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/edzer/sp/">sp</a></span><span class="op">)</span>
 <span class="va">world_sp</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/methods/as.html">as</a></span><span class="op">(</span><span class="va">world</span>, Class <span class="op">=</span> <span class="st">"Spatial"</span><span class="op">)</span>
 <span class="co"># sp functions ...</span></code></pre></div>
 <p><code>Spatial</code> objects can be converted back to <code>sf</code> in the same way or with <code><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf()</a></code>:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_sf</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="va">world_sp</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="basic-map" class="section level3" number="2.2.3">
@@ -343,7 +358,7 @@ By default this creates a multi-panel plot (like <strong>sp</strong>’s <code><
 A legend or ‘key’ with a continuous color is produced if the object to be plotted has a single variable (see the right-hand panel).
 Colors can also be set with <code>col =</code>, although this will not create a continuous palette or a legend.
 </p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">world</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">world</span><span class="op">[</span><span class="st">"pop"</span><span class="op">]</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -356,13 +371,13 @@ FIGURE 2.4: Plotting with sf, with multiple variables (left) and a single variab
 &lt;code&gt;plot()&lt;/code&gt;ing of &lt;strong&gt;sf&lt;/strong&gt; objects uses &lt;code&gt;sf:::plot.sf()&lt;/code&gt; behind the scenes.
 &lt;code&gt;plot()&lt;/code&gt; is a generic method that behaves differently depending on the class of object being plotted.&lt;/p&gt;"><sup>8</sup></a>
 To demonstrate this, and to provide a taster of content covered in Chapters <a href="attr.html#attr">3</a> and <a href="spatial-operations.html#spatial-operations">4</a> on attribute and spatial data operations, the subsequent code chunk combines countries in Asia:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_asia</span> <span class="op">=</span> <span class="va">world</span><span class="op">[</span><span class="va">world</span><span class="op">$</span><span class="va">continent</span> <span class="op">==</span> <span class="st">"Asia"</span>, <span class="op">]</span>
 <span class="va">asia</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union</a></span><span class="op">(</span><span class="va">world_asia</span><span class="op">)</span></code></pre></div>
 <p>We can now plot the Asian continent over a map of the world.
 Note that the first plot must only have one facet for <code>add = TRUE</code> to work.
 If the first plot has a key, <code>reset = FALSE</code> must be used (result not shown):</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">world</span><span class="op">[</span><span class="st">"pop"</span><span class="op">]</span>, reset <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">asia</span>, add <span class="op">=</span> <span class="cn">TRUE</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></code></pre></div>
 <p>Adding layers in this way can be used to verify the geographic correspondence between layers:
@@ -380,7 +395,7 @@ Note: many plot arguments are ignored in facet maps, when more than one &lt;code
 </p>
 <p>Figure <a href="spatial-class.html#fig:contpop">2.5</a> illustrates this flexibility by overlaying circles, whose diameters (set with <code>cex =</code>) represent country populations, on a map of the world.
 An unprojected version of this figure can be created with the following commands (see exercises at the end of this chapter and the script <a href="https://github.com/Robinlovelace/geocompr/blob/main/code/02-contpop.R"><code>02-contplot.R</code></a> to reproduce Figure <a href="spatial-class.html#fig:contpop">2.5</a>):</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">world</span><span class="op">[</span><span class="st">"continent"</span><span class="op">]</span>, reset <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="va">cex</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">world</span><span class="op">$</span><span class="va">pop</span><span class="op">)</span> <span class="op">/</span> <span class="fl">10000</span>
 <span class="va">world_cents</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid</a></span><span class="op">(</span><span class="va">world</span>, of_largest <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
@@ -396,7 +411,7 @@ FIGURE 2.5: Country continents (represented by fill color) and 2015 populations 
 <strong>sf</strong>’s plot method also has arguments specific to geographic data. <code>expandBB</code>, for example, can be used to plot an <code>sf</code> object in context:
 it takes a numeric vector of length four that expands the bounding box of the plot relative to zero in the following order: bottom, left, top, right.
 This is used to plot India in the context of its giant Asian neighbors, with an emphasis on China to the east, in the following code chunk, which generates Figure <a href="spatial-class.html#fig:china">2.6</a> (see exercises below on adding text to plots):</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">india</span> <span class="op">=</span> <span class="va">world</span><span class="op">[</span><span class="va">world</span><span class="op">$</span><span class="va">name_long</span> <span class="op">==</span> <span class="st">"India"</span>, <span class="op">]</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">india</span><span class="op">)</span>, expandBB <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">1</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"gray"</span>, lwd <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">world_asia</span><span class="op">[</span><span class="fl">0</span><span class="op">]</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
@@ -515,7 +530,7 @@ The names of these functions are simple and consistent, as they all start with t
 <li>A list: a collection of objects such as matrices, multilinestrings or geometry collections</li>
 </ol>
 <p>The function <code><a href="https://r-spatial.github.io/sf/reference/st.html">st_point()</a></code> creates single points from numeric vectors:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>                 <span class="co"># XY point</span>
 <span class="co">#&gt; POINT (5 2)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>              <span class="co"># XYZ point</span>
@@ -527,7 +542,7 @@ The names of these functions are simple and consistent, as they all start with t
 <p>The results show that XY (2D coordinates), XYZ (3D coordinates) and XYZM (3D with an additional variable, typically measurement accuracy) point types are created from vectors of length 2, 3, and 4, respectively.
 The XYM type must be specified using the <code>dim</code> argument (which is short for dimension).</p>
 <p>By contrast, use matrices in the case of multipoint (<code><a href="https://r-spatial.github.io/sf/reference/st.html">st_multipoint()</a></code>) and linestring (<code><a href="https://r-spatial.github.io/sf/reference/st.html">st_linestring()</a></code>) objects:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># the rbind function simplifies the creation of matrices</span>
 <span class="co">## MULTIPOINT</span>
 <span class="va">multipoint_matrix</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>
@@ -538,31 +553,31 @@ The XYM type must be specified using the <code>dim</code> argument (which is sho
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_linestring</a></span><span class="op">(</span><span class="va">linestring_matrix</span><span class="op">)</span>
 <span class="co">#&gt; LINESTRING (1 5, 4 4, 4 1, 2 2, 3 2)</span></code></pre></div>
 <p>Finally, use lists for the creation of multilinestrings, (multi-)polygons and geometry collections:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## POLYGON</span>
 <span class="va">polygon_list</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_polygon</a></span><span class="op">(</span><span class="va">polygon_list</span><span class="op">)</span>
 <span class="co">#&gt; POLYGON ((1 5, 2 2, 4 1, 4 4, 1 5))</span></code></pre></div>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## POLYGON with a hole</span>
 <span class="va">polygon_border</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span>
 <span class="va">polygon_hole</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span>
 <span class="va">polygon_with_hole_list</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">polygon_border</span>, <span class="va">polygon_hole</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_polygon</a></span><span class="op">(</span><span class="va">polygon_with_hole_list</span><span class="op">)</span>
 <span class="co">#&gt; POLYGON ((1 5, 2 2, 4 1, 4 4, 1 5), (2 4, 3 4, 3 3, 2 3, 2 4))</span></code></pre></div>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## MULTILINESTRING</span>
 <span class="va">multilinestring_list</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>, 
                             <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_multilinestring</a></span><span class="op">(</span><span class="op">(</span><span class="va">multilinestring_list</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; MULTILINESTRING ((1 5, 4 4, 4 1, 2 2, 3 2), (1 2, 2 4))</span></code></pre></div>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## MULTIPOLYGON</span>
 <span class="va">multipolygon_list</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
                          <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_multipolygon</a></span><span class="op">(</span><span class="va">multipolygon_list</span><span class="op">)</span>
 <span class="co">#&gt; MULTIPOLYGON (((1 5, 2 2, 4 1, 4 4, 1 5)), ((0 2, 1 2, 1 3, 0 3, 0 2)))</span></code></pre></div>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## GEOMETRYCOLLECTION</span>
 <span class="va">gemetrycollection_list</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_multipoint</a></span><span class="op">(</span><span class="va">multipoint_matrix</span><span class="op">)</span>,
                               <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_linestring</a></span><span class="op">(</span><span class="va">linestring_matrix</span><span class="op">)</span><span class="op">)</span>
@@ -579,7 +594,7 @@ A simple feature geometry column (<code>sfc</code>) is a list of <code>sfg</code
 For instance, to combine two simple features into one object with two features, we can use the <code><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc()</a></code> function.
 
 This is important since <code>sfc</code> represents the geometry column in <strong>sf</strong> data frames:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># sfc POINT</span>
 <span class="va">point1</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>
 <span class="va">point2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>
@@ -595,7 +610,7 @@ This is important since <code>sfc</code> represents the geometry column in <stro
 <p>In most cases, an <code>sfc</code> object contains objects of the same geometry type.
 Therefore, when we convert <code>sfg</code> objects of type polygon into a simple feature geometry column, we would also end up with an <code>sfc</code> object of type polygon, which can be verified with <code><a href="https://r-spatial.github.io/sf/reference/st_geometry_type.html">st_geometry_type()</a></code>.
 Equally, a geometry column of multilinestrings would result in an <code>sfc</code> object of type multilinestring:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># sfc POLYGON</span>
 <span class="va">polygon_list1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="va">polygon1</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_polygon</a></span><span class="op">(</span><span class="va">polygon_list1</span><span class="op">)</span>
@@ -605,7 +620,7 @@ Equally, a geometry column of multilinestrings would result in an <code>sfc</cod
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry_type.html">st_geometry_type</a></span><span class="op">(</span><span class="va">polygon_sfc</span><span class="op">)</span>
 <span class="co">#&gt; [1] POLYGON POLYGON</span>
 <span class="co">#&gt; 18 Levels: GEOMETRY POINT LINESTRING POLYGON MULTIPOINT ... TRIANGLE</span></code></pre></div>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># sfc MULTILINESTRING</span>
 <span class="va">multilinestring_list1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>, 
                             <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
@@ -618,7 +633,7 @@ Equally, a geometry column of multilinestrings would result in an <code>sfc</cod
 <span class="co">#&gt; [1] MULTILINESTRING MULTILINESTRING</span>
 <span class="co">#&gt; 18 Levels: GEOMETRY POINT LINESTRING POLYGON MULTIPOINT ... TRIANGLE</span></code></pre></div>
 <p>It is also possible to create an <code>sfc</code> object from <code>sfg</code> objects with different geometry types:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># sfc GEOMETRY</span>
 <span class="va">point_multilinestring_sfc</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="va">point1</span>, <span class="va">multilinestring1</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry_type.html">st_geometry_type</a></span><span class="op">(</span><span class="va">point_multilinestring_sfc</span><span class="op">)</span>
@@ -627,13 +642,13 @@ Equally, a geometry column of multilinestrings would result in an <code>sfc</cod
 <p>As mentioned before, <code>sfc</code> objects can additionally store information on the coordinate reference systems (CRS).
 To specify a certain CRS, we can use the <code>epsg (SRID)</code> or <code>proj4string</code> attributes of an <code>sfc</code> object.
 The default value of <code>epsg (SRID)</code> and <code>proj4string</code> is <code>NA</code> (<em>Not Available</em>), as can be verified with <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">points_sfc</span><span class="op">)</span>
 <span class="co">#&gt; Coordinate Reference System: NA</span></code></pre></div>
 <p>All geometries in an <code>sfc</code> object must have the same CRS.
 We can add coordinate reference system as a <code>crs</code> argument of <code><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc()</a></code>.
 This argument accepts an integer with the <code>epsg</code> code such as <code>4326</code>, which automatically adds the ‘proj4string’ (see Section <a href="spatial-class.html#crs-intro">2.4</a>):</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># EPSG definition</span>
 <span class="va">points_sfc_wgs</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="va">point1</span>, <span class="va">point2</span>, crs <span class="op">=</span> <span class="fl">4326</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">points_sfc_wgs</span><span class="op">)</span>
@@ -659,7 +674,7 @@ This argument accepts an integer with the <code>epsg</code> code such as <code>4
 <span class="co">#&gt;         BBOX[-90,-180,90,180]],</span>
 <span class="co">#&gt;     ID["EPSG",4326]]</span></code></pre></div>
 <p>It also accepts a raw proj4string (result not shown):</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># PROJ4STRING definition</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="va">point1</span>, <span class="va">point2</span>, crs <span class="op">=</span> <span class="st">"+proj=longlat +datum=WGS84 +no_defs"</span><span class="op">)</span></code></pre></div>
 
@@ -681,7 +696,7 @@ This example contains a geometry (the coordinates), and three attributes with th
 Other attributes might include an urbanity category (city or village), or a remark if the measurement was made using an automatic station.&lt;/p&gt;"><sup>11</sup></a>
 Objects of class <code>sf</code> represent such data by combining the attributes (<code>data.frame</code>) with the simple feature geometry column (<code>sfc</code>).
 They are created with <code><a href="https://r-spatial.github.io/sf/reference/sf.html">st_sf()</a></code> as illustrated below, which creates the London example described above:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">lnd_point</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">51.5</span><span class="op">)</span><span class="op">)</span>                 <span class="co"># sfg object</span>
 <span class="va">lnd_geom</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="va">lnd_point</span>, crs <span class="op">=</span> <span class="fl">4326</span><span class="op">)</span>           <span class="co"># sfc object</span>
 <span class="va">lnd_attrib</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>                           <span class="co"># data.frame object</span>
@@ -694,13 +709,13 @@ They are created with <code><a href="https://r-spatial.github.io/sf/reference/sf
 Second, the geometry was converted into a simple feature geometry column (<code>sfc</code>), with a CRS.
 Third, attributes were stored in a <code>data.frame</code>, which was combined with the <code>sfc</code> object with <code><a href="https://r-spatial.github.io/sf/reference/sf.html">st_sf()</a></code>.
 This results in an <code>sf</code> object, as demonstrated below (some output is omitted):</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">lnd_sf</span>
 <span class="co">#&gt; Simple feature collection with 1 features and 3 fields</span>
 <span class="co">#&gt; ...</span>
 <span class="co">#&gt;     name temperature       date         geometry</span>
 <span class="co">#&gt; 1 London          25 2017-06-21 POINT (0.1 51.5)</span></code></pre></div>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">lnd_sf</span><span class="op">)</span>
 <span class="co">#&gt; [1] "sf"         "data.frame"</span></code></pre></div>
 <p>The result shows that <code>sf</code> objects actually have two classes, <code>sf</code> and <code>data.frame</code>.
@@ -768,11 +783,11 @@ In this case, <strong>terra</strong> provides the possibility to divide the rast
 It consists of a few raster objects and one vector object covering an area of the Zion National Park (Utah, USA).
 For example, <code>srtm.tif</code> is a digital elevation model of this area (for more details, see its documentation <code><a href="https://rdrr.io/pkg/spDataLarge/man/srtm.html">?srtm</a></code>).
 First, let’s create a <code>SpatRaster</code> object named <code>my_rast</code>:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">raster_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/srtm.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
 <span class="va">my_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">raster_filepath</span><span class="op">)</span></code></pre></div>
 <p>Typing the name of the raster into the console, will print out the raster header (dimensions, resolution, extent, CRS) and some additional information (class, data source, summary of the raster values):</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">my_rast</span>
 <span class="co">#&gt; class       : SpatRaster </span>
 <span class="co">#&gt; dimensions  : 457, 465, 1  (nrow, ncol, nlyr)</span>
@@ -793,7 +808,7 @@ First, let’s create a <code>SpatRaster</code> object named <code>my_rast</code
 </h3>
 <p>Similar to the <strong>sf</strong> package, <strong>terra</strong> also provides <code><a href="https://rdrr.io/pkg/terra/man/plot.html">plot()</a></code> methods for its own classes.
 </p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:basic-new-raster-plot"></span>
@@ -816,7 +831,7 @@ FIGURE 2.12: Basic raster plot.
 <p>The <code>SpatRaster</code> class represents rasters object in <strong>terra</strong>.
 The easiest way to create a raster object in R is to read-in a raster file from disk or from a server (Section <a href="read-write.html#raster-data-1">7.6.2</a>.
 </p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">single_raster_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/srtm.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
 <span class="va">single_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">raster_filepath</span><span class="op">)</span></code></pre></div>
 <p>The <strong>terra</strong> package supports numerous drivers with the help of the GDAL library.
@@ -828,13 +843,13 @@ The default CRS of raster objects is WGS84, but can be changed with the <code>cr
 This means the unit of the resolution is in degrees which we set to 0.5 (<code>resolution</code>).
 Values (<code>vals</code>) are assigned to each cell: 1 to cell 1, 2 to cell 2, and so on.
 Remember: <code><a href="https://rdrr.io/pkg/terra/man/rast.html">rast()</a></code> fills cells row-wise (unlike <code><a href="https://rdrr.io/r/base/matrix.html">matrix()</a></code>) starting at the upper left corner, meaning the top row contains the values 1 to 6, the second 7 to 12, etc.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">new_raster</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span>nrows <span class="op">=</span> <span class="fl">6</span>, ncols <span class="op">=</span> <span class="fl">6</span>, resolution <span class="op">=</span> <span class="fl">0.5</span>, 
                   xmin <span class="op">=</span> <span class="op">-</span><span class="fl">1.5</span>, xmax <span class="op">=</span> <span class="fl">1.5</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="fl">1.5</span>, ymax <span class="op">=</span> <span class="fl">1.5</span>,
                   vals <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">36</span><span class="op">)</span></code></pre></div>
 <p>For other ways of creating raster objects, see <code><a href="https://rdrr.io/pkg/terra/man/rast.html">?rast</a></code>.</p>
 <p>The <code>SpatRaster</code> class also handles multiple layers, which typically correspond to a single multispectral satellite file or a time-series of rasters.</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">multi_raster_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/landsat.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
 <span class="va">multi_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">multi_raster_file</span><span class="op">)</span>
 <span class="va">multi_rast</span>
@@ -848,16 +863,16 @@ Remember: <code><a href="https://rdrr.io/pkg/terra/man/rast.html">rast()</a></co
 <span class="co">#&gt; min values  :  7550,  6404,  5678,  5252 </span>
 <span class="co">#&gt; max values  : 19071, 22051, 25780, 31961</span></code></pre></div>
 <p><code><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nlyr()</a></code> retrieves the number of layers stored in a <code>SpatRaster</code> object:</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nlyr</a></span><span class="op">(</span><span class="va">multi_rast</span><span class="op">)</span>
 <span class="co">#&gt; [1] 4</span></code></pre></div>
 <p>For multi-layer raster objects, layers can be selected with <code><a href="https://rdrr.io/pkg/terra/man/subset.html">terra::subset()</a></code>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;The &lt;code&gt;[[&lt;/code&gt; and &lt;code&gt;$&lt;/code&gt; operators can also be used for layers’ selection.&lt;/p&gt;"><sup>13</sup></a>
 It accepts a layer number or its name as the second argument:</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">multi_rast3</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/subset.html">subset</a></span><span class="op">(</span><span class="va">multi_rast</span>, <span class="fl">3</span><span class="op">)</span>
 <span class="va">multi_rast4</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/subset.html">subset</a></span><span class="op">(</span><span class="va">multi_rast</span>, <span class="fl">4</span><span class="op">)</span></code></pre></div>
 <p>The opposite operation, combining several <code>SpatRaster</code> objects into one, can be done using the <code>c</code> function:</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">multi_rast34</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="va">multi_rast3</span>, <span class="va">multi_rast4</span><span class="op">)</span></code></pre></div>
 
 <div class="rmdnote">
@@ -971,12 +986,12 @@ Importantly, <code>proj4string</code>s are not used to store CRSs anymore.
 Longer explanations on the recent changes in the PROJ library and why <code>proj4string</code> was replaced by <code>WKT2</code> can be found in <span class="citation"><a href="references.html#ref-bivand_progress_2020a" role="doc-biblioref">R. S. Bivand</a> (<a href="references.html#ref-bivand_progress_2020a" role="doc-biblioref">2020</a>)</span>, Chapter 2 of <span class="citation"><a href="references.html#ref-pebesma_spatial_2022" role="doc-biblioref">E. Pebesma and Bivand</a> (<a href="references.html#ref-pebesma_spatial_2022" role="doc-biblioref">2022</a>)</span>, and <a href="https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/">blog post by Floris Vanderhaeghe</a>.</p>
 <p>Let’s look at how CRSs are stored in R spatial objects and how they can be set.
 For this, we need to read-in a vector dataset:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">vector_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shapes/world.gpkg"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
 <span class="va">new_vector</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">vector_filepath</span><span class="op">)</span></code></pre></div>
 <p>Our new object, <code>new_vector</code>, is a polygon representing a world map data (<code><a href="https://nowosad.github.io/spData/reference/world.html">?spData::world</a></code>).
 In <strong>sf</strong> the CRS of an object can be retrieved using <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>.</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">new_vector</span><span class="op">)</span> <span class="co"># get CRS</span>
 <span class="co">#&gt; Coordinate Reference System:</span>
 <span class="co">#&gt;   User input: WGS 84 </span>
@@ -1017,16 +1032,16 @@ For example, try to run:</p>
 <code>st_crs(new_vector)$proj4string</code> extracts the <code>proj4string</code> representation</li>
 </ul>
 <p>In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs()</a></code> function can be used:</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">new_vector</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs</a></span><span class="op">(</span><span class="va">new_vector</span>, <span class="st">"EPSG:4326"</span><span class="op">)</span> <span class="co"># set CRS</span></code></pre></div>
 <p>The second argument in the above function could be either SRID (<code>"EPSG:4326"</code> in the example), complete WKT2 representation, <code>proj4string</code>, or CRS extracted from the existing object with <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>.</p>
 <p>The <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> function can be used to access CRS information from a <code>SpatRaster</code> object<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;Use the &lt;code&gt;cat()&lt;/code&gt; (e.g., &lt;code&gt;cat(crs(my_rast))&lt;/code&gt;) function to print it nicely.&lt;/p&gt;"><sup>17</sup></a>:</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span> <span class="co"># get CRS</span>
 <span class="co">#&gt; [1] "GEOGCRS[\"WGS 84\",\n    DATUM[\"World Geodetic System 1984\",\n        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n            LENGTHUNIT[\"metre\",1]]],\n    PRIMEM[\"Greenwich\",0,\n        ANGLEUNIT[\"degree\",0.0174532925199433]],\n    CS[ellipsoidal,2],\n        AXIS[\"geodetic latitude (Lat)\",north,\n            ORDER[1],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        AXIS[\"geodetic longitude (Lon)\",east,\n            ORDER[2],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n    ID[\"EPSG\",4326]]"</span></code></pre></div>
 <p>The output is the WKT2 representation of CRS.</p>
 <p>The same function, <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code>, is can be also used to set a CRS for raster objects.</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span> <span class="op">=</span> <span class="st">"EPSG:26912"</span> <span class="co"># set CRS</span></code></pre></div>
 <p>Here, we can use either SRID, complete WKT2 representation, <code>proj4string</code>, or CRS extracted from other existing object with <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code>.</p>
 <p>Importantly, the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> functions do not alter coordinates’ values or geometries.
@@ -1050,9 +1065,9 @@ This is advantageous, preventing confusion caused by different units (most CRSs 
 This is demonstrated in the code chunk below, which calculates the area of Luxembourg:
 
 </p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">luxembourg</span> <span class="op">=</span> <span class="va">world</span><span class="op">[</span><span class="va">world</span><span class="op">$</span><span class="va">name_long</span> <span class="op">==</span> <span class="st">"Luxembourg"</span>, <span class="op">]</span></code></pre></div>
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">luxembourg</span> <span class="op">=</span> <span class="va">world</span><span class="op">[</span><span class="va">world</span><span class="op">$</span><span class="va">name_long</span> <span class="op">==</span> <span class="st">"Luxembourg"</span>, <span class="op">]</span></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_area</a></span><span class="op">(</span><span class="va">luxembourg</span><span class="op">)</span> <span class="co"># requires the s2 package in recent versions of sf</span>
 <span class="co">#&gt; 2.41e+09 [m^2]</span></code></pre></div>
 <p>The output is in units of square meters (m<sup>2</sup>), showing that the result represents two-dimensional space.
@@ -1060,25 +1075,25 @@ This information, stored as an attribute (which interested readers can discover 
 Reporting units prevents confusion.
 To take the Luxembourg example, if the units remained unspecified, one could incorrectly assume that the units were in hectares.
 To translate the huge number into a more digestible size, it is tempting to divide the results by a million (the number of square meters in a square kilometer):</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_area</a></span><span class="op">(</span><span class="va">luxembourg</span><span class="op">)</span> <span class="op">/</span> <span class="fl">1000000</span>
 <span class="co">#&gt; 2409 [m^2]</span></code></pre></div>
 <p>However, the result is incorrectly given again as square meters.
 The solution is to set the correct units with the <strong>units</strong> package:</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">units</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/units/man/units.html">set_units</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_area</a></span><span class="op">(</span><span class="va">luxembourg</span><span class="op">)</span>, <span class="va">km</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>
 <span class="co">#&gt; 2409 [km^2]</span></code></pre></div>
 <p>Units are of equal importance in the case of raster data.
 However, so far <strong>sf</strong> is the only spatial package that supports units, meaning that people working on raster data should approach changes in the units of analysis (for example, converting pixel widths from imperial to decimal units) with care.
 The <code>my_rast</code> object (see above) uses a WGS84 projection with decimal degrees as units.
 Consequently, its resolution is also given in decimal degrees but you have to know it, since the <code><a href="https://rdrr.io/pkg/terra/man/dimensions.html">res()</a></code> function simply returns a numeric vector.</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">res</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span>
 <span class="co">#&gt; [1] 0.000833 0.000833</span></code></pre></div>
 <p>If we used the UTM projection, the units would change.</p>
 <!--jn:toDO-->
 <!--set eval=TRUE later-->
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">repr</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/project.html">project</a></span><span class="op">(</span><span class="va">my_rast</span>, <span class="st">"EPSG:26912"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">res</a></span><span class="op">(</span><span class="va">repr</span><span class="op">)</span></code></pre></div>
 <p>Again, the <code><a href="https://rdrr.io/pkg/terra/man/dimensions.html">res()</a></code> command gives back a numeric vector without any unit, forcing us to know that the unit of the UTM projection is meters.</p>
