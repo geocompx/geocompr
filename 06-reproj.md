@@ -519,5 +519,71 @@ Chapter 6 for this free online book is recommended reading --- see: [rspatial.or
 ## Exercises
 
 
+```
+#> 
+#> 
+#> processing file: ./_06-ex.Rmd
+```
+
+  |                                                                              |                                                                      |   0%  |                                                                              |......                                                                |   9%
+  ordinary text without R code
+
+  |                                                                              |.............                                                         |  18%
+label: 06-reproj-36
+  |                                                                              |...................                                                   |  27%
+  ordinary text without R code
+
+  |                                                                              |.........................                                             |  36%
+label: 06-reproj-37
+  |                                                                              |................................                                      |  45%
+  ordinary text without R code
+
+  |                                                                              |......................................                                |  55%
+label: 06-reproj-38
+  |                                                                              |.............................................                         |  64%
+  ordinary text without R code
+
+  |                                                                              |...................................................                   |  73%
+label: 06-reproj-39
+  |                                                                              |.........................................................             |  82%
+  ordinary text without R code
+
+  |                                                                              |................................................................      |  91%
+label: 06-reproj-40
+  |                                                                              |......................................................................| 100%
+  ordinary text without R code
 
 
+
+
+E1. Create a new object called `nz_wgs` by transforming `nz` object into the WGS84 CRS.
+
+- Create an object of class `crs` for both and use this to query their CRSs.
+- With reference to the bounding box of each object, what units does each CRS use?
+- Remove the CRS from `nz_wgs` and plot the result: what is wrong with this map of New Zealand and why?
+
+
+
+E2. Transform the `world` dataset to the transverse Mercator projection (`"+proj=tmerc"`) and plot the result.
+What has changed and why?
+Try to transform it back into WGS 84 and plot the new object.
+Why does the new object differ from the original one?
+
+
+
+E3. Transform the continuous raster (`con_raster`) into NAD83 / UTM zone 12N using the nearest neighbor interpolation method.
+What has changed?
+How does it influence the results?
+
+
+
+E4. Transform the categorical raster (`cat_raster`) into WGS 84 using the bilinear interpolation method.
+What has changed?
+How does it influence the results?
+
+
+
+E5. Create your own `proj4string`. 
+It should have the Lambert Azimuthal Equal Area (`laea`) projection, the WGS84 ellipsoid, the longitude of projection center of 95 degrees west, the latitude of projection center of 60 degrees north, and its units should be in meters.
+Next, subset Canada from the `world` object and transform it into the new projection. 
+Plot and compare a map before and after the transformation.
