@@ -197,7 +197,7 @@ For spatial statistics\index{spatial!statistics} and predictive modeling, howeve
 This does not mean you must choose either R or Python: Python\index{Python} supports most common statistical techniques (though R tends to support new developments in spatial statistics earlier) and many concepts learned from Python can be applied to the R\index{R} world.
 Like R, Python also supports geographic data analysis and manipulation with packages such as **osgeo**, **Shapely**, **NumPy** and **PyGeoProcessing** [@garrard_geoprocessing_2016].
 
-## R's spatial ecosystem
+## R's spatial ecosystem {#r-ecosystem}
 
 There are many ways to handle geographic data in R, with dozens of packages\index{R-spatial} in the area.^[
 An overview of R's spatial ecosystem can be found in the CRAN\index{CRAN} Task View on the Analysis of Spatial Data
