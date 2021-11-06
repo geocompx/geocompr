@@ -172,7 +172,7 @@ names(world)
 
 The contents of this `geom` column give `sf` objects their spatial powers: `world$geom` is a '[list column](https://adv-r.hadley.nz/vectors-chap.html#list-columns)' that contains all the coordinates of the country polygons.
 \index{list column}
-The **sf** package provides a `plot()` method for visualizing geographic data:
+`sf` objects can be plotted quickly with the base R function `plot()`;
 the following command creates Figure \@ref(fig:world-all).
 
 
