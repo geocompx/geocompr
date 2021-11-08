@@ -195,6 +195,8 @@ Python modules providing access to geoalgorithms\index{geoalgorithm} include `gr
 
 For spatial statistics\index{spatial!statistics} and predictive modeling, however, R is second-to-none.
 This does not mean you must choose either R or Python: Python\index{Python} supports most common statistical techniques (though R tends to support new developments in spatial statistics earlier) and many concepts learned from Python can be applied to the R\index{R} world.
+<!--rl:toDo-->
+<!--to update! -->
 Like R, Python also supports geographic data analysis and manipulation with packages such as **osgeo**, **Shapely**, **NumPy** and **PyGeoProcessing** [@garrard_geoprocessing_2016].
 
 ## R's spatial ecosystem {#r-ecosystem}
@@ -214,8 +216,6 @@ This resulted in the **sf** package (covered in Section \@ref(intro-sf)).
 Multiple places reflect the immense interest in **sf**. 
 This is especially true for the [R-sig-Geo Archives](https://stat.ethz.ch/pipermail/r-sig-geo/), a long-standing open access email list containing much R-spatial wisdom accumulated over the years.
 
-<!--jn:toDo-->
-<!--https://github.com/Robinlovelace/geocompr/issues/639 -->
 <div class="figure" style="text-align: center">
 <img src="figures/01-cranlogs.png" alt="Downloads of selected R packages for working with geographic data. The y-axis shows average number of downloads per day, within a 91-day rolling window." width="100%" />
 <p class="caption">(\#fig:cranlogs)Downloads of selected R packages for working with geographic data. The y-axis shows average number of downloads per day, within a 91-day rolling window.</p>
@@ -308,8 +308,9 @@ Other examples of bridges between R and GIS include **RSAGA** [@R-RSAGA, first p
 <!-- rqgisprocess -->
 
 Visualization was not a focus initially, with the bulk of R-spatial development focused on analysis and geographic operations.
-**sp** provided methods for map making using both the base and lattice plotting system but demand was growing for advanced map making capabilities, especially after the release of **ggplot2** in 2007.
-**ggmap** extended **ggplot2**'s spatial capabilities [@kahle_ggmap_2013], by facilitating access to 'basemap' tiles from online services such as Google Maps. 
+**sp** provided methods for map making using both the base and lattice plotting system but demand was growing for advanced map making capabilities.
+**RgoogleMaps** first released in 2009, allowed to overlay R spatial data on top of 'basemap' tiles from online services such as Google Maps or OpenStreetMap [@loecher_rgooglemaps_2015].
+It was followed by the **ggmap** package that added similar 'basemap' tiles capabilities to **ggplot2** [@kahle_ggmap_2013].
 Though **ggmap** facilitated map-making with **ggplot2**, its utility was limited by the need to `fortify` spatial objects, which means converting them into long data frames.
 While this works well for points it is computationally inefficient for lines and polygons, since each coordinate (vertex) is converted into a row, leading to huge data frames to represent complex geometries.
 Although geographic visualization tended to focus on vector data, raster visualization is supported in **raster** and received a boost with the release of **rasterVis**, which is described in a book on the subject of spatial and temporal data visualization [@lamigueiro_displaying_2018].
