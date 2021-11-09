@@ -760,88 +760,68 @@ These and other typical raster processing operations are part of the map algebra
 ## Exercises
 
 
-Some of the exercises use a vector (`zion_points`) and raster dataset (`srtm`) from the **spDataLarge** package.
-They also use a polygonal 'convex hull' derived from the vector dataset (`ch`) to represent the area of interest:
-
-```r
-library(sf)
-library(terra)
-zion_points = read_sf(system.file("vector/zion_points.gpkg", package = "spDataLarge"))
-srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
-ch = st_combine(zion_points) %>%
-  st_convex_hull() %>% 
-  st_as_sf()
-```
-
-E1. Generate and plot simplified versions of the `nz` dataset.
-Experiment with different values of `keep` (ranging from 0.5 to 0.00005) for `ms_simplify()` and `dTolerance` (from 100 to 100,000) `st_simplify()`.
-
-- At what value does the form of the result start to break down for each method, making New Zealand unrecognizable?
-- Advanced: What is different about the geometry type of the results from `st_simplify()` compared with the geometry type of `ms_simplify()`? What problems does this create and how can this be resolved?
+For these exercises we will use the `us_states` and `us_states_df` datasets from the **spData** package.
+You must have attached the package, and other packages used in the attribute operations chapter (**sf**, **dplyr**, **terra**) with commands such as `library(spData)` before attempting these exercises
 
 
 
-E2. In the first exercise in Chapter Spatial data operations it was established that Canterbury region had 70 of the 101 highest points in New Zealand. 
-Using `st_buffer()`, how many points in `nz_height` are within 100 km of Canterbury?
+`us_states` is a spatial object (of class `sf`), containing geometry and a few attributes (including name, region, area, and population) of states within the contiguous United States.
+`us_states_df` is a data frame (of class `data.frame`) containing the name and additional variables (including median income and poverty level, for the years 2010 and 2015) of US states, including Alaska, Hawaii and Puerto Rico.
+The data comes from the United States Census Bureau, and is documented in `?us_states` and `?us_states_df`.
+
+E1. Create a new object called `us_states_name` that contains only the `NAME` column from the `us_states` object using either base R (`[`) or tidyverse (`select()`) syntax.
+What is the class of the new object and what makes it geographic?
 
 
 
-E3. Find the geographic centroid of New Zealand. 
-How far is it from the geographic centroid of Canterbury?
+E2. Select columns from the `us_states` object which contain population data.
+Obtain the same result using a different command (bonus: try to find three ways of obtaining the same result).
+Hint: try to use helper functions, such as `contains` or `starts_with` from **dplyr** (see `?contains`).
 
+E3. Find all states with the following characteristics (bonus find *and* plot them):
 
+- Belong to the Midwest region.
+- Belong to the West region, have an area below 250,000 km^2^ *and* in 2015 a population greater than 5,000,000 residents (hint: you may need to use the function `units::set_units()` or `as.numeric()`).
+- Belong to the South region, had an area larger than 150,000 km^2^ or a total population in 2015 larger than 7,000,000 residents.
 
-E4. Most world maps have a north-up orientation.
-A world map with a south-up orientation could be created by a reflection (one of the affine transformations not mentioned in this chapter) of the `world` object's geometry.
-Write code to do so.
-Hint: you need to use a two-element vector for this transformation.
- Bonus: create an upside-down map of your country.
- 
+E4. What was the total population in 2015 in the `us_states` dataset?
+What was the minimum and maximum total population in 2015?
 
+E5. How many states are there in each region?
 
-E5. Subset the point in `p` that is contained within `x` *and* `y`.
+E6. What was the minimum and maximum total population in 2015 in each region?
+What was the total population in 2015 in each region?
 
-- Using base subsetting operators.
-- Using an intermediary object created with `st_intersection()`\index{vector!intersection}.
+E7. Add variables from `us_states_df` to `us_states`, and create a new object called `us_states_stats`.
+What function did you use and why?
+Which variable is the key in both datasets?
+What is the class of the new object?
 
+E8. `us_states_df` has two more rows than `us_states`.
+How can you find them? (hint: try to use the `dplyr::anti_join()` function)
 
+E9. What was the population density in 2015 in each state?
+What was the population density in 2010 in each state?
 
-E6. Calculate the length of the boundary lines of US states in meters.
-Which state has the longest border and which has the shortest?
-Hint: The `st_length` function computes the length of a `LINESTRING` or `MULTILINESTRING` geometry.
+E10. How much has population density changed between 2010 and 2015 in each state?
+Calculate the change in percentages and map them.
 
+E11. Change the columns' names in `us_states` to lowercase. (Hint: helper functions - `tolower()` and `colnames()` may help.)
 
+E12. Using `us_states` and `us_states_df` create a new object called `us_states_sel`.
+The new object should have only two variables - `median_income_15` and `geometry`.
+Change the name of the `median_income_15` column to `Income`.
 
-E7. Crop the `srtm` raster using (1) the `zion_points` dataset and (2) the `ch` dataset.
-Are there any differences in the output maps?
-Next, mask `srtm` using these two datasets.
-Can you see any difference now?
-How can you explain that?
+E13. Calculate the change in the number of residents living below the poverty level between 2010 and 2015 for each state. (Hint: See ?us_states_df for documentation on the poverty level columns.)
+Bonus: Calculate the change in the *percentage* of residents living below the poverty level in each state.
 
+E14. What was the minimum, average and maximum state's number of people living below the poverty line in 2015 for each region?
+Bonus: What is the region with the largest increase in people living below the poverty line?
 
+E15. Create a raster from scratch with nine rows and columns and a resolution of 0.5 decimal degrees (WGS84).
+Fill it with random numbers.
+Extract the values of the four corner cells. 
 
-E8. Firstly, extract values from `srtm` at the points represented in `zion_points`.
-Next, extract average values of `srtm` using a 90 buffer around each point from `zion_points` and compare these two sets of values. 
-When would extracting values by buffers be more suitable than by points alone?
+E16. What is the most common class of our example raster `grain` (hint: `modal()`)?
 
-
-
-E9. Subset points higher than 3100 meters in New Zealand (the `nz_height` object) and create a template raster with a resolution of 3 km. 
-Using these objects:
-
-- Count numbers of the highest points in each grid cell.
-- Find the maximum elevation in each grid cell.
-
-
-
-E10. Aggregate the raster counting high points in New Zealand (created in the previous exercise), reduce its geographic resolution by half (so cells are 6 by 6 km) and plot the result.
-
-- Resample the lower resolution raster back to a resolution of 3 km. How have the results changed?
-- Name two advantages and disadvantages of reducing raster resolution.
-
-
-
-E11. Polygonize the `grain` dataset and filter all squares representing clay.
-
-- Name two advantages and disadvantages of vector data over raster data.
--  At which points would it be useful to convert rasters to vectors in your work?
+E17. Plot the histogram and the boxplot of the `data(dem, package = "spDataLarge")` raster. 
