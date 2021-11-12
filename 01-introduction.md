@@ -322,13 +322,24 @@ The **stars** package, closely connected to **sf**, was created for handling ras
 In 2020, **terra** -- a successor of the **raster** package aimed at better performance and more straightforward user interface was firstly released (see Chapter \@ref(raster-data)).
 <!--ref-->
 
-<!-- This modernization had several reasons, including influences from software development outside of the R environment and the ... -->
-<!-- PROJ -->
+<!-- Upstream software dependencies -->
+This modernization had several reasons, including impacts from spatial software development outside of the R environment and the  ... [@bivand_progress_2021].
+The most important external factor affecting most spatial software, including R spatial packages, were the major updates, including many breaking changes to the PROJ library that had begun in 2018 (learn more in Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)).
+
+<!-- spatstat -->
+
+<!-- spherical geometry in sf + s2-->
+
+<!-- lidr?? -->
+
+<!-- retirement of rgdal, rgeos and maptools -->
+<!-- https://stat.ethz.ch/pipermail/r-sig-geo/2021-September/028760.html -->
 
 <!-- viz improvements -->
 <!-- add rayshader + ggspatial to the above viz list -->
 <!-- add mapsf -->
 <!-- mention tmap4 -->
+
 
 <!-- add info about specialized packages - sfnetworks, landscapemetrics, gdalcubes, rgee, etc. -->
 <!-- better to add review papers, including Robin's, mine, forest, etc. -->
