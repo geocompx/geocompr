@@ -39,7 +39,7 @@ Another unique aspect of spatial objects is distance.
 All spatial objects are related through space, and distance calculations can be used to explore the strength of this relationship, as described in the context of vector data in Section \@ref(distance-relations).
 
 Spatial operations on raster objects include subsetting --- covered in Section \@ref(spatial-raster-subsetting) --- and merging several raster 'tiles' into a single object, as demonstrated in Section \@ref(merging-rasters).
-*Map algebra* cover a range of operations that modify raster cell values, with or without reference to surrounding cell values, is is vital for many applications.
+*Map algebra* covers a range of operations that modify raster cell values, with or without reference to surrounding cell values, is is vital for many applications.
 The concept of map algebra is introduced in Section \@ref(map-algebra); local, focal and zonal map algebra operations are covered in sections \@ref(local-operations), \@ref(focal-operations), and \@ref(zonal-operations), respectively. Global map algebra operations, which generate summary statistics representing an entire raster dataset, and distance calculations on rasters, are discussed in Section \@ref(global-operations-and-distances).
 In the final section before the exercises (\@ref(merging-rasets)) the process of merging two raster datasets is discussed and demonstrated with reference to a reproducible example.
 
@@ -605,20 +605,21 @@ The next subsection explores these and related operations in more detail.
 ### Map algebra
 
 \index{map algebra}
-The term 'map algebra' was coined in the late 1970s to describe a "set of conventions, capabilities, and techniques" for the analysis of geographic data [@tomlin_1994_map].
+The term 'map algebra' was coined in the late 1970s to describe a "set of conventions, capabilities, and techniques" for the analysis of geographic raster *and* (although less prominently) vector data [@tomlin_1994_map].
+Although the concept never became widely adopted, the term usefully encapsulates and helps classify the range operations that can be undertaken on raster datasets.
+In this context we define map algebra more narrowly, as operations that modify or summarise raster cell values, with reference to surrounding cells, zones, or statistical functions that apply to every cell.
 
-
-Map algebra operations tend to be fast.
-This is because raster datasets only implicitly store coordinates.
-To derive the coordinate of a specific cell, we have to calculate it using its matrix position and the raster resolution and origin.
+Map algebra operations tend to be fast, because raster datasets only implicitly store coordinates (hence the oversimplifying phrase "raster is faster but vector is corrector").
+The location of cells in raster datasets can be calculated it using its matrix position and the resolution and origin of the dataset (stored in the header).
 For the processing, however, the geographic position of a cell is barely relevant as long as we make sure that the cell position is still the same after the processing.
 Additionally, if two or more raster datasets share the same extent, projection and resolution, one could treat them as matrices for the processing.
-This is exactly what map algebra is doing in R.
-First, the **terra** package checks the headers of the rasters on which to perform any algebraic operation, and only if they are correspondent to each other, the processing goes on.
-And secondly, map algebra retains the so-called one-to-one locational correspondence.
-This is where it substantially differs from matrix algebra which changes positions when for example multiplying or dividing matrices.
 
-Map algebra (or cartographic modeling) divides raster operations into four subclasses [@tomlin_geographic_1990], with each working on one or several grids simultaneously:
+This is the way that map algebra works with the **terra** package.
+First, the headers of the raster datasets are queried and (in cases where map algebra operations work on more than one dataset) checked to ensure the datasets are compatible.
+Second, map algebra retains the so-called one-to-one locational correspondence, meaning that cells cannot move.
+This differs from matrix algebra, in which values change position, for example when multiplying or dividing matrices.
+
+Map algebra (or cartographic modeling with raster data) divides raster operations into four subclasses [@tomlin_geographic_1990], with each working on one or several grids simultaneously:
 
 1. *Local* or per-cell operations
 2. *Focal* or neighborhood operations.
