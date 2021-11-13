@@ -81,15 +81,14 @@ p_hpnz2 = tm_shape(nz) + tm_polygons(col = "white") +
 tmap_arrange(p_hpnz1, p_hpnz2, ncol = 2)
 ```
 
-Like attribute subsetting, the command `x[y, ]` subsets features of a *target* `x` using the contents of a *source* object `y`.
+Like attribute subsetting, the command `x[y, ]` (equivalent to `nz_height[canterbury, ]`) subsets features of a *target* `x` using the contents of a *source* object `y`.
 Instead of `y` being a vector of class `logical` or `integer`, however, for spatial subsetting both `x` and `y` must be geographic objects.
-Specifically, objects used for spatial subsetting in this way must have the class `sf` or `sfc`.
+Specifically, objects used for spatial subsetting in this way must have the class `sf` or `sfc`: both `nz` and `nz_height` are geographic vector data frames and have the class `sf`, and the result of the operation returns another `sf` object representing the features in the target `nz_height` object that intersect with (in this case high points that are located within) the `canterbury` region. 
 
-Various *topological relations* can be used for spatial subsetting.
-These determine the type of spatial relationship that features in the target object must have with the subsetting object to be selected, including *touches*, *crosses* or *within* (see Section \@ref(topological-relations)). 
-*Intersects* is the default spatial subsetting operator, a default that returns `TRUE` for many types of spatial relations, including *touches*, *crosses* and *is within*.
-These alternative spatial operators can be specified with the `op =` argument, a third argument that can be passed to the `[` operator for `sf` objects.
-This is demonstrated in the following command which returns the opposite of `st_intersects()`, points that do not intersect with Canterbury (see Section \@ref(topological-relations)):
+Various *topological relations* can be used for spatial subsetting which determine the type of spatial relationship that features in the target object must have with the subsetting object to be selected.
+These include *touches*, *crosses* or *within*, as we will see shortly in Section \@ref(topological-relations). 
+The default setting `st_intersects` is a 'catch all' topological relation that will return features in the target that *touch*, *cross* or are *within* the source 'subsetting' object.
+As indicated above, alternative spatial operators can be specified with the `op =` argument, as demonstrated in the following command which returns the opposite of `st_intersects()`, points that do not intersect with Canterbury (see Section \@ref(topological-relations)):
 
 ```{r 04-spatial-operations-4, eval=FALSE}
 nz_height[canterbury, , op = st_disjoint]
@@ -101,16 +100,17 @@ One can use this to change the subsetting operation in many ways.
 `nz_height[canterbury, 2, op = st_disjoint]`, for example, returns the same rows but only includes the second attribute column (see `` sf:::`[.sf` `` and the `?sf` for details).
 ```
 
-For many applications, this is all you'll need to know about spatial subsetting for vector data.
-In this case, you can safely skip to Section \@ref(topological-relations).
-
+For many applications, this is all you'll need to know about spatial subsetting for vector data: it just works.
+If you are impatient to learn about more topological relations, beyond `st_intersects()` and `st_disjoint()`, skip to the next section (\@ref(topological-relations)).
 If you're interested in the details, including other ways of subsetting, read on.
-Another way of doing spatial subsetting uses objects returned by *topological operators*.
-This is demonstrated in the first command below:
+
+Another way of doing spatial subsetting uses objects returned by topological operators.
+These objects can be useful in their own right, for example when exploring the graph network of relationships between contiguous regions, but they can also be used for subsetting, as demonstrated in the code chunk below:
 
 ```{r 04-spatial-operations-6}
 sel_sgbp = st_intersects(x = nz_height, y = canterbury)
 class(sel_sgbp)
+sel_sgbp
 sel_logical = lengths(sel_sgbp) > 0
 canterbury_height2 = nz_height[sel_logical, ]
 ```
@@ -125,7 +125,7 @@ Note: another way to return a logical output is by setting `sparse = FALSE` (mea
 Note: the solution involving `sgbp` objects is more generalisable though, as it works for many-to-many operations and has lower memory requirements.
 ```
 
-It should be noted that a logical  can also be used with `filter()` as follows (`sparse = FALSE` is explained in Section \@ref(topological-relations)):
+It should be noted that a logical can also be used with `filter()` as follows (`sparse = FALSE` is explained in Section \@ref(topological-relations)):
 
 ```{r 04-spatial-operations-7b}
 canterbury_height3 = nz_height %>%
