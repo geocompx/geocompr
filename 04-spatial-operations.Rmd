@@ -45,21 +45,22 @@ It is important to note that spatial operations that use two spatial objects rel
 ## Spatial operations on vector data {#spatial-vec}
 
 This section provides an overview of spatial operations on vector geographic data represented as simple features in the **sf** package.
-Section \@ref(spatial-ras) presents spatial operations on raster datasets using functions from the **terra** package.
+Section \@ref(spatial-ras) presents spatial operations on raster datasets using classes and functions from the **terra** package.
 
 ### Spatial subsetting
 
 <!--jn:toDo-->
 <!--consider adding st_filter explanation-->
 
-Spatial subsetting is the process of selecting features of a spatial object based on whether or not they in some way *relate* in space to another object.
-It is analogous to *attribute subsetting* (covered in Section \@ref(vector-attribute-subsetting)) and can be done with the base R square bracket (`[`) operator or with the `filter()` function from the **tidyverse**\index{tidyverse (package)}.
+Spatial subsetting is the process of taking a spatial object and returning a new object containing only features that *relate* in space to another object.
+Analogous to *attribute subsetting* (covered in Section \@ref(vector-attribute-subsetting)), subsets of `sf` data frames can be created with square bracket (`[`) operator using the syntax `x[y, , op = st_intersects]`, where `x` is an `sf` object from which a subset of rows will be returned, `y` is the 'subsetting object' and `, op = st_intersects` is an optional argument that specifies the topological relation (also known as the binary predicate) used to do the subsetting.
+The default topological relation used when an `op` argument is not provided is `st_intersects()`: the command `x[y, ]` is identical to `x[y, , op = st_intersects]` shown above but not `x[y, , op = st_disjoint]` (the meaning of these and other topological relations is described in the next section).
+The `filter()` function from the **tidyverse**\index{tidyverse (package)} can also be used but this approach more verbose, as we will see in the examples below.
 \index{vector!subsetting}
 \index{spatial!subsetting}
 
-An example of spatial subsetting is provided by the `nz` and `nz_height` datasets in **spData**.
-These contain projected data on the 16 main regions and 101 highest points in New Zealand, respectively (Figure \@ref(fig:nz-subset)).
-The following code chunk first creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region:
+To demonstrate spatial subsetting, we will use the `nz` and `nz_height` datasets in the **spData** package, which contain geographic data on the 16 main regions and 101 highest points in New Zealand, respectively (Figure \@ref(fig:nz-subset)), in a projected coordinate system.
+The following code chunk creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region:
 
 ```{r 04-spatial-operations-3}
 canterbury = nz %>% filter(Name == "Canterbury")
@@ -80,8 +81,9 @@ p_hpnz2 = tm_shape(nz) + tm_polygons(col = "white") +
 tmap_arrange(p_hpnz1, p_hpnz2, ncol = 2)
 ```
 
-Like attribute subsetting `x[y, ]` subsets features of a *target* `x` using the contents of a *source* object `y`.
-Instead of `y` being of class `logical` or `integer` --- a vector of `TRUE` and `FALSE` values or whole numbers --- for spatial subsetting it is another spatial (`sf`) object.
+Like attribute subsetting, the command `x[y, ]` subsets features of a *target* `x` using the contents of a *source* object `y`.
+Instead of `y` being a vector of class `logical` or `integer`, however, for spatial subsetting both `x` and `y` must be geographic objects.
+Specifically, objects used for spatial subsetting in this way must have the class `sf` or `sfc`.
 
 Various *topological relations* can be used for spatial subsetting.
 These determine the type of spatial relationship that features in the target object must have with the subsetting object to be selected, including *touches*, *crosses* or *within* (see Section \@ref(topological-relations)). 
