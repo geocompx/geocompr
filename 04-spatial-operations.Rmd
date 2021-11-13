@@ -21,29 +21,22 @@ grain = rast(system.file("raster/grain.tif", package = "spData"))
 
 ## Introduction
 
-Spatial operations are a vital part of geocomputation\index{geocomputation}.
+Spatial operations, including spatial joins between vector datasets and local and focal operations on raster datasets, are a vital part of geocomputation\index{geocomputation}.
 This chapter shows how spatial objects can be modified in a multitude of ways based on their location and shape.
-The content builds on the previous chapter because many spatial operations have a non-spatial (attribute) equivalent.
+Many spatial operations have a non-spatial (attribute) equivalent, so concepts such as subsetting and joining datasets demonstrated in the previous chapter are applicable here.
 This is especially true for *vector* operations: Section \@ref(vector-attribute-manipulation) on vector attribute manipulation provides the basis for understanding its spatial counterpart, namely spatial subsetting (covered in Section \@ref(spatial-subsetting)).
 Spatial joining (Section \@ref(spatial-joining)) and aggregation (Section \@ref(spatial-aggr)) also have non-spatial counterparts, covered in the previous chapter.
 
-Spatial operations differ from non-spatial operations in some ways, however.
-To illustrate the point, imagine you are researching road safety.
-Spatial joins can be used to find road speed limits related with administrative zones, even when no zone ID is provided.
-But this raises the question: should the road completely fall inside a zone for its values to be joined?
-Or is simply crossing or being within a certain distance sufficient?
-When posing such questions, it becomes apparent that spatial operations differ substantially from attribute operations on data frames:
-the *type* of spatial relationship between objects must be considered.
-These are covered in Section \@ref(topological-relations), on topological relations.
+Spatial operations differ from non-spatial operations in in a number of ways, however:
+Spatial joins, for example, can be done in a number of ways --- including matching entities that intersect with or are within a certain distance of the target dataset --- while the attribution joins discussed in Section \@ref(vector-attribute-joining) in the previous chapter can only be done in one way (except when using fuzzy joins, as described in the documentation of the [**fuzzyjoin**](https://cran.r-project.org/package=fuzzyjoin) package).
+The *type* of spatial relationship between objects must be considered when undertaking spatial operations, as described in Section \@ref(topological-relations), on topological relations between vector features.
+\index{spatial operations}.
+Another unique aspect of spatial objects is distance: all spatial objects are related through space, and distance calculations can be used to explore the strength of this relationship, as described in the context of vector data in Section \@ref(distance-relations).
 
-\index{spatial operations}
-Another unique aspect of spatial objects is distance.
-All spatial objects are related through space, and distance calculations can be used to explore the strength of this relationship. These are covered in Section \@ref(distance-relations).
-
-Spatial operations also apply to raster objects.
-Spatial subsetting of raster objects is covered in Section \@ref(spatial-raster-subsetting); merging several raster 'tiles' into a single object is covered in Section \@ref(merging-rasters).
-For many applications, the most important spatial operation on raster objects is *map algebra*, as we will see in Sections \@ref(map-algebra) to \@ref(global-operations-and-distances).
-Map algebra is also the prerequisite for distance calculations on rasters, a technique which is covered in Section \@ref(global-operations-and-distances).
+Spatial operations on raster objects include subsetting --- covered in Section \@ref(spatial-raster-subsetting) --- and merging several raster 'tiles' into a single object, as demonstrated in Section \@ref(merging-rasters).
+*Map algebra* covers a range of operations that modify raster cell values, with or without reference to surrounding cell values, is is vital for many applications.
+The concept of map algebra is introduced in Section \@ref(map-algebra); local, focal and zonal map algebra operations are covered in sections \@ref(local-operations), \@ref(focal-operations), and \@ref(zonal-operations), respectively. Global map algebra operations, which generate summary statistics representing an entire raster dataset, and distance calculations on rasters, are discussed in Section \@ref(global-operations-and-distances).
+In the final section before the exercises (\@ref(merging-rasets)) the process of merging two raster datasets is discussed and demonstrated with reference to a reproducible example.
 
 ```{block2 04-spatial-operations-2, type='rmdnote'}
 It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in Section \@ref(crs-intro) and which will be covered in more depth in Chapter \@ref(reproj-geo-data).
@@ -51,21 +44,23 @@ It is important to note that spatial operations that use two spatial objects rel
 
 ## Spatial operations on vector data {#spatial-vec}
 
-This section provides an overview of spatial operations on vector geographic data represented as simple features in the **sf** package before Section \@ref(spatial-ras), which presents spatial methods using the **raster** package.
+This section provides an overview of spatial operations on vector geographic data represented as simple features in the **sf** package.
+Section \@ref(spatial-ras) presents spatial operations on raster datasets using classes and functions from the **terra** package.
 
 ### Spatial subsetting
 
 <!--jn:toDo-->
 <!--consider adding st_filter explanation-->
 
-Spatial subsetting is the process of selecting features of a spatial object based on whether or not they in some way *relate* in space to another object.
-It is analogous to *attribute subsetting* (covered in Section \@ref(vector-attribute-subsetting)) and can be done with the base R square bracket (`[`) operator or with the `filter()` function from the **tidyverse**\index{tidyverse (package)}.
+Spatial subsetting is the process of taking a spatial object and returning a new object containing only features that *relate* in space to another object.
+Analogous to *attribute subsetting* (covered in Section \@ref(vector-attribute-subsetting)), subsets of `sf` data frames can be created with square bracket (`[`) operator using the syntax `x[y, , op = st_intersects]`, where `x` is an `sf` object from which a subset of rows will be returned, `y` is the 'subsetting object' and `, op = st_intersects` is an optional argument that specifies the topological relation (also known as the binary predicate) used to do the subsetting.
+The default topological relation used when an `op` argument is not provided is `st_intersects()`: the command `x[y, ]` is identical to `x[y, , op = st_intersects]` shown above but not `x[y, , op = st_disjoint]` (the meaning of these and other topological relations is described in the next section).
+The `filter()` function from the **tidyverse**\index{tidyverse (package)} can also be used but this approach more verbose, as we will see in the examples below.
 \index{vector!subsetting}
 \index{spatial!subsetting}
 
-An example of spatial subsetting is provided by the `nz` and `nz_height` datasets in **spData**.
-These contain projected data on the 16 main regions and 101 highest points in New Zealand, respectively (Figure \@ref(fig:nz-subset)).
-The following code chunk first creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region:
+To demonstrate spatial subsetting, we will use the `nz` and `nz_height` datasets in the **spData** package, which contain geographic data on the 16 main regions and 101 highest points in New Zealand, respectively (Figure \@ref(fig:nz-subset)), in a projected coordinate system.
+The following code chunk creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region:
 
 ```{r 04-spatial-operations-3}
 canterbury = nz %>% filter(Name == "Canterbury")
@@ -86,14 +81,14 @@ p_hpnz2 = tm_shape(nz) + tm_polygons(col = "white") +
 tmap_arrange(p_hpnz1, p_hpnz2, ncol = 2)
 ```
 
-Like attribute subsetting `x[y, ]` subsets features of a *target* `x` using the contents of a *source* object `y`.
-Instead of `y` being of class `logical` or `integer` --- a vector of `TRUE` and `FALSE` values or whole numbers --- for spatial subsetting it is another spatial (`sf`) object.
+Like attribute subsetting, the command `x[y, ]` (equivalent to `nz_height[canterbury, ]`) subsets features of a *target* `x` using the contents of a *source* object `y`.
+Instead of `y` being a vector of class `logical` or `integer`, however, for spatial subsetting both `x` and `y` must be geographic objects.
+Specifically, objects used for spatial subsetting in this way must have the class `sf` or `sfc`: both `nz` and `nz_height` are geographic vector data frames and have the class `sf`, and the result of the operation returns another `sf` object representing the features in the target `nz_height` object that intersect with (in this case high points that are located within) the `canterbury` region. 
 
-Various *topological relations* can be used for spatial subsetting.
-These determine the type of spatial relationship that features in the target object must have with the subsetting object to be selected, including *touches*, *crosses* or *within* (see Section \@ref(topological-relations)). 
-*Intersects* is the default spatial subsetting operator, a default that returns `TRUE` for many types of spatial relations, including *touches*, *crosses* and *is within*.
-These alternative spatial operators can be specified with the `op =` argument, a third argument that can be passed to the `[` operator for `sf` objects.
-This is demonstrated in the following command which returns the opposite of `st_intersects()`, points that do not intersect with Canterbury (see Section \@ref(topological-relations)):
+Various *topological relations* can be used for spatial subsetting which determine the type of spatial relationship that features in the target object must have with the subsetting object to be selected.
+These include *touches*, *crosses* or *within*, as we will see shortly in Section \@ref(topological-relations). 
+The default setting `st_intersects` is a 'catch all' topological relation that will return features in the target that *touch*, *cross* or are *within* the source 'subsetting' object.
+As indicated above, alternative spatial operators can be specified with the `op =` argument, as demonstrated in the following command which returns the opposite of `st_intersects()`, points that do not intersect with Canterbury (see Section \@ref(topological-relations)):
 
 ```{r 04-spatial-operations-4, eval=FALSE}
 nz_height[canterbury, , op = st_disjoint]
@@ -105,16 +100,17 @@ One can use this to change the subsetting operation in many ways.
 `nz_height[canterbury, 2, op = st_disjoint]`, for example, returns the same rows but only includes the second attribute column (see `` sf:::`[.sf` `` and the `?sf` for details).
 ```
 
-For many applications, this is all you'll need to know about spatial subsetting for vector data.
-In this case, you can safely skip to Section \@ref(topological-relations).
-
+For many applications, this is all you'll need to know about spatial subsetting for vector data: it just works.
+If you are impatient to learn about more topological relations, beyond `st_intersects()` and `st_disjoint()`, skip to the next section (\@ref(topological-relations)).
 If you're interested in the details, including other ways of subsetting, read on.
-Another way of doing spatial subsetting uses objects returned by *topological operators*.
-This is demonstrated in the first command below:
+
+Another way of doing spatial subsetting uses objects returned by topological operators.
+These objects can be useful in their own right, for example when exploring the graph network of relationships between contiguous regions, but they can also be used for subsetting, as demonstrated in the code chunk below:
 
 ```{r 04-spatial-operations-6}
 sel_sgbp = st_intersects(x = nz_height, y = canterbury)
 class(sel_sgbp)
+sel_sgbp
 sel_logical = lengths(sel_sgbp) > 0
 canterbury_height2 = nz_height[sel_logical, ]
 ```
@@ -129,7 +125,7 @@ Note: another way to return a logical output is by setting `sparse = FALSE` (mea
 Note: the solution involving `sgbp` objects is more generalisable though, as it works for many-to-many operations and has lower memory requirements.
 ```
 
-It should be noted that a logical  can also be used with `filter()` as follows (`sparse = FALSE` is explained in Section \@ref(topological-relations)):
+It should be noted that a logical can also be used with `filter()` as follows (`sparse = FALSE` is explained in Section \@ref(topological-relations)):
 
 ```{r 04-spatial-operations-7b}
 canterbury_height3 = nz_height %>%
@@ -137,11 +133,12 @@ canterbury_height3 = nz_height %>%
 ```
 
 At this point, there are three versions of `canterbury_height`, one created with spatial subsetting directly and the other two via intermediary selection objects.
-To explore these objects and spatial subsetting in more detail, see the supplementary vignettes on `subsetting` and [`tidyverse-pitfalls`](https://geocompr.github.io/geocompkg/articles/).
+To explore spatial subsetting in more detail, see the supplementary vignettes on `subsetting` and [`tidyverse-pitfalls`](https://geocompr.github.io/geocompkg/articles/) on the [geocompkg website](https://geocompr.github.io/geocompkg/articles/).
+The next section explores different types of spatial relation, also known as binary predicates, that can be used to identify whether or not two features are spatially related or not.
 
 ### Topological relations
 
-Topological relations describe the spatial relationships between objects.
+Topological relations describe the spatial relationships between objects [@egenhofer_1990_mathematical].
 To understand them, it helps to have some simple test data to work with.
 Figure \@ref(fig:relation-objects) contains a polygon (`a`), a line (`l`) and some points (`p`), which are created in the code below.
 \index{topological relations}
@@ -607,17 +604,21 @@ The next subsection explores these and related operations in more detail.
 ### Map algebra
 
 \index{map algebra}
-Map algebra makes raster processing really fast.
-This is because raster datasets only implicitly store coordinates.
-To derive the coordinate of a specific cell, we have to calculate it using its matrix position and the raster resolution and origin.
+The term 'map algebra' was coined in the late 1970s to describe a "set of conventions, capabilities, and techniques" for the analysis of geographic raster *and* (although less prominently) vector data [@tomlin_1994_map].
+Although the concept never became widely adopted, the term usefully encapsulates and helps classify the range operations that can be undertaken on raster datasets.
+In this context we define map algebra more narrowly, as operations that modify or summarise raster cell values, with reference to surrounding cells, zones, or statistical functions that apply to every cell.
+
+Map algebra operations tend to be fast, because raster datasets only implicitly store coordinates (hence the oversimplifying phrase "raster is faster but vector is corrector").
+The location of cells in raster datasets can be calculated it using its matrix position and the resolution and origin of the dataset (stored in the header).
 For the processing, however, the geographic position of a cell is barely relevant as long as we make sure that the cell position is still the same after the processing.
 Additionally, if two or more raster datasets share the same extent, projection and resolution, one could treat them as matrices for the processing.
-This is exactly what map algebra is doing in R.
-First, the **terra** package checks the headers of the rasters on which to perform any algebraic operation, and only if they are correspondent to each other, the processing goes on.
-And secondly, map algebra retains the so-called one-to-one locational correspondence.
-This is where it substantially differs from matrix algebra which changes positions when for example multiplying or dividing matrices.
 
-Map algebra (or cartographic modeling) divides raster operations into four subclasses [@tomlin_geographic_1990], with each working on one or several grids simultaneously:
+This is the way that map algebra works with the **terra** package.
+First, the headers of the raster datasets are queried and (in cases where map algebra operations work on more than one dataset) checked to ensure the datasets are compatible.
+Second, map algebra retains the so-called one-to-one locational correspondence, meaning that cells cannot move.
+This differs from matrix algebra, in which values change position, for example when multiplying or dividing matrices.
+
+Map algebra (or cartographic modeling with raster data) divides raster operations into four subclasses [@tomlin_geographic_1990], with each working on one or several grids simultaneously:
 
 1. *Local* or per-cell operations
 2. *Focal* or neighborhood operations.
