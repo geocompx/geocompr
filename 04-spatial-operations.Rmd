@@ -146,16 +146,53 @@ See @dieck_algebraic_2008 for an updated textbook teaching algebraic topology.
 However, topological relations can be clearly understood intuitively with reference to visualizations of commonly used functions that test for different types of topological relationships, as illustrated in Figure \@ref(fig:relation-objects).
 In `sf`, functions testing for different types of topological relations are as 'binary predicates', as described in the vignette *Manipulating Simple Feature Geometries*, which can be viewed with the command [`vignette("sf3")`](https://r-spatial.github.io/sf/articles/sf3.html), and in the help page [`?geos_binary_pred`](https://r-spatial.github.io/sf/reference/geos_binary_ops.html) [@pebesma_simple_2018].
 
-To understand them, it helps to have some simple test data to work with.
-Figure \@ref(fig:relation-objects) contains a polygon (`a`), a line (`l`) and some points (`p`), which are created in the code below.
+Figure \@ref(fig:relation-objects)
+
 \index{topological relations}
 
-```{r 04-spatial-operations-8}
+```{r 04-spatial-operations-8, echo=FALSE}
+library(ggplot2)
 # create a polygon
-a_poly = st_polygon(list(rbind(c(-1, -1), c(1, -1), c(1, 1), c(-1, -1))))
-a = st_sfc(a_poly)
+p1 = st_sfc(st_polygon(list(rbind(c(0, 0), c(1, 0), c(1, 1), c(0, 0)))))
+p2 = st_sfc(st_polygon(list(rbind(c(0, 0), c(0, 1), c(1, 1), c(0, 0)))))
+p3 = st_sfc(st_polygon(list(rbind(c(0.7, 0.3), c(0.7, 0.95), c(0.9, 0.95), c(0.7, 0.3)))))
+p4 = st_sfc(st_polygon(list(rbind(c(0.6, 0.1), c(0.7, 0.5), c(0.9, 0.5), c(0.6, 0.1)))))
+p5 = st_sfc(st_polygon(list(rbind(c(0, 0.2), c(0, 1), c(0.9, 1), c(0, 0.2)))))
+
+# convert to sf objects
+psf1 = st_sf(data.frame(Object = "Polygon1"), geometry = p1)
+psf2 = st_sf(data.frame(Object = "Polygon2"), geometry = p2)
+psf3 = st_sf(data.frame(Object = "Polygon3"), geometry = p3)
+psf4 = st_sf(data.frame(Object = "Polygon4"), geometry = p4)
+psf5 = st_sf(data.frame(Object = "Polygon5"), geometry = p5)
+
+# plot them
+ps1 = rbind(psf1, psf2)
+ps2 = rbind(psf1, psf3)
+# sf::st_intersects(psf1, psf2, sparse = FALSE)
+# sf::st_disjoint(psf1, psf2, sparse = FALSE)
+# sf::st_overlaps(psf1, psf2, sparse = FALSE)
+# sf::st_relate(psf1, psf2, sparse = FALSE)
+# sf::st_relate(psf1, psf3)
+# tm_shape(ps1) + tm_polygons(col = "Object") + tm_layout(legend.position = c("left", "top"))
+
+theme_set(new = theme_void())
+g1 = ggplot(ps1) + geom_sf(aes(fill = Object), alpha = 0.5, show.legend = FALSE)
+# g1 + annotate("text", x = 0.3, y = 0.9, label = "st_intersects(Polygon1, Polygon2)")
+g1 + annotate("text", x = 0.1, y = 0.95, label = "intersects TRUE\ndisjoint     FALSE\ntouches    TRUE\n", hjust = "left", vjust = "top") 
+# Try annotating only which type of relations apply
+# g1 + annotate("text", x = 0.1, y = 0.95, label = "Relations: intersects, touches", hjust = "left", vjust = "top")
+g1an = g1 + annotate("text", x = 0.1, y = 0.95, label = "Relations: intersects, touches\nDE-9IM: FF2F11212", hjust = "left", vjust = "top")
+
+g2 = ggplot(ps2) + geom_sf(aes(fill = Object), alpha = 0.5, show.legend = FALSE)
+g2an = g2 + annotate("text", x = 0.1, y = 0.95, label = "Relations: intersects,\ntouches, overlaps\nDE-9IM: 212101212", hjust = "left", vjust = "top")
+
+library(patchwork)
+g1an + g2an
+
+
 # create a line
-l_line = st_linestring(x = matrix(c(-1, -1, -0.5, 1), ncol = 2))
+l_line = st_linestring(x = matrix(c(-1, -1, -0.5, 1), ncol = 3))
 l = st_sfc(l_line)
 # create points
 p_matrix = matrix(c(0.5, 1, -1, 0, 0, 1, 0.5, 1), ncol = 2)
