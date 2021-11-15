@@ -27,7 +27,8 @@ de_9im = function(x,
                     "st_overlaps",
                     "st_equals",
                     "st_covers",
-                    "st_covered_by"
+                    "st_covered_by",
+                    ...
                     # ,
                     # "st_equals_exact" # requuires par argument
                     ),
@@ -35,7 +36,7 @@ de_9im = function(x,
                   output = "character",
                   collapse = "\n"
                   ) {
-  require("sf", quietly = TRUE)
+  require("sf")
   if (is(x, "sfc") && is(y, "sfc")) {
     x = st_sf(data.frame(Object = object_names[1]), geometry = x)
     y = st_sf(data.frame(Object = object_names[2]), geometry = y)
