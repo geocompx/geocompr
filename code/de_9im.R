@@ -35,7 +35,7 @@ de_9im = function(x,
                   output = "character",
                   collapse = "\n"
                   ) {
-  requireNamespace("sf", quietly = TRUE)
+  require("sf", quietly = TRUE)
   if (is(x, "sfc") && is(y, "sfc")) {
     x = st_sf(data.frame(Object = object_names[1]), geometry = x)
     y = st_sf(data.frame(Object = object_names[2]), geometry = y)
