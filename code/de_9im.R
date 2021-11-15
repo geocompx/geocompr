@@ -27,14 +27,14 @@ de_9im = function(x,
                     "st_overlaps",
                     "st_equals",
                     "st_covers",
-                    "st_covered_by",
-                    ...
+                    "st_covered_by"
                     # ,
                     # "st_equals_exact" # requuires par argument
                     ),
+                  include_relate = TRUE,
                   sparse = FALSE,
                   output = "character",
-                  collapse = "\n"
+                  collapse = " ✓\n"
                   ) {
   require("sf")
   if (is(x, "sfc") && is(y, "sfc")) {
@@ -50,6 +50,11 @@ de_9im = function(x,
   if(output == "character") {
     res = unlist(funs)[res]
   }
+  if(include_relate) {
+    relation = sf::st_relate(x, y)
+    relate_text = paste0(" \nDE-9IM string: \n", relation) 
+    res = c(res, relate_text)
+  }
   if(plot) {
     res_text = paste(res, collapse = collapse)
     message("Object x has the following spatial relations to y: ", res_text)
@@ -58,12 +63,12 @@ de_9im = function(x,
   res
 }
 
-de_9im_plot = function(xy, label = "test", alpha = 0.5, show.legend = FALSE, x = 0.1, y = 0.95) {
+de_9im_plot = function(xy, label = "test", alpha = 0.5, show.legend = FALSE, x = 0.1, y = 0.95, theme = ggplot2::theme_void()) {
   require("ggplot2", quietly = TRUE)
   # browser()
   ggplot(xy) + geom_sf(aes(fill = Object), alpha = alpha, show.legend = show.legend) +
     annotate("text", x = 0.1, y = 0.95, label = label, hjust = "left", vjust = "top") +
-    ggplot2::theme_void()
+    theme
 }
 
 # # Test code to functionalize:
