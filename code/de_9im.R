@@ -11,7 +11,21 @@
 de_9im = function(x,
                   y,
                   object_names = c("x", "y"),
-                  funs = list("st_intersects", "st_disjoint"),
+                  funs = list(
+                    "st_intersects",
+                    "st_disjoint",
+                    "st_touches",
+                    "st_crosses",
+                    "st_within",
+                    "st_contains",
+                    "st_contains_properly",
+                    "st_overlaps",
+                    "st_equals",
+                    "st_covers",
+                    "st_covered_by"
+                    # ,
+                    # "st_equals_exact" # requuires par argument
+                    ),
                   sparse = FALSE,
                   output = "character"
                   ) {
