@@ -21,3 +21,15 @@ de_9im = function(x, y, object_names = c("x", "y"), funs = list("st_intersects",
   })
   unlist(res)
 }
+
+# # Test code to functionalize:
+# theme_set(new = theme_void())
+# g1 = ggplot(ps1) + geom_sf(aes(fill = Object), alpha = 0.5, show.legend = FALSE)
+# # g1 + annotate("text", x = 0.3, y = 0.9, label = "st_intersects(Polygon1, Polygon2)")
+# g1 + annotate("text", x = 0.1, y = 0.95, label = "intersects TRUE\ndisjoint     FALSE\ntouches    TRUE\n", hjust = "left", vjust = "top") 
+# # Try annotating only which type of relations apply
+# # g1 + annotate("text", x = 0.1, y = 0.95, label = "Relations: intersects, touches", hjust = "left", vjust = "top")
+# g1an = g1 + annotate("text", x = 0.1, y = 0.95, label = "Relations: intersects, touches\nDE-9IM: FF2F11212", hjust = "left", vjust = "top")
+# 
+# g2 = ggplot(ps2) + geom_sf(aes(fill = Object), alpha = 0.5, show.legend = FALSE)
+# g2an = g2 + annotate("text", x = 0.1, y = 0.95, label = "Relations: intersects,\ntouches, overlaps\nDE-9IM: 212101212", hjust = "left", vjust = "top")
