@@ -8,9 +8,14 @@
 #' x = st_sfc(st_polygon(list(rbind(c(0, 0), c(1, 0), c(1, 1), c(0, 0)))))
 #' y = st_sfc(st_polygon(list(rbind(c(0, 0), c(0, 1), c(1, 1), c(0, 0)))))
 #' de_9im(x, y)
+#' p3 = st_sfc(st_polygon(list(rbind(c(0.7, 0.3), c(0.7, 0.95), c(0.9, 0.95), c(0.7, 0.3)))))
+#' p4 = st_sfc(st_polygon(list(rbind(c(0.6, 0.1), c(0.7, 0.5), c(0.9, 0.5), c(0.6, 0.1)))))
+#' p5 = st_sfc(st_polygon(list(rbind(c(0, 0.2), c(0, 1), c(0.9, 1), c(0, 0.2)))))
+#' de_9im(x, p3)
 de_9im = function(x,
                   y,
                   object_names = c("x", "y"),
+                  plot = TRUE,
                   funs = list(
                     "st_intersects",
                     "st_disjoint",
@@ -27,7 +32,8 @@ de_9im = function(x,
                     # "st_equals_exact" # requuires par argument
                     ),
                   sparse = FALSE,
-                  output = "character"
+                  output = "character",
+                  collapse = "\n"
                   ) {
   requireNamespace("sf", quietly = TRUE)
   if (is(x, "sfc") && is(y, "sfc")) {
@@ -43,7 +49,20 @@ de_9im = function(x,
   if(output == "character") {
     res = unlist(funs)[res]
   }
+  if(plot) {
+    res_text = paste(res, collapse = collapse)
+    message("Object x has the following spatial relations to y: ", res_text)
+    res = de_9im_plot(xy, label = res_text)
+  }
   res
+}
+
+de_9im_plot = function(xy, label = "test", alpha = 0.5, show.legend = FALSE, x = 0.1, y = 0.95) {
+  require("ggplot2", quietly = TRUE)
+  # browser()
+  ggplot(xy) + geom_sf(aes(fill = Object), alpha = alpha, show.legend = show.legend) +
+    annotate("text", x = 0.1, y = 0.95, label = label, hjust = "left", vjust = "top") +
+    ggplot2::theme_void()
 }
 
 # # Test code to functionalize:
@@ -53,7 +72,5 @@ de_9im = function(x,
 # g1 + annotate("text", x = 0.1, y = 0.95, label = "intersects TRUE\ndisjoint     FALSE\ntouches    TRUE\n", hjust = "left", vjust = "top")
 # # Try annotating only which type of relations apply
 # # g1 + annotate("text", x = 0.1, y = 0.95, label = "Relations: intersects, touches", hjust = "left", vjust = "top")
-# g1an = g1 + annotate("text", x = 0.1, y = 0.95, label = "Relations: intersects, touches\nDE-9IM: FF2F11212", hjust = "left", vjust = "top")
+# g1an = g1 + 
 #
-# g2 = ggplot(ps2) + geom_sf(aes(fill = Object), alpha = 0.5, show.legend = FALSE)
-# g2an = g2 + annotate("text", x = 0.1, y = 0.95, label = "Relations: intersects,\ntouches, overlaps\nDE-9IM: 212101212", hjust = "left", vjust = "top")
