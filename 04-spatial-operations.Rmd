@@ -200,7 +200,7 @@ polygon = st_polygon(list(polygon_matrix))
 polygon_sfc = st_sfc(polygon)
 ```
 
-We will create additional geometries to demonstrate spatial relations with the following commands.
+We will create additional geometries to demonstrate spatial relations with the following commands which, when plotted on top of the polygon created above, relate in space to one another, as shown in Figure \@ref(fig:relation-objects).
 Note the use of the function `st_as_sf()` and the argument `coords` to efficiently convert from a data frame containing columns representing coordinates to an `sf` object containing points:
 
 ```{r}
@@ -217,7 +217,7 @@ point_df = read.csv(text = "x,y
 point_sf = st_as_sf(point_df, coords = c("x", "y"))
 ```
 
-```{r relation-objects, echo=FALSE, fig.cap="Points (p 1 to 4), line and polygon objects arranged to illustrate topological relations.", fig.asp=1, out.width="50%", fig.scap="Demonstration of topological relations."}
+```{r relation-objects, echo=FALSE, fig.cap="Points (`point_df` 1 to 3), line and polygon objects arranged to illustrate topological relations.", fig.asp=1, out.width="50%", fig.scap="Demonstration of topological relations."}
 par(pty = "s")
 plot(polygon_sfc, border = "red", col = "gray", axes = TRUE)
 plot(line_sfc, add = TRUE)
@@ -249,11 +249,11 @@ st_intersects(point_sf, polygon_sfc, sparse = FALSE)
 ```
 
 The output is a matrix in which each row represents a feature in the target object and each column represents a feature in the selecting object.
-In this case, only the first two features in `p` intersect with `a` and there is only one feature in `a` so the result has only one column.
+In this case, only the third feature in `point_sf` intersects with `polygon_sfc`.
+There is only one feature in `polygon_sfc` so the result has only one column.
 The result can be used for subsetting as we saw in Section \@ref(spatial-subsetting).
 
-Note that `st_intersects()` returns `TRUE` for the second feature in the object `p` even though it just touches the polygon `a`: *intersects* is a 'catch-all' topological operation which identifies many types of spatial relation.
-
+Note: `st_intersects()` returns `TRUE` even in cases where the features just touch: *intersects* is a 'catch-all' topological operation which identifies many types of spatial relation, as illustrated in Figure \@ref(fig:relate).
 The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (note `[, 1]` converts the result into a vector):
 
 ```{r 04-spatial-operations-11}
@@ -261,14 +261,14 @@ st_disjoint(point_sf, polygon_sfc, sparse = FALSE)[, 1]
 ```
 
 `st_within()` returns `TRUE` only for objects that are completely within the selecting object.
-This applies only to the first object, which is inside the triangular polygon, as illustrated below:
+This also only applies to the third point, which is inside the polygon, as illustrated below:
 
 ```{r 04-spatial-operations-12}
 st_within(point_sf, polygon_sfc, sparse = FALSE)[, 1]
 ```
 
 Note that although the first point is *within* the triangle, it does not *touch* any part of its border.
-For this reason `st_touches()` only returns `TRUE` for the second point:
+For this reason `st_touches()` only returns `FALSE` for all points:
 
 ```{r 04-spatial-operations-13}
 st_touches(point_sf, polygon_sfc, sparse = FALSE)[, 1]
@@ -277,11 +277,12 @@ st_touches(point_sf, polygon_sfc, sparse = FALSE)[, 1]
 What about features that do not touch, but *almost touch* the selection object?
 These can be selected using `st_is_within_distance()`, which has an additional `dist` argument.
 It can be used to set how close target objects need to be before they are selected.
-Note that although point 4 is one unit of distance from the nearest node of `a` (at point 2 in Figure \@ref(fig:relation-objects)), it is still selected when the distance is set to 0.9.
-This is illustrated in the code chunk below, the second line of which converts the lengthy list output into a `logical` object:
+Note that although point 4 is one unit of distance from the nearest node of `polygon_sfc` (at point 2 in Figure \@ref(fig:relation-objects)), it is still selected when the distance is set to 0.9.
+This is illustrated in the code chunk below, the second line of which uses the function `lengths()` to convert the lengthy list output into a `logical` object:
 
 ```{r 04-spatial-operations-14}
-sel = st_is_within_distance(point_sf, polygon_sfc, dist = 0.9) # can only return a sparse matrix
+# can only return a sparse matrix
+sel = st_is_within_distance(point_sf, polygon_sfc, dist = 0.1) 
 lengths(sel) > 0
 ```
 
