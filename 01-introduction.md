@@ -310,6 +310,7 @@ Other examples of bridges between R and GIS include **RSAGA** [@R-RSAGA, first p
 Visualization was not a focus initially, with the bulk of R-spatial development focused on analysis and geographic operations.
 **sp** provided methods for map making using both the base and lattice plotting system but demand was growing for advanced map making capabilities.
 **RgoogleMaps** first released in 2009, allowed to overlay R spatial data on top of 'basemap' tiles from online services such as Google Maps or OpenStreetMap [@loecher_rgooglemaps_2015].
+\index{ggplot2 (package)}
 It was followed by the **ggmap** package that added similar 'basemap' tiles capabilities to **ggplot2** [@kahle_ggmap_2013].
 Though **ggmap** facilitated map-making with **ggplot2**, its utility was limited by the need to `fortify` spatial objects, which means converting them into long data frames.
 While this works well for points it is computationally inefficient for lines and polygons, since each coordinate (vertex) is converted into a row, leading to huge data frames to represent complex geometries.
@@ -317,37 +318,50 @@ Although geographic visualization tended to focus on vector data, raster visuali
 As of 2018 map making in R is a hot topic with dedicated packages such as **tmap**, **leaflet** and **mapview** all supporting the class system provided by **sf**, the focus of the next chapter (see Chapter \@ref(adv-map) for more on visualization).
 
 Since late 2018, a movement of modernizing basic R packages related to handling spatial data has continued. 
+\index{stars (package)}
 The **stars** package, closely connected to **sf**, was created for handling raster and vector data cubes.
 <!--ref-->
+\index{terra (package)}
 In 2020, **terra** -- a successor of the **raster** package aimed at better performance and more straightforward user interface was firstly released (see Chapter \@ref(raster-data)).
 <!--ref-->
 
 <!-- Upstream software dependencies -->
-This modernization had several reasons, including impacts from spatial software development outside of the R environment and the  ... [@bivand_progress_2021].
-The most important external factor affecting most spatial software, including R spatial packages, were the major updates, including many breaking changes to the PROJ library that had begun in 2018 (learn more in Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)).
+This modernization had several reasons, including the emergence of new technologies and standard and the impacts from spatial software development outside of the R environment [@bivand_progress_2020].
+The most important external factor affecting most spatial software, including R spatial packages, were the major updates, including many breaking changes to the PROJ library\index{PROJ} that had begun in 2018 (learn more in Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)).
+
 
 <!-- spatstat -->
 
-<!-- spherical geometry in sf + s2-->
-
 <!-- lidr?? -->
 
-<!-- retirement of rgdal, rgeos and maptools -->
-<!-- https://stat.ethz.ch/pipermail/r-sig-geo/2021-September/028760.html -->
+\index{rayshader (package)}
+Since 2018, the progress of spatial visualization tools in R has been related to a few factors.
+Firstly, new types of spatial plots were developed, including the **rayshader** package offering a combination of raytracing and multiple hill-shading methods to produce 2D and 3D data visualizations.
+<!-- ref -->
+\index{ggplot2 (package)}
+Secondly, **ggplot2** gained new spatial capabilities, mostly thanks to the **ggspatial** package that adds scale bars and north arrows and **gganimate** that enables smooth and customizable spatial animations.
+<!--ref-->
+Thirdly, 
 
-<!-- viz improvements -->
-<!-- add rayshader + ggspatial to the above viz list -->
-<!-- add mapsf -->
-<!-- mention tmap4 -->
+<!--ref-->
+Lastly, some of the existing mapping tools have been rewritten to minimize dependencies, improve user interface, or allow for easier creation of extensions.
+This includes the **mapsf** package (successor of **cartography**) and version 4 of the **tmap** package, in which most of the internal code was revised.
+<!-- ref -->
+
+<!-- spherical geometry in sf + s2-->
 
 
+<!-- toDo: rl-->
+<!-- question: should we add a paragraph about the following stuff here?-->
 <!-- add info about specialized packages - sfnetworks, landscapemetrics, gdalcubes, rgee, etc. -->
-<!-- better to add review papers, including Robin's, mine, forest, etc. -->
+<!-- better to add review papers, including Robin's, mine, etc. -->
 <!-- interoperbility? -->
 <!-- @hesselbarth_opensource_2021 -->
 <!-- @lovelace_open_2021a -->
 
-<!-- check https://twitter.com/jakub_nowosad/status/1453722281264377865 -->
+In late 2021, the planned retirement of **rgdal**, **rgeos** and **maptools** at the end of 2023 was announced on [the R-sig-Geo mailing list](https://stat.ethz.ch/pipermail/r-sig-geo/2021-September/028760.html) by Roger Bivand.
+This would have a large impact on existing workflows applying these packages, but also will influence the packages that depend on **rgdal**, **rgeos** or **maptools**. 
+Therefore, Bivand's suggestion is to plan a transition to more modern tools, including **sf** and **terra**, as explained in this book's next chapters.
 
 ## Exercises
 

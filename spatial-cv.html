@@ -100,11 +100,11 @@
 A familiarity with generalized linear models (GLM) and machine learning is highly recommended <span class="citation">(for example from <a href="references.html#ref-zuur_mixed_2009" role="doc-biblioref">A. Zuur et al. 2009</a>; <a href="references.html#ref-james_introduction_2013" role="doc-biblioref">James et al. 2013</a>)</span>.</p>
 <p>The chapter uses the following packages:<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 Package &lt;strong&gt;kernlab&lt;/strong&gt;, &lt;strong&gt;pROC&lt;/strong&gt;, &lt;strong&gt;RSAGA&lt;/strong&gt; and &lt;strong&gt;spDataLarge&lt;/strong&gt; must also be installed although these do not need to be attached.&lt;/p&gt;"><sup>66</sup></a></p>
-<div class="sourceCode" id="cb369"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb368"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster">raster</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb370"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb369"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mlr.mlr-org.com">mlr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://parallelmap.mlr-org.com">parallelMap</a></span><span class="op">)</span></code></pre></div>
 <p>Required data will be attached in due course.</p>
@@ -152,7 +152,7 @@ Spatial CV alleviates this problem and is the <strong>central</strong> theme in 
 </h2>
 <p>This case study is based on a dataset of landslide locations in Southern Ecuador, illustrated in Figure <a href="spatial-cv.html#fig:lsl-map">11.1</a> and described in detail in <span class="citation"><a href="references.html#ref-muenchow_geomorphic_2012" role="doc-biblioref">Muenchow, Brenning, and Richter</a> (<a href="references.html#ref-muenchow_geomorphic_2012" role="doc-biblioref">2012</a>)</span>.
 A subset of the dataset used in that paper is provided in the <strong>RSAGA</strong> package, which can be loaded as follows:</p>
-<div class="sourceCode" id="cb371"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb370"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"landslides"</span>, package <span class="op">=</span> <span class="st">"RSAGA"</span><span class="op">)</span></code></pre></div>
 <p>This should load three objects: a <code>data.frame</code> named <code>landslides</code>, a <code>list</code> named <code>dem</code>, and an <code>sf</code> object named <code>study_area</code>.
 <code>landslides</code> contains a factor column <code>lslpts</code> where <code>TRUE</code> corresponds to an observed landslide ‘initiation point,’ with the coordinates stored in columns <code>x</code> and <code>y</code>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
@@ -162,7 +162,7 @@ The 1360 non-landslide points were sampled randomly from the study area, with th
 <p>To make the number of landslide and non-landslide points balanced, let us sample 175 from the 1360 non-landslide points.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;The &lt;code&gt;landslides&lt;/code&gt; dataset has been used in classes and summer schools.
 To show how predictive performance of different algorithms changes with an unbalanced and highly spatially autocorrelated response variable, 1360 non-landslide points were randomly selected, i.e., many more absences than presences.
 However, especially a logistic regression with a log-link, as used in this chapter, expects roughly the same number of presences and absences in the response.&lt;/p&gt;"><sup>69</sup></a></p>
-<div class="sourceCode" id="cb372"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb371"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># select non-landslide points</span>
 <span class="va">non_pts</span> <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">landslides</span>, <span class="va">lslpts</span> <span class="op">==</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="co"># select landslide points</span>
@@ -176,7 +176,7 @@ However, especially a logistic regression with a log-link, as used in this chapt
 <code>dem$header</code>, a <code>list</code> which represents a raster ‘header’ (see Section <a href="spatial-class.html#raster-data">2.3</a>), and <code>dem$data</code>, a matrix with the altitude of each pixel.
 <code>dem</code> can be converted into a <code>raster</code> object with:</p>
 <!-- Idea: could create a function to do this -->
-<div class="sourceCode" id="cb373"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb372"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dem</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/raster.html">raster</a></span><span class="op">(</span>
   <span class="va">dem</span><span class="op">$</span><span class="va">data</span>, 
   crs <span class="op">=</span> <span class="va">dem</span><span class="op">$</span><span class="va">header</span><span class="op">$</span><span class="va">proj4string</span>,
@@ -209,7 +209,7 @@ We leave it as an exercise to the reader to compute the following terrain attrib
 </ul>
 <p>Data containing the landslide points, with the corresponding terrain attributes, is provided in the <strong>spDataLarge</strong> package, along with the terrain attribute raster stack from which the values were extracted.
 Hence, if you have not computed the predictors yourself, attach the corresponding data before running the code of the remaining chapter:</p>
-<div class="sourceCode" id="cb374"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb373"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># attach landslide points with terrain attributes</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"lsl"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
 <span class="co"># attach terrain attribute raster stack</span>
@@ -336,7 +336,7 @@ This introduction to supervised statistical learning provides the basis for doin
 <p>Supervised learning involves predicting a response variable as a function of predictors (Section <a href="spatial-cv.html#intro-cv">11.4</a>).
 In R, modeling functions are usually specified using formulas (see <code><a href="https://rdrr.io/r/stats/formula.html">?formula</a></code> and the detailed <a href="https://www.datacamp.com/community/tutorials/r-formula-tutorial">Formulas in R Tutorial</a> for details of R formulas).
 The following command specifies and runs a generalized linear model:</p>
-<div class="sourceCode" id="cb375"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb374"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fit</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html">glm</a></span><span class="op">(</span><span class="va">lslpts</span> <span class="op">~</span> <span class="va">slope</span> <span class="op">+</span> <span class="va">cplan</span> <span class="op">+</span> <span class="va">cprof</span> <span class="op">+</span> <span class="va">elev</span> <span class="op">+</span> <span class="va">log10_carea</span>,
           family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">binomial</a></span><span class="op">(</span><span class="op">)</span>,
           data <span class="op">=</span> <span class="va">lsl</span><span class="op">)</span></code></pre></div>
@@ -347,7 +347,7 @@ The following command specifies and runs a generalized linear model:</p>
 <li>The data frame which contains the response and the predictors</li>
 </ul>
 <p>The results of this model can be printed as follows (<code>summary(fit)</code> provides a more detailed account of the results):</p>
-<div class="sourceCode" id="cb376"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb375"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>
 <span class="co">#&gt; [1] "glm" "lm"</span>
 <span class="va">fit</span>
@@ -366,7 +366,7 @@ The following command specifies and runs a generalized linear model:</p>
 It can also be used for prediction.
 This is done with the generic <code><a href="https://rdrr.io/pkg/raster/man/predict.html">predict()</a></code> method, which in this case calls the function <code><a href="https://rdrr.io/r/stats/predict.glm.html">predict.glm()</a></code>.
 Setting <code>type</code> to <code>response</code> returns the predicted probabilities (of landslide occurrence) for each observation in <code>lsl</code>, as illustrated below (see <code><a href="https://rdrr.io/r/stats/predict.glm.html">?predict.glm</a></code>):</p>
-<div class="sourceCode" id="cb377"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb376"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pred_glm</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/predict.html">predict</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">fit</span>, type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html">head</a></span><span class="op">(</span><span class="va">pred_glm</span><span class="op">)</span>
 <span class="co">#&gt;      1      2      3      4      5      6 </span>
@@ -374,7 +374,7 @@ Setting <code>type</code> to <code>response</code> returns the predicted probabi
 <p>Spatial predictions can be made by applying the coefficients to the predictor rasters.
 This can be done manually or with <code><a href="https://rdrr.io/pkg/raster/man/predict.html">raster::predict()</a></code>.
 In addition to a model object (<code>fit</code>), this function also expects a raster stack with the predictors named as in the model’s input data frame (Figure <a href="spatial-cv.html#fig:lsl-susc">11.2</a>).</p>
-<div class="sourceCode" id="cb378"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb377"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># making the prediction</span>
 <span class="va">pred</span> <span class="op">=</span> <span class="fu">raster</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/predict.html">predict</a></span><span class="op">(</span><span class="va">ta</span>, model <span class="op">=</span> <span class="va">fit</span>, type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -405,7 +405,7 @@ This is a value between 0.5 and 1.0, with 0.5 indicating a model that is no bett
 Thus, the higher the AUROC, the better the model’s predictive power.
 The following code chunk computes the AUROC value of the model with <code>roc()</code>, which takes the response and the predicted values as inputs.
 <code><a href="https://mlr.mlr-org.com/reference/measures.html">auc()</a></code> returns the area under the curve.</p>
-<div class="sourceCode" id="cb379"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb378"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">pROC</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/pROC/man/auc.html">auc</a></span><span class="op">(</span><span class="fu">pROC</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/pROC/man/roc.html">roc</a></span><span class="op">(</span><span class="va">lsl</span><span class="op">$</span><span class="va">lslpts</span>, <span class="fu"><a href="https://rdrr.io/r/stats/fitted.values.html">fitted</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; Area under the curve: 0.826</span></code></pre></div>
 <p>An AUROC value of
@@ -487,7 +487,7 @@ The first essential argument of these <code>make*()</code> functions is <code>da
 The <code>target</code> argument expects the name of a response variable and <code>positive</code> determines which of the two factor levels of the response variable indicate the landslide initiation point (in our case this is <code>TRUE</code>).
 All other variables of the <code>lsl</code> dataset will serve as predictors except for the coordinates (see the result of <code>getTaskFormula(task)</code> for the model formula).
 For spatial CV, the <code>coordinates</code> parameter is used (see Section <a href="spatial-cv.html#intro-cv">11.4</a> and Figure <a href="spatial-cv.html#fig:partitioning">11.3</a>) which expects the coordinates as a xy data frame.</p>
-<div class="sourceCode" id="cb380"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb379"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mlr.mlr-org.com">mlr</a></span><span class="op">)</span>
 <span class="co"># coordinates needed for the spatial partitioning</span>
 <span class="va">coords</span> <span class="op">=</span> <span class="va">lsl</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span><span class="op">]</span>
@@ -500,7 +500,7 @@ For spatial CV, the <code>coordinates</code> parameter is used (see Section <a h
 All classification <strong>learners</strong> start with <code>classif.</code> and all regression learners with <code>regr.</code> (see <code><a href="https://mlr.mlr-org.com/reference/makeLearners.html">?makeLearners</a></code> for details).
 <code><a href="https://mlr.mlr-org.com/reference/listLearners.html">listLearners()</a></code> helps to find out about all available learners and from which package <strong>mlr</strong> imports them (Table <a href="spatial-cv.html#tab:lrns">11.2</a>).
 For a specific task, we can run:</p>
-<div class="sourceCode" id="cb381"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb380"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://mlr.mlr-org.com/reference/listLearners.html">listLearners</a></span><span class="op">(</span><span class="va">task</span>, warn.missing.packages <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">class</span>, <span class="va">name</span>, <span class="va">short.name</span>, <span class="va">package</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://rdrr.io/pkg/raster/man/headtail.html">head</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
@@ -613,13 +613,13 @@ RWeka
 We opt for the binomial classification method used in Section <a href="spatial-cv.html#conventional-model">11.3</a> and implemented as <code>classif.binomial</code> in <strong>mlr</strong>.
 Additionally, we must specify the link-function, <code>logit</code> in this case, which is also the default of the <code><a href="https://rdrr.io/r/stats/family.html">binomial()</a></code> function.
 <code>predict.type</code> determines the type of the prediction with <code>prob</code> resulting in the predicted probability for landslide occurrence between 0 and 1 (this corresponds to <code>type = response</code> in <code>predict.glm</code>).</p>
-<div class="sourceCode" id="cb382"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb381"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">lrn</span> <span class="op">=</span> <span class="fu"><a href="https://mlr.mlr-org.com/reference/makeLearner.html">makeLearner</a></span><span class="op">(</span>cl <span class="op">=</span> <span class="st">"classif.binomial"</span>,
                   link <span class="op">=</span> <span class="st">"logit"</span>,
                   predict.type <span class="op">=</span> <span class="st">"prob"</span>,
                   fix.factors.prediction <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>To find out from which package the specified learner is taken and how to access the corresponding help pages, we can run:</p>
-<div class="sourceCode" id="cb383"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb382"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://mlr.mlr-org.com/reference/getLearnerPackages.html">getLearnerPackages</a></span><span class="op">(</span><span class="va">lrn</span><span class="op">)</span>
 <span class="fu"><a href="https://mlr.mlr-org.com/reference/helpLearner.html">helpLearner</a></span><span class="op">(</span><span class="va">lrn</span><span class="op">)</span></code></pre></div>
 <!--
@@ -647,13 +647,13 @@ Further advantages are simple parallelization of resampling techniques and the a
 Most importantly, (spatial) resampling in <strong>mlr</strong> is straightforward, requiring only two more steps: specifying a resampling method and running it.
 We will use a 100-repeated 5-fold spatial CV: five partitions will be chosen based on the provided coordinates in our <code>task</code> and the partitioning will be repeated 100 times:<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;Note that package &lt;strong&gt;sperrorest&lt;/strong&gt; initially implemented spatial cross-validation in R &lt;span class="citation"&gt;(&lt;a href="references.html#ref-brenning_spatial_2012" role="doc-biblioref"&gt;Brenning 2012b&lt;/a&gt;)&lt;/span&gt;.
 In the meantime, its functionality was integrated into the &lt;strong&gt;mlr&lt;/strong&gt; package which is the reason why we are using &lt;strong&gt;mlr&lt;/strong&gt; &lt;span class="citation"&gt;(&lt;a href="references.html#ref-schratz_performance_nodate" role="doc-biblioref"&gt;Schratz et al. 2018&lt;/a&gt;)&lt;/span&gt;.The &lt;strong&gt;caret&lt;/strong&gt; package is another umbrella-package &lt;span class="citation"&gt;(&lt;a href="references.html#ref-kuhn_applied_2013" role="doc-biblioref"&gt;Kuhn and Johnson 2013&lt;/a&gt;)&lt;/span&gt; for streamlined modeling in R; however, so far it does not provide spatial CV which is why we refrain from using it for spatial data.&lt;/p&gt;'><sup>70</sup></a></p>
-<div class="sourceCode" id="cb384"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb383"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">perf_level</span> <span class="op">=</span> <span class="fu"><a href="https://mlr.mlr-org.com/reference/makeResampleDesc.html">makeResampleDesc</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"SpRepCV"</span>, folds <span class="op">=</span> <span class="fl">5</span>, reps <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></code></pre></div>
 <p>To execute the spatial resampling, we run <code><a href="https://mlr.mlr-org.com/reference/resample.html">resample()</a></code> using the specified learner, task, resampling strategy and of course the performance measure, here the AUROC.
 This takes some time (around 10 seconds on a modern laptop) because it computes the AUROC for 500 models.
 Setting a seed ensures the reproducibility of the obtained result and will ensure the same spatial partitioning when re-running the code.</p>
 <!-- I just thought it might be worth showing the differences between an error on the fold level and repetition level but aggregating to the rep level is not a one-liner in mlr -->
-<div class="sourceCode" id="cb385"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb384"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">012348</span><span class="op">)</span>
 <span class="va">sp_cv</span> <span class="op">=</span> <span class="fu">mlr</span><span class="fu">::</span><span class="fu"><a href="https://mlr.mlr-org.com/reference/resample.html">resample</a></span><span class="op">(</span>learner <span class="op">=</span> <span class="va">lrn</span>, task <span class="op">=</span> <span class="va">task</span>,
                       resampling <span class="op">=</span> <span class="va">perf_level</span>, 
@@ -661,7 +661,7 @@ Setting a seed ensures the reproducibility of the obtained result and will ensur
 <!-- sp_cv and conv_cv have been saved in spatialcv.Rdata. I needed to run the modeling outside of the book since knitr sets its own seed and I am not sure if this actually helps to make sure that the same partitions are used in the cv.
 I really don't understand why I have to load spatialcv.Rdata here a third time...-->
 <p>The output of the preceding code chunk is a bias-reduced assessment of the model’s predictive performance, as illustrated in the following code chunk (required input data is saved in the file <code>spatialcv.Rdata</code> in the book’s GitHub repo):</p>
-<div class="sourceCode" id="cb386"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb385"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># summary statistics of the 500 models</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/summary.html">summary</a></span><span class="op">(</span><span class="va">sp_cv</span><span class="op">$</span><span class="va">measures.test</span><span class="op">$</span><span class="va">auc</span><span class="op">)</span>
 <span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span>
@@ -705,7 +705,7 @@ This works for non-spatial data but is of less use for spatial data where ‘spa
 <p>Before defining spatial tuning, we will set up the <strong>mlr</strong> building blocks, introduced in Section <a href="spatial-cv.html#glm">11.5.1</a>, for the SVM.
 The classification task remains the same, hence we can simply reuse the <code>task</code> object created in Section <a href="spatial-cv.html#glm">11.5.1</a>.
 Learners implementing SVM can be found using <code><a href="https://mlr.mlr-org.com/reference/listLearners.html">listLearners()</a></code> as follows:</p>
-<div class="sourceCode" id="cb387"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb386"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">lrns</span> <span class="op">=</span> <span class="fu"><a href="https://mlr.mlr-org.com/reference/listLearners.html">listLearners</a></span><span class="op">(</span><span class="va">task</span>, warn.missing.packages <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">lrns</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"svm"</span>, <span class="va">class</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">class</span>, <span class="va">name</span>, <span class="va">short.name</span>, <span class="va">package</span><span class="op">)</span>
@@ -715,7 +715,7 @@ Learners implementing SVM can be found using <code><a href="https://mlr.mlr-org.
 <span class="co">#&gt; 17   classif.svm     Support Vector Machines (libsvm)        svm   e1071</span></code></pre></div>
 <p>Of the options illustrated above, we will use <code>ksvm()</code> from the <strong>kernlab</strong> package <span class="citation">(<a href="references.html#ref-karatzoglou_kernlab_2004" role="doc-biblioref">Karatzoglou et al. 2004</a>)</span>.
 To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel which is also the default of <code>ksvm()</code>.</p>
-<div class="sourceCode" id="cb388"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb387"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">lrn_ksvm</span> <span class="op">=</span> <span class="fu"><a href="https://mlr.mlr-org.com/reference/makeLearner.html">makeLearner</a></span><span class="op">(</span><span class="st">"classif.ksvm"</span>,
                         predict.type <span class="op">=</span> <span class="st">"prob"</span>,
                         kernel <span class="op">=</span> <span class="st">"rbfdot"</span><span class="op">)</span></code></pre></div>
@@ -723,7 +723,7 @@ To allow for non-linear relationships, we use the popular radial basis function 
 Again we will use a 100-repeated 5-fold spatial CV.</p>
 <!-- Instead of saying "outer resampling" we concluded to use "performance estimation level" and "tuning level" (inner) in our paper
 # this is also what is shown in the nested CV figure so it would be more consistent -->
-<div class="sourceCode" id="cb389"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb388"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># performance estimation level</span>
 <span class="va">perf_level</span> <span class="op">=</span> <span class="fu"><a href="https://mlr.mlr-org.com/reference/makeResampleDesc.html">makeResampleDesc</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"SpRepCV"</span>, folds <span class="op">=</span> <span class="fl">5</span>, reps <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></code></pre></div>
 <p>Note that this is the exact same code as used for the GLM in Section <a href="spatial-cv.html#glm">11.5.1</a>; we have simply repeated it here as a reminder.</p>
@@ -755,7 +755,7 @@ Questions Pat:
 talk in person (see also exercises):
 - can I compare the mean AUROC of the GLM and the SVM when using the same seed? Or is seeding not strictly necessary? I mean, ok, the partitions vary a bit but overall...
 -->
-<div class="sourceCode" id="cb390"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb389"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># five spatially disjoint partitions</span>
 <span class="va">tune_level</span> <span class="op">=</span> <span class="fu"><a href="https://mlr.mlr-org.com/reference/makeResampleDesc.html">makeResampleDesc</a></span><span class="op">(</span><span class="st">"SpCV"</span>, iters <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>
 <span class="co"># use 50 randomly selected hyperparameters</span>
@@ -766,7 +766,7 @@ talk in person (see also exercises):
   <span class="fu"><a href="https://paramhelpers.mlr-org.com/reference/Param.html">makeNumericParam</a></span><span class="op">(</span><span class="st">"sigma"</span>, lower <span class="op">=</span> <span class="op">-</span><span class="fl">15</span>, upper <span class="op">=</span> <span class="fl">6</span>, trafo <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fl">2</span><span class="op">^</span><span class="va">x</span><span class="op">)</span>
   <span class="op">)</span></code></pre></div>
 <p>The next stage is to modify the learner <code>lrn_ksvm</code> in accordance with all the characteristics defining the hyperparameter tuning with <code><a href="https://mlr.mlr-org.com/reference/makeTuneWrapper.html">makeTuneWrapper()</a></code>.</p>
-<div class="sourceCode" id="cb391"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb390"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">wrapped_lrn_ksvm</span> <span class="op">=</span> <span class="fu"><a href="https://mlr.mlr-org.com/reference/makeTuneWrapper.html">makeTuneWrapper</a></span><span class="op">(</span>learner <span class="op">=</span> <span class="va">lrn_ksvm</span>, 
                                    resampling <span class="op">=</span> <span class="va">tune_level</span>,
                                    par.set <span class="op">=</span> <span class="va">ps</span>,
@@ -792,7 +792,7 @@ Model runtime can be reduced with parallelization, which can be done in a number
 <p>Before starting the parallelization, we ensure that the processing continues even if one of the models throws an error by setting <code>on.learner.error</code> to <code>warn</code>.
 This avoids the process stopping just because of one failed model, which is desirable on large model runs.
 To inspect the failed models once the processing is completed, we dump them:</p>
-<div class="sourceCode" id="cb392"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb391"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://mlr.mlr-org.com/reference/configureMlr.html">configureMlr</a></span><span class="op">(</span>on.learner.error <span class="op">=</span> <span class="st">"warn"</span>, on.error.dump <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>To start the parallelization, we set the <code>mode</code> to <code>multicore</code> which will use <code>mclapply()</code> in the background on a single machine in the case of a Unix-based operating system.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 See &lt;code&gt;?parallelStart&lt;/code&gt; for further modes and github.com/berndbischl/parallelMap for more on the unified interface to popular parallelization back-ends.&lt;/p&gt;"><sup>72</sup></a>
@@ -802,7 +802,7 @@ We will use half of the available cores (set with the <code>cpus</code> paramete
 <!-- the partitions are created before the parallelization by the normal set.seed() call. mc.set.seed makes sure that the randomly chosen hyperparameters for the tuning are reproducible. These will first set within the parallelization.-->
 Setting <code>mc.set.seed</code> to <code>TRUE</code> ensures that the randomly chosen hyperparameters during the tuning can be reproduced when running the code again.
 Unfortunately, <code>mc.set.seed</code> is only available under Unix-based systems.</p>
-<div class="sourceCode" id="cb393"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb392"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://parallelmap.mlr-org.com">parallelMap</a></span><span class="op">)</span>
 <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.info.html">Sys.info</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="st">"sysname"</span><span class="op">]</span> <span class="op"><a href="https://rdrr.io/pkg/raster/man/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"Linux"</span>, <span class="st">"Darwin"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
 <span class="fu"><a href="https://parallelmap.mlr-org.com/reference/parallelStart.html">parallelStart</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"multicore"</span>, 
@@ -825,7 +825,7 @@ After the processing, it is good practice to explicitly stop the parallelization
 Finally, we save the output object (<code>result</code>) to disk in case we would like to use it another R session.
 Before running the subsequent code, be aware that it is time-consuming:
 the 125,500 models took ~1/2hr on a server using 24 cores (see below).</p>
-<div class="sourceCode" id="cb394"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb393"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">12345</span><span class="op">)</span>
 <span class="va">result</span> <span class="op">=</span> <span class="fu">mlr</span><span class="fu">::</span><span class="fu"><a href="https://mlr.mlr-org.com/reference/resample.html">resample</a></span><span class="op">(</span>learner <span class="op">=</span> <span class="va">wrapped_lrn_ksvm</span>, 
                        task <span class="op">=</span> <span class="va">task</span>,
@@ -838,17 +838,17 @@ the 125,500 models took ~1/2hr on a server using 24 cores (see below).</p>
 <span class="co"># saveRDS(result, "svm_sp_sp_rbf_50it.rds")</span></code></pre></div>
 <p>In case you do not want to run the code locally, we have saved a subset of the <a href="https://github.com/Robinlovelace/geocompr/blob/main/extdata/spatial_cv_result.rds">results</a> in the book’s GitHub repo.
 They can be loaded as follows:</p>
-<div class="sourceCode" id="cb395"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb394"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">result</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"extdata/spatial_cv_result.rds"</span><span class="op">)</span></code></pre></div>
 <p>Note that runtime depends on many aspects: CPU speed, the selected algorithm, the selected number of cores and the dataset.</p>
-<div class="sourceCode" id="cb396"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb395"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Exploring the results</span>
 <span class="co"># runtime in minutes</span>
 <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">runtime</span> <span class="op">/</span> <span class="fl">60</span>, <span class="fl">2</span><span class="op">)</span>
 <span class="co">#&gt; [1] 37.4</span></code></pre></div>
 <!-- interestingly, running the code with 4 cores takes 41.67 minutes -->
 <p>Even more important than the runtime is the final aggregated AUROC: the model’s ability to discriminate the two classes.</p>
-<div class="sourceCode" id="cb397"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb396"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># final aggregated AUROC </span>
 <span class="va">result</span><span class="op">$</span><span class="va">aggr</span>
 <span class="co">#&gt; auc.test.mean </span>
@@ -861,7 +861,7 @@ However, using more than 50 iterations in the random search would probably yield
 On the other hand, increasing the number of random search iterations would also increase the total number of models and thus runtime.</p>
 <p>The estimated optimal hyperparameters for each fold at the performance estimation level can also be viewed.
 The following command shows the best hyperparameter combination of the first fold of the first iteration (recall this results from the first 5 * 50 model runs):</p>
-<div class="sourceCode" id="cb398"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb397"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># winning hyperparameters of tuning step, </span>
 <span class="co"># i.e. the best combination out of 50 * 5 models</span>
 <span class="va">result</span><span class="op">$</span><span class="va">extract</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">x</span>
@@ -871,7 +871,7 @@ The following command shows the best hyperparameter combination of the first fol
 <span class="co">#&gt; $sigma</span>
 <span class="co">#&gt; [1] 0.023</span></code></pre></div>
 <p>The estimated hyperparameters have been used for the first fold in the first iteration of the performance estimation level which resulted in the following AUROC value:</p>
-<div class="sourceCode" id="cb399"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb398"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">result</span><span class="op">$</span><span class="va">measures.test</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>
 <span class="co">#&gt;   iter   auc</span>
 <span class="co">#&gt; 1    1 0.799</span></code></pre></div>
@@ -986,7 +986,7 @@ For a discussion on the need for (spatial) tuning of hyperparameters, please ref
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-11-12.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-11-17.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
