@@ -688,7 +688,7 @@ It offers advanced controls including the ability to 'burst' datasets into multi
 Additionally, it provides automatic coloring of attributes (via argument `zcol`).
 In essence, it can be considered a data-driven **leaflet** API\index{API} (see below for more information about **leaflet**). 
 Given that **mapview** always expects a spatial object (`sf`, `Spatial*`, `Raster*`) as its first argument, it works well at the end of piped expressions. 
-Consider the following example where **sf** is used to intersect lines and polygons and then is visualised with **mapview** (Figure \@ref(fig:mapview2)).
+Consider the following example where **sf** is used to intersect lines and polygons and then is visualized with **mapview** (Figure \@ref(fig:mapview2)).
 
 
 ```r
@@ -705,6 +705,9 @@ trails %>%
 <img src="figures/mapview-example.png" alt="Using mapview at the end of a sf-based pipe expression." width="100%" />
 <p class="caption">(\#fig:mapview2)Using mapview at the end of a sf-based pipe expression.</p>
 </div>
+
+<!--toDo:jn-->
+<!-- add more info about mapview improved performance ("mapview can use all of them by setting e.g. `mapviewOptions(platform = "leafgl"/"mapdeck")` or `mapviewOptions(georaster = TRUE)`") -->
 
 One important thing to keep in mind is that **mapview** layers are added via the `+` operator (similar to **ggplot2** or **tmap**). This is a frequent [gotcha](https://en.wikipedia.org/wiki/Gotcha_(programming)) in piped workflows where the main binding operator is `%>%`.
 For further information on **mapview**, see the package's website at: [r-spatial.github.io/mapview/](https://r-spatial.github.io/mapview/articles/).

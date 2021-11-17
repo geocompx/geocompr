@@ -326,13 +326,14 @@ In 2020, **terra** -- a successor of the **raster** package aimed at better perf
 <!--ref-->
 
 <!-- Upstream software dependencies -->
-This modernization had several reasons, including the emergence of new technologies and standard and the impacts from spatial software development outside of the R environment [@bivand_progress_2020].
+This modernization had several reasons, including the emergence of new technologies and standard, and the impacts from spatial software development outside of the R environment [@bivand_progress_2020].
 The most important external factor affecting most spatial software, including R spatial packages, were the major updates, including many breaking changes to the PROJ library\index{PROJ} that had begun in 2018 (learn more in Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)).
-
-
-<!-- spatstat -->
+Most importantly, these changes forced the replacement of `proj4string` to `WKT2` representation for storage of coordinate reference systems and coordinates operations.
 
 <!-- lidr?? -->
+
+
+<!--ref-->
 
 \index{rayshader (package)}
 Since 2018, the progress of spatial visualization tools in R has been related to a few factors.
@@ -341,8 +342,9 @@ Firstly, new types of spatial plots were developed, including the **rayshader** 
 \index{ggplot2 (package)}
 Secondly, **ggplot2** gained new spatial capabilities, mostly thanks to the **ggspatial** package that adds scale bars and north arrows and **gganimate** that enables smooth and customizable spatial animations.
 <!--ref-->
-Thirdly, 
-
+Thirdly, performance of visualizing large spatial dataset was improved.
+This especially relates to automatic plotting of downscaled rasters in **tmap** and the possibility of using high-performance interactive rendering platforms in the **mapview** package, such as `"leafgl"` and `"mapdeck"`.
+<!-- mapview can use all of them by setting e.g. `mapviewOptions(platform = "leafgl"/"mapdeck")` or `mapviewOptions(georaster = TRUE)` -->
 <!--ref-->
 Lastly, some of the existing mapping tools have been rewritten to minimize dependencies, improve user interface, or allow for easier creation of extensions.
 This includes the **mapsf** package (successor of **cartography**) and version 4 of the **tmap** package, in which most of the internal code was revised.
@@ -358,6 +360,8 @@ This includes the **mapsf** package (successor of **cartography**) and version 4
 <!-- interoperbility? -->
 <!-- @hesselbarth_opensource_2021 -->
 <!-- @lovelace_open_2021a -->
+
+<!-- spatstat?? -->
 
 In late 2021, the planned retirement of **rgdal**, **rgeos** and **maptools** at the end of 2023 was announced on [the R-sig-Geo mailing list](https://stat.ethz.ch/pipermail/r-sig-geo/2021-September/028760.html) by Roger Bivand.
 This would have a large impact on existing workflows applying these packages, but also will influence the packages that depend on **rgdal**, **rgeos** or **maptools**. 
