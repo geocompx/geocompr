@@ -763,7 +763,14 @@ These and other typical raster processing operations are part of the map algebra
 For these exercises we will use the `us_states` and `us_states_df` datasets from the **spData** package.
 You must have attached the package, and other packages used in the attribute operations chapter (**sf**, **dplyr**, **terra**) with commands such as `library(spData)` before attempting these exercises:
 
-
+```r
+library(sf)
+library(dplyr)
+library(terra)
+library(spData)
+data(us_states)
+data(us_states_df)
+```
 
 `us_states` is a spatial object (of class `sf`), containing geometry and a few attributes (including name, region, area, and population) of states within the contiguous United States.
 `us_states_df` is a data frame (of class `data.frame`) containing the name and additional variables (including median income and poverty level, for the years 2010 and 2015) of US states, including Alaska, Hawaii and Puerto Rico.
