@@ -761,7 +761,7 @@ These and other typical raster processing operations are part of the map algebra
 
 
 For these exercises we will use the `us_states` and `us_states_df` datasets from the **spData** package.
-You must have attached the package, and other packages used in the attribute operations chapter (**sf**, **dplyr**, **terra**) with commands such as `library(spData)` before attempting these exercises
+You must have attached the package, and other packages used in the attribute operations chapter (**sf**, **dplyr**, **terra**) with commands such as `library(spData)` before attempting these exercises:
 
 
 
