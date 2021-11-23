@@ -829,6 +829,10 @@ E15. Create a raster from scratch with nine rows and columns and a resolution of
 Fill it with random numbers.
 Extract the values of the four corner cells. 
 
-E16. What is the most common class of our example raster `grain` (hint: `modal()`)?
 
-E17. Plot the histogram and the boxplot of the `data(dem, package = "spDataLarge")` raster. 
+
+E16. What is the most common class of our example raster `grain` (hint: `modal`)?
+
+
+
+E17. Plot the histogram and the boxplot of the `dem.tif` file from the **spDataLarge** package (`system.file("raster/dem.tif", package = "spDataLarge")`). 
