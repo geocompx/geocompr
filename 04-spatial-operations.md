@@ -879,15 +879,22 @@ E3. Generalizing the question to all regions: how many of New Zealand's 16 regio
 
 
 
-E4. Use `data(dem, package = "spDataLarge")`, and reclassify the elevation in three classes: low, medium and high.
-Secondly, attach the NDVI raster (`data(ndvi, package = "spDataLarge")`) and compute the mean NDVI and the mean elevation for each altitudinal class.
+E4. Use `dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))`, and reclassify the elevation in three classes: low (<300), medium and high (>500).
+Secondly, read the NDVI raster (`ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))`) and compute the mean NDVI and the mean elevation for each altitudinal class.
 
-E5. Apply a line detection filter to `raster(system.file("external/rlogo.grd", package = "raster"))`.
+
+
+E5. Apply a line detection filter to `rast(system.file("ex/logo.tif", package = "terra"))`.
 Plot the result.
-Hint: Read `?raster::focal()`.
+Hint: Read `?terra::focal()`.
 
-E6. Calculate the NDVI of a Landsat image. 
+
+
+E6. Calculate the Normalized Difference Water Index	(NDWI; `(green - nir)/(green + nir)`) of a Landsat image. 
 Use the Landsat image provided by the **spDataLarge** package (`system.file("raster/landsat.tif", package = "spDataLarge")`).
+Also, calculate a correlation between NDVI and NDWI for this area.
+
+
 
 E7. A StackOverflow [post](https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances) shows how to compute distances to the nearest coastline using `raster::distance()`.
 Retrieve a digital elevation model of Spain, and compute a raster which represents distances to the coast across the country (hint: use `getData()`).
