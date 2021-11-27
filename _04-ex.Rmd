@@ -111,11 +111,33 @@ two_rasts_df = as.data.frame(two_rasts)
 cor(two_rasts_df$ndvi, two_rasts_df$ndwi)
 ```
 
+E7. A StackOverflow [post](https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances) shows how to compute distances to the nearest coastline using `raster::distance()`.
+ Retrieve a digital elevation model of Spain, and compute a raster which represents distances to the coast across the country (hint: use `getData()`).
+ Note: it may be wise to increase the cell size of the input raster to reduce compute time during this operation.
 
-<!--toDo:jn-->
-<!--improve/replace/modify the following q-->
-<!-- E7. A StackOverflow [post](https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances) shows how to compute distances to the nearest coastline using `raster::distance()`. -->
-<!-- Retrieve a digital elevation model of Spain, and compute a raster which represents distances to the coast across the country (hint: use `getData()`). -->
-<!-- Second, use a simple approach to weight the distance raster with elevation (other weighting approaches are possible, include flow direction and steepness); every 100 altitudinal meters should increase the distance to the coast by 10 km. -->
-<!-- Finally, compute the difference between the raster using the Euclidean distance and the raster weighted by elevation. -->
-<!-- Note: it may be wise to increase the cell size of the input raster to reduce compute time during this operation. -->
+```{r}
+# Fetch the DEM data for Spain
+spain_dem = raster::getData("alt", country = "ESP", mask = FALSE)
+
+# Convert the DEM to terra format
+spain_dem = rast(spain_dem)
+
+# Assign the correct CRS to the DEM: WGS 84
+crs(spain_dem) = "EPSG:4326"
+
+# Reduce the resolution by a factor of 20 to speed up calculations
+spain_dem = aggregate(spain_dem, fact = 20)
+
+# According to the documentation, terra::distance() will calculate distance
+# for all cells that are NA to the nearest cell that are not NA. To calculate
+# distance to the coast, we need a raster that has NA values over land and any
+# other value over water
+water_mask = is.na(spain_dem)
+water_mask[water_mask == 0] = NA
+
+# Use the distance() function on this mask to get distance to the coast
+distance_to_coast = distance(water_mask)
+
+# Plot the result
+plot(distance_to_coast, main = "Distance to the coast")
+```
