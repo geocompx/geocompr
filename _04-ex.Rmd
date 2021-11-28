@@ -112,7 +112,8 @@ cor(two_rasts_df$ndvi, two_rasts_df$ndwi)
 ```
 
 E7. A StackOverflow [post](https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances) shows how to compute distances to the nearest coastline using `raster::distance()`.
-Retrieve a digital elevation model of Spain, and compute a raster which represents distances to the coast across the country (hint: use `geodata::elevation_30s()`).
+Try to do something similar but with `terra::distance()`: retrieve a digital elevation model of Spain, and compute a raster which represents distances to the coast across the country (hint: use `geodata::elevation_30s()`).
+Convert the resulting distances from meters to kilometers.
 Note: it may be wise to increase the cell size of the input raster to reduce compute time during this operation.
 
 ```{r}
@@ -131,7 +132,25 @@ water_mask[water_mask == 0] = NA
 
 # Use the distance() function on this mask to get distance to the coast
 distance_to_coast = distance(water_mask)
+# convert distance into km
+distance_to_coast_km = distance_to_coast / 1000
 
 # Plot the result
-plot(distance_to_coast, main = "Distance to the coast")
+plot(distance_to_coast_km, main = "Distance to the coast (km)")
 ```
+
+E8. Try to modify the approach used in the above exercise by weighting the distance raster with the elevation raster; every 100 altitudinal meters should increase the distance to the coast by 10 km.
+
+```{r}
+# now let's weight each 100 altitudinal meters by an additional distance of 10 km
+distance_to_coast_km2 = distance_to_coast_km + ((spain_dem / 100) * 10)
+# plot the result
+plot(distance_to_coast_km2)
+```
+
+E9. Compute and visualize the difference between the raster created using the Euclidean distance (E7) and the raster weighted by elevation (E8).
+
+```{r}
+plot(distance_to_coast_km - distance_to_coast_km2)
+```
+
