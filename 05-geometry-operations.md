@@ -621,7 +621,7 @@ A variety of georeferencing techniques exist, including:
 
 - Georectification based on known [ground control points](https://www.qgistutorials.com/en/docs/3/georeferencing_basics.html);
 - Orthorectification, which also accounts for local topography
-- Image [registration](https://en.wikipedia.org/wiki/Image_registration) is used to combine images of the same thing but shot from different sensors the process of aligning one image with another (in terms of coordinate system, and resolution)
+- Image [registration](https://en.wikipedia.org/wiki/Image_registration) is used to combine images of the same thing but shot from different sensors by aligning one image with another (in terms of coordinate system and resolution)
 
 R is rather unsuitable for the first two points since these often require manual intervention which is why they are usually done with the help of dedicated GIS software (see also Chapter \@ref(gis)).
 On the other hand, aligning several images is possible in R and this section shows among others how to do so.
@@ -880,7 +880,7 @@ We will use two objects to illustrate raster cropping:
 - A vector (`sf`) object `zion` representing Zion National Park.
 
 Both target and cropping objects must have the same projection.
-The following code chunk therefore not only reads the datasets from the **spDataLarge** package9 installed in Chapter \@ref(spatial-class)), it also reprojects `zion` (see Section \@ref(reproj-geo-data) for more on reprojection):
+The following code chunk therefore not only reads the datasets from the **spDataLarge** package (installed in Chapter \@ref(spatial-class)), it also reprojects `zion` (see Section \@ref(reproj-geo-data) for more on reprojection):
 
 
 ```r
@@ -956,8 +956,8 @@ zion_points = cbind(zion_points, elevation)
 
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/pointextr-1.png" alt="Locations of points used for raster extraction (left) and their 1km buffers (right)." width="100%" />
-<p class="caption">(\#fig:pointextr)Locations of points used for raster extraction (left) and their 1km buffers (right).</p>
+<img src="05-geometry-operations_files/figure-html/pointextr-1.png" alt="Locations of points used for raster extraction." width="100%" />
+<p class="caption">(\#fig:pointextr)Locations of points used for raster extraction.</p>
 </div>
 
 Raster extraction also works with **line** selectors.
@@ -1199,7 +1199,7 @@ elev_point = as.points(elev) %>%
 </div>
 
 Another common type of spatial vectorization is the creation of contour lines representing lines of continuous height or temperatures (isotherms) for example.
-We will use a real-world digital elevation model (DEM) because the artificial raster `elev` produces parallel lines (task: verify this and explain why this happens).
+We will use a real-world digital elevation model (DEM) because the artificial raster `elev` produces parallel lines (task for the reader: verify this and explain why this happens).
 Contour lines can be created with the **terra** function `as.contour()`, which is itself a wrapper around `filled.contour()`, as demonstrated below (not shown):
 
 
@@ -1258,6 +1258,7 @@ They also use a polygonal 'convex hull' derived from the vector dataset (`ch`) t
 ```r
 library(sf)
 library(terra)
+library(spData)
 zion_points = read_sf(system.file("vector/zion_points.gpkg", package = "spDataLarge"))
 srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
 ch = st_combine(zion_points) %>%
@@ -1318,8 +1319,8 @@ When would extracting values by buffers be more suitable than by points alone?
 
 
 
-E9. Subset points higher than 3100 meters in New Zealand (the `nz_height` object) and create a template raster with a resolution of 3 km. 
-Using these objects:
+E9. Subset points higher than 3100 meters in New Zealand (the `nz_height` object) and create a template raster with a resolution of 3 km for the extent of the new point dataset. 
+Using these two new objects:
 
 - Count numbers of the highest points in each grid cell.
 - Find the maximum elevation in each grid cell.
@@ -1328,12 +1329,16 @@ Using these objects:
 
 E10. Aggregate the raster counting high points in New Zealand (created in the previous exercise), reduce its geographic resolution by half (so cells are 6 by 6 km) and plot the result.
 
-- Resample the lower resolution raster back to a resolution of 3 km. How have the results changed?
+- Resample the lower resolution raster back to the original resolution of 3 km. How have the results changed?
 - Name two advantages and disadvantages of reducing raster resolution.
+
+
 
 
 
 E11. Polygonize the `grain` dataset and filter all squares representing clay.
 
+
+
 - Name two advantages and disadvantages of vector data over raster data.
--  At which points would it be useful to convert rasters to vectors in your work?
+- When would it be useful to convert rasters to vectors in your work?

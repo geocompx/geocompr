@@ -44,7 +44,7 @@ Map algebra is also the prerequisite for distance calculations on rasters, a tec
 
 ## Spatial operations on vector data {#spatial-vec}
 
-This section provides an overview of spatial operations on vector geographic data represented as simple features in the **sf** package before Section \@ref(spatial-ras), which presents spatial methods using the **raster** package.
+This section provides an overview of spatial operations on vector geographic data represented as simple features in the **sf** package before Section \@ref(spatial-ras), which presents spatial methods using the **terra** package.
 
 ### Spatial subsetting
 
@@ -897,7 +897,11 @@ Also, calculate a correlation between NDVI and NDWI for this area.
 
 
 E7. A StackOverflow [post](https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances) shows how to compute distances to the nearest coastline using `raster::distance()`.
-Retrieve a digital elevation model of Spain, and compute a raster which represents distances to the coast across the country (hint: use `getData()`).
-Second, use a simple approach to weight the distance raster with elevation (other weighting approaches are possible, include flow direction and steepness); every 100 altitudinal meters should increase the distance to the coast by 10 km.
-Finally, compute the difference between the raster using the Euclidean distance and the raster weighted by elevation.
+Try to do something similar but with `terra::distance()`: retrieve a digital elevation model of Spain, and compute a raster which represents distances to the coast across the country (hint: use `geodata::elevation_30s()`).
+Convert the resulting distances from meters to kilometers.
 Note: it may be wise to increase the cell size of the input raster to reduce compute time during this operation.
+
+
+
+E8. Try to modify the approach used in the above exercise by weighting the distance raster with the elevation raster; every 100 altitudinal meters should increase the distance to the coast by 10 km.
+Next, compute and visualize the difference between the raster created using the Euclidean distance (E7) and the raster weighted by elevation.

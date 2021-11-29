@@ -139,7 +139,7 @@ st_distance(london_geo, london_proj)
 
 To make the `london` and `london_proj` objects geographically comparable one of them must be transformed into the CRS of the other.
 But which CRS to use?
-The answer is usually 'to the projected CRS', which in this case is the British National Grid (EPSG:27700):
+The answer is usually 'the projected CRS', which in this case is the British National Grid (EPSG:27700):
 
 
 ```r
@@ -546,7 +546,18 @@ How does it influence the results?
 
 
 
-E5. Create your own `proj4string`. 
-It should have the Lambert Azimuthal Equal Area (`laea`) projection, the WGS84 ellipsoid, the longitude of projection center of 95 degrees west, the latitude of projection center of 60 degrees north, and its units should be in meters.
-Next, subset Canada from the `world` object and transform it into the new projection. 
-Plot and compare a map before and after the transformation.
+<!--toDo:jn-->
+<!--improve/replace/modify the following q-->
+<!-- E5. Create your own `proj4string`.  -->
+<!-- It should have the Lambert Azimuthal Equal Area (`laea`) projection, the WGS84 ellipsoid, the longitude of projection center of 95 degrees west, the latitude of projection center of 60 degrees north, and its units should be in meters. -->
+<!-- Next, subset Canada from the `world` object and transform it into the new projection.  -->
+<!-- Plot and compare a map before and after the transformation. -->
+
+<!-- ```{r 06-reproj-40} -->
+<!-- new_p4s = "+proj=laea +ellps=WGS84 +lon_0=-95 +lat_0=60 +units=m" -->
+<!-- canada = dplyr::filter(world, name_long == "Canada") -->
+<!-- new_canada = st_transform(canada, new_p4s) -->
+<!-- par(mfrow = c(1, 2)) -->
+<!-- plot(st_geometry(canada), graticule = TRUE, axes = TRUE) -->
+<!-- plot(st_geometry(new_canada), graticule = TRUE, axes = TRUE) -->
+<!-- ``` -->

@@ -839,8 +839,10 @@ What is a geometry type of the loaded object?
 E4. Download the borders of Germany using **rnaturalearth**, and create a new object called `germany_borders`.
 Write this new object to a file of the GeoPackage format.
 
-E5. Download the global monthly minimum temperature with a spatial resolution of five minutes using the **raster** package.
-Extract the June values, and save them to a file named `tmin_june.tif` file (hint: use `raster::subset()`).
+E5. Download the global monthly minimum temperature with a spatial resolution of five minutes using the **geodata** package.
+Extract the June values, and save them to a file named `tmin_june.tif` file (hint: use `terra::subset()`).
+
+
 
 E6. Create a static map of Germany's borders, and save it to a PNG file.
 

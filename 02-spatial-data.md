@@ -74,7 +74,7 @@ There is much overlap in some fields and raster and vector datasets can be used 
 ecologists and demographers, for example, commonly use both vector and raster data.
 Furthermore, it is possible to convert between the two forms (see Section \@ref(raster-vector)).
 Whether your work involves more use of vector or raster datasets, it is worth understanding the underlying data model before using them, as discussed in subsequent chapters.
-This book uses **sf** and **raster** packages to work with vector data and raster datasets, respectively.
+This book uses **sf** and **terra** packages to work with vector data and raster datasets, respectively.
 
 ## Vector data
 
