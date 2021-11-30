@@ -780,11 +780,24 @@ Consequently, the discrete borders of these features become blurred, and dependi
 
 ### R packages for raster data handling
 
-<!--jn:toDo - update:-->
-<!-- one intro paragraph about terra + stars -->
-<!-- maybe also add comparison table -->
+R has several packages able to read and process spatial raster data; see \Wref(the-history-of-r-spatial) for more context.
+However, currently, two main packages with this purpose exist -- **terra** and **stars**.^[We are not mentioning the **raster** package here as it is now being replaced with **terra**.]
+We are focusing on the **terra** package in this book; however, it may be worth knowing the basic similarities and differences between the packages before deciding which one to use.
 
+First, **terra** focuses on the most common raster data model (regular grids), while **stars** also allows storing less popular models (including regular, rotated, sheared, rectilinear, and curvilinear grids).
+While **terra** usually handle one or multi-layered rasters^[It also has an additional class `SpatRasterDataset` for storing many collections of datasets.], the **stars** package provides ways to store raster data cubes -- a raster object with many layers (e.g., bands), for many moments in time (e.g., months), and many attributes (e.g., sensor type A and sensor type B).
+Importantly, in both packages, all layers or elements of a data cube must have the same spatial dimensions and extent.
+Second, both packages allow to either read all of the raster data into memory or just to read its metadata -- this is usually done automatically based on the input file size.
+However, they store raster values very differently. 
+**terra** is based on C++ code and mostly uses C++ pointers.
+**stars** stores values as lists of arrays for smaller rasters or just a file path for larger ones.
+Third, **stars** functions are closely related to the vector objects and functions in **sf**, while **terra** uses its own class of objects for vector data, namely `SpatVector`.
+Fourth, both packages have a different approach for how various functions work on their objects.
+The **terra** package mostly relies on a large number of built-in functions, where each function has a specific purpose (e.g., resampling or cropping).
+On the other hand, **stars** uses some build-in functions (usually with names starting with `st_`), has its own methods for existing R functions (e.g., `split()` or `aggregate()`), and also for existing **dplyr** functions (e.g., `filter()` or `slice()`).
 
+Importantly, it is straightforward to convert objects from **terra** to **stars** (`st_as_stars()`) and the other way round (`rast`).
+We also encourage you to read @pebesma_spatial_2022 for the most comprehensive introduction to the **stars** package.
 
 ### An introduction to terra
 

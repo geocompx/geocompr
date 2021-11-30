@@ -223,6 +223,8 @@ This is especially true for the [R-sig-Geo Archives](https://stat.ethz.ch/piperm
 
 It is noteworthy that shifts in the wider R community, as exemplified by the data processing package **dplyr** (released in [2014](https://cran.r-project.org/src/contrib/Archive/dplyr/)) influenced shifts in R's spatial ecosystem. 
 Alongside other packages that have a shared style and emphasis on 'tidy data' (including, e.g., **ggplot2**), **dplyr** was placed in the **tidyverse** 'metapackage'\index{tidyverse (package)} in late [2016](https://cran.r-project.org/src/contrib/Archive/tidyverse/).
+<!--rl:toDo-->
+<!-- add reference -->
 The **tidyverse**\index{tidyverse (package)} approach, with its focus on long-form data and fast intuitively named functions, has become immensely popular.
 This has led to a demand for 'tidy geographic data' which has been partly met by **sf**.
 An obvious feature of the **tidyverse** is the tendency for packages to work in harmony.
@@ -241,8 +243,8 @@ Table: (\#tab:revdep)The top 5 most downloaded packages that depend on sf, in te
 |leafem  |       898|
 |tmap    |       841|
 
-<!--jn:toDo-->
-<!--add terra paragraph-->
+Parallel group of developments relates to the [rspatial](https://github.com/rspatial) set of packages.^[Note the difference between "r-spatial", organization containing packages such as **sf**, and "rspatial", organization responsible for **terra**.]
+Its main member is the **terra** package for spatial raster handling (see Section \@ref(an-introduction-to-terra)).
 
 ## The history of R-spatial
 
