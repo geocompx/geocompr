@@ -10,6 +10,7 @@ library(sf)
 library(terra)
 library(dplyr)
 library(spData)
+#> Warning: multiple methods tables found for 'approxNA'
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 grain = rast(system.file("raster/grain.tif", package = "spData"))
 ```
@@ -526,9 +527,6 @@ elev[id]
 terra::extract(elev, matrix(c(0.1, 0.1), ncol = 2))
 ```
 
-<!--jn:toDo-->
-<!-- to update? -->
-<!-- It is convenient that both functions also accept objects of class `Spatial* Objects`. -->
 Raster objects can also be subset with another raster object, as demonstrated in the code chunk below:
 
 
@@ -746,8 +744,7 @@ Here, we choose the minimum, but any other summary function, including `sum()`, 
 r_focal = focal(elev, w = matrix(1, nrow = 3, ncol = 3), fun = min)
 ```
 
-<!--jn:toDo-->
-<!-- , na.rm=TRUE vs , na.rm=FALSE -->
+This function also accepts additional arguments, for example, should it remove NAs in the process (`na.rm = TRUE`) or not (`na.rm = FALSE`).
 
 <div class="figure" style="text-align: center">
 <img src="figures/04_focal_example.png" alt="Input raster (left) and resulting output raster (right) due to a focal operation - finding the minimum value in 3-by-3 moving windows." width="100%" />

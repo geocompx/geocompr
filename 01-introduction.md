@@ -235,7 +235,7 @@ There is no equivalent **geoverse**, but there are attempts at harmonization bet
 
 Table: (\#tab:revdep)The top 5 most downloaded packages that depend on sf, in terms of average number of downloads per day over the previous month. As of 2021-11-19  there are  289  packages which import sf.
 
-|package | Downloads|
+|Package | Downloads|
 |:-------|---------:|
 |spdep   |      1413|
 |lwgeom  |      1163|

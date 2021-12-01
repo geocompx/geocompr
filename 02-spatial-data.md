@@ -50,6 +50,7 @@ The other packages that were installed contain data that will be used in the boo
 
 ```r
 library(spData)        # load geographic data
+#> Warning: multiple methods tables found for 'approxNA'
 library(spDataLarge)   # load larger geographic data
 ```
 
@@ -1189,12 +1190,11 @@ res(my_rast)
 
 If we used the UTM projection, the units would change.
 
-<!--jn:toDO-->
-<!--set eval=TRUE later-->
 
 ```r
 repr = project(my_rast, "EPSG:26912")
 res(repr)
+#> [1] 0.000833 0.000833
 ```
 
 Again, the `res()` command gives back a numeric vector without any unit, forcing us to know that the unit of the UTM projection is meters.

@@ -10,6 +10,7 @@ library(sf)
 library(terra)
 library(dplyr)
 library(spData)
+#> Warning: multiple methods tables found for 'approxNA'
 library(spDataLarge)
 ```
 
@@ -619,7 +620,7 @@ Geometric raster operations include the shift, flipping, mirroring, scaling, rot
 These operations are necessary for a variety of applications including georeferencing, used to allow images to be overlaid on an accurate map with a known CRS [@liu_essential_2009].
 A variety of georeferencing techniques exist, including:
 
-- Georectification based on known [ground control points](https://www.qgistutorials.com/en/docs/3/georeferencing_basics.html);
+- Georectification based on known [ground control points](https://www.qgistutorials.com/en/docs/3/georeferencing_basics.html)
 - Orthorectification, which also accounts for local topography
 - Image [registration](https://en.wikipedia.org/wiki/Image_registration) is used to combine images of the same thing but shot from different sensors by aligning one image with another (in terms of coordinate system and resolution)
 
@@ -721,8 +722,6 @@ Looking at Figure \@ref(fig:origin-example) reveals the effect of changing the o
 ```r
 # change the origin
 origin(elev_4) = c(0.25, 0.25)
-plot(elev_4)
-plot(elev, add = TRUE) # and add the original raster
 ```
 
 <div class="figure" style="text-align: center">

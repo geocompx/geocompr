@@ -10,6 +10,7 @@
 ```r
 library(sf)
 library(raster)
+#> Warning: multiple methods tables found for 'approxNA'
 library(dplyr)
 library(spData)
 library(spDataLarge)
