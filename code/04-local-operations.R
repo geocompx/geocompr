@@ -3,10 +3,10 @@ library(terra)
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 
 elev_poly = st_as_sf(as.polygons(elev))
-elev2 = elev + elev; elev_poly2 = st_as_sf(as.polygons(elev2))
-elev3 = elev^2; elev_poly3 = st_as_sf(as.polygons(elev3))
-elev4 = log(elev); elev_poly4 = st_as_sf(as.polygons(elev4))
-elev5 = elev > 5; elev_poly5 = st_as_sf(as.polygons(elev5))
+elev2 = elev + elev; elev_poly2 = st_as_sf(as.polygons(elev2, dissolve = FALSE))
+elev3 = elev^2; elev_poly3 = st_as_sf(as.polygons(elev3, dissolve = FALSE))
+elev4 = log(elev); elev_poly4 = st_as_sf(as.polygons(elev4, dissolve = FALSE))
+elev5 = elev > 5; elev_poly5 = st_as_sf(as.polygons(elev5, dissolve = FALSE))
 
 tm1 = tm_shape(elev_poly) +
   tm_polygons(col = "elev", lwd = 0.5, style = "cont", title = "", legend.is.portrait = FALSE) +
