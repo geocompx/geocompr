@@ -11,7 +11,7 @@ tm1 = tm_shape(srtm) +
   tm_raster(palette = terrain_colors, title = "Elevation (m)", 
             legend.show = TRUE, style = "cont") + 
   tm_shape(zion) +
-  tm_borders(lwd = 2, col = "grey70") + 
+  tm_borders(lwd = 2) + 
   tm_shape(zion_points) + 
   tm_dots(col = "black", size = 0.1) + 
   tm_add_legend(type = "symbol", col = "black", size = 0.2,
