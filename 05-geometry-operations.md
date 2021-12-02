@@ -770,8 +770,8 @@ identical(dem, dem_disagg)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/bilinear-1.png" alt="Bilinear disaggregation in action." width="100%" />
-<p class="caption">(\#fig:bilinear)Bilinear disaggregation in action.</p>
+<img src="05-geometry-operations_files/figure-html/bilinear-1.png" alt="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation." width="100%" />
+<p class="caption">(\#fig:bilinear)The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation.</p>
 </div>
 
 Comparing the values of `dem` and `dem_disagg` tells us that they are not identical (you can also use `compareGeom()` or `all.equal()`).
