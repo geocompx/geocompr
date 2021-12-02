@@ -49,13 +49,13 @@ Various 'geoportals' (web services providing geospatial datasets such as [Data.g
 \index{geoportals}
 Some global geoportals overcome this issue.
 The [GEOSS portal](http://www.geoportal.org/) and the [Copernicus Open Access Hub](https://scihub.copernicus.eu/), for example, contain many raster datasets with global coverage.
-A wealth of vector datasets can be accessed from the National Aeronautics and Space Administration agency (NASA), [SEDAC](http://sedac.ciesin.columbia.edu/) portal and the European Union's [INSPIRE geoportal](http://inspire-geoportal.ec.europa.eu/), with global and regional coverage.
+A wealth of vector datasets can be accessed from the National Aeronautics and Space Administration agency's (NASA) [SEDAC](http://sedac.ciesin.columbia.edu/) portal and the European Union's [INSPIRE geoportal](http://inspire-geoportal.ec.europa.eu/), with global and regional coverage.
 
 Most geoportals provide a graphical interface allowing datasets to be queried based on characteristics such as spatial and temporal extent, the United States Geological Services' [EarthExplorer](https://earthexplorer.usgs.gov/) being a prime example.
 *Exploring* datasets interactively on a browser is an effective way of understanding available layers.
 *Downloading* data is best done with code, however, from reproducibility and efficiency perspectives.
 Downloads can be initiated from the command line using a variety of techniques, primarily via URLs and APIs\index{API} (see the [Sentinel API](https://scihub.copernicus.eu/twiki/do/view/SciHubWebPortal/APIHubDescription) for example).
-Files hosted on static URLs can be downloaded with `download.file()`, as illustrated in the code chunk below which accesses US National Parks data from: [catalog.data.gov/dataset/national-parks](https://catalog.data.gov/dataset/national-parks):
+Files hosted on static URLs can be downloaded with `download.file()`, as illustrated in the code chunk below which accesses US National Parks data from [catalog.data.gov/dataset/national-parks](https://catalog.data.gov/dataset/national-parks):
 
 
 ```r
@@ -834,7 +834,7 @@ E1. List and describe three types of vector, raster, and geodatabase formats.
 
 E2. Name at least two differences between `read_sf()` and the more well-known function `st_read()`.
 
-E3. Read the `cycle_hire_xy.csv` file from the **spData** package as a spatial object (Hint: it is located in the `misc\` folder).
+E3. Read the `cycle_hire_xy.csv` file from the **spData** package as a spatial object (Hint: it is located in the `misc` folder).
 What is a geometry type of the loaded object? 
 
 E4. Download the borders of Germany using **rnaturalearth**, and create a new object called `germany_borders`.
