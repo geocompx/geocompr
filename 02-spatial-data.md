@@ -638,8 +638,7 @@ st_geometry_type(point_multilinestring_sfc)
 ```
 
 As mentioned before, `sfc` objects can additionally store information on the coordinate reference systems (CRS).
-To specify a certain CRS, we can use the `epsg (SRID)` or `proj4string` attributes of an `sfc` object.
-The default value of `epsg (SRID)` and `proj4string` is `NA` (*Not Available*), as can be verified with `st_crs()`:
+The default value is `NA` (*Not Available*), as can be verified with `st_crs()`:
 
 
 ```r
@@ -649,12 +648,13 @@ st_crs(points_sfc)
 
 All geometries in an `sfc` object must have the same CRS.
 We can add coordinate reference system as a `crs` argument of `st_sfc()`. 
-This argument accepts an integer with the `epsg` code such as `4326`, which automatically adds the 'proj4string' (see Section \@ref(crs-intro)):
+To specify a certain CRS, we can provide Spatial Reference System Identifier (SRID, e.g., `"EPSG:4326"`), well-known text (WKT2), or proj4string representation (see Section \@ref(crs-intro)).
+If we provide SRID or proj4string, then the well-known text (WKT2) will be added automatically.
 
 
 ```r
 # EPSG definition
-points_sfc_wgs = st_sfc(point1, point2, crs = 4326)
+points_sfc_wgs = st_sfc(point1, point2, crs = "EPSG:4326")
 st_crs(points_sfc_wgs)
 #> Coordinate Reference System:
 #>   User input: EPSG:4326 
@@ -678,17 +678,6 @@ st_crs(points_sfc_wgs)
 #>         BBOX[-90,-180,90,180]],
 #>     ID["EPSG",4326]]
 ```
-
-It also accepts a raw proj4string (result not shown):
-
-
-```r
-# PROJ4STRING definition
-st_sfc(point1, point2, crs = "+proj=longlat +datum=WGS84 +no_defs")
-```
-
-\BeginKnitrBlock{rmdnote}<div class="rmdnote">Sometimes `st_crs()` will return a `proj4string` but not an `epsg` code. 
-This is because there is no general method to convert from `proj4string` to `epsg` (see Chapter \@ref(reproj-geo-data)).</div>\EndKnitrBlock{rmdnote}
 
 ### The sf class {#sf}
 

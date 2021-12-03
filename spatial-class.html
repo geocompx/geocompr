@@ -643,17 +643,17 @@ Equally, a geometry column of multilinestrings would result in an <code>sfc</cod
 <span class="co">#&gt; [1] POINT           MULTILINESTRING</span>
 <span class="co">#&gt; 18 Levels: GEOMETRY POINT LINESTRING POLYGON MULTIPOINT ... TRIANGLE</span></code></pre></div>
 <p>As mentioned before, <code>sfc</code> objects can additionally store information on the coordinate reference systems (CRS).
-To specify a certain CRS, we can use the <code>epsg (SRID)</code> or <code>proj4string</code> attributes of an <code>sfc</code> object.
-The default value of <code>epsg (SRID)</code> and <code>proj4string</code> is <code>NA</code> (<em>Not Available</em>), as can be verified with <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>:</p>
+The default value is <code>NA</code> (<em>Not Available</em>), as can be verified with <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>:</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">points_sfc</span><span class="op">)</span>
 <span class="co">#&gt; Coordinate Reference System: NA</span></code></pre></div>
 <p>All geometries in an <code>sfc</code> object must have the same CRS.
 We can add coordinate reference system as a <code>crs</code> argument of <code><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc()</a></code>.
-This argument accepts an integer with the <code>epsg</code> code such as <code>4326</code>, which automatically adds the ‘proj4string’ (see Section <a href="spatial-class.html#crs-intro">2.4</a>):</p>
+To specify a certain CRS, we can provide Spatial Reference System Identifier (SRID, e.g., <code>"EPSG:4326"</code>), well-known text (WKT2), or proj4string representation (see Section <a href="spatial-class.html#crs-intro">2.4</a>).
+If we provide SRID or proj4string, then the well-known text (WKT2) will be added automatically.</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># EPSG definition</span>
-<span class="va">points_sfc_wgs</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="va">point1</span>, <span class="va">point2</span>, crs <span class="op">=</span> <span class="fl">4326</span><span class="op">)</span>
+<span class="va">points_sfc_wgs</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="va">point1</span>, <span class="va">point2</span>, crs <span class="op">=</span> <span class="st">"EPSG:4326"</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">points_sfc_wgs</span><span class="op">)</span>
 <span class="co">#&gt; Coordinate Reference System:</span>
 <span class="co">#&gt;   User input: EPSG:4326 </span>
@@ -676,15 +676,6 @@ This argument accepts an integer with the <code>epsg</code> code such as <code>4
 <span class="co">#&gt;         AREA["World"],</span>
 <span class="co">#&gt;         BBOX[-90,-180,90,180]],</span>
 <span class="co">#&gt;     ID["EPSG",4326]]</span></code></pre></div>
-<p>It also accepts a raw proj4string (result not shown):</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># PROJ4STRING definition</span>
-<span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="va">point1</span>, <span class="va">point2</span>, crs <span class="op">=</span> <span class="st">"+proj=longlat +datum=WGS84 +no_defs"</span><span class="op">)</span></code></pre></div>
-
-<div class="rmdnote">
-Sometimes <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code> will return a <code>proj4string</code> but not an <code>epsg</code> code.
-This is because there is no general method to convert from <code>proj4string</code> to <code>epsg</code> (see Chapter <a href="reproj-geo-data.html#reproj-geo-data">6</a>).
-</div>
 </div>
 <div id="sf" class="section level3" number="2.2.8">
 <h3>
@@ -699,7 +690,7 @@ This example contains a geometry (the coordinates), and three attributes with th
 Other attributes might include an urbanity category (city or village), or a remark if the measurement was made using an automatic station.&lt;/p&gt;"><sup>12</sup></a>
 Objects of class <code>sf</code> represent such data by combining the attributes (<code>data.frame</code>) with the simple feature geometry column (<code>sfc</code>).
 They are created with <code><a href="https://r-spatial.github.io/sf/reference/sf.html">st_sf()</a></code> as illustrated below, which creates the London example described above:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">lnd_point</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">51.5</span><span class="op">)</span><span class="op">)</span>                 <span class="co"># sfg object</span>
 <span class="va">lnd_geom</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="va">lnd_point</span>, crs <span class="op">=</span> <span class="fl">4326</span><span class="op">)</span>           <span class="co"># sfc object</span>
 <span class="va">lnd_attrib</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>                           <span class="co"># data.frame object</span>
@@ -712,13 +703,13 @@ They are created with <code><a href="https://r-spatial.github.io/sf/reference/sf
 Second, the geometry was converted into a simple feature geometry column (<code>sfc</code>), with a CRS.
 Third, attributes were stored in a <code>data.frame</code>, which was combined with the <code>sfc</code> object with <code><a href="https://r-spatial.github.io/sf/reference/sf.html">st_sf()</a></code>.
 This results in an <code>sf</code> object, as demonstrated below (some output is omitted):</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">lnd_sf</span>
 <span class="co">#&gt; Simple feature collection with 1 features and 3 fields</span>
 <span class="co">#&gt; ...</span>
 <span class="co">#&gt;     name temperature       date         geometry</span>
 <span class="co">#&gt; 1 London          25 2017-06-21 POINT (0.1 51.5)</span></code></pre></div>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">lnd_sf</span><span class="op">)</span>
 <span class="co">#&gt; [1] "sf"         "data.frame"</span></code></pre></div>
 <p>The result shows that <code>sf</code> objects actually have two classes, <code>sf</code> and <code>data.frame</code>.
@@ -799,11 +790,11 @@ In this case, <strong>terra</strong> provides the possibility to divide the rast
 It consists of a few raster objects and one vector object covering an area of the Zion National Park (Utah, USA).
 For example, <code>srtm.tif</code> is a digital elevation model of this area (for more details, see its documentation <code><a href="https://rdrr.io/pkg/spDataLarge/man/srtm.html">?srtm</a></code>).
 First, let’s create a <code>SpatRaster</code> object named <code>my_rast</code>:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">raster_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/srtm.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
 <span class="va">my_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">raster_filepath</span><span class="op">)</span></code></pre></div>
 <p>Typing the name of the raster into the console, will print out the raster header (dimensions, resolution, extent, CRS) and some additional information (class, data source, summary of the raster values):</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">my_rast</span>
 <span class="co">#&gt; class       : SpatRaster </span>
 <span class="co">#&gt; dimensions  : 457, 465, 1  (nrow, ncol, nlyr)</span>
@@ -824,7 +815,7 @@ First, let’s create a <code>SpatRaster</code> object named <code>my_rast</code
 </h3>
 <p>Similar to the <strong>sf</strong> package, <strong>terra</strong> also provides <code><a href="https://rdrr.io/pkg/terra/man/plot.html">plot()</a></code> methods for its own classes.
 </p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:basic-new-raster-plot"></span>
@@ -847,7 +838,7 @@ FIGURE 2.12: Basic raster plot.
 <p>The <code>SpatRaster</code> class represents rasters object in <strong>terra</strong>.
 The easiest way to create a raster object in R is to read-in a raster file from disk or from a server (Section <a href="read-write.html#raster-data-1">7.6.2</a>.
 </p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">single_raster_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/srtm.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
 <span class="va">single_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">raster_filepath</span><span class="op">)</span></code></pre></div>
 <p>The <strong>terra</strong> package supports numerous drivers with the help of the GDAL library.
@@ -859,13 +850,13 @@ The default CRS of raster objects is WGS84, but can be changed with the <code>cr
 This means the unit of the resolution is in degrees which we set to 0.5 (<code>resolution</code>).
 Values (<code>vals</code>) are assigned to each cell: 1 to cell 1, 2 to cell 2, and so on.
 Remember: <code><a href="https://rdrr.io/pkg/terra/man/rast.html">rast()</a></code> fills cells row-wise (unlike <code><a href="https://rdrr.io/r/base/matrix.html">matrix()</a></code>) starting at the upper left corner, meaning the top row contains the values 1 to 6, the second 7 to 12, etc.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">new_raster</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span>nrows <span class="op">=</span> <span class="fl">6</span>, ncols <span class="op">=</span> <span class="fl">6</span>, resolution <span class="op">=</span> <span class="fl">0.5</span>, 
                   xmin <span class="op">=</span> <span class="op">-</span><span class="fl">1.5</span>, xmax <span class="op">=</span> <span class="fl">1.5</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="fl">1.5</span>, ymax <span class="op">=</span> <span class="fl">1.5</span>,
                   vals <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">36</span><span class="op">)</span></code></pre></div>
 <p>For other ways of creating raster objects, see <code><a href="https://rdrr.io/pkg/terra/man/rast.html">?rast</a></code>.</p>
 <p>The <code>SpatRaster</code> class also handles multiple layers, which typically correspond to a single multispectral satellite file or a time-series of rasters.</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">multi_raster_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/landsat.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
 <span class="va">multi_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">multi_raster_file</span><span class="op">)</span>
 <span class="va">multi_rast</span>
@@ -879,16 +870,16 @@ Remember: <code><a href="https://rdrr.io/pkg/terra/man/rast.html">rast()</a></co
 <span class="co">#&gt; min values  :  7550,  6404,  5678,  5252 </span>
 <span class="co">#&gt; max values  : 19071, 22051, 25780, 31961</span></code></pre></div>
 <p><code><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nlyr()</a></code> retrieves the number of layers stored in a <code>SpatRaster</code> object:</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nlyr</a></span><span class="op">(</span><span class="va">multi_rast</span><span class="op">)</span>
 <span class="co">#&gt; [1] 4</span></code></pre></div>
 <p>For multi-layer raster objects, layers can be selected with <code><a href="https://rdrr.io/pkg/terra/man/subset.html">terra::subset()</a></code>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;The &lt;code&gt;[[&lt;/code&gt; and &lt;code&gt;$&lt;/code&gt; operators can also be used for layers’ selection.&lt;/p&gt;"><sup>16</sup></a>
 It accepts a layer number or its name as the second argument:</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">multi_rast3</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/subset.html">subset</a></span><span class="op">(</span><span class="va">multi_rast</span>, <span class="fl">3</span><span class="op">)</span>
 <span class="va">multi_rast4</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/subset.html">subset</a></span><span class="op">(</span><span class="va">multi_rast</span>, <span class="fl">4</span><span class="op">)</span></code></pre></div>
 <p>The opposite operation, combining several <code>SpatRaster</code> objects into one, can be done using the <code>c</code> function:</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">multi_rast34</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="va">multi_rast3</span>, <span class="va">multi_rast4</span><span class="op">)</span></code></pre></div>
 
 <div class="rmdnote">
@@ -1002,12 +993,12 @@ Importantly, <code>proj4string</code>s are not used to store CRSs anymore.
 Longer explanations on the recent changes in the PROJ library and why <code>proj4string</code> was replaced by <code>WKT2</code> can be found in <span class="citation"><a href="references.html#ref-bivand_progress_2020" role="doc-biblioref">R. S. Bivand</a> (<a href="references.html#ref-bivand_progress_2020" role="doc-biblioref">2020</a>)</span>, Chapter 2 of <span class="citation"><a href="references.html#ref-pebesma_spatial_2022" role="doc-biblioref">E. Pebesma and Bivand</a> (<a href="references.html#ref-pebesma_spatial_2022" role="doc-biblioref">2022</a>)</span>, and <a href="https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/">blog post by Floris Vanderhaeghe</a>.</p>
 <p>Let’s look at how CRSs are stored in R spatial objects and how they can be set.
 For this, we need to read-in a vector dataset:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">vector_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shapes/world.gpkg"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
 <span class="va">new_vector</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">vector_filepath</span><span class="op">)</span></code></pre></div>
 <p>Our new object, <code>new_vector</code>, is a polygon representing a world map data (<code><a href="https://nowosad.github.io/spData/reference/world.html">?spData::world</a></code>).
 In <strong>sf</strong> the CRS of an object can be retrieved using <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>.</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">new_vector</span><span class="op">)</span> <span class="co"># get CRS</span>
 <span class="co">#&gt; Coordinate Reference System:</span>
 <span class="co">#&gt;   User input: WGS 84 </span>
@@ -1048,16 +1039,16 @@ For example, try to run:</p>
 <code>st_crs(new_vector)$proj4string</code> extracts the <code>proj4string</code> representation</li>
 </ul>
 <p>In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs()</a></code> function can be used:</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">new_vector</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs</a></span><span class="op">(</span><span class="va">new_vector</span>, <span class="st">"EPSG:4326"</span><span class="op">)</span> <span class="co"># set CRS</span></code></pre></div>
 <p>The second argument in the above function could be either SRID (<code>"EPSG:4326"</code> in the example), complete WKT2 representation, <code>proj4string</code>, or CRS extracted from the existing object with <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>.</p>
 <p>The <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> function can be used to access CRS information from a <code>SpatRaster</code> object<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;Use the &lt;code&gt;cat()&lt;/code&gt; (e.g., &lt;code&gt;cat(crs(my_rast))&lt;/code&gt;) function to print it nicely.&lt;/p&gt;"><sup>20</sup></a>:</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span> <span class="co"># get CRS</span>
 <span class="co">#&gt; [1] "GEOGCRS[\"WGS 84\",\n    DATUM[\"World Geodetic System 1984\",\n        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n            LENGTHUNIT[\"metre\",1]]],\n    PRIMEM[\"Greenwich\",0,\n        ANGLEUNIT[\"degree\",0.0174532925199433]],\n    CS[ellipsoidal,2],\n        AXIS[\"geodetic latitude (Lat)\",north,\n            ORDER[1],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        AXIS[\"geodetic longitude (Lon)\",east,\n            ORDER[2],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n    ID[\"EPSG\",4326]]"</span></code></pre></div>
 <p>The output is the WKT2 representation of CRS.</p>
 <p>The same function, <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code>, is can be also used to set a CRS for raster objects.</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span> <span class="op">=</span> <span class="st">"EPSG:26912"</span> <span class="co"># set CRS</span></code></pre></div>
 <p>Here, we can use either SRID, complete WKT2 representation, <code>proj4string</code>, or CRS extracted from other existing object with <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code>.</p>
 <p>Importantly, the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> functions do not alter coordinates’ values or geometries.
@@ -1081,9 +1072,9 @@ This is advantageous, preventing confusion caused by different units (most CRSs 
 This is demonstrated in the code chunk below, which calculates the area of Luxembourg:
 
 </p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">luxembourg</span> <span class="op">=</span> <span class="va">world</span><span class="op">[</span><span class="va">world</span><span class="op">$</span><span class="va">name_long</span> <span class="op">==</span> <span class="st">"Luxembourg"</span>, <span class="op">]</span></code></pre></div>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_area</a></span><span class="op">(</span><span class="va">luxembourg</span><span class="op">)</span> <span class="co"># requires the s2 package in recent versions of sf</span>
 <span class="co">#&gt; 2.41e+09 [m^2]</span></code></pre></div>
 <p>The output is in units of square meters (m<sup>2</sup>), showing that the result represents two-dimensional space.
@@ -1091,23 +1082,23 @@ This information, stored as an attribute (which interested readers can discover 
 Reporting units prevents confusion.
 To take the Luxembourg example, if the units remained unspecified, one could incorrectly assume that the units were in hectares.
 To translate the huge number into a more digestible size, it is tempting to divide the results by a million (the number of square meters in a square kilometer):</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_area</a></span><span class="op">(</span><span class="va">luxembourg</span><span class="op">)</span> <span class="op">/</span> <span class="fl">1000000</span>
 <span class="co">#&gt; 2409 [m^2]</span></code></pre></div>
 <p>However, the result is incorrectly given again as square meters.
 The solution is to set the correct units with the <strong>units</strong> package:</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">units</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/units/man/units.html">set_units</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_area</a></span><span class="op">(</span><span class="va">luxembourg</span><span class="op">)</span>, <span class="va">km</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>
 <span class="co">#&gt; 2409 [km^2]</span></code></pre></div>
 <p>Units are of equal importance in the case of raster data.
 However, so far <strong>sf</strong> is the only spatial package that supports units, meaning that people working on raster data should approach changes in the units of analysis (for example, converting pixel widths from imperial to decimal units) with care.
 The <code>my_rast</code> object (see above) uses a WGS84 projection with decimal degrees as units.
 Consequently, its resolution is also given in decimal degrees but you have to know it, since the <code><a href="https://rdrr.io/pkg/terra/man/dimensions.html">res()</a></code> function simply returns a numeric vector.</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">res</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span>
 <span class="co">#&gt; [1] 0.000833 0.000833</span></code></pre></div>
 <p>If we used the UTM projection, the units would change.</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">repr</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/project.html">project</a></span><span class="op">(</span><span class="va">my_rast</span>, <span class="st">"EPSG:26912"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">res</a></span><span class="op">(</span><span class="va">repr</span><span class="op">)</span>
 <span class="co">#&gt; [1] 0.000833 0.000833</span></code></pre></div>
@@ -1211,7 +1202,7 @@ What kind of information you can learn from it?</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-12-02.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-12-03.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
