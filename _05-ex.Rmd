@@ -5,6 +5,7 @@ They also use a polygonal 'convex hull' derived from the vector dataset (`ch`) t
 ```{r 05-geometry-operations-68, message=FALSE, include=TRUE}
 library(sf)
 library(terra)
+library(spData)
 zion_points = read_sf(system.file("vector/zion_points.gpkg", package = "spDataLarge"))
 srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
 ch = st_combine(zion_points) %>%
@@ -18,7 +19,7 @@ Experiment with different values of `keep` (ranging from 0.5 to 0.00005) for `ms
 - At what value does the form of the result start to break down for each method, making New Zealand unrecognizable?
 - Advanced: What is different about the geometry type of the results from `st_simplify()` compared with the geometry type of `ms_simplify()`? What problems does this create and how can this be resolved?
 
-```{r 05-geometry-operations-69}
+```{r 05-geometry-operations-69, eval=FALSE}
 plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.5))
 plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.05))
 # Starts to breakdown here at 0.5% of the points:
@@ -49,7 +50,7 @@ nrow(nz)
 E2. In the first exercise in Chapter Spatial data operations it was established that Canterbury region had 70 of the 101 highest points in New Zealand. 
 Using `st_buffer()`, how many points in `nz_height` are within 100 km of Canterbury?
 
-```{r 05-geometry-operations-70}
+```{r 05-geometry-operations-70, eval=FALSE}
 canterbury = nz[nz$Name == "Canterbury", ]
 cant_buff = st_buffer(canterbury, 100)
 nz_height_near_cant = nz_height[cant_buff, ]
@@ -59,7 +60,7 @@ nrow(nz_height_near_cant) # 75 - 5 more
 E3. Find the geographic centroid of New Zealand. 
 How far is it from the geographic centroid of Canterbury?
 
-```{r 05-geometry-operations-71}
+```{r 05-geometry-operations-71, eval=FALSE}
 cant_cent = st_centroid(canterbury)
 nz_centre = st_centroid(st_union(nz))
 st_distance(cant_cent, nz_centre) # 234 km
@@ -71,7 +72,7 @@ Write code to do so.
 Hint: you need to use a two-element vector for this transformation.
  Bonus: create an upside-down map of your country.
  
-```{r 05-geometry-operations-72}
+```{r 05-geometry-operations-72, eval=FALSE}
 world_sfc = st_geometry(world)
 world_sfc_mirror = world_sfc * c(1, -1)
 plot(world_sfc)
@@ -99,7 +100,7 @@ E5. Subset the point in `p` that is contained within `x` *and* `y`.
 - Using base subsetting operators.
 - Using an intermediary object created with `st_intersection()`\index{vector!intersection}.
 
-```{r 05-geometry-operations-73}
+```{r 05-geometry-operations-73, eval=FALSE}
 p_in_y = p[y]
 p_in_xy = p_in_y[x]
 x_and_y = st_intersection(x, y)
@@ -110,7 +111,7 @@ E6. Calculate the length of the boundary lines of US states in meters.
 Which state has the longest border and which has the shortest?
 Hint: The `st_length` function computes the length of a `LINESTRING` or `MULTILINESTRING` geometry.
 
-```{r 05-geometry-operations-74}
+```{r 05-geometry-operations-74, eval=FALSE}
 us_states2163 = st_transform(us_states, "EPSG:2163")
 us_states_bor = st_cast(us_states2163, "MULTILINESTRING")
 us_states_bor$borders = st_length(us_states_bor)
@@ -149,14 +150,14 @@ zion_points_buf = st_buffer(zion_points, dist = 90)
 plot(srtm)
 plot(st_geometry(zion_points_buf), add = TRUE)
 plot(ch, add = TRUE)
-zion_points$srtm = extract(srtm, vect(zion_points), 
-                           buffer = 90, fun = mean)[[2]]
-zion_points$srtm2 = extract(srtm, vect(zion_points))[[2]]
-plot(zion_points$srtm, zion_points$srtm2)
+
+zion_points_points = extract(srtm, vect(zion_points))
+zion_points_buf = extract(srtm, vect(zion_points_buf))
+plot(zion_points_points$srtm, zion_points_buf$srtm2)
 ```
 
-E9. Subset points higher than 3100 meters in New Zealand (the `nz_height` object) and create a template raster with a resolution of 3 km. 
-Using these objects:
+E9. Subset points higher than 3100 meters in New Zealand (the `nz_height` object) and create a template raster with a resolution of 3 km for the extent of the new point dataset. 
+Using these two new objects:
 
 - Count numbers of the highest points in each grid cell.
 - Find the maximum elevation in each grid cell.
@@ -165,47 +166,75 @@ Using these objects:
 nz_height3100 = dplyr::filter(nz_height, elevation > 3100)
 new_graticule = st_graticule(nz_height3100, datum = "EPSG:2193")
 plot(st_geometry(nz_height3100), graticule = new_graticule, axes = TRUE)
-nz_template = raster(extent(nz_height3100), resolution = 3000,
-                         crs = st_crs(nz_height3100)$proj4string)
-nz_raster = rasterize(nz_height3100, nz_template, 
-                       field = "elevation", fun = "count")
+
+nz_template = rast(ext(nz_height3100), resolution = 3000, crs = crs(nz_height3100))
+
+nz_raster = rasterize(vect(nz_height3100), nz_template, 
+                       field = "elevation", fun = "length")
 plot(nz_raster)
-nz_raster2 = rasterize(nz_height3100, nz_template, 
+plot(st_geometry(nz_height3100), add = TRUE)
+
+nz_raster2 = rasterize(vect(nz_height3100), nz_template, 
                        field = "elevation", fun = max)
 plot(nz_raster2)
+plot(st_geometry(nz_height3100), add = TRUE)
 ```
 
 E10. Aggregate the raster counting high points in New Zealand (created in the previous exercise), reduce its geographic resolution by half (so cells are 6 by 6 km) and plot the result.
 
-- Resample the lower resolution raster back to a resolution of 3 km. How have the results changed?
+- Resample the lower resolution raster back to the original resolution of 3 km. How have the results changed?
 - Name two advantages and disadvantages of reducing raster resolution.
 
 ```{r 05-geometry-operations-78}
-nz_raster_low = raster::aggregate(nz_raster, fact = 2, fun = sum)
+nz_raster_low = raster::aggregate(nz_raster, fact = 2, fun = sum, na.rm = TRUE)
 res(nz_raster_low)
+
 nz_resample = resample(nz_raster_low, nz_raster)
 plot(nz_raster_low)
 plot(nz_resample) # the results are spread over a greater area and there are border issues
 plot(nz_raster)
-# advantage: lower memory use
-# advantage: faster processing
-# advantage: good for viz in some cases
-# disadvantage: removes geographic detail
-# disadvantage: another processing step
+```
+
+```{asis}
+Advantages:
+
+- lower memory use
+- faster processing
+- good for viz in some cases
+
+Disadvantages:
+
+- removes geographic detail
+- adds another processing step
 ```
 
 E11. Polygonize the `grain` dataset and filter all squares representing clay.
 
+```{r}
+grain = rast(system.file("raster/grain.tif", package = "spData"))
+```
+
 - Name two advantages and disadvantages of vector data over raster data.
--  At which points would it be useful to convert rasters to vectors in your work?
+- When would it be useful to convert rasters to vectors in your work?
 
 ```{r 05-geometry-operations-79}
-grain_poly = rasterToPolygons(grain) %>% 
+grain_poly = as.polygons(grain) %>% 
   st_as_sf()
 levels(grain)
-clay = dplyr::filter(grain_poly, layer == 1)
+clay = dplyr::filter(grain_poly, grain == "clay")
 plot(clay)
-# advantages: can be used to subset other vector objects
-# can do affine transformations and use sf/dplyr verbs
-# disadvantages: better consistency, fast processing on some operations, functions developed for some domains
 ```
+
+```{asis}
+Advantages: 
+
+- can be used to subset other vector objects
+- can do affine transformations and use sf/dplyr verbs
+
+Disadvantages: 
+
+- better consistency
+- fast processing on some operations
+- functions developed for some domains
+```
+

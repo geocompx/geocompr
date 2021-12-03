@@ -557,9 +557,9 @@ Geometric raster operations include the shift, flipping, mirroring, scaling, rot
 These operations are necessary for a variety of applications including georeferencing, used to allow images to be overlaid on an accurate map with a known CRS [@liu_essential_2009].
 A variety of georeferencing techniques exist, including:
 
-- Georectification based on known [ground control points](https://www.qgistutorials.com/en/docs/3/georeferencing_basics.html);
+- Georectification based on known [ground control points](https://www.qgistutorials.com/en/docs/3/georeferencing_basics.html)
 - Orthorectification, which also accounts for local topography
-- Image [registration](https://en.wikipedia.org/wiki/Image_registration) is used to combine images of the same thing but shot from different sensors the process of aligning one image with another (in terms of coordinate system, and resolution)
+- Image [registration](https://en.wikipedia.org/wiki/Image_registration) is used to combine images of the same thing but shot from different sensors by aligning one image with another (in terms of coordinate system and resolution)
 
 R is rather unsuitable for the first two points since these often require manual intervention which is why they are usually done with the help of dedicated GIS software (see also Chapter \@ref(gis)).
 On the other hand, aligning several images is possible in R and this section shows among others how to do so.
@@ -638,11 +638,21 @@ If the origins of two raster datasets are just marginally apart, it sometimes is
 ]
 Looking at Figure \@ref(fig:origin-example) reveals the effect of changing the origin.
 
-```{r origin-example, fig.cap="Rasters with identical values but different origins."}
+```{r}
 # change the origin
 origin(elev_4) = c(0.25, 0.25)
-plot(elev_4)
-plot(elev, add = TRUE) # and add the original raster
+```
+
+```{r origin-example, fig.cap="Rasters with identical values but different origins.", echo=FALSE}
+elev_poly = st_as_sf(as.polygons(elev, dissolve = FALSE))
+elev4_poly = st_as_sf(as.polygons(elev_4, dissolve = FALSE))
+tm_shape(elev4_poly) +
+  tm_grid() +
+  tm_polygons(col = "elev") + 
+  tm_shape(elev_poly) +
+  tm_polygons(col = "elev") +
+  tm_layout(frame = FALSE, legend.show = FALSE,
+            inner.margins = c(0.1, 0.12, 0, 0))
 ```
 
 Note that changing the resolution (next section) frequently also changes the origin.
@@ -687,17 +697,8 @@ dem_disagg = disagg(dem_agg, fact = 5, method = "bilinear")
 identical(dem, dem_disagg)
 ```
 
-```{r bilinear, echo = FALSE, fig.width=8, fig.height=10, fig.cap="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation.", fig.cap="Bilinear disaggregation in action."}
-elev = rast(system.file("raster/elev.tif", package = "spData"))
-elev_agg = aggregate(elev, fact = 2, fun = mean)
-plot(extend(elev, 1), col = NA, legend = FALSE, mar = c(3, 3, 2, 4))
-plot(elev_agg, add = TRUE)
-xy_1 = xyFromCell(elev, 1)
-xy_2 = xyFromCell(elev_agg, c(1, 2, 4, 5))
-arrows(xy_2[, 1], xy_2[, 2], xy_1[, 1], xy_1[, 2], length = 0.05)
-# points(xy_1, pch = 16, col = "black", cex = 2)
-points(xy_2, pch = 21, bg = "salmon", col = "black")
-plot(as.polygons(elev, dissolve = FALSE)[1], add = TRUE)
+```{r bilinear, echo = FALSE, fig.width=8, fig.height=10, fig.cap="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation.", fig.scap="Bilinear disaggregation in action.", warning=FALSE}
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-bilinear.R", print.eval = TRUE)
 ```
 
 Comparing the values of `dem` and `dem_disagg` tells us that they are not identical (you can also use `compareGeom()` or `all.equal()`).
@@ -829,7 +830,7 @@ We will use two objects to illustrate raster cropping:
 - A vector (`sf`) object `zion` representing Zion National Park.
 
 Both target and cropping objects must have the same projection.
-The following code chunk therefore not only reads the datasets from the **spDataLarge** package9 installed in Chapter \@ref(spatial-class)), it also reprojects `zion` (see Section \@ref(reproj-geo-data) for more on reprojection):
+The following code chunk therefore not only reads the datasets from the **spDataLarge** package (installed in Chapter \@ref(spatial-class)), it also reprojects `zion` (see Section \@ref(reproj-geo-data) for more on reprojection):
 
 ```{r 05-geometry-operations-43, results='hide'}
 srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
@@ -927,7 +928,7 @@ elevation = terra::extract(srtm, vect(zion_points2))
 zion_points = cbind(zion_points, elevation)
 ```
 
-```{r pointextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Locations of points used for raster extraction (left) and their 1km buffers (right).", fig.asp=0.57}
+```{r pointextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Locations of points used for raster extraction.", fig.asp=0.57}
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-pointextr.R", print.eval = TRUE)
 ```
 
@@ -1090,7 +1091,7 @@ rast_poly_srtm = tm_shape(srtm) +
             main.title.size = 1, legend.frame = TRUE,
             legend.position = c("left", "bottom"))
 rast_poly_nlcd = tm_shape(nlcd) +
-  tm_raster(style = "cat", title = "Land cover", legend.show = TRUE) + 
+  tm_raster(drop.levels = TRUE, title = "Land cover", legend.show = TRUE) + 
   tm_shape(zion) +
   tm_polygons(lwd = 2, alpha = 0.3) +
   tm_layout(main.title = "B. Categorical data extraction", 
@@ -1219,7 +1220,7 @@ source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-raster-vector
 ```
 
 Another common type of spatial vectorization is the creation of contour lines representing lines of continuous height or temperatures (isotherms) for example.
-We will use a real-world digital elevation model (DEM) because the artificial raster `elev` produces parallel lines (task: verify this and explain why this happens).
+We will use a real-world digital elevation model (DEM) because the artificial raster `elev` produces parallel lines (task for the reader: verify this and explain why this happens).
 Contour lines can be created with the **terra** function `as.contour()`, which is itself a wrapper around `filled.contour()`, as demonstrated below (not shown):
 
 ```{r 05-geometry-operations-66, eval=FALSE}

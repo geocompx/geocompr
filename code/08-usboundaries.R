@@ -1,7 +1,7 @@
 # Aim: create animation showing shifting US boundaries
 # depends on 17 MB USAboundariesData package
-# link to script file that shows chaning state boundaries
-# install.packages("USAboundaries")
+# link to script file that shows changing state boundaries
+# install.packages("USAboundariesData", repos = "https://ropensci.r-universe.dev", type = "source")
 library(USAboundaries)
 library(tidyverse)
 library(tmap)
@@ -12,10 +12,10 @@ dates_unique = unique(dates)
 #   Error in us_states(map_date, resolution, states) : 
 #   map_date <= as.Date("2000-12-31") is not TRUE
 dates_unique = dates_unique[dates_unique <= "2000-12-31"]
-usb1 = USAboundaries::us_boundaries(map_date = dates_unique[1])
+usb1 = USAboundaries::us_states(map_date = dates_unique[1])
 usb1$year = lubridate::year(dates_unique[1])
 plot(usb1$geometry)
-usbl = map(dates_unique, ~USAboundaries::us_boundaries(map_date = .))
+usbl = map(dates_unique, ~USAboundaries::us_states(map_date = .))
 # usb = do.call(rbind, usbl)
 statepop = historydata::us_state_populations %>%
   dplyr::select(-GISJOIN) %>% rename(name = state) 
@@ -29,7 +29,7 @@ i = 2
 dates_unique[dates_unique > "2000-12-31"] = "2000-12-31"
 
 for(i in 2:length(dates_unique)) {
-  usbi = USAboundaries::us_boundaries(map_date = dates_unique[i])
+  usbi = USAboundaries::us_states(map_date = dates_unique[i])
   print(st_crs(usbi))
   usbi$year = lubridate::year(dates_unique[i])
   if(dates_unique[i] == "2000-12-31") usbi$year = 2010

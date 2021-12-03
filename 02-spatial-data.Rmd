@@ -71,7 +71,7 @@ There is much overlap in some fields and raster and vector datasets can be used 
 ecologists and demographers, for example, commonly use both vector and raster data.
 Furthermore, it is possible to convert between the two forms (see Section \@ref(raster-vector)).
 Whether your work involves more use of vector or raster datasets, it is worth understanding the underlying data model before using them, as discussed in subsequent chapters.
-This book uses **sf** and **raster** packages to work with vector data and raster datasets, respectively.
+This book uses **sf** and **terra** packages to work with vector data and raster datasets, respectively.
 
 ## Vector data
 
@@ -708,18 +708,24 @@ source("code/02-raster-intro-plot2.R", print.eval = TRUE)
 
 ### R packages for raster data handling
 
-<!--jn:toDo - update:-->
-<!-- one intro paragraph about terra + stars -->
-<!-- maybe also add comparison table -->
+R has several packages able to read and process spatial raster data; see \Wref(the-history-of-r-spatial) for more context.
+However, currently, two main packages with this purpose exist -- **terra** and **stars**.^[We are not mentioning the **raster** package here as it is now being replaced with **terra**.]
+We are focusing on the **terra** package in this book; however, it may be worth knowing the basic similarities and differences between the packages before deciding which one to use.
 
-```{r, echo=FALSE}
-rast_table = tibble::tribble(
-  ~Feature, ~terra, ~stars,
-  "Data types", "", "",
-  "Raster operations", "", "",
-  "Performance", "", ""
-)
-```
+First, **terra** focuses on the most common raster data model (regular grids), while **stars** also allows storing less popular models (including regular, rotated, sheared, rectilinear, and curvilinear grids).
+While **terra** usually handle one or multi-layered rasters^[It also has an additional class `SpatRasterDataset` for storing many collections of datasets.], the **stars** package provides ways to store raster data cubes -- a raster object with many layers (e.g., bands), for many moments in time (e.g., months), and many attributes (e.g., sensor type A and sensor type B).
+Importantly, in both packages, all layers or elements of a data cube must have the same spatial dimensions and extent.
+Second, both packages allow to either read all of the raster data into memory or just to read its metadata -- this is usually done automatically based on the input file size.
+However, they store raster values very differently. 
+**terra** is based on C++ code and mostly uses C++ pointers.
+**stars** stores values as lists of arrays for smaller rasters or just a file path for larger ones.
+Third, **stars** functions are closely related to the vector objects and functions in **sf**, while **terra** uses its own class of objects for vector data, namely `SpatVector`.
+Fourth, both packages have a different approach for how various functions work on their objects.
+The **terra** package mostly relies on a large number of built-in functions, where each function has a specific purpose (e.g., resampling or cropping).
+On the other hand, **stars** uses some build-in functions (usually with names starting with `st_`), has its own methods for existing R functions (e.g., `split()` or `aggregate()`), and also for existing **dplyr** functions (e.g., `filter()` or `slice()`).
+
+Importantly, it is straightforward to convert objects from **terra** to **stars** (using `st_as_stars()`) and the other way round (using `rast()`).
+We also encourage you to read @pebesma_spatial_2022 for the most comprehensive introduction to the **stars** package.
 
 ### An introduction to terra
 
@@ -837,7 +843,7 @@ multi_rast34 = c(multi_rast3, multi_rast4)
 ```{block2 02-spatial-data-2a, type='rmdnote'}
 Most `SpatRaster` objects do not store raster values, but rather a pointer to the file itself.
 This has a significant side-effect -- they cannot be directly saved to `".rds"` or `".rda"` files or used in cluster computing.
-In these cases, there are two possible solutions: (1) use of the `wrap()` function that creates a special kind of temporary object that can be saved as an R object or using in cluster computing, or (2) save the object as a regular raster with `writeRaster()`.
+In these cases, there are two possible solutions: (1) use of the `wrap()` function that creates a special kind of temporary object that can be saved as an R object or used in cluster computing, or (2) save the object as a regular raster with `writeRaster()`.
 ```
 
 <!--jn:toDo-->
@@ -942,7 +948,7 @@ In the past, the `proj4string` definitions, was the standard way to specify coor
 These string representations, built on a key=value form (e.g, `+proj=longlat +datum=WGS84 +no_defs`), are, however, currently discouraged in most cases.
 PROJ version 6 and further still allows to use `proj4string`s to define coordinate operations, but some `proj4string` keys are no longer supported or are not advisable to use (e.g., `+nadgrids`, `+towgs84`, `+k`, `+init=epsg:`) and only three datums (i.e., WGS84, NAD83, and NAD27) can be directly set in `proj4string`.
 Importantly, `proj4string`s are not used to store CRSs anymore.
-Longer explanations on the recent changes in the PROJ library and why `proj4string` was replaced by `WKT2` can be found in @bivand_progress_2020a, Chapter 2 of @pebesma_spatial_2022, and [blog post by Floris Vanderhaeghe](https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/).
+Longer explanations on the recent changes in the PROJ library and why `proj4string` was replaced by `WKT2` can be found in @bivand_progress_2020, Chapter 2 of @pebesma_spatial_2022, and [blog post by Floris Vanderhaeghe](https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/).
 
 Let's look at how CRSs are stored in R spatial objects and how they can be set.
 For this, we need to read-in a vector dataset:
@@ -1053,9 +1059,7 @@ res(my_rast)
 
 If we used the UTM projection, the units would change.
 
-<!--jn:toDO-->
-<!--set eval=TRUE later-->
-```{r 02-spatial-data-62, warning=FALSE, message=FALSE, eval=FALSE}
+```{r 02-spatial-data-62, warning=FALSE, message=FALSE}
 repr = project(my_rast, "EPSG:26912")
 res(repr)
 ```
