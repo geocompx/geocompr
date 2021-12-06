@@ -344,23 +344,28 @@ To access and modify it explicitly, use the `st_crs` function, for example, `st_
 
 ## Modifying map projections
 
-\index{CRS!proj4string} 
-Established CRSs captured by EPSG codes are well-suited for many applications.
-However in some cases it is desirable to create a new CRS, using a custom `proj4string`.
-This system allows a very wide range of projections to be created, as we'll see in some of the custom map projections in this section.
+<!--toDo:jn-->
+<!--not longer valid-->
+<!-- proj4strings still can be used - explain how to use them and when -->
+<!-- however, focus on wkt2 customization here! -->
 
-A long and growing list of projections has been developed and many of these can be set with the `+proj=` element of `proj4string`s.^[
-The Wikipedia page 'List of map projections' has 70+ projections and illustrations.
-]
+<!-- \index{CRS!proj4string}  -->
+<!-- Established CRSs captured by EPSG codes are well-suited for many applications. -->
+<!-- However in some cases it is desirable to create a new CRS, using a custom `proj4string`. -->
+<!-- This system allows a very wide range of projections to be created, as we'll see in some of the custom map projections in this section. -->
 
-When mapping the world while preserving area relationships, the Mollweide projection is a good choice [@jenny_guide_2017] (Figure \@ref(fig:mollproj)).
-To use this projection, we need to specify it using the `proj4string` element, `"+proj=moll"`, in the `st_transform` function:
+<!-- A long and growing list of projections has been developed and many of these can be set with the `+proj=` element of `proj4string`s.^[ -->
+<!-- The Wikipedia page 'List of map projections' has 70+ projections and illustrations. -->
+<!-- ] -->
 
-```{r 06-reproj-22}
+<!-- When mapping the world while preserving area relationships, the Mollweide projection is a good choice [@jenny_guide_2017] (Figure \@ref(fig:mollproj)). -->
+<!-- To use this projection, we need to specify it using the `proj4string` element, `"+proj=moll"`, in the `st_transform` function: -->
+
+```{r 06-reproj-22, eval=FALSE, echo=FALSE}
 world_mollweide = st_transform(world, crs = "+proj=moll")
 ```
 
-```{r mollproj, echo=FALSE, fig.cap="Mollweide projection of the world.", warning=FALSE, message=FALSE}
+```{r mollproj, fig.cap="Mollweide projection of the world.", warning=FALSE, message=FALSE, eval=FALSE, echo=FALSE}
 library(tmap)
 world_mollweide_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
   lwgeom::st_transform_proj(crs = "+proj=moll")
@@ -370,24 +375,24 @@ tm_shape(world_mollweide_gr) +
   tm_borders(col = "black") 
 ```
 
-On the other hand, when mapping the world, it is often desirable to have as little distortion as possible for all spatial properties (area, direction, distance).
-One of the most popular projections to achieve this is the Winkel tripel projection (Figure \@ref(fig:wintriproj)).^[
-This projection is used, among others, by the National Geographic Society.
-]
-`st_transform_proj()` from the **lwgeom** package allows for coordinate transformations to a wide range of CRSs, including the Winkel tripel projection: 
+<!-- On the other hand, when mapping the world, it is often desirable to have as little distortion as possible for all spatial properties (area, direction, distance). -->
+<!-- One of the most popular projections to achieve this is the Winkel tripel projection (Figure \@ref(fig:wintriproj)).^[ -->
+<!-- This projection is used, among others, by the National Geographic Society. -->
+<!-- ] -->
+<!-- `st_transform_proj()` from the **lwgeom** package allows for coordinate transformations to a wide range of CRSs, including the Winkel tripel projection:  -->
 
-```{r 06-reproj-23}
+```{r 06-reproj-23, eval=FALSE, echo=FALSE}
 world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 ```
 
-```{r wintriproj, echo=FALSE, fig.cap="Winkel tripel projection of the world.", error=TRUE}
+```{r wintriproj, fig.cap="Winkel tripel projection of the world.", error=TRUE, eval=FALSE, echo=FALSE}
 world_wintri_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
   lwgeom::st_transform_proj(crs = "+proj=wintri")
 tm_shape(world_wintri_gr) + tm_lines(col = "gray") +
   tm_shape(world_wintri) + tm_borders(col = "black")
 ```
 
-```{block2 06-reproj-24, type='rmdnote'}
+```{block2 06-reproj-24, type='rmdnote', echo=FALSE}
 The three main functions for transformation of simple features coordinates are `sf::st_transform()`, `sf::sf_project()`, and `lwgeom::st_transform_proj()`.
 The `st_transform` function uses the GDAL interface to PROJ, while `sf_project()` (which works with two-column numeric matrices, representing points) and `lwgeom::st_transform_proj()` use the PROJ API directly.
 The first one is appropriate for most situations, and provides a set of the most often used parameters and well-defined transformations.
@@ -402,17 +407,17 @@ mat_projected = sf_project(from = st_crs(4326)$proj4string, to = st_crs(27700)$p
 plot(mat_projected)
 ```
 
-Moreover, PROJ parameters can be modified in most CRS definitions.
-The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on longitude and latitude of `0` (Figure \@ref(fig:laeaproj1)).
+<!-- Moreover, PROJ parameters can be modified in most CRS definitions. -->
+<!-- The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on longitude and latitude of `0` (Figure \@ref(fig:laeaproj1)). -->
 
-```{r 06-reproj-26}
+```{r 06-reproj-26, eval=FALSE, echo=FALSE}
 world_laea1 = st_transform(world, 
                            crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_0=0")
 ```
 <!-- plot(world_laea1$geom) -->
 <!-- plot(world_laea1$geom, graticule = TRUE) -->
 
-```{r laeaproj1, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection centered on longitude and latitude of 0.", fig.scap="Lambert azimuthal equal-area projection of the world", warning=FALSE}
+```{r laeaproj1, fig.cap="Lambert azimuthal equal-area projection centered on longitude and latitude of 0.", fig.scap="Lambert azimuthal equal-area projection of the world", warning=FALSE, eval=FALSE, echo=FALSE}
 world_laea1_g = st_graticule(ndiscr = 10000) %>%
   st_transform("+proj=laea +x_0=0 +y_0=0 +lon_0=0 +lat_0=0") %>% 
   st_geometry()
@@ -425,15 +430,15 @@ tm_shape(world_laea1_g) + tm_lines(col = "gray") +
   tm_shape(world_laea1_lines) + tm_lines(col = "black")
 ```
 
-We can change the PROJ parameters, for example the center of the projection, using the `+lon_0` and `+lat_0` parameters. 
-The code below gives the map centered on New York City (Figure \@ref(fig:laeaproj2)).
+<!-- We can change the PROJ parameters, for example the center of the projection, using the `+lon_0` and `+lat_0` parameters.  -->
+<!-- The code below gives the map centered on New York City (Figure \@ref(fig:laeaproj2)). -->
 
-```{r 06-reproj-27}
+```{r 06-reproj-27, eval=FALSE, echo=FALSE}
 world_laea2 = st_transform(world,
                            crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40")
 ```
 
-```{r laeaproj2, echo=FALSE, fig.cap="Lambert azimuthal equal-area projection of the world centered on New York City.", fig.scap="Lambert azimuthal equal-area projection centered on New York City.", warning=FALSE}
+```{r laeaproj2, fig.cap="Lambert azimuthal equal-area projection of the world centered on New York City.", fig.scap="Lambert azimuthal equal-area projection centered on New York City.", warning=FALSE, eval=FALSE, echo=FALSE}
 # Currently fails, see https://github.com/Robinlovelace/geocompr/issues/460
 world_laea2_g = st_graticule(ndiscr = 10000) %>%
   st_transform("+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40.1 +ellps=WGS84 +no_defs") %>%
