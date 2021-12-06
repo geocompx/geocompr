@@ -131,14 +131,17 @@ The subsequent sections go into more depth, exploring which CRS to use and the d
 ## When to reproject?
 
 \index{CRS!reprojection} 
-The previous section showed how to set the CRS manually, with `st_set_crs(london, 4326)`.
+The previous section showed how to set the CRS manually, with `st_set_crs(london, "EPSG:4326")`.
 In real world applications, however, CRSs are usually set automatically when data is read-in.
 The main task involving CRSs is often to *transform* objects, from one CRS into another.
-But when should data be transformed? And into which CRS?
+But when should data be transformed? 
+And into which CRS?
 There are no clear-cut answers to these questions and CRS selection always involves trade-offs [@maling_coordinate_1992].
 However, there are some general principles provided in this section that can help you decide. 
 
 First it's worth considering *when to transform*.
+<!--toDo:rl-->
+<!--not longer valid-->
 In some cases transformation to a projected CRS is essential, such as when using geometric functions such as `st_buffer()`, as Figure \@ref(fig:crs-buf) showed.
 Conversely, publishing data online with the **leaflet** package may require a geographic CRS.
 Another case is when two objects with different CRSs must be compared or combined, as shown when we try to find the distance between two objects with different CRSs:
@@ -153,7 +156,7 @@ But which CRS to use?
 The answer is usually 'the projected CRS', which in this case is the British National Grid (EPSG:27700):
 
 ```{r 06-reproj-10}
-london2 = st_transform(london_geo, 27700)
+london2 = st_transform(london_geo, "EPSG:27700")
 ```
 
 Now that a transformed version of `london` has been created, using the **sf** function `st_transform()`, the distance between the two representations of London can be found.
@@ -196,12 +199,14 @@ This means that when working with local data sources, it is likely preferable to
 The example of London was easy to answer because (a) the British National Grid (with its associated EPSG code 27700) is well known and (b) the original dataset (`london`) already had that CRS.
 
 In cases where an appropriate CRS is not immediately clear, the choice of CRS should depend on the properties that are most important to preserve in the subsequent maps and analysis.
-All CRSs are either equal-area, equidistant, conformal (with shapes remaining unchanged), or some combination of compromises of those.
+All CRSs are either equal-area, equidistant, conformal (with shapes remaining unchanged), or some combination of compromises of those (section \@ref(projected-coordinate-reference-systems)).
 Custom CRSs with local parameters can be created for a region of interest and multiple CRSs can be used in projects when no single CRS suits all tasks.
 'Geodesic calculations' can provide a fall-back if no CRSs are appropriate (see [proj.org/geodesic.html](https://proj.org/geodesic.html)).
 Regardless of the projected CRS used, the results may not be accurate for geometries covering hundreds of kilometers.
 
 When deciding on a custom CRS, we recommend the following:^[
+<!--toDo:rl-->
+<!-- jn:I we can assume who is the "anonymous reviewer", can we ask him/her to use his/her name? -->
 Many thanks to an anonymous reviewer whose comments formed the basis of this advice.
 ]
 
@@ -211,11 +216,19 @@ Many thanks to an anonymous reviewer whose comments formed the basis of this adv
 \index{projection!Stereographic}
 \index{projection!Universal Transverse Mercator}
 
-- A Lambert azimuthal equal-area ([LAEA](https://en.wikipedia.org/wiki/Lambert_azimuthal_equal-area_projection)) projection for a custom local projection (set `lon_0` and `lat_0` to the center of the study area), which is an equal-area projection at all locations but distorts shapes beyond thousands of kilometres
--  Azimuthal equidistant ([AEQD](https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection)) projections for a specifically accurate straight-line distance between a point and the centre point of the local projection
-- Lambert conformal conic ([LCC](https://en.wikipedia.org/wiki/Lambert_conformal_conic_projection)) projections for regions covering thousands of kilometres, with the cone set to keep distance and area properties reasonable between the secant lines
-- Stereographic ([STERE](https://en.wikipedia.org/wiki/Stereographic_projection)) projections for polar regions, but taking care not to rely on area and distance calculations thousands of kilometres from the center
+- A Lambert azimuthal equal-area ([LAEA](https://en.wikipedia.org/wiki/Lambert_azimuthal_equal-area_projection)) projection for a custom local projection (set `lon_0` and `lat_0` to the center of the study area), which is an equal-area projection at all locations but distorts shapes beyond thousands of kilometers
+- Azimuthal equidistant ([AEQD](https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection)) projections for a specifically accurate straight-line distance between a point and the center point of the local projection
+- Lambert conformal conic ([LCC](https://en.wikipedia.org/wiki/Lambert_conformal_conic_projection)) projections for regions covering thousands of kilometers, with the cone set to keep distance and area properties reasonable between the secant lines
+- Stereographic ([STERE](https://en.wikipedia.org/wiki/Stereographic_projection)) projections for polar regions, but taking care not to rely on area and distance calculations thousands of kilometers from the center
 
+<!--toDo:jn-->
+<!--consider rewriting/updating the following section, maybe with some R code?-->
+One possible approach to automatically select a projected CRS specific to a local dataset is to create an azimuthal equidistant ([AEQD](https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection)) projection for the center-point of the study area.
+This involves creating a custom CRS (with no EPSG code) with units of meters based on the center point of a dataset.
+This approach should be used with caution: no other datasets will be compatible with the custom CRS created and results may not be accurate when used on extensive datasets covering hundreds of kilometers.
+
+<!--toDo:jn-->
+<!--consider rewriting/updating UTM section-->
 A commonly used default is Universal Transverse Mercator ([UTM](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system)), a set of CRSs that divides the Earth into 60 longitudinal wedges and 20 latitudinal segments.
 The transverse Mercator projection used by UTM CRSs is conformal but distorts areas and distances with increasing severity with distance from the center of the UTM zone.
 Documentation from the GIS software Manifold therefore suggests restricting the longitudinal extent of projects using UTM zones to 6 degrees from the central meridian (source: [manifold.net](http://www.manifold.net/doc/mfd9/universal_transverse_mercator_projection.htm)).
@@ -266,10 +279,6 @@ st_crs(epsg_utm_lnd)$proj4string
 ```
 
 Maps of UTM zones such as that provided by [dmap.co.uk](http://www.dmap.co.uk/utmworld.htm) confirm that London is in UTM zone 30U.
-
-Another approach to automatically select a projected CRS specific to a local dataset is to create an azimuthal equidistant ([AEQD](https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection)) projection for the center-point of the study area.
-This involves creating a custom CRS (with no EPSG code) with units of meters based on the centerpoint of a dataset.
-This approach should be used with caution: no other datasets will be compatible with the custom CRS created and results may not be accurate when used on extensive datasets covering hundreds of kilometers.
 
 The principles outlined in this section apply equally to vector and raster datasets.
 Some features of CRS transformation however are unique to each geographic data model.
