@@ -59,7 +59,7 @@ Files hosted on static URLs can be downloaded with `download.file()`, as illustr
 
 
 ```r
-download.file(url = "http://nrdata.nps.gov/programs/lands/nps_boundary.zip",
+download.file(url = "https://irma.nps.gov/DataStore/DownloadFile/666527",
               destfile = "nps_boundary.zip")
 unzip(zipfile = "nps_boundary.zip")
 usa_parks = st_read(dsn = "nps_boundary.shp")
@@ -75,6 +75,11 @@ usa_parks = st_read(dsn = "nps_boundary.shp")
 Many R packages have been developed for accessing geographic data, some of which are presented in Table \@ref(tab:datapackages).
 These provide interfaces to one or more spatial libraries or geoportals and aim to make data access even quicker from the command line.
 
+<!--toDo:JN-->
+<!-- update the table -->
+
+
+
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>(\#tab:datapackages)Selected R packages for geographic data retrieval.</caption>
  <thead>
@@ -85,10 +90,6 @@ These provide interfaces to one or more spatial libraries or geoportals and aim 
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> getlandsat </td>
-   <td style="text-align:left;"> Provides access to Landsat 8 data. </td>
-  </tr>
-  <tr>
    <td style="text-align:left;"> osmdata </td>
    <td style="text-align:left;"> Download and import small OpenStreetMap datasets. </td>
   </tr>
@@ -97,25 +98,19 @@ These provide interfaces to one or more spatial libraries or geoportals and aim 
    <td style="text-align:left;"> Download and import large OpenStreetMap datasets. </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> raster </td>
-   <td style="text-align:left;"> getData() imports administrative, elevation, WorldClim data. </td>
+   <td style="text-align:left;"> geodata </td>
+   <td style="text-align:left;"> Download and import imports administrative, elevation, WorldClim data. </td>
   </tr>
   <tr>
    <td style="text-align:left;"> rnaturalearth </td>
    <td style="text-align:left;"> Access to Natural Earth vector and raster data. </td>
   </tr>
-  <tr>
-   <td style="text-align:left;"> rnoaa </td>
-   <td style="text-align:left;"> Imports National Oceanic and Atmospheric Administration (NOAA) climate data. </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> rWBclimate </td>
-   <td style="text-align:left;"> Access World Bank climate data. </td>
-  </tr>
 </tbody>
 </table>
 
-It should be emphasised that Table \@ref(tab:datapackages) represents only a small number of available geographic data packages.
+It should be emphasized that Table \@ref(tab:datapackages) represents only a small number of available geographic data packages.
+<!--toDo:JN-->
+<!-- update the list -->
 Other notable packages include **GSODR**, which provides Global Summary Daily Weather Data in R (see the package's [README](https://github.com/ropensci/GSODR) for an overview of weather data sources);
 **tidycensus** and **tigris**, which provide socio-demographic vector data for the USA; and **hddtools**, which provides access to a range of hydrological datasets.
 
@@ -131,17 +126,20 @@ class(usa)
 #> [1] "SpatialPolygonsDataFrame"
 #> attr(,"package")
 #> [1] "sp"
-# alternative way of accessing the data, with raster::getData()
-# getData("GADM", country = "USA", level = 0)
+# alternative way of accessing the data, with geodata
+# geodata::gadm("USA", level = 0, path = tempdir())
 ```
 
-By default **rnaturalearth** returns objects of class `Spatial`.
+By default **rnaturalearth** returns objects of class `Spatial*`.
 The result can be converted into an `sf` objects with `st_as_sf()` as follows:
 
 
 ```r
 usa_sf = st_as_sf(usa)
 ```
+
+<!--toDo:JN-->
+<!-- add info about other world-data packages -->
 
 A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of ten minutes using the **geodata** package.
 The result is a multilayer object of class `SpatRaster`.
@@ -158,7 +156,8 @@ class(worldclim_prec)
 
 A third example uses the **osmdata** package [@R-osmdata] to find parks from the OpenStreetMap (OSM) database\index{OpenStreetMap}.
 As illustrated in the code-chunk below, queries begin with the function `opq()` (short for OpenStreetMap query), the first argument of which is bounding box, or text string representing a bounding box (the city of Leeds in this case).
-The result is passed to a function for selecting which OSM elements we're interested in (parks in this case), represented by *key-value pairs*. Next, they are passed to the function `osmdata_sf()` which does the work of downloading the data and converting it into a list of `sf` objects (see `vignette('osmdata')` for further details):
+The result is passed to a function for selecting which OSM elements we're interested in (parks in this case), represented by *key-value pairs*.
+Next, they are passed to the function `osmdata_sf()` which does the work of downloading the data and converting it into a list of `sf` objects (see `vignette('osmdata')` for further details):
 
 
 ```r
@@ -177,8 +176,8 @@ Although the quality of datasets derived from OSM varies, the data source and wi
 Using OSM encourages 'citizen science' and contributions back to the digital commons (you can start editing data representing a part of the world you know well at [www.openstreetmap.org](https://www.openstreetmap.org)).
 Further examples of OSM data in action are provided in Chapters \@ref(gis), \@ref(transport) and \@ref(location).
 
-Sometimes, packages come with inbuilt datasets.
-These can be accessed in four ways: by attaching the package (if the package uses 'lazy loading' as **spData** does), with `data(dataset)`, by referring to the dataset with `pkg::dataset` or with `system.file()` to access raw data files.
+Sometimes, packages come with built-in datasets.
+These can be accessed in four ways: by attaching the package (if the package uses 'lazy loading' as **spData** does), with `data(dataset, package = mypackage)`, by referring to the dataset with `mypackage::dataset`, or with `system.file(filepath, package = mypackage)` to access raw data files.
 The following code chunk illustrates the latter two options using the `world` dataset (already loaded by attaching its parent package with `library(spData)`):^[
 For more information on data import with R packages, see Sections 5.5 and 5.6 of @gillespie_efficient_2016.
 ]
@@ -186,13 +185,16 @@ For more information on data import with R packages, see Sections 5.5 and 5.6 of
 
 ```r
 world2 = spData::world
-world3 = st_read(system.file("shapes/world.gpkg", package = "spData"))
+world3 = read_sf(system.file("shapes/world.gpkg", package = "spData"))
 ```
+
+The last example, `system.file("shapes/world.gpkg", package = "spData")`, returns a path to the `world.gpkg` file, which is stored inside of the `"shapes/"` folder of the **spData** package.
 
 ## Geographic web services
 
 <!--toDo:RL-->
 <!--revise and update the following section-->
+<!--jn: Robin, I am leaving this section entirely to you -- I have zero knowladge about OWS-->
 
 \index{geographic web services}
 In an effort to standardize web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of specifications for web services (collectively known as OWS, which is short for OGC Web Services).
@@ -230,7 +232,7 @@ xml = xml2::read_xml(txt)
 xml
 #> {xml_document} ...
 #> [1] <ows:ServiceIdentification>\n  <ows:Title>GeoServer WFS...
-#> [2] <ows:ServiceProvider>\n  <ows:ProviderName>Food and Agr...
+#> [2] <ows:ServiceProvider>\n  <ows:ProviderName>UN-FAO Fishe...
 #> ...
 ```
 
@@ -246,7 +248,7 @@ One can extract them programmatically using web technologies [@nolan_xml_2014] o
 qf = list(request = "GetFeature", typeName = "area:FAO_AREAS")
 file = tempfile(fileext = ".gml")
 httr::GET(url = base_url, path = endpoint, query = qf, httr::write_disk(file))
-fao_areas = sf::read_sf(file)
+fao_areas = read_sf(file)
 ```
 
 Note the use of `write_disk()` to ensure that the results are written to disk rather than loaded into memory, allowing them to be imported with **sf**.
@@ -353,13 +355,6 @@ Table \@ref(tab:formats) presents some basic information about selected and ofte
    <td style="text-align:left;width: 7em; "> Open </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> R-raster </td>
-   <td style="text-align:left;width: 7em; "> .gri, .grd </td>
-   <td style="text-align:left;width: 14em; "> Native raster format of the R-package raster. </td>
-   <td style="text-align:left;"> Raster </td>
-   <td style="text-align:left;width: 7em; "> Open </td>
-  </tr>
-  <tr>
    <td style="text-align:left;"> SQLite/SpatiaLite </td>
    <td style="text-align:left;width: 7em; "> .sqlite </td>
    <td style="text-align:left;width: 14em; "> Standalone  relational database, SpatiaLite is the spatial extension of SQLite. </td>
@@ -409,9 +404,12 @@ Additionally, GeoTIFF is still being expanded and improved.
 One of the most significant recent addition to the GeoTIFF format is its variant called COG (*Cloud Optimized GeoTIFF*).
 Raster objects saved as COGs can be hosted on HTTP servers, so other people can read only parts of the file without downloading the whole file.
 
+<!-- jn:toDo-->
+<!-- add ref to cog example if we will made one-->
+
 ## Data input (I) {#data-input}
 
-Executing commands such as `sf::st_read()` (the main function we use for loading vector data) or `terra::rast()` (the main function used for loading raster data) silently sets off a chain of events that reads data from files.
+Executing commands such as `sf::read_sf()` (the main function we use for loading vector data) or `terra::rast()` (the main function used for loading raster data) silently sets off a chain of events that reads data from files.
 Moreover, there are many R packages containing a wide range of geographic data or providing simple access to different data sources.
 All of them load the data into R or, more precisely, assign objects to your workspace, stored in RAM accessible from the [`.GlobalEnv`](http://adv-r.had.co.nz/Environments.html) of the R session.
 
@@ -614,9 +612,12 @@ multilayer_filepath = system.file("raster/landsat.tif", package = "spDataLarge")
 multilayer_rast = rast(multilayer_filepath)
 ```
 
+<!-- jn:toDo-->
 <!-- COG example?? -->
 
 <!-- ### Databases -->
+
+<!-- jn:toDo-->
 <!-- postgis input example -->
 
 ## Data output (O) {#data-output}
@@ -705,14 +706,13 @@ Using INT4U is not recommended as R does not support 32-bit unsigned integers.
 The data type determines the bit representation of the raster object written to disk (Table \@ref(tab:datatypes)).
 Which data type to use depends on the range of the values of your raster object.
 The more values a data type can represent, the larger the file will get on disk.
-Commonly, one would use LOG1S for bitmap (binary) rasters.
 Unsigned integers (INT1U, INT2U, INT4U) are suitable for categorical data, while float numbers (FLT4S and FLT8S) usually represent continuous data.
 `writeRaster()` uses FLT4S as the default.
 While this works in most cases, the size of the output file will be unnecessarily large if you save binary or categorical data.
 Therefore, we would recommend to use the data type that needs the least storage space, but is still able to represent all values (check the range of values with the `summary()` function).
 
 <table>
-<caption>(\#tab:datatypes)Data types supported by the raster package.</caption>
+<caption>(\#tab:datatypes)Data types supported by the terra package.</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Data type </th>
@@ -721,16 +721,6 @@ Therefore, we would recommend to use the data type that needs the least storage 
   </tr>
  </thead>
 <tbody>
-  <tr>
-   <td style="text-align:left;"> LOG1S </td>
-   <td style="text-align:left;"> FALSE (0) </td>
-   <td style="text-align:left;"> TRUE (1) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> INT1S </td>
-   <td style="text-align:left;"> -127 </td>
-   <td style="text-align:left;"> 127 </td>
-  </tr>
   <tr>
    <td style="text-align:left;"> INT1U </td>
    <td style="text-align:left;"> 0 </td>
@@ -818,7 +808,7 @@ tmap_obj = tm_shape(world) + tm_polygons(col = "lifeExp")
 tmap_save(tmap_obj, filename = "lifeExp_tmap.png")
 ```
 
-On the other hand, you can save interactive maps created in the `mapview` package as an HTML file or image using the `mapshot()` function:
+On the other hand, you can save interactive maps created in the **mapview** package as an HTML file or image using the `mapshot()` function:
 
 
 ```r
