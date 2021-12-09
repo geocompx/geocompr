@@ -38,6 +38,7 @@ The final Section \@ref(visual-outputs) demonstrates methods for saving visual o
 
 <!--toDo:RL-->
 <!--revise and update the following section-->
+<!-- we should add http://freegisdata.rtwilson.com/ somewhere -->
 
 \index{open data}
 A vast and ever-increasing amount of geographic data is available on the internet, much of which is free to access and use (with appropriate credit given to its providers).
@@ -140,8 +141,11 @@ usa_sf = st_as_sf(usa)
 
 <!--toDo:JN-->
 <!-- add info about other world-data packages -->
+<!-- https://github.com/wmgeolab/rgeoboundaries -->
+<!-- https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0231866 -->
+<!-- https://www.geoboundaries.org/ -->
 
-A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of ten minutes using the **geodata** package.
+A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of ten minutes (~18.5 km at the equator) using the **geodata** package.
 The result is a multilayer object of class `SpatRaster`.
 
 
@@ -190,11 +194,14 @@ world3 = read_sf(system.file("shapes/world.gpkg", package = "spData"))
 
 The last example, `system.file("shapes/world.gpkg", package = "spData")`, returns a path to the `world.gpkg` file, which is stored inside of the `"shapes/"` folder of the **spData** package.
 
+<!--toDo:jn-->
+<!-- consider data from rgee -->
+
 ## Geographic web services
 
 <!--toDo:RL-->
 <!--revise and update the following section-->
-<!--jn: Robin, I am leaving this section entirely to you -- I have zero knowladge about OWS-->
+<!--jn: Robin, I am leaving this section entirely to you -- I have zero knowledge about OWS-->
 
 \index{geographic web services}
 In an effort to standardize web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of specifications for web services (collectively known as OWS, which is short for OGC Web Services).
@@ -282,7 +289,7 @@ For further information on the topic, we recommend examples from European Centre
 
 \index{file formats}
 Geographic datasets are usually stored as files or in spatial databases.
-File formats can either store vector or raster data, while spatial databases such as [PostGIS](https://trac.osgeo.org/postgis/wiki/WKTRaster) can store both (see also Section \@ref(postgis)).
+File formats can either store vector or raster data, while spatial databases such as [PostGIS](https://postgis.net/) can store both (see also Section \@ref(postgis)).
 Today the variety of file formats may seem bewildering but there has been much consolidation and standardization since the beginnings of GIS software in the 1960s when the first widely distributed program ([SYMAP](https://news.harvard.edu/gazette/story/2011/10/the-invention-of-gis/)) for spatial analysis was created at Harvard University [@coppock_history_1991].
 
 \index{GDAL}
@@ -519,6 +526,27 @@ For some drivers, `dsn` could be provided as a folder name, access credentials f
 
 Some vector driver formats can store multiple data layers.
 By default, `st_read()` automatically reads the first layer of the file specified in `dsn`; however, using the `layer` argument you can specify any other layer.
+
+<!--toDo:JN-->
+<!--sql from files I-->
+
+
+```r
+tanzania = read_sf(vector_filepath,
+                 query = 'SELECT * FROM "world" WHERE name_long = "Tanzania"')
+```
+
+<!--toDo:JN-->
+<!--sql from files II-->
+
+```r
+tanzania_buf = st_buffer(tanzania, 50000)
+tanzania_buf_geom = st_geometry(tanzania_buf)
+tanzania_buf_wkt = st_as_text(tanzania_buf_geom)
+tanzania_neigh = read_sf(vector_filepath,
+                   wkt_filter = tanzania_buf_wkt)
+```
+
 
 Naturally, some options are specific to certain drivers.^[
 A list of supported vector formats and options can be found at http://gdal.org/ogr_formats.html.
