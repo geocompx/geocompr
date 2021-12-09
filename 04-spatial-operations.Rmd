@@ -370,31 +370,30 @@ text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y")) # add text
 ### Spatial joining 
 
 Joining two non-spatial datasets relies on a shared 'key' variable, as described in Section \@ref(vector-attribute-joining).
-Spatial data joining applies the same concept, but instead relies on shared areas of geographic space (it is also known as spatial overlay).
-As with attribute data, joining adds a new column to the target object (the argument `x` in joining functions), from a source object (`y`).
+Spatial data joining applies the same concept, but instead relies on spatial relations, described in the previous section.
+As with attribute data, joining adds new columns to the target object (the argument `x` in joining functions), from a source object (`y`).
 \index{join!spatial}
 \index{spatial!join}
 
-The process can be illustrated by an example.
-Imagine you have ten points randomly distributed across the Earth's surface.
-Of the points that are on land, which countries are they in?
-Random points to demonstrate spatial joining are created as follows:
+The process is illustrated by the following example: imagine you have ten points randomly distributed across the Earth's surface and you ask, for the points that are on land, which countries are they in?
+Implementing this idea in a [reproducible example](https://github.com/Robinlovelace/geocompr/blob/main/code/04-spatial-join.R) will build your geographic data handling skills and show how spatial joins work.
+The starting point is to create points that are randomly scattered over the Earth's surface:
 
 ```{r 04-spatial-operations-19}
 set.seed(2018) # set seed for reproducibility
-(bb_world = st_bbox(world)) # the world's bounds
+(bb = st_bbox(world)) # the world's bounds
 random_df = tibble(
-  x = runif(n = 10, min = bb_world[1], max = bb_world[3]),
-  y = runif(n = 10, min = bb_world[2], max = bb_world[4])
+  x = runif(n = 10, min = bb[1], max = bb[3]),
+  y = runif(n = 10, min = bb[2], max = bb[4])
 )
 random_points = random_df %>% 
   st_as_sf(coords = c("x", "y")) %>% # set coordinates
   st_set_crs(4326) # set geographic CRS
 ```
 
-The scenario is illustrated in Figure \@ref(fig:spatial-join).
-The `random_points` object (top left) has no attribute data, while the `world` (top right) does.
-The spatial join operation is done by `st_join()`, which adds the `name_long` variable to the points, resulting in `random_joined` which is illustrated in Figure \@ref(fig:spatial-join) (bottom left --- see [`04-spatial-join.R`](https://github.com/Robinlovelace/geocompr/blob/main/code/04-spatial-join.R)).
+The scenario illustrated in Figure \@ref(fig:spatial-join) shows that the `random_points` object (top left) lacks attribute data, while the `world` (top right) has attributes, including country names shown for a sample of countries in the legend.
+Spatial joins are implemented with `st_join()`, as illustrated in the code chunk below.
+The output is the `random_joined` object which is illustrated in Figure \@ref(fig:spatial-join) (bottom left).
 Before creating the joined dataset, we use spatial subsetting to create `world_random`, which contains only countries that contain random points, to verify the number of country names returned in the joined dataset should be four (see the top right panel of Figure \@ref(fig:spatial-join)).
 
 ```{r 04-spatial-operations-20, message=FALSE}
