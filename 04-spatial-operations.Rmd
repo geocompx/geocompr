@@ -657,21 +657,18 @@ elev[clip]
 # terra::extract(elev, ext(clip))
 ```
 
-Basically, this amounts to retrieving the values of the first raster (here: `elev`) falling within the extent of a second raster (here: `clip`).
+This amounts to retrieving the values of the first raster object (in this case `elev`) that fall within the extent of a second raster (here: `clip`), as illustrated in Figure \@ref(fig:raster-subset).
 
 ```{r raster-subset, echo = FALSE, fig.cap = "Original raster (left). Raster mask (middle). Output of masking a raster (right).", fig.scap="Subsetting raster values."}
 knitr::include_graphics("figures/04_raster_subset.png")
 ```
 
-So far, the subsetting returned the values of specific cells, however, when doing spatial subsetting, one often also expects a spatial object as an output.
-To do this, we can use again the `[` when we additionally set the `drop` parameter to `FALSE`.
-Let's illustrate this by retrieving the first two cells of `elev` as an individual raster object. 
-As mentioned in Section \@ref(manipulating-raster-objects), the `[` operator accepts various inputs to subset rasters and returns a raster object when `drop = FALSE`.
-The code chunk below subsets the `elev` raster by cell ID and row-column index with identical results: the first two cells on the top row (only the first 2 lines of the output is shown):
+The example above returned the values of specific cells, but in many cases spatial outputs from subsetting operations on raster datasets are needed.
+This can be done using the `[` operator, with `drop = FALSE`, as outlined in Section \@ref(manipulating-raster-objects), which also shows how raster objects can be subsetted by various objects.
+This is demonstrated in the code below, which returns the first two cells of `elev` as a raster object the first two cells on the top row (only the first 2 lines of the output is shown):
 
 ```{r 04-spatial-operations-36, eval=FALSE}
 elev[1:2, drop = FALSE]    # spatial subsetting with cell IDs
-elev[1, 1:2, drop = FALSE] # spatial subsetting by row,column indices
 #> class       : SpatRaster 
 #> dimensions  : 1, 2, 1  (nrow, ncol, nlyr)
 #> ...
@@ -876,20 +873,22 @@ Chapter \@ref(gis) shows how to access such GIS functionality from within R.
 
 \index{map algebra!zonal operations}
 Just like focal operations, *zonal* operations apply an aggregation function to multiple raster cells.
-However, a second raster, usually a categorical raster, defines the *zonal filters* (or 'zones') in the case of zonal operations as opposed to a predefined neighborhood window in the case of focal operations (see previous Section).
-Consequently, the raster cells defining the zonal filter do not necessarily have to be neighbors.
-Our grain size raster is a good example (right panel of Figure \@ref(fig:cont-raster)) because the different grain sizes are spread in an irregular fashion throughout the raster.
+However, a second raster, usually with categorical values, defines the *zonal filters* (or 'zones') in the case of zonal operations, as opposed to a predefined neighborhood window in the case of focal operation presented in the previous section.
+Consequently, raster cells defining the zonal filter do not necessarily have to be neighbors.
+Our grain size raster is a good example, as illustrated in the right panel of Figure \@ref(fig:cont-raster)): different grain sizes are spread irregularly throughout the raster.
 Finally, the result of a zonal operation is a summary table grouped by zone which is why this operation is also known as *zonal statistics* in the GIS world\index{GIS}. 
-This is in contrast to focal operations which return a raster object (see previous Section).
+This is in contrast to focal operations which return a raster object.
 
-For example, to find the mean elevation for each grain size class (Figure \@ref(fig:cont-raster)), we use the `zonal()` function.
+The following code chunk uses the `zonal()` function to calculate the mean elevation associated with each grain size class, for example.
+The output is shown in Figure \@ref(fig:cont-raster)).
 
 ```{r 04-spatial-operations-43, eval=FALSE}
 z = zonal(elev, grain, fun = "mean")
 z
 ```
 
-This returns the statistics\index{statistics} for each category, here the mean altitude for each grain size class.^[It is also possible to get a raster with calculated statistics for each zone by setting the `as.raster` argument to `TRUE`.]
+This returns the statistics\index{statistics} for each category, here the mean altitude for each grain size class.
+Note: it is also possible to get a raster with calculated statistics for each zone by setting the `as.raster` argument to `TRUE`.
 
 ### Global operations and distances
 
