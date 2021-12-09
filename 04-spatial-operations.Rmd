@@ -460,30 +460,43 @@ if (knitr::is_latex_output()){
 
 Imagine that we need to join the `capacity` variable in `cycle_hire_osm` onto the official 'target' data contained in `cycle_hire`.
 This is when a non-overlapping join is needed.
-The simplest method is to use the topological operator `st_is_within_distance()` shown in Section \@ref(topological-relations), using a threshold distance of 20 m.
-Note that, before performing the relation, both objects are transformed into a projected CRS.
-These projected objects are created below (note the affix `_P`, short for projected):
+The simplest method is to use the topological operator `st_is_within_distance()`, as demonstrated below using a threshold distance of 20 m (note that this works with projected and unprojected data).
 
 ```{r 04-spatial-operations-24}
+sel = st_is_within_distance(cycle_hire, cycle_hire_osm, dist = 20)
+summary(lengths(sel) > 0)
+```
+
+```{r 04-spatial-operations-24-without-s2-test, eval=FALSE, echo=FALSE}
+sf::sf_use_s2(FALSE)
+sel = st_is_within_distance(cycle_hire, cycle_hire_osm, dist = 20)
+summary(lengths(sel) > 0)
+# still works: must be lwgeom or some other magic!
+```
+
+
+```{r 04-spatial-operations-24-projected, eval=FALSE, echo=FALSE}
+# This chunk contains the non-overlapping join on projected data, a step that is no longer needed:
+# Note that, before performing the relation, both objects are transformed into a projected CRS.
+# These projected objects are created below (note the affix `_P`, short for projected):
 cycle_hire_P = st_transform(cycle_hire, 27700)
 cycle_hire_osm_P = st_transform(cycle_hire_osm, 27700)
 sel = st_is_within_distance(cycle_hire_P, cycle_hire_osm_P, dist = 20)
 summary(lengths(sel) > 0)
 ```
 
-This shows that there are `r sum(lengths(sel) > 0)` points in the target object `cycle_hire_P` within the threshold distance of `cycle_hire_osm_P`.
-How to retrieve the *values* associated with the respective `cycle_hire_osm_P` points?
+This shows that there are `r sum(lengths(sel) > 0)` points in the target object `cycle_hire` within the threshold distance of `cycle_hire_osm`.
+How to retrieve the *values* associated with the respective `cycle_hire_osm` points?
 The solution is again with `st_join()`, but with an addition `dist` argument (set to 20 m below):
 
 ```{r 04-spatial-operations-25}
-z = st_join(cycle_hire_P, cycle_hire_osm_P,
-            join = st_is_within_distance, dist = 20)
+z = st_join(cycle_hire, cycle_hire_osm, st_is_within_distance, dist = 20)
 nrow(cycle_hire)
 nrow(z)
 ```
 
 Note that the number of rows in the joined result is greater than the target.
-This is because some cycle hire stations in `cycle_hire_P` have multiple matches in `cycle_hire_osm_P`.
+This is because some cycle hire stations in `cycle_hire` have multiple matches in `cycle_hire_osm`.
 To aggregate the values for the overlapping points and return the mean, we can use the aggregation methods learned in Chapter \@ref(attr), resulting in an object with the same number of rows as the target:
 
 ```{r 04-spatial-operations-26}
@@ -500,7 +513,7 @@ plot(cycle_hire_osm["capacity"])
 plot(z["capacity"])
 ```
 
-The result of this join has used a spatial operation to change the attribute data associated with simple features;  the geometry associated with each feature has remained unchanged.
+The result of this join has used a spatial operation to change the attribute data associated with simple features; the geometry associated with each feature has remained unchanged.
 
 ### Spatial data aggregation {#spatial-aggr}
 
