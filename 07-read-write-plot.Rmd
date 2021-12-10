@@ -478,18 +478,49 @@ tanzania = read_sf(vector_filepath,
                    query = 'SELECT * FROM "world" WHERE name_long = "Tanzania"')
 ```
 
-The second one uses the `wkt_filter` argument.
+The second mechanism uses the `wkt_filter` argument.
+This argument expects a well-known text representing study area for which we want to extract the data.
+Let's try it using a small example -- we want to read polygons from our file that intersect with the buffer of 50,000 meters of Tanzania's borders.
+To do it, we need to prepare our "filter" by (a) creating the buffer (Section \@ref(buffer)), (b) converting the `sf` buffer object into an `sfc` geometry object with `st_geometry()`, and (c) translating geometries into their well-known text representation with `st_as_text()`:
 
-<!--toDo:JN-->
-<!--sql from files II-->
 ```{r}
 tanzania_buf = st_buffer(tanzania, 50000)
 tanzania_buf_geom = st_geometry(tanzania_buf)
 tanzania_buf_wkt = st_as_text(tanzania_buf_geom)
+```
+
+Now, we can apply this "filter" using the `wkt_filter` argument.
+
+```{r}
 tanzania_neigh = read_sf(vector_filepath,
                          wkt_filter = tanzania_buf_wkt)
 ```
 
+<!-- Our result is ... -->
+
+```{r, echo=FALSE}
+library(tmap)
+tm1 = tm_shape(tanzania) +
+  tm_polygons(lwd = 2) +
+  tm_text(text = "name_long") + 
+  tm_scale_bar(c(0, 200, 400), position = c("left", "bottom")) +
+  tm_layout(title = "query")
+tanzania_neigh[tanzania_neigh$iso_a2 == "CD", "name_long"] = "Democratic\nRepublic\nof the Congo"
+tm2 = tm_shape(tanzania_neigh) +
+  tm_polygons() +
+  tm_text(text = "name_long", size = "AREA",
+          auto.placement = FALSE, remove.overlap = FALSE,
+          root = 6, legend.size.show = FALSE) +
+  tm_shape(tanzania_buf) +
+  tm_polygons(col = "red", border.col = "red", alpha = 0.05) +
+  tm_add_legend(type = "fill", labels = "50km buffer around Tanzania",
+                col = "red", alpha = 0.1, border.col = "red")  +
+  tm_scale_bar(c(0, 200, 400), position = c("right", "bottom")) +
+  tm_layout(legend.width = 0.5,
+            legend.position = c("left", "bottom"),
+            title = "wkt_filter")
+tmap_arrange(tm1, tm2)
+```
 
 Naturally, some options are specific to certain drivers.^[
 A list of supported vector formats and options can be found at http://gdal.org/ogr_formats.html.
