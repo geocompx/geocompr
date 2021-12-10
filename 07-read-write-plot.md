@@ -557,12 +557,6 @@ tanzania_neigh = read_sf(vector_filepath,
 
 <!-- Our result is ... -->
 
-
-```
-#> Scale bar set for latitude km and will be different at the top and bottom of the map.
-#> Legend labels were too wide. The labels have been resized to 0.62. Increase legend.width (argument of tm_layout) to make the legend wider and therefore the labels larger.
-```
-
 <img src="07-read-write-plot_files/figure-html/unnamed-chunk-4-1.png" width="100%" style="display: block; margin: auto;" />
 
 Naturally, some options are specific to certain drivers.^[
