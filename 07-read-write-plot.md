@@ -538,7 +538,7 @@ tanzania = read_sf(vector_filepath,
 The second mechanism uses the `wkt_filter` argument.
 This argument expects a well-known text representing study area for which we want to extract the data.
 Let's try it using a small example -- we want to read polygons from our file that intersect with the buffer of 50,000 meters of Tanzania's borders.
-To do it, we need to prepare our "filter" by (a) creating the buffer (Section \@ref(buffer)), (b) converting the `sf` buffer object into an `sfc` geometry object with `st_geometry()`, and (c) translating geometries into their well-known text representation with `st_as_text()`:
+To do it, we need to prepare our "filter" by (a) creating the buffer (Section \@ref(buffers)), (b) converting the `sf` buffer object into an `sfc` geometry object with `st_geometry()`, and (c) translating geometries into their well-known text representation with `st_as_text()`:
 
 
 ```r
