@@ -60,7 +60,7 @@ Files hosted on static URLs can be downloaded with `download.file()`, as illustr
 download.file(url = "https://irma.nps.gov/DataStore/DownloadFile/666527",
               destfile = "nps_boundary.zip")
 unzip(zipfile = "nps_boundary.zip")
-usa_parks = st_read(dsn = "nps_boundary.shp")
+usa_parks = read_sf(dsn = "nps_boundary.shp")
 ```
 
 ## Geographic data packages
@@ -415,12 +415,9 @@ All of them load the data into R or, more precisely, assign objects to your work
 
 ### Vector data {#iovec}
 
-<!--toDo:RL-->
-<!--st_read vs read_sf-->
-
 \index{vector!data input}
 Spatial vector data comes in a wide variety of file formats.
-Most popular representations such as `.geojson` and `.gpkg` files can be imported directly into R with the **sf** function `st_read()` (or the 'tidy' equivalent `read_sf()`), which uses [GDAL's vector drivers](https://gdal.org/drivers/vector/index.html)\index{GDAL} behind the scenes.
+Most popular representations such as `.geojson` and `.gpkg` files can be imported directly into R with the **sf** function `read_sf()` (or the equivalent `st_read()`), which uses [GDAL's vector drivers](https://gdal.org/drivers/vector/index.html)\index{GDAL} behind the scenes.
 `st_drivers()` returns a data frame containing `name` and `long_name` in the first two columns, and features of each driver available to GDAL (and therefore **sf**), including ability to write data and store raster data in the subsequent columns, as illustrated for key file formats in Table \@ref(tab:drivers).  
 The following commands show the first three drivers reported the computer's GDAL installation (results can vary depending on the GDAL version installed) and a summary of the their features.
 Note that the majority of drivers can write data (51 out of 87) while only 16 formats can efficiently represent raster data in addition to vector data (see `?st_drivers()` for details):
@@ -445,14 +442,14 @@ knitr::kable(head(sf_drivers, n = 6),
 
 <!-- One of the major advantages of **sf** is that it is fast. -->
 <!-- reference to the vignette -->
-The first argument of `st_read()` is `dsn`, which should be a text string or an object containing a single text string.
+The first argument of `read_sf()` is `dsn`, which should be a text string or an object containing a single text string.
 The content of a text string could vary between different drivers.
 In most cases, as with the ESRI Shapefile\index{Shapefile} (`.shp`) or the `GeoPackage`\index{GeoPackage} format (`.gpkg`), the `dsn` would be a file name.
-`st_read()` guesses the driver based on the file extension, as illustrated for a `.gpkg` file below:
+`read_sf()` guesses the driver based on the file extension, as illustrated for a `.gpkg` file below:
 
 ```{r 07-read-write-plot-18, eval=FALSE}
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
-world = st_read(vector_filepath)
+world = read_sf(vector_filepath)
 #> Reading layer `world' from data source `.../world.gpkg' using driver `GPKG'
 #> Simple feature collection with 177 features and 10 fields
 #> geometry type:  MULTIPOLYGON
@@ -463,13 +460,13 @@ world = st_read(vector_filepath)
 ```
 ```{r 07-read-write-plot-19, echo=FALSE}
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
-world = st_read(vector_filepath, quiet = TRUE)
+world = read_sf(vector_filepath, quiet = TRUE)
 ```
 
-For some drivers, `dsn` could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the `st_read()` help page for more details).
+For some drivers, `dsn` could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the `read_sf()` help page for more details).
 
 Some vector driver formats can store multiple data layers.
-By default, `st_read()` automatically reads the first layer of the file specified in `dsn`; however, using the `layer` argument you can specify any other layer.
+By default, `read_sf()` automatically reads the first layer of the file specified in `dsn`; however, using the `layer` argument you can specify any other layer.
 
 <!--toDo:JN-->
 <!--sql from files I-->
@@ -501,7 +498,7 @@ For the comma-separated value (csv) format, visit http://www.gdal.org/drv_csv.ht
 
 ```{r 07-read-write-plot-20, results='hide'}
 cycle_hire_txt = system.file("misc/cycle_hire_xy.csv", package = "spData")
-cycle_hire_xy = st_read(cycle_hire_txt, options = c("X_POSSIBLE_NAMES=X",
+cycle_hire_xy = read_sf(cycle_hire_txt, options = c("X_POSSIBLE_NAMES=X",
                                                     "Y_POSSIBLE_NAMES=Y"))
 ```
 
@@ -509,7 +506,9 @@ Instead of columns describing xy-coordinates, a single column can also contain t
 Well-known text (WKT)\index{well-known text}, well-known binary (WKB)\index{well-known binary}, and the GeoJSON formats are examples of this.
 For instance, the `world_wkt.csv` file has a column named `WKT` representing polygons of the world's countries.
 We will again use the `options` parameter to indicate this.
-Here, we will use `read_sf()`, the tidyverse-flavoured version of `st_read()`: strings are parsed as characters instead of factors and the resulting data frame is a [tibble](https://r4ds.had.co.nz/tibbles.html). The driver name is also not printed to the console.
+<!--toDo:JN-->
+<!--add a comment about st_read-->
+<!-- Here, we will use `read_sf()`, the tidyverse-flavoured version of `st_read()`: strings are parsed as characters instead of factors and the resulting data frame is a [tibble](https://r4ds.had.co.nz/tibbles.html). The driver name is also not printed to the console. -->
 
 ```{r 07-read-write-plot-21, results='hide'}
 world_txt = system.file("misc/world_wkt.csv", package = "spData")
@@ -529,7 +528,7 @@ In these situations, it is possible to add the missing information using the `st
 Please refer also to Section \@ref(crs-intro) for more information.
 ```
 
-As a final example, we will show how `st_read()` also reads KML files.
+As a final example, we will show how `read_sf()` also reads KML files.
 A KML file stores geographic information in XML format - a data format for the creation of web pages and the transfer of data in an application-independent way [@nolan_xml_2014].
 Here, we access a KML file from the web.
 This file contains more than one layer.
@@ -595,7 +594,7 @@ world_files = list.files(pattern = "world\\.")
 file.remove(world_files)
 ```
 
-The counterpart of `st_read()` is `st_write()`.
+The counterpart of `read_sf()` is `st_write()`.
 It allows you to write **sf** objects to a wide range of geographic vector file formats, including the most common such as `.geojson`, `.shp` and `.gpkg`.
 Based on the file name, `st_write()` decides automatically which driver to use. 
 The speed of the writing process depends also on the driver.
