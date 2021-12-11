@@ -109,6 +109,9 @@ These provide interfaces to one or more spatial libraries or geoportals and aim 
 </tbody>
 </table>
 
+<!--toDo:JN-->
+<!-- new ideas: geocoding, censuses (tigris book ref), raster/nonraster tables -->
+
 It should be emphasized that Table \@ref(tab:datapackages) represents only a small number of available geographic data packages.
 <!--toDo:JN-->
 <!-- update the list -->
