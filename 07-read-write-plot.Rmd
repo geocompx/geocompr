@@ -450,18 +450,7 @@ The content of a text string could vary between different drivers.
 In most cases, as with the ESRI Shapefile\index{Shapefile} (`.shp`) or the `GeoPackage`\index{GeoPackage} format (`.gpkg`), the `dsn` would be a file name.
 `read_sf()` guesses the driver based on the file extension, as illustrated for a `.gpkg` file below:
 
-```{r 07-read-write-plot-18, eval=FALSE}
-vector_filepath = system.file("shapes/world.gpkg", package = "spData")
-world = read_sf(vector_filepath)
-#> Reading layer `world' from data source `.../world.gpkg' using driver `GPKG'
-#> Simple feature collection with 177 features and 10 fields
-#> geometry type:  MULTIPOLYGON
-#> dimension:      XY
-#> bbox:           xmin: -180 ymin: -90 xmax: 180 ymax: 83.64513
-#> epsg (SRID):    4326
-#> proj4string:    +proj=longlat +datum=WGS84 +no_defs
-```
-```{r 07-read-write-plot-19, echo=FALSE}
+```{r 07-read-write-plot-19}
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
 world = read_sf(vector_filepath, quiet = TRUE)
 ```
@@ -473,7 +462,7 @@ By default, `read_sf()` automatically reads the first layer of the file specifie
 
 The `read_sf()` function also allows for reading just parts of the file into RAM with two possible mechanisms.
 The first one is related to the `query` argument, which allows specifying what part of the data to read with [the OGR SQL query text](https://gdal.org/user/ogr_sql_dialect.html).
-An example below extracts data for Tanzania only.
+An example below extracts data for Tanzania only (Figure \@ref(readsfquery):A).
 It is done by specifying that we want to get all columns (`SELECT *`) from the `"world"` layer for which the `name_long` equals to `"Tanzania"`:
 
 ```{r}
@@ -499,15 +488,15 @@ tanzania_neigh = read_sf(vector_filepath,
                          wkt_filter = tanzania_buf_wkt)
 ```
 
-<!-- Our result is ... -->
+Our result, shown in Figure \@ref(readsfquery):B, contains Tanzania and every country within its 50 km buffer.
 
-```{r, echo=FALSE, message=FALSE}
+```{r readsfquery, echo=FALSE, message=FALSE, fig.cap="Reading a subset of the vector data using a query (A) and a wkt filter (B)."}
 library(tmap)
 tm1 = tm_shape(tanzania) +
   tm_polygons(lwd = 2) +
   tm_text(text = "name_long") + 
   tm_scale_bar(c(0, 200, 400), position = c("left", "bottom")) +
-  tm_layout(title = "query")
+  tm_layout(main.title = "A. query")
 tanzania_neigh[tanzania_neigh$iso_a2 == "CD", "name_long"] = "Democratic\nRepublic\nof the Congo"
 tm2 = tm_shape(tanzania_neigh) +
   tm_polygons() +
@@ -521,7 +510,7 @@ tm2 = tm_shape(tanzania_neigh) +
   tm_scale_bar(c(0, 200, 400), position = c("right", "bottom")) +
   tm_layout(legend.width = 0.5,
             legend.position = c("left", "bottom"),
-            title = "wkt_filter")
+            main.title = "B. wkt_filter")
 tmap_arrange(tm1, tm2)
 ```
 
