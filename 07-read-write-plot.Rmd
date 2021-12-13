@@ -612,49 +612,38 @@ The next two sections will demonstrate how to do this.
 
 ### Vector data
 
-<!--toDo:RL-->
-<!--st_write vs write_sf-->
-
 \index{vector!data output}
 ```{r 07-read-write-plot-27, echo=FALSE, results='hide'}
-world_files = list.files(pattern = "world\\.")
+world_files = list.files(pattern = "world*")
 file.remove(world_files)
 ```
 
-The counterpart of `read_sf()` is `st_write()`.
+The counterpart of `read_sf()` is `write_sf()`.
 It allows you to write **sf** objects to a wide range of geographic vector file formats, including the most common such as `.geojson`, `.shp` and `.gpkg`.
-Based on the file name, `st_write()` decides automatically which driver to use. 
+Based on the file name, `write_sf()` decides automatically which driver to use. 
 The speed of the writing process depends also on the driver.
 
 ```{r 07-read-write-plot-28}
-st_write(obj = world, dsn = "world.gpkg")
+write_sf(obj = world, dsn = "world.gpkg")
 ```
 
-**Note**: if you try to write to the same data source again, the function will fail:
+**Note**: if you try to write to the same data source again, the function will overwrite the file:
 
 ```{r 07-read-write-plot-29, error=TRUE}
-st_write(obj = world, dsn = "world.gpkg")
+write_sf(obj = world, dsn = "world.gpkg")
 ```
 
-The error message tells us why the function failed:
-`world.gpkg` already contains a layer called `world`. 
-To fix this problem, use the `append` argument.
-When this argument is set to `TRUE`, the old layer is kept and the `world` object is added as a second new layer:
+Instead of overwriting the file, we could add a new layer to the file with `append = TRUE`, which is supported my several spatial formats, including GeoPackage.
 
 ```{r 07-read-write-plot-31, results='hide'}
-st_write(obj = world, dsn = "world.gpkg", append = TRUE)
+write_sf(obj = world, dsn = "world_many_layers.gpkg", append = TRUE)
 ```
 
-Alternatively with `append = FALSE`, existing layers are deleted before the function attempts to write our object to a file:
-
-```{r 07-read-write-plot-30, results='hide'}
-st_write(obj = world, dsn = "world.gpkg", append = FALSE)
-```
-
-You can achieve the same with `write_sf()` since it is equivalent to (technically an *alias* for) `st_write()`, except that its defaults for `append` is `FALSE` and `quiet` is `TRUE`.
+Alternatively, you can use `st_write()` since it is equivalent to `write_sf()`.
+However, it has different defaults -- it does not overwrite files (returns an error when you try to do it) and shows a short summary of the written file format and the object.
 
 ```{r 07-read-write-plot-32}
-write_sf(obj = world, dsn = "world.gpkg")
+st_write(obj = world, dsn = "world2.gpkg")
 ```
 
 The `layer_options` argument could be also used for many different purposes.
@@ -663,12 +652,12 @@ This can be done by specifying `GEOMETRY` inside of `layer_options`.
 It could be either `AS_XY` for simple point datasets (it creates two new columns for coordinates) or `AS_WKT` for more complex spatial data (one new column is created which contains the well-known text representation of spatial objects).
 
 ```{r 07-read-write-plot-33, eval=FALSE}
-st_write(cycle_hire_xy, "cycle_hire_xy.csv", layer_options = "GEOMETRY=AS_XY")
-st_write(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
+write_sf(cycle_hire_xy, "cycle_hire_xy.csv", layer_options = "GEOMETRY=AS_XY")
+write_sf(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
 ```
 
 ```{r, echo=FALSE, results='hide'}
-file.remove("world.gpkg")
+file.remove(world_files)
 ```
 
 ### Raster data
