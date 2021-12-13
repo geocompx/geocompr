@@ -737,20 +737,13 @@ In most cases, as with the ESRI Shapefile (<code>.shp</code>) or the <code>GeoPa
 <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> guesses the driver based on the file extension, as illustrated for a <code>.gpkg</code> file below:</p>
 <div class="sourceCode" id="cb238"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">vector_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shapes/world.gpkg"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
-<span class="va">world</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">vector_filepath</span><span class="op">)</span>
-<span class="co">#&gt; Reading layer `world' from data source `.../world.gpkg' using driver `GPKG'</span>
-<span class="co">#&gt; Simple feature collection with 177 features and 10 fields</span>
-<span class="co">#&gt; geometry type:  MULTIPOLYGON</span>
-<span class="co">#&gt; dimension:      XY</span>
-<span class="co">#&gt; bbox:           xmin: -180 ymin: -90 xmax: 180 ymax: 83.64513</span>
-<span class="co">#&gt; epsg (SRID):    4326</span>
-<span class="co">#&gt; proj4string:    +proj=longlat +datum=WGS84 +no_defs</span></code></pre></div>
+<span class="va">world</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">vector_filepath</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>For some drivers, <code>dsn</code> could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> help page for more details).</p>
 <p>Some vector driver formats can store multiple data layers.
 By default, <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> automatically reads the first layer of the file specified in <code>dsn</code>; however, using the <code>layer</code> argument you can specify any other layer.</p>
 <p>The <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> function also allows for reading just parts of the file into RAM with two possible mechanisms.
 The first one is related to the <code>query</code> argument, which allows specifying what part of the data to read with <a href="https://gdal.org/user/ogr_sql_dialect.html">the OGR SQL query text</a>.
-An example below extracts data for Tanzania only.
+An example below extracts data for Tanzania only (Figure <a href="#readsfquery"><strong>??</strong></a>:A).
 It is done by specifying that we want to get all columns (<code>SELECT *</code>) from the <code>"world"</code> layer for which the <code>name_long</code> equals to <code>"Tanzania"</code>:</p>
 <div class="sourceCode" id="cb239"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tanzania</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">vector_filepath</span>,
@@ -767,8 +760,13 @@ To do it, we need to prepare our “filter” by (a) creating the buffer (Sectio
 <div class="sourceCode" id="cb241"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tanzania_neigh</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">vector_filepath</span>,
                          wkt_filter <span class="op">=</span> <span class="va">tanzania_buf_wkt</span><span class="op">)</span></code></pre></div>
-<!-- Our result is ... -->
-<div class="inline-figure"><img src="07-read-write-plot_files/figure-html/unnamed-chunk-4-1.png" width="100%" style="display: block; margin: auto;"></div>
+<p>Our result, shown in Figure <a href="#readsfquery"><strong>??</strong></a>:B, contains Tanzania and every country within its 50 km buffer.</p>
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:readsfquery"></span>
+<img src="07-read-write-plot_files/figure-html/readsfquery-1.png" alt="Reading a subset of the vector data using a query (A) and a wkt filter (B)." width="100%"><p class="caption">
+FIGURE 7.1: Reading a subset of the vector data using a query (A) and a wkt filter (B).
+</p>
+</div>
 <p>Naturally, some options are specific to certain drivers.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
 A list of supported vector formats and options can be found at &lt;a href="http://gdal.org/ogr_formats.html" class="uri"&gt;http://gdal.org/ogr_formats.html&lt;/a&gt;.&lt;/p&gt;'><sup>39</sup></a>
 For example, think of coordinates stored in a spreadsheet format (<code>.csv</code>).
@@ -860,42 +858,32 @@ The next two sections will demonstrate how to do this.</p>
 <h3>
 <span class="header-section-number">7.7.1</span> Vector data<a class="anchor" aria-label="anchor" href="#vector-data-1"><i class="fas fa-link"></i></a>
 </h3>
-<!--toDo:RL-->
-<!--st_write vs write_sf-->
 <p></p>
-<p>The counterpart of <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> is <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write()</a></code>.
+<p>The counterpart of <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> is <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf()</a></code>.
 It allows you to write <strong>sf</strong> objects to a wide range of geographic vector file formats, including the most common such as <code>.geojson</code>, <code>.shp</code> and <code>.gpkg</code>.
-Based on the file name, <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write()</a></code> decides automatically which driver to use.
+Based on the file name, <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf()</a></code> decides automatically which driver to use.
 The speed of the writing process depends also on the driver.</p>
 <div class="sourceCode" id="cb247"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span><span class="op">)</span>
-<span class="co">#&gt; Writing layer `world' to data source `world.gpkg' using driver `GPKG'</span>
-<span class="co">#&gt; Writing 177 features with 10 fields and geometry type Multi Polygon.</span></code></pre></div>
-<p><strong>Note</strong>: if you try to write to the same data source again, the function will fail:</p>
-<div class="sourceCode" id="cb248"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span><span class="op">)</span>
-<span class="co">#&gt; Layer world in dataset world.gpkg already exists:</span>
-<span class="co">#&gt; use either append=TRUE to append to layer or append=FALSE to overwrite layer</span>
-<span class="co">#&gt; Error in CPL_write_ogr(obj, dsn, layer, driver, as.character(dataset_options), : Dataset already exists.</span></code></pre></div>
-<p>The error message tells us why the function failed:
-<code>world.gpkg</code> already contains a layer called <code>world</code>.
-To fix this problem, use the <code>append</code> argument.
-When this argument is set to <code>TRUE</code>, the old layer is kept and the <code>world</code> object is added as a second new layer:</p>
-<div class="sourceCode" id="cb249"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span>, append <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<p>Alternatively with <code>append = FALSE</code>, existing layers are deleted before the function attempts to write our object to a file:</p>
-<div class="sourceCode" id="cb250"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span>, append <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<p>You can achieve the same with <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf()</a></code> since it is equivalent to (technically an <em>alias</em> for) <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write()</a></code>, except that its defaults for <code>append</code> is <code>FALSE</code> and <code>quiet</code> is <code>TRUE</code>.</p>
-<div class="sourceCode" id="cb251"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span><span class="op">)</span></code></pre></div>
+<p><strong>Note</strong>: if you try to write to the same data source again, the function will overwrite the file:</p>
+<div class="sourceCode" id="cb248"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span><span class="op">)</span></code></pre></div>
+<p>Instead of overwriting the file, we could add a new layer to the file with <code>append = TRUE</code>, which is supported my several spatial formats, including GeoPackage.</p>
+<div class="sourceCode" id="cb249"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world_many_layers.gpkg"</span>, append <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<p>Alternatively, you can use <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write()</a></code> since it is equivalent to <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf()</a></code>.
+However, it has different defaults – it does not overwrite files (returns an error when you try to do it) and shows a short summary of the written file format and the object.</p>
+<div class="sourceCode" id="cb250"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world2.gpkg"</span><span class="op">)</span>
+<span class="co">#&gt; Writing layer `world2' to data source `world2.gpkg' using driver `GPKG'</span>
+<span class="co">#&gt; Writing 177 features with 10 fields and geometry type Multi Polygon.</span></code></pre></div>
 <p>The <code>layer_options</code> argument could be also used for many different purposes.
 One of them is to write spatial data to a text file.
 This can be done by specifying <code>GEOMETRY</code> inside of <code>layer_options</code>.
 It could be either <code>AS_XY</code> for simple point datasets (it creates two new columns for coordinates) or <code>AS_WKT</code> for more complex spatial data (one new column is created which contains the well-known text representation of spatial objects).</p>
-<div class="sourceCode" id="cb252"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span><span class="va">cycle_hire_xy</span>, <span class="st">"cycle_hire_xy.csv"</span>, layer_options <span class="op">=</span> <span class="st">"GEOMETRY=AS_XY"</span><span class="op">)</span>
-<span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span><span class="va">world_wkt</span>, <span class="st">"world_wkt.csv"</span>, layer_options <span class="op">=</span> <span class="st">"GEOMETRY=AS_WKT"</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb251"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span><span class="va">cycle_hire_xy</span>, <span class="st">"cycle_hire_xy.csv"</span>, layer_options <span class="op">=</span> <span class="st">"GEOMETRY=AS_XY"</span><span class="op">)</span>
+<span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span><span class="va">world_wkt</span>, <span class="st">"world_wkt.csv"</span>, layer_options <span class="op">=</span> <span class="st">"GEOMETRY=AS_WKT"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="raster-data-2" class="section level3" number="7.7.2">
 <h3>
@@ -1011,13 +999,13 @@ FLT8S
 </table></div>
 <p>By default, the output file format is derived from the filename.
 Naming a file <code>*.tif</code> will create a GeoTIFF file, as demonstrated below:</p>
-<div class="sourceCode" id="cb253"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb252"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/writeRaster.html">writeRaster</a></span><span class="op">(</span><span class="va">single_layer</span>, filename <span class="op">=</span> <span class="st">"my_raster.tif"</span>, datatype <span class="op">=</span> <span class="st">"INT2U"</span><span class="op">)</span></code></pre></div>
 <p>Some raster file formats have additional options, that can be set by providing <a href="http://www.gdal.org/formats_list.html">GDAL parameters</a> to the <code>options</code> argument of <code><a href="https://rdrr.io/pkg/terra/man/writeRaster.html">writeRaster()</a></code>.
 GeoTIFF files are written in <strong>terra</strong>, by default, with the LZW compression <code>gdal = c("COMPRESS=LZW")</code>.
 To change or disable the compression, we need to modify this argument.
 Additionally, we can save our raster object as COG (<em>Cloud Optimized GeoTIFF</em>, Section <a href="read-write.html#file-formats">7.5</a>) with the <code>"of=COG"</code> option.</p>
-<div class="sourceCode" id="cb254"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb253"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/writeRaster.html">writeRaster</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">single_layer</span>,
             filename <span class="op">=</span> <span class="st">"my_raster.tif"</span>,
             datatype <span class="op">=</span> <span class="st">"INT2U"</span>,
@@ -1032,7 +1020,7 @@ Additionally, we can save our raster object as COG (<em>Cloud Optimized GeoTIFF<
 <p>
 R supports many different static and interactive graphics formats.
 The most general method to save a static plot is to open a graphic device, create a plot, and close it, for example:</p>
-<div class="sourceCode" id="cb255"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb254"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/grDevices/png.html">png</a></span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"lifeExp.png"</span>, width <span class="op">=</span> <span class="fl">500</span>, height <span class="op">=</span> <span class="fl">350</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">world</span><span class="op">[</span><span class="st">"lifeExp"</span><span class="op">]</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html">dev.off</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
@@ -1041,12 +1029,12 @@ You can specify several properties of the output plot, including width, height a
 <p>Additionally, several graphic packages provide their own functions to save a graphical output.
 For example, the <strong>tmap</strong> package has the <code><a href="https://rdrr.io/pkg/tmap/man/tmap_save.html">tmap_save()</a></code> function.
 You can save a <code>tmap</code> object to different graphic formats or an HTML file by specifying the object name and a file path to a new file.</p>
-<div class="sourceCode" id="cb256"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb255"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-tmap/tmap">tmap</a></span><span class="op">)</span>
 <span class="va">tmap_obj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_shape.html">tm_shape</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_polygons.html">tm_polygons</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"lifeExp"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tmap_save.html">tmap_save</a></span><span class="op">(</span><span class="va">tmap_obj</span>, filename <span class="op">=</span> <span class="st">"lifeExp_tmap.png"</span><span class="op">)</span></code></pre></div>
 <p>On the other hand, you can save interactive maps created in the <strong>mapview</strong> package as an HTML file or image using the <code><a href="https://rdrr.io/pkg/mapview/man/mapshot.html">mapshot()</a></code> function:</p>
-<div class="sourceCode" id="cb257"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb256"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/mapview">mapview</a></span><span class="op">)</span>
 <span class="va">mapview_obj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mapview/man/mapView.html">mapview</a></span><span class="op">(</span><span class="va">world</span>, zcol <span class="op">=</span> <span class="st">"lifeExp"</span>, legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/mapview/man/mapshot.html">mapshot</a></span><span class="op">(</span><span class="va">mapview_obj</span>, file <span class="op">=</span> <span class="st">"my_interactive_map.html"</span><span class="op">)</span></code></pre></div>
@@ -1126,7 +1114,7 @@ Export this map to a file called <code>cycle_hire.html</code>.</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-12-11.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-12-13.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

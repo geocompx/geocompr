@@ -511,16 +511,8 @@ In most cases, as with the ESRI Shapefile\index{Shapefile} (`.shp`) or the `GeoP
 
 ```r
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
-world = read_sf(vector_filepath)
-#> Reading layer `world' from data source `.../world.gpkg' using driver `GPKG'
-#> Simple feature collection with 177 features and 10 fields
-#> geometry type:  MULTIPOLYGON
-#> dimension:      XY
-#> bbox:           xmin: -180 ymin: -90 xmax: 180 ymax: 83.64513
-#> epsg (SRID):    4326
-#> proj4string:    +proj=longlat +datum=WGS84 +no_defs
+world = read_sf(vector_filepath, quiet = TRUE)
 ```
-
 
 For some drivers, `dsn` could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the `read_sf()` help page for more details).
 
@@ -529,7 +521,7 @@ By default, `read_sf()` automatically reads the first layer of the file specifie
 
 The `read_sf()` function also allows for reading just parts of the file into RAM with two possible mechanisms.
 The first one is related to the `query` argument, which allows specifying what part of the data to read with [the OGR SQL query text](https://gdal.org/user/ogr_sql_dialect.html).
-An example below extracts data for Tanzania only.
+An example below extracts data for Tanzania only (Figure \@ref(readsfquery):A).
 It is done by specifying that we want to get all columns (`SELECT *`) from the `"world"` layer for which the `name_long` equals to `"Tanzania"`:
 
 
@@ -558,9 +550,12 @@ tanzania_neigh = read_sf(vector_filepath,
                          wkt_filter = tanzania_buf_wkt)
 ```
 
-<!-- Our result is ... -->
+Our result, shown in Figure \@ref(readsfquery):B, contains Tanzania and every country within its 50 km buffer.
 
-<img src="07-read-write-plot_files/figure-html/unnamed-chunk-4-1.png" width="100%" style="display: block; margin: auto;" />
+<div class="figure" style="text-align: center">
+<img src="07-read-write-plot_files/figure-html/readsfquery-1.png" alt="Reading a subset of the vector data using a query (A) and a wkt filter (B)." width="100%" />
+<p class="caption">(\#fig:readsfquery)Reading a subset of the vector data using a query (A) and a wkt filter (B).</p>
+</div>
 
 Naturally, some options are specific to certain drivers.^[
 A list of supported vector formats and options can be found at http://gdal.org/ogr_formats.html.
@@ -672,56 +667,41 @@ The next two sections will demonstrate how to do this.
 
 ### Vector data
 
-<!--toDo:RL-->
-<!--st_write vs write_sf-->
-
 \index{vector!data output}
 
 
-The counterpart of `read_sf()` is `st_write()`.
+The counterpart of `read_sf()` is `write_sf()`.
 It allows you to write **sf** objects to a wide range of geographic vector file formats, including the most common such as `.geojson`, `.shp` and `.gpkg`.
-Based on the file name, `st_write()` decides automatically which driver to use. 
+Based on the file name, `write_sf()` decides automatically which driver to use. 
 The speed of the writing process depends also on the driver.
 
 
 ```r
-st_write(obj = world, dsn = "world.gpkg")
-#> Writing layer `world' to data source `world.gpkg' using driver `GPKG'
-#> Writing 177 features with 10 fields and geometry type Multi Polygon.
+write_sf(obj = world, dsn = "world.gpkg")
 ```
 
-**Note**: if you try to write to the same data source again, the function will fail:
-
-
-```r
-st_write(obj = world, dsn = "world.gpkg")
-#> Layer world in dataset world.gpkg already exists:
-#> use either append=TRUE to append to layer or append=FALSE to overwrite layer
-#> Error in CPL_write_ogr(obj, dsn, layer, driver, as.character(dataset_options), : Dataset already exists.
-```
-
-The error message tells us why the function failed:
-`world.gpkg` already contains a layer called `world`. 
-To fix this problem, use the `append` argument.
-When this argument is set to `TRUE`, the old layer is kept and the `world` object is added as a second new layer:
-
-
-```r
-st_write(obj = world, dsn = "world.gpkg", append = TRUE)
-```
-
-Alternatively with `append = FALSE`, existing layers are deleted before the function attempts to write our object to a file:
-
-
-```r
-st_write(obj = world, dsn = "world.gpkg", append = FALSE)
-```
-
-You can achieve the same with `write_sf()` since it is equivalent to (technically an *alias* for) `st_write()`, except that its defaults for `append` is `FALSE` and `quiet` is `TRUE`.
+**Note**: if you try to write to the same data source again, the function will overwrite the file:
 
 
 ```r
 write_sf(obj = world, dsn = "world.gpkg")
+```
+
+Instead of overwriting the file, we could add a new layer to the file with `append = TRUE`, which is supported my several spatial formats, including GeoPackage.
+
+
+```r
+write_sf(obj = world, dsn = "world_many_layers.gpkg", append = TRUE)
+```
+
+Alternatively, you can use `st_write()` since it is equivalent to `write_sf()`.
+However, it has different defaults -- it does not overwrite files (returns an error when you try to do it) and shows a short summary of the written file format and the object.
+
+
+```r
+st_write(obj = world, dsn = "world2.gpkg")
+#> Writing layer `world2' to data source `world2.gpkg' using driver `GPKG'
+#> Writing 177 features with 10 fields and geometry type Multi Polygon.
 ```
 
 The `layer_options` argument could be also used for many different purposes.
@@ -731,8 +711,8 @@ It could be either `AS_XY` for simple point datasets (it creates two new columns
 
 
 ```r
-st_write(cycle_hire_xy, "cycle_hire_xy.csv", layer_options = "GEOMETRY=AS_XY")
-st_write(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
+write_sf(cycle_hire_xy, "cycle_hire_xy.csv", layer_options = "GEOMETRY=AS_XY")
+write_sf(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
 ```
 
 
