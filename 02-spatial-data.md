@@ -791,11 +791,17 @@ We also encourage you to read @pebesma_spatial_2022 for the most comprehensive i
 
 ### An introduction to terra
 
-The **terra** package supports raster objects in R. 
-It provides an extensive set of functions to create, read, export, manipulate and process raster datasets.
-Aside from general raster data manipulation, **terra** provides many low-level functions that can form the basis to develop more advanced raster functionality.
+The **terra** package supports raster objects in R.
+Like its predecessor **raster** (created by the same developer, Robert Hijmans), it provides an extensive set of functions to create, read, export, manipulate and process raster datasets.
+**terra**'s functionality is largely the same as the more mature **raster** package, but there are some differences: **terra** functions are usually more computationally efficient than **raster** equivalents.
+<!-- todo: add evidence (RL 2021-11) -->
+On the other hand, the **raster** class system is popular and used by many other packages; as with **sf** and **sp**, the good news is you can seamlessly translate between the two types of object to ensure backwards compatibility with older scripts and packages, for example, with the functions `raster()`, `stack()`, or `brick()` (see the previous chapter for more on the evolution of R packages for working with geographic data).
+
+
+
+In addition to functions for raster data manipulation, **terra** provides many low-level functions that can form a foundation for developing new tools for working with raster datasets.
 \index{terra (package)|see {terra}}
-**terra** also lets you work on large raster datasets that are too large to fit into the main memory. 
+**terra** also lets you work on large raster datasets that are too large to fit into the main memory.
 In this case, **terra** provides the possibility to divide the raster into smaller chunks, and processes these iteratively instead of loading the whole raster file into RAM.
 
 For the illustration of **terra** concepts, we will use datasets from the **spDataLarge**.
@@ -807,6 +813,10 @@ First, let's create a `SpatRaster` object named `my_rast`:
 ```r
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 my_rast = rast(raster_filepath)
+class(my_rast)
+#> [1] "SpatRaster"
+#> attr(,"package")
+#> [1] "terra"
 ```
 
 Typing the name of the raster into the console, will print out the raster header (dimensions, resolution, extent, CRS) and some additional information (class, data source, summary of the raster values): 

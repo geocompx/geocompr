@@ -29,12 +29,11 @@ This is the online home of *Geocomputation with R*, a book on geographic data an
 <a href="https://www.routledge.com/9781138304512"><img src="images/cover.png" width="250" height="375" alt="The geocompr book cover" align="right" style="margin: 0 1em 0 1em" /></a>
   
 **Note**: The first edition of the book has been published by CRC Press in the [R Series](https://www.routledge.com/Chapman--HallCRC-The-R-Series/book-series/CRCTHERSER).
-You can buy the book from [CRC Press](https://www.routledge.com/9781138304512), or [Amazon](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577/), and see the archived first edition on the open source book platform [bookdown.org](https://bookdown.org/robinlovelace/geocompr/). 
+You can buy the book from [CRC Press](https://www.routledge.com/9781138304512), or [Amazon](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577/), and see the archived **First Edition** hosted on [bookdown.org](https://bookdown.org/robinlovelace/geocompr/). 
 
-Inspired by [**bookdown**](https://github.com/rstudio/bookdown) and the Free and Open Source Software for Geospatial ([FOSS4G](https://foss4g.org/)) movement, this book is open source.
-This ensures its contents are reproducible and publicly accessible for people worldwide.
-
-The online version of the book is hosted at [geocompr.robinlovelace.net](https://geocompr.robinlovelace.net) and kept up-to-date by [GitHub Actions](https://github.com/Robinlovelace/geocompr/actions), which provides information on its 'build status' as follows:
+Inspired by [**bookdown**](https://bookdown.org/) and the Free and Open Source Software for Geospatial ([FOSS4G](https://foss4g.org/)) movement, the code and prose underlying this book is open source, ensuring it's reproducible, accessible and modifiable (e.g. in case you find an inevitable typo) for the benefit of people worldwide.
+The online version of the book is hosted at [geocompr.robinlovelace.net](https://geocompr.robinlovelace.net) and kept up-to-date by [GitHub Actions](https://github.com/Robinlovelace/geocompr/actions).
+Its current 'build status' as follows:
 
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
 
