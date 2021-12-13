@@ -117,10 +117,10 @@ lengths(sel) > 0
 
 ## ----04-spatial-operations-19--------------------------------------------
 set.seed(2018) # set seed for reproducibility
-(bb_world = st_bbox(world)) # the world's bounds
+(bb = st_bbox(world)) # the world's bounds
 random_df = tibble(
-  x = runif(n = 10, min = bb_world[1], max = bb_world[3]),
-  y = runif(n = 10, min = bb_world[2], max = bb_world[4])
+  x = runif(n = 10, min = bb[1], max = bb[3]),
+  y = runif(n = 10, min = bb[2], max = bb[4])
 )
 random_points = random_df %>% 
   st_as_sf(coords = c("x", "y")) %>% # set coordinates
