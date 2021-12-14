@@ -156,8 +156,35 @@ Figure \@ref(fig:relations) shows a variety of geometry pairs and their associat
 The third and fourth pairs in Figure \@ref(fig:relations) (from left to right and then down) demonstrate that, for some relations, order is important: while the relations *equals*, *intersects*, *crosses*, *touches* and *overlaps* are symmetrical, meaning that if `function(x, y)` is true, `function(y, x)` will also by true, relations in which the order of the geomtries are important such as *contains* and *within* are not.
 \index{topological relations}
 
+
+```
+#> Warning: Currect projection of shape xy unknown. Long-lat (WGS84) is assumed.
+
+#> Warning: Currect projection of shape xy unknown. Long-lat (WGS84) is assumed.
+
+#> Warning: Currect projection of shape xy unknown. Long-lat (WGS84) is assumed.
+
+#> Warning: Currect projection of shape xy unknown. Long-lat (WGS84) is assumed.
+
+#> Warning: Currect projection of shape xy unknown. Long-lat (WGS84) is assumed.
+
+#> Warning: Currect projection of shape xy unknown. Long-lat (WGS84) is assumed.
+
+#> Warning: Currect projection of shape xy unknown. Long-lat (WGS84) is assumed.
+
+#> Warning: Currect projection of shape xy unknown. Long-lat (WGS84) is assumed.
+
+#> Warning: Currect projection of shape xy unknown. Long-lat (WGS84) is assumed.
+
+#> Warning: Currect projection of shape xy unknown. Long-lat (WGS84) is assumed.
+
+#> Warning: Currect projection of shape xy unknown. Long-lat (WGS84) is assumed.
+
+#> Warning: Currect projection of shape xy unknown. Long-lat (WGS84) is assumed.
+```
+
 <div class="figure" style="text-align: center">
-<img src="04-spatial-operations_files/figure-html/relations-1.png" alt="Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue." width="33%" /><img src="04-spatial-operations_files/figure-html/relations-2.png" alt="Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue." width="33%" /><img src="04-spatial-operations_files/figure-html/relations-3.png" alt="Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue." width="33%" /><img src="04-spatial-operations_files/figure-html/relations-4.png" alt="Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue." width="33%" /><img src="04-spatial-operations_files/figure-html/relations-5.png" alt="Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue." width="33%" /><img src="04-spatial-operations_files/figure-html/relations-6.png" alt="Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue." width="33%" />
+<img src="04-spatial-operations_files/figure-html/relations-1.png" alt="Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue." width="100%" />
 <p class="caption">(\#fig:relations)Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue.</p>
 </div>
 
