@@ -770,7 +770,7 @@ Consequently, the discrete borders of these features become blurred, and dependi
 
 ### R packages for working with raster data
 
-Over the last two decades, several packages packages for reading and processing raster datasets have been developed.
+Over the last two decades, several packages for reading and processing raster datasets have been developed.
 As outlined in Section \@ref(the-history-of-r-spatial), chief among them was **raster**, which led to a step change in R's raster capabilities when it was launched in 2010 and the premier package in the space until the development of **terra** and **stars**.
 Both more recently developed package provide powerful and performant functions for working with raster datasets and there is substantial overlap between their possibly use cases.
 In this book we focus on **terra**, which replaces the older and (in most cases) slower **raster**.
