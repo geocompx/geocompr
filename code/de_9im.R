@@ -34,7 +34,8 @@ de_9im = function(x,
                   include_relate = TRUE,
                   sparse = FALSE,
                   output = "character",
-                  collapse = " ✓\n"
+                  collapse = " ✓\n",
+                  tmap = TRUE
                   ) {
   require("sf")
   if (is(x, "sfc") && is(y, "sfc")) {
@@ -58,7 +59,11 @@ de_9im = function(x,
   if(plot) {
     res_text1 = paste(res, collapse = collapse)
     message("Object x has the following spatial relations to y: ", res_text)
-    res = de_9im_plot2(xy, label1 = res_text1, label2 = res_text2)
+    if (tmap){
+      res = de_9im_plot2(xy, label1 = res_text1, label2 = res_text2)
+    } else {
+      res = de_9im_plot(xy, label1 = res_text1, label2 = res_text2)
+    }
   }
   res
 }
