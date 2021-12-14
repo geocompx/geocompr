@@ -768,11 +768,13 @@ Consequently, the discrete borders of these features become blurred, and dependi
 <p class="caption">(\#fig:raster-intro-plot2)Examples of continuous and categorical rasters.</p>
 </div>
 
-### R packages for raster data handling
+### R packages for working with raster data
 
-R has several packages able to read and process spatial raster data; see \Wref(the-history-of-r-spatial) for more context.
-However, currently, two main packages with this purpose exist -- **terra** and **stars**.^[We are not mentioning the **raster** package here as it is now being replaced with **terra**.]
-We are focusing on the **terra** package in this book; however, it may be worth knowing the basic similarities and differences between the packages before deciding which one to use.
+Over the last two decades, several packages packages for reading and processing raster datasets have been developed.
+As outlined in Section \@ref(the-history-of-r-spatial), chief among them was **raster**, which led to a step change in R's raster capabilities when it was launched in 2010 and the premier package in the space until the development of **terra** and **stars**.
+Both more recently developed package provide powerful and performant functions for working with raster datasets and there is substantial overlap between their possibly use cases.
+In this book we focus on **terra**, which replaces the older and (in most cases) slower **raster**.
+Before learning about the how **terra**'s class system works, this section describes similarities and differences between **terra** and **raster**; this knowledge will help decide which is most appropriate in different situations.
 
 First, **terra** focuses on the most common raster data model (regular grids), while **stars** also allows storing less popular models (including regular, rotated, sheared, rectilinear, and curvilinear grids).
 While **terra** usually handle one or multi-layered rasters^[It also has an additional class `SpatRasterDataset` for storing many collections of datasets.], the **stars** package provides ways to store raster data cubes -- a raster object with many layers (e.g., bands), for many moments in time (e.g., months), and many attributes (e.g., sensor type A and sensor type B).
