@@ -50,25 +50,43 @@ de_9im = function(x,
   if(output == "character") {
     res = unlist(funs)[res]
   }
+  res_text2 = ""
   if(include_relate) {
     relation = sf::st_relate(x, y)
-    relate_text = paste0(" \nDE-9IM string: \n", relation) 
-    res = c(res, relate_text)
+    res_text2 = paste0(" \nDE-9IM string: \n", relation) 
   }
   if(plot) {
-    res_text = paste(res, collapse = collapse)
+    res_text1 = paste(res, collapse = collapse)
     message("Object x has the following spatial relations to y: ", res_text)
-    res = de_9im_plot(xy, label = res_text)
+    res = de_9im_plot2(xy, label1 = res_text1, label2 = res_text2)
   }
   res
 }
 
-de_9im_plot = function(xy, label = "test", alpha = 0.5, show.legend = FALSE, x = 0.1, y = 0.95, theme = ggplot2::theme_void()) {
+de_9im_plot = function(xy, label1 = "test", label2 = "",
+                       alpha = 0.5, show.legend = FALSE, x = 0.1, y = 0.95, 
+                       theme = ggplot2::theme_void()) {
   require("ggplot2", quietly = TRUE)
   # browser()
-  ggplot(xy) + geom_sf(aes(fill = Object), alpha = alpha, show.legend = show.legend) +
-    annotate("text", x = 0.1, y = 0.95, label = label, hjust = "left", vjust = "top") +
+  ggplot(xy) + 
+    geom_sf(aes(fill = Object), alpha = alpha, show.legend = show.legend) +
+    annotate("text", x = 0.1, y = 0.95, label = label1, hjust = "left", vjust = "top") +
+    annotate("text", x = 0.1, y = 0.1, label = label2, hjust = "left", vjust = "bottom", 
+             fontface = "italic") +
     theme
+}
+
+de_9im_plot2 = function(xy, label1 = "test", label2 = "",
+                       alpha = 0.5, show.legend = FALSE, x = 0.1, y = 0.95, 
+                       theme = ggplot2::theme_void()) {
+  require("tmap", quietly = TRUE)
+  # browser()
+  tm_shape(xy) +
+    tm_polygons("Object", legend.show = FALSE, alpha = alpha,
+                palette = c("#E36939", "#6673E3")) +
+    tm_credits(label1, position = c("left", "top")) +
+    tm_credits(label2, position = c("left", "bottom"), fontface = "italic") +
+    tm_layout(frame = FALSE)
 }
 
 # # Test code to functionalize:
