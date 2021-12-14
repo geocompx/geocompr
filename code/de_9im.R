@@ -58,7 +58,7 @@ de_9im = function(x,
   }
   if(plot) {
     res_text1 = paste(res, collapse = collapse)
-    message("Object x has the following spatial relations to y: ", res_text)
+    message("Object x has the following spatial relations to y: ", res_text1, res_text2)
     if (tmap){
       res = de_9im_plot2(xy, label1 = res_text1, label2 = res_text2)
     } else {
@@ -89,8 +89,8 @@ de_9im_plot2 = function(xy, label1 = "test", label2 = "",
   tm_shape(xy) +
     tm_polygons("Object", legend.show = FALSE, alpha = alpha,
                 palette = c("#E36939", "#6673E3")) +
-    tm_credits(label1, position = c("left", "top")) +
-    tm_credits(label2, position = c("left", "bottom"), fontface = "italic") +
+    tm_credits(label1, position = c(0.1, "top"), just = "top") +
+    tm_credits(label2, position = c(0.1, "center"), fontface = "italic", just = "bottom") +
     tm_layout(frame = FALSE)
 }
 
