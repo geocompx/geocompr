@@ -533,7 +533,7 @@ By default, `read_sf()` automatically reads the first layer of the file specifie
 
 The `read_sf()` function also allows for reading just parts of the file into RAM with two possible mechanisms.
 The first one is related to the `query` argument, which allows specifying what part of the data to read with [the OGR SQL query text](https://gdal.org/user/ogr_sql_dialect.html).
-An example below extracts data for Tanzania only (Figure \@ref(readsfquery):A).
+An example below extracts data for Tanzania only (Figure \@ref(fig:readsfquery):A).
 It is done by specifying that we want to get all columns (`SELECT *`) from the `"world"` layer for which the `name_long` equals to `"Tanzania"`:
 
 
@@ -562,7 +562,7 @@ tanzania_neigh = read_sf(vector_filepath,
                          wkt_filter = tanzania_buf_wkt)
 ```
 
-Our result, shown in Figure \@ref(readsfquery):B, contains Tanzania and every country within its 50 km buffer.
+Our result, shown in Figure \@ref(fig:readsfquery):B, contains Tanzania and every country within its 50 km buffer.
 
 <div class="figure" style="text-align: center">
 <img src="07-read-write-plot_files/figure-html/readsfquery-1.png" alt="Reading a subset of the vector data using a query (A) and a wkt filter (B)." width="100%" />
