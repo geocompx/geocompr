@@ -567,6 +567,7 @@ The GeoPackage standard describes the rules on how to store geospatial informati
 Hence, GeoPackage is a lightweight spatial database container, which allows the storage of vector and raster data but also of non-spatial data and extensions.
 Aside from GeoPackage, there are other geospatial data exchange formats worth checking out (Table <a href="read-write.html#tab:formats">7.2</a>).</p>
 <p>
+
 The GeoTIFF format seems to be the most prominent raster data format.
 It allows spatial information, such as CRS, to be embedded within a TIFF file.
 Similar to ESRI Shapefile, this format was firstly developed in the 1990s, but as an open format.
@@ -851,8 +852,41 @@ Similar to vector data, raster data comes in many file formats with some of them
 <div class="sourceCode" id="cb248"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">multilayer_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/landsat.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
 <span class="va">multilayer_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">multilayer_filepath</span><span class="op">)</span></code></pre></div>
-<!-- jn:toDo-->
-<!-- COG example?? -->
+<p>
+
+
+All of the previous examples read spatial information from files stored on your hard drive.
+However, GDAL also allows reading data directly from online resources, such as HTTP/HTTPS/FTP web resources.
+The only thing we need to do is to add a <code>/vsicurl/</code> prefix before the path to the file.
+Let’s try it by connecting to the global monthly snow probability at 500 m resolution for the period 2000–2012 <span class="citation">(<a href="references.html#ref-hengl_t_2021_5774954" role="doc-biblioref">T. Hengl 2021</a>)</span>.
+Snow probability for December is stored as a Cloud Optimized GeoTIFF (COG) file (see Section <a href="read-write.html#file-formats">7.5</a>) at <a href="https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0" class="uri">https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0</a>..0cm_2000..2012_v2.0.tif.
+To read an online file, we just need to provide its URL together with the <code>/vsicurl/</code> prefix.</p>
+<div class="sourceCode" id="cb249"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">myurl</span> <span class="op">=</span> <span class="st">"/vsicurl/https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif"</span>
+<span class="va">snow</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">myurl</span><span class="op">)</span>
+<span class="va">snow</span>
+<span class="co">#&gt; class       : SpatRaster </span>
+<span class="co">#&gt; dimensions  : 35849, 86400, 1  (nrow, ncol, nlyr)</span>
+<span class="co">#&gt; resolution  : 0.00417, 0.00417  (x, y)</span>
+<span class="co">#&gt; extent      : -180, 180, -62, 87.4  (xmin, xmax, ymin, ymax)</span>
+<span class="co">#&gt; coord. ref. : lon/lat WGS 84 (EPSG:4326) </span>
+<span class="co">#&gt; source      : clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif </span>
+<span class="co">#&gt; name        : clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0</span></code></pre></div>
+<p>Due to the fact that the input data is COG, we are actually not reading this file to our RAM, but rather creating a connection to it without obtaining any values.
+Its values will be read if we apply any value-based operation.
+This allows us also to just read a tiny portion of the data without downloading the entire file.
+For example, we can get the snow probability for December in Reykjavik by specifying its coordinates and applying the <code><a href="https://rdrr.io/pkg/terra/man/extract.html">extract()</a></code> function:</p>
+<div class="sourceCode" id="cb250"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">rey</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>lon <span class="op">=</span> <span class="op">-</span><span class="fl">21.94</span>, lat <span class="op">=</span> <span class="fl">64.15</span><span class="op">)</span>
+<span class="va">snow_rey</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">snow</span>, <span class="va">rey</span><span class="op">)</span>
+<span class="va">snow_rey</span>
+<span class="co">#&gt;   ID clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0</span>
+<span class="co">#&gt; 1  1                                                         70</span></code></pre></div>
+<p>This way, we just downloaded a single value instead of the whole, large GeoTIFF file.</p>
+<p>The above example just shows one simple (but useful) case, but there is more to explore.
+The <code>/vsicurl/</code> prefix also works not only for raster but also for vector file formats allowing to read vectors directly from online storage.
+Importantly, it is not the only prefix provided by GDAL – many more exist, such as <code>/vsizip/</code> to read spatial files from ZIP archives without decompressing them beforehand or <code>/vsis3/</code> for on-the-fly reading files available in AWS S3 buckets.
+You can learn more about it at <a href="https://gdal.org/user/virtual_file_systems.html" class="uri">https://gdal.org/user/virtual_file_systems.html</a>.</p>
 <!-- ### Databases -->
 <!-- jn:toDo-->
 <!-- postgis input example -->
@@ -874,17 +908,17 @@ The next two sections will demonstrate how to do this.</p>
 It allows you to write <strong>sf</strong> objects to a wide range of geographic vector file formats, including the most common such as <code>.geojson</code>, <code>.shp</code> and <code>.gpkg</code>.
 Based on the file name, <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf()</a></code> decides automatically which driver to use.
 The speed of the writing process depends also on the driver.</p>
-<div class="sourceCode" id="cb249"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb251"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span><span class="op">)</span></code></pre></div>
 <p><strong>Note</strong>: if you try to write to the same data source again, the function will overwrite the file:</p>
-<div class="sourceCode" id="cb250"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb252"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span><span class="op">)</span></code></pre></div>
 <p>Instead of overwriting the file, we could add a new layer to the file with <code>append = TRUE</code>, which is supported my several spatial formats, including GeoPackage.</p>
-<div class="sourceCode" id="cb251"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb253"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world_many_layers.gpkg"</span>, append <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>Alternatively, you can use <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write()</a></code> since it is equivalent to <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf()</a></code>.
 However, it has different defaults – it does not overwrite files (returns an error when you try to do it) and shows a short summary of the written file format and the object.</p>
-<div class="sourceCode" id="cb252"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb254"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world2.gpkg"</span><span class="op">)</span>
 <span class="co">#&gt; Writing layer `world2' to data source `world2.gpkg' using driver `GPKG'</span>
 <span class="co">#&gt; Writing 177 features with 10 fields and geometry type Multi Polygon.</span></code></pre></div>
@@ -892,7 +926,7 @@ However, it has different defaults – it does not overwrite files (returns an e
 One of them is to write spatial data to a text file.
 This can be done by specifying <code>GEOMETRY</code> inside of <code>layer_options</code>.
 It could be either <code>AS_XY</code> for simple point datasets (it creates two new columns for coordinates) or <code>AS_WKT</code> for more complex spatial data (one new column is created which contains the well-known text representation of spatial objects).</p>
-<div class="sourceCode" id="cb253"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb255"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span><span class="va">cycle_hire_xy</span>, <span class="st">"cycle_hire_xy.csv"</span>, layer_options <span class="op">=</span> <span class="st">"GEOMETRY=AS_XY"</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span><span class="va">world_wkt</span>, <span class="st">"world_wkt.csv"</span>, layer_options <span class="op">=</span> <span class="st">"GEOMETRY=AS_WKT"</span><span class="op">)</span></code></pre></div>
 </div>
@@ -1010,13 +1044,13 @@ FLT8S
 </table></div>
 <p>By default, the output file format is derived from the filename.
 Naming a file <code>*.tif</code> will create a GeoTIFF file, as demonstrated below:</p>
-<div class="sourceCode" id="cb254"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb256"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/writeRaster.html">writeRaster</a></span><span class="op">(</span><span class="va">single_layer</span>, filename <span class="op">=</span> <span class="st">"my_raster.tif"</span>, datatype <span class="op">=</span> <span class="st">"INT2U"</span><span class="op">)</span></code></pre></div>
 <p>Some raster file formats have additional options, that can be set by providing <a href="http://www.gdal.org/formats_list.html">GDAL parameters</a> to the <code>options</code> argument of <code><a href="https://rdrr.io/pkg/terra/man/writeRaster.html">writeRaster()</a></code>.
 GeoTIFF files are written in <strong>terra</strong>, by default, with the LZW compression <code>gdal = c("COMPRESS=LZW")</code>.
 To change or disable the compression, we need to modify this argument.
 Additionally, we can save our raster object as COG (<em>Cloud Optimized GeoTIFF</em>, Section <a href="read-write.html#file-formats">7.5</a>) with the <code>"of=COG"</code> option.</p>
-<div class="sourceCode" id="cb255"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb257"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/writeRaster.html">writeRaster</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">single_layer</span>,
             filename <span class="op">=</span> <span class="st">"my_raster.tif"</span>,
             datatype <span class="op">=</span> <span class="st">"INT2U"</span>,
@@ -1031,7 +1065,7 @@ Additionally, we can save our raster object as COG (<em>Cloud Optimized GeoTIFF<
 <p>
 R supports many different static and interactive graphics formats.
 The most general method to save a static plot is to open a graphic device, create a plot, and close it, for example:</p>
-<div class="sourceCode" id="cb256"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb258"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/grDevices/png.html">png</a></span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"lifeExp.png"</span>, width <span class="op">=</span> <span class="fl">500</span>, height <span class="op">=</span> <span class="fl">350</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">world</span><span class="op">[</span><span class="st">"lifeExp"</span><span class="op">]</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html">dev.off</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
@@ -1040,12 +1074,12 @@ You can specify several properties of the output plot, including width, height a
 <p>Additionally, several graphic packages provide their own functions to save a graphical output.
 For example, the <strong>tmap</strong> package has the <code><a href="https://rdrr.io/pkg/tmap/man/tmap_save.html">tmap_save()</a></code> function.
 You can save a <code>tmap</code> object to different graphic formats or an HTML file by specifying the object name and a file path to a new file.</p>
-<div class="sourceCode" id="cb257"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb259"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-tmap/tmap">tmap</a></span><span class="op">)</span>
 <span class="va">tmap_obj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_shape.html">tm_shape</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_polygons.html">tm_polygons</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"lifeExp"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tmap_save.html">tmap_save</a></span><span class="op">(</span><span class="va">tmap_obj</span>, filename <span class="op">=</span> <span class="st">"lifeExp_tmap.png"</span><span class="op">)</span></code></pre></div>
 <p>On the other hand, you can save interactive maps created in the <strong>mapview</strong> package as an HTML file or image using the <code><a href="https://rdrr.io/pkg/mapview/man/mapshot.html">mapshot()</a></code> function:</p>
-<div class="sourceCode" id="cb258"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb260"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/mapview">mapview</a></span><span class="op">)</span>
 <span class="va">mapview_obj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mapview/man/mapView.html">mapview</a></span><span class="op">(</span><span class="va">world</span>, zcol <span class="op">=</span> <span class="st">"lifeExp"</span>, legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/mapview/man/mapshot.html">mapshot</a></span><span class="op">(</span><span class="va">mapview_obj</span>, file <span class="op">=</span> <span class="st">"my_interactive_map.html"</span><span class="op">)</span></code></pre></div>
@@ -1125,7 +1159,7 @@ Export this map to a file called <code>cycle_hire.html</code>.</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-12-14.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2021-12-16.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

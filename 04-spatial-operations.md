@@ -39,7 +39,7 @@ Another unique aspect of spatial objects is distance: all spatial objects are re
 Spatial operations on raster objects include subsetting --- covered in Section \@ref(spatial-raster-subsetting) --- and merging several raster 'tiles' into a single object, as demonstrated in Section \@ref(merging-rasters).
 *Map algebra* covers a range of operations that modify raster cell values, with or without reference to surrounding cell values, is vital for many applications.
 The concept of map algebra is introduced in Section \@ref(map-algebra); local, focal and zonal map algebra operations are covered in sections \@ref(local-operations), \@ref(focal-operations), and \@ref(zonal-operations), respectively. Global map algebra operations, which generate summary statistics representing an entire raster dataset, and distance calculations on rasters, are discussed in Section \@ref(global-operations-and-distances).
-In the final section before the exercises (\@ref(merging-rasets)) the process of merging two raster datasets is discussed and demonstrated with reference to a reproducible example.
+In the final section before the exercises (\@ref(merging-rasters)) the process of merging two raster datasets is discussed and demonstrated with reference to a reproducible example.
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in Section \@ref(crs-intro) and which will be covered in more depth in Chapter \@ref(reproj-geo-data).</div>\EndKnitrBlock{rmdnote}
 
