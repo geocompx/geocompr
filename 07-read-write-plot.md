@@ -69,7 +69,6 @@ usa_parks = read_sf(dsn = "nps_boundary.shp")
 ## Geographic data packages
 
 <!--toDo:RL-->
-<!--toDo:JN-->
 <!--revise and update the following section-->
 
 \index{data packages}
@@ -78,9 +77,6 @@ These provide interfaces to one or more spatial libraries or geoportals and aim 
 
 <!--toDo:JN-->
 <!-- update the table -->
-
-
-
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>(\#tab:datapackages)Selected R packages for geographic data retrieval.</caption>
  <thead>
@@ -106,28 +102,33 @@ These provide interfaces to one or more spatial libraries or geoportals and aim 
    <td style="text-align:left;"> rnaturalearth </td>
    <td style="text-align:left;"> Access to Natural Earth vector and raster data. </td>
   </tr>
+  <tr>
+   <td style="text-align:left;"> rnoaa </td>
+   <td style="text-align:left;"> Imports National Oceanic and Atmospheric Administration (NOAA) climate data. </td>
+  </tr>
 </tbody>
 </table>
 
 <!--toDo:JN-->
-<!-- new ideas: 
-geocoding -- tidygeocoder, 
-rstac - https://gist.github.com/h-a-graham/420434c158c139180f5eb82859099082,
-censuses (tigris book ref - https://walker-data.com/census-r/working-with-census-data-outside-the-united-states.html); tigris, tidycensus, geobr, RCzechia, bcdata, cancensus, idbr
-rgee - see https://github.com/loreabad6/30DayMapChallenge/blob/main/scripts/day08_blue.R
-
-check: geoTS, sta, FedData, elevatr, modistsp, giscoR, climateR, KrigR, getSpatialData, https://rspatialdata.github.io/
-
-https://github.com/eblondel/geosapi
-raster/nonraster tables 
-https://github.com/ropensci/rsat
--->
+<!-- add to the table: -->
+<!-- - elevatr - https://github.com/jhollist/elevatr/issues/64 -->
+<!-- https://github.com/ropensci/rsat -->
+<!-- https://github.com/mikejohnson51/climateR/issues/44 -->
+<!-- maybe: -->
+<!-- - https://github.com/ErikKusch/KrigR -->
+<!-- mention: -->
+<!-- - https://github.com/ropensci/MODIStsp -->
 
 It should be emphasized that Table \@ref(tab:datapackages) represents only a small number of available geographic data packages.
 <!--toDo:JN-->
 <!-- update the list -->
 Other notable packages include **GSODR**, which provides Global Summary Daily Weather Data in R (see the package's [README](https://github.com/ropensci/GSODR) for an overview of weather data sources);
-**tidycensus** and **tigris**, which provide socio-demographic vector data for the USA; and **hddtools**, which provides access to a range of hydrological datasets.
+<!-- ; and **hddtools**, which provides access to a range of hydrological datasets. --> 
+<!-- not on CRAN anymore -->
+<!-- **tidycensus** and **tigris**, which provide socio-demographic vector data for the USA -->
+<!-- censuses (tigris book ref - https://walker-data.com/census-r/working-with-census-data-outside-the-united-states.html); tigris, tidycensus, geobr, RCzechia, bcdata, cancensus, idbr -->
+<!-- https://cran.r-project.org/web/packages/FedData/index.html -->
+<!-- https://github.com/rOpenGov/giscoR -->
 
 Each data package has its own syntax for accessing data.
 This diversity is demonstrated in the subsequent code chunks, which show how to get data using three packages from Table \@ref(tab:datapackages).
@@ -210,12 +211,16 @@ The last example, `system.file("shapes/world.gpkg", package = "spData")`, return
 
 <!--toDo:jn-->
 <!-- consider data from rgee -->
+<!-- rgee - see https://github.com/loreabad6/30DayMapChallenge/blob/main/scripts/day08_blue.R -->
+<!-- geocoding -- tidygeocoder,  -->
+<!-- rstac - https://gist.github.com/h-a-graham/420434c158c139180f5eb82859099082, -->
 
 ## Geographic web services
 
 <!--toDo:RL-->
 <!--revise and update the following section-->
 <!--jn: Robin, I am leaving this section entirely to you -- I have zero knowledge about OWS-->
+<!-- potentially useful package - https://github.com/eblondel/geosapi -->
 
 \index{geographic web services}
 In an effort to standardize web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of specifications for web services (collectively known as OWS, which is short for OGC Web Services).
@@ -587,9 +592,6 @@ Instead of columns describing xy-coordinates, a single column can also contain t
 Well-known text (WKT)\index{well-known text}, well-known binary (WKB)\index{well-known binary}, and the GeoJSON formats are examples of this.
 For instance, the `world_wkt.csv` file has a column named `WKT` representing polygons of the world's countries.
 We will again use the `options` parameter to indicate this.
-<!--toDo:JN-->
-<!--add a comment about st_read-->
-<!-- Here, we will use `read_sf()`, the tidyverse-flavoured version of `st_read()`: strings are parsed as characters instead of factors and the resulting data frame is a [tibble](https://r4ds.had.co.nz/tibbles.html). The driver name is also not printed to the console. -->
 
 
 ```r
@@ -874,6 +876,7 @@ dev.off()
 Other available graphic devices include `pdf()`, `bmp()`, `jpeg()`, and `tiff()`. 
 You can specify several properties of the output plot, including width, height and resolution.
 
+\index{tmap (package)!saving maps}
 Additionally, several graphic packages provide their own functions to save a graphical output.
 For example, the **tmap** package has the `tmap_save()` function.
 You can save a `tmap` object to different graphic formats or an HTML file by specifying the object name and a file path to a new file.
