@@ -417,10 +417,7 @@ It allows spatial information, such as CRS, to be embedded within a TIFF file.
 Similar to ESRI Shapefile, this format was firstly developed in the 1990s, but as an open format.
 Additionally, GeoTIFF is still being expanded and improved.
 One of the most significant recent addition to the GeoTIFF format is its variant called COG (*Cloud Optimized GeoTIFF*).
-Raster objects saved as COGs can be hosted on HTTP servers, so other people can read only parts of the file without downloading the whole file.
-
-<!-- jn:toDo-->
-<!-- add ref to cog example if we will made one-->
+Raster objects saved as COGs can be hosted on HTTP servers, so other people can read only parts of the file without downloading the whole file (see Sections \@ref(raster-data-read) and \@ref(raster-data-write)).
 
 ## Data input (I) {#data-input}
 
@@ -472,6 +469,7 @@ For some drivers, `dsn` could be provided as a folder name, access credentials f
 Some vector driver formats can store multiple data layers.
 By default, `read_sf()` automatically reads the first layer of the file specified in `dsn`; however, using the `layer` argument you can specify any other layer.
 
+\index{OGR SQL}
 The `read_sf()` function also allows for reading just parts of the file into RAM with two possible mechanisms.
 The first one is related to the `query` argument, which allows specifying what part of the data to read with [the OGR SQL query text](https://gdal.org/user/ogr_sql_dialect.html).
 An example below extracts data for Tanzania only (Figure \@ref(fig:readsfquery):A).
@@ -567,6 +565,7 @@ In these situations, it is possible to add the missing information using the `st
 Please refer also to Section \@ref(crs-intro) for more information.
 ```
 
+\index{KML}
 As a final example, we will show how `read_sf()` also reads KML files.
 A KML file stores geographic information in XML format - a data format for the creation of web pages and the transfer of data in an application-independent way [@nolan_xml_2014].
 Here, we access a KML file from the web.
@@ -590,7 +589,7 @@ A [benchmark](https://github.com/ATFutures/geobench) suggests it is around 10 ti
 file.remove("KML_Samples.kml")
 ```
 
-### Raster data
+### Raster data {#raster-data-read}
 
 \index{raster!data input}
 Similar to vector data, raster data comes in many file formats with some of them supporting multilayer files.
@@ -614,8 +613,8 @@ multilayer_rast = rast(multilayer_filepath)
 All of the previous examples read spatial information from files stored on your hard drive. 
 However, GDAL also allows reading data directly from online resources, such as HTTP/HTTPS/FTP web resources.
 The only thing we need to do is to add a `/vsicurl/` prefix before the path to the file.
-Let's try it by connecting to the global monthly snow probability at 500 m resolution for the period 2000–2012 [@hengl_t_2021_5774954].
-Snow probability for December is stored as a Cloud Optimized GeoTIFF (COG) file (see Section \@ref(file-formats)) at https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif.
+Let's try it by connecting to the global monthly snow probability at 500 m resolution for the period 2000-2012 [@hengl_t_2021_5774954].
+Snow probability for December is stored as a Cloud Optimized GeoTIFF (COG) file (see Section \@ref(file-formats)) at \url{https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif}.
 To read an online file, we just need to provide its URL together with the `/vsicurl/` prefix.
 
 ```{r}
@@ -625,9 +624,9 @@ snow
 ```
 
 Due to the fact that the input data is COG, we are actually not reading this file to our RAM, but rather creating a connection to it without obtaining any values.
-Its values will be read if we apply any value-based operation.
+Its values will be read if we apply any value-based operation (e.g., `crop()` or `extract()`).
 This allows us also to just read a tiny portion of the data without downloading the entire file.
-For example, we can get the snow probability for December in Reykjavik by specifying its coordinates and applying the `extract()` function:
+For example, we can get the snow probability for December in Reykjavik (70%) by specifying its coordinates and applying the `extract()` function:
 
 ```{r}
 rey = data.frame(lon = -21.94, lat = 64.15)
@@ -703,7 +702,7 @@ write_sf(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
 file.remove(world_files)
 ```
 
-### Raster data
+### Raster data {#raster-data-write}
 
 \index{raster!data output}
 The `writeRaster()` function saves `SpatRaster` objects to files on disk. 
