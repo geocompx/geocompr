@@ -110,7 +110,18 @@ knitr::kable(datapackages,
 ```
 
 <!--toDo:JN-->
-<!-- new ideas: geocoding, censuses (tigris book ref), raster/nonraster tables -->
+<!-- new ideas: 
+geocoding -- tidygeocoder, 
+rstac - https://gist.github.com/h-a-graham/420434c158c139180f5eb82859099082,
+censuses (tigris book ref - https://walker-data.com/census-r/working-with-census-data-outside-the-united-states.html); tigris, tidycensus, geobr, RCzechia, bcdata, cancensus, idbr
+rgee - see https://github.com/loreabad6/30DayMapChallenge/blob/main/scripts/day08_blue.R
+
+check: geoTS, sta, FedData, elevatr, modistsp, giscoR, climateR, KrigR, getSpatialData, https://rspatialdata.github.io/
+
+https://github.com/eblondel/geosapi
+raster/nonraster tables 
+https://github.com/ropensci/rsat
+-->
 
 It should be emphasized that Table \@ref(tab:datapackages) represents only a small number of available geographic data packages.
 <!--toDo:JN-->
@@ -400,15 +411,13 @@ Hence, GeoPackage is a lightweight spatial database container, which allows the 
 Aside from GeoPackage, there are other geospatial data exchange formats worth checking out (Table \@ref(tab:formats)).
 
 \index{GeoTIFF}
+\index{COG}
 The GeoTIFF format seems to be the most prominent raster data format.
 It allows spatial information, such as CRS, to be embedded within a TIFF file. 
 Similar to ESRI Shapefile, this format was firstly developed in the 1990s, but as an open format.
 Additionally, GeoTIFF is still being expanded and improved.
 One of the most significant recent addition to the GeoTIFF format is its variant called COG (*Cloud Optimized GeoTIFF*).
-Raster objects saved as COGs can be hosted on HTTP servers, so other people can read only parts of the file without downloading the whole file.
-
-<!-- jn:toDo-->
-<!-- add ref to cog example if we will made one-->
+Raster objects saved as COGs can be hosted on HTTP servers, so other people can read only parts of the file without downloading the whole file (see Sections \@ref(raster-data-read) and \@ref(raster-data-write)).
 
 ## Data input (I) {#data-input}
 
@@ -460,9 +469,10 @@ For some drivers, `dsn` could be provided as a folder name, access credentials f
 Some vector driver formats can store multiple data layers.
 By default, `read_sf()` automatically reads the first layer of the file specified in `dsn`; however, using the `layer` argument you can specify any other layer.
 
+\index{OGR SQL}
 The `read_sf()` function also allows for reading just parts of the file into RAM with two possible mechanisms.
 The first one is related to the `query` argument, which allows specifying what part of the data to read with [the OGR SQL query text](https://gdal.org/user/ogr_sql_dialect.html).
-An example below extracts data for Tanzania only (Figure \@ref(readsfquery):A).
+An example below extracts data for Tanzania only (Figure \@ref(fig:readsfquery):A).
 It is done by specifying that we want to get all columns (`SELECT *`) from the `"world"` layer for which the `name_long` equals to `"Tanzania"`:
 
 ```{r}
@@ -488,7 +498,7 @@ tanzania_neigh = read_sf(vector_filepath,
                          wkt_filter = tanzania_buf_wkt)
 ```
 
-Our result, shown in Figure \@ref(readsfquery):B, contains Tanzania and every country within its 50 km buffer.
+Our result, shown in Figure \@ref(fig:readsfquery):B, contains Tanzania and every country within its 50 km buffer.
 
 ```{r readsfquery, echo=FALSE, message=FALSE, fig.cap="Reading a subset of the vector data using a query (A) and a wkt filter (B)."}
 library(tmap)
@@ -555,6 +565,7 @@ In these situations, it is possible to add the missing information using the `st
 Please refer also to Section \@ref(crs-intro) for more information.
 ```
 
+\index{KML}
 As a final example, we will show how `read_sf()` also reads KML files.
 A KML file stores geographic information in XML format - a data format for the creation of web pages and the transfer of data in an application-independent way [@nolan_xml_2014].
 Here, we access a KML file from the web.
@@ -578,7 +589,7 @@ A [benchmark](https://github.com/ATFutures/geobench) suggests it is around 10 ti
 file.remove("KML_Samples.kml")
 ```
 
-### Raster data
+### Raster data {#raster-data-read}
 
 \index{raster!data input}
 Similar to vector data, raster data comes in many file formats with some of them supporting multilayer files.
@@ -596,8 +607,39 @@ multilayer_filepath = system.file("raster/landsat.tif", package = "spDataLarge")
 multilayer_rast = rast(multilayer_filepath)
 ```
 
-<!-- jn:toDo-->
-<!-- COG example?? -->
+\index{vsicurl}
+\index{GDAL}
+\index{COG}
+All of the previous examples read spatial information from files stored on your hard drive. 
+However, GDAL also allows reading data directly from online resources, such as HTTP/HTTPS/FTP web resources.
+The only thing we need to do is to add a `/vsicurl/` prefix before the path to the file.
+Let's try it by connecting to the global monthly snow probability at 500 m resolution for the period 2000-2012 [@hengl_t_2021_5774954].
+Snow probability for December is stored as a Cloud Optimized GeoTIFF (COG) file (see Section \@ref(file-formats)) at \url{https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif}.
+To read an online file, we just need to provide its URL together with the `/vsicurl/` prefix.
+
+```{r}
+myurl = "/vsicurl/https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif"
+snow = rast(myurl)
+snow
+```
+
+Due to the fact that the input data is COG, we are actually not reading this file to our RAM, but rather creating a connection to it without obtaining any values.
+Its values will be read if we apply any value-based operation (e.g., `crop()` or `extract()`).
+This allows us also to just read a tiny portion of the data without downloading the entire file.
+For example, we can get the snow probability for December in Reykjavik (70%) by specifying its coordinates and applying the `extract()` function:
+
+```{r}
+rey = data.frame(lon = -21.94, lat = 64.15)
+snow_rey = extract(snow, rey)
+snow_rey
+```
+
+This way, we just downloaded a single value instead of the whole, large GeoTIFF file.
+
+The above example just shows one simple (but useful) case, but there is more to explore.
+The `/vsicurl/` prefix also works not only for raster but also for vector file formats allowing to read vectors directly from online storage.
+Importantly, it is not the only prefix provided by GDAL -- many more exist, such as `/vsizip/` to read spatial files from ZIP archives without decompressing them beforehand or `/vsis3/` for on-the-fly reading files available in AWS S3 buckets.
+You can learn more about it at https://gdal.org/user/virtual_file_systems.html.
 
 <!-- ### Databases -->
 
@@ -660,7 +702,7 @@ write_sf(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
 file.remove(world_files)
 ```
 
-### Raster data
+### Raster data {#raster-data-write}
 
 \index{raster!data output}
 The `writeRaster()` function saves `SpatRaster` objects to files on disk. 
