@@ -328,15 +328,21 @@ To access and modify it explicitly, use the `st_crs` function, for example, `st_
 
 
 
-<!-- On the other hand, when mapping the world, it is often desirable to have as little distortion as possible for all spatial properties (area, direction, distance). -->
-<!-- One of the most popular projections to achieve this is the Winkel tripel projection (Figure \@ref(fig:wintriproj)).^[ -->
-<!-- This projection is used, among others, by the National Geographic Society. -->
-<!-- ] -->
-<!-- `st_transform_proj()` from the **lwgeom** package allows for coordinate transformations to a wide range of CRSs, including the Winkel tripel projection:  -->
+On the other hand, when mapping the world, it is often desirable to have as little distortion as possible for all spatial properties (area, direction, distance).
+One of the most popular projections to achieve this is the Winkel tripel projection (Figure \@ref(fig:wintriproj)).^[
+This projection is used, among others, by the National Geographic Society.
+]
+`st_transform_proj()` from the **lwgeom** package allows for coordinate transformations to a wide range of CRSs, including the Winkel tripel projection:
 
 
+```r
+world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
+```
 
 
+```
+#> Error in tm_shape(world_wintri_gr): could not find function "tm_shape"
+```
 
 
 
