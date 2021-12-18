@@ -165,9 +165,6 @@ To see how topological relations work in practice, let's create a simple reprodu
 Note that to create tabular data representing coordinates (x and y) of the polygon vertices, we use the base R function `read.csv()` and then convert the result into a matrix, a `POLYGON` and finally an `sfc` object:
 
 
-
-
-
 ```r
 polygon_df = read.csv(text = "x, y
 0, 0.0

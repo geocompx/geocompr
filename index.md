@@ -94,7 +94,7 @@ After opening the `geocompr.Rproj` project in RStudio (or opening the folder in 
 
 
 ```r
-bookdown::serve_book()
+bookdown::serve_book(".")
 ```
 
 
