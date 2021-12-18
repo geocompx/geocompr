@@ -19,7 +19,7 @@ california_raster_centr = st_as_sf(as.polygons(raster_template2))
 california_raster_centr = st_centroid(california_raster_centr)
 
 r1po = tm_shape(california_raster1) + 
-  tm_raster(col = "layer", legend.show = TRUE, title = "Values: ") +
+  tm_raster(legend.show = TRUE, title = "Values: ") +
   tm_shape(california_raster_centr) +
   tm_dots() + 
   tm_shape(california) + tm_borders() + 
@@ -27,7 +27,7 @@ r1po = tm_shape(california_raster1) +
             legend.show = FALSE, frame = FALSE)
 
 r2po = tm_shape(california_raster2) +
-  tm_raster(col = "layer", legend.show = TRUE, title = "Values: ") +
+  tm_raster(legend.show = TRUE, title = "Values: ") +
   tm_shape(california_raster_centr) + 
   tm_dots() + 
   tm_shape(california) + tm_borders() + 
