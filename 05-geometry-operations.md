@@ -750,7 +750,7 @@ dem_agg = aggregate(dem, fact = 5, fun = mean)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="https://user-images.githubusercontent.com/1825120/146618665-949e5256-3324-4a59-ba69-604fc9820efc.png" alt="Original raster (left). Aggregated raster (right)." width="100%" />
+<img src="05-geometry-operations_files/figure-html/aggregate-example-1.png" alt="Original raster (left). Aggregated raster (right)." width="100%" />
 <p class="caption">(\#fig:aggregate-example)Original raster (left). Aggregated raster (right).</p>
 </div>
 
