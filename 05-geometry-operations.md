@@ -766,7 +766,7 @@ identical(dem, dem_disagg)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="https://user-images.githubusercontent.com/1825120/146619205-3c0c2e3f-9e8b-4fda-b014-9c342a4befbb.png" alt="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation." width="100%" />
+<img src="05-geometry-operations_files/figure-html/bilinear-1.png" alt="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation." width="100%" />
 <p class="caption">(\#fig:bilinear)The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation.</p>
 </div>
 
@@ -1164,7 +1164,10 @@ Compare it to a polygon rasterization, with `touches = FALSE` by default, which 
 california_raster2 = rasterize(vect(california), raster_template2) 
 ```
 
-
+<div class="figure" style="text-align: center">
+<img src="05-geometry-operations_files/figure-html/vector-rasterization2-1.png" alt="Examples of line and polygon rasterizations." width="100%" />
+<p class="caption">(\#fig:vector-rasterization2)Examples of line and polygon rasterizations.</p>
+</div>
 
 ### Spatial vectorization
 
