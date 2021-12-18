@@ -23,11 +23,6 @@ It highlights issues that can arise when using inappropriate CRSs and how to *tr
 \index{CRS!projected} 
 As illustrated in Figure \@ref(fig:vectorplots), there are two types of CRSs: *geographic* ('lon/lat', with units in degrees longitude and latitude) and *projected* (typically with units of meters from a datum).
 This has consequences.
-<!--toDo:rl-->
-<!--jn: many ideas in this chapter are not longer valid-->
-<!--jn: I commented out or echo/eval=FALSE many outdated ideas-->
-<!-- Many geometry operations in **sf**, for example, assume their inputs have a projected CRS, because the GEOS functions they are based on assume projected data. -->
-
 To check if our data has geographic CRS, we can use `sf::st_is_longlat()` for vector data and `terra::is.lonlat()` for raster data.
 In some cases the CRS is unknown, as shown below using the example of London introduced in Section \@ref(vector-data):
 
@@ -53,18 +48,25 @@ st_is_longlat(london_geo)
 ```
 
 Datasets without a specified CRS can cause problems.
-
-<!-- An example is provided below, which creates a buffer of one unit around `london` and `london_geo` objects: -->
-<!--toDo:rl-->
-<!--not longer valid-->
+An example is provided below, which creates a buffer of one unit around `london` and `london_geo` objects (note that we temporarily 'switch off' the S2 geometry engine so that the `sf` package creates a buffer incorrectly assuming that units of degrees represent projected data):
 
 
-<!--toDo:rl-->
-<!--not longer valid-->
-<!-- Only the second operation generates a warning. -->
-<!-- The warning message is useful, telling us that the result may be of limited use because it is in units of latitude and longitude, rather than meters or some other suitable measure of distance assumed by `st_buffer()`. -->
-<!-- The consequences of a failure to work on projected data are illustrated in Figure \@ref(fig:crs-buf) (left panel): -->
-<!-- the buffer is elongated in the north-south direction because lines of longitude converge towards the Earth's poles. -->
+```r
+london_buff_no_crs = st_buffer(london, dist = 1)
+sf::sf_use_s2(FALSE)
+#> Spherical geometry (s2) switched off
+london_buff = st_buffer(london_geo, dist = 1)
+#> Warning in st_buffer.sfc(st_geometry(x), dist, nQuadSegs, endCapStyle =
+#> endCapStyle, : st_buffer does not correctly buffer longitude/latitude data
+#> dist is assumed to be in decimal degrees (arc_degrees).
+sf::sf_use_s2(TRUE)
+#> Spherical geometry (s2) switched on
+```
+
+The results of the above code chunk show that, when spherical geometry operations are turned off, performing buffers (and other geometric operations) on unprojected datasets generate a warnings.
+The warning message is useful, telling us that the result may be of limited use because it is in units of latitude and longitude, rather than meters or some other suitable measure of distance assumed by `st_buffer()`.
+The consequences of a failure to work on projected data are illustrated in Figure \@ref(fig:crs-buf) (left panel):
+the buffer is elongated in the north-south direction because lines of longitude converge towards the Earth's poles.
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">The distance between two lines of longitude, called meridians, is around 111 km at the equator (execute `geosphere::distGeo(c(0, 0), c(1, 0))` to find the precise distance).
 This shrinks to zero at the poles.
@@ -72,13 +74,11 @@ At the latitude of London, for example, meridians are less than 70 km apart (cha
 <!-- `geosphere::distGeo(c(0, 51.5), c(1, 51.5))` -->
 Lines of latitude, by contrast, are equidistant from each other irrespective of latitude: they are always around 111 km apart, including at the equator and near the poles (see Figures \@ref(fig:crs-buf) to \@ref(fig:wintriproj)).</div>\EndKnitrBlock{rmdnote}
 
-<!--toDo:rl-->
-<!--not longer valid-->
-<!-- Do not interpret the warning about the geographic (`longitude/latitude`) CRS as "the CRS should not be set": it almost always should be! -->
-<!-- It is better understood as a suggestion to *reproject* the data onto a projected CRS. -->
-<!-- This suggestion does not always need to be heeded: performing spatial and geometric operations makes little or no difference in some cases (e.g., spatial subsetting). -->
-<!-- But for operations involving distances such as buffering, the only way to ensure a good result is to create a projected copy of the data and run the operation on that. -->
-<!-- This is done in the code chunk below: -->
+Do not interpret the warning about the geographic (`longitude/latitude`) CRS as "the CRS should not be set": it almost always should be!
+It is better understood as a suggestion to *reproject* the data onto a projected CRS.
+This suggestion does not always need to be heeded: performing spatial and geometric operations makes little or no difference in some cases (e.g., spatial subsetting).
+But for operations involving distances such as buffering, the only way to ensure a good result (without using spherical geometry engines) is to create a projected copy of the data and run the operation on that.
+This is done in the code chunk below:
 
 
 ```r
@@ -86,28 +86,34 @@ london_proj = data.frame(x = 530000, y = 180000) %>%
   st_as_sf(coords = 1:2, crs = "EPSG:27700")
 ```
 
-<!-- The result is a new object that is identical to `london`, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters.  -->
-<!-- We can verify that the CRS has changed using `st_crs()` as follows (some of the output has been replaced by `...`): -->
+The result is a new object that is identical to `london`, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters.
+We can verify that the CRS has changed using `st_crs()` as follows (some of the output has been replaced by `...`):
 
 
 
-<!-- Notable components of this CRS description include the EPSG code (`EPSG: 27700`), the projection ([transverse Mercator](https://en.wikipedia.org/wiki/Transverse_Mercator_projection), `+proj=tmerc`), the origin (`+lat_0=49 +lon_0=-2`) and units (`+units=m`).^[ -->
-<!-- For a short description of the most relevant projection parameters and related concepts, see the fourth lecture by Jochen Albrecht hosted at -->
-<!-- http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/ and information at https://proj.org/usage/projections.html. -->
-<!-- Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj. -->
-<!-- ] -->
-<!-- The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: `st_is_longlat(london_proj)` now returns `FALSE` and geometry operations on `london_proj` will work without a warning, meaning buffers can be produced from it using proper units of distance. -->
-<!-- As pointed out above, moving one degree means moving a bit more than 111 km at the equator (to be precise: 111,320 meters). -->
-<!-- This is used as the new buffer distance: -->
+Notable components of this CRS description include the EPSG code (`EPSG: 27700`), the projection ([transverse Mercator](https://en.wikipedia.org/wiki/Transverse_Mercator_projection), `+proj=tmerc`), the origin (`+lat_0=49 +lon_0=-2`) and units (`+units=m`).^[
+For a short description of the most relevant projection parameters and related concepts, see the fourth lecture by Jochen Albrecht hosted at
+http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/ and information at https://proj.org/usage/projections.html.
+Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj.
+]
+The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: `st_is_longlat(london_proj)` now returns `FALSE` and geometry operations on `london_proj` will work without a warning, meaning buffers can be produced from it using proper units of distance.
+As pointed out above, moving one degree means moving a bit more than 111 km at the equator (to be precise: 111,320 meters).
+This is used as the new buffer distance:
 
 
+```r
+london_proj_buff = st_buffer(london_proj, 111320)
+```
 
-<!-- The result in Figure \@ref(fig:crs-buf) (right panel) shows that buffers based on a projected CRS are not distorted: -->
-<!-- every part of the buffer's border is equidistant to London. -->
+The result in Figure \@ref(fig:crs-buf) (right panel) shows that buffers based on a projected CRS are not distorted:
+every part of the buffer's border is equidistant to London.
 
+<div class="figure" style="text-align: center">
+<img src="06-reproj_files/figure-html/crs-buf-1.png" alt="Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline." width="45%" /><img src="06-reproj_files/figure-html/crs-buf-2.png" alt="Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline." width="45%" />
+<p class="caption">(\#fig:crs-buf)Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline.</p>
+</div>
 
-
-<!-- The importance of CRSs (primarily whether they are projected or geographic) has been demonstrated using the example of London. -->
+The importance of CRSs (primarily whether they are projected or geographic) has been demonstrated using the example of London.
 The subsequent sections go into more depth, exploring which CRS to use and the details of reprojecting vector and raster objects.
 
 ## When to reproject?
