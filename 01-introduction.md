@@ -332,7 +332,7 @@ New ideas about spatial data representations were also being developed in this p
 \index{lidR (package)}
 It includes the **stars** package, closely connected to **sf**, for handling raster and vector data cubes [@pebesma_stars_2021] and **lidR** for processing of airborne LiDAR (Light Detection and Ranging) point clouds [@Roussel2020].
 
-This modernization had several reasons, including the emergence of new technologies and standard, and the impacts from spatial software development outside of the R environment [@bivand_progress_2020].
+This modernization had several reasons, including the emergence of new technologies and standard, and the impacts from spatial software development outside of the R environment [@bivand_progress_2021].
 The most important external factor affecting most spatial software, including R spatial packages, were the major updates, including many breaking changes to the PROJ library\index{PROJ} that had begun in 2018.
 Most importantly, these changes forced the replacement of `proj4string` to `WKT2` representation for storage of coordinate reference systems and coordinates operations (learn more in Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)).
 

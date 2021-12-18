@@ -10,7 +10,6 @@ library(sf)
 library(terra)
 library(dplyr)
 library(spData)
-#> Warning: multiple methods tables found for 'approxNA'
 library(spDataLarge)
 ```
 
@@ -725,7 +724,7 @@ origin(elev_4) = c(0.25, 0.25)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/origin-example-1.png" alt="Rasters with identical values but different origins." width="100%" />
+<img src="https://user-images.githubusercontent.com/1825120/146618199-786fe3ad-9718-4dd0-a640-41180fc17e63.png" alt="Rasters with identical values but different origins." width="100%" />
 <p class="caption">(\#fig:origin-example)Rasters with identical values but different origins.</p>
 </div>
 
@@ -751,16 +750,13 @@ dem_agg = aggregate(dem, fact = 5, fun = mean)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/aggregate-example-1.png" alt="Original raster (left). Aggregated raster (right)." width="100%" />
+<img src="https://user-images.githubusercontent.com/1825120/146618665-949e5256-3324-4a59-ba69-604fc9820efc.png" alt="Original raster (left). Aggregated raster (right)." width="100%" />
 <p class="caption">(\#fig:aggregate-example)Original raster (left). Aggregated raster (right).</p>
 </div>
 
-By contrast, the `disagg()` function increases the resolution.
-However, we have to specify a method on how to fill the new cells.
-The `disagg()` function provides two methods.
-The default one (`method = "near"`) simply gives all output cells the value of the input cell, and hence duplicates values which leads to a blocky output image.
-
-The `bilinear` method, in turn, is an interpolation technique that uses the four nearest pixel centers of the input image (salmon colored points in Figure \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Figure \@ref(fig:bilinear) as the value of the output cell - square in the upper left corner in Figure \@ref(fig:bilinear)).
+The `disagg()` function increases the resolution of raster objects, providing two a methods for assigning values to the newly created cells: the default method (`method = "near"`) simply gives all output cells the value of the input cell, and hence duplicates values, leading to a 'blocky' output.
+The `bilinear` method uses the four nearest pixel centers of the input image (salmon colored points in Figure \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Figure \@ref(fig:bilinear).
+The value of the output cell is represented by a square in the upper left corner in Figure \@ref(fig:bilinear)).
 
 
 ```r
@@ -770,7 +766,7 @@ identical(dem, dem_disagg)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/bilinear-1.png" alt="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation." width="100%" />
+<img src="https://user-images.githubusercontent.com/1825120/146619205-3c0c2e3f-9e8b-4fda-b014-9c342a4befbb.png" alt="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation." width="100%" />
 <p class="caption">(\#fig:bilinear)The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation.</p>
 </div>
 
@@ -1034,7 +1030,7 @@ group_by(zion_srtm_values, ID) %>%
   summarize(across(srtm, list(min = min, mean = mean, max = max)))
 #> # A tibble: 1 × 4
 #>      ID srtm_min srtm_mean srtm_max
-#>   <dbl>    <dbl>     <dbl>    <dbl>
+#>   <dbl>    <int>     <dbl>    <int>
 #> 1     1     1122     1818.     2661
 ```
 
@@ -1060,7 +1056,7 @@ zion_nlcd %>%
 #> # A tibble: 7 × 3
 #> # Groups:   ID, levels [7]
 #>      ID levels      n
-#>   <dbl>  <dbl>  <int>
+#>   <dbl>  <int>  <int>
 #> 1     1      2   4205
 #> 2     1      3  98285
 #> 3     1      4 298299
@@ -1168,10 +1164,7 @@ Compare it to a polygon rasterization, with `touches = FALSE` by default, which 
 california_raster2 = rasterize(vect(california), raster_template2) 
 ```
 
-<div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/vector-rasterization2-1.png" alt="Examples of line and polygon rasterizations." width="100%" />
-<p class="caption">(\#fig:vector-rasterization2)Examples of line and polygon rasterizations.</p>
-</div>
+
 
 ### Spatial vectorization
 

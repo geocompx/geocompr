@@ -35,7 +35,7 @@ The necessary packages can be 'loaded' (technically they are attached) with the 
 
 ```r
 library(sf)          # classes and functions for vector data
-#> Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1
+#> Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1; sf_use_s2() is TRUE
 ```
 
 The output from `library(sf)` reports which versions of key geographic libraries such as GEOS the package is using, as outlined in Section \@ref(intro-sf).
@@ -50,7 +50,6 @@ The other packages that were installed contain data that will be used in the boo
 
 ```r
 library(spData)        # load geographic data
-#> Warning: multiple methods tables found for 'approxNA'
 library(spDataLarge)   # load larger geographic data
 ```
 
@@ -759,12 +758,13 @@ The value might be numeric or categorical (Figure \@ref(fig:raster-intro-plot):C
 <p class="caption">(\#fig:raster-intro-plot)Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map.</p>
 </div>
 
-Raster maps usually represent continuous phenomena such as elevation, temperature, population density or spectral data (Figure \@ref(fig:raster-intro-plot2)).
-Of course, we can represent discrete features such as soil or land-cover classes also with the help of a raster data model (Figure \@ref(fig:raster-intro-plot2)).
-Consequently, the discrete borders of these features become blurred, and depending on the spatial task a vector representation might be more suitable.
+Raster maps usually represent continuous phenomena such as elevation, temperature, population density or spectral data.
+Discrete features such as soil or land-cover classes can also be represented in the raster data model.
+Both uses of raster datasets are illustrated in Figure \@ref(fig:raster-intro-plot2), which shows how the borders of discrete features may become blurred in raster datasets.
+Depending on the nature of the application, vector representations of discrete features may be more suitable.
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/raster-intro-plot2-1.png" alt="Examples of continuous and categorical rasters." width="100%" />
+<img src="https://user-images.githubusercontent.com/1825120/146617327-45919232-a6a3-4d9d-a158-afa87f47381b.png" alt="Examples of continuous and categorical rasters." width="100%" />
 <p class="caption">(\#fig:raster-intro-plot2)Examples of continuous and categorical rasters.</p>
 </div>
 
@@ -866,7 +866,7 @@ There are several other approaches for plotting raster data in R that are outsid
 ### Raster classes {#raster-classes}
 
 The `SpatRaster` class represents rasters object in **terra**.
-The easiest way to create a raster object in R is to read-in a raster file from disk or from a server (Section \@ref(raster-data-1).
+The easiest way to create a raster object in R is to read-in a raster file from disk or from a server (Section \@ref(raster-data-read).
 \index{raster!class}
 
 
@@ -908,9 +908,9 @@ multi_rast
 #> extent      : 301905, 335745, 4111245, 4154085  (xmin, xmax, ymin, ymax)
 #> coord. ref. : WGS 84 / UTM zone 12N (EPSG:32612) 
 #> source      : landsat.tif 
-#> names       : lan_1, lan_2, lan_3, lan_4 
-#> min values  :  7550,  6404,  5678,  5252 
-#> max values  : 19071, 22051, 25780, 31961
+#> names       : landsat_1, landsat_2, landsat_3, landsat_4 
+#> min values  :      7550,      6404,      5678,      5252 
+#> max values  :     19071,     22051,     25780,     31961
 ```
 
 `nlyr()` retrieves the number of layers stored in a `SpatRaster` object:
@@ -1044,7 +1044,7 @@ In the past, the `proj4string` definitions, was the standard way to specify coor
 These string representations, built on a key=value form (e.g, `+proj=longlat +datum=WGS84 +no_defs`), are, however, currently discouraged in most cases.
 PROJ version 6 and further still allows to use `proj4string`s to define coordinate operations, but some `proj4string` keys are no longer supported or are not advisable to use (e.g., `+nadgrids`, `+towgs84`, `+k`, `+init=epsg:`) and only three datums (i.e., WGS84, NAD83, and NAD27) can be directly set in `proj4string`.
 Importantly, `proj4string`s are not used to store CRSs anymore.
-Longer explanations on the recent changes in the PROJ library and why `proj4string` was replaced by `WKT2` can be found in @bivand_progress_2020, Chapter 2 of @pebesma_spatial_2022, and [blog post by Floris Vanderhaeghe](https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/).
+Longer explanations on the recent changes in the PROJ library and why `proj4string` was replaced by `WKT2` can be found in @bivand_progress_2021, Chapter 2 of @pebesma_spatial_2022, and [blog post by Floris Vanderhaeghe](https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/).
 
 Let's look at how CRSs are stored in R spatial objects and how they can be set.
 For this, we need to read-in a vector dataset:

@@ -10,7 +10,6 @@ library(sf)
 library(terra)
 library(dplyr)
 library(spData)
-#> Warning: multiple methods tables found for 'approxNA'
 ```
 
 ## Introduction

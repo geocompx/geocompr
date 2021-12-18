@@ -10,7 +10,6 @@ library(sf)
 library(terra)
 library(dplyr)
 library(spData)
-#> Warning: multiple methods tables found for 'approxNA'
 library(spDataLarge)
 ```
 
@@ -404,15 +403,15 @@ In this region, 8 land cover classes were distinguished (a full list of NLCD2011
 
 ```r
 unique(cat_raster)
-#>   levels
-#> 1      1
-#> 2      2
-#> 3      3
-#> 4      4
-#> 5      5
-#> 6      6
-#> 7      7
-#> 8      8
+#>       levels
+#> 1      Water
+#> 2  Developed
+#> 3     Barren
+#> 4     Forest
+#> 5  Shrubland
+#> 6 Herbaceous
+#> 7 Cultivated
+#> 8   Wetlands
 ```
 
 When reprojecting categorical rasters, the estimated values must be the same as those of the original.

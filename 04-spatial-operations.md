@@ -10,7 +10,6 @@ library(sf)
 library(terra)
 library(dplyr)
 library(spData)
-#> Warning: multiple methods tables found for 'approxNA'
 ```
 
 - You also need to read in a couple of datasets as follows for Section \@ref(spatial-ras)
@@ -238,7 +237,7 @@ In this case, only the third feature in `point_sf` intersects with `polygon_sfc`
 There is only one feature in `polygon_sfc` so the result has only one column.
 The result can be used for subsetting as we saw in Section \@ref(spatial-subsetting).
 
-Note: `st_intersects()` returns `TRUE` even in cases where the features just touch: *intersects* is a 'catch-all' topological operation which identifies many types of spatial relation, as illustrated in Figure \@ref(fig:relate).
+Note: `st_intersects()` returns `TRUE` even in cases where the features just touch: *intersects* is a 'catch-all' topological operation which identifies many types of spatial relation, as illustrated in Figure \@ref(fig:relations).
 The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (note `[, 1]` converts the result into a vector):
 
 
