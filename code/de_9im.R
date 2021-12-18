@@ -58,6 +58,8 @@ de_9im = function(x,
   }
   if(plot) {
     res_text1 = paste(res, collapse = collapse)
+    collapse_no_break = gsub(pattern = "\\n", replacement = "", x = collapse)
+    res_text1 = paste0(res_text1, collapse_no_break)
     message("Object x has the following spatial relations to y: ", res_text1, res_text2)
     if (tmap){
       res = de_9im_plot2(xy, label1 = res_text1, label2 = res_text2)
