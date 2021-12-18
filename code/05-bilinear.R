@@ -17,7 +17,7 @@ elev_lines4 = st_linestring(rbind(xy_1, xy_2[4, ]))
 elev_lines_all = st_sfc(elev_lines1, elev_lines2, elev_lines3, elev_lines4)
 
 tm_shape(elev_agg) +
-  tm_raster(col = "elev", style = "cont", title = "") + 
+  tm_raster(style = "cont", title = "") + 
   tm_shape(elev_lines_all) +
   tm_lines() +
   tm_shape(elev_poly1) +
