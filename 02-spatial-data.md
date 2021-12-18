@@ -764,7 +764,7 @@ Both uses of raster datasets are illustrated in Figure \@ref(fig:raster-intro-pl
 Depending on the nature of the application, vector representations of discrete features may be more suitable.
 
 <div class="figure" style="text-align: center">
-<img src="https://user-images.githubusercontent.com/1825120/146617327-45919232-a6a3-4d9d-a158-afa87f47381b.png" alt="Examples of continuous and categorical rasters." width="100%" />
+<img src="02-spatial-data_files/figure-html/raster-intro-plot2-1.png" alt="Examples of continuous and categorical rasters." width="100%" />
 <p class="caption">(\#fig:raster-intro-plot2)Examples of continuous and categorical rasters.</p>
 </div>
 

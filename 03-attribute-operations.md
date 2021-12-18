@@ -631,7 +631,7 @@ elev = rast(nrows = 6, ncols = 6, resolution = 0.5,
 The result is a raster object with 6 rows and 6 columns (specified by the `nrow` and `ncol` arguments), and a minimum and maximum spatial extent in x and y direction (`xmin`, `xmax`, `ymin`, `ymax`).
 The `vals` argument sets the values that each cell contains: numeric data ranging from 1 to 36 in this case.
 Raster objects can also contain categorical values of class `logical` or `factor` variables in R.
-The following code creates the raster datasets shown Figure \@ref(fig:cont-raster):
+The following code creates the raster datasets shown in Figure \@ref(fig:cont-raster):
 
 
 ```r
@@ -658,7 +658,7 @@ levels(grain)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="https://user-images.githubusercontent.com/1825120/146617366-7308535b-30f6-4c87-83f7-21702c7d993b.png" alt="Raster datasets with numeric (left) and categorical values (right)." width="100%" />
+<img src="03-attribute-operations_files/figure-html/cont-raster-1.png" alt="Raster datasets with numeric (left) and categorical values (right)." width="100%" />
 <p class="caption">(\#fig:cont-raster)Raster datasets with numeric (left) and categorical values (right).</p>
 </div>
 
