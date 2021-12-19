@@ -15,15 +15,13 @@ library(spDataLarge)
 
 ## Introduction
 
-The previous three chapters have demonstrated how geographic datasets are structured in R (Chapter \@ref(spatial-class)) and how to manipulate them based on their non-geographic attributes (Chapter \@ref(attr)) and spatial properties (Chapter \@ref(spatial-operations)).
-This chapter extends these skills.
-After reading it --- and attempting the exercises at the end --- you should understand and have control over the geometry column in `sf` objects and the geographic location of pixels represented in rasters.
+So far the book has explained the structure of geographic datasets (Chapter \@ref(spatial-class)), and how to manipulate them based on their non-geographic attributes (Chapter \@ref(attr)) and spatial relations (Chapter \@ref(spatial-operations)).
+This chapter focusses on manipulating the geographic elements of geographic objects, for example by simplifying and converting vector geometries, cropping raster datasets, and converting vector objects into rasters and from rasters into vectors.
+After reading it --- and attempting the exercises at the end --- you should understand and have control over the geometry column in `sf` objects and the extent and geographic location of pixels represented in rasters in relation to other geographic objects.
 
 Section \@ref(geo-vec) covers transforming vector geometries with 'unary' and 'binary' operations.
-Unary operations work on a single geometry in isolation.
-This includes simplification (of lines and polygons), the creation of buffers and centroids, and shifting/scaling/rotating single geometries using 'affine transformations' (Sections \@ref(simplification) to \@ref(affine-transformations)).
-Binary transformations modify one geometry based on the shape of another.
-This includes clipping and geometry unions\index{vector!union}, covered in Sections \@ref(clipping) and \@ref(geometry-unions), respectively.
+Unary operations work on a single geometry in isolation, including simplification (of lines and polygons), the creation of buffers and centroids, and shifting/scaling/rotating single geometries using 'affine transformations' (Sections \@ref(simplification) to \@ref(affine-transformations)).
+Binary transformations modify one geometry based on the shape of anothe, including clipping and geometry unions\index{vector!union}, covered in Sections \@ref(clipping) and \@ref(geometry-unions), respectively.
 Type transformations (from a polygon to a line, for example) are demonstrated in Section \@ref(type-trans).
 
 Section \@ref(geo-ras) covers geometric transformations on raster objects.
@@ -288,8 +286,8 @@ two overlapping circles with a center point one unit away from each other and a 
 ```r
 b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
 b = st_buffer(b, dist = 1) # convert points to circles
-plot(b)
-text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y")) # add text
+plot(b, border = "grey")
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3) # add text
 ```
 
 <div class="figure" style="text-align: center">
@@ -305,8 +303,8 @@ This can be done using the function `st_intersection()`\index{vector!intersectio
 x = b[1]
 y = b[2]
 x_and_y = st_intersection(x, y)
-plot(b)
-plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
+plot(b, border = "grey")
+plot(x_and_y, col = "lightgrey", border = "grey", add = TRUE) # color intersecting area
 ```
 
 <div class="figure" style="text-align: center">
@@ -321,9 +319,18 @@ The subsequent code chunk demonstrates how this works for all combinations of th
 <p class="caption">(\#fig:venn-clip)Spatial equivalents of logical operators.</p>
 </div>
 
-To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
+### Subsetting and clipping
+
+Clipping objects can change their geometry but it can also subset objects, returning only features that intersect (or partly intersect) with a clipping/subsetting object.
+To illustrate this point, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
 Some points will be inside just one circle, some will be inside both and some will be inside neither.
-`st_sample()` is used below to generate a *simple random* distribution of points within the extent of circles `x` and `y`, resulting in output illustrated in Figure \@ref(fig:venn-subset).
+`st_sample()` is used below to generate a *simple random* distribution of points within the extent of circles `x` and `y`, resulting in output illustrated in Figure \@ref(fig:venn-subset), raising the question: how to subset the points to only return the point that intersects with *both* `x` and `y`?
+
+<div class="figure" style="text-align: center">
+<img src="05-geometry-operations_files/figure-html/venn-subset-1.png" alt="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted." width="100%" />
+<p class="caption">(\#fig:venn-subset)Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted.</p>
+</div>
+
 
 
 ```r
@@ -331,33 +338,30 @@ bb = st_bbox(st_union(x, y))
 box = st_as_sfc(bb)
 set.seed(2017)
 p = st_sample(x = box, size = 10)
-plot(box)
-plot(x, add = TRUE)
-plot(y, add = TRUE)
-plot(p, add = TRUE)
-text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
+x_and_y = st_intersection(x, y)
 ```
 
-<div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/venn-subset-1.png" alt="Randomly distributed points within the bounding box enclosing circles x and y." width="50%" />
-<p class="caption">(\#fig:venn-subset)Randomly distributed points within the bounding box enclosing circles x and y.</p>
-</div>
-
-The logical operator way would find the points inside both `x` and `y` using a spatial predicate such as `st_intersects()`, whereas the intersection\index{vector!intersection} method simply finds the points inside the intersecting region created above as `x_and_y`.
-As demonstrated below the results are identical, but the method that uses the clipped polygon is more concise:
+The code chunk below demonstrates three ways to achieve the same result.
+We can use the intersection\index{vector!intersection} of `x` and `y` (represented by `x_and_y` in the previous code chunk) as a subsetting object directly, as shown in the first line in the code chunk below.
+We can also find the *intersection* between the input points represented by `p` and the subsetting/clipping object `x_and_y`, as demonstrated in the second line in the code chunk below.
+This second approach will return features that partly intersect with `x_and_y` but with modified geometries for spatially extensive features that cross the border of the subsetting object.
+The third approach is to create a subsetting object using the binary spatial predicate `st_intersects()`, introduced in the previous chapter.
+The results are identical (except superficial differences in attribute names), but the implementation differs substantially:
 
 
 ```r
+p_xy1 = p[x_and_y]
+p_xy2 = st_intersection(p, x_and_y)
 sel_p_xy = st_intersects(p, x, sparse = FALSE)[, 1] &
   st_intersects(p, y, sparse = FALSE)[, 1]
-p_xy1 = p[sel_p_xy]
-p_xy2 = p[x_and_y]
-identical(p_xy1, p_xy2)
-#> [1] TRUE
+p_xy3 = p[sel_p_xy]
 ```
 
 
 
+Although the example above is rather contrived and provided for educational rather than applied purposes, and we encourage the reader to reproduce the results to deepen your understanding for handling geographic vector objects in R, it raises an important question: which implementation to use?
+Generally, more concise implementations should be favored, meaning the first approach above.
+We will return to the question of choosing between different implementations of the same technique or algorithm in Chapter \@ref(algorithms).
 
 ### Geometry unions
 
@@ -715,7 +719,7 @@ If two rasters have different origins, their cells do not overlap completely whi
 To change the origin -- use `origin()`.^[
 If the origins of two raster datasets are just marginally apart, it sometimes is sufficient to simply increase the `tolerance` argument  of `terra::terraOptions()`.
 ]
-Looking at Figure \@ref(fig:origin-example) reveals the effect of changing the origin.
+Figure \@ref(fig:origin-example) reveals the effect of changing the origin in this way.
 
 
 ```r
