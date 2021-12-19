@@ -43,18 +43,27 @@ st_is_longlat(london_geo)
 ```
 
 Datasets without a specified CRS can cause problems.
-An example is provided below, which creates a buffer of one unit around `london` and `london_geo` objects (note that we temporarily 'switch off' the S2 geometry engine so that the `sf` package creates a buffer incorrectly assuming that units of degrees represent projected data):
+An example is provided below, which creates a buffer of one degree around `london` and a buffer of 100km (roughly the same distance at the equator where 1 degree is 111 km) around the `london_geo` object.
 
-```{r 06-reproj-4}
-london_buff_no_crs = st_buffer(london, dist = 1)
+```{r 06-reproj-4-1}
+london_buff_no_crs = st_buffer(london, dist = 1)   # incorrect: no CRS
+london_buff_s2 = st_buffer(london_geo, dist = 1e5) # silent use of s2
+london_buff_s2_100_cells = st_buffer(london_geo, dist = 1e5, max_cells = 100) 
+```
+
+In the first line above, `sf` assumes that the input is projected and generates a result that has a buffer in units of degrees, which is problematic, as we will see.
+In the second line, `sf` silently uses the spherical geometry engine S2, introduced in Chapter \@ref(spatial-class), to calculate the extent of the buffer using the default value of `max_cells = 1000` --- set to `100` in line three --- the consequences which will become apparent shortly (see `?s2::?s2_buffer_cells` for details).
+To highlight the impact of `sf`'s use of the S2 geometry engine for unprojected (geographic) coordinate systems, we will temporarily disable it with the command `sf_use_s2()` (which is on, `TRUE`, by default), in the code chunk below.
+Like `london_buff_no_crs`, the new `london_geo` object is a geographic abomination: it has units of degrees, which makes no sense in the vast majority of cases:
+
+```{r 06-reproj-4-2}
 sf::sf_use_s2(FALSE)
-london_buff = st_buffer(london_geo, dist = 1)
+london_buff_lonlat = st_buffer(london_geo, dist = 1) # incorrect result
 sf::sf_use_s2(TRUE)
 ```
 
-The results of the above code chunk show that, when spherical geometry operations are turned off, performing buffers (and other geometric operations) on unprojected datasets generate a warnings.
-The warning message is useful, telling us that the result may be of limited use because it is in units of latitude and longitude, rather than meters or some other suitable measure of distance assumed by `st_buffer()`.
-The consequences of a failure to work on projected data are illustrated in Figure \@ref(fig:crs-buf) (left panel):
+The results of the above code chunk show that, when spherical geometry operations are turned off, performing buffers (and other geometric operations) on unprojected datasets generate an important warning: the result of this operation may be of limited use because it is in units of latitude and longitude, rather than meters or some other suitable measure of distance.
+
 the buffer is elongated in the north-south direction because lines of longitude converge towards the Earth's poles.
 
 ```{block2 06-reproj-5, type="rmdnote"}
@@ -96,24 +105,27 @@ As pointed out above, moving one degree means moving a bit more than 111 km at t
 This is used as the new buffer distance:
 
 ```{r 06-reproj-8}
-london_proj_buff = st_buffer(london_proj, 111320)
+london_buff_projected = st_buffer(london_proj, 111320)
 ```
 
-The result in Figure \@ref(fig:crs-buf) (right panel) shows that buffers based on a projected CRS are not distorted:
-every part of the buffer's border is equidistant to London.
+The geometries of the three `london_buff*` objects that *have* a specified CRS created above (`london_buff_s2`, `london_buff_lonlat` and `london_buff_projected`) created in the preceding code chunks are illustrated in Figure \@ref(fig:crs-buf).
+It is clear from this figure that shows that buffers based on `s2` and properly projected CRSs are not distorted, meaning that every part of the buffer boundary is equidistant to London.
 
-```{r crs-buf, fig.cap="Buffers around London with a geographic (left) and projected (right) CRS. The gray outline represents the UK coastline.", fig.scap="Buffers around London with a geographic and projected CRS.",  fig.asp=1, fig.show='hold', out.width="45%", echo=FALSE}
+```{r crs-buf, fig.cap="Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot is the result of buffering lon/lat data with the default settings in sf which calls S2 spherical geometry engine by default and sets `max_cells` to 1000 (thin line) and with `max_cells` set to 100 (thick line). The gray outline represents the UK coastline.", fig.scap="Buffers around London with a geographic and projected CRS.",  fig.asp=1, fig.show='hold', out.width="33%", echo=FALSE}
 uk = rnaturalearth::ne_countries(scale = 50) %>% 
   st_as_sf() %>% 
   filter(grepl(pattern = "United Kingdom|Ire", x = name_long))
-plot(london_buff, graticule = st_crs(4326), axes = TRUE, reset = FALSE)
-plot(london_geo, add = TRUE)
+plot(london_buff_s2, graticule = st_crs(4326), axes = TRUE, reset = FALSE, lwd = 2)
+plot(london_buff_s2_100_cells, lwd = 9, add = TRUE)
 plot(st_geometry(uk), add = TRUE, border = "gray", lwd = 3)
 uk_proj = uk %>%
   st_transform(27700)
-plot(london_proj_buff, graticule = st_crs(27700), axes = TRUE, reset = FALSE)
+plot(london_buff_projected, graticule = st_crs(27700), axes = TRUE, reset = FALSE, lwd = 2)
 plot(london_proj, add = TRUE)
 plot(st_geometry(uk_proj), add = TRUE, border = "gray", lwd = 3)
+plot(london_buff_lonlat, graticule = st_crs(27700), axes = TRUE, reset = FALSE, lwd = 2)
+plot(london_proj, add = TRUE)
+plot(st_geometry(uk), add = TRUE, border = "gray", lwd = 3)
 ```
 
 The importance of CRSs (primarily whether they are projected or geographic) has been demonstrated using the example of London.
