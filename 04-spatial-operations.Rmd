@@ -152,9 +152,7 @@ The next section explores different types of spatial relation, also known as bin
 
 Topological relations describe the spatial relationships between objects.
 "Binary topological relationships", to give them their full name, are logical statements (in that the answer can only be `TRUE` or `FALSE`) about the spatial relationships between two objects defined by ordered sets of points (typically forming points, lines and polygons) in two or more dimensions [@egenhofer_mathematical_1990].
-That may sound rather abstract and, indeed, the definition and classification of topological relations is based on earlier mathematical foundations first published as a book in 1966 [@spanier_algebraic_1995].^[
-See @dieck_algebraic_2008 for an updated textbook teaching algebraic topology.
-]
+That may sound rather abstract and, indeed, the definition and classification of topological relations is based on mathematical foundations first published in book form in 1966 [@spanier_algebraic_1995], with the field of algebraic topology continuing into the 21^st^ century [@dieck_algebraic_2008].
 
 Despite their mathematical origins, topological relations can be understood intuitively with reference to visualizations of commonly used functions that test for common types of spatial relationships.
 Figure \@ref(fig:relations) shows a variety of geometry pairs and their associated relations.
@@ -165,31 +163,29 @@ The third and fourth pairs in Figure \@ref(fig:relations) (from left to right an
 # source("https://github.com/Robinlovelace/geocompr/raw/c4-v2-updates-rl/code/de_9im.R")
 source("code/de_9im.R")
 library(sf)
-p1 = st_sfc(st_polygon(list(rbind(c(0, 0), c(0, 1), c(1, 1), c(1, 0.5), c(0, 0)))))
-p2 = st_sfc(st_polygon(list(rbind(c(0, 0), c(1, 0), c(1, 0.5), c(0, 0)))))
-p3 = st_sfc(st_polygon(list(rbind(c(0, 0), c(1, 0), c(1, 0.7), c(0, 0)))))
-p4 = st_sfc(st_polygon(list(rbind(c(0.7, 0.8), c(0.7, 0.5), c(0.9, 0.5), c(0.7, 0.8)))))
-p5 = st_sfc(st_polygon(list(rbind(c(0.6, 0.7), c(0.7, 0.5), c(1, 0.5), c(0.6, 0.7)))))
-p6 = st_sfc(st_polygon(list(rbind(c(0.1, 0), c(1, 0), c(1, 0.3), c(0.1, 0)))))
-p7 = st_sfc(st_polygon(list(rbind(c(0.05, 0.4), c(0.05, 0.97), c(0.6, 0.97), c(0.5, 0.4), c(0.05, 0.4)))))
+xy2sfc = function(x, y) st_sfc(st_polygon(list(cbind(x, y))))
+p1 = xy2sfc(x = c(0, 0, 1, 1,   0), y = c(0, 1, 1, 0.5, 0))
+p2 = xy2sfc(x = c(0, 1, 1, 0), y = c(0, 0, 0.5, 0))
+p3 = xy2sfc(x = c(0, 1, 1, 0), y = c(0, 0, 0.7, 0))
+p4 = xy2sfc(x = c(0.7, 0.7, 0.9, 0.7), y = c(0.8, 0.5, 0.5, 0.8))
+p5 = xy2sfc(x = c(0.6, 0.7, 1, 0.6), y = c(0.7, 0.5, 0.5, 0.7))
+p6 = xy2sfc(x = c(0.1, 1, 1, 0.1), y = c(0, 0, 0.3, 0))
+p7 = xy2sfc(x = c(0.05, 0.05, 0.6, 0.5, 0.05), y = c(0.4, 0.97, 0.97, 0.4, 0.4))
 
 # todo: add 3 more with line/point relations?
 tmap::tmap_arrange(de_9im(p1, p2), de_9im(p1, p3), de_9im(p1, p4),
-                   de_9im(p7, p1), de_9im(p1, p5), de_9im(p1, p6))
+                   de_9im(p7, p1), de_9im(p1, p5), de_9im(p1, p6), nrow = 2)
 ```
 
 In `sf`, functions testing for different types of topological relations are called 'binary predicates', as described in the vignette *Manipulating Simple Feature Geometries*, which can be viewed with the command [`vignette("sf3")`](https://r-spatial.github.io/sf/articles/sf3.html), and in the help page [`?geos_binary_pred`](https://r-spatial.github.io/sf/reference/geos_binary_ops.html) [@pebesma_simple_2018].
 To see how topological relations work in practice, let's create a simple reproducible example, building on the relations illustrated in Figure \@ref(fig:relations) and consolidating knowledge of how vector geometries are represented from a previous chapter (Section \@ref(geometry)).
-Note that to create tabular data representing coordinates (x and y) of the polygon vertices, we use the base R function `read.csv()` and then convert the result into a matrix, a `POLYGON` and finally an `sfc` object:
+Note that to create tabular data representing coordinates (x and y) of the polygon vertices, we use the base R function `cbind()` to create a matrix representing coordinates points, a `POLYGON`, and finally an `sfc` object, as described in Chapter \@ref(spatial-class):
 
 ```{r}
-polygon_df = read.csv(text = "x, y
-0, 0.0
-0, 1.0
-1, 1.0
-1, 0.5
-0, 0.0")
-polygon_matrix = as.matrix(polygon_df)
+polygon_matrix = cbind(
+  x = c(0, 0, 1, 1,   0),
+  y = c(0, 1, 1, 0.5, 0)
+)
 polygon = st_polygon(list(polygon_matrix))
 polygon_sfc = st_sfc(polygon)
 ```
@@ -198,16 +194,15 @@ We will create additional geometries to demonstrate spatial relations with the f
 Note the use of the function `st_as_sf()` and the argument `coords` to efficiently convert from a data frame containing columns representing coordinates to an `sf` object containing points:
 
 ```{r}
-line_df = read.csv(text = "x,y
-0.1, 0
-1, 0.1")
-line = st_linestring(x = as.matrix(line_df))
-line_sfc = st_sfc(line)
+line_sfc = st_sfc(st_linestring(cbind(
+  x = c(0.1, 1),
+  y = c(0,   0.1)
+)))
 # create points
-point_df = read.csv(text = "x,y
-0.1,0
-0.7,0.2
-0.4,0.8")
+point_df = data.frame(
+  x = c(0.1, 0.7, 0.4),
+  y = c(0.0, 0.2, 0.8)
+)
 point_sf = st_as_sf(point_df, coords = c("x", "y"))
 ```
 
@@ -376,7 +371,7 @@ The starting point is to create points that are randomly scattered over the Eart
 ```{r 04-spatial-operations-19}
 set.seed(2018) # set seed for reproducibility
 (bb = st_bbox(world)) # the world's bounds
-random_df = tibble(
+random_df = data.frame(
   x = runif(n = 10, min = bb[1], max = bb[3]),
   y = runif(n = 10, min = bb[2], max = bb[4])
 )
@@ -710,7 +705,7 @@ The term 'map algebra' was coined in the late 1970s to describe a "set of conven
 <!-- Although the concept never became widely adopted, the term usefully encapsulates and helps classify the range operations that can be undertaken on raster datasets. -->
 In this context, we define map algebra more narrowly, as operations that modify or summarise raster cell values, with reference to surrounding cells, zones, or statistical functions that apply to every cell.
 
-Map algebra operations tend to be fast, because raster datasets only implicitly store coordinates (hence the oversimplifying phrase "raster is faster but vector is corrector").
+Map algebra operations tend to be fast, because raster datasets only implicitly store coordinates, hence the [old adage](https://geozoneblog.wordpress.com/2013/04/19/raster-vs-vector/) "raster is faster but vector is corrector".
 The location of cells in raster datasets can be calculated it using its matrix position and the resolution and origin of the dataset (stored in the header).
 For the processing, however, the geographic position of a cell is barely relevant as long as we make sure that the cell position is still the same after the processing.
 Additionally, if two or more raster datasets share the same extent, projection and resolution, one could treat them as matrices for the processing.
