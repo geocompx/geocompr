@@ -17,13 +17,12 @@ library(spDataLarge)
 Section \@ref(crs-intro) introduced coordinate reference systems (CRSs) and demonstrated their importance.
 This chapter goes further.
 It highlights issues that can arise when using inappropriate CRSs and how to *transform* data from one CRS to another.
-
 \index{CRS!geographic} 
 \index{CRS!projected} 
-As illustrated in Figure \@ref(fig:vectorplots), there are two types of CRSs: *geographic* ('lon/lat', with units in degrees longitude and latitude) and *projected* (typically with units of meters from a datum).
+As illustrated in Figure \@ref(fig:vectorplots) from that earlier chapter, there are two types of CRSs: *geographic* ('lon/lat', with units in degrees longitude and latitude) and *projected* (typically with units of meters from a datum).
 This has consequences.
 To check if our data has geographic CRS, we can use `sf::st_is_longlat()` for vector data and `terra::is.lonlat()` for raster data.
-In some cases the CRS is unknown, as shown below using the example of London introduced in Section \@ref(vector-data):
+In some cases the CRS is unknown, as is the case in the `london` dataset created in the code chunk below, building on the example of London introduced in Section \@ref(vector-data):
 
 ```{r 06-reproj-2}
 london = data.frame(lon = -0.1, lat = 51.5) %>% 
@@ -31,7 +30,7 @@ london = data.frame(lon = -0.1, lat = 51.5) %>%
 st_is_longlat(london)
 ```
 
-This shows that unless a CRS is manually specified or is loaded from a source that has CRS metadata, the CRS is `NA`.
+The output `NA` shows, that unless a CRS is manually specified or is loaded from a source that has CRS metadata, `sf` does not assume a CRS (unlike the GeoJSON specification which assumes coordinates have a lon/lat CRS: EPSG:4326).
 A CRS can be added to `sf` objects with `st_set_crs()` as follows:^[
 The CRS can also be added when creating `sf` objects with the `crs` argument (e.g., `st_sf(geometry = st_sfc(st_point(c(-0.1, 51.5))), crs = "EPSG:4326")`).
 The same argument can also be used to set the CRS when creating raster datasets (e.g., `rast(crs = "EPSG:4326")`).
@@ -43,7 +42,16 @@ st_is_longlat(london_geo)
 ```
 
 Datasets without a specified CRS can cause problems.
-An example is provided below, which creates a buffer of one degree around `london` and a buffer of 100km (roughly the same distance at the equator where 1 degree is 111 km) around the `london_geo` object.
+<!-- Todo: add s2 section -->
+Since `sf` version 1.0.0, R's ability to work with datasets that have lon/lat CRSs has improved substantially, thanks to its integration with the S2 geometry engine introduced in Section \@(s2).
+However, CRSs and transforming between them is still important.
+In this section we will demonstrate the importance of CRSs, and the impacts of using the S2 library, before moving on to the question of when to reproject in Section \@ref(whenproject) and techniques for reprojecting vector and raster objects in the remainder of the chapter. 
+
+The example used in this introductory section is to create a buffer of 100 km around `london`.
+We will also create a deliberately faulty buffer with a 'distance' of 1 degree, which is roughly equvalent to 100 km (1 degree is 111 km at the equator).
+Before diving into the code, it may be worth skipping briefly ahead to peek at Figure \@ref(crs-buf) to get a visual handle on the outputs that you should be able to reproduce by following the code chunks below.
+
+The first stage is to create three buffers around the `london` and `london_geo` objects created above:
 
 ```{r 06-reproj-4-1}
 london_buff_no_crs = st_buffer(london, dist = 1)   # incorrect: no CRS
@@ -131,7 +139,7 @@ plot(st_geometry(uk), add = TRUE, border = "gray", lwd = 3)
 The importance of CRSs (primarily whether they are projected or geographic) has been demonstrated using the example of London.
 The subsequent sections go into more depth, exploring which CRS to use and the details of reprojecting vector and raster objects.
 
-## When to reproject?
+## When to reproject? {#whenproject}
 
 \index{CRS!reprojection} 
 The previous section showed how to set the CRS manually, with `st_set_crs(london, "EPSG:4326")`.
