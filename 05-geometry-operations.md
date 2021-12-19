@@ -724,7 +724,7 @@ origin(elev_4) = c(0.25, 0.25)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="https://user-images.githubusercontent.com/1825120/146618199-786fe3ad-9718-4dd0-a640-41180fc17e63.png" alt="Rasters with identical values but different origins." width="100%" />
+<img src="05-geometry-operations_files/figure-html/origin-example-1.png" alt="Rasters with identical values but different origins." width="100%" />
 <p class="caption">(\#fig:origin-example)Rasters with identical values but different origins.</p>
 </div>
 
