@@ -48,10 +48,10 @@ However, CRSs and transforming between them is still important.
 In this section we will demonstrate the importance of CRSs, and the impacts of using the S2 library, before moving on to the question of when to reproject in Section \@ref(whenproject) and techniques for reprojecting vector and raster objects in the remainder of the chapter. 
 
 The example used in this introductory section is to create a buffer of 100 km around `london`.
-We will also create a deliberately faulty buffer with a 'distance' of 1 degree, which is roughly equvalent to 100 km (1 degree is 111 km at the equator).
-Before diving into the code, it may be worth skipping briefly ahead to peek at Figure \@ref(crs-buf) to get a visual handle on the outputs that you should be able to reproduce by following the code chunks below.
+We will also create a deliberately faulty buffer with a 'distance' of 1 degree, which is roughly equivalent to 100 km (1 degree is 111 km at the equator).
+Before diving into the code, it may be worth skipping briefly ahead to peek at Figure \@ref(fig:crs-buf) to get a visual handle on the outputs that you should be able to reproduce by following the code chunks below.
 
-The first stage is to create three buffers around the `london` and `london_geo` objects created above:
+The first stage is to create three buffers around the `london` and `london_geo` objects created above with boundary distances of 1 degree and 100 km  (or 100,000 m, which can be expressed as `1e5` in scientific notation) from central London:
 
 ```{r 06-reproj-4-1}
 london_buff_no_crs = st_buffer(london, dist = 1)   # incorrect: no CRS
@@ -109,15 +109,13 @@ http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/ and information 
 Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj.
 ]
 The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: `st_is_longlat(london_proj)` now returns `FALSE` and geometry operations on `london_proj` will work without a warning, meaning buffers can be produced from it using proper units of distance.
-As pointed out above, moving one degree means moving a bit more than 111 km at the equator (to be precise: 111,320 meters).
-This is used as the new buffer distance:
+The following line of code creates a buffer around *projected* data of exactly 100 km:
 
 ```{r 06-reproj-8}
-london_buff_projected = st_buffer(london_proj, 111320)
+london_buff_projected = st_buffer(london_proj, 1e5)
 ```
 
 The geometries of the three `london_buff*` objects that *have* a specified CRS created above (`london_buff_s2`, `london_buff_lonlat` and `london_buff_projected`) created in the preceding code chunks are illustrated in Figure \@ref(fig:crs-buf).
-It is clear from this figure that shows that buffers based on `s2` and properly projected CRSs are not distorted, meaning that every part of the buffer boundary is equidistant to London.
 
 ```{r crs-buf, fig.cap="Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot is the result of buffering lon/lat data with the default settings in sf which calls S2 spherical geometry engine by default and sets `max_cells` to 1000 (thin line) and with `max_cells` set to 100 (thick line). The gray outline represents the UK coastline.", fig.scap="Buffers around London with a geographic and projected CRS.",  fig.asp=1, fig.show='hold', out.width="33%", echo=FALSE}
 uk = rnaturalearth::ne_countries(scale = 50) %>% 
@@ -136,8 +134,15 @@ plot(london_proj, add = TRUE)
 plot(st_geometry(uk), add = TRUE, border = "gray", lwd = 3)
 ```
 
-The importance of CRSs (primarily whether they are projected or geographic) has been demonstrated using the example of London.
-The subsequent sections go into more depth, exploring which CRS to use and the details of reprojecting vector and raster objects.
+It is clear from Figure \@ref(fig:crs-buf) that buffers based on `s2` and properly projected CRSs are not 'squashed', meaning that every part of the buffer boundary is equidistant to London.
+The results that are generated from lon/lat CRSs when `s2` is *not* used, either because the input lacks a CRS or because `sf_use_s2()` is turned off, are heavily distorted, with the result elongated in the north-south axis, highlighting the dangers of using algorithms that assume projected data on lon/lat inputs (as GEOS does).
+The results generated using S2 are also distorted, however, although less dramatically.
+Both buffer boundaries in Figure \@ref(fig:crs-buf) (left) are jagged, although this may only be apparent or relevant when for the thick boundary representing a buffer created with the `s2` argument `max_cells` set to 100.
+The less is that results obtained from lon/lat data via `s2` will be different from results obtained from using projected data, although these differences reduce as the value of `max_cells` increases: the 'right' value for this argument may depend on many factors and the default value 1000 is a reasonable default, balancing speed of computation against resolution of results, in many cases.
+In situations where curved boundaries are advantageous, transforming to a projected CRS before buffering (or performing other geometry operations) may be appropriate
+
+The importance of CRSs (primarily whether they are projected or geographic) and the impacts of `sf`'s default setting to use S2 for buffers on lon/lat data is clear from the example above.
+The subsequent sections go into more depth, exploring which CRS to use when projected CRSs *are* needed and the details of reprojecting vector and raster objects.
 
 ## When to reproject? {#whenproject}
 
