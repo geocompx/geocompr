@@ -345,10 +345,10 @@ This projection is used, among others, by the National Geographic Society.
 world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 ```
 
-
-```
-#> Error in tm_shape(world_wintri_gr): could not find function "tm_shape"
-```
+<div class="figure" style="text-align: center">
+<img src="06-reproj_files/figure-html/wintriproj-1.png" alt="Winkel tripel projection of the world." width="100%" />
+<p class="caption">(\#fig:wintriproj)Winkel tripel projection of the world.</p>
+</div>
 
 
 
