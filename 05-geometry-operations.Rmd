@@ -326,7 +326,7 @@ text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3) # add text
 Imagine you want to select not one circle or the other, but the space covered by both `x` *and* `y`.
 This can be done using the function `st_intersection()`\index{vector!intersection}, illustrated using objects named `x` and `y` which represent the left- and right-hand circles (Figure \@ref(fig:circle-intersection)).
 
-```{r circle-intersection, fig.cap="Overlapping circles with a gray color indicating intersection between them.", fig.asp=1, out.width="50%", , fig.scap="Overlapping circles showing intersection types."}
+```{r circle-intersection, fig.cap="Overlapping circles with a gray color indicating intersection between them.", fig.asp=1, out.width="50%", fig.scap="Overlapping circles showing intersection types."}
 x = b[1]
 y = b[2]
 x_and_y = st_intersection(x, y)
@@ -337,45 +337,73 @@ plot(x_and_y, col = "lightgrey", border = "grey", add = TRUE) # color intersecti
 The subsequent code chunk demonstrates how this works for all combinations of the 'Venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book *R for Data Science* [@grolemund_r_2016].
 
 ```{r venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators.", warning=FALSE}
-# source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-venn-clip.R")
-source("code/05-venn-clip.R")
-
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-venn-clip.R")
+# source("code/05-venn-clip.R") # for testing local version, todo: remove or change
 ```
 
-To illustrate the relationship between subsetting and clipping spatial data, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
-Some points will be inside just one circle, some will be inside both and some will be inside neither.
-`st_sample()` is used below to generate a *simple random* distribution of points within the extent of circles `x` and `y`, resulting in output illustrated in Figure \@ref(fig:venn-subset).
+### Subsetting and clipping
 
-```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y.", out.width="50%", fig.asp=1, fig.scap="Randomly distributed points within the bounding box."}
+Clipping objects can change their geometry but it can also subset objects, returning only features that intersect (or partly intersect) with a clipping/subsetting object.
+To illustrate this point, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
+Some points will be inside just one circle, some will be inside both and some will be inside neither.
+`st_sample()` is used below to generate a *simple random* distribution of points within the extent of circles `x` and `y`, resulting in output illustrated in Figure \@ref(fig:venn-subset), raising the question: how to subset the points to only return the point that intersects with *both* `x` and `y`?
+
+```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted.", fig.height=6, fig.width=9, fig.asp=0.6, fig.scap="Randomly distributed points within the bounding box. Note that only one point intersects with both x and y, highlighted with a red circle.", echo=FALSE}
 bb = st_bbox(st_union(x, y))
 box = st_as_sfc(bb)
 set.seed(2017)
 p = st_sample(x = box, size = 10)
-plot(box)
-plot(x, add = TRUE)
-plot(y, add = TRUE)
+p_xy1 = p[x_and_y]
+plot(box, border = "grey", lty = 2)
+plot(x, add = TRUE, border = "grey")
+plot(y, add = TRUE, border = "grey")
 plot(p, add = TRUE)
-text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"))
+plot(p_xy1, cex = 3, col = "red", add = TRUE)
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 2)
 ```
 
-The logical operator way would find the points inside both `x` and `y` using a spatial predicate such as `st_intersects()`, whereas the intersection\index{vector!intersection} method simply finds the points inside the intersecting region created above as `x_and_y`.
-As demonstrated below the results are identical, but the method that uses the clipped polygon is more concise:
+
+```{r venn-subset-to-show, eval=FALSE}
+bb = st_bbox(st_union(x, y))
+box = st_as_sfc(bb)
+set.seed(2017)
+p = st_sample(x = box, size = 10)
+x_and_y = st_intersection(x, y)
+```
+
+The code chunk below demonstrates three ways to achieve the same result.
+We can use the intersection\index{vector!intersection} of `x` and `y` (represented by `x_and_y` in the previous code chunk) as a subsetting object directly, as shown in the first line in the code chunk below.
+We can also find the *intersection* between the input points represented by `p` and the subsetting/clipping object `x_and_y`, as demonstrated in the second line in the code chunk below.
+This second approach will return features that partly intersect with `x_and_y` but with modified geometries for spatially extensive features that cross the border of the subsetting object.
+The third approach is to create a subsetting object using the binary spatial predicate `st_intersects()`, introduced in the previous chapter.
+The results are identical (except superficial differences in attribute names), but the implementation differs substantially:
 
 ```{r 05-geometry-operations-21}
+p_xy1 = p[x_and_y]
+p_xy2 = st_intersection(p, x_and_y)
 sel_p_xy = st_intersects(p, x, sparse = FALSE)[, 1] &
   st_intersects(p, y, sparse = FALSE)[, 1]
-p_xy1 = p[sel_p_xy]
-p_xy2 = p[x_and_y]
-identical(p_xy1, p_xy2)
+p_xy3 = p[sel_p_xy]
 ```
 
-
 ```{r 05-geometry-operations-22, echo=FALSE, eval=FALSE}
+# test if objects are identical:
+identical(p_xy1, p_xy2)
+identical(p_xy2, p_xy3)
+identical(p_xy1, p_xy3)
+waldo::compare(p_xy1, p_xy2) # the same except attribute names
+waldo::compare(p_xy2, p_xy3) # the same except attribute names
+
+
 # An alternative way to sample from the bb
 bb = st_bbox(st_union(x, y))
 pmulti = st_multipoint(pmat)
 box = st_convex_hull(pmulti)
 ```
+
+Although the example above is rather contrived and provided for educational rather than applied purposes, and we encourage the reader to reproduce the results to deepen your understanding for handling geographic vector objects in R, it raises an important question: which implementation to use?
+Generally, more concise implementations should be favored, meaning the first approach above.
+We will return to the question of choosing between different implementations of the same technique or algorithm in Chapter \@ref(algorithms).
 
 ### Geometry unions
 
