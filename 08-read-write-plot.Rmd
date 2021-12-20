@@ -181,10 +181,28 @@ The last example, `system.file("shapes/world.gpkg", package = "spData")`, return
 
 \index{geocoding}
 Another way to obtain spatial information is to perform geocoding -- transform a description of a location, usually an address, into its coordinates.
-<!-- Geocoding  -->
-Several packages for geocoding exist in R; however **tidygeocoder** seems to allow to connect to [the largest number of geocoding services](https://jessecambon.github.io/tidygeocoder/articles/geocoder_services.html)
-<!--more-->
-This package also allows to perform the opposite process called reverse geocoding used to get a set of information (name, address, etc.) based on a pair of coordinates.
+This is usually done by sending a query to an online service and getting the location as a result.
+Many such services exist that differ in the used method of geocoding, usage limitations, costs, or API key requirements. 
+R has several packages for geocoding; however, **tidygeocoder** seems to allow to connect to [the largest number of geocoding services](https://jessecambon.github.io/tidygeocoder/articles/geocoder_services.html) with a consistent interface.
+The **tidygeocoder** main function is `geocode`, which takes a data frame with addresses and adds coordinates as `"lat"` and `"long"`.
+This function also allows to select a geocoding service with the `method` argument and has many additional parameters.
+
+The example below searches for John Snow blue plaque coordinates located on a building in the Soho district of London.
+
+```{r, eval=FALSE}
+library(tidygeocoder)
+geo_df = data.frame(address = "54 Frith St, London W1D 4SJ, United Kingdom")
+geo_df = geocode(df, address, method = "osm")
+geo_df
+```
+
+The resulting data frame can be converted into an `sf` object with `st_as_sf()`.
+
+```{r, eval=FALSE}
+geo_sf = st_as_sf(geo_df, coords = c("lat", "long"), crs = "EPSG:4326")
+```
+
+This package also allows performing the opposite process called reverse geocoding used to get a set of information (name, address, etc.) based on a pair of coordinates.
 <!-- https://github.com/jessecambon/tidygeocoder -->
 
 <!--toDo:jn-->
