@@ -1,29 +1,88 @@
 
-E1. List and describe three types of vector, raster, and geodatabase formats.
-
-E2. Name at least two differences between `read_sf()` and the more well-known function `st_read()`.
-
-E3. Read the `cycle_hire_xy.csv` file from the **spData** package as a spatial object (Hint: it is located in the `misc` folder).
-What is a geometry type of the loaded object? 
-
-E4. Download the borders of Germany using **rnaturalearth**, and create a new object called `germany_borders`.
-Write this new object to a file of the GeoPackage format.
-
-E5. Download the global monthly minimum temperature with a spatial resolution of five minutes using the **geodata** package.
-Extract the June values, and save them to a file named `tmin_june.tif` file (hint: use `terra::subset()`).
-
 ```{r}
-library(geodata)
-gmmt = worldclim_global(var = "tmin", res = 5, path = tempdir())
-names(gmmt)
-plot(gmmt)
-
-gmmt_june = terra::subset(gmmt, "wc2.1_5m_tmin_06")
-plot(gmmt_june)
-writeRaster(gmmt_june, "tmin_june.tif")
+library(terra)
 ```
 
-E6. Create a static map of Germany's borders, and save it to a PNG file.
 
-E7. Create an interactive map using data from the `cycle_hire_xy.csv` file. 
-Export this map to a file called `cycle_hire.html`.
+E1. Create a new object called `nz_wgs` by transforming `nz` object into the WGS84 CRS.
+
+- Create an object of class `crs` for both and use this to query their CRSs.
+- With reference to the bounding box of each object, what units does each CRS use?
+- Remove the CRS from `nz_wgs` and plot the result: what is wrong with this map of New Zealand and why?
+
+```{r 06-reproj-36, eval=FALSE}
+st_crs(nz)
+nz_wgs = st_transform(nz, "EPSG:4326")
+nz_crs = st_crs(nz)
+nz_wgs_crs = st_crs(nz_wgs)
+nz_crs$epsg
+nz_wgs_crs$epsg
+st_bbox(nz)
+st_bbox(nz_wgs)
+nz_wgs_NULL_crs = st_set_crs(nz_wgs, NA)
+nz_27700 = st_transform(nz_wgs, "EPSG:27700")
+par(mfrow = c(1, 3))
+plot(st_geometry(nz))
+plot(st_geometry(nz_wgs))
+plot(st_geometry(nz_wgs_NULL_crs))
+# answer: it is fatter in the East-West direction
+# because New Zealand is close to the South Pole and meridians converge there
+plot(st_geometry(nz_27700))
+par(mfrow = c(1, 1))
+```
+
+E2. Transform the `world` dataset to the transverse Mercator projection (`"+proj=tmerc"`) and plot the result.
+What has changed and why?
+Try to transform it back into WGS 84 and plot the new object.
+Why does the new object differ from the original one?
+
+```{r 06-reproj-37, eval=FALSE}
+# see https://github.com/r-spatial/sf/issues/509
+world_tmerc = st_transform(world, "+proj=tmerc")
+plot(st_geometry(world_tmerc))
+world_4326 = st_transform(world_tmerc, "EPSG:4326")
+plot(st_geometry(world_4326))
+```
+
+E3. Transform the continuous raster (`con_raster`) into NAD83 / UTM zone 12N using the nearest neighbor interpolation method.
+What has changed?
+How does it influence the results?
+
+```{r 06-reproj-38}
+con_raster = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
+con_raster_utm12n = project(con_raster, "EPSG:32612", method = "near")
+con_raster_utm12n
+
+plot(con_raster)
+plot(con_raster_utm12n)
+```
+
+E4. Transform the categorical raster (`cat_raster`) into WGS 84 using the bilinear interpolation method.
+What has changed?
+How does it influence the results?
+
+```{r 06-reproj-39}
+cat_raster = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
+cat_raster_wgs84 = project(cat_raster, "EPSG:4326", method = "bilinear")
+cat_raster_wgs84
+
+plot(cat_raster)
+plot(cat_raster_wgs84)
+```
+
+<!--toDo:jn-->
+<!--improve/replace/modify the following q-->
+<!-- E5. Create your own `proj4string`.  -->
+<!-- It should have the Lambert Azimuthal Equal Area (`laea`) projection, the WGS84 ellipsoid, the longitude of projection center of 95 degrees west, the latitude of projection center of 60 degrees north, and its units should be in meters. -->
+<!-- Next, subset Canada from the `world` object and transform it into the new projection.  -->
+<!-- Plot and compare a map before and after the transformation. -->
+
+<!-- ```{r 06-reproj-40} -->
+<!-- new_p4s = "+proj=laea +ellps=WGS84 +lon_0=-95 +lat_0=60 +units=m" -->
+<!-- canada = dplyr::filter(world, name_long == "Canada") -->
+<!-- new_canada = st_transform(canada, new_p4s) -->
+<!-- par(mfrow = c(1, 2)) -->
+<!-- plot(st_geometry(canada), graticule = TRUE, axes = TRUE) -->
+<!-- plot(st_geometry(new_canada), graticule = TRUE, axes = TRUE) -->
+<!-- ``` -->
+

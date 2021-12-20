@@ -1,88 +1,134 @@
 
-```{r}
+Some of the exercises use a vector (`zion_points`) and raster dataset (`srtm`) from the **spDataLarge** package.
+They also use a polygonal 'convex hull' derived from the vector dataset (`ch`) to represent the area of interest:
+
+```{r 05-geometry-operations-68, message=FALSE, include=TRUE}
+library(sf)
 library(terra)
+library(spData)
+zion_points = read_sf(system.file("vector/zion_points.gpkg", package = "spDataLarge"))
+srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
+ch = st_combine(zion_points) %>%
+  st_convex_hull() %>% 
+  st_as_sf()
 ```
 
+E1. Crop the `srtm` raster using (1) the `zion_points` dataset and (2) the `ch` dataset.
+Are there any differences in the output maps?
+Next, mask `srtm` using these two datasets.
+Can you see any difference now?
+How can you explain that?
 
-E1. Create a new object called `nz_wgs` by transforming `nz` object into the WGS84 CRS.
+```{r 05-geometry-operations-75}
+plot(srtm)
+plot(st_geometry(zion_points), add = TRUE)
+plot(ch, add = TRUE)
 
-- Create an object of class `crs` for both and use this to query their CRSs.
-- With reference to the bounding box of each object, what units does each CRS use?
-- Remove the CRS from `nz_wgs` and plot the result: what is wrong with this map of New Zealand and why?
+srtm_crop1 = crop(srtm, vect(zion_points))
+srtm_crop2 = crop(srtm, vect(ch))
+plot(srtm_crop1)
+plot(srtm_crop2)
 
-```{r 06-reproj-36, eval=FALSE}
-st_crs(nz)
-nz_wgs = st_transform(nz, "EPSG:4326")
-nz_crs = st_crs(nz)
-nz_wgs_crs = st_crs(nz_wgs)
-nz_crs$epsg
-nz_wgs_crs$epsg
-st_bbox(nz)
-st_bbox(nz_wgs)
-nz_wgs_NULL_crs = st_set_crs(nz_wgs, NA)
-nz_27700 = st_transform(nz_wgs, "EPSG:27700")
-par(mfrow = c(1, 3))
-plot(st_geometry(nz))
-plot(st_geometry(nz_wgs))
-plot(st_geometry(nz_wgs_NULL_crs))
-# answer: it is fatter in the East-West direction
-# because New Zealand is close to the South Pole and meridians converge there
-plot(st_geometry(nz_27700))
-par(mfrow = c(1, 1))
+srtm_mask1 = mask(srtm, vect(zion_points))
+srtm_mask2 = mask(srtm, vect(ch))
+plot(srtm_mask1)
+plot(srtm_mask2)
 ```
 
-E2. Transform the `world` dataset to the transverse Mercator projection (`"+proj=tmerc"`) and plot the result.
-What has changed and why?
-Try to transform it back into WGS 84 and plot the new object.
-Why does the new object differ from the original one?
+E2. Firstly, extract values from `srtm` at the points represented in `zion_points`.
+Next, extract average values of `srtm` using a 90 buffer around each point from `zion_points` and compare these two sets of values. 
+When would extracting values by buffers be more suitable than by points alone?
 
-```{r 06-reproj-37, eval=FALSE}
-# see https://github.com/r-spatial/sf/issues/509
-world_tmerc = st_transform(world, "+proj=tmerc")
-plot(st_geometry(world_tmerc))
-world_4326 = st_transform(world_tmerc, "EPSG:4326")
-plot(st_geometry(world_4326))
+```{r 05-geometry-operations-76}
+zion_points_buf = st_buffer(zion_points, dist = 90)
+plot(srtm)
+plot(st_geometry(zion_points_buf), add = TRUE)
+plot(ch, add = TRUE)
+
+zion_points_points = extract(srtm, vect(zion_points))
+zion_points_buf = extract(srtm, vect(zion_points_buf))
+plot(zion_points_points$srtm, zion_points_buf$srtm2)
 ```
 
-E3. Transform the continuous raster (`con_raster`) into NAD83 / UTM zone 12N using the nearest neighbor interpolation method.
-What has changed?
-How does it influence the results?
+E3. Subset points higher than 3100 meters in New Zealand (the `nz_height` object) and create a template raster with a resolution of 3 km for the extent of the new point dataset. 
+Using these two new objects:
 
-```{r 06-reproj-38}
-con_raster = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
-con_raster_utm12n = project(con_raster, "EPSG:32612", method = "near")
-con_raster_utm12n
+- Count numbers of the highest points in each grid cell.
+- Find the maximum elevation in each grid cell.
 
-plot(con_raster)
-plot(con_raster_utm12n)
+```{r 05-geometry-operations-77}
+nz_height3100 = dplyr::filter(nz_height, elevation > 3100)
+new_graticule = st_graticule(nz_height3100, datum = "EPSG:2193")
+plot(st_geometry(nz_height3100), graticule = new_graticule, axes = TRUE)
+
+nz_template = rast(ext(nz_height3100), resolution = 3000, crs = crs(nz_height3100))
+
+nz_raster = rasterize(vect(nz_height3100), nz_template, 
+                       field = "elevation", fun = "length")
+plot(nz_raster)
+plot(st_geometry(nz_height3100), add = TRUE)
+
+nz_raster2 = rasterize(vect(nz_height3100), nz_template, 
+                       field = "elevation", fun = max)
+plot(nz_raster2)
+plot(st_geometry(nz_height3100), add = TRUE)
 ```
 
-E4. Transform the categorical raster (`cat_raster`) into WGS 84 using the bilinear interpolation method.
-What has changed?
-How does it influence the results?
+E4. Aggregate the raster counting high points in New Zealand (created in the previous exercise), reduce its geographic resolution by half (so cells are 6 by 6 km) and plot the result.
 
-```{r 06-reproj-39}
-cat_raster = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
-cat_raster_wgs84 = project(cat_raster, "EPSG:4326", method = "bilinear")
-cat_raster_wgs84
+- Resample the lower resolution raster back to the original resolution of 3 km. How have the results changed?
+- Name two advantages and disadvantages of reducing raster resolution.
 
-plot(cat_raster)
-plot(cat_raster_wgs84)
+```{r 05-geometry-operations-78}
+nz_raster_low = raster::aggregate(nz_raster, fact = 2, fun = sum, na.rm = TRUE)
+res(nz_raster_low)
+
+nz_resample = resample(nz_raster_low, nz_raster)
+plot(nz_raster_low)
+plot(nz_resample) # the results are spread over a greater area and there are border issues
+plot(nz_raster)
 ```
 
-<!--toDo:jn-->
-<!--improve/replace/modify the following q-->
-<!-- E5. Create your own `proj4string`.  -->
-<!-- It should have the Lambert Azimuthal Equal Area (`laea`) projection, the WGS84 ellipsoid, the longitude of projection center of 95 degrees west, the latitude of projection center of 60 degrees north, and its units should be in meters. -->
-<!-- Next, subset Canada from the `world` object and transform it into the new projection.  -->
-<!-- Plot and compare a map before and after the transformation. -->
+```{asis}
+Advantages:
 
-<!-- ```{r 06-reproj-40} -->
-<!-- new_p4s = "+proj=laea +ellps=WGS84 +lon_0=-95 +lat_0=60 +units=m" -->
-<!-- canada = dplyr::filter(world, name_long == "Canada") -->
-<!-- new_canada = st_transform(canada, new_p4s) -->
-<!-- par(mfrow = c(1, 2)) -->
-<!-- plot(st_geometry(canada), graticule = TRUE, axes = TRUE) -->
-<!-- plot(st_geometry(new_canada), graticule = TRUE, axes = TRUE) -->
-<!-- ``` -->
+- lower memory use
+- faster processing
+- good for viz in some cases
+
+Disadvantages:
+
+- removes geographic detail
+- adds another processing step
+```
+
+E5. Polygonize the `grain` dataset and filter all squares representing clay.
+
+```{r}
+grain = rast(system.file("raster/grain.tif", package = "spData"))
+```
+
+- Name two advantages and disadvantages of vector data over raster data.
+- When would it be useful to convert rasters to vectors in your work?
+
+```{r 05-geometry-operations-79}
+grain_poly = as.polygons(grain) %>% 
+  st_as_sf()
+levels(grain)
+clay = dplyr::filter(grain_poly, grain == "clay")
+plot(clay)
+```
+
+```{asis}
+Advantages: 
+
+- can be used to subset other vector objects
+- can do affine transformations and use sf/dplyr verbs
+
+Disadvantages: 
+
+- better consistency
+- fast processing on some operations
+- functions developed for some domains
+```
 
