@@ -252,15 +252,16 @@ Map servers such as PostGIS have adopted these protocols, leading to standardiza
 Like other web APIs, OWS APIs use a 'base URL', an 'endpoint' and 'URL query arguments' following a `?` to request data (see the [`best-practices-api-packages`](https://httr.r-lib.org/articles/api-packages.html) vignette in the **httr** package).
 
 There are many requests that can be made to a OWS service.
-One of the most fundamental is `getCapabilities`, demonstrated with **httr** below.
+One of the most fundamental is `getCapabilities`, demonstrated with **httr** functions `GET()` and `modify_url()` below.
 The code chunk demonstrates how API\index{API} queries can be constructed and dispatched, in this case to discover the capabilities of a service run by the Food and Agriculture Organization of the United Nations (FAO):
 
 
 ```r
+library(httr)
 base_url = "http://www.fao.org"
 endpoint = "/figis/geoserver/wfs"
 q = list(request = "GetCapabilities")
-res = httr::GET(url = httr::modify_url(base_url, path = endpoint), query = q)
+res = GET(url = modify_url(base_url, path = endpoint), query = q)
 res$url
 #> [1] "https://www.fao.org/figis/geoserver/wfs?request=GetCapabilities"
 ```
@@ -272,7 +273,7 @@ One way of extracting the contents of the request is as follows:
 
 
 ```r
-txt = httr::content(res, "text")
+txt = content(res, "text")
 xml = xml2::read_xml(txt)
 ```
 
@@ -296,7 +297,7 @@ One can extract them programmatically using web technologies [@nolan_xml_2014] o
 ```r
 qf = list(request = "GetFeature", typeName = "area:FAO_AREAS")
 file = tempfile(fileext = ".gml")
-httr::GET(url = base_url, path = endpoint, query = qf, httr::write_disk(file))
+GET(url = base_url, path = endpoint, query = qf, write_disk(file))
 fao_areas = read_sf(file)
 ```
 
