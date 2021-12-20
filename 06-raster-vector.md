@@ -409,3 +409,58 @@ grain_poly = as.polygons(grain) %>%
 <img src="06-raster-vector_files/figure-html/06-raster-vector-40-1.png" alt="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right)." width="100%" />
 <p class="caption">(\#fig:06-raster-vector-40)Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).</p>
 </div>
+
+## Exercises
+
+
+Some of the exercises use a vector (`zion_points`) and raster dataset (`srtm`) from the **spDataLarge** package.
+They also use a polygonal 'convex hull' derived from the vector dataset (`ch`) to represent the area of interest:
+
+```r
+library(sf)
+library(terra)
+library(spData)
+zion_points = read_sf(system.file("vector/zion_points.gpkg", package = "spDataLarge"))
+srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
+ch = st_combine(zion_points) %>%
+  st_convex_hull() %>% 
+  st_as_sf()
+```
+
+E1. Crop the `srtm` raster using (1) the `zion_points` dataset and (2) the `ch` dataset.
+Are there any differences in the output maps?
+Next, mask `srtm` using these two datasets.
+Can you see any difference now?
+How can you explain that?
+
+
+
+E2. Firstly, extract values from `srtm` at the points represented in `zion_points`.
+Next, extract average values of `srtm` using a 90 buffer around each point from `zion_points` and compare these two sets of values. 
+When would extracting values by buffers be more suitable than by points alone?
+
+
+
+E3. Subset points higher than 3100 meters in New Zealand (the `nz_height` object) and create a template raster with a resolution of 3 km for the extent of the new point dataset. 
+Using these two new objects:
+
+- Count numbers of the highest points in each grid cell.
+- Find the maximum elevation in each grid cell.
+
+
+
+E4. Aggregate the raster counting high points in New Zealand (created in the previous exercise), reduce its geographic resolution by half (so cells are 6 by 6 km) and plot the result.
+
+- Resample the lower resolution raster back to the original resolution of 3 km. How have the results changed?
+- Name two advantages and disadvantages of reducing raster resolution.
+
+
+
+
+
+E5. Polygonize the `grain` dataset and filter all squares representing clay.
+
+
+
+- Name two advantages and disadvantages of vector data over raster data.
+- When would it be useful to convert rasters to vectors in your work?
