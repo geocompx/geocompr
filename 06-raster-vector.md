@@ -1,29 +1,15 @@
 # Raster-vector interactions {#raster-vector}
 
+This chapter requires the following packages:
+
 
 ```r
 library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
 library(terra)
-#> terra version1.5.4
-#> 
-#> Attaching package: 'terra'
-#> The following object is masked from 'package:dplyr':
-#> 
-#>     src
-#> The following object is masked from 'package:knitr':
-#> 
-#>     spin
 library(sf)
-#> Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1; sf_use_s2() is TRUE
 ```
+
+## Introduction
 
 \index{raster-vector!interactions} 
 This Chapter focuses on interactions between raster and vector geographic data models, introduced in Chapter \@ref(spatial-class).
@@ -404,7 +390,7 @@ contour(dem, col = "white", add = TRUE)
 
 <div class="figure" style="text-align: center">
 <img src="figures/05-contour-tmap.png" alt="DEM hillshade of the southern flank of Mt. Mongón overlaid by contour lines." width="100%" />
-<p class="caption">(\#fig:contour-tmap)DEM hillshade of the southern flank of Mt. Mongón overlaid by contour lines.</p>
+<p class="caption">(\#fig:06-raster-vector-38)DEM hillshade of the southern flank of Mt. Mongón overlaid by contour lines.</p>
 </div>
 
 The final type of vectorization involves conversion of rasters to polygons.
@@ -420,6 +406,6 @@ grain_poly = as.polygons(grain) %>%
 ```
 
 <div class="figure" style="text-align: center">
-<img src="06-raster-vector_files/figure-html/raster-vectorization2-1.png" alt="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right)." width="100%" />
-<p class="caption">(\#fig:raster-vectorization2)Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).</p>
+<img src="06-raster-vector_files/figure-html/06-raster-vector-40-1.png" alt="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right)." width="100%" />
+<p class="caption">(\#fig:06-raster-vector-40)Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).</p>
 </div>
