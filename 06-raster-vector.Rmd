@@ -1,10 +1,14 @@
 # Raster-vector interactions {#raster-vector}
 
-```{r}
+This chapter requires the following packages:
+
+```{r 06-raster-vector-1, message=FALSE}
 library(dplyr)
 library(terra)
 library(sf)
 ```
+
+## Introduction
 
 \index{raster-vector!interactions} 
 This Chapter focuses on interactions between raster and vector geographic data models, introduced in Chapter \@ref(spatial-class).
@@ -35,7 +39,7 @@ We will use two objects to illustrate raster cropping:
 Both target and cropping objects must have the same projection.
 The following code chunk therefore not only reads the datasets from the **spDataLarge** package (installed in Chapter \@ref(spatial-class)), it also reprojects `zion` (see Section \@ref(reproj-geo-data) for more on reprojection):
 
-```{r 05-geometry-operations-43, results='hide'}
+```{r 06-raster-vector-2, results='hide'}
 srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
 zion = st_read(system.file("vector/zion.gpkg", package = "spDataLarge"))
 zion = st_transform(zion, crs(srtm))
@@ -44,7 +48,7 @@ zion = st_transform(zion, crs(srtm))
 We will use `crop()` from the **terra** package to crop the `srtm` raster.
 It reduces the rectangular extent of the object passed to its first argument based on the extent of the object passed to its second argument, as demonstrated in the command below (which generates Figure \@ref(fig:cropmask)(B) --- note the smaller extent of the raster background):
 
-```{r 05-geometry-operations-44}
+```{r 06-raster-vector-3 }
 srtm_cropped = crop(srtm, vect(zion))
 ```
 
@@ -52,14 +56,14 @@ srtm_cropped = crop(srtm, vect(zion))
 Related to `crop()` is the **terra** function `mask()`, which sets values outside of the bounds of the object passed to its second argument to `NA`.
 The following command therefore masks every cell outside of the Zion National Park boundaries (Figure \@ref(fig:cropmask)(C)):
 
-```{r 05-geometry-operations-45}
+```{r 06-raster-vector-4 }
 srtm_masked = mask(srtm, vect(zion))
 ```
 
 Importantly, we want to use both `crop()` and `mask()` together in most cases. 
 This combination of functions would (a) limit the raster's extent to our area of interest and then (b) replace all of the values outside of the area to NA.
 
-```{r}
+```{r 06-raster-vector-5}
 srtm_cropped = crop(srtm, vect(zion))
 srtm_final = mask(srtm_cropped, vect(zion))
 ```
@@ -68,7 +72,7 @@ Changing the settings of `mask()` yields different results.
 Setting `updatevalue = 0`, for example, will set all pixels outside the national park to 0.
 Setting `inverse = TRUE` will mask everything *inside* the bounds of the park (see `?mask` for details) (Figure \@ref(fig:cropmask)(D)).
 
-```{r 05-geometry-operations-46}
+```{r 06-raster-vector-6 }
 srtm_inv_masked = mask(srtm, vect(zion), inverse = TRUE)
 ```
 
@@ -116,13 +120,13 @@ For this purpose, we will use `zion_points`, which contain a sample of 30 locati
 The following command extracts elevation values from `srtm` and creates a data frame with points' IDs (one value per vector's row) and related `srtm` values for each point.
 Now, we can add the resulting object to our `zion_points` dataset with the `cbind()` function: 
 
-```{r 05-geometry-operations-47}
+```{r 06-raster-vector-8 }
 data("zion_points", package = "spDataLarge")
 elevation = terra::extract(srtm, vect(zion_points))
 zion_points = cbind(zion_points, elevation)
 ```
 
-```{r, echo=FALSE, eval=FALSE}
+```{r 06-raster-vector-9, echo=FALSE, eval=FALSE}
 library(dplyr)
 zion_points2 = zion_points
 zion_points2$a = 1
@@ -142,14 +146,14 @@ However, the line extraction approach is not recommended to obtain values along 
 In this case, a better approach is to split the line into many points and then extract the values for these points.
 To demonstrate this, the code below creates `zion_transect`, a straight line going from northwest to southeast of the Zion National Park, illustrated in Figure \@ref(fig:lineextr)(A) (see Section \@ref(vector-data) for a recap on the vector data model):
 
-```{r 05-geometry-operations-49}
+```{r 06-raster-vector-11 }
 zion_transect = cbind(c(-113.2, -112.9), c(37.45, 37.2)) %>%
   st_linestring() %>% 
   st_sfc(crs = crs(srtm)) %>% 
   st_sf()
 ```
 
-```{r 05-geometry-operations-50, eval=FALSE, echo=FALSE}
+```{r 06-raster-vector-12, eval=FALSE, echo=FALSE}
 # Aim: show how extraction works with non-straight lines by
 # using this alternative line object:
 zion_transect2 = cbind(c(-113.2, -112.9, -113.2), c(36.45, 37.2, 37.5)) %>%
@@ -165,7 +169,7 @@ The method demonstrated below provides an 'elevation profile' of the route (the 
 The first step is to add a unique `id` for each transect.
 Next, with the `st_segmentize()` function we can add points along our line(s) with a provided density (`dfMaxLength`) and convert them into points with `st_cast()`.
 
-```{r, warning=FALSE}
+```{r 06-raster-vector-13, warning=FALSE}
 zion_transect$id = 1:nrow(zion_transect)
 zion_transect = st_segmentize(zion_transect, dfMaxLength = 250)
 zion_transect = st_cast(zion_transect, "POINT")
@@ -174,7 +178,7 @@ zion_transect = st_cast(zion_transect, "POINT")
 Now, we have a large set of points, and we want to derive a distance between the first point in our transects and each of the subsequent points. 
 In this case, we only have one transect, but the code, in principle, should work on any number of transects:
 
-```{r}
+```{r 06-raster-vector-14}
 zion_transect = zion_transect %>% 
   group_by(id) %>% 
   mutate(dist = st_distance(geometry)[, 1]) 
@@ -182,7 +186,7 @@ zion_transect = zion_transect %>%
 
 Finally, we can extract elevation values for each point in our transects and combine this information with our main object.
 
-```{r}
+```{r 06-raster-vector-15}
 zion_elev = terra::extract(srtm, vect(zion_transect))
 zion_transect = cbind(zion_transect, zion_elev)
 ```
@@ -232,7 +236,7 @@ The final type of geographic vector object for raster extraction is **polygons**
 Like lines, polygons tend to return many raster values per polygon.
 This is demonstrated in the command below, which results in a data frame with column names `ID` (the row number of the polygon) and `srtm` (associated elevation values):
 
-```{r 05-geometry-operations-53, eval=FALSE, echo=FALSE}
+```{r 06-raster-vector-17, eval=FALSE, echo=FALSE}
 # aim: create zion_many to test multi-polygon results
 n = 3
 zion_many = st_sample(x = zion, size = n) %>% 
@@ -252,14 +256,14 @@ zion_nlcd = terra::extract(nlcd, vect(zion_many2))
 count(zion_nlcd, levels)
 ```
 
-```{r 05-geometry-operations-54}
+```{r 06-raster-vector-18 }
 zion_srtm_values = terra::extract(x = srtm, y = vect(zion))
 ```
 
 Such results can be used to generate summary statistics for raster values per polygon, for example to characterize a single region or to compare many regions.
 The generation of summary statistics is demonstrated in the code below, which creates the object `zion_srtm_df` containing summary statistics for elevation values in Zion National Park (see Figure \@ref(fig:polyextr)(A)):
 
-```{r 05-geometry-operations-55}
+```{r 06-raster-vector-19 }
 group_by(zion_srtm_values, ID) %>% 
   summarize(across(srtm, list(min = min, mean = mean, max = max)))
 ```
@@ -275,7 +279,7 @@ Because there is only one polygon in the example a data frame with a single row 
 The similar approach works for counting occurrences of categorical raster values within polygons.
 This is illustrated with a land cover dataset (`nlcd`) from the **spDataLarge** package in Figure \@ref(fig:polyextr)(B), and demonstrated in the code below:
 
-```{r 05-geometry-operations-56, warning=FALSE, message=FALSE}
+```{r 06-raster-vector-20, warning=FALSE, message=FALSE}
 nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 zion2 = st_transform(zion, st_crs(nlcd))
 zion_nlcd = terra::extract(nlcd, vect(zion2))
@@ -303,7 +307,7 @@ rast_poly_nlcd = tm_shape(nlcd) +
 tmap_arrange(rast_poly_srtm, rast_poly_nlcd, ncol = 2)
 ```
 
-```{block2 05-geometry-operations-56b, type='rmdnote'}
+```{block2 06-raster-vector-22, type='rmdnote'}
 Polygons usually have irregular shapes, and therefore, a polygon can overlap only some parts of a raster's cells. 
 To get more detailed results, the `extract()` function has an argument called `exact`. 
 With `exact = TRUE`, we get one more column `fraction` in the output data frame, which contains a fraction of each cell that is covered by the polygon.
@@ -311,7 +315,7 @@ This could be useful to calculate a weighted mean for continuous rasters or more
 By default, it is `FALSE` as this operation requires more computations.
 ```
 
-```{r, include=FALSE}
+```{r 06-raster-vector-23, include=FALSE}
 zion_srtm_values = terra::extract(x = srtm, y = vect(zion), exact = FALSE)
 ```
 
@@ -331,7 +335,7 @@ Often the target resolution is imposed on the user, for example when the output 
 
 To demonstrate rasterization in action, we will use a template raster that has the same extent and CRS as the input vector data `cycle_hire_osm_projected` (a dataset on cycle hire points in London is illustrated in Figure \@ref(fig:vector-rasterization1)(A)) and spatial resolution of 1000 meters:
 
-```{r 05-geometry-operations-57}
+```{r 06-raster-vector-24 }
 cycle_hire_osm = spData::cycle_hire_osm
 cycle_hire_osm_projected = st_transform(cycle_hire_osm, "EPSG:27700")
 raster_template = rast(ext(cycle_hire_osm_projected), resolution = 1000,
@@ -344,7 +348,7 @@ To illustrate this flexibility we will try three different approaches to rasteri
 First, we create a raster representing the presence or absence of cycle hire points (known as presence/absence rasters).
 In this case `rasterize()` requires only one argument in addition to `x` and `y` (the aforementioned vector and raster objects): a value to be transferred to all non-empty cells specified by `field` (results illustrated Figure \@ref(fig:vector-rasterization1)(B)).
 
-```{r 05-geometry-operations-58}
+```{r 06-raster-vector-25 }
 ch_raster1 = rasterize(vect(cycle_hire_osm_projected), raster_template,
                        field = 1)
 ```
@@ -352,7 +356,7 @@ ch_raster1 = rasterize(vect(cycle_hire_osm_projected), raster_template,
 The `fun` argument specifies summary statistics used to convert multiple observations in close proximity into associate cells in the raster object.
 By default `fun = "last"` is used but other options such as `fun = "length"` can be used, in this case to count the number of cycle hire points in each grid cell (the results of this operation are illustrated in Figure \@ref(fig:vector-rasterization1)(C)).
 
-```{r 05-geometry-operations-59}
+```{r 06-raster-vector-26 }
 ch_raster2 = rasterize(vect(cycle_hire_osm_projected), raster_template, 
                        fun = "length")
 ```
@@ -361,7 +365,7 @@ The new output, `ch_raster2`, shows the number of cycle hire points in each grid
 The cycle hire locations have different numbers of bicycles described by the `capacity` variable, raising the question, what's the capacity in each grid cell?
 To calculate that we must `sum` the field (`"capacity"`), resulting in output illustrated in Figure \@ref(fig:vector-rasterization1)(D), calculated with the following command (other summary functions such as `mean` could be used):
 
-```{r 05-geometry-operations-60}
+```{r 06-raster-vector-27 }
 ch_raster3 = rasterize(vect(cycle_hire_osm_projected), raster_template, 
                        field = "capacity", fun = sum)
 ```
@@ -373,7 +377,7 @@ source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-vector-raster
 Another dataset based on California's polygons and borders (created below) illustrates rasterization of lines.
 After casting the polygon objects into a multilinestring, a template raster is created with a resolution of a 0.5 degree:
 
-```{r 05-geometry-operations-61}
+```{r 06-raster-vector-29 }
 california = dplyr::filter(us_states, NAME == "California")
 california_borders = st_cast(california, "MULTILINESTRING")
 raster_template2 = rast(ext(california), resolution = 0.5,
@@ -384,14 +388,14 @@ When considering line or polygon rasterization, one useful additional argument i
 By default it is `FALSE`, but when changed to `TRUE` -- all cells that are touched by a line or polygon border get a value.
 Line rasterization with `touches = TRUE` is demonstrated in the code below (Figure \@ref(fig:vector-rasterization2)(A)).
 
-```{r 05-geometry-operations-62}
+```{r 06-raster-vector-30 }
 california_raster1 = rasterize(vect(california_borders), raster_template2,
                                touches = TRUE)
 ```
 
 Compare it to a polygon rasterization, with `touches = FALSE` by default, which selects only cells whose centroids are inside the selector polygon, as illustrated in Figure \@ref(fig:vector-rasterization2)(B).
 
-```{r 05-geometry-operations-63}
+```{r 06-raster-vector-31 }
 california_raster2 = rasterize(vect(california), raster_template2) 
 ```
 
@@ -405,7 +409,7 @@ source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-vector-raster
 Spatial vectorization is the counterpart of rasterization (Section \@ref(rasterization)), but in the opposite direction.
 It involves converting spatially continuous raster data into spatially discrete vector data such as points, lines or polygons.
 
-```{block2 05-geometry-operations-64, type="rmdnote"}
+```{block2 06-raster-vector-33, type="rmdnote"}
 Be careful with the wording!
 In R, vectorization refers to the possibility of replacing `for`-loops and alike by doing things like `1:10 / 2` (see also @wickham_advanced_2019).
 ```
@@ -414,7 +418,7 @@ The simplest form of vectorization is to convert the centroids of raster cells i
 `as.points()` does exactly this for all non-`NA` raster grid cells (Figure \@ref(fig:raster-vectorization1)).
 Note, here we also used `st_as_sf()` to convert the resulting object to the `sf` class.
 
-```{r 05-geometry-operations-65}
+```{r 06-raster-vector-34 }
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 elev_point = as.points(elev) %>% 
   st_as_sf()
@@ -429,7 +433,7 @@ Another common type of spatial vectorization is the creation of contour lines re
 We will use a real-world digital elevation model (DEM) because the artificial raster `elev` produces parallel lines (task for the reader: verify this and explain why this happens).
 Contour lines can be created with the **terra** function `as.contour()`, which is itself a wrapper around `filled.contour()`, as demonstrated below (not shown):
 
-```{r 05-geometry-operations-66, eval=FALSE}
+```{r 06-raster-vector-36, eval=FALSE}
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 cl = as.contour(dem)
 plot(dem, axes = FALSE)
@@ -439,7 +443,7 @@ plot(cl, add = TRUE)
 Contours can also be added to existing plots with functions such as `contour()`, `rasterVis::contourplot()` or `tmap::tm_iso()`.
 As illustrated in Figure \@ref(fig:contour-tmap), isolines can be labelled.
 
-```{r contour, eval=FALSE, fig.cap="DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines.", fig.scap="DEM with hillshading."}
+```{r contour-tmap, eval=FALSE, fig.cap="DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines.", fig.scap="DEM with hillshading."}
 # create hillshade
 hs = shade(slope = terrain(dem, "slope", unit = "radians"),
            aspect = terrain(dem, "aspect", unit = "radians"))
@@ -452,7 +456,7 @@ contour(dem, col = "white", add = TRUE)
 
 \index{hillshade}
 
-```{r contour-tmap, echo=FALSE, message=FALSE, fig.cap="DEM hillshade of the southern flank of Mt. Mongón overlaid by contour lines.", warning=FALSE, fig.asp=0.56, fig.scap="Hillshade overlaid by contours."}
+```{r 06-raster-vector-38, echo=FALSE, message=FALSE, fig.cap="DEM hillshade of the southern flank of Mt. Mongón overlaid by contour lines.", warning=FALSE, fig.asp=0.56, fig.scap="Hillshade overlaid by contours."}
 knitr::include_graphics("figures/05-contour-tmap.png")
 ```
 
@@ -461,12 +465,12 @@ This can be done with `terra::as.polygons()`, which converts each raster cell in
 
 This is illustrated below by converting the `grain` object into polygons and subsequently dissolving borders between polygons with the same attribute values (also see the `dissolve` argument in `as.polygons()`).
 
-```{r 05-geometry-operations-67}
+```{r 06-raster-vector-39 }
 grain = rast(system.file("raster/grain.tif", package = "spData"))
 grain_poly = as.polygons(grain) %>% 
   st_as_sf()
 ```
 
-```{r raster-vectorization2, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).", warning=FALSE, fig.asp=0.4, fig.scap="Illustration of vectorization."}
+```{r 06-raster-vector-40, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).", warning=FALSE, fig.asp=0.4, fig.scap="Illustration of vectorization."}
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-raster-vectorization2.R", print.eval = TRUE)
 ```
