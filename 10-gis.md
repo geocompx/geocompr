@@ -782,7 +782,7 @@ RPostgreSQL::postgresqlCloseConnection(conn)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="09-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer." width="60%" />
+<img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer." width="60%" />
 <p class="caption">(\#fig:postgis)Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer.</p>
 </div>
 

@@ -544,7 +544,7 @@ To put these results in perspective, let us compare them with AUROC\index{AUROC}
 As expected, the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance due to spatial autocorrelation\index{autocorrelation!spatial} of the latter.
 
 <div class="figure" style="text-align: center">
-<img src="11-spatial-cv_files/figure-html/boxplot-cv-1.png" alt="Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation." width="100%" />
+<img src="12-spatial-cv_files/figure-html/boxplot-cv-1.png" alt="Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation." width="100%" />
 <p class="caption">(\#fig:boxplot-cv)Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation.</p>
 </div>
 

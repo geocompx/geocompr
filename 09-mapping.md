@@ -98,7 +98,7 @@ tm_shape(nz) +
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/tmshape-1.png" alt="New Zealand's shape plotted with fill (left), border (middle) and fill and border (right) layers added using tmap functions." width="100%" />
+<img src="09-mapping_files/figure-html/tmshape-1.png" alt="New Zealand's shape plotted with fill (left), border (middle) and fill and border (right) layers added using tmap functions." width="100%" />
 <p class="caption">(\#fig:tmshape)New Zealand's shape plotted with fill (left), border (middle) and fill and border (right) layers added using tmap functions.</p>
 </div>
 
@@ -172,7 +172,7 @@ tmap_arrange(map_nz1, map_nz2, map_nz3)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/tmlayers-1.png" alt="Maps with additional layers added to the final map of Figure 8.1." width="100%" />
+<img src="09-mapping_files/figure-html/tmlayers-1.png" alt="Maps with additional layers added to the final map of Figure 8.1." width="100%" />
 <p class="caption">(\#fig:tmlayers)Maps with additional layers added to the final map of Figure 8.1.</p>
 </div>
 
@@ -208,7 +208,7 @@ tmap_arrange(ma1, ma2, ma3, ma4, ma5, ma6)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/tmstatic-1.png" alt="The impact of changing commonly used fill and border aesthetics to fixed values." width="100%" />
+<img src="09-mapping_files/figure-html/tmstatic-1.png" alt="The impact of changing commonly used fill and border aesthetics to fixed values." width="100%" />
 <p class="caption">(\#fig:tmstatic)The impact of changing commonly used fill and border aesthetics to fixed values.</p>
 </div>
 
@@ -233,7 +233,7 @@ tm_shape(nz) + tm_fill(col = "Land_area")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/tmcol-1.png" alt="Comparison of base (left) and tmap (right) handling of a numeric color field." width="45%" /><img src="08-mapping_files/figure-html/tmcol-2.png" alt="Comparison of base (left) and tmap (right) handling of a numeric color field." width="45%" />
+<img src="09-mapping_files/figure-html/tmcol-1.png" alt="Comparison of base (left) and tmap (right) handling of a numeric color field." width="45%" /><img src="09-mapping_files/figure-html/tmcol-2.png" alt="Comparison of base (left) and tmap (right) handling of a numeric color field." width="45%" />
 <p class="caption">(\#fig:tmcol)Comparison of base (left) and tmap (right) handling of a numeric color field.</p>
 </div>
 
@@ -269,7 +269,7 @@ tm_shape(nz) + tm_polygons(col = "Median_income", palette = "BuGn")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/tmpal-1.png" alt="Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette." width="100%" />
+<img src="09-mapping_files/figure-html/tmpal-1.png" alt="Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette." width="100%" />
 <p class="caption">(\#fig:tmpal)Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette.</p>
 </div>
 
@@ -286,7 +286,7 @@ Here are six of the most useful break styles:
 - `style = "cat"` was designed to represent categorical values and assures that each category receives a unique color.
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/break-styles-1.png" alt="Illustration of different binning methods set using the style argument in tmap." width="100%" />
+<img src="09-mapping_files/figure-html/break-styles-1.png" alt="Illustration of different binning methods set using the style argument in tmap." width="100%" />
 <p class="caption">(\#fig:break-styles)Illustration of different binning methods set using the style argument in tmap.</p>
 </div>
 
@@ -319,7 +319,7 @@ Their main purpose is to visualize the difference from an important reference po
 The reference point's value can be adjusted in **tmap** using the `midpoint` argument.
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/colpal-1.png" alt="Examples of categorical, sequential and diverging palettes." width="50%" />
+<img src="09-mapping_files/figure-html/colpal-1.png" alt="Examples of categorical, sequential and diverging palettes." width="50%" />
 <p class="caption">(\#fig:colpal)Examples of categorical, sequential and diverging palettes.</p>
 </div>
 
@@ -351,7 +351,7 @@ map_nz +
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/na-sb-1.png" alt="Map with additional elements - a north arrow and scale bar." width="50%" />
+<img src="09-mapping_files/figure-html/na-sb-1.png" alt="Map with additional elements - a north arrow and scale bar." width="50%" />
 <p class="caption">(\#fig:na-sb)Map with additional elements - a north arrow and scale bar.</p>
 </div>
 
@@ -366,7 +366,7 @@ map_nz + tm_layout(frame = FALSE)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/layout1-1.png" alt="Layout options specified by (from left to right) title, scale, bg.color and frame arguments." width="100%" />
+<img src="09-mapping_files/figure-html/layout1-1.png" alt="Layout options specified by (from left to right) title, scale, bg.color and frame arguments." width="100%" />
 <p class="caption">(\#fig:layout1)Layout options specified by (from left to right) title, scale, bg.color and frame arguments.</p>
 </div>
 
@@ -381,14 +381,14 @@ Here are some useful layout settings (some of which are illustrated in Figure \@
 - Color settings controlling `sepia.intensity` (how yellowy the map looks) and `saturation` (a color-grayscale)
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/layout2-1.png" alt="Illustration of selected layout options." width="100%" />
+<img src="09-mapping_files/figure-html/layout2-1.png" alt="Illustration of selected layout options." width="100%" />
 <p class="caption">(\#fig:layout2)Illustration of selected layout options.</p>
 </div>
 
 The impact of changing the color settings listed above is illustrated in Figure \@ref(fig:layout3) (see `?tm_layout` for a full list).
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/layout3-1.png" alt="Illustration of selected color-related layout options." width="100%" />
+<img src="09-mapping_files/figure-html/layout3-1.png" alt="Illustration of selected color-related layout options." width="100%" />
 <p class="caption">(\#fig:layout3)Illustration of selected color-related layout options.</p>
 </div>
 
@@ -405,7 +405,7 @@ map_nza + tm_style("col_blind")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/tmstyles-1.png" alt="Selected tmap styles." width="100%" />
+<img src="09-mapping_files/figure-html/tmstyles-1.png" alt="Selected tmap styles." width="100%" />
 <p class="caption">(\#fig:tmstyles)Selected tmap styles.</p>
 </div>
 
@@ -441,7 +441,7 @@ tm_shape(world) +
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/urban-facet-1.png" alt="Faceted map showing the top 30 largest urban agglomerations from 1970 to 2030 based on population projections by the United Nations." width="100%" />
+<img src="09-mapping_files/figure-html/urban-facet-1.png" alt="Faceted map showing the top 30 largest urban agglomerations from 1970 to 2030 based on population projections by the United Nations." width="100%" />
 <p class="caption">(\#fig:urban-facet)Faceted map showing the top 30 largest urban agglomerations from 1970 to 2030 based on population projections by the United Nations.</p>
 </div>
 
@@ -506,7 +506,7 @@ print(nz_map, vp = viewport(0.8, 0.27, width = 0.5, height = 0.5))
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/insetmap1-1.png" alt="Inset map providing a context - location of the central part of the Southern Alps in New Zealand." width="100%" />
+<img src="09-mapping_files/figure-html/insetmap1-1.png" alt="Inset map providing a context - location of the central part of the Southern Alps in New Zealand." width="100%" />
 <p class="caption">(\#fig:insetmap1)Inset map providing a context - location of the central part of the Southern Alps in New Zealand.</p>
 </div>
 
@@ -544,7 +544,7 @@ print(alaska_map, vp = grid::viewport(0.15, 0.15, width = 0.3, height = 0.3))
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/insetmap2-1.png" alt="Map of the United States." width="100%" />
+<img src="09-mapping_files/figure-html/insetmap2-1.png" alt="Map of the United States." width="100%" />
 <p class="caption">(\#fig:insetmap2)Map of the United States.</p>
 </div>
 
@@ -903,7 +903,7 @@ plot(st_geometry(nz), add = TRUE)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/nz-plot-1.png" alt="Map of New Zealand created with plot(). The legend to the right refers to elevation (1000 m above sea level)." width="100%" />
+<img src="09-mapping_files/figure-html/nz-plot-1.png" alt="Map of New Zealand created with plot(). The legend to the right refers to elevation (1000 m above sea level)." width="100%" />
 <p class="caption">(\#fig:nz-plot)Map of New Zealand created with plot(). The legend to the right refers to elevation (1000 m above sea level).</p>
 </div>
 
@@ -925,7 +925,7 @@ g1
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/nz-gg-1.png" alt="Map of New Zealand created with ggplot2." width="50%" />
+<img src="09-mapping_files/figure-html/nz-gg-1.png" alt="Map of New Zealand created with ggplot2." width="50%" />
 <p class="caption">(\#fig:nz-gg)Map of New Zealand created with ggplot2.</p>
 </div>
 
@@ -1051,7 +1051,7 @@ tm_shape(nz_carto) + tm_polygons("Median_income")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/cartomap1-1.png" alt="Comparison of standard map (left) and continuous area cartogram (right)." width="100%" />
+<img src="09-mapping_files/figure-html/cartomap1-1.png" alt="Comparison of standard map (left) and continuous area cartogram (right)." width="100%" />
 <p class="caption">(\#fig:cartomap1)Comparison of standard map (left) and continuous area cartogram (right).</p>
 </div>
 
@@ -1068,7 +1068,7 @@ us_states2163_dorling = cartogram_dorling(us_states2163, "total_pop_15")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="08-mapping_files/figure-html/cartomap2-1.png" alt="Comparison of non-continuous area cartogram (left) and Dorling cartogram (right)." width="100%" />
+<img src="09-mapping_files/figure-html/cartomap2-1.png" alt="Comparison of non-continuous area cartogram (left) and Dorling cartogram (right)." width="100%" />
 <p class="caption">(\#fig:cartomap2)Comparison of non-continuous area cartogram (left) and Dorling cartogram (right).</p>
 </div>
 

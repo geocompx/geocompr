@@ -167,9 +167,6 @@ The result is a multilayer object of class `SpatRaster`.
 library(geodata)
 worldclim_prec = worldclim_global("prec", res = 10, path = tempdir())
 class(worldclim_prec)
-#> [1] "SpatRaster"
-#> attr(,"package")
-#> [1] "terra"
 ```
 
 A third example uses the **osmdata** package [@R-osmdata] to find parks from the OpenStreetMap (OSM) database\index{OpenStreetMap}.
@@ -567,7 +564,7 @@ tanzania_neigh = read_sf(vector_filepath,
 Our result, shown in Figure \@ref(fig:readsfquery):B, contains Tanzania and every country within its 50 km buffer.
 
 <div class="figure" style="text-align: center">
-<img src="07-read-write-plot_files/figure-html/readsfquery-1.png" alt="Reading a subset of the vector data using a query (A) and a wkt filter (B)." width="100%" />
+<img src="08-read-write-plot_files/figure-html/readsfquery-1.png" alt="Reading a subset of the vector data using a query (A) and a wkt filter (B)." width="100%" />
 <p class="caption">(\#fig:readsfquery)Reading a subset of the vector data using a query (A) and a wkt filter (B).</p>
 </div>
 

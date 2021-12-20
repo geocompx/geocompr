@@ -163,7 +163,7 @@ C1 = (T1[1, , drop = FALSE] + T1[2, , drop = FALSE] + T1[3, , drop = FALSE]) / 3
 ```
 
 <div class="figure" style="text-align: center">
-<img src="10-algorithms_files/figure-html/polymat-1.png" alt="Illustration of polygon centroid calculation problem." width="100%" />
+<img src="11-algorithms_files/figure-html/polymat-1.png" alt="Illustration of polygon centroid calculation problem." width="100%" />
 <p class="caption">(\#fig:polymat)Illustration of polygon centroid calculation problem.</p>
 </div>
 
@@ -219,7 +219,7 @@ A = vapply(T_all, function(x) {
 ```
 
 <div class="figure" style="text-align: center">
-<img src="10-algorithms_files/figure-html/polycent-1.png" alt="Illustration of iterative centroid algorithm with triangles. The X represents the area-weighted centroid in iterations 2 and 3." width="100%" />
+<img src="11-algorithms_files/figure-html/polycent-1.png" alt="Illustration of iterative centroid algorithm with triangles. The X represents the area-weighted centroid in iterations 2 and 3." width="100%" />
 <p class="caption">(\#fig:polycent)Illustration of iterative centroid algorithm with triangles. The X represents the area-weighted centroid in iterations 2 and 3.</p>
 </div>
 
