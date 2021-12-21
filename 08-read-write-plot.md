@@ -234,8 +234,12 @@ This package also allows performing the opposite process called reverse geocodin
 <!-- https://github.com/jessecambon/tidygeocoder -->
 
 <!--toDo:jn-->
+<!-- we should add a rgee section in the bridges chapter and add a reference here -->
 <!-- consider data from rgee -->
 <!-- rgee - see https://github.com/loreabad6/30DayMapChallenge/blob/main/scripts/day08_blue.R -->
+<!-- Finally, there are some packages that allows to download spatial data among many other functions.  -->
+<!-- Prominent example here is the **rgee** package  -->
+<!-- ee_imagecollection_to_local -->
 
 ## Geographic web services
 
