@@ -117,6 +117,7 @@ These provide interfaces to one or more spatial libraries or geoportals and aim 
 <!-- maybe: -->
 <!-- - https://github.com/ErikKusch/KrigR -->
 <!-- https://cran.r-project.org/web/packages/FedData/index.html -->
+<!-- https://github.com/VeruGHub/easyclimate -->
 <!-- mention: -->
 <!-- - https://github.com/ropensci/MODIStsp -->
 
