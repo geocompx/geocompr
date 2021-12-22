@@ -186,8 +186,7 @@ polygon_matrix = cbind(
   x = c(0, 0, 1, 1,   0),
   y = c(0, 1, 1, 0.5, 0)
 )
-polygon = st_polygon(list(polygon_matrix))
-polygon_sfc = st_sfc(polygon)
+polygon_sfc = st_sfc(st_polygon(list(polygon_matrix)))
 ```
 
 We will create additional geometries to demonstrate spatial relations with the following commands which, when plotted on top of the polygon created above, relate in space to one another, as shown in Figure \@ref(fig:relation-objects).
@@ -195,13 +194,13 @@ Note the use of the function `st_as_sf()` and the argument `coords` to efficient
 
 ```{r}
 line_sfc = st_sfc(st_linestring(cbind(
-  x = c(0.1, 1),
-  y = c(0,   0.1)
+  x = c(0.4, 1),
+  y = c(0.2, 0.5)
 )))
 # create points
 point_df = data.frame(
-  x = c(0.1, 0.7, 0.4),
-  y = c(0.0, 0.2, 0.8)
+  x = c(0.2, 0.7, 0.4),
+  y = c(0.1, 0.2, 0.8)
 )
 point_sf = st_as_sf(point_df, coords = c("x", "y"))
 ```
@@ -209,26 +208,25 @@ point_sf = st_as_sf(point_df, coords = c("x", "y"))
 ```{r relation-objects, echo=FALSE, fig.cap="Points (`point_df` 1 to 3), line and polygon objects arranged to illustrate topological relations.", fig.asp=1, out.width="50%", fig.scap="Demonstration of topological relations."}
 par(pty = "s")
 plot(polygon_sfc, border = "red", col = "gray", axes = TRUE)
-plot(line_sfc, add = TRUE)
-plot(point_sf, add = TRUE, lab = 1:4)
-text(point_df[, 1] + 0.02, point_df[, 2] + 0.03, 1:3, cex = 1.3)
+plot(line_sfc, lwd = 5, add = TRUE)
+plot(point_sf, add = TRUE, lab = 1:4, cex = 2)
+text(point_df[, 1] + 0.02, point_df[, 2] + 0.04, 1:3, cex = 1.3)
 ```
 
 A simple query is: which of the points in `point_sf` intersect in some way with polygon `polygon_sfc`?
-The question can be answered by inspection (points 1 and 2 are over or touch the triangle).
-It can also be answered by using a *spatial predicate* such as *do the objects intersect*?
-This is implemented in **sf** as follows:
+The question can be answered by inspection (points 1 and 3 are touching and within the polygon, respectively).
+This question can also be answered using spatial predicates such as `st_intersects()` follows:
 
 ```{r 04-spatial-operations-9, eval=FALSE}
 st_intersects(point_sf, polygon_sfc)
-#> Sparse geometry binary ..., where the predicate was `intersects'
-#> 1: (empty)
-#> 2: (empty)
-#> 3: 1
+#> Sparse geometry binary predicate... where the predicate was `intersects'
+#>  1: 1
+#>  2: (empty)
+#>  3: 1
 ```
 
 The contents of the result should be as you expected:
-the function returns a positive (`1`) for the third point, and a negative result (represented by an empty vector) for the first two which are outside the polygon's border.
+the function returns a positive (`1`) for the first and third point, and a negative result (represented by an empty vector) for the second are outside the polygon's border.
 What may be unexpected is that the result comes in the form of a list of vectors.
 This *sparse matrix* output only registers a relation if one exists, reducing the memory requirements of topological operations on multi-feature objects.
 As we saw in the previous section, a *dense matrix* consisting of `TRUE` or `FALSE` values for each combination of features can also be returned when `sparse = FALSE`:
@@ -243,6 +241,18 @@ There is only one feature in `polygon_sfc` so the result has only one column.
 The result can be used for subsetting as we saw in Section \@ref(spatial-subsetting).
 
 Note: `st_intersects()` returns `TRUE` even in cases where the features just touch: *intersects* is a 'catch-all' topological operation which identifies many types of spatial relation, as illustrated in Figure \@ref(fig:relations).
+
+A more restrictive question is: which points lie within the polygon?
+The can be answered as follows:
+
+```{r 04-spatial-operations-9-2, eval=FALSE}
+st_within(point_sf, polygon_sfc)
+#> Sparse geometry binary predicate... where the predicate was `within'
+#> 1: (empty)
+#> 2: (empty)
+#> 3: 1
+```
+
 The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (note `[, 1]` converts the result into a vector):
 
 ```{r 04-spatial-operations-11}
@@ -250,7 +260,7 @@ st_disjoint(point_sf, polygon_sfc, sparse = FALSE)[, 1]
 ```
 
 `st_within()` returns `TRUE` only for objects that are completely within the selecting object.
-This also only applies to the third point, which is inside the polygon, as illustrated below:
+This only applies to the third point, which is inside the polygon, as illustrated below:
 
 ```{r 04-spatial-operations-12}
 st_within(point_sf, polygon_sfc, sparse = FALSE)[, 1]
