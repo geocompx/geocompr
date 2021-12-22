@@ -301,7 +301,7 @@ Colin Rundel addressed this issue by developing **rgeos**, an R interface to  th
 
 Another limitation of **sp** --- its restricted support for raster data --- was overcome by **raster**\index{raster}, first released in 2010 [@R-raster].
 Its class system and functions support a range of raster operations as outlined in Section \@ref(raster-data).
-A key feature of **raster** is its ability to work with datasets that are too large to fit into RAM (R's interface to PostGIS\index{PostGIS} supports off-disc operations on vector geographic data).
+A key feature of **raster** is its ability to work with datasets that are too large to fit into RAM (R's interface to PostGIS\index{PostGIS} supports off-disk operations on vector geographic data).
 **raster** also supports map algebra (see Section \@ref(map-algebra)).
 
 In parallel with these developments of class systems and methods came the support for R as an interface to dedicated GIS software.
