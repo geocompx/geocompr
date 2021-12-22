@@ -215,74 +215,52 @@ text(point_df[, 1] + 0.02, point_df[, 2] + 0.04, 1:3, cex = 1.3)
 
 A simple query is: which of the points in `point_sf` intersect in some way with polygon `polygon_sfc`?
 The question can be answered by inspection (points 1 and 3 are touching and within the polygon, respectively).
-This question can also be answered using spatial predicates such as `st_intersects()` follows:
+This question can be answered with the spatial predicate `st_intersects()` as follows:
 
 ```{r 04-spatial-operations-9, eval=FALSE}
 st_intersects(point_sf, polygon_sfc)
-#> Sparse geometry binary predicate... where the predicate was `intersects'
+#> Sparse geometry binary predicate... `intersects'
 #>  1: 1
 #>  2: (empty)
 #>  3: 1
 ```
 
-The contents of the result should be as you expected:
-the function returns a positive (`1`) for the first and third point, and a negative result (represented by an empty vector) for the second are outside the polygon's border.
+The result should match your intuition:
+positive (`1`) results are returned for the first and third point, and a negative result (represented by an empty vector) for the second are outside the polygon's border.
 What may be unexpected is that the result comes in the form of a list of vectors.
 This *sparse matrix* output only registers a relation if one exists, reducing the memory requirements of topological operations on multi-feature objects.
-As we saw in the previous section, a *dense matrix* consisting of `TRUE` or `FALSE` values for each combination of features can also be returned when `sparse = FALSE`:
+As we saw in the previous section, a *dense matrix* consisting of `TRUE` or `FALSE` values is returned when `sparse = FALSE`:
 
 ```{r 04-spatial-operations-10}
 st_intersects(point_sf, polygon_sfc, sparse = FALSE)
 ```
 
-The output is a matrix in which each row represents a feature in the target object and each column represents a feature in the selecting object.
-In this case, only the third feature in `point_sf` intersects with `polygon_sfc`.
-There is only one feature in `polygon_sfc` so the result has only one column.
-The result can be used for subsetting as we saw in Section \@ref(spatial-subsetting).
+In the above output each row represents a feature in the target (argument `x`) object and each column represents a feature in the selecting object (`y`).
+In this case, there is only one feature in the `y` object `polygon_sfc` so the result, which can be used for subsetting as we saw in Section \@ref(spatial-subsetting), has only one column.
 
-Note: `st_intersects()` returns `TRUE` even in cases where the features just touch: *intersects* is a 'catch-all' topological operation which identifies many types of spatial relation, as illustrated in Figure \@ref(fig:relations).
-
-A more restrictive question is: which points lie within the polygon?
-The can be answered as follows:
+`st_intersects()` returns `TRUE` even in cases where the features just touch: *intersects* is a 'catch-all' topological operation which identifies many types of spatial relation, as illustrated in Figure \@ref(fig:relations).
+More restrictive questions include which points lie within the polygon, and which features are on or contain a shared boundary with `y`?
+These can be answered as follows (results not show):
 
 ```{r 04-spatial-operations-9-2, eval=FALSE}
 st_within(point_sf, polygon_sfc)
-#> Sparse geometry binary predicate... where the predicate was `within'
-#> 1: (empty)
-#> 2: (empty)
-#> 3: 1
+st_touches(point_sf, polygon_sfc)
 ```
 
+Note that although the first point is *touches* the polygon, it is not within it; the third point is within the polygon but does not touch any part of its border.
 The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (note `[, 1]` converts the result into a vector):
 
 ```{r 04-spatial-operations-11}
 st_disjoint(point_sf, polygon_sfc, sparse = FALSE)[, 1]
 ```
 
-`st_within()` returns `TRUE` only for objects that are completely within the selecting object.
-This only applies to the third point, which is inside the polygon, as illustrated below:
-
-```{r 04-spatial-operations-12}
-st_within(point_sf, polygon_sfc, sparse = FALSE)[, 1]
-```
-
-Note that although the first point is *within* the triangle, it does not *touch* any part of its border.
-For this reason `st_touches()` only returns `FALSE` for all points:
-
-```{r 04-spatial-operations-13}
-st_touches(point_sf, polygon_sfc, sparse = FALSE)[, 1]
-```
-
-What about features that do not touch, but *almost touch* the selection object?
-These can be selected using `st_is_within_distance()`, which has an additional `dist` argument.
+The function `st_is_within_distance()` detects features that *almost touch* the selection object, which has an additional `dist` argument.
 It can be used to set how close target objects need to be before they are selected.
 Note that although point 4 is one unit of distance from the nearest node of `polygon_sfc` (at point 2 in Figure \@ref(fig:relation-objects)), it is still selected when the distance is set to 0.9.
-This is illustrated in the code chunk below, the second line of which uses the function `lengths()` to convert the lengthy list output into a `logical` object:
+This is illustrated in the code chunk below, which shows that every point is within 0.2 units of the polygon:
 
 ```{r 04-spatial-operations-14}
-# can only return a sparse matrix
-sel = st_is_within_distance(point_sf, polygon_sfc, dist = 0.1) 
-lengths(sel) > 0
+st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
 ```
 
 
