@@ -344,6 +344,41 @@ plot(b)
 text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y")) # add text
 ```
 
+To demonstrate how DE-9IM strings work, let's take a look at the first geometry pair in Figure \@ref(fig:relations)
+
+```{r, echo=FALSE, warning=FALSE}
+p1_2 = st_as_sf(c(p1, p3))
+p1_2_intersection_interior = st_as_sf(st_intersection(p1, p3))
+p1_2_intersection_interior$domain_a = "Interior"
+p1_2_intersection_interior$domain_b = "Interior"
+p1_2_intersection_interior$Object = "Intersection"
+p1_2_intersection = st_intersection(st_cast(p1, "LINESTRING"), p3)
+b9 = replicate(p1_2, n = 9, simplify = FALSE)
+b9sf = do.call(rbind, b9)
+b9sf$Object = rep(c("x", "y"), 9)
+domains = c("Interior", "Boundary", "Exterior")
+b9sf$domain_a = rep(rep(domains, 3), each = 2)
+b9sf$domain_b = rep(rep(domains, each = 3), each = 2)
+b9sf = rbind(b9sf, p1_2_intersection_interior)
+b9sf$domain_a = ordered(b9sf$domain_a, levels = c("Interior", "Boundary", "Exterior"))
+b9sf$domain_b = ordered(b9sf$domain_b, levels = c("Interior", "Boundary", "Exterior"))
+b9sf = b9sf %>% 
+  mutate(alpha = case_when(
+   Object == "x" ~ 0.1, 
+   Object == "y" ~ 0.1, 
+   TRUE ~ 0.2 
+  ))
+library(ggplot2)
+ggplot(b9sf) +
+  geom_sf(aes(fill = Object, alpha = alpha)) +
+  facet_grid(domain_b ~ domain_a) +
+  scale_fill_manual(values = c("red", "lightblue", "yellow")) +
+  scale_alpha_continuous(range = c(0.3, 0.5)) +
+  guides(alpha = FALSE) +
+  theme_void()
+```
+
+
 ### Spatial joining 
 
 Joining two non-spatial datasets relies on a shared 'key' variable, as described in Section \@ref(vector-attribute-joining).
