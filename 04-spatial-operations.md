@@ -150,15 +150,16 @@ That may sound rather abstract and, indeed, the definition and classification of
 
 Despite their mathematical origins, topological relations can be understood intuitively with reference to visualizations of commonly used functions that test for common types of spatial relationships.
 Figure \@ref(fig:relations) shows a variety of geometry pairs and their associated relations.
-The third and fourth pairs in Figure \@ref(fig:relations) (from left to right and then down) demonstrate that, for some relations, order is important: while the relations *equals*, *intersects*, *crosses*, *touches* and *overlaps* are symmetrical, meaning that if `function(x, y)` is true, `function(y, x)` will also by true, relations in which the order of the geomtries are important such as *contains* and *within* are not.
+The third and fourth pairs in Figure \@ref(fig:relations) (from left to right and then down) demonstrate that, for some relations, order is important: while the relations *equals*, *intersects*, *crosses*, *touches* and *overlaps* are symmetrical, meaning that if `function(x, y)` is true, `function(y, x)` will also by true, relations in which the order of the geometries are important such as *contains* and *within* are not.
+Notice that each geometry pair has a "DE-9IM" string such as FF2F11212, described in the next section.
 \index{topological relations}
 
 <div class="figure" style="text-align: center">
-<img src="04-spatial-operations_files/figure-html/relations-1.png" alt="Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue." width="100%" />
-<p class="caption">(\#fig:relations)Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue.</p>
+<img src="04-spatial-operations_files/figure-html/relations-1.png" alt="Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue. The nature of the spatial relationship for each pair is described by the Dimensionally Extended 9-Intersection Model string." width="100%" />
+<p class="caption">(\#fig:relations)Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue. The nature of the spatial relationship for each pair is described by the Dimensionally Extended 9-Intersection Model string.</p>
 </div>
 
-In `sf`, functions testing for different types of topological relations are called 'binary predicates', as described in the vignette *Manipulating Simple Feature Geometries*, which can be viewed with the command [`vignette("sf3")`](https://r-spatial.github.io/sf/articles/sf3.html), and in the help page [`?geos_binary_pred`](https://r-spatial.github.io/sf/reference/geos_binary_ops.html) [@pebesma_simple_2018].
+In `sf`, functions testing for different types of topological relations are called 'binary predicates', as described in the vignette *Manipulating Simple Feature Geometries*, which can be viewed with the command [`vignette("sf3")`](https://r-spatial.github.io/sf/articles/sf3.html), and in the help page [`?geos_binary_pred`](https://r-spatial.github.io/sf/reference/geos_binary_ops.html).
 To see how topological relations work in practice, let's create a simple reproducible example, building on the relations illustrated in Figure \@ref(fig:relations) and consolidating knowledge of how vector geometries are represented from a previous chapter (Section \@ref(geometry)).
 Note that to create tabular data representing coordinates (x and y) of the polygon vertices, we use the base R function `cbind()` to create a matrix representing coordinates points, a `POLYGON`, and finally an `sfc` object, as described in Chapter \@ref(spatial-class):
 
@@ -168,8 +169,7 @@ polygon_matrix = cbind(
   x = c(0, 0, 1, 1,   0),
   y = c(0, 1, 1, 0.5, 0)
 )
-polygon = st_polygon(list(polygon_matrix))
-polygon_sfc = st_sfc(polygon)
+polygon_sfc = st_sfc(st_polygon(list(polygon_matrix)))
 ```
 
 We will create additional geometries to demonstrate spatial relations with the following commands which, when plotted on top of the polygon created above, relate in space to one another, as shown in Figure \@ref(fig:relation-objects).
@@ -178,13 +178,13 @@ Note the use of the function `st_as_sf()` and the argument `coords` to efficient
 
 ```r
 line_sfc = st_sfc(st_linestring(cbind(
-  x = c(0.1, 1),
-  y = c(0,   0.1)
+  x = c(0.4, 1),
+  y = c(0.2, 0.5)
 )))
 # create points
 point_df = data.frame(
-  x = c(0.1, 0.7, 0.4),
-  y = c(0.0, 0.2, 0.8)
+  x = c(0.2, 0.7, 0.4),
+  y = c(0.1, 0.2, 0.8)
 )
 point_sf = st_as_sf(point_df, coords = c("x", "y"))
 ```
@@ -195,78 +195,64 @@ point_sf = st_as_sf(point_df, coords = c("x", "y"))
 </div>
 
 A simple query is: which of the points in `point_sf` intersect in some way with polygon `polygon_sfc`?
-The question can be answered by inspection (points 1 and 2 are over or touch the triangle).
-It can also be answered by using a *spatial predicate* such as *do the objects intersect*?
-This is implemented in **sf** as follows:
+The question can be answered by inspection (points 1 and 3 are touching and within the polygon, respectively).
+This question can be answered with the spatial predicate `st_intersects()` as follows:
 
 
 ```r
 st_intersects(point_sf, polygon_sfc)
-#> Sparse geometry binary ..., where the predicate was `intersects'
-#> 1: (empty)
-#> 2: (empty)
-#> 3: 1
+#> Sparse geometry binary predicate... `intersects'
+#>  1: 1
+#>  2: (empty)
+#>  3: 1
 ```
 
-The contents of the result should be as you expected:
-the function returns a positive (`1`) for the third point, and a negative result (represented by an empty vector) for the first two which are outside the polygon's border.
+The result should match your intuition:
+positive (`1`) results are returned for the first and third point, and a negative result (represented by an empty vector) for the second are outside the polygon's border.
 What may be unexpected is that the result comes in the form of a list of vectors.
 This *sparse matrix* output only registers a relation if one exists, reducing the memory requirements of topological operations on multi-feature objects.
-As we saw in the previous section, a *dense matrix* consisting of `TRUE` or `FALSE` values for each combination of features can also be returned when `sparse = FALSE`:
+As we saw in the previous section, a *dense matrix* consisting of `TRUE` or `FALSE` values is returned when `sparse = FALSE`:
 
 
 ```r
 st_intersects(point_sf, polygon_sfc, sparse = FALSE)
 #>       [,1]
-#> [1,] FALSE
+#> [1,]  TRUE
 #> [2,] FALSE
 #> [3,]  TRUE
 ```
 
-The output is a matrix in which each row represents a feature in the target object and each column represents a feature in the selecting object.
-In this case, only the third feature in `point_sf` intersects with `polygon_sfc`.
-There is only one feature in `polygon_sfc` so the result has only one column.
-The result can be used for subsetting as we saw in Section \@ref(spatial-subsetting).
+In the above output each row represents a feature in the target (argument `x`) object and each column represents a feature in the selecting object (`y`).
+In this case, there is only one feature in the `y` object `polygon_sfc` so the result, which can be used for subsetting as we saw in Section \@ref(spatial-subsetting), has only one column.
 
-Note: `st_intersects()` returns `TRUE` even in cases where the features just touch: *intersects* is a 'catch-all' topological operation which identifies many types of spatial relation, as illustrated in Figure \@ref(fig:relations).
+`st_intersects()` returns `TRUE` even in cases where the features just touch: *intersects* is a 'catch-all' topological operation which identifies many types of spatial relation, as illustrated in Figure \@ref(fig:relations).
+More restrictive questions include which points lie within the polygon, and which features are on or contain a shared boundary with `y`?
+These can be answered as follows (results not show):
+
+
+```r
+st_within(point_sf, polygon_sfc)
+st_touches(point_sf, polygon_sfc)
+```
+
+Note that although the first point is *touches* the polygon, it is not within it; the third point is within the polygon but does not touch any part of its border.
 The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (note `[, 1]` converts the result into a vector):
 
 
 ```r
 st_disjoint(point_sf, polygon_sfc, sparse = FALSE)[, 1]
-#> [1]  TRUE  TRUE FALSE
+#> [1] FALSE  TRUE FALSE
 ```
 
-`st_within()` returns `TRUE` only for objects that are completely within the selecting object.
-This also only applies to the third point, which is inside the polygon, as illustrated below:
-
-
-```r
-st_within(point_sf, polygon_sfc, sparse = FALSE)[, 1]
-#> [1] FALSE FALSE  TRUE
-```
-
-Note that although the first point is *within* the triangle, it does not *touch* any part of its border.
-For this reason `st_touches()` only returns `FALSE` for all points:
-
-
-```r
-st_touches(point_sf, polygon_sfc, sparse = FALSE)[, 1]
-#> [1] FALSE FALSE FALSE
-```
-
-What about features that do not touch, but *almost touch* the selection object?
-These can be selected using `st_is_within_distance()`, which has an additional `dist` argument.
+The function `st_is_within_distance()` detects features that *almost touch* the selection object, which has an additional `dist` argument.
 It can be used to set how close target objects need to be before they are selected.
 Note that although point 4 is one unit of distance from the nearest node of `polygon_sfc` (at point 2 in Figure \@ref(fig:relation-objects)), it is still selected when the distance is set to 0.9.
-This is illustrated in the code chunk below, the second line of which uses the function `lengths()` to convert the lengthy list output into a `logical` object:
+This is illustrated in the code chunk below, which shows that every point is within 0.2 units of the polygon:
 
 
 ```r
-# can only return a sparse matrix
-sel = st_is_within_distance(point_sf, polygon_sfc, dist = 0.1) 
-lengths(sel) > 0
-#> [1]  TRUE FALSE  TRUE
+st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
+#> [1] TRUE TRUE TRUE
 ```
 
 
@@ -281,15 +267,51 @@ You can learn more at https://www.r-spatial.org/r/2017/06/22/spatial-index.html.
 
 
 
-<!-- Todo:reinstate this section (RL 2021-11) -->
-<!-- ### DE-9IM strings -->
+### DE-9IM strings
 
-<!-- Underlying the binary predicates demonstrated in the previous section is the Dimensionally Extended 9-Intersection Model (DE-9IM). -->
-<!-- The model was originally labelled "DE + 9IM" by its inventors, referring to the "dimension of the intersections of' boundaries, interiors, and exteriors of two features" [@clementini_comparison_1995] -->
-<!-- , but is now generally referred to as DE-9IM [@shen_2018_classification] -->
-<!-- The way the model works can be demonstrated with reference to two intersecting polygons, as illustrated in Figure \@ref(fig:de-9im). -->
+Underlying the binary predicates demonstrated in the previous section is the Dimensionally Extended 9-Intersection Model (DE-9IM).
+The model was originally labelled "DE + 9IM" by its inventors, referring to the "dimension of the intersections of boundaries, interiors, and exteriors of two features" [@clementini_comparison_1995], but is now referred to as DE-9IM [@shen_classification_2018].
+<!-- The model's workings can be demonstrated with reference to two intersecting polygons, as illustrated in Figure \@ref(fig:de-9im). -->
 
 
+
+To demonstrate how DE-9IM strings work, let's take a look at the various ways that the first geometry pair in Figure \@ref(fig:relations) relate.
+Figure \@ref(fig:de9imgg) illustrates the 9 intersection model (9IM) which shows the intersections between every combination of each object's interior, boundary and exterior: when each component of the first object `x` is arranged as columns and each component of `y` is arranged as rows, a facetted graphic is created with the intersections between each element highlighted.
+
+<div class="figure" style="text-align: center">
+<img src="04-spatial-operations_files/figure-html/de9imgg-1.png" alt="Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works." width="100%" />
+<p class="caption">(\#fig:de9imgg)Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works.</p>
+</div>
+
+DE-9IM strings are derived from the dimension of each type of relation.
+In this case the red intersections in Figure \@ref(fig:de9imgg) have dimensions of 0 (points), 1 (lines), and 2 (polygons), as shown in Table \@ref(tab:de9emtable).
+
+
+Table: (\#tab:de9emtable)Table showing relations between interiors, boundaries and exteriors of geometries x and y.
+
+|             |Interior (x) |Boundary (x) |Exterior (x) |
+|:------------|:------------|:------------|:------------|
+|Interior (y) |2            |1            |2            |
+|Boundary (y) |1            |1            |1            |
+|Exterior (y) |2            |1            |2            |
+
+Flattening this matrix 'row-wise' (meaning concatenating the first row, then the second, then the third) results in the string `212111212`.
+Another example will serve to demonstrate the system:
+the relation shown in Figure \@ref(fig:relate) (the third polygon pair in the third column and 1st row) can be defined in the DE-9IM system as follows:
+
+- The intersections between the *interior* of the larger object `x` and the interior, boundary and exterior of `y` have dimensions of 2, 1 and 2 respectively, 
+- The intersections between the *boundary* of the larger object `x` and the interior, boundary and exterior of `y` have dimensions of F, F and 1 respectively, where 'F' means 'false', the objects are disjoint
+- The intersections between the *exterior* of `x` and the interior, boundary and exterior of `y` have dimensions of F, F and 2 respectively: the exterior of the larger object does not touch the interior or boundary of `y`, but the exterior of the smaller and larger objects cover the same area.
+
+These three components, when concatenated, create the string `212`, `FF1`, and `FF2`.
+This is the same as the result obtained from the function `st_relate()` (see the source code of this chapter to see how objects `p1` and `p4` were created):
+
+
+```r
+st_relate(p1, p4)
+#>      [,1]       
+#> [1,] "212FF1FF2"
+```
 
 ### Spatial joining 
 
