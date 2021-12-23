@@ -344,9 +344,10 @@ plot(b)
 text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y")) # add text
 ```
 
-To demonstrate how DE-9IM strings work, let's take a look at the first geometry pair in Figure \@ref(fig:relations)
+To demonstrate how DE-9IM strings work, let's take a look at the various ways that the first geometry pair in Figure \@ref(fig:relations) relate.
+Figure \@ref(fig:de9imgg) illustrates the 9 intersection model (9IM) which shows the intersections between every combination of each object's interior, boundary and exterior: when each component of the first object `x` is arranged as columns and each component of `y` is arranged as rows, a facetted graphic is created with the intersections between each element highlighted.
 
-```{r, echo=FALSE, warning=FALSE}
+```{r de9imgg, echo=FALSE, warning=FALSE, fig.cap="Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works." }
 p1_2 = st_as_sf(c(p1, p3))
 ii = st_as_sf(st_intersection(p1, p3))
 ii$Object = "Intersection"
@@ -367,13 +368,62 @@ ei$Object = "Intersection"
 ei$domain_a = "Exterior"
 ei$domain_b = "Interior"
 
+ib = st_sf(x = st_intersection(
+  st_cast(p3, "LINESTRING"),
+  st_difference(p1, st_buffer(st_cast(p1, "LINESTRING"), dist = 0.005))
+  ))
+ib = st_buffer(ib, dist = 0.01)
+ib$Object = "Intersection"
+ib$domain_a = "Interior"
+ib$domain_b = "Boundary"
+
+bb = st_cast(ii, "POINT")
+bb_line = st_sf(x = st_sfc(st_linestring(matrix(c(1, 0.5, 1, 0.7), nrow = 2, byrow = TRUE))))
+bb_line_buffer = st_buffer(bb_line, dist = 0.01)
+bb_buffer = st_buffer(bb, dist = 0.01)
+bb = st_union(bb_buffer, bb_line_buffer)
+bb$Object = "Intersection"
+bb$domain_a = "Boundary"
+bb$domain_b = "Boundary"
+
+eb = st_sf(x = st_difference(
+  st_cast(p3, "LINESTRING"),
+  p1
+  ))
+eb = st_buffer(eb, dist = 0.01)
+eb$Object = "Intersection"
+eb$domain_a = "Exterior"
+eb$domain_b = "Boundary"
+
+ie = st_sf(x = st_difference(p1, p3))
+ie$Object = "Intersection"
+ie$domain_a = "Interior"
+ie$domain_b = "Exterior"
+
+be = st_sf(x = st_difference(
+  st_cast(p1, "LINESTRING"),
+  p3
+  ))
+be = st_buffer(be, dist = 0.01)
+be$Object = "Intersection"
+be$domain_a = "Boundary"
+be$domain_b = "Exterior"
+
+ee = st_sf(x = st_difference(
+  st_buffer(st_union(p1, p3), 0.02),
+  st_union(p1, p3)
+  ))
+ee$Object = "Intersection"
+ee$domain_a = "Exterior"
+ee$domain_b = "Exterior"
+
 b9 = replicate(p1_2, n = 9, simplify = FALSE)
 b9sf = do.call(rbind, b9)
 b9sf$Object = rep(c("x", "y"), 9)
 domains = c("Interior", "Boundary", "Exterior")
 b9sf$domain_a = rep(rep(domains, 3), each = 2)
 b9sf$domain_b = rep(rep(domains, each = 3), each = 2)
-b9sf = rbind(b9sf, ii, bi, ei)
+b9sf = rbind(b9sf, ii, bi, ei, ib, bb, eb, ie, be, ee)
 b9sf$domain_a = ordered(b9sf$domain_a, levels = c("Interior", "Boundary", "Exterior"))
 b9sf$domain_b = ordered(b9sf$domain_b, levels = c("Interior", "Boundary", "Exterior"))
 b9sf = b9sf %>% 
@@ -387,10 +437,30 @@ ggplot(b9sf) +
   geom_sf(aes(fill = Object, alpha = alpha)) +
   facet_grid(domain_b ~ domain_a) +
   scale_fill_manual(values = c("red", "lightblue", "yellow"), position = "top", name = "") +
-  scale_alpha_continuous(range = c(0.3, 0.5)) +
+  scale_alpha_continuous(range = c(0.3, 0.9)) +
   guides(alpha = "none") +
   theme_void() +
   theme(legend.position = "top")
+```
+
+DE-9IM strings are derived from the dimension of each type of relation.
+In this case the red intersections in Figure \@ref(fig:de9imgg) have dimensions of 0 (points), 1 (lines), and 2 (polygons), as shown in Table \@ref(tab:de9emtable).
+
+```{r de9emtable, echo=FALSE}
+# See https://github.com/Robinlovelace/geocompr/issues/699
+pattern = st_relate(p1, p3)
+matrix_de_9im = function(pattern) {
+    string = unlist(strsplit(pattern , ""))
+    matrix_de_9im = matrix(string, nrow = 3, byrow = TRUE)
+    colnames(matrix_de_9im) = c("I", "B", "E")
+    row.names(matrix_de_9im) = c("I", "B", "E")
+    return(matrix_de_9im)
+}
+
+m = matrix_de_9im(pattern)
+colnames(m) = c("Interior (x)", "Boundary (x)", "Exterior (x)")
+rownames(m) = c("Interior (y)", "Boundary (y)", "Exterior (y)")
+knitr::kable(m, caption = "Table showing relations between interiors, boundaries and exteriors of geometries x and y.")
 ```
 
 
