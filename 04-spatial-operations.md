@@ -297,21 +297,56 @@ Table: (\#tab:de9emtable)Table showing relations between interiors, boundaries a
 
 Flattening this matrix 'row-wise' (meaning concatenating the first row, then the second, then the third) results in the string `212111212`.
 Another example will serve to demonstrate the system:
-the relation shown in Figure \@ref(fig:relate) (the third polygon pair in the third column and 1st row) can be defined in the DE-9IM system as follows:
+the relation shown in Figure \@ref(fig:relations) (the third polygon pair in the third column and 1st row) can be defined in the DE-9IM system as follows:
 
 - The intersections between the *interior* of the larger object `x` and the interior, boundary and exterior of `y` have dimensions of 2, 1 and 2 respectively, 
 - The intersections between the *boundary* of the larger object `x` and the interior, boundary and exterior of `y` have dimensions of F, F and 1 respectively, where 'F' means 'false', the objects are disjoint
 - The intersections between the *exterior* of `x` and the interior, boundary and exterior of `y` have dimensions of F, F and 2 respectively: the exterior of the larger object does not touch the interior or boundary of `y`, but the exterior of the smaller and larger objects cover the same area.
 
 These three components, when concatenated, create the string `212`, `FF1`, and `FF2`.
-This is the same as the result obtained from the function `st_relate()` (see the source code of this chapter to see how objects `p1` and `p4` were created):
+This is the same as the result obtained from the function `st_relate()` (see the source code of this chapter to see how other geometries in Figure \@ref(fig:relations) were created):
 
 
 ```r
-st_relate(p1, p4)
+xy2sfc = function(x, y) st_sfc(st_polygon(list(cbind(x, y))))
+x = xy2sfc(x = c(0, 0, 1, 1,   0), y = c(0, 1, 1, 0.5, 0))
+y = xy2sfc(x = c(0.7, 0.7, 0.9, 0.7), y = c(0.8, 0.5, 0.5, 0.8))
+st_relate(x, y)
 #>      [,1]       
 #> [1,] "212FF1FF2"
 ```
+
+Understanding DE-9IM strings allows new binary spatial predicates to be developed.
+The help page `?st_relate` contains function definitions for 'queen' and 'rook' relations in which polygons share a border or only a point, respectively.
+'Queen' relations mean that 'boundary-boundary' relations (the cell in the second column and the second row in Table \@ref(tab:de9emtable), or the 5th element of the DE-9IM string) must not be empty, corresponding to the pattern `F***T****`, while for 'rook' relations the same element must be 1 (meaning a linear intersection).
+These are implemented as follows:
+
+
+```r
+st_queen = function(x, y) st_relate(x, y, pattern = "F***T****")
+st_rook = function(x, y) st_relate(x, y, pattern = "F***1****")
+```
+
+Building on the object `x` created previously, we can use the newly created functions to find out which elements in the grid are a 'queen' and 'rook' in relation to the middle square of the grid as follows:
+
+
+```r
+grid = st_make_grid(x, n = 3)
+queens = lengths(st_queen(grid, grid[5])) > 0
+rooks = lengths(st_rook(grid, grid[5])) > 0
+plot(grid, col = queens)
+plot(grid, col = rooks)
+```
+
+<div class="figure" style="text-align: center">
+<img src="04-spatial-operations_files/figure-html/queens-1.png" alt="Demonstration of custom binary spatial predicates for finding 'queen' (left) and 'rook' (right) relations to the central square in a grid with 9 geometries." width="100%" /><img src="04-spatial-operations_files/figure-html/queens-2.png" alt="Demonstration of custom binary spatial predicates for finding 'queen' (left) and 'rook' (right) relations to the central square in a grid with 9 geometries." width="100%" />
+<p class="caption">(\#fig:queens)Demonstration of custom binary spatial predicates for finding 'queen' (left) and 'rook' (right) relations to the central square in a grid with 9 geometries.</p>
+</div>
+
+<!-- Another of a custom binary spatial predicate is 'overlapping lines' which detects lines that overlap for some or all of another line's geometry. -->
+<!-- This can be implemented as follows, with the pattern signifying that the intersection between the two line interiors must be a line: -->
+
+
 
 ### Spatial joining 
 
