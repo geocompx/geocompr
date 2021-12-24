@@ -465,17 +465,95 @@ knitr::kable(m, caption = "Table showing relations between interiors, boundaries
 
 Flattening this matrix 'row-wise' (meaning concatenating the first row, then the second, then the third) results in the string `212111212`.
 Another example will serve to demonstrate the system:
-the relation shown in Figure \@ref(fig:relate) (the third polygon pair in the third column and 1st row) can be defined in the DE-9IM system as follows:
+the relation shown in Figure \@ref(fig:relations) (the third polygon pair in the third column and 1st row) can be defined in the DE-9IM system as follows:
 
 - The intersections between the *interior* of the larger object `x` and the interior, boundary and exterior of `y` have dimensions of 2, 1 and 2 respectively, 
 - The intersections between the *boundary* of the larger object `x` and the interior, boundary and exterior of `y` have dimensions of F, F and 1 respectively, where 'F' means 'false', the objects are disjoint
 - The intersections between the *exterior* of `x` and the interior, boundary and exterior of `y` have dimensions of F, F and 2 respectively: the exterior of the larger object does not touch the interior or boundary of `y`, but the exterior of the smaller and larger objects cover the same area.
 
 These three components, when concatenated, create the string `212`, `FF1`, and `FF2`.
-This is the same as the result obtained from the function `st_relate()` (see the source code of this chapter to see how objects `p1` and `p4` were created):
+This is the same as the result obtained from the function `st_relate()` (see the source code of this chapter to see how other geometries in Figure \@ref(fig:relations) were created):
 
 ```{r}
-st_relate(p1, p4)
+xy2sfc = function(x, y) st_sfc(st_polygon(list(cbind(x, y))))
+x = xy2sfc(x = c(0, 0, 1, 1,   0), y = c(0, 1, 1, 0.5, 0))
+y = xy2sfc(x = c(0.7, 0.7, 0.9, 0.7), y = c(0.8, 0.5, 0.5, 0.8))
+st_relate(x, y)
+```
+
+Understanding DE-9IM strings allows new binary spatial predicates to be developed.
+The help page `?st_relate` contains function definitions for 'queen' and 'rook' relations in which polygons share a border or only a point, respectively.
+'Queen' relations mean that 'boundary-boundary' relations (the cell in the second column and the second row in Table \@ref(tab:de9emtable), or the 5th element of the DE-9IM string) must not be empty, corresponding to the pattern `F***T****`, while for 'rook' relations the same element must be 1 (meaning a linear intersection).
+These are implemented as follows:
+
+```{r}
+st_queen = function(x, y) st_relate(x, y, pattern = "F***T****")
+st_rook = function(x, y) st_relate(x, y, pattern = "F***1****")
+```
+
+Building on the object `x` created previously, we can use the newly created functions to find out which elements in the grid are a 'queen' and 'rook' in relation to the middle square of the grid as follows:
+
+```{r queens, fig.cap="Demonstration of custom binary spatial predicates for finding 'queen' (left) and 'rook' (right) relations to the central square in a grid with 9 geometries."}
+grid = st_make_grid(x, n = 3)
+queens = lengths(st_queen(grid, grid[5])) > 0
+rooks = lengths(st_rook(grid, grid[5])) > 0
+plot(grid, col = queens)
+plot(grid, col = rooks)
+```
+
+<!-- Another of a custom binary spatial predicate is 'overlapping lines' which detects lines that overlap for some or all of another line's geometry. -->
+<!-- This can be implemented as follows, with the pattern signifying that the intersection between the two line interiors must be a line: -->
+
+```{r, echo=FALSE, eval=FALSE}
+st_lineoverlap = function(x, y) st_relate(x, y, pattern = "T*1******")
+line1 = st_sfc(st_linestring(cbind(
+  x = c(0, 0.8),
+  y = c(0, 0)
+)))
+line2 = st_sfc(st_linestring(cbind(
+  x = c(0.1, 0.5),
+  y = c(0, 0)
+)))
+line3 = st_sfc(st_linestring(cbind(
+  x = c(0, 0.5),
+  y = c(0, 0.2)
+)))
+st_queen(line1, line2)
+st_relate(line1, line2)
+st_relate(line1, line3)
+st_lineoverlap(line1, line2)
+st_lineoverlap(line1, line3)
+de_9im(line1, line2)
+# test the function
+rnet = pct::get_pct_rnet(region = "isle-of-wight")
+osm_net = osmextract::oe_get_network(place = "isle-of-wight", mode = "driving")
+sel = st_relate(rnet, osm_net, pattern = "T*1******")
+summary(lengths(sel) > 0)
+rnet_joined1 = st_join(rnet, osm_net, join = st_lineoverlap)
+rnet_joined2 = st_join(rnet, osm_net, join = st_relate, pattern = "T*1******")
+rnet_joined3 = st_join(rnet, osm_net)
+summary(is.na(rnet_joined1$osm_id))
+summary(is.na(rnet_joined2$osm_id))
+summary(is.na(rnet_joined3$osm_id))
+sel_relates = st_relate(rnet[1, ], osm_net)
+dim(sel_relates)
+sel_table = table(sel_relates)
+sel_table
+dim(sel_table)
+sel_restrictive = sel_relates[1, ] == "0F1FF0102"
+summary(sel_restrictive)
+nrow(osm_net)
+mapview::mapview(rnet[1, ]) + mapview::mapview(osm_net[sel_restrictive, ])
+
+rnet_approx = rnet
+st_precision(rnet_approx) = 100
+head(st_coordinates(rnet_approx))
+
+sel_relates = st_relate(rnet_approx[1, ], osm_net)
+dim(sel_relates)
+sel_table = table(sel_relates)
+sel_table
+
 ```
 
 ### Spatial joining 
