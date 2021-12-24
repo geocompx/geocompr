@@ -515,7 +515,7 @@ For instance, if we are interested in a density (points per grid cell or inhabit
 
 There is more to learn about CRSs.
 An excellent resource in this area, also implemented in R, is the website R Spatial.
-Chapter 6 for this free online book is recommended reading --- see: [rspatial.org/terra/spatial/6-crs.html](https://rspatial.org/terra/spatial/6-crs.html)
+Chapter 6 from this free online book is recommended reading --- see: [rspatial.org/terra/spatial/6-crs.html](https://rspatial.org/terra/spatial/6-crs.html)
 
 ## Exercises
 
