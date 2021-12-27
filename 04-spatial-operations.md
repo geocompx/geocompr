@@ -330,17 +330,9 @@ st_rook = function(x, y) st_relate(x, y, pattern = "F***1****")
 Building on the object `x` created previously, we can use the newly created functions to find out which elements in the grid are a 'queen' and 'rook' in relation to the middle square of the grid as follows:
 
 
-```r
-grid = st_make_grid(x, n = 3)
-grid_sf = st_sf(grid)
-grid_sf$queens = lengths(st_queen(grid, grid[5])) > 0
-grid_sf$rooks = lengths(st_rook(grid, grid[5])) > 0
-tm_shape(grid_sf) +
-  tm_fill(col = c("queens", "rooks"), palette = c("white", "black")) +
-  tm_shape(grid_sf) +
-  tm_borders(col = "grey", lwd = 2) +
-  tm_layout(frame = FALSE, legend.show = FALSE,
-            panel.labels = c("queen", "rook"))
+
+
+```
 #> Warning: Currect projection of shape grid_sf unknown. Long-lat (WGS84) is
 #> assumed.
 
@@ -352,6 +344,7 @@ tm_shape(grid_sf) +
 <img src="04-spatial-operations_files/figure-html/queens-1.png" alt="Demonstration of custom binary spatial predicates for finding 'queen' (left) and 'rook' (right) relations to the central square in a grid with 9 geometries." width="100%" />
 <p class="caption">(\#fig:queens)Demonstration of custom binary spatial predicates for finding 'queen' (left) and 'rook' (right) relations to the central square in a grid with 9 geometries.</p>
 </div>
+
 
 <!-- Another of a custom binary spatial predicate is 'overlapping lines' which detects lines that overlap for some or all of another line's geometry. -->
 <!-- This can be implemented as follows, with the pattern signifying that the intersection between the two line interiors must be a line: -->
