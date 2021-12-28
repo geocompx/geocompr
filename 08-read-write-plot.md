@@ -554,8 +554,8 @@ In most cases, as with the ESRI Shapefile\index{Shapefile} (`.shp`) or the `GeoP
 
 
 ```r
-vector_filepath = system.file("shapes/world.gpkg", package = "spData")
-world = read_sf(vector_filepath, quiet = TRUE)
+f = system.file("shapes/world.gpkg", package = "spData")
+world = read_sf(f, quiet = TRUE)
 ```
 
 For some drivers, `dsn` could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the `read_sf()` help page for more details).
@@ -571,11 +571,10 @@ It is done by specifying that we want to get all columns (`SELECT *`) from the `
 
 
 ```r
-tanzania = read_sf(vector_filepath,
-                   query = 'SELECT * FROM "world" WHERE name_long = "Tanzania"')
+tanzania = read_sf(f, query = 'SELECT * FROM world WHERE name_long = "Tanzania"')
 ```
 
-If you do not know the names of the available columns, a good approach is to just read one row of the data with `'SELECT * FROM "world" WHERE FID = 1'`.
+If you do not know the names of the available columns, a good approach is to just read one row of the data with `'SELECT * FROM world WHERE FID = 1'`.
 `FID` represents a *feature ID* -- most often, it is a row number; however, its values depend on the used file format. 
 For example, `FID` starts from 0 in ESRI Shapefile, from 1 in some other file formats, or can be even arbitrary.
 
@@ -597,8 +596,7 @@ Now, we can apply this "filter" using the `wkt_filter` argument.
 
 
 ```r
-tanzania_neigh = read_sf(vector_filepath,
-                         wkt_filter = tanzania_buf_wkt)
+tanzania_neigh = read_sf(f, wkt_filter = tanzania_buf_wkt)
 ```
 
 Our result, shown in Figure \@ref(fig:readsfquery):B, contains Tanzania and every country within its 50 km buffer.
@@ -620,8 +618,10 @@ For the comma-separated value (csv) format, visit http://www.gdal.org/drv_csv.ht
 
 ```r
 cycle_hire_txt = system.file("misc/cycle_hire_xy.csv", package = "spData")
-cycle_hire_xy = read_sf(cycle_hire_txt, options = c("X_POSSIBLE_NAMES=X",
-                                                    "Y_POSSIBLE_NAMES=Y"))
+cycle_hire_xy = read_sf(
+  cycle_hire_txt,
+  options = c("X_POSSIBLE_NAMES=X", "Y_POSSIBLE_NAMES=Y")
+  )
 ```
 
 Instead of columns describing xy-coordinates, a single column can also contain the geometry information.

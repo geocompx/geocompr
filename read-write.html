@@ -770,8 +770,8 @@ The content of a text string could vary between different drivers.
 In most cases, as with the ESRI Shapefile (<code>.shp</code>) or the <code>GeoPackage</code> format (<code>.gpkg</code>), the <code>dsn</code> would be a file name.
 <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> guesses the driver based on the file extension, as illustrated for a <code>.gpkg</code> file below:</p>
 <div class="sourceCode" id="cb249"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">vector_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shapes/world.gpkg"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
-<span class="va">world</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">vector_filepath</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">f</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shapes/world.gpkg"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
+<span class="va">world</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">f</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>For some drivers, <code>dsn</code> could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> help page for more details).</p>
 <p>Some vector driver formats can store multiple data layers.
 By default, <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> automatically reads the first layer of the file specified in <code>dsn</code>; however, using the <code>layer</code> argument you can specify any other layer.</p>
@@ -781,9 +781,8 @@ The first one is related to the <code>query</code> argument, which allows specif
 An example below extracts data for Tanzania only (Figure <a href="read-write.html#fig:readsfquery">8.1</a>:A).
 It is done by specifying that we want to get all columns (<code>SELECT *</code>) from the <code>"world"</code> layer for which the <code>name_long</code> equals to <code>"Tanzania"</code>:</p>
 <div class="sourceCode" id="cb250"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">tanzania</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">vector_filepath</span>,
-                   query <span class="op">=</span> <span class="st">'SELECT * FROM "world" WHERE name_long = "Tanzania"'</span><span class="op">)</span></code></pre></div>
-<p>If you do not know the names of the available columns, a good approach is to just read one row of the data with <code>'SELECT * FROM "world" WHERE FID = 1'</code>.
+<code class="sourceCode R"><span class="va">tanzania</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">f</span>, query <span class="op">=</span> <span class="st">'SELECT * FROM world WHERE name_long = "Tanzania"'</span><span class="op">)</span></code></pre></div>
+<p>If you do not know the names of the available columns, a good approach is to just read one row of the data with <code>'SELECT * FROM world WHERE FID = 1'</code>.
 <code>FID</code> represents a <em>feature ID</em> – most often, it is a row number; however, its values depend on the used file format.
 For example, <code>FID</code> starts from 0 in ESRI Shapefile, from 1 in some other file formats, or can be even arbitrary.</p>
 <p>The second mechanism uses the <code>wkt_filter</code> argument.
@@ -796,8 +795,7 @@ To do it, we need to prepare our “filter” by (a) creating the buffer (Sectio
 <span class="va">tanzania_buf_wkt</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_text.html">st_as_text</a></span><span class="op">(</span><span class="va">tanzania_buf_geom</span><span class="op">)</span></code></pre></div>
 <p>Now, we can apply this “filter” using the <code>wkt_filter</code> argument.</p>
 <div class="sourceCode" id="cb252"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">tanzania_neigh</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">vector_filepath</span>,
-                         wkt_filter <span class="op">=</span> <span class="va">tanzania_buf_wkt</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">tanzania_neigh</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">f</span>, wkt_filter <span class="op">=</span> <span class="va">tanzania_buf_wkt</span><span class="op">)</span></code></pre></div>
 <p>Our result, shown in Figure <a href="read-write.html#fig:readsfquery">8.1</a>:B, contains Tanzania and every country within its 50 km buffer.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:readsfquery"></span>
@@ -814,8 +812,10 @@ To find out about possible options, please refer to the ‘Open Options’ secti
 For the comma-separated value (csv) format, visit <a href="http://www.gdal.org/drv_csv.html" class="uri">http://www.gdal.org/drv_csv.html</a>.</p>
 <div class="sourceCode" id="cb253"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cycle_hire_txt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"misc/cycle_hire_xy.csv"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
-<span class="va">cycle_hire_xy</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">cycle_hire_txt</span>, options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"X_POSSIBLE_NAMES=X"</span>,
-                                                    <span class="st">"Y_POSSIBLE_NAMES=Y"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="va">cycle_hire_xy</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span>
+  <span class="va">cycle_hire_txt</span>,
+  options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"X_POSSIBLE_NAMES=X"</span>, <span class="st">"Y_POSSIBLE_NAMES=Y"</span><span class="op">)</span>
+  <span class="op">)</span></code></pre></div>
 <p>Instead of columns describing xy-coordinates, a single column can also contain the geometry information.
 Well-known text (WKT), well-known binary (WKB), and the GeoJSON formats are examples of this.
 For instance, the <code>world_wkt.csv</code> file has a column named <code>WKT</code> representing polygons of the world’s countries.
