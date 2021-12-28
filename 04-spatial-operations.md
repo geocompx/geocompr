@@ -957,10 +957,12 @@ This is frequently the case when you want to combine spectral imagery from scene
 The `merge()` command will still work but you will see a clear border in the resulting image.
 On the other hand, the `mosaic()` command lets you define a function for the overlapping area. 
 For instance, we could compute the mean value -- this might smooth the clear border in the merged result but it will most likely not make it disappear.
-To do so, we need a more advanced approach. 
-Remote sensing scientists frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image.
-The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`calcHistMatch()`) and **RStoolbox** (`histMatch()`, `pifMatch()`) provide the corresponding functions for the **raster**'s package objects.
-For a more detailed introduction on how to use R for remote sensing, we refer the reader to @wegmann_remote_2016.
+<!-- The following sentences have been commented out and can be removed because the packages, and info, is now out of date -->
+<!-- See https://github.com/Robinlovelace/geocompr/pull/424 for discussion -->
+<!-- To do so, we need a more advanced approach.  -->
+<!-- Remote sensing scientists frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image. -->
+<!-- The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`calcHistMatch()`) and **RStoolbox** (`histMatch()`, `pifMatch()`) provide the corresponding functions for the **raster**'s package objects. -->
+For a more detailed introduction to remote sensing with R, see @wegmann_remote_2016.
 <!--jn:toDo-->
 <!--update the above reference to the 2nd edition-->
 
