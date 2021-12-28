@@ -374,23 +374,11 @@ plot(cl, add = TRUE)
 Contours can also be added to existing plots with functions such as `contour()`, `rasterVis::contourplot()` or `tmap::tm_iso()`.
 As illustrated in Figure \@ref(fig:contour-tmap), isolines can be labelled.
 
-
-```r
-# create hillshade
-hs = shade(slope = terrain(dem, "slope", unit = "radians"),
-           aspect = terrain(dem, "aspect", unit = "radians"))
-plot(hs, col = gray(0:100 / 100), legend = FALSE)
-# overlay with DEM
-plot(dem, col = terrain.colors(25), alpha = 0.5, legend = FALSE, add = TRUE)
-# add contour lines
-contour(dem, col = "white", add = TRUE)
-```
-
 \index{hillshade}
 
 <div class="figure" style="text-align: center">
-<img src="figures/05-contour-tmap.png" alt="DEM hillshade of the southern flank of Mt. Mongón overlaid by contour lines." width="100%" />
-<p class="caption">(\#fig:06-raster-vector-38)DEM hillshade of the southern flank of Mt. Mongón overlaid by contour lines.</p>
+<img src="figures/05-contour-tmap.png" alt="DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines." width="100%" />
+<p class="caption">(\#fig:contour-tmap)DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines.</p>
 </div>
 
 The final type of vectorization involves conversion of rasters to polygons.
