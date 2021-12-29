@@ -130,7 +130,7 @@ london_buff_projected = st_buffer(london_proj, 1e5)
 
 The geometries of the three `london_buff*` objects that *have* a specified CRS created above (`london_buff_s2`, `london_buff_lonlat` and `london_buff_projected`) created in the preceding code chunks are illustrated in Figure \@ref(fig:crs-buf).
 
-```{r crs-buf, fig.cap="Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot is the result of buffering lon/lat data with the default settings in sf which calls S2 spherical geometry engine by default and sets `max_cells` to 1000 (thin line) and with `max_cells` set to 100 (thick line). The gray outline represents the UK coastline.", fig.scap="Buffers around London with a geographic and projected CRS.",  fig.asp=1, fig.show='hold', out.width="33%", echo=FALSE}
+```{r crs-buf-old, include=FALSE, eval=FALSE}
 uk = rnaturalearth::ne_countries(scale = 50) %>% 
   st_as_sf() %>% 
   filter(grepl(pattern = "United Kingdom|Ire", x = name_long))
@@ -145,6 +145,40 @@ plot(st_geometry(uk_proj), add = TRUE, border = "gray", lwd = 3)
 plot(london_buff_lonlat, graticule = st_crs(27700), axes = TRUE, reset = FALSE, lwd = 2)
 plot(london_proj, add = TRUE)
 plot(st_geometry(uk), add = TRUE, border = "gray", lwd = 3)
+```
+
+```{r crs-buf, fig.cap="Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot is the result of buffering lon/lat data with the default settings in sf which calls S2 spherical geometry engine by default and sets `max_cells` to 1000 (thin line) and with `max_cells` set to 100 (thick line). The gray outline represents the UK coastline.", fig.scap="Buffers around London with a geographic and projected CRS.", echo=FALSE}
+uk = rnaturalearth::ne_countries(scale = 10) %>% 
+  st_as_sf() %>% 
+  filter(grepl(pattern = "United Kingdom|Ire", x = name_long))
+library(tmap)
+tm1 = tm_shape(london_buff_s2) + 
+  tm_graticules(lwd = 0.2) +
+  tm_borders(col = "black", lwd = 0.5) + 
+  tm_shape(london_buff_s2_100_cells) +
+  tm_borders(col = "black", lwd = 1.5) +
+  tm_shape(uk) +
+  tm_borders(lty = 3) +
+  tm_shape(london_proj) +
+  tm_symbols()
+
+tm2 = tm_shape(london_buff_projected, bbox = st_bbox(london_buff_s2)) + 
+  tm_grid(lwd = 0.2) +
+  tm_borders() + 
+  tm_shape(uk) +
+  tm_borders() +
+  tm_shape(london_proj) +
+  tm_symbols()
+
+tm3 = tm_shape(london_buff_lonlat, bbox = st_bbox(london_buff_s2)) + 
+  tm_graticules(lwd = 0.2) +
+  tm_borders() + 
+  tm_shape(uk) +
+  tm_borders() +
+  tm_shape(london_proj) +
+  tm_symbols()
+
+tmap_arrange(tm1, tm2, tm3, nrow = 1)
 ```
 
 It is clear from Figure \@ref(fig:crs-buf) that buffers based on `s2` and properly projected CRSs are not 'squashed', meaning that every part of the buffer boundary is equidistant to London.
