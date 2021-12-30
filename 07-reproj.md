@@ -124,6 +124,14 @@ The result is a new object that is identical to `london`, but reprojected onto a
 We can verify that the CRS has changed using `st_crs()` as follows (some of the output has been replaced by `...`):
 
 
+```r
+st_crs(london_proj)
+#> Coordinate Reference System:
+#>   User input: EPSG:27700 
+#>   wkt:
+#> PROJCRS["OSGB36 / British National Grid",
+#> ...
+```
 
 <!--toDo:rl-->
 <!-- jn: the next paragraph need to be updated! -->
