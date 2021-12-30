@@ -60,6 +60,9 @@ st_is_longlat(london_geo)
 ```
 
 Datasets without a specified CRS can cause problems: all geographic coordinates have a coordinate system and software can only make good decisions around plotting and and geometry operations if it knows what type of CRS it is working with.
+
+## Geometry operations on projected and unprojected data {#geom-proj}
+
 If no CRS has been set, `sf` uses the GEOS geometry library for many operations.
 GEOS is not well suited to lon/lat CRSs, as we will see later in this chapter.
 If a CRS has been set, `sf` will use either GEOS or the S2 *spherical geometry engine* depending on the type of CRS.
