@@ -16,8 +16,7 @@ library(spDataLarge)
 ## Introduction
 
 Section \@ref(crs-intro) introduced coordinate reference systems (CRSs) and demonstrated their importance.
-This chapter goes further.
-It highlights issues that can arise when using inappropriate CRSs and how to *transform* data from one CRS to another.
+This chapter goes further, highlighting issues that can arise due to ignoring CRSs and to *transform* geographic data from one CRS to another.
 \index{CRS!geographic} 
 \index{CRS!projected} 
 As illustrated in Figure \@ref(fig:vectorplots) from that earlier chapter, there are two types of CRSs: *geographic* ('lon/lat', with units in degrees longitude and latitude) and *projected* (typically with units of meters from a datum).
@@ -33,11 +32,14 @@ st_is_longlat(london)
 #> [1] NA
 ```
 
-The output `NA` shows, that unless a CRS is manually specified or is loaded from a source that has CRS metadata, `sf` does not assume a CRS (unlike the GeoJSON specification which assumes coordinates have a lon/lat CRS: `EPSG:4326`).
-A CRS can be added to `sf` objects with `st_set_crs()` as follows:^[
-The CRS can also be added when creating `sf` objects with the `crs` argument (e.g., `st_sf(geometry = st_sfc(st_point(c(-0.1, 51.5))), crs = "EPSG:4326")`).
-The same argument can also be used to set the CRS when creating raster datasets (e.g., `rast(crs = "EPSG:4326")`).
-]
+The output `NA` shows that `sf` does not know what the CRS is and is unwilling to guess (`NA` literally means 'not available').
+Unless a CRS is manually specified or is loaded from a source that has CRS metadata, `sf` does not make any explicit assumptions about which coordinate systems, other than to say "I don't know".
+This behavior makes sense given the diversity of available CRSs but differs from some approaches, such as the GeoJSON file format specification, which makes the simplifying assumption that all coordinates have a lon/lat CRS: `EPSG:4326`.
+A CRS can be added to `sf` objects in three main ways:
+
+- By assigning the CRS to a pre-existing object, e.g. with `st_crs(london) = "EPSG:4326"`.
+- By passing a CRS to the `crs` argument in `sf` functions that create geometry objects such as `st_as_sf(... crs = "EPSG:4326")`. The same argument can also be used to set the CRS when creating raster datasets (e.g., `rast(crs = "EPSG:4326")`).
+- With the `st_set_crs()`, which returns a version of the data that has a new CRS, an approach that is demonstrated in the following code chunk.
 
 
 ```r
