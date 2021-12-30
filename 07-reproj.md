@@ -16,12 +16,12 @@ library(spDataLarge)
 ## Introduction {#reproj-intro}
 
 Section \@ref(crs-intro) introduced coordinate reference systems (CRSs) and demonstrated their importance.
-This chapter goes further, highlighting issues that can arise due to ignoring CRSs and to *transform* geographic data from one CRS to another.
+This chapter goes further, highlighting specific issues that can arise due to ignoring CRSs, and demonstrating how to **set** coordinate systems and *transform* geographic data from one CRS to another.
 \index{CRS!geographic} 
 \index{CRS!projected} 
 As illustrated in Figure \@ref(fig:vectorplots) from that earlier chapter, there are two types of CRSs: *geographic* ('lon/lat', with units in degrees longitude and latitude) and *projected* (typically with units of meters from a datum).
 In many projects there is no need to worry about, let alone convert between, different CRSs.
-It is important to know if your data is in a projected or geographic coordinates system, and the consequences of this for geometry operations.
+It is important to know if your data is in a projected or geographic coordinate system, and the consequences of this for geometry operations.
 However, if you know the CRS of your data and the consequences for geometry operations (covered in the next section), CRS should *just work*: knowledge of CRSs is often most important when things go wrong.
 Having a clearly defined project CRS that all project data is in (or is converted into), plus understanding how and why to use different CRSs, can ensure that things don't go wrong. 
 
