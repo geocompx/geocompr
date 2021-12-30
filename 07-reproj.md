@@ -13,7 +13,7 @@ library(spData)
 library(spDataLarge)
 ```
 
-## Introduction
+## Introduction {#reproj-intro}
 
 Section \@ref(crs-intro) introduced coordinate reference systems (CRSs) and demonstrated their importance.
 This chapter goes further, highlighting issues that can arise due to ignoring CRSs and to *transform* geographic data from one CRS to another.
@@ -310,12 +310,37 @@ We will cover the particularities of vector data transformation in Section \@ref
 \index{CRS!reprojection} 
 \index{vector!reprojection} 
 Chapter \@ref(spatial-class) demonstrated how vector geometries are made-up of points, and how points form the basis of more complex objects such as lines and polygons.
-Reprojecting vectors thus consists of transforming the coordinates of these points.
-This is illustrated by `cycle_hire_osm`, an `sf` object from **spData** that represents cycle hire locations across London.
-The previous section showed how the CRS of vector data can be queried with `st_crs()`.
-<!--toDo:rl-->
-<!--not longer valid-->
-<!-- Although the output of this function is printed as a single entity, the result is in fact a named list of class `crs`, with names `proj4string` (which contains full details of the CRS) and `epsg` for its code. -->
+Reprojecting vectors thus consists of transforming the coordinates of these points, which form the vertices of lines and polygons.
+This is demonstrated below with reference to `cycle_hire_osm`, an `sf` object from **spData** that represents 'docking stations' where you can hire a bicycle across London.
+The CRS of `sf` objects can be queried --- and as we learned in Section \@ref(reproj-intro) set --- with the function `st_crs()`.
+The output is printed as multiple lines of text containing information about the coordinate system:
+
+
+```r
+st_crs(cycle_hire_osm)
+#> Coordinate Reference System:
+#>   User input: EPSG:4326 
+#>   wkt:
+#> GEOGCS["WGS 84",
+#>     DATUM["WGS_1984",
+#>         SPHEROID["WGS 84",6378137,298.257223563,
+#>             AUTHORITY["EPSG","7030"]],
+#>         AUTHORITY["EPSG","6326"]],
+#>     PRIMEM["Greenwich",0,
+#>         AUTHORITY["EPSG","8901"]],
+#>     UNIT["degree",0.0174532925199433,
+#>         AUTHORITY["EPSG","9122"]],
+#>     AUTHORITY["EPSG","4326"]]
+```
+
+The output contains two main components: 1) `User input` (in this case `EPSG:4326`) and 2) `wkt`.
+The `User input` component is simply the text that the user entered to describe the CRS, with `EPSG:` added as a prefix if the CRS was given as an EPSG code.
+`crs = 4326` is understood by `sf` as `crs = "EPSG:4326"` and can be used, although we prefer the more explicit character string to prevent ambiguity.
+
+The `wkt` component stands for '**w**ell-**k**nown **t**ext representation of coordinate reference systems'.
+The language was developed as an open standard by the Open Geospatial Commission (OGC) "for the description of coordinate operations" and is related to the WKT representation of geometries, which was also developed by the OGC and is used when printing vector geometries, as outlined in Section \@ref(geometry).
+The full the WKT CRS format specification, the latest version of which was published in 2019 as an internationally agreed standard (ISO 19162:2019), is available in a 132 page document published at [docs.opengeospatial.org](http://docs.opengeospatial.org/is/18-010r7/18-010r7.html).
+Although the output of this function is printed as a single entity, the result is in fact a named list of class `crs`, with names `proj4string` (which contains full details of the CRS) and `epsg` for its code.
 <!-- This is demonstrated below: -->
 
 

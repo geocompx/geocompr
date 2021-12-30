@@ -107,9 +107,9 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://nowosad.github.io/spData/">spData</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Nowosad/spData">spDataLarge</a></span><span class="op">)</span></code></pre></div>
 </div>
-<div id="introduction-4" class="section level2" number="7.1">
+<div id="reproj-intro" class="section level2" number="7.1">
 <h2>
-<span class="header-section-number">7.1</span> Introduction<a class="anchor" aria-label="anchor" href="#introduction-4"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.1</span> Introduction<a class="anchor" aria-label="anchor" href="#reproj-intro"><i class="fas fa-link"></i></a>
 </h2>
 <p>Section <a href="spatial-class.html#crs-intro">2.4</a> introduced coordinate reference systems (CRSs) and demonstrated their importance.
 This chapter goes further, highlighting issues that can arise due to ignoring CRSs and to <em>transform</em> geographic data from one CRS to another.
@@ -342,12 +342,32 @@ We will cover the particularities of vector data transformation in Section <a hr
 <p>
 
 Chapter <a href="spatial-class.html#spatial-class">2</a> demonstrated how vector geometries are made-up of points, and how points form the basis of more complex objects such as lines and polygons.
-Reprojecting vectors thus consists of transforming the coordinates of these points.
-This is illustrated by <code>cycle_hire_osm</code>, an <code>sf</code> object from <strong>spData</strong> that represents cycle hire locations across London.
-The previous section showed how the CRS of vector data can be queried with <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>.
-<!--toDo:rl-->
-<!--not longer valid-->
-<!-- Although the output of this function is printed as a single entity, the result is in fact a named list of class `crs`, with names `proj4string` (which contains full details of the CRS) and `epsg` for its code. -->
+Reprojecting vectors thus consists of transforming the coordinates of these points, which form the vertices of lines and polygons.
+This is demonstrated below with reference to <code>cycle_hire_osm</code>, an <code>sf</code> object from <strong>spData</strong> that represents ‘docking stations’ where you can hire a bicycle across London.
+The CRS of <code>sf</code> objects can be queried — and as we learned in Section <a href="reproj-geo-data.html#reproj-intro">7.1</a> set — with the function <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>.
+The output is printed as multiple lines of text containing information about the coordinate system:</p>
+<div class="sourceCode" id="cb227"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">cycle_hire_osm</span><span class="op">)</span>
+<span class="co">#&gt; Coordinate Reference System:</span>
+<span class="co">#&gt;   User input: EPSG:4326 </span>
+<span class="co">#&gt;   wkt:</span>
+<span class="co">#&gt; GEOGCS["WGS 84",</span>
+<span class="co">#&gt;     DATUM["WGS_1984",</span>
+<span class="co">#&gt;         SPHEROID["WGS 84",6378137,298.257223563,</span>
+<span class="co">#&gt;             AUTHORITY["EPSG","7030"]],</span>
+<span class="co">#&gt;         AUTHORITY["EPSG","6326"]],</span>
+<span class="co">#&gt;     PRIMEM["Greenwich",0,</span>
+<span class="co">#&gt;         AUTHORITY["EPSG","8901"]],</span>
+<span class="co">#&gt;     UNIT["degree",0.0174532925199433,</span>
+<span class="co">#&gt;         AUTHORITY["EPSG","9122"]],</span>
+<span class="co">#&gt;     AUTHORITY["EPSG","4326"]]</span></code></pre></div>
+<p>The output contains two main components: 1) <code>User input</code> (in this case <code>EPSG:4326</code>) and 2) <code>wkt</code>.
+The <code>User input</code> component is simply the text that the user entered to describe the CRS, with <code>EPSG:</code> added as a prefix if the CRS was given as an EPSG code.
+<code>crs = 4326</code> is understood by <code>sf</code> as <code>crs = "EPSG:4326"</code> and can be used, although we prefer the more explicit character string to prevent ambiguity.</p>
+<p>The <code>wkt</code> component stands for ‘<strong>w</strong>ell-<strong>k</strong>nown <strong>t</strong>ext representation of coordinate reference systems.’
+The language was developed as an open standard by the Open Geospatial Commission (OGC) “for the description of coordinate operations” and is related to the WKT representation of geometries, which was also developed by the OGC and is used when printing vector geometries, as outlined in Section <a href="spatial-class.html#geometry">2.2.5</a>.
+The full the WKT CRS format specification, the latest version of which was published in 2019 as an internationally agreed standard (ISO 19162:2019), is available in a 132 page document published at <a href="http://docs.opengeospatial.org/is/18-010r7/18-010r7.html">docs.opengeospatial.org</a>.
+Although the output of this function is printed as a single entity, the result is in fact a named list of class <code>crs</code>, with names <code>proj4string</code> (which contains full details of the CRS) and <code>epsg</code> for its code.
 <!-- This is demonstrated below: --></p>
 <!--toDo:rl-->
 <!--not longer valid-->
@@ -402,12 +422,12 @@ On a side note – the second argument can also be an existing raster object wit
 <p>Let’s take a look at two examples of raster transformation: using categorical and continuous data.
 Land cover data are usually represented by categorical maps.
 The <code>nlcd.tif</code> file provides information for a small area in Utah, USA obtained from <a href="https://www.mrlc.gov/data/nlcd-2011-land-cover-conus">National Land Cover Database 2011</a> in the NAD83 / UTM zone 12N CRS.</p>
-<div class="sourceCode" id="cb227"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb228"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cat_raster</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/nlcd.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">cat_raster</span><span class="op">)</span>
 <span class="co">#&gt; [1] "PROJCRS[\"NAD83 / UTM zone 12N\",\n    BASEGEOGCRS[\"NAD83\",\n        DATUM[\"North American Datum 1983\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4269]],\n    CONVERSION[\"UTM zone 12N\",\n        METHOD[\"Transverse Mercator\",\n            ID[\"EPSG\",9807]],\n        PARAMETER[\"Latitude of natural origin\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8801]],\n        PARAMETER[\"Longitude of natural origin\",-111,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8802]],\n        PARAMETER[\"Scale factor at natural origin\",0.9996,\n            SCALEUNIT[\"unity\",1],\n            ID[\"EPSG\",8805]],\n        PARAMETER[\"False easting\",500000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8806]],\n        PARAMETER[\"False northing\",0,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8807]]],\n    CS[Cartesian,2],\n        AXIS[\"(E)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"(N)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"North America - 114°W to 108°W and NAD83 by country\"],\n        BBOX[31.33,-114,84,-108]],\n    ID[\"EPSG\",26912]]"</span></code></pre></div>
 <p>In this region, 8 land cover classes were distinguished (a full list of NLCD2011 land cover classes can be found at <a href="https://www.mrlc.gov/data/legends/national-land-cover-database-2011-nlcd2011-legend">mrlc.gov</a>):</p>
-<div class="sourceCode" id="cb228"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb229"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/unique.html">unique</a></span><span class="op">(</span><span class="va">cat_raster</span><span class="op">)</span>
 <span class="co">#&gt;       levels</span>
 <span class="co">#&gt; 1      Water</span>
@@ -423,7 +443,7 @@ This could be done using the nearest neighbor method (<code>near</code>), which 
 An example is reprojecting <code>cat_raster</code> to WGS84, a geographic CRS well suited for web mapping.
 The first step is to obtain the PROJ definition of this CRS, which can be done, for example using the <a href="http://spatialreference.org/ref/epsg/wgs-84/">http://spatialreference.org</a> webpage.
 The final step is to reproject the raster with the <code><a href="https://rdrr.io/pkg/terra/man/project.html">project()</a></code> function which, in the case of categorical data, uses the nearest neighbor method (<code>near</code>):</p>
-<div class="sourceCode" id="cb229"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb230"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cat_raster_wgs84</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/project.html">project</a></span><span class="op">(</span><span class="va">cat_raster</span>, <span class="st">"EPSG:4326"</span>, method <span class="op">=</span> <span class="st">"near"</span><span class="op">)</span></code></pre></div>
 <p>Many properties of the new object differ from the previous one, including the number of columns and rows (and therefore number of cells), resolution (transformed from meters into degrees), and extent, as illustrated in Table <a href="reproj-geo-data.html#tab:catraster">7.1</a> (note that the number of categories increases from 8 to 9 because of the addition of <code>NA</code> values, not because a new category has been created — the land cover classes are preserved).</p>
 <div class="inline-table"><table class="table table-sm">
@@ -458,7 +478,7 @@ The final step is to reproject the raster with the <code><a href="https://rdrr.i
 </table></div>
 <p>Reprojecting numeric rasters (with <code>numeric</code> or in this case <code>integer</code> values) follows an almost identical procedure.
 This is demonstrated below with <code>srtm.tif</code> in <strong>spDataLarge</strong> from <a href="https://www2.jpl.nasa.gov/srtm/">the Shuttle Radar Topography Mission (SRTM)</a>, which represents height in meters above sea level (elevation) with the WGS84 CRS:</p>
-<div class="sourceCode" id="cb230"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb231"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">con_raster</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/srtm.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">con_raster</span><span class="op">)</span>
 <span class="co">#&gt; [1] "GEOGCRS[\"WGS 84\",\n    DATUM[\"World Geodetic System 1984\",\n        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n            LENGTHUNIT[\"metre\",1]]],\n    PRIMEM[\"Greenwich\",0,\n        ANGLEUNIT[\"degree\",0.0174532925199433]],\n    CS[ellipsoidal,2],\n        AXIS[\"geodetic latitude (Lat)\",north,\n            ORDER[1],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        AXIS[\"geodetic longitude (Lon)\",east,\n            ORDER[2],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n    ID[\"EPSG\",4326]]"</span></code></pre></div>
@@ -467,7 +487,7 @@ Instead, we will use the bilinear method which computes the output cell value ba
 The values in the projected dataset are the distance-weighted average of the values from these four cells:
 the closer the input cell is to the center of the output cell, the greater its weight.
 The following commands create a text string representing WGS 84 / UTM zone 12N, and reproject the raster into this CRS, using the <code>bilinear</code> method:</p>
-<div class="sourceCode" id="cb231"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb232"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">con_raster_ea</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/project.html">project</a></span><span class="op">(</span><span class="va">con_raster</span>, <span class="st">"EPSG:32612"</span>, method <span class="op">=</span> <span class="st">"bilinear"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">con_raster_ea</span><span class="op">)</span>
 <span class="co">#&gt; [1] "PROJCRS[\"WGS 84 / UTM zone 12N\",\n    BASEGEOGCRS[\"WGS 84\",\n        DATUM[\"World Geodetic System 1984\",\n            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4326]],\n    CONVERSION[\"UTM zone 12N\",\n        METHOD[\"Transverse Mercator\",\n            ID[\"EPSG\",9807]],\n        PARAMETER[\"Latitude of natural origin\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8801]],\n        PARAMETER[\"Longitude of natural origin\",-111,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8802]],\n        PARAMETER[\"Scale factor at natural origin\",0.9996,\n            SCALEUNIT[\"unity\",1],\n            ID[\"EPSG\",8805]],\n        PARAMETER[\"False easting\",500000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8806]],\n        PARAMETER[\"False northing\",0,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8807]]],\n    CS[Cartesian,2],\n        AXIS[\"(E)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"(N)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"World - N hemisphere - 114°W to 108°W - by country\"],\n        BBOX[0,-114,84,-108]],\n    ID[\"EPSG\",32612]]"</span></code></pre></div>
@@ -535,7 +555,7 @@ For instance, if we are interested in a density (points per grid cell or inhabit
 One of the most popular projections to achieve this is the Winkel tripel projection (Figure <a href="reproj-geo-data.html#fig:wintriproj">7.2</a>).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 This projection is used, among others, by the National Geographic Society.&lt;/p&gt;"><sup>32</sup></a>
 <code>st_transform_proj()</code> from the <strong>lwgeom</strong> package allows for coordinate transformations to a wide range of CRSs, including the Winkel tripel projection:</p>
-<div class="sourceCode" id="cb232"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb233"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_wintri</span> <span class="op">=</span> <span class="fu">lwgeom</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lwgeom/man/st_transform_proj.html">st_transform_proj</a></span><span class="op">(</span><span class="va">world</span>, crs <span class="op">=</span> <span class="st">"+proj=wintri"</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:wintriproj"></span>
@@ -609,7 +629,7 @@ How does it influence the results?</p>
       <ul class="nav navbar-nav">
 <li><a class="nav-link" href="#reproj-geo-data"><span class="header-section-number">7</span> Reprojecting geographic data</a></li>
 <li><a class="nav-link" href="#prerequisites-4">Prerequisites</a></li>
-<li><a class="nav-link" href="#introduction-4"><span class="header-section-number">7.1</span> Introduction</a></li>
+<li><a class="nav-link" href="#reproj-intro"><span class="header-section-number">7.1</span> Introduction</a></li>
 <li><a class="nav-link" href="#whenproject"><span class="header-section-number">7.2</span> When to reproject?</a></li>
 <li><a class="nav-link" href="#which-crs-to-use"><span class="header-section-number">7.3</span> Which CRS to use?</a></li>
 <li><a class="nav-link" href="#reproj-vec-geom"><span class="header-section-number">7.4</span> Reprojecting vector geometries</a></li>
