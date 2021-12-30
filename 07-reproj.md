@@ -30,6 +30,7 @@ The next section shows how to set CRSs and highlights the importance of understa
 Section \@ref(geom-proj) demonstrates the importance of knowing what CRS your data is in with reference to a worked example of creating buffers.
 The questions of when to reproject and which CRS to use are covered in Section \@ref(whenproject) and Section \@ref(which-crs), respectively.
 Reprojecting vector and raster objects is covered in sections \@ref(reproj-vec-geom) and \@ref(reproj-ras).
+Modifying global map projections is covered in Section \@ref(mapproj).
 
 ## Assigning coordinate systems
 
@@ -540,7 +541,7 @@ Therefore, the task at hand determines which projection to choose.
 For instance, if we are interested in a density (points per grid cell or inhabitants per grid cell) we should use an equal-area projection (see also Chapter \@ref(location)).</div>\EndKnitrBlock{rmdnote}
 
 
-## Modifying map projections
+## Modifying map projections {#mapproj}
 
 <!--toDo:jn-->
 <!--not longer valid-->
