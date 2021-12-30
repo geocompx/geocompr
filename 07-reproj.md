@@ -59,6 +59,9 @@ st_is_longlat(london_geo)
 #> [1] TRUE
 ```
 
+<!-- The following example demonstrates how to add CRS metadata to raster datasets. -->
+<!-- Todo: add this -->
+
 Datasets without a specified CRS can cause problems: all geographic coordinates have a coordinate system and software can only make good decisions around plotting and and geometry operations if it knows what type of CRS it is working with.
 
 ## Geometry operations on projected and unprojected data {#geom-proj}
