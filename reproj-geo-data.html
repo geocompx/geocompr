@@ -116,9 +116,20 @@ This chapter goes further, highlighting issues that can arise due to ignoring CR
 
 
 As illustrated in Figure <a href="spatial-class.html#fig:vectorplots">2.1</a> from that earlier chapter, there are two types of CRSs: <em>geographic</em> (‘lon/lat,’ with units in degrees longitude and latitude) and <em>projected</em> (typically with units of meters from a datum).
-This has consequences.
-To check if our data has geographic CRS, we can use <code><a href="https://r-spatial.github.io/sf/reference/st_is_longlat.html">sf::st_is_longlat()</a></code> for vector data and <code><a href="https://rdrr.io/pkg/terra/man/is.lonlat.html">terra::is.lonlat()</a></code> for raster data.
-In some cases the CRS is unknown, as is the case in the <code>london</code> dataset created in the code chunk below, building on the example of London introduced in Section <a href="spatial-class.html#vector-data">2.2</a>:</p>
+In many projects there is no need to worry about, let alone convert between, different CRSs.
+It is important to know if your data is in a projected or geographic coordinates system, and the consequences of this for geometry operations.
+However, if you know the CRS of your data and the consequences for geometry operations (covered in the next section), CRS should <em>just work</em>: knowledge of CRSs is often most important when things go wrong.
+Having a clearly defined project CRS that all project data is in (or is converted into), plus understanding how and why to use different CRSs, can ensure that things don’t go wrong.</p>
+<p>This chapter teaches the fundamentals of CRSs, demonstrates the consequences of using different CRSs (including what can go wrong), and how to ‘reproject’ datasets from one coordinate system to another.
+The next section shows how to set CRSs and highlights the importance of understanding them, with reference to the impacts of using spherical geometry engines.
+The questions of when to reproject and which CRS to use are covered in Section <a href="reproj-geo-data.html#whenproject">7.3</a> and Section <a href="reproj-geo-data.html#which-crs">7.4</a>, respectively.
+Reprojecting vector and raster objects is covered in sections <a href="reproj-geo-data.html#reproj-vec-geom">7.5</a> and <a href="reproj-geo-data.html#reproj-ras">7.6</a>.</p>
+</div>
+<div id="assigning-coordinate-systems" class="section level2" number="7.2">
+<h2>
+<span class="header-section-number">7.2</span> Assigning coordinate systems<a class="anchor" aria-label="anchor" href="#assigning-coordinate-systems"><i class="fas fa-link"></i></a>
+</h2>
+<p>In some cases the CRS of a geographic object is unknown, as is the case in the <code>london</code> dataset created in the code chunk below, building on the example of London introduced in Section <a href="spatial-class.html#vector-data">2.2</a>:</p>
 <div class="sourceCode" id="cb216"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">london</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>lon <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span>, lat <span class="op">=</span> <span class="fl">51.5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"lon"</span>, <span class="st">"lat"</span><span class="op">)</span><span class="op">)</span>
@@ -126,8 +137,8 @@ In some cases the CRS is unknown, as is the case in the <code>london</code> data
 <span class="co">#&gt; [1] NA</span></code></pre></div>
 <p>The output <code>NA</code> shows that <code>sf</code> does not know what the CRS is and is unwilling to guess (<code>NA</code> literally means ‘not available’).
 Unless a CRS is manually specified or is loaded from a source that has CRS metadata, <code>sf</code> does not make any explicit assumptions about which coordinate systems, other than to say “I don’t know.”
-This behavior makes sense given the diversity of available CRSs but differs from some approaches, such as the GeoJSON file format specification, which makes the simplifying assumption that all coordinates have a lon/lat CRS: <code>EPSG:4326</code>.
-A CRS can be added to <code>sf</code> objects in three main ways:</p>
+This behavior makes sense given the diversity of available CRSs but differs from some approaches, such as the GeoJSON file format specification, which makes the simplifying assumption that all coordinates have a lon/lat CRS: <code>EPSG:4326</code>.</p>
+<p>A CRS can be added to <code>sf</code> objects in three main ways:</p>
 <ul>
 <li>By assigning the CRS to a pre-existing object, e.g. with <code>st_crs(london) = "EPSG:4326"</code>.</li>
 <li>By passing a CRS to the <code>crs</code> argument in <code>sf</code> functions that create geometry objects such as <code>st_as_sf(... crs = "EPSG:4326")</code>. The same argument can also be used to set the CRS when creating raster datasets (e.g., <code>rast(crs = "EPSG:4326")</code>).</li>
@@ -143,10 +154,8 @@ GEOS is not well suited to lon/lat CRSs, as we will see later in this chapter.
 If a CRS has been set, <code>sf</code> will use either GEOS or the S2 <em>spherical geometry engine</em> depending on the type of CRS.
 <!-- Todo: add s2 section -->
 <!--jn: s2 section is still missing from the book-->
-Since <code>sf</code> version 1.0.0, R’s ability to work with geographic vector datasets that have lon/lat CRSs has improved substantially, thanks to its integration with S2 introduced in Section <a href="#s2"><strong>??</strong></a>.
-However, CRSs and transforming between them are still important, especially for geographic raster datasets for which spherical geometry is less relevant (S2 only works with vector geometries).
-In this section we will demonstrate the importance of CRSs, and the impacts of using the S2 library for vector data, before moving on to the question of when to reproject in Section <a href="reproj-geo-data.html#whenproject">7.2</a> and techniques for reprojecting vector and raster objects in the remainder of the chapter.</p>
-<p>The example used in this introductory section is to create a buffer of 100 km around <code>london</code>.
+Since <code>sf</code> version 1.0.0, R’s ability to work with geographic vector datasets that have lon/lat CRSs has improved substantially, thanks to its integration with S2 introduced in Section <a href="#s2"><strong>??</strong></a>.</p>
+<p>To demonstrate the importance of CRSs, we will in this section create a buffer of 100 km around the <code>london</code> object created in the previous section.
 We will also create a deliberately faulty buffer with a ‘distance’ of 1 degree, which is roughly equivalent to 100 km (1 degree is about 111 km at the equator).
 Before diving into the code, it may be worth skipping briefly ahead to peek at Figure <a href="reproj-geo-data.html#fig:crs-buf">7.1</a> to get a visual handle on the outputs that you should be able to reproduce by following the code chunks below.</p>
 <p>The first stage is to create three buffers around the <code>london</code> and <code>london_geo</code> objects created above with boundary distances of 1 degree and 100 km (or 100,000 m, which can be expressed as <code>1e5</code> in scientific notation) from central London:</p>
@@ -167,10 +176,8 @@ Like <code>london_buff_no_crs</code>, the new <code>london_geo</code> object is 
 <span class="co">#&gt; dist is assumed to be in decimal degrees (arc_degrees).</span>
 <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/s2.html">sf_use_s2</a></span><span class="op">(</span><span class="cn">TRUE</span><span class="op">)</span>
 <span class="co">#&gt; Spherical geometry (s2) switched on</span></code></pre></div>
-<p>The results of the above code chunk show that, when spherical geometry operations are turned off, performing buffers (and other geometric operations) on unprojected datasets generate an important warning: the result of this operation may be of limited use because it is in units of latitude and longitude, rather than meters or some other suitable measure of distance.
-<!--toDo:rl-->
-<!--jn: something is wrong with the next sentence... -->
-the buffer is elongated in the north-south direction because lines of longitude converge towards the Earth’s poles.</p>
+<p>The warning message above hints at issues with performing planar geometry operations on lon/lat data.
+When spherical geometry operations are turned off, with the command <code>sf::sf_use_s2(FALSE)</code>, buffers (and other geometric operations) may result in worthless outputs because they use units of latitude and longitude, a poor substitute for proper units of distances such as meters.</p>
 
 <div class="rmdnote">
 The distance between two lines of longitude, called meridians, is around 111 km at the equator (execute <code>geosphere::distGeo(c(0, 0), c(1, 0))</code> to find the precise distance).
@@ -220,9 +227,9 @@ In situations where curved boundaries are advantageous, transforming to a projec
 <p>The importance of CRSs (primarily whether they are projected or geographic) and the impacts of <code>sf</code>’s default setting to use S2 for buffers on lon/lat data is clear from the example above.
 The subsequent sections go into more depth, exploring which CRS to use when projected CRSs <em>are</em> needed and the details of reprojecting vector and raster objects.</p>
 </div>
-<div id="whenproject" class="section level2" number="7.2">
+<div id="whenproject" class="section level2" number="7.3">
 <h2>
-<span class="header-section-number">7.2</span> When to reproject?<a class="anchor" aria-label="anchor" href="#whenproject"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.3</span> When to reproject?<a class="anchor" aria-label="anchor" href="#whenproject"><i class="fas fa-link"></i></a>
 </h2>
 <p>
 The previous section showed how to set the CRS manually, with <code>st_set_crs(london, "EPSG:4326")</code>.
@@ -245,11 +252,11 @@ Another case is when two objects with different CRSs must be compared or combine
 But which CRS to use?
 The answer depends on context: many projects, especially those involving web mapping, require outputs in EPSG:4326, in which case it is worth transforming the projected object.
 If, however, the project requires planar geometry operations rather than spherical geometry operations engine (e.g. to create buffers with smooth edges), it may be worth transforming data with a geographic CRS into an equivalent object with a projected CRS, such as the British National Grid (EPSG:27700).
-That is the subject of Section <a href="reproj-geo-data.html#reproj-vec-geom">7.4</a>.</p>
+That is the subject of Section <a href="reproj-geo-data.html#reproj-vec-geom">7.5</a>.</p>
 </div>
-<div id="which-crs-to-use" class="section level2" number="7.3">
+<div id="which-crs" class="section level2" number="7.4">
 <h2>
-<span class="header-section-number">7.3</span> Which CRS to use?<a class="anchor" aria-label="anchor" href="#which-crs-to-use"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.4</span> Which CRS to use?<a class="anchor" aria-label="anchor" href="#which-crs"><i class="fas fa-link"></i></a>
 </h2>
 <!--jn:toDo-->
 <!--mention websites and the crssuggest package-->
@@ -322,17 +329,17 @@ UTM EPSG codes run sequentially from 32601 to 32660 for northern hemisphere loca
 <p>Maps of UTM zones such as that provided by <a href="http://www.dmap.co.uk/utmworld.htm">dmap.co.uk</a> confirm that London is in UTM zone 30U.</p>
 <p>The principles outlined in this section apply equally to vector and raster datasets.
 Some features of CRS transformation however are unique to each geographic data model.
-We will cover the particularities of vector data transformation in Section <a href="reproj-geo-data.html#reproj-vec-geom">7.4</a> and those of raster transformation in Section <a href="reproj-geo-data.html#reprojecting-raster-geometries">7.5</a>.</p>
+We will cover the particularities of vector data transformation in Section <a href="reproj-geo-data.html#reproj-vec-geom">7.5</a> and those of raster transformation in Section <a href="#reprojecting-raster-geometries"><strong>??</strong></a>.</p>
 </div>
-<div id="reproj-vec-geom" class="section level2" number="7.4">
+<div id="reproj-vec-geom" class="section level2" number="7.5">
 <h2>
-<span class="header-section-number">7.4</span> Reprojecting vector geometries<a class="anchor" aria-label="anchor" href="#reproj-vec-geom"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.5</span> Reprojecting vector geometries<a class="anchor" aria-label="anchor" href="#reproj-vec-geom"><i class="fas fa-link"></i></a>
 </h2>
 <p>
 
 Chapter <a href="spatial-class.html#spatial-class">2</a> demonstrated how vector geometries are made-up of points, and how points form the basis of more complex objects such as lines and polygons.
 Reprojecting vectors thus consists of transforming the coordinates of these points, which form the vertices of lines and polygons.</p>
-<p>Section <a href="reproj-geo-data.html#whenproject">7.2</a> contains an example in which at least one <code>sf</code> object must be transformed into an equivalent object with a different CRS to calculate the distance between two objects.</p>
+<p>Section <a href="reproj-geo-data.html#whenproject">7.3</a> contains an example in which at least one <code>sf</code> object must be transformed into an equivalent object with a different CRS to calculate the distance between two objects.</p>
 <div class="sourceCode" id="cb225"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">london2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">london_geo</span>, <span class="st">"EPSG:27700"</span><span class="op">)</span></code></pre></div>
 <p>Now that a transformed version of <code>london</code> has been created, using the <strong>sf</strong> function <code><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform()</a></code>, the distance between the two representations of London can be found.
@@ -404,9 +411,9 @@ Printing a spatial object in the console automatically returns its coordinate re
 To access and modify it explicitly, use the <code>st_crs</code> function, for example, <code>st_crs(cycle_hire_osm)</code>.
 </div>
 </div>
-<div id="reprojecting-raster-geometries" class="section level2" number="7.5">
+<div id="reproj-ras" class="section level2" number="7.6">
 <h2>
-<span class="header-section-number">7.5</span> Reprojecting raster geometries<a class="anchor" aria-label="anchor" href="#reprojecting-raster-geometries"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.6</span> Reprojecting raster geometries<a class="anchor" aria-label="anchor" href="#reproj-ras"><i class="fas fa-link"></i></a>
 </h2>
 <p>
 
@@ -418,7 +425,7 @@ transforming a vector object involves changing the coordinates of every vertex b
 Rasters are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters), so it is usually impracticable to transform coordinates of pixels separately.
 Raster reprojection involves creating a new raster object, often with a different number of columns and rows than the original.
 The attributes must subsequently be re-estimated, allowing the new pixels to be ‘filled’ with appropriate values.
-In other words, raster reprojection can be thought of as two separate spatial operations: a vector reprojection of the raster extent to another CRS (Section <a href="reproj-geo-data.html#reproj-vec-geom">7.4</a>), and computation of new pixel values through resampling (Section <a href="geometric-operations.html#resampling">5.3.4</a>).
+In other words, raster reprojection can be thought of as two separate spatial operations: a vector reprojection of the raster extent to another CRS (Section <a href="reproj-geo-data.html#reproj-vec-geom">7.5</a>), and computation of new pixel values through resampling (Section <a href="geometric-operations.html#resampling">5.3.4</a>).
 Thus in most cases when both raster and vector data are used, it is better to avoid reprojecting rasters and reproject vectors instead.</p>
 
 <div class="rmdnote">
@@ -545,9 +552,9 @@ Therefore, the task at hand determines which projection to choose.
 For instance, if we are interested in a density (points per grid cell or inhabitants per grid cell) we should use an equal-area projection (see also Chapter <a href="location.html#location">14</a>).
 </div>
 </div>
-<div id="modifying-map-projections" class="section level2" number="7.6">
+<div id="modifying-map-projections" class="section level2" number="7.7">
 <h2>
-<span class="header-section-number">7.6</span> Modifying map projections<a class="anchor" aria-label="anchor" href="#modifying-map-projections"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.7</span> Modifying map projections<a class="anchor" aria-label="anchor" href="#modifying-map-projections"><i class="fas fa-link"></i></a>
 </h2>
 <!--toDo:jn-->
 <!--not longer valid-->
@@ -586,9 +593,9 @@ FIGURE 7.2: Winkel tripel projection of the world.
 An excellent resource in this area, also implemented in R, is the website R Spatial.
 Chapter 6 from this free online book is recommended reading — see: <a href="https://rspatial.org/terra/spatial/6-crs.html">rspatial.org/terra/spatial/6-crs.html</a></p>
 </div>
-<div id="exercises-5" class="section level2" number="7.7">
+<div id="exercises-5" class="section level2" number="7.8">
 <h2>
-<span class="header-section-number">7.7</span> Exercises<a class="anchor" aria-label="anchor" href="#exercises-5"><i class="fas fa-link"></i></a>
+<span class="header-section-number">7.8</span> Exercises<a class="anchor" aria-label="anchor" href="#exercises-5"><i class="fas fa-link"></i></a>
 </h2>
 <p>E1. Create a new object called <code>nz_wgs</code> by transforming <code>nz</code> object into the WGS84 CRS.</p>
 <ul>
@@ -642,12 +649,13 @@ How does it influence the results?</p>
 <li><a class="nav-link" href="#reproj-geo-data"><span class="header-section-number">7</span> Reprojecting geographic data</a></li>
 <li><a class="nav-link" href="#prerequisites-4">Prerequisites</a></li>
 <li><a class="nav-link" href="#reproj-intro"><span class="header-section-number">7.1</span> Introduction</a></li>
-<li><a class="nav-link" href="#whenproject"><span class="header-section-number">7.2</span> When to reproject?</a></li>
-<li><a class="nav-link" href="#which-crs-to-use"><span class="header-section-number">7.3</span> Which CRS to use?</a></li>
-<li><a class="nav-link" href="#reproj-vec-geom"><span class="header-section-number">7.4</span> Reprojecting vector geometries</a></li>
-<li><a class="nav-link" href="#reprojecting-raster-geometries"><span class="header-section-number">7.5</span> Reprojecting raster geometries</a></li>
-<li><a class="nav-link" href="#modifying-map-projections"><span class="header-section-number">7.6</span> Modifying map projections</a></li>
-<li><a class="nav-link" href="#exercises-5"><span class="header-section-number">7.7</span> Exercises</a></li>
+<li><a class="nav-link" href="#assigning-coordinate-systems"><span class="header-section-number">7.2</span> Assigning coordinate systems</a></li>
+<li><a class="nav-link" href="#whenproject"><span class="header-section-number">7.3</span> When to reproject?</a></li>
+<li><a class="nav-link" href="#which-crs"><span class="header-section-number">7.4</span> Which CRS to use?</a></li>
+<li><a class="nav-link" href="#reproj-vec-geom"><span class="header-section-number">7.5</span> Reprojecting vector geometries</a></li>
+<li><a class="nav-link" href="#reproj-ras"><span class="header-section-number">7.6</span> Reprojecting raster geometries</a></li>
+<li><a class="nav-link" href="#modifying-map-projections"><span class="header-section-number">7.7</span> Modifying map projections</a></li>
+<li><a class="nav-link" href="#exercises-5"><span class="header-section-number">7.8</span> Exercises</a></li>
 </ul>
 
       <div class="book-extra">

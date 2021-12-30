@@ -20,9 +20,19 @@ This chapter goes further, highlighting issues that can arise due to ignoring CR
 \index{CRS!geographic} 
 \index{CRS!projected} 
 As illustrated in Figure \@ref(fig:vectorplots) from that earlier chapter, there are two types of CRSs: *geographic* ('lon/lat', with units in degrees longitude and latitude) and *projected* (typically with units of meters from a datum).
-This has consequences.
-To check if our data has geographic CRS, we can use `sf::st_is_longlat()` for vector data and `terra::is.lonlat()` for raster data.
-In some cases the CRS is unknown, as is the case in the `london` dataset created in the code chunk below, building on the example of London introduced in Section \@ref(vector-data):
+In many projects there is no need to worry about, let alone convert between, different CRSs.
+It is important to know if your data is in a projected or geographic coordinates system, and the consequences of this for geometry operations.
+However, if you know the CRS of your data and the consequences for geometry operations (covered in the next section), CRS should *just work*: knowledge of CRSs is often most important when things go wrong.
+Having a clearly defined project CRS that all project data is in (or is converted into), plus understanding how and why to use different CRSs, can ensure that things don't go wrong. 
+
+This chapter teaches the fundamentals of CRSs, demonstrates the consequences of using different CRSs (including what can go wrong), and how to 'reproject' datasets from one coordinate system to another.
+The next section shows how to set CRSs and highlights the importance of understanding them, with reference to the impacts of using spherical geometry engines.
+The questions of when to reproject and which CRS to use are covered in Section \@ref(whenproject) and Section \@ref(which-crs), respectively.
+Reprojecting vector and raster objects is covered in sections \@ref(reproj-vec-geom) and \@ref(reproj-ras).
+
+## Assigning coordinate systems
+
+In some cases the CRS of a geographic object is unknown, as is the case in the `london` dataset created in the code chunk below, building on the example of London introduced in Section \@ref(vector-data):
 
 
 ```r
@@ -35,6 +45,7 @@ st_is_longlat(london)
 The output `NA` shows that `sf` does not know what the CRS is and is unwilling to guess (`NA` literally means 'not available').
 Unless a CRS is manually specified or is loaded from a source that has CRS metadata, `sf` does not make any explicit assumptions about which coordinate systems, other than to say "I don't know".
 This behavior makes sense given the diversity of available CRSs but differs from some approaches, such as the GeoJSON file format specification, which makes the simplifying assumption that all coordinates have a lon/lat CRS: `EPSG:4326`.
+
 A CRS can be added to `sf` objects in three main ways:
 
 - By assigning the CRS to a pre-existing object, e.g. with `st_crs(london) = "EPSG:4326"`.
@@ -55,10 +66,8 @@ If a CRS has been set, `sf` will use either GEOS or the S2 *spherical geometry e
 <!-- Todo: add s2 section -->
 <!--jn: s2 section is still missing from the book-->
 Since `sf` version 1.0.0, R's ability to work with geographic vector datasets that have lon/lat CRSs has improved substantially, thanks to its integration with S2 introduced in Section \@ref(s2).
-However, CRSs and transforming between them are still important, especially for geographic raster datasets for which spherical geometry is less relevant (S2 only works with vector geometries).
-In this section we will demonstrate the importance of CRSs, and the impacts of using the S2 library for vector data, before moving on to the question of when to reproject in Section \@ref(whenproject) and techniques for reprojecting vector and raster objects in the remainder of the chapter. 
 
-The example used in this introductory section is to create a buffer of 100 km around `london`.
+To demonstrate the importance of CRSs, we will in this section create a buffer of 100 km around the `london` object created in the previous section.
 We will also create a deliberately faulty buffer with a 'distance' of 1 degree, which is roughly equivalent to 100 km (1 degree is about 111 km at the equator).
 Before diving into the code, it may be worth skipping briefly ahead to peek at Figure \@ref(fig:crs-buf) to get a visual handle on the outputs that you should be able to reproduce by following the code chunks below.
 
@@ -88,10 +97,8 @@ sf::sf_use_s2(TRUE)
 #> Spherical geometry (s2) switched on
 ```
 
-The results of the above code chunk show that, when spherical geometry operations are turned off, performing buffers (and other geometric operations) on unprojected datasets generate an important warning: the result of this operation may be of limited use because it is in units of latitude and longitude, rather than meters or some other suitable measure of distance.
-<!--toDo:rl-->
-<!--jn: something is wrong with the next sentence... -->
-the buffer is elongated in the north-south direction because lines of longitude converge towards the Earth's poles.
+The warning message above hints at issues with performing planar geometry operations on lon/lat data. 
+When spherical geometry operations are turned off, with the command `sf::sf_use_s2(FALSE)`, buffers (and other geometric operations) may result in worthless outputs because they use units of latitude and longitude, a poor substitute for proper units of distances such as meters.
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">The distance between two lines of longitude, called meridians, is around 111 km at the equator (execute `geosphere::distGeo(c(0, 0), c(1, 0))` to find the precise distance).
 This shrinks to zero at the poles.
@@ -185,7 +192,7 @@ The answer depends on context: many projects, especially those involving web map
 If, however, the project requires planar geometry operations rather than spherical geometry operations engine (e.g. to create buffers with smooth edges), it may be worth transforming data with a geographic CRS into an equivalent object with a projected CRS, such as the British National Grid (EPSG:27700).
 That is the subject of Section \@ref(reproj-vec-geom).
 
-## Which CRS to use?
+## Which CRS to use? {#which-crs}
 
 <!--jn:toDo-->
 <!--mention websites and the crssuggest package-->
@@ -399,7 +406,7 @@ crs_lnd$epsg
 To access and modify it explicitly, use the `st_crs` function, for example, `st_crs(cycle_hire_osm)`.</div>\EndKnitrBlock{rmdnote}
 
 
-## Reprojecting raster geometries
+## Reprojecting raster geometries {#reproj-ras}
 
 \index{raster!reprojection} 
 \index{raster!warping} 
