@@ -181,28 +181,9 @@ st_distance(london_geo, london_proj)
 
 To make the `london` and `london_proj` objects geographically comparable one of them must be transformed into the CRS of the other.
 But which CRS to use?
-The answer is usually 'the projected CRS', which in this case is the British National Grid (EPSG:27700):
-
-
-```r
-london2 = st_transform(london_geo, "EPSG:27700")
-```
-
-Now that a transformed version of `london` has been created, using the **sf** function `st_transform()`, the distance between the two representations of London can be found.
-It may come as a surprise that `london` and `london2` are just over 2 km apart!^[
-The difference in location between the two points is not due to imperfections in the transforming operation (which is in fact very accurate) but the low precision of the manually-created coordinates that created `london` and `london_proj`.
-Also surprising may be that the result is provided in a matrix with units of meters.
-This is because `st_distance()` can provide distances between many features and because the CRS has units of meters.
-Use `as.numeric()` to coerce the result into a regular number.
-]
-
-
-```r
-st_distance(london2, london_proj)
-#> Units: [m]
-#>      [,1]
-#> [1,] 2018
-```
+The answer depends on context: many projects, especially those involving web mapping, require outputs in EPSG:4326, in which case it is worth transforming the projected object.
+If, however, the project requires planar geometry operations rather than spherical geometry operations engine (e.g. to create buffers with smooth edges), it may be worth transforming data with a geographic CRS into an equivalent object with a projected CRS, such as the British National Grid (EPSG:27700).
+That is the subject of Section \@ref(reproj-vec-geom).
 
 ## Which CRS to use?
 
@@ -311,7 +292,33 @@ We will cover the particularities of vector data transformation in Section \@ref
 \index{vector!reprojection} 
 Chapter \@ref(spatial-class) demonstrated how vector geometries are made-up of points, and how points form the basis of more complex objects such as lines and polygons.
 Reprojecting vectors thus consists of transforming the coordinates of these points, which form the vertices of lines and polygons.
-This is demonstrated below with reference to `cycle_hire_osm`, an `sf` object from **spData** that represents 'docking stations' where you can hire a bicycle across London.
+
+Section \@ref(whenproject) contains an example in which at least one `sf` object must be transformed into an equivalent object with a different CRS to calculate the distance between two objects.
+
+
+
+```r
+london2 = st_transform(london_geo, "EPSG:27700")
+```
+
+Now that a transformed version of `london` has been created, using the **sf** function `st_transform()`, the distance between the two representations of London can be found.
+It may come as a surprise that `london` and `london2` are just over 2 km apart!^[
+The difference in location between the two points is not due to imperfections in the transforming operation (which is in fact very accurate) but the low precision of the manually-created coordinates that created `london` and `london_proj`.
+Also surprising may be that the result is provided in a matrix with units of meters.
+This is because `st_distance()` can provide distances between many features and because the CRS has units of meters.
+Use `as.numeric()` to coerce the result into a regular number.
+]
+
+
+```r
+st_distance(london2, london_proj)
+#> Units: [m]
+#>      [,1]
+#> [1,] 2018
+```
+
+
+This is demonstrated below with reference to `cycle_hire_osm`, an `sf` object from **spData** that represents 'docking stations' where you can hire bicycles in London.
 The CRS of `sf` objects can be queried --- and as we learned in Section \@ref(reproj-intro) set --- with the function `st_crs()`.
 The output is printed as multiple lines of text containing information about the coordinate system:
 
@@ -340,9 +347,26 @@ The `User input` component is simply the text that the user entered to describe 
 The `wkt` component stands for '**w**ell-**k**nown **t**ext representation of coordinate reference systems'.
 The language was developed as an open standard by the Open Geospatial Commission (OGC) "for the description of coordinate operations" and is related to the WKT representation of geometries, which was also developed by the OGC and is used when printing vector geometries, as outlined in Section \@ref(geometry).
 The full the WKT CRS format specification, the latest version of which was published in 2019 as an internationally agreed standard (ISO 19162:2019), is available in a 132 page document published at [docs.opengeospatial.org](http://docs.opengeospatial.org/is/18-010r7/18-010r7.html).
-Although the output of this function is printed as a single entity, the result is in fact a named list of class `crs`, with names `proj4string` (which contains full details of the CRS) and `epsg` for its code.
-<!-- This is demonstrated below: -->
 
+Although the two components, `User input` and `wkt`, are printed as a single entity, the output of `st_crs()` is in fact a named list of class `crs` with two elements, single character strings named `input` and `wkt`:
+
+
+```
+#> [1] "crs"
+#> [1] "input" "wkt"
+```
+
+Additional elements can be retrieved with the `$` operator, including `Name`, `proj4string` and `epsg` (see [`?st_crs`](https://r-spatial.github.io/sf/reference/st_crs.html) and the CRS and tranformation tutorial on the GDAL [website](https://gdal.org/tutorials/osr_api_tut.html#querying-coordinate-reference-system) for details):
+
+
+```r
+crs_lnd$Name
+#> [1] "WGS 84"
+crs_lnd$proj4string
+#> [1] "+proj=longlat +datum=WGS84 +no_defs"
+crs_lnd$epsg
+#> [1] 4326
+```
 
 
 <!--toDo:rl-->
