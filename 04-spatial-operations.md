@@ -330,15 +330,16 @@ st_rook = function(x, y) st_relate(x, y, pattern = "F***1****")
 Building on the object `x` created previously, we can use the newly created functions to find out which elements in the grid are a 'queen' and 'rook' in relation to the middle square of the grid as follows:
 
 
-
-
+```r
+grid = st_make_grid(x, n = 3)
+grid_sf = st_sf(grid)
+grid_sf$queens = lengths(st_queen(grid, grid[5])) > 0
+plot(grid, col = grid_sf$queens)
+grid_sf$rooks = lengths(st_rook(grid, grid[5])) > 0
+plot(grid, col = grid_sf$rooks)
 ```
-#> Warning: Currect projection of shape grid_sf unknown. Long-lat (WGS84) is
-#> assumed.
 
-#> Warning: Currect projection of shape grid_sf unknown. Long-lat (WGS84) is
-#> assumed.
-```
+<img src="04-spatial-operations_files/figure-html/queenscode-1.png" width="100%" style="display: block; margin: auto;" /><img src="04-spatial-operations_files/figure-html/queenscode-2.png" width="100%" style="display: block; margin: auto;" />
 
 <div class="figure" style="text-align: center">
 <img src="04-spatial-operations_files/figure-html/queens-1.png" alt="Demonstration of custom binary spatial predicates for finding 'queen' (left) and 'rook' (right) relations to the central square in a grid with 9 geometries." width="100%" />
