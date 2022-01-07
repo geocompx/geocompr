@@ -32,7 +32,7 @@ Reprojecting vector and raster objects is covered in sections \@ref(reproj-vec-g
 Modifying map projections is covered in Section \@ref(mapproj).
 
 
-### CRSs in R {#crs-in-r}
+## CRSs in R {#crs-in-r}
 
 \index{CRS!EPSG}
 \index{CRS!WKT2}
@@ -49,10 +49,13 @@ SRIDs are usually short and therefore easier to remember.
 Each SRID is associated with a well-known text (WKT2) definition of the coordinate reference system. 
 
 A WKT2 describes coordinate reference systems (CRSs) and coordinates operations between them in the form of well-known text strings.
-It is exhaustive, detailed, and precise (as you can see later in this section), allowing for unambiguous CRSs storage and transformations.
+It is exhaustive, detailed, and precise, allowing for unambiguous CRSs storage and transformations.
 It consists of all information about any given CRS, including its datum and ellipsoid, prime meridian, projection, units, etc.
-This feature also makes the WKT2 approach more complicated
-and usually too complex to be manually defined.
+This feature also makes the WKT2 approach more complicated and usually too complex to be manually defined.
+
+The `wkt` component stands for '**w**ell-**k**nown **t**ext representation of coordinate reference systems'.
+The language was developed as an open standard by the Open Geospatial Commission (OGC) "for the description of coordinate operations" and is related to the WKT representation of geometries, which was also developed by the OGC and is used when printing vector geometries, as outlined in Section \@ref(geometry).
+The full the WKT CRS format specification, the latest version of which was published in 2019 as an internationally agreed standard (ISO 19162:2019), is available in a 132 page document published at [docs.opengeospatial.org](http://docs.opengeospatial.org/is/18-010r7/18-010r7.html).
 
 In the past, the `proj4string` definitions, was the standard way to specify coordinate operations and store CRSs.
 These string representations, built on a key=value form (e.g, `+proj=longlat +datum=WGS84 +no_defs`), are, however, currently discouraged in most cases.
@@ -73,11 +76,18 @@ new_vector = read_sf(vector_filepath)
 Our new object, `new_vector`, is a polygon representing a world map data (`?spData::world`).
 In **sf** the CRS of an object can be retrieved using `st_crs()`.
 
-```{r 02-spatial-data-53}
+```{r 02-spatial-data-53, eval=FALSE}
 st_crs(new_vector) # get CRS
+#> Coordinate Reference System:
+#>   User input: WGS 84 
+#>   wkt:
+#>   ...
 ```
 
-CRS in the `sf` objects is a list of two elements - `input` and `wkt`.
+The output is a list containing two main components: 1) `User input` (in this case `EPSG:4326`) and 2) `wkt`.
+The `User input` component is simply the text that the user entered to describe the CRS, with `EPSG:` added as a prefix if the CRS was given as an EPSG code.
+`crs = 4326` is understood by `sf` as `crs = "EPSG:4326"` and can be used, although we prefer the more explicit character string to prevent ambiguity.
+
 The `input` element is quite flexible, and depending on the input file or user input, can contain SRID representation (e.g., `"EPSG:4326"`), CRS's name (e.g., `"WGS84"`), or even `proj4string` definition.
 The `wkt` element stores the WKT2 representation, which is used when saving the object to a file or doing any coordinate operations.
 Above, we can see that the `new_vector` object has the WGS84 ellipsoid, uses the Greenwich prime meridian, and the latitude and longitude axis order.
@@ -118,7 +128,6 @@ Here, we can use either SRID, complete WKT2 representation, `proj4string`, or CR
 
 Importantly, the `st_crs()` and `crs()` functions do not alter coordinates' values or geometries.
 Their role is only to set a metadata information about the object CRS.
-
 
 In some cases the CRS of a geographic object is unknown, as is the case in the `london` dataset created in the code chunk below, building on the example of London introduced in Section \@ref(vector-data):
 
@@ -481,15 +490,7 @@ The output is printed as multiple lines of text containing information about the
 st_crs(cycle_hire_osm)
 ```
 
-The output contains two main components: 1) `User input` (in this case `EPSG:4326`) and 2) `wkt`.
-The `User input` component is simply the text that the user entered to describe the CRS, with `EPSG:` added as a prefix if the CRS was given as an EPSG code.
-`crs = 4326` is understood by `sf` as `crs = "EPSG:4326"` and can be used, although we prefer the more explicit character string to prevent ambiguity.
-
-The `wkt` component stands for '**w**ell-**k**nown **t**ext representation of coordinate reference systems'.
-The language was developed as an open standard by the Open Geospatial Commission (OGC) "for the description of coordinate operations" and is related to the WKT representation of geometries, which was also developed by the OGC and is used when printing vector geometries, as outlined in Section \@ref(geometry).
-The full the WKT CRS format specification, the latest version of which was published in 2019 as an internationally agreed standard (ISO 19162:2019), is available in a 132 page document published at [docs.opengeospatial.org](http://docs.opengeospatial.org/is/18-010r7/18-010r7.html).
-
-Although the two components, `User input` and `wkt`, are printed as a single entity, the output of `st_crs()` is in fact a named list of class `crs` with two elements, single character strings named `input` and `wkt`:
+As we saw in Section \@ref(crs-setting), the main CRS components, `User input` and `wkt`, are printed as a single entity, the output of `st_crs()` is in fact a named list of class `crs` with two elements, single character strings named `input` and `wkt`:
 
 ```{r 06-reproj-16, echo=FALSE}
 crs_lnd = st_crs(london_geo)
