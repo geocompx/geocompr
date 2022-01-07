@@ -50,6 +50,7 @@ The other packages that were installed contain data that will be used in the boo
 
 ```r
 library(spData)        # load geographic data
+#> Warning: multiple methods tables found for 'direction'
 library(spDataLarge)   # load larger geographic data
 ```
 

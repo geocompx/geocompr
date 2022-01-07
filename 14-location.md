@@ -10,6 +10,7 @@ library(sf)
 library(dplyr)
 library(purrr)
 library(raster)
+#> Warning: multiple methods tables found for 'direction'
 library(osmdata)
 library(spDataLarge)
 ```

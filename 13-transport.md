@@ -13,6 +13,7 @@ The **nabor** package must also be installed, although it does not need to be at
 library(sf)
 library(dplyr)
 library(spDataLarge)
+#> Warning: multiple methods tables found for 'direction'
 library(stplanr)      # geographic transport data package
 library(tmap)         # visualization package (see Chapter 8)
 ```

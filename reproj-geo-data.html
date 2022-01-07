@@ -6,16 +6,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Chapter 7 Reprojecting geographic data | Geocomputation with R</title>
 <meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow">
-<meta name="description" content="Prerequisites This chapter requires the following packages (lwgeom is also used, but does not need to be attached): library(sf) library(terra) library(dplyr) library(spData) library(spDataLarge) ...">
+<meta name="description" content="Prerequisites This chapter requires the following packages (lwgeom is also used, but does not need to be attached): library(sf) library(terra) library(dplyr) library(spData) #&gt; Warning: multiple...">
 <meta name="generator" content="bookdown 0.24 with bs4_book()">
 <meta property="og:title" content="Chapter 7 Reprojecting geographic data | Geocomputation with R">
 <meta property="og:type" content="book">
 <meta property="og:url" content="https://geocompr.robinlovelace.net/reproj-geo-data.html">
 <meta property="og:image" content="https://geocompr.robinlovelace.net/images/cover.png">
-<meta property="og:description" content="Prerequisites This chapter requires the following packages (lwgeom is also used, but does not need to be attached): library(sf) library(terra) library(dplyr) library(spData) library(spDataLarge) ...">
+<meta property="og:description" content="Prerequisites This chapter requires the following packages (lwgeom is also used, but does not need to be attached): library(sf) library(terra) library(dplyr) library(spData) #&gt; Warning: multiple...">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Chapter 7 Reprojecting geographic data | Geocomputation with R">
-<meta name="twitter:description" content="Prerequisites This chapter requires the following packages (lwgeom is also used, but does not need to be attached): library(sf) library(terra) library(dplyr) library(spData) library(spDataLarge) ...">
+<meta name="twitter:description" content="Prerequisites This chapter requires the following packages (lwgeom is also used, but does not need to be attached): library(sf) library(terra) library(dplyr) library(spData) #&gt; Warning: multiple...">
 <meta name="twitter:image" content="https://geocompr.robinlovelace.net/images/cover.png">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/header-attrs-2.11/header-attrs.js"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
@@ -100,11 +100,12 @@
 <ul>
 <li>This chapter requires the following packages (<strong>lwgeom</strong> is also used, but does not need to be attached):</li>
 </ul>
-<div class="sourceCode" id="cb215"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb216"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/terra/">terra</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://nowosad.github.io/spData/">spData</a></span><span class="op">)</span>
+<span class="co">#&gt; Warning: multiple methods tables found for 'direction'</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Nowosad/spData">spDataLarge</a></span><span class="op">)</span></code></pre></div>
 </div>
 <div id="reproj-intro" class="section level2" number="7.1">
@@ -132,7 +133,7 @@ Modifying map projections is covered in Section <a href="reproj-geo-data.html#ma
 <span class="header-section-number">7.2</span> Assigning coordinate systems<a class="anchor" aria-label="anchor" href="#assigning-coordinate-systems"><i class="fas fa-link"></i></a>
 </h2>
 <p>In some cases the CRS of a geographic object is unknown, as is the case in the <code>london</code> dataset created in the code chunk below, building on the example of London introduced in Section <a href="spatial-class.html#vector-data">2.2</a>:</p>
-<div class="sourceCode" id="cb216"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb217"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">london</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>lon <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span>, lat <span class="op">=</span> <span class="fl">51.5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"lon"</span>, <span class="st">"lat"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_is_longlat.html">st_is_longlat</a></span><span class="op">(</span><span class="va">london</span><span class="op">)</span>
@@ -146,7 +147,7 @@ This behavior makes sense given the diversity of available CRSs but differs from
 <li>By passing a CRS to the <code>crs</code> argument in <code>sf</code> functions that create geometry objects such as <code>st_as_sf(... crs = "EPSG:4326")</code>. The same argument can also be used to set the CRS when creating raster datasets (e.g., <code>rast(crs = "EPSG:4326")</code>).</li>
 <li>With the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs()</a></code>, which returns a version of the data that has a new CRS, an approach that is demonstrated in the following code chunk.</li>
 </ul>
-<div class="sourceCode" id="cb217"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb218"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">london_geo</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs</a></span><span class="op">(</span><span class="va">london</span>, <span class="st">"EPSG:4326"</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_is_longlat.html">st_is_longlat</a></span><span class="op">(</span><span class="va">london_geo</span><span class="op">)</span>
 <span class="co">#&gt; [1] TRUE</span></code></pre></div>
@@ -168,7 +169,7 @@ Since <code>sf</code> version 1.0.0, R’s ability to work with geographic vecto
 We will also create a deliberately faulty buffer with a ‘distance’ of 1 degree, which is roughly equivalent to 100 km (1 degree is about 111 km at the equator).
 Before diving into the code, it may be worth skipping briefly ahead to peek at Figure <a href="reproj-geo-data.html#fig:crs-buf">7.1</a> to get a visual handle on the outputs that you should be able to reproduce by following the code chunks below.</p>
 <p>The first stage is to create three buffers around the <code>london</code> and <code>london_geo</code> objects created above with boundary distances of 1 degree and 100 km (or 100,000 m, which can be expressed as <code>1e5</code> in scientific notation) from central London:</p>
-<div class="sourceCode" id="cb218"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb219"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">london_buff_no_crs</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london</span>, dist <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>   <span class="co"># incorrect: no CRS</span>
 <span class="va">london_buff_s2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_geo</span>, dist <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span> <span class="co"># silent use of s2</span>
 <span class="va">london_buff_s2_100_cells</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_geo</span>, dist <span class="op">=</span> <span class="fl">1e5</span>, max_cells <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> </code></pre></div>
@@ -176,7 +177,7 @@ Before diving into the code, it may be worth skipping briefly ahead to peek at F
 In the second line, <code>sf</code> silently uses the spherical geometry engine S2, introduced in Chapter <a href="spatial-class.html#spatial-class">2</a>, to calculate the extent of the buffer using the default value of <code>max_cells = 1000</code> — set to <code>100</code> in line three — the consequences which will become apparent shortly (see <code><a href="https://r-spatial.github.io/s2/reference/s2_boundary.html">?s2::s2_buffer_cells</a></code> for details).
 To highlight the impact of <code>sf</code>’s use of the S2 geometry engine for unprojected (geographic) coordinate systems, we will temporarily disable it with the command <code><a href="https://r-spatial.github.io/sf/reference/s2.html">sf_use_s2()</a></code> (which is on, <code>TRUE</code>, by default), in the code chunk below.
 Like <code>london_buff_no_crs</code>, the new <code>london_geo</code> object is a geographic abomination: it has units of degrees, which makes no sense in the vast majority of cases:</p>
-<div class="sourceCode" id="cb219"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb220"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/s2.html">sf_use_s2</a></span><span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span>
 <span class="co">#&gt; Spherical geometry (s2) switched off</span>
 <span class="va">london_buff_lonlat</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_geo</span>, dist <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># incorrect result</span>
@@ -202,12 +203,12 @@ But for operations involving distances such as buffering, the only way to ensure
 <!--toDo:rl-->
 <!-- jn: idea -- maybe it would be add a table somewhere in the book showing which operations are impacted by s2? -->
 This is done in the code chunk below:</p>
-<div class="sourceCode" id="cb220"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb221"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">london_proj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">530000</span>, y <span class="op">=</span> <span class="fl">180000</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, crs <span class="op">=</span> <span class="st">"EPSG:27700"</span><span class="op">)</span></code></pre></div>
 <p>The result is a new object that is identical to <code>london</code>, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters.
 We can verify that the CRS has changed using <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code> as follows (some of the output has been replaced by <code>...</code>):</p>
-<div class="sourceCode" id="cb221"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb222"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">london_proj</span><span class="op">)</span>
 <span class="co">#&gt; Coordinate Reference System:</span>
 <span class="co">#&gt;   User input: EPSG:27700 </span>
@@ -222,7 +223,7 @@ For a short description of the most relevant projection parameters and related c
 Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj.&lt;/p&gt;'><sup>27</sup></a>
 The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: <code>st_is_longlat(london_proj)</code> now returns <code>FALSE</code> and geometry operations on <code>london_proj</code> will work without a warning, meaning buffers can be produced from it using proper units of distance.
 The following line of code creates a buffer around <em>projected</em> data of exactly 100 km:</p>
-<div class="sourceCode" id="cb222"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb223"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">london_buff_projected</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_proj</span>, <span class="fl">1e5</span><span class="op">)</span></code></pre></div>
 <p>The geometries of the three <code>london_buff*</code> objects that <em>have</em> a specified CRS created above (<code>london_buff_s2</code>, <code>london_buff_lonlat</code> and <code>london_buff_projected</code>) created in the preceding code chunks are illustrated in Figure <a href="reproj-geo-data.html#fig:crs-buf">7.1</a>.</p>
 <div class="figure" style="text-align: center">
@@ -261,7 +262,7 @@ However, there are some general principles provided in this section that can hel
 In some cases transformation to a projected CRS is essential, such as when using geometric functions such as <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>, as Figure <a href="reproj-geo-data.html#fig:crs-buf">7.1</a> showed.
 Conversely, publishing data online with the <strong>leaflet</strong> package may require a geographic CRS.
 Another case is when two objects with different CRSs must be compared or combined, as shown when we try to find the distance between two objects with different CRSs:</p>
-<div class="sourceCode" id="cb223"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb224"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">london_geo</span>, <span class="va">london_proj</span><span class="op">)</span>
 <span class="co"># &gt; Error: st_crs(x) == st_crs(y) is not TRUE</span></code></pre></div>
 <p>To make the <code>london</code> and <code>london_proj</code> objects geographically comparable one of them must be transformed into the CRS of the other.
@@ -330,7 +331,7 @@ Documentation from the GIS software Manifold therefore suggests restricting the 
 <p>Almost every place on Earth has a UTM code, such as “60H” which refers to northern New Zealand where R was invented.
 UTM EPSG codes run sequentially from 32601 to 32660 for northern hemisphere locations and from 32701 to 32760 for southern hemisphere locations.</p>
 <p>To show how the system works, let’s create a function, <code>lonlat2UTM()</code> to calculate the EPSG code associated with any point on the planet as <a href="https://stackoverflow.com/a/9188972/">follows</a>:</p>
-<div class="sourceCode" id="cb224"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb225"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">lonlat2UTM</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">lonlat</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">utm</span> <span class="op">=</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">floor</a></span><span class="op">(</span><span class="op">(</span><span class="va">lonlat</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fl">180</span><span class="op">)</span> <span class="op">/</span> <span class="fl">6</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html">%%</a></span> <span class="fl">60</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span>
   <span class="kw">if</span><span class="op">(</span><span class="va">lonlat</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span>
@@ -340,7 +341,7 @@ UTM EPSG codes run sequentially from 32601 to 32660 for northern hemisphere loca
   <span class="op">}</span>
 <span class="op">}</span></code></pre></div>
 <p>The following command uses this function to identify the UTM zone and associated EPSG code for Auckland and London:</p>
-<div class="sourceCode" id="cb225"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb226"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">epsg_utm_auk</span> <span class="op">=</span> <span class="fu">lonlat2UTM</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">174.7</span>, <span class="op">-</span><span class="fl">36.9</span><span class="op">)</span><span class="op">)</span>
 <span class="va">epsg_utm_lnd</span> <span class="op">=</span> <span class="fu">lonlat2UTM</span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html">st_coordinates</a></span><span class="op">(</span><span class="va">london</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">epsg_utm_auk</span><span class="op">)</span><span class="op">$</span><span class="va">proj4string</span>
@@ -363,7 +364,7 @@ We will cover the particularities of vector data transformation in Section <a hr
 Chapter <a href="spatial-class.html#spatial-class">2</a> demonstrated how vector geometries are made-up of points, and how points form the basis of more complex objects such as lines and polygons.
 Reprojecting vectors thus consists of transforming the coordinates of these points, which form the vertices of lines and polygons.</p>
 <p>Section <a href="reproj-geo-data.html#whenproject">7.4</a> contains an example in which at least one <code>sf</code> object must be transformed into an equivalent object with a different CRS to calculate the distance between two objects.</p>
-<div class="sourceCode" id="cb226"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb227"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">london2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">london_geo</span>, <span class="st">"EPSG:27700"</span><span class="op">)</span></code></pre></div>
 <p>Now that a transformed version of <code>london</code> has been created, using the <strong>sf</strong> function <code><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform()</a></code>, the distance between the two representations of London can be found.
 It may come as a surprise that <code>london</code> and <code>london2</code> are just over 2 km apart!<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
@@ -371,7 +372,7 @@ The difference in location between the two points is not due to imperfections in
 Also surprising may be that the result is provided in a matrix with units of meters.
 This is because &lt;code&gt;st_distance()&lt;/code&gt; can provide distances between many features and because the CRS has units of meters.
 Use &lt;code&gt;as.numeric()&lt;/code&gt; to coerce the result into a regular number.&lt;/p&gt;"><sup>29</sup></a></p>
-<div class="sourceCode" id="cb227"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb228"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">london2</span>, <span class="va">london_proj</span><span class="op">)</span>
 <span class="co">#&gt; Units: [m]</span>
 <span class="co">#&gt;      [,1]</span>
@@ -379,7 +380,7 @@ Use &lt;code&gt;as.numeric()&lt;/code&gt; to coerce the result into a regular nu
 <p>This is demonstrated below with reference to <code>cycle_hire_osm</code>, an <code>sf</code> object from <strong>spData</strong> that represents ‘docking stations’ where you can hire bicycles in London.
 The CRS of <code>sf</code> objects can be queried — and as we learned in Section <a href="reproj-geo-data.html#reproj-intro">7.1</a> set — with the function <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>.
 The output is printed as multiple lines of text containing information about the coordinate system:</p>
-<div class="sourceCode" id="cb228"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb229"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">cycle_hire_osm</span><span class="op">)</span>
 <span class="co">#&gt; Coordinate Reference System:</span>
 <span class="co">#&gt;   User input: EPSG:4326 </span>
@@ -404,7 +405,7 @@ The full the WKT CRS format specification, the latest version of which was publi
 <pre><code>#&gt; [1] "crs"
 #&gt; [1] "input" "wkt"</code></pre>
 <p>Additional elements can be retrieved with the <code>$</code> operator, including <code>Name</code>, <code>proj4string</code> and <code>epsg</code> (see <a href="https://r-spatial.github.io/sf/reference/st_crs.html"><code>?st_crs</code></a> and the CRS and tranformation tutorial on the GDAL <a href="https://gdal.org/tutorials/osr_api_tut.html#querying-coordinate-reference-system">website</a> for details):</p>
-<div class="sourceCode" id="cb230"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb231"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">crs_lnd</span><span class="op">$</span><span class="va">Name</span>
 <span class="co">#&gt; [1] "WGS 84"</span>
 <span class="va">crs_lnd</span><span class="op">$</span><span class="va">proj4string</span>
@@ -464,12 +465,12 @@ On a side note – the second argument can also be an existing raster object wit
 <p>Let’s take a look at two examples of raster transformation: using categorical and continuous data.
 Land cover data are usually represented by categorical maps.
 The <code>nlcd.tif</code> file provides information for a small area in Utah, USA obtained from <a href="https://www.mrlc.gov/data/nlcd-2011-land-cover-conus">National Land Cover Database 2011</a> in the NAD83 / UTM zone 12N CRS.</p>
-<div class="sourceCode" id="cb231"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb232"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cat_raster</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/nlcd.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">cat_raster</span><span class="op">)</span>
 <span class="co">#&gt; [1] "PROJCRS[\"NAD83 / UTM zone 12N\",\n    BASEGEOGCRS[\"NAD83\",\n        DATUM[\"North American Datum 1983\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4269]],\n    CONVERSION[\"UTM zone 12N\",\n        METHOD[\"Transverse Mercator\",\n            ID[\"EPSG\",9807]],\n        PARAMETER[\"Latitude of natural origin\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8801]],\n        PARAMETER[\"Longitude of natural origin\",-111,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8802]],\n        PARAMETER[\"Scale factor at natural origin\",0.9996,\n            SCALEUNIT[\"unity\",1],\n            ID[\"EPSG\",8805]],\n        PARAMETER[\"False easting\",500000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8806]],\n        PARAMETER[\"False northing\",0,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8807]]],\n    CS[Cartesian,2],\n        AXIS[\"(E)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"(N)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"North America - 114°W to 108°W and NAD83 by country\"],\n        BBOX[31.33,-114,84,-108]],\n    ID[\"EPSG\",26912]]"</span></code></pre></div>
 <p>In this region, 8 land cover classes were distinguished (a full list of NLCD2011 land cover classes can be found at <a href="https://www.mrlc.gov/data/legends/national-land-cover-database-2011-nlcd2011-legend">mrlc.gov</a>):</p>
-<div class="sourceCode" id="cb232"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb233"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/unique.html">unique</a></span><span class="op">(</span><span class="va">cat_raster</span><span class="op">)</span>
 <span class="co">#&gt;       levels</span>
 <span class="co">#&gt; 1      Water</span>
@@ -485,7 +486,7 @@ This could be done using the nearest neighbor method (<code>near</code>), which 
 An example is reprojecting <code>cat_raster</code> to WGS84, a geographic CRS well suited for web mapping.
 The first step is to obtain the PROJ definition of this CRS, which can be done, for example using the <a href="http://spatialreference.org/ref/epsg/wgs-84/">http://spatialreference.org</a> webpage.
 The final step is to reproject the raster with the <code><a href="https://rdrr.io/pkg/terra/man/project.html">project()</a></code> function which, in the case of categorical data, uses the nearest neighbor method (<code>near</code>):</p>
-<div class="sourceCode" id="cb233"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb234"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cat_raster_wgs84</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/project.html">project</a></span><span class="op">(</span><span class="va">cat_raster</span>, <span class="st">"EPSG:4326"</span>, method <span class="op">=</span> <span class="st">"near"</span><span class="op">)</span></code></pre></div>
 <p>Many properties of the new object differ from the previous one, including the number of columns and rows (and therefore number of cells), resolution (transformed from meters into degrees), and extent, as illustrated in Table <a href="reproj-geo-data.html#tab:catraster">7.1</a> (note that the number of categories increases from 8 to 9 because of the addition of <code>NA</code> values, not because a new category has been created — the land cover classes are preserved).</p>
 <div class="inline-table"><table class="table table-sm">
@@ -520,7 +521,7 @@ The final step is to reproject the raster with the <code><a href="https://rdrr.i
 </table></div>
 <p>Reprojecting numeric rasters (with <code>numeric</code> or in this case <code>integer</code> values) follows an almost identical procedure.
 This is demonstrated below with <code>srtm.tif</code> in <strong>spDataLarge</strong> from <a href="https://www2.jpl.nasa.gov/srtm/">the Shuttle Radar Topography Mission (SRTM)</a>, which represents height in meters above sea level (elevation) with the WGS84 CRS:</p>
-<div class="sourceCode" id="cb234"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb235"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">con_raster</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/srtm.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">con_raster</span><span class="op">)</span>
 <span class="co">#&gt; [1] "GEOGCRS[\"WGS 84\",\n    DATUM[\"World Geodetic System 1984\",\n        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n            LENGTHUNIT[\"metre\",1]]],\n    PRIMEM[\"Greenwich\",0,\n        ANGLEUNIT[\"degree\",0.0174532925199433]],\n    CS[ellipsoidal,2],\n        AXIS[\"geodetic latitude (Lat)\",north,\n            ORDER[1],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        AXIS[\"geodetic longitude (Lon)\",east,\n            ORDER[2],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n    ID[\"EPSG\",4326]]"</span></code></pre></div>
@@ -529,7 +530,7 @@ Instead, we will use the bilinear method which computes the output cell value ba
 The values in the projected dataset are the distance-weighted average of the values from these four cells:
 the closer the input cell is to the center of the output cell, the greater its weight.
 The following commands create a text string representing WGS 84 / UTM zone 12N, and reproject the raster into this CRS, using the <code>bilinear</code> method:</p>
-<div class="sourceCode" id="cb235"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb236"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">con_raster_ea</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/project.html">project</a></span><span class="op">(</span><span class="va">con_raster</span>, <span class="st">"EPSG:32612"</span>, method <span class="op">=</span> <span class="st">"bilinear"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">con_raster_ea</span><span class="op">)</span>
 <span class="co">#&gt; [1] "PROJCRS[\"WGS 84 / UTM zone 12N\",\n    BASEGEOGCRS[\"WGS 84\",\n        DATUM[\"World Geodetic System 1984\",\n            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4326]],\n    CONVERSION[\"UTM zone 12N\",\n        METHOD[\"Transverse Mercator\",\n            ID[\"EPSG\",9807]],\n        PARAMETER[\"Latitude of natural origin\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8801]],\n        PARAMETER[\"Longitude of natural origin\",-111,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8802]],\n        PARAMETER[\"Scale factor at natural origin\",0.9996,\n            SCALEUNIT[\"unity\",1],\n            ID[\"EPSG\",8805]],\n        PARAMETER[\"False easting\",500000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8806]],\n        PARAMETER[\"False northing\",0,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8807]]],\n    CS[Cartesian,2],\n        AXIS[\"(E)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"(N)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"World - N hemisphere - 114°W to 108°W - by country\"],\n        BBOX[0,-114,84,-108]],\n    ID[\"EPSG\",32612]]"</span></code></pre></div>
@@ -597,7 +598,7 @@ For instance, if we are interested in a density (points per grid cell or inhabit
 One of the most popular projections to achieve this is the Winkel tripel projection (Figure <a href="reproj-geo-data.html#fig:wintriproj">7.2</a>).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 This projection is used, among others, by the National Geographic Society.&lt;/p&gt;"><sup>32</sup></a>
 <code>st_transform_proj()</code> from the <strong>lwgeom</strong> package allows for coordinate transformations to a wide range of CRSs, including the Winkel tripel projection:</p>
-<div class="sourceCode" id="cb236"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb237"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_wintri</span> <span class="op">=</span> <span class="fu">lwgeom</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lwgeom/man/st_transform_proj.html">st_transform_proj</a></span><span class="op">(</span><span class="va">world</span>, crs <span class="op">=</span> <span class="st">"+proj=wintri"</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:wintriproj"></span>
@@ -697,7 +698,7 @@ How does it influence the results?</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-01-06.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-01-07.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

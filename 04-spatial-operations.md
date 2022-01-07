@@ -10,6 +10,7 @@ library(sf)
 library(terra)
 library(dplyr)
 library(spData)
+#> Warning: multiple methods tables found for 'direction'
 ```
 
 - You also need to read in a couple of datasets as follows for Section \@ref(spatial-ras)
@@ -255,7 +256,6 @@ st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
 #> [1] TRUE TRUE TRUE
 ```
 
-
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Functions for calculating topological relations use spatial indices to largely speed up spatial query performance.
 They achieve that using the Sort-Tile-Recursive (STR) algorithm.
 The `st_join` function, mentioned in the next section, also uses the spatial indexing. 
@@ -278,9 +278,18 @@ The model was originally labelled "DE + 9IM" by its inventors, referring to the 
 To demonstrate how DE-9IM strings work, let's take a look at the various ways that the first geometry pair in Figure \@ref(fig:relations) relate.
 Figure \@ref(fig:de9imgg) illustrates the 9 intersection model (9IM) which shows the intersections between every combination of each object's interior, boundary and exterior: when each component of the first object `x` is arranged as columns and each component of `y` is arranged as rows, a facetted graphic is created with the intersections between each element highlighted.
 
+
+```
+#> 
+#> Attaching package: 'ggplot2'
+#> The following object is masked from 'package:terra':
+#> 
+#>     arrow
+```
+
 <div class="figure" style="text-align: center">
-<img src="04-spatial-operations_files/figure-html/de9imgg-1.png" alt="Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works." width="100%" />
-<p class="caption">(\#fig:de9imgg)Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works.</p>
+<img src="04-spatial-operations_files/figure-html/de9imgg-1.png" alt="Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works. Colors not in the legend represent the overlap between different components. The thick lines highlight 2 dimensional intesections, e.g. between the boundary of object x and the interior of object y, shown in the middle top facet." width="100%" />
+<p class="caption">(\#fig:de9imgg)Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works. Colors not in the legend represent the overlap between different components. The thick lines highlight 2 dimensional intesections, e.g. between the boundary of object x and the interior of object y, shown in the middle top facet.</p>
 </div>
 
 DE-9IM strings are derived from the dimension of each type of relation.
