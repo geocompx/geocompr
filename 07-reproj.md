@@ -326,16 +326,6 @@ That is the subject of Section \@ref(reproj-vec-geom).
 
 ## Which CRS to use? {#which-crs}
 
-<!--jn:toDo-->
-<!--mention websites and the crssuggest package-->
-<!-- https://epsg.org/home.html -->
-
-<!--     Custom CRSs are also ideally specified as WKT2 -->
-<!--     https://epsg.io/ -->
-<!-- the two below websites are not up-to-date -->
-<!--     https://spatialreference.org/ref/epsg/ -->
-<!--     https://epsg.org/home.html -->
-
 \index{CRS!reprojection} 
 \index{projection!World Geodetic System}
 The question of *which CRS* is tricky, and there is rarely a 'right' answer:
@@ -391,6 +381,10 @@ lonlat2UTM(c(174.7, -36.9))
 lonlat2UTM(st_coordinates(london))
 #> [1] 32630
 ```
+
+Currently, we also have tools helping us to select a proper CRS, which includes the **crssuggest** package <!--add ref or docs-->.
+The main function in this package, `suggest_crs()`, takes a spatial object with geographic CRS and returns a list of possible projected CRSs that could be used for the given area.^[This package also allows to figure out the true CRS of the data without any CRS information attached.]
+Important note: while this package is helpful in many situations, you need to be aware of the properties of the recommended CRS before you apply it.
 
 \index{CRS!custom} 
 In cases where an appropriate CRS is not immediately clear, the choice of CRS should depend on the properties that are most important to preserve in the subsequent maps and analysis.
@@ -653,8 +647,15 @@ At best we can comply with two out of three spatial properties (distance, area, 
 Therefore, the task at hand determines which projection to choose. 
 For instance, if we are interested in a density (points per grid cell or inhabitants per grid cell) we should use an equal-area projection (see also Chapter \@ref(location)).</div>\EndKnitrBlock{rmdnote}
 
+## Custom map projections {#mapproj}
 
-## Modifying map projections {#mapproj}
+<!--     Custom CRSs are also ideally specified as WKT2 -->
+<!--     https://epsg.io/ -->
+<!-- the two below websites are not up-to-date -->
+<!--     https://spatialreference.org/ref/epsg/ -->
+<!--     https://epsg.org/home.html -->
+
+<!-- https://projectionwizard.org/ -->
 
 <!--toDo:jn-->
 <!--not longer valid-->
