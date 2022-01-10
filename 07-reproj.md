@@ -384,7 +384,8 @@ lonlat2UTM(st_coordinates(london))
 
 Currently, we also have tools helping us to select a proper CRS, which includes the **crssuggest** package <!--add ref or docs-->.
 The main function in this package, `suggest_crs()`, takes a spatial object with geographic CRS and returns a list of possible projected CRSs that could be used for the given area.^[This package also allows to figure out the true CRS of the data without any CRS information attached.]
-Important note: while this package is helpful in many situations, you need to be aware of the properties of the recommended CRS before you apply it.
+Another helpful tool is a webpage https://jjimenezshaw.github.io/crs-explorer/ that lists CRSs based on selected location and type.
+Important note: while these tools is helpful in many situations, you need to be aware of the properties of the recommended CRS before you apply it.
 
 \index{CRS!custom} 
 In cases where an appropriate CRS is not immediately clear, the choice of CRS should depend on the properties that are most important to preserve in the subsequent maps and analysis.
@@ -418,6 +419,7 @@ This approach should be used with caution: no other datasets will be compatible 
 The principles outlined in this section apply equally to vector and raster datasets.
 Some features of CRS transformation however are unique to each geographic data model.
 We will cover the particularities of vector data transformation in Section \@ref(reproj-vec-geom) and those of raster transformation in Section \@ref(reproj-ras).
+Next, the last section, shows how to create custom map projections (Section \@ref(mapproj)).
 <!--toDo:jn-->
 <!-- add reference to the modifying section -->
 
@@ -649,37 +651,51 @@ For instance, if we are interested in a density (points per grid cell or inhabit
 
 ## Custom map projections {#mapproj}
 
+Established CRSs captured by SRID codes are well-suited for many applications.
+However, it is desirable to create a new, custom CRS in some cases.
+Section \@ref(which-crs) mentioned reasons for using custom CRSs, and provided several possible approaches.
+Here, we show how to apply these ideas in R.
+
+<!--toDo:jn-->
+<!-- show example of azimuthal equidistant in the center-point of the study area -->
 <!--     Custom CRSs are also ideally specified as WKT2 -->
 <!--     https://epsg.io/ -->
 <!-- the two below websites are not up-to-date -->
 <!--     https://spatialreference.org/ref/epsg/ -->
 <!--     https://epsg.org/home.html -->
-
 <!-- https://projectionwizard.org/ -->
 
-<!--toDo:jn-->
-<!--not longer valid-->
-<!-- proj4strings still can be used - explain how to use them and when -->
-<!-- however, focus on wkt2 customization here! -->
-<!-- also, consider moving this section to the bottom of the chapter and show some raster examples -->
+\index{CRS!proj4string}
+A `proj4string` definition can also be used to create custom projections, as long we accept its limitations mentioned in Section \@ref(crs-in-r). 
+Many projections have been developed and can be set with the `+proj=` element of `proj4string`s.^[
+The Wikipedia page 'List of map projections' has 70+ projections and illustrations.
+]
 
-<!-- \index{CRS!proj4string}  -->
-<!-- Established CRSs captured by EPSG codes are well-suited for many applications. -->
-<!-- However in some cases it is desirable to create a new CRS, using a custom `proj4string`. -->
-<!-- This system allows a very wide range of projections to be created, as we'll see in some of the custom map projections in this section. -->
-
-<!-- A long and growing list of projections has been developed and many of these can be set with the `+proj=` element of `proj4string`s.^[ -->
-<!-- The Wikipedia page 'List of map projections' has 70+ projections and illustrations. -->
-<!-- ] -->
-
-<!-- When mapping the world while preserving area relationships, the Mollweide projection is a good choice [@jenny_guide_2017] (Figure \@ref(fig:mollproj)). -->
-<!-- To use this projection, we need to specify it using the `proj4string` element, `"+proj=moll"`, in the `st_transform` function: -->
+When mapping the world while preserving area relationships, the Mollweide projection is a good choice [@jenny_guide_2017] (Figure \@ref(fig:mollproj)).
+To use this projection, we need to specify it using the `proj4string` element, `"+proj=moll"`, in the `st_transform` function:
 
 
+```r
+world_mollweide = st_transform(world, crs = "+proj=moll")
+```
 
 
+```r
+library(tmap)
+world_mollweide_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
+  lwgeom::st_transform_proj(crs = "+proj=moll")
+tm_shape(world_mollweide_gr) +
+  tm_lines(col = "gray") +
+  tm_shape(world_mollweide) +
+  tm_borders(col = "black") 
+```
 
-On the other hand, when mapping the world, it is often desirable to have as little distortion as possible for all spatial properties (area, direction, distance).
+<div class="figure" style="text-align: center">
+<img src="07-reproj_files/figure-html/mollproj-1.png" alt="Mollweide projection of the world." width="100%" />
+<p class="caption">(\#fig:mollproj)Mollweide projection of the world.</p>
+</div>
+
+On the other hand, it is often desirable to have as little distortion as possible for all spatial properties (area, direction, distance) when mapping the world.
 One of the most popular projections to achieve this is the Winkel tripel projection (Figure \@ref(fig:wintriproj)).^[
 This projection is used, among others, by the National Geographic Society.
 ]
@@ -695,21 +711,15 @@ world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 <p class="caption">(\#fig:wintriproj)Winkel tripel projection of the world.</p>
 </div>
 
+<!--jn:toDO-->
+<!--check if the following block is still correct-->
 
 
 
 
-<!-- Moreover, PROJ parameters can be modified in most CRS definitions. -->
-<!-- The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on longitude and latitude of `0` (Figure \@ref(fig:laeaproj1)). -->
 
-
-<!-- plot(world_laea1$geom) -->
-<!-- plot(world_laea1$geom, graticule = TRUE) -->
-
-
-
-<!-- We can change the PROJ parameters, for example the center of the projection, using the `+lon_0` and `+lat_0` parameters.  -->
-<!-- The code below gives the map centered on New York City (Figure \@ref(fig:laeaproj2)). -->
+Moreover, `proj4string` parameters can be modified in most CRS definitions, for example the center of the projection can be adjusted using the `+lon_0` and `+lat_0` parameters.
+The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on the longitude and latitude of New York City (Figure \@ref(fig:laeaproj2)).
 
 
 
@@ -717,9 +727,12 @@ world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 
 More information on CRS modifications can be found in the [Using PROJ](https://proj.org/usage/index.html) documentation.
 
-There is more to learn about CRSs.
-An excellent resource in this area, also implemented in R, is the website R Spatial.
-Chapter 6 from this free online book is recommended reading --- see: [rspatial.org/terra/spatial/6-crs.html](https://rspatial.org/terra/spatial/6-crs.html)
+<!--toDo:jn-->
+<!--revise the last paragraph-->
+
+<!-- There is more to learn about CRSs. -->
+<!-- An excellent resource in this area, also implemented in R, is the website R Spatial. -->
+<!-- Chapter 6 from this free online book is recommended reading --- see: [rspatial.org/terra/spatial/6-crs.html](https://rspatial.org/terra/spatial/6-crs.html) -->
 
 ## Exercises
 
