@@ -679,17 +679,6 @@ To use this projection, we need to specify it using the `proj4string` element, `
 world_mollweide = st_transform(world, crs = "+proj=moll")
 ```
 
-
-```r
-library(tmap)
-world_mollweide_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
-  lwgeom::st_transform_proj(crs = "+proj=moll")
-tm_shape(world_mollweide_gr) +
-  tm_lines(col = "gray") +
-  tm_shape(world_mollweide) +
-  tm_borders(col = "black") 
-```
-
 <div class="figure" style="text-align: center">
 <img src="07-reproj_files/figure-html/mollproj-1.png" alt="Mollweide projection of the world." width="100%" />
 <p class="caption">(\#fig:mollproj)Mollweide projection of the world.</p>
@@ -722,8 +711,15 @@ Moreover, `proj4string` parameters can be modified in most CRS definitions, for 
 The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on the longitude and latitude of New York City (Figure \@ref(fig:laeaproj2)).
 
 
+```r
+world_laea2 = st_transform(world,
+                           crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40")
+```
 
-
+<div class="figure" style="text-align: center">
+<img src="07-reproj_files/figure-html/laeaproj2-1.png" alt="Lambert azimuthal equal-area projection of the world centered on New York City." width="100%" />
+<p class="caption">(\#fig:laeaproj2)Lambert azimuthal equal-area projection of the world centered on New York City.</p>
+</div>
 
 More information on CRS modifications can be found in the [Using PROJ](https://proj.org/usage/index.html) documentation.
 
