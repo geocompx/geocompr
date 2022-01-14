@@ -11,6 +11,7 @@ library(dplyr)
 library(purrr)
 library(raster)
 #> Warning: multiple methods tables found for 'direction'
+#> Warning: multiple methods tables found for 'gridDistance'
 library(osmdata)
 library(spDataLarge)
 ```

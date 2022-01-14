@@ -14,6 +14,7 @@ library(sf)
 library(dplyr)
 library(spDataLarge)
 #> Warning: multiple methods tables found for 'direction'
+#> Warning: multiple methods tables found for 'gridDistance'
 library(stplanr)      # geographic transport data package
 library(tmap)         # visualization package (see Chapter 8)
 ```

@@ -11,6 +11,7 @@ Packages that have already been used including **spData**, **spDataLarge** and *
 library(sf)
 library(raster)
 #> Warning: multiple methods tables found for 'direction'
+#> Warning: multiple methods tables found for 'gridDistance'
 ```
 
 

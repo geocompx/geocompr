@@ -218,12 +218,12 @@ zion_nlcd %>%
   count()
 #> # A tibble: 7 × 3
 #> # Groups:   ID, levels [7]
-#>      ID levels      n
-#>   <dbl>  <int>  <int>
-#> 1     1      2   4205
-#> 2     1      3  98285
-#> 3     1      4 298299
-#> 4     1      5 203701
+#>      ID levels         n
+#>   <dbl> <fct>      <int>
+#> 1     1 Developed   4205
+#> 2     1 Barren     98285
+#> 3     1 Forest    298299
+#> 4     1 Shrubland 203701
 #> # … with 3 more rows
 ```
 

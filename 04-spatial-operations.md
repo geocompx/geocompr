@@ -11,6 +11,7 @@ library(terra)
 library(dplyr)
 library(spData)
 #> Warning: multiple methods tables found for 'direction'
+#> Warning: multiple methods tables found for 'gridDistance'
 ```
 
 - You also need to read in a couple of datasets as follows for Section \@ref(spatial-ras)

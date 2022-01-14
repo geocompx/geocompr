@@ -29,6 +29,7 @@ The code chunk below illustrates this by using three functions, covered in Chapt
 ```r
 library(spData)
 #> Warning: multiple methods tables found for 'direction'
+#> Warning: multiple methods tables found for 'gridDistance'
 nz_u1 = sf::st_union(nz)
 nz_u2 = aggregate(nz["Population"], list(rep(1, nrow(nz))), sum)
 nz_u3 = dplyr::summarise(nz, t = sum(Population))

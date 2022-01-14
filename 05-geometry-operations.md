@@ -11,6 +11,7 @@ library(terra)
 library(dplyr)
 library(spData)
 #> Warning: multiple methods tables found for 'direction'
+#> Warning: multiple methods tables found for 'gridDistance'
 library(spDataLarge)
 ```
 
@@ -827,7 +828,7 @@ Figure \@ref(fig:resampl) shows a comparison of different resampling methods on 
 <p class="caption">(\#fig:resampl)Visual comparison of the original raster and five different resampling methods.</p>
 </div>
 
-As you will see in section \@ref(reprojecting-raster-geometries), raster reprojection is a special case of resampling when our target raster has a different CRS than the original raster.
+As you will see in section \@ref(reproj-ras), raster reprojection is a special case of resampling when our target raster has a different CRS than the original raster.
 
 <!--jn:toDo-->
 <!-- decide -->
