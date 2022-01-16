@@ -43,7 +43,7 @@ The following code chunk therefore not only reads the datasets from the **spData
 
 ```r
 srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
-zion = st_read(system.file("vector/zion.gpkg", package = "spDataLarge"))
+zion = read_sf(system.file("vector/zion.gpkg", package = "spDataLarge"))
 zion = st_transform(zion, crs(srtm))
 ```
 

@@ -664,15 +664,7 @@ Let's try it by transforming the `zion` object to a custom azimuthal equidistant
 
 
 ```r
-zion = st_read(system.file("vector/zion.gpkg", package = "spDataLarge"))
-#> Reading layer `zion' from data source 
-#>   `/usr/local/lib/R/site-library/spDataLarge/vector/zion.gpkg' 
-#>   using driver `GPKG'
-#> Simple feature collection with 1 feature and 11 fields
-#> Geometry type: POLYGON
-#> Dimension:     XY
-#> Bounding box:  xmin: 303000 ymin: 4110000 xmax: 335000 ymax: 4150000
-#> Projected CRS: UTM Zone 12, Northern Hemisphere
+zion = read_sf(system.file("vector/zion.gpkg", package = "spDataLarge"))
 ```
 
 Using a custom AEQD CRS requires knowing the coordinates of the center point of a dataset in degrees (geographic CRS).
@@ -681,8 +673,6 @@ In our case, this information can be extracted by calculating a centroid of the 
 
 ```r
 zion_centr = st_centroid(zion)
-#> Warning in st_centroid.sf(zion): st_centroid assumes attributes are constant
-#> over geometries of x
 zion_centr_wgs84 = st_transform(zion_centr, "EPSG:4326")
 st_as_text(st_geometry(zion_centr_wgs84))
 #> [1] "POINT (-113 37.3)"
