@@ -434,7 +434,7 @@ Many thanks to an anonymous reviewer whose comments formed the basis of this adv
 </ul>
 <p>One possible approach to automatically select a projected CRS specific to a local dataset is to create an azimuthal equidistant (<a href="https://en.wikipedia.org/wiki/Azimuthal_equidistant_projection">AEQD</a>) projection for the center-point of the study area.
 This involves creating a custom CRS (with no EPSG code) with units of meters based on the center point of a dataset.
-This approach should be used with caution: no other datasets will be compatible with the custom CRS created and results may not be accurate when used on extensive datasets covering hundreds of kilometers.</p>
+Note that this approach should be used with caution: no other datasets will be compatible with the custom CRS created and results may not be accurate when used on extensive datasets covering hundreds of kilometers.</p>
 <p>The principles outlined in this section apply equally to vector and raster datasets.
 Some features of CRS transformation however are unique to each geographic data model.
 We will cover the particularities of vector data transformation in Section <a href="reproj-geo-data.html#reproj-vec-geom">7.7</a> and those of raster transformation in Section <a href="reproj-geo-data.html#reproj-ras">7.8</a>.
@@ -667,21 +667,54 @@ For instance, if we are interested in a density (points per grid cell or inhabit
 However, it is desirable to create a new, custom CRS in some cases.
 Section <a href="reproj-geo-data.html#which-crs">7.6</a> mentioned reasons for using custom CRSs, and provided several possible approaches.
 Here, we show how to apply these ideas in R.</p>
-<!--toDo:jn-->
-<!-- show example of azimuthal equidistant in the center-point of the study area -->
-<!--     Custom CRSs are also ideally specified as WKT2 -->
-<!--     https://epsg.io/ -->
-<!-- the two below websites are not up-to-date -->
-<!--     https://spatialreference.org/ref/epsg/ -->
-<!--     https://epsg.org/home.html -->
-<!-- https://projectionwizard.org/ -->
+<p>One possible approach to creating a custom CRS is to take an existing WKT2 definition of a CRS, modify some of its elements, and then use the new definition for reprojecting.
+This can be done for spatial vectors with <code>st_crs()$wkt</code> and <code><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform()</a></code>, and for spatial rasters with <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/project.html">project()</a></code>.</p>
+<p>Let’s try it by transforming the <code>zion</code> object to a custom azimuthal equidistant (AEQD) CRS.</p>
+<div class="sourceCode" id="cb237"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">zion</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"vector/zion.gpkg"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; Reading layer `zion' from data source </span>
+<span class="co">#&gt;   `/usr/local/lib/R/site-library/spDataLarge/vector/zion.gpkg' </span>
+<span class="co">#&gt;   using driver `GPKG'</span>
+<span class="co">#&gt; Simple feature collection with 1 feature and 11 fields</span>
+<span class="co">#&gt; Geometry type: POLYGON</span>
+<span class="co">#&gt; Dimension:     XY</span>
+<span class="co">#&gt; Bounding box:  xmin: 303000 ymin: 4110000 xmax: 335000 ymax: 4150000</span>
+<span class="co">#&gt; Projected CRS: UTM Zone 12, Northern Hemisphere</span></code></pre></div>
+<p>Using a custom AEQD CRS requires knowing the coordinates of the center point of a dataset in degrees (geographic CRS).
+In our case, this information can be extracted by calculating a centroid of the <code>zion</code> area and transforming it into WGS84.</p>
+<div class="sourceCode" id="cb238"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">zion_centr</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid</a></span><span class="op">(</span><span class="va">zion</span><span class="op">)</span>
+<span class="co">#&gt; Warning in st_centroid.sf(zion): st_centroid assumes attributes are constant</span>
+<span class="co">#&gt; over geometries of x</span>
+<span class="va">zion_centr_wgs84</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">zion_centr</span>, <span class="st">"EPSG:4326"</span><span class="op">)</span>
+<span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_text.html">st_as_text</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">zion_centr_wgs84</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; [1] "POINT (-113 37.3)"</span></code></pre></div>
+<p>Next, we can use the newly obtained values to update the WKT2 definition of the azimuthal equidistant (AEQD) CRS seen below.
+Notice that we modified just two values below – <code>"Central_Meridian"</code> to the longitude and <code>"Latitude_Of_Origin"</code> to the latitude of our centroid.</p>
+<div class="sourceCode" id="cb239"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">my_wkt</span> <span class="op">=</span> <span class="st">'PROJCS["Custom_AEQD",
+ GEOGCS["GCS_WGS_1984",
+  DATUM["WGS_1984",
+   SPHEROID["WGS_1984",6378137.0,298.257223563]],
+  PRIMEM["Greenwich",0.0],
+  UNIT["Degree",0.0174532925199433]],
+ PROJECTION["Azimuthal_Equidistant"],
+ PARAMETER["Central_Meridian",-113.0263],
+ PARAMETER["Latitude_Of_Origin",37.29818],
+ UNIT["Meter",1.0]]'</span></code></pre></div>
+<p>This approach’s last step is to transform our original object (<code>zion</code>) to our new custom CRS (<code>zion_aeqd</code>).</p>
+<div class="sourceCode" id="cb240"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">zion_aeqd</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">zion</span>, <span class="va">my_wkt</span><span class="op">)</span></code></pre></div>
+<p>Custom projections can also be made interactively, for example, using the <a href="https://projectionwizard.org/#">Projection Wizard</a> web application <span class="citation">(<a href="references.html#ref-savric_projection_2016" role="doc-biblioref">Šavrič, Jenny, and Jenny 2016</a>)</span>.
+This website allows you to select a spatial extent of your data and a distortion property, and returns a list of possible projections.
+The list also contains WKT2 definitions of the projections that you can copy and use for reprojections.</p>
 <p>
 A <code>proj4string</code> definition can also be used to create custom projections, as long we accept its limitations mentioned in Section <a href="reproj-geo-data.html#crs-in-r">7.2</a>.
-Many projections have been developed and can be set with the <code>+proj=</code> element of <code>proj4string</code>s.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
+For example, many projections have been developed and can be set with the <code>+proj=</code> element of <code>proj4string</code>s.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 The Wikipedia page ‘List of map projections’ has 70+ projections and illustrations.&lt;/p&gt;"><sup>32</sup></a></p>
 <p>When mapping the world while preserving area relationships, the Mollweide projection is a good choice <span class="citation">(<a href="references.html#ref-jenny_guide_2017" role="doc-biblioref">Jenny et al. 2017</a>)</span> (Figure <a href="reproj-geo-data.html#fig:mollproj">7.2</a>).
 To use this projection, we need to specify it using the <code>proj4string</code> element, <code>"+proj=moll"</code>, in the <code>st_transform</code> function:</p>
-<div class="sourceCode" id="cb237"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb241"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_mollweide</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">world</span>, crs <span class="op">=</span> <span class="st">"+proj=moll"</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:mollproj"></span>
@@ -693,7 +726,7 @@ FIGURE 7.2: Mollweide projection of the world.
 One of the most popular projections to achieve this is the Winkel tripel projection (Figure <a href="reproj-geo-data.html#fig:wintriproj">7.3</a>).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 This projection is used, among others, by the National Geographic Society.&lt;/p&gt;"><sup>33</sup></a>
 <code>st_transform_proj()</code> from the <strong>lwgeom</strong> package allows for coordinate transformations to a wide range of CRSs, including the Winkel tripel projection:</p>
-<div class="sourceCode" id="cb238"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb242"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_wintri</span> <span class="op">=</span> <span class="fu">lwgeom</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lwgeom/man/st_transform_proj.html">st_transform_proj</a></span><span class="op">(</span><span class="va">world</span>, crs <span class="op">=</span> <span class="st">"+proj=wintri"</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:wintriproj"></span>
@@ -705,7 +738,7 @@ FIGURE 7.3: Winkel tripel projection of the world.
 <!--check if the following block is still correct-->
 <p>Moreover, <code>proj4string</code> parameters can be modified in most CRS definitions, for example the center of the projection can be adjusted using the <code>+lon_0</code> and <code>+lat_0</code> parameters.
 The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on the longitude and latitude of New York City (Figure <a href="reproj-geo-data.html#fig:laeaproj2">7.4</a>).</p>
-<div class="sourceCode" id="cb239"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb243"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_laea2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">world</span>,
                            crs <span class="op">=</span> <span class="st">"+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40"</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
