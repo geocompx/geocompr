@@ -774,9 +774,9 @@ Depending on the nature of the application, vector representations of discrete f
 
 Over the last two decades, several packages for reading and processing raster datasets have been developed.
 As outlined in Section \@ref(the-history-of-r-spatial), chief among them was **raster**, which led to a step change in R's raster capabilities when it was launched in 2010 and the premier package in the space until the development of **terra** and **stars**.
-Both more recently developed package provide powerful and performant functions for working with raster datasets and there is substantial overlap between their possibly use cases.
+Both more recently developed package provide powerful and performant functions for working with raster datasets and there is substantial overlap between their possible use cases.
 In this book we focus on **terra**, which replaces the older and (in most cases) slower **raster**.
-Before learning about the how **terra**'s class system works, this section describes similarities and differences between **terra** and **raster**; this knowledge will help decide which is most appropriate in different situations.
+Before learning about the how **terra**'s class system works, this section describes similarities and differences between **terra** and **stars**; this knowledge will help decide which is most appropriate in different situations.
 
 First, **terra** focuses on the most common raster data model (regular grids), while **stars** also allows storing less popular models (including regular, rotated, sheared, rectilinear, and curvilinear grids).
 While **terra** usually handle one or multi-layered rasters^[It also has an additional class `SpatRasterDataset` for storing many collections of datasets.], the **stars** package provides ways to store raster data cubes -- a raster object with many layers (e.g., bands), for many moments in time (e.g., months), and many attributes (e.g., sensor type A and sensor type B).
@@ -977,7 +977,7 @@ Ellipsoids are part of a wider component of CRSs: the *datum*.
 This contains information on what ellipsoid to use and the precise relationship between the Cartesian coordinates and location on the Earth's surface.
 There are two types of datum --- geocentric (such as `WGS84`) and local (such as `NAD83`).
 You can see examples of these two types of datums in Figure \@ref(fig:datum-fig).
-Black lines represent a *geocentric datum*, which center is located in the Earth's center of gravity and is not optimized for a specific location.
+Black lines represent a *geocentric datum*, whose center is located in the Earth's center of gravity and is not optimized for a specific location.
 In a *local datum*, shown as a purple dashed line, the ellipsoidal surface is shifted to align with the surface at a particular location.
 These allow local variations in Earth's surface, for example due to large mountain ranges, to be accounted for in a local CRS.
 This can be seen in Figure \@ref(fig:datum-fig), where the local datum is fitted to the area of Philippines, but is misaligned with most of the rest of the planet's surface. 
