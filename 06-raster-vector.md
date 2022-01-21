@@ -240,6 +240,9 @@ By default, it is `FALSE` as this operation requires more computations.</div>\En
 
 
 
+<!--toDo:JN-->
+<!-- mention https://github.com/isciences/exactextractr -->
+
 ## Rasterization {#rasterization}
 
 \index{raster-vector!rasterization} 

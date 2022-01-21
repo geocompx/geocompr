@@ -1078,6 +1078,9 @@ New mapping packages are emerging all the time.
 In 2018 alone, a number of mapping packages have been released on CRAN\index{CRAN}, including **mapdeck**, **mapsapi**, and **rayshader**.
 In terms of interactive mapping, **leaflet.extras** contains many functions for extending the functionality of **leaflet** (see the end of the [`point-pattern`](https://geocompr.github.io/geocompkg/articles/point-pattern.html) vignette in the **geocompkg** website for examples of heatmaps created by **leaflet.extras**).
 
+<!--toDo:JN-->
+<!-- add https://github.com/riatelab/fisheye -->
+
 ## Exercises
 
 These exercises rely on a new object, `africa`.
