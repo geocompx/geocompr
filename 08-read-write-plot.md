@@ -435,6 +435,18 @@ Table \@ref(tab:formats) presents some basic information about selected and ofte
   </tr>
 </tbody>
 </table>
+
+<!--toDo: JN -->
+<!-- additional suggestions from our readers: -->
+<!-- - Spreadsheets, CSV files, CSV/TSV and other tabular friends/ convenient for exchanging data with systems not supporting spatial data, badly or using less common tools -->
+<!-- - KEA - https://gdal.org/drivers/raster/kea.html -->
+<!-- - TopoJSON - https://github.com/topojson/topojson -->
+<!-- - .geojson (usually) limited to longlat -->
+<!-- - NetCDF - https://en.wikipedia.org/wiki/NetCDF -->
+<!-- - @flatgeobuf also supports indexing -->
+<!-- - .hdf5 (hyperspec) and .las/.laz (lidar) -->
+<!-- - sfarrow & geoparquet/pandas/GeoFeather -->
+
 \index{Shapefile}
 \index{GeoPackage}
 
