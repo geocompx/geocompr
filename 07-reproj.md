@@ -437,7 +437,6 @@ Reprojecting vectors thus consists of transforming the coordinates of these poin
 Section \@ref(whenproject) contains an example in which at least one `sf` object must be transformed into an equivalent object with a different CRS to calculate the distance between two objects.
 
 
-
 ```r
 london2 = st_transform(london_geo, "EPSG:27700")
 ```
