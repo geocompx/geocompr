@@ -789,7 +789,6 @@ Third, **stars** functions are closely related to the vector objects and functio
 Fourth, both packages have a different approach for how various functions work on their objects.
 The **terra** package mostly relies on a large number of built-in functions, where each function has a specific purpose (e.g., resampling or cropping).
 On the other hand, **stars** uses some build-in functions (usually with names starting with `st_`), has its own methods for existing R functions (e.g., `split()` or `aggregate()`), and also for existing **dplyr** functions (e.g., `filter()` or `slice()`).
-Finally, it is worth knowing that **terra** has its own spatial vector class - `SpatVector`.
 
 Importantly, it is straightforward to convert objects from **terra** to **stars** (using `st_as_stars()`) and the other way round (using `rast()`).
 We also encourage you to read @pebesma_spatial_2022 for the most comprehensive introduction to the **stars** package.
