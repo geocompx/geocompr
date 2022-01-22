@@ -4,21 +4,21 @@
 
 - This chapter requires the following packages (**lwgeom** is also used, but does not need to be attached):
 
+<!-- TODO: remove warning=FALSE in next chunk to suppress the following message: -->
+<!-- #> Warning: multiple methods tables found for 'gridDistance' -->
 
 ```r
 library(sf)
 library(terra)
 library(dplyr)
 library(spData)
-#> Warning: multiple methods tables found for 'direction'
-#> Warning: multiple methods tables found for 'gridDistance'
 library(spDataLarge)
 ```
 
 ## Introduction {#reproj-intro}
 
 Section \@ref(crs-intro) introduced coordinate reference systems (CRSs) and demonstrated their importance.
-This chapter goes further, highlighting specific issues that can arise due to ignoring CRSs, and demonstrating how to **set** coordinate systems and *transform* geographic data from one CRS to another.
+This chapter goes further,  coordinate systems and *transform* geographic data from one CRS to another.
 \index{CRS!geographic} 
 \index{CRS!projected} 
 As illustrated in Figure \@ref(fig:vectorplots) from that earlier chapter, there are two types of CRSs: *geographic* ('lon/lat', with units in degrees longitude and latitude) and *projected* (typically with units of meters from a datum).
