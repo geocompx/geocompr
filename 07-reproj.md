@@ -17,7 +17,7 @@ library(spDataLarge)
 
 ## Introduction {#reproj-intro}
 
-Section \@ref(crs-intro) introduced coordinate reference systems (CRSs), with a focus on the two major types of CRS: *geographic* ('lon/lat', with units in degrees longitude and latitude) and *projected* (typically with units of meters from a datum).
+Section \@ref(crs-intro) introduced coordinate reference systems (CRSs), with a focus on the two major types: *geographic* ('lon/lat', with units in degrees longitude and latitude) and *projected* (typically with units of meters from a datum) coordinate systems.
 This chapter builds on that knowledge and goes further.
 It demonstrates how to set and *transform* geographic data from one CRS to another and, furthermore, highlights specific issues that can arise due to ignoring CRSs that you should be aware of, especially if your data is stored with lon/lat coordinates.
 \index{CRS!geographic} 
@@ -25,7 +25,7 @@ It demonstrates how to set and *transform* geographic data from one CRS to anoth
 
 In many projects there is no need to worry about, let alone convert between, different CRSs.
 It is important to know if your data is in a projected or geographic coordinate system, and the consequences of this for geometry operations.
-However, if you know the CRS of your data and the consequences for geometry operations (covered in the next section), CRS should *just work*: knowledge of CRSs is often most important when things go wrong.
+However, if you know the CRS of your data and the consequences for geometry operations (covered in the next section), CRSs should *just work* behind the scenes: people often suddenly need to learn about CRSs when things go wrong.
 Having a clearly defined project CRS that all project data is in (or is converted into), plus understanding how and why to use different CRSs, can ensure that things don't go wrong. 
 
 This chapter teaches the fundamentals of CRSs, demonstrates the consequences of using different CRSs (including what can go wrong), and how to 'reproject' datasets from one coordinate system to another.
