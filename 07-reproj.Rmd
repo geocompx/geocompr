@@ -78,7 +78,7 @@ On this point @opengeospatialconsortium_wellknown_2018 is clear, the verbose WKT
 
 > Should any attributes or values given in the cited identifier be in conflict with attributes or values given explicitly in the WKT description, the WKT values shall prevail. 
 
-The convention of referring to CRSs identifiers in the form *AUTHORITY:CODE* allows a wide range of formally defined coordinate systems to be referred to.^[
+The convention of referring to CRSs identifiers in the form `AUTHORITY:code` allows a wide range of formally defined coordinate systems to be referred to.^[
 Several other ways of referring to unique CRSs can be used, with five identifier types (EPSG code, POSTGIS SRID, INTERNAL SRID, PROJ4 string, and WKT strings accepted by [QGIS](https://docs.qgis.org/3.16/en/docs/pyqgis_developer_cookbook/crs.html?highlight=srid) and other identifier types [@opengeospatialconsortium_wellknown_2018.
 ]
 The most commonly used authority of SRIDs is *EPSG* but other authorities, such as *ESRI*, exist.
@@ -109,7 +109,7 @@ Longer explanations on the recent changes in the PROJ library and why `proj4stri
 ## Querying and setting coordinate systems {#crs-setting}
 
 Let's look at how CRSs are stored in R spatial objects and how they can be queried and set.
-For this, we need to read-in a vector dataset:
+First we will look at getting and setting CRSs in **vector** geographic data objects, starting with the following example:
 
 ```{r 02-spatial-data-52, message=FALSE, results='hide'}
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
@@ -132,16 +132,15 @@ st_crs(new_vector) # get CRS
 new_vector_crs = st_crs(new_vector)
 ```
 
-
 The output is a list containing two main components:
 
-1. `User input` (in this case `WGS 84`, which in this case was taken from the input file), corresponding to CRS identifiers such as `EPSG:4326` described above
+1. `User input` (in this case `WGS 84`, a synonym for `EPSG:4326` which in this case was taken from the input file), corresponding to CRS identifiers described above
 1. `wkt`, containing the full WKT string with all relevant information about the CRS.
 
-The `input` element is quite flexible, and depending on the input file or user input, can contain SRID representation (e.g., `"EPSG:4326"`), CRS's name (e.g., `"WGS84"`), or even `proj4string` definition.
+The `input` element is flexible, and depending on the input file or user input, can contain the `AUTHORITY:code` representation (e.g., `EPSG:4326`), the CRS's name (e.g., `WGS 84`), or even the `proj4string` definition.
 The `wkt` element stores the WKT2 representation, which is used when saving the object to a file or doing any coordinate operations.
 Above, we can see that the `new_vector` object has the WGS84 ellipsoid, uses the Greenwich prime meridian, and the latitude and longitude axis order.
-In this case, we also have some additional elements, such as `USAGE` explaining the area suitable for the use of this CRS, and `ID` pointing to the CRS's SRID - `"EPSG:4326"`.
+In this case, we also have some additional elements, such as `USAGE` explaining the area suitable for the use of this CRS, and `ID` pointing to the CRS's SRID - `EPSG:4326`.
 
 The `st_crs` function also has one helpful feature -- we can retrieve some additional information about the used CRS. 
 For example, try to run:
@@ -151,15 +150,20 @@ For example, try to run:
 - `st_crs(new_vector)$srid` extracts its SRID (when available)
 - `st_crs(new_vector)$proj4string` extracts the `proj4string` representation
 
-In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used:
+In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used (in this case the WKT string remains unchanged because the CRS was already set correctly when the file was read-in):
 
 ```{r 02-spatial-data-54}
 new_vector = st_set_crs(new_vector, "EPSG:4326") # set CRS
 ```
 
-The second argument in the above function could be either SRID (`"EPSG:4326"` in the example), complete WKT2 representation, `proj4string`, or CRS extracted from the existing object with `st_crs()`.
+```{r, echo=FALSE, eval=FALSE}
+waldo::compare(new_vector_crs, st_crs(new_vector))
+# `old$input`: "WGS 84"   
+# `new$input`: "EPSG:4326"
+```
 
-The `crs()` function can be used to access CRS information from a `SpatRaster` object (note the use of the `cat()` function to print it nicely): 
+Getting and setting CRSs works in a similar way for **raster** geographic data objects.
+The `crs()` function in the `terra` package accesses CRS information from a `SpatRaster` object (note the use of the `cat()` function to print it nicely): 
 
 ```{r 02-spatial-data-55}
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
