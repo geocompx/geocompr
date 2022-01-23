@@ -78,7 +78,7 @@ On this point @opengeospatialconsortium_wellknown_2019 is clear, the verbose WKT
 
 > Should any attributes or values given in the cited identifier be in conflict with attributes or values given explicitly in the WKT description, the WKT values shall prevail. 
 
-The convention of referring to CRSs identifiers in the form `AUTHORITY:CODE` allows a wide range of formally defined coordinate systems to be referred to.^[
+The convention of referring to CRSs identifiers in the form `AUTHORITY:CODE`, which is also used by geographic software written in other [languages](https://jorisvandenbossche.github.io/blog/2020/02/11/geopandas-pyproj-crs/), allows a wide range of formally defined coordinate systems to be referred to.^[
 Several other ways of referring to unique CRSs can be used, with five identifier types (EPSG code, POSTGIS SRID, INTERNAL SRID, PROJ4 string, and WKT strings accepted by [QGIS](https://docs.qgis.org/3.16/en/docs/pyqgis_developer_cookbook/crs.html?highlight=srid) and other identifier types [@opengeospatialconsortium_wellknown_2019.
 ]
 The most commonly used authority of SRIDs is *EPSG* but other authorities, such as *ESRI*, exist.
@@ -502,7 +502,6 @@ Next, the last section, shows how to create custom map projections (Section \@re
 
 ## Reprojecting vector geometries {#reproj-vec-geom}
 
-<!--toDo:rl-->
 <!--jn: idea adding info about custom piplines?-->
 
 \index{CRS!reprojection} 
@@ -527,7 +526,6 @@ Use `as.numeric()` to coerce the result into a regular number.
 ```{r 06-reproj-11}
 st_distance(london2, london_proj)
 ```
-
 
 This is demonstrated below with reference to `cycle_hire_osm`, an `sf` object from **spData** that represents 'docking stations' where you can hire bicycles in London.
 The CRS of `sf` objects can be queried --- and as we learned in Section \@ref(reproj-intro) set --- with the function `st_crs()`.
@@ -556,7 +554,8 @@ crs_lnd$epsg
 As mentioned in Section \@(...), WKT representation, stored in the `$wkt` element of the `crs_lnd` object is the ultimate source of truth.
 This means that the outputs of the previous code chunk are queries from the `wkt` representation provided by PROJ, rather than inherent attributes of the object and its CRS.
 
-Both `wkt` and `User Input` elements of the CRS are changed by transforming the object to a projected CRS (only the first 4 lines of the CRS output are shown for brevity):
+Both `wkt` and `User Input` elements of the CRS are changed when the object's CRS is transformed.
+In the code chunk below, we create a new version of `cycle_hire_osm` with a projected CRS (only the first 4 lines of the CRS output are shown for brevity):
 
 ```{r 06-reproj-18, eval=FALSE}
 cycle_hire_osm_projected = st_transform(cycle_hire_osm, "EPSG:27700")
@@ -568,35 +567,23 @@ st_crs(cycle_hire_osm_projected)
 #> ...
 ```
 
-<!--toDo:rl-->
-<!--not longer valid-->
-<!-- The resulting object has a new CRS with an EPSG code 27700. -->
-<!-- But how to find out more details about this EPSG code, or any code? -->
-<!-- One option is to search for it online. -->
-<!-- Another option is to use a function from the **rgdal** package to find the name of the CRS: -->
+The resulting object has a new CRS with an EPSG code 27700.
+But how to find out more details about this EPSG code, or any code?
+One option is to search for it online, 
 
-```{r 06-reproj-19, eval=FALSE, echo=FALSE}
-crs_codes = rgdal::make_EPSG()[1:2]
-dplyr::filter(crs_codes, code == 27700)
+```{r 06-reproj-19}
+crs_lnd_new = st_crs("EPSG:27700")
+crs_lnd_new$Name
+crs_lnd_new$proj4string
+crs_lnd_new$epsg
 ```
 
-<!--toDo:rl-->
-<!--not longer valid-->
-<!-- The result shows that the EPSG code 27700 represents the British National Grid, a result that could have been found by searching online for "[EPSG 27700](https://www.google.com/search?q=CRS+27700)". -->
-<!-- But what about the `proj4string` element? -->
-<!-- `proj4string`s are text strings that describe the CRS. -->
-<!-- They can be seen as formulas for converting a projected point into a point on the surface of the Earth and can be accessed from `crs` objects as follows (see [proj.org/](https://proj.org/) for further details of what the output means): -->
-
-```{r 06-reproj-20, eval=FALSE, echo=FALSE}
-st_crs(27700)$proj4string
-#> [1] "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 ...
-```
+The result shows that the EPSG code 27700 represents the British National Grid, a result that could have been found by searching online for "[EPSG 27700](https://www.google.com/search?q=CRS+27700)".
 
 ```{block2 06-reproj-21, type='rmdnote'}
 Printing a spatial object in the console automatically returns its coordinate reference system.
 To access and modify it explicitly, use the `st_crs` function, for example, `st_crs(cycle_hire_osm)`.
 ```
-
 
 ## Reprojecting raster geometries {#reproj-ras}
 
@@ -644,11 +631,13 @@ On a side note -- the second argument can also be an existing raster object with
 
 Let's take a look at two examples of raster transformation: using categorical and continuous data.
 Land cover data are usually represented by categorical maps.
-The `nlcd.tif` file provides information for a small area in Utah, USA obtained from [National Land Cover Database 2011](https://www.mrlc.gov/data/nlcd-2011-land-cover-conus) in the NAD83 / UTM zone 12N CRS.
+The `nlcd.tif` file provides information for a small area in Utah, USA obtained from [National Land Cover Database 2011](https://www.mrlc.gov/data/nlcd-2011-land-cover-conus) in the NAD83 / UTM zone 12N CRS, as shown in the output of the code chunk below (only first line of output shown):
 
-```{r 06-reproj-29}
+```{r 06-reproj-29, results='hide'}
 cat_raster = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 crs(cat_raster)
+#> PROJCRS["NAD83 / UTM zone 12N",
+#> ...
 ```
 
 In this region, 8 land cover classes were distinguished (a full list of NLCD2011 land cover classes can be found at [mrlc.gov](https://www.mrlc.gov/data/legends/national-land-cover-database-2011-nlcd2011-legend)):
@@ -788,6 +777,7 @@ zion_aeqd = st_transform(zion, my_wkt)
 Custom projections can also be made interactively, for example, using the [Projection Wizard](https://projectionwizard.org/#) web application [@savric_projection_2016].
 This website allows you to select a spatial extent of your data and a distortion property, and returns a list of possible projections.
 The list also contains WKT2 definitions of the projections that you can copy and use for reprojections.
+See @opengeospatialconsortium_wellknown_2019 for details on creating custom CRS definitions using WKT strings.
 
 \index{CRS!proj4string}
 A `proj4string` definition can also be used to create custom projections, as long we accept its limitations mentioned in Section \@ref(crs-in-r).
