@@ -41,7 +41,7 @@ Modifying map projections is covered in Section \@ref(mapproj).
 \index{CRS!EPSG}
 \index{CRS!WKT}
 \index{CRS!proj4string}
-Most geographic software that require CRS conversions, including core R packages `sf` and `terra`, have an interface to [PROJ](https://proj.org), an open source C++ library "that transforms coordinates from one coordinate reference system (CRS) to another".
+Most modern geographic tools that require CRS conversions, including core R-spatial packages and desktop GIS software such as QGIS, interface with [PROJ](https://proj.org), an open source C++ library "that transforms coordinates from one coordinate reference system (CRS) to another".
 CRSs can be described in many ways, including 1) simple yet potentially ambiguous statements such as "it's in lon/lat coordinates", 2) more formalised yet now outdated 'proj4 strings' such as `+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs` and 3) with an identifying code such as `EPSG:4326`.
 Each text string refers to the same thing: the 'WGS84' coordinate system that forms the basis of Global Positioning System (GPS) coordinates and many other datasets.
 But which one is correct?
