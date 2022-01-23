@@ -47,12 +47,12 @@ But which one is correct?
 
 The short answer is the third definition is correct: `EPSG:4326` is understood by `sf` (and by extension `stars`) and `terra` packages covered in this book, has the benefit of being human readable (search for it online and you will find a web page describing the CRS titled EPSG:4326 at on the website [epsg.io](https://epsg.io/4326), for example), and is future proof.
 The more concise identifier `4326` is understood by `sf`.
-However, **we urge users to use the more explicit `AUTHORITY:code` representation to prevent ambiguity and to provide context**.
+However, **we urge users to use the more explicit `AUTHORITY:CODE` representation to prevent ambiguity and to provide context**.
 
 A longer answer is that more detail is needed.
 None of three descriptions above contain sufficient information about WGS84 or any CRS for unambiguous transformations: due to the complexity of CRSs, it is not possible to capture all relevant information about them in such short text strings.
-For this reason, the Open Geospatial Consortium (OGC, which also developed the simple features specification that the `sf` package implements) developed an open standard format for describing CRSs that is called WKT (Well Known Text) in a [100+ page document](https://portal.opengeospatial.org/files/18-010r7) that "defines the structure and content of a text string implementation of the abstract model for coordinate reference systems described in ISO 19111:2019" [@opengeospatialconsortium_wellknown_2018].
-The WKT representation of the WGS84 CRS is as follows:
+For this reason, the Open Geospatial Consortium (OGC, which also developed the simple features specification that the `sf` package implements) developed an open standard format for describing CRSs that is called WKT (Well Known Text) in a [100+ page document](https://portal.opengeospatial.org/files/18-010r7) that "defines the structure and content of a text string implementation of the abstract model for coordinate reference systems described in ISO 19111:2019" [@opengeospatialconsortium_wellknown_2019].
+The WKT representation of the WGS84 CRS, which has the **identifier** `EPSG:4326` is as follows:
 
 <!-- Source: https://spatialreference.org/ref/epsg/4326/prettywkt/ -->
 <!-- ``` -->
@@ -69,17 +69,17 @@ The WKT representation of the WGS84 CRS is as follows:
 <!-- ``` -->
 
 ```{r}
-sf::st_crs("EPSG:4326")
+st_crs("EPSG:4326")
 ```
 
-The output of the command shows how the CRS identifier or Spatial Reference System Identifier ([SRID](https://postgis.net/workshops/postgis-intro/projection.html)) works: it is simply a look-up, providing a unique identifier associated with a more complete WTK representation of the CRS.
+The output of the command shows how the CRS identifier or Spatial Reference System Identifier (also known as [SRID](https://postgis.net/workshops/postgis-intro/projection.html)) works: it is simply a look-up, providing a unique identifier associated with a more complete WTK representation of the CRS.
 This raises the question: what happens if there is a mismatch between the identifier and the longer WKT representation of a CRS?
-On this point @opengeospatialconsortium_wellknown_2018 is clear, the verbose WKT2 representation takes precedence over the [identifier](https://docs.opengeospatial.org/is/18-010r7/18-010r7.html#37): 
+On this point @opengeospatialconsortium_wellknown_2019 is clear, the verbose WKT2 representation takes precedence over the [identifier](https://docs.opengeospatial.org/is/18-010r7/18-010r7.html#37): 
 
 > Should any attributes or values given in the cited identifier be in conflict with attributes or values given explicitly in the WKT description, the WKT values shall prevail. 
 
-The convention of referring to CRSs identifiers in the form `AUTHORITY:code` allows a wide range of formally defined coordinate systems to be referred to.^[
-Several other ways of referring to unique CRSs can be used, with five identifier types (EPSG code, POSTGIS SRID, INTERNAL SRID, PROJ4 string, and WKT strings accepted by [QGIS](https://docs.qgis.org/3.16/en/docs/pyqgis_developer_cookbook/crs.html?highlight=srid) and other identifier types [@opengeospatialconsortium_wellknown_2018.
+The convention of referring to CRSs identifiers in the form `AUTHORITY:CODE` allows a wide range of formally defined coordinate systems to be referred to.^[
+Several other ways of referring to unique CRSs can be used, with five identifier types (EPSG code, POSTGIS SRID, INTERNAL SRID, PROJ4 string, and WKT strings accepted by [QGIS](https://docs.qgis.org/3.16/en/docs/pyqgis_developer_cookbook/crs.html?highlight=srid) and other identifier types [@opengeospatialconsortium_wellknown_2019.
 ]
 The most commonly used authority of SRIDs is *EPSG* but other authorities, such as *ESRI*, exist.
 `ESRI:54030`, for example, refers to ESRI's implementation of the Robinson projection, which has the following WKT representation (only first 8 lines shown):
@@ -99,11 +99,12 @@ sf::st_crs("ESRI:54030")
 
 WKT strings are exhaustive, detailed, and precise, allowing for unambiguous CRSs storage and transformations.
 They contain all relevant information about any given CRS, including its datum and ellipsoid, prime meridian, projection, and units.^[
-In the past, the `proj4string` definitions, was the standard way to specify coordinate operations and store CRSs.
+Before the emergence of WKT CRS definitions, `proj4string` was the standard way to specify coordinate operations and store CRSs.
 These string representations, built on a key=value form (e.g, `+proj=longlat +datum=WGS84 +no_defs`), are, however, currently discouraged in most cases.
 PROJ version 6 and further still allows to use `proj4string`s to define coordinate operations, but some `proj4string` keys are no longer supported or are not advisable to use (e.g., `+nadgrids`, `+towgs84`, `+k`, `+init=epsg:`) and only three datums (i.e., WGS84, NAD83, and NAD27) can be directly set in `proj4string`.
 Importantly, `proj4string`s are not used to store CRSs anymore.
-Longer explanations on the recent changes in the PROJ library and why `proj4string` was replaced by `WKT2` can be found in @bivand_progress_2021, Chapter 2 of @pebesma_spatial_2022, and [blog post by Floris Vanderhaeghe](https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/).
+Longer explanations of the evolution of CRS definitions and the PROJ library can be found in @bivand_progress_2021, Chapter 2 of @pebesma_spatial_2022, and [blog post by Floris Vanderhaeghe](https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/).
+As outlined in the [PROJ documentation](https://proj.org/development/reference/cpp/cpp_general.html) there are different versions of the WKT CRS format including WKT1, WKT2, the latter of which corresponds to the ISO 19111:2019 [@opengeospatialconsortium_wellknown_2019].
 ]
 
 ## Querying and setting coordinate systems {#crs-setting}
@@ -137,7 +138,7 @@ The output is a list containing two main components:
 1. `User input` (in this case `WGS 84`, a synonym for `EPSG:4326` which in this case was taken from the input file), corresponding to CRS identifiers described above
 1. `wkt`, containing the full WKT string with all relevant information about the CRS.
 
-The `input` element is flexible, and depending on the input file or user input, can contain the `AUTHORITY:code` representation (e.g., `EPSG:4326`), the CRS's name (e.g., `WGS 84`), or even the `proj4string` definition.
+The `input` element is flexible, and depending on the input file or user input, can contain the `AUTHORITY:CODE` representation (e.g., `EPSG:4326`), the CRS's name (e.g., `WGS 84`), or even the `proj4string` definition.
 The `wkt` element stores the WKT2 representation, which is used when saving the object to a file or doing any coordinate operations.
 Above, we can see that the `new_vector` object has the WGS84 ellipsoid, uses the Greenwich prime meridian, and the latitude and longitude axis order.
 In this case, we also have some additional elements, such as `USAGE` explaining the area suitable for the use of this CRS, and `ID` pointing to the CRS's SRID - `EPSG:4326`.
@@ -552,15 +553,19 @@ crs_lnd$proj4string
 crs_lnd$epsg
 ```
 
+As mentioned in Section \@(...), WKT representation, stored in the `$wkt` element of the `crs_lnd` object is the ultimate source of truth.
+This means that the outputs of the previous code chunk are queries from the `wkt` representation provided by PROJ, rather than inherent attributes of the object and its CRS.
 
-<!--toDo:rl-->
-<!--not longer valid-->
-<!-- This duality of CRS objects means that they can be set either using an EPSG code or a `proj4string`. -->
-<!-- This means that `st_crs("+proj=longlat +datum=WGS84 +no_defs")` is equivalent to `st_crs(4326)`, although not all `proj4string`s have an associated EPSG code. -->
-<!-- Both elements of the CRS are changed by transforming the object to a projected CRS: -->
+Both `wkt` and `User Input` elements of the CRS are changed by transforming the object to a projected CRS (only the first 4 lines of the CRS output are shown for brevity):
 
-```{r 06-reproj-18, eval=FALSE, echo=FALSE}
+```{r 06-reproj-18, eval=FALSE}
 cycle_hire_osm_projected = st_transform(cycle_hire_osm, "EPSG:27700")
+st_crs(cycle_hire_osm_projected)
+#> Coordinate Reference System:
+#>   User input: EPSG:27700 
+#>   wkt:
+#> PROJCRS["OSGB36 / British National Grid",
+#> ...
 ```
 
 <!--toDo:rl-->
