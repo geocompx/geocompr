@@ -39,7 +39,7 @@ Modifying map projections is covered in Section \@ref(mapproj).
 ## Coordinate Reference Systems {#crs-in-r}
 
 \index{CRS!EPSG}
-\index{CRS!WKT2}
+\index{CRS!WKT}
 \index{CRS!proj4string}
 Most geographic software that require CRS conversions, including core R packages `sf` and `terra`, have an interface to [PROJ](https://proj.org), an open source C++ library "that transforms coordinates from one coordinate reference system (CRS) to another".
 CRSs can be described in many ways, including 1) simple yet potentially ambiguous statements such as "it's in lon/lat coordinates", 2) more formalised yet now outdated 'proj4 strings' such as `+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs` and 3) with an identifying code such as `EPSG:4326`.
@@ -95,17 +95,18 @@ st_crs("EPSG:4326")
 #>     ID["EPSG",4326]]
 ```
 
-The output of the command shows how the CRS identifier or Spatial Reference System Identifier (also known as [SRID](https://postgis.net/workshops/postgis-intro/projection.html)) works: it is simply a look-up, providing a unique identifier associated with a more complete WTK representation of the CRS.
+The output of the command shows how the CRS identifier or Spatial Reference System Identifier (also known as a Spatial Reference Identifier or [SRID](https://postgis.net/workshops/postgis-intro/projection.html)) works: it is simply a look-up, providing a unique identifier associated with a more complete WTK representation of the CRS.
 This raises the question: what happens if there is a mismatch between the identifier and the longer WKT representation of a CRS?
-On this point @opengeospatialconsortium_wellknown_2019 is clear, the verbose WKT2 representation takes precedence over the [identifier](https://docs.opengeospatial.org/is/18-010r7/18-010r7.html#37): 
+On this point @opengeospatialconsortium_wellknown_2019 is clear, the verbose WKT representation takes precedence over the [identifier](https://docs.opengeospatial.org/is/18-010r7/18-010r7.html#37): 
 
 > Should any attributes or values given in the cited identifier be in conflict with attributes or values given explicitly in the WKT description, the WKT values shall prevail. 
 
 The convention of referring to CRSs identifiers in the form `AUTHORITY:CODE`, which is also used by geographic software written in other [languages](https://jorisvandenbossche.github.io/blog/2020/02/11/geopandas-pyproj-crs/), allows a wide range of formally defined coordinate systems to be referred to.^[
-Several other ways of referring to unique CRSs can be used, with five identifier types (EPSG code, POSTGIS SRID, INTERNAL SRID, PROJ4 string, and WKT strings accepted by [QGIS](https://docs.qgis.org/3.16/en/docs/pyqgis_developer_cookbook/crs.html?highlight=srid) and other identifier types [@opengeospatialconsortium_wellknown_2019.
+Several other ways of referring to unique CRSs can be used, with five identifier types (EPSG code, PostGIS SRID, INTERNAL SRID, PROJ4 string, and WKT strings accepted by [QGIS](https://docs.qgis.org/3.16/en/docs/pyqgis_developer_cookbook/crs.html?highlight=srid) and other identifier types [@opengeospatialconsortium_wellknown_2019.
 ]
-The most commonly used authority of SRIDs is *EPSG* but other authorities, such as *ESRI*, exist.
-`ESRI:54030`, for example, refers to ESRI's implementation of the Robinson projection, which has the following WKT representation (only first 8 lines shown):
+The most commonly used authority in CRS identifiers is *EPSG*, an acronym for the European Petroleum Survey Group which published a standardized list of CRSs (the EPSG was [taken over](http://wiki.gis.com/wiki/index.php/European_Petroleum_Survey_Group) by the oil and gas body the [Geomatics Committee of the International Association of Oil & Gas Producers](https://www.iogp.org/our-committees/geomatics/) in 2005).
+Other authorities can be used in CRS identifiers.
+`ESRI:54030`, for example, refers to ESRI's implementation of the Robinson projection, which has the following WKT string (only first 8 lines shown):
 
 
 ```r
@@ -128,7 +129,7 @@ These string representations, built on a key=value form (e.g, `+proj=longlat +da
 PROJ version 6 and further still allows to use `proj4string`s to define coordinate operations, but some `proj4string` keys are no longer supported or are not advisable to use (e.g., `+nadgrids`, `+towgs84`, `+k`, `+init=epsg:`) and only three datums (i.e., WGS84, NAD83, and NAD27) can be directly set in `proj4string`.
 Importantly, `proj4string`s are not used to store CRSs anymore.
 Longer explanations of the evolution of CRS definitions and the PROJ library can be found in @bivand_progress_2021, Chapter 2 of @pebesma_spatial_2022, and [blog post by Floris Vanderhaeghe](https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/).
-As outlined in the [PROJ documentation](https://proj.org/development/reference/cpp/cpp_general.html) there are different versions of the WKT CRS format including WKT1, WKT2, the latter of which corresponds to the ISO 19111:2019 [@opengeospatialconsortium_wellknown_2019].
+As outlined in the [PROJ documentation](https://proj.org/development/reference/cpp/cpp_general.html) there are different versions of the WKT CRS format including WKT1 and two variants of WKT2, the latter of which (WKT2, 2018 specification) corresponds to the ISO 19111:2019 [@opengeospatialconsortium_wellknown_2019].
 ]
 
 ## Querying and setting coordinate systems {#crs-setting}
@@ -162,16 +163,16 @@ The output is a list containing two main components:
 1. `wkt`, containing the full WKT string with all relevant information about the CRS.
 
 The `input` element is flexible, and depending on the input file or user input, can contain the `AUTHORITY:CODE` representation (e.g., `EPSG:4326`), the CRS's name (e.g., `WGS 84`), or even the `proj4string` definition.
-The `wkt` element stores the WKT2 representation, which is used when saving the object to a file or doing any coordinate operations.
+The `wkt` element stores the WKT representation, which is used when saving the object to a file or doing any coordinate operations.
 Above, we can see that the `new_vector` object has the WGS84 ellipsoid, uses the Greenwich prime meridian, and the latitude and longitude axis order.
-In this case, we also have some additional elements, such as `USAGE` explaining the area suitable for the use of this CRS, and `ID` pointing to the CRS's SRID - `EPSG:4326`.
+In this case, we also have some additional elements, such as `USAGE` explaining the area suitable for the use of this CRS, and `ID` pointing to the CRS's identifier: `EPSG:4326`.
 
 The `st_crs` function also has one helpful feature -- we can retrieve some additional information about the used CRS. 
 For example, try to run:
 
 - `st_crs(new_vector)$IsGeographic` to check is the CRS is geographic or not
 - `st_crs(new_vector)$units_gdal` to find out the CRS units
-- `st_crs(new_vector)$srid` extracts its SRID (when available)
+- `st_crs(new_vector)$srid` extracts its 'SRID' identifier (when available)
 - `st_crs(new_vector)$proj4string` extracts the `proj4string` representation
 
 In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used (in this case the WKT string remains unchanged because the CRS was already set correctly when the file was read-in):
@@ -207,7 +208,7 @@ cat(crs(my_rast)) # get CRS
 #>     ID["EPSG",4326]]
 ```
 
-The output is the WKT2 representation of CRS. 
+The output is the WKT representation of CRS. 
 The same function, `crs()`, is can be also used to set a CRS for raster objects.
 
 
@@ -215,7 +216,8 @@ The same function, `crs()`, is can be also used to set a CRS for raster objects.
 crs(my_rast) = "EPSG:26912" # set CRS
 ```
 
-Here, we can use either SRID, complete WKT2 representation, `proj4string`, or CRS extracted from other existing object with `crs()`.
+Here, we can use either the identifier (recommended in most cases) or complete WKT representation.
+Alternative methods to set `crs` include `proj4string` strings or CRSs extracted from other existing object with `crs()`, although these approaches may be less future proof.
 
 Importantly, the `st_crs()` and `crs()` functions do not alter coordinates' values or geometries.
 Their role is only to set a metadata information about the object CRS.
@@ -725,12 +727,12 @@ For instance, if we are interested in a density (points per grid cell or inhabit
 
 ## Custom map projections {#mapproj}
 
-Established CRSs captured by SRID codes are well-suited for many applications.
+Established CRSs captured by `AUTHORITY:CODE` identifiers such as `EPSG:4326` are well suited for many applications.
 However, it is desirable to create a new, custom CRS in some cases.
 Section \@ref(which-crs) mentioned reasons for using custom CRSs, and provided several possible approaches.
 Here, we show how to apply these ideas in R.
 
-One possible approach to creating a custom CRS is to take an existing WKT2 definition of a CRS, modify some of its elements, and then use the new definition for reprojecting.
+One possible approach to creating a custom CRS is to take an existing WKT definition of a CRS, modify some of its elements, and then use the new definition for reprojecting.
 This can be done for spatial vectors with `st_crs()$wkt` and `st_transform()`, and for spatial rasters with `crs()` and `project()`.
 
 Let's try it by transforming the `zion` object to a custom azimuthal equidistant (AEQD) CRS.
@@ -751,7 +753,7 @@ st_as_text(st_geometry(zion_centr_wgs84))
 #> [1] "POINT (-113 37.3)"
 ```
 
-Next, we can use the newly obtained values to update the WKT2 definition of the azimuthal equidistant (AEQD) CRS seen below.
+Next, we can use the newly obtained values to update the WKT definition of the azimuthal equidistant (AEQD) CRS seen below.
 Notice that we modified just two values below -- `"Central_Meridian"` to the longitude and `"Latitude_Of_Origin"` to the latitude of our centroid.
 
 
@@ -777,7 +779,7 @@ zion_aeqd = st_transform(zion, my_wkt)
 
 Custom projections can also be made interactively, for example, using the [Projection Wizard](https://projectionwizard.org/#) web application [@savric_projection_2016].
 This website allows you to select a spatial extent of your data and a distortion property, and returns a list of possible projections.
-The list also contains WKT2 definitions of the projections that you can copy and use for reprojections.
+The list also contains WKT definitions of the projections that you can copy and use for reprojections.
 See @opengeospatialconsortium_wellknown_2019 for details on creating custom CRS definitions using WKT strings.
 
 \index{CRS!proj4string}
