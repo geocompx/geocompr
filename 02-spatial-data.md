@@ -270,7 +270,9 @@ There are many reasons (linked to the advantages of the simple features model):
 - **sf** function names are relatively consistent and intuitive (all begin with `st_`)
 - **sf** functions can be combined using `%>%` operator and works well with the [tidyverse](http://tidyverse.org/) collection of R packages\index{tidyverse}.
 
-**sf**'s support for **tidyverse** packages is exemplified by the provision of two functions for reading in data, `st_read()` and `read_sf()` which store attributes in base R `data.frame` and **tidyverse** `tibble` classes respectively, as demonstrated below (see Chapter \@ref(attr) for more on manipulating geographic data with **tidyverse** functions and Section \@ref(iovec) for further details on reading and writing geographic vector data with R):
+**sf**'s support for **tidyverse** packages is exemplified by the provision of the `read_sf()` function for reading geographic vector datasets.
+Unlike the function `st_read()`, which returns attributes stored in a base R `data.frame` (and which provides more verbose messages, not shown in the code chunk below), `read_sf()` returns data as a **tidyverse** `tibble`.
+This is demonstrated below (see Section \@ref(iovec)) on reading geographic vector data):
 
 
 ```r
@@ -290,12 +292,11 @@ class(nc_tbl)
 ```
 
 
-**sf** is now the go-to package for analysis of spatial vector data in R (not withstanding the **spatstat** package ecosystem which provides numerous functions for spatial statistics).
+As described in Chapter \@ref(attr), which shows how to manipulate `sf` objects with **tidyverse** functions, **sf** is now the go-to package for analysis of spatial vector data in R (not withstanding the **spatstat** package ecosystem which provides numerous functions for spatial statistics).
 Many popular packages build on **sf**, as shown by the rise in its popularity in terms of number of downloads per day, as shown in Section \@ref(r-ecosystem) in the previous chapter.
-However, it will take many years for most packages to fully transition away from older packages such as **sp**, many packages depend on both **sf** and **sp** and some will never switch [@bivand_progress_2021].
+Transitioning established packages and workflows away from legacy packages **rgeos** and **rgdal** takes time [@bivand_progress_2021], but the process was given a sense of urgency by messages printed when they were loaded, which state that they "will be retired by the end of 2023".
+This means that anyone still using these packages should "**transition to sf/stars/terra functions using GDAL and PROJ at your earliest convenience**". 
 
-In this context it is important to note that people still using **sp** (and related **rgeos** and **rgdal**) packages are advised to switch to **sf**.
-The description of [**rgeos**](https://cran.r-project.org/package=rgeos) on CRAN, for example, states that the package "will be retired by the **end of 2023**" and advises people to plan for the transition to **sf**.
 In other words, **sf** is future proof but **sp** is not.
 For workflows that depend on the legacy class system, `sf` objects can be converted from and to the `Spatial` class of the **sp** package as follows:
 
