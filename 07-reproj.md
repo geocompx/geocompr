@@ -46,9 +46,10 @@ CRSs can be described in many ways, including 1) simple yet potentially ambiguou
 Each text string refers to the same thing: the 'WGS84' coordinate system that forms the basis of Global Positioning System (GPS) coordinates and many other datasets.
 But which one is correct?
 
-The short answer is the third definition is correct: `EPSG:4326` is understood by `sf` (and by extension `stars`) and `terra` packages covered in this book, has the benefit of being human readable (search for it online and you will find a web page describing the CRS titled EPSG:4326 at on the website [epsg.io](https://epsg.io/4326), for example), and is future proof.
-The more concise identifier `4326` is understood by `sf`.
-However, **we urge users to use the more explicit `AUTHORITY:CODE` representation to prevent ambiguity and to provide context**.
+The short answer is that the third way to identify CRSs is correct: `EPSG:4326` is understood by `sf` (and by extension `stars`) and `terra` packages R covered in this book, plus many other software projects for working with geographic data including [QGIS](https://docs.qgis.org/3.16/en/docs/user_manual/working_with_projections/working_with_projections.html) and [PROJ](https://proj.org/development/quickstart.html).
+`EPSG:4326` is future-proof.
+Furthermore, although it is machine readable, unlike the `proj4string` representation "EPSG:4326" is short, easy to remember and highly 'findable' online (searching for EPSG:4326 yields a dedicated page on the website [epsg.io](https://epsg.io/4326), for example).
+The more concise identifier `4326` is understood by `sf`, but **we recommend the more explicit `AUTHORITY:CODE` representation to prevent ambiguity and to provide context**.
 
 A longer answer is that more detail is needed.
 None of three descriptions above contain sufficient information about WGS84 or any CRS for unambiguous transformations: due to the complexity of CRSs, it is not possible to capture all relevant information about them in such short text strings.
@@ -103,7 +104,7 @@ On this point @opengeospatialconsortium_wellknown_2019 is clear, the verbose WKT
 
 The convention of referring to CRSs identifiers in the form `AUTHORITY:CODE`, which is also used by geographic software written in other [languages](https://jorisvandenbossche.github.io/blog/2020/02/11/geopandas-pyproj-crs/), allows a wide range of formally defined coordinate systems to be referred to.^[
 Several
-other ways of referring to unique CRSs can be used, with five identifier types (EPSG code, PostGIS SRID, INTERNAL SRID, PROJ4 string, and WKT strings accepted by [QGIS](https://docs.qgis.org/3.16/en/docs/pyqgis_developer_cookbook/crs.html?highlight=srid) and other identifier types @opengeospatialconsortium_wellknown_2019.
+other ways of referring to unique CRSs can be used, with five identifier types (EPSG code, PostGIS SRID, INTERNAL SRID, PROJ4 string, and WKT strings accepted by [QGIS](https://docs.qgis.org/3.16/en/docs/pyqgis_developer_cookbook/crs.html?highlight=srid) and other identifier types such as a more verbose variant of the `EPSG:4326` identifier, `urn:ogc:def:crs:EPSG::4326` @opengeospatialconsortium_wellknown_2019.
 ]
 The most commonly used authority in CRS identifiers is *EPSG*, an acronym for the European Petroleum Survey Group which published a standardized list of CRSs (the EPSG was [taken over](http://wiki.gis.com/wiki/index.php/European_Petroleum_Survey_Group) by the oil and gas body the [Geomatics Committee of the International Association of Oil & Gas Producers](https://www.iogp.org/our-committees/geomatics/) in 2005).
 Other authorities can be used in CRS identifiers.
@@ -122,6 +123,9 @@ sf::st_crs("ESRI:54030")
 #>                 LENGTHUNIT["metre",1]]],
 #> ...
 ```
+
+
+
 
 WKT strings are exhaustive, detailed, and precise, allowing for unambiguous CRSs storage and transformations.
 They contain all relevant information about any given CRS, including its datum and ellipsoid, prime meridian, projection, and units.^[
