@@ -647,37 +647,19 @@ st_crs(points_sfc)
 #> Coordinate Reference System: NA
 ```
 
-All geometries in an `sfc` object must have the same CRS.
-We can add coordinate reference system as a `crs` argument of `st_sfc()`. 
-To specify a certain CRS, we can provide Spatial Reference System Identifier (SRID, e.g., `"EPSG:4326"`), well-known text (WKT2), or proj4string representation (see Section \@ref(crs-intro)).
-If we provide SRID or proj4string, then the well-known text (WKT2) will be added automatically.
+All geometries in `sfc` objects must have the same CRS.
+A CRS can be specified with the `crs` argument of `st_sfc()` (or `st_sf()`), which takes a **CRS identifier** provided as a text string, such as `crs = "EPSG:4326"` (see Section \@ref(crs-in-r) for other CRS representations and details on what this means).
 
 
 ```r
-# EPSG definition
+# Set the CRS with an identifier referring to an 'EPSG' CRS code:
 points_sfc_wgs = st_sfc(point1, point2, crs = "EPSG:4326")
-st_crs(points_sfc_wgs)
+st_crs(points_sfc_wgs) # print CRS (only first 4 lines of output shown)
 #> Coordinate Reference System:
 #>   User input: EPSG:4326 
 #>   wkt:
 #> GEOGCRS["WGS 84",
-#>     DATUM["World Geodetic System 1984",
-#>         ELLIPSOID["WGS 84",6378137,298.257223563,
-#>             LENGTHUNIT["metre",1]]],
-#>     PRIMEM["Greenwich",0,
-#>         ANGLEUNIT["degree",0.0174532925199433]],
-#>     CS[ellipsoidal,2],
-#>         AXIS["geodetic latitude (Lat)",north,
-#>             ORDER[1],
-#>             ANGLEUNIT["degree",0.0174532925199433]],
-#>         AXIS["geodetic longitude (Lon)",east,
-#>             ORDER[2],
-#>             ANGLEUNIT["degree",0.0174532925199433]],
-#>     USAGE[
-#>         SCOPE["unknown"],
-#>         AREA["World"],
-#>         BBOX[-90,-180,90,180]],
-#>     ID["EPSG",4326]]
+#> ...
 ```
 
 ### The sf class {#sf}
