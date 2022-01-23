@@ -834,7 +834,7 @@ The `writeRaster()` function saves `SpatRaster` objects to files on disk.
 The function expects input regarding output data type and file format, but also accepts GDAL options specific to a selected file format (see `?writeRaster` for more details).
 
 \index{raster!data types}
-The **terra** package offers nine data types when saving a raster: LOG1S, INT1S, INT1U, INT2S, INT2U, INT4S, INT4U, FLT4S, and FLT8S.^[
+The **terra** package offers seven data types when saving a raster: INT1U, INT2S, INT2U, INT4S, INT4U, FLT4S, and FLT8S.^[
 Using INT4U is not recommended as R does not support 32-bit unsigned integers.
 ]
 The data type determines the bit representation of the raster object written to disk (Table \@ref(tab:datatypes)).
