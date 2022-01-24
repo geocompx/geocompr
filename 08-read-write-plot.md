@@ -373,7 +373,7 @@ Table \@ref(tab:formats) presents some basic information about selected and ofte
   <tr>
    <td style="text-align:left;"> GeoJSON </td>
    <td style="text-align:left;width: 7em; "> .geojson </td>
-   <td style="text-align:left;width: 14em; "> Extends the JSON exchange format by including a subset of the simple feature representation. </td>
+   <td style="text-align:left;width: 14em; "> Extends the JSON exchange format by including a subset of the simple feature representation; mostly used for storing coordinates in longitude and latitude; it is extended by the TopoJSON format </td>
    <td style="text-align:left;"> Vector </td>
    <td style="text-align:left;width: 7em; "> Open </td>
   </tr>
@@ -430,21 +430,13 @@ Table \@ref(tab:formats) presents some basic information about selected and ofte
    <td style="text-align:left;"> GeoPackage </td>
    <td style="text-align:left;width: 7em; "> .gpkg </td>
    <td style="text-align:left;width: 14em; "> Lightweight database container based on SQLite allowing an easy and platform-independent exchange of geodata </td>
-   <td style="text-align:left;"> Vector and raster </td>
+   <td style="text-align:left;"> Vector and (very limited) raster </td>
    <td style="text-align:left;width: 7em; "> Open </td>
   </tr>
 </tbody>
 </table>
-
-<!--toDo: JN -->
 <!-- additional suggestions from our readers: -->
-<!-- - Spreadsheets, CSV files, CSV/TSV and other tabular friends/ convenient for exchanging data with systems not supporting spatial data, badly or using less common tools -->
 <!-- - KEA - https://gdal.org/drivers/raster/kea.html -->
-<!-- - TopoJSON - https://github.com/topojson/topojson -->
-<!-- - .geojson (usually) limited to longlat -->
-<!-- - NetCDF - https://en.wikipedia.org/wiki/NetCDF -->
-<!-- - @flatgeobuf also supports indexing -->
-<!-- - .hdf5 (hyperspec) and .las/.laz (lidar) -->
 <!-- - sfarrow & geoparquet/pandas/GeoFeather -->
 
 \index{Shapefile}
@@ -474,13 +466,15 @@ Additionally, GeoTIFF is still being expanded and improved.
 One of the most significant recent addition to the GeoTIFF format is its variant called COG (*Cloud Optimized GeoTIFF*).
 Raster objects saved as COGs can be hosted on HTTP servers, so other people can read only parts of the file without downloading the whole file (see Sections \@ref(raster-data-read) and \@ref(raster-data-write)).
 
+There is also a plethora of other spatial data formats that we do not explain in detail or mention in Table \@ref(tab:formats) due to the book limits.
+If you need to use other formats, we encourage you to read the GDAL documentation about [vector](https://gdal.org/drivers/vector/index.html) and [raster](https://gdal.org/drivers/raster/index.html) drivers.
+Additionally, some spatial data formats can store other data models (types) than vector or raster.
+It includes LAS and LAZ formats for storing lidar point clouds, and NetCDF and HDF for storing multidimensional arrays.
+<!-- do we mention them anywhere in the book and can reference to? -->
 
-<!--toDo: JN -->
-<!-- tabular formats -->
-
-<!--toDo: JN -->
-<!-- other formats (netcdf, las) -->
-
+Finally, spatial data is also often stored using tabular (non-spatial) text formats, including CSV files or Excel spreadsheets.
+For example, this can be convenient to share spatial samples with people who do not use GIS tools or exchange data with other software that does not accept spatial data formats. 
+However, this approach has several possible issues -- it is fairly challenging for storing geometries more complex than POINTs and does not directly store information about CRS.
 
 ## Data input (I) {#data-input}
 
