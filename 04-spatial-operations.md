@@ -340,8 +340,6 @@ grid_sf$rooks = lengths(st_rook(grid, grid[5])) > 0
 plot(grid, col = grid_sf$rooks)
 ```
 
-<img src="04-spatial-operations_files/figure-html/queenscode-1.png" width="100%" style="display: block; margin: auto;" /><img src="04-spatial-operations_files/figure-html/queenscode-2.png" width="100%" style="display: block; margin: auto;" />
-
 <div class="figure" style="text-align: center">
 <img src="04-spatial-operations_files/figure-html/queens-1.png" alt="Demonstration of custom binary spatial predicates for finding 'queen' (left) and 'rook' (right) relations to the central square in a grid with 9 geometries." width="100%" />
 <p class="caption">(\#fig:queens)Demonstration of custom binary spatial predicates for finding 'queen' (left) and 'rook' (right) relations to the central square in a grid with 9 geometries.</p>
