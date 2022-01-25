@@ -474,12 +474,6 @@ Simple features consist of two main parts: geometries and non-geographic attribu
 Figure \@ref(fig:02-sfdiagram) shows how an sf object is created -- geometries come from an `sfc` object, while attributes are taken from a `data.frame` or `tibble`.
 To learn more about building sf geometries from scratch read the following Sections \@ref(sfg) and \@ref(sfc).
 
-
-```r
-# source("code/02-sfdiagram.R")
-knitr::include_graphics("figures/02-sfdiagram.png")
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/02-sfdiagram.png" alt="Building blocks of sf objects." width="100%" />
 <p class="caption">(\#fig:02-sfdiagram)Building blocks of sf objects.</p>
