@@ -247,7 +247,7 @@ In turn, `sfc` objects are composed of one or more objects of class `sfg`: simpl
 \index{simple feature columns|see {sf!sfc}}
 
 To understand how the spatial components of simple features work, it is vital to understand simple feature geometries.
-For this reason we cover each currently supported simple features geometry type in Section \@ref(geometry) before moving on to describe how these can be represented in R using `sfg` objects, which form the basis of `sfc` and eventually full `sf` objects.
+For this reason we cover each currently supported simple features geometry type in Section \@ref(geometry) before moving on to describe how these can be represented in R using `sf` objects, which are based on `sfg` and `sfc` objects.
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">The preceding code chunk uses `=` to create a new object called `world_mini` in the command `world_mini = world[1:2, 1:3]`.
 This is called assignment.
@@ -468,6 +468,72 @@ Finally, a geometry collection can contain any combination of geometries includi
 <p class="caption">(\#fig:geomcollection)Illustration of a geometry collection.</p>
 </div>
 
+### The sf class {#sf}
+
+Simple features consist of two main parts: geometries and non-geographic attributes.
+Figure \@ref(fig:02-sfdiagram) shows how an sf object is created -- geometries come from an `sfc` object, while attributes are taken from a `data.frame` or `tibble`.
+To learn more about building sf geometries from scratch read the following Sections \@ref(sfg) and \@ref(sfc).
+
+
+```r
+# source("code/02-sfdiagram.R")
+knitr::include_graphics("figures/02-sfdiagram.png")
+```
+
+<div class="figure" style="text-align: center">
+<img src="figures/02-sfdiagram.png" alt="Building blocks on sf objects." width="100%" />
+<p class="caption">(\#fig:02-sfdiagram)Building blocks on sf objects.</p>
+</div>
+
+Non-geographic attributes represent the name of the feature or other attributes such as measured values, groups, and other things.
+\index{sf!class}
+To illustrate attributes, we will represent a temperature of 25°C in London on June 21^st^, 2017.
+This example contains a geometry (the coordinates), and three attributes with three different classes (place name, temperature and date).^[
+Other attributes might include an urbanity category (city or village), or a remark if the measurement was made using an automatic station.
+]
+Objects of class `sf` represent such data by combining the attributes (`data.frame`) with the simple feature geometry column (`sfc`).
+They are created with `st_sf()` as illustrated below, which creates the London example described above:
+
+
+```r
+lnd_point = st_point(c(0.1, 51.5))                 # sfg object
+lnd_geom = st_sfc(lnd_point, crs = 4326)           # sfc object
+lnd_attrib = data.frame(                           # data.frame object
+  name = "London",
+  temperature = 25,
+  date = as.Date("2017-06-21")
+  )
+lnd_sf = st_sf(lnd_attrib, geometry = lnd_geom)    # sf object
+```
+
+What just happened? First, the coordinates were used to create the simple feature geometry (`sfg`).
+Second, the geometry was converted into a simple feature geometry column (`sfc`), with a CRS.
+Third, attributes were stored in a `data.frame`, which was combined with the `sfc` object with `st_sf()`.
+This results in an `sf` object, as demonstrated below (some output is omitted):
+
+
+```r
+lnd_sf
+#> Simple feature collection with 1 features and 3 fields
+#> ...
+#>     name temperature       date         geometry
+#> 1 London          25 2017-06-21 POINT (0.1 51.5)
+```
+
+
+```r
+class(lnd_sf)
+#> [1] "sf"         "data.frame"
+```
+
+The result shows that `sf` objects actually have two classes, `sf` and `data.frame`.
+Simple features are simply data frames (square tables), but with spatial attributes stored in a list column, usually called `geometry`, as described in Section \@ref(intro-sf).
+This duality is central to the concept of simple features:
+most of the time a `sf` can be treated as and behaves like a `data.frame`.
+Simple features are, in essence, data frames with a spatial extension.
+
+
+
 ### Simple feature geometries (sfg) {#sfg}
 
 The `sfg` class represents the different simple feature geometry types in R: point, linestring, polygon (and their 'multi' equivalents, such as multipoints) or geometry collection.
@@ -661,60 +727,6 @@ st_crs(points_sfc_wgs) # print CRS (only first 4 lines of output shown)
 #> GEOGCRS["WGS 84",
 #> ...
 ```
-
-### The sf class {#sf}
-
-Sections \@ref(geometry) to \@ref(sfc) deal with purely geometric objects, 'sf geometry' and 'sf column' objects, respectively.
-These are geographic building blocks of geographic vector data represented as simple features.
-The final building block is non-geographic attributes, representing the name of the feature or other attributes such as measured values, groups, and other things.
-\index{sf!class}
-
-To illustrate attributes, we will represent a temperature of 25°C in London on June 21^st^, 2017.
-This example contains a geometry (the coordinates), and three attributes with three different classes (place name, temperature and date).^[
-Other attributes might include an urbanity category (city or village), or a remark if the measurement was made using an automatic station.
-]
-Objects of class `sf` represent such data by combining the attributes (`data.frame`) with the simple feature geometry column (`sfc`).
-They are created with `st_sf()` as illustrated below, which creates the London example described above:
-
-
-```r
-lnd_point = st_point(c(0.1, 51.5))                 # sfg object
-lnd_geom = st_sfc(lnd_point, crs = 4326)           # sfc object
-lnd_attrib = data.frame(                           # data.frame object
-  name = "London",
-  temperature = 25,
-  date = as.Date("2017-06-21")
-  )
-lnd_sf = st_sf(lnd_attrib, geometry = lnd_geom)    # sf object
-```
-
-What just happened? First, the coordinates were used to create the simple feature geometry (`sfg`).
-Second, the geometry was converted into a simple feature geometry column (`sfc`), with a CRS.
-Third, attributes were stored in a `data.frame`, which was combined with the `sfc` object with `st_sf()`.
-This results in an `sf` object, as demonstrated below (some output is omitted):
-
-
-```r
-lnd_sf
-#> Simple feature collection with 1 features and 3 fields
-#> ...
-#>     name temperature       date         geometry
-#> 1 London          25 2017-06-21 POINT (0.1 51.5)
-```
-
-
-```r
-class(lnd_sf)
-#> [1] "sf"         "data.frame"
-```
-
-The result shows that `sf` objects actually have two classes, `sf` and `data.frame`.
-Simple features are simply data frames (square tables), but with spatial attributes stored in a list column, usually called `geometry`, as described in Section \@ref(intro-sf).
-This duality is central to the concept of simple features:
-most of the time a `sf` can be treated as and behaves like a `data.frame`.
-Simple features are, in essence, data frames with a spatial extension.
-
-
 
 ## Raster data
 
