@@ -1,6 +1,7 @@
 library(DiagrammeR)
 library(DiagrammeRsvg)
 save_png = function(plot, path){
+  par(bg = NA)
   DiagrammeRsvg::export_svg(plot) %>%
     charToRaw() %>%
     rsvg::rsvg() %>%
@@ -27,3 +28,4 @@ sf_diagram = grViz("digraph {
                   height = 100)
 
 save_png(sf_diagram, "figures/02-sfdiagram.png")
+knitr::plot_crop("figures/02-sfdiagram.png")
