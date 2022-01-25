@@ -481,8 +481,8 @@ knitr::include_graphics("figures/02-sfdiagram.png")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/02-sfdiagram.png" alt="Building blocks on sf objects." width="100%" />
-<p class="caption">(\#fig:02-sfdiagram)Building blocks on sf objects.</p>
+<img src="figures/02-sfdiagram.png" alt="Building blocks of sf objects." width="100%" />
+<p class="caption">(\#fig:02-sfdiagram)Building blocks of sf objects.</p>
 </div>
 
 Non-geographic attributes represent the name of the feature or other attributes such as measured values, groups, and other things.
