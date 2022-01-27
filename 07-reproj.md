@@ -41,7 +41,7 @@ We cover reprojecting vector and raster objects in sections \@ref(reproj-vec-geo
 \index{CRS!EPSG}
 \index{CRS!WKT}
 \index{CRS!proj4string}
-Most modern geographic tools that require CRS conversions, including core R-spatial packages and desktop GIS software such as QGIS, interface with [PROJ](https://proj.org), an open source C++ library "that transforms coordinates from one coordinate reference system (CRS) to another".
+Most modern geographic tools that require CRS conversions, including core R-spatial packages and desktop GIS software such as QGIS, interface with [PROJ](https://proj.org), an open source C++ library that "transforms coordinates from one coordinate reference system (CRS) to another".
 CRSs can be described in many ways, including the following.
 
 1. Simple yet potentially ambiguous statements such as "it's in lon/lat coordinates".
