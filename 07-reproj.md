@@ -30,11 +30,10 @@ Having a clearly defined project CRS that all project data is in, plus understan
 Furthermore, learning about coordinate systems will deepen your knowledge of geographic datasets and how to use them effectively.
 
 This chapter teaches the fundamentals of CRSs, demonstrates the consequences of using different CRSs (including what can go wrong), and how to 'reproject' datasets from one coordinate system to another.
-The next section introduces CRSs in R, followed by Section \@ref(crs-in-r) which shows how to get and set CRSs associated with spatial objects. 
+In the next section we introduce CRSs in R, followed by Section \@ref(crs-in-r) which shows how to get and set CRSs associated with spatial objects. 
 Section \@ref(geom-proj) demonstrates the importance of knowing what CRS your data is in with reference to a worked example of creating buffers.
-The questions of when to reproject and which CRS to use are covered in Section \@ref(whenproject) and Section \@ref(which-crs), respectively.
-Reprojecting vector and raster objects is covered in sections \@ref(reproj-vec-geom) and \@ref(reproj-ras).
-Modifying map projections is covered in Section \@ref(mapproj).
+We tackle questions of when to reproject and which CRS to use in Section \@ref(whenproject) and Section \@ref(which-crs), respectively.
+We cover reprojecting vector and raster objects in sections \@ref(reproj-vec-geom) and \@ref(reproj-ras) and modifying map projections in Section \@ref(mapproj).
 
 
 ## Coordinate Reference Systems {#crs-in-r}
