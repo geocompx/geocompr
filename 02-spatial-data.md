@@ -827,7 +827,7 @@ my_rast
 #> max value   : 2892
 ```
 
-Dedicated functions report each component: `dim(my_rast)` returns the number of rows, columns and layers; `ncell()` the number of cells (pixels); `res()` the spatial resolution; `ext()` its spatial extent; and `crs()` its coordinate reference system (raster reprojection is covered in Section \@ref(reprojecting-raster-geometries)).
+Dedicated functions report each component: `dim(my_rast)` returns the number of rows, columns and layers; `ncell()` the number of cells (pixels); `res()` the spatial resolution; `ext()` its spatial extent; and `crs()` its coordinate reference system (raster reprojection is covered in Section \@ref(reproj-ras)).
 `inMemory()` reports whether the raster data is stored in memory or on disk.
 
 `help("terra-package")` returns a full list of all available **terra** functions.

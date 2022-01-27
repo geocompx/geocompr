@@ -26,7 +26,8 @@ It demonstrates how to set and *transform* geographic data from one CRS to anoth
 In many projects there is no need to worry about, let alone convert between, different CRSs.
 It is important to know if your data is in a projected or geographic coordinate system, and the consequences of this for geometry operations.
 However, if you know the CRS of your data and the consequences for geometry operations (covered in the next section), CRSs should *just work* behind the scenes: people often suddenly need to learn about CRSs when things go wrong.
-Having a clearly defined project CRS that all project data is in (or is converted into), plus understanding how and why to use different CRSs, can ensure that things don't go wrong, and deepen your knowledge of geographic datasets, and how to transform them, for different applications of geocomputation.
+Having a clearly defined project CRS that all project data is in, plus understanding how and why to use different CRSs, can ensure that things don't go wrong.
+Furthermore, learning about coordinate systems will deepen your knowledge of geographic datasets and how to use them effectively.
 
 This chapter teaches the fundamentals of CRSs, demonstrates the consequences of using different CRSs (including what can go wrong), and how to 'reproject' datasets from one coordinate system to another.
 The next section introduces CRSs in R, followed by Section \@ref(crs-in-r) which shows how to get and set CRSs associated with spatial objects. 
@@ -497,8 +498,6 @@ The principles outlined in this section apply equally to vector and raster datas
 Some features of CRS transformation however are unique to each geographic data model.
 We will cover the particularities of vector data transformation in Section \@ref(reproj-vec-geom) and those of raster transformation in Section \@ref(reproj-ras).
 Next, the last section, shows how to create custom map projections (Section \@ref(mapproj)).
-<!--toDo:jn-->
-<!-- add reference to the modifying section -->
 
 ## Reprojecting vector geometries {#reproj-vec-geom}
 
@@ -574,7 +573,7 @@ crs_lnd$epsg
 #> [1] 4326
 ```
 
-As mentioned in Section \@(...), WKT representation, stored in the `$wkt` element of the `crs_lnd` object is the ultimate source of truth.
+As mentioned in Section \@ref(crs-in-r), WKT representation, stored in the `$wkt` element of the `crs_lnd` object is the ultimate source of truth.
 This means that the outputs of the previous code chunk are queries from the `wkt` representation provided by PROJ, rather than inherent attributes of the object and its CRS.
 
 Both `wkt` and `User Input` elements of the CRS are changed when the object's CRS is transformed.
