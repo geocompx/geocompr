@@ -51,14 +51,14 @@ CRSs can be described in many ways, including the following.
 Each refers to the same thing: the 'WGS84' coordinate system that forms the basis of Global Positioning System (GPS) coordinates and many other datasets.
 But which one is correct?
 
-The short answer is that the third way to identify CRSs is correct: `EPSG:4326` is understood by `sf` (and by extension `stars`) and `terra` packages R covered in this book, plus many other software projects for working with geographic data including [QGIS](https://docs.qgis.org/3.16/en/docs/user_manual/working_with_projections/working_with_projections.html) and [PROJ](https://proj.org/development/quickstart.html).
+The short answer is that the third way to identify CRSs is correct: `EPSG:4326` is understood by **sf** (and by extension **stars**) and **terra** packages R covered in this book, plus many other software projects for working with geographic data including [QGIS](https://docs.qgis.org/3.16/en/docs/user_manual/working_with_projections/working_with_projections.html) and [PROJ](https://proj.org/development/quickstart.html).
 `EPSG:4326` is future-proof.
 Furthermore, although it is machine readable, unlike the `proj4string` representation "EPSG:4326" is short, easy to remember and highly 'findable' online (searching for EPSG:4326 yields a dedicated page on the website [epsg.io](https://epsg.io/4326), for example).
-The more concise identifier `4326` is understood by `sf`, but **we recommend the more explicit `AUTHORITY:CODE` representation to prevent ambiguity and to provide context**.
+The more concise identifier `4326` is understood by **sf**, but **we recommend the more explicit `AUTHORITY:CODE` representation to prevent ambiguity and to provide context**.
 
 A longer answer is that more detail is needed.
 None of three descriptions above contain sufficient information about WGS84 or any CRS for unambiguous transformations: due to the complexity of CRSs, it is not possible to capture all relevant information about them in such short text strings.
-For this reason, the Open Geospatial Consortium (OGC, which also developed the simple features specification that the `sf` package implements) developed an open standard format for describing CRSs that is called WKT (Well Known Text) in a [100+ page document](https://portal.opengeospatial.org/files/18-010r7) that "defines the structure and content of a text string implementation of the abstract model for coordinate reference systems described in ISO 19111:2019" [@opengeospatialconsortium_wellknown_2019].
+For this reason, the Open Geospatial Consortium (OGC, which also developed the simple features specification that the **sf** package implements) developed an open standard format for describing CRSs that is called WKT (Well Known Text) in a [100+ page document](https://portal.opengeospatial.org/files/18-010r7) that "defines the structure and content of a text string implementation of the abstract model for coordinate reference systems described in ISO 19111:2019" [@opengeospatialconsortium_wellknown_2019].
 The WKT representation of the WGS84 CRS, which has the **identifier** `EPSG:4326` is as follows:
 
 <!-- Source: https://spatialreference.org/ref/epsg/4326/prettywkt/ -->
@@ -154,7 +154,7 @@ new_vector = read_sf(vector_filepath)
 ```
 
 Our new object, `new_vector`, is a an `sf` data frame representing countries worldwide (see the help page `?spData::world` for details).
-The CRS can be retrieved with the `sf` function `st_crs()`.
+The CRS can be retrieved with the **sf** function `st_crs()`.
 
 
 ```r
@@ -242,14 +242,14 @@ st_is_longlat(london)
 #> [1] NA
 ```
 
-The output `NA` shows that `sf` does not know what the CRS is and is unwilling to guess (`NA` literally means 'not available').
-Unless a CRS is manually specified or is loaded from a source that has CRS metadata, `sf` does not make any explicit assumptions about which coordinate systems, other than to say "I don't know".
+The output `NA` shows that **sf** does not know what the CRS is and is unwilling to guess (`NA` literally means 'not available').
+Unless a CRS is manually specified or is loaded from a source that has CRS metadata, **sf** does not make any explicit assumptions about which coordinate systems, other than to say "I don't know".
 This behavior makes sense given the diversity of available CRSs but differs from some approaches, such as the GeoJSON file format specification, which makes the simplifying assumption that all coordinates have a lon/lat CRS: `EPSG:4326`.
 
 A CRS can be added to `sf` objects in three main ways:
 
 - By assigning the CRS to a pre-existing object, e.g. with `st_crs(london) = "EPSG:4326"`.
-- By passing a CRS to the `crs` argument in `sf` functions that create geometry objects such as `st_as_sf(... crs = "EPSG:4326")`. The same argument can also be used to set the CRS when creating raster datasets (e.g., `rast(crs = "EPSG:4326")`).
+- By passing a CRS to the `crs` argument in **sf** functions that create geometry objects such as `st_as_sf(... crs = "EPSG:4326")`. The same argument can also be used to set the CRS when creating raster datasets (e.g., `rast(crs = "EPSG:4326")`).
 - With the `st_set_crs()`, which returns a version of the data that has a new CRS, an approach that is demonstrated in the following code chunk.
 
 
@@ -266,12 +266,12 @@ Datasets without a specified CRS can cause problems: all geographic coordinates 
 
 ## Geometry operations on projected and unprojected data {#geom-proj}
 
-If no CRS has been set, `sf` uses the GEOS geometry library for many operations.
+If no CRS has been set, **sf** uses the GEOS geometry library for many operations.
 GEOS is not well suited to lon/lat CRSs, as we will see later in this chapter.
-If a CRS has been set, `sf` will use either GEOS or the S2 *spherical geometry engine* depending on the type of CRS.
+If a CRS has been set, **sf** will use either GEOS or the S2 *spherical geometry engine* depending on the type of CRS.
 <!-- Todo: add s2 section -->
 <!--jn: s2 section is still missing from the book-->
-Since `sf` version 1.0.0, R's ability to work with geographic vector datasets that have lon/lat CRSs has improved substantially, thanks to its integration with S2 introduced in Section \@ref(s2).
+Since **sf** version 1.0.0, R's ability to work with geographic vector datasets that have lon/lat CRSs has improved substantially, thanks to its integration with S2 introduced in Section \@ref(s2).
 
 To demonstrate the importance of CRSs, we will in this section create a buffer of 100 km around the `london` object created in the previous section.
 We will also create a deliberately faulty buffer with a 'distance' of 1 degree, which is roughly equivalent to 100 km (1 degree is about 111 km at the equator).
@@ -286,9 +286,9 @@ london_buff_s2 = st_buffer(london_geo, dist = 1e5) # silent use of s2
 london_buff_s2_100_cells = st_buffer(london_geo, dist = 1e5, max_cells = 100) 
 ```
 
-In the first line above, `sf` assumes that the input is projected and generates a result that has a buffer in units of degrees, which is problematic, as we will see.
-In the second line, `sf` silently uses the spherical geometry engine S2, introduced in Chapter \@ref(spatial-class), to calculate the extent of the buffer using the default value of `max_cells = 1000` --- set to `100` in line three --- the consequences which will become apparent shortly (see `?s2::s2_buffer_cells` for details).
-To highlight the impact of `sf`'s use of the S2 geometry engine for unprojected (geographic) coordinate systems, we will temporarily disable it with the command `sf_use_s2()` (which is on, `TRUE`, by default), in the code chunk below.
+In the first line above, **sf** assumes that the input is projected and generates a result that has a buffer in units of degrees, which is problematic, as we will see.
+In the second line, **sf** silently uses the spherical geometry engine S2, introduced in Chapter \@ref(spatial-class), to calculate the extent of the buffer using the default value of `max_cells = 1000` --- set to `100` in line three --- the consequences which will become apparent shortly (see `?s2::s2_buffer_cells` for details).
+To highlight the impact of **sf**'s use of the S2 geometry engine for unprojected (geographic) coordinate systems, we will temporarily disable it with the command `sf_use_s2()` (which is on, `TRUE`, by default), in the code chunk below.
 Like `london_buff_no_crs`, the new `london_geo` object is a geographic abomination: it has units of degrees, which makes no sense in the vast majority of cases:
 
 
@@ -373,7 +373,7 @@ Both buffer boundaries in Figure \@ref(fig:crs-buf) (left) are jagged, although 
 The less is that results obtained from lon/lat data via `s2` will be different from results obtained from using projected data, although these differences reduce as the value of `max_cells` increases: the 'right' value for this argument may depend on many factors and the default value 1000 is a reasonable default, balancing speed of computation against resolution of results, in many cases.
 In situations where curved boundaries are advantageous, transforming to a projected CRS before buffering (or performing other geometry operations) may be appropriate.
 
-The importance of CRSs (primarily whether they are projected or geographic) and the impacts of `sf`'s default setting to use S2 for buffers on lon/lat data is clear from the example above.
+The importance of CRSs (primarily whether they are projected or geographic) and the impacts of **sf**'s default setting to use S2 for buffers on lon/lat data is clear from the example above.
 The subsequent sections go into more depth, exploring which CRS to use when projected CRSs *are* needed and the details of reprojecting vector and raster objects.
 
 ## When to reproject? {#whenproject}
