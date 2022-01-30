@@ -7,6 +7,7 @@
 library(cranlogs)
 library(tidyverse)
 library(ggplot2)
+options(scipen = 99)
 
 # which packages to track:
 pkgs = c("sp", "raster", "sf", "terra", "stars")
