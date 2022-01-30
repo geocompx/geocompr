@@ -16,8 +16,6 @@ library(dplyr)   # tidyverse package for data frame manipulation
 
 ```r
 library(spData)  # spatial data package introduced in Chapter 2
-#> Warning: multiple methods tables found for 'direction'
-#> Warning: multiple methods tables found for 'gridDistance'
 ```
 
 ## Introduction

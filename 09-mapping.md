@@ -10,8 +10,6 @@
 ```r
 library(sf)
 library(raster)
-#> Warning: multiple methods tables found for 'direction'
-#> Warning: multiple methods tables found for 'gridDistance'
 library(dplyr)
 library(spData)
 library(spDataLarge)

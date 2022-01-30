@@ -10,8 +10,6 @@ library(sf)
 library(terra)
 library(dplyr)
 library(spData)
-#> Warning: multiple methods tables found for 'direction'
-#> Warning: multiple methods tables found for 'gridDistance'
 library(spDataLarge)
 ```
 
