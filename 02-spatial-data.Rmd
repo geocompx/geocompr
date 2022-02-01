@@ -677,7 +677,7 @@ st_crs(points_sfc_wgs) # print CRS (only first 4 lines of output shown)
 ## because I want to show the underlying structure 
 ##
 ## library(sf) will be called later
-pkgload::unload("sf")
+unloadNamespace("sf")
 ```
 
 **sfheaders** is an R package that speeds-up the construction of `sf` objects, with a focus on:
@@ -687,13 +687,9 @@ pkgload::unload("sf")
 
 The intention is to allow every **sfheaders** operation implemented in R to have a C++ implementation, as described in the [`Cpp` vignette](https://dcooley.github.io/sfheaders/articles/Cpp.html).
 For most people users the R functions will be more than sufficient to benefit from the computational speed of the package.
-Although developed separately from **sf**, it is designed to be aligned with and create valid `sf` objects, of the type described in preceding sections.
+**sfheaders** was developed separately from **sf**, but aims to be fully compatible, creating valid `sf` objects of the type described in preceding sections.
 
-The simplest use-case for `**sfheaders**` is best demonstrated with examples of building  `sfg`, `sfc` and `sf` objects.
-
-### Simple Feature Geometry - sfg
-
-Here are examples showing
+The simplest use-case for `**sfheaders**` is demonstrated in the code chunks below with examples of building  `sfg`, `sfc` and `sf` objects showing:
 
 - a vector converted to `sfg_POINT`
 - a matrix converted to `sfg_LINESTRING`
@@ -715,122 +711,46 @@ sfheaders::sfg_linestring(obj = m)
 ```{r sfheaders-sfg_polygon}
 n = 4
 df = data.frame(
-  x = 1:n
-  , y = n:1
+  x = 1:n,
+  y = n:1
 )
 sfheaders::sfg_polygon(obj = df)
-sf <- sfheaders::sfg_polygon(obj = df)
+sf = sfheaders::sfg_polygon(obj = df)
 class(sf)
-# sf::st_crs(sf) <- 4326  ## Web Mecarter (long/lat)
 ```
 
-In these examples I have deliberately not used the print methods that come with the **sf** library, to show you the underlying structures of the objects. If I now load **sf** 
+The examples above show the print methods that come with the **sf** library, demonstrating the underlying structures of the objects.
+Loading **sf** and creating the `sfg_POLYGON` again results in an object printed as a regular **sf** object:
 
 ```{r sfheaders-library-sf}
 library(sf)
-```
-
-and create the `sfg_POLYGON` again, you'll see it's printed to the console as a regular **sf** object
-
-
-```{r sfheaders-sfg_polygon_print}
 sfheaders::sfg_polygon(obj = df)
 ```
 
-### Simple Feature Collections - sfc
+Reusing the objects `v`, `m`, and `df` we can also build simple feature collection/column (`sfc`) objects as follows (outputs not shown):
 
-Reusing the objects `v`, `m`, and `df` we can also build `sfc` objects
-
-```{r sfheaders-sfc_point2}
+```{r sfheaders-sfc_point2, eval=FALSE}
 sfheaders::sfc_point(obj = v)
-```
-
-```{r sfheaders-sfc_linestring2}
 sfheaders::sfc_linestring(obj = m)
-```
-
-```{r sfheaders-sfc_polygon2}
 sfheaders::sfc_polygon(obj = df)
 ```
 
-### Simple Features - sf
+Similarly, `sf` objects can be created as follows:
 
-And similarly, `sf` objects
-
-```{r sfheaders-sfc_point}
+```{r sfheaders-sfc_point, eval=FALSE}
 sfheaders::sf_point(obj = v)
-```
-
-```{r sfheaders-sfc_linestring}
 sfheaders::sf_linestring(obj = m)
-```
-
-```{r sfheaders-sfc_polygon}
 sfheaders::sf_polygon(obj = df)
 ```
 
-In each of these examples you'll notices the CRS (coordinate reference system) is not defined. If you plan on doing any calculations or geometric operations using **sf** functions you'll need to set this manually, for example
+In each of these examples the CRS (coordinate reference system) is not defined.
+If you plan on doing any calculations or geometric operations using **sf** functions, set the CRS as follows (see Chapter \@ref(reproj-geo-data) for details):
 
 ```{r sfheaders-crs}
-sf <- sfheaders::sfg_polygon(obj = df)
-# sf::st_crs(sf) <- 4326  ## Web Mecarter (long/lat)
+df_sf = sfheaders::sf_polygon(obj = df)
+sf::st_crs(df_sf) = 4326
 ```
 
-
-## Building sf objects in C++
-
-To use the C++ API you need to link to both the `**sfheaders**` and `{geometries}` libraries.
-
-If you're building a package you define these links in the `LinkingTo` section of the `DESCRIPTION` file. For example, this is the `LinkingTo` section of the [`{geojsonsf}`](https://github.com/SymbolixAU/geojsonsf/blob/master/DESCRIPTION) library.
-
-```
-LinkingTo: 
-    geometries,
-    jsonify (>= 1.1.1),
-    rapidjsonr (>= 1.2.0),
-    Rcpp,
-    sfheaders (>= 0.2.2)
-```
-
-Now all the C++ headers in `**sfheaders**` will be available in your package, just define them as `#include` statements at the top of your code and away you go.
-
-Here are the same examples as before, showing
-
-- a vector converted to `sfg_POINT`
-- a matrix converted to `sfg_LINESTRING`
-- a data.frame converted to `sfg_POLYGON`
-
-but written as C++ (through Rcpp)
-
-```c++
-#include "sfheaders/sfg/point/sfg_point.hpp"
-#include "sfheaders/sfg/linestring/sfg_linestring.hpp"
-#include "sfheaders/sfg/polygon/sfg_polygon.hpp"
-//' Create Point
-//'
-//' builds an sfg_point object from a valid SEXP type
-//'
-//' [[Rcpp::export]]
-SEXP create_point(SEXP x) {
-  return sfheaders::sfg::sfg_point( x );
-}
-//' Create Linestring
-//' 
-//' builds an sfg_linestring object from a vaild SEXP type
-//' 
-//' [[Rcpp::export]]
-SEXP create_linestring(SEXP x) {
-  return sfheaders::sfg::sfg_linestring( x );
-}
-//' Create Polygon
-//' 
-//' builds an sfg_polygon object from a vaild SEXP type
-//' 
-//' [[Rcpp::export]]
-SEXP create_polygon(SEXP x) {
-  return sfheaders::sfg::sfg_polygon( x );
-}
-```
 
 ## Raster data
 
