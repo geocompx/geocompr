@@ -31,3 +31,25 @@ bench::mark(
 # <bch:expr> <bch:tm> <bch:tm>     <dbl> <bch:byt>    <dbl> <int> <dbl>   <bch:tm> <list> <list>     <list>           <list>  
 #   1 sf           4.74ms   4.91ms      198.    1.86MB     11.6    85     5      430ms <NULL> <Rprofmem> <bench_tm [90]>  <tibble>
 #   2 sfheaders    1.01ms   1.08ms      894.     2.1MB     56.6   142     9      159ms <NULL> <Rprofmem> <bench_tm [151]> <tibble>
+
+
+
+library(sf)
+nc = sf::st_read(system.file("./shape/nc.shp", package = "sf"))
+
+# sf::st_cast(nc, "LINESTRING")
+## Error
+
+sfheaders::sf_cast(nc, "LINESTRING")
+
+# And where it is comparible between sf and sfheaders, the latter is faster
+
+bench::mark(check = FALSE,
+  sf = {
+    sf::st_cast(nc, "POINT")
+  },
+  sfheaders = {
+    sfheaders::sf_cast(nc, "POINT")
+  }
+)
+
