@@ -677,7 +677,8 @@ st_crs(points_sfc_wgs) # print CRS (only first 4 lines of output shown)
 ## because I want to show the underlying structure 
 ##
 ## library(sf) will be called later
-unloadNamespace("sf")
+# unloadNamespace("sf") # errors
+# pkgload::unload("sf")
 ```
 
 **sfheaders** is an R package that speeds-up the construction of `sf` objects, with a focus on:
@@ -695,11 +696,38 @@ The simplest use-case for `**sfheaders**` is demonstrated in the code chunks bel
 - a matrix converted to `sfg_LINESTRING`
 - a data.frame converted to `sfg_POLYGON`
 
-```{r sfheaders-sfg_point} 
-v = c(1,1)
-sfheaders::sfg_point(obj = v)
+We will start by creating the simplest possible `sfg` object starting with a single coordinate pair, assigned to a vector names `v`:
+
+```{r}
+v = c(1, 1)
+v_sfg_sfh = sfheaders::sfg_point(obj = v)
 ```
 
+```{r sfheaders-sfg_point, eval=FALSE} 
+v_sfg_sfh # printing without sf loaded
+#>      [,1] [,2]
+#> [1,]    1    1
+#> attr(,"class")
+#> [1] "XY"    "POINT" "sfg" 
+```
+
+The example above shows the print methods that come with the **sfheaders** package, when **sf** is not loaded, demonstrating the underlying structures of the objects.
+When **sf** is loaded (as is the case here), the result of the above command is indistinguishable from `sf` objects:
+
+```{r}
+v_sfg_sf = st_point(v, c(1, 2))
+print(v_sfg_sf) == print(v_sfg_sfh)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+# (although `sfg` objects created with **sfheaders** have a dimension while `sfg` objects created with the **sf** package do not)
+waldo::compare(v_sfg_sf, v_sfg_sfh)
+dim(v_sfg_sf)
+dim(v_sfg_sfh)
+attr(v_sfg_sfh, "dim")
+```
+
+The next examples shows how **sfheaders** creates objects creates `sfg` objects from matrices:
 
 ```{r sfheaders-sfg_linestring}
 n = 8
@@ -717,14 +745,6 @@ df = data.frame(
 sfheaders::sfg_polygon(obj = df)
 sf = sfheaders::sfg_polygon(obj = df)
 class(sf)
-```
-
-The examples above show the print methods that come with the **sf** library, demonstrating the underlying structures of the objects.
-Loading **sf** and creating the `sfg_POLYGON` again results in an object printed as a regular **sf** object:
-
-```{r sfheaders-library-sf}
-library(sf)
-sfheaders::sfg_polygon(obj = df)
 ```
 
 Reusing the objects `v`, `m`, and `df` we can also build simple feature collection/column (`sfc`) objects as follows (outputs not shown):
