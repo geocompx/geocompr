@@ -2,21 +2,26 @@
 
 ## Prerequisites {-}
 
-- This chapter requires QGIS\index{QGIS}, SAGA\index{SAGA} and GRASS\index{GRASS} to be installed and the following packages to be attached:^[
-Packages that have already been used including **spData**, **spDataLarge** and **dplyr** also need to be installed. 
-]
+- This chapter requires QGIS\index{QGIS}, SAGA\index{SAGA} and GRASS\index{GRASS} to be installed and the following packages to be attached:
 
 ```{r 09-gis-1, message=FALSE}
 library(sf)
-library(raster)
+library(terra)
 ```
 
 ```{r 09-gis-1-2, message=FALSE, eval=FALSE}
-#library(RQGIS)
-library(RSAGA)
+# remotes::install_github("paleolimbot/qgisprocess")
+library(qgisprocess)
+library(Rsagacmd)
 library(rgrass7)
 ```
 
+<!-- RSAGA is no longer under active development and no support is available. Try Rsagacmd. -->
+<!-- https://github.com/r-spatial/RSAGA -->
+<!-- https://github.com/stevenpawley/Rsagacmd -->
+
+<!-- issue of rgrass -->
+<!-- https://github.com/rsbivand/rgrass -->
 
 ## Introduction
 
@@ -30,7 +35,7 @@ it was only after the widespread uptake of computer mice and high-resolution scr
 GRASS, one of the longest-standing GIS\index{GIS} programs, for example, relied primarily on command-line interaction before it gained a sophisticated GUI [@landa_new_2008].
 ]
 In dedicated GIS\index{GIS} packages, by contrast, the emphasis tends to be on the graphical user interface (GUI)\index{graphical user interface}.
-You *can* interact with GRASS\index{GRASS}, QGIS\index{QGIS}, SAGA\index{SAGA} and gvSIG from system terminals and embedded CLIs\index{command-line interface} such as the [Python Console in QGIS](https://docs.qgis.org/testing/en/docs/pyqgis_developer_cookbook/intro.html)\index{Python}, but 'pointing and clicking' is the norm.
+You *can* interact with GRASS\index{GRASS}, QGIS\index{QGIS}, SAGA\index{SAGA} and gvSIG from system terminals and embedded CLIs\index{command-line interface}, but 'pointing and clicking' is the norm.
 This means many GIS\index{GIS} users miss out on the advantages of the command-line according to Gary Sherman, creator of QGIS\index{QGIS} [@sherman_desktop_2008]:
 
 > With the advent of 'modern' GIS software, most people want to point and
@@ -43,32 +48,31 @@ The 'CLI vs GUI'\index{graphical user interface} debate can be adversial but it 
 The advantages of a good CLI\index{command-line interface} such as that provided by R (and enhanced by IDEs\index{IDE} such as RStudio\index{RStudio}) are numerous.
 A good CLI:
 
-- Facilitates the automation of repetitive tasks; 
-- Enables transparency and reproducibility, the backbone of good scientific practice and data science;
-- Encourages software development by providing tools to modify existing functions and implement new ones;
-- Helps develop future-proof programming skills which are in high demand in many disciplines and industries; and
-- Is user-friendly and fast, allowing an efficient workflow.
+- Facilitates the automation of repetitive tasks
+- Enables transparency and reproducibility, the backbone of good scientific practice and data science
+- Encourages software development by providing tools to modify existing functions and implement new ones
+- Helps develop future-proof programming skills which are in high demand in many disciplines and industries
+- Is user-friendly and fast, allowing an efficient workflow
 
 On the other hand, GUI-based GIS\index{GIS} systems (particularly QGIS\index{QGIS}) are also advantageous.
 A good GIS GUI:
 
-- Has a 'shallow' learning curve meaning geographic data can be explored and visualized without hours of learning a new language;
-- Provides excellent support for 'digitizing' (creating new vector datasets), including trace, snap and topological tools;^[
-The **mapedit** package allows the quick editing of a few spatial features but not professional, large-scale cartographic digitizing;
+- Has a 'shallow' learning curve meaning geographic data can be explored and visualized without hours of learning a new language
+- Provides excellent support for 'digitizing' (creating new vector datasets), including trace, snap and topological tools^[
+The **mapedit** package allows the quick editing of a few spatial features but not professional, large-scale cartographic digitizing.
 ]
-- Enables georeferencing (matching raster images to existing maps) with ground control points and orthorectification;
-- Supports stereoscopic mapping (e.g., LiDAR and structure from motion); and
-- Provides access to spatial database management systems with object-oriented relational data models, topology and fast (spatial) querying.
+- Enables georeferencing (matching raster images to existing maps) with ground control points and orthorectification
+- Supports stereoscopic mapping (e.g., LiDAR and structure from motion)
+- Provides access to spatial database management systems with object-oriented relational data models, topology and fast (spatial) querying
 
 Another advantage of dedicated GISs is that they provide access to hundreds of 'geoalgorithms' (computational recipes to solve geographic problems --- see Chapter \@ref(algorithms)).
 Many of these are unavailable from the R command line, except via 'GIS bridges', the topic of (and motivation for) this chapter.^[
 An early use of the term 'bridge' referred to the coupling of R with GRASS\index{GRASS} [@neteler_open_2008].
-Roger Bivand elaborated on this in his talk, "Bridges between GIS and R", delivered at the 2016 GEOSTAT summer school (see slides at: http://spatial.nhh.no/misc/).
 ]
 
 ```{block2 09-gis-2, type="rmdnote"}
 A command-line interface is a means of interacting with computer programs in which the user issues commands via successive lines of text (command lines).
-`bash` in Linux and `PowerShell` in Windows are common examples.
+`bash` in Linux and `PowerShell` in Windows are its common examples.
 CLIs can be augmented with IDEs such as RStudio for R, which provides code auto-completion and other features to improve the user experience.
 ```
 
@@ -79,10 +83,14 @@ R was not designed as a GIS.
 However, its ability to interface with dedicated GISs gives it astonishing geospatial capabilities.
 R is well known as a statistical programming language, but many people are unaware of its ability to replicate GIS workflows, with the additional benefits of a (relatively) consistent CLI.
 Furthermore, R outperforms GISs in some areas of geocomputation\index{geocomputation}, including interactive/animated map making (see Chapter \@ref(adv-map)) and spatial statistical modeling (see Chapter \@ref(spatial-cv)).
-This chapter focuses on 'bridges' to three mature open source GIS products (see Table \@ref(tab:gis-comp)): QGIS\index{QGIS} (via the package **RQGIS**\index{RQGIS (package)}; Section \@ref(rqgis)), SAGA\index{SAGA} (via **RSAGA**\index{RSAGA (package)}; Section \@ref(rsaga)) and GRASS\index{GRASS} (via **rgrass7**\index{rgrass7 (package)}; Section \@ref(rgrass)).
-Though not covered here, it is worth being aware of the interface to ArcGIS\index{ArcGIS}, a proprietary and very popular GIS software, via **RPyGeo**.^[By the way, it is also possible to use R from within Desktop GIS software packages. 
-The so-called R-ArcGIS bridge (see https://github.com/R-ArcGIS/r-bridge) allows R to be used from within ArcGIS\index{ArcGIS}. 
-One can also use R scripts from within QGIS\index{QGIS} (see https://docs.qgis.org/2.18/en/docs/training_manual/processing/r_intro.html).
+This chapter focuses on 'bridges' to three mature open source GIS products (see Table \@ref(tab:gis-comp)): QGIS\index{QGIS} (via the package **qgisprocess**\index{qgisprocess (package)}; Section \@ref(rqgis)), SAGA\index{SAGA} (via **Rsagacmd**\index{Rsagacmd (package)}; Section \@ref(rsaga)) and GRASS\index{GRASS} (via **rgrass7**\index{rgrass7 (package)}; Section \@ref(rgrass)).
+<!--toDo:jn-->
+<!-- Though not covered here, it is worth being aware of the interface to ArcGIS\index{ArcGIS}, a proprietary and very popular GIS software, via **RPyGeo**.^[By the way, it is also possible to use R from within Desktop GIS software packages.  -->
+<!-- The so-called R-ArcGIS bridge (see https://github.com/R-ArcGIS/r-bridge) allows R to be used from within ArcGIS\index{ArcGIS}.  -->
+<!--toDo:jn-->
+<!-- rgee? -->
+<!-- whitetoolbox? -->
+One can also use R scripts from within QGIS\index{QGIS} (see https://docs.qgis.org/3.16/en/docs/training_manual/processing/r_intro.html).
 Finally, it is also possible to use R from the GRASS GIS\index{GRASS} command line (see https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7).
 ]
 To complement the R-GIS bridges, the chapter ends with a very brief introduction to interfaces to spatial libraries (Section \@ref(gdal)) and spatial databases\index{spatial database} (Section \@ref(postgis)).
