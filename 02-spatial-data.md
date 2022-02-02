@@ -735,7 +735,7 @@ The simplest use-case for **sfheaders** is demonstrated in the code chunks below
 
 - a vector converted to `sfg_POINT`
 - a matrix converted to `sfg_LINESTRING`
-- a data.frame converted to `sfg_POLYGON`
+- a data frame converted to `sfg_POLYGON`
 
 We will start by creating the simplest possible `sfg` object, a single coordinate pair, assigned to a vector named `v`:
 
@@ -770,7 +770,7 @@ print(v_sfg_sf) == print(v_sfg_sfh)
 
 
 
-The next examples shows how **sfheaders** creates objects creates `sfg` objects from matrices:
+The next examples shows how **sfheaders** creates `sfg` objects from matrices:
 
 
 ```r
@@ -823,7 +823,7 @@ sf::st_crs(df_sf) = 4326
 ```
 
 **sfheaders** is also good at 'deconstructing' and 'reconstructing' `sf` objects, meaning converting geometry columns into data frames that contain data on the coordinates of each vertex and geometry feature (and multi-feature) ids.
-It is fast and reliable at 'casting' geometry columns to different types, a topic covered in Chapter \@ref(eometric-operations).
+It is fast and reliable at 'casting' geometry columns to different types, a topic covered in Chapter \@ref(geometric-operations).
 Benchmarks, in the package's [documentation](https://dcooley.github.io/sfheaders/articles/examples.html#performance) and in test code developed for this book, show it is much faster than the `sf` package for such operations.
 
 ## Raster data
