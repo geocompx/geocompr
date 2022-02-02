@@ -107,7 +107,7 @@ There is more to CRSs, as described in Sections \@ref(crs-intro) and \@ref(repro
 <p class="caption">(\#fig:vectorplots)Illustration of vector (point) data in which location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.</p>
 </div>
 
-**sf** is a package providing a class system for geographic vector data.
+**sf** is a package providing classes for geographic vector data.
 Not only does **sf** supersede **sp**, it also provides a consistent command-line interface to GEOS\index{GEOS} and GDAL\index{GDAL}, superseding **rgeos** and **rgdal** (described in Section \@ref(the-history-of-r-spatial)).
 This section introduces **sf** classes in preparation for subsequent chapters (Chapters \@ref(geometric-operations) and \@ref(read-write) cover the GEOS and GDAL interface, respectively).
 
@@ -719,6 +719,114 @@ st_crs(points_sfc_wgs) # print CRS (only first 4 lines of output shown)
 #> GEOGCRS["WGS 84",
 #> ...
 ```
+
+### The sfheaders package
+
+
+
+**sfheaders** is an R package that speeds-up the construction of `sf` objects, with a focus on:
+
+1. **building** **sf** objects from vectors, matrices and data frames, rapidly, and without depending on the **sf** library
+2. **exposing** its underlying C++ code through header files (hence the name, **sfheaders**), enabling others to extend it using compiled and fast-running code
+
+The intention is to allow every **sfheaders** operation implemented in R to have a C++ implementation, as described in the [`Cpp` vignette](https://dcooley.github.io/sfheaders/articles/Cpp.html).
+For most people users the R functions will be more than sufficient to benefit from the computational speed of the package.
+**sfheaders** was developed separately from **sf**, but aims to be fully compatible, creating valid `sf` objects of the type described in preceding sections.
+
+The simplest use-case for `**sfheaders**` is demonstrated in the code chunks below with examples of building  `sfg`, `sfc` and `sf` objects showing:
+
+- a vector converted to `sfg_POINT`
+- a matrix converted to `sfg_LINESTRING`
+- a data.frame converted to `sfg_POLYGON`
+
+We will start by creating the simplest possible `sfg` object, a single coordinate pair, assigned to a vector named `v`:
+
+
+```r
+v = c(1, 1)
+v_sfg_sfh = sfheaders::sfg_point(obj = v)
+```
+
+
+```r
+v_sfg_sfh # printing without sf loaded
+#>      [,1] [,2]
+#> [1,]    1    1
+#> attr(,"class")
+#> [1] "XY"    "POINT" "sfg" 
+```
+
+
+
+The example above shows how the `sfg` object `v_sfg_sfh` is printed when **sf** is not loaded, demonstrating its underlying structure.
+When **sf** is loaded (as is the case here), the result of the above command is indistinguishable from `sf` objects:
+
+
+```r
+v_sfg_sf = st_point(v, c(1, 2))
+print(v_sfg_sf) == print(v_sfg_sfh)
+#> POINT (1 1)
+#> POINT (1 1)
+#> [1] TRUE
+```
+
+
+
+The next examples shows how **sfheaders** creates objects creates `sfg` objects from matrices:
+
+
+```r
+n = 8
+m = matrix(1:n, ncol = 2)
+sfheaders::sfg_linestring(obj = m)
+#> LINESTRING (1 5, 2 6, 3 7, 4 8)
+```
+
+
+
+```r
+n = 4
+df = data.frame(
+  x = 1:n,
+  y = n:1
+)
+sfheaders::sfg_polygon(obj = df)
+#> POLYGON ((1 4, 2 3, 3 2, 4 1, 1 4))
+sf = sfheaders::sfg_polygon(obj = df)
+class(sf)
+#> [1] "XY"      "POLYGON" "sfg"
+```
+
+Reusing the objects `v`, `m`, and `df` we can also build simple feature collection/column (`sfc`) objects as follows (outputs not shown):
+
+
+```r
+sfheaders::sfc_point(obj = v)
+sfheaders::sfc_linestring(obj = m)
+sfheaders::sfc_polygon(obj = df)
+```
+
+Similarly, `sf` objects can be created as follows:
+
+
+```r
+sfheaders::sf_point(obj = v)
+sfheaders::sf_linestring(obj = m)
+sfheaders::sf_polygon(obj = df)
+```
+
+In each of these examples the CRS (coordinate reference system) is not defined.
+If you plan on doing any calculations or geometric operations using **sf** functions, set the CRS as follows (see Chapter \@ref(reproj-geo-data) for details):
+
+
+```r
+df_sf = sfheaders::sf_polygon(obj = df)
+sf::st_crs(df_sf) = 4326
+```
+
+**sfheaders** is also good at 'deconstructing' and 'reconstructing' `sf` objects, meaning converting geometry columns into data frames that contain data on the coordinates of each vertex and geometry feature (and multi-feature) ids.
+It is fast and reliable at 'casting' geometry columns to different types, a topic covered in Chapter \@ref(eometric-operations).
+Benchmarks, in the package's [documentation](https://dcooley.github.io/sfheaders/articles/examples.html#performance) and in test code developed for this book, show it is much faster than the `sf` package for such operations.
 
 ## Raster data
 
