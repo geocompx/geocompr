@@ -724,16 +724,14 @@ st_crs(points_sfc_wgs) # print CRS (only first 4 lines of output shown)
 
 
 
-**sfheaders** is an R package that speeds-up the construction of `sf` objects, with a focus on:
-
-1. **building** **sf** objects from vectors, matrices and data frames, rapidly, and without depending on the **sf** library
-2. **exposing** its underlying C++ code through header files (hence the name, **sfheaders**), enabling others to extend it using compiled and fast-running code
-
-The intention is to allow every **sfheaders** operation implemented in R to have a C++ implementation, as described in the [`Cpp` vignette](https://dcooley.github.io/sfheaders/articles/Cpp.html).
-For most people users the R functions will be more than sufficient to benefit from the computational speed of the package.
+**sfheaders** is an R package that speeds-up the construction, conversion and manipulation of `sf` objects [@cooley_2020_sfheaders].
+Its focus is on building **sf** objects from vectors, matrices and data frames, rapidly, and without depending on the **sf** library; and **exposing** its underlying C++ code through header files (hence the name, **sfheaders**).
+This approach enables others to extend it using compiled and fast-running code.
+Every core **sfheaders** function has a corresponding C++ implementation, as described in the [`Cpp` vignette](https://dcooley.github.io/sfheaders/articles/Cpp.html).
+For most people the R functions will be more than sufficient to benefit from the computational speed of the package.
 **sfheaders** was developed separately from **sf**, but aims to be fully compatible, creating valid `sf` objects of the type described in preceding sections.
 
-The simplest use-case for `**sfheaders**` is demonstrated in the code chunks below with examples of building  `sfg`, `sfc` and `sf` objects showing:
+The simplest use-case for **sfheaders** is demonstrated in the code chunks below with examples of building  `sfg`, `sfc` and `sf` objects showing:
 
 - a vector converted to `sfg_POINT`
 - a matrix converted to `sfg_LINESTRING`
