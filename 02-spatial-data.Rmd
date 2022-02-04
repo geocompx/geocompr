@@ -1036,7 +1036,6 @@ For now, it is sufficient to know:
 - Knowing which CRS your data is in, and whether it is in geographic (lon/lat) or projected (typically meters), is important and has consequences for how R handles spatial and geometry operations
 - CRSs of `sf` objects can be queried with the function `st_crs()`, CRSs of `terra` objects can be queried with the function `crs()`
 
-
 ```{r vector-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for a vector data type.", message=FALSE, fig.asp=0.56, fig.scap="Examples of geographic and projected CRSs (vector data)."}
 # source("https://github.com/Robinlovelace/geocompr/raw/main/code/02-vector-crs.R")
 knitr::include_graphics("figures/02_vector_crs.png")
@@ -1044,7 +1043,39 @@ knitr::include_graphics("figures/02_vector_crs.png")
 
 ### Spherical geometry operations with S2 {#s2}
 
+Spherical geometry engines are based on the fact that world is round while simple mathematical procedures for geocomputation, such as calculating a straight line between two points or the area enclosed by a polygon, assume planar (projected) geometries.
+Since **sf** version 1.0.0, R supports spherical geometry operations 'out of the box', thanks to its interface to Google's S2 spherical geometry engine via the **s2** interface package.
+S2 is perhaps best known as an example of a Discrete Global Grid System (DGGS).
+Another example is the [H3](https://eng.uber.com/h3/) global hexagonal hierarchical spatial index  [@bondaruk_assessing_2020].
 
+Although potentially useful for describing locations anywhere on Earth using character strings such as [e66ef376f790adf8a5af7fca9e6e422c03c9143f](https://developers.google.com/maps/documentation/gaming/concepts_playable_locations), the main benefit of **sf**'s interface to S2 is its provision of drop-in functions for calculations such as distance, buffer, and area calculations, as described in **sf**'s built in documentation which can be opened with the command [`vignette("sf7")`](https://r-spatial.github.io/sf/articles/sf7.html).
+
+**sf** can run in two modes with respect to S2: on and off.
+By default the S2 geometry engine is turned on, as can be verified with the following command:
+
+```{r}
+sf_use_s2()
+```
+
+An example of the consequences of turning the geometry engine off is shown below, by creating buffers around the `india` object created earlier in the chapter (note the warnings emitted when S2 is turned off):
+
+```{r}
+india_buffer_with_s2 = st_buffer(india, 1)
+sf_use_s2(FALSE)
+india_buffer_without_s2 = st_buffer(india, 1)
+```
+
+```{r s2example, fig.show='hold', out.width="60%", echo=FALSE, fig.cap="Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the light green polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger red polygon was created with S2 switched off, resulting in a buffer with inaccurate units of degrees longitude/latitude."}
+plot(st_geometry(india_buffer_without_s2), expandBB = c(0, 0.2, 0.1, 1), col = "red")
+plot(st_geometry(india_buffer_with_s2), expandBB = c(0, 0.2, 0.1, 1), col = "lightgreen", add = TRUE)
+```
+
+Throughout this book we will assume that S2 is turned on, unless explicitly stated.
+Turn it on again with the following command.
+
+```{r}
+sf_use_s2(TRUE)
+```
 
 ## Units
 <!--rl-->
