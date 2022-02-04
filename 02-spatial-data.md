@@ -350,8 +350,6 @@ Adding layers in this way can be used to verify the geographic correspondence be
 the `plot()` function is fast to execute and requires few lines of code, but does not create interactive maps with a wide range of options.
 For more advanced map making we recommend using dedicated visualization packages such as **tmap** (see Chapter \@ref(adv-map)).
 
-### Base plot arguments {#base-args}
-
 There are various ways to modify maps with **sf**'s `plot()` method.
 Because **sf** extends base R plotting methods `plot()`'s arguments such as `main =` (which specifies the title of the map) work with `sf` objects (see `?graphics::plot` and `?par`).^[
 Note: many plot arguments are ignored in facet maps, when more than one `sf` column is plotted.
@@ -723,7 +721,7 @@ st_crs(points_sfc_wgs) # print CRS (only first 4 lines of output shown)
 
 
 
-**sfheaders** is an R package that speeds-up the construction, conversion and manipulation of `sf` objects [@cooley_2020_sfheaders].
+**sfheaders** is an R package that speeds-up the construction, conversion and manipulation of `sf` objects [@cooley_sfheaders_2020].
 Its focus is on building **sf** objects from vectors, matrices and data frames, rapidly, and without depending on the **sf** library; and **exposing** its underlying C++ code through header files (hence the name, **sfheaders**).
 This approach enables others to extend it using compiled and fast-running code.
 Every core **sfheaders** function has a corresponding C++ implementation, as described in the [`Cpp` vignette](https://dcooley.github.io/sfheaders/articles/Cpp.html).
