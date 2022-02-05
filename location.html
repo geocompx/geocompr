@@ -100,7 +100,7 @@
 <ul>
 <li>This chapter requires the following packages (<strong>revgeo</strong> must also be installed):</li>
 </ul>
-<div class="sourceCode" id="cb449"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb448"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://purrr.tidyverse.org">purrr</a></span><span class="op">)</span>
@@ -167,7 +167,7 @@ The following sections will demonstrate how the techniques learned during the fi
 <p>The German government provides gridded census data at either 1 km or 100 m resolution.
 The following code chunk downloads, unzips and reads in the 1 km data.
 Please note that <code>census_de</code> is also available from the <strong>spDataLarge</strong> package (<code>data("census_de", package = "spDataLarge"</code>).</p>
-<div class="sourceCode" id="cb450"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb449"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span><span class="op">(</span><span class="st">"https://tinyurl.com/ybtpkwxz"</span>, 
               destfile <span class="op">=</span> <span class="st">"census.zip"</span>, mode <span class="op">=</span> <span class="st">"wb"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/unzip.html">unzip</a></span><span class="op">(</span><span class="st">"census.zip"</span><span class="op">)</span> <span class="co"># unzip the files</span>
@@ -176,7 +176,7 @@ Please note that <code>census_de</code> is also available from the <strong>spDat
 For our work, we only need a subset of these: Easting (<code>x</code>) and Northing (<code>y</code>), number of inhabitants (population; <code>pop</code>), mean average age (<code>mean_age</code>), proportion of women (<code>women</code>) and average household size (<code>hh_size</code>).
 These variables are selected and renamed from German into English in the code chunk below and summarized in Table <a href="location.html#tab:census-desc">14.1</a>.
 Further, <code><a href="https://dplyr.tidyverse.org/reference/mutate_all.html">mutate_all()</a></code> is used to convert values -1 and -9 (meaning unknown) to <code>NA</code>.</p>
-<div class="sourceCode" id="cb451"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb450"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># pop = population, hh_size = household size</span>
 <span class="va">input</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">census_de</span>, x <span class="op">=</span> <span class="va">x_mp_1km</span>, y <span class="op">=</span> <span class="va">y_mp_1km</span>, pop <span class="op">=</span> <span class="va">Einwohner</span>,
                       women <span class="op">=</span> <span class="va">Frauen_A</span>, mean_age <span class="op">=</span> <span class="va">Alter_D</span>,
@@ -247,9 +247,9 @@ Further, <code><a href="https://dplyr.tidyverse.org/reference/mutate_all.html">m
 <code><a href="https://rdrr.io/pkg/raster/man/rasterFromXYZ.html">rasterFromXYZ()</a></code> makes this really easy.
 It requires an input data frame where the first two columns represent coordinates on a regular grid.
 All the remaining columns (here: <code>pop</code>, <code>women</code>, <code>mean_age</code>, <code>hh_size</code>) will serve as input for the raster brick layers (Figure <a href="location.html#fig:census-stack">14.1</a>; see also <code>code/13-location-jm.R</code> in our github repository).</p>
-<div class="sourceCode" id="cb452"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb451"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">input_ras</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/rasterFromXYZ.html">rasterFromXYZ</a></span><span class="op">(</span><span class="va">input_tidy</span>, crs <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="fl">3035</span><span class="op">)</span><span class="op">$</span><span class="va">proj4string</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb453"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb452"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">input_ras</span>
 <span class="co">#&gt; class : RasterBrick</span>
 <span class="co">#&gt; dimensions : 868, 642, 557256, 4 (nrow, ncol, ncell, nlayers)</span>
@@ -282,7 +282,7 @@ However, the level of detail is sufficient to delineate metropolitan areas (see 
 Class 1 in the variable <code>women</code>, for instance, represents areas in which 0 to 40% of the population is female;
 these are reclassified with a comparatively high weight of 3 because the target demographic is predominantly male.
 Similarly, the classes containing the youngest people and highest proportion of single households are reclassified to have high weights.</p>
-<div class="sourceCode" id="cb454"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb453"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">rcl_pop</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">127</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">375</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">1250</span>, 
                    <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">3000</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">6000</span>, <span class="fl">6</span>, <span class="fl">6</span>, <span class="fl">8000</span><span class="op">)</span>, 
                  ncol <span class="op">=</span> <span class="fl">3</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
@@ -296,13 +296,13 @@ Similarly, the classes containing the youngest people and highest proportion of 
 For instance, the first element corresponds in both cases to the population.
 Subsequently, the <code>for</code>-loop applies the reclassification matrix to the corresponding raster layer.
 Finally, the code chunk below ensures the <code>reclass</code> layers have the same name as the layers of <code>input_ras</code>.</p>
-<div class="sourceCode" id="cb455"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb454"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">reclass</span> <span class="op">=</span> <span class="va">input_ras</span>
 <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/nlayers.html">nlayers</a></span><span class="op">(</span><span class="va">reclass</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">reclass</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/reclassify.html">reclassify</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reclass</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span>, rcl <span class="op">=</span> <span class="va">rcl</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span>, right <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>
 <span class="op">}</span>
 <span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html">names</a></span><span class="op">(</span><span class="va">reclass</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/names.html">names</a></span><span class="op">(</span><span class="va">input_ras</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb456"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb455"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">reclass</span>
 <span class="co">#&gt; ... (full output not shown)</span>
 <span class="co">#&gt; names       :  pop, women, mean_age, hh_size </span>
@@ -316,10 +316,10 @@ Finally, the code chunk below ensures the <code>reclass</code> layers have the s
 <p>We define metropolitan areas as pixels of 20 km<sup>2</sup> inhabited by more than 500,000 people.
 Pixels at this coarse resolution can rapidly be created using <code><a href="https://r-spatial.github.io/sf/reference/aggregate.sf.html">aggregate()</a></code>, as introduced in Section <a href="geometric-operations.html#aggregation-and-disaggregation">5.3.3</a>.
 The command below uses the argument <code>fact = 20</code> to reduce the resolution of the result twenty-fold (recall the original raster resolution was 1 km<sup>2</sup>):</p>
-<div class="sourceCode" id="cb457"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb456"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pop_agg</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/aggregate.sf.html">aggregate</a></span><span class="op">(</span><span class="va">reclass</span><span class="op">$</span><span class="va">pop</span>, fact <span class="op">=</span> <span class="fl">20</span>, fun <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></code></pre></div>
 <p>The next stage is to keep only cells with more than half a million people.</p>
-<div class="sourceCode" id="cb458"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb457"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/summary.html">summary</a></span><span class="op">(</span><span class="va">pop_agg</span><span class="op">)</span>
 <span class="co">#&gt;             pop</span>
 <span class="co">#&gt; Min.        127</span>
@@ -334,13 +334,13 @@ Each region consists of one or more raster cells.
 It would be nice if we could join all cells belonging to one region.
 <strong>raster</strong>’s <code><a href="https://rdrr.io/pkg/raster/man/clump.html">clump()</a></code> command does exactly that.
 Subsequently, <code><a href="https://rdrr.io/pkg/raster/man/rasterToPolygons.html">rasterToPolygons()</a></code> converts the raster object into spatial polygons, and <code><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf()</a></code> converts it into an <code>sf</code>-object.</p>
-<div class="sourceCode" id="cb459"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb458"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">polys</span> <span class="op">=</span> <span class="va">pop_agg</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://rdrr.io/pkg/raster/man/clump.html">clump</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://rdrr.io/pkg/raster/man/rasterToPolygons.html">rasterToPolygons</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p><code>polys</code> now features a column named <code>clumps</code> which indicates to which metropolitan region each polygon belongs and which we will use to dissolve the polygons into coherent single regions (see also Section <a href="geometric-operations.html#geometry-unions">5.2.7</a>):</p>
-<div class="sourceCode" id="cb460"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb459"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">metros</span> <span class="op">=</span> <span class="va">polys</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">clumps</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
@@ -358,13 +358,13 @@ Consequently, extracting the centroid coordinate of each metropolitan area can s
 The <strong>revgeo</strong> package provides access to the open source Photon geocoder for OpenStreetMap, Google Maps and Bing.
 By default, it uses the Photon API.
 <code><a href="https://rdrr.io/pkg/revgeo/man/revgeo.html">revgeo::revgeo()</a></code> only accepts geographical coordinates (latitude/longitude); therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system (Chapter <a href="reproj-geo-data.html#reproj-geo-data">7</a>).</p>
-<div class="sourceCode" id="cb461"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb460"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">metros_wgs</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">metros</span>, <span class="fl">4326</span><span class="op">)</span>
 <span class="va">coords</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid</a></span><span class="op">(</span><span class="va">metros_wgs</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_coordinates.html">st_coordinates</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://rdrr.io/pkg/terra/man/math-generics.html">round</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></code></pre></div>
 <p>Choosing <code>frame</code> as <code>revgeocode()</code>’s <code>output</code> option will give back a <code>data.frame</code> with several columns referring to the location including the street name, house number and city.</p>
-<div class="sourceCode" id="cb462"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb461"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">revgeo</span><span class="op">)</span>
 <span class="va">metro_names</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/revgeo/man/revgeo.html">revgeo</a></span><span class="op">(</span>longitude <span class="op">=</span> <span class="va">coords</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, latitude <span class="op">=</span> <span class="va">coords</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>, 
                      output <span class="op">=</span> <span class="st">"frame"</span><span class="op">)</span></code></pre></div>
@@ -414,7 +414,7 @@ By default, it uses the Photon API.
 <p>Overall, we are satisfied with the <code>city</code> column serving as metropolitan names (Table <a href="location.html#tab:metro-names">14.2</a>) apart from one exception, namely Wülfrath which belongs to the greater region of Düsseldorf.
 Hence, we replace Wülfrath with Düsseldorf (Figure <a href="location.html#fig:metro-areas">14.2</a>).
 Umlauts like <code>ü</code> might lead to trouble further on, for example when determining the bounding box of a metropolitan area with <code><a href="https://docs.ropensci.org/osmdata/reference/opq.html">opq()</a></code> (see further below), which is why we avoid them.</p>
-<div class="sourceCode" id="cb463"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb462"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">metro_names</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">metro_names</span>, <span class="va">city</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://rdrr.io/pkg/raster/man/as.character.html">as.character</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">.</span> <span class="op">==</span> <span class="st">"Wülfrath"</span>, <span class="st">"Duesseldorf"</span>, <span class="va">.</span><span class="op">)</span></code></pre></div>
@@ -440,7 +440,7 @@ Before running this code: please consider it will download almost 2GB of data.
 To save time and resources, we have put the output named <code>shops</code> into <strong>spDataLarge</strong>.
 To make it available in your environment ensure that the <strong>spDataLarge</strong> package is loaded, or run <code>data("shops", package = "spDataLarge")</code>.</li>
 </ul>
-<div class="sourceCode" id="cb464"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb463"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">shops</span> <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="va">metro_names</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="https://rdrr.io/r/base/message.html">message</a></span><span class="op">(</span><span class="st">"Downloading shops of: "</span>, <span class="va">x</span>, <span class="st">"\n"</span><span class="op">)</span>
   <span class="co"># give the server a bit time</span>
@@ -459,7 +459,7 @@ To make it available in your environment ensure that the <strong>spDataLarge</st
 <p>It is highly unlikely that there are no shops in any of our defined metropolitan areas.
 The following <code>if</code> condition simply checks if there is at least one shop for each region.
 If not, we recommend to try to download the shops again for this/these specific region/s.</p>
-<div class="sourceCode" id="cb465"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb464"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># checking if we have downloaded shops for each metropolitan area</span>
 <span class="va">ind</span> <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="va">shops</span>, <span class="va">nrow</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span>
 <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html">any</a></span><span class="op">(</span><span class="va">ind</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
@@ -469,7 +469,7 @@ If not, we recommend to try to download the shops again for this/these specific 
 <p>To make sure that each list element (an <code>sf</code> data frame) comes with the same columns, we only keep the <code>osm_id</code> and the <code>shop</code> columns with the help of another <code>map</code> loop.
 This is not a given since OSM contributors are not equally meticulous when collecting data.
 Finally, we <code>rbind</code> all shops into one large <code>sf</code> object.</p>
-<div class="sourceCode" id="cb466"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb465"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># select only specific columns</span>
 <span class="va">shops</span> <span class="op">=</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="va">shops</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="va"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>, <span class="va">osm_id</span>, <span class="va">shop</span><span class="op">)</span>
 <span class="co"># putting all list elements into a single data frame</span>
@@ -487,7 +487,7 @@ This is because the <code>shop</code> column contains <code>NA</code> values, wh
 </div>
 <p>The result of the subsequent code chunk is therefore an estimate of shop density (shops/km<sup>2</sup>).
 <code><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform()</a></code> is used before <code><a href="https://rdrr.io/pkg/raster/man/rasterize.html">rasterize()</a></code> to ensure the CRS of both inputs match.</p>
-<div class="sourceCode" id="cb467"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb466"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">shops</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">shops</span>, <span class="fu"><a href="https://rdrr.io/pkg/raster/man/projection.html">proj4string</a></span><span class="op">(</span><span class="va">reclass</span><span class="op">)</span><span class="op">)</span>
 <span class="co"># create poi raster</span>
 <span class="va">poi</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/rasterize.html">rasterize</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">shops</span>, y <span class="op">=</span> <span class="va">reclass</span>, field <span class="op">=</span> <span class="st">"osm_id"</span>, fun <span class="op">=</span> <span class="st">"count"</span><span class="op">)</span></code></pre></div>
@@ -495,7 +495,7 @@ This is because the <code>shop</code> column contains <code>NA</code> values, wh
 Defining class intervals is an arbitrary undertaking to a certain degree.
 One can use equal breaks, quantile breaks, fixed values or others.
 Here, we choose the Fisher-Jenks natural breaks approach which minimizes within-class variance, the result of which provides an input for the reclassification matrix.</p>
-<div class="sourceCode" id="cb468"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb467"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># construct reclassification matrix</span>
 <span class="va">int</span> <span class="op">=</span> <span class="fu">classInt</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/classInt/reference/classIntervals.html">classIntervals</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/getValues.html">values</a></span><span class="op">(</span><span class="va">poi</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">4</span>, style <span class="op">=</span> <span class="st">"fisher"</span><span class="op">)</span>
 <span class="va">int</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/math-generics.html">round</a></span><span class="op">(</span><span class="va">int</span><span class="op">$</span><span class="va">brks</span><span class="op">)</span>
@@ -516,14 +516,14 @@ First of all, we have already delineated metropolitan areas, that is areas where
 Second, though it is advantageous to have many potential customers within a specific catchment area, the sheer number alone might not actually represent the desired target group.
 For instance, residential tower blocks are areas with a high population density but not necessarily with a high purchasing power for expensive cycle components.
 This is achieved with the complementary functions <code><a href="https://rdrr.io/pkg/raster/man/addLayer.html">addLayer()</a></code> and <code><a href="https://rdrr.io/pkg/raster/man/addLayer.html">dropLayer()</a></code>:</p>
-<div class="sourceCode" id="cb469"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb468"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># add poi raster</span>
 <span class="va">reclass</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/addLayer.html">addLayer</a></span><span class="op">(</span><span class="va">reclass</span>, <span class="va">poi</span><span class="op">)</span>
 <span class="co"># delete population raster</span>
 <span class="va">reclass</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/raster/man/addLayer.html">dropLayer</a></span><span class="op">(</span><span class="va">reclass</span>, <span class="st">"pop"</span><span class="op">)</span></code></pre></div>
 <p>In common with other data science projects, data retrieval and ‘tidying’ have consumed much of the overall workload so far.
 With clean data, the final step — calculating a final score by summing all raster layers — can be accomplished in a single line of code.</p>
-<div class="sourceCode" id="cb470"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb469"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># calculate the total score</span>
 <span class="va">result</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html">sum</a></span><span class="op">(</span><span class="va">reclass</span><span class="op">)</span></code></pre></div>
 <p>For instance, a score greater than 9 might be a suitable threshold indicating raster cells where a bike shop could be placed (Figure <a href="location.html#fig:bikeshop-berlin">14.3</a>; see also <code>code/13-location-jm.R</code>).</p>
@@ -637,7 +637,7 @@ Change the age raster accordingly, repeat the remaining analyses and compare the
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-02-04.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-02-05.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
