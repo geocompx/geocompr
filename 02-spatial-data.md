@@ -8,6 +8,7 @@ This is the first practical chapter of the book, and therefore it comes with som
 We assume that you have an up-to-date version of R installed and that you are comfortable using software with a command-line interface such as the integrated development environment (IDE) RStudio.
 <!--or VSCode?-->
 
+<!-- Should we update these references to more up-to-date resources? -->
 If you are new to R, we recommend reading Chapter 2 of the online book *Efficient R Programming* by @gillespie_efficient_2016 and learning the basics of the language with reference to resources such as @grolemund_r_2016.
 Organize your work (e.g., with RStudio projects) and give scripts sensible names such as `02-chapter.R` to document the code you write as you learn.
 \index{R!pre-requisites}
@@ -107,8 +108,20 @@ There is more to CRSs, as described in Sections \@ref(crs-intro) and \@ref(repro
 <p class="caption">(\#fig:vectorplots)Illustration of vector (point) data in which location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.</p>
 </div>
 
-**sf** is a package providing classes for geographic vector data.
-Not only does **sf** supersede **sp**, it also provides a consistent command-line interface to GEOS\index{GEOS} and GDAL\index{GDAL}, superseding **rgeos** and **rgdal** (described in Section \@ref(the-history-of-r-spatial)).
+**sf** provides classes for geographic vector data and a consistent command-line interface to important low level libraries for geocomputation:
+
+- GDAL\index{GDAL}, for reading, writing and manipulating a wide range of geographic data formats, covered in Chapter \@ref(read-write)
+- PROJ, a powerful library for coordinate system transformations, which underlies the content covered in Chapter \@ref(reproj-geo-data)
+- GEOS\index{GEOS}, a planar geometry engine for operations such as calculating buffers and centroids on data with a projected CRS, covered in Chapter \@ref(geometric-operations)
+- [S2](https://s2geometry.io/), a spherical geometry engine written in C++ developed by Google, via the [**s2**](https://r-spatial.github.io/s2/) package, covered in Section \@ref(s2) below and in Chapter \@ref(reproj-geo-data)
+<!-- - [liblwgeom](https://github.com/postgis/postgis/tree/master/liblwgeom), a geometry engine used by PostGIS, via the [**lwgeom**](https://r-spatial.github.io/lwgeom/) package -->
+
+At the time of writing (2022), **sf** is the only package *in any language* that provides a unified command line interface (CLI) to this wide range of geographic libraries in an interactive environment for data science.
+Information about these interfaces is printed by **sf** the first time the package is loaded: the message `Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1; sf_use_s2() is TRUE` that appears below the `library(sf)` command at the beginning of this chapter tells us the versions of linked GEOS, GDAL and PROJ libraries (these vary between computers and over time) and whether or not the S2 interface is turned on.
+A unique feature of **sf** is that you can change switch the default geometry engine used on unprojected data: 'switching off' S2 can be done with the command `sf::sf_use_s2("FALSE")`, meaning that the planar geometry engine GEOS will be used by default for all geometry operations, including geometry operations on unprojected data.
+As we will see in Section \@ref(s2), planar geometry is based on 2 dimensional space.
+Planar geometry engines such as GEOS assume 'flat' (projected) coordinates while spherical geometry engines such as S2 assume unprojected (lon/lat) coordinates.
+
 This section introduces **sf** classes in preparation for subsequent chapters (Chapters \@ref(geometric-operations) and \@ref(read-write) cover the GEOS and GDAL interface, respectively).
 
 ### An introduction to simple features {#intro-sf}
@@ -287,7 +300,6 @@ class(nc_dfr)
 class(nc_tbl)
 #> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
 ```
-
 
 As described in Chapter \@ref(attr), which shows how to manipulate `sf` objects with **tidyverse** functions, **sf** is now the go-to package for analysis of spatial vector data in R (not withstanding the **spatstat** package ecosystem which provides numerous functions for spatial statistics).
 Many popular packages build on **sf**, as shown by the rise in its popularity in terms of number of downloads per day, as shown in Section \@ref(r-ecosystem) in the previous chapter.
@@ -812,6 +824,51 @@ st_crs(df_sf) = "EPSG:4326"
 It is fast and reliable at 'casting' geometry columns to different types, a topic covered in Chapter \@ref(geometric-operations).
 Benchmarks, in the package's [documentation](https://dcooley.github.io/sfheaders/articles/examples.html#performance) and in test code developed for this book, show it is much faster than the `sf` package for such operations.
 
+### Spherical geometry operations with S2 {#s2}
+
+Spherical geometry engines are based on the fact that world is round while simple mathematical procedures for geocomputation, such as calculating a straight line between two points or the area enclosed by a polygon, assume planar (projected) geometries.
+Since **sf** version 1.0.0, R supports spherical geometry operations 'out of the box', thanks to its interface to Google's S2 spherical geometry engine via the **s2** interface package.
+S2 is perhaps best known as an example of a Discrete Global Grid System (DGGS).
+Another example is the [H3](https://eng.uber.com/h3/) global hexagonal hierarchical spatial index  [@bondaruk_assessing_2020].
+
+Although potentially useful for describing locations anywhere on Earth using character strings such as [e66ef376f790adf8a5af7fca9e6e422c03c9143f](https://developers.google.com/maps/documentation/gaming/concepts_playable_locations), the main benefit of **sf**'s interface to S2 is its provision of drop-in functions for calculations such as distance, buffer, and area calculations, as described in **sf**'s built in documentation which can be opened with the command [`vignette("sf7")`](https://r-spatial.github.io/sf/articles/sf7.html).
+
+**sf** can run in two modes with respect to S2: on and off.
+By default the S2 geometry engine is turned on, as can be verified with the following command:
+
+
+```r
+sf_use_s2()
+#> [1] TRUE
+```
+
+An example of the consequences of turning the geometry engine off is shown below, by creating buffers around the `india` object created earlier in the chapter (note the warnings emitted when S2 is turned off):
+
+
+```r
+india_buffer_with_s2 = st_buffer(india, 1)
+sf_use_s2(FALSE)
+#> Spherical geometry (s2) switched off
+india_buffer_without_s2 = st_buffer(india, 1)
+#> Warning in st_buffer.sfc(st_geometry(x), dist, nQuadSegs, endCapStyle =
+#> endCapStyle, : st_buffer does not correctly buffer longitude/latitude data
+#> dist is assumed to be in decimal degrees (arc_degrees).
+```
+
+<div class="figure" style="text-align: center">
+<img src="02-spatial-data_files/figure-html/s2example-1.png" alt="Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the light green polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger red polygon was created with S2 switched off, resulting in a buffer with inaccurate units of degrees longitude/latitude." width="60%" />
+<p class="caption">(\#fig:s2example)Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the light green polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger red polygon was created with S2 switched off, resulting in a buffer with inaccurate units of degrees longitude/latitude.</p>
+</div>
+
+Throughout this book we will assume that S2 is turned on, unless explicitly stated.
+Turn it on again with the following command.
+
+
+```r
+sf_use_s2(TRUE)
+#> Spherical geometry (s2) switched on
+```
+
 ## Raster data
 
 The spatial raster data model represents the world with the continuous grid of cells (often also called pixels; Figure \@ref(fig:raster-intro-plot):A).
@@ -1098,7 +1155,6 @@ For now, it is sufficient to know:
 - That coordinate systems are a key component of geographic objects
 - Knowing which CRS your data is in, and whether it is in geographic (lon/lat) or projected (typically meters), is important and has consequences for how R handles spatial and geometry operations
 - CRSs of `sf` objects can be queried with the function `st_crs()`, CRSs of `terra` objects can be queried with the function `crs()`
-
 
 <div class="figure" style="text-align: center">
 <img src="figures/02_vector_crs.png" alt="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for a vector data type." width="100%" />
