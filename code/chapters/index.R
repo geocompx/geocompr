@@ -29,7 +29,7 @@ is_html = knitr::is_html_output()
 ## The online version of the book is hosted at [geocompr.robinlovelace.net](https://geocompr.robinlovelace.net) and kept up-to-date by [GitHub Actions](https://github.com/Robinlovelace/geocompr/actions), which provides information on its 'build status' as follows:
 
 ## 
-## [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render-Book-from-master/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
+## [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
 
 
 
@@ -44,13 +44,13 @@ is_html = knitr::is_html_output()
 ## This will take you to an editable version of the the source [R Markdown](http://rmarkdown.rstudio.com/) file that generated the page you're on:
 
 ## 
-## [![](figures/editme.png)](https://github.com/Robinlovelace/geocompr/edit/master/index.Rmd)
+## [![](figures/editme.png)](https://github.com/Robinlovelace/geocompr/edit/main/index.Rmd)
 
 ## 
 ## To raise an issue about the book's content (e.g. code not running) or make a feature request, check-out the [issue tracker](https://github.com/Robinlovelace/geocompr/issues).
 
 ## 
-## Maintainers and contributors must follow this repository’s [CODE OF CONDUCT](https://github.com/Robinlovelace/geocompr/blob/master/CODE_OF_CONDUCT.md).
+## Maintainers and contributors must follow this repository’s [CODE OF CONDUCT](https://github.com/Robinlovelace/geocompr/blob/main/CODE_OF_CONDUCT.md).
 
 ## 
 ## ## Reproducibility {-}
@@ -63,7 +63,7 @@ is_html = knitr::is_html_output()
 
 
 
-## To build the book locally, clone or [download](https://github.com/Robinlovelace/geocompr/archive/master.zip) the [geocompr repo](https://github.com/Robinlovelace/geocompr/), load R in root directory (e.g. by opening [geocompr.Rproj](https://github.com/Robinlovelace/geocompr/blob/master/geocompr.Rproj) in RStudio) and run the following lines:
+## To build the book locally, clone or [download](https://github.com/Robinlovelace/geocompr/archive/main.zip) the [geocompr repo](https://github.com/Robinlovelace/geocompr/), load R in root directory (e.g. by opening [geocompr.Rproj](https://github.com/Robinlovelace/geocompr/blob/main/geocompr.Rproj) in RStudio) and run the following lines:
 
 
 ## ----index-4, eval=FALSE, echo=is_html----------------------------------------------------------------
@@ -81,7 +81,7 @@ is_html = knitr::is_html_output()
 
 ## - Communicating about the book in digital media e.g. via the [#geocompr hashtag](https://twitter.com/hashtag/geocompr) on Twitter (see our [Guestbook at geocompr.github.io](https://geocompr.github.io/guestbook/)) or by letting us know of [courses](https://github.com/geocompr/geocompr.github.io/edit/source/content/guestbook/index.md) using the book
 
-## - [Citing](https://github.com/Robinlovelace/geocompr/raw/master/cite-geocompr.bib) or [linking-to](https://geocompr.robinlovelace.net/) it
+## - [Citing](https://github.com/Robinlovelace/geocompr/raw/main/cite-geocompr.bib) or [linking-to](https://geocompr.robinlovelace.net/) it
 
 ## - '[Starring](https://help.github.com/articles/about-stars/)' the [geocompr GitHub repository](https://github.com/robinlovelace/geocompr)
 
