@@ -856,8 +856,8 @@ india_buffer_without_s2 = st_buffer(india, 1)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/s2example-1.png" alt="Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the light green polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger red polygon was created with S2 switched off, resulting in a buffer with inaccurate units of degrees longitude/latitude." width="60%" />
-<p class="caption">(\#fig:s2example)Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the light green polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger red polygon was created with S2 switched off, resulting in a buffer with inaccurate units of degrees longitude/latitude.</p>
+<img src="02-spatial-data_files/figure-html/s2example-1.png" alt="Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer with inaccurate units of degrees longitude/latitude." width="100%" />
+<p class="caption">(\#fig:s2example)Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer with inaccurate units of degrees longitude/latitude.</p>
 </div>
 
 Throughout this book we will assume that S2 is turned on, unless explicitly stated.
