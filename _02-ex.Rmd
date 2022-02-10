@@ -11,7 +11,7 @@ E1. Use `summary()` on the geometry column of the `world` data object that is in
 - The number of countries?
 - Its coordinate reference system (CRS)?
     
-```{r}
+```{r e1}
 summary(world)
 # - Its geometry type?
 #   multipolygon
@@ -28,7 +28,7 @@ Find two similarities and two differences between the image on your computer and
 - Why was `cex` set to the `sqrt(world$pop) / 10000`?
 - Bonus: experiment with different ways to visualize the global population.
 
-```{r}
+```{r e2}
 plot(world["continent"], reset = FALSE)
 cex = sqrt(world$pop) / 10000
 world_cents = st_centroid(world, of_largest = TRUE)
@@ -42,6 +42,15 @@ plot(st_geometry(world_cents), cex = world$pop / 1e9)
 plot(st_geometry(world_cents), cex = world$pop / 1e8)
 plot(world["pop"])
 plot(world["pop"], logz = TRUE)
+
+# Similarities: global extent, colorscheme, relative size of circles
+# 
+# Differences: projection (Antarctica is much smaller for example), graticules, location of points in the countries.
+# 
+# To understand these differences read-over, run, and experiment with different argument values in this script: https://github.com/Robinlovelace/geocompr/raw/main/code/02-contpop.R
+# 
+# `cex` refers to the diameter of symbols plotted, as explained by the help page `?graphics::points`. It is an acronym for 'Chacter symbol EXpansion'.
+# It was set to the square route of the population divided by 10,000 because a) otherwise the symbols would not fit on the map and b) to make circle area proportional to population.
 ```
 
 E3. Use `plot()` to create maps of Nigeria in context (see Section 2.2.3).
@@ -49,12 +58,23 @@ E3. Use `plot()` to create maps of Nigeria in context (see Section 2.2.3).
 - Adjust the `lwd`, `col` and `expandBB` arguments of `plot()`. 
 - Challenge: read the documentation of `text()` and annotate the map.
 
-```{r}
+```{r e3}
 nigeria = world[world$name_long == "Nigeria", ]
 plot(st_geometry(nigeria), expandBB = c(0, 0.2, 0.1, 1), col = "gray", lwd = 3)
 plot(world[0], add = TRUE)
 world_coords = st_coordinates(world_cents)
 text(world_coords, world$iso_a2)
+
+# Alternative answer:
+nigeria = world[world$name_long == "Nigeria", ]
+africa = world[world$continent == "Africa", ]
+plot(st_geometry(nigeria), col = "white", lwd = 3, main = "Nigeria in context", border = "lightgrey", expandBB = c(0.5, 0.2, 0.5, 0.2))
+plot(st_geometry(world), lty = 3, add = TRUE, border = "grey")
+plot(st_geometry(nigeria), col = "yellow", add = TRUE, border = "darkgrey")
+a = africa[grepl("Niger", africa$name_long), ]
+ncentre = st_centroid(a)
+ncentre_num = st_coordinates(ncentre)
+text(x = ncentre_num[, 1], y = ncentre_num[, 2], labels = a$name_long)
 ```
 
 E4. Create an empty `SpatRaster` object called `my_raster` with 10 columns and 10 rows.
