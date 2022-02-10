@@ -1237,10 +1237,7 @@ Again, the `res()` command gives back a numeric vector without any unit, forcing
 ## Exercises {#ex2}
 
 
-<!--toDo: rl -->
-<!--add solutions to E1-E3!-->
-
-E1. Use `summary()` on the geometry column of the `world` data object. What does the output tell us about:
+E1. Use `summary()` on the geometry column of the `world` data object that is included in the **spData** package. What does the output tell us about:
 
 - Its geometry type?
 - The number of countries?
@@ -1248,15 +1245,16 @@ E1. Use `summary()` on the geometry column of the `world` data object. What does
     
 
 
-E2. Run the code that 'generated' the map of the world in Section 2.2.4 Base plot arguments.
+E2. Run the code that 'generated' the map of the world in Section 2.2.3 (Basic map making).
 Find two similarities and two differences between the image on your computer and that in the book.
 
 - What does the `cex` argument do (see `?plot`)?
 - Why was `cex` set to the `sqrt(world$pop) / 10000`?
 - Bonus: experiment with different ways to visualize the global population.
 
-    
-E3. Use `plot()` to create maps of Nigeria in context (see Section 2.2.4 Base plot arguments).
+
+
+E3. Use `plot()` to create maps of Nigeria in context (see Section 2.2.3).
 
 - Adjust the `lwd`, `col` and `expandBB` arguments of `plot()`. 
 - Challenge: read the documentation of `text()` and annotate the map.
