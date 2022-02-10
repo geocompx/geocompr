@@ -1,3 +1,11 @@
+```{r 05-ex-e0}
+library(sf)
+library(raster)
+library(dplyr)
+library(spData)
+library(spDataLarge)
+# library(RQGIS)
+```
 
 E1. Generate and plot simplified versions of the `nz` dataset.
 Experiment with different values of `keep` (ranging from 0.5 to 0.00005) for `ms_simplify()` and `dTolerance` (from 100 to 100,000) `st_simplify()`.
@@ -5,7 +13,7 @@ Experiment with different values of `keep` (ranging from 0.5 to 0.00005) for `ms
 - At what value does the form of the result start to break down for each method, making New Zealand unrecognizable?
 - Advanced: What is different about the geometry type of the results from `st_simplify()` compared with the geometry type of `ms_simplify()`? What problems does this create and how can this be resolved?
 
-```{r 05-geometry-operations-69, eval=FALSE}
+```{r 05-ex-e1}
 plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.5))
 plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.05))
 # Starts to breakdown here at 0.5% of the points:
@@ -36,7 +44,7 @@ nrow(nz)
 E2. In the first exercise in Chapter Spatial data operations it was established that Canterbury region had 70 of the 101 highest points in New Zealand. 
 Using `st_buffer()`, how many points in `nz_height` are within 100 km of Canterbury?
 
-```{r 05-geometry-operations-70, eval=FALSE}
+```{r 05-ex-e2}
 canterbury = nz[nz$Name == "Canterbury", ]
 cant_buff = st_buffer(canterbury, 100)
 nz_height_near_cant = nz_height[cant_buff, ]
@@ -46,7 +54,7 @@ nrow(nz_height_near_cant) # 75 - 5 more
 E3. Find the geographic centroid of New Zealand. 
 How far is it from the geographic centroid of Canterbury?
 
-```{r 05-geometry-operations-71, eval=FALSE}
+```{r 05-ex-e3}
 cant_cent = st_centroid(canterbury)
 nz_centre = st_centroid(st_union(nz))
 st_distance(cant_cent, nz_centre) # 234 km
@@ -58,7 +66,7 @@ Write code to do so.
 Hint: you need to use a two-element vector for this transformation.
  Bonus: create an upside-down map of your country.
  
-```{r 05-geometry-operations-72, eval=FALSE}
+```{r 05-ex-e4}
 world_sfc = st_geometry(world)
 world_sfc_mirror = world_sfc * c(1, -1)
 plot(world_sfc)
@@ -86,7 +94,7 @@ E5. Subset the point in `p` that is contained within `x` *and* `y`.
 - Using base subsetting operators.
 - Using an intermediary object created with `st_intersection()`\index{vector!intersection}.
 
-```{r 05-geometry-operations-73, eval=FALSE}
+```{r 05-ex-e5}
 p_in_y = p[y]
 p_in_xy = p_in_y[x]
 x_and_y = st_intersection(x, y)
@@ -97,7 +105,7 @@ E6. Calculate the length of the boundary lines of US states in meters.
 Which state has the longest border and which has the shortest?
 Hint: The `st_length` function computes the length of a `LINESTRING` or `MULTILINESTRING` geometry.
 
-```{r 05-geometry-operations-74, eval=FALSE}
+```{r 05-ex-e6}
 us_states2163 = st_transform(us_states, "EPSG:2163")
 us_states_bor = st_cast(us_states2163, "MULTILINESTRING")
 us_states_bor$borders = st_length(us_states_bor)
