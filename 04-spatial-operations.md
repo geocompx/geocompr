@@ -968,6 +968,13 @@ For a more detailed introduction to remote sensing with R, see @wegmann_remote_2
 
 
 
+```r
+library(sf)
+library(dplyr)
+data(nz, package = "spData")
+data(nz_height, package = "spData")
+```
+
 E1. It was established in Section \@ref(spatial-vec) that Canterbury was the region of New Zealand containing most of the 100 highest points in the country.
 How many of these high points does the Canterbury region contain?
 
