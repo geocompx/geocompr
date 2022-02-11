@@ -886,6 +886,8 @@ E5. Subset the point in `p` that is contained within `x` *and* `y`.
 
 
 
+
+
 E6. Calculate the length of the boundary lines of US states in meters.
 Which state has the longest border and which has the shortest?
 Hint: The `st_length` function computes the length of a `LINESTRING` or `MULTILINESTRING` geometry.
