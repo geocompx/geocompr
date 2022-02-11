@@ -193,7 +193,7 @@ group_by(zion_srtm_values, ID) %>%
   summarize(across(srtm, list(min = min, mean = mean, max = max)))
 #> # A tibble: 1 × 4
 #>      ID srtm_min srtm_mean srtm_max
-#>   <dbl>    <dbl>     <dbl>    <dbl>
+#>   <dbl>    <int>     <dbl>    <int>
 #> 1     1     1122     1818.     2661
 ```
 
