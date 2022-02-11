@@ -32,7 +32,11 @@ This is the online home of *Geocomputation with R*, a book on geographic data an
 You can buy the book from [CRC Press](https://www.routledge.com/9781138304512), or [Amazon](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577/), and see the archived **First Edition** hosted on [bookdown.org](https://bookdown.org/robinlovelace/geocompr/). 
 
 Inspired by the Free and Open Source Software for Geospatial ([FOSS4G](https://foss4g.org/)) movement, the code and prose underlying this book are open, ensuring that the content is reproducible, transparent, and accessible.
-Hosting the source code on [GitHub](https://github.com/Robinlovelace/geocompr/) allows anyone to contribute new content and typo fixes for the benefit of everyone.
+Hosting the source code on [GitHub](https://github.com/Robinlovelace/geocompr/) allows anyone to interact with the project by opening issues or contributing new content and typo fixes for the benefit of everyone.
+
+[![](https://img.shields.io/github/stars/robinlovelace/geocompr?style=for-the-badge)](https://github.com/robinlovelace/geocompr)
+[![](https://img.shields.io/github/contributors/robinlovelace/geocompr?style=for-the-badge)](https://github.com/Robinlovelace/geocompr/graphs/contributors)
+
 The online version of the book is hosted at [geocompr.robinlovelace.net](https://geocompr.robinlovelace.net) and kept up-to-date by [GitHub Actions](https://github.com/Robinlovelace/geocompr/actions).
 Its current 'build status' as follows:
 
@@ -79,14 +83,10 @@ These can be installed using the [**remotes**](https://github.com/r-lib/remotes)
 ```r
 install.packages("remotes")
 remotes::install_github("geocompr/geocompkg")
-remotes::install_github("nowosad/spData")
-remotes::install_github("nowosad/spDataLarge")
-
-# During development work on the 2nd edition you may also need dev versions of
-# other packages to build the book, e.g.,:
-remotes::install_github("rspatial/terra")
-remotes::install_github("mtennekes/tmap")
 ```
+
+
+
 
 After installing the book's dependencies, you can rebuild the book for testing and educational purposes.
 To do this [download](https://github.com/Robinlovelace/geocompr/archive/refs/heads/main.zip) and unzip or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the book's source code.
