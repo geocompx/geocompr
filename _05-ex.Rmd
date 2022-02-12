@@ -1,5 +1,6 @@
 ```{r 05-ex-e0, message=FALSE}
 library(sf)
+library(terra)
 library(dplyr)
 library(spData)
 library(spDataLarge)
@@ -120,4 +121,31 @@ us_states_bor = st_cast(us_states2163, "MULTILINESTRING")
 us_states_bor$borders = st_length(us_states_bor)
 arrange(us_states_bor, borders)
 arrange(us_states_bor, -borders)
+```
+
+E7. Read the srtm.tif file into R (`srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))`).
+This raster has a resolution of 0.00083 by 0.00083 degrees. 
+Change its resolution to 0.01 by 0.01 degrees using all of the method available in the **terra** package.
+Visualize the results.
+Can you notice any differences between the results of these resampling methods?
+
+```{r 05-ex-e7}
+srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
+rast_template = rast(ext(srtm), res = 0.01)
+srtm_resampl1 = resample(srtm, y = rast_template, method = "bilinear")
+srtm_resampl2 = resample(srtm, y = rast_template, method = "near")
+srtm_resampl3 = resample(srtm, y = rast_template, method = "cubic")
+srtm_resampl4 = resample(srtm, y = rast_template, method = "cubicspline")
+srtm_resampl5 = resample(srtm, y = rast_template, method = "lanczos")
+
+srtm_resampl_all = c(srtm_resampl1, srtm_resampl2, srtm_resampl3,
+                     srtm_resampl4, srtm_resampl5)
+plot(srtm_resampl_all)
+
+# differences
+plot(srtm_resampl_all - srtm_resampl1)
+plot(srtm_resampl_all - srtm_resampl2)
+plot(srtm_resampl_all - srtm_resampl3)
+plot(srtm_resampl_all - srtm_resampl4)
+plot(srtm_resampl_all - srtm_resampl5)
 ```
