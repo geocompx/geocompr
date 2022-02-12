@@ -407,7 +407,16 @@ grain_poly = as.polygons(grain) %>%
 Some of the exercises use a vector (`zion_points`) and raster dataset (`srtm`) from the **spDataLarge** package.
 They also use a polygonal 'convex hull' derived from the vector dataset (`ch`) to represent the area of interest:
 
-
+```r
+library(sf)
+library(terra)
+library(spData)
+zion_points = read_sf(system.file("vector/zion_points.gpkg", package = "spDataLarge"))
+srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
+ch = st_combine(zion_points) %>%
+  st_convex_hull() %>% 
+  st_as_sf()
+```
 
 E1. Crop the `srtm` raster using (1) the `zion_points` dataset and (2) the `ch` dataset.
 Are there any differences in the output maps?
