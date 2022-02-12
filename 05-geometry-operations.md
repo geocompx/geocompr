@@ -891,3 +891,11 @@ E5. Subset the point in `p` that is contained within `x` *and* `y`.
 E6. Calculate the length of the boundary lines of US states in meters.
 Which state has the longest border and which has the shortest?
 Hint: The `st_length` function computes the length of a `LINESTRING` or `MULTILINESTRING` geometry.
+
+
+
+E7. Read the srtm.tif file into R (`srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))`).
+This raster has a resolution of 0.00083 by 0.00083 degrees. 
+Change its resolution to 0.01 by 0.01 degrees using all of the method available in the **terra** package.
+Visualize the results.
+Can you notice any differences between the results of these resampling methods?
