@@ -288,7 +288,7 @@ This is demonstrated below (see Section \@ref(iovec)) on reading geographic vect
 
 
 ```r
-nc_dfr = st_read(system.file("shape/nc.shp", package="sf"))
+nc_dfr = st_read(system.file("shape/nc.shp", package = "sf"))
 #> Reading layer `nc' from data source 
 #>   `/usr/local/lib/R/site-library/sf/shape/nc.shp' using driver `ESRI Shapefile'
 #> Simple feature collection with 100 features and 14 fields
@@ -296,7 +296,7 @@ nc_dfr = st_read(system.file("shape/nc.shp", package="sf"))
 #> Dimension:     XY
 #> Bounding box:  xmin: -84.3 ymin: 33.9 xmax: -75.5 ymax: 36.6
 #> Geodetic CRS:  NAD27
-nc_tbl = read_sf(system.file("shape/nc.shp", package="sf"))
+nc_tbl = read_sf(system.file("shape/nc.shp", package = "sf"))
 class(nc_dfr)
 #> [1] "sf"         "data.frame"
 class(nc_tbl)
@@ -314,7 +314,7 @@ For workflows that depend on the legacy class system, `sf` objects can be conver
 
 ```r
 library(sp)
-world_sp = as(world, Class = "Spatial") # from an sf object to sp
+world_sp = as(world, "Spatial") # from an sf object to sp
 # sp functions ...
 world_sf = st_as_sf(world_sp)           # from sp to sf
 ```
