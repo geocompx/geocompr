@@ -291,7 +291,7 @@ text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3) # add text
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/points-1.png" alt="Overlapping circles." width="50%" />
+<img src="05-geometry-operations_files/figure-html/points-1.png" alt="Overlapping circles." width="100%" />
 <p class="caption">(\#fig:points)Overlapping circles.</p>
 </div>
 
@@ -304,11 +304,11 @@ x = b[1]
 y = b[2]
 x_and_y = st_intersection(x, y)
 plot(b, border = "grey")
-plot(x_and_y, col = "lightgrey", border = "grey", add = TRUE) # color intersecting area
+plot(x_and_y, col = "lightgrey", border = "grey", add = TRUE) # intersecting area
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/circle-intersection-1.png" alt="Overlapping circles with a gray color indicating intersection between them." width="50%" />
+<img src="05-geometry-operations_files/figure-html/circle-intersection-1.png" alt="Overlapping circles with a gray color indicating intersection between them." width="100%" />
 <p class="caption">(\#fig:circle-intersection)Overlapping circles with a gray color indicating intersection between them.</p>
 </div>
 

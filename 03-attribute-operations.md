@@ -316,7 +316,8 @@ This can be done with the base R function `aggregate()` as follows:
 
 
 ```r
-world_agg1 = aggregate(pop ~ continent, FUN = sum, data = world, na.rm = TRUE)
+world_agg1 = aggregate(pop ~ continent, FUN = sum, data = world,
+                       na.rm = TRUE)
 class(world_agg1)
 #> [1] "data.frame"
 ```
@@ -328,7 +329,8 @@ The result is a non-spatial data frame with six rows, one per continent, and two
 
 
 ```r
-world_agg2 = aggregate(world["pop"], list(world$continent), FUN = sum, na.rm = TRUE)
+world_agg2 = aggregate(world["pop"], list(world$continent), FUN = sum, 
+                       na.rm = TRUE)
 class(world_agg2)
 #> [1] "sf"         "data.frame"
 nrow(world_agg2)
