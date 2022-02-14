@@ -129,10 +129,8 @@ library(qgisprocess)
 <!-- qgis_show_help() -->
 
 We are now ready for some QGIS geocomputation from within R! 
-The example below shows how to unite polygons, a process that unfortunately produces so-called slivers \index{sliver polygons}, tiny polygons resulting from overlaps between the inputs that frequently occur in real-world data.
-We will see how to remove them.
-
-For the union\index{union}, we use again the incongruent polygons we have already encountered in Section \@ref(spatial-aggr).
+The example below shows how to unite polygons\index{union}.
+We use again the incongruent polygons we have already encountered in Section \@ref(spatial-aggr).
 Both polygon datasets are available in the **spData** package, and for both we would like to use a geographic CRS\index{CRS!geographic} (see also Chapter \@ref(reproj-geo-data)).
 
 
@@ -173,6 +171,16 @@ Finally, we can let QGIS\index{QGIS} do the work.
 <!-- Setting the `load_output` to `TRUE` automatically loads the QGIS output as an **sf**-object\index{sf} into R. -->
 
 
+```r
+union = qgis_run_algorithm(alg, INPUT = incongr_wgs, OVERLAY = aggzone_wgs, 
+                           OUTPUT = file.path(tempdir(), "union.gpkg"))
+union
+```
+
+
+```r
+union_sf = st_as_sf(union)
+```
 
 <!-- Note that the QGIS\index{QGIS} union\index{vector!union} operation merges the two input layers into one layer by using the intersection\index{vector!intersection} and the symmetrical difference of the two input layers (which by the way is also the default when doing a union operation in GRASS\index{GRASS} and SAGA\index{SAGA}). -->
 <!-- This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)! -->
@@ -181,45 +189,25 @@ Finally, we can let QGIS\index{QGIS} do the work.
 <!-- `st_dimension()` returns `NA` if a geometry is empty, and can therefore be used as a filter.  -->
 
 
-
-<!-- Next we convert multipart polygons into single-part polygons (also known as explode geometries or casting). -->
-<!-- This is necessary for the deletion of sliver polygons\index{sliver polygons} later on. -->
-
-
-
-<!-- One way to identify slivers\index{sliver polygons} is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^ (see blue colored polygons in the left panel of Figure \@ref(fig:sliver-fig)).  -->
+```r
+grep("clean", qgis_algo$algorithm, value = TRUE)
+```
 
 
+```r
+qgis_show_help("grass7:v.clean")
+```
 
-<!-- The next step is to find a function that makes the slivers\index{sliver polygons} disappear. -->
-<!-- Assuming the function or its short description contains the word "sliver", we can run: -->
-
-
-
-<!-- This returns only one geoalgorithm\index{geoalgorithm} whose parameters can be accessed with the help of `get_usage()` again. -->
+<!-- https://grass.osgeo.org/grass78/manuals/v.clean.html -->
 
 
-<!-- \index{sliver polygons} -->
-
-<!-- Conveniently, the user does not need to specify each single parameter. -->
-<!-- In case a parameter is left unspecified, `run_qgis()` will automatically use the corresponding default value as an argument if available. -->
-<!-- To find out about the default values, run `get_args_man()`.   -->
-
-<!-- To remove the slivers, we specify that all polygons with an area less or equal to 25,000 m^2^ should be joined to the neighboring polygon with the largest area (see right panel of Figure \@ref(fig:sliver-fig)). -->
-
-
-
-<div class="figure" style="text-align: center">
-<img src="figures/09_sliver.png" alt="Sliver polygons colored in blue (left panel). Cleaned polygons (right panel)." width="100%" />
-<p class="caption">(\#fig:sliver-fig)Sliver polygons colored in blue (left panel). Cleaned polygons (right panel).</p>
-</div>
-
-<!-- In the code chunk above note that -->
-
-<!-- - leaving the output parameter(s) unspecified saves the resulting QGIS output to a temporary folder created by QGIS\index{QGIS}; -->
-<!-- `run_qgis()` prints these paths to the console after successfully running the QGIS engine; and -->
-<!-- - if the output consists of multiple files and you have set `load_output` to `TRUE`, `run_qgis()` will return a list with each element corresponding to one output file. -->
-
+```r
+clean = qgis_run_algorithm("grass7:v.clean", input = union_sf, type = 4,
+                           tool = 10, threshold = 25000, 
+                           output = file.path(tempdir(), "clean.gpkg"))
+clean = read_sf(clean[[2]])
+plot(clean)
+```
 <!-- To learn more about **RQGIS**\index{RQGIS (package)}, see @muenchow_rqgis:_2017.  -->
 
 ## (R)SAGA {#rsaga}
