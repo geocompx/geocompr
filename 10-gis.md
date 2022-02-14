@@ -205,8 +205,8 @@ qgis_show_help("grass7:v.clean")
 clean = qgis_run_algorithm("grass7:v.clean", input = union_sf, type = 4,
                            tool = 10, threshold = 25000, 
                            output = file.path(tempdir(), "clean.gpkg"))
-clean = read_sf(clean[[2]])
-plot(clean)
+clean_sf = st_as_sf(clean)
+plot(clean_sf)
 ```
 <!-- To learn more about **RQGIS**\index{RQGIS (package)}, see @muenchow_rqgis:_2017.  -->
 
