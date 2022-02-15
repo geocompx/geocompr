@@ -1,0 +1,230 @@
+The solutions assume the following packages are attached (other packages will be attached when needed):
+
+```{r 12-ex-e0, message=FALSE, warning=FALSE}
+library(dplyr)
+# library(kernlab)
+library(mlr3)
+library(mlr3learners)
+library(mlr3extralearners)
+library(mlr3spatiotempcv)
+library(mlr3tuning)
+library(qgisprocess)
+library(raster)
+# library(rlang)
+library(sf)
+library(tmap)
+```
+
+E1. Compute the following terrain attributes from the `ta$elev` datasets loaded with `data("ta", package = "spDataLarge")` with the help of R-GIS bridges (see this [Chapter](https://geocompr.robinlovelace.net/gis.html#gis)):
+    - Slope
+    - Plan curvature
+    - Profile curvature
+    - Catchment area
+    
+```{r, eval=FALSE}
+# attach data
+data("ta", package = "spDataLarge")
+dem = ta$elev
+
+algs = qgisprocess::qgis_algorithms()
+dplyr::filter(algs, grepl("curvature", algorithm))
+alg = "saga:slopeaspectcurvature"
+qgisprocess::qgis_show_help(alg)
+qgisprocess::qgis_arguments(alg)
+# terrain attributes (ta)
+out_nms = paste0(tempdir(), "/", c("aspect", "slope", "cplan", "cprof"),
+                 ".sdat")
+args = rlang::set_names(out_nms, c("ASPECT", "SLOPE", "C_PLAN", "C_PROF"))
+out = qgis_run_algorithm(alg, ELEVATION = dem, METHOD = 6, 
+                         UNIT_SLOPE = "[1] degree",
+                         UNIT_ASPECT = "[1] degree",
+                         !!!args,
+                         .quiet = TRUE
+                         )
+# use brick because then the layers will be in memory and not on disk
+ta = raster::brick(lapply(out[names(args)], \(x) x[1]))
+# hillshade (needs radians)
+# hs = hillShade(ta$SLOPE * pi / 180, ta$ASPECT * pi / 180, 40, 270)
+# plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
+# plot(dem, add = TRUE, alpha = 0.6)
+# dplyr::filter(lsl, lslpts == TRUE) |> 
+#   sf::st_as_sf(coords = c("x", "y"), crs = 32717) |>
+#   plot(add = TRUE, pch = 16)
+
+ta = raster::dropLayer(ta, "ASPECT")
+names(ta) = c("slope", "cplan", "cprof")
+# catchment area
+dplyr::filter(algs, grepl("[Cc]atchment", algorithm))
+alg = "saga:catchmentarea"
+qgis_show_help(alg)
+qgis_arguments(alg)
+carea = qgis_run_algorithm(alg,
+                           ELEVATION = dem, 
+                           METHOD = 4, 
+                           FLOW = file.path(tempdir(), "carea.sdat"))
+# transform carea
+carea = raster(carea$FLOW[1])
+log10_carea = log10(carea)
+names(log10_carea) = "log10_carea"
+# add log_carea and dem to the terrain attributes
+ta = addLayer(x = ta, dem, log10_carea)
+```
+
+E2. Extract the values from the corresponding output rasters to the `lsl` data frame (`data("lsl", package = "spDataLarge"`) by adding new variables called `slope`, `cplan`, `cprof`, `elev` and `log_carea` (see this [section](https://geocompr.robinlovelace.net/spatial-cv.html#case-landslide) for details).
+
+```{r, eval=FALSE}
+# attach terrain attribute raster stack (in case you have skipped the previous
+# exercise)
+data("ta", "lsl", package = "spDataLarge")
+lsl = dplyr::select(lsl, x, y, lslpts)
+# extract values to points, i.e., create predictors
+lsl[, names(ta)] = raster::extract(ta, lsl[, c("x", "y")])
+```
+
+E3. Use the derived terrain attribute rasters in combination with a GLM to make a spatial prediction map similar to that shown in this [Figure](https://geocompr.robinlovelace.net/spatial-cv.html#fig:lsl-susc).
+Running `data("study_mask", package = "spDataLarge")` attaches a mask of the study area.
+
+```{r, eval=FALSE}
+# attach data (in case you have skipped exercises 1) and 2)
+# landslide points with terrain attributes and terrain attribute raster stack
+data("lsl", "ta", "study_mask", package = "spDataLarge")
+
+# fit the model
+fit = glm(lslpts ~ slope + cplan + cprof + elev + log10_carea, 
+          data = lsl, family = binomial())
+
+# make the prediction
+pred = raster::predict(object = ta, model = fit, type = "response")
+
+# make the map
+lsl_sf = sf::st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
+hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
+rect = tmaptools::bb_poly(hs)
+bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
+tm_shape(hs, bbox = bbx) +
+  tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
+          labels.rot = c(0, 90)) +
+  tm_raster(palette = "white", legend.show = FALSE) +
+  # hillshade
+  tm_shape(mask(hs, study_area), bbox = bbx) +
+	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+	# prediction raster
+  tm_shape(mask(pred, study_area)) +
+	tm_raster(alpha = 0.5, palette = RColorBrewer::brewer.pal(name = "Reds", 6),
+	          auto.palette.mapping = FALSE, legend.show = TRUE,
+	          title = "Susceptibility\nprobability") +
+	# rectangle and outer margins
+  qtm(rect, fill = NULL) +
+	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
+	          legend.position = c("left", "bottom"),
+	          legend.title.size = 0.9)
+```
+
+E4. Compute a 100-repeated 5-fold non-spatial cross-validation and spatial CV based on the GLM learner and compare the AUROC values from both resampling strategies with the help of boxplots (see this [Figure](https://geocompr.robinlovelace.net/spatial-cv.html#fig:boxplot-cv).
+Hint: You need to specify a non-spatial resampling strategy.
+
+```{r, eval=FALSE}
+# attach data (in case you have skipped exercises 1) and 2)
+data("lsl", package = "spDataLarge")  # landslide points with terrain attributes
+
+# create task
+task = TaskClassifST$new(
+  id = "lsl_ecuador",
+  backend = mlr3::as_data_backend(lsl), target = "lslpts", positive = "TRUE",
+  extra_args = list(
+    coordinate_names = c("x", "y"),
+    coords_as_features = FALSE,
+    crs = 32717)
+)
+
+# construct learners (for all subsequent exercises)
+# GLM
+lrn_glm = lrn("classif.log_reg", predict_type = "prob")
+
+# SVM
+# construct SVM learner (using ksvm function from the kernlab package)
+lrn_ksvm = lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot",
+               type = "C-svc")
+# specify nested resampling and adjust learner accordingly
+# five spatially disjoint partitions
+tune_level = rsmp("spcv_coords", folds = 5)
+# use 50 randomly selected hyperparameters
+terminator = trm("evals", n_evals = 50)
+tuner = tnr("random_search")
+# define the outer limits of the randomly selected hyperparameters
+ps = ps(
+  C = p_dbl(lower = -12, upper = 15, trafo = function(x) 2^x),
+  sigma = p_dbl(lower = -15, upper = 6, trafo = function(x) 2^x)
+)
+at_ksvm = AutoTuner$new(
+  learner = lrn_ksvm,
+  resampling = tune_level,
+  measure = msr("classif.auc"),
+  search_space = ps,
+  terminator = terminator,
+  tuner = tuner
+)
+
+# QDA
+lrn_qda = lrn("classif.qda", predict_type = "prob")
+
+# SVM without tuning hyperparameters
+vals = lrn_ksvm$param_set$values
+lrn_ksvm_notune = lrn_ksvm$clone()
+lrn_ksvm_notune$param_set$values = c(vals, C = 1, sigma = 1)
+
+# define resampling strategies
+# specify the reampling method, i.e. spatial CV with 100 repetitions and 5 folds
+# -> in each repetition dataset will be splitted into five folds
+# method: repeated_spcv_coords -> spatial partioning
+rsmp_sp = rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
+# method: repeated_cv -> non-spatial partitioning
+rsmp_nsp = rsmp("repeated_cv", folds = 5, repeats = 100)
+
+# (spatial) cross-validataion
+#****************************
+# create your design
+grid = benchmark_grid(tasks = task, 
+                      learners = list(lrn_glm, at_ksvm, lrn_qda, 
+                                      lrn_ksvm_notune),
+                      resamplings = list(rsmp_sp, rsmp_nsp))
+# execute the cross-validation
+library(future)
+# execute the outer loop sequentially and parallelize the inner loop
+future::plan(list("sequential", "multisession"), 
+             workers = floor(availableCores() / 2))
+set.seed(021522)
+bmr = benchmark(grid, store_backends = FALSE)
+# stop parallelization
+future:::ClusterRegistry("stop")
+# save your result, e.g. to 
+# saveRDS(bmr, file = "extdata/12-bmr.rds")
+
+# plot your result
+autoplot(bmr, measure = msr("classif.auc"))
+```
+
+E5. Model landslide susceptibility using a quadratic discriminant analysis (QDA).
+Assess the predictive performance of the QDA. 
+What is the a difference between the spatially cross-validated mean AUROC value of the QDA and the GLM?
+
+```{r, eval=FALSE}
+# attach data (in case you have skipped exercise 4)
+bmr = readRDS("extdata/12-bmr.rds")
+
+# plot your result
+autoplot(bmr, measure = msr("classif.auc"))
+# QDA has higher AUROC values on average than GLM which indicates moderately
+# non-linear boundaries
+```
+
+E6. Run the SVM without tuning the hyperparameters.
+Use the `rbfdot` kernel with $\sigma$ = 1 and *C* = 1. 
+Leaving the hyperparameters unspecified in **kernlab**'s `ksvm()` would otherwise initialize an automatic non-spatial hyperparameter tuning.
+
+```{r, eval=FALSE}
+# attach data (in case you have skipped exercise 4)
+bmr = readRDS("extdata/12-bmr.rds")
+# plot your result
+autoplot(bmr, measure = msr("classif.auc"))
+```
