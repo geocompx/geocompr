@@ -9,13 +9,13 @@ The chapter uses the following packages:^[
 Packages **GGally**, **lgr**, **kernlab**, **ml3measures**, **paradox**, **pROC**, **progressr** and **spDataLarge** must also be installed although these do not need to be attached.
 ]
 
-```{r 11-spatial-cv-1, message=FALSE }
+```{r 12-spatial-cv-1, message=FALSE }
 library(sf)
 library(raster)
 library(dplyr)
 ```
 
-```{r 11-spatial-cv-1-2, eval=FALSE}
+```{r 12-spatial-cv-1-2, eval=FALSE}
 library(future)
 library(mlr3)
 library(mlr3learners)
@@ -75,7 +75,7 @@ Spatial CV\index{cross-validation!spatial CV} alleviates this problem and is the
 This case study is based on a dataset of landslide locations in Southern Ecuador, illustrated in Figure \@ref(fig:lsl-map) and described in detail in @muenchow_geomorphic_2012.
 A subset of the dataset used in that paper is provided in the **spDataLarge**\index{spDataLarge (package)} package, which can be loaded as follows:
 
-```{r 11-spatial-cv-2}
+```{r 12-spatial-cv-2}
 data("lsl", "ta", "study_mask", package = "spDataLarge")
 ```
 
@@ -143,7 +143,7 @@ Supervised learning involves predicting a response variable as a function of pre
 In R\index{R}, modeling functions are usually specified using formulas (see `?formula` and the detailed [Formulas in R Tutorial](https://www.datacamp.com/community/tutorials/r-formula-tutorial) for details of R formulas).
 The following command specifies and runs a generalized linear model\index{GLM}:
 
-```{r 11-spatial-cv-6}
+```{r 12-spatial-cv-6}
 fit = glm(lslpts ~ slope + cplan + cprof + elev + log10_carea,
           family = binomial(),
           data = lsl)
@@ -157,7 +157,7 @@ It is worth understanding each of the three input arguments:
 
 The results of this model can be printed as follows (`summary(fit)` provides a more detailed account of the results):
 
-```{r 11-spatial-cv-7}
+```{r 12-spatial-cv-7}
 class(fit)
 fit
 ```
@@ -167,7 +167,7 @@ It can also be used for prediction.
 This is done with the generic `predict()` method, which in this case calls the function `predict.glm()`.
 Setting `type` to `response` returns the predicted probabilities (of landslide occurrence) for each observation in `lsl`, as illustrated below (see `?predict.glm`):
 
-```{r 11-spatial-cv-8}
+```{r 12-spatial-cv-8}
 pred_glm = predict(object = fit, type = "response")
 head(pred_glm)
 ```
@@ -176,7 +176,7 @@ Spatial predictions can be made by applying the coefficients to the predictor ra
 This can be done manually or with `raster::predict()`.
 In addition to a model object (`fit`), this function also expects a raster stack with the predictors named as in the model's input data frame (Figure \@ref(fig:lsl-susc)).
 
-```{r 11-spatial-cv-9}
+```{r 12-spatial-cv-9}
 # making the prediction
 pred = raster::predict(ta, model = fit, type = "response")
 ```
@@ -233,7 +233,7 @@ Thus, the higher the AUROC\index{AUROC}, the better the model's predictive power
 The following code chunk computes the AUROC\index{AUROC} value of the model with `roc()`, which takes the response and the predicted values as inputs. 
 `auc()` returns the area under the curve.
 
-```{r 11-spatial-cv-10, message=FALSE, eval=FALSE}
+```{r 12-spatial-cv-10, message=FALSE, eval=FALSE}
 pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
 #> Area under the curve: 0.826
 ```
@@ -310,7 +310,7 @@ For spatial CV, we need to provide a few extra arguments (`extra_args`).
 The `coordinate_names` argument expects the names of the coordinate columns (see Section \@ref(intro-cv) and Figure \@ref(fig:partitioning)).
 Additionally, one should indicate the used CRS (`crs`) and if one wishes to use the coordinates as predictors in the modeling (`coords_as_features`).
 
-```{r 11-spatial-cv-11, eval=FALSE}
+```{r 12-spatial-cv-11, eval=FALSE}
 library(mlr3)
 library(mlr3spatiotempcv)
 # create task
@@ -342,7 +342,7 @@ All classification\index{classification} **learners** start with `classif.` and 
 `mlr3extralearners::list_mlr3learners()` lists all available learners and from which package **mlr3** imports them (Table \@ref(tab:lrns)). 
 To find out about learners that are able to model a binary response variable, we can run:
 
-```{r 11-spatial-cv-12, eval=FALSE}
+```{r 12-spatial-cv-12, eval=FALSE}
 library(mlr3extralearners)
 list_mlr3learners(
   filter = list(class = "classif", properties = "twoclass"), 
@@ -373,26 +373,26 @@ This yields all learners able to model two-class problems (landslide yes or no).
 We opt for the binomial classification\index{classification} method used in Section \@ref(conventional-model) and implemented as `classif.log_reg` in **mlr3learners**.
 Additionally, we need to specify the `predict.type` which determines the type of the prediction with `prob` resulting in the predicted probability for landslide occurrence between 0 and 1 (this corresponds to `type = response` in `predict.glm`).
 
-```{r 11-spatial-cv-13, eval=FALSE}
+```{r 12-spatial-cv-13, eval=FALSE}
 library(mlr3learners)
 learner = lrn("classif.log_reg", predict_type = "prob")
 ```
 
 To access the help page of the learner and find out from which package it was taken, we can run:
 
-```{r 11-spatial-cv-14, eval=FALSE}
+```{r 12-spatial-cv-14, eval=FALSE}
 learner$help()
 ```
 
 <!--
 Having specified a learner and a task, we can train our model which basically executes the `glm()` command in the background for our task. 
 
-```{r 11-spatial-cv-15, eval=FALSE}
+```{r 12-spatial-cv-15, eval=FALSE}
 learner$train(task)
 learner$model
 ```
 
-```{r 11-spatial-cv-16, eval=FALSE, echo=FALSE}
+```{r 12-spatial-cv-16, eval=FALSE, echo=FALSE}
 learner$model$formula
 task$data()
 learner$model
@@ -400,7 +400,7 @@ learner$model
 
 `getLearnerModel()` extracts the used model which shows that **mlr** passed all specified parameters to the `glm` function in the background as also proved by following code:
 
-```{r 11-spatial-cv-17, eval=FALSE}
+```{r 12-spatial-cv-17, eval=FALSE}
 fit = glm(lslpts ~ ., family = binomial(link = "logit"), 
           data = dplyr::select(lsl, -x, -y))
 identical(fit$coefficients, learner$model$coefficients)
@@ -419,7 +419,7 @@ We will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatial CV}:
     In the meantime, its functionality was integrated into the **mlr3** ecosystem which is the reason why we are using **mlr3** [@schratz_hyperparameter_2019]. The **tidymodels** framework is another umbrella-package for streamlined modeling in R; however, it only recently integrated support for spatial cross validation via **spatialsample** which so far only supports one spatial resampling method.
 
 
-```{r 11-spatial-cv-18, eval=FALSE}
+```{r 12-spatial-cv-18, eval=FALSE}
 perf_level = rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 ```
 
@@ -427,7 +427,7 @@ To execute the spatial resampling, we run `resample()` using the previously spec
 This takes some time (around 15 seconds on a modern laptop) because it computes the performance measure for 500 models. 
 Setting a seed ensures the reproducibility\index{reproducibility} of the obtained result and will ensure the same spatial partitioning when re-running the code.
 
-```{r 11-spatial-cv-19, eval=FALSE}
+```{r 12-spatial-cv-19, eval=FALSE}
 set.seed(012348)
 # reduce verbosity
 lgr::get_logger("mlr3")$set_threshold("warn")
@@ -437,15 +437,15 @@ sp_cv = resample(task = task,
                  resampling = perf_level)
 ```
 
-The output of the preceding code chunk is a bias-reduced assessment of the model's predictive performance, as illustrated in the following code chunk (required input data is saved in the file `11-sp_cv.rds` in the book's GitHub repo).
+The output of the preceding code chunk is a bias-reduced assessment of the model's predictive performance, as illustrated in the following code chunk (required input data is saved in the file `12-sp_cv.rds` in the book's GitHub repo).
 As performance measure, we again choose the AUROC.
 
-```{r 11-spatial-cv-21, echo=FALSE}
-bm_agg = readRDS("extdata/11-sp_conv_cv.rds")
+```{r 12-spatial-cv-21, echo=FALSE}
+bm_agg = readRDS("extdata/12-sp_conv_cv.rds")
 sp_cv = bm_agg$resample_result[[1]]
 ```
 
-```{r 11-spatial-cv-22}
+```{r 12-spatial-cv-22}
 # summary statistics of the 500 models
 sp_cv$score(measures = msr("classif.auc"))[, summary(classif.auc)]
 # mean AUROC of the 500 models
@@ -501,7 +501,7 @@ Before defining spatial tuning, we will set up the **mlr3**\index{mlr3 (package)
 The classification\index{classification} task remains the same, hence we can simply reuse the `task` object created in Section \@ref(glm).
 Learners implementing SVM can be found using `listLearners()` as follows:
 
-```{r 11-spatial-cv-23}
+```{r 12-spatial-cv-23}
 mlr3extralearners::list_mlr3learners() %>%
   .[class == "classif" & grepl("svm", id), .(id, class, mlr3_package, required_packages)]
 ```
@@ -509,7 +509,7 @@ mlr3extralearners::list_mlr3learners() %>%
 Of the options illustrated above, we will use `ksvm()` from the **kernlab** package [@karatzoglou_kernlab_2004].
 To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel which is also the default of `ksvm()`.
 
-```{r 11-spatial-cv-24, eval=FALSE}
+```{r 12-spatial-cv-24, eval=FALSE}
 lrn_ksvm = lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot")
 ```
 
@@ -519,7 +519,7 @@ Again we will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatia
 <!-- Instead of saying "outer resampling" we concluded to use "performance estimation level" and "tuning level" (inner) in our paper
 # this is also what is shown in the nested CV figure so it would be more consistent -->
 
-```{r 11-spatial-cv-25, eval=FALSE}
+```{r 12-spatial-cv-25, eval=FALSE}
 # performance estimation level
 perf_level = rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 ```
@@ -556,7 +556,7 @@ talk in person (see also exercises):
 - can I compare the mean AUROC of the GLM and the SVM when using the same seed? Or is seeding not strictly necessary? I mean, ok, the partitions vary a bit but overall...
 -->
 
-```{r 11-spatial-cv-26, eval=FALSE}
+```{r 12-spatial-cv-26, eval=FALSE}
 library("mlr3tuning")
 # five spatially disjoint partitions
 tune_level = rsmp("spcv_coords", folds = 5)
@@ -572,7 +572,7 @@ ps = ps(
 
 The next stage is to modify the learner `lrn_ksvm` in accordance with all the characteristics defining the hyperparameter tuning with `AutoTuner$new()`.
 
-```{r 11-spatial-cv-27, eval=FALSE}
+```{r 12-spatial-cv-27, eval=FALSE}
 at_ksvm = AutoTuner$new(
   learner = lrn_ksvm,
   resampling = tune_level,
@@ -623,7 +623,7 @@ Finally, we save the output object (`result`) to disk in case we would like to u
 Before running the subsequent code, be aware that it is time-consuming since it will run the spatial cross-validation with 125,500 models.
 Note that runtime depends on many aspects: CPU speed, the selected algorithm, the selected number of cores and the dataset.
 
-```{r 11-spatial-cv-30, eval=FALSE}
+```{r 12-spatial-cv-30, eval=FALSE}
 set.seed(12345)
 progressr::with_progress(expr = {
   result = resample(task = task,
@@ -640,16 +640,16 @@ future:::ClusterRegistry("stop")
 # saveRDS(result, "svm_sp_sp_rbf_50it.rds")
 ```
 
-In case you do not want to run the code locally, we have saved a subset of the [results](https://github.com/Robinlovelace/geocompr/blob/main/extdata/spatial_cv_result.rds) in the book's GitHub repo.
+In case you do not want to run the code locally, we have saved a subset of the [results](https://github.com/Robinlovelace/geocompr/blob/main/extdata/12-spatial_cv_result.rds) in the book's GitHub repo.
 They can be loaded as follows:
 
-```{r 11-spatial-cv-31}
-result = readRDS("extdata/spatial_cv_result.rds")
+```{r 12-spatial-cv-31}
+result = readRDS("extdata/12-spatial_cv_result.rds")
 ```
 
 Let us have a look at the final AUROC\index{AUROC}: the model's ability to discriminate the two classes. 
 
-```{r 11-spatial-cv-33}
+```{r 12-spatial-cv-33}
 # final aggregated AUROC 
 result$aggr
 # same as
@@ -663,7 +663,7 @@ On the other hand, increasing the number of random search iterations would also 
 The estimated optimal hyperparameters for each fold at the performance estimation level can also be viewed.
 The following command shows the best hyperparameter combination of the first fold of the first iteration (recall this results from the first 5 \* 50 model runs):
 
-```{r 11-spatial-cv-34}
+```{r 12-spatial-cv-34}
 # winning hyperparameters of tuning step, 
 # i.e. the best combination out of 50 * 5 models
 result$extract[[1]]$x
@@ -671,7 +671,7 @@ result$extract[[1]]$x
 
 The estimated hyperparameters have been used for the first fold in the first iteration of the performance estimation level which resulted in the following AUROC\index{AUROC} value:
 
-```{r 11-spatial-cv-35}
+```{r 12-spatial-cv-35}
 result$measures.test[1, ]
 ```
 
@@ -701,23 +701,7 @@ We recommend the following resources in this direction:
 
 ## Exercises
 
-1. Compute the following terrain attributes from the `dem` datasets loaded with `data("landslides", package = "RSAGA")` with the help of R-GIS bridges (see Chapter \@ref(gis)):
-    - Slope
-    - Plan curvature
-    - Profile curvature
-    - Catchment area
-1. Extract the values from the corresponding output rasters to the `landslides` data frame (`data(landslides, package = "RSAGA"`) by adding new variables called `slope`, `cplan`, `cprof`, `elev` and `log_carea`. Keep all landslide initiation points and 175 randomly selected non-landslide points (see Section \@ref(case-landslide) for details).
-1. Use the derived terrain attribute rasters in combination with a GLM to make a spatial prediction map similar to that shown in Figure \@ref(fig:lsl-susc).
-Running `data("study_mask", package = "spDataLarge")` attaches a mask of the study area.
-1. Compute a 100-repeated 5-fold non-spatial cross-validation and spatial CV based on the GLM learner and compare the AUROC values from both resampling\index{resampling} strategies with the help of boxplots (see Figure \@ref(fig:boxplot-cv)).
-Hint: You need to specify a non-spatial resampling\index{resampling} strategy.
-<!-- @Patrick: talk in person; but I think this step is not necessary since spatial and non-spatial partitions must be different -->
-<!-- Before running the spatial cross-validation for both tasks set a seed to make sure that both use the same partitions which in turn guarantees comparability.-->
-1. Model landslide susceptibility using a quadratic discriminant analysis [QDA, @james_introduction_2013].
-Assess the predictive performance (AUROC) of the QDA. 
-What is the difference between the spatially cross-validated mean AUROC value of the QDA and the GLM?
-<!-- so I think, setting a seed here makes sure that the same spatial partitions are used for both models, right?-->
-1. Run the SVM without tuning the hyperparameters.
-Use the `rbfdot` kernel with $\sigma$ = 1 and *C* = 1. 
-Leaving the hyperparameters unspecified in **kernlab**'s `ksvm()` would otherwise initialize an automatic non-spatial hyperparameter tuning.
-For a discussion on the need for (spatial) tuning of hyperparameters, please refer to @schratz_hyperparameter_2019.
+```{r, echo=FALSE, results='asis'}
+res = knitr::knit_child('_12-ex.Rmd', quiet = TRUE, options = list(include = FALSE, eval = FALSE))
+cat(res, sep = '\n')
+```
