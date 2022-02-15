@@ -109,18 +109,30 @@ Table: (\#tab:gis-comp)Comparison between three open-source GIS. Hybrid refers t
 QGIS\index{QGIS} is one of the most popular open-source GIS [Table \@ref(tab:gis-comp); @graser_processing_2015]. 
 Its main advantage lies in the fact that it provides a unified interface to several other open-source GIS.
 This means that you have access to GDAL\index{GDAL}, GRASS\index{GRASS}, and SAGA\index{SAGA} through QGIS\index{QGIS} [@graser_processing_2015]. 
-Since version 3.14, QGIS provides a command line API\index{API} that allows to run all these geoalgorithms (frequently more than 1000, depending on your set-up) outside of the QGIS GUI.
+Since version 3.14, QGIS provides a command line API\index{API}, `qgis_process`, that allows to run all these geoalgorithms (frequently more than 1000, depending on your set-up) outside of the QGIS GUI.
 
 The **qgisprocess** package \index{qgisprocess (package)} wraps this QGIS command-line utility, and thus makes it possible to call QGIS, GDAL, GRASS, and SAGA algorithms from the R session.
 Before running **qgisprocess**\index{qgisprocess (package)}, make sure you have installed QGIS\index{QGIS} and all its (third-party) dependencies such as SAGA\index{SAGA} and GRASS\index{GRASS}.
-<!--toDo:jn-->
-<!-- mention automatic configuration -->
-<!-- qgis_configure() for details -->
 
 
 ```r
 library(qgisprocess)
 ```
+
+This package automatically tries to detect a QGIS installation and complains if it cannot find it.^[You can see details of the detection process with `qgis_configure()`.]
+There are a few possible solutions when the configuration fails: you can set `options(qgisprocess.path = "path/to/your_qgis_process")`, or set up the `R_QGISPROCESS_PATH` environment variable.
+<!--toDo:jn-->
+<!-- link to the vignette https://github.com/paleolimbot/qgisprocess/pull/31/files when it is online -->
+The above approaches can also be used when you have more than one QGIS installation and want to decide which one to use.
+
+Next, we can find which providers (meaning different software) are available on our computer.
+
+
+```r
+qgis_providers()
+```
+
+The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
 
 <!--toDo:jn-->
 <!-- next mention and explain qgis_algorithms() -->
@@ -162,6 +174,12 @@ alg = "native:union"
 # qgis_description(alg)
 qgis_show_help(alg)
 ```
+
+
+```r
+qgis_arguments(alg)
+```
+
 
 Finally, we can let QGIS\index{QGIS} do the work.
 <!-- qgis_run_algorithm -->
