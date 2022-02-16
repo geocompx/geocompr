@@ -117,6 +117,9 @@ Before running **qgisprocess**\index{qgisprocess (package)}, make sure you have 
 
 ```r
 library(qgisprocess)
+#> Using 'qgis_process' at 'qgis_process'.
+#> QGIS version: 3.20.3-Odense
+#> ...
 ```
 
 This package automatically tries to detect a QGIS installation and complains if it cannot find it.^[You can see details of the detection process with `qgis_configure()`.]
@@ -130,18 +133,26 @@ Next, we can find which providers (meaning different software) are available on 
 
 ```r
 qgis_providers()
+#> # A tibble: 6 × 2
+#>   provider provider_title   
+#>   <chr>    <chr>            
+#> 1 3d       QGIS (3D)        
+#> 2 gdal     GDAL             
+#> 3 grass7   GRASS            
+#> 4 native   QGIS (native c++)
+#> 5 qgis     QGIS             
+#> 6 saga     SAGA
 ```
 
 The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
 
+We are now ready for some QGIS geocomputation from within R!
+Let's try two example case studies.
 <!--toDo:jn-->
-<!-- next mention and explain qgis_algorithms() -->
-<!-- You can also find the algorithms\index{algorithm} in the [QGIS online documentation](https://docs.qgis.org/2.18/en/docs/user_manual/processing_algs/index.html). -->
-<!-- maybe also mention that it can be expanded based on other installed software... -->
-<!-- qgis_show_help() -->
-
-We are now ready for some QGIS geocomputation from within R! 
-The example below shows how to unite polygons\index{union}.
+<!-- add a second one later -->
+The first one shows how to unite polygons\index{union}.
+<!--toDo:jn-->
+<!-- add an extended explanation -->
 We use again the incongruent polygons we have already encountered in Section \@ref(spatial-aggr).
 Both polygon datasets are available in the **spData** package, and for both we would like to use a geographic CRS\index{CRS!geographic} (see also Chapter \@ref(reproj-geo-data)).
 
@@ -152,34 +163,41 @@ incongr_wgs = st_transform(incongruent, "EPSG:4326")
 aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 ```
 
-To find an algorithm to do this work we can search the output of the `qgis_algorithms()` function.
-Assuming that the short description of the function contains the word "union"\index{union}, we can run:
+<!--toDo:jn-->
+<!-- next mention and explain qgis_algorithms() -->
+<!-- You can also find the algorithms\index{algorithm} in the [QGIS online documentation](https://docs.qgis.org/2.18/en/docs/user_manual/processing_algs/index.html). -->
+<!-- maybe also mention that it can be expanded based on other installed software... -->
+<!-- qgis_show_help() -->
+To find an algorithm to do this work, we can search the output of the `qgis_algorithms()` function.
+This function returns a data frame containing all of the available providers and the algorithms they provide. 
 
 
 ```r
 qgis_algo = qgis_algorithms()
-grep("union", qgis_algo$algorithm, value = TRUE)
 ```
 
-<!--toDo:jn-->
-<!-- explain the above result -->
-The next step is to find out how `native:union` can be used.
-<!-- qgis_description("native:union") -->
-<!-- qgis_show_help("native:union") -->
-<!-- `get_usage()` returns all function parameters and default values.  -->
+The `qgis_algo` object has a lot of columns, but usually, we are only interested in the `algorithm` column that combines information about the provider and the algorithm name.
+Assuming that the short description of the function contains the word "union"\index{union}, we can run the following code to find the algorithm of interest:
+
+
+```r
+grep("union", qgis_algo$algorithm, value = TRUE)
+#> [1] "native:union"      "saga:fuzzyunionor" "saga:polygonunion"
+```
+
+One of the algorithms on the above list, `"native:union"`, sounds promising.
+The next step is to find out what this algorithm does and how we can use it.
+This is the role of the `qgis_show_help()`, which gives us a help information, including the description of the algorithm, its arguments, and outputs.^[We can also extract some of information independently with `qgis_description()`, `qgis_arguments()`, and `qgis_outputs()`.]
 
 
 ```r
 alg = "native:union"
-# qgis_description(alg)
 qgis_show_help(alg)
 ```
 
-
-```r
-qgis_arguments(alg)
-```
-
+<!--toDo:jn-->
+<!-- explain the help file -->
+<!-- acceptable values -- `Path to a vector layer` it can be an `sf` object -->
 
 Finally, we can let QGIS\index{QGIS} do the work.
 <!-- qgis_run_algorithm -->
