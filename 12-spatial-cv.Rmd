@@ -76,10 +76,11 @@ This case study is based on a dataset of landslide locations in Southern Ecuador
 A subset of the dataset used in that paper is provided in the **spDataLarge**\index{spDataLarge (package)} package, which can be loaded as follows:
 
 ```{r 12-spatial-cv-2}
-data("lsl", "ta", "study_mask", package = "spDataLarge")
+data("lsl", "study_mask", package = "spDataLarge")
+ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 ```
 
-This should load three objects: a `data.frame` named `lsl`, a `RasterStack` (see Section \@ref(raster-classes)) named `ta` containing terrain attribute rasters, and an `sf` object named `study_mask`.
+This should load three objects: a `data.frame` named `lsl`, an `sf` object named `study_mask` and a `SpatRaster` (see Section \@ref(raster-classes)) named `ta` containing terrain attribute rasters.
 `lsl` contains a factor column `lslpts` where `TRUE` corresponds to an observed landslide 'initiation point', with the coordinates stored in columns `x` and `y`.^[
 The landslide initiation point is located in the scarp of a landslide polygon. See @muenchow_geomorphic_2012 for further details.
 ]
@@ -89,24 +90,27 @@ The 175 non-landslide points were sampled randomly from the study area, with the
 ```{r lsl-map, echo=FALSE, fig.cap="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador.", fig.scap="Landslide initiation points."}
 # library(tmap)
 # data("lsl", package = "spDataLarge")
-# data("ta", package = "spDataLarge")
+# ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 # lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
-# hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
-# rect = tmaptools::bb_poly(hs)
-# bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
+# hs = terra::shade(slope = ta$slope * pi / 180, 
+#                   terra::terrain(ta$elev, v = "aspect", unit = "radians"))
+# # so far tmaptools does not support terra objects
+# 
+# rect = tmaptools::bb_poly(raster::raster(hs))
+# bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
 # 
 # tm_shape(hs, bbox = bbx) +
-# 	tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
-# 	        labels.rot = c(0, 90)) +
-# 	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
-# 	tm_shape(ta$elev) +
-# 	tm_raster(alpha = 0.5, palette = terrain.colors(10), legend.show = FALSE) +
-# 	tm_shape(lsl_sf) + 
-# 	tm_bubbles("lslpts", size = 0.2, palette = "-RdYlBu", title.col = "Landslide: ") +
-# #   tm_shape(sam) +
-# #   tm_bubbles(border.col = "gold", border.lwd = 2, alpha = 0, size = 0.5) +
+#   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
+#           labels.rot = c(0, 90)) +
+#   tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+#   tm_shape(ta$elev) +
+#   tm_raster(alpha = 0.5, palette = terrain.colors(10), legend.show = FALSE) +
+#   tm_shape(lsl_sf) +
+#   tm_bubbles("lslpts", size = 0.2, palette = "-RdYlBu", title.col = "Landslide: ") +
+#   #   tm_shape(sam) +
+#   #   tm_bubbles(border.col = "gold", border.lwd = 2, alpha = 0, size = 0.5) +
 #   qtm(rect, fill = NULL) +
-# 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) +
+#   tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) +
 #   tm_legend(bg.color = "white")
 knitr::include_graphics("figures/lsl-map-1.png")
 ```
@@ -115,12 +119,12 @@ knitr::include_graphics("figures/lsl-map-1.png")
 The first three rows of `lsl`, rounded to two significant digits, can be found in Table \@ref(tab:lslsummary).
 
 ```{r lslsummary, echo=FALSE, warning=FALSE}
-lsl_table = lsl %>%
-  mutate_at(vars(-one_of("x", "y", "lslpts")), list(~signif(., 2))) %>%
+lsl_table = lsl |>
+  mutate(across(.cols = -any_of(c("x", "y", "lslpts")), ~signif(., 2))) |>
   head(3)
 knitr::kable(lsl_table, caption = "Structure of the lsl dataset.",
              caption.short = "`lsl` dataset.", booktabs = TRUE) %>%
-  kableExtra::kable_styling(latex_options="scale_down")
+  kableExtra::kable_styling(latex_options = "scale_down")
 ```
 
 To model landslide susceptibility, we need some predictors.
@@ -182,23 +186,27 @@ pred = raster::predict(ta, model = fit, type = "response")
 ```
 
 ```{r lsl-susc, echo=FALSE, fig.cap="Spatial prediction of landslide susceptibility using a GLM.", fig.scap = "Spatial prediction of landslide susceptibility.", warning=FALSE}
-# attach study mask for the natural part of the study area
-# data("ta", "lsl", study_mask", package = "spDataLarge")
+# # attach study mask for the natural part of the study area
+# data("lsl", "study_mask", package = "spDataLarge")
+# ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
+# study_mask = terra::vect(study_mask)
 # # white raster to only plot the axis ticks, otherwise gridlines would be visible
 # lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
-# hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
-# rect = tmaptools::bb_poly(hs)
-# bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
+# hs = terra::shade(ta$slope * pi / 180,
+#                   terra::terrain(ta$elev, v = "aspect", unit = "radians"))
+# rect = tmaptools::bb_poly(raster::raster(hs))
+# bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.02, 1), ylim = c(-0.02, 1),
+#                     relative = TRUE)
 # tm_shape(hs, bbox = bbx) +
 #   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
 #           labels.rot = c(0, 90)) +
 #   tm_raster(palette = "white", legend.show = FALSE) +
 #   # hillshade
-#   tm_shape(mask(hs, study_mask), bbox = bbx) +
+#   tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
 # 	tm_raster(palette = gray(0:100 / 100), n = 100,
 # 	          legend.show = FALSE) +
 # 	# prediction raster
-#   tm_shape(mask(pred,study_mask)) +
+#   tm_shape(terra::mask(pred, study_mask)) +
 # 	tm_raster(alpha = 0.5, palette = "Reds", n = 6, legend.show = TRUE,
 # 	          title = "Susceptibility") +
 # 	# rectangle and outer margins
@@ -210,7 +218,7 @@ knitr::include_graphics("figures/lsl-susc-1.png")
 ```
 
 Here, when making predictions we neglect spatial autocorrelation\index{autocorrelation!spatial} since we assume that on average the predictive accuracy remains the same with or without spatial autocorrelation structures.
-However, it is possible to include spatial autocorrelation\index{autocorrelation!spatial} structures into models [@zuur_mixed_2009;@blangiardo_spatial_2015;@zuur_beginners_2017] as well as into predictions [kriging approaches,  see, e.g., @goovaerts_geostatistics_1997;@hengl_practical_2007;@bivand_applied_2013].
+However, it is possible to include spatial autocorrelation\index{autocorrelation!spatial} structures into models [@zuur_mixed_2009;@blangiardo_spatial_2015;@zuur_beginners_2017] as well as into predictions [kriging approaches, see, e.g., @goovaerts_geostatistics_1997;@hengl_practical_2007;@bivand_applied_2013].
 This is, however, beyond the scope of this book.
 <!--
 Nevertheless, we give the interested reader some pointers where to look it up:

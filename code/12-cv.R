@@ -1,6 +1,6 @@
-# Filename: 11-glm.R (2021-09-08)
+# Filename: 12-cv.R (2022-02-16)
 #
-# TO DO: Introducing spatial cross-validation with the help of mlr3
+# TO DO: Introduce spatial cross-validation with the help of mlr3
 #
 # Author(s): Jannes Muenchow
 #
@@ -33,7 +33,8 @@ library(tmap)
 #**********************************************************
 
 # attach data
-data("lsl", "ta", package = "spDataLarge")
+data("lsl", "study_mask", package = "spDataLarge")
+ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 
 # 2.1 create a mlr3 task====
 #**********************************************************
@@ -52,7 +53,7 @@ task = TaskClassifST$new(
     crs = 32717)
 )
 # pls note that you can use a task created by TaskClassifST for both the spatial
-# and the conventiona CV approach
+# and the conventional CV approach
 
 # 2.2 construct a learner and run the model====
 #**********************************************************
@@ -112,7 +113,8 @@ print(design_grid)
 # run the cross-validations (spatial and conventional)
 # execute the outer loop sequentially and parallelize the inner loop
 future::plan(list("sequential", "multisession"), 
-             workers = floor(future::availableCores()))
+             # use half of all available cores
+             workers = floor(future::availableCores()) / 2)
 
 # why do we need the seed?
 # the seed is needed when to make sure
@@ -152,8 +154,9 @@ ggplot2::ggplot(data = d, mapping = aes(x = resampling_id, y = classif.auc)) +
   labs(y = "AUROC", x = "")
 
 # save your result
-saveRDS(agg, file = "extdata/11-sp_conv_cv.rds")
-
+# saveRDS(agg, file = "extdata/12-sp_conv_cv.rds")
+# read in if necessary
+# agg = readRDS("extdata/12-sp_conv_cv.rds")
 #**********************************************************
 # 3 spatial prediction----
 #**********************************************************
@@ -163,35 +166,35 @@ saveRDS(agg, file = "extdata/11-sp_conv_cv.rds")
 #**********************************************************
 
 lrn_glm$train(task)
-fit = learner$model
+fit = lrn_glm$model
 # according to lrn_glm$help() the default for predictions was adjusted to FALSE,
 # since we would like to have TRUE predictions, we have to change back
-fit$coefficients = fit$coefficients * -1
+# fit$coefficients = fit$coefficients * -1
 
-pred = raster::predict(object = ta, model = fit, fun = predict,
+pred = terra::predict(object = ta, model = fit, fun = predict,
                        type = "response")
 
 # make the prediction "manually"
-ta_2 = stack(ta)
+ta_2 = ta
 newdata = as.data.frame(as.matrix(ta_2))
 colSums(is.na(newdata))  # ok, there are NAs
 ind = rowSums(is.na(newdata)) == 0
-tmp = learner$predict_newdata(newdata = newdata[ind, ], task = task)
+tmp = lrn_glm$predict_newdata(newdata = newdata[ind, ], task = task)
 newdata[ind, "pred"] = as.data.table(tmp)[["prob.TRUE"]]
 # check
-all.equal(values(pred), newdata$pred)
+all.equal(as.numeric(values(pred)), newdata$pred)
 pred_2 = ta$slope
 values(pred_2) = newdata$pred
 all.equal(pred, pred_2)
-plot(stack(pred, pred_2))
+plot(c(pred, pred_2))
 
 #**********************************************************
 # 3.2 plot the prediction====
 #**********************************************************
 
-hs = hillShade(ta$slope * pi / 180, 
-               raster::terrain(ta$elev, opt = "aspect", unit = "radians"),
-               40, 270)
+hs = terra::shade(ta$slope * pi / 180, 
+                  terra::terrain(ta$elev, v = "aspect", unit = "radians"),
+                  40, 270)
 plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
 # plot(pred, col = RColorBrewer::brewer.pal("YlOrRd", n =  9), add = TRUE, 
 #      alpha = 0.6)
@@ -200,19 +203,21 @@ plot(pred, col = RColorBrewer::brewer.pal(name = "Reds", 9), add = TRUE,
 
 # or using tmap 
 # white raster to only plot the axis ticks, otherwise gridlines would be visible
+study_mask = terra::vect(study_mask)
 lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
-rect = tmaptools::bb_poly(hs)
-bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
+rect = tmaptools::bb_poly(raster::raster(hs))
+bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.02, 1), ylim = c(-0.02, 1), 
+                    relative = TRUE)
 tm_shape(hs, bbox = bbx) +
   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
           labels.rot = c(0, 90)) +
   tm_raster(palette = "white", legend.show = FALSE) +
   # hillshade
-  tm_shape(mask(hs, study_mask), bbox = bbx) +
+  tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
   tm_raster(palette = gray(0:100 / 100), n = 100,
             legend.show = FALSE) +
   # prediction raster
-  tm_shape(mask(pred,study_mask)) +
+  tm_shape(terra::mask(pred, study_mask)) +
   tm_raster(alpha = 0.5, palette = "Reds", n = 6, legend.show = TRUE,
             title = "Susceptibility") +
   # rectangle and outer margins
