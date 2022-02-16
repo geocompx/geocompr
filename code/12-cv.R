@@ -124,6 +124,11 @@ set.seed(012348)
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("info")
 progressr::with_progress(expr = {
+  # New argument `encapsulate` for `resample()` and `benchmark()` to
+  # conveniently enable encapsulation and also set the fallback learner to the
+  # respective featureless learner. This is simply for convenience, configuring
+  # each learner individually is still possible and allows a more fine-grained
+  # control
   bmr = benchmark(design_grid, 
                   encapsulate = "evaluate",
                   store_backends = FALSE,
