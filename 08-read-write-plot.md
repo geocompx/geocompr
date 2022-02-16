@@ -725,12 +725,6 @@ To read an online file, we just need to provide its URL together with the `/vsic
 ```r
 myurl = "/vsicurl/https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif"
 snow = rast(myurl)
-#> Warning in new_CppObject_xp(fields$.module, fields$.pointer, ...): GDAL
-#> Message 1: HTTP response code on https://zenodo.org/record/5774954/files/
-#> clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.aux: 503
-#> Warning in new_CppObject_xp(fields$.module, fields$.pointer, ...): GDAL
-#> Message 1: HTTP response code on https://zenodo.org/record/5774954/files/
-#> clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.AUX: 503
 snow
 #> class       : SpatRaster 
 #> dimensions  : 35849, 86400, 1  (nrow, ncol, nlyr)
