@@ -202,27 +202,32 @@ However, the **qgisprocess** package also allows to provide `sf` object as well 
 The algorithm's outputs (it is possible to have more than one output) are listed at the end of the help list.
 
 Finally, we can let QGIS\index{QGIS} do the work.
-<!-- qgis_run_algorithm -->
-<!-- Note that the workhorse function `run_qgis()` accepts R named arguments, i.e., you can specify the parameter names as returned by `get_usage()` in `run_qgis()` as you would do in any other regular R function. -->
-<!-- Note also that `run_qgis()` accepts spatial objects residing in R's global environment as input (here: `aggzone_wgs` and `incongr_wgs`).  -->
-<!-- But of course, you could also specify paths to spatial vector files stored on disk. -->
-<!-- Setting the `load_output` to `TRUE` automatically loads the QGIS output as an **sf**-object\index{sf} into R. -->
+The main function of **qgisprocess** is `qgis_run_algorithm()`.
+It accepts the used algorithm name and a set of named arguments shown in the help list, and performs expected calculations.
+In our case, three arguments seem important - `INPUT`, `OVERLAY`, and `OUTPUT`.
+The first one, `INPUT`, is our main vector object `incongr_wgs`, while the second one, `OVERLAY`, is `aggzone_wgs`.
+The last argument, `OUTPUT`, expects a path to a new vector file; however, if we do not provide the path, **qgisprocess** will automatically create a temporary file.
 
 ```{r 09-gis-7, eval=FALSE}
-union = qgis_run_algorithm(alg, INPUT = incongr_wgs, OVERLAY = aggzone_wgs, 
-                           OUTPUT = file.path(tempdir(), "union.gpkg"))
+union = qgis_run_algorithm(alg, INPUT = incongr_wgs, OVERLAY = aggzone_wgs)
 union
 ```
+
+Running the above line of code will save our two input objects into temporary .gpkg files, run the selected algorithm on them, and return a temporary .gpkg file as the output.
+The **qgisprocess** package stores the `qgis_run_algorithm()` result as a list containing, in this case, a path to the output file.
+We can either read this file back into R with `read_sf()` (e.g., `union_sf = read_sf(union[[1]])`) or directly with `st_as_sf()`:
 
 ```{r, eval=FALSE}
 union_sf = st_as_sf(union)
 ```
 
-<!-- Note that the QGIS\index{QGIS} union\index{vector!union} operation merges the two input layers into one layer by using the intersection\index{vector!intersection} and the symmetrical difference of the two input layers (which by the way is also the default when doing a union operation in GRASS\index{GRASS} and SAGA\index{SAGA}). -->
-<!-- This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)! -->
-<!-- The QGIS output contains empty geometries and multipart polygons. -->
-<!-- Empty geometries might lead to problems in subsequent geoprocessing tasks which is why they will be deleted. -->
-<!-- `st_dimension()` returns `NA` if a geometry is empty, and can therefore be used as a filter.  -->
+Note that the QGIS\index{QGIS} union\index{vector!union} operation merges the two input layers into one layer by using the intersection\index{vector!intersection} and the symmetrical difference of the two input layers (which, by the way, is also the default when doing a union operation in GRASS\index{GRASS} and SAGA\index{SAGA}).
+This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)!
+
+<!--toDo:jn-->
+<!-- expand the output description -->
+<!-- mention the problems (e.g., what sliver polygons are) -->
+<!-- One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m2 (see blue colored polygons in the left panel of Figure 9.1). -->
 
 ```{r, eval=FALSE}
 grep("clean", qgis_algo$algorithm, value = TRUE)
