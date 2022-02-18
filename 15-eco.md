@@ -311,7 +311,7 @@ text(tree_mo, pretty = 0)
 
 
 <div class="figure" style="text-align: center">
-<img src="figures/14_tree.png" alt="Simple example of a decision tree with three internal nodes and four terminal nodes." width="100%" />
+<img src="figures/15_tree.png" alt="Simple example of a decision tree with three internal nodes and four terminal nodes." width="100%" />
 <p class="caption">(\#fig:tree)Simple example of a decision tree with three internal nodes and four terminal nodes.</p>
 </div>
 

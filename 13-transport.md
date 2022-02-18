@@ -556,7 +556,7 @@ route_cycleway$all = c(desire_rail$all, desire_carshort$all)
 
 
 
-The results of the preceding code are visualized in Figure \@ref(fig:cycleways), which shows routes with high levels of car dependency and highlights opportunities for cycling rail stations (the subsequent code chunk creates a simple version of the figure --- see `code/12-cycleways.R` to reproduce the figure exactly).
+The results of the preceding code are visualized in Figure \@ref(fig:cycleways), which shows routes with high levels of car dependency and highlights opportunities for cycling rail stations (the subsequent code chunk creates a simple version of the figure --- see `code/13-cycleways.R` to reproduce the figure exactly).
 The method has some limitations: in reality, people do not travel to zone centroids or always use the shortest route\index{shortest route} algorithm for a particular mode.
 However, the results demonstrate routes along which cycle paths could be prioritized from car dependency and public transport perspectives.
 

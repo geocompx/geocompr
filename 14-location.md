@@ -110,7 +110,7 @@ Table: (\#tab:census-desc)Categories for each variable in census data from Daten
 After the preprocessing, the data can be converted into a raster stack\index{raster!stack} or brick\index{raster!brick} (see Sections \@ref(raster-classes) and \@ref(raster-subsetting)).
 `rasterFromXYZ()` makes this really easy.
 It requires an input data frame where the first two columns represent coordinates on a regular grid.
-All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as input for the raster brick layers (Figure \@ref(fig:census-stack); see also `code/13-location-jm.R` in our github repository).
+All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as input for the raster brick layers (Figure \@ref(fig:census-stack); see also `code/14-location-jm.R` in our github repository).
 
 
 ```r
@@ -246,7 +246,7 @@ Given no other column as input, `summarize()` only dissolves the geometry.
 <p class="caption">(\#fig:metro-areas)The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names.</p>
 </div>
 
-The resulting eight metropolitan areas suitable for bike shops (Figure \@ref(fig:metro-areas); see also `code/13-location-jm.R` for creating the figure) are still missing a name.
+The resulting eight metropolitan areas suitable for bike shops (Figure \@ref(fig:metro-areas); see also `code/14-location-jm.R` for creating the figure) are still missing a name.
 A reverse geocoding\index{geocoding} approach can settle this problem.
 Given a coordinate, reverse geocoding finds the corresponding address.
 Consequently, extracting the centroid\index{centroid} coordinate of each metropolitan area can serve as an input for a reverse geocoding API\index{API}.
@@ -424,7 +424,7 @@ With clean data, the final step --- calculating a final score by summing all ras
 result = sum(reclass)
 ```
 
-For instance, a score greater than 9 might be a suitable threshold indicating raster cells where a bike shop could be placed (Figure \@ref(fig:bikeshop-berlin); see also `code/13-location-jm.R`).
+For instance, a score greater than 9 might be a suitable threshold indicating raster cells where a bike shop could be placed (Figure \@ref(fig:bikeshop-berlin); see also `code/14-location-jm.R`).
 
 <div class="figure" style="text-align: center">
 

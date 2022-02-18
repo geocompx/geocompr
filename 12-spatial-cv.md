@@ -146,7 +146,7 @@ Hence, if you have not computed the predictors yourself, attach the correspondin
 # attach landslide points with terrain attributes
 data("lsl", package = "spDataLarge")
 # attach terrain attribute raster stack
-data("ta", package = "spDataLarge")
+ta = stack(system.file("raster/ta.tif", package = "spDataLarge"))
 ```
 
 The first three rows of `lsl`, rounded to two significant digits, can be found in Table \@ref(tab:lslsummary).
@@ -167,34 +167,34 @@ The first three rows of `lsl`, rounded to two significant digits, can be found i
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:right;"> 715078 </td>
-   <td style="text-align:right;"> 9558647 </td>
+   <td style="text-align:right;"> 713888 </td>
+   <td style="text-align:right;"> 9558537 </td>
+   <td style="text-align:left;"> FALSE </td>
+   <td style="text-align:right;"> 34 </td>
+   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0.003 </td>
+   <td style="text-align:right;"> 2400 </td>
+   <td style="text-align:right;"> 2.8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 712788 </td>
+   <td style="text-align:right;"> 9558917 </td>
+   <td style="text-align:left;"> FALSE </td>
+   <td style="text-align:right;"> 39 </td>
+   <td style="text-align:right;"> -0.039 </td>
+   <td style="text-align:right;"> -0.017 </td>
+   <td style="text-align:right;"> 2100 </td>
+   <td style="text-align:right;"> 4.1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 713408 </td>
+   <td style="text-align:right;"> 9560307 </td>
    <td style="text-align:left;"> FALSE </td>
    <td style="text-align:right;"> 37 </td>
-   <td style="text-align:right;"> 0.021 </td>
-   <td style="text-align:right;"> 0.009 </td>
-   <td style="text-align:right;"> 2500 </td>
-   <td style="text-align:right;"> 2.6 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 713748 </td>
-   <td style="text-align:right;"> 9558047 </td>
-   <td style="text-align:left;"> FALSE </td>
-   <td style="text-align:right;"> 42 </td>
-   <td style="text-align:right;"> -0.024 </td>
-   <td style="text-align:right;"> 0.007 </td>
-   <td style="text-align:right;"> 2500 </td>
-   <td style="text-align:right;"> 3.1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> 712508 </td>
-   <td style="text-align:right;"> 9558887 </td>
-   <td style="text-align:left;"> FALSE </td>
-   <td style="text-align:right;"> 20 </td>
-   <td style="text-align:right;"> 0.039 </td>
-   <td style="text-align:right;"> 0.015 </td>
-   <td style="text-align:right;"> 2100 </td>
-   <td style="text-align:right;"> 2.3 </td>
+   <td style="text-align:right;"> -0.013 </td>
+   <td style="text-align:right;"> 0.010 </td>
+   <td style="text-align:right;"> 2000 </td>
+   <td style="text-align:right;"> 3.6 </td>
   </tr>
 </tbody>
 </table>
@@ -234,11 +234,11 @@ fit
 #> 
 #> Coefficients:
 #> (Intercept)        slope        cplan        cprof         elev  log10_carea  
-#>    1.97e+00     9.30e-02    -2.57e+01    -1.43e+01     2.41e-05    -2.12e+00  
+#>    2.51e+00     7.90e-02    -2.89e+01    -1.76e+01     1.79e-04    -2.27e+00  
 #> 
 #> Degrees of Freedom: 349 Total (i.e. Null);  344 Residual
 #> Null Deviance:	    485 
-#> Residual Deviance: 361 	AIC: 373
+#> Residual Deviance: 373 	AIC: 385
 ```
 
 The model object `fit`, of class `glm`, contains the coefficients defining the fitted relationship between response and predictors.
@@ -251,7 +251,7 @@ Setting `type` to `response` returns the predicted probabilities (of landslide o
 pred_glm = predict(object = fit, type = "response")
 head(pred_glm)
 #>      1      2      3      4      5      6 
-#> 0.3327 0.4755 0.0995 0.1480 0.3486 0.6766
+#> 0.1901 0.1172 0.0952 0.2503 0.3382 0.1575
 ```
 
 Spatial predictions can be made by applying the coefficients to the predictor rasters. 
