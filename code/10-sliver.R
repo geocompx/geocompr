@@ -1,86 +1,40 @@
-# Filename: 09-sliver.R (2018-06-04)
-#
-# TO DO: Create sliver polygon figure
-#
-# Author(s): Jannes Muenchow
-#
-#**********************************************************
-# CONTENTS-------------------------------------------------
-#**********************************************************
-#
-# 1. ATTACH PACKAGES AND DATA
-# 2. ELIMINATE SLIVER POLYGONS
-# 3. FIGURES
-#
-#**********************************************************
-# 1 ATTACH PACKAGES AND DATA-------------------------------
-#**********************************************************
-
-# attach packages
-library(RQGIS)
-library(spData)
+library(qgisprocess)
 library(sf)
-library(dplyr)
 library(tmap)
 
-# attach data
-data("incongruent", package = "spData")
-data("aggregating_zones", package = "spData")
-incongruent = st_transform(incongruent, 4326)
-aggregating_zones = st_transform(aggregating_zones, 4326)
+data("incongruent", "aggregating_zones", package = "spData")
+incongr_wgs = st_transform(incongruent, "EPSG:4326")
+aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 
-#**********************************************************
-# 2 ELIMINATE SLIVER POLYGONS------------------------------
-#**********************************************************
+alg = "native:union"
+union = qgis_run_algorithm(alg, INPUT = incongr_wgs, OVERLAY = aggzone_wgs)
+union_sf = st_as_sf(union)
 
-set_env(dev = FALSE)
-get_usage("qgis:union")
-union = run_qgis("qgis:union", 
-                 INPUT = incongruent,
-                 INPUT2 = aggregating_zones,
-                 OUTPUT = file.path(tempdir(), "union.shp"),
-                 load_output = TRUE)
-# getting rid of empty geometries
-union = union[!is.na(st_dimension(union)), ]
-# multipart polygons to single polygons
-single = st_cast(union, "MULTIPOLYGON") %>%
-  st_cast("POLYGON")
-# figure
+single = st_cast(union_sf, "MULTIPOLYGON") |> st_cast("POLYGON")
 single$area = st_area(single)
-# find polygons which are smaller than 25000 m^2
 x = 25000
 units(x) = "m^2"
 sub = dplyr::filter(single, area < x)
-# have a quick glance
-plot(single$geometry, col = NA)
-plot(sub$geometry, add = TRUE, col = "blue", border = "blue", lwd = 1.5)
 
-# eliminate sliver polygons
-get_usage("qgis:eliminatesliverpolygons")
-clean = run_qgis("qgis:eliminatesliverpolygons",
-                 INPUT = single,
-                 ATTRIBUTE = "area",
-                 COMPARISON = "<=",
-                 COMPARISONVALUE = 25000,
-                 OUTPUT = file.path(tempdir(), "clean.shp"),
-                 load_output = TRUE)
-# have a quick glance
-plot(st_geometry(clean))
 
-#**********************************************************
-# 3 FIGURES------------------------------------------------
-#**********************************************************
+clean = qgis_run_algorithm("grass7:v.clean", input = union_sf, type = 4,
+                           tool = 10, threshold = 25000, 
+                           output = file.path(tempdir(), "clean.gpkg"))
+clean_sf = st_as_sf(clean)
 
-sliver_fig = tm_shape(single) + 
-  tm_borders() + 
-  tm_shape(sub) + 
-  tm_fill(col = "blue") + 
-  tm_borders(col = "blue", lwd = 1.5)
+tm1 = tm_shape(union_sf) +
+  tm_polygons(alpha = 0.2, lwd = 0.2) +
+  tm_shape(sub) +
+  tm_fill(col = "#C51111") +
+  tm_layout(main.title = "Sliver polygons included",
+            main.title.size = 1)
 
-clean_fig = tm_shape(clean) + 
-  tm_borders()
+tm2 = tm_shape(clean_sf) +
+  tm_polygons(alpha = 0.2, lwd = 0.2) +
+  tm_layout(main.title = "Sliver polygons cleaned",
+            main.title.size = 1)
 
-sc_maps = tmap_arrange(sliver_fig, clean_fig, ncol = 2) 
+sc_maps = tmap_arrange(tm1, tm2, nrow = 1)
 
 # save the output
 tmap_save(sc_maps, "figures/09-sliver.png",
