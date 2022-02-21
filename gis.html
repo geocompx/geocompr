@@ -253,21 +253,22 @@ Let’s try two example case studies.
 <!--toDo:jn-->
 <!-- add a second one later -->
 The first one shows how to unite polygons.
-<!--toDo:jn-->
-<!-- add an extended explanation -->
-We use again the incongruent polygons we have already encountered in Section <a href="spatial-operations.html#spatial-aggr">4.2.6</a>.
+Consider a situation when you have two polygon objects with different spatial units (e.g., regions, administrative units).
+Our goal is to merge these two objects into one, containing all of the boundary lines and related attributes.
+We use again the incongruent polygons we have already encountered in Section <a href="spatial-operations.html#incongruent">4.2.7</a> (Figure <a href="gis.html#fig:uniondata">10.1</a>).
 Both polygon datasets are available in the <strong>spData</strong> package, and for both we would like to use a geographic CRS (see also Chapter <a href="reproj-geo-data.html#reproj-geo-data">7</a>).</p>
 <div class="sourceCode" id="cb340"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"incongruent"</span>, <span class="st">"aggregating_zones"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
 <span class="va">incongr_wgs</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">incongruent</span>, <span class="st">"EPSG:4326"</span><span class="op">)</span>
 <span class="va">aggzone_wgs</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">aggregating_zones</span>, <span class="st">"EPSG:4326"</span><span class="op">)</span></code></pre></div>
-<!--toDo:jn-->
-<!-- next mention and explain qgis_algorithms() -->
-<!-- You can also find the algorithms\index{algorithm} in the [QGIS online documentation](https://docs.qgis.org/2.18/en/docs/user_manual/processing_algs/index.html). -->
-<!-- maybe also mention that it can be expanded based on other installed software... -->
-<!-- qgis_show_help() -->
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:uniondata"></span>
+<img src="10-gis_files/figure-html/uniondata-1.png" alt="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders). " width="100%"><p class="caption">
+FIGURE 10.1: Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders).
+</p>
+</div>
 <p>To find an algorithm to do this work, we can search the output of the <code>qgis_algorithms()</code> function.
-This function returns a data frame containing all of the available providers and the algorithms they provide.</p>
+This function returns a data frame containing all of the available providers and the algorithms they contain.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.&lt;/p&gt;"><sup>51</sup></a></p>
 <div class="sourceCode" id="cb341"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">qgis_algo</span> <span class="op">=</span> <span class="fu">qgis_algorithms</span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p>The <code>qgis_algo</code> object has a lot of columns, but usually, we are only interested in the <code>algorithm</code> column that combines information about the provider and the algorithm name.
@@ -277,14 +278,14 @@ Assuming that the short description of the function contains the word “union�
 <span class="co">#&gt; [1] "native:union"      "saga:fuzzyunionor" "saga:polygonunion"</span></code></pre></div>
 <p>One of the algorithms on the above list, <code>"native:union"</code>, sounds promising.
 The next step is to find out what this algorithm does and how we can use it.
-This is the role of the <code>qgis_show_help()</code>, which gives us a help information, including the description of the algorithm, its arguments, and outputs.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;We can also extract some of information independently with &lt;code&gt;qgis_description()&lt;/code&gt;, &lt;code&gt;qgis_arguments()&lt;/code&gt;, and &lt;code&gt;qgis_outputs()&lt;/code&gt;.&lt;/p&gt;"><sup>51</sup></a></p>
+This is the role of the <code>qgis_show_help()</code>, which gives us a help information, including the description of the algorithm, its arguments, and outputs.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;We can also extract some of information independently with &lt;code&gt;qgis_description()&lt;/code&gt;, &lt;code&gt;qgis_arguments()&lt;/code&gt;, and &lt;code&gt;qgis_outputs()&lt;/code&gt;.&lt;/p&gt;"><sup>52</sup></a></p>
 <div class="sourceCode" id="cb343"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">alg</span> <span class="op">=</span> <span class="st">"native:union"</span>
 <span class="fu">qgis_show_help</span><span class="op">(</span><span class="va">alg</span><span class="op">)</span></code></pre></div>
 <p>The description gives a few sentences summary of what the selected algorithm does.
 Next, a list of arguments gives us the possible arguments’ names, for example, <code>INPUT</code>, <code>OVERLAY</code>, <code>OVERLAY_FIELDS_PREFIX</code>, and <code>OUTPUT</code> in this case, and their acceptable values.
 Based on the help information, some of the above arguments seem to expect a “path to a vector layer.”
-However, the <strong>qgisprocess</strong> package also allows to provide <code>sf</code> object as well in these cases.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;Objects from the &lt;strong&gt;terra&lt;/strong&gt; and &lt;strong&gt;stars&lt;/strong&gt; package can be used when a path to a raster layer.&lt;/p&gt;"><sup>52</sup></a>
+However, the <strong>qgisprocess</strong> package also allows to provide <code>sf</code> object as well in these cases.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;Objects from the &lt;strong&gt;terra&lt;/strong&gt; and &lt;strong&gt;stars&lt;/strong&gt; package can be used when a path to a raster layer.&lt;/p&gt;"><sup>53</sup></a>
 The algorithm’s outputs (it is possible to have more than one output) are listed at the end of the help list.</p>
 <p>Finally, we can let QGIS do the work.
 The main function of <strong>qgisprocess</strong> is <code>qgis_run_algorithm()</code>.
@@ -302,10 +303,12 @@ We can either read this file back into R with <code><a href="https://r-spatial.g
 <code class="sourceCode R"><span class="va">union_sf</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="va">union</span><span class="op">)</span></code></pre></div>
 <p>Note that the QGIS union operation merges the two input layers into one layer by using the intersection and the symmetrical difference of the two input layers (which, by the way, is also the default when doing a union operation in GRASS and SAGA).
 This is <strong>not</strong> the same as <code>st_union(incongr_wgs, aggzone_wgs)</code> (see Exercises)!</p>
-<!--toDo:jn-->
-<!-- expand the output description -->
-<!-- mention the problems (e.g., what sliver polygons are) -->
-<!-- One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m2 (see red colored polygons in the left panel of Figure \@ref(fig:sliver)). -->
+<p>Our result, <code>union_sf</code>, is a multipolygon with a larger number of features than two input objects .
+Notice, however, that many of these polygons are small and do not represent real areas but are rather a result of our two datasets having a different level of detail.
+These artifacts of error are called sliver polygons (see red-colored polygons in the left panel of <a href="gis.html#fig:sliver">10.2</a>)
+One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m<sup>2</sup>, and next remove them.</p>
+<!-- toDo:jn -->
+<!-- is casting needed here? test that! -->
 <p>Let’s search for an appropriate algorithm.</p>
 <div class="sourceCode" id="cb346"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grep</a></span><span class="op">(</span><span class="st">"clean"</span>, <span class="va">qgis_algo</span><span class="op">$</span><span class="va">algorithm</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
@@ -314,15 +317,16 @@ This is <strong>not</strong> the same as <code>st_union(incongr_wgs, aggzone_wgs
 <div class="sourceCode" id="cb347"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">qgis_show_help</span><span class="op">(</span><span class="st">"grass7:v.clean"</span><span class="op">)</span></code></pre></div>
 <!-- https://grass.osgeo.org/grass78/manuals/v.clean.html -->
+<!-- explain different arguments names/style -->
 <div class="sourceCode" id="cb348"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">clean</span> <span class="op">=</span> <span class="fu">qgis_run_algorithm</span><span class="op">(</span><span class="st">"grass7:v.clean"</span>, input <span class="op">=</span> <span class="va">union_sf</span>,
                            type <span class="op">=</span> <span class="fl">4</span>, tool <span class="op">=</span> <span class="fl">10</span>, threshold <span class="op">=</span> <span class="fl">25000</span><span class="op">)</span>
 <span class="va">clean_sf</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="va">clean</span><span class="op">)</span></code></pre></div>
-<p><a href="gis.html#fig:sliver">10.1</a></p>
+<p><a href="gis.html#fig:sliver">10.2</a></p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:sliver"></span>
 <img src="figures/10-sliver.png" alt="Sliver polygons colored in red (left panel). Cleaned polygons (right panel)." width="100%"><p class="caption">
-FIGURE 10.1: Sliver polygons colored in red (left panel). Cleaned polygons (right panel).
+FIGURE 10.2: Sliver polygons colored in red (left panel). Cleaned polygons (right panel).
 </p>
 </div>
 </div>
@@ -385,7 +389,7 @@ So the function call for calculating the ‘SAGA Wetness Index’ becomes:</p>
 <div class="sourceCode" id="cb356"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/RSAGA/man/rsaga.wetness.index.html">rsaga.wetness.index</a></span><span class="op">(</span>in.dem <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"dem"</span><span class="op">)</span>, 
                     out.wetness.index <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"twi"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>Of course, we would like to inspect our result visually (Figure <a href="gis.html#fig:saga-twi">10.2</a>).
+<p>Of course, we would like to inspect our result visually (Figure <a href="gis.html#fig:saga-twi">10.3</a>).
 To load and plot the SAGA output file, we use the <strong>raster</strong> package.</p>
 <div class="sourceCode" id="cb357"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster">raster</a></span><span class="op">)</span>
@@ -395,7 +399,7 @@ To load and plot the SAGA output file, we use the <strong>raster</strong> packag
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:saga-twi"></span>
 <img src="figures/09_twi.png" alt="SAGA wetness index of Mount Mongón, Peru." width="50%"><p class="caption">
-FIGURE 10.2: SAGA wetness index of Mount Mongón, Peru.
+FIGURE 10.3: SAGA wetness index of Mount Mongón, Peru.
 </p>
 </div>
 <p>You can find an extended version of this example in <code>vignette("RSAGA-landslides")</code> which includes the use of statistical geocomputing to derive terrain attributes as predictors for a non-linear Generalized Additive Model (GAM) to predict spatially landslide susceptibility <span class="citation">(<a href="references.html#ref-muenchow_geomorphic_2012" role="doc-biblioref">Muenchow, Brenning, and Richter 2012</a>)</span>.
@@ -528,11 +532,11 @@ To access the GRASS help page of the traveling salesman algorithm, run <code>exe
 <code class="sourceCode R"><span class="fu"><a href="https://rsbivand.github.io/rgrass/reference/execGRASS.html">execGRASS</a></span><span class="op">(</span>cmd <span class="op">=</span> <span class="st">"v.net.salesman"</span>, input <span class="op">=</span> <span class="st">"streets_points_con"</span>,
           output <span class="op">=</span> <span class="st">"shortest_route"</span>, center_cats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"1-"</span>, <span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">points</span><span class="op">)</span><span class="op">)</span>,
           flags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"overwrite"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>To visualize our result, we import the output layer into R, convert it into an sf-object keeping only the geometry, and visualize it with the help of the <strong>mapview</strong> package (Figure <a href="gis.html#fig:grass-mapview">10.3</a> and Section <a href="adv-map.html#interactive-maps">9.4</a>).</p>
+<p>To visualize our result, we import the output layer into R, convert it into an sf-object keeping only the geometry, and visualize it with the help of the <strong>mapview</strong> package (Figure <a href="gis.html#fig:grass-mapview">10.4</a> and Section <a href="adv-map.html#interactive-maps">9.4</a>).</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:grass-mapview"></span>
 <img src="figures/09_shortest_route.png" alt="Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London." width="80%"><p class="caption">
-FIGURE 10.3: Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London.
+FIGURE 10.4: Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London.
 </p>
 </div>
 <div class="sourceCode" id="cb367"><pre class="downlit sourceCode r">
@@ -621,7 +625,7 @@ In the example below <code>ogrinfo</code> provides metadata on a vector dataset:
 <span class="co">#&gt; ...</span></code></pre></div>
 <p>This example — which returns the same result as <code><a href="http://rgdal.r-forge.r-project.org/reference/readOGR.html">rgdal::ogrInfo()</a></code> — may be simple, but it shows how to use GDAL via the system command-line, independently of other packages.
 The ‘link’ to GDAL provided by <strong>link2gi</strong> could be used as a foundation for doing more advanced GDAL work from the R or system CLI.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
-Note also that the &lt;strong&gt;RSAGA&lt;/strong&gt; package uses the command line interface to use SAGA geoalgorithms from within R (see Section &lt;a href="gis.html#rsaga"&gt;10.3&lt;/a&gt;). &lt;/p&gt;'><sup>53</sup></a>
+Note also that the &lt;strong&gt;RSAGA&lt;/strong&gt; package uses the command line interface to use SAGA geoalgorithms from within R (see Section &lt;a href="gis.html#rsaga"&gt;10.3&lt;/a&gt;). &lt;/p&gt;'><sup>54</sup></a>
 TauDEM (<a href="http://hydrology.usu.edu/taudem/taudem5/index.html" class="uri">http://hydrology.usu.edu/taudem/taudem5/index.html</a>) and the Orfeo Toolbox (<a href="https://www.orfeo-toolbox.org/" class="uri">https://www.orfeo-toolbox.org/</a>) are other spatial data processing libraries/programs offering a command line interface.
 At the time of writing, it appears that there is only a developer version of an R/TauDEM interface on R-Forge (<a href="https://r-forge.r-project.org/R/?group_id=956" class="uri">https://r-forge.r-project.org/R/?group_id=956</a>).
 In any case, the above example shows how to access these libraries from the system command line via R.
@@ -639,15 +643,15 @@ They can organize large collections of data into related tables (entities) via u
 This is useful because geographic datasets tend to become big and messy quite quickly.
 Databases enable storing and querying large datasets efficiently based on spatial and non-spatial fields, and provide multi-user access and topology support.</p>
 <p>The most important open source spatial database is PostGIS <span class="citation">(<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">Obe and Hsu 2015</a>)</span>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
-SQLite/SpatiaLite are certainly also important but implicitly we have already introduced this approach since GRASS is using SQLite in the background (see Section &lt;a href="gis.html#rgrass"&gt;10.4&lt;/a&gt;).&lt;/p&gt;'><sup>54</sup></a>
+SQLite/SpatiaLite are certainly also important but implicitly we have already introduced this approach since GRASS is using SQLite in the background (see Section &lt;a href="gis.html#rgrass"&gt;10.4&lt;/a&gt;).&lt;/p&gt;'><sup>55</sup></a>
 R bridges to spatial DBMSs such as PostGIS are important, allowing access to huge data stores without loading several gigabytes of geographic data into RAM, and likely crashing the R session.
 The remainder of this section shows how PostGIS can be called from R, based on “Hello real word” from <em>PostGIS in Action, Second Edition</em> <span class="citation">(<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">Obe and Hsu 2015</a>)</span>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
-Thanks to Manning Publications, Regina Obe and Leo Hsu for permission to use this example.&lt;/p&gt;"><sup>55</sup></a></p>
+Thanks to Manning Publications, Regina Obe and Leo Hsu for permission to use this example.&lt;/p&gt;"><sup>56</sup></a></p>
 <p>The subsequent code requires a working internet connection, since we are accessing a PostgreSQL/PostGIS database which is living in the QGIS Cloud (<a href="https://qgiscloud.com/" class="uri">https://qgiscloud.com/</a>).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 QGIS Cloud lets you store geographic data and maps in the cloud.
 In the background, it uses QGIS Server and PostgreSQL/PostGIS.
 This way, the reader can follow the PostGIS example without the need to have PostgreSQL/PostGIS installed on a local machine.
-Thanks to the QGIS Cloud team for hosting this example.&lt;/p&gt;"><sup>56</sup></a></p>
+Thanks to the QGIS Cloud team for hosting this example.&lt;/p&gt;"><sup>57</sup></a></p>
 <div class="sourceCode" id="cb369"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tomoakin/RPostgreSQL">RPostgreSQL</a></span><span class="op">)</span>
 <span class="va">conn</span> <span class="op">=</span> <span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html">dbConnect</a></span><span class="op">(</span>drv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/RPostgreSQL/man/PostgreSQL.html">PostgreSQL</a></span><span class="op">(</span><span class="op">)</span>, dbname <span class="op">=</span> <span class="st">"rtafdf_zljbqm"</span>,
@@ -677,7 +681,7 @@ Additionally, <code><a href="https://r-spatial.github.io/sf/reference/st_read.ht
   <span class="st">"WHERE name = 'US Route 1' AND state = 'MD';"</span><span class="op">)</span>
 <span class="va">us_route</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span>, geom <span class="op">=</span> <span class="st">"wkb_geometry"</span><span class="op">)</span></code></pre></div>
 <p>This results in an <strong>sf</strong>-object named <code>us_route</code> of type <code>sfc_MULTILINESTRING</code>.
-The next step is to add a 20-mile buffer (corresponds to 1609 meters times 20) around the selected highway (Figure <a href="gis.html#fig:postgis">10.4</a>).</p>
+The next step is to add a 20-mile buffer (corresponds to 1609 meters times 20) around the selected highway (Figure <a href="gis.html#fig:postgis">10.5</a>).</p>
 <div class="sourceCode" id="cb373"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span>
   <span class="st">"SELECT ST_Union(ST_Buffer(wkb_geometry, 1609 * 20))::geometry"</span>,
@@ -686,8 +690,8 @@ The next step is to add a 20-mile buffer (corresponds to 1609 meters times 20) a
 <span class="va">buf</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span><span class="op">)</span></code></pre></div>
 <p>Note that this was a spatial query using functions (<code>ST_Union()</code>, <code>ST_Buffer()</code>) you should be already familiar with since you find them also in the <strong>sf</strong>-package, though here they are written in lowercase characters (<code><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union()</a></code>, <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>).
 In fact, function names of the <strong>sf</strong> package largely follow the PostGIS naming conventions.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
-The prefix &lt;code&gt;st&lt;/code&gt; stands for space/time.&lt;/p&gt;"><sup>57</sup></a>
-The last query will find all Hardee restaurants (<code>HDE</code>) within the buffer zone (Figure <a href="gis.html#fig:postgis">10.4</a>).</p>
+The prefix &lt;code&gt;st&lt;/code&gt; stands for space/time.&lt;/p&gt;"><sup>58</sup></a>
+The last query will find all Hardee restaurants (<code>HDE</code>) within the buffer zone (Figure <a href="gis.html#fig:postgis">10.5</a>).</p>
 <div class="sourceCode" id="cb374"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span>
   <span class="st">"SELECT r.wkb_geometry"</span>,
@@ -704,7 +708,7 @@ The last query will find all Hardee restaurants (<code>HDE</code>) within the bu
 <span class="va">hardees</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span><span class="op">)</span></code></pre></div>
 <p>Please refer to <span class="citation"><a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">Obe and Hsu</a> (<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">2015</a>)</span> for a detailed explanation of the spatial SQL query.
 Finally, it is good practice to close the database connection as follows:<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
-It is important to close the connection here because QGIS Cloud (free version) allows only ten concurrent connections.&lt;/p&gt;"><sup>58</sup></a></p>
+It is important to close the connection here because QGIS Cloud (free version) allows only ten concurrent connections.&lt;/p&gt;"><sup>59</sup></a></p>
 <div class="sourceCode" id="cb375"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RPostgreSQL/man/postgresqlSupport.html">postgresqlCloseConnection</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt; old-style crs object detected; please recreate object with a recent sf::st_crs()
@@ -712,7 +716,7 @@ It is important to close the connection here because QGIS Cloud (free version) a
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:postgis"></span>
 <img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer." width="60%"><p class="caption">
-FIGURE 10.4: Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer.
+FIGURE 10.5: Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer.
 </p>
 </div>
 <p>Unlike PostGIS, <strong>sf</strong> only supports spatial vector data.
@@ -801,7 +805,7 @@ Additionally, give <code>mapview</code> a try.</p></li>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-02-18.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-02-21.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
