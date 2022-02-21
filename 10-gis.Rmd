@@ -182,14 +182,8 @@ tm_shape(incongr_wgs) +
             legend.text.size = 1)
 ```
 
-
-<!--toDo:jn-->
-<!-- next mention and explain qgis_algorithms() -->
-<!-- You can also find the algorithms\index{algorithm} in the [QGIS online documentation](https://docs.qgis.org/2.18/en/docs/user_manual/processing_algs/index.html). -->
-<!-- maybe also mention that it can be expanded based on other installed software... -->
-<!-- qgis_show_help() -->
 To find an algorithm to do this work, we can search the output of the `qgis_algorithms()` function.
-This function returns a data frame containing all of the available providers and the algorithms they provide. 
+This function returns a data frame containing all of the available providers and the algorithms they contain.^[Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.] 
 
 ```{r, eval=FALSE}
 qgis_algo = qgis_algorithms()
@@ -241,10 +235,13 @@ union_sf = st_as_sf(union)
 Note that the QGIS\index{QGIS} union\index{vector!union} operation merges the two input layers into one layer by using the intersection\index{vector!intersection} and the symmetrical difference of the two input layers (which, by the way, is also the default when doing a union operation in GRASS\index{GRASS} and SAGA\index{SAGA}).
 This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)!
 
-<!--toDo:jn-->
-<!-- expand the output description -->
-<!-- mention the problems (e.g., what sliver polygons are) -->
-<!-- One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m2 (see red colored polygons in the left panel of Figure \@ref(fig:sliver)). -->
+Our result, `union_sf`, is a multipolygon with a larger number of features than two input objects .
+Notice, however, that many of these polygons are small and do not represent real areas but are rather a result of our two datasets having a different level of detail.
+These artifacts of error are called sliver polygons (see red-colored polygons in the left panel of \@ref(fig:sliver))
+One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^, and next remove them.
+
+<!-- toDo:jn -->
+<!-- is casting needed here? test that! -->
 
 Let's search for an appropriate algorithm.
 
@@ -260,6 +257,7 @@ qgis_show_help("grass7:v.clean")
 ```
 
 <!-- https://grass.osgeo.org/grass78/manuals/v.clean.html -->
+<!-- explain different arguments names/style -->
 
 ```{r 09-gis-7c, eval=FALSE}
 clean = qgis_run_algorithm("grass7:v.clean", input = union_sf,
