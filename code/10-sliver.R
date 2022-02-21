@@ -37,5 +37,5 @@ tm2 = tm_shape(clean_sf) +
 sc_maps = tmap_arrange(tm1, tm2, nrow = 1)
 
 # save the output
-tmap_save(sc_maps, "figures/09-sliver.png",
+tmap_save(sc_maps, "figures/10-sliver.png",
           width = 12, height = 5, units = "cm")
