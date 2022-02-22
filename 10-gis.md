@@ -230,10 +230,6 @@ Our result, `union_sf`, is a multipolygon with a larger number of features than 
 Notice, however, that many of these polygons are small and do not represent real areas but are rather a result of our two datasets having a different level of detail.
 These artifacts of error are called sliver polygons (see red-colored polygons in the left panel of \@ref(fig:sliver))
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^, and next remove them.
-
-<!-- toDo:jn -->
-<!-- is casting needed here? test that! -->
-
 Let's search for an appropriate algorithm.
 
 
@@ -241,21 +237,32 @@ Let's search for an appropriate algorithm.
 grep("clean", qgis_algo$algorithm, value = TRUE)
 ```
 
-This time the found algorithm is not included in QGIS, but GRASS GIS.
-<!-- add move about v.clean -->
+This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS.
+GRASS GIS's `v.clean` is a powerful tool for cleaning topology of spatial vector data. 
+Importantly, we can use it through **qgisprocess**.
+
+Similarly to the previous step, we should start by looking at this algorithm's help.
 
 
 ```r
 qgis_show_help("grass7:v.clean")
 ```
 
-<!-- https://grass.osgeo.org/grass78/manuals/v.clean.html -->
-<!-- explain different arguments names/style -->
+You may notice that the help text is quite long and contains a lot of arguments.^[Also note that these arguments, contrary to the QGIS's ones, are in lower case.]
+This is because `v.clean` is a multi tool -- it can clean different types of geometries and solve different types of topological problems.
+For this example, let's focus on just a few arguments, however, we encourage you to visit [this algorithm's documentation](https://grass.osgeo.org/grass78/manuals/v.clean.html) to learn more about `v.clean` capabilities.
+
+The main argument for this algorithm is `input` -- our vector object.
+Next, we need to select a tool -- a cleaning method. ^[It is also possible to select several tools, which will then be executed sequentially.]
+About a dozen of tools exist in `v.clean` allowing to, for example, remove duplicate geometries, remove small angles between lines, or remove small areas.
+In this case, we are interested in the latter tool, `rmarea`, which is identified by the number 10.
+Several of the tools, `rmarea` included, expect an additional argument `threshold`, which behavior depends on the selected tool.
+In our case, the `rmarea` tool removes all areas smaller or equal to `threshold`. 
 
 
 ```r
 clean = qgis_run_algorithm("grass7:v.clean", input = union_sf,
-                           type = 4, tool = 10, threshold = 25000)
+                           tool = 10, threshold = 25000)
 clean_sf = st_as_sf(clean)
 ```
 
