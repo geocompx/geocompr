@@ -148,9 +148,12 @@ The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `
 
 We are now ready for some QGIS geocomputation from within R!
 Let's try two example case studies.
+The first one shows how to unite polygons\index{union}.
 <!--toDo:jn-->
 <!-- add a second one later -->
-The first one shows how to unite polygons\index{union}.
+
+### Vector data
+
 Consider a situation when you have two polygon objects with different spatial units (e.g., regions, administrative units).
 Our goal is to merge these two objects into one, containing all of the boundary lines and related attributes.
 We use again the incongruent polygons we have already encountered in Section \@ref(incongruent) (Figure \@ref(fig:uniondata)).
@@ -259,6 +262,8 @@ In this case, we are interested in the latter tool, `rmarea`, which is identifie
 Several of the tools, `rmarea` included, expect an additional argument `threshold`, which behavior depends on the selected tool.
 In our case, the `rmarea` tool removes all areas smaller or equal to `threshold`. 
 
+Let's run this algorithm and convert its output into a new `sf` object `clean_sf`.
+
 
 ```r
 clean = qgis_run_algorithm("grass7:v.clean", input = union_sf,
@@ -266,12 +271,14 @@ clean = qgis_run_algorithm("grass7:v.clean", input = union_sf,
 clean_sf = st_as_sf(clean)
 ```
 
-\@ref(fig:sliver)
+The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver polygons are now removed.
 
 <div class="figure" style="text-align: center">
 <img src="figures/10-sliver.png" alt="Sliver polygons colored in red (left panel). Cleaned polygons (right panel)." width="100%" />
 <p class="caption">(\#fig:sliver)Sliver polygons colored in red (left panel). Cleaned polygons (right panel).</p>
 </div>
+
+### Raster data
 
 ## (R)SAGA {#rsaga}
 
