@@ -180,8 +180,7 @@ pred = terra::predict(object = ta, model = fit, fun = predict,
                        type = "response")
 
 # make the prediction "manually"
-ta_2 = ta
-newdata = as.data.frame(as.matrix(ta_2))
+newdata = as.data.frame(as.matrix(ta))
 colSums(is.na(newdata))  # ok, there are NAs
 ind = rowSums(is.na(newdata)) == 0
 tmp = lrn_glm$predict_newdata(newdata = newdata[ind, ], task = task)
