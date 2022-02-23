@@ -1,18 +1,52 @@
+```{r 08-ex-e0, message=FALSE}
+library(sf)
+library(terra)
+```
 
 E1. List and describe three types of vector, raster, and geodatabase formats.
 
+```{asis}
+Vector formats: Shapefile (old format supported by many programs), GeoPackage (more recent format with better support of attribute data) and GeoJSON (common format for web mapping).
+
+Raster formats: GeoTiff, Arc ASCII, R-raster (see book for descriptions).
+
+Database formats: PostGIS, SQLite, FileGDB (see book for details).
+```
+
+
 E2. Name at least two differences between `read_sf()` and the more well-known function `st_read()`.
+
+```{asis}
+`st_read()` prints outputs and keeps strings as text strings (`st_read()` creates factors). This can be seen from the source code of `read_sf()`, which show's it wraps `st_read()`:
+```
+
+```{r 08-ex-e2}
+read_sf
+```
 
 E3. Read the `cycle_hire_xy.csv` file from the **spData** package as a spatial object (Hint: it is located in the `misc` folder).
 What is a geometry type of the loaded object? 
 
+```{r 08-ex-e3}
+c_h = read.csv(system.file("misc/cycle_hire_xy.csv", package = "spData")) %>% 
+  st_as_sf(coords = c("X", "Y"))
+c_h
+```
+
 E4. Download the borders of Germany using **rnaturalearth**, and create a new object called `germany_borders`.
 Write this new object to a file of the GeoPackage format.
+
+```{r 08-ex-e4}
+library(rnaturalearth)
+germany_borders = ne_countries(country = "Germany", returnclass = "sf")
+plot(germany_borders)
+st_write(germany_borders, "germany_borders.gpkg")
+```
 
 E5. Download the global monthly minimum temperature with a spatial resolution of five minutes using the **geodata** package.
 Extract the June values, and save them to a file named `tmin_june.tif` file (hint: use `terra::subset()`).
 
-```{r}
+```{r 08-ex-e5}
 library(geodata)
 gmmt = worldclim_global(var = "tmin", res = 5, path = tempdir())
 names(gmmt)
@@ -25,5 +59,17 @@ writeRaster(gmmt_june, "tmin_june.tif")
 
 E6. Create a static map of Germany's borders, and save it to a PNG file.
 
+```{r 08-ex-e6}
+png(filename = "germany.png", width = 350, height = 500)
+plot(st_geometry(germany_borders), axes = TRUE, graticule = TRUE)
+dev.off()
+```
+
 E7. Create an interactive map using data from the `cycle_hire_xy.csv` file. 
 Export this map to a file called `cycle_hire.html`.
+
+```{r 08-ex-e7, eval=FALSE}
+library(mapview)
+mapview_obj = mapview(c_h, zcol = "nbikes", legend = TRUE)
+mapshot(mapview_obj, file = "cycle_hire.html")
+```
