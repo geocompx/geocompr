@@ -11,7 +11,7 @@ Packages **GGally**, **lgr**, **kernlab**, **ml3measures**, **paradox**, **pROC*
 
 ```{r 12-spatial-cv-1, message=FALSE }
 library(sf)
-library(raster)
+library(terra)
 library(dplyr)
 ```
 
@@ -91,27 +91,29 @@ The 175 non-landslide points were sampled randomly from the study area, with the
 # library(tmap)
 # data("lsl", package = "spDataLarge")
 # ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
-# lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
-# hs = terra::shade(slope = ta$slope * pi / 180, 
+# lsl_sf = sf::st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
+# hs = terra::shade(slope = ta$slope * pi / 180,
 #                   terra::terrain(ta$elev, v = "aspect", unit = "radians"))
 # # so far tmaptools does not support terra objects
 # 
 # rect = tmaptools::bb_poly(raster::raster(hs))
-# bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
+# bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.0001, 1), 
+#                     ylim = c(-0.0001, 1), relative = TRUE)
 # 
-# tm_shape(hs, bbox = bbx) +
+# map = tm_shape(hs, bbox = bbx) +
 #   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
 #           labels.rot = c(0, 90)) +
 #   tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
 #   tm_shape(ta$elev) +
 #   tm_raster(alpha = 0.5, palette = terrain.colors(10), legend.show = FALSE) +
 #   tm_shape(lsl_sf) +
-#   tm_bubbles("lslpts", size = 0.2, palette = "-RdYlBu", title.col = "Landslide: ") +
-#   #   tm_shape(sam) +
-#   #   tm_bubbles(border.col = "gold", border.lwd = 2, alpha = 0, size = 0.5) +
+#   tm_bubbles("lslpts", size = 0.2, palette = "-RdYlBu", 
+#              title.col = "Landslide: ") +
 #   qtm(rect, fill = NULL) +
 #   tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) +
 #   tm_legend(bg.color = "white")
+# tmap::tmap_save(map, filename = "figures/lsl-map-1.png", width = 11, 
+#                 height = 11, units = "cm")
 knitr::include_graphics("figures/lsl-map-1.png")
 ```
 \index{hillshade}
@@ -182,7 +184,7 @@ In addition to a model object (`fit`), this function also expects a raster stack
 
 ```{r 12-spatial-cv-9}
 # making the prediction
-pred = raster::predict(ta, model = fit, type = "response")
+pred = terra::predict(ta, model = fit, type = "response")
 ```
 
 ```{r lsl-susc, echo=FALSE, fig.cap="Spatial prediction of landslide susceptibility using a GLM.", fig.scap = "Spatial prediction of landslide susceptibility.", warning=FALSE}
@@ -191,13 +193,13 @@ pred = raster::predict(ta, model = fit, type = "response")
 # ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 # study_mask = terra::vect(study_mask)
 # # white raster to only plot the axis ticks, otherwise gridlines would be visible
-# lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
+# lsl_sf = sf::st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
 # hs = terra::shade(ta$slope * pi / 180,
 #                   terra::terrain(ta$elev, v = "aspect", unit = "radians"))
 # rect = tmaptools::bb_poly(raster::raster(hs))
-# bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.02, 1), ylim = c(-0.02, 1),
-#                     relative = TRUE)
-# tm_shape(hs, bbox = bbx) +
+# bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.00001, 1), 
+#                     ylim = c(-0.00001, 1), relative = TRUE)
+# map = tm_shape(hs, bbox = bbx) +
 #   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
 #           labels.rot = c(0, 90)) +
 #   tm_raster(palette = "white", legend.show = FALSE) +
@@ -214,6 +216,8 @@ pred = raster::predict(ta, model = fit, type = "response")
 # 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
 # 	          legend.position = c("left", "bottom"),
 # 	          legend.title.size = 0.9)
+# tmap::tmap_save(map, filename = "figures/lsl-susc-1.png", width = 11, 
+#                 height = 11, units = "cm")
 knitr::include_graphics("figures/lsl-susc-1.png")
 ```
 
@@ -243,13 +247,12 @@ The following code chunk computes the AUROC\index{AUROC} value of the model with
 
 ```{r 12-spatial-cv-10, message=FALSE, eval=FALSE}
 pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
-#> Area under the curve: 0.826
+#> Area under the curve: 0.8216
 ```
 
 An AUROC\index{AUROC} value of
 <!-- `r # round(pROC::auc(pROC::roc(lsl$lslpts, fitted(fit))), 2)` -->
-0.83
-represents a good fit.
+0.82 represents a good fit.
 However, this is an overoptimistic estimation since we have computed it on the complete dataset. 
 To derive a biased-reduced assessment, we have to use cross-validation\index{cross-validation} and in the case of spatial data should make use of spatial CV\index{cross-validation!spatial CV}.
 
@@ -466,7 +469,7 @@ As expected, the spatially cross-validated result yields lower AUROC values on a
 ```{r boxplot-cv, echo=FALSE, fig.width=6, fig.height=9, fig.cap="Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation.", fig.scap="Boxplot showing AUROC values."}
 library(ggplot2)
 # extract the AUROC values and put them into one data.table
-d = purrr::map_dfr(agg$resample_result, ~ .$score(msr("classif.auc")))
+d = purrr::map_dfr(bm_agg$resample_result, ~ .$score(msr("classif.auc")))
 # rename the levels of resampling_id
 d[, resampling_id := as.factor(resampling_id) |>
     forcats::fct_recode("conventional CV" = "repeated_cv", 
