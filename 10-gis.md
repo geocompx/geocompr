@@ -314,6 +314,8 @@ dem_wetness = qgis_run_algorithm("saga:sagawetnessindex", DEM = dem)
 dem_wetness_twi = rast(unclass(dem_wetness$TWI))
 ```
 
+<!-- @jasiewicz_geomorphons_2013 -->
+
 
 ```r
 grep("geomorphon", qgis_algo$algorithm, value = TRUE)
