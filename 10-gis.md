@@ -280,6 +280,59 @@ The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver po
 
 ### Raster data
 
+
+```r
+library(qgisprocess)
+library(terra)
+dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
+```
+
+
+```r
+dem_slope = terrain(dem, unit = "radians")
+dem_aspect = terrain(dem, unit = "radians", v = "aspect")
+```
+
+
+```r
+qgis_algo = qgis_algorithms()
+grep("wetness", qgis_algo$algorithm, value = TRUE)
+```
+
+
+```r
+qgis_show_help("saga:sagawetnessindex")
+```
+
+
+```r
+dem_wetness = qgis_run_algorithm("saga:sagawetnessindex", DEM = dem)
+```
+
+
+```r
+dem_wetness_twi = rast(unclass(dem_wetness$TWI))
+```
+
+
+```r
+grep("geomorphon", qgis_algo$algorithm, value = TRUE)
+qgis_show_help("grass7:r.geomorphon")
+```
+
+
+```r
+dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon", elevation = dem, 
+                                    `-m` = TRUE, search = 120)
+```
+
+
+```r
+dem_geomorph_terra = qgis_as_terra(dem_geomorph$forms)
+```
+
+<img src="figures/10-qgis-raster-map.png" width="100%" style="display: block; margin: auto;" />
+
 ## Other GIS bridges
 
 ### (R)SAGA {#rsaga}

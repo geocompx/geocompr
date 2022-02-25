@@ -123,7 +123,13 @@ Such administrative zones can provide vital context to transport analysis, such 
 The geographic resolution of these zones is important: small zones with high geographic resolution are usually preferable but their high number in large regions can have consequences for processing (especially for origin-destination analysis in which the number of possibilities increases as a non-linear function of the number of zones) [@hollander_transport_2016].
 
 <div class="rmdnote">
-<p>Another issue with small zones is related to anonymity rules. To make it impossible to infer the identity of individuals in zones, detailed socio-demographic variables are often only available at a low geographic resolution. Breakdowns of travel mode by age and sex, for example, are available at the Local Authority level in the UK, but not at the much higher Output Area level, each of which contains around 100 households. For further details, see www.ons.gov.uk/methodology/geography.</p>
+<p>Another issue with small zones is related to anonymity rules. To make
+it impossible to infer the identity of individuals in zones, detailed
+socio-demographic variables are often only available at a low geographic
+resolution. Breakdowns of travel mode by age and sex, for example, are
+available at the Local Authority level in the UK, but not at the much
+higher Output Area level, each of which contains around 100 households.
+For further details, see www.ons.gov.uk/methodology/geography.</p>
 </div>
 
 The 102 zones used in this chapter are stored in `bristol_zones`, as illustrated in Figure \@ref(fig:zones).
