@@ -6,11 +6,15 @@ library(mlr3tuning)
 library(mlr3spatiotempcv)
 library(qgisprocess)
 library(raster)
+library(terra)
 library(sf)
 library(vegan)
 
 data("study_area", "random_points", "comm", "dem", "ndvi", 
      package = "spDataLarge")
+dem = rast(dem)
+ndvi = rast(ndvi)
+
 alg = "saga:sagawetnessindex"
 args = qgis_arguments(alg)
 qgis_show_help(alg)
@@ -21,20 +25,17 @@ ep = qgis_run_algorithm(alg = "saga:sagawetnessindex",
                         SLOPE = tempfile(fileext = ".sdat"),
                         AREA = tempfile(fileext = ".sdat"),
                         .quiet = TRUE)
-# do not use stack, since it won't read in the data and therefore won't change 
-# the origin
-ep = lapply(ep[c("AREA", "SLOPE")], `[`) |>
-  brick()
+ep = ep[c("AREA", "SLOPE")] |>
+  unlist() |>
+  terra::rast()
 # make sure all rasters share the same origin
 origin(ep) = origin(dem)
-ep = stack(dem, ndvi, ep) 
-ep$carea = log10(ep$carea)
-ep$carea = log10(ep$carea)
+ep = c(dem, ndvi, ep) 
 names(ep) = c("dem", "ndvi", "carea", "cslope")
 ep$carea = log10(ep$carea)
+random_points[, names(ep)] = 
+  terra::extract(ep, terra::vect(random_points))[, -1]
 
-data(ep, package = "spDataLarge")
-random_points[, names(ep)] = raster::extract(ep, random_points)
 # presence-absence matrix
 pa = decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
