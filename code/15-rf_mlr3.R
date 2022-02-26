@@ -10,10 +10,9 @@ library(terra)
 library(sf)
 library(vegan)
 
-data("study_area", "random_points", "comm", "dem", "ndvi", 
-     package = "spDataLarge")
-dem = rast(dem)
-ndvi = rast(ndvi)
+data("study_area", "random_points", "comm", package = "spDataLarge")
+dem = terra::rast(system.file("raster/dem.tif", package = "spDataLarge"))
+ndvi = terra::rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 
 alg = "saga:sagawetnessindex"
 args = qgis_arguments(alg)
@@ -25,6 +24,7 @@ ep = qgis_run_algorithm(alg = "saga:sagawetnessindex",
                         SLOPE = tempfile(fileext = ".sdat"),
                         AREA = tempfile(fileext = ".sdat"),
                         .quiet = TRUE)
+# read in catchment area and catchment slope
 ep = ep[c("AREA", "SLOPE")] |>
   unlist() |>
   terra::rast()
@@ -40,7 +40,7 @@ random_points[, names(ep)] =
 pa = decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
 pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
-nmds = readRDS("extdata/14-nmds.rds")
+nmds = readRDS("extdata/15-nmds.rds")
 
 elev = dplyr::filter(random_points, id %in% rownames(pa)) %>% 
   dplyr::pull(dem)
