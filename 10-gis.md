@@ -280,12 +280,18 @@ The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver po
 
 ### Raster data
 
+<!-- Explain our goal -->
+For this example, we will use `dem.tif` -- a digital elevation model\index{digital elevation model} of the Mongón study area <!--refs??-->.
+It has a resolution of about 30 by 30 meters and uses a projected CRS.
+
 
 ```r
 library(qgisprocess)
 library(terra)
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 ```
+
+The **terra** package's `terrain()` allows calculation of several fundamental topographic characteristics such as slope, aspect, TPI (*Topographic Position Index*), TRI (*Topographic Ruggedness Index*), roughness, and flow directions.
 
 
 ```r
@@ -298,6 +304,9 @@ dem_aspect = terrain(dem, unit = "radians", v = "aspect")
 qgis_algo = qgis_algorithms()
 grep("wetness", qgis_algo$algorithm, value = TRUE)
 ```
+
+Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here, particularly on digital elevation models\index{digital elevation model} (soil properties, terrain attributes, climate parameters). 
+Hence, SAGA is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets [@conrad_system_2015]. 
 
 
 ```r
@@ -343,8 +352,8 @@ The System for Automated Geoscientific Analyses (SAGA\index{SAGA}; Table \@ref(t
 In addition, there is a Python interface (SAGA Python API\index{API}).
 **RSAGA**\index{RSAGA (package)} uses the former to run SAGA\index{SAGA} from within R.
 
-Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here particularly on digital elevation models\index{digital elevation model} (soil properties, terrain attributes, climate parameters). 
-Hence, SAGA is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets [@conrad_system_2015]. 
+<!-- Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here particularly on digital elevation models\index{digital elevation model} (soil properties, terrain attributes, climate parameters).  -->
+<!-- Hence, SAGA is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets [@conrad_system_2015].  -->
 Therefore, we will introduce **RSAGA**\index{RSAGA (package)} with a raster use case from @muenchow_geomorphic_2012.
 Specifically, we would like to compute the SAGA wetness index from a digital elevation model.
 First of all, we need to make sure that **RSAGA** will find SAGA on the computer when called.
