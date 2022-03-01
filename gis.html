@@ -303,7 +303,7 @@ We can either read this file back into R with <code><a href="https://r-spatial.g
 This is <strong>not</strong> the same as <code>st_union(incongr_wgs, aggzone_wgs)</code> (see Exercises)!</p>
 <p>Our result, <code>union_sf</code>, is a multipolygon with a larger number of features than two input objects .
 Notice, however, that many of these polygons are small and do not represent real areas but are rather a result of our two datasets having a different level of detail.
-These artifacts of error are called sliver polygons (see red-colored polygons in the left panel of <a href="gis.html#fig:sliver">10.2</a>)
+These artifacts of error are called sliver polygons (see red-colored polygons in the left panel of Figure <a href="gis.html#fig:sliver">10.2</a>)
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m<sup>2</sup>, and next remove them.
 Let’s search for an appropriate algorithm.</p>
 <div class="sourceCode" id="cb346"><pre class="downlit sourceCode r">
@@ -347,21 +347,36 @@ It has a resolution of about 30 by 30 meters and uses a projected CRS.</p>
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">qgisprocess</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/terra/">terra</a></span><span class="op">)</span>
 <span class="va">dem</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/dem.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>The <strong>terra</strong> package’s <code><a href="https://rdrr.io/pkg/raster/man/terrain.html">terrain()</a></code> allows calculation of several fundamental topographic characteristics such as slope, aspect, TPI (<em>Topographic Position Index</em>), TRI (<em>Topographic Ruggedness Index</em>), roughness, and flow directions.</p>
+<p>The <strong>terra</strong> package’s <code><a href="https://rdrr.io/pkg/raster/man/terrain.html">terrain()</a></code> allows calculation of several fundamental topographic characteristics such as slope, aspect, TPI (<em>Topographic Position Index</em>), TRI (<em>Topographic Ruggedness Index</em>), roughness, and flow directions.
+<!--toDo:jn-->
+<!--refs?-->
+It allows selecting a terrain characteristic and, in the case of <code>"slope"</code> and <code>"aspect"</code>, the output unit.</p>
 <div class="sourceCode" id="cb350"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dem_slope</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/terrain.html">terrain</a></span><span class="op">(</span><span class="va">dem</span>, unit <span class="op">=</span> <span class="st">"radians"</span><span class="op">)</span>
-<span class="va">dem_aspect</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/terrain.html">terrain</a></span><span class="op">(</span><span class="va">dem</span>, unit <span class="op">=</span> <span class="st">"radians"</span>, v <span class="op">=</span> <span class="st">"aspect"</span><span class="op">)</span></code></pre></div>
+<span class="va">dem_aspect</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/terrain.html">terrain</a></span><span class="op">(</span><span class="va">dem</span>, v <span class="op">=</span> <span class="st">"aspect"</span>, unit <span class="op">=</span> <span class="st">"radians"</span><span class="op">)</span></code></pre></div>
+<p>That being said – many more topographic characteristics exist, which can be more suitable in some contexts.
+<!--toDo:jn-->
+<!-- for example... -->
+<!-- Topographic Wetness Index --></p>
 <div class="sourceCode" id="cb351"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">qgis_algo</span> <span class="op">=</span> <span class="fu">qgis_algorithms</span><span class="op">(</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grep</a></span><span class="op">(</span><span class="st">"wetness"</span>, <span class="va">qgis_algo</span><span class="op">$</span><span class="va">algorithm</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<p>Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here, particularly on digital elevation models (soil properties, terrain attributes, climate parameters).
-Hence, SAGA is especially good at the fast processing of large (high-resolution) raster datasets <span class="citation">(<a href="references.html#ref-conrad_system_2015" role="doc-biblioref">Conrad et al. 2015</a>)</span>.</p>
+<p>An output of the above code suggests that the algorithm we want exists in the SAGA GIS software.
+<!-- https://grass.osgeo.org/grass80/manuals/r.topidx.html -->
+Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here, particularly on digital elevation models (soil properties, terrain attributes, climate parameters).
+Hence, SAGA is especially good at the fast processing of large (high-resolution) raster datasets <span class="citation">(<a href="references.html#ref-conrad_system_2015" role="doc-biblioref">Conrad et al. 2015</a>)</span>.
+<!-- https://saga-gis.sourceforge.io/saga_tool_doc/2.2.2/ta_hydrology_15.html --></p>
 <div class="sourceCode" id="cb352"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">qgis_show_help</span><span class="op">(</span><span class="st">"saga:sagawetnessindex"</span><span class="op">)</span></code></pre></div>
+<p>This algorithm requires only one argument – the input <code>DEM</code> and several additional arguments.<a href="references.html#fn56" class="footnote-ref" id="fnref56"><sup>56</sup></a>
+It returns not one but four rasters – catchment area, catchment slope, modified catchment area, and topographic wetness index.</p>
 <div class="sourceCode" id="cb353"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dem_wetness</span> <span class="op">=</span> <span class="fu">qgis_run_algorithm</span><span class="op">(</span><span class="st">"saga:sagawetnessindex"</span>, DEM <span class="op">=</span> <span class="va">dem</span><span class="op">)</span></code></pre></div>
+<p>The result, <code>dem_wetness</code> is a list with file paths to the four outputs.
+We can read a selected output by providing an output name in the <code>qgis_as_terra()</code> function.</p>
 <div class="sourceCode" id="cb354"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">dem_wetness_twi</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html">unclass</a></span><span class="op">(</span><span class="va">dem_wetness</span><span class="op">$</span><span class="va">TWI</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">dem_wetness_twi</span> <span class="op">=</span> <span class="fu">qgis_as_terra</span><span class="op">(</span><span class="va">dem_wetness</span><span class="op">$</span><span class="va">TWI</span><span class="op">)</span></code></pre></div>
+<!-- The result shows (the left panel of Figure \@ref(fig:qgis-raster-map). -->
 <!-- @jasiewicz_geomorphons_2013 -->
 <div class="sourceCode" id="cb355"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grep</a></span><span class="op">(</span><span class="st">"geomorphon"</span>, <span class="va">qgis_algo</span><span class="op">$</span><span class="va">algorithm</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
@@ -673,7 +688,7 @@ In the example below <code>ogrinfo</code> provides metadata on a vector dataset:
 <span class="co">#&gt; Layer SRS WKT:</span>
 <span class="co">#&gt; ...</span></code></pre></div>
 <p>This example — which returns the same result as <code><a href="http://rgdal.r-forge.r-project.org/reference/readOGR.html">rgdal::ogrInfo()</a></code> — may be simple, but it shows how to use GDAL via the system command-line, independently of other packages.
-The ‘link’ to GDAL provided by <strong>link2gi</strong> could be used as a foundation for doing more advanced GDAL work from the R or system CLI.<a href="references.html#fn56" class="footnote-ref" id="fnref56"><sup>56</sup></a>
+The ‘link’ to GDAL provided by <strong>link2gi</strong> could be used as a foundation for doing more advanced GDAL work from the R or system CLI.<a href="references.html#fn57" class="footnote-ref" id="fnref57"><sup>57</sup></a>
 TauDEM (<a href="http://hydrology.usu.edu/taudem/taudem5/index.html" class="uri">http://hydrology.usu.edu/taudem/taudem5/index.html</a>) and the Orfeo Toolbox (<a href="https://www.orfeo-toolbox.org/" class="uri">https://www.orfeo-toolbox.org/</a>) are other spatial data processing libraries/programs offering a command line interface.
 At the time of writing, it appears that there is only a developer version of an R/TauDEM interface on R-Forge (<a href="https://r-forge.r-project.org/R/?group_id=956" class="uri">https://r-forge.r-project.org/R/?group_id=956</a>).
 In any case, the above example shows how to access these libraries from the system command line via R.
@@ -690,10 +705,10 @@ Spatial database management systems (spatial DBMS) store spatial and non-spatial
 They can organize large collections of data into related tables (entities) via unique identifiers (primary and foreign keys) and implicitly via space (think for instance of a spatial join).
 This is useful because geographic datasets tend to become big and messy quite quickly.
 Databases enable storing and querying large datasets efficiently based on spatial and non-spatial fields, and provide multi-user access and topology support.</p>
-<p>The most important open source spatial database is PostGIS <span class="citation">(<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">Obe and Hsu 2015</a>)</span>.<a href="references.html#fn57" class="footnote-ref" id="fnref57"><sup>57</sup></a>
+<p>The most important open source spatial database is PostGIS <span class="citation">(<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">Obe and Hsu 2015</a>)</span>.<a href="references.html#fn58" class="footnote-ref" id="fnref58"><sup>58</sup></a>
 R bridges to spatial DBMSs such as PostGIS are important, allowing access to huge data stores without loading several gigabytes of geographic data into RAM, and likely crashing the R session.
-The remainder of this section shows how PostGIS can be called from R, based on “Hello real word” from <em>PostGIS in Action, Second Edition</em> <span class="citation">(<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">Obe and Hsu 2015</a>)</span>.<a href="references.html#fn58" class="footnote-ref" id="fnref58"><sup>58</sup></a></p>
-<p>The subsequent code requires a working internet connection, since we are accessing a PostgreSQL/PostGIS database which is living in the QGIS Cloud (<a href="https://qgiscloud.com/" class="uri">https://qgiscloud.com/</a>).<a href="references.html#fn59" class="footnote-ref" id="fnref59"><sup>59</sup></a></p>
+The remainder of this section shows how PostGIS can be called from R, based on “Hello real word” from <em>PostGIS in Action, Second Edition</em> <span class="citation">(<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">Obe and Hsu 2015</a>)</span>.<a href="references.html#fn59" class="footnote-ref" id="fnref59"><sup>59</sup></a></p>
+<p>The subsequent code requires a working internet connection, since we are accessing a PostgreSQL/PostGIS database which is living in the QGIS Cloud (<a href="https://qgiscloud.com/" class="uri">https://qgiscloud.com/</a>).<a href="references.html#fn60" class="footnote-ref" id="fnref60"><sup>60</sup></a></p>
 <div class="sourceCode" id="cb378"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tomoakin/RPostgreSQL">RPostgreSQL</a></span><span class="op">)</span>
 <span class="va">conn</span> <span class="op">=</span> <span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html">dbConnect</a></span><span class="op">(</span>drv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/RPostgreSQL/man/PostgreSQL.html">PostgreSQL</a></span><span class="op">(</span><span class="op">)</span>, dbname <span class="op">=</span> <span class="st">"rtafdf_zljbqm"</span>,
@@ -731,7 +746,7 @@ The next step is to add a 20-mile buffer (corresponds to 1609 meters times 20) a
   <span class="st">"WHERE name = 'US Route 1' AND state = 'MD';"</span><span class="op">)</span>
 <span class="va">buf</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span><span class="op">)</span></code></pre></div>
 <p>Note that this was a spatial query using functions (<code>ST_Union()</code>, <code>ST_Buffer()</code>) you should be already familiar with since you find them also in the <strong>sf</strong>-package, though here they are written in lowercase characters (<code><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union()</a></code>, <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>).
-In fact, function names of the <strong>sf</strong> package largely follow the PostGIS naming conventions.<a href="references.html#fn60" class="footnote-ref" id="fnref60"><sup>60</sup></a>
+In fact, function names of the <strong>sf</strong> package largely follow the PostGIS naming conventions.<a href="references.html#fn61" class="footnote-ref" id="fnref61"><sup>61</sup></a>
 The last query will find all Hardee restaurants (<code>HDE</code>) within the buffer zone (Figure <a href="gis.html#fig:postgis">10.5</a>).</p>
 <div class="sourceCode" id="cb383"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span>
@@ -748,7 +763,7 @@ The last query will find all Hardee restaurants (<code>HDE</code>) within the bu
 <span class="op">)</span>
 <span class="va">hardees</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span><span class="op">)</span></code></pre></div>
 <p>Please refer to <span class="citation">Obe and Hsu (<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">2015</a>)</span> for a detailed explanation of the spatial SQL query.
-Finally, it is good practice to close the database connection as follows:<a href="references.html#fn61" class="footnote-ref" id="fnref61"><sup>61</sup></a></p>
+Finally, it is good practice to close the database connection as follows:<a href="references.html#fn62" class="footnote-ref" id="fnref62"><sup>62</sup></a></p>
 <div class="sourceCode" id="cb384"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RPostgreSQL/man/postgresqlSupport.html">postgresqlCloseConnection</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt; old-style crs object detected; please recreate object with a recent sf::st_crs()
@@ -853,7 +868,7 @@ Additionally, give <code>mapview</code> a try.</p></li>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-02-28.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-03-01.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

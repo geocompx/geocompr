@@ -231,7 +231,7 @@ This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)
 
 Our result, `union_sf`, is a multipolygon with a larger number of features than two input objects .
 Notice, however, that many of these polygons are small and do not represent real areas but are rather a result of our two datasets having a different level of detail.
-These artifacts of error are called sliver polygons (see red-colored polygons in the left panel of \@ref(fig:sliver))
+These artifacts of error are called sliver polygons (see red-colored polygons in the left panel of Figure \@ref(fig:sliver))
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^, and next remove them.
 Let's search for an appropriate algorithm.
 
@@ -292,12 +292,20 @@ dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 ```
 
 The **terra** package's `terrain()` allows calculation of several fundamental topographic characteristics such as slope, aspect, TPI (*Topographic Position Index*), TRI (*Topographic Ruggedness Index*), roughness, and flow directions.
+<!--toDo:jn-->
+<!--refs?-->
+It allows selecting a terrain characteristic and, in the case of `"slope"` and `"aspect"`, the output unit.
 
 
 ```r
 dem_slope = terrain(dem, unit = "radians")
-dem_aspect = terrain(dem, unit = "radians", v = "aspect")
+dem_aspect = terrain(dem, v = "aspect", unit = "radians")
 ```
+
+That being said -- many more topographic characteristics exist, which can be more suitable in some contexts.
+<!--toDo:jn-->
+<!-- for example... -->
+<!-- Topographic Wetness Index -->
 
 
 ```r
@@ -305,23 +313,34 @@ qgis_algo = qgis_algorithms()
 grep("wetness", qgis_algo$algorithm, value = TRUE)
 ```
 
+An output of the above code suggests that the algorithm we want exists in the SAGA GIS software.
+<!-- https://grass.osgeo.org/grass80/manuals/r.topidx.html -->
 Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here, particularly on digital elevation models\index{digital elevation model} (soil properties, terrain attributes, climate parameters). 
 Hence, SAGA is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets [@conrad_system_2015]. 
+<!-- https://saga-gis.sourceforge.io/saga_tool_doc/2.2.2/ta_hydrology_15.html -->
 
 
 ```r
 qgis_show_help("saga:sagawetnessindex")
 ```
 
+This algorithm requires only one argument -- the input `DEM` and several additional arguments.^[The additional arguments of `"saga:sagawetnessindex"` are well-explained at https://gis.stackexchange.com/a/323454/20955.]
+It returns not one but four rasters -- catchment area, catchment slope, modified catchment area, and topographic wetness index.
+
 
 ```r
 dem_wetness = qgis_run_algorithm("saga:sagawetnessindex", DEM = dem)
 ```
 
+The result, `dem_wetness` is a list with file paths to the four outputs.
+We can read a selected output by providing an output name in the `qgis_as_terra()` function.
+
 
 ```r
-dem_wetness_twi = rast(unclass(dem_wetness$TWI))
+dem_wetness_twi = qgis_as_terra(dem_wetness$TWI)
 ```
+
+<!-- The result shows (the left panel of Figure \@ref(fig:qgis-raster-map). -->
 
 <!-- @jasiewicz_geomorphons_2013 -->
 
