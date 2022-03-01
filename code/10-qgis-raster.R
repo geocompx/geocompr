@@ -15,10 +15,10 @@ qgis_show_help("saga:sagawetnessindex")
 dem_wetness = qgis_run_algorithm("saga:sagawetnessindex", 
                                   DEM = dem)
 
-dem_wetness_1 = rast(unclass(dem_wetness$AREA))
-dem_wetness_2 = rast(unclass(dem_wetness$AREA_MOD))
-dem_wetness_3 = rast(unclass(dem_wetness$SLOPE))
-dem_wetness_4 = rast(unclass(dem_wetness$TWI))
+dem_wetness_1 = qgis_as_terra(dem_wetness$AREA)
+dem_wetness_2 = qgis_as_terra(dem_wetness$AREA_MOD)
+dem_wetness_3 = qgis_as_terra(dem_wetness$SLOPE)
+dem_wetness_4 = qgis_as_terra(dem_wetness$TWI)
 
 # plot(dem_wetness_1)
 # plot(dem_wetness_2)
