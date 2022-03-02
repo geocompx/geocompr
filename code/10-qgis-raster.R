@@ -1,5 +1,6 @@
 library(qgisprocess)
 library(terra)
+library(tmap)
 
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 
@@ -62,7 +63,7 @@ tm2 = tm_shape(dem_hillshade) +
   tm_raster(alpha = 0.5,
             title = "",
             drop.levels = TRUE,
-            labels = levels(dem_geomorphon)[[1]]) + # ERROR??
+            labels = levels(dem_geomorph_terra)[[1]]) + # ERROR??
   tm_layout(inner.margins = c(0, 0, 0, 0.22),
             legend.position = c("RIGHT", "top"),
             frame = FALSE,
