@@ -377,16 +377,30 @@ We can read a selected output by providing an output name in the <code>qgis_as_t
 <div class="sourceCode" id="cb354"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dem_wetness_twi</span> <span class="op">=</span> <span class="fu">qgis_as_terra</span><span class="op">(</span><span class="va">dem_wetness</span><span class="op">$</span><span class="va">TWI</span><span class="op">)</span></code></pre></div>
 <!-- The result shows (the left panel of Figure \@ref(fig:qgis-raster-map). -->
-<!-- @jasiewicz_geomorphons_2013 -->
+<p>Information from digital elevation models can also be categorized, for example, to geomorphons <span class="citation">(<a href="references.html#ref-jasiewicz_geomorphons_2013" role="doc-biblioref">Jasiewicz and Stepinski 2013</a>)</span>.
+Geomorphons represent terrain forms, such as slopes, ridges, or valleys.
+<!-- used for what?? --></p>
+<p>The original implementation of geomorphons’ algorithm exists in GRASS GIS.
+We can find it in the list of algorithms available through <strong>qgisprocess</strong> as <code>"grass7:r.geomorphon"</code>.</p>
 <div class="sourceCode" id="cb355"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grep</a></span><span class="op">(</span><span class="st">"geomorphon"</span>, <span class="va">qgis_algo</span><span class="op">$</span><span class="va">algorithm</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="fu">qgis_show_help</span><span class="op">(</span><span class="st">"grass7:r.geomorphon"</span><span class="op">)</span></code></pre></div>
+<p>Calculation of geomorphons requires an input DEM (<code>elevation</code>), and can be customized with a set of optional arguments.
+It includes, <code>search</code> – a length for which the line-of-sight is calculated, and <code>-m</code> – a flag specifying that the search value will be provided in meters (and not the number of cells).
+More information about additional arguments can be found in the original paper and the <a href="https://grass.osgeo.org/grass78/manuals/r.geomorphon.html">GRASS GIS documentation</a>.</p>
 <div class="sourceCode" id="cb356"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dem_geomorph</span> <span class="op">=</span> <span class="fu">qgis_run_algorithm</span><span class="op">(</span><span class="st">"grass7:r.geomorphon"</span>, elevation <span class="op">=</span> <span class="va">dem</span>, 
                                     `-m` <span class="op">=</span> <span class="cn">TRUE</span>, search <span class="op">=</span> <span class="fl">120</span><span class="op">)</span></code></pre></div>
+<p>Our output <code>dem_geomorph$forms</code> contains a raster file with 10 categories – each one representing a terrain form.
+We can read it into R with <code>qgis_as_terra()</code>, and then we are able to visualize it (the right panel of Figure <a href="gis.html#fig:qgis-raster-map">10.3</a>) or use it for our subsequent calculations.</p>
 <div class="sourceCode" id="cb357"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dem_geomorph_terra</span> <span class="op">=</span> <span class="fu">qgis_as_terra</span><span class="op">(</span><span class="va">dem_geomorph</span><span class="op">$</span><span class="va">forms</span><span class="op">)</span></code></pre></div>
-<div class="inline-figure"><img src="figures/10-qgis-raster-map.png" width="100%" style="display: block; margin: auto;"></div>
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:qgis-raster-map"></span>
+<img src="figures/10-qgis-raster-map.png" alt="Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mongón study area." width="100%"><p class="caption">
+FIGURE 10.3: Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mongón study area.
+</p>
+</div>
 </div>
 </div>
 <div id="other-gis-bridges" class="section level2" number="10.3">
@@ -452,7 +466,7 @@ So the function call for calculating the ‘SAGA Wetness Index’ becomes:</p>
 <div class="sourceCode" id="cb365"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/RSAGA/man/rsaga.wetness.index.html">rsaga.wetness.index</a></span><span class="op">(</span>in.dem <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"dem"</span><span class="op">)</span>, 
                     out.wetness.index <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"twi"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>Of course, we would like to inspect our result visually (Figure <a href="gis.html#fig:saga-twi">10.3</a>).
+<p>Of course, we would like to inspect our result visually (Figure <a href="gis.html#fig:saga-twi">10.4</a>).
 To load and plot the SAGA output file, we use the <strong>raster</strong> package.</p>
 <div class="sourceCode" id="cb366"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/raster">raster</a></span><span class="op">)</span>
@@ -462,7 +476,7 @@ To load and plot the SAGA output file, we use the <strong>raster</strong> packag
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:saga-twi"></span>
 <img src="figures/09_twi.png" alt="SAGA wetness index of Mount Mongón, Peru." width="50%"><p class="caption">
-FIGURE 10.3: SAGA wetness index of Mount Mongón, Peru.
+FIGURE 10.4: SAGA wetness index of Mount Mongón, Peru.
 </p>
 </div>
 <p>You can find an extended version of this example in <code>vignette("RSAGA-landslides")</code> which includes the use of statistical geocomputing to derive terrain attributes as predictors for a non-linear Generalized Additive Model (GAM) to predict spatially landslide susceptibility <span class="citation">(<a href="references.html#ref-muenchow_geomorphic_2012" role="doc-biblioref">Muenchow, Brenning, and Richter 2012</a>)</span>.
@@ -595,11 +609,11 @@ To access the GRASS help page of the traveling salesman algorithm, run <code>exe
 <code class="sourceCode R"><span class="fu"><a href="https://rsbivand.github.io/rgrass/reference/execGRASS.html">execGRASS</a></span><span class="op">(</span>cmd <span class="op">=</span> <span class="st">"v.net.salesman"</span>, input <span class="op">=</span> <span class="st">"streets_points_con"</span>,
           output <span class="op">=</span> <span class="st">"shortest_route"</span>, center_cats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"1-"</span>, <span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">points</span><span class="op">)</span><span class="op">)</span>,
           flags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"overwrite"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>To visualize our result, we import the output layer into R, convert it into an sf-object keeping only the geometry, and visualize it with the help of the <strong>mapview</strong> package (Figure <a href="gis.html#fig:grass-mapview">10.4</a> and Section <a href="adv-map.html#interactive-maps">9.4</a>).</p>
+<p>To visualize our result, we import the output layer into R, convert it into an sf-object keeping only the geometry, and visualize it with the help of the <strong>mapview</strong> package (Figure <a href="gis.html#fig:grass-mapview">10.5</a> and Section <a href="adv-map.html#interactive-maps">9.4</a>).</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:grass-mapview"></span>
 <img src="figures/09_shortest_route.png" alt="Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London." width="80%"><p class="caption">
-FIGURE 10.4: Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London.
+FIGURE 10.5: Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London.
 </p>
 </div>
 <div class="sourceCode" id="cb376"><pre class="downlit sourceCode r">
@@ -738,7 +752,7 @@ Additionally, <code><a href="https://r-spatial.github.io/sf/reference/st_read.ht
   <span class="st">"WHERE name = 'US Route 1' AND state = 'MD';"</span><span class="op">)</span>
 <span class="va">us_route</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span>, geom <span class="op">=</span> <span class="st">"wkb_geometry"</span><span class="op">)</span></code></pre></div>
 <p>This results in an <strong>sf</strong>-object named <code>us_route</code> of type <code>sfc_MULTILINESTRING</code>.
-The next step is to add a 20-mile buffer (corresponds to 1609 meters times 20) around the selected highway (Figure <a href="gis.html#fig:postgis">10.5</a>).</p>
+The next step is to add a 20-mile buffer (corresponds to 1609 meters times 20) around the selected highway (Figure <a href="gis.html#fig:postgis">10.6</a>).</p>
 <div class="sourceCode" id="cb382"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span>
   <span class="st">"SELECT ST_Union(ST_Buffer(wkb_geometry, 1609 * 20))::geometry"</span>,
@@ -747,7 +761,7 @@ The next step is to add a 20-mile buffer (corresponds to 1609 meters times 20) a
 <span class="va">buf</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span><span class="op">)</span></code></pre></div>
 <p>Note that this was a spatial query using functions (<code>ST_Union()</code>, <code>ST_Buffer()</code>) you should be already familiar with since you find them also in the <strong>sf</strong>-package, though here they are written in lowercase characters (<code><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union()</a></code>, <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>).
 In fact, function names of the <strong>sf</strong> package largely follow the PostGIS naming conventions.<a href="references.html#fn61" class="footnote-ref" id="fnref61"><sup>61</sup></a>
-The last query will find all Hardee restaurants (<code>HDE</code>) within the buffer zone (Figure <a href="gis.html#fig:postgis">10.5</a>).</p>
+The last query will find all Hardee restaurants (<code>HDE</code>) within the buffer zone (Figure <a href="gis.html#fig:postgis">10.6</a>).</p>
 <div class="sourceCode" id="cb383"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span>
   <span class="st">"SELECT r.wkb_geometry"</span>,
@@ -771,7 +785,7 @@ Finally, it is good practice to close the database connection as follows:<a href
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:postgis"></span>
 <img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer." width="60%"><p class="caption">
-FIGURE 10.5: Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer.
+FIGURE 10.6: Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer.
 </p>
 </div>
 <p>Unlike PostGIS, <strong>sf</strong> only supports spatial vector data.

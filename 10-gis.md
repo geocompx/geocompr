@@ -342,7 +342,12 @@ dem_wetness_twi = qgis_as_terra(dem_wetness$TWI)
 
 <!-- The result shows (the left panel of Figure \@ref(fig:qgis-raster-map). -->
 
-<!-- @jasiewicz_geomorphons_2013 -->
+Information from digital elevation models can also be categorized, for example, to geomorphons [@jasiewicz_geomorphons_2013].
+Geomorphons represent terrain forms, such as slopes, ridges, or valleys.
+<!-- used for what?? -->
+
+The original implementation of geomorphons' algorithm exists in GRASS GIS.
+We can find it in the list of algorithms available through **qgisprocess** as `"grass7:r.geomorphon"`.
 
 
 ```r
@@ -350,18 +355,28 @@ grep("geomorphon", qgis_algo$algorithm, value = TRUE)
 qgis_show_help("grass7:r.geomorphon")
 ```
 
+Calculation of geomorphons requires an input DEM (`elevation`), and can be customized with a set of optional arguments.
+It includes, `search` -- a length for which the line-of-sight is calculated, and ``-m`` -- a flag specifying that the search value will be provided in meters (and not the number of cells).
+More information about additional arguments can be found in the original paper and the [GRASS GIS documentation](https://grass.osgeo.org/grass78/manuals/r.geomorphon.html).
+
 
 ```r
 dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon", elevation = dem, 
                                     `-m` = TRUE, search = 120)
 ```
 
+Our output `dem_geomorph$forms` contains a raster file with 10 categories -- each one representing a terrain form.
+We can read it into R with `qgis_as_terra()`, and then we are able to visualize it (the right panel of Figure \@ref(fig:qgis-raster-map)) or use it for our subsequent calculations.
+
 
 ```r
 dem_geomorph_terra = qgis_as_terra(dem_geomorph$forms)
 ```
 
-<img src="figures/10-qgis-raster-map.png" width="100%" style="display: block; margin: auto;" />
+<div class="figure" style="text-align: center">
+<img src="figures/10-qgis-raster-map.png" alt="Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mongón study area." width="100%" />
+<p class="caption">(\#fig:qgis-raster-map)Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mongón study area.</p>
+</div>
 
 ## Other GIS bridges
 
