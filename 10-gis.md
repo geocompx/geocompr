@@ -148,11 +148,10 @@ The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `
 
 We are now ready for some QGIS geocomputation from within R!
 Let's try two example case studies.
-The first one shows how to unite polygons\index{union}.
-<!--toDo:jn-->
-<!-- add a second one later -->
+The first one shows how to unite two polygonal datasets with different borders\index{union} (Section \@ref(qgis-vector)).
+The second one focuses on deriving new information from a digital elevation model represented as a raster (Section \@ref(qgis-raster)).
 
-### Vector data
+### Vector data {#qgis-vector}
 
 Consider a situation when you have two polygon objects with different spatial units (e.g., regions, administrative units).
 Our goal is to merge these two objects into one, containing all of the boundary lines and related attributes.
@@ -278,10 +277,14 @@ The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver po
 <p class="caption">(\#fig:sliver)Sliver polygons colored in red (left panel). Cleaned polygons (right panel).</p>
 </div>
 
-### Raster data
+### Raster data {#qgis-raster}
 
-<!-- Explain our goal -->
-For this example, we will use `dem.tif` -- a digital elevation model\index{digital elevation model} of the Mongón study area <!--refs??-->.
+Digital elevation models (DEMs) contain elevation information for each raster cell.
+They are applied for many purposes, including satellite navigation, water flow models, surface analysis, or visualization.
+Here, we are interested in deriving new information from a DEM raster that could be used as predictors in statistical learning.
+Various terrain parameters, for example, can be helpful for the prediction of landslides (see Chapter \@ref(spatial-cv))
+
+For this section, we will use `dem.tif` -- a digital elevation model\index{digital elevation model} of the Mongón study area <!--refs??-->.
 It has a resolution of about 30 by 30 meters and uses a projected CRS.
 
 
@@ -292,9 +295,7 @@ dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 ```
 
 The **terra** package's `terrain()` allows calculation of several fundamental topographic characteristics such as slope, aspect, TPI (*Topographic Position Index*), TRI (*Topographic Ruggedness Index*), roughness, and flow directions.
-<!--toDo:jn-->
-<!--refs?-->
-It allows selecting a terrain characteristic and, in the case of `"slope"` and `"aspect"`, the output unit.
+This function allows choosing a terrain characteristic (`v`) and, in the case of `"slope"` and `"aspect"`, the output unit.
 
 
 ```r
@@ -302,10 +303,11 @@ dem_slope = terrain(dem, unit = "radians")
 dem_aspect = terrain(dem, v = "aspect", unit = "radians")
 ```
 
-That being said -- many more topographic characteristics exist, which can be more suitable in some contexts.
-<!--toDo:jn-->
-<!-- for example... -->
-<!-- Topographic Wetness Index -->
+It returns a new raster object with the same dimensions as the original one but with new values representing a selected terrain characteristic.
+
+That being said -- many more terrain characteristics exist, some of which can be more suitable in certain contexts.
+For example, the topographic wetness index (TWI) was found useful in studying hydrological and biological processes [@sorensen_calculation_2006].
+Let's search the algorithm list for this index using a `"wetness"` keyword.
 
 
 ```r
@@ -313,11 +315,11 @@ qgis_algo = qgis_algorithms()
 grep("wetness", qgis_algo$algorithm, value = TRUE)
 ```
 
-An output of the above code suggests that the algorithm we want exists in the SAGA GIS software.
-<!-- https://grass.osgeo.org/grass80/manuals/r.topidx.html -->
+An output of the above code suggests that the desired algorithm exists in the SAGA GIS software.^[TWI can be also calculated using the `r.topidx` GRASS GIS function.]
 Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here, particularly on digital elevation models\index{digital elevation model} (soil properties, terrain attributes, climate parameters). 
-Hence, SAGA is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets [@conrad_system_2015]. 
-<!-- https://saga-gis.sourceforge.io/saga_tool_doc/2.2.2/ta_hydrology_15.html -->
+Hence, SAGA is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets [@conrad_system_2015].
+
+The `"saga:sagawetnessindex"` algorithm is actually a modified TWI, that results in a more realistic soil moisture potential for the cells located in valley floors [@bohner_spatial_2006].
 
 
 ```r
@@ -332,7 +334,7 @@ It returns not one but four rasters -- catchment area, catchment slope, modified
 dem_wetness = qgis_run_algorithm("saga:sagawetnessindex", DEM = dem)
 ```
 
-The result, `dem_wetness` is a list with file paths to the four outputs.
+The result, `dem_wetness`, is a list with file paths to the four outputs.
 We can read a selected output by providing an output name in the `qgis_as_terra()` function.
 
 
@@ -340,7 +342,9 @@ We can read a selected output by providing an output name in the `qgis_as_terra(
 dem_wetness_twi = qgis_as_terra(dem_wetness$TWI)
 ```
 
-<!-- The result shows (the left panel of Figure \@ref(fig:qgis-raster-map). -->
+You can see the output TWI map on the left panel of Figure \@ref(fig:qgis-raster-map).
+The topographic wetness index is unitless.
+Its low values represent areas that will not accumulate water, while higher values show areas that will accumulate water at increasing levels.
 
 Information from digital elevation models can also be categorized, for example, to geomorphons [@jasiewicz_geomorphons_2013].
 Geomorphons represent terrain forms, such as slopes, ridges, or valleys.
