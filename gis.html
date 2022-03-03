@@ -392,7 +392,7 @@ More information about additional arguments can be found in the original paper a
 <code class="sourceCode R"><span class="va">dem_geomorph</span> <span class="op">=</span> <span class="fu">qgis_run_algorithm</span><span class="op">(</span><span class="st">"grass7:r.geomorphon"</span>, elevation <span class="op">=</span> <span class="va">dem</span>, 
                                     `-m` <span class="op">=</span> <span class="cn">TRUE</span>, search <span class="op">=</span> <span class="fl">120</span><span class="op">)</span></code></pre></div>
 <p>Our output <code>dem_geomorph$forms</code> contains a raster file with 10 categories – each one representing a terrain form.
-We can read it into R with <code>qgis_as_terra()</code>, and then we are able to visualize it (the right panel of Figure <a href="gis.html#fig:qgis-raster-map">10.3</a>) or use it for our subsequent calculations.</p>
+We can read it into R with <code>qgis_as_terra()</code>, and then visualize it (the right panel of Figure <a href="gis.html#fig:qgis-raster-map">10.3</a>) or use it for our subsequent calculations.</p>
 <div class="sourceCode" id="cb357"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dem_geomorph_terra</span> <span class="op">=</span> <span class="fu">qgis_as_terra</span><span class="op">(</span><span class="va">dem_geomorph</span><span class="op">$</span><span class="va">forms</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -743,14 +743,14 @@ To find out about attributes available in a table, we can run:</p>
 <span class="co">#&gt; [1] "qc_id"        "wkb_geometry" "gid"          "feature"     </span>
 <span class="co">#&gt; [5] "name"         "state"   </span></code></pre></div>
 <p>The first query will select <code>US Route 1</code> in Maryland (<code>MD</code>).
-Note that <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code> allows us to read geographic data from a database if it is provided with an open connection to a database and a query.
-Additionally, <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code> needs to know which column represents the geometry (here: <code>wkb_geometry</code>).</p>
+Note that <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> allows us to read geographic data from a database if it is provided with an open connection to a database and a query.
+Additionally, <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> needs to know which column represents the geometry (here: <code>wkb_geometry</code>).</p>
 <div class="sourceCode" id="cb381"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span>
   <span class="st">"SELECT *"</span>,
   <span class="st">"FROM highways"</span>,
   <span class="st">"WHERE name = 'US Route 1' AND state = 'MD';"</span><span class="op">)</span>
-<span class="va">us_route</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span>, geom <span class="op">=</span> <span class="st">"wkb_geometry"</span><span class="op">)</span></code></pre></div>
+<span class="va">us_route</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span>, geom <span class="op">=</span> <span class="st">"wkb_geometry"</span><span class="op">)</span></code></pre></div>
 <p>This results in an <strong>sf</strong>-object named <code>us_route</code> of type <code>sfc_MULTILINESTRING</code>.
 The next step is to add a 20-mile buffer (corresponds to 1609 meters times 20) around the selected highway (Figure <a href="gis.html#fig:postgis">10.6</a>).</p>
 <div class="sourceCode" id="cb382"><pre class="downlit sourceCode r">
@@ -758,7 +758,7 @@ The next step is to add a 20-mile buffer (corresponds to 1609 meters times 20) a
   <span class="st">"SELECT ST_Union(ST_Buffer(wkb_geometry, 1609 * 20))::geometry"</span>,
   <span class="st">"FROM highways"</span>,
   <span class="st">"WHERE name = 'US Route 1' AND state = 'MD';"</span><span class="op">)</span>
-<span class="va">buf</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span><span class="op">)</span></code></pre></div>
+<span class="va">buf</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span><span class="op">)</span></code></pre></div>
 <p>Note that this was a spatial query using functions (<code>ST_Union()</code>, <code>ST_Buffer()</code>) you should be already familiar with since you find them also in the <strong>sf</strong>-package, though here they are written in lowercase characters (<code><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union()</a></code>, <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>).
 In fact, function names of the <strong>sf</strong> package largely follow the PostGIS naming conventions.<a href="references.html#fn61" class="footnote-ref" id="fnref61"><sup>61</sup></a>
 The last query will find all Hardee restaurants (<code>HDE</code>) within the buffer zone (Figure <a href="gis.html#fig:postgis">10.6</a>).</p>
@@ -775,13 +775,11 @@ The last query will find all Hardee restaurants (<code>HDE</code>) within the bu
   <span class="st">"state = 'MD' AND"</span>,
   <span class="st">"r.franchise = 'HDE');"</span>
 <span class="op">)</span>
-<span class="va">hardees</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span><span class="op">)</span></code></pre></div>
+<span class="va">hardees</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span><span class="op">)</span></code></pre></div>
 <p>Please refer to <span class="citation">Obe and Hsu (<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">2015</a>)</span> for a detailed explanation of the spatial SQL query.
 Finally, it is good practice to close the database connection as follows:<a href="references.html#fn62" class="footnote-ref" id="fnref62"><sup>62</sup></a></p>
 <div class="sourceCode" id="cb384"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RPostgreSQL/man/postgresqlSupport.html">postgresqlCloseConnection</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt; old-style crs object detected; please recreate object with a recent sf::st_crs()
-#&gt; old-style crs object detected; please recreate object with a recent sf::st_crs()</code></pre>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:postgis"></span>
 <img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer." width="60%"><p class="caption">
@@ -883,7 +881,7 @@ Additionally, give <code>mapview</code> a try.</p></li>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-03-02.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-03-03.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

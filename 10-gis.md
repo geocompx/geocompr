@@ -366,7 +366,7 @@ dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon", elevation = dem,
 ```
 
 Our output `dem_geomorph$forms` contains a raster file with 10 categories -- each one representing a terrain form.
-We can read it into R with `qgis_as_terra()`, and then we are able to visualize it (the right panel of Figure \@ref(fig:qgis-raster-map)) or use it for our subsequent calculations.
+We can read it into R with `qgis_as_terra()`, and then visualize it (the right panel of Figure \@ref(fig:qgis-raster-map)) or use it for our subsequent calculations.
 
 
 ```r
@@ -819,8 +819,8 @@ dbListFields(conn, "highways")
 ```
 
 The first query will select `US Route 1` in Maryland (`MD`).
-Note that `st_read()` allows us to read geographic data from a database if it is provided with an open connection to a database and a query.
-Additionally, `st_read()` needs to know which column represents the geometry (here: `wkb_geometry`).
+Note that `read_sf()` allows us to read geographic data from a database if it is provided with an open connection to a database and a query.
+Additionally, `read_sf()` needs to know which column represents the geometry (here: `wkb_geometry`).
 
 
 ```r
@@ -828,7 +828,7 @@ query = paste(
   "SELECT *",
   "FROM highways",
   "WHERE name = 'US Route 1' AND state = 'MD';")
-us_route = st_read(conn, query = query, geom = "wkb_geometry")
+us_route = read_sf(conn, query = query, geom = "wkb_geometry")
 ```
 
 This results in an **sf**-object\index{sf} named `us_route` of type `sfc_MULTILINESTRING`.
@@ -840,7 +840,7 @@ query = paste(
   "SELECT ST_Union(ST_Buffer(wkb_geometry, 1609 * 20))::geometry",
   "FROM highways",
   "WHERE name = 'US Route 1' AND state = 'MD';")
-buf = st_read(conn, query = query)
+buf = read_sf(conn, query = query)
 ```
 
 Note that this was a spatial query using functions (`ST_Union()`\index{vector!union}, `ST_Buffer()`\index{vector!buffers}) you should be already familiar with since you find them also in the **sf**-package, though here they are written in lowercase characters (`st_union()`, `st_buffer()`).
@@ -863,7 +863,7 @@ query = paste(
   "state = 'MD' AND",
   "r.franchise = 'HDE');"
 )
-hardees = st_read(conn, query = query)
+hardees = read_sf(conn, query = query)
 ```
 
 Please refer to @obe_postgis_2015 for a detailed explanation of the spatial SQL query.
@@ -877,12 +877,6 @@ RPostgreSQL::postgresqlCloseConnection(conn)
 ```
 
 
-
-
-```
-#> old-style crs object detected; please recreate object with a recent sf::st_crs()
-#> old-style crs object detected; please recreate object with a recent sf::st_crs()
-```
 
 <div class="figure" style="text-align: center">
 <img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer." width="60%" />

@@ -135,12 +135,12 @@ Chapter <a href="geometric-operations.html#geometric-operations">5</a> already i
 To programming novices scripts may sound intimidating but they are simply plain text files, typically saved with an extension representing the language they contain.
 R scripts are generally saved with a <code>.R</code> extension and named to reflect what they do.
 An example is <code>10-hello.R</code>, a script file stored in the <code>code</code> folder of the book’s repository, which contains the following two lines of code:</p>
-<div class="sourceCode" id="cb386"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb385"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Aim: provide a minimal R script</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="st">"Hello geocompr"</span><span class="op">)</span></code></pre></div>
 <p>The lines of code may not be particularly exciting but they demonstrate the point: scripts do not need to be complicated.
 Saved scripts can be called and executed in their entirety with <code><a href="https://rdrr.io/r/base/source.html">source()</a></code>, as demonstrated below which shows how the comment is ignored but the instruction is executed:</p>
-<div class="sourceCode" id="cb387"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb386"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/11-hello.R"</span><span class="op">)</span>
 <span class="co">#&gt; [1] "Hello geocompr"</span></code></pre></div>
 <p>There are no strict rules on what can and cannot go into script files and nothing to prevent you from saving broken, non-reproducible code.<a href="references.html#fn64" class="footnote-ref" id="fnref64"><sup>64</sup></a>
@@ -169,7 +169,7 @@ See the web page reprex.tidyverse.org for details.
 A particular consideration with scripts for geocomputation is that they tend to have external dependencies, such as the QGIS dependency to run code in Chapter <a href="gis.html#gis">10</a>, and require input data in a specific format.
 Such dependencies should be mentioned as comments in the script or elsewhere in the project of which it is a part, as illustrated in the script <a href="https://github.com/Robinlovelace/geocompr/blob/main/code/11-centroid-alg.R"><code>10-centroid-alg.R</code></a>.
 The work undertaken by this script is demonstrated in the reproducible example below, which works on a pre-requisite object named <code>poly_mat</code>, a square with sides 9 units in length (the meaning of this will become apparent in the next section):<a href="references.html#fn66" class="footnote-ref" id="fnref66"><sup>66</sup></a></p>
-<div class="sourceCode" id="cb388"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb387"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">poly_mat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span>
   x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">9</span>, <span class="fl">9</span>, <span class="fl">0</span><span class="op">)</span>,
   y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">9</span>, <span class="fl">9</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>
@@ -209,14 +209,14 @@ It helps to further break down this approach into discrete tasks before writing 
 The algorithm will only work for <em>convex polygons</em>, which contain no internal angles greater than 180°, no star shapes allowed (packages <strong>decido</strong> and <strong>sfdct</strong> can triangulate non-convex polygons using external libraries, as shown in the <a href="https://geocompr.github.io/geocompkg/articles/algorithm.html">algorithm</a> vignette at geocompr.github.io).</p>
 <p>The simplest data structure of a polygon is a matrix of x and y coordinates in which each row represents a vertex tracing the polygon’s border in order where the first and last rows are identical <span class="citation">(<a href="references.html#ref-wise_gis_2001" role="doc-biblioref">Wise 2001</a>)</span>.
 In this case, we’ll create a polygon with five vertices in base R, building on an example from <em>GIS Algorithms</em> <span class="citation">(<a href="references.html#ref-xiao_gis_2016" role="doc-biblioref">Xiao 2016</a> see <a href="https://github.com/gisalgs/geom" role="doc-biblioref">github.com/gisalgs</a> for Python code)</span>, as illustrated in Figure <a href="algorithms.html#fig:polymat">11.2</a>:</p>
-<div class="sourceCode" id="cb390"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb389"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># generate a simple matrix representation of a polygon:</span>
 <span class="va">x_coords</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">12</span>, <span class="fl">20</span>, <span class="fl">10</span><span class="op">)</span>
 <span class="va">y_coords</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">15</span>, <span class="fl">0</span><span class="op">)</span>
 <span class="va">poly_mat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">x_coords</span>, <span class="va">y_coords</span><span class="op">)</span></code></pre></div>
 <p>Now that we have an example dataset, we are ready to undertake step 1 outlined above.
 The code below shows how this can be done by creating a single triangle (<code>T1</code>), that demonstrates the method; it also demonstrates step 2 by calculating its centroid based on the <a href="https://math.stackexchange.com/q/1702595/">formula</a> <span class="math inline">\(1/3(a + b + c)\)</span> where <span class="math inline">\(a\)</span> to <span class="math inline">\(c\)</span> are coordinates representing the triangle’s vertices:</p>
-<div class="sourceCode" id="cb391"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb390"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># create a point representing the origin:</span>
 <span class="va">Origin</span> <span class="op">=</span> <span class="va">poly_mat</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>
 <span class="co"># create 'triangle matrix':</span>
@@ -237,7 +237,7 @@ The formula to calculate the area of a triangle is as follows <span class="citat
 \]</span></p>
 <p>Where <span class="math inline">\(A\)</span> to <span class="math inline">\(C\)</span> are the triangle’s three points and <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> refer to the x and y dimensions.
 A translation of this formula into R code that works with the data in the matrix representation of a triangle <code>T1</code> is as follows (the function <code><a href="https://rdrr.io/r/base/MathFun.html">abs()</a></code> ensures a positive result):</p>
-<div class="sourceCode" id="cb392"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb391"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># calculate the area of the triangle represented by matrix T1:</span>
 <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">T1</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">*</span> <span class="op">(</span><span class="va">T1</span><span class="op">[</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">]</span> <span class="op">-</span> <span class="va">T1</span><span class="op">[</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span>
   <span class="va">T1</span><span class="op">[</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">*</span> <span class="op">(</span><span class="va">T1</span><span class="op">[</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">]</span> <span class="op">-</span> <span class="va">T1</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span>
@@ -249,7 +249,7 @@ To make the code more generalizable, we will see how it can be converted into a 
 <p>Step 4 requires steps 2 and 3 to be undertaken not just on one triangle (as demonstrated above) but on all triangles.
 This requires <em>iteration</em> to create all triangles representing the polygon, illustrated in Figure <a href="algorithms.html#fig:polycent">11.3</a>.
 <code><a href="https://rdrr.io/r/base/lapply.html">lapply()</a></code> and <code><a href="https://rdrr.io/r/base/lapply.html">vapply()</a></code> are used to iterate over each triangle here because they provide a concise solution in base R:<a href="references.html#fn68" class="footnote-ref" id="fnref68"><sup>68</sup></a></p>
-<div class="sourceCode" id="cb393"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb392"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">i</span> <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">poly_mat</span><span class="op">)</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span>
 <span class="va">T_all</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">i</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">Origin</span>, <span class="va">poly_mat</span><span class="op">[</span><span class="va">x</span><span class="op">:</span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span>, <span class="op">]</span>, <span class="va">Origin</span><span class="op">)</span>
@@ -273,7 +273,7 @@ FIGURE 11.3: Illustration of iterative centroid algorithm with triangles. The X 
 To demonstrate the link between algorithms and scripts, the contents of this section have been condensed into <code>10-centroid-alg.R</code>.
 We saw at the end of Section <a href="algorithms.html#scripts">11.2</a> how this script can calculate the centroid of a square.
 The great thing about <em>scripting</em> the algorithm is that it works on the new <code>poly_mat</code> object (see exercises below to verify these results with reference to <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid()</a></code>):</p>
-<div class="sourceCode" id="cb394"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb393"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"code/11-centroid-alg.R"</span><span class="op">)</span>
 <span class="co">#&gt; [1] "The area is: 245"</span>
 <span class="co">#&gt; [1] "The coordinates of the centroid are: 8.83, 9.22"</span></code></pre></div>
@@ -297,7 +297,7 @@ A great advantage of the open source nature of such libraries is that their sour
 Functions, however, refer to the implementation in a particular programming language, rather than the ‘recipe’ itself.
 In R, functions are objects in their own right, that can be created and joined together in a modular fashion.
 We can, for example, create a function that undertakes step 2 of our centroid generation algorithm as follows:</p>
-<div class="sourceCode" id="cb395"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb394"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">t_centroid</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
   <span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span> <span class="op">+</span> <span class="va">x</span><span class="op">[</span><span class="fl">2</span>, <span class="op">]</span> <span class="op">+</span> <span class="va">x</span><span class="op">[</span><span class="fl">3</span>, <span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="fl">3</span>
 <span class="op">}</span></code></pre></div>
@@ -305,12 +305,12 @@ We can, for example, create a function that undertakes step 2 of our centroid ge
 1) the function <em>body</em>, the code inside the curly brackets that define what the function does with the inputs; and 2) the <em>formals</em>, the list of arguments the function works with — <code>x</code> in this case (the third key component, the environment, is beyond the scope of this section).
 By default, functions return the last object that has been calculated (the coordinates of the centroid in the case of <code>t_centroid()</code>).<a href="references.html#fn70" class="footnote-ref" id="fnref70"><sup>70</sup></a></p>
 <p>The function now works on any inputs you pass it, as illustrated in the below command which calculates the area of the 1<sup>st</sup> triangle from the example polygon in the previous section (see Figure <a href="algorithms.html#fig:polycent">11.3</a>):</p>
-<div class="sourceCode" id="cb396"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb395"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">t_centroid</span><span class="op">(</span><span class="va">T1</span><span class="op">)</span>
 <span class="co">#&gt; x_coords y_coords </span>
 <span class="co">#&gt;     3.33     3.33</span></code></pre></div>
 <p>We can also create a function to calculate a triangle’s area, which we will name <code>t_area()</code>:</p>
-<div class="sourceCode" id="cb397"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb396"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">t_area</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
   <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span>
     <span class="va">x</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">*</span> <span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">]</span> <span class="op">-</span> <span class="va">x</span><span class="op">[</span><span class="fl">3</span>, <span class="fl">2</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span>
@@ -321,11 +321,11 @@ By default, functions return the last object that has been calculated (the coord
 <p>Note that after the function’s creation, a triangle’s area can be calculated in a single line of code, avoiding duplication of verbose code:
 functions are a mechanism for <em>generalizing</em> code.
 The newly created function <code>t_area()</code> takes any object <code>x</code>, assumed to have the same dimensions as the ‘triangle matrix’ data structure we’ve been using, and returns its area, as illustrated on <code>T1</code> as follows:</p>
-<div class="sourceCode" id="cb398"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb397"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">t_area</span><span class="op">(</span><span class="va">T1</span><span class="op">)</span>
 <span class="co">#&gt; [1] 50</span></code></pre></div>
 <p>We can test the generalizability of the function by using it to find the area of a new triangle matrix, which has a height of 1 and a base of 3:</p>
-<div class="sourceCode" id="cb399"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb398"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">t_new</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">0</span><span class="op">)</span>,
               y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span>
 <span class="fu">t_area</span><span class="op">(</span><span class="va">t_new</span><span class="op">)</span>
@@ -335,7 +335,7 @@ The newly created function <code>t_area()</code> takes any object <code>x</code>
 Provided that you know what the output will be, one function can be used as the building block of another.
 Thus, the functions <code>t_centroid()</code> and <code>t_area()</code> can be used as sub-components of a larger function to do the work of the script <code>10-centroid-alg.R</code>: calculate the area of any convex polygon.
 The code chunk below creates the function <code>poly_centroid()</code> to mimic the behavior of <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">sf::st_centroid()</a></code> for convex polygons:<a href="references.html#fn71" class="footnote-ref" id="fnref71"><sup>71</sup></a></p>
-<div class="sourceCode" id="cb400"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb399"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">poly_centroid</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">poly_mat</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">Origin</span> <span class="op">=</span> <span class="va">poly_mat</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span> <span class="co"># create a point representing the origin</span>
   <span class="va">i</span> <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/ncell.html">nrow</a></span><span class="op">(</span><span class="va">poly_mat</span><span class="op">)</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span>
@@ -347,18 +347,18 @@ The code chunk below creates the function <code>poly_centroid()</code> to mimic 
   <span class="va">A</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">vapply</a></span><span class="op">(</span><span class="va">T_all</span>, <span class="va">t_area</span>, FUN.VALUE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/double.html">double</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span>
   <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/weighted.mean.html">weighted.mean</a></span><span class="op">(</span><span class="va">C</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, <span class="va">A</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/raster/man/weighted.mean.html">weighted.mean</a></span><span class="op">(</span><span class="va">C</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>, <span class="va">A</span><span class="op">)</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
-<div class="sourceCode" id="cb401"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb400"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">poly_centroid</span><span class="op">(</span><span class="va">poly_mat</span><span class="op">)</span>
 <span class="co">#&gt; [1] 8.83 9.22</span></code></pre></div>
 <p>Functions such as <code>poly_centroid()</code> can further be extended to provide different types of output.
 To return the result as an object of class <code>sfg</code>, for example, a ‘wrapper’ function can be used to modify the output of <code>poly_centroid()</code> before returning the result:</p>
-<div class="sourceCode" id="cb402"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb401"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">poly_centroid_sfg</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">centroid_coords</span> <span class="op">=</span> <span class="fu">poly_centroid</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
   <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_point</a></span><span class="op">(</span><span class="va">centroid_coords</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 <p>We can verify that the output is the same as the output from <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">sf::st_centroid()</a></code> as follows:</p>
-<div class="sourceCode" id="cb403"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb402"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">poly_sfc</span> <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_polygon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">poly_mat</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/identical.html">identical</a></span><span class="op">(</span><span class="fu">poly_centroid_sfg</span><span class="op">(</span><span class="va">poly_mat</span><span class="op">)</span>, <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid</a></span><span class="op">(</span><span class="va">poly_sfc</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; [1] TRUE</span></code></pre></div>
@@ -485,7 +485,7 @@ First steps towards programming can be slow (the exercises below should not be r
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-03-02.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-03-03.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
