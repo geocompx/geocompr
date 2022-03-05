@@ -287,18 +287,18 @@ This is demonstrated below (see Section \@ref(iovec)) on reading geographic vect
 
 
 ```r
-nc_dfr = st_read(system.file("shape/nc.shp", package = "sf"))
-#> Reading layer `nc' from data source 
-#>   `/usr/local/lib/R/site-library/sf/shape/nc.shp' using driver `ESRI Shapefile'
-#> Simple feature collection with 100 features and 14 fields
+world_dfr = st_read(system.file("shapes/world.shp", package = "spData"))
+#> Reading layer `world' from data source 
+#>   `/usr/local/lib/R/site-library/spData/shapes/world.shp' using driver `ESRI Shapefile'
+#> Simple feature collection with 177 features and 10 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
-#> Bounding box:  xmin: -84.3 ymin: 33.9 xmax: -75.5 ymax: 36.6
-#> Geodetic CRS:  NAD27
-nc_tbl = read_sf(system.file("shape/nc.shp", package = "sf"))
-class(nc_dfr)
+#> Bounding box:  xmin: -180 ymin: -89.9 xmax: 180 ymax: 83.6
+#> Geodetic CRS:  WGS 84
+world_tbl = read_sf(system.file("shapes/world.shp", package = "spData"))
+class(world_dfr)
 #> [1] "sf"         "data.frame"
-class(nc_tbl)
+class(world_tbl)
 #> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
 ```
 
