@@ -221,7 +221,7 @@ The example below searches for John Snow blue plaque coordinates located on a bu
 ```r
 library(tidygeocoder)
 geo_df = data.frame(address = "54 Frith St, London W1D 4SJ, UK")
-geo_df = geocode(df, address, method = "osm")
+geo_df = geocode(geo_df, address, method = "osm")
 geo_df
 ```
 
