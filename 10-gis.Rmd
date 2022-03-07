@@ -345,12 +345,12 @@ You can see the output TWI map on the left panel of Figure \@ref(fig:qgis-raster
 The topographic wetness index is unitless.
 Its low values represent areas that will not accumulate water, while higher values show areas that will accumulate water at increasing levels.
 
-Information from digital elevation models can also be categorized, for example, to geomorphons [@jasiewicz_geomorphons_2013].
-Geomorphons represent terrain forms, such as slopes, ridges, or valleys.
-<!-- used for what?? -->
+Information from digital elevation models can also be categorized, for example, to geomorphons -- the geomorphological phonotypes consisting of 10 classes that represent terrain forms, such as slopes, ridges, or valleys [@jasiewicz_geomorphons_2013].
+These classes are used in many studies, including landslide susceptibility, ecosystem services, human mobility, and digital soil mapping. 
+<!-- https://scholar.google.pl/scholar?cites=8284408958489255337&as_sdt=2005&sciodt=0,5&hl=en -->
+<!-- https://www.nature.com/articles/s41597-020-0479-6.pdf -->
 
-The original implementation of geomorphons' algorithm exists in GRASS GIS.
-We can find it in the list of algorithms available through **qgisprocess** as `"grass7:r.geomorphon"`.
+The original implementation of the geomorphons' algorithm was created in GRASS GIS, and we can find it in the **qgisprocess** list as `"grass7:r.geomorphon"`:
 
 ```{r, eval=FALSE}
 grep("geomorphon", qgis_algo$algorithm, value = TRUE)
@@ -366,12 +366,15 @@ dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon", elevation = dem,
                                     `-m` = TRUE, search = 120)
 ```
 
-Our output `dem_geomorph$forms` contains a raster file with 10 categories -- each one representing a terrain form.
-We can read it into R with `qgis_as_terra()`, and then visualize it (the right panel of Figure \@ref(fig:qgis-raster-map)) or use it for our subsequent calculations.
+Our output, `dem_geomorph$forms`, contains a raster file with 10 categories -- each one representing a terrain form.
+We can read it into R with `qgis_as_terra()`, and then visualize it (the right panel of Figure \@ref(fig:qgis-raster-map)) or use it in our subsequent calculations.
 
 ```{r, eval=FALSE}
 dem_geomorph_terra = qgis_as_terra(dem_geomorph$forms)
 ```
+
+Interestingly, there are connections between some geomorphons and the TWI values, as shown in Figure \@ref(fig:qgis-raster-map).
+The largest TWI values mostly occur in valleys and hollows, while the lowest values are seen, as expected, on ridges.
 
 ```{r qgis-raster-map, echo=FALSE, fig.cap="Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mongón study area."}
 knitr::include_graphics("figures/10-qgis-raster-map.png")
