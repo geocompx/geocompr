@@ -660,7 +660,7 @@ link2GI::linkGDAL()
 <!--explain the syntax-->
 Now we can use the `system()` function to call any of the GDAL tools.
 For example, `ogrinfo()` provides metadata of a vector dataset.
-Here we will call this tool with a two additional flags: `-al` to list all features of all layers and `-so` to get a summary only (and not a complete geometry list):
+Here we will call this tool with two additional flags: `-al` to list all features of all layers and `-so` to get a summary only (and not a complete geometry list):
 
 
 ```r
