@@ -642,37 +642,44 @@ The aim is not to be comprehensive, but to demonstrate other ways of accessing t
 As discussed in Chapter \@ref(read-write), GDAL\index{GDAL} is a low-level library that supports many geographic data formats.
 GDAL is so effective that most GIS programs use GDAL\index{GDAL} in the background for importing and exporting geographic data, rather than re-inventing the wheel and using bespoke read-write code.
 But GDAL\index{GDAL} offers more than data I/O.
-It has [geoprocessing tools](http://www.gdal.org/pages.html) for vector and raster data, functionality to create [tiles](https://www.gdal.org/gdal2tiles.html) for serving raster data online, and rapid [rasterization](https://www.gdal.org/gdal_rasterize.html) of vector data, all of which can be accessed via the system of R command line.
+It has [geoprocessing tools](https://gdal.org/programs/index.html) for vector and raster data, functionality to create [tiles](https://gdal.org/programs/gdal2tiles.html#gdal2tiles) for serving raster data online, and rapid [rasterization](https://gdal.org/programs/gdal_rasterize.html#gdal-rasterize) of vector data, all of which can be accessed via the system of R command line.
+
+<!--toDo:jn-->
+<!--expand a list of what is possible-->
+
 
 The code chunk below demonstrates this functionality:
 `linkGDAL()` searches the computer for a working GDAL\index{GDAL} installation and adds the location of the executable files to the PATH variable, allowing GDAL to be called.
-In the example below `ogrinfo` provides metadata on a vector dataset:
 
 
 ```r
 link2GI::linkGDAL()
-cmd = paste("ogrinfo -ro -so -al", system.file("shape/nc.shp", package = "sf"))
+```
+
+<!--toDo:jn-->
+<!--explain the syntax-->
+Now we can use the `system()` function to call any of the GDAL tools.
+For example, `ogrinfo()` provides metadata of a vector dataset.
+Here we will call this tool with a two additional flags: `-al` to list all features of all layers and `-so` to get a summary only (and not a complete geometry list):
+
+
+```r
+our_filepath = system.file("shapes/world.gpkg", package = "spData")
+cmd = paste("ogrinfo -al -so", our_filepath)
 system(cmd)
-#> INFO: Open of `C:/Users/geocompr/Documents/R/win-library/3.5/sf/shape/nc.shp'
-#>     using driver `ESRI Shapefile' successful.
+#> INFO: Open of `/home/jn/R/x86_64-redhat-linux-gnu-library/4.1/spData/shapes/world.gpkg'
+#>       using driver `GPKG' successful.
 #> 
-#> Layer name: nc
-#> Metadata:
-#>  DBF_DATE_LAST_UPDATE=2016-10-26
-#> Geometry: Polygon
-#> Feature Count: 100
-#> Extent: (-84.323853, 33.881992) - (-75.456978, 36.589649)
+#> Layer name: world
+#> Geometry: Multi Polygon
+#> Feature Count: 177
+#> Extent: (-180.000000, -89.900000) - (179.999990, 83.645130)
 #> Layer SRS WKT:
 #> ...
 ```
 
-This example --- which returns the same result as `rgdal::ogrInfo()` --- may be simple, but it shows how to use GDAL\index{GDAL} via the system command-line\index{command-line interface}, independently of other packages.
-The 'link' to GDAL provided by **link2gi** could be used as a foundation for doing more advanced GDAL work from the R or system CLI.^[
-Note also that the **RSAGA** package uses the command line interface to use SAGA geoalgorithms from within R (see Section \@ref(rsaga)). 
-]
-TauDEM (http://hydrology.usu.edu/taudem/taudem5/index.html) and the Orfeo Toolbox (https://www.orfeo-toolbox.org/) are other spatial data processing libraries/programs offering a command line interface. 
-At the time of writing, it appears that there is only a developer version of an R/TauDEM interface on R-Forge (https://r-forge.r-project.org/R/?group_id=956).
-In any case, the above example shows how to access these libraries from the system command line via R.
+The 'link' to GDAL provided by **link2GI** could be used as a foundation for doing more advanced GDAL work from the R or system CLI.
+TauDEM (http://hydrology.usu.edu/taudem/taudem5/index.html) and the Orfeo Toolbox (https://www.orfeo-toolbox.org/) are other spatial data processing libraries/programs offering a command line interface -- the above example shows how to access these libraries from the system command line via R.
 This in turn could be the starting point for creating a proper interface to these libraries in the form of new R packages.
 
 Before diving into a project to create a new bridge, however, it is important to be aware of the power of existing R packages and that `system()` calls may not be platform-independent (they may fail on some computers).
