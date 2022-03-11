@@ -687,6 +687,9 @@ Furthermore, **sf** brings most of the power provided by GDAL\index{GDAL}, GEOS\
 
 ### Bridges to spatial databases {#postgis}
 
+<!--toDo:jn-->
+<!--consider referencing to 3rd edition-->
+
 \index{spatial database}
 Spatial database management systems (spatial DBMS) store spatial and non-spatial data in a structured way.
 They can organize large collections of data into related tables (entities) via unique identifiers (primary and foreign keys) and implicitly via space (think for instance of a spatial join). 
@@ -707,18 +710,20 @@ In the background, it uses QGIS Server and PostgreSQL/PostGIS.
 This way, the reader can follow the PostGIS example without the need to have PostgreSQL/PostGIS installed on a local machine.
 Thanks to the QGIS Cloud team for hosting this example.
 ]
+Our first step here is to create a connection to a database by providing its name, host name, and user information.
 
 
 ```r
 library(RPostgreSQL)
-conn = dbConnect(drv = PostgreSQL(), dbname = "rtafdf_zljbqm",
-                 host = "db.qgiscloud.com",
-                 port = "5432", user = "rtafdf_zljbqm", 
-                 password = "d3290ead")
+conn = dbConnect(drv = PostgreSQL(), dbname = "rtafdf_zljbqm", host = "db.qgiscloud.com",
+                 port = "5432", user = "rtafdf_zljbqm", password = "d3290ead")
 ```
 
+Our new object, `conn`, is just an established link between our R session and the database.
+It does not store any data.
+
 Often the first question is, 'which tables can be found in the database?'.
-This can be asked as follows (the answer is 5 tables):
+This can be answered with `dbListTables()` as follows:
 
 
 ```r
@@ -727,9 +732,10 @@ dbListTables(conn)
 #> [5] "highways" 
 ```
 
-We are only interested in the `restaurants` and the `highways` tables.
+The answer is five tables.
+Here, we are only interested in the `restaurants` and the `highways` tables.
 The former represents the locations of fast-food restaurants in the US, and the latter are principal US highways.
-To find out about attributes available in a table, we can run:
+To find out about attributes available in a table, we can run `dbListFields`:
 
 
 ```r
@@ -738,7 +744,9 @@ dbListFields(conn, "highways")
 #> [5] "name"         "state"   
 ```
 
-The first query will select `US Route 1` in Maryland (`MD`).
+Now, as we know the available datasets, we can perform some queries -- ask the database some questions.
+The query needs to be provided in a language understandable by the database -- usually, it is SQL.
+The first query will select `US Route 1` in the state of Maryland (`MD`) from the `highways` table.
 Note that `read_sf()` allows us to read geographic data from a database if it is provided with an open connection to a database and a query.
 Additionally, `read_sf()` needs to know which column represents the geometry (here: `wkb_geometry`).
 
@@ -751,34 +759,38 @@ query = paste(
 us_route = read_sf(conn, query = query, geom = "wkb_geometry")
 ```
 
-This results in an **sf**-object\index{sf} named `us_route` of type `sfc_MULTILINESTRING`.
-The next step is to add a 20-mile buffer (corresponds to 1609 meters times 20) around the selected highway (Figure \@ref(fig:postgis)).
+This results in an **sf**-object\index{sf} named `us_route` of type `MULTILINESTRING`.
+
+As we mentioned before, it is also possible to not only ask non-spatial questions, but also query datasets based on their spatial properties.
+To show this, the next example adds a 35-kilometer (35,000 m) buffer around the selected highway (Figure \@ref(fig:postgis)).
 
 
 ```r
 query = paste(
-  "SELECT ST_Union(ST_Buffer(wkb_geometry, 1609 * 20))::geometry",
+  "SELECT ST_Union(ST_Buffer(wkb_geometry, 35000))::geometry",
   "FROM highways",
   "WHERE name = 'US Route 1' AND state = 'MD';")
 buf = read_sf(conn, query = query)
 ```
 
-Note that this was a spatial query using functions (`ST_Union()`\index{vector!union}, `ST_Buffer()`\index{vector!buffers}) you should be already familiar with since you find them also in the **sf**-package, though here they are written in lowercase characters (`st_union()`, `st_buffer()`).
+Note that this was a spatial query using functions (`ST_Union()`\index{vector!union}, `ST_Buffer()`\index{vector!buffers}) you should be already familiar with.
+You find them also in the **sf**-package, though here they are written in lowercase characters (`st_union()`, `st_buffer()`).
 In fact, function names of the **sf** package largely follow the PostGIS\index{PostGIS} naming conventions.^[
 The prefix `st` stands for space/time.
 ]
-The last query will find all Hardee restaurants (`HDE`) within the buffer zone (Figure \@ref(fig:postgis)).
+
+The last query will find all Hardee's restaurants (`HDE`) within the 35 km buffer zone (Figure \@ref(fig:postgis)).
 
 
 ```r
 query = paste(
-  "SELECT r.wkb_geometry",
+  "SELECT *",
   "FROM restaurants r",
   "WHERE EXISTS (",
   "SELECT gid",
   "FROM highways",
   "WHERE",
-  "ST_DWithin(r.wkb_geometry, wkb_geometry, 1609 * 20) AND",
+  "ST_DWithin(r.wkb_geometry, wkb_geometry, 35000) AND",
   "name = 'US Route 1' AND",
   "state = 'MD' AND",
   "r.franchise = 'HDE');"
@@ -799,8 +811,8 @@ RPostgreSQL::postgresqlCloseConnection(conn)
 
 
 <div class="figure" style="text-align: center">
-<img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer." width="60%" />
-<p class="caption">(\#fig:postgis)Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer.</p>
+<img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer." width="60%" />
+<p class="caption">(\#fig:postgis)Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer.</p>
 </div>
 
 Unlike PostGIS, **sf** only supports spatial vector data. 

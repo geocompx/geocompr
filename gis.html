@@ -680,6 +680,8 @@ Furthermore, <strong>sf</strong> brings most of the power provided by GDAL, GEOS
 <h3>
 <span class="header-section-number">10.5.2</span> Bridges to spatial databases<a class="anchor" aria-label="anchor" href="#postgis"><i class="fas fa-link"></i></a>
 </h3>
+<!--toDo:jn-->
+<!--consider referencing to 3rd edition-->
 <p>
 Spatial database management systems (spatial DBMS) store spatial and non-spatial data in a structured way.
 They can organize large collections of data into related tables (entities) via unique identifiers (primary and foreign keys) and implicitly via space (think for instance of a spatial join).
@@ -688,27 +690,31 @@ Databases enable storing and querying large datasets efficiently based on spatia
 <p>The most important open source spatial database is PostGIS <span class="citation">(<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">Obe and Hsu 2015</a>)</span>.<a href="references.html#fn58" class="footnote-ref" id="fnref58"><sup>58</sup></a>
 R bridges to spatial DBMSs such as PostGIS are important, allowing access to huge data stores without loading several gigabytes of geographic data into RAM, and likely crashing the R session.
 The remainder of this section shows how PostGIS can be called from R, based on “Hello real word” from <em>PostGIS in Action, Second Edition</em> <span class="citation">(<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">Obe and Hsu 2015</a>)</span>.<a href="references.html#fn59" class="footnote-ref" id="fnref59"><sup>59</sup></a></p>
-<p>The subsequent code requires a working internet connection, since we are accessing a PostgreSQL/PostGIS database which is living in the QGIS Cloud (<a href="https://qgiscloud.com/" class="uri">https://qgiscloud.com/</a>).<a href="references.html#fn60" class="footnote-ref" id="fnref60"><sup>60</sup></a></p>
+<p>The subsequent code requires a working internet connection, since we are accessing a PostgreSQL/PostGIS database which is living in the QGIS Cloud (<a href="https://qgiscloud.com/" class="uri">https://qgiscloud.com/</a>).<a href="references.html#fn60" class="footnote-ref" id="fnref60"><sup>60</sup></a>
+Our first step here is to create a connection to a database by providing its name, host name, and user information.</p>
 <div class="sourceCode" id="cb360"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tomoakin/RPostgreSQL">RPostgreSQL</a></span><span class="op">)</span>
-<span class="va">conn</span> <span class="op">=</span> <span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html">dbConnect</a></span><span class="op">(</span>drv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/RPostgreSQL/man/PostgreSQL.html">PostgreSQL</a></span><span class="op">(</span><span class="op">)</span>, dbname <span class="op">=</span> <span class="st">"rtafdf_zljbqm"</span>,
-                 host <span class="op">=</span> <span class="st">"db.qgiscloud.com"</span>,
-                 port <span class="op">=</span> <span class="st">"5432"</span>, user <span class="op">=</span> <span class="st">"rtafdf_zljbqm"</span>, 
-                 password <span class="op">=</span> <span class="st">"d3290ead"</span><span class="op">)</span></code></pre></div>
+<span class="va">conn</span> <span class="op">=</span> <span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html">dbConnect</a></span><span class="op">(</span>drv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/RPostgreSQL/man/PostgreSQL.html">PostgreSQL</a></span><span class="op">(</span><span class="op">)</span>, dbname <span class="op">=</span> <span class="st">"rtafdf_zljbqm"</span>, host <span class="op">=</span> <span class="st">"db.qgiscloud.com"</span>,
+                 port <span class="op">=</span> <span class="st">"5432"</span>, user <span class="op">=</span> <span class="st">"rtafdf_zljbqm"</span>, password <span class="op">=</span> <span class="st">"d3290ead"</span><span class="op">)</span></code></pre></div>
+<p>Our new object, <code>conn</code>, is just an established link between our R session and the database.
+It does not store any data.</p>
 <p>Often the first question is, ‘which tables can be found in the database?’.
-This can be asked as follows (the answer is 5 tables):</p>
+This can be answered with <code><a href="https://dbi.r-dbi.org/reference/dbListTables.html">dbListTables()</a></code> as follows:</p>
 <div class="sourceCode" id="cb361"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbListTables.html">dbListTables</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span>
 <span class="co">#&gt; [1] "spatial_ref_sys" "topology"        "layer"           "restaurants"    </span>
 <span class="co">#&gt; [5] "highways" </span></code></pre></div>
-<p>We are only interested in the <code>restaurants</code> and the <code>highways</code> tables.
+<p>The answer is five tables.
+Here, we are only interested in the <code>restaurants</code> and the <code>highways</code> tables.
 The former represents the locations of fast-food restaurants in the US, and the latter are principal US highways.
-To find out about attributes available in a table, we can run:</p>
+To find out about attributes available in a table, we can run <code>dbListFields</code>:</p>
 <div class="sourceCode" id="cb362"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbListFields.html">dbListFields</a></span><span class="op">(</span><span class="va">conn</span>, <span class="st">"highways"</span><span class="op">)</span>
 <span class="co">#&gt; [1] "qc_id"        "wkb_geometry" "gid"          "feature"     </span>
 <span class="co">#&gt; [5] "name"         "state"   </span></code></pre></div>
-<p>The first query will select <code>US Route 1</code> in Maryland (<code>MD</code>).
+<p>Now, as we know the available datasets, we can perform some queries – ask the database some questions.
+The query needs to be provided in a language understandable by the database – usually, it is SQL.
+The first query will select <code>US Route 1</code> in the state of Maryland (<code>MD</code>) from the <code>highways</code> table.
 Note that <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> allows us to read geographic data from a database if it is provided with an open connection to a database and a query.
 Additionally, <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> needs to know which column represents the geometry (here: <code>wkb_geometry</code>).</p>
 <div class="sourceCode" id="cb363"><pre class="downlit sourceCode r">
@@ -717,26 +723,28 @@ Additionally, <code><a href="https://r-spatial.github.io/sf/reference/st_read.ht
   <span class="st">"FROM highways"</span>,
   <span class="st">"WHERE name = 'US Route 1' AND state = 'MD';"</span><span class="op">)</span>
 <span class="va">us_route</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span>, geom <span class="op">=</span> <span class="st">"wkb_geometry"</span><span class="op">)</span></code></pre></div>
-<p>This results in an <strong>sf</strong>-object named <code>us_route</code> of type <code>sfc_MULTILINESTRING</code>.
-The next step is to add a 20-mile buffer (corresponds to 1609 meters times 20) around the selected highway (Figure <a href="gis.html#fig:postgis">10.4</a>).</p>
+<p>This results in an <strong>sf</strong>-object named <code>us_route</code> of type <code>MULTILINESTRING</code>.</p>
+<p>As we mentioned before, it is also possible to not only ask non-spatial questions, but also query datasets based on their spatial properties.
+To show this, the next example adds a 35-kilometer (35,000 m) buffer around the selected highway (Figure <a href="gis.html#fig:postgis">10.4</a>).</p>
 <div class="sourceCode" id="cb364"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span>
-  <span class="st">"SELECT ST_Union(ST_Buffer(wkb_geometry, 1609 * 20))::geometry"</span>,
+  <span class="st">"SELECT ST_Union(ST_Buffer(wkb_geometry, 35000))::geometry"</span>,
   <span class="st">"FROM highways"</span>,
   <span class="st">"WHERE name = 'US Route 1' AND state = 'MD';"</span><span class="op">)</span>
 <span class="va">buf</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span><span class="op">)</span></code></pre></div>
-<p>Note that this was a spatial query using functions (<code>ST_Union()</code>, <code>ST_Buffer()</code>) you should be already familiar with since you find them also in the <strong>sf</strong>-package, though here they are written in lowercase characters (<code><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union()</a></code>, <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>).
-In fact, function names of the <strong>sf</strong> package largely follow the PostGIS naming conventions.<a href="references.html#fn61" class="footnote-ref" id="fnref61"><sup>61</sup></a>
-The last query will find all Hardee restaurants (<code>HDE</code>) within the buffer zone (Figure <a href="gis.html#fig:postgis">10.4</a>).</p>
+<p>Note that this was a spatial query using functions (<code>ST_Union()</code>, <code>ST_Buffer()</code>) you should be already familiar with.
+You find them also in the <strong>sf</strong>-package, though here they are written in lowercase characters (<code><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union()</a></code>, <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>).
+In fact, function names of the <strong>sf</strong> package largely follow the PostGIS naming conventions.<a href="references.html#fn61" class="footnote-ref" id="fnref61"><sup>61</sup></a></p>
+<p>The last query will find all Hardee’s restaurants (<code>HDE</code>) within the 35 km buffer zone (Figure <a href="gis.html#fig:postgis">10.4</a>).</p>
 <div class="sourceCode" id="cb365"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span>
-  <span class="st">"SELECT r.wkb_geometry"</span>,
+  <span class="st">"SELECT *"</span>,
   <span class="st">"FROM restaurants r"</span>,
   <span class="st">"WHERE EXISTS ("</span>,
   <span class="st">"SELECT gid"</span>,
   <span class="st">"FROM highways"</span>,
   <span class="st">"WHERE"</span>,
-  <span class="st">"ST_DWithin(r.wkb_geometry, wkb_geometry, 1609 * 20) AND"</span>,
+  <span class="st">"ST_DWithin(r.wkb_geometry, wkb_geometry, 35000) AND"</span>,
   <span class="st">"name = 'US Route 1' AND"</span>,
   <span class="st">"state = 'MD' AND"</span>,
   <span class="st">"r.franchise = 'HDE');"</span>
@@ -748,8 +756,8 @@ Finally, it is good practice to close the database connection as follows:<a href
 <code class="sourceCode R"><span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RPostgreSQL/man/postgresqlSupport.html">postgresqlCloseConnection</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:postgis"></span>
-<img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer." width="60%"><p class="caption">
-FIGURE 10.4: Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and three restaurants (light blue points) within the buffer.
+<img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer." width="60%"><p class="caption">
+FIGURE 10.4: Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer.
 </p>
 </div>
 <p>Unlike PostGIS, <strong>sf</strong> only supports spatial vector data.
@@ -848,7 +856,7 @@ Additionally, give <code>mapview</code> a try.</p></li>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-03-09.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-03-11.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
