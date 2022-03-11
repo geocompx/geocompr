@@ -715,7 +715,8 @@ Our first step here is to create a connection to a database by providing its nam
 
 ```r
 library(RPostgreSQL)
-conn = dbConnect(drv = PostgreSQL(), dbname = "rtafdf_zljbqm", host = "db.qgiscloud.com",
+conn = dbConnect(drv = PostgreSQL(), 
+                 dbname = "rtafdf_zljbqm", host = "db.qgiscloud.com",
                  port = "5432", user = "rtafdf_zljbqm", password = "d3290ead")
 ```
 
@@ -811,7 +812,7 @@ RPostgreSQL::postgresqlCloseConnection(conn)
 
 
 <div class="figure" style="text-align: center">
-<img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer." width="60%" />
+<img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer." width="100%" />
 <p class="caption">(\#fig:postgis)Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer.</p>
 </div>
 
