@@ -235,7 +235,7 @@ st_within(point_sf, polygon_sfc)
 st_touches(point_sf, polygon_sfc)
 ```
 
-Note that although the first point *touches* the polygon, it is not within it; the third point is within the polygon but does not touch any part of its border.
+Note that although the first point *touches* the boundary polygon, it is not within it; the third point is within the polygon but does not touch any part of its border.
 The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (note `[, 1]` converts the result into a vector):
 
 
@@ -246,14 +246,19 @@ st_disjoint(point_sf, polygon_sfc, sparse = FALSE)[, 1]
 
 The function `st_is_within_distance()` detects features that *almost touch* the selection object, which has an additional `dist` argument.
 It can be used to set how close target objects need to be before they are selected.
-Note that although point 4 is one unit of distance from the nearest node of `polygon_sfc` (at point 2 in Figure \@ref(fig:relation-objects)), it is still selected when the distance is set to 0.9.
-This is illustrated in the code chunk below, which shows that every point is within 0.2 units of the polygon:
+Note that although point 2 is more than 0.2 units of distance from the nearest vertex of `polygon_sfc`, it is still selected when the distance is set to 0.2.
+This is because distance is measured to the nearest edge, in this case the part of the the polygon that lies directly above point 2 in Figure \@ref(fig:relation-objects).
+(You can verify the actual distance between point 2 and the polygon is 0.13 with the command `st_distance(point_sf, polygon_sfc)`.)
+The 'is within distance' binary spatial predicate is demonstrated in the code chunk below, the results of which show that every point is within 0.2 units of the polygon:
 
 
 ```r
 st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
 #> [1] TRUE TRUE TRUE
 ```
+
+
+
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Functions for calculating topological relations use spatial indices to largely speed up spatial query performance.
 They achieve that using the Sort-Tile-Recursive (STR) algorithm.
