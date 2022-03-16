@@ -429,42 +429,36 @@ In addition, there is a Python interface (SAGA Python API).
 <p>The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the Geographical Resources Analysis Support System (GRASS) [Table <a href="gis.html#tab:gis-comp">10.1</a>; <span class="citation">Neteler and Mitasova (<a href="references.html#ref-neteler_open_2008" role="doc-biblioref">2008</a>)</span>] from 1982 to 1995.
 Academia continued this work since 1997.
 Similar to SAGA, GRASS focused on raster processing in the beginning while only later, since GRASS 6.0, adding advanced vector functionality <span class="citation">(<a href="references.html#ref-bivand_applied_2013" role="doc-biblioref">Bivand, Pebesma, and Gómez-Rubio 2013</a>)</span>.</p>
-<!-- We will introduce **rgrass7**\index{rgrass7 (package)} with one of the most interesting problems in GIScience - the traveling salesman problem\index{traveling salesman}.  -->
-<!-- Suppose a traveling salesman would like to visit 24 customers.  -->
-<!-- Additionally, he would like to start and finish his journey at home which makes a total of 25 locations while covering the shortest distance possible. -->
-<!-- There is a single best solution to this problem; however, to find it is even for modern computers (mostly) impossible [@longley_geographic_2015]. -->
-<!-- In our case, the number of possible solutions correspond to `(25 - 1)! / 2`, i.e., the factorial of 24 divided by 2 (since we do not differentiate between forward or backward direction). -->
-<!-- Even if one iteration can be done in a nanosecond, this still corresponds to 9837145 years.  -->
-<!-- Luckily, there are clever, almost optimal solutions which run in a tiny fraction of this inconceivable amount of time. -->
-<!-- GRASS GIS\index{GRASS} provides one of these solutions (for more details, see [v.net.salesman](https://grass.osgeo.org/grass77/manuals/v.net.salesman.html)).  -->
-<!-- In our use case, we would like to find the shortest path\index{shortest route} between the first 25 bicycle stations (instead of customers) on London's streets (and we simply assume that the first bike station corresponds to the home of our traveling salesman\index{traveling salesman}). -->
-<!-- ```{r 09-gis-24} -->
-<!-- data("cycle_hire", package = "spData") -->
-<!-- points = cycle_hire[1:25, ] -->
-<!-- ``` -->
-<!-- Aside from the cycle hire points data, we will need the OpenStreetMap\index{OpenStreetMap} data of London. -->
-<!-- We download it with the help of the **osmdata**\index{osmdata (package)} package (see also Section \@ref(retrieving-data)). -->
-<!-- We constrain the download of the street network (in OSM language called "highway") to  the bounding box\index{bounding box} of the cycle hire data, and attach the corresponding data as an `sf`-object\index{sf}. -->
-<!-- `osmdata_sf()` returns a list with several spatial objects (points, lines, polygons, etc.). -->
-<!-- Here, we will only keep the line objects. -->
+<p>Here, we introduce <strong>rgrass</strong> with one of the most interesting problems in GIScience - the traveling salesman problem.
+Suppose a traveling salesman would like to visit 24 customers.
+Additionally, he would like to start and finish his journey at home which makes a total of 25 locations while covering the shortest distance possible.
+There is a single best solution to this problem; however, to check all of the possible solutions it is (mostly) impossible for modern computers <span class="citation">(<a href="references.html#ref-longley_geographic_2015" role="doc-biblioref">Longley 2015</a>)</span>.
+In our case, the number of possible solutions correspond to <code>(25 - 1)! / 2</code>, i.e., the factorial of 24 divided by 2 (since we do not differentiate between forward or backward direction).
+Even if one iteration can be done in a nanosecond, this still corresponds to 9837145 years.
+Luckily, there are clever, almost optimal solutions which run in a tiny fraction of this inconceivable amount of time.
+GRASS GIS provides one of these solutions (for more details, see <a href="https://grass.osgeo.org/grass80/manuals/v.net.salesman.html">v.net.salesman</a>).
+In our use case, we would like to find the shortest path between the first 25 bicycle stations (instead of customers) on London’s streets (and we simply assume that the first bike station corresponds to the home of our traveling salesman).</p>
+<div class="sourceCode" id="cb358"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"cycle_hire"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
+<span class="va">points</span> <span class="op">=</span> <span class="va">cycle_hire</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">25</span>, <span class="op">]</span></code></pre></div>
+<p>Aside from the cycle hire points data, we need a street network for this area.
+We can download it with from OpenStreetMap with the help of the <strong>osmdata</strong> package (see also Section <a href="read-write.html#retrieving-data">8.2</a>).
+To do this, we constrain the query of the street network (in OSM language called “highway”) to the bounding box of <code>points</code>, and attach the corresponding data as an <code>sf</code>-object.
+<code><a href="https://docs.ropensci.org/osmdata/reference/osmdata_sf.html">osmdata_sf()</a></code> returns a list with several spatial objects (points, lines, polygons, etc.), but here, we only keep the line objects with their related ids.
 <!-- OpenStreetMap\index{OpenStreetMap} objects come with a lot of columns, `streets` features almost 500. -->
 <!-- In fact, we are only interested in the geometry column. -->
 <!-- Nevertheless, we are keeping one attribute column; otherwise, we will run into trouble when trying to provide `writeVECT()` only with a geometry object (see further below and `?writeVECT` for more details). -->
-<!-- Remember that the geometry column is sticky, hence, even though we are just selecting one attribute, the geometry column will be also returned (see Section \@ref(intro-sf)). -->
-<!-- ```{r 09-gis-25, eval=FALSE} -->
-<!-- library(osmdata) -->
-<!-- b_box = st_bbox(points) -->
-<!-- london_streets = opq(b_box) %>% -->
-<!--   add_osm_feature(key = "highway") %>% -->
-<!--   osmdata_sf() %>% -->
-<!--   `[[`("osm_lines") -->
-<!-- london_streets = dplyr::select(london_streets, osm_id) -->
-<!-- ``` -->
-<!-- As a convenience to the reader, one can attach `london_streets` to the global environment using `data("london_streets", package = "spDataLarge")`.  -->
-<!-- ```{r 09-gis-26, eval=FALSE, echo=FALSE} -->
-<!-- data("london_streets", package = "spDataLarge") -->
-<!-- ``` -->
-<!-- Now that we have the data, we can go on and initiate a GRASS\index{GRASS} session, i.e., we have to create a GRASS spatial database. -->
+<!-- Remember that the geometry column is sticky, hence, even though we are just selecting one attribute, the geometry column will be also returned (see Section \@ref(intro-sf)). --></p>
+<div class="sourceCode" id="cb359"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/osmdata/">osmdata</a></span><span class="op">)</span>
+<span class="va">b_box</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html">st_bbox</a></span><span class="op">(</span><span class="va">points</span><span class="op">)</span>
+<span class="va">london_streets</span> <span class="op">=</span> <span class="fu"><a href="https://docs.ropensci.org/osmdata/reference/opq.html">opq</a></span><span class="op">(</span><span class="va">b_box</span><span class="op">)</span> <span class="op"><a href="https://docs.ropensci.org/osmdata/reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="https://docs.ropensci.org/osmdata/reference/add_osm_feature.html">add_osm_feature</a></span><span class="op">(</span>key <span class="op">=</span> <span class="st">"highway"</span><span class="op">)</span> <span class="op"><a href="https://docs.ropensci.org/osmdata/reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="https://docs.ropensci.org/osmdata/reference/osmdata_sf.html">osmdata_sf</a></span><span class="op">(</span><span class="op">)</span> 
+<span class="va">london_streets</span> <span class="op">=</span> <span class="va">london_streets</span><span class="op">[[</span><span class="st">"osm_lines"</span><span class="op">]</span><span class="op">]</span>
+<span class="va">london_streets</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">london_streets</span>, <span class="va">osm_id</span><span class="op">)</span></code></pre></div>
+<p>As a convenience to the reader, one can attach <code>london_streets</code> to the global environment using <code>data("london_streets", package = "spDataLarge")</code>.</p>
+<p>Now that we have the data, we can go on and initiate a GRASS session, i.e., we have to create a GRASS spatial database.
 <!-- The GRASS geodatabase \index{spatial database} system is based on SQLite. -->
 <!-- Consequently, different users can easily work on the same project, possibly with different read/write permissions. -->
 <!-- However, one has to set up this spatial database\index{spatial database} (also from within R), and users used to a GIS GUI\index{graphical user interface} popping up by one click might find this process a bit intimidating in the beginning. -->
@@ -474,7 +468,7 @@ Similar to SAGA, GRASS focused on raster processing in the beginning while only 
 <!-- PERMANENT is a mandatory mapset and is created automatically. -->
 <!-- It stores the projection, the spatial extent and the default resolution for raster data. -->
 <!-- In order to share geographic data with all users of a project, the database owner can add spatial data to the PERMANENT mapset. -->
-<!-- Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass77/manuals/helptext.html) for more information on the GRASS spatial database\index{spatial database} system. -->
+<!-- Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass77/manuals/helptext.html) for more information on the GRASS spatial database\index{spatial database} system. --></p>
 <!-- You have to set up a location and a mapset if you want to use GRASS\index{GRASS} from within R. -->
 <!-- First of all, we need to find out if and where GRASS 7 is installed on the computer. -->
 <!-- ```{r 09-gis-27, eval=FALSE} -->
@@ -650,14 +644,14 @@ It has <a href="https://gdal.org/programs/index.html">geoprocessing tools</a> fo
 <!--expand a list of what is possible-->
 <p>The code chunk below demonstrates this functionality:
 <code>linkGDAL()</code> searches the computer for a working GDAL installation and adds the location of the executable files to the PATH variable, allowing GDAL to be called.</p>
-<div class="sourceCode" id="cb358"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb360"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">link2GI</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/link2GI/reference/linkGDAL.html">linkGDAL</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <!--toDo:jn-->
 <!--explain the syntax-->
 <p>Now we can use the <code><a href="https://rdrr.io/r/base/system.html">system()</a></code> function to call any of the GDAL tools.
 For example, <code>ogrinfo()</code> provides metadata of a vector dataset.
 Here we will call this tool with two additional flags: <code>-al</code> to list all features of all layers and <code>-so</code> to get a summary only (and not a complete geometry list):</p>
-<div class="sourceCode" id="cb359"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb361"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">our_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shapes/world.gpkg"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span>
 <span class="va">cmd</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"ogrinfo -al -so"</span>, <span class="va">our_filepath</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.html">system</a></span><span class="op">(</span><span class="va">cmd</span><span class="op">)</span>
@@ -692,7 +686,7 @@ R bridges to spatial DBMSs such as PostGIS are important, allowing access to hug
 The remainder of this section shows how PostGIS can be called from R, based on “Hello real word” from <em>PostGIS in Action, Second Edition</em> <span class="citation">(<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">Obe and Hsu 2015</a>)</span>.<a href="references.html#fn59" class="footnote-ref" id="fnref59"><sup>59</sup></a></p>
 <p>The subsequent code requires a working internet connection, since we are accessing a PostgreSQL/PostGIS database which is living in the QGIS Cloud (<a href="https://qgiscloud.com/" class="uri">https://qgiscloud.com/</a>).<a href="references.html#fn60" class="footnote-ref" id="fnref60"><sup>60</sup></a>
 Our first step here is to create a connection to a database by providing its name, host name, and user information.</p>
-<div class="sourceCode" id="cb360"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb362"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tomoakin/RPostgreSQL">RPostgreSQL</a></span><span class="op">)</span>
 <span class="va">conn</span> <span class="op">=</span> <span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html">dbConnect</a></span><span class="op">(</span>drv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/RPostgreSQL/man/PostgreSQL.html">PostgreSQL</a></span><span class="op">(</span><span class="op">)</span>, 
                  dbname <span class="op">=</span> <span class="st">"rtafdf_zljbqm"</span>, host <span class="op">=</span> <span class="st">"db.qgiscloud.com"</span>,
@@ -701,7 +695,7 @@ Our first step here is to create a connection to a database by providing its nam
 It does not store any data.</p>
 <p>Often the first question is, ‘which tables can be found in the database?’.
 This can be answered with <code><a href="https://dbi.r-dbi.org/reference/dbListTables.html">dbListTables()</a></code> as follows:</p>
-<div class="sourceCode" id="cb361"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb363"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbListTables.html">dbListTables</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span>
 <span class="co">#&gt; [1] "spatial_ref_sys" "topology"        "layer"           "restaurants"    </span>
 <span class="co">#&gt; [5] "highways" </span></code></pre></div>
@@ -709,7 +703,7 @@ This can be answered with <code><a href="https://dbi.r-dbi.org/reference/dbListT
 Here, we are only interested in the <code>restaurants</code> and the <code>highways</code> tables.
 The former represents the locations of fast-food restaurants in the US, and the latter are principal US highways.
 To find out about attributes available in a table, we can run <code>dbListFields</code>:</p>
-<div class="sourceCode" id="cb362"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb364"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbListFields.html">dbListFields</a></span><span class="op">(</span><span class="va">conn</span>, <span class="st">"highways"</span><span class="op">)</span>
 <span class="co">#&gt; [1] "qc_id"        "wkb_geometry" "gid"          "feature"     </span>
 <span class="co">#&gt; [5] "name"         "state"   </span></code></pre></div>
@@ -718,7 +712,7 @@ The query needs to be provided in a language understandable by the database – 
 The first query will select <code>US Route 1</code> in the state of Maryland (<code>MD</code>) from the <code>highways</code> table.
 Note that <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> allows us to read geographic data from a database if it is provided with an open connection to a database and a query.
 Additionally, <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> needs to know which column represents the geometry (here: <code>wkb_geometry</code>).</p>
-<div class="sourceCode" id="cb363"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb365"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span>
   <span class="st">"SELECT *"</span>,
   <span class="st">"FROM highways"</span>,
@@ -727,7 +721,7 @@ Additionally, <code><a href="https://r-spatial.github.io/sf/reference/st_read.ht
 <p>This results in an <strong>sf</strong>-object named <code>us_route</code> of type <code>MULTILINESTRING</code>.</p>
 <p>As we mentioned before, it is also possible to not only ask non-spatial questions, but also query datasets based on their spatial properties.
 To show this, the next example adds a 35-kilometer (35,000 m) buffer around the selected highway (Figure <a href="gis.html#fig:postgis">10.4</a>).</p>
-<div class="sourceCode" id="cb364"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb366"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span>
   <span class="st">"SELECT ST_Union(ST_Buffer(wkb_geometry, 35000))::geometry"</span>,
   <span class="st">"FROM highways"</span>,
@@ -737,7 +731,7 @@ To show this, the next example adds a 35-kilometer (35,000 m) buffer around the 
 You find them also in the <strong>sf</strong>-package, though here they are written in lowercase characters (<code><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union()</a></code>, <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>).
 In fact, function names of the <strong>sf</strong> package largely follow the PostGIS naming conventions.<a href="references.html#fn61" class="footnote-ref" id="fnref61"><sup>61</sup></a></p>
 <p>The last query will find all Hardee’s restaurants (<code>HDE</code>) within the 35 km buffer zone (Figure <a href="gis.html#fig:postgis">10.4</a>).</p>
-<div class="sourceCode" id="cb365"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb367"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span>
   <span class="st">"SELECT *"</span>,
   <span class="st">"FROM restaurants r"</span>,
@@ -753,7 +747,7 @@ In fact, function names of the <strong>sf</strong> package largely follow the Po
 <span class="va">hardees</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span><span class="op">)</span></code></pre></div>
 <p>Please refer to <span class="citation">Obe and Hsu (<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">2015</a>)</span> for a detailed explanation of the spatial SQL query.
 Finally, it is good practice to close the database connection as follows:<a href="references.html#fn62" class="footnote-ref" id="fnref62"><sup>62</sup></a></p>
-<div class="sourceCode" id="cb366"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb368"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RPostgreSQL/man/postgresqlSupport.html">postgresqlCloseConnection</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:postgis"></span>
@@ -857,7 +851,7 @@ Additionally, give <code>mapview</code> a try.</p></li>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-03-12.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-03-16.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
