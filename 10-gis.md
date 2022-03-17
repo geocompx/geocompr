@@ -443,25 +443,35 @@ london_streets = dplyr::select(london_streets, osm_id)
 
 As a convenience to the reader, one can attach `london_streets` to the global environment using `data("london_streets", package = "spDataLarge")`.
 
-Now that we have the data, we can go on and initiate a GRASS\index{GRASS} session, i.e., we have to create a GRASS spatial database.
-<!-- The GRASS geodatabase \index{spatial database} system is based on SQLite. -->
-<!-- Consequently, different users can easily work on the same project, possibly with different read/write permissions. -->
-<!-- However, one has to set up this spatial database\index{spatial database} (also from within R), and users used to a GIS GUI\index{graphical user interface} popping up by one click might find this process a bit intimidating in the beginning. -->
-<!-- First of all, the GRASS database requires its own directory, and contains a location (see the [GRASS GIS Database](https://grass.osgeo.org/grass77/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass77/manuals/index.html) for further information). -->
-<!-- The location in turn simply contains the geodata for one project.  -->
-<!-- Within one location, several mapsets can exist and typically refer to different users.  -->
-<!-- PERMANENT is a mandatory mapset and is created automatically. -->
-<!-- It stores the projection, the spatial extent and the default resolution for raster data. -->
-<!-- In order to share geographic data with all users of a project, the database owner can add spatial data to the PERMANENT mapset. -->
-<!-- Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass77/manuals/helptext.html) for more information on the GRASS spatial database\index{spatial database} system. -->
+Now that we have the data, we can go on and initiate a GRASS\index{GRASS} session.
+First of all, we need to find out if and where GRASS is installed on the computer.
 
-<!-- You have to set up a location and a mapset if you want to use GRASS\index{GRASS} from within R. -->
-<!-- First of all, we need to find out if and where GRASS 7 is installed on the computer. -->
 
-<!-- ```{r 09-gis-27, eval=FALSE} -->
-<!-- library(link2GI) -->
-<!-- link = findGRASS()  -->
-<!-- ``` -->
+```r
+library(link2GI)
+link = findGRASS()
+```
+
+GRASS GIS differs from many other GIS software in its approach for handling input data -- it puts all of the input data in a GRASS spatial database.
+The GRASS geodatabase \index{spatial database} system is based on SQLite.
+Consequently, different users can easily work on the same project, possibly with different read/write permissions.
+However, one has to set up this spatial database\index{spatial database} (also from within R), and users might find this process a bit intimidating in the beginning.
+First of all, the GRASS database requires its own directory, which, in turn, contains a location (see the [GRASS GIS Database](https://grass.osgeo.org/grass80/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass80/manuals/index.html) for further information).
+The location stores the geodata for one project or one area.
+Within one location, several mapsets can exist that typically refer to different users or different tasks.
+Each location also has PERMANENT -- a mandatory mapset that is created automatically.
+PERMANENT stores the projection, the spatial extent and the default resolution for raster data.
+In order to share geographic data with all users of a project, the database owner can add spatial data to the PERMANENT mapset.
+So, to sum it all up -- the GRASS geodatabase may contain many locations (all data in one location have the same CRS), and each location can store many mapsets (groups of datasets).
+Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass80/manuals/helptext.html) for more information on the GRASS spatial database\index{spatial database} system.
+
+Now, you have to set up a location and a mapset if you want to use GRASS\index{GRASS} from within R.
+
+<!--toDo:jn-->
+<!--improve the next code chunk-->
+
+
+
 
 <!-- `link` is a `data.frame` which contains in its rows the GRASS 7 installations on your computer.  -->
 <!-- Here, we will use a GRASS 7\index{GRASS} installation. -->
