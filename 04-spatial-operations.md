@@ -983,9 +983,12 @@ data(nz_height, package = "spData")
 E1. It was established in Section \@ref(spatial-vec) that Canterbury was the region of New Zealand containing most of the 100 highest points in the country.
 How many of these high points does the Canterbury region contain?
 
+**Bonus:** plot the result using the `plot()` function to show all of New Zealand, `canterbury` region highlighted in yellow, high points in Canterbury represented with black dots and  
 
 
-E2. Which region has the second highest number of `nz_height` points in, and how many does it have?
+
+
+E2. Which region has the second highest number of `nz_height` points, and how many does it have?
 
 
 
