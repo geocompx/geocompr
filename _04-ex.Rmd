@@ -66,26 +66,49 @@ nz_height_combined %>%
   na.omit()
 ```
 
-E4. To test your knowledge of spatial predicates:
+E4. Test your knowledge of spatial predicates by finding out and plotting how US states relate to each other and other spatial objects.
 
-- Create an object representing Colorado state in the USA, e.g. with the command 
-`colorado = us_states[us_states$NAME == "Colorado",]` (base R) or
-`colorado = us_states %>% filter(NAME == "Colorado")` (tidyverse).
-- Create a new object representing all the objects that intersect, in some way, with Colorado and plot the result.
-- Create another object representing all the objects that touch Colorado and plot the result.
+The starting point of this exercise is to create an object representing Colorado state in the USA. Do this with the command 
+`colorado = us_states[us_states$NAME == "Colorado",]` (base R) or with with the  `filter()` function (tidyverse) and plot the resulting object in the context of US states.
 
-```{r 04-ex-4}
-plot(us_states$geometry)
-plot(Colorado$geometry, col = 2, add = TRUE)
+- Create a new object representing all the states that geographically intersect with Colorado and plot the result (hint: the most concise way to do this is with the subsetting method `[`).
+- Create another object representing all the objects that touch (have a shared boundary with) Colorado and plot the result (hint: remember you can use the argument `op = st_intersects` and other spatial relations during spatial subsetting operations in base R).
+
+```{r 04-ex-4-1}
 colorado = us_states[us_states$NAME == "Colorado", ]
-intersects_with_colorado = us_states[colorado, , op = st_intersects]
-touches_colorado = us_states[colorado, , op = st_touches]
 plot(us_states$geometry)
+plot(colorado$geometry, col = "grey", add = TRUE)
+```
+
+```{r 04-ex-4-2}
+intersects_with_colorado = us_states[colorado, , op = st_intersects]
+plot(us_states$geometry, main = "States that intersect with Colorado")
+plot(intersects_with_colorado$geometry, col = "grey", add = TRUE)
+```
+
+```{r 04-ex-4-3}
+# Alternative but more verbose solutions
+# 2: With intermediate object, one list for each state
+sel_intersects_colorado = st_intersects(us_states, colorado)
+sel_intersects_colorado_list = lengths(sel_intersects_colorado) > 0
+intersects_with_colorado = us_states[sel_intersects_colorado_list, ]
+
+# 3: With intermediate object, one index for each state
+sel_intersects_colorado2 = st_intersects(colorado, us_states)
+sel_intersects_colorado2
+us_states$NAME[unlist(sel_intersects_colorado2)]
+
+# 4: With tidyverse
+us_states %>% 
+  st_filter(y = colorado, .predicate = st_intersects)
+```
+
+```{r 04-ex-4-4}
+touches_colorado = us_states[colorado, , op = st_touches]
+plot(us_states$geometry, main = "States that touch Colorado")
 plot(touches_colorado$geometry, col = "grey", add = TRUE)
 ```
 
-
-# What are the neighbouring states of Colorado? 
 
 E4. Use `dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))`, and reclassify the elevation in three classes: low (<300), medium and high (>500).
 Secondly, read the NDVI raster (`ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))`) and compute the mean NDVI and the mean elevation for each altitudinal class.
