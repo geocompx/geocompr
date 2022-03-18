@@ -43,8 +43,23 @@ E3. Generalizing the question to all regions: how many of New Zealand's 16 regio
 - Bonus: create a table listing these regions in order of the number of points and their name.
 
 ```{r 04-ex-e3}
+# Base R way:
 nz_height_count = aggregate(nz_height, nz, length)
 nz_height_combined = cbind(nz, count = nz_height_count$elevation)
+plot(nz_height_combined)
+
+# Tidyverse way:
+nz_height_joined = st_join(nz_height, nz %>% select(Name))
+# Calculate n. points in each region - this contains the result
+nz_height_counts = nz_height_joined %>% 
+  group_by(Name) %>% 
+  summarise(count = n())
+
+# Optionally join results with nz geometries:
+nz_height_combined = left_join(nz, nz_height_counts %>% sf::st_drop_geometry())
+# plot(nz_height_combined) # Check: results identical to base R result
+
+# Generate a summary table
 nz_height_combined %>% 
   st_drop_geometry() %>% 
   dplyr::select(Name, count) %>% 
