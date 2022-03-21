@@ -606,7 +606,31 @@ Now, you have to set up a location and a mapset if you want to use GRASS\index{G
 
 ### WhiteboxTools {#whitebox}
 
+<!-- whitebox init -->
+
 <!-- https://giswqs.github.io/whiteboxR/ -->
+
+<!-- Pre-compiled binaries are only available for download for 64-bit Linux (Ubuntu 20.04), Windows and Mac OS (Intel) platforms. -->
+
+
+```r
+whitebox::install_whitebox()
+```
+
+<!-- source code (or docker) - https://github.com/jblindsay/whitebox-tools -->
+
+
+```r
+library(whitebox)
+wbt_init()
+```
+
+<!-- `??whitebox` -->
+<!-- ??wbt_ -->
+
+<!-- For more information visit https://giswqs.github.io/whiteboxR/ -->
+<!-- https://www.whiteboxgeo.com/manual/wbt_book/intro.html -->
+
 
 ## When to use what?
 
