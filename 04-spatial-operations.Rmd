@@ -30,7 +30,7 @@ Spatial joining (Section \@ref(spatial-joining)) and aggregation (Section \@ref(
 Spatial operations differ from non-spatial operations in a number of ways, however:
 Spatial joins, for example, can be done in a number of ways --- including matching entities that intersect with or are within a certain distance of the target dataset --- while the attribution joins discussed in Section \@ref(vector-attribute-joining) in the previous chapter can only be done in one way (except when using fuzzy joins, as described in the documentation of the [**fuzzyjoin**](https://cran.r-project.org/package=fuzzyjoin) package).
 The *type* of spatial relationship between objects must be considered when undertaking spatial operations, as described in Section \@ref(topological-relations), on topological relations between vector features.
-\index{spatial operations}.
+\index{spatial operations}
 Another unique aspect of spatial objects is distance: all spatial objects are related through space, and distance calculations can be used to explore the strength of this relationship, as described in the context of vector data in Section \@ref(distance-relations).
 
 Spatial operations on raster objects include subsetting --- covered in Section \@ref(spatial-raster-subsetting) --- and merging several raster 'tiles' into a single object, as demonstrated in Section \@ref(merging-rasters).
@@ -52,7 +52,7 @@ Section \@ref(spatial-ras) presents spatial operations on raster datasets using 
 Spatial subsetting is the process of taking a spatial object and returning a new object containing only features that *relate* in space to another object.
 Analogous to *attribute subsetting* (covered in Section \@ref(vector-attribute-subsetting)), subsets of `sf` data frames can be created with square bracket (`[`) operator using the syntax `x[y, , op = st_intersects]`, where `x` is an `sf` object from which a subset of rows will be returned, `y` is the 'subsetting object' and `, op = st_intersects` is an optional argument that specifies the topological relation (also known as the binary predicate) used to do the subsetting.
 The default topological relation used when an `op` argument is not provided is `st_intersects()`: the command `x[y, ]` is identical to `x[y, , op = st_intersects]` shown above but not `x[y, , op = st_disjoint]` (the meaning of these and other topological relations is described in the next section).
-The `filter()` function from the **tidyverse**\index{tidyverse (package)} can also be used but this approach more verbose, as we will see in the examples below.
+The `filter()` function from the **tidyverse**\index{tidyverse (package)} can also be used but this approach is more verbose, as we will see in the examples below.
 \index{vector!subsetting}
 \index{spatial!subsetting}
 
@@ -248,7 +248,7 @@ st_within(point_sf, polygon_sfc)
 st_touches(point_sf, polygon_sfc)
 ```
 
-Note that although the first point is *touches* the polygon, it is not within it; the third point is within the polygon but does not touch any part of its border.
+Note that although the first point *touches* the boundary polygon, it is not within it; the third point is within the polygon but does not touch any part of its border.
 The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (note `[, 1]` converts the result into a vector):
 
 ```{r 04-spatial-operations-11}
@@ -257,12 +257,24 @@ st_disjoint(point_sf, polygon_sfc, sparse = FALSE)[, 1]
 
 The function `st_is_within_distance()` detects features that *almost touch* the selection object, which has an additional `dist` argument.
 It can be used to set how close target objects need to be before they are selected.
-Note that although point 4 is one unit of distance from the nearest node of `polygon_sfc` (at point 2 in Figure \@ref(fig:relation-objects)), it is still selected when the distance is set to 0.9.
-This is illustrated in the code chunk below, which shows that every point is within 0.2 units of the polygon:
+Note that although point 2 is more than 0.2 units of distance from the nearest vertex of `polygon_sfc`, it is still selected when the distance is set to 0.2.
+This is because distance is measured to the nearest edge, in this case the part of the the polygon that lies directly above point 2 in Figure \@ref(fig:relation-objects).
+(You can verify the actual distance between point 2 and the polygon is 0.13 with the command `st_distance(point_sf, polygon_sfc)`.)
+The 'is within distance' binary spatial predicate is demonstrated in the code chunk below, the results of which show that every point is within 0.2 units of the polygon:
 
 ```{r 04-spatial-operations-14}
 st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
 ```
+
+```{r, eval=FALSE, echo=FALSE}
+# verify distances to the polygon with reference to paragraph above:
+st_distance(point_sf, polygon_sfc)
+#           [,1]
+# [1,] 0.0000000
+# [2,] 0.1341641
+# [3,] 0.0000000
+```
+
 
 ```{block2 04-spatial-operations-15, type='rmdnote'}
 Functions for calculating topological relations use spatial indices to largely speed up spatial query performance.
@@ -784,7 +796,7 @@ agg_aw$value
 ```
 
 In our case it is meaningful to sum up the values of the intersections falling into the aggregating zones since total income is a so-called spatially extensive variable (which increases with area), assuming income is evenly distributed across the smaller zones (hence the warning message above).
-This would be different for spatially [intensive](http://ibis.geog.ubc.ca/courses/geob370/notes/intensive_extensive.htm) variables such as *average* income or percentages, which do not increase as the area increases.
+This would be different for spatially [intensive](https://geodacenter.github.io/workbook/3b_rates/lab3b.html#spatially-extensive-and-spatially-intensive-variables) variables such as *average* income or percentages, which do not increase as the area increases.
 `st_interpolate_aw()` works equally with spatially intensive variables: set the `extensive` parameter to `FALSE` and it will use an average rather than a sum function when doing the aggregation.
 
 ### Distance relations 
