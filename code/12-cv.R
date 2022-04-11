@@ -179,6 +179,7 @@ saveRDS(agg, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-sp
 # 3.1 make the prediction using the glm====
 #**********************************************************
 
+<<<<<<< HEAD
 # lrn_glm$train(task)
 # fit = lrn_glm$model
 # # according to lrn_glm$help() the default for predictions was adjusted to FALSE,
@@ -210,10 +211,7 @@ saveRDS(agg, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-sp
 #                   terra::terrain(ta$elev, v = "aspect", unit = "radians"),
 #                   40, 270)
 # plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
-# # plot(pred, col = RColorBrewer::brewer.pal("YlOrRd", n =  9), add = TRUE, 
-# #      alpha = 0.6)
 # plot(pred, col = RColorBrewer::brewer.pal(name = "Reds", 9), add = TRUE, 
-#      alpha = 0.6)
 # 
 # # or using tmap 
 # # white raster to only plot the axis ticks, otherwise gridlines would be visible

@@ -152,27 +152,41 @@ The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `
 
 We are now ready for some QGIS geocomputation from within R!
 Let's try two example case studies.
-<!--toDo:jn-->
-<!-- add a second one later -->
 The first one shows how to unite polygons\index{union}.
 <!--toDo:jn-->
-<!-- add an extended explanation -->
-We use again the incongruent polygons we have already encountered in Section \@ref(spatial-aggr).
+<!-- add a second one later -->
+
+### Vector data
+
+Consider a situation when you have two polygon objects with different spatial units (e.g., regions, administrative units).
+Our goal is to merge these two objects into one, containing all of the boundary lines and related attributes.
+We use again the incongruent polygons we have already encountered in Section \@ref(incongruent) (Figure \@ref(fig:uniondata)).
 Both polygon datasets are available in the **spData** package, and for both we would like to use a geographic CRS\index{CRS!geographic} (see also Chapter \@ref(reproj-geo-data)).
 
-```{r 09-gis-4, eval=FALSE}
+```{r 09-gis-4}
 data("incongruent", "aggregating_zones", package = "spData")
 incongr_wgs = st_transform(incongruent, "EPSG:4326")
 aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 ```
 
-<!--toDo:jn-->
-<!-- next mention and explain qgis_algorithms() -->
-<!-- You can also find the algorithms\index{algorithm} in the [QGIS online documentation](https://docs.qgis.org/2.18/en/docs/user_manual/processing_algs/index.html). -->
-<!-- maybe also mention that it can be expanded based on other installed software... -->
-<!-- qgis_show_help() -->
+```{r uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders). "}
+library(tmap)
+tm_shape(incongr_wgs) +
+  tm_polygons(border.col = "grey5") +
+  tm_shape(aggzone_wgs) +
+  tm_borders(alpha = 0.5, col = "red") +
+  tm_add_legend(type = "line",
+                labels = c("incongr_wgs", "aggzone_wgs"),
+                col = c("grey5", "red"),
+                lwd = 3) +
+  tm_scale_bar(position = c("left", "bottom"),
+               breaks = c(0, 0.5, 1)) +
+  tm_layout(frame = FALSE,
+            legend.text.size = 1)
+```
+
 To find an algorithm to do this work, we can search the output of the `qgis_algorithms()` function.
-This function returns a data frame containing all of the available providers and the algorithms they provide. 
+This function returns a data frame containing all of the available providers and the algorithms they contain.^[Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.] 
 
 ```{r, eval=FALSE}
 qgis_algo = qgis_algorithms()
@@ -195,51 +209,81 @@ alg = "native:union"
 qgis_show_help(alg)
 ```
 
-<!--toDo:jn-->
-<!-- explain the help file -->
-<!-- acceptable values -- `Path to a vector layer` it can be an `sf` object -->
+The description gives a few sentences summary of what the selected algorithm does. 
+Next, a list of arguments gives us the possible arguments' names, for example, `INPUT`, `OVERLAY`, `OVERLAY_FIELDS_PREFIX`, and `OUTPUT` in this case, and their acceptable values.
+Based on the help information, some of the above arguments seem to expect a "path to a vector layer".
+However, the **qgisprocess** package also allows to provide `sf` object as well in these cases.^[Objects from the **terra** and **stars** package can be used when a path to a raster layer.]
+The algorithm's outputs (it is possible to have more than one output) are listed at the end of the help list.
 
 Finally, we can let QGIS\index{QGIS} do the work.
-<!-- qgis_run_algorithm -->
-<!-- Note that the workhorse function `run_qgis()` accepts R named arguments, i.e., you can specify the parameter names as returned by `get_usage()` in `run_qgis()` as you would do in any other regular R function. -->
-<!-- Note also that `run_qgis()` accepts spatial objects residing in R's global environment as input (here: `aggzone_wgs` and `incongr_wgs`).  -->
-<!-- But of course, you could also specify paths to spatial vector files stored on disk. -->
-<!-- Setting the `load_output` to `TRUE` automatically loads the QGIS output as an **sf**-object\index{sf} into R. -->
+The main function of **qgisprocess** is `qgis_run_algorithm()`.
+It accepts the used algorithm name and a set of named arguments shown in the help list, and performs expected calculations.
+In our case, three arguments seem important - `INPUT`, `OVERLAY`, and `OUTPUT`.
+The first one, `INPUT`, is our main vector object `incongr_wgs`, while the second one, `OVERLAY`, is `aggzone_wgs`.
+The last argument, `OUTPUT`, expects a path to a new vector file; however, if we do not provide the path, **qgisprocess** will automatically create a temporary file.
 
 ```{r 09-gis-7, eval=FALSE}
-union = qgis_run_algorithm(alg, INPUT = incongr_wgs, OVERLAY = aggzone_wgs, 
-                           OUTPUT = file.path(tempdir(), "union.gpkg"))
+union = qgis_run_algorithm(alg, INPUT = incongr_wgs, OVERLAY = aggzone_wgs)
 union
 ```
+
+Running the above line of code will save our two input objects into temporary .gpkg files, run the selected algorithm on them, and return a temporary .gpkg file as the output.
+The **qgisprocess** package stores the `qgis_run_algorithm()` result as a list containing, in this case, a path to the output file.
+We can either read this file back into R with `read_sf()` (e.g., `union_sf = read_sf(union[[1]])`) or directly with `st_as_sf()`:
 
 ```{r, eval=FALSE}
 union_sf = st_as_sf(union)
 ```
 
-<!-- Note that the QGIS\index{QGIS} union\index{vector!union} operation merges the two input layers into one layer by using the intersection\index{vector!intersection} and the symmetrical difference of the two input layers (which by the way is also the default when doing a union operation in GRASS\index{GRASS} and SAGA\index{SAGA}). -->
-<!-- This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)! -->
-<!-- The QGIS output contains empty geometries and multipart polygons. -->
-<!-- Empty geometries might lead to problems in subsequent geoprocessing tasks which is why they will be deleted. -->
-<!-- `st_dimension()` returns `NA` if a geometry is empty, and can therefore be used as a filter.  -->
+Note that the QGIS\index{QGIS} union\index{vector!union} operation merges the two input layers into one layer by using the intersection\index{vector!intersection} and the symmetrical difference of the two input layers (which, by the way, is also the default when doing a union operation in GRASS\index{GRASS} and SAGA\index{SAGA}).
+This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)!
+
+Our result, `union_sf`, is a multipolygon with a larger number of features than two input objects .
+Notice, however, that many of these polygons are small and do not represent real areas but are rather a result of our two datasets having a different level of detail.
+These artifacts of error are called sliver polygons (see red-colored polygons in the left panel of \@ref(fig:sliver))
+One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^, and next remove them.
+Let's search for an appropriate algorithm.
 
 ```{r, eval=FALSE}
 grep("clean", qgis_algo$algorithm, value = TRUE)
 ```
 
+This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS.
+GRASS GIS's `v.clean` is a powerful tool for cleaning topology of spatial vector data. 
+Importantly, we can use it through **qgisprocess**.
+
+Similarly to the previous step, we should start by looking at this algorithm's help.
+
 ```{r, eval=FALSE}
 qgis_show_help("grass7:v.clean")
 ```
 
-<!-- https://grass.osgeo.org/grass78/manuals/v.clean.html -->
+You may notice that the help text is quite long and contains a lot of arguments.^[Also note that these arguments, contrary to the QGIS's ones, are in lower case.]
+This is because `v.clean` is a multi tool -- it can clean different types of geometries and solve different types of topological problems.
+For this example, let's focus on just a few arguments, however, we encourage you to visit [this algorithm's documentation](https://grass.osgeo.org/grass78/manuals/v.clean.html) to learn more about `v.clean` capabilities.
+
+The main argument for this algorithm is `input` -- our vector object.
+Next, we need to select a tool -- a cleaning method. ^[It is also possible to select several tools, which will then be executed sequentially.]
+About a dozen of tools exist in `v.clean` allowing to, for example, remove duplicate geometries, remove small angles between lines, or remove small areas.
+In this case, we are interested in the latter tool, `rmarea`, which is identified by the number 10.
+Several of the tools, `rmarea` included, expect an additional argument `threshold`, which behavior depends on the selected tool.
+In our case, the `rmarea` tool removes all areas smaller or equal to `threshold`. 
+
+Let's run this algorithm and convert its output into a new `sf` object `clean_sf`.
 
 ```{r 09-gis-7c, eval=FALSE}
-clean = qgis_run_algorithm("grass7:v.clean", input = union_sf, type = 4,
-                           tool = 10, threshold = 25000, 
-                           output = file.path(tempdir(), "clean.gpkg"))
+clean = qgis_run_algorithm("grass7:v.clean", input = union_sf,
+                           tool = 10, threshold = 25000)
 clean_sf = st_as_sf(clean)
-plot(clean_sf)
 ```
-<!-- To learn more about **RQGIS**\index{RQGIS (package)}, see @muenchow_rqgis:_2017.  -->
+
+The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver polygons are now removed.
+
+```{r sliver, echo=FALSE, fig.cap="Sliver polygons colored in red (left panel). Cleaned polygons (right panel)."}
+knitr::include_graphics("figures/10-sliver.png")
+```
+
+### Raster data
 
 ## (R)SAGA {#rsaga}
 
@@ -545,12 +589,12 @@ As mentioned previously, SAGA\index{SAGA} is especially good at the fast process
 GRASS GIS\index{GRASS}, on the other hand, is the only GIS presented here supporting a topologically based spatial database which is especially useful for network analyses but also simulation studies (see below).
 QGIS is much more user-friendly compared to GRASS- and SAGA-GIS, especially for first-time GIS users, and probably the most popular open-source GIS.
 Therefore, **RQGIS**\index{RQGIS (package)} is an appropriate choice for most use cases.
-Its main advantages are
+Its main advantages are:
 
-- a unified access to several GIS, and therefore the provision of >1000 geoalgorithms (Table \@ref(tab:gis-comp)) including duplicated functionality, e.g., you can perform overlay-operations using QGIS-\index{QGIS}, SAGA-\index{SAGA} or GRASS-geoalgorithms\index{GRASS};
-- automatic data format conversions (SAGA uses `.sdat` grid files and GRASS uses its own database format but QGIS will handle the corresponding conversions);
-- its automatic passing of geographic R objects to QGIS geoalgorithms\index{geoalgorithm} and back into R; and
-- convenience functions to support the access of the online help, named arguments and automatic default value retrieval (**rgrass7**\index{rgrass7 (package)} inspired the latter two features).
+- A unified access to several GIS, and therefore the provision of >1000 geoalgorithms (Table \@ref(tab:gis-comp)) including duplicated functionality, e.g., you can perform overlay-operations using QGIS-\index{QGIS}, SAGA-\index{SAGA} or GRASS-geoalgorithms\index{GRASS}
+- Automatic data format conversions (SAGA uses `.sdat` grid files and GRASS uses its own database format but QGIS will handle the corresponding conversions)
+- Its automatic passing of geographic R objects to QGIS geoalgorithms\index{geoalgorithm} and back into R
+- Convenience functions to support the access of the online help, named arguments and automatic default value retrieval (**rgrass7**\index{rgrass7 (package)} inspired the latter two features)
 
 By all means, there are use cases when you certainly should use one of the other R-GIS bridges.
 Though QGIS is the only GIS providing a unified interface to several GIS\index{GIS} software packages, it only provides access to a subset of the corresponding third-party geoalgorithms (for more information please refer to @muenchow_rqgis:_2017).
