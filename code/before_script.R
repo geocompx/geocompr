@@ -25,7 +25,8 @@ knit_hooks$set(output = function(x, options) {
                 x = paste(x, collapse = '\n')
         }
         hook_output(x, options)
-})
+},
+               crop = knitr::hook_pdfcrop)
 
 set.seed(2017)
 options(digits = 3)
