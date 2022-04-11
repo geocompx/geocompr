@@ -9,9 +9,9 @@ The chapter uses the following packages:
 
 ```{r 14-eco-1, message=FALSE, eval=FALSE}
 library(sf)
-library(raster)
-# library(RQGIS)
-library(mlr)
+library(terra)
+library(qgisprocess)
+library(mlr3)
 library(dplyr)
 library(vegan)
 ```
@@ -63,15 +63,19 @@ To guarantee an optimal prediction, it is advisable to tune beforehand the hyper
 
 All the data needed for the subsequent analyses is available via the **spDataLarge** package.
 
-```{r 14-eco-2, eval=FALSE}
-data("study_area", "random_points", "comm", "dem", "ndvi", package = "spDataLarge")
+```{r 15-eco-2, eval=FALSE}
+# spatial vector objects
+data("study_area", "random_points", "comm", package = "spDataLarge")
+# spatial raster objects
+dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
+ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 ```
 
 `study_area` is an `sf`\index{sf} polygon representing the outlines of the study area.
 `random_points` is an `sf` object, and contains the 100 randomly chosen sites.
 `comm` is a community matrix of the wide data format [@wickham_tidy_2014] where the rows represent the visited sites in the field and the columns the observed species.^[In statistics, this is also called a contingency table or cross-table.]
 
-```{r 14-eco-3, eval=FALSE}
+```{r 15-eco-3, eval=FALSE}
 # sites 35 to 40 and corresponding occurrences of the first five species in the
 # community matrix
 comm[35:40, 1:5]
@@ -89,7 +93,7 @@ The rownames of `comm` correspond to the `id` column of `random_points`.
 `dem` is the digital elevation model\index{digital elevation model} (DEM) for the study area, and `ndvi` is the Normalized Difference Vegetation Index (NDVI) computed from the red and near-infrared channels of a Landsat scene (see Section \@ref(local-operations) and `?ndvi`).
 Visualizing the data helps to get more familiar with it, as shown in Figure \@ref(fig:sa-mongon) where the `dem` is overplotted by the `random_points` and the `study_area`.
 
-```{r 14-eco-4, eval=FALSE, echo=FALSE}
+```{r 15-eco-4, eval=FALSE, echo=FALSE}
 # create hillshade
 hs = hillShade(terrain(dem), terrain(dem, "aspect"))
 # plot the data
@@ -138,66 +142,93 @@ To compute catchment area\index{catchment area} and catchment slope, we will mak
 `get_usage()` returns all function\index{function} parameters and default values of a specific geoalgorithm\index{geoalgorithm}.
 Here, we present only a selection of the complete output.
 
-```{r 14-eco-5, eval=FALSE}
-get_usage("saga:sagawetnessindex")
-#>ALGORITHM: Saga wetness index
-#>	DEM <ParameterRaster>
-#>  ...
-#>	SLOPE_TYPE <ParameterSelection>
-#>  ...
-#>	AREA <OutputRaster>
-#>	SLOPE <OutputRaster>
-#>	AREA_MOD <OutputRaster>
-#>	TWI <OutputRaster>
+```{r 15-eco-5, eval=FALSE}
+qgis_show_help("saga:sagawetnessindex")
+#> Saga wetness index (saga:sagawetnessindex)
 #> ...
-#>SLOPE_TYPE(Type of Slope)
-#>	0 - [0] local slope
-#>	1 - [1] catchment slope
+#> ----------------
+#> Arguments
+#> ----------------
+#> 
+#> DEM: Elevation
+#> 	Argument type:	raster
+#> 	Acceptable values:
+#> 		- Path to a raster layer
+#> ...
+#> SLOPE_TYPE: Type of Slope
+#> 	Argument type:	enum
+#> 	Available values:
+#> 		- 0: [0] local slope
+#> 		- 1: [1] catchment slope
+#> ...
+#> AREA: Catchment area
+#> 	Argument type:	rasterDestination
+#> 	Acceptable values:
+#> 		- Path for new raster layer
+#>... 
+#> ----------------
+#> Outputs
+#> ----------------
+#> 
+#> AREA: <outputRaster>
+#> 	Catchment area
+#> SLOPE: <outputRaster>
+#> 	Catchment slope
 #> ...
 ```
 
 Subsequently, we can specify the needed parameters using R named arguments (see Section \@ref(rqgis)).
-Remember that we can use a `RasterLayer` living in R's\index{R} global environment to specify the input raster `DEM` (see Section \@ref(rqgis)).
+Remember that we can use a `SpatRaster` living in R's\index{R} global environment to specify the input raster `DEM` (see Section \@ref(rqgis)).
 Specifying 1 as the `SLOPE_TYPE` makes sure that the algorithm will return the catchment slope.
 The resulting output rasters\index{raster} should be saved to temporary files with an `.sdat` extension which is a SAGA\index{SAGA} raster format.
-Setting `load_output` to `TRUE` ensures that the resulting rasters will be imported into R.
 
-```{r 14-eco-6, eval=FALSE}
+```{r 15-eco-6, eval=FALSE}
 # environmental predictors: catchment slope and catchment area
-ep = run_qgis(alg = "saga:sagawetnessindex",
-              DEM = dem,
-              SLOPE_TYPE = 1, 
-              SLOPE = tempfile(fileext = ".sdat"),
-              AREA = tempfile(fileext = ".sdat"),
-              load_output = TRUE,
-              show_output_paths = FALSE)
+ep = qgis_run_algorithm(alg = "saga:sagawetnessindex",
+                        DEM = dem,
+                        SLOPE_TYPE = 1, 
+                        SLOPE = tempfile(fileext = ".sdat"),
+                        AREA = tempfile(fileext = ".sdat"),
+                        .quiet = TRUE)
 ```
 
-This returns a list named `ep` consisting of two elements: `AREA` and `SLOPE`.
-Let us add two more raster objects to the list, namely `dem` and `ndvi`, and convert it into a raster stack\index{raster!stack} (see Section \@ref(raster-classes)).
+This returns a list named `ep` containing the paths to the computed output rasters.
+Let us read in catchment area as well as catchment slope into a multilayer `SpatRaster` object (see Section \@ref(raster-classes)).
+Additionally, we will add two more raster objects it, namely `dem` and `ndvi`.
 
-```{r 14-eco-7, eval=FALSE}
-ep = stack(c(dem, ndvi, ep))
-names(ep) = c("dem", "ndvi", "carea", "cslope")
+```{r 15-eco-7, eval=FALSE}
+# read in catchment area and catchment slope
+ep = ep[c("AREA", "SLOPE")] |>
+  unlist() |>
+  terra::rast()
+# assign proper names 
+names(ep) = c("carea", "cslope")
+# make sure all rasters share the same origin
+origin(ep) = origin(dem)
+# add dem and ndvi to the multilayer SpatRaster object
+ep = c(dem, ndvi, ep) 
 ```
 
 Additionally, the catchment area\index{catchment area} values are highly skewed to the right (`hist(ep$carea)`).
 A log10-transformation makes the distribution more normal.
 
-```{r 14-eco-8, eval=FALSE}
+```{r 15-eco-8, eval=FALSE}
 ep$carea = log10(ep$carea)
 ```
 
 As a convenience to the reader, we have added `ep` to **spDataLarge**:
 
-```{r 14-eco-9, eval=FALSE}
-data("ep", package = "spDataLarge")
+```{r 15-eco-9, eval=FALSE}
+ep = terra::rast(system.file("raster/ep.tif", package = "spDataLarge"))
 ```
 
 Finally, we can extract the terrain attributes to our field observations (see also Section \@ref(raster-extraction)).
 
-```{r 14-eco-10, eval=FALSE}
-random_points[, names(ep)] = raster::extract(ep, random_points)
+```{r 15-eco-10, eval=FALSE}
+random_points[, names(ep)] = 
+  # first column is for our purposes an unnecessary ID column created
+  # automatically by terra::extract
+  terra::extract(ep, terra::vect(random_points))[, -1]
 ```
 
 ## Reducing dimensionality {#nmds}
