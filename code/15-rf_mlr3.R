@@ -28,12 +28,13 @@ ep = qgis_run_algorithm(alg = "saga:sagawetnessindex",
 ep = ep[c("AREA", "SLOPE")] |>
   unlist() |>
   terra::rast()
+names(ep) = c("carea", "cslope")
 # make sure all rasters share the same origin
 origin(ep) = origin(dem)
 ep = c(dem, ndvi, ep) 
-names(ep) = c("dem", "ndvi", "carea", "cslope")
 ep$carea = log10(ep$carea)
 random_points[, names(ep)] = 
+  # first column is an ID column we don't need
   terra::extract(ep, terra::vect(random_points))[, -1]
 
 # presence-absence matrix
