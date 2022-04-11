@@ -60,10 +60,12 @@ task = TaskClassifST$new(
 
 # glm learner
 lrn_glm = lrn("classif.log_reg", predict_type = "prob")
+lrn_glm$fallback = lrn("classif.featureless", predict_type = "prob")
 
 # construct SVM learner (using ksvm function from the kernlab package)
 lrn_ksvm = lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot",
                type = "C-svc")
+lrn_ksvm$fallback = lrn("classif.featureless", predict_type = "prob")
 # rbfdot Radial Basis kernel "Gaussian" 
 # the list of hyper-parameters (kernel parameters). This is a list which
 # contains the parameters to be used with the kernel function. For valid
@@ -93,7 +95,7 @@ at_ksvm = AutoTuner$new(
   terminator = terminator,
   tuner = tuner
 )
-
+at_ksvm$fallback = lrn("classif.featureless", predict_type = "prob") 
 # 2.3 cross-validation====
 #**********************************************************
 
@@ -114,7 +116,8 @@ print(design_grid)
 # execute the outer loop sequentially and parallelize the inner loop
 future::plan(list("sequential", "multisession"), 
              # use half of all available cores
-             workers = floor(future::availableCores()) / 2)
+             # workers = floor(future::availableCores()) / 2
+             workers = 8)
 
 # why do we need the seed?
 # the seed is needed when to make sure
@@ -123,6 +126,7 @@ set.seed(012348)
 # reduce verbosity
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("info")
+tictoc::tic()
 progressr::with_progress(expr = {
   # New argument `encapsulate` for `resample()` and `benchmark()` to
   # conveniently enable encapsulation and also set the fallback learner to the
@@ -134,6 +138,10 @@ progressr::with_progress(expr = {
                   store_backends = FALSE,
                   store_models = TRUE)
 })
+tictoc::toc()
+# stop the parallelization plan
+future:::ClusterRegistry("stop")
+
 # plot your result
 # library(mlr3viz)
 # p1 = autoplot(bmr, measure = msr("classif.auc"))
@@ -153,15 +161,16 @@ d[, resampling_id := as.factor(resampling_id) |>
                         "spatial CV" = "repeated_spcv_coords") |> 
     forcats::fct_rev()]
 # create the boxplot which shows the overfitting in the nsp-case
-ggplot2::ggplot(data = d, mapping = aes(x = resampling_id, y = classif.auc)) +
-  geom_boxplot(fill = c("lightblue2", "mistyrose2")) +
-  theme_bw() +
-  labs(y = "AUROC", x = "")
+# ggplot2::ggplot(data = d, mapping = aes(x = resampling_id, y = classif.auc)) +
+#   geom_boxplot(fill = c("lightblue2", "mistyrose2")) +
+#   theme_bw() +
+#   labs(y = "AUROC", x = "")
 
 # save your result
-# saveRDS(agg, file = "extdata/12-sp_conv_cv.rds")
+saveRDS(agg, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-sp_conv_cv_test.rds")
 # read in if necessary
 # agg = readRDS("extdata/12-sp_conv_cv.rds")
+
 #**********************************************************
 # 3 spatial prediction----
 #**********************************************************
@@ -170,63 +179,63 @@ ggplot2::ggplot(data = d, mapping = aes(x = resampling_id, y = classif.auc)) +
 # 3.1 make the prediction using the glm====
 #**********************************************************
 
-lrn_glm$train(task)
-fit = lrn_glm$model
-# according to lrn_glm$help() the default for predictions was adjusted to FALSE,
-# since we would like to have TRUE predictions, we have to change back
-# fit$coefficients = fit$coefficients * -1
-
-pred = terra::predict(object = ta, model = fit, fun = predict,
-                       type = "response")
-
-# make the prediction "manually"
-ta_2 = ta
-newdata = as.data.frame(as.matrix(ta_2))
-colSums(is.na(newdata))  # ok, there are NAs
-ind = rowSums(is.na(newdata)) == 0
-tmp = lrn_glm$predict_newdata(newdata = newdata[ind, ], task = task)
-newdata[ind, "pred"] = as.data.table(tmp)[["prob.TRUE"]]
-# check
-all.equal(as.numeric(values(pred)), newdata$pred)
-pred_2 = ta$slope
-values(pred_2) = newdata$pred
-all.equal(pred, pred_2)
-plot(c(pred, pred_2))
-
-#**********************************************************
-# 3.2 plot the prediction====
-#**********************************************************
-
-hs = terra::shade(ta$slope * pi / 180, 
-                  terra::terrain(ta$elev, v = "aspect", unit = "radians"),
-                  40, 270)
-plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
-# plot(pred, col = RColorBrewer::brewer.pal("YlOrRd", n =  9), add = TRUE, 
+# lrn_glm$train(task)
+# fit = lrn_glm$model
+# # according to lrn_glm$help() the default for predictions was adjusted to FALSE,
+# # since we would like to have TRUE predictions, we have to change back
+# # fit$coefficients = fit$coefficients * -1
+# 
+# pred = terra::predict(object = ta, model = fit, fun = predict,
+#                        type = "response")
+# 
+# # make the prediction "manually"
+# ta_2 = ta
+# newdata = as.data.frame(as.matrix(ta_2))
+# colSums(is.na(newdata))  # ok, there are NAs
+# ind = rowSums(is.na(newdata)) == 0
+# tmp = lrn_glm$predict_newdata(newdata = newdata[ind, ], task = task)
+# newdata[ind, "pred"] = as.data.table(tmp)[["prob.TRUE"]]
+# # check
+# all.equal(as.numeric(values(pred)), newdata$pred)
+# pred_2 = ta$slope
+# values(pred_2) = newdata$pred
+# all.equal(pred, pred_2)
+# plot(c(pred, pred_2))
+# 
+# #**********************************************************
+# # 3.2 plot the prediction====
+# #**********************************************************
+# 
+# hs = terra::shade(ta$slope * pi / 180, 
+#                   terra::terrain(ta$elev, v = "aspect", unit = "radians"),
+#                   40, 270)
+# plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
+# # plot(pred, col = RColorBrewer::brewer.pal("YlOrRd", n =  9), add = TRUE, 
+# #      alpha = 0.6)
+# plot(pred, col = RColorBrewer::brewer.pal(name = "Reds", 9), add = TRUE, 
 #      alpha = 0.6)
-plot(pred, col = RColorBrewer::brewer.pal(name = "Reds", 9), add = TRUE, 
-     alpha = 0.6)
-
-# or using tmap 
-# white raster to only plot the axis ticks, otherwise gridlines would be visible
-study_mask = terra::vect(study_mask)
-lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
-rect = tmaptools::bb_poly(raster::raster(hs))
-bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.02, 1), ylim = c(-0.02, 1), 
-                    relative = TRUE)
-tm_shape(hs, bbox = bbx) +
-  tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
-          labels.rot = c(0, 90)) +
-  tm_raster(palette = "white", legend.show = FALSE) +
-  # hillshade
-  tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
-  tm_raster(palette = gray(0:100 / 100), n = 100,
-            legend.show = FALSE) +
-  # prediction raster
-  tm_shape(terra::mask(pred, study_mask)) +
-  tm_raster(alpha = 0.5, palette = "Reds", n = 6, legend.show = TRUE,
-            title = "Susceptibility") +
-  # rectangle and outer margins
-  qtm(rect, fill = NULL) +
-  tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
-            legend.position = c("left", "bottom"),
-            legend.title.size = 0.9)
+# 
+# # or using tmap 
+# # white raster to only plot the axis ticks, otherwise gridlines would be visible
+# study_mask = terra::vect(study_mask)
+# lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
+# rect = tmaptools::bb_poly(raster::raster(hs))
+# bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.02, 1), ylim = c(-0.02, 1), 
+#                     relative = TRUE)
+# tm_shape(hs, bbox = bbx) +
+#   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
+#           labels.rot = c(0, 90)) +
+#   tm_raster(palette = "white", legend.show = FALSE) +
+#   # hillshade
+#   tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
+#   tm_raster(palette = gray(0:100 / 100), n = 100,
+#             legend.show = FALSE) +
+#   # prediction raster
+#   tm_shape(terra::mask(pred, study_mask)) +
+#   tm_raster(alpha = 0.5, palette = "Reds", n = 6, legend.show = TRUE,
+#             title = "Susceptibility") +
+#   # rectangle and outer margins
+#   qtm(rect, fill = NULL) +
+#   tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
+#             legend.position = c("left", "bottom"),
+#             legend.title.size = 0.9)
