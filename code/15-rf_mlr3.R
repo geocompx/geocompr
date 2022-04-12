@@ -84,3 +84,23 @@ at = AutoTuner$new(
 at$train(task)
 at$tuning_result
 at$predict(task)
+
+# predict to new data
+pred_terra = terra::predict(ep, model = at)
+names(pred_terra) = "pred"
+
+# doing it "manually"
+newdata = as.data.frame(as.matrix(ep))
+colSums(is.na(newdata))  # 0 NAs
+# but assuming there were results in a more generic approach
+ind = rowSums(is.na(newdata)) == 0
+tmp = at$predict_newdata(newdata = newdata[ind, ], task = task)
+newdata[ind, "pred"] = as.data.table(tmp)[["response"]]
+pred_2 = pred_terra
+pred_2[] = newdata$pred
+# same as
+# values(pred_2) = newdata$pred
+# all.equal(pred_terra, pred_2)  # does not work, don't know why
+identical(values(pred_terra), values(pred_2))  # TRUE
+plot(pred_terra - pred_2)  # just 0s, perfect
+plot(c(pred, pred_2))
