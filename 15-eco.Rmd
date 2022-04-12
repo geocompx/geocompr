@@ -40,7 +40,7 @@ In this chapter we will demonstrate ecological applications of some of the techn
 This case study will involve analyzing the composition and the spatial distribution of the vascular plants on the southern slope of Mt. Mongón, a *lomas* mountain near Casma on the central northern coast of Peru (Figure \@ref(fig:study-area-mongon)).
 
 ```{r study-area-mongon, echo=FALSE, fig.cap="The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017).", out.width="60%", fig.scap="The Mt. Mongón study area."}
-knitr::include_graphics("figures/study-area-mongon.png")
+knitr::include_graphics("figures/15_study_area_mongon.png")
 # knitr::include_graphics("https://user-images.githubusercontent.com/1825120/38989956-6eae7c9a-43d0-11e8-8f25-3dd3594f7e74.png")
 ```
 
@@ -130,7 +130,7 @@ plot(st_geometry(study_area), add = TRUE)
 #                          under = TRUE)
 # grid.text("m asl", x = unit(0.8, "npc"), y = unit(0.75, "npc"), 
 #           gp = gpar(cex = 0.8))
-knitr::include_graphics("figures/sa-mongon-1.png")
+knitr::include_graphics("figures/15_sa_mongon_sampling.png")
 ```
 
 The next step is to compute variables which we will not only need for the modeling and predictive mapping (see Section \@ref(predictive-mapping)) but also for aligning the Non-metric multidimensional scaling (NMDS)\index{NMDS} axes with the main gradient in the study area, altitude and humidity, respectively (see Section \@ref(nmds)).
@@ -304,7 +304,7 @@ Since humidity is highly correlated with elevation, we rotate the NMDS axes\inde
 Plotting the result reveals that the first axis is, as intended, clearly associated with altitude (Figure \@ref(fig:xy-nmds)).
 
 ```{r xy-nmds-code, fig.cap="Plotting the first NMDS axis against altitude.", fig.scap = "First NMDS axis against altitude plot.", fig.asp=1, out.width="60%", eval=FALSE}
-elev = dplyr::filter(random_points, id %in% rownames(pa)) %>% 
+elev = dplyr::filter(random_points, id %in% rownames(pa)) |> 
   dplyr::pull(dem)
 # rotating NMDS in accordance with altitude (proxy for humidity)
 rotnmds = MDSrotate(nmds, elev)
@@ -316,11 +316,11 @@ plot(y = sc[, 1], x = elev, xlab = "elevation in m",
 ```
 
 ```{r xy-nmds, fig.cap="Plotting the first NMDS axis against altitude.", fig.scap = "First NMDS axis against altitude plot.", fig.asp=1, out.width="60%"}
-knitr::include_graphics("figures/xy-nmds-1.png")
+knitr::include_graphics("figures/15_xy_nmds.png")
 ```
 
 ```{r 15-eco-15, eval=FALSE, echo=FALSE}
-# scores and rotated scores in one figure                        
+# scores and rotated scores in one figure
 p1 = xyplot(scores(rotnmds)[, 2] ~ scores(rotnmds)[, 1], pch = 16, 
              col = "lightblue", xlim = c(-3, 2), ylim = c(-2, 2),
              xlab = list("Dimension 1", cex = 0.8), 
@@ -357,8 +357,8 @@ plot(scores(nmds, choices = 1:2))
 points(scores(rotnmds, choices = 1:2), col = "lightblue", pch = 16)
 
 
-sc = scores(nmds, choices = 1:2) %>% as.data.frame
-sc$id = rownames(sc) %>% as.numeric
+sc = scores(nmds, choices = 1:2) |> as.data.frame()
+sc$id = rownames(sc) |> as.numeric()
 rp = inner_join(select(sc, id), st_drop_geometry(random_points))
 fit_1 = envfit(nmds, select(rp, dem))
 fit_2 = envfit(rotnmds, select(rp, dem))
@@ -566,71 +566,67 @@ is relatively good when considering the range of the response variable which is
 ### Predictive mapping
 
 The tuned hyperparameters\index{hyperparameter} can now be used for the prediction.
-We simply have to modify our learner using the result of the hyperparameter tuning, and run the corresponding model.
+To do so, we only need to run the `predict` method of our fitted `AutoTuner` object.
 
-```{r 14-eco-27, eval=FALSE}
+```{r 15-eco-27, eval=FALSE}
 # predicting using the best hyperparameter combination
 at$predict(task)
 ```
 
-The last step is to apply the model to the spatially available predictors, i.e., to the raster stack\index{raster!stack}.
-So far, `terra::predict()` does not support the output of **ranger** models, hence, we will have to program the prediction ourselves.
-First, we convert `ep` into a prediction data frame which secondly serves as input for the `predict.ranger()` function.
-Thirdly, we put the predicted values back into a `RasterLayer`\index{raster} (see Section \@ref(raster-subsetting) and Figure \@ref(fig:rf-pred)).
+The `predict` method will apply the model to all observations used in the modeling.
+Given a multilayer `SpatRaster` containing rasters named as the predictors used in the modeling, `terra::predict()` will also make spatial predictions, i.e., predict to new data.
 
-```{r 14-eco-28, eval=FALSE}
-terra::predict(ep, model = at)
-
-# convert raster stack into a data frame
-new_data = as.data.frame(as.matrix(ep))
-# apply the model to the data frame
-pred_rf = predict(model_rf, newdata = new_data)
-# put the predicted values into a raster
-pred = dem
-# replace altitudinal values by rf-prediction values
-pred[] = pred_rf$data$response
+```{r 15-eco-28, eval=FALSE}
+pred = terra::predict(ep, model = at, fun = predict)
 ```
 
 ```{r rf-pred, echo=FALSE, fig.cap="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.", fig.width = 10, fig.height = 10, fig.scap="Predictive mapping of the floristic gradient."}
-# library("latticeExtra")
-# library("grid")
-# 
-# # create a color palette
-# blue = rgb(0, 0, 146, maxColorValue = 255)
-# lightblue = rgb(0, 129, 255, maxColorValue = 255)
-# turquoise = rgb(0, 233, 255, maxColorValue = 255)
-# green = rgb(142, 255, 11, maxColorValue = 255)
-# yellow = rgb(245, 255, 8, maxColorValue = 255)
-# orange = rgb(255, 173, 0, maxColorValue = 255)
-# lightred = rgb(255, 67, 0, maxColorValue = 255)
-# red = rgb(170, 0, 0, maxColorValue = 255)
-# pal = colorRampPalette(c(blue, lightblue, turquoise, green, yellow, 
-#                          orange, lightred, red))
-# 
 # # restrict the prediction to your study area
-# pred = mask(pred, study_area) %>%
-#   trim
+# pred = terra::mask(pred, terra::vect(study_area)) |>
+#   terra::trim()
 # # create a hillshade
-# hs = hillShade(terrain(dem), terrain(dem, "aspect")) %>%
-#   mask(., study_area) 
-# spplot(extend(pred, 2), col.regions = pal(50), alpha.regions = 0.7,
+# hs = terra::shade(terra::terrain(ep$dem, v = "slope", unit = "radians"),
+#                   terra::terrain(ep$dem, v = "aspect", unit = "radians"),
+#                   40, 270) |>
+#   terra::mask(terra::vect(study_area))
+# 
+# # png(file = "figures/15_rf_pred.png", width = 20, height = 20, units = "cm", 
+# #     res = 300)
+# spplot(terra::extend(pred, 2), col.regions = pal(50), alpha.regions = 0.7,
 #        scales = list(draw = TRUE,
-#                      tck = c(1, 0), 
+#                      tck = c(1, 0),
 #                      cex = 0.8),
 #        colorkey = list(space = "right", width = 0.5, height = 0.5,
 #                        axis.line = list(col = "black")),
 #        sp.layout = list(
 #          # list("sp.points", as(random_points, "Spatial"), pch = 16,
 #          #      col = "black", cex = 0.8, first = FALSE),
-#          list("sp.polygons", as(study_area, "Spatial"), 
-#               col = "black", first = FALSE, lwd = 3)
+#          list("sp.polygons", as(study_area, "Spatial"),
+#               col = "black", first = FALSE, lwd = 5)
 #        )
-#        ) + 
-#   latticeExtra::as.layer(spplot(hs, col.regions = gray(0:100 / 100)), 
+#        ) +
+#   latticeExtra::as.layer(spplot(hs, col.regions = gray(0:100 / 100)),
 #                          under = TRUE)
-# grid.text("NMDS1", x = unit(0.75, "npc"), y = unit(0.75, "npc"), 
-#           gp = gpar(cex = 0.8))
-knitr::include_graphics("figures/rf-pred-1.png")
+# grid.text("NMDS1", x = unit(0.92, "npc"), y = unit(0.77, "npc"),
+#           gp = gpar(cex = 0.9))
+# # dev.off()
+
+knitr::include_graphics("figures/15_rf_pred.png")
+```
+
+In case, `terra::predict()` does not support a model algorithm, you can still make the predictions manually.
+
+```{r 15-eco-29, eval=FALSE}
+newdata = as.data.frame(as.matrix(ep))
+colSums(is.na(newdata))  # 0 NAs
+# but assuming there were 0s results in a more generic approach
+ind = rowSums(is.na(newdata)) == 0
+tmp = at$predict_newdata(newdata = newdata[ind, ], task = task)
+newdata[ind, "pred"] = as.data.table(tmp)[["response"]]
+pred_2 = ep$dem
+# now fill the raster with the predicted values
+pred_2[] = newdata$pred
+identical(values(pred), values(pred_2))  # TRUE
 ```
 
 The predictive mapping clearly reveals distinct vegetation belts (Figure \@ref(fig:rf-pred)).
@@ -647,7 +643,7 @@ Interestingly, the spatial prediction clearly reveals that the bromeliad belt is
 
 In this chapter we have ordinated\index{ordination} the community matrix of the **lomas** Mt. Mongón with the help of a NMDS\index{NMDS} (Section \@ref(nmds)).
 The first axis, representing the main floristic gradient in the study area, was modeled as a function of environmental predictors which partly were derived through R-GIS\index{GIS} bridges (Section \@ref(data-and-data-preparation)).
-The **mlr**\index{mlr (package)} package provided the building blocks to spatially tune the hyperparameters\index{hyperparameter} `mtry`, `sample.fraction` and `min.node.size` (Section \@ref(mlr-building-blocks)).
+The **mlr3**\index{mlr3 (package)} package provided the building blocks to spatially tune the hyperparameters\index{hyperparameter} `mtry`, `sample.fraction` and `min.node.size` (Section \@ref(mlr-building-blocks)).
 The tuned hyperparameters\index{hyperparameter} served as input for the final model which in turn was applied to the environmental predictors for a spatial representation of the floristic gradient (Section \@ref(predictive-mapping)).
 The result demonstrates spatially the astounding biodiversity in the middle of the desert.
 Since **lomas** mountains are heavily endangered, the prediction map can serve as basis for informed decision-making on delineating protection zones, and making the local population aware of the uniqueness found in their immediate neighborhood.
