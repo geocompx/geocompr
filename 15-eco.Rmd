@@ -261,7 +261,7 @@ Often ordinations\index{ordination} using presence-absence data yield better res
 Ordination techniques such as NMDS\index{NMDS} require at least one observation per site.
 Hence, we need to dismiss all sites in which no species were found.
 
-```{r 14-eco-11, eval=FALSE}
+```{r 15-eco-11, eval=FALSE}
 # presence-absence matrix
 pa = decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
@@ -273,7 +273,7 @@ The resulting output matrix serves as input for the NMDS\index{NMDS}.
 NMDS\index{NMDS} is an iterative procedure trying to make the ordinated space more similar to the input matrix in each step.
 To make sure that the algorithm converges, we set the number of steps to 500 (`try` parameter).
 
-```{r 14-eco-12, eval=FALSE, message=FALSE}
+```{r 15-eco-12, eval=FALSE, message=FALSE}
 set.seed(25072018)
 nmds = metaMDS(comm = pa, k = 4, try = 500)
 nmds$stress
@@ -288,11 +288,11 @@ nmds$stress
 #> 0.08831395
 ```
 
-```{r 14-eco-13, eval=FALSE, echo=FALSE}
+```{r 15-eco-13, eval=FALSE, echo=FALSE}
 saveRDS(nmds, "extdata/15-nmds.rds")
 ```
 
-```{r 14-eco-14, include=FALSE, eval=FALSE}
+```{r 15-eco-14, include=FALSE, eval=FALSE}
 nmds = readRDS("extdata/15-nmds.rds")
 ```
 
@@ -319,7 +319,7 @@ plot(y = sc[, 1], x = elev, xlab = "elevation in m",
 knitr::include_graphics("figures/xy-nmds-1.png")
 ```
 
-```{r 14-eco-15, eval=FALSE, echo=FALSE}
+```{r 15-eco-15, eval=FALSE, echo=FALSE}
 # scores and rotated scores in one figure                        
 p1 = xyplot(scores(rotnmds)[, 2] ~ scores(rotnmds)[, 1], pch = 16, 
              col = "lightblue", xlim = c(-3, 2), ylim = c(-2, 2),
@@ -380,9 +380,9 @@ Here, we shortly introduce decision trees and bagging, since they form the basis
 We refer the reader to @james_introduction_2013 for a more detailed description of random forests\index{random forest} and related techniques.
 
 To introduce decision trees by example, we first construct a response-predictor matrix by joining the rotated NMDS\index{NMDS} scores to the field observations (`random_points`).
-We will also use the resulting data frame for the **mlr**\index{mlr (package)} modeling later on.
+We will also use the resulting data frame for the **mlr3**\index{mlr3 (package)} modeling later on.
 
-```{r 14-eco-16, eval=FALSE}
+```{r 15-eco-16, eval=FALSE}
 # construct response-predictor matrix
 # id- and response variable
 rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
@@ -393,19 +393,19 @@ rp = inner_join(random_points, rp, by = "id")
 Decision trees split the predictor space into a number of regions.
 To illustrate this, we apply a decision tree to our data using the scores of the first NMDS\index{NMDS} axis as the response (`sc`) and altitude (`dem`) as the only predictor.
 
-```{r 14-eco-17, eval=FALSE}
+```{r 15-eco-17, eval=FALSE}
 library("tree")
 tree_mo = tree(sc ~ dem, data = rp)
 plot(tree_mo)
 text(tree_mo, pretty = 0)
 ```
 
-```{r 14-eco-18, echo=FALSE, eval=FALSE}
+```{r 15-eco-18, echo=FALSE, eval=FALSE}
 library("tree")
 tree_mo = tree(sc ~ dem, data = rp)
 ```
 
-```{r 14-eco-19, eval=FALSE, echo=FALSE}
+```{r 15-eco-19, eval=FALSE, echo=FALSE}
 png("figures/15_tree.png", width = 1100, height = 700, units = "px", res = 300)
 par(mar = rep(1, 4))
 plot(tree_mo)
@@ -441,7 +441,7 @@ for each split of the tree—in other words, that bagging should be done.
 @james_introduction_2013
 -->
 
-### **mlr** building blocks
+### **mlr3** building blocks
 
 The code in this section largely follows the steps we have introduced in Section \@ref(svm).
 The only differences are the following:
@@ -449,7 +449,7 @@ The only differences are the following:
 1. The response variable is numeric, hence a regression\index{regression} task will replace the classification\index{classification} task of Section \@ref(svm).
 1. Instead of the AUROC\index{AUROC} which can only be used for categorical response variables, we will use the root mean squared error (RMSE\index{RMSE}) as performance measure.
 1. We use a random forest\index{random forest} model instead of a support vector machine\index{SVM} which naturally goes along with different hyperparameters\index{hyperparameter}.
-1. We are leaving the assessment of a bias-reduced performance measure as an exercise to the reader (see Exercises). 
+1. We are leaving the assessment of a bias-reduced performance measure as an exercise to the reader (see Exercises).
 Instead we show how to tune hyperparameters\index{hyperparameter} for (spatial) predictions.
 
 Remember that 125,500 models were necessary to retrieve bias-reduced performance estimates when using 100-repeated 5-fold spatial cross-validation\index{cross-validation!spatial CV} and a random search of 50 iterations (see Section \@ref(svm)).
@@ -463,42 +463,26 @@ This means, the inner hyperparameter\index{hyperparameter} tuning level is no lo
 Therefore, we tune the hyperparameters\index{hyperparameter} for a good spatial prediction on the complete dataset via a 5-fold spatial CV\index{cross-validation!spatial CV} with one repetition.
 <!-- If we used more than one repetition (say 2) we would retrieve multiple optimal tuned hyperparameter combinations (say 2) -->
 
-The preparation for the modeling using the **mlr**\index{mlr (package)} package includes the construction of a response-predictor matrix containing only variables which should be used in the modeling and the construction of a separate coordinate data frame.
+Having already constructed the input variables (`rp`), we are all set for specifying the **mlr3**\index{mlr3 (package)} building blocks (task, learner, and resampling).
+For specifying a spatial task, we use again the **mlr3spatiotempcv** package (section \@ref(spatial-cv-with-mlr3)).
+Since our response (`sc`) is numeric, we use a regression\index{regression} task.
 
-```{r 14-eco-20, eval=FALSE}
-# extract the coordinates into a separate data frame
-coords = sf::st_coordinates(rp) %>% 
-  as.data.frame() %>%
-  rename(x = X, y = Y)
-# only keep response and predictors which should be used for the modeling
-rp = dplyr::select(rp, -id, -spri) %>%
-  st_drop_geometry()
+```{r 15-eco-20, eval=FALSE}
+# create task
+task = TaskRegrST$new(id = "mongon", backend = dplyr::select(rp, -id, -spri),
+                      target = "sc")
 ```
 
-Having constructed the input variables, we are all set for specifying the **mlr**\index{mlr (package)} building blocks (task, learner, and resampling).
-We will use a regression\index{regression} task since the response variable is numeric.
-The learner is a random forest\index{random forest} model implementation from the **ranger** package.
+Using an `sf` object as the backend automatically provides the geometry information needed for the spatial partitioning later on.
+Additionally, we got rid of the columns `id` and `spri` since these variables should not be used as predictors in the modeling.
+Next, we go on to contruct the a random forest\index{random forest} learner from the **ranger** package.
 
-```{r 14-eco-21, eval=FALSE}
-# create task
-task = makeRegrTask(data = rp, target = "sc", coordinates = coords)
-# learner
-lrn_rf = makeLearner(cl = "regr.ranger", predict.type = "response")
+```{r 15-eco-21, eval=FALSE}
+lrn_rf = lrn("regr.ranger", predict_type = "response")
 ```
 
 As opposed to for example support vector machines\index{SVM} (see Section \@ref(svm)), random forests often already show good performances when used with the default values of their hyperparameters (which may be one reason for their popularity).
 Still, tuning often moderately improves model results, and thus is worth the effort [@probst_hyperparameters_2018].
-Since we deal with geographic data, we will again make use of spatial cross-validation to tune the hyperparameters\index{hyperparameter} (see Sections \@ref(intro-cv) and \@ref(spatial-cv-with-mlr)).
-Specifically, we will use a five-fold spatial partitioning with only one repetition (`makeResampleDesc()`). 
-In each of these spatial partitions, we run 50 models (`makeTuneControlRandom()`) to find the optimal hyperparameter\index{hyperparameter} combination.
-
-```{r 14-eco-22, eval=FALSE}
-# spatial partitioning
-perf_level = makeResampleDesc("SpCV", iters = 5)
-# specifying random search
-ctrl = makeTuneControlRandom(maxit = 50L)
-```
-
 In random forests\index{random forest}, the hyperparameters\index{hyperparameter} `mtry`, `min.node.size` and `sample.fraction` determine the degree of randomness, and should be tuned [@probst_hyperparameters_2018].
 `mtry` indicates how many predictor variables should be used in each tree. 
 If all predictors are used, then this corresponds in fact to bagging (see beginning of Section \@ref(modeling-the-floristic-gradient)).
@@ -510,16 +494,35 @@ Naturally, as trees and computing time become larger, the lower the `min.node.si
 Hyperparameter\index{hyperparameter} combinations will be selected randomly but should fall inside specific tuning limits (`makeParamSet()`).
 `mtry` should range between 1 and the number of predictors
 <!-- (`r # ncol(rp) - 1`), -->
-(4)
-`sample.fraction`
-should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10.
+(4), `sample.fraction` should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10.
 
 ```{r 14-eco-23, eval=FALSE}
 # specifying the search space
-ps = makeParamSet(
-  makeIntegerParam("mtry", lower = 1, upper = ncol(rp) - 1),
-  makeNumericParam("sample.fraction", lower = 0.2, upper = 0.9),
-  makeIntegerParam("min.node.size", lower = 1, upper = 10)
+search_space = ps(
+  mtry = p_int(lower = 1, upper = ncol(task$data()) - 1),
+  sample.fraction = p_dbl(lower = 0.2, upper = 0.9),
+  min.node.size = p_int(lower = 1, upper = 10)
+)
+```
+
+Having defined the search space, we are all set for specifying our tuning via the `AutoTuner()` function.
+Since we deal with geographic data, we will again make use of spatial cross-validation to tune the hyperparameters\index{hyperparameter} (see Sections \@ref(intro-cv) and \@ref(spatial-cv-with-mlr)).
+Specifically, we will use a five-fold spatial partitioning with only one repetition (`rsmp()`). 
+In each of these spatial partitions, we run 50 models (`trm()`) while using randomly selected hyperparameter configurations (`tnr`) within predefined limits (`seach_space`) to find the optimal hyperparameter\index{hyperparameter} combination.
+
+```{r 15-eco-22, eval=FALSE}
+at = AutoTuner$new(
+  learner = lrn_rf,
+  # spatial partitioning
+  resampling = rsmp("spcv_coords", folds = 5),
+  # performance measure
+  measure = msr("regr.rmse"),
+  # specify 50 iterations
+  terminator = trm("evals", n_evals = 50),
+  # predefined hyperparameter search space
+  search_space = search_space,
+  # specify random search
+  tuner = tnr("random_search")
 )
 ```
 
@@ -528,34 +531,33 @@ The performance measure is the root mean squared error (RMSE\index{RMSE}).
 
 ```{r 14-eco-24, eval=FALSE}
 # hyperparamter tuning
-set.seed(02082018)
-tune = tuneParams(learner = lrn_rf, 
-                  task = task,
-                  resampling = perf_level,
-                  par.set = ps,
-                  control = ctrl, 
-                  measures = mlr::rmse)
+set.seed(0412022)
+at$train(task)
 #>...
-#> [Tune-x] 49: mtry=3; sample.fraction=0.533; min.node.size=5
-#> [Tune-y] 49: rmse.test.rmse=0.5636692; time: 0.0 min
-#> [Tune-x] 50: mtry=1; sample.fraction=0.68; min.node.size=5
-#> [Tune-y] 50: rmse.test.rmse=0.6314249; time: 0.0 min
-#> [Tune] Result: mtry=4; sample.fraction=0.887; min.node.size=10 :
-#> rmse.test.rmse=0.5104918
+#> INFO  [11:39:31.375] [mlr3] Finished benchmark 
+#> INFO  [11:39:31.427] [bbotk] Result of batch 50: 
+#> INFO  [11:39:31.432] [bbotk]  mtry sample.fraction min.node.size regr.rmse warnings errors runtime_learners 
+#> INFO  [11:39:31.432] [bbotk]     2       0.2059293            10 0.5118128        0      0            0.149 
+#> INFO  [11:39:31.432] [bbotk]                                 uhash 
+#> INFO  [11:39:31.432] [bbotk]  81dfa6f8-0109-410d-bdb5-a1490e7caf8e 
+#> INFO  [11:39:31.448] [bbotk] Finished optimizing after 50 evaluation(s) 
+#> INFO  [11:39:31.451] [bbotk] Result: 
+#> INFO  [11:39:31.455] [bbotk]  mtry sample.fraction min.node.size learner_param_vals  x_domain regr.rmse 
+#> INFO  [11:39:31.455] [bbotk]     4       0.8999753             7          <list[4]> <list[3]> 0.3751501
 ```
 
-```{r 14-eco-25, eval=FALSE, echo=FALSE}
-saveRDS(tune, "extdata/15-tune.rds")
+```{r 15-eco-25, eval=FALSE, echo=FALSE}
+saveRDS(at, "extdata/15-tune.rds")
 ```
 
 ```{r 14-eco-26, echo=FALSE, eval=FALSE}
 tune = readRDS("extdata/15-tune.rds")
 ```
 
-An `mtry` of 4, a `sample.fraction` of 0.887, and a `min.node.size` of 10 represent the best hyperparameter\index{hyperparameter} combination.
+An `mtry` of 4, a `sample.fraction` of 0.9, and a `min.node.size` of 7 represent the best hyperparameter\index{hyperparameter} combination.
 An RMSE\index{RMSE} of
-<!-- `r # round(tune$y[attr(tune$y, "names") == "rmse.test.rmse"], 2)` -->
-0.51
+<!-- `r round(tune$tuning_result$regr.rmse, 2)` -->
+0.38
 is relatively good when considering the range of the response variable which is
 <!-- `r # round(diff(range(rp$sc)), 2)` -->
 3.04
@@ -567,32 +569,18 @@ The tuned hyperparameters\index{hyperparameter} can now be used for the predicti
 We simply have to modify our learner using the result of the hyperparameter tuning, and run the corresponding model.
 
 ```{r 14-eco-27, eval=FALSE}
-# learning using the best hyperparameter combination
-lrn_rf = makeLearner(cl = "regr.ranger",
-                     predict.type = "response",
-                     mtry = tune$x$mtry, 
-                     sample.fraction = tune$x$sample.fraction,
-                     min.node.size = tune$x$min.node.size)
-# doing the same more elegantly using setHyperPars()
-# lrn_rf = setHyperPars(makeLearner("regr.ranger", predict.type = "response"),
-#                       par.vals = tune$x)
-# train model
-model_rf = train(lrn_rf, task)
-# to retrieve the ranger output, run:
-# mlr::getLearnerModel(model_rf)
-# which corresponds to:
-# ranger(sc ~ ., data = rp, 
-#        mtry = tune$x$mtry, 
-#        sample.fraction = tune$x$sample.fraction,
-#        min.node.sie = tune$x$min.node.size)
+# predicting using the best hyperparameter combination
+at$predict(task)
 ```
 
 The last step is to apply the model to the spatially available predictors, i.e., to the raster stack\index{raster!stack}.
-So far, `raster::predict()` does not support the output of **ranger** models, hence, we will have to program the prediction ourselves.
+So far, `terra::predict()` does not support the output of **ranger** models, hence, we will have to program the prediction ourselves.
 First, we convert `ep` into a prediction data frame which secondly serves as input for the `predict.ranger()` function.
 Thirdly, we put the predicted values back into a `RasterLayer`\index{raster} (see Section \@ref(raster-subsetting) and Figure \@ref(fig:rf-pred)).
 
 ```{r 14-eco-28, eval=FALSE}
+terra::predict(ep, model = at)
+
 # convert raster stack into a data frame
 new_data = as.data.frame(as.matrix(ep))
 # apply the model to the data frame
