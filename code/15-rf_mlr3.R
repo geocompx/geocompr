@@ -1,3 +1,22 @@
+# Filename: 15-rf_mlr3.R (2022-04-14)
+
+# TO DO: use spatially cross-validated tuned hyperparameters to make a spatial prediction of the floristic composition of the Mount Mongón
+
+# Author(s): jannes.muenchow
+
+#**********************************************************
+# CONTENTS----
+#**********************************************************
+
+# 1 attach packages and data
+# 2 preprocessing
+# 3 modeling
+
+#**********************************************************
+# 1 attach packages and data----
+#**********************************************************
+
+# attach packages
 library(dplyr)
 library(mlr3)
 library(mlr3extralearners)
@@ -10,9 +29,14 @@ library(terra)
 library(sf)
 library(vegan)
 
+# attach data
 data("study_area", "random_points", "comm", package = "spDataLarge")
 dem = terra::rast(system.file("raster/dem.tif", package = "spDataLarge"))
 ndvi = terra::rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
+
+#**********************************************************
+# 2 preprocessing----
+#**********************************************************
 
 alg = "saga:sagawetnessindex"
 args = qgis_arguments(alg)
@@ -54,6 +78,10 @@ sc = scores(rotnmds, choices = 1:2)
 rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
 rp = inner_join(random_points, rp, by = "id")
+
+#**********************************************************
+# 3 modeling----
+#**********************************************************
 
 # create task
 task = TaskRegrST$new(id = "mongon", backend = dplyr::select(rp, -id, -spri),
