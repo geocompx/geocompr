@@ -179,7 +179,6 @@ saveRDS(agg, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-sp
 # 3.1 make the prediction using the glm====
 #**********************************************************
 
-<<<<<<< HEAD
 # lrn_glm$train(task)
 # fit = lrn_glm$model
 # # according to lrn_glm$help() the default for predictions was adjusted to FALSE,
