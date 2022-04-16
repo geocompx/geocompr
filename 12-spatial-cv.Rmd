@@ -138,7 +138,7 @@ Since terrain attributes are frequently associated with landsliding [@muenchow_g
 - `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
 - `log10_carea`: the decadic logarithm of the catchment area (log10 m^2^) representing the amount of water flowing towards a location.
 
-Data containing the landslide points, with the corresponding terrain attributes, is provided in the **spDataLarge** package, along with the terrain attribute raster stack from which the values were extracted.
+Data containing the landslide points, with the corresponding terrain attributes, is provided in the **spDataLarge** package, along with the multilayer terrain attribute raster from which the values were extracted.
 Hence, if you have not computed the predictors yourself, attach the corresponding data before running the code of the remaining chapter:
 
 ```{r 11-spatial-cv-5}
@@ -198,8 +198,8 @@ head(pred_glm)
 ```
 
 Spatial predictions can be made by applying the coefficients to the predictor rasters. 
-This can be done manually or with `raster::predict()`.
-In addition to a model object (`fit`), this function also expects a raster stack with the predictors named as in the model's input data frame (Figure \@ref(fig:lsl-susc)).
+This can be done manually or with `terra::predict()`.
+In addition to a model object (`fit`), this function also expects a `SpatRaster` with the predictors named as in the model's input data frame (Figure \@ref(fig:lsl-susc)).
 
 ```{r 12-spatial-cv-9}
 # making the prediction
@@ -687,7 +687,10 @@ mean(result$measures.test$auc)
 ```
 
 It appears that the GLM\index{GLM} (aggregated AUROC\index{AUROC} was `r sp_cv$aggr`) is slightly better than the SVM\index{SVM} in this specific case.
-However, using more than 50 iterations in the random search would probably yield hyperparameters\index{hyperparameter} that result in models with a better AUROC [@schratz_hyperparameter_2019].
+To guarantee an absolute fair comparison, one should also make sure that the two models use the exact same partitions something we haven't done here.
+To do so, **mlr3** offers the functions `benchmark()` and `benchmark_grid()` (see also https://mlr3book.mlr-org.com/perf-eval-cmp.html#benchmarking; @becker_mlr3_2021). 
+We will explore these functions in more detail in the Exercises.
+Please note also that using more than 50 iterations in the random search of the SVM would probably yield hyperparameters\index{hyperparameter} that result in models with a better AUROC [@schratz_hyperparameter_2019].
 On the other hand, increasing the number of random search iterations would also increase the total number of models and thus runtime.
 
 The estimated optimal hyperparameters for each fold at the performance estimation level can also be viewed.
@@ -718,9 +721,9 @@ This chapter used cross-validation\index{cross-validation} to assess predictive 
 As described in Section \@ref(intro-cv), observations with spatial coordinates may not be statistically independent due to spatial autocorrelation\index{autocorrelation!spatial}, violating a fundamental assumption of cross-validation.
 Spatial CV\index{cross-validation!spatial CV} addresses this issue by reducing bias introduced by spatial autocorrelation\index{autocorrelation!spatial}. 
 
-The **mlr**\index{mlr (package)} package facilitates (spatial) resampling\index{resampling} techniques in combination with the most popular statistical learning\index{statistical learning} techniques including linear regression\index{regression!linear}, semi-parametric models such as generalized additive models\index{generalized additive model} and machine learning\index{machine learning} techniques such as random forests\index{random forest}, SVMs\index{SVM}, and boosted regression trees [@bischl_mlr:_2016;@schratz_hyperparameter_2019].
+The **mlr3**\index{mlr3 (package)} package facilitates (spatial) resampling\index{resampling} techniques in combination with the most popular statistical learning\index{statistical learning} techniques including linear regression\index{regression!linear}, semi-parametric models such as generalized additive models\index{generalized additive model} and machine learning\index{machine learning} techniques such as random forests\index{random forest}, SVMs\index{SVM}, and boosted regression trees [@bischl_mlr:_2016;@schratz_hyperparameter_2019].
 Machine learning algorithms often require hyperparameter\index{hyperparameter} inputs, the optimal 'tuning' of which can require thousands of model runs which require large computational resources, consuming much time, RAM and/or cores.
-**mlr** tackles this issue by enabling parallelization\index{parallelization}.
+**mlr3** tackles this issue by enabling parallelization\index{parallelization}.
 
 Machine learning overall, and its use to understand spatial data, is a large field and this chapter has provided the basics, but there is more to learn.
 We recommend the following resources in this direction:
