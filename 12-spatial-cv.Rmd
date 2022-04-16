@@ -20,7 +20,7 @@ library(future)
 library(mlr3)
 library(mlr3learners)
 library(mlr3extralearners)
-library(ml3spatiotempcv)
+library(mlr3spatiotempcv)
 library(mlr3tuning)
 library(mlr3viz)
 ```
@@ -145,14 +145,16 @@ Hence, if you have not computed the predictors yourself, attach the correspondin
 # attach landslide points with terrain attributes
 data("lsl", package = "spDataLarge")
 # attach terrain attribute raster stack
-ta = stack(system.file("raster/ta.tif", package = "spDataLarge"))
+ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 ```
 
 The first three rows of `lsl`, rounded to two significant digits, can be found in Table \@ref(tab:lslsummary).
 
 ```{r lslsummary, echo=FALSE, warning=FALSE}
-lsl_table = lsl %>%
-  mutate_at(vars(-one_of("x", "y", "lslpts")), list(~signif(., 2))) %>%
+lsl_table = lsl |>
+  dplyr::mutate(
+    dplyr::across(-dplyr::all_of(c("x", "y", "lslpts")), 
+                  ~ signif(.x, 2))) |>
   head(3)
 knitr::kable(lsl_table, caption = "Structure of the lsl dataset.",
              caption.short = "`lsl` dataset.", booktabs = TRUE) %>%
@@ -344,9 +346,11 @@ Additionally, one should indicate the used CRS (`crs`) and if one wishes to use 
 library(mlr3)
 library(mlr3spatiotempcv)
 # create task
-task = TaskClassifST$new(
+task = mlr3spatiotempcv::TaskClassifST$new(
   id = "ecuador_lsl",
-  backend = mlr3::as_data_backend(lsl), target = "lslpts", positive = "TRUE",
+  backend = mlr3::as_data_backend(lsl), 
+  target = "lslpts", 
+  positive = "TRUE",
   extra_args = list(
     coordinate_names = c("x", "y"),
     coords_as_features = FALSE,
@@ -362,9 +366,9 @@ For a short data exploration, the `autoplot()` function of the **mlr3viz** packa
 ```{r autoplot, eval=FALSE}
 library(mlr3viz)
 # plot response against each predictor
-autoplot(task, type = "duo")
+mlr3viz::autoplot(task, type = "duo")
 # plot all variables against each other
-autoplot(task, type = "pairs")
+mlr3viz::autoplot(task, type = "pairs")
 ```
 
 Having created a task, we need to choose a **learner** that determines the statistical learning\index{statistical learning} method to use.
@@ -374,14 +378,14 @@ To find out about learners that are able to model a binary response variable, we
 
 ```{r 12-spatial-cv-12, eval=FALSE}
 library(mlr3extralearners)
-list_mlr3learners(
+mlr3extralearners::list_mlr3learners(
   filter = list(class = "classif", properties = "twoclass"), 
   select = c("id", "mlr3_package", "required_packages")) |>
   head()
 ```
 
 ```{r lrns, echo=FALSE}
-lrns_df = list_mlr3learners(
+lrns_df = mlr3extralearners::list_mlr3learners(
   filter = list(class = "classif", properties = "twoclass"), 
   select = c("id", "mlr3_package", "required_packages")) |>
   head()
@@ -405,7 +409,7 @@ Additionally, we need to specify the `predict.type` which determines the type of
 
 ```{r 12-spatial-cv-13, eval=FALSE}
 library(mlr3learners)
-learner = lrn("classif.log_reg", predict_type = "prob")
+learner = mlr3::lrn("classif.log_reg", predict_type = "prob")
 ```
 
 To access the help page of the learner and find out from which package it was taken, we can run:
@@ -428,8 +432,6 @@ task$data()
 learner$model
 ```
 
-`getLearnerModel()` extracts the used model which shows that **mlr** passed all specified parameters to the `glm` function in the background as also proved by following code:
-
 ```{r 12-spatial-cv-17, eval=FALSE}
 fit = glm(lslpts ~ ., family = binomial(link = "logit"), 
           data = dplyr::select(lsl, -x, -y))
@@ -450,7 +452,7 @@ We will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatial CV}:
 
 
 ```{r 12-spatial-cv-18, eval=FALSE}
-perf_level = rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
+perf_level = mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 ```
 
 To execute the spatial resampling, we run `resample()` using the previously specified task, learner, and resampling strategy.
@@ -462,9 +464,9 @@ set.seed(012348)
 # reduce verbosity
 lgr::get_logger("mlr3")$set_threshold("warn")
 # run spatial cross-validation
-sp_cv = resample(task = task,
-                 learner = learner,
-                 resampling = perf_level)
+sp_cv = mlr3::resample(task = task,
+                       learner = learner,
+                       resampling = perf_level)
 ```
 
 The output of the preceding code chunk is a bias-reduced assessment of the model's predictive performance, as illustrated in the following code chunk (required input data is saved in the file `12-sp_cv.rds` in the book's GitHub repo).
@@ -495,10 +497,11 @@ d[, resampling_id := as.factor(resampling_id) |>
                         "spatial CV" = "repeated_spcv_coords") |> 
     forcats::fct_rev()]
 # create the boxplot
-ggplot2::ggplot(data = d, mapping = aes(x = resampling_id, y = classif.auc)) +
-  geom_boxplot(fill = c("lightblue2", "mistyrose2")) +
-  theme_bw() +
-  labs(y = "AUROC", x = "")
+ggplot2::ggplot(data = d, 
+                mapping = ggplot2::aes(x = resampling_id, y = classif.auc)) +
+  ggplot2::geom_boxplot(fill = c("lightblue2", "mistyrose2")) +
+  ggplot2::theme_bw() +
+  ggplot2::labs(y = "AUROC", x = "")
 ```
 
 ### Spatial tuning of machine-learning hyperparameters {#svm}
@@ -533,14 +536,15 @@ Learners implementing SVM can be found using `listLearners()` as follows:
 
 ```{r 12-spatial-cv-23}
 mlr3extralearners::list_mlr3learners() %>%
-  .[class == "classif" & grepl("svm", id), .(id, class, mlr3_package, required_packages)]
+  .[class == "classif" & grepl("svm", id),
+    .(id, class, mlr3_package, required_packages)]
 ```
 
 Of the options illustrated above, we will use `ksvm()` from the **kernlab** package [@karatzoglou_kernlab_2004].
 To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel which is also the default of `ksvm()`.
 
 ```{r 12-spatial-cv-24, eval=FALSE}
-lrn_ksvm = lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot")
+lrn_ksvm = mlr3::lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot")
 ```
 
 The next stage is to specify a resampling strategy.
@@ -551,7 +555,7 @@ Again we will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatia
 
 ```{r 12-spatial-cv-25, eval=FALSE}
 # performance estimation level
-perf_level = rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
+perf_level = mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 ```
 
 Note that this is the exact same code as used for the GLM\index{GLM} in Section \@ref(glm); we have simply repeated it here as a reminder.
@@ -589,24 +593,24 @@ talk in person (see also exercises):
 ```{r 12-spatial-cv-26, eval=FALSE}
 library("mlr3tuning")
 # five spatially disjoint partitions
-tune_level = rsmp("spcv_coords", folds = 5)
+tune_level = mlr3::rsmp("spcv_coords", folds = 5)
 # use 50 randomly selected hyperparameters
-terminator = trm("evals", n_evals = 50)
-tuner = tnr("random_search")
+terminator = mlr3tuning::trm("evals", n_evals = 50)
+tuner = mlr3tuning::tnr("random_search")
 # define the outer limits of the randomly selected hyperparameters
-ps = ps(
-  C = p_dbl(lower = -12, upper = 15, trafo = function(x) 2^x),
-  sigma = p_dbl(lower = -15, upper = 6, trafo = function(x) 2^x)
+ps = paradox::ps(
+  C = paradox::p_dbl(lower = -12, upper = 15, trafo = function(x) 2^x),
+  sigma = paradox::p_dbl(lower = -15, upper = 6, trafo = function(x) 2^x)
 )
 ```
 
 The next stage is to modify the learner `lrn_ksvm` in accordance with all the characteristics defining the hyperparameter tuning with `AutoTuner$new()`.
 
 ```{r 12-spatial-cv-27, eval=FALSE}
-at_ksvm = AutoTuner$new(
+at_ksvm = mlr3tuning::AutoTuner$new(
   learner = lrn_ksvm,
   resampling = tune_level,
-  measure = msr("classif.auc"),
+  measure = mlr3::msr("classif.auc"),
   search_space = ps,
   terminator = terminator,
   tuner = tuner
@@ -656,12 +660,12 @@ Note that runtime depends on many aspects: CPU speed, the selected algorithm, th
 ```{r 12-spatial-cv-30, eval=FALSE}
 set.seed(12345)
 progressr::with_progress(expr = {
-  result = resample(task = task,
-                    learner = at_ksvm, 
-                    # outer resampling (performance level)
-                    resampling = perf_level,
-                    store_models = TRUE,
-                    encapsulate = "evaluate")
+  result = mlr3::resample(task = task,
+                          learner = at_ksvm, 
+                          # outer resampling (performance level)
+                          resampling = perf_level,
+                          store_models = TRUE,
+                          encapsulate = "evaluate")
 })
 
 # stop parallelization
