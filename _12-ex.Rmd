@@ -15,7 +15,7 @@ library(sf)
 library(tmap)
 ```
 
-E1. Compute the following terrain attributes from the `ta$elev` datasets loaded with `data("ta", package = "spDataLarge")` with the help of R-GIS bridges (see this [Chapter](https://geocompr.robinlovelace.net/gis.html#gis)):
+E1. Compute the following terrain attributes from the `elev` dataset loaded with `terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))$elev` with the help of R-GIS bridges (see this [Chapter](https://geocompr.robinlovelace.net/gis.html#gis)):
     - Slope
     - Plan curvature
     - Profile curvature
@@ -23,8 +23,7 @@ E1. Compute the following terrain attributes from the `ta$elev` datasets loaded 
     
 ```{r, eval=FALSE}
 # attach data
-ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
-dem = ta$elev
+dem = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))$elev
 
 algs = qgisprocess::qgis_algorithms()
 dplyr::filter(algs, grepl("curvature", algorithm))
@@ -32,27 +31,15 @@ alg = "saga:slopeaspectcurvature"
 qgisprocess::qgis_show_help(alg)
 qgisprocess::qgis_arguments(alg)
 # terrain attributes (ta)
-out_nms = paste0(tempdir(), "/", c("aspect", "slope", "cplan", "cprof"),
+out_nms = paste0(tempdir(), "/", c("slope", "cplan", "cprof"),
                  ".sdat")
-args = rlang::set_names(out_nms, c("ASPECT", "SLOPE", "C_PLAN", "C_PROF"))
+args = rlang::set_names(out_nms, c("SLOPE", "C_PLAN", "C_PROF"))
 out = qgis_run_algorithm(alg, ELEVATION = dem, METHOD = 6, 
                          UNIT_SLOPE = "[1] degree",
-                         UNIT_ASPECT = "[1] degree",
                          !!!args,
                          .quiet = TRUE
                          )
-# use brick because then the layers will be in memory and not on disk
-out[names(args)] |> terra::rast()
-ta = terra::rast(sapply(out[names(args)], \(x) x[1]))
-# hillshade (needs radians)
-# hs = hillShade(ta$SLOPE * pi / 180, ta$ASPECT * pi / 180, 40, 270)
-# plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
-# plot(dem, add = TRUE, alpha = 0.6)
-# dplyr::filter(lsl, lslpts == TRUE) |> 
-#   sf::st_as_sf(coords = c("x", "y"), crs = 32717) |>
-#   plot(add = TRUE, pch = 16)
-
-ta = raster::dropLayer(ta, "ASPECT")
+ta = out[names(args)] |> unlist() |> terra::rast()
 names(ta) = c("slope", "cplan", "cprof")
 # catchment area
 dplyr::filter(algs, grepl("[Cc]atchment", algorithm))
@@ -64,11 +51,11 @@ carea = qgis_run_algorithm(alg,
                            METHOD = 4, 
                            FLOW = file.path(tempdir(), "carea.sdat"))
 # transform carea
-carea = raster(carea$FLOW[1])
+carea = terra::rast(carea$FLOW[1])
 log10_carea = log10(carea)
 names(log10_carea) = "log10_carea"
 # add log_carea and dem to the terrain attributes
-ta = addLayer(x = ta, dem, log10_carea)
+ta = c(ta, dem, log10_carea)
 ```
 
 E2. Extract the values from the corresponding output rasters to the `lsl` data frame (`data("lsl", package = "spDataLarge"`) by adding new variables called `slope`, `cplan`, `cprof`, `elev` and `log_carea` (see this [section](https://geocompr.robinlovelace.net/spatial-cv.html#case-landslide) for details).
@@ -76,10 +63,12 @@ E2. Extract the values from the corresponding output rasters to the `lsl` data f
 ```{r, eval=FALSE}
 # attach terrain attribute raster stack (in case you have skipped the previous
 # exercise)
-data("ta", "lsl", package = "spDataLarge")
+data("lsl", package = "spDataLarge")
+ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 lsl = dplyr::select(lsl, x, y, lslpts)
 # extract values to points, i.e., create predictors
-lsl[, names(ta)] = raster::extract(ta, lsl[, c("x", "y")])
+lsl[, names(ta)] = terra::extract(ta, lsl[, c("x", "y")]) |>
+  dplyr::select(-ID)
 ```
 
 E3. Use the derived terrain attribute rasters in combination with a GLM to make a spatial prediction map similar to that shown in this [Figure](https://geocompr.robinlovelace.net/spatial-cv.html#fig:lsl-susc).
@@ -88,32 +77,38 @@ Running `data("study_mask", package = "spDataLarge")` attaches a mask of the stu
 ```{r, eval=FALSE}
 # attach data (in case you have skipped exercises 1) and 2)
 # landslide points with terrain attributes and terrain attribute raster stack
-data("lsl", "ta", "study_mask", package = "spDataLarge")
+data("lsl", "study_mask", package = "spDataLarge")
+ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 
 # fit the model
 fit = glm(lslpts ~ slope + cplan + cprof + elev + log10_carea, 
           data = lsl, family = binomial())
 
 # make the prediction
-pred = raster::predict(object = ta, model = fit, type = "response")
+pred = terra::predict(object = ta, model = fit, type = "response")
 
 # make the map
 lsl_sf = sf::st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
-hs = hillShade(ta$slope * pi / 180, terrain(ta$elev, opt = "aspect"))
-rect = tmaptools::bb_poly(hs)
-bbx = tmaptools::bb(hs, xlim = c(-0.02, 1), ylim = c(-0.02, 1), relative = TRUE)
+study_mask = terra::vect(study_mask)
+lsl_sf = sf::st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
+hs = terra::shade(ta$slope * pi / 180,
+                  terra::terrain(ta$elev, v = "aspect", unit = "radians"))
+rect = tmaptools::bb_poly(raster::raster(hs))
+bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.00001, 1),
+                    ylim = c(-0.00001, 1), relative = TRUE)
+# white raster to only plot the axis ticks, otherwise gridlines would be visible
 tm_shape(hs, bbox = bbx) +
   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
           labels.rot = c(0, 90)) +
   tm_raster(palette = "white", legend.show = FALSE) +
   # hillshade
-  tm_shape(mask(hs, study_area), bbox = bbx) +
-	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+  tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
+	tm_raster(palette = gray(0:100 / 100), n = 100,
+	          legend.show = FALSE) +
 	# prediction raster
-  tm_shape(mask(pred, study_area)) +
-	tm_raster(alpha = 0.5, palette = RColorBrewer::brewer.pal(name = "Reds", 6),
-	          auto.palette.mapping = FALSE, legend.show = TRUE,
-	          title = "Susceptibility\nprobability") +
+  tm_shape(terra::mask(pred, study_mask)) +
+	tm_raster(alpha = 0.5, palette = "Reds", n = 6, legend.show = TRUE,
+	          title = "Susceptibility") +
 	# rectangle and outer margins
   qtm(rect, fill = NULL) +
 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
