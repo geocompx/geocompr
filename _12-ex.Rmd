@@ -23,7 +23,7 @@ E1. Compute the following terrain attributes from the `ta$elev` datasets loaded 
     
 ```{r, eval=FALSE}
 # attach data
-data("ta", package = "spDataLarge")
+ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 dem = ta$elev
 
 algs = qgisprocess::qgis_algorithms()
@@ -42,7 +42,8 @@ out = qgis_run_algorithm(alg, ELEVATION = dem, METHOD = 6,
                          .quiet = TRUE
                          )
 # use brick because then the layers will be in memory and not on disk
-ta = raster::brick(lapply(out[names(args)], \(x) x[1]))
+out[names(args)] |> terra::rast()
+ta = terra::rast(sapply(out[names(args)], \(x) x[1]))
 # hillshade (needs radians)
 # hs = hillShade(ta$SLOPE * pi / 180, ta$ASPECT * pi / 180, 40, 270)
 # plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
