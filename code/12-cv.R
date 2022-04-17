@@ -136,7 +136,7 @@ progressr::with_progress(expr = {
   bmr = benchmark(design_grid, 
                   encapsulate = "evaluate",
                   store_backends = FALSE,
-                  store_models = TRUE)
+                  store_models = FALSE)
 })
 tictoc::toc()
 # stop the parallelization plan
@@ -153,13 +153,13 @@ future:::ClusterRegistry("stop")
 
 # instead of using autoplot, it might be easier to create the figure yourself
 agg = bmr$aggregate(measures = msr("classif.auc"))
-# extract the AUROC values and put them into one data.table
-d = purrr::map_dfr(agg$resample_result, ~ .$score(msr("classif.auc")))
-# rename the levels of resampling_id
-d[, resampling_id := as.factor(resampling_id) |>
-    forcats::fct_recode("conventional CV" = "repeated_cv", 
-                        "spatial CV" = "repeated_spcv_coords") |> 
-    forcats::fct_rev()]
+# # extract the AUROC values and put them into one data.table
+# d = purrr::map_dfr(agg$resample_result, ~ .$score(msr("classif.auc")))
+# # rename the levels of resampling_id
+# d[, resampling_id := as.factor(resampling_id) |>
+#     forcats::fct_recode("conventional CV" = "repeated_cv", 
+#                         "spatial CV" = "repeated_spcv_coords") |> 
+#     forcats::fct_rev()]
 # create the boxplot which shows the overfitting in the nsp-case
 # ggplot2::ggplot(data = d, mapping = aes(x = resampling_id, y = classif.auc)) +
 #   geom_boxplot(fill = c("lightblue2", "mistyrose2")) +
