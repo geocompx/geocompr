@@ -236,3 +236,17 @@ saveRDS(agg, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-sp
 #   tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
 #             legend.position = c("left", "bottom"),
 #             legend.title.size = 0.9)
+
+# # only GLM
+design_grid = benchmark_grid(
+  tasks = task,
+  learners = lrn_glm,
+  resamplings = list(rsmp_sp, rsmp_nsp))
+bmr = benchmark(design = design_grid, store_backends = FALSE)
+# bmr_dt = as.data.table(bmr)
+# saveRDS(bmr, "extdata/12-glm_sp_nsp_bmr.rds")
+# agg = bmr$aggregate(measures = mlr3::msr("classif.auc"))
+# saveRDS(agg, "extdata/12-glm_sp_nsp.rds")
+score = bmr$score(measures = msr("classif.auc"))
+saveRDS(score[, .(task_id, resampling_id, learner_id, classif.auc)], 
+        "extdata/12-glm_score_sp_nsp.rds")
