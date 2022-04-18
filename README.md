@@ -42,18 +42,18 @@ changed, including:
     [here](https://github.com/Robinlovelace/geocompr/search?q=terra&type=commits))
 -   Update of Chapter 7 to include mention alternative ways or
     reading-in OSM data in
-    [#656](https://github.com/Robinlovelace/geocompr/pull/656)
+    [\#656](https://github.com/Robinlovelace/geocompr/pull/656)
 -   Refactor build settings so the book builds on Docker images in the
     [geocompr/docker](https://github.com/geocompr/docker) repo
 -   Improve the experience of using the book in Binder (ideal for trying
     out the code before installing or updating the necessary R
     packages), as documented in issue
-    [#691](https://github.com/Robinlovelace/geocompr/issues/691) (thanks
-    to [yuvipanda](https://github.com/yuvipanda))
+    [\#691](https://github.com/Robinlovelace/geocompr/issues/691)
+    (thanks to [yuvipanda](https://github.com/yuvipanda))
 -   Improved communication of binary spatial predicates in Chapter 4
-    (see [#675](https://github.com/Robinlovelace/geocompr/pull/675))
+    (see [\#675](https://github.com/Robinlovelace/geocompr/pull/675))
 -   New section on the links between subsetting and clipping (see
-    [#698](https://github.com/Robinlovelace/geocompr/pull/698)) in
+    [\#698](https://github.com/Robinlovelace/geocompr/pull/698)) in
     Chapter 5
 -   New
     [section](https://geocompr.robinlovelace.net/spatial-operations.html#de-9im-strings)
@@ -104,15 +104,16 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [rsbivand](https://github.com/rsbivand),
 [iod-ine](https://github.com/iod-ine),
 [KiranmayiV](https://github.com/KiranmayiV),
+[defuneste](https://github.com/defuneste),
 [zmbc](https://github.com/zmbc),
 [erstearns](https://github.com/erstearns),
+[FlorentBedecarratsNM](https://github.com/FlorentBedecarratsNM),
 [dcooley](https://github.com/dcooley),
+[marcosci](https://github.com/marcosci),
 [MikeJohnPage](https://github.com/MikeJohnPage),
-[defuneste](https://github.com/defuneste),
 [eyesofbambi](https://github.com/eyesofbambi),
 [nickbearman](https://github.com/nickbearman),
 [tyluRp](https://github.com/tyluRp),
-[marcosci](https://github.com/marcosci),
 [giocomai](https://github.com/giocomai),
 [KHwong12](https://github.com/KHwong12),
 [LaurieLBaker](https://github.com/LaurieLBaker),
@@ -132,7 +133,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [olyerickson](https://github.com/olyerickson),
 [yvkschaefer](https://github.com/yvkschaefer),
 [katiejolly](https://github.com/katiejolly),
-[layik](https://github.com/layik),
+[kwhkim](https://github.com/kwhkim), [layik](https://github.com/layik),
 [mpaulacaldas](https://github.com/mpaulacaldas),
 [mtennekes](https://github.com/mtennekes),
 [mvl22](https://github.com/mvl22),
@@ -166,26 +167,25 @@ dependencies](https://github.com/r-spatial/sf#installing) and the
 
 ``` r
 install.packages("remotes")
+# To reproduce the first Part (chapters 1 to 8):
 remotes::install_github("geocompr/geocompkg")
-remotes::install_github("nowosad/spData")
-remotes::install_github("nowosad/spDataLarge")
 
 # During development work on the 2nd edition you may also need dev versions of
 # other packages to build the book, e.g.:
-remotes::install_github("rspatial/terra")
 remotes::install_github("mtennekes/tmap")
 ```
 
-Running the commands above should install the packages needed to run
-most parts of the book. To install and build the book in its entirety,
-run the following command (which installs additional ‘Suggests’
-packages):
+Running the commands above should install the packages needed to run the
+first part of the book (chapters 1 to 8). To install and build the book
+in its entirety, run the following command (which installs additional
+‘Suggests’ packages, this may take some time to run!):
 
 ``` r
-remotes::install_github("geocompr/geocompkg", dependencies = "Suggests")
+# To reproduce all chapters (install lots of packages, may take some time!)
+remotes::install_github("geocompr/geocompkg", dependencies = TRUE)
 ```
 
-You need a recent version of the GDAL, GEOS, PROJ and UDUNITS libraries
+You need a recent version of the GDAL, GEOS, PROJ and udunits libraries
 installed for this to work on Mac and Linux. See the **sf** package’s
 [README](https://github.com/r-spatial/sf) for information on that.
 
