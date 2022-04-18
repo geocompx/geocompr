@@ -9,20 +9,16 @@ The chapter uses the following packages:^[
 Packages **GGally**, **lgr**, **kernlab**, **ml3measures**, **paradox**, **pROC**, **progressr** and **spDataLarge** must also be installed although these do not need to be attached.
 ]
 
-```{r 12-spatial-cv-1, message=FALSE }
-library(sf)
-library(terra)
+```{r 12-spatial-cv-1, message=FALSE}
 library(dplyr)
-```
-
-```{r 12-spatial-cv-1-2, eval=FALSE}
-library(future)
 library(mlr3)
 library(mlr3learners)
 library(mlr3extralearners)
 library(mlr3spatiotempcv)
 library(mlr3tuning)
 library(mlr3viz)
+library(sf)
+library(terra)
 ```
 
 Required data will be attached in due course.
@@ -125,7 +121,7 @@ lsl_table = lsl |>
   mutate(across(.cols = -any_of(c("x", "y", "lslpts")), ~signif(., 2))) |>
   head(3)
 knitr::kable(lsl_table, caption = "Structure of the lsl dataset.",
-             caption.short = "`lsl` dataset.", booktabs = TRUE) %>%
+             caption.short = "`lsl` dataset.", booktabs = TRUE) |>
   kableExtra::kable_styling(latex_options = "scale_down")
 ```
 
@@ -141,24 +137,11 @@ Since terrain attributes are frequently associated with landsliding [@muenchow_g
 Data containing the landslide points, with the corresponding terrain attributes, is provided in the **spDataLarge** package, along with the multilayer terrain attribute raster from which the values were extracted.
 Hence, if you have not computed the predictors yourself, attach the corresponding data before running the code of the remaining chapter:
 
-```{r 11-spatial-cv-5}
+```{r 12-spatial-cv-5}
 # attach landslide points with terrain attributes
 data("lsl", package = "spDataLarge")
 # attach terrain attribute raster stack
 ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
-```
-
-The first three rows of `lsl`, rounded to two significant digits, can be found in Table \@ref(tab:lslsummary).
-
-```{r lslsummary, echo=FALSE, warning=FALSE}
-lsl_table = lsl |>
-  dplyr::mutate(
-    dplyr::across(-dplyr::all_of(c("x", "y", "lslpts")), 
-                  ~ signif(.x, 2))) |>
-  head(3)
-knitr::kable(lsl_table, caption = "Structure of the lsl dataset.",
-             caption.short = "`lsl` dataset.", booktabs = TRUE) %>%
-  kableExtra::kable_styling(latex_options="scale_down")
 ```
 
 ## Conventional modeling approach in R {#conventional-model}
@@ -203,7 +186,7 @@ Spatial predictions can be made by applying the coefficients to the predictor ra
 This can be done manually or with `terra::predict()`.
 In addition to a model object (`fit`), this function also expects a `SpatRaster` with the predictors named as in the model's input data frame (Figure \@ref(fig:lsl-susc)).
 
-```{r 12-spatial-cv-9}
+```{r 12-spatial-cv-9, eval=FALSE}
 # making the prediction
 pred = terra::predict(ta, model = fit, type = "response")
 ```
@@ -343,8 +326,6 @@ The `coordinate_names` argument expects the names of the coordinate columns (see
 Additionally, one should indicate the used CRS (`crs`) and if one wishes to use the coordinates as predictors in the modeling (`coords_as_features`).
 
 ```{r 12-spatial-cv-11, eval=FALSE}
-library(mlr3)
-library(mlr3spatiotempcv)
 # create task
 task = mlr3spatiotempcv::TaskClassifST$new(
   id = "ecuador_lsl",
@@ -473,15 +454,17 @@ The output of the preceding code chunk is a bias-reduced assessment of the model
 As performance measure, we again choose the AUROC.
 
 ```{r 12-spatial-cv-21, echo=FALSE}
-bm_agg = readRDS("extdata/12-sp_conv_cv.rds")
-sp_cv = bm_agg$resample_result[[1]]
+# bm_agg = readRDS("extdata/12-sp_conv_cv.rds")
+# sp_cv = bm_agg$resample_result[[1]]
+score = readRDS("extdata/12-glm_score_sp_nsp.rds")
 ```
 
 ```{r 12-spatial-cv-22}
+score[, .(mean_auc = mean(classif.auc)), by = resampling_id]
 # summary statistics of the 500 models
-sp_cv$score(measures = msr("classif.auc"))[, summary(classif.auc)]
+# sp_cv$score(measures = mlr3::msr("classif.auc"))[, summary(classif.auc)]
 # mean AUROC of the 500 models
-sp_cv$aggregate(measures = msr("classif.auc"))
+# sp_cv$aggregate(measures = mlr3::msr("classif.auc"))
 ```
 
 To put these results in perspective, let us compare them with AUROC\index{AUROC} values from a 100-repeated 5-fold non-spatial cross-validation (Figure \@ref(fig:boxplot-cv); the code for the non-spatial cross-validation\index{cross-validation} is not shown here but will be explored in the exercise section).
@@ -490,7 +473,8 @@ As expected, the spatially cross-validated result yields lower AUROC values on a
 ```{r boxplot-cv, echo=FALSE, fig.width=6, fig.height=9, fig.cap="Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation.", fig.scap="Boxplot showing AUROC values."}
 library(ggplot2)
 # extract the AUROC values and put them into one data.table
-d = purrr::map_dfr(bm_agg$resample_result, ~ .$score(msr("classif.auc")))
+# d = purrr::map_dfr(bm_agg$resample_result, ~ .$score(mlr3::msr("classif.auc")))
+d = score
 # rename the levels of resampling_id
 d[, resampling_id := as.factor(resampling_id) |>
     forcats::fct_recode("conventional CV" = "repeated_cv", 
@@ -690,7 +674,7 @@ result$aggr
 mean(result$measures.test$auc)
 ```
 
-It appears that the GLM\index{GLM} (aggregated AUROC\index{AUROC} was `r sp_cv$aggr`) is slightly better than the SVM\index{SVM} in this specific case.
+It appears that the GLM\index{GLM} (aggregated AUROC\index{AUROC} was `r score[resampling_id == "repeated_spcv_coords", round(mean(classif.auc), 2)]`) is slightly better than the SVM\index{SVM} in this specific case.
 To guarantee an absolute fair comparison, one should also make sure that the two models use the exact same partitions something we haven't done here.
 To do so, **mlr3** offers the functions `benchmark()` and `benchmark_grid()` (see also https://mlr3book.mlr-org.com/perf-eval-cmp.html#benchmarking; @becker_mlr3_2021). 
 We will explore these functions in more detail in the Exercises.
