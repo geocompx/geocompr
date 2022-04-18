@@ -111,7 +111,7 @@ With a wide range of packages, R also supports advanced geospatial statistics\in
 \index{R!language}
 New integrated development environments (IDEs\index{IDE}) such as RStudio\index{RStudio} have made R more user-friendly for many, easing map making with a panel dedicated to interactive visualization.
 
-At its core, R is an object-oriented, [functional programming language](http://adv-r.had.co.nz/Functional-programming.html) [@wickham_advanced_2019], and was specifically designed as an interactive interface to other software [@chambers_extending_2016]. 
+At its core, R is an object-oriented, [functional programming language](https://adv-r.hadley.nz/fp.html) [@wickham_advanced_2019], and was specifically designed as an interactive interface to other software [@chambers_extending_2016]. 
 The latter also includes many 'bridges' to a treasure trove of GIS\index{GIS} software, 'geolibraries' and functions (see Chapter \@ref(gis)).
 It is thus ideal for quickly creating 'geo-tools', without needing to master lower level languages (compared to R) such as C\index{C}, FORTRAN\index{FORTRAN} or Java\index{Java} (see Section \@ref(software-for-geocomputation)). 
 \index{R}

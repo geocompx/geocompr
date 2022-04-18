@@ -9,11 +9,18 @@ The chapter uses the following packages:
 
 
 ```r
-library(sf)
-library(raster)
-# library(RQGIS)
-library(mlr)
+library(data.table)
 library(dplyr)
+library(mlr3)
+library(mlr3spatiotempcv)
+library(mlr3tuning)
+library(mlr3learners)
+library(qgisprocess)
+library(paradox)
+library(ranger)
+library(sf)
+library(terra)
+library(tree)
 library(vegan)
 ```
 
@@ -22,7 +29,7 @@ library(vegan)
 In this chapter we will model the floristic gradient of fog oases to reveal distinctive vegetation belts that are clearly controlled by water availability.
 To do so, we will bring together concepts presented in previous chapters and even extend them (Chapters \@ref(spatial-class) to \@ref(geometric-operations) and  Chapters \@ref(gis) and \@ref(spatial-cv)).
 
-Fog oases are one of the most fascinating vegetation formations we have ever encountered. 
+Fog oases are one of the most fascinating vegetation formations we have ever encountered.
 These formations, locally termed *lomas*, develop on mountains along the coastal deserts of Peru and Chile.^[Similar vegetation formations develop also in other parts of the world, e.g., in Namibia and along the coasts of Yemen and Oman [@galletti_land_2016].]
 The deserts' extreme conditions and remoteness provide the habitat for a unique ecosystem, including species endemic to the fog oases.
 Despite the arid conditions and low levels of precipitation of around 30-50 mm per year on average, fog deposition increases the amount of water available to plants during austal winter.
@@ -41,7 +48,7 @@ In this chapter we will demonstrate ecological applications of some of the techn
 This case study will involve analyzing the composition and the spatial distribution of the vascular plants on the southern slope of Mt. Mongón, a *lomas* mountain near Casma on the central northern coast of Peru (Figure \@ref(fig:study-area-mongon)).
 
 <div class="figure" style="text-align: center">
-<img src="figures/study-area-mongon.png" alt="The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017)." width="60%" />
+<img src="figures/15_study_area_mongon.png" alt="The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017)." width="60%" />
 <p class="caption">(\#fig:study-area-mongon)The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017).</p>
 </div>
 
@@ -66,7 +73,11 @@ All the data needed for the subsequent analyses is available via the **spDataLar
 
 
 ```r
-data("study_area", "random_points", "comm", "dem", "ndvi", package = "spDataLarge")
+# spatial vector objects
+data("study_area", "random_points", "comm", package = "spDataLarge")
+# spatial raster objects
+dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
+ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 ```
 
 `study_area` is an `sf`\index{sf} polygon representing the outlines of the study area.
@@ -89,7 +100,7 @@ comm[35:40, 1:5]
 
 The values represent species cover per site, and were recorded as the area covered by a species in proportion to the site area in percentage points (%; please note that one site can have >100% due to overlapping cover between individual plants).
 The rownames of `comm` correspond to the `id` column of `random_points`.
-`dem` is the digital elevation model\index{digital elevation model} (DEM) for the study area, and `ndvi` is the Normalized Difference Vegetation Index (NDVI) computed from the red and near-infrared channels of a Landsat scene (see Section \@ref(local-operations) and `?ndvi`).
+`dem` is the digital elevation model\index{digital elevation model} (DEM) for the study area, and `ndvi` is the Normalized Difference Vegetation Index (NDVI) computed from the red and near-infrared channels of a Landsat scene (see Section \@ref(local-operations) and `?ndvi.tif`).
 Visualizing the data helps to get more familiar with it, as shown in Figure \@ref(fig:sa-mongon) where the `dem` is overplotted by the `random_points` and the `study_area`.
 
 
@@ -97,7 +108,7 @@ Visualizing the data helps to get more familiar with it, as shown in Figure \@re
 \index{hillshade}
 
 <div class="figure" style="text-align: center">
-<img src="figures/sa-mongon-1.png" alt="Study mask (polygon), location of the sampling sites (black points) and DEM in the background." width="100%" />
+<img src="figures/15_sa_mongon_sampling.png" alt="Study mask (polygon), location of the sampling sites (black points) and DEM in the background." width="100%" />
 <p class="caption">(\#fig:sa-mongon)Study mask (polygon), location of the sampling sites (black points) and DEM in the background.</p>
 </div>
 
@@ -107,53 +118,78 @@ Specifically, we will compute catchment slope and catchment area\index{catchment
 Curvatures might also represent valuable predictors, in the Exercise section you can find out how they would change the modeling result.
 
 To compute catchment area\index{catchment area} and catchment slope, we will make use of the `saga:sagawetnessindex` function.^[Admittedly, it is a bit unsatisfying that the only way of knowing that `sagawetnessindex` computes the desired terrain attributes is to be familiar with SAGA\index{SAGA}.]
-`get_usage()` returns all function\index{function} parameters and default values of a specific geoalgorithm\index{geoalgorithm}.
+`qgis_show_help()` returns all function\index{function} parameters and default values of a specific geoalgorithm\index{geoalgorithm}.
 Here, we present only a selection of the complete output.
 
 
 ```r
-get_usage("saga:sagawetnessindex")
-#>ALGORITHM: Saga wetness index
-#>	DEM <ParameterRaster>
-#>  ...
-#>	SLOPE_TYPE <ParameterSelection>
-#>  ...
-#>	AREA <OutputRaster>
-#>	SLOPE <OutputRaster>
-#>	AREA_MOD <OutputRaster>
-#>	TWI <OutputRaster>
+qgisprocess::qgis_show_help("saga:sagawetnessindex")
+#> Saga wetness index (saga:sagawetnessindex)
 #> ...
-#>SLOPE_TYPE(Type of Slope)
-#>	0 - [0] local slope
-#>	1 - [1] catchment slope
+#> ----------------
+#> Arguments
+#> ----------------
+#> 
+#> DEM: Elevation
+#> 	Argument type:	raster
+#> 	Acceptable values:
+#> 		- Path to a raster layer
+#> ...
+#> SLOPE_TYPE: Type of Slope
+#> 	Argument type:	enum
+#> 	Available values:
+#> 		- 0: [0] local slope
+#> 		- 1: [1] catchment slope
+#> ...
+#> AREA: Catchment area
+#> 	Argument type:	rasterDestination
+#> 	Acceptable values:
+#> 		- Path for new raster layer
+#>... 
+#> ----------------
+#> Outputs
+#> ----------------
+#> 
+#> AREA: <outputRaster>
+#> 	Catchment area
+#> SLOPE: <outputRaster>
+#> 	Catchment slope
 #> ...
 ```
 
 Subsequently, we can specify the needed parameters using R named arguments (see Section \@ref(rqgis)).
-Remember that we can use a `RasterLayer` living in R's\index{R} global environment to specify the input raster `DEM` (see Section \@ref(rqgis)).
+Remember that we can use a `SpatRaster` living in R's\index{R} global environment to specify the input raster `DEM` (see Section \@ref(rqgis)).
 Specifying 1 as the `SLOPE_TYPE` makes sure that the algorithm will return the catchment slope.
 The resulting output rasters\index{raster} should be saved to temporary files with an `.sdat` extension which is a SAGA\index{SAGA} raster format.
-Setting `load_output` to `TRUE` ensures that the resulting rasters will be imported into R.
 
 
 ```r
 # environmental predictors: catchment slope and catchment area
-ep = run_qgis(alg = "saga:sagawetnessindex",
-              DEM = dem,
-              SLOPE_TYPE = 1, 
-              SLOPE = tempfile(fileext = ".sdat"),
-              AREA = tempfile(fileext = ".sdat"),
-              load_output = TRUE,
-              show_output_paths = FALSE)
+ep = qgisprocess::qgis_run_algorithm(
+  alg = "saga:sagawetnessindex",
+  DEM = dem,
+  SLOPE_TYPE = 1, 
+  SLOPE = tempfile(fileext = ".sdat"),
+  AREA = tempfile(fileext = ".sdat"),
+  .quiet = TRUE)
 ```
 
-This returns a list named `ep` consisting of two elements: `AREA` and `SLOPE`.
-Let us add two more raster objects to the list, namely `dem` and `ndvi`, and convert it into a raster stack\index{raster!stack} (see Section \@ref(raster-classes)).
+This returns a list named `ep` containing the paths to the computed output rasters.
+Let us read in catchment area as well as catchment slope into a multilayer `SpatRaster` object (see Section \@ref(raster-classes)).
+Additionally, we will add two more raster objects to it, namely `dem` and `ndvi`.
 
 
 ```r
-ep = stack(c(dem, ndvi, ep))
-names(ep) = c("dem", "ndvi", "carea", "cslope")
+# read in catchment area and catchment slope
+ep = ep[c("AREA", "SLOPE")] |>
+  unlist() |>
+  terra::rast()
+# assign proper names 
+names(ep) = c("carea", "cslope")
+# make sure all rasters share the same origin
+terra::origin(ep) = terra::origin(dem)
+# add dem and ndvi to the multilayer SpatRaster object
+ep = c(dem, ndvi, ep) 
 ```
 
 Additionally, the catchment area\index{catchment area} values are highly skewed to the right (`hist(ep$carea)`).
@@ -168,14 +204,17 @@ As a convenience to the reader, we have added `ep` to **spDataLarge**:
 
 
 ```r
-data("ep", package = "spDataLarge")
+ep = terra::rast(system.file("raster/ep.tif", package = "spDataLarge"))
 ```
 
 Finally, we can extract the terrain attributes to our field observations (see also Section \@ref(raster-extraction)).
 
 
 ```r
-random_points[, names(ep)] = raster::extract(ep, random_points)
+random_points[, names(ep)] = 
+  # terra::extract adds automatically a for our purposes unnecessary ID column
+  terra::extract(ep, terra::vect(random_points)) |>
+  dplyr::select(-ID)
 ```
 
 ## Reducing dimensionality {#nmds}
@@ -211,7 +250,7 @@ Hence, we need to dismiss all sites in which no species were found.
 
 ```r
 # presence-absence matrix
-pa = decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
+pa = vegan::decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
 pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
 ```
@@ -224,7 +263,7 @@ To make sure that the algorithm converges, we set the number of steps to 500 (`t
 
 ```r
 set.seed(25072018)
-nmds = metaMDS(comm = pa, k = 4, try = 500)
+nmds = vegan::metaMDS(comm = pa, k = 4, try = 500)
 nmds$stress
 #> ...
 #> Run 498 stress 0.08834745 
@@ -250,12 +289,12 @@ Plotting the result reveals that the first axis is, as intended, clearly associa
 
 
 ```r
-elev = dplyr::filter(random_points, id %in% rownames(pa)) %>% 
+elev = dplyr::filter(random_points, id %in% rownames(pa)) |> 
   dplyr::pull(dem)
 # rotating NMDS in accordance with altitude (proxy for humidity)
-rotnmds = MDSrotate(nmds, elev)
+rotnmds = vegan::MDSrotate(nmds, elev)
 # extracting the first two axes
-sc = scores(rotnmds, choices = 1:2)
+sc = vegan::scores(rotnmds, choices = 1:2)
 # plotting the first axis against altitude
 plot(y = sc[, 1], x = elev, xlab = "elevation in m", 
      ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8)
@@ -263,11 +302,11 @@ plot(y = sc[, 1], x = elev, xlab = "elevation in m",
 
 
 ```r
-knitr::include_graphics("figures/xy-nmds-1.png")
+knitr::include_graphics("figures/15_xy_nmds.png")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/xy-nmds-1.png" alt="Plotting the first NMDS axis against altitude." width="60%" />
+<img src="figures/15_xy_nmds.png" alt="Plotting the first NMDS axis against altitude." width="60%" />
 <p class="caption">(\#fig:xy-nmds)Plotting the first NMDS axis against altitude.</p>
 </div>
 
@@ -279,12 +318,12 @@ To spatially visualize them, we can model the NMDS\index{NMDS} scores with the p
 ## Modeling the floristic gradient
 
 To predict the floristic gradient spatially, we will make use of a random forest\index{random forest} model [@hengl_random_2018].
-Random forest\index{random forest} models are frequently used in environmental and ecological modeling, and often provide the best results in terms of predictive performance [@schratz_performance_nodate]. 
+Random forest\index{random forest} models are frequently used in environmental and ecological modeling, and often provide the best results in terms of predictive performance [@schratz_hyperparameter_2019]. 
 Here, we shortly introduce decision trees and bagging, since they form the basis of random forests\index{random forest}.
 We refer the reader to @james_introduction_2013 for a more detailed description of random forests\index{random forest} and related techniques.
 
 To introduce decision trees by example, we first construct a response-predictor matrix by joining the rotated NMDS\index{NMDS} scores to the field observations (`random_points`).
-We will also use the resulting data frame for the **mlr**\index{mlr (package)} modeling later on.
+We will also use the resulting data frame for the **mlr3**\index{mlr3 (package)} modeling later on.
 
 
 ```r
@@ -301,7 +340,7 @@ To illustrate this, we apply a decision tree to our data using the scores of the
 
 ```r
 library("tree")
-tree_mo = tree(sc ~ dem, data = rp)
+tree_mo = tree::tree(sc ~ dem, data = rp)
 plot(tree_mo)
 text(tree_mo, pretty = 0)
 ```
@@ -339,7 +378,7 @@ for each split of the tree—in other words, that bagging should be done.
 @james_introduction_2013
 -->
 
-### **mlr** building blocks
+### **mlr3** building blocks
 
 The code in this section largely follows the steps we have introduced in Section \@ref(svm).
 The only differences are the following:
@@ -347,7 +386,7 @@ The only differences are the following:
 1. The response variable is numeric, hence a regression\index{regression} task will replace the classification\index{classification} task of Section \@ref(svm).
 1. Instead of the AUROC\index{AUROC} which can only be used for categorical response variables, we will use the root mean squared error (RMSE\index{RMSE}) as performance measure.
 1. We use a random forest\index{random forest} model instead of a support vector machine\index{SVM} which naturally goes along with different hyperparameters\index{hyperparameter}.
-1. We are leaving the assessment of a bias-reduced performance measure as an exercise to the reader (see Exercises). 
+1. We are leaving the assessment of a bias-reduced performance measure as an exercise to the reader (see Exercises).
 Instead we show how to tune hyperparameters\index{hyperparameter} for (spatial) predictions.
 
 Remember that 125,500 models were necessary to retrieve bias-reduced performance estimates when using 100-repeated 5-fold spatial cross-validation\index{cross-validation!spatial CV} and a random search of 50 iterations (see Section \@ref(svm)).
@@ -361,45 +400,28 @@ This means, the inner hyperparameter\index{hyperparameter} tuning level is no lo
 Therefore, we tune the hyperparameters\index{hyperparameter} for a good spatial prediction on the complete dataset via a 5-fold spatial CV\index{cross-validation!spatial CV} with one repetition.
 <!-- If we used more than one repetition (say 2) we would retrieve multiple optimal tuned hyperparameter combinations (say 2) -->
 
-The preparation for the modeling using the **mlr**\index{mlr (package)} package includes the construction of a response-predictor matrix containing only variables which should be used in the modeling and the construction of a separate coordinate data frame.
-
-
-```r
-# extract the coordinates into a separate data frame
-coords = sf::st_coordinates(rp) %>% 
-  as.data.frame() %>%
-  rename(x = X, y = Y)
-# only keep response and predictors which should be used for the modeling
-rp = dplyr::select(rp, -id, -spri) %>%
-  st_drop_geometry()
-```
-
-Having constructed the input variables, we are all set for specifying the **mlr**\index{mlr (package)} building blocks (task, learner, and resampling).
-We will use a regression\index{regression} task since the response variable is numeric.
-The learner is a random forest\index{random forest} model implementation from the **ranger** package.
+Having already constructed the input variables (`rp`), we are all set for specifying the **mlr3**\index{mlr3 (package)} building blocks (task, learner, and resampling).
+For specifying a spatial task, we use again the **mlr3spatiotempcv** [@schratz_mlr3spatiotempcv_2021] package (section \@ref(spatial-cv-with-mlr3)).
+Since our response (`sc`) is numeric, we use a regression\index{regression} task.
 
 
 ```r
 # create task
-task = makeRegrTask(data = rp, target = "sc", coordinates = coords)
-# learner
-lrn_rf = makeLearner(cl = "regr.ranger", predict.type = "response")
+task = mlr3spatiotempcv::TaskRegrST$new(
+  id = "mongon", backend = dplyr::select(rp, -id, -spri), target = "sc")
+```
+
+Using an `sf` object as the backend automatically provides the geometry information needed for the spatial partitioning later on.
+Additionally, we got rid of the columns `id` and `spri` since these variables should not be used as predictors in the modeling.
+Next, we go on to contruct the a random forest\index{random forest} learner from the **ranger** package.
+
+
+```r
+lrn_rf = lrn("regr.ranger", predict_type = "response")
 ```
 
 As opposed to for example support vector machines\index{SVM} (see Section \@ref(svm)), random forests often already show good performances when used with the default values of their hyperparameters (which may be one reason for their popularity).
 Still, tuning often moderately improves model results, and thus is worth the effort [@probst_hyperparameters_2018].
-Since we deal with geographic data, we will again make use of spatial cross-validation to tune the hyperparameters\index{hyperparameter} (see Sections \@ref(intro-cv) and \@ref(spatial-cv-with-mlr)).
-Specifically, we will use a five-fold spatial partitioning with only one repetition (`makeResampleDesc()`). 
-In each of these spatial partitions, we run 50 models (`makeTuneControlRandom()`) to find the optimal hyperparameter\index{hyperparameter} combination.
-
-
-```r
-# spatial partitioning
-perf_level = makeResampleDesc("SpCV", iters = 5)
-# specifying random search
-ctrl = makeTuneControlRandom(maxit = 50L)
-```
-
 In random forests\index{random forest}, the hyperparameters\index{hyperparameter} `mtry`, `min.node.size` and `sample.fraction` determine the degree of randomness, and should be tuned [@probst_hyperparameters_2018].
 `mtry` indicates how many predictor variables should be used in each tree. 
 If all predictors are used, then this corresponds in fact to bagging (see beginning of Section \@ref(modeling-the-floristic-gradient)).
@@ -408,53 +430,72 @@ Smaller fractions lead to greater diversity, and thus less correlated trees whic
 The `min.node.size` parameter indicates the number of observations a terminal node should at least have (see also Figure \@ref(fig:tree)).
 Naturally, as trees and computing time become larger, the lower the `min.node.size`.
 
-Hyperparameter\index{hyperparameter} combinations will be selected randomly but should fall inside specific tuning limits (`makeParamSet()`).
+Hyperparameter\index{hyperparameter} combinations will be selected randomly but should fall inside specific tuning limits (created with `paradox::ps()`).
 `mtry` should range between 1 and the number of predictors
 <!-- (), -->
-(4)
-`sample.fraction`
-should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10.
+(4), `sample.fraction` should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10.
 
 
 ```r
 # specifying the search space
-ps = makeParamSet(
-  makeIntegerParam("mtry", lower = 1, upper = ncol(rp) - 1),
-  makeNumericParam("sample.fraction", lower = 0.2, upper = 0.9),
-  makeIntegerParam("min.node.size", lower = 1, upper = 10)
+search_space = paradox::ps(
+  mtry = paradox::p_int(lower = 1, upper = ncol(task$data()) - 1),
+  sample.fraction = paradox::p_dbl(lower = 0.2, upper = 0.9),
+  min.node.size = paradox::p_int(lower = 1, upper = 10)
 )
 ```
 
-Finally, `tuneParams()` runs the hyperparameter\index{hyperparameter} tuning, and will find the optimal hyperparameter\index{hyperparameter} combination for the specified parameters.
+Having defined the search space, we are all set for specifying our tuning via the `AutoTuner()` function.
+Since we deal with geographic data, we will again make use of spatial cross-validation to tune the hyperparameters\index{hyperparameter} (see Sections \@ref(intro-cv) and \@ref(spatial-cv-with-mlr)).
+Specifically, we will use a five-fold spatial partitioning with only one repetition (`rsmp()`). 
+In each of these spatial partitions, we run 50 models (`trm()`) while using randomly selected hyperparameter configurations (`tnr`) within predefined limits (`seach_space`) to find the optimal hyperparameter\index{hyperparameter} combination.
 The performance measure is the root mean squared error (RMSE\index{RMSE}).
 
 
 ```r
+at = mlr3tuning::AutoTuner$new(
+  learner = lrn_rf,
+  # spatial partitioning
+  resampling = mlr3::rsmp("spcv_coords", folds = 5),
+  # performance measure
+  measure = mlr3::msr("regr.rmse"),
+  # specify 50 iterations
+  terminator = mlr3tuning::trm("evals", n_evals = 50),
+  # predefined hyperparameter search space
+  search_space = search_space,
+  # specify random search
+  tuner = mlr3tuning::tnr("random_search")
+)
+```
+
+Calling the `train()`-method of the `AutoTuner`-object finally runs the hyperparameter\index{hyperparameter} tuning, and will find the optimal hyperparameter\index{hyperparameter} combination for the specified parameters.
+
+
+```r
 # hyperparamter tuning
-set.seed(02082018)
-tune = tuneParams(learner = lrn_rf, 
-                  task = task,
-                  resampling = perf_level,
-                  par.set = ps,
-                  control = ctrl, 
-                  measures = mlr::rmse)
+set.seed(0412022)
+at$train(task)
 #>...
-#> [Tune-x] 49: mtry=3; sample.fraction=0.533; min.node.size=5
-#> [Tune-y] 49: rmse.test.rmse=0.5636692; time: 0.0 min
-#> [Tune-x] 50: mtry=1; sample.fraction=0.68; min.node.size=5
-#> [Tune-y] 50: rmse.test.rmse=0.6314249; time: 0.0 min
-#> [Tune] Result: mtry=4; sample.fraction=0.887; min.node.size=10 :
-#> rmse.test.rmse=0.5104918
+#> INFO  [11:39:31.375] [mlr3] Finished benchmark 
+#> INFO  [11:39:31.427] [bbotk] Result of batch 50: 
+#> INFO  [11:39:31.432] [bbotk]  mtry sample.fraction min.node.size regr.rmse warnings errors runtime_learners 
+#> INFO  [11:39:31.432] [bbotk]     2       0.2059293            10 0.5118128        0      0            0.149 
+#> INFO  [11:39:31.432] [bbotk]                                 uhash 
+#> INFO  [11:39:31.432] [bbotk]  81dfa6f8-0109-410d-bdb5-a1490e7caf8e 
+#> INFO  [11:39:31.448] [bbotk] Finished optimizing after 50 evaluation(s) 
+#> INFO  [11:39:31.451] [bbotk] Result: 
+#> INFO  [11:39:31.455] [bbotk]  mtry sample.fraction min.node.size learner_param_vals  x_domain regr.rmse 
+#> INFO  [11:39:31.455] [bbotk]     4       0.8999753             7          <list[4]> <list[3]> 0.3751501
 ```
 
 
 
 
 
-An `mtry` of 4, a `sample.fraction` of 0.887, and a `min.node.size` of 10 represent the best hyperparameter\index{hyperparameter} combination.
+An `mtry` of 4, a `sample.fraction` of 0.9, and a `min.node.size` of 7 represent the best hyperparameter\index{hyperparameter} combination.
 An RMSE\index{RMSE} of
 <!--  -->
-0.51
+0.38
 is relatively good when considering the range of the response variable which is
 <!--  -->
 3.04
@@ -463,51 +504,42 @@ is relatively good when considering the range of the response variable which is
 ### Predictive mapping
 
 The tuned hyperparameters\index{hyperparameter} can now be used for the prediction.
-We simply have to modify our learner using the result of the hyperparameter tuning, and run the corresponding model.
+To do so, we only need to run the `predict` method of our fitted `AutoTuner` object.
 
 
 ```r
-# learning using the best hyperparameter combination
-lrn_rf = makeLearner(cl = "regr.ranger",
-                     predict.type = "response",
-                     mtry = tune$x$mtry, 
-                     sample.fraction = tune$x$sample.fraction,
-                     min.node.size = tune$x$min.node.size)
-# doing the same more elegantly using setHyperPars()
-# lrn_rf = setHyperPars(makeLearner("regr.ranger", predict.type = "response"),
-#                       par.vals = tune$x)
-# train model
-model_rf = train(lrn_rf, task)
-# to retrieve the ranger output, run:
-# mlr::getLearnerModel(model_rf)
-# which corresponds to:
-# ranger(sc ~ ., data = rp, 
-#        mtry = tune$x$mtry, 
-#        sample.fraction = tune$x$sample.fraction,
-#        min.node.sie = tune$x$min.node.size)
+# predicting using the best hyperparameter combination
+at$predict(task)
 ```
 
-The last step is to apply the model to the spatially available predictors, i.e., to the raster stack\index{raster!stack}.
-So far, `raster::predict()` does not support the output of **ranger** models, hence, we will have to program the prediction ourselves.
-First, we convert `ep` into a prediction data frame which secondly serves as input for the `predict.ranger()` function.
-Thirdly, we put the predicted values back into a `RasterLayer`\index{raster} (see Section \@ref(raster-subsetting) and Figure \@ref(fig:rf-pred)).
+The `predict` method will apply the model to all observations used in the modeling.
+Given a multilayer `SpatRaster` containing rasters named as the predictors used in the modeling, `terra::predict()` will also make spatial predictions, i.e., predict to new data.
 
 
 ```r
-# convert raster stack into a data frame
-new_data = as.data.frame(as.matrix(ep))
-# apply the model to the data frame
-pred_rf = predict(model_rf, newdata = new_data)
-# put the predicted values into a raster
-pred = dem
-# replace altitudinal values by rf-prediction values
-pred[] = pred_rf$data$response
+pred = terra::predict(ep, model = at, fun = predict)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/rf-pred-1.png" alt="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts." width="100%" />
+<img src="figures/15_rf_pred.png" alt="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts." width="100%" />
 <p class="caption">(\#fig:rf-pred)Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.</p>
 </div>
+
+In case, `terra::predict()` does not support a model algorithm, you can still make the predictions manually.
+
+
+```r
+newdata = as.data.frame(as.matrix(ep))
+colSums(is.na(newdata))  # 0 NAs
+# but assuming there were 0s results in a more generic approach
+ind = rowSums(is.na(newdata)) == 0
+tmp = at$predict_newdata(newdata = newdata[ind, ], task = task)
+newdata[ind, "pred"] = data.table::as.data.table(tmp)[["response"]]
+pred_2 = ep$dem
+# now fill the raster with the predicted values
+pred_2[] = newdata$pred
+identical(values(pred), values(pred_2))  # TRUE
+```
 
 The predictive mapping clearly reveals distinct vegetation belts (Figure \@ref(fig:rf-pred)).
 Please refer to @muenchow_soil_2013 for a detailed description of vegetation belts on **lomas** mountains.
@@ -523,7 +555,7 @@ Interestingly, the spatial prediction clearly reveals that the bromeliad belt is
 
 In this chapter we have ordinated\index{ordination} the community matrix of the **lomas** Mt. Mongón with the help of a NMDS\index{NMDS} (Section \@ref(nmds)).
 The first axis, representing the main floristic gradient in the study area, was modeled as a function of environmental predictors which partly were derived through R-GIS\index{GIS} bridges (Section \@ref(data-and-data-preparation)).
-The **mlr**\index{mlr (package)} package provided the building blocks to spatially tune the hyperparameters\index{hyperparameter} `mtry`, `sample.fraction` and `min.node.size` (Section \@ref(mlr-building-blocks)).
+The **mlr3**\index{mlr3 (package)} package provided the building blocks to spatially tune the hyperparameters\index{hyperparameter} `mtry`, `sample.fraction` and `min.node.size` (Section \@ref(mlr3-building-blocks)).
 The tuned hyperparameters\index{hyperparameter} served as input for the final model which in turn was applied to the environmental predictors for a spatial representation of the floristic gradient (Section \@ref(predictive-mapping)).
 The result demonstrates spatially the astounding biodiversity in the middle of the desert.
 Since **lomas** mountains are heavily endangered, the prediction map can serve as basis for informed decision-making on delineating protection zones, and making the local population aware of the uniqueness found in their immediate neighborhood.
@@ -548,24 +580,46 @@ However, this does not imply that the random forest\index{random forest} model h
 
 ## Exercises
 
-1. Run a NMDS\index{NMDS} using the percentage data of the community matrix. 
+
+The solutions assume the following packages are attached (other packages will be attached when needed):
+
+
+
+E1. Run a NMDS\index{NMDS} using the percentage data of the community matrix. 
 Report the stress value and compare it to the stress value as retrieved from the NMDS using presence-absence data.
 What might explain the observed difference?
 
-1. Compute all the predictor rasters\index{raster} we have used in the chapter (catchment slope, catchment area), and put them into a raster stack.
-Add `dem` and `ndvi` to the raster stack\index{raster!stack}.
-Next, compute profile and tangential curvature as additional predictor rasters and add them to the raster stack (hint: `grass7:r.slope.aspect`).
+
+
+The NMDS using the presence-absence values yields a better result (`nmds_pa$stress`) than the one using percentage data (`nmds_per$stress`).
+This might seem surprising at first sight.
+On the other hand, the percentage matrix contains both more information and more noise.
+Another aspect is how the data was collected.
+Imagine a botanist in the field.
+It might seem feasible to differentiate between a plant which has a cover of 5% and another species that covers 10%.
+However, what about a herbal species that was only detected three times and consequently has a very tiny cover, e.g., 0.0001%. 
+Maybe another herbal species was detected 6 times, is its cover then 0.0002%?
+The point here is that percentage data as specified during a field campaign might reflect a precision that the data does not have.
+This again introduces noise which in turn will worsen the ordination result.
+Still, it is a valuable information if one species had a higher frequency or coverage in one plot than another compared to just presence-absence data.
+One compromise would be to use a categorical scale such as the Londo scale.
+
+E2. Compute all the predictor rasters\index{raster} we have used in the chapter (catchment slope, catchment area), and put them into a `SpatRaster`-object.
+Add `dem` and `ndvi` to it.
+Next, compute profile and tangential curvature and add them as additional predictor rasters (hint: `grass7:r.slope.aspect`).
 Finally, construct a response-predictor matrix. 
 The scores of the first NMDS\index{NMDS} axis (which were the result when using the presence-absence community matrix) rotated in accordance with elevation represent the response variable, and should be joined to `random_points` (use an inner join).
-To complete the response-predictor matrix, extract the values of the environmental predictor raster stack to `random_points`.
-
-1. Use the response-predictor matrix of the previous exercise to fit a random forest\index{random forest} model. 
-Find the optimal hyperparameters\index{hyperparameter} and use them for making a prediction map.
+To complete the response-predictor matrix, extract the values of the environmental predictor raster object to `random_points`.
 
 
-1. Retrieve the bias-reduced RMSE of a random forest\index{random forest} model using spatial cross-validation\index{cross-validation!spatial CV} including the estimation of optimal hyperparameter\index{hyperparameter} combinations (random search with 50 iterations) in an inner tuning loop (see Section \@ref(svm)).
+
+E3. Retrieve the bias-reduced RMSE of a random forest\index{random forest} and a linear model using spatial cross-validation\index{cross-validation!spatial CV}.
+The random forest modeling should include the estimation of optimal hyperparameter\index{hyperparameter} combinations (random search with 50 iterations) in an inner tuning loop (see Section \@ref(svm)).
 Parallelize\index{parallelization} the tuning level (see Section \@ref(svm)).
 Report the mean RMSE\index{RMSE} and use a boxplot to visualize all retrieved RMSEs.
+Please not that this exercise is best solved using the mlr3 functions `benchmark_grid()` and `benchmark()` (see https://mlr3book.mlr-org.com/perf-eval-cmp.html#benchmarking for more information).
 
-1. Retrieve the bias-reduced RMSE\index{RMSE} of a simple linear model\index{regression!linear} using spatial cross-validation\index{cross-validation!spatial CV}. 
-Compare the result to the result of the random forest model\index{random forest} by making RMSE\index{RMSE} boxplots for each modeling approach.
+
+
+In fact, `lm` performs at least as good the random forest model, and thus should be preferred since it is much easier to understand and computationally much less demanding (no need for fitting hyperparameters).
+But keep in mind that the used dataset is small in terms of observations and predictors and that the response-predictor relationships are also relatively linear.
