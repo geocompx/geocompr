@@ -518,9 +518,11 @@ mlr3extralearners::list_mlr3learners() %>%
 
 Of the options illustrated above, we will use `ksvm()` from the **kernlab** package [@karatzoglou_kernlab_2004].
 To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel which is also the default of `ksvm()`.
+To make sure that the tuning does not stop because of one failing model, we additionally define a fallback learner (for more information please refer to https://mlr3book.mlr-org.com/technical.html#fallback-learners).
 
 ```{r 12-spatial-cv-24, eval=FALSE}
 lrn_ksvm = mlr3::lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot")
+lrn_ksvm$fallback = lrn("classif.featureless", predict_type = "prob")
 ```
 
 The next stage is to specify a resampling strategy.
@@ -624,7 +626,7 @@ Additionally, we instructed **future** to only use half instead of all available
 Now we are set up for computing the nested spatial CV.
 Using a seed allows us to recreate the exact same spatial partitions when re-running the code.
 Specifying the `resample()` parameters follows the exact same procedure as presented when using a GLM\index{GLM}, the only difference being the `store_models` and `encapsulate` arguments.
-The former allows the extraction of the hyperparameter\index{hyperparameter} tuning results which is important if we plan follow-up analyses on the tuning.
+Setting the former to `TRUE` would allow the extraction of the hyperparameter\index{hyperparameter} tuning results which is important if we plan follow-up analyses on the tuning.
 The latter ensures that the processing continues even if one of the models throws an error.
 This avoids the process stopping just because of one failed model, which is desirable on large model runs.
 Once the processing is completed, one can have a look at the failed models.
@@ -640,7 +642,7 @@ progressr::with_progress(expr = {
                           learner = at_ksvm, 
                           # outer resampling (performance level)
                           resampling = perf_level,
-                          store_models = TRUE,
+                          store_models = FALSE,
                           encapsulate = "evaluate")
 })
 
