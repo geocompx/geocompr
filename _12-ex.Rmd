@@ -140,11 +140,14 @@ task = TaskClassifST$new(
 # construct learners (for all subsequent exercises)
 # GLM
 lrn_glm = lrn("classif.log_reg", predict_type = "prob")
+lrn_glm$fallback = lrn("classif.featureless", predict_type = "prob")
 
 # SVM
 # construct SVM learner (using ksvm function from the kernlab package)
 lrn_ksvm = lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot",
                type = "C-svc")
+lrn_ksvm$fallback = lrn("classif.featureless", predict_type = "prob")
+
 # specify nested resampling and adjust learner accordingly
 # five spatially disjoint partitions
 tune_level = rsmp("spcv_coords", folds = 5)
@@ -167,6 +170,7 @@ at_ksvm = AutoTuner$new(
 
 # QDA
 lrn_qda = lrn("classif.qda", predict_type = "prob")
+lrn_qda$fallback = lrn("classif.featureless", predict_type = "prob")
 
 # SVM without tuning hyperparameters
 vals = lrn_ksvm$param_set$values
@@ -194,7 +198,10 @@ library(future)
 future::plan(list("sequential", "multisession"), 
              workers = floor(availableCores() / 2))
 set.seed(021522)
-bmr = benchmark(grid, store_backends = FALSE)
+bmr = benchmark(grid, 
+                store_backends = FALSE, 
+                store_models = FALSE, 
+                encapsulate = "evaluate")
 # stop parallelization
 future:::ClusterRegistry("stop")
 # save your result, e.g. to 
