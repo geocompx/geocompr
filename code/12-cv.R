@@ -60,6 +60,7 @@ task = TaskClassifST$new(
 
 # glm learner
 lrn_glm = lrn("classif.log_reg", predict_type = "prob")
+# define a fallback learner in case one model fails
 lrn_glm$fallback = lrn("classif.featureless", predict_type = "prob")
 
 # construct SVM learner (using ksvm function from the kernlab package)
@@ -95,6 +96,7 @@ at_ksvm = AutoTuner$new(
   terminator = terminator,
   tuner = tuner
 )
+# define a fallback learner in case one model fails
 at_ksvm$fallback = lrn("classif.featureless", predict_type = "prob") 
 # 2.3 cross-validation====
 #**********************************************************
@@ -141,6 +143,8 @@ progressr::with_progress(expr = {
 tictoc::toc()
 # stop the parallelization plan
 future:::ClusterRegistry("stop")
+# save your result
+saveRDS(bmr, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-sp_conv_cv_test.rds")
 
 # plot your result
 # library(mlr3viz)
@@ -151,25 +155,24 @@ future:::ClusterRegistry("stop")
 #   scale_x_discrete(labels=c("spatial CV", "conventional CV")) +
 #   ggplot2::theme_bw()
 
-# instead of using autoplot, it might be easier to create the figure yourself
-agg = bmr$aggregate(measures = msr("classif.auc"))
-# # extract the AUROC values and put them into one data.table
+# # instead of using autoplot, it might be easier to create the figure yourself
+# agg = bmr$aggregate(measures = msr("classif.auc"))
+# # # extract the AUROC values and put them into one data.table
 # d = purrr::map_dfr(agg$resample_result, ~ .$score(msr("classif.auc")))
 # # rename the levels of resampling_id
 # d[, resampling_id := as.factor(resampling_id) |>
-#     forcats::fct_recode("conventional CV" = "repeated_cv", 
-#                         "spatial CV" = "repeated_spcv_coords") |> 
+#     forcats::fct_recode("conventional CV" = "repeated_cv",
+#                         "spatial CV" = "repeated_spcv_coords") |>
 #     forcats::fct_rev()]
-# create the boxplot which shows the overfitting in the nsp-case
-# ggplot2::ggplot(data = d, mapping = aes(x = resampling_id, y = classif.auc)) +
-#   geom_boxplot(fill = c("lightblue2", "mistyrose2")) +
-#   theme_bw() +
-#   labs(y = "AUROC", x = "")
-
-# save your result
-saveRDS(agg, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-sp_conv_cv_test.rds")
-# read in if necessary
-# agg = readRDS("extdata/12-sp_conv_cv.rds")
+# # create the boxplot which shows the overfitting in the nsp-case
+# ggplot2::ggplot(
+#   data = d, 
+#   mapping = ggplot2::aes(x = interaction(resampling_id, learner_id), 
+#                          y = classif.auc, fill = resampling_id
+#                          )) +
+#   ggplot2::geom_boxplot() +
+#   ggplot2::theme_bw() +
+#   ggplot2::labs(y = "AUROC", x = "")
 
 #**********************************************************
 # 3 spatial prediction----
@@ -237,16 +240,22 @@ saveRDS(agg, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-sp
 #             legend.position = c("left", "bottom"),
 #             legend.title.size = 0.9)
 
-# # only GLM
-design_grid = benchmark_grid(
-  tasks = task,
-  learners = lrn_glm,
-  resamplings = list(rsmp_sp, rsmp_nsp))
-bmr = benchmark(design = design_grid, store_backends = FALSE)
-# bmr_dt = as.data.table(bmr)
-# saveRDS(bmr, "extdata/12-glm_sp_nsp_bmr.rds")
-# agg = bmr$aggregate(measures = mlr3::msr("classif.auc"))
-# saveRDS(agg, "extdata/12-glm_sp_nsp.rds")
-score = bmr$score(measures = msr("classif.auc"))
-saveRDS(score[, .(task_id, resampling_id, learner_id, classif.auc)], 
-        "extdata/12-glm_score_sp_nsp.rds")
+
+
+
+
+
+
+# # # only GLM----
+# design_grid = benchmark_grid(
+#   tasks = task,
+#   learners = lrn_glm,
+#   resamplings = list(rsmp_sp, rsmp_nsp))
+# bmr = benchmark(design = design_grid, store_backends = FALSE)
+# # bmr_dt = as.data.table(bmr)
+# # saveRDS(bmr, "extdata/12-glm_sp_nsp_bmr.rds")
+# # agg = bmr$aggregate(measures = mlr3::msr("classif.auc"))
+# # saveRDS(agg, "extdata/12-glm_sp_nsp.rds")
+# score = bmr$score(measures = msr("classif.auc"))
+# saveRDS(score[, .(task_id, resampling_id, learner_id, classif.auc)], 
+#         "extdata/12-glm_score_sp_nsp.rds")
