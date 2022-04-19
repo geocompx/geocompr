@@ -31,7 +31,7 @@ To do so, we will bring together concepts presented in previous chapters and eve
 Fog oases are one of the most fascinating vegetation formations we have ever encountered.
 These formations, locally termed *lomas*, develop on mountains along the coastal deserts of Peru and Chile.^[Similar vegetation formations develop also in other parts of the world, e.g., in Namibia and along the coasts of Yemen and Oman [@galletti_land_2016].]
 The deserts' extreme conditions and remoteness provide the habitat for a unique ecosystem, including species endemic to the fog oases.
-Despite the arid conditions and low levels of precipitation of around 30-50 mm per year on average, fog deposition increases the amount of water available to plants during austal winter.
+Despite the arid conditions and low levels of precipitation of around 30-50 mm per year on average, fog deposition increases the amount of water available to plants during austral winter.
 This results in green southern-facing mountain slopes along the coastal strip of Peru (Figure \@ref(fig:study-area-mongon)). 
 This fog, which develops below the temperature inversion caused by the cold Humboldt current in austral winter, provides the name for this habitat.
 Every few years, the El Niño phenomenon brings torrential rainfall to this sun-baked environment [@dillon_lomas_2003].
@@ -424,7 +424,7 @@ text(tree_mo, pretty = 0)
 dev.off()
 ```
 
-```{r tree, echo=FALSE, fig.cap="Simple example of a decision tree with three internal nodes and four terminal nodes.", fig.scap="Simple example of a decision tree."}
+```{r tree, echo=FALSE, fig.cap="Simple example of a decision tree with three internal nodes and four terminal nodes.", out.width="60%", fig.scap="Simple example of a decision tree."}
 knitr::include_graphics("figures/15_tree.png")
 ```
 
@@ -486,7 +486,7 @@ task = mlr3spatiotempcv::TaskRegrST$new(
 
 Using an `sf` object as the backend automatically provides the geometry information needed for the spatial partitioning later on.
 Additionally, we got rid of the columns `id` and `spri` since these variables should not be used as predictors in the modeling.
-Next, we go on to contruct the a random forest\index{random forest} learner from the **ranger** package.
+Next, we go on to construct the a random forest\index{random forest} learner from the **ranger** package.
 
 ```{r 15-eco-21, eval=FALSE}
 lrn_rf = lrn("regr.ranger", predict_type = "response")
@@ -519,11 +519,11 @@ search_space = paradox::ps(
 Having defined the search space, we are all set for specifying our tuning via the `AutoTuner()` function.
 Since we deal with geographic data, we will again make use of spatial cross-validation to tune the hyperparameters\index{hyperparameter} (see Sections \@ref(intro-cv) and \@ref(spatial-cv-with-mlr)).
 Specifically, we will use a five-fold spatial partitioning with only one repetition (`rsmp()`). 
-In each of these spatial partitions, we run 50 models (`trm()`) while using randomly selected hyperparameter configurations (`tnr`) within predefined limits (`seach_space`) to find the optimal hyperparameter\index{hyperparameter} combination.
+In each of these spatial partitions, we run 50 models (`trm()`) while using randomly selected hyperparameter configurations (`tnr()`) within predefined limits (`seach_space`) to find the optimal hyperparameter\index{hyperparameter} combination [see also Section \@ref(svm) and https://mlr3book.mlr-org.com/optimization.html#autotuner, @becker_mlr3_2021].
 The performance measure is the root mean squared error (RMSE\index{RMSE}).
 
 ```{r 15-eco-22, eval=FALSE}
-at = mlr3tuning::AutoTuner$new(
+autotuner_rf = mlr3tuning::AutoTuner$new(
   learner = lrn_rf,
   # spatial partitioning
   resampling = mlr3::rsmp("spcv_coords", folds = 5),
@@ -541,9 +541,9 @@ at = mlr3tuning::AutoTuner$new(
 Calling the `train()`-method of the `AutoTuner`-object finally runs the hyperparameter\index{hyperparameter} tuning, and will find the optimal hyperparameter\index{hyperparameter} combination for the specified parameters.
 
 ```{r 14-eco-24, eval=FALSE}
-# hyperparamter tuning
+# hyperparameter tuning
 set.seed(0412022)
-at$train(task)
+autotuner_rf$train(task)
 #>...
 #> INFO  [11:39:31.375] [mlr3] Finished benchmark 
 #> INFO  [11:39:31.427] [bbotk] Result of batch 50: 
@@ -558,16 +558,16 @@ at$train(task)
 ```
 
 ```{r 15-eco-25, eval=FALSE, echo=FALSE}
-saveRDS(at, "extdata/15-tune.rds")
+saveRDS(autotuner_rf, "extdata/15-tune.rds")
 ```
 
 ```{r 15-eco-26, echo=FALSE, eval=FALSE}
-tune = readRDS("extdata/15-tune.rds")
+autotuner_rf = readRDS("extdata/15-tune.rds")
 ```
 
 An `mtry` of 4, a `sample.fraction` of 0.9, and a `min.node.size` of 7 represent the best hyperparameter\index{hyperparameter} combination.
 An RMSE\index{RMSE} of
-<!-- `r # round(tune$tuning_result$regr.rmse, 2)` -->
+<!-- `r # round(autotuner_rf$tuning_result$regr.rmse, 2)` -->
 0.38
 is relatively good when considering the range of the response variable which is
 <!-- `r # round(diff(range(rp$sc)), 2)` -->
@@ -581,17 +581,17 @@ To do so, we only need to run the `predict` method of our fitted `AutoTuner` obj
 
 ```{r 15-eco-27, eval=FALSE}
 # predicting using the best hyperparameter combination
-at$predict(task)
+autotuner_rf$predict(task)
 ```
 
 The `predict` method will apply the model to all observations used in the modeling.
 Given a multilayer `SpatRaster` containing rasters named as the predictors used in the modeling, `terra::predict()` will also make spatial predictions, i.e., predict to new data.
 
 ```{r 15-eco-28, eval=FALSE}
-pred = terra::predict(ep, model = at, fun = predict)
+pred = terra::predict(ep, model = autotuner_rf, fun = predict)
 ```
 
-```{r rf-pred, echo=FALSE, fig.cap="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.", fig.width = 10, fig.height = 10, fig.scap="Predictive mapping of the floristic gradient."}
+```{r rf-pred, echo=FALSE, fig.cap="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.", out.width="60%", fig.scap="Predictive mapping of the floristic gradient."}
 # # restrict the prediction to your study area
 # pred = terra::mask(pred, terra::vect(study_area)) |>
 #   terra::trim()
@@ -632,7 +632,7 @@ newdata = as.data.frame(as.matrix(ep))
 colSums(is.na(newdata))  # 0 NAs
 # but assuming there were 0s results in a more generic approach
 ind = rowSums(is.na(newdata)) == 0
-tmp = at$predict_newdata(newdata = newdata[ind, ], task = task)
+tmp = autotuner_rf$predict_newdata(newdata = newdata[ind, ], task = task)
 newdata[ind, "pred"] = data.table::as.data.table(tmp)[["response"]]
 pred_2 = ep$dem
 # now fill the raster with the predicted values
