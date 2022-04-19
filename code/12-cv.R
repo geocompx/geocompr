@@ -144,7 +144,7 @@ tictoc::toc()
 # stop the parallelization plan
 future:::ClusterRegistry("stop")
 # save your result
-saveRDS(bmr, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-sp_conv_cv_test.rds")
+saveRDS(bmr, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-bmr_test.rds")
 
 # plot your result
 # library(mlr3viz)
