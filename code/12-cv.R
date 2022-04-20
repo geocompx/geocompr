@@ -158,6 +158,9 @@ future:::ClusterRegistry("stop")
 score = bmr$score(measure = mlr3::msr("classif.auc")) %>%
   # keep only the columns you need
   .[, .(task_id, learner_id, resampling_id, classif.auc)]
+# or read in the score
+# score = readRDS("extdata/12-bmr_score.rds")
+
 # rename the levels of resampling_id
 score[, resampling_id := as.factor(resampling_id) |>
         forcats::fct_recode("conventional CV" = "repeated_cv",
