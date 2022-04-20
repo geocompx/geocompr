@@ -11,12 +11,15 @@ Packages **GGally**, **lgr**, **kernlab**, **ml3measures**, **paradox**, **pROC*
 
 ```{r 12-spatial-cv-1, message=FALSE}
 library(dplyr)
+library(future)
+library(lgr)
 library(mlr3)
 library(mlr3learners)
 library(mlr3extralearners)
 library(mlr3spatiotempcv)
 library(mlr3tuning)
 library(mlr3viz)
+library(progressr)
 library(sf)
 library(terra)
 ```
@@ -522,7 +525,7 @@ Of the options illustrated above, we will use `ksvm()` from the **kernlab** pack
 To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel which is also the default of `ksvm()`.
 To make sure that the tuning does not stop because of one failing model, we additionally define a fallback learner (for more information please refer to https://mlr3book.mlr-org.com/technical.html#fallback-learners).
 
-```{r 12-spatial-cv-24, eval=FALSE}
+```{r 12-spatial-cv-24}
 lrn_ksvm = mlr3::lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot")
 lrn_ksvm$fallback = lrn("classif.featureless", predict_type = "prob")
 ```
@@ -533,12 +536,12 @@ Again we will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatia
 <!-- Instead of saying "outer resampling" we concluded to use "performance estimation level" and "tuning level" (inner) in our paper
 # this is also what is shown in the nested CV figure so it would be more consistent -->
 
-```{r 12-spatial-cv-25, eval=FALSE}
+```{r 12-spatial-cv-25}
 # performance estimation level
 perf_level = mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 ```
 
-Note that this is the exact same code as used for the GLM\index{GLM} in Section \@ref(glm); we have simply repeated it here as a reminder.
+Note that this is the exact same code as used for the resampling for the GLM\index{GLM} in Section \@ref(glm); we have simply repeated it here as a reminder.
 
 So far, the process has been identical to that described in Section \@ref(glm).
 The next step is new, however: to tune the hyperparameters\index{hyperparameter}.
@@ -551,7 +554,7 @@ knitr::include_graphics("figures/13_cv.png")
 
 This means that we split each fold again into five spatially disjoint subfolds which are used to determine the optimal hyperparameters\index{hyperparameter} (`tune_level` object in the code chunk below; see Figure \@ref(fig:inner-outer) for a visual representation).
 To find the optimal hyperparameter combination, we fit 50 models (`terminator` object in the code chunk below) in each of these subfolds with randomly selected values for the hyperparameters C and Sigma.
-The random selection of values C and Sigma is additionally restricted to a predefined tuning space (`ps` object).
+The random selection of values C and Sigma is additionally restricted to a predefined tuning space (`search_space` object).
 The range of the tuning space was chosen with values recommended in the literature [@schratz_hyperparameter_2019].
 
 <!--
@@ -578,7 +581,7 @@ tune_level = mlr3::rsmp("spcv_coords", folds = 5)
 terminator = mlr3tuning::trm("evals", n_evals = 50)
 tuner = mlr3tuning::tnr("random_search")
 # define the outer limits of the randomly selected hyperparameters
-ps = paradox::ps(
+seach_space = paradox::ps(
   C = paradox::p_dbl(lower = -12, upper = 15, trafo = function(x) 2^x),
   sigma = paradox::p_dbl(lower = -15, upper = 6, trafo = function(x) 2^x)
 )
@@ -591,7 +594,7 @@ at_ksvm = mlr3tuning::AutoTuner$new(
   learner = lrn_ksvm,
   resampling = tune_level,
   measure = mlr3::msr("classif.auc"),
-  search_space = ps,
+  search_space = search_space,
   terminator = terminator,
   tuner = tuner
 )
@@ -626,7 +629,6 @@ future::plan(list("sequential", "multisession"),
 Additionally, we instructed **future** to only use half instead of all available cores (default), a setting that allows possible other users to work on the same high performance computing cluster in case one is used.
 
 Now we are set up for computing the nested spatial CV.
-Using a seed allows us to recreate the exact same spatial partitions when re-running the code.
 Specifying the `resample()` parameters follows the exact same procedure as presented when using a GLM\index{GLM}, the only difference being the `store_models` and `encapsulate` arguments.
 Setting the former to `TRUE` would allow the extraction of the hyperparameter\index{hyperparameter} tuning results which is important if we plan follow-up analyses on the tuning.
 The latter ensures that the processing continues even if one of the models throws an error.
@@ -638,20 +640,19 @@ Before running the subsequent code, be aware that it is time-consuming since it 
 Note that runtime depends on many aspects: CPU speed, the selected algorithm, the selected number of cores and the dataset.
 
 ```{r 12-spatial-cv-30, eval=FALSE}
-set.seed(12345)
 progressr::with_progress(expr = {
-  result = mlr3::resample(task = task,
-                          learner = at_ksvm, 
-                          # outer resampling (performance level)
-                          resampling = perf_level,
-                          store_models = FALSE,
-                          encapsulate = "evaluate")
+  rr_spcv_svm = mlr3::resample(task = task,
+                               learner = at_ksvm, 
+                               # outer resampling (performance level)
+                               resampling = perf_level,
+                               store_models = FALSE,
+                               encapsulate = "evaluate")
 })
 
 # stop parallelization
 future:::ClusterRegistry("stop")
 # compute the AUROC values
-score_svm = result$score(measure = mlr3::msr("classif.auc")) %>%
+score_spcv_svm = rr_spcv_svm$score(measure = mlr3::msr("classif.auc")) %>%
   # keep only the columns you need
   .[, .(task_id, learner_id, resampling_id, classif.auc)]
 ```
@@ -661,15 +662,15 @@ They can be loaded as follows:
 
 ```{r 12-spatial-cv-31}
 score = readRDS("extdata/12-bmr_score.rds")
-score_svm = score[learner_id == "classif.ksvm.tuned" & 
-                    resampling_id == "repeated_spcv_coords"]
+score_spcv_svm = score[learner_id == "classif.ksvm.tuned" & 
+                         resampling_id == "repeated_spcv_coords"]
 ```
 
 Let us have a look at the final AUROC\index{AUROC}: the model's ability to discriminate the two classes. 
 
 ```{r 12-spatial-cv-33}
 # final mean AUROC
-round(mean(score_svm$classif.auc), 2)
+round(mean(score_spcv_svm$classif.auc), 2)
 ```
 
 It appears that the GLM\index{GLM} (aggregated AUROC\index{AUROC} was `r score[resampling_id == "repeated_spcv_coords" & learner_id == "classif.log_reg", round(mean(classif.auc), 2)]`) is slightly better than the SVM\index{SVM} in this specific case.
