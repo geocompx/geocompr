@@ -27,9 +27,9 @@ Required data will be attached in due course.
 
 Statistical learning\index{statistical learning} is concerned with the use of statistical and computational models for identifying patterns in data and predicting from these patterns.
 Due to its origins, statistical learning\index{statistical learning} is one of R's\index{R} great strengths (see Section \@ref(software-for-geocomputation)).^[
-Applying statistical techniques to geographic data has been an active topic of research for many decades in the fields of Geostatistics, Spatial Statistics and point pattern analysis [@diggle_modelbased_2007; @gelfand_handbook_2010; @baddeley_spatial_2015].
+Applying statistical techniques to geographic data has been an active topic of research for many decades in the fields of geostatistics, spatial statistics and point pattern analysis [@diggle_modelbased_2007; @gelfand_handbook_2010; @baddeley_spatial_2015].
 ]
-Statistical learning\index{statistical learning} combines methods from statistics\index{statistics} and machine learning\index{machine learning} and its methods can be categorized into supervised and unsupervised techniques.
+Statistical learning\index{statistical learning} combines methods from statistics\index{statistics} and machine learning\index{machine learning} and can be categorized into supervised and unsupervised techniques.
 Both are increasingly used in disciplines ranging from physics, biology and ecology to geography and economics [@james_introduction_2013].
 
 This chapter focuses on supervised techniques in which there is a training dataset, as opposed to unsupervised techniques such as clustering\index{clustering}.
@@ -76,7 +76,7 @@ data("lsl", "study_mask", package = "spDataLarge")
 ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 ```
 
-This should load three objects: a `data.frame` named `lsl`, an `sf` object named `study_mask` and a `SpatRaster` (see Section \@ref(raster-classes)) named `ta` containing terrain attribute rasters.
+The above code loads three objects: a `data.frame` named `lsl`, an `sf` object named `study_mask` and a `SpatRaster` (see Section \@ref(raster-classes)) named `ta` containing terrain attribute rasters.
 `lsl` contains a factor column `lslpts` where `TRUE` corresponds to an observed landslide 'initiation point', with the coordinates stored in columns `x` and `y`.^[
 The landslide initiation point is located in the scarp of a landslide polygon. See @muenchow_geomorphic_2012 for further details.
 ]
@@ -87,28 +87,26 @@ The 175 non-landslide points were sampled randomly from the study area, with the
 # library(tmap)
 # data("lsl", package = "spDataLarge")
 # ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
-# lsl_sf = sf::st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
+# lsl_sf = sf::st_as_sf(lsl, coords = c("x", "y"), crs = "EPSG:32717")
 # hs = terra::shade(slope = ta$slope * pi / 180,
 #                   terra::terrain(ta$elev, v = "aspect", unit = "radians"))
 # # so far tmaptools does not support terra objects
 # 
-# rect = tmaptools::bb_poly(raster::raster(hs))
-# bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.0001, 1), 
+# bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.0001, 1),
 #                     ylim = c(-0.0001, 1), relative = TRUE)
 # 
 # map = tm_shape(hs, bbox = bbx) +
 #   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
-#           labels.rot = c(0, 90)) +
+#           labels.rot = c(0, 90), lines = FALSE) +
 #   tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
 #   tm_shape(ta$elev) +
 #   tm_raster(alpha = 0.5, palette = terrain.colors(10), legend.show = FALSE) +
 #   tm_shape(lsl_sf) +
-#   tm_bubbles("lslpts", size = 0.2, palette = "-RdYlBu", 
+#   tm_bubbles("lslpts", size = 0.2, palette = "-RdYlBu",
 #              title.col = "Landslide: ") +
-#   qtm(rect, fill = NULL) +
-#   tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) +
+#   tm_layout(inner.margins = 0) +
 #   tm_legend(bg.color = "white")
-# tmap::tmap_save(map, filename = "figures/lsl-map-1.png", width = 11, 
+# tmap::tmap_save(map, filename = "figures/lsl-map-1.png", width = 11,
 #                 height = 11, units = "cm")
 knitr::include_graphics("figures/lsl-map-1.png")
 ```
@@ -118,9 +116,8 @@ The first three rows of `lsl`, rounded to two significant digits, can be found i
 
 ```{r lslsummary, echo=FALSE, warning=FALSE}
 lsl_table = lsl |>
-  mutate(across(.cols = -any_of(c("x", "y", "lslpts")), ~signif(., 2))) |>
-  head(3)
-knitr::kable(lsl_table, caption = "Structure of the lsl dataset.",
+  mutate(across(.cols = -any_of(c("x", "y", "lslpts")), ~signif(., 2)))
+knitr::kable(lsl_table[c(1, 2, 350), ], caption = "Structure of the lsl dataset.",
              caption.short = "`lsl` dataset.", booktabs = TRUE) |>
   kableExtra::kable_styling(latex_options = "scale_down")
 ```
@@ -128,12 +125,17 @@ knitr::kable(lsl_table, caption = "Structure of the lsl dataset.",
 To model landslide susceptibility, we need some predictors.
 Since terrain attributes are frequently associated with landsliding [@muenchow_geomorphic_2012], we have already extracted following terrain attributes from `ta` to `lsl`:
 
-- `slope`: slope angle (°).
-- `cplan`: plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow.
-- `cprof`: profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle.
-- `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
-- `log10_carea`: the decadic logarithm of the catchment area (log10 m^2^) representing the amount of water flowing towards a location.
+- `slope` -  slope angle (°)
+- `cplan` - plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow
+- `cprof` - profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle
+- `elev` - elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area
+- `log10_carea` - the decadic logarithm of the catchment area (log10 m^2^) representing the amount of water flowing towards a location
 
+<!--
+JN:already done at the beginning of the chapter
+-->
+
+<!--
 Data containing the landslide points, with the corresponding terrain attributes, is provided in the **spDataLarge** package, along with the multilayer terrain attribute raster from which the values were extracted.
 Hence, if you have not computed the predictors yourself, attach the corresponding data before running the code of the remaining chapter:
 
@@ -143,6 +145,8 @@ data("lsl", package = "spDataLarge")
 # attach terrain attribute raster stack
 ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 ```
+
+-->
 
 ## Conventional modeling approach in R {#conventional-model}
 
@@ -163,7 +167,7 @@ It is worth understanding each of the three input arguments:
 
 - A formula, which specifies landslide occurrence (`lslpts`) as a function of the predictors
 - A family, which specifies the type of model, in this case `binomial` because the response is binary (see `?family`)
-- The data frame which contains the response and the predictors
+- The data frame which contains the response and the predictors (as columns)
 
 The results of this model can be printed as follows (`summary(fit)` provides a more detailed account of the results):
 
@@ -184,7 +188,7 @@ head(pred_glm)
 
 Spatial predictions can be made by applying the coefficients to the predictor rasters. 
 This can be done manually or with `terra::predict()`.
-In addition to a model object (`fit`), this function also expects a `SpatRaster` with the predictors named as in the model's input data frame (Figure \@ref(fig:lsl-susc)).
+In addition to a model object (`fit`), this function also expects a `SpatRaster` with the predictors (raster layers) named as in the model's input data frame (Figure \@ref(fig:lsl-susc)).
 
 ```{r 12-spatial-cv-9, eval=FALSE}
 # making the prediction
@@ -196,16 +200,15 @@ pred = terra::predict(ta, model = fit, type = "response")
 # data("lsl", "study_mask", package = "spDataLarge")
 # ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 # study_mask = terra::vect(study_mask)
-# # white raster to only plot the axis ticks, otherwise gridlines would be visible
 # lsl_sf = sf::st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
 # hs = terra::shade(ta$slope * pi / 180,
 #                   terra::terrain(ta$elev, v = "aspect", unit = "radians"))
-# rect = tmaptools::bb_poly(raster::raster(hs))
-# bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.00001, 1), 
-#                     ylim = c(-0.00001, 1), relative = TRUE)
+# bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.0001, 1),
+#                     ylim = c(-0.0001, 1), relative = TRUE)
+# 
 # map = tm_shape(hs, bbox = bbx) +
 #   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
-#           labels.rot = c(0, 90)) +
+#           labels.rot = c(0, 90), lines = FALSE) +
 #   tm_raster(palette = "white", legend.show = FALSE) +
 #   # hillshade
 #   tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
@@ -215,12 +218,10 @@ pred = terra::predict(ta, model = fit, type = "response")
 #   tm_shape(terra::mask(pred, study_mask)) +
 # 	tm_raster(alpha = 0.5, palette = "Reds", n = 6, legend.show = TRUE,
 # 	          title = "Susceptibility") +
-# 	# rectangle and outer margins
-#   qtm(rect, fill = NULL) +
-# 	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
-# 	          legend.position = c("left", "bottom"),
-# 	          legend.title.size = 0.9)
-# tmap::tmap_save(map, filename = "figures/lsl-susc-1.png", width = 11, 
+# 	tm_layout(legend.position = c("left", "bottom"),
+# 	          legend.title.size = 0.9,
+# 	          inner.margins = 0)
+# tmap::tmap_save(map, filename = "figures/lsl-susc-1.png", width = 11,
 #                 height = 11, units = "cm")
 knitr::include_graphics("figures/lsl-susc-1.png")
 ```
