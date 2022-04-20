@@ -440,23 +440,23 @@ lgr::get_logger("mlr3")$set_threshold("warn")
 sp_cv = mlr3::resample(task = task,
                        learner = learner,
                        resampling = perf_level)
+# compute the AUROC as a data.table
+score_glm = sp_cv$score(measure = mlr3::measure("classif.auc")) %>%
+  # keep only the columns you need
+  .[, .(task_id, learner_id, resampling_id, classif.auc)]
 ```
 
-The output of the preceding code chunk is a bias-reduced assessment of the model's predictive performance, as illustrated in the following code chunk (required input data is saved in the file `12-sp_cv.rds` in the book's GitHub repo).
+The output of the preceding code chunk is a bias-reduced assessment of the model's predictive performance, as illustrated in the following code chunk (required input data is saved in the file `extdata/12-bmr_score.rds` in the book's GitHub repo).
 As performance measure, we again choose the AUROC.
 
 ```{r 12-spatial-cv-21, echo=FALSE, eval=FALSE}
-# bm_agg = readRDS("extdata/12-sp_conv_cv.rds")
-# sp_cv = bm_agg$resample_result[[1]]
-score = readRDS("extdata/12-glm_score_sp_nsp.rds")
+score = readRDS("extdata/12-bmr_score.rds")
+score_glm = score[learner_id == "classif.log_reg"]
 ```
 
 ```{r 12-spatial-cv-22, eval=FALSE}
-score[, .(mean_auc = mean(classif.auc)), by = resampling_id]
-# summary statistics of the 500 models
-# sp_cv$score(measures = mlr3::msr("classif.auc"))[, summary(classif.auc)]
-# mean AUROC of the 500 models
-# sp_cv$aggregate(measures = mlr3::msr("classif.auc"))
+# compute the mean AUROC by resampling strategy
+score_glm[, .(mean_auc = round(mean(classif.auc), 2)), by = resampling_id]
 ```
 
 To put these results in perspective, let us compare them with AUROC\index{AUROC} values from a 100-repeated 5-fold non-spatial cross-validation (Figure \@ref(fig:boxplot-cv); the code for the non-spatial cross-validation\index{cross-validation} is not shown here but will be explored in the exercise section).
@@ -464,16 +464,13 @@ As expected, the spatially cross-validated result yields lower AUROC values on a
 
 ```{r boxplot-cv, echo=FALSE, fig.width=6, fig.height=9, fig.cap="Boxplot showing the difference in AUROC values between spatial and conventional 100-repeated 5-fold cross-validation.", fig.scap="Boxplot showing AUROC values.", eval=FALSE}
 library(ggplot2)
-# extract the AUROC values and put them into one data.table
-# d = purrr::map_dfr(bm_agg$resample_result, ~ .$score(mlr3::msr("classif.auc")))
-d = score
 # rename the levels of resampling_id
-d[, resampling_id := as.factor(resampling_id) |>
-    forcats::fct_recode("conventional CV" = "repeated_cv", 
+score_glm[, resampling_id := as.factor(resampling_id) |>
+            forcats::fct_recode("conventional CV" = "repeated_cv", 
                         "spatial CV" = "repeated_spcv_coords") |> 
-    forcats::fct_rev()]
+            forcats::fct_rev()]
 # create the boxplot
-ggplot2::ggplot(data = d, 
+ggplot2::ggplot(data = score_glm, 
                 mapping = ggplot2::aes(x = resampling_id, y = classif.auc)) +
   ggplot2::geom_boxplot(fill = c("lightblue2", "mistyrose2")) +
   ggplot2::theme_bw() +
@@ -648,28 +645,30 @@ progressr::with_progress(expr = {
 
 # stop parallelization
 future:::ClusterRegistry("stop")
-# save your result, e.g.:
-# saveRDS(result, "svm_sp_sp_rbf_50it.rds")
+# compute the AUROC values
+score_svm = result$score(measure = mlr3::msr("classif.auc")) %>%
+  # keep only the columns you need
+  .[, .(task_id, learner_id, resampling_id, classif.auc)]
 ```
 
-In case you do not want to run the code locally, we have saved a subset of the [results](https://github.com/Robinlovelace/geocompr/blob/main/extdata/12-spatial_cv_result.rds) in the book's GitHub repo.
+In case you do not want to run the code locally, we have saved [score_svm](https://github.com/Robinlovelace/geocompr/blob/main/extdata/12-bmr_score.rds) in the book's GitHub repo.
 They can be loaded as follows:
 
 ```{r 12-spatial-cv-31}
-result = readRDS("extdata/12-spatial_cv_result.rds")
+score = readRDS("extdata/12-bmr_score.rds")
+score_svm = score[learner_id == "classif.ksvm.tuned" & 
+                    resampling_id == "repeated_spcv_coords"]
 ```
 
 Let us have a look at the final AUROC\index{AUROC}: the model's ability to discriminate the two classes. 
 
 ```{r 12-spatial-cv-33}
-# final aggregated AUROC 
-result$aggr
-# same as
-mean(result$measures.test$auc)
+# final mean AUROC
+round(mean(score_svm$classif.auc), 2)
 ```
 
-It appears that the GLM\index{GLM} (aggregated AUROC\index{AUROC} was `r # score[resampling_id == "repeated_spcv_coords", round(mean(classif.auc), 2)]`) is slightly better than the SVM\index{SVM} in this specific case.
-To guarantee an absolute fair comparison, one should also make sure that the two models use the exact same partitions -- something we haven't done here.
+It appears that the GLM\index{GLM} (aggregated AUROC\index{AUROC} was `r score[resampling_id == "repeated_spcv_coords" & learner_id == "classif.log_reg", round(mean(classif.auc), 2)]`) is slightly better than the SVM\index{SVM} in this specific case.
+To guarantee an absolute fair comparison, one should also make sure that the two models use the exact same partitions -- something we have not shown here but have silently used in the background (see `code/12_cv.R` in the book's github repo for more information).
 To do so, **mlr3** offers the functions `benchmark_grid()` and `benchmark()` [see also https://mlr3book.mlr-org.com/perf-eval-cmp.html#benchmarking, @becker_mlr3_2022]. 
 We will explore these functions in more detail in the Exercises.
 Please note also that using more than 50 iterations in the random search of the SVM would probably yield hyperparameters\index{hyperparameter} that result in models with a better AUROC [@schratz_hyperparameter_2019].
