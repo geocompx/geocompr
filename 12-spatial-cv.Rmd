@@ -302,8 +302,7 @@ Getting acquainted with each of these packages, including how to undertake cross
 Comparing model results from different packages can be even more laborious.
 The **mlr3** package and ecosystem was developed to address these issues.
 It acts as a 'meta-package', providing a unified interface to popular supervised and unsupervised statistical learning techniques including classification, regression\index{regression}, survival analysis and clustering\index{clustering} [@lang_mlr3_2019].
-The standardized **mlr3** interface is based on eight 'building blocks'.
-As illustrated in Figure \@ref(fig:building-blocks), these have a clear order.
+The standardized **mlr3** interface is based on eight 'building blocks', and as illustrated in Figure \@ref(fig:building-blocks), these have a clear order.
 
 ```{r building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the mlr3 package. Source: @becker_mlr3_2021 (Permission to reuse this figure was kindly granted.)", fig.scap="Basic building blocks of the mlr3 package."}
 knitr::include_graphics("figures/13_ml_abstraction_crop.png")
@@ -317,14 +316,14 @@ Third, the **resampling** approach assesses the predictive performance of the mo
 ### Generalized linear model {#glm}
 
 To implement a GLM\index{GLM} in **mlr3**\index{mlr3 (package)}, we must create a **task** containing the landslide data.
-Since the response is binary (two-category variable) and has a spatial dimension, we create a classification\index{classification} task with `mlr3spatiotempcv::TaskClassifST$new()` (for non-spatial tasks, use `TaskClassif$new()` or `TaskRegr$new()` for regression\index{regression} tasks, see `?Task` for other task types).^[The **mlr3** ecosystem makes heavily use of **data.table** and **R6** classes. And though you might use **mlr3** without knowing the specifics of **data.table** or **R6**, it might be rather helpful. To learn more about **data.table**, please refer to https://rdatatable.gitlab.io/data.table/index.html. To learn more about **R6**, we recommend [Chapter 14](https://adv-r.hadley.nz/fp.html) of the Advanced R book [@wickham_advanced_2019].]
+Since the response is binary (two-category variable) and has a spatial dimension, we create a classification\index{classification} task with `mlr3spatiotempcv::TaskClassifST$new()` (for non-spatial tasks, use `TaskClassif$new()` or `TaskRegr$new()` for regression\index{regression} tasks, see `?Task` for other task types).^[The **mlr3** ecosystem makes heavily use of **data.table** and **R6** classes. And though you might use **mlr3** without knowing the specifics of **data.table** or **R6**, it might be rather helpful. To learn more about **data.table**, please refer to https://rdatatable.gitlab.io/data.table/index.html. To learn more about **R6**, we recommend [Chapter 14](https://adv-r.hadley.nz/r6.html) of the Advanced R book [@wickham_advanced_2019].]
 The first essential argument of these `Task*$new()` functions is `backend`.
-`backend` expects the data to be used for the modeling including the response and predictor variables.
+`backend` expects that the input data includes the response and predictor variables.
 The `target` argument indicates the name of a response variable (in our case this is `lslpts`) and `positive` determines which of the two factor levels of the response variable indicate the landslide initiation point (in our case this is `TRUE`).
 All other variables of the `lsl` dataset will serve as predictors.
 For spatial CV, we need to provide a few extra arguments (`extra_args`).
 The `coordinate_names` argument expects the names of the coordinate columns (see Section \@ref(intro-cv) and Figure \@ref(fig:partitioning)).
-Additionally, one should indicate the used CRS (`crs`) and if one wishes to use the coordinates as predictors in the modeling (`coords_as_features`).
+Additionally, we should indicate the used CRS (`crs`) and decide if we want to use the coordinates as predictors in the modeling (`coords_as_features`).
 
 ```{r 12-spatial-cv-11, eval=FALSE}
 # create task
@@ -336,13 +335,13 @@ task = mlr3spatiotempcv::TaskClassifST$new(
   extra_args = list(
     coordinate_names = c("x", "y"),
     coords_as_features = FALSE,
-    crs = 32717)
+    crs = "EPSG:32717")
   )
 ```
 
 Note that `TaskClassifST$new()` also accepts an `sf`-object as input for the `backend` parameter.
 In this case, you might only want to specify the `coords_as_features` argument of the `extra_args` list.
-We did not convert `lsl` into an `sf`-object because `TaskClassifST$new()` just converts it back into a non-spatial `data.table` object in the background.
+We did not convert `lsl` into an `sf`-object because `TaskClassifST$new()` would just trun it back into a non-spatial `data.table` object in the background.
 For a short data exploration, the `autoplot()` function of the **mlr3viz** package might come in handy since it plots the response against all predictors and all predictors against all predictors (not shown).
 
 ```{r autoplot, eval=FALSE}
