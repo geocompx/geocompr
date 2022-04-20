@@ -32,7 +32,7 @@ To do so, we will bring together concepts presented in previous chapters and eve
 Fog oases are one of the most fascinating vegetation formations we have ever encountered.
 These formations, locally termed *lomas*, develop on mountains along the coastal deserts of Peru and Chile.^[Similar vegetation formations develop also in other parts of the world, e.g., in Namibia and along the coasts of Yemen and Oman [@galletti_land_2016].]
 The deserts' extreme conditions and remoteness provide the habitat for a unique ecosystem, including species endemic to the fog oases.
-Despite the arid conditions and low levels of precipitation of around 30-50 mm per year on average, fog deposition increases the amount of water available to plants during austal winter.
+Despite the arid conditions and low levels of precipitation of around 30-50 mm per year on average, fog deposition increases the amount of water available to plants during austral winter.
 This results in green southern-facing mountain slopes along the coastal strip of Peru (Figure \@ref(fig:study-area-mongon)). 
 This fog, which develops below the temperature inversion caused by the cold Humboldt current in austral winter, provides the name for this habitat.
 Every few years, the El Niño phenomenon brings torrential rainfall to this sun-baked environment [@dillon_lomas_2003].
@@ -350,7 +350,7 @@ text(tree_mo, pretty = 0)
 
 
 <div class="figure" style="text-align: center">
-<img src="figures/15_tree.png" alt="Simple example of a decision tree with three internal nodes and four terminal nodes." width="100%" />
+<img src="figures/15_tree.png" alt="Simple example of a decision tree with three internal nodes and four terminal nodes." width="60%" />
 <p class="caption">(\#fig:tree)Simple example of a decision tree with three internal nodes and four terminal nodes.</p>
 </div>
 
@@ -401,7 +401,7 @@ Therefore, we tune the hyperparameters\index{hyperparameter} for a good spatial 
 <!-- If we used more than one repetition (say 2) we would retrieve multiple optimal tuned hyperparameter combinations (say 2) -->
 
 Having already constructed the input variables (`rp`), we are all set for specifying the **mlr3**\index{mlr3 (package)} building blocks (task, learner, and resampling).
-For specifying a spatial task, we use again the **mlr3spatiotempcv** [@schratz_mlr3spatiotempcv_2021] package (section \@ref(spatial-cv-with-mlr3)).
+For specifying a spatial task, we use again the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021 & Section \@ref(spatial-cv-with-mlr3)].
 Since our response (`sc`) is numeric, we use a regression\index{regression} task.
 
 
@@ -413,7 +413,7 @@ task = mlr3spatiotempcv::TaskRegrST$new(
 
 Using an `sf` object as the backend automatically provides the geometry information needed for the spatial partitioning later on.
 Additionally, we got rid of the columns `id` and `spri` since these variables should not be used as predictors in the modeling.
-Next, we go on to contruct the a random forest\index{random forest} learner from the **ranger** package.
+Next, we go on to construct the a random forest\index{random forest} learner from the **ranger** package.
 
 
 ```r
@@ -448,12 +448,12 @@ search_space = paradox::ps(
 Having defined the search space, we are all set for specifying our tuning via the `AutoTuner()` function.
 Since we deal with geographic data, we will again make use of spatial cross-validation to tune the hyperparameters\index{hyperparameter} (see Sections \@ref(intro-cv) and \@ref(spatial-cv-with-mlr)).
 Specifically, we will use a five-fold spatial partitioning with only one repetition (`rsmp()`). 
-In each of these spatial partitions, we run 50 models (`trm()`) while using randomly selected hyperparameter configurations (`tnr`) within predefined limits (`seach_space`) to find the optimal hyperparameter\index{hyperparameter} combination.
+In each of these spatial partitions, we run 50 models (`trm()`) while using randomly selected hyperparameter configurations (`tnr()`) within predefined limits (`seach_space`) to find the optimal hyperparameter\index{hyperparameter} combination [see also Section \@ref(svm) and https://mlr3book.mlr-org.com/optimization.html#autotuner, @becker_mlr3_2021].
 The performance measure is the root mean squared error (RMSE\index{RMSE}).
 
 
 ```r
-at = mlr3tuning::AutoTuner$new(
+autotuner_rf = mlr3tuning::AutoTuner$new(
   learner = lrn_rf,
   # spatial partitioning
   resampling = mlr3::rsmp("spcv_coords", folds = 5),
@@ -472,9 +472,9 @@ Calling the `train()`-method of the `AutoTuner`-object finally runs the hyperpar
 
 
 ```r
-# hyperparamter tuning
+# hyperparameter tuning
 set.seed(0412022)
-at$train(task)
+autotuner_rf$train(task)
 #>...
 #> INFO  [11:39:31.375] [mlr3] Finished benchmark 
 #> INFO  [11:39:31.427] [bbotk] Result of batch 50: 
@@ -509,7 +509,7 @@ To do so, we only need to run the `predict` method of our fitted `AutoTuner` obj
 
 ```r
 # predicting using the best hyperparameter combination
-at$predict(task)
+autotuner_rf$predict(task)
 ```
 
 The `predict` method will apply the model to all observations used in the modeling.
@@ -517,11 +517,11 @@ Given a multilayer `SpatRaster` containing rasters named as the predictors used 
 
 
 ```r
-pred = terra::predict(ep, model = at, fun = predict)
+pred = terra::predict(ep, model = autotuner_rf, fun = predict)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/15_rf_pred.png" alt="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts." width="100%" />
+<img src="figures/15_rf_pred.png" alt="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts." width="60%" />
 <p class="caption">(\#fig:rf-pred)Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.</p>
 </div>
 
@@ -533,7 +533,7 @@ newdata = as.data.frame(as.matrix(ep))
 colSums(is.na(newdata))  # 0 NAs
 # but assuming there were 0s results in a more generic approach
 ind = rowSums(is.na(newdata)) == 0
-tmp = at$predict_newdata(newdata = newdata[ind, ], task = task)
+tmp = autotuner_rf$predict_newdata(newdata = newdata[ind, ], task = task)
 newdata[ind, "pred"] = data.table::as.data.table(tmp)[["response"]]
 pred_2 = ep$dem
 # now fill the raster with the predicted values
@@ -591,18 +591,7 @@ What might explain the observed difference?
 
 
 
-The NMDS using the presence-absence values yields a better result (`nmds_pa$stress`) than the one using percentage data (`nmds_per$stress`).
-This might seem surprising at first sight.
-On the other hand, the percentage matrix contains both more information and more noise.
-Another aspect is how the data was collected.
-Imagine a botanist in the field.
-It might seem feasible to differentiate between a plant which has a cover of 5% and another species that covers 10%.
-However, what about a herbal species that was only detected three times and consequently has a very tiny cover, e.g., 0.0001%. 
-Maybe another herbal species was detected 6 times, is its cover then 0.0002%?
-The point here is that percentage data as specified during a field campaign might reflect a precision that the data does not have.
-This again introduces noise which in turn will worsen the ordination result.
-Still, it is a valuable information if one species had a higher frequency or coverage in one plot than another compared to just presence-absence data.
-One compromise would be to use a categorical scale such as the Londo scale.
+
 
 E2. Compute all the predictor rasters\index{raster} we have used in the chapter (catchment slope, catchment area), and put them into a `SpatRaster`-object.
 Add `dem` and `ndvi` to it.
@@ -618,8 +607,3 @@ The random forest modeling should include the estimation of optimal hyperparamet
 Parallelize\index{parallelization} the tuning level (see Section \@ref(svm)).
 Report the mean RMSE\index{RMSE} and use a boxplot to visualize all retrieved RMSEs.
 Please not that this exercise is best solved using the mlr3 functions `benchmark_grid()` and `benchmark()` (see https://mlr3book.mlr-org.com/perf-eval-cmp.html#benchmarking for more information).
-
-
-
-In fact, `lm` performs at least as good the random forest model, and thus should be preferred since it is much easier to understand and computationally much less demanding (no need for fitting hyperparameters).
-But keep in mind that the used dataset is small in terms of observations and predictors and that the response-predictor relationships are also relatively linear.
