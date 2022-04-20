@@ -83,7 +83,7 @@ tune_level = rsmp("spcv_coords", folds = 5)
 terminator = trm("evals", n_evals = 50)
 tuner = tnr("random_search")
 # define the outer limits of the randomly selected hyperparameters
-ps = ps(
+search_space = ps(
   C = p_dbl(lower = -12, upper = 15, trafo = function(x) 2^x),
   sigma = p_dbl(lower = -15, upper = 6, trafo = function(x) 2^x)
 )
@@ -92,12 +92,11 @@ at_ksvm = AutoTuner$new(
   learner = lrn_ksvm,
   resampling = tune_level,
   measure = msr("classif.auc"),
-  search_space = ps,
+  search_space = search_space,
   terminator = terminator,
   tuner = tuner
 )
-# define a fallback learner in case one model fails
-at_ksvm$fallback = lrn("classif.featureless", predict_type = "prob") 
+
 # 2.3 cross-validation====
 #**********************************************************
 
@@ -144,7 +143,7 @@ tictoc::toc()
 # stop the parallelization plan
 future:::ClusterRegistry("stop")
 # save your result
-saveRDS(bmr, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-bmr_test.rds")
+# saveRDS(bmr, file = "extdata/12-bmr_glm_svm_spcv_convcv.rds")
 
 # plot your result
 # library(mlr3viz)
@@ -155,24 +154,24 @@ saveRDS(bmr, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-bm
 #   scale_x_discrete(labels=c("spatial CV", "conventional CV")) +
 #   ggplot2::theme_bw()
 
-# # instead of using autoplot, it might be easier to create the figure yourself
-# agg = bmr$aggregate(measures = msr("classif.auc"))
-# # # extract the AUROC values and put them into one data.table
-# d = purrr::map_dfr(agg$resample_result, ~ .$score(msr("classif.auc")))
-# # rename the levels of resampling_id
-# d[, resampling_id := as.factor(resampling_id) |>
-#     forcats::fct_recode("conventional CV" = "repeated_cv",
-#                         "spatial CV" = "repeated_spcv_coords") |>
-#     forcats::fct_rev()]
-# # create the boxplot which shows the overfitting in the nsp-case
-# ggplot2::ggplot(
-#   data = d, 
-#   mapping = ggplot2::aes(x = interaction(resampling_id, learner_id), 
-#                          y = classif.auc, fill = resampling_id
-#                          )) +
-#   ggplot2::geom_boxplot() +
-#   ggplot2::theme_bw() +
-#   ggplot2::labs(y = "AUROC", x = "")
+# instead of using autoplot, it might be easier to create the figure yourself
+score = bmr$score(measure = mlr3::msr("classif.auc")) %>%
+  # keep only the columns you need
+  .[, .(task_id, learner_id, resampling_id, classif.auc)]
+# rename the levels of resampling_id
+score[, resampling_id := as.factor(resampling_id) |>
+        forcats::fct_recode("conventional CV" = "repeated_cv",
+                            "spatial CV" = "repeated_spcv_coords") |>
+        forcats::fct_rev()]
+# create the boxplot which shows the overfitting in the nsp-case
+ggplot2::ggplot(
+  data = score,
+  mapping = ggplot2::aes(x = interaction(resampling_id, learner_id),
+                         y = classif.auc, fill = resampling_id
+  )) +
+  ggplot2::geom_boxplot() +
+  ggplot2::theme_bw() +
+  ggplot2::labs(y = "AUROC", x = "")
 
 #**********************************************************
 # 3 spatial prediction----
@@ -182,80 +181,58 @@ saveRDS(bmr, file = "/home/jannes.muenchow/rpackages/misc/geocompr/extdata/12-bm
 # 3.1 make the prediction using the glm====
 #**********************************************************
 
-# lrn_glm$train(task)
-# fit = lrn_glm$model
-# # according to lrn_glm$help() the default for predictions was adjusted to FALSE,
-# # since we would like to have TRUE predictions, we have to change back
-# # fit$coefficients = fit$coefficients * -1
-# 
-# pred = terra::predict(object = ta, model = fit, fun = predict,
-#                        type = "response")
-# 
-# # make the prediction "manually"
-# ta_2 = ta
-# newdata = as.data.frame(as.matrix(ta_2))
-# colSums(is.na(newdata))  # ok, there are NAs
-# ind = rowSums(is.na(newdata)) == 0
-# tmp = lrn_glm$predict_newdata(newdata = newdata[ind, ], task = task)
-# newdata[ind, "pred"] = as.data.table(tmp)[["prob.TRUE"]]
-# # check
-# all.equal(as.numeric(values(pred)), newdata$pred)
-# pred_2 = ta$slope
-# values(pred_2) = newdata$pred
-# all.equal(pred, pred_2)
-# plot(c(pred, pred_2))
-# 
-# #**********************************************************
-# # 3.2 plot the prediction====
-# #**********************************************************
-# 
-# hs = terra::shade(ta$slope * pi / 180, 
-#                   terra::terrain(ta$elev, v = "aspect", unit = "radians"),
-#                   40, 270)
-# plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
-# plot(pred, col = RColorBrewer::brewer.pal(name = "Reds", 9), add = TRUE, 
-# 
-# # or using tmap 
-# # white raster to only plot the axis ticks, otherwise gridlines would be visible
-# study_mask = terra::vect(study_mask)
-# lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
-# rect = tmaptools::bb_poly(raster::raster(hs))
-# bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.02, 1), ylim = c(-0.02, 1), 
-#                     relative = TRUE)
-# tm_shape(hs, bbox = bbx) +
-#   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
-#           labels.rot = c(0, 90)) +
-#   tm_raster(palette = "white", legend.show = FALSE) +
-#   # hillshade
-#   tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
-#   tm_raster(palette = gray(0:100 / 100), n = 100,
-#             legend.show = FALSE) +
-#   # prediction raster
-#   tm_shape(terra::mask(pred, study_mask)) +
-#   tm_raster(alpha = 0.5, palette = "Reds", n = 6, legend.show = TRUE,
-#             title = "Susceptibility") +
-#   # rectangle and outer margins
-#   qtm(rect, fill = NULL) +
-#   tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
-#             legend.position = c("left", "bottom"),
-#             legend.title.size = 0.9)
+lrn_glm$train(task)
+fit = lrn_glm$model
+# according to lrn_glm$help() the default for predictions was adjusted to FALSE,
+# since we would like to have TRUE predictions, we have to change back
+# fit$coefficients = fit$coefficients * -1
 
+pred = terra::predict(object = ta, model = fit, fun = predict,
+                      type = "response")
 
+# make the prediction "manually"
+ta_2 = ta
+newdata = as.data.frame(as.matrix(ta_2))
+colSums(is.na(newdata))  # ok, there are NAs
+ind = rowSums(is.na(newdata)) == 0
+tmp = lrn_glm$predict_newdata(newdata = newdata[ind, ], task = task)
+newdata[ind, "pred"] = as.data.table(tmp)[["prob.TRUE"]]
+# check
+all.equal(as.numeric(values(pred)), newdata$pred)  # TRUE
+pred_2 = ta$slope
+pred_2[] = newdata$pred
 
+#**********************************************************
+# 3.2 plot the prediction====
+#**********************************************************
 
+hs = terra::shade(ta$slope * pi / 180,
+                  terra::terrain(ta$elev, v = "aspect", unit = "radians"),
+                  40, 270)
+plot(hs, col = gray(seq(0, 1, length.out = 100)), legend = FALSE)
+plot(pred, col = RColorBrewer::brewer.pal(name = "Reds", 9), add = TRUE)
 
-
-
-# # # only GLM----
-# design_grid = benchmark_grid(
-#   tasks = task,
-#   learners = lrn_glm,
-#   resamplings = list(rsmp_sp, rsmp_nsp))
-# bmr = benchmark(design = design_grid, store_backends = FALSE)
-# # bmr_dt = as.data.table(bmr)
-# # saveRDS(bmr, "extdata/12-glm_sp_nsp_bmr.rds")
-# # agg = bmr$aggregate(measures = mlr3::msr("classif.auc"))
-# # saveRDS(agg, "extdata/12-glm_sp_nsp.rds")
-# score = bmr$score(measures = msr("classif.auc"))
-# saveRDS(score[, .(task_id, resampling_id, learner_id, classif.auc)], 
-#         "extdata/12-glm_score_sp_nsp.rds")
+# or using tmap
+# white raster to only plot the axis ticks, otherwise gridlines would be visible
+study_mask = terra::vect(study_mask)
+lsl_sf = st_as_sf(lsl, coords = c("x", "y"), crs = 32717)
+rect = tmaptools::bb_poly(raster::raster(hs))
+bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.02, 1), ylim = c(-0.02, 1),
+                    relative = TRUE)
+tm_shape(hs, bbox = bbx) +
+  tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
+          labels.rot = c(0, 90)) +
+  tm_raster(palette = "white", legend.show = FALSE) +
+  # hillshade
+  tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
+  tm_raster(palette = gray(0:100 / 100), n = 100,
+            legend.show = FALSE) +
+  # prediction raster
+  tm_shape(terra::mask(pred, study_mask)) +
+  tm_raster(alpha = 0.5, palette = "Reds", n = 6, legend.show = TRUE,
+            title = "Susceptibility") +
+  # rectangle and outer margins
+  qtm(rect, fill = NULL) +
+  tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
+            legend.position = c("left", "bottom"),
+            legend.title.size = 0.9)
