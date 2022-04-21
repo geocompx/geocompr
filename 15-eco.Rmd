@@ -398,13 +398,20 @@ We refer the reader to @james_introduction_2013 for a more detailed description 
 
 To introduce decision trees by example, we first construct a response-predictor matrix by joining the rotated NMDS\index{NMDS} scores to the field observations (`random_points`).
 We will also use the resulting data frame for the **mlr3**\index{mlr3 (package)} modeling later on.
-
-```{r 15-eco-16, message=FALSE}
+<!-- JM: build process stops telling us that sc[, 1] causes the problem though I really don't know why... -->
+```{r 15-eco-16, message=FALSE, eval=FALSE}
 # construct response-predictor matrix
 # id- and response variable
 rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
 rp = inner_join(random_points, rp, by = "id")
+```
+
+```{r attach-rp, echo=FALSE}
+# rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
+# rp = inner_join(random_points, rp, by = "id")
+# saveRDS(rp, "extdata/15-rp.rds")
+rp = readRDS("extdata/15-rp.rds")
 ```
 
 Decision trees split the predictor space into a number of regions.
@@ -513,7 +520,7 @@ Hyperparameter\index{hyperparameter} combinations will be selected randomly but 
 <!-- (`r # ncol(rp) - 1`), -->
 (4), `sample.fraction` should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10.
 
-```{r 15-eco-23}
+```{r 15-eco-22}
 # specifying the search space
 search_space = paradox::ps(
   mtry = paradox::p_int(lower = 1, upper = ncol(task$data()) - 1),
@@ -528,7 +535,7 @@ Specifically, we will use a five-fold spatial partitioning with only one repetit
 In each of these spatial partitions, we run 50 models (`trm()`) while using randomly selected hyperparameter configurations (`tnr()`) within predefined limits (`seach_space`) to find the optimal hyperparameter\index{hyperparameter} combination [see also Section \@ref(svm) and https://mlr3book.mlr-org.com/optimization.html#autotuner, @becker_mlr3_2022].
 The performance measure is the root mean squared error (RMSE\index{RMSE}).
 
-```{r 15-eco-22}
+```{r 15-eco-23}
 autotuner_rf = mlr3tuning::AutoTuner$new(
   learner = lrn_rf,
   # spatial partitioning
