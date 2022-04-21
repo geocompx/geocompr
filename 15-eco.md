@@ -300,11 +300,6 @@ plot(y = sc[, 1], x = elev, xlab = "elevation in m",
      ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8)
 ```
 
-
-```r
-knitr::include_graphics("figures/15_xy_nmds.png")
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/15_xy_nmds.png" alt="Plotting the first NMDS axis against altitude." width="60%" />
 <p class="caption">(\#fig:xy-nmds)Plotting the first NMDS axis against altitude.</p>
@@ -324,7 +319,7 @@ We refer the reader to @james_introduction_2013 for a more detailed description 
 
 To introduce decision trees by example, we first construct a response-predictor matrix by joining the rotated NMDS\index{NMDS} scores to the field observations (`random_points`).
 We will also use the resulting data frame for the **mlr3**\index{mlr3 (package)} modeling later on.
-
+<!-- JM: build process stops telling us that sc[, 1] causes the problem though I really don't know why... -->
 
 ```r
 # construct response-predictor matrix
@@ -333,6 +328,8 @@ rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
 rp = inner_join(random_points, rp, by = "id")
 ```
+
+
 
 Decision trees split the predictor space into a number of regions.
 To illustrate this, we apply a decision tree to our data using the scores of the first NMDS\index{NMDS} axis as the response (`sc`) and altitude (`dem`) as the only predictor.
@@ -446,9 +443,9 @@ search_space = paradox::ps(
 ```
 
 Having defined the search space, we are all set for specifying our tuning via the `AutoTuner()` function.
-Since we deal with geographic data, we will again make use of spatial cross-validation to tune the hyperparameters\index{hyperparameter} (see Sections \@ref(intro-cv) and \@ref(spatial-cv-with-mlr)).
+Since we deal with geographic data, we will again make use of spatial cross-validation to tune the hyperparameters\index{hyperparameter} (see Sections \@ref(intro-cv) and \@ref(spatial-cv-with-mlr3)).
 Specifically, we will use a five-fold spatial partitioning with only one repetition (`rsmp()`). 
-In each of these spatial partitions, we run 50 models (`trm()`) while using randomly selected hyperparameter configurations (`tnr()`) within predefined limits (`seach_space`) to find the optimal hyperparameter\index{hyperparameter} combination [see also Section \@ref(svm) and https://mlr3book.mlr-org.com/optimization.html#autotuner, @becker_mlr3_2021].
+In each of these spatial partitions, we run 50 models (`trm()`) while using randomly selected hyperparameter configurations (`tnr()`) within predefined limits (`seach_space`) to find the optimal hyperparameter\index{hyperparameter} combination [see also Section \@ref(svm) and https://mlr3book.mlr-org.com/optimization.html#autotuner, @becker_mlr3_2022].
 The performance measure is the root mean squared error (RMSE\index{RMSE}).
 
 
@@ -493,13 +490,9 @@ autotuner_rf$train(task)
 
 
 An `mtry` of 4, a `sample.fraction` of 0.9, and a `min.node.size` of 7 represent the best hyperparameter\index{hyperparameter} combination.
-An RMSE\index{RMSE} of
-<!--  -->
-0.38
+An RMSE\index{RMSE} of 0.38
 is relatively good when considering the range of the response variable which is
-<!--  -->
-3.04
-(`diff(range(rp$sc))`).
+3.04 (`diff(range(rp$sc))`).
 
 ### Predictive mapping
 
@@ -510,6 +503,15 @@ To do so, we only need to run the `predict` method of our fitted `AutoTuner` obj
 ```r
 # predicting using the best hyperparameter combination
 autotuner_rf$predict(task)
+#> <PredictionRegr> for 84 observations:
+#>     row_ids  truth response
+#>           1 -1.084   -1.073
+#>           2 -0.975   -1.050
+#>           3 -0.912   -1.012
+#> ---                        
+#>          82  0.814    0.646
+#>          83  0.814    0.790
+#>          84  0.808    0.845
 ```
 
 The `predict` method will apply the model to all observations used in the modeling.
@@ -531,6 +533,8 @@ In case, `terra::predict()` does not support a model algorithm, you can still ma
 ```r
 newdata = as.data.frame(as.matrix(ep))
 colSums(is.na(newdata))  # 0 NAs
+#>    dem   ndvi  carea cslope 
+#>      0      0      0      0
 # but assuming there were 0s results in a more generic approach
 ind = rowSums(is.na(newdata)) == 0
 tmp = autotuner_rf$predict_newdata(newdata = newdata[ind, ], task = task)
@@ -538,7 +542,9 @@ newdata[ind, "pred"] = data.table::as.data.table(tmp)[["response"]]
 pred_2 = ep$dem
 # now fill the raster with the predicted values
 pred_2[] = newdata$pred
-identical(values(pred), values(pred_2))  # TRUE
+# check if terra and our manual prediction is the same
+all(values(pred - pred_2) == 0)
+#> [1] TRUE
 ```
 
 The predictive mapping clearly reveals distinct vegetation belts (Figure \@ref(fig:rf-pred)).
