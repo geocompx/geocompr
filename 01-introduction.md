@@ -233,15 +233,15 @@ An obvious feature of the **tidyverse** is the tendency for packages to work in 
 There is no equivalent **geoverse**, but there are attempts at harmonization between packages hosted in the [r-spatial](https://github.com/r-spatial/discuss/issues/11) organization and a growing number of packages use **sf**\index{sf} (Table \@ref(tab:revdep)). 
 
 
-Table: (\#tab:revdep)The top 5 most downloaded packages that depend on sf, in terms of average number of downloads per day over the previous month. As of 2021-11-19  there are  289  packages which import sf.
+Table: (\#tab:revdep)The top 5 most downloaded packages that depend on sf, in terms of average number of downloads per day over the previous month. As of 2022-04-22  there are  332  packages which import sf.
 
 |Package | Downloads|
 |:-------|---------:|
-|spdep   |      1413|
-|lwgeom  |      1163|
-|stars   |       960|
-|leafem  |       898|
-|tmap    |       841|
+|spdep   |      1419|
+|lwgeom  |      1000|
+|stars   |       940|
+|leafem  |       863|
+|mapview |       760|
 
 Parallel group of developments relates to the [rspatial](https://github.com/rspatial) set of packages.^[Note the difference between "r-spatial", organization containing packages such as **sf**, and "rspatial", organization responsible for **terra**.]
 Its main member is the **terra** package for spatial raster handling (see Section \@ref(an-introduction-to-terra)).
