@@ -180,7 +180,9 @@ The chapters in Part I aim to address this by providing reproducible code on sim
 
 An important aspect of the book from a teaching/learning perspective is the **exercises** at the end of each chapter.
 Completing these will develop your skills and equip you with the confidence needed to tackle a range of geospatial problems.
-Solutions to the exercises, and a number of extended examples, are provided on the book's supporting website, at [geocompr.github.io](https://geocompr.github.io/).
+Solutions to the exercises can be found in an online booklet that accompanies Geocomputation with R, hosted at [geocompr.github.io/solutions](https://geocompr.github.io/solutions/).
+To learn how to this booklet was created, and how to update solutions in files such as [_01-ex.Rmd](https://github.com/Robinlovelace/geocompr/blob/main/_01-ex.Rmd), see this [blog post](https://geocompr.github.io/post/2022/geocompr-solutions/).
+For more blog posts and extended examples see the book's supporting website at [geocompr.github.io](https://geocompr.github.io/).
 
 Impatient readers are welcome to dive straight into the practical examples, starting in Chapter \@ref(spatial-class).
 However, we recommend reading about the wider context of *Geocomputation with R* in Chapter \@ref(intro) first.
