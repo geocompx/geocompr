@@ -23,7 +23,7 @@ library(gridExtra)
 library(lattice)
 library(latticeExtra)
 library(sperrorest)
-library(reshape2)
+library(tidyr)
 
 # attach data
 data(lsl, package = "spDataLarge")
@@ -48,10 +48,10 @@ spp[, paste("fold", 1:5)] = lapply(resamp_sp$`1`, function(x) {
   spp$fold
 })
 # melt the data frame
-spp = reshape2::melt(spp, id.vars = c("x", "y"))
+spp = tidyr::pivot_longer(spp, `fold 1`:`fold 5`)
 names(spp) = c("x", "y", "fold", "value")
-xyplot(y ~ x | fold, groups = value, data = spp, layout = c(5, 1), asp = "iso",
-       pch = 16)
+# xyplot(y ~ x | fold, groups = value, data = spp, layout = c(5, 1), asp = "iso",
+#        pch = 16)
 spp$mode = "spatial partitioning"
 
 # extract random partitioning points
@@ -63,10 +63,10 @@ rpp[, paste("fold", 1:5)] = lapply(resamp_nsp$`1`, function(x) {
   rpp$fold
 })
 # melt the data frame
-rpp = reshape2::melt(rpp, id.vars = c("x", "y"))
+rpp = tidyr::pivot_longer(rpp, `fold 1`:`fold 5`)
 names(rpp) = c("x", "y", "fold", "value")
-xyplot(y ~ x | fold, groups = value, data = rpp, layout = c(5, 1), asp = "iso",
-       pch = 16)
+# xyplot(y ~ x | fold, groups = value, data = rpp, layout = c(5, 1), asp = "iso",
+#        pch = 16)
 rpp$mode = "random partitioning"
 # rbind spatial and random partitioning points
 pp = rbind(spp, rpp)
