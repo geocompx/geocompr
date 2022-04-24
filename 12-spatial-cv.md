@@ -31,9 +31,9 @@ Required data will be attached in due course.
 
 Statistical learning\index{statistical learning} is concerned with the use of statistical and computational models for identifying patterns in data and predicting from these patterns.
 Due to its origins, statistical learning\index{statistical learning} is one of R's\index{R} great strengths (see Section \@ref(software-for-geocomputation)).^[
-Applying statistical techniques to geographic data has been an active topic of research for many decades in the fields of Geostatistics, Spatial Statistics and point pattern analysis [@diggle_modelbased_2007; @gelfand_handbook_2010; @baddeley_spatial_2015].
+Applying statistical techniques to geographic data has been an active topic of research for many decades in the fields of geostatistics, spatial statistics and point pattern analysis [@diggle_modelbased_2007; @gelfand_handbook_2010; @baddeley_spatial_2015].
 ]
-Statistical learning\index{statistical learning} combines methods from statistics\index{statistics} and machine learning\index{machine learning} and its methods can be categorized into supervised and unsupervised techniques.
+Statistical learning\index{statistical learning} combines methods from statistics\index{statistics} and machine learning\index{machine learning} and can be categorized into supervised and unsupervised techniques.
 Both are increasingly used in disciplines ranging from physics, biology and ecology to geography and economics [@james_introduction_2013].
 
 This chapter focuses on supervised techniques in which there is a training dataset, as opposed to unsupervised techniques such as clustering\index{clustering}.
@@ -81,7 +81,7 @@ data("lsl", "study_mask", package = "spDataLarge")
 ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 ```
 
-This should load three objects: a `data.frame` named `lsl`, an `sf` object named `study_mask` and a `SpatRaster` (see Section \@ref(raster-classes)) named `ta` containing terrain attribute rasters.
+The above code loads three objects: a `data.frame` named `lsl`, an `sf` object named `study_mask` and a `SpatRaster` (see Section \@ref(raster-classes)) named `ta` containing terrain attribute rasters.
 `lsl` contains a factor column `lslpts` where `TRUE` corresponds to an observed landslide 'initiation point', with the coordinates stored in columns `x` and `y`.^[
 The landslide initiation point is located in the scarp of a landslide polygon. See @muenchow_geomorphic_2012 for further details.
 ]
@@ -100,6 +100,7 @@ The first three rows of `lsl`, rounded to two significant digits, can be found i
 <caption>(\#tab:lslsummary)Structure of the lsl dataset.</caption>
  <thead>
   <tr>
+   <th style="text-align:left;">   </th>
    <th style="text-align:right;"> x </th>
    <th style="text-align:right;"> y </th>
    <th style="text-align:left;"> lslpts </th>
@@ -112,6 +113,7 @@ The first three rows of `lsl`, rounded to two significant digits, can be found i
  </thead>
 <tbody>
   <tr>
+   <td style="text-align:left;"> 1 </td>
    <td style="text-align:right;"> 713888 </td>
    <td style="text-align:right;"> 9558537 </td>
    <td style="text-align:left;"> FALSE </td>
@@ -122,6 +124,7 @@ The first three rows of `lsl`, rounded to two significant digits, can be found i
    <td style="text-align:right;"> 2.8 </td>
   </tr>
   <tr>
+   <td style="text-align:left;"> 2 </td>
    <td style="text-align:right;"> 712788 </td>
    <td style="text-align:right;"> 9558917 </td>
    <td style="text-align:left;"> FALSE </td>
@@ -132,14 +135,15 @@ The first three rows of `lsl`, rounded to two significant digits, can be found i
    <td style="text-align:right;"> 4.1 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 713408 </td>
-   <td style="text-align:right;"> 9560307 </td>
-   <td style="text-align:left;"> FALSE </td>
-   <td style="text-align:right;"> 37 </td>
-   <td style="text-align:right;"> -0.013 </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 2000 </td>
-   <td style="text-align:right;"> 3.6 </td>
+   <td style="text-align:left;"> 350 </td>
+   <td style="text-align:right;"> 713826 </td>
+   <td style="text-align:right;"> 9559078 </td>
+   <td style="text-align:left;"> TRUE </td>
+   <td style="text-align:right;"> 35 </td>
+   <td style="text-align:right;"> 0.020 </td>
+   <td style="text-align:right;"> -0.003 </td>
+   <td style="text-align:right;"> 2400 </td>
+   <td style="text-align:right;"> 3.2 </td>
   </tr>
 </tbody>
 </table>
@@ -147,11 +151,11 @@ The first three rows of `lsl`, rounded to two significant digits, can be found i
 To model landslide susceptibility, we need some predictors.
 Since terrain attributes are frequently associated with landsliding [@muenchow_geomorphic_2012], we have already extracted following terrain attributes from `ta` to `lsl`:
 
-- `slope`: slope angle (°).
-- `cplan`: plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow.
-- `cprof`: profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle.
-- `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area.
-- `log10_carea`: the decadic logarithm of the catchment area (log10 m^2^) representing the amount of water flowing towards a location.
+- `slope` -  slope angle (°)
+- `cplan` - plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow
+- `cprof` - profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle
+- `elev` - elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area
+- `log10_carea` - the decadic logarithm of the catchment area (log10 m^2^) representing the amount of water flowing towards a location
 
 It might be a worthwhile exercise to compute the terrain attributes with the help of R-GIS bridges (see Chapter \@ref(gis)) and extract them to the landslide points (see Exercise section at the end of this Chapter).
 
@@ -175,7 +179,7 @@ It is worth understanding each of the three input arguments:
 
 - A formula, which specifies landslide occurrence (`lslpts`) as a function of the predictors
 - A family, which specifies the type of model, in this case `binomial` because the response is binary (see `?family`)
-- The data frame which contains the response and the predictors
+- The data frame which contains the response and the predictors (as columns)
 
 The results of this model can be printed as follows (`summary(fit)` provides a more detailed account of the results):
 
@@ -212,7 +216,7 @@ head(pred_glm)
 
 Spatial predictions can be made by applying the coefficients to the predictor rasters. 
 This can be done manually or with `terra::predict()`.
-In addition to a model object (`fit`), this function also expects a `SpatRaster` with the predictors named as in the model's input data frame (Figure \@ref(fig:lsl-susc)).
+In addition to a model object (`fit`), this function also expects a `SpatRaster` with the predictors (raster layers) named as in the model's input data frame (Figure \@ref(fig:lsl-susc)).
 
 
 ```r
@@ -321,12 +325,12 @@ Third, the **resampling** approach assesses the predictive performance of the mo
 To implement a GLM\index{GLM} in **mlr3**\index{mlr3 (package)}, we must create a **task** containing the landslide data.
 Since the response is binary (two-category variable) and has a spatial dimension, we create a classification\index{classification} task with `TaskClassifST$new()` of the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021, for non-spatial tasks, use `mlr3::TaskClassif$new()` or `mlr3::TaskRegr$new()` for regression\index{regression} tasks, see `?Task` for other task types].^[The **mlr3** ecosystem makes heavily use of **data.table** and **R6** classes. And though you might use **mlr3** without knowing the specifics of **data.table** or **R6**, it might be rather helpful. To learn more about **data.table**, please refer to https://rdatatable.gitlab.io/data.table/index.html. To learn more about **R6**, we recommend [Chapter 14](https://adv-r.hadley.nz/fp.html) of the Advanced R book [@wickham_advanced_2019].]
 The first essential argument of these `Task*$new()` functions is `backend`.
-`backend` expects the data to be used for the modeling including the response and predictor variables.
+`backend` expects that the input data includes the response and predictor variables.
 The `target` argument indicates the name of a response variable (in our case this is `lslpts`) and `positive` determines which of the two factor levels of the response variable indicate the landslide initiation point (in our case this is `TRUE`).
 All other variables of the `lsl` dataset will serve as predictors.
 For spatial CV, we need to provide a few extra arguments (`extra_args`).
 The `coordinate_names` argument expects the names of the coordinate columns (see Section \@ref(intro-cv) and Figure \@ref(fig:partitioning)).
-Additionally, one should indicate the used CRS (`crs`) and if one wishes to use the coordinates as predictors in the modeling (`coords_as_features`).
+Additionally, we should indicate the used CRS (`crs`) and decide if we want to use the coordinates as predictors in the modeling (`coords_as_features`).
 
 
 ```r
@@ -339,18 +343,17 @@ task = mlr3spatiotempcv::TaskClassifST$new(
   extra_args = list(
     coordinate_names = c("x", "y"),
     coords_as_features = FALSE,
-    crs = 32717)
+    crs = "EPSG:32717")
   )
 ```
 
 Note that `TaskClassifST$new()` also accepts an `sf`-object as input for the `backend` parameter.
 In this case, you might only want to specify the `coords_as_features` argument of the `extra_args` list.
-We did not convert `lsl` into an `sf`-object because `TaskClassifST$new()` just converts it back into a non-spatial `data.table` object in the background.
+We did not convert `lsl` into an `sf`-object because `TaskClassifST$new()` would just turn it back into a non-spatial `data.table` object in the background.
 For a short data exploration, the `autoplot()` function of the **mlr3viz** package might come in handy since it plots the response against all predictors and all predictors against all predictors (not shown).
 
 
 ```r
-library(mlr3viz)
 # plot response against each predictor
 mlr3viz::autoplot(task, type = "duo")
 # plot all variables against each other
@@ -364,7 +367,6 @@ To find out about learners that are able to model a binary response variable, we
 
 
 ```r
-library(mlr3extralearners)
 mlr3extralearners::list_mlr3learners(
   filter = list(class = "classif", properties = "twoclass"), 
   select = c("id", "mlr3_package", "required_packages")) |>
@@ -420,7 +422,6 @@ Additionally, we need to specify the `predict.type` which determines the type of
 
 
 ```r
-library(mlr3learners)
 learner = mlr3::lrn("classif.log_reg", predict_type = "prob")
 ```
 
@@ -508,6 +509,7 @@ mean(score_spcv_glm$classif.auc) |>
 ```
 
 To put these results in perspective, let us compare them with AUROC\index{AUROC} values from a 100-repeated 5-fold non-spatial cross-validation (Figure \@ref(fig:boxplot-cv); the code for the non-spatial cross-validation\index{cross-validation} is not shown here but will be explored in the exercise section).
+<!--JN: why "as expected"? I think it would be great to explain this expectation in a few sentences here...-->
 As expected, the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance due to spatial autocorrelation\index{autocorrelation!spatial} of the latter.
 
 
@@ -541,7 +543,7 @@ Random forest\index{random forest} models might be more popular than SVMs; howev
 Since (spatial) hyperparameter tuning is the major aim of this section, we will use an SVM.
 For those wishing to apply a random forest model, we recommend to read this chapter, and then proceed to Chapter \@ref(eco) in which we will apply the currently covered concepts and techniques to make spatial predictions based on a random forest model.
 
-SVMs\index{SVM} search for the best possible 'hyperplanes' to separate classes (in a classification\index{classification} case) and estimate 'kernels' with specific hyperparameters to allow for non-linear boundaries between classes [@james_introduction_2013].
+SVMs\index{SVM} search for the best possible 'hyperplanes' to separate classes (in a classification\index{classification} case) and estimate 'kernels' with specific hyperparameters to create non-linear boundaries between classes [@james_introduction_2013].
 Hyperparameters\index{hyperparameter} should not be confused with coefficients of parametric models, which are sometimes also referred to as parameters.^[
 For a detailed description of the difference between coefficients and hyperparameters, see the 'machine mastery' blog post on the subject.
 <!-- For a more detailed description of the difference between coefficients and hyperparameters, see the [machine mastery blog](https://machinelearningmastery.com/difference-between-a-parameter-and-a-hyperparameter/). -->
@@ -559,9 +561,9 @@ Learners implementing SVM can be found using `listLearners()` as follows:
 
 
 ```r
-mlr3extralearners::list_mlr3learners() %>%
-  .[class == "classif" & grepl("svm", id),
-    .(id, class, mlr3_package, required_packages)]
+mlr3_learners = list_mlr3learners()
+mlr3_learners[class == "classif" & grepl("svm", id),
+              .(id, class, mlr3_package, required_packages)]
 #>               id   class      mlr3_package              required_packages
 #> 1:  classif.ksvm classif mlr3extralearners mlr3,mlr3extralearners,kernlab
 #> 2: classif.lssvm classif mlr3extralearners mlr3,mlr3extralearners,kernlab
@@ -625,14 +627,13 @@ talk in person (see also exercises):
 
 
 ```r
-library("mlr3tuning")
 # five spatially disjoint partitions
 tune_level = mlr3::rsmp("spcv_coords", folds = 5)
 # use 50 randomly selected hyperparameters
 terminator = mlr3tuning::trm("evals", n_evals = 50)
 tuner = mlr3tuning::tnr("random_search")
 # define the outer limits of the randomly selected hyperparameters
-seach_space = paradox::ps(
+search_space = paradox::ps(
   C = paradox::p_dbl(lower = -12, upper = 15, trafo = function(x) 2^x),
   sigma = paradox::p_dbl(lower = -15, upper = 6, trafo = function(x) 2^x)
 )
@@ -653,17 +654,17 @@ at_ksvm = mlr3tuning::AutoTuner$new(
 ```
 
 The tuning is now set-up to fit 250 models to determine optimal hyperparameters for one fold.
-Repeating this for each fold, we end up with 1250 (250 \* 5) models for each repetition.
+Repeating this for each fold, we end up with 1,250 (250 \* 5) models for each repetition.
 Repeated 100 times means fitting a total of 125,000 models to identify optimal hyperparameters (Figure \@ref(fig:partitioning)).
 These are used in the performance estimation, which requires the fitting of another 500 models (5 folds \* 100 repetitions; see Figure \@ref(fig:partitioning)). 
 To make the performance estimation processing chain even clearer, let us write down the commands we have given to the computer:
 
-1. Performance level (upper left part of Figure \@ref(fig:inner-outer)): split the dataset into five spatially disjoint (outer) subfolds.
-1. Tuning level (lower left part of Figure \@ref(fig:inner-outer)): use the first fold of the performance level and split it again spatially into five (inner) subfolds for the hyperparameter tuning. 
-Use the 50 randomly selected hyperparameters\index{hyperparameter} in each of these inner subfolds, i.e., fit 250 models.
-1. Performance estimation: Use the best hyperparameter combination from the previous step (tuning level) and apply it to the first outer fold in the performance level to estimate the performance (AUROC\index{AUROC}).
-1. Repeat steps 2 and 3 for the remaining four outer folds.
-1. Repeat steps 2 to 4, 100 times.
+1. Performance level (upper left part of Figure \@ref(fig:inner-outer)) - split the dataset into five spatially disjoint (outer) subfolds
+1. Tuning level (lower left part of Figure \@ref(fig:inner-outer)) - use the first fold of the performance level and split it again spatially into five (inner) subfolds for the hyperparameter tuning. 
+Use the 50 randomly selected hyperparameters\index{hyperparameter} in each of these inner subfolds, i.e., fit 250 models
+1. Performance estimation - Use the best hyperparameter combination from the previous step (tuning level) and apply it to the first outer fold in the performance level to estimate the performance (AUROC\index{AUROC})
+1. Repeat steps 2 and 3 for the remaining four outer folds
+1. Repeat steps 2 to 4, 100 times
 
 The process of hyperparameter tuning and performance estimation is computationally intensive.
 To decrease model runtime, **mlr3** offers the possibility to use parallelization\index{parallelization} with the help of the **future** package.
