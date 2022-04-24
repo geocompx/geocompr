@@ -66,6 +66,11 @@ changed, including:
 -   New
     [section](https://geocompr.robinlovelace.net/spatial-class.html#s2)
     in Chapter 2 on spherical geometry engines and the **s2** package
+-   Replacement of code based on the old **mlr** package with code based
+    on the new **mlr3** package, as described in a huge [pull
+    request](https://github.com/Robinlovelace/geocompr/pull/771) and
+    [popular
+    tweet](https://twitter.com/robinlovelace/status/1516139001668898825)
     <!-- Todo: update this bullet point (Rl 2021-11) -->
     <!-- - Next issue  -->
 
@@ -75,8 +80,8 @@ changed, including:
 See
 [https://github.com/Robinlovelace/geocompr/compare/1.9…main](https://github.com/Robinlovelace/geocompr/compare/1.9...main#files_bucket)
 for a continuously updated summary of the changes to date. At the time
-of writing (November 2021) there have been around 6k lines added and 6k
-lines removed, lots of refactoring!
+of writing (April 2022) there have been more than 10k lines of
+code/prose added, lots of refactoring!
 
 [![](https://user-images.githubusercontent.com/1825120/140612663-e62566a2-62ab-4a22-827a-e86f5ce7bd63.png)](https://github.com/Robinlovelace/geocompr/compare/1.9...main)
 
@@ -290,10 +295,10 @@ removed from the main book build to reduce package dependencies and the
 book’s build time:
 
 ``` r
-source("code/cranlogs.R")
+source("code/01-cranlogs.R")
 source("code/sf-revdep.R")
-source("code/08-urban-animation.R")
-source("code/08-map-pkgs.R")
+source("code/09-urban-animation.R")
+source("code/09-map-pkgs.R")
 ```
 
 Note: the `.Rproj` file is configured to build a website not a single
