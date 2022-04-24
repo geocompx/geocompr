@@ -9,7 +9,7 @@
 [![RstudioCloud](images/cloud.png)](https://rstudio.cloud/project/1642300)
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
 [![Docker](https://img.shields.io/docker/pulls/geocompr/geocompr?style=plastic)](https://github.com/geocompr/docker/)
-[![discord](https://img.shields.io/discord/878051191374876683?label=discord&logo=Discord&color=blue)](https://discord.gg/Te3gWeDwmf)
+[![discord](https://img.shields.io/discord/878051191374876683?label=discord&logo=Discord&color=blue)](https://discord.com/invite/Te3gWeDwmf)
 
 <!-- [![DOI](https://zenodo.org/badge/84222786.svg)](https://zenodo.org/badge/latestdoi/84222786) -->
 <!-- badges: end -->
@@ -18,7 +18,7 @@
 
 This repository hosts the code underlying Geocomputation with R, a book
 by [Robin Lovelace](https://www.robinlovelace.net/), [Jakub
-Nowosad](https://nowosad.github.io/), and [Jannes
+Nowosad](https://jakubnowosad.com/), and [Jannes
 Muenchow](https://github.com/jannes-m):
 
 > Lovelace, Robin, Jakub Nowosad and Jannes Muenchow (2019).
@@ -232,7 +232,7 @@ DockerHub. These images allow you to explore Geocomputation with R in a
 virtual machine that has up-to-date dependencies.
 
 After you have [installed
-docker](https://www.docker.com/products/container-runtime) and set-it up
+docker](https://www.docker.com/products/container-runtime/) and set-it up
 on [your
 computer](https://docs.docker.com/engine/install/linux-postinstall/) you
 can start RStudio Server without a password (see the [Rocker
