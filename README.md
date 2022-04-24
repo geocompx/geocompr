@@ -19,7 +19,10 @@
 This repository hosts the code underlying Geocomputation with R, a book
 by [Robin Lovelace](https://www.robinlovelace.net/), [Jakub
 Nowosad](https://jakubnowosad.com/), and [Jannes
-Muenchow](https://github.com/jannes-m):
+Muenchow](https://github.com/jannes-m). If you find the contents useful,
+please [cite
+it](https://github.com/Robinlovelace/geocompr/raw/main/CITATION.bib) as
+follows:
 
 > Lovelace, Robin, Jakub Nowosad and Jannes Muenchow (2019).
 > Geocomputation with R. The R Series. CRC Press.
@@ -94,9 +97,15 @@ We encourage contributions on any part of the book, including:
 -   improvements to the text, e.g. clarifying unclear sentences, fixing
     typos (see guidance from [Yihui
     Xie](https://yihui.org/en/2013/06/fix-typo-in-documentation/));
--   changes to the code, e.g. to do things in a more efficient way; and
+-   changes to the code, e.g. to do things in a more efficient way;
 -   suggestions on content (see the project’s [issue
-    tracker](https://github.com/Robinlovelace/geocompr/issues)).
+    tracker](https://github.com/Robinlovelace/geocompr/issues));
+-   improvements to and alternative approaches in the Geocompr solutions
+    booklet hosted at
+    [geocompr.github.io/solutions](https://geocompr.github.io/solutions/)
+    (see a blog post on how to update solutions in files such as
+    [\_01-ex.Rmd](https://github.com/Robinlovelace/geocompr/blob/main/_01-ex.Rmd)
+    [here](https://geocompr.github.io/post/2022/geocompr-solutions/))
 
 See
 [our-style.md](https://github.com/Robinlovelace/geocompr/blob/main/misc/our-style.md)
@@ -232,8 +241,8 @@ DockerHub. These images allow you to explore Geocomputation with R in a
 virtual machine that has up-to-date dependencies.
 
 After you have [installed
-docker](https://www.docker.com/products/container-runtime/) and set-it up
-on [your
+docker](https://www.docker.com/products/container-runtime/) and set-it
+up on [your
 computer](https://docs.docker.com/engine/install/linux-postinstall/) you
 can start RStudio Server without a password (see the [Rocker
 project](https://www.rocker-project.org/use/managing_users/) for info on
