@@ -8,7 +8,7 @@
 [![Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/main?urlpath=rstudio)
 [![RstudioCloud](images/cloud.png)](https://rstudio.cloud/project/1642300)
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
-[![Docker](https://github.com/geocompr/docker/actions/workflows/latest.yml/badge.svg)](https://github.com/geocompr/docker/)
+[![Docker](https://img.shields.io/docker/pulls/geocompr/geocompr?style=plastic)](https://github.com/geocompr/docker/)
 [![discord](https://img.shields.io/discord/878051191374876683?label=discord&logo=Discord&color=blue)](https://discord.gg/Te3gWeDwmf)
 
 <!-- [![DOI](https://zenodo.org/badge/84222786.svg)](https://zenodo.org/badge/latestdoi/84222786) -->
