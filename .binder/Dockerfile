@@ -1,12 +1,21 @@
-FROM rocker/binder:3.6.0
-LABEL maintainer='Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
+FROM geocompr/geocompr:binder
+
+## Declares build arguments
+ARG NB_USER
+ARG NB_UID
+
+COPY --chown=${NB_USER} . ${HOME}
+
+ENV DEBIAN_FRONTEND=noninteractive
 USER root
-COPY . ${HOME}
-RUN chown -R ${NB_USER} ${HOME}
+RUN echo "Checking for 'apt.txt'..." \
+        ; if test -f "apt.txt" ; then \
+        apt-get update --fix-missing > /dev/null\
+        && xargs -a apt.txt apt-get install --yes \
+        && apt-get clean > /dev/null \
+        && rm -rf /var/lib/apt/lists/* \
+        ; fi
 USER ${NB_USER}
 
-
-
-RUN wget https://github.com/robinlovelace/geocompr/raw/master/DESCRIPTION && R -e "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl'); devtools::install_deps()"
-
-RUN rm DESCRIPTION.1
+## Run an install.R script, if it exists.
+RUN if [ -f install.R ]; then R --quiet -f install.R; fi

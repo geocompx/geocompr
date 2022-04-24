@@ -24,7 +24,7 @@ library(tidyverse)
 #**********************************************************
 
 # git has to be in PATH
-out_json = gh::gh(endpoint = "/repos/robinlovelace/geocompr/contributors")
+out_json = gh::gh(endpoint = "/repos/robinlovelace/geocompr/contributors", .limit = "Inf")
 link = vapply(out_json, "[[", FUN.VALUE = "", "html_url")
 name = gsub(pattern = "https://github.com/", "", link)
 commits = paste0("https://github.com/Robinlovelace/geocompr/commits?author=", name)

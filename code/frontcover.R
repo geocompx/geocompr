@@ -36,6 +36,7 @@ p1 = ggplot(nz) +
                      na.value = NA) +
   theme_void() +
   guides(fill = FALSE)
+p1
 
 s_x = 1.05
 s_y = 1.05

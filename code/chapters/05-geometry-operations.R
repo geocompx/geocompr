@@ -145,7 +145,7 @@ plot(b)
 plot(x_and_y, col = "lightgrey", add = TRUE) # color intersecting area
 
 ## ----venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators.", warning=FALSE----
-source("https://github.com/Robinlovelace/geocompr/raw/master/code/05-venn-clip.R")
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-venn-clip.R")
 
 ## ----venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y.", out.width="50%", fig.asp=1, fig.scap="Randomly distributed points within the bounding box."----
 bb = st_bbox(st_union(x, y))
@@ -183,7 +183,7 @@ regions2 = us_states %>% group_by(REGION) %>%
 # summarize(africa[buff, "pop"], pop = sum(pop, na.rm = TRUE))
 
 ## ----us-regions, fig.cap="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.", echo=FALSE, warning=FALSE, fig.asp=0.2, out.width="100%", fig.scap="Spatial aggregation on contiguous polygons."----
-source("https://github.com/Robinlovelace/geocompr/raw/master/code/05-us-regions.R", print.eval = TRUE)
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-us-regions.R", print.eval = TRUE)
 
 ## ----05-geometry-operations-25-------------------------------------------
 us_west = us_states[us_states$REGION == "West", ]
@@ -309,7 +309,7 @@ plot(elev_4)
 plot(elev, add = TRUE)
 
 ## ----05-geometry-operations-40-------------------------------------------
-data("dem", package = "RQGIS")
+data("dem", package = "spDataLarge")
 dem_agg = aggregate(dem, fact = 5, fun = mean)
 
 ## ----aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right).", echo=FALSE----
@@ -524,7 +524,7 @@ ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template,
                        field = "capacity", fun = sum)
 
 ## ----vector-rasterization1, echo=FALSE, fig.cap="Examples of point rasterization.", warning=FALSE----
-source("https://github.com/Robinlovelace/geocompr/raw/master/code/05-vector-rasterization1.R", print.eval = TRUE)
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-vector-rasterization1.R", print.eval = TRUE)
 
 ## ----05-geometry-operations-61-------------------------------------------
 california = dplyr::filter(us_states, NAME == "California")
@@ -539,7 +539,7 @@ california_raster1 = rasterize(california_borders, raster_template2)
 california_raster2 = rasterize(california, raster_template2) 
 
 ## ----vector-rasterization2, echo=FALSE, fig.cap="Examples of line and polygon rasterizations.", warning=FALSE----
-source("https://github.com/Robinlovelace/geocompr/raw/master/code/05-vector-rasterization2.R", print.eval = TRUE)
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-vector-rasterization2.R", print.eval = TRUE)
 
 ## Be careful with the wording!
 
@@ -548,10 +548,10 @@ elev_point = rasterToPoints(elev, spatial = TRUE) %>%
   st_as_sf()
 
 ## ----raster-vectorization1, echo=FALSE, fig.cap="Raster and point representation of the elev object.", warning=FALSE----
-source("https://github.com/Robinlovelace/geocompr/raw/master/code/05-raster-vectorization1.R", print.eval = TRUE)
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-raster-vectorization1.R", print.eval = TRUE)
 
 ## ----05-geometry-operations-66, eval = FALSE-----------------------------
-## data(dem, package = "RQGIS")
+## data(dem, package = "spDataLarge")
 ## cl = rasterToContour(dem)
 ## plot(dem, axes = FALSE)
 ## plot(cl, add = TRUE)
@@ -567,7 +567,7 @@ source("https://github.com/Robinlovelace/geocompr/raw/master/code/05-raster-vect
 
 ## ----contour-tmap, echo=FALSE, message=FALSE, fig.cap="DEM hillshade of the southern flank of Mt. Mongón overlaid by contour lines.", warning=FALSE, fig.asp=0.56, fig.scap="Hillshade overlaid by contours."----
 library(tmap)
-data("dem", package = "RQGIS")
+data("dem", package = "spDataLarge")
 # create hillshade
 hs = hillShade(slope = terrain(dem, "slope"), aspect = terrain(dem, "aspect"))
 # create contour
@@ -596,7 +596,7 @@ grain_poly2 = grain_poly %>%
   summarize()
 
 ## ----raster-vectorization2, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).", warning=FALSE, fig.asp=0.4, fig.scap="Illustration of vectorization."----
-source("https://github.com/Robinlovelace/geocompr/raw/master/code/05-raster-vectorization2.R", print.eval = TRUE)
+source("https://github.com/Robinlovelace/geocompr/raw/main/code/05-raster-vectorization2.R", print.eval = TRUE)
 
 ## ----05-geometry-operations-68, message=FALSE----------------------------
 library(RQGIS)

@@ -13,4 +13,4 @@ gh_pkgs = c(
   "ropenscilabs/packagemetrics",
   "ropensci/USAboundariesData"
   )
-devtools::install_github(gh_pkgs)
+remotes::install_github(gh_pkgs)

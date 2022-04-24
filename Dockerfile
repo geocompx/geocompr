@@ -1,7 +1,9 @@
-FROM rocker/geospatial
-RUN R -e "remotes::install_github('r-spatial/lwgeom')"
-RUN R -e "remotes::install_github('geocompr/geocompkg')"
-RUN R -e "remotes::install_cran('magick')"
-RUN apt-get update && \
-  # set repos to CRAN to allow package updates
-    echo "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site 
+FROM geocompr/geocompr
+RUN su rstudio && \
+  cd /home/rstudio && \
+  wget https://github.com/Robinlovelace/geocompr/archive/master.zip && \
+  unzip master.zip && \
+  mv geocompr-master /home/rstudio/geocompr && \
+  cd geocompr && \
+  Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::gitbook", clean = FALSE)'
+RUN chown -Rv rstudio /home/rstudio/geocompr 
