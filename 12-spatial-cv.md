@@ -151,11 +151,11 @@ The first three rows of `lsl`, rounded to two significant digits, can be found i
 To model landslide susceptibility, we need some predictors.
 Since terrain attributes are frequently associated with landsliding [@muenchow_geomorphic_2012], we have already extracted following terrain attributes from `ta` to `lsl`:
 
-- `slope` -  slope angle (°)
-- `cplan` - plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow
-- `cprof` - profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle
-- `elev` - elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area
-- `log10_carea` - the decadic logarithm of the catchment area (log10 m^2^) representing the amount of water flowing towards a location
+- `slope`:  slope angle (°)
+- `cplan`: plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow
+- `cprof`: profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle
+- `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area
+- `log10_carea`: the decadic logarithm of the catchment area (log10 m^2^) representing the amount of water flowing towards a location
 
 It might be a worthwhile exercise to compute the terrain attributes with the help of R-GIS bridges (see Chapter \@ref(gis)) and extract them to the landslide points (see Exercise section at the end of this Chapter).
 
