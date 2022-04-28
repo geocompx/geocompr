@@ -14,6 +14,8 @@ library(terra)
 library(qgisprocess)
 library(Rsagacmd)
 library(rgrass7)
+library(rstac)
+library(gdalcubes)
 ```
 
 <!-- RSAGA is no longer under active development and no support is available. Try Rsagacmd. -->
@@ -93,7 +95,7 @@ This chapter focuses on 'bridges' to three mature open source GIS products (see 
 One can also use R scripts from within QGIS\index{QGIS} (see https://docs.qgis.org/3.16/en/docs/training_manual/processing/r_intro.html).
 Finally, it is also possible to use R from the GRASS GIS\index{GRASS} command line (see https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7).
 ]
-To complement the R-GIS bridges, the chapter ends with a very brief introduction to interfaces to spatial libraries (Section \@ref(gdal)) and spatial databases\index{spatial database} (Section \@ref(postgis)).
+To complement the R-GIS bridges, the chapter ends with a very brief introduction to interfaces to spatial libraries (Section \@ref(gdal)), spatial databases\index{spatial database} (Section \@ref(postgis)), and  cloud-based processing of Earth observation data (Section \@ref(cloud)).
 
 ```{r gis-comp, echo=FALSE, message=FALSE}
 library(dplyr)
@@ -894,6 +896,70 @@ PostgreSQL/PostGIS is a formidable choice as an open-source spatial database.
 But the same is true for the lightweight SQLite/SpatiaLite database engine and GRASS\index{GRASS} which uses SQLite in the background (see Section \@ref(rgrass)).
 
 As a final note, if your data is getting too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, then the next logical step is to use large-scale geographic querying on distributed computing systems, as for example, provided by GeoMesa (http://www.geomesa.org/) or Apache Sedona [https://sedona.apache.org/; formermly known as GeoSpark - @huang_geospark_2017].
+
+
+
+
+
+## Bridges to cloud technologies and services {#cloud}
+
+
+
+### STAC, COGs, and data cubes in the cloud
+Major cloud computing providers (Amazon Web Services, Microsoft Azure / Planetary Computer, Google Cloud Platform, and others) offer huge catalogs of open Earth observation data such as the complete Sentinel-2 archive on their platforms. We can use R and directly connect to and process data from these archives, ideally from a machine in the same cloud and region.
+
+Three promising developments that make working with such image archives on cloud platforms _easier_ and _more efficient_ are the [SpatioTemporal Asset Catalog (STAC)](https://stacspec.org), the [cloud-optimized GeoTIFF (COG)](https://www.cogeo.org/) image file format, and the concept of data cubes. Below, we introduce these individual developments and briefly describe how they can be used from R. 
+
+The SpatioTemporal Asset Catalog (STAC) is a general description format for spatiotemporal data that is used to describe a variety of datasets on cloud platforms including imagery, SAR data, and point clouds. Besides simple static catalog descriptions, STAC-API presents a web service to query items (e.g. images) of catalogs by space, time, and other properties. In R, the **rstac** package [@simoes_rstac_2021] allows to connect to STAC-API endpoints and search for items. In the example below, we request all images from the [Sentinel-2 Cloud-Optimized GeoTIFF (COG) dataset on Amazon Web Services](https://registry.opendata.aws/sentinel-2-l2a-cogs) that intersect with a predefined area and time of interest. The result contains all found images and their metadata and URLs pointing to actual files on AWS. 
+
+```{r 09-stac-example, eval = FALSE}
+library(rstac)
+
+# Connect to the STAC-API endpoint for Sentinel-2 data
+# and search for images intersecting our AOI
+s = stac("https://earth-search.aws.element84.com/v0")
+items = s |>
+  stac_search(collections = "sentinel-s2-l2a-cogs",
+              bbox = c(7.1, 51.8, 7.2, 52.8), 
+              datetime = "2020-01-01/2020-12-31") |>
+  post_request() |> items_fetch()
+```
+
+
+Cloud storage differs from local hard disks and traditional image file formats do not perform well in cloud-based geoprocessing. Broadly speaking, the cloud-optimized GeoTIFF format is a specific type of GeoTIFF that makes it possible to efficiently read only parts of an image from cloud storage. As a result, reading rectangular subsets of an image or reading images at lower resolution becomes much more efficient. As an R user, you don't have to install anything to work with COGs because  [GDAL](https://gdal.org) (and any package using it) can already work with COGs. However, keep in mind that the availability of COGs is a big plus while browsing through catalogs of data providers.
+
+For larger areas of interest, requested images are still relatively difficult to work with: they may use different map projections, may spatially overlap, and the spatial resolution often depends on the spectral band. The **gdalcubes** package [@appel_gdalcubes_2019] can be used to abstract from individual images and to create and process image collections as four-dimensional data cubes.
+
+The example below shows a minimal example to create a lower resolution (250m) maximum NDVI composite from the Sentinel-2 images returned by the previous STAC-API search.
+
+```{r 09-gdalcubes-example, eval = FALSE}
+library(gdalcubes)
+
+# Create an image collection object from STAC items
+collection = stac_image_collection(items$features, property_filter = function(x) {x[["eo:cloud_cover"]] < 10})
+
+# Define spatiotemporal extent, resolution and CRS of the target data cube
+v = cube_view(srs = "EPSG:3857", extent = collection, dx = 250, dy = 250, dt = "P1D")
+
+# Create and process the data cube
+raster_cube(collection, v) |>
+  select_bands(c("B04", "B08")) |>
+  apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
+  reduce_time("max(NDVI)") -> cube
+
+# gdalcubes_options(parallel = 8)
+# plot(cube, zlim = c(0,1))
+```
+
+The combination of STAC, COGs, and data cubes forms a cloud-native workflow to analyze (larger) collections of satellite imagery in the cloud. For more details, please refer to this [tutorial presented at OpenGeoHub summer school 2021](https://appelmar.github.io/ogh2021/tutorial.html).
+
+
+### openEO
+
+Besides hosting large data archives, numerous cloud-based services to process Earth observation data have been launched during the last years. OpenEO [@schramm_openeo_2021] is an initiative to support interoperability among cloud services by defining a common language for processing the data. The initial idea has been described in an [r-spatial.org blog post](https://r-spatial.org/2016/11/29/openeo.html) and aims at making it possible for users to change between cloud services easily with as little code changes as possible. The [standardized processes](https://processes.openeo.org) use a multidimensional data cube model as an interface to the data. Implementations are available for eight different backends (see https://hub.openeo.org) to which users can connect with R, Python, JavaScript, QGIS, or a web editor and define (and chain) processes on collections. Since the functionality and data availability differs among the backends, the **openeo** R package [@lahn_openeo_2021] dynamically loads available processes and collections from the connected backend. Afterwards, users can load image collections, apply and chain processes, submit jobs, and explore and plot results. 
+
+
+
 
 ## Exercises
 
