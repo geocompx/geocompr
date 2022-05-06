@@ -214,10 +214,10 @@ ep = terra::rast(system.file("raster/ep.tif", package = "spDataLarge"))
 Finally, we can extract the terrain attributes to our field observations (see also Section \@ref(raster-extraction)).
 
 ```{r 15-eco-10, cache=TRUE, cache.lazy=FALSE, message=FALSE, warning=FALSE}
-random_points[, names(ep)] = 
-  # terra::extract adds automatically a for our purposes unnecessary ID column
-  terra::extract(ep, terra::vect(random_points)) |>
+# terra::extract adds automatically a for our purposes unnecessary ID column
+ep_rp = terra::extract(ep, terra::vect(random_points)) |>
   dplyr::select(-ID)
+random_points = cbind(random_points, ep_rp)
 ```
 
 ## Reducing dimensionality {#nmds}
@@ -228,7 +228,7 @@ If you are unfamiliar with ordination\index{ordination} techniques or in need of
 **vegan**'s\index{vegan (package)} package documentation is also a very helpful resource (`vignette(package = "vegan")`).
 
 Principal component analysis (PCA\index{PCA}) is probably the most famous ordination\index{ordination} technique. 
-It is a great tool to reduce dimensionality if one can expect linear relationships between variables, and if the joint absence of a variable (for example calcium) in two plots (observations) can be considered a similarity.
+It is a great tool to reduce dimensionality if one can expect linear relationships between variables, and if the joint absence of a variable in two plots (observations) can be considered a similarity.
 This is barely the case with vegetation data.
 
 For one, relationships are usually non-linear along environmental gradients.
@@ -238,7 +238,7 @@ Secondly, the joint absence of a species in two plots is hardly an indication fo
 Suppose a plant species is absent from the driest (e.g., an extreme desert) and the most moistest locations (e.g., a tree savanna) of our sampling.
 Then we really should refrain from counting this as a similarity because it is very likely that the only thing these two completely different environmental settings have in common in terms of floristic composition is the shared absence of species (except for rare ubiquitous species). 
 
-Non-metric multidimensional scaling (NMDS\index{NMDS}) is one popular dimension-reducing technique in ecology [@vonwehrden_pluralism_2009].
+Non-metric multidimensional scaling (NMDS\index{NMDS}) is one popular dimension-reducing technique used in ecology [@vonwehrden_pluralism_2009].
 NMDS\index{NMDS} reduces the rank-based differences between the distances between objects in the original matrix and distances between the ordinated objects. 
 The difference is expressed as stress. 
 The lower the stress value, the better the ordination, i.e., the low-dimensional representation of the original matrix.
@@ -257,7 +257,7 @@ pa = vegan::decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
 ``` 
 
-The resulting output matrix serves as input for the NMDS\index{NMDS}.
+The resulting matrix serves as input for the NMDS\index{NMDS}.
 `k` specifies the number of output axes, here, set to 4.^[One way of choosing `k` is to try `k` values between 1 and 6 and then using the result which yields the best stress value [@mccune_analysis_2002].]
 NMDS\index{NMDS} is an iterative procedure trying to make the ordinated space more similar to the input matrix in each step.
 To make sure that the algorithm converges, we set the number of steps to 500 (`try` parameter).
@@ -369,8 +369,8 @@ To spatially visualize them, we can model the NMDS\index{NMDS} scores with the p
 
 ## Modeling the floristic gradient
 
-To predict the floristic gradient spatially, we will make use of a random forest\index{random forest} model [@hengl_random_2018].
-Random forest\index{random forest} models are frequently used in environmental and ecological modeling, and often provide the best results in terms of predictive performance [@schratz_hyperparameter_2019]. 
+To predict the floristic gradient spatially, we use a random forest\index{random forest} model [@hengl_random_2018].
+Random forest\index{random forest} models are frequently applied in environmental and ecological modeling, and often provide the best results in terms of predictive performance [@schratz_hyperparameter_2019]. 
 Here, we shortly introduce decision trees and bagging, since they form the basis of random forests\index{random forest}.
 We refer the reader to @james_introduction_2013 for a more detailed description of random forests\index{random forest} and related techniques.
 
@@ -396,40 +396,32 @@ Decision trees split the predictor space into a number of regions.
 To illustrate this, we apply a decision tree to our data using the scores of the first NMDS\index{NMDS} axis as the response (`sc`) and altitude (`dem`) as the only predictor.
 
 ```{r 15-eco-17, eval=FALSE}
-library("tree")
 tree_mo = tree::tree(sc ~ dem, data = rp)
 plot(tree_mo)
 text(tree_mo, pretty = 0)
-```
-
-```{r 15-eco-18, echo=FALSE, eval=FALSE}
-library("tree")
-tree_mo = tree::tree(sc ~ dem, data = rp)
-```
-
-```{r 15-eco-19, eval=FALSE, echo=FALSE}
-png("figures/15_tree.png", width = 1100, height = 700, units = "px", res = 300)
-par(mar = rep(1, 4))
-plot(tree_mo)
-text(tree_mo, pretty = 0)
-dev.off()
 ```
 
 ```{r tree, echo=FALSE, fig.cap="Simple example of a decision tree with three internal nodes and four terminal nodes.", out.width="60%", fig.scap="Simple example of a decision tree."}
+# tree_mo = tree::tree(sc ~ dem, data = rp)
+# png("figures/15_tree.png", width = 1100, height = 700, units = "px", res = 300)
+# par(mar = rep(1, 4))
+# plot(tree_mo)
+# text(tree_mo, pretty = 0)
+# dev.off()
 knitr::include_graphics("figures/15_tree.png")
 ```
 
 The resulting tree consists of three internal nodes and four terminal nodes (Figure \@ref(fig:tree)).
 The first internal node at the top of the tree assigns all observations which are below
 <!-- `r # gsub("<", "", as.character(as.data.frame(tree_mo$fram$splits)[1, "cutleft"]))` -->
-328.5
+328.5 m
 to the left and all other observations to the right branch.
 The observations falling into the left branch have a mean NMDS\index{NMDS} score of
 <!-- `r # round(tree_mo$frame$yval[2], 3)` -->
 -1.198.
 Overall, we can interpret the tree as follows: the higher the elevation, the higher the NMDS\index{NMDS} score becomes.
 Decision trees have a tendency to overfit\index{overfitting}, that is they mirror too closely the input data including its noise which in turn leads to bad predictive performances [Section \@ref(intro-cv); @james_introduction_2013].
-Bootstrap aggregation (bagging) is an ensemble technique and helps to overcome this problem.
+Bootstrap aggregation (bagging) is an ensemble technique that can help to overcome this problem.
 Ensemble techniques simply combine the predictions of multiple models.
 Thus, bagging takes repeated samples from the same input data and averages the predictions.
 This reduces the variance and overfitting\index{overfitting} with the result of a much better predictive accuracy compared to decision trees.
