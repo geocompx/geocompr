@@ -450,7 +450,7 @@ Remember that 125,500 models were necessary to retrieve bias-reduced performance
 In the hyperparameter\index{hyperparameter} tuning level, we found the best hyperparameter combination which in turn was used in the outer performance level for predicting the test data of a specific spatial partition (see also Figure \@ref(fig:inner-outer)). 
 This was done for five spatial partitions, and repeated a 100 times yielding in total 500 optimal hyperparameter combinations.
 Which one should we use for making spatial predictions?
-The answer is simple, none at all. 
+The answer is simple: none at all. 
 Remember, the tuning was done to retrieve a bias-reduced performance estimate, not to do the best possible spatial prediction.
 For the latter, one estimates the best hyperparameter\index{hyperparameter} combination from the complete dataset.
 This means, the inner hyperparameter\index{hyperparameter} tuning level is no longer needed which makes perfect sense since we are applying our model to new data (unvisited field observations) for which the true outcomes are unavailable, hence testing is impossible in any case. 
@@ -458,8 +458,7 @@ Therefore, we tune the hyperparameters\index{hyperparameter} for a good spatial 
 <!-- If we used more than one repetition (say 2) we would retrieve multiple optimal tuned hyperparameter combinations (say 2) -->
 
 Having already constructed the input variables (`rp`), we are all set for specifying the **mlr3**\index{mlr3 (package)} building blocks (task, learner, and resampling).
-For specifying a spatial task, we use again the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021 & Section \@ref(spatial-cv-with-mlr3)].
-Since our response (`sc`) is numeric, we use a regression\index{regression} task.
+For specifying a spatial task, we use again the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021 & Section \@ref(spatial-cv-with-mlr3)], and since our response (`sc`) is numeric, we use a regression\index{regression} task.
 
 ```{r 15-eco-20}
 # create task
@@ -475,7 +474,7 @@ Next, we go on to construct the a random forest\index{random forest} learner fro
 lrn_rf = lrn("regr.ranger", predict_type = "response")
 ```
 
-As opposed to for example support vector machines\index{SVM} (see Section \@ref(svm)), random forests often already show good performances when used with the default values of their hyperparameters (which may be one reason for their popularity).
+As opposed to, for example, support vector machines\index{SVM} (see Section \@ref(svm)), random forests often already show good performances when used with the default values of their hyperparameters (which may be one reason for their popularity).
 Still, tuning often moderately improves model results, and thus is worth the effort [@probst_hyperparameters_2018].
 In random forests\index{random forest}, the hyperparameters\index{hyperparameter} `mtry`, `min.node.size` and `sample.fraction` determine the degree of randomness, and should be tuned [@probst_hyperparameters_2018].
 `mtry` indicates how many predictor variables should be used in each tree. 
@@ -508,16 +507,11 @@ The performance measure is the root mean squared error (RMSE\index{RMSE}).
 ```{r 15-eco-23}
 autotuner_rf = mlr3tuning::AutoTuner$new(
   learner = lrn_rf,
-  # spatial partitioning
-  resampling = mlr3::rsmp("spcv_coords", folds = 5),
-  # performance measure
-  measure = mlr3::msr("regr.rmse"),
-  # specify 50 iterations
-  terminator = mlr3tuning::trm("evals", n_evals = 50),
-  # predefined hyperparameter search space
-  search_space = search_space,
-  # specify random search
-  tuner = mlr3tuning::tnr("random_search")
+  resampling = mlr3::rsmp("spcv_coords", folds = 5), # spatial partitioning
+  measure = mlr3::msr("regr.rmse"), # performance measure
+  terminator = mlr3tuning::trm("evals", n_evals = 50), # specify 50 iterations
+  search_space = search_space, # predefined hyperparameter search space
+  tuner = mlr3tuning::tnr("random_search") # specify random search
 )
 ```
 
@@ -527,17 +521,6 @@ Calling the `train()`-method of the `AutoTuner`-object finally runs the hyperpar
 # hyperparameter tuning
 set.seed(0412022)
 autotuner_rf$train(task)
-#>...
-#> INFO  [11:39:31.375] [mlr3] Finished benchmark 
-#> INFO  [11:39:31.427] [bbotk] Result of batch 50: 
-#> INFO  [11:39:31.432] [bbotk]  mtry sample.fraction min.node.size regr.rmse warnings errors runtime_learners 
-#> INFO  [11:39:31.432] [bbotk]     2       0.2059293            10 0.5118128        0      0            0.149 
-#> INFO  [11:39:31.432] [bbotk]                                 uhash 
-#> INFO  [11:39:31.432] [bbotk]  81dfa6f8-0109-410d-bdb5-a1490e7caf8e 
-#> INFO  [11:39:31.448] [bbotk] Finished optimizing after 50 evaluation(s) 
-#> INFO  [11:39:31.451] [bbotk] Result: 
-#> INFO  [11:39:31.455] [bbotk]  mtry sample.fraction min.node.size learner_param_vals  x_domain regr.rmse 
-#> INFO  [11:39:31.455] [bbotk]     4       0.8999753             7          <list[4]> <list[3]> 0.3751501
 ```
 
 ```{r 15-eco-25, eval=FALSE, echo=FALSE}
@@ -571,36 +554,26 @@ pred = terra::predict(ep, model = autotuner_rf, fun = predict)
 ```
 
 ```{r rf-pred, echo=FALSE, fig.cap="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.", out.width="60%", fig.scap="Predictive mapping of the floristic gradient."}
-# # restrict the prediction to your study area
+# hs = terra::shade(terra::terrain(dem, v = "slope", unit = "radians"),
+#                   terra::terrain(dem, v = "aspect", unit = "radians"),
+#                   10, 200) |>
+#   terra::mask(terra::vect(study_area))
 # pred = terra::mask(pred, terra::vect(study_area)) |>
 #   terra::trim()
-# # create a hillshade
-# hs = terra::shade(terra::terrain(ep$dem, v = "slope", unit = "radians"),
-#                   terra::terrain(ep$dem, v = "aspect", unit = "radians"),
-#                   40, 270) |>
-#   terra::mask(terra::vect(study_area))
-# 
-# # png(file = "figures/15_rf_pred.png", width = 20, height = 20, units = "cm", 
-# #     res = 300)
-# spplot(terra::extend(pred, 2), col.regions = pal(50), alpha.regions = 0.7,
-#        scales = list(draw = TRUE,
-#                      tck = c(1, 0),
-#                      cex = 0.8),
-#        colorkey = list(space = "right", width = 0.5, height = 0.5,
-#                        axis.line = list(col = "black")),
-#        sp.layout = list(
-#          # list("sp.points", as(random_points, "Spatial"), pch = 16,
-#          #      col = "black", cex = 0.8, first = FALSE),
-#          list("sp.polygons", as(study_area, "Spatial"),
-#               col = "black", first = FALSE, lwd = 5)
-#        )
-#        ) +
-#   latticeExtra::as.layer(spplot(hs, col.regions = gray(0:100 / 100)),
-#                          under = TRUE)
-# grid.text("NMDS1", x = unit(0.92, "npc"), y = unit(0.77, "npc"),
-#           gp = gpar(cex = 0.9))
-# # dev.off()
-
+# library(tmap)
+# pal = hcl.colors(n = 99, palette = "Blue-Red 3")
+# tm = tm_shape(hs) +
+#   tm_grid(n.x = 3, n.y = 3, lines = FALSE) +
+#   tm_raster(style = "cont", palette = rev(hcl.colors(99, "Grays")),
+#             legend.show = FALSE) +
+#   tm_shape(pred, is.master = TRUE) +
+#   tm_raster(style = "cont", title = "NMDS1", alpha = 0.7,
+#             legend.reverse = TRUE, n = 9, palette = pal) +
+#   tm_shape(study_area) +
+#   tm_borders() +
+#   tm_layout(inner.margins = 0.02, legend.outside = TRUE)
+# tmap_save(tm, "figures/15_rf_pred.png",
+#           width = 12, height = 7, units = "cm")
 knitr::include_graphics("figures/15_rf_pred.png")
 ```
 
@@ -624,8 +597,8 @@ The predictive mapping clearly reveals distinct vegetation belts (Figure \@ref(f
 Please refer to @muenchow_soil_2013 for a detailed description of vegetation belts on **lomas** mountains.
 The blue color tones represent the so-called *Tillandsia*-belt.
 *Tillandsia* is a highly adapted genus especially found in high quantities at the sandy and quite desertic foot of *lomas* mountains.
-The yellow color tones refer to a herbaceous vegetation belt with a much higher plant cover compared to the *Tillandsia*-belt.
-The orange colors represent the bromeliad belt, which features the highest species richness and plant cover.
+The white color tones refer to a herbaceous vegetation belt with a much higher plant cover compared to the *Tillandsia*-belt.
+The pink colors represent the bromeliad belt, which features the highest species richness and plant cover.
 It can be found directly beneath the temperature inversion (ca. 750-850 m asl) where humidity due to fog is highest.
 Water availability naturally decreases above the temperature inversion, and the landscape becomes desertic again with only a few succulent species (succulent belt; red colors).
 Interestingly, the spatial prediction clearly reveals that the bromeliad belt is interrupted which is a very interesting finding we would have not detected without the predictive mapping.
@@ -641,10 +614,10 @@ Since **lomas** mountains are heavily endangered, the prediction map can serve a
 
 In terms of methodology, a few additional points could be addressed:
 
-- It would be interesting to also model the second ordination\index{ordination} axis, and to subsequently find an innovative way of visualizing jointly the modeled scores of the two axes in one prediction map.
-- If we were interested in interpreting the model in an ecologically meaningful way, we should probably use (semi-)parametric models [@muenchow_predictive_2013;@zuur_mixed_2009;@zuur_beginners_2017].
-However, there are at least approaches that help to interpret machine learning models such as random forests\index{random forest} (see, e.g., [https://mlr-org.github.io/interpretable-machine-learning-iml-and-mlr/](https://mlr-org.github.io/interpretable-machine-learning-iml-and-mlr/)).
-- A sequential model-based optimization (SMBO) might be preferable to the random search for hyperparameter\index{hyperparameter} optimization used in this chapter [@probst_hyperparameters_2018]. 
+- It would be interesting to also model the second ordination\index{ordination} axis, and to subsequently find an innovative way of visualizing jointly the modeled scores of the two axes in one prediction map
+- If we were interested in interpreting the model in an ecologically meaningful way, we should probably use (semi-)parametric models [@muenchow_predictive_2013;@zuur_mixed_2009;@zuur_beginners_2017]
+However, there are at least approaches that help to interpret machine learning models such as random forests\index{random forest} (see, e.g., [https://mlr-org.github.io/interpretable-machine-learning-iml-and-mlr/](https://mlr-org.github.io/interpretable-machine-learning-iml-and-mlr/))
+- A sequential model-based optimization (SMBO) might be preferable to the random search for hyperparameter\index{hyperparameter} optimization used in this chapter [@probst_hyperparameters_2018]
 
 Finally, please note that random forest\index{random forest} and other machine learning\index{machine learning} models are frequently used in a setting with lots of observations and many predictors, much more than used in this chapter, and where it is unclear which variables and variable interactions contribute to explaining the response.
 Additionally, the relationships might be highly non-linear.
