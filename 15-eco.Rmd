@@ -31,14 +31,13 @@ To do so, we will bring together concepts presented in previous chapters and eve
 Fog oases are one of the most fascinating vegetation formations we have ever encountered.
 These formations, locally termed *lomas*, develop on mountains along the coastal deserts of Peru and Chile.^[Similar vegetation formations develop also in other parts of the world, e.g., in Namibia and along the coasts of Yemen and Oman [@galletti_land_2016].]
 The deserts' extreme conditions and remoteness provide the habitat for a unique ecosystem, including species endemic to the fog oases.
-Despite the arid conditions and low levels of precipitation of around 30-50 mm per year on average, fog deposition increases the amount of water available to plants during austral winter.
+Despite the arid conditions and low levels of precipitation of around 30-50 mm per year on average, fog deposition increases the amount of water available to plants during winter.
 This results in green southern-facing mountain slopes along the coastal strip of Peru (Figure \@ref(fig:study-area-mongon)). 
-This fog, which develops below the temperature inversion caused by the cold Humboldt current in austral winter, provides the name for this habitat.
+The fog, which develops below the temperature inversion caused by the cold Humboldt current in austral winter, provides the name for this habitat.
 Every few years, the El Niño phenomenon brings torrential rainfall to this sun-baked environment [@dillon_lomas_2003].
 This causes the desert to bloom, and provides tree seedlings a chance to develop roots long enough to survive the following arid conditions.
 
-Unfortunately, fog oases are heavily endangered.
-This is mostly due to human activity (agriculture and climate change).
+Unfortunately, fog oases are heavily endangered, primarily due to human activity (agriculture and climate change).
 To effectively protect the last remnants of this unique vegetation ecosystem, evidence is needed on the composition and spatial distribution of the native flora [@muenchow_predictive_2013; @muenchow_soil_2013].
 *Lomas* mountains also have economic value as a tourist destination, and can contribute to the well-being of local people via recreation.
 For example, most Peruvians live in the coastal desert, and *lomas* mountains are frequently the closest "green" destination.
@@ -60,8 +59,8 @@ On the other hand, it also increased fog activity on the southern slopes of Peru
 The first hypothesis is that four plant belts will be found along the altitudinal gradient: a low-elevation *Tillandsia* belt, a herbaceous belt, a bromeliad belt, and an uppermost succulent belt [@muenchow_soil_2013].
 -->
 
-Ordinations\index{ordination} are dimension-reducing techniques which allow the extraction of the main gradients from a (noisy) dataset, in our case the floristic gradient developing along the southern mountain slope (see next section).
-In this chapter we will model the first ordination axis, i.e., the floristic gradient, as a function of environmental predictors such as altitude, slope, catchment area\index{catchment area} and NDVI\index{NDVI}.
+Ordinations\index{ordination} are dimension-reducing techniques that allow the extraction of the main gradients from a (noisy) dataset, in our case the floristic gradient developing along the southern mountain slope (see next section).
+In this chapter, we will model the first ordination axis, i.e., the floristic gradient, as a function of environmental predictors such as altitude, slope, catchment area\index{catchment area} and NDVI\index{NDVI}.
 For this, we will make use of a random forest model\index{random forest} - a very popular machine learning\index{machine learning} algorithm [@breiman_random_2001].
 The model will allow us to make spatial predictions of the floristic composition anywhere in the study area.
 To guarantee an optimal prediction, it is advisable to tune beforehand the hyperparameters\index{hyperparameter} with the help of spatial cross-validation\index{cross-validation!spatial CV} (see Section \@ref(svm)).
@@ -71,15 +70,12 @@ To guarantee an optimal prediction, it is advisable to tune beforehand the hyper
 All the data needed for the subsequent analyses is available via the **spDataLarge** package.
 
 ```{r 15-eco-2}
-# spatial vector objects
 data("study_area", "random_points", "comm", package = "spDataLarge")
-# spatial raster objects
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 ```
 
-`study_area` is an `sf`\index{sf} polygon representing the outlines of the study area.
-`random_points` is an `sf` object, and contains the 100 randomly chosen sites.
+`study_area` is a polygon representing the outline of the study area, and `random_points` is an `sf` object containing the 100 randomly chosen sites.
 `comm` is a community matrix of the wide data format [@wickham_tidy_2014] where the rows represent the visited sites in the field and the columns the observed species.^[In statistics, this is also called a contingency table or cross-table.]
 
 ```{r 15-eco-3, eval=FALSE}
@@ -95,60 +91,45 @@ comm[35:40, 1:5]
 #> 40         0         0         0       0.2     0.125
 ```
 
-The values represent species cover per site, and were recorded as the area covered by a species in proportion to the site area in percentage points (%; please note that one site can have >100% due to overlapping cover between individual plants).
+The values represent species cover per site, and were recorded as the area covered by a species in proportion to the site area (%; please note that one site can have >100% due to overlapping cover between individual plants).
 The rownames of `comm` correspond to the `id` column of `random_points`.
-`dem` is the digital elevation model\index{digital elevation model} (DEM) for the study area, and `ndvi` is the Normalized Difference Vegetation Index (NDVI) computed from the red and near-infrared channels of a Landsat scene (see Section \@ref(local-operations) and `?ndvi.tif`).
+`dem` is the digital elevation model\index{digital elevation model} (DEM) for the study area, and `ndvi` is the Normalized Difference Vegetation Index (NDVI) computed from the red and near-infrared channels of a Landsat scene (see Section \@ref(local-operations) and `?spDataLarge::ndvi.tif`).
 Visualizing the data helps to get more familiar with it, as shown in Figure \@ref(fig:sa-mongon) where the `dem` is overplotted by the `random_points` and the `study_area`.
-
-```{r 15-eco-4, eval=FALSE, echo=FALSE}
-# create hillshade
-hs = hillShade(terrain(dem), terrain(dem, "aspect"))
-# plot the data
-par(mar = rep(1, 4))
-plot(hs, col = gray(0:100 / 100), legend = FALSE, axes = FALSE, box = FALSE)
-plot(dem, axes = FALSE, add = TRUE, alpha = 0.5, legend = FALSE)
-axis(1)
-axis(2)
-plot(st_geometry(random_points), add = TRUE)
-plot(st_geometry(study_area), add = TRUE)
-# white margins between axes and plot are too wide
-```
 
 \index{hillshade}
 
 ```{r sa-mongon, echo=FALSE, message=FALSE, fig.cap="Study mask (polygon), location of the sampling sites (black points) and DEM in the background.", fig.scap="Study mask, location of the sampling sites."}
-# library("latticeExtra")
-# library("grid")
-# library("sp")
 # hs = terra::shade(terra::terrain(dem, v = "slope", unit = "radians"),
 #                   terra::terrain(dem, v = "aspect", unit = "radians"),
-#                   40, 270)
-# spplot(dem, col.regions = terrain.colors(50), alpha.regions = 0.5,
-#        scales = list(draw = TRUE,
-#                      tck = c(1, 0)),
-#        colorkey = list(space = "right", title = "m asl",
-#                                width = 0.5, height = 0.5,
-#                        axis.line = list(col = "black")),
-#        sp.layout = list(
-#          list("sp.points", as(random_points, "Spatial"), pch = 16,
-#               col = "black", cex = 0.8, first = FALSE),
-#          list("sp.polygons", as(study_area, "Spatial"), 
-#               col = "black", first = FALSE)
-#        )
-#        ) + 
-#   latticeExtra::as.layer(spplot(hs, col.regions = gray(0:100 / 100)), 
-#                          under = TRUE)
-# grid.text("m asl", x = unit(0.8, "npc"), y = unit(0.75, "npc"), 
-#           gp = gpar(cex = 0.8))
+#                   10, 200)
+# library(tmap)
+# tm = tm_shape(hs) +
+#   tm_grid(n.x = 3, n.y = 3) +
+#   tm_raster(style = "cont", palette = rev(hcl.colors(99, "Grays")),
+#             legend.show = FALSE) +
+#   tm_shape(dem) +
+#   tm_raster(alpha = 0.5,
+#             style = "cont",
+#             title = "m asl",
+#             legend.reverse = TRUE,
+#             n = 11,
+#             palette = terrain.colors(50)) +
+#   tm_shape(study_area) +
+#   tm_borders() +
+#   tm_shape(random_points) +
+#   tm_dots() +
+#   tm_layout(inner.margins = 0, legend.outside = TRUE)
+# tmap_save(tm, "figures/15_sa_mongon_sampling.png",
+#           width = 12, height = 7, units = "cm")
 knitr::include_graphics("figures/15_sa_mongon_sampling.png")
 ```
 
-The next step is to compute variables which we will not only need for the modeling and predictive mapping (see Section \@ref(predictive-mapping)) but also for aligning the Non-metric multidimensional scaling (NMDS)\index{NMDS} axes with the main gradient in the study area, altitude and humidity, respectively (see Section \@ref(nmds)).
+The next step is to compute variables which are not only needed for the modeling and predictive mapping (see Section \@ref(predictive-mapping)) but also for aligning the Non-metric multidimensional scaling (NMDS)\index{NMDS} axes with the main gradient in the study area, altitude and humidity, respectively (see Section \@ref(nmds)).
 
-Specifically, we will compute catchment slope and catchment area\index{catchment area} from a digital elevation model\index{digital elevation model} using R-GIS bridges (see Chapter \@ref(gis)).
-Curvatures might also represent valuable predictors, in the Exercise section you can find out how they would change the modeling result.
+Specifically, we compute catchment slope and catchment area\index{catchment area} from a digital elevation model\index{digital elevation model} using R-GIS bridges (see Chapter \@ref(gis)).
+Curvatures might also represent valuable predictors, and in the Exercise section you can find out how they would impact the modeling result.
 
-To compute catchment area\index{catchment area} and catchment slope, we will make use of the `saga:sagawetnessindex` function.^[Admittedly, it is a bit unsatisfying that the only way of knowing that `sagawetnessindex` computes the desired terrain attributes is to be familiar with SAGA\index{SAGA}.]
+To compute catchment area\index{catchment area} and catchment slope, we can make use of the `saga:sagawetnessindex` function.^[Admittedly, it is a bit unsatisfying that the only way of knowing that `sagawetnessindex` computes the desired terrain attributes is to be familiar with SAGA\index{SAGA}.]
 `qgis_show_help()` returns all function\index{function} parameters and default values of a specific geoalgorithm\index{geoalgorithm}.
 Here, we present only a selection of the complete output.
 
@@ -190,7 +171,7 @@ qgisprocess::qgis_show_help("saga:sagawetnessindex")
 Subsequently, we can specify the needed parameters using R named arguments (see Section \@ref(rqgis)).
 Remember that we can use a `SpatRaster` living in R's\index{R} global environment to specify the input raster `DEM` (see Section \@ref(rqgis)).
 Specifying 1 as the `SLOPE_TYPE` makes sure that the algorithm will return the catchment slope.
-The resulting output rasters\index{raster} should be saved to temporary files with an `.sdat` extension which is a SAGA\index{SAGA} raster format.
+The resulting rasters\index{raster} are saved to temporary files with an `.sdat` extension which is a SAGA\index{SAGA} raster format.
 
 ```{r 15-eco-6, eval=FALSE}
 # environmental predictors: catchment slope and catchment area
@@ -204,7 +185,7 @@ ep = qgisprocess::qgis_run_algorithm(
 ```
 
 This returns a list named `ep` containing the paths to the computed output rasters.
-Let us read in catchment area as well as catchment slope into a multilayer `SpatRaster` object (see Section \@ref(raster-classes)).
+Let's read in catchment area as well as catchment slope into a multilayer `SpatRaster` object (see Section \@ref(raster-classes)).
 Additionally, we will add two more raster objects to it, namely `dem` and `ndvi`.
 
 ```{r 15-eco-7, eval=FALSE}
@@ -212,12 +193,9 @@ Additionally, we will add two more raster objects to it, namely `dem` and `ndvi`
 ep = ep[c("AREA", "SLOPE")] |>
   unlist() |>
   terra::rast()
-# assign proper names 
-names(ep) = c("carea", "cslope")
-# make sure all rasters share the same origin
-terra::origin(ep) = terra::origin(dem)
-# add dem and ndvi to the multilayer SpatRaster object
-ep = c(dem, ndvi, ep) 
+names(ep) = c("carea", "cslope") # assign proper names 
+terra::origin(ep) = terra::origin(dem) # make sure rasters have the same origin
+ep = c(dem, ndvi, ep) # add dem and ndvi to the multilayer SpatRaster object
 ```
 
 Additionally, the catchment area\index{catchment area} values are highly skewed to the right (`hist(ep$carea)`).
