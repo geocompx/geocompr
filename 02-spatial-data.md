@@ -114,9 +114,9 @@ There is more to CRSs, as described in Sections \@ref(crs-intro) and \@ref(repro
 
 **sf** provides classes for geographic vector data and a consistent command-line interface to important low level libraries for geocomputation:
 
-- GDAL\index{GDAL}, for reading, writing and manipulating a wide range of geographic data formats, covered in Chapter \@ref(read-write)
-- PROJ, a powerful library for coordinate system transformations, which underlies the content covered in Chapter \@ref(reproj-geo-data)
-- GEOS\index{GEOS}, a planar geometry engine for operations such as calculating buffers and centroids on data with a projected CRS, covered in Chapter \@ref(geometric-operations)
+- [GDAL](https://gdal.org/)\index{GDAL}, for reading, writing and manipulating a wide range of geographic data formats, covered in Chapter \@ref(read-write)
+- [PROJ](https://proj.org/), a powerful library for coordinate system transformations, which underlies the content covered in Chapter \@ref(reproj-geo-data)
+- [GEOS](https://libgeos.org/)\index{GEOS}, a planar geometry engine for operations such as calculating buffers and centroids on data with a projected CRS, covered in Chapter \@ref(geometric-operations)
 - [S2](https://s2geometry.io/), a spherical geometry engine written in C++ developed by Google, via the [**s2**](https://r-spatial.github.io/s2/) package, covered in Section \@ref(s2) below and in Chapter \@ref(reproj-geo-data)
 <!-- - [liblwgeom](https://github.com/postgis/postgis/tree/master/liblwgeom), a geometry engine used by PostGIS, via the [**lwgeom**](https://r-spatial.github.io/lwgeom/) package -->
 
