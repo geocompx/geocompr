@@ -29,8 +29,8 @@ library(osmdata)
 london_coords = c(-0.1, 51.5)
 london_bb = c(-0.11, 51.49, -0.09, 51.51)
 bb = tmaptools::bb(london_bb)
-osm_data = opq(bbox = london_bb) %>% 
-  add_osm_feature(key = "highway", value = "bus_stop") %>% 
+osm_data = opq(bbox = london_bb) |> 
+  add_osm_feature(key = "highway", value = "bus_stop") |> 
   osmdata_sf()
 osm_data_points = osm_data$osm_points
 osm_data_points[4, ]
@@ -78,7 +78,7 @@ methods(class = "sf") # methods for sf objects, first 12 shown
 
 ```{r 03-attribute-operations-5, eval=FALSE, echo=FALSE}
 # Another way to show sf methods:
-attributes(methods(class = "sf"))$info %>% 
+attributes(methods(class = "sf"))$info |>
   dplyr::filter(!visible)
 ```
 
@@ -193,7 +193,7 @@ Key functions for subsetting data frames (including `sf` data frames) with **dpl
 i = sample(nrow(world), size = 10)
 benchmark_subset = bench::mark(
   world[i, ],
-  world %>% slice(i)
+  world |> slice(i)
 )
 benchmark_subset[c("expression", "itr/sec", "mem_alloc")]
 # # October 2021 on laptop with CRAN version of dplyr:
@@ -201,7 +201,7 @@ benchmark_subset[c("expression", "itr/sec", "mem_alloc")]
 #   expression         `itr/sec` mem_alloc
 #   <bch:expr>             <dbl> <bch:byt>
 # 1 world[i, ]             1744.    5.55KB
-# 2 world %>% slice(i)      671.    4.45KB
+# 2 world |> slice(i)      671.    4.45KB
 ```
 
 `select()` selects columns by name or position.
@@ -317,15 +317,15 @@ Pipes enable expressive code: the output of a previous function becomes the firs
 This is illustrated below, in which only countries from Asia are filtered from the `world` dataset, next the object is subset by columns (`name_long` and `continent`) and the first five rows (result not shown).
 
 ```{r 03-attribute-operations-24}
-world7 = world %>%
-  filter(continent == "Asia") %>%
-  dplyr::select(name_long, continent) %>%
+world7 = world |>
+  filter(continent == "Asia") |>
+  dplyr::select(name_long, continent) |>
   slice(1:5)
 ```
 
 The above chunk shows how the pipe operator allows commands to be written in a clear order:
 the above run from top to bottom (line-by-line) and left to right.
-The alternative to `%>%` is nested function calls, which is harder to read:
+The alternative to `|>` is nested function calls, which is harder to read:
 
 ```{r 03-attribute-operations-25}
 world8 = slice(
@@ -364,11 +364,11 @@ nrow(world_agg2)
 ```
 
 The resulting `world_agg2` object is a spatial object containing 8 features representing the continents of the world (and the open ocean).
-`group_by() %>% summarize()` is the **dplyr** equivalent of `aggregate()`, with the variable name provided in the `group_by()` function specifying the grouping variable and information on what is to be summarized passed to the `summarize()` function, as shown below:
+`group_by() |> summarize()` is the **dplyr** equivalent of `aggregate()`, with the variable name provided in the `group_by()` function specifying the grouping variable and information on what is to be summarized passed to the `summarize()` function, as shown below:
 
 ```{r 03-attribute-operations-28}
-world_agg3 = world %>%
-  group_by(continent) %>%
+world_agg3 = world |>
+  group_by(continent) |>
   summarize(pop = sum(pop, na.rm = TRUE))
 ```
 
@@ -376,8 +376,8 @@ The approach may seem more complex but it has benefits: flexibility, readability
 This flexibility is illustrated in the command below, which calculates not only the population but also the area and number of countries in each continent:
 
 ```{r 03-attribute-operations-29}
-world_agg4  = world %>% 
-  group_by(continent) %>%
+world_agg4  = world |> 
+  group_by(continent) |>
   summarize(pop = sum(pop, na.rm = TRUE), `area (sqkm)` = sum(area_km2), n = n())
 ```
 
@@ -388,14 +388,14 @@ Let's combine what we have learned so far about **dplyr** functions, by chaining
 The following command calculates population density (with `mutate()`), arranges continents by the number countries they contain (with `dplyr::arrange()`), and keeps only the 3 most populous continents (with `top_n()`), the result of which is presented in Table \@ref(tab:continents)):
 
 ```{r 03-attribute-operations-30}
-world_agg5 = world %>% 
-  st_drop_geometry() %>%                      # drop the geometry for speed
-  dplyr::select(pop, continent, area_km2) %>% # subset the columns of interest  
-  group_by(continent) %>%                     # group by continent and summarize:
-  summarize(Pop = sum(pop, na.rm = TRUE), Area = sum(area_km2), N = n()) %>%
-  mutate(Density = round(Pop / Area)) %>%     # calculate population density
-  top_n(n = 3, wt = Pop) %>%                  # keep only the top 3
-  arrange(desc(N))                            # arrange in order of n. countries
+world_agg5 = world |> 
+  st_drop_geometry() |>                      # drop the geometry for speed
+  dplyr::select(pop, continent, area_km2) |> # subset the columns of interest  
+  group_by(continent) |>                     # group by continent and summarize:
+  summarize(Pop = sum(pop, na.rm = TRUE), Area = sum(area_km2), N = n()) |>
+  mutate(Density = round(Pop / Area)) |>     # calculate population density
+  top_n(n = 3, wt = Pop) |>                  # keep only the top 3
+  arrange(desc(N))                           # arrange in order of n. countries
 ```
 
 ```{r continents, echo=FALSE}
@@ -551,14 +551,14 @@ Alternatively, we can use one of **dplyr** functions - `mutate()` or `transmute(
 `mutate()` adds new columns at the penultimate position in the `sf` object (the last one is reserved for the geometry):
 
 ```{r 03-attribute-operations-43, eval=FALSE}
-world %>% 
+world |> 
   mutate(pop_dens = pop / area_km2)
 ```
 
 The difference between `mutate()` and `transmute()` is that the latter drops all other existing columns (except for the sticky geometry column):
 
 ```{r 03-attribute-operations-44, eval=FALSE}
-world %>% 
+world |> 
   transmute(pop_dens = pop / area_km2)
 ```
 
@@ -567,7 +567,7 @@ For example, we want to combine the `continent` and `region_un` columns into a n
 Additionally, we can define a separator (here: a colon `:`) which defines how the values of the input columns should be joined, and if the original columns should be removed (here: `TRUE`):
 
 ```{r 03-attribute-operations-45, eval=FALSE}
-world_unite = world %>%
+world_unite = world |>
   unite("con_reg", continent:region_un, sep = ":", remove = TRUE)
 ```
 
@@ -575,7 +575,7 @@ The `separate()` function does the opposite of `unite()`: it splits one column i
 This function also comes from the **tidyr** package.
 
 ```{r 03-attribute-operations-46, eval=FALSE}
-world_separate = world_unite %>% 
+world_separate = world_unite |> 
   separate(con_reg, c("continent", "region_un"), sep = ":")
 ```
 
@@ -588,7 +588,7 @@ The first replaces an old name with a new one.
 The following command, for example, renames the lengthy `name_long` column to simply `name`:
 
 ```{r 03-attribute-operations-48, eval=FALSE}
-world %>% 
+world |> 
   rename(name = name_long)
 ```
 
@@ -596,12 +596,12 @@ world %>%
 This is illustrated below, which outputs the same `world` object, but with very short names: 
 
 ```{r 03-attribute-operations-49, eval=FALSE, echo=FALSE}
-abbreviate(names(world), minlength = 1) %>% dput()
+abbreviate(names(world), minlength = 1) |> dput()
 ```
 
 ```{r 03-attribute-operations-50, eval=FALSE}
 new_names = c("i", "n", "c", "r", "s", "t", "a", "p", "l", "gP", "geom")
-world %>% 
+world |> 
   setNames(new_names)
 ```
 
@@ -613,7 +613,7 @@ Hence, an approach such as `select(world, -geom)` will be unsuccessful and you s
 ]
 
 ```{r 03-attribute-operations-51}
-world_data = world %>% st_drop_geometry()
+world_data = world |> st_drop_geometry()
 class(world_data)
 ```
 
