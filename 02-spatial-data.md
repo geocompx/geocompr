@@ -5,17 +5,19 @@
 ## Prerequisites {-}
 
 This is the first practical chapter of the book, and therefore it comes with some software requirements.
-You need to have access to a computer with R (version [4.2.0](https://stat.ethz.ch/pipermail/r-announce/2022/000683.html released April 2022 or greater) installed.
-We highly recommend not only reading the text but also *running the code* in each chapter to build your geocomputational skills.
-To do this, create a new folder on your computer to save your notes in R scripts as you go.
-You can [download](https://github.com/Robinlovelace/geocompr/archive/refs/heads/main.zip) or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the source code underlying the book from [github.com/robinlovelace/geocompr](https://github.com/Robinlovelace/geocompr) to support your learning.
-After you have set-up a place to save your work start running/editing/testing code using an integrated development environment (IDE) such as [RStudio](https://www.rstudio.com/products/rstudio/download/#download) (recommended for most people, especially beginners) or [VS Code](https://github.com/REditorSupport/vscode-R)).
+You need access to a computer with a recent version of R installed (R [4.2.0](https://stat.ethz.ch/pipermail/r-announce/2022/000683.html) or a later version).
+We recommend not only reading the prose but also *running the code* in each chapter to build your geocomputational skills.
 
-If you are new to R, we recommend following introductory R resources such as [Hands on Programming with R](https://rstudio-education.github.io/hopr/starting.html) which covers installation and how R works.
+To keep track of your learning journey, it may be worth starting by creating a new folder on your computer to save your R scripts, outputs and other things related to Geocomputation with R as you go.
+You can also [download](https://github.com/Robinlovelace/geocompr/archive/refs/heads/main.zip) or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the [source code](https://github.com/Robinlovelace/geocompr) underlying the book to support your learning.
+We strongly recommend installing an integrated development environment (IDE) such as [RStudio](https://www.rstudio.com/products/rstudio/download/#download) (recommended for most people) or [VS Code](https://github.com/REditorSupport/vscode-R)) and using projects and workspaces when writing/running/testing R code.
+
+If you are new to R, we recommend following introductory R resources such as [Hands on Programming with R](https://rstudio-education.github.io/hopr/starting.html) by Garrett Grolemund or an [Introduction to R](https://cengel.github.io/R-intro/) Claudia Engel before you dive into Geocomputation with R code.
 Organize your work (e.g., with RStudio projects) and give scripts sensible names such as `02-chapter.R` to document the code you write as you learn.
 \index{R!pre-requisites}
 
-The packages used in this chapter can be installed with the following commands:^[
+After you have got a good set-up, it's time to run some code!
+Unless you already have these packages installed, the first thing to do is to install foundational R packages used in this chapter, with the following commands:^[
 **spDataLarge** is not on CRAN\index{CRAN}, meaning it must be installed via *r-universe*  or with the following command: `remotes::install_github("Nowosad/spDataLarge")`.
 ]
 
