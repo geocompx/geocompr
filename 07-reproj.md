@@ -51,7 +51,7 @@ CRSs can be described in many ways, including the following.
 Each refers to the same thing: the 'WGS84' coordinate system that forms the basis of Global Positioning System (GPS) coordinates and many other datasets.
 But which one is correct?
 
-The short answer is that the third way to identify CRSs is correct: `EPSG:4326` is understood by **sf** (and by extension **stars**) and **terra** packages R covered in this book, plus many other software projects for working with geographic data including [QGIS](https://docs.qgis.org/3.16/en/docs/user_manual/working_with_projections/working_with_projections.html) and [PROJ](https://proj.org/development/quickstart.html).
+The short answer is that the third way to identify CRSs is correct: `EPSG:4326` is understood by **sf** (and by extension **stars**) and **terra** packages covered in this book, plus many other software projects for working with geographic data including [QGIS](https://docs.qgis.org/3.16/en/docs/user_manual/working_with_projections/working_with_projections.html) and [PROJ](https://proj.org/development/quickstart.html).
 `EPSG:4326` is future-proof.
 Furthermore, although it is machine readable, unlike the `proj4string` representation "EPSG:4326" is short, easy to remember and highly 'findable' online (searching for EPSG:4326 yields a dedicated page on the website [epsg.io](https://epsg.io/4326), for example).
 The more concise identifier `4326` is understood by **sf**, but **we recommend the more explicit `AUTHORITY:CODE` representation to prevent ambiguity and to provide context**.
@@ -370,7 +370,7 @@ Both buffer boundaries in Figure \@ref(fig:crs-buf) (left) are jagged, although 
 <!--toDo:rl-->
 <!--jn: maybe it is worth to emphasize that the differences are due to the use of S2 vs GEOS-->
 <!--jn: you mention S2 a lot in this section, but not GEOS...-->
-The less is that results obtained from lon/lat data via `s2` will be different from results obtained from using projected data, although these differences reduce as the value of `max_cells` increases: the 'right' value for this argument may depend on many factors and the default value 1000 is a reasonable default, balancing speed of computation against resolution of results, in many cases.
+The lesson is that results obtained from lon/lat data via `s2` will be different from results obtained from using projected data, although these differences reduce as the value of `max_cells` increases: the 'right' value for this argument may depend on many factors and the default value 1000 is a reasonable default, balancing speed of computation against resolution of results, in many cases.
 In situations where curved boundaries are advantageous, transforming to a projected CRS before buffering (or performing other geometry operations) may be appropriate.
 
 The importance of CRSs (primarily whether they are projected or geographic) and the impacts of **sf**'s default setting to use S2 for buffers on lon/lat data is clear from the example above.
@@ -464,10 +464,10 @@ lonlat2UTM(st_coordinates(london))
 #> [1] 32630
 ```
 
-Currently, we also have tools helping us to select a proper CRS, which includes the **crssuggest** package <!--add ref or docs-->.
+Currently, we also have tools helping us to select a proper CRS, which includes the **crssuggest** package<!--add ref or docs-->.
 The main function in this package, `suggest_crs()`, takes a spatial object with geographic CRS and returns a list of possible projected CRSs that could be used for the given area.^[This package also allows to figure out the true CRS of the data without any CRS information attached.]
 Another helpful tool is a webpage https://jjimenezshaw.github.io/crs-explorer/ that lists CRSs based on selected location and type.
-Important note: while these tools is helpful in many situations, you need to be aware of the properties of the recommended CRS before you apply it.
+Important note: while these tools are helpful in many situations, you need to be aware of the properties of the recommended CRS before you apply it.
 
 \index{CRS!custom} 
 In cases where an appropriate CRS is not immediately clear, the choice of CRS should depend on the properties that are most important to preserve in the subsequent maps and analysis.

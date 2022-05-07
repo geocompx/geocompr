@@ -397,8 +397,8 @@ grain_poly = as.polygons(grain) %>%
 ```
 
 <div class="figure" style="text-align: center">
-<img src="06-raster-vector_files/figure-html/06-raster-vector-40-1.png" alt="Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right)." width="100%" />
-<p class="caption">(\#fig:06-raster-vector-40)Illustration of vectorization of raster (left) into polygon (center) and polygon aggregation (right).</p>
+<img src="06-raster-vector_files/figure-html/06-raster-vector-40-1.png" alt="Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right)." width="100%" />
+<p class="caption">(\#fig:06-raster-vector-40)Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right).</p>
 </div>
 
 ## Exercises

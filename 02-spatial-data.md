@@ -5,11 +5,13 @@
 ## Prerequisites {-}
 
 This is the first practical chapter of the book, and therefore it comes with some software requirements.
-We assume that you have an up-to-date version of R installed and that you are comfortable using software with a command-line interface such as the integrated development environment (IDE) RStudio.
-<!--or VSCode?-->
+You need to have access to a computer with R (version [4.2.0](https://stat.ethz.ch/pipermail/r-announce/2022/000683.html released April 2022 or greater) installed.
+We highly recommend not only reading the text but also *running the code* in each chapter to build your geocomputational skills.
+To do this, create a new folder on your computer to save your notes in R scripts as you go.
+You can [download](https://github.com/Robinlovelace/geocompr/archive/refs/heads/main.zip) or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the source code underlying the book from [github.com/robinlovelace/geocompr](https://github.com/Robinlovelace/geocompr) to support your learning.
+After you have set-up a place to save your work start running/editing/testing code using an integrated development environment (IDE) such as [RStudio](https://www.rstudio.com/products/rstudio/download/#download) (recommended for most people, especially beginners) or [VS Code](https://github.com/REditorSupport/vscode-R)).
 
-<!-- Should we update these references to more up-to-date resources? -->
-If you are new to R, we recommend reading Chapter 2 of the online book *Efficient R Programming* by @gillespie_efficient_2016 and learning the basics of the language with reference to resources such as @grolemund_r_2016.
+If you are new to R, we recommend following introductory R resources such as [Hands on Programming with R](https://rstudio-education.github.io/hopr/starting.html) which covers installation and how R works.
 Organize your work (e.g., with RStudio projects) and give scripts sensible names such as `02-chapter.R` to document the code you write as you learn.
 \index{R!pre-requisites}
 
@@ -119,7 +121,7 @@ There is more to CRSs, as described in Sections \@ref(crs-intro) and \@ref(repro
 Information about these interfaces is printed by **sf** the first time the package is loaded: the message `Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1; sf_use_s2() is TRUE` that appears below the `library(sf)` command at the beginning of this chapter tells us the versions of linked GEOS, GDAL and PROJ libraries (these vary between computers and over time) and whether or not the S2 interface is turned on.
 Nowadays, we take it for granted, however, only the tight integration with different geographic libraries makes reproducible geocomputation possible in the first place.
 
-A neat feature of **sf** is that you can change switch the default geometry engine used on unprojected data: 'switching off' S2 can be done with the command `sf::sf_use_s2(FALSE)`, meaning that the planar geometry engine GEOS will be used by default for all geometry operations, including geometry operations on unprojected data.
+A neat feature of **sf** is that you can change the default geometry engine used on unprojected data: 'switching off' S2 can be done with the command `sf::sf_use_s2(FALSE)`, meaning that the planar geometry engine GEOS will be used by default for all geometry operations, including geometry operations on unprojected data.
 As we will see in Section \@ref(s2), planar geometry is based on 2 dimensional space.
 Planar geometry engines such as GEOS assume 'flat' (projected) coordinates while spherical geometry engines such as S2 assume unprojected (lon/lat) coordinates.
 
@@ -982,7 +984,7 @@ my_rast
 #> max value   : 2892
 ```
 
-Dedicated functions report each component: `dim(my_rast)` returns the number of rows, columns and layers; `ncell()` the number of cells (pixels); `res()` the spatial resolution; `ext()` its spatial extent; and `crs()` its coordinate reference system (raster reprojection is covered in Section \@ref(reproj-ras)).
+Dedicated functions report each component: `dim()` returns the number of rows, columns and layers; `ncell()` the number of cells (pixels); `res()` the spatial resolution; `ext()` its spatial extent; and `crs()` its coordinate reference system (raster reprojection is covered in Section \@ref(reproj-ras)).
 `inMemory()` reports whether the raster data is stored in memory or on disk.
 
 `help("terra-package")` returns a full list of all available **terra** functions.

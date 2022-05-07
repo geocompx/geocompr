@@ -695,7 +695,7 @@ elev[1]
 ```
 
 Subsetting of multi-layered raster objects will return the cell value(s) for each layer.
-For example, `c(elev, grain)[1]` returns a data frame with one row and two columns --- one for each layer.
+For example, `two_layers = c(grain, elev); two_layers[1]` returns a data frame with one row and two columns --- one for each layer.
 To extract all values or complete rows, you can also use `values()`.
 
 Cell values can be modified by overwriting existing values in conjunction with a subsetting operation.
@@ -720,7 +720,7 @@ Replacing values of multilayered rasters can be done with a matrix with as many 
 
 ```r
 two_layers = c(grain, elev) 
-two_layers[1] = cbind(c(0), c(4))
+two_layers[1] = cbind(c(1), c(4))
 two_layers[]
 ```
 

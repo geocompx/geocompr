@@ -165,7 +165,9 @@ This is illustrated using <code>us_states</code>, representing the contiguous Un
 As we show in Chapter <a href="reproj-geo-data.html#reproj-geo-data">7</a>, GEOS assumes that the data is in a projected CRS and this could lead to unexpected results when using a geographic CRS.
 Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (epsg = 2163) (on the left in Figure <a href="geometric-operations.html#fig:us-simp">5.2</a>):</p>
 <div class="sourceCode" id="cb161"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">us_states2163</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">us_states</span>, <span class="fl">2163</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">us_states2163</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">us_states</span>, <span class="st">"EPSG:2163"</span><span class="op">)</span>
+<span class="va">us_states2163</span> <span class="op">=</span> <span class="va">us_states2163</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>AREA <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/catalyze.html">as.numeric</a></span><span class="op">(</span><span class="va">AREA</span><span class="op">)</span><span class="op">)</span> </code></pre></div>
 <p><code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_simplify()</a></code> works equally well with projected polygons:</p>
 <div class="sourceCode" id="cb162"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">us_states_simp1</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_simplify</a></span><span class="op">(</span><span class="va">us_states2163</span>, dTolerance <span class="op">=</span> <span class="fl">100000</span><span class="op">)</span>  <span class="co"># 100 km</span></code></pre></div>
@@ -179,7 +181,6 @@ The result has only 1% of the vertices of the input (set using the argument <cod
 Simplification of multipolygon objects can remove small internal polygons, even if the &lt;code&gt;keep_shapes&lt;/code&gt; argument is set to TRUE. To prevent this, you need to set &lt;code&gt;explode = TRUE&lt;/code&gt;. This option converts all mutlipolygons into separate polygons before its simplification.&lt;/p&gt;"><sup>20</sup></a></p>
 <div class="sourceCode" id="cb163"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># proportion of points to retain (0-1; default 0.05)</span>
-<span class="va">us_states2163</span><span class="op">$</span><span class="va">AREA</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/catalyze.html">as.numeric</a></span><span class="op">(</span><span class="va">us_states2163</span><span class="op">$</span><span class="va">AREA</span><span class="op">)</span>
 <span class="va">us_states_simp2</span> <span class="op">=</span> <span class="fu">rmapshaper</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rmapshaper/man/ms_simplify.html">ms_simplify</a></span><span class="op">(</span><span class="va">us_states2163</span>, keep <span class="op">=</span> <span class="fl">0.01</span>,
                                           keep_shapes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>Finally, the visual comparison of the original dataset and the two simplified versions shows differences between the Douglas-Peucker (<code>st_simplify</code>) and Visvalingam (<code>ms_simplify</code>) algorithm outputs (Figure <a href="geometric-operations.html#fig:us-simp">5.2</a>):</p>
@@ -450,7 +451,9 @@ Conversion from multipoint or linestring to polygon is often used to calculate a
 <div class="sourceCode" id="cb182"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">multipoint_2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_cast.html">st_cast</a></span><span class="op">(</span><span class="va">linestring</span>, <span class="st">"MULTIPOINT"</span><span class="op">)</span>
 <span class="va">multipoint_3</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_cast.html">st_cast</a></span><span class="op">(</span><span class="va">polyg</span>, <span class="st">"MULTIPOINT"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/terra/man/all.equal.html">all.equal</a></span><span class="op">(</span><span class="va">multipoint</span>, <span class="va">multipoint_2</span>, <span class="va">multipoint_3</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/all.equal.html">all.equal</a></span><span class="op">(</span><span class="va">multipoint</span>, <span class="va">multipoint_2</span><span class="op">)</span>
+<span class="co">#&gt; [1] TRUE</span>
+<span class="fu"><a href="https://rdrr.io/pkg/terra/man/all.equal.html">all.equal</a></span><span class="op">(</span><span class="va">multipoint</span>, <span class="va">multipoint_3</span><span class="op">)</span>
 <span class="co">#&gt; [1] TRUE</span></code></pre></div>
 
 <div class="rmdnote">
@@ -795,7 +798,7 @@ When merging or performing map algebra on rasters, their resolution, projection,
 The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions.
 We can deal with such mismatches by aligning the rasters.</p>
 <p>In the simplest case, two images only differ with regard to their extent.
-Following code adds one row and two columns to each side of the raster while setting all new values to an elevation of 1000 meters (Figure <a href="geometric-operations.html#fig:extend-example">5.13</a>).</p>
+Following code adds one row and two columns to each side of the raster while setting all new values to <code>NA</code> (Figure <a href="geometric-operations.html#fig:extend-example">5.13</a>).</p>
 <div class="sourceCode" id="cb187"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">elev</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/elev.tif"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span><span class="op">)</span>
 <span class="va">elev_2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/extend.html">extend</a></span><span class="op">(</span><span class="va">elev</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -812,7 +815,7 @@ FIGURE 5.13: Original raster (left) and the same raster (right) extended by one 
 <p>However, we can align the extent of two rasters with <code><a href="https://rdrr.io/pkg/terra/man/extend.html">extend()</a></code>.
 Instead of telling the function how many rows or columns should be added (as done before), we allow it to figure it out by using another raster object.
 Here, we extend the <code>elev</code> object to the extent of <code>elev_2</code>.
-The newly added rows and column receive the default value of the <code>value</code> parameter, i.e., <code>NA</code>.</p>
+The newly added rows and column receive the <code>NA</code>.</p>
 <div class="sourceCode" id="cb189"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">elev_4</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/extend.html">extend</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">elev_2</span><span class="op">)</span></code></pre></div>
 <p>The origin of a raster is the cell corner closest to the coordinates (0, 0).
@@ -1040,7 +1043,7 @@ Can you notice any differences between the results of these resampling methods?<
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-04-25.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-05-07.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

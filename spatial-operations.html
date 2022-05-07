@@ -128,8 +128,8 @@ The <em>type</em> of spatial relationship between objects must be considered whe
 
 Another unique aspect of spatial objects is distance: all spatial objects are related through space, and distance calculations can be used to explore the strength of this relationship, as described in the context of vector data in Section <a href="spatial-operations.html#distance-relations">4.2.8</a>.</p>
 <p>Spatial operations on raster objects include subsetting — covered in Section <a href="spatial-operations.html#spatial-raster-subsetting">4.3.1</a> — and merging several raster ‘tiles’ into a single object, as demonstrated in Section <a href="spatial-operations.html#merging-rasters">4.3.8</a>.
-<em>Map algebra</em> covers a range of operations that modify raster cell values, with or without reference to surrounding cell values, is vital for many applications.
-The concept of map algebra is introduced in Section <a href="spatial-operations.html#map-algebra">4.3.2</a>; local, focal and zonal map algebra operations are covered in sections <a href="spatial-operations.html#local-operations">4.3.3</a>, <a href="spatial-operations.html#focal-operations">4.3.4</a>, and <a href="spatial-operations.html#zonal-operations">4.3.5</a>, respectively. Global map algebra operations, which generate summary statistics representing an entire raster dataset, and distance calculations on rasters, are discussed in Section <a href="spatial-operations.html#global-operations-and-distances">4.3.6</a>.
+<em>Map algebra</em> covers a range of operations that modify raster cell values, with or without reference to surrounding cell values.
+The concept of map algebra, vital for many applications, is introduced in Section <a href="spatial-operations.html#map-algebra">4.3.2</a>; local, focal and zonal map algebra operations are covered in sections <a href="spatial-operations.html#local-operations">4.3.3</a>, <a href="spatial-operations.html#focal-operations">4.3.4</a>, and <a href="spatial-operations.html#zonal-operations">4.3.5</a>, respectively. Global map algebra operations, which generate summary statistics representing an entire raster dataset, and distance calculations on rasters, are discussed in Section <a href="spatial-operations.html#global-operations-and-distances">4.3.6</a>.
 In the final section before the exercises (<a href="spatial-operations.html#merging-rasters">4.3.8</a>) the process of merging two raster datasets is discussed and demonstrated with reference to a reproducible example.</p>
 
 <div class="rmdnote">
@@ -643,8 +643,8 @@ FIGURE 4.10: Original raster (left). Raster mask (middle). Output of masking a r
 </p>
 </div>
 <p>The example above returned the values of specific cells, but in many cases spatial outputs from subsetting operations on raster datasets are needed.
-This can be done using the <code>[</code> operator, with <code>drop = FALSE</code>, as outlined in Section <a href="attr.html#manipulating-raster-objects">3.3</a>, which also shows how raster objects can be subsetted by various objects.
-This is demonstrated in the code below, which returns the first two cells of <code>elev</code> as a raster object the first two cells on the top row (only the first 2 lines of the output is shown):</p>
+This can be done with the <code>[</code> operator, using <code>drop = FALSE</code>.
+The code below returns the first two cells of <code>elev</code> as a raster object the first two cells on the top row (only the first 2 lines of the output is shown):</p>
 <div class="sourceCode" id="cb144"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">elev</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>    <span class="co"># spatial subsetting with cell IDs</span>
 <span class="co">#&gt; class       : SpatRaster </span>
@@ -678,7 +678,7 @@ The term ‘map algebra’ was coined in the late 1970s to describe a “set of 
 <!-- Although the concept never became widely adopted, the term usefully encapsulates and helps classify the range operations that can be undertaken on raster datasets. -->
 In this context, we define map algebra more narrowly, as operations that modify or summarise raster cell values, with reference to surrounding cells, zones, or statistical functions that apply to every cell.</p>
 <p>Map algebra operations tend to be fast, because raster datasets only implicitly store coordinates, hence the <a href="https://geozoneblog.wordpress.com/2013/04/19/raster-vs-vector/">old adage</a> “raster is faster but vector is corrector”.
-The location of cells in raster datasets can be calculated it using its matrix position and the resolution and origin of the dataset (stored in the header).
+The location of cells in raster datasets can be calculated by using its matrix position and the resolution and origin of the dataset (stored in the header).
 For the processing, however, the geographic position of a cell is barely relevant as long as we make sure that the cell position is still the same after the processing.
 Additionally, if two or more raster datasets share the same extent, projection and resolution, one could treat them as matrices for the processing.</p>
 <p>This is the way that map algebra works with the <strong>terra</strong> package.
@@ -825,11 +825,10 @@ Chapter <a href="gis.html#gis">10</a> shows how to access such GIS functionality
 Just like focal operations, <em>zonal</em> operations apply an aggregation function to multiple raster cells.
 However, a second raster, usually with categorical values, defines the <em>zonal filters</em> (or ‘zones’) in the case of zonal operations, as opposed to a predefined neighborhood window in the case of focal operation presented in the previous section.
 Consequently, raster cells defining the zonal filter do not necessarily have to be neighbors.
-Our grain size raster is a good example, as illustrated in the right panel of Figure <a href="attr.html#fig:cont-raster">3.2</a>): different grain sizes are spread irregularly throughout the raster.
+Our grain size raster is a good example, as illustrated in the right panel of Figure <a href="attr.html#fig:cont-raster">3.2</a>: different grain sizes are spread irregularly throughout the raster.
 Finally, the result of a zonal operation is a summary table grouped by zone which is why this operation is also known as <em>zonal statistics</em> in the GIS world.
 This is in contrast to focal operations which return a raster object.</p>
-<p>The following code chunk uses the <code><a href="https://rdrr.io/pkg/terra/man/zonal.html">zonal()</a></code> function to calculate the mean elevation associated with each grain size class, for example.
-The output is shown in Figure <a href="attr.html#fig:cont-raster">3.2</a>).</p>
+<p>The following code chunk uses the <code><a href="https://rdrr.io/pkg/terra/man/zonal.html">zonal()</a></code> function to calculate the mean elevation associated with each grain size class, for example.</p>
 <div class="sourceCode" id="cb155"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/zonal.html">zonal</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">grain</span>, fun <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span>
 <span class="va">z</span>
@@ -1011,7 +1010,7 @@ Next, compute and visualize the difference between the raster created using the 
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-04-25.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-05-07.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

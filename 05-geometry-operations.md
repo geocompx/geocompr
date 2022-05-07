@@ -76,8 +76,13 @@ As we show in Chapter \@ref(reproj-geo-data), GEOS assumes that the data is in a
 Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (epsg = 2163) (on the left in Figure \@ref(fig:us-simp)):
 
 
+
+
+
 ```r
-us_states2163 = st_transform(us_states, 2163)
+us_states2163 = st_transform(us_states, "EPSG:2163")
+us_states2163 = us_states2163 %>% 
+  mutate(AREA = as.numeric(AREA)) 
 ```
 
 `st_simplify()` works equally well with projected polygons:
@@ -100,7 +105,6 @@ Simplification of multipolygon objects can remove small internal polygons, even 
 
 ```r
 # proportion of points to retain (0-1; default 0.05)
-us_states2163$AREA = as.numeric(us_states2163$AREA)
 us_states_simp2 = rmapshaper::ms_simplify(us_states2163, keep = 0.01,
                                           keep_shapes = TRUE)
 ```
@@ -442,7 +446,9 @@ The transformation process can be also reversed using `st_cast`:
 ```r
 multipoint_2 = st_cast(linestring, "MULTIPOINT")
 multipoint_3 = st_cast(polyg, "MULTIPOINT")
-all.equal(multipoint, multipoint_2, multipoint_3)
+all.equal(multipoint, multipoint_2)
+#> [1] TRUE
+all.equal(multipoint, multipoint_3)
 #> [1] TRUE
 ```
 
@@ -674,7 +680,7 @@ The same problem arises when we would like to merge satellite imagery from diffe
 We can deal with such mismatches by aligning the rasters.
 
 In the simplest case, two images only differ with regard to their extent.
-Following code adds one row and two columns to each side of the raster while setting all new values to an elevation of 1000 meters (Figure \@ref(fig:extend-example)).
+Following code adds one row and two columns to each side of the raster while setting all new values to `NA` (Figure \@ref(fig:extend-example)).
 
 
 ```r
@@ -698,7 +704,7 @@ elev_3 = elev + elev_2
 However, we can align the extent of two rasters with `extend()`. 
 Instead of telling the function how many rows or columns should be added (as done before), we allow it to figure it out by using another raster object.
 Here, we extend the `elev` object to the extent of `elev_2`. 
-The newly added rows and column receive the default value of the `value` parameter, i.e., `NA`.
+The newly added rows and column receive the `NA`.
 
 
 ```r

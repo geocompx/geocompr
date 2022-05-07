@@ -36,8 +36,8 @@ The *type* of spatial relationship between objects must be considered when under
 Another unique aspect of spatial objects is distance: all spatial objects are related through space, and distance calculations can be used to explore the strength of this relationship, as described in the context of vector data in Section \@ref(distance-relations).
 
 Spatial operations on raster objects include subsetting --- covered in Section \@ref(spatial-raster-subsetting) --- and merging several raster 'tiles' into a single object, as demonstrated in Section \@ref(merging-rasters).
-*Map algebra* covers a range of operations that modify raster cell values, with or without reference to surrounding cell values, is vital for many applications.
-The concept of map algebra is introduced in Section \@ref(map-algebra); local, focal and zonal map algebra operations are covered in sections \@ref(local-operations), \@ref(focal-operations), and \@ref(zonal-operations), respectively. Global map algebra operations, which generate summary statistics representing an entire raster dataset, and distance calculations on rasters, are discussed in Section \@ref(global-operations-and-distances).
+*Map algebra* covers a range of operations that modify raster cell values, with or without reference to surrounding cell values.
+The concept of map algebra, vital for many applications, is introduced in Section \@ref(map-algebra); local, focal and zonal map algebra operations are covered in sections \@ref(local-operations), \@ref(focal-operations), and \@ref(zonal-operations), respectively. Global map algebra operations, which generate summary statistics representing an entire raster dataset, and distance calculations on rasters, are discussed in Section \@ref(global-operations-and-distances).
 In the final section before the exercises (\@ref(merging-rasters)) the process of merging two raster datasets is discussed and demonstrated with reference to a reproducible example.
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in Section \@ref(crs-intro) and which will be covered in more depth in Chapter \@ref(reproj-geo-data).</div>\EndKnitrBlock{rmdnote}
@@ -656,8 +656,8 @@ This amounts to retrieving the values of the first raster object (in this case `
 </div>
 
 The example above returned the values of specific cells, but in many cases spatial outputs from subsetting operations on raster datasets are needed.
-This can be done using the `[` operator, with `drop = FALSE`, as outlined in Section \@ref(manipulating-raster-objects), which also shows how raster objects can be subsetted by various objects.
-This is demonstrated in the code below, which returns the first two cells of `elev` as a raster object the first two cells on the top row (only the first 2 lines of the output is shown):
+This can be done with the `[` operator, using `drop = FALSE`.
+The code below returns the first two cells of `elev` as a raster object the first two cells on the top row (only the first 2 lines of the output is shown):
 
 
 ```r
@@ -708,7 +708,7 @@ The term 'map algebra' was coined in the late 1970s to describe a "set of conven
 In this context, we define map algebra more narrowly, as operations that modify or summarise raster cell values, with reference to surrounding cells, zones, or statistical functions that apply to every cell.
 
 Map algebra operations tend to be fast, because raster datasets only implicitly store coordinates, hence the [old adage](https://geozoneblog.wordpress.com/2013/04/19/raster-vs-vector/) "raster is faster but vector is corrector".
-The location of cells in raster datasets can be calculated it using its matrix position and the resolution and origin of the dataset (stored in the header).
+The location of cells in raster datasets can be calculated by using its matrix position and the resolution and origin of the dataset (stored in the header).
 For the processing, however, the geographic position of a cell is barely relevant as long as we make sure that the cell position is still the same after the processing.
 Additionally, if two or more raster datasets share the same extent, projection and resolution, one could treat them as matrices for the processing.
 
@@ -881,12 +881,11 @@ Chapter \@ref(gis) shows how to access such GIS functionality from within R.
 Just like focal operations, *zonal* operations apply an aggregation function to multiple raster cells.
 However, a second raster, usually with categorical values, defines the *zonal filters* (or 'zones') in the case of zonal operations, as opposed to a predefined neighborhood window in the case of focal operation presented in the previous section.
 Consequently, raster cells defining the zonal filter do not necessarily have to be neighbors.
-Our grain size raster is a good example, as illustrated in the right panel of Figure \@ref(fig:cont-raster)): different grain sizes are spread irregularly throughout the raster.
+Our grain size raster is a good example, as illustrated in the right panel of Figure \@ref(fig:cont-raster): different grain sizes are spread irregularly throughout the raster.
 Finally, the result of a zonal operation is a summary table grouped by zone which is why this operation is also known as *zonal statistics* in the GIS world\index{GIS}. 
 This is in contrast to focal operations which return a raster object.
 
 The following code chunk uses the `zonal()` function to calculate the mean elevation associated with each grain size class, for example.
-The output is shown in Figure \@ref(fig:cont-raster)).
 
 
 ```r
