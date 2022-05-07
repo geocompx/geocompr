@@ -376,7 +376,7 @@ world_agg5 = world %>%
 ```
 
 
-Table: (\#tab:continents)The top 3 most populous continents ordered by population density (people per square km).
+Table: (\#tab:continents)The top 3 most populous continents ordered by number of countries.
 
 |continent |        Pop|     Area|  N| Density|
 |:---------|----------:|--------:|--:|-------:|
