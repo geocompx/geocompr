@@ -131,7 +131,7 @@ If you really have to do the analysis on a big or even the complete dataset, hop
 For this, you need to learn a system that is able to do this parallelization efficiently such as Hadoop, GeoMesa (http://www.geomesa.org/) or GeoSpark [@huang_geospark_2017].
 But still, you are applying the same techniques and concepts you have used on small datasets to answer a big data\index{big data} question, the only difference is that you then do it in a big data setting.
 
-## Where to search for help and ask questions? {#questions}
+## Getting help? {#questions}
 <!-- Now wondering if this should be an appendix, or even a new chapter?? -->
 
 <!-- Chapter \@ref(intro) states that the approach advocated in this book "can help remove constraints on your creativity imposed by software". -->
@@ -159,8 +159,16 @@ Steps 1 to 3 outlined above are fairly self-explanatory but, due to the vastness
 
 ### Searching for solutions online
 
-<!-- toDo:rl-->
-<!-- TODO: add content here.... -->
+A logical place to start for many issues is search engines.
+'Googling it' can in some cases result in the discovery of blog posts, forum messages and other online content about the precise issue you're having.
+Simply typing in a clear description of the problem/question is a valid approach here but it is important to be specific (e.g. with reference to function and package names and input dataset sources if the problem is dataset specific).
+You can also make online searches more effective by including additional detail:
+<!-- To provide a concrete example, imagine you want to know how to use custom symbols in an interactive map. -->
+
+- Use quote marks to maximise the chances that 'hits' relate to the exact issue you're having by reducing the number of results returned
+<!-- todo: add example -->
+- Set [time restraints](https://uk.pcmag.com/software-services/138320/21-google-search-tips-youll-want-to-learn), for example only returning content created within the last year can be useful when searching for help on an evolving package.
+- Make use of additional [search engine features](https://www.makeuseof.com/tag/6-ways-to-search-by-date-on-google/), for example restricting searches to content hosted on CRAN with site:r-project.org
 
 ### Places to search for (and ask) for help {#help}
 
@@ -176,7 +184,7 @@ Steps 1 to 3 outlined above are fairly self-explanatory but, due to the vastness
 
 In terms asking a good question, a clearly stated questions supported by an accessible and fully reproducible example is key.
 It is also helpful, after showing the code that 'did not work' from the user's perspective, to explain what you would like to see.
-A very useful tool for creating reproducible examples is **reprex**.
+A very useful tool for creating reproducible examples is the **reprex** package.
 <!-- Todo: show how reprex works. -->
 
 

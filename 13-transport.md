@@ -82,8 +82,8 @@ In terms of transport, Bristol is well served by rail and road links, and has a 
 
 Despite impressive walking and cycling statistics\index{statistics}, the city has a major congestion problem.
 Part of the solution is to continue to increase the proportion of trips made by cycling.
-Cycling has a greater potential to replace car trips than walking because of the speed of this mode, around 3-4 times faster than walking (with typical [speeds](https://en.wikipedia.org/wiki/Bicycle_performance) of 15-20 km/h vs 4-6 km/h for walking).
-There is an ambitious [plan](http://www.cyclingweekly.com/news/interview-bristols-mayor-george-ferguson-24114) to double the share of cycling by 2020.
+Cycling has a greater potential to replace car trips than walking, with typical [speeds](https://en.wikipedia.org/wiki/Bicycle_performance) of 15-20 km/h vs 4-6 km/h for walking).
+Furthermore many local transport plans, including Bristol's [Transport Strategy](https://www.bristol.gov.uk/documents/20182/3641895/Bristol+Transport+Strategy+-+adopted+2019.pdf/383a996e-2219-dbbb-dc75-3a270bfce26c), have ambitious plans for cycling.
 
 In this policy context, the aim of this chapter, beyond demonstrating how geocomputation with R can be used to support sustainable transport planning, is to provide evidence for decision-makers in Bristol to decide how best to increase the share of walking and cycling in particular in the city.
 This high-level aim will be met via the following objectives:
