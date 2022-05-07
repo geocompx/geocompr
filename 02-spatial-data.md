@@ -10,10 +10,14 @@ We recommend not only reading the prose but also *running the code* in each chap
 
 To keep track of your learning journey, it may be worth starting by creating a new folder on your computer to save your R scripts, outputs and other things related to Geocomputation with R as you go.
 You can also [download](https://github.com/Robinlovelace/geocompr/archive/refs/heads/main.zip) or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the [source code](https://github.com/Robinlovelace/geocompr) underlying the book to support your learning.
-We strongly recommend installing an integrated development environment (IDE) such as [RStudio](https://www.rstudio.com/products/rstudio/download/#download) (recommended for most people) or [VS Code](https://github.com/REditorSupport/vscode-R)) and using projects and workspaces when writing/running/testing R code.
+We strongly recommend installing an integrated development environment (IDE) such as [RStudio](https://www.rstudio.com/products/rstudio/download/#download) (recommended for most people) or [VS Code](https://github.com/REditorSupport/vscode-R) when writing/running/testing R code.^[
+We recommend using [RStudio projects](https://r4ds.had.co.nz/workflow-projects.html), [VS Code workspaces](https://code.visualstudio.com/docs/editor/workspaces) or similar system to manage your projects.
+A quick way to do this with RStudio is via the **rstudioapi** package.
+Open a new project called 'geocompr-learning' in your home directory with the following command from the R console in RStudio, for example: `rstudioapi::openProject("~/geocompr-learning")`.
+]
 
-If you are new to R, we recommend following introductory R resources such as [Hands on Programming with R](https://rstudio-education.github.io/hopr/starting.html) by Garrett Grolemund or an [Introduction to R](https://cengel.github.io/R-intro/) Claudia Engel before you dive into Geocomputation with R code.
-Organize your work (e.g., with RStudio projects) and give scripts sensible names such as `02-chapter.R` to document the code you write as you learn.
+If you are new to R, we recommend following introductory R resources such as [Hands on Programming with R](https://rstudio-education.github.io/hopr/starting.html) by Garrett Grolemund or an [Introduction to R](https://cengel.github.io/R-intro/) by Claudia Engel before you dive into Geocomputation with R code.
+Organize your work (e.g., with RStudio projects) and give scripts sensible names such as `chapter-02-notes.R` to document the code as you learn.
 \index{R!pre-requisites}
 
 After you have got a good set-up, it's time to run some code!
