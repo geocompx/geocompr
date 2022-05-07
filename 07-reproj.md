@@ -153,7 +153,7 @@ vector_filepath = system.file("shapes/world.gpkg", package = "spData")
 new_vector = read_sf(vector_filepath)
 ```
 
-Our new object, `new_vector`, is a an `sf` data frame representing countries worldwide (see the help page `?spData::world` for details).
+Our new object, `new_vector`, is a data frame of class `sf` that represents countries worldwide (see the help page `?spData::world` for details).
 The CRS can be retrieved with the **sf** function `st_crs()`.
 
 
