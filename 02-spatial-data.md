@@ -135,7 +135,7 @@ Simple Features is a hierarchical data model that represents a wide range of geo
 Of 18 geometry types supported by the specification, only 7 are used in the vast majority of geographic research (see Figure \@ref(fig:sf-ogc));
 these core geometry types are fully supported by the R package **sf** [@pebesma_simple_2018].^[
 The full OGC standard includes rather exotic geometry types including 'surface' and 'curve' geometry types, which currently have limited application in real world applications.
-All 18 types can be represented with the **sf** package, although (as of summer 2018) plotting only works for the 'core 7'.
+All 18 types can be represented with the **sf** package, although at the time of writing (2022) plotting only works for the 'core 7'.
 ]
 
 <div class="figure" style="text-align: center">
