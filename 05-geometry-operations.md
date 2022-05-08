@@ -93,7 +93,7 @@ us_states_simp1 = st_simplify(us_states2163, dTolerance = 100000)  # 100 km
 ```
 
 A limitation with `st_simplify()` is that it simplifies objects on a per-geometry basis.
-This means the 'topology' is lost, resulting in overlapping and 'holy' areal units illustrated in Figure \@ref(fig:us-simp) (middle panel).
+This means the 'topology' is lost, resulting in overlapping and 'holey' areal units illustrated in Figure \@ref(fig:us-simp) (middle panel).
 `ms_simplify()` from **rmapshaper** provides an alternative that overcomes this issue.
 By default it uses the Visvalingam algorithm, which overcomes some limitations of the Douglas-Peucker algorithm [@visvalingam_line_1993].
 <!-- https://bost.ocks.org/mike/simplify/ -->
