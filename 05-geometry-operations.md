@@ -413,8 +413,8 @@ texas_union = st_union(us_west_union, texas)
 
 \index{vector!geometry casting} 
 Geometry casting is a powerful operation that enables transformation of the geometry type.
-It is implemented in the `st_cast` function from the **sf** package.
-Importantly, `st_cast` behaves differently on single simple feature geometry (`sfg`) objects, simple feature geometry column (`sfc`) and simple features objects.
+It is implemented in the `st_cast()` function from the **sf** package.
+Importantly, `st_cast()` behaves differently on single simple feature geometry (`sfg`) objects, simple feature geometry column (`sfc`) and simple features objects.
 
 Let's create a multipoint to illustrate how geometry casting works on simple feature geometry (`sfg`) objects:
 
@@ -423,7 +423,7 @@ Let's create a multipoint to illustrate how geometry casting works on simple fea
 multipoint = st_multipoint(matrix(c(1, 3, 5, 1, 3, 1), ncol = 2))
 ```
 
-In this case, `st_cast` can be useful to transform the new object into linestring or polygon (Figure \@ref(fig:single-cast)):
+In this case, `st_cast()` can be useful to transform the new object into a linestring or a polygon (Figure \@ref(fig:single-cast)):
 
 
 ```r
@@ -432,15 +432,15 @@ polyg = st_cast(multipoint, "POLYGON")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/single-cast-1.png" alt="Examples of linestring and polygon casted from a multipoint geometry." width="100%" />
-<p class="caption">(\#fig:single-cast)Examples of linestring and polygon casted from a multipoint geometry.</p>
+<img src="05-geometry-operations_files/figure-html/single-cast-1.png" alt="Examples of a linestring and a polygon casted from a multipoint geometry." width="100%" />
+<p class="caption">(\#fig:single-cast)Examples of a linestring and a polygon casted from a multipoint geometry.</p>
 </div>
 
 Conversion from multipoint to linestring is a common operation that creates a line object from ordered point observations, such as GPS measurements or geotagged media.
-This allows spatial operations such as the length of the path traveled.
+This, in turn, allows to perform spatial operations such as the calculation of the length of the path traveled.
 Conversion from multipoint or linestring to polygon is often used to calculate an area, for example from the set of GPS measurements taken around a lake or from the corners of a building lot.
 
-The transformation process can be also reversed using `st_cast`:
+The transformation process can be also reversed using `st_cast()`:
 
 
 ```r
@@ -452,20 +452,20 @@ all.equal(multipoint, multipoint_3)
 #> [1] TRUE
 ```
 
-\BeginKnitrBlock{rmdnote}<div class="rmdnote">For single simple feature geometries (`sfg`), `st_cast` also provides geometry casting from non-multi-types to multi-types (e.g., `POINT` to `MULTIPOINT`) and from multi-types to non-multi-types.
-However, only the first element of the old object would remain in the second group of cases.</div>\EndKnitrBlock{rmdnote}
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">For single simple feature geometries (`sfg`), `st_cast()` also provides geometry casting from non-multi-types to multi-types (e.g., `POINT` to `MULTIPOINT`) and from multi-types to non-multi-types.
+However, when casting from multi-types to non-multi-types only the first element of the old object would remain in the output object.</div>\EndKnitrBlock{rmdnote}
 
 
 
-Geometry casting of simple features geometry column (`sfc`) and simple features objects works the same as for single geometries in most of the cases. 
+Geometry casting of simple features geometry column (`sfc`) and simple features objects works the same as for `sfg` in most of the cases. 
 One important difference is the conversion between multi-types to non-multi-types.
-As a result of this process, multi-objects are split into many non-multi-objects.
+As a result of this process, multi-objects of `sfc` or `sf` are split into many non-multi-objects.
 
 Table \@ref(tab:sfs-st-cast) shows possible geometry type transformations on simple feature objects.
-Each input simple feature object with only one element (first column) is transformed directly into another geometry type.
-Several of the transformations are not possible, for example, you cannot convert a single point into a multilinestring or a polygon (so the cells `[1, 4:5]` in the table are NA).
-On the other hand, some of the transformations are splitting the single element input object into a multi-element object.
-You can see that, for example, when you cast a multipoint consisting of five pairs of coordinates into a point.
+Single simple feature geometries (represented by the first column in the table) can be transformed into multiple geometry types, represented by the columns in Table \@ref(tab:sfs-st-cast).
+Some transformations are not possible: you cannot convert a single point into a multilinestring or a polygon, for example, explaining why the cells `[1, 4:5]` in the table contain NA.
+Some transformations split single features input into multiple sub-features, 'expanding' `sf` objects (adding new rows with duplicate attribute values).
+When a multipoint geometry consisting of five pairs of coordinates is tranformed into a 'POINT' geometry, for example, the output will contain five features.
 
 <table>
 <caption>(\#tab:sfs-st-cast)Geometry casting on simple feature geometries (see Section 2.1) with input type by row and output type by column</caption>
@@ -582,7 +582,7 @@ multilinestring_sf
 You can imagine it as a road or river network. 
 The new object has only one row that defines all the lines.
 This restricts the number of operations that can be done, for example it prevents adding names to each line segment or calculating lengths of single lines.
-The `st_cast` function can be used in this situation, as it separates one mutlilinestring into three linestrings:
+The `st_cast()` function can be used in this situation, as it separates one mutlilinestring into three linestrings:
 
 
 ```r
