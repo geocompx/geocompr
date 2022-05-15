@@ -886,7 +886,7 @@ Please refer to @obe_postgis_2015 for a more detailed description of the SQL que
 PostgreSQL/PostGIS is a formidable choice as an open-source spatial database.
 But the same is true for the lightweight SQLite/SpatiaLite database engine and GRASS\index{GRASS} which uses SQLite in the background (see Section \@ref(rgrass)).
 
-As a final note, if your data is getting too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, then the next logical step is to use large-scale geographic querying on distributed computing systems, as for example, provided by GeoMesa (http://www.geomesa.org/) or Apache Sedona [https://sedona.apache.org/; formermly known as GeoSpark - @huang_geospark_2017].
+As a final note, if your data is getting too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, then the next logical step is to use large-scale geographic querying on distributed computing systems, as for example, provided by GeoMesa (http://www.geomesa.org/) or Apache Sedona [https://sedona.apache.org/; formerly known as GeoSpark - @huang_geospark_2017].
 
 ## Bridges to cloud technologies and services {#cloud}
 
@@ -916,7 +916,6 @@ items = s |>
               datetime = "2020-01-01/2020-12-31") |>
   post_request() |> items_fetch()
 ```
-
 
 Cloud storage differs from local hard disks and traditional image file formats do not perform well in cloud-based geoprocessing. 
 Broadly speaking, the cloud-optimized GeoTIFF\index{COG} format is a specific type of GeoTIFF that makes it possible to efficiently read only parts of an image from cloud storage. 
