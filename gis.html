@@ -832,7 +832,6 @@ In the example below, we request all images from the <a href="https://registry.o
 The result contains all found images and their metadata (e.g. cloud cover) and URLs pointing to actual files on AWS.</p>
 <div class="sourceCode" id="cb374"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/brazil-data-cube/rstac">rstac</a></span><span class="op">)</span>
-
 <span class="co"># Connect to the STAC-API endpoint for Sentinel-2 data</span>
 <span class="co"># and search for images intersecting our AOI</span>
 <span class="va">s</span> <span class="op">=</span> <span class="fu">stac</span><span class="op">(</span><span class="st">"https://earth-search.aws.element84.com/v0"</span><span class="op">)</span>
@@ -850,19 +849,15 @@ The <strong>gdalcubes</strong> package <span class="citation">(<a href="referenc
 <p>The code below shows a minimal example to create a lower resolution (250m) maximum NDVI composite from the Sentinel-2 images returned by the previous STAC-API search.</p>
 <div class="sourceCode" id="cb375"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/appelmar/gdalcubes_R">gdalcubes</a></span><span class="op">)</span>
-
 <span class="co"># Filter images from STAC response by cloud cover and create an image collection object</span>
 <span class="va">collection</span> <span class="op">=</span> <span class="fu">stac_image_collection</span><span class="op">(</span><span class="va">items</span><span class="op">$</span><span class="va">features</span>, property_filter <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span><span class="va">x</span><span class="op">[[</span><span class="st">"eo:cloud_cover"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;</span> <span class="fl">10</span><span class="op">}</span><span class="op">)</span>
-
 <span class="co"># Define spatiotemporal extent, resolution (250m, daily) and CRS of the target data cube</span>
 <span class="va">v</span> <span class="op">=</span> <span class="fu">cube_view</span><span class="op">(</span>srs <span class="op">=</span> <span class="st">"EPSG:3857"</span>, extent <span class="op">=</span> <span class="va">collection</span>, dx <span class="op">=</span> <span class="fl">250</span>, dy <span class="op">=</span> <span class="fl">250</span>, dt <span class="op">=</span> <span class="st">"P1D"</span><span class="op">)</span> <span class="co"># "P1D" is an ISO 8601 duration string</span>
-
 <span class="co"># Create and process the data cube</span>
 <span class="va">cube</span> <span class="op">=</span> <span class="fu">raster_cube</span><span class="op">(</span><span class="va">collection</span>, <span class="va">v</span><span class="op">)</span> |&gt;
   <span class="fu">select_bands</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="st">"B04"</span>, <span class="st">"B08"</span><span class="op">)</span><span class="op">)</span> |&gt;
   <span class="fu">apply_pixel</span><span class="op">(</span><span class="st">"(B08-B04)/(B08+B04)"</span>, <span class="st">"NDVI"</span><span class="op">)</span> |&gt;
   <span class="fu">reduce_time</span><span class="op">(</span><span class="st">"max(NDVI)"</span><span class="op">)</span>
-
 <span class="co"># gdalcubes_options(parallel = 8)</span>
 <span class="co"># plot(cube, zlim = c(0,1))</span></code></pre></div>
 <p>To filter images by cloud cover, we provide a property filter function that is applied on each STAC result item while creating the image collection.
@@ -889,36 +884,31 @@ The openEO platform backend includes a free tier and registration is possible fr
 <span id="cb376-3"><a href="gis.html#cb376-3" aria-hidden="true" tabindex="-1"></a>p <span class="ot">=</span> <span class="fu">processes</span>() <span class="co"># load available processes</span></span>
 <span id="cb376-4"><a href="gis.html#cb376-4" aria-hidden="true" tabindex="-1"></a>collections <span class="ot">=</span> <span class="fu">list_collections</span>() <span class="co"># load available collections</span></span>
 <span id="cb376-5"><a href="gis.html#cb376-5" aria-hidden="true" tabindex="-1"></a>formats <span class="ot">=</span> <span class="fu">list_file_formats</span>() <span class="co"># load available output formats</span></span>
-<span id="cb376-6"><a href="gis.html#cb376-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb376-7"><a href="gis.html#cb376-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Load Sentinel-2 collection</span></span>
-<span id="cb376-8"><a href="gis.html#cb376-8" aria-hidden="true" tabindex="-1"></a>s2 <span class="ot">=</span> p<span class="sc">$</span><span class="fu">load_collection</span>(<span class="at">id =</span> <span class="st">"SENTINEL2_L2A"</span>,</span>
-<span id="cb376-9"><a href="gis.html#cb376-9" aria-hidden="true" tabindex="-1"></a>                       <span class="at">spatial_extent =</span> <span class="fu">list</span>(<span class="at">west =</span> <span class="fl">7.5</span>, <span class="at">east =</span> <span class="fl">8.5</span>,</span>
-<span id="cb376-10"><a href="gis.html#cb376-10" aria-hidden="true" tabindex="-1"></a>                                             <span class="at">north =</span> <span class="fl">51.1</span>, <span class="at">south =</span> <span class="fl">50.1</span>),</span>
-<span id="cb376-11"><a href="gis.html#cb376-11" aria-hidden="true" tabindex="-1"></a>                       <span class="at">temporal_extent =</span> <span class="fu">list</span>(<span class="st">"2021-01-01"</span>, <span class="st">"2021-01-31"</span>),</span>
-<span id="cb376-12"><a href="gis.html#cb376-12" aria-hidden="true" tabindex="-1"></a>                       <span class="at">bands=</span><span class="fu">list</span>(<span class="st">"B04"</span>,<span class="st">"B08"</span>))</span>
-<span id="cb376-13"><a href="gis.html#cb376-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb376-14"><a href="gis.html#cb376-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute NDVI vegetation index</span></span>
-<span id="cb376-15"><a href="gis.html#cb376-15" aria-hidden="true" tabindex="-1"></a>compute_ndvi <span class="ot">=</span> p<span class="sc">$</span><span class="fu">reduce_dimension</span>(<span class="at">data =</span> s2, <span class="at">dimension =</span> <span class="st">"bands"</span>,</span>
-<span id="cb376-16"><a href="gis.html#cb376-16" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">reducer =</span> <span class="cf">function</span>(data,context) {</span>
-<span id="cb376-17"><a href="gis.html#cb376-17" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">return</span>((data[<span class="dv">2</span>]<span class="sc">-</span>data[<span class="dv">1</span>])<span class="sc">/</span>(data[<span class="dv">2</span>]<span class="sc">+</span>data[<span class="dv">1</span>]))</span>
-<span id="cb376-18"><a href="gis.html#cb376-18" aria-hidden="true" tabindex="-1"></a>                                  })</span>
-<span id="cb376-19"><a href="gis.html#cb376-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb376-20"><a href="gis.html#cb376-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute maximum over time</span></span>
-<span id="cb376-21"><a href="gis.html#cb376-21" aria-hidden="true" tabindex="-1"></a>reduce_max <span class="ot">=</span> p<span class="sc">$</span><span class="fu">reduce_dimension</span>(<span class="at">data=</span>compute_ndvi, <span class="at">dimension =</span> <span class="st">"t"</span>,</span>
-<span id="cb376-22"><a href="gis.html#cb376-22" aria-hidden="true" tabindex="-1"></a>                                <span class="at">reducer =</span> <span class="cf">function</span>(x,y) {<span class="fu">max</span>(x)})</span>
-<span id="cb376-23"><a href="gis.html#cb376-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb376-24"><a href="gis.html#cb376-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Export as GeoTIFF</span></span>
-<span id="cb376-25"><a href="gis.html#cb376-25" aria-hidden="true" tabindex="-1"></a>result <span class="ot">=</span> p<span class="sc">$</span><span class="fu">save_result</span>(reduce_max, formats<span class="sc">$</span>output<span class="sc">$</span>GTiff)</span>
-<span id="cb376-26"><a href="gis.html#cb376-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb376-27"><a href="gis.html#cb376-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Login, see https://docs.openeo.cloud/getting-started/r/#authentication</span></span>
-<span id="cb376-28"><a href="gis.html#cb376-28" aria-hidden="true" tabindex="-1"></a><span class="fu">login</span>(<span class="at">login_type =</span> <span class="st">"oidc"</span>,</span>
-<span id="cb376-29"><a href="gis.html#cb376-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">provider =</span> <span class="st">"egi"</span>,</span>
-<span id="cb376-30"><a href="gis.html#cb376-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">config =</span> <span class="fu">list</span>(</span>
-<span id="cb376-31"><a href="gis.html#cb376-31" aria-hidden="true" tabindex="-1"></a>        <span class="at">client_id=</span> <span class="st">"..."</span>,</span>
-<span id="cb376-32"><a href="gis.html#cb376-32" aria-hidden="true" tabindex="-1"></a>        <span class="at">secret =</span> <span class="st">"..."</span>))<span class="er">)</span></span>
-<span id="cb376-33"><a href="gis.html#cb376-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb376-34"><a href="gis.html#cb376-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Execute processes</span></span>
-<span id="cb376-35"><a href="gis.html#cb376-35" aria-hidden="true" tabindex="-1"></a><span class="fu">compute_result</span>(<span class="at">graph =</span> result, <span class="at">output_file =</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".tif"</span>))</span></code></pre></div>
+<span id="cb376-6"><a href="gis.html#cb376-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Load Sentinel-2 collection</span></span>
+<span id="cb376-7"><a href="gis.html#cb376-7" aria-hidden="true" tabindex="-1"></a>s2 <span class="ot">=</span> p<span class="sc">$</span><span class="fu">load_collection</span>(<span class="at">id =</span> <span class="st">"SENTINEL2_L2A"</span>,</span>
+<span id="cb376-8"><a href="gis.html#cb376-8" aria-hidden="true" tabindex="-1"></a>                       <span class="at">spatial_extent =</span> <span class="fu">list</span>(<span class="at">west =</span> <span class="fl">7.5</span>, <span class="at">east =</span> <span class="fl">8.5</span>,</span>
+<span id="cb376-9"><a href="gis.html#cb376-9" aria-hidden="true" tabindex="-1"></a>                                             <span class="at">north =</span> <span class="fl">51.1</span>, <span class="at">south =</span> <span class="fl">50.1</span>),</span>
+<span id="cb376-10"><a href="gis.html#cb376-10" aria-hidden="true" tabindex="-1"></a>                       <span class="at">temporal_extent =</span> <span class="fu">list</span>(<span class="st">"2021-01-01"</span>, <span class="st">"2021-01-31"</span>),</span>
+<span id="cb376-11"><a href="gis.html#cb376-11" aria-hidden="true" tabindex="-1"></a>                       <span class="at">bands=</span><span class="fu">list</span>(<span class="st">"B04"</span>,<span class="st">"B08"</span>))</span>
+<span id="cb376-12"><a href="gis.html#cb376-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb376-13"><a href="gis.html#cb376-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute NDVI vegetation index</span></span>
+<span id="cb376-14"><a href="gis.html#cb376-14" aria-hidden="true" tabindex="-1"></a>compute_ndvi <span class="ot">=</span> p<span class="sc">$</span><span class="fu">reduce_dimension</span>(<span class="at">data =</span> s2, <span class="at">dimension =</span> <span class="st">"bands"</span>,</span>
+<span id="cb376-15"><a href="gis.html#cb376-15" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">reducer =</span> <span class="cf">function</span>(data,context) {</span>
+<span id="cb376-16"><a href="gis.html#cb376-16" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">return</span>((data[<span class="dv">2</span>]<span class="sc">-</span>data[<span class="dv">1</span>])<span class="sc">/</span>(data[<span class="dv">2</span>]<span class="sc">+</span>data[<span class="dv">1</span>]))</span>
+<span id="cb376-17"><a href="gis.html#cb376-17" aria-hidden="true" tabindex="-1"></a>                                  })</span>
+<span id="cb376-18"><a href="gis.html#cb376-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute maximum over time</span></span>
+<span id="cb376-19"><a href="gis.html#cb376-19" aria-hidden="true" tabindex="-1"></a>reduce_max <span class="ot">=</span> p<span class="sc">$</span><span class="fu">reduce_dimension</span>(<span class="at">data=</span>compute_ndvi, <span class="at">dimension =</span> <span class="st">"t"</span>,</span>
+<span id="cb376-20"><a href="gis.html#cb376-20" aria-hidden="true" tabindex="-1"></a>                                <span class="at">reducer =</span> <span class="cf">function</span>(x,y) {<span class="fu">max</span>(x)})</span>
+<span id="cb376-21"><a href="gis.html#cb376-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Export as GeoTIFF</span></span>
+<span id="cb376-22"><a href="gis.html#cb376-22" aria-hidden="true" tabindex="-1"></a>result <span class="ot">=</span> p<span class="sc">$</span><span class="fu">save_result</span>(reduce_max, formats<span class="sc">$</span>output<span class="sc">$</span>GTiff)</span>
+<span id="cb376-23"><a href="gis.html#cb376-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Login, see https://docs.openeo.cloud/getting-started/r/#authentication</span></span>
+<span id="cb376-24"><a href="gis.html#cb376-24" aria-hidden="true" tabindex="-1"></a><span class="fu">login</span>(<span class="at">login_type =</span> <span class="st">"oidc"</span>,</span>
+<span id="cb376-25"><a href="gis.html#cb376-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">provider =</span> <span class="st">"egi"</span>,</span>
+<span id="cb376-26"><a href="gis.html#cb376-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">config =</span> <span class="fu">list</span>(</span>
+<span id="cb376-27"><a href="gis.html#cb376-27" aria-hidden="true" tabindex="-1"></a>        <span class="at">client_id=</span> <span class="st">"..."</span>,</span>
+<span id="cb376-28"><a href="gis.html#cb376-28" aria-hidden="true" tabindex="-1"></a>        <span class="at">secret =</span> <span class="st">"..."</span>))<span class="er">)</span></span>
+<span id="cb376-29"><a href="gis.html#cb376-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Execute processes</span></span>
+<span id="cb376-30"><a href="gis.html#cb376-30" aria-hidden="true" tabindex="-1"></a><span class="fu">compute_result</span>(<span class="at">graph =</span> result, <span class="at">output_file =</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".tif"</span>))</span></code></pre></div>
 </div>
 </div>
 <div id="exercises-8" class="section level2" number="10.7">
@@ -1014,7 +1004,7 @@ Additionally, give <code>mapview</code> a try.</p></li>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-05-14.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-05-15.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

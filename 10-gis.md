@@ -888,15 +888,10 @@ But the same is true for the lightweight SQLite/SpatiaLite database engine and G
 
 As a final note, if your data is getting too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, then the next logical step is to use large-scale geographic querying on distributed computing systems, as for example, provided by GeoMesa (http://www.geomesa.org/) or Apache Sedona [https://sedona.apache.org/; formermly known as GeoSpark - @huang_geospark_2017].
 
-
-
-
-
 ## Bridges to cloud technologies and services {#cloud}
 
-
-
 ### STAC, COGs, and data cubes in the cloud
+
 Major cloud computing providers (Amazon Web Services, Microsoft Azure / Planetary Computer, Google Cloud Platform, and others)\index{cloud computing} offer huge catalogs of open Earth observation data such as the complete Sentinel-2 archive on their platforms. 
 We can use R and directly connect to and process data from these archives, ideally from a machine in the same cloud and region.
 
@@ -912,7 +907,6 @@ The result contains all found images and their metadata (e.g. cloud cover) and U
 
 ```r
 library(rstac)
-
 # Connect to the STAC-API endpoint for Sentinel-2 data
 # and search for images intersecting our AOI
 s = stac("https://earth-search.aws.element84.com/v0")
@@ -937,19 +931,15 @@ The code below shows a minimal example to create a lower resolution (250m) maxim
 
 ```r
 library(gdalcubes)
-
 # Filter images from STAC response by cloud cover and create an image collection object
 collection = stac_image_collection(items$features, property_filter = function(x) {x[["eo:cloud_cover"]] < 10})
-
 # Define spatiotemporal extent, resolution (250m, daily) and CRS of the target data cube
 v = cube_view(srs = "EPSG:3857", extent = collection, dx = 250, dy = 250, dt = "P1D") # "P1D" is an ISO 8601 duration string
-
 # Create and process the data cube
 cube = raster_cube(collection, v) |>
   select_bands(c("B04", "B08")) |>
   apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
   reduce_time("max(NDVI)")
-
 # gdalcubes_options(parallel = 8)
 # plot(cube, zlim = c(0,1))
 ```
@@ -960,7 +950,6 @@ In this case, we ignore images with 10% or more cloud cover.
 
 The combination of STAC\index{STAC}, COGs\index{COG}, and data cubes\index{data cube} forms a cloud-native workflow to analyze (larger) collections of satellite imagery in the cloud\index{cloud computing}. 
 For more details, please refer to this [tutorial presented at OpenGeoHub summer school 2021](https://appelmar.github.io/ogh2021/tutorial.html).
-
 
 ### openEO
 
@@ -976,14 +965,12 @@ The following code will connect to the [openEO platform backend](https://openeo.
 The openEO\index{openEO} platform backend includes a free tier and registration is possible from existing institutional or social platform accounts. 
 
 
-
 ```r
 library(openeo)
 con = connect(host = "https://openeo.cloud")
 p = processes() # load available processes
 collections = list_collections() # load available collections
 formats = list_file_formats() # load available output formats
-
 # Load Sentinel-2 collection
 s2 = p$load_collection(id = "SENTINEL2_L2A",
                        spatial_extent = list(west = 7.5, east = 8.5,
@@ -996,21 +983,17 @@ compute_ndvi = p$reduce_dimension(data = s2, dimension = "bands",
                                   reducer = function(data,context) {
                                     return((data[2]-data[1])/(data[2]+data[1]))
                                   })
-
 # Compute maximum over time
 reduce_max = p$reduce_dimension(data=compute_ndvi, dimension = "t",
                                 reducer = function(x,y) {max(x)})
-
 # Export as GeoTIFF
 result = p$save_result(reduce_max, formats$output$GTiff)
-
 # Login, see https://docs.openeo.cloud/getting-started/r/#authentication
 login(login_type = "oidc",
       provider = "egi",
       config = list(
         client_id= "...",
         secret = "...")))
-
 # Execute processes
 compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 ```
