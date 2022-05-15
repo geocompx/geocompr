@@ -931,10 +931,13 @@ The code below shows a minimal example to create a lower resolution (250m) maxim
 
 ```r
 library(gdalcubes)
-# Filter images from STAC response by cloud cover and create an image collection object
-collection = stac_image_collection(items$features, property_filter = function(x) {x[["eo:cloud_cover"]] < 10})
-# Define spatiotemporal extent, resolution (250m, daily) and CRS of the target data cube
-v = cube_view(srs = "EPSG:3857", extent = collection, dx = 250, dy = 250, dt = "P1D") # "P1D" is an ISO 8601 duration string
+# Filter images from STAC response by cloud cover 
+# and create an image collection object
+collection = stac_image_collection(items$features, 
+                  property_filter = function(x) {x[["eo:cloud_cover"]] < 10})
+# Define extent, resolution (250m, daily) and CRS of the target data cube
+v = cube_view(srs = "EPSG:3857", extent = collection, dx = 250, dy = 250,
+              dt = "P1D") # "P1D" is an ISO 8601 duration string
 # Create and process the data cube
 cube = raster_cube(collection, v) |>
   select_bands(c("B04", "B08")) |>
