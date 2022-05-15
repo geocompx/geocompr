@@ -882,36 +882,36 @@ Since the functionality and data availability differs among the backends, the <s
 Afterwards, users can load image collections, apply and chain processes, submit jobs, and explore and plot results.</p>
 <p>The following code will connect to the <a href="https://openeo.cloud/">openEO platform backend</a>, request available datasets, processes, and output formats, define a process graph to compute a maximum NDVI image from Sentinel-2 data, and finally executes the graph after logging in to the backend.
 The openEO platform backend includes a free tier and registration is possible from existing institutional or social platform accounts.</p>
-<div class="sourceCode" id="cb376"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb376-1"><a href="gis.html#cb376-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(openeo)</span>
-<span id="cb376-2"><a href="gis.html#cb376-2" aria-hidden="true" tabindex="-1"></a>con <span class="ot">=</span> <span class="fu">connect</span>(<span class="at">host =</span> <span class="st">"https://openeo.cloud"</span>)</span>
-<span id="cb376-3"><a href="gis.html#cb376-3" aria-hidden="true" tabindex="-1"></a>p <span class="ot">=</span> <span class="fu">processes</span>() <span class="co"># load available processes</span></span>
-<span id="cb376-4"><a href="gis.html#cb376-4" aria-hidden="true" tabindex="-1"></a>collections <span class="ot">=</span> <span class="fu">list_collections</span>() <span class="co"># load available collections</span></span>
-<span id="cb376-5"><a href="gis.html#cb376-5" aria-hidden="true" tabindex="-1"></a>formats <span class="ot">=</span> <span class="fu">list_file_formats</span>() <span class="co"># load available output formats</span></span>
-<span id="cb376-6"><a href="gis.html#cb376-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Load Sentinel-2 collection</span></span>
-<span id="cb376-7"><a href="gis.html#cb376-7" aria-hidden="true" tabindex="-1"></a>s2 <span class="ot">=</span> p<span class="sc">$</span><span class="fu">load_collection</span>(<span class="at">id =</span> <span class="st">"SENTINEL2_L2A"</span>,</span>
-<span id="cb376-8"><a href="gis.html#cb376-8" aria-hidden="true" tabindex="-1"></a>                       <span class="at">spatial_extent =</span> <span class="fu">list</span>(<span class="at">west =</span> <span class="fl">7.5</span>, <span class="at">east =</span> <span class="fl">8.5</span>,</span>
-<span id="cb376-9"><a href="gis.html#cb376-9" aria-hidden="true" tabindex="-1"></a>                                             <span class="at">north =</span> <span class="fl">51.1</span>, <span class="at">south =</span> <span class="fl">50.1</span>),</span>
-<span id="cb376-10"><a href="gis.html#cb376-10" aria-hidden="true" tabindex="-1"></a>                       <span class="at">temporal_extent =</span> <span class="fu">list</span>(<span class="st">"2021-01-01"</span>, <span class="st">"2021-01-31"</span>),</span>
-<span id="cb376-11"><a href="gis.html#cb376-11" aria-hidden="true" tabindex="-1"></a>                       <span class="at">bands=</span><span class="fu">list</span>(<span class="st">"B04"</span>,<span class="st">"B08"</span>))</span>
-<span id="cb376-12"><a href="gis.html#cb376-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb376-13"><a href="gis.html#cb376-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute NDVI vegetation index</span></span>
-<span id="cb376-14"><a href="gis.html#cb376-14" aria-hidden="true" tabindex="-1"></a>compute_ndvi <span class="ot">=</span> p<span class="sc">$</span><span class="fu">reduce_dimension</span>(<span class="at">data =</span> s2, <span class="at">dimension =</span> <span class="st">"bands"</span>,</span>
-<span id="cb376-15"><a href="gis.html#cb376-15" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">reducer =</span> <span class="cf">function</span>(data,context) {</span>
-<span id="cb376-16"><a href="gis.html#cb376-16" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">return</span>((data[<span class="dv">2</span>]<span class="sc">-</span>data[<span class="dv">1</span>])<span class="sc">/</span>(data[<span class="dv">2</span>]<span class="sc">+</span>data[<span class="dv">1</span>]))</span>
-<span id="cb376-17"><a href="gis.html#cb376-17" aria-hidden="true" tabindex="-1"></a>                                  })</span>
-<span id="cb376-18"><a href="gis.html#cb376-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute maximum over time</span></span>
-<span id="cb376-19"><a href="gis.html#cb376-19" aria-hidden="true" tabindex="-1"></a>reduce_max <span class="ot">=</span> p<span class="sc">$</span><span class="fu">reduce_dimension</span>(<span class="at">data=</span>compute_ndvi, <span class="at">dimension =</span> <span class="st">"t"</span>,</span>
-<span id="cb376-20"><a href="gis.html#cb376-20" aria-hidden="true" tabindex="-1"></a>                                <span class="at">reducer =</span> <span class="cf">function</span>(x,y) {<span class="fu">max</span>(x)})</span>
-<span id="cb376-21"><a href="gis.html#cb376-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Export as GeoTIFF</span></span>
-<span id="cb376-22"><a href="gis.html#cb376-22" aria-hidden="true" tabindex="-1"></a>result <span class="ot">=</span> p<span class="sc">$</span><span class="fu">save_result</span>(reduce_max, formats<span class="sc">$</span>output<span class="sc">$</span>GTiff)</span>
-<span id="cb376-23"><a href="gis.html#cb376-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Login, see https://docs.openeo.cloud/getting-started/r/#authentication</span></span>
-<span id="cb376-24"><a href="gis.html#cb376-24" aria-hidden="true" tabindex="-1"></a><span class="fu">login</span>(<span class="at">login_type =</span> <span class="st">"oidc"</span>,</span>
-<span id="cb376-25"><a href="gis.html#cb376-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">provider =</span> <span class="st">"egi"</span>,</span>
-<span id="cb376-26"><a href="gis.html#cb376-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">config =</span> <span class="fu">list</span>(</span>
-<span id="cb376-27"><a href="gis.html#cb376-27" aria-hidden="true" tabindex="-1"></a>        <span class="at">client_id=</span> <span class="st">"..."</span>,</span>
-<span id="cb376-28"><a href="gis.html#cb376-28" aria-hidden="true" tabindex="-1"></a>        <span class="at">secret =</span> <span class="st">"..."</span>))<span class="er">)</span></span>
-<span id="cb376-29"><a href="gis.html#cb376-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Execute processes</span></span>
-<span id="cb376-30"><a href="gis.html#cb376-30" aria-hidden="true" tabindex="-1"></a><span class="fu">compute_result</span>(<span class="at">graph =</span> result, <span class="at">output_file =</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".tif"</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb376"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Open-EO/openeo-r-client">openeo</a></span><span class="op">)</span>
+<span class="va">con</span> <span class="op">=</span> <span class="fu">connect</span><span class="op">(</span>host <span class="op">=</span> <span class="st">"https://openeo.cloud"</span><span class="op">)</span>
+<span class="va">p</span> <span class="op">=</span> <span class="fu">processes</span><span class="op">(</span><span class="op">)</span> <span class="co"># load available processes</span>
+<span class="va">collections</span> <span class="op">=</span> <span class="fu">list_collections</span><span class="op">(</span><span class="op">)</span> <span class="co"># load available collections</span>
+<span class="va">formats</span> <span class="op">=</span> <span class="fu">list_file_formats</span><span class="op">(</span><span class="op">)</span> <span class="co"># load available output formats</span>
+<span class="co"># Load Sentinel-2 collection</span>
+<span class="va">s2</span> <span class="op">=</span> <span class="va">p</span><span class="op">$</span><span class="fu">load_collection</span><span class="op">(</span>id <span class="op">=</span> <span class="st">"SENTINEL2_L2A"</span>,
+                       spatial_extent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>west <span class="op">=</span> <span class="fl">7.5</span>, east <span class="op">=</span> <span class="fl">8.5</span>,
+                                             north <span class="op">=</span> <span class="fl">51.1</span>, south <span class="op">=</span> <span class="fl">50.1</span><span class="op">)</span>,
+                       temporal_extent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"2021-01-01"</span>, <span class="st">"2021-01-31"</span><span class="op">)</span>,
+                       bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"B04"</span>,<span class="st">"B08"</span><span class="op">)</span><span class="op">)</span> 
+<span class="co"># Compute NDVI vegetation index</span>
+<span class="va">compute_ndvi</span> <span class="op">=</span> <span class="va">p</span><span class="op">$</span><span class="fu">reduce_dimension</span><span class="op">(</span>data <span class="op">=</span> <span class="va">s2</span>, dimension <span class="op">=</span> <span class="st">"bands"</span>,
+                                  reducer <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">context</span><span class="op">)</span> <span class="op">{</span>
+                                    <span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">-</span> <span class="va">data</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">data</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">+</span> <span class="va">data</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>
+                                  <span class="op">}</span><span class="op">)</span>
+<span class="co"># Compute maximum over time</span>
+<span class="va">reduce_max</span> <span class="op">=</span> <span class="va">p</span><span class="op">$</span><span class="fu">reduce_dimension</span><span class="op">(</span>data <span class="op">=</span> <span class="va">compute_ndvi</span>, dimension <span class="op">=</span> <span class="st">"t"</span>,
+                                reducer <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span> <span class="op">{</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">}</span><span class="op">)</span>
+<span class="co"># Export as GeoTIFF</span>
+<span class="va">result</span> <span class="op">=</span> <span class="va">p</span><span class="op">$</span><span class="fu">save_result</span><span class="op">(</span><span class="va">reduce_max</span>, <span class="va">formats</span><span class="op">$</span><span class="va">output</span><span class="op">$</span><span class="va">GTiff</span><span class="op">)</span>
+<span class="co"># Login, see https://docs.openeo.cloud/getting-started/r/#authentication</span>
+<span class="fu">login</span><span class="op">(</span>login_type <span class="op">=</span> <span class="st">"oidc"</span>,
+      provider <span class="op">=</span> <span class="st">"egi"</span>,
+      config <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>
+        client_id<span class="op">=</span> <span class="st">"..."</span>,
+        secret <span class="op">=</span> <span class="st">"..."</span><span class="op">)</span><span class="op">)</span>
+<span class="co"># Execute processes</span>
+<span class="fu">compute_result</span><span class="op">(</span>graph <span class="op">=</span> <span class="va">result</span>, output_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".tif"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 </div>
 </div>
 <div id="exercises-8" class="section level2" number="10.7">

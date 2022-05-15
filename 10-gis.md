@@ -979,16 +979,15 @@ s2 = p$load_collection(id = "SENTINEL2_L2A",
                        spatial_extent = list(west = 7.5, east = 8.5,
                                              north = 51.1, south = 50.1),
                        temporal_extent = list("2021-01-01", "2021-01-31"),
-                       bands=list("B04","B08"))
-
+                       bands = list("B04","B08")) 
 # Compute NDVI vegetation index
 compute_ndvi = p$reduce_dimension(data = s2, dimension = "bands",
-                                  reducer = function(data,context) {
-                                    return((data[2]-data[1])/(data[2]+data[1]))
+                                  reducer = function(data, context) {
+                                    (data[2] - data[1]) / (data[2] + data[1])
                                   })
 # Compute maximum over time
-reduce_max = p$reduce_dimension(data=compute_ndvi, dimension = "t",
-                                reducer = function(x,y) {max(x)})
+reduce_max = p$reduce_dimension(data = compute_ndvi, dimension = "t",
+                                reducer = function(x, y) {max(x)})
 # Export as GeoTIFF
 result = p$save_result(reduce_max, formats$output$GTiff)
 # Login, see https://docs.openeo.cloud/getting-started/r/#authentication
@@ -996,7 +995,7 @@ login(login_type = "oidc",
       provider = "egi",
       config = list(
         client_id= "...",
-        secret = "...")))
+        secret = "..."))
 # Execute processes
 compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 ```
