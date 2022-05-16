@@ -318,7 +318,7 @@ It was followed by the **ggmap** package that added similar 'basemap' tiles capa
 Though **ggmap** facilitated map-making with **ggplot2**, its utility was limited by the need to `fortify` spatial objects, which means converting them into long data frames.
 While this works well for points it is computationally inefficient for lines and polygons, since each coordinate (vertex) is converted into a row, leading to huge data frames to represent complex geometries.
 Although geographic visualization tended to focus on vector data, raster visualization is supported in **raster** and received a boost with the release of **rasterVis**, which is described in a book on the subject of spatial and temporal data visualization [@lamigueiro_displaying_2018].
-As of 2018 map making in R is a hot topic with dedicated packages such as **tmap**, **leaflet** and **mapview** all supporting the class system provided by **sf**, the focus of the next chapter (see Chapter \@ref(adv-map) for more on visualization).
+Since then map making in R has become a hot topic, with dedicated packages such as **tmap**, **leaflet**, **rayshader** and **mapview** gaining popularity, as highlighted in Chapter \@ref(adv-map).
 
 Since 2018, a movement of modernizing basic R packages related to handling spatial data has continued. 
 \index{terra (package)}
