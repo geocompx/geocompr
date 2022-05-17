@@ -38,8 +38,11 @@ install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
 These operating systems (OSs) have 'systems requirements' that are described in the package's [README](https://github.com/r-spatial/sf).
 Various OS-specific instructions can be found online, such as the article *Installation of R 4.0 on Ubuntu 20.04* on the blog [rtask.thinkr.fr](https://rtask.thinkr.fr/installation-of-r-4-0-on-ubuntu-20-04-lts-and-tips-for-spatial-packages/).</div>\EndKnitrBlock{rmdnote}
 
-All the packages needed to reproduce the contents of the book can be installed with the following command: `remotes::install_github("geocompr/geocompkg")`.
-The necessary packages can be 'loaded' (technically they are attached) with the `library()` function as follows:
+The packages needed to reproduce Part 1 of this book can be installed with the following command: `remotes::install_github("geocompr/geocompkg")`.
+This command uses the function `install_packages()` from the **remotes** package to install source code hosted on the GitHub code hosting, version and collaboration platform.
+The following command will install **all** dependencies required to reproduce the entire book (warning: this may take several minutes): `remotes::install_github("geocompr/geocompkg", dependencies = TRUE)`
+
+The packages needed to run the code presented in this chapter can be 'loaded' (technically they are attached) with the `library()` function as follows:
 
 
 ```r
