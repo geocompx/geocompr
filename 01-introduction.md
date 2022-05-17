@@ -53,8 +53,9 @@ Our approach differs from early adopters such as Stan Openshaw, however, in its 
 At the turn of the 21^st^ Century, it was unrealistic to expect readers to be able to reproduce code examples, due to barriers preventing access to the necessary hardware, software and data.
 Fast-forward two decades and things have progressed rapidly.
 Anyone with access to a laptop with ~4GB RAM can realistically expect to be able to install and run software for geocomputation on publicly accessible datasets, which are more widely available than ever before (as we will see in Chapter \@ref(read-write)).^[
-A laptop with 4GB running a modern operating system such as Ubuntu 16.04 onward should also be able to reproduce the contents of this book.
-A laptop with this specification or above can be acquired second-hand for ~US$100 in many countries nowadays, reducing the financial/hardware barrier to geocomputation far below the levels in operation in the early 2000s, when high-performance computers were unaffordable for most people.
+A laptop with 4GB running a modern operating system such as Ubuntu 22.04 onward should also be able to reproduce the contents of this book.
+A laptop with this specification or above can be acquired second-hand for ~US$100 in most countries today.
+Financial and hardware barriers to geocomputation that existed in 1990s and early 2000s, when high-performance computers were unaffordable for most people, have now been removed.
 ]
 Unlike early works in the field, all the work presented in this book is reproducible using code and example data supplied alongside the book, in R\index{R} packages such as **spData**, the installation of which is covered in Chapter \@ref(spatial-class).
 
@@ -367,9 +368,7 @@ E1. Think about the terms 'GIS'\index{GIS}, 'GDS' and 'geocomputation' described
 
 E2. Provide three reasons for using a scriptable language such as R for geocomputation instead of using a graphical user interface (GUI) based GIS such as QGIS\index{QGIS}.
 
-E3. Think about a real world problem you would like to solve with geographic data that could help people living in your local area and sketch a map of the geographic processes involved.
-
-E4. Consider the datasets needed to represent the problem computationally and sketch a workflow for processing them, resulting in outputs that could help inform decision making related to the problem you thought of in the previous exercise. Use a pen and paper or a digital sketching tool such as Excalidraw.
+E3. In the year 2000 Stan Openshaw wrote that geocomputation involved "practical work that is beneficial or useful" to others. Think about a practical problem and possible solutions that could be informed with new evidence derived from the analysis, visualisation or modelling of geographic data. With a pen and paper (or computational equivalent) sketch inputs and possible outputs illustrating how geocomputation could help.
 
 <!--toDo: rl -->
 <!--add solutions!-->
