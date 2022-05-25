@@ -352,7 +352,7 @@ Plots are added as layers to existing images by setting `add = TRUE`.^[
 `plot()`ing of **sf** objects uses `sf:::plot.sf()` behind the scenes.
 `plot()` is a generic method that behaves differently depending on the class of object being plotted.
 ]
-To demonstrate this, and to provide a taster of content covered in Chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, the subsequent code chunk combines countries in Asia:
+To demonstrate this, and to provide a insight into the contents of Chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, the subsequent code chunk filters countries in Asia and combines them into a single feature:
 
 
 ```r
