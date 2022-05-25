@@ -402,13 +402,16 @@ The code above uses the function `st_centroid()` to convert one geometry type (p
 \index{bounding box}
 **sf**'s plot method also has arguments specific to geographic data. `expandBB`, for example, can be used to plot an `sf` object in context:
 it takes a numeric vector of length four that expands the bounding box of the plot relative to zero in the following order: bottom, left, top, right.
-This is used to plot India in the context of its giant Asian neighbors, with an emphasis on China to the east, in the following code chunk, which generates Figure \@ref(fig:china) (see exercises below on adding text to plots):
+This is used to plot India in the context of its giant Asian neighbors, with an emphasis on China to the east, in the following code chunk, which generates Figure \@ref(fig:china) (see exercises below on adding text to plots):^[
+Note the use of `st_geometry(india)` to return only the geometry associated with the object to prevent attributes being plotted in a simple feature column (`sfc`) object.
+An alternative is to use `india[0]`, which returns an `sf` object that contains no attribute data..
+]
 
 
 ```r
 india = world[world$name_long == "India", ]
 plot(st_geometry(india), expandBB = c(0, 0.2, 0.1, 1), col = "gray", lwd = 3)
-plot(world_asia[0], add = TRUE)
+plot(st_geometry(world_asia), add = TRUE)
 ```
 
 <div class="figure" style="text-align: center">
@@ -416,7 +419,9 @@ plot(world_asia[0], add = TRUE)
 <p class="caption">(\#fig:china)India in context, demonstrating the expandBB argument.</p>
 </div>
 
-Note the use of `[0]` to keep only the geometry column and `lwd` to emphasize India.
+
+
+Note the use of `lwd` to emphasize India in the plotting code.
 See Section \@ref(other-mapping-packages) for other visualization techniques for representing a range of geometry types, the subject of the next section.
 
 ### Geometry types {#geometry}
