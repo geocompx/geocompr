@@ -787,7 +787,7 @@ When **sf** is loaded (as is the case here), the result of the above command is 
 
 
 ```r
-v_sfg_sf = st_point(v, c(1, 2))
+v_sfg_sf = st_point(v)
 print(v_sfg_sf) == print(v_sfg_sfh)
 #> POINT (1 1)
 #> POINT (1 1)
