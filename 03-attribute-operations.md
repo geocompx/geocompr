@@ -293,7 +293,7 @@ world7 = world %>%
 
 The above chunk shows how the pipe operator allows commands to be written in a clear order:
 the above run from top to bottom (line-by-line) and left to right.
-A alternative to piped operations is nested function calls, which are harder to read:
+An alternative to piped operations is nested function calls, which are harder to read:
 
 
 ```r
