@@ -84,7 +84,7 @@ This enables geometries imported from spatial databases to have a variety of nam
 \index{tidyverse (package)}.
 Thus **sf** enables the full power of R's data analysis capabilities to be unleashed on geographic data, whether you use base R or tidyverse functions for data analysis.
 \index{tibble}
-(See [`Rdatatable/data.table#2273`](https://github.com/Rdatatable/data.table/issues/2273) for discussion of compatibility between `sf` objects and the fast `data.table` package.)
+**sf** objects can also be used with the high-performance data processing package **data.table** although, as documented in the issue [`Rdatatable/data.table#2273`](https://github.com/Rdatatable/data.table/issues/2273), is not fully [compatible](https://github.com/Rdatatable/data.table/issues/5352) with `sf` objects.
 Before using these capabilities it is worth re-capping how to discover the basic properties of vector data objects.
 Let's start by using base R functions to learn about the `world` dataset from the **spData** package:
 
@@ -531,11 +531,8 @@ The geometry column can only be used for creating maps and spatial operations if
 Fortunately, non-spatial data frames with a geometry list column (like `coffee_world`) can be coerced into an `sf` object as follows: `st_as_sf(coffee_world)`. </div>\EndKnitrBlock{rmdnote}
 
 This section covers the majority of joining use cases.
-For more information, we recommend @grolemund_r_2016, the [join vignette](https://geocompr.github.io/geocompkg/articles/join.html) in the **geocompkg** package that accompanies this book, and documentation of the **data.table** package.^[
-**data.table** is a high-performance data processing package.
-Its application to geographic data is covered in a blog post hosted at r-spatial.org/r/2017/11/13/perp-performance.html.
-]
-Another type of join is a spatial join, covered in the next chapter (Section \@ref(spatial-joining)).
+For more information, we recommend reading the chapter [Relational data](https://r4ds.had.co.nz/relational-data.html?q=join#relational-data) in @grolemund_r_2016, the [join vignette](https://geocompr.github.io/geocompkg/articles/join.html) in the **geocompkg** package that accompanies this book, and [documentation](https://asardaes.github.io/table.express/articles/joins.html) describing joins with **data.table** and other packages.
+Spatial joins are covered in the next chapter (Section \@ref(spatial-joining)).
 
 ### Creating attributes and removing spatial information {#vec-attr-creation}
 
