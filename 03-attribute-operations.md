@@ -366,10 +366,10 @@ This flexibility is illustrated in the command below, which calculates not only 
 ```r
 world_agg4  = world %>% 
   group_by(continent) %>%
-  summarize(pop = sum(pop, na.rm = TRUE), `area (sqkm)` = sum(area_km2), n = n())
+  summarize(pop = sum(pop, na.rm = TRUE), `area_sqkm` = sum(area_km2), n = n())
 ```
 
-In the previous code chunk `pop`, `area (sqkm)` and `n` are column names in the result, and `sum()` and `n()` were the aggregating functions.
+In the previous code chunk `pop`, `area_sqkm` and `n` are column names in the result, and `sum()` and `n()` were the aggregating functions.
 These aggregating functions return `sf` objects with rows representing continents and geometries containing the multiple polygons representing each land mass and associated islands (this works thanks to the geometric operation 'union', as explained in Section \@ref(geometry-unions)).
 
 Let's combine what we have learned so far about **dplyr** functions, by chaining multiple commands to summarize attribute data about countries worldwide by continent.
