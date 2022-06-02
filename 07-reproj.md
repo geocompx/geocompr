@@ -540,7 +540,7 @@ st_distance(london2, london_proj)
 #> [1,] 2018
 ```
 
-This is demonstrated below with reference to `cycle_hire_osm`, an `sf` object from **spData** that represents 'docking stations' where you can hire bicycles in London.
+Functions for querying and reprojecting CRSs are demonstrated below with reference to `cycle_hire_osm`, an `sf` object from **spData** that represents 'docking stations' where you can hire bicycles in London.
 The CRS of `sf` objects can be queried --- and as we learned in Section \@ref(reproj-intro) set --- with the function `st_crs()`.
 The output is printed as multiple lines of text containing information about the coordinate system:
 
