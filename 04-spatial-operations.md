@@ -558,8 +558,8 @@ This is implemented in `st_interpolate_aw()`, as demonstrated in the code chunk 
 
 ```r
 iv = incongruent["value"] # keep only the values to be transferred
-agg_aw = st_interpolate_aw(iv, aggregating_zones, ext = TRUE)
-#> Warning in st_interpolate_aw.sf(iv, aggregating_zones, ext = TRUE):
+agg_aw = st_interpolate_aw(iv, aggregating_zones, extensive = TRUE)
+#> Warning in st_interpolate_aw.sf(iv, aggregating_zones, extensive = TRUE):
 #> st_interpolate_aw assumes attributes are constant or uniform over areas of x
 agg_aw$value
 #> [1] 19.6 25.7
