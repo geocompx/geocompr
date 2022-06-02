@@ -283,7 +283,7 @@ The <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> func
 <span class="co">#&gt;             ANGLEUNIT["degree",0.0174532925199433]],</span>
 <span class="co">#&gt;     ID["EPSG",4326]]</span></code></pre></div>
 <p>The output is the WKT representation of CRS.
-The same function, <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code>, is can be also used to set a CRS for raster objects.</p>
+The same function, <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code>, can be also used to set a CRS for raster objects.</p>
 <div class="sourceCode" id="cb229"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span> <span class="op">=</span> <span class="st">"EPSG:26912"</span> <span class="co"># set CRS</span></code></pre></div>
 <p>Here, we can use either the identifier (recommended in most cases) or complete WKT representation.
@@ -373,14 +373,17 @@ We can verify that the CRS has changed using <code><a href="https://r-spatial.gi
 <span class="co">#&gt;   User input: EPSG:27700 </span>
 <span class="co">#&gt;   wkt:</span>
 <span class="co">#&gt; PROJCRS["OSGB36 / British National Grid",</span>
+<span class="co">#&gt;     BASEGEOGCRS["OSGB36",</span>
+<span class="co">#&gt;         DATUM["Ordnance Survey of Great Britain 1936",</span>
+<span class="co">#&gt;             ELLIPSOID["Airy 1830",6377563.396,299.3249646,</span>
+<span class="co">#&gt;                 LENGTHUNIT["metre",1]]],</span>
 <span class="co">#&gt; ...</span></code></pre></div>
-<!--toDo:rl-->
-<!-- jn: the next paragraph need to be updated! -->
-<p>Notable components of this CRS description include the EPSG code (<code>EPSG: 27700</code>), the projection (<a href="https://en.wikipedia.org/wiki/Transverse_Mercator_projection">transverse Mercator</a>, <code>+proj=tmerc</code>), the origin (<code>+lat_0=49 +lon_0=-2</code>) and units (<code>+units=m</code>).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
+<p>Notable components of this CRS description include the EPSG code (<code>EPSG: 27700</code>) and the detailed <code>wkt</code> string (only the first 5 lines of which are shown).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
 For a short description of the most relevant projection parameters and related concepts, see the fourth lecture by Jochen Albrecht hosted at
 &lt;a href="http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/" class="uri"&gt;http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/&lt;/a&gt; and information at &lt;a href="https://proj.org/usage/projections.html" class="uri"&gt;https://proj.org/usage/projections.html&lt;/a&gt;.
 Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj.&lt;/p&gt;'><sup>28</sup></a>
-The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: <code>st_is_longlat(london_proj)</code> now returns <code>FALSE</code> and geometry operations on <code>london_proj</code> will work without a warning, meaning buffers can be produced from it using proper units of distance.
+The fact that the units of the CRS, described in the LENGTHUNIT field, are meters (rather than degrees) tells us that this is a projected CRS: <code>st_is_longlat(london_proj)</code> now returns <code>FALSE</code> and geometry operations on <code>london_proj</code> will work without a warning.
+Buffers operations on the <code>london_proj</code> will use GEOS and results will returned with proper units of distance.
 The following line of code creates a buffer around <em>projected</em> data of exactly 100 km:</p>
 <div class="sourceCode" id="cb236"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">london_buff_projected</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_proj</span>, <span class="fl">1e5</span><span class="op">)</span></code></pre></div>
@@ -681,7 +684,8 @@ This is demonstrated below with <code>srtm.tif</code> in <strong>spDataLarge</st
 <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">con_raster</span><span class="op">)</span>
 <span class="co">#&gt; [1] "GEOGCRS[\"WGS 84\",\n    DATUM[\"World Geodetic System 1984\",\n        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n            LENGTHUNIT[\"metre\",1]]],\n    PRIMEM[\"Greenwich\",0,\n        ANGLEUNIT[\"degree\",0.0174532925199433]],\n    CS[ellipsoidal,2],\n        AXIS[\"geodetic latitude (Lat)\",north,\n            ORDER[1],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        AXIS[\"geodetic longitude (Lon)\",east,\n            ORDER[2],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n    ID[\"EPSG\",4326]]"</span></code></pre></div>
 <p>We will reproject this dataset into a projected CRS, but <em>not</em> with the nearest neighbor method which is appropriate for categorical data.
-Instead, we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;Other methods mentioned in Section &lt;a href="geometric-operations.html#resampling"&gt;5.3.4&lt;/a&gt; also can be used here.&lt;/p&gt;'><sup>32</sup></a>
+Instead, we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
+Other methods mentioned in Section &lt;a href="geometric-operations.html#resampling"&gt;5.3.4&lt;/a&gt; also can be used here.&lt;/p&gt;'><sup>32</sup></a>
 The values in the projected dataset are the distance-weighted average of the values from these four cells:
 the closer the input cell is to the center of the output cell, the greater its weight.
 The following commands create a text string representing WGS 84 / UTM zone 12N, and reproject the raster into this CRS, using the <code>bilinear</code> method:</p>
