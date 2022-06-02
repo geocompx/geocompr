@@ -27,11 +27,6 @@ Often the extent of input raster datasets is larger than the area of interest.
 In this case raster **cropping** and **masking** are useful for unifying the spatial extent of input data.
 Both operations reduce object memory use and associated computational resources for subsequent analysis steps, and may be a necessary preprocessing step before creating attractive maps involving raster data.
 
-<!--jn:toDo-->
-<!-- two possibilities: -->
-<!-- 1. explain the need of the use of `vect()` -->
-<!-- 2. wait for https://github.com/rspatial/terra/issues/89 -->
-
 We will use two objects to illustrate raster cropping:
 
 - A `SpatRaster` object `srtm` representing elevation (meters above sea level) in south-western Utah
@@ -47,12 +42,14 @@ zion = read_sf(system.file("vector/zion.gpkg", package = "spDataLarge"))
 zion = st_transform(zion, crs(srtm))
 ```
 
-We will use `crop()` from the **terra** package to crop the `srtm` raster.
-It reduces the rectangular extent of the object passed to its first argument based on the extent of the object passed to its second argument, as demonstrated in the command below (which generates Figure \@ref(fig:cropmask)(B) --- note the smaller extent of the raster background):
+We use `crop()` from the **terra** package to crop the `srtm` raster.
+The function reduces the rectangular extent of the object passed to its first argument based on the extent of the object passed to its second argument.
+This functionality is demonstrated in the command below, which generates Figure \@ref(fig:cropmask)(B) (note the use of the **terra** function `vect()` to convert the `sf` object `zion` into `zion_vect` which contains the same data but stored in **terra**'s `SpatVector` class for geographic vector data):
 
 
 ```r
-srtm_cropped = crop(srtm, vect(zion))
+zion_vect = vect(zion)
+srtm_cropped = crop(srtm, zion_vect)
 ```
 
 \index{raster-vector!raster masking} 
@@ -61,7 +58,7 @@ The following command therefore masks every cell outside of the Zion National Pa
 
 
 ```r
-srtm_masked = mask(srtm, vect(zion))
+srtm_masked = mask(srtm, zion_vect)
 ```
 
 Importantly, we want to use both `crop()` and `mask()` together in most cases. 
@@ -69,8 +66,8 @@ This combination of functions would (a) limit the raster's extent to our area of
 
 
 ```r
-srtm_cropped = crop(srtm, vect(zion))
-srtm_final = mask(srtm_cropped, vect(zion))
+srtm_cropped = crop(srtm, zion_vect)
+srtm_final = mask(srtm_cropped, zion_vect)
 ```
 
 Changing the settings of `mask()` yields different results.
@@ -79,7 +76,7 @@ Setting `inverse = TRUE` will mask everything *inside* the bounds of the park (s
 
 
 ```r
-srtm_inv_masked = mask(srtm, vect(zion), inverse = TRUE)
+srtm_inv_masked = mask(srtm, zion_vect, inverse = TRUE)
 ```
 
 <div class="figure" style="text-align: center">
@@ -181,7 +178,7 @@ This is demonstrated in the command below, which results in a data frame with co
 
 
 ```r
-zion_srtm_values = terra::extract(x = srtm, y = vect(zion))
+zion_srtm_values = terra::extract(x = srtm, y = zion_vect)
 ```
 
 Such results can be used to generate summary statistics for raster values per polygon, for example to characterize a single region or to compare many regions.
