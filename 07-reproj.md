@@ -562,11 +562,14 @@ st_crs(cycle_hire_osm)
 #>     AUTHORITY["EPSG","4326"]]
 ```
 
-As we saw in Section \@ref(crs-setting), the main CRS components, `User input` and `wkt`, are printed as a single entity, the output of `st_crs()` is in fact a named list of class `crs` with two elements, single character strings named `input` and `wkt`:
+As we saw in Section \@ref(crs-setting), the main CRS components, `User input` and `wkt`, are printed as a single entity, the output of `st_crs()` is in fact a named list of class `crs` with two elements, single character strings named `input` and `wkt`, as shown in the output of the following code chunk:
 
 
-```
+```r
+crs_lnd = st_crs(london_geo)
+class(crs_lnd)
 #> [1] "crs"
+names(crs_lnd)
 #> [1] "input" "wkt"
 ```
 

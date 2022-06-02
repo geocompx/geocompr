@@ -952,7 +952,7 @@ E1. List and describe three types of vector, raster, and geodatabase formats.
 
 
 
-E2. Name at least two differences between `read_sf()` and the more well-known function `st_read()`.
+E2. Name at least two differences between the **sf** functions `read_sf()` and `st_read()`.
 
 
 
