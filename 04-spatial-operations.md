@@ -273,6 +273,7 @@ You can learn more at https://www.r-spatial.org/r/2017/06/22/spatial-index.html.
 ### DE-9IM strings
 
 Underlying the binary predicates demonstrated in the previous section is the Dimensionally Extended 9-Intersection Model (DE-9IM).
+As the cryptic name suggests, this is not an easy topic, but may be worth learning to better understand spatial relationships and, potentially, to create your own spatial predicates.
 The model was originally labelled "DE + 9IM" by its inventors, referring to the "dimension of the intersections of boundaries, interiors, and exteriors of two features" [@clementini_comparison_1995], but is now referred to as DE-9IM [@shen_classification_2018].
 <!-- The model's workings can be demonstrated with reference to two intersecting polygons, as illustrated in Figure \@ref(fig:de-9im). -->
 
