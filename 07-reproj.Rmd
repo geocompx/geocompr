@@ -291,17 +291,20 @@ st_crs(london_proj)
 #>   User input: EPSG:27700 
 #>   wkt:
 #> PROJCRS["OSGB36 / British National Grid",
+#>     BASEGEOGCRS["OSGB36",
+#>         DATUM["Ordnance Survey of Great Britain 1936",
+#>             ELLIPSOID["Airy 1830",6377563.396,299.3249646,
+#>                 LENGTHUNIT["metre",1]]],
 #> ...
 ```
 
-<!--toDo:rl-->
-<!-- jn: the next paragraph need to be updated! -->
-Notable components of this CRS description include the EPSG code (`EPSG: 27700`), the projection ([transverse Mercator](https://en.wikipedia.org/wiki/Transverse_Mercator_projection), `+proj=tmerc`), the origin (`+lat_0=49 +lon_0=-2`) and units (`+units=m`).^[
+Notable components of this CRS description include the EPSG code (`EPSG: 27700`) and the detailed `wkt` string (only the first 5 lines of which are shown).^[
 For a short description of the most relevant projection parameters and related concepts, see the fourth lecture by Jochen Albrecht hosted at
 http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/ and information at https://proj.org/usage/projections.html.
 Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj.
 ]
-The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: `st_is_longlat(london_proj)` now returns `FALSE` and geometry operations on `london_proj` will work without a warning, meaning buffers can be produced from it using proper units of distance.
+The fact that the units of the CRS, described in the LENGTHUNIT field, are meters (rather than degrees) tells us that this is a projected CRS: `st_is_longlat(london_proj)` now returns `FALSE` and geometry operations on `london_proj` will work without a warning.
+Buffers operations on the `london_proj` will use GEOS and results will returned with proper units of distance.
 The following line of code creates a buffer around *projected* data of exactly 100 km:
 
 ```{r 06-reproj-8}
@@ -697,7 +700,9 @@ crs(con_raster)
 ```
 
 We will reproject this dataset into a projected CRS, but *not* with the nearest neighbor method which is appropriate for categorical data.
-Instead, we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster.^[Other methods mentioned in Section \@ref(resampling) also can be used here.]
+Instead, we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster.^[
+Other methods mentioned in Section \@ref(resampling) also can be used here.
+]
 The values in the projected dataset are the distance-weighted average of the values from these four cells:
 the closer the input cell is to the center of the output cell, the greater its weight.
 The following commands create a text string representing WGS 84 / UTM zone 12N, and reproject the raster into this CRS, using the `bilinear` method:
