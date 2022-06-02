@@ -273,7 +273,9 @@ You can learn more at https://www.r-spatial.org/r/2017/06/22/spatial-index.html.
 ### DE-9IM strings
 
 Underlying the binary predicates demonstrated in the previous section is the Dimensionally Extended 9-Intersection Model (DE-9IM).
-As the cryptic name suggests, this is not an easy topic, but may be worth learning to better understand spatial relationships and, potentially, to create your own spatial predicates.
+As the cryptic name suggests, this is not an easy topic.
+Learning it may be worthwhile, however, to better understand spatial relationships.
+Furthermore, advanced uses of DE-9IM include creating custom spatial predicates.
 The model was originally labelled "DE + 9IM" by its inventors, referring to the "dimension of the intersections of boundaries, interiors, and exteriors of two features" [@clementini_comparison_1995], but is now referred to as DE-9IM [@shen_classification_2018].
 <!-- The model's workings can be demonstrated with reference to two intersecting polygons, as illustrated in Figure \@ref(fig:de-9im). -->
 
@@ -525,7 +527,7 @@ nz_agg2 = st_join(x = nz, y = nz_height) %>%
 
 
 
-The resulting `nz_agg` objects have the same geometry as the aggregating object `nz` but with a new column summarising the values of `x` in each region using the function `mean()`.
+The resulting `nz_agg` objects have the same geometry as the aggregating object `nz` but with a new column summarizing the values of `x` in each region using the function `mean()`.
 Other functions could be used instead of `mean()` here, including `median()`, `sd()` and other functions that return a single value per group.
 Note: one difference between the `aggregate()` and `group_by() %>% summarize()` approaches is that the former results in `NA` values for unmatching region names while the latter preserves region names.
 The 'tidy' approach is thus more flexible in terms of aggregating functions and the column names of the results.
