@@ -884,7 +884,7 @@ Extract the values of the four corner cells.
 
 
 
-E16. What is the most common class of our example raster `grain` (hint: `modal`)?
+E16. What is the most common class of our example raster `grain`?
 
 
 
