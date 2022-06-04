@@ -752,8 +752,10 @@ snow_rey
 This way, we just downloaded a single value instead of the whole, large GeoTIFF file.
 
 The above example just shows one simple (but useful) case, but there is more to explore.
-The `/vsicurl/` prefix also works not only for raster but also for vector file formats allowing to read vectors directly from online storage.
-Importantly, it is not the only prefix provided by GDAL -- many more exist, such as `/vsizip/` to read spatial files from ZIP archives without decompressing them beforehand or `/vsis3/` for on-the-fly reading files available in AWS S3 buckets.
+The `/vsicurl/` prefix also works not only for raster but also for vector file formats.
+It allows reading vectors directly from online storage with `read_sf()` just by adding the prefix before the vector file URL.
+
+Importantly, `/vsicurl/` is not the only prefix provided by GDAL -- many more exist, such as `/vsizip/` to read spatial files from ZIP archives without decompressing them beforehand or `/vsis3/` for on-the-fly reading files available in AWS S3 buckets.
 You can learn more about it at https://gdal.org/user/virtual_file_systems.html.
 
 <!-- ### Databases -->
