@@ -642,8 +642,7 @@ In any case, there are other reasons to perform a geometric operation on a singl
 For instance, in Chapter \@ref(location) we define metropolitan areas in Germany as 20 km^2^ pixels with more than 500,000 inhabitants. 
 The original inhabitant raster, however, has a resolution of 1 km^2^ which is why we will decrease (aggregate) the resolution by a factor of 20 (see Section \@ref(define-metropolitan-areas)).
 Another reason for aggregating a raster is simply to decrease run-time or save disk space.
-Of course, this is only possible if the task at hand allows a coarser resolution.
-Sometimes a coarser resolution is sufficient for the task at hand.
+Of course, this approach is only recommended if the task at hand allows a coarser resolution of raster data.
 
 ### Geometric intersections
 

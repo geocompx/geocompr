@@ -1034,14 +1034,14 @@ Hint: Read `?terra::focal()`.
 
 E7. Calculate the Normalized Difference Water Index	(NDWI; `(green - nir)/(green + nir)`) of a Landsat image. 
 Use the Landsat image provided by the **spDataLarge** package (`system.file("raster/landsat.tif", package = "spDataLarge")`).
-Also, calculate a correlation between NDVI and NDWI for this area.
+Also, calculate a correlation between NDVI and NDWI for this area (hint: you can use the `layerCor()` function).
 
 
 
 E8. A StackOverflow [post](https://stackoverflow.com/questions/35555709/global-raster-of-geographic-distances) shows how to compute distances to the nearest coastline using `raster::distance()`.
 Try to do something similar but with `terra::distance()`: retrieve a digital elevation model of Spain, and compute a raster which represents distances to the coast across the country (hint: use `geodata::elevation_30s()`).
 Convert the resulting distances from meters to kilometers.
-Note: it may be wise to increase the cell size of the input raster to reduce compute time during this operation.
+Note: it may be wise to increase the cell size of the input raster to reduce compute time during this operation (`aggregate()`).
 
 
 
