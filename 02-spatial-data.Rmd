@@ -39,8 +39,11 @@ These operating systems (OSs) have 'systems requirements' that are described in 
 Various OS-specific instructions can be found online, such as the article *Installation of R 4.0 on Ubuntu 20.04* on the blog [rtask.thinkr.fr](https://rtask.thinkr.fr/installation-of-r-4-0-on-ubuntu-20-04-lts-and-tips-for-spatial-packages/).
 ```
 
-All the packages needed to reproduce the contents of the book can be installed with the following command: `remotes::install_github("geocompr/geocompkg")`.
-The necessary packages can be 'loaded' (technically they are attached) with the `library()` function as follows:
+The packages needed to reproduce Part 1 of this book can be installed with the following command: `remotes::install_github("geocompr/geocompkg")`.
+This command uses the function `install_packages()` from the **remotes** package to install source code hosted on the GitHub code hosting, version and collaboration platform.
+The following command will install **all** dependencies required to reproduce the entire book (warning: this may take several minutes): `remotes::install_github("geocompr/geocompkg", dependencies = TRUE)`
+
+The packages needed to run the code presented in this chapter can be 'loaded' (technically they are attached) with the `library()` function as follows:
 
 ```{r 02-spatial-data-3-1, message=TRUE}
 library(sf)          # classes and functions for vector data
@@ -312,7 +315,7 @@ Plots are added as layers to existing images by setting `add = TRUE`.^[
 `plot()`ing of **sf** objects uses `sf:::plot.sf()` behind the scenes.
 `plot()` is a generic method that behaves differently depending on the class of object being plotted.
 ]
-To demonstrate this, and to provide a taster of content covered in Chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, the subsequent code chunk combines countries in Asia:
+To demonstrate this, and to provide a insight into the contents of Chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, the subsequent code chunk filters countries in Asia and combines them into a single feature:
 
 ```{r 02-spatial-data-14, warning=FALSE}
 world_asia = world[world$continent == "Asia", ]
@@ -358,12 +361,15 @@ The code above uses the function `st_centroid()` to convert one geometry type (p
 \index{bounding box}
 **sf**'s plot method also has arguments specific to geographic data. `expandBB`, for example, can be used to plot an `sf` object in context:
 it takes a numeric vector of length four that expands the bounding box of the plot relative to zero in the following order: bottom, left, top, right.
-This is used to plot India in the context of its giant Asian neighbors, with an emphasis on China to the east, in the following code chunk, which generates Figure \@ref(fig:china) (see exercises below on adding text to plots):
+This is used to plot India in the context of its giant Asian neighbors, with an emphasis on China to the east, in the following code chunk, which generates Figure \@ref(fig:china) (see exercises below on adding text to plots):^[
+Note the use of `st_geometry(india)` to return only the geometry associated with the object to prevent attributes being plotted in a simple feature column (`sfc`) object.
+An alternative is to use `india[0]`, which returns an `sf` object that contains no attribute data..
+]
 
 ```{r 02-spatial-data-17, eval=FALSE}
 india = world[world$name_long == "India", ]
 plot(st_geometry(india), expandBB = c(0, 0.2, 0.1, 1), col = "gray", lwd = 3)
-plot(world_asia[0], add = TRUE)
+plot(st_geometry(world_asia), add = TRUE)
 ```
 
 ```{r china, fig.cap="India in context, demonstrating the expandBB argument.", warning=FALSE, echo=FALSE, out.width="50%"}
@@ -378,7 +384,11 @@ text(indchi_coords[, 1], indchi_coords[, 2], indchi$name_long)
 par(old_par)
 ```
 
-Note the use of `[0]` to keep only the geometry column and `lwd` to emphasize India.
+```{r, eval=FALSE, echo=FALSE}
+waldo::compare(st_geometry(world), world[0])
+```
+
+Note the use of `lwd` to emphasize India in the plotting code.
 See Section \@ref(other-mapping-packages) for other visualization techniques for representing a range of geometry types, the subject of the next section.
 
 ### Geometry types {#geometry}
@@ -610,9 +620,9 @@ st_multipolygon(multipolygon_list)
 
 ```{r 02-spatial-data-24, eval=FALSE}
 ## GEOMETRYCOLLECTION
-gemetrycollection_list = list(st_multipoint(multipoint_matrix),
+geometrycollection_list = list(st_multipoint(multipoint_matrix),
                               st_linestring(linestring_matrix))
-st_geometrycollection(gemetrycollection_list)
+st_geometrycollection(geometrycollection_list)
 #> GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2),
 #>   LINESTRING (1 5, 4 4, 4 1, 2 2, 3 2))
 ```
@@ -735,7 +745,7 @@ The example above shows how the `sfg` object `v_sfg_sfh` is printed when **sf** 
 When **sf** is loaded (as is the case here), the result of the above command is indistinguishable from `sf` objects:
 
 ```{r}
-v_sfg_sf = st_point(v, c(1, 2))
+v_sfg_sf = st_point(v)
 print(v_sfg_sf) == print(v_sfg_sfh)
 ```
 
@@ -1002,7 +1012,9 @@ multi_rast
 nlyr(multi_rast)
 ```
 
-For multi-layer raster objects, layers can be selected with `terra::subset()`.^[The `[[` and `$` operators can also be used for layers' selection.]
+For multi-layer raster objects, layers can be selected with `terra::subset()`.^[
+The `[[` and `$` operators can also be used to select layers, for example with commands `multi_rast$landsat_1` and `multi_rast[["landsat_1"]]`.
+]
 It accepts a layer number or its name as the second argument:
 
 ```{r}

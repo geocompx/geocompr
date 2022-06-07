@@ -2,7 +2,7 @@
 
 ## Prerequisites {-}
 
-- This chapter requires the following packages to be installed and attached: 
+- This chapter requires the following packages to be installed and attached:
 
 ```{r 03-attribute-operations-1, message=FALSE}
 library(sf)      # vector data package introduced in Chapter 2
@@ -10,11 +10,13 @@ library(terra)   # raster data package introduced in Chapter 2
 library(dplyr)   # tidyverse package for data frame manipulation
 ```
 
-- It also relies on **spData**, which loads datasets used in the code examples of this chapter:
+- It relies on **spData**, which loads datasets used in the code examples of this chapter:
 
 ```{r 03-attribute-operations-2, results='hide'}
 library(spData)  # spatial data package introduced in Chapter 2
 ```
+
+- Also ensure you have installed the **tidyr** package, or the **tidyverse** of which it is a part, if you want to run data 'tidying' operations in Section \@ref(vec-attr-creation): 
 
 ## Introduction
 
@@ -100,7 +102,7 @@ This enables geometries imported from spatial databases to have a variety of nam
 \index{tidyverse (package)}.
 Thus **sf** enables the full power of R's data analysis capabilities to be unleashed on geographic data, whether you use base R or tidyverse functions for data analysis.
 \index{tibble}
-(See [`Rdatatable/data.table#2273`](https://github.com/Rdatatable/data.table/issues/2273) for discussion of compatibility between `sf` objects and the fast `data.table` package.)
+**sf** objects can also be used with the high-performance data processing package **data.table** although, as documented in the issue [`Rdatatable/data.table#2273`](https://github.com/Rdatatable/data.table/issues/2273), is not fully [compatible](https://github.com/Rdatatable/data.table/issues/5352) with `sf` objects.
 Before using these capabilities it is worth re-capping how to discover the basic properties of vector data objects.
 Let's start by using base R functions to learn about the `world` dataset from the **spData** package:
 
@@ -325,7 +327,7 @@ world7 = world |>
 
 The above chunk shows how the pipe operator allows commands to be written in a clear order:
 the above run from top to bottom (line-by-line) and left to right.
-The alternative to `|>` is nested function calls, which is harder to read:
+An alternative to piped operations is nested function calls, which are harder to read:
 
 ```{r 03-attribute-operations-25}
 world8 = slice(
@@ -334,6 +336,17 @@ world8 = slice(
     name_long, continent),
   1:5)
 ```
+
+Another alternative is to split the operations into multiple self-contained lines, which is recommended when developing new R packages, an approach which has the advantage of saving intermediate results with distinct names which can be later inspected for debugging purposes (an approach which has disadvantages of being verbose and cluttering the global environment when undertaking interactive analysis):
+
+```{r 03-attribute-operations-25-2}
+world9_filtered = filter(world, continent == "Asia")
+world9_selected = dplyr::select(world9_filtered, continent)
+world9 = slice(world9_selected, 1:5)
+```
+
+Each approach has advantages and disadvantages, the importance of which depend on your programming style and applications.
+For interactive data analysis, the focus of this chapter, we find piped operations fast and intuitive, especially when combined with [RStudio](https://support.rstudio.com/hc/en-us/articles/200711853-Keyboard-Shortcuts-in-the-RStudio-IDE)/[VSCode](https://github.com/REditorSupport/vscode-R/wiki/Keyboard-shortcuts) shortcuts for creating pipes and [auto-completing](https://support.rstudio.com/hc/en-us/articles/205273297-Code-Completion-in-the-RStudio-IDE) variable names.
 
 ### Vector attribute aggregation
 
@@ -377,11 +390,11 @@ This flexibility is illustrated in the command below, which calculates not only 
 
 ```{r 03-attribute-operations-29}
 world_agg4  = world |> 
-  group_by(continent) |>
-  summarize(pop = sum(pop, na.rm = TRUE), `area (sqkm)` = sum(area_km2), n = n())
+  group_by(continent) |> 
+  summarize(pop = sum(pop, na.rm = TRUE), `area_sqkm` = sum(area_km2), n = n())
 ```
 
-In the previous code chunk `pop`, `area (sqkm)` and `n` are column names in the result, and `sum()` and `n()` were the aggregating functions.
+In the previous code chunk `pop`, `area_sqkm` and `n` are column names in the result, and `sum()` and `n()` were the aggregating functions.
 These aggregating functions return `sf` objects with rows representing continents and geometries containing the multiple polygons representing each land mass and associated islands (this works thanks to the geometric operation 'union', as explained in Section \@ref(geometry-unions)).
 
 Let's combine what we have learned so far about **dplyr** functions, by chaining multiple commands to summarize attribute data about countries worldwide by continent.
@@ -529,11 +542,8 @@ Fortunately, non-spatial data frames with a geometry list column (like `coffee_w
 ```
 
 This section covers the majority of joining use cases.
-For more information, we recommend @grolemund_r_2016, the [join vignette](https://geocompr.github.io/geocompkg/articles/join.html) in the **geocompkg** package that accompanies this book, and documentation of the **data.table** package.^[
-**data.table** is a high-performance data processing package.
-Its application to geographic data is covered in a blog post hosted at r-spatial.org/r/2017/11/13/perp-performance.html.
-]
-Another type of join is a spatial join, covered in the next chapter (Section \@ref(spatial-joining)).
+For more information, we recommend reading the chapter [Relational data](https://r4ds.had.co.nz/relational-data.html?q=join#relational-data) in @grolemund_r_2016, the [join vignette](https://geocompr.github.io/geocompkg/articles/join.html) in the **geocompkg** package that accompanies this book, and [documentation](https://asardaes.github.io/table.express/articles/joins.html) describing joins with **data.table** and other packages.
+Spatial joins are covered in the next chapter (Section \@ref(spatial-joining)).
 
 ### Creating attributes and removing spatial information {#vec-attr-creation}
 
@@ -568,15 +578,15 @@ Additionally, we can define a separator (here: a colon `:`) which defines how th
 
 ```{r 03-attribute-operations-45, eval=FALSE}
 world_unite = world |>
-  unite("con_reg", continent:region_un, sep = ":", remove = TRUE)
+  tidyr::unite("con_reg", continent:region_un, sep = ":", remove = TRUE)
 ```
 
-The `separate()` function does the opposite of `unite()`: it splits one column into multiple columns using either a regular expression or character positions.
-This function also comes from the **tidyr** package.
+The resulting `sf` object has a new column called `con_reg` representing the continent and region of each country, e.g. `South America:Americas` for Argentina and other South America countries.
+**tidyr**'s `separate()` function does the opposite of `unite()`: it splits one column into multiple columns using either a regular expression or character positions.
 
 ```{r 03-attribute-operations-46, eval=FALSE}
-world_separate = world_unite |> 
-  separate(con_reg, c("continent", "region_un"), sep = ":")
+world_separate = world_unite |>
+  tidyr::separate(con_reg, c("continent", "region_un"), sep = ":")
 ```
 
 ```{r 03-attribute-operations-47, echo=FALSE, eval=FALSE}
@@ -601,14 +611,13 @@ abbreviate(names(world), minlength = 1) |> dput()
 
 ```{r 03-attribute-operations-50, eval=FALSE}
 new_names = c("i", "n", "c", "r", "s", "t", "a", "p", "l", "gP", "geom")
-world |> 
+world_new_names = world |>
   setNames(new_names)
 ```
 
-It is important to note that attribute data operations preserve the geometry of the simple features.
-As mentioned at the outset of the chapter, it can be useful to remove the geometry.
-To do this, you have to explicitly remove it.
-Hence, an approach such as `select(world, -geom)` will be unsuccessful and you should instead use `st_drop_geometry()`.^[
+Each of these attribute data operations preserve the geometry of the simple features.
+Sometimes it makes sense to remove the geometry, for example to speed-up aggregation.
+Do this with `st_drop_geometry()`, **not** manually with commands such as `select(world, -geom)`, as shown below.^[
 `st_geometry(world_st) = NULL` also works to remove the geometry from `world`, but overwrites the original object.
 ]
 

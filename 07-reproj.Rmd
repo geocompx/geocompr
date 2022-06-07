@@ -78,7 +78,7 @@ The WKT representation of the WGS84 CRS, which has the **identifier** `EPSG:4326
 st_crs("EPSG:4326")
 ```
 
-The output of the command shows how the CRS identifier (also known as a Spatial Reference Identifier or [SRID](https://postgis.net/workshops/postgis-intro/projection.html)) works: it is simply a look-up, providing a unique identifier associated with a more complete WTK representation of the CRS.
+The output of the command shows how the CRS identifier (also known as a Spatial Reference Identifier or [SRID](https://postgis.net/workshops/postgis-intro/projection.html)) works: it is simply a look-up, providing a unique identifier associated with a more complete WKT representation of the CRS.
 This raises the question: what happens if there is a mismatch between the identifier and the longer WKT representation of a CRS?
 On this point @opengeospatialconsortium_wellknown_2019 is clear, the verbose WKT representation takes precedence over the [identifier](https://docs.opengeospatial.org/is/18-010r7/18-010r7.html#37): 
 
@@ -186,7 +186,7 @@ cat(crs(my_rast)) # get CRS
 ```
 
 The output is the WKT representation of CRS. 
-The same function, `crs()`, is can be also used to set a CRS for raster objects.
+The same function, `crs()`, can be also used to set a CRS for raster objects.
 
 ```{r 02-spatial-data-56}
 crs(my_rast) = "EPSG:26912" # set CRS
@@ -291,17 +291,20 @@ st_crs(london_proj)
 #>   User input: EPSG:27700 
 #>   wkt:
 #> PROJCRS["OSGB36 / British National Grid",
+#>     BASEGEOGCRS["OSGB36",
+#>         DATUM["Ordnance Survey of Great Britain 1936",
+#>             ELLIPSOID["Airy 1830",6377563.396,299.3249646,
+#>                 LENGTHUNIT["metre",1]]],
 #> ...
 ```
 
-<!--toDo:rl-->
-<!-- jn: the next paragraph need to be updated! -->
-Notable components of this CRS description include the EPSG code (`EPSG: 27700`), the projection ([transverse Mercator](https://en.wikipedia.org/wiki/Transverse_Mercator_projection), `+proj=tmerc`), the origin (`+lat_0=49 +lon_0=-2`) and units (`+units=m`).^[
+Notable components of this CRS description include the EPSG code (`EPSG: 27700`) and the detailed `wkt` string (only the first 5 lines of which are shown).^[
 For a short description of the most relevant projection parameters and related concepts, see the fourth lecture by Jochen Albrecht hosted at
 http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/ and information at https://proj.org/usage/projections.html.
 Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj.
 ]
-The fact that the units of the CRS are meters (rather than degrees) tells us that this is a projected CRS: `st_is_longlat(london_proj)` now returns `FALSE` and geometry operations on `london_proj` will work without a warning, meaning buffers can be produced from it using proper units of distance.
+The fact that the units of the CRS, described in the LENGTHUNIT field, are meters (rather than degrees) tells us that this is a projected CRS: `st_is_longlat(london_proj)` now returns `FALSE` and geometry operations on `london_proj` will work without a warning.
+Buffers operations on the `london_proj` will use GEOS and results will returned with proper units of distance.
 The following line of code creates a buffer around *projected* data of exactly 100 km:
 
 ```{r 06-reproj-8}
@@ -368,7 +371,9 @@ Both buffer boundaries in Figure \@ref(fig:crs-buf) (left) are jagged, although 
 <!--toDo:rl-->
 <!--jn: maybe it is worth to emphasize that the differences are due to the use of S2 vs GEOS-->
 <!--jn: you mention S2 a lot in this section, but not GEOS...-->
-The lesson is that results obtained from lon/lat data via `s2` will be different from results obtained from using projected data, although these differences reduce as the value of `max_cells` increases: the 'right' value for this argument may depend on many factors and the default value 1000 is a reasonable default, balancing speed of computation against resolution of results, in many cases.
+The lesson is that results obtained from lon/lat data via S2 will be different from results obtained from using projected data.
+The difference between S2 derived buffers and GEOS derived buffers on projected data reduce as the value of `max_cells` increases: the 'right' value for this argument may depend on many factors and the default value 1000 is a reasonable default.
+When choosing `max_cells` values, speed of computation should be balanced against resolution of results, in many.
 In situations where curved boundaries are advantageous, transforming to a projected CRS before buffering (or performing other geometry operations) may be appropriate.
 
 The importance of CRSs (primarily whether they are projected or geographic) and the impacts of **sf**'s default setting to use S2 for buffers on lon/lat data is clear from the example above.
@@ -539,7 +544,7 @@ Use `as.numeric()` to coerce the result into a regular number.
 st_distance(london2, london_proj)
 ```
 
-This is demonstrated below with reference to `cycle_hire_osm`, an `sf` object from **spData** that represents 'docking stations' where you can hire bicycles in London.
+Functions for querying and reprojecting CRSs are demonstrated below with reference to `cycle_hire_osm`, an `sf` object from **spData** that represents 'docking stations' where you can hire bicycles in London.
 The CRS of `sf` objects can be queried --- and as we learned in Section \@ref(reproj-intro) set --- with the function `st_crs()`.
 The output is printed as multiple lines of text containing information about the coordinate system:
 
@@ -547,9 +552,9 @@ The output is printed as multiple lines of text containing information about the
 st_crs(cycle_hire_osm)
 ```
 
-As we saw in Section \@ref(crs-setting), the main CRS components, `User input` and `wkt`, are printed as a single entity, the output of `st_crs()` is in fact a named list of class `crs` with two elements, single character strings named `input` and `wkt`:
+As we saw in Section \@ref(crs-setting), the main CRS components, `User input` and `wkt`, are printed as a single entity, the output of `st_crs()` is in fact a named list of class `crs` with two elements, single character strings named `input` and `wkt`, as shown in the output of the following code chunk:
 
-```{r 06-reproj-16, echo=FALSE}
+```{r 06-reproj-16}
 crs_lnd = st_crs(london_geo)
 class(crs_lnd)
 names(crs_lnd)
@@ -697,7 +702,9 @@ crs(con_raster)
 ```
 
 We will reproject this dataset into a projected CRS, but *not* with the nearest neighbor method which is appropriate for categorical data.
-Instead, we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster.^[Other methods mentioned in Section \@ref(resampling) also can be used here.]
+Instead, we will use the bilinear method which computes the output cell value based on the four nearest cells in the original raster.^[
+Other methods mentioned in Section \@ref(resampling) also can be used here.
+]
 The values in the projected dataset are the distance-weighted average of the values from these four cells:
 the closer the input cell is to the center of the output cell, the greater its weight.
 The following commands create a text string representing WGS 84 / UTM zone 12N, and reproject the raster into this CRS, using the `bilinear` method:

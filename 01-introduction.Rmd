@@ -58,8 +58,9 @@ Our approach differs from early adopters such as Stan Openshaw, however, in its 
 At the turn of the 21^st^ Century, it was unrealistic to expect readers to be able to reproduce code examples, due to barriers preventing access to the necessary hardware, software and data.
 Fast-forward two decades and things have progressed rapidly.
 Anyone with access to a laptop with ~4GB RAM can realistically expect to be able to install and run software for geocomputation on publicly accessible datasets, which are more widely available than ever before (as we will see in Chapter \@ref(read-write)).^[
-A laptop with 4GB running a modern operating system such as Ubuntu 16.04 onward should also be able to reproduce the contents of this book.
-A laptop with this specification or above can be acquired second-hand for ~US$100 in many countries nowadays, reducing the financial/hardware barrier to geocomputation far below the levels in operation in the early 2000s, when high-performance computers were unaffordable for most people.
+A laptop with 4GB running a modern operating system such as Ubuntu 22.04 onward should also be able to reproduce the contents of this book.
+A laptop with this specification or above can be acquired second-hand for ~US$100 in most countries today.
+Financial and hardware barriers to geocomputation that existed in 1990s and early 2000s, when high-performance computers were unaffordable for most people, have now been removed.
 ]
 Unlike early works in the field, all the work presented in this book is reproducible using code and example data supplied alongside the book, in R\index{R} packages such as **spData**, the installation of which is covered in Chapter \@ref(spatial-class).
 
@@ -238,7 +239,7 @@ This resulted in the **sf** package (covered in Section \@ref(intro-sf)).
 Multiple places reflect the immense interest in **sf**. 
 This is especially true for the [R-sig-Geo Archives](https://stat.ethz.ch/pipermail/r-sig-geo/), a long-standing open access email list containing much R-spatial wisdom accumulated over the years.
 
-```{r cranlogs, fig.cap="Downloads of selected R packages for working with geographic data. The y-axis shows average number of downloads per day, within a 91-day rolling window.", echo=FALSE, fig.scap="The popularity of spatial packages in R."}
+```{r cranlogs, fig.cap="Downloads of selected R packages for working with geographic data from early 2013 to present. The y axis shows the average number of dailly downloads from the popular cloud.r-project.org CRAN mirror with a 91-day rolling window (log scale).", echo=FALSE, fig.scap="The popularity of spatial packages in R."}
 knitr::include_graphics("figures/01-cranlogs.png")
 ```
 
@@ -316,17 +317,25 @@ Prior to 2005, geographic coordinates were generally treated like any other numb
 enabling data operations to work on geographic data (see Section \@ref(why-simple-features)).
 Further, **sp** provides generic methods such as `summary()` and `plot()` for geographic data.
 In the following decade, **sp** classes rapidly became popular for geographic data in R and the number of packages that depended on it increased from around 20 in 2008 to over 100 in 2013 [@bivand_applied_2013].
-As of 2018 almost 500 packages rely on **sp**, making it an important part of the R ecosystem. 
+Now that number is more than 500 packages depending on **sp** (compared with a similar number for the **sf** package which is growing faster), making it an important part of the R ecosystem. 
 Prominent R packages using **sp** include: **gstat**, for spatial and spatio-temporal geostatistics\index{spatial!statistics}; **geosphere**, for spherical trigonometry; and **adehabitat** used for the analysis of habitat selection by animals [@R-gstat; @calenge_package_2006; @hijmans_geosphere_2016].
 
-While **rgdal** and **sp** solved many spatial issues, R still lacked the ability to do geometric operations (see Chapter \@ref(geometric-operations)).
-Colin Rundel addressed this issue by developing **rgeos**, an R interface to  the open-source geometry library (GEOS\index{GEOS}) during a Google Summer of Code project in 2010 [@R-rgeos].
-**rgeos** enabled GEOS\index{GEOS} to manipulate **sp** objects, with functions such as `gIntersection()`.
+```{r, eval=FALSE, echo=FALSE}
+# Aim: show n. pkgs that depend on sf and sp
+revdep_sp = devtools::revdep(pkg = "sp")
+length(revdep_sp) # 622 # 2022-05-29
+revdep_sf = devtools::revdep(pkg = "sf")
+length(revdep_sf) # 479 # 2022-05-29
+```
 
-Another limitation of **sp** --- its restricted support for raster data --- was overcome by **raster**\index{raster}, first released in 2010 [@R-raster].
-Its class system and functions support a range of raster operations as outlined in Section \@ref(raster-data).
-A key feature of **raster** is its ability to work with datasets that are too large to fit into RAM (R's interface to PostGIS\index{PostGIS} supports off-disk operations on vector geographic data).
-**raster** also supports map algebra (see Section \@ref(map-algebra)).
+While **rgdal** and **sp** solved many spatial issues, it was not until **rgeos** was developed during a Google Summer of Code project in 2010 [@R-rgeos] that geometry operations could be undertaken on **sp** objects.
+Functions such as `gIntersection()` enabled users to find spatial relationships between geographic objects and to modify their geometries (see Chapter \@ref(geometric-operations) for details on geometric operations with **sf**).
+
+A limitation of the **sp** ecosystem was its limited support for raster data.
+This was overcome by **raster**\index{raster}, first released in 2010 [@R-raster].
+**rasters**'s class system and functions enabled a range of raster operations, capabilities now implemented in the **terra** package, which superscedes **raster**, as outlined in Section \@ref(raster-data).
+An important capability of **raster** and **terra** is their ability to work with datasets that are too large to fit into RAM (R's interface to PostGIS\index{PostGIS} also supports off-disk operations, on geographic vector datasets).
+**raster** and **terra** also supports map algebra, as described in Section \@ref(map-algebra).
 
 In parallel with these developments of class systems and methods came the support for R as an interface to dedicated GIS software.
 **GRASS** [@bivand_using_2000] and follow-on packages **spgrass6** and **rgrass7** (for GRASS\index{GRASS} GIS 6 and 7, respectively) were prominent examples in this direction [@bivand_rgrass7_2016;@bivand_spgrass6_2016].
@@ -342,21 +351,21 @@ It was followed by the **ggmap** package that added similar 'basemap' tiles capa
 Though **ggmap** facilitated map-making with **ggplot2**, its utility was limited by the need to `fortify` spatial objects, which means converting them into long data frames.
 While this works well for points it is computationally inefficient for lines and polygons, since each coordinate (vertex) is converted into a row, leading to huge data frames to represent complex geometries.
 Although geographic visualization tended to focus on vector data, raster visualization is supported in **raster** and received a boost with the release of **rasterVis**, which is described in a book on the subject of spatial and temporal data visualization [@lamigueiro_displaying_2018].
-As of 2018 map making in R is a hot topic with dedicated packages such as **tmap**, **leaflet** and **mapview** all supporting the class system provided by **sf**, the focus of the next chapter (see Chapter \@ref(adv-map) for more on visualization).
+Since then map making in R has become a hot topic, with dedicated packages such as **tmap**, **leaflet**, **rayshader** and **mapview** gaining popularity, as highlighted in Chapter \@ref(adv-map).
 
-Since 2018, a movement of modernizing basic R packages related to handling spatial data has continued. 
+Since 2018, when the First Edition of Geocomputation with R was published, the development of geographic R packages has accelerated. 
 \index{terra (package)}
-**terra** -- a successor of the **raster** package aimed at better performance and more straightforward user interface was firstly released (see Chapter \@ref(raster-data)) in 2020 [@hijmans_terra_2021].
-In mid-2021, a significant change was made to the **sf** package by incorporating spherical geometry calculations.
-Since this change, by default, many spatial operations on data with geographic CRSs apply the C++ s2geometry library's spherical geometry algorithms, while these types of operations on data with projected CRSs are still using GEOS.
-<!--toDo:rl-->
-<!--add reference to the section about spherical geometry in sf -->
-New ideas about spatial data representations were also being developed in this period. 
+**terra**, a successor of the **raster** package, was firstly released in 2020 [@hijmans_terra_2021], bringing several benefits to R users working with raster datasets: it  is faster and has more a straightforward user interface than its predecessor, as described in Section \@ref(raster-data).
+
+In mid-2021, a substantial (and in some cases breaking) change was made to the **sf** package by incorporating spherical geometry calculations.
+Since then, by default, many spatial operations on data with geographic CRSs use the S2 spherical geometry engine as a back-end, as described in Section \@ref(s2).
+Additional ways of representing and working with geographic data in R since 2018 also include the **stars** and **lidR** packages.
+**stars**, which integrates closely with **sf**, handles raster and vector data cubes [@pebesma_stars_2021].
+**lidR** processes of airborne LiDAR (Light Detection and Ranging) point clouds [@Roussel2020].
 \index{stars (package)}
 \index{lidR (package)}
-It includes the **stars** package, closely connected to **sf**, for handling raster and vector data cubes [@pebesma_stars_2021] and **lidR** for processing of airborne LiDAR (Light Detection and Ranging) point clouds [@Roussel2020].
 
-This modernization had several reasons, including the emergence of new technologies and standard, and the impacts from spatial software development outside of the R environment [@bivand_progress_2021].
+This modernization had several motivations, including the emergence of new technologies and standard, and the impacts from spatial software development outside of the R environment [@bivand_progress_2021].
 The most important external factor affecting most spatial software, including R spatial packages, were the major updates, including many breaking changes to the PROJ library\index{PROJ} that had begun in 2018.
 Most importantly, these changes forced the replacement of `proj4string` to `WKT` representation for storage of coordinate reference systems and coordinates operations (learn more in Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)).
 

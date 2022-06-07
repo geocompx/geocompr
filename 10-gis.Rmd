@@ -85,7 +85,7 @@ R was not designed as a GIS.
 However, its ability to interface with dedicated GISs gives it astonishing geospatial capabilities.
 R is well known as a statistical programming language, but many people are unaware of its ability to replicate GIS workflows, with the additional benefits of a (relatively) consistent CLI.
 Furthermore, R outperforms GISs in some areas of geocomputation\index{geocomputation}, including interactive/animated map making (see Chapter \@ref(adv-map)) and spatial statistical modeling (see Chapter \@ref(spatial-cv)).
-This chapter focuses on 'bridges' to three mature open source GIS products (see Table \@ref(tab:gis-comp)): QGIS\index{QGIS} (via the package **qgisprocess**\index{qgisprocess (package)}; Section \@ref(rqgis)), SAGA\index{SAGA} (via **Rsagacmd**\index{Rsagacmd (package)}; Section \@ref(rsaga)) and GRASS\index{GRASS} (via **rgrass7**\index{rgrass7 (package)}; Section \@ref(rgrass)).
+This chapter focuses on 'bridges' to three mature open source GIS products (see Table \@ref(tab:gis-comp)): QGIS\index{QGIS} (via the package **qgisprocess**\index{qgisprocess (package)}; Section \@ref(rqgis)), SAGA\index{SAGA} (via **Rsagacmd**\index{Rsagacmd (package)}; Section \@ref(saga)) and GRASS\index{GRASS} (via **rgrass7**\index{rgrass7 (package)}; Section \@ref(grass)).
 <!--toDo:jn-->
 <!-- Though not covered here, it is worth being aware of the interface to ArcGIS\index{ArcGIS}, a proprietary and very popular GIS software, via **RPyGeo**.^[By the way, it is also possible to use R from within Desktop GIS software packages.  -->
 <!-- The so-called R-ArcGIS bridge (see https://github.com/R-ArcGIS/r-bridge) allows R to be used from within ArcGIS\index{ArcGIS}.  -->
@@ -757,7 +757,7 @@ This is useful because geographic datasets tend to become big and messy quite qu
 Databases enable storing and querying large datasets efficiently based on spatial and non-spatial fields, and provide multi-user access and topology\index{topological relations} support.
 
 The most important open source spatial database\index{spatial database} is PostGIS\index{PostGIS} [@obe_postgis_2015].^[
-SQLite/SpatiaLite are certainly also important but implicitly we have already introduced this approach since GRASS\index{GRASS} is using SQLite in the background (see Section \@ref(rgrass)).
+SQLite/SpatiaLite are certainly also important but implicitly we have already introduced this approach since GRASS\index{GRASS} is using SQLite in the background (see Section \@ref(grass)).
 ]
 R bridges to spatial DBMSs such as PostGIS\index{PostGIS} are important, allowing access to huge data stores without loading several gigabytes of geographic data into RAM, and likely crashing the R session.
 The remainder of this section shows how PostGIS can be called from R, based on "Hello real world" from *PostGIS in Action, Second Edition* [@obe_postgis_2015].^[
@@ -893,19 +893,14 @@ This subsection is only a brief introduction to PostgreSQL/PostGIS.
 Nevertheless, we would like to encourage the practice of storing geographic and non-geographic data in a spatial DBMS\index{spatial database} while only attaching those subsets to R's global environment which are needed for further (geo-)statistical analysis.
 Please refer to @obe_postgis_2015 for a more detailed description of the SQL queries presented and a more comprehensive introduction to PostgreSQL/PostGIS in general.
 PostgreSQL/PostGIS is a formidable choice as an open-source spatial database.
-But the same is true for the lightweight SQLite/SpatiaLite database engine and GRASS\index{GRASS} which uses SQLite in the background (see Section \@ref(rgrass)).
+But the same is true for the lightweight SQLite/SpatiaLite database engine and GRASS\index{GRASS} which uses SQLite in the background (see Section \@ref(grass)).
 
-As a final note, if your data is getting too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, then the next logical step is to use large-scale geographic querying on distributed computing systems, as for example, provided by GeoMesa (http://www.geomesa.org/) or Apache Sedona [https://sedona.apache.org/; formermly known as GeoSpark - @huang_geospark_2017].
-
-
-
-
+As a final note, if your data is getting too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, then the next logical step is to use large-scale geographic querying on distributed computing systems, as for example, provided by GeoMesa (http://www.geomesa.org/) or Apache Sedona [https://sedona.apache.org/; formerly known as GeoSpark - @huang_geospark_2017].
 
 ## Bridges to cloud technologies and services {#cloud}
 
-
-
 ### STAC, COGs, and data cubes in the cloud
+
 Major cloud computing providers (Amazon Web Services, Microsoft Azure / Planetary Computer, Google Cloud Platform, and others)\index{cloud computing} offer huge catalogs of open Earth observation data such as the complete Sentinel-2 archive on their platforms. 
 We can use R and directly connect to and process data from these archives, ideally from a machine in the same cloud and region.
 
@@ -920,7 +915,6 @@ The result contains all found images and their metadata (e.g. cloud cover) and U
 
 ```{r 09-stac-example, eval = FALSE}
 library(rstac)
-
 # Connect to the STAC-API endpoint for Sentinel-2 data
 # and search for images intersecting our AOI
 s = stac("https://earth-search.aws.element84.com/v0")
@@ -930,7 +924,6 @@ items = s |>
               datetime = "2020-01-01/2020-12-31") |>
   post_request() |> items_fetch()
 ```
-
 
 Cloud storage differs from local hard disks and traditional image file formats do not perform well in cloud-based geoprocessing. 
 Broadly speaking, the cloud-optimized GeoTIFF\index{COG} format is a specific type of GeoTIFF that makes it possible to efficiently read only parts of an image from cloud storage. 
@@ -944,19 +937,18 @@ The code below shows a minimal example to create a lower resolution (250m) maxim
 
 ```{r 09-gdalcubes-example, eval = FALSE}
 library(gdalcubes)
-
-# Filter images from STAC response by cloud cover and create an image collection object
-collection = stac_image_collection(items$features, property_filter = function(x) {x[["eo:cloud_cover"]] < 10})
-
-# Define spatiotemporal extent, resolution (250m, daily) and CRS of the target data cube
-v = cube_view(srs = "EPSG:3857", extent = collection, dx = 250, dy = 250, dt = "P1D") # "P1D" is an ISO 8601 duration string
-
+# Filter images from STAC response by cloud cover 
+# and create an image collection object
+collection = stac_image_collection(items$features, 
+                  property_filter = function(x) {x[["eo:cloud_cover"]] < 10})
+# Define extent, resolution (250m, daily) and CRS of the target data cube
+v = cube_view(srs = "EPSG:3857", extent = collection, dx = 250, dy = 250,
+              dt = "P1D") # "P1D" is an ISO 8601 duration string
 # Create and process the data cube
 cube = raster_cube(collection, v) |>
   select_bands(c("B04", "B08")) |>
   apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
   reduce_time("max(NDVI)")
-
 # gdalcubes_options(parallel = 8)
 # plot(cube, zlim = c(0,1))
 ```
@@ -967,7 +959,6 @@ In this case, we ignore images with 10% or more cloud cover.
 
 The combination of STAC\index{STAC}, COGs\index{COG}, and data cubes\index{data cube} forms a cloud-native workflow to analyze (larger) collections of satellite imagery in the cloud\index{cloud computing}. 
 For more details, please refer to this [tutorial presented at OpenGeoHub summer school 2021](https://appelmar.github.io/ogh2021/tutorial.html).
-
 
 ### openEO
 
@@ -982,41 +973,34 @@ Afterwards, users can load image collections, apply and chain processes, submit 
 The following code will connect to the [openEO platform backend](https://openeo.cloud/), request available datasets, processes, and output formats, define a process graph to compute a maximum NDVI image from Sentinel-2 data, and finally executes the graph after logging in to the backend. 
 The openEO\index{openEO} platform backend includes a free tier and registration is possible from existing institutional or social platform accounts. 
 
-
 ```{r 09-openeo-example, eval=FALSE}
 library(openeo)
 con = connect(host = "https://openeo.cloud")
 p = processes() # load available processes
 collections = list_collections() # load available collections
 formats = list_file_formats() # load available output formats
-
 # Load Sentinel-2 collection
 s2 = p$load_collection(id = "SENTINEL2_L2A",
                        spatial_extent = list(west = 7.5, east = 8.5,
                                              north = 51.1, south = 50.1),
                        temporal_extent = list("2021-01-01", "2021-01-31"),
-                       bands=list("B04","B08"))
-
+                       bands = list("B04","B08")) 
 # Compute NDVI vegetation index
 compute_ndvi = p$reduce_dimension(data = s2, dimension = "bands",
-                                  reducer = function(data,context) {
-                                    return((data[2]-data[1])/(data[2]+data[1]))
+                                  reducer = function(data, context) {
+                                    (data[2] - data[1]) / (data[2] + data[1])
                                   })
-
 # Compute maximum over time
-reduce_max = p$reduce_dimension(data=compute_ndvi, dimension = "t",
-                                reducer = function(x,y) {max(x)})
-
+reduce_max = p$reduce_dimension(data = compute_ndvi, dimension = "t",
+                                reducer = function(x, y) {max(x)})
 # Export as GeoTIFF
 result = p$save_result(reduce_max, formats$output$GTiff)
-
 # Login, see https://docs.openeo.cloud/getting-started/r/#authentication
 login(login_type = "oidc",
       provider = "egi",
       config = list(
         client_id= "...",
-        secret = "...")))
-
+        secret = "..."))
 # Execute processes
 compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 ```
@@ -1040,7 +1024,7 @@ Visualize your result.
 For example, plot a hillshade\index{hillshade}, and on top of it the digital elevation model\index{digital elevation model}, your viewshed\index{viewshed} output and the point.
 Additionally, give `mapview` a try.
 
-1. Compute catchment area\index{catchment area} and catchment slope of `data("dem", package = "spDataLarge")` using **RSAGA** (see Section \@ref(rsaga)).
+1. Compute catchment area\index{catchment area} and catchment slope of `data("dem", package = "spDataLarge")` using **RSAGA** (see Section \@ref(saga)).
 
 1. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice (see Section \@ref(gdal)).
 
