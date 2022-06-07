@@ -127,7 +127,7 @@ zion_points = cbind(zion_points, elevation)
 library(dplyr)
 zion_points2 = zion_points
 zion_points2$a = 1
-zion_points2 = zion_points2 %>% group_by(a) %>% summarise()
+zion_points2 = zion_points2 |> group_by(a) |> summarise()
 elevation = terra::extract(srtm, vect(zion_points2))
 zion_points = cbind(zion_points, elevation)
 ```
@@ -143,19 +143,22 @@ However, the line extraction approach is not recommended to obtain values along 
 In this case, a better approach is to split the line into many points and then extract the values for these points.
 To demonstrate this, the code below creates `zion_transect`, a straight line going from northwest to southeast of the Zion National Park, illustrated in Figure \@ref(fig:lineextr)(A) (see Section \@ref(vector-data) for a recap on the vector data model):
 
+<!--toDo:jn-->
+<!--fix pipes-->
+
 ```{r 06-raster-vector-11 }
-zion_transect = cbind(c(-113.2, -112.9), c(37.45, 37.2)) %>%
-  st_linestring() %>% 
-  st_sfc(crs = crs(srtm)) %>% 
-  st_sf()
+zion_transect = cbind(c(-113.2, -112.9), c(37.45, 37.2)) |>
+  st_linestring() |> 
+  st_sfc(crs = crs(srtm)) |>
+  st_sf(geometry = _)
 ```
 
 ```{r 06-raster-vector-12, eval=FALSE, echo=FALSE}
 # Aim: show how extraction works with non-straight lines by
 # using this alternative line object:
-zion_transect2 = cbind(c(-113.2, -112.9, -113.2), c(36.45, 37.2, 37.5)) %>%
-  st_linestring() %>% 
-  st_sfc(crs = crs(srtm)) %>% 
+zion_transect2 = cbind(c(-113.2, -112.9, -113.2), c(36.45, 37.2, 37.5)) |>
+  st_linestring() |> 
+  st_sfc(crs = crs(srtm)) |>
   st_sf()
 zion_transect = rbind(zion_transect, zion_transect2)
 ```
@@ -176,8 +179,8 @@ Now, we have a large set of points, and we want to derive a distance between the
 In this case, we only have one transect, but the code, in principle, should work on any number of transects:
 
 ```{r 06-raster-vector-14}
-zion_transect = zion_transect %>% 
-  group_by(id) %>% 
+zion_transect = zion_transect |> 
+  group_by(id) |> 
   mutate(dist = st_distance(geometry)[, 1]) 
 ```
 
@@ -195,9 +198,9 @@ library(tmap)
 library(grid)
 library(ggplot2)
 
-zion_transect_line = cbind(c(-113.2, -112.9), c(37.45, 37.2)) %>%
-  st_linestring() %>% 
-  st_sfc(crs = crs(srtm)) %>% 
+zion_transect_line = cbind(c(-113.2, -112.9), c(37.45, 37.2)) |>
+  st_linestring() |> 
+  st_sfc(crs = crs(srtm)) |> 
   st_sf()
 
 zion_transect_points = st_cast(zion_transect, "POINT")[c(1, nrow(zion_transect)), ]
@@ -233,12 +236,16 @@ The final type of geographic vector object for raster extraction is **polygons**
 Like lines, polygons tend to return many raster values per polygon.
 This is demonstrated in the command below, which results in a data frame with column names `ID` (the row number of the polygon) and `srtm` (associated elevation values):
 
+<!--toDo:jn-->
+<!--fix pipes-->
+
+
 ```{r 06-raster-vector-17, eval=FALSE, echo=FALSE}
 # aim: create zion_many to test multi-polygon results
 n = 3
-zion_many = st_sample(x = zion, size = n) %>% 
-  st_buffer(dist = 500) %>% 
-  st_sf(data.frame(v = 1:n), geometry = .)
+zion_many = st_sample(x = zion, size = n) |> 
+  st_buffer(dist = 500) |>
+  st_sf(data.frame(v = 1:n), geometry = _)
 plot(zion_many)
 
 # for continuous data:
@@ -261,7 +268,7 @@ Such results can be used to generate summary statistics for raster values per po
 The generation of summary statistics is demonstrated in the code below, which creates the object `zion_srtm_df` containing summary statistics for elevation values in Zion National Park (see Figure \@ref(fig:polyextr)(A)):
 
 ```{r 06-raster-vector-19 }
-group_by(zion_srtm_values, ID) %>% 
+group_by(zion_srtm_values, ID) |> 
   summarize(across(srtm, list(min = min, mean = mean, max = max)))
 ```
 
@@ -280,8 +287,8 @@ This is illustrated with a land cover dataset (`nlcd`) from the **spDataLarge** 
 nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 zion2 = st_transform(zion, st_crs(nlcd))
 zion_nlcd = terra::extract(nlcd, vect(zion2))
-zion_nlcd %>% 
-  group_by(ID, levels) %>%
+zion_nlcd |> 
+  group_by(ID, levels) |>
   count()
 ```
 
@@ -420,7 +427,7 @@ Note, here we also used `st_as_sf()` to convert the resulting object to the `sf`
 
 ```{r 06-raster-vector-34 }
 elev = rast(system.file("raster/elev.tif", package = "spData"))
-elev_point = as.points(elev) %>% 
+elev_point = as.points(elev) |> 
   st_as_sf()
 ```
 
@@ -463,7 +470,7 @@ This is illustrated below by converting the `grain` object into polygons and sub
 
 ```{r 06-raster-vector-39 }
 grain = rast(system.file("raster/grain.tif", package = "spData"))
-grain_poly = as.polygons(grain) %>% 
+grain_poly = as.polygons(grain) |> 
   st_as_sf()
 ```
 

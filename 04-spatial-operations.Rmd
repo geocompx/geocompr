@@ -59,7 +59,7 @@ To demonstrate spatial subsetting, we will use the `nz` and `nz_height` datasets
 The following code chunk creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region:
 
 ```{r 04-spatial-operations-3}
-canterbury = nz %>% filter(Name == "Canterbury")
+canterbury = nz |> filter(Name == "Canterbury")
 canterbury_height = nz_height[canterbury, ]
 ```
 
@@ -124,16 +124,18 @@ Note: the solution involving `sgbp` objects is more generalisable though, as it 
 The same result can be achieved with the **sf** function `st_filter()` which was [created](https://github.com/r-spatial/sf/issues/1148) to increase compatibility between `sf` objects and **dplyr** data manipulation code:
 
 ```{r}
-canterbury_height3 = nz_height %>%
+canterbury_height3 = nz_height |>
   st_filter(y = canterbury, .predicate = st_intersects)
 ```
 
+<!--toDo:jn-->
+<!-- fix pipes -->
 
 ```{r 04-spatial-operations-7b-old, eval=FALSE, echo=FALSE}
 # Additional tests of subsetting
-canterbury_height4 = nz_height %>%
-  filter(st_intersects(x = ., y = canterbury, sparse = FALSE))
-canterbury_height5 = nz_height %>%
+canterbury_height4 = nz_height |>
+  filter(st_intersects(x = _, y = canterbury, sparse = FALSE))
+canterbury_height5 = nz_height |>
   filter(sel_logical)
 identical(canterbury_height3, canterbury_height4)
 identical(canterbury_height3, canterbury_height5)
@@ -439,7 +441,7 @@ b9sf$domain_b = rep(rep(domains, each = 3), each = 2)
 b9sf = rbind(b9sf, ii, bi, ei, ib, bb, eb, ie, be, ee)
 b9sf$domain_a = ordered(b9sf$domain_a, levels = c("Interior", "Boundary", "Exterior"))
 b9sf$domain_b = ordered(b9sf$domain_b, levels = c("Interior", "Boundary", "Exterior"))
-b9sf = b9sf %>% 
+b9sf = b9sf |> 
   mutate(alpha = case_when(
    Object == "x" ~ 0.1, 
    Object == "y" ~ 0.1, 
@@ -599,8 +601,8 @@ random_df = data.frame(
   x = runif(n = 10, min = bb[1], max = bb[3]),
   y = runif(n = 10, min = bb[2], max = bb[4])
 )
-random_points = random_df %>% 
-  st_as_sf(coords = c("x", "y")) %>% # set coordinates
+random_points = random_df |> 
+  st_as_sf(coords = c("x", "y")) |> # set coordinates
   st_set_crs("EPSG:4326") # set geographic CRS
 ```
 
@@ -665,9 +667,9 @@ if (knitr::is_latex_output()){
     # tm_bubbles(col = "red", alpha = 0.5, size = 0.2) +
     # tm_scale_bar()
   library(leaflet)
-  leaflet() %>%
-    # addProviderTiles(providers$OpenStreetMap.BlackAndWhite) %>%
-    addCircles(data = cycle_hire) %>%
+  leaflet() |>
+    # addProviderTiles(providers$OpenStreetMap.BlackAndWhite) |>
+    addCircles(data = cycle_hire) |>
     addCircles(data = cycle_hire_osm, col = "red")  
 }
 ```
@@ -714,8 +716,8 @@ This is because some cycle hire stations in `cycle_hire` have multiple matches i
 To aggregate the values for the overlapping points and return the mean, we can use the aggregation methods learned in Chapter \@ref(attr), resulting in an object with the same number of rows as the target:
 
 ```{r 04-spatial-operations-26}
-z = z %>% 
-  group_by(id) %>% 
+z = z |> 
+  group_by(id) |> 
   summarize(capacity = mean(capacity))
 nrow(z) == nrow(cycle_hire)
 ```
@@ -733,7 +735,7 @@ The result of this join has used a spatial operation to change the attribute dat
 
 As with attribute data aggregation, spatial data aggregation *condenses* data: aggregated outputs have fewer rows than non-aggregated inputs.
 Statistical *aggregating functions*, such as mean average or sum, summarise multiple values \index{statistics} of a variable, and return a single value per *grouping variable*.
-Section \@ref(vector-attribute-aggregation) demonstrated how `aggregate()` and `group_by() %>% summarize()` condense data based on attribute variables, this section shows how the same functions work with spatial objects.
+Section \@ref(vector-attribute-aggregation) demonstrated how `aggregate()` and `group_by() |> summarize()` condense data based on attribute variables, this section shows how the same functions work with spatial objects.
 \index{aggregation!spatial}
 
 Returning to the example of New Zealand, imagine you want to find out the average height of high points in each region: it is the geometry of the source (`y` or `nz` in this case) that defines how values in the target object (`x` or `nz_height`) are grouped.
@@ -755,8 +757,8 @@ tm_shape(nz_agg) +
 ```
 
 ```{r 04-spatial-operations-29}
-nz_agg2 = st_join(x = nz, y = nz_height) %>%
-  group_by(Name) %>%
+nz_agg2 = st_join(x = nz, y = nz_height) |>
+  group_by(Name) |>
   summarize(elevation = mean(elevation, na.rm = TRUE))
 ```
 
@@ -768,9 +770,10 @@ plot(nz_agg2)
 
 The resulting `nz_agg` objects have the same geometry as the aggregating object `nz` but with a new column summarizing the values of `x` in each region using the function `mean()`.
 Other functions could be used instead of `mean()` here, including `median()`, `sd()` and other functions that return a single value per group.
-Note: one difference between the `aggregate()` and `group_by() %>% summarize()` approaches is that the former results in `NA` values for unmatching region names while the latter preserves region names.
+Note: one difference between the `aggregate()` and `group_by() |> summarize()` approaches is that the former results in `NA` values for unmatching region names while the latter preserves region names.
 The 'tidy' approach is thus more flexible in terms of aggregating functions and the column names of the results.
 Aggregating operations that also create new geometries are covered in Section \@ref(geometry-unions).
+
 
 ### Joining incongruent layers {#incongruent}
 
@@ -811,7 +814,7 @@ This is illustrated in the code chunk below, which finds the distance between th
 \index{sf!distance relations}
 
 ```{r 04-spatial-operations-31, warning=FALSE}
-nz_heighest = nz_height %>% top_n(n = 1, wt = elevation)
+nz_heighest = nz_height |> top_n(n = 1, wt = elevation)
 canterbury_centroid = st_centroid(canterbury)
 st_distance(nz_heighest, canterbury_centroid)
 ```

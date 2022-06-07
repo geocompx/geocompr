@@ -201,7 +201,7 @@ Their role is only to set a metadata information about the object CRS.
 In some cases the CRS of a geographic object is unknown, as is the case in the `london` dataset created in the code chunk below, building on the example of London introduced in Section \@ref(vector-data):
 
 ```{r 06-reproj-2}
-london = data.frame(lon = -0.1, lat = 51.5) %>% 
+london = data.frame(lon = -0.1, lat = 51.5) |> 
   st_as_sf(coords = c("lon", "lat"))
 st_is_longlat(london)
 ```
@@ -278,7 +278,7 @@ But for operations involving distances such as buffering, the only way to ensure
 This is done in the code chunk below:
 
 ```{r 06-reproj-6}
-london_proj = data.frame(x = 530000, y = 180000) %>% 
+london_proj = data.frame(x = 530000, y = 180000) |> 
   st_as_sf(coords = 1:2, crs = "EPSG:27700")
 ```
 
@@ -314,25 +314,25 @@ london_buff_projected = st_buffer(london_proj, 1e5)
 The geometries of the three `london_buff*` objects that *have* a specified CRS created above (`london_buff_s2`, `london_buff_lonlat` and `london_buff_projected`) created in the preceding code chunks are illustrated in Figure \@ref(fig:crs-buf).
 
 ```{r crs-buf-old, include=FALSE, eval=FALSE}
-uk = rnaturalearth::ne_countries(scale = 50) %>% 
-  st_as_sf() %>% 
+uk = rnaturalearth::ne_countries(scale = 50) |> 
+  st_as_sf() |> 
   filter(grepl(pattern = "United Kingdom|Ire", x = name_long))
 plot(london_buff_s2, graticule = st_crs(4326), axes = TRUE, reset = FALSE, lwd = 2)
 plot(london_buff_s2_100_cells, lwd = 9, add = TRUE)
 plot(st_geometry(uk), add = TRUE, border = "gray", lwd = 3)
-uk_proj = uk %>%
-  st_transform(27700)
-plot(london_buff_projected, graticule = st_crs(27700), axes = TRUE, reset = FALSE, lwd = 2)
+uk_proj = uk |>
+  st_transform("EPSG:27700")
+plot(london_buff_projected, graticule = st_crs("EPSG:27700"), axes = TRUE, reset = FALSE, lwd = 2)
 plot(london_proj, add = TRUE)
 plot(st_geometry(uk_proj), add = TRUE, border = "gray", lwd = 3)
-plot(london_buff_lonlat, graticule = st_crs(27700), axes = TRUE, reset = FALSE, lwd = 2)
+plot(london_buff_lonlat, graticule = st_crs("EPSG:27700"), axes = TRUE, reset = FALSE, lwd = 2)
 plot(london_proj, add = TRUE)
 plot(st_geometry(uk), add = TRUE, border = "gray", lwd = 3)
 ```
 
 ```{r crs-buf, fig.cap="Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot illustrates the result of buffering unprojected data with sf, which calls Google's S2 spherical geometry engine by default with `max_cells = 1000` (thin line). The thick 'blocky' line illustrates the result of the same operation with `max_cells = 100`.", fig.scap="Buffers around London with a geographic and projected CRS.", echo=FALSE, fig.asp=0.39, fig.width = 8}
-uk = rnaturalearth::ne_countries(scale = 50) %>% 
-  st_as_sf() %>% 
+uk = rnaturalearth::ne_countries(scale = 50) |> 
+  st_as_sf() |> 
   filter(grepl(pattern = "United Kingdom|Ire", x = name_long))
 library(tmap)
 tm1 = tm_shape(london_buff_s2, bbox = st_bbox(london_buff_s2_100_cells)) + 
@@ -684,7 +684,7 @@ tibble(
   resolution = c(mean(res(cat_raster)), mean(res(cat_raster_wgs84),
                                              na.rm = TRUE)),
   unique_categories = c(length(unique(values(cat_raster))),
-                        length(unique(values(cat_raster_wgs84))))) %>%
+                        length(unique(values(cat_raster_wgs84))))) |>
   knitr::kable(caption = paste("Key attributes in the original ('cat\\_raster')", 
                                "and projected ('cat\\_raster\\_wgs84')", 
                                "categorical raster datasets."),
@@ -730,7 +730,7 @@ tibble(
   resolution = c(mean(res(con_raster)), mean(res(con_raster_ea), 
                                              na.rm = TRUE)),
   mean = c(mean(values(con_raster)), mean(values(con_raster_ea), 
-                                          na.rm = TRUE))) %>%
+                                          na.rm = TRUE))) |>
   knitr::kable(caption = paste("Key attributes in the original ('con\\_raster')", 
                                "and projected ('con\\_raster\\_ea') continuous raster", 
                                "datasets."),
@@ -813,7 +813,7 @@ world_mollweide = st_transform(world, crs = "+proj=moll")
 
 ```{r mollproj, fig.cap="Mollweide projection of the world.", warning=FALSE, message=FALSE, echo=FALSE}
 library(tmap)
-world_mollweide_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
+world_mollweide_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) |>
   lwgeom::st_transform_proj(crs = "+proj=moll")
 tm_shape(world_mollweide_gr) +
   tm_lines(col = "gray") +
@@ -832,7 +832,7 @@ world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 ```
 
 ```{r wintriproj, fig.cap="Winkel tripel projection of the world.", echo=FALSE}
-world_wintri_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) %>%
+world_wintri_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) |>
   lwgeom::st_transform_proj(crs = "+proj=wintri")
 library(tmap)
 tm_shape(world_wintri_gr) + tm_lines(col = "gray") +
@@ -868,8 +868,8 @@ world_laea2 = st_transform(world,
 
 ```{r laeaproj2, fig.cap="Lambert azimuthal equal-area projection of the world centered on New York City.", fig.scap="Lambert azimuthal equal-area projection centered on New York City.", warning=FALSE, echo=FALSE}
 # Currently fails, see https://github.com/Robinlovelace/geocompr/issues/460
-world_laea2_g = st_graticule(ndiscr = 10000) %>%
-  st_transform("+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40.1 +ellps=WGS84 +no_defs") %>%
+world_laea2_g = st_graticule(ndiscr = 10000) |>
+  st_transform("+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40.1 +ellps=WGS84 +no_defs") |>
   st_geometry()
 tm_shape(world_laea2_g) + tm_lines(col = "gray") +
   tm_shape(world_laea2) + tm_borders(col = "black")
