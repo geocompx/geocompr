@@ -486,7 +486,7 @@ rr_spcv_glm = mlr3::resample(task = task,
                              learner = learner,
                              resampling = resampling)
 # compute the AUROC as a data.table
-score_spcv_glm = rr_glm$score(measure = mlr3::msr("classif.auc")) %>%
+score_spcv_glm = rr_spcv_glm$score(measure = mlr3::msr("classif.auc")) %>%
   # keep only the columns you need
   .[, .(task_id, learner_id, resampling_id, classif.auc)]
 ```
