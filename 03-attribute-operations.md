@@ -122,7 +122,7 @@ Tidyverse compatibility is an advantage of **sf** over its predecessor **sp**, b
 
 Base R subsetting methods include the operator `[` and the function `subset()`.
 The key **dplyr** subsetting functions are  `filter()` and `slice()` for subsetting rows, and `select()` for subsetting columns.
-Both approaches preserve the spatial components of attribute data in `sf` objects, while using the operator `$` or the **dplyr** function `pull()` to return a single attribute column as a vector will lose the geometry data, as we will see.
+Both approaches preserve the spatial components of attribute data in `sf` objects, while using the operator `$` or the **dplyr** function `pull()` to return a single attribute column as a vector will lose the attribute data, as we will see.
 \index{attribute!subsetting}
 This section focuses on subsetting `sf` data frames; for further details on subsetting vectors and non-geographic data frames we recommend reading section section [2.7](https://cran.r-project.org/doc/manuals/r-release/R-intro.html#Index-vectors) of An Introduction to R [@rcoreteam_introduction_2021] and Chapter [4](https://adv-r.hadley.nz/subsetting.html) of Advanced R Programming [@wickham_advanced_2019], respectively.
 
