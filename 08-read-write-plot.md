@@ -179,8 +179,8 @@ Next, they are passed to the function `osmdata_sf()` which does the work of down
 
 ```r
 library(osmdata)
-parks = opq(bbox = "leeds uk") %>% 
-  add_osm_feature(key = "leisure", value = "park") %>% 
+parks = opq(bbox = "leeds uk") |> 
+  add_osm_feature(key = "leisure", value = "park") |> 
   osmdata_sf()
 ```
 

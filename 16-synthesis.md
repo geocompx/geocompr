@@ -59,7 +59,7 @@ The syntax differs but the results are (in essence) the same:
 ```r
 library(dplyr)                          # attach tidyverse package
 nz_name1 = nz["Name"]                   # base R approach
-nz_name2 = nz %>% select(Name)          # tidyverse approach
+nz_name2 = nz |> select(Name)          # tidyverse approach
 identical(nz_name1$Name, nz_name2$Name) # check results
 #> [1] TRUE
 ```
@@ -73,7 +73,7 @@ However, if you do choose to use **tidyverse**\index{tidyverse (package)} functi
 While commonly needed operators/functions were covered in depth --- such as the base R `[` subsetting operator and the **dplyr** function `filter()` --- there are many other functions for working with geographic data, from other packages, that have not been mentioned.
 Chapter \@ref(intro) mentions 20+ influential packages for working with geographic data, and only a handful of these are demonstrated in subsequent chapters.
 There are hundreds more.
-As of early 2019, there are nearly 200 packages mentioned in the Spatial [Task View](https://cran.r-project.org/web/views/);
+As of mid-2022, there are about 200 packages mentioned in the Spatial [Task View](https://cran.r-project.org/web/views/);
 more packages and countless functions for geographic data are developed each year, making it impractical to cover them all in a single book.
 
 

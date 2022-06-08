@@ -465,8 +465,8 @@ To do this, we constrain the query of the street network (in OSM language called
 ```r
 library(osmdata)
 b_box = st_bbox(points)
-london_streets = opq(b_box) %>%
-  add_osm_feature(key = "highway") %>%
+london_streets = opq(b_box) |>
+  add_osm_feature(key = "highway") |>
   osmdata_sf() 
 london_streets = london_streets[["osm_lines"]]
 london_streets = dplyr::select(london_streets, osm_id)
@@ -604,8 +604,8 @@ Now, you have to set up a location and a mapset if you want to use GRASS\index{G
 <!-- ``` -->
 
 <!-- ```{r 09-gis-34, eval=FALSE} -->
-<!-- route = readVECT("shortest_route") %>% -->
-<!--   st_as_sf() %>% -->
+<!-- route = readVECT("shortest_route") |> -->
+<!--   st_as_sf() |> -->
 <!--   st_geometry() -->
 <!-- mapview::mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) + -->
 <!--   points -->

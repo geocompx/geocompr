@@ -236,7 +236,7 @@ In some cases the CRS of a geographic object is unknown, as is the case in the `
 
 
 ```r
-london = data.frame(lon = -0.1, lat = 51.5) %>% 
+london = data.frame(lon = -0.1, lat = 51.5) |> 
   st_as_sf(coords = c("lon", "lat"))
 st_is_longlat(london)
 #> [1] NA
@@ -322,7 +322,7 @@ This is done in the code chunk below:
 
 
 ```r
-london_proj = data.frame(x = 530000, y = 180000) %>% 
+london_proj = data.frame(x = 530000, y = 180000) |> 
   st_as_sf(coords = 1:2, crs = "EPSG:27700")
 ```
 

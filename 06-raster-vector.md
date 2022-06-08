@@ -122,12 +122,15 @@ However, the line extraction approach is not recommended to obtain values along 
 In this case, a better approach is to split the line into many points and then extract the values for these points.
 To demonstrate this, the code below creates `zion_transect`, a straight line going from northwest to southeast of the Zion National Park, illustrated in Figure \@ref(fig:lineextr)(A) (see Section \@ref(vector-data) for a recap on the vector data model):
 
+<!--toDo:jn-->
+<!--fix pipes-->
+
 
 ```r
-zion_transect = cbind(c(-113.2, -112.9), c(37.45, 37.2)) %>%
-  st_linestring() %>% 
-  st_sfc(crs = crs(srtm)) %>% 
-  st_sf()
+zion_transect = cbind(c(-113.2, -112.9), c(37.45, 37.2)) |>
+  st_linestring() |> 
+  st_sfc(crs = crs(srtm)) |>
+  st_sf(geometry = _)
 ```
 
 
@@ -150,8 +153,8 @@ In this case, we only have one transect, but the code, in principle, should work
 
 
 ```r
-zion_transect = zion_transect %>% 
-  group_by(id) %>% 
+zion_transect = zion_transect |> 
+  group_by(id) |> 
   mutate(dist = st_distance(geometry)[, 1]) 
 ```
 
@@ -174,6 +177,10 @@ The final type of geographic vector object for raster extraction is **polygons**
 Like lines, polygons tend to return many raster values per polygon.
 This is demonstrated in the command below, which results in a data frame with column names `ID` (the row number of the polygon) and `srtm` (associated elevation values):
 
+<!--toDo:jn-->
+<!--fix pipes-->
+
+
 
 
 
@@ -186,7 +193,7 @@ The generation of summary statistics is demonstrated in the code below, which cr
 
 
 ```r
-group_by(zion_srtm_values, ID) %>% 
+group_by(zion_srtm_values, ID) |> 
   summarize(across(srtm, list(min = min, mean = mean, max = max)))
 #> # A tibble: 1 × 4
 #>      ID srtm_min srtm_mean srtm_max
@@ -210,8 +217,8 @@ This is illustrated with a land cover dataset (`nlcd`) from the **spDataLarge** 
 nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 zion2 = st_transform(zion, st_crs(nlcd))
 zion_nlcd = terra::extract(nlcd, vect(zion2))
-zion_nlcd %>% 
-  group_by(ID, levels) %>%
+zion_nlcd |> 
+  group_by(ID, levels) |>
   count()
 #> # A tibble: 7 × 3
 #> # Groups:   ID, levels [7]
@@ -349,7 +356,7 @@ Note, here we also used `st_as_sf()` to convert the resulting object to the `sf`
 
 ```r
 elev = rast(system.file("raster/elev.tif", package = "spData"))
-elev_point = as.points(elev) %>% 
+elev_point = as.points(elev) |> 
   st_as_sf()
 ```
 
@@ -389,7 +396,7 @@ This is illustrated below by converting the `grain` object into polygons and sub
 
 ```r
 grain = rast(system.file("raster/grain.tif", package = "spData"))
-grain_poly = as.polygons(grain) %>% 
+grain_poly = as.polygons(grain) |> 
   st_as_sf()
 ```
 
@@ -411,8 +418,8 @@ library(spData)
 zion_points_path = system.file("vector/zion_points.gpkg", package = "spDataLarge")
 zion_points = read_sf(zion_points_path)
 srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
-ch = st_combine(zion_points) %>%
-  st_convex_hull() %>% 
+ch = st_combine(zion_points) |>
+  st_convex_hull() |> 
   st_as_sf()
 ```
 

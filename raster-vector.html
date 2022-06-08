@@ -190,11 +190,13 @@ Then, it extracts one value for each raster cell touched by a line.
 However, the line extraction approach is not recommended to obtain values along the transects as it is hard to get the correct distance between each pair of extracted raster values.</p>
 <p>In this case, a better approach is to split the line into many points and then extract the values for these points.
 To demonstrate this, the code below creates <code>zion_transect</code>, a straight line going from northwest to southeast of the Zion National Park, illustrated in Figure <a href="raster-vector.html#fig:lineextr">6.3</a>(A) (see Section <a href="spatial-class.html#vector-data">2.2</a> for a recap on the vector data model):</p>
+<!--toDo:jn-->
+<!--fix pipes-->
 <div class="sourceCode" id="cb204"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">zion_transect</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">113.2</span>, <span class="op">-</span><span class="fl">112.9</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">37.45</span>, <span class="fl">37.2</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
-  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_linestring</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
-  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span>crs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">srtm</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
-  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html">st_sf</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">zion_transect</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">113.2</span>, <span class="op">-</span><span class="fl">112.9</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/c.html">c</a></span><span class="op">(</span><span class="fl">37.45</span>, <span class="fl">37.2</span><span class="op">)</span><span class="op">)</span> |&gt;
+  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_linestring</a></span><span class="op">(</span><span class="op">)</span> |&gt; 
+  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span>crs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">srtm</span><span class="op">)</span><span class="op">)</span> |&gt;
+  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html">st_sf</a></span><span class="op">(</span>geometry <span class="op">=</span> _<span class="op">)</span></code></pre></div>
 <p>The utility of extracting heights from a linear selector is illustrated by imagining that you are planning a hike.
 The method demonstrated below provides an ‘elevation profile’ of the route (the line does not need to be straight), useful for estimating how long it will take due to long climbs.</p>
 <p>The first step is to add a unique <code>id</code> for each transect.
@@ -206,8 +208,8 @@ Next, with the <code><a href="https://r-spatial.github.io/sf/reference/geos_unar
 <p>Now, we have a large set of points, and we want to derive a distance between the first point in our transects and each of the subsequent points.
 In this case, we only have one transect, but the code, in principle, should work on any number of transects:</p>
 <div class="sourceCode" id="cb206"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">zion_transect</span> <span class="op">=</span> <span class="va">zion_transect</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
+<code class="sourceCode R"><span class="va">zion_transect</span> <span class="op">=</span> <span class="va">zion_transect</span> |&gt; 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> |&gt; 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>dist <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">geometry</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span> </code></pre></div>
 <p>Finally, we can extract elevation values for each point in our transects and combine this information with our main object.</p>
 <div class="sourceCode" id="cb207"><pre class="downlit sourceCode r">
@@ -223,12 +225,14 @@ FIGURE 6.3: Location of a line used for raster extraction (left) and the elevati
 <p>The final type of geographic vector object for raster extraction is <strong>polygons</strong>.
 Like lines, polygons tend to return many raster values per polygon.
 This is demonstrated in the command below, which results in a data frame with column names <code>ID</code> (the row number of the polygon) and <code>srtm</code> (associated elevation values):</p>
+<!--toDo:jn-->
+<!--fix pipes-->
 <div class="sourceCode" id="cb208"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">zion_srtm_values</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">srtm</span>, y <span class="op">=</span> <span class="va">zion_vect</span><span class="op">)</span></code></pre></div>
 <p>Such results can be used to generate summary statistics for raster values per polygon, for example to characterize a single region or to compare many regions.
 The generation of summary statistics is demonstrated in the code below, which creates the object <code>zion_srtm_df</code> containing summary statistics for elevation values in Zion National Park (see Figure <a href="raster-vector.html#fig:polyextr">6.4</a>(A)):</p>
 <div class="sourceCode" id="cb209"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">zion_srtm_values</span>, <span class="va">ID</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
+<code class="sourceCode R"><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">zion_srtm_values</span>, <span class="va">ID</span><span class="op">)</span> |&gt; 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html">across</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>min <span class="op">=</span> <span class="va">min</span>, mean <span class="op">=</span> <span class="va">mean</span>, max <span class="op">=</span> <span class="va">max</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 1 × 4</span>
 <span class="co">#&gt;      ID srtm_min srtm_mean srtm_max</span>
@@ -246,8 +250,8 @@ This is illustrated with a land cover dataset (<code>nlcd</code>) from the <stro
 <code class="sourceCode R"><span class="va">nlcd</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/nlcd.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span>
 <span class="va">zion2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">zion</span>, <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">nlcd</span><span class="op">)</span><span class="op">)</span>
 <span class="va">zion_nlcd</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">nlcd</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">zion2</span><span class="op">)</span><span class="op">)</span>
-<span class="va">zion_nlcd</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">levels</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
+<span class="va">zion_nlcd</span> |&gt; 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">levels</span><span class="op">)</span> |&gt;
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 7 × 3</span>
 <span class="co">#&gt; # Groups:   ID, levels [7]</span>
@@ -359,7 +363,7 @@ In R, vectorization refers to the possibility of replacing <code>for</code>-loop
 Note, here we also used <code><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf()</a></code> to convert the resulting object to the <code>sf</code> class.</p>
 <div class="sourceCode" id="cb218"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">elev</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/elev.tif"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span><span class="op">)</span>
-<span class="va">elev_point</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/as.spatvector.html">as.points</a></span><span class="op">(</span><span class="va">elev</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
+<span class="va">elev_point</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/as.spatvector.html">as.points</a></span><span class="op">(</span><span class="va">elev</span><span class="op">)</span> |&gt; 
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:raster-vectorization1"></span>
@@ -389,7 +393,7 @@ This can be done with <code><a href="https://rdrr.io/pkg/terra/man/as.spatvector
 <p>This is illustrated below by converting the <code>grain</code> object into polygons and subsequently dissolving borders between polygons with the same attribute values (also see the <code>dissolve</code> argument in <code><a href="https://rdrr.io/pkg/terra/man/as.spatvector.html">as.polygons()</a></code>).</p>
 <div class="sourceCode" id="cb220"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">grain</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/grain.tif"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span><span class="op">)</span>
-<span class="va">grain_poly</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/as.spatvector.html">as.polygons</a></span><span class="op">(</span><span class="va">grain</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
+<span class="va">grain_poly</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/as.spatvector.html">as.polygons</a></span><span class="op">(</span><span class="va">grain</span><span class="op">)</span> |&gt; 
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:06-raster-vector-40"></span>
@@ -411,8 +415,8 @@ They also use a polygonal ‘convex hull’ derived from the vector dataset (<co
 <span class="va">zion_points_path</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"vector/zion_points.gpkg"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span>
 <span class="va">zion_points</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">zion_points_path</span><span class="op">)</span>
 <span class="va">srtm</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/srtm.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span>
-<span class="va">ch</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_combine</a></span><span class="op">(</span><span class="va">zion_points</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
-  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_convex_hull</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> 
+<span class="va">ch</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_combine</a></span><span class="op">(</span><span class="va">zion_points</span><span class="op">)</span> |&gt;
+  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_convex_hull</a></span><span class="op">(</span><span class="op">)</span> |&gt; 
   <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p>E1. Crop the <code>srtm</code> raster using (1) the <code>zion_points</code> dataset and (2) the <code>ch</code> dataset.
 Are there any differences in the output maps?
@@ -480,7 +484,7 @@ Using these two new objects:</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-06-05.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-06-07.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

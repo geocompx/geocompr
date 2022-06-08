@@ -131,8 +131,8 @@ This is demonstrated by the following code chunk, which creates Figure \@ref(fig
 ```r
 library(leaflet)
 popup = c("Robin", "Jakub", "Jannes")
-leaflet() %>%
-  addProviderTiles("NASAGIBS.ViirsEarthAtNight2012") %>%
+leaflet() |>
+  addProviderTiles("NASAGIBS.ViirsEarthAtNight2012") |>
   addMarkers(lng = c(-3, 23, 11),
              lat = c(52, 53, 49), 
              popup = popup)

@@ -146,7 +146,7 @@ More shapes and layers can be added, as illustrated in the code chunk below whic
 
 
 ```r
-nz_water = st_union(nz) %>% st_buffer(22200) %>% 
+nz_water = st_union(nz) |> st_buffer(22200) |> 
   st_cast(to = "LINESTRING")
 map_nz2 = map_nz1 +
   tm_shape(nz_water) + tm_lines()
@@ -430,7 +430,7 @@ This use case of faceted plot is illustrated in Figure \@ref(fig:urban-facet).
 
 
 ```r
-urb_1970_2030 = urban_agglomerations %>% 
+urb_1970_2030 = urban_agglomerations |> 
   filter(year %in% c(1970, 1990, 2010, 2030))
 
 tm_shape(world) +
@@ -470,7 +470,7 @@ The first step is to define the area of interest, which can be done by creating 
 ```r
 nz_region = st_bbox(c(xmin = 1340000, xmax = 1450000,
                       ymin = 5130000, ymax = 5210000),
-                    crs = st_crs(nz_height)) %>% 
+                    crs = st_crs(nz_height)) |> 
   st_as_sfc()
 ```
 
@@ -693,10 +693,10 @@ Consider the following example where **sf** is used to intersect lines and polyg
 
 
 ```r
-trails %>%
-  st_transform(st_crs(franconia)) %>%
-  st_intersection(franconia[franconia$district == "Oberfranken", ]) %>%
-  st_collection_extract("LINE") %>%
+trails |>
+  st_transform(st_crs(franconia)) |>
+  st_intersection(franconia[franconia$district == "Oberfranken", ]) |>
+  st_collection_extract("LINE") |>
   mapview(color = "red", lwd = 3, layer.name = "trails") +
   mapview(franconia, zcol = "district", burst = TRUE) +
   breweries
@@ -710,7 +710,8 @@ trails %>%
 <!--toDo:jn-->
 <!-- add more info about mapview improved performance ("mapview can use all of them by setting e.g. `mapviewOptions(platform = "leafgl"/"mapdeck")` or `mapviewOptions(georaster = TRUE)`") -->
 
-One important thing to keep in mind is that **mapview** layers are added via the `+` operator (similar to **ggplot2** or **tmap**). This is a frequent [gotcha](https://en.wikipedia.org/wiki/Gotcha_(programming)) in piped workflows where the main binding operator is `%>%`.
+One important thing to keep in mind is that **mapview** layers are added via the `+` operator (similar to **ggplot2** or **tmap**). 
+This is a frequent [gotcha](https://en.wikipedia.org/wiki/Gotcha_(programming)) in piped workflows where the main binding operator is `|>`.
 For further information on **mapview**, see the package's website at: [r-spatial.github.io/mapview/](https://r-spatial.github.io/mapview/articles/).
 
 There are other ways to create interactive maps with R.
@@ -736,8 +737,8 @@ set_token(Sys.getenv("MAPBOX"))
 crash_data = read.csv("https://git.io/geocompr-mapdeck")
 crash_data = na.omit(crash_data)
 ms = mapdeck_style("dark")
-mapdeck(style = ms, pitch = 45, location = c(0, 52), zoom = 4) %>%
-add_grid(data = crash_data, lat = "lat", lon = "lng", cell_size = 1000,
+mapdeck(style = ms, pitch = 45, location = c(0, 52), zoom = 4) |>
+  add_grid(data = crash_data, lat = "lat", lon = "lng", cell_size = 1000,
          elevation_scale = 50, layer_id = "grid_layer",
          colour_range = viridisLite::plasma(6))
 ```
@@ -748,7 +749,7 @@ add_grid(data = crash_data, lat = "lat", lon = "lng", cell_size = 1000,
 </div>
 
 In the browser you can zoom and drag, in addition to rotating and tilting the map when pressing `Cmd`/`Ctrl`.
-Multiple layers can be added with the `%>%` operator, as demonstrated in the [`mapdeck` vignette](https://cran.r-project.org/web/packages/mapdeck/vignettes/mapdeck.html). 
+Multiple layers can be added with the `|>` operator, as demonstrated in the [`mapdeck` vignette](https://cran.r-project.org/web/packages/mapdeck/vignettes/mapdeck.html). 
 
 Mapdeck also supports `sf` objects, as can be seen by replacing the `add_grid()` function call in the preceding code chunk with `add_polygon(data = lnd, layer_id = "polygon_layer")`, to add polygons representing London to an interactive tilted map.
 
@@ -766,12 +767,12 @@ This allows multiple map layers and control settings to be added interactively, 
 
 ```r
 pal = colorNumeric("RdYlBu", domain = cycle_hire$nbikes)
-leaflet(data = cycle_hire) %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  addCircles(col = ~pal(nbikes), opacity = 0.9) %>% 
-  addPolygons(data = lnd, fill = FALSE) %>% 
-  addLegend(pal = pal, values = ~nbikes) %>% 
-  setView(lng = -0.1, 51.5, zoom = 12) %>% 
+leaflet(data = cycle_hire) |> 
+  addProviderTiles(providers$CartoDB.Positron) |>
+  addCircles(col = ~pal(nbikes), opacity = 0.9) |> 
+  addPolygons(data = lnd, fill = FALSE) |> 
+  addLegend(pal = pal, values = ~nbikes) |> 
+  setView(lng = -0.1, 51.5, zoom = 12) |> 
   addMiniMap()
 ```
 
@@ -825,8 +826,8 @@ ui = fluidPage(
   )
 server = function(input, output) {
   output$map = renderLeaflet({
-    leaflet() %>% 
-      # addProviderTiles("OpenStreetMap.BlackAndWhite") %>%
+    leaflet() |> 
+      # addProviderTiles("OpenStreetMap.BlackAndWhite") |>
       addPolygons(data = world[world$lifeExp < input$life, ])})
 }
 shinyApp(ui, server)
@@ -1087,10 +1088,10 @@ Create it using the `world` and `worldbank_df` datasets from the **spData** pack
 
 
 ```r
-africa = world %>% 
-  filter(continent == "Africa", !is.na(iso_a2)) %>% 
-  left_join(worldbank_df, by = "iso_a2") %>% 
-  dplyr::select(name, subregion, gdpPercap, HDI, pop_growth) %>% 
+africa = world |> 
+  filter(continent == "Africa", !is.na(iso_a2)) |> 
+  left_join(worldbank_df, by = "iso_a2") |> 
+  dplyr::select(name, subregion, gdpPercap, HDI, pop_growth) |> 
   st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
 ```
 

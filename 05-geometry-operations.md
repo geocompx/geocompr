@@ -81,7 +81,7 @@ Therefore, the first step is to project the data into some adequate projected CR
 
 ```r
 us_states2163 = st_transform(us_states, "EPSG:2163")
-us_states2163 = us_states2163 %>% 
+us_states2163 = us_states2163 |> 
   mutate(AREA = as.numeric(AREA)) 
 ```
 
@@ -378,7 +378,8 @@ This is demonstrated in the code chunk below in which 49 `us_states` are aggrega
 ```r
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
                     FUN = sum, na.rm = TRUE)
-regions2 = us_states %>% group_by(REGION) %>%
+regions2 = us_states |> 
+  group_by(REGION) |>
   summarize(pop = sum(total_pop_15, na.rm = TRUE))
 ```
 

@@ -287,9 +287,9 @@ This is illustrated below, in which only countries from Asia are filtered from t
 
 
 ```r
-world7 = world %>%
-  filter(continent == "Asia") %>%
-  dplyr::select(name_long, continent) %>%
+world7 = world |>
+  filter(continent == "Asia") |>
+  dplyr::select(name_long, continent) |>
   slice(1:5)
 ```
 
@@ -352,12 +352,12 @@ nrow(world_agg2)
 ```
 
 The resulting `world_agg2` object is a spatial object containing 8 features representing the continents of the world (and the open ocean).
-`group_by() %>% summarize()` is the **dplyr** equivalent of `aggregate()`, with the variable name provided in the `group_by()` function specifying the grouping variable and information on what is to be summarized passed to the `summarize()` function, as shown below:
+`group_by() |> summarize()` is the **dplyr** equivalent of `aggregate()`, with the variable name provided in the `group_by()` function specifying the grouping variable and information on what is to be summarized passed to the `summarize()` function, as shown below:
 
 
 ```r
-world_agg3 = world %>%
-  group_by(continent) %>%
+world_agg3 = world |>
+  group_by(continent) |>
   summarize(pop = sum(pop, na.rm = TRUE))
 ```
 
@@ -366,8 +366,8 @@ This flexibility is illustrated in the command below, which calculates not only 
 
 
 ```r
-world_agg4  = world %>% 
-  group_by(continent) %>%
+world_agg4  = world |> 
+  group_by(continent) |> 
   summarize(pop = sum(pop, na.rm = TRUE), `area_sqkm` = sum(area_km2), n = n())
 ```
 
@@ -379,14 +379,14 @@ The following command calculates population density (with `mutate()`), arranges 
 
 
 ```r
-world_agg5 = world %>% 
-  st_drop_geometry() %>%                      # drop the geometry for speed
-  dplyr::select(pop, continent, area_km2) %>% # subset the columns of interest  
-  group_by(continent) %>%                     # group by continent and summarize:
-  summarize(Pop = sum(pop, na.rm = TRUE), Area = sum(area_km2), N = n()) %>%
-  mutate(Density = round(Pop / Area)) %>%     # calculate population density
-  top_n(n = 3, wt = Pop) %>%                  # keep only the top 3
-  arrange(desc(N))                            # arrange in order of n. countries
+world_agg5 = world |> 
+  st_drop_geometry() |>                      # drop the geometry for speed
+  dplyr::select(pop, continent, area_km2) |> # subset the columns of interest  
+  group_by(continent) |>                     # group by continent and summarize:
+  summarize(Pop = sum(pop, na.rm = TRUE), Area = sum(area_km2), N = n()) |>
+  mutate(Density = round(Pop / Area)) |>     # calculate population density
+  top_n(n = 3, wt = Pop) |>                  # keep only the top 3
+  arrange(desc(N))                           # arrange in order of n. countries
 ```
 
 
@@ -554,7 +554,7 @@ Alternatively, we can use one of **dplyr** functions - `mutate()` or `transmute(
 
 
 ```r
-world %>% 
+world |> 
   mutate(pop_dens = pop / area_km2)
 ```
 
@@ -562,7 +562,7 @@ The difference between `mutate()` and `transmute()` is that the latter drops all
 
 
 ```r
-world %>% 
+world |> 
   transmute(pop_dens = pop / area_km2)
 ```
 
@@ -572,7 +572,7 @@ Additionally, we can define a separator (here: a colon `:`) which defines how th
 
 
 ```r
-world_unite = world %>%
+world_unite = world |>
   tidyr::unite("con_reg", continent:region_un, sep = ":", remove = TRUE)
 ```
 
@@ -581,7 +581,7 @@ The resulting `sf` object has a new column called `con_reg` representing the con
 
 
 ```r
-world_separate = world_unite %>% 
+world_separate = world_unite |>
   tidyr::separate(con_reg, c("continent", "region_un"), sep = ":")
 ```
 
@@ -593,7 +593,7 @@ The following command, for example, renames the lengthy `name_long` column to si
 
 
 ```r
-world %>% 
+world |> 
   rename(name = name_long)
 ```
 
@@ -605,7 +605,7 @@ This is illustrated below, which outputs the same `world` object, but with very 
 
 ```r
 new_names = c("i", "n", "c", "r", "s", "t", "a", "p", "l", "gP", "geom")
-world_new_names = world %>% 
+world_new_names = world |>
   setNames(new_names)
 ```
 
@@ -617,7 +617,7 @@ Do this with `st_drop_geometry()`, **not** manually with commands such as `selec
 
 
 ```r
-world_data = world %>% st_drop_geometry()
+world_data = world |> st_drop_geometry()
 class(world_data)
 #> [1] "tbl_df"     "tbl"        "data.frame"
 ```

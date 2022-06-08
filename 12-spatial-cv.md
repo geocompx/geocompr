@@ -474,6 +474,9 @@ As performance measure, we again choose the AUROC.
 To retrieve it, we use the `score()` method of the resampling result output object (`score_spcv_glm`).
 This returns a `data.table` object with 500 rows -- one for each model.
 
+<!--toDo:jn-->
+<!--fix pipes-->
+
 
 ```r
 # reduce verbosity
@@ -692,6 +695,9 @@ After the processing, it is good practice to explicitly stop the parallelization
 Finally, we save the output object (`result`) to disk in case we would like to use it in another R session.
 Before running the subsequent code, be aware that it is time-consuming since it will run the spatial cross-validation with 125,500 models.
 Note that runtime depends on many aspects: CPU speed, the selected algorithm, the selected number of cores and the dataset.
+
+<!--toDo:jn-->
+<!--fix pipes-->
 
 
 ```r
