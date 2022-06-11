@@ -76,13 +76,9 @@ As we show in Chapter \@ref(reproj-geo-data), GEOS assumes that the data is in a
 Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (epsg = 2163) (on the left in Figure \@ref(fig:us-simp)):
 
 
-
-
-
 ```r
 us_states2163 = st_transform(us_states, "EPSG:2163")
-us_states2163 = us_states2163 |> 
-  mutate(AREA = as.numeric(AREA)) 
+us_states2163 = us_states2163
 ```
 
 `st_simplify()` works equally well with projected polygons:
