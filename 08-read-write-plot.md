@@ -898,14 +898,14 @@ writeRaster(single_layer, filename = "my_raster.tif", datatype = "INT2U")
 Some raster file formats have additional options, that can be set by providing [GDAL parameters](http://www.gdal.org/formats_list.html) to the `options` argument of `writeRaster()`.
 GeoTIFF files are written in **terra**, by default, with the LZW compression `gdal = c("COMPRESS=LZW")`.
 To change or disable the compression, we need to modify this argument.
-Additionally, we can save our raster object as COG (*Cloud Optimized GeoTIFF*, Section \@ref(file-formats)) with the `"of=COG"` option.
+Additionally, we can save our raster object as COG (*Cloud Optimized GeoTIFF*, Section \@ref(file-formats)) with the `"TILED=YES"` and `"COPY_SRC_OVERVIEWS=YES"` options.
 
 
 ```r
 writeRaster(x = single_layer,
             filename = "my_raster.tif",
             datatype = "INT2U",
-            gdal = c("COMPRESS=NONE", "of=COG"),
+            gdal = c("COMPRESS=NONE", "TILED=YES", "COPY_SRC_OVERVIEWS=YES"),
             overwrite = TRUE)
 ```
 
