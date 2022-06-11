@@ -799,7 +799,7 @@ In short, this process takes the values of our original raster and recalculates 
 
 
 There are several methods for estimating values for a raster with different resolutions/origins, as shown in Figure \@ref(fig:resampl).
-These resampling methods include:
+The main resampling methods include:
 
 - Nearest neighbor: assigns the value of the nearest cell of the original raster to the cell of the target one. This is a fast simple technique that is usually suitable for resampling categorical rasters.
 - Bilinear interpolation: assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure \@ref(fig:bilinear)). This is the fastest method that is appropriate for continuous rasters.
@@ -839,14 +839,13 @@ Figure \@ref(fig:resampl) shows a comparison of different resampling methods on 
 <p class="caption">(\#fig:resampl)Visual comparison of the original raster and five different resampling methods.</p>
 </div>
 
+The `resample()` function also has some additional resampling methods, including `sum`, `min`, `q1`, `med`, `q3`, `max`, `average`, `mode`, and `rms`.
+All of them calculate a given statistic based on the values of all non-NA contributing grid cells.
+For example, `sum` is useful when each raster cell represents a spatially extensive variable (e.g., number of people).
+As an effect of using `sum`, the resampled raster should have the sample total number of people as the original one.
+
 As you will see in section \@ref(reproj-ras), raster reprojection is a special case of resampling when our target raster has a different CRS than the original raster.
 
-<!--jn:toDo-->
-<!-- decide -->
-<!-- should we mention gdalUtils or gdalUtilities? -->
-<!-- gdalUtils - https://cran.r-project.org/web/packages/gdalUtils/index.html - we mentioned it in geocompr 1; however it seems abandoned -->
-<!-- gdalUtilities - https://cran.r-project.org/web/packages/gdalUtilities/index.html -->
-<!-- also - add some reference to GDAL functions! -->
 \index{GDAL}
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Most geometry operations in **terra** are user-friendly, rather fast, and work on large raster objects.
 However, there could be some cases, when **terra** is not the most performant either for extensive rasters or many raster files, and some alternatives should be considered.
