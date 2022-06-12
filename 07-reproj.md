@@ -819,16 +819,19 @@ world_mollweide = st_transform(world, crs = "+proj=moll")
 <p class="caption">(\#fig:mollproj)Mollweide projection of the world.</p>
 </div>
 
-On the other hand, it is often desirable to have as little distortion as possible for all spatial properties (area, direction, distance) when mapping the world.
-One of the most popular projections to achieve this is the Winkel tripel projection (Figure \@ref(fig:wintriproj)).^[
+It is often desirable to minimize distortion for all spatial properties (area, direction, distance) when mapping the world.
+One of the most popular projections to achieve this is [Winkel tripel](http://www.winkel.org/other/Winkel%20Tripel%20Projections.htm), illustrated in Figure \@ref(fig:wintriproj).^[
 This projection is used, among others, by the National Geographic Society.
 ]
-`st_transform_proj()` from the **lwgeom** package allows for coordinate transformations to a wide range of CRSs, including the Winkel tripel projection:
+The result was created with `st_transform_proj()` from the **lwgeom**, which enables transformations to projections not supported by GDAL, with the following command:
 
 
 ```r
 world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
 ```
+
+
+
 
 <div class="figure" style="text-align: center">
 <img src="07-reproj_files/figure-html/wintriproj-1.png" alt="Winkel tripel projection of the world." width="100%" />
