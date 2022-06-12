@@ -524,7 +524,10 @@ Section \@ref(whenproject) contains an example in which at least one `sf` object
 london2 = st_transform(london_geo, "EPSG:27700")
 ```
 
-Now that a transformed version of `london` has been created, using the **sf** function `st_transform()`, the distance between the two representations of London can be found.
+Now that a transformed version of `london` has been created, using the **sf** function `st_transform()`, the distance between the two representations of London can be found.^[
+An alternative to `st_transform()` is `st_transform_proj()` from the **lwgeom**, which enables transformations which bypasses GDAL and can support projections not supported by GDAL.
+At the time of writing (2022) we could not find any projections supported by `st_transform_proj()` but not supported by `st_transform()`.
+]
 It may come as a surprise that `london` and `london2` are just over 2 km apart!^[
 The difference in location between the two points is not due to imperfections in the transforming operation (which is in fact very accurate) but the low precision of the manually-created coordinates that created `london` and `london_proj`.
 Also surprising may be that the result is provided in a matrix with units of meters.
@@ -798,7 +801,7 @@ zion_aeqd = st_transform(zion, my_wkt)
 Custom projections can also be made interactively, for example, using the [Projection Wizard](https://projectionwizard.org/#) web application [@savric_projection_2016].
 This website allows you to select a spatial extent of your data and a distortion property, and returns a list of possible projections.
 The list also contains WKT definitions of the projections that you can copy and use for reprojections.
-See @opengeospatialconsortium_wellknown_2019 for details on creating custom CRS definitions using WKT strings.
+See @opengeospatialconsortium_wellknown_2019 for details on creating custom CRS definitions with WKT strings.
 
 \index{CRS!proj4string}
 A `proj4string` definition can also be used to create custom projections, as long we accept its limitations mentioned in Section \@ref(crs-in-r).
@@ -823,11 +826,11 @@ It is often desirable to minimize distortion for all spatial properties (area, d
 One of the most popular projections to achieve this is [Winkel tripel](http://www.winkel.org/other/Winkel%20Tripel%20Projections.htm), illustrated in Figure \@ref(fig:wintriproj).^[
 This projection is used, among others, by the National Geographic Society.
 ]
-The result was created with `st_transform_proj()` from the **lwgeom**, which enables transformations to projections not supported by GDAL, with the following command:
+The result was created with the following command:
 
 
 ```r
-world_wintri = lwgeom::st_transform_proj(world, crs = "+proj=wintri")
+world_wintri = st_transform(world, crs = "+proj=wintri")
 ```
 
 
