@@ -337,7 +337,7 @@ Additional ways of representing and working with geographic data in R since 2018
 
 This modernization had several motivations, including the emergence of new technologies and standard, and the impacts from spatial software development outside of the R environment [@bivand_progress_2021].
 The most important external factor affecting most spatial software, including R spatial packages, were the major updates, including many breaking changes to the PROJ library\index{PROJ} that had begun in 2018.
-Most importantly, these changes forced the replacement of `proj4string` to `WKT` representation for storage of coordinate reference systems and coordinates operations (learn more in Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)).
+Most importantly, these changes forced the replacement of 'proj-string' representations of coordinate reference systems with 'Well Known Text', as described in Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data).
 
 \index{rayshader (package)}
 Since 2018, the progress of spatial visualization tools in R has been related to a few factors.

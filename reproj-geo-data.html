@@ -6,16 +6,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Chapter 7 Reprojecting geographic data | Geocomputation with R</title>
 <meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow">
-<meta name="description" content="Prerequisites This chapter requires the following packages (lwgeom is also used, but does not need to be attached): library(sf) library(terra) library(dplyr) library(spData) library(spDataLarge) ...">
+<meta name="description" content="Prerequisites This chapter requires the following packages: library(sf) library(terra) library(dplyr) library(spData) library(spDataLarge)  7.1 Introduction Section 2.4 introduced coordinate...">
 <meta name="generator" content="bookdown 0.26 with bs4_book()">
 <meta property="og:title" content="Chapter 7 Reprojecting geographic data | Geocomputation with R">
 <meta property="og:type" content="book">
 <meta property="og:url" content="https://geocompr.robinlovelace.net/reproj-geo-data.html">
 <meta property="og:image" content="https://geocompr.robinlovelace.net/images/cover.png">
-<meta property="og:description" content="Prerequisites This chapter requires the following packages (lwgeom is also used, but does not need to be attached): library(sf) library(terra) library(dplyr) library(spData) library(spDataLarge) ...">
+<meta property="og:description" content="Prerequisites This chapter requires the following packages: library(sf) library(terra) library(dplyr) library(spData) library(spDataLarge)  7.1 Introduction Section 2.4 introduced coordinate...">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Chapter 7 Reprojecting geographic data | Geocomputation with R">
-<meta name="twitter:description" content="Prerequisites This chapter requires the following packages (lwgeom is also used, but does not need to be attached): library(sf) library(terra) library(dplyr) library(spData) library(spDataLarge) ...">
+<meta name="twitter:description" content="Prerequisites This chapter requires the following packages: library(sf) library(terra) library(dplyr) library(spData) library(spDataLarge)  7.1 Introduction Section 2.4 introduced coordinate...">
 <meta name="twitter:image" content="https://geocompr.robinlovelace.net/images/cover.png">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
@@ -98,7 +98,7 @@
 <h2>Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites-4"><i class="fas fa-link"></i></a>
 </h2>
 <ul>
-<li>This chapter requires the following packages (<strong>lwgeom</strong> is also used, but does not need to be attached):</li>
+<li>This chapter requires the following packages:</li>
 </ul>
 <!-- TODO: remove warning=FALSE in next chunk to suppress the following message: --><!-- #> Warning: multiple methods tables found for 'gridDistance' --><div class="sourceCode" id="cb222"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span>
@@ -145,7 +145,7 @@ CRSs can be described in many ways, including the following.</p>
 But which one is correct?</p>
 <p>The short answer is that the third way to identify CRSs is correct: <code>EPSG:4326</code> is understood by <strong>sf</strong> (and by extension <strong>stars</strong>) and <strong>terra</strong> packages covered in this book, plus many other software projects for working with geographic data including <a href="https://docs.qgis.org/3.16/en/docs/user_manual/working_with_projections/working_with_projections.html">QGIS</a> and <a href="https://proj.org/development/quickstart.html">PROJ</a>.
 <code>EPSG:4326</code> is future-proof.
-Furthermore, although it is machine readable, unlike the <code>proj4string</code> representation “EPSG:4326” is short, easy to remember and highly ‘findable’ online (searching for EPSG:4326 yields a dedicated page on the website <a href="https://epsg.io/4326">epsg.io</a>, for example).
+Furthermore, although it is machine readable, unlike the proj-string representation “EPSG:4326” is short, easy to remember and highly ‘findable’ online (searching for EPSG:4326 yields a dedicated page on the website <a href="https://epsg.io/4326">epsg.io</a>, for example).
 The more concise identifier <code>4326</code> is understood by <strong>sf</strong>, but <strong>we recommend the more explicit <code>AUTHORITY:CODE</code> representation to prevent ambiguity and to provide context</strong>.</p>
 <p>The longer answer is that none of the three descriptions are sufficient and more detail is needed for unambiguous CRS handling and transformations: due to the complexity of CRSs, it is not possible to capture all relevant information about them in such short text strings.
 For this reason, the Open Geospatial Consortium (OGC, which also developed the simple features specification that the <strong>sf</strong> package implements) developed an open standard format for describing CRSs that is called WKT (Well Known Text).
@@ -212,10 +212,10 @@ Other authorities can be used in CRS identifiers.
 <span class="co">#&gt; ...</span></code></pre></div>
 <p>WKT strings are exhaustive, detailed, and precise, allowing for unambiguous CRSs storage and transformations.
 They contain all relevant information about any given CRS, including its datum and ellipsoid, prime meridian, projection, and units.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
-Before the emergence of WKT CRS definitions, &lt;code&gt;proj4string&lt;/code&gt; was the standard way to specify coordinate operations and store CRSs.
+Before the emergence of WKT CRS definitions, proj-string was the standard way to specify coordinate operations and store CRSs.
 These string representations, built on a key=value form (e.g, &lt;code&gt;+proj=longlat +datum=WGS84 +no_defs&lt;/code&gt;), are, however, currently discouraged in most cases.
-PROJ version 6 and further still allows to use &lt;code&gt;proj4string&lt;/code&gt;s to define coordinate operations, but some &lt;code&gt;proj4string&lt;/code&gt; keys are no longer supported or are not advisable to use (e.g., &lt;code&gt;+nadgrids&lt;/code&gt;, &lt;code&gt;+towgs84&lt;/code&gt;, &lt;code&gt;+k&lt;/code&gt;, &lt;code&gt;+init=epsg:&lt;/code&gt;) and only three datums (i.e., WGS84, NAD83, and NAD27) can be directly set in &lt;code&gt;proj4string&lt;/code&gt;.
-Importantly, &lt;code&gt;proj4string&lt;/code&gt;s are not used to store CRSs anymore.
+PROJ version 6 and further still allows to use proj-strings to define coordinate operations, but some proj-string keys are no longer supported or are not advisable to use (e.g., &lt;code&gt;+nadgrids&lt;/code&gt;, &lt;code&gt;+towgs84&lt;/code&gt;, &lt;code&gt;+k&lt;/code&gt;, &lt;code&gt;+init=epsg:&lt;/code&gt;) and only three datums (i.e., WGS84, NAD83, and NAD27) can be directly set in proj-string.
+Importantly, proj-strings are not used to store CRSs anymore.
 Longer explanations of the evolution of CRS definitions and the PROJ library can be found in &lt;span class="citation"&gt;Bivand (&lt;a href="references.html#ref-bivand_progress_2021" role="doc-biblioref"&gt;2021&lt;/a&gt;)&lt;/span&gt;, Chapter 2 of &lt;span class="citation"&gt;Pebesma and Bivand (&lt;a href="references.html#ref-pebesma_spatial_2022" role="doc-biblioref"&gt;2022&lt;/a&gt;)&lt;/span&gt;, and &lt;a href="https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/"&gt;blog post by Floris Vanderhaeghe&lt;/a&gt;.
 As outlined in the &lt;a href="https://proj.org/development/reference/cpp/cpp_general.html"&gt;PROJ documentation&lt;/a&gt; there are different versions of the WKT CRS format including WKT1 and two variants of WKT2, the latter of which (WKT2, 2018 specification) corresponds to the ISO 19111:2019 &lt;span class="citation"&gt;(&lt;a href="references.html#ref-opengeospatialconsortium_wellknown_2019" role="doc-biblioref"&gt;Open Geospatial Consortium 2019&lt;/a&gt;)&lt;/span&gt;.&lt;/p&gt;'><sup>27</sup></a></p>
 </div>
@@ -243,7 +243,7 @@ The CRS can be retrieved with the <strong>sf</strong> function <code><a href="ht
 <li>
 <code>wkt</code>, containing the full WKT string with all relevant information about the CRS.</li>
 </ol>
-<p>The <code>input</code> element is flexible, and depending on the input file or user input, can contain the <code>AUTHORITY:CODE</code> representation (e.g., <code>EPSG:4326</code>), the CRS’s name (e.g., <code>WGS 84</code>), or even the <code>proj4string</code> definition.
+<p>The <code>input</code> element is flexible, and depending on the input file or user input, can contain the <code>AUTHORITY:CODE</code> representation (e.g., <code>EPSG:4326</code>), the CRS’s name (e.g., <code>WGS 84</code>), or even the proj-string definition.
 The <code>wkt</code> element stores the WKT representation, which is used when saving the object to a file or doing any coordinate operations.
 Above, we can see that the <code>new_vector</code> object has the WGS84 ellipsoid, uses the Greenwich prime meridian, and the latitude and longitude axis order.
 In this case, we also have some additional elements, such as <code>USAGE</code> explaining the area suitable for the use of this CRS, and <code>ID</code> pointing to the CRS’s identifier: <code>EPSG:4326</code>.</p>
@@ -257,7 +257,7 @@ For example, try to run:</p>
 <li>
 <code>st_crs(new_vector)$srid</code> extracts its ‘SRID’ identifier (when available)</li>
 <li>
-<code>st_crs(new_vector)$proj4string</code> extracts the <code>proj4string</code> representation</li>
+<code>st_crs(new_vector)$proj4string</code> extracts the proj-string representation</li>
 </ul>
 <p>In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs()</a></code> function can be used (in this case the WKT string remains unchanged because the CRS was already set correctly when the file was read-in):</p>
 <div class="sourceCode" id="cb227"><pre class="downlit sourceCode r">
@@ -287,7 +287,7 @@ The same function, <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()<
 <div class="sourceCode" id="cb229"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span> <span class="op">=</span> <span class="st">"EPSG:26912"</span> <span class="co"># set CRS</span></code></pre></div>
 <p>Here, we can use either the identifier (recommended in most cases) or complete WKT representation.
-Alternative methods to set <code>crs</code> include <code>proj4string</code> strings or CRSs extracted from other existing object with <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code>, although these approaches may be less future proof.</p>
+Alternative methods to set <code>crs</code> include proj-string strings or CRSs extracted from other existing object with <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code>, although these approaches may be less future proof.</p>
 <p>Importantly, the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> functions do not alter coordinates’ values or geometries.
 Their role is only to set a metadata information about the object CRS.</p>
 <p>In some cases the CRS of a geographic object is unknown, as is the case in the <code>london</code> dataset created in the code chunk below, building on the example of London introduced in Section <a href="spatial-class.html#vector-data">2.2</a>:</p>
@@ -748,12 +748,11 @@ For instance, if we are interested in a density (points per grid cell or inhabit
 <span class="header-section-number">7.9</span> Custom map projections<a class="anchor" aria-label="anchor" href="#mapproj"><i class="fas fa-link"></i></a>
 </h2>
 <p>Established CRSs captured by <code>AUTHORITY:CODE</code> identifiers such as <code>EPSG:4326</code> are well suited for many applications.
-However, it is desirable to create a new, custom CRS in some cases.
+However, it is desirable to use alternative projections or to create custom CRSs in some cases.
 Section <a href="reproj-geo-data.html#which-crs">7.6</a> mentioned reasons for using custom CRSs, and provided several possible approaches.
 Here, we show how to apply these ideas in R.</p>
-<p>One possible approach to creating a custom CRS is to take an existing WKT definition of a CRS, modify some of its elements, and then use the new definition for reprojecting.
-This can be done for spatial vectors with <code>st_crs()$wkt</code> and <code><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform()</a></code>, and for spatial rasters with <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/project.html">project()</a></code>.</p>
-<p>Let’s try it by transforming the <code>zion</code> object to a custom azimuthal equidistant (AEQD) CRS.</p>
+<p>One is to take an existing WKT definition of a CRS, modify some of its elements, and then use the new definition for reprojecting.
+This can be done for spatial vectors with <code>st_crs()$wkt</code> and <code><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform()</a></code>, and for spatial rasters with <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/project.html">project()</a></code>, as demonstrated in the following example which transforms the <code>zion</code> object to a custom azimuthal equidistant (AEQD) CRS.</p>
 <div class="sourceCode" id="cb252"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">zion</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"vector/zion.gpkg"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Using a custom AEQD CRS requires knowing the coordinates of the center point of a dataset in degrees (geographic CRS).
@@ -784,11 +783,10 @@ This website allows you to select a spatial extent of your data and a distortion
 The list also contains WKT definitions of the projections that you can copy and use for reprojections.
 See <span class="citation">Open Geospatial Consortium (<a href="references.html#ref-opengeospatialconsortium_wellknown_2019" role="doc-biblioref">2019</a>)</span> for details on creating custom CRS definitions with WKT strings.</p>
 <p>
-A <code>proj4string</code> definition can also be used to create custom projections, as long we accept its limitations mentioned in Section <a href="reproj-geo-data.html#crs-in-r">7.2</a>.
-For example, many projections have been developed and can be set with the <code>+proj=</code> element of <code>proj4string</code>s.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
-The Wikipedia page ‘List of map projections’ has 70+ projections and illustrations.&lt;/p&gt;"><sup>35</sup></a></p>
-<p>When mapping the world while preserving area relationships, the Mollweide projection is a good choice <span class="citation">(<a href="references.html#ref-jenny_guide_2017" role="doc-biblioref">Jenny et al. 2017</a>)</span> (Figure <a href="reproj-geo-data.html#fig:mollproj">7.2</a>).
-To use this projection, we need to specify it using the <code>proj4string</code> element, <code>"+proj=moll"</code>, in the <code>st_transform</code> function:</p>
+PROJ strings can also be used to create custom projections, accepting the limitations inherent to projections, especially of geometries covering large geographic areas, mentioned in Section <a href="reproj-geo-data.html#crs-in-r">7.2</a>.
+Many projections have been developed and can be set with the <code>+proj=</code> element of PROJ strings, with dozens of projects described in detail on the <a href="https://proj.org/operations/projections/index.html">PROJ website</a> alone.</p>
+<p>When mapping the world while preserving area relationships the Mollweide projection, illustrated in Figure <a href="reproj-geo-data.html#fig:mollproj">7.2</a>, is a popular and often sensible choice <span class="citation">(<a href="references.html#ref-jenny_guide_2017" role="doc-biblioref">Jenny et al. 2017</a>)</span>.
+To use this projection, we need to specify it using the proj-string element, <code>"+proj=moll"</code>, in the <code>st_transform</code> function:</p>
 <div class="sourceCode" id="cb256"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_mollweide</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">world</span>, crs <span class="op">=</span> <span class="st">"+proj=moll"</span><span class="op">)</span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -799,7 +797,7 @@ FIGURE 7.2: Mollweide projection of the world.
 </div>
 <p>It is often desirable to minimize distortion for all spatial properties (area, direction, distance) when mapping the world.
 One of the most popular projections to achieve this is <a href="http://www.winkel.org/other/Winkel%20Tripel%20Projections.htm">Winkel tripel</a>, illustrated in Figure <a href="reproj-geo-data.html#fig:wintriproj">7.3</a>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
-This projection is used, among others, by the National Geographic Society.&lt;/p&gt;"><sup>36</sup></a>
+This projection is used, among others, by the National Geographic Society.&lt;/p&gt;"><sup>35</sup></a>
 The result was created with the following command:</p>
 <div class="sourceCode" id="cb257"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_wintri</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">world</span>, crs <span class="op">=</span> <span class="st">"+proj=wintri"</span><span class="op">)</span></code></pre></div>
@@ -811,7 +809,7 @@ FIGURE 7.3: Winkel tripel projection of the world.
 </div>
 <!--jn:toDO-->
 <!--check if the following block is still correct-->
-<p>Moreover, <code>proj4string</code> parameters can be modified in most CRS definitions, for example the center of the projection can be adjusted using the <code>+lon_0</code> and <code>+lat_0</code> parameters.
+<p>Moreover, proj-string parameters can be modified in most CRS definitions, for example the center of the projection can be adjusted using the <code>+lon_0</code> and <code>+lat_0</code> parameters.
 The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on the longitude and latitude of New York City (Figure <a href="reproj-geo-data.html#fig:laeaproj2">7.4</a>).</p>
 <div class="sourceCode" id="cb258"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">world_laea2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">world</span>,
@@ -851,7 +849,7 @@ What has changed?
 How does it influence the results?</p>
 <!--toDo:jn-->
 <!--improve/replace/modify the following q-->
-<!-- E5. Create your own `proj4string`.  -->
+<!-- E5. Create your own proj-string.  -->
 <!-- It should have the Lambert Azimuthal Equal Area (`laea`) projection, the WGS84 ellipsoid, the longitude of projection center of 95 degrees west, the latitude of projection center of 60 degrees north, and its units should be in meters. -->
 <!-- Next, subset Canada from the `world` object and transform it into the new projection.  -->
 <!-- Plot and compare a map before and after the transformation. -->
