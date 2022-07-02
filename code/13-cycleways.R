@@ -13,3 +13,4 @@ m_leaflet = tm_shape(bristol_ttwa) +
   tm_shape(bristol_stations_top) +
   tm_dots(size = 0.3, col = "red") +
   tm_layout(legend.position = c("LEFT", "TOP"))
+# m_leaflet
