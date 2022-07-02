@@ -310,29 +310,7 @@ fao_areas = read_sf(file)
 Note the use of `write_disk()` to ensure that the results are written to disk rather than loaded into memory, allowing them to be imported with **sf**.
 This example shows how to gain low-level access to web services using **httr**, which can be useful for understanding how web services work.
 For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose.
-
-Packages **ows4R**, **rwfs** and **sos4R** have been developed for working with OWS services in general, WFS and the sensor observation service (SOS) respectively.
-As of October 2018, only **ows4R** is on CRAN.
-The package's basic functionality is demonstrated below, in commands that get all `FAO_AREAS` as we did in the previous code chunk:^[
-To filter features on the server before downloading them, the argument `cql_filter` can be used. Adding `cql_filter = URLencode("F_CODE= '27'")` to the command, for example, would instruct the server to only return the feature with values in the `F_CODE` column equal to 27.
-]
-
-
-```r
-library(ows4R)
-wfs = WFSClient$new("http://www.fao.org/figis/geoserver/wfs",
-                      serviceVersion = "1.0.0", logger = "INFO")
-fao_areas = wfs$getFeatures("area:FAO_AREAS")
-```
-
-
-
-There is much more to learn about web services and much potential for development of R-OWS interfaces, an active area of development.
-For further information on the topic, we recommend examples from European Centre for Medium-Range Weather Forecasts (ECMWF) services at [github.com/OpenDataHack](https://github.com/OpenDataHack/data_service_catalogue) and reading-up on OCG Web Services at [opengeospatial.org](http://www.opengeospatial.org/standards).
-
-
-
-
+The package **ows4R** was developed for working with OWS services.
 
 ## File formats
 

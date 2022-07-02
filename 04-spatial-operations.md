@@ -581,7 +581,7 @@ This is illustrated in the code chunk below, which finds the distance between th
 
 
 ```r
-nz_heighest = nz_height |> top_n(n = 1, wt = elevation)
+nz_heighest = nz_height |> slice_max(n = 1, order_by = elevation)
 canterbury_centroid = st_centroid(canterbury)
 st_distance(nz_heighest, canterbury_centroid)
 #> Units: [m]
@@ -988,8 +988,7 @@ library(spData)
 E1. It was established in Section \@ref(spatial-vec) that Canterbury was the region of New Zealand containing most of the 100 highest points in the country.
 How many of these high points does the Canterbury region contain?
 
-**Bonus:** plot the result using the `plot()` function to show all of New Zealand, `canterbury` region highlighted in yellow, high points in Canterbury represented with black dots and  
-
+**Bonus:** plot the result using the `plot()` function to show all of New Zealand, `canterbury` region highlighted in yellow, high points in Canterbury represented by red crosses (hint: `pch = 7`) and high points in other parts of New Zealand represented by blue circles. See the help page `?points` for details with an illustration of different `pch` values.
 
 
 

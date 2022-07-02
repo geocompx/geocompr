@@ -318,20 +318,33 @@ Next it would be interesting to have a look at the distribution of interzonal mo
 
 ## Routes
 
-From a geographer's perspective, routes are desire lines\index{desire lines} that are no longer straight:
-the origin and destination points are the same, but the pathway to get from A to B is more complex.
-Desire lines\index{desire lines} contain only two vertices (their beginning and end points) but routes can contain hundreds of vertices if they cover a large distance or represent travel patterns on an intricate road network (routes on simple grid-based road networks require relatively few vertices).
-Routes are generated from desire lines\index{desire lines} --- or more commonly origin-destination pairs --- using routing services which either run locally or remotely.
+From a geographical perspective, routes are desire lines\index{desire lines} that are no longer straight:
+the origin and destination points are the same as in the desire line representation of travel, but the pathway to get from A to B is more complex.
+The geometries of routes are typically (but not always) determined by the transport network.
 
-**Local routing**\index{routing} can be advantageous in terms of speed of execution and control over the weighting profile for different modes of transport.
-Disadvantages include the difficulty of representing complex networks locally; temporal dynamics (primarily due to traffic); and the need for specialized software such as 'pgRouting', an issue that developers of packages **stplanr**\index{stplanr (package)} and **dodgr** seek to address.
+While desire lines\index{desire lines} contain only two vertices (their beginning and end points), routes can contain any number of vertices, representing points between A and B joined by straight lines: the definition of a LINESTRING geometry.
+Routes covering large distances or following intricate network can have many hundreds of vertices; routes on grid-based or simplified road networks tend to have fewer.
+Routes are generated from desire lines\index{desire lines} --- or more commonly matrices containing coordinate pairs representing desire lines --- using routing services.
+There are three main ways to compute routes from OD data:
 
-**Remote routing**\index{routing} services, by contrast, use a web API\index{API} to send queries about origins and destinations and return results generated on a powerful server running specialised software.
-This gives remote routing\index{routing} services various advantages, including that they usually
+- In-memory routing using R packages that enable route calculation
+- Locally hosted routing engines external to R that can be called from R
+- Routing services that are hosted by external entities that provide a web API that can be called from R
 
-- have global coverage;
-- are update regularly; and
-- run on specialist hardware and software set-up for the job.
+**In-memory** options include [**sfnetworks**](https://luukvdmeer.github.io/sfnetworks/)\index{sfnetworks (package)}, [**dodgr**](https://atfutures.github.io/dodgr/) and [**cppRouting**](https://github.com/vlarmet/cppRouting) packages.
+While fast and flexible, in-memory options may be harder to set-up than dedicated routing engines: routing is a hard problem and many hundreds of hours have been put into open source routing engines that can be downloaded and hosted locally.
+
+**Locally hosted** routing engines include OpenTripPlanner, OSRM and R5, and associated R packages **opentripplanner**, [**osrm**](https://github.com/riatelab/osrm) and **r5r** [@morgan_opentripplanner_2019; @pereira_r5r_2021].
+Locally hosted routing engines benefit from speed of execution and control over the weighting profile for different modes of transport.
+Disadvantages include the difficulty of representing complex networks locally; temporal dynamics (primarily due to traffic); and the need for specialized software.
+
+**Routing services**\index{routing}, by contrast, use a web API\index{API} to send queries about origins and destinations and return results generated on a powerful server running specialised software.
+Routing services based on open source routing engines, such as OSRM's publicly available service, work exactly the same when called from R as locally hosted instances, simply requiring arguments specifying 'base URLs' to be updated.
+However, the fact that external routing services are hosted on a dedicated machine (usually funded by commercial company with incentives to generate accurate routes)\index{routing} gives them advantages:
+
+- Provision of routing services worldwide (or usually at least over a large region).
+- Established routing services available are usually update regularly and can often respond to traffic levels.
+- Routing services usually run on dedicated hardware and software including systems such as load balancers to ensure consistent performance.
 
 Disadvantages of remote routing\index{routing} services include speed (they rely on data transfer over the internet) and price (the Google routing API, for example, limits the number of free queries).
 The **googleway** package provides an interface to Google's routing API\index{API}.
@@ -496,16 +509,11 @@ This function is demonstrated below using a subset of the `bristol_ways` object 
 
 
 ```r
-ways_freeway = bristol_ways %>% filter(maxspeed == "70 mph") 
-ways_sln = SpatialLinesNetwork(ways_freeway)
-#> Warning in SpatialLinesNetwork.sf(ways_freeway): Graph composed of multiple
-#> subgraphs, consider cleaning it with sln_clean_graph().
-slotNames(ways_sln)
-#> [1] "sl"          "g"           "nb"          "weightfield"
-weightfield(ways_sln)
-#> [1] "length"
-class(ways_sln@g)
-#> [1] "igraph"
+# ways_freeway = bristol_ways %>% filter(maxspeed == "70 mph") 
+# ways_sln = SpatialLinesNetwork(ways_freeway)
+# slotNames(ways_sln)
+# weightfield(ways_sln)
+# class(ways_sln@g)
 ```
 
 The output of the previous code chunk shows that `ways_sln` is a composite object with various 'slots'.
@@ -518,14 +526,9 @@ The results demonstrate that each graph\index{graph} edge represents a segment: 
 <!-- Todo (optional): make this section use potential cycle routes around Stokes Bradley not freeway data (RL) -->
 
 ```r
-e = igraph::edge_betweenness(ways_sln@g)
-plot(ways_sln@sl$geometry, lwd = e / 500)
+# e = igraph::edge_betweenness(ways_sln@g)
+# plot(ways_sln@sl$geometry, lwd = e / 500)
 ```
-
-<div class="figure" style="text-align: center">
-<img src="13-transport_files/figure-html/wayssln-1.png" alt="Illustration of a small route network, with segment thickness proportional to its betweenness, generated using the igraph package and described in the text." width="60%" />
-<p class="caption">(\#fig:wayssln)Illustration of a small route network, with segment thickness proportional to its betweenness, generated using the igraph package and described in the text.</p>
-</div>
 
 
 
@@ -572,7 +575,7 @@ qtm(route_cycleway, lines.lwd = "all")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="13-transport_files/figure-html/cycleways-1.png" alt="Potential routes along which to prioritise cycle infrastructure in Bristol, based on access key rail stations (red dots) and routes with many short car journeys (north of Bristol surrounding Stoke Bradley). Line thickness is proportional to number of trips." width="70%" />
+<img src="https://user-images.githubusercontent.com/1825120/39901156-a8ec9ef6-54be-11e8-94fb-0b5f6b48775e.png" alt="Potential routes along which to prioritise cycle infrastructure in Bristol, based on access key rail stations (red dots) and routes with many short car journeys (north of Bristol surrounding Stoke Bradley). Line thickness is proportional to number of trips." width="70%" />
 <p class="caption">(\#fig:cycleways)Potential routes along which to prioritise cycle infrastructure in Bristol, based on access key rail stations (red dots) and routes with many short car journeys (north of Bristol surrounding Stoke Bradley). Line thickness is proportional to number of trips.</p>
 </div>
 

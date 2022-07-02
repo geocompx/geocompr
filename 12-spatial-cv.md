@@ -519,9 +519,6 @@ As expected, the spatially cross-validated result yields lower AUROC values on a
 ```
 #> 
 #> Attaching package: 'ggplot2'
-#> The following object is masked from 'package:terra':
-#> 
-#>     arrow
 #> The following object is masked from 'package:lgr':
 #> 
 #>     Layout
