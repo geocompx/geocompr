@@ -52,7 +52,7 @@ dev.off()
 
 
 ## ----08-ex-e7, eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------------------
-#> library(mapview)
-#> mapview_obj = mapview(c_h, zcol = "nbikes", legend = TRUE)
-#> mapshot(mapview_obj, file = "cycle_hire.html")
+## library(mapview)
+## mapview_obj = mapview(c_h, zcol = "nbikes", legend = TRUE)
+## mapshot(mapview_obj, file = "cycle_hire.html")
 

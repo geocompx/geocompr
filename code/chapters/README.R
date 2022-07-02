@@ -41,7 +41,7 @@ contributors_text = paste0(c_rmd, collapse = ", ")
 
 
 ## ----gen-code, results='hide', echo=FALSE--------------------------------------------------------------------------------------------------------------------------------------
-# geocompkg:::generate_chapter_code()
+geocompkg:::generate_chapter_code()
 
 
 ## ----extra-pkgs, message=FALSE, eval=FALSE-------------------------------------------------------------------------------------------------------------------------------------
