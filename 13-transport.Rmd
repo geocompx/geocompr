@@ -369,14 +369,19 @@ We will filter-out a subset of the desire lines with a focus on estimating cycli
 Clearly, not all car trips can realistically be replaced by cycling.
 However, 5 km Euclidean distance (or around 6-8 km of route distance) can realistically be cycled by many people, especially if they are riding an [electric bike](https://www.sciencedirect.com/science/article/pii/S0967070X21003401).
 <!-- Todo: add reference (RL 2022-07) -->
-We will therefore only route desire lines\index{desire lines} along which a high (100+) number of car trips take place that are 5 km in distance or less.
-This routing\index{routing} is done in the code chunk below by the **stplanr**\index{stplanr (package)} function `route()`, which creates `sf` objects representing routes on the transport network\index{network}, one for each desire line.
+We will therefore only route desire lines\index{desire lines} along which a high (100+) number of car trips take place that are 5 km in distance or less:
 
 ```{r 13-transport-17, message=FALSE}
 desire_lines$distance_km = as.numeric(st_length(desire_lines)) / 1000
 desire_lines_short = desire_lines %>% 
   filter(car_driver >= 100 & distance_km <= 5)
 ```
+
+In the code above `st_length()` calculated the length of each desire line, as described in Section \@ref(distance-relations).
+The `filter()` function from **dplyr** was used to filter the `desire_lines` dataset based on the criteria outlines above\index{filter operation|see{attribute!subsetting}}, as described in Section \@ref(vector-attribute-subsetting).
+The next stage is to convert these desire lines into routes.
+We will do this using the publicly available OSRM service \index{routing} with the **stplanr** functions `route()` and `route_osrm()`\index{stplanr (package)}.
+The code chunk below creates `routes_short`, an `sf` object representing routes on the transport network\index{network} that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line:
 
 ```{r 13-transport-18, eval=FALSE}
 routes_short = route(l = desire_lines_short, route_fun = route_osrm,
@@ -386,18 +391,23 @@ routes_short = route(l = desire_lines_short, route_fun = route_osrm,
 ```{r, eval=FALSE, echo=FALSE}
 # save result of previous command
 saveRDS(routes_short, "routes_short.Rds")
-piggyback::pb_upload("routes_short.Rds")
-piggyback::pb_download_url("routes_short.Rds")
+gh_release_upload = function(file, tag = "0.0.1") {
+  msg = glue::glue("gh release upload {tag} {file} --clobber")
+  message("Running this command:\n", msg)
+  # processx::run(msg, spinner = TRUE) # fails...
+  system(msg)
+}
+# piggyback::pb_upload("routes_short.Rds") # fails with:
+# Error in parse_url(url) : length(url) == 1 is not TRUE
+# piggyback::pb_download_url("routes_short.Rds")
+gh_release_upload("routes_short.Rds", tag = "1.9.1-2")
 ```
+Note: calls to external routing engines such as in the command above only work with an internet connection (and sometimes an API key stored in an environment variable, although not in this case).
 
 ```{r 13-transport-18-2, echo=FALSE}
 u = "https://github.com/Robinlovelace/geocompr/releases/download/1.9.1-2/routes_short.Rds"
 routes_short = readRDS(url(u))
 ```
-
-`st_length()` determines the length of a linestring, and falls into the distance relations category (see also Section \@ref(distance-relations)).
-Subsequently, we apply a simple attribute filter operation\index{filter operation|see{attribute!subsetting}} (see Section \@ref(vector-attribute-subsetting)) before letting the OSRM service do the routing\index{routing} on a remote server.
-Note that the routing\index{routing} only works with a working internet connection.
 
 We could keep the new `routes_short` object separate from the straight line representation of the same trip in `desire_lines_short` but, from a data management perspective, it makes more sense to combine them: they represent the same trip.
 The new route dataset contains `distance` (referring to route distance this time) and `duration` fields (in seconds) which could be useful.
