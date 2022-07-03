@@ -367,21 +367,20 @@ Doing routing on a subset of the data before trying to compute routes for a larg
 
 We will filter-out a subset of the desire lines with a focus on estimating cycling potential based on the observation that the benefits cycling trips are greatest when they replace car trips and that relatively short trips are more likely to be cycled than long trips [@lovelace_propensity_2017].
 Clearly, not all car trips can realistically be replaced by cycling.
-However, 5 km Euclidean distance (or around 6-8 km of route distance) can realistically be cycled by many people, especially if they are riding an [electric bike](https://www.sciencedirect.com/science/article/pii/S0967070X21003401).
+Trips between 2.5 and 5 km Euclidean distance (or around 3 km, below which trips are can be made by walking or scooter, to 6-8 km of route distance) have a relatively high probability of being cycled, and the maximum distance increases when trips are made by [electric bike](https://www.sciencedirect.com/science/article/pii/S0967070X21003401).
 <!-- Todo: add reference (RL 2022-07) -->
-We will therefore only route desire lines\index{desire lines} along which a high (100+) number of car trips take place that are 5 km in distance or less:
+Considering this, and the utility of a small route dataset for testing, we will compute routes for the subset of desire lines\index{desire lines} along which a high (100+) number of car trips take place that are 2.5 to 5 km in length:
 
 ```{r 13-transport-17, message=FALSE}
 desire_lines$distance_km = as.numeric(st_length(desire_lines)) / 1000
 desire_lines_short = desire_lines %>% 
-  filter(car_driver >= 100 & distance_km <= 5)
+  filter(car_driver >= 100 & distance_km <= 5 & distance_km >= 2.5)
 ```
 
 In the code above `st_length()` calculated the length of each desire line, as described in Section \@ref(distance-relations).
-The `filter()` function from **dplyr** was used to filter the `desire_lines` dataset based on the criteria outlines above\index{filter operation|see{attribute!subsetting}}, as described in Section \@ref(vector-attribute-subsetting).
+The `filter()` function from **dplyr** filtered the `desire_lines` dataset based on the criteria outlined above\index{filter operation|see{attribute!subsetting}}, as described in Section \@ref(vector-attribute-subsetting).
 The next stage is to convert these desire lines into routes.
-We will do this using the publicly available OSRM service \index{routing} with the **stplanr** functions `route()` and `route_osrm()`\index{stplanr (package)}.
-The code chunk below creates `routes_short`, an `sf` object representing routes on the transport network\index{network} that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line:
+This is done using the publicly available OSRM service \index{routing} with the **stplanr** functions `route()` and `route_osrm()`\index{stplanr (package)} in the code chunk below:
 
 ```{r 13-transport-18, eval=FALSE}
 routes_short = route(l = desire_lines_short, route_fun = route_osrm,
@@ -402,40 +401,33 @@ gh_release_upload = function(file, tag = "0.0.1") {
 # piggyback::pb_download_url("routes_short.Rds")
 gh_release_upload("routes_short.Rds", tag = "1.9.1-2")
 ```
-Note: calls to external routing engines such as in the command above only work with an internet connection (and sometimes an API key stored in an environment variable, although not in this case).
 
 ```{r 13-transport-18-2, echo=FALSE}
 u = "https://github.com/Robinlovelace/geocompr/releases/download/1.9.1-2/routes_short.Rds"
 routes_short = readRDS(url(u))
 ```
 
-We could keep the new `routes_short` object separate from the straight line representation of the same trip in `desire_lines_short` but, from a data management perspective, it makes more sense to combine them: they represent the same trip.
-The new route dataset contains `distance` (referring to route distance this time) and `duration` fields (in seconds) which could be useful.
-However, for the purposes of this chapter, we are only interested in the geometry, from which route distance can be calculated.
-The following command makes use of the ability of simple features\index{sf} objects to contain multiple geographic columns:
-
-```{r 13-transport-19}
-desire_lines_short$geom_car = st_geometry(routes_short)
-```
-
-This allows plotting the desire lines\index{desire lines} along which many short car journeys take place alongside likely routes traveled by cars by referring to each geometry column separately (`desire_lines_short$geometry` and `desire_lines_short$geom_car` in this case).
+The output is `routes_short`, an `sf` object representing routes on the transport network\index{network} that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line.
+Note: calls to external routing engines such as in the command above only work with an internet connection (and sometimes an API key stored in an environment variable, although not in this case).
+In addition to the columns contained in the `desire_lines` object, the new route dataset contains `distance` (referring to route distance this time) and `duration` columns (in seconds), which provide potentially useful extra information on the nature of each route.
+We will plot desire lines\index{desire lines} along which many short car journeys take place alongside cycling routes.
 Making the width of the routes proportional to the number of car journeys that could potentially be replaced provides an effective way to prioritize interventions on the road network [@lovelace_propensity_2017].
-
 The code chunk below plots the desire lines and routes, resulting in Figure \@ref(fig:routes) which shows routes along which people drive short distances:^[
-Not that the red routes and black desire lines do not start at the same point.
+Not that the red routes and black desire lines do not start at exactly the same points.
 This is because zone centroids rarely lie on the route network: instead the route originate from the transport network node nearest the centroid.
 Note also that routes are assumed to originate in the zone centroids, a simplifying assumption which is used in transport models to reduce the computational resources needed to calculate the shortest path between all combinations of possible origins and destinations [@hollander_transport_2016].
 ]
 
-```{r routes, warning=FALSE, fig.cap="Routes along which many (300+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).", fig.scap="Routes along which many car journeys are made."}
+```{r routes, warning=FALSE, fig.cap="Routes along which many (100+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).", fig.scap="Routes along which many car journeys are made."}
+tm_shape(desire_lines_short) + tm_lines()
 plot(st_geometry(desire_lines_short))
-plot(desire_lines_short$geom_car, col = "red", add = TRUE)
+plot(st_geometry(routes_short), col = "red", add = TRUE)
 plot(st_geometry(st_centroid(zones_od)), add = TRUE)
 ```
 
 \index{routes}
 
-Plotting the results on an interactive map, with `mapview::mapview(desire_lines_short$geom_car)` for example, shows that many short car trips take place in and around Bradley Stoke.
+Plotting the results on an interactive map, with `mapview::mapview(st_geometry(routes_short))` for example, shows that many short car trips take place in and around Bradley Stoke.
 It is easy to find explanations for the area's high level of car dependency: according to  [Wikipedia](https://en.wikipedia.org/wiki/Bradley_Stoke), Bradley Stoke is "Europe's largest new town built with private investment", suggesting limited public transport provision.
 Furthermore, the town is surrounded by large (cycling unfriendly) road structures, "such as junctions on both the M4 and M5 motorways" [@tallon_bristol_2007].
 
