@@ -369,44 +369,46 @@ We will filter-out a subset of the desire lines with a focus on estimating cycli
 Clearly, not all car trips can realistically be replaced by cycling.
 However, 5 km Euclidean distance (or around 6-8 km of route distance) can realistically be cycled by many people, especially if they are riding an [electric bike](https://www.sciencedirect.com/science/article/pii/S0967070X21003401).
 <!-- Todo: add reference (RL 2022-07) -->
-We will therefore only route desire lines\index{desire lines} along which a high (300+) number of car trips take place that are up to 5 km in distance.
+We will therefore only route desire lines\index{desire lines} along which a high (100+) number of car trips take place that are 5 km in distance or less.
 This routing\index{routing} is done in the code chunk below by the **stplanr**\index{stplanr (package)} function `route()`, which creates `sf` objects representing routes on the transport network\index{network}, one for each desire line.
 
 ```{r 13-transport-17, message=FALSE}
-desire_lines$distance = as.numeric(st_length(desire_lines))
-desire_carshort = dplyr::filter(desire_lines, car_driver > 300 & distance < 5000)
+desire_lines$distance_km = as.numeric(st_length(desire_lines)) / 1000
+desire_lines_short = desire_lines %>% 
+  filter(car_driver >= 100 & distance_km <= 5)
 ```
 
 ```{r 13-transport-18, eval=FALSE}
-route_carshort = route(l = desire_carshort, route_fun = route_osrm)
+routes_short = route(l = desire_lines_short, route_fun = route_osrm,
+                   osrm.profile = "bike")
 ```
 
 ```{r, eval=FALSE, echo=FALSE}
 # save result of previous command
-saveRDS(route_carshort, "route_carshort.Rds")
-piggyback::pb_upload("route_carshort.Rds")
-piggyback::pb_download_url("route_carshort.Rds")
+saveRDS(routes_short, "routes_short.Rds")
+piggyback::pb_upload("routes_short.Rds")
+piggyback::pb_download_url("routes_short.Rds")
 ```
 
 ```{r 13-transport-18-2, echo=FALSE}
-u = "https://github.com/Robinlovelace/geocompr/releases/download/1.2/route_carshort.Rds"
-route_carshort = readRDS(url(u))
+u = "https://github.com/Robinlovelace/geocompr/releases/download/1.9.1-2/routes_short.Rds"
+routes_short = readRDS(url(u))
 ```
 
 `st_length()` determines the length of a linestring, and falls into the distance relations category (see also Section \@ref(distance-relations)).
 Subsequently, we apply a simple attribute filter operation\index{filter operation|see{attribute!subsetting}} (see Section \@ref(vector-attribute-subsetting)) before letting the OSRM service do the routing\index{routing} on a remote server.
 Note that the routing\index{routing} only works with a working internet connection.
 
-We could keep the new `route_carshort` object separate from the straight line representation of the same trip in `desire_carshort` but, from a data management perspective, it makes more sense to combine them: they represent the same trip.
+We could keep the new `routes_short` object separate from the straight line representation of the same trip in `desire_lines_short` but, from a data management perspective, it makes more sense to combine them: they represent the same trip.
 The new route dataset contains `distance` (referring to route distance this time) and `duration` fields (in seconds) which could be useful.
 However, for the purposes of this chapter, we are only interested in the geometry, from which route distance can be calculated.
 The following command makes use of the ability of simple features\index{sf} objects to contain multiple geographic columns:
 
 ```{r 13-transport-19}
-desire_carshort$geom_car = st_geometry(route_carshort)
+desire_lines_short$geom_car = st_geometry(routes_short)
 ```
 
-This allows plotting the desire lines\index{desire lines} along which many short car journeys take place alongside likely routes traveled by cars by referring to each geometry column separately (`desire_carshort$geometry` and `desire_carshort$geom_car` in this case).
+This allows plotting the desire lines\index{desire lines} along which many short car journeys take place alongside likely routes traveled by cars by referring to each geometry column separately (`desire_lines_short$geometry` and `desire_lines_short$geom_car` in this case).
 Making the width of the routes proportional to the number of car journeys that could potentially be replaced provides an effective way to prioritize interventions on the road network [@lovelace_propensity_2017].
 
 The code chunk below plots the desire lines and routes, resulting in Figure \@ref(fig:routes) which shows routes along which people drive short distances:^[
@@ -416,14 +418,14 @@ Note also that routes are assumed to originate in the zone centroids, a simplify
 ]
 
 ```{r routes, warning=FALSE, fig.cap="Routes along which many (300+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).", fig.scap="Routes along which many car journeys are made."}
-plot(st_geometry(desire_carshort))
-plot(desire_carshort$geom_car, col = "red", add = TRUE)
+plot(st_geometry(desire_lines_short))
+plot(desire_lines_short$geom_car, col = "red", add = TRUE)
 plot(st_geometry(st_centroid(zones_od)), add = TRUE)
 ```
 
 \index{routes}
 
-Plotting the results on an interactive map, with `mapview::mapview(desire_carshort$geom_car)` for example, shows that many short car trips take place in and around Bradley Stoke.
+Plotting the results on an interactive map, with `mapview::mapview(desire_lines_short$geom_car)` for example, shows that many short car trips take place in and around Bradley Stoke.
 It is easy to find explanations for the area's high level of car dependency: according to  [Wikipedia](https://en.wikipedia.org/wiki/Bradley_Stoke), Bradley Stoke is "Europe's largest new town built with private investment", suggesting limited public transport provision.
 Furthermore, the town is surrounded by large (cycling unfriendly) road structures, "such as junctions on both the M4 and M5 motorways" [@tallon_bristol_2007].
 
@@ -560,13 +562,13 @@ However, each stage could be useful on its own, and feed into wider analyses.
 To summarize, these were: identifying short but car-dependent commuting routes (generated from desire lines) in Section \@ref(routes); creating desire lines\index{desire lines} representing trips to rail stations in Section \@ref(nodes); and analysis of transport systems at the route network\index{network} using graph\index{graph} theory in Section \@ref(route-networks).
 
 The final code chunk of this chapter combines these strands of analysis.
-It adds the car-dependent routes in `route_carshort` with a newly created object, `route_rail` and creates a new column representing the amount of travel along the centroid-to-centroid\index{centroid} desire lines they represent:
+It adds the car-dependent routes in `routes_short` with a newly created object, `route_rail` and creates a new column representing the amount of travel along the centroid-to-centroid\index{centroid} desire lines they represent:
 
 ```{r 13-transport-25, eval=FALSE}
 route_rail = desire_rail %>%
   st_set_geometry("leg_orig") %>% 
   route(l = ., route_fun = route_osrm) %>% 
-  select(names(route_carshort))
+  select(names(routes_short))
 ```
 
 ```{r, eval=FALSE, echo=FALSE}
@@ -582,9 +584,9 @@ u = "https://github.com/Robinlovelace/geocompr/releases/download/1.2/route_rail.
 route_rail = readRDS(url(u))
 ```
 
-```{r 13-transport-26}
-route_cycleway = rbind(route_rail, route_carshort)
-route_cycleway$all = c(desire_rail$all, desire_carshort$all)
+```{r 13-transport-26, eval=FALSE}
+route_cycleway = rbind(route_rail, routes_short)
+route_cycleway$all = c(desire_rail$all, desire_lines_short$all)
 ```
 
 ```{r 13-transport-27, eval=FALSE, echo=FALSE}
