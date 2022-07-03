@@ -335,7 +335,7 @@ While fast and flexible, in-memory options may be harder to set-up than dedicate
 Locally hosted routing engines run on the user's computer but in a process separate from R.
 They benefit from speed of execution and control over the weighting profile for different modes of transport.
 Disadvantages include the difficulty of representing complex networks locally; temporal dynamics (primarily due to traffic); and the need for specialized software.
-A key feature of some advanced routing engines (both locally hosted and remotely hosted) such as R5 and OpenTripPlanner is the provision of *multi-modal* routes: allowing a single journey from A to B to be made by more than one mode of transport, such as cycling from home to a bus stop, catching a bus to the city centre, and then walking to the destination.
+A key feature of some advanced routing engines (both locally hosted and remotely hosted) such as R5, OpenTripPlanner and [Valhalla](https://github.com/valhalla/valhalla) (which at the time of writing does not have an R interface to the best of our knowledge) is the provision of *multi-modal* routes: allowing a single journey from A to B to be made by more than one mode of transport, such as cycling from home to a bus stop, catching a bus to the city centre, and then walking to the destination.
 
 **Remotely hosted**\index{routing} routing engines, by contrast, use a web API\index{API} to send queries about origins and destinations and return results generated on a powerful server running dedicated software.
 Routing services based on open source routing engines, such as OSRM's publicly available service, work exactly the same when called from R as locally hosted instances, simply requiring arguments specifying 'base URLs' to be updated.
@@ -357,7 +357,12 @@ The package **stplanr** tackles this problem by providing a unified interface fo
 The function takes a wide range of inputs, including geographic desire lines (with the `l = ` argument), coordinates and even text strings representing unique addresses, and returns route data as consistent `sf` objects.
 <!-- TODO: at some point I hope to create a dedicated router package, mention that if it gets created (RL 2022-07) -->
 
-Instead of routing\index{routing} *all* desire lines generated in the previous section, which would be time and memory-consuming, we will focus on the desire lines\index{desire lines} of policy interest.
+Regardless of the routing engine used, there are two broad types of output: route level and segment level.
+Route level outputs contain a single feature (typically a multilinestring and associated row in the data frame representation) per origin-destination pair.
+Most routing engines return route level by default; multi-modal engines can provide outputs at the 'leg' level (one feature per continuous movement by a single mode of transport) while the **cyclestreets** package, for example, provides segment level data by default.
+When working with segment or leg-level data, route-level statistics can be returned by grouping by columns representing trip start and end points and summarizing/aggregating columns containing segment-level data.
+
+Instead of routing\index{routing} *all* desire lines generated in the previous section, which would be time and memory-consuming (route datasets are usually substantially larger than desire line datasets because they have more detailed geometries and often have more attributes such as road name), we will focus on the desire lines\index{desire lines} of policy interest.
 The benefits of cycling trips are greatest when they replace car trips.
 Clearly, not all car trips can realistically be replaced by cycling.
 However, 5 km Euclidean distance (or around 6-8 km of route distance) can realistically be cycled by many people, especially if they are riding an electric bicycle ('ebike').
