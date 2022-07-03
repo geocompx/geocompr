@@ -558,15 +558,16 @@ tm_shape(route_network_scenario) +
 ```
 
 
-
-The data used in this section was downloaded using **osmdata**\index{osmdata (package)}.
+Another, more common, type of route network dataset is road network datasets.
+This type of route network dataset is available for every city worldwide from OpenStreetMap.
+The input dataset used to illustrate this type of route network downloaded using **osmdata**\index{osmdata (package)}.
 To avoid having to request the data from OSM\index{OpenStreetMap} repeatedly, we will use the `bristol_ways` object from the **spDataLarge** package, which contains point and line data for the case study area (see `?bristol_ways`):
 
 ```{r 13-transport-22}
 summary(bristol_ways)
 ```
 
-The above code chunk loaded a simple feature\index{sf} object representing around 3,000 segments on the transport network\index{network}.
+The above code chunk summarized a simple feature\index{sf} object representing around 3,000 segments on the transport network\index{network}.
 This an easily manageable dataset size (transport datasets can be large, but it's best to start small).
 
 As mentioned, route networks\index{network} can usefully be represented as mathematical graphs\index{graph}, with nodes\index{node} on the network\index{network} connected by edges\index{edge}.
@@ -577,39 +578,47 @@ To overcome this issue functionality was developed in the
 and subsequently
 **sfnetworks**\index{sfnetworks (package)}
 packages to represent route networks simultaneously as graphs *and* a set of geographic lines.
-We will demonstrate **sfnetworks** functionality on a subset of the `bristol_ways` object, representing the major road network in the area (roads with a maximum speed of 70 miles per hour).
+We will demonstrate **sfnetworks** functionality on the `bristol_ways` object.
 
 ```{r 13-transport-23}
+library(sfnetworks)
 bristol_ways$geometry_type = st_geometry_type(bristol_ways)
-ways_freeway = bristol_ways |> 
-  filter(maxspeed == "70 mph", geometry_type == "LINESTRING") 
-ways_sfn = sfnetworks::as_sfnetwork(ways_freeway)
+ways_freeway = bristol_ways
+ways_sfn = as_sfnetwork(ways_freeway)
 class(ways_sfn)
 ways_sfn
 ```
 
-The output of the previous code chunk shows that `ways_sln` is a composite object with various 'slots'.
-These include: the spatial component of the network\index{network} (named `sl`), the graph component (`g`) and the 'weightfield', the edge variable used for shortest path \index{shortest route} calculation (by default segment distance).
-`ways_sln` is of class `sfNetwork`, defined by the S4 class\index{S4 class} system.
-This means that each component can be accessed using the `@` operator, which is used below to extract its graph component and process it using the **igraph**\index{igraph (package)} package, before plotting the results in geographic space.
-In the example below, the 'edge betweenness'\index{edge}, meaning the number of shortest paths\index{shortest route} passing through each edge, is calculated (see `?igraph::betweenness` for further details and Figure \@ref(fig:wayssln)).
-The results demonstrate that each graph\index{graph} edge represents a segment: the segments near the center of the road network\index{network} have the greatest betweenness scores.
+The output of the previous code chunk shows that `ways_sfn` is a composite object, containing both nodes and edges in graph and spatial form.
+`ways_sfn` is of class `sfnetwork`, which builds on the `igraph` class from the **igraph** package.
+In the example below, the 'edge betweenness'\index{edge}, meaning the number of shortest paths\index{shortest route} passing through each edge, is calculated (see `?igraph::betweenness` for further details).
+The result of calculating edge betweenness for this dataset are shown Figure \@ref(fig:wayssln), which has the cycle route network dataset calculated with the `overline()` function as an overlay for comparison.
+The results demonstrate that each graph\index{graph} edge represents a segment: the segments near the center of the road network\index{network} have the highest betweenness values, whereas segments closer to central Bristol have higher cycling potential, based on these simplistic datasets.
 
 <!-- Todo (optional): make this section use potential cycle routes around Stokes Bradley not freeway data (RL) -->
 ```{r wayssln, fig.cap="Illustration of a small route network, with segment thickness proportional to its betweenness, generated using the igraph package and described in the text.", fig.asp=0.8, out.width="60%", fig.scap="Illustration of a small route network."}
-# e = igraph::edge_betweenness(ways_sln@g)
-# plot(ways_sln@sl$geometry, lwd = e / 500)
+ways_centrality = ways_sfn |> 
+  activate("edges") %>%  
+  mutate(  
+    lengths = st_length(.),  
+    betweenness = tidygraph::centrality_edge_betweenness(lengths)  
+    ) 
+tm_shape(ways_centrality |> st_as_sf()) +
+  tm_lines(lwd = "betweenness", scale = 9) +
+  tm_shape(route_network_scenario) +
+  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "N. bike trips (modelled, one direction)", col = "green")
 ```
 
 ```{r 13-transport-24, eval=FALSE, echo=FALSE}
 # not producing groups of routes so removing for now...
-# m = igraph::clusters(ways_sln@g)
-# igraph::V(ways_sln@g)$m = m$membership
-# gdf = igraph::as_long_data_frame(ways_sln@g)
+# m = igraph::clusters(ways_sfn@g)
+# igraph::V(ways_sfn@g)$m = m$membership
+# gdf = igraph::as_long_data_frame(ways_sfn@g)
 ```
 
-One can also find the shortest route\index{shortest route} between origins and destinations using this graph\index{graph} representation of the route network\index{network}.
-This can be done with functions such as `sum_network_routes()` from **stplanr**\index{stplanr (package)}, which undertakes 'local routing'\index{routing} (see Section \@ref(routes)).
+One can also find the shortest route\index{shortest route} between origins and destinations using this graph\index{graph} representation of the route network\index{network} with the **sfnetworks** package.
+<!-- TODO: make an exercise based on this if time allows (RL 2022-07) -->
+While the methods presented in this section are relatively simple compared with what is possible with spatial network generation (e.g. with `overline()`) and analysis techniques (e.g. with **sfnetworks**), they should provide a strong starting point for further exploration and research into the area.
 
 ## Prioritizing new infrastructure
 
