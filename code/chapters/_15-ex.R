@@ -1,6 +1,4 @@
-The solutions assume the following packages are attached (other packages will be attached when needed):
-
-```{r 15-ex-e0, message=FALSE, warning=FALSE}
+## ----15-ex-e0, message=FALSE, warning=FALSE------------------------------------------------------------------------------------------------------------------------------------
 library(data.table)
 library(dplyr)
 library(future)
@@ -17,13 +15,9 @@ library(terra)
 library(tictoc)
 library(sf)
 library(vegan)
-```
 
-E1. Run a NMDS\index{NMDS} using the percentage data of the community matrix. 
-Report the stress value and compare it to the stress value as retrieved from the NMDS using presence-absence data.
-What might explain the observed difference?
 
-```{r 15-ex-e1, message=FALSE}
+## ----15-ex-e1, message=FALSE---------------------------------------------------------------------------------------------------------------------------------------------------
 data("comm", package = "spDataLarge")
 pa = decostand(comm, "pa")
 pa = pa[rowSums(pa) != 0, ]
@@ -33,31 +27,34 @@ nmds_pa = metaMDS(comm = pa, k = 4, try = 500)
 nmds_per = metaMDS(comm = comm, k = 4, try = 500)
 nmds_pa$stress
 nmds_per$stress
-```
 
-```{asis 15-ex-e1-asis, message=FALSE}
-The NMDS using the presence-absence values yields a better result (`nmds_pa$stress`) than the one using percentage data (`nmds_per$stress`).
-This might seem surprising at first sight.
-On the other hand, the percentage matrix contains both more information and more noise.
-Another aspect is how the data was collected.
-Imagine a botanist in the field.
-It might seem feasible to differentiate between a plant which has a cover of 5% and another species that covers 10%.
-However, what about a herbal species that was only detected three times and consequently has a very tiny cover, e.g., 0.0001%. 
-Maybe another herbal species was detected 6 times, is its cover then 0.0002%?
-The point here is that percentage data as specified during a field campaign might reflect a precision that the data does not have.
-This again introduces noise which in turn will worsen the ordination result.
-Still, it is a valuable information if one species had a higher frequency or coverage in one plot than another compared to just presence-absence data.
-One compromise would be to use a categorical scale such as the Londo scale.
-```
 
-E2. Compute all the predictor rasters\index{raster} we have used in the chapter (catchment slope, catchment area), and put them into a `SpatRaster`-object.
-Add `dem` and `ndvi` to it.
-Next, compute profile and tangential curvature and add them as additional predictor rasters (hint: `grass7:r.slope.aspect`).
-Finally, construct a response-predictor matrix. 
-The scores of the first NMDS\index{NMDS} axis (which were the result when using the presence-absence community matrix) rotated in accordance with elevation represent the response variable, and should be joined to `random_points` (use an inner join).
-To complete the response-predictor matrix, extract the values of the environmental predictor raster object to `random_points`.
+## The NMDS using the presence-absence values yields a better result (`nmds_pa$stress`) than the one using percentage data (`nmds_per$stress`).
 
-```{r 15-ex-e2}
+## This might seem surprising at first sight.
+
+## On the other hand, the percentage matrix contains both more information and more noise.
+
+## Another aspect is how the data was collected.
+
+## Imagine a botanist in the field.
+
+## It might seem feasible to differentiate between a plant which has a cover of 5% and another species that covers 10%.
+
+## However, what about a herbal species that was only detected three times and consequently has a very tiny cover, e.g., 0.0001%.
+
+## Maybe another herbal species was detected 6 times, is its cover then 0.0002%?
+
+## The point here is that percentage data as specified during a field campaign might reflect a precision that the data does not have.
+
+## This again introduces noise which in turn will worsen the ordination result.
+
+## Still, it is a valuable information if one species had a higher frequency or coverage in one plot than another compared to just presence-absence data.
+
+## One compromise would be to use a categorical scale such as the Londo scale.
+
+
+## ----15-ex-e2------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # first compute the terrain attributes we have also used in the chapter
 library(dplyr)
 library(terra)
@@ -112,15 +109,9 @@ rp = data.frame(id = as.numeric(rownames(sc)),
                 sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
 rp = inner_join(random_points, rp, by = "id")
-```
 
-E3. Retrieve the bias-reduced RMSE of a random forest\index{random forest} and a linear model using spatial cross-validation\index{cross-validation!spatial CV}.
-The random forest modeling should include the estimation of optimal hyperparameter\index{hyperparameter} combinations (random search with 50 iterations) in an inner tuning loop (see Section \@ref(svm)).
-Parallelize\index{parallelization} the tuning level (see Section \@ref(svm)).
-Report the mean RMSE\index{RMSE} and use a boxplot to visualize all retrieved RMSEs.
-Please not that this exercise is best solved using the mlr3 functions `benchmark_grid()` and `benchmark()` (see https://mlr3book.mlr-org.com/perf-eval-cmp.html#benchmarking for more information).
 
-```{r 15-ex-e3, message=FALSE}
+## ----15-ex-e3, message=FALSE---------------------------------------------------------------------------------------------------------------------------------------------------
 library(dplyr)
 library(future)
 library(mlr3)
@@ -213,9 +204,9 @@ ggplot(data = d, mapping = aes(x = learner_id, y = regr.rmse)) +
   geom_boxplot(fill = c("lightblue2", "mistyrose2")) +
   theme_bw() +
   labs(y = "RMSE", x = "model")
-```
 
-```{asis 15-ex-e3-asis, message=FALSE}
-In fact, `lm` performs at least as good the random forest model, and thus should be preferred since it is much easier to understand and computationally much less demanding (no need for fitting hyperparameters).
-But keep in mind that the used dataset is small in terms of observations and predictors and that the response-predictor relationships are also relatively linear.
-```
+
+## In fact, `lm` performs at least as good the random forest model, and thus should be preferred since it is much easier to understand and computationally much less demanding (no need for fitting hyperparameters).
+
+## But keep in mind that the used dataset is small in terms of observations and predictors and that the response-predictor relationships are also relatively linear.
+

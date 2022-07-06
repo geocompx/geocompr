@@ -1,17 +1,10 @@
-
-```{r 02-ex-e0, message=FALSE}
+## ----02-ex-e0, message=FALSE---------------------------------------------------------------------------------------------------------------------------------------------------
 library(sf)
 library(spData)
 library(terra)
-```
 
-E1. Use `summary()` on the geometry column of the `world` data object that is included in the **spData** package. What does the output tell us about:
 
-- Its geometry type?
-- The number of countries?
-- Its coordinate reference system (CRS)?
-    
-```{r 02-ex-e1}
+## ----02-ex-e1------------------------------------------------------------------------------------------------------------------------------------------------------------------
 summary(world)
 # - Its geometry type?
 #   multipolygon
@@ -19,16 +12,9 @@ summary(world)
 #   177
 # - Its coordinate reference system (CRS)?
 #   epsg:4326
-```
 
-E2. Run the code that 'generated' the map of the world in Section 2.2.3 (Basic map making).
-Find two similarities and two differences between the image on your computer and that in the book.
 
-- What does the `cex` argument do (see `?plot`)?
-- Why was `cex` set to the `sqrt(world$pop) / 10000`?
-- Bonus: experiment with different ways to visualize the global population.
-
-```{r 02-ex-e2}
+## ----02-ex-e2------------------------------------------------------------------------------------------------------------------------------------------------------------------
 plot(world["continent"], reset = FALSE)
 cex = sqrt(world$pop) / 10000
 world_cents = st_centroid(world, of_largest = TRUE)
@@ -51,14 +37,9 @@ plot(world["pop"], logz = TRUE)
 # 
 # `cex` refers to the diameter of symbols plotted, as explained by the help page `?graphics::points`. It is an acronym for 'Chacter symbol EXpansion'.
 # It was set to the square route of the population divided by 10,000 because a) otherwise the symbols would not fit on the map and b) to make circle area proportional to population.
-```
 
-E3. Use `plot()` to create maps of Nigeria in context (see Section 2.2.3).
 
-- Adjust the `lwd`, `col` and `expandBB` arguments of `plot()`. 
-- Challenge: read the documentation of `text()` and annotate the map.
-
-```{r 02-ex-e3}
+## ----02-ex-e3------------------------------------------------------------------------------------------------------------------------------------------------------------------
 nigeria = world[world$name_long == "Nigeria", ]
 plot(st_geometry(nigeria), expandBB = c(0, 0.2, 0.1, 1), col = "gray", lwd = 3)
 plot(world[0], add = TRUE)
@@ -75,41 +56,34 @@ a = africa[grepl("Niger", africa$name_long), ]
 ncentre = st_centroid(a)
 ncentre_num = st_coordinates(ncentre)
 text(x = ncentre_num[, 1], y = ncentre_num[, 2], labels = a$name_long)
-```
 
-E4. Create an empty `SpatRaster` object called `my_raster` with 10 columns and 10 rows.
-Assign random values between 0 and 10 to the new raster and plot it.
 
-```{r 02-ex-e4, message = FALSE}
+## ----02-ex-e4, message = FALSE-------------------------------------------------------------------------------------------------------------------------------------------------
 my_raster = rast(ncol = 10, nrow = 10,
                  vals = sample(0:10, size = 10 * 10, replace = TRUE))
 plot(my_raster)
-```
 
-E5. Read-in the `raster/nlcd.tif` file from the **spDataLarge** package. 
-What kind of information can you get about the properties of this file?
 
-```{r 02-ex-e5, message = FALSE}
+## ----02-ex-e5, message = FALSE-------------------------------------------------------------------------------------------------------------------------------------------------
 nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 dim(nlcd) # dimensions
 res(nlcd) # resolution
 ext(nlcd) # extent
 nlyr(nlcd) # number of layers
 cat(crs(nlcd)) # CRS
-```
 
-E6. Check the CRS of the `raster/nlcd.tif` file from the **spDataLarge** package. 
-What kind of information you can learn from it?
 
-```{r 02-ex-e6, message = FALSE}
+## ----02-ex-e6, message = FALSE-------------------------------------------------------------------------------------------------------------------------------------------------
 cat(crs(nlcd))
-```
 
-```{asis 02-ex-e62, message = FALSE}
-The WKT above describes a two-dimensional projected coordinate reference system.
-It is based on the GRS 1980 ellipsoid with  North American Datum 1983  and the Greenwich prime meridian.
-It used the Transverse Mercator projection to transform from geographic to projected CRS (UTM zone 12N).
-Its first axis is related to eastness, while the second one is related to northness, and both axes have units in meters.
-The SRID of the above CRS is "EPSG:26912".
-```
+
+## The WKT above describes a two-dimensional projected coordinate reference system.
+
+## It is based on the GRS 1980 ellipsoid with  North American Datum 1983  and the Greenwich prime meridian.
+
+## It used the Transverse Mercator projection to transform from geographic to projected CRS (UTM zone 12N).
+
+## Its first axis is related to eastness, while the second one is related to northness, and both axes have units in meters.
+
+## The SRID of the above CRS is "EPSG:26912".
 

@@ -1,6 +1,4 @@
-<!-- You are nowhere! -->
-
-```{r c404, echo=FALSE, message=FALSE, fig.asp=1}
+## ----c404, echo=FALSE, message=FALSE, fig.asp=1--------------------------------------------------------------------------------------------------------------------------------
 library(tmap)
 library(sf)
 null_island = st_point(c(0, 0))
@@ -12,5 +10,4 @@ tm_shape(null_island) +
   tm_layout(bg.color = "lightblue",
             main.title = "You are here:",
             main.title.color = "grey40")
-```
 

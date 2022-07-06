@@ -1,5 +1,5 @@
 if(!exists("route_cycleway")) {
-  source("code/chapters/12-transport.R")
+  source("code/chapters/13-transport.R")
 } 
 tmap_mode("plot")
 bristol_stations_top = bristol_stations[desire_rail, , op = st_is_within_distance, dist = 500]
@@ -13,3 +13,4 @@ m_leaflet = tm_shape(bristol_ttwa) +
   tm_shape(bristol_stations_top) +
   tm_dots(size = 0.3, col = "red") +
   tm_layout(legend.position = c("LEFT", "TOP"))
+# m_leaflet
