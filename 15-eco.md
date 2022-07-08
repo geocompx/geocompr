@@ -18,6 +18,7 @@ library(mlr3learners)
 library(qgisprocess)
 library(paradox)
 library(ranger)
+library(tree)
 library(sf)
 library(terra)
 library(tree)
@@ -339,12 +340,10 @@ text(tree_mo, pretty = 0)
 
 The resulting tree consists of three internal nodes and four terminal nodes (Figure \@ref(fig:tree)).
 The first internal node at the top of the tree assigns all observations which are below
-<!--  -->
-328.5 m
-to the left and all other observations to the right branch.
+<!---->
+328.5 m to the left and all other observations to the right branch.
 The observations falling into the left branch have a mean NMDS\index{NMDS} score of
-<!--  -->
--1.198.
+<!---->-1.198.
 Overall, we can interpret the tree as follows: the higher the elevation, the higher the NMDS\index{NMDS} score becomes.
 Decision trees have a tendency to overfit\index{overfitting}, that is they mirror too closely the input data including its noise which in turn leads to bad predictive performances [Section \@ref(intro-cv); @james_introduction_2013].
 Bootstrap aggregation (bagging) is an ensemble technique that can help to overcome this problem.
@@ -419,9 +418,7 @@ The `min.node.size` parameter indicates the number of observations a terminal no
 Naturally, as trees and computing time become larger, the lower the `min.node.size`.
 
 Hyperparameter\index{hyperparameter} combinations will be selected randomly but should fall inside specific tuning limits (created with `paradox::ps()`).
-`mtry` should range between 1 and the number of predictors
-<!-- (), -->
-(4), `sample.fraction` should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10.
+`mtry` should range between 1 and the number of predictors (7) <!-- (4)-->, `sample.fraction` should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10.
 
 
 ```r
@@ -464,11 +461,16 @@ autotuner_rf$train(task)
 
 
 
-<!-- An `mtry` of , a `sample.fraction` of , and a `min.node.size` of  represent the best hyperparameter\index{hyperparameter} combination. -->
-<!-- An RMSE\index{RMSE} of  -->
-<!-- is relatively good when considering the range of the response variable which is -->
-<!--  (`diff(range(rp$sc))`). -->
 
+```r
+autotuner_rf$tuning_result
+```
+
+<!--
+An `mtry` of , a `sample.fraction` of , and a `min.node.size` of  represent the best hyperparameter\index{hyperparameter} combination.
+An RMSE\index{RMSE} of 
+is relatively good when considering the range of the response variable which is  (`diff(range(rp$sc))`).
+-->
 ### Predictive mapping
 
 The tuned hyperparameters\index{hyperparameter} can now be used for the prediction.

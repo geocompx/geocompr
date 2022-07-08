@@ -110,6 +110,7 @@ In it you will also make use of R’s interfaces to dedicated GIS software, and 
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paleolimbot/qgisprocess">qgisprocess</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://paradox.mlr-org.com">paradox</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/imbs-hl/ranger">ranger</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/terra/">terra</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span></span>
@@ -369,12 +370,10 @@ FIGURE 15.4: Simple example of a decision tree with three internal nodes and fou
 </div>
 <p>The resulting tree consists of three internal nodes and four terminal nodes (Figure <a href="eco.html#fig:tree">15.4</a>).
 The first internal node at the top of the tree assigns all observations which are below
-<!--  -->
-328.5 m
-to the left and all other observations to the right branch.
+<!---->
+328.5 m to the left and all other observations to the right branch.
 The observations falling into the left branch have a mean NMDS score of
-<!--  -->
--1.198.
+<!---->-1.198.
 Overall, we can interpret the tree as follows: the higher the elevation, the higher the NMDS score becomes.
 Decision trees have a tendency to overfit, that is they mirror too closely the input data including its noise which in turn leads to bad predictive performances [Section <a href="spatial-cv.html#intro-cv">12.4</a>; <span class="citation">James et al. (<a href="references.html#ref-james_introduction_2013" role="doc-biblioref">2013</a>)</span>].
 Bootstrap aggregation (bagging) is an ensemble technique that can help to overcome this problem.
@@ -435,9 +434,7 @@ Smaller fractions lead to greater diversity, and thus less correlated trees whic
 The <code>min.node.size</code> parameter indicates the number of observations a terminal node should at least have (see also Figure <a href="eco.html#fig:tree">15.4</a>).
 Naturally, as trees and computing time become larger, the lower the <code>min.node.size</code>.</p>
 <p>Hyperparameter combinations will be selected randomly but should fall inside specific tuning limits (created with <code><a href="https://paradox.mlr-org.com/reference/ps.html">paradox::ps()</a></code>).
-<code>mtry</code> should range between 1 and the number of predictors
-<!-- (), -->
-(4), <code>sample.fraction</code> should range between 0.2 and 0.9 and <code>min.node.size</code> should range between 1 and 10.</p>
+<code>mtry</code> should range between 1 and the number of predictors (7) <!-- (4)-->, <code>sample.fraction</code> should range between 0.2 and 0.9 and <code>min.node.size</code> should range between 1 and 10.</p>
 <div class="sourceCode" id="cb487"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># specifying the search space</span></span>
 <span><span class="va">search_space</span> <span class="op">=</span> <span class="fu">paradox</span><span class="fu">::</span><span class="fu"><a href="https://paradox.mlr-org.com/reference/ps.html">ps</a></span><span class="op">(</span></span>
@@ -464,10 +461,13 @@ The performance measure is the root mean squared error (RMSE).</p>
 <code class="sourceCode R"><span><span class="co"># hyperparameter tuning</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">0412022</span><span class="op">)</span></span>
 <span><span class="va">autotuner_rf</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span><span class="op">)</span></span></code></pre></div>
-<!-- An `mtry` of , a `sample.fraction` of , and a `min.node.size` of  represent the best hyperparameter\index{hyperparameter} combination. -->
-<!-- An RMSE\index{RMSE} of  -->
-<!-- is relatively good when considering the range of the response variable which is -->
-<!--  (`diff(range(rp$sc))`). -->
+<div class="sourceCode" id="cb490"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">autotuner_rf</span><span class="op">$</span><span class="va">tuning_result</span></span></code></pre></div>
+<!--
+An `mtry` of , a `sample.fraction` of , and a `min.node.size` of  represent the best hyperparameter\index{hyperparameter} combination.
+An RMSE\index{RMSE} of 
+is relatively good when considering the range of the response variable which is  (`diff(range(rp$sc))`).
+-->
 </div>
 <div id="predictive-mapping" class="section level3" number="15.4.2">
 <h3>
@@ -475,15 +475,15 @@ The performance measure is the root mean squared error (RMSE).</p>
 </h3>
 <p>The tuned hyperparameters can now be used for the prediction.
 To do so, we only need to run the <code>predict</code> method of our fitted <code>AutoTuner</code> object.</p>
-<div class="sourceCode" id="cb490"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb491"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># predicting using the best hyperparameter combination</span></span>
 <span><span class="va">autotuner_rf</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>predict</code> method will apply the model to all observations used in the modeling.
 Given a multilayer <code>SpatRaster</code> containing rasters named as the predictors used in the modeling, <code><a href="https://rdrr.io/pkg/terra/man/predict.html">terra::predict()</a></code> will also make spatial predictions, i.e., predict to new data.</p>
-<div class="sourceCode" id="cb491"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb492"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pred</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/predict.html">predict</a></span><span class="op">(</span><span class="va">ep</span>, model <span class="op">=</span> <span class="va">autotuner_rf</span>, fun <span class="op">=</span> <span class="va">predict</span><span class="op">)</span></span></code></pre></div>
 <p>In case, <code><a href="https://rdrr.io/pkg/terra/man/predict.html">terra::predict()</a></code> does not support a model algorithm, you can still make the predictions manually.</p>
-<div class="sourceCode" id="cb492"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb493"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">newdata</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/coerce.html">as.matrix</a></span><span class="op">(</span><span class="va">ep</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/rowSums.html">colSums</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">newdata</span><span class="op">)</span><span class="op">)</span>  <span class="co"># 0 NAs</span></span>
 <span><span class="co"># but assuming there were 0s results in a more generic approach</span></span>
@@ -589,7 +589,7 @@ However, this does not imply that the random forest model has returned the best 
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-07-07.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-07-08.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
