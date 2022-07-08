@@ -236,11 +236,16 @@ zion_nlcd |>
 <p class="caption">(\#fig:polyextr)Area used for continuous (left) and categorical (right) raster extraction.</p>
 </div>
 
+Although the **terra** package offers rapid extraction of raster values within polygons, `extract()` can still be a bottleneck when processing large polygon datasets.
+The **exactextractr** package offers a [significantly faster alternative](https://github.com/Robinlovelace/geocompr/issues/813) for extracting pixel values through the `exact_extract()` function. 
+The `exact_extract()` function also computes, by default, the fraction of each raster cell overlapped by the polygon, which is more precise (see note below for details). 
+
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Polygons usually have irregular shapes, and therefore, a polygon can overlap only some parts of a raster's cells. 
 To get more detailed results, the `extract()` function has an argument called `exact`. 
 With `exact = TRUE`, we get one more column `fraction` in the output data frame, which contains a fraction of each cell that is covered by the polygon.
 This could be useful to calculate a weighted mean for continuous rasters or more precise coverage for categorical rasters.
-By default, it is `FALSE` as this operation requires more computations.</div>\EndKnitrBlock{rmdnote}
+By default, it is `FALSE` as this operation requires more computations. 
+The `exactextractr::exact_extract()` function always computes the coverage fraction of the polygon in each cell.</div>\EndKnitrBlock{rmdnote}
 
 
 
@@ -434,6 +439,8 @@ How can you explain that?
 E2. Firstly, extract values from `srtm` at the points represented in `zion_points`.
 Next, extract average values of `srtm` using a 90 buffer around each point from `zion_points` and compare these two sets of values. 
 When would extracting values by buffers be more suitable than by points alone?
+
+- Bonus: Implement extraction using `exactextractr` and compare the results.
 
 
 
