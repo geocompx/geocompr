@@ -17,6 +17,7 @@ library(mlr3learners)
 library(qgisprocess)
 library(paradox)
 library(ranger)
+library(tree)
 library(sf)
 library(terra)
 library(tree)
@@ -413,12 +414,10 @@ knitr::include_graphics("figures/15_tree.png")
 
 The resulting tree consists of three internal nodes and four terminal nodes (Figure \@ref(fig:tree)).
 The first internal node at the top of the tree assigns all observations which are below
-<!-- `r # gsub("<", "", as.character(as.data.frame(tree_mo$fram$splits)[1, "cutleft"]))` -->
-328.5 m
-to the left and all other observations to the right branch.
+<!--`r # gsub("<", "", as.character(as.data.frame(tree_mo$fram$splits)[1, "cutleft"]))`-->
+328.5 m to the left and all other observations to the right branch.
 The observations falling into the left branch have a mean NMDS\index{NMDS} score of
-<!-- `r # round(tree_mo$frame$yval[2], 3)` -->
--1.198.
+<!--`r # round(tree_mo$frame$yval[2], 3)`-->-1.198.
 Overall, we can interpret the tree as follows: the higher the elevation, the higher the NMDS\index{NMDS} score becomes.
 Decision trees have a tendency to overfit\index{overfitting}, that is they mirror too closely the input data including its noise which in turn leads to bad predictive performances [Section \@ref(intro-cv); @james_introduction_2013].
 Bootstrap aggregation (bagging) is an ensemble technique that can help to overcome this problem.
@@ -490,9 +489,7 @@ The `min.node.size` parameter indicates the number of observations a terminal no
 Naturally, as trees and computing time become larger, the lower the `min.node.size`.
 
 Hyperparameter\index{hyperparameter} combinations will be selected randomly but should fall inside specific tuning limits (created with `paradox::ps()`).
-`mtry` should range between 1 and the number of predictors
-<!-- (`r # ncol(rp) - 1`), -->
-(4), `sample.fraction` should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10.
+`mtry` should range between 1 and the number of predictors (`r ncol(rp) - 1`) <!-- (4)-->, `sample.fraction` should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10.
 
 ```{r 15-eco-22}
 # specifying the search space
@@ -522,31 +519,35 @@ autotuner_rf = mlr3tuning::AutoTuner$new(
 
 Calling the `train()`-method of the `AutoTuner`-object finally runs the hyperparameter\index{hyperparameter} tuning, and will find the optimal hyperparameter\index{hyperparameter} combination for the specified parameters.
 
-```{r 15-eco-24, eval=FALSE}
+```{r 15-eco-24, eval=FALSE, cache=TRUE, cache.lazy=FALSE}
 # hyperparameter tuning
 set.seed(0412022)
 autotuner_rf$train(task)
 ```
 
-```{r 15-eco-25, eval=FALSE, echo=FALSE}
+```{r 15-eco-25, cache=TRUE, cache.lazy=FALSE, eval=FALSE, echo=FALSE}
 saveRDS(autotuner_rf, "extdata/15-tune.rds")
 ```
 
-```{r 15-eco-26, echo=FALSE, cache.lazy=FALSE}
+```{r 15-eco-26, echo=FALSE, cache=TRUE, cache.lazy=FALSE}
 autotuner_rf = readRDS("extdata/15-tune.rds")
 ```
 
-<!-- An `mtry` of `r # autotuner_rf$tuning_result$mtry`, a `sample.fraction` of `r # round(autotuner_rf$tuning_result$sample.fraction, 2)`, and a `min.node.size` of `r # autotuner_rf$tuning_result$min.node.size` represent the best hyperparameter\index{hyperparameter} combination. -->
-<!-- An RMSE\index{RMSE} of `r # round(autotuner_rf$tuning_result$regr.rmse, 2)` -->
-<!-- is relatively good when considering the range of the response variable which is -->
-<!-- `r # round(diff(range(rp$sc)), 2)` (`diff(range(rp$sc))`). -->
+```{r tuning-result, cache=TRUE, cache.lazy=FALSE}
+autotuner_rf$tuning_result
+```
 
+<!--
+An `mtry` of `r # autotuner_rf$tuning_result$mtry`, a `sample.fraction` of `r # round(autotuner_rf$tuning_result$sample.fraction, 2)`, and a `min.node.size` of `r # autotuner_rf$tuning_result$min.node.size` represent the best hyperparameter\index{hyperparameter} combination.
+An RMSE\index{RMSE} of `r # round(autotuner_rf$tuning_result$regr.rmse, 2)`
+is relatively good when considering the range of the response variable which is `r # round(diff(range(rp$sc)), 2)` (`diff(range(rp$sc))`).
+-->
 ### Predictive mapping
 
 The tuned hyperparameters\index{hyperparameter} can now be used for the prediction.
 To do so, we only need to run the `predict` method of our fitted `AutoTuner` object.
 
-```{r 15-eco-27, cache.lazy=FALSE}
+```{r 15-eco-27, cache=TRUE, cache.lazy=FALSE}
 # predicting using the best hyperparameter combination
 autotuner_rf$predict(task)
 ```
@@ -554,7 +555,7 @@ autotuner_rf$predict(task)
 The `predict` method will apply the model to all observations used in the modeling.
 Given a multilayer `SpatRaster` containing rasters named as the predictors used in the modeling, `terra::predict()` will also make spatial predictions, i.e., predict to new data.
 
-```{r 15-eco-28, cache.lazy=FALSE, eval=FALSE}
+```{r 15-eco-28, cache=TRUE, cache.lazy=FALSE, eval=FALSE}
 pred = terra::predict(ep, model = autotuner_rf, fun = predict)
 ```
 
@@ -584,7 +585,7 @@ knitr::include_graphics("figures/15_rf_pred.png")
 
 In case, `terra::predict()` does not support a model algorithm, you can still make the predictions manually.
 
-```{r 15-eco-29, cache.lazy=FALSE, eval=FALSE}
+```{r 15-eco-29, cache=TRUE, cache.lazy=FALSE, eval=FALSE}
 newdata = as.data.frame(as.matrix(ep))
 colSums(is.na(newdata))  # 0 NAs
 # but assuming there were 0s results in a more generic approach
