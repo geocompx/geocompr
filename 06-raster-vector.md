@@ -440,7 +440,7 @@ E2. Firstly, extract values from `srtm` at the points represented in `zion_point
 Next, extract average values of `srtm` using a 90 buffer around each point from `zion_points` and compare these two sets of values. 
 When would extracting values by buffers be more suitable than by points alone?
 
-- Bonus: Implement extraction using `exactextractr` and compare the results.
+- Bonus: Implement extraction using the **exactextractr** package and compare the results.
 
 
 
