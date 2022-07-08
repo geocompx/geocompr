@@ -39,6 +39,8 @@ E2. Firstly, extract values from `srtm` at the points represented in `zion_point
 Next, extract average values of `srtm` using a 90 buffer around each point from `zion_points` and compare these two sets of values. 
 When would extracting values by buffers be more suitable than by points alone?
 
+- Bonus: Implement extraction using `exactextractr` and compare the results.
+
 ```{r 06-ex-e2}
 zion_points_buf = st_buffer(zion_points, dist = 90)
 plot(srtm)
@@ -48,6 +50,19 @@ plot(ch, add = TRUE)
 zion_points_points = extract(srtm, vect(zion_points))
 zion_points_buf = extract(srtm, vect(zion_points_buf))
 plot(zion_points_points$srtm, zion_points_buf$srtm2)
+
+# Bonus
+zion_points_buf_2 = exactextractr::exact_extract(x = srtm, 
+                                         y = zion_buffer)
+# Make output similar to terra::extract() 
+zion_points_buf_2 = lapply(seq_along(zion_points_buf_2), \(i) cbind(ID = i,
+                                                                    zion_points_buf_2[[i]]))
+
+
+zion_points_buf_2 = do.call(rbind, zion_points_buf_2) 
+zion_points_buf_2 = rename(zion_points_buf_2, srtm = value)
+
+plot(zion_points_points$srtm, zion_points_buf_2$srtm2)
 ```
 
 E3. Subset points higher than 3100 meters in New Zealand (the `nz_height` object) and create a template raster with a resolution of 3 km for the extent of the new point dataset. 
