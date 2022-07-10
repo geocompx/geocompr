@@ -3,25 +3,26 @@
 # load data if not already loaded:
 if(!exists("desire_lines")) {
   library(sf)
-  library(tidyverse)
+  library(dplyr)
   library(spDataLarge)
   library(stplanr)
   library(tmap)     
-  zones_attr = bristol_od %>% 
-    group_by(o) %>% 
-    summarize_if(is.numeric, sum) %>% 
+  zones_attr = bristol_od |> 
+    group_by(o) |> 
+    summarize_if(is.numeric, sum) |> 
     dplyr::rename(geo_code = o)
   
   zones_joined = left_join(bristol_zones, zones_attr, by = "geo_code")
   
-  zones_od = bristol_od %>% 
-    group_by(d) %>% 
-    summarize_if(is.numeric, sum) %>% 
-    dplyr::select(geo_code = d, all_dest = all) %>% 
-    inner_join(zones_joined, ., by = "geo_code")
+  zones_od = bristol_od |> 
+    group_by(d) |> 
+    summarize_if(is.numeric, sum) |> 
+    dplyr::select(geo_code = d, all_dest = all) |> 
+    inner_join(zones_joined, ., by = "geo_code") |> 
+    st_as_sf()
   
-  od_top5 = bristol_od %>% 
-    arrange(desc(all)) %>% 
+  od_top5 = bristol_od |> 
+    arrange(desc(all)) |> 
     top_n(5, wt = all)
   
   bristol_od$Active = (bristol_od$bicycle + bristol_od$foot) /
