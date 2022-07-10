@@ -324,7 +324,7 @@ From a geographical perspective, routes are desire lines\index{desire lines} tha
 the origin and destination points are the same as in the desire line representation of travel, but the pathway to get from A to B is more complex.
 The geometries of routes are typically (but not always) determined by the transport network.
 
-While desire lines\index{desire lines} contain only two vertices (their beginning and end points), routes can contain any number of vertices, representing points between A and B joined by straight lines: the definition of a LINESTRING geometry.
+While desire lines\index{desire lines} contain only two vertices (their beginning and end points), routes can contain any number of vertices, representing points between A and B joined by straight lines: the definition of a linestring geometry.
 Routes covering large distances or following intricate network can have many hundreds of vertices; routes on grid-based or simplified road networks tend to have fewer.
 Routes are generated from desire lines\index{desire lines} --- or more commonly matrices containing coordinate pairs representing desire lines --- using routing services.
 There are three main ways to compute routes from OD data:
@@ -340,15 +340,15 @@ While fast and flexible, in-memory options may be harder to set-up than dedicate
 Locally hosted routing engines run on the user's computer but in a process separate from R.
 They benefit from speed of execution and control over the weighting profile for different modes of transport.
 Disadvantages include the difficulty of representing complex networks locally; temporal dynamics (primarily due to traffic); and the need for specialized software.
-A key feature of some advanced routing engines (both locally hosted and remotely hosted) such as R5, OpenTripPlanner and [Valhalla](https://github.com/valhalla/valhalla) (which at the time of writing does not have an R interface to the best of our knowledge) is the provision of *multi-modal* routes: allowing a single journey from A to B to be made by more than one mode of transport, such as cycling from home to a bus stop, catching a bus to the city centre, and then walking to the destination.
+A key feature of some advanced routing engines (both locally hosted and remotely hosted) such as R5, OpenTripPlanner and [Valhalla](https://github.com/valhalla/valhalla) (which at the time of writing does not have an R interface to the best of our knowledge) is the provision of *multi-modal* routes: allowing a single journey from A to B to be made by more than one mode of transport, such as cycling from home to a bus stop, catching a bus to the city center, and then walking to the destination.
 
 **Remotely hosted**\index{routing} routing engines, by contrast, use a web API\index{API} to send queries about origins and destinations and return results generated on a powerful server running dedicated software.
 Routing services based on open source routing engines, such as OSRM's publicly available service, work exactly the same when called from R as locally hosted instances, simply requiring arguments specifying 'base URLs' to be updated.
 However, the fact that external routing services are hosted on a dedicated machine (usually funded by commercial company with incentives to generate accurate routes)\index{routing} can give them advantages, including:
 
-- Provision of routing services worldwide (or usually at least over a large region).
-- Established routing services available are usually update regularly and can often respond to traffic levels.
-- Routing services usually run on dedicated hardware and software including systems such as load balancers to ensure consistent performance.
+- Provision of routing services worldwide (or usually at least over a large region)
+- Established routing services available are usually update regularly and can often respond to traffic levels
+- Routing services usually run on dedicated hardware and software including systems such as load balancers to ensure consistent performance
 
 Disadvantages of remote routing\index{routing} services include speed when batch jobs are not possible (they often rely on data transfer over the internet on a route-by-route basis), price (the Google routing API, for example, limits the number of free queries) and licensing issues.
 [**googleway**](http://symbolixau.github.io/googleway/) and [**mapbox**](https://walker-data.com/mapboxapi/articles/navigation.html) packages demonstrate this approach by providing access to routing services from Google and Mapbox, respectively\index{API}.
@@ -370,7 +370,7 @@ When working with segment or leg-level data, route-level statistics can be retur
 Instead of routing\index{routing} *all* desire lines generated in the previous section, we will focus on the desire lines\index{desire lines} of policy interest.
 Doing routing on a subset of the data before trying to compute routes for a large number of OD pairs is often sensible: routing can be time and memory-consuming: route datasets are usually substantially larger than desire line datasets because they have more detailed geometries and often have more attributes such as road name.
 
-We will filter-out a subset of the desire lines with a focus on estimating cycling potential based on the observation that the benefits cycling trips are greatest when they replace car trips and that relatively short trips are more likely to be cycled than long trips [@lovelace_propensity_2017].
+We will filter-out a subset of the desire lines with a focus on estimating cycling potential based on the observation that the benefits of cycling trips are greatest when they replace car trips and that relatively short trips are more likely to be cycled than long trips [@lovelace_propensity_2017].
 Clearly, not all car trips can realistically be replaced by cycling.
 Trips between 2.5 and 5 km Euclidean distance (or around 3 km, below which trips are can be made by walking or scooter, to 6-8 km of route distance) have a relatively high probability of being cycled, and the maximum distance increases when trips are made by [electric bike](https://www.sciencedirect.com/science/article/pii/S0967070X21003401).
 <!-- Todo: add reference (RL 2022-07) -->
@@ -379,7 +379,7 @@ Considering this, and the utility of a small route dataset for testing, we will 
 ```{r 13-transport-17, message=FALSE}
 desire_lines$distance_km = as.numeric(st_length(desire_lines)) / 1000
 desire_lines_short = desire_lines |> 
-  filter(car_driver >= 100 & distance_km <= 5 & distance_km >= 2.5)
+  filter(car_driver >= 100, distance_km <= 5, distance_km >= 2.5)
 ```
 
 In the code above `st_length()` calculated the length of each desire line, as described in Section \@ref(distance-relations).
@@ -389,7 +389,7 @@ This is done using the publicly available OSRM service \index{routing} with the 
 
 ```{r 13-transport-18, eval=FALSE}
 routes_short = route(l = desire_lines_short, route_fun = route_osrm,
-                   osrm.profile = "bike")
+                     osrm.profile = "bike")
 ```
 
 ```{r, eval=FALSE, echo=FALSE}
@@ -418,7 +418,7 @@ In addition to the columns contained in the `desire_lines` object, the new route
 We will plot desire lines\index{desire lines} along which many short car journeys take place alongside cycling routes.
 Making the width of the routes proportional to the number of car journeys that could potentially be replaced provides an effective way to prioritize interventions on the road network [@lovelace_propensity_2017].
 The code chunk below plots the desire lines and routes, resulting in Figure \@ref(fig:routes) which shows routes along which people drive short distances:^[
-Not that the red routes and black desire lines do not start at exactly the same points.
+Note that the red routes and black desire lines do not start at exactly the same points.
 This is because zone centroids rarely lie on the route network: instead the route originate from the transport network node nearest the centroid.
 Note also that routes are assumed to originate in the zone centroids, a simplifying assumption which is used in transport models to reduce the computational resources needed to calculate the shortest path between all combinations of possible origins and destinations [@hollander_transport_2016].
 ]
