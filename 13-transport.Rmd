@@ -515,14 +515,14 @@ While routes generally contain data at same level as desire lines (or at the lev
 Each segment (roughly corresponding to a continuous section of street between junctions) in a route network is present once and only once.
 
 Sometimes route networks are the input into a transport data analysis project; sometimes they are an output; and sometimes route networks are both an input and an output.
-To be specific: any routing engines requires some kind of route network input, so any transport research involving routes must invariably involve route network data in the internal or external routing engines (in the latter case the route network data is not necessarily imported into R).
-However, route networks are also important outputs in many transport research projects: summarising data such as the potential number of trips made on particular segments and represented as a route network, can help prioritize investment where it is most needed.
+To be specific: any routing engines requires some kind of route network input, so any transport research of routes must invariably involve route network data in the internal or external routing engines (in the latter case the route network data is not necessarily imported into R).
+However, route networks are also important outputs in many transport research projects: summarizing data such as the potential number of trips made on particular segments and represented as a route network, can help prioritize investment where it is most needed.
 \index{network}
 
 To demonstrate how to create route networks as an output derived from route level data, imagine a simple scenario of mode shift.
-Imagine that 50% of car trips between 0 to 3 km in route distance are replace by cycling, a percentage that drops by 10 percentage points for every additional km of route distance so that 20% of car trips of 6 km are replaced by cycling and no car trips that are 8 km or longer are replaced by cycling.
+Imagine that 50% of car trips between 0 to 3 km in route distance are replaced by cycling, a percentage that drops by 10 percentage points for every additional km of route distance so that 20% of car trips of 6 km are replaced by cycling and no car trips that are 8 km or longer are replaced by cycling.
 This is of course an unrealistic scenario [@lovelace_propensity_2017], but is a useful starting point.
-In this case we can model mode shift from cars to bikes as follows:
+In this case, we can model mode shift from cars to bikes as follows:
 
 ```{r uptakefun}
 uptake = function(x) {
@@ -546,7 +546,7 @@ The package take route level data, breaks linestrings at junctions (were two or 
 route_network_scenario = overline(routes_short_scenario, attrib = "bicycle")
 ```
 
-The outputs of the two preceeding code chunks are summarised in Figure \@ref(fig:rnetvis) below.
+The outputs of the two preceding code chunks are summarized in Figure \@ref(fig:rnetvis) below.
 
 ```{r rnetvis, out.width="49%", fig.show='hold', fig.cap="Illustration of the % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).", echo=FALSE}
 routes_short_scenario |> 
@@ -556,9 +556,8 @@ routes_short_scenario |>
   ylab("Percent trips switching from driving to cycling") +
   scale_y_continuous(labels = scales::percent)
 tm_shape(route_network_scenario) +
-  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "N. bike trips (modelled, one direction)")
+  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "No. bike trips (modeled, one direction)")
 ```
-
 
 Another, more common, type of route network dataset is road network datasets.
 This type of route network dataset is available for every city worldwide from OpenStreetMap.
@@ -569,23 +568,18 @@ To avoid having to request the data from OSM\index{OpenStreetMap} repeatedly, we
 summary(bristol_ways)
 ```
 
-The above code chunk summarized a simple feature\index{sf} object representing around 3,000 segments on the transport network\index{network}.
+The above code chunk summarized a simple feature\index{sf} object representing around 5,000 segments on the transport network\index{network}.
 This an easily manageable dataset size (transport datasets can be large, but it's best to start small).
 
 As mentioned, route networks\index{network} can usefully be represented as mathematical graphs\index{graph}, with nodes\index{node} on the network\index{network} connected by edges\index{edge}.
 A number of R packages have been developed for dealing with such graphs\index{graph}, notably **igraph**\index{igraph (package)}.
 You can manually convert a route network into an `igraph` object, but the geographic attributes will be lost.
-To overcome this issue functionality was developed in the
-**stplanr**\index{stplanr (package)}
-and subsequently
-**sfnetworks**\index{sfnetworks (package)}
-packages to represent route networks simultaneously as graphs *and* a set of geographic lines.
+To overcome this issue functionality was developed in the **stplanr**\index{stplanr (package)} and subsequently **sfnetworks**\index{sfnetworks (package)} packages to represent route networks simultaneously as graphs *and* a set of geographic lines.
 We will demonstrate **sfnetworks** functionality on the `bristol_ways` object.
 
 ```{r 13-transport-23}
 bristol_ways$geometry_type = st_geometry_type(bristol_ways)
-ways_freeway = bristol_ways
-ways_sfn = as_sfnetwork(ways_freeway)
+ways_sfn = as_sfnetwork(bristol_ways)
 class(ways_sfn)
 ways_sfn
 ```
@@ -600,14 +594,12 @@ The results demonstrate that each graph\index{graph} edge represents a segment: 
 ```{r wayssln, fig.cap="Illustration of a small route network, with segment thickness proportional to its betweenness, generated using the igraph package and described in the text.", fig.asp=0.8, out.width="60%", fig.scap="Illustration of a small route network."}
 ways_centrality = ways_sfn |> 
   activate("edges") |>  
-  mutate(  
-    lengths = st_length(.),  
-    betweenness = tidygraph::centrality_edge_betweenness(lengths)  
-    ) 
+  mutate(lengths = st_length(_),  
+         betweenness = tidygraph::centrality_edge_betweenness(lengths)) 
 tm_shape(ways_centrality |> st_as_sf()) +
-  tm_lines(lwd = "betweenness", scale = 9) +
+  tm_lines(lwd = "betweenness", scale = 9, title.lwd = "Betweenness") +
   tm_shape(route_network_scenario) +
-  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "N. bike trips (modelled, one direction)", col = "green")
+  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "N0. bike trips (modeled, one direction)", col = "green")
 ```
 
 ```{r 13-transport-24, eval=FALSE, echo=FALSE}
@@ -619,7 +611,7 @@ tm_shape(ways_centrality |> st_as_sf()) +
 
 One can also find the shortest route\index{shortest route} between origins and destinations using this graph\index{graph} representation of the route network\index{network} with the **sfnetworks** package.
 <!-- TODO: make an exercise based on this if time allows (RL 2022-07) -->
-While the methods presented in this section are relatively simple compared with what is possible with spatial network generation (e.g. with `overline()`) and analysis techniques (e.g. with **sfnetworks**), they should provide a strong starting point for further exploration and research into the area.
+While the methods presented in this section are relatively simple compared with what is possible with spatial network generation (e.g., with `overline()`) and analysis techniques (e.g., with **sfnetworks**), they should provide a strong starting point for further exploration and research into the area.
 
 ## Prioritizing new infrastructure
 
