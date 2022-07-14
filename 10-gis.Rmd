@@ -18,10 +18,6 @@ library(rstac)
 library(gdalcubes)
 ```
 
-<!-- RSAGA is no longer under active development and no support is available. Try Rsagacmd. -->
-<!-- https://github.com/r-spatial/RSAGA -->
-<!-- https://github.com/stevenpawley/Rsagacmd -->
-
 <!-- issue of rgrass -->
 <!-- https://github.com/rsbivand/rgrass -->
 
@@ -389,6 +385,10 @@ knitr::include_graphics("figures/10-qgis-raster-map.png")
 
 ### SAGA GIS {#saga}
 
+<!-- RSAGA is no longer under active development and no support is available. Try Rsagacmd. -->
+<!-- https://github.com/r-spatial/RSAGA -->
+<!-- https://github.com/stevenpawley/Rsagacmd -->
+
 The System for Automated Geoscientific Analyses (SAGA\index{SAGA}; Table \@ref(tab:gis-comp)) provides the possibility to execute SAGA modules via the command line interface\index{command-line interface} (`saga_cmd.exe` under Windows and just `saga_cmd` under Linux) (see the [SAGA wiki on modules](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/)).
 In addition, there is a Python interface (SAGA Python API\index{API}).
 <!-- **RSAGA**\index{RSAGA (package)} uses the former to run SAGA\index{SAGA} from within R. -->
@@ -409,6 +409,27 @@ saga = saga_gis(backend = "terra")
 ```{r, eval=FALSE}
 ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 ```
+
+`tidy(sg)` `tidy(srg)`
+
+```{r, eval=FALSE, echo=FALSE}
+sg = saga$imagery_segmentation$seed_generation
+ss = sg(ndvi, band_width = 1)
+plot(ss[[2]])
+srg = saga$imagery_segmentation$seeded_region_growing
+b = srg(ss[[2]], ndvi)
+plot(b$segments)
+bb = st_as_sf(as.polygons(b$segments))
+```
+
+```{r, eval=FALSE, echo=FALSE}
+library(tmap)
+tm_shape(ndvi) + 
+  tm_raster(style = "order") +
+  tm_shape(bb) +
+  tm_borders()
+```
+
 
 <!-- add ref to the ndvi calculations section -->
 
