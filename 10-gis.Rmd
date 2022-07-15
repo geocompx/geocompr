@@ -402,41 +402,66 @@ In addition, there is a Python interface (SAGA Python API\index{API}).
 
 ```{r, eval=FALSE}
 library(terra)
+library(sf)
 library(Rsagacmd)
 saga = saga_gis(backend = "terra")
 ```
+
+<!-- add ref to the ndvi calculations section -->
 
 ```{r, eval=FALSE}
 ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 ```
 
-`tidy(sg)` `tidy(srg)`
+`tidy(sg)`
 
 ```{r, eval=FALSE, echo=FALSE}
 sg = saga$imagery_segmentation$seed_generation
-ss = sg(ndvi, band_width = 1)
-plot(ss[[2]])
+ndvi_seeds = sg(ndvi, band_width = 2)
+plot(ndvi_seeds$seed_grid)
+```
+
+`ndvi_seeds$variance`
+ `tidy(srg)`
+
+```{r, eval=FALSE, echo=FALSE}
 srg = saga$imagery_segmentation$seeded_region_growing
-b = srg(ss[[2]], ndvi)
-plot(b$segments)
-bb = st_as_sf(as.polygons(b$segments))
+ndvi_srg = srg(ndvi_seeds$seed_grid, ndvi)
+plot(ndvi_srg$segments)
+```
+
+`ndvi_srg$similarity`, `ndvi_srg$table`
+
+```{r, eval=FALSE, echo=FALSE}
+ndvi_segments = st_as_sf(as.polygons(ndvi_srg$segments))
 ```
 
 ```{r, eval=FALSE, echo=FALSE}
 library(tmap)
 tm_shape(ndvi) + 
   tm_raster(style = "order") +
-  tm_shape(bb) +
+  tm_shape(ndvi_segments) +
   tm_borders()
 ```
 
+```{r, eval=FALSE, echo=FALSE}
+library(supercells)
+library(regional)
+ndvi_sc = supercells(ndvi, k = 400, compactness = 0.2)
+```
 
-<!-- add ref to the ndvi calculations section -->
+```{r, eval=FALSE, echo=FALSE}
+library(tmap)
+tm_shape(ndvi) + 
+  tm_raster(style = "order") +
+  tm_shape(ndvi_sc) +
+  tm_borders()
+```
 
 <!-- explain saga$ -->
 
 <!-- expain/mention other segmentation techinques -->
-<!-- mention supercells -->
+<!-- mention supercells -- exercises?? -->
 <!-- https://github.com/joaofgoncalves/SegOptim ?? -->
 
 <!-- add figure -->
