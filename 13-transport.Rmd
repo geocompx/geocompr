@@ -129,10 +129,13 @@ In addition to the boundary defining the study area (Bristol in this case), two 
 Often, the same geographic units are used for origins and destinations.
 However, different zoning systems, such as '[Workplace Zones](https://data.gov.uk/dataset/workplace-zones-a-new-geography-for-workplace-statistics3)', may be appropriate to represent the increased density of trip destinations in areas with many 'trip attractors' such as schools and shops [@office_for_national_statistics_workplace_2014].
 
-The simplest way to define a study area is often the first matching boundary returned by OpenStreetMap\index{OpenStreetMap}, which can be obtained using **osmdata** with a command such as `osmdata::getbb("Bristol", format_out = "sf_polygon",  limit = 1)`. This results in an `sf` object representing the bounds of the largest matching city region, either a rectangular polygon of the bounding box or a detailed polygonal boundary.^[
+The simplest way to define a study area is often the first matching boundary returned by OpenStreetMap\index{OpenStreetMap}.
+This can be done with a command such as `osmdata::getbb("Bristol", format_out = "sf_polygon",  limit = 1)`.
+This returns an `sf` object (or a list of `sf` objects if `limit = 1` is not specified) representing the bounds of the largest matching city region, either a rectangular polygon of the bounding box or a detailed polygonal boundary.^[
 In cases where the first match does not provide the right name, the country or region should be specified, for example `Bristol Tennessee` for a Bristol located in America.
 ]
-For Bristol, UK, a detailed polygon is returned, representing the official boundary of Bristol (see the inner blue boundary in Figure \@ref(fig:bristol)) but there are a couple of issues with this approach:
+For Bristol, a detailed polygon is returned, as represented by the `bristol_region` object in the **spDataLarge** package.
+See the inner blue boundary in Figure \@ref(fig:bristol): there are a couple of issues with this approach:
 
 - The first OSM boundary returned by OSM may not be the official boundary used by local authorities
 - Even if OSM returns the official boundary, this may be inappropriate for transport research because they bear little relation to where people travel
@@ -177,9 +180,9 @@ nrow(bristol_zones)
 The results of the previous code chunk shows that there are more than 10 OD pairs for every zone, meaning we will need to aggregate the origin-destination data before it is joined with `bristol_zones`, as illustrated below (origin-destination data is described in Section \@ref(desire-lines)):
 
 ```{r 13-transport-7}
-zones_attr = bristol_od |> 
+zones_attr_old = bristol_od |> 
   group_by(o) |> 
-  summarize_if(is.numeric, sum) |> 
+  summarize(across(where(is.numeric), sum)) |> 
   dplyr::rename(geo_code = o)
 ```
 
@@ -229,7 +232,7 @@ The result is `zones_od`, which contains a new column reporting the number of tr
 ```{r 13-transport-10}
 zones_od = bristol_od |> 
   group_by(d) |> 
-  summarize_if(is.numeric, sum) |> 
+  summarize(across(where(is.numeric), sum)) |> 
   dplyr::select(geo_code = d, all_dest = all) |> 
   inner_join(zones_joined, ., by = "geo_code") |> 
   st_as_sf()
