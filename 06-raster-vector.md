@@ -405,6 +405,11 @@ grain_poly = as.polygons(grain) |>
   st_as_sf()
 ```
 
+The aggregated polygons of the `grain` dataset have rectilinear boundaries which arise from being defined by connecting rectangular pixels.
+The **smoothr** package described in Chapter \@ref(geometry-operations) can be used to smooth the edges of the polygons.
+As smoothing removes sharp edges in the polygon boundaries, the smoothed polygons will not have the same exact spatial coverage as the original pixels (see the **smoothr** [website](https://strimas.com/smoothr/) for examples).
+Caution should therefore be taken when using the smoothed polygons for further analysis.
+
 <div class="figure" style="text-align: center">
 <img src="06-raster-vector_files/figure-html/06-raster-vector-40-1.png" alt="Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right)." width="100%" />
 <p class="caption">(\#fig:06-raster-vector-40)Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right).</p>

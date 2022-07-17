@@ -20,10 +20,6 @@ library(rstac)
 library(gdalcubes)
 ```
 
-<!-- RSAGA is no longer under active development and no support is available. Try Rsagacmd. -->
-<!-- https://github.com/r-spatial/RSAGA -->
-<!-- https://github.com/stevenpawley/Rsagacmd -->
-
 <!-- issue of rgrass -->
 <!-- https://github.com/rsbivand/rgrass -->
 
@@ -394,6 +390,10 @@ The largest TWI values mostly occur in valleys and hollows, while the lowest val
 
 ### SAGA GIS {#saga}
 
+<!-- RSAGA is no longer under active development and no support is available. Try Rsagacmd. -->
+<!-- https://github.com/r-spatial/RSAGA -->
+<!-- https://github.com/stevenpawley/Rsagacmd -->
+
 The System for Automated Geoscientific Analyses (SAGA\index{SAGA}; Table \@ref(tab:gis-comp)) provides the possibility to execute SAGA modules via the command line interface\index{command-line interface} (`saga_cmd.exe` under Windows and just `saga_cmd` under Linux) (see the [SAGA wiki on modules](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/)).
 In addition, there is a Python interface (SAGA Python API\index{API}).
 <!-- **RSAGA**\index{RSAGA (package)} uses the former to run SAGA\index{SAGA} from within R. -->
@@ -408,21 +408,41 @@ In addition, there is a Python interface (SAGA Python API\index{API}).
 
 ```r
 library(terra)
+library(sf)
 library(Rsagacmd)
 saga = saga_gis(backend = "terra")
 ```
+
+<!-- add ref to the ndvi calculations section -->
 
 
 ```r
 ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 ```
 
-<!-- add ref to the ndvi calculations section -->
+`tidy(sg)`
+
+
+
+`ndvi_seeds$variance`
+ `tidy(srg)`
+
+
+
+`ndvi_srg$similarity`, `ndvi_srg$table`
+
+
+
+
+
+
+
+
 
 <!-- explain saga$ -->
 
 <!-- expain/mention other segmentation techinques -->
-<!-- mention supercells -->
+<!-- mention supercells -- exercises?? -->
 <!-- https://github.com/joaofgoncalves/SegOptim ?? -->
 
 <!-- add figure -->

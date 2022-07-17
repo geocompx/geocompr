@@ -28,7 +28,8 @@ Section \@ref(geo-ras) covers geometric transformations on raster objects.
 This involves changing the size and number of the underlying pixels, and assigning them new values.
 It teaches how to change the resolution (also called raster aggregation and disaggregation), the extent and the origin of a raster.
 These operations are especially useful if one would like to align raster datasets from diverse sources.
-Aligned raster objects share a one-to-one correspondence between pixels, allowing them to be processed using map algebra operations, described in Section \@ref(map-algebra). The final Section \@ref(raster-vector) connects vector and raster objects. 
+Aligned raster objects share a one-to-one correspondence between pixels, allowing them to be processed using map algebra operations, described in Section \@ref(map-algebra). 
+The interaction between raster and vector objects is covered in Chapter \@ref(raster-vector). 
 It shows how raster values can be 'masked' and 'extracted' by vector geometries.
 Importantly it shows how to 'polygonize' rasters and 'rasterize' vector datasets, making the two data models more interchangeable.
 
@@ -105,11 +106,25 @@ us_states_simp2 = rmapshaper::ms_simplify(us_states2163, keep = 0.01,
                                           keep_shapes = TRUE)
 ```
 
-Finally, the visual comparison of the original dataset and the two simplified versions shows differences between the Douglas-Peucker (`st_simplify`) and Visvalingam (`ms_simplify`) algorithm outputs (Figure \@ref(fig:us-simp)):
+
+An alternative to simplification is smoothing the boundaries of polygon and linestring geometries, which is implemented in the **smoothr** package. 
+Smoothing interpolates the edges of geometries and does not necessarily lead to fewer vertices, but can be especially useful when working with geometries that arise from spatially vectorizing a raster (a topic covered in Chapter \@ref(raster-vector).
+**smoothr** implements three techniques for smoothing: a Gaussian kernel regression, Chaikin's corner cutting algorithm, and spline interpolation, which are all described in the package vignette and [website](https://strimas.com/smoothr/). 
+Note that similar to `st_simplify()`, the smoothing algorithms don't preserve 'topology'.
+The workhorse function of **smoothr** is `smooth()`, where the `method` argument specifies what smoothing technique to use.
+Below is an example of using Gaussian kernel regression to smooth the borders of US states by using `method=ksmooth`.
+The `smoothness` argument controls the bandwidth of the Gaussian that is used to smooth the geometry and has a default value of 1.
+
+
+```r
+us_states_simp3 = smoothr::smooth(us_states2163, method = 'ksmooth', smoothness = 6)
+```
+
+Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in (Figure \@ref(fig:us-simp)). Differences can be observed between the outputs of the Douglas-Peucker (`st_simplify`), Visvalingam (`ms_simplify`), and Gaussian kernel regression (`smooth(method=ksmooth`) algorithms.
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/us-simp-1.png" alt="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (center) and rmapshaper (right) packages." width="100%" />
-<p class="caption">(\#fig:us-simp)Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (center) and rmapshaper (right) packages.</p>
+<img src="05-geometry-operations_files/figure-html/us-simp-1.png" alt="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages." width="100%" />
+<p class="caption">(\#fig:us-simp)Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages.</p>
 </div>
 
 ### Centroids

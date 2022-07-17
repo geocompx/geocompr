@@ -56,14 +56,15 @@ Most geoportals provide a graphical interface allowing datasets to be queried ba
 *Exploring* datasets interactively on a browser is an effective way of understanding available layers.
 *Downloading* data is best done with code, however, from reproducibility and efficiency perspectives.
 Downloads can be initiated from the command line using a variety of techniques, primarily via URLs and APIs\index{API} (see the [Sentinel API](https://scihub.copernicus.eu/twiki/do/view/SciHubWebPortal/APIHubDescription) for example).
-Files hosted on static URLs can be downloaded with `download.file()`, as illustrated in the code chunk below which accesses US National Parks data from [catalog.data.gov/dataset/national-parks](https://catalog.data.gov/dataset/national-parks):
+Files hosted on static URLs can be downloaded with `download.file()`, as illustrated in the code chunk below which accesses PeRL: Permafrost Region Pond and Lake Database from [doi.pangaea.de](https://doi.pangaea.de/10.1594/PANGAEA.868349):
 
 
 ```r
-download.file(url = "https://irma.nps.gov/DataStore/DownloadFile/666527",
-              destfile = "nps_boundary.zip")
-unzip(zipfile = "nps_boundary.zip")
-usa_parks = read_sf(dsn = "nps_boundary.shp")
+download.file(url = "https://hs.pangaea.de/Maps/PeRL/PeRL_permafrost_landscapes.zip",
+              destfile = "PeRL_permafrost_landscapes.zip", 
+              mode = "wb")
+unzip("PeRL_permafrost_landscapes.zip")
+canada_perma_land = read_sf("PeRL_permafrost_landscapes/canada_perma_land.shp")
 ```
 
 ## Geographic data packages
@@ -648,17 +649,17 @@ download.file(u, "KML_Samples.kml")
 st_layers("KML_Samples.kml")
 #> Driver: LIBKML 
 #> Available layers:
-#>               layer_name geometry_type features fields
-#> 1             Placemarks                      3     11
-#> 2      Styles and Markup                      1     11
-#> 3       Highlighted Icon                      1     11
-#> 4        Ground Overlays                      1     11
-#> 5        Screen Overlays                      0     11
-#> 6                  Paths                      6     11
-#> 7               Polygons                      0     11
-#> 8          Google Campus                      4     11
-#> 9       Extruded Polygon                      1     11
-#> 10 Absolute and Relative                      4     11
+#>               layer_name geometry_type features fields crs_name
+#> 1             Placemarks                      3     11   WGS 84
+#> 2      Styles and Markup                      1     11   WGS 84
+#> 3       Highlighted Icon                      1     11   WGS 84
+#> 4        Ground Overlays                      1     11   WGS 84
+#> 5        Screen Overlays                      0     11   WGS 84
+#> 6                  Paths                      6     11   WGS 84
+#> 7               Polygons                      0     11   WGS 84
+#> 8          Google Campus                      4     11   WGS 84
+#> 9       Extruded Polygon                      1     11   WGS 84
+#> 10 Absolute and Relative                      4     11   WGS 84
 kml = read_sf("KML_Samples.kml", layer = "Placemarks")
 ```
 
