@@ -390,27 +390,24 @@ The largest TWI values mostly occur in valleys and hollows, while the lowest val
 
 ### SAGA GIS {#saga}
 
-<!-- RSAGA is no longer under active development and no support is available. Try Rsagacmd. -->
-<!-- https://github.com/r-spatial/RSAGA -->
-<!-- https://github.com/stevenpawley/Rsagacmd -->
-
 The System for Automated Geoscientific Analyses (SAGA\index{SAGA}; Table \@ref(tab:gis-comp)) provides the possibility to execute SAGA modules via the command line interface\index{command-line interface} (`saga_cmd.exe` under Windows and just `saga_cmd` under Linux) (see the [SAGA wiki on modules](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/)).
 In addition, there is a Python interface (SAGA Python API\index{API}).
-<!-- **RSAGA**\index{RSAGA (package)} uses the former to run SAGA\index{SAGA} from within R. -->
-
-<!-- You can find an extended version of this example in `vignette("RSAGA-landslides")` which includes the use of statistical geocomputing to derive terrain attributes as predictors for a non-linear Generalized Additive Model\index{generalized additive model} (GAM) to predict spatially landslide susceptibility [@muenchow_geomorphic_2012]. -->
-<!-- The term statistical geocomputation emphasizes the strength of combining R's data science\index{data science} power with the geoprocessing power of a GIS which is at the very heart of building a bridge from R\index{R} to GIS\index{GIS}. -->
-
-<!-- saga_bin -->
-<!-- cores -->
-<!-- backend -->
+**Rsagacmd**\index{Rsagacmd (package)} uses the former to run SAGA\index{SAGA} from within R.
 
 
 ```r
-library(terra)
-library(sf)
 library(Rsagacmd)
-saga = saga_gis(backend = "terra")
+```
+
+To start using this package, we need to run the `saga_gis()` function.
+It serves two main purposes: 
+
+- It dynamically^[This means that the available libraries will depend on the installed SAGA GIS version.] creates a new object that contains links to all valid SAGA-GIS libraries and tools
+- It sets up general package options, such as `raster_backend` (R package to use for handling raster data), `vector_backend` (R package to use for handling vector data), and `cores` (a maximum number of CPU cores used for processing, default: all)
+
+
+```r
+saga = saga_gis(raster_backend = "terra", vector_backend = "sf")
 ```
 
 <!-- add ref to the ndvi calculations section -->
@@ -426,6 +423,7 @@ ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 
 `ndvi_seeds$variance`
  `tidy(srg)`
+
 
 
 
