@@ -180,7 +180,7 @@ nrow(bristol_zones)
 The results of the previous code chunk shows that there are more than 10 OD pairs for every zone, meaning we will need to aggregate the origin-destination data before it is joined with `bristol_zones`, as illustrated below (origin-destination data is described in Section \@ref(desire-lines)):
 
 ```{r 13-transport-7}
-zones_attr_old = bristol_od |> 
+zones_attr = bristol_od |> 
   group_by(o) |> 
   summarize(across(where(is.numeric), sum)) |> 
   dplyr::rename(geo_code = o)
@@ -586,7 +586,7 @@ To overcome this issue functionality was developed in the **stplanr**\index{stpl
 We will demonstrate **sfnetworks** functionality on the `bristol_ways` object.
 
 ```{r 13-transport-23}
-bristol_ways$geometry_type = st_geometry_type(bristol_ways)
+bristol_ways$lengths = st_length(bristol_ways)
 ways_sfn = as_sfnetwork(bristol_ways)
 class(ways_sfn)
 ways_sfn
@@ -601,8 +601,7 @@ The results demonstrate that each graph\index{graph} edge represents a segment: 
 ```{r wayssln, fig.cap="Illustration of a small route network, with segment thickness proportional to its betweenness, generated using the igraph package and described in the text.", fig.asp=0.8, out.width="60%", fig.scap="Illustration of a small route network."}
 ways_centrality = ways_sfn |> 
   activate("edges") |>  
-  mutate(lengths = st_length(_),  
-         betweenness = tidygraph::centrality_edge_betweenness(lengths)) 
+  mutate(betweenness = tidygraph::centrality_edge_betweenness(lengths)) 
 tm_shape(ways_centrality |> st_as_sf()) +
   tm_lines(lwd = "betweenness", scale = 9, title.lwd = "Betweenness") +
   tm_shape(route_network_scenario) +
