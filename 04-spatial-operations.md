@@ -12,7 +12,7 @@ library(dplyr)
 library(spData)
 ```
 
-- You also need to read in a couple of datasets as follows for Section \@ref(spatial-ras)
+- You also need to read in a couple of datasets as follows for Section \@ref(spatial-ras):
 
 
 ```r
@@ -730,7 +730,8 @@ Map algebra (or cartographic modeling with raster data) divides raster operation
 2. *Focal* or neighborhood operations.
 Most often the output cell value is the result of a 3 x 3 input cell block
 3. *Zonal* operations are similar to focal operations, but the surrounding pixel grid on which new values are computed can have irregular sizes and shapes
-4. *Global* or per-raster operations; that means the output cell derives its value potentially from one or several entire rasters
+4. *Global* or per-raster operations. 
+That means the output cell derives its value potentially from one or several entire rasters
 
 This typology classifies map algebra operations by the number of cells used for each pixel processing step and the type of the output.
 For the sake of completeness, we should mention that raster operations can also be classified by discipline such as terrain, hydrological analysis, or image classification.

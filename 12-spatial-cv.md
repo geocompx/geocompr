@@ -759,7 +759,7 @@ Machine learning algorithms often require hyperparameter\index{hyperparameter} i
 Machine learning overall, and its use to understand spatial data, is a large field and this chapter has provided the basics, but there is more to learn.
 We recommend the following resources in this direction:
 
-- The **mlr3 book** [@becker_mlr3_2022; https://mlr-org.github.io/mlr-tutorial/release/html/)] and especially the [chapter on the handling of spatio-temporal data](https://mlr3book.mlr-org.com/spatiotemporal.html).
+- The **mlr3 book** [@becker_mlr3_2022; https://mlr-org.github.io/mlr-tutorial/release/html/] and especially the [chapter on the handling of spatio-temporal data](https://mlr3book.mlr-org.com/spatiotemporal.html)
 - An academic paper on hyperparameter\index{hyperparameter} tuning [@schratz_hyperparameter_2019]
 - An academic paper on how to use **mlr3spatiotempcv** [@schratz_mlr3spatiotempcv_2021]
 - In case of spatio-temporal data, one should account for spatial\index{autocorrelation!spatial} and temporal\index{autocorrelation!temporal} autocorrelation when doing CV\index{cross-validation} [@meyer_improving_2018]

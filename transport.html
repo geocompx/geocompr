@@ -6,16 +6,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Chapter 13 Transportation | Geocomputation with R</title>
 <meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow">
-<meta name="description" content="Prerequisites This chapter uses the following packages:78 library(sf) library(dplyr) library(spDataLarge) library(stplanr)   # geographic transport data package library(tmap)     # visualization...">
+<meta name="description" content="Prerequisites This chapter uses the following packages:78 library(sf) library(tidyverse) library(spDataLarge) library(stplanr)   # geographic transport data package library(tmap)     #...">
 <meta name="generator" content="bookdown 0.27 with bs4_book()">
 <meta property="og:title" content="Chapter 13 Transportation | Geocomputation with R">
 <meta property="og:type" content="book">
 <meta property="og:url" content="https://geocompr.robinlovelace.net/transport.html">
 <meta property="og:image" content="https://geocompr.robinlovelace.net/images/cover.png">
-<meta property="og:description" content="Prerequisites This chapter uses the following packages:78 library(sf) library(dplyr) library(spDataLarge) library(stplanr)   # geographic transport data package library(tmap)     # visualization...">
+<meta property="og:description" content="Prerequisites This chapter uses the following packages:78 library(sf) library(tidyverse) library(spDataLarge) library(stplanr)   # geographic transport data package library(tmap)     #...">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Chapter 13 Transportation | Geocomputation with R">
-<meta name="twitter:description" content="Prerequisites This chapter uses the following packages:78 library(sf) library(dplyr) library(spDataLarge) library(stplanr)   # geographic transport data package library(tmap)     # visualization...">
+<meta name="twitter:description" content="Prerequisites This chapter uses the following packages:78 library(sf) library(tidyverse) library(spDataLarge) library(stplanr)   # geographic transport data package library(tmap)     #...">
 <meta name="twitter:image" content="https://geocompr.robinlovelace.net/images/cover.png">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
@@ -104,10 +104,12 @@ The &lt;strong&gt;nabor&lt;/strong&gt; package must also be installed, although 
 </ul>
 <div class="sourceCode" id="cb424"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Nowosad/spData">spDataLarge</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/stplanr">stplanr</a></span><span class="op">)</span>      <span class="co"># geographic transport data package</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-tmap/tmap">tmap</a></span><span class="op">)</span>         <span class="co"># visualization package (see Chapter 8)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-tmap/tmap">tmap</a></span><span class="op">)</span>         <span class="co"># visualization package (see Chapter 9)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_cran.html">install_cran</a></span><span class="op">(</span><span class="st">"sfnetworks"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://luukvdmeer.github.io/sfnetworks/">sfnetworks</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div id="introduction-7" class="section level2" number="13.1">
 <h2>
@@ -120,23 +122,29 @@ The effort of moving (overcoming distance) is central to the ‘first law’ of 
 </blockquote>
 <p>This ‘law’ is the basis for spatial autocorrelation and other key geographic concepts.
 It applies to phenomena as diverse as friendship networks and ecological diversity and can be explained by the costs of transport — in terms of time, energy and money — which constitute the ‘friction of distance’.
-From this perspective, transport technologies are disruptive, changing geographic relationships between geographic entities including mobile humans and goods: “the purpose of transportation is to overcome space” <span class="citation">(<a href="references.html#ref-rodrigue_geography_2013" role="doc-biblioref">Rodrigue, Comtois, and Slack 2013</a>)</span>.</p>
+From this perspective, transport technologies are disruptive, changing spatial relationships between geographic entities including mobile humans and goods: “the purpose of transportation is to overcome space” <span class="citation">(<a href="references.html#ref-rodrigue_geography_2013" role="doc-biblioref">Rodrigue, Comtois, and Slack 2013</a>)</span>.</p>
 <p>Transport is an inherently geospatial activity.
 It involves traversing continuous geographic space between A and B, and infinite localities in between.
 It is therefore unsurprising that transport researchers have long turned to geocomputational methods to understand movement patterns and that transport problems are a motivator of geocomputational methods.</p>
 <p>This chapter introduces the geographic analysis of transport systems at different geographic levels, including:</p>
 <ul>
 <li>
-<strong>Areal units</strong>: transport patterns can be understood with reference to zonal aggregates such as the main mode of travel (by car, bike or foot, for example) and average distance of trips made by people living in a particular zone, covered in Section <a href="transport.html#transport-zones">13.3</a>.</li>
+<strong>Areal units</strong>: transport patterns can be understood with reference to zonal aggregates, such as the main mode of travel (by car, bike or foot, for example), and average distance of trips made by people living in a particular zone, covered in Section <a href="transport.html#transport-zones">13.3</a>
+</li>
 <li>
-<strong>Desire lines</strong>: straight lines that represent ‘origin-destination’ data that records how many people travel (or could travel) between places (points or zones) in geographic space, the topic of Section <a href="transport.html#desire-lines">13.4</a>.</li>
+<strong>Desire lines</strong>: straight lines that represent ‘origin-destination’ data that records how many people travel (or could travel) between places (points or zones) in geographic space, the topic of Section <a href="transport.html#desire-lines">13.4</a>
+</li>
 <li>
 <strong>Routes</strong>: these are lines representing a path along the route network along the desire lines defined in the previous bullet point.
-We will see how to create them in Section <a href="transport.html#routes">13.5</a>.</li>
+We will see how to create them in Section <a href="#routes"><strong>??</strong></a>
+</li>
 <li>
-<strong>Nodes</strong>: these are points in the transport system that can represent common origins and destinations and public transport stations such as bus stops and rail stations, the topic of Section <a href="transport.html#nodes">13.6</a>.</li>
+<strong>Nodes</strong>: these are points in the transport system that can represent common origins and destinations and public transport stations such as bus stops and rail stations, the topic of Section <a href="transport.html#nodes">13.6</a>
+</li>
 <li>
-<strong>Route networks</strong>: these represent the system of roads, paths and other linear features in an area and are covered in Section <a href="transport.html#route-networks">13.7</a>. They can be represented as geographic features (representing route segments) or structured as an interconnected graph, with the level of traffic on different segments referred to as ‘flow’ by transport modelers <span class="citation">(<a href="references.html#ref-hollander_transport_2016" role="doc-biblioref">Hollander 2016</a>)</span>.</li>
+<strong>Route networks</strong>: these represent the system of roads, paths and other linear features in an area and are covered in Section <a href="transport.html#route-networks">13.7</a>.
+They can be represented as geographic features (representing route segments) or structured as an interconnected graph, with the level of traffic on different segments referred to as ‘flow’ by transport modelers <span class="citation">(<a href="references.html#ref-hollander_transport_2016" role="doc-biblioref">Hollander 2016</a>)</span>
+</li>
 </ul>
 <p>Another key level is <strong>agents</strong>, mobile entities like you and me.
 These can be represented computationally thanks to software such as <a href="http://www.matsim.org/">MATSim</a>, which captures the dynamics of transport systems using an agent-based modeling (ABM) approach at high spatial and temporal resolution <span class="citation">(<a href="references.html#ref-horni_multi-agent_2016" role="doc-biblioref">Horni, Nagel, and Axhausen 2016</a>)</span>.
@@ -150,7 +158,7 @@ Selecting an appropriate level of geographic analysis can help simplify this com
 For this reason, this chapter is based around a policy scenario, introduced in the next section, that asks:
 how to increase cycling in the city of Bristol?
 Chapter <a href="location.html#location">14</a> demonstrates another application of geocomputation:
-prioritising the location of new bike shops.
+prioritizing the location of new bike shops.
 There is a link between the chapters because bike shops may benefit from new cycling infrastructure, demonstrating an important feature of transport systems: they are closely linked to broader social, economic and land-use patterns.</p>
 </div>
 <div id="bris-case" class="section level2" number="13.2">
@@ -161,7 +169,7 @@ There is a link between the chapters because bike shops may benefit from new cyc
 An overview of the region’s transport network is illustrated in Figure <a href="transport.html#fig:bristol">13.1</a>, which shows a diversity of transport infrastructure, for cycling, public transport, and private motor vehicles.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:bristol"></span>
-<img src="figures/bristol.png" alt="Bristol's transport network represented by colored lines for active (green), public (railways, black) and private motor (red) modes of travel. Blue border lines represent the inner city boundary and the larger Travel To Work Area (TTWA)." width="100%"><p class="caption">
+<img src="figures/13_bristol.png" alt="Bristol's transport network represented by colored lines for active (green), public (railways, black) and private motor (red) modes of travel. Blue border lines represent the inner city boundary and the larger Travel To Work Area (TTWA)." width="100%"><p class="caption">
 FIGURE 13.1: Bristol’s transport network represented by colored lines for active (green), public (railways, black) and private motor (red) modes of travel. Blue border lines represent the inner city boundary and the larger Travel To Work Area (TTWA).
 </p>
 </div>
@@ -173,14 +181,14 @@ Bristol shows a high average income per capita but also contains areas of severe
 8% of the population said they cycled to work in the 2011 census, compared with only 3% nationwide.</p>
 <p>Despite impressive walking and cycling statistics, the city has a major congestion problem.
 Part of the solution is to continue to increase the proportion of trips made by cycling.
-Cycling has a greater potential to replace car trips than walking, with typical <a href="https://en.wikipedia.org/wiki/Bicycle_performance">speeds</a> of 15-20 km/h vs 4-6 km/h for walking).
+Cycling has a greater potential to replace car trips than walking, with typical <a href="https://en.wikipedia.org/wiki/Bicycle_performance">speeds</a> of 15-20 km/h vs 4-6 km/h for walking.
 Furthermore many local transport plans, including Bristol’s <a href="https://www.bristol.gov.uk/documents/20182/3641895/Bristol+Transport+Strategy+-+adopted+2019.pdf/383a996e-2219-dbbb-dc75-3a270bfce26c">Transport Strategy</a>, have ambitious plans for cycling.</p>
-<p>In this policy context, the aim of this chapter, beyond demonstrating how geocomputation with R can be used to support sustainable transport planning, is to provide evidence for decision-makers in Bristol to decide how best to increase the share of walking and cycling in particular in the city.
+<p>In this policy context, the aim of this chapter, beyond demonstrating how geocomputation with R can be used to support sustainable transport planning, is to provide evidence for decision-makers in Bristol how best to increase the share of walking and cycling in particular in the city.
 This high-level aim will be met via the following objectives:</p>
 <ul>
 <li>Describe the geographical pattern of transport behavior in the city</li>
 <li>Identify key public transport nodes and routes along which cycling to rail stations could be encouraged, as the first stage in multi-model trips</li>
-<li>Analyze travel ‘desire lines’, to find where many people drive short distances</li>
+<li>Analyze travel ‘desire lines’ to find where many people drive short distances</li>
 <li>Identify cycle route locations that will encourage less car driving and more cycling</li>
 </ul>
 <p>To get the wheels rolling on the practical aspects of this chapter, we begin by loading zonal data on travel patterns.
@@ -194,9 +202,12 @@ These zone-level data are small but often vital for gaining a basic understandin
 In addition to the boundary defining the study area (Bristol in this case), two zone types are of particular interest to transport researchers: origin and destination zones.
 Often, the same geographic units are used for origins and destinations.
 However, different zoning systems, such as ‘<a href="https://data.gov.uk/dataset/workplace-zones-a-new-geography-for-workplace-statistics3">Workplace Zones</a>’, may be appropriate to represent the increased density of trip destinations in areas with many ‘trip attractors’ such as schools and shops <span class="citation">(<a href="references.html#ref-office_for_national_statistics_workplace_2014" role="doc-biblioref">Office for National Statistics 2014</a>)</span>.</p>
-<p>The simplest way to define a study area is often the first matching boundary returned by OpenStreetMap, which can be obtained using <strong>osmdata</strong> with a command such as <code>bristol_region = osmdata::getbb("Bristol", format_out = "sf_polygon")</code>. This results in an <code>sf</code> object representing the bounds of the largest matching city region, either a rectangular polygon of the bounding box or a detailed polygonal boundary.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
+<p>The simplest way to define a study area is often the first matching boundary returned by OpenStreetMap.
+This can be done with a command such as <code>osmdata::getbb("Bristol", format_out = "sf_polygon",  limit = 1)</code>.
+This returns an <code>sf</code> object (or a list of <code>sf</code> objects if <code>limit = 1</code> is not specified) representing the bounds of the largest matching city region, either a rectangular polygon of the bounding box or a detailed polygonal boundary.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 In cases where the first match does not provide the right name, the country or region should be specified, for example &lt;code&gt;Bristol Tennessee&lt;/code&gt; for a Bristol located in America.&lt;/p&gt;"><sup>79</sup></a>
-For Bristol, UK, a detailed polygon is returned, representing the official boundary of Bristol (see the inner blue boundary in Figure <a href="transport.html#fig:bristol">13.1</a>) but there are a couple of issues with this approach:</p>
+For Bristol, a detailed polygon is returned, as represented by the <code>bristol_region</code> object in the <strong>spDataLarge</strong> package.
+See the inner blue boundary in Figure <a href="transport.html#fig:bristol">13.1</a>: there are a couple of issues with this approach:</p>
 <ul>
 <li>The first OSM boundary returned by OSM may not be the official boundary used by local authorities</li>
 <li>Even if OSM returns the official boundary, this may be inappropriate for transport research because they bear little relation to where people travel</li>
@@ -226,7 +237,7 @@ Note the zones get smaller in densely populated areas: each houses a similar num
 <div class="sourceCode" id="cb425"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">bristol_zones</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "geo_code" "name"     "geometry"</span></span></code></pre></div>
-<p>To add travel data, we will undertake an <em>attribute join</em>, a common task described in Section <a href="attr.html#vector-attribute-joining">3.2.4</a>.
+<p>To add travel data, we will perform an <em>attribute join</em>, a common task described in Section <a href="attr.html#vector-attribute-joining">3.2.4</a>.
 We will use travel data from the UK’s 2011 census question on travel to work, data stored in <code>bristol_od</code>, which was provided by the <a href="https://www.ons.gov.uk/help/localstatistics">ons.gov.uk</a> data portal.
 <code>bristol_od</code> is an origin-destination (OD) dataset on travel to work between zones from the UK’s 2011 Census (see Section <a href="transport.html#desire-lines">13.4</a>).
 The first column is the ID of the zone of origin and the second column is the zone of destination.
@@ -238,17 +249,17 @@ The first column is the ID of the zone of origin and the second column is the zo
 <span><span class="co">#&gt; [1] 102</span></span></code></pre></div>
 <p>The results of the previous code chunk shows that there are more than 10 OD pairs for every zone, meaning we will need to aggregate the origin-destination data before it is joined with <code>bristol_zones</code>, as illustrated below (origin-destination data is described in Section <a href="transport.html#desire-lines">13.4</a>):</p>
 <div class="sourceCode" id="cb427"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">zones_attr</span> <span class="op">=</span> <span class="va">bristol_od</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">o</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise_all.html">summarize_if</a></span><span class="op">(</span><span class="va">is.numeric</span>, <span class="va">sum</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<code class="sourceCode R"><span><span class="va">zones_attr</span> <span class="op">=</span> <span class="va">bristol_od</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">o</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html">across</a></span><span class="op">(</span><span class="fu">where</span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, <span class="va">sum</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>geo_code <span class="op">=</span> <span class="va">o</span><span class="op">)</span></span></code></pre></div>
 <p>The preceding chunk:</p>
 <ul>
-<li>grouped the data by zone of origin (contained in the column <code>o</code>);</li>
-<li>aggregated the variables in the <code>bristol_od</code> dataset <em>if</em> they were numeric, to find the total number of people living in each zone by mode of transport; and<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
-the &lt;code&gt;_if&lt;/code&gt; affix requires a &lt;code&gt;TRUE&lt;/code&gt;/&lt;code&gt;FALSE&lt;/code&gt; question to be asked of the variables, in this case ‘is it numeric?’ and only variables returning true are summarized.&lt;/p&gt;"><sup>80</sup></a>
+<li>Grouped the data by zone of origin (contained in the column <code>o</code>)</li>
+<li>Aggregated the variables in the <code>bristol_od</code> dataset <em>if</em> they were numeric, to find the total number of people living in each zone by mode of transport<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
+The &lt;code&gt;_if&lt;/code&gt; affix requires a &lt;code&gt;TRUE&lt;/code&gt;/&lt;code&gt;FALSE&lt;/code&gt; question to be asked of the variables, in this case ‘is it numeric?’ and only variables returning true are summarized.&lt;/p&gt;"><sup>80</sup></a>
 </li>
-<li>renamed the grouping variable <code>o</code> so it matches the ID column <code>geo_code</code> in the <code>bristol_zones</code> object.</li>
+<li>Renamed the grouping variable <code>o</code> so it matches the ID column <code>geo_code</code> in the <code>bristol_zones</code> object</li>
 </ul>
 <p>The resulting object <code>zones_attr</code> is a data frame with rows representing zones and an ID variable.
 We can verify that the IDs match those in the <code>zones</code> dataset using the <code>%in%</code> operator as follows:</p>
@@ -281,19 +292,20 @@ People tend to gravitate towards central places.
 This explains why the spatial distribution represented in the right panel in Figure <a href="transport.html#fig:zones">13.2</a> is relatively uneven, with the most common destination zones concentrated in Bristol city center.
 The result is <code>zones_od</code>, which contains a new column reporting the number of trip destinations by any mode, is created as follows:</p>
 <div class="sourceCode" id="cb430"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">zones_od</span> <span class="op">=</span> <span class="va">bristol_od</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise_all.html">summarize_if</a></span><span class="op">(</span><span class="va">is.numeric</span>, <span class="va">sum</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span>geo_code <span class="op">=</span> <span class="va">d</span>, all_dest <span class="op">=</span> <span class="va">all</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">inner_join</a></span><span class="op">(</span><span class="va">zones_joined</span>, <span class="va">.</span>, by <span class="op">=</span> <span class="st">"geo_code"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">zones_od</span> <span class="op">=</span> <span class="va">bristol_od</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">d</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html">across</a></span><span class="op">(</span><span class="fu">where</span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, <span class="va">sum</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span>geo_code <span class="op">=</span> <span class="va">d</span>, all_dest <span class="op">=</span> <span class="va">all</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">inner_join</a></span><span class="op">(</span><span class="va">zones_joined</span>, <span class="va">.</span>, by <span class="op">=</span> <span class="st">"geo_code"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>A simplified version of Figure <a href="transport.html#fig:zones">13.2</a> is created with the code below (see <code>12-zones.R</code> in the <a href="https://github.com/Robinlovelace/geocompr/tree/main/code"><code>code</code></a> folder of the book’s GitHub repo to reproduce the figure and Section <a href="adv-map.html#faceted-maps">9.2.6</a> for details on faceted maps with <strong>tmap</strong>):</p>
 <div class="sourceCode" id="cb431"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/tmap/man/qtm.html">qtm</a></span><span class="op">(</span><span class="va">zones_od</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"all"</span>, <span class="st">"all_dest"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_layout.html">tm_layout</a></span><span class="op">(</span>panel.labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Origin"</span>, <span class="st">"Destination"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:zones"></span>
-<img src="13-transport_files/figure-html/zones-1.png" alt="Number of trips (commuters) living and working in the region. The left map shows zone of origin of commute trips; the right map shows zone of destination (generated by the script 12-zones.R)." width="100%"><p class="caption">
-FIGURE 13.2: Number of trips (commuters) living and working in the region. The left map shows zone of origin of commute trips; the right map shows zone of destination (generated by the script 12-zones.R).
+<img src="13-transport_files/figure-html/zones-1.png" alt="Number of trips (commuters) living and working in the region. The left map shows zone of origin of commute trips; the right map shows zone of destination (generated by the script 13-zones.R)." width="100%"><p class="caption">
+FIGURE 13.2: Number of trips (commuters) living and working in the region. The left map shows zone of origin of commute trips; the right map shows zone of destination (generated by the script 13-zones.R).
 </p>
 </div>
 </div>
@@ -301,14 +313,16 @@ FIGURE 13.2: Number of trips (commuters) living and working in the region. The l
 <h2>
 <span class="header-section-number">13.4</span> Desire lines<a class="anchor" aria-label="anchor" href="#desire-lines"><i class="fas fa-link"></i></a>
 </h2>
-<p>Unlike zones, which represent trip origins and destinations, desire lines connect the centroid of the origin and the destination zone, and thereby represent where people <em>desire</em> to go between zones.
-They represent the quickest ‘bee line’ or ‘crow flies’ route between A and B that would be taken, if it were not for obstacles such as buildings and windy roads getting in the way (we will see how to convert desire lines into routes in the next section).</p>
+<p>Desire lines connect origins and destinations, representing where people <em>desire</em> to go, typically between zones.
+They represent the quickest ‘bee line’ or ‘crow flies’ route between A and B that would be taken, if it were not for obstacles such as buildings and windy roads getting in the way (we will see how to convert desire lines into routes in the next section).
+Typically, desire lines are represented geographically as starting and ending in the geographic (or population weighted) centroid of each zone.
+This is the type of desire line that we will create and use in this section, although it is worth being aware of ‘jittering’ techniques that enable multiple start and end points to increase the spatial coverage and accuracy of analyses building on OD data <span class="citation">(<a href="#ref-lovelace_jittering_2022b" role="doc-biblioref"><strong>lovelace_jittering_2022b?</strong></a>)</span>.</p>
 <p>We have already loaded data representing desire lines in the dataset <code>bristol_od</code>.
 This origin-destination (OD) data frame object represents the number of people traveling between the zone represented in <code>o</code> and <code>d</code>, as illustrated in Table <a href="transport.html#tab:od">13.1</a>.
 To arrange the OD data by all trips and then filter-out only the top 5, type (please refer to Chapter <a href="attr.html#attr">3</a> for a detailed description of non-spatial attribute operations):</p>
 <div class="sourceCode" id="cb432"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">od_top5</span> <span class="op">=</span> <span class="va">bristol_od</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">all</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<code class="sourceCode R"><span><span class="va">od_top5</span> <span class="op">=</span> <span class="va">bristol_od</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">all</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/top_n.html">top_n</a></span><span class="op">(</span><span class="fl">5</span>, wt <span class="op">=</span> <span class="va">all</span><span class="op">)</span></span></code></pre></div>
 <div class="inline-table"><table class="table table-sm">
 <caption>
@@ -393,7 +407,7 @@ For real-world use one would use centroid values generated from projected data o
 <div class="sourceCode" id="cb435"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">desire_lines</span> <span class="op">=</span> <span class="fu"><a href="https://docs.ropensci.org/stplanr/reference/od2line.html">od2line</a></span><span class="op">(</span><span class="va">od_inter</span>, <span class="va">zones_od</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Creating centroids representing desire line start and end points.</span></span></code></pre></div>
-<p>An illustration of the results is presented in Figure <a href="transport.html#fig:desire">13.3</a>, a simplified version of which is created with the following command (see the code in <code>12-desire.R</code> to reproduce the figure exactly and Chapter <a href="adv-map.html#adv-map">9</a> for details on visualization with <strong>tmap</strong>):</p>
+<p>An illustration of the results is presented in Figure <a href="transport.html#fig:desire">13.3</a>, a simplified version of which is created with the following command (see the code in <code>13-desire.R</code> to reproduce the figure exactly and Chapter <a href="adv-map.html#adv-map">9</a> for details on visualization with <strong>tmap</strong>):</p>
 <div class="sourceCode" id="cb436"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/tmap/man/qtm.html">qtm</a></span><span class="op">(</span><span class="va">desire_lines</span>, lines.lwd <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -403,84 +417,101 @@ FIGURE 13.3: Desire lines representing trip patterns in Bristol, with width repr
 </p>
 </div>
 <p>The map shows that the city center dominates transport patterns in the region, suggesting policies should be prioritized there, although a number of peripheral sub-centers can also be seen.
-Next it would be interesting to have a look at the distribution of interzonal modes, e.g. between which zones is cycling the least or the most common means of transport.</p>
+Next it would be interesting to have a look at the distribution of interzonal modes, e.g., between which zones is cycling the least or the most common means of transport.</p>
 </div>
-<div id="routes" class="section level2" number="13.5">
+<div id="routes-and-routing-engines" class="section level2" number="13.5">
 <h2>
-<span class="header-section-number">13.5</span> Routes<a class="anchor" aria-label="anchor" href="#routes"><i class="fas fa-link"></i></a>
+<span class="header-section-number">13.5</span> Routes and routing engines<a class="anchor" aria-label="anchor" href="#routes-and-routing-engines"><i class="fas fa-link"></i></a>
 </h2>
 <p>From a geographical perspective, routes are desire lines that are no longer straight:
 the origin and destination points are the same as in the desire line representation of travel, but the pathway to get from A to B is more complex.
 The geometries of routes are typically (but not always) determined by the transport network.</p>
-<p>While desire lines contain only two vertices (their beginning and end points), routes can contain any number of vertices, representing points between A and B joined by straight lines: the definition of a LINESTRING geometry.
+<p>While desire lines contain only two vertices (their beginning and end points), routes can contain any number of vertices, representing points between A and B joined by straight lines: the definition of a linestring geometry.
 Routes covering large distances or following intricate network can have many hundreds of vertices; routes on grid-based or simplified road networks tend to have fewer.
 Routes are generated from desire lines — or more commonly matrices containing coordinate pairs representing desire lines — using routing services.
 There are three main ways to compute routes from OD data:</p>
 <ul>
 <li>In-memory routing using R packages that enable route calculation</li>
 <li>Locally hosted routing engines external to R that can be called from R</li>
-<li>Routing services that are hosted by external entities that provide a web API that can be called from R</li>
+<li>Remotely hosted routing engines by external entities that provide a web API that can be called from R</li>
 </ul>
 <p><strong>In-memory</strong> options include <a href="https://luukvdmeer.github.io/sfnetworks/"><strong>sfnetworks</strong></a>, <a href="https://atfutures.github.io/dodgr/"><strong>dodgr</strong></a> and <a href="https://github.com/vlarmet/cppRouting"><strong>cppRouting</strong></a> packages.
 While fast and flexible, in-memory options may be harder to set-up than dedicated routing engines: routing is a hard problem and many hundreds of hours have been put into open source routing engines that can be downloaded and hosted locally.</p>
 <p><strong>Locally hosted</strong> routing engines include OpenTripPlanner, OSRM and R5, and associated R packages <strong>opentripplanner</strong>, <a href="https://github.com/riatelab/osrm"><strong>osrm</strong></a> and <strong>r5r</strong> <span class="citation">(<a href="references.html#ref-morgan_opentripplanner_2019" role="doc-biblioref">Morgan et al. 2019</a>; <a href="references.html#ref-pereira_r5r_2021" role="doc-biblioref">Pereira et al. 2021</a>)</span>.
-Locally hosted routing engines benefit from speed of execution and control over the weighting profile for different modes of transport.
-Disadvantages include the difficulty of representing complex networks locally; temporal dynamics (primarily due to traffic); and the need for specialized software.</p>
-<p><strong>Routing services</strong>, by contrast, use a web API to send queries about origins and destinations and return results generated on a powerful server running specialised software.
+Locally hosted routing engines run on the user’s computer but in a process separate from R.
+They benefit from speed of execution and control over the weighting profile for different modes of transport.
+Disadvantages include the difficulty of representing complex networks locally; temporal dynamics (primarily due to traffic); and the need for specialized software.
+A key feature of some advanced routing engines (both locally hosted and remotely hosted) such as R5, OpenTripPlanner and <a href="https://github.com/valhalla/valhalla">Valhalla</a> (which at the time of writing does not have an R interface to the best of our knowledge) is the provision of <em>multi-modal</em> routes: allowing a single journey from A to B to be made by more than one mode of transport, such as cycling from home to a bus stop, catching a bus to the city center, and then walking to the destination.</p>
+<p><strong>Remotely hosted</strong> routing engines, by contrast, use a web API to send queries about origins and destinations and return results generated on a powerful server running dedicated software.
 Routing services based on open source routing engines, such as OSRM’s publicly available service, work exactly the same when called from R as locally hosted instances, simply requiring arguments specifying ‘base URLs’ to be updated.
-However, the fact that external routing services are hosted on a dedicated machine (usually funded by commercial company with incentives to generate accurate routes) gives them advantages:</p>
+However, the fact that external routing services are hosted on a dedicated machine (usually funded by commercial company with incentives to generate accurate routes) can give them advantages, including:</p>
 <ul>
-<li>Provision of routing services worldwide (or usually at least over a large region).</li>
-<li>Established routing services available are usually update regularly and can often respond to traffic levels.</li>
-<li>Routing services usually run on dedicated hardware and software including systems such as load balancers to ensure consistent performance.</li>
+<li>Provision of routing services worldwide (or usually at least over a large region)</li>
+<li>Established routing services available are usually update regularly and can often respond to traffic levels</li>
+<li>Routing services usually run on dedicated hardware and software including systems such as load balancers to ensure consistent performance</li>
 </ul>
-<p>Disadvantages of remote routing services include speed (they rely on data transfer over the internet) and price (the Google routing API, for example, limits the number of free queries).
-The <strong>googleway</strong> package provides an interface to Google’s routing API.
-Free (but rate limited) routing service include <a href="http://project-osrm.org/">OSRM</a> and <a href="https://openrouteservice.org/">openrouteservice.org</a>.</p>
-<p>Instead of routing <em>all</em> desire lines generated in the previous section, which would be time and memory-consuming, we will focus on the desire lines of policy interest.
-The benefits of cycling trips are greatest when they replace car trips.
+<p>Disadvantages of remote routing services include speed when batch jobs are not possible (they often rely on data transfer over the internet on a route-by-route basis), price (the Google routing API, for example, limits the number of free queries) and licensing issues.
+<a href="http://symbolixau.github.io/googleway/"><strong>googleway</strong></a> and <a href="https://walker-data.com/mapboxapi/articles/navigation.html"><strong>mapbox</strong></a> packages demonstrate this approach by providing access to routing services from Google and Mapbox, respectively.
+Free (but rate limited) routing service include <a href="http://project-osrm.org/">OSRM</a> and <a href="https://openrouteservice.org/">openrouteservice.org</a> which can be accessed from R with the <a href="https://rgeomatic.hypotheses.org/category/osrm"><strong>osrm</strong></a> and <a href="https://github.com/GIScience/openrouteservice-r"><strong>openrouteservice</strong></a> packages, the latter of which is not on CRAN.
+There are also more specific routing services such as that provided by <a href="https://www.cyclestreets.net/">CycleStreets.net</a>, a cycle journey planner and not-for-profit transport technology company “for cyclists, by cyclists”.
+While R users can access CycleStreets routes via the package <a href="https://rpackage.cyclestreets.net/"><strong>cyclestreets</strong></a>, many routing services lack R interfaces, representing a substantial opportunity for package development: building an R package to provide an interface to a web API can be a rewarding experience.</p>
+<p>The wide range of R packages for computing and importing data representing routes on transport networks is a strength, meaning that the language has been increasingly used for transport research over the last few years.
+However, a minor disadvantage of this proliferation of package and approaches is that there are many package and function names to remember.
+The package <strong>stplanr</strong> tackles this problem by providing a unified interface for generating routes with the <code><a href="https://docs.ropensci.org/stplanr/reference/route.html">route()</a></code> function.
+The function takes a wide range of inputs, including geographic desire lines (with the <code>l =</code> argument), coordinates and even text strings representing unique addresses, and returns route data as consistent <code>sf</code> objects.
+<!-- TODO: at some point I hope to create a dedicated router package, mention that if it gets created (RL 2022-07) --></p>
+<p>Regardless of the routing engine used, there are two broad types of output: route level and segment level.
+Route level outputs contain a single feature (typically a multilinestring and associated row in the data frame representation) per origin-destination pair, meaning a single row of data per trip.
+Most routing engines return route level by default, although multi-modal engines generally provide outputs at the ‘leg’ level (one feature per continuous movement by a single mode of transport).
+Segment level data, by contrast, provides information about routes at the street segment.
+The <strong>cyclestreets</strong> package, for example, provides segment level data by default, including street names and level of ‘quietness’, a proxy for cycle-friendliness.</p>
+<p>Segment level results are less common partly because they have the disadvantage of complexity (with many rows of data returned for a single OD pair).
+Such complexity may be advantageous, however, when the characteristics of individual ways on the network are important; it is hard to discern the most dangerous part of trip with route level data, for example.
+When working with segment or leg-level data, route-level statistics can be returned by grouping by columns representing trip start and end points and summarizing/aggregating columns containing segment-level data.</p>
+<p>Instead of routing <em>all</em> desire lines generated in the previous section, we will focus on the desire lines of policy interest.
+Doing routing on a subset of the data before trying to compute routes for a large number of OD pairs is often sensible: routing can be time and memory-consuming: route datasets are usually substantially larger than desire line datasets because they have more detailed geometries and often have more attributes such as road name.</p>
+<p>We will filter-out a subset of the desire lines with a focus on estimating cycling potential based on the observation that the benefits of cycling trips are greatest when they replace car trips and that relatively short trips are more likely to be cycled than long trips <span class="citation">(<a href="references.html#ref-lovelace_propensity_2017" role="doc-biblioref">Lovelace et al. 2017</a>)</span>.
 Clearly, not all car trips can realistically be replaced by cycling.
-However, 5 km Euclidean distance (or around 6-8 km of route distance) can realistically be cycled by many people, especially if they are riding an electric bicycle (‘ebike’).
-We will therefore only route desire lines along which a high (300+) number of car trips take place that are up to 5 km in distance.
-This routing is done in the code chunk below by the <strong>stplanr</strong> function <code><a href="https://docs.ropensci.org/stplanr/reference/route.html">route()</a></code>, which creates <code>sf</code> objects representing routes on the transport network, one for each desire line.</p>
+Trips between 2.5 and 5 km Euclidean distance (or around 3 km, below which trips are can be made by walking or scooter, to 6-8 km of route distance) have a relatively high probability of being cycled, and the maximum distance increases when trips are made by <a href="https://www.sciencedirect.com/science/article/pii/S0967070X21003401">electric bike</a>.
+Considering this, and the utility of a small route dataset for testing, we will compute routes for the subset of desire lines along which a high (100+) number of car trips take place that are 2.5 to 5 km in length:</p>
 <div class="sourceCode" id="cb437"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">desire_lines</span><span class="op">$</span><span class="va">distance</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_length</a></span><span class="op">(</span><span class="va">desire_lines</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">desire_carshort</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">desire_lines</span>, <span class="va">car_driver</span> <span class="op">&gt;</span> <span class="fl">300</span> <span class="op">&amp;</span> <span class="va">distance</span> <span class="op">&lt;</span> <span class="fl">5000</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">desire_lines</span><span class="op">$</span><span class="va">distance_km</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_length</a></span><span class="op">(</span><span class="va">desire_lines</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fl">1000</span></span>
+<span><span class="va">desire_lines_short</span> <span class="op">=</span> <span class="va">desire_lines</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">car_driver</span> <span class="op">&gt;=</span> <span class="fl">100</span>, <span class="va">distance_km</span> <span class="op">&lt;=</span> <span class="fl">5</span>, <span class="va">distance_km</span> <span class="op">&gt;=</span> <span class="fl">2.5</span><span class="op">)</span></span></code></pre></div>
+<p>In the code above <code><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_length()</a></code> calculated the length of each desire line, as described in Section <a href="spatial-operations.html#distance-relations">4.2.8</a>.
+The <code><a href="https://dplyr.tidyverse.org/reference/filter.html">filter()</a></code> function from <strong>dplyr</strong> filtered the <code>desire_lines</code> dataset based on the criteria outlined above, as described in Section <a href="attr.html#vector-attribute-subsetting">3.2.1</a>.
+The next stage is to convert these desire lines into routes.
+This is done using the publicly available OSRM service with the <strong>stplanr</strong> functions <code><a href="https://docs.ropensci.org/stplanr/reference/route.html">route()</a></code> and <code><a href="https://docs.ropensci.org/stplanr/reference/route_osrm.html">route_osrm()</a></code> in the code chunk below:</p>
 <div class="sourceCode" id="cb438"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">route_carshort</span> <span class="op">=</span> <span class="fu"><a href="https://docs.ropensci.org/stplanr/reference/route.html">route</a></span><span class="op">(</span>l <span class="op">=</span> <span class="va">desire_carshort</span>, route_fun <span class="op">=</span> <span class="va">route_osrm</span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_length()</a></code> determines the length of a linestring, and falls into the distance relations category (see also Section <a href="spatial-operations.html#distance-relations">4.2.8</a>).
-Subsequently, we apply a simple attribute filter operation (see Section <a href="attr.html#vector-attribute-subsetting">3.2.1</a>) before letting the OSRM service do the routing on a remote server.
-Note that the routing only works with a working internet connection.</p>
-<p>We could keep the new <code>route_carshort</code> object separate from the straight line representation of the same trip in <code>desire_carshort</code> but, from a data management perspective, it makes more sense to combine them: they represent the same trip.
-The new route dataset contains <code>distance</code> (referring to route distance this time) and <code>duration</code> fields (in seconds) which could be useful.
-However, for the purposes of this chapter, we are only interested in the geometry, from which route distance can be calculated.
-The following command makes use of the ability of simple features objects to contain multiple geographic columns:</p>
-<div class="sourceCode" id="cb439"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">desire_carshort</span><span class="op">$</span><span class="va">geom_car</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">route_carshort</span><span class="op">)</span></span></code></pre></div>
-<p>This allows plotting the desire lines along which many short car journeys take place alongside likely routes traveled by cars by referring to each geometry column separately (<code>desire_carshort$geometry</code> and <code>desire_carshort$geom_car</code> in this case).
-Making the width of the routes proportional to the number of car journeys that could potentially be replaced provides an effective way to prioritize interventions on the road network <span class="citation">(<a href="references.html#ref-lovelace_propensity_2017" role="doc-biblioref">Lovelace et al. 2017</a>)</span>.</p>
-<p>The code chunk below plots the desire lines and routes, resulting in Figure <a href="transport.html#fig:routes">13.4</a> which shows routes along which people drive short distances:<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
-Not that the red routes and black desire lines do not start at the same point.
+<code class="sourceCode R"><span><span class="va">routes_short</span> <span class="op">=</span> <span class="fu"><a href="https://docs.ropensci.org/stplanr/reference/route.html">route</a></span><span class="op">(</span>l <span class="op">=</span> <span class="va">desire_lines_short</span>, route_fun <span class="op">=</span> <span class="va">route_osrm</span>,</span>
+<span>                     osrm.profile <span class="op">=</span> <span class="st">"bike"</span><span class="op">)</span></span></code></pre></div>
+<p>The output is <code>routes_short</code>, an <code>sf</code> object representing routes on the transport network that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line.
+Note: calls to external routing engines such as in the command above only work with an internet connection (and sometimes an API key stored in an environment variable, although not in this case).
+In addition to the columns contained in the <code>desire_lines</code> object, the new route dataset contains <code>distance</code> (referring to route distance this time) and <code>duration</code> columns (in seconds), which provide potentially useful extra information on the nature of each route.
+We will plot desire lines along which many short car journeys take place alongside cycling routes.
+Making the width of the routes proportional to the number of car journeys that could potentially be replaced provides an effective way to prioritize interventions on the road network <span class="citation">(<a href="references.html#ref-lovelace_propensity_2017" role="doc-biblioref">Lovelace et al. 2017</a>)</span>.
+The code chunk below plots the desire lines and routes, resulting in Figure <a href="transport.html#fig:routes">13.4</a> which shows routes along which people drive short distances:<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
+Note that the red routes and black desire lines do not start at exactly the same points.
 This is because zone centroids rarely lie on the route network: instead the route originate from the transport network node nearest the centroid.
 Note also that routes are assumed to originate in the zone centroids, a simplifying assumption which is used in transport models to reduce the computational resources needed to calculate the shortest path between all combinations of possible origins and destinations &lt;span class="citation"&gt;(&lt;a href="references.html#ref-hollander_transport_2016" role="doc-biblioref"&gt;Hollander 2016&lt;/a&gt;)&lt;/span&gt;.&lt;/p&gt;'><sup>83</sup></a></p>
-<div class="sourceCode" id="cb440"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">desire_carshort</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">desire_carshort</span><span class="op">$</span><span class="va">geom_car</span>, col <span class="op">=</span> <span class="st">"red"</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid</a></span><span class="op">(</span><span class="va">zones_od</span><span class="op">)</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb439"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_shape.html">tm_shape</a></span><span class="op">(</span><span class="va">desire_lines_short</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_lines.html">tm_lines</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_shape.html">tm_shape</a></span><span class="op">(</span><span class="va">routes_short</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_lines.html">tm_lines</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> </span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:routes"></span>
-<img src="13-transport_files/figure-html/routes-1.png" alt="Routes along which many (300+) short (&lt;5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots)." width="100%"><p class="caption">
-FIGURE 13.4: Routes along which many (300+) short (&lt;5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).
+<img src="13-transport_files/figure-html/routes-1.png" alt="Routes along which many (100+) short (&lt;5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots)." width="100%"><p class="caption">
+FIGURE 13.4: Routes along which many (100+) short (&lt;5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).
 </p>
 </div>
 <p></p>
-<p>Plotting the results on an interactive map, with <code>mapview::mapview(desire_carshort$geom_car)</code> for example, shows that many short car trips take place in and around Bradley Stoke.
+<p>Plotting the results on an interactive map, with <code>mapview::mapview(st_geometry(routes_short))</code> for example, shows that many short car trips take place in and around Bradley Stoke.
 It is easy to find explanations for the area’s high level of car dependency: according to <a href="https://en.wikipedia.org/wiki/Bradley_Stoke">Wikipedia</a>, Bradley Stoke is “Europe’s largest new town built with private investment”, suggesting limited public transport provision.
 Furthermore, the town is surrounded by large (cycling unfriendly) road structures, “such as junctions on both the M4 and M5 motorways” <span class="citation">(<a href="references.html#ref-tallon_bristol_2007" role="doc-biblioref">Tallon 2007</a>)</span>.</p>
-<p>There are many benefits of converting travel desire lines into likely routes of travel from a policy perspective, primary among them the ability to understand what it is about the surrounding environment that makes people travel by a particular mode.
-We discuss future directions of research building on the routes in Section <a href="transport.html#future-directions-of-travel">13.9</a>.
-For the purposes of this case study, suffice to say that the roads along which these short car journeys travel should be prioritized for investigation to understand how they can be made more conducive to sustainable transport modes.
-One option would be to add new public transport nodes to the network.
+<p>There are many benefits of converting travel desire lines into routes.
+It is important to remember that we cannot be sure what proportion of trips will follow the routes calculated by routing engines.
+However, route and street/way/segment level results can be highly policy relevant.
+Route segment results can enable the prioritization of investment in cycleways where they are most needed according to available data <span class="citation">(<a href="references.html#ref-lovelace_propensity_2017" role="doc-biblioref">Lovelace et al. 2017</a>)</span>, for example.
+Another common intervention in transport systems is the addition of new public transport nodes to the network.
 Such nodes are described in the next section.</p>
 </div>
 <div id="nodes" class="section level2" number="13.6">
@@ -490,8 +521,8 @@ Such nodes are described in the next section.</p>
 <p>Nodes in geographic transport data are zero-dimensional features (points) among the predominantly one-dimensional features (lines) that comprise the network.
 There are two types of transport nodes:</p>
 <ol style="list-style-type: decimal">
-<li>Nodes not directly on the network such as zone centroids — covered in the next section — or individual origins and destinations such as houses and workplaces.</li>
-<li>Nodes that are a part of transport networks, representing individual pathways, intersections between pathways (junctions) and points for entering or exiting a transport network such as bus stops and train stations.</li>
+<li>Nodes not directly on the network such as zone centroids — covered in the next section — or individual origins and destinations such as houses and workplaces</li>
+<li>Nodes that are a part of transport networks, representing individual pathways, intersections between pathways (junctions) and points for entering or exiting a transport network such as bus stops and train stations</li>
 </ol>
 <p>Transport networks can be represented as graphs, in which each segment is connected (via edges representing geographic lines) to one or more other edges in the network.
 Nodes outside the network can be added with “centroid connectors”, new route segments to nearby nodes on the network <span class="citation">(<a href="references.html#ref-hollander_transport_2016" role="doc-biblioref">Hollander 2016</a>)</span>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
@@ -512,15 +543,15 @@ From an active travel perspective, public transport ‘legs’ of longer journey
 <p>Building on the analysis conducted in Section <a href="transport.html#desire-lines">13.4</a>, public transport nodes can be used to construct three-part desire lines for trips that can be taken by bus and (the mode used in this example) rail.
 The first stage is to identify the desire lines with most public transport travel, which in our case is easy because our previously created dataset <code>desire_lines</code> already contains a variable describing the number of trips by train (the public transport potential could also be estimated using public transport routing services such as <a href="http://www.opentripplanner.org/">OpenTripPlanner</a>).
 To make the approach easier to follow, we will select only the top three desire lines in terms of rails use:</p>
-<div class="sourceCode" id="cb441"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb440"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">desire_rail</span> <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/top_n.html">top_n</a></span><span class="op">(</span><span class="va">desire_lines</span>, n <span class="op">=</span> <span class="fl">3</span>, wt <span class="op">=</span> <span class="va">train</span><span class="op">)</span></span></code></pre></div>
 <p>The challenge now is to ‘break-up’ each of these lines into three pieces, representing travel via public transport nodes.
-This can be done by converting a desire line into a multiline object consisting of three line geometries representing origin, public transport and destination legs of the trip.
-This operation can be divided into three stages: matrix creation (of origins, destinations and the ‘via’ points representing rail stations), identification of nearest neighbors and conversion to multilines.
+This can be done by converting a desire line into a multilinestring object consisting of three line geometries representing origin, public transport and destination legs of the trip.
+This operation can be divided into three stages: matrix creation (of origins, destinations and the ‘via’ points representing rail stations), identification of nearest neighbors and conversion to multilinestrings.
 These are undertaken by <code><a href="https://docs.ropensci.org/stplanr/reference/line_via.html">line_via()</a></code>.
-This <strong>stplanr</strong> function takes input lines and points and returns a copy of the desire lines — see the <a href="https://geocompr.github.io/geocompkg/articles/linevia.html">Desire Lines Extended</a> vignette on the geocompr.github.io website and <code><a href="https://docs.ropensci.org/stplanr/reference/line_via.html">?line_via</a></code> for details on how this works.
+This <strong>stplanr</strong> function takes input lines and points and returns a copy of the desire lines — see the <a href="https://docs.ropensci.org/stplanr/reference/line_via.html"><code>?line_via()</code></a> for details on how this works.
 The output is the same as the input line, except it has new geometry columns representing the journey via public transport nodes, as demonstrated below:</p>
-<div class="sourceCode" id="cb442"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb441"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">ncol</a></span><span class="op">(</span><span class="va">desire_rail</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 10</span></span>
 <span><span class="va">desire_rail</span> <span class="op">=</span> <span class="fu"><a href="https://docs.ropensci.org/stplanr/reference/line_via.html">line_via</a></span><span class="op">(</span><span class="va">desire_rail</span>, <span class="va">bristol_stations</span><span class="op">)</span></span>
@@ -539,10 +570,46 @@ FIGURE 13.5: Station nodes (red dots) used as intermediary points that convert s
 <h2>
 <span class="header-section-number">13.7</span> Route networks<a class="anchor" aria-label="anchor" href="#route-networks"><i class="fas fa-link"></i></a>
 </h2>
-<p>
-The data used in this section was downloaded using <strong>osmdata</strong>.
-To avoid having to request the data from OSM repeatedly, we will use the <code>bristol_ways</code> object, which contains point and line data for the case study area (see <code><a href="https://rdrr.io/pkg/spDataLarge/man/bristol_ways.html">?bristol_ways</a></code>):</p>
+<p>While routes generally contain data at same level as desire lines (or at the level of segments with potentially overlapping segments), route network datasets represent a more-or-less complete representation of a transport network.
+Each segment (roughly corresponding to a continuous section of street between junctions) in a route network is present once and only once.</p>
+<p>Sometimes route networks are the input into a transport data analysis project; sometimes they are an output; and sometimes route networks are both an input and an output.
+To be specific: any routing engines requires some kind of route network input, so any transport research of routes must invariably involve route network data in the internal or external routing engines (in the latter case the route network data is not necessarily imported into R).
+However, route networks are also important outputs in many transport research projects: summarizing data such as the potential number of trips made on particular segments and represented as a route network, can help prioritize investment where it is most needed.
+</p>
+<p>To demonstrate how to create route networks as an output derived from route level data, imagine a simple scenario of mode shift.
+Imagine that 50% of car trips between 0 to 3 km in route distance are replaced by cycling, a percentage that drops by 10 percentage points for every additional km of route distance so that 20% of car trips of 6 km are replaced by cycling and no car trips that are 8 km or longer are replaced by cycling.
+This is of course an unrealistic scenario <span class="citation">(<a href="references.html#ref-lovelace_propensity_2017" role="doc-biblioref">Lovelace et al. 2017</a>)</span>, but is a useful starting point.
+In this case, we can model mode shift from cars to bikes as follows:</p>
+<div class="sourceCode" id="cb442"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">uptake</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span><span class="op">(</span></span>
+<span>    <span class="va">x</span> <span class="op">&lt;=</span> <span class="fl">3</span> <span class="op">~</span> <span class="fl">0.5</span>,</span>
+<span>    <span class="va">x</span> <span class="op">&gt;=</span> <span class="fl">8</span> <span class="op">~</span> <span class="fl">0</span>,</span>
+<span>    <span class="cn">TRUE</span> <span class="op">~</span> <span class="op">(</span><span class="fl">8</span> <span class="op">-</span> <span class="va">x</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fl">8</span> <span class="op">-</span> <span class="fl">3</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.5</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">routes_short_scenario</span> <span class="op">=</span> <span class="va">routes_short</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>uptake <span class="op">=</span> <span class="fu">uptake</span><span class="op">(</span><span class="va">distance</span> <span class="op">/</span> <span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>bicycle <span class="op">=</span> <span class="va">bicycle</span> <span class="op">+</span> <span class="va">car_driver</span> <span class="op">*</span> <span class="va">uptake</span>,</span>
+<span>         car_driver <span class="op">=</span> <span class="va">car_driver</span> <span class="op">*</span> <span class="va">uptake</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">routes_short_scenario</span><span class="op">$</span><span class="va">bicycle</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">routes_short</span><span class="op">$</span><span class="va">bicycle</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4003</span></span></code></pre></div>
+<p>Having created a scenario in which approximately 4000 trips have switched from driving to cycling, we can now model where this updated modeled cycling activity will take place with the function <code><a href="https://docs.ropensci.org/stplanr/reference/overline.html">overline()</a></code> from the <strong>stplanr</strong> package.
+The package take route level data, breaks linestrings at junctions (were two or more linestring geometries meet), and calculates aggregate statistics for each unique route segment <span class="citation">(see <a href="#ref-morgan_travel_2020" role="doc-biblioref"><strong>morgan_travel_2020?</strong></a> for further details)</span>, taking attributes to summarize as the second argument:</p>
 <div class="sourceCode" id="cb443"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">route_network_scenario</span> <span class="op">=</span> <span class="fu"><a href="https://docs.ropensci.org/stplanr/reference/overline.html">overline</a></span><span class="op">(</span><span class="va">routes_short_scenario</span>, attrib <span class="op">=</span> <span class="st">"bicycle"</span><span class="op">)</span></span></code></pre></div>
+<p>The outputs of the two preceding code chunks are summarized in Figure <a href="transport.html#fig:rnetvis">13.6</a> below.</p>
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:rnetvis"></span>
+<img src="13-transport_files/figure-html/rnetvis-1.png" alt="Illustration of the % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right)." width="49%"><img src="13-transport_files/figure-html/rnetvis-2.png" alt="Illustration of the % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right)." width="49%"><p class="caption">
+FIGURE 13.6: Illustration of the % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).
+</p>
+</div>
+<p>Another, more common, type of route network dataset is road network datasets.
+This type of route network dataset is available for every city worldwide from OpenStreetMap.
+The input dataset used to illustrate this type of route network downloaded using <strong>osmdata</strong>.
+To avoid having to request the data from OSM repeatedly, we will use the <code>bristol_ways</code> object from the <strong>spDataLarge</strong> package, which contains point and line data for the case study area (see <code><a href="https://rdrr.io/pkg/spDataLarge/man/bristol_ways.html">?bristol_ways</a></code>):</p>
+<div class="sourceCode" id="cb444"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/summary.html">summary</a></span><span class="op">(</span><span class="va">bristol_ways</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      highway        maxspeed         ref                geometry   </span></span>
 <span><span class="co">#&gt;  cycleway:1317   30 mph : 925   A38    : 214   LINESTRING   :4915  </span></span>
@@ -552,31 +619,74 @@ To avoid having to request the data from OSM repeatedly, we will use the <code>b
 <span><span class="co">#&gt;                  50 mph : 158   A420   : 115                       </span></span>
 <span><span class="co">#&gt;                  (Other): 490   (Other):1877                       </span></span>
 <span><span class="co">#&gt;                  NA's   :2061   NA's   :2295</span></span></code></pre></div>
-<p>The above code chunk loaded a simple feature object representing around 3,000 segments on the transport network.
+<p>The above code chunk summarized a simple feature object representing around 5,000 segments on the transport network.
 This an easily manageable dataset size (transport datasets can be large, but it’s best to start small).</p>
 <p>As mentioned, route networks can usefully be represented as mathematical graphs, with nodes on the network connected by edges.
 A number of R packages have been developed for dealing with such graphs, notably <strong>igraph</strong>.
-One can manually convert a route network into an <code>igraph</code> object, but the geographic attributes will be lost.
-To overcome this issue <code>SpatialLinesNetwork()</code> was developed in the <strong>stplanr</strong> package to represent route networks simultaneously as graphs <em>and</em> a set of geographic lines.
-This function is demonstrated below using a subset of the <code>bristol_ways</code> object used in previous sections.</p>
-<div class="sourceCode" id="cb444"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># ways_freeway = bristol_ways %&gt;% filter(maxspeed == "70 mph") </span></span>
-<span><span class="co"># ways_sln = SpatialLinesNetwork(ways_freeway)</span></span>
-<span><span class="co"># slotNames(ways_sln)</span></span>
-<span><span class="co"># weightfield(ways_sln)</span></span>
-<span><span class="co"># class(ways_sln@g)</span></span></code></pre></div>
-<p>The output of the previous code chunk shows that <code>ways_sln</code> is a composite object with various ‘slots’.
-These include: the spatial component of the network (named <code>sl</code>), the graph component (<code>g</code>) and the ‘weightfield’, the edge variable used for shortest path calculation (by default segment distance).
-<code>ways_sln</code> is of class <code>sfNetwork</code>, defined by the S4 class system.
-This means that each component can be accessed using the <code>@</code> operator, which is used below to extract its graph component and process it using the <strong>igraph</strong> package, before plotting the results in geographic space.
-In the example below, the ‘edge betweenness’, meaning the number of shortest paths passing through each edge, is calculated (see <code><a href="https://rdrr.io/pkg/igraph/man/betweenness.html">?igraph::betweenness</a></code> for further details and Figure <a href="#fig:wayssln"><strong>??</strong></a>).
-The results demonstrate that each graph edge represents a segment: the segments near the center of the road network have the greatest betweenness scores.</p>
-<!-- Todo (optional): make this section use potential cycle routes around Stokes Bradley not freeway data (RL) -->
+You can manually convert a route network into an <code>igraph</code> object, but the geographic attributes will be lost.
+To overcome this issue functionality was developed in the <strong>stplanr</strong> and subsequently <strong>sfnetworks</strong> packages to represent route networks simultaneously as graphs <em>and</em> a set of geographic lines.
+We will demonstrate <strong>sfnetworks</strong> functionality on the <code>bristol_ways</code> object.</p>
 <div class="sourceCode" id="cb445"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># e = igraph::edge_betweenness(ways_sln@g)</span></span>
-<span><span class="co"># plot(ways_sln@sl$geometry, lwd = e / 500)</span></span></code></pre></div>
-<p>One can also find the shortest route between origins and destinations using this graph representation of the route network.
-This can be done with functions such as <code>sum_network_routes()</code> from <strong>stplanr</strong>, which undertakes ‘local routing’ (see Section <a href="transport.html#routes">13.5</a>).</p>
+<code class="sourceCode R"><span><span class="va">bristol_ways</span><span class="op">$</span><span class="va">lengths</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_length</a></span><span class="op">(</span><span class="va">bristol_ways</span><span class="op">)</span></span>
+<span><span class="va">ways_sfn</span> <span class="op">=</span> <span class="fu"><a href="https://luukvdmeer.github.io/sfnetworks/reference/as_sfnetwork.html">as_sfnetwork</a></span><span class="op">(</span><span class="va">bristol_ways</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">ways_sfn</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "sfnetwork" "tbl_graph" "igraph"</span></span>
+<span><span class="va">ways_sfn</span></span>
+<span><span class="co">#&gt; # A sfnetwork with 5728 nodes and 4915 edges</span></span>
+<span><span class="co">#&gt; #</span></span>
+<span><span class="co">#&gt; # CRS:  EPSG:4326 </span></span>
+<span><span class="co">#&gt; #</span></span>
+<span><span class="co">#&gt; # A directed multigraph with 1013 components with spatially explicit edges</span></span>
+<span><span class="co">#&gt; #</span></span>
+<span><span class="co">#&gt; # Node Data:     5,728 × 1 (active)</span></span>
+<span><span class="co">#&gt; # Geometry type: POINT</span></span>
+<span><span class="co">#&gt; # Dimension:     XY</span></span>
+<span><span class="co">#&gt; # Bounding box:  xmin: -2.84 ymin: 51.3 xmax: -2.26 ymax: 51.7</span></span>
+<span><span class="co">#&gt;       geometry</span></span>
+<span><span class="co">#&gt;    &lt;POINT [°]&gt;</span></span>
+<span><span class="co">#&gt; 1 (-2.61 51.4)</span></span>
+<span><span class="co">#&gt; 2 (-2.61 51.4)</span></span>
+<span><span class="co">#&gt; 3 (-2.62 51.4)</span></span>
+<span><span class="co">#&gt; 4 (-2.62 51.4)</span></span>
+<span><span class="co">#&gt; 5 (-2.34 51.5)</span></span>
+<span><span class="co">#&gt; 6 (-2.28 51.5)</span></span>
+<span><span class="co">#&gt; # … with 5,722 more rows</span></span>
+<span><span class="co">#&gt; #</span></span>
+<span><span class="co">#&gt; # Edge Data:     4,915 × 7</span></span>
+<span><span class="co">#&gt; # Geometry type: LINESTRING</span></span>
+<span><span class="co">#&gt; # Dimension:     XY</span></span>
+<span><span class="co">#&gt; # Bounding box:  xmin: -2.84 ymin: 51.3 xmax: -2.26 ymax: 51.7</span></span>
+<span><span class="co">#&gt;    from    to highway maxspeed ref                              geometry lengths</span></span>
+<span><span class="co">#&gt;   &lt;int&gt; &lt;int&gt; &lt;fct&gt;   &lt;fct&gt;    &lt;fct&gt;                    &lt;LINESTRING [°]&gt;     [m]</span></span>
+<span><span class="co">#&gt; 1     1     2 road    &lt;NA&gt;     B3130 (-2.61 51.4, -2.61 51.4, -2.61 51.…    218.</span></span>
+<span><span class="co">#&gt; 2     3     4 road    20 mph   B3130 (-2.62 51.4, -2.62 51.4, -2.62 51.…    135.</span></span>
+<span><span class="co">#&gt; 3     5     6 road    70 mph   M4    (-2.34 51.5, -2.34 51.5, -2.34 51.…   4517.</span></span>
+<span><span class="co">#&gt; # … with 4,912 more rows</span></span></code></pre></div>
+<p>The output of the previous code chunk shows that <code>ways_sfn</code> is a composite object, containing both nodes and edges in graph and spatial form.
+<code>ways_sfn</code> is of class <code>sfnetwork</code>, which builds on the <code>igraph</code> class from the <strong>igraph</strong> package.
+In the example below, the ‘edge betweenness’, meaning the number of shortest paths passing through each edge, is calculated (see <code><a href="https://rdrr.io/pkg/igraph/man/betweenness.html">?igraph::betweenness</a></code> for further details).
+The result of calculating edge betweenness for this dataset are shown Figure <a href="transport.html#fig:wayssln">13.7</a>, which has the cycle route network dataset calculated with the <code><a href="https://docs.ropensci.org/stplanr/reference/overline.html">overline()</a></code> function as an overlay for comparison.
+The results demonstrate that each graph edge represents a segment: the segments near the center of the road network have the highest betweenness values, whereas segments closer to central Bristol have higher cycling potential, based on these simplistic datasets.</p>
+<div class="sourceCode" id="cb446"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ways_centrality</span> <span class="op">=</span> <span class="va">ways_sfn</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://tidygraph.data-imaginist.com/reference/activate.html">activate</a></span><span class="op">(</span><span class="st">"edges"</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>betweenness <span class="op">=</span> <span class="fu">tidygraph</span><span class="fu">::</span><span class="fu"><a href="https://tidygraph.data-imaginist.com/reference/centrality.html">centrality_edge_betweenness</a></span><span class="op">(</span><span class="va">lengths</span><span class="op">)</span><span class="op">)</span> </span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_shape.html">tm_shape</a></span><span class="op">(</span><span class="va">ways_centrality</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_lines.html">tm_lines</a></span><span class="op">(</span>lwd <span class="op">=</span> <span class="st">"betweenness"</span>, scale <span class="op">=</span> <span class="fl">9</span>, title.lwd <span class="op">=</span> <span class="st">"Betweenness"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_shape.html">tm_shape</a></span><span class="op">(</span><span class="va">route_network_scenario</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tm_lines.html">tm_lines</a></span><span class="op">(</span>lwd <span class="op">=</span> <span class="st">"bicycle"</span>, scale <span class="op">=</span> <span class="fl">9</span>, title.lwd <span class="op">=</span> <span class="st">"N0. bike trips (modeled, one direction)"</span>, col <span class="op">=</span> <span class="st">"green"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :</span></span>
+<span><span class="co">#&gt; GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019</span></span>
+<span><span class="co">#&gt; Legend labels were too wide. Therefore, legend.text.size has been set to 0.44. Increase legend.width (argument of tm_layout) to make the legend wider and therefore the labels larger.</span></span></code></pre></div>
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:wayssln"></span>
+<img src="13-transport_files/figure-html/wayssln-1.png" alt="Illustration of a small route network, with segment thickness proportional to its betweenness, generated using the igraph package and described in the text." width="60%"><p class="caption">
+FIGURE 13.7: Illustration of a small route network, with segment thickness proportional to its betweenness, generated using the igraph package and described in the text.
+</p>
+</div>
+<p>One can also find the shortest route between origins and destinations using this graph representation of the route network with the <strong>sfnetworks</strong> package.
+<!-- TODO: make an exercise based on this if time allows (RL 2022-07) -->
+While the methods presented in this section are relatively simple compared with what is possible with spatial network generation (e.g., with <code><a href="https://docs.ropensci.org/stplanr/reference/overline.html">overline()</a></code>) and analysis techniques (e.g., with <strong>sfnetworks</strong>), they should provide a strong starting point for further exploration and research into the area.</p>
 </div>
 <div id="prioritizing-new-infrastructure" class="section level2" number="13.8">
 <h2>
@@ -585,30 +695,30 @@ This can be done with functions such as <code>sum_network_routes()</code> from <
 <p>This chapter’s final practical section demonstrates the policy-relevance of geocomputation for transport applications by identifying locations where new transport infrastructure may be needed.
 Clearly, the types of analysis presented here would need to be extended and complemented by other methods to be used in real-world applications, as discussed in Section <a href="transport.html#future-directions-of-travel">13.9</a>.
 However, each stage could be useful on its own, and feed into wider analyses.
-To summarize, these were: identifying short but car-dependent commuting routes (generated from desire lines) in Section <a href="transport.html#routes">13.5</a>; creating desire lines representing trips to rail stations in Section <a href="transport.html#nodes">13.6</a>; and analysis of transport systems at the route network using graph theory in Section <a href="transport.html#route-networks">13.7</a>.</p>
+To summarize, these were: identifying short but car-dependent commuting routes (generated from desire lines) in Section <a href="#routes"><strong>??</strong></a>; creating desire lines representing trips to rail stations in Section <a href="transport.html#nodes">13.6</a>; and analysis of transport systems at the route network using graph theory in Section <a href="transport.html#route-networks">13.7</a>.</p>
 <p>The final code chunk of this chapter combines these strands of analysis.
-It adds the car-dependent routes in <code>route_carshort</code> with a newly created object, <code>route_rail</code> and creates a new column representing the amount of travel along the centroid-to-centroid desire lines they represent:</p>
-<div class="sourceCode" id="cb446"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">route_rail</span> <span class="op">=</span> <span class="va">desire_rail</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_set_geometry</a></span><span class="op">(</span><span class="st">"leg_orig"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://docs.ropensci.org/stplanr/reference/route.html">route</a></span><span class="op">(</span>l <span class="op">=</span> <span class="va">.</span>, route_fun <span class="op">=</span> <span class="va">route_osrm</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">route_carshort</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+It adds the car-dependent routes in <code>routes_short</code> with a newly created object, <code>route_rail</code> and creates a new column representing the amount of travel along the centroid-to-centroid desire lines they represent:</p>
 <div class="sourceCode" id="cb447"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">route_cycleway</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">route_rail</span>, <span class="va">route_carshort</span><span class="op">)</span></span>
-<span><span class="va">route_cycleway</span><span class="op">$</span><span class="va">all</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">desire_rail</span><span class="op">$</span><span class="va">all</span>, <span class="va">desire_carshort</span><span class="op">$</span><span class="va">all</span><span class="op">)</span></span></code></pre></div>
-<p>The results of the preceding code are visualized in Figure <a href="transport.html#fig:cycleways">13.6</a>, which shows routes with high levels of car dependency and highlights opportunities for cycling rail stations (the subsequent code chunk creates a simple version of the figure — see <code>code/13-cycleways.R</code> to reproduce the figure exactly).
+<code class="sourceCode R"><span><span class="va">route_rail</span> <span class="op">=</span> <span class="va">desire_rail</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_set_geometry</a></span><span class="op">(</span><span class="st">"leg_orig"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://docs.ropensci.org/stplanr/reference/route.html">route</a></span><span class="op">(</span>l <span class="op">=</span> <span class="va">_</span>, route_fun <span class="op">=</span> <span class="va">route_osrm</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">routes_short</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb448"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">route_cycleway</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">route_rail</span>, <span class="va">routes_short</span><span class="op">)</span></span>
+<span><span class="va">route_cycleway</span><span class="op">$</span><span class="va">all</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">desire_rail</span><span class="op">$</span><span class="va">all</span>, <span class="va">desire_lines_short</span><span class="op">$</span><span class="va">all</span><span class="op">)</span></span></code></pre></div>
+<p>The results of the preceding code are visualized in Figure <a href="transport.html#fig:cycleways">13.8</a>, which shows routes with high levels of car dependency and highlights opportunities for cycling rail stations (the subsequent code chunk creates a simple version of the figure — see <code>code/13-cycleways.R</code> to reproduce the figure exactly).
 The method has some limitations: in reality, people do not travel to zone centroids or always use the shortest route algorithm for a particular mode.
 However, the results demonstrate routes along which cycle paths could be prioritized from car dependency and public transport perspectives.</p>
-<div class="sourceCode" id="cb448"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb449"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/tmap/man/qtm.html">qtm</a></span><span class="op">(</span><span class="va">route_cycleway</span>, lines.lwd <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:cycleways"></span>
 <img src="https://user-images.githubusercontent.com/1825120/39901156-a8ec9ef6-54be-11e8-94fb-0b5f6b48775e.png" alt="Potential routes along which to prioritise cycle infrastructure in Bristol, based on access key rail stations (red dots) and routes with many short car journeys (north of Bristol surrounding Stoke Bradley). Line thickness is proportional to number of trips." width="70%"><p class="caption">
-FIGURE 13.6: Potential routes along which to prioritise cycle infrastructure in Bristol, based on access key rail stations (red dots) and routes with many short car journeys (north of Bristol surrounding Stoke Bradley). Line thickness is proportional to number of trips.
+FIGURE 13.8: Potential routes along which to prioritise cycle infrastructure in Bristol, based on access key rail stations (red dots) and routes with many short car journeys (north of Bristol surrounding Stoke Bradley). Line thickness is proportional to number of trips.
 </p>
 </div>
 <p>The results may look more attractive in an interactive map, but what do they mean?
-The routes highlighted in Figure <a href="transport.html#fig:cycleways">13.6</a> suggest that transport systems are intimately linked to the wider economic and social context.
+The routes highlighted in Figure <a href="transport.html#fig:cycleways">13.8</a> suggest that transport systems are intimately linked to the wider economic and social context.
 The example of Stoke Bradley is a case in point:
 its location, lack of public transport services and active travel infrastructure help explain why it is so highly car-dependent.
 The wider point is that car dependency has a spatial distribution which has implications for sustainable transport policies <span class="citation">(<a href="references.html#ref-hickman_transitions_2011" role="doc-biblioref">Hickman, Ashiru, and Banister 2011</a>)</span>.</p>
@@ -636,31 +746,20 @@ Similar tools could be used to encourage evidence-based transport policies relat
 <h2>
 <span class="header-section-number">13.10</span> Exercises<a class="anchor" aria-label="anchor" href="#ex-transport"><i class="fas fa-link"></i></a>
 </h2>
-<ol style="list-style-type: decimal">
-<li>What is the total distance of cycleways that would be constructed if all the routes presented in Figure <a href="transport.html#fig:cycleways">13.6</a> were to be constructed?
-<ul>
-<li>Bonus: find two ways of arriving at the same answer.</li>
-</ul>
-</li>
-<li>What proportion of trips represented in the <code>desire_lines</code> are accounted for in the <code>route_cycleway</code> object?
-<ul>
-<li>Bonus: what proportion of trips cross the proposed routes?</li>
-<li>Advanced: write code that would increase this proportion.</li>
-</ul>
-</li>
-<li>The analysis presented in this chapter is designed for teaching how geocomputation methods can be applied to transport research. If you were to do this ‘for real’ for local government or a transport consultancy, what top 3 things would you do differently?
+<p>E1. What is the total distance of cycleways that would be constructed if all the routes presented in Figure <a href="transport.html#fig:cycleways">13.8</a> were to be constructed?
+- Bonus: find two ways of arriving at the same answer.</p>
+<p>E2. What proportion of trips represented in the <code>desire_lines</code> are accounted for in the <code>route_cycleway</code> object?
+- Bonus: what proportion of trips cross the proposed routes?
+- Advanced: write code that would increase this proportion.</p>
+<p>E3. The analysis presented in this chapter is designed for teaching how geocomputation methods can be applied to transport research. If you were to do this ‘for real’ for local government or a transport consultancy, what top 3 things would you do differently?
 <!-- Higher level of geographic resolution. -->
 <!-- Use cycle-specific routing services. -->
 <!-- Identify key walking routes. -->
 <!-- Include a higher proportion of trips in the analysis -->
-</li>
-<li>Clearly, the routes identified in Figure <a href="transport.html#fig:cycleways">13.6</a> only provide part of the picture. How would you extend the analysis to incorporate more trips that could potentially be cycled?</li>
-<li>Imagine that you want to extend the scenario by creating key <em>areas</em> (not routes) for investment in place-based cycling policies such as car-free zones, cycle parking points and reduced car parking strategy. How could raster data assist with this work?
-<ul>
-<li>Bonus: develop a raster layer that divides the Bristol region into 100 cells (10 by 10) and provide a metric related to transport policy, such as number of people trips that pass through each cell by walking or the average speed limit of roads, from the <code>bristol_ways</code> dataset (the approach taken in Chapter <a href="location.html#location">14</a>).</li>
-</ul>
-</li>
-</ol>
+E4. Clearly, the routes identified in Figure <a href="transport.html#fig:cycleways">13.8</a> only provide part of the picture. How would you extend the analysis to incorporate more trips that could potentially be cycled?
+E5. Imagine that you want to extend the scenario by creating key <em>areas</em> (not routes) for investment in place-based cycling policies such as car-free zones, cycle parking points and reduced car parking strategy. How could raster data assist with this work?
+- Bonus: develop a raster layer that divides the Bristol region into 100 cells (10 by 10) and provide a metric related to transport policy, such as number of people trips that pass through each cell by walking or the average speed limit of roads, from the <code>bristol_ways</code> dataset (the approach taken in Chapter <a href="location.html#location">14</a>).</p>
+
 </div>
 </div>
 
@@ -686,7 +785,7 @@ Similar tools could be used to encourage evidence-based transport policies relat
 <li><a class="nav-link" href="#bris-case"><span class="header-section-number">13.2</span> A case study of Bristol</a></li>
 <li><a class="nav-link" href="#transport-zones"><span class="header-section-number">13.3</span> Transport zones</a></li>
 <li><a class="nav-link" href="#desire-lines"><span class="header-section-number">13.4</span> Desire lines</a></li>
-<li><a class="nav-link" href="#routes"><span class="header-section-number">13.5</span> Routes</a></li>
+<li><a class="nav-link" href="#routes-and-routing-engines"><span class="header-section-number">13.5</span> Routes and routing engines</a></li>
 <li><a class="nav-link" href="#nodes"><span class="header-section-number">13.6</span> Nodes</a></li>
 <li><a class="nav-link" href="#route-networks"><span class="header-section-number">13.7</span> Route networks</a></li>
 <li><a class="nav-link" href="#prioritizing-new-infrastructure"><span class="header-section-number">13.8</span> Prioritizing new infrastructure</a></li>
@@ -709,7 +808,7 @@ Similar tools could be used to encourage evidence-based transport policies relat
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-07-17.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-07-18.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
