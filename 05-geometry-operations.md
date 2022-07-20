@@ -579,7 +579,7 @@ Let's try to apply geometry type transformations on a new object, `multilinestri
 multilinestring_list = list(matrix(c(1, 4, 5, 3), ncol = 2), 
                             matrix(c(4, 4, 4, 1), ncol = 2),
                             matrix(c(2, 4, 2, 2), ncol = 2))
-multilinestring = st_multilinestring((multilinestring_list))
+multilinestring = st_multilinestring(multilinestring_list)
 multilinestring_sf = st_sf(geom = st_sfc(multilinestring))
 multilinestring_sf
 #> Simple feature collection with 1 feature and 0 fields
