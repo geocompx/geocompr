@@ -460,6 +460,7 @@ In the second step, we create a base map showing the New Zealand's Southern Alps
 This is a place where the most important message is stated. 
 
 ```{r 08-mapping-17}
+nz_elev = rast(system.file("raster/nz_elev.tif", package = "spDataLarge"))
 nz_height_map = tm_shape(nz_elev, bbox = nz_region) +
   tm_raster(style = "cont", palette = "YlGn", legend.show = TRUE) +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 1) +
@@ -676,7 +677,7 @@ trails |>
   st_intersection(franconia[franconia$district == "Oberfranken", ]) |>
   st_collection_extract("LINE") |>
   mapview(color = "red", lwd = 3, layer.name = "trails") +
-  mapview(franconia, zcol = "district", burst = TRUE) +
+  mapview(franconia, zcol = "district", burst = FALSE) +
   breweries
 ```
 
@@ -934,7 +935,7 @@ This behavior is illustrated in the subsequent code chunk which generates Figure
 ```{r nz-plot, message=FALSE, fig.cap="Map of New Zealand created with plot(). The legend to the right refers to elevation (1000 m above sea level).", fig.scap="Map of New Zealand created with plot()."}
 g = st_graticule(nz, lon = c(170, 175), lat = c(-45, -40, -35))
 plot(nz_water, graticule = g, axes = TRUE, col = "blue")
-raster::plot(nz_elev / 1000, add = TRUE)
+terra::plot(nz_elev / 1000, add = TRUE)
 plot(st_geometry(nz), add = TRUE)
 ```
 
@@ -968,7 +969,7 @@ At the same time, **ggplot2** has a few drawbacks.
 The `geom_sf()` function is not always able to create a desired legend to use from the spatial [data](https://github.com/tidyverse/ggplot2/issues/2037).
 Raster objects are also not natively supported in **ggplot2** and need to be converted into a data frame before plotting.
 
-We have covered mapping with **sf**, **raster** and **ggplot2** packages first because these packages are highly flexible, allowing for the creation of a wide range of static maps.
+We have covered mapping with **sf**, **terra** and **ggplot2** packages first because these packages are highly flexible, allowing for the creation of a wide range of static maps.
 Before we cover mapping packages for plotting a specific type of map (in the next paragraph), it is worth considering alternatives to the packages already covered for general-purpose mapping (Table \@ref(tab:map-gpkg)).
 
 ```{r map-gpkg, echo=FALSE, message=FALSE, warning=FALSE}
@@ -1068,14 +1069,15 @@ africa = world |>
   filter(continent == "Africa", !is.na(iso_a2)) |> 
   left_join(worldbank_df, by = "iso_a2") |> 
   dplyr::select(name, subregion, gdpPercap, HDI, pop_growth) |> 
-  st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
+  st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25") |>
+  st_make_valid()
 ```
 
 We will also use `zion` and `nlcd` datasets from **spDataLarge**:
 
 ```{r 08-mapping-42, results='hide'}
 zion = st_read((system.file("vector/zion.gpkg", package = "spDataLarge")))
-data(nlcd, package = "spDataLarge")
+nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 ```
 
 1. Create a map showing the geographic distribution of the Human Development Index (`HDI`) across Africa with base **graphics** (hint: use `plot()`) and **tmap** packages (hint: use `tm_shape(africa) + ...`).
