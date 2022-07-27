@@ -415,6 +415,7 @@ Table \@ref(tab:formats) presents some basic information about selected and ofte
 <!-- additional suggestions from our readers: -->
 <!-- - KEA - https://gdal.org/drivers/raster/kea.html -->
 <!-- - sfarrow & geoparquet/pandas/GeoFeather -->
+<!-- Zarr - long term time series raster cloud format -->
 
 \index{Shapefile}
 \index{GeoPackage}

@@ -229,6 +229,7 @@ zion_nlcd |>
 #> 3     1 Forest    298299
 #> 4     1 Shrubland 203701
 #> # … with 3 more rows
+#> # ℹ Use `print(n = ...)` to see more rows
 ```
 
 <div class="figure" style="text-align: center">
