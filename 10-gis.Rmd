@@ -18,10 +18,6 @@ library(rstac)
 library(gdalcubes)
 ```
 
-<!-- RSAGA is no longer under active development and no support is available. Try Rsagacmd. -->
-<!-- https://github.com/r-spatial/RSAGA -->
-<!-- https://github.com/stevenpawley/Rsagacmd -->
-
 <!-- issue of rgrass -->
 <!-- https://github.com/rsbivand/rgrass -->
 
@@ -391,31 +387,78 @@ knitr::include_graphics("figures/10-qgis-raster-map.png")
 
 The System for Automated Geoscientific Analyses (SAGA\index{SAGA}; Table \@ref(tab:gis-comp)) provides the possibility to execute SAGA modules via the command line interface\index{command-line interface} (`saga_cmd.exe` under Windows and just `saga_cmd` under Linux) (see the [SAGA wiki on modules](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/)).
 In addition, there is a Python interface (SAGA Python API\index{API}).
-<!-- **RSAGA**\index{RSAGA (package)} uses the former to run SAGA\index{SAGA} from within R. -->
-
-<!-- You can find an extended version of this example in `vignette("RSAGA-landslides")` which includes the use of statistical geocomputing to derive terrain attributes as predictors for a non-linear Generalized Additive Model\index{generalized additive model} (GAM) to predict spatially landslide susceptibility [@muenchow_geomorphic_2012]. -->
-<!-- The term statistical geocomputation emphasizes the strength of combining R's data science\index{data science} power with the geoprocessing power of a GIS which is at the very heart of building a bridge from R\index{R} to GIS\index{GIS}. -->
-
-<!-- saga_bin -->
-<!-- cores -->
-<!-- backend -->
+**Rsagacmd**\index{Rsagacmd (package)} uses the former to run SAGA\index{SAGA} from within R.
 
 ```{r, eval=FALSE}
-library(terra)
 library(Rsagacmd)
-saga = saga_gis(backend = "terra")
 ```
+
+To start using this package, we need to run the `saga_gis()` function.
+It serves two main purposes: 
+
+- It dynamically^[This means that the available libraries will depend on the installed SAGA GIS version.] creates a new object that contains links to all valid SAGA-GIS libraries and tools
+- It sets up general package options, such as `raster_backend` (R package to use for handling raster data), `vector_backend` (R package to use for handling vector data), and `cores` (a maximum number of CPU cores used for processing, default: all)
+
+```{r, eval=FALSE}
+saga = saga_gis(raster_backend = "terra", vector_backend = "sf")
+```
+
+<!-- add ref to the ndvi calculations section -->
 
 ```{r, eval=FALSE}
 ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 ```
 
-<!-- add ref to the ndvi calculations section -->
+`tidy(sg)`
+
+```{r, eval=FALSE, echo=FALSE}
+sg = saga$imagery_segmentation$seed_generation
+ndvi_seeds = sg(ndvi, band_width = 2)
+plot(ndvi_seeds$seed_grid)
+```
+
+`ndvi_seeds$variance`
+ `tidy(srg)`
+
+
+```{r, eval=FALSE, echo=FALSE}
+srg = saga$imagery_segmentation$seeded_region_growing
+ndvi_srg = srg(ndvi_seeds$seed_grid, ndvi, method = 1)
+plot(ndvi_srg$segments)
+```
+
+`ndvi_srg$similarity`, `ndvi_srg$table`
+
+```{r, eval=FALSE, echo=FALSE}
+ndvi_segments = st_as_sf(as.polygons(ndvi_srg$segments))
+```
+
+```{r, eval=FALSE, echo=FALSE}
+library(tmap)
+tm_shape(ndvi) + 
+  tm_raster(style = "order") +
+  tm_shape(ndvi_segments) +
+  tm_borders()
+```
+
+```{r, eval=FALSE, echo=FALSE}
+library(supercells)
+library(regional)
+ndvi_sc = supercells(ndvi, k = 400, compactness = 0.2)
+```
+
+```{r, eval=FALSE, echo=FALSE}
+library(tmap)
+tm_shape(ndvi) + 
+  tm_raster(style = "order") +
+  tm_shape(ndvi_sc) +
+  tm_borders()
+```
 
 <!-- explain saga$ -->
 
 <!-- expain/mention other segmentation techinques -->
-<!-- mention supercells -->
+<!-- mention supercells -- exercises?? -->
 <!-- https://github.com/joaofgoncalves/SegOptim ?? -->
 
 <!-- add figure -->
