@@ -666,7 +666,10 @@ It is also possible to use the function `levels()` for retrieving and adding new
 levels(grain) = data.frame(value = c(0, 1, 2), wetness = c("wet", "moist", "dry"))
 levels(grain)
 #> [[1]]
-#> [1] "wet"   "moist" "dry"
+#>   value wetness
+#> 1     0     wet
+#> 2     1   moist
+#> 3     2     dry
 ```
 
 <div class="figure" style="text-align: center">
