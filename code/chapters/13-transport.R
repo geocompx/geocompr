@@ -24,7 +24,9 @@ library(tmap)         # visualization package (see Chapter 8)
 
 
 ## ----bristol, echo=FALSE, fig.cap="Bristol's transport network represented by colored lines for active (green), public (railways, black) and private motor (red) modes of travel. Blue border lines represent the inner city boundary and the larger Travel To Work Area (TTWA).", fig.scap="Bristol's transport network."----
-knitr::include_graphics("figures/bristol.png")
+#cat("* Current directory: ", getwd(), "\n")
+#knitr::include_graphics("figures/bristol.png")
+knitr::include_graphics("figures/13_bristol.png")
 # knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34452756-985267de-ed3e-11e7-9f59-fda1f3852253.png")
 
 
@@ -253,7 +255,7 @@ route_cycleway$all = c(desire_rail$all, desire_carshort$all)
 # tmap_leaflet(m_leaflet) # not working
 # online figure - backup
 u = "https://user-images.githubusercontent.com/1825120/39901156-a8ec9ef6-54be-11e8-94fb-0b5f6b48775e.png"
-knitr::include_graphics(u)
+# knitr::include_graphics(u)
 
 
 ## ----13-transport-29, eval=FALSE, echo=FALSE-----------------------------------------------------------------------------------------------------------------------------------

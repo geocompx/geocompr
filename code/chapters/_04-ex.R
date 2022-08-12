@@ -1,10 +1,10 @@
-## ----04-ex-e0, include=TRUE, message=FALSE-------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-e0, include=TRUE, message=FALSE------------------------------------
 library(sf)
 library(dplyr)
 library(spData)
 
 
-## ----04-ex-e1------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-e1-----------------------------------------------------------------
 library(tmap)
 # tmap_mode("view")
 qtm(nz) + qtm(nz_height)
@@ -19,7 +19,7 @@ plot(nz_not_canterbury_height$geometry, pch = 1, col = "blue", add = TRUE)
 plot(canterbury_height$geometry, pch = 4, col = "red", add = TRUE)
 
 
-## ----04-ex-e2------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-e2-----------------------------------------------------------------
 nz_height_count = aggregate(nz_height, nz, length)
 nz_height_combined = cbind(nz, count = nz_height_count$elevation)
 nz_height_combined |> 
@@ -29,7 +29,7 @@ nz_height_combined |>
   slice(2)
 
 
-## ----04-ex-e3------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-e3-----------------------------------------------------------------
 # Base R way:
 nz_height_count = aggregate(nz_height, nz, length)
 nz_height_combined = cbind(nz, count = nz_height_count$elevation)
@@ -54,19 +54,19 @@ nz_height_combined |>
   na.omit()
 
 
-## ----04-ex-4-1-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-4-1----------------------------------------------------------------
 colorado = us_states[us_states$NAME == "Colorado", ]
 plot(us_states$geometry)
 plot(colorado$geometry, col = "grey", add = TRUE)
 
 
-## ----04-ex-4-2-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-4-2----------------------------------------------------------------
 intersects_with_colorado = us_states[colorado, , op = st_intersects]
 plot(us_states$geometry, main = "States that intersect with Colorado")
 plot(intersects_with_colorado$geometry, col = "grey", add = TRUE)
 
 
-## ----04-ex-4-3-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-4-3----------------------------------------------------------------
 # Alternative but more verbose solutions
 # 2: With intermediate object, one list for each state
 sel_intersects_colorado = st_intersects(us_states, colorado)
@@ -83,13 +83,13 @@ us_states |>
   st_filter(y = colorado, .predicate = st_intersects)
 
 
-## ----04-ex-4-4-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-4-4----------------------------------------------------------------
 touches_colorado = us_states[colorado, , op = st_touches]
 plot(us_states$geometry, main = "States that touch Colorado")
 plot(touches_colorado$geometry, col = "grey", add = TRUE)
 
 
-## ----04-ex-4-5-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-4-5----------------------------------------------------------------
 washington_to_cali = us_states |> 
   filter(grepl(pattern = "Columbia|Cali", x = NAME)) |> 
   st_centroid() |> 
@@ -102,7 +102,7 @@ plot(states_crossed$geometry, col = "grey", add = TRUE)
 plot(washington_to_cali, add = TRUE)
 
 
-## ----04-ex-e5------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-e5-----------------------------------------------------------------
 library(terra)
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
@@ -117,7 +117,7 @@ plot(dem_reclass)
 zonal(c(dem, ndvi), dem_reclass, fun = "mean")
 
 
-## ----04-ex-e6------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-e6-----------------------------------------------------------------
 # from the focal help page (?terra::focal()):
 # Laplacian filter: filter=matrix(c(0,1,0,1,-4,1,0,1,0), nrow=3)
 # Sobel filters (for edge detection): 
@@ -136,7 +136,7 @@ sobel_y = focal(r, w = filter_y)
 plot(sobel_y, col = c("black", "white"))
 
 
-## ----04-ex-e7------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-e7-----------------------------------------------------------------
 file = system.file("raster/landsat.tif", package = "spDataLarge")
 multi_rast = rast(file)
 
@@ -164,7 +164,7 @@ two_rasts_df = as.data.frame(two_rasts)
 cor(two_rasts_df$ndvi, two_rasts_df$ndwi)
 
 
-## ----04-ex-e8------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-e8-----------------------------------------------------------------
 # Fetch the DEM data for Spain
 spain_dem = geodata::elevation_30s(country = "Spain", path = ".", mask = FALSE)
 
@@ -187,7 +187,7 @@ distance_to_coast_km = distance_to_coast / 1000
 plot(distance_to_coast_km, main = "Distance to the coast (km)")
 
 
-## ----04-ex-e9------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-ex-e9-----------------------------------------------------------------
 # now let's weight each 100 altitudinal meters by an additional distance of 10 km
 distance_to_coast_km2 = distance_to_coast_km + ((spain_dem / 100) * 10)
 # plot the result
