@@ -1,0 +1,6 @@
+install.packages('rcartocolor')
+install.packages("terra")
+install.packages("spData")
+install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
+install.packages('rmapshaper')
+install.packages('kableExtra')
