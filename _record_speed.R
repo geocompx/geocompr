@@ -113,12 +113,14 @@ if (file.exists("_record_speed.csv")) {
       cat('!E error during [combine & write] to _record_speed.csv\n')
       stop(e)
     })
+} else {
+  write_csv(dat, 
+            "_record_speed.csv")
 }
 
-write_csv(dat, 
-          "_record_speed.csv")
 
-
+## 근데 총 원고의 양에 따라 달라지므로
+## 그걸 고려해야 할 듯?
 
 
 
@@ -192,3 +194,5 @@ write_csv(dat,
 #'   return(df)
 #'   
 #' }
+#' 
+#' 
