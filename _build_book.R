@@ -1,5 +1,4 @@
-# This is old version
-# USE _build_book.R for NEW VERSION
+# This is newer version of _record_speed.csv
 uptime <- function(unit = 'second'){
   # only for linux?
   since <- system('uptime -s',intern = TRUE)  |>
@@ -105,19 +104,19 @@ dat = data.frame(datetime = format(Sys.time(), "%Y-%m-%d %H:%M:%S", tz="Asia/Seo
                  uptime_min = uptime_min
 )
 
-if (file.exists("_record_speed.csv")) {
+if (file.exists("_build_book_speed.csv")) {
 
   tryCatch({
-    dat0 = read.csv("_record_speed.csv")
+    dat0 = read.csv("_build_book_speed.csv")
     datAll = rbind(dat0, dat)
-    write_csv(datAll, "_record_speed.csv")},
+    write_csv(datAll, "_build_book_speed.csv")},
     error = function(e) {
-      cat('!E error during [combine & write] to _record_speed.csv\n')
+      cat('!E error during [combine & write] to _build_book_speed.csv\n')
       stop(e)
     })
 } else {
   write_csv(dat, 
-            "_record_speed.csv")
+            "_build_book_speed.csv")
 }
 
 
