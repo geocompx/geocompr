@@ -58,7 +58,7 @@ t0 = Sys.time()
 # # Error: bookdown::render_book() failed to render the output format 'bookdown::pdf'.
 # render_book(output_format = bookdown::pdf_book()) 
 # 여전히 ERROR
-render_book(output_format = "bookdown::pdf_book")
+bookdown::render_book(output_format = "bookdown::pdf_book")
 t1 = Sys.time()
 #dt = as.difftime(t1 - t0, units='mins') # 주의!!!
 dt = as.numeric(difftime(t1, t0, units='mins'))
@@ -103,6 +103,8 @@ dat = data.frame(datetime = format(Sys.time(), "%Y-%m-%d %H:%M:%S", tz="Asia/Seo
                  time_elapsed = as.numeric(dt), # mins
                  uptime_min = uptime_min
 )
+
+## Error나 Warning 메시지도 기록해야?
 
 if (file.exists("_build_book_speed.csv")) {
 
