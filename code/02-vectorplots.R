@@ -12,6 +12,7 @@ origin_osgb = st_point(c(0, 0)) %>%
 london_orign = rbind(london_osgb, origin_osgb)
 
 png("figures/vector_lonlat.png")
+# library(sf)
 globe::globeearth(eye = c(0, 0))
 gratmat = st_coordinates(st_graticule())[, 1:2]
 globe::globelines(loc = gratmat, col = "grey", lty = 3)
