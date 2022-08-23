@@ -11,12 +11,12 @@ The **nabor** package must also be installed, although it does not need to be at
 
 ```r
 library(sf)
-library(tidyverse)
+library(dplyr)
 library(spDataLarge)
 library(stplanr)      # geographic transport data package
 library(tmap)         # visualization package (see Chapter 9)
-remotes::install_cran("sfnetworks")
-library(sfnetworks)
+library(ggplot2)      # data visualisation package
+library(sfnetworks)   # spatial network classes and functions 
 ```
 
 ## Introduction
@@ -403,6 +403,7 @@ This is done using the publicly available OSRM service \index{routing} with the 
 ```r
 routes_short = route(l = desire_lines_short, route_fun = route_osrm,
                      osrm.profile = "bike")
+#> Most common output is sf
 ```
 
 
@@ -533,7 +534,7 @@ routes_short_scenario = routes_short |>
   mutate(bicycle = bicycle + car_driver * uptake,
          car_driver = car_driver * uptake)
 sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
-#> [1] 4003
+#> [1] 4012
 ```
 
 Having created a scenario in which approximately 4000 trips have switched from driving to cycling, we can now model where this updated modeled cycling activity will take place with the function `overline()` from the **stplanr** package.
@@ -632,8 +633,6 @@ tm_shape(ways_centrality |> st_as_sf()) +
   tm_lines(lwd = "betweenness", scale = 9, title.lwd = "Betweenness") +
   tm_shape(route_network_scenario) +
   tm_lines(lwd = "bicycle", scale = 9, title.lwd = "N0. bike trips (modeled, one direction)", col = "green")
-#> Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
-#> GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
 #> Legend labels were too wide. Therefore, legend.text.size has been set to 0.44. Increase legend.width (argument of tm_layout) to make the legend wider and therefore the labels larger.
 ```
 

@@ -87,7 +87,6 @@ This chapter focuses on 'bridges' to three mature open source GIS products (see 
 <!-- The so-called R-ArcGIS bridge (see https://github.com/R-ArcGIS/r-bridge) allows R to be used from within ArcGIS\index{ArcGIS}.  -->
 <!--toDo:jn-->
 <!-- rgee? -->
-<!-- whitetoolbox? -->
 One can also use R scripts from within QGIS\index{QGIS} (see https://docs.qgis.org/3.16/en/docs/training_manual/processing/r_intro.html).
 Finally, it is also possible to use R from the GRASS GIS\index{GRASS} command line (see https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7).
 ]
@@ -652,34 +651,6 @@ Now, you have to set up a location and a mapset if you want to use GRASS\index{G
 <!-- - You can also start R from within a running GRASS\index{GRASS} session [for more information please refer to @bivand_applied_2013 and this [wiki](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7)]. -->
 <!-- - Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass77/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm\index{geoalgorithm}. -->
 <!-- - If you would like to use GRASS 6 from within R, use the R package **spgrass6**. -->
-
-### WhiteboxTools {#whitebox}
-
-<!-- whitebox init -->
-
-<!-- https://giswqs.github.io/whiteboxR/ -->
-
-<!-- Pre-compiled binaries are only available for download for 64-bit Linux (Ubuntu 20.04), Windows and Mac OS (Intel) platforms. -->
-
-
-```r
-whitebox::install_whitebox()
-```
-
-<!-- source code (or docker) - https://github.com/jblindsay/whitebox-tools -->
-
-
-```r
-library(whitebox)
-wbt_init()
-```
-
-<!-- `??whitebox` -->
-<!-- ??wbt_ -->
-
-<!-- For more information visit https://giswqs.github.io/whiteboxR/ -->
-<!-- https://www.whiteboxgeo.com/manual/wbt_book/intro.html -->
-
 
 ## When to use what?
 
