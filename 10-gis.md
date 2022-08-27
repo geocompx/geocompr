@@ -635,7 +635,7 @@ mapview::mapview(route) + points
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/09_shortest_route.png" alt="Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London." width="80%" />
+<img src="figures/10_shortest_route.png" alt="Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London." width="80%" />
 <p class="caption">(\#fig:grass-mapview)Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London.</p>
 </div>
 
