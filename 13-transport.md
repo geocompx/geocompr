@@ -534,7 +534,7 @@ routes_short_scenario = routes_short |>
   mutate(bicycle = bicycle + car_driver * uptake,
          car_driver = car_driver * uptake)
 sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
-#> [1] 4012
+#> [1] 4000
 ```
 
 Having created a scenario in which approximately 4000 trips have switched from driving to cycling, we can now model where this updated modeled cycling activity will take place with the function `overline()` from the **stplanr** package.
