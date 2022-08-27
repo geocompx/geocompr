@@ -139,25 +139,24 @@ The following code chunk therefore not only reads the datasets from the <strong>
 <span><span class="va">zion</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">zion</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">srtm</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>We use <code><a href="https://rdrr.io/pkg/terra/man/crop.html">crop()</a></code> from the <strong>terra</strong> package to crop the <code>srtm</code> raster.
 The function reduces the rectangular extent of the object passed to its first argument based on the extent of the object passed to its second argument.
-This functionality is demonstrated in the command below, which generates Figure <a href="raster-vector.html#fig:cropmask">6.1</a>(B) (note the use of the <strong>terra</strong> function <code><a href="https://rdrr.io/pkg/terra/man/vect.html">vect()</a></code> to convert the <code>sf</code> object <code>zion</code> into <code>zion_vect</code> which contains the same data but stored in <strong>terra</strong>’s <code>SpatVector</code> class for geographic vector data):</p>
+This functionality is demonstrated in the command below, which generates Figure <a href="raster-vector.html#fig:cropmask">6.1</a>(B):</p>
 <div class="sourceCode" id="cb200"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">zion_vect</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">zion</span><span class="op">)</span></span>
-<span><span class="va">srtm_cropped</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crop.html">crop</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">zion_vect</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">srtm_cropped</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crop.html">crop</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">zion</span><span class="op">)</span></span></code></pre></div>
 <p>
 Related to <code><a href="https://rdrr.io/pkg/terra/man/crop.html">crop()</a></code> is the <strong>terra</strong> function <code><a href="https://rdrr.io/pkg/terra/man/mask.html">mask()</a></code>, which sets values outside of the bounds of the object passed to its second argument to <code>NA</code>.
 The following command therefore masks every cell outside of the Zion National Park boundaries (Figure <a href="raster-vector.html#fig:cropmask">6.1</a>(C)):</p>
 <div class="sourceCode" id="cb201"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">srtm_masked</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/mask.html">mask</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">zion_vect</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">srtm_masked</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/mask.html">mask</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">zion</span><span class="op">)</span></span></code></pre></div>
 <p>Importantly, we want to use both <code><a href="https://rdrr.io/pkg/terra/man/crop.html">crop()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/mask.html">mask()</a></code> together in most cases.
 This combination of functions would (a) limit the raster’s extent to our area of interest and then (b) replace all of the values outside of the area to NA.</p>
 <div class="sourceCode" id="cb202"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">srtm_cropped</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crop.html">crop</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">zion_vect</span><span class="op">)</span></span>
-<span><span class="va">srtm_final</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/mask.html">mask</a></span><span class="op">(</span><span class="va">srtm_cropped</span>, <span class="va">zion_vect</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">srtm_cropped</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crop.html">crop</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">zion</span><span class="op">)</span></span>
+<span><span class="va">srtm_final</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/mask.html">mask</a></span><span class="op">(</span><span class="va">srtm_cropped</span>, <span class="va">zion</span><span class="op">)</span></span></code></pre></div>
 <p>Changing the settings of <code><a href="https://rdrr.io/pkg/terra/man/mask.html">mask()</a></code> yields different results.
 Setting <code>updatevalue = 0</code>, for example, will set all pixels outside the national park to 0.
 Setting <code>inverse = TRUE</code> will mask everything <em>inside</em> the bounds of the park (see <code><a href="https://rdrr.io/pkg/terra/man/mask.html">?mask</a></code> for details) (Figure <a href="raster-vector.html#fig:cropmask">6.1</a>(D)).</p>
 <div class="sourceCode" id="cb203"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">srtm_inv_masked</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/mask.html">mask</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">zion_vect</span>, inverse <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">srtm_inv_masked</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/mask.html">mask</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">zion</span>, inverse <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:cropmask"></span>
 <img src="06-raster-vector_files/figure-html/cropmask-1.png" alt="Illustration of raster cropping and raster masking." width="100%"><p class="caption">
@@ -169,10 +168,6 @@ FIGURE 6.1: Illustration of raster cropping and raster masking.
 <h2>
 <span class="header-section-number">6.3</span> Raster extraction<a class="anchor" aria-label="anchor" href="#raster-extraction"><i class="fas fa-link"></i></a>
 </h2>
-<!--jn:toDo-->
-<!-- two possibilities: -->
-<!-- 1. explain the need of the use of `vect()` -->
-<!-- 2. wait for https://github.com/rspatial/terra/issues/89 -->
 <p>
 Raster extraction is the process of identifying and returning the values associated with a ‘target’ raster at specific locations, based on a (typically vector) geographic ‘selector’ object.
 The results depend on the type of selector used (points, lines or polygons) and arguments passed to the <code><a href="https://rdrr.io/pkg/terra/man/extract.html">terra::extract()</a></code> function, which we use to demonstrate raster extraction.
@@ -183,7 +178,7 @@ The following command extracts elevation values from <code>srtm</code> and creat
 Now, we can add the resulting object to our <code>zion_points</code> dataset with the <code><a href="https://rdrr.io/r/base/cbind.html">cbind()</a></code> function:</p>
 <div class="sourceCode" id="cb204"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"zion_points"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span></span>
-<span><span class="va">elevation</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">zion_points</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">elevation</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">zion_points</span><span class="op">)</span></span>
 <span><span class="va">zion_points</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">zion_points</span>, <span class="va">elevation</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:pointextr"></span>
@@ -219,7 +214,7 @@ In this case, we only have one transect, but the code, in principle, should work
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>dist <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">geometry</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span> </span></code></pre></div>
 <p>Finally, we can extract elevation values for each point in our transects and combine this information with our main object.</p>
 <div class="sourceCode" id="cb208"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">zion_elev</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">zion_transect</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">zion_elev</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">zion_transect</span><span class="op">)</span></span>
 <span><span class="va">zion_transect</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">zion_transect</span>, <span class="va">zion_elev</span><span class="op">)</span></span></code></pre></div>
 <p>The resulting <code>zion_transect</code> can be used to create elevation profiles, as illustrated in Figure <a href="raster-vector.html#fig:lineextr">6.3</a>(B).</p>
 <div class="figure" style="text-align: center">
@@ -234,7 +229,7 @@ This is demonstrated in the command below, which results in a data frame with co
 <!--toDo:jn-->
 <!--fix pipes-->
 <div class="sourceCode" id="cb209"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">zion_srtm_values</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">srtm</span>, y <span class="op">=</span> <span class="va">zion_vect</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">zion_srtm_values</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">srtm</span>, y <span class="op">=</span> <span class="va">zion</span><span class="op">)</span></span></code></pre></div>
 <p>Such results can be used to generate summary statistics for raster values per polygon, for example to characterize a single region or to compare many regions.
 The generation of summary statistics is demonstrated in the code below, which creates the object <code>zion_srtm_df</code> containing summary statistics for elevation values in Zion National Park (see Figure <a href="raster-vector.html#fig:polyextr">6.4</a>(A)):</p>
 <div class="sourceCode" id="cb210"><pre class="downlit sourceCode r">
@@ -255,7 +250,7 @@ This is illustrated with a land cover dataset (<code>nlcd</code>) from the <stro
 <div class="sourceCode" id="cb211"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nlcd</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/nlcd.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">zion2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">zion</span>, <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">nlcd</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">zion_nlcd</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">nlcd</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">zion2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">zion_nlcd</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">nlcd</span>, <span class="va">zion2</span><span class="op">)</span></span>
 <span><span class="va">zion_nlcd</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">levels</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -314,18 +309,18 @@ Often the target resolution is imposed on the user, for example when the output 
 First, we create a raster representing the presence or absence of cycle hire points (known as presence/absence rasters).
 In this case <code><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize()</a></code> requires only one argument in addition to <code>x</code> and <code>y</code> (the aforementioned vector and raster objects): a value to be transferred to all non-empty cells specified by <code>field</code> (results illustrated Figure <a href="raster-vector.html#fig:vector-rasterization1">6.5</a>(B)).</p>
 <div class="sourceCode" id="cb213"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ch_raster1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">cycle_hire_osm_projected</span><span class="op">)</span>, <span class="va">raster_template</span>,</span>
+<code class="sourceCode R"><span><span class="va">ch_raster1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="va">cycle_hire_osm_projected</span>, <span class="va">raster_template</span>,</span>
 <span>                       field <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>fun</code> argument specifies summary statistics used to convert multiple observations in close proximity into associate cells in the raster object.
 By default <code>fun = "last"</code> is used but other options such as <code>fun = "length"</code> can be used, in this case to count the number of cycle hire points in each grid cell (the results of this operation are illustrated in Figure <a href="raster-vector.html#fig:vector-rasterization1">6.5</a>(C)).</p>
 <div class="sourceCode" id="cb214"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ch_raster2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">cycle_hire_osm_projected</span><span class="op">)</span>, <span class="va">raster_template</span>, </span>
+<code class="sourceCode R"><span><span class="va">ch_raster2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="va">cycle_hire_osm_projected</span>, <span class="va">raster_template</span>, </span>
 <span>                       fun <span class="op">=</span> <span class="st">"length"</span><span class="op">)</span></span></code></pre></div>
 <p>The new output, <code>ch_raster2</code>, shows the number of cycle hire points in each grid cell.
 The cycle hire locations have different numbers of bicycles described by the <code>capacity</code> variable, raising the question, what’s the capacity in each grid cell?
 To calculate that we must <code>sum</code> the field (<code>"capacity"</code>), resulting in output illustrated in Figure <a href="raster-vector.html#fig:vector-rasterization1">6.5</a>(D), calculated with the following command (other summary functions such as <code>mean</code> could be used):</p>
 <div class="sourceCode" id="cb215"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ch_raster3</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">cycle_hire_osm_projected</span><span class="op">)</span>, <span class="va">raster_template</span>, </span>
+<code class="sourceCode R"><span><span class="va">ch_raster3</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="va">cycle_hire_osm_projected</span>, <span class="va">raster_template</span>, </span>
 <span>                       field <span class="op">=</span> <span class="st">"capacity"</span>, fun <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:vector-rasterization1"></span>
@@ -344,11 +339,11 @@ After casting the polygon objects into a multilinestring, a template raster is c
 By default it is <code>FALSE</code>, but when changed to <code>TRUE</code> – all cells that are touched by a line or polygon border get a value.
 Line rasterization with <code>touches = TRUE</code> is demonstrated in the code below (Figure <a href="raster-vector.html#fig:vector-rasterization2">6.6</a>(A)).</p>
 <div class="sourceCode" id="cb217"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">california_raster1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">california_borders</span><span class="op">)</span>, <span class="va">raster_template2</span>,</span>
+<code class="sourceCode R"><span><span class="va">california_raster1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="va">california_borders</span>, <span class="va">raster_template2</span>,</span>
 <span>                               touches <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Compare it to a polygon rasterization, with <code>touches = FALSE</code> by default, which selects only cells whose centroids are inside the selector polygon, as illustrated in Figure <a href="raster-vector.html#fig:vector-rasterization2">6.6</a>(B).</p>
 <div class="sourceCode" id="cb218"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">california_raster2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">california</span><span class="op">)</span>, <span class="va">raster_template2</span><span class="op">)</span> </span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">california_raster2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="va">california</span>, <span class="va">raster_template2</span><span class="op">)</span> </span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:vector-rasterization2"></span>
 <img src="06-raster-vector_files/figure-html/vector-rasterization2-1.png" alt="Examples of line and polygon rasterizations." width="100%"><p class="caption">
@@ -394,7 +389,7 @@ As illustrated in Figure <a href="raster-vector.html#fig:contour-tmap">6.8</a>, 
 <p></p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:contour-tmap"></span>
-<img src="figures/05-contour-tmap.png" alt="DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines." width="100%"><p class="caption">
+<img src="figures/06-contour-tmap.png" alt="DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines." width="100%"><p class="caption">
 FIGURE 6.8: DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines.
 </p>
 </div>

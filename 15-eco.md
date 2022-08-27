@@ -204,7 +204,7 @@ Finally, we can extract the terrain attributes to our field observations (see al
 
 ```r
 # terra::extract adds automatically a for our purposes unnecessary ID column
-ep_rp = terra::extract(ep, terra::vect(random_points)) |>
+ep_rp = terra::extract(ep, random_points) |>
   dplyr::select(-ID)
 random_points = cbind(random_points, ep_rp)
 ```

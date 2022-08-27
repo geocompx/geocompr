@@ -641,7 +641,6 @@ mapview::mapview(route) + points
 
 
 
-
 There are a few important considerations to note in the process:
 
 - We could have used GRASS's spatial database\index{spatial database} (based on SQLite) which allows faster processing.

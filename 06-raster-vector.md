@@ -44,12 +44,11 @@ zion = st_transform(zion, crs(srtm))
 
 We use `crop()` from the **terra** package to crop the `srtm` raster.
 The function reduces the rectangular extent of the object passed to its first argument based on the extent of the object passed to its second argument.
-This functionality is demonstrated in the command below, which generates Figure \@ref(fig:cropmask)(B) (note the use of the **terra** function `vect()` to convert the `sf` object `zion` into `zion_vect` which contains the same data but stored in **terra**'s `SpatVector` class for geographic vector data):
+This functionality is demonstrated in the command below, which generates Figure \@ref(fig:cropmask)(B):
 
 
 ```r
-zion_vect = vect(zion)
-srtm_cropped = crop(srtm, zion_vect)
+srtm_cropped = crop(srtm, zion)
 ```
 
 \index{raster-vector!raster masking} 
@@ -58,7 +57,7 @@ The following command therefore masks every cell outside of the Zion National Pa
 
 
 ```r
-srtm_masked = mask(srtm, zion_vect)
+srtm_masked = mask(srtm, zion)
 ```
 
 Importantly, we want to use both `crop()` and `mask()` together in most cases. 
@@ -66,8 +65,8 @@ This combination of functions would (a) limit the raster's extent to our area of
 
 
 ```r
-srtm_cropped = crop(srtm, zion_vect)
-srtm_final = mask(srtm_cropped, zion_vect)
+srtm_cropped = crop(srtm, zion)
+srtm_final = mask(srtm_cropped, zion)
 ```
 
 Changing the settings of `mask()` yields different results.
@@ -76,7 +75,7 @@ Setting `inverse = TRUE` will mask everything *inside* the bounds of the park (s
 
 
 ```r
-srtm_inv_masked = mask(srtm, zion_vect, inverse = TRUE)
+srtm_inv_masked = mask(srtm, zion, inverse = TRUE)
 ```
 
 <div class="figure" style="text-align: center">
@@ -85,11 +84,6 @@ srtm_inv_masked = mask(srtm, zion_vect, inverse = TRUE)
 </div>
 
 ## Raster extraction
-
-<!--jn:toDo-->
-<!-- two possibilities: -->
-<!-- 1. explain the need of the use of `vect()` -->
-<!-- 2. wait for https://github.com/rspatial/terra/issues/89 -->
 
 \index{raster-vector!raster extraction} 
 Raster extraction is the process of identifying and returning the values associated with a 'target' raster at specific locations, based on a (typically vector) geographic 'selector' object.
@@ -104,7 +98,7 @@ Now, we can add the resulting object to our `zion_points` dataset with the `cbin
 
 ```r
 data("zion_points", package = "spDataLarge")
-elevation = terra::extract(srtm, vect(zion_points))
+elevation = terra::extract(srtm, zion_points)
 zion_points = cbind(zion_points, elevation)
 ```
 
@@ -162,7 +156,7 @@ Finally, we can extract elevation values for each point in our transects and com
 
 
 ```r
-zion_elev = terra::extract(srtm, vect(zion_transect))
+zion_elev = terra::extract(srtm, zion_transect)
 zion_transect = cbind(zion_transect, zion_elev)
 ```
 
@@ -185,7 +179,7 @@ This is demonstrated in the command below, which results in a data frame with co
 
 
 ```r
-zion_srtm_values = terra::extract(x = srtm, y = zion_vect)
+zion_srtm_values = terra::extract(x = srtm, y = zion)
 ```
 
 Such results can be used to generate summary statistics for raster values per polygon, for example to characterize a single region or to compare many regions.
@@ -216,7 +210,7 @@ This is illustrated with a land cover dataset (`nlcd`) from the **spDataLarge** 
 ```r
 nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 zion2 = st_transform(zion, st_crs(nlcd))
-zion_nlcd = terra::extract(nlcd, vect(zion2))
+zion_nlcd = terra::extract(nlcd, zion2)
 zion_nlcd |> 
   group_by(ID, levels) |>
   count()
@@ -284,7 +278,7 @@ In this case `rasterize()` requires only one argument in addition to `x` and `y`
 
 
 ```r
-ch_raster1 = rasterize(vect(cycle_hire_osm_projected), raster_template,
+ch_raster1 = rasterize(cycle_hire_osm_projected, raster_template,
                        field = 1)
 ```
 
@@ -293,7 +287,7 @@ By default `fun = "last"` is used but other options such as `fun = "length"` can
 
 
 ```r
-ch_raster2 = rasterize(vect(cycle_hire_osm_projected), raster_template, 
+ch_raster2 = rasterize(cycle_hire_osm_projected, raster_template, 
                        fun = "length")
 ```
 
@@ -303,7 +297,7 @@ To calculate that we must `sum` the field (`"capacity"`), resulting in output il
 
 
 ```r
-ch_raster3 = rasterize(vect(cycle_hire_osm_projected), raster_template, 
+ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template, 
                        field = "capacity", fun = sum)
 ```
 
@@ -329,7 +323,7 @@ Line rasterization with `touches = TRUE` is demonstrated in the code below (Figu
 
 
 ```r
-california_raster1 = rasterize(vect(california_borders), raster_template2,
+california_raster1 = rasterize(california_borders, raster_template2,
                                touches = TRUE)
 ```
 
@@ -337,7 +331,7 @@ Compare it to a polygon rasterization, with `touches = FALSE` by default, which 
 
 
 ```r
-california_raster2 = rasterize(vect(california), raster_template2) 
+california_raster2 = rasterize(california, raster_template2) 
 ```
 
 <div class="figure" style="text-align: center">
@@ -389,7 +383,7 @@ As illustrated in Figure \@ref(fig:contour-tmap), isolines can be labelled.
 \index{hillshade}
 
 <div class="figure" style="text-align: center">
-<img src="figures/05-contour-tmap.png" alt="DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines." width="100%" />
+<img src="figures/06-contour-tmap.png" alt="DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines." width="100%" />
 <p class="caption">(\#fig:contour-tmap)DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines.</p>
 </div>
 
