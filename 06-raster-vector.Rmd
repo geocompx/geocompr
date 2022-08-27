@@ -42,11 +42,10 @@ zion = st_transform(zion, crs(srtm))
 
 We use `crop()` from the **terra** package to crop the `srtm` raster.
 The function reduces the rectangular extent of the object passed to its first argument based on the extent of the object passed to its second argument.
-This functionality is demonstrated in the command below, which generates Figure \@ref(fig:cropmask)(B) (note the use of the **terra** function `vect()` to convert the `sf` object `zion` into `zion_vect` which contains the same data but stored in **terra**'s `SpatVector` class for geographic vector data):
+This functionality is demonstrated in the command below, which generates Figure \@ref(fig:cropmask)(B):
 
 ```{r 06-raster-vector-3 }
-zion_vect = vect(zion)
-srtm_cropped = crop(srtm, zion_vect)
+srtm_cropped = crop(srtm, zion)
 ```
 
 \index{raster-vector!raster masking} 
@@ -54,15 +53,15 @@ Related to `crop()` is the **terra** function `mask()`, which sets values outsid
 The following command therefore masks every cell outside of the Zion National Park boundaries (Figure \@ref(fig:cropmask)(C)):
 
 ```{r 06-raster-vector-4 }
-srtm_masked = mask(srtm, zion_vect)
+srtm_masked = mask(srtm, zion)
 ```
 
 Importantly, we want to use both `crop()` and `mask()` together in most cases. 
 This combination of functions would (a) limit the raster's extent to our area of interest and then (b) replace all of the values outside of the area to NA.
 
 ```{r 06-raster-vector-5}
-srtm_cropped = crop(srtm, zion_vect)
-srtm_final = mask(srtm_cropped, zion_vect)
+srtm_cropped = crop(srtm, zion)
+srtm_final = mask(srtm_cropped, zion)
 ```
 
 Changing the settings of `mask()` yields different results.
@@ -70,7 +69,7 @@ Setting `updatevalue = 0`, for example, will set all pixels outside the national
 Setting `inverse = TRUE` will mask everything *inside* the bounds of the park (see `?mask` for details) (Figure \@ref(fig:cropmask)(D)).
 
 ```{r 06-raster-vector-6 }
-srtm_inv_masked = mask(srtm, zion_vect, inverse = TRUE)
+srtm_inv_masked = mask(srtm, zion, inverse = TRUE)
 ```
 
 ```{r cropmask, echo = FALSE, fig.cap="Illustration of raster cropping and raster masking.", fig.asp=0.36, fig.width = 10, warning=FALSE}
@@ -102,11 +101,6 @@ tmap_arrange(pz1, pz2, pz3, pz4, ncol = 4, asp = NA)
 
 ## Raster extraction
 
-<!--jn:toDo-->
-<!-- two possibilities: -->
-<!-- 1. explain the need of the use of `vect()` -->
-<!-- 2. wait for https://github.com/rspatial/terra/issues/89 -->
-
 \index{raster-vector!raster extraction} 
 Raster extraction is the process of identifying and returning the values associated with a 'target' raster at specific locations, based on a (typically vector) geographic 'selector' object.
 The results depend on the type of selector used (points, lines or polygons) and arguments passed to the `terra::extract()` function, which we use to demonstrate raster extraction.
@@ -119,7 +113,7 @@ Now, we can add the resulting object to our `zion_points` dataset with the `cbin
 
 ```{r 06-raster-vector-8 }
 data("zion_points", package = "spDataLarge")
-elevation = terra::extract(srtm, vect(zion_points))
+elevation = terra::extract(srtm, zion_points)
 zion_points = cbind(zion_points, elevation)
 ```
 
@@ -128,7 +122,7 @@ library(dplyr)
 zion_points2 = zion_points
 zion_points2$a = 1
 zion_points2 = zion_points2 |> group_by(a) |> summarise()
-elevation = terra::extract(srtm, vect(zion_points2))
+elevation = terra::extract(srtm, zion_points2)
 zion_points = cbind(zion_points, elevation)
 ```
 
@@ -187,7 +181,7 @@ zion_transect = zion_transect |>
 Finally, we can extract elevation values for each point in our transects and combine this information with our main object.
 
 ```{r 06-raster-vector-15}
-zion_elev = terra::extract(srtm, vect(zion_transect))
+zion_elev = terra::extract(srtm, zion_transect)
 zion_transect = cbind(zion_transect, zion_elev)
 ```
 
@@ -249,14 +243,14 @@ zion_many = st_sample(x = zion, size = n) |>
 plot(zion_many)
 
 # for continuous data:
-zion_srtm_values1 = terra::extract(x = srtm, y = vect(zion_many), fun = min)
-zion_srtm_values2 = terra::extract(x = srtm, y = vect(zion_many), fun = mean)
-zion_srtm_values3 = terra::extract(x = srtm, y = vect(zion_many), fun = max)
+zion_srtm_values1 = terra::extract(x = srtm, y = zion_many, fun = min)
+zion_srtm_values2 = terra::extract(x = srtm, y = zion_many, fun = mean)
+zion_srtm_values3 = terra::extract(x = srtm, y = zion_many, fun = max)
 
 # for categories
 nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 zion_many2 = st_transform(zion_many, st_crs(nlcd))
-zion_nlcd = terra::extract(nlcd, vect(zion_many2))
+zion_nlcd = terra::extract(nlcd, zion_many2)
 count(zion_nlcd, levels)
 ```
 
@@ -286,7 +280,7 @@ This is illustrated with a land cover dataset (`nlcd`) from the **spDataLarge** 
 ```{r 06-raster-vector-20, warning=FALSE, message=FALSE}
 nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 zion2 = st_transform(zion, st_crs(nlcd))
-zion_nlcd = terra::extract(nlcd, vect(zion2))
+zion_nlcd = terra::extract(nlcd, zion2)
 zion_nlcd |> 
   group_by(ID, levels) |>
   count()
@@ -361,7 +355,7 @@ First, we create a raster representing the presence or absence of cycle hire poi
 In this case `rasterize()` requires only one argument in addition to `x` and `y` (the aforementioned vector and raster objects): a value to be transferred to all non-empty cells specified by `field` (results illustrated Figure \@ref(fig:vector-rasterization1)(B)).
 
 ```{r 06-raster-vector-25 }
-ch_raster1 = rasterize(vect(cycle_hire_osm_projected), raster_template,
+ch_raster1 = rasterize(cycle_hire_osm_projected, raster_template,
                        field = 1)
 ```
 
@@ -369,7 +363,7 @@ The `fun` argument specifies summary statistics used to convert multiple observa
 By default `fun = "last"` is used but other options such as `fun = "length"` can be used, in this case to count the number of cycle hire points in each grid cell (the results of this operation are illustrated in Figure \@ref(fig:vector-rasterization1)(C)).
 
 ```{r 06-raster-vector-26 }
-ch_raster2 = rasterize(vect(cycle_hire_osm_projected), raster_template, 
+ch_raster2 = rasterize(cycle_hire_osm_projected, raster_template, 
                        fun = "length")
 ```
 
@@ -378,7 +372,7 @@ The cycle hire locations have different numbers of bicycles described by the `ca
 To calculate that we must `sum` the field (`"capacity"`), resulting in output illustrated in Figure \@ref(fig:vector-rasterization1)(D), calculated with the following command (other summary functions such as `mean` could be used):
 
 ```{r 06-raster-vector-27 }
-ch_raster3 = rasterize(vect(cycle_hire_osm_projected), raster_template, 
+ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template, 
                        field = "capacity", fun = sum)
 ```
 
@@ -401,14 +395,14 @@ By default it is `FALSE`, but when changed to `TRUE` -- all cells that are touch
 Line rasterization with `touches = TRUE` is demonstrated in the code below (Figure \@ref(fig:vector-rasterization2)(A)).
 
 ```{r 06-raster-vector-30 }
-california_raster1 = rasterize(vect(california_borders), raster_template2,
+california_raster1 = rasterize(california_borders, raster_template2,
                                touches = TRUE)
 ```
 
 Compare it to a polygon rasterization, with `touches = FALSE` by default, which selects only cells whose centroids are inside the selector polygon, as illustrated in Figure \@ref(fig:vector-rasterization2)(B).
 
 ```{r 06-raster-vector-31 }
-california_raster2 = rasterize(vect(california), raster_template2) 
+california_raster2 = rasterize(california, raster_template2) 
 ```
 
 ```{r vector-rasterization2, echo=FALSE, fig.cap="Examples of line and polygon rasterizations.", warning=FALSE}
