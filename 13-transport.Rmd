@@ -316,7 +316,77 @@ source("https://github.com/Robinlovelace/geocompr/raw/main/code/13-desire.R", pr
 ```
 
 The map shows that the city center dominates transport patterns in the region, suggesting policies should be prioritized there, although a number of peripheral sub-centers can also be seen.
-Next it would be interesting to have a look at the distribution of interzonal modes, e.g., between which zones is cycling the least or the most common means of transport.
+Desire lines are important generalized components of transport systems.
+More concrete components include nodes, which have specific destinations (rather than hypothetical straight lines represented in desire lines).
+Nodes are covered in the next section.
+
+## Nodes
+
+Nodes\index{node} in geographic transport desets are points among the predominantly linear features that comprise networkworks\index{network}.
+There are two main types of transport nodes:
+
+1.  Nodes\index{node} not directly on the network\index{network} such as zone centroids\index{centroid} --- covered in the next section --- or individual origins and destinations such as houses and workplaces
+2.  Nodes\index{node} that are a part of transport networks\index{network}, representing individual pathways, intersections between pathways (junctions) and points for entering or exiting a transport network\index{network} such as bus stops and train stations
+
+Transport networks\index{network} can be represented as graphs\index{graph}, in which each segment is connected (via edges representing geographic lines) to one or more other edges\index{edge} in the network.
+Nodes outside the network\index{network} can be added with "centroid connectors"\index{centroid}, new route segments to nearby nodes\index{node} on the network\index{network} [@hollander_transport_2016].[^13-transport-6]
+Every node\index{node} in the network\index{network} is then connected by one or more 'edges'\index{edge} that represent individual segments on the network\index{network}. We will see how transport networks\index{network} can be represented as graphs\index{graph} in Section \@ref(route-networks).
+
+[^13-transport-6]:  The location of these connectors should be chosen carefully because they can lead to over-estimates of traffic volumes in their immediate surroundings [@jafari_investigation_2015].
+
+Public transport stops are particularly important nodes\index{node} that can be represented as either type of node: a bus stop that is part of a road, or a large rail station that is represented by its pedestrian entry point hundreds of meters from railway tracks.
+We will use railway stations to illustrate public transport nodes\index{node}, in relation to the research question of increasing cycling in Bristol.
+These stations are provided by **spDataLarge** in `bristol_stations`.
+
+A common barrier preventing people from switching away from cars for commuting to work is that the distance from home to work is too far to walk or cycle.
+Public transport can reduce this barrier by providing a fast and high-volume option for common routes into cities.
+From an active travel perspective, public transport 'legs' of longer journeys divide trips into three:
+
+-   The origin leg, typically from residential areas to public transport stations
+-   The public transport leg, which typically goes from the station nearest a trip's origin to the station nearest its destination
+-   The destination leg, from the station of alighting to the destination
+
+Building on the analysis conducted in Section \@ref(desire-lines), public transport nodes\index{node} can be used to construct three-part desire lines\index{desire lines} for trips that can be taken by bus and (the mode used in this example) rail.
+The first stage is to identify the desire lines\index{desire lines} with most public transport travel, which in our case is easy because our previously created dataset `desire_lines` already contains a variable describing the number of trips by train (the public transport potential could also be estimated using public transport routing\index{routing} services such as [OpenTripPlanner](http://www.opentripplanner.org/)).
+To make the approach easier to follow, we will select only the top three desire lines\index{desire lines} in terms of rails use:
+
+```{r 13-transport-20}
+desire_rail = top_n(desire_lines, n = 3, wt = train)
+```
+
+The challenge now is to 'break-up' each of these lines into three pieces, representing travel via public transport nodes\index{node}.
+This can be done by converting a desire line into a multilinestring object consisting of three line geometries representing origin, public transport and destination legs of the trip.
+This operation can be divided into three stages: matrix creation (of origins, destinations and the 'via' points representing rail stations), identification of nearest neighbors\index{nearest neighbor} and conversion to multilinestrings\index{multilinestrings}.
+These are undertaken by `line_via()`.
+This **stplanr**\index{stplanr (package)} function takes input lines and points and returns a copy of the desire lines\index{desire lines} --- see the [`?line_via()`](https://docs.ropensci.org/stplanr/reference/line_via.html) for details on how this works.
+The output is the same as the input line, except it has new geometry columns representing the journey via public transport nodes\index{node}, as demonstrated below:
+
+```{r 13-transport-21}
+ncol(desire_rail)
+desire_rail = line_via(desire_rail, bristol_stations)
+ncol(desire_rail)
+```
+
+As illustrated in Figure \@ref(fig:stations), the initial `desire_rail` lines now have three additional geometry list columns\index{list column} representing travel from home to the origin station, from there to the destination, and finally from the destination station to the destination.
+In this case, the destination leg is very short (walking distance) but the origin legs may be sufficiently far to justify investment in cycling infrastructure to encourage people to cycle to the stations on the outward leg of peoples' journey to work in the residential areas surrounding the three origin stations in Figure \@ref(fig:stations).
+
+```{r stations, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Station nodes (red dots) used as intermediary points that convert straight desire lines with high rail usage (black) into three legs: to the origin station (red) via public transport (gray) and to the destination (a very short blue line).", fig.scap="Station nodes."}
+zone_cents = st_centroid(zones_od)
+zone_cents_rail = zone_cents[desire_rail, ]
+bb = tmaptools::bb(desire_rail, ext = 1.1)
+tm_shape(desire_rail, bbox = bb) + tm_lines() +
+  tm_shape(desire_rail$leg_orig) + tm_lines(col = "red", lwd = 3) +
+  tm_shape(desire_rail$leg_via) + tm_lines(col = "gray", lwd = 2) +
+  tm_shape(bristol_stations) + tm_dots(col = "red") +
+  tm_shape(desire_rail$leg_dest) + tm_lines(col = "blue", lwd = 5) +
+  tm_shape(zone_cents_rail) + tm_dots(col = "black")
+# tmap_mode("plot")
+# qtm(bristol_stations, basemaps = "https://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=feae177da543411c9efa64160305212d", dots.col = "red", symbols.size = 2) +
+#   tm_shape(desire_rail) +
+#   tm_lines(col = "black", lwd = 4) +
+#   tm_shape(legs) +
+#   tm_lines()
+```
 
 ## Routes
 
@@ -439,9 +509,9 @@ Note: calls to external routing engines such as in the command above only work w
 In addition to the columns contained in the `desire_lines` object, the new route dataset contains `distance` (referring to route distance this time) and `duration` columns (in seconds), which provide potentially useful extra information on the nature of each route.
 We will plot desire lines\index{desire lines} along which many short car journeys take place alongside cycling routes.
 Making the width of the routes proportional to the number of car journeys that could potentially be replaced provides an effective way to prioritize interventions on the road network [@lovelace_propensity_2017].
-The code chunk below plots the desire lines and routes, resulting in Figure \@ref(fig:routes) which shows routes along which people drive short distances:[^13-transport-6]
+The code chunk below plots the desire lines and routes, resulting in Figure \@ref(fig:routes) which shows routes along which people drive short distances:[^13-transport-7]
 
-[^13-transport-6]:  Note that the red routes and black desire lines do not start at exactly the same points.
+[^13-transport-7]:  Note that the red routes and black desire lines do not start at exactly the same points.
     This is because zone centroids rarely lie on the route network: instead the route originate from the transport network node nearest the centroid.
     Note also that routes are assumed to originate in the zone centroids, a simplifying assumption which is used in transport models to reduce the computational resources needed to calculate the shortest path between all combinations of possible origins and destinations [@hollander_transport_2016].
 
@@ -457,79 +527,9 @@ It is easy to find explanations for the area's high level of car dependency: acc
 Furthermore, the town is surrounded by large (cycling unfriendly) road structures, "such as junctions on both the M4 and M5 motorways" [@tallon_bristol_2007].
 
 There are many benefits of converting travel desire lines\index{desire lines} into routes.
-It is important to remember that we cannot be sure what proportion of trips will follow the routes calculated by routing engines.
+It is important to remember that we cannot be sure how many (if any) trips will follow the exact routes calculated by routing engines.
 However, route and street/way/segment level results can be highly policy relevant.
 Route segment results can enable the prioritization of investment in cycleways where they are most needed according to available data [@lovelace_propensity_2017], for example.
-Another common intervention in transport systems is the addition of new public transport nodes\index{node} to the network\index{network}.
-Such nodes\index{node} are described in the next section.
-
-## Nodes
-
-Nodes\index{node} in geographic transport data are zero-dimensional features (points) among the predominantly one-dimensional features (lines) that comprise the network\index{network}.
-There are two types of transport nodes:
-
-1.  Nodes\index{node} not directly on the network\index{network} such as zone centroids\index{centroid} --- covered in the next section --- or individual origins and destinations such as houses and workplaces
-2.  Nodes\index{node} that are a part of transport networks\index{network}, representing individual pathways, intersections between pathways (junctions) and points for entering or exiting a transport network\index{network} such as bus stops and train stations
-
-Transport networks\index{network} can be represented as graphs\index{graph}, in which each segment is connected (via edges representing geographic lines) to one or more other edges\index{edge} in the network.
-Nodes outside the network\index{network} can be added with "centroid connectors"\index{centroid}, new route segments to nearby nodes\index{node} on the network\index{network} [@hollander_transport_2016].[^13-transport-7]
-Every node\index{node} in the network\index{network} is then connected by one or more 'edges'\index{edge} that represent individual segments on the network\index{network}. We will see how transport networks\index{network} can be represented as graphs\index{graph} in Section \@ref(route-networks).
-
-[^13-transport-7]:  The location of these connectors should be chosen carefully because they can lead to over-estimates of traffic volumes in their immediate surroundings [@jafari_investigation_2015].
-
-Public transport stops are particularly important nodes\index{node} that can be represented as either type of node: a bus stop that is part of a road, or a large rail station that is represented by its pedestrian entry point hundreds of meters from railway tracks.
-We will use railway stations to illustrate public transport nodes\index{node}, in relation to the research question of increasing cycling in Bristol.
-These stations are provided by **spDataLarge** in `bristol_stations`.
-
-A common barrier preventing people from switching away from cars for commuting to work is that the distance from home to work is too far to walk or cycle.
-Public transport can reduce this barrier by providing a fast and high-volume option for common routes into cities.
-From an active travel perspective, public transport 'legs' of longer journeys divide trips into three:
-
--   The origin leg, typically from residential areas to public transport stations
--   The public transport leg, which typically goes from the station nearest a trip's origin to the station nearest its destination
--   The destination leg, from the station of alighting to the destination
-
-Building on the analysis conducted in Section \@ref(desire-lines), public transport nodes\index{node} can be used to construct three-part desire lines\index{desire lines} for trips that can be taken by bus and (the mode used in this example) rail.
-The first stage is to identify the desire lines\index{desire lines} with most public transport travel, which in our case is easy because our previously created dataset `desire_lines` already contains a variable describing the number of trips by train (the public transport potential could also be estimated using public transport routing\index{routing} services such as [OpenTripPlanner](http://www.opentripplanner.org/)).
-To make the approach easier to follow, we will select only the top three desire lines\index{desire lines} in terms of rails use:
-
-```{r 13-transport-20}
-desire_rail = top_n(desire_lines, n = 3, wt = train)
-```
-
-The challenge now is to 'break-up' each of these lines into three pieces, representing travel via public transport nodes\index{node}.
-This can be done by converting a desire line into a multilinestring object consisting of three line geometries representing origin, public transport and destination legs of the trip.
-This operation can be divided into three stages: matrix creation (of origins, destinations and the 'via' points representing rail stations), identification of nearest neighbors\index{nearest neighbor} and conversion to multilinestrings\index{multilinestrings}.
-These are undertaken by `line_via()`.
-This **stplanr**\index{stplanr (package)} function takes input lines and points and returns a copy of the desire lines\index{desire lines} --- see the [`?line_via()`](https://docs.ropensci.org/stplanr/reference/line_via.html) for details on how this works.
-The output is the same as the input line, except it has new geometry columns representing the journey via public transport nodes\index{node}, as demonstrated below:
-
-```{r 13-transport-21}
-ncol(desire_rail)
-desire_rail = line_via(desire_rail, bristol_stations)
-ncol(desire_rail)
-```
-
-As illustrated in Figure \@ref(fig:stations), the initial `desire_rail` lines now have three additional geometry list columns\index{list column} representing travel from home to the origin station, from there to the destination, and finally from the destination station to the destination.
-In this case, the destination leg is very short (walking distance) but the origin legs may be sufficiently far to justify investment in cycling infrastructure to encourage people to cycle to the stations on the outward leg of peoples' journey to work in the residential areas surrounding the three origin stations in Figure \@ref(fig:stations).
-
-```{r stations, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Station nodes (red dots) used as intermediary points that convert straight desire lines with high rail usage (black) into three legs: to the origin station (red) via public transport (gray) and to the destination (a very short blue line).", fig.scap="Station nodes."}
-zone_cents = st_centroid(zones_od)
-zone_cents_rail = zone_cents[desire_rail, ]
-bb = tmaptools::bb(desire_rail, ext = 1.1)
-tm_shape(desire_rail, bbox = bb) + tm_lines() +
-  tm_shape(desire_rail$leg_orig) + tm_lines(col = "red", lwd = 3) +
-  tm_shape(desire_rail$leg_via) + tm_lines(col = "gray", lwd = 2) +
-  tm_shape(bristol_stations) + tm_dots(col = "red") +
-  tm_shape(desire_rail$leg_dest) + tm_lines(col = "blue", lwd = 5) +
-  tm_shape(zone_cents_rail) + tm_dots(col = "black")
-# tmap_mode("plot")
-# qtm(bristol_stations, basemaps = "https://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=feae177da543411c9efa64160305212d", dots.col = "red", symbols.size = 2) +
-#   tm_shape(desire_rail) +
-#   tm_lines(col = "black", lwd = 4) +
-#   tm_shape(legs) +
-#   tm_lines()
-```
 
 ## Route networks
 
