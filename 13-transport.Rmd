@@ -373,11 +373,18 @@ In this case, the destination leg is very short (walking distance) but the origi
 zone_cents = st_centroid(zones_od)
 zone_cents_rail = zone_cents[desire_rail, ]
 bb = tmaptools::bb(desire_rail, ext = 1.1)
-tm_shape(desire_rail, bbox = bb) + tm_lines() +
-  tm_shape(desire_rail$leg_orig) + tm_lines(col = "red", lwd = 3) +
-  tm_shape(desire_rail$leg_via) + tm_lines(col = "gray", lwd = 2) +
+desire_rail_plot = rbind(
+  st_sf(data.frame(Geometry = "Desire line (original)"), geometry = desire_rail$geometry),
+  st_sf(data.frame(Geometry = "Leg 1 (origin to station)"), geometry = desire_rail$leg_orig),
+  st_sf(data.frame(Geometry = "Leg 2 (station to station)"), geometry = desire_rail$leg_via),
+  st_sf(data.frame(Geometry = "Leg 3 (station to destination)"), geometry = desire_rail$leg_dest)
+) 
+desire_rail_plot = desire_rail_plot |> 
+  mutate(lty = case_when(Geometry == "Desire line (original)" ~ 2, TRUE ~ 1))
+# tmaptools::palette_explorer()
+tm_shape(desire_rail_plot, bbox = bb) +
+  tm_lines(col = "Geometry", palette = "Set2", lty = desire_rail_plot$lty) +
   tm_shape(bristol_stations) + tm_dots(col = "red") +
-  tm_shape(desire_rail$leg_dest) + tm_lines(col = "blue", lwd = 5) +
   tm_shape(zone_cents_rail) + tm_dots(col = "black")
 # tmap_mode("plot")
 # qtm(bristol_stations, basemaps = "https://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=feae177da543411c9efa64160305212d", dots.col = "red", symbols.size = 2) +
