@@ -523,12 +523,6 @@ gh_release_upload = function(file, tag = "0.0.1") {
 gh_release_upload("routes_short.Rds", tag = "1.9.1-2")
 ```
 
-```{r 13-transport-18-2, echo=FALSE, eval=FALSE}
-# In case OSRM server goes down
-u = "https://github.com/Robinlovelace/geocompr/releases/download/1.9.1-2/routes_short.Rds"
-routes_short = readRDS(url(u))
-```
-
 The output is `routes_short`, an `sf` object representing routes on the transport network\index{network} that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line.
 Note: calls to external routing engines such as in the command above only work with an internet connection (and sometimes an API key stored in an environment variable, although not in this case).
 In addition to the columns contained in the `desire_lines` object, the new route dataset contains `distance` (referring to route distance this time) and `duration` columns (in seconds), which provide potentially useful extra information on the nature of each route.
@@ -540,12 +534,23 @@ The code chunk below plots the desire lines and routes, resulting in Figure \@re
     This is because zone centroids rarely lie on the route network: instead the route originate from the transport network node nearest the centroid.
     Note also that routes are assumed to originate in the zone centroids, a simplifying assumption which is used in transport models to reduce the computational resources needed to calculate the shortest path between all combinations of possible origins and destinations [@hollander_transport_2016].
 
-```{r routes, warning=FALSE, fig.cap="Routes along which many (100+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).", fig.scap="Routes along which many car journeys are made."}
-tm_shape(desire_lines_short) + tm_lines() +
-  tm_shape(routes_short) + tm_lines(col = "red") 
+```{r routes, warning=FALSE, fig.cap="Routes along which many (100+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).", fig.scap="Routes along which many car journeys are made.", echo=FALSE}
+# TODO (low priority, RL): add a facetted plot showing network cleaning/overline functions
+routes_plot_data = rbind(
+  desire_lines_short |> transmute(Entity = "Desire lines"),
+  routes_short |> transmute(Entity = "Routes")
+)
+zone_cents_routes = zone_cents[desire_lines_short, ]
+routes_plot_data |> 
+  ggplot() +
+  geom_sf(aes(color = Entity, linetype = Entity)) +
+  scale_color_manual(values = c("black", "red")) +
+  scale_linetype_manual(values = c(2, 1)) +
+  geom_sf(data = zone_cents_routes) +
+  theme_void()
+# tm_shape(desire_lines_short) + tm_lines() +
+#   tm_shape(routes_short) + tm_lines(col = "red") 
 ```
-
-\index{routes}
 
 Plotting the results on an interactive map, with `mapview::mapview(st_geometry(routes_short))` for example, shows that many short car trips take place in and around Bradley Stoke.
 It is easy to find explanations for the area's high level of car dependency: according to [Wikipedia](https://en.wikipedia.org/wiki/Bradley_Stoke), Bradley Stoke is "Europe's largest new town built with private investment", suggesting limited public transport provision.
