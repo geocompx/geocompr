@@ -15,6 +15,7 @@ region = getbb("Bristol", format_out = "sf_polygon", limit = 1) |>
   st_set_crs("EPSG:4326")
 region = st_sf(data.frame(Name = "Bristol (OSM)"), geometry = region$geometry)
 mapview::mapview(region)
+dir.create("extdata")
 saveRDS(region, "extdata/bristol-region.rds")
 remotes::install_github("robinlovelace/ukboundaries")
 library(ukboundaries)
