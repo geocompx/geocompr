@@ -10,7 +10,7 @@
 <meta name="generator" content="bookdown 0.28 with bs4_book()">
 <meta property="og:title" content="Chapter 5 Geometry operations | Geocomputation with R">
 <meta property="og:type" content="book">
-<meta property="og:url" content="https://geocompr.robinlovelace.net/geometric-operations.html">
+<meta property="og:url" content="https://geocompr.robinlovelace.net/geometry-operations.html">
 <meta property="og:image" content="https://geocompr.robinlovelace.net/images/cover.png">
 <meta property="og:description" content="Prerequisites This chapter uses the same packages as Chapter 4 but with the addition of spDataLarge, which was installed in Chapter 2: library(sf) library(terra) library(dplyr) library(spData)...">
 <meta name="twitter:card" content="summary">
@@ -74,7 +74,7 @@
 <li><a class="" href="spatial-class.html"><span class="header-section-number">2</span> Geographic data in R</a></li>
 <li><a class="" href="attr.html"><span class="header-section-number">3</span> Attribute data operations</a></li>
 <li><a class="" href="spatial-operations.html"><span class="header-section-number">4</span> Spatial data operations</a></li>
-<li><a class="active" href="geometric-operations.html"><span class="header-section-number">5</span> Geometry operations</a></li>
+<li><a class="active" href="geometry-operations.html"><span class="header-section-number">5</span> Geometry operations</a></li>
 <li><a class="" href="raster-vector.html"><span class="header-section-number">6</span> Raster-vector interactions</a></li>
 <li><a class="" href="reproj-geo-data.html"><span class="header-section-number">7</span> Reprojecting geographic data</a></li>
 <li><a class="" href="read-write.html"><span class="header-section-number">8</span> Geographic data I/O</a></li>
@@ -96,9 +96,9 @@
         </div>
       </nav>
 </div>
-  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="geometric-operations" class="section level1" number="5">
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="geometry-operations" class="section level1" number="5">
 <h1>
-<span class="header-section-number">5</span> Geometry operations<a class="anchor" aria-label="anchor" href="#geometric-operations"><i class="fas fa-link"></i></a>
+<span class="header-section-number">5</span> Geometry operations<a class="anchor" aria-label="anchor" href="#geometry-operations"><i class="fas fa-link"></i></a>
 </h1>
 <div id="prerequisites-3" class="section level2 unnumbered">
 <h2>Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites-3"><i class="fas fa-link"></i></a>
@@ -120,11 +120,11 @@
 <p>So far the book has explained the structure of geographic datasets (Chapter <a href="spatial-class.html#spatial-class">2</a>), and how to manipulate them based on their non-geographic attributes (Chapter <a href="attr.html#attr">3</a>) and spatial relations (Chapter <a href="spatial-operations.html#spatial-operations">4</a>).
 This chapter focusses on manipulating the geographic elements of geographic objects, for example by simplifying and converting vector geometries, cropping raster datasets, and converting vector objects into rasters and from rasters into vectors.
 After reading it — and attempting the exercises at the end — you should understand and have control over the geometry column in <code>sf</code> objects and the extent and geographic location of pixels represented in rasters in relation to other geographic objects.</p>
-<p>Section <a href="geometric-operations.html#geo-vec">5.2</a> covers transforming vector geometries with ‘unary’ and ‘binary’ operations.
-Unary operations work on a single geometry in isolation, including simplification (of lines and polygons), the creation of buffers and centroids, and shifting/scaling/rotating single geometries using ‘affine transformations’ (Sections <a href="geometric-operations.html#simplification">5.2.1</a> to <a href="geometric-operations.html#affine-transformations">5.2.4</a>).
-Binary transformations modify one geometry based on the shape of another, including clipping and geometry unions, covered in Sections <a href="geometric-operations.html#clipping">5.2.5</a> and <a href="geometric-operations.html#geometry-unions">5.2.7</a>, respectively.
-Type transformations (from a polygon to a line, for example) are demonstrated in Section <a href="geometric-operations.html#type-trans">5.2.8</a>.</p>
-<p>Section <a href="geometric-operations.html#geo-ras">5.3</a> covers geometric transformations on raster objects.
+<p>Section <a href="geometry-operations.html#geo-vec">5.2</a> covers transforming vector geometries with ‘unary’ and ‘binary’ operations.
+Unary operations work on a single geometry in isolation, including simplification (of lines and polygons), the creation of buffers and centroids, and shifting/scaling/rotating single geometries using ‘affine transformations’ (Sections <a href="geometry-operations.html#simplification">5.2.1</a> to <a href="geometry-operations.html#affine-transformations">5.2.4</a>).
+Binary transformations modify one geometry based on the shape of another, including clipping and geometry unions, covered in Sections <a href="geometry-operations.html#clipping">5.2.5</a> and <a href="geometry-operations.html#geometry-unions">5.2.7</a>, respectively.
+Type transformations (from a polygon to a line, for example) are demonstrated in Section <a href="geometry-operations.html#type-trans">5.2.8</a>.</p>
+<p>Section <a href="geometry-operations.html#geo-ras">5.3</a> covers geometric transformations on raster objects.
 This involves changing the size and number of the underlying pixels, and assigning them new values.
 It teaches how to change the resolution (also called raster aggregation and disaggregation), the extent and the origin of a raster.
 These operations are especially useful if one would like to align raster datasets from diverse sources.
@@ -150,7 +150,7 @@ Another reason for simplifying objects is to reduce the amount of memory, disk s
 it may be wise to simplify complex geometries before publishing them as interactive maps.
 The <strong>sf</strong> package provides <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_simplify()</a></code>, which uses the GEOS implementation of the Douglas-Peucker algorithm to reduce the vertex count.
 <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_simplify()</a></code> uses the <code>dTolerance</code> to control the level of generalization in map units <span class="citation">(see <a href="references.html#ref-douglas_algorithms_1973" role="doc-biblioref">Douglas and Peucker 1973</a> for details)</span>.
-Figure <a href="geometric-operations.html#fig:seine-simp">5.1</a> illustrates simplification of a <code>LINESTRING</code> geometry representing the river Seine and tributaries.
+Figure <a href="geometry-operations.html#fig:seine-simp">5.1</a> illustrates simplification of a <code>LINESTRING</code> geometry representing the river Seine and tributaries.
 The simplified geometry was created by the following command:</p>
 <div class="sourceCode" id="cb160"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">seine_simp</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_simplify</a></span><span class="op">(</span><span class="va">seine</span>, dTolerance <span class="op">=</span> <span class="fl">2000</span><span class="op">)</span>  <span class="co"># 2000 m</span></span></code></pre></div>
@@ -161,7 +161,7 @@ FIGURE 5.1: Comparison of the original and simplified geometry of the seine obje
 </p>
 </div>
 <p>The resulting <code>seine_simp</code> object is a copy of the original <code>seine</code> but with fewer vertices.
-This is apparent, with the result being visually simpler (Figure <a href="geometric-operations.html#fig:seine-simp">5.1</a>, right) and consuming less memory than the original object, as verified below:</p>
+This is apparent, with the result being visually simpler (Figure <a href="geometry-operations.html#fig:seine-simp">5.1</a>, right) and consuming less memory than the original object, as verified below:</p>
 <div class="sourceCode" id="cb161"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/object.size.html">object.size</a></span><span class="op">(</span><span class="va">seine</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 18096 bytes</span></span>
@@ -170,7 +170,7 @@ This is apparent, with the result being visually simpler (Figure <a href="geomet
 <p>Simplification is also applicable for polygons.
 This is illustrated using <code>us_states</code>, representing the contiguous United States.
 As we show in Chapter <a href="reproj-geo-data.html#reproj-geo-data">7</a>, GEOS assumes that the data is in a projected CRS and this could lead to unexpected results when using a geographic CRS.
-Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (epsg = 2163) (on the left in Figure <a href="geometric-operations.html#fig:us-simp">5.2</a>):</p>
+Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (epsg = 2163) (on the left in Figure <a href="geometry-operations.html#fig:us-simp">5.2</a>):</p>
 <div class="sourceCode" id="cb162"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">us_states2163</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">us_states</span>, <span class="st">"EPSG:2163"</span><span class="op">)</span></span>
 <span><span class="va">us_states2163</span> <span class="op">=</span> <span class="va">us_states2163</span></span></code></pre></div>
@@ -178,7 +178,7 @@ Therefore, the first step is to project the data into some adequate projected CR
 <div class="sourceCode" id="cb163"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">us_states_simp1</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_simplify</a></span><span class="op">(</span><span class="va">us_states2163</span>, dTolerance <span class="op">=</span> <span class="fl">100000</span><span class="op">)</span>  <span class="co"># 100 km</span></span></code></pre></div>
 <p>A limitation with <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_simplify()</a></code> is that it simplifies objects on a per-geometry basis.
-This means the ‘topology’ is lost, resulting in overlapping and ‘holey’ areal units illustrated in Figure <a href="geometric-operations.html#fig:us-simp">5.2</a> (middle panel).
+This means the ‘topology’ is lost, resulting in overlapping and ‘holey’ areal units illustrated in Figure <a href="geometry-operations.html#fig:us-simp">5.2</a> (middle panel).
 <code>ms_simplify()</code> from <strong>rmapshaper</strong> provides an alternative that overcomes this issue.
 By default it uses the Visvalingam algorithm, which overcomes some limitations of the Douglas-Peucker algorithm <span class="citation">(<a href="references.html#ref-visvalingam_line_1993" role="doc-biblioref">Visvalingam and Whyatt 1993</a>)</span>.
 <!-- https://bost.ocks.org/mike/simplify/ -->
@@ -198,7 +198,7 @@ Below is an example of using Gaussian kernel regression to smooth the borders of
 The <code>smoothness</code> argument controls the bandwidth of the Gaussian that is used to smooth the geometry and has a default value of 1.</p>
 <div class="sourceCode" id="cb165"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">us_states_simp3</span> <span class="op">=</span> <span class="fu">smoothr</span><span class="fu">::</span><span class="fu"><a href="https://strimas.com/smoothr/reference/smooth.html">smooth</a></span><span class="op">(</span><span class="va">us_states2163</span>, method <span class="op">=</span> <span class="st">'ksmooth'</span>, smoothness <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
-<p>Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in (Figure <a href="geometric-operations.html#fig:us-simp">5.2</a>). Differences can be observed between the outputs of the Douglas-Peucker (<code>st_simplify</code>), Visvalingam (<code>ms_simplify</code>), and Gaussian kernel regression (<code>smooth(method=ksmooth</code>) algorithms.</p>
+<p>Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in (Figure <a href="geometry-operations.html#fig:us-simp">5.2</a>). Differences can be observed between the outputs of the Douglas-Peucker (<code>st_simplify</code>), Visvalingam (<code>ms_simplify</code>), and Gaussian kernel regression (<code>smooth(method=ksmooth</code>) algorithms.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:us-simp"></span>
 <img src="05-geometry-operations_files/figure-html/us-simp-1.png" alt="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages." width="100%"><p class="caption">
@@ -217,12 +217,12 @@ All of them create single point representations of more complex vector objects.<
 <p>The most commonly used centroid operation is the <em>geographic centroid</em>.
 This type of centroid operation (often referred to as ‘the centroid’) represents the center of mass in a spatial object (think of balancing a plate on your finger).
 Geographic centroids have many uses, for example to create a simple point representation of complex geometries, or to estimate distances between polygons.
-They can be calculated with the <strong>sf</strong> function <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid()</a></code> as demonstrated in the code below, which generates the geographic centroids of regions in New Zealand and tributaries to the River Seine, illustrated with black points in Figure <a href="geometric-operations.html#fig:centr">5.3</a>.</p>
+They can be calculated with the <strong>sf</strong> function <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid()</a></code> as demonstrated in the code below, which generates the geographic centroids of regions in New Zealand and tributaries to the River Seine, illustrated with black points in Figure <a href="geometry-operations.html#fig:centr">5.3</a>.</p>
 <div class="sourceCode" id="cb166"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nz_centroid</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid</a></span><span class="op">(</span><span class="va">nz</span><span class="op">)</span></span>
 <span><span class="va">seine_centroid</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid</a></span><span class="op">(</span><span class="va">seine</span><span class="op">)</span></span></code></pre></div>
 <p>Sometimes the geographic centroid falls outside the boundaries of their parent objects (think of a doughnut).
-In such cases <em>point on surface</em> operations can be used to guarantee the point will be in the parent object (e.g., for labeling irregular multipolygon objects such as island states), as illustrated by the red points in Figure <a href="geometric-operations.html#fig:centr">5.3</a>.
+In such cases <em>point on surface</em> operations can be used to guarantee the point will be in the parent object (e.g., for labeling irregular multipolygon objects such as island states), as illustrated by the red points in Figure <a href="geometry-operations.html#fig:centr">5.3</a>.
 Notice that these red points always lie on their parent objects.
 They were created with <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_point_on_surface()</a></code> as follows:<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
 A description of how &lt;code&gt;st_point_on_surface()&lt;/code&gt; works is provided at &lt;a href="https://gis.stackexchange.com/q/76498" class="uri"&gt;https://gis.stackexchange.com/q/76498&lt;/a&gt;.&lt;/p&gt;'><sup>22</sup></a></p>
@@ -249,7 +249,7 @@ Unlike simplification (which is often used for visualization and reducing file s
 How many points are within a given distance of this line?
 Which demographic groups are within travel distance of this new shop?
 These kinds of questions can be answered and visualized by creating buffers around the geographic entities of interest.</p>
-<p>Figure <a href="geometric-operations.html#fig:buffs">5.4</a> illustrates buffers of different sizes (5 and 50 km) surrounding the river Seine and tributaries.
+<p>Figure <a href="geometry-operations.html#fig:buffs">5.4</a> illustrates buffers of different sizes (5 and 50 km) surrounding the river Seine and tributaries.
 These buffers were created with commands below, which show that the command <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code> requires at least two arguments: an input geometry and a distance, provided in the units of the CRS (in this case meters):</p>
 <div class="sourceCode" id="cb168"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">seine_buff_5km</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">seine</span>, dist <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span></span>
@@ -283,7 +283,7 @@ The <strong>sf</strong> package implements affine transformation for objects of 
 <code class="sourceCode R"><span><span class="va">nz_sfc</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">nz</span><span class="op">)</span></span></code></pre></div>
 <p>Shifting moves every point by the same distance in map units.
 It could be done by adding a numerical vector to a vector object.
-For example, the code below shifts all y-coordinates by 100,000 meters to the north, but leaves the x-coordinates untouched (left panel of Figure <a href="geometric-operations.html#fig:affine-trans">5.5</a>).</p>
+For example, the code below shifts all y-coordinates by 100,000 meters to the north, but leaves the x-coordinates untouched (left panel of Figure <a href="geometry-operations.html#fig:affine-trans">5.5</a>).</p>
 <div class="sourceCode" id="cb170"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nz_shift</span> <span class="op">=</span> <span class="va">nz_sfc</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100000</span><span class="op">)</span></span></code></pre></div>
 <p>Scaling enlarges or shrinks objects by a factor.
@@ -291,7 +291,7 @@ It can be applied either globally or locally.
 Global scaling increases or decreases all coordinates values in relation to the origin coordinates, while keeping all geometries topological relations intact.
 It can be done by subtraction or multiplication of a<code>sfg</code> or <code>sfc</code> object.</p>
 <p>Local scaling treats geometries independently and requires points around which geometries are going to be scaled, e.g., centroids.
-In the example below, each geometry is shrunk by a factor of two around the centroids (middle panel in Figure <a href="geometric-operations.html#fig:affine-trans">5.5</a>).
+In the example below, each geometry is shrunk by a factor of two around the centroids (middle panel in Figure <a href="geometry-operations.html#fig:affine-trans">5.5</a>).
 To achieve that, each object is firstly shifted in a way that its center has coordinates of <code>0, 0</code> (<code>(nz_sfc - nz_centroid_sfc)</code>).
 Next, the sizes of the geometries are reduced by half (<code>* 0.5</code>).
 Finally, each object’s centroid is moved back to the input data coordinates (<code>+ nz_centroid_sfc</code>).</p>
@@ -314,7 +314,7 @@ The rotation matrix can be implemented in R as:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">cos</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html">sin</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span>, <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html">sin</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Trig.html">cos</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="op">}</span> </span></code></pre></div>
 <p>The <code>rotation</code> function accepts one argument <code>a</code> - a rotation angle in degrees.
-Rotation could be done around selected points, such as centroids (right panel of Figure <a href="geometric-operations.html#fig:affine-trans">5.5</a>).
+Rotation could be done around selected points, such as centroids (right panel of Figure <a href="geometry-operations.html#fig:affine-trans">5.5</a>).
 See <code><a href="https://r-spatial.github.io/sf/articles/sf3.html">vignette("sf3")</a></code> for more examples.</p>
 <div class="sourceCode" id="cb173"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nz_rotate</span> <span class="op">=</span> <span class="op">(</span><span class="va">nz_sfc</span> <span class="op">-</span> <span class="va">nz_centroid_sfc</span><span class="op">)</span> <span class="op">*</span> <span class="fu">rotation</span><span class="op">(</span><span class="fl">30</span><span class="op">)</span> <span class="op">+</span> <span class="va">nz_centroid_sfc</span></span></code></pre></div>
@@ -337,7 +337,7 @@ Spatial clipping is a form of spatial subsetting that involves changes to the <c
 <p>Clipping can only apply to features more complex than points:
 lines, polygons and their ‘multi’ equivalents.
 To illustrate the concept we will start with a simple example:
-two overlapping circles with a center point one unit away from each other and a radius of one (Figure <a href="geometric-operations.html#fig:points">5.6</a>).</p>
+two overlapping circles with a center point one unit away from each other and a radius of one (Figure <a href="geometry-operations.html#fig:points">5.6</a>).</p>
 <div class="sourceCode" id="cb175"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">b</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># create 2 points</span></span>
 <span><span class="va">b</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">b</span>, dist <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># convert points to circles</span></span>
@@ -350,7 +350,7 @@ FIGURE 5.6: Overlapping circles.
 </p>
 </div>
 <p>Imagine you want to select not one circle or the other, but the space covered by both <code>x</code> <em>and</em> <code>y</code>.
-This can be done using the function <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_ops.html">st_intersection()</a></code>, illustrated using objects named <code>x</code> and <code>y</code> which represent the left- and right-hand circles (Figure <a href="geometric-operations.html#fig:circle-intersection">5.7</a>).</p>
+This can be done using the function <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_ops.html">st_intersection()</a></code>, illustrated using objects named <code>x</code> and <code>y</code> which represent the left- and right-hand circles (Figure <a href="geometry-operations.html#fig:circle-intersection">5.7</a>).</p>
 <div class="sourceCode" id="cb176"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="va">b</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">y</span> <span class="op">=</span> <span class="va">b</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></span>
@@ -376,9 +376,9 @@ FIGURE 5.8: Spatial equivalents of logical operators.
 <span class="header-section-number">5.2.6</span> Subsetting and clipping<a class="anchor" aria-label="anchor" href="#subsetting-and-clipping"><i class="fas fa-link"></i></a>
 </h3>
 <p>Clipping objects can change their geometry but it can also subset objects, returning only features that intersect (or partly intersect) with a clipping/subsetting object.
-To illustrate this point, we will subset points that cover the bounding box of the circles <code>x</code> and <code>y</code> in Figure <a href="geometric-operations.html#fig:venn-clip">5.8</a>.
+To illustrate this point, we will subset points that cover the bounding box of the circles <code>x</code> and <code>y</code> in Figure <a href="geometry-operations.html#fig:venn-clip">5.8</a>.
 Some points will be inside just one circle, some will be inside both and some will be inside neither.
-<code><a href="https://r-spatial.github.io/sf/reference/st_sample.html">st_sample()</a></code> is used below to generate a <em>simple random</em> distribution of points within the extent of circles <code>x</code> and <code>y</code>, resulting in output illustrated in Figure <a href="geometric-operations.html#fig:venn-subset">5.9</a>, raising the question: how to subset the points to only return the point that intersects with <em>both</em> <code>x</code> and <code>y</code>?</p>
+<code><a href="https://r-spatial.github.io/sf/reference/st_sample.html">st_sample()</a></code> is used below to generate a <em>simple random</em> distribution of points within the extent of circles <code>x</code> and <code>y</code>, resulting in output illustrated in Figure <a href="geometry-operations.html#fig:venn-subset">5.9</a>, raising the question: how to subset the points to only return the point that intersects with <em>both</em> <code>x</code> and <code>y</code>?</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:venn-subset"></span>
 <img src="05-geometry-operations_files/figure-html/venn-subset-1.png" alt="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted." width="100%"><p class="caption">
@@ -413,7 +413,7 @@ We will return to the question of choosing between different implementations of 
 </h3>
 <p>
 As we saw in Section <a href="attr.html#vector-attribute-aggregation">3.2.3</a>, spatial aggregation can silently dissolve the geometries of touching polygons in the same group.
-This is demonstrated in the code chunk below in which 49 <code>us_states</code> are aggregated into 4 regions using base and <strong>tidyverse</strong> functions (see results in Figure <a href="geometric-operations.html#fig:us-regions">5.10</a>):</p>
+This is demonstrated in the code chunk below in which 49 <code>us_states</code> are aggregated into 4 regions using base and <strong>tidyverse</strong> functions (see results in Figure <a href="geometry-operations.html#fig:us-regions">5.10</a>):</p>
 <div class="sourceCode" id="cb179"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">regions</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/aggregate.html">aggregate</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">us_states</span><span class="op">[</span>, <span class="st">"total_pop_15"</span><span class="op">]</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">us_states</span><span class="op">$</span><span class="va">REGION</span><span class="op">)</span>,</span>
 <span>                    FUN <span class="op">=</span> <span class="va">sum</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -448,7 +448,7 @@ Importantly, <code><a href="https://r-spatial.github.io/sf/reference/st_cast.htm
 <p>Let’s create a multipoint to illustrate how geometry casting works on simple feature geometry (<code>sfg</code>) objects:</p>
 <div class="sourceCode" id="cb182"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multipoint</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_multipoint</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>In this case, <code><a href="https://r-spatial.github.io/sf/reference/st_cast.html">st_cast()</a></code> can be useful to transform the new object into a linestring or a polygon (Figure <a href="geometric-operations.html#fig:single-cast">5.11</a>):</p>
+<p>In this case, <code><a href="https://r-spatial.github.io/sf/reference/st_cast.html">st_cast()</a></code> can be useful to transform the new object into a linestring or a polygon (Figure <a href="geometry-operations.html#fig:single-cast">5.11</a>):</p>
 <div class="sourceCode" id="cb183"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">linestring</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_cast.html">st_cast</a></span><span class="op">(</span><span class="va">multipoint</span>, <span class="st">"LINESTRING"</span><span class="op">)</span></span>
 <span><span class="va">polyg</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_cast.html">st_cast</a></span><span class="op">(</span><span class="va">multipoint</span>, <span class="st">"POLYGON"</span><span class="op">)</span></span></code></pre></div>
@@ -477,8 +477,8 @@ However, when casting from multi-types to non-multi-types only the first element
 <p>Geometry casting of simple features geometry column (<code>sfc</code>) and simple features objects works the same as for <code>sfg</code> in most of the cases.
 One important difference is the conversion between multi-types to non-multi-types.
 As a result of this process, multi-objects of <code>sfc</code> or <code>sf</code> are split into many non-multi-objects.</p>
-<p>Table <a href="geometric-operations.html#tab:sfs-st-cast">5.1</a> shows possible geometry type transformations on simple feature objects.
-Single simple feature geometries (represented by the first column in the table) can be transformed into multiple geometry types, represented by the columns in Table <a href="geometric-operations.html#tab:sfs-st-cast">5.1</a>.
+<p>Table <a href="geometry-operations.html#tab:sfs-st-cast">5.1</a> shows possible geometry type transformations on simple feature objects.
+Single simple feature geometries (represented by the first column in the table) can be transformed into multiple geometry types, represented by the columns in Table <a href="geometry-operations.html#tab:sfs-st-cast">5.1</a>.
 Some transformations are not possible: you cannot convert a single point into a multilinestring or a polygon, for example, explaining why the cells <code>[1, 4:5]</code> in the table contain NA.
 Some transformations split single features input into multiple sub-features, ‘expanding’ <code>sf</code> objects (adding new rows with duplicate attribute values).
 When a multipoint geometry consisting of five pairs of coordinates is tranformed into a ‘POINT’ geometry, for example, the output will contain five features.</p>
@@ -701,7 +701,7 @@ NA
 </td>
 </tr></tfoot>
 </table></div>
-<p>Let’s try to apply geometry type transformations on a new object, <code>multilinestring_sf</code>, as an example (on the left in Figure <a href="geometric-operations.html#fig:line-cast">5.12</a>):</p>
+<p>Let’s try to apply geometry type transformations on a new object, <code>multilinestring_sf</code>, as an example (on the left in Figure <a href="geometry-operations.html#fig:line-cast">5.12</a>):</p>
 <div class="sourceCode" id="cb185"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multilinestring_list</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">3</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, </span>
 <span>                            <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">1</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
@@ -811,7 +811,7 @@ When merging or performing map algebra on rasters, their resolution, projection,
 The same problem arises when we would like to merge satellite imagery from different sensors with different projections and resolutions.
 We can deal with such mismatches by aligning the rasters.</p>
 <p>In the simplest case, two images only differ with regard to their extent.
-Following code adds one row and two columns to each side of the raster while setting all new values to <code>NA</code> (Figure <a href="geometric-operations.html#fig:extend-example">5.13</a>).</p>
+Following code adds one row and two columns to each side of the raster while setting all new values to <code>NA</code> (Figure <a href="geometry-operations.html#fig:extend-example">5.13</a>).</p>
 <div class="sourceCode" id="cb189"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">elev</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/elev.tif"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">elev_2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/extend.html">extend</a></span><span class="op">(</span><span class="va">elev</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -840,7 +840,7 @@ In the below example a cell corner exists with coordinates (0, 0), but that is n
 <p>If two rasters have different origins, their cells do not overlap completely which would make map algebra impossible.
 To change the origin – use <code><a href="https://rdrr.io/pkg/terra/man/origin.html">origin()</a></code>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 If the origins of two raster datasets are just marginally apart, it sometimes is sufficient to simply increase the &lt;code&gt;tolerance&lt;/code&gt; argument of &lt;code&gt;terra::terraOptions()&lt;/code&gt;.&lt;/p&gt;"><sup>23</sup></a>
-Figure <a href="geometric-operations.html#fig:origin-example">5.14</a> reveals the effect of changing the origin in this way.</p>
+Figure <a href="geometry-operations.html#fig:origin-example">5.14</a> reveals the effect of changing the origin in this way.</p>
 <div class="sourceCode" id="cb193"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># change the origin</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/origin.html">origin</a></span><span class="op">(</span><span class="va">elev_4</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.25</span><span class="op">)</span></span></code></pre></div>
@@ -862,7 +862,7 @@ To match resolutions, one can either decrease (<code><a href="https://rdrr.io/pk
 Here we refer to spatial resolution.
 In remote sensing the spectral (spectral bands), temporal (observations through time of the same area) and radiometric (color depth) resolution are also important.
 Check out the &lt;code&gt;tapp()&lt;/code&gt; example in the documentation for getting an idea on how to do temporal raster aggregation.&lt;/p&gt;"><sup>24</sup></a>
-As an example, we here change the spatial resolution of <code>dem</code> (found in the <strong>spDataLarge</strong> package) by a factor of 5 (Figure <a href="geometric-operations.html#fig:aggregate-example">5.15</a>).
+As an example, we here change the spatial resolution of <code>dem</code> (found in the <strong>spDataLarge</strong> package) by a factor of 5 (Figure <a href="geometry-operations.html#fig:aggregate-example">5.15</a>).
 Additionally, the output cell value should correspond to the mean of the input cells (note that one could use other functions as well, such as <code><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html">median()</a></code>, <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code>, etc.):</p>
 <div class="sourceCode" id="cb194"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dem</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/dem.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span></span>
@@ -874,8 +874,8 @@ FIGURE 5.15: Original raster (left). Aggregated raster (right).
 </p>
 </div>
 <p>The <code><a href="https://rdrr.io/pkg/terra/man/disaggregate.html">disagg()</a></code> function increases the resolution of raster objects, providing two a methods for assigning values to the newly created cells: the default method (<code>method = "near"</code>) simply gives all output cells the value of the input cell, and hence duplicates values, leading to a ‘blocky’ output.
-The <code>bilinear</code> method uses the four nearest pixel centers of the input image (salmon colored points in Figure <a href="geometric-operations.html#fig:bilinear">5.16</a>) to compute an average weighted by distance (arrows in Figure <a href="geometric-operations.html#fig:bilinear">5.16</a>.
-The value of the output cell is represented by a square in the upper left corner in Figure <a href="geometric-operations.html#fig:bilinear">5.16</a>).</p>
+The <code>bilinear</code> method uses the four nearest pixel centers of the input image (salmon colored points in Figure <a href="geometry-operations.html#fig:bilinear">5.16</a>) to compute an average weighted by distance (arrows in Figure <a href="geometry-operations.html#fig:bilinear">5.16</a>.
+The value of the output cell is represented by a square in the upper left corner in Figure <a href="geometry-operations.html#fig:bilinear">5.16</a>).</p>
 <div class="sourceCode" id="cb195"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dem_disagg</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/disaggregate.html">disagg</a></span><span class="op">(</span><span class="va">dem_agg</span>, fact <span class="op">=</span> <span class="fl">5</span>, method <span class="op">=</span> <span class="st">"bilinear"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/identical.html">identical</a></span><span class="op">(</span><span class="va">dem</span>, <span class="va">dem_disagg</span><span class="op">)</span></span>
@@ -901,11 +901,11 @@ This is the role of resampling – a process of computing values for new pixel l
 In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin.</p>
 <!--toDo: jn-->
 <!-- consider if adding this new figure makes sense -->
-<p>There are several methods for estimating values for a raster with different resolutions/origins, as shown in Figure <a href="geometric-operations.html#fig:resampl">5.17</a>.
+<p>There are several methods for estimating values for a raster with different resolutions/origins, as shown in Figure <a href="geometry-operations.html#fig:resampl">5.17</a>.
 The main resampling methods include:</p>
 <ul>
 <li>Nearest neighbor: assigns the value of the nearest cell of the original raster to the cell of the target one. This is a fast simple technique that is usually suitable for resampling categorical rasters.</li>
-<li>Bilinear interpolation: assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure <a href="geometric-operations.html#fig:bilinear">5.16</a>). This is the fastest method that is appropriate for continuous rasters.</li>
+<li>Bilinear interpolation: assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure <a href="geometry-operations.html#fig:bilinear">5.16</a>). This is the fastest method that is appropriate for continuous rasters.</li>
 <li>Cubic interpolation: uses values of 16 nearest cells of the original raster to determine the output cell value, applying third-order polynomial functions. Used for continuous rasters and results in a smoother surface that results bilinear interpolation, but is more computationally intensive.</li>
 <li>Cubic spline interpolation: also uses values of 16 nearest cells of the original raster to determine output cell, but applies cubic splines (piecewise third-order polynomial functions) to derive the results. Used for continuous rasters.</li>
 <li>Lanczos windowed sinc resampling: uses values of 36 nearest cells of the original raster to determine the output cell value. Used for continuous rasters.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
@@ -925,7 +925,7 @@ For this example, we create <code>target_rast</code>, but you would often use an
 <p>Next, we need to provide our two raster objects as the first two arguments and one of the resampling methods described above.</p>
 <div class="sourceCode" id="cb197"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dem_resampl</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/resample.html">resample</a></span><span class="op">(</span><span class="va">dem</span>, y <span class="op">=</span> <span class="va">target_rast</span>, method <span class="op">=</span> <span class="st">"bilinear"</span><span class="op">)</span></span></code></pre></div>
-<p>Figure <a href="geometric-operations.html#fig:resampl">5.17</a> shows a comparison of different resampling methods on the <code>dem</code> object.</p>
+<p>Figure <a href="geometry-operations.html#fig:resampl">5.17</a> shows a comparison of different resampling methods on the <code>dem</code> object.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:resampl"></span>
 <img src="05-geometry-operations_files/figure-html/resampl-1.png" alt="Visual comparison of the original raster and five different resampling methods." width="100%"><p class="caption">
@@ -978,7 +978,7 @@ A world map with a south-up orientation could be created by a reflection (one of
 Write code to do so.
 Hint: you need to use a two-element vector for this transformation.
 Bonus: create an upside-down map of your country.</p>
-<p>E5. Run the code in Section <a href="https://geocompr.robinlovelace.net/geometric-operations.html#subsetting-and-clipping">5.2.6</a>. With reference to the objects created in that section, subset the point in <code>p</code> that is contained within <code>x</code> <em>and</em> <code>y</code>.</p>
+<p>E5. Run the code in Section <a href="https://geocompr.robinlovelace.net/geometry-operations.html#subsetting-and-clipping">5.2.6</a>. With reference to the objects created in that section, subset the point in <code>p</code> that is contained within <code>x</code> <em>and</em> <code>y</code>.</p>
 <ul>
 <li>Using base subsetting operators.</li>
 <li>Using an intermediary object created with <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_ops.html">st_intersection()</a></code>.</li>
@@ -1011,7 +1011,7 @@ Can you notice any differences between the results of these resampling methods?<
 <hr>
 <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
       <ul class="nav navbar-nav">
-<li><a class="nav-link" href="#geometric-operations"><span class="header-section-number">5</span> Geometry operations</a></li>
+<li><a class="nav-link" href="#geometry-operations"><span class="header-section-number">5</span> Geometry operations</a></li>
 <li><a class="nav-link" href="#prerequisites-3">Prerequisites</a></li>
 <li><a class="nav-link" href="#introduction-2"><span class="header-section-number">5.1</span> Introduction</a></li>
 <li>

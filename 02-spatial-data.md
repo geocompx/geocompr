@@ -123,7 +123,7 @@ There is more to CRSs, as described in Sections \@ref(crs-intro) and \@ref(repro
 
 - [GDAL](https://gdal.org/)\index{GDAL}, for reading, writing and manipulating a wide range of geographic data formats, covered in Chapter \@ref(read-write)
 - [PROJ](https://proj.org/), a powerful library for coordinate system transformations, which underlies the content covered in Chapter \@ref(reproj-geo-data)
-- [GEOS](https://libgeos.org/)\index{GEOS}, a planar geometry engine for operations such as calculating buffers and centroids on data with a projected CRS, covered in Chapter \@ref(geometric-operations)
+- [GEOS](https://libgeos.org/)\index{GEOS}, a planar geometry engine for operations such as calculating buffers and centroids on data with a projected CRS, covered in Chapter \@ref(geometry-operations)
 - [S2](https://s2geometry.io/), a spherical geometry engine written in C++ developed by Google, via the [**s2**](https://r-spatial.github.io/s2/) package, covered in Section \@ref(s2) below and in Chapter \@ref(reproj-geo-data)
 <!-- - [liblwgeom](https://github.com/postgis/postgis/tree/master/liblwgeom), a geometry engine used by PostGIS, via the [**lwgeom**](https://r-spatial.github.io/lwgeom/) package -->
 
@@ -134,7 +134,7 @@ A neat feature of **sf** is that you can change the default geometry engine used
 As we will see in Section \@ref(s2), planar geometry is based on 2 dimensional space.
 Planar geometry engines such as GEOS assume 'flat' (projected) coordinates while spherical geometry engines such as S2 assume unprojected (lon/lat) coordinates.
 
-This section introduces **sf** classes in preparation for subsequent chapters (Chapters \@ref(geometric-operations) and \@ref(read-write) cover the GEOS and GDAL interface, respectively).
+This section introduces **sf** classes in preparation for subsequent chapters (Chapters \@ref(geometry-operations) and \@ref(read-write) cover the GEOS and GDAL interface, respectively).
 
 ### An introduction to simple features {#intro-sf}
 
@@ -397,7 +397,7 @@ plot(st_geometry(world_cents), add = TRUE, cex = cex)
 <p class="caption">(\#fig:contpop)Country continents (represented by fill color) and 2015 populations (represented by circles, with area proportional to population).</p>
 </div>
 
-The code above uses the function `st_centroid()` to convert one geometry type (polygons) to another (points) (see Chapter \@ref(geometric-operations)), the aesthetics of which are varied with the `cex` argument.
+The code above uses the function `st_centroid()` to convert one geometry type (polygons) to another (points) (see Chapter \@ref(geometry-operations)), the aesthetics of which are varied with the `cex` argument.
 
 \index{bounding box}
 **sf**'s plot method also has arguments specific to geographic data. `expandBB`, for example, can be used to plot an `sf` object in context:
@@ -838,7 +838,7 @@ st_crs(df_sf) = "EPSG:4326"
 ```
 
 **sfheaders** is also good at 'deconstructing' and 'reconstructing' `sf` objects, meaning converting geometry columns into data frames that contain data on the coordinates of each vertex and geometry feature (and multi-feature) ids.
-It is fast and reliable at 'casting' geometry columns to different types, a topic covered in Chapter \@ref(geometric-operations).
+It is fast and reliable at 'casting' geometry columns to different types, a topic covered in Chapter \@ref(geometry-operations).
 Benchmarks, in the package's [documentation](https://dcooley.github.io/sfheaders/articles/examples.html#performance) and in test code developed for this book, show it is much faster than the `sf` package for such operations.
 
 ### Spherical geometry operations with S2 {#s2}

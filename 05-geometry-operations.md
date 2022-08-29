@@ -1,4 +1,4 @@
-# Geometry operations {#geometric-operations}
+# Geometry operations {#geometry-operations}
 
 ## Prerequisites {-}
 
@@ -902,7 +902,7 @@ Hint: you need to use a two-element vector for this transformation.
  
 
 
-E5. Run the code in Section [5.2.6](https://geocompr.robinlovelace.net/geometric-operations.html#subsetting-and-clipping). With reference to the objects created in that section, subset the point in `p` that is contained within `x` *and* `y`.
+E5. Run the code in Section [5.2.6](https://geocompr.robinlovelace.net/geometry-operations.html#subsetting-and-clipping). With reference to the objects created in that section, subset the point in `p` that is contained within `x` *and* `y`.
 
 - Using base subsetting operators.
 - Using an intermediary object created with `st_intersection()`\index{vector!intersection}.
