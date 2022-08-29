@@ -589,6 +589,8 @@ Use `"v.select"` and `"v.extract"` for vector data.
 - You can also start R from within a running GRASS\index{GRASS} session [for more information please refer to @bivand_applied_2013].
 - Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass82/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm\index{geoalgorithm}.
 
+**GRASS GIS set up appendix**
+
 It is also possible to set up a location and a mapset manually to use GRASS\index{GRASS} from within R.
 First of all, we need to find out if and where GRASS is installed on the computer.
 
