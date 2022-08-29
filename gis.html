@@ -489,79 +489,31 @@ To do this, we constrain the query of the street network (in OSM language called
 <span><span class="va">london_streets</span> <span class="op">=</span> <span class="va">london_streets</span><span class="op">[[</span><span class="st">"osm_lines"</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="va">london_streets</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">london_streets</span>, <span class="va">osm_id</span><span class="op">)</span></span></code></pre></div>
 <p>As a convenience to the reader, one can attach <code>london_streets</code> to the global environment using <code>data("london_streets", package = "spDataLarge")</code>.</p>
-<p>Now that we have the data, we can go on and initiate a GRASS session.</p>
-<!-- Once you are familiar with how to set up the GRASS environment, it becomes tedious to do so over and over again. -->
-<p>Luckily, <code>linkGRASS()</code> of the <strong>link2GI</strong> packages lets to set up the GRASS environment with just one line of code.
+<p>Now that we have the data, we can go on and initiate a GRASS session.
+Luckily, <code>linkGRASS()</code> of the <strong>link2GI</strong> packages lets to set up the GRASS environment with just one line of code.
 The only thing you need to provide is a spatial object which determines the projection and the extent of the spatial database.
 First, <code>linkGRASS()</code> finds all GRASS installations on your computer.
 Since we have set <code>ver_select</code> to <code>TRUE</code>, we can interactively choose one of the found GRASS-installations.
 If there is just one installation, the <code>linkGRASS()</code> automatically chooses it.
 Second, <code>linkGRASS()</code> establishes a connection to GRASS GIS.</p>
 <div class="sourceCode" id="cb365"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">link2GI</span><span class="fu">::</span><span class="fu">linkGRASS</span><span class="op">(</span><span class="va">london_streets</span>, ver_select <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-
-<div class="rmdnote">
-<p>First of all, we need to find out if and where GRASS is installed on the computer.</p>
-</div>
-<div class="sourceCode" id="cb366"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/link2GI/">link2GI</a></span><span class="op">)</span></span>
-<span><span class="va">link</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/link2GI/reference/findGRASS.html">findGRASS</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>GRASS GIS differs from many other GIS software in its approach for handling input data – it puts all of the input data in a GRASS spatial database.
-The GRASS geodatabase system is based on SQLite.
-Consequently, different users can easily work on the same project, possibly with different read/write permissions.
-However, one has to set up this spatial database (also from within R), and users might find this process a bit intimidating in the beginning.
-First of all, the GRASS database requires its own directory, which, in turn, contains a location (see the <a href="https://grass.osgeo.org/grass82/manuals/grass_database.html">GRASS GIS Database</a> help pages at <a href="https://grass.osgeo.org/grass82/manuals/index.html">grass.osgeo.org</a> for further information).
-The location stores the geodata for one project or one area.
-Within one location, several mapsets can exist that typically refer to different users or different tasks.
-Each location also has PERMANENT – a mandatory mapset that is created automatically.
-PERMANENT stores the projection, the spatial extent and the default resolution for raster data.
-In order to share geographic data with all users of a project, the database owner can add spatial data to the PERMANENT mapset.
-So, to sum it all up – the GRASS geodatabase may contain many locations (all data in one location have the same CRS), and each location can store many mapsets (groups of datasets).
-Please refer to <span class="citation">Neteler and Mitasova (<a href="references.html#ref-neteler_open_2008" role="doc-biblioref">2008</a>)</span> and the <a href="https://grass.osgeo.org/grass80/manuals/helptext.html">GRASS GIS quick start</a> for more information on the GRASS spatial database system.</p>
-<p>Now, you have to set up a location and a mapset if you want to use GRASS from within R.</p>
-<!--toDo:jn-->
-<!--improve the next code chunk-->
-<div class="sourceCode" id="cb367"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rsbivand.github.io/rgrass/">rgrass</a></span><span class="op">)</span></span>
-<span><span class="va">grass_path</span> <span class="op">=</span> <span class="va">link</span><span class="op">$</span><span class="va">instDir</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb368"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">initGRASS</span><span class="op">(</span>gisBase <span class="op">=</span> <span class="va">grass_path</span>, gisDbase <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, </span>
-<span>          location <span class="op">=</span> <span class="st">"london"</span>, mapset <span class="op">=</span> <span class="st">"PERMANENT"</span>, override <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<!-- `link` is a `data.frame` which contains in its rows the GRASS 7 installations on your computer.  -->
-<!-- Here, we will use a GRASS 7\index{GRASS} installation. -->
-<!-- If you have not installed GRASS 7 on your computer, we recommend that you do so now. -->
-<!-- Assuming that we have found a working installation on your computer, we use the corresponding path in `initGRASS`.  -->
-<!-- Additionally, we specify where to store the spatial database\index{spatial database} (gisDbase), name the location `london`, and use the PERMANENT mapset. -->
-<p>After GRASS GIS initialization, we are able to use the <code>execGRASS()</code> function.
-It expects the name of the GRASS GIS module (e.g., <code>"g.proj"</code> or <code>"g.region"</code>) and potentially a few additional arguments or flags, and then it executes the given task in GRASS GIS.
-Here, let’s use it to define the projection, the extent, and the resolution: <code>"g.proj"</code> sets the used CRS, while <code>"g.region"</code> is used to specify the extent and resolution.</p>
-<div class="sourceCode" id="cb369"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">execGRASS</span><span class="op">(</span><span class="st">"g.proj"</span>, flags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"c"</span>, <span class="st">"quiet"</span><span class="op">)</span>, srid <span class="op">=</span> <span class="st">"EPSG:4326"</span><span class="op">)</span></span>
-<span><span class="va">b_box</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html">st_bbox</a></span><span class="op">(</span><span class="va">london_streets</span><span class="op">)</span></span>
-<span><span class="fu">execGRASS</span><span class="op">(</span><span class="st">"g.region"</span>, flags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"quiet"</span><span class="op">)</span>,</span>
-<span>          n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">b_box</span><span class="op">[</span><span class="st">"ymax"</span><span class="op">]</span><span class="op">)</span>, s <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">b_box</span><span class="op">[</span><span class="st">"ymin"</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>          e <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">b_box</span><span class="op">[</span><span class="st">"xmax"</span><span class="op">]</span><span class="op">)</span>, w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">b_box</span><span class="op">[</span><span class="st">"xmin"</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>          res <span class="op">=</span> <span class="st">"1"</span><span class="op">)</span></span></code></pre></div>
-<p>In this example, use are using the “EPSG:4326” CRS and setting our extent to the bounding box of the <code>london_streets</code> dataset.
-You can check if it worked correctly by running <code>execGRASS("g.proj", flags = "p")</code> and <code>execGRASS("g.region", flags = "p")</code>.</p>
-<pre><code>
-Before we can use GRASS geoalgorithms\index{geoalgorithm}, we need to add data to GRASS's spatial database\index{spatial database}.
-Luckily, the convenience function `write_VECT()` does this for us.
-(Use `write_RAST()` for raster data.)
-In our case, we add the street and cycle hire point data while using only the first attribute column, and name them as `london_streets` and `points` in GRASS.
-
-
-```r
-write_VECT(terra::vect(london_streets), vname = "london_streets")
-write_VECT(terra::vect(points[, 1]), vname = "points")</code></pre>
-<!--jn: toDo-->
-<!-- explain terra vectors -->
-<!-- maybe reference my bp or vig -->
-<p>Now, both of datasets exist in the GRASS GIS database.</p>
-<p>To perform our network analysis, we need a topological clean street network.
+<span><span class="fu">link2GI</span><span class="fu">::</span><span class="fu">linkGRASS</span><span class="op">(</span><span class="va">london_streets</span>, ver_select <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>Before we can use GRASS geoalgorithms, we need to add data to GRASS’s spatial database.
+Luckily, the convenience function <code>write_VECT()</code> does this for us.
+(Use <code>write_RAST()</code> for raster data.)
+In our case, we add the street and cycle hire point data while using only the first attribute column, and name them as <code>london_streets</code> and <code>points</code> in GRASS.</p>
+<div class="sourceCode" id="cb366"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">write_VECT</span><span class="op">(</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">london_streets</span><span class="op">)</span>, vname <span class="op">=</span> <span class="st">"london_streets"</span><span class="op">)</span></span>
+<span><span class="fu">write_VECT</span><span class="op">(</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">points</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span>, vname <span class="op">=</span> <span class="st">"points"</span><span class="op">)</span></span></code></pre></div>
+<p>The <strong>rgrass</strong> package expects its inputs and gives its outputs as <strong>terra</strong> objects.
+Therefore, we need to convert our <code>sf</code> spatial vectors to <strong>terra</strong>’s <code>SpatVector</code>s using the <code><a href="https://rdrr.io/pkg/terra/man/vect.html">vect()</a></code> function to be able to use <code>write_VECT()</code>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;You can learn more how to convert between spatial classes in R by reading the (Conversions between different spatial classes in R)[&lt;a href="https://geocompr.github.io/post/2021/spatial-classes-conversion/" class="uri"&gt;https://geocompr.github.io/post/2021/spatial-classes-conversion/&lt;/a&gt;] blog post and the
+(Coercion between object formats)[&lt;a href="https://CRAN.R-project.org/package=rgrass/vignettes/coerce.html" class="uri"&gt;https://CRAN.R-project.org/package=rgrass/vignettes/coerce.html&lt;/a&gt;] vignette&lt;/p&gt;'><sup>60</sup></a></p>
+<p>Now, both of datasets exist in the GRASS GIS database.
+To perform our network analysis, we need a topological clean street network.
 GRASS’s <code>"v.clean"</code> takes care of the removal of duplicates, small angles and dangles, among others.
 Here, we break lines at each intersection to ensure that the subsequent routing algorithm can actually turn right or left at an intersection, and save the output in a GRASS object named <code>streets_clean</code>.</p>
-<div class="sourceCode" id="cb371"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb367"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">execGRASS</span><span class="op">(</span>cmd <span class="op">=</span> <span class="st">"v.clean"</span>, input <span class="op">=</span> <span class="st">"london_streets"</span>, output <span class="op">=</span> <span class="st">"streets_clean"</span>,</span>
 <span>          tool <span class="op">=</span> <span class="st">"break"</span>, flags <span class="op">=</span> <span class="st">"overwrite"</span><span class="op">)</span></span></code></pre></div>
 
@@ -573,7 +525,7 @@ For example, try <code>execGRASS("g.region", flags = "help")</code>.
 However, to find the shortest route between them, we need to connect them to the nearest streets segment.
 <code>"v.net"</code>’s connect-operator does exactly this.
 We save its output in <code>streets_points_con</code>.</p>
-<div class="sourceCode" id="cb372"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb368"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">execGRASS</span><span class="op">(</span>cmd <span class="op">=</span> <span class="st">"v.net"</span>, input <span class="op">=</span> <span class="st">"streets_clean"</span>, output <span class="op">=</span> <span class="st">"streets_points_con"</span>,</span>
 <span>          points <span class="op">=</span> <span class="st">"points"</span>, operation <span class="op">=</span> <span class="st">"connect"</span>, threshold <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>          flags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"overwrite"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -582,12 +534,12 @@ One of its arguments is <code>center_cats</code>, which requires a numeric range
 This range represents the points for which a shortest route should be calculated.
 Since we would like to calculate the route for all cycle stations, we set it to <code>1-25</code>.
 To access the GRASS help page of the traveling salesman algorithm, run <code>execGRASS("g.manual", entry = "v.net.salesman")</code>.</p>
-<div class="sourceCode" id="cb373"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb369"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">execGRASS</span><span class="op">(</span>cmd <span class="op">=</span> <span class="st">"v.net.salesman"</span>, input <span class="op">=</span> <span class="st">"streets_points_con"</span>,</span>
 <span>          output <span class="op">=</span> <span class="st">"shortest_route"</span>, center_cats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"1-"</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">points</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>          flags <span class="op">=</span> <span class="st">"overwrite"</span><span class="op">)</span></span></code></pre></div>
 <p>To see our result, we read the result into R, convert it into an sf-object keeping only the geometry, and visualize it with the help of the <strong>mapview</strong> package (Figure <a href="gis.html#fig:grass-mapview">10.4</a> and Section <a href="adv-map.html#interactive-maps">9.4</a>).</p>
-<div class="sourceCode" id="cb374"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb370"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">route</span> <span class="op">=</span> <span class="fu">read_VECT</span><span class="op">(</span><span class="st">"shortest_route"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -611,6 +563,41 @@ Use <code>"v.select"</code> and <code>"v.extract"</code> for vector data.
 <li>You can also start R from within a running GRASS session <span class="citation">(for more information please refer to <a href="references.html#ref-bivand_applied_2013" role="doc-biblioref">Bivand, Pebesma, and Gómez-Rubio 2013</a>)</span>.</li>
 <li>Refer to the excellent <a href="https://grass.osgeo.org/grass82/manuals/">GRASS online help</a> or <code>execGRASS("g.manual", flags = "i")</code> for more information on each available GRASS geoalgorithm.</li>
 </ul>
+<p>It is also possible to set up a location and a mapset manually to use GRASS from within R.
+First of all, we need to find out if and where GRASS is installed on the computer.</p>
+<div class="sourceCode" id="cb371"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/link2GI/">link2GI</a></span><span class="op">)</span></span>
+<span><span class="va">link</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/link2GI/reference/findGRASS.html">findGRASS</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>GRASS GIS differs from many other GIS software in its approach for handling input data – it puts all of the input data in a GRASS spatial database.
+The GRASS geodatabase system is based on SQLite.
+Consequently, different users can easily work on the same project, possibly with different read/write permissions.
+However, one has to set up this spatial database (also from within R), and users might find this process a bit intimidating in the beginning.
+First of all, the GRASS database requires its own directory, which, in turn, contains a location (see the <a href="https://grass.osgeo.org/grass82/manuals/grass_database.html">GRASS GIS Database</a> help pages at <a href="https://grass.osgeo.org/grass82/manuals/index.html">grass.osgeo.org</a> for further information).
+The location stores the geodata for one project or one area.
+Within one location, several mapsets can exist that typically refer to different users or different tasks.
+Each location also has PERMANENT – a mandatory mapset that is created automatically.
+PERMANENT stores the projection, the spatial extent and the default resolution for raster data.
+In order to share geographic data with all users of a project, the database owner can add spatial data to the PERMANENT mapset.
+So, to sum it all up – the GRASS geodatabase may contain many locations (all data in one location have the same CRS), and each location can store many mapsets (groups of datasets).
+Please refer to <span class="citation">Neteler and Mitasova (<a href="references.html#ref-neteler_open_2008" role="doc-biblioref">2008</a>)</span> and the <a href="https://grass.osgeo.org/grass80/manuals/helptext.html">GRASS GIS quick start</a> for more information on the GRASS spatial database system.</p>
+<p>Next, we need to point to the path to GRASS GIS, and specify where to store the spatial database (gisDbase), name the location <code>london</code>, and use the PERMANENT mapset.</p>
+<div class="sourceCode" id="cb372"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rsbivand.github.io/rgrass/">rgrass</a></span><span class="op">)</span></span>
+<span><span class="va">grass_path</span> <span class="op">=</span> <span class="va">link</span><span class="op">$</span><span class="va">instDir</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="fu">initGRASS</span><span class="op">(</span>gisBase <span class="op">=</span> <span class="va">grass_path</span>, gisDbase <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, </span>
+<span>          location <span class="op">=</span> <span class="st">"london"</span>, mapset <span class="op">=</span> <span class="st">"PERMANENT"</span>, override <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>After GRASS GIS initialization, we are able to use the <code>execGRASS()</code> function.
+It expects the name of the GRASS GIS module (e.g., <code>"g.proj"</code> or <code>"g.region"</code>) and potentially a few additional arguments or flags, and then it executes the given task in GRASS GIS.
+Here, let’s use it to define the projection, the extent, and the resolution: <code>"g.proj"</code> sets the used CRS, while <code>"g.region"</code> is used to specify the extent and resolution.</p>
+<div class="sourceCode" id="cb373"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">execGRASS</span><span class="op">(</span><span class="st">"g.proj"</span>, flags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"c"</span>, <span class="st">"quiet"</span><span class="op">)</span>, srid <span class="op">=</span> <span class="st">"EPSG:4326"</span><span class="op">)</span></span>
+<span><span class="va">b_box</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html">st_bbox</a></span><span class="op">(</span><span class="va">london_streets</span><span class="op">)</span></span>
+<span><span class="fu">execGRASS</span><span class="op">(</span><span class="st">"g.region"</span>, flags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"quiet"</span><span class="op">)</span>,</span>
+<span>          n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">b_box</span><span class="op">[</span><span class="st">"ymax"</span><span class="op">]</span><span class="op">)</span>, s <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">b_box</span><span class="op">[</span><span class="st">"ymin"</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>          e <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">b_box</span><span class="op">[</span><span class="st">"xmax"</span><span class="op">]</span><span class="op">)</span>, w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">b_box</span><span class="op">[</span><span class="st">"xmin"</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>          res <span class="op">=</span> <span class="st">"1"</span><span class="op">)</span></span></code></pre></div>
+<p>In this example, use are using the “EPSG:4326” CRS and setting our extent to the bounding box of the <code>london_streets</code> dataset.
+You can check if it worked correctly by running <code>execGRASS("g.proj", flags = "p")</code> and <code>execGRASS("g.region", flags = "p")</code>.</p>
 </div>
 </div>
 <div id="when-to-use-what" class="section level2" number="10.4">
@@ -662,14 +649,14 @@ It has <a href="https://gdal.org/programs/index.html">geoprocessing tools</a> fo
 <!--expand a list of what is possible-->
 <p>The code chunk below demonstrates this functionality:
 <code><a href="https://r-spatial.github.io/link2GI/reference/linkGDAL.html">linkGDAL()</a></code> searches the computer for a working GDAL installation and adds the location of the executable files to the PATH variable, allowing GDAL to be called.</p>
-<div class="sourceCode" id="cb375"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb374"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">link2GI</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/link2GI/reference/linkGDAL.html">linkGDAL</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <!--toDo:jn-->
 <!--explain the syntax-->
 <p>Now we can use the <code><a href="https://rdrr.io/r/base/system.html">system()</a></code> function to call any of the GDAL tools.
 For example, <code>ogrinfo()</code> provides metadata of a vector dataset.
 Here we will call this tool with two additional flags: <code>-al</code> to list all features of all layers and <code>-so</code> to get a summary only (and not a complete geometry list):</p>
-<div class="sourceCode" id="cb376"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb375"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">our_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shapes/world.gpkg"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span></span>
 <span><span class="va">cmd</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"ogrinfo -al -so"</span>, <span class="va">our_filepath</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.html">system</a></span><span class="op">(</span><span class="va">cmd</span><span class="op">)</span></span>
@@ -700,17 +687,17 @@ They can organize large collections of data into related tables (entities) via u
 This is useful because geographic datasets tend to become big and messy quite quickly.
 Databases enable storing and querying large datasets efficiently based on spatial and non-spatial fields, and provide multi-user access and topology support.</p>
 <p>The most important open source spatial database is PostGIS <span class="citation">(<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">Obe and Hsu 2015</a>)</span>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
-SQLite/SpatiaLite are certainly also important but implicitly we have already introduced this approach since GRASS is using SQLite in the background (see Section &lt;a href="gis.html#grass"&gt;10.3.2&lt;/a&gt;).&lt;/p&gt;'><sup>60</sup></a>
+SQLite/SpatiaLite are certainly also important but implicitly we have already introduced this approach since GRASS is using SQLite in the background (see Section &lt;a href="gis.html#grass"&gt;10.3.2&lt;/a&gt;).&lt;/p&gt;'><sup>61</sup></a>
 R bridges to spatial DBMSs such as PostGIS are important, allowing access to huge data stores without loading several gigabytes of geographic data into RAM, and likely crashing the R session.
 The remainder of this section shows how PostGIS can be called from R, based on “Hello real world” from <em>PostGIS in Action, Second Edition</em> <span class="citation">(<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">Obe and Hsu 2015</a>)</span>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
-Thanks to Manning Publications, Regina Obe and Leo Hsu for permission to use this example.&lt;/p&gt;"><sup>61</sup></a></p>
+Thanks to Manning Publications, Regina Obe and Leo Hsu for permission to use this example.&lt;/p&gt;"><sup>62</sup></a></p>
 <p>The subsequent code requires a working internet connection, since we are accessing a PostgreSQL/PostGIS database which is living in the QGIS Cloud (<a href="https://qgiscloud.com/" class="uri">https://qgiscloud.com/</a>).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 QGIS Cloud lets you store geographic data and maps in the cloud.
 In the background, it uses QGIS Server and PostgreSQL/PostGIS.
 This way, the reader can follow the PostGIS example without the need to have PostgreSQL/PostGIS installed on a local machine.
-Thanks to the QGIS Cloud team for hosting this example.&lt;/p&gt;"><sup>62</sup></a>
+Thanks to the QGIS Cloud team for hosting this example.&lt;/p&gt;"><sup>63</sup></a>
 Our first step here is to create a connection to a database by providing its name, host name, and user information.</p>
-<div class="sourceCode" id="cb377"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb376"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tomoakin/RPostgreSQL">RPostgreSQL</a></span><span class="op">)</span></span>
 <span><span class="va">conn</span> <span class="op">=</span> <span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html">dbConnect</a></span><span class="op">(</span>drv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/RPostgreSQL/man/PostgreSQL.html">PostgreSQL</a></span><span class="op">(</span><span class="op">)</span>, </span>
 <span>                 dbname <span class="op">=</span> <span class="st">"rtafdf_zljbqm"</span>, host <span class="op">=</span> <span class="st">"db.qgiscloud.com"</span>,</span>
@@ -719,7 +706,7 @@ Our first step here is to create a connection to a database by providing its nam
 It does not store any data.</p>
 <p>Often the first question is, ‘which tables can be found in the database?’.
 This can be answered with <code><a href="https://dbi.r-dbi.org/reference/dbListTables.html">dbListTables()</a></code> as follows:</p>
-<div class="sourceCode" id="cb378"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb377"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbListTables.html">dbListTables</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "spatial_ref_sys" "topology"        "layer"           "restaurants"    </span></span>
 <span><span class="co">#&gt; [5] "highways" </span></span></code></pre></div>
@@ -727,7 +714,7 @@ This can be answered with <code><a href="https://dbi.r-dbi.org/reference/dbListT
 Here, we are only interested in the <code>restaurants</code> and the <code>highways</code> tables.
 The former represents the locations of fast-food restaurants in the US, and the latter are principal US highways.
 To find out about attributes available in a table, we can run <code>dbListFields</code>:</p>
-<div class="sourceCode" id="cb379"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb378"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbListFields.html">dbListFields</a></span><span class="op">(</span><span class="va">conn</span>, <span class="st">"highways"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "qc_id"        "wkb_geometry" "gid"          "feature"     </span></span>
 <span><span class="co">#&gt; [5] "name"         "state"   </span></span></code></pre></div>
@@ -736,7 +723,7 @@ The query needs to be provided in a language understandable by the database – 
 The first query will select <code>US Route 1</code> in the state of Maryland (<code>MD</code>) from the <code>highways</code> table.
 Note that <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> allows us to read geographic data from a database if it is provided with an open connection to a database and a query.
 Additionally, <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> needs to know which column represents the geometry (here: <code>wkb_geometry</code>).</p>
-<div class="sourceCode" id="cb380"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb379"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span></span>
 <span>  <span class="st">"SELECT *"</span>,</span>
 <span>  <span class="st">"FROM highways"</span>,</span>
@@ -745,7 +732,7 @@ Additionally, <code><a href="https://r-spatial.github.io/sf/reference/st_read.ht
 <p>This results in an <strong>sf</strong>-object named <code>us_route</code> of type <code>MULTILINESTRING</code>.</p>
 <p>As we mentioned before, it is also possible to not only ask non-spatial questions, but also query datasets based on their spatial properties.
 To show this, the next example adds a 35-kilometer (35,000 m) buffer around the selected highway (Figure <a href="gis.html#fig:postgis">10.5</a>).</p>
-<div class="sourceCode" id="cb381"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb380"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span></span>
 <span>  <span class="st">"SELECT ST_Union(ST_Buffer(wkb_geometry, 35000))::geometry"</span>,</span>
 <span>  <span class="st">"FROM highways"</span>,</span>
@@ -754,9 +741,9 @@ To show this, the next example adds a 35-kilometer (35,000 m) buffer around the 
 <p>Note that this was a spatial query using functions (<code>ST_Union()</code>, <code>ST_Buffer()</code>) you should be already familiar with.
 You find them also in the <strong>sf</strong>-package, though here they are written in lowercase characters (<code><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union()</a></code>, <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>).
 In fact, function names of the <strong>sf</strong> package largely follow the PostGIS naming conventions.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
-The prefix &lt;code&gt;st&lt;/code&gt; stands for space/time.&lt;/p&gt;"><sup>63</sup></a></p>
+The prefix &lt;code&gt;st&lt;/code&gt; stands for space/time.&lt;/p&gt;"><sup>64</sup></a></p>
 <p>The last query will find all Hardee’s restaurants (<code>HDE</code>) within the 35 km buffer zone (Figure <a href="gis.html#fig:postgis">10.5</a>).</p>
-<div class="sourceCode" id="cb382"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb381"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">query</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span></span>
 <span>  <span class="st">"SELECT *"</span>,</span>
 <span>  <span class="st">"FROM restaurants r"</span>,</span>
@@ -772,8 +759,8 @@ The prefix &lt;code&gt;st&lt;/code&gt; stands for space/time.&lt;/p&gt;"><sup>63
 <span><span class="va">hardees</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">conn</span>, query <span class="op">=</span> <span class="va">query</span><span class="op">)</span></span></code></pre></div>
 <p>Please refer to <span class="citation">Obe and Hsu (<a href="references.html#ref-obe_postgis_2015" role="doc-biblioref">2015</a>)</span> for a detailed explanation of the spatial SQL query.
 Finally, it is good practice to close the database connection as follows:<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
-It is important to close the connection here because QGIS Cloud (free version) allows only ten concurrent connections.&lt;/p&gt;"><sup>64</sup></a></p>
-<div class="sourceCode" id="cb383"><pre class="downlit sourceCode r">
+It is important to close the connection here because QGIS Cloud (free version) allows only ten concurrent connections.&lt;/p&gt;"><sup>65</sup></a></p>
+<div class="sourceCode" id="cb382"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">RPostgreSQL</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RPostgreSQL/man/postgresqlSupport.html">postgresqlCloseConnection</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:postgis"></span>
@@ -810,7 +797,7 @@ Besides simple static catalog descriptions, STAC-API presents a web service to q
 In R, the <strong>rstac</strong> package <span class="citation">(<a href="references.html#ref-simoes_rstac_2021" role="doc-biblioref">Simoes et al. 2021</a>)</span> allows to connect to STAC-API endpoints and search for items.
 In the example below, we request all images from the <a href="https://registry.opendata.aws/sentinel-2-l2a-cogs">Sentinel-2 Cloud-Optimized GeoTIFF (COG) dataset on Amazon Web Services</a> that intersect with a predefined area and time of interest.
 The result contains all found images and their metadata (e.g. cloud cover) and URLs pointing to actual files on AWS.</p>
-<div class="sourceCode" id="cb384"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb383"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/brazil-data-cube/rstac">rstac</a></span><span class="op">)</span></span>
 <span><span class="co"># Connect to the STAC-API endpoint for Sentinel-2 data</span></span>
 <span><span class="co"># and search for images intersecting our AOI</span></span>
@@ -827,7 +814,7 @@ As an R user, you don’t have to install anything to work with COGs because <a 
 <p>For larger areas of interest, requested images are still relatively difficult to work with: they may use different map projections, may spatially overlap, and the spatial resolution often depends on the spectral band.
 The <strong>gdalcubes</strong> package <span class="citation">(<a href="references.html#ref-appel_gdalcubes_2019" role="doc-biblioref">Appel and Pebesma 2019</a>)</span> can be used to abstract from individual images and to create and process image collections as four-dimensional data cubes.</p>
 <p>The code below shows a minimal example to create a lower resolution (250m) maximum NDVI composite from the Sentinel-2 images returned by the previous STAC-API search.</p>
-<div class="sourceCode" id="cb385"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb384"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/appelmar/gdalcubes_R">gdalcubes</a></span><span class="op">)</span></span>
 <span><span class="co"># Filter images from STAC response by cloud cover </span></span>
 <span><span class="co"># and create an image collection object</span></span>
@@ -862,7 +849,7 @@ Since the functionality and data availability differs among the backends, the <s
 Afterwards, users can load image collections, apply and chain processes, submit jobs, and explore and plot results.</p>
 <p>The following code will connect to the <a href="https://openeo.cloud/">openEO platform backend</a>, request available datasets, processes, and output formats, define a process graph to compute a maximum NDVI image from Sentinel-2 data, and finally executes the graph after logging in to the backend.
 The openEO platform backend includes a free tier and registration is possible from existing institutional or social platform accounts.</p>
-<div class="sourceCode" id="cb386"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb385"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Open-EO/openeo-r-client">openeo</a></span><span class="op">)</span></span>
 <span><span class="va">con</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/openeo/man/connect.html">connect</a></span><span class="op">(</span>host <span class="op">=</span> <span class="st">"https://openeo.cloud"</span><span class="op">)</span></span>
 <span><span class="va">p</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/openeo/man/processes.html">processes</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># load available processes</span></span>
