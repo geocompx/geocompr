@@ -581,9 +581,9 @@ This is illustrated in the code chunk below, which finds the distance between th
 
 
 ```r
-nz_heighest = nz_height |> slice_max(n = 1, order_by = elevation)
+nz_highest = nz_height |> slice_max(n = 1, order_by = elevation)
 canterbury_centroid = st_centroid(canterbury)
-st_distance(nz_heighest, canterbury_centroid)
+st_distance(nz_highest, canterbury_centroid)
 #> Units: [m]
 #>        [,1]
 #> [1,] 115540
