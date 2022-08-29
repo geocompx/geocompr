@@ -492,8 +492,23 @@ london_streets = dplyr::select(london_streets, osm_id)
 As a convenience to the reader, one can attach `london_streets` to the global environment using `data("london_streets", package = "spDataLarge")`.
 
 Now that we have the data, we can go on and initiate a GRASS\index{GRASS} session.
-First of all, we need to find out if and where GRASS is installed on the computer.
 
+<!-- Once you are familiar with how to set up the GRASS environment, it becomes tedious to do so over and over again. -->
+Luckily, `linkGRASS()` of the **link2GI** packages lets to set up the GRASS environment with just one line of code.
+The only thing you need to provide is a spatial object which determines the projection and the extent of the spatial database\index{spatial database}.
+First, `linkGRASS()` finds all GRASS\index{GRASS} installations on your computer.
+Since we have set `ver_select` to `TRUE`, we can interactively choose one of the found GRASS-installations.
+If there is just one installation, the `linkGRASS()` automatically chooses it.
+Second, `linkGRASS()` establishes a connection to GRASS GIS.
+
+
+```r
+link2GI::linkGRASS(london_streets, ver_select = TRUE)
+```
+
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">
+First of all, we need to find out if and where GRASS is installed on the computer.
+</div>\EndKnitrBlock{rmdnote}
 
 ```r
 library(link2GI)
@@ -553,24 +568,7 @@ execGRASS("g.region", flags = c("quiet"),
 
 In this example, use are using the "EPSG:4326" CRS and setting our extent to the bounding box of the `london_streets` dataset.
 You can check if it worked correctly by running `execGRASS("g.proj", flags = "p")` and `execGRASS("g.region", flags = "p")`.
-
-\BeginKnitrBlock{rmdnote}<div class="rmdnote">To learn about the possible arguments and flags of the GRASS GIS modules you can you the `help` flag.
-For example, try `execGRASS("g.region", flags = "help")`.</div>\EndKnitrBlock{rmdnote}
-
-<!--jn: toDo-->
-<!-- github issue opened -->
-
-<!-- Once you are familiar with how to set up the GRASS environment, it becomes tedious to do so over and over again. -->
-<!-- Luckily, `linkGRASS7()` of the **link2GI** packages lets you do it with one line of code. -->
-<!-- The only thing you need to provide is a spatial object which determines the projection and the extent of the spatial database.\index{spatial database}. -->
-<!-- First, `linkGRASS7()` finds all GRASS\index{GRASS} installations on your computer. -->
-<!-- Since we have set `ver_select` to `TRUE`, we can interactively choose one of the found GRASS-installations. -->
-<!-- If there is just one installation, the `linkGRASS7()` automatically chooses this one. -->
-<!-- Second, `linkGRASS7()` establishes a connection to GRASS 7. -->
-
-<!-- ```{r 09-gis-30, eval=FALSE} -->
-<!-- link2GI::linkGRASS7(london_streets, ver_select = TRUE) -->
-<!-- ``` -->
+```
 
 Before we can use GRASS geoalgorithms\index{geoalgorithm}, we need to add data to GRASS's spatial database\index{spatial database}.
 Luckily, the convenience function `write_VECT()` does this for us.
@@ -598,6 +596,9 @@ Here, we break lines at each intersection to ensure that the subsequent routing 
 execGRASS(cmd = "v.clean", input = "london_streets", output = "streets_clean",
           tool = "break", flags = "overwrite")
 ```
+
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">To learn about the possible arguments and flags of the GRASS GIS modules you can you the `help` flag.
+For example, try `execGRASS("g.region", flags = "help")`.</div>\EndKnitrBlock{rmdnote}
 
 It is likely that a few of our cycling station points will not lie exactly on a street segment.
 However, to find the shortest route\index{shortest route} between them, we need to connect them to the nearest streets segment.
