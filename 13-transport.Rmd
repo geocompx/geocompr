@@ -511,21 +511,6 @@ routes_short = route(l = desire_lines_short, route_fun = route_osrm,
                      osrm.profile = "bike")
 ```
 
-```{r, eval=FALSE, echo=FALSE}
-# save result of previous command
-saveRDS(routes_short, "routes_short.Rds")
-gh_release_upload = function(file, tag = "0.0.1") {
-  msg = glue::glue("gh release upload {tag} {file} --clobber")
-  message("Running this command:\n", msg)
-  # processx::run(msg, spinner = TRUE) # fails...
-  system(msg)
-}
-# piggyback::pb_upload("routes_short.Rds") # fails with:
-# Error in parse_url(url) : length(url) == 1 is not TRUE
-# piggyback::pb_download_url("routes_short.Rds")
-gh_release_upload("routes_short.Rds", tag = "1.9.1-2")
-```
-
 The output is `routes_short`, an `sf` object representing routes on the transport network\index{network} that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line.
 Note: calls to external routing engines such as in the command above only work with an internet connection (and sometimes an API key stored in an environment variable, although not in this case).
 In addition to the columns contained in the `desire_lines` object, the new route dataset contains `distance` (referring to route distance this time) and `duration` columns (in seconds), which provide potentially useful extra information on the nature of each route.
@@ -686,58 +671,55 @@ However, each stage could be useful on its own, and feed into wider analyses.
 To summarize, these were: identifying short but car-dependent commuting routes (generated from desire lines) in Section \@ref(routes); creating desire lines representing trips to rail stations in Section \@ref(nodes); and analysis of transport systems at the route network level using graph theory and the **sfnetworks** package in Section \@ref(route-networks).
 
 The final code chunk of this chapter combines these strands of analysis.
-It adds the car-dependent routes in `routes_short` with a newly created object, `route_rail` and creates a new column representing the amount of travel along the centroid-to-centroid\index{centroid} desire lines they represent:
+It overlays estimates of cycling potential from the previous section on top of a new dataset representing areas within a short distance of cycling infrastructure.
+This new dataset is created in the code chunk below which: 1) filters out the cycleway entities from the `bristol_ways` object representing the transport network; 2) 'unions' the individual LINESTRING entities of the cycleways into a single multilinestring object (for speed of buffering); and 3) creates a 100 m buffer around them to create a polygon:
 
-```{r 13-transport-25, eval=FALSE}
-route_rail = desire_rail |>
-  st_set_geometry("leg_orig") |> 
-  route(l = _, route_fun = route_osrm) |> 
-  select(names(routes_short))
+```{r 13-transport-25}
+existing_cycleways_buffer = bristol_ways |> 
+  filter(highway == "cycleway") |>    # 1) filter out cycleways
+  st_union() |>                       # 2) unite geometries
+  st_buffer(dist = 100)               # 3) create buffer
 ```
 
-```{r, eval=FALSE, echo=FALSE}
-# save result of previous command
-saveRDS(route_rail, "route_rail.Rds")
-piggyback::pb_upload("route_rail.Rds")
-piggyback::pb_download_url("route_rail.Rds")
-route_rail
+The next stage is to create a dataset representing points on the network where there is high cycling potential but little provision for cycling:
+
+```{r 13-transport-26}
+route_network_no_infra = st_difference(
+  route_network_scenario,
+  existing_cycleways_buffer
+)
 ```
 
-```{r 13-transport-25-2, echo=FALSE}
-u = "https://github.com/Robinlovelace/geocompr/releases/download/1.2/route_rail.Rds"
-route_rail = readRDS(url(u))
-```
-
-```{r 13-transport-26, eval=FALSE}
-route_cycleway = rbind(route_rail, routes_short)
-route_cycleway$all = c(desire_rail$all, desire_lines_short$all)
-```
-
-```{r 13-transport-27, eval=FALSE, echo=FALSE}
-n_trips = route_cycleway$all / 100
-tm_shape(route_cycleway) +
-  tm_lines("distance", lwd = "n_trips")
-```
-
-The results of the preceding code are visualized in Figure \@ref(fig:cycleways), which shows routes with high levels of car dependency and highlights opportunities for cycling rail stations (the subsequent code chunk creates a simple version of the figure --- see `code/13-cycleways.R` to reproduce the figure exactly).
-The method has some limitations: in reality, people do not travel to zone centroids or always use the shortest route\index{shortest route} algorithm for a particular mode.
-However, the results demonstrate routes along which cycle paths could be prioritized from car dependency and public transport perspectives.
+The results of the preceding code chunks are shown in Figure \@ref(fig:cycleways), which shows routes with high levels of car dependency and high cycling potential but no cycleways.
 
 ```{r 13-transport-28, eval=FALSE}
-qtm(route_cycleway, lines.lwd = "all")
+tmap_mode("view")
+qtm(route_network_no_infra, basemaps = leaflet::providers$Esri.WorldTopoMap,
+    lines.lwd = 5)
 ```
 
-```{r cycleways, echo=FALSE, message=FALSE, fig.cap="Potential routes along which to prioritise cycle infrastructure in Bristol, based on access key rail stations (red dots) and routes with many short car journeys (north of Bristol surrounding Stoke Bradley). Line thickness is proportional to number of trips.", fig.asp=0.8, out.width="70%", fig.scap="Routes along which to prioritise cycle infrastructure."}
+```{r cycleways, echo=FALSE, message=FALSE, fig.cap="Potential routes along which to prioritise cycle infrastructure in Bristol to reduce car dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right).", out.width="50%", fig.show='hold', fig.scap="Routes along which to prioritise cycle infrastructure."}
+# Previous verson:
 # source("https://github.com/Robinlovelace/geocompr/raw/main/code/13-cycleways.R")
 # m_leaflet
 # tmap_leaflet(m_leaflet) # not working
 # online figure - backup
-u = "https://user-images.githubusercontent.com/1825120/39901156-a8ec9ef6-54be-11e8-94fb-0b5f6b48775e.png"
-knitr::include_graphics(u)
+# u = "https://user-images.githubusercontent.com/1825120/39901156-a8ec9ef6-54be-11e8-94fb-0b5f6b48775e.png"
+# knitr::include_graphics(u)
+tm_shape(existing_cycleways_buffer, bbox = bristol_region) +
+ tm_polygons(col = "lightgreen") +
+ tm_shape(route_network_scenario) +
+ tm_lines(lwd = "bicycle", scale = 9, title.lwd = "No. bike trips (modeled, one direction)")
+knitr::include_graphics("figures/bristol_cycleways_zoomed.png")
 ```
+
+
+The method has some limitations: in reality, people do not travel to zone centroids or always use the shortest route\index{shortest route} algorithm for a particular mode.
+However, the results demonstrate routes along which cycle paths could be prioritized from car dependency and public transport perspectives.
 
 The results may look more attractive in an interactive map, but what do they mean?
 The routes highlighted in Figure \@ref(fig:cycleways) suggest that transport systems are intimately linked to the wider economic and social context.
+
 The example of Stoke Bradley is a case in point: its location, lack of public transport services and active travel infrastructure help explain why it is so highly car-dependent.
 The wider point is that car dependency has a spatial distribution which has implications for sustainable transport policies [@hickman_transitions_2011].
 
