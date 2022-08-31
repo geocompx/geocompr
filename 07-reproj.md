@@ -276,6 +276,17 @@ If a CRS has been set, **sf** will use either GEOS or the S2 *spherical geometry
 <!--jn: s2 section is still missing from the book-->
 Since **sf** version 1.0.0, R's ability to work with geographic vector datasets that have lon/lat CRSs has improved substantially, thanks to its integration with S2 introduced in Section \@ref(s2).
 
+<div class="figure" style="text-align: center">
+
+```{=html}
+<div id="htmlwidget-9b841de324d41155df19" style="width:100%;height:415.296px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9b841de324d41155df19">{"x":{"diagram":"digraph G3 {\n   layout=dot\n   rankdir=TB\n   \n   node [shape = rectangle];\n   rec1 [label = \"Spatial data\" shape = oval];\n   rec2 [label = \"Geographic CRS\" shape = diamond];\n   rec3 [label = \"Projected CRS\" shape = diamond];\n   rec4 [label = \"sf uses s2library for \ngeometry operations\"];\n   rec5 [label = \"sf uses GEOS for \ngeometry operations\"];\n   rec6 [label = \"Result\" shape = oval];\n\n   rec1 -> rec2;\n   rec1 -> rec3;\n   rec2 -> rec4;\n   rec3 -> rec5;\n   rec4 -> rec6;\n   rec5 -> rec6;\n   }","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+```
+
+<p class="caption">(\#fig:s2geos)Behavior of the geometry operations of the sf package depending on the CRS of the input data.</p>
+</div>
+
+
 To demonstrate the importance of CRSs, we will in this section create a buffer of 100 km around the `london` object created in the previous section.
 We will also create a deliberately faulty buffer with a 'distance' of 1 degree, which is roughly equivalent to 100 km (1 degree is about 111 km at the equator).
 Before diving into the code, it may be worth skipping briefly ahead to peek at Figure \@ref(fig:crs-buf) to get a visual handle on the outputs that you should be able to reproduce by following the code chunks below.

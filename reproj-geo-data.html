@@ -32,7 +32,8 @@
 <script src="libs/htmlwidgets-1.5.4/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
 <script src="libs/leaflet-1.3.1/leaflet.js"></script><link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
 <script src="libs/proj4-2.6.2/proj4.min.js"></script><script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script><link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
-<script src="libs/leaflet-binding-2.1.1/leaflet.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+<script src="libs/leaflet-binding-2.1.1/leaflet.js"></script><script src="libs/viz-1.8.2/viz.js"></script><link href="libs/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
+<script src="libs/grViz-binding-1.0.9/grViz.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
 <script>
@@ -329,9 +330,16 @@ If a CRS has been set, <strong>sf</strong> will use either GEOS or the S2 <em>sp
 <!-- Todo: add s2 section -->
 <!--jn: s2 section is still missing from the book-->
 Since <strong>sf</strong> version 1.0.0, R’s ability to work with geographic vector datasets that have lon/lat CRSs has improved substantially, thanks to its integration with S2 introduced in Section <a href="spatial-class.html#s2">2.2.9</a>.</p>
+<div class="figure" style="text-align: center">
+<span style="display:block;" id="fig:s2geos"></span>
+<div id="htmlwidget-9b841de324d41155df19" style="width:100%;height:415.296px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9b841de324d41155df19">{"x":{"diagram":"digraph G3 {\n   layout=dot\n   rankdir=TB\n   \n   node [shape = rectangle];\n   rec1 [label = \"Spatial data\" shape = oval];\n   rec2 [label = \"Geographic CRS\" shape = diamond];\n   rec3 [label = \"Projected CRS\" shape = diamond];\n   rec4 [label = \"sf uses s2library for \ngeometry operations\"];\n   rec5 [label = \"sf uses GEOS for \ngeometry operations\"];\n   rec6 [label = \"Result\" shape = oval];\n\n   rec1 -> rec2;\n   rec1 -> rec3;\n   rec2 -> rec4;\n   rec3 -> rec5;\n   rec4 -> rec6;\n   rec5 -> rec6;\n   }","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><p class="caption">
+FIGURE 7.1: Behavior of the geometry operations of the sf package depending on the CRS of the input data.
+</p>
+</div>
 <p>To demonstrate the importance of CRSs, we will in this section create a buffer of 100 km around the <code>london</code> object created in the previous section.
 We will also create a deliberately faulty buffer with a ‘distance’ of 1 degree, which is roughly equivalent to 100 km (1 degree is about 111 km at the equator).
-Before diving into the code, it may be worth skipping briefly ahead to peek at Figure <a href="reproj-geo-data.html#fig:crs-buf">7.1</a> to get a visual handle on the outputs that you should be able to reproduce by following the code chunks below.</p>
+Before diving into the code, it may be worth skipping briefly ahead to peek at Figure <a href="reproj-geo-data.html#fig:crs-buf">7.2</a> to get a visual handle on the outputs that you should be able to reproduce by following the code chunks below.</p>
 <p>The first stage is to create three buffers around the <code>london</code> and <code>london_geo</code> objects created above with boundary distances of 1 degree and 100 km (or 100,000 m, which can be expressed as <code>1e5</code> in scientific notation) from central London:</p>
 <div class="sourceCode" id="cb233"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">london_buff_no_crs</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london</span>, dist <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>   <span class="co"># incorrect: no CRS</span></span>
@@ -358,7 +366,7 @@ The distance between two lines of longitude, called meridians, is around 111 km 
 This shrinks to zero at the poles.
 At the latitude of London, for example, meridians are less than 70 km apart (challenge: execute code that verifies this).
 <!-- `geosphere::distGeo(c(0, 51.5), c(1, 51.5))` -->
-Lines of latitude, by contrast, are equidistant from each other irrespective of latitude: they are always around 111 km apart, including at the equator and near the poles (see Figures <a href="reproj-geo-data.html#fig:crs-buf">7.1</a> to <a href="reproj-geo-data.html#fig:wintriproj">7.3</a>).
+Lines of latitude, by contrast, are equidistant from each other irrespective of latitude: they are always around 111 km apart, including at the equator and near the poles (see Figures <a href="reproj-geo-data.html#fig:crs-buf">7.2</a> to <a href="reproj-geo-data.html#fig:wintriproj">7.4</a>).
 </div>
 <p>Do not interpret the warning about the geographic (<code>longitude/latitude</code>) CRS as “the CRS should not be set”: it almost always should be!
 It is better understood as a suggestion to <em>reproject</em> the data onto a projected CRS.
@@ -392,17 +400,17 @@ Buffers operations on the <code>london_proj</code> will use GEOS and results wil
 The following line of code creates a buffer around <em>projected</em> data of exactly 100 km:</p>
 <div class="sourceCode" id="cb237"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">london_buff_projected</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_proj</span>, <span class="fl">1e5</span><span class="op">)</span></span></code></pre></div>
-<p>The geometries of the three <code>london_buff*</code> objects that <em>have</em> a specified CRS created above (<code>london_buff_s2</code>, <code>london_buff_lonlat</code> and <code>london_buff_projected</code>) created in the preceding code chunks are illustrated in Figure <a href="reproj-geo-data.html#fig:crs-buf">7.1</a>.</p>
+<p>The geometries of the three <code>london_buff*</code> objects that <em>have</em> a specified CRS created above (<code>london_buff_s2</code>, <code>london_buff_lonlat</code> and <code>london_buff_projected</code>) created in the preceding code chunks are illustrated in Figure <a href="reproj-geo-data.html#fig:crs-buf">7.2</a>.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:crs-buf"></span>
 <img src="07-reproj_files/figure-html/crs-buf-1.png" alt="Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot illustrates the result of buffering unprojected data with sf, which calls Google's S2 spherical geometry engine by default with `max_cells = 1000` (thin line). The thick 'blocky' line illustrates the result of the same operation with `max_cells = 100`." width="100%"><p class="caption">
-FIGURE 7.1: Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot illustrates the result of buffering unprojected data with sf, which calls Google’s S2 spherical geometry engine by default with <code>max_cells = 1000</code> (thin line). The thick ‘blocky’ line illustrates the result of the same operation with <code>max_cells = 100</code>.
+FIGURE 7.2: Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot illustrates the result of buffering unprojected data with sf, which calls Google’s S2 spherical geometry engine by default with <code>max_cells = 1000</code> (thin line). The thick ‘blocky’ line illustrates the result of the same operation with <code>max_cells = 100</code>.
 </p>
 </div>
-<p>It is clear from Figure <a href="reproj-geo-data.html#fig:crs-buf">7.1</a> that buffers based on <code>s2</code> and properly projected CRSs are not ‘squashed’, meaning that every part of the buffer boundary is equidistant to London.
+<p>It is clear from Figure <a href="reproj-geo-data.html#fig:crs-buf">7.2</a> that buffers based on <code>s2</code> and properly projected CRSs are not ‘squashed’, meaning that every part of the buffer boundary is equidistant to London.
 The results that are generated from lon/lat CRSs when <code>s2</code> is <em>not</em> used, either because the input lacks a CRS or because <code><a href="https://r-spatial.github.io/sf/reference/s2.html">sf_use_s2()</a></code> is turned off, are heavily distorted, with the result elongated in the north-south axis, highlighting the dangers of using algorithms that assume projected data on lon/lat inputs (as GEOS does).
 The results generated using S2 are also distorted, however, although less dramatically.
-Both buffer boundaries in Figure <a href="reproj-geo-data.html#fig:crs-buf">7.1</a> (left) are jagged, although this may only be apparent or relevant when for the thick boundary representing a buffer created with the <code>s2</code> argument <code>max_cells</code> set to 100.
+Both buffer boundaries in Figure <a href="reproj-geo-data.html#fig:crs-buf">7.2</a> (left) are jagged, although this may only be apparent or relevant when for the thick boundary representing a buffer created with the <code>s2</code> argument <code>max_cells</code> set to 100.
 <!--toDo:rl-->
 <!--jn: maybe it is worth to emphasize that the differences are due to the use of S2 vs GEOS-->
 <!--jn: you mention S2 a lot in this section, but not GEOS...-->
@@ -428,7 +436,7 @@ However, there are some general principles provided in this section that can hel
 <p>First it’s worth considering <em>when to transform</em>.
 <!--toDo:rl-->
 <!--not longer valid-->
-In some cases transformation to a projected CRS is essential, such as when using geometric functions such as <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>, as Figure <a href="reproj-geo-data.html#fig:crs-buf">7.1</a> showed.
+In some cases transformation to a projected CRS is essential, such as when using geometric functions such as <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>, as Figure <a href="reproj-geo-data.html#fig:crs-buf">7.2</a> showed.
 Conversely, publishing data online with the <strong>leaflet</strong> package may require a geographic CRS.
 Another case is when two objects with different CRSs must be compared or combined, as shown when we try to find the distance between two objects with different CRSs:</p>
 <div class="sourceCode" id="cb238"><pre class="downlit sourceCode r">
@@ -782,18 +790,18 @@ See <span class="citation">Open Geospatial Consortium (<a href="references.html#
 <p>
 PROJ strings can also be used to create custom projections, accepting the limitations inherent to projections, especially of geometries covering large geographic areas, mentioned in Section <a href="reproj-geo-data.html#crs-in-r">7.2</a>.
 Many projections have been developed and can be set with the <code>+proj=</code> element of PROJ strings, with dozens of projects described in detail on the <a href="https://proj.org/operations/projections/index.html">PROJ website</a> alone.</p>
-<p>When mapping the world while preserving area relationships the Mollweide projection, illustrated in Figure <a href="reproj-geo-data.html#fig:mollproj">7.2</a>, is a popular and often sensible choice <span class="citation">(<a href="references.html#ref-jenny_guide_2017" role="doc-biblioref">Jenny et al. 2017</a>)</span>.
+<p>When mapping the world while preserving area relationships the Mollweide projection, illustrated in Figure <a href="reproj-geo-data.html#fig:mollproj">7.3</a>, is a popular and often sensible choice <span class="citation">(<a href="references.html#ref-jenny_guide_2017" role="doc-biblioref">Jenny et al. 2017</a>)</span>.
 To use this projection, we need to specify it using the proj-string element, <code>"+proj=moll"</code>, in the <code>st_transform</code> function:</p>
 <div class="sourceCode" id="cb257"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">world_mollweide</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">world</span>, crs <span class="op">=</span> <span class="st">"+proj=moll"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:mollproj"></span>
 <img src="07-reproj_files/figure-html/mollproj-1.png" alt="Mollweide projection of the world." width="100%"><p class="caption">
-FIGURE 7.2: Mollweide projection of the world.
+FIGURE 7.3: Mollweide projection of the world.
 </p>
 </div>
 <p>It is often desirable to minimize distortion for all spatial properties (area, direction, distance) when mapping the world.
-One of the most popular projections to achieve this is <a href="http://www.winkel.org/other/Winkel%20Tripel%20Projections.htm">Winkel tripel</a>, illustrated in Figure <a href="reproj-geo-data.html#fig:wintriproj">7.3</a>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
+One of the most popular projections to achieve this is <a href="http://www.winkel.org/other/Winkel%20Tripel%20Projections.htm">Winkel tripel</a>, illustrated in Figure <a href="reproj-geo-data.html#fig:wintriproj">7.4</a>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 This projection is used, among others, by the National Geographic Society.&lt;/p&gt;"><sup>35</sup></a>
 The result was created with the following command:</p>
 <div class="sourceCode" id="cb258"><pre class="downlit sourceCode r">
@@ -801,20 +809,20 @@ The result was created with the following command:</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:wintriproj"></span>
 <img src="07-reproj_files/figure-html/wintriproj-1.png" alt="Winkel tripel projection of the world." width="100%"><p class="caption">
-FIGURE 7.3: Winkel tripel projection of the world.
+FIGURE 7.4: Winkel tripel projection of the world.
 </p>
 </div>
 <!--jn:toDO-->
 <!--check if the following block is still correct-->
 <p>Moreover, proj-string parameters can be modified in most CRS definitions, for example the center of the projection can be adjusted using the <code>+lon_0</code> and <code>+lat_0</code> parameters.
-The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on the longitude and latitude of New York City (Figure <a href="reproj-geo-data.html#fig:laeaproj2">7.4</a>).</p>
+The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on the longitude and latitude of New York City (Figure <a href="reproj-geo-data.html#fig:laeaproj2">7.5</a>).</p>
 <div class="sourceCode" id="cb259"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">world_laea2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">world</span>,</span>
 <span>                           crs <span class="op">=</span> <span class="st">"+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:laeaproj2"></span>
 <img src="07-reproj_files/figure-html/laeaproj2-1.png" alt="Lambert azimuthal equal-area projection of the world centered on New York City." width="100%"><p class="caption">
-FIGURE 7.4: Lambert azimuthal equal-area projection of the world centered on New York City.
+FIGURE 7.5: Lambert azimuthal equal-area projection of the world centered on New York City.
 </p>
 </div>
 <p>More information on CRS modifications can be found in the <a href="https://proj.org/usage/index.html">Using PROJ</a> documentation.</p>
@@ -907,7 +915,7 @@ How does it influence the results?</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-08-29.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-08-31.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
