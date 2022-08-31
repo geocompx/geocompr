@@ -271,7 +271,7 @@ Datasets without a specified CRS can cause problems: all geographic coordinates 
 
 If no CRS has been set, **sf** uses the GEOS geometry library for many operations.
 GEOS is not well suited to lon/lat CRSs, as we will see later in this chapter.
-If a CRS has been set, **sf** will use either GEOS or the S2 *spherical geometry engine* depending on the type of CRS.
+If a CRS has been set, **sf** will use either GEOS or the S2 *spherical geometry engine* depending on the type of CRS (Figure \@ref(fig:s2geos)).
 <!-- Todo: add s2 section -->
 <!--jn: s2 section is still missing from the book-->
 Since **sf** version 1.0.0, R's ability to work with geographic vector datasets that have lon/lat CRSs has improved substantially, thanks to its integration with S2 introduced in Section \@ref(s2).
@@ -280,10 +280,10 @@ Since **sf** version 1.0.0, R's ability to work with geographic vector datasets 
 
 ```{=html}
 <div id="htmlwidget-9b841de324d41155df19" style="width:100%;height:415.296px;" class="grViz html-widget"></div>
-<script type="application/json" data-for="htmlwidget-9b841de324d41155df19">{"x":{"diagram":"digraph G3 {\n   layout=dot\n   rankdir=TB\n   \n   node [shape = rectangle];\n   rec1 [label = \"Spatial data\" shape = oval];\n   rec2 [label = \"Geographic CRS\" shape = diamond];\n   rec3 [label = \"Projected CRS\" shape = diamond];\n   rec4 [label = \"sf uses s2library for \ngeometry operations\"];\n   rec5 [label = \"sf uses GEOS for \ngeometry operations\"];\n   rec6 [label = \"Result\" shape = oval];\n\n   rec1 -> rec2;\n   rec1 -> rec3;\n   rec2 -> rec4;\n   rec3 -> rec5;\n   rec4 -> rec6;\n   rec5 -> rec6;\n   }","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-9b841de324d41155df19">{"x":{"diagram":"digraph G3 {\n   layout=dot\n   rankdir=TB\n   \n   node [shape = rectangle];\n   rec1 [label = \"Spatial data\" shape = oval];\n   rec2 [label = \"Geographic CRS\" shape = diamond];\n   rec3 [label = \"Projected CRS\nor CRS is missing\" shape = diamond]\n   rec4 [label = \"sf uses s2library for \ngeometry operations\" center = true];\n   rec5 [label = \"sf uses GEOS for \ngeometry operations\" center = true];\n   rec6 [label = \"Result\" shape = oval weight=100];\n\n   rec1 -> rec2;\n   rec1 -> rec3;\n   rec2 -> rec4;\n   rec3 -> rec5;\n   rec4 -> rec6;\n   rec5 -> rec6;\n   }","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 ```
 
-<p class="caption">(\#fig:s2geos)Behavior of the geometry operations of the sf package depending on the CRS of the input data.</p>
+<p class="caption">(\#fig:s2geos)The behavior of the geometry operations in the sf package depending on the input data's CRS.</p>
 </div>
 
 
