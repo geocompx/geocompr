@@ -34,9 +34,10 @@ install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
 ```
 
 \index{R!installation}
-\BeginKnitrBlock{rmdnote}<div class="rmdnote">If you're running Mac or Linux, the previous command to install **sf** may not work first time.
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">We recommend following R instructions on [CRAN](https://cran.r-project.org/).
+If you're running Mac or Linux, the previous command to install **sf** may not work first time.
 These operating systems (OSs) have 'systems requirements' that are described in the package's [README](https://github.com/r-spatial/sf).
-Various OS-specific instructions can be found online, such as the article *Installation of R 4.0 on Ubuntu 20.04* on the blog [rtask.thinkr.fr](https://rtask.thinkr.fr/installation-of-r-4-0-on-ubuntu-20-04-lts-and-tips-for-spatial-packages/).</div>\EndKnitrBlock{rmdnote}
+Other OS-specific instructions can be found online, including the article *Installation of R 4.2 on Ubuntu 22.04.1 LTS and tips for spatial packages* on the [rtask.thinkr.fr](https://rtask.thinkr.fr/installation-of-r-4-2-on-ubuntu-22-04-lts-and-tips-for-spatial-packages/) website.</div>\EndKnitrBlock{rmdnote}
 
 The packages needed to reproduce Part 1 of this book can be installed with the following command: `remotes::install_github("geocompr/geocompkg")`.
 This command uses the function `install_packages()` from the **remotes** package to install source code hosted on the GitHub code hosting, version and collaboration platform.

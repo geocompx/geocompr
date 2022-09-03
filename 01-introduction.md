@@ -52,11 +52,12 @@ This book aims to go beyond teaching methods and code; by the end of it you shou
 Our approach differs from early adopters such as Stan Openshaw, however, in its emphasis on reproducibility and collaboration.
 At the turn of the 21^st^ Century, it was unrealistic to expect readers to be able to reproduce code examples, due to barriers preventing access to the necessary hardware, software and data.
 Fast-forward two decades and things have progressed rapidly.
-Anyone with access to a laptop with ~4GB RAM can realistically expect to be able to install and run software for geocomputation on publicly accessible datasets, which are more widely available than ever before (as we will see in Chapter \@ref(read-write)).^[
-A laptop with 4GB running a modern operating system such as Ubuntu 22.04 onward should also be able to reproduce the contents of this book.
-A laptop with this specification or above can be acquired second-hand for ~US$100 in most countries today.
-Financial and hardware barriers to geocomputation that existed in 1990s and early 2000s, when high-performance computers were unaffordable for most people, have now been removed.
+Anyone with access to a laptop with sufficient RAM (at least 8 GB recommended) can install and run software for geocomputation, and reproduce the contents of this book.
+Financial and hardware barriers to geocomputation that existed in 1990s and early 2000s, when high-performance computers were too expensive for most people, have been removed.^[
+A suitable laptop can be acquired second-hand for $100 or less in most countries today from websites such as [Ebay](https://www.ebay.com/sch/i.html?_from=R40&_nkw=laptop&_sacat=0&_oaa=1&_udhi=100&rt=nc&RAM%2520Size=4%2520GB%7C16%2520GB%7C8%2520GB&_dcat=177).
+Further information on installing R on modern operating systems such as [Ubuntu 22.04](https://rtask.thinkr.fr/installation-of-r-4-2-on-ubuntu-22-04-lts-and-tips-for-spatial-packages/) is provided in Chapter \@ref(spatial-class).
 ]
+Geocomputation is also more accessible because publicly accessible datasets are more widely available than ever before, as we will see in Chapter \@ref(read-write).
 Unlike early works in the field, all the work presented in this book is reproducible using code and example data supplied alongside the book, in R\index{R} packages such as **spData**, the installation of which is covered in Chapter \@ref(spatial-class).
 
 Geocomputation\index{geocomputation} is closely related to other terms including: Geographic Information Science (GIScience); Geomatics; Geoinformatics; Spatial Information Science; Geoinformation Engineering [@longley_geographic_2015]; and Geographic Data Science\index{Geographic Data Science} (GDS).
@@ -140,7 +141,7 @@ leaflet() |>
 
 <div class="figure" style="text-align: center">
 <iframe src="https://geocompr.github.io/img/interactive.html" width="100%" height="400px" data-external="1"></iframe>
-<p class="caption">(\#fig:interactive)The blue markers indicate where the authors are from. The basemap is a tiled image of the Earth at night provided by NASA. Interact with the online version at geocompr.robinlovelace.net, for example by zooming in and clicking on the popups.</p>
+<p class="caption">(\#fig:01-introduction-leaflet)The blue markers indicate where the authors are from. The basemap is a tiled image of the Earth at night provided by NASA. Interact with the online version at geocompr.robinlovelace.net, for example by zooming in and clicking on the popups.</p>
 </div>
 
 \index{map making!interactive}

@@ -248,7 +248,9 @@ pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
 ```
 
 The resulting matrix serves as input for the NMDS\index{NMDS}.
-`k` specifies the number of output axes, here, set to 4.^[One way of choosing `k` is to try `k` values between 1 and 6 and then using the result which yields the best stress value [@mccune_analysis_2002].]
+`k` specifies the number of output axes, here, set to 4.^[
+One way of choosing `k` is to try `k` values between 1 and 6 and then using the result which yields the best stress value [@mccune_analysis_2002].
+]
 NMDS\index{NMDS} is an iterative procedure trying to make the ordinated space more similar to the input matrix in each step.
 To make sure that the algorithm converges, we set the number of steps to 500 (`try` parameter).
 
