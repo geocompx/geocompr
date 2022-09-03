@@ -1,11 +1,11 @@
-## ----04-spatial-operations-1, message=FALSE, results='hide'--------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-1, message=FALSE, results='hide'-----------------------------------------------------------------------------------------------
 library(sf)
 library(terra)
 library(dplyr)
 library(spData)
 
 
-## ----04-spatial-operations-1-1-------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-1-1----------------------------------------------------------------------------------------------------------------------------
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 grain = rast(system.file("raster/grain.tif", package = "spData"))
 
@@ -13,7 +13,7 @@ grain = rast(system.file("raster/grain.tif", package = "spData"))
 ## It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in Section \@ref(crs-intro) and which will be covered in more depth in Chapter \@ref(reproj-geo-data).
 
 
-## ----04-spatial-operations-3---------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-3------------------------------------------------------------------------------------------------------------------------------
 canterbury = nz |> filter(Name == "Canterbury")
 canterbury_height = nz_height[canterbury, ]
 
@@ -32,7 +32,7 @@ p_hpnz2 = tm_shape(nz) + tm_polygons(col = "white") +
 tmap_arrange(p_hpnz1, p_hpnz2, ncol = 2)
 
 
-## ----04-spatial-operations-4, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-4, eval=FALSE------------------------------------------------------------------------------------------------------------------
 ## nz_height[canterbury, , op = st_disjoint]
 
 
@@ -43,7 +43,7 @@ tmap_arrange(p_hpnz1, p_hpnz2, ncol = 2)
 ## `nz_height[canterbury, 2, op = st_disjoint]`, for example, returns the same rows but only includes the second attribute column (see `` sf:::`[.sf` `` and the `?sf` for details).
 
 
-## ----04-spatial-operations-6---------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-6------------------------------------------------------------------------------------------------------------------------------
 sel_sgbp = st_intersects(x = nz_height, y = canterbury)
 class(sel_sgbp)
 sel_sgbp
@@ -56,12 +56,12 @@ canterbury_height2 = nz_height[sel_logical, ]
 ## Note: the solution involving `sgbp` objects is more generalisable though, as it works for many-to-many operations and has lower memory requirements.
 
 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ---------------------------------------------------------------------------------------------------------------------------------------------------------
 canterbury_height3 = nz_height |>
   st_filter(y = canterbury, .predicate = st_intersects)
 
 
-## ----04-spatial-operations-7b-old, eval=FALSE, echo=FALSE----------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-7b-old, eval=FALSE, echo=FALSE-------------------------------------------------------------------------------------------------
 ## # Additional tests of subsetting
 ## canterbury_height4 = nz_height |>
 ##   filter(st_intersects(x = _, y = canterbury, sparse = FALSE))
@@ -92,7 +92,7 @@ tmap::tmap_arrange(de_9im(p1, p2), de_9im(p1, p3), de_9im(p1, p4),
                    de_9im(p7, p1), de_9im(p1, p5), de_9im(p1, p6), nrow = 2)
 
 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ---------------------------------------------------------------------------------------------------------------------------------------------------------
 polygon_matrix = cbind(
   x = c(0, 0, 1, 1,   0),
   y = c(0, 1, 1, 0.5, 0)
@@ -100,7 +100,7 @@ polygon_matrix = cbind(
 polygon_sfc = st_sfc(st_polygon(list(polygon_matrix)))
 
 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ---------------------------------------------------------------------------------------------------------------------------------------------------------
 line_sfc = st_sfc(st_linestring(cbind(
   x = c(0.4, 1),
   y = c(0.2, 0.5)
@@ -121,7 +121,7 @@ plot(point_sf, add = TRUE, lab = 1:4, cex = 2)
 text(point_df[, 1] + 0.02, point_df[, 2] + 0.04, 1:3, cex = 1.3)
 
 
-## ----04-spatial-operations-9, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-9, eval=FALSE------------------------------------------------------------------------------------------------------------------
 ## st_intersects(point_sf, polygon_sfc)
 ## #> Sparse geometry binary predicate... `intersects'
 ## #>  1: 1
@@ -129,24 +129,24 @@ text(point_df[, 1] + 0.02, point_df[, 2] + 0.04, 1:3, cex = 1.3)
 ## #>  3: 1
 
 
-## ----04-spatial-operations-10--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-10-----------------------------------------------------------------------------------------------------------------------------
 st_intersects(point_sf, polygon_sfc, sparse = FALSE)
 
 
-## ----04-spatial-operations-9-2, eval=FALSE-------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-9-2, eval=FALSE----------------------------------------------------------------------------------------------------------------
 ## st_within(point_sf, polygon_sfc)
 ## st_touches(point_sf, polygon_sfc)
 
 
-## ----04-spatial-operations-11--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-11-----------------------------------------------------------------------------------------------------------------------------
 st_disjoint(point_sf, polygon_sfc, sparse = FALSE)[, 1]
 
 
-## ----04-spatial-operations-14--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-14-----------------------------------------------------------------------------------------------------------------------------
 st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
 
 
-## ---- eval=FALSE, echo=FALSE---------------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE, echo=FALSE------------------------------------------------------------------------------------------------------------------------------
 ## # verify distances to the polygon with reference to paragraph above:
 ## st_distance(point_sf, polygon_sfc)
 ## #           [,1]
@@ -164,18 +164,18 @@ st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
 ## You can learn more at https://www.r-spatial.org/r/2017/06/22/spatial-index.html.
 
 
-## ----04-spatial-operations-16, eval=FALSE, echo=FALSE--------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-16, eval=FALSE, echo=FALSE-----------------------------------------------------------------------------------------------------
 ## # other tests
 ## st_overlaps(point_sf, polygon_sfc, sparse = FALSE)
 ## st_covers(point_sf, polygon_sfc, sparse = FALSE)
 ## st_covered_by(point_sf, polygon_sfc, sparse = FALSE)
 
 
-## ----04-spatial-operations-17, eval=FALSE, echo=FALSE--------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-17, eval=FALSE, echo=FALSE-----------------------------------------------------------------------------------------------------
 ## st_contains(a, p[2, ], sparse = TRUE)
 
 
-## ----04-spatial-operations-18, eval=FALSE, echo=FALSE--------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-18, eval=FALSE, echo=FALSE-----------------------------------------------------------------------------------------------------
 ## # starting simpler so commented
 ## a1 = st_polygon(list(rbind(c(-1, -1), c(1, -1), c(1, 1), c(-1, -1))))
 ## a2 = st_polygon(list(rbind(c(2, 0), c(2, 2), c(3, 2), c(3, 0), c(2, 0))))
@@ -197,7 +197,7 @@ st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
 ## plot(p, add = TRUE)
 
 
-## ----de-9im, echo=FALSE, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------------------
+## ----de-9im, echo=FALSE, eval=FALSE-----------------------------------------------------------------------------------------------------------------------
 ## # Todo one day: revive this
 ## b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
 ## b = st_buffer(b, dist = 1) # convert points to circles
@@ -326,7 +326,7 @@ ggplot(b9sf) +
   theme(legend.position = "top")
 
 
-## ----de9emtable, echo=FALSE----------------------------------------------------------------------------------------------------------------------------------------------------
+## ----de9emtable, echo=FALSE-------------------------------------------------------------------------------------------------------------------------------
 # See https://github.com/Robinlovelace/geocompr/issues/699
 pattern = st_relate(p1, p3)
 matrix_de_9im = function(pattern) {
@@ -343,19 +343,19 @@ rownames(m) = c("Interior (y)", "Boundary (y)", "Exterior (y)")
 knitr::kable(m, caption = "Table showing relations between interiors, boundaries and exteriors of geometries x and y.")
 
 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ---------------------------------------------------------------------------------------------------------------------------------------------------------
 xy2sfc = function(x, y) st_sfc(st_polygon(list(cbind(x, y))))
 x = xy2sfc(x = c(0, 0, 1, 1,   0), y = c(0, 1, 1, 0.5, 0))
 y = xy2sfc(x = c(0.7, 0.7, 0.9, 0.7), y = c(0.8, 0.5, 0.5, 0.8))
 st_relate(x, y)
 
 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ---------------------------------------------------------------------------------------------------------------------------------------------------------
 st_queen = function(x, y) st_relate(x, y, pattern = "F***T****")
 st_rook = function(x, y) st_relate(x, y, pattern = "F***1****")
 
 
-## ----queenscode, fig.show='hide'-----------------------------------------------------------------------------------------------------------------------------------------------
+## ----queenscode, fig.show='hide'--------------------------------------------------------------------------------------------------------------------------
 grid = st_make_grid(x, n = 3)
 grid_sf = st_sf(grid)
 grid_sf$queens = lengths(st_queen(grid, grid[5])) > 0
@@ -373,7 +373,7 @@ tm_shape(grid_sf) +
             panel.labels = c("queen", "rook"))
 
 
-## ---- echo=FALSE, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------------------------
+## ---- echo=FALSE, eval=FALSE------------------------------------------------------------------------------------------------------------------------------
 ## st_lineoverlap = function(x, y) st_relate(x, y, pattern = "T*1******")
 ## line1 = st_sfc(st_linestring(cbind(
 ##   x = c(0, 0.8),
@@ -425,7 +425,7 @@ tm_shape(grid_sf) +
 ## 
 
 
-## ----04-spatial-operations-19--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-19-----------------------------------------------------------------------------------------------------------------------------
 set.seed(2018) # set seed for reproducibility
 (bb = st_bbox(world)) # the world's bounds
 random_df = data.frame(
@@ -437,7 +437,7 @@ random_points = random_df |>
   st_set_crs("EPSG:4326") # set geographic CRS
 
 
-## ----04-spatial-operations-20, message=FALSE-----------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-20, message=FALSE--------------------------------------------------------------------------------------------------------------
 world_random = world[random_points, ]
 nrow(world_random)
 random_joined = st_join(random_points, world["name_long"])
@@ -449,16 +449,16 @@ source("code/04-spatial-join.R")
 tmap_arrange(jm1, jm2, jm3, jm4, nrow = 2, ncol = 2)
 
 
-## ----04-spatial-operations-21, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-21, eval=FALSE-----------------------------------------------------------------------------------------------------------------
 ## plot(st_geometry(cycle_hire), col = "blue")
 ## plot(st_geometry(cycle_hire_osm), add = TRUE, pch = 3, col = "red")
 
 
-## ----04-spatial-operations-22, message=FALSE-----------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-22, message=FALSE--------------------------------------------------------------------------------------------------------------
 any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
 
 
-## ----04-spatial-operations-23, echo=FALSE, eval=FALSE--------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-23, echo=FALSE, eval=FALSE-----------------------------------------------------------------------------------------------------
 ## # included to show alternative ways of showing there's no overlap
 ## sum(st_geometry(cycle_hire) %in% st_geometry(cycle_hire_osm))
 ## sum(st_coordinates(cycle_hire)[, 1] %in% st_coordinates(cycle_hire_osm)[, 1])
@@ -484,19 +484,19 @@ if (knitr::is_latex_output()){
 }
 
 
-## ----04-spatial-operations-24--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-24-----------------------------------------------------------------------------------------------------------------------------
 sel = st_is_within_distance(cycle_hire, cycle_hire_osm, dist = 20)
 summary(lengths(sel) > 0)
 
 
-## ----04-spatial-operations-24-without-s2-test, eval=FALSE, echo=FALSE----------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-24-without-s2-test, eval=FALSE, echo=FALSE-------------------------------------------------------------------------------------
 ## sf::sf_use_s2(FALSE)
 ## sel = st_is_within_distance(cycle_hire, cycle_hire_osm, dist = 20)
 ## summary(lengths(sel) > 0)
 ## # still works: must be lwgeom or some other magic!
 
 
-## ----04-spatial-operations-24-projected, eval=FALSE, echo=FALSE----------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-24-projected, eval=FALSE, echo=FALSE-------------------------------------------------------------------------------------------
 ## # This chunk contains the non-overlapping join on projected data, a step that is no longer needed:
 ## # Note that, before performing the relation, both objects are transformed into a projected CRS.
 ## # These projected objects are created below (note the affix `_P`, short for projected):
@@ -506,42 +506,42 @@ summary(lengths(sel) > 0)
 ## summary(lengths(sel) > 0)
 
 
-## ----04-spatial-operations-25--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-25-----------------------------------------------------------------------------------------------------------------------------
 z = st_join(cycle_hire, cycle_hire_osm, st_is_within_distance, dist = 20)
 nrow(cycle_hire)
 nrow(z)
 
 
-## ----04-spatial-operations-26--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-26-----------------------------------------------------------------------------------------------------------------------------
 z = z |> 
   group_by(id) |> 
   summarize(capacity = mean(capacity))
 nrow(z) == nrow(cycle_hire)
 
 
-## ----04-spatial-operations-27, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-27, eval=FALSE-----------------------------------------------------------------------------------------------------------------
 ## plot(cycle_hire_osm["capacity"])
 ## plot(z["capacity"])
 
 
-## ----04-spatial-operations-28--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-28-----------------------------------------------------------------------------------------------------------------------------
 nz_agg = aggregate(x = nz_height, by = nz, FUN = mean)
 
 
-## ----spatial-aggregation, echo=FALSE, fig.cap="Average height of the top 101 high points across the regions of New Zealand.", fig.asp=1, message=FALSE, out.width="50%"--------
+## ----spatial-aggregation, echo=FALSE, fig.cap="Average height of the top 101 high points across the regions of New Zealand.", fig.asp=1, message=FALSE, out.width="50%"----
 library(tmap)
 tm_shape(nz_agg) +
   tm_fill("elevation", breaks = seq(27, 30, by = 0.5) * 1e2) +
   tm_borders()
 
 
-## ----04-spatial-operations-29--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-29-----------------------------------------------------------------------------------------------------------------------------
 nz_agg2 = st_join(x = nz, y = nz_height) |>
   group_by(Name) |>
   summarize(elevation = mean(elevation, na.rm = TRUE))
 
 
-## ----test-tidy-spatial-join, eval=FALSE, echo=FALSE----------------------------------------------------------------------------------------------------------------------------
+## ----test-tidy-spatial-join, eval=FALSE, echo=FALSE-------------------------------------------------------------------------------------------------------
 ## plot(nz_agg)
 ## plot(nz_agg2)
 ## # aggregate looses the name of aggregating objects
@@ -551,36 +551,36 @@ nz_agg2 = st_join(x = nz, y = nz_height) |>
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/04-areal-example.R", print.eval = TRUE)
 
 
-## ----04-spatial-operations-30--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-30-----------------------------------------------------------------------------------------------------------------------------
 iv = incongruent["value"] # keep only the values to be transferred
 agg_aw = st_interpolate_aw(iv, aggregating_zones, extensive = TRUE)
 agg_aw$value
 
 
-## ----04-spatial-operations-31, warning=FALSE-----------------------------------------------------------------------------------------------------------------------------------
-nz_heighest = nz_height |> slice_max(n = 1, order_by = elevation)
+## ----04-spatial-operations-31, warning=FALSE--------------------------------------------------------------------------------------------------------------
+nz_highest = nz_height |> slice_max(n = 1, order_by = elevation)
 canterbury_centroid = st_centroid(canterbury)
-st_distance(nz_heighest, canterbury_centroid)
+st_distance(nz_highest, canterbury_centroid)
 
 
-## ----04-spatial-operations-32--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-32-----------------------------------------------------------------------------------------------------------------------------
 co = filter(nz, grepl("Canter|Otag", Name))
 st_distance(nz_height[1:3, ], co)
 
 
-## ----04-spatial-operations-33, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-33, eval=FALSE-----------------------------------------------------------------------------------------------------------------
 ## plot(st_geometry(co)[2])
 ## plot(st_geometry(nz_height)[2:3], add = TRUE)
 
 
-## ----04-spatial-operations-34, eval = FALSE------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-34, eval = FALSE---------------------------------------------------------------------------------------------------------------
 ## id = cellFromXY(elev, xy = matrix(c(0.1, 0.1), ncol = 2))
 ## elev[id]
 ## # the same as
 ## terra::extract(elev, matrix(c(0.1, 0.1), ncol = 2))
 
 
-## ----04-spatial-operations-35, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-35, eval=FALSE-----------------------------------------------------------------------------------------------------------------
 ## clip = rast(xmin = 0.9, xmax = 1.8, ymin = -0.45, ymax = 0.45,
 ##             resolution = 0.3, vals = rep(1, 9))
 ## elev[clip]
@@ -588,40 +588,40 @@ st_distance(nz_height[1:3, ], co)
 ## # terra::extract(elev, ext(clip))
 
 
-## ----raster-subset, echo = FALSE, fig.cap = "Original raster (left). Raster mask (middle). Output of masking a raster (right).", fig.scap="Subsetting raster values."----------
+## ----raster-subset, echo = FALSE, fig.cap = "Original raster (left). Raster mask (middle). Output of masking a raster (right).", fig.scap="Subsetting raster values."----
 knitr::include_graphics("figures/04_raster_subset.png")
 
 
-## ----04-spatial-operations-36, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-36, eval=FALSE-----------------------------------------------------------------------------------------------------------------
 ## elev[1:2, drop = FALSE]    # spatial subsetting with cell IDs
 ## #> class       : SpatRaster
 ## #> dimensions  : 1, 2, 1  (nrow, ncol, nlyr)
 ## #> ...
 
 
-## ----04-spatial-operations-37, echo=FALSE, eval=FALSE--------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-37, echo=FALSE, eval=FALSE-----------------------------------------------------------------------------------------------------
 ## # aim: illustrate the result of previous spatial subsetting example
 ## x = elev[1, 1:2, drop = FALSE]
 ## plot(x)
 
 
-## ----04-spatial-operations-38, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-38, eval=FALSE-----------------------------------------------------------------------------------------------------------------
 ## # create raster mask
 ## rmask = elev
 ## values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
 
 
-## ----04-spatial-operations-38b, eval=FALSE-------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-38b, eval=FALSE----------------------------------------------------------------------------------------------------------------
 ## # spatial subsetting
 ## elev[rmask, drop = FALSE]           # with [ operator
 ## mask(elev, rmask)                   # with mask()
 
 
-## ----04-spatial-operations-38c, eval=FALSE-------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-38c, eval=FALSE----------------------------------------------------------------------------------------------------------------
 ## elev[elev < 20] = NA
 
 
-## ----04-spatial-operations-41, eval = FALSE------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-41, eval = FALSE---------------------------------------------------------------------------------------------------------------
 ## elev + elev
 ## elev^2
 ## log(elev)
@@ -632,35 +632,35 @@ knitr::include_graphics("figures/04_raster_subset.png")
 knitr::include_graphics("figures/04-local-operations.png")
 
 
-## ----04-spatial-operations-40--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-40-----------------------------------------------------------------------------------------------------------------------------
 rcl = matrix(c(0, 12, 1, 12, 24, 2, 24, 36, 3), ncol = 3, byrow = TRUE)
 rcl
 
 
-## ----04-spatial-operations-40b, eval = FALSE-----------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-40b, eval = FALSE--------------------------------------------------------------------------------------------------------------
 ## recl = classify(elev, rcl = rcl)
 
 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ---------------------------------------------------------------------------------------------------------------------------------------------------------
 multi_raster_file = system.file("raster/landsat.tif", package = "spDataLarge")
 multi_rast = rast(multi_raster_file)
 
 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ndvi_fun = function(nir, red){
   (nir - red) / (nir + red)
 }
 
 
-## ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ndvi_rast = lapp(multi_rast[[c(4, 3)]], fun = ndvi_fun)
 
 
-## ----04-ndvi, echo=FALSE, fig.cap="RGB image (left) and NDVI values (right) calculated for the example satellite file of the Zion National Park"-------------------------------
+## ----04-ndvi, echo=FALSE, fig.cap="RGB image (left) and NDVI values (right) calculated for the example satellite file of the Zion National Park"----------
 knitr::include_graphics("figures/04-ndvi.png")
 
 
-## ----04-spatial-operations-42, eval = FALSE------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-42, eval = FALSE---------------------------------------------------------------------------------------------------------------
 ## r_focal = focal(elev, w = matrix(1, nrow = 3, ncol = 3), fun = min)
 
 
@@ -668,18 +668,18 @@ knitr::include_graphics("figures/04-ndvi.png")
 knitr::include_graphics("figures/04_focal_example.png")
 
 
-## ----04-spatial-operations-43--------------------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-43-----------------------------------------------------------------------------------------------------------------------------
 z = zonal(elev, grain, fun = "mean")
 z
 
 
-## ----04-spatial-operations-44, eval = FALSE------------------------------------------------------------------------------------------------------------------------------------
+## ----04-spatial-operations-44, eval = FALSE---------------------------------------------------------------------------------------------------------------
 ## aut = geodata::elevation_30s(country = "AUT", path = tempdir())
 ## ch = geodata::elevation_30s(country = "CHE", path = tempdir())
 ## aut_ch = merge(aut, ch)
 
 
-## ---- echo=FALSE, results='asis'-----------------------------------------------------------------------------------------------------------------------------------------------
+## ---- echo=FALSE, results='asis'--------------------------------------------------------------------------------------------------------------------------
 res = knitr::knit_child('_04-ex.Rmd', quiet = TRUE, options = list(include = FALSE, eval = FALSE))
 cat(res, sep = '\n')
 

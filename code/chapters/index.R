@@ -1,7 +1,21 @@
-## ----index-1, echo=FALSE-------------------------------------------------------------------------------------------------------------------------------------------------------
+## ----index-1, echo=FALSE----------------------------------------------------------------------------------------------------------------------------------
 is_on_ghactions = identical(Sys.getenv("GITHUB_ACTIONS"), "true")
 is_online = curl::has_internet()
 is_html = knitr::is_html_output()
+
+
+## ---- echo = FALSE----------------------------------------------------------------------------------------------------------------------------------------
+# google scholar metadata
+library(metathis)
+if (is_html) {
+  meta() |> 
+    meta_google_scholar(
+      title = "Geocomputation with R",
+      author = c("Robin Lovelace", "Jakub Nowosad", "Jannes Muenchow"),
+      publication_date = "2019",
+      isbn = "9780203730058"
+    ) 
+}
 
 
 ## # Welcome {-}
@@ -103,12 +117,12 @@ is_html = knitr::is_html_output()
 ## These can be installed using the [**remotes**](https://github.com/r-lib/remotes) package.
 
 
-## ----index-3, message=FALSE, eval=FALSE, echo=is_html, results='hide'----------------------------------------------------------------------------------------------------------
+## ----index-3, message=FALSE, eval=FALSE, echo=is_html, results='hide'-------------------------------------------------------------------------------------
 ## install.packages("remotes")
 ## remotes::install_github("geocompr/geocompkg")
 
 
-## ---- echo=FALSE, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------------------------
+## ---- echo=FALSE, eval=FALSE------------------------------------------------------------------------------------------------------------------------------
 ## remotes::install_github("nowosad/spData")
 ## remotes::install_github("nowosad/spDataLarge")
 ## 
@@ -125,11 +139,11 @@ is_html = knitr::is_html_output()
 ## After opening the `geocompr.Rproj` project in [RStudio](https://www.rstudio.com/products/rstudio/download/#download) (or opening the folder in another IDE such as [VS Code](https://github.com/REditorSupport/vscode-R)), you should be able to reproduce the contents with the following command:
 
 
-## ----index-3-1, eval=FALSE, echo=is_html---------------------------------------------------------------------------------------------------------------------------------------
+## ----index-3-1, eval=FALSE, echo=is_html------------------------------------------------------------------------------------------------------------------
 ## bookdown::serve_book(".")
 
 
-## ----index-3-2, echo=FALSE, include=FALSE--------------------------------------------------------------------------------------------------------------------------------------
+## ----index-3-2, echo=FALSE, include=FALSE-----------------------------------------------------------------------------------------------------------------
 # is geocompkg installed?
 geocompkg_is_installed = "geocompkg" %in% installed.packages()
 if(!geocompkg_is_installed){
@@ -208,7 +222,7 @@ if(!geocompkg_is_installed){
 ## \begin{center} \Large \emph{F{\"u}r meine Katharina und alle unsere Kinder  } \end{center}
 
 
-## ----contrib-preface, include=FALSE--------------------------------------------------------------------------------------------------------------------------------------------
+## ----contrib-preface, include=FALSE-----------------------------------------------------------------------------------------------------------------------
 contributors = readr::read_csv("extdata/contributors.csv")
 c_txt = contributors$name
 c_url = contributors$link
