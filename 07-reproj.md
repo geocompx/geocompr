@@ -269,10 +269,9 @@ Datasets without a specified CRS can cause problems: all geographic coordinates 
 
 ## Geometry operations on projected and unprojected data {#geom-proj}
 
-If no CRS has been set, **sf** uses the GEOS geometry library for many operations.
-GEOS is not well suited to lon/lat CRSs, as we will see later in this chapter.
-If a CRS has been set, **sf** will use either GEOS or the S2 *spherical geometry engine* depending on the type of CRS (Figure \@ref(fig:s2geos)).
-Since **sf** version 1.0.0, R's ability to work with geographic vector datasets that have lon/lat CRSs has improved substantially, thanks to its integration with S2 introduced in Section \@ref(s2).
+Since **sf** version 1.0.0, R's ability to work with geographic vector datasets that have lon/lat CRSs has improved substantially, thanks to its integration with the S2 *spherical geometry engine* introduced in Section \@ref(s2).
+As shown in Figure \@ref(fig:s2geos), **sf** uses either GEOS or the S2  depending on the type of CRS and whether S2 has been disabled (it is enabled by default).
+GEOS is always used for projected data and data with no CRS; for geographic data S2 is used by default but can be disabled with `sf::sf_use_s2(FALSE)`
 
 <div class="figure" style="text-align: center">
 <img src="figures/07-s2geos.png" alt="The behavior of the geometry operations in the sf package depending on the input data's CRS." width="100%" />
@@ -280,7 +279,7 @@ Since **sf** version 1.0.0, R's ability to work with geographic vector datasets 
 </div>
 
 
-To demonstrate the importance of CRSs, we will in this section create a buffer of 100 km around the `london` object created in the previous section.
+To demonstrate the importance of CRSs, we will create buffer of 100 km around the `london` object from the previous section.
 We will also create a deliberately faulty buffer with a 'distance' of 1 degree, which is roughly equivalent to 100 km (1 degree is about 111 km at the equator).
 Before diving into the code, it may be worth skipping briefly ahead to peek at Figure \@ref(fig:crs-buf) to get a visual handle on the outputs that you should be able to reproduce by following the code chunks below.
 
