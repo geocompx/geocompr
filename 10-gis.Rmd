@@ -9,6 +9,9 @@ library(sf)
 library(terra)
 ```
 
+<!--toDo:jn-->
+<!-- qgisprocess to CRAN -->
+
 ```{r 09-gis-1-2, message=FALSE, eval=FALSE}
 # remotes::install_github("paleolimbot/qgisprocess")
 library(qgisprocess)
@@ -17,9 +20,6 @@ library(rgrass)
 library(rstac)
 library(gdalcubes)
 ```
-
-<!-- issue of rgrass -->
-<!-- https://github.com/rsbivand/rgrass -->
 
 ## Introduction
 
@@ -33,14 +33,10 @@ it was only after the widespread uptake of computer mice and high-resolution scr
 GRASS, one of the longest-standing GIS\index{GIS} programs, for example, relied primarily on command-line interaction before it gained a sophisticated GUI [@landa_new_2008].
 ]
 In dedicated GIS\index{GIS} packages, by contrast, the emphasis tends to be on the graphical user interface (GUI)\index{graphical user interface}.
-You *can* interact with GRASS\index{GRASS}, QGIS\index{QGIS}, SAGA\index{SAGA} and gvSIG from system terminals and embedded CLIs\index{command-line interface}, but 'pointing and clicking' is the norm.
+You *can* interact with QGIS\index{QGIS}, SAGA\index{SAGA}, GRASS\index{GRASS} and gvSIG from system terminals and embedded CLIs\index{command-line interface}, but 'pointing and clicking' is the norm.
 This means many GIS\index{GIS} users miss out on the advantages of the command-line according to Gary Sherman, creator of QGIS\index{QGIS} [@sherman_desktop_2008]:
 
-> With the advent of 'modern' GIS software, most people want to point and
-click their way through life. That’s good, but there is a tremendous amount
-of flexibility and power waiting for you with the command line. Many times
-you can do something on the command line in a fraction of the time you
-can do it with a GUI.
+> With the advent of 'modern' GIS software, most people want to point and click their way through life. That’s good, but there is a tremendous amount of flexibility and power waiting for you with the command line. Many times you can do something on the command line in a fraction of the time you can do it with a GUI.
 
 The 'CLI vs GUI'\index{graphical user interface} debate can be adversial but it does not have to be; both options can be used interchangeably, depending on the task at hand and the user's skillset.^[GRASS GIS and PostGIS are popular in academia and industry and can be seen as products which buck this trend as they are built around the command-line.]
 The advantages of a good CLI\index{command-line interface} such as that provided by R (and enhanced by IDEs\index{IDE} such as RStudio\index{RStudio}) are numerous.
@@ -94,9 +90,9 @@ To complement the R-GIS bridges, the chapter ends with a very brief introduction
 
 ```{r gis-comp, echo=FALSE, message=FALSE}
 library(dplyr)
-d = tibble("GIS" = c("GRASS", "QGIS", "SAGA"),
-            "First release" = c("1984", "2002", "2004"),
-            "No. functions" = c(">500", ">1000", ">600"),
+d = tibble("GIS" = c("QGIS", "SAGA", "GRASS"),
+            "First release" = c("2002", "2004", "1982"),
+            "No. functions" = c(">1000", ">600", ">500"),
             "Support" = c("hybrid", "hybrid", "hybrid"))
 knitr::kable(x = d, 
              caption = paste("Comparison between three open-source GIS.", 
@@ -467,7 +463,7 @@ tm_shape(ndvi) +
 
 ### GRASS GIS {#grass}
 
-The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the Geographical Resources Analysis Support System (GRASS)\index{GRASS} [Table \@ref(tab:gis-comp); @neteler_open_2008] from 1982 to 1995. 
+The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the Geographical Resources Analysis Support System (GRASS)\index{GRASS} (Table \@ref(tab:gis-comp); @neteler_open_2008) from 1982 to 1995. 
 Academia continued this work since 1997.
 Similar to SAGA\index{SAGA}, GRASS focused on raster processing in the beginning while only later, since GRASS 6.0, adding advanced vector functionality [@bivand_applied_2013].
 
@@ -489,11 +485,7 @@ points = cycle_hire[1:25, ]
 Aside from the cycle hire points data, we need a street network for this area.
 We can download it with from OpenStreetMap\index{OpenStreetMap} with the help of the **osmdata** \index{osmdata (package)} package (see also Section \@ref(retrieving-data)).
 To do this, we constrain the query of the street network (in OSM language called "highway") to the bounding box\index{bounding box} of `points`, and attach the corresponding data as an `sf`-object\index{sf}.
-`osmdata_sf()` returns a list with several spatial objects (points, lines, polygons, etc.), but here, we only keep the line objects with their related ids.
-<!-- OpenStreetMap\index{OpenStreetMap} objects come with a lot of columns, `streets` features almost 500. -->
-<!-- In fact, we are only interested in the geometry column. -->
-<!-- Nevertheless, we are keeping one attribute column; otherwise, we will run into trouble when trying to provide `writeVECT()` only with a geometry object (see further below and `?writeVECT` for more details). -->
-<!-- Remember that the geometry column is sticky, hence, even though we are just selecting one attribute, the geometry column will be also returned (see Section \@ref(intro-sf)). -->
+`osmdata_sf()` returns a list with several spatial objects (points, lines, polygons, etc.), but here, we only keep the line objects with their related ids.^[As a convenience to the reader, one can attach `london_streets` to the global environment using `data("london_streets", package = "spDataLarge")`.]
 
 ```{r 09-gis-25, eval=FALSE}
 library(osmdata)
@@ -505,10 +497,8 @@ london_streets = london_streets[["osm_lines"]]
 london_streets = dplyr::select(london_streets, osm_id)
 ```
 
-As a convenience to the reader, one can attach `london_streets` to the global environment using `data("london_streets", package = "spDataLarge")`.
-
 Now that we have the data, we can go on and initiate a GRASS\index{GRASS} session.
-Luckily, `linkGRASS()` of the **link2GI** packages lets to set up the GRASS environment with just one line of code.
+Luckily, `linkGRASS()` of the **link2GI** packages lets to set up the GRASS environment with just one line of code.^[For a more complete description of setting up the GRASS environment read the appendix at the end of this section.]
 The only thing you need to provide is a spatial object which determines the projection and the extent of the spatial database\index{spatial database}.
 First, `linkGRASS()` finds all GRASS\index{GRASS} installations on your computer.
 Since we have set `ver_select` to `TRUE`, we can interactively choose one of the found GRASS-installations.
@@ -659,9 +649,9 @@ You can check if it worked correctly by running `execGRASS("g.proj", flags = "p"
 
 To recommend a single R-GIS interface is hard since the usage depends on personal preferences, the tasks at hand and your familiarity with different GIS\index{GIS} software packages which in turn probably depends on your field of study.
 As mentioned previously, SAGA\index{SAGA} is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets, and frequently used by hydrologists, climatologists and soil scientists [@conrad_system_2015].
-GRASS GIS\index{GRASS}, on the other hand, is the only GIS presented here supporting a topologically based spatial database which is especially useful for network analyses but also simulation studies (see below).
+GRASS GIS\index{GRASS}, on the other hand, is the only GIS presented here supporting a topologically based spatial database which is especially useful for network analyses but also simulation studies.
 QGIS is much more user-friendly compared to GRASS- and SAGA-GIS, especially for first-time GIS users, and probably the most popular open-source GIS.
-Therefore, **RQGIS**\index{RQGIS (package)} is an appropriate choice for most use cases.
+Therefore, **qgisprocess**\index{qgisprocess (package)} is an appropriate choice for most use cases.
 Its main advantages are:
 
 - A unified access to several GIS, and therefore the provision of >1000 geoalgorithms (Table \@ref(tab:gis-comp)) including duplicated functionality, e.g., you can perform overlay-operations using QGIS-\index{QGIS}, SAGA-\index{SAGA} or GRASS-geoalgorithms\index{GRASS}
@@ -671,18 +661,15 @@ Its main advantages are:
 
 By all means, there are use cases when you certainly should use one of the other R-GIS bridges.
 Though QGIS is the only GIS providing a unified interface to several GIS\index{GIS} software packages, it only provides access to a subset of the corresponding third-party geoalgorithms (for more information please refer to @muenchow_rqgis:_2017).
-Therefore, to use the complete set of SAGA and GRASS functions, stick with **RSAGA**\index{RSAGA (package)} and **rgrass**. 
-When doing so, take advantage of **RSAGA**'s numerous user-friendly functions.
-Note also, that **RSAGA** offers native R functions for geocomputation such as `multi.local.function()`, `pick.from.points()` and many more.
-**RSAGA** supports much more SAGA versions than (R)QGIS.
+Therefore, to use the complete set of SAGA and GRASS functions, stick with **Rsagacmd**\index{Rsagacmd (package)} and **rgrass**. 
 Finally, if you need topological correct data and/or spatial database management functionality such as multi-user access, we recommend the usage of GRASS. 
-In addition, if you would like to run simulations with the help of a geodatabase\index{spatial database} [@krug_clearing_2010], use **rgrass** directly since **RQGIS** always starts a new GRASS session for each call.
+In addition, if you would like to run simulations with the help of a geodatabase\index{spatial database} [@krug_clearing_2010], use **rgrass** directly since **qgisprocess** always starts a new GRASS session for each call.
 
 Please note that there are a number of further GIS software packages that have a scripting interface but for which there is no dedicated R package that accesses these: gvSig, OpenJump, Orfeo Toolbox and TauDEM.
 
 ## Other bridges
 
-The focus of this chapter is on R interfaces to Desktop GIS\index{GIS} software.
+The focus of this chapter, so far, was on R interfaces to Desktop GIS\index{GIS} software.
 We emphasize these bridges because dedicated GIS software is well-known and a common 'way in' to understanding geographic data.
 They also provide access to many geoalgorithms\index{geoalgorithm}.
 
@@ -697,9 +684,6 @@ As discussed in Chapter \@ref(read-write), GDAL\index{GDAL} is a low-level libra
 GDAL is so effective that most GIS programs use GDAL\index{GDAL} in the background for importing and exporting geographic data, rather than re-inventing the wheel and using bespoke read-write code.
 But GDAL\index{GDAL} offers more than data I/O.
 It has [geoprocessing tools](https://gdal.org/programs/index.html) for vector and raster data, functionality to create [tiles](https://gdal.org/programs/gdal2tiles.html#gdal2tiles) for serving raster data online, and rapid [rasterization](https://gdal.org/programs/gdal_rasterize.html#gdal-rasterize) of vector data, all of which can be accessed via the system of R command line.
-
-<!--toDo:jn-->
-<!--expand a list of what is possible-->
 
 The code chunk below demonstrates this functionality:
 `linkGDAL()` searches the computer for a working GDAL\index{GDAL} installation and adds the location of the executable files to the PATH variable, allowing GDAL to be called.
