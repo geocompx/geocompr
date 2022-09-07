@@ -678,10 +678,8 @@ The code chunk below demonstrates this functionality:
 link2GI::linkGDAL()
 ```
 
-<!--toDo:jn-->
-<!--explain the syntax-->
 Now we can use the `system()` function to call any of the GDAL tools.
-For example, `ogrinfo()` provides metadata of a vector dataset.
+For example, `ogrinfo` provides metadata of a vector dataset.
 Here we will call this tool with two additional flags: `-al` to list all features of all layers and `-so` to get a summary only (and not a complete geometry list):
 
 
@@ -699,6 +697,16 @@ system(cmd)
 #> Layer SRS WKT:
 #> ...
 ```
+
+Other commonly used GDAL tools include:
+
+- `gdalinfo`: provides metadata of a raster dataset
+- `gdal_translate`: converts between different raster file formats
+- `ogr2ogr`: converts between different vector file formats
+- `gdalwarp`: reprojects, transform, and clip raster datasets
+- `gdaltransform`: transforms coordinates
+
+Visit https://gdal.org/programs/ to see the complete list of GDAL tools and read their help files.
 
 The 'link' to GDAL provided by **link2GI** could be used as a foundation for doing more advanced GDAL work from the R or system CLI.
 TauDEM (http://hydrology.usu.edu/taudem) and the Orfeo Toolbox (https://www.orfeo-toolbox.org/) are other spatial data processing libraries/programs offering a command line interface -- the above example shows how to access these libraries from the system command line via R.
