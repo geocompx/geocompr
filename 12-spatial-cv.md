@@ -373,6 +373,11 @@ mlr3extralearners::list_mlr3learners(
   head()
 ```
 
+
+```
+#> This will take a few seconds.
+```
+
 <table>
 <caption>(\#tab:lrns)Sample of available learners for binomial tasks in the mlr3 package.</caption>
  <thead>
@@ -562,6 +567,7 @@ Learners implementing SVM can be found using `listLearners()` as follows:
 
 ```r
 mlr3_learners = list_mlr3learners()
+#> This will take a few seconds.
 mlr3_learners[class == "classif" & grepl("svm", id),
               .(id, class, mlr3_package, required_packages)]
 #>               id   class      mlr3_package              required_packages

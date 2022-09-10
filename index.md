@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2022-09-08'
+date: '2022-09-10'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -44,7 +44,7 @@ Its current 'build status' as follows:
 
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
 
-This version of the book was built on GH Actions on 2022-09-08.
+This version of the book was built on GH Actions on 2022-09-10.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
@@ -104,17 +104,23 @@ bookdown::serve_book(".")
 
 See the project's [GitHub repo](https://github.com/robinlovelace/geocompr#reproducing-the-book) for full details on reproducing the book.
 
-## Supporting the project {-}
+## Getting involved {-}
 
-If you find the book useful, please support it by:
+If you find the project of use and interest, you can get involved in many ways, by:
 
-- Telling people about it in person
-- Communicating about the book in digital media, e.g., via the [#geocompr hashtag](https://twitter.com/hashtag/geocompr) on Twitter (see our [Guestbook at geocompr.github.io](https://geocompr.github.io/guestbook/)) or by letting us know of [courses](https://github.com/geocompr/geocompr.github.io/edit/source/content/guestbook/index.md) using the book
-- [Citing](https://github.com/Robinlovelace/geocompr/raw/main/CITATION.bib) or [linking-to](https://geocompr.robinlovelace.net/) it
-- '[Starring](https://help.github.com/articles/about-stars/)' the [geocompr GitHub repository](https://github.com/robinlovelace/geocompr)
-- Reviewing it, e.g., on Amazon or [Goodreads](https://www.goodreads.com/book/show/42780859-geocomputation-with-r)
-- Asking questions about or making suggestion on the content via [GitHub](https://github.com/Robinlovelace/geocompr/issues/372) or Twitter.
+- Telling people about it
 - [Buying](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577) a copy
+- Helping people get started with open source software for reproducible research in general, and working with geographic data in R in particular (this can be an excellent way to consolidate and build your own skills)
+- Communicating about the book online, via the [#geocompr hashtag](https://twitter.com/hashtag/geocompr) on Twitter (see our [Guestbook at geocompr.github.io](https://geocompr.github.io/guestbook/)) or by letting us know of [courses](https://github.com/geocompr/geocompr.github.io/edit/source/content/guestbook/index.md) using the book
+- [Citing](https://github.com/Robinlovelace/geocompr/raw/main/CITATION.bib) and [linking-to](https://geocompr.robinlovelace.net/) it
+- '[Starring](https://help.github.com/articles/about-stars/)' the [geocompr GitHub repository](https://github.com/robinlovelace/geocompr)
+- Reviewing it, on [Amazon](https://www.amazon.com/Geocomputation-Chapman-Hall-Robin-Lovelace/dp/1138304514/), [Goodreads](https://www.goodreads.com/book/show/42780859-geocomputation-with-r) or elsewhere
+- Asking questions about the content or making suggestion on [GitHub](https://github.com/Robinlovelace/geocompr/issues), [Twitter](https://twitter.com/hashtag/geocompr?src=hashtag_click) or [Discord](https://discord.gg/PMztXYgNxp)
+- Answering questions, or at least responding to people asking for clarification or reproducible examples to demonstrate their question
+- Supporting community translations
+  - The Spanish version: https://geocompr.github.io/es/
+  - The French version: https://geocompr.github.io/fr/
+  - The Japanese version: http://babayoshihiko.ddns.net/geo/
 
 Further details can be found at [github.com/Robinlovelace/geocompr](https://github.com/Robinlovelace/geocompr#geocomputation-with-r).
 
