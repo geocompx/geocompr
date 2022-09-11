@@ -583,7 +583,7 @@ uptake = function(x) {
 routes_short_scenario = routes_short |> 
   mutate(uptake = uptake(distance / 1000)) |> 
   mutate(bicycle = bicycle + car_driver * uptake,
-         car_driver = car_driver * (1 -uptake))
+         car_driver = car_driver * (1 - uptake))
 sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
 ```
 
@@ -605,21 +605,19 @@ routes_short_scenario |>
   ylab("Percent trips switching from driving to cycling") +
   scale_y_continuous(labels = scales::percent)
 tm_shape(route_network_scenario) +
-  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "No. bike trips (modeled, one direction)")
+  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "N. bike trips per day\n(modeled, one direction)")
 ```
 
-Another, more common, type of route network dataset is road network datasets.
-This type of route network dataset is available for every city worldwide from OpenStreetMap.
-The input dataset used to illustrate this type of route network downloaded using **osmdata**\index{osmdata (package)}.
-To avoid having to request the data from OSM\index{OpenStreetMap} repeatedly, we will use the `bristol_ways` object from the **spDataLarge** package, which contains point and line data for the case study area (see `?bristol_ways`):
+Transport networks with records at the segment level, typically with attributes such as road type and width, constitute a common type of route network.
+Such route network datasets are available worldwide from OpenStreetMap, and can be downloaded with packages such as **osmdata**\index{osmdata (package)} and **osmextract**\index{osmextract (package)}.
+To save time downloading and preparing OSM\index{OpenStreetMap}, we will use the `bristol_ways` object from the **spDataLarge** package, an `sf` object with LINESTRING geometries and attributes representing a sample of the transport network in the case study region (see `?bristol_ways` for details), as shown in the output below:
 
 ```{r 13-transport-22}
 summary(bristol_ways)
 ```
 
-The above code chunk summarized a simple feature\index{sf} object representing around 5,000 segments on the transport network\index{network}.
-As mentioned, route networks can usefully be represented as mathematical graphs\index{graph}, with nodes\index{node} on the network, connected by edges\index{edge}.
-
+The output shows that `bristol_ways` represents just over 6 thousand segments on the transport network\index{network}.
+This and other geographic networks can be represented as mathematical graphs\index{graph}, with nodes\index{node} on the network, connected by edges\index{edge}.
 A number of R packages have been developed for dealing with such graphs, notably **igraph**\index{igraph (package)}.
 You can manually convert a route network into an `igraph` object, but the geographic attributes will be lost.
 To overcome this limitation of **igraph**, the **sfnetworks**\index{sfnetworks (package)} package, which to represent route networks simultaneously as graphs *and* geographic lines, was developed.
