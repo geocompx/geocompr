@@ -4,8 +4,7 @@ opts_chunk$set(
         background = "#FCFCFC", # code chunk color in latex
         comment = "#>",
         collapse = TRUE,
-        # Uncomment for faster but potentially less reliable builds:
-        # cache = TRUE,
+        cache = TRUE,
         fig.pos = "t",
         fig.path = "figures/",
         fig.align = "center",
