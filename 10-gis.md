@@ -381,9 +381,7 @@ The largest TWI values mostly occur in valleys and hollows, while the lowest val
 <p class="caption">(\#fig:qgis-raster-map)Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mongón study area.</p>
 </div>
 
-## Other GIS bridges
-
-### SAGA GIS {#saga}
+## SAGA GIS {#saga}
 
 The System for Automated Geoscientific Analyses (SAGA\index{SAGA}; Table \@ref(tab:gis-comp)) provides the possibility to execute SAGA modules via the command line interface\index{command-line interface} (`saga_cmd.exe` under Windows and just `saga_cmd` under Linux) (see the [SAGA wiki on modules](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/)).
 In addition, there is a Python interface (SAGA Python API\index{API}).
@@ -405,14 +403,39 @@ It serves two main purposes:
 saga = saga_gis(raster_backend = "terra", vector_backend = "sf")
 ```
 
-<!-- add ref to the ndvi calculations section -->
+We will use the normalized difference vegetation index (NDVI) data for the Mongón study area in Peru from the 22nd of September 2000.^[Read Section \@ref(local-operations) on details of how to calculate NDVI from a remote sensing image.]
+<!--toDo:jn-->
+<!-- our goal? -->
 
 
 ```r
 ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 ```
 
-`tidy(sg)`
+
+```r
+tm_shape(ndvi) +
+  tm_raster(style = "cont", palette = "PRGn", title = "NDVI",
+            n = 7) +
+  tm_layout(frame = FALSE, legend.frame = TRUE)
+```
+
+Our `saga` object contains connections to all of the available SAGA tools.
+It is organized as a list of libraries (groups of tools), and inside of a library it has a list of tools.
+We can access any tool with the `$` sign (remember to use TAB for autocompletion).
+
+
+```r
+sg = saga$imagery_segmentation$seed_generation
+```
+
+In the above example, we first opened the `imagery_segmentation` library and then the `seed_generation` tool.
+We also assigned it to the `sg` object, not to retype the whole code in our next steps.
+<!--toDo:jn-->
+<!-- explain the tool -->
+
+If we just type `sg`, we will get a quick summary of the tool and a data frame with its parameters, descriptions, and defaults.
+You may also use `tidy(sg)` to extract just the parameters' table.
 
 
 
@@ -443,7 +466,7 @@ ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 <!-- mention many raster layers -->
 <!-- how to find help? other resources -->
 
-### GRASS GIS {#grass}
+## GRASS GIS {#grass}
 
 The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the Geographical Resources Analysis Support System (GRASS)\index{GRASS} (Table \@ref(tab:gis-comp); @neteler_open_2008) from 1982 to 1995. 
 Academia continued this work since 1997.
