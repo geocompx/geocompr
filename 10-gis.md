@@ -412,13 +412,8 @@ We will use the normalized difference vegetation index (NDVI) data for the Mong√
 ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 ```
 
-
-```r
-tm_shape(ndvi) +
-  tm_raster(style = "cont", palette = "PRGn", title = "NDVI",
-            n = 7) +
-  tm_layout(frame = FALSE, legend.frame = TRUE)
-```
+<!--toDo:jn-->
+<!-- ref to figure -->
 
 Our `saga` object contains connections to all of the available SAGA tools.
 It is organized as a list of libraries (groups of tools), and inside of a library it has a list of tools.
@@ -429,23 +424,48 @@ We can access any tool with the `$` sign (remember to use TAB for autocompletion
 sg = saga$imagery_segmentation$seed_generation
 ```
 
-In the above example, we first opened the `imagery_segmentation` library and then the `seed_generation` tool.
+In the above example, we first opened the `imagery_segmentation` library and then its `seed_generation` tool.
 We also assigned it to the `sg` object, not to retype the whole code in our next steps.
+<!-- https://saga-gis.sourceforge.io/saga_tool_doc/8.3.0/imagery_segmentation_2.html -->
 <!--toDo:jn-->
 <!-- explain the tool -->
 
 If we just type `sg`, we will get a quick summary of the tool and a data frame with its parameters, descriptions, and defaults.
 You may also use `tidy(sg)` to extract just the parameters' table.
 
-
-
-`ndvi_seeds$variance`
- `tidy(srg)`
-
+The `seed_generation` tool requires at least one input (`features`): a raster data.
+We are able to provide a set of additional parameters, including `band_width` that specifies the size of initial polygons.
 
 
 
-`ndvi_srg$similarity`, `ndvi_srg$table`
+Our output is a list of three objects: `variance` , `seed_grid`, and `seed_points`.
+<!--toDo:jn-->
+<!-- explain the outputs -->
+<!-- `ndvi_seeds$variance` -->
+
+The second SAGA GIS tool we will use is `seeded_region_growing`.
+<!--toDo:jn-->
+<!-- explain the tool -->
+<!-- https://saga-gis.sourceforge.io/saga_tool_doc/8.3.0/imagery_segmentation_3.html -->
+<!-- `tidy(srg)` -->
+
+The `seeded_region_growing` tool requires two inputs: our `seed_grid` calculated in the previous step and the `ndvi` raster object.
+Additionally, we can specify several parameters.
+<!--toDo:jn-->
+<!-- explain the parameters -->
+
+Here, we will only change `method` to 1, meaning that our output regions will be created only based on the similarity of their NDVI values.
+
+
+
+The tool returns a list of three objects: `segments`, `similarity`, `table`.
+<!--toDo:jn-->
+<!-- explain the outputs -->
+
+
+
+<!--toDo:jn-->
+<!-- ref to Section \@ref(spatial-vectorization) -->
 
 
 
@@ -454,8 +474,6 @@ You may also use `tidy(sg)` to extract just the parameters' table.
 
 
 
-
-<!-- explain saga$ -->
 
 <!-- expain/mention other segmentation techinques -->
 <!-- mention supercells -- exercises?? -->
