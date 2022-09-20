@@ -20,7 +20,7 @@ ndvi_segments = as.polygons(ndvi_srg$segments) |>
 tms1 = tm_shape(ndvi) +
   tm_raster(style = "cont", palette = "PRGn", title = "NDVI",
             n = 7) +
-  tm_layout(frame = FALSE, legend.frame = TRUE, legend.position = c("left", "bottom"))
+  tm_layout(frame = FALSE, legend.frame = TRUE, legend.position = c("LEFT", "BOTTOM"), legend.text.size = 0.4, legend.title.size = 0.5)
 tms2 = tms1 + 
   tm_shape(ndvi_segments) +
   tm_borders(col = "red") +
