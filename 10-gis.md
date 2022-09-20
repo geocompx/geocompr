@@ -414,6 +414,7 @@ ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 
 <!--toDo:jn-->
 <!-- ref to figure -->
+Figure \@ref(fig:sagasegments)
 
 Our `saga` object contains connections to all of the available SAGA tools.
 It is organized as a list of libraries (groups of tools), and inside of a library it has a list of tools.
@@ -437,6 +438,10 @@ The `seed_generation` tool requires at least one input (`features`): a raster da
 We are able to provide a set of additional parameters, including `band_width` that specifies the size of initial polygons.
 
 
+```r
+ndvi_seeds = sg(ndvi, band_width = 2)
+plot(ndvi_seeds$seed_grid)
+```
 
 Our output is a list of three objects: `variance` , `seed_grid`, and `seed_points`.
 <!--toDo:jn-->
@@ -457,19 +462,26 @@ Additionally, we can specify several parameters.
 Here, we will only change `method` to 1, meaning that our output regions will be created only based on the similarity of their NDVI values.
 
 
+```r
+srg = saga$imagery_segmentation$seeded_region_growing
+ndvi_srg = srg(ndvi_seeds$seed_grid, ndvi, method = 1)
+plot(ndvi_srg$segments)
+```
 
 The tool returns a list of three objects: `segments`, `similarity`, `table`.
 <!--toDo:jn-->
 <!-- explain the outputs -->
 
 
+```r
+ndvi_segments = as.polygons(ndvi_srg$segments) |> 
+  st_as_sf()
+```
 
 <!--toDo:jn-->
 <!-- ref to Section \@ref(spatial-vectorization) -->
 
-
-
-
+<img src="figures/10-saga-segments.png" width="100%" style="display: block; margin: auto;" />
 
 
 
@@ -478,11 +490,6 @@ The tool returns a list of three objects: `segments`, `similarity`, `table`.
 <!-- expain/mention other segmentation techinques -->
 <!-- mention supercells -- exercises?? -->
 <!-- https://github.com/joaofgoncalves/SegOptim ?? -->
-
-<!-- add figure -->
-
-<!-- mention many raster layers -->
-<!-- how to find help? other resources -->
 
 ## GRASS GIS {#grass}
 
