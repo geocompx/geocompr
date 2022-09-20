@@ -20,12 +20,12 @@ ndvi_segments = as.polygons(ndvi_srg$segments) |>
 tms1 = tm_shape(ndvi) +
   tm_raster(style = "cont", palette = "PRGn", title = "NDVI",
             n = 7) +
-  tm_layout(frame = FALSE, legend.frame = TRUE)
+  tm_layout(frame = FALSE, legend.frame = TRUE, legend.position = c("left", "bottom"))
 tms2 = tms1 + 
   tm_shape(ndvi_segments) +
   tm_borders(col = "red") +
   tm_layout(legend.show = FALSE)
 tms = tmap_arrange(tms1, tms2)
 
-tmap_save(tms, filename = "figures/10-saga-segments.png", dpi = 300, width = 9,
-          height = 5.75, units = "cm")
+tmap_save(tms, filename = "figures/10-saga-segments.png", dpi = 150, width = 9,
+          height = 4.75, units = "cm")
