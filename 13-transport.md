@@ -475,40 +475,7 @@ This is done using the publicly available OSRM service with the **stplanr** func
 ```r
 routes_short = route(l = desire_lines_short, route_fun = route_osrm,
                      osrm.profile = "bike")
-#> Warning in open.connection(con, "rb"): URL 'https://
-#> routing.openstreetmap.de/routed-bike/route/v1/
-#> driving/-2.62449584285587,51.5083596238341;-2.66873099020632,51.5135817785512?
-#> alternatives=false&geometries=geojson&steps=false&overview=full': Timeout of 60
-#> seconds was reached
-#> Warning in open.connection(con, "rb"): URL 'https://
-#> routing.openstreetmap.de/routed-bike/route/v1/
-#> driving/-2.62449584285587,51.5083596238341;-2.59034611794926,51.4954738583735?
-#> alternatives=false&geometries=geojson&steps=false&overview=full': Timeout of 60
-#> seconds was reached
-#> Warning in open.connection(con, "rb"): URL 'https://
-#> routing.openstreetmap.de/routed-bike/route/v1/
-#> driving/-2.62449584285587,51.5083596238341;-2.69118073309699,51.503707391076?
-#> alternatives=false&geometries=geojson&steps=false&overview=full': Timeout of 60
-#> seconds was reached
-#> Warning in open.connection(con, "rb"): URL 'https://
-#> routing.openstreetmap.de/routed-bike/route/v1/
-#> driving/-2.62449584285587,51.5083596238341;-2.61293233057088,51.5477373737121?
-#> alternatives=false&geometries=geojson&steps=false&overview=full': Timeout of 60
-#> seconds was reached
-#> Warning in open.connection(con, "rb"): URL 'https://
-#> routing.openstreetmap.de/routed-bike/route/v1/
-#> driving/-2.62449584285587,51.5083596238341;-2.57685718183124,51.5331930848153?
-#> alternatives=false&geometries=geojson&steps=false&overview=full': Timeout of 60
-#> seconds was reached
-#> Warning in open.connection(con, "rb"): URL 'https://
-#> routing.openstreetmap.de/routed-bike/route/v1/
-#> driving/-2.59894010071684,51.5057758287574;-2.61293233057088,51.5477373737121?
-#> alternatives=false&geometries=geojson&steps=false&overview=full': Timeout of 60
-#> seconds was reached
 #> Most common output is sf
-#> These routes failed: 1, 2, 3, 4, 5, 6
-#> The first of which was:
-#> <simpleError in open.connection(con, "rb"): cannot open the connection to 'https://routing.openstreetmap.de/routed-bike/route/v1/driving/-2.62449584285587,51.5083596238341;-2.66873099020632,51.5135817785512?alternatives=false&geometries=geojson&steps=false&overview=full'>
 ```
 
 The output is `routes_short`, an `sf` object representing routes on the transport network\index{network} that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line.
@@ -565,7 +532,7 @@ routes_short_scenario = routes_short |>
   mutate(bicycle = bicycle + car_driver * uptake,
          car_driver = car_driver * (1 -uptake))
 sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
-#> [1] 3796
+#> [1] 3986
 ```
 
 Having created a scenario in which approximately 4000 trips have switched from driving to cycling, we can now model where this updated modeled cycling activity will take place.
