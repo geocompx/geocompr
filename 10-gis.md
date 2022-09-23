@@ -471,7 +471,10 @@ ndvi_segments = as.polygons(ndvi_srg$segments) |>
 <!--toDo:jn-->
 <!-- explain the outputs -->
 
-<img src="figures/10-saga-segments.png" width="100%" style="display: block; margin: auto;" />
+<div class="figure" style="text-align: center">
+<img src="figures/10-saga-segments.png" alt="Normalized difference vegetation index (NDVI, left panel) and NDVi-based segments derived using t he seeded region growing algorithm for the Mongón study area." width="100%" />
+<p class="caption">(\#fig:sagasegments)Normalized difference vegetation index (NDVI, left panel) and NDVi-based segments derived using t he seeded region growing algorithm for the Mongón study area.</p>
+</div>
 
 
 
