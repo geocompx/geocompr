@@ -23,7 +23,7 @@ tms1 = tm_shape(ndvi) +
   tm_layout(frame = FALSE, legend.frame = TRUE, legend.position = c("LEFT", "BOTTOM"), legend.text.size = 0.4, legend.title.size = 0.5)
 tms2 = tms1 + 
   tm_shape(ndvi_segments) +
-  tm_borders(col = "red") +
+  tm_borders(col = "red", lwd = 0.5) +
   tm_layout(legend.show = FALSE)
 tms = tmap_arrange(tms1, tms2)
 
