@@ -456,7 +456,7 @@ plot(ndvi_srg$segments)
 
 The tool returns a list of three objects: `segments`, `similarity`, `table`.
 The `similarity` object is a raster showing similarity between the seeds and the other cells, and `table` is a data frame storing information about the input seeds.
-Finally, `ndvi_srg$segments` is a raster with our resulting areas.
+Finally, `ndvi_srg$segments` is a raster with our resulting areas (the right panel of Figure \@ref(fig:sagasegments)).
 We can convert it into polygons with `as.polygons()` and `st_as_sf()` (Section \@ref(spatial-vectorization)).
 
 
@@ -465,22 +465,14 @@ ndvi_segments = as.polygons(ndvi_srg$segments) |>
   st_as_sf()
 ```
 
- (the right panel of Figure \@ref(fig:sagasegments))
-<!--toDo:jn-->
-<!-- explain the outputs -->
-
 <div class="figure" style="text-align: center">
 <img src="figures/10-saga-segments.png" alt="Normalized difference vegetation index (NDVI, left panel) and NDVi-based segments derived using t he seeded region growing algorithm for the Mongón study area." width="100%" />
 <p class="caption">(\#fig:sagasegments)Normalized difference vegetation index (NDVI, left panel) and NDVi-based segments derived using t he seeded region growing algorithm for the Mongón study area.</p>
 </div>
 
-
-
-
-
-<!-- expain/mention other segmentation techinques -->
-<!-- mention supercells -- exercises?? -->
-<!-- https://github.com/joaofgoncalves/SegOptim ?? -->
+The resulting polygons (segments) represent areas with similar values. 
+They can also be further aggregated into larger polygons using various techniques, such as clustering (e.g., k-means), regionalization (e.g., SKATER) or supervised classification methods.
+You can try to do it in Exercises.
 
 ## GRASS GIS {#grass}
 
@@ -1039,3 +1031,6 @@ Additionally, give `mapview` a try.
 
 1. Query all Californian highways from the PostgreSQL/PostGIS\index{PostGIS} database living in the QGIS\index{QGIS} Cloud introduced in this chapter (see Section \@ref(postgis)).
 
+<!-- expain/mention other segmentation techinques -->
+<!-- mention supercells -- exercises?? -->
+<!-- https://github.com/joaofgoncalves/SegOptim ?? -->
