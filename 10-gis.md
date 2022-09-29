@@ -1008,28 +1008,29 @@ compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 
 ## Exercises
 
-1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see Chapter \@ref(spatial-class)). 
 
-1. Union `poly_1` and `poly_2` using `st_union()` and `qgis:union`.
-What is the difference between the two union operations\index{vector!union}? 
-How can we use the **sf**\index{sf} package to obtain the same result as QGIS\index{QGIS}?
+<!-- 1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see Chapter \@ref(spatial-class)).  -->
 
-1. Calculate the intersection\index{vector!intersection} of `poly_1` and `poly_2` using:
+<!-- 1. Union `poly_1` and `poly_2` using `st_union()` and `qgis:union`. -->
+<!-- What is the difference between the two union operations\index{vector!union}?  -->
+<!-- How can we use the **sf**\index{sf} package to obtain the same result as QGIS\index{QGIS}? -->
 
-    - **RQGIS**, **RSAGA** and **rgrass**
-    - **sf**
+<!-- 1. Calculate the intersection\index{vector!intersection} of `poly_1` and `poly_2` using: -->
 
-1. Attach `data(dem, package = "spDataLarge")` and `data(random_points, package = "spDataLarge")`.
-Select randomly a point from `random_points` and find all `dem` pixels that can be seen from this point (hint: viewshed\index{viewshed}).
-Visualize your result.
-For example, plot a hillshade\index{hillshade}, and on top of it the digital elevation model\index{digital elevation model}, your viewshed\index{viewshed} output and the point.
-Additionally, give `mapview` a try.
+<!--     - **RQGIS**, **RSAGA** and **rgrass** -->
+<!--     - **sf** -->
 
-1. Compute catchment area\index{catchment area} and catchment slope of `data("dem", package = "spDataLarge")` using **RSAGA** (see Section \@ref(saga)).
+<!-- 1. Attach `data(dem, package = "spDataLarge")` and `data(random_points, package = "spDataLarge")`. -->
+<!-- Select randomly a point from `random_points` and find all `dem` pixels that can be seen from this point (hint: viewshed\index{viewshed}). -->
+<!-- Visualize your result. -->
+<!-- For example, plot a hillshade\index{hillshade}, and on top of it the digital elevation model\index{digital elevation model}, your viewshed\index{viewshed} output and the point. -->
+<!-- Additionally, give `mapview` a try. -->
 
-1. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice (see Section \@ref(gdal)).
+<!-- 1. Compute catchment area\index{catchment area} and catchment slope of `data("dem", package = "spDataLarge")` using **RSAGA** (see Section \@ref(saga)). -->
 
-1. Query all Californian highways from the PostgreSQL/PostGIS\index{PostGIS} database living in the QGIS\index{QGIS} Cloud introduced in this chapter (see Section \@ref(postgis)).
+<!-- 1. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice (see Section \@ref(gdal)). -->
+
+<!-- 1. Query all Californian highways from the PostgreSQL/PostGIS\index{PostGIS} database living in the QGIS\index{QGIS} Cloud introduced in this chapter (see Section \@ref(postgis)). -->
 
 <!-- expain/mention other segmentation techinques -->
 <!-- mention supercells -- exercises?? -->
