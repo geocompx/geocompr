@@ -1009,6 +1009,27 @@ compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 ## Exercises
 
 
+<!-- qgisprocess 1-3 -->
+<!-- sagagis 1 -->
+<!-- sagagis supercells -->
+<!-- expain/mention other segmentation techinques -->
+<!-- mention supercells -- exercises?? -->
+<!-- https://github.com/joaofgoncalves/SegOptim ?? -->
+<!-- rgrass 1 -->
+<!-- gdal 1-2 -->
+1. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice.
+What kind of information you can find there?
+
+
+
+1. Use `gdalwarp` to decrease the resolution of your raster file (for example, if the resolution is 0.5, change it into 1). Note: `-tr` and `-r` flags will be used in this exercise.
+
+
+
+
+<!-- postgis 1? -->
+<!-- stac+gdalcubes 1 -->
+
 <!-- 1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see Chapter \@ref(spatial-class)).  -->
 
 <!-- 1. Union `poly_1` and `poly_2` using `st_union()` and `qgis:union`. -->
@@ -1028,10 +1049,6 @@ compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 
 <!-- 1. Compute catchment area\index{catchment area} and catchment slope of `data("dem", package = "spDataLarge")` using **RSAGA** (see Section \@ref(saga)). -->
 
-<!-- 1. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice (see Section \@ref(gdal)). -->
+
 
 <!-- 1. Query all Californian highways from the PostgreSQL/PostGIS\index{PostGIS} database living in the QGIS\index{QGIS} Cloud introduced in this chapter (see Section \@ref(postgis)). -->
-
-<!-- expain/mention other segmentation techinques -->
-<!-- mention supercells -- exercises?? -->
-<!-- https://github.com/joaofgoncalves/SegOptim ?? -->
