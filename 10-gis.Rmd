@@ -9,17 +9,17 @@ library(sf)
 library(terra)
 ```
 
+<!--toDo:jn-->
+<!-- qgisprocess to CRAN -->
+
 ```{r 09-gis-1-2, message=FALSE, eval=FALSE}
 # remotes::install_github("paleolimbot/qgisprocess")
 library(qgisprocess)
 library(Rsagacmd)
-library(rgrass7)
+library(rgrass)
 library(rstac)
 library(gdalcubes)
 ```
-
-<!-- issue of rgrass -->
-<!-- https://github.com/rsbivand/rgrass -->
 
 ## Introduction
 
@@ -33,14 +33,10 @@ it was only after the widespread uptake of computer mice and high-resolution scr
 GRASS, one of the longest-standing GIS\index{GIS} programs, for example, relied primarily on command-line interaction before it gained a sophisticated GUI [@landa_new_2008].
 ]
 In dedicated GIS\index{GIS} packages, by contrast, the emphasis tends to be on the graphical user interface (GUI)\index{graphical user interface}.
-You *can* interact with GRASS\index{GRASS}, QGIS\index{QGIS}, SAGA\index{SAGA} and gvSIG from system terminals and embedded CLIs\index{command-line interface}, but 'pointing and clicking' is the norm.
+You *can* interact with QGIS\index{QGIS}, SAGA\index{SAGA}, GRASS\index{GRASS} and gvSIG from system terminals and embedded CLIs\index{command-line interface}, but 'pointing and clicking' is the norm.
 This means many GIS\index{GIS} users miss out on the advantages of the command-line according to Gary Sherman, creator of QGIS\index{QGIS} [@sherman_desktop_2008]:
 
-> With the advent of 'modern' GIS software, most people want to point and
-click their way through life. That’s good, but there is a tremendous amount
-of flexibility and power waiting for you with the command line. Many times
-you can do something on the command line in a fraction of the time you
-can do it with a GUI.
+> With the advent of 'modern' GIS software, most people want to point and click their way through life. That’s good, but there is a tremendous amount of flexibility and power waiting for you with the command line. Many times you can do something on the command line in a fraction of the time you can do it with a GUI.
 
 The 'CLI vs GUI'\index{graphical user interface} debate can be adversial but it does not have to be; both options can be used interchangeably, depending on the task at hand and the user's skillset.^[GRASS GIS and PostGIS are popular in academia and industry and can be seen as products which buck this trend as they are built around the command-line.]
 The advantages of a good CLI\index{command-line interface} such as that provided by R (and enhanced by IDEs\index{IDE} such as RStudio\index{RStudio}) are numerous.
@@ -81,23 +77,22 @@ R was not designed as a GIS.
 However, its ability to interface with dedicated GISs gives it astonishing geospatial capabilities.
 R is well known as a statistical programming language, but many people are unaware of its ability to replicate GIS workflows, with the additional benefits of a (relatively) consistent CLI.
 Furthermore, R outperforms GISs in some areas of geocomputation\index{geocomputation}, including interactive/animated map making (see Chapter \@ref(adv-map)) and spatial statistical modeling (see Chapter \@ref(spatial-cv)).
-This chapter focuses on 'bridges' to three mature open source GIS products (see Table \@ref(tab:gis-comp)): QGIS\index{QGIS} (via the package **qgisprocess**\index{qgisprocess (package)}; Section \@ref(rqgis)), SAGA\index{SAGA} (via **Rsagacmd**\index{Rsagacmd (package)}; Section \@ref(saga)) and GRASS\index{GRASS} (via **rgrass7**\index{rgrass7 (package)}; Section \@ref(grass)).^[
+This chapter focuses on 'bridges' to three mature open source GIS products (see Table \@ref(tab:gis-comp)): QGIS\index{QGIS} (via the package **qgisprocess**\index{qgisprocess (package)}; Section \@ref(rqgis)), SAGA\index{SAGA} (via **Rsagacmd**\index{Rsagacmd (package)}; Section \@ref(saga)) and GRASS\index{GRASS} (via **rgrass**\index{rgrass (package)}; Section \@ref(grass)).^[
 <!--toDo:jn-->
 <!-- Though not covered here, it is worth being aware of the interface to ArcGIS\index{ArcGIS}, a proprietary and very popular GIS software, via **RPyGeo**.^[By the way, it is also possible to use R from within Desktop GIS software packages.  -->
 <!-- The so-called R-ArcGIS bridge (see https://github.com/R-ArcGIS/r-bridge) allows R to be used from within ArcGIS\index{ArcGIS}.  -->
 <!--toDo:jn-->
 <!-- rgee? -->
-<!-- whitetoolbox? -->
 One can also use R scripts from within QGIS\index{QGIS} (see https://docs.qgis.org/3.16/en/docs/training_manual/processing/r_intro.html).
-Finally, it is also possible to use R from the GRASS GIS\index{GRASS} command line (see https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7).
+Finally, it is also possible to use R from the GRASS GIS\index{GRASS} command line (see https://grasswiki.osgeo.org/wiki/R_statistics/rgrass).
 ]
 To complement the R-GIS bridges, the chapter ends with a very brief introduction to interfaces to spatial libraries (Section \@ref(gdal)), spatial databases\index{spatial database} (Section \@ref(postgis)), and  cloud-based processing of Earth observation data (Section \@ref(cloud)).
 
 ```{r gis-comp, echo=FALSE, message=FALSE}
 library(dplyr)
-d = tibble("GIS" = c("GRASS", "QGIS", "SAGA"),
-            "First release" = c("1984", "2002", "2004"),
-            "No. functions" = c(">500", ">1000", ">600"),
+d = tibble("GIS" = c("QGIS", "SAGA", "GRASS"),
+            "First release" = c("2002", "2004", "1982"),
+            "No. functions" = c(">1000", ">600", ">500"),
             "Support" = c("hybrid", "hybrid", "hybrid"))
 knitr::kable(x = d, 
              caption = paste("Comparison between three open-source GIS.", 
@@ -381,9 +376,14 @@ The largest TWI values mostly occur in valleys and hollows, while the lowest val
 knitr::include_graphics("figures/10-qgis-raster-map.png")
 ```
 
-## Other GIS bridges
+## SAGA GIS {#saga}
 
-### SAGA GIS {#saga}
+Our goal in this section is to delineate areas with similar values of normalized difference vegetation index (NDVI).
+We will use the NDVI data for the Mongón study area in Peru from the 22nd of September 2000 (the left panel of Figure \@ref(fig:sagasegments)) and a seeded region growing algorithm from SAGA GIS to achive the goal.^[Read Section \@ref(local-operations) on details of how to calculate NDVI from a remote sensing image.]
+
+```{r, eval=FALSE}
+ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
+```
 
 The System for Automated Geoscientific Analyses (SAGA\index{SAGA}; Table \@ref(tab:gis-comp)) provides the possibility to execute SAGA modules via the command line interface\index{command-line interface} (`saga_cmd.exe` under Windows and just `saga_cmd` under Linux) (see the [SAGA wiki on modules](https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/)).
 In addition, there is a Python interface (SAGA Python API\index{API}).
@@ -403,72 +403,67 @@ It serves two main purposes:
 saga = saga_gis(raster_backend = "terra", vector_backend = "sf")
 ```
 
-<!-- add ref to the ndvi calculations section -->
+Our `saga` object contains connections to all of the available SAGA tools.
+It is organized as a list of libraries (groups of tools), and inside of a library it has a list of tools.
+We can access any tool with the `$` sign (remember to use TAB for autocompletion).
+
+The seeded region growing algorithm works in two main steps [@adams_seeded_1994;@bohner_image_2006].
+First, initial cells ("seeds") are generated by finding the cells with the smallest variance in local windows of a specified size.
+Then, the region growing algorithm is used to merge neighboring pixels of the seeds to create homogeneous areas.
 
 ```{r, eval=FALSE}
-ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
+sg = saga$imagery_segmentation$seed_generation
 ```
 
-`tidy(sg)`
+In the above example, we first opened the `imagery_segmentation` library and then its `seed_generation` tool.
+We also assigned it to the `sg` object, not to retype the whole tool code in our next steps.^[You can read more about the tool at https://saga-gis.sourceforge.io/saga_tool_doc/8.3.0/imagery_segmentation_2.html.]
+If we just type `sg`, we will get a quick summary of the tool and a data frame with its parameters, descriptions, and defaults.
+You may also use `tidy(sg)` to extract just the parameters' table.
+The `seed_generation` tool requires at least one input (`features`): a raster data.
+We are able to provide a set of additional parameters, including `band_width` that specifies the size of initial polygons.
 
-```{r, eval=FALSE, echo=FALSE}
-sg = saga$imagery_segmentation$seed_generation
+```{r, eval=FALSE}
 ndvi_seeds = sg(ndvi, band_width = 2)
 plot(ndvi_seeds$seed_grid)
 ```
 
-`ndvi_seeds$variance`
- `tidy(srg)`
+Our output is a list of three objects: `variance` -- a raster map of local variance, `seed_grid` -- a raster map with the generated seeds, and `seed_points` -- a spatial vector object with the generated seeds.
 
+The second SAGA GIS tool we use is `seeded_region_growing`.^[You can read more about the tool at https://saga-gis.sourceforge.io/saga_tool_doc/8.3.0/imagery_segmentation_3.html.]
+The `seeded_region_growing` tool requires two inputs: our `seed_grid` calculated in the previous step and the `ndvi` raster object.
+Additionally, we can specify several parameters, such as `normalize` to standardize the input features, `neighbour` (4 or 8-neighborhood), and `method`.
+The last parameter can be set to either `0` or `1` (region growing is based on raster cells' values and their positions or just the values).
+For a more detailed description of the method, see @bohner_image_2006.
 
-```{r, eval=FALSE, echo=FALSE}
+Here, we will only change `method` to `1`, meaning that our output regions will be created only based on the similarity of their NDVI values.
+
+```{r, eval=FALSE}
 srg = saga$imagery_segmentation$seeded_region_growing
 ndvi_srg = srg(ndvi_seeds$seed_grid, ndvi, method = 1)
 plot(ndvi_srg$segments)
 ```
 
-`ndvi_srg$similarity`, `ndvi_srg$table`
+The tool returns a list of three objects: `segments`, `similarity`, `table`.
+The `similarity` object is a raster showing similarity between the seeds and the other cells, and `table` is a data frame storing information about the input seeds.
+Finally, `ndvi_srg$segments` is a raster with our resulting areas (the right panel of Figure \@ref(fig:sagasegments)).
+We can convert it into polygons with `as.polygons()` and `st_as_sf()` (Section \@ref(spatial-vectorization)).
 
-```{r, eval=FALSE, echo=FALSE}
-ndvi_segments = st_as_sf(as.polygons(ndvi_srg$segments))
+```{r, eval=FALSE}
+ndvi_segments = as.polygons(ndvi_srg$segments) |> 
+  st_as_sf()
 ```
 
-```{r, eval=FALSE, echo=FALSE}
-library(tmap)
-tm_shape(ndvi) + 
-  tm_raster(style = "order") +
-  tm_shape(ndvi_segments) +
-  tm_borders()
+```{r sagasegments, echo=FALSE, fig.cap="Normalized difference vegetation index (NDVI, left panel) and NDVi-based segments derived using t he seeded region growing algorithm for the Mongón study area."}
+knitr::include_graphics("figures/10-saga-segments.png")
 ```
 
-```{r, eval=FALSE, echo=FALSE}
-library(supercells)
-library(regional)
-ndvi_sc = supercells(ndvi, k = 400, compactness = 0.2)
-```
+The resulting polygons (segments) represent areas with similar values. 
+They can also be further aggregated into larger polygons using various techniques, such as clustering (e.g., k-means), regionalization (e.g., SKATER) or supervised classification methods.
+You can try to do it in Exercises.
 
-```{r, eval=FALSE, echo=FALSE}
-library(tmap)
-tm_shape(ndvi) + 
-  tm_raster(style = "order") +
-  tm_shape(ndvi_sc) +
-  tm_borders()
-```
+## GRASS GIS {#grass}
 
-<!-- explain saga$ -->
-
-<!-- expain/mention other segmentation techinques -->
-<!-- mention supercells -- exercises?? -->
-<!-- https://github.com/joaofgoncalves/SegOptim ?? -->
-
-<!-- add figure -->
-
-<!-- mention many raster layers -->
-<!-- how to find help? other resources -->
-
-### GRASS GIS {#grass}
-
-The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the Geographical Resources Analysis Support System (GRASS)\index{GRASS} [Table \@ref(tab:gis-comp); @neteler_open_2008] from 1982 to 1995. 
+The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the Geographical Resources Analysis Support System (GRASS)\index{GRASS} (Table \@ref(tab:gis-comp); @neteler_open_2008) from 1982 to 1995. 
 Academia continued this work since 1997.
 Similar to SAGA\index{SAGA}, GRASS focused on raster processing in the beginning while only later, since GRASS 6.0, adding advanced vector functionality [@bivand_applied_2013].
 
@@ -490,11 +485,7 @@ points = cycle_hire[1:25, ]
 Aside from the cycle hire points data, we need a street network for this area.
 We can download it with from OpenStreetMap\index{OpenStreetMap} with the help of the **osmdata** \index{osmdata (package)} package (see also Section \@ref(retrieving-data)).
 To do this, we constrain the query of the street network (in OSM language called "highway") to the bounding box\index{bounding box} of `points`, and attach the corresponding data as an `sf`-object\index{sf}.
-`osmdata_sf()` returns a list with several spatial objects (points, lines, polygons, etc.), but here, we only keep the line objects with their related ids.
-<!-- OpenStreetMap\index{OpenStreetMap} objects come with a lot of columns, `streets` features almost 500. -->
-<!-- In fact, we are only interested in the geometry column. -->
-<!-- Nevertheless, we are keeping one attribute column; otherwise, we will run into trouble when trying to provide `writeVECT()` only with a geometry object (see further below and `?writeVECT` for more details). -->
-<!-- Remember that the geometry column is sticky, hence, even though we are just selecting one attribute, the geometry column will be also returned (see Section \@ref(intro-sf)). -->
+`osmdata_sf()` returns a list with several spatial objects (points, lines, polygons, etc.), but here, we only keep the line objects with their related ids.^[As a convenience to the reader, one can attach `london_streets` to the global environment using `data("london_streets", package = "spDataLarge")`.]
 
 ```{r 09-gis-25, eval=FALSE}
 library(osmdata)
@@ -506,9 +497,109 @@ london_streets = london_streets[["osm_lines"]]
 london_streets = dplyr::select(london_streets, osm_id)
 ```
 
-As a convenience to the reader, one can attach `london_streets` to the global environment using `data("london_streets", package = "spDataLarge")`.
-
 Now that we have the data, we can go on and initiate a GRASS\index{GRASS} session.
+Luckily, `linkGRASS()` of the **link2GI** packages lets to set up the GRASS environment with just one line of code.^[For a more complete description of setting up the GRASS environment read the appendix at the end of this section.]
+The only thing you need to provide is a spatial object which determines the projection and the extent of the spatial database\index{spatial database}.
+First, `linkGRASS()` finds all GRASS\index{GRASS} installations on your computer.
+Since we have set `ver_select` to `TRUE`, we can interactively choose one of the found GRASS-installations.
+If there is just one installation, the `linkGRASS()` automatically chooses it.
+Second, `linkGRASS()` establishes a connection to GRASS GIS.
+
+```{r 09-gis-30, eval=FALSE}
+library(rgrass)
+link2GI::linkGRASS(london_streets, ver_select = TRUE)
+```
+
+Before we can use GRASS geoalgorithms\index{geoalgorithm}, we need to add data to GRASS's spatial database\index{spatial database}.
+Luckily, the convenience function `write_VECT()` does this for us.
+(Use `write_RAST()` for raster data.)
+In our case, we add the street and cycle hire point data while using only the first attribute column, and name them as `london_streets` and `points` in GRASS.
+
+```{r 09-gis-31, eval=FALSE}
+write_VECT(terra::vect(london_streets), vname = "london_streets")
+write_VECT(terra::vect(points[, 1]), vname = "points")
+```
+
+The **rgrass** package expects its inputs and gives its outputs as **terra** objects. 
+Therefore, we need to convert our `sf` spatial vectors to **terra**'s `SpatVector`s using the `vect()` function to be able to use `write_VECT()`.^[You can learn more how to convert between spatial classes in R by reading the (Conversions between different spatial classes in R)[https://geocompr.github.io/post/2021/spatial-classes-conversion/] blog post and the 
+(Coercion between object formats)[https://CRAN.R-project.org/package=rgrass/vignettes/coerce.html] vignette] 
+
+Now, both of datasets exist in the GRASS GIS database.
+To perform our network\index{network} analysis, we need a topological clean street network.
+GRASS's `"v.clean"` takes care of the removal of duplicates, small angles and dangles, among others.
+Here, we break lines at each intersection to ensure that the subsequent routing algorithm can actually turn right or left at an intersection, and save the output in a GRASS object named `streets_clean`.
+
+```{r 09-gis-32, eval=FALSE}
+execGRASS(cmd = "v.clean", input = "london_streets", output = "streets_clean",
+          tool = "break", flags = "overwrite")
+```
+
+```{block2 06-raster-vector-22, type='rmdnote'}
+To learn about the possible arguments and flags of the GRASS GIS modules you can you the `help` flag.
+For example, try `execGRASS("g.region", flags = "help")`.
+```
+
+It is likely that a few of our cycling station points will not lie exactly on a street segment.
+However, to find the shortest route\index{shortest route} between them, we need to connect them to the nearest streets segment.
+`"v.net"`'s connect-operator does exactly this.
+We save its output in `streets_points_con`.
+
+```{r 09-gis-32b, eval=FALSE}
+execGRASS(cmd = "v.net", input = "streets_clean", output = "streets_points_con",
+          points = "points", operation = "connect", threshold = 0.001,
+          flags = c("overwrite", "c"))
+```
+
+The resulting clean dataset serves as input for the `"v.net.salesman"` algorithm, which finally finds the shortest route between all cycle hire stations.
+One of its arguments is `center_cats`, which requires a numeric range as input.
+This range represents the points for which a shortest route should be calculated.
+Since we would like to calculate the route for all cycle stations, we set it to `1-25`.
+To access the GRASS help page of the traveling salesman\index{traveling salesman} algorithm\index{algorithm}, run `execGRASS("g.manual", entry = "v.net.salesman")`.
+
+```{r 09-gis-33, eval=FALSE}
+execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
+          output = "shortest_route", center_cats = paste0("1-", nrow(points)),
+          flags = "overwrite")
+```
+
+To see our result, we read the result into R, convert it into an sf-object keeping only the geometry, and visualize it with the help of the **mapview** package (Figure \@ref(fig:grass-mapview) and Section \@ref(interactive-maps)).
+
+```{r 09-gis-34, eval=FALSE}
+route = read_VECT("shortest_route") |>
+  st_as_sf() |>
+  st_geometry()
+mapview::mapview(route) + points
+```
+
+```{r grass-mapview, fig.cap="Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London.", fig.scap="Shortest route between 24 cycle hire stations.", echo=FALSE, out.width="80%"}
+knitr::include_graphics("figures/10_shortest_route.png")
+```
+
+```{r 09-gis-35, eval=FALSE, echo=FALSE}
+library(mapview)
+m_1 = mapview(route) +  points
+mapview::mapshot(m_1,
+                 file = file.path(getwd(), "figures/09_shortest_route.png"),
+                 remove_controls = c("homeButton", "layersControl",
+                                     "zoomControl"))
+```
+
+There are a few important considerations to note in the process:
+
+- We could have used GRASS's spatial database\index{spatial database} (based on SQLite) which allows faster processing.
+That means we have only exported geographic data at the beginning.
+Then we created new objects but only imported the final result back into R.
+To find out which datasets are currently available, run `execGRASS("g.list", type = "vector,raster", flags = "p")`.
+- We could have also accessed an already existing GRASS spatial database from within R.
+Prior to importing data into R, you might want to perform some (spatial) subsetting\index{vector!subsetting}.
+Use `"v.select"` and `"v.extract"` for vector data.
+`"db.select"` lets you select subsets of the attribute table of a vector layer without returning the corresponding geometry.
+- You can also start R from within a running GRASS\index{GRASS} session [for more information please refer to @bivand_applied_2013].
+- Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass82/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm\index{geoalgorithm}.
+
+**GRASS GIS set up appendix**
+
+It is also possible to set up a location and a mapset manually to use GRASS\index{GRASS} from within R.
 First of all, we need to find out if and where GRASS is installed on the computer.
 
 ```{r 09-gis-27, eval=FALSE}
@@ -520,7 +611,7 @@ GRASS GIS differs from many other GIS software in its approach for handling inpu
 The GRASS geodatabase \index{spatial database} system is based on SQLite.
 Consequently, different users can easily work on the same project, possibly with different read/write permissions.
 However, one has to set up this spatial database\index{spatial database} (also from within R), and users might find this process a bit intimidating in the beginning.
-First of all, the GRASS database requires its own directory, which, in turn, contains a location (see the [GRASS GIS Database](https://grass.osgeo.org/grass80/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass80/manuals/index.html) for further information).
+First of all, the GRASS database requires its own directory, which, in turn, contains a location (see the [GRASS GIS Database](https://grass.osgeo.org/grass82/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass82/manuals/index.html) for further information).
 The location stores the geodata for one project or one area.
 Within one location, several mapsets can exist that typically refer to different users or different tasks.
 Each location also has PERMANENT -- a mandatory mapset that is created automatically.
@@ -529,212 +620,56 @@ In order to share geographic data with all users of a project, the database owne
 So, to sum it all up -- the GRASS geodatabase may contain many locations (all data in one location have the same CRS), and each location can store many mapsets (groups of datasets).
 Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass80/manuals/helptext.html) for more information on the GRASS spatial database\index{spatial database} system.
 
-Now, you have to set up a location and a mapset if you want to use GRASS\index{GRASS} from within R.
+Next, we need to point to the path to GRASS GIS, and specify where to store the spatial database\index{spatial database} (gisDbase), name the location `london`, and use the PERMANENT mapset.
 
-<!--toDo:jn-->
-<!--improve the next code chunk-->
-
-```{r, eval=FALSE, echo=FALSE}
-# remotes::install_github("rsbivand/rgrass")
-library(rgrass7)
+```{r, eval=FALSE}
+library(rgrass)
 grass_path = link$instDir[[1]]
-
-initGRASS(grass_path,
-          home = tempdir(), # home parameter necessary under UNIX-based systems
-          gisDbase = tempdir(), SG = london_streets, override = TRUE)
-
-initGRASS(gisBase = grass_path,
-          home = tempdir(), # home parameter necessary under UNIX-based systems
-          gisDbase = tempdir(), 
-          location = "london", mapset = "PERMANENT",  override = TRUE)
+initGRASS(gisBase = grass_path, gisDbase = tempdir(), 
+          location = "london", mapset = "PERMANENT", override = TRUE)
 ```
 
+After GRASS GIS initialization, we are able to use the `execGRASS()` function.
+It expects the name of the GRASS GIS module (e.g., `"g.proj"` or `"g.region"`) and potentially a few additional arguments or flags, and then it executes the given task in GRASS GIS.
+Here, let's use it to define the projection, the extent, and the resolution: `"g.proj"` sets the used CRS, while `"g.region"` is used to specify the extent and resolution.
 
-<!-- `link` is a `data.frame` which contains in its rows the GRASS 7 installations on your computer.  -->
-<!-- Here, we will use a GRASS 7\index{GRASS} installation. -->
-<!-- If you have not installed GRASS 7 on your computer, we recommend that you do so now. -->
-<!-- Assuming that we have found a working installation on your computer, we use the corresponding path in `initGRASS`.  -->
-<!-- Additionally, we specify where to store the spatial database\index{spatial database} (gisDbase), name the location `london`, and use the PERMANENT mapset. -->
-
-<!-- ```{r 09-gis-28, eval=FALSE} -->
-<!-- library(rgrass7) -->
-<!-- # find a GRASS 7 installation, and use the first one -->
-<!-- ind = grep("7", link$version)[1] -->
-<!-- # next line of code only necessary if we want to use GRASS as installed by  -->
-<!-- # OSGeo4W. Among others, this adds some paths to PATH, which are also needed -->
-<!-- # for running GRASS. -->
-<!-- link2GI::paramGRASSw(link[ind, ]) -->
-<!-- grass_path =  -->
-<!--   ifelse(test = !is.null(link$installation_type) &&  -->
-<!--            link$installation_type[ind] == "osgeo4W", -->
-<!--          yes = file.path(link$instDir[ind], "apps/grass", link$version[ind]), -->
-<!--          no = link$instDir) -->
-<!-- initGRASS(gisBase = grass_path, -->
-<!--           # home parameter necessary under UNIX-based systems -->
-<!--           home = tempdir(), -->
-<!--           gisDbase = tempdir(), location = "london",  -->
-<!--           mapset = "PERMANENT", override = TRUE) -->
-<!-- ``` -->
-
-<!-- Subsequently, we define the projection, the extent and the resolution. -->
-
-<!-- ```{r 09-gis-29, eval=FALSE} -->
-<!-- execGRASS("g.proj", flags = c("c", "quiet"),  -->
-<!--           proj4 = st_crs(london_streets)$proj4string) -->
-<!-- b_box = st_bbox(london_streets)  -->
-<!-- execGRASS("g.region", flags = c("quiet"),  -->
-<!--           n = as.character(b_box["ymax"]), s = as.character(b_box["ymin"]),  -->
-<!--           e = as.character(b_box["xmax"]), w = as.character(b_box["xmin"]),  -->
-<!--           res = "1") -->
-<!-- ``` -->
-
-<!-- Once you are familiar with how to set up the GRASS environment, it becomes tedious to do so over and over again. -->
-<!-- Luckily, `linkGRASS7()` of the **link2GI** packages lets you do it with one line of code. -->
-<!-- The only thing you need to provide is a spatial object which determines the projection and the extent of the spatial database.\index{spatial database}. -->
-<!-- First, `linkGRASS7()` finds all GRASS\index{GRASS} installations on your computer. -->
-<!-- Since we have set `ver_select` to `TRUE`, we can interactively choose one of the found GRASS-installations. -->
-<!-- If there is just one installation, the `linkGRASS7()` automatically chooses this one. -->
-<!-- Second, `linkGRASS7()` establishes a connection to GRASS 7. -->
-
-<!-- ```{r 09-gis-30, eval=FALSE} -->
-<!-- link2GI::linkGRASS7(london_streets, ver_select = TRUE) -->
-<!-- ``` -->
-
-<!-- Before we can use GRASS geoalgorithms\index{geoalgorithm}, we need to add data to GRASS's spatial database\index{spatial database}. -->
-<!-- Luckily, the convenience function `writeVECT()` does this for us. -->
-<!-- (Use `writeRAST()` in the case of raster data.) -->
-<!-- In our case we add the street and cycle hire point data while using only the first attribute column, and name them also `london_streets` and `points`.  -->
-
-<!-- To use **sf**-objects with **rgrass7**, we have to run `use_sf()` first (note: the code below assumes you are running **rgrass7** 0.2.1 or above). -->
-
-<!-- ```{r 09-gis-31, eval=FALSE} -->
-<!-- use_sf() -->
-<!-- writeVECT(SDF = london_streets, vname = "london_streets") -->
-<!-- writeVECT(SDF = points[, 1], vname = "points") -->
-<!-- ``` -->
-
-<!-- To perform our network\index{network} analysis, we need a topological clean street network. -->
-<!-- GRASS's `v.clean` takes care of the removal of duplicates, small angles and dangles, among others.  -->
-<!-- Here, we break lines at each intersection to ensure that the subsequent routing algorithm can actually turn right or left at an intersection, and save the output in a GRASS object named `streets_clean`. -->
-<!-- It is likely that a few of our cycling station points will not lie exactly on a street segment. -->
-<!-- However, to find the shortest route\index{shortest route} between them, we need to connect them to the nearest streets segment. -->
-<!-- `v.net`'s connect-operator does exactly this.  -->
-<!-- We save its output in `streets_points_con`. -->
-
-<!-- ```{r 09-gis-32, eval=FALSE} -->
-<!-- # clean street network -->
-<!-- execGRASS(cmd = "v.clean", input = "london_streets", output = "streets_clean", -->
-<!--           tool = "break", flags = "overwrite") -->
-<!-- # connect points with street network -->
-<!-- execGRASS(cmd = "v.net", input = "streets_clean", output = "streets_points_con",  -->
-<!--           points = "points", operation = "connect", threshold = 0.001, -->
-<!--           flags = c("overwrite", "c")) -->
-<!-- ``` -->
-
-<!-- The resulting clean dataset serves as input for the `v.net.salesman`-algorithm, which finally finds the shortest route between all cycle hire stations. -->
-<!-- `center_cats` requires a numeric range as input. -->
-<!-- This range represents the points for which a shortest route should be calculated.  -->
-<!-- Since we would like to calculate the route for all cycle stations, we set it to `1-25`. -->
-<!-- To access the GRASS help page of the traveling salesman\index{traveling salesman} algorithm\index{algorithm}, run `execGRASS("g.manual", entry = "v.net.salesman")`. -->
-
-<!-- ```{r 09-gis-33, eval=FALSE} -->
-<!-- execGRASS(cmd = "v.net.salesman", input = "streets_points_con", -->
-<!--           output = "shortest_route", center_cats = paste0("1-", nrow(points)), -->
-<!--           flags = c("overwrite")) -->
-<!-- ``` -->
-
-<!-- To visualize our result, we import the output layer into R, convert it into an sf-object keeping only the geometry, and visualize it with the help of the **mapview** package (Figure \@ref(fig:grass-mapview) and Section \@ref(interactive-maps)). -->
-
-<!-- ```{r grass-mapview, fig.cap="Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London.", fig.scap="Shortest route between 24 cycle hire stations.", echo=FALSE, out.width="80%"} -->
-<!-- knitr::include_graphics("figures/09_shortest_route.png") -->
-<!-- ``` -->
-
-<!-- ```{r 09-gis-34, eval=FALSE} -->
-<!-- route = readVECT("shortest_route") |> -->
-<!--   st_as_sf() |> -->
-<!--   st_geometry() -->
-<!-- mapview::mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) + -->
-<!--   points -->
-<!-- ``` -->
-
-<!-- ```{r 09-gis-35, eval=FALSE, echo=FALSE} -->
-<!-- library("mapview") -->
-<!-- m_1 = mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) + -->
-<!--   points -->
-<!-- mapview::mapshot(m_1,  -->
-<!--                  file = file.path(getwd(), "figures/09_shortest_route.png"), -->
-<!--                  remove_controls = c("homeButton", "layersControl", -->
-<!--                                      "zoomControl")) -->
-<!-- ``` -->
-
-<!-- There are a few important considerations to note in the process: -->
-
-<!-- - We could have used GRASS's spatial database\index{spatial database} (based on SQLite) which allows faster processing.  -->
-<!-- That means we have only exported geographic data at the beginning. -->
-<!-- Then we created new objects but only imported the final result back into R. -->
-<!-- To find out which datasets are currently available, run `execGRASS("g.list", type = "vector,raster", flags = "p")`. -->
-<!-- - We could have also accessed an already existing GRASS spatial database from within R. -->
-<!-- Prior to importing data into R, you might want to perform some (spatial) subsetting\index{vector!subsetting}. -->
-<!-- Use `v.select` and `v.extract` for vector data.  -->
-<!-- `db.select` lets you select subsets of the attribute table of a vector layer without returning the corresponding geometry. -->
-<!-- - You can also start R from within a running GRASS\index{GRASS} session [for more information please refer to @bivand_applied_2013 and this [wiki](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass7)]. -->
-<!-- - Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass77/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm\index{geoalgorithm}. -->
-<!-- - If you would like to use GRASS 6 from within R, use the R package **spgrass6**. -->
-
-### WhiteboxTools {#whitebox}
-
-<!-- whitebox init -->
-
-<!-- https://giswqs.github.io/whiteboxR/ -->
-
-<!-- Pre-compiled binaries are only available for download for 64-bit Linux (Ubuntu 20.04), Windows and Mac OS (Intel) platforms. -->
-
-```{r, eval=FALSE}
-whitebox::install_whitebox()
+```{r 09-gis-29, eval=FALSE}
+execGRASS("g.proj", flags = c("c", "quiet"), srid = "EPSG:4326")
+b_box = st_bbox(london_streets)
+execGRASS("g.region", flags = c("quiet"),
+          n = as.character(b_box["ymax"]), s = as.character(b_box["ymin"]),
+          e = as.character(b_box["xmax"]), w = as.character(b_box["xmin"]),
+          res = "1")
 ```
 
-<!-- source code (or docker) - https://github.com/jblindsay/whitebox-tools -->
-
-```{r, eval=FALSE}
-library(whitebox)
-wbt_init()
-```
-
-<!-- `??whitebox` -->
-<!-- ??wbt_ -->
-
-<!-- For more information visit https://giswqs.github.io/whiteboxR/ -->
-<!-- https://www.whiteboxgeo.com/manual/wbt_book/intro.html -->
-
+In this example, use are using the "EPSG:4326" CRS and setting our extent to the bounding box of the `london_streets` dataset.
+You can check if it worked correctly by running `execGRASS("g.proj", flags = "p")` and `execGRASS("g.region", flags = "p")`.
 
 ## When to use what?
 
 To recommend a single R-GIS interface is hard since the usage depends on personal preferences, the tasks at hand and your familiarity with different GIS\index{GIS} software packages which in turn probably depends on your field of study.
 As mentioned previously, SAGA\index{SAGA} is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets, and frequently used by hydrologists, climatologists and soil scientists [@conrad_system_2015].
-GRASS GIS\index{GRASS}, on the other hand, is the only GIS presented here supporting a topologically based spatial database which is especially useful for network analyses but also simulation studies (see below).
+GRASS GIS\index{GRASS}, on the other hand, is the only GIS presented here supporting a topologically based spatial database which is especially useful for network analyses but also simulation studies.
 QGIS is much more user-friendly compared to GRASS- and SAGA-GIS, especially for first-time GIS users, and probably the most popular open-source GIS.
-Therefore, **RQGIS**\index{RQGIS (package)} is an appropriate choice for most use cases.
+Therefore, **qgisprocess**\index{qgisprocess (package)} is an appropriate choice for most use cases.
 Its main advantages are:
 
 - A unified access to several GIS, and therefore the provision of >1000 geoalgorithms (Table \@ref(tab:gis-comp)) including duplicated functionality, e.g., you can perform overlay-operations using QGIS-\index{QGIS}, SAGA-\index{SAGA} or GRASS-geoalgorithms\index{GRASS}
 - Automatic data format conversions (SAGA uses `.sdat` grid files and GRASS uses its own database format but QGIS will handle the corresponding conversions)
 - Its automatic passing of geographic R objects to QGIS geoalgorithms\index{geoalgorithm} and back into R
-- Convenience functions to support the access of the online help, named arguments and automatic default value retrieval (**rgrass7**\index{rgrass7 (package)} inspired the latter two features)
+- Convenience functions to support the access of the online help, named arguments and automatic default value retrieval (**rgrass**\index{rgrass (package)} inspired the latter two features)
 
 By all means, there are use cases when you certainly should use one of the other R-GIS bridges.
 Though QGIS is the only GIS providing a unified interface to several GIS\index{GIS} software packages, it only provides access to a subset of the corresponding third-party geoalgorithms (for more information please refer to @muenchow_rqgis:_2017).
-Therefore, to use the complete set of SAGA and GRASS functions, stick with **RSAGA**\index{RSAGA (package)} and **rgrass7**. 
-When doing so, take advantage of **RSAGA**'s numerous user-friendly functions.
-Note also, that **RSAGA** offers native R functions for geocomputation such as `multi.local.function()`, `pick.from.points()` and many more.
-**RSAGA** supports much more SAGA versions than (R)QGIS.
+Therefore, to use the complete set of SAGA and GRASS functions, stick with **Rsagacmd**\index{Rsagacmd (package)} and **rgrass**. 
 Finally, if you need topological correct data and/or spatial database management functionality such as multi-user access, we recommend the usage of GRASS. 
-In addition, if you would like to run simulations with the help of a geodatabase\index{spatial database} [@krug_clearing_2010], use **rgrass7** directly since **RQGIS** always starts a new GRASS session for each call.
+In addition, if you would like to run simulations with the help of a geodatabase\index{spatial database} [@krug_clearing_2010], use **rgrass** directly since **qgisprocess** always starts a new GRASS session for each call.
 
 Please note that there are a number of further GIS software packages that have a scripting interface but for which there is no dedicated R package that accesses these: gvSig, OpenJump, Orfeo Toolbox and TauDEM.
 
 ## Other bridges
 
-The focus of this chapter is on R interfaces to Desktop GIS\index{GIS} software.
+The focus of this chapter, so far, was on R interfaces to Desktop GIS\index{GIS} software.
 We emphasize these bridges because dedicated GIS software is well-known and a common 'way in' to understanding geographic data.
 They also provide access to many geoalgorithms\index{geoalgorithm}.
 
@@ -750,9 +685,6 @@ GDAL is so effective that most GIS programs use GDAL\index{GDAL} in the backgrou
 But GDAL\index{GDAL} offers more than data I/O.
 It has [geoprocessing tools](https://gdal.org/programs/index.html) for vector and raster data, functionality to create [tiles](https://gdal.org/programs/gdal2tiles.html#gdal2tiles) for serving raster data online, and rapid [rasterization](https://gdal.org/programs/gdal_rasterize.html#gdal-rasterize) of vector data, all of which can be accessed via the system of R command line.
 
-<!--toDo:jn-->
-<!--expand a list of what is possible-->
-
 The code chunk below demonstrates this functionality:
 `linkGDAL()` searches the computer for a working GDAL\index{GDAL} installation and adds the location of the executable files to the PATH variable, allowing GDAL to be called.
 
@@ -760,10 +692,8 @@ The code chunk below demonstrates this functionality:
 link2GI::linkGDAL()
 ```
 
-<!--toDo:jn-->
-<!--explain the syntax-->
 Now we can use the `system()` function to call any of the GDAL tools.
-For example, `ogrinfo()` provides metadata of a vector dataset.
+For example, `ogrinfo` provides metadata of a vector dataset.
 Here we will call this tool with two additional flags: `-al` to list all features of all layers and `-so` to get a summary only (and not a complete geometry list):
 
 ```{r 09-gis-36, eval=FALSE, message=FALSE}
@@ -781,6 +711,16 @@ system(cmd)
 #> ...
 ```
 
+Other commonly used GDAL tools include:
+
+- `gdalinfo`: provides metadata of a raster dataset
+- `gdal_translate`: converts between different raster file formats
+- `ogr2ogr`: converts between different vector file formats
+- `gdalwarp`: reprojects, transform, and clip raster datasets
+- `gdaltransform`: transforms coordinates
+
+Visit https://gdal.org/programs/ to see the complete list of GDAL tools and to read their help files.
+
 The 'link' to GDAL provided by **link2GI** could be used as a foundation for doing more advanced GDAL work from the R or system CLI.
 TauDEM (http://hydrology.usu.edu/taudem) and the Orfeo Toolbox (https://www.orfeo-toolbox.org/) are other spatial data processing libraries/programs offering a command line interface -- the above example shows how to access these libraries from the system command line via R.
 This in turn could be the starting point for creating a proper interface to these libraries in the form of new R packages.
@@ -791,7 +731,7 @@ Furthermore, **sf** brings most of the power provided by GDAL\index{GDAL}, GEOS\
 ### Bridges to spatial databases {#postgis}
 
 <!--toDo:jn-->
-<!--consider referencing to 3rd edition-->
+<!--consider referencing to 3rd edition of the PostGIS book-->
 
 \index{spatial database}
 Spatial database management systems (spatial DBMS) store spatial and non-spatial data in a structured way.
@@ -938,17 +878,25 @@ Please refer to @obe_postgis_2015 for a more detailed description of the SQL que
 PostgreSQL/PostGIS is a formidable choice as an open-source spatial database.
 But the same is true for the lightweight SQLite/SpatiaLite database engine and GRASS\index{GRASS} which uses SQLite in the background (see Section \@ref(grass)).
 
-As a final note, if your data is getting too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, then the next logical step is to use large-scale geographic querying on distributed computing systems, as for example, provided by GeoMesa (http://www.geomesa.org/) or Apache Sedona [https://sedona.apache.org/; formerly known as GeoSpark - @huang_geospark_2017].
+If your datasets are too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, it may be worth exploring large-scale geographic querying on distributed computing systems.
+Such systems are outside the scope of this book but it worth mentioning that open source software providing this functionality exists.
+Prominent projects in this space include [GeoMesa](http://www.geomesa.org/) and [Apache Sedona](https://sedona.apache.org/), formerly known as GeoSpark [@huang_geospark_2017], which has and R interface provided by the [**apache.sedona**](https://cran.r-project.org/package=apache.sedona) package.
 
 ## Bridges to cloud technologies and services {#cloud}
 
-### STAC, COGs, and data cubes in the cloud
-
-Major cloud computing providers (Amazon Web Services, Microsoft Azure / Planetary Computer, Google Cloud Platform, and others)\index{cloud computing} offer huge catalogs of open Earth observation data such as the complete Sentinel-2 archive on their platforms. 
+In recent years, cloud technologies have become more and more prominent on the internet. 
+This also includes their use to store and process spatial data.
+Major cloud computing providers (Amazon Web Services, Microsoft Azure / Planetary Computer, Google Cloud Platform, and others)\index{cloud computing} offer vast catalogs of open Earth observation data, such as the complete Sentinel-2 archive, on their platforms. 
 We can use R and directly connect to and process data from these archives, ideally from a machine in the same cloud and region.
 
 Three promising developments that make working with such image archives on cloud platforms _easier_ and _more efficient_ are the [SpatioTemporal Asset Catalog (STAC)](https://stacspec.org)\index{STAC}, the [cloud-optimized GeoTIFF (COG)](https://www.cogeo.org/)\index{COG} image file format, and the concept of data cubes\index{data cube}. 
-Below, we introduce these individual developments and briefly describe how they can be used from R. 
+Section \@ref(staccog) introduces these individual developments and briefly describes how they can be used from R.
+
+Besides hosting large data archives, numerous cloud-based services\index{cloud computing} to process Earth observation data have been launched during the last few years.
+It includes the OpenEO initiative -- a unified interface between programming languages (including R) and various cloud-based services.
+You can find more information about OpenEO in Section \@ref(openeo).
+
+### STAC, COGs, and data cubes in the cloud {#staccog}
 
 The SpatioTemporal Asset Catalog (STAC)\index{STAC} is a general description format for spatiotemporal data that is used to describe a variety of datasets on cloud platforms including imagery, synthetic aperture radar (SAR) data, and point clouds. 
 Besides simple static catalog descriptions, STAC-API presents a web service to query items (e.g. images) of catalogs by space, time, and other properties. 
@@ -999,13 +947,15 @@ cube = raster_cube(collection, v) |>
 To filter images by cloud cover, we provide a property filter function that is applied on each STAC\index{STAC} result item while creating the image collection. 
 The function receives available metadata of an image as input list and returns a single logical value such that only images for which the function yields TRUE will be considered. 
 In this case, we ignore images with 10% or more cloud cover. 
-
-The combination of STAC\index{STAC}, COGs\index{COG}, and data cubes\index{data cube} forms a cloud-native workflow to analyze (larger) collections of satellite imagery in the cloud\index{cloud computing}. 
 For more details, please refer to this [tutorial presented at OpenGeoHub summer school 2021](https://appelmar.github.io/ogh2021/tutorial.html).
+
+The combination of STAC\index{STAC}, COGs\index{COG}, and data cubes\index{data cube} forms a cloud-native workflow to analyze (large) collections of satellite imagery in the cloud\index{cloud computing}. 
+These tools already form a backbone, for example, of the **sits** R package, which allows land use and land cover classification of big Earth observation data.
+The package builds EO data cubes from image collections available in cloud services and performs land classification of data cubes using various machine learning algorithms.
+For more information about **sits** visit https://e-sensing.github.io/sitsbook/ or read the related article [@rs13132428].
 
 ### openEO
 
-Besides hosting large data archives, numerous cloud-based services\index{cloud computing} to process Earth observation data have been launched during the last years. 
 OpenEO [@schramm_openeo_2021]\index{openEO} is an initiative to support interoperability among cloud services by defining a common language for processing the data. 
 The initial idea has been described in an [r-spatial.org blog post](https://r-spatial.org/2016/11/29/openeo.html) and aims at making it possible for users to change between cloud services easily with as little code changes as possible. 
 The [standardized processes](https://processes.openeo.org) use a multidimensional data cube model\index{data cube} as an interface to the data. 
@@ -1039,37 +989,16 @@ reduce_max = p$reduce_dimension(data = compute_ndvi, dimension = "t",
 # Export as GeoTIFF
 result = p$save_result(reduce_max, formats$output$GTiff)
 # Login, see https://docs.openeo.cloud/getting-started/r/#authentication
-login(login_type = "oidc",
-      provider = "egi",
-      config = list(
-        client_id= "...",
-        secret = "..."))
+login(login_type = "oidc", provider = "egi", 
+      config = list(client_id = "...", secret = "..."))
 # Execute processes
 compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 ```
 
 ## Exercises
 
-1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see Chapter \@ref(spatial-class)). 
-
-1. Union `poly_1` and `poly_2` using `st_union()` and `qgis:union`.
-What is the difference between the two union operations\index{vector!union}? 
-How can we use the **sf**\index{sf} package to obtain the same result as QGIS\index{QGIS}?
-
-1. Calculate the intersection\index{vector!intersection} of `poly_1` and `poly_2` using:
-
-    - **RQGIS**, **RSAGA** and **rgrass7**
-    - **sf**
-
-1. Attach `data(dem, package = "spDataLarge")` and `data(random_points, package = "spDataLarge")`.
-Select randomly a point from `random_points` and find all `dem` pixels that can be seen from this point (hint: viewshed\index{viewshed}).
-Visualize your result.
-For example, plot a hillshade\index{hillshade}, and on top of it the digital elevation model\index{digital elevation model}, your viewshed\index{viewshed} output and the point.
-Additionally, give `mapview` a try.
-
-1. Compute catchment area\index{catchment area} and catchment slope of `data("dem", package = "spDataLarge")` using **RSAGA** (see Section \@ref(saga)).
-
-1. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice (see Section \@ref(gdal)).
-
-1. Query all Californian highways from the PostgreSQL/PostGIS\index{PostGIS} database living in the QGIS\index{QGIS} Cloud introduced in this chapter (see Section \@ref(postgis)).
-
+```{r, echo=FALSE, results='asis'}
+res = knitr::knit_child('_10-ex.Rmd', quiet = TRUE, 
+                        options = list(include = FALSE, eval = FALSE))
+cat(res, sep = '\n')
+```
