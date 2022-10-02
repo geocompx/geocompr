@@ -40,40 +40,40 @@ latest version at
 Since commencing work on the Second Edition in September 2021 much has
 changed, including:
 
--   Replacement of `raster` with `terra` in Chapters 1 to 7 (see commits
-    related to this update
-    [here](https://github.com/Robinlovelace/geocompr/search?q=terra&type=commits))
--   Update of Chapter 7 to include mention alternative ways or
-    reading-in OSM data in
-    [\#656](https://github.com/Robinlovelace/geocompr/pull/656)
--   Refactor build settings so the book builds on Docker images in the
-    [geocompr/docker](https://github.com/geocompr/docker) repo
--   Improve the experience of using the book in Binder (ideal for trying
-    out the code before installing or updating the necessary R
-    packages), as documented in issue
-    [\#691](https://github.com/Robinlovelace/geocompr/issues/691)
-    (thanks to [yuvipanda](https://github.com/yuvipanda))
--   Improved communication of binary spatial predicates in Chapter 4
-    (see [\#675](https://github.com/Robinlovelace/geocompr/pull/675))
--   New section on the links between subsetting and clipping (see
-    [\#698](https://github.com/Robinlovelace/geocompr/pull/698)) in
-    Chapter 5
--   New
-    [section](https://geocompr.robinlovelace.net/spatial-operations.html#de-9im-strings)
-    on the dimensionally extended 9 intersection model (DE-9IM)
--   New [chapter](https://geocompr.robinlovelace.net/raster-vector.html)
-    on raster-vector interactions split out from Chapter 5
--   New
-    [section](https://geocompr.robinlovelace.net/spatial-class.html#the-sfheaders-package)
-    on the **sfheaders** package
--   New
-    [section](https://geocompr.robinlovelace.net/spatial-class.html#s2)
-    in Chapter 2 on spherical geometry engines and the **s2** package
--   Replacement of code based on the old **mlr** package with code based
-    on the new **mlr3** package, as described in a huge [pull
-    request](https://github.com/Robinlovelace/geocompr/pull/771)
-    <!-- Todo: update this bullet point (Rl 2021-11) -->
-    <!-- - Next issue  -->
+- Replacement of `raster` with `terra` in Chapters 1 to 7 (see commits
+  related to this update
+  [here](https://github.com/Robinlovelace/geocompr/search?q=terra&type=commits))
+- Update of Chapter 7 to include mention alternative ways or reading-in
+  OSM data in
+  [\#656](https://github.com/Robinlovelace/geocompr/pull/656)
+- Refactor build settings so the book builds on Docker images in the
+  [geocompr/docker](https://github.com/geocompr/docker) repo
+- Improve the experience of using the book in Binder (ideal for trying
+  out the code before installing or updating the necessary R packages),
+  as documented in issue
+  [\#691](https://github.com/Robinlovelace/geocompr/issues/691) (thanks
+  to [yuvipanda](https://github.com/yuvipanda))
+- Improved communication of binary spatial predicates in Chapter 4 (see
+  [\#675](https://github.com/Robinlovelace/geocompr/pull/675))
+- New section on the links between subsetting and clipping (see
+  [\#698](https://github.com/Robinlovelace/geocompr/pull/698)) in
+  Chapter 5
+- New
+  [section](https://geocompr.robinlovelace.net/spatial-operations.html#de-9im-strings)
+  on the dimensionally extended 9 intersection model (DE-9IM)
+- New [chapter](https://geocompr.robinlovelace.net/raster-vector.html)
+  on raster-vector interactions split out from Chapter 5
+- New
+  [section](https://geocompr.robinlovelace.net/spatial-class.html#the-sfheaders-package)
+  on the **sfheaders** package
+- New
+  [section](https://geocompr.robinlovelace.net/spatial-class.html#s2) in
+  Chapter 2 on spherical geometry engines and the **s2** package
+- Replacement of code based on the old **mlr** package with code based
+  on the new **mlr3** package, as described in a huge [pull
+  request](https://github.com/Robinlovelace/geocompr/pull/771)
+  <!-- Todo: update this bullet point (Rl 2021-11) -->
+  <!-- - Next issue  -->
 
 <!-- Todo: add news file? (RL 2021-11) -->
 <!-- See NEWS.md for a summary of the changes. -->
@@ -92,18 +92,18 @@ Contributions at this stage are very welcome.
 
 We encourage contributions on any part of the book, including:
 
--   improvements to the text, e.g. clarifying unclear sentences, fixing
-    typos (see guidance from [Yihui
-    Xie](https://yihui.org/en/2013/06/fix-typo-in-documentation/));
--   changes to the code, e.g. to do things in a more efficient way;
--   suggestions on content (see the project’s [issue
-    tracker](https://github.com/Robinlovelace/geocompr/issues));
--   improvements to and alternative approaches in the Geocompr solutions
-    booklet hosted at
-    [geocompr.github.io/solutions](https://geocompr.github.io/solutions/)
-    (see a blog post on how to update solutions in files such as
-    [\_01-ex.Rmd](https://github.com/Robinlovelace/geocompr/blob/main/_01-ex.Rmd)
-    [here](https://geocompr.github.io/post/2022/geocompr-solutions/))
+- improvements to the text, e.g. clarifying unclear sentences, fixing
+  typos (see guidance from [Yihui
+  Xie](https://yihui.org/en/2013/06/fix-typo-in-documentation/));
+- changes to the code, e.g. to do things in a more efficient way;
+- suggestions on content (see the project’s [issue
+  tracker](https://github.com/Robinlovelace/geocompr/issues));
+- improvements to and alternative approaches in the Geocompr solutions
+  booklet hosted at
+  [geocompr.github.io/solutions](https://geocompr.github.io/solutions/)
+  (see a blog post on how to update solutions in files such as
+  [\_01-ex.Rmd](https://github.com/Robinlovelace/geocompr/blob/main/_01-ex.Rmd)
+  [here](https://geocompr.github.io/post/2022/geocompr-solutions/))
 
 See
 [our-style.md](https://github.com/Robinlovelace/geocompr/blob/main/misc/our-style.md)
@@ -128,6 +128,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [appelmar](https://github.com/appelmar),
 [MikeJohnPage](https://github.com/MikeJohnPage),
 [eyesofbambi](https://github.com/eyesofbambi),
+[darrellcarvalho](https://github.com/darrellcarvalho),
 [nickbearman](https://github.com/nickbearman),
 [tyluRp](https://github.com/tyluRp),
 [giocomai](https://github.com/giocomai),
@@ -135,9 +136,8 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [LaurieLBaker](https://github.com/LaurieLBaker),
 [MarHer90](https://github.com/MarHer90),
 [mdsumner](https://github.com/mdsumner),
-[pat-s](https://github.com/pat-s),
-[darrellcarvalho](https://github.com/darrellcarvalho),
-[e-clin](https://github.com/e-clin), [gisma](https://github.com/gisma),
+[pat-s](https://github.com/pat-s), [e-clin](https://github.com/e-clin),
+[gisma](https://github.com/gisma),
 [ateucher](https://github.com/ateucher),
 [annakrystalli](https://github.com/annakrystalli),
 [andtheWings](https://github.com/andtheWings),
@@ -175,13 +175,47 @@ During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
 [`our-impact.csv`](https://github.com/Robinlovelace/geocompr/blob/main/misc/our-impact.csv).
 
-## Reproducing the book
+## Downloading the source code
 
-To ease reproducibility, we created the `geocompkg` package. Installing
-it from GitHub will install all the R packages needed build the book
-(you will need a computer with necessary [system
-dependencies](https://github.com/r-spatial/sf#installing) and the
-[**remotes**](https://github.com/r-lib/remotes/) package installed):
+The recommended way to get the source code underlying Geocomputation
+with R on your computer is by cloning the repo. You can can that on any
+computer with [Git](https://github.com/git-guides/install-git) installed
+with the following command:
+
+``` bash
+git clone https://github.com/Robinlovelace/geocompr.git
+```
+
+An alternative approach, which we recommend for people who want to
+contribute to open source projects hosted on GitHub, is to install the
+[`gh` CLI tool](https://github.com/cli/cli#installation). From there
+cloning a fork of the source code, that you can change and share
+(including with Pull Requests to improve the book), can be done with the
+following command:
+
+``` bash
+git fork robinlovelace/geocompr # (git clone robinlovelace/geocompr # also works)
+```
+
+Both of those methods require you to have Git installed. If not, you can
+download the book’s source code from the URL
+<https://github.com/Robinlovelace/geocompr/archive/refs/heads/main.zip>
+. Download/unzip the source code from the R command line to increase
+reproducibility and reduce time spent clicking around:
+
+``` r
+u = "https://github.com/Robinlovelace/geocompr/archive/refs/heads/main.zip"
+f = basename(u)
+download.file(u, f)        # download the file
+unzip(f)                   # unzip it
+file.rename(f, "geocompr") # rename the directory
+rstudioapi::openProject("geococompr") 
+```
+
+## Reproducing the book in R/RStudio/VS Code
+
+To ease reproducibility, we created the `geocompkg` package. Install it
+with the following commands:
 
 ``` r
 install.packages("remotes")
@@ -189,10 +223,17 @@ install.packages("remotes")
 remotes::install_github("geocompr/geocompkg")
 ```
 
-Running the commands above should install the packages needed to run the
-first part of the book (chapters 1 to 8). To install and build the book
-in its entirety, run the following command (which installs additional
-‘Suggests’ packages, this may take some time to run!):
+Installing `geocompkg` will also install core packages required for
+reproducing **Part 1 of the book** (chapters 1 to 8). Note: you may also
+need to install [system
+dependencies](https://github.com/r-spatial/sf#installing) if you’re
+running Linux (recommended) or Mac operating systems. You also need to
+have the [**remotes**](https://github.com/r-lib/remotes/) package
+installed:
+
+To reproduce book **in its entirety**, run the following command (which
+installs additional ‘Suggests’ packages, this may take some time to
+run!):
 
 ``` r
 # To reproduce all chapters (install lots of packages, may take some time!)
@@ -201,21 +242,36 @@ remotes::install_github("geocompr/geocompkg", dependencies = TRUE)
 
 You need a recent version of the GDAL, GEOS, PROJ and udunits libraries
 installed for this to work on Mac and Linux. See the **sf** package’s
-[README](https://github.com/r-spatial/sf) for information on that.
-
-Once the dependencies have been installed you should be able to build
-and view a local version the book with:
+[README](https://github.com/r-spatial/sf) for information on that. After
+the dependencies have been installed you should be able to build and
+view a local version the book with:
 
 ``` r
+# Change this depending on where you have the book code stored:
+rstudioapi::openProject("~/Downloads/geocompr")
+ # or code /location/of/geocompr in the system terminal
+ # or cd /location/of/geocompr then R in the system terminal, then:
 bookdown::render_book("index.Rmd") # to build the book
-browseURL("_book/index.html") # to view it
+browseURL("_book/index.html")      # to view it
 ```
 
 <!-- The code associated with each chapter is saved in the `code/chapters/` folder. -->
 <!-- `source("code/chapters/07-transport.R")` runs run the code chunks in chapter 7, for example. -->
 <!-- These R scripts are generated with the follow command which wraps `knitr::purl()`: -->
 
-## Geocompr in binder
+## Geocompr in a devcontainer
+
+A great feature of VS Code is
+[devcontainers](https://code.visualstudio.com/docs/remote/containers),
+which allow you to develop in an isolated Docker container. If you have
+VS Code and the necessary dependencies installed on your computer, you
+can build Geocomputation with R in a devcontainer as shown below (see
+[\#873](https://github.com/Robinlovelace/geocompr/issues/873) for
+details):
+
+![](https://user-images.githubusercontent.com/1825120/193398022-bbcfbfda-5d57-4c57-8db3-ed1fdb4a07be.png)
+
+## Geocompr in Binder
 
 For many people the quickest way to get started with Geocomputation with
 R is in your web browser via Binder. To see an interactive RStudio
