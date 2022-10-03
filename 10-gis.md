@@ -951,7 +951,7 @@ cube = raster_cube(collection, v) |>
   apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
   reduce_time("max(NDVI)")
 # gdalcubes_options(parallel = 8)
-# plot(cube, zlim = c(0,1))
+# plot(cube, zlim = c(0, 1))
 ```
 
 To filter images by cloud cover, we provide a property filter function that is applied on each STAC\index{STAC} result item while creating the image collection. 
@@ -1028,7 +1028,16 @@ What kind of information you can find there?
 
 <!-- postgis 1? -->
 1. Query all Californian highways from the PostgreSQL/PostGIS\index{PostGIS} database living in the QGIS\index{QGIS} Cloud introduced in this chapter.
+
+
+
 <!-- stac+gdalcubes 1 -->
+1. The `ndvi.tif` raster (`system.file("raster/ndvi.tif", package = "spDataLarge")`) contains NDVI calculated for the Mongón study area based on Landsat data from September 22nd, 2000.
+Use **rstac**, **gdalcubes**, and **terra** to download Sentinel-2 images for the same area from 
+2020-08-01 to 2020-10-31, calculate its NDVI, and then compare it with the results from `ndvi.tif`.
+
+
+
 
 <!-- 1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see Chapter \@ref(spatial-class)).  -->
 
