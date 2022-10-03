@@ -1012,7 +1012,7 @@ compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 <!-- qgisprocess 1-3 -->
 <!-- sagagis 1 -->
 <!-- sagagis supercells -->
-<!-- expain/mention other segmentation techinques -->
+<!-- explain/mention other segmentation techniques -->
 <!-- mention supercells -- exercises?? -->
 <!-- https://github.com/joaofgoncalves/SegOptim ?? -->
 <!-- rgrass 1 -->
@@ -1026,8 +1026,8 @@ What kind of information you can find there?
 
 
 
-
 <!-- postgis 1? -->
+1. Query all Californian highways from the PostgreSQL/PostGIS\index{PostGIS} database living in the QGIS\index{QGIS} Cloud introduced in this chapter.
 <!-- stac+gdalcubes 1 -->
 
 <!-- 1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see Chapter \@ref(spatial-class)).  -->
@@ -1048,7 +1048,3 @@ What kind of information you can find there?
 <!-- Additionally, give `mapview` a try. -->
 
 <!-- 1. Compute catchment area\index{catchment area} and catchment slope of `data("dem", package = "spDataLarge")` using **RSAGA** (see Section \@ref(saga)). -->
-
-
-
-<!-- 1. Query all Californian highways from the PostgreSQL/PostGIS\index{PostGIS} database living in the QGIS\index{QGIS} Cloud introduced in this chapter (see Section \@ref(postgis)). -->
