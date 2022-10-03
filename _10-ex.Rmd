@@ -35,7 +35,6 @@ system(cmd2)
 
 ```{r}
 library(RPostgreSQL)
-library(sf)
 conn = dbConnect(drv = PostgreSQL(), 
                  dbname = "rtafdf_zljbqm", host = "db.qgiscloud.com",
                  port = "5432", user = "rtafdf_zljbqm", password = "d3290ead")
@@ -48,6 +47,53 @@ plot(st_geometry(ca_highways))
 ```
 
 <!-- stac+gdalcubes 1 -->
+1. The `ndvi.tif` raster (`system.file("raster/ndvi.tif", package = "spDataLarge")`) contains NDVI calculated for the Mongón study area based on a Landsat data from September 22nd, 2000.
+Use **rstac**, **gdalcubes**, and **terra** to download Sentinel-2 images for the same area from 
+2020-08-01 to 2020-10-31, calculate its NDVI, and then compare it with the results from `ndvi.tif`.
+
+```{r}
+library(rstac)
+library(gdalcubes)
+?spDataLarge::ndvi.tif
+ndvi1 = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
+bbox1 = as.numeric(st_bbox(project(ndvi1, "EPSG:4326")))
+
+# get data
+s = stac("https://earth-search.aws.element84.com/v0")
+items = s |>
+  stac_search(collections = "sentinel-s2-l2a-cogs",
+              bbox = bbox1, 
+              datetime = "2020-08-01/2020-10-31") |>
+  post_request() |> items_fetch()
+collection = stac_image_collection(items$features, 
+                  property_filter = function(x) {x[["eo:cloud_cover"]] < 10})
+v = cube_view(srs = "EPSG:32717", extent = collection,
+              dx = xres(ndvi1), dy = yres(ndvi1),
+              dt = "P1D")
+
+# calculate ndvi
+ndvi2 = raster_cube(collection, v) |>
+  select_bands(c("B04", "B08")) |>
+  apply_pixel("(B08-B04)/(B08+B04)", "NDVI")
+
+# write results to file
+gdalcubes_options(parallel = 2)
+gdalcubes::write_tif(ndvi2, dir = ".", prefix = "ndvi2")
+
+# unify two datasets
+ndvi2 = rast("ndvi22020-10-10.tif")
+plot(ndvi2)
+ndvi2 = resample(ndvi2, ndvi1, method = "bilinear")
+plot(ndvi2)
+
+# vizualize the final results
+ndvi_all = c(ndvi1, ndvi2)
+names(ndvi_all) = c("y2000", "y2020")
+library(tmap)
+tm_shape(ndvi_all) +
+  tm_raster(style = "cont")
+```
+
 
 <!-- 1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see Chapter \@ref(spatial-class)).  -->
 
@@ -67,9 +113,5 @@ plot(st_geometry(ca_highways))
 <!-- Additionally, give `mapview` a try. -->
 
 <!-- 1. Compute catchment area\index{catchment area} and catchment slope of `data("dem", package = "spDataLarge")` using **RSAGA** (see Section \@ref(saga)). -->
-
-
-
-
 
 
