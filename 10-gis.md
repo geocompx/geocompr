@@ -1032,7 +1032,7 @@ What kind of information you can find there?
 
 
 <!-- stac+gdalcubes 1 -->
-1. The `ndvi.tif` raster (`system.file("raster/ndvi.tif", package = "spDataLarge")`) contains NDVI calculated for the Mongón study area based on Landsat data from September 22nd, 2000.
+1. The `ndvi.tif` raster (`system.file("raster/ndvi.tif", package = "spDataLarge")`) contains NDVI calculated for the Mongón study area based on a Landsat data from September 22nd, 2000.
 Use **rstac**, **gdalcubes**, and **terra** to download Sentinel-2 images for the same area from 
 2020-08-01 to 2020-10-31, calculate its NDVI, and then compare it with the results from `ndvi.tif`.
 
