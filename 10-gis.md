@@ -474,6 +474,11 @@ The resulting polygons (segments) represent areas with similar values.
 They can also be further aggregated into larger polygons using various techniques, such as clustering (e.g., k-means), regionalization (e.g., SKATER) or supervised classification methods.
 You can try to do it in Exercises.
 
+<!-- jn:toDo-->
+<!-- explain/mention other segmentation techniques -->
+<!-- mention supercells -- exercises?? -->
+<!-- https://github.com/joaofgoncalves/SegOptim ?? -->
+
 ## GRASS GIS {#grass}
 
 The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the Geographical Resources Analysis Support System (GRASS)\index{GRASS} (Table \@ref(tab:gis-comp); @neteler_open_2008) from 1982 to 1995. 
@@ -1015,12 +1020,12 @@ compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 
 
 
+1. Continue working on the `ndvi_segments` object created in the SAGA GIS section.
+Extract average NDVI values from the `ndvi` raster and group them into six clusters using `kmeans()`. 
+Visualize the results.
 
 
-<!-- sagagis supercells -->
-<!-- explain/mention other segmentation techniques -->
-<!-- mention supercells -- exercises?? -->
-<!-- https://github.com/joaofgoncalves/SegOptim ?? -->
+
 <!-- rgrass 1 -->
 <!-- gdal 1-2 -->
 1. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice.
