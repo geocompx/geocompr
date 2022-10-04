@@ -19,12 +19,55 @@ plot(swi_results_all[["area"]])
 plot(swi_results_all[["slope"]])
 ```
 
+1. Continue working on the `ndvi_segments` object created in the SAGA GIS section.
+Extract average NDVI values from the `ndvi` raster and group them into six clusters using `kmeans()`. 
+Visualize the results.
 
+```{r}
+library(Rsagacmd)
+saga = saga_gis(raster_backend = "terra", vector_backend = "sf")
+ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
+sg = saga$imagery_segmentation$seed_generation
 
-<!-- sagagis supercells -->
-<!-- explain/mention other segmentation techniques -->
-<!-- mention supercells -- exercises?? -->
-<!-- https://github.com/joaofgoncalves/SegOptim ?? -->
+ndvi_seeds = sg(ndvi, band_width = 2)
+plot(ndvi_seeds$seed_grid)
+
+srg = saga$imagery_segmentation$seeded_region_growing
+ndvi_srg = srg(ndvi_seeds$seed_grid, ndvi, method = 1)
+plot(ndvi_srg$segments)
+
+ndvi_segments = as.polygons(ndvi_srg$segments) |> 
+  st_as_sf()
+
+# extract values
+ndvi_segments_vals = extract(ndvi, ndvi_segments, fun = "mean")
+ndvi_segments = cbind(ndvi_segments, ndvi_segments_vals)
+
+# k-means
+ks = kmeans(ndvi_segments[["ndvi"]], centers = 6)
+ndvi_segments$k = ks$cluster
+
+# merge polygons
+library(dplyr)
+ndvi_segments2 = ndvi_segments |> 
+  group_by(k) |> 
+  summarise()
+
+# visualize results
+library(tmap)
+tm1 = tm_shape(ndvi) +
+  tm_raster(style = "cont", palette = "PRGn", title = "NDVI", n = 7) + 
+  tm_shape(ndvi_segments2) +
+  tm_borders(col = "red") +
+  tm_layout(legend.outside = TRUE)
+
+tm2 = tm_shape(ndvi_segments2) +
+  tm_polygons(col = "k", style = "cat", palette = "Set1") +
+  tm_layout(legend.outside = TRUE)
+
+tmap_arrange(tm1, tm2)
+```
+
 <!-- rgrass 1 -->
 <!-- gdal 1-2 -->
 1. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice.
