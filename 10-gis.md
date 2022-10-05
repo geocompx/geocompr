@@ -1015,19 +1015,23 @@ compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 
 
 <!-- qgisprocess 1-3 -->
+E1. Compute global solar irradiation for an area of `system.file("raster/dem.tif", package = "spDataLarge")` for March 21 at 11:00 AM using the `r.sun` GRASS GIS through **qgisprocess**.
+
+
+
 <!-- sagagis 1 -->
-1. Compute catchment area\index{catchment area} and catchment slope of `system.file("raster/dem.tif", package = "spDataLarge")` using **Rsagacmd**.
+E2. Compute catchment area\index{catchment area} and catchment slope of `system.file("raster/dem.tif", package = "spDataLarge")` using **Rsagacmd**.
 
 
 
-1. Continue working on the `ndvi_segments` object created in the SAGA GIS section.
+E3. Continue working on the `ndvi_segments` object created in the SAGA GIS section.
 Extract average NDVI values from the `ndvi` raster and group them into six clusters using `kmeans()`. 
 Visualize the results.
 
 
 
 <!-- rgrass 1 -->
-1. Attach `data(random_points, package = "spDataLarge")` and read `system.file("raster/dem.tif", package = "spDataLarge")` into R.
+E4. Attach `data(random_points, package = "spDataLarge")` and read `system.file("raster/dem.tif", package = "spDataLarge")` into R.
 Select a point randomly from `random_points` and find all `dem` pixels that can be seen from this point (hint: viewshed\index{viewshed} can be calculated using GRASS GIS).
 Visualize your result.
 For example, plot a hillshade\index{hillshade}, the digital elevation model\index{digital elevation model}, your viewshed\index{viewshed} output, and the point.
@@ -1035,23 +1039,22 @@ Additionally, give `mapview` a try.
 
 
 
-
 <!-- gdal 1-2 -->
-1. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice.
+E5. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice.
 What kind of information you can find there?
 
 
 
-1. Use `gdalwarp` to decrease the resolution of your raster file (for example, if the resolution is 0.5, change it into 1). Note: `-tr` and `-r` flags will be used in this exercise.
+E6. Use `gdalwarp` to decrease the resolution of your raster file (for example, if the resolution is 0.5, change it into 1). Note: `-tr` and `-r` flags will be used in this exercise.
 
 
 
 <!-- postgis 1? -->
-1. Query all Californian highways from the PostgreSQL/PostGIS\index{PostGIS} database living in the QGIS\index{QGIS} Cloud introduced in this chapter.
+E7. Query all Californian highways from the PostgreSQL/PostGIS\index{PostGIS} database living in the QGIS\index{QGIS} Cloud introduced in this chapter.
 
 
 
 <!-- stac+gdalcubes 1 -->
-1. The `ndvi.tif` raster (`system.file("raster/ndvi.tif", package = "spDataLarge")`) contains NDVI calculated for the Mongón study area based on Landsat data from September 22nd, 2000.
+E8. The `ndvi.tif` raster (`system.file("raster/ndvi.tif", package = "spDataLarge")`) contains NDVI calculated for the Mongón study area based on Landsat data from September 22nd, 2000.
 Use **rstac**, **gdalcubes**, and **terra** to download Sentinel-2 images for the same area from 
 2020-08-01 to 2020-10-31, calculate its NDVI, and then compare it with the results from `ndvi.tif`.
