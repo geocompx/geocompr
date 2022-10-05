@@ -1055,17 +1055,3 @@ What kind of information you can find there?
 1. The `ndvi.tif` raster (`system.file("raster/ndvi.tif", package = "spDataLarge")`) contains NDVI calculated for the Mongón study area based on Landsat data from September 22nd, 2000.
 Use **rstac**, **gdalcubes**, and **terra** to download Sentinel-2 images for the same area from 
 2020-08-01 to 2020-10-31, calculate its NDVI, and then compare it with the results from `ndvi.tif`.
-
-
-
-
-<!-- 1. Create two overlapping polygons (`poly_1` and `poly_2`) with the help of the **sf**-package (see Chapter \@ref(spatial-class)).  -->
-
-<!-- 1. Union `poly_1` and `poly_2` using `st_union()` and `qgis:union`. -->
-<!-- What is the difference between the two union operations\index{vector!union}?  -->
-<!-- How can we use the **sf**\index{sf} package to obtain the same result as QGIS\index{QGIS}? -->
-
-<!-- 1. Calculate the intersection\index{vector!intersection} of `poly_1` and `poly_2` using: -->
-
-<!--     - **RQGIS**, **RSAGA** and **rgrass** -->
-<!--     - **sf** -->
