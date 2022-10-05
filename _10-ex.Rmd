@@ -69,6 +69,53 @@ tmap_arrange(tm1, tm2)
 ```
 
 <!-- rgrass 1 -->
+1. Attach `data(random_points, package = "spDataLarge")` and read `system.file("raster/dem.tif", package = "spDataLarge")` into R.
+Select a point randomly from `random_points` and find all `dem` pixels that can be seen from this point (hint: viewshed\index{viewshed} can be calculated using GRASS GIS).
+Visualize your result.
+For example, plot a hillshade\index{hillshade}, the digital elevation model\index{digital elevation model}, your viewshed\index{viewshed} output, and the point.
+Additionally, give `mapview` a try.
+
+```{r}
+library(rgrass)
+dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
+data(random_points, package = "spDataLarge")
+random_point = random_points[sample(1:nrow(random_points), 1), ]
+
+link2GI::linkGRASS(dem)
+write_RAST(dem, vname = "dem")
+
+execGRASS("r.viewshed",
+          input = "dem", 
+          coordinates = sf::st_coordinates(random_point),
+          output = "view",
+          flags = "overwrite")
+out = read_RAST("view")
+
+# simple viz
+plot(out)
+
+# hillshade viz
+hs = shade(slope = terrain(dem, "slope", unit = "radians"), 
+           aspect = terrain(dem, "aspect", unit = "radians"))
+
+library(tmap)
+tm_shape(hs) +
+	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+	tm_shape(dem) +
+	tm_raster(alpha = 0.6, palette = hcl.colors(25, "Geyser"), legend.show = FALSE) +
+  tm_shape(out) +
+  tm_raster(style = "cont", legend.show = FALSE) +
+	tm_shape(random_point) +
+	tm_symbols(col = "black") +
+	tm_layout(frame = FALSE)
+
+# mapview viz
+library(mapview)
+mapview(out, col = "white", map.type = "Esri.WorldImagery") +
+  mapview(point)
+```
+
+
 <!-- gdal 1-2 -->
 1. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice.
 What kind of information you can find there?
@@ -165,12 +212,6 @@ tm_shape(ndvi_all) +
 <!--     - **RQGIS**, **RSAGA** and **rgrass** -->
 <!--     - **sf** -->
 
-<!-- 1. Attach `data(dem, package = "spDataLarge")` and `data(random_points, package = "spDataLarge")`. -->
-<!-- Select randomly a point from `random_points` and find all `dem` pixels that can be seen from this point (hint: viewshed\index{viewshed}). -->
-<!-- Visualize your result. -->
-<!-- For example, plot a hillshade\index{hillshade}, and on top of it the digital elevation model\index{digital elevation model}, your viewshed\index{viewshed} output and the point. -->
-<!-- Additionally, give `mapview` a try. -->
 
-<!-- 1. Compute catchment area\index{catchment area} and catchment slope of `data("dem", package = "spDataLarge")` using **RSAGA** (see Section \@ref(saga)). -->
 
 
