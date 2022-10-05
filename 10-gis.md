@@ -1027,6 +1027,15 @@ Visualize the results.
 
 
 <!-- rgrass 1 -->
+1. Attach `data(random_points, package = "spDataLarge")` and read `system.file("raster/dem.tif", package = "spDataLarge")` into R.
+Select a point randomly from `random_points` and find all `dem` pixels that can be seen from this point (hint: viewshed\index{viewshed} can be calculated using GRASS GIS).
+Visualize your result.
+For example, plot a hillshade\index{hillshade}, the digital elevation model\index{digital elevation model}, your viewshed\index{viewshed} output, and the point.
+Additionally, give `mapview` a try.
+
+
+
+
 <!-- gdal 1-2 -->
 1. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice.
 What kind of information you can find there?
@@ -1060,11 +1069,3 @@ Use **rstac**, **gdalcubes**, and **terra** to download Sentinel-2 images for th
 
 <!--     - **RQGIS**, **RSAGA** and **rgrass** -->
 <!--     - **sf** -->
-
-<!-- 1. Attach `data(dem, package = "spDataLarge")` and `data(random_points, package = "spDataLarge")`. -->
-<!-- Select randomly a point from `random_points` and find all `dem` pixels that can be seen from this point (hint: viewshed\index{viewshed}). -->
-<!-- Visualize your result. -->
-<!-- For example, plot a hillshade\index{hillshade}, and on top of it the digital elevation model\index{digital elevation model}, your viewshed\index{viewshed} output and the point. -->
-<!-- Additionally, give `mapview` a try. -->
-
-<!-- 1. Compute catchment area\index{catchment area} and catchment slope of `data("dem", package = "spDataLarge")` using **RSAGA** (see Section \@ref(saga)). -->
