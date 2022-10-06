@@ -92,7 +92,7 @@ Table: (\#tab:gis-comp)Comparison between three open-source GIS. Hybrid refers t
 |SAGA  |2004          |>600          |hybrid  |
 |GRASS |1982          |>500          |hybrid  |
 
-To complement the R-GIS bridges, the second part of the chapter gives a very brief introduction to interfaces to spatial libraries (Section \@ref(gdal)), spatial databases\index{spatial database} (Section \@ref(postgis)), and cloud-based processing of Earth observation data (Section \@ref(cloud)).
+To complement the R-GIS bridges, the second part of the chapter gives a brief introduction to interfaces to spatial libraries (Section \@ref(gdal)), spatial databases\index{spatial database} (Section \@ref(postgis)), and cloud-based processing of Earth observation data (Section \@ref(cloud)).
 
 ## QGIS through **qgisprocess** {#rqgis}
 
