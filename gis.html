@@ -175,14 +175,9 @@ However, its ability to interface with dedicated GISs gives it astonishing geosp
 R is well known as a statistical programming language, but many people are unaware of its ability to replicate GIS workflows, with the additional benefits of a (relatively) consistent CLI.
 Furthermore, R outperforms GISs in some areas of geocomputation, including interactive/animated map making (see Chapter <a href="adv-map.html#adv-map">9</a>) and spatial statistical modeling (see Chapter <a href="spatial-cv.html#spatial-cv">12</a>).
 This chapter focuses on ‘bridges’ to three mature open source GIS products (see Table <a href="gis.html#tab:gis-comp">10.1</a>): QGIS (via the package <strong>qgisprocess</strong>; Section <a href="gis.html#rqgis">10.2</a>), SAGA (via <strong>Rsagacmd</strong>; Section <a href="gis.html#saga">10.3</a>) and GRASS (via <strong>rgrass</strong>; Section <a href="gis.html#grass">10.4</a>).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
-<!--toDo:jn-->
-<!-- Though not covered here, it is worth being aware of the interface to ArcGIS\index{ArcGIS}, a proprietary and very popular GIS software, via **RPyGeo**.^[By the way, it is also possible to use R from within Desktop GIS software packages.  -->
-<!-- The so-called R-ArcGIS bridge (see https://github.com/R-ArcGIS/r-bridge) allows R to be used from within ArcGIS\index{ArcGIS}.  -->
-<!--toDo:jn-->
-<!-- rgee? -->
+Though not covered here, it is worth being aware of so-called R-ArcGIS bridge (see &lt;a href="https://github.com/R-ArcGIS/r-bridge" class="uri"&gt;https://github.com/R-ArcGIS/r-bridge&lt;/a&gt;) that allows R to be used from within ArcGIS
 One can also use R scripts from within QGIS (see &lt;a href="https://docs.qgis.org/3.16/en/docs/training_manual/processing/r_intro.html" class="uri"&gt;https://docs.qgis.org/3.16/en/docs/training_manual/processing/r_intro.html&lt;/a&gt;).
-Finally, it is also possible to use R from the GRASS GIS command line (see &lt;a href="https://grasswiki.osgeo.org/wiki/R_statistics/rgrass" class="uri"&gt;https://grasswiki.osgeo.org/wiki/R_statistics/rgrass&lt;/a&gt;).&lt;/p&gt;'><sup>50</sup></a>
-To complement the R-GIS bridges, the chapter ends with a very brief introduction to interfaces to spatial libraries (Section <a href="gis.html#gdal">10.6.1</a>), spatial databases (Section <a href="gis.html#postgis">10.6.2</a>), and cloud-based processing of Earth observation data (Section <a href="gis.html#cloud">10.7</a>).</p>
+Finally, it is also possible to use R from the GRASS GIS command line (see &lt;a href="https://grasswiki.osgeo.org/wiki/R_statistics/rgrass" class="uri"&gt;https://grasswiki.osgeo.org/wiki/R_statistics/rgrass&lt;/a&gt;).&lt;/p&gt;'><sup>50</sup></a></p>
 <div class="inline-table"><table class="table table-sm">
 <caption>
 <span id="tab:gis-comp">TABLE 10.1: </span>Comparison between three open-source GIS. Hybrid refers to the support of vector and raster operations.</caption>
@@ -213,6 +208,7 @@ To complement the R-GIS bridges, the chapter ends with a very brief introduction
 </tr>
 </tbody>
 </table></div>
+<p>To complement the R-GIS bridges, the second part of the chapter gives a very brief introduction to interfaces to spatial libraries (Section <a href="gis.html#gdal">10.6.1</a>), spatial databases (Section <a href="gis.html#postgis">10.6.2</a>), and cloud-based processing of Earth observation data (Section <a href="gis.html#cloud">10.7</a>).</p>
 </div>
 <div id="rqgis" class="section level2" number="10.2">
 <h2>
@@ -386,9 +382,7 @@ We can read a selected output by providing an output name in the <code><a href="
 The topographic wetness index is unitless.
 Its low values represent areas that will not accumulate water, while higher values show areas that will accumulate water at increasing levels.</p>
 <p>Information from digital elevation models can also be categorized, for example, to geomorphons – the geomorphological phonotypes consisting of 10 classes that represent terrain forms, such as slopes, ridges, or valleys <span class="citation">(<a href="references.html#ref-jasiewicz_geomorphons_2013" role="doc-biblioref">Jasiewicz and Stepinski 2013</a>)</span>.
-These classes are used in many studies, including landslide susceptibility, ecosystem services, human mobility, and digital soil mapping.
-<!-- https://scholar.google.pl/scholar?cites=8284408958489255337&as_sdt=2005&sciodt=0,5&hl=en -->
-<!-- https://www.nature.com/articles/s41597-020-0479-6.pdf --></p>
+These phonotypes are used in many studies, including landslide susceptibility, ecosystem services, human mobility, and digital soil mapping.</p>
 <p>The original implementation of the geomorphons’ algorithm was created in GRASS GIS, and we can find it in the <strong>qgisprocess</strong> list as <code>"grass7:r.geomorphon"</code>:</p>
 <div class="sourceCode" id="cb357"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grep</a></span><span class="op">(</span><span class="st">"geomorphon"</span>, <span class="va">qgis_algo</span><span class="op">$</span><span class="va">algorithm</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -418,7 +412,7 @@ FIGURE 10.3: Topographic wetness index (TWI, left panel) and geomorphons (right 
 <span class="header-section-number">10.3</span> SAGA GIS<a class="anchor" aria-label="anchor" href="#saga"><i class="fas fa-link"></i></a>
 </h2>
 <p>Our goal in this section is to delineate areas with similar values of normalized difference vegetation index (NDVI).
-We will use the NDVI data for the Mongón study area in Peru from the 22nd of September 2000 (the left panel of Figure <a href="gis.html#fig:sagasegments">10.4</a>) and a seeded region growing algorithm from SAGA GIS to achive the goal.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;Read Section &lt;a href="spatial-operations.html#local-operations"&gt;4.3.3&lt;/a&gt; on details of how to calculate NDVI from a remote sensing image.&lt;/p&gt;'><sup>59</sup></a></p>
+We will use the NDVI data for the Mongón study area in Peru from the 22nd of September 2000 (the left panel of Figure <a href="gis.html#fig:sagasegments">10.4</a>) and a seeded region growing algorithm from SAGA GIS to achieve the goal.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;Read Section &lt;a href="spatial-operations.html#local-operations"&gt;4.3.3&lt;/a&gt; on details of how to calculate NDVI from a remote sensing image.&lt;/p&gt;'><sup>59</sup></a></p>
 <div class="sourceCode" id="cb360"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ndvi</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/ndvi.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The System for Automated Geoscientific Analyses (SAGA; Table <a href="gis.html#tab:gis-comp">10.1</a>) provides the possibility to execute SAGA modules via the command line interface (<code>saga_cmd.exe</code> under Windows and just <code>saga_cmd</code> under Linux) (see the <a href="https://sourceforge.net/p/saga-gis/wiki/Executing%20Modules%20with%20SAGA%20CMD/">SAGA wiki on modules</a>).
@@ -478,10 +472,8 @@ FIGURE 10.4: Normalized difference vegetation index (NDVI, left panel) and NDVi-
 <p>The resulting polygons (segments) represent areas with similar values.
 They can also be further aggregated into larger polygons using various techniques, such as clustering (e.g., k-means), regionalization (e.g., SKATER) or supervised classification methods.
 You can try to do it in Exercises.</p>
-<!-- jn:toDo-->
-<!-- explain/mention other segmentation techniques -->
-<!-- mention supercells -- exercises?? -->
-<!-- https://github.com/joaofgoncalves/SegOptim ?? -->
+<p>R also has other tools to achieve the goal of creating polygons with similar values (so-called segments).
+It includes the <strong>SegOptim</strong> package <span class="citation">(<a href="references.html#ref-goncalves_segoptim_2019" role="doc-biblioref">Gonçalves et al. 2019</a>)</span> that allows running several image segmentation algorithms and <strong>supercells</strong> <span class="citation">(<a href="references.html#ref-nowosad_extended_2022" role="doc-biblioref">Nowosad and Stepinski 2022</a>)</span> that implements superpixels algorithm SLIC to work with geospatial data.</p>
 </div>
 <div id="grass" class="section level2" number="10.4">
 <h2>
@@ -1006,7 +998,7 @@ Use <strong>rstac</strong>, <strong>gdalcubes</strong>, and <strong>terra</stron
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-10-05.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-10-06.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
