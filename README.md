@@ -194,7 +194,7 @@ cloning a fork of the source code, that you can change and share
 following command:
 
 ``` bash
-git fork robinlovelace/geocompr # (git clone robinlovelace/geocompr # also works)
+git fork robinlovelace/geocompr # (gh repo clone robinlovelace/geocompr # also works)
 ```
 
 Both of those methods require you to have Git installed. If not, you can
@@ -209,7 +209,7 @@ f = basename(u)
 download.file(u, f)        # download the file
 unzip(f)                   # unzip it
 file.rename(f, "geocompr") # rename the directory
-rstudioapi::openProject("geococompr") 
+rstudioapi::openProject("geococompr") # or open the folder in vscode / other IDE
 ```
 
 ## Reproducing the book in R/RStudio/VS Code

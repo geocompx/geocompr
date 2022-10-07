@@ -78,15 +78,10 @@ However, its ability to interface with dedicated GISs gives it astonishing geosp
 R is well known as a statistical programming language, but many people are unaware of its ability to replicate GIS workflows, with the additional benefits of a (relatively) consistent CLI.
 Furthermore, R outperforms GISs in some areas of geocomputation\index{geocomputation}, including interactive/animated map making (see Chapter \@ref(adv-map)) and spatial statistical modeling (see Chapter \@ref(spatial-cv)).
 This chapter focuses on 'bridges' to three mature open source GIS products (see Table \@ref(tab:gis-comp)): QGIS\index{QGIS} (via the package **qgisprocess**\index{qgisprocess (package)}; Section \@ref(rqgis)), SAGA\index{SAGA} (via **Rsagacmd**\index{Rsagacmd (package)}; Section \@ref(saga)) and GRASS\index{GRASS} (via **rgrass**\index{rgrass (package)}; Section \@ref(grass)).^[
-<!--toDo:jn-->
-<!-- Though not covered here, it is worth being aware of the interface to ArcGIS\index{ArcGIS}, a proprietary and very popular GIS software, via **RPyGeo**.^[By the way, it is also possible to use R from within Desktop GIS software packages.  -->
-<!-- The so-called R-ArcGIS bridge (see https://github.com/R-ArcGIS/r-bridge) allows R to be used from within ArcGIS\index{ArcGIS}.  -->
-<!--toDo:jn-->
-<!-- rgee? -->
+Though not covered here, it is worth being aware of so-called R-ArcGIS bridge (see https://github.com/R-ArcGIS/r-bridge) that allows R to be used from within ArcGIS\index{ArcGIS}
 One can also use R scripts from within QGIS\index{QGIS} (see https://docs.qgis.org/3.16/en/docs/training_manual/processing/r_intro.html).
 Finally, it is also possible to use R from the GRASS GIS\index{GRASS} command line (see https://grasswiki.osgeo.org/wiki/R_statistics/rgrass).
 ]
-To complement the R-GIS bridges, the chapter ends with a very brief introduction to interfaces to spatial libraries (Section \@ref(gdal)), spatial databases\index{spatial database} (Section \@ref(postgis)), and  cloud-based processing of Earth observation data (Section \@ref(cloud)).
 
 ```{r gis-comp, echo=FALSE, message=FALSE}
 library(dplyr)
@@ -102,6 +97,8 @@ knitr::kable(x = d,
              booktabs = TRUE) #|>
   # kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
 ```
+
+To complement the R-GIS bridges, the second part of the chapter gives a brief introduction to interfaces to spatial libraries (Section \@ref(gdal)), spatial databases\index{spatial database} (Section \@ref(postgis)), and cloud-based processing of Earth observation data (Section \@ref(cloud)).
 
 ## QGIS through **qgisprocess** {#rqgis}
 
@@ -342,9 +339,7 @@ The topographic wetness index is unitless.
 Its low values represent areas that will not accumulate water, while higher values show areas that will accumulate water at increasing levels.
 
 Information from digital elevation models can also be categorized, for example, to geomorphons -- the geomorphological phonotypes consisting of 10 classes that represent terrain forms, such as slopes, ridges, or valleys [@jasiewicz_geomorphons_2013].
-These classes are used in many studies, including landslide susceptibility, ecosystem services, human mobility, and digital soil mapping. 
-<!-- https://scholar.google.pl/scholar?cites=8284408958489255337&as_sdt=2005&sciodt=0,5&hl=en -->
-<!-- https://www.nature.com/articles/s41597-020-0479-6.pdf -->
+These phonotypes are used in many studies, including landslide susceptibility, ecosystem services, human mobility, and digital soil mapping. 
 
 The original implementation of the geomorphons' algorithm was created in GRASS GIS, and we can find it in the **qgisprocess** list as `"grass7:r.geomorphon"`:
 
@@ -379,7 +374,7 @@ knitr::include_graphics("figures/10-qgis-raster-map.png")
 ## SAGA GIS {#saga}
 
 Our goal in this section is to delineate areas with similar values of normalized difference vegetation index (NDVI).
-We will use the NDVI data for the Mongón study area in Peru from the 22nd of September 2000 (the left panel of Figure \@ref(fig:sagasegments)) and a seeded region growing algorithm from SAGA GIS to achive the goal.^[Read Section \@ref(local-operations) on details of how to calculate NDVI from a remote sensing image.]
+We will use the NDVI data for the Mongón study area in Peru from the 22nd of September 2000 (the left panel of Figure \@ref(fig:sagasegments)) and a seeded region growing algorithm from SAGA GIS to achieve the goal.^[Read Section \@ref(local-operations) on details of how to calculate NDVI from a remote sensing image.]
 
 ```{r, eval=FALSE}
 ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
@@ -460,6 +455,9 @@ knitr::include_graphics("figures/10-saga-segments.png")
 The resulting polygons (segments) represent areas with similar values. 
 They can also be further aggregated into larger polygons using various techniques, such as clustering (e.g., k-means), regionalization (e.g., SKATER) or supervised classification methods.
 You can try to do it in Exercises.
+
+R also has other tools to achieve the goal of creating polygons with similar values (so-called segments).
+It includes the **SegOptim** package [@goncalves_segoptim_2019] that allows running several image segmentation algorithms and **supercells** [@nowosad_extended_2022] that implements superpixels algorithm SLIC to work with geospatial data.
 
 ## GRASS GIS {#grass}
 
@@ -941,7 +939,7 @@ cube = raster_cube(collection, v) |>
   apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
   reduce_time("max(NDVI)")
 # gdalcubes_options(parallel = 8)
-# plot(cube, zlim = c(0,1))
+# plot(cube, zlim = c(0, 1))
 ```
 
 To filter images by cloud cover, we provide a property filter function that is applied on each STAC\index{STAC} result item while creating the image collection. 
