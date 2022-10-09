@@ -662,11 +662,14 @@ The next stage is to create a dataset representing points on the network where t
 
 ```r
 route_network_no_infra = st_difference(
-  # route_network_scenario,
-  # Temporary workaround, see https://github.com/Robinlovelace/geocompr/issues/863:
+  route_network_scenario,
   route_network_scenario |> st_set_crs(st_crs(existing_cycleways_buffer)),
   existing_cycleways_buffer
 )
+```
+
+
+```
 #> Warning: st_crs<- : replacing crs does not reproject data; use st_transform for
 #> that
 #> Warning: attribute variables are assumed to be spatially constant throughout all
