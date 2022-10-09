@@ -38,8 +38,8 @@ This chapter introduces the geographic analysis of transport systems at differen
 -   **Areal units**: transport patterns can be understood with reference to zonal aggregates, such as the main mode of travel (by car, bike or foot, for example), and average distance of trips made by people living in a particular zone, covered in Section \@ref(transport-zones).
 -   **Desire lines**\index{desire lines}: straight lines that represent 'origin-destination' data that records how many people travel (or could travel) between places (points or zones) in geographic space, the topic of Section \@ref(desire-lines).
 -   **Nodes**\index{node}: these are points in the transport system that can represent common origins and destinations and public transport stations such as bus stops and rail stations, the topic of Section \@ref(nodes).
--   **Routes**: these are lines representing a path along the route network along the desire lines and between nodes. Routes, and the *routing engines* that generate them, are covered in Section \@ref(routes).
--   **Route networks**\index{network}: these represent the system of roads, paths and other linear features in an area and are covered in Section \@ref(route-networks). They can be represented as geographic features (representing route segments) or structured as an interconnected graph, with the level of traffic on different segments referred to as 'flow' by transport modelers [@hollander_transport_2016]
+-   **Routes**: these are lines representing a path along the route network along the desire lines and between nodes. Routes (which can be represented as single linestrings or multiple short *segments*) and the *routing engines* that generate them, are covered in Section \@ref(routes).
+-   **Route networks**\index{network}: these represent the system of roads, paths and other linear features in an area and are covered in Section \@ref(route-networks). They can be represented as geographic features (typically short segments of road that add up to create a full network) or structured as an interconnected graph, with the level of traffic on different segments referred to as 'flow' by transport modelers [@hollander_transport_2016]
 
 Another key level is **agents**, mobile entities like you and me and vehicles that enable use to move such as bikes and buses.
 These can be represented computationally in software such as [MATSim](http://www.matsim.org/) and [A/B Street](https://github.com/a-b-street/abstreet), which represent the dynamics of transport systems using an agent-based modeling (ABM)\index{agent-based modeling} frameworks, usually at high levels of spatial and temporal resolution [@horni_multi-agent_2016]. ABM is a powerful approach to transport research with great potential for integration with R's spatial classes [@thiele_r_2014; @lovelace_spatial_2016], but is outside the scope of this chapter.
@@ -418,12 +418,11 @@ Changing route network characteristics (or weights associated with different rou
 
 ### Locally hosted dedicated routing engines {#localengine}
 
-**Locally hosted** routing engines include OpenTripPlanner and R5 (which are multi-modal), and the OpenStreetMap Routing Machine (OSRM) (which is uni-modal).
-These can be accessed from R with the packages **opentripplanner**, [**osrm**](https://github.com/riatelab/osrm) and **r5r** [@morgan_opentripplanner_2019; @pereira_r5r_2021].
+**Locally hosted** routing engines include OpenTripPlanner, [Valhalla](https://github.com/valhalla/valhalla), and R5 (which are multi-modal), and the OpenStreetMap Routing Machine (OSRM) (which is 'uni-modal').
+These can be accessed from R with the packages **opentripplanner**, [**valhalla**](https://github.com/chris31415926535/valhallr), **r5r** and [**osrm**](https://github.com/riatelab/osrm) [@morgan_opentripplanner_2019; @pereira_r5r_2021].
 Locally hosted routing engines run on the user's computer but in a process separate from R.
 They benefit from speed of execution and control over the weighting profile for different modes of transport.
 Disadvantages include the difficulty of representing complex networks locally; temporal dynamics (primarily due to traffic); and the need for specialized software.
-A key feature of some advanced routing engines (both locally hosted and remotely hosted) such as R5, OpenTripPlanner and [Valhalla](https://github.com/valhalla/valhalla) (which at the time of writing does not have an R interface to the best of our knowledge) is the provision of *multi-modal* routes: allowing a single journey from A to B to be made by more than one mode of transport, such as cycling from home to a bus stop, catching a bus to the city center, and then walking to the destination.
 
 ### Remotely hosted dedicated routing engines {#remoteengine}
 
@@ -721,8 +720,9 @@ Transport is the fastest growing source of greenhouse gas emissions in many coun
 Transport-related emissions are unequally distributed across society but (unlike food and heating) are not essential for well-being.
 There is great potential for the sector to rapidly decarbonize through demand reduction, electrification of the vehicle fleet and the uptake of active travel modes such as walking and cycling.
 New technologies can reduce car dependency by enabling more car sharing.
-'Micro-mobility' systems such as dockless bike and e-scooter schemes are also emerging, creating valuable datasets in the General Bikeshare Feed Specification (GBFS) format that can be imported and processed with the [**gbfs**](https://github.com/simonpcouch/gbfs) package.
-Further exploration of such 'transport futures' at the local level represents promising direction of travel for transport-related geographic and computational research.
+'Micro-mobility' systems such as dockless bike and e-scooter schemes are also emerging, creating valuable datasets in the General Bikeshare Feed Specification (GBFS) format, which can be imported and processed with the [**gbfs**](https://github.com/simonpcouch/gbfs) package.
+These and other changes will have large impacts on accessibility, the ability of people to reach employment and service locations that they need, something that can be quantified currently and under scenarios of change with packages such as [**accessibility**](https://ipeagit.github.io/accessibility/) packages.
+Further exploration of such 'transport futures' at local, regional and national levels could yield important new insights.
 
 Methodologically, the foundations presented in this chapter could be extended by including more variables in the analysis.
 Characteristics of the route such as speed limits, busyness and the provision of protected cycling and walking paths could be linked to 'mode-split' (the proportion of trips made by different modes of transport).
