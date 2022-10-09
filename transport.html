@@ -472,15 +472,24 @@ The geometries of routes are typically (but not always) determined by the transp
 Routes covering large distances or following intricate network can have many hundreds of vertices; routes on grid-based or simplified road networks tend to have fewer.</p>
 <p>Routes are generated from desire lines or, more commonly, matrices containing coordinate pairs representing desire lines.
 This routing process is done by a range of broadly-defined <em>routing engines</em>: software and web services that return geometries and attributes describing how to get from origins to destinations.
-There are three main types of routing engine:</p>
+Routing engines can be classified based on <em>where</em> they run relative to R:</p>
 <ul>
-<li>In-memory routing using R packages that enable route calculation</li>
-<li>Locally hosted routing engines external to R that can be called from R</li>
-<li>Remotely hosted routing engines by external entities that provide a web API that can be called from R</li>
+<li>In-memory routing using R packages that enable route calculation (described in Section <a href="transport.html#memengine">13.6.1</a>)</li>
+<li>Locally hosted routing engines external to R that can be called from R (Section <a href="transport.html#localengine">13.6.2</a>)</li>
+<li>Remotely hosted routing engines by external entities that provide a web API that can be called from R (<a href="transport.html#remoteengine">13.6.3</a>)</li>
 </ul>
-<div id="routing-engines-in-r-package" class="section level3" number="13.6.1">
+<p>Before describing each, it is worth outlining other ways of categorizing routing engines.
+Routing engines can be multi-modal, meaning that they can calculate trips composed of more than one more of transport, or not.
+Multi-modal routing engines can return results consisting of multiple <em>legs</em>, each one made by a different mode of transport.
+The optimal route from a residential area to a commercial area could involve 1) walking to the nearest bus stop, 2) catching the bus to the nearest node to the destination, and 3) walking to the destination, given a set of input parameters.
+The transition points between these three legs are commonly referred to as ‘ingress’ and ‘egress’, meaning getting on/off a public transport vehicle.
+Multi-modal routing engines such as R5 are more sophisticated and have larger input data requirements than ‘uni-modal’ routing engines such as OSRM (described in Section <a href="transport.html#localengine">13.6.2</a>).
+A major strength of multi-modal engines is their ability to represent ‘transit’ (public transport) trips by trains, buses etc.
+Multi-model routing engines require input datasets representing public transport networks, typically in General Transit Feed Specification (<a href="https://developers.google.com/transit/gtfs">GTFS</a>) files, which can be processed with functions in the <a href="https://r-transit.github.io/tidytransit/index.html"><strong>tidytransit</strong></a> and <a href="https://ipeagit.github.io/gtfstools/"><strong>gtfstools</strong></a> packages (other packages and tools for working with GTFS files are available).
+A uni-modal routing engine may be sufficient for projects focussed on specific (non public) modes of transport.</p>
+<div id="memengine" class="section level3" number="13.6.1">
 <h3>
-<span class="header-section-number">13.6.1</span> Routing engines in R package<a class="anchor" aria-label="anchor" href="#routing-engines-in-r-package"><i class="fas fa-link"></i></a>
+<span class="header-section-number">13.6.1</span> In-memory routing with R<a class="anchor" aria-label="anchor" href="#memengine"><i class="fas fa-link"></i></a>
 </h3>
 <p>Routing engines in R enable route networks stored as R objects <em>in memory</em> to be used as the basis of route calculation.
 Options include <a href="https://luukvdmeer.github.io/sfnetworks/"><strong>sfnetworks</strong></a>, <a href="https://atfutures.github.io/dodgr/"><strong>dodgr</strong></a> and <a href="https://github.com/vlarmet/cppRouting"><strong>cppRouting</strong></a> packages, each of which provide their own class system to represent route networks, the topic of the next section.</p>
@@ -489,22 +498,23 @@ Routing is a hard problem and many hundreds of hours have been put into open sou
 On the other hand, R-based routing engines may be well-suited to model experiments and the statistical analysis of the impacts of changes on the network.
 Changing route network characteristics (or weights associated with different route segment types), re-calculating routes, and analyzing results under many scenarios in a single language has benefits for research applications.</p>
 </div>
-<div id="locally-hosted-dedicated-routing-engines" class="section level3" number="13.6.2">
+<div id="localengine" class="section level3" number="13.6.2">
 <h3>
-<span class="header-section-number">13.6.2</span> Locally hosted dedicated routing engines<a class="anchor" aria-label="anchor" href="#locally-hosted-dedicated-routing-engines"><i class="fas fa-link"></i></a>
+<span class="header-section-number">13.6.2</span> Locally hosted dedicated routing engines<a class="anchor" aria-label="anchor" href="#localengine"><i class="fas fa-link"></i></a>
 </h3>
-<p><strong>Locally hosted</strong> routing engines include OpenTripPlanner, OSRM and R5, and associated R packages <strong>opentripplanner</strong>, <a href="https://github.com/riatelab/osrm"><strong>osrm</strong></a> and <strong>r5r</strong> <span class="citation">(<a href="references.html#ref-morgan_opentripplanner_2019" role="doc-biblioref">Morgan et al. 2019</a>; <a href="references.html#ref-pereira_r5r_2021" role="doc-biblioref">Pereira et al. 2021</a>)</span>.
+<p><strong>Locally hosted</strong> routing engines include OpenTripPlanner and R5 (which are multi-modal), and the OpenStreetMap Routing Machine (OSRM) (which is uni-modal).
+These can be accessed from R with the packages <strong>opentripplanner</strong>, <a href="https://github.com/riatelab/osrm"><strong>osrm</strong></a> and <strong>r5r</strong> <span class="citation">(<a href="references.html#ref-morgan_opentripplanner_2019" role="doc-biblioref">Morgan et al. 2019</a>; <a href="references.html#ref-pereira_r5r_2021" role="doc-biblioref">Pereira et al. 2021</a>)</span>.
 Locally hosted routing engines run on the user’s computer but in a process separate from R.
 They benefit from speed of execution and control over the weighting profile for different modes of transport.
 Disadvantages include the difficulty of representing complex networks locally; temporal dynamics (primarily due to traffic); and the need for specialized software.
 A key feature of some advanced routing engines (both locally hosted and remotely hosted) such as R5, OpenTripPlanner and <a href="https://github.com/valhalla/valhalla">Valhalla</a> (which at the time of writing does not have an R interface to the best of our knowledge) is the provision of <em>multi-modal</em> routes: allowing a single journey from A to B to be made by more than one mode of transport, such as cycling from home to a bus stop, catching a bus to the city center, and then walking to the destination.</p>
 </div>
-<div id="remotely-hosted-dedicated-routing-engines" class="section level3" number="13.6.3">
+<div id="remoteengine" class="section level3" number="13.6.3">
 <h3>
-<span class="header-section-number">13.6.3</span> Remotely hosted dedicated routing engines<a class="anchor" aria-label="anchor" href="#remotely-hosted-dedicated-routing-engines"><i class="fas fa-link"></i></a>
+<span class="header-section-number">13.6.3</span> Remotely hosted dedicated routing engines<a class="anchor" aria-label="anchor" href="#remoteengine"><i class="fas fa-link"></i></a>
 </h3>
-<p><strong>Remotely hosted</strong> routing engines use a web API to send queries about origins and destinations and return results generated on a powerful server running dedicated software.
-Routing services based on open source routing engines, such as OSRM’s publicly available service, work exactly the same when called from R as locally hosted instances, simply requiring arguments specifying ‘base URLs’ to be updated.
+<p><strong>Remotely hosted</strong> routing engines use a web API to send queries about origins and destinations and return results.
+Routing services based on open source routing engines, such as OSRM’s publicly available service, work the same when called from R as locally hosted instances, simply requiring arguments specifying ‘base URLs’ to be updated.
 However, the fact that external routing services are hosted on a dedicated machine (usually funded by commercial company with incentives to generate accurate routes) can can give them advantages, including:</p>
 <ul>
 <li>Provision of routing services worldwide (or usually at least over a large region)</li>
@@ -799,9 +809,9 @@ Similar tools could be used to encourage evidence-based transport policies relat
 <li><a class="nav-link" href="#nodes"><span class="header-section-number">13.5</span> Nodes</a></li>
 <li>
 <a class="nav-link" href="#routes"><span class="header-section-number">13.6</span> Routes</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#routing-engines-in-r-package"><span class="header-section-number">13.6.1</span> Routing engines in R package</a></li>
-<li><a class="nav-link" href="#locally-hosted-dedicated-routing-engines"><span class="header-section-number">13.6.2</span> Locally hosted dedicated routing engines</a></li>
-<li><a class="nav-link" href="#remotely-hosted-dedicated-routing-engines"><span class="header-section-number">13.6.3</span> Remotely hosted dedicated routing engines</a></li>
+<li><a class="nav-link" href="#memengine"><span class="header-section-number">13.6.1</span> In-memory routing with R</a></li>
+<li><a class="nav-link" href="#localengine"><span class="header-section-number">13.6.2</span> Locally hosted dedicated routing engines</a></li>
+<li><a class="nav-link" href="#remoteengine"><span class="header-section-number">13.6.3</span> Remotely hosted dedicated routing engines</a></li>
 <li><a class="nav-link" href="#route-and-segment-level-outputs"><span class="header-section-number">13.6.4</span> Route and segment level outputs</a></li>
 <li><a class="nav-link" href="#routing-a-worked-example"><span class="header-section-number">13.6.5</span> Routing: A worked example</a></li>
 </ul>
