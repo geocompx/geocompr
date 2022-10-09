@@ -1,5 +1,8 @@
 # (PART) Applications {.unnumbered}
 
+
+
+
 # Transportation {#transport}
 
 ## Prerequisites {.unnumbered}
@@ -622,8 +625,6 @@ tm_shape(ways_centrality |> st_as_sf()) +
   tm_lines(lwd = "betweenness", scale = 9, title.lwd = "Betweenness") +
   tm_shape(route_network_scenario) +
   tm_lines(lwd = "bicycle", scale = 9, title.lwd = "N0. bike trips (modeled, one direction)", col = "green")
-#> Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
-#> GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
 ```
 
 <div class="figure" style="text-align: center">
@@ -670,12 +671,6 @@ route_network_no_infra = st_difference(
 ```
 
 
-```
-#> Warning: st_crs<- : replacing crs does not reproject data; use st_transform for
-#> that
-#> Warning: attribute variables are assumed to be spatially constant throughout all
-#> geometries
-```
 
 The results of the preceding code chunks are shown in Figure \@ref(fig:cycleways), which shows routes with high levels of car dependency and high cycling potential but no cycleways.
 
@@ -684,18 +679,6 @@ The results of the preceding code chunks are shown in Figure \@ref(fig:cycleways
 tmap_mode("view")
 qtm(route_network_no_infra, basemaps = leaflet::providers$Esri.WorldTopoMap,
     lines.lwd = 5)
-```
-
-
-```
-#> Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
-#> GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
-
-#> Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
-#> GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
-
-#> Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
-#> GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
 ```
 
 <div class="figure" style="text-align: center">
