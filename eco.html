@@ -423,15 +423,13 @@ Therefore, we tune the hyperparameters for a good spatial prediction on the comp
 <p>Having already constructed the input variables (<code>rp</code>), we are all set for specifying the <strong>mlr3</strong> building blocks (task, learner, and resampling).
 For specifying a spatial task, we use again the <strong>mlr3spatiotempcv</strong> package <span class="citation">(<a href="references.html#ref-schratz_mlr3spatiotempcv_2021" role="doc-biblioref">Schratz et al. 2021</a> &amp; Section <a href="spatial-cv.html#spatial-cv-with-mlr3">12.5</a>)</span>, and since our response (<code>sc</code>) is numeric, we use a regression task.</p>
 <div class="sourceCode" id="cb498"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/knitr/man/opts_chunk.html">opts_chunk</a></span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>eval <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb499"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># create task</span></span>
 <span><span class="va">task</span> <span class="op">=</span> <span class="fu">mlr3spatiotempcv</span><span class="fu">::</span><span class="fu"><a href="https://mlr3spatiotempcv.mlr-org.com/reference/as_task_regr_st.html">as_task_regr_st</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">rp</span>, <span class="op">-</span><span class="va">id</span>, <span class="op">-</span><span class="va">spri</span><span class="op">)</span>,</span>
 <span>  id <span class="op">=</span> <span class="st">"mongon"</span>, target <span class="op">=</span> <span class="st">"sc"</span><span class="op">)</span></span></code></pre></div>
 <p>Using an <code>sf</code> object as the backend automatically provides the geometry information needed for the spatial partitioning later on.
 Additionally, we got rid of the columns <code>id</code> and <code>spri</code> since these variables should not be used as predictors in the modeling.
 Next, we go on to construct the a random forest learner from the <strong>ranger</strong> package <span class="citation">(<a href="references.html#ref-wright_ranger_2017" role="doc-biblioref">Wright and Ziegler 2017</a>)</span>.</p>
-<div class="sourceCode" id="cb500"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb499"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lrn_rf</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.ranger"</span>, predict_type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span></span></code></pre></div>
 <p>As opposed to, for example, support vector machines (see Section <a href="spatial-cv.html#svm">12.5.2</a>), random forests often already show good performances when used with the default values of their hyperparameters (which may be one reason for their popularity).
 Still, tuning often moderately improves model results, and thus is worth the effort <span class="citation">(<a href="references.html#ref-probst_hyperparameters_2018" role="doc-biblioref">Probst, Wright, and Boulesteix 2018</a>)</span>.
@@ -444,7 +442,7 @@ The <code>min.node.size</code> parameter indicates the number of observations a 
 Naturally, as trees and computing time become larger, the lower the <code>min.node.size</code>.</p>
 <p>Hyperparameter combinations will be selected randomly but should fall inside specific tuning limits (created with <code><a href="https://paradox.mlr-org.com/reference/ps.html">paradox::ps()</a></code>).
 <code>mtry</code> should range between 1 and the number of predictors (4) <!-- (4)-->, <code>sample.fraction</code> should range between 0.2 and 0.9 and <code>min.node.size</code> should range between 1 and 10 <span class="citation">(<a href="references.html#ref-probst_hyperparameters_2018" role="doc-biblioref">Probst, Wright, and Boulesteix 2018</a>)</span>.</p>
-<div class="sourceCode" id="cb501"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb500"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># specifying the search space</span></span>
 <span><span class="va">search_space</span> <span class="op">=</span> <span class="fu">paradox</span><span class="fu">::</span><span class="fu"><a href="https://paradox.mlr-org.com/reference/ps.html">ps</a></span><span class="op">(</span></span>
 <span>  mtry <span class="op">=</span> <span class="fu">paradox</span><span class="fu">::</span><span class="fu"><a href="https://paradox.mlr-org.com/reference/Domain.html">p_int</a></span><span class="op">(</span>lower <span class="op">=</span> <span class="fl">1</span>, upper <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">ncol</a></span><span class="op">(</span><span class="va">task</span><span class="op">$</span><span class="fu">data</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span>,</span>
@@ -456,7 +454,7 @@ Since we deal with geographic data, we will again make use of spatial cross-vali
 Specifically, we will use a five-fold spatial partitioning with only one repetition (<code><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">rsmp()</a></code>).
 In each of these spatial partitions, we run 50 models (<code><a href="https://bbotk.mlr-org.com/reference/trm.html">trm()</a></code>) while using randomly selected hyperparameter configurations (<code><a href="https://mlr3tuning.mlr-org.com/reference/tnr.html">tnr()</a></code>) within predefined limits (<code>seach_space</code>) to find the optimal hyperparameter combination <span class="citation">(see also Section <a href="spatial-cv.html#svm">12.5.2</a> and <a href="https://mlr3book.mlr-org.com/optimization.html#autotuner" class="uri" role="doc-biblioref">https://mlr3book.mlr-org.com/optimization.html#autotuner</a>, <a href="references.html#ref-becker_mlr3_2022" role="doc-biblioref">Becker et al. 2022</a>)</span>.
 The performance measure is the root mean squared error (RMSE).</p>
-<div class="sourceCode" id="cb502"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb501"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">autotuner_rf</span> <span class="op">=</span> <span class="fu">mlr3tuning</span><span class="fu">::</span><span class="va"><a href="https://mlr3tuning.mlr-org.com/reference/AutoTuner.html">AutoTuner</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  learner <span class="op">=</span> <span class="va">lrn_rf</span>,</span>
 <span>  resampling <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">rsmp</a></span><span class="op">(</span><span class="st">"spcv_coords"</span>, folds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>, <span class="co"># spatial partitioning</span></span>
@@ -466,11 +464,11 @@ The performance measure is the root mean squared error (RMSE).</p>
 <span>  tuner <span class="op">=</span> <span class="fu">mlr3tuning</span><span class="fu">::</span><span class="fu"><a href="https://mlr3tuning.mlr-org.com/reference/tnr.html">tnr</a></span><span class="op">(</span><span class="st">"random_search"</span><span class="op">)</span> <span class="co"># specify random search</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Calling the <code>train()</code>-method of the <code>AutoTuner</code>-object finally runs the hyperparameter tuning, and will find the optimal hyperparameter combination for the specified parameters.</p>
-<div class="sourceCode" id="cb503"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb502"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># hyperparameter tuning</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">0412022</span><span class="op">)</span></span>
 <span><span class="va">autotuner_rf</span><span class="op">$</span><span class="fu">train</span><span class="op">(</span><span class="va">task</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb504"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb503"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">autotuner_rf</span><span class="op">$</span><span class="va">tuning_result</span></span>
 <span><span class="co">#&gt;    mtry sample.fraction min.node.size learner_param_vals  x_domain regr.rmse</span></span>
 <span><span class="co">#&gt; 1:    4             0.9             7          &lt;list[4]&gt; &lt;list[3]&gt;     0.375</span></span></code></pre></div>
@@ -486,7 +484,7 @@ is relatively good when considering the range of the response variable which is 
 </h3>
 <p>The tuned hyperparameters can now be used for the prediction.
 To do so, we only need to run the <code>predict</code> method of our fitted <code>AutoTuner</code> object.</p>
-<div class="sourceCode" id="cb505"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb504"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># predicting using the best hyperparameter combination</span></span>
 <span><span class="va">autotuner_rf</span><span class="op">$</span><span class="fu">predict</span><span class="op">(</span><span class="va">task</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Detected version mismatch: Learner 'regr.ranger.tuned' has been trained</span></span>
@@ -504,7 +502,7 @@ To do so, we only need to run the <code>predict</code> method of our fitted <cod
 <span><span class="co">#&gt;          84  0.808    0.845</span></span></code></pre></div>
 <p>The <code>predict</code> method will apply the model to all observations used in the modeling.
 Given a multilayer <code>SpatRaster</code> containing rasters named as the predictors used in the modeling, <code><a href="https://rdrr.io/pkg/terra/man/predict.html">terra::predict()</a></code> will also make spatial predictions, i.e., predict to new data.</p>
-<div class="sourceCode" id="cb506"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb505"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pred</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/predict.html">predict</a></span><span class="op">(</span><span class="va">ep</span>, model <span class="op">=</span> <span class="va">autotuner_rf</span>, fun <span class="op">=</span> <span class="va">predict</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:rf-pred"></span>
@@ -513,7 +511,7 @@ FIGURE 15.5: Predictive mapping of the floristic gradient clearly revealing dist
 </p>
 </div>
 <p>In case, <code><a href="https://rdrr.io/pkg/terra/man/predict.html">terra::predict()</a></code> does not support a model algorithm, you can still make the predictions manually.</p>
-<div class="sourceCode" id="cb507"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb506"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">newdata</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/coerce.html">as.matrix</a></span><span class="op">(</span><span class="va">ep</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/raster/man/rowSums.html">colSums</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">newdata</span><span class="op">)</span><span class="op">)</span>  <span class="co"># 0 NAs</span></span>
 <span><span class="co"># but assuming there were 0s results in a more generic approach</span></span>

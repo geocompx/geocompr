@@ -323,8 +323,6 @@ rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
 rp = inner_join(random_points, rp, by = "id")
 ```
 
-
-
 Decision trees split the predictor space into a number of regions.
 To illustrate this, we apply a decision tree to our data using the scores of the first NMDS\index{NMDS} axis as the response (`sc`) and altitude (`dem`) as the only predictor.
 
@@ -388,12 +386,6 @@ Therefore, we tune the hyperparameters\index{hyperparameter} for a good spatial 
 
 Having already constructed the input variables (`rp`), we are all set for specifying the **mlr3**\index{mlr3 (package)} building blocks (task, learner, and resampling).
 For specifying a spatial task, we use again the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021 & Section \@ref(spatial-cv-with-mlr3)], and since our response (`sc`) is numeric, we use a regression\index{regression} task.
-
-
-```r
-knitr::opts_chunk$set(eval = FALSE)
-```
-
 
 
 ```r
