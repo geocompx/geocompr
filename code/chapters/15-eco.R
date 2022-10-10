@@ -1,4 +1,4 @@
-## ----15-eco-1, message=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-1, message=FALSE------------------------------------------------------------------------
 library(data.table)
 library(dplyr)
 library(mlr3)
@@ -20,13 +20,13 @@ knitr::include_graphics("figures/15_study_area_mongon.png")
 # knitr::include_graphics("https://user-images.githubusercontent.com/1825120/38989956-6eae7c9a-43d0-11e8-8f25-3dd3594f7e74.png")
 
 
-## ----15-eco-2---------------------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-2---------------------------------------------------------------------------------------
 data("study_area", "random_points", "comm", package = "spDataLarge")
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 
 
-## ----15-eco-3, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-3, eval=FALSE---------------------------------------------------------------------------
 ## # sites 35 to 40 and corresponding occurrences of the first five species in the
 ## # community matrix
 ## comm[35:40, 1:5]
@@ -65,7 +65,7 @@ ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 knitr::include_graphics("figures/15_sa_mongon_sampling.png")
 
 
-## ----15-eco-5, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-5, eval=FALSE---------------------------------------------------------------------------
 ## qgisprocess::qgis_show_help("saga:sagawetnessindex")
 ## #> Saga wetness index (saga:sagawetnessindex)
 ## #> ...
@@ -100,7 +100,7 @@ knitr::include_graphics("figures/15_sa_mongon_sampling.png")
 ## #> ...
 
 
-## ----15-eco-6, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-6, eval=FALSE---------------------------------------------------------------------------
 ## # environmental predictors: catchment slope and catchment area
 ## ep = qgisprocess::qgis_run_algorithm(
 ##   alg = "saga:sagawetnessindex",
@@ -111,7 +111,7 @@ knitr::include_graphics("figures/15_sa_mongon_sampling.png")
 ##   .quiet = TRUE)
 
 
-## ----15-eco-7, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-7, eval=FALSE---------------------------------------------------------------------------
 ## # read in catchment area and catchment slope
 ## ep = ep[c("AREA", "SLOPE")] |>
 ##   unlist() |>
@@ -121,29 +121,29 @@ knitr::include_graphics("figures/15_sa_mongon_sampling.png")
 ## ep = c(dem, ndvi, ep) # add dem and ndvi to the multilayer SpatRaster object
 
 
-## ----15-eco-8, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-8, eval=FALSE---------------------------------------------------------------------------
 ## ep$carea = log10(ep$carea)
 
 
-## ----15-eco-9, cache.lazy=FALSE---------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-9, cache.lazy=FALSE---------------------------------------------------------------------
 ep = terra::rast(system.file("raster/ep.tif", package = "spDataLarge"))
 
 
-## ----15-eco-10, cache=TRUE, cache.lazy=FALSE, message=FALSE, warning=FALSE--------------------------------------------------------------------------------
+## ----15-eco-10, cache=TRUE, cache.lazy=FALSE, message=FALSE, warning=FALSE--------------------------
 # terra::extract adds automatically a for our purposes unnecessary ID column
 ep_rp = terra::extract(ep, random_points) |>
   dplyr::select(-ID)
 random_points = cbind(random_points, ep_rp)
 
 
-## ----15-eco-11--------------------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-11--------------------------------------------------------------------------------------
 # presence-absence matrix
 pa = vegan::decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
 pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
 
 
-## ----15-eco-12, eval=FALSE, message=FALSE-----------------------------------------------------------------------------------------------------------------
+## ----15-eco-12, eval=FALSE, message=FALSE-----------------------------------------------------------
 ## set.seed(25072018)
 ## nmds = vegan::metaMDS(comm = pa, k = 4, try = 500)
 ## nmds$stress
@@ -158,11 +158,11 @@ pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
 ## #> 0.08831395
 
 
-## ----15-eco-13, eval=FALSE, echo=FALSE--------------------------------------------------------------------------------------------------------------------
+## ----15-eco-13, eval=FALSE, echo=FALSE--------------------------------------------------------------
 ## saveRDS(nmds, "extdata/15-nmds.rds")
 
 
-## ----15-eco-14, include=FALSE-----------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-14, include=FALSE-----------------------------------------------------------------------
 nmds = readRDS("extdata/15-nmds.rds")
 
 
@@ -188,7 +188,7 @@ sc = vegan::scores(rotnmds, choices = 1:2)
 knitr::include_graphics("figures/15_xy_nmds.png")
 
 
-## ----15-eco-15, eval=FALSE, echo=FALSE--------------------------------------------------------------------------------------------------------------------
+## ----15-eco-15, eval=FALSE, echo=FALSE--------------------------------------------------------------
 ## # scores and rotated scores in one figure
 ## p1 = xyplot(scores(rotnmds)[, 2] ~ scores(rotnmds)[, 1], pch = 16,
 ##              col = "lightblue", xlim = c(-3, 2), ylim = c(-2, 2),
@@ -238,7 +238,7 @@ knitr::include_graphics("figures/15_xy_nmds.png")
 ## plot(fit_2)
 
 
-## ----15-eco-16, message=FALSE, eval=FALSE-----------------------------------------------------------------------------------------------------------------
+## ----15-eco-16, message=FALSE, eval=FALSE-----------------------------------------------------------
 ## # construct response-predictor matrix
 ## # id- and response variable
 ## rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
@@ -246,14 +246,14 @@ knitr::include_graphics("figures/15_xy_nmds.png")
 ## rp = inner_join(random_points, rp, by = "id")
 
 
-## ----attach-rp, echo=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----attach-rp, echo=FALSE--------------------------------------------------------------------------
 # rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
 # rp = inner_join(random_points, rp, by = "id")
 # saveRDS(rp, "extdata/15-rp.rds")
 rp = readRDS("extdata/15-rp.rds")
 
 
-## ----15-eco-17, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-17, eval=FALSE--------------------------------------------------------------------------
 ## tree_mo = tree::tree(sc ~ dem, data = rp)
 ## plot(tree_mo)
 ## text(tree_mo, pretty = 0)
@@ -269,21 +269,21 @@ rp = readRDS("extdata/15-rp.rds")
 knitr::include_graphics("figures/15_tree.png")
 
 
-## ---------------------------------------------------------------------------------------------------------------------------------------------------------
+## ---------------------------------------------------------------------------------------------------
 knitr::opts_chunk$set(eval = FALSE)
 
 
-## ----15-eco-20--------------------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-20--------------------------------------------------------------------------------------
 # create task
 task = mlr3spatiotempcv::as_task_regr_st(dplyr::select(rp, -id, -spri),
   id = "mongon", target = "sc")
 
 
-## ----15-eco-21--------------------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-21--------------------------------------------------------------------------------------
 lrn_rf = lrn("regr.ranger", predict_type = "response")
 
 
-## ----15-eco-22--------------------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-22--------------------------------------------------------------------------------------
 # specifying the search space
 search_space = paradox::ps(
   mtry = paradox::p_int(lower = 1, upper = ncol(task$data()) - 1),
@@ -292,7 +292,7 @@ search_space = paradox::ps(
 )
 
 
-## ----15-eco-23--------------------------------------------------------------------------------------------------------------------------------------------
+## ----15-eco-23--------------------------------------------------------------------------------------
 autotuner_rf = mlr3tuning::AutoTuner$new(
   learner = lrn_rf,
   resampling = mlr3::rsmp("spcv_coords", folds = 5), # spatial partitioning
@@ -303,30 +303,30 @@ autotuner_rf = mlr3tuning::AutoTuner$new(
 )
 
 
-## ----15-eco-24, eval=FALSE, cache=TRUE, cache.lazy=FALSE--------------------------------------------------------------------------------------------------
+## ----15-eco-24, eval=FALSE, cache=TRUE, cache.lazy=FALSE--------------------------------------------
 ## # hyperparameter tuning
 ## set.seed(0412022)
 ## autotuner_rf$train(task)
 
 
-## ----15-eco-25, cache=TRUE, cache.lazy=FALSE, eval=FALSE, echo=FALSE--------------------------------------------------------------------------------------
+## ----15-eco-25, cache=TRUE, cache.lazy=FALSE, eval=FALSE, echo=FALSE--------------------------------
 ## saveRDS(autotuner_rf, "extdata/15-tune.rds")
 
 
-## ----15-eco-26, echo=FALSE, cache=TRUE, cache.lazy=FALSE--------------------------------------------------------------------------------------------------
+## ----15-eco-26, echo=FALSE, cache=TRUE, cache.lazy=FALSE--------------------------------------------
 autotuner_rf = readRDS("extdata/15-tune.rds")
 
 
-## ----tuning-result, cache=TRUE, cache.lazy=FALSE----------------------------------------------------------------------------------------------------------
+## ----tuning-result, cache=TRUE, cache.lazy=FALSE----------------------------------------------------
 autotuner_rf$tuning_result
 
 
-## ----15-eco-27, cache=TRUE, cache.lazy=FALSE--------------------------------------------------------------------------------------------------------------
+## ----15-eco-27, cache=TRUE, cache.lazy=FALSE--------------------------------------------------------
 # predicting using the best hyperparameter combination
 autotuner_rf$predict(task)
 
 
-## ----15-eco-28, cache=TRUE, cache.lazy=FALSE, eval=FALSE--------------------------------------------------------------------------------------------------
+## ----15-eco-28, cache=TRUE, cache.lazy=FALSE, eval=FALSE--------------------------------------------
 ## pred = terra::predict(ep, model = autotuner_rf, fun = predict)
 
 
@@ -354,7 +354,7 @@ autotuner_rf$predict(task)
 knitr::include_graphics("figures/15_rf_pred.png")
 
 
-## ----15-eco-29, cache=TRUE, cache.lazy=FALSE, eval=FALSE--------------------------------------------------------------------------------------------------
+## ----15-eco-29, cache=TRUE, cache.lazy=FALSE, eval=FALSE--------------------------------------------
 ## newdata = as.data.frame(as.matrix(ep))
 ## colSums(is.na(newdata))  # 0 NAs
 ## # but assuming there were 0s results in a more generic approach
@@ -368,7 +368,7 @@ knitr::include_graphics("figures/15_rf_pred.png")
 ## all(values(pred - pred_2) == 0)
 
 
-## ---- echo=FALSE, results='asis'--------------------------------------------------------------------------------------------------------------------------
+## ---- echo=FALSE, results='asis'--------------------------------------------------------------------
 res = knitr::knit_child('_15-ex.Rmd', quiet = TRUE, options = list(include = FALSE, eval = FALSE))
 cat(res, sep = '\n')
 

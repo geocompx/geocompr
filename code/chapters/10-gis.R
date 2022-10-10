@@ -1,9 +1,9 @@
-## ----09-gis-1, message=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-1, message=FALSE------------------------------------------------------------------------
 library(sf)
 library(terra)
 
 
-## ----09-gis-1-2, message=FALSE, eval=FALSE----------------------------------------------------------------------------------------------------------------
+## ----09-gis-1-2, message=FALSE, eval=FALSE----------------------------------------------------------
 ## # remotes::install_github("paleolimbot/qgisprocess")
 ## library(qgisprocess)
 ## library(Rsagacmd)
@@ -19,11 +19,11 @@ library(terra)
 ## CLIs can be augmented with IDEs such as RStudio for R, which provides code auto-completion and other features to improve the user experience.
 
 
-## ----gis-comp, echo=FALSE, message=FALSE------------------------------------------------------------------------------------------------------------------
+## ----gis-comp, echo=FALSE, message=FALSE------------------------------------------------------------
 library(dplyr)
-d = tibble("GIS" = c("GRASS", "QGIS", "SAGA"),
-            "First release" = c("1984", "2002", "2004"),
-            "No. functions" = c(">500", ">1000", ">600"),
+d = tibble("GIS" = c("QGIS", "SAGA", "GRASS"),
+            "First release" = c("2002", "2004", "1982"),
+            "No. functions" = c(">1000", ">600", ">500"),
             "Support" = c("hybrid", "hybrid", "hybrid"))
 knitr::kable(x = d, 
              caption = paste("Comparison between three open-source GIS.", 
@@ -34,14 +34,14 @@ knitr::kable(x = d,
   # kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## library(qgisprocess)
 ## #> Using 'qgis_process' at 'qgis_process'.
 ## #> QGIS version: 3.20.3-Odense
 ## #> ...
 
 
-## ----providers, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----providers, eval=FALSE--------------------------------------------------------------------------
 ## qgis_providers()
 ## #> # A tibble: 6 × 2
 ## #>   provider provider_title
@@ -54,13 +54,13 @@ knitr::kable(x = d,
 ## #> 6 saga     SAGA
 
 
-## ----09-gis-4---------------------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-4---------------------------------------------------------------------------------------
 data("incongruent", "aggregating_zones", package = "spData")
 incongr_wgs = st_transform(incongruent, "EPSG:4326")
 aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 
 
-## ----uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders). "--------------------
+## ----uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders). "----
 library(tmap)
 tm_shape(incongr_wgs) +
   tm_polygons(border.col = "grey5") +
@@ -76,86 +76,86 @@ tm_shape(incongr_wgs) +
             legend.text.size = 1)
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## qgis_algo = qgis_algorithms()
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## grep("union", qgis_algo$algorithm, value = TRUE)
 ## #> [1] "native:union"      "saga:fuzzyunionor" "saga:polygonunion"
 
 
-## ----09-gis-6, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-6, eval=FALSE---------------------------------------------------------------------------
 ## alg = "native:union"
 ## qgis_show_help(alg)
 
 
-## ----09-gis-7, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-7, eval=FALSE---------------------------------------------------------------------------
 ## union = qgis_run_algorithm(alg, INPUT = incongr_wgs, OVERLAY = aggzone_wgs)
 ## union
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## union_sf = st_as_sf(union)
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## grep("clean", qgis_algo$algorithm, value = TRUE)
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## qgis_show_help("grass7:v.clean")
 
 
-## ----09-gis-7c, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-7c, eval=FALSE--------------------------------------------------------------------------
 ## clean = qgis_run_algorithm("grass7:v.clean", input = union_sf,
 ##                            tool = 10, threshold = 25000)
 ## clean_sf = st_as_sf(clean)
 
 
-## ----sliver, echo=FALSE, fig.cap="Sliver polygons colored in red (left panel). Cleaned polygons (right panel)."-------------------------------------------
+## ----sliver, echo=FALSE, fig.cap="Sliver polygons colored in red (left panel). Cleaned polygons (right panel)."----
 knitr::include_graphics("figures/10-sliver.png")
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## library(qgisprocess)
 ## library(terra)
 ## dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## dem_slope = terrain(dem, unit = "radians")
 ## dem_aspect = terrain(dem, v = "aspect", unit = "radians")
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## qgis_algo = qgis_algorithms()
 ## grep("wetness", qgis_algo$algorithm, value = TRUE)
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## qgis_show_help("saga:sagawetnessindex")
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## dem_wetness = qgis_run_algorithm("saga:sagawetnessindex", DEM = dem)
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## dem_wetness_twi = qgis_as_terra(dem_wetness$TWI)
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## grep("geomorphon", qgis_algo$algorithm, value = TRUE)
 ## qgis_show_help("grass7:r.geomorphon")
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon", elevation = dem,
 ##                                     `-m` = TRUE, search = 120)
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## dem_geomorph_terra = qgis_as_terra(dem_geomorph$forms)
 
 
@@ -163,62 +163,48 @@ knitr::include_graphics("figures/10-sliver.png")
 knitr::include_graphics("figures/10-qgis-raster-map.png")
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
-## library(Rsagacmd)
-
-
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
-## saga = saga_gis(raster_backend = "terra", vector_backend = "sf")
-
-
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 
 
-## ---- eval=FALSE, echo=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
+## library(Rsagacmd)
+
+
+## ---- eval=FALSE------------------------------------------------------------------------------------
+## saga = saga_gis(raster_backend = "terra", vector_backend = "sf")
+
+
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## sg = saga$imagery_segmentation$seed_generation
+
+
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## ndvi_seeds = sg(ndvi, band_width = 2)
 ## plot(ndvi_seeds$seed_grid)
 
 
-## ---- eval=FALSE, echo=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## srg = saga$imagery_segmentation$seeded_region_growing
 ## ndvi_srg = srg(ndvi_seeds$seed_grid, ndvi, method = 1)
 ## plot(ndvi_srg$segments)
 
 
-## ---- eval=FALSE, echo=FALSE------------------------------------------------------------------------------------------------------------------------------
-## ndvi_segments = st_as_sf(as.polygons(ndvi_srg$segments))
+## ---- eval=FALSE------------------------------------------------------------------------------------
+## ndvi_segments = as.polygons(ndvi_srg$segments) |>
+##   st_as_sf()
 
 
-## ---- eval=FALSE, echo=FALSE------------------------------------------------------------------------------------------------------------------------------
-## library(tmap)
-## tm_shape(ndvi) +
-##   tm_raster(style = "order") +
-##   tm_shape(ndvi_segments) +
-##   tm_borders()
+## ----sagasegments, echo=FALSE, fig.cap="Normalized difference vegetation index (NDVI, left panel) and NDVi-based segments derived using t he seeded region growing algorithm for the Mongón study area."----
+knitr::include_graphics("figures/10-saga-segments.png")
 
 
-## ---- eval=FALSE, echo=FALSE------------------------------------------------------------------------------------------------------------------------------
-## library(supercells)
-## library(regional)
-## ndvi_sc = supercells(ndvi, k = 400, compactness = 0.2)
-
-
-## ---- eval=FALSE, echo=FALSE------------------------------------------------------------------------------------------------------------------------------
-## library(tmap)
-## tm_shape(ndvi) +
-##   tm_raster(style = "order") +
-##   tm_shape(ndvi_sc) +
-##   tm_borders()
-
-
-## ----09-gis-24--------------------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-24--------------------------------------------------------------------------------------
 data("cycle_hire", package = "spData")
 points = cycle_hire[1:25, ]
 
 
-## ----09-gis-25, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-25, eval=FALSE--------------------------------------------------------------------------
 ## library(osmdata)
 ## b_box = st_bbox(points)
 ## london_streets = opq(b_box) |>
@@ -228,17 +214,17 @@ points = cycle_hire[1:25, ]
 ## london_streets = dplyr::select(london_streets, osm_id)
 
 
-## ----09-gis-30, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-30, eval=FALSE--------------------------------------------------------------------------
 ## library(rgrass)
 ## link2GI::linkGRASS(london_streets, ver_select = TRUE)
 
 
-## ----09-gis-31, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-31, eval=FALSE--------------------------------------------------------------------------
 ## write_VECT(terra::vect(london_streets), vname = "london_streets")
 ## write_VECT(terra::vect(points[, 1]), vname = "points")
 
 
-## ----09-gis-32, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-32, eval=FALSE--------------------------------------------------------------------------
 ## execGRASS(cmd = "v.clean", input = "london_streets", output = "streets_clean",
 ##           tool = "break", flags = "overwrite")
 
@@ -248,19 +234,19 @@ points = cycle_hire[1:25, ]
 ## For example, try `execGRASS("g.region", flags = "help")`.
 
 
-## ----09-gis-32b, eval=FALSE-------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-32b, eval=FALSE-------------------------------------------------------------------------
 ## execGRASS(cmd = "v.net", input = "streets_clean", output = "streets_points_con",
 ##           points = "points", operation = "connect", threshold = 0.001,
 ##           flags = c("overwrite", "c"))
 
 
-## ----09-gis-33, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-33, eval=FALSE--------------------------------------------------------------------------
 ## execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
 ##           output = "shortest_route", center_cats = paste0("1-", nrow(points)),
 ##           flags = "overwrite")
 
 
-## ----09-gis-34, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-34, eval=FALSE--------------------------------------------------------------------------
 ## route = read_VECT("shortest_route") |>
 ##   st_as_sf() |>
 ##   st_geometry()
@@ -271,7 +257,7 @@ points = cycle_hire[1:25, ]
 knitr::include_graphics("figures/10_shortest_route.png")
 
 
-## ----09-gis-35, eval=FALSE, echo=FALSE--------------------------------------------------------------------------------------------------------------------
+## ----09-gis-35, eval=FALSE, echo=FALSE--------------------------------------------------------------
 ## library(mapview)
 ## m_1 = mapview(route) +  points
 ## mapview::mapshot(m_1,
@@ -280,19 +266,19 @@ knitr::include_graphics("figures/10_shortest_route.png")
 ##                                      "zoomControl"))
 
 
-## ----09-gis-27, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-27, eval=FALSE--------------------------------------------------------------------------
 ## library(link2GI)
 ## link = findGRASS()
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## library(rgrass)
 ## grass_path = link$instDir[[1]]
 ## initGRASS(gisBase = grass_path, gisDbase = tempdir(),
 ##           location = "london", mapset = "PERMANENT", override = TRUE)
 
 
-## ----09-gis-29, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-29, eval=FALSE--------------------------------------------------------------------------
 ## execGRASS("g.proj", flags = c("c", "quiet"), srid = "EPSG:4326")
 ## b_box = st_bbox(london_streets)
 ## execGRASS("g.region", flags = c("quiet"),
@@ -301,11 +287,11 @@ knitr::include_graphics("figures/10_shortest_route.png")
 ##           res = "1")
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE------------------------------------------------------------------------------------
 ## link2GI::linkGDAL()
 
 
-## ----09-gis-36, eval=FALSE, message=FALSE-----------------------------------------------------------------------------------------------------------------
+## ----09-gis-36, eval=FALSE, message=FALSE-----------------------------------------------------------
 ## our_filepath = system.file("shapes/world.gpkg", package = "spData")
 ## cmd = paste("ogrinfo -al -so", our_filepath)
 ## system(cmd)
@@ -320,26 +306,26 @@ knitr::include_graphics("figures/10_shortest_route.png")
 ## #> ...
 
 
-## ----09-gis-37, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-37, eval=FALSE--------------------------------------------------------------------------
 ## library(RPostgreSQL)
 ## conn = dbConnect(drv = PostgreSQL(),
 ##                  dbname = "rtafdf_zljbqm", host = "db.qgiscloud.com",
 ##                  port = "5432", user = "rtafdf_zljbqm", password = "d3290ead")
 
 
-## ----09-gis-38, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-38, eval=FALSE--------------------------------------------------------------------------
 ## dbListTables(conn)
 ## #> [1] "spatial_ref_sys" "topology"        "layer"           "restaurants"
 ## #> [5] "highways"
 
 
-## ----09-gis-39, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-39, eval=FALSE--------------------------------------------------------------------------
 ## dbListFields(conn, "highways")
 ## #> [1] "qc_id"        "wkb_geometry" "gid"          "feature"
 ## #> [5] "name"         "state"
 
 
-## ----09-gis-40, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-40, eval=FALSE--------------------------------------------------------------------------
 ## query = paste(
 ##   "SELECT *",
 ##   "FROM highways",
@@ -347,7 +333,7 @@ knitr::include_graphics("figures/10_shortest_route.png")
 ## us_route = read_sf(conn, query = query, geom = "wkb_geometry")
 
 
-## ----09-gis-41, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-41, eval=FALSE--------------------------------------------------------------------------
 ## query = paste(
 ##   "SELECT ST_Union(ST_Buffer(wkb_geometry, 35000))::geometry",
 ##   "FROM highways",
@@ -355,7 +341,7 @@ knitr::include_graphics("figures/10_shortest_route.png")
 ## buf = read_sf(conn, query = query)
 
 
-## ----09-gis-42, eval=FALSE, warning=FALSE-----------------------------------------------------------------------------------------------------------------
+## ----09-gis-42, eval=FALSE, warning=FALSE-----------------------------------------------------------
 ## query = paste(
 ##   "SELECT *",
 ##   "FROM restaurants r",
@@ -371,11 +357,11 @@ knitr::include_graphics("figures/10_shortest_route.png")
 ## hardees = read_sf(conn, query = query)
 
 
-## ----09-gis-43, eval=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-43, eval=FALSE--------------------------------------------------------------------------
 ## RPostgreSQL::postgresqlCloseConnection(conn)
 
 
-## ----09-gis-44, echo=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----09-gis-44, echo=FALSE--------------------------------------------------------------------------
 load("extdata/postgis_data.Rdata")
 
 
@@ -399,7 +385,7 @@ tm_shape(buf) +
             legend.outside.size = 0.3) 
 
 
-## ----09-stac-example, eval = FALSE------------------------------------------------------------------------------------------------------------------------
+## ----09-stac-example, eval = FALSE------------------------------------------------------------------
 ## library(rstac)
 ## # Connect to the STAC-API endpoint for Sentinel-2 data
 ## # and search for images intersecting our AOI
@@ -411,7 +397,7 @@ tm_shape(buf) +
 ##   post_request() |> items_fetch()
 
 
-## ----09-gdalcubes-example, eval = FALSE-------------------------------------------------------------------------------------------------------------------
+## ----09-gdalcubes-example, eval = FALSE-------------------------------------------------------------
 ## library(gdalcubes)
 ## # Filter images from STAC response by cloud cover
 ## # and create an image collection object
@@ -426,10 +412,10 @@ tm_shape(buf) +
 ##   apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
 ##   reduce_time("max(NDVI)")
 ## # gdalcubes_options(parallel = 8)
-## # plot(cube, zlim = c(0,1))
+## # plot(cube, zlim = c(0, 1))
 
 
-## ----09-openeo-example, eval=FALSE------------------------------------------------------------------------------------------------------------------------
+## ----09-openeo-example, eval=FALSE------------------------------------------------------------------
 ## library(openeo)
 ## con = connect(host = "https://openeo.cloud")
 ## p = processes() # load available processes
@@ -452,11 +438,14 @@ tm_shape(buf) +
 ## # Export as GeoTIFF
 ## result = p$save_result(reduce_max, formats$output$GTiff)
 ## # Login, see https://docs.openeo.cloud/getting-started/r/#authentication
-## login(login_type = "oidc",
-##       provider = "egi",
-##       config = list(
-##         client_id= "...",
-##         secret = "..."))
+## login(login_type = "oidc", provider = "egi",
+##       config = list(client_id = "...", secret = "..."))
 ## # Execute processes
 ## compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
+
+
+## ---- echo=FALSE, results='asis'--------------------------------------------------------------------
+res = knitr::knit_child('_10-ex.Rmd', quiet = TRUE, 
+                        options = list(include = FALSE, eval = FALSE))
+cat(res, sep = '\n')
 
