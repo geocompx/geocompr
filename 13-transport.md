@@ -5,6 +5,8 @@
 
 # Transportation {#transport}
 
+
+
 ## Prerequisites {.unnumbered}
 
 -   This chapter uses the following packages:[^13-transport-1]
@@ -544,7 +546,7 @@ uptake = function(x) {
 routes_short_scenario = routes_short |> 
   mutate(uptake = uptake(distance / 1000)) |> 
   mutate(bicycle = bicycle + car_driver * uptake,
-         car_driver = car_driver * (1 -uptake))
+         car_driver = car_driver * (1 - uptake))
 sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
 #> [1] 3980
 ```
@@ -565,10 +567,9 @@ The outputs of the two preceding code chunks are summarized in Figure \@ref(fig:
 <p class="caption">(\#fig:rnetvis)Illustration of the % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).</p>
 </div>
 
-Another, more common, type of route network dataset is road network datasets.
-This type of route network dataset is available for every city worldwide from OpenStreetMap.
-The input dataset used to illustrate this type of route network downloaded using **osmdata**\index{osmdata (package)}.
-To avoid having to request the data from OSM\index{OpenStreetMap} repeatedly, we will use the `bristol_ways` object from the **spDataLarge** package, which contains point and line data for the case study area (see `?bristol_ways`):
+Transport networks with records at the segment level, typically with attributes such as road type and width, constitute a common type of route network.
+Such route network datasets are available worldwide from OpenStreetMap, and can be downloaded with packages such as **osmdata**\index{osmdata (package)} and **osmextract**\index{osmextract (package)}.
+To save time downloading and preparing OSM\index{OpenStreetMap}, we will use the `bristol_ways` object from the **spDataLarge** package, an `sf` object with LINESTRING geometries and attributes representing a sample of the transport network in the case study region (see `?bristol_ways` for details), as shown in the output below:
 
 
 ```r
@@ -579,13 +580,11 @@ summary(bristol_ways)
 #>  road    :3422   Mode  :character   Mode  :character   +proj=long...:   0
 ```
 
-The above code chunk summarized a simple feature\index{sf} object representing around 5,000 segments on the transport network\index{network}.
-This an easily manageable dataset size (transport datasets can be large, but it's best to start small).
-
-As mentioned, route networks can usefully be represented as mathematical graphs\index{graph}, with nodes\index{node} on the network, connected by edges\index{edge}.
+The output shows that `bristol_ways` represents just over 6 thousand segments on the transport network\index{network}.
+This and other geographic networks can be represented as mathematical graphs\index{graph}, with nodes\index{node} on the network, connected by edges\index{edge}.
 A number of R packages have been developed for dealing with such graphs, notably **igraph**\index{igraph (package)}.
 You can manually convert a route network into an `igraph` object, but the geographic attributes will be lost.
-To overcome this issue functionality was developed in the **sfnetworks**\index{sfnetworks (package)} package, to represent route networks simultaneously as graphs *and* a set of geographic lines.
+To overcome this limitation of **igraph**, the **sfnetworks**\index{sfnetworks (package)} package, which to represent route networks simultaneously as graphs *and* geographic lines, was developed.
 We will demonstrate **sfnetworks** functionality on the `bristol_ways` object.
 
 
@@ -609,11 +608,10 @@ ways_sfn
 #> # … 
 ```
 
-
 The output of the previous code chunk (with the final output shortened to contain only the most important 8 lines due to space considerations) shows that `ways_sfn` is a composite object, containing both nodes and edges in graph and spatial form.
 `ways_sfn` is of class `sfnetwork`, which builds on the `igraph` class from the **igraph** package.
 In the example below, the 'edge betweenness'\index{edge}, meaning the number of shortest paths\index{shortest route} passing through each edge, is calculated (see `?igraph::betweenness` for further details).
-The result of calculating edge betweenness for this dataset are shown Figure \@ref(fig:wayssln), which has the cycle route network dataset calculated with the `overline()` function as an overlay for comparison.
+The output of the edge betweenness calculation is shown Figure \@ref(fig:wayssln), which has the cycle route network dataset calculated with the `overline()` function as an overlay for comparison.
 The results demonstrate that each graph edge represents a segment: the segments near the center of the road network have the highest betweenness values, whereas segments closer to central Bristol have higher cycling potential, based on these simplistic datasets.
 
 
@@ -621,31 +619,33 @@ The results demonstrate that each graph edge represents a segment: the segments 
 ways_centrality = ways_sfn |> 
   activate("edges") |>  
   mutate(betweenness = tidygraph::centrality_edge_betweenness(lengths)) 
-tm_shape(ways_centrality |> st_as_sf()) +
-  tm_lines(lwd = "betweenness", scale = 9, title.lwd = "Betweenness") +
-  tm_shape(route_network_scenario) +
-  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "N0. bike trips (modeled, one direction)", col = "green")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="13-transport_files/figure-html/wayssln-1.png" alt="Illustration of a small route network, with segment thickness proportional to its betweenness, generated using the igraph package and described in the text." width="60%" />
-<p class="caption">(\#fig:wayssln)Illustration of a small route network, with segment thickness proportional to its betweenness, generated using the igraph package and described in the text.</p>
+<img src="13-transport_files/figure-html/wayssln-1.png" alt="Illustration of route network datasets. The grey lines represent a simplified road network, with segment thickness proportional to betweenness. The green lines represent potential cycling flows (one way) calculated with the code above." width="100%" />
+<p class="caption">(\#fig:wayssln)Illustration of route network datasets. The grey lines represent a simplified road network, with segment thickness proportional to betweenness. The green lines represent potential cycling flows (one way) calculated with the code above.</p>
 </div>
 
 
 
 One can also find the shortest route\index{shortest route} between origins and destinations using this graph representation of the route network with the **sfnetworks** package.
-<!-- TODO: make an exercise based on this if time allows (RL 2022-07) --> While the methods presented in this section are relatively simple compared with what is possible with spatial network generation (e.g., with `overline()`) and analysis techniques (e.g., with **sfnetworks**), they should provide a strong starting point for further exploration and research into the area.
+<!-- TODO: make an exercise based on this if time allows (RL 2022-07) -->
+The methods presented in this section are relatively simple compared with what is possible.
+The dual graph/spatial capabilities that **sfnetworks** opens up enable many new powerful techniques can cannot be fully covered in this section.
+This section does, however, provide a strong starting point for further exploration and research into the area.
+A final point is that the example dataset we used above is relatively small.
+It may also be worth considering how the work could adapt to larger networks: testing methods on a subset of the data, and ensuring you have enough RAM will help, although it's also worth exploring other tools that can do transport network analysis that are optimised for large networks, such as R5 [@alessandretti_multimodal_2022].
+
 
 ## Prioritizing new infrastructure
 
-This chapter's final practical section demonstrates the policy-relevance of geocomputation for transport applications by identifying locations where new transport infrastructure may be needed.
-Clearly, the types of analysis presented here would need to be extended and complemented by other methods to be used in real-world applications, as discussed in Section \@ref(future-directions-of-travel).
-However, each stage could be useful on its own, and feed into wider analyses.
-To summarize, these were: identifying short but car-dependent commuting routes (generated from desire lines) in Section \@ref(routes); creating desire lines representing trips to rail stations in Section \@ref(nodes); and analysis of transport systems at the route network level using graph theory and the **sfnetworks** package in Section \@ref(route-networks).
+This final practical section demonstrates the policy relevance of geocomputation for transport planning and policies, with a simple example to help prioritise locations new investment.
+Clearly, the approach is deliberately simplified for educational purposes.
+The analysis would need to be substantially expanded --- including with larger input datasets --- to inform transport planning design, investment and policy decisions (possible next steps are discussed in Section \@ref(future-directions-of-travel)).
 
-The final code chunk of this chapter combines these strands of analysis.
-It overlays estimates of cycling potential from the previous section on top of a new dataset representing areas within a short distance of cycling infrastructure.
+An advantage of the data driven approach outlined in this chapter is its modularity: each aspect can be useful on its own, and feed into wider analyses.
+The steps that got us to this stage included identifying short but car-dependent commuting routes (generated from desire lines) in Section \@ref(routes) and analsysi of route network characteristics with the **sfnetworks** package in Section \@ref(route-networks).
+The final code chunk of this chapter combines these strands of analysis, by overlaying estimates of cycling potential from the previous section on top of a new dataset representing areas within a short distance of cycling infrastructure.
 This new dataset is created in the code chunk below which: 1) filters out the cycleway entities from the `bristol_ways` object representing the transport network; 2) 'unions' the individual LINESTRING entities of the cycleways into a single multilinestring object (for speed of buffering); and 3) creates a 100 m buffer around them to create a polygon:
 
 

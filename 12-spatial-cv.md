@@ -1,5 +1,8 @@
 # Statistical learning {#spatial-cv}
 
+
+
+
 ## Prerequisites {-}
 
 This chapter assumes proficiency with geographic data analysis\index{geographic data analysis}, for example gained by studying the contents and working-through the exercises in Chapters \@ref(spatial-class) to \@ref(reproj-geo-data).
