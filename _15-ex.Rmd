@@ -25,12 +25,12 @@ What might explain the observed difference?
 
 ```{r 15-ex-e1, message=FALSE}
 data("comm", package = "spDataLarge")
-pa = decostand(comm, "pa")
+pa = vegan::decostand(comm, "pa")
 pa = pa[rowSums(pa) != 0, ]
 comm = comm[rowSums(comm) != 0, ]
 set.seed(25072018)
-nmds_pa = metaMDS(comm = pa, k = 4, try = 500)
-nmds_per = metaMDS(comm = comm, k = 4, try = 500)
+nmds_pa = vegan::metaMDS(comm = pa, k = 4, try = 500)
+nmds_per = vegan::metaMDS(comm = comm, k = 4, try = 500)
 nmds_pa$stress
 nmds_per$stress
 ```
@@ -65,6 +65,13 @@ library(qgisprocess)
 library(vegan)
 data("comm", "random_points", package = "spDataLarge")
 dem = terra::rast(system.file("raster/dem.tif", package = "spDataLarge"))
+ndvi = terra::rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
+
+# use presence-absence matrix and get rid of empty
+pa = vegan::decostand(comm, "pa")
+pa = pa[rowSums(pa) != 0, ]
+
+# compute environmental predictors (ep) catchment slope and catchment area
 ep = qgisprocess::qgis_run_algorithm(
   alg = "saga:sagawetnessindex",
   DEM = dem,
@@ -84,7 +91,7 @@ origin(ep) = origin(dem)
 ep = c(dem, ndvi, ep) 
 ep$carea = log10(ep$carea)
 
-# computing the curvatures
+# compute the curvatures
 qgis_show_help("grass7:r.slope.aspect")
 curvs = qgis_run_algorithm(
   "grass7:r.slope.aspect",
@@ -107,11 +114,11 @@ elev = dplyr::filter(random_points, id %in% rownames(pa)) %>%
 # rotating NMDS in accordance with altitude (proxy for humidity)
 rotnmds = MDSrotate(nmds_pa, elev)
 # extracting the first two axes
-sc = scores(rotnmds, choices = 1:2)
+sc = vegan::scores(rotnmds, choices = 1:2, display = "sites")
 rp = data.frame(id = as.numeric(rownames(sc)),
                 sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
-rp = inner_join(random_points, rp, by = "id")
+rp = dplyr::inner_join(random_points, rp, by = "id")
 ```
 
 E3. Retrieve the bias-reduced RMSE of a random forest\index{random forest} and a linear model using spatial cross-validation\index{cross-validation!spatial CV}.
