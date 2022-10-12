@@ -135,12 +135,14 @@ library(mlr3spatiotempcv)
 library(mlr3learners)
 library(mlr3viz)
 library(paradox)
+library(ranger)
+
 # define the task
-task = mlr3spatiotempcv::TaskRegrST$new(
-  id = "mongon",
-  backend = select(rp, -id, -spri), 
-  target = "sc"
-  )
+task = mlr3spatiotempcv::as_task_regr_st(
+  dplyr::select(rp, -id, -spri),
+  target = "sc", 
+  id = "mongon")
+
 # define the learners
 mlr3::mlr_learners
 # linear model
@@ -176,7 +178,7 @@ print(design_grid)
 # execute the outer loop sequentially and parallelize the inner loop
 future::plan(list("sequential", "multisession"), 
              workers = floor(future::availableCores() / 2))
-set.seed(04132022)
+set.seed(10112022)
 # reduce verbosity
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("info")
@@ -199,7 +201,7 @@ tictoc::toc()
 # stop parallelization
 future:::ClusterRegistry("stop")
 # save your result, e.g. to 
-# saveRDS(bmr, file = "extdata/15_bmr.rds")
+saveRDS(bmr, file = "extdata/15-bmr.rds")
 
 # mean RMSE
 bmr$aggregate(measures = msr("regr.rmse"))
