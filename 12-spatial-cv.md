@@ -14,6 +14,8 @@ Packages **GGally**, **lgr**, **kernlab**, **ml3measures**, **paradox**, **pROC*
 
 
 ```r
+library(sf)
+library(terra)
 library(dplyr)
 library(future)
 library(lgr)
@@ -24,8 +26,6 @@ library(mlr3spatiotempcv)
 library(mlr3tuning)
 library(mlr3viz)
 library(progressr)
-library(sf)
-library(terra)
 ```
 
 Required data will be attached in due course.

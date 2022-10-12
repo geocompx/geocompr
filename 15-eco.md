@@ -9,8 +9,10 @@ The chapter uses the following packages:
 
 
 ```r
-library(data.table)
+library(sf)
+library(terra)
 library(dplyr)
+library(data.table)
 library(mlr3)
 library(mlr3spatiotempcv)
 library(mlr3tuning)
@@ -18,8 +20,6 @@ library(mlr3learners)
 library(qgisprocess)
 library(paradox)
 library(ranger)
-library(sf)
-library(terra)
 library(tree)
 library(vegan)
 ```
