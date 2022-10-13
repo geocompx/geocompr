@@ -1,10 +1,5 @@
 # (PART) Applications {.unnumbered}
 
-```{r, echo=FALSE}
-knitr::opts_chunk$set(warning = FALSE)
-```
-
-
 # Transportation {#transport}
 
 ```{r transport-setup, include=FALSE}
@@ -13,7 +8,7 @@ knitr::opts_chunk$set(warning = FALSE)
 
 ## Prerequisites {.unnumbered}
 
--   This chapter uses the following packages:[^13-transport-1]
+- This chapter uses the following packages:[^13-transport-1]
 
 [^13-transport-1]: The **nabor** package must also be installed, although it does not need to be attached.
 
@@ -43,19 +38,25 @@ It is therefore unsurprising that transport researchers have long turned to geog
 
 This chapter introduces the geographic analysis of transport systems at different geographic levels:
 
--   **Areal units**: transport patterns can be understood with reference to zonal aggregates, such as the main mode of travel (by car, bike or foot, for example), and average distance of trips made by people living in a particular zone, covered in Section \@ref(transport-zones).
--   **Desire lines**\index{desire lines}: straight lines that represent 'origin-destination' data that records how many people travel (or could travel) between places (points or zones) in geographic space, the topic of Section \@ref(desire-lines).
--   **Nodes**\index{node}: these are points in the transport system that can represent common origins and destinations and public transport stations such as bus stops and rail stations, the topic of Section \@ref(nodes).
--   **Routes**: these are lines representing a path along the route network along the desire lines and between nodes. Routes (which can be represented as single linestrings or multiple short *segments*) and the *routing engines* that generate them, are covered in Section \@ref(routes).
--   **Route networks**\index{network}: these represent the system of roads, paths and other linear features in an area and are covered in Section \@ref(route-networks). They can be represented as geographic features (typically short segments of road that add up to create a full network) or structured as an interconnected graph, with the level of traffic on different segments referred to as 'flow' by transport modelers [@hollander_transport_2016]
+- **Areal units**: transport patterns can be understood with reference to zonal aggregates, such as the main mode of travel (by car, bike or foot, for example), and average distance of trips made by people living in a particular zone, covered in Section \@ref(transport-zones)
+- **Desire lines**\index{desire lines}: straight lines that represent 'origin-destination' data that records how many people travel (or could travel) between places (points or zones) in geographic space, the topic of Section \@ref(desire-lines)
+- **Nodes**\index{node}: these are points in the transport system that can represent common origins and destinations and public transport stations such as bus stops and rail stations, the topic of Section \@ref(nodes)
+- **Routes**: these are lines representing a path along the route network along the desire lines and between nodes.
+Routes (which can be represented as single linestrings or multiple short *segments*) and the *routing engines* that generate them, are covered in Section \@ref(routes)
+- **Route networks**\index{network}: these represent the system of roads, paths and other linear features in an area and are covered in Section \@ref(route-networks).
+They can be represented as geographic features (typically short segments of road that add up to create a full network) or structured as an interconnected graph, with the level of traffic on different segments referred to as 'flow' by transport modelers [@hollander_transport_2016]
 
 Another key level is **agents**, mobile entities like you and me and vehicles that enable use to move such as bikes and buses.
-These can be represented computationally in software such as [MATSim](http://www.matsim.org/) and [A/B Street](https://github.com/a-b-street/abstreet), which represent the dynamics of transport systems using an agent-based modeling (ABM)\index{agent-based modeling} frameworks, usually at high levels of spatial and temporal resolution [@horni_multi-agent_2016]. ABM is a powerful approach to transport research with great potential for integration with R's spatial classes [@thiele_r_2014; @lovelace_spatial_2016], but is outside the scope of this chapter.
+These can be represented computationally in software such as [MATSim](http://www.matsim.org/) and [A/B Street](https://github.com/a-b-street/abstreet), which represent the dynamics of transport systems using an agent-based modeling (ABM)\index{agent-based modeling} frameworks, usually at high levels of spatial and temporal resolution [@horni_multi-agent_2016]. 
+ABM is a powerful approach to transport research with great potential for integration with R's spatial classes [@thiele_r_2014; @lovelace_spatial_2016], but is outside the scope of this chapter.
 Beyond geographic levels and agents, the basic unit of analysis in many transport models is the **trip**, a single purpose journey from an origin 'A' to a destination 'B' [@hollander_transport_2016].
 Trips join-up the different levels of transport systems and can be represented simplistically as geographic *desire lines* connecting *zone* centroids\index{centroid} (*nodes*) or as routes that follow the transport *route network*.
 In this context, *agents*\index{agent-based modeling} are usually point entities that move within the transport network.
 
-Transport systems are dynamic [@xie_evolving_2011]. While the focus of this chapter is the *geographic* analysis of a transport systems, it provides insights into how the approach can be used to simulate scenarios of change, in Section \@ref(prioritizing-new-infrastructure). The purpose of geographic transport modeling can be interpreted as simplifying the complexity of these spatio-temporal systems in ways that capture their essence. Selecting appropriate levels of geographic analysis can help simplify this complexity without losing its most important features and variables, enabling better decision making and more effective interventions [@hollander_transport_2016].
+Transport systems are dynamic [@xie_evolving_2011].
+While the focus of this chapter is the *geographic* analysis of a transport systems, it provides insights into how the approach can be used to simulate scenarios of change, in Section \@ref(prioritizing-new-infrastructure). 
+The purpose of geographic transport modeling can be interpreted as simplifying the complexity of these spatio-temporal systems in ways that capture their essence.
+Selecting appropriate levels of geographic analysis can help simplify this complexity without losing its most important features and variables, enabling better decision making and more effective interventions [@hollander_transport_2016].
 
 Typically, models are designed to tackle a particular problem, such as how to improve safety or the environmental performance of transport systems.
 For this reason, this chapter is based around a policy scenario, introduced in the next section, that asks: how to increase cycling in the city of Bristol?
@@ -72,17 +73,15 @@ An overview of the region's transport network is illustrated in Figure \@ref(fig
 # code that generated the input data - see also ?bristol_ways
 # source("https://github.com/Robinlovelace/geocompr/raw/main/code/13-transport-data-gen.R") 
 # view input data
-summary(bristol_ways)
-summary(bristol_ttwa)
-summary(bristol_region)
-
+# summary(bristol_ways)
+# summary(bristol_ttwa)
+# summary(bristol_region)
 region_all = rbind(bristol_region, bristol_ttwa)
 tmap_mode("view")
 tm_shape(region_all[1, ], bbox = region_all) +
   tm_fill("yellow", alpha = 0.5) +
   tm_shape(bristol_ways) +
-  tm_lines(col = "highway", lwd = 2.1, palette = "-Set1"
-    ) +
+  tm_lines(col = "highway", lwd = 2.1, palette = "-Set1") +
   tm_scale_bar() +
   tm_shape(region_all) +
   tm_borders(col = "black") +
@@ -122,10 +121,10 @@ To highlight the importance of policy considerations in transportation research,
 The broader aim is to demonstrate how geocomputation can support evidence-based transport planning.
 In this chapter you will learn how to:
 
--   Describe the geographical patterns of transport behavior in cities
--   Identify key public transport nodes supporting multi-model trips
--   Analyze travel 'desire lines' to find where many people drive short distances
--   Identify cycle route locations that will encourage less car driving and more cycling
+- Describe the geographical patterns of transport behavior in cities
+- Identify key public transport nodes supporting multi-model trips
+- Analyze travel 'desire lines' to find where many people drive short distances
+- Identify cycle route locations that will encourage less car driving and more cycling
 
 To get the wheels rolling on the practical aspects of this chapter, the next section begins by loading zonal data on travel patterns.
 These zone-level datasets are small but often vital for gaining a basic understanding of a settlement's overall transport system.
@@ -145,8 +144,8 @@ See the inner blue boundary in Figure \@ref(fig:bristol): there are a couple of 
 
 [^13-transport-2]: In cases where the first match does not provide the right name, the country or region should be specified, for example `Bristol Tennessee` for a Bristol located in America.
 
--   The first OSM boundary returned by OSM may not be the official boundary used by local authorities
--   Even if OSM returns the official boundary, this may be inappropriate for transport research because they bear little relation to where people travel
+- The first OSM boundary returned by OSM may not be the official boundary used by local authorities
+- Even if OSM returns the official boundary, this may be inappropriate for transport research because they bear little relation to where people travel
 
 Travel to Work Areas (TTWAs) address these issues by creating a zoning system analogous to hydrological watersheds.
 TTWAs were first defined as contiguous zones within which 75% of the population travels to work [@coombes_efficient_1986], and this is the definition used in this chapter.
@@ -196,9 +195,9 @@ zones_attr = bristol_od |>
 
 The preceding chunk:
 
--   Grouped the data by zone of origin (contained in the column `o`)
--   Aggregated the variables in the `bristol_od` dataset *if* they were numeric, to find the total number of people living in each zone by mode of transport[^13-transport-3]
--   Renamed the grouping variable `o` so it matches the ID column `geo_code` in the `bristol_zones` object
+- Grouped the data by zone of origin (contained in the column `o`)
+- Aggregated the variables in the `bristol_od` dataset *if* they were numeric, to find the total number of people living in each zone by mode of transport[^13-transport-3]
+- Renamed the grouping variable `o` so it matches the ID column `geo_code` in the `bristol_zones` object
 
 [^13-transport-3]: The `_if` affix requires a `TRUE`/`FALSE` question to be asked of the variables, in this case 'is it numeric?'
     and only variables returning true are summarized.
@@ -241,8 +240,7 @@ zones_destinations = bristol_od |>
   group_by(d) |> 
   summarize(across(where(is.numeric), sum)) |> 
   dplyr::select(geo_code = d, all_dest = all)
-zones_od = inner_join(zones_joined, zones_destinations, by = "geo_code") |> 
-  st_as_sf()
+zones_od = inner_join(zones_joined, zones_destinations, by = "geo_code")
 ```
 
 A simplified version of Figure \@ref(fig:zones) is created with the code below (see `12-zones.R` in the [`code`](https://github.com/Robinlovelace/geocompr/tree/main/code) folder of the book's GitHub repo to reproduce the figure and Section \@ref(faceted-maps) for details on faceted maps with **tmap**\index{tmap (package)}):
@@ -270,8 +268,7 @@ To arrange the OD data by all trips and then filter-out only the top 5, type (pl
 
 ```{r 13-transport-12}
 od_top5 = bristol_od |> 
-  arrange(desc(all)) |> 
-  top_n(5, wt = all)
+  slice_max(all, n = 5)
 ```
 
 ```{r od, echo=FALSE}
@@ -294,7 +291,7 @@ bristol_od$Active = (bristol_od$bicycle + bristol_od$foot) /
   bristol_od$all * 100
 ```
 
-There are two main types of OD pair: *interzonal* and *intrazonal*.
+There are two main types of OD pairs: *interzonal* and *intrazonal*.
 Interzonal OD pairs represent travel between zones in which the destination is different from the origin.
 Intrazonal OD pairs represent travel within the same zone (see the top row of Table \@ref(tab:od)).
 The following code chunk splits `od_bristol` into these two types:
