@@ -574,7 +574,7 @@ Route segment results can enable the prioritization of investment where it is mo
 ## Route networks
 
 While routes generally contain data on travel *behavior*, at the same geographic level as desire lines and OD pairs, route network datasets usually represent the physical transport network.
-Each *segment* in a route network roughly corresponds to a continuous section of street between junctions and appears only once, although the average length of segments depends on the data source (segments in the OSM-derived `bristol_ways` dataset used in this section have an average length of just over 200 m, with a standard deviation of nearly 500 m.
+Each *segment* in a route network roughly corresponds to a continuous section of street between junctions and appears only once, although the average length of segments depends on the data source (segments in the OSM-derived `bristol_ways` dataset used in this section have an average length of just over 200 m, with a standard deviation of nearly 500 m).
 Variability in segment lengths can be explained by the fact that in some rural locations junctions are far apart while in dense urban areas there are crossings and other segment breaks every few meters.
 
 Route networks can be an input into, or an output of, transport data analysis projects, or both.
@@ -612,15 +612,14 @@ route_network_scenario = overline(routes_short_scenario, attrib = "bicycle")
 
 The outputs of the two preceding code chunks are summarized in Figure \@ref(fig:rnetvis) below.
 
-```{r rnetvis, out.width="49%", fig.show='hold', fig.cap="Illustration of the % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).", echo=FALSE}
+```{r rnetvis, out.width="49%", fig.show='hold', fig.cap="Illustration of the % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).", echo=FALSE, fig.height=6}
 routes_short_scenario |> 
   ggplot() +
   geom_line(aes(distance / 1000, uptake)) +
-  xlab("Route distance (km)") +
-  ylab("Percent trips switching from driving to cycling") +
+  labs(x = "Route distance (km)", y = NULL, title = "Percent trips switching from driving to cycling") +
   scale_y_continuous(labels = scales::percent)
 tm_shape(route_network_scenario) +
-  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "N. bike trips per day\n(modeled, one direction)")
+  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "No. bike trips per day\n(modeled, one direction)")
 ```
 
 Transport networks with records at the segment level, typically with attributes such as road type and width, constitute a common type of route network.
@@ -674,7 +673,7 @@ tm_shape(ways_centrality |> st_as_sf(), bb = bb_wayssln) +
   tm_lines(lwd = "betweenness", scale = 9, title.lwd = "Betweenness", col = "grey",
     lwd.legend = c(5000, 10000), legend.lwd.is.portrait = TRUE) +
   tm_shape(route_network_scenario) +
-  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "N0. bike trips (modeled, one direction)",
+  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "No. bike trips (modeled, one direction)",
     lwd.legend = c(1000, 2000), legend.lwd.is.portrait = TRUE, col = "darkgreen")
 ```
 
@@ -691,17 +690,16 @@ The methods presented in this section are relatively simple compared with what i
 The dual graph/spatial capabilities that **sfnetworks** opens up enable many new powerful techniques can cannot be fully covered in this section.
 This section does, however, provide a strong starting point for further exploration and research into the area.
 A final point is that the example dataset we used above is relatively small.
-It may also be worth considering how the work could adapt to larger networks: testing methods on a subset of the data, and ensuring you have enough RAM will help, although it's also worth exploring other tools that can do transport network analysis that are optimised for large networks, such as R5 [@alessandretti_multimodal_2022].
-
+It may also be worth considering how the work could adapt to larger networks: testing methods on a subset of the data, and ensuring you have enough RAM will help, although it's also worth exploring other tools that can do transport network analysis that are optimized for large networks, such as R5 [@alessandretti_multimodal_2022].
 
 ## Prioritizing new infrastructure
 
-This final practical section demonstrates the policy relevance of geocomputation for transport planning and policies, with a simple example to help prioritise locations new investment.
+This final practical section demonstrates the policy relevance of geocomputation for transport planning and policies, with a simple example to help prioritize locations of a new investment.
 Clearly, the approach is deliberately simplified for educational purposes.
 The analysis would need to be substantially expanded --- including with larger input datasets --- to inform transport planning design, investment and policy decisions (possible next steps are discussed in Section \@ref(future-directions-of-travel)).
 
 An advantage of the data driven approach outlined in this chapter is its modularity: each aspect can be useful on its own, and feed into wider analyses.
-The steps that got us to this stage included identifying short but car-dependent commuting routes (generated from desire lines) in Section \@ref(routes) and analsysi of route network characteristics with the **sfnetworks** package in Section \@ref(route-networks).
+The steps that got us to this stage included identifying short but car-dependent commuting routes (generated from desire lines) in Section \@ref(routes) and analysis of route network characteristics with the **sfnetworks** package in Section \@ref(route-networks).
 The final code chunk of this chapter combines these strands of analysis, by overlaying estimates of cycling potential from the previous section on top of a new dataset representing areas within a short distance of cycling infrastructure.
 This new dataset is created in the code chunk below which: 1) filters out the cycleway entities from the `bristol_ways` object representing the transport network; 2) 'unions' the individual LINESTRING entities of the cycleways into a single multilinestring object (for speed of buffering); and 3) creates a 100 m buffer around them to create a polygon:
 
@@ -720,7 +718,6 @@ waldo::compare(
   sf::st_crs(existing_cycleways_buffer)
 )
 ```
-
 
 ```{r 13-transport-26, eval=FALSE}
 route_network_no_infra = st_difference(
@@ -748,7 +745,7 @@ qtm(route_network_no_infra, basemaps = leaflet::providers$Esri.WorldTopoMap,
     lines.lwd = 5)
 ```
 
-```{r cycleways, echo=FALSE, message=FALSE, fig.cap="Potential routes along which to prioritise cycle infrastructure in Bristol to reduce car dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right).", out.width="50%", fig.show='hold', fig.scap="Routes along which to prioritise cycle infrastructure."}
+```{r cycleways, echo=FALSE, message=FALSE, fig.cap="Potential routes along which to prioritise cycle infrastructure in Bristol to reduce car dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right).", out.width="50%", fig.show='hold', fig.scap="Routes along which to prioritise cycle infrastructure.", fig.height=6}
 # Previous verson:
 # source("https://github.com/Robinlovelace/geocompr/raw/main/code/13-cycleways.R")
 # m_leaflet
@@ -762,7 +759,6 @@ tm_shape(existing_cycleways_buffer, bbox = bristol_region) +
  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "No. bike trips (modeled, one direction)")
 knitr::include_graphics("figures/bristol_cycleways_zoomed.png")
 ```
-
 
 The method has some limitations: in reality, people do not travel to zone centroids or always use the shortest route\index{shortest route} algorithm for a particular mode.
 However, the results demonstrate routes along which cycle paths could be prioritized from car dependency and public transport perspectives.
