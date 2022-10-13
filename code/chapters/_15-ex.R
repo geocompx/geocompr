@@ -1,4 +1,4 @@
-## ----15-ex-e0, message=FALSE, warning=FALSE---------------------------------------------------------------------------------------------------------------
+## ----15-ex-e0, message=FALSE, warning=FALSE---------------------------------------------------------
 library(data.table)
 library(dplyr)
 library(future)
@@ -17,7 +17,7 @@ library(sf)
 library(vegan)
 
 
-## ----15-ex-e1, message=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ----15-ex-e1, message=FALSE------------------------------------------------------------------------
 data("comm", package = "spDataLarge")
 pa = decostand(comm, "pa")
 pa = pa[rowSums(pa) != 0, ]
@@ -54,7 +54,7 @@ nmds_per$stress
 ## One compromise would be to use a categorical scale such as the Londo scale.
 
 
-## ----15-ex-e2---------------------------------------------------------------------------------------------------------------------------------------------
+## ----15-ex-e2---------------------------------------------------------------------------------------
 # first compute the terrain attributes we have also used in the chapter
 library(dplyr)
 library(terra)
@@ -111,7 +111,7 @@ rp = data.frame(id = as.numeric(rownames(sc)),
 rp = inner_join(random_points, rp, by = "id")
 
 
-## ----15-ex-e3, message=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ----15-ex-e3, message=FALSE------------------------------------------------------------------------
 library(dplyr)
 library(future)
 library(mlr3)

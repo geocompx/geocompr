@@ -1,10 +1,10 @@
-## ----index-1, echo=FALSE----------------------------------------------------------------------------------------------------------------------------------
+## ----index-1, echo=FALSE----------------------------------------------------------------------------
 is_on_ghactions = identical(Sys.getenv("GITHUB_ACTIONS"), "true")
 is_online = curl::has_internet()
 is_html = knitr::is_html_output()
 
 
-## ---- echo = FALSE----------------------------------------------------------------------------------------------------------------------------------------
+## ---- echo = FALSE----------------------------------------------------------------------------------
 # google scholar metadata
 library(metathis)
 if (is_html) {
@@ -117,12 +117,12 @@ if (is_html) {
 ## These can be installed using the [**remotes**](https://github.com/r-lib/remotes) package.
 
 
-## ----index-3, message=FALSE, eval=FALSE, echo=is_html, results='hide'-------------------------------------------------------------------------------------
+## ----index-3, message=FALSE, eval=FALSE, echo=is_html, results='hide'-------------------------------
 ## install.packages("remotes")
 ## remotes::install_github("geocompr/geocompkg")
 
 
-## ---- echo=FALSE, eval=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ---- echo=FALSE, eval=FALSE------------------------------------------------------------------------
 ## remotes::install_github("nowosad/spData")
 ## remotes::install_github("nowosad/spDataLarge")
 ## 
@@ -139,11 +139,11 @@ if (is_html) {
 ## After opening the `geocompr.Rproj` project in [RStudio](https://www.rstudio.com/products/rstudio/download/#download) (or opening the folder in another IDE such as [VS Code](https://github.com/REditorSupport/vscode-R)), you should be able to reproduce the contents with the following command:
 
 
-## ----index-3-1, eval=FALSE, echo=is_html------------------------------------------------------------------------------------------------------------------
+## ----index-3-1, eval=FALSE, echo=is_html------------------------------------------------------------
 ## bookdown::serve_book(".")
 
 
-## ----index-3-2, echo=FALSE, include=FALSE-----------------------------------------------------------------------------------------------------------------
+## ----index-3-2, echo=FALSE, include=FALSE-----------------------------------------------------------
 # is geocompkg installed?
 geocompkg_is_installed = "geocompkg" %in% installed.packages()
 if(!geocompkg_is_installed){
@@ -156,27 +156,39 @@ if(!geocompkg_is_installed){
 ## See the project's [GitHub repo](https://github.com/robinlovelace/geocompr#reproducing-the-book) for full details on reproducing the book.
 
 
-## ## Supporting the project {-}
+## ## Getting involved {-}
 
 ## 
 
-## If you find the book useful, please support it by:
+## If you find the project of use and interest, you can get involved in many ways, by:
 
 ## 
 
-## - Telling people about it in person
+## - Telling people about it
 
-## - Communicating about the book in digital media, e.g., via the [#geocompr hashtag](https://twitter.com/hashtag/geocompr) on Twitter (see our [Guestbook at geocompr.github.io](https://geocompr.github.io/guestbook/)) or by letting us know of [courses](https://github.com/geocompr/geocompr.github.io/edit/source/content/guestbook/index.md) using the book
+## - [Buying](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577) a copy
 
-## - [Citing](https://github.com/Robinlovelace/geocompr/raw/main/CITATION.bib) or [linking-to](https://geocompr.robinlovelace.net/) it
+## - Helping people get started with open source software for reproducible research in general, and working with geographic data in R in particular (this can be an excellent way to consolidate and build your own skills)
+
+## - Communicating about the book online, via the [#geocompr hashtag](https://twitter.com/hashtag/geocompr) on Twitter (see our [Guestbook at geocompr.github.io](https://geocompr.github.io/guestbook/)) or by letting us know of [courses](https://github.com/geocompr/geocompr.github.io/edit/source/content/guestbook/index.md) using the book
+
+## - [Citing](https://github.com/Robinlovelace/geocompr/raw/main/CITATION.bib) and [linking-to](https://geocompr.robinlovelace.net/) it
 
 ## - '[Starring](https://help.github.com/articles/about-stars/)' the [geocompr GitHub repository](https://github.com/robinlovelace/geocompr)
 
-## - Reviewing it, e.g., on Amazon or [Goodreads](https://www.goodreads.com/book/show/42780859-geocomputation-with-r)
+## - Reviewing it, on [Amazon](https://www.amazon.com/Geocomputation-Chapman-Hall-Robin-Lovelace/dp/1138304514/), [Goodreads](https://www.goodreads.com/book/show/42780859-geocomputation-with-r) or elsewhere
 
-## - Asking questions about or making suggestion on the content via [GitHub](https://github.com/Robinlovelace/geocompr/issues/372) or Twitter.
+## - Asking questions about the content or making suggestion on [GitHub](https://github.com/Robinlovelace/geocompr/issues), [Twitter](https://twitter.com/hashtag/geocompr?src=hashtag_click) or [Discord](https://discord.gg/PMztXYgNxp)
 
-## - [Buying](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577) a copy
+## - Answering questions, or at least responding to people asking for clarification or reproducible examples to demonstrate their question
+
+## - Supporting community translations
+
+##   - The Spanish version: https://geocompr.github.io/es/
+
+##   - The French version: https://geocompr.github.io/fr/
+
+##   - The Japanese version: http://babayoshihiko.ddns.net/geo/
 
 ## 
 
@@ -222,7 +234,7 @@ if(!geocompkg_is_installed){
 ## \begin{center} \Large \emph{F{\"u}r meine Katharina und alle unsere Kinder  } \end{center}
 
 
-## ----contrib-preface, include=FALSE-----------------------------------------------------------------------------------------------------------------------
+## ----contrib-preface, include=FALSE-----------------------------------------------------------------
 contributors = readr::read_csv("extdata/contributors.csv")
 c_txt = contributors$name
 c_url = contributors$link

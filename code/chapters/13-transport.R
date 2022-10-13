@@ -1,4 +1,8 @@
-## ----13-transport-1, message=FALSE, results='hide'--------------------------------------------------------------------------------------------------------
+## ---- echo=FALSE------------------------------------------------------------------------------------
+knitr::opts_chunk$set(warning = FALSE)
+
+
+## ----13-transport-1, message=FALSE, results='hide'--------------------------------------------------
 library(sf)
 library(dplyr)
 library(spDataLarge)
@@ -8,7 +12,7 @@ library(ggplot2)      # data visualization package
 library(sfnetworks)   # spatial network classes and functions 
 
 
-## ----13-transport-2, echo=FALSE, eval=FALSE---------------------------------------------------------------------------------------------------------------
+## ----13-transport-2, echo=FALSE, eval=FALSE---------------------------------------------------------
 ## # code that generated the input data - see also ?bristol_ways
 ## # source("https://github.com/Robinlovelace/geocompr/raw/main/code/13-transport-data-gen.R")
 ## # view input data
@@ -34,7 +38,7 @@ knitr::include_graphics("figures/13_bristol.png")
 # knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34452756-985267de-ed3e-11e7-9f59-fda1f3852253.png")
 
 
-## ----13-transport-3, eval=FALSE, echo=FALSE---------------------------------------------------------------------------------------------------------------
+## ----13-transport-3, eval=FALSE, echo=FALSE---------------------------------------------------------
 ## if(!require(readODS)) {
 ##   install.packages("readODS")
 ## }
@@ -55,33 +59,33 @@ knitr::include_graphics("figures/13_bristol.png")
 ## For further details, see www.ons.gov.uk/methodology/geography.
 
 
-## ----13-transport-5---------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-5---------------------------------------------------------------------------------
 names(bristol_zones)
 
 
-## ----13-transport-6---------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-6---------------------------------------------------------------------------------
 nrow(bristol_od)
 nrow(bristol_zones)
 
 
-## ----13-transport-7---------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-7---------------------------------------------------------------------------------
 zones_attr = bristol_od |> 
   group_by(o) |> 
   summarize(across(where(is.numeric), sum)) |> 
   dplyr::rename(geo_code = o)
 
 
-## ----13-transport-8---------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-8---------------------------------------------------------------------------------
 summary(zones_attr$geo_code %in% bristol_zones$geo_code)
 
 
-## ----13-transport-9---------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-9---------------------------------------------------------------------------------
 zones_joined = left_join(bristol_zones, zones_attr, by = "geo_code")
 sum(zones_joined$all)
 names(zones_joined)
 
 
-## ----13-transport-10--------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-10--------------------------------------------------------------------------------
 zones_destinations = bristol_od |> 
   group_by(d) |> 
   summarize(across(where(is.numeric), sum)) |> 
@@ -90,7 +94,7 @@ zones_od = inner_join(zones_joined, zones_destinations, by = "geo_code") |>
   st_as_sf()
 
 
-## ----13-transport-11, eval=FALSE--------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-11, eval=FALSE--------------------------------------------------------------------
 ## qtm(zones_od, c("all", "all_dest")) +
 ##   tm_layout(panel.labels = c("Origin", "Destination"))
 
@@ -100,13 +104,13 @@ zones_od = inner_join(zones_joined, zones_destinations, by = "geo_code") |>
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/13-zones.R", print.eval = TRUE)
 
 
-## ----13-transport-12--------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-12--------------------------------------------------------------------------------
 od_top5 = bristol_od |> 
   arrange(desc(all)) |> 
   top_n(5, wt = all)
 
 
-## ----od, echo=FALSE---------------------------------------------------------------------------------------------------------------------------------------
+## ----od, echo=FALSE---------------------------------------------------------------------------------
 od_top5 |> 
   knitr::kable(
     caption = paste("Sample of the top 5 origin-destination pairs in the",
@@ -116,21 +120,21 @@ od_top5 |>
     booktabs = TRUE)
 
 
-## ----13-transport-13--------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-13--------------------------------------------------------------------------------
 bristol_od$Active = (bristol_od$bicycle + bristol_od$foot) /
   bristol_od$all * 100
 
 
-## ----13-transport-14--------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-14--------------------------------------------------------------------------------
 od_intra = filter(bristol_od, o == d)
 od_inter = filter(bristol_od, o != d)
 
 
-## ----13-transport-15, warning=FALSE-----------------------------------------------------------------------------------------------------------------------
+## ----13-transport-15, warning=FALSE-----------------------------------------------------------------
 desire_lines = od2line(od_inter, zones_od)
 
 
-## ----13-transport-16, eval=FALSE--------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-16, eval=FALSE--------------------------------------------------------------------
 ## qtm(desire_lines, lines.lwd = "all")
 
 
@@ -138,11 +142,11 @@ desire_lines = od2line(od_inter, zones_od)
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/13-desire.R", print.eval = TRUE)
 
 
-## ----13-transport-20--------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-20--------------------------------------------------------------------------------
 desire_rail = top_n(desire_lines, n = 3, wt = train)
 
 
-## ----13-transport-21--------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-21--------------------------------------------------------------------------------
 ncol(desire_rail)
 desire_rail = line_via(desire_rail, bristol_stations)
 ncol(desire_rail)
@@ -191,13 +195,13 @@ tm_shape(desire_rail_plot, bbox = bb) +
 #   tm_lines()
 
 
-## ----13-transport-17, message=FALSE-----------------------------------------------------------------------------------------------------------------------
+## ----13-transport-17, message=FALSE-----------------------------------------------------------------
 desire_lines$distance_km = as.numeric(st_length(desire_lines)) / 1000
 desire_lines_short = desire_lines |> 
   filter(car_driver >= 100, distance_km <= 5, distance_km >= 2.5)
 
 
-## ----13-transport-18--------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-18--------------------------------------------------------------------------------
 routes_short = route(l = desire_lines_short, route_fun = route_osrm,
                      osrm.profile = "bike")
 
@@ -224,7 +228,7 @@ routes_plot_data |>
 #   tm_shape(routes_short) + tm_lines(col = "red") 
 
 
-## ----uptakefun--------------------------------------------------------------------------------------------------------------------------------------------
+## ----uptakefun--------------------------------------------------------------------------------------
 uptake = function(x) {
   case_when(
     x <= 3 ~ 0.5,
@@ -239,7 +243,7 @@ routes_short_scenario = routes_short |>
 sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
 
 
-## ----rnet1------------------------------------------------------------------------------------------------------------------------------------------------
+## ----rnet1------------------------------------------------------------------------------------------
 route_network_scenario = overline(routes_short_scenario, attrib = "bicycle")
 
 
@@ -254,17 +258,17 @@ tm_shape(route_network_scenario) +
   tm_lines(lwd = "bicycle", scale = 9, title.lwd = "No. bike trips (modeled, one direction)")
 
 
-## ----13-transport-22--------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-22--------------------------------------------------------------------------------
 summary(bristol_ways)
 
 
-## ----13-transport-23--------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-23--------------------------------------------------------------------------------
 bristol_ways$lengths = st_length(bristol_ways)
 ways_sfn = as_sfnetwork(bristol_ways)
 class(ways_sfn)
 
 
-## ----13-transport-23-2, eval=FALSE------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-23-2, eval=FALSE------------------------------------------------------------------
 ## ways_sfn
 ## #> # A sfnetwork with 5728 nodes and 4915 edges
 ## #> # A directed multigraph with 1013 components with spatially explicit edges
@@ -286,28 +290,37 @@ tm_shape(ways_centrality |> st_as_sf()) +
   tm_lines(lwd = "bicycle", scale = 9, title.lwd = "N0. bike trips (modeled, one direction)", col = "green")
 
 
-## ----13-transport-24, eval=FALSE, echo=FALSE--------------------------------------------------------------------------------------------------------------
+## ----13-transport-24, eval=FALSE, echo=FALSE--------------------------------------------------------
 ## # not producing groups of routes so removing for now...
 ## # m = igraph::clusters(ways_sfn@g)
 ## # igraph::V(ways_sfn@g)$m = m$membership
 ## # gdf = igraph::as_long_data_frame(ways_sfn@g)
 
 
-## ----13-transport-25--------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-25--------------------------------------------------------------------------------
 existing_cycleways_buffer = bristol_ways |> 
   filter(highway == "cycleway") |>    # 1) filter out cycleways
   st_union() |>                       # 2) unite geometries
   st_buffer(dist = 100)               # 3) create buffer
 
 
-## ---- echo=FALSE, eval=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ---- echo=FALSE, eval=FALSE------------------------------------------------------------------------
 ## waldo::compare(
 ##   sf::st_crs(route_network_scenario),
 ##   sf::st_crs(existing_cycleways_buffer)
 ## )
 
 
-## ----13-transport-26--------------------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-26, eval=FALSE--------------------------------------------------------------------
+## route_network_no_infra = st_difference(
+##   route_network_scenario,
+##   route_network_scenario |> st_set_crs(st_crs(existing_cycleways_buffer)),
+##   existing_cycleways_buffer
+## )
+
+
+## ----13-transport-26-workaround, echo=FALSE---------------------------------------------------------
+# TODO: remove this hidden chunk when rocker project updates PROJ version
 route_network_no_infra = st_difference(
   # route_network_scenario,
   # Temporary workaround, see https://github.com/Robinlovelace/geocompr/issues/863:
@@ -316,7 +329,7 @@ route_network_no_infra = st_difference(
 )
 
 
-## ----13-transport-28, eval=FALSE--------------------------------------------------------------------------------------------------------------------------
+## ----13-transport-28, eval=FALSE--------------------------------------------------------------------
 ## tmap_mode("view")
 ## qtm(route_network_no_infra, basemaps = leaflet::providers$Esri.WorldTopoMap,
 ##     lines.lwd = 5)
@@ -337,7 +350,7 @@ tm_shape(existing_cycleways_buffer, bbox = bristol_region) +
 knitr::include_graphics("figures/bristol_cycleways_zoomed.png")
 
 
-## ---- echo=FALSE, results='asis'--------------------------------------------------------------------------------------------------------------------------
+## ---- echo=FALSE, results='asis'--------------------------------------------------------------------
 res = knitr::knit_child('_13-ex.Rmd', quiet = TRUE, options = list(include = FALSE, eval = FALSE))
 cat(res, sep = '\n')
 

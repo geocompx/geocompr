@@ -1,7 +1,7 @@
 ## \mainmatter
 
 
-## ----gdsl, echo=FALSE, message=FALSE----------------------------------------------------------------------------------------------------------------------
+## ----gdsl, echo=FALSE, message=FALSE----------------------------------------------------------------
 d = readr::read_csv("extdata/gis-vs-gds-table.csv")
 knitr::kable(x = d, 
              caption = paste("Differences in emphasis between software", 
@@ -20,14 +20,14 @@ knitr::kable(x = d,
 ## This may sound simple and easy to achieve (which it is if you carefully maintain your R code in script files), but has profound implications for teaching and the scientific process [@pebesma_r_2012].
 
 
-## ----01-introduction-2, eval=FALSE, echo=FALSE------------------------------------------------------------------------------------------------------------
+## ----01-introduction-2, eval=FALSE, echo=FALSE------------------------------------------------------
 ## a = osmdata::getbb("Hereford")
 ## b = osmdata::getbb("Bialystok")
 ## rowMeans(a)
 ## rowMeans(b)
 
 
-## ---- eval=FALSE------------------------------------------------------------------------------------------------------------------------------------------
+## ----interactive-demo, eval=FALSE-------------------------------------------------------------------
 ## library(leaflet)
 ## popup = c("Robin", "Jakub", "Jannes")
 ## leaflet() |>
@@ -37,7 +37,7 @@ knitr::kable(x = d,
 ##              popup = popup)
 
 
-## ----01-introduction-leaflet, fig.cap="The blue markers indicate where the authors are from. The basemap is a tiled image of the Earth at night provided by NASA. Interact with the online version at geocompr.robinlovelace.net, for example by zooming in and clicking on the popups.", out.width="100%", fig.scap="Where the authors are from.", echo=FALSE----
+## ----interactive, fig.cap="The blue markers indicate where the authors are from. The basemap is a tiled image of the Earth at night provided by NASA. Interact with the online version at geocompr.robinlovelace.net, for example by zooming in and clicking on the popups.", out.width="100%", fig.scap="Where the authors are from.", echo=FALSE----
 if(knitr::is_latex_output()){
     knitr::include_graphics("figures/interactive.png")   
 } else if(knitr::is_html_output()){
@@ -59,7 +59,7 @@ if(knitr::is_latex_output()){
 knitr::include_graphics("figures/01-cranlogs.png")
 
 
-## ----revdep, echo=FALSE, message=FALSE--------------------------------------------------------------------------------------------------------------------
+## ----revdep, echo=FALSE, message=FALSE--------------------------------------------------------------
 top_dls = readr::read_csv("extdata/top_dls.csv")
 knitr::kable(top_dls[1:5, 1:2], digits = 0, 
              caption = paste("The top 5 most downloaded packages that depend", 
@@ -73,7 +73,7 @@ knitr::kable(top_dls[1:5, 1:2], digits = 0,
 # cranlogs::cran_top_downloads(when = "last-month") # most downloaded pkgs
 
 
-## ---- eval=FALSE, echo=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE, echo=FALSE------------------------------------------------------------------------
 ## # Aim: show n. pkgs that depend on sf and sp
 ## revdep_sp = devtools::revdep(pkg = "sp")
 ## length(revdep_sp) # 622 # 2022-05-29
@@ -81,7 +81,7 @@ knitr::kable(top_dls[1:5, 1:2], digits = 0,
 ## length(revdep_sf) # 479 # 2022-05-29
 
 
-## ---- echo=FALSE, results='asis'--------------------------------------------------------------------------------------------------------------------------
+## ---- echo=FALSE, results='asis'--------------------------------------------------------------------
 res = knitr::knit_child('_01-ex.Rmd', quiet = TRUE, options = list(include = FALSE, eval = FALSE))
 cat(res, sep = '\n')
 

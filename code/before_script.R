@@ -4,8 +4,9 @@ opts_chunk$set(
         background = "#FCFCFC", # code chunk color in latex
         comment = "#>",
         collapse = TRUE,
-        # Uncomment for faster but potentially less reliable builds:
-        # cache = TRUE,
+        # The following line speeds-up the build.
+        # Uncomment it to avoid cached data (which can cause issues):
+        cache = TRUE,
         fig.pos = "t",
         fig.path = "figures/",
         fig.align = "center",
@@ -32,4 +33,5 @@ knit_hooks$set(output = function(x, options) {
 set.seed(2017)
 options(digits = 3)
 options(dplyr.print_min = 4, dplyr.print_max = 4)
-options("rgdal_show_exportToProj4_warnings"="none") #hides proj4 warnings
+# Hide proj4 warnings:
+options("rgdal_show_exportToProj4_warnings" = "none")

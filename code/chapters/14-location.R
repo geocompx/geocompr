@@ -1,4 +1,4 @@
-## ----13-location-1, message=FALSE-------------------------------------------------------------------------------------------------------------------------
+## ----13-location-1, message=FALSE-------------------------------------------------------------------
 library(sf)
 library(dplyr)
 library(purrr)
@@ -7,14 +7,14 @@ library(osmdata)
 library(spDataLarge)
 
 
-## ----13-location-2, eval=FALSE----------------------------------------------------------------------------------------------------------------------------
+## ----13-location-2, eval=FALSE----------------------------------------------------------------------
 ## download.file("https://tinyurl.com/ybtpkwxz",
 ##               destfile = "census.zip", mode = "wb")
 ## unzip("census.zip") # unzip the files
 ## census_de = readr::read_csv2(list.files(pattern = "Gitter.csv"))
 
 
-## ----13-location-4----------------------------------------------------------------------------------------------------------------------------------------
+## ----13-location-4----------------------------------------------------------------------------------
 # pop = population, hh_size = household size
 input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D,
@@ -23,7 +23,7 @@ input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
 input_tidy = mutate_all(input, list(~ifelse(. %in% c(-1, -9), NA, .)))
 
 
-## ----census-desc, echo=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ----census-desc, echo=FALSE------------------------------------------------------------------------
 tab = tribble(
   ~"class", ~"pop", ~"women", ~"age", ~"hh",
   1, "3-250", "0-40", "0-40", "1-2", 
@@ -67,11 +67,11 @@ knitr::kable(tab,
              align = "c", booktabs = TRUE)
 
 
-## ----13-location-5----------------------------------------------------------------------------------------------------------------------------------------
+## ----13-location-5----------------------------------------------------------------------------------
 input_ras = rasterFromXYZ(input_tidy, crs = st_crs(3035)$proj4string)
 
 
-## ----13-location-6, eval=FALSE----------------------------------------------------------------------------------------------------------------------------
+## ----13-location-6, eval=FALSE----------------------------------------------------------------------
 ## input_ras
 ## #> class : RasterBrick
 ## #> dimensions : 868, 642, 557256, 4 (nrow, ncol, ncell, nlayers)
@@ -94,7 +94,7 @@ input_ras = rasterFromXYZ(input_tidy, crs = st_crs(3035)$proj4string)
 knitr::include_graphics("figures/08_census_stack.png")
 
 
-## ----13-location-8----------------------------------------------------------------------------------------------------------------------------------------
+## ----13-location-8----------------------------------------------------------------------------------
 rcl_pop = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 
                    4, 4, 3000, 5, 5, 6000, 6, 6, 8000), 
                  ncol = 3, byrow = TRUE)
@@ -106,7 +106,7 @@ rcl_hh = rcl_women
 rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
 
 
-## ----13-location-9----------------------------------------------------------------------------------------------------------------------------------------
+## ----13-location-9----------------------------------------------------------------------------------
 reclass = input_ras
 for (i in seq_len(nlayers(reclass))) {
   reclass[[i]] = reclassify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
@@ -114,7 +114,7 @@ for (i in seq_len(nlayers(reclass))) {
 names(reclass) = names(input_ras)
 
 
-## ----13-location-10, eval=FALSE---------------------------------------------------------------------------------------------------------------------------
+## ----13-location-10, eval=FALSE---------------------------------------------------------------------
 ## reclass
 ## #> ... (full output not shown)
 ## #> names       :  pop, women, mean_age, hh_size
@@ -122,23 +122,23 @@ names(reclass) = names(input_ras)
 ## #> max values  : 8000,     3,        3,       3
 
 
-## ----13-location-11, warning=FALSE------------------------------------------------------------------------------------------------------------------------
+## ----13-location-11, warning=FALSE------------------------------------------------------------------
 pop_agg = aggregate(reclass$pop, fact = 20, fun = sum)
 
 
-## ----13-location-12, warning=FALSE------------------------------------------------------------------------------------------------------------------------
+## ----13-location-12, warning=FALSE------------------------------------------------------------------
 summary(pop_agg)
 pop_agg = pop_agg[pop_agg > 500000, drop = FALSE] 
 
 
-## ----13-location-13, warning=FALSE, message=FALSE---------------------------------------------------------------------------------------------------------
+## ----13-location-13, warning=FALSE, message=FALSE---------------------------------------------------
 polys = pop_agg %>% 
   clump() %>%
   rasterToPolygons() %>%
   st_as_sf()
 
 
-## ----13-location-14---------------------------------------------------------------------------------------------------------------------------------------
+## ----13-location-14---------------------------------------------------------------------------------
 metros = polys %>%
   group_by(clumps) %>%
   summarize()
@@ -148,33 +148,33 @@ metros = polys %>%
 knitr::include_graphics("figures/08_metro_areas.png")
 
 
-## ----13-location-16, warning=FALSE------------------------------------------------------------------------------------------------------------------------
+## ----13-location-16, warning=FALSE------------------------------------------------------------------
 metros_wgs = st_transform(metros, 4326)
 coords = st_centroid(metros_wgs) %>%
   st_coordinates() %>%
   round(4)
 
 
-## ----13-location-17, eval=FALSE---------------------------------------------------------------------------------------------------------------------------
+## ----13-location-17, eval=FALSE---------------------------------------------------------------------
 ## library(revgeo)
 ## metro_names = revgeo(longitude = coords[, 1], latitude = coords[, 2],
 ##                      output = "frame")
 
 
-## ----metro-names, echo=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ----metro-names, echo=FALSE------------------------------------------------------------------------
 knitr::kable(dplyr::select(metro_names, city, state), 
              caption = "Result of the reverse geocoding.", 
              caption.short = "Result of the reverse geocoding.", 
              booktabs = TRUE)
 
 
-## ----13-location-19---------------------------------------------------------------------------------------------------------------------------------------
+## ----13-location-19---------------------------------------------------------------------------------
 metro_names = dplyr::pull(metro_names, city) %>% 
   as.character() %>% 
   ifelse(. == "Wülfrath", "Duesseldorf", .)
 
 
-## ----13-location-20, eval=FALSE, message=FALSE------------------------------------------------------------------------------------------------------------
+## ----13-location-20, eval=FALSE, message=FALSE------------------------------------------------------
 ## shops = map(metro_names, function(x) {
 ##   message("Downloading shops of: ", x, "\n")
 ##   # give the server a bit time
@@ -192,7 +192,7 @@ metro_names = dplyr::pull(metro_names, city) %>%
 ## })
 
 
-## ----13-location-21, eval=FALSE---------------------------------------------------------------------------------------------------------------------------
+## ----13-location-21, eval=FALSE---------------------------------------------------------------------
 ## # checking if we have downloaded shops for each metropolitan area
 ## ind = map(shops, nrow) == 0
 ## if (any(ind)) {
@@ -201,7 +201,7 @@ metro_names = dplyr::pull(metro_names, city) %>%
 ## }
 
 
-## ----13-location-22, eval=FALSE---------------------------------------------------------------------------------------------------------------------------
+## ----13-location-22, eval=FALSE---------------------------------------------------------------------
 ## # select only specific columns
 ## shops = map(shops, dplyr::select, osm_id, shop)
 ## # putting all list elements into a single data frame
@@ -213,13 +213,13 @@ metro_names = dplyr::pull(metro_names, city) %>%
 ## This is because the `shop` column contains `NA` values, which the `count()` function omits when rasterizing vector objects.
 
 
-## ----13-location-25, message=FALSE------------------------------------------------------------------------------------------------------------------------
+## ----13-location-25, message=FALSE------------------------------------------------------------------
 shops = st_transform(shops, proj4string(reclass))
 # create poi raster
 poi = rasterize(x = shops, y = reclass, field = "osm_id", fun = "count")
 
 
-## ----13-location-26, message=FALSE, warning=FALSE---------------------------------------------------------------------------------------------------------
+## ----13-location-26, message=FALSE, warning=FALSE---------------------------------------------------
 # construct reclassification matrix
 int = classInt::classIntervals(values(poi), n = 4, style = "fisher")
 int = round(int$brks)
@@ -231,14 +231,14 @@ poi = reclassify(poi, rcl = rcl_poi, right = NA)
 names(poi) = "poi"
 
 
-## ----13-location-27---------------------------------------------------------------------------------------------------------------------------------------
+## ----13-location-27---------------------------------------------------------------------------------
 # add poi raster
 reclass = addLayer(reclass, poi)
 # delete population raster
 reclass = dropLayer(reclass, "pop")
 
 
-## ----13-location-28---------------------------------------------------------------------------------------------------------------------------------------
+## ----13-location-28---------------------------------------------------------------------------------
 # calculate the total score
 result = sum(reclass)
 

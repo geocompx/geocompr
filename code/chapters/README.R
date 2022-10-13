@@ -1,4 +1,4 @@
-## ---- echo = FALSE----------------------------------------------------------------------------------------------------------------------------------------
+## ---- echo = FALSE----------------------------------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -7,7 +7,7 @@ knitr::opts_chunk$set(
 is_online = curl::has_internet()
 
 
-## ----contributors, include=FALSE--------------------------------------------------------------------------------------------------------------------------
+## ----contributors, include=FALSE--------------------------------------------------------------------
 contributors = source("code/list-contributors.R")[[1]]
 # save for future reference:
 readr::write_csv(contributors, "extdata/contributors.csv")
@@ -20,42 +20,57 @@ c_rmd = paste0("[", c_txt, "](", c_url, ")")
 contributors_text = paste0(c_rmd, collapse = ", ")
 
 
-## ----readme-install-github, eval=FALSE--------------------------------------------------------------------------------------------------------------------
+## ----dl-unzip, eval=FALSE---------------------------------------------------------------------------
+## u = "https://github.com/Robinlovelace/geocompr/archive/refs/heads/main.zip"
+## f = basename(u)
+## download.file(u, f)        # download the file
+## unzip(f)                   # unzip it
+## file.rename(f, "geocompr") # rename the directory
+## rstudioapi::openProject("geococompr") # or open the folder in vscode / other IDE
+
+
+## ----readme-install-github, eval=FALSE--------------------------------------------------------------
 ## install.packages("remotes")
 ## # To reproduce the first Part (chapters 1 to 8):
 ## remotes::install_github("geocompr/geocompkg")
 
 
-## ----readme-install-github-2, message=FALSE, eval=FALSE, results='hide'-----------------------------------------------------------------------------------
+## ----readme-install-github-2, message=FALSE, eval=FALSE, results='hide'-----------------------------
 ## # To reproduce all chapters (install lots of packages, may take some time!)
 ## remotes::install_github("geocompr/geocompkg", dependencies = TRUE)
 
 
-## ----readme-render-book, eval=FALSE-----------------------------------------------------------------------------------------------------------------------
+## ----readme-render-book, eval=FALSE-----------------------------------------------------------------
+## # Change this depending on where you have the book code stored:
+## rstudioapi::openProject("~/Downloads/geocompr")
+##  # or code /location/of/geocompr in the system terminal
+##  # or cd /location/of/geocompr then R in the system terminal, then:
 ## bookdown::render_book("index.Rmd") # to build the book
-## browseURL("_book/index.html") # to view it
+## browseURL("_book/index.html")      # to view it
+## # Or, to serve a live preview the book and observe impact of changes:
+## bookdown::serve_book()
 
 
-## ----gen-code, results='hide', echo=FALSE, eval=FALSE-----------------------------------------------------------------------------------------------------
+## ----gen-code, results='hide', echo=FALSE, eval=FALSE-----------------------------------------------
 ## geocompkg:::generate_chapter_code()
 
 
-## ----extra-pkgs, message=FALSE, eval=FALSE----------------------------------------------------------------------------------------------------------------
+## ----extra-pkgs, message=FALSE, eval=FALSE----------------------------------------------------------
 ## source("code/extra-pkgs.R")
 
 
-## ----source-readme, eval=FALSE----------------------------------------------------------------------------------------------------------------------------
+## ----source-readme, eval=FALSE----------------------------------------------------------------------
 ## source("code/01-cranlogs.R")
 ## source("code/sf-revdep.R")
 ## source("code/09-urban-animation.R")
 ## source("code/09-map-pkgs.R")
 
 
-## ----render-book, eval=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ----render-book, eval=FALSE------------------------------------------------------------------------
 ## rmarkdown::render("README.Rmd", output_format = "github_document", output_file = "README.md")
 
 
-## ----scripts,  eval=FALSE, echo=FALSE---------------------------------------------------------------------------------------------------------------------
+## ----scripts,  eval=FALSE, echo=FALSE---------------------------------------------------------------
 ## # We aim to make every script in the `code` folder reproducible.
 ## # To check they can all be reproduced run the following:
 ## # Aim: test reproducibility of scripts
@@ -71,7 +86,7 @@ contributors_text = paste0(c_rmd, collapse = ", ")
 ## }
 
 
-## ----gen-stats, echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE--------------------------------------------------------------------------------------
+## ----gen-stats, echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE--------------------------------
 ## # source("code/generate-chapter-code.R")
 ## book_stats = readr::read_csv("extdata/word-count-time.csv",
 ##                              col_types=('iiDd'))
@@ -89,7 +104,7 @@ contributors_text = paste0(c_rmd, collapse = ", ")
 ## book_stats$n_pages = book_stats$n_words / 300
 
 
-## ----bookstats, warning=FALSE, echo=FALSE, fig.width=8, fig.height=5, eval=FALSE--------------------------------------------------------------------------
+## ----bookstats, warning=FALSE, echo=FALSE, fig.width=8, fig.height=5, eval=FALSE--------------------
 ## ggplot(book_stats) +
 ##   geom_area(aes(date, n_pages, fill = chapter), position = "stack") +
 ##   ylab("Estimated number of pages") +
@@ -100,10 +115,10 @@ contributors_text = paste0(c_rmd, collapse = ", ")
 ##   coord_cartesian(ylim = c(0, 350))
 
 
-## ----gen-cite, warning=FALSE------------------------------------------------------------------------------------------------------------------------------
+## ----gen-cite, warning=FALSE------------------------------------------------------------------------
 # geocompkg:::generate_citations()
 
 
-## ----pkg_df, message=FALSE--------------------------------------------------------------------------------------------------------------------------------
+## ----pkg_df, message=FALSE--------------------------------------------------------------------------
 pkg_df = readr::read_csv("extdata/package_list.csv")
 

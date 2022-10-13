@@ -1,7 +1,7 @@
 ## The solutions assume the following packages are attached (other packages will be attached when needed):
 
 
-## ----12-ex-e0, message=FALSE, warning=FALSE---------------------------------------------------------------------------------------------------------------
+## ----12-ex-e0, message=FALSE, warning=FALSE---------------------------------------------------------
 library(dplyr)
 # library(kernlab)
 library(mlr3)
@@ -16,7 +16,7 @@ library(sf)
 library(tmap)
 
 
-## ----12-ex-e1-1, eval=FALSE-------------------------------------------------------------------------------------------------------------------------------
+## ----12-ex-e1-1, eval=FALSE-------------------------------------------------------------------------
 ## # attach data
 ## dem = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))$elev
 ## 
@@ -53,7 +53,7 @@ library(tmap)
 ## ta = c(ta, dem, log10_carea)
 
 
-## ----12-ex-e2, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------
+## ----12-ex-e2, eval=FALSE---------------------------------------------------------------------------
 ## # attach terrain attribute raster stack (in case you have skipped the previous
 ## # exercise)
 ## data("lsl", package = "spDataLarge")
@@ -64,7 +64,7 @@ library(tmap)
 ##   dplyr::select(-ID)
 
 
-## ----12-ex-e3, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------
+## ----12-ex-e3, eval=FALSE---------------------------------------------------------------------------
 ## # attach data (in case you have skipped exercises 1) and 2)
 ## # landslide points with terrain attributes and terrain attribute raster stack
 ## data("lsl", "study_mask", package = "spDataLarge")
@@ -105,7 +105,7 @@ library(tmap)
 ## 	          legend.title.size = 0.9)
 
 
-## ----12-ex-e4, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------
+## ----12-ex-e4, eval=FALSE---------------------------------------------------------------------------
 ## # attach data (in case you have skipped exercises 1) and 2)
 ## data("lsl", package = "spDataLarge")  # landslide points with terrain attributes
 ## 
@@ -193,7 +193,7 @@ library(tmap)
 ## autoplot(bmr, measure = msr("classif.auc"))
 
 
-## ----12-ex-e5, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------
+## ----12-ex-e5, eval=FALSE---------------------------------------------------------------------------
 ## # attach data (in case you have skipped exercise 4)
 ## bmr = readRDS("extdata/12-bmr.rds")
 ## 
@@ -203,7 +203,7 @@ library(tmap)
 ## # non-linear boundaries
 
 
-## ----12-ex-e6, eval=FALSE---------------------------------------------------------------------------------------------------------------------------------
+## ----12-ex-e6, eval=FALSE---------------------------------------------------------------------------
 ## # attach data (in case you have skipped exercise 4)
 ## bmr = readRDS("extdata/12-bmr.rds")
 ## # plot your result
