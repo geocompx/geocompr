@@ -1,4 +1,4 @@
-## ----15-ex-e0, message=FALSE, warning=FALSE---------------------------------------------------------
+## ----15-ex-e0, message=FALSE, warning=FALSE-----------------------------------
 library(data.table)
 library(dplyr)
 library(future)
@@ -17,14 +17,14 @@ library(sf)
 library(vegan)
 
 
-## ----15-ex-e1, message=FALSE------------------------------------------------------------------------
+## ----15-ex-e1, message=FALSE--------------------------------------------------
 data("comm", package = "spDataLarge")
-pa = decostand(comm, "pa")
+pa = vegan::decostand(comm, "pa")
 pa = pa[rowSums(pa) != 0, ]
 comm = comm[rowSums(comm) != 0, ]
 set.seed(25072018)
-nmds_pa = metaMDS(comm = pa, k = 4, try = 500)
-nmds_per = metaMDS(comm = comm, k = 4, try = 500)
+nmds_pa = vegan::metaMDS(comm = pa, k = 4, try = 500)
+nmds_per = vegan::metaMDS(comm = comm, k = 4, try = 500)
 nmds_pa$stress
 nmds_per$stress
 
@@ -54,7 +54,7 @@ nmds_per$stress
 ## One compromise would be to use a categorical scale such as the Londo scale.
 
 
-## ----15-ex-e2---------------------------------------------------------------------------------------
+## ----15-ex-e2-----------------------------------------------------------------
 # first compute the terrain attributes we have also used in the chapter
 library(dplyr)
 library(terra)
@@ -62,6 +62,13 @@ library(qgisprocess)
 library(vegan)
 data("comm", "random_points", package = "spDataLarge")
 dem = terra::rast(system.file("raster/dem.tif", package = "spDataLarge"))
+ndvi = terra::rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
+
+# use presence-absence matrix and get rid of empty
+pa = vegan::decostand(comm, "pa")
+pa = pa[rowSums(pa) != 0, ]
+
+# compute environmental predictors (ep) catchment slope and catchment area
 ep = qgisprocess::qgis_run_algorithm(
   alg = "saga:sagawetnessindex",
   DEM = dem,
@@ -81,7 +88,7 @@ origin(ep) = origin(dem)
 ep = c(dem, ndvi, ep) 
 ep$carea = log10(ep$carea)
 
-# computing the curvatures
+# compute the curvatures
 qgis_show_help("grass7:r.slope.aspect")
 curvs = qgis_run_algorithm(
   "grass7:r.slope.aspect",
@@ -104,14 +111,14 @@ elev = dplyr::filter(random_points, id %in% rownames(pa)) %>%
 # rotating NMDS in accordance with altitude (proxy for humidity)
 rotnmds = MDSrotate(nmds_pa, elev)
 # extracting the first two axes
-sc = scores(rotnmds, choices = 1:2)
+sc = vegan::scores(rotnmds, choices = 1:2, display = "sites")
 rp = data.frame(id = as.numeric(rownames(sc)),
                 sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
-rp = inner_join(random_points, rp, by = "id")
+rp = dplyr::inner_join(random_points, rp, by = "id")
 
 
-## ----15-ex-e3, message=FALSE------------------------------------------------------------------------
+## ----15-ex-e3, message=FALSE--------------------------------------------------
 library(dplyr)
 library(future)
 library(mlr3)
@@ -119,12 +126,14 @@ library(mlr3spatiotempcv)
 library(mlr3learners)
 library(mlr3viz)
 library(paradox)
+library(ranger)
+
 # define the task
-task = mlr3spatiotempcv::TaskRegrST$new(
-  id = "mongon",
-  backend = select(rp, -id, -spri), 
-  target = "sc"
-  )
+task = mlr3spatiotempcv::as_task_regr_st(
+  dplyr::select(rp, -id, -spri),
+  target = "sc", 
+  id = "mongon")
+
 # define the learners
 mlr3::mlr_learners
 # linear model
@@ -160,7 +169,7 @@ print(design_grid)
 # execute the outer loop sequentially and parallelize the inner loop
 future::plan(list("sequential", "multisession"), 
              workers = floor(future::availableCores() / 2))
-set.seed(04132022)
+set.seed(10112022)
 # reduce verbosity
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("info")
@@ -183,7 +192,7 @@ tictoc::toc()
 # stop parallelization
 future:::ClusterRegistry("stop")
 # save your result, e.g. to 
-# saveRDS(bmr, file = "extdata/15_bmr.rds")
+saveRDS(bmr, file = "extdata/15-bmr.rds")
 
 # mean RMSE
 bmr$aggregate(measures = msr("regr.rmse"))
