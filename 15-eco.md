@@ -9,19 +9,19 @@ The chapter uses the following packages:
 
 
 ```r
-library(sf)
-library(terra)
-library(dplyr)
-library(data.table)
-library(mlr3)
-library(mlr3spatiotempcv)
-library(mlr3tuning)
-library(mlr3learners)
-library(qgisprocess)
-library(paradox)
-library(ranger)
-library(tree)
-library(vegan)
+library(sf)  # vector data package introduced in Chapter 2
+library(terra)  # raster data package introduced in Chapter 2
+library(data.table)  # fast data.frame manipulation package (used internally by mlr3)
+library(dplyr)  # tidyverse package for data frame manipulation introduced in chapter 3
+library(mlr3)  # machine learning package introduced in chapter 12
+library(mlr3spatiotempcv)  # spatio-temporal resampling package introduced in chapter 12
+library(mlr3tuning)  # hyperparameter tuning package introduced in chapter 12
+library(mlr3learners)  # interface to most important machine learning packages; introduced in chapter 12
+library(qgisprocess)  # bridge to QGIS package introduced in chapter 10
+library(paradox)  # package for defining hyperparameter spaces introduced in chapter 12
+library(ranger)  # random forest package
+library(tree)  # decision tree package
+library(vegan)  # community ecology package
 ```
 
 ## Introduction
@@ -219,8 +219,7 @@ Principal component analysis (PCA\index{PCA}) is probably the most famous ordina
 It is a great tool to reduce dimensionality if one can expect linear relationships between variables, and if the joint absence of a variable in two plots (observations) can be considered a similarity.
 This is barely the case with vegetation data.
 
-For one, relationships are usually non-linear along environmental gradients.
-That means the presence of a plant usually follows a unimodal relationship along a gradient (e.g., humidity, temperature or salinity) with a peak at the most favorable conditions and declining ends towards the unfavorable conditions. 
+For one, the presence of a plant often follows a unimodal, i.e. a non-linear, relationship along a gradient (e.g., humidity, temperature or salinity) with a peak at the most favorable conditions and declining ends towards the unfavorable conditions.
 
 Secondly, the joint absence of a species in two plots is hardly an indication for similarity.
 Suppose a plant species is absent from the driest (e.g., an extreme desert) and the most moistest locations (e.g., a tree savanna) of our sampling.
@@ -523,7 +522,7 @@ all(values(pred - pred_2) == 0)
 ```
 
 The predictive mapping clearly reveals distinct vegetation belts (Figure \@ref(fig:rf-pred)).
-Please refer to @muenchow_soil_2013 for a detailed description of vegetation belts on **lomas** mountains.
+Please refer to @muenchow_soil_2013 for a detailed description of vegetation belts on *lomas* mountains.
 The blue color tones represent the so-called *Tillandsia*-belt.
 *Tillandsia* is a highly adapted genus especially found in high quantities at the sandy and quite desertic foot of *lomas* mountains.
 The yellow color tones refer to a herbaceous vegetation belt with a much higher plant cover compared to the *Tillandsia*-belt.
@@ -534,12 +533,12 @@ Interestingly, the spatial prediction clearly reveals that the bromeliad belt is
 
 ## Conclusions
 
-In this chapter we have ordinated\index{ordination} the community matrix of the **lomas** Mt. Mongón with the help of a NMDS\index{NMDS} (Section \@ref(nmds)).
+In this chapter we have ordinated\index{ordination} the community matrix of the *lomas* Mt. Mongón with the help of a NMDS\index{NMDS} (Section \@ref(nmds)).
 The first axis, representing the main floristic gradient in the study area, was modeled as a function of environmental predictors which partly were derived through R-GIS\index{GIS} bridges (Section \@ref(data-and-data-preparation)).
 The **mlr3**\index{mlr3 (package)} package provided the building blocks to spatially tune the hyperparameters\index{hyperparameter} `mtry`, `sample.fraction` and `min.node.size` (Section \@ref(mlr3-building-blocks)).
 The tuned hyperparameters\index{hyperparameter} served as input for the final model which in turn was applied to the environmental predictors for a spatial representation of the floristic gradient (Section \@ref(predictive-mapping)).
 The result demonstrates spatially the astounding biodiversity in the middle of the desert.
-Since **lomas** mountains are heavily endangered, the prediction map can serve as basis for informed decision-making on delineating protection zones, and making the local population aware of the uniqueness found in their immediate neighborhood.
+Since *lomas* mountains are heavily endangered, the prediction map can serve as basis for informed decision-making on delineating protection zones, and making the local population aware of the uniqueness found in their immediate neighborhood.
 
 In terms of methodology, a few additional points could be addressed:
 
