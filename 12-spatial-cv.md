@@ -331,7 +331,7 @@ The first essential argument of these `Task*$new()` functions is `backend`.
 `backend` expects that the input data includes the response and predictor variables.
 The `target` argument indicates the name of a response variable (in our case this is `lslpts`) and `positive` determines which of the two factor levels of the response variable indicate the landslide initiation point (in our case this is `TRUE`).
 All other variables of the `lsl` dataset will serve as predictors.
-For spatial CV, we need to provide a few extra arguments (`extra_args`).
+For spatial CV, we need to provide a few extra arguments.
 The `coordinate_names` argument expects the names of the coordinate columns (see Section \@ref(intro-cv) and Figure \@ref(fig:partitioning)).
 Additionally, we should indicate the used CRS (`crs`) and decide if we want to use the coordinates as predictors in the modeling (`coords_as_features`).
 
@@ -343,15 +343,14 @@ task = mlr3spatiotempcv::TaskClassifST$new(
   backend = mlr3::as_data_backend(lsl), 
   target = "lslpts", 
   positive = "TRUE",
-  extra_args = list(
-    coordinate_names = c("x", "y"),
-    coords_as_features = FALSE,
-    crs = "EPSG:32717")
+  coordinate_names = c("x", "y"),
+  coords_as_features = FALSE,
+  crs = "EPSG:32717")
   )
 ```
 
-Note that `TaskClassifST$new()` also accepts an `sf`-object as input for the `backend` parameter.
-In this case, you might only want to specify the `coords_as_features` argument of the `extra_args` list.
+Note that `mlr3spatiotempcv::as_task_classif_st()` also accepts an `sf`-object as input for the `backend` parameter.
+In this case, you might only want to additionally specify the `coords_as_features` argument.
 We did not convert `lsl` into an `sf`-object because `TaskClassifST$new()` would just turn it back into a non-spatial `data.table` object in the background.
 For a short data exploration, the `autoplot()` function of the **mlr3viz** package might come in handy since it plots the response against all predictors and all predictors against all predictors (not shown).
 
