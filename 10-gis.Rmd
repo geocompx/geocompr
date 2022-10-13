@@ -194,18 +194,21 @@ grep("union", qgis_algo$algorithm, value = TRUE)
 
 One of the algorithms on the above list, `"native:union"`, sounds promising.
 The next step is to find out what this algorithm does and how we can use it.
-This is the role of the `qgis_show_help()`, which gives us a help information, including the description of the algorithm, its arguments, and outputs.^[We can also extract some of information independently with `qgis_description()`, `qgis_arguments()`, and `qgis_outputs()`.]
+This is the role of the `qgis_show_help()`, which returns a short summary of what the algorithm does, its arguments, and outputs.^[We can also extract some of information independently with `qgis_description()`, `qgis_arguments()`, and `qgis_outputs()`.]
+This makes it output rather long.
+Here, we only present the arguments`"native:union"` expects.
 
 ```{r 09-gis-6, eval=FALSE}
 alg = "native:union"
-qgis_show_help(alg)
+qgis_arguments(alg) |> 
+  dplyr::mutate(acceptable_values = unlist(acceptable_values)) |>
+  dplyr::select(name, description, acceptable_values)
 ```
 
-The description gives a few sentences summary of what the selected algorithm does. 
-Next, a list of arguments gives us the possible arguments' names, for example, `INPUT`, `OVERLAY`, `OVERLAY_FIELDS_PREFIX`, and `OUTPUT` in this case, and their acceptable values.
-Based on the help information, some of the above arguments seem to expect a "path to a vector layer".
-However, the **qgisprocess** package also allows to provide `sf` object as well in these cases.^[Objects from the **terra** and **stars** package can be used when a path to a raster layer.]
-The algorithm's outputs (it is possible to have more than one output) are listed at the end of the help list.
+Apparently, these are `INPUT`, `OVERLAY`, `OVERLAY_FIELDS_PREFIX`, and `OUTPUT`.
+It seems that some of the above arguments expect a "path to a vector layer" (column: `acceptaple_values`).
+However, the **qgisprocess** package also allows to provide `sf` objects as well in these cases.^[Objects from the **terra** and **stars** package can be used when a "path to a raster layer" is expected.]
+Though this is really convenient, if your spatial data is already available in your R session, we recommend to provide the path to your spatial data on disk when you only read it in to submit it to a **qgisprocess** algorithm because the first thing **qgisprocess** does when executing a geoalgorithm is to export the spatial data living in your R session back to disk in a format known to QGIS such as .gpkg or .tif files.
 
 Finally, we can let QGIS\index{QGIS} do the work.
 The main function of **qgisprocess** is `qgis_run_algorithm()`.
@@ -213,7 +216,7 @@ It accepts the used algorithm name and a set of named arguments shown in the hel
 In our case, three arguments seem important - `INPUT`, `OVERLAY`, and `OUTPUT`.
 The first one, `INPUT`, is our main vector object `incongr_wgs`, while the second one, `OVERLAY`, is `aggzone_wgs`.
 The last argument, `OUTPUT`, expects a path to a new vector file; however, if we do not provide the path, **qgisprocess** will automatically create a temporary file.
-The final `.quiet` argument only tells **qgisprocess** to be less verbose.
+The `.quiet` argument only tells **qgisprocess** to be less verbose.
 
 ```{r 09-gis-7, eval=FALSE}
 union = qgis_run_algorithm(alg, INPUT = incongr_wgs, OVERLAY = aggzone_wgs, 
@@ -252,22 +255,35 @@ Similarly to the previous step, we should start by looking at this algorithm's h
 qgis_show_help("grass7:v.clean")
 ```
 
-You may notice that the help text is quite long and contains a lot of arguments.^[Also note that these arguments, contrary to the QGIS's ones, are in lower case.]
+We have omitted the output here, because the help text is quite long and contains a lot of arguments.^[Also note that these arguments, contrary to the QGIS's ones, are in lower case.]
 This is because `v.clean` is a multi tool -- it can clean different types of geometries and solve different types of topological problems.
 For this example, let's focus on just a few arguments, however, we encourage you to visit [this algorithm's documentation](https://grass.osgeo.org/grass78/manuals/v.clean.html) to learn more about `v.clean` capabilities.
+
+```{r, eval=FALSE}
+qgis_arguments("grass7:v.clean") |>
+  dplyr::select(name, description) |>
+  dplyr::slice_head(n = 4)
+#> # A tibble: 4 × 2
+#>   name      description                              
+#>   <chr>     <chr>                                    
+#> 1 input     Layer to clean                           
+#> 2 type      Input feature type                       
+#> 3 tool      Cleaning tool                            
+#> 4 threshold Threshold (comma separated for each tool)
+```
 
 The main argument for this algorithm is `input` -- our vector object.
 Next, we need to select a tool -- a cleaning method. ^[It is also possible to select several tools, which will then be executed sequentially.]
 About a dozen tools exist in `v.clean` allowing to remove duplicate geometries, remove small angles between lines, or remove small areas, among others.
-In this case, we are interested in the latter tool, `rmarea`, which is identified by the number 10.
-Several of the tools, `rmarea` included, expect an additional argument `threshold`, which behavior depends on the selected tool.
+In this case, we are interested in the latter tool, `rmarea`.
+Several of the tools, `rmarea` included, expect an additional argument `threshold`, whose behavior depends on the selected tool.
 In our case, the `rmarea` tool removes all areas smaller or equal to a provided `threshold`. 
 
 Let's run this algorithm and convert its output into a new `sf` object `clean_sf`.
 
 ```{r 09-gis-7c, eval=FALSE}
 clean = qgis_run_algorithm("grass7:v.clean", input = union_sf,
-                           tool = 10, threshold = 25000, .quiet = TRUE)
+                           tool = "rmarea", threshold = 25000, .quiet = TRUE)
 clean_sf = st_as_sf(clean)
 ```
 
@@ -311,10 +327,13 @@ The `"saga:sagawetnessindex"` algorithm is actually a modified TWI, that results
 
 ```{r, eval=FALSE}
 qgis_show_help("saga:sagawetnessindex")
+# output not shown here
 ```
 
-This algorithm requires only one argument -- the input `DEM` and several additional arguments.^[The additional arguments of `"saga:sagawetnessindex"` are well-explained at https://gis.stackexchange.com/a/323454/20955.]
-It returns not one but four rasters -- catchment area, catchment slope, modified catchment area, and topographic wetness index.
+Here, we stick with the default values for all arguments.
+Therefore, we only have to specify one argument -- the input `DEM`.
+Of course, when applying this algorithm you should make sure that the default values are in correspondence with your study aim.^[The additional arguments of `"saga:sagawetnessindex"` are well-explained at https://gis.stackexchange.com/a/323454/20955.]
+`"saga:sagawetnessindex"` returns not one but four rasters -- catchment area, catchment slope, modified catchment area, and topographic wetness index.
 
 ```{r, eval=FALSE}
 dem_wetness = qgis_run_algorithm("saga:sagawetnessindex", DEM = dem, 
@@ -339,7 +358,9 @@ The original implementation of the geomorphons' algorithm was created in GRASS G
 
 ```{r, eval=FALSE}
 grep("geomorphon", qgis_algo$algorithm, value = TRUE)
+#> [1] "grass7:r.geomorphon"
 qgis_show_help("grass7:r.geomorphon")
+# output not shown
 ```
 
 Calculation of geomorphons requires an input DEM (`elevation`), and can be customized with a set of optional arguments.
