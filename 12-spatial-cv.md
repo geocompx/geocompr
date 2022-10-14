@@ -345,7 +345,7 @@ task = mlr3spatiotempcv::TaskClassifST$new(
   positive = "TRUE",
   coordinate_names = c("x", "y"),
   coords_as_features = FALSE,
-  crs = "EPSG:32717")
+  crs = "EPSG:32717"
   )
 ```
 
@@ -552,10 +552,7 @@ Since (spatial) hyperparameter tuning is the major aim of this section, we will 
 For those wishing to apply a random forest model, we recommend to read this chapter, and then proceed to Chapter \@ref(eco) in which we will apply the currently covered concepts and techniques to make spatial predictions based on a random forest model.
 
 SVMs\index{SVM} search for the best possible 'hyperplanes' to separate classes (in a classification\index{classification} case) and estimate 'kernels' with specific hyperparameters to create non-linear boundaries between classes [@james_introduction_2013].
-Hyperparameters\index{hyperparameter} should not be confused with coefficients of parametric models, which are sometimes also referred to as parameters.^[
-For a detailed description of the difference between coefficients and hyperparameters, see the 'machine mastery' blog post on the subject.
-<!-- For a more detailed description of the difference between coefficients and hyperparameters, see the [machine mastery blog](https://machinelearningmastery.com/difference-between-a-parameter-and-a-hyperparameter/). -->
-]
+Hyperparameters\index{hyperparameter} should not be confused with coefficients of parametric models, which are sometimes also referred to as parameters (see also the [machine mastery blog](https://machinelearningmastery.com/difference-between-a-parameter-and-a-hyperparameter/)).
 Coefficients can be estimated from the data, while hyperparameters are set before the learning begins.
 Optimal hyperparameters are usually determined within a defined range with the help of cross-validation methods.
 This is called hyperparameter tuning.
@@ -565,11 +562,11 @@ This works for non-spatial data but is of less use for spatial data where 'spati
 
 Before defining spatial tuning, we will set up the **mlr3**\index{mlr3 (package)} building blocks, introduced in Section \@ref(glm), for the SVM.
 The classification\index{classification} task remains the same, hence we can simply reuse the `task` object created in Section \@ref(glm).
-Learners implementing SVM can be found using `listLearners()` as follows:
+Learners implementing SVM can be found using the `list_mlr3learners()` command of the **mlr3extralearners** package as follows:
 
 
 ```r
-mlr3_learners = list_mlr3learners()
+mlr3_learners = mlr3extralearners::list_mlr3learners()
 #> This will take a few seconds.
 #> obliqueRSF has been superseded by aorsf. We highly recommend you use aorsf to fit oblique random survival forests: see https://github.com/bcjaeger/aorsf or install from CRAN with install.packages('aorsf')
 mlr3_learners[class == "classif" & grepl("svm", id),
@@ -581,12 +578,14 @@ mlr3_learners[class == "classif" & grepl("svm", id),
 ```
 
 Of the options illustrated above, we will use `ksvm()` from the **kernlab** package [@karatzoglou_kernlab_2004].
-To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel which is also the default of `ksvm()`.
+To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel (`"rbfdot" `) which is also the default of `ksvm()`.
+Setting the`type` argument to `"C-svc"` makes sure that `ksvm()` is solving a classification task. 
 To make sure that the tuning does not stop because of one failing model, we additionally define a fallback learner (for more information please refer to https://mlr3book.mlr-org.com/technical.html#fallback-learners).
 
 
 ```r
-lrn_ksvm = mlr3::lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot")
+lrn_ksvm = mlr3::lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot",
+                     type = "C-svc")
 lrn_ksvm$fallback = lrn("classif.featureless", predict_type = "prob")
 ```
 

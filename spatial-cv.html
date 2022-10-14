@@ -478,16 +478,17 @@ All other variables of the <code>lsl</code> dataset will serve as predictors.
 For spatial CV, we need to provide a few extra arguments.
 The <code>coordinate_names</code> argument expects the names of the coordinate columns (see Section <a href="spatial-cv.html#intro-cv">12.4</a> and Figure <a href="spatial-cv.html#fig:partitioning">12.3</a>).
 Additionally, we should indicate the used CRS (<code>crs</code>) and decide if we want to use the coordinates as predictors in the modeling (<code>coords_as_features</code>).</p>
-<div class="sourceCode" id="cb414"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb414-1"><a href="spatial-cv.html#cb414-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create task</span></span>
-<span id="cb414-2"><a href="spatial-cv.html#cb414-2" aria-hidden="true" tabindex="-1"></a>task <span class="ot">=</span> mlr3spatiotempcv<span class="sc">::</span>TaskClassifST<span class="sc">$</span><span class="fu">new</span>(</span>
-<span id="cb414-3"><a href="spatial-cv.html#cb414-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">id =</span> <span class="st">"ecuador_lsl"</span>,</span>
-<span id="cb414-4"><a href="spatial-cv.html#cb414-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">backend =</span> mlr3<span class="sc">::</span><span class="fu">as_data_backend</span>(lsl), </span>
-<span id="cb414-5"><a href="spatial-cv.html#cb414-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">target =</span> <span class="st">"lslpts"</span>, </span>
-<span id="cb414-6"><a href="spatial-cv.html#cb414-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">positive =</span> <span class="st">"TRUE"</span>,</span>
-<span id="cb414-7"><a href="spatial-cv.html#cb414-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">coordinate_names =</span> <span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"y"</span>),</span>
-<span id="cb414-8"><a href="spatial-cv.html#cb414-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">coords_as_features =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb414-9"><a href="spatial-cv.html#cb414-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">crs =</span> <span class="st">"EPSG:32717"</span>)</span>
-<span id="cb414-10"><a href="spatial-cv.html#cb414-10" aria-hidden="true" tabindex="-1"></a>  <span class="er">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb414"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># create task</span></span>
+<span><span class="va">task</span> <span class="op">=</span> <span class="fu">mlr3spatiotempcv</span><span class="fu">::</span><span class="va"><a href="https://mlr3spatiotempcv.mlr-org.com/reference/TaskClassifST.html">TaskClassifST</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
+<span>  id <span class="op">=</span> <span class="st">"ecuador_lsl"</span>,</span>
+<span>  backend <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/as_data_backend.html">as_data_backend</a></span><span class="op">(</span><span class="va">lsl</span><span class="op">)</span>, </span>
+<span>  target <span class="op">=</span> <span class="st">"lslpts"</span>, </span>
+<span>  positive <span class="op">=</span> <span class="st">"TRUE"</span>,</span>
+<span>  coordinate_names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span>,</span>
+<span>  coords_as_features <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  crs <span class="op">=</span> <span class="st">"EPSG:32717"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
 <p>Note that <code><a href="https://mlr3spatiotempcv.mlr-org.com/reference/as_task_classif_st.html">mlr3spatiotempcv::as_task_classif_st()</a></code> also accepts an <code>sf</code>-object as input for the <code>backend</code> parameter.
 In this case, you might only want to additionally specify the <code>coords_as_features</code> argument.
 We did not convert <code>lsl</code> into an <code>sf</code>-object because <code>TaskClassifST$new()</code> would just turn it back into a non-spatial <code>data.table</code> object in the background.
@@ -687,9 +688,7 @@ Random forest models might be more popular than SVMs; however, the positive effe
 Since (spatial) hyperparameter tuning is the major aim of this section, we will use an SVM.
 For those wishing to apply a random forest model, we recommend to read this chapter, and then proceed to Chapter <a href="eco.html#eco">15</a> in which we will apply the currently covered concepts and techniques to make spatial predictions based on a random forest model.</p>
 <p>SVMs search for the best possible ‘hyperplanes’ to separate classes (in a classification case) and estimate ‘kernels’ with specific hyperparameters to create non-linear boundaries between classes <span class="citation">(<a href="references.html#ref-james_introduction_2013" role="doc-biblioref">James et al. 2013</a>)</span>.
-Hyperparameters should not be confused with coefficients of parametric models, which are sometimes also referred to as parameters.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
-For a detailed description of the difference between coefficients and hyperparameters, see the ‘machine mastery’ blog post on the subject.
-<!-- For a more detailed description of the difference between coefficients and hyperparameters, see the [machine mastery blog](https://machinelearningmastery.com/difference-between-a-parameter-and-a-hyperparameter/). -->&lt;/p&gt;"><sup>85</sup></a>
+Hyperparameters should not be confused with coefficients of parametric models, which are sometimes also referred to as parameters (see also the <a href="https://machinelearningmastery.com/difference-between-a-parameter-and-a-hyperparameter/">machine mastery blog</a>).
 Coefficients can be estimated from the data, while hyperparameters are set before the learning begins.
 Optimal hyperparameters are usually determined within a defined range with the help of cross-validation methods.
 This is called hyperparameter tuning.</p>
@@ -697,9 +696,9 @@ This is called hyperparameter tuning.</p>
 This works for non-spatial data but is of less use for spatial data where ‘spatial tuning’ should be undertaken.</p>
 <p>Before defining spatial tuning, we will set up the <strong>mlr3</strong> building blocks, introduced in Section <a href="spatial-cv.html#glm">12.5.1</a>, for the SVM.
 The classification task remains the same, hence we can simply reuse the <code>task</code> object created in Section <a href="spatial-cv.html#glm">12.5.1</a>.
-Learners implementing SVM can be found using <code>listLearners()</code> as follows:</p>
+Learners implementing SVM can be found using the <code><a href="https://rdrr.io/pkg/mlr3extralearners/man/list_mlr3learners.html">list_mlr3learners()</a></code> command of the <strong>mlr3extralearners</strong> package as follows:</p>
 <div class="sourceCode" id="cb425"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mlr3_learners</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mlr3extralearners/man/list_mlr3learners.html">list_mlr3learners</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">mlr3_learners</span> <span class="op">=</span> <span class="fu">mlr3extralearners</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mlr3extralearners/man/list_mlr3learners.html">list_mlr3learners</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; This will take a few seconds.</span></span>
 <span><span class="co">#&gt; obliqueRSF has been superseded by aorsf. We highly recommend you use aorsf to fit oblique random survival forests: see https://github.com/bcjaeger/aorsf or install from CRAN with install.packages('aorsf')</span></span>
 <span><span class="va">mlr3_learners</span><span class="op">[</span><span class="va">class</span> <span class="op">==</span> <span class="st">"classif"</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"svm"</span>, <span class="va">id</span><span class="op">)</span>,</span>
@@ -709,10 +708,12 @@ Learners implementing SVM can be found using <code>listLearners()</code> as foll
 <span><span class="co">#&gt; 2: classif.lssvm classif mlr3extralearners mlr3,mlr3extralearners,kernlab</span></span>
 <span><span class="co">#&gt; 3:   classif.svm classif      mlr3learners        mlr3,mlr3learners,e1071</span></span></code></pre></div>
 <p>Of the options illustrated above, we will use <code>ksvm()</code> from the <strong>kernlab</strong> package <span class="citation">(<a href="references.html#ref-karatzoglou_kernlab_2004" role="doc-biblioref">Karatzoglou et al. 2004</a>)</span>.
-To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel which is also the default of <code>ksvm()</code>.
+To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel (<code>"rbfdot"</code>) which is also the default of <code>ksvm()</code>.
+Setting the<code>type</code> argument to <code>"C-svc"</code> makes sure that <code>ksvm()</code> is solving a classification task.
 To make sure that the tuning does not stop because of one failing model, we additionally define a fallback learner (for more information please refer to <a href="https://mlr3book.mlr-org.com/technical.html#fallback-learners" class="uri">https://mlr3book.mlr-org.com/technical.html#fallback-learners</a>).</p>
 <div class="sourceCode" id="cb426"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lrn_ksvm</span> <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.ksvm"</span>, predict_type <span class="op">=</span> <span class="st">"prob"</span>, kernel <span class="op">=</span> <span class="st">"rbfdot"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">lrn_ksvm</span> <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.ksvm"</span>, predict_type <span class="op">=</span> <span class="st">"prob"</span>, kernel <span class="op">=</span> <span class="st">"rbfdot"</span>,</span>
+<span>                     type <span class="op">=</span> <span class="st">"C-svc"</span><span class="op">)</span></span>
 <span><span class="va">lrn_ksvm</span><span class="op">$</span><span class="va">fallback</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.featureless"</span>, predict_type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span></code></pre></div>
 <p>The next stage is to specify a resampling strategy.
 Again we will use a 100-repeated 5-fold spatial CV.</p>
