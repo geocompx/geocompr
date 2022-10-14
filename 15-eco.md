@@ -9,19 +9,19 @@ The chapter uses the following packages:
 
 
 ```r
-library(sf)  # vector data package introduced in Chapter 2
-library(terra)  # raster data package introduced in Chapter 2
-library(data.table)  # fast data.frame manipulation package (used internally by mlr3)
-library(dplyr)  # tidyverse package for data frame manipulation introduced in chapter 3
-library(mlr3)  # machine learning package introduced in chapter 12
-library(mlr3spatiotempcv)  # spatio-temporal resampling package introduced in chapter 12
-library(mlr3tuning)  # hyperparameter tuning package introduced in chapter 12
-library(mlr3learners)  # interface to most important machine learning packages; introduced in chapter 12
-library(qgisprocess)  # bridge to QGIS package introduced in chapter 10
-library(paradox)  # package for defining hyperparameter spaces introduced in chapter 12
-library(ranger)  # random forest package
-library(tree)  # decision tree package
-library(vegan)  # community ecology package
+library(sf)
+library(terra)
+library(dplyr)
+library(data.table)        # fast data.frame manipulation (used by mlr3)
+library(mlr3)              # machine learning (see Chapter 12)
+library(mlr3spatiotempcv)  # spatio-temporal resampling 
+library(mlr3tuning)        # hyperparameter tuning package
+library(mlr3learners)      # interface to most important machine learning packages
+library(paradox)           # defining hyperparameter spaces
+library(ranger)            # random forest package
+library(qgisprocess)       # bridge to QGIS (Chapter 10)
+library(tree)              # decision tree package
+library(vegan)             # community ecology package
 ```
 
 ## Introduction
