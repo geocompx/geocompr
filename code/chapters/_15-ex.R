@@ -1,4 +1,6 @@
-## ----15-ex-e0, message=FALSE, warning=FALSE-----------------------------------
+## ----15-ex-e0, message=FALSE, warning=FALSE----------------------------------------------------------------------
+library(sf)
+library(terra)
 library(data.table)
 library(dplyr)
 library(future)
@@ -11,13 +13,11 @@ library(mlr3tuning)
 library(mlr3viz)
 library(progressr)
 library(qgisprocess)
-library(terra)
 library(tictoc)
-library(sf)
 library(vegan)
 
 
-## ----15-ex-e1, message=FALSE--------------------------------------------------
+## ----15-ex-e1, message=FALSE-------------------------------------------------------------------------------------
 data("comm", package = "spDataLarge")
 pa = vegan::decostand(comm, "pa")
 pa = pa[rowSums(pa) != 0, ]
@@ -54,7 +54,7 @@ nmds_per$stress
 ## One compromise would be to use a categorical scale such as the Londo scale.
 
 
-## ----15-ex-e2-----------------------------------------------------------------
+## ----15-ex-e2----------------------------------------------------------------------------------------------------
 # first compute the terrain attributes we have also used in the chapter
 library(dplyr)
 library(terra)
@@ -116,9 +116,10 @@ rp = data.frame(id = as.numeric(rownames(sc)),
                 sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
 rp = dplyr::inner_join(random_points, rp, by = "id")
+# saveRDS(rp, "extdata/15-rp_exercises.rds")
 
 
-## ----15-ex-e3, message=FALSE--------------------------------------------------
+## ----15-ex-e3, message=FALSE-------------------------------------------------------------------------------------
 library(dplyr)
 library(future)
 library(mlr3)
@@ -127,6 +128,9 @@ library(mlr3learners)
 library(mlr3viz)
 library(paradox)
 library(ranger)
+
+# in case you have not run the previous exercises, run:
+# rp = readRDS("extdata/15-rp_exercises.rds")
 
 # define the task
 task = mlr3spatiotempcv::as_task_regr_st(
@@ -174,6 +178,8 @@ set.seed(10112022)
 lgr::get_logger("mlr3")$set_threshold("warn")
 lgr::get_logger("bbotk")$set_threshold("info")
 # BE CAREFUL: Running the benchmark might take quite some time
+# therefore, we have stored the result of the benchmarking in
+# extdata/15-bmr-exercises.rds (see below)
 tictoc::tic()
 progressr::with_progress(expr = {
   bmr = mlr3::benchmark(
@@ -191,20 +197,27 @@ tictoc::toc()
 
 # stop parallelization
 future:::ClusterRegistry("stop")
-# save your result, e.g. to 
-saveRDS(bmr, file = "extdata/15-bmr.rds")
+# we have saved the result as follows
+# saveRDS(bmr, file = "extdata/15-bmr_exercises.rds")
+# READ IT IN in in case you don't want to run the spatial CV yourself as it is computationally
+# demanding
+# bmr = readRDS("extdata/15-bmr_exercises.rds")
 
 # mean RMSE
 bmr$aggregate(measures = msr("regr.rmse"))
 # or computed manually
+agg = bmr$aggregate(measures = msr("regr.rmse"))
+
+# lm performs slightly better when considering the mean rmse
 purrr::map(agg$resample_result, ~ mean(.$score(msr("regr.rmse"))$regr.rmse))
+# however, looking at the median, the random forest performs slightly better
+purrr::map(agg$resample_result, ~ median(.$score(msr("regr.rmse"))$regr.rmse))
 
 # make a boxplot (when using autoplot, mlr3viz needs to be attached!)
-# library(mlr3viz)
+library(mlr3viz)
 autoplot(bmr, measure = msr("regr.rmse"))
 
 # or doing it "manually"
-agg = bmr$aggregate(measures = msr("regr.rmse"))
 # extract the AUROC values and put them into one data.table
 d = purrr::map_dfr(agg$resample_result, ~ .$score(msr("regr.rmse")))
 # create the boxplots
