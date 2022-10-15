@@ -681,11 +681,6 @@ The results demonstrate that each graph edge represents a segment: the segments 
 <code class="sourceCode R"><span><span class="va">ways_centrality</span> <span class="op">=</span> <span class="va">ways_sfn</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://tidygraph.data-imaginist.com/reference/activate.html">activate</a></span><span class="op">(</span><span class="st">"edges"</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>betweenness <span class="op">=</span> <span class="fu">tidygraph</span><span class="fu">::</span><span class="fu"><a href="https://tidygraph.data-imaginist.com/reference/centrality.html">centrality_edge_betweenness</a></span><span class="op">(</span><span class="va">lengths</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
-<pre><code>#&gt; Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
-#&gt; GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
-
-#&gt; Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
-#&gt; GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019</code></pre>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:wayssln"></span>
 <img src="13-transport_files/figure-html/wayssln-1.png" alt="Illustration of route network datasets. The grey lines represent a simplified road network, with segment thickness proportional to betweenness. The green lines represent potential cycling flows (one way) calculated with the code above." width="100%"><p class="caption">
@@ -710,35 +705,23 @@ We will identify promising locations for investment in sustainable transport inf
 The steps that got us to this stage included identifying short but car-dependent commuting routes (generated from desire lines) in Section <a href="transport.html#routes">13.6</a> and analysis of route network characteristics with the <strong>sfnetworks</strong> package in Section <a href="transport.html#route-networks">13.7</a>.
 The final code chunk of this chapter combines these strands of analysis, by overlaying estimates of cycling potential from the previous section on top of a new dataset representing areas within a short distance of cycling infrastructure.
 This new dataset is created in the code chunk below which: 1) filters out the cycleway entities from the <code>bristol_ways</code> object representing the transport network; 2) ‘unions’ the individual LINESTRING entities of the cycleways into a single multilinestring object (for speed of buffering); and 3) creates a 100 m buffer around them to create a polygon:</p>
-<div class="sourceCode" id="cb459"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb458"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">existing_cycleways_buffer</span> <span class="op">=</span> <span class="va">bristol_ways</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">highway</span> <span class="op">==</span> <span class="st">"cycleway"</span><span class="op">)</span> <span class="op">|&gt;</span>    <span class="co"># 1) filter out cycleways</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span>                       <span class="co"># 2) unite geometries</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span>dist <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>               <span class="co"># 3) create buffer</span></span></code></pre></div>
 <p>The next stage is to create a dataset representing points on the network where there is high cycling potential but little provision for cycling:</p>
-<div class="sourceCode" id="cb460"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb459"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">route_network_no_infra</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_ops.html">st_difference</a></span><span class="op">(</span></span>
 <span>  <span class="va">route_network_scenario</span>,</span>
 <span>  <span class="va">route_network_scenario</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">existing_cycleways_buffer</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="va">existing_cycleways_buffer</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<pre><code>#&gt; Warning: st_crs&lt;- : replacing crs does not reproject data; use st_transform for
-#&gt; that
-#&gt; Warning: attribute variables are assumed to be spatially constant throughout all
-#&gt; geometries</code></pre>
 <p>The results of the preceding code chunks are shown in Figure <a href="transport.html#fig:cycleways">13.8</a>, which shows routes with high levels of car dependency and high cycling potential but no cycleways.</p>
-<div class="sourceCode" id="cb462"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb460"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tmap_mode.html">tmap_mode</a></span><span class="op">(</span><span class="st">"view"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/tmap/man/qtm.html">qtm</a></span><span class="op">(</span><span class="va">route_network_no_infra</span>, basemaps <span class="op">=</span> <span class="fu">leaflet</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/leaflet/man/providers.html">providers</a></span><span class="op">$</span><span class="va">Esri.WorldTopoMap</span>,</span>
 <span>    lines.lwd <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
-<pre><code>#&gt; Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
-#&gt; GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
-
-#&gt; Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
-#&gt; GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
-
-#&gt; Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
-#&gt; GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019</code></pre>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:cycleways"></span>
 <img src="13-transport_files/figure-html/cycleways-1.png" alt="Potential routes along which to prioritise cycle infrastructure in Bristol to reduce car dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right)." width="50%"><img src="figures/bristol_cycleways_zoomed.png" alt="Potential routes along which to prioritise cycle infrastructure in Bristol to reduce car dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right)." width="50%"><p class="caption">
