@@ -2,8 +2,6 @@
 
 # Transportation {#transport}
 
-
-
 ## Prerequisites {.unnumbered}
 
 - This chapter uses the following packages:[^13-transport-1]
@@ -455,7 +453,7 @@ The function takes a wide range of inputs, including geographic desire lines (wi
 
 ### Route and segment level outputs
 
-Regardless of the routing engine used, there are two broad types of output: route level and segment level.
+There are two broad types of output: route level and segment level.
 Route level outputs contain a single feature (typically a multilinestring and associated row in the data frame representation) per origin-destination pair, meaning a single row of data per trip.
 Most routing engines return route level by default, although multi-modal engines generally provide outputs at the 'leg' level (one feature per continuous movement by a single mode of transport).
 Segment level data, by contrast, provides information about routes at the street segment.
@@ -468,14 +466,15 @@ When working with segment or leg-level data, route-level statistics can be retur
 
 ### Routing: A worked example
 
-Instead of routing\index{routing} *all* desire lines generated in the previous section, we will focus on the desire lines\index{desire lines} of policy interest.
-Doing routing on a subset of the data before trying to compute routes for a large number of OD pairs is often sensible.
-Routing can be time and memory-consuming: route datasets are usually substantially larger than desire line datasets because they have more detailed geometries and often have more attributes such as road name.
+Instead of routing\index{routing} *all* desire lines generated in Section \@ref(desire-lines), we focus on a subset that is highly policy relevant.
+Running a computationally intensive operation on a subset before trying to process the whole dataset is often sensible, and this applies to routing.
+Routing can be time and memory-consuming, resulting in large objects, due to the detailed geometries and extra attributes of route objects.
+We will therefore filter the desire lines before calculating routes in this section.
 
-We will filter-out a subset of the desire lines with a focus on estimating cycling potential based on the observation that the benefits of cycling trips are greatest when they replace car trips and that relatively short trips are more likely to be cycled than long trips [@lovelace_propensity_2017].
-Clearly, not all car trips can realistically be replaced by cycling.
-Trips between 2.5 and 5 km Euclidean distance (or around 3 km, below which trips are can be made by walking or scooter, to 6-8 km of route distance) have a relatively high probability of being cycled, and the maximum distance increases when trips are made by [electric bike](https://www.sciencedirect.com/science/article/pii/S0967070X21003401).
-Considering this, and the utility of a small route dataset for testing, we will compute routes for the subset of desire lines along which a high (100+) number of car trips take place that are 2.5 to 5 km in length:
+Cycling is most beneficial when it replaces car trips.
+Short (around 5 km, which can be cycled in 15 minutes at a speed of 20 km/hr) trips are more likely to be cycled than long trips [@lovelace_propensity_2017].
+Trips between 2.5 and 5 km Euclidean distance have a relatively high probability of being cycled, and the maximum distance increases when trips are made by [electric bike](https://www.sciencedirect.com/science/article/pii/S0967070X21003401).
+These considerations inform the following code chunk which filters the desire lines and returns the object `desire_lines_short` representing OD pairs between which many (100+) short (2.5 to 5 km Euclidean distance) trips are driven:
 
 
 ```r
@@ -624,6 +623,15 @@ ways_centrality = ways_sfn |>
   mutate(betweenness = tidygraph::centrality_edge_betweenness(lengths)) 
 ```
 
+
+```
+#> Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
+#> GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
+
+#> Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
+#> GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
+```
+
 <div class="figure" style="text-align: center">
 <img src="13-transport_files/figure-html/wayssln-1.png" alt="Illustration of route network datasets. The grey lines represent a simplified road network, with segment thickness proportional to betweenness. The green lines represent potential cycling flows (one way) calculated with the code above." width="100%" />
 <p class="caption">(\#fig:wayssln)Illustration of route network datasets. The grey lines represent a simplified road network, with segment thickness proportional to betweenness. The green lines represent potential cycling flows (one way) calculated with the code above.</p>
@@ -671,6 +679,12 @@ route_network_no_infra = st_difference(
 ```
 
 
+```
+#> Warning: st_crs<- : replacing crs does not reproject data; use st_transform for
+#> that
+#> Warning: attribute variables are assumed to be spatially constant throughout all
+#> geometries
+```
 
 The results of the preceding code chunks are shown in Figure \@ref(fig:cycleways), which shows routes with high levels of car dependency and high cycling potential but no cycleways.
 
@@ -679,6 +693,18 @@ The results of the preceding code chunks are shown in Figure \@ref(fig:cycleways
 tmap_mode("view")
 qtm(route_network_no_infra, basemaps = leaflet::providers$Esri.WorldTopoMap,
     lines.lwd = 5)
+```
+
+
+```
+#> Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
+#> GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
+
+#> Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
+#> GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
+
+#> Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
+#> GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
 ```
 
 <div class="figure" style="text-align: center">

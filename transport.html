@@ -544,7 +544,7 @@ The function takes a wide range of inputs, including geographic desire lines (wi
 <h3>
 <span class="header-section-number">13.6.4</span> Route and segment level outputs<a class="anchor" aria-label="anchor" href="#route-and-segment-level-outputs"><i class="fas fa-link"></i></a>
 </h3>
-<p>Regardless of the routing engine used, there are two broad types of output: route level and segment level.
+<p>There are two broad types of output: route level and segment level.
 Route level outputs contain a single feature (typically a multilinestring and associated row in the data frame representation) per origin-destination pair, meaning a single row of data per trip.
 Most routing engines return route level by default, although multi-modal engines generally provide outputs at the ‘leg’ level (one feature per continuous movement by a single mode of transport).
 Segment level data, by contrast, provides information about routes at the street segment.
@@ -558,13 +558,14 @@ When working with segment or leg-level data, route-level statistics can be retur
 <h3>
 <span class="header-section-number">13.6.5</span> Routing: A worked example<a class="anchor" aria-label="anchor" href="#routing-a-worked-example"><i class="fas fa-link"></i></a>
 </h3>
-<p>Instead of routing <em>all</em> desire lines generated in the previous section, we will focus on the desire lines of policy interest.
-Doing routing on a subset of the data before trying to compute routes for a large number of OD pairs is often sensible.
-Routing can be time and memory-consuming: route datasets are usually substantially larger than desire line datasets because they have more detailed geometries and often have more attributes such as road name.</p>
-<p>We will filter-out a subset of the desire lines with a focus on estimating cycling potential based on the observation that the benefits of cycling trips are greatest when they replace car trips and that relatively short trips are more likely to be cycled than long trips <span class="citation">(<a href="references.html#ref-lovelace_propensity_2017" role="doc-biblioref">Lovelace et al. 2017</a>)</span>.
-Clearly, not all car trips can realistically be replaced by cycling.
-Trips between 2.5 and 5 km Euclidean distance (or around 3 km, below which trips are can be made by walking or scooter, to 6-8 km of route distance) have a relatively high probability of being cycled, and the maximum distance increases when trips are made by <a href="https://www.sciencedirect.com/science/article/pii/S0967070X21003401">electric bike</a>.
-Considering this, and the utility of a small route dataset for testing, we will compute routes for the subset of desire lines along which a high (100+) number of car trips take place that are 2.5 to 5 km in length:</p>
+<p>Instead of routing <em>all</em> desire lines generated in Section <a href="transport.html#desire-lines">13.4</a>, we focus on a subset that is highly policy relevant.
+Running a computationally intensive operation on a subset before trying to process the whole dataset is often sensible, and this applies to routing.
+Routing can be time and memory-consuming, resulting in large objects, due to the detailed geometries and extra attributes of route objects.
+We will therefore filter the desire lines before calculating routes in this section.</p>
+<p>Cycling is most beneficial when it replaces car trips.
+Short (around 5 km, which can be cycled in 15 minutes at a speed of 20 km/hr) trips are more likely to be cycled than long trips <span class="citation">(<a href="references.html#ref-lovelace_propensity_2017" role="doc-biblioref">Lovelace et al. 2017</a>)</span>.
+Trips between 2.5 and 5 km Euclidean distance have a relatively high probability of being cycled, and the maximum distance increases when trips are made by <a href="https://www.sciencedirect.com/science/article/pii/S0967070X21003401">electric bike</a>.
+These considerations inform the following code chunk which filters the desire lines and returns the object <code>desire_lines_short</code> representing OD pairs between which many (100+) short (2.5 to 5 km Euclidean distance) trips are driven:</p>
 <div class="sourceCode" id="cb450"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">desire_lines</span><span class="op">$</span><span class="va">distance_km</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_length</a></span><span class="op">(</span><span class="va">desire_lines</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fl">1000</span></span>
 <span><span class="va">desire_lines_short</span> <span class="op">=</span> <span class="va">desire_lines</span> <span class="op">|&gt;</span> </span>
@@ -680,6 +681,11 @@ The results demonstrate that each graph edge represents a segment: the segments 
 <code class="sourceCode R"><span><span class="va">ways_centrality</span> <span class="op">=</span> <span class="va">ways_sfn</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://tidygraph.data-imaginist.com/reference/activate.html">activate</a></span><span class="op">(</span><span class="st">"edges"</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>betweenness <span class="op">=</span> <span class="fu">tidygraph</span><span class="fu">::</span><span class="fu"><a href="https://tidygraph.data-imaginist.com/reference/centrality.html">centrality_edge_betweenness</a></span><span class="op">(</span><span class="va">lengths</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
+<pre><code>#&gt; Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
+#&gt; GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
+
+#&gt; Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
+#&gt; GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019</code></pre>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:wayssln"></span>
 <img src="13-transport_files/figure-html/wayssln-1.png" alt="Illustration of route network datasets. The grey lines represent a simplified road network, with segment thickness proportional to betweenness. The green lines represent potential cycling flows (one way) calculated with the code above." width="100%"><p class="caption">
@@ -704,23 +710,35 @@ We will identify promising locations for investment in sustainable transport inf
 The steps that got us to this stage included identifying short but car-dependent commuting routes (generated from desire lines) in Section <a href="transport.html#routes">13.6</a> and analysis of route network characteristics with the <strong>sfnetworks</strong> package in Section <a href="transport.html#route-networks">13.7</a>.
 The final code chunk of this chapter combines these strands of analysis, by overlaying estimates of cycling potential from the previous section on top of a new dataset representing areas within a short distance of cycling infrastructure.
 This new dataset is created in the code chunk below which: 1) filters out the cycleway entities from the <code>bristol_ways</code> object representing the transport network; 2) ‘unions’ the individual LINESTRING entities of the cycleways into a single multilinestring object (for speed of buffering); and 3) creates a 100 m buffer around them to create a polygon:</p>
-<div class="sourceCode" id="cb458"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb459"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">existing_cycleways_buffer</span> <span class="op">=</span> <span class="va">bristol_ways</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">highway</span> <span class="op">==</span> <span class="st">"cycleway"</span><span class="op">)</span> <span class="op">|&gt;</span>    <span class="co"># 1) filter out cycleways</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span>                       <span class="co"># 2) unite geometries</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span>dist <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>               <span class="co"># 3) create buffer</span></span></code></pre></div>
 <p>The next stage is to create a dataset representing points on the network where there is high cycling potential but little provision for cycling:</p>
-<div class="sourceCode" id="cb459"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb460"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">route_network_no_infra</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_ops.html">st_difference</a></span><span class="op">(</span></span>
 <span>  <span class="va">route_network_scenario</span>,</span>
 <span>  <span class="va">route_network_scenario</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">existing_cycleways_buffer</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="va">existing_cycleways_buffer</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<pre><code>#&gt; Warning: st_crs&lt;- : replacing crs does not reproject data; use st_transform for
+#&gt; that
+#&gt; Warning: attribute variables are assumed to be spatially constant throughout all
+#&gt; geometries</code></pre>
 <p>The results of the preceding code chunks are shown in Figure <a href="transport.html#fig:cycleways">13.8</a>, which shows routes with high levels of car dependency and high cycling potential but no cycleways.</p>
-<div class="sourceCode" id="cb460"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb462"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/tmap/man/tmap_mode.html">tmap_mode</a></span><span class="op">(</span><span class="st">"view"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/tmap/man/qtm.html">qtm</a></span><span class="op">(</span><span class="va">route_network_no_infra</span>, basemaps <span class="op">=</span> <span class="fu">leaflet</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/leaflet/man/providers.html">providers</a></span><span class="op">$</span><span class="va">Esri.WorldTopoMap</span>,</span>
 <span>    lines.lwd <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+<pre><code>#&gt; Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
+#&gt; GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
+
+#&gt; Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
+#&gt; GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019
+
+#&gt; Warning in CPL_transform(x, crs, aoi, pipeline, reverse, desired_accuracy, :
+#&gt; GDAL Error 1: PROJ: proj_as_wkt: DatumEnsemble can only be exported to WKT2:2019</code></pre>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:cycleways"></span>
 <img src="13-transport_files/figure-html/cycleways-1.png" alt="Potential routes along which to prioritise cycle infrastructure in Bristol to reduce car dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right)." width="50%"><img src="figures/bristol_cycleways_zoomed.png" alt="Potential routes along which to prioritise cycle infrastructure in Bristol to reduce car dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right)." width="50%"><p class="caption">
@@ -827,7 +845,7 @@ Similar tools could be used to encourage evidence-based transport policies relat
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-10-14.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-10-15.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
