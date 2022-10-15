@@ -474,8 +474,7 @@ Routing can be time and memory-consuming, resulting in large objects, due to the
 We will therefore filter the desire lines before calculating routes in this section.
 
 Cycling is most beneficial when it replaces car trips.
-Short (around 5 km, which can be cycled in 15 minutes at a speed of 20 km/hr) trips are more likely to be cycled than long trips [@lovelace_propensity_2017].
-Trips between 2.5 and 5 km Euclidean distance have a relatively high probability of being cycled, and the maximum distance increases when trips are made by [electric bike](https://www.sciencedirect.com/science/article/pii/S0967070X21003401).
+Short (around 5 km, which can be cycled in 15 minutes at a speed of 20 km/hr) have a relatively high probability of being cycled, and the maximum distance increases when trips are made by [electric bike](https://www.sciencedirect.com/science/article/pii/S0967070X21003401) [@lovelace_propensity_2017].
 These considerations inform the following code chunk which filters the desire lines and returns the object `desire_lines_short` representing OD pairs between which many (100+) short (2.5 to 5 km Euclidean distance) trips are driven:
 
 
@@ -494,7 +493,6 @@ This is done using the publicly available OSRM service with the **stplanr** func
 ```r
 routes_short = route(l = desire_lines_short, route_fun = route_osrm,
                      osrm.profile = "bike")
-#> Most common output is sf
 ```
 
 The output is `routes_short`, an `sf` object representing routes on the transport network\index{network} that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line.
@@ -513,9 +511,9 @@ The code chunk below plots the desire lines and routes, resulting in Figure \@re
 <p class="caption">(\#fig:routes)Routes along which many (100+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).</p>
 </div>
 
-Plotting the results on an interactive map, with `mapview::mapview(st_geometry(routes_short))` for example, shows that many short car trips take place in and around Bradley Stoke.
+Plotting the results on an interactive map, with `mapview::mapview(st_geometry(routes_short))` for example, shows that many short car trips take place in and around Bradley Stoke, around 10 km North of central Bristol.
 It is easy to find explanations for the area's high level of car dependency: according to [Wikipedia](https://en.wikipedia.org/wiki/Bradley_Stoke), Bradley Stoke is "Europe's largest new town built with private investment", suggesting limited public transport provision.
-Furthermore, the town is surrounded by large (cycling unfriendly) road structures, "such as junctions on both the M4 and M5 motorways" [@tallon_bristol_2007].
+Furthermore, the town is surrounded by large (cycling unfriendly) road structures, including the M4 and M5 motorways [@tallon_bristol_2007].
 
 There are many benefits of converting travel desire lines\index{desire lines} into routes.
 It is important to remember that we cannot be sure how many (if any) trips will follow the exact routes calculated by routing engines.

@@ -563,8 +563,7 @@ Running a computationally intensive operation on a subset before trying to proce
 Routing can be time and memory-consuming, resulting in large objects, due to the detailed geometries and extra attributes of route objects.
 We will therefore filter the desire lines before calculating routes in this section.</p>
 <p>Cycling is most beneficial when it replaces car trips.
-Short (around 5 km, which can be cycled in 15 minutes at a speed of 20 km/hr) trips are more likely to be cycled than long trips <span class="citation">(<a href="references.html#ref-lovelace_propensity_2017" role="doc-biblioref">Lovelace et al. 2017</a>)</span>.
-Trips between 2.5 and 5 km Euclidean distance have a relatively high probability of being cycled, and the maximum distance increases when trips are made by <a href="https://www.sciencedirect.com/science/article/pii/S0967070X21003401">electric bike</a>.
+Short (around 5 km, which can be cycled in 15 minutes at a speed of 20 km/hr) have a relatively high probability of being cycled, and the maximum distance increases when trips are made by <a href="https://www.sciencedirect.com/science/article/pii/S0967070X21003401">electric bike</a> <span class="citation">(<a href="references.html#ref-lovelace_propensity_2017" role="doc-biblioref">Lovelace et al. 2017</a>)</span>.
 These considerations inform the following code chunk which filters the desire lines and returns the object <code>desire_lines_short</code> representing OD pairs between which many (100+) short (2.5 to 5 km Euclidean distance) trips are driven:</p>
 <div class="sourceCode" id="cb450"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">desire_lines</span><span class="op">$</span><span class="va">distance_km</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_length</a></span><span class="op">(</span><span class="va">desire_lines</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fl">1000</span></span>
@@ -576,8 +575,7 @@ The next stage is to convert these desire lines into routes.
 This is done using the publicly available OSRM service with the <strong>stplanr</strong> functions <code><a href="https://docs.ropensci.org/stplanr/reference/route.html">route()</a></code> and <code><a href="https://docs.ropensci.org/stplanr/reference/route_osrm.html">route_osrm()</a></code> in the code chunk below:</p>
 <div class="sourceCode" id="cb451"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">routes_short</span> <span class="op">=</span> <span class="fu"><a href="https://docs.ropensci.org/stplanr/reference/route.html">route</a></span><span class="op">(</span>l <span class="op">=</span> <span class="va">desire_lines_short</span>, route_fun <span class="op">=</span> <span class="va">route_osrm</span>,</span>
-<span>                     osrm.profile <span class="op">=</span> <span class="st">"bike"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Most common output is sf</span></span></code></pre></div>
+<span>                     osrm.profile <span class="op">=</span> <span class="st">"bike"</span><span class="op">)</span></span></code></pre></div>
 <p>The output is <code>routes_short</code>, an <code>sf</code> object representing routes on the transport network that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line.
 Note: calls to external routing engines such as in the command above only work with an internet connection (and sometimes an API key stored in an environment variable, although not in this case).
 In addition to the columns contained in the <code>desire_lines</code> object, the new route dataset contains <code>distance</code> (referring to route distance this time) and <code>duration</code> columns (in seconds), which provide potentially useful extra information on the nature of each route.
@@ -592,9 +590,9 @@ Note also that routes are assumed to originate in the zone centroids, a simplify
 FIGURE 13.5: Routes along which many (100+) short (&lt;5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).
 </p>
 </div>
-<p>Plotting the results on an interactive map, with <code>mapview::mapview(st_geometry(routes_short))</code> for example, shows that many short car trips take place in and around Bradley Stoke.
+<p>Plotting the results on an interactive map, with <code>mapview::mapview(st_geometry(routes_short))</code> for example, shows that many short car trips take place in and around Bradley Stoke, around 10 km North of central Bristol.
 It is easy to find explanations for the area’s high level of car dependency: according to <a href="https://en.wikipedia.org/wiki/Bradley_Stoke">Wikipedia</a>, Bradley Stoke is “Europe’s largest new town built with private investment”, suggesting limited public transport provision.
-Furthermore, the town is surrounded by large (cycling unfriendly) road structures, “such as junctions on both the M4 and M5 motorways” <span class="citation">(<a href="references.html#ref-tallon_bristol_2007" role="doc-biblioref">Tallon 2007</a>)</span>.</p>
+Furthermore, the town is surrounded by large (cycling unfriendly) road structures, including the M4 and M5 motorways <span class="citation">(<a href="references.html#ref-tallon_bristol_2007" role="doc-biblioref">Tallon 2007</a>)</span>.</p>
 <p>There are many benefits of converting travel desire lines into routes.
 It is important to remember that we cannot be sure how many (if any) trips will follow the exact routes calculated by routing engines.
 However, route and street/way/segment level results can be highly policy relevant.
