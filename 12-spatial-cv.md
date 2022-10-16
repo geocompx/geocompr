@@ -313,9 +313,11 @@ It acts as a 'meta-package', providing a unified interface to popular supervised
 The standardized **mlr3** interface is based on eight 'building blocks'.
 As illustrated in Figure \@ref(fig:building-blocks), these have a clear order.
 
+(ref:building-blocks) Basic building blocks of the mlr3 package. Source: @becker_mlr3_2022. (Permission to reuse this figure was kindly granted.)
+
 <div class="figure" style="text-align: center">
-<img src="figures/13_ml_abstraction_crop.png" alt="Basic building blocks of the mlr3 package. Source: @becker_mlr3_2022. (Permission to reuse this figure was kindly granted.)" width="100%" />
-<p class="caption">(\#fig:building-blocks)Basic building blocks of the mlr3 package. Source: @becker_mlr3_2022. (Permission to reuse this figure was kindly granted.)</p>
+<img src="figures/13_ml_abstraction_crop.png" alt="(ref:building-blocks)" width="100%" />
+<p class="caption">(\#fig:building-blocks)(ref:building-blocks)</p>
 </div>
 
 The **mlr3** modeling process consists of three main stages.

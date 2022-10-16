@@ -565,8 +565,8 @@ route_network_scenario = overline(routes_short_scenario, attrib = "bicycle")
 The outputs of the two preceding code chunks are summarized in Figure \@ref(fig:rnetvis) below.
 
 <div class="figure" style="text-align: center">
-<img src="13-transport_files/figure-html/rnetvis-1.png" alt="Illustration of the % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right)." width="49%" /><img src="13-transport_files/figure-html/rnetvis-2.png" alt="Illustration of the % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right)." width="49%" />
-<p class="caption">(\#fig:rnetvis)Illustration of the % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).</p>
+<img src="13-transport_files/figure-html/rnetvis-1.png" alt="Illustration of the percentage of car trips switching to cycling as a function of distance (left) and route network level results of this function (right)." width="49%" /><img src="13-transport_files/figure-html/rnetvis-2.png" alt="Illustration of the percentage of car trips switching to cycling as a function of distance (left) and route network level results of this function (right)." width="49%" />
+<p class="caption">(\#fig:rnetvis)Illustration of the percentage of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).</p>
 </div>
 
 Transport networks with records at the segment level, typically with attributes such as road type and width, constitute a common type of route network.
