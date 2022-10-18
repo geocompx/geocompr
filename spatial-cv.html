@@ -661,11 +661,6 @@ If required, you can read it in as follows:</p>
 <p>To put these results in perspective, let us compare them with AUROC values from a 100-repeated 5-fold non-spatial cross-validation (Figure <a href="spatial-cv.html#fig:boxplot-cv">12.5</a>; the code for the non-spatial cross-validation is not shown here but will be explored in the exercise section).
 <!--JN: why "as expected"? I think it would be great to explain this expectation in a few sentences here...-->
 As expected, the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance due to spatial autocorrelation of the latter.</p>
-<pre><code>#&gt; 
-#&gt; Attaching package: 'ggplot2'
-#&gt; The following object is masked from 'package:lgr':
-#&gt; 
-#&gt;     Layout</code></pre>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:boxplot-cv"></span>
 <img src="12-spatial-cv_files/figure-html/boxplot-cv-1.png" alt="Boxplot showing the difference in GLM AUROC values on spatial and conventional 100-repeated 5-fold cross-validation." width="75%"><p class="caption">
@@ -698,7 +693,7 @@ This works for non-spatial data but is of less use for spatial data where ‘spa
 <p>Before defining spatial tuning, we will set up the <strong>mlr3</strong> building blocks, introduced in Section <a href="spatial-cv.html#glm">12.5.1</a>, for the SVM.
 The classification task remains the same, hence we can simply reuse the <code>task</code> object created in Section <a href="spatial-cv.html#glm">12.5.1</a>.
 Learners implementing SVM can be found using the <code><a href="https://rdrr.io/pkg/mlr3extralearners/man/list_mlr3learners.html">list_mlr3learners()</a></code> command of the <strong>mlr3extralearners</strong> package as follows:</p>
-<div class="sourceCode" id="cb425"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb424"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mlr3_learners</span> <span class="op">=</span> <span class="fu">mlr3extralearners</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mlr3extralearners/man/list_mlr3learners.html">list_mlr3learners</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; This will take a few seconds.</span></span>
 <span><span class="co">#&gt; obliqueRSF has been superseded by aorsf. We highly recommend you use aorsf to fit oblique random survival forests: see https://github.com/bcjaeger/aorsf or install from CRAN with install.packages('aorsf')</span></span>
@@ -712,7 +707,7 @@ Learners implementing SVM can be found using the <code><a href="https://rdrr.io/
 To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel (<code>"rbfdot"</code>) which is also the default of <code>ksvm()</code>.
 Setting the<code>type</code> argument to <code>"C-svc"</code> makes sure that <code>ksvm()</code> is solving a classification task.
 To make sure that the tuning does not stop because of one failing model, we additionally define a fallback learner (for more information please refer to <a href="https://mlr3book.mlr-org.com/technical.html#fallback-learners" class="uri">https://mlr3book.mlr-org.com/technical.html#fallback-learners</a>).</p>
-<div class="sourceCode" id="cb426"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb425"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lrn_ksvm</span> <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.ksvm"</span>, predict_type <span class="op">=</span> <span class="st">"prob"</span>, kernel <span class="op">=</span> <span class="st">"rbfdot"</span>,</span>
 <span>                     type <span class="op">=</span> <span class="st">"C-svc"</span><span class="op">)</span></span>
 <span><span class="va">lrn_ksvm</span><span class="op">$</span><span class="va">fallback</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.featureless"</span>, predict_type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span></code></pre></div>
@@ -720,7 +715,7 @@ To make sure that the tuning does not stop because of one failing model, we addi
 Again we will use a 100-repeated 5-fold spatial CV.</p>
 <!-- Instead of saying "outer resampling" we concluded to use "performance estimation level" and "tuning level" (inner) in our paper
 # this is also what is shown in the nested CV figure so it would be more consistent -->
-<div class="sourceCode" id="cb427"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb426"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># performance estimation level</span></span>
 <span><span class="va">perf_level</span> <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">rsmp</a></span><span class="op">(</span><span class="st">"repeated_spcv_coords"</span>, folds <span class="op">=</span> <span class="fl">5</span>, repeats <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 <p>Note that this is the exact same code as used for the resampling for the GLM in Section <a href="spatial-cv.html#glm">12.5.1</a>; we have simply repeated it here as a reminder.</p>
@@ -752,7 +747,7 @@ Questions Pat:
 talk in person (see also exercises):
 - can I compare the mean AUROC of the GLM and the SVM when using the same seed? Or is seeding not strictly necessary? I mean, ok, the partitions vary a bit but overall...
 -->
-<div class="sourceCode" id="cb428"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb427"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># five spatially disjoint partitions</span></span>
 <span><span class="va">tune_level</span> <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">rsmp</a></span><span class="op">(</span><span class="st">"spcv_coords"</span>, folds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co"># use 50 randomly selected hyperparameters</span></span>
@@ -764,7 +759,7 @@ talk in person (see also exercises):
 <span>  sigma <span class="op">=</span> <span class="fu">paradox</span><span class="fu">::</span><span class="fu"><a href="https://paradox.mlr-org.com/reference/Domain.html">p_dbl</a></span><span class="op">(</span>lower <span class="op">=</span> <span class="op">-</span><span class="fl">15</span>, upper <span class="op">=</span> <span class="fl">6</span>, trafo <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fl">2</span><span class="op">^</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The next stage is to modify the learner <code>lrn_ksvm</code> in accordance with all the characteristics defining the hyperparameter tuning with <code>AutoTuner$new()</code>.</p>
-<div class="sourceCode" id="cb429"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb428"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">at_ksvm</span> <span class="op">=</span> <span class="fu">mlr3tuning</span><span class="fu">::</span><span class="va"><a href="https://mlr3tuning.mlr-org.com/reference/AutoTuner.html">AutoTuner</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  learner <span class="op">=</span> <span class="va">lrn_ksvm</span>,</span>
 <span>  resampling <span class="op">=</span> <span class="va">tune_level</span>,</span>
@@ -791,7 +786,7 @@ To decrease model runtime, <strong>mlr3</strong> offers the possibility to use p
 Since we are about to run a nested cross-validation, we can decide if we would like to parallelize the inner or the outer loop (see lower left part of Figure <a href="spatial-cv.html#fig:inner-outer">12.6</a>).
 Since the former will run 125,000 models, whereas the latter only runs 500, it is quite obvious that we should parallelize the inner loop.
 To set up the parallelization of the inner loop, we run:</p>
-<div class="sourceCode" id="cb430"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb429"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org">future</a></span><span class="op">)</span></span>
 <span><span class="co"># execute the outer loop sequentially and parallelize the inner loop</span></span>
 <span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html">plan</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"sequential"</span>, <span class="st">"multisession"</span><span class="op">)</span>, </span>
@@ -809,7 +804,7 @@ Before running the subsequent code, be aware that it is time-consuming since it 
 Note that runtime depends on many aspects: CPU speed, the selected algorithm, the selected number of cores and the dataset.</p>
 <!--toDo:jn-->
 <!--fix pipes-->
-<div class="sourceCode" id="cb431"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb430"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">progressr</span><span class="fu">::</span><span class="fu"><a href="https://progressr.futureverse.org/reference/with_progress.html">with_progress</a></span><span class="op">(</span>expr <span class="op">=</span> <span class="op">{</span></span>
 <span>  <span class="va">rr_spcv_svm</span> <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/resample.html">resample</a></span><span class="op">(</span>task <span class="op">=</span> <span class="va">task</span>,</span>
 <span>                               learner <span class="op">=</span> <span class="va">at_ksvm</span>, </span>
@@ -827,12 +822,12 @@ Note that runtime depends on many aspects: CPU speed, the selected algorithm, th
 <span>  <span class="va">.</span><span class="op">[</span>, <span class="fu">.</span><span class="op">(</span><span class="va">task_id</span>, <span class="va">learner_id</span>, <span class="va">resampling_id</span>, <span class="va">classif.auc</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 <p>In case you do not want to run the code locally, we have saved <a href="https://github.com/Robinlovelace/geocompr/blob/main/extdata/12-bmr_score.rds">score_svm</a> in the book’s GitHub repo.
 They can be loaded as follows:</p>
-<div class="sourceCode" id="cb432"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb431"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">score</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="st">"extdata/12-bmr_score.rds"</span><span class="op">)</span></span>
 <span><span class="va">score_spcv_svm</span> <span class="op">=</span> <span class="va">score</span><span class="op">[</span><span class="va">learner_id</span> <span class="op">==</span> <span class="st">"classif.ksvm.tuned"</span> <span class="op">&amp;</span> </span>
 <span>                         <span class="va">resampling_id</span> <span class="op">==</span> <span class="st">"repeated_spcv_coords"</span><span class="op">]</span></span></code></pre></div>
 <p>Let us have a look at the final AUROC: the model’s ability to discriminate the two classes.</p>
-<div class="sourceCode" id="cb433"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb432"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># final mean AUROC</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html">mean</a></span><span class="op">(</span><span class="va">score_spcv_svm</span><span class="op">$</span><span class="va">classif.auc</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.74</span></span></code></pre></div>
@@ -949,7 +944,7 @@ Leaving the hyperparameters unspecified in <strong>kernlab</strong>’s <code>ks
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-10-16.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-10-18.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

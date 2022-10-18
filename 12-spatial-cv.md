@@ -525,15 +525,6 @@ To put these results in perspective, let us compare them with AUROC\index{AUROC}
 <!--JN: why "as expected"? I think it would be great to explain this expectation in a few sentences here...-->
 As expected, the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance due to spatial autocorrelation\index{autocorrelation!spatial} of the latter.
 
-
-```
-#> 
-#> Attaching package: 'ggplot2'
-#> The following object is masked from 'package:lgr':
-#> 
-#>     Layout
-```
-
 <div class="figure" style="text-align: center">
 <img src="12-spatial-cv_files/figure-html/boxplot-cv-1.png" alt="Boxplot showing the difference in GLM AUROC values on spatial and conventional 100-repeated 5-fold cross-validation." width="75%" />
 <p class="caption">(\#fig:boxplot-cv)Boxplot showing the difference in GLM AUROC values on spatial and conventional 100-repeated 5-fold cross-validation.</p>
