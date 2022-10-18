@@ -11,13 +11,12 @@ library(dplyr)
 library(spData)
 ```
 
-- You also need to read in a couple of datasets as follows for Section \@ref(spatial-ras)
+- You also need to read in a couple of datasets as follows for Section \@ref(spatial-ras):
 
 ```{r 04-spatial-operations-1-1}
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 grain = rast(system.file("raster/grain.tif", package = "spData"))
 ```
-
 
 ## Introduction
 
@@ -29,13 +28,13 @@ Spatial joining (Section \@ref(spatial-joining)) and aggregation (Section \@ref(
 
 Spatial operations differ from non-spatial operations in a number of ways, however:
 Spatial joins, for example, can be done in a number of ways --- including matching entities that intersect with or are within a certain distance of the target dataset --- while the attribution joins discussed in Section \@ref(vector-attribute-joining) in the previous chapter can only be done in one way (except when using fuzzy joins, as described in the documentation of the [**fuzzyjoin**](https://cran.r-project.org/package=fuzzyjoin) package).
-The *type* of spatial relationship between objects must be considered when undertaking spatial operations, as described in Section \@ref(topological-relations), on topological relations between vector features.
+Different *types* of spatial relationship between objects, including intersects and disjoint, are described in Section \@ref(topological-relations).
 \index{spatial operations}
 Another unique aspect of spatial objects is distance: all spatial objects are related through space, and distance calculations can be used to explore the strength of this relationship, as described in the context of vector data in Section \@ref(distance-relations).
 
 Spatial operations on raster objects include subsetting --- covered in Section \@ref(spatial-raster-subsetting) --- and merging several raster 'tiles' into a single object, as demonstrated in Section \@ref(merging-rasters).
-*Map algebra* covers a range of operations that modify raster cell values, with or without reference to surrounding cell values, is vital for many applications.
-The concept of map algebra is introduced in Section \@ref(map-algebra); local, focal and zonal map algebra operations are covered in sections \@ref(local-operations), \@ref(focal-operations), and \@ref(zonal-operations), respectively. Global map algebra operations, which generate summary statistics representing an entire raster dataset, and distance calculations on rasters, are discussed in Section \@ref(global-operations-and-distances).
+*Map algebra* covers a range of operations that modify raster cell values, with or without reference to surrounding cell values.
+The concept of map algebra, vital for many applications, is introduced in Section \@ref(map-algebra); local, focal and zonal map algebra operations are covered in sections \@ref(local-operations), \@ref(focal-operations), and \@ref(zonal-operations), respectively. Global map algebra operations, which generate summary statistics representing an entire raster dataset, and distance calculations on rasters, are discussed in Section \@ref(global-operations-and-distances).
 In the final section before the exercises (\@ref(merging-rasters)) the process of merging two raster datasets is discussed and demonstrated with reference to a reproducible example.
 
 ```{block2 04-spatial-operations-2, type='rmdnote'}
@@ -60,7 +59,7 @@ To demonstrate spatial subsetting, we will use the `nz` and `nz_height` datasets
 The following code chunk creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region:
 
 ```{r 04-spatial-operations-3}
-canterbury = nz %>% filter(Name == "Canterbury")
+canterbury = nz |> filter(Name == "Canterbury")
 canterbury_height = nz_height[canterbury, ]
 ```
 
@@ -125,16 +124,18 @@ Note: the solution involving `sgbp` objects is more generalisable though, as it 
 The same result can be achieved with the **sf** function `st_filter()` which was [created](https://github.com/r-spatial/sf/issues/1148) to increase compatibility between `sf` objects and **dplyr** data manipulation code:
 
 ```{r}
-canterbury_height3 = nz_height %>%
+canterbury_height3 = nz_height |>
   st_filter(y = canterbury, .predicate = st_intersects)
 ```
 
+<!--toDo:jn-->
+<!-- fix pipes -->
 
 ```{r 04-spatial-operations-7b-old, eval=FALSE, echo=FALSE}
 # Additional tests of subsetting
-canterbury_height4 = nz_height %>%
-  filter(st_intersects(x = ., y = canterbury, sparse = FALSE))
-canterbury_height5 = nz_height %>%
+canterbury_height4 = nz_height |>
+  filter(st_intersects(x = _, y = canterbury, sparse = FALSE))
+canterbury_height5 = nz_height |>
   filter(sel_logical)
 identical(canterbury_height3, canterbury_height4)
 identical(canterbury_height3, canterbury_height5)
@@ -319,6 +320,9 @@ plot(p, add = TRUE)
 ### DE-9IM strings
 
 Underlying the binary predicates demonstrated in the previous section is the Dimensionally Extended 9-Intersection Model (DE-9IM).
+As the cryptic name suggests, this is not an easy topic.
+Learning it may be worthwhile, however, to better understand spatial relationships.
+Furthermore, advanced uses of DE-9IM include creating custom spatial predicates.
 The model was originally labelled "DE + 9IM" by its inventors, referring to the "dimension of the intersections of boundaries, interiors, and exteriors of two features" [@clementini_comparison_1995], but is now referred to as DE-9IM [@shen_classification_2018].
 <!-- The model's workings can be demonstrated with reference to two intersecting polygons, as illustrated in Figure \@ref(fig:de-9im). -->
 
@@ -437,7 +441,7 @@ b9sf$domain_b = rep(rep(domains, each = 3), each = 2)
 b9sf = rbind(b9sf, ii, bi, ei, ib, bb, eb, ie, be, ee)
 b9sf$domain_a = ordered(b9sf$domain_a, levels = c("Interior", "Boundary", "Exterior"))
 b9sf$domain_b = ordered(b9sf$domain_b, levels = c("Interior", "Boundary", "Exterior"))
-b9sf = b9sf %>% 
+b9sf = b9sf |> 
   mutate(alpha = case_when(
    Object == "x" ~ 0.1, 
    Object == "y" ~ 0.1, 
@@ -597,8 +601,8 @@ random_df = data.frame(
   x = runif(n = 10, min = bb[1], max = bb[3]),
   y = runif(n = 10, min = bb[2], max = bb[4])
 )
-random_points = random_df %>% 
-  st_as_sf(coords = c("x", "y")) %>% # set coordinates
+random_points = random_df |> 
+  st_as_sf(coords = c("x", "y")) |> # set coordinates
   st_set_crs("EPSG:4326") # set geographic CRS
 ```
 
@@ -663,9 +667,9 @@ if (knitr::is_latex_output()){
     # tm_bubbles(col = "red", alpha = 0.5, size = 0.2) +
     # tm_scale_bar()
   library(leaflet)
-  leaflet() %>%
-    # addProviderTiles(providers$OpenStreetMap.BlackAndWhite) %>%
-    addCircles(data = cycle_hire) %>%
+  leaflet() |>
+    # addProviderTiles(providers$OpenStreetMap.BlackAndWhite) |>
+    addCircles(data = cycle_hire) |>
     addCircles(data = cycle_hire_osm, col = "red")  
 }
 ```
@@ -712,8 +716,8 @@ This is because some cycle hire stations in `cycle_hire` have multiple matches i
 To aggregate the values for the overlapping points and return the mean, we can use the aggregation methods learned in Chapter \@ref(attr), resulting in an object with the same number of rows as the target:
 
 ```{r 04-spatial-operations-26}
-z = z %>% 
-  group_by(id) %>% 
+z = z |> 
+  group_by(id) |> 
   summarize(capacity = mean(capacity))
 nrow(z) == nrow(cycle_hire)
 ```
@@ -731,7 +735,7 @@ The result of this join has used a spatial operation to change the attribute dat
 
 As with attribute data aggregation, spatial data aggregation *condenses* data: aggregated outputs have fewer rows than non-aggregated inputs.
 Statistical *aggregating functions*, such as mean average or sum, summarise multiple values \index{statistics} of a variable, and return a single value per *grouping variable*.
-Section \@ref(vector-attribute-aggregation) demonstrated how `aggregate()` and `group_by() %>% summarize()` condense data based on attribute variables, this section shows how the same functions work with spatial objects.
+Section \@ref(vector-attribute-aggregation) demonstrated how `aggregate()` and `group_by() |> summarize()` condense data based on attribute variables, this section shows how the same functions work with spatial objects.
 \index{aggregation!spatial}
 
 Returning to the example of New Zealand, imagine you want to find out the average height of high points in each region: it is the geometry of the source (`y` or `nz` in this case) that defines how values in the target object (`x` or `nz_height`) are grouped.
@@ -753,8 +757,8 @@ tm_shape(nz_agg) +
 ```
 
 ```{r 04-spatial-operations-29}
-nz_agg2 = st_join(x = nz, y = nz_height) %>%
-  group_by(Name) %>%
+nz_agg2 = st_join(x = nz, y = nz_height) |>
+  group_by(Name) |>
   summarize(elevation = mean(elevation, na.rm = TRUE))
 ```
 
@@ -764,9 +768,12 @@ plot(nz_agg2)
 # aggregate looses the name of aggregating objects
 ```
 
-The resulting `nz_agg` objects have the same geometry as the aggregating object `nz` but with a new column summarising the values of `x` in each region using the function `mean()` (which cold, of course, be replaced by `median()`, `sd()` and other functions that return a single value).
-Note: one difference between the `aggregate()` and `group_by() %>% summarize()` approaches is that the former results in `NA` values for unmatching region names, while the latter preserves region names and is more flexible in terms of aggregating functions and the column names of the results.
-For aggregating operations which also create new geometries, see Section \@ref(geometry-unions).
+The resulting `nz_agg` objects have the same geometry as the aggregating object `nz` but with a new column summarizing the values of `x` in each region using the function `mean()`.
+Other functions could be used instead of `mean()` here, including `median()`, `sd()` and other functions that return a single value per group.
+Note: one difference between the `aggregate()` and `group_by() |> summarize()` approaches is that the former results in `NA` values for unmatching region names while the latter preserves region names.
+The 'tidy' approach is thus more flexible in terms of aggregating functions and the column names of the results.
+Aggregating operations that also create new geometries are covered in Section \@ref(geometry-unions).
+
 
 ### Joining incongruent layers {#incongruent}
 
@@ -791,7 +798,7 @@ This is implemented in `st_interpolate_aw()`, as demonstrated in the code chunk 
 
 ```{r 04-spatial-operations-30}
 iv = incongruent["value"] # keep only the values to be transferred
-agg_aw = st_interpolate_aw(iv, aggregating_zones, ext = TRUE)
+agg_aw = st_interpolate_aw(iv, aggregating_zones, extensive = TRUE)
 agg_aw$value
 ```
 
@@ -807,9 +814,9 @@ This is illustrated in the code chunk below, which finds the distance between th
 \index{sf!distance relations}
 
 ```{r 04-spatial-operations-31, warning=FALSE}
-nz_heighest = nz_height %>% top_n(n = 1, wt = elevation)
+nz_highest = nz_height |> slice_max(n = 1, order_by = elevation)
 canterbury_centroid = st_centroid(canterbury)
-st_distance(nz_heighest, canterbury_centroid)
+st_distance(nz_highest, canterbury_centroid)
 ```
 
 There are two potentially surprising things about the result:
@@ -876,8 +883,8 @@ knitr::include_graphics("figures/04_raster_subset.png")
 ```
 
 The example above returned the values of specific cells, but in many cases spatial outputs from subsetting operations on raster datasets are needed.
-This can be done using the `[` operator, with `drop = FALSE`, as outlined in Section \@ref(manipulating-raster-objects), which also shows how raster objects can be subsetted by various objects.
-This is demonstrated in the code below, which returns the first two cells of `elev` as a raster object the first two cells on the top row (only the first 2 lines of the output is shown):
+This can be done with the `[` operator, using `drop = FALSE`.
+The code below returns the first two cells of `elev` as a raster object the first two cells on the top row (only the first 2 lines of the output is shown):
 
 ```{r 04-spatial-operations-36, eval=FALSE}
 elev[1:2, drop = FALSE]    # spatial subsetting with cell IDs
@@ -928,7 +935,7 @@ The term 'map algebra' was coined in the late 1970s to describe a "set of conven
 In this context, we define map algebra more narrowly, as operations that modify or summarise raster cell values, with reference to surrounding cells, zones, or statistical functions that apply to every cell.
 
 Map algebra operations tend to be fast, because raster datasets only implicitly store coordinates, hence the [old adage](https://geozoneblog.wordpress.com/2013/04/19/raster-vs-vector/) "raster is faster but vector is corrector".
-The location of cells in raster datasets can be calculated it using its matrix position and the resolution and origin of the dataset (stored in the header).
+The location of cells in raster datasets can be calculated by using its matrix position and the resolution and origin of the dataset (stored in the header).
 For the processing, however, the geographic position of a cell is barely relevant as long as we make sure that the cell position is still the same after the processing.
 Additionally, if two or more raster datasets share the same extent, projection and resolution, one could treat them as matrices for the processing.
 
@@ -943,7 +950,8 @@ Map algebra (or cartographic modeling with raster data) divides raster operation
 2. *Focal* or neighborhood operations.
 Most often the output cell value is the result of a 3 x 3 input cell block
 3. *Zonal* operations are similar to focal operations, but the surrounding pixel grid on which new values are computed can have irregular sizes and shapes
-4. *Global* or per-raster operations; that means the output cell derives its value potentially from one or several entire rasters
+4. *Global* or per-raster operations. 
+That means the output cell derives its value potentially from one or several entire rasters
 
 This typology classifies map algebra operations by the number of cells used for each pixel processing step and the type of the output.
 For the sake of completeness, we should mention that raster operations can also be classified by discipline such as terrain, hydrological analysis, or image classification.
@@ -1087,12 +1095,11 @@ Chapter \@ref(gis) shows how to access such GIS functionality from within R.
 Just like focal operations, *zonal* operations apply an aggregation function to multiple raster cells.
 However, a second raster, usually with categorical values, defines the *zonal filters* (or 'zones') in the case of zonal operations, as opposed to a predefined neighborhood window in the case of focal operation presented in the previous section.
 Consequently, raster cells defining the zonal filter do not necessarily have to be neighbors.
-Our grain size raster is a good example, as illustrated in the right panel of Figure \@ref(fig:cont-raster)): different grain sizes are spread irregularly throughout the raster.
+Our grain size raster is a good example, as illustrated in the right panel of Figure \@ref(fig:cont-raster): different grain sizes are spread irregularly throughout the raster.
 Finally, the result of a zonal operation is a summary table grouped by zone which is why this operation is also known as *zonal statistics* in the GIS world\index{GIS}. 
 This is in contrast to focal operations which return a raster object.
 
 The following code chunk uses the `zonal()` function to calculate the mean elevation associated with each grain size class, for example.
-The output is shown in Figure \@ref(fig:cont-raster)).
 
 ```{r 04-spatial-operations-43}
 z = zonal(elev, grain, fun = "mean")
