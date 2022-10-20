@@ -44,21 +44,9 @@ This chapter focuses on supervised techniques in which there is a training datas
 Response variables can be binary (such as landslide occurrence), categorical (land use), integer (species richness count) or numeric (soil acidity measured in pH).
 Supervised techniques model the relationship between such responses --- which are known for a sample of observations --- and one or more predictors.
 
-<!-- For this we can use techniques from the field of statistics or from the field of machine learning.
-Which to use depends on the primary aim: statistical inference or prediction.
-Statistical regression techniques are especially useful if the aim is statistical inference.
-These techniques also allow predictions of unseen data points but this is usually only of secondary interest to statisticians.
-Statistical inference, on the other hand, refers among others to a predictor's significance, its importance for a specific model, its relationship with the response and the uncertainties associated with the estimated coefficients.
-To trust the p-values and standard errors of such models we need to perform a thorough model validation testing if one or several of the underlying model assumptions (heterogeneity, independence, etc.) have been violated [@zuur_mixed_2009].
-By contrast, statistical inference is impossible with machine learning [@james_introduction_2013].
--->
-<!-- The primary aim of machine learning is to make good predictions, whereas the field of statistics is more focussed on the underlying theory [e.g. @zuur_mixed_2009] -->
-
 The primary aim of much machine learning\index{machine learning} research is to make good predictions, as opposed to statistical/Bayesian inference, which is good at helping to understand underlying mechanisms and uncertainties in the data [see @krainski_advanced_2018].
 Machine learning thrives in the age of 'big data'\index{big data} because its methods make few assumptions about input variables and can handle huge datasets.
 Machine learning is conducive to tasks such as the prediction of future customer behavior, recommendation services (music, movies, what to buy next), face recognition, autonomous driving, text classification and predictive maintenance (infrastructure, industry).
-
-<!-- ^[In this case we do not have too worry too much about possible model misspecifications since we explicitly do not want to do statistical inference.] -->
 
 This chapter is based on a case study: the (spatial) prediction of landslides.
 This application links to the applied nature of geocomputation, defined in Chapter \@ref(intro), and illustrates how machine learning\index{machine learning} borrows from the field of statistics\index{statistics} when the sole aim is prediction.
@@ -222,18 +210,6 @@ knitr::include_graphics("figures/lsl-susc-1.png")
 Here, when making predictions we neglect spatial autocorrelation\index{autocorrelation!spatial} since we assume that on average the predictive accuracy remains the same with or without spatial autocorrelation structures.
 However, it is possible to include spatial autocorrelation\index{autocorrelation!spatial} structures into models [@zuur_mixed_2009;@blangiardo_spatial_2015;@zuur_beginners_2017] as well as into predictions [kriging approaches, see, e.g., @goovaerts_geostatistics_1997;@hengl_practical_2007;@bivand_applied_2013].
 This is, however, beyond the scope of this book.
-<!--
-Nevertheless, we give the interested reader some pointers where to look it up:
-
-1. The predictions of regression kriging combines the predictions of a regression with the kriging of the regression's residuals [@bivand_applied_2013]. 
-2. One can also add a spatial correlation (dependency) structure to a generalized least squares model  [`nlme::gls()`; @zuur_mixed_2009; @zuur_beginners_2017].  
-3. Finally, there are mixed-effect modeling approaches.
-Basically, a random effect imposes a dependency structure on the response variable which in turn allows for observations of one class to be more similar to each other than to those of another class [@zuur_mixed_2009]. 
-Classes can be, for example, bee hives, owl nests, vegetation transects or an altitudinal stratification.
-This mixed modeling approach assumes normal and independent distributed random intercepts.^[Note that for spatial predictions one would usually use the population intercept.]
-This can even be extended by using a random intercept that is normal and spatially dependent.
-For this, however, you will have to resort most likely to Bayesian modeling approaches since frequentist software tools are rather limited in this respect especially for more complex models [@blangiardo_spatial_2015; @zuur_beginners_2017]. 
--->
 
 Spatial prediction maps are one very important outcome of a model.
 Even more important is how good the underlying model is at making them since a prediction map is useless if the model's predictive performance is bad.
@@ -263,9 +239,6 @@ For example, a 100-repeated 5-fold cross-validation means to randomly split the 
 This guarantees that each observation is used once in one of the test sets, and requires the fitting of five models.
 Subsequently, this procedure is repeated 100 times.
 Of course, the data splitting will differ in each repetition.
-<!--if the error is calc. on the fold-level. most often its calc. on the repetition level. maybe worth noting.
-talk about this in person
--->
 Overall, this sums up to 500 models, whereas the mean performance measure (AUROC\index{AUROC}) of all models is the model's overall predictive power.
 
 However, geographic data is special.
@@ -273,16 +246,9 @@ As we will see in Chapter \@ref(transport), the 'first law' of geography states 
 This means these points are not statistically independent because training and test points in conventional CV\index{cross-validation} are often too close to each other (see first row of Figure \@ref(fig:partitioning)).
 'Training' observations near the 'test' observations can provide a kind of 'sneak preview':
 information that should be unavailable to the training dataset.
-<!-- "folds" only for the repetition split, "partitions" or "subsets" for splitting within a fold
-talk about this in person
--->
 To alleviate this problem 'spatial partitioning' is used to split the observations into spatially disjointed subsets (using the observations' coordinates in a *k*-means clustering\index{clustering!kmeans}; @brenning_spatial_2012; second row of Figure \@ref(fig:partitioning)).
 This partitioning strategy is the **only** difference between spatial and conventional CV.
 As a result, spatial CV leads to a bias-reduced assessment of a model's predictive performance, and hence helps to avoid overfitting\index{overfitting}.
-<!-- Alex suggested to remove this: 
-It is important to note that spatial CV reduces the bias introduced by spatial autocorrelation but does not completely remove it. 
-This is because there are still a few points in the test and training data which are still neighbors (@brenning_spatial_2012; see second row of \@ref(fig:partitioning)).
--->
 
 ```{r partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row).", echo=FALSE, fig.scap="Spatial visualization of selected test and training observations."}
 knitr::include_graphics("figures/13_partitioning.png")
@@ -434,9 +400,6 @@ As performance measure, we again choose the AUROC.
 To retrieve it, we use the `score()` method of the resampling result output object (`score_spcv_glm`).
 This returns a `data.table` object with 500 rows -- one for each model.
 
-<!--toDo:jn-->
-<!--fix pipes-->
-
 ```{r 12-spatial-cv-19, eval=FALSE}
 # reduce verbosity
 lgr::get_logger("mlr3")$set_threshold("warn")
@@ -445,7 +408,7 @@ rr_spcv_glm = mlr3::resample(task = task,
                              learner = learner,
                              resampling = resampling)
 # compute the AUROC as a data.table
-score_spcv_glm = rr_spcv_glm$score(measure = mlr3::msr("classif.auc")) %>%
+score_spcv_glm = rr_spcv_glm$score(measure = mlr3::msr("classif.auc")) |>
   # keep only the columns you need
   .[, .(task_id, learner_id, resampling_id, classif.auc)]
 ```
@@ -468,8 +431,7 @@ mean(score_spcv_glm$classif.auc) |>
 ```
 
 To put these results in perspective, let us compare them with AUROC\index{AUROC} values from a 100-repeated 5-fold non-spatial cross-validation (Figure \@ref(fig:boxplot-cv); the code for the non-spatial cross-validation\index{cross-validation} is not shown here but will be explored in the exercise section).
-<!--JN: why "as expected"? I think it would be great to explain this expectation in a few sentences here...-->
-As expected, the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance due to spatial autocorrelation\index{autocorrelation!spatial} of the latter.
+As expected (see section \@(intro-cv)), the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance due to spatial autocorrelation\index{autocorrelation!spatial} of the latter.
 
 ```{r boxplot-cv, echo=FALSE, message=FALSE, out.width="75%", fig.cap="Boxplot showing the difference in GLM AUROC values on spatial and conventional 100-repeated 5-fold cross-validation.", fig.scap="Boxplot showing AUROC values."}
 library(ggplot2)
@@ -533,8 +495,8 @@ lrn_ksvm$fallback = lrn("classif.featureless", predict_type = "prob")
 The next stage is to specify a resampling strategy.
 Again we will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatial CV}.
 
-<!-- Instead of saying "outer resampling" we concluded to use "performance estimation level" and "tuning level" (inner) in our paper
-# this is also what is shown in the nested CV figure so it would be more consistent -->
+<!-- we agreed on using "performance estimation level" and "tuning level" instead of saying "outer and inner resampling" in our paper
+-->
 
 ```{r 12-spatial-cv-25}
 # performance estimation level
@@ -556,22 +518,6 @@ This means that we split each fold again into five spatially disjoint subfolds w
 To find the optimal hyperparameter combination, we fit 50 models (`terminator` object in the code chunk below) in each of these subfolds with randomly selected values for the hyperparameters C and Sigma.
 The random selection of values C and Sigma is additionally restricted to a predefined tuning space (`search_space` object).
 The range of the tuning space was chosen with values recommended in the literature [@schratz_hyperparameter_2019].
-
-<!--
-Questions Pat:
-- why not using e1071 svm -> inner hyperparameter tuning also possible I guess...
-## Because kernlab has more kernel options. Other than that there is no argument
-- explanation correct?
-## If you mean the paragraph above, yes
-- trafo-function?
-## is just a different approach of writing the limits. You could also directly write 2^{-15}. Makes it easier to see the limits at the first glance. Personal preference though
-- 125,000 models
--->
-
-<!--
-talk in person (see also exercises):
-- can I compare the mean AUROC of the GLM and the SVM when using the same seed? Or is seeding not strictly necessary? I mean, ok, the partitions vary a bit but overall...
--->
 
 ```{r 12-spatial-cv-26, eval=FALSE}
 # five spatially disjoint partitions
@@ -637,9 +583,6 @@ After the processing, it is good practice to explicitly stop the parallelization
 Finally, we save the output object (`result`) to disk in case we would like to use it in another R session.
 Before running the subsequent code, be aware that it is time-consuming since it will run the spatial cross-validation with 125,500 models.
 Note that runtime depends on many aspects: CPU speed, the selected algorithm, the selected number of cores and the dataset.
-
-<!--toDo:jn-->
-<!--fix pipes-->
 
 ```{r 12-spatial-cv-30, eval=FALSE}
 progressr::with_progress(expr = {
