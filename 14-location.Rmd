@@ -322,9 +322,9 @@ shops = map(metro_names, function(x) {
   message("Downloading shops of: ", x, "\n")
   # give the server a bit time
   Sys.sleep(sample(seq(5, 10, 0.1), 1))
-  query = opq(x) |>
-    add_osm_feature(key = "shop")
-  points = osmdata_sf(query)
+  query = osmdata::opq(x) |>
+    osmdata::add_osm_feature(key = "shop")
+  points = osmdata::osmdata_sf(query)
   # request the same data again if nothing has been downloaded
   iter = 2
   while (nrow(points$osm_points) == 0 & iter > 0) {
@@ -342,20 +342,18 @@ If not, we recommend to try to download the shops again for this/these specific 
 
 ```{r 14-location-21, eval=FALSE}
 # checking if we have downloaded shops for each metropolitan area
-ind = map_dbl(shops, nrow) == 0
+ind = purrr::map_dbl(shops, nrow) == 0
 if (any(ind)) {
   message("There are/is still (a) metropolitan area/s without any features:\n",
           paste(metro_names[ind], collapse = ", "), "\nPlease fix it!")
 }
 ```
 
-To make sure that each list element (an `sf`\index{sf} data frame) comes with the same columns, we only keep the `osm_id` and the `shop` columns with the help of another `map` loop.
-This is not a given since OSM contributors are not equally meticulous when collecting data.
-Finally, we `rbind` all shops into one large `sf`\index{sf} object.
+To make sure that each list element (an `sf`\index{sf} data frame) comes with the same columns^[This is not a given since OSM contributors are not equally meticulous when collecting data.] we only keep the `osm_id` and the `shop` columns with the help of the `map_dfr` loop which additionally rowbinds all shops into one large `sf`\index{sf} object.
 
 ```{r 14-location-22, eval=FALSE}
 # select only specific columns
-shops = map_dfr(shops, dplyr::select, osm_id, shop)
+shops = purrr::map_dfr(shops, dplyr::select, osm_id, shop)
 ```
 
 Note: `shops` is provided in the `spDataLarge` and can be accessed as follows:
