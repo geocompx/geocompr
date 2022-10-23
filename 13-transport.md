@@ -324,7 +324,7 @@ Desire lines are important generalized components of transport systems.
 More concrete components include nodes, which have specific destinations (rather than hypothetical straight lines represented in desire lines).
 Nodes are covered in the next section.
 
-## Nodes
+## Nodes {#nodes}
 
 Nodes in geographic transport datasets are points among the predominantly linear features that comprise transport networks.
 Broadly are two main types of transport nodes:
@@ -409,9 +409,28 @@ Multi-modal routing engines can return results consisting of multiple *legs*, ea
 The optimal route from a residential area to a commercial area could involve 1) walking to the nearest bus stop, 2) catching the bus to the nearest node to the destination, and 3) walking to the destination, given a set of input parameters.
 The transition points between these three legs are commonly referred to as 'ingress' and 'egress', meaning getting on/off a public transport vehicle.
 Multi-modal routing engines such as R5 are more sophisticated and have larger input data requirements than 'uni-modal' routing engines such as OSRM (described in Section \@ref(localengine)).
+
 A major strength of multi-modal engines is their ability to represent 'transit' (public transport) trips by trains, buses etc.
 Multi-model routing engines require input datasets representing public transport networks, typically in General Transit Feed Specification ([GTFS](https://developers.google.com/transit/gtfs)) files, which can be processed with functions in the [**tidytransit**](https://r-transit.github.io/tidytransit/index.html) and [**gtfstools**](https://ipeagit.github.io/gtfstools/) packages (other packages and tools for working with GTFS files are available).
-A uni-modal routing engine may be sufficient for projects focused on specific (non public) modes of transport.
+Single mode routing engines may be sufficient for projects focused on specific (non public) modes of transport.
+Another way of classifying routing engines (or settings) is by the geographic level of the outputs: routes, legs and segments.
+
+
+### Routes, legs and segments {#route-legs-segments}
+
+Routing engines can generate outputs at three geographic levels: routes, legs and segments:
+
+- Route level outputs contain a single feature (typically a multilinestring and associated row in the data frame representation) per origin-destination pair, meaning a single row of data per trip.
+- Segment level outputs contain a single feature and associated attributes per mode for each origin-destination pair, as described in Section \@ref(nodes). The **r5r** function `detailed_itineraries()` returns legs which, confusingly, are sometimes referred to as 'segments'.
+- Segment level outputs provide the most detailed information about routes, with records for each small section of the transport network. Typically segments are similar in length, or identical to, ways in OpenStreetMap. The **cyclestreets** function `journey()` returns data at the segment level which can be aggregated by grouping by origin and destination level data returned by the `route()` function in **stplanr**.
+
+Most routing engines return route level by default, although multi-modal engines generally provide outputs at the leg level (one feature per continuous movement by a single mode of transport).
+Segment level outputs have the advantage of providing more detail.
+The **cyclestreets** package returns multiple 'quietness' levels per route, enabling identification of the 'weakest link' in cycle networks.
+Disadvantages of segment level outputs include increased file sizes and complexities associated with the extra detail.
+
+Route level results can be converted into segment level results using the function `stplanr::overline()` [@morgan_travel_2020].
+When working with segment or leg-level data, route-level statistics can be returned by grouping by columns representing trip start and end points and summarizing/aggregating columns containing segment-level data.
 
 ### In-memory routing with R {#memengine}
 
@@ -452,19 +471,6 @@ However, a minor disadvantage of this proliferation of package and approaches is
 The package **stplanr** tackles this problem by providing a unified interface for generating routes with the `route()` function.
 The function takes a wide range of inputs, including geographic desire lines (with the `l =` argument), coordinates and even text strings representing unique addresses, and returns route data as consistent `sf` objects.
 <!-- TODO: at some point I hope to create a dedicated router package, mention that if it gets created (RL 2022-07) -->
-
-### Route and segment level outputs
-
-There are two broad types of output: route level and segment level.
-Route level outputs contain a single feature (typically a multilinestring and associated row in the data frame representation) per origin-destination pair, meaning a single row of data per trip.
-Most routing engines return route level by default, although multi-modal engines generally provide outputs at the 'leg' level (one feature per continuous movement by a single mode of transport).
-Segment level data, by contrast, provides information about routes at the street segment.
-The **cyclestreets** package, for example, provides segment level data by default, including street names and level of 'quietness', a proxy for cycle-friendliness.
-
-Segment level results are less common.
-They are more complex (with many rows of data returned for a single OD pair), making them harder to work with.
-Segment level results provide characteristics of individual ways on the network are important, useful when aiming to discern the most dangerous part of trip, although route level results can be converted into segment level results using the function `stplanr::overline()` [@morgan_travel_2020].
-When working with segment or leg-level data, route-level statistics can be returned by grouping by columns representing trip start and end points and summarizing/aggregating columns containing segment-level data.
 
 ### Routing: A worked example
 
@@ -716,7 +722,7 @@ Similar tools could be used to encourage evidence-based transport policies relat
 
 
 E1. In much of the analysis presented in the chapter we focused on active modes, but what about driving trips?
-  - What proportion of trips in the `desire_lines` object are made by driving a car in Bristol?
+  - What proportion of trips in the `desire_lines` object are made by driving?
   - What proportion of `desire_lines` have a straight line length of 5 km or more in distance?
   - What proportion of trips in desire lines that are longer than 5 km in length are made by driving?
   - Plot the desire lines that are both less than 5 km in length and along which more than 50% of trips are made by car.
