@@ -5,15 +5,23 @@
 ## Prerequisites {-}
 
 This is the first practical chapter of the book, and therefore it comes with some software requirements.
-We assume that you have an up-to-date version of R installed and that you are comfortable using software with a command-line interface such as the integrated development environment (IDE) RStudio.
-<!--or VSCode?-->
+You need access to a computer with a recent version of R installed (R [4.2.0](https://stat.ethz.ch/pipermail/r-announce/2022/000683.html) or a later version).
+We recommend not only reading the prose but also *running the code* in each chapter to build your geocomputational skills.
 
-<!-- Should we update these references to more up-to-date resources? -->
-If you are new to R, we recommend reading Chapter 2 of the online book *Efficient R Programming* by @gillespie_efficient_2016 and learning the basics of the language with reference to resources such as @grolemund_r_2016.
-Organize your work (e.g., with RStudio projects) and give scripts sensible names such as `02-chapter.R` to document the code you write as you learn.
+To keep track of your learning journey, it may be worth starting by creating a new folder on your computer to save your R scripts, outputs and other things related to Geocomputation with R as you go.
+You can also [download](https://github.com/Robinlovelace/geocompr/archive/refs/heads/main.zip) or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the [source code](https://github.com/Robinlovelace/geocompr) underlying the book to support your learning.
+We strongly recommend installing an integrated development environment (IDE) such as [RStudio](https://www.rstudio.com/products/rstudio/download/#download) (recommended for most people) or [VS Code](https://github.com/REditorSupport/vscode-R) when writing/running/testing R code.^[
+We recommend using [RStudio projects](https://r4ds.had.co.nz/workflow-projects.html), [VS Code workspaces](https://code.visualstudio.com/docs/editor/workspaces) or similar system to manage your projects.
+A quick way to do this with RStudio is via the **rstudioapi** package.
+Open a new project called 'geocompr-learning' in your home directory with the following command from the R console in RStudio, for example: `rstudioapi::openProject("~/geocompr-learning")`.
+]
+
+If you are new to R, we recommend following introductory R resources such as [Hands on Programming with R](https://rstudio-education.github.io/hopr/starting.html) by Garrett Grolemund or an [Introduction to R](https://cengel.github.io/R-intro/) by Claudia Engel before you dive into Geocomputation with R code.
+Organize your work (e.g., with RStudio projects) and give scripts sensible names such as `chapter-02-notes.R` to document the code as you learn.
 \index{R!pre-requisites}
 
-The packages used in this chapter can be installed with the following commands:^[
+After you have got a good set-up, it's time to run some code!
+Unless you already have these packages installed, the first thing to do is to install foundational R packages used in this chapter, with the following commands:^[
 **spDataLarge** is not on CRAN\index{CRAN}, meaning it must be installed via *r-universe*  or with the following command: `remotes::install_github("Nowosad/spDataLarge")`.
 ]
 
@@ -26,13 +34,17 @@ install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
 
 \index{R!installation}
 ```{block2 02-spatial-data-2, type='rmdnote'}
+We recommend following R instructions on [CRAN](https://cran.r-project.org/).
 If you're running Mac or Linux, the previous command to install **sf** may not work first time.
 These operating systems (OSs) have 'systems requirements' that are described in the package's [README](https://github.com/r-spatial/sf).
-Various OS-specific instructions can be found online, such as the article *Installation of R 4.0 on Ubuntu 20.04* on the blog [rtask.thinkr.fr](https://rtask.thinkr.fr/installation-of-r-4-0-on-ubuntu-20-04-lts-and-tips-for-spatial-packages/).
+Other OS-specific instructions can be found online, including the article *Installation of R 4.2 on Ubuntu 22.04.1 LTS and tips for spatial packages* on the [rtask.thinkr.fr](https://rtask.thinkr.fr/installation-of-r-4-2-on-ubuntu-22-04-lts-and-tips-for-spatial-packages/) website.
 ```
 
-All the packages needed to reproduce the contents of the book can be installed with the following command: `remotes::install_github("geocompr/geocompkg")`.
-The necessary packages can be 'loaded' (technically they are attached) with the `library()` function as follows:
+The packages needed to reproduce Part 1 of this book can be installed with the following command: `remotes::install_github("geocompr/geocompkg")`.
+This command uses the function `install_packages()` from the **remotes** package to install source code hosted on the GitHub code hosting, version and collaboration platform.
+The following command will install **all** dependencies required to reproduce the entire book (warning: this may take several minutes): `remotes::install_github("geocompr/geocompkg", dependencies = TRUE)`
+
+The packages needed to run the code presented in this chapter can be 'loaded' (technically they are attached) with the `library()` function as follows:
 
 ```{r 02-spatial-data-3-1, message=TRUE}
 library(sf)          # classes and functions for vector data
@@ -110,20 +122,20 @@ knitr::include_graphics(c("figures/vector_lonlat.png", "figures/vector_projected
 
 **sf** provides classes for geographic vector data and a consistent command-line interface to important low level libraries for geocomputation:
 
-- GDAL\index{GDAL}, for reading, writing and manipulating a wide range of geographic data formats, covered in Chapter \@ref(read-write)
-- PROJ, a powerful library for coordinate system transformations, which underlies the content covered in Chapter \@ref(reproj-geo-data)
-- GEOS\index{GEOS}, a planar geometry engine for operations such as calculating buffers and centroids on data with a projected CRS, covered in Chapter \@ref(geometric-operations)
+- [GDAL](https://gdal.org/)\index{GDAL}, for reading, writing and manipulating a wide range of geographic data formats, covered in Chapter \@ref(read-write)
+- [PROJ](https://proj.org/), a powerful library for coordinate system transformations, which underlies the content covered in Chapter \@ref(reproj-geo-data)
+- [GEOS](https://libgeos.org/)\index{GEOS}, a planar geometry engine for operations such as calculating buffers and centroids on data with a projected CRS, covered in Chapter \@ref(geometry-operations)
 - [S2](https://s2geometry.io/), a spherical geometry engine written in C++ developed by Google, via the [**s2**](https://r-spatial.github.io/s2/) package, covered in Section \@ref(s2) below and in Chapter \@ref(reproj-geo-data)
 <!-- - [liblwgeom](https://github.com/postgis/postgis/tree/master/liblwgeom), a geometry engine used by PostGIS, via the [**lwgeom**](https://r-spatial.github.io/lwgeom/) package -->
 
 Information about these interfaces is printed by **sf** the first time the package is loaded: the message `Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1; sf_use_s2() is TRUE` that appears below the `library(sf)` command at the beginning of this chapter tells us the versions of linked GEOS, GDAL and PROJ libraries (these vary between computers and over time) and whether or not the S2 interface is turned on.
 Nowadays, we take it for granted, however, only the tight integration with different geographic libraries makes reproducible geocomputation possible in the first place.
 
-A neat feature of **sf** is that you can change switch the default geometry engine used on unprojected data: 'switching off' S2 can be done with the command `sf::sf_use_s2("FALSE")`, meaning that the planar geometry engine GEOS will be used by default for all geometry operations, including geometry operations on unprojected data.
+A neat feature of **sf** is that you can change the default geometry engine used on unprojected data: 'switching off' S2 can be done with the command `sf::sf_use_s2(FALSE)`, meaning that the planar geometry engine GEOS will be used by default for all geometry operations, including geometry operations on unprojected data.
 As we will see in Section \@ref(s2), planar geometry is based on 2 dimensional space.
 Planar geometry engines such as GEOS assume 'flat' (projected) coordinates while spherical geometry engines such as S2 assume unprojected (lon/lat) coordinates.
 
-This section introduces **sf** classes in preparation for subsequent chapters (Chapters \@ref(geometric-operations) and \@ref(read-write) cover the GEOS and GDAL interface, respectively).
+This section introduces **sf** classes in preparation for subsequent chapters (Chapters \@ref(geometry-operations) and \@ref(read-write) cover the GEOS and GDAL interface, respectively).
 
 ### An introduction to simple features {#intro-sf}
 
@@ -133,7 +145,7 @@ Simple Features is a hierarchical data model that represents a wide range of geo
 Of 18 geometry types supported by the specification, only 7 are used in the vast majority of geographic research (see Figure \@ref(fig:sf-ogc));
 these core geometry types are fully supported by the R package **sf** [@pebesma_simple_2018].^[
 The full OGC standard includes rather exotic geometry types including 'surface' and 'curve' geometry types, which currently have limited application in real world applications.
-All 18 types can be represented with the **sf** package, although (as of summer 2018) plotting only works for the 'core 7'.
+All 18 types can be represented with the **sf** package, although at the time of writing (2022) plotting only works for the 'core 7'.
 ]
 
 ```{r sf-ogc, fig.cap="Simple feature types fully supported by sf.", out.width="60%", echo=FALSE}
@@ -259,17 +271,17 @@ There are many reasons (linked to the advantages of the simple features model):
 - Enhanced plotting performance
 - **sf** objects can be treated as data frames in most operations
 - **sf** function names are relatively consistent and intuitive (all begin with `st_`)
-- **sf** functions can be combined using `%>%` operator and works well with the [tidyverse](http://tidyverse.org/) collection of R packages\index{tidyverse}.
+- **sf** functions can be combined with the `|>` operator and works well with the [tidyverse](http://tidyverse.org/) collection of R packages\index{tidyverse}.
 
 **sf**'s support for **tidyverse** packages is exemplified by the provision of the `read_sf()` function for reading geographic vector datasets.
 Unlike the function `st_read()`, which returns attributes stored in a base R `data.frame` (and which provides more verbose messages, not shown in the code chunk below), `read_sf()` returns data as a **tidyverse** `tibble`.
 This is demonstrated below (see Section \@ref(iovec)) on reading geographic vector data):
 
 ```{r}
-nc_dfr = st_read(system.file("shape/nc.shp", package = "sf"))
-nc_tbl = read_sf(system.file("shape/nc.shp", package = "sf"))
-class(nc_dfr)
-class(nc_tbl)
+world_dfr = st_read(system.file("shapes/world.shp", package = "spData"))
+world_tbl = read_sf(system.file("shapes/world.shp", package = "spData"))
+class(world_dfr)
+class(world_tbl)
 ```
 
 As described in Chapter \@ref(attr), which shows how to manipulate `sf` objects with **tidyverse** functions, **sf** is now the go-to package for analysis of spatial vector data in R (not withstanding the **spatstat** package ecosystem which provides numerous functions for spatial statistics).
@@ -290,7 +302,7 @@ world_sf = st_as_sf(world_sp)           # from sp to sf
 ### Basic map making {#basic-map}
 
 Basic maps are created in **sf** with `plot()`.
-By default this creates a multi-panel plot (like **sp**'s `spplot()`), one sub-plot for each variable of the object, as illustrated in the left-hand panel in Figure \@ref(fig:sfplot).
+By default this creates a multi-panel plot, one sub-plot for each variable of the object, as illustrated in the left-hand panel in Figure \@ref(fig:sfplot).
 A legend or 'key' with a continuous color is produced if the object to be plotted has a single variable (see the right-hand panel).
 Colors can also be set with `col = `, although this will not create a continuous palette or a legend. 
 \index{map making!basic}
@@ -304,7 +316,7 @@ Plots are added as layers to existing images by setting `add = TRUE`.^[
 `plot()`ing of **sf** objects uses `sf:::plot.sf()` behind the scenes.
 `plot()` is a generic method that behaves differently depending on the class of object being plotted.
 ]
-To demonstrate this, and to provide a taster of content covered in Chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, the subsequent code chunk combines countries in Asia:
+To demonstrate this, and to provide a insight into the contents of Chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, the subsequent code chunk filters countries in Asia and combines them into a single feature:
 
 ```{r 02-spatial-data-14, warning=FALSE}
 world_asia = world[world$continent == "Asia", ]
@@ -345,17 +357,20 @@ plot(st_geometry(world_cents), add = TRUE, cex = cex)
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/02-contpop.R")
 ```
 
-The code above uses the function `st_centroid()` to convert one geometry type (polygons) to another (points) (see Chapter \@ref(geometric-operations)), the aesthetics of which are varied with the `cex` argument.
+The code above uses the function `st_centroid()` to convert one geometry type (polygons) to another (points) (see Chapter \@ref(geometry-operations)), the aesthetics of which are varied with the `cex` argument.
 
 \index{bounding box}
 **sf**'s plot method also has arguments specific to geographic data. `expandBB`, for example, can be used to plot an `sf` object in context:
 it takes a numeric vector of length four that expands the bounding box of the plot relative to zero in the following order: bottom, left, top, right.
-This is used to plot India in the context of its giant Asian neighbors, with an emphasis on China to the east, in the following code chunk, which generates Figure \@ref(fig:china) (see exercises below on adding text to plots):
+This is used to plot India in the context of its giant Asian neighbors, with an emphasis on China to the east, in the following code chunk, which generates Figure \@ref(fig:china) (see exercises below on adding text to plots):^[
+Note the use of `st_geometry(india)` to return only the geometry associated with the object to prevent attributes being plotted in a simple feature column (`sfc`) object.
+An alternative is to use `india[0]`, which returns an `sf` object that contains no attribute data..
+]
 
 ```{r 02-spatial-data-17, eval=FALSE}
 india = world[world$name_long == "India", ]
 plot(st_geometry(india), expandBB = c(0, 0.2, 0.1, 1), col = "gray", lwd = 3)
-plot(world_asia[0], add = TRUE)
+plot(st_geometry(world_asia), add = TRUE)
 ```
 
 ```{r china, fig.cap="India in context, demonstrating the expandBB argument.", warning=FALSE, echo=FALSE, out.width="50%"}
@@ -370,7 +385,11 @@ text(indchi_coords[, 1], indchi_coords[, 2], indchi$name_long)
 par(old_par)
 ```
 
-Note the use of `[0]` to keep only the geometry column and `lwd` to emphasize India.
+```{r, eval=FALSE, echo=FALSE}
+waldo::compare(st_geometry(world), world[0])
+```
+
+Note the use of `lwd` to emphasize India in the plotting code.
 See Section \@ref(other-mapping-packages) for other visualization techniques for representing a range of geometry types, the subject of the next section.
 
 ### Geometry types {#geometry}
@@ -602,9 +621,9 @@ st_multipolygon(multipolygon_list)
 
 ```{r 02-spatial-data-24, eval=FALSE}
 ## GEOMETRYCOLLECTION
-gemetrycollection_list = list(st_multipoint(multipoint_matrix),
+geometrycollection_list = list(st_multipoint(multipoint_matrix),
                               st_linestring(linestring_matrix))
-st_geometrycollection(gemetrycollection_list)
+st_geometrycollection(geometrycollection_list)
 #> GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2),
 #>   LINESTRING (1 5, 4 4, 4 1, 2 2, 3 2))
 ```
@@ -727,7 +746,7 @@ The example above shows how the `sfg` object `v_sfg_sfh` is printed when **sf** 
 When **sf** is loaded (as is the case here), the result of the above command is indistinguishable from `sf` objects:
 
 ```{r}
-v_sfg_sf = st_point(v, c(1, 2))
+v_sfg_sf = st_point(v)
 print(v_sfg_sf) == print(v_sfg_sfh)
 ```
 
@@ -775,7 +794,7 @@ st_crs(df_sf) = "EPSG:4326"
 ```
 
 **sfheaders** is also good at 'deconstructing' and 'reconstructing' `sf` objects, meaning converting geometry columns into data frames that contain data on the coordinates of each vertex and geometry feature (and multi-feature) ids.
-It is fast and reliable at 'casting' geometry columns to different types, a topic covered in Chapter \@ref(geometric-operations).
+It is fast and reliable at 'casting' geometry columns to different types, a topic covered in Chapter \@ref(geometry-operations).
 Benchmarks, in the package's [documentation](https://dcooley.github.io/sfheaders/articles/examples.html#performance) and in test code developed for this book, show it is much faster than the `sf` package for such operations.
 
 ### Spherical geometry operations with S2 {#s2}
@@ -828,6 +847,14 @@ Turn it on again with the following command.
 sf_use_s2(TRUE)
 ```
 
+```{block2 09-gis-2, type="rmdnote"}
+Although the **sf**'s used of S2 makes sense in many cases, in some cases there are good reasons for turning S2 off for the duration of an R session or even for an entire project.
+As documented in issue [1771](https://github.com/r-spatial/sf/issues/1771) in **sf**'s GitHub repo, the default behavior can make code that would work with S2 turned off (and with older versions of **sf**) fail.
+These edge cases include operations on polygons that are not valid according to S2's stricter definition.
+If you see error message such as `#> Error in s2_geography_from_wkb ...` it may be worth trying the command that generated the error message again, after turning off S2. 
+To turn off S2 for the entirety of a project you can create a file called .Rprofile in the root directory (the main folder) of your project containing the command `sf::sf_use_s2(FALSE)`.
+```
+
 ## Raster data
 
 The spatial raster data model represents the world with the continuous grid of cells (often also called pixels; Figure \@ref(fig:raster-intro-plot):A).
@@ -872,7 +899,7 @@ In this book we focus on **terra**, which replaces the older and (in most cases)
 Before learning about the how **terra**'s class system works, this section describes similarities and differences between **terra** and **stars**; this knowledge will help decide which is most appropriate in different situations.
 
 First, **terra** focuses on the most common raster data model (regular grids), while **stars** also allows storing less popular models (including regular, rotated, sheared, rectilinear, and curvilinear grids).
-While **terra** usually handle one or multi-layered rasters^[It also has an additional class `SpatRasterDataset` for storing many collections of datasets.], the **stars** package provides ways to store raster data cubes -- a raster object with many layers (e.g., bands), for many moments in time (e.g., months), and many attributes (e.g., sensor type A and sensor type B).
+While **terra** usually handles one or multi-layered rasters^[It also has an additional class `SpatRasterDataset` for storing many collections of datasets.], the **stars** package provides ways to store raster data cubes -- a raster object with many layers (e.g., bands), for many moments in time (e.g., months), and many attributes (e.g., sensor type A and sensor type B).
 Importantly, in both packages, all layers or elements of a data cube must have the same spatial dimensions and extent.
 Second, both packages allow to either read all of the raster data into memory or just to read its metadata -- this is usually done automatically based on the input file size.
 However, they store raster values very differently. 
@@ -922,7 +949,7 @@ Typing the name of the raster into the console, will print out the raster header
 my_rast
 ```
 
-Dedicated functions report each component: `dim(my_rast)` returns the number of rows, columns and layers; `ncell()` the number of cells (pixels); `res()` the spatial resolution; `ext()` its spatial extent; and `crs()` its coordinate reference system (raster reprojection is covered in Section \@ref(reproj-ras)).
+Dedicated functions report each component: `dim()` returns the number of rows, columns and layers; `ncell()` the number of cells (pixels); `res()` the spatial resolution; `ext()` its spatial extent; and `crs()` its coordinate reference system (raster reprojection is covered in Section \@ref(reproj-ras)).
 `inMemory()` reports whether the raster data is stored in memory or on disk.
 
 `help("terra-package")` returns a full list of all available **terra** functions.
@@ -986,12 +1013,14 @@ multi_rast
 nlyr(multi_rast)
 ```
 
-For multi-layer raster objects, layers can be selected with `terra::subset()`.^[The `[[` and `$` operators can also be used for layers' selection.]
+For multi-layer raster objects, layers can be selected with `terra::subset()`.^[
+The `[[` and `$` operators can also be used to select layers, for example with commands `multi_rast$landsat_1` and `multi_rast[["landsat_1"]]`.
+]
 It accepts a layer number or its name as the second argument:
 
 ```{r}
 multi_rast3 = subset(multi_rast, 3)
-multi_rast4 = subset(multi_rast, 4)
+multi_rast4 = subset(multi_rast, "landsat_4")
 ```
 
 The opposite operation, combining several `SpatRaster` objects into one, can be done using the `c` function:

@@ -1,4 +1,4 @@
-# Geometry operations {#geometric-operations}
+# Geometry operations {#geometry-operations}
 
 ## Prerequisites {-}
 
@@ -20,14 +20,15 @@ After reading it --- and attempting the exercises at the end --- you should unde
 
 Section \@ref(geo-vec) covers transforming vector geometries with 'unary' and 'binary' operations.
 Unary operations work on a single geometry in isolation, including simplification (of lines and polygons), the creation of buffers and centroids, and shifting/scaling/rotating single geometries using 'affine transformations' (Sections \@ref(simplification) to \@ref(affine-transformations)).
-Binary transformations modify one geometry based on the shape of anothe, including clipping and geometry unions\index{vector!union}, covered in Sections \@ref(clipping) and \@ref(geometry-unions), respectively.
+Binary transformations modify one geometry based on the shape of another, including clipping and geometry unions\index{vector!union}, covered in Sections \@ref(clipping) and \@ref(geometry-unions), respectively.
 Type transformations (from a polygon to a line, for example) are demonstrated in Section \@ref(type-trans).
 
 Section \@ref(geo-ras) covers geometric transformations on raster objects.
 This involves changing the size and number of the underlying pixels, and assigning them new values.
 It teaches how to change the resolution (also called raster aggregation and disaggregation), the extent and the origin of a raster.
 These operations are especially useful if one would like to align raster datasets from diverse sources.
-Aligned raster objects share a one-to-one correspondence between pixels, allowing them to be processed using map algebra operations, described in Section \@ref(map-algebra). The final Section \@ref(raster-vector) connects vector and raster objects. 
+Aligned raster objects share a one-to-one correspondence between pixels, allowing them to be processed using map algebra operations, described in Section \@ref(map-algebra). 
+The interaction between raster and vector objects is covered in Chapter \@ref(raster-vector). 
 It shows how raster values can be 'masked' and 'extracted' by vector geometries.
 Importantly it shows how to 'polygonize' rasters and 'rasterize' vector datasets, making the two data models more interchangeable.
 
@@ -75,7 +76,8 @@ As we show in Chapter \@ref(reproj-geo-data), GEOS assumes that the data is in a
 Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (epsg = 2163) (on the left in Figure \@ref(fig:us-simp)):
 
 ```{r 05-geometry-operations-4}
-us_states2163 = st_transform(us_states, 2163)
+us_states2163 = st_transform(us_states, "EPSG:2163")
+us_states2163 = us_states2163
 ```
 
 `st_simplify()` works equally well with projected polygons:
@@ -85,7 +87,7 @@ us_states_simp1 = st_simplify(us_states2163, dTolerance = 100000)  # 100 km
 ```
 
 A limitation with `st_simplify()` is that it simplifies objects on a per-geometry basis.
-This means the 'topology' is lost, resulting in overlapping and 'holy' areal units illustrated in Figure \@ref(fig:us-simp) (middle panel).
+This means the 'topology' is lost, resulting in overlapping and 'holey' areal units illustrated in Figure \@ref(fig:us-simp) (middle panel).
 `ms_simplify()` from **rmapshaper** provides an alternative that overcomes this issue.
 By default it uses the Visvalingam algorithm, which overcomes some limitations of the Douglas-Peucker algorithm [@visvalingam_line_1993].
 <!-- https://bost.ocks.org/mike/simplify/ -->
@@ -96,19 +98,33 @@ Simplification of multipolygon objects can remove small internal polygons, even 
 
 ```{r 05-geometry-operations-6, warning=FALSE, message=FALSE}
 # proportion of points to retain (0-1; default 0.05)
-us_states2163$AREA = as.numeric(us_states2163$AREA)
 us_states_simp2 = rmapshaper::ms_simplify(us_states2163, keep = 0.01,
                                           keep_shapes = TRUE)
 ```
 
-Finally, the visual comparison of the original dataset and the two simplified versions shows differences between the Douglas-Peucker (`st_simplify`) and Visvalingam (`ms_simplify`) algorithm outputs (Figure \@ref(fig:us-simp)):
 
-```{r us-simp, echo=FALSE, fig.cap="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (center) and rmapshaper (right) packages.", warning=FALSE, fig.asp=0.3, fig.scap="Polygon simplification in action."}
+An alternative to simplification is smoothing the boundaries of polygon and linestring geometries, which is implemented in the **smoothr** package. 
+Smoothing interpolates the edges of geometries and does not necessarily lead to fewer vertices, but can be especially useful when working with geometries that arise from spatially vectorizing a raster (a topic covered in Chapter \@ref(raster-vector).
+**smoothr** implements three techniques for smoothing: a Gaussian kernel regression, Chaikin's corner cutting algorithm, and spline interpolation, which are all described in the package vignette and [website](https://strimas.com/smoothr/). 
+Note that similar to `st_simplify()`, the smoothing algorithms don't preserve 'topology'.
+The workhorse function of **smoothr** is `smooth()`, where the `method` argument specifies what smoothing technique to use.
+Below is an example of using Gaussian kernel regression to smooth the borders of US states by using `method=ksmooth`.
+The `smoothness` argument controls the bandwidth of the Gaussian that is used to smooth the geometry and has a default value of 1.
+
+```{r 05-geometry-operations-6b, warning=FALSE}
+us_states_simp3 = smoothr::smooth(us_states2163, method = 'ksmooth', smoothness = 6)
+
+```
+
+Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in (Figure \@ref(fig:us-simp)). Differences can be observed between the outputs of the Douglas-Peucker (`st_simplify`), Visvalingam (`ms_simplify`), and Gaussian kernel regression (`smooth(method=ksmooth`) algorithms.
+
+```{r us-simp, echo=FALSE, fig.cap="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages.", warning=FALSE, fig.asp=0.3, fig.scap="Polygon simplification in action."}
 library(tmap)
 p_ussimp1 = tm_shape(us_states2163) + tm_polygons() + tm_layout(main.title = "Original data")
 p_ussimp2 = tm_shape(us_states_simp1) + tm_polygons() + tm_layout(main.title = "st_simplify")
 p_ussimp3 = tm_shape(us_states_simp2) + tm_polygons() + tm_layout(main.title = "ms_simplify")
-tmap_arrange(p_ussimp1, p_ussimp2, p_ussimp3, ncol = 3)
+p_ussimp4 = tm_shape(us_states_simp3) + tm_polygons() + tm_layout(main.title = "smooth(method=ksmooth)")
+tmap_arrange(p_ussimp1, p_ussimp2, p_ussimp3, p_ussimp4, ncol = 2, nrow = 2)
 ```
 
 ### Centroids
@@ -316,7 +332,7 @@ lines, polygons and their 'multi' equivalents.
 To illustrate the concept we will start with a simple example:
 two overlapping circles with a center point one unit away from each other and a radius of one (Figure \@ref(fig:points)).
 
-```{r points, fig.cap="Overlapping circles.", fig.asp=0.4}
+```{r points, fig.cap="Overlapping circles.", fig.asp=0.4, crop = TRUE}
 b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
 b = st_buffer(b, dist = 1) # convert points to circles
 plot(b, border = "grey")
@@ -326,7 +342,7 @@ text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3) # add text
 Imagine you want to select not one circle or the other, but the space covered by both `x` *and* `y`.
 This can be done using the function `st_intersection()`\index{vector!intersection}, illustrated using objects named `x` and `y` which represent the left- and right-hand circles (Figure \@ref(fig:circle-intersection)).
 
-```{r circle-intersection, fig.cap="Overlapping circles with a gray color indicating intersection between them.", fig.asp=0.4, fig.scap="Overlapping circles showing intersection types."}
+```{r circle-intersection, fig.cap="Overlapping circles with a gray color indicating intersection between them.", fig.asp=0.4, fig.scap="Overlapping circles showing intersection types.", crop = TRUE}
 x = b[1]
 y = b[2]
 x_and_y = st_intersection(x, y)
@@ -415,12 +431,13 @@ This is demonstrated in the code chunk below in which 49 `us_states` are aggrega
 ```{r 05-geometry-operations-23}
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
                     FUN = sum, na.rm = TRUE)
-regions2 = us_states %>% group_by(REGION) %>%
+regions2 = us_states |> 
+  group_by(REGION) |>
   summarize(pop = sum(total_pop_15, na.rm = TRUE))
 ```
 
 ```{r 05-geometry-operations-24, echo=FALSE}
-# st_join(buff, africa[, "pop"]) %>%
+# st_join(buff, africa[, "pop"]) |>
 #   summarize(pop = sum(pop, na.rm = TRUE))
 # summarize(africa[buff, "pop"], pop = sum(pop, na.rm = TRUE))
 ```
@@ -456,8 +473,8 @@ plot(us_southhwest)
 
 \index{vector!geometry casting} 
 Geometry casting is a powerful operation that enables transformation of the geometry type.
-It is implemented in the `st_cast` function from the **sf** package.
-Importantly, `st_cast` behaves differently on single simple feature geometry (`sfg`) objects, simple feature geometry column (`sfc`) and simple features objects.
+It is implemented in the `st_cast()` function from the **sf** package.
+Importantly, `st_cast()` behaves differently on single simple feature geometry (`sfg`) objects, simple feature geometry column (`sfc`) and simple features objects.
 
 Let's create a multipoint to illustrate how geometry casting works on simple feature geometry (`sfg`) objects:
 
@@ -465,14 +482,14 @@ Let's create a multipoint to illustrate how geometry casting works on simple fea
 multipoint = st_multipoint(matrix(c(1, 3, 5, 1, 3, 1), ncol = 2))
 ```
 
-In this case, `st_cast` can be useful to transform the new object into linestring or polygon (Figure \@ref(fig:single-cast)):
+In this case, `st_cast()` can be useful to transform the new object into a linestring or a polygon (Figure \@ref(fig:single-cast)):
 
 ```{r 05-geometry-operations-29}
 linestring = st_cast(multipoint, "LINESTRING")
 polyg = st_cast(multipoint, "POLYGON")
 ```
 
-```{r single-cast, echo = FALSE, fig.cap="Examples of linestring and polygon casted from a multipoint geometry.", warning=FALSE, fig.asp=0.3, fig.scap="Examples of casting operations."}
+```{r single-cast, echo = FALSE, fig.cap="Examples of a linestring and a polygon casted from a multipoint geometry.", warning=FALSE, fig.asp=0.3, fig.scap="Examples of casting operations."}
 p_sc1 = tm_shape(st_sfc(multipoint)) + tm_symbols(shape = 1, col = "black", size = 0.5) +
   tm_layout(main.title = "MULTIPOINT", inner.margins = c(0.05, 0.05, 0.05, 0.05))
 p_sc2 = tm_shape(st_sfc(linestring)) + tm_lines() +
@@ -483,20 +500,21 @@ tmap_arrange(p_sc1, p_sc2, p_sc3, ncol = 3)
 ```
 
 Conversion from multipoint to linestring is a common operation that creates a line object from ordered point observations, such as GPS measurements or geotagged media.
-This allows spatial operations such as the length of the path traveled.
+This, in turn, allows to perform spatial operations such as the calculation of the length of the path traveled.
 Conversion from multipoint or linestring to polygon is often used to calculate an area, for example from the set of GPS measurements taken around a lake or from the corners of a building lot.
 
-The transformation process can be also reversed using `st_cast`:
+The transformation process can be also reversed using `st_cast()`:
 
 ```{r 05-geometry-operations-30}
 multipoint_2 = st_cast(linestring, "MULTIPOINT")
 multipoint_3 = st_cast(polyg, "MULTIPOINT")
-all.equal(multipoint, multipoint_2, multipoint_3)
+all.equal(multipoint, multipoint_2)
+all.equal(multipoint, multipoint_3)
 ```
 
 ```{block2 05-geometry-operations-31, type='rmdnote'}
-For single simple feature geometries (`sfg`), `st_cast` also provides geometry casting from non-multi-types to multi-types (e.g., `POINT` to `MULTIPOINT`) and from multi-types to non-multi-types.
-However, only the first element of the old object would remain in the second group of cases.
+For single simple feature geometries (`sfg`), `st_cast()` also provides geometry casting from non-multi-types to multi-types (e.g., `POINT` to `MULTIPOINT`) and from multi-types to non-multi-types.
+However, when casting from multi-types to non-multi-types only the first element of the old object would remain in the output object.
 ```
 
 ```{r 05-geometry-operations-32, include=FALSE}
@@ -508,15 +526,15 @@ t = cast_all(multipoint)
 t2 = cast_all(polyg)
 ```
 
-Geometry casting of simple features geometry column (`sfc`) and simple features objects works the same as for single geometries in most of the cases. 
+Geometry casting of simple features geometry column (`sfc`) and simple features objects works the same as for `sfg` in most of the cases. 
 One important difference is the conversion between multi-types to non-multi-types.
-As a result of this process, multi-objects are split into many non-multi-objects.
+As a result of this process, multi-objects of `sfc` or `sf` are split into many non-multi-objects.
 
 Table \@ref(tab:sfs-st-cast) shows possible geometry type transformations on simple feature objects.
-Each input simple feature object with only one element (first column) is transformed directly into another geometry type.
-Several of the transformations are not possible, for example, you cannot convert a single point into a multilinestring or a polygon (so the cells `[1, 4:5]` in the table are NA).
-On the other hand, some of the transformations are splitting the single element input object into a multi-element object.
-You can see that, for example, when you cast a multipoint consisting of five pairs of coordinates into a point.
+Single simple feature geometries (represented by the first column in the table) can be transformed into multiple geometry types, represented by the columns in Table \@ref(tab:sfs-st-cast).
+Some transformations are not possible: you cannot convert a single point into a multilinestring or a polygon, for example, explaining why the cells `[1, 4:5]` in the table contain NA.
+Some transformations split single features input into multiple sub-features, 'expanding' `sf` objects (adding new rows with duplicate attribute values).
+When a multipoint geometry consisting of five pairs of coordinates is tranformed into a 'POINT' geometry, for example, the output will contain five features.
 
 ```{r sfs-st-cast, echo=FALSE}
 sfs_st_cast = read.csv("extdata/sfs-st-cast.csv")
@@ -536,7 +554,7 @@ knitr::kable(sfs_st_cast,
                              "(see Section 2.1) with input type by row and", 
                              "output type by column"),
              caption.short = "Geometry casting on simple feature geometries.",
-             booktabs = TRUE) %>% 
+             booktabs = TRUE) |> 
   kableExtra::add_footnote("Note: Values like (1) represent the number of features; NA means the operation is not possible. Abbreviations: POI, LIN, POL and GC refer to POINT, LINESTRING, POLYGON and GEOMETRYCOLLECTION. The MULTI version of these geometry types is indicated by a preceding M, e.g., MPOI is the acronym for MULTIPOINT.", notation = "none")
 ```
 
@@ -546,7 +564,7 @@ Let's try to apply geometry type transformations on a new object, `multilinestri
 multilinestring_list = list(matrix(c(1, 4, 5, 3), ncol = 2), 
                             matrix(c(4, 4, 4, 1), ncol = 2),
                             matrix(c(2, 4, 2, 2), ncol = 2))
-multilinestring = st_multilinestring((multilinestring_list))
+multilinestring = st_multilinestring(multilinestring_list)
 multilinestring_sf = st_sf(geom = st_sfc(multilinestring))
 multilinestring_sf
 ```
@@ -554,7 +572,7 @@ multilinestring_sf
 You can imagine it as a road or river network. 
 The new object has only one row that defines all the lines.
 This restricts the number of operations that can be done, for example it prevents adding names to each line segment or calculating lengths of single lines.
-The `st_cast` function can be used in this situation, as it separates one mutlilinestring into three linestrings:
+The `st_cast()` function can be used in this situation, as it separates one mutlilinestring into three linestrings:
 
 ```{r 05-geometry-operations-34}
 linestring_sf2 = st_cast(multilinestring_sf, "LINESTRING")
@@ -598,8 +616,7 @@ In any case, there are other reasons to perform a geometric operation on a singl
 For instance, in Chapter \@ref(location) we define metropolitan areas in Germany as 20 km^2^ pixels with more than 500,000 inhabitants. 
 The original inhabitant raster, however, has a resolution of 1 km^2^ which is why we will decrease (aggregate) the resolution by a factor of 20 (see Section \@ref(define-metropolitan-areas)).
 Another reason for aggregating a raster is simply to decrease run-time or save disk space.
-Of course, this is only possible if the task at hand allows a coarser resolution.
-Sometimes a coarser resolution is sufficient for the task at hand.
+Of course, this approach is only recommended if the task at hand allows a coarser resolution of raster data.
 
 ### Geometric intersections
 
@@ -626,7 +643,7 @@ The same problem arises when we would like to merge satellite imagery from diffe
 We can deal with such mismatches by aligning the rasters.
 
 In the simplest case, two images only differ with regard to their extent.
-Following code adds one row and two columns to each side of the raster while setting all new values to an elevation of 1000 meters (Figure \@ref(fig:extend-example)).
+Following code adds one row and two columns to each side of the raster while setting all new values to `NA` (Figure \@ref(fig:extend-example)).
 
 ```{r extend-example0}
 elev = rast(system.file("raster/elev.tif", package = "spData"))
@@ -646,7 +663,7 @@ elev_3 = elev + elev_2
 However, we can align the extent of two rasters with `extend()`. 
 Instead of telling the function how many rows or columns should be added (as done before), we allow it to figure it out by using another raster object.
 Here, we extend the `elev` object to the extent of `elev_2`. 
-The newly added rows and column receive the default value of the `value` parameter, i.e., `NA`.
+The newly added rows and column receive the `NA`.
 
 ```{r 05-geometry-operations-38}
 elev_4 = extend(elev, elev_2)
@@ -741,17 +758,47 @@ However, what to do when we have two or more rasters with different resolutions 
 This is the role of resampling -- a process of computing values for new pixel locations.
 In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin.
 
-Several methods for recalculating (estimating) values for a raster with different resolutions/origins exist (Figure \@ref(fig:resampl)).
-It includes:
+<!--toDo: jn-->
+<!-- consider if adding this new figure makes sense -->
 
-- Nearest neighbor - assigns the value of the nearest cell of the original raster to the cell of the target one.
-It is fast and usually suitable for categorical rasters
-- Bilinear interpolation - assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure \@ref(fig:bilinear)). The fastest method for continuous rasters
-- Cubic interpolation - uses values of 16 nearest cells of the original raster to determine the output cell value, applying third-order polynomial functions. Used for continuous rasters. It results in a more smoothed surface than the bilinear interpolation, but is also more computationally demanding
-- Cubic spline interpolation - also uses values of 16 nearest cells of the original raster to determine the output cell value, but applies cubic splines (piecewise third-order polynomial functions) to derive the results. Used for continuous rasters
-- Lanczos windowed sinc resampling - uses values of 36 nearest cells of the original raster to determine the output cell value. Used for continuous rasters^[More detailed explanation of this method can be found at https://gis.stackexchange.com/a/14361/20955.]
+```{r, echo=FALSE, eval=FALSE}
+target_rast = rast(xmin = 794600, xmax = 798200, 
+                   ymin = 8931800, ymax = 8935400,
+                   resolution = 150, crs = "EPSG:32717")
 
-As you can find in the above explanation, only *nearest neighbor* is suitable for categorical rasters, while all the methods can be used (with different outcomes) for the continuous rasters.
+target_rast_p = st_as_sf(as.polygons(target_rast))
+dem_resampl1 = resample(dem, target_rast, method = "near")
+
+tm1 = tm_shape(dem) +
+  tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
+  tm_layout(frame = FALSE)
+
+tm2 = tm_shape(dem) +
+  tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
+  tm_layout(frame = FALSE) +
+  tm_shape(target_rast_p) +
+  tm_borders()
+
+tm3 = tm_shape(dem_resampl1) +
+  tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
+  tm_layout(frame = FALSE)
+
+tmap_arrange(tm1, tm2, tm3, nrow = 1)
+```
+
+
+There are several methods for estimating values for a raster with different resolutions/origins, as shown in Figure \@ref(fig:resampl).
+The main resampling methods include:
+
+- Nearest neighbor: assigns the value of the nearest cell of the original raster to the cell of the target one. This is a fast simple technique that is usually suitable for resampling categorical rasters.
+- Bilinear interpolation: assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure \@ref(fig:bilinear)). This is the fastest method that is appropriate for continuous rasters.
+- Cubic interpolation: uses values of 16 nearest cells of the original raster to determine the output cell value, applying third-order polynomial functions. Used for continuous rasters and results in a smoother surface that results bilinear interpolation, but is more computationally intensive.
+- Cubic spline interpolation: also uses values of 16 nearest cells of the original raster to determine output cell, but applies cubic splines (piecewise third-order polynomial functions) to derive the results. Used for continuous rasters.
+- Lanczos windowed sinc resampling: uses values of 36 nearest cells of the original raster to determine the output cell value. Used for continuous rasters.^[
+More detailed explanation of this method can be found at https://gis.stackexchange.com/a/14361/20955.
+]
+
+The above explanation highlights that only *nearest neighbor* resampling is suitable for categorical rasters, while all the methods can be used (with different outcomes) for continuous rasters.
 Additionally, each successive method requires more processing time.
 
 To apply resampling, the **terra** package provides a `resample()` function.
@@ -803,14 +850,13 @@ tm6 = tm_shape(dem_resampl5) +
 tmap_arrange(tm1, tm2, tm3, tm4, tm5, tm6)
 ```
 
+The `resample()` function also has some additional resampling methods, including `sum`, `min`, `q1`, `med`, `q3`, `max`, `average`, `mode`, and `rms`.
+All of them calculate a given statistic based on the values of all non-NA contributing grid cells.
+For example, `sum` is useful when each raster cell represents a spatially extensive variable (e.g., number of people).
+As an effect of using `sum`, the resampled raster should have the sample total number of people as the original one.
+
 As you will see in section \@ref(reproj-ras), raster reprojection is a special case of resampling when our target raster has a different CRS than the original raster.
 
-<!--jn:toDo-->
-<!-- decide -->
-<!-- should we mention gdalUtils or gdalUtilities? -->
-<!-- gdalUtils - https://cran.r-project.org/web/packages/gdalUtils/index.html - we mentioned it in geocompr 1; however it seems abandoned -->
-<!-- gdalUtilities - https://cran.r-project.org/web/packages/gdalUtilities/index.html -->
-<!-- also - add some reference to GDAL functions! -->
 \index{GDAL}
 ```{block2 type='rmdnote'}
 Most geometry operations in **terra** are user-friendly, rather fast, and work on large raster objects.

@@ -25,7 +25,7 @@ attributes(us_states_name)
 attributes(us_states_name$geometry)
 ```
 
-```{asis}
+```{asis 03-ex-e1-asis}
 - It is of class `sf` and `data.frame`: it has 2 classes.
 - It is the `sf` class that makes in geographic.
 - More specifically it is the attributes of the object (`sf_column`) and the geometry column (such as `bbox`, `crs`) that make it geographic.
@@ -36,16 +36,16 @@ Obtain the same result using a different command (bonus: try to find three ways 
 Hint: try to use helper functions, such as `contains` or `matches` from **dplyr** (see `?contains`).
 
 ```{r 03-ex-e2}
-us_states %>% dplyr::select(total_pop_10, total_pop_15)
+us_states |> dplyr::select(total_pop_10, total_pop_15)
 
 # or
-us_states %>% dplyr::select(starts_with("total_pop"))
+us_states |> dplyr::select(starts_with("total_pop"))
 
 # or
-us_states %>% dplyr::select(contains("total_pop"))
+us_states |> dplyr::select(contains("total_pop"))
 
 # or
-us_states %>% dplyr::select(matches("tal_p"))
+us_states |> dplyr::select(matches("tal_p"))
 ```
 
 E3. Find all states with the following characteristics (bonus find *and* plot them):
@@ -55,23 +55,23 @@ E3. Find all states with the following characteristics (bonus find *and* plot th
 - Belong to the South region, had an area larger than 150,000 km^2^ or a total population in 2015 larger than 7,000,000 residents.
 
 ```{r 03-ex-e3}
-us_states %>% 
+us_states |> 
   filter(REGION == "Midwest")
 
-us_states %>% filter(REGION == "West", AREA < units::set_units(250000, km^2),total_pop_15 > 5000000)
+us_states |> filter(REGION == "West", AREA < units::set_units(250000, km^2), total_pop_15 > 5000000)
 # or
-us_states %>% filter(REGION == "West", as.numeric(AREA) < 250000,total_pop_15 > 5000000)
+us_states |> filter(REGION == "West", as.numeric(AREA) < 250000, total_pop_15 > 5000000)
 
-us_states %>% filter(REGION == "South", AREA > units::set_units(150000, km^2), total_pop_15 > 7000000)
+us_states |> filter(REGION == "South", AREA > units::set_units(150000, km^2), total_pop_15 > 7000000)
 # or
-us_states %>% filter(REGION == "South", as.numeric(AREA) > 150000, total_pop_15 > 7000000)
+us_states |> filter(REGION == "South", as.numeric(AREA) > 150000, total_pop_15 > 7000000)
 ```
 
 E4. What was the total population in 2015 in the `us_states` dataset?
 What was the minimum and maximum total population in 2015?
 
 ```{r 03-ex-e4}
-us_states %>% summarize(total_pop = sum(total_pop_15),
+us_states |> summarize(total_pop = sum(total_pop_15),
                         min_pop = min(total_pop_15),
                         max_pop = max(total_pop_15))
 ```
@@ -79,8 +79,8 @@ us_states %>% summarize(total_pop = sum(total_pop_15),
 E5. How many states are there in each region?
 
 ```{r 03-ex-e5}
-us_states %>%
-  group_by(REGION) %>%
+us_states |>
+  group_by(REGION) |>
   summarize(nr_of_states = n())
 ```
 
@@ -88,8 +88,8 @@ E6. What was the minimum and maximum total population in 2015 in each region?
 What was the total population in 2015 in each region?
 
 ```{r 03-ex-e6}
-us_states %>%
-  group_by(REGION) %>%
+us_states |>
+  group_by(REGION) |>
   summarize(min_pop = min(total_pop_15),
             max_pop = max(total_pop_15),
             tot_pop = sum(total_pop_15))
@@ -101,7 +101,7 @@ Which variable is the key in both datasets?
 What is the class of the new object?
 
 ```{r 03-ex-e7}
-us_states_stats = us_states %>%
+us_states_stats = us_states |>
   left_join(us_states_df, by = c("NAME" = "state"))
 class(us_states_stats)
 ```
@@ -110,7 +110,7 @@ E8. `us_states_df` has two more rows than `us_states`.
 How can you find them? (hint: try to use the `dplyr::anti_join()` function)
 
 ```{r 03-ex-e8}
-us_states_df %>%
+us_states_df |>
   anti_join(st_drop_geometry(us_states), by = c("state" = "NAME"))
 ```
 
@@ -118,7 +118,7 @@ E9. What was the population density in 2015 in each state?
 What was the population density in 2010 in each state?
 
 ```{r 03-ex-e9}
-us_states2 = us_states %>%
+us_states2 = us_states |>
   mutate(pop_dens_15 = total_pop_15/AREA,
          pop_dens_10 = total_pop_10/AREA)
 ```
@@ -127,7 +127,7 @@ E10. How much has population density changed between 2010 and 2015 in each state
 Calculate the change in percentages and map them.
 
 ```{r 03-ex-e10}
-us_popdens_change = us_states2 %>%
+us_popdens_change = us_states2 |>
   mutate(pop_dens_diff_10_15 = pop_dens_15 - pop_dens_10,
          pop_dens_diff_10_15p = (pop_dens_diff_10_15/pop_dens_15) * 100)
 plot(us_popdens_change["pop_dens_diff_10_15p"])
@@ -145,8 +145,8 @@ The new object should have only two variables - `median_income_15` and `geometry
 Change the name of the `median_income_15` column to `Income`.
 
 ```{r 03-ex-e12}
-us_states_sel = us_states %>%
-  left_join(us_states_df, by = c("NAME" = "state")) %>%
+us_states_sel = us_states |>
+  left_join(us_states_df, by = c("NAME" = "state")) |>
   dplyr::select(Income = median_income_15)
 ```
 
@@ -154,14 +154,15 @@ E13. Calculate the change in the number of residents living below the poverty le
 Bonus: Calculate the change in the *percentage* of residents living below the poverty level in each state.
 
 ```{r 03-ex-e13}
-us_pov_change = us_states %>%
-  left_join(us_states_df, by = c("NAME" = "state")) %>%
+us_pov_change = us_states |>
+  left_join(us_states_df, by = c("NAME" = "state")) |>
   mutate(pov_change = poverty_level_15 - poverty_level_10)
  
 # Bonus
-us_pov_pct_change = us_states %>%
-  left_join(us_states_df, by = c("NAME" = "state")) %>%
-  mutate(pov_pct_10 = (poverty_level_10 / total_pop_10) * 100, pov_pct_15 = (poverty_level_15 / total_pop_15) * 100) %>%
+us_pov_pct_change = us_states |>
+  left_join(us_states_df, by = c("NAME" = "state")) |>
+  mutate(pov_pct_10 = (poverty_level_10 / total_pop_10) * 100, 
+         pov_pct_15 = (poverty_level_15 / total_pop_15) * 100) |>
   mutate(pov_pct_change = pov_pct_15 - pov_pct_10)
 ```
 
@@ -169,18 +170,18 @@ E14. What was the minimum, average and maximum state's number of people living b
 Bonus: What is the region with the largest increase in people living below the poverty line?
 
 ```{r 03-ex-e14}
-us_pov_change_reg = us_pov_change %>%
-  group_by(REGION) %>%
+us_pov_change_reg = us_pov_change |>
+  group_by(REGION) |>
   summarize(min_state_pov_15 = min(poverty_level_15),
             mean_state_pov_15 = mean(poverty_level_15),
             max_state_pov_15 = max(poverty_level_15))
 
 # Bonus
-us_pov_change %>%
-  group_by(REGION) %>%
-  summarize(region_pov_change = sum(pov_change)) %>%
-  filter(region_pov_change == max(region_pov_change)) %>%
-  pull(REGION) %>%
+us_pov_change |>
+  group_by(REGION) |>
+  summarize(region_pov_change = sum(pov_change)) |>
+  filter(region_pov_change == max(region_pov_change)) |>
+  pull(REGION) |>
   as.character()
 ```
 
@@ -197,12 +198,12 @@ r[c(1, 9, 81 - 9 + 1, 81)]
 r[c(1, nrow(r)), c(1, ncol(r))]
 ```
 
-E16. What is the most common class of our example raster `grain` (hint: `modal`)?
+E16. What is the most common class of our example raster `grain`?
 
 ```{r 03-ex-e16}
 grain = rast(system.file("raster/grain.tif", package = "spData"))
-global(grain, fun = modal) # only one value is shown when there are ties
-freq(grain) # the most common classes are silt and sand (13 cells)
+freq(grain) |> 
+  arrange(-count )# the most common classes are silt and sand (13 cells)
 ```
 
 E17. Plot the histogram and the boxplot of the `dem.tif` file from the **spDataLarge** package (`system.file("raster/dem.tif", package = "spDataLarge")`). 

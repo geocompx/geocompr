@@ -51,17 +51,18 @@ Some global geoportals overcome this issue.
 The [GEOSS portal](http://www.geoportal.org/) and the [Copernicus Open Access Hub](https://scihub.copernicus.eu/), for example, contain many raster datasets with global coverage.
 A wealth of vector datasets can be accessed from the [SEDAC](http://sedac.ciesin.columbia.edu/) portal run by the National Aeronautics and Space Administration (NASA) and the European Union's [INSPIRE geoportal](http://inspire-geoportal.ec.europa.eu/), with global and regional coverage.
 
-Most geoportals provide a graphical interface allowing datasets to be queried based on characteristics such as spatial and temporal extent, the United States Geological Services' [EarthExplorer](https://earthexplorer.usgs.gov/) being a prime example.
+Most geoportals provide a graphical interface allowing datasets to be queried based on characteristics such as spatial and temporal extent, the United States Geological Survey's [EarthExplorer](https://earthexplorer.usgs.gov/) being a prime example.
 *Exploring* datasets interactively on a browser is an effective way of understanding available layers.
 *Downloading* data is best done with code, however, from reproducibility and efficiency perspectives.
 Downloads can be initiated from the command line using a variety of techniques, primarily via URLs and APIs\index{API} (see the [Sentinel API](https://scihub.copernicus.eu/twiki/do/view/SciHubWebPortal/APIHubDescription) for example).
-Files hosted on static URLs can be downloaded with `download.file()`, as illustrated in the code chunk below which accesses US National Parks data from [catalog.data.gov/dataset/national-parks](https://catalog.data.gov/dataset/national-parks):
+Files hosted on static URLs can be downloaded with `download.file()`, as illustrated in the code chunk below which accesses PeRL: Permafrost Region Pond and Lake Database from [doi.pangaea.de](https://doi.pangaea.de/10.1594/PANGAEA.868349):
 
 ```{r 07-read-write-plot-2, eval=FALSE}
-download.file(url = "https://irma.nps.gov/DataStore/DownloadFile/666527",
-              destfile = "nps_boundary.zip")
-unzip(zipfile = "nps_boundary.zip")
-usa_parks = read_sf(dsn = "nps_boundary.shp")
+download.file(url = "https://hs.pangaea.de/Maps/PeRL/PeRL_permafrost_landscapes.zip",
+              destfile = "PeRL_permafrost_landscapes.zip", 
+              mode = "wb")
+unzip("PeRL_permafrost_landscapes.zip")
+canada_perma_land = read_sf("PeRL_permafrost_landscapes/canada_perma_land.shp")
 ```
 
 ## Geographic data packages
@@ -88,7 +89,7 @@ datapackages = tibble::tribble(
 knitr::kable(datapackages, 
              caption = "Selected R packages for geographic data retrieval.", 
              caption.short = "Selected R packages for geographic data retrieval.",
-             booktabs = TRUE) %>%
+             booktabs = TRUE) |>
   kableExtra::kable_styling(latex_options="scale_down")
 ```
 
@@ -154,8 +155,8 @@ Next, they are passed to the function `osmdata_sf()` which does the work of down
 
 ```{r 07-read-write-plot-6, eval=FALSE}
 library(osmdata)
-parks = opq(bbox = "leeds uk") %>% 
-  add_osm_feature(key = "leisure", value = "park") %>% 
+parks = opq(bbox = "leeds uk") |> 
+  add_osm_feature(key = "leisure", value = "park") |> 
   osmdata_sf()
 ```
 
@@ -194,7 +195,7 @@ The example below searches for John Snow blue plaque coordinates located on a bu
 ```{r, eval=FALSE}
 library(tidygeocoder)
 geo_df = data.frame(address = "54 Frith St, London W1D 4SJ, UK")
-geo_df = geocode(df, address, method = "osm")
+geo_df = geocode(geo_df, address, method = "osm")
 geo_df
 ```
 
@@ -290,88 +291,7 @@ fao_areas = read_sf(file)
 Note the use of `write_disk()` to ensure that the results are written to disk rather than loaded into memory, allowing them to be imported with **sf**.
 This example shows how to gain low-level access to web services using **httr**, which can be useful for understanding how web services work.
 For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose.
-
-Packages **ows4R**, **rwfs** and **sos4R** have been developed for working with OWS services in general, WFS and the sensor observation service (SOS) respectively.
-As of October 2018, only **ows4R** is on CRAN.
-The package's basic functionality is demonstrated below, in commands that get all `FAO_AREAS` as we did in the previous code chunk:^[
-To filter features on the server before downloading them, the argument `cql_filter` can be used. Adding `cql_filter = URLencode("F_CODE= '27'")` to the command, for example, would instruct the server to only return the feature with values in the `F_CODE` column equal to 27.
-]
-
-```{r 07-read-write-plot-13, eval=FALSE}
-library(ows4R)
-wfs = WFSClient$new("http://www.fao.org/figis/geoserver/wfs",
-                      serviceVersion = "1.0.0", logger = "INFO")
-fao_areas = wfs$getFeatures("area:FAO_AREAS")
-```
-
-```{r 07-read-write-plot-14, echo=FALSE, eval=FALSE}
-# not shown as too verbose an example already
-area_27 = wfs$getFeatures("area:FAO_AREAS",
-                          cql_filter = URLencode("F_CODE= '27'"))
-```
-
-There is much more to learn about web services and much potential for development of R-OWS interfaces, an active area of development.
-For further information on the topic, we recommend examples from European Centre for Medium-Range Weather Forecasts (ECMWF) services at [github.com/OpenDataHack](https://github.com/OpenDataHack/data_service_catalogue) and reading-up on OCG Web Services at [opengeospatial.org](http://www.opengeospatial.org/standards).
-
-```{r 07-read-write-plot-15, eval=FALSE, echo=FALSE}
-# checking out WFS using German datasets
-library(ows4R)
-library(sf)
-base_url = "http://www.lfu.bayern.de/gdi/wfs/naturschutz/schutzgebiete?"
-wfs = WFSClient$new(base_url, "1.0.0", logger = "INFO")
-# wfs$getUrl()
-# wfs$getClassName()
-
-caps = wfs$getCapabilities()
-caps
-tmp = caps$findFeatureTypeByName("")
-# find out about the available feature types
-sapply(tmp, function(x) x$getName())
-# ok, let's download the national parcs of Bavaria
-ft = caps$findFeatureTypeByName("lfu:nationalpark")
-ft$getDescription()  # some problem here, I guess due to German spelling (umlaut, etc.). BTW the same happens when using the data from the Netherlands
-ft$getBoundingBox()  # no bounding box
-ft$getDefaultCRS()  # default CRS
-nps = ft$getFeatures()
-# this does not work properly, however, it downloads the data to the temporary
-# directory, hence, we can load them into R ourselves
-file = grep("gml", dir(tempdir()), value = TRUE)
-file = file.path(tempdir(), file)
-# assuming there is only one file
-layer = read_sf(file)
-plot(layer$geometry)
-```
-
-```{r 07-read-write-plot-16, eval=FALSE, echo=FALSE}
-library(ows4R)
-library(sf)
-# data gathered from https://catalog.data.gov/dataset?res_format=WFS
-# downloading US national parks
-base_url = paste0("http://gstore.unm.edu/apps/rgis/datasets/",
-                  "7bbe8af5-029b-4adf-b06c-134f0dd57226/services/ogc/wfs?")
-# downloading public US airports
-base_url = paste0("http://gstore.unm.edu/apps/rgis/datasets/",
-                 "7387537d-dff6-48d1-9004-4f089f48dea1/services/ogc/wfs?")
-# establish the connection
-wfs = WFSClient$new(base_url, "1.0.0", logger = "INFO")
-# wfs$getUrl()
-# wfs$getClassName()
-
-caps = wfs$getCapabilities()
-caps
-# find out about the available feature types
-tmp = caps$findFeatureTypeByName("")
-tmp$getName()
-# ok, let's download all US national parcs 
-ft = caps$findFeatureTypeByName("nps_boundary")
-# ft = caps$findFeatureTypeByName("tra2shp")  # airports
-ft$getDescription()
-ft$getBoundingBox()  
-ft$getDefaultCRS()  
-nps = ft$getFeatures()
-# this returns an sf object
-plot(nps$msGeometry)
-```
+The package **ows4R** was developed for working with OWS services.
 
 ## File formats
 
@@ -382,7 +302,7 @@ Today the variety of file formats may seem bewildering but there has been much c
 
 \index{GDAL}
 GDAL (which should be pronounced "goo-dal", with the double "o" making a reference to object-orientation), the Geospatial Data Abstraction Library, has resolved many issues associated with incompatibility between geographic file formats since its release in 2000.
-GDAL provides a unified and high-performance interface for reading and writing of many raster and vector data formats.^[As we mentioned in Chapter \@ref(geometric-operations), GDAL also contains a set of utility functions allowing for raster mosaicing, resampling, cropping, and reprojecting, etc.]
+GDAL provides a unified and high-performance interface for reading and writing of many raster and vector data formats.^[As we mentioned in Chapter \@ref(geometry-operations), GDAL also contains a set of utility functions allowing for raster mosaicing, resampling, cropping, and reprojecting, etc.]
 Many open and proprietary GIS programs, including GRASS, ArcGIS\index{ArcGIS} and QGIS\index{QGIS}, use GDAL\index{GDAL} behind their GUIs\index{graphical user interface} for doing the legwork of ingesting and spitting out geographic data in appropriate formats.
 
 GDAL\index{GDAL} provides access to more than 200 vector and raster data formats.
@@ -404,14 +324,15 @@ file_formats = tibble::tribble(~Name, ~Extension, ~Info, ~Type, ~Model,
 knitr::kable(file_formats, 
              caption = "Selected spatial file formats.",
              caption.short = "Selected spatial file formats.",
-             booktabs = TRUE) %>% 
-  kableExtra::column_spec(2, width = "7em") %>% 
-  kableExtra::column_spec(3, width = "14em") %>% 
+             booktabs = TRUE) |> 
+  kableExtra::column_spec(2, width = "7em") |> 
+  kableExtra::column_spec(3, width = "14em") |> 
   kableExtra::column_spec(5, width = "7em")
 ```
 <!-- additional suggestions from our readers: -->
 <!-- - KEA - https://gdal.org/drivers/raster/kea.html -->
 <!-- - sfarrow & geoparquet/pandas/GeoFeather -->
+<!-- Zarr - long term time series raster cloud format -->
 
 \index{Shapefile}
 \index{GeoPackage}
@@ -472,14 +393,14 @@ summary(sf_drivers[-c(1:2)])
 ```
 
 ```{r drivers, echo=FALSE}
-sf_drivers = st_drivers() %>%
-  dplyr::filter(name %in% c("ESRI Shapefile", "GeoJSON", "KML", "GPX", "GPKG", "FlatGeobuf")) %>% 
+sf_drivers = st_drivers() |>
+  dplyr::filter(name %in% c("ESRI Shapefile", "GeoJSON", "KML", "GPX", "GPKG", "FlatGeobuf")) |> 
   tibble::as_tibble() # remove unhelpful row names
 knitr::kable(head(sf_drivers, n = 6),
              caption = paste("Popular drivers/formats for reading/writing", 
                              "vector data."),
              caption.short = "Sample of available vector drivers.",
-             booktabs = TRUE) %>% 
+             booktabs = TRUE) |> 
   kableExtra::column_spec(2, width = "7em")
 ```
 
@@ -671,8 +592,10 @@ snow_rey
 This way, we just downloaded a single value instead of the whole, large GeoTIFF file.
 
 The above example just shows one simple (but useful) case, but there is more to explore.
-The `/vsicurl/` prefix also works not only for raster but also for vector file formats allowing to read vectors directly from online storage.
-Importantly, it is not the only prefix provided by GDAL -- many more exist, such as `/vsizip/` to read spatial files from ZIP archives without decompressing them beforehand or `/vsis3/` for on-the-fly reading files available in AWS S3 buckets.
+The `/vsicurl/` prefix also works not only for raster but also for vector file formats.
+It allows reading vectors directly from online storage with `read_sf()` just by adding the prefix before the vector file URL.
+
+Importantly, `/vsicurl/` is not the only prefix provided by GDAL -- many more exist, such as `/vsizip/` to read spatial files from ZIP archives without decompressing them beforehand or `/vsis3/` for on-the-fly reading files available in AWS S3 buckets.
 You can learn more about it at https://gdal.org/user/virtual_file_systems.html.
 
 <!-- ### Databases -->
@@ -709,7 +632,7 @@ write_sf(obj = world, dsn = "world.gpkg")
 write_sf(obj = world, dsn = "world.gpkg")
 ```
 
-Instead of overwriting the file, we could add a new layer to the file with `append = TRUE`, which is supported my several spatial formats, including GeoPackage.
+Instead of overwriting the file, we could add a new layer to the file with `append = TRUE`, which is supported by several spatial formats, including GeoPackage.
 
 ```{r 07-read-write-plot-31, results='hide'}
 write_sf(obj = world, dsn = "world_many_layers.gpkg", append = TRUE)
@@ -780,15 +703,19 @@ writeRaster(single_layer, filename = "my_raster.tif", datatype = "INT2U")
 Some raster file formats have additional options, that can be set by providing [GDAL parameters](http://www.gdal.org/formats_list.html) to the `options` argument of `writeRaster()`.
 GeoTIFF files are written in **terra**, by default, with the LZW compression `gdal = c("COMPRESS=LZW")`.
 To change or disable the compression, we need to modify this argument.
-Additionally, we can save our raster object as COG (*Cloud Optimized GeoTIFF*, Section \@ref(file-formats)) with the `"of=COG"` option.
 
 ```{r 07-read-write-plot-35, eval=FALSE}
-writeRaster(x = single_layer,
-            filename = "my_raster.tif",
-            datatype = "INT2U",
-            gdal = c("COMPRESS=NONE", "of=COG"),
-            overwrite = TRUE)
+writeRaster(x = single_layer, filename = "my_raster.tif",
+            gdal = c("COMPRESS=NONE"), overwrite = TRUE)
 ```
+
+Additionally, we can save our raster object as COG (*Cloud Optimized GeoTIFF*, Section \@ref(file-formats)) with the `filetype = "COG"` options.
+
+```{r 07-read-write-plot-35b, eval=FALSE}
+writeRaster(x = single_layer, filename = "my_raster.tif",
+            filetype = "COG", overwrite = TRUE)
+```
+
 
 ## Visual outputs
 
@@ -827,6 +754,7 @@ mapshot(mapview_obj, file = "my_interactive_map.html")
 ## Exercises
 
 ```{r, echo=FALSE, results='asis'}
-res = knitr::knit_child('_08-ex.Rmd', quiet = TRUE, options = list(include = FALSE, eval = FALSE))
+res = knitr::knit_child('_08-ex.Rmd', quiet = TRUE, 
+                        options = list(include = FALSE, eval = FALSE))
 cat(res, sep = '\n')
 ```
