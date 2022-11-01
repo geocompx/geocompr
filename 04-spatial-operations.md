@@ -191,8 +191,8 @@ point_sf = st_as_sf(point_df, coords = c("x", "y"))
 ```
 
 <div class="figure" style="text-align: center">
-<img src="04-spatial-operations_files/figure-html/relation-objects-1.png" alt="Points (`point_df` 1 to 3), line and polygon objects arranged to illustrate topological relations." width="50%" />
-<p class="caption">(\#fig:relation-objects)Points (`point_df` 1 to 3), line and polygon objects arranged to illustrate topological relations.</p>
+<img src="04-spatial-operations_files/figure-html/relation-objects-1.png" alt="Points, line and polygon objects arranged to illustrate topological relations." width="50%" />
+<p class="caption">(\#fig:relation-objects)Points, line and polygon objects arranged to illustrate topological relations.</p>
 </div>
 
 A simple query is: which of the points in `point_sf` intersect in some way with polygon `polygon_sfc`?
