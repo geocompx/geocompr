@@ -48,7 +48,7 @@ The packages needed to run the code presented in this chapter can be 'loaded' (t
 
 ```r
 library(sf)          # classes and functions for vector data
-#> Linking to GEOS 3.8.0, GDAL 3.0.4, PROJ 6.3.1; sf_use_s2() is TRUE
+#> Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
 ```
 
 The output from `library(sf)` reports which versions of key geographic libraries such as GEOS the package is using, as outlined in Section \@ref(intro-sf).

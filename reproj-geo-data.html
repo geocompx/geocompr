@@ -22,7 +22,7 @@
 <script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><link href="libs/Lato-0.4.2/font.css" rel="stylesheet">
 <link href="libs/Roboto_Mono-0.4.2/font.css" rel="stylesheet">
 <link href="libs/Montserrat-0.4.2/font.css" rel="stylesheet">
-<script src="libs/bs3compat-0.4.0/transition.js"></script><script src="libs/bs3compat-0.4.0/tabs.js"></script><script src="libs/bs3compat-0.4.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs3compat-0.4.1/transition.js"></script><script src="libs/bs3compat-0.4.1/tabs.js"></script><script src="libs/bs3compat-0.4.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
 <script src="libs/bs4_book-1.0.0/bs4_book.js"></script><meta name="citation_title" content="Chapter 7 Reprojecting geographic data | Geocomputation with R">
 <meta name="citation_author" content="Robin Lovelace">
 <meta name="citation_author" content="Jakub Nowosad">
@@ -173,9 +173,17 @@ The WKT representation of the WGS84 CRS, which has the <strong>identifier</stron
 <span><span class="co">#&gt;   User input: EPSG:4326 </span></span>
 <span><span class="co">#&gt;   wkt:</span></span>
 <span><span class="co">#&gt; GEOGCRS["WGS 84",</span></span>
-<span><span class="co">#&gt;     DATUM["World Geodetic System 1984",</span></span>
+<span><span class="co">#&gt;     ENSEMBLE["World Geodetic System 1984 ensemble",</span></span>
+<span><span class="co">#&gt;         MEMBER["World Geodetic System 1984 (Transit)"],</span></span>
+<span><span class="co">#&gt;         MEMBER["World Geodetic System 1984 (G730)"],</span></span>
+<span><span class="co">#&gt;         MEMBER["World Geodetic System 1984 (G873)"],</span></span>
+<span><span class="co">#&gt;         MEMBER["World Geodetic System 1984 (G1150)"],</span></span>
+<span><span class="co">#&gt;         MEMBER["World Geodetic System 1984 (G1674)"],</span></span>
+<span><span class="co">#&gt;         MEMBER["World Geodetic System 1984 (G1762)"],</span></span>
+<span><span class="co">#&gt;         MEMBER["World Geodetic System 1984 (G2139)"],</span></span>
 <span><span class="co">#&gt;         ELLIPSOID["WGS 84",6378137,298.257223563,</span></span>
-<span><span class="co">#&gt;             LENGTHUNIT["metre",1]]],</span></span>
+<span><span class="co">#&gt;             LENGTHUNIT["metre",1]],</span></span>
+<span><span class="co">#&gt;         ENSEMBLEACCURACY[2.0]],</span></span>
 <span><span class="co">#&gt;     PRIMEM["Greenwich",0,</span></span>
 <span><span class="co">#&gt;         ANGLEUNIT["degree",0.0174532925199433]],</span></span>
 <span><span class="co">#&gt;     CS[ellipsoidal,2],</span></span>
@@ -186,8 +194,8 @@ The WKT representation of the WGS84 CRS, which has the <strong>identifier</stron
 <span><span class="co">#&gt;             ORDER[2],</span></span>
 <span><span class="co">#&gt;             ANGLEUNIT["degree",0.0174532925199433]],</span></span>
 <span><span class="co">#&gt;     USAGE[</span></span>
-<span><span class="co">#&gt;         SCOPE["unknown"],</span></span>
-<span><span class="co">#&gt;         AREA["World"],</span></span>
+<span><span class="co">#&gt;         SCOPE["Horizontal component of 3D system."],</span></span>
+<span><span class="co">#&gt;         AREA["World."],</span></span>
 <span><span class="co">#&gt;         BBOX[-90,-180,90,180]],</span></span>
 <span><span class="co">#&gt;     ID["EPSG",4326]]</span></span></code></pre></div>
 <p>The output of the command shows how the CRS identifier (also known as a Spatial Reference Identifier or <a href="https://postgis.net/workshops/postgis-intro/projection.html">SRID</a>) works: it is simply a look-up, providing a unique identifier associated with a more complete WKT representation of the CRS.
@@ -588,7 +596,7 @@ One option is to search for it online,</p>
 <div class="sourceCode" id="cb247"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">crs_lnd_new</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="st">"EPSG:27700"</span><span class="op">)</span></span>
 <span><span class="va">crs_lnd_new</span><span class="op">$</span><span class="va">Name</span></span>
-<span><span class="co">#&gt; [1] "OSGB 1936 / British National Grid"</span></span>
+<span><span class="co">#&gt; [1] "OSGB36 / British National Grid"</span></span>
 <span><span class="va">crs_lnd_new</span><span class="op">$</span><span class="va">proj4string</span></span>
 <span><span class="co">#&gt; [1] "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +units=m +no_defs"</span></span>
 <span><span class="va">crs_lnd_new</span><span class="op">$</span><span class="va">epsg</span></span>
@@ -697,7 +705,7 @@ The following commands create a text string representing WGS 84 / UTM zone 12N, 
 <div class="sourceCode" id="cb252"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">con_raster_ea</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/project.html">project</a></span><span class="op">(</span><span class="va">con_raster</span>, <span class="st">"EPSG:32612"</span>, method <span class="op">=</span> <span class="st">"bilinear"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">con_raster_ea</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "PROJCRS[\"WGS 84 / UTM zone 12N\",\n    BASEGEOGCRS[\"WGS 84\",\n        DATUM[\"World Geodetic System 1984\",\n            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4326]],\n    CONVERSION[\"UTM zone 12N\",\n        METHOD[\"Transverse Mercator\",\n            ID[\"EPSG\",9807]],\n        PARAMETER[\"Latitude of natural origin\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8801]],\n        PARAMETER[\"Longitude of natural origin\",-111,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8802]],\n        PARAMETER[\"Scale factor at natural origin\",0.9996,\n            SCALEUNIT[\"unity\",1],\n            ID[\"EPSG\",8805]],\n        PARAMETER[\"False easting\",500000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8806]],\n        PARAMETER[\"False northing\",0,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8807]]],\n    CS[Cartesian,2],\n        AXIS[\"(E)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"(N)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"World - N hemisphere - 114°W to 108°W - by country\"],\n        BBOX[0,-114,84,-108]],\n    ID[\"EPSG\",32612]]"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "PROJCRS[\"WGS 84 / UTM zone 12N\",\n    BASEGEOGCRS[\"WGS 84\",\n        ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n            MEMBER[\"World Geodetic System 1984 (Transit)\"],\n            MEMBER[\"World Geodetic System 1984 (G730)\"],\n            MEMBER[\"World Geodetic System 1984 (G873)\"],\n            MEMBER[\"World Geodetic System 1984 (G1150)\"],\n            MEMBER[\"World Geodetic System 1984 (G1674)\"],\n            MEMBER[\"World Geodetic System 1984 (G1762)\"],\n            MEMBER[\"World Geodetic System 1984 (G2139)\"],\n            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n                LENGTHUNIT[\"metre\",1]],\n            ENSEMBLEACCURACY[2.0]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4326]],\n    CONVERSION[\"UTM zone 12N\",\n        METHOD[\"Transverse Mercator\",\n            ID[\"EPSG\",9807]],\n        PARAMETER[\"Latitude of natural origin\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8801]],\n        PARAMETER[\"Longitude of natural origin\",-111,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8802]],\n        PARAMETER[\"Scale factor at natural origin\",0.9996,\n            SCALEUNIT[\"unity\",1],\n            ID[\"EPSG\",8805]],\n        PARAMETER[\"False easting\",500000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8806]],\n        PARAMETER[\"False northing\",0,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8807]]],\n    CS[Cartesian,2],\n        AXIS[\"(E)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"(N)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"Engineering survey, topographic mapping.\"],\n        AREA[\"Between 114°W and 108°W, northern hemisphere between equator and 84°N, onshore and offshore. Canada - Alberta; Northwest Territories (NWT); Nunavut; Saskatchewan. Mexico. United States (USA).\"],\n        BBOX[0,-114,84,-108]],\n    ID[\"EPSG\",32612]]"</span></span></code></pre></div>
 <p>Raster reprojection on numeric variables also leads to small changes to values and spatial properties, such as the number of cells, resolution, and extent.
 These changes are demonstrated in Table <a href="reproj-geo-data.html#tab:rastercrs">7.2</a><a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
 Another minor change, that is not represented in Table &lt;a href="reproj-geo-data.html#tab:rastercrs"&gt;7.2&lt;/a&gt;, is that the class of the values in the new projected raster dataset is &lt;code&gt;numeric&lt;/code&gt;.
