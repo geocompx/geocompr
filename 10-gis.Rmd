@@ -80,7 +80,7 @@ Furthermore, R outperforms GISs in some areas of geocomputation\index{geocomputa
 This chapter focuses on 'bridges' to three mature open source GIS products (see Table \@ref(tab:gis-comp)): QGIS\index{QGIS} (via the package **qgisprocess**\index{qgisprocess (package)}; Section \@ref(rqgis)), SAGA\index{SAGA} (via **Rsagacmd**\index{Rsagacmd (package)}; Section \@ref(saga)) and GRASS\index{GRASS} (via **rgrass**\index{rgrass (package)}; Section \@ref(grass)).^[
 Though not covered here, it is worth being aware of so-called R-ArcGIS bridge (see https://github.com/R-ArcGIS/r-bridge) that allows R to be used from within ArcGIS\index{ArcGIS}
 One can also use R scripts from within QGIS\index{QGIS} (see https://docs.qgis.org/3.22/en/docs/training_manual/processing/r_intro.html).
-Finally, it is also possible to use R from the GRASS GIS\index{GRASS} command line (see https://grasswiki.osgeo.org/wiki/R_statistics/rgrass).
+Finally, it is also possible to use R from the GRASS GIS\index{GRASS} command line (see https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#R_within_GRASS).
 ]
 
 ```{r gis-comp, echo=FALSE, message=FALSE}
@@ -477,6 +477,22 @@ The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created 
 Academia continued this work since 1997.
 Similar to SAGA\index{SAGA}, GRASS focused on raster processing in the beginning while only later, since GRASS 6.0, adding advanced vector functionality [@bivand_applied_2013].
 
+GRASS stores the input data in a GRASS GIS database.
+With regard to vector data, GRASS is by default a topological GIS, i.e., it only stores the geometry of adjacent features once.
+SQLite is the default database driver for vector attribute management, and attributes are linked to the geometry, i.e., to the GRASS GIS database, via keys ([GRASS GIS vector management](https://grasswiki.osgeo.org/wiki/Vector_Database_Management#GRASS_GIS_vector_management_model)).
+
+Before one can use GRASS, one has to set up the GRASS GIS database\index{spatial database} (also from within R), and users might find this process a bit intimidating in the beginning.
+First of all, the GRASS database requires its own directory, which, in turn, contains a location (see the [GRASS GIS Database](https://grass.osgeo.org/grass82/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass82/manuals/index.html) for further information).
+The location stores the geodata for one project or one area.
+Within one location, several mapsets can exist that typically refer to different users or different tasks.
+Each location also has a PERMANENT mapset -- a mandatory mapset that is created automatically.
+In order to share geographic data with all users of a project, the database owner can add spatial data to the PERMANENT mapset.
+In addition, the PERMANENT mapset stores the projection, the spatial extent and the default resolution for raster data.
+So, to sum it all up -- the GRASS GIS database may contain many locations (all data in one location have the same CRS), and each location can store many mapsets (groups of datasets).
+Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass80/manuals/helptext.html) for more information on the GRASS spatial database\index{spatial database} system.
+To quickly use GRASS from within R, we will use the **link2GI** package, however, one can also set up the GRASS GIS database step-by-step.
+Please refer to [GRASS within R](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#GRASS_within_R) for how to do so.
+
 Here, we introduce **rgrass**\index{rgrass (package)} with one of the most interesting problems in GIScience - the traveling salesman problem\index{traveling salesman}.
 Suppose a traveling salesman would like to visit 24 customers.
 Additionally, he would like to start and finish his journey at home which makes a total of 25 locations while covering the shortest distance possible.
@@ -508,7 +524,7 @@ london_streets = dplyr::select(london_streets, osm_id)
 ```
 
 Now that we have the data, we can go on and initiate a GRASS\index{GRASS} session.
-Luckily, `linkGRASS()` of the **link2GI** packages lets one set up the GRASS environment with just one line of code.^[For a more complete description of setting up the GRASS environment read the appendix at the end of this section.]
+Luckily, `linkGRASS()` of the **link2GI** packages lets one set up the GRASS environment with just one line of code.
 The only thing you need to provide is a spatial object which determines the projection and the extent of the spatial database\index{spatial database}.
 First, `linkGRASS()` finds all GRASS\index{GRASS} installations on your computer.
 Since we have set `ver_select` to `TRUE`, we can interactively choose one of the found GRASS-installations.
@@ -596,7 +612,7 @@ mapview::mapshot(m_1,
 
 There are a few important considerations to note in the process:
 
-- We could have used GRASS's spatial database\index{spatial database} (based on SQLite) which allows faster processing.
+- We could have used GRASS's spatial database\index{spatial database} which allows faster processing.
 That means we have only exported geographic data at the beginning.
 Then we created new objects but only imported the final result back into R.
 To find out which datasets are currently available, run `execGRASS("g.list", type = "vector,raster", flags = "p")`.
@@ -606,54 +622,6 @@ Use `"v.select"` and `"v.extract"` for vector data.
 `"db.select"` lets you select subsets of the attribute table of a vector layer without returning the corresponding geometry.
 - You can also start R from within a running GRASS\index{GRASS} session [for more information please refer to @bivand_applied_2013].
 - Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass82/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm\index{geoalgorithm}.
-
-**GRASS GIS set up appendix**
-
-It is also possible to set up a location and a mapset manually to use GRASS\index{GRASS} from within R.
-First of all, we need to find out if and where GRASS is installed on the computer.
-
-```{r 09-gis-27, eval=FALSE}
-library(link2GI)
-link = findGRASS()
-```
-
-GRASS GIS differs from many other GIS software in its approach for handling input data -- it puts all of the input data in a GRASS spatial database.
-The GRASS geodatabase \index{spatial database} system is based on SQLite.
-Consequently, different users can easily work on the same project, possibly with different read/write permissions.
-However, one has to set up this spatial database\index{spatial database} (also from within R), and users might find this process a bit intimidating in the beginning.
-First of all, the GRASS database requires its own directory, which, in turn, contains a location (see the [GRASS GIS Database](https://grass.osgeo.org/grass82/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass82/manuals/index.html) for further information).
-The location stores the geodata for one project or one area.
-Within one location, several mapsets can exist that typically refer to different users or different tasks.
-Each location also has PERMANENT -- a mandatory mapset that is created automatically.
-PERMANENT stores the projection, the spatial extent and the default resolution for raster data.
-In order to share geographic data with all users of a project, the database owner can add spatial data to the PERMANENT mapset.
-So, to sum it all up -- the GRASS geodatabase may contain many locations (all data in one location have the same CRS), and each location can store many mapsets (groups of datasets).
-Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass80/manuals/helptext.html) for more information on the GRASS spatial database\index{spatial database} system.
-
-Next, we need to point to the path to GRASS GIS, and specify where to store the spatial database\index{spatial database} (gisDbase), name the location `london`, and use the PERMANENT mapset.
-
-```{r, eval=FALSE}
-library(rgrass)
-grass_path = link$instDir[[1]]
-initGRASS(gisBase = grass_path, gisDbase = tempdir(), 
-          location = "london", mapset = "PERMANENT", override = TRUE)
-```
-
-After GRASS GIS initialization, we are able to use the `execGRASS()` function.
-It expects the name of the GRASS GIS module (e.g., `"g.proj"` or `"g.region"`) and potentially a few additional arguments or flags, and then it executes the given task in GRASS GIS.
-Here, let's use it to define the projection, the extent, and the resolution: `"g.proj"` sets the used CRS, while `"g.region"` is used to specify the extent and resolution.
-
-```{r 09-gis-29, eval=FALSE}
-execGRASS("g.proj", flags = c("c", "quiet"), srid = "EPSG:4326")
-b_box = st_bbox(london_streets)
-execGRASS("g.region", flags = c("quiet"),
-          n = as.character(b_box["ymax"]), s = as.character(b_box["ymin"]),
-          e = as.character(b_box["xmax"]), w = as.character(b_box["xmin"]),
-          res = "1")
-```
-
-In this example, use are using the "EPSG:4326" CRS and setting our extent to the bounding box of the `london_streets` dataset.
-You can check if it worked correctly by running `execGRASS("g.proj", flags = "p")` and `execGRASS("g.region", flags = "p")`.
 
 ## When to use what?
 
