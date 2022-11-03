@@ -116,7 +116,7 @@ There is already excellent material on these methods, including statistically or
 Other topics which received limited attention were remote sensing and using R alongside (rather than as a bridge to) dedicated GIS\index{GIS} software.
 There are many resources on these topics, including @wegmann_remote_2016 and the GIS-related teaching materials available from [Marburg University](https://moc.online.uni-marburg.de/doku.php).
 
-Instead of covering spatial statistical modeling and inference techniques, we focussed on machine learning\index{machine learning} (see Chapters \@ref(spatial-cv) and \@ref(eco)).
+Instead of covering spatial statistical modeling and inference techniques, we focused on machine learning\index{machine learning} (see Chapters \@ref(spatial-cv) and \@ref(eco)).
 Again, the reason was that there are already excellent resources on these topics, especially with ecological use cases, including @zuur_mixed_2009, @zuur_beginners_2017 and freely available teaching material and code on *Geostatistics & Open-source Statistical Computing* by David Rossiter, hosted at [css.cornell.edu/faculty/dgr2](http://www.css.cornell.edu/faculty/dgr2/teach/) and the [*R for Geographic Data Science*](https://sdesabbata.github.io/r-for-geographic-data-science/) project by [Stefano De Sabbata](https://sdesabbata.github.io/) [at the University of Leicester](https://le.ac.uk/people/stefano-de-sabbata) for an introduction to R\index{R} for geographic data science\index{data science}.
 There are also excellent resources on spatial statistics\index{spatial!statistics} using Bayesian modeling, a powerful framework for modeling and uncertainty estimation [@blangiardo_spatial_2015;@krainski_advanced_2018].
 

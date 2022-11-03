@@ -563,7 +563,7 @@ Animated maps solve these issues.
 Although they depend on digital publication, this is becoming less of an issue as more and more content moves online.
 Animated maps can still enhance paper reports: you can always link readers to a web-page containing an animated (or interactive) version of a printed map to help make it come alive.
 There are several ways to generate animations in R, including with animation packages such as **gganimate**, which builds on **ggplot2** (see Section \@ref(other-mapping-packages)).
-This section focusses on creating animated maps with **tmap** because its syntax will be familiar from previous sections and the flexibility of the approach.
+This section focuses on creating animated maps with **tmap** because its syntax will be familiar from previous sections and the flexibility of the approach.
 
 Figure \@ref(fig:urban-animated) is a simple example of an animated map.
 Unlike the faceted plot, it does not squeeze multiple maps into a single screen and allows the reader to see how the spatial distribution of the world's most populous agglomerations evolve over time (see the book's website for the animated version).
