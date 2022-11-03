@@ -293,9 +293,9 @@ There are many reasons (linked to the advantages of the simple features model):
 - **sf** function names are relatively consistent and intuitive (all begin with `st_`)
 - **sf** functions can be combined with the `|>` operator and works well with the [tidyverse](http://tidyverse.org/) collection of R packages\index{tidyverse}.
 
-**sf**'s support for **tidyverse** packages is exemplified by the provision of the `read_sf()` function for reading geographic vector datasets.
-Unlike the function `st_read()`, which returns attributes stored in a base R `data.frame` (and which provides more verbose messages, not shown in the code chunk below), `read_sf()` returns data as a **tidyverse** `tibble`.
-This is demonstrated below (see Section \@ref(iovec)) on reading geographic vector data):
+**sf**'s support for **tidyverse** packages is exemplified by `read_sf()`, a function for importing geographic vector data covered in detail in Section \@ref(iovec).
+Unlike the function `st_read()`, which returns attributes stored in a base R `data.frame` (and which emits verbose messages, not shown in the code chunk below), `read_sf()` silently returns data as a **tidyverse** `tibble`.
+This is demonstrated below:
 
 
 ```r
