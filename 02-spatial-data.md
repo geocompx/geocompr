@@ -314,7 +314,8 @@ class(world_tbl)
 #> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
 ```
 
-As described in Chapter \@ref(attr), which shows how to manipulate `sf` objects with **tidyverse** functions, **sf** is now the go-to package for analysis of spatial vector data in R (not withstanding the **spatstat** package ecosystem which provides numerous functions for spatial statistics).
+As described in Chapter \@ref(attr), which shows how to manipulate `sf` objects with **tidyverse** functions, **sf** is now the go-to package for analysis of spatial vector data in R.
+**spatstat**, a package ecosystem which provides numerous functions for spatial statistics, and **terra** both have vector geographic data classes, but neither have the same level of uptake as **sf** does for working with vector data.
 Many popular packages build on **sf**, as shown by the rise in its popularity in terms of number of downloads per day, as shown in Section \@ref(r-ecosystem) in the previous chapter.
 Transitioning established packages and workflows away from legacy packages **rgeos** and **rgdal** takes time [@bivand_progress_2021], but the process was given a sense of urgency by messages printed when they were loaded, which state that they "will be retired by the end of 2023".
 This means that anyone still using these packages should "**transition to sf/stars/terra functions using GDAL and PROJ at your earliest convenience**". 
@@ -363,13 +364,18 @@ asia = st_union(world_asia)
 
 We can now plot the Asian continent over a map of the world.
 Note that the first plot must only have one facet for `add = TRUE` to work.
-If the first plot has a key, `reset = FALSE` must be used (result not shown):
+If the first plot has a key, `reset = FALSE` must be used:
 
 
 ```r
 plot(world["pop"], reset = FALSE)
 plot(asia, add = TRUE, col = "red")
 ```
+
+<div class="figure" style="text-align: center">
+<img src="02-spatial-data_files/figure-html/asia-1.png" alt="A plot of Asia added as a layer on top of countries worldwide." width="50%" />
+<p class="caption">(\#fig:asia)A plot of Asia added as a layer on top of countries worldwide.</p>
+</div>
 
 Adding layers in this way can be used to verify the geographic correspondence between layers: 
 the `plot()` function is fast to execute and requires few lines of code, but does not create interactive maps with a wide range of options.
@@ -471,8 +477,8 @@ A polygon with a hole would be, for example, `POLYGON ((1 5, 2 2, 4 1, 4 4, 1 5)
 
 
 So far we have created geometries with only one geometric entity per feature.
-However, **sf** also allows multiple geometries to exist within a single feature (hence the term 'geometry collection') using "multi" version of each geometry type:
 \index{sf!multi features}
+**sf** also allows multiple geometries of a single type to exist within a single feature within "multi" version of each geometry type:
 
 - Multipoint: `MULTIPOINT (5 2, 1 3, 3 4, 3 2)`
 - Multilinestring: `MULTILINESTRING ((1 5, 4 4, 4 1, 2 2, 3 2), (1 2, 2 4))`
@@ -487,6 +493,7 @@ Finally, a geometry collection can contain any combination of geometries includi
 \index{sf!geometry collection}
 
 - Geometry collection: `GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2), LINESTRING (1 5, 4 4, 4 1, 2 2, 3 2))`
+
 
 <div class="figure" style="text-align: center">
 <img src="02-spatial-data_files/figure-html/geomcollection-1.png" alt="Illustration of a geometry collection." width="33%" />
