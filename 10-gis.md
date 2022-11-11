@@ -471,8 +471,8 @@ ndvi_segments = as.polygons(ndvi_srg$segments) |>
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/10-saga-segments.png" alt="Normalized difference vegetation index (NDVI, left panel) and NDVi-based segments derived using t he seeded region growing algorithm for the Mongón study area." width="100%" />
-<p class="caption">(\#fig:sagasegments)Normalized difference vegetation index (NDVI, left panel) and NDVi-based segments derived using t he seeded region growing algorithm for the Mongón study area.</p>
+<img src="figures/10-saga-segments.png" alt="Normalized difference vegetation index (NDVI, left panel) and NDVi-based segments derived using the seeded region growing algorithm for the Mongón study area." width="100%" />
+<p class="caption">(\#fig:sagasegments)Normalized difference vegetation index (NDVI, left panel) and NDVi-based segments derived using the seeded region growing algorithm for the Mongón study area.</p>
 </div>
 
 The resulting polygons (segments) represent areas with similar values. 
