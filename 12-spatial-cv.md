@@ -346,7 +346,6 @@ mlr3extralearners::list_mlr3learners(
 
 ```
 #> This will take a few seconds.
-#> obliqueRSF has been superseded by aorsf. We highly recommend you use aorsf to fit oblique random survival forests: see https://github.com/bcjaeger/aorsf or install from CRAN with install.packages('aorsf')
 ```
 
 <table>
@@ -523,7 +522,6 @@ Learners implementing SVM can be found using the `list_mlr3learners()` command o
 ```r
 mlr3_learners = mlr3extralearners::list_mlr3learners()
 #> This will take a few seconds.
-#> obliqueRSF has been superseded by aorsf. We highly recommend you use aorsf to fit oblique random survival forests: see https://github.com/bcjaeger/aorsf or install from CRAN with install.packages('aorsf')
 mlr3_learners[class == "classif" & grepl("svm", id),
               .(id, class, mlr3_package, required_packages)]
 #>               id   class      mlr3_package              required_packages
