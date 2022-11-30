@@ -261,24 +261,15 @@ The resulting eight metropolitan areas suitable for bike shops (Figure \@ref(fig
 A reverse geocoding\index{geocoding} approach can settle this problem.
 Given a coordinate, reverse geocoding finds the corresponding address.
 Consequently, extracting the centroid\index{centroid} coordinate of each metropolitan area can serve as an input for a reverse geocoding API\index{API}.
-The **revgeo** package provides access to the open source Photon geocoder for OpenStreetMap\index{OpenStreetMap}, Google Maps and Bing. 
-By default, it uses the Photon API\index{API}.
-`revgeo::revgeo()` only accepts geographical coordinates (latitude/longitude); therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system\index{CRS} (Chapter \@ref(reproj-geo-data)).
+This is exactly what the `rev_geocode_OSM()` function of the **tmaptools** package expects.
+Setting additionally `as.data.frame` to `TRUE` will give back a `data.frame` with several columns referring to the location including the street name, house number and city.
+However, here, we are only interested in the name of the city.
 
-```{r 14-location-16, warning=FALSE}
-metros_wgs = sf::st_transform(metros, 4326)
-coords = sf::st_centroid(metros_wgs) |>
-  sf::st_coordinates() |>
-  round(4)
-```
-
-Choosing `frame` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the street name, house number and city.
-
-```{r 14-location-17, eval=FALSE}
-# remotes::install_github("mhudecheck/revgeo")
-library(revgeo)
-metro_names = revgeo::revgeo(longitude = coords[, 1], latitude = coords[, 2], 
-                             output = "frame")
+```{r 14-location-17, warning=FALSE, eval=FALSE}
+metro_names = sf::st_centroid(metros) |>
+  tmaptools::rev_geocode_OSM(as.data.frame = TRUE) |>
+  dplyr::select(city, town, state)
+metro_names = mutate(metro_names, city = ifelse(is.na(city), town, city))
 ```
 
 To make sure that the reader uses the exact same results, we have put them into **spDataLarge** as the object `metro_names`.
@@ -298,7 +289,8 @@ Umlauts like `ü` might lead to trouble further on, for example when determining
 ```{r 14-location-19}
 metro_names = metro_names$city |> 
   as.character() |>
-  {\(x) ifelse(x == "Wülfrath", "Duesseldorf", x)}()
+  {\(x) ifelse(x == "Wülfrath", "Düsseldorf", x)}() |>
+  {\(x) gsub("ü", "ue", x)}()
 ```
 
 ## Points of interest
@@ -492,7 +484,7 @@ Please note that the unzipped file has a size of 1.23 GB.
 To read it into R\index{R}, you can use `readr::read_csv`.
 This takes 30 seconds on my machine (16 GB RAM)
 `data.table::fread()` might be even faster, and returns an object of class `data.table()`.
-Use `as.tibble()` to convert it into a tibble\index{tibble}.
+Use `dplyr::as_tibble()` to convert it into a tibble\index{tibble}.
 Build an inhabitant raster\index{raster}, aggregate\index{aggregation!spatial} it to a cell resolution of 1 km, and compare the difference with the inhabitant raster (`inh`) we have created using class mean values.
 
 1. Suppose our bike shop predominantly sold electric bikes to older people. 
