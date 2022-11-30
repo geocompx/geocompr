@@ -203,9 +203,9 @@ knitr::kable(lrns_df,
 ##                              learner = learner,
 ##                              resampling = resampling)
 ## # compute the AUROC as a data.table
-## score_spcv_glm = rr_spcv_glm$score(measure = mlr3::msr("classif.auc")) %>%
-##   # keep only the columns you need
-##   .[, .(task_id, learner_id, resampling_id, classif.auc)]
+## score_spcv_glm = rr_spcv_glm$score(measure = mlr3::msr("classif.auc")) 
+## # keep only the columns you need
+## score_spcv_glm = score_spcv_glm[, .(task_id, learner_id, resampling_id, classif.auc)]
 
 
 ## ----12-spatial-cv-21-------------------------------------------------------------------------------
@@ -298,9 +298,9 @@ knitr::include_graphics("figures/13_cv.png")
 ## # stop parallelization
 ## future:::ClusterRegistry("stop")
 ## # compute the AUROC values
-## score_spcv_svm = rr_spcv_svm$score(measure = mlr3::msr("classif.auc")) %>%
-##   # keep only the columns you need
-##   .[, .(task_id, learner_id, resampling_id, classif.auc)]
+## score_spcv_svm = rr_spcv_svm$score(measure = mlr3::msr("classif.auc")) 
+## # keep only the columns you need
+## score_spcv_svm = score_spcv_svm[, .(task_id, learner_id, resampling_id, classif.auc)]
 
 
 ## ----12-spatial-cv-31-------------------------------------------------------------------------------
