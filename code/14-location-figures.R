@@ -133,7 +133,8 @@ coords = st_centroid(metros) |>
 # move all labels up except for Düsseldorf
 metro_names = dplyr::pull(metro_names, city) |> 
   as.character() |> 
-  {\(x) ifelse(x == "Wülfrath", "Duesseldorf", x)}()
+  {\(x) ifelse(x == "Wülfrath", "Düsseldorf", x)}() |>
+  {\(x) gsub("ü", "ue", x)}
 ind = metro_names %in% "Duesseldorf"
 coords[!ind, 2] = coords[!ind, 2] + 30000
 
