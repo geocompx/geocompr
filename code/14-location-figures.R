@@ -127,13 +127,13 @@ metros = polys |>
 pal = RColorBrewer::brewer.pal(5, "GnBu")
 # cuts = c(0, 249000, 499000, 749000, 999000, 1249000)
 cuts = c(0, 250000, 500000, 750000, 1000000, 1250000)
-coords = st_centroid(metros) %>%
-  st_coordinates() %>%
+coords = st_centroid(metros) |>
+  st_coordinates() |>
   round(4)
 # move all labels up except for Düsseldorf
-metro_names = dplyr::pull(metro_names, city) %>% 
-  as.character() %>% 
-  ifelse(. == "Wülfrath", "Duesseldorf", .)
+metro_names = dplyr::pull(metro_names, city) |> 
+  as.character() |> 
+  {\(x) ifelse(x == "Wülfrath", "Duesseldorf", x)}()
 ind = metro_names %in% "Duesseldorf"
 coords[!ind, 2] = coords[!ind, 2] + 30000
 
