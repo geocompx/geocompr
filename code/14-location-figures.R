@@ -1,4 +1,4 @@
-# Filename: 14-location_figures.R (2019-04-22)
+# Filename: 14-location_figures.R (2022-11-30)
 #
 # TO DO: Build figures for location chapter
 #
@@ -18,9 +18,10 @@
 #**********************************************************
 
 # attach packages
-library(raster)
+library(terra)
 library(sp)
 library(sf)
+library(geodata)
 library(lattice)
 library(latticeExtra)
 library(grid)
@@ -30,11 +31,15 @@ library(mapview)
 library(tidyverse)
 library(htmlwidgets)
 library(leaflet)
+# we still need the raster package but will reference it when needed with
+# raster::
+# library(raster)
 
 # attach data
 data("census_de", "metro_names", "shops", package = "spDataLarge")
 # download German border polygon
-ger = getData(country = "DEU", level = 0)
+ger = geodata::gadm(country = "DEU", level = 0, path = tempdir())
+# ger = raster::getData(country = "DEU", level = 0)
 
 #**********************************************************
 # 2 CENSUS STACK FIGURE------------------------------------
@@ -46,27 +51,23 @@ input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D,
                       hh_size = HHGroesse_D)
 # set -1 and -9 to NA
-input_tidy = mutate_all(input, list(~ifelse(. %in% c(-1, -9), NA, .)))
-input_ras = rasterFromXYZ(input_tidy, crs = st_crs(3035)$proj4string)
-
-# convert the brick into a stack, ratify and factor variables apparently only
-# work with a raster stack
-input_ras = stack(input_ras)
-# ratify rasters (factor variables)
-for (i in names(input_ras)) {
-  input_ras[[i]] = ratify(input_ras[[i]])
-  values(input_ras[[i]]) = as.factor(values(input_ras[[i]]))
-}
+input_tidy = dplyr::mutate(
+  input, 
+  dplyr::across(.fns =  ~ifelse(.x %in% c(-1, -9), NA, .x)))
+input_ras = terra::rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 
 # reproject German outline
-ger = spTransform(ger, proj4string(input_ras))
+ger = terra::project(ger, crs(input_ras))
 
 # 2.2 Create figure========================================
 #**********************************************************
 
 # find out about lattice settings
 # trellis.par.get()
-p_1 = spplot(input_ras, col.regions = RColorBrewer::brewer.pal(6, "GnBu"), 
+p_1 = spplot(input_ras, col.regions = RColorBrewer::brewer.pal(6, "GnBu"),
+             # at necessary since the factor variables are represented as
+             # continuous variables
+             at = 1:6, 
              main = list("Classes", cex = 0.5),
              layout = c(4, 1), 
              # Leave some space between the panels
@@ -74,14 +75,14 @@ p_1 = spplot(input_ras, col.regions = RColorBrewer::brewer.pal(6, "GnBu"),
              colorkey = list(space = "top", width = 0.8, height = 0.2,
                              # make tick size smaller
                              tck = 0.5,
-                             labels = list(cex = 0.4)),
+                             labels = list(cex = 0.4), at = 1:6),
              strip = strip.custom(bg = "white",
                                   par.strip.text = list(cex = 0.5),
                                   factor.levels = c("population", "women",
                                                     "mean age", 
                                                     "household size")),
              sp.layout = list(
-               list("sp.polygons", ger, col = gray(0.5),
+               list("sp.polygons", as(ger, "Spatial"), col = gray(0.5),
                     first = FALSE)))
 # save the output
 ggplot2::ggsave(filename = "figures/08_census_stack.png",
@@ -105,22 +106,21 @@ rcl_hh = rcl_women
 rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
 # reclassify
 reclass = map2(as.list(input_ras), rcl, function(x, y) {
-  reclassify(x = x, rcl = y, right = NA)
-}) %>% 
-  stack
-names(reclass) = names(input_ras)
+  terra::classify(x = x, rcl = y, right = NA)
+}) |>
+  rast()
 # aggregate by a factor of 20
-pop_agg = aggregate(reclass$pop, fact = 20, fun = sum)
+pop_agg = terra::aggregate(reclass$pop, fact = 20, fun = sum, na.rm = TRUE)
 # just keep raster cells with more than 500,000 inhabitants
 polys = pop_agg[pop_agg > 500000, drop = FALSE] 
 # convert all cells belonging to one region ino polygons
-polys = polys %>% 
-  clump() %>%
-  rasterToPolygons() %>%
+polys = polys |>
+  terra::patches(directions = 8) |>
+  terra::as.polygons() |>
   st_as_sf()
 # dissolve
-metros = polys %>%
-  group_by(clumps) %>%
+metros = polys |>
+  group_by(patches) |>
   summarize()
 
 # palette
@@ -139,7 +139,7 @@ coords[!ind, 2] = coords[!ind, 2] + 30000
 
 # 3.2 Create figure========================================
 #**********************************************************
-p_2 = 
+p_2 =
   spplot(pop_agg, col.regions = pal, 
          main = list("Number of people in 1000", cex = 0.5),
          # if we want to get rid of the plot frame around the map
@@ -157,7 +157,8 @@ p_2 =
          at = cuts,
          # overlay with further spatial objects
          sp.layout = list(
-           list("sp.polygons", ger, col = gray(0.5), first = FALSE),
+           list("sp.polygons", as(ger, "Spatial"), col = gray(0.5),
+                first = FALSE),
            list("sp.polygons", as(metros, "Spatial"), col = "gold",
                 lwd = 2, first = FALSE)
            # list("sp.text", coords, txt = metro_names, cex = 0.7, font = 3,
@@ -207,41 +208,40 @@ ggplot2::ggsave(filename = "figures/08_metro_areas.png",
 
 # 4.1 Data preparation=====================================
 #**********************************************************
-shops = st_transform(shops, proj4string(reclass))
+shops = st_transform(shops, st_crs(reclass))
 # create poi raster
-poi = rasterize(x = shops, y = reclass, field = "osm_id", fun = "count")
+poi = terra::rasterize(x = terra::vect(shops),
+                       y = reclass, field = "osm_id", fun = "length")
 int = classInt::classIntervals(values(poi), n = 4, style = "fisher")
 int = round(int$brks)
 rcl_poi = matrix(c(int[1], rep(int[-c(1, length(int))], each = 2), 
                    int[length(int)] + 1), ncol = 2, byrow = TRUE)
 rcl_poi = cbind(rcl_poi, 0:3)  
 # reclassify
-poi = reclassify(poi, rcl = rcl_poi, right = NA) 
+poi = terra::classify(poi, rcl = rcl_poi, right = NA) 
 names(poi) = "poi"
 
 # dismiss population raster
-reclass = dropLayer(reclass, "pop")
-# add poi raster
-reclass = addLayer(reclass, poi)
+reclass = reclass[[names(reclass) != "pop"]] |>
+  c(poi)
 # calculate the total score
 result = sum(reclass)
 # have a look at suitable bike shop locations in Berlin
 berlin = metros[metro_names == "Berlin", ]
-berlin_raster = raster::crop(result, berlin) 
+berlin_raster = terra::crop(result, berlin) 
 
 # 4.2 Figure===============================================
 #**********************************************************
-m = mapview(berlin_raster, col.regions = c(NA, "darkgreen"),
+m = mapview(raster::raster(berlin_raster), col.regions = c(NA, "darkgreen"),
             na.color = "transparent", legend = TRUE, map.type = "OpenStreetMap")
 mapshot(m, url = file.path(getwd(), "figures/08_bikeshops_berlin.html"))
 
 # using leaflet (instead of mapview)
 berlin_raster = berlin_raster > 9
-berlin_raster = berlin_raster == TRUE
 berlin_raster[berlin_raster == 0] = NA
 
-leaflet() %>% 
-  addTiles() %>%
-  addRasterImage(berlin_raster, colors = "darkgreen", opacity = 0.8) %>%
+leaflet() |>
+  addTiles() |>
+  addRasterImage(raster::raster(berlin_raster), colors = "darkgreen", opacity = 0.8) |>
   addLegend("bottomright", colors = c("darkgreen"), 
             labels = c("potential locations"), title = "Legend")
