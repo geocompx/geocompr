@@ -271,7 +271,7 @@ metro_names = sf::st_centroid(metros) |>
   dplyr::select(city, town, state)
 # smaller cities are returned in column town. To have all names in one column,
 # we move the town name to the city column in case it is NA
-metro_names = mutate(metro_names, city = ifelse(is.na(city), town, city))
+metro_names = dplyr::mutate(metro_names, city = ifelse(is.na(city), town, city))
 ```
 
 To make sure that the reader uses the exact same results, we have put them into **spDataLarge** as the object `metro_names`.
@@ -312,7 +312,7 @@ To save time and resources, we have put the output named `shops` into **spDataLa
 To make it available in your environment ensure that the **spDataLarge** package is loaded, or run `data("shops", package = "spDataLarge")`.
 
 ```{r 14-location-20, eval=FALSE, message=FALSE}
-shops = map(metro_names, function(x) {
+shops = purrr::map(metro_names, function(x) {
   message("Downloading shops of: ", x, "\n")
   # give the server a bit time
   Sys.sleep(sample(seq(5, 10, 0.1), 1))
@@ -369,7 +369,7 @@ The result of the subsequent code chunk is therefore an estimate of shop density
 `st_transform()`\index{sf!st\_transform} is used before `rasterize()`\index{raster!rasterize} to ensure the CRS\index{CRS} of both inputs match.
 
 ```{r 14-location-25, message=FALSE, warning=FALSE}
-shops = st_transform(shops, st_crs(reclass))
+shops = sf::st_transform(shops, st_crs(reclass))
 # create poi raster
 poi = terra::rasterize(x = terra::vect(shops),
                        y = reclass, field = "osm_id", fun = "length")
@@ -429,13 +429,13 @@ if (knitr::is_latex_output()) {
     # summary(berlin_raster)
     # berlin_raster
     berlin_raster = berlin_raster[berlin_raster > 9, drop = FALSE]
-    leaflet() |> 
-      addTiles() |>
+    leaflet::leaflet() |> 
+      leaflet::addTiles() |>
       # addRasterImage so far only supports raster objects
-      addRasterImage(raster::raster(berlin_raster), colors = "darkgreen",
-                     opacity = 0.8) |>
-      addLegend("bottomright", colors = c("darkgreen"), 
-                labels = c("potential locations"), title = "Legend")  
+      leaflet::addRasterImage(raster::raster(berlin_raster), colors = "darkgreen",
+                              opacity = 0.8) |>
+      leaflet::addLegend("bottomright", colors = c("darkgreen"), 
+                         labels = c("potential locations"), title = "Legend")  
 }
 ```
 

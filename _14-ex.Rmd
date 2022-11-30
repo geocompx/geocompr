@@ -9,8 +9,6 @@ library(purrr)
 library(terra)
 library(osmdata)
 library(spDataLarge)
-# the raster package is also needed but will be referenced with :: syntax in due
-# course
 ```
 
 E1. Download the csv file containing inhabitant information for a 100 m cell resolution (https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
@@ -18,7 +16,7 @@ Please note that the unzipped file has a size of 1.23 GB.
 To read it into R you can use `readr::read_csv`.
 This takes 30 seconds on my machine (16 GB RAM)
 `data.table::fread()` might be even faster, and returns an object of class `data.table()`.
-Use `as.tibble()` to convert it into a tibble.
+Use `dplyr::as_tibble()` to convert it into a tibble.
 Build an inhabitant raster, aggregate it to a cell resolution of 1 km, and compare the difference with the inhabitant raster (`inh`) we have created using class mean values.
 
 ```{r, 14-ex-e1, eval=FALSE}
@@ -32,7 +30,7 @@ data("census_de", package = "spDataLarge")
 input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D,
                       hh_size = HHGroesse_D)
-input_tidy = mutate(input, across(.fns = ~ifelse(. %in% c(-1, -9), NA, .)))
+input_tidy = dplyr::mutate(input, dplyr::across(.fns = ~ifelse(. %in% c(-1, -9), NA, .)))
 input_ras = terra::rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 inh_coarse = input_ras$pop
 # reclassify, i.e. convert the classes into inhabitant numbers using class means
@@ -57,11 +55,11 @@ base_name = grep(".csv$", nms$Name, value = TRUE)
 unzip(file.path(tempdir(), "census.zip"), files = base_name, exdir = tempdir())
 # read in the csv file
 input = data.table::fread(file.path(tempdir(), base_name)) |>
-  dplyr::as_tibble
+  dplyr::as_tibble()
 input = dplyr::select(input, x = starts_with("x_mp_1"), y = starts_with("y_mp_1"),
-                        inh = Einwohner)
+                      inh = Einwohner)
 # set -1 and -9 to NA
-input = mutate(input, across(.fns = ~ifelse(. %in% c(-1, -9), NA, .)))
+input = dplyr::mutate(input, dplyr::across(.fns = ~ifelse(. %in% c(-1, -9), NA, .)))
 # convert table into a raster (x and y are cell midpoints)
 inh_fine = terra::rast(input, type = "xyz", crs = "EPSG:3035")
 # CHECK: contains the fine raster the number of inhabitants or only inhabitant classes
@@ -75,7 +73,7 @@ inh_fine = terra::aggregate(inh_fine,
                             fact = terra::res(inh_coarse)[1] / terra::res(inh_fine)[1], 
                             fun = sum, na.rm = TRUE)
 # origin has to be the same
-origin(inh_fine) = origin(inh_coarse)
+terra::origin(inh_fine) = terra::origin(inh_coarse)
 # make the comparison
 summary(inh_fine - inh_coarse)
 plot(inh_fine - inh_coarse)
@@ -109,13 +107,12 @@ rcl_hh = rcl_women
 rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
 
 reclass = input_ras
-for (i in 1:raster::nlayers(reclass)) {
-  reclass[[i]] = reclassify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
+for (i in 1:terra::nlyr(reclass)) {
+  reclass[[i]] = terra::classify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
 }
 names(reclass) = names(input_ras)
 
 # The rest of the analysis follows exactly the code presented in the book. 
-
 
 # Add metro names to metros sf object
 #************************************
@@ -133,7 +130,7 @@ polys = pop_agg |>
   sf::st_as_sf()
 
 metros = polys |>
-  group_by(patches) |>
+  dplyr::group_by(patches) |>
   dplyr::summarize()
 metros$metro_names = metro_names
 
@@ -168,9 +165,9 @@ berlin_raster = terra::crop(result, berlin)
 berlin_raster = berlin_raster > 9
 berlin_raster[berlin_raster == 0] = NA
 # make the plot
-leaflet() |>
-  addTiles() |>
-  addRasterImage(raster::raster(berlin_raster), colors = "darkgreen", opacity = 0.8) |>
-  addLegend("bottomright", colors = c("darkgreen"), 
-            labels = c("potential locations"), title = "Legend")
+leaflet::leaflet() |>
+  leaflet::addTiles() |>
+  leaflet::addRasterImage(raster::raster(berlin_raster), colors = "darkgreen", opacity = 0.8) |>
+  leaflet::addLegend("bottomright", colors = c("darkgreen"), 
+                     labels = c("potential locations"), title = "Legend")
 ```
