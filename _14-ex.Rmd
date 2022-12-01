@@ -56,30 +56,34 @@ unzip(file.path(tempdir(), "census.zip"), files = base_name, exdir = tempdir())
 # read in the csv file
 input = data.table::fread(file.path(tempdir(), base_name)) |>
   dplyr::as_tibble()
-input = dplyr::select(input, x = starts_with("x_mp_1"), y = starts_with("y_mp_1"),
-                      inh = Einwohner)
+input = dplyr::select(input, x = starts_with("x_mp_1"),
+                      y = starts_with("y_mp_1"), inh = Einwohner)
 # set -1 and -9 to NA
-input = dplyr::mutate(input, dplyr::across(.fns = ~ifelse(. %in% c(-1, -9), NA, .)))
+input = dplyr::mutate(input,
+                      dplyr::across(.fns = ~ifelse(. %in% c(-1, -9), NA, .)))
 # convert table into a raster (x and y are cell midpoints)
 inh_fine = terra::rast(input, type = "xyz", crs = "EPSG:3035")
-# CHECK: contains the fine raster the number of inhabitants or only inhabitant classes
-# (like its coarse counterpart?)
+# Note that inh_fine contains the actual number of inhabitants per raster cell
+# instead of mean class values as was the case with its coarse 1km counterpart
 
 # Comparing the coarse with the fine raster
 #******************************************
 
 # aggregate to the resolution of the coarse raster
-inh_fine = terra::aggregate(inh_fine, 
-                            fact = terra::res(inh_coarse)[1] / terra::res(inh_fine)[1], 
-                            fun = sum, na.rm = TRUE)
+inh_fine = terra::aggregate(
+  inh_fine, fact = terra::res(inh_coarse)[1] / terra::res(inh_fine)[1], 
+  fun = sum, na.rm = TRUE)
 # origin has to be the same
 terra::origin(inh_fine) = terra::origin(inh_coarse)
 # make the comparison
 summary(inh_fine - inh_coarse)
 plot(inh_fine - inh_coarse)
 plot(abs(inh_fine - inh_coarse) > 1000)
-terra::global((abs(inh_fine - inh_coarse) > 1000), stat = "sum", na.rm = TRUE)
-terra::global((abs(inh_fine - inh_coarse) > 5000), stat = "sum", na.rm = TRUE)
+# the biggest deviations can be found in big cities like Berlin
+terra::global((abs(inh_fine - inh_coarse) > 1000), fun = "sum", na.rm = TRUE)
+# 18,121 cells have a deviation > 1000 inhabitants
+terra::global((abs(inh_fine - inh_coarse) > 5000), fun = "sum", na.rm = TRUE)
+# 338 cells have a deviation > 5000
 ```
 
 E2. Suppose our bike shop predominantly sold electric bikes to older people. 
