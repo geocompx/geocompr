@@ -9,7 +9,7 @@
 
 ```r
 library(sf)
-library(raster)
+library(terra)
 library(dplyr)
 library(spData)
 library(spDataLarge)
@@ -22,6 +22,13 @@ library(spDataLarge)
 library(tmap)    # for static and interactive maps
 library(leaflet) # for interactive maps
 library(ggplot2) # tidyverse data visualization package
+```
+
+- You also need to read in a couple of datasets as follows for Section \@ref(spatial-ras):
+
+
+```r
+nz_elev = rast(system.file("raster/nz_elev.tif", package = "spDataLarge"))
 ```
 
 ## Introduction
@@ -40,7 +47,6 @@ Common design issues include poor placement, size and readability of text and ca
 Furthermore, poor map making can hinder the communication of results [@brewer_designing_2015]:
 
 > Amateur-looking maps can undermine your audience’s ability to understand important information and weaken the presentation of a professional data investigation.
-
 Maps have been used for several thousand years for a wide variety of purposes.
 Historic examples include maps of buildings and land ownership in the Old Babylonian dynasty more than 3000 years ago and Ptolemy's world map in his masterpiece *Geography* nearly 2000 years ago [@talbert_ancient_2014].
 
@@ -58,22 +64,24 @@ Finally, Section \@ref(other-mapping-packages) covers a range of alternative map
 
 \index{map making!static maps}
 Static maps are the most common type of visual output from geocomputation.
-Standard formats include `.png` and `.pdf` for raster and vector outputs respectively.
+Standard formats include `.png` and `.pdf` for raster and vector outputs, respectively.
 Initially, static maps were the only type of maps that R could produce.
-Things advanced with the release of **sp** [see @pebesma_classes_2005] and many techniques for map making have been developed since then.
-However, despite the innovation of interactive mapping, static plotting was still the emphasis of geographic data visualisation in R a decade later [@cheshire_spatial_2015].
+Things have advanced with the release of **sp** [see @pebesma_classes_2005], and many map-making techniques have been developed since then.
+However, despite the innovation of interactive mapping, static plotting was still the emphasis of geographic data visualization in R a decade later [@cheshire_spatial_2015].
 
 The generic `plot()` function is often the fastest way to create static maps from vector and raster spatial objects (see sections \@ref(basic-map) and \@ref(basic-map-raster)).
 Sometimes, simplicity and speed are priorities, especially during the development phase of a project, and this is where `plot()` excels.
 The base R approach is also extensible, with `plot()` offering dozens of arguments.
-Another approach is the **grid** package which allows low level control of static maps, as illustrated in Chapter [14](https://www.stat.auckland.ac.nz/~paul/RG2e/chapter14.html) of @murrell_r_2016.
-This section focuses on **tmap** and emphasizes the important aesthetic and layout options.
+Another approach is the **grid** package which allows low-level control of static maps, as illustrated in Chapter [14](https://www.stat.auckland.ac.nz/~paul/RG2e/chapter14.html) of @murrell_r_2016.
+This section focuses on **tmap** and emphasizes the essential aesthetic and layout options.
 
 \index{tmap (package)}
 **tmap** is a powerful and flexible map-making package with sensible defaults.
 It has a concise syntax that allows for the creation of attractive maps with minimal code which will be familiar to **ggplot2** users.
 It also has the unique capability to generate static and interactive maps using the same code via `tmap_mode()`.
-Finally, it accepts a wider range of spatial classes (including `raster` objects) than alternatives such as **ggplot2** (see the vignettes [`tmap-getstarted`](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html) and [`tmap-changes-v2`](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-changes-v2.html), as well as @tennekes_tmap_2018, for further documentation).
+Finally, it accepts a wider range of spatial classes (including **sf** and **terra** objects) than alternatives such as **ggplot2** (see the vignettes [`tmap-getstarted`](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html) and [`tmap-changes-v2`](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-changes-v2.html), as well as @tennekes_tmap_2018, for further documentation).
+<!--toDo:jn-->
+<!-- update the above vignettes links -->
 
 ### tmap basics
 
@@ -1103,25 +1111,15 @@ us_states2163_dorling = cartogram_dorling(us_states2163, "total_pop_15")
 
 ## Exercises
 
+
 These exercises rely on a new object, `africa`.
 Create it using the `world` and `worldbank_df` datasets from the **spData** package as follows (see Chapter \@ref(attr)):
 
 
-```r
-africa = world |> 
-  filter(continent == "Africa", !is.na(iso_a2)) |> 
-  left_join(worldbank_df, by = "iso_a2") |> 
-  dplyr::select(name, subregion, gdpPercap, HDI, pop_growth) |> 
-  st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
-```
 
 We will also use `zion` and `nlcd` datasets from **spDataLarge**:
 
 
-```r
-zion = st_read((system.file("vector/zion.gpkg", package = "spDataLarge")))
-data(nlcd, package = "spDataLarge")
-```
 
 1. Create a map showing the geographic distribution of the Human Development Index (`HDI`) across Africa with base **graphics** (hint: use `plot()`) and **tmap** packages (hint: use `tm_shape(africa) + ...`).
     - Name two advantages of each based on the experience.
@@ -1163,4 +1161,5 @@ What is the information provided by the first and the second map?
 How do they differ from each other?
 1. Visualize population growth in Africa. 
 Next, compare it with the maps of a hexagonal and regular grid created using the **geogrid** package.
+
 
