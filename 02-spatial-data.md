@@ -523,7 +523,7 @@ They are created with `st_sf()` as illustrated below, which creates the London e
 
 ```r
 lnd_point = st_point(c(0.1, 51.5))                 # sfg object
-lnd_geom = st_sfc(lnd_point, crs = 4326)           # sfc object
+lnd_geom = st_sfc(lnd_point, crs = "EPSG:4326")    # sfc object
 lnd_attrib = data.frame(                           # data.frame object
   name = "London",
   temperature = 25,
