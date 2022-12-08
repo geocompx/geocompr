@@ -17,7 +17,7 @@ m_jenks = tm_shape(nz) +
   tm_polygons(col = "Median_income", style = "jenks") +
   tm_layout(title = 'style = "jenks"')
 m_cont = tm_shape(nz_elev) +
-  tm_raster(col = "elevation", style = "cont", 
+  tm_raster(style = "cont", 
             contrast = c(0.2, 1)) +
   tm_layout(title = 'style = "cont"')
 m_cat = tm_shape(nz) +
