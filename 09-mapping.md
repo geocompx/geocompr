@@ -1113,53 +1113,95 @@ us_states2163_dorling = cartogram_dorling(us_states2163, "total_pop_15")
 
 
 These exercises rely on a new object, `africa`.
-Create it using the `world` and `worldbank_df` datasets from the **spData** package as follows (see Chapter \@ref(attr)):
+Create it using the `world` and `worldbank_df` datasets from the **spData** package as follows:
 
-
+```r
+library(spData)
+africa = world |> 
+  filter(continent == "Africa", !is.na(iso_a2)) |> 
+  left_join(worldbank_df, by = "iso_a2") |> 
+  dplyr::select(name, subregion, gdpPercap, HDI, pop_growth) |> 
+  st_transform("ESRI:102022")
+```
 
 We will also use `zion` and `nlcd` datasets from **spDataLarge**:
 
+```r
+zion = st_read((system.file("vector/zion.gpkg", package = "spDataLarge")))
+data(nlcd, package = "spDataLarge")
+```
 
-
-1. Create a map showing the geographic distribution of the Human Development Index (`HDI`) across Africa with base **graphics** (hint: use `plot()`) and **tmap** packages (hint: use `tm_shape(africa) + ...`).
+E1. Create a map showing the geographic distribution of the Human Development Index (`HDI`) across Africa with base **graphics** (hint: use `plot()`) and **tmap** packages (hint: use `tm_shape(africa) + ...`).
     - Name two advantages of each based on the experience.
     - Name three other mapping packages and an advantage of each.
     - Bonus: create three more maps of Africa using these three packages.
-1. Extend the **tmap** created for the previous exercise so the legend has three bins: "High" (`HDI` above 0.7), "Medium" (`HDI` between 0.55 and 0.7) and "Low" (`HDI` below 0.55).
+
+
+
+E2. Extend the **tmap** created for the previous exercise so the legend has three bins: "High" (`HDI` above 0.7), "Medium" (`HDI` between 0.55 and 0.7) and "Low" (`HDI` below 0.55).
     - Bonus: improve the map aesthetics, for example by changing the legend title, class labels and color palette.
-1. Represent `africa`'s subregions on the map. 
+
+
+
+E3. Represent `africa`'s subregions on the map. 
 Change the default color palette and legend title.
 Next, combine this map and the map created in the previous exercise into a single plot.
-1. Create a land cover map of the Zion National Park.
+
+
+
+E4. Create a land cover map of the Zion National Park.
     - Change the default colors to match your perception of the land cover categories
     - Add a scale bar and north arrow and change the position of both to improve the map's aesthetic appeal
     - Bonus: Add an inset map of Zion National Park's location in the context of the Utah state. (Hint: an object representing Utah can be subset from the `us_states` dataset.) 
-1. Create facet maps of countries in Eastern Africa:
+
+
+
+E5. Create facet maps of countries in Eastern Africa:
     - With one facet showing HDI and the other representing population growth (hint: using variables `HDI` and `pop_growth`, respectively)
     - With a 'small multiple' per country
-<!--comment to the next q:  worldbank_df along the iso_a2 variable is pegging Kosovo and South Cyprus to Somaliland -->
-1. Building on the previous facet map examples, create animated maps of East Africa:
+
+
+
+E6. Building on the previous facet map examples, create animated maps of East Africa:
     - Showing first the spatial distribution of HDI scores then population growth
     - Showing each country in order
-1. Create an interactive map of Africa:
+
+
+
+E7. Create an interactive map of Africa:
     - With **tmap**
     - With **mapview**
     - With **leaflet**
     - Bonus: For each approach, add a legend (if not automatically provided) and a scale bar
-1. Sketch on paper ideas for a web mapping app that could be used to make transport or land-use policies more evidence based:
+
+
+
+E8. Sketch on paper ideas for a web mapping app that could be used to make transport or land-use policies more evidence based:
     - In the city you live, for a couple of users per day
     - In the country you live, for dozens of users per day
     - Worldwide for hundreds of users per day and large data serving requirements
-1. Update the code in `coffeeApp/app.R` so that instead of centering on Brazil the user can select which country to focus on:
+
+
+
+E9. Update the code in `coffeeApp/app.R` so that instead of centering on Brazil the user can select which country to focus on:
     - Using `textInput()`
     - Using `selectInput()`
-1. Reproduce Figure \@ref(fig:tmshape) and the 1st and 6th panel of Figure \@ref(fig:break-styles) as closely as possible using the **ggplot2** package.
-1. Join `us_states` and `us_states_df` together and calculate a poverty rate for each state using the new dataset.
+
+
+
+E10. Reproduce Figure \@ref(fig:tmshape) and the 1st and 6th panel of Figure \@ref(fig:break-styles) as closely as possible using the **ggplot2** package.
+
+
+
+E11. Join `us_states` and `us_states_df` together and calculate a poverty rate for each state using the new dataset.
 Next, construct a continuous area cartogram based on total population. 
 Finally, create and compare two maps of the poverty rate: (1) a standard choropleth map and (2) a map using the created cartogram boundaries.
 What is the information provided by the first and the second map?
 How do they differ from each other?
-1. Visualize population growth in Africa. 
+
+
+
+E12. Visualize population growth in Africa. 
 Next, compare it with the maps of a hexagonal and regular grid created using the **geogrid** package.
 
 
