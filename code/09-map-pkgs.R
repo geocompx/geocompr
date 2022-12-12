@@ -3,7 +3,6 @@ remotes::install_github("ropenscilabs/packagemetrics")
 
 # generic mapping packages ------------------------------------------------
 generic_map_pkgs = c(
-  "cartography",
   "ggplot2",
   "googleway",
   "ggspatial",
@@ -22,8 +21,8 @@ specific_map_pkgs = c(
   "cartogram",
   "geogrid",
   "geofacet",
-  "globe",
-  "linemap"
+  "linemap",
+  "rayshader"
 )
 
 specific_map_pkgs = packagemetrics::package_list_metrics(specific_map_pkgs)
