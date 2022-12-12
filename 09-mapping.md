@@ -527,7 +527,7 @@ We can use US National Atlas Equal Area for the map of the contiguous United Sta
 
 
 ```r
-us_states_map = tm_shape(us_states, projection = 2163) + tm_polygons() + 
+us_states_map = tm_shape(us_states, projection = "EPSG:2163") + tm_polygons() + 
   tm_layout(frame = FALSE)
 ```
 
@@ -981,10 +981,6 @@ Before we cover mapping packages for plotting a specific type of map (in the nex
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> cartography </td>
-   <td style="text-align:left;width: 9cm; "> Thematic Cartography </td>
-  </tr>
-  <tr>
    <td style="text-align:left;"> ggplot2 </td>
    <td style="text-align:left;width: 9cm; "> Create Elegant Data Visualisations Using the Grammar of Graphics </td>
   </tr>
@@ -1048,12 +1044,12 @@ Such packages create cartograms that distort geographical space, create line map
    <td style="text-align:left;"> 'ggplot2' Faceting Utilities for Geographical Data </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> globe </td>
-   <td style="text-align:left;"> Plot 2D and 3D Views of the Earth, Including Major Coastline </td>
-  </tr>
-  <tr>
    <td style="text-align:left;"> linemap </td>
    <td style="text-align:left;"> Line Maps </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rayshader </td>
+   <td style="text-align:left;"> Create Maps and Visualize Data in 2D and 3D </td>
   </tr>
 </tbody>
 </table>
