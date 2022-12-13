@@ -9,7 +9,7 @@ This chapter assumes proficiency with geographic data analysis\index{geographic 
 A familiarity with generalized linear models (GLM)\index{GLM} and machine learning\index{machine learning} is highly recommended [for example from @zuur_mixed_2009;@james_introduction_2013].
 
 The chapter uses the following packages:^[
-Packages **GGally**, **lgr**, **kernlab**, **ml3measures**, **paradox**, **pROC**, **progressr** and **spDataLarge** must also be installed although these do not need to be attached.
+Packages **GGally**, **lgr**, **kernlab**, **mlr3measures**, **paradox**, **pROC**, **progressr** and **spDataLarge** must also be installed although these do not need to be attached.
 ]
 
 
