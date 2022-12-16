@@ -7,7 +7,7 @@
 <title>Chapter 15 Ecology | Geocomputation with R</title>
 <meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow">
 <meta name="description" content="Prerequisites This chapter assumes you have a strong grasp of geographic data analysis and processing, covered in Chapters 2 to 5. In it you will also make use of R’s interfaces to dedicated GIS...">
-<meta name="generator" content="bookdown 0.30 with bs4_book()">
+<meta name="generator" content="bookdown 0.31 with bs4_book()">
 <meta property="og:title" content="Chapter 15 Ecology | Geocomputation with R">
 <meta property="og:type" content="book">
 <meta property="og:url" content="https://geocompr.robinlovelace.net/eco.html">
@@ -29,7 +29,7 @@
 <meta name="citation_author" content="Jannes Muenchow">
 <meta name="citation_publication_date" content="2019">
 <meta name="citation_isbn" content="9780203730058">
-<script src="libs/htmlwidgets-1.5.4/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
+<script src="libs/htmlwidgets-1.6.0/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
 <script src="libs/leaflet-1.3.1/leaflet.js"></script><link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
 <script src="libs/proj4-2.6.2/proj4.min.js"></script><script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script><link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
 <script src="libs/leaflet-binding-2.1.1/leaflet.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
@@ -428,7 +428,7 @@ For specifying a spatial task, we use again the <strong>mlr3spatiotempcv</strong
 Additionally, we got rid of the columns <code>id</code> and <code>spri</code> since these variables should not be used as predictors in the modeling.
 Next, we go on to construct the a random forest learner from the <strong>ranger</strong> package <span class="citation">(<a href="references.html#ref-wright_ranger_2017" role="doc-biblioref">Wright and Ziegler 2017</a>)</span>.</p>
 <div class="sourceCode" id="cb495"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lrn_rf</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mlr3/man/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.ranger"</span>, predict_type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">lrn_rf</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"regr.ranger"</span>, predict_type <span class="op">=</span> <span class="st">"response"</span><span class="op">)</span></span></code></pre></div>
 <p>As opposed to, for example, support vector machines (see Section <a href="spatial-cv.html#svm">12.5.2</a>), random forests often already show good performances when used with the default values of their hyperparameters (which may be one reason for their popularity).
 Still, tuning often moderately improves model results, and thus is worth the effort <span class="citation">(<a href="references.html#ref-probst_hyperparameters_2018" role="doc-biblioref">Probst, Wright, and Boulesteix 2018</a>)</span>.
 In random forests, the hyperparameters <code>mtry</code>, <code>min.node.size</code> and <code>sample.fraction</code> determine the degree of randomness, and should be tuned <span class="citation">(<a href="references.html#ref-probst_hyperparameters_2018" role="doc-biblioref">Probst, Wright, and Boulesteix 2018</a>)</span>.
@@ -447,19 +447,19 @@ Naturally, as trees and computing time become larger, the lower the <code>min.no
 <span>  sample.fraction <span class="op">=</span> <span class="fu">paradox</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/paradox/man/Domain.html">p_dbl</a></span><span class="op">(</span>lower <span class="op">=</span> <span class="fl">0.2</span>, upper <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span>,</span>
 <span>  min.node.size <span class="op">=</span> <span class="fu">paradox</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/paradox/man/Domain.html">p_int</a></span><span class="op">(</span>lower <span class="op">=</span> <span class="fl">1</span>, upper <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Having defined the search space, we are all set for specifying our tuning via the <code><a href="https://rdrr.io/pkg/mlr3tuning/man/AutoTuner.html">AutoTuner()</a></code> function.
+<p>Having defined the search space, we are all set for specifying our tuning via the <code><a href="https://mlr3tuning.mlr-org.com/reference/AutoTuner.html">AutoTuner()</a></code> function.
 Since we deal with geographic data, we will again make use of spatial cross-validation to tune the hyperparameters (see Sections <a href="spatial-cv.html#intro-cv">12.4</a> and <a href="spatial-cv.html#spatial-cv-with-mlr3">12.5</a>).
-Specifically, we will use a five-fold spatial partitioning with only one repetition (<code><a href="https://rdrr.io/pkg/mlr3/man/mlr_sugar.html">rsmp()</a></code>).
-In each of these spatial partitions, we run 50 models (<code><a href="https://bbotk.mlr-org.com/reference/trm.html">trm()</a></code>) while using randomly selected hyperparameter configurations (<code><a href="https://rdrr.io/pkg/mlr3tuning/man/tnr.html">tnr()</a></code>) within predefined limits (<code>seach_space</code>) to find the optimal hyperparameter combination <span class="citation">(see also Section <a href="spatial-cv.html#svm">12.5.2</a> and <a href="https://mlr3book.mlr-org.com/optimization.html#autotuner" class="uri" role="doc-biblioref">https://mlr3book.mlr-org.com/optimization.html#autotuner</a>, <a href="references.html#ref-becker_mlr3_2022" role="doc-biblioref">Becker et al. 2022</a>)</span>.
+Specifically, we will use a five-fold spatial partitioning with only one repetition (<code><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">rsmp()</a></code>).
+In each of these spatial partitions, we run 50 models (<code><a href="https://bbotk.mlr-org.com/reference/trm.html">trm()</a></code>) while using randomly selected hyperparameter configurations (<code><a href="https://mlr3tuning.mlr-org.com/reference/tnr.html">tnr()</a></code>) within predefined limits (<code>seach_space</code>) to find the optimal hyperparameter combination <span class="citation">(see also Section <a href="spatial-cv.html#svm">12.5.2</a> and <a href="https://mlr3book.mlr-org.com/optimization.html#autotuner" class="uri" role="doc-biblioref">https://mlr3book.mlr-org.com/optimization.html#autotuner</a>, <a href="references.html#ref-becker_mlr3_2022" role="doc-biblioref">Becker et al. 2022</a>)</span>.
 The performance measure is the root mean squared error (RMSE).</p>
 <div class="sourceCode" id="cb497"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">autotuner_rf</span> <span class="op">=</span> <span class="fu">mlr3tuning</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/mlr3tuning/man/AutoTuner.html">AutoTuner</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">autotuner_rf</span> <span class="op">=</span> <span class="fu">mlr3tuning</span><span class="fu">::</span><span class="va"><a href="https://mlr3tuning.mlr-org.com/reference/AutoTuner.html">AutoTuner</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
 <span>  learner <span class="op">=</span> <span class="va">lrn_rf</span>,</span>
-<span>  resampling <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mlr3/man/mlr_sugar.html">rsmp</a></span><span class="op">(</span><span class="st">"spcv_coords"</span>, folds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>, <span class="co"># spatial partitioning</span></span>
-<span>  measure <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mlr3/man/mlr_sugar.html">msr</a></span><span class="op">(</span><span class="st">"regr.rmse"</span><span class="op">)</span>, <span class="co"># performance measure</span></span>
+<span>  resampling <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">rsmp</a></span><span class="op">(</span><span class="st">"spcv_coords"</span>, folds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>, <span class="co"># spatial partitioning</span></span>
+<span>  measure <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">msr</a></span><span class="op">(</span><span class="st">"regr.rmse"</span><span class="op">)</span>, <span class="co"># performance measure</span></span>
 <span>  terminator <span class="op">=</span> <span class="fu">mlr3tuning</span><span class="fu">::</span><span class="fu"><a href="https://bbotk.mlr-org.com/reference/trm.html">trm</a></span><span class="op">(</span><span class="st">"evals"</span>, n_evals <span class="op">=</span> <span class="fl">50</span><span class="op">)</span>, <span class="co"># specify 50 iterations</span></span>
 <span>  search_space <span class="op">=</span> <span class="va">search_space</span>, <span class="co"># predefined hyperparameter search space</span></span>
-<span>  tuner <span class="op">=</span> <span class="fu">mlr3tuning</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mlr3tuning/man/tnr.html">tnr</a></span><span class="op">(</span><span class="st">"random_search"</span><span class="op">)</span> <span class="co"># specify random search</span></span>
+<span>  tuner <span class="op">=</span> <span class="fu">mlr3tuning</span><span class="fu">::</span><span class="fu"><a href="https://mlr3tuning.mlr-org.com/reference/tnr.html">tnr</a></span><span class="op">(</span><span class="st">"random_search"</span><span class="op">)</span> <span class="co"># specify random search</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Calling the <code>train()</code>-method of the <code>AutoTuner</code>-object finally runs the hyperparameter tuning, and will find the optimal hyperparameter combination for the specified parameters.</p>
 <div class="sourceCode" id="cb498"><pre class="downlit sourceCode r">
@@ -579,7 +579,7 @@ To complete the response-predictor matrix, extract the values of the environment
 The random forest modeling should include the estimation of optimal hyperparameter combinations (random search with 50 iterations) in an inner tuning loop (see Section <a href="spatial-cv.html#svm">12.5.2</a>).
 Parallelize the tuning level (see Section <a href="spatial-cv.html#svm">12.5.2</a>).
 Report the mean RMSE and use a boxplot to visualize all retrieved RMSEs.
-Please not that this exercise is best solved using the mlr3 functions <code><a href="https://rdrr.io/pkg/mlr3/man/benchmark_grid.html">benchmark_grid()</a></code> and <code><a href="https://rdrr.io/pkg/mlr3/man/benchmark.html">benchmark()</a></code> (see <a href="https://mlr3book.mlr-org.com/perf-eval-cmp.html#benchmarking" class="uri">https://mlr3book.mlr-org.com/perf-eval-cmp.html#benchmarking</a> for more information).</p>
+Please not that this exercise is best solved using the mlr3 functions <code><a href="https://mlr3.mlr-org.com/reference/benchmark_grid.html">benchmark_grid()</a></code> and <code><a href="https://mlr3.mlr-org.com/reference/benchmark.html">benchmark()</a></code> (see <a href="https://mlr3book.mlr-org.com/perf-eval-cmp.html#benchmarking" class="uri">https://mlr3book.mlr-org.com/perf-eval-cmp.html#benchmarking</a> for more information).</p>
 
 </div>
 </div>
@@ -631,7 +631,7 @@ Please not that this exercise is best solved using the mlr3 functions <code><a h
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-12-13.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2022-12-16.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
