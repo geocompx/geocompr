@@ -782,7 +782,7 @@ recl = classify(elev, rcl = rcl)
 The `classify()` function can be also used when we want to reduce the number of classes in our categorical rasters.
 We will perform several additional reclassifications in Chapter \@ref(location).
 
-Apart of arithmetic operators, one can also use the `app()`, `tapp()` and `lapp()` functions.
+Apart from arithmetic operators, one can also use the `app()`, `tapp()` and `lapp()` functions.
 They are more efficient, hence, they are preferable in the presence of large raster datasets. 
 Additionally, they allow you to save an output file directly.
 The `app()` function applies a function to each cell of a raster and is used to summarize (e.g., calculating the sum) the values of multiple layers into one layer.
