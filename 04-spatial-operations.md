@@ -663,8 +663,8 @@ This amounts to retrieving the values of the first raster object (in this case `
 </div>
 
 The example above returned the values of specific cells, but in many cases spatial outputs from subsetting operations on raster datasets are needed.
-This can be done with the `[` operator, using `drop = FALSE`.
-The code below returns the first two cells of `elev` as a raster object the first two cells on the top row (only the first 2 lines of the output is shown):
+This can be done by setting the `drop` argument of the `[` operator to `FALSE`.
+The code below returns the first two cells of `elev`, i.e., the first two cells of the top row, as a raster object (only the first 2 lines of the output is shown):
 
 
 ```r
