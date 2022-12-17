@@ -15,13 +15,14 @@ poly_target = rbind(c(-1, 0.5), c(-0.5, 0.5), c(-0.5, 1), c(-1, 1), c(-1, 0.5)) 
   list() |>
   st_polygon() |>
   st_sfc() |>
-  st_sf(data.frame(id = 1), geometry = ., crs = "EPSG:4326")
+  st_sf(data.frame(id = 1), geometry = _, crs = "EPSG:4326")
 
 polys = st_as_sf(terra::as.polygons(elev, na.rm = FALSE, dissolve = FALSE))
 r_focal = focal(elev, w = matrix(1, nrow = 3, ncol = 3), fun = min)
 poly_focal = st_as_sf(terra::as.polygons(r_focal, na.rm = FALSE, dissolve = FALSE))
 poly_focal$focal_min[is.nan(poly_focal$focal_min)] = NA
 poly_focal$focal_min2 = as.character(poly_focal$focal_min)
+poly_focal$focal_min2[is.na(poly_focal$focal_min2)] = "NA"
 
 tm1 = tm_shape(polys) +
   tm_polygons(col = "elev", style = "cont", lwd = 0.5, breaks = 0:36) +
