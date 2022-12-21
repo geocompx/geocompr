@@ -141,7 +141,7 @@ leaflet() |>
 
 <div class="figure" style="text-align: center">
 <iframe src="https://geocompr.github.io/img/interactive.html" width="100%" height="400px" data-external="1"></iframe>
-<p class="caption">(\#fig:interactive)The blue markers indicate where the authors are from. The basemap is a tiled image of the Earth at night provided by NASA. Interact with the online version at geocompr.robinlovelace.net, for example by zooming in and clicking on the popups.</p>
+<p class="caption">(\#fig:interactive)The blue markers indicate where the authors are from. The basemap is a tiled image of the Earth at night provided by NASA. Interact with the online version at r.geocompx.org, for example by zooming in and clicking on the popups.</p>
 </div>
 
 \index{map making!interactive}

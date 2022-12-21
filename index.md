@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2022-12-17'
+date: '2022-12-21'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -17,7 +17,7 @@ graphics: yes
 description: "Geocomputation with R is for people who want to analyze, visualize and model geographic data with open source software. It is based on R, a statistical programming language that has powerful data processing, visualization, and geospatial capabilities. The book equips you with the knowledge and skills to tackle a wide range of issues manifested in geographic data, including those with scientific, societal, and environmental implications. This book will interest people from many backgrounds, especially Geographic Information Systems (GIS) users interested in applying their domain-specific knowledge in a powerful open source language for data science, and R users interested in extending their skills to handle spatial data."
 github-repo: "Robinlovelace/geocompr"
 cover-image: "images/cover.png"
-url: https://geocompr.robinlovelace.net/
+url: https://r.geocompx.org/
 ---
 
 
@@ -39,12 +39,12 @@ Hosting the source code on [GitHub](https://github.com/Robinlovelace/geocompr/) 
 [![](https://img.shields.io/github/stars/robinlovelace/geocompr?style=for-the-badge)](https://github.com/robinlovelace/geocompr)
 [![](https://img.shields.io/github/contributors/robinlovelace/geocompr?style=for-the-badge)](https://github.com/Robinlovelace/geocompr/graphs/contributors)
 
-The online version of the book is hosted at [geocompr.robinlovelace.net](https://geocompr.robinlovelace.net) and kept up-to-date by [GitHub Actions](https://github.com/Robinlovelace/geocompr/actions).
+The online version of the book is hosted at [r.geocompx.org](https://r.geocompx.org) and kept up-to-date by [GitHub Actions](https://github.com/Robinlovelace/geocompr/actions).
 Its current 'build status' as follows:
 
 [![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
 
-This version of the book was built on GH Actions on 2022-12-17.
+This version of the book was built on GH Actions on 2022-12-21.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
@@ -112,7 +112,7 @@ If you find the project of use and interest, you can get involved in many ways, 
 - [Buying](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577) a copy
 - Helping people get started with open source software for reproducible research in general, and working with geographic data in R in particular (this can be an excellent way to consolidate and build your own skills)
 - Communicating about the book online, via the [#geocompr hashtag](https://twitter.com/hashtag/geocompr) on Twitter (see our [Guestbook at geocompr.github.io](https://geocompr.github.io/guestbook/)) or by letting us know of [courses](https://github.com/geocompr/geocompr.github.io/edit/source/content/guestbook/index.md) using the book
-- [Citing](https://github.com/Robinlovelace/geocompr/raw/main/CITATION.bib) and [linking-to](https://geocompr.robinlovelace.net/) it
+- [Citing](https://github.com/Robinlovelace/geocompr/raw/main/CITATION.bib) and [linking-to](https://r.geocompx.org) it
 - '[Starring](https://help.github.com/articles/about-stars/)' the [geocompr GitHub repository](https://github.com/robinlovelace/geocompr)
 - Reviewing it, on [Amazon](https://www.amazon.com/Geocomputation-Chapman-Hall-Robin-Lovelace/dp/1138304514/), [Goodreads](https://www.goodreads.com/book/show/42780859-geocomputation-with-r) or elsewhere
 - Asking questions about the content or making suggestion on [GitHub](https://github.com/Robinlovelace/geocompr/issues), [Twitter](https://twitter.com/hashtag/geocompr?src=hashtag_click) or [Discord](https://discord.gg/PMztXYgNxp)
@@ -230,7 +230,7 @@ If you are interested in the wider context and motivations behind this book, rea
 
 
 
-Many thanks to everyone who contributed directly and indirectly via the code hosting and collaboration site GitHub, including the following people who contributed direct via pull requests: prosoitos, florisvdh, katygregg, Lvulis, rsbivand, iod-ine, KiranmayiV, babayoshihiko, cuixueqin, defuneste, zmbc, erstearns, FlorentBedecarratsNM, dcooley, marcosci, appelmar, MikeJohnPage, eyesofbambi, darrellcarvalho, nickbearman, tyluRp, giocomai, KHwong12, LaurieLBaker, MarHer90, mdsumner, pat-s, e-clin, gisma, ateucher, annakrystalli, andtheWings, kant, gavinsimpson, Himanshuteli, yutannihilation, jimr1603, jbixon13, olyerickson, yvkschaefer, katiejolly, kwhkim, layik, mpaulacaldas, mtennekes, mvl22, ganes1410, richfitz, wdearden, yihui, adambhouston, chihinl, cshancock, ec-nebi, gregor-d, jasongrahn, p-kono, pokyah, schuetzingit, sdesabbata, tim-salabim, tszberkowitz.
+Many thanks to everyone who contributed directly and indirectly via the code hosting and collaboration site GitHub, including the following people who contributed direct via pull requests: prosoitos, florisvdh, katygregg, Lvulis, rsbivand, iod-ine, babayoshihiko, KiranmayiV, cuixueqin, defuneste, zmbc, erstearns, FlorentBedecarratsNM, dcooley, marcosci, appelmar, MikeJohnPage, eyesofbambi, darrellcarvalho, nickbearman, tyluRp, giocomai, KHwong12, LaurieLBaker, MarHer90, mdsumner, pat-s, sdesabbata, e-clin, gisma, ateucher, annakrystalli, andtheWings, kant, gavinsimpson, Himanshuteli, yutannihilation, jimr1603, jbixon13, olyerickson, yvkschaefer, katiejolly, kwhkim, layik, mpaulacaldas, mtennekes, mvl22, ganes1410, richfitz, wdearden, yihui, adambhouston, chihinl, cshancock, ec-nebi, gregor-d, jasongrahn, p-kono, pokyah, schuetzingit, tim-salabim, tszberkowitz.
 Special thanks to Marco Sciaini, who not only created the front cover image, but also published the code that generated it (see `code/frontcover.R` in the book's GitHub repo). 
 Dozens more people contributed online, by raising and commenting on issues, and by providing feedback via social media.
 The `#geocompr` hashtag will live on!

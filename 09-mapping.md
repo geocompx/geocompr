@@ -577,8 +577,8 @@ Figure \@ref(fig:urban-animated) is a simple example of an animated map.
 Unlike the faceted plot, it does not squeeze multiple maps into a single screen and allows the reader to see how the spatial distribution of the world's most populous agglomerations evolve over time (see the book's website for the animated version).
 
 <div class="figure" style="text-align: center">
-<img src="figures/urban-animated.gif" alt="Animated map showing the top 30 largest urban agglomerations from 1950 to 2030 based on population projects by the United Nations. Animated version available online at: geocompr.robinlovelace.net." width="100%" />
-<p class="caption">(\#fig:urban-animated)Animated map showing the top 30 largest urban agglomerations from 1950 to 2030 based on population projects by the United Nations. Animated version available online at: geocompr.robinlovelace.net.</p>
+<img src="figures/urban-animated.gif" alt="Animated map showing the top 30 largest urban agglomerations from 1950 to 2030 based on population projects by the United Nations. Animated version available online at: r.geocompx.org." width="100%" />
+<p class="caption">(\#fig:urban-animated)Animated map showing the top 30 largest urban agglomerations from 1950 to 2030 based on population projects by the United Nations. Animated version available online at: r.geocompx.org.</p>
 </div>
 
 
@@ -614,8 +614,8 @@ Code to reproduce this map can be found in the script `08-usboundaries.R`.
 
 
 <div class="figure" style="text-align: center">
-<img src="https://user-images.githubusercontent.com/1825120/38543030-5794b6f0-3c9b-11e8-9da9-10ec1f3ea726.gif" alt="Animated map showing population growth, state formation and boundary changes in the United States, 1790-2010. Animated version available online at geocompr.robinlovelace.net." width="100%" />
-<p class="caption">(\#fig:animus)Animated map showing population growth, state formation and boundary changes in the United States, 1790-2010. Animated version available online at geocompr.robinlovelace.net.</p>
+<img src="https://user-images.githubusercontent.com/1825120/38543030-5794b6f0-3c9b-11e8-9da9-10ec1f3ea726.gif" alt="Animated map showing population growth, state formation and boundary changes in the United States, 1790-2010. Animated version available online at r.geocompx.org." width="100%" />
+<p class="caption">(\#fig:animus)Animated map showing population growth, state formation and boundary changes in the United States, 1790-2010. Animated version available online at r.geocompx.org.</p>
 </div>
 
 ## Interactive maps
@@ -644,7 +644,7 @@ map_nz
 
 <div class="figure" style="text-align: center">
 <iframe src="https://geocompr.github.io/img/tmview-1.html" width="100%" height="400px" data-external="1"></iframe>
-<p class="caption">(\#fig:tmview)Interactive map of New Zealand created with tmap in view mode. Interactive version available online at: geocompr.robinlovelace.net.</p>
+<p class="caption">(\#fig:tmview)Interactive map of New Zealand created with tmap in view mode. Interactive version available online at: r.geocompx.org.</p>
 </div>
 
 Now that the interactive mode has been 'turned on', all maps produced with **tmap** will launch (another way to create interactive maps is with the `tmap_leaflet` function).
@@ -899,7 +899,7 @@ This way your prototype web applications should be limited not by technical cons
 
 <div class="figure" style="text-align: center">
 <iframe src="https://shiny.robinlovelace.net/CycleHireApp/?showcase=0" width="690" height="400px" data-external="1"></iframe>
-<p class="caption">(\#fig:CycleHireApp-html)Hire a cycle App, a simple web mapping application for finding the closest cycle hiring station based on your location and requirement of cycles. Interactive version available online at geocompr.robinlovelace.net.</p>
+<p class="caption">(\#fig:CycleHireApp-html)Hire a cycle App, a simple web mapping application for finding the closest cycle hiring station based on your location and requirement of cycles. Interactive version available online at r.geocompx.org.</p>
 </div>
 
 <!--toDo:rl-->
