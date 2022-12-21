@@ -710,7 +710,7 @@ elev_3 = elev + elev_2
 However, we can align the extent of two rasters with `extend()`. 
 Instead of telling the function how many rows or columns should be added (as done before), we allow it to figure it out by using another raster object.
 Here, we extend the `elev` object to the extent of `elev_2`. 
-The newly added rows and column receive the `NA`.
+The values of the newly added rows and columns are set to `NA`.
 
 
 ```r
