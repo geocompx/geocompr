@@ -32,10 +32,14 @@ Press](https://www.crcpress.com/9781138304512) in the [R
 Series](https://www.routledge.com/Chapman--HallCRC-The-R-Series/book-series/CRCTHERSER)
 and can be viewed online at
 [bookdown.org](https://bookdown.org/robinlovelace/geocompr/). Read the
-latest version at
-[geocompr.robinlovelace.net](https://geocompr.robinlovelace.net/).
+latest version at [r.geocompx.org](https://r.geocompx.org/).
 
 ### Note: we are actively working on the Second Edition 🏗
+
+<details>
+<summary>
+Summary of the changes
+</summary>
 
 Since commencing work on the Second Edition in September 2021 much has
 changed, including:
@@ -59,16 +63,15 @@ changed, including:
   [\#698](https://github.com/Robinlovelace/geocompr/pull/698)) in
   Chapter 5
 - New
-  [section](https://geocompr.robinlovelace.net/spatial-operations.html#de-9im-strings)
+  [section](https://r.geocompx.org/spatial-operations.html#de-9im-strings)
   on the dimensionally extended 9 intersection model (DE-9IM)
-- New [chapter](https://geocompr.robinlovelace.net/raster-vector.html)
-  on raster-vector interactions split out from Chapter 5
+- New [chapter](https://r.geocompx.org/raster-vector.html) on
+  raster-vector interactions split out from Chapter 5
 - New
-  [section](https://geocompr.robinlovelace.net/spatial-class.html#the-sfheaders-package)
+  [section](https://r.geocompx.org/spatial-class.html#the-sfheaders-package)
   on the **sfheaders** package
-- New
-  [section](https://geocompr.robinlovelace.net/spatial-class.html#s2) in
-  Chapter 2 on spherical geometry engines and the **s2** package
+- New [section](https://r.geocompx.org/spatial-class.html#s2) in Chapter
+  2 on spherical geometry engines and the **s2** package
 - Replacement of code based on the old **mlr** package with code based
   on the new **mlr3** package, as described in a huge [pull
   request](https://github.com/Robinlovelace/geocompr/pull/771)
@@ -85,6 +88,8 @@ of writing (April 2022) there have been more than 10k lines of
 code/prose added, lots of refactoring!
 
 [![](https://user-images.githubusercontent.com/1825120/140612663-e62566a2-62ab-4a22-827a-e86f5ce7bd63.png)](https://github.com/Robinlovelace/geocompr/compare/1.9...main)
+
+</details>
 
 Contributions at this stage are very welcome.
 
@@ -116,8 +121,8 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [Lvulis](https://github.com/Lvulis),
 [rsbivand](https://github.com/rsbivand),
 [iod-ine](https://github.com/iod-ine),
-[KiranmayiV](https://github.com/KiranmayiV),
 [babayoshihiko](https://github.com/babayoshihiko),
+[KiranmayiV](https://github.com/KiranmayiV),
 [cuixueqin](https://github.com/cuixueqin),
 [defuneste](https://github.com/defuneste),
 [zmbc](https://github.com/zmbc),
@@ -136,8 +141,9 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [LaurieLBaker](https://github.com/LaurieLBaker),
 [MarHer90](https://github.com/MarHer90),
 [mdsumner](https://github.com/mdsumner),
-[pat-s](https://github.com/pat-s), [e-clin](https://github.com/e-clin),
-[gisma](https://github.com/gisma),
+[pat-s](https://github.com/pat-s),
+[sdesabbata](https://github.com/sdesabbata),
+[e-clin](https://github.com/e-clin), [gisma](https://github.com/gisma),
 [ateucher](https://github.com/ateucher),
 [annakrystalli](https://github.com/annakrystalli),
 [andtheWings](https://github.com/andtheWings),
@@ -167,7 +173,6 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [p-kono](https://github.com/p-kono),
 [pokyah](https://github.com/pokyah),
 [schuetzingit](https://github.com/schuetzingit),
-[sdesabbata](https://github.com/sdesabbata),
 [tim-salabim](https://github.com/tim-salabim),
 [tszberkowitz](https://github.com/tszberkowitz).
 
@@ -253,6 +258,8 @@ rstudioapi::openProject("~/Downloads/geocompr")
  # or cd /location/of/geocompr then R in the system terminal, then:
 bookdown::render_book("index.Rmd") # to build the book
 browseURL("_book/index.html")      # to view it
+# Or, to serve a live preview the book and observe impact of changes:
+bookdown::serve_book()
 ```
 
 <!-- The code associated with each chapter is saved in the `code/chapters/` folder. -->
