@@ -104,7 +104,7 @@ us_states_simp2 = rmapshaper::ms_simplify(us_states2163, keep = 0.01,
 
 
 An alternative to simplification is smoothing the boundaries of polygon and linestring geometries, which is implemented in the **smoothr** package. 
-Smoothing interpolates the edges of geometries and does not necessarily lead to fewer vertices, but can be especially useful when working with geometries that arise from spatially vectorizing a raster (a topic covered in Chapter \@ref(raster-vector).
+Smoothing interpolates the edges of geometries and does not necessarily lead to fewer vertices, but can be especially useful when working with geometries that arise from spatially vectorizing a raster (a topic covered in Chapter \@ref(raster-vector)).
 **smoothr** implements three techniques for smoothing: a Gaussian kernel regression, Chaikin's corner cutting algorithm, and spline interpolation, which are all described in the package vignette and [website](https://strimas.com/smoothr/). 
 Note that similar to `st_simplify()`, the smoothing algorithms don't preserve 'topology'.
 The workhorse function of **smoothr** is `smooth()`, where the `method` argument specifies what smoothing technique to use.
@@ -667,7 +667,7 @@ elev_3 = elev + elev_2
 However, we can align the extent of two rasters with `extend()`. 
 Instead of telling the function how many rows or columns should be added (as done before), we allow it to figure it out by using another raster object.
 Here, we extend the `elev` object to the extent of `elev_2`. 
-The newly added rows and column receive the `NA`.
+The values of the newly added rows and columns are set to `NA`.
 
 ```{r 05-geometry-operations-38}
 elev_4 = extend(elev, elev_2)
@@ -736,7 +736,8 @@ p_ar2 = tm_shape(dem_agg) +
 tmap_arrange(p_ar1, p_ar2, ncol = 2)
 ```
 
-The `disagg()` function increases the resolution of raster objects, providing two a methods for assigning values to the newly created cells: the default method (`method = "near"`) simply gives all output cells the value of the input cell, and hence duplicates values, leading to a 'blocky' output.
+The `disagg()` function increases the resolution of raster objects. 
+It comes with two methods on how to compute the values of the newly created cells: the default method (`method = "near"`) simply gives all output cells the value of the input cell, and hence duplicates values, which translates into a 'blocky' output.
 The `bilinear` method uses the four nearest pixel centers of the input image (salmon colored points in Figure \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Figure \@ref(fig:bilinear).
 The value of the output cell is represented by a square in the upper left corner in Figure \@ref(fig:bilinear)).
 
@@ -796,14 +797,14 @@ The main resampling methods include:
 
 - Nearest neighbor: assigns the value of the nearest cell of the original raster to the cell of the target one. This is a fast simple technique that is usually suitable for resampling categorical rasters.
 - Bilinear interpolation: assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure \@ref(fig:bilinear)). This is the fastest method that is appropriate for continuous rasters.
-- Cubic interpolation: uses values of 16 nearest cells of the original raster to determine the output cell value, applying third-order polynomial functions. Used for continuous rasters and results in a smoother surface that results bilinear interpolation, but is more computationally intensive.
-- Cubic spline interpolation: also uses values of 16 nearest cells of the original raster to determine output cell, but applies cubic splines (piecewise third-order polynomial functions) to derive the results. Used for continuous rasters.
-- Lanczos windowed sinc resampling: uses values of 36 nearest cells of the original raster to determine the output cell value. Used for continuous rasters.^[
+- Cubic interpolation: uses values of the 16 nearest cells of the original raster to determine the output cell value, applying third-order polynomial functions. Used for continuous rasters and results in a smoother surface compared to bilinear interpolation, but is computationally more demanding.
+- Cubic spline interpolation: also uses values of the 16 nearest cells of the original raster to determine the output cell value, but applies cubic splines (piecewise third-order polynomial functions). Used for continuous rasters.
+- Lanczos windowed sinc resampling: uses values of the 36 nearest cells of the original raster to determine the output cell value. Used for continuous rasters.^[
 More detailed explanation of this method can be found at https://gis.stackexchange.com/a/14361/20955.
 ]
 
-The above explanation highlights that only *nearest neighbor* resampling is suitable for categorical rasters, while all the methods can be used (with different outcomes) for continuous rasters.
-Additionally, each successive method requires more processing time.
+The above explanation highlights that only *nearest neighbor* resampling is suitable for categorical rasters, while all methods can be used (with different outcomes) for continuous rasters.
+Please note also, that the methods gain both in complexity and processing time from top to bottom.
 
 To apply resampling, the **terra** package provides a `resample()` function.
 It accepts an input raster (`x`), a raster with target spatial properties (`y`), and a resampling method (`method`).
