@@ -22,10 +22,7 @@ library(terra)
 library(sp)
 library(sf)
 library(geodata)
-library(lattice)
-library(latticeExtra)
-library(grid)
-library(gridExtra)
+library(tmap)
 library(classInt)
 library(mapview)
 library(tidyverse)
@@ -57,38 +54,19 @@ input_tidy = dplyr::mutate(
 input_ras = terra::rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 
 # reproject German outline
-ger = terra::project(ger, crs(input_ras))
+ger = st_as_sf(terra::project(ger, crs(input_ras)))
 
 # 2.2 Create figure========================================
 #**********************************************************
+tm_1 = tm_shape(input_ras) +
+  tm_raster(style = "cat", palette = "GnBu", title = "Class") +
+  tm_facets(nrow = 1) +
+  tm_shape(ger) +
+  tm_borders() +
+  tm_layout(panel.labels = c("population", "women", "mean age", "household size"),
+            legend.outside.size = 0.08)
 
-# find out about lattice settings
-# trellis.par.get()
-p_1 = spplot(input_ras, col.regions = RColorBrewer::brewer.pal(6, "GnBu"),
-             # at necessary since the factor variables are represented as
-             # continuous variables
-             at = 1:6, 
-             main = list("Classes", cex = 0.5),
-             layout = c(4, 1), 
-             # Leave some space between the panels
-             between = list(x = 0.5),
-             colorkey = list(space = "top", width = 0.8, height = 0.2,
-                             # make tick size smaller
-                             tck = 0.5,
-                             labels = list(cex = 0.4), at = 1:6),
-             strip = strip.custom(bg = "white",
-                                  par.strip.text = list(cex = 0.5),
-                                  factor.levels = c("population", "women",
-                                                    "mean age", 
-                                                    "household size")),
-             sp.layout = list(
-               list("sp.polygons", as(ger, "Spatial"), col = gray(0.5),
-                    first = FALSE)))
-# save the output
-ggplot2::ggsave(filename = "figures/08_census_stack.png",
-                plot = arrangeGrob(p_1, ncol = 1),
-                width = 5.1, height = 3)
-
+tmap_save(tm_1, "figures/14_census_stack.png", width = 5.1, height = 2)
 
 #**********************************************************
 # 3 METROPOLITAN AREA FIGURE-------------------------------
@@ -114,94 +92,27 @@ pop_agg = terra::aggregate(reclass$pop, fact = 20, fun = sum, na.rm = TRUE)
 # just keep raster cells with more than 500,000 inhabitants
 polys = pop_agg[pop_agg > 500000, drop = FALSE] 
 # convert all cells belonging to one region ino polygons
-polys = polys |>
+metros = polys |>
   terra::patches(directions = 8) |>
   terra::as.polygons() |>
   st_as_sf()
-# dissolve
-metros = polys |>
-  group_by(patches) |>
-  summarize()
+metros$names = c("Hamburg", "Berlin", "Düsseldorf", "Leipzig",
+                 "Frankfurt am Main", "Nürnberg", "Stuttgart", "München")
 
-# palette
-pal = RColorBrewer::brewer.pal(5, "GnBu")
-# cuts = c(0, 249000, 499000, 749000, 999000, 1249000)
-cuts = c(0, 250000, 500000, 750000, 1000000, 1250000)
-coords = st_centroid(metros) |>
-  st_coordinates() |>
-  round(4)
-# move all labels up except for Düsseldorf
-metro_names = dplyr::pull(metro_names, city) |> 
-  as.character() |> 
-  {\(x) ifelse(x == "Wülfrath", "Düsseldorf", x)}() |>
-  {\(x) gsub("ü", "ue", x)}
-ind = metro_names %in% "Duesseldorf"
-coords[!ind, 2] = coords[!ind, 2] + 30000
+metros_points = st_centroid(metros)
 
-# 3.2 Create figure========================================
-#**********************************************************
-p_2 =
-  spplot(pop_agg, col.regions = pal, 
-         main = list("Number of people in 1000", cex = 0.5),
-         # if we want to get rid of the plot frame around the map
-         # par.settings = list(axis.line = list(col = 'transparent')), 
-         colorkey = list(space = "top", width = 0.5, height = 0.4,
-                         # make tick length shorter
-                         tck = 0.5,
-                         labels = list(cex = 0.4, at = cuts,
-                                       labels = cuts / 1000),
-                         # draw a box and ticks around the legend
-                         axis.line = list(col = "black")),
-         # legend necessary if we do not use main as legend title
-         # legend = list(top = list(fun = grid::textGrob("Size\n(m)", x = 1.05))),
-         # at command necessary again as we have a continous variable!!!
-         at = cuts,
-         # overlay with further spatial objects
-         sp.layout = list(
-           list("sp.polygons", as(ger, "Spatial"), col = gray(0.5),
-                first = FALSE),
-           list("sp.polygons", as(metros, "Spatial"), col = "gold",
-                lwd = 2, first = FALSE)
-           # list("sp.text", coords, txt = metro_names, cex = 0.7, font = 3,
-           #      first = FALSE)
-         ))
+tm_2 = tm_shape(pop_agg/1000) +
+  tm_raster(palette = "GnBu",
+            title = "Number of people\n(in 1,000)") +
+  tm_shape(ger) +
+  tm_borders() +
+  tm_shape(metros) +
+  tm_borders(col = "gold", lwd = 2) +
+  tm_shape(metros_points) +
+  tm_text(text = "names", ymod = 0.6, shadow = TRUE, size = 0.9) +
+  tm_layout(legend.outside = TRUE, legend.outside.size = 0.3)
 
-# use shadow text
-# take care, latticeExtra::layer uses NSE, you need to use the data-argument!!!
-# See ?layer and:
-# browseURL(paste0("https://procomun.wordpress.com/2013/04/24/", 
-#                  "stamen-maps-with-spplot/))
-# browseURL(paste0("https://gist.github.com/oscarperpinan/",
-#                  "7482848#file-stamenpolywithlayerinfunction4-r"))
-# shadowtext by Barry Rowlingson
-# browseURL(paste0("http://blog.revolutionanalytics.com/2009/05/",
-#                  "make-text-stand-out-with-outlines.html"))
-# needs some adjustment for lattice, strwidth and strheight replace by
-# stringWidth and stringHeight (gridExtra), see
-# browseURL("https://stat.ethz.ch/pipermail/r-help/2004-November/061255.html")
-theta = seq(pi / 4, 2 * pi, length.out = 8)
-xy = xy.coords(coords)
-xo = 75 * convertWidth(stringWidth("A"), unitTo = "native", valueOnly = TRUE)
-yo = 75 * convertWidth(stringHeight("A"), unitTo = "native", valueOnly = TRUE)
-p_3 = p_2 + 
-  latticeExtra::layer(
-    for (i in theta) {
-      ltext(x = xy$x + cos(i) * xo, y = xy$y + sin(i) * yo, 
-            labels = metro_names, col = "white", font = 3, cex = 0.5)
-    },
-    data = list(xy = xy, metro_names = metro_names, theta = theta,
-                xo = xo, yo = yo)
-  ) +
-  latticeExtra::layer(
-    ltext(x = xy$x, y =  xy$y, labels = metro_names, col = "black", cex = 0.5, 
-          font = 3),
-    data = list(xy = xy, metro_names = metro_names)
-  )
-  
-# save the output
-ggplot2::ggsave(filename = "figures/08_metro_areas.png",
-                plot = arrangeGrob(p_3, ncol = 1),
-                width = 3, height = 4)
+tmap_save(tm_2, "figures/14_metro_areas.png", width = 4, height = 4)
 
 #**********************************************************
 # 4 POTENTIAL LOCATIONS------------------------------------ 
