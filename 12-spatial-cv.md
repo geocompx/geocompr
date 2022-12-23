@@ -563,8 +563,8 @@ Using the same data for the performance assessment and the tuning would potentia
 This can be avoided using nested spatial CV\index{cross-validation!spatial CV}.
 
 <div class="figure" style="text-align: center">
-<img src="figures/13_cv.png" alt="Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2019). Permission to reuse it was kindly granted.)" width="100%" />
-<p class="caption">(\#fig:inner-outer)Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2019). Permission to reuse it was kindly granted.)</p>
+<img src="figures/13_cv.png" alt="Schematic of hyperparameter tuning and performance estimation levels in CV. [Figure was taken from Schratz et al. (2019). Permission to reuse it was kindly granted.]" width="100%" />
+<p class="caption">(\#fig:inner-outer)Schematic of hyperparameter tuning and performance estimation levels in CV. [Figure was taken from Schratz et al. (2019). Permission to reuse it was kindly granted.]</p>
 </div>
 
 This means that we split each fold again into five spatially disjoint subfolds which are used to determine the optimal hyperparameters\index{hyperparameter} (`tune_level` object in the code chunk below; see Figure \@ref(fig:inner-outer) for a visual representation).

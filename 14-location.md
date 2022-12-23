@@ -2,19 +2,19 @@
 
 ## Prerequisites {-}
 
-- This chapter requires the following packages (**revgeo** must also be installed):
+- This chapter requires the following packages (**tmaptools** must also be installed):
 
 
 ```r
 library(sf)
 library(dplyr)
 library(purrr)
-library(raster)
+library(terra)
 library(osmdata)
 library(spDataLarge)
 ```
 
-- Required data, that will be downloaded in due course
+- Required data will be downloaded in due course.
 
 As a convenience to the reader and to ensure easy reproducibility, we have made available the downloaded data in the **spDataLarge** package.
 
@@ -67,7 +67,6 @@ Although we have applied these steps to a specific case study, they could be gen
 
 The German government provides gridded census data at either 1 km or 100 m resolution.
 The following code chunk downloads, unzips and reads in the 1 km data.
-Please note that `census_de` is also available from the **spDataLarge** package (`data("census_de", package = "spDataLarge"`).
 
 
 ```r
@@ -77,10 +76,17 @@ unzip("census.zip") # unzip the files
 census_de = readr::read_csv2(list.files(pattern = "Gitter.csv"))
 ```
 
-The `census_de` object is a data frame containing 13 variables for more than 300,000 grid cells across Germany.
+Please note that `census_de` is also available from the **spDataLarge** package:
+
+
+```r
+data("census_de", package = "spDataLarge")
+```
+
+The `census_de` object is a data frame containing 13 variables for more than 360,000 grid cells across Germany.
 For our work, we only need a subset of these: Easting (`x`) and Northing (`y`), number of inhabitants (population; `pop`), mean average age (`mean_age`), proportion of women (`women`) and average household size (`hh_size`).
 These variables are selected and renamed from German into English in the code chunk below and summarized in Table \@ref(tab:census-desc). 
-Further, `mutate_all()` is used to convert values -1 and -9 (meaning unknown) to `NA`.
+Further, `mutate()` is used to convert values -1 and -9 (meaning unknown) to `NA`.
 
 
 ```r
@@ -89,12 +95,14 @@ input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D,
                       hh_size = HHGroesse_D)
 # set -1 and -9 to NA
-input_tidy = mutate_all(input, list(~ifelse(. %in% c(-1, -9), NA, .)))
+input_tidy = dplyr::mutate(
+  input, 
+  dplyr::across(.fns =  ~ifelse(.x %in% c(-1, -9), NA, .x)))
 ```
 
 
 
-Table: (\#tab:census-desc)Categories for each variable in census data from Datensatzbeschreibung...xlsx located in the downloaded file census.zip (see Figure 13.1 for their spatial distribution).
+Table: (\#tab:census-desc)Categories for each variable in census data from Datensatzbeschreibung...xlsx located in the downloaded file census.zip (see Figure \@ref(fig:census-stack) for their spatial distribution).
 
 | class | Population | % female | Mean age | Household size |
 |:-----:|:----------:|:--------:|:--------:|:--------------:|
@@ -107,27 +115,27 @@ Table: (\#tab:census-desc)Categories for each variable in census data from Daten
 
 ## Create census rasters
  
-After the preprocessing, the data can be converted into a raster stack\index{raster!stack} or brick\index{raster!brick} (see Sections \@ref(raster-classes) and \@ref(raster-subsetting)).
-`rasterFromXYZ()` makes this really easy.
-It requires an input data frame where the first two columns represent coordinates on a regular grid.
-All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as input for the raster brick layers (Figure \@ref(fig:census-stack); see also `code/14-location-jm.R` in our github repository).
+After the preprocessing, the data can be converted into a `SpatRaster` object (see Sections \@ref(raster-classes) and \@ref(raster-subsetting)) with the help of the `rast()` function.
+Setting its `type` argument to `xyz`, it requires an input data frame whose columns `x` and `y` represent coordinates on a regular grid.
+All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as input for the raster layers (Figure \@ref(fig:census-stack); see also `code/14-location-figures.R` in our github repository).
 
 
 ```r
-input_ras = rasterFromXYZ(input_tidy, crs = st_crs(3035)$proj4string)
+input_ras = terra::rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 ```
 
 
 ```r
 input_ras
-#> class : RasterBrick
-#> dimensions : 868, 642, 557256, 4 (nrow, ncol, ncell, nlayers)
-#> resolution : 1000, 1000 (x, y)
-#> extent : 4031000, 4673000, 2684000, 3552000 (xmin, xmax, ymin, ymax)
-#> coord. ref. : +proj=laea +lat_0=52 +lon_0=10
-#> names       :  pop, women, mean_age, hh_size 
-#> min values  :    1,     1,        1,       1 
-#> max values  :    6,     5,        5,       5
+#> class       : SpatRaster 
+#> dimensions  : 868, 642, 4  (nrow, ncol, nlyr)
+#> resolution  : 1000, 1000  (x, y)
+#> extent      : 4031000, 4673000, 2684000, 3552000  (xmin, xmax, ymin, ymax)
+#> coord. ref. : ETRS89-extended / LAEA Europe (EPSG:3035) 
+#> source(s)   : memory
+#> names       : pop, women, mean_age, hh_size 
+#> min values  :   1,     1,        1,       1 
+#> max values  :   6,     5,        5,       5
 ```
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Note that we are using an equal-area projection (EPSG:3035; Lambert Equal Area Europe), i.e., a projected CRS\index{CRS!projected} where each grid cell has the same area, here 1000 x 1000 square meters. 
@@ -135,8 +143,8 @@ Since we are using mainly densities such as the number of inhabitants or the por
 Be careful with geographic CRS\index{CRS!geographic} where grid cell areas constantly decrease in poleward directions (see also Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)). </div>\EndKnitrBlock{rmdnote}
 
 <div class="figure" style="text-align: center">
-<img src="figures/08_census_stack.png" alt="Gridded German census data of 2011 (see Table 13.1 for a description of the classes)." width="100%" />
-<p class="caption">(\#fig:census-stack)Gridded German census data of 2011 (see Table 13.1 for a description of the classes).</p>
+<img src="figures/08_census_stack.png" alt="Gridded German census data of 2011 (see Table \@ref(tab:census-desc) for a description of the classes)." width="100%" />
+<p class="caption">(\#fig:census-stack)Gridded German census data of 2011 (see Table \@ref(tab:census-desc) for a description of the classes).</p>
 </div>
 
 The next stage is to reclassify the values of the rasters stored in `input_ras` in accordance with the survey mentioned in Section \@ref(case-study), using the **raster** function `reclassify()`, which was introduced in Section \@ref(local-operations)\index{map algebra!local operations}.
@@ -174,8 +182,8 @@ Finally, the code chunk below ensures the `reclass` layers have the same name as
 
 ```r
 reclass = input_ras
-for (i in seq_len(nlayers(reclass))) {
-  reclass[[i]] = reclassify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
+for (i in seq_len(terra::nlyr(reclass))) {
+  reclass[[i]] = terra::classify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
 }
 names(reclass) = names(input_ras)
 ```
@@ -198,77 +206,71 @@ The command below uses the argument `fact = 20` to reduce the resolution of the 
 
 
 ```r
-pop_agg = aggregate(reclass$pop, fact = 20, fun = sum)
+pop_agg = terra::aggregate(reclass$pop, fact = 20, fun = sum, na.rm = TRUE)
+summary(pop_agg)
+#>       pop         
+#>  Min.   :    127  
+#>  1st Qu.:  39886  
+#>  Median :  66008  
+#>  Mean   :  99503  
+#>  3rd Qu.: 105696  
+#>  Max.   :1204870  
+#>  NA's   :447
 ```
 
 The next stage is to keep only cells with more than half a million people.
 
 
 ```r
-summary(pop_agg)
-#>             pop
-#> Min.        127
-#> 1st Qu.   39886
-#> Median    66008
-#> 3rd Qu.  105696
-#> Max.    1204870
-#> NA's        447
 pop_agg = pop_agg[pop_agg > 500000, drop = FALSE] 
 ```
 
 Plotting this reveals eight metropolitan regions (Figure \@ref(fig:metro-areas)).
 Each region consists of one or more raster cells.
 It would be nice if we could join all cells belonging to one region.
-**raster**'s\index{raster} `clump()` command does exactly that.
-Subsequently, `rasterToPolygons()` converts the raster object into spatial polygons, and `st_as_sf()` converts it into an `sf`-object.
+**terra**'s\index{terra} `patches()` command does exactly that.
+Subsequently, `as.polygons()` converts the raster object into spatial polygons, and `st_as_sf()` converts it into an `sf`-object.
 
 
 ```r
-polys = pop_agg %>% 
-  clump() %>%
-  rasterToPolygons() %>%
-  st_as_sf()
+polys = pop_agg |> 
+  terra::patches(directions = 8) |>
+  terra::as.polygons() |>
+  sf::st_as_sf()
 ```
 
-`polys` now features a column named `clumps` which indicates to which metropolitan region each polygon belongs and which we will use to dissolve\index{dissolve} the polygons into coherent single regions (see also Section \@ref(geometry-unions)):
+`polys` now features a column named `patches` which indicates to which metropolitan region each polygon belongs and which we will use to dissolve\index{dissolve} the polygons into coherent single regions (see also Section \@ref(geometry-unions)):
 
 
 ```r
-metros = polys %>%
-  group_by(clumps) %>%
-  summarize()
+metros = polys |>
+  dplyr::group_by(patches) |>
+  dplyr::summarize()
 ```
 
 Given no other column as input, `summarize()` only dissolves the geometry.
 
 <div class="figure" style="text-align: center">
-<img src="figures/08_metro_areas.png" alt="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names." width="100%" />
+<img src="figures/08_metro_areas.png" alt="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names." width="70%" />
 <p class="caption">(\#fig:metro-areas)The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names.</p>
 </div>
 
-The resulting eight metropolitan areas suitable for bike shops (Figure \@ref(fig:metro-areas); see also `code/14-location-jm.R` for creating the figure) are still missing a name.
+The resulting eight metropolitan areas suitable for bike shops (Figure \@ref(fig:metro-areas); see also `code/14-location-figures.R` for creating the figure) are still missing a name.
 A reverse geocoding\index{geocoding} approach can settle this problem.
 Given a coordinate, reverse geocoding finds the corresponding address.
 Consequently, extracting the centroid\index{centroid} coordinate of each metropolitan area can serve as an input for a reverse geocoding API\index{API}.
-The **revgeo** package provides access to the open source Photon geocoder for OpenStreetMap\index{OpenStreetMap}, Google Maps and Bing. 
-By default, it uses the Photon API\index{API}.
-`revgeo::revgeo()` only accepts geographical coordinates (latitude/longitude); therefore, the first requirement is to bring the metropolitan polygons into an appropriate coordinate reference system\index{CRS} (Chapter \@ref(reproj-geo-data)).
+This is exactly what the `rev_geocode_OSM()` function of the **tmaptools** package expects.
+Setting additionally `as.data.frame` to `TRUE` will give back a `data.frame` with several columns referring to the location including the street name, house number and city.
+However, here, we are only interested in the name of the city.
 
 
 ```r
-metros_wgs = st_transform(metros, 4326)
-coords = st_centroid(metros_wgs) %>%
-  st_coordinates() %>%
-  round(4)
-```
-
-Choosing `frame` as `revgeocode()`'s `output` option will give back a `data.frame` with several columns referring to the location including the street name, house number and city.
-
-
-```r
-library(revgeo)
-metro_names = revgeo(longitude = coords[, 1], latitude = coords[, 2], 
-                     output = "frame")
+metro_names = sf::st_centroid(metros, of_largest_polygon = TRUE) |>
+  tmaptools::rev_geocode_OSM(as.data.frame = TRUE) |>
+  dplyr::select(city, town, state)
+# smaller cities are returned in column town. To have all names in one column,
+# we move the town name to the city column in case it is NA
+metro_names = dplyr::mutate(metro_names, city = ifelse(is.na(city), town, city))
 ```
 
 To make sure that the reader uses the exact same results, we have put them into **spDataLarge** as the object `metro_names`.
@@ -276,26 +278,27 @@ To make sure that the reader uses the exact same results, we have put them into 
 
 Table: (\#tab:metro-names)Result of the reverse geocoding.
 
-|city              |state                  |
-|:-----------------|:----------------------|
-|Hamburg           |Hamburg                |
-|Berlin            |Berlin                 |
-|Wülfrath          |North Rhine-Westphalia |
-|Leipzig           |Saxony                 |
-|Frankfurt am Main |Hesse                  |
-|Nuremberg         |Bavaria                |
-|Stuttgart         |Baden-Württemberg      |
-|Munich            |Bavaria                |
+|city              |state               |
+|:-----------------|:-------------------|
+|Hamburg           |NA                  |
+|Berlin            |NA                  |
+|Velbert           |Nordrhein-Westfalen |
+|Leipzig           |Sachsen             |
+|Frankfurt am Main |Hessen              |
+|Nürnberg          |Bayern              |
+|Stuttgart         |Baden-Württemberg   |
+|München           |Bayern              |
 
-Overall, we are satisfied with the `city` column serving as metropolitan names (Table \@ref(tab:metro-names)) apart from one exception, namely Wülfrath which belongs to the greater region of Düsseldorf.
-Hence, we replace Wülfrath with Düsseldorf (Figure \@ref(fig:metro-areas)).
+Overall, we are satisfied with the `city` column serving as metropolitan names (Table \@ref(tab:metro-names)) apart from one exception, namely Velbert which belongs to the greater region of Düsseldorf.
+Hence, we replace Velbert with Düsseldorf (Figure \@ref(fig:metro-areas)).
 Umlauts like `ü` might lead to trouble further on, for example when determining the bounding box of a metropolitan area with `opq()` (see further below), which is why we avoid them.
 
 
 ```r
-metro_names = dplyr::pull(metro_names, city) %>% 
-  as.character() %>% 
-  ifelse(. == "Wülfrath", "Duesseldorf", .)
+metro_names = metro_names$city |> 
+  as.character() |>
+  {\(x) ifelse(x == "Velbert", "Düsseldorf", x)}() |>
+  {\(x) gsub("ü", "ue", x)}()
 ```
 
 ## Points of interest
@@ -316,20 +319,21 @@ To make it available in your environment ensure that the **spDataLarge** package
 
 
 ```r
-shops = map(metro_names, function(x) {
+shops = purrr::map(metro_names, function(x) {
   message("Downloading shops of: ", x, "\n")
   # give the server a bit time
   Sys.sleep(sample(seq(5, 10, 0.1), 1))
-  query = opq(x) %>%
-    add_osm_feature(key = "shop")
-  points = osmdata_sf(query)
+  query = osmdata::opq(x) |>
+    osmdata::add_osm_feature(key = "shop")
+  points = osmdata::osmdata_sf(query)
   # request the same data again if nothing has been downloaded
   iter = 2
   while (nrow(points$osm_points) == 0 & iter > 0) {
     points = osmdata_sf(query)
     iter = iter - 1
   }
-  points = st_set_crs(points$osm_points, 4326)
+  # return only the point features
+  points$osm_points
 })
 ```
 
@@ -340,44 +344,41 @@ If not, we recommend to try to download the shops again for this/these specific 
 
 ```r
 # checking if we have downloaded shops for each metropolitan area
-ind = map(shops, nrow) == 0
+ind = purrr::map_dbl(shops, nrow) == 0
 if (any(ind)) {
   message("There are/is still (a) metropolitan area/s without any features:\n",
           paste(metro_names[ind], collapse = ", "), "\nPlease fix it!")
 }
 ```
 
-To make sure that each list element (an `sf`\index{sf} data frame) comes with the same columns, we only keep the `osm_id` and the `shop` columns with the help of another `map` loop.
-This is not a given since OSM contributors are not equally meticulous when collecting data.
-Finally, we `rbind` all shops into one large `sf`\index{sf} object.
+To make sure that each list element (an `sf`\index{sf} data frame) comes with the same columns^[This is not a given since OSM contributors are not equally meticulous when collecting data.] we only keep the `osm_id` and the `shop` columns with the help of the `map_dfr` loop which additionally rowbinds all shops into one large `sf`\index{sf} object.
 
 
 ```r
 # select only specific columns
-shops = map(shops, dplyr::select, osm_id, shop)
-# putting all list elements into a single data frame
-shops = do.call(rbind, shops)
+shops = purrr::map_dfr(shops, dplyr::select, osm_id, shop)
 ```
 
-It would have been easier to simply use `map_dfr()`\index{loop!map\_dfr}. 
-Unfortunately, so far it does not work in harmony with `sf` objects.
-Note: `shops` is provided in the `spDataLarge` package.
+Note: `shops` is provided in the `spDataLarge` and can be accessed as follows:
+
+
+```r
+data("shops", package = "spDataLarge")
+```
 
 The only thing left to do is to convert the spatial point object into a raster (see Section \@ref(rasterization)).
 The `sf` object, `shops`, is converted into a raster\index{raster} having the same parameters (dimensions, resolution, CRS\index{CRS}) as the `reclass` object.
-Importantly, the `count()` function is used here to calculate the number of shops in each cell.
-
-\BeginKnitrBlock{rmdnote}<div class="rmdnote">If the `shop` column were used instead of the `osm_id` column, we would have retrieved fewer shops per grid cell. 
-This is because the `shop` column contains `NA` values, which the `count()` function omits when rasterizing vector objects.</div>\EndKnitrBlock{rmdnote}
+Importantly, the `length()` function is used here to count the number of shops in each cell.
 
 The result of the subsequent code chunk is therefore an estimate of shop density (shops/km^2^).
 `st_transform()`\index{sf!st\_transform} is used before `rasterize()`\index{raster!rasterize} to ensure the CRS\index{CRS} of both inputs match.
 
 
 ```r
-shops = st_transform(shops, proj4string(reclass))
+shops = sf::st_transform(shops, st_crs(reclass))
 # create poi raster
-poi = rasterize(x = shops, y = reclass, field = "osm_id", fun = "count")
+poi = terra::rasterize(x = terra::vect(shops),
+                       y = reclass, field = "osm_id", fun = "length")
 ```
 
 As with the other raster layers (population, women, mean age, household size) the `poi` raster is reclassified into four classes (see Section \@ref(create-census-rasters)). 
@@ -388,13 +389,13 @@ Here, we choose the Fisher-Jenks natural breaks approach which minimizes within-
 
 ```r
 # construct reclassification matrix
-int = classInt::classIntervals(values(poi), n = 4, style = "fisher")
+int = classInt::classIntervals(terra::values(poi), n = 4, style = "fisher")
 int = round(int$brks)
 rcl_poi = matrix(c(int[1], rep(int[-c(1, length(int))], each = 2), 
                    int[length(int)] + 1), ncol = 2, byrow = TRUE)
 rcl_poi = cbind(rcl_poi, 0:3)  
 # reclassify
-poi = reclassify(poi, rcl = rcl_poi, right = NA) 
+poi = terra::classify(poi, rcl = rcl_poi, right = NA) 
 names(poi) = "poi"
 ```
 
@@ -405,14 +406,12 @@ The reasoning for the latter is twofold.
 First of all, we have already delineated metropolitan areas, that is areas where the population density is above average compared to the rest of Germany.
 Second, though it is advantageous to have many potential customers within a specific catchment area\index{catchment area}, the sheer number alone might not actually represent the desired target group.
 For instance, residential tower blocks are areas with a high population density but not necessarily with a high purchasing power for expensive cycle components.
-This is achieved with the complementary functions `addLayer()` and `dropLayer()`:
 
 
 ```r
-# add poi raster
-reclass = addLayer(reclass, poi)
-# delete population raster
-reclass = dropLayer(reclass, "pop")
+# remove population raster and add poi raster
+reclass = reclass[[names(reclass) != "pop"]] |>
+  c(poi)
 ```
 
 In common with other data science projects, data retrieval and 'tidying' have consumed much of the overall workload so far.
@@ -424,7 +423,7 @@ With clean data, the final step --- calculating a final score by summing all ras
 result = sum(reclass)
 ```
 
-For instance, a score greater than 9 might be a suitable threshold indicating raster cells where a bike shop could be placed (Figure \@ref(fig:bikeshop-berlin); see also `code/14-location-jm.R`).
+For instance, a score greater than 9 might be a suitable threshold indicating raster cells where a bike shop could be placed (Figure \@ref(fig:bikeshop-berlin); see also `code/14-location-figures.R`).
 
 <div class="figure" style="text-align: center">
 
@@ -465,26 +464,16 @@ That is, if there already is a bike shop in the vicinity of the chosen location,
 
 ## Exercises
 
-1. We have used `raster::rasterFromXYZ()` to convert a `input_tidy` into a raster brick\index{raster!brick}.
-Try to achieve the same with the help of the `sp::gridded()` function.
-<!--
-input = st_as_sf(input, coords = c("x", "y"))
-# use the correct projection (see data description)
-input = st_set_crs(input, 3035)
-# convert into an sp-object
-input = as(input, "Spatial")
-gridded(input) = TRUE
-# convert into a raster stack
-input = stack(input)
--->
 
-1. Download the csv file containing inhabitant information for a 100-m cell resolution (https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
+E1. Download the csv file containing inhabitant information for a 100 m cell resolution (https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
 Please note that the unzipped file has a size of 1.23 GB.
-To read it into R\index{R}, you can use `readr::read_csv`.
+To read it into R you can use `readr::read_csv`.
 This takes 30 seconds on my machine (16 GB RAM)
 `data.table::fread()` might be even faster, and returns an object of class `data.table()`.
-Use `as.tibble()` to convert it into a tibble\index{tibble}.
-Build an inhabitant raster\index{raster}, aggregate\index{aggregation!spatial} it to a cell resolution of 1 km, and compare the difference with the inhabitant raster (`inh`) we have created using class mean values.
+Use `dplyr::as_tibble()` to convert it into a tibble.
+Build an inhabitant raster, aggregate it to a cell resolution of 1 km, and compare the difference with the inhabitant raster (`inh`) we have created using class mean values.
 
-1. Suppose our bike shop predominantly sold electric bikes to older people. 
-Change the age raster\index{raster} accordingly, repeat the remaining analyses and compare the changes with our original result.
+
+
+E2. Suppose our bike shop predominantly sold electric bikes to older people. 
+Change the age raster accordingly, repeat the remaining analyses and compare the changes with our original result.
