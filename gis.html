@@ -547,21 +547,21 @@ Second, <code>linkGRASS()</code> establishes a connection to GRASS GIS.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rsbivand.github.io/rgrass/">rgrass</a></span><span class="op">)</span></span>
 <span><span class="fu">link2GI</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/link2GI/reference/linkGRASS.html">linkGRASS</a></span><span class="op">(</span><span class="va">london_streets</span>, ver_select <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Before we can use GRASS geoalgorithms, we need to add data to GRASS’s spatial database.
-Luckily, the convenience function <code>write_VECT()</code> does this for us.
-(Use <code>write_RAST()</code> for raster data.)
+Luckily, the convenience function <code><a href="https://rsbivand.github.io/rgrass/reference/readVECT.html">write_VECT()</a></code> does this for us.
+(Use <code><a href="https://rsbivand.github.io/rgrass/reference/readRAST.html">write_RAST()</a></code> for raster data.)
 In our case, we add the street and cycle hire point data while using only the first attribute column, and name them as <code>london_streets</code> and <code>points</code> in GRASS.</p>
 <div class="sourceCode" id="cb370"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">write_VECT</span><span class="op">(</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">london_streets</span><span class="op">)</span>, vname <span class="op">=</span> <span class="st">"london_streets"</span><span class="op">)</span></span>
-<span><span class="fu">write_VECT</span><span class="op">(</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">points</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span>, vname <span class="op">=</span> <span class="st">"points"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rsbivand.github.io/rgrass/reference/readVECT.html">write_VECT</a></span><span class="op">(</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">london_streets</span><span class="op">)</span>, vname <span class="op">=</span> <span class="st">"london_streets"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rsbivand.github.io/rgrass/reference/readVECT.html">write_VECT</a></span><span class="op">(</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/vect.html">vect</a></span><span class="op">(</span><span class="va">points</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span>, vname <span class="op">=</span> <span class="st">"points"</span><span class="op">)</span></span></code></pre></div>
 <p>The <strong>rgrass</strong> package expects its inputs and gives its outputs as <strong>terra</strong> objects.
-Therefore, we need to convert our <code>sf</code> spatial vectors to <strong>terra</strong>’s <code>SpatVector</code>s using the <code><a href="https://rdrr.io/pkg/terra/man/vect.html">vect()</a></code> function to be able to use <code>write_VECT()</code>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;You can learn more how to convert between spatial classes in R by reading the (Conversions between different spatial classes in R)[&lt;a href="https://geocompr.github.io/post/2021/spatial-classes-conversion/" class="uri"&gt;https://geocompr.github.io/post/2021/spatial-classes-conversion/&lt;/a&gt;] blog post and the
+Therefore, we need to convert our <code>sf</code> spatial vectors to <strong>terra</strong>’s <code>SpatVector</code>s using the <code><a href="https://rdrr.io/pkg/terra/man/vect.html">vect()</a></code> function to be able to use <code><a href="https://rsbivand.github.io/rgrass/reference/readVECT.html">write_VECT()</a></code>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;You can learn more how to convert between spatial classes in R by reading the (Conversions between different spatial classes in R)[&lt;a href="https://geocompr.github.io/post/2021/spatial-classes-conversion/" class="uri"&gt;https://geocompr.github.io/post/2021/spatial-classes-conversion/&lt;/a&gt;] blog post and the
 (Coercion between object formats)[&lt;a href="https://CRAN.R-project.org/package=rgrass/vignettes/coerce.html" class="uri"&gt;https://CRAN.R-project.org/package=rgrass/vignettes/coerce.html&lt;/a&gt;] vignette&lt;/p&gt;'><sup>64</sup></a></p>
 <p>Now, both datasets exist in the GRASS GIS database.
 To perform our network analysis, we need a topological clean street network.
 GRASS’s <code>"v.clean"</code> takes care of the removal of duplicates, small angles and dangles, among others.
 Here, we break lines at each intersection to ensure that the subsequent routing algorithm can actually turn right or left at an intersection, and save the output in a GRASS object named <code>streets_clean</code>.</p>
 <div class="sourceCode" id="cb371"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">execGRASS</span><span class="op">(</span>cmd <span class="op">=</span> <span class="st">"v.clean"</span>, input <span class="op">=</span> <span class="st">"london_streets"</span>, output <span class="op">=</span> <span class="st">"streets_clean"</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rsbivand.github.io/rgrass/reference/execGRASS.html">execGRASS</a></span><span class="op">(</span>cmd <span class="op">=</span> <span class="st">"v.clean"</span>, input <span class="op">=</span> <span class="st">"london_streets"</span>, output <span class="op">=</span> <span class="st">"streets_clean"</span>,</span>
 <span>          tool <span class="op">=</span> <span class="st">"break"</span>, flags <span class="op">=</span> <span class="st">"overwrite"</span><span class="op">)</span></span></code></pre></div>
 
 <div class="rmdnote">
@@ -573,7 +573,7 @@ However, to find the shortest route between them, we need to connect them to the
 <code>"v.net"</code>’s connect-operator does exactly this.
 We save its output in <code>streets_points_con</code>.</p>
 <div class="sourceCode" id="cb372"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">execGRASS</span><span class="op">(</span>cmd <span class="op">=</span> <span class="st">"v.net"</span>, input <span class="op">=</span> <span class="st">"streets_clean"</span>, output <span class="op">=</span> <span class="st">"streets_points_con"</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rsbivand.github.io/rgrass/reference/execGRASS.html">execGRASS</a></span><span class="op">(</span>cmd <span class="op">=</span> <span class="st">"v.net"</span>, input <span class="op">=</span> <span class="st">"streets_clean"</span>, output <span class="op">=</span> <span class="st">"streets_points_con"</span>,</span>
 <span>          points <span class="op">=</span> <span class="st">"points"</span>, operation <span class="op">=</span> <span class="st">"connect"</span>, threshold <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>          flags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"overwrite"</span>, <span class="st">"c"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The resulting clean dataset serves as input for the <code>"v.net.salesman"</code> algorithm, which finally finds the shortest route between all cycle hire stations.
@@ -582,12 +582,12 @@ This range represents the points for which a shortest route should be calculated
 Since we would like to calculate the route for all cycle stations, we set it to <code>1-25</code>.
 To access the GRASS help page of the traveling salesman algorithm, run <code>execGRASS("g.manual", entry = "v.net.salesman")</code>.</p>
 <div class="sourceCode" id="cb373"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">execGRASS</span><span class="op">(</span>cmd <span class="op">=</span> <span class="st">"v.net.salesman"</span>, input <span class="op">=</span> <span class="st">"streets_points_con"</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rsbivand.github.io/rgrass/reference/execGRASS.html">execGRASS</a></span><span class="op">(</span>cmd <span class="op">=</span> <span class="st">"v.net.salesman"</span>, input <span class="op">=</span> <span class="st">"streets_points_con"</span>,</span>
 <span>          output <span class="op">=</span> <span class="st">"shortest_route"</span>, center_cats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"1-"</span>, <span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">points</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>          flags <span class="op">=</span> <span class="st">"overwrite"</span><span class="op">)</span></span></code></pre></div>
 <p>To see our result, we read the result into R, convert it into an sf-object keeping only the geometry, and visualize it with the help of the <strong>mapview</strong> package (Figure <a href="gis.html#fig:grass-mapview">10.5</a> and Section <a href="adv-map.html#interactive-maps">9.4</a>).</p>
 <div class="sourceCode" id="cb374"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">route</span> <span class="op">=</span> <span class="fu">read_VECT</span><span class="op">(</span><span class="st">"shortest_route"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">route</span> <span class="op">=</span> <span class="fu"><a href="https://rsbivand.github.io/rgrass/reference/readVECT.html">read_VECT</a></span><span class="op">(</span><span class="st">"shortest_route"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">mapview</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mapview/man/mapView.html">mapview</a></span><span class="op">(</span><span class="va">route</span><span class="op">)</span> <span class="op">+</span> <span class="va">points</span></span></code></pre></div>
@@ -942,10 +942,10 @@ Use <strong>rstac</strong>, <strong>gdalcubes</strong>, and <strong>terra</stron
     <h2>Note: Second Edition is under construction 🏗</h2>
     <!--<p>Now is a great time to provide feedback</p>-->
         <ul class="list-unstyled">
-<!--<li><a href="https://forms.gle/nq9RmbxJyZXQgc948">Provide feedback (5 min)</a></li>--><li><a href="https://geocompr.robinlovelace.net/#reproducibility">Install updated packages</a></li>
+<!--<li><a href="https://forms.gle/nq9RmbxJyZXQgc948">Provide feedback (5 min)</a></li>--><li><a href="https://r.geocompx.org/#reproducibility">Install updated packages</a></li>
           <li><a href="https://github.com/Robinlovelace/geocompr/issues">Open an issue <i class="fas fa-question"></i></a></li>
           <li><a href="https://discord.gg/PMztXYgNxp">Chat on Discord <i class="fab fa-discord"></i></a></li>
-          <li><a href="https://geocompr.github.io/solutions/">Check solutions to the exercises <i class="fa fa-check"></i></a></li>
+          <li><a href="https://r.geocompx.org/solutions/">Check solutions to the exercises <i class="fa fa-check"></i></a></li>
           <li><a href="https://supportukrainenow.org/">Support Ukraine 🇺🇦
 </a></li>
         </ul>
