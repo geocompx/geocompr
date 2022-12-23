@@ -635,7 +635,7 @@ This demonstrates how the `rast()` function works to create an example raster na
 
 
 ```r
-elev = rast(nrows = 6, ncols = 6, resolution = 0.5, 
+elev = rast(nrows = 6, ncols = 6,
             xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
             vals = 1:36)
 ```

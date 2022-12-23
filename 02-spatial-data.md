@@ -1050,19 +1050,21 @@ Rasters from files are usually not read entirely into RAM, with an exception of 
 Rasters can also be created from scratch using the same `rast()` function.
 This is illustrated in the subsequent code chunk, which results in a new `SpatRaster` object.
 The resulting raster consists of 36 cells (6 columns and 6 rows specified by `nrows` and `ncols`) centered around the Prime Meridian and the Equator (see `xmin`, `xmax`, `ymin` and `ymax` parameters).
-The default CRS of raster objects is WGS84, but can be changed with the `crs` argument.
-This means the unit of the resolution is in degrees which we set to 0.5 (`resolution`). 
 Values (`vals`) are assigned to each cell: 1 to cell 1, 2 to cell 2, and so on.
 Remember: `rast()` fills cells row-wise (unlike `matrix()`) starting at the upper left corner, meaning the top row contains the values 1 to 6, the second 7 to 12, etc.
+For other ways of creating raster objects, see `?rast`.
 
 
 ```r
-new_raster = rast(nrows = 6, ncols = 6, resolution = 0.5, 
+new_raster = rast(nrows = 6, ncols = 6, 
                   xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
                   vals = 1:36)
 ```
 
-For other ways of creating raster objects, see `?rast`.
+Given the number of rows and columns as well as the extent (`xmin`, `xmax`, `ymin`, `ymax`), the resolution has to be 0.5.
+The unit of the resolution is that of the underlying CRS. 
+Here, it is degrees, because the default CRS of raster objects is WGS84.
+However, one can specify any other CRS with the `crs` argument.
 
 The `SpatRaster` class also handles multiple layers, which typically correspond to a single multispectral satellite file or a time-series of rasters.
 
