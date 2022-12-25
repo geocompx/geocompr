@@ -22,24 +22,23 @@ As a convenience to the reader and to ensure easy reproducibility, we have made 
 
 This chapter demonstrates how the skills learned in Parts I and II can be applied to a particular domain: geomarketing\index{geomarketing} (sometimes also referred to as location analysis\index{location analysis} or location intelligence).
 This is a broad field of research and commercial application.
-A typical example is where to locate a new shop.
+A typical example of geomarketing is where to locate a new shop.
 The aim here is to attract most visitors and, ultimately, make the most profit.
 There are also many non-commercial applications that can use the technique for public benefit, for example where to locate new health services [@tomintz_geography_2008].
 
 People are fundamental to location analysis\index{location analysis}, in particular where they are likely to spend their time and other resources.
 Interestingly, ecological concepts and models are quite similar to those used for store location analysis.
 Animals and plants can best meet their needs in certain 'optimal' locations, based on variables that change over space (@muenchow_review_2018; see also chapter \@ref(eco)).
-This is one of the great strengths of geocomputation and GIScience in general.
-Concepts and methods are transferable to other fields.
+This is one of the great strengths of geocomputation and GIScience in general: concepts and methods are transferable to other fields.
 Polar bears, for example, prefer northern latitudes where temperatures are lower and food (seals and sea lions) is plentiful.
 Similarly, humans tend to congregate in certain places, creating economic niches (and high land prices) analogous to the ecological niche of the Arctic.
-The main task of location analysis is to find out where such 'optimal locations' are for specific services, based on available data.
+The main task of location analysis is to find out, based on available data, where such 'optimal locations' are for specific services.
 Typical research questions include:
 
 - Where do target groups live and which areas do they frequent?
 - Where are competing stores or services located?
 - How many people can easily reach specific stores?
-- Do existing services over- or under-exploit the market potential?
+- Do existing services over- or under-utilize the market potential?
 - What is the market share of a company in a specific area?
 
 This chapter demonstrates how geocomputation can answer such questions based on a hypothetical case study based on real data.
@@ -86,25 +85,22 @@ data("census_de", package = "spDataLarge")
 The `census_de` object is a data frame containing 13 variables for more than 360,000 grid cells across Germany.
 For our work, we only need a subset of these: Easting (`x`) and Northing (`y`), number of inhabitants (population; `pop`), mean average age (`mean_age`), proportion of women (`women`) and average household size (`hh_size`).
 These variables are selected and renamed from German into English in the code chunk below and summarized in Table \@ref(tab:census-desc). 
-Further, `mutate()` is used to convert values -1 and -9 (meaning unknown) to `NA`.
+Further, `mutate()` is used to convert values -1 and -9 (meaning "unknown") to `NA`.
 
 
 ```r
 # pop = population, hh_size = household size
 input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
-                      women = Frauen_A, mean_age = Alter_D,
-                      hh_size = HHGroesse_D)
+                      women = Frauen_A, mean_age = Alter_D, hh_size = HHGroesse_D)
 # set -1 and -9 to NA
-input_tidy = dplyr::mutate(
-  input, 
+input_tidy = dplyr::mutate(input,
   dplyr::across(.fns =  ~ifelse(.x %in% c(-1, -9), NA, .x)))
 ```
 
 
-
 Table: (\#tab:census-desc)Categories for each variable in census data from Datensatzbeschreibung...xlsx located in the downloaded file census.zip (see Figure \@ref(fig:census-stack) for their spatial distribution).
 
-| class | Population | % female | Mean age | Household size |
+| Class | Population | % female | Mean age | Household size |
 |:-----:|:----------:|:--------:|:--------:|:--------------:|
 |   1   |   3-250    |   0-40   |   0-40   |      1-2       |
 |   2   |  250-500   |  40-47   |  40-42   |     2-2.5      |
@@ -116,8 +112,8 @@ Table: (\#tab:census-desc)Categories for each variable in census data from Daten
 ## Create census rasters
  
 After the preprocessing, the data can be converted into a `SpatRaster` object (see Sections \@ref(raster-classes) and \@ref(raster-subsetting)) with the help of the `rast()` function.
-Setting its `type` argument to `xyz`, it requires an input data frame whose columns `x` and `y` represent coordinates on a regular grid.
-All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as input for the raster layers (Figure \@ref(fig:census-stack); see also `code/14-location-figures.R` in our github repository).
+When setting its `type` argument to `xyz`, the `x` and `y` columns of the input data frame should correspond to coordinates on a regular grid.
+All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as values of the raster layers (Figure \@ref(fig:census-stack); see also `code/14-location-figures.R` in our github repository).
 
 
 ```r
@@ -143,11 +139,11 @@ Since we are using mainly densities such as the number of inhabitants or the por
 Be careful with geographic CRS\index{CRS!geographic} where grid cell areas constantly decrease in poleward directions (see also Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)). </div>\EndKnitrBlock{rmdnote}
 
 <div class="figure" style="text-align: center">
-<img src="figures/08_census_stack.png" alt="Gridded German census data of 2011 (see Table \@ref(tab:census-desc) for a description of the classes)." width="100%" />
+<img src="figures/14_census_stack.png" alt="Gridded German census data of 2011 (see Table \@ref(tab:census-desc) for a description of the classes)." width="100%" />
 <p class="caption">(\#fig:census-stack)Gridded German census data of 2011 (see Table \@ref(tab:census-desc) for a description of the classes).</p>
 </div>
 
-The next stage is to reclassify the values of the rasters stored in `input_ras` in accordance with the survey mentioned in Section \@ref(case-study), using the **raster** function `reclassify()`, which was introduced in Section \@ref(local-operations)\index{map algebra!local operations}.
+The next stage is to reclassify the values of the rasters stored in `input_ras` in accordance with the survey mentioned in Section \@ref(case-study), using the **terra** function `classify()`, which was introduced in Section \@ref(local-operations)\index{map algebra!local operations}.
 In the case of the population data, we convert the classes into a numeric data type using class means. 
 Raster cells are assumed to have a population of 127 if they have a value of 1 (cells in 'class 1' contain between 3 and 250 inhabitants) and 375 if they have a value of 2 (containing 250 to 500 inhabitants), and so on (see Table \@ref(tab:census-desc)).
 A cell value of 8000 inhabitants was chosen for 'class 6' because these cells contain more than 8000 people.
@@ -200,7 +196,7 @@ reclass
 
 ## Define metropolitan areas
 
-We define metropolitan areas as pixels of 20 km^2^ inhabited by more than 500,000 people.
+We deliberately define metropolitan areas as pixels of 20 km^2^ inhabited by more than 500,000 people.
 Pixels at this coarse resolution can rapidly be created using `aggregate()`\index{aggregation}, as introduced in Section \@ref(aggregation-and-disaggregation).
 The command below uses the argument `fact = 20` to reduce the resolution of the result twenty-fold (recall the original raster resolution was 1 km^2^):
 
@@ -229,35 +225,23 @@ Plotting this reveals eight metropolitan regions (Figure \@ref(fig:metro-areas))
 Each region consists of one or more raster cells.
 It would be nice if we could join all cells belonging to one region.
 **terra**'s\index{terra} `patches()` command does exactly that.
-Subsequently, `as.polygons()` converts the raster object into spatial polygons, and `st_as_sf()` converts it into an `sf`-object.
+Subsequently, `as.polygons()` converts the raster object into spatial polygons, and `st_as_sf()` converts it into an `sf` object.
 
 
 ```r
-polys = pop_agg |> 
+metros = pop_agg |> 
   terra::patches(directions = 8) |>
   terra::as.polygons() |>
   sf::st_as_sf()
 ```
 
-`polys` now features a column named `patches` which indicates to which metropolitan region each polygon belongs and which we will use to dissolve\index{dissolve} the polygons into coherent single regions (see also Section \@ref(geometry-unions)):
-
-
-```r
-metros = polys |>
-  dplyr::group_by(patches) |>
-  dplyr::summarize()
-```
-
-Given no other column as input, `summarize()` only dissolves the geometry.
-
 <div class="figure" style="text-align: center">
-<img src="figures/08_metro_areas.png" alt="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names." width="70%" />
+<img src="figures/14_metro_areas.png" alt="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names." width="70%" />
 <p class="caption">(\#fig:metro-areas)The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names.</p>
 </div>
 
 The resulting eight metropolitan areas suitable for bike shops (Figure \@ref(fig:metro-areas); see also `code/14-location-figures.R` for creating the figure) are still missing a name.
-A reverse geocoding\index{geocoding} approach can settle this problem.
-Given a coordinate, reverse geocoding finds the corresponding address.
+A reverse geocoding\index{geocoding} approach can settle this problem: given a coordinate, it finds the corresponding address.
 Consequently, extracting the centroid\index{centroid} coordinate of each metropolitan area can serve as an input for a reverse geocoding API\index{API}.
 This is exactly what the `rev_geocode_OSM()` function of the **tmaptools** package expects.
 Setting additionally `as.data.frame` to `TRUE` will give back a `data.frame` with several columns referring to the location including the street name, house number and city.
@@ -313,9 +297,10 @@ The subsequent code chunk does this using a number of functions including:
 - `osmdata_sf()`, which converts the OSM\index{OpenStreetMap} data into spatial objects (of class `sf`).
 - `while()`\index{loop!while}, which tries repeatedly (three times in this case) to download the data if it fails the first time.^[The OSM-download will sometimes fail at the first attempt.
 ]
+
 Before running this code: please consider it will download almost 2GB of data.
 To save time and resources, we have put the output named `shops` into **spDataLarge**.
-To make it available in your environment ensure that the **spDataLarge** package is loaded, or run `data("shops", package = "spDataLarge")`.
+To make it available in your environment run `data("shops", package = "spDataLarge")`.
 
 
 ```r
@@ -328,7 +313,7 @@ shops = purrr::map(metro_names, function(x) {
   points = osmdata::osmdata_sf(query)
   # request the same data again if nothing has been downloaded
   iter = 2
-  while (nrow(points$osm_points) == 0 & iter > 0) {
+  while (nrow(points$osm_points) == 0 && iter > 0) {
     points = osmdata_sf(query)
     iter = iter - 1
   }
@@ -351,7 +336,7 @@ if (any(ind)) {
 }
 ```
 
-To make sure that each list element (an `sf`\index{sf} data frame) comes with the same columns^[This is not a given since OSM contributors are not equally meticulous when collecting data.] we only keep the `osm_id` and the `shop` columns with the help of the `map_dfr` loop which additionally rowbinds all shops into one large `sf`\index{sf} object.
+To make sure that each list element (an `sf`\index{sf} data frame) comes with the same columns^[This is not a given since OSM contributors are not equally meticulous when collecting data.] we only keep the `osm_id` and the `shop` columns with the help of the `map_dfr` loop which additionally combines all shops into one large `sf`\index{sf} object.
 
 
 ```r
@@ -377,8 +362,7 @@ The result of the subsequent code chunk is therefore an estimate of shop density
 ```r
 shops = sf::st_transform(shops, st_crs(reclass))
 # create poi raster
-poi = terra::rasterize(x = terra::vect(shops),
-                       y = reclass, field = "osm_id", fun = "length")
+poi = terra::rasterize(x = shops, y = reclass, field = "osm_id", fun = "length")
 ```
 
 As with the other raster layers (population, women, mean age, household size) the `poi` raster is reclassified into four classes (see Section \@ref(create-census-rasters)). 
@@ -457,9 +441,9 @@ Subsequent steps in the analysis could be taken:
 
 - Find an optimal location based on number of inhabitants within a specific catchment area\index{catchment area}.
 For example, the shop should be reachable for as many people as possible within 15 minutes of traveling bike distance (catchment area\index{catchment area} routing\index{routing}).
-Thereby, we should account for the fact that the further away the people are from the shop, the more unlikely it becomes that they actually visit it (distance decay function).
+Thereby, we should account for the fact that the further away the people are from the shop, the more unlikely it becomes that they actually visit it (distance decay function)
 - Also it would be a good idea to take into account competitors. 
-That is, if there already is a bike shop in the vicinity of the chosen location, possible customers (or sales potential) should be distributed between the competitors [@huff_probabilistic_1963; @wieland_market_2017].
+That is, if there already is a bike shop in the vicinity of the chosen location, possible customers (or sales potential) should be distributed between the competitors [@huff_probabilistic_1963; @wieland_market_2017]
 - We need to find suitable and affordable real estate, e.g., in terms of accessibility, availability of parking spots, desired frequency of passers-by, having big windows, etc.
 
 ## Exercises
@@ -468,7 +452,7 @@ That is, if there already is a bike shop in the vicinity of the chosen location,
 E1. Download the csv file containing inhabitant information for a 100 m cell resolution (https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
 Please note that the unzipped file has a size of 1.23 GB.
 To read it into R you can use `readr::read_csv`.
-This takes 30 seconds on my machine (16 GB RAM)
+This takes 30 seconds on a machine with 16 GB RAM.
 `data.table::fread()` might be even faster, and returns an object of class `data.table()`.
 Use `dplyr::as_tibble()` to convert it into a tibble.
 Build an inhabitant raster, aggregate it to a cell resolution of 1 km, and compare the difference with the inhabitant raster (`inh`) we have created using class mean values.
