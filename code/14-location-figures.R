@@ -109,7 +109,8 @@ tm_2 = tm_shape(pop_agg/1000) +
   tm_shape(metros) +
   tm_borders(col = "gold", lwd = 2) +
   tm_shape(metros_points) +
-  tm_text(text = "names", ymod = 0.6, shadow = TRUE, size = 0.9) +
+  tm_text(text = "names", ymod = 0.6, shadow = TRUE, size = 0.75,
+          fontface = "italic") +
   tm_layout(legend.outside = TRUE, legend.outside.size = 0.3)
 
 tmap_save(tm_2, "figures/14_metro_areas.png", width = 4, height = 4)
