@@ -650,7 +650,7 @@ The following code creates the raster datasets shown in Figure \@ref(fig:cont-ra
 grain_order = c("clay", "silt", "sand")
 grain_char = sample(grain_order, 36, replace = TRUE)
 grain_fact = factor(grain_char, levels = grain_order)
-grain = rast(nrows = 6, ncols = 6, resolution = 0.5, 
+grain = rast(nrows = 6, ncols = 6, 
              xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
              vals = grain_fact)
 ```
