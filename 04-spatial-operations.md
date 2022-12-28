@@ -930,7 +930,7 @@ Quite similar to spatial clipping is intersecting two layers (Section \@ref(spat
 The difference is that these two layers (vector or raster) simply share an overlapping area (see Figure \@ref(fig:venn-clip) for an example).
 However, be careful with the wording.
 Sometimes the same words have slightly different meanings for raster and vector data models.
-While aggregating polygon geometries means dissoling boundaries, for raster data geometries it means increasing cell sizes and thereby reducing spatial resolution.
+While aggregating polygon geometries means dissolving boundaries, for raster data geometries it means increasing cell sizes and thereby reducing spatial resolution.
 Zonal operations dissolve the cells of one raster in accordance with the zones (categories) of another raster dataset using an aggregating function.
 
 ### Merging rasters
