@@ -151,7 +151,7 @@ That may sound rather abstract and, indeed, the definition and classification of
 
 Despite their mathematical origins, topological relations can be understood intuitively with reference to visualizations of commonly used functions that test for common types of spatial relationships.
 Figure \@ref(fig:relations) shows a variety of geometry pairs and their associated relations.
-The third and fourth pairs in Figure \@ref(fig:relations) (from left to right and then down) demonstrate that, for some relations, order is important: while the relations *equals*, *intersects*, *crosses*, *touches* and *overlaps* are symmetrical, meaning that if `function(x, y)` is true, `function(y, x)` will also by true, relations in which the order of the geometries are important such as *contains* and *within* are not.
+The third and fourth pairs in Figure \@ref(fig:relations) (from left to right and then down) demonstrate that, for some relations, order is important: while the relations *equals*, *intersects*, *crosses*, *touches* and *overlaps* are symmetrical, meaning that if `function(x, y)` is true, `function(y, x)` will also be true, relations in which the order of the geometries are important such as *contains* and *within* are not.
 Notice that each geometry pair has a "DE-9IM" string such as FF2F11212, described in the next section.
 \index{topological relations}
 
@@ -228,7 +228,7 @@ In this case, there is only one feature in the `y` object `polygon_sfc` so the r
 
 `st_intersects()` returns `TRUE` even in cases where the features just touch: *intersects* is a 'catch-all' topological operation which identifies many types of spatial relation, as illustrated in Figure \@ref(fig:relations).
 More restrictive questions include which points lie within the polygon, and which features are on or contain a shared boundary with `y`?
-These can be answered as follows (results not show):
+These can be answered as follows (results not shown):
 
 
 ```r
@@ -930,10 +930,8 @@ Quite similar to spatial clipping is intersecting two layers (Section \@ref(spat
 The difference is that these two layers (vector or raster) simply share an overlapping area (see Figure \@ref(fig:venn-clip) for an example).
 However, be careful with the wording.
 Sometimes the same words have slightly different meanings for raster and vector data models.
-Aggregating in the case of vector data refers to dissolving polygons, while it means increasing the resolution in the case of raster data.
-In fact, one could see dissolving or aggregating polygons as decreasing the resolution. 
-However, zonal operations might be the better raster equivalent compared to changing the cell resolution. 
-Zonal operations can dissolve the cells of one raster in accordance with the zones (categories) of another raster using an aggregation function (see above).
+While aggregating polygon geometries means dissoling boundaries, for raster data geometries it means increasing cell sizes and thereby reducing spatial resolution.
+Zonal operations dissolve the cells of one raster in accordance with the zones (categories) of another raster dataset using an aggregating function.
 
 ### Merging rasters
 
