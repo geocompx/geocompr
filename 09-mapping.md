@@ -822,7 +822,7 @@ This section gives some context, teaches the basics of **shiny** from a web mapp
 The way **shiny** works is well documented at [shiny.rstudio.com](https://shiny.rstudio.com/).
 The two key elements of a **shiny** app reflect the duality common to most web application development: 'front end' (the bit the user sees) and 'back end' code.
 In **shiny** apps, these elements are typically created in objects named `ui` and `server` within an R script named `app.R`, which lives in an 'app folder'.
-This allows web mapping applications to be represented in a single file, such as the [`CycleHireApp/app.R`](https://github.com/Robinlovelace/geocompr/blob/main/apps/CycleHireApp/app.R) file in the book's GitHub repo.
+This allows web mapping applications to be represented in a single file, such as the [`CycleHireApp/app.R`](https://github.com/geocompx/geocompr/blob/main/apps/CycleHireApp/app.R) file in the book's GitHub repo.
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">In **shiny** apps these are often split into `ui.R` (short for user interface) and `server.R` files, naming conventions used by `shiny-server`, a server-side Linux application for serving shiny apps on public-facing websites.
 `shiny-server` also serves apps defined by a single `app.R` file in an 'app folder'.
@@ -867,7 +867,7 @@ The function `shinyApp()` combines both the `ui` and `server` elements and serve
 When you move the slider in the map shown in Figure \@ref(fig:lifeApp), you are actually causing R code to re-run, although this is hidden from view in the user interface.
 
 Building on this basic example and knowing where to find help (see `?shiny`), the best way forward now may be to stop reading and start programming!
-The recommended next step is to open the previously mentioned [`CycleHireApp/app.R`](https://github.com/Robinlovelace/geocompr/blob/main/apps/CycleHireApp/app.R) script in an IDE of choice, modify it and re-run it repeatedly.
+The recommended next step is to open the previously mentioned [`CycleHireApp/app.R`](https://github.com/geocompx/geocompr/blob/main/apps/CycleHireApp/app.R) script in an IDE of choice, modify it and re-run it repeatedly.
 The example contains some of the components of a web mapping application implemented in **shiny** and should 'shine' a light on how they behave.
 
 The `CycleHireApp/app.R` script contains **shiny** functions that go beyond those demonstrated in the simple 'lifeApp' example.

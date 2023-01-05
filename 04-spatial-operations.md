@@ -367,7 +367,7 @@ As with attribute data, joining adds new columns to the target object (the argum
 \index{spatial!join}
 
 The process is illustrated by the following example: imagine you have ten points randomly distributed across the Earth's surface and you ask, for the points that are on land, which countries are they in?
-Implementing this idea in a [reproducible example](https://github.com/Robinlovelace/geocompr/blob/main/code/04-spatial-join.R) will build your geographic data handling skills and show how spatial joins work.
+Implementing this idea in a [reproducible example](https://github.com/geocompx/geocompr/blob/main/code/04-spatial-join.R) will build your geographic data handling skills and show how spatial joins work.
 The starting point is to create points that are randomly scattered over the Earth's surface:
 
 
@@ -966,7 +966,7 @@ The `merge()` command will still work but you will see a clear border in the res
 On the other hand, the `mosaic()` command lets you define a function for the overlapping area. 
 For instance, we could compute the mean value -- this might smooth the clear border in the merged result but it will most likely not make it disappear.
 <!-- The following sentences have been commented out and can be removed because the packages, and info, is now out of date -->
-<!-- See https://github.com/Robinlovelace/geocompr/pull/424 for discussion -->
+<!-- See https://github.com/geocompx/geocompr/pull/424 for discussion -->
 <!-- To do so, we need a more advanced approach.  -->
 <!-- Remote sensing scientists frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image. -->
 <!-- The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`calcHistMatch()`) and **RStoolbox** (`histMatch()`, `pifMatch()`) provide the corresponding functions for the **raster**'s package objects. -->

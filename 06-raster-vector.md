@@ -233,7 +233,7 @@ zion_nlcd |>
 </div>
 
 Although the **terra** package offers rapid extraction of raster values within polygons, `extract()` can still be a bottleneck when processing large polygon datasets.
-The **exactextractr** package offers a [significantly faster alternative](https://github.com/Robinlovelace/geocompr/issues/813) for extracting pixel values through the `exact_extract()` function. 
+The **exactextractr** package offers a [significantly faster alternative](https://github.com/geocompx/geocompr/issues/813) for extracting pixel values through the `exact_extract()` function. 
 The `exact_extract()` function also computes, by default, the fraction of each raster cell overlapped by the polygon, which is more precise (see note below for details). 
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Polygons usually have irregular shapes, and therefore, a polygon can overlap only some parts of a raster's cells. 
