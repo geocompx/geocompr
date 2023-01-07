@@ -34,15 +34,15 @@ This is the online home of *Geocomputation with R*, a book on geographic data an
 You can buy the book from [CRC Press](https://www.routledge.com/9781138304512), or [Amazon](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577/), and see the archived **First Edition** hosted on [bookdown.org](https://bookdown.org/robinlovelace/geocompr/). 
 
 Inspired by the Free and Open Source Software for Geospatial ([FOSS4G](https://foss4g.org/)) movement, the code and prose underlying this book are open, ensuring that the content is reproducible, transparent, and accessible.
-Hosting the source code on [GitHub](https://github.com/Robinlovelace/geocompr/) allows anyone to interact with the project by opening issues or contributing new content and typo fixes for the benefit of everyone.
+Hosting the source code on [GitHub](https://github.com/geocompx/geocompr) allows anyone to interact with the project by opening issues or contributing new content and typo fixes for the benefit of everyone.
 
-[![](https://img.shields.io/github/stars/robinlovelace/geocompr?style=for-the-badge)](https://github.com/robinlovelace/geocompr)
-[![](https://img.shields.io/github/contributors/robinlovelace/geocompr?style=for-the-badge)](https://github.com/Robinlovelace/geocompr/graphs/contributors)
+[![](https://img.shields.io/github/stars/geocompx/geocompr?style=for-the-badge)](https://github.com/geocompx/geocompr)
+[![](https://img.shields.io/github/contributors/geocompx/geocompr?style=for-the-badge)](https://github.com/geocompx/geocompr/graphs/contributors)
 
-The online version of the book is hosted at [r.geocompx.org](https://r.geocompx.org) and kept up-to-date by [GitHub Actions](https://github.com/Robinlovelace/geocompr/actions).
+The online version of the book is hosted at [r.geocompx.org](https://r.geocompx.org) and kept up-to-date by [GitHub Actions](https://github.com/geocompx/geocompr/actions).
 Its current 'build status' as follows:
 
-[![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
+[![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 
 This version of the book was built on GH Actions on 2023-01-07.
 
@@ -54,18 +54,18 @@ This version of the book was built on GH Actions on 2023-01-07.
 Once logged-in to GitHub, click on the 'Edit this page' icon in the right panel of the book website.
 This will take you to an editable version of the the source [R Markdown](http://rmarkdown.rstudio.com/) file that generated the page you're on.
 
-<!--[![](figures/editme.png)](https://github.com/Robinlovelace/geocompr/edit/main/index.Rmd)-->
+<!--[![](figures/editme.png)](https://github.com/geocompx/geocompr/edit/main/index.Rmd)-->
 
-To raise an issue about the book's content (e.g. code not running) or make a feature request, check-out the [issue tracker](https://github.com/Robinlovelace/geocompr/issues).
+To raise an issue about the book's content (e.g. code not running) or make a feature request, check-out the [issue tracker](https://github.com/geocompx/geocompr/issues).
 
-Maintainers and contributors must follow this repository’s [CODE OF CONDUCT](https://github.com/Robinlovelace/geocompr/blob/main/CODE_OF_CONDUCT.md).
+Maintainers and contributors must follow this repository’s [CODE OF CONDUCT](https://github.com/geocompx/geocompr/blob/main/CODE_OF_CONDUCT.md).
 
 ## Reproducibility {-}
 
 The quickest way to reproduce the contents of the book if you're new to geographic data in R may be in the web browser, thanks to [Binder](https://mybinder.org/).
 Clicking on the link below should open a new window containing RStudio Server in your web browser, enabling you to open chapter files and running code chunks to test that the code is reproducible.
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/main?urlpath=rstudio)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/geocompx/geocompr/main?urlpath=rstudio)
 
 If you see something like the image below, congratulations, it worked!
 You can start exploring Geocomputation with R in a cloud-based environment, noting [mybinder.org user guidelines](https://mybinder.readthedocs.io/en/latest/about/user-guidelines.html)):
@@ -92,8 +92,8 @@ remotes::install_github("geocompr/geocompkg")
 
 
 After installing the book's dependencies, you can rebuild the book for testing and educational purposes.
-To do this [download](https://github.com/Robinlovelace/geocompr/archive/refs/heads/main.zip) and unzip or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the book's source code.
-After opening the `geocompr.Rproj` project in [RStudio](https://www.rstudio.com/products/rstudio/download/#download) (or opening the folder in another IDE such as [VS Code](https://github.com/REditorSupport/vscode-R)), you should be able to reproduce the contents with the following command:
+To do this [download](https://github.com/geocompx/geocompr/archive/refs/heads/main.zip) and unzip or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the book's source code.
+After opening the `geocompr.Rproj` project in [RStudio](https://posit.co/download/rstudio-desktop/#download) (or opening the folder in another IDE such as [VS Code](https://github.com/REditorSupport/vscode-R)), you should be able to reproduce the contents with the following command:
 
 
 ```r
@@ -102,7 +102,7 @@ bookdown::serve_book(".")
 
 
 
-See the project's [GitHub repo](https://github.com/robinlovelace/geocompr#reproducing-the-book) for full details on reproducing the book.
+See the project's [GitHub repo](https://github.com/geocompx/geocompr#reproducing-the-book) for full details on reproducing the book.
 
 ## Getting involved {-}
 
@@ -111,18 +111,18 @@ If you find the project of use and interest, you can get involved in many ways, 
 - Telling people about it
 - [Buying](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577) a copy
 - Helping people get started with open source software for reproducible research in general, and working with geographic data in R in particular (this can be an excellent way to consolidate and build your own skills)
-- '[Starring](https://help.github.com/articles/about-stars/)' the [geocompr GitHub repository](https://github.com/robinlovelace/geocompr)
-- [Citing](https://github.com/Robinlovelace/geocompr/raw/main/CITATION.bib) and [linking-to](https://r.geocompx.org) it
+- '[Starring](https://help.github.com/articles/about-stars/)' the [geocompr GitHub repository](https://github.com/geocompx/geocompr)
+- [Citing](https://github.com/geocompx/geocompr/raw/main/CITATION.bib) and [linking-to](https://r.geocompx.org) it
 - Communicating about the book online, via the [#geocompr hashtag](https://twitter.com/hashtag/geocompr) on Twitter (see our [Guestbook at geocompx.org](https://geocompx.org/guestbook/)) or by letting us know of [courses](https://github.com/geocompx/geocompx.org/edit/source/content/guestbook/index.md) using the book
 - Reviewing it, on [Amazon](https://www.amazon.com/Geocomputation-Chapman-Hall-Robin-Lovelace/dp/1138304514/), [Goodreads](https://www.goodreads.com/book/show/42780859-geocomputation-with-r) or elsewhere
-- Asking questions about the content or making suggestion on [GitHub](https://github.com/Robinlovelace/geocompr/issues), [Twitter](https://twitter.com/hashtag/geocompr?src=hashtag_click) or [Discord](https://discord.gg/PMztXYgNxp)
+- Asking questions about the content or making suggestion on [GitHub](https://github.com/geocompx/geocompr/issues), [Twitter](https://twitter.com/hashtag/geocompr?src=hashtag_click) or [Discord](https://discord.gg/PMztXYgNxp)
 - Answering questions, or at least responding to people asking for clarification or reproducible examples to demonstrate their question
 - Supporting community translations
   - The Spanish version: https://r.geocompx.org/es/
   - The French version: https://r.geocompx.org/fr/
   - The Japanese version: http://babayoshihiko.ddns.net/geo/
 
-Further details can be found at [github.com/Robinlovelace/geocompr](https://github.com/Robinlovelace/geocompr#geocomputation-with-r).
+Further details can be found at [github.com/geocompx/geocompr](https://github.com/geocompx/geocompr#geocomputation-with-r).
 
 <hr>
 
@@ -189,9 +189,9 @@ The chapters in Part I aim to address this by providing reproducible code on sim
 
 An important aspect of the book from a teaching/learning perspective is the **exercises** at the end of each chapter.
 Completing these will develop your skills and equip you with the confidence needed to tackle a range of geospatial problems.
-Solutions to the exercises can be found in an online booklet that accompanies Geocomputation with R, hosted at [geocompr.github.io/solutions](https://geocompr.github.io/solutions/).
-To learn how to this booklet was created, and how to update solutions in files such as [_01-ex.Rmd](https://github.com/Robinlovelace/geocompr/blob/main/_01-ex.Rmd), see this [blog post](https://geocompr.github.io/post/2022/geocompr-solutions/).
-For more blog posts and extended examples see the book's supporting website at [geocompr.github.io](https://geocompr.github.io/).
+Solutions to the exercises can be found in an online booklet that accompanies Geocomputation with R, hosted at [r.geocompx.org/solutions](https://r.geocompx.org/solutions).
+To learn how to this booklet was created, and how to update solutions in files such as [_01-ex.Rmd](https://github.com/geocompx/geocompr/blob/main/_01-ex.Rmd), see this [blog post](https://geocompx.org/post/2022/geocompr-solutions/).
+For more blog posts and extended examples see the book's supporting website at [geocompx.org](https://geocompx.org).
 
 Impatient readers are welcome to dive straight into the practical examples, starting in Chapter \@ref(spatial-class).
 However, we recommend reading about the wider context of *Geocomputation with R* in Chapter \@ref(intro) first.
@@ -211,7 +211,7 @@ As outlined in Section \@ref(why-use-r-for-geocomputation), there are many reaso
 R is well-suited to the interactive use required in many geographic data analysis workflows compared with other languages.
 R excels in the rapidly growing fields of Data Science (which includes data carpentry, statistical learning techniques and data visualization) and Big Data (via efficient interfaces to databases and distributed computing systems).
 Furthermore R enables a reproducible workflow: sharing scripts underlying your analysis will allow others to build-on your work.
-To ensure reproducibility in this book we have made its source code available at [github.com/Robinlovelace/geocompr](https://github.com/Robinlovelace/geocompr#geocomputation-with-r).
+To ensure reproducibility in this book we have made its source code available at [github.com/geocompx/geocompr](https://github.com/geocompx/geocompr#geocomputation-with-r).
 There you will find script files in the `code/` folder that generate figures:
 when code generating a figure is not provided in the main text of the book, the name of the script file that generated it is provided in the caption (see for example the caption for Figure \@ref(fig:zones)).
 
