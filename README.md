@@ -10,7 +10,8 @@
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 [![Docker](https://img.shields.io/docker/pulls/geocompr/geocompr?style=plastic)](https://github.com/geocompx/docker/)
 [![discord](https://img.shields.io/discord/878051191374876683?label=discord&logo=Discord&color=blue)](https://discord.gg/PMztXYgNxp)
-
+[![Open in GitHub
+Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=84222786&machine=basicLinux32gb&devcontainer_path=.devcontainer.json&location=WestEurope)
 <!-- [![DOI](https://zenodo.org/badge/84222786.svg)](https://zenodo.org/badge/latestdoi/84222786) -->
 <!-- badges: end -->
 
@@ -198,7 +199,7 @@ cloning a fork of the source code, that you can change and share
 following command:
 
 ``` bash
-git fork geocompx/geocompr # (gh repo clone geocompx/geocompr # also works)
+gh repo fork geocompx/geocompr # (gh repo clone geocompx/geocompr # also works)
 ```
 
 Both of those methods require you to have Git installed. If not, you can
