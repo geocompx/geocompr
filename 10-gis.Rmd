@@ -77,8 +77,9 @@ However, its ability to interface with dedicated GISs gives it astonishing geosp
 R is well known as a statistical programming language, but many people are unaware of its ability to replicate GIS workflows, with the additional benefits of a (relatively) consistent CLI.
 Furthermore, R outperforms GISs in some areas of geocomputation\index{geocomputation}, including interactive/animated map making (see Chapter \@ref(adv-map)) and spatial statistical modeling (see Chapter \@ref(spatial-cv)).
 This chapter focuses on 'bridges' to three mature open source GIS products (see Table \@ref(tab:gis-comp)): QGIS\index{QGIS} (via the package **qgisprocess**\index{qgisprocess (package)}; Section \@ref(rqgis)), SAGA\index{SAGA} (via **Rsagacmd**\index{Rsagacmd (package)}; Section \@ref(saga)) and GRASS\index{GRASS} (via **rgrass**\index{rgrass (package)}; Section \@ref(grass)).^[
-Though not covered here, it is worth being aware of so-called R-ArcGIS bridge (see https://github.com/R-ArcGIS/r-bridge) that allows R to be used from within ArcGIS\index{ArcGIS}
-One can also use R scripts from within QGIS\index{QGIS} (see https://docs.qgis.org/3.22/en/docs/training_manual/processing/r_intro.html).
+The now now longer maintained R package **RPyGeo** established an interface to the geoprocessing tools of ArcGIS from with R.
+And though not covered here, it is worth being aware of the so-called R-ArcGIS bridge (see https://github.com/R-ArcGIS/r-bridge) that allows R to be used from within ArcGIS\index{ArcGIS}.
+Please note further that one can also use R scripts from within QGIS\index{QGIS} (see https://docs.qgis.org/3.22/en/docs/training_manual/processing/r_intro.html).
 Finally, it is also possible to use R from the GRASS GIS\index{GRASS} command line (see https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#R_within_GRASS).
 ]
 
