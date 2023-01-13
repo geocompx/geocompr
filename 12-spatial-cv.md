@@ -506,11 +506,11 @@ Random forest\index{random forest} models might be more popular than SVMs; howev
 Since (spatial) hyperparameter tuning is the major aim of this section, we will use an SVM.
 For those wishing to apply a random forest model, we recommend to read this chapter, and then proceed to Chapter \@ref(eco) in which we will apply the currently covered concepts and techniques to make spatial predictions based on a random forest model.
 
-SVMs\index{SVM} search for the best possible 'hyperplanes' to separate classes (in a classification\index{classification} case) and estimate 'kernels' with specific hyperparameters to create non-linear boundaries between classes [@james_introduction_2013].
-Hyperparameters\index{hyperparameter} should not be confused with coefficients of parametric models, which are sometimes also referred to as parameters (see also the [machine mastery blog](https://machinelearningmastery.com/difference-between-a-parameter-and-a-hyperparameter/)).
-Coefficients can be estimated from the data, while hyperparameters are set before the learning begins.
-Optimal hyperparameters are usually determined within a defined range with the help of cross-validation methods.
-This is called hyperparameter tuning.
+SVMs\index{SVM} search for the best possible 'hyperplanes' to separate classes (in a classification\index{classification} case) and estimate 'kernels' with specific hyperparameters\index{hyperparameter} to create non-linear boundaries between classes [@james_introduction_2013].
+Machine learning algorithms often feature hyperparameters\index{hyperparameter} and parameters.
+Parameters can be estimated from the data while hyperparameters\index{hyperparameter} are set before the learning begins (see also the [machine mastery blog](https://machinelearningmastery.com/difference-between-a-parameter-and-a-hyperparameter/) and the [hyperparameter optimization chapter](https://mlr3book.mlr-org.com/optimization.html) of the mlr3 book).
+The optimal hyperparameter\index{hyperparameter} configuration is usually found within a specific search space and determined with the help of cross-validation methods.
+This is called hyperparameter\index{hyperparameter} tuning and the main topic of this section.
 
 Some SVM implementations such as that provided by **kernlab** allow hyperparameters to be tuned automatically, usually based on random sampling (see upper row of Figure \@ref(fig:partitioning)).
 This works for non-spatial data but is of less use for spatial data where 'spatial tuning' should be undertaken.
