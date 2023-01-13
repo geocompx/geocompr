@@ -296,22 +296,18 @@
       el.style.width = "100%";
       el.style.height = "100%";
 
-      var rect = cel.getBoundingClientRect();
-
       return {
-        getWidth: function() { return rect.width; },
-        getHeight: function() { return rect.height; }
+        getWidth: function() { return cel.getBoundingClientRect().width; },
+        getHeight: function() { return cel.getBoundingClientRect().height; }
       };
 
     } else {
       el.style.width = px(sizing.width);
       el.style.height = px(sizing.height);
 
-      var rect = cel.getBoundingClientRect();
-
       return {
-        getWidth: function() { return rect.width; },
-        getHeight: function() { return rect.height; }
+        getWidth: function() { return cel.getBoundingClientRect().width; },
+        getHeight: function() { return cel.getBoundingClientRect().height; }
       };
     }
   }

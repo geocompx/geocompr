@@ -359,6 +359,11 @@ mlr3extralearners::list_mlr3learners(
  </thead>
 <tbody>
   <tr>
+   <td style="text-align:left;"> classif.abess </td>
+   <td style="text-align:left;"> mlr3extralearners </td>
+   <td style="text-align:left;"> mlr3 , abess </td>
+  </tr>
+  <tr>
    <td style="text-align:left;"> classif.AdaBoostM1 </td>
    <td style="text-align:left;"> mlr3extralearners </td>
    <td style="text-align:left;"> mlr3             , mlr3extralearners, RWeka </td>
@@ -380,11 +385,6 @@ mlr3extralearners::list_mlr3learners(
   </tr>
   <tr>
    <td style="text-align:left;"> classif.cforest </td>
-   <td style="text-align:left;"> mlr3extralearners </td>
-   <td style="text-align:left;"> mlr3             , mlr3extralearners, partykit         , sandwich         , coin </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> classif.ctree </td>
    <td style="text-align:left;"> mlr3extralearners </td>
    <td style="text-align:left;"> mlr3             , mlr3extralearners, partykit         , sandwich         , coin </td>
   </tr>
