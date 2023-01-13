@@ -445,11 +445,13 @@ any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
 
 Imagine that we need to join the `capacity` variable in `cycle_hire_osm` onto the official 'target' data contained in `cycle_hire`.
 This is when a non-overlapping join is needed.
-The simplest method is to use the topological operator `st_is_within_distance()`, as demonstrated below using a threshold distance of 20 m (note that this works with projected and unprojected data).
+The simplest method is to use the binary predicate `st_is_within_distance()`, as demonstrated below using a threshold distance of 20 m.
+One can set the threshold distance in metric units also for unprojected data (e.g. lon/lat CRSs such as WGS84), if the spherical geometry engine (s2) is enabled, as it is in **sf** by default (see section \@ref(s2)).
 
 
 ```r
-sel = st_is_within_distance(cycle_hire, cycle_hire_osm, dist = 20)
+sel = st_is_within_distance(cycle_hire, cycle_hire_osm, 
+                            dist = units::set_units(20, "m"))
 summary(lengths(sel) > 0)
 #>    Mode   FALSE    TRUE 
 #> logical     304     438
@@ -466,7 +468,8 @@ The solution is again with `st_join()`, but with an addition `dist` argument (se
 
 
 ```r
-z = st_join(cycle_hire, cycle_hire_osm, st_is_within_distance, dist = 20)
+z = st_join(cycle_hire, cycle_hire_osm, st_is_within_distance, 
+            dist = units::set_units(20, "m"))
 nrow(cycle_hire)
 #> [1] 742
 nrow(z)

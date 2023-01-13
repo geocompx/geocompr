@@ -480,9 +480,11 @@ FIGURE 4.7: The spatial distribution of cycle hire points in London based on off
 </div>
 <p>Imagine that we need to join the <code>capacity</code> variable in <code>cycle_hire_osm</code> onto the official ‘target’ data contained in <code>cycle_hire</code>.
 This is when a non-overlapping join is needed.
-The simplest method is to use the topological operator <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_is_within_distance()</a></code>, as demonstrated below using a threshold distance of 20 m (note that this works with projected and unprojected data).</p>
+The simplest method is to use the binary predicate <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_is_within_distance()</a></code>, as demonstrated below using a threshold distance of 20 m.
+One can set the threshold distance in metric units also for unprojected data (e.g. lon/lat CRSs such as WGS84), if the spherical geometry engine (s2) is enabled, as it is in <strong>sf</strong> by default (see section <a href="spatial-class.html#s2">2.2.9</a>).</p>
 <div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sel</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_is_within_distance</a></span><span class="op">(</span><span class="va">cycle_hire</span>, <span class="va">cycle_hire_osm</span>, dist <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">sel</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_is_within_distance</a></span><span class="op">(</span><span class="va">cycle_hire</span>, <span class="va">cycle_hire_osm</span>, </span>
+<span>                            dist <span class="op">=</span> <span class="fu">units</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/units/man/units.html">set_units</a></span><span class="op">(</span><span class="fl">20</span>, <span class="st">"m"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/summary.html">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lengths.html">lengths</a></span><span class="op">(</span><span class="va">sel</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    Mode   FALSE    TRUE </span></span>
 <span><span class="co">#&gt; logical     304     438</span></span></code></pre></div>
@@ -490,7 +492,8 @@ The simplest method is to use the topological operator <code><a href="https://r-
 How to retrieve the <em>values</em> associated with the respective <code>cycle_hire_osm</code> points?
 The solution is again with <code><a href="https://r-spatial.github.io/sf/reference/st_join.html">st_join()</a></code>, but with an addition <code>dist</code> argument (set to 20 m below):</p>
 <div class="sourceCode" id="cb134"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_join.html">st_join</a></span><span class="op">(</span><span class="va">cycle_hire</span>, <span class="va">cycle_hire_osm</span>, <span class="va">st_is_within_distance</span>, dist <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_join.html">st_join</a></span><span class="op">(</span><span class="va">cycle_hire</span>, <span class="va">cycle_hire_osm</span>, <span class="va">st_is_within_distance</span>, </span>
+<span>            dist <span class="op">=</span> <span class="fu">units</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/units/man/units.html">set_units</a></span><span class="op">(</span><span class="fl">20</span>, <span class="st">"m"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">cycle_hire</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 742</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span></span>
