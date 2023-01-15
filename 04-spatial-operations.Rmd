@@ -157,12 +157,12 @@ That may sound rather abstract and, indeed, the definition and classification of
 
 Despite their mathematical origins, topological relations can be understood intuitively with reference to visualizations of commonly used functions that test for common types of spatial relationships.
 Figure \@ref(fig:relations) shows a variety of geometry pairs and their associated relations.
-The third and fourth pairs in Figure \@ref(fig:relations) (from left to right and then down) demonstrate that, for some relations, order is important: while the relations *equals*, *intersects*, *crosses*, *touches* and *overlaps* are symmetrical, meaning that if `function(x, y)` is true, `function(y, x)` will also by true, relations in which the order of the geometries are important such as *contains* and *within* are not.
+The third and fourth pairs in Figure \@ref(fig:relations) (from left to right and then down) demonstrate that, for some relations, order is important: while the relations *equals*, *intersects*, *crosses*, *touches* and *overlaps* are symmetrical, meaning that if `function(x, y)` is true, `function(y, x)` will also be true, relations in which the order of the geometries are important such as *contains* and *within* are not.
 Notice that each geometry pair has a "DE-9IM" string such as FF2F11212, described in the next section.
 \index{topological relations}
 
 ```{r relations, echo=FALSE, fig.cap="Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue. The nature of the spatial relationship for each pair is described by the Dimensionally Extended 9-Intersection Model string.", fig.show='hold', message=FALSE, fig.asp=0.66, warning=FALSE}
-# source("https://github.com/Robinlovelace/geocompr/raw/c4-v2-updates-rl/code/de_9im.R")
+# source("https://github.com/geocompx/geocompr/raw/c4-v2-updates-rl/code/de_9im.R")
 source("code/de_9im.R")
 library(sf)
 xy2sfc = function(x, y) st_sfc(st_polygon(list(cbind(x, y))))
@@ -242,7 +242,7 @@ In this case, there is only one feature in the `y` object `polygon_sfc` so the r
 
 `st_intersects()` returns `TRUE` even in cases where the features just touch: *intersects* is a 'catch-all' topological operation which identifies many types of spatial relation, as illustrated in Figure \@ref(fig:relations).
 More restrictive questions include which points lie within the polygon, and which features are on or contain a shared boundary with `y`?
-These can be answered as follows (results not show):
+These can be answered as follows (results not shown):
 
 ```{r 04-spatial-operations-9-2, eval=FALSE}
 st_within(point_sf, polygon_sfc)
@@ -462,7 +462,7 @@ DE-9IM strings are derived from the dimension of each type of relation.
 In this case the red intersections in Figure \@ref(fig:de9imgg) have dimensions of 0 (points), 1 (lines), and 2 (polygons), as shown in Table \@ref(tab:de9emtable).
 
 ```{r de9emtable, echo=FALSE}
-# See https://github.com/Robinlovelace/geocompr/issues/699
+# See https://github.com/geocompx/geocompr/issues/699
 pattern = st_relate(p1, p3)
 matrix_de_9im = function(pattern) {
     string = unlist(strsplit(pattern , ""))
@@ -591,7 +591,7 @@ As with attribute data, joining adds new columns to the target object (the argum
 \index{spatial!join}
 
 The process is illustrated by the following example: imagine you have ten points randomly distributed across the Earth's surface and you ask, for the points that are on land, which countries are they in?
-Implementing this idea in a [reproducible example](https://github.com/Robinlovelace/geocompr/blob/main/code/04-spatial-join.R) will build your geographic data handling skills and show how spatial joins work.
+Implementing this idea in a [reproducible example](https://github.com/geocompx/geocompr/blob/main/code/04-spatial-join.R) will build your geographic data handling skills and show how spatial joins work.
 The starting point is to create points that are randomly scattered over the Earth's surface:
 
 ```{r 04-spatial-operations-19}
@@ -618,7 +618,7 @@ random_joined = st_join(random_points, world["name_long"])
 ```
 
 ```{r spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join. A new attribute variable is added to random points (top left) from source world object (top right) resulting in the data represented in the final panel.", fig.asp=0.5, warning=FALSE, message=FALSE, out.width="100%", fig.scap="Illustration of a spatial join."}
-# source("https://github.com/Robinlovelace/geocompr/raw/main/code/04-spatial-join.R")
+# source("https://github.com/geocompx/geocompr/raw/main/code/04-spatial-join.R")
 source("code/04-spatial-join.R")
 tmap_arrange(jm1, jm2, jm3, jm4, nrow = 2, ncol = 2)
 ```
@@ -676,10 +676,12 @@ if (knitr::is_latex_output()){
 
 Imagine that we need to join the `capacity` variable in `cycle_hire_osm` onto the official 'target' data contained in `cycle_hire`.
 This is when a non-overlapping join is needed.
-The simplest method is to use the topological operator `st_is_within_distance()`, as demonstrated below using a threshold distance of 20 m (note that this works with projected and unprojected data).
+The simplest method is to use the binary predicate `st_is_within_distance()`, as demonstrated below using a threshold distance of 20 m.
+One can set the threshold distance in metric units also for unprojected data (e.g. lon/lat CRSs such as WGS84), if the spherical geometry engine (s2) is enabled, as it is in **sf** by default (see section \@ref(s2)).
 
 ```{r 04-spatial-operations-24}
-sel = st_is_within_distance(cycle_hire, cycle_hire_osm, dist = 20)
+sel = st_is_within_distance(cycle_hire, cycle_hire_osm, 
+                            dist = units::set_units(20, "m"))
 summary(lengths(sel) > 0)
 ```
 
@@ -706,7 +708,8 @@ How to retrieve the *values* associated with the respective `cycle_hire_osm` poi
 The solution is again with `st_join()`, but with an addition `dist` argument (set to 20 m below):
 
 ```{r 04-spatial-operations-25}
-z = st_join(cycle_hire, cycle_hire_osm, st_is_within_distance, dist = 20)
+z = st_join(cycle_hire, cycle_hire_osm, st_is_within_distance, 
+            dist = units::set_units(20, "m"))
 nrow(cycle_hire)
 nrow(z)
 ```
@@ -786,7 +789,7 @@ This is problematic for spatial aggregation (and other spatial operations) illus
 Areal interpolation overcomes this issue by transferring values from one set of areal units to another, using a range of algorithms including simple area weighted approaches and more sophisticated approaches such as 'pycnophylactic' methods [@tobler_smooth_1979].
 
 ```{r areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units with respect to larger aggregating zones (translucent blue borders).", fig.asp=0.2, fig.scap="Illustration of congruent and incongruent areal units."}
-source("https://github.com/Robinlovelace/geocompr/raw/main/code/04-areal-example.R", print.eval = TRUE)
+source("https://github.com/geocompx/geocompr/raw/main/code/04-areal-example.R", print.eval = TRUE)
 ```
 
 The **spData** package contains a dataset named `incongruent` (colored polygons with black borders in the right panel of Figure \@ref(fig:areal-example)) and a dataset named `aggregating_zones` (the two polygons with the translucent blue border in the right panel of Figure \@ref(fig:areal-example)).
@@ -1131,10 +1134,8 @@ Quite similar to spatial clipping is intersecting two layers (Section \@ref(spat
 The difference is that these two layers (vector or raster) simply share an overlapping area (see Figure \@ref(fig:venn-clip) for an example).
 However, be careful with the wording.
 Sometimes the same words have slightly different meanings for raster and vector data models.
-Aggregating in the case of vector data refers to dissolving polygons, while it means increasing the resolution in the case of raster data.
-In fact, one could see dissolving or aggregating polygons as decreasing the resolution. 
-However, zonal operations might be the better raster equivalent compared to changing the cell resolution. 
-Zonal operations can dissolve the cells of one raster in accordance with the zones (categories) of another raster using an aggregation function (see above).
+While aggregating polygon geometries means dissolving boundaries, for raster data geometries it means increasing cell sizes and thereby reducing spatial resolution.
+Zonal operations dissolve the cells of one raster in accordance with the zones (categories) of another raster dataset using an aggregating function.
 
 ### Merging rasters
 
@@ -1168,7 +1169,7 @@ The `merge()` command will still work but you will see a clear border in the res
 On the other hand, the `mosaic()` command lets you define a function for the overlapping area. 
 For instance, we could compute the mean value -- this might smooth the clear border in the merged result but it will most likely not make it disappear.
 <!-- The following sentences have been commented out and can be removed because the packages, and info, is now out of date -->
-<!-- See https://github.com/Robinlovelace/geocompr/pull/424 for discussion -->
+<!-- See https://github.com/geocompx/geocompr/pull/424 for discussion -->
 <!-- To do so, we need a more advanced approach.  -->
 <!-- Remote sensing scientists frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image. -->
 <!-- The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`calcHistMatch()`) and **RStoolbox** (`histMatch()`, `pifMatch()`) provide the corresponding functions for the **raster**'s package objects. -->

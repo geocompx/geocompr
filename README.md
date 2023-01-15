@@ -5,12 +5,13 @@
 
 <!-- badges: start -->
 
-[![Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/main?urlpath=rstudio)
+[![Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/geocompx/geocompr/main?urlpath=rstudio)
 [![RstudioCloud](images/cloud.png)](https://rstudio.cloud/project/1642300)
-[![Actions](https://github.com/Robinlovelace/geocompr/workflows/Render/badge.svg)](https://github.com/Robinlovelace/geocompr/actions)
-[![Docker](https://img.shields.io/docker/pulls/geocompr/geocompr?style=plastic)](https://github.com/geocompr/docker/)
+[![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
+[![Docker](https://img.shields.io/docker/pulls/geocompr/geocompr?style=plastic)](https://github.com/geocompx/docker/)
 [![discord](https://img.shields.io/discord/878051191374876683?label=discord&logo=Discord&color=blue)](https://discord.gg/PMztXYgNxp)
-
+[![Open in GitHub
+Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=84222786&machine=basicLinux32gb&devcontainer_path=.devcontainer.json&location=WestEurope)
 <!-- [![DOI](https://zenodo.org/badge/84222786.svg)](https://zenodo.org/badge/latestdoi/84222786) -->
 <!-- badges: end -->
 
@@ -21,7 +22,7 @@ by [Robin Lovelace](https://www.robinlovelace.net/), [Jakub
 Nowosad](https://jakubnowosad.com/), and [Jannes
 Muenchow](https://github.com/jannes-m). If you find the contents useful,
 please [cite
-it](https://github.com/Robinlovelace/geocompr/raw/main/CITATION.bib) as
+it](https://github.com/geocompx/geocompr/raw/main/CITATION.bib) as
 follows:
 
 > Lovelace, Robin, Jakub Nowosad and Jannes Muenchow (2019).
@@ -46,22 +47,20 @@ changed, including:
 
 - Replacement of `raster` with `terra` in Chapters 1 to 7 (see commits
   related to this update
-  [here](https://github.com/Robinlovelace/geocompr/search?q=terra&type=commits))
+  [here](https://github.com/geocompx/geocompr/search?q=terra&type=commits))
 - Update of Chapter 7 to include mention alternative ways or reading-in
-  OSM data in
-  [\#656](https://github.com/Robinlovelace/geocompr/pull/656)
+  OSM data in [\#656](https://github.com/geocompx/geocompr/pull/656)
 - Refactor build settings so the book builds on Docker images in the
   [geocompr/docker](https://github.com/geocompr/docker) repo
 - Improve the experience of using the book in Binder (ideal for trying
   out the code before installing or updating the necessary R packages),
   as documented in issue
-  [\#691](https://github.com/Robinlovelace/geocompr/issues/691) (thanks
-  to [yuvipanda](https://github.com/yuvipanda))
+  [\#691](https://github.com/geocompx/geocompr/issues/691) (thanks to
+  [yuvipanda](https://github.com/yuvipanda))
 - Improved communication of binary spatial predicates in Chapter 4 (see
-  [\#675](https://github.com/Robinlovelace/geocompr/pull/675))
+  [\#675](https://github.com/geocompx/geocompr/pull/675))
 - New section on the links between subsetting and clipping (see
-  [\#698](https://github.com/Robinlovelace/geocompr/pull/698)) in
-  Chapter 5
+  [\#698](https://github.com/geocompx/geocompr/pull/698)) in Chapter 5
 - New
   [section](https://r.geocompx.org/spatial-operations.html#de-9im-strings)
   on the dimensionally extended 9 intersection model (DE-9IM)
@@ -74,7 +73,7 @@ changed, including:
   2 on spherical geometry engines and the **s2** package
 - Replacement of code based on the old **mlr** package with code based
   on the new **mlr3** package, as described in a huge [pull
-  request](https://github.com/Robinlovelace/geocompr/pull/771)
+  request](https://github.com/geocompx/geocompr/pull/771)
   <!-- Todo: update this bullet point (Rl 2021-11) -->
   <!-- - Next issue  -->
 
@@ -82,12 +81,12 @@ changed, including:
 <!-- See NEWS.md for a summary of the changes. -->
 
 See
-[https://github.com/Robinlovelace/geocompr/compare/1.9…main](https://github.com/Robinlovelace/geocompr/compare/1.9...main#files_bucket)
+[https://github.com/geocompx/geocompr/compare/1.9…main](https://github.com/geocompx/geocompr/compare/1.9...main#files_bucket)
 for a continuously updated summary of the changes to date. At the time
 of writing (April 2022) there have been more than 10k lines of
 code/prose added, lots of refactoring!
 
-[![](https://user-images.githubusercontent.com/1825120/140612663-e62566a2-62ab-4a22-827a-e86f5ce7bd63.png)](https://github.com/Robinlovelace/geocompr/compare/1.9...main)
+[![](https://user-images.githubusercontent.com/1825120/140612663-e62566a2-62ab-4a22-827a-e86f5ce7bd63.png)](https://github.com/geocompx/geocompr/compare/1.9...main)
 
 </details>
 
@@ -102,16 +101,16 @@ We encourage contributions on any part of the book, including:
   Xie](https://yihui.org/en/2013/06/fix-typo-in-documentation/));
 - changes to the code, e.g. to do things in a more efficient way;
 - suggestions on content (see the project’s [issue
-  tracker](https://github.com/Robinlovelace/geocompr/issues));
+  tracker](https://github.com/geocompx/geocompr/issues));
 - improvements to and alternative approaches in the Geocompr solutions
   booklet hosted at
-  [geocompr.github.io/solutions](https://geocompr.github.io/solutions/)
-  (see a blog post on how to update solutions in files such as
-  [\_01-ex.Rmd](https://github.com/Robinlovelace/geocompr/blob/main/_01-ex.Rmd)
+  [r.geocompx.org/solutions](https://r.geocompx.org/solutions) (see a
+  blog post on how to update solutions in files such as
+  [\_01-ex.Rmd](https://github.com/geocompx/geocompr/blob/main/_01-ex.Rmd)
   [here](https://geocompr.github.io/post/2022/geocompr-solutions/))
 
 See
-[our-style.md](https://github.com/Robinlovelace/geocompr/blob/main/misc/our-style.md)
+[our-style.md](https://github.com/geocompx/geocompr/blob/main/misc/our-style.md)
 for the book’s style.
 
 Many thanks to all contributors to the book so far via GitHub (this list
@@ -129,11 +128,12 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [erstearns](https://github.com/erstearns),
 [FlorentBedecarratsNM](https://github.com/FlorentBedecarratsNM),
 [dcooley](https://github.com/dcooley),
+[darrellcarvalho](https://github.com/darrellcarvalho),
 [marcosci](https://github.com/marcosci),
 [appelmar](https://github.com/appelmar),
 [MikeJohnPage](https://github.com/MikeJohnPage),
 [eyesofbambi](https://github.com/eyesofbambi),
-[darrellcarvalho](https://github.com/darrellcarvalho),
+[krystof236](https://github.com/krystof236),
 [nickbearman](https://github.com/nickbearman),
 [tyluRp](https://github.com/tyluRp),
 [giocomai](https://github.com/giocomai),
@@ -178,7 +178,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
-[`our-impact.csv`](https://github.com/Robinlovelace/geocompr/blob/main/misc/our-impact.csv).
+[`our-impact.csv`](https://github.com/geocompx/geocompr/blob/main/misc/our-impact.csv).
 
 ## Downloading the source code
 
@@ -188,7 +188,7 @@ computer with [Git](https://github.com/git-guides/install-git) installed
 with the following command:
 
 ``` bash
-git clone https://github.com/Robinlovelace/geocompr.git
+git clone https://github.com/geocompx/geocompr.git
 ```
 
 An alternative approach, which we recommend for people who want to
@@ -199,17 +199,17 @@ cloning a fork of the source code, that you can change and share
 following command:
 
 ``` bash
-git fork robinlovelace/geocompr # (gh repo clone robinlovelace/geocompr # also works)
+gh repo fork geocompx/geocompr # (gh repo clone geocompx/geocompr # also works)
 ```
 
 Both of those methods require you to have Git installed. If not, you can
 download the book’s source code from the URL
-<https://github.com/Robinlovelace/geocompr/archive/refs/heads/main.zip>
-. Download/unzip the source code from the R command line to increase
+<https://github.com/geocompx/geocompr/archive/refs/heads/main.zip> .
+Download/unzip the source code from the R command line to increase
 reproducibility and reduce time spent clicking around:
 
 ``` r
-u = "https://github.com/Robinlovelace/geocompr/archive/refs/heads/main.zip"
+u = "https://github.com/geocompx/geocompr/archive/refs/heads/main.zip"
 f = basename(u)
 download.file(u, f)        # download the file
 unzip(f)                   # unzip it
@@ -273,8 +273,7 @@ A great feature of VS Code is
 which allow you to develop in an isolated Docker container. If you have
 VS Code and the necessary dependencies installed on your computer, you
 can build Geocomputation with R in a devcontainer as shown below (see
-[\#873](https://github.com/Robinlovelace/geocompr/issues/873) for
-details):
+[\#873](https://github.com/geocompx/geocompr/issues/873) for details):
 
 ![](https://user-images.githubusercontent.com/1825120/193398022-bbcfbfda-5d57-4c57-8db3-ed1fdb4a07be.png)
 
@@ -283,12 +282,12 @@ details):
 For many people the quickest way to get started with Geocomputation with
 R is in your web browser via Binder. To see an interactive RStudio
 Server instance click on the following button, which will open
-[mybinder.org](https://mybinder.org/v2/gh/robinlovelace/geocompr/main?urlpath=rstudio)
+[mybinder.org](https://mybinder.org/v2/gh/geocompx/geocompr/main?urlpath=rstudio)
 with an R installation that has all the dependencies needed to reproduce
 the book:
 
 [![Launch Rstudio
-Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/robinlovelace/geocompr/main?urlpath=rstudio)
+Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/geocompx/geocompr/main?urlpath=rstudio)
 
 You can also have a play with the repo in RStudio Cloud by clicking on
 this link (requires log-in):
@@ -337,7 +336,7 @@ If you want to call QGIS from R, you can use the `qgis` tag, by running
 the following command for example (which also shows how to set a
 password and use a different port on localhost):
 
-    docker run -d -p 8799:8787 -e USERID=$UID -e PASSWORD=strongpass -v $(pwd):/home/rstudio/geocompr robinlovelace/geocompr:qgis
+    docker run -d -p 8799:8787 -e USERID=$UID -e PASSWORD=strongpass -v $(pwd):/home/rstudio/geocompr geocompx/geocompr:qgis
 
 From this point to *build* the book you can open projects in the
 `geocompr` directory from the project box in the top-right hand corner,
@@ -375,8 +374,8 @@ source("code/09-map-pkgs.R")
 
 Note: the `.Rproj` file is configured to build a website not a single
 page. To reproduce this
-[README](https://github.com/Robinlovelace/geocompr/blob/main/README.Rmd)
-use the following command:
+[README](https://github.com/geocompx/geocompr/blob/main/README.Rmd) use
+the following command:
 
 ``` r
 rmarkdown::render("README.Rmd", output_format = "github_document", output_file = "README.md")

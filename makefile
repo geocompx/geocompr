@@ -22,7 +22,7 @@ md: ## Generate Markdown
 	Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::pdf_book", clean = FALSE)'
 
 install: ## Perform install
-	Rscript -e 'remotes::install_github("Robinlovelace/geocompr")'
+	Rscript -e 'remotes::install_github("geocompx/geocompr")'
 
 deploy: ## Perform deployment
 	Rscript -e 'bookdown::publish_book(render = "local", account = "robinlovelace")'

@@ -1,0 +1,173 @@
+```{asis 14-ex-asis1, message=FALSE}
+The solutions assume the following packages are attached (other packages will be attached when needed):
+```
+
+```{r 14-ex-e0, message=FALSE, warning=FALSE}
+library(sf)
+library(dplyr)
+library(purrr)
+library(terra)
+library(osmdata)
+library(spDataLarge)
+```
+
+E1. Download the csv file containing inhabitant information for a 100 m cell resolution (https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
+Please note that the unzipped file has a size of 1.23 GB.
+To read it into R you can use `readr::read_csv`.
+This takes 30 seconds on a machine with 16 GB RAM.
+`data.table::fread()` might be even faster, and returns an object of class `data.table()`.
+Use `dplyr::as_tibble()` to convert it into a tibble.
+Build an inhabitant raster, aggregate it to a cell resolution of 1 km, and compare the difference with the inhabitant raster (`inh`) we have created using class mean values.
+
+```{r, 14-ex-e1, eval=FALSE}
+# Coarse inhabitant raster (1 km resolution)
+#*******************************************
+
+# inhabitant raster (coarse resolution); this is one of the results of the 
+# previous exercise
+data("census_de", package = "spDataLarge")
+input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
+                      women = Frauen_A, mean_age = Alter_D, hh_size = HHGroesse_D)
+input_tidy = dplyr::mutate(input, dplyr::across(.fns = ~ifelse(. %in% c(-1, -9), NA, .)))
+input_ras = terra::rast(input_tidy, type = "xyz", crs = "EPSG:3035")
+inh_coarse = input_ras$pop
+# reclassify, i.e. convert the classes into inhabitant numbers using class means
+rcl = matrix(c(1, 1, 125, 2, 2, 375, 3, 3, 1250, 4, 4, 3000, 5, 5, 6000,
+               6, 6, 8000), ncol = 3, byrow = TRUE)
+inh_coarse = terra::classify(inh_coarse, rcl = rcl, right = NA)
+
+# Fine inhabitant raster (100 m resolution)
+#******************************************
+url =
+  paste0("https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/",
+         "DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip", 
+         "?__blob=publicationFile&v=3")
+# download fine raster
+download.file(url = url, destfile = file.path(tempdir(), "census.zip"),
+              method = "auto", mode = "wb")
+# list the file names
+nms = unzip(file.path(tempdir(), "census.zip"), list = TRUE)
+# unzip only the csv file
+base_name = grep(".csv$", nms$Name, value = TRUE)
+unzip(file.path(tempdir(), "census.zip"), files = base_name, exdir = tempdir())
+# read in the csv file
+input = data.table::fread(file.path(tempdir(), base_name)) |>
+  dplyr::as_tibble()
+input = dplyr::select(input, x = starts_with("x_mp_1"),
+                      y = starts_with("y_mp_1"), inh = Einwohner)
+# set -1 and -9 to NA
+input = dplyr::mutate(input,
+                      dplyr::across(.fns = ~ifelse(. %in% c(-1, -9), NA, .)))
+# convert table into a raster (x and y are cell midpoints)
+inh_fine = terra::rast(input, type = "xyz", crs = "EPSG:3035")
+# Note that inh_fine contains the actual number of inhabitants per raster cell
+# instead of mean class values as was the case with its coarse 1km counterpart
+
+# Comparing the coarse with the fine raster
+#******************************************
+
+# aggregate to the resolution of the coarse raster
+inh_fine = terra::aggregate(
+  inh_fine, fact = terra::res(inh_coarse)[1] / terra::res(inh_fine)[1], 
+  fun = sum, na.rm = TRUE)
+# origin has to be the same
+terra::origin(inh_fine) = terra::origin(inh_coarse)
+# make the comparison
+summary(inh_fine - inh_coarse)
+plot(inh_fine - inh_coarse)
+plot(abs(inh_fine - inh_coarse) > 1000)
+# the biggest deviations can be found in big cities like Berlin
+terra::global((abs(inh_fine - inh_coarse) > 1000), fun = "sum", na.rm = TRUE)
+# 18,121 cells have a deviation > 1000 inhabitants
+terra::global((abs(inh_fine - inh_coarse) > 5000), fun = "sum", na.rm = TRUE)
+# 338 cells have a deviation > 5000
+```
+
+E2. Suppose our bike shop predominantly sold electric bikes to older people. 
+Change the age raster accordingly, repeat the remaining analyses and compare the changes with our original result.
+
+```{r, 14-ex-e2, eval=FALSE}
+# Here, we assue that you have already created `input_ras` in the first exercise.
+# attach further necessary data
+data("metro_names", "shops", package = "spDataLarge")
+
+# Basically, we are assuming that especially older people will use an electric
+# bike, therefore, we increase the weights for raster cells where predominantly
+# older people are living.
+rcl_pop = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 
+                   4, 4, 3000, 5, 5, 6000, 6, 6, 8000), 
+                 ncol = 3, byrow = TRUE)
+rcl_women = matrix(c(1, 1, 3, 2, 2, 2, 3, 3, 1, 4, 5, 0), 
+                   ncol = 3, byrow = TRUE)
+# here we are giving the classes (3 to 5) containing the oldest people the
+# highest weight
+rcl_age = matrix(c(1, 1, 1, 2, 2, 1, 3, 5, 3),
+                 ncol = 3, byrow = TRUE)
+rcl_hh = rcl_women
+rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
+
+reclass = input_ras
+for (i in 1:terra::nlyr(reclass)) {
+  reclass[[i]] = terra::classify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
+}
+names(reclass) = names(input_ras)
+
+# The rest of the analysis follows exactly the code presented in the book. 
+
+# Add metro names to metros sf object
+#************************************
+metro_names = dplyr::pull(metro_names, city) |>
+  as.character() |>
+  {\(x) ifelse(x == "Velbert", "Düsseldorf", x)}() |>
+  {\(x) gsub("ü", "ue", x)}()
+
+pop_agg = terra::aggregate(reclass$pop, fact = 20, fun = sum, na.rm = TRUE)
+pop_agg = pop_agg[pop_agg > 500000, drop = FALSE] 
+
+polys = pop_agg |>
+  terra::patches(directions = 8) |>
+  terra::as.polygons() |>
+  sf::st_as_sf()
+
+metros = polys |>
+  dplyr::group_by(patches) |>
+  dplyr::summarize()
+metros$metro_names = metro_names
+
+# Create shop/poi density raster
+#*******************************
+shops = sf::st_transform(shops, sf::st_crs(reclass))
+# create poi raster
+poi = terra::rasterize(x = shops, y = reclass, field = "osm_id", fun = "length")
+# construct reclassification matrix
+int = classInt::classIntervals(values(poi), n = 4, style = "fisher")
+int = round(int$brks)
+rcl_poi = matrix(c(int[1], rep(int[-c(1, length(int))], each = 2), 
+                   int[length(int)] + 1), ncol = 2, byrow = TRUE)
+rcl_poi = cbind(rcl_poi, 0:3)  
+# reclassify
+poi = terra::classify(poi, rcl = rcl_poi, right = NA) 
+names(poi) = "poi"
+# remove population raster and add poi raster
+reclass = reclass[[names(reclass) != "pop"]] |>
+  c(poi)
+
+# Identify suitable locations
+#****************************
+# calculate the total score
+result = sum(reclass)
+
+# have a look at suitable bike shop locations in Berlin
+berlin = metros[metro_names == "Berlin", ]
+berlin_raster = terra::crop(result, berlin)
+# summary(berlin_raster)
+# berlin_raster
+berlin_raster = berlin_raster > 9
+berlin_raster[berlin_raster == 0] = NA
+# make the plot
+leaflet::leaflet() |>
+  leaflet::addTiles() |>
+  leaflet::addRasterImage(raster::raster(berlin_raster), colors = "darkgreen", opacity = 0.8) |>
+  leaflet::addLegend("bottomright", colors = c("darkgreen"), 
+                     labels = c("potential locations"), title = "Legend")
+```

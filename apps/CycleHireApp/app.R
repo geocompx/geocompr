@@ -1,4 +1,4 @@
-#Shiny app for cycle hire from https://github.com/Robinlovelace/geocompr/issues/584
+#Shiny app for cycle hire from https://github.com/geocompx/geocompr/issues/584
 # Author - Kiranmayi Vadlamudi
 #25th Dec 2020
 
