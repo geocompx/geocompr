@@ -1,0 +1,453 @@
+# スクリプト、アルゴリズム、関数  {#algorithms}
+
+## 必須パッケージ  {- #prerequisites-11}
+
+この章では、主に基本的なRを使用する。これから開発するアルゴリズムの結果を確認するために **sf**\index{sf}  パッケージを使用する。
+Chapter \@ref(spatial-class) で紹介した地理クラスと、それを使ってさまざまな入力ファイル形式を表現する方法（Chapter \@ref(read-write) 参照）について理解していることを前提にしている。
+
+## イントロダクション  {#intro-algorithms}
+
+Chapter \@ref(intro) は、ジオコンピューティングは既存のツールを使うだけでなく、「共有可能な R スクリプトや関数の形で」新しいツールを開発することが重要であることを示した。
+本章では、これらの再現性のあるコードの構成要素について学ぶ。
+また、Chapter \@ref(gis) で使用されているような低レベルの幾何学的アルゴリズムも紹介する。
+これを読めば、このようなアルゴリズムの仕組みを理解し、複数のデータセットに対して、多くの人が、何度も使えるようなコードを書くことができるようになるはずである。
+章だけでは、熟練したプログラマーになることはできない。
+プログラミングは難しく、十分な練習が必要である [@abelson_structure_1996] :
+
+> To appreciate programming as an intellectual activity in its own right you must turn to computer programming; you must read and write computer programs --- many of them.
+
+しかし、この方向に進むには強い理由がある。^[
+この章では、プログラミングそのものを教えるわけではない。
+プログラミングについては、@wickham_advanced_2019、@gillespie_efficient_2016、@xiao_gis_2016 を推奨する。 
+]
+再現性\index{reproducibility}の利点は、他の人があなたの研究を複製することを可能にするだけではない。
+再現性のあるコードは、一度だけ実行されるように書かれたコードよりも、計算効率、スケーラビリティ、適応やメンテナンスのしやすさなど、あらゆる面で優れていることが多いのである。
+
+スクリプトは、再現可能な R コードの基礎であり、このトピックは、Section \@ref(scripts) でカバーされている。
+アルゴリズムは、Section \@ref(geometric-algorithms) で説明されているように、一連のステップを使用して入力を変更し、その結果、出力を得るためのレシピである。
+共有と再現を容易にするために、アルゴリズムを関数に配置することができる。
+それが、Section \@ref(functions) のトピックである。
+ポリゴンの重心\index{centroid}を求める例で、これらの概念を結びつけていこう。
+Chapter \@ref(geometry-operations) で、重心の関数\index{centroid} `st_centroid()` をすでに紹介したが、この例は、一見単純な操作が比較的複雑なコードの結果であることを強調し、次の観察を保証する [@wise_gis_2001] 。
+
+> One of the most intriguing things about spatial data problems is that things which appear to be trivially easy to a human being can be surprisingly difficult on a computer.
+
+この例は、@xiao_gis_2016 にならい、「世の中にあるものを複製するのではなく、世の中のものがどのように機能しているかを示す」という本章の第二の目的も反映している。
+
+## スクリプト  {#scripts}
+
+パッケージで配布される関数が R コードの構成要素だとすれば、スクリプトはそれらを論理的な順序でまとめ、再現可能なワークフローを作り出すための接着剤となる。
+プログラミングの初心者にとってスクリプトは敷居が高く聞こえるかもしれないが、単なるプレーンテキストファイルであり、通常はその言語を表す拡張子で保存される。
+R スクリプトは一般に、`.R` 拡張子で保存され、実行内容を反映した名前が付けられる。
+例として、この本のリポジトリの `code` フォルダに格納されているスクリプトファイル `10-hello.R` があり、次の2行のコードが含まれている。
+
+```r
+# Aim: provide a minimal R script
+print("Hello geocompr")
+```
+
+このコード列は、特に刺激的なものではないが、「スクリプトは複雑である必要はない」という点を示している。
+保存されたスクリプトは、`source()` を使って、その全体を呼び出したり、実行したりすることができる。
+
+```{r 10-algorithms-1}
+source("code/11-hello.R")
+```
+
+スクリプトファイルに、何を入れて何を入れないかについて厳密なルールはなく、壊れた再現性のないコードになることもよくある。^[
+有効な R を含まないコード行は、エラーを防ぐため、行頭に `#` を追加してコメントアウトする必要がある。
+`10-hello.R` スクリプトの1行目を参照。
+]
+しかし、守るべき慣習もある。
+
+- 順番に書く：映画の脚本と同じように、スクリプトも「設定」「データ処理」「結果保存」といった明確な順番が必要である（映画でいうところの「始まり」「中間」「終わり」にほぼ相当する）。
+- 他の人(と未来の自分)が理解できるように、スクリプトにコメントを追加してみよう。最低限、コメントにはスクリプトの目的（Figure \@ref(fig:codecheck) 参照）と（長いスクリプトの場合）セクションに分けることが必要である。これは、例えば、RStudio \index{RStudio}  で、「折りたたみ可能な」コードセクションの見出しを作成するショートカット `Ctrl+Shift+R` を使って行うことができる。
+
+- 特に、スクリプトは再現可能であるべきである。どんなコンピュータでも動作する自己完結型のスクリプトは、調子の良い日に自分のコンピュータでしか動作しないスクリプトよりも有用である。これには、必要なパッケージを最初に添付し、データを永続的なソース（信頼できるウェブサイトなど）から読み込み、前のステップが実行されたことを確認することが含まれる^[
+前のステップは、コメントまたは `if(!exists("x")) source("x.R")` のような if 文で参照できる（オブジェクト `x` が見つからない場合、スクリプトファイル `x.R` を実行する）。
+]
+
+R スクリプトで再現性を強制するのは難しいが、それを助けるツールはある。
+RStudio\index{RStudio} は、デフォルトで R スクリプトを「コードチェック」し、不具合のあるコードに赤い波線を引く（下図参照）。
+
+```{r codecheck, echo=FALSE, fig.cap="Code checking in RStudio. This example, from the script 10-centroid-alg.R, highlights an unclosed curly bracket on line 19.", fig.scap="Illustration of 'code checking' in RStudio."}
+knitr::include_graphics("figures/codecheck.png")
+```
+
+```{block2 spellcheck, type='rmdnote'}
+A useful tool for reproducibility is the **reprex** package.
+Its main function `reprex()` tests lines of R code to check if they are reproducible, and provides markdown output to facilitate communication on sites such as GitHub.
+See the web page reprex.tidyverse.org for details.
+```
+
+\index{reproducibility}
+
+このセクションの内容は、あらゆるタイプの R スクリプトに適用される。
+Chapter \@ref(gis) ジオコンピューティングのためのスクリプトで特に考慮すべき点は、QGIS \index{QGIS}  のコードを実行するための依存関係など、外部依存性があり、特定の形式の入力データを必要とする傾向があることである。
+このような依存関係は、スクリプトのコメントとして、またはスクリプトの一部であるプロジェクトの他の場所で言及されるべきである。  [ `10-centroid-alg.R` ](https://github.com/geocompx/geocompr/blob/main/code/11-centroid-alg.R)。
+このスクリプトが行う作業は、以下の再現例で示されている。このスクリプトは、`poly_mat` という、長さ9単位の辺を持つ正方形（この意味は次のセクションで明らかになる） という前提条件のオブジェクトに対して動作する。^[
+この例では、インターネットに接続していることを前提に、`source()` が URL（ここでは短縮版を使用）で動作することを示している。
+そうでない場合は、https://github.com/geocompx/geocompr からダウンロードできる `geocompr` フォルダのルートディレクトリから R を実行していると仮定して、`source("code/11-centroid-alg.R")` で同じスクリプトを呼び出すことができる。
+]
+
+```{r 10-algorithms-2, eval=FALSE}
+poly_mat = cbind(
+  x = c(0, 0, 9, 9, 0),
+  y = c(0, 9, 9, 0, 0)
+)
+source("https://raw.githubusercontent.com/geocompx/geocompr/master/code/11-centroid-alg.R")
+```
+
+```{r 10-algorithms-3, echo=FALSE}
+poly_mat = cbind(
+  x = c(0, 0, 9, 9, 0),
+  y = c(0, 9, 9, 0, 0)
+)
+if(curl::has_internet()) {
+  source("https://raw.githubusercontent.com/geocompx/geocompr/master/code/11-centroid-alg.R")
+  } else {
+  source("code/11-centroid-setup.R")
+  }
+```
+
+## 幾何学的アルゴリズム  {#geometric-algorithms}
+
+アルゴリズム \index{algorithm}  は、料理のレシピに相当するコンピューティングと理解することができる。
+入力（食材）に対して実行されると、有用な（美味しい）出力が得られる指示の完全なセットである。
+具体的なケーススタディに入る前に、アルゴリズムとスクリプト（Section \@ref(scripts) ）や関数（Section \@ref(functions) で説明するように、アルゴリズムを一般化するために使用することができる）の関係について簡単に説明する。
+
+「アルゴリズム」\index{algorithm}という言葉は、9 世紀のバグダッドで、初期の数学教科書である *Hisab al-jabr w'al-muqabala* の出版に端を発している。
+この本はラテン語に翻訳され、人気を博しただけでなく、著者の名字である [al-Khwārizmī](https://en.wikipedia.org/wiki/Muhammad_ibn_Musa_al-Khwarizmi) が「科学用語として不滅の名声を得て、
+Alchoarismi、Algorismi、そして最終的には algorithm になった」 [@bellos_alex_2011] 。
+コンピューティング時代には、アルゴリズム\index{algorithm}は、問題を解決する一連のステップを指し、その結果、あらかじめ定義された出力が得られる。
+入力は、適切なデータ構造で正式に定義されなければならない [@wise_gis_2001]。
+アルゴリズム\index{algorithm}は、多くの場合、コードで実装される前に、処理の目的を示すフローチャートや疑似コード \index{pseudocode}として開始される。
+使い勝手をよくするために、一般的なアルゴリズムは関数内にパッケージ化されていることが多く、（関数のソースコードを見ない限り）一部または全部の手順が隠されている場合がある（Section \@ref(functions) を参照）。
+
+Chapter \@ref(gis) で見たような Geoalgorithms\index{geoalgorithm} は、地理的なデータを取り込み、一般的には地理的な結果を返すアルゴリズムである（同じものを表す別の用語として、<u>GISアルゴリズム</u>、<u>幾何アルゴリズム</u>がある）。
+簡単そうに聞こえるだろうが、このテーマは奥が深く、「計算幾何学」という学問分野全体がその研究に専念している。 [@berg_computational_2008]、このテーマに関する書籍も多数出版されている。
+例えば、@orourke_computational_1998 は、再現可能で自由に利用できる C コードを用いて、徐々に難しくなる幾何学的アルゴリズムの範囲を紹介している。
+
+幾何学的アルゴリズムの例としては、ポリゴンの重心\index{centroid}を求めるものがある。
+重心\index{centroid}の計算には多くのアプローチがあり、中には特定のタイプの[空間データ](https://en.wikipedia.org/wiki/Centroid)に対してのみ機能するものもある。
+本節では、視覚化しやすいアプローチを選択する。ポリゴンを多くの三角形に分割し、それぞれの重心\index{centroid}を求める。このアプローチは、他の重心アルゴリズムと並んで @kaiser_algorithms_1993 によって議論された [簡単な説明は @orourke_computational_1998]。
+コードを書く前に、このアプローチをさらに個別のタスクに分解するのに役立つ（以降、ステップ1からステップ4と呼ぶが、これらは模式図や疑似コード\index{pseudocode} として提示すこともできる）。
+
+1. ポリゴンを連続した三角形に分割する。
+2. 各三角形の重心\index{centroid}を求める。
+3. それぞれの三角形の面積を求める。
+4. 三角形の中心点の面積加重平均\index{centroid}を求める。
+
+一見、簡単そうに見えるが、言葉をコードに変換するには、入力に制約がある場合でも、試行錯誤を繰り返しながら作業を進める必要がある。
+このアルゴリズムは、180°以上の内角を持たない*凸ポリゴン*に対してのみ動作し、星形は使用できない（パッケージの **decido** と **sfdct** は外部ライブラリを使用して非凸ポリゴンを三角測量できる。geocompr.github.ioの [algorithm](https://geocompr.github.io/geocompkg/articles/algorithm.html) vignetteに示されている。）。 
+
+ポリゴンの最も単純なデータ構造は、xとyの座標の行列で、各行はポリゴンの境界を順にたどる頂点を表し、最初と最後の行は同一である [@wise_gis_2001]。
+今回は、*GIS Algorithms* [@xiao_gis_2016 see [github.com/gisalgs](https://github.com/gisalgs/geom) for Python code] の例を参考に、Figure \@ref(fig:polymat) に示すように、5つの頂点を持つポリゴンを base R で作成する。
+
+```{r centroid-setup, echo=FALSE, eval=FALSE}
+# show where the data came from:
+source("code/11-centroid-setup.R")
+```
+
+```{r 10-algorithms-4}
+# generate a simple matrix representation of a polygon:
+x_coords = c(10, 0, 0, 12, 20, 10)
+y_coords = c(0, 0, 10, 20, 15, 0)
+poly_mat = cbind(x_coords, y_coords)
+```
+
+これで、例のデータセットができたので、上記のステップ1に着手する準備が整った。
+以下のコードでは、1つの三角形 ( `T1` ) を作成して、この方法を示している。また、 [formula](https://math.stackexchange.com/q/1702595/) $1/3(a + b + c)$ ( $a$ から $c$ は三角形の頂点を表す座標) に基づいて重心 \index{centroid}  を計算し、ステップ 2 を示している。
+
+```{r 10-algorithms-5}
+# create a point representing the origin:
+Origin = poly_mat[1, ]
+# create 'triangle matrix':
+T1 = rbind(Origin, poly_mat[2:3, ], Origin) 
+# find centroid (drop = FALSE preserves classes, resulting in a matrix):
+C1 = (T1[1, , drop = FALSE] + T1[2, , drop = FALSE] + T1[3, , drop = FALSE]) / 3
+```
+
+```{r polymat, echo=FALSE, fig.cap="Illustration of polygon centroid calculation problem.", fig.height="100", warning=FALSE}
+# initial plot: can probably delete this:
+old_par = par(pty = "s") 
+plot(poly_mat)
+lines(poly_mat)
+lines(T1, col = "blue", lwd = 5)
+text(x = C1[ ,1], y = C1[, 2], "C1")
+par(old_par)
+```
+
+ステップ3では、各三角形の面積を求めるので、大きな三角形の不釣り合いな影響を考慮した<u>加重平均</u>を計算する。 
+三角形の面積を計算する公式は次の通りである。 [@kaiser_algorithms_1993] :
+
+$$
+\frac{Ax ( B y − C y ) + B x ( C y − A y ) + C x ( A y − B y )}
+{ 2 }
+$$
+
+ここで、 $A$ から $C$ は三角形 `T1` の3点、 $x$ と $y$ は x と y の次元を指す。
+この式を、三角形の行列表現のデータを扱う R コードに翻訳すると、次のようになる（関数 `abs()` は、正の結果を保証する）。
+
+```{r 10-algorithms-6}
+# calculate the area of the triangle represented by matrix T1:
+abs(T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
+  T1[2, 1] * (T1[3, 2] - T1[1, 2]) +
+  T1[3, 1] * (T1[1, 2] - T1[2, 2]) ) / 2
+```
+
+このコードチャンクは正しい結果を出力する。^[
+この結果は、以下の式で確認することができる（ベースが水平であると仮定している）。
+面積は、ベース幅×高さの半分となる。 $A = B * H / 2$.
+この場合、 $10 * 10 / 2 = 50$.
+]
+このコードは不格好で、別の三角行列で実行する場合、再入力しなければならない点が問題である。
+より一般化するために、このコードを Section \@ref(functions) で関数に変換する方法を見てみよう。
+
+ステップ4では、ステップ2と3を1つの三角形だけでなく、すべての三角形に対して行う必要がある（上の例）。
+このため、ポリゴンを表すすべての三角形を作成するための<u>イテレーション</u>（繰り返し）が必要である。Figure \@ref(fig:polycent) に示す。
+`lapply()`\index{loop!lapply} と `vapply()`\index{loop!vapply} が各三角形の反復処理に使われているのは、基本 R で簡潔な解が得られるからである。^[
+`vapply()`\index{loop!vapply} のドキュメントについては `?lapply` を参照。イテレーションについては Chapter \@ref(location) を参照。
+]
+
+```{r 10-algorithms-7}
+i = 2:(nrow(poly_mat) - 2)
+T_all = lapply(i, function(x) {
+  rbind(Origin, poly_mat[x:(x + 1), ], Origin)
+})
+
+C_list = lapply(T_all,  function(x) (x[1, ] + x[2, ] + x[3, ]) / 3)
+C = do.call(rbind, C_list)
+
+A = vapply(T_all, function(x) {
+  abs(x[1, 1] * (x[2, 2] - x[3, 2]) +
+        x[2, 1] * (x[3, 2] - x[1, 2]) +
+        x[3, 1] * (x[1, 2] - x[2, 2]) ) / 2
+  }, FUN.VALUE = double(1))
+```
+
+```{r polycent, fig.cap="Illustration of iterative centroid algorithm with triangles. The X represents the area-weighted centroid in iterations 2 and 3.", fig.scap="Illustration of iterative centroid algorithm with triangles.", echo=FALSE, fig.asp=0.3}
+# idea: show animated version on web version
+source("code/11-polycent.R")
+```
+
+これで、ステップ4を完了し、総面積を `sum(A)` で計算し、ポリゴンの重心\index{centroid}座標を  `weighted.mean(C [, 1] , A)` と  `weighted.mean(C [, 2] , A)` でポリゴンの重心座標を計算する (注意深い読者のための練習: これらのコマンドが動作することを確認してみよう)。
+アルゴリズム \index{algorithm}  とスクリプトの関連性を示すために、このセクションの内容を凝縮して `10-centroid-alg.R` とした。
+Section \@ref(scripts) の最後で、このスクリプトが正方形の重心\index{centroid}を計算する方法を見た。
+アルゴリズムを*スクリプト*化することの素晴らしい点は、新しい `poly_mat` オブジェクト上で動作することである（ `st_centroid()` を参照してこれらの結果を検証するには、以下の演習を参照）。
+
+```{r 10-algorithms-8}
+source("code/11-centroid-alg.R")
+```
+
+上記の例では、低レベルの地理的な操作は、ベースとなるRで第一原理から開発することが<u>できる</u>ことが示されている。
+また、すでに試行錯誤したソリューションが存在する場合、車輪の再発明をする価値はないことも示している。
+もし、ポリゴンの重心 \index{centroid}  を求めるだけなら、`poly_mat` を **sf** オブジェクトとして表現し、代わりに既存の `sf::st_centroid()` 関数を使用する方が早かっただろう。
+しかし、第一原理でアルゴリズムを書くことの大きな利点は、プロセスのすべての段階を理解できることであり、他の人のコードを使うときには保証されないことである。
+さらに考慮すべきは性能である。R は C++\index{C++} のような低レベルの言語と比較すると数値計算が遅く、最適化が困難である（Section \@ref(software-for-geocomputation) 参照）。
+新しい手法の開発を目的とするのであれば、計算効率を優先させるべきではない。
+これは、「早すぎる最適化はプログラミングにおける諸悪の根源（あるいは少なくともそのほとんど）」という言葉に集約される [@knuth_computer_1974]。
+
+アルゴリズム\index{algorithm}開発は大変な作業である。
+このことは、base R\index{R} を使った重心\index{centroid}アルゴリズム\index{algorithm} の開発に費やされた作業量から明らかである。このアルゴリズムは、実世界での応用が限られている（実際には凸ポリゴンは珍しい）問題に対する一つの、むしろ非効率的なアプローチに過ぎないのである。
+この経験は、GEOS\index{GEOS}（`sf::st_centroid()` の基盤となっている）や CGAL\index{CGAL} (計算幾何学アルゴリズムライブラリ) など、高速に動作するだけでなく、幅広い入力ジオメトリタイプに対応する低レベル地理ライブラリの理解につながるはずである。
+このようなライブラリのオープンソース化の大きな利点は、そのソースコード \index{source code}  が、研究、理解、（技術と自信があれば）改変のために容易に利用できることである。^[
+CGAL\index{CGAL} の関数 `CGAL::centroid()` は、https://doc.cgal.org/latest/Kernel_23/group__centroid__grp.html で説明したように、実際には 7 つのサブ関数で構成されており、幅広い入力データ型に対応できるようになっているが、私たちが作成したソリューションは非常に特定の入力データ型にのみ対応する。
+GEOS\index{GEOS} の関数 `Centroid::getCentroid()` の基礎となるソースコードは、https://github.com/libgeos/geos/search?q=getCentroid で見ることができる。
+]
+
+## 関数  {#functions}
+
+アルゴリズムと同様に \index{algorithm}、関数は入力を受け取り、出力を返す。
+しかし、関数 \index{function}  は、「レシピ」そのものではなく、特定のプログラミング言語での実装を指している。
+R では、関数 \index{function}  はそれ自体がオブジェクトであり、モジュール方式で作成したり結合したりすることができる。
+例えば、重心 \index{centroid}  生成アルゴリズム \index{algorithm}  のステップ 2 を引き受ける関数を以下のように作成することができる。
+
+```{r 10-algorithms-9}
+t_centroid = function(x) {
+  (x[1, ] + x[2, ] + x[3, ]) / 3
+}
+```
+
+上記の例では、 [functions](http://adv-r.had.co.nz/Functions.html) の2つの重要な構成要素を示している。
+1) 関数の *body* 、中括弧内のコードで、関数が入力に対して何をするかを定義する。 2) *formals* 、関数が扱う引数のリスト --- この場合は `x` である（3番目の重要なコンポーネント、環境はこのセクションの範囲外）。
+デフォルトでは、関数は最後に計算したオブジェクトを返す（`t_centroid()` の場合は重心の座標\index{centroid}）。^[
+また、関数の本文に `return(output)` を追加することで、関数の出力を明示的に設定することができる。 `output` は返すべき結果である。
+]
+
+```{r 10-algorithms-10, eval=FALSE, echo=FALSE}
+body(t_centroid)
+formals(t_centroid)
+environment(t_centroid)
+```
+
+この関数は、前のセクションのポリゴンの例から最初の三角形の面積を計算する以下のコマンドのように、渡した入力に対して動作する ( Figure \@ref(fig:polycent) を参照)。
+
+```{r 10-algorithms-11}
+t_centroid(T1)
+```
+
+また、三角形の面積を計算する関数\index{function}を作成することができる。ここでは、`t_area()` と名付ける。
+
+```{r 10-algorithms-12}
+t_area = function(x) {
+  abs(
+    x[1, 1] * (x[2, 2] - x[3, 2]) +
+    x[2, 1] * (x[3, 2] - x[1, 2]) +
+    x[3, 1] * (x[1, 2] - x[2, 2])
+  ) / 2
+}
+```
+
+なお、この関数を作成した後は、1行のコードで三角形の面積を計算できるようになり、冗長なコードの重複を避けることができる。
+関数は、コードを一般化するためのメカニズムである。
+新たに作成した関数\index{function} `t_area()` は、これまで使ってきた「三角行列」データ構造と同じ寸法を持つと仮定した任意のオブジェクト `x` を受け取り、その面積を返すもので、`T1` で図示すと次のようになる。
+
+```{r 10-algorithms-13}
+t_area(T1)
+```
+
+関数\index{function}を使って、高さ1、底辺3 の新しい三角行列の面積を求めることで、その一般化可能性を検証することができる。
+
+```{r 10-algorithms-14}
+t_new = cbind(x = c(0, 3, 3, 0),
+              y = c(0, 0, 1, 0))
+t_area(t_new)
+```
+
+関数の便利な点は、モジュール化されていることである。
+出力が何であるかが分かっていれば、ある関数を別の関数の構成要素として利用することができる。
+したがって、関数 `t_centroid()` と `t_area()` は、スクリプト `10-centroid-alg.R`のより大きな関数\index{function}のサブコンポーネントである : 任意の凸ポリゴンの面積を計算するために使用することができる。
+以下のコードでは、凸ポリゴンに対する `sf::st_centroid()` の動作を模倣する関数 `poly_centroid()` を作成している:^[
+なお、作成した関数は、`lapply()`\index{loop!lapply}  と `vapply()`\index{loop!vapply}  の関数呼び出しで繰り返し呼び出されている。
+]
+
+```{r 10-algorithms-15}
+poly_centroid = function(poly_mat) {
+  Origin = poly_mat[1, ] # create a point representing the origin
+  i = 2:(nrow(poly_mat) - 2)
+  T_all = lapply(i, function(x) {
+    rbind(Origin, poly_mat[x:(x + 1), ], Origin)
+  })
+  C_list = lapply(T_all, t_centroid)
+  C = do.call(rbind, C_list)
+  A = vapply(T_all, t_area, FUN.VALUE = double(1))
+  c(weighted.mean(C[, 1], A), weighted.mean(C[, 2], A))
+}
+```
+
+
+```{r 10-algorithms-16, echo=FALSE, eval=FALSE}
+# a slightly more complex version of the function with output set
+poly_centroid = function(poly_mat, output = "matrix") {
+  Origin = poly_mat[1, ] # create a point representing the origin
+  i = 2:(nrow(poly_mat) - 2)
+  T_all = T_all = lapply(i, function(x) {
+    rbind(Origin, poly_mat[x:(x + 1), ], Origin)
+  })
+  C_list = lapply(T_all, t_centroid)
+  C = do.call(rbind, C_list)
+  A = vapply(T_all, t_area, FUN.VALUE = double(1))
+  centroid_coords = c(weighted.mean(C[, 1], A), weighted.mean(C[, 2], A))
+  if(output == "matrix") {
+    return(centroid_coords)
+  } else if(output == "area")
+    return(sum(A))
+}
+```
+
+```{r 10-algorithms-17}
+poly_centroid(poly_mat)
+```
+
+`poly_centroid()` などの関数\index{function}はさらに拡張して、さまざまなタイプの出力を提供することができる。
+例えば、結果をクラス `sfg` のオブジェクトとして返すには、結果を返す前に、「ラッパー」関数を用いて `poly_centroid()` の出力を変更することができる。
+
+```{r 10-algorithms-18}
+poly_centroid_sfg = function(x) {
+  centroid_coords = poly_centroid(x)
+  sf::st_point(centroid_coords)
+}
+```
+
+以下のように、`sf::st_centroid()` からの出力と同じであることが確認できる。
+
+```{r 10-algorithms-19}
+poly_sfc = sf::st_polygon(list(poly_mat))
+identical(poly_centroid_sfg(poly_mat), sf::st_centroid(poly_sfc))
+```
+
+## プログラミング  {#programming}
+
+この章では、スクリプトからアルゴリズム\index{algorithm}という厄介なトピックを経由して関数へと移った。
+抽象的な議論だけでなく、具体的な問題を解決するために、それぞれの実用例を作成した。
+
+- スクリプト `10-centroid-alg.R` が紹介され、「ポリゴンマトリックス」での実演が行われることとした。
+- このスクリプトを動作させるための個々のステップは、アルゴリズム \index{algorithm}、計算レシピとして記述された。
+- アルゴリズムを一般化するために、 \index{algorithm}  をモジュール関数に変換し、最終的にそれらを組み合わせて、前節の関数 `poly_centroid()` を作成した。
+
+これらのステップは、それぞれ単体で見れば簡単なことである。
+しかし、プログラミングの技術とは、スクリプト、アルゴリズム、関数を組み合わせて、性能の良い、堅牢で使いやすいツールを作り出し、それを他の人が使えるようにすることなのである。
+この本を読んでいるほとんどの人がそうであるように、プログラミングの初心者であれば、前のセクションの結果を追って再現できることは、大きな達成感を得ることができるはずである。 
+プログラミングができるようになるまでには、何時間もかけて熱心に勉強し、練習する必要がある。
+
+新しいアルゴリズム\index{algorithm}を効率的に実装することを目指す開発者が直面する課題は、私たちがおもちゃのような関数を作ったに過ぎないことを考慮することで見えてく。
+現在の状態では、`poly_centroid()` はほとんどの（非凸）ポリゴンで失敗する!
+ここから生じる疑問は、関数\index{function}をどのように一般化するかということである。
+(1) 非凸ポリゴンを三角測量する方法を探す (この章をサポートするオンライン記事 [algorithm](https://geocompr.github.io/geocompkg/articles/algorithm.html) で扱っている話題) と (2) 三角メッシュに依存しない他の重心\index{centroid}のアルゴリズム\index{algorithm}を調べるという2つの選択肢がある。
+
+もっと大きな疑問は、高性能なアルゴリズムがすでに実装され、`st_centroid()` のような関数にパッケージされているのに、ソリューションをプログラミングする価値があるのだろうか、ということである。
+この具体的なケースにおける還元論的な答えは「ノー」である。
+広い意味で、プログラミングを学ぶことの利点を考えると、答えは「場合による」である。
+プログラミングでは、あるメソッドを実装しようとすると、すでに誰かがその苦労をしていることに気づき、何時間も無駄にすることがよくある。
+から、この章を幾何学的アルゴリズムのプログラミングを習得するための最初の足がかりとするのではなく、一般化された解をプログラミングしようとするときと、既存の上位の解を利用するときのレッスンとして利用する方が生産的だろうね。
+新しい関数を書くのがベストな場合もあれば、すでにある関数を使うのがベストな場合もあるはずである。
+
+この章を読んだからといって、あなたの仕事に必要な新しい関数 \index{function}  がすぐに作れるようになることを保証するものではない。
+しかし、その内容は、いつ試すのが適切か（既存の関数で解決できない場合、プログラミング作業が自分の能力の範囲内である場合、解決策のメリットが開発の時間コストを上回りそうな場合）を判断するのに役立つと確信している。
+プログラミングへの最初の一歩は遅いだろうが（以下の演習は急いではいけない）、長期的な見返りは大きくなる。
+
+## 演習  {#ex-algorithms}
+
+1. 本書のGitHubレポの `code` フォルダにあるスクリプト `10-centroid-alg.R` を読んでみよう。
+    - Section \@ref(scripts) で取り上げられているベストプラクティスのうち、どれに準拠しているのだろうか？
+    \index{IDE}  - RStudio \index{RStudio}  のような IDE で、コンピュータ上にスクリプトのバージョンを作成する（できれば、コピーペーストではなく、自分のコーディングスタイルとコメントで、スクリプトを一行ずつタイプアウトする --- これは、スクリプトのタイプ方法を学習するのに役立つ）。正方形のポリゴンの例(例えば `poly_mat = cbind(x = c(0, 0, 9, 9, 0), y = c(0, 9, 9, 0, 0))` で作成)を使って、スクリプトを一行ずつ実行する。
+    - より再現性を高めるために、スクリプトにどのような変更を加えればよいのだろうか。
+    <!-- - Answer: The script could state that it needs an object called `poly_mat` to be present and, if none is present, create an example dataset at the outset for testing. -->
+<!-- 1. Check-out the script `10-earthquakes.R` in the `code` folder of the book's GitHub [repo](https://github.com/geocompx/geocompr/blob/main/code/11-earthquakes.R). -->
+<!--     - Try to reproduce the results: how many significant earthquakes were there last month? -->
+<!--     - Modify the script so that it provides a map with all earthquakes that happened in the past hour. -->
+<!-- change line 10 to: -->
+<!-- u = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_hour.geojson" -->
+    - ドキュメントはどのように改善されたか？
+  <!-- It could document the source of the data better - e.g. with `data from https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php` -->
+1. Section \@ref(geometric-algorithms) では、`poly_mat` で表されるポリゴンの面積と地理的重心 \index{centroid}  を計算すると、`r sum(A)` となる。  `r round(c(weighted.mean(C [, 1] , A), weighted.mean(C [, 2] , A)), 1)` である。
+    - このアルゴリズムの実装であるスクリプト `10-centroid-alg.R` を参考に、自分のコンピュータで結果を再現してみよう（おまけ：コマンドをタイプアウトしてみよう - コピーペーストはなるべく避けてみよう）。
+    <!-- Todo: add link to that script file (RL) -->
+    - この結果は正しいだろうか？ `poly_mat` を `st_polygon()` で `sfc` オブジェクト ( `poly_sfc` という名前) に変換し (ヒント: この関数は `list()` クラスのオブジェクトを受け取ります)、次に `st_area()` と `st_centroid()` を使って検証してみよう。
+<!-- We can verify the answer by converting `poly_mat` into a simple feature collection as follows, which shows the calculations match: -->
+```{r 10-algorithms-20, eval=FALSE, echo=FALSE}
+poly_sfc = sf::st_polygon(list(poly_mat))
+sf::st_area(poly_sfc)
+sf::st_centroid(poly_sfc)
+```
+1. 私たちが作成したアルゴリズム \index{algorithm}  は *凸包* に対してのみ動作することが述べられている。凸包の定義 \index{convex hull}  ( Chapter \@ref(geometry-operations) を参照) と、凸包でない*ポリゴンのアルゴリズムをテストしてみよう。
+     - ボーナス1: この方法が凸包にしか使えない理由を考え、他の種類のポリゴンに使えるようにするためにアルゴリズムに加えるべき変更点に注意すること。
+<!-- The algorithm would need to be able to have negative as well as positive area values. -->
+     - ボーナス 2: `10-centroid-alg.R` の内容を基に、行列形式で表現されたラインストリングの全長を求めることができる、R の基本関数のみを使用したアルゴリズム \index{algorithm}  を作成する。
+<!-- Todo: add example of matrix representing a linestring, demonstrate code to verify the answer, suggest alternative functions to decompose as a bonus. -->
+1. Section \@ref(functions) では、クラス `sfg` の出力 ( `poly_centroid_sfg()` ) と型安定な `matrix` の出力 ( `poly_centroid_type_stable()` ) を生成する `poly_centroid()` 関数の異なるバージョンを作成した。さらに、型が安定した（クラス `sf` の入力のみを受け付ける）バージョン（例: `poly_centroid_sf()` ）を作成し、`sf` オブジェクトを返すことで、関数を拡張する（ヒント: オブジェクト `x` を、コマンド `sf::st_coordinates(x)` で行列に変換する必要があるだろう）。
+    - を実行し、動作を確認する。 `poly_centroid_sf(sf::st_sf(sf::st_sfc(poly_sfc)))` 
+    - `poly_centroid_sf(poly_mat)` を実行しようとすると、どのようなエラーメッセージが表示されるか？
+
+```{r 10-algorithms-21, eval=FALSE, echo=FALSE}
+poly_centroid_sf = function(x) {
+  stopifnot(is(x, "sf"))
+  xcoords = sf::st_coordinates(x)
+  centroid_coords = poly_centroid(xcoords)
+  centroid_sf = sf::st_sf(geometry = sf::st_sfc(sf::st_point(centroid_coords)))
+  centroid_sf
+}
+poly_centroid_sf(sf::st_sf(sf::st_sfc(poly_sfc)))
+poly_centroid_sf(poly_sfc)
+poly_centroid_sf(poly_mat)
+```

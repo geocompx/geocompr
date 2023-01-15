@@ -1,0 +1,801 @@
+# (PART) 応用  {.unnumbered}
+
+# 交通  {#transport}
+
+```{r transport-setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+```
+
+## 必須パッケージ  {.unnumbered}
+
+- この章では、以下のパッケージを使用する[^13-transport-1]
+
+[^13-transport-1]: **nabor** パッケージもインストールされている必要があるが、ロードする必要はない。
+
+```{r 13-transport-1, message=FALSE, results='hide'}
+library(sf)
+library(dplyr)
+library(spDataLarge)
+library(stplanr)    # 地理交通データを処理
+library(tmap)       # 地図作成（Chapter 9 参照）
+library(ggplot2)    # データ可視化パッケージ
+library(sfnetworks) # 空間ネットワークのクラスと関数
+```
+
+## イントロダクション  {#introduction-13}
+
+交通ほど地理的空間が明確なセクターは他にないだろう。
+1970年に Waldo [@miller_tobler_2004] が述べた（下記参照）ように、移動の努力（距離の克服）は、地理学の「第一法則」の中心である。
+
+> Everything is related to everything else, but near things are more related than distant things.
+
+この「法則」は、空間自己相関 \index{autocorrelation!spatial}  など、地理学の重要な概念の基礎となるものである。
+それは、友情のネットワークや生態系の多様性といった多様な現象に適用され、「距離の摩擦」を構成する時間、エネルギー、金銭といった輸送のコストによって説明することができる。
+この観点からすると、輸送テクノロジーは破壊的であり、移動する人間やモノを含む地理的な実体間の関係を変化させる。「輸送の目的は空間を克服することである」 [@rodrigue_geography_2013]。
+
+交通は本質的に空間的な活動であり、出発点「A」から目的点「B」に移動し、その間にある無限の地域を通過することになる。
+したがって、交通研究者が、移動パターンを理解し、介入によってそのパフォーマンスをどのように改善できるかを理解するために、地理的・計算的手法に長い間注目してきたことは当然である [@lovelace_open_2021]。
+
+本章では、交通システムの地理的分析について、さまざまな地理的レベルで紹介する。
+
+- **実際の単位**：交通パターンは、主な移動手段（車、自転車、徒歩など）や、特定のゾーンに住む人々の平均移動距離など、ゾーンごとの集計を参照して理解することができる（ Section \@ref(transport-zones) でカバーされる）。
+- **希望線** (desire line)\index{desire lines} : 地理空間における場所（点またはゾーン）間を何人が移動したか（または移動できたか）を記録した「起点-終点」データを表す直線で、Section \@ref(desire-lines) の話題である。
+- **ノード** (node)\index{node} : これらは、共通の起点と終点を表すことができる交通システムの点であり、バス停や鉄道駅などの公共交通機関の駅、Section \@ref(nodes) のトピックである。
+- **ルート**：希望線に沿ったルート網とノード間のルートを表す線である。
+ルート（１つのラインストリングまたは複数の<u>セグメント</u>の場合がある）と、ルートを生成する<u>ルートエンジン</u>は、Section \@ref(routes) で詳しく述べる。
+- **ルートネットワーク** (network)\index{network} : これらは、ある地域の道路、小道、その他の線形特徴のシステムを表し、Section \@ref(route-networks) で取り上げている。これらは地理的な特徴（短いセグメントでネットワーク全体を作り上げる）として表現することもできるし、相互接続されたグラフとして構造化することもできる。異なるセグメント上の交通のレベルは、交通モデラーによって「フロー」と呼ばれる [@hollander_transport_2016]。
+
+もうひとつの重要なレベルは、私やあなたのような移動する存在を表す**エージェント**である。
+これらは、[MATSim](http://www.matsim.org/) のようなソフトウェアのおかげで、計算によって表現することができる。これは、エージェントベースモデリング (ABM)\index{agent-based modeling}  のアプローチを用いて、高い空間および時間分解能で輸送システムのダイナミクスを捉えるものである [@horni_multi-agent_2016]。
+ABM は、R の空間クラスと統合できる可能性が高い交通研究の強力なアプローチであるが [@thiele_r_2014; @lovelace_spatial_2016]、本章の範囲外である。
+地理的レベルやエージェントを超えて、ほとんどの交通モデルの分析の基本単位は**トリップ**であり、出発地「A」から目的地「B」までの単一目的の旅である [@hollander_transport_2016]。
+トリップは、異なるレベルの交通システムを結合し、単純化すると、<u>ゾーン<,u>の重心\index{centroid}（<u>ノード</u>）を結ぶ地理的な<u>希望線</u>として、あるいは交通<u>ルートネットワーク/u>に沿った経路として表現することができる。
+この文脈では、<u>エージェント</u>\index{agent-based modeling}は通常、輸送ネットワーク内を移動する点である。
+
+交通システムはどう的である [@xie_evolving_2011]。
+この章では、交通システムの地理的な分析に焦点を当てるが、変化のシナリオをシミュレートするために、この手法をどのように利用できるかについて、Section \@ref(prioritizing-new-infrastructure) にて洞察を提供する。
+地理学上の交通モデルの目的は、このような時空間システムの複雑さを、その本質を捉える形で単純化することにあると解釈できる。
+適切なレベルの地理的分析を選択することで、最も重要な特徴や変数を失うことなく、この複雑さを単純化し、より良い意思決定とより効果的な介入を可能にすることができる [@hollander_transport_2016]＞
+
+一般的に、モデルは特定の問題を解決するために設計される。
+そのため、本章では、次章で紹介する政策シナリオを軸に、問いかけを行っている。ブリストル市内で自転車を増やす方法は？
+Chapter \@ref(location) では、ジオコンピュテーションの応用として、新しい自転車店の立地の優先順位付けを行う。
+新しいサイクリング・インフラが効果的に配置されると、人々がサイクリングするようになり、サイクリング・ショップの需要や地域の経済活動を高めることができる。
+これは、交通システムの重要な特徴を強調している。交通システムは、より広範な現象や土地利用パターンと密接に関連している。
+
+## ブリストルのケーススタディ  {#bris-case}
+
+本章で使用する事例は、イングランド西部の都市ブリストルで、ウェールズの首都カーディフから東に 30 km ほど離れた場所にある。
+この地域の交通網の概要は、Figure \@ref(fig:bristol) に示されており、自転車、公共交通、自家用車のための多様な交通インフラが示されている。
+
+```{r 13-transport-2, echo=FALSE, eval=FALSE}
+# code that generated the input data - see also ?bristol_ways
+# source("https://github.com/geocompx/geocompr/raw/main/code/13-transport-data-gen.R") 
+# view input data
+# summary(bristol_ways)
+# summary(bristol_ttwa)
+# summary(bristol_region)
+
+region_all = rbind(bristol_region, bristol_ttwa)
+tmap_mode("view")
+tm_shape(region_all[1, ], bbox = region_all) +
+  tm_fill("yellow", alpha = 0.5) +
+  tm_shape(bristol_ways) +
+  tm_lines(col = "highway", lwd = 2.1, palette = "-Set1") +
+  tm_scale_bar() +
+  tm_shape(region_all) +
+  tm_borders(col = "black") +
+  tm_basemap(server = leaflet::providers$Esri.WorldTopoMap)
+```
+
+```{r bristol, echo=FALSE, fig.cap="ブリストルの交通網は、アクティブ（緑）、公共（鉄道、黒）、自家用車（赤）の各移動手段を色分けして表現している。黒い境界線は、市街地の境界線（黄色でハイライト）と、より広い TTWA (Travel To Work Area) を表している。", fig.scap="Bristol's transport network."}
+knitr::include_graphics("figures/13_bristol.png")
+# knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34452756-985267de-ed3e-11e7-9f59-fda1f3852253.png")
+```
+
+ブリストルはイングランドで10番目に大きい市で、人口は 50 万人であるが、その旅行キャッチメントエリア\index{catchment area}  はもっと大きい（Section \@ref(transport-zones) 参照）。
+航空宇宙、メディア、金融サービス、観光などの企業が集まり、2つの主要な大学とともに、活気ある経済が展開されている。
+ブリストルは一人当たりの平均所得が高いが、深刻な貧困地域も含まれている [@bristol_city_council_deprivation_2015]。
+
+交通の面では、ブリストルは鉄道や道路の便がよく、アクティブ・トラベルのレベルも比較的高い。
+[Active People Survey](https://www.gov.uk/government/statistical-data-sets/how-often-and-time-spent-walking-and-cycling-at-local-authority-level-cw010#table-cw0103)によると、国民の19％が月に1回以上自転車を利用し、88％が歩いている（全国平均はそれぞれ15％、81％）。
+2011年の国勢調査では、自転車で通勤していると答えた人は全体の8％だったのに対し、全国ではわずか3％にとどまっている。
+
+```{r 13-transport-3, eval=FALSE, echo=FALSE}
+if(!require(readODS)) {
+  install.packages("readODS")
+}
+u = "https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/536823/local-area-walking-and-cycling-in-england-2015.zip"
+download.file(u, "local-area-walking-and-cycling-in-england-2015.zip")
+unzip("local-area-walking-and-cycling-in-england-2015.zip")
+View(readODS::read_ods("Table index.ods"))
+cw0103 = readODS::read_ods("cw0103.ods")
+View(cw0103)
+```
+
+多くの都市と同様にブリストルも渋滞、大気質、運動不足などの大きな問題を抱えている。
+自転車は、これらの問題すべてに効率的に取り組むことができる。典型的な[速度](https://en.wikipedia.org/wiki/Bicycle_performance)は、徒歩の時速4〜6kmに対して時速15〜20kmと、徒歩よりも自動車による移動を置き換える可能性が大きい。
+このため、ブリストルの[交通戦略](https://www.bristol.gov.uk/council-and-mayor/policies-plans-and-strategies/bristol-transport-strategy)では、サイクリングについて野心的な計画を立てている。
+
+この章では、交通研究における政策的配慮の重要性を強調するため、人々を車から解放し、より持続可能な手段、特に徒歩と自転車に乗せることを任務とする人々（交通プランナー、政治家、その他の利害関係者）にエビデンスを提供する目的で書かれている。
+より広い目的として、ジオコンピューティングがどのように証拠に基づく交通計画をサポートできるかを示すことである。
+この章では、次のことを学ぶ。
+
+- 都市における交通行動の地理的パターンを説明する。
+- マルチ・モデル・トリップをサポートする主要な公共交通機関のノードを特定する。
+- 移動の「希望線」\index{desire lines}を分析、多くの人が短距離をドライブする場所を見つける。
+- Identify cycle route locations that will encourage less car driving and more cycling
+
+本章の実用的な面から始めるため、次節で、移動パターンに関するゾーンデータをロードする。
+このようなゾーンレベルのデータは少ないが、集落の交通システム全体を基本的に理解するためには不可欠な場合が多い。
+
+## トランスポートゾーン  {#transport-zones}
+
+交通システムは主に線形の地物やノード\index{node}（例えば、ルートや駅）に基づいているが、連続した空間を具体的な単位に分割するために、面的なデータから始めることがしばしば意味を持つ [@hollander_transport_2016]。
+調査地域（ここではブリストル）を定義する境界線に加えて、交通研究者にとって特に関心の高い2つのゾーンタイプ、すなわち発着地ゾーンがある。
+多くの場合、発着地には同じ地理的単位が使用される。
+しかし、学校や商店などの「トリップアトラクター」が多い地域では、「 [Workplace Zones](https://data.gov.uk/dataset/workplace-zones-a-new-geography-for-workplace-statistics3)」のような異なるゾーニングシステムが、トリップ先の密度上昇を表すのに適切だろう [@office_for_national_statistics_workplace_2014]。
+
+調査地域を定義する最も簡単な方法は、OpenStreetMap\index{OpenStreetMap} が返す最初のマッチング境界であることが多い。
+これは **osmdata** を使用して `bristol_region = osmdata::getbb("Bristol", format_out = "sf_polygon")` のようなコマンドで取得することができる。
+この結果、最大の一致する都市地域の境界を表す `sf` オブジェクトが得られ、バウンディングボックスの長方形ポリゴンまたは詳細なポリゴン境界のいずれかが得られる。^[13-transport-2]
+イギリスのブリストルについては、**spDataLarge** パッケージにあるブリストルの公式な境界を表す詳細なポリゴンが返される。
+Figure \@ref(fig:bristol) の内側の青い境界を参照。なお、この方法にはいくつかの問題点がある。
+
+[^13-transport-2]:最初のマッチングで正しい名称が得られない場合、国または地域を指定する必要がある。例えば、アメリカにあるブリストルは `Bristol Tennessee` のように指定する。
+
+- OSM から最初に返された OSM 境界は、自治体が使用する正式な境界とは異なる場合がある
+- OSM が正式な境界線を返したとしても、人々が移動する場所とはほとんど関係がないため、交通研究にとっては不適切かもしれない。
+
+TTWA（Travel to Work Area）は、水文学的な流域に類似したゾーニングシステムを構築することで、これらの問題に対処している。
+TTWAはまず、人口の75％が通勤で利用する連続したゾーンと定義され、 [@coombes_efficient_1986]、この章ではこの定義を用いる。
+ブリストルは、周辺の町からの旅行者を惹きつける主要な雇用主であるため、そのTTWAは市域よりもかなり大きい（ Figure \@ref(fig:bristol) 参照）。
+この輸送方向の境界を表すポリゴンは、本章の冒頭でロードした **spDataLarge** パッケージが提供するオブジェクト `bristol_ttwa` に格納されている。
+
+本章で使用する出発地と目的地は同じである。中間の地理的解像度で公式に定義されたゾーン（ [official](https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/annualsmallareapopulationestimates/2014-10-23) の名称は Middle layer Super Output Areas または MSOAs）である。
+それぞれ約8,000人が暮らしている。
+このような行政区域は、特定の介入から最も恩恵を受ける可能性のある人々のタイプなど、輸送分析に不可欠な状況を提供することができる [e.g., @moreno-monroy_public_2017] .
+
+これらのゾーンの地理的解像度は重要である。通常、地理的解像度の高い小さなゾーンが望ましいが、大きな地域でその数が多いと、処理に影響を及ぼすことがある（特に、ゾーン数の非線形関数として可能性の数が増加する起点-終点分析） [@hollander_transport_2016]。
+
+```{block 12-transport-4, type='rmdnote'}
+小規模ゾーンのもう一つの問題は、匿名性のルールに関連するものである。
+ゾーン内の個人の身元を推測することを不可能にするため、詳細な社会人口統計変数は、しばしば低い地理的解像度でしか利用できない。
+例えば、年齢や性別による移動手段の内訳は、英国では自治体レベルでは利用できるが、100世帯程度で構成される出力エリアレベルでは利用できない。
+詳細は、 www.ons.gov.uk/methodology/geography を参照。
+```
+
+本章で使用する 102 のゾーンは、、Figure \@ref(fig:zones) に図示されているように `bristol_zones` に格納されている。
+人口が密集しているところでは、ゾーンが小さくなっていることに注意しておこう。
+`bristol_zones` は、輸送に関する属性データは含まず、各ゾーンの名称とコードのみである。
+
+```{r 13-transport-5}
+names(bristol_zones)
+```
+
+旅行データを追加するために、Section \@ref(vector-attribute-joining) で説明されている一般的なタスクである *attribute join* \index{attribute!join} を実行する。
+ここでは、英国の2011年国勢調査の出勤時間に関する質問から、 [ons.gov.uk](https://www.ons.gov.uk/help/localstatistics) データポータルから提供された、`bristol_od` に保存されている旅行データを使用する。
+`bristol_od` は、英国の2011年国勢調査によるゾーン間の通勤に関する起点 (Origin)ー終点 (Desitination)（OD）データセットである（ 参照）。
+Section \@ref(desire-lines) 1列目は出発地のゾーンID、2列目は目的地のゾーンである。
+`bristol_od` は、 よりも多くの行を持ち、ゾーンそのものよりもゾーン<u>間</u>の移動を表している。
+`bristol_zones` 
+```{r 13-transport-6}
+nrow(bristol_od)
+nrow(bristol_zones)
+```
+
+先ほどのコードチャンクの結果、各ゾーンに10組以上のODペアがあることがわかった。つまり、下図のように、`bristol_zones`、結合する前に発着地データを集約する必要がある（発着地データは Section \@ref(desire-lines) に記述されている）。
+
+```{r 13-transport-7}
+zones_attr = bristol_od %>% 
+  group_by(o) %>% 
+  summarize_if(is.numeric, sum) %>% 
+  dplyr::rename(geo_code = o)
+```
+
+上記のチャンクは、
+
+- 原産地別にデータをグループ化した（`o` の列に含まれる）。
+- `bristol_od` データセットの変数が数値であれば、それを集計して、各ゾーンに住む人の交通手段別の総数を求める。[^13-transport-3]
+- グループ化変数 `o` の名前を変更し、`bristol_zones` オブジェクトの ID 列 `geo_code` と一致するようにした。
+
+[^13-transport-3]: `_if` の接頭辞は、変数に対して `TRUE`/`FALSE` の質問をすることを要求しており、この場合は「それは数値か？」で、
+    真を返す変数のみが要約される。
+
+結果として得られるオブジェクト `zones_attr` は、ゾーンを表す行とID変数を持つデータフレームである。
+IDが `zones` データセットのものと一致するかどうかは、`%in%` 演算子を用いて以下のように確認することができる。
+
+```{r 13-transport-8}
+summary(zones_attr$geo_code %in% bristol_zones$geo_code)
+```
+
+その結果、新しいオブジェクトには102のゾーンがすべて存在し、`zone_attr`、ゾーン上に結合できる形になっていることがわかった。[^13-transport-4]
+これは、結合関数 `left_join()` を使って行われる（なお、`inner_join()` でも同じ結果になる）。
+
+[^13-transport-4]: また、実データで ID が逆方向で一致するかどうかのチェックも重要だろう。
+これは、`summary()` コマンドの ID の順序を変更することで可能となる。`summary(bristol_zones $geo_code %in% zones_attr$ geo_code)` --- または、`setdiff()` を次のように使用することで可能である。`setdiff(bristol_zones $geo_code, zones_attr$ geo_code)`
+
+```{r 13-transport-9}
+zones_joined = left_join(bristol_zones, zones_attr, by = "geo_code")
+sum(zones_joined$all)
+names(zones_joined)
+```
+
+結果は、調査地域の各ゾーンを起点とするトリップの総数（ほぼ1/400万）とその移動手段（自転車、徒歩、自動車、電車）を表す列が新たに追加されている `zones_joined` である。
+トリップの起点の地理的な分布は、左の地図（Figure \@ref(fig:zones)）に示されている。
+このことから、ほとんどのゾーンは、調査エリア内で 0〜4,000 のトリップを発生させていることがわかる。
+ブリストルの中心部付近に住む人の移動が増え、郊外に住む人の移動が減っている。
+これはなぜだろうか。調査地域内のトリップだけを扱っていることを忘れないでおこう。
+のトリップ数が少ないのは、これらの周辺ゾーンにいる多くの人が、調査地域外の他の地域へ移動するためであると考えられる。
+調査地域外のトリップは、モデルで表現されていないゾーンに行くトリップをカバーする特別な目的地IDによって、地域モデルに含めることができる [@hollander_transport_2016]。
+しかし、`bristol_od` のデータは、このようなトリップを無視している。
+
+OD データセットが出発地のゾーンに集約されるのと同じように、目的地のゾーンに関する情報を提供するために集約することもできる。
+人は、中心部に引き寄せられるように集まる傾向がある。
+このことは、右図（Figure \@ref(fig:zones) ）で表される空間分布が比較的不均一であり、最も多い目的地ゾーンがブリストル市の中心部に集中していることを説明している。
+その結果、任意のモードによる旅行先数を報告する新しい列を含む、`zones_od` が以下のように作成される。
+
+```{r 13-transport-10}
+zones_destinations = bristol_od |> 
+  group_by(d) |> 
+  summarize(across(where(is.numeric), sum)) |> 
+  dplyr::select(geo_code = d, all_dest = all)
+zones_od = inner_join(zones_joined, zones_destinations, by = "geo_code")
+```
+
+Figure \@ref(fig:zones) の簡易版を以下のコードで作成する（図を再現するには、本書の GitHub リポジトリの `12-zones.R` を参照。  [`code`](https://github.com/geocompx/geocompr/tree/main/code) フォルダで図を再現し、**tmap**\index{tmap (package)} によるファセット・マップの詳細は Section \@ref(faceted-maps) を参照)。
+
+```{r 13-transport-11, eval=FALSE}
+qtm(zones_od, c("all", "all_dest")) +
+  tm_layout(panel.labels = c("Origin", "Destination"))
+```
+
+```{r zones, echo=FALSE, fig.cap="地域内に居住・勤務するトリップ（通勤者）数。左の地図は通勤トリップの出発地、右の地図は目的地のゾーン（12-zones.Rスクリプトで生成）。", message=FALSE, fig.scap="Number of trips (commuters) living and working in the region."}
+# file.edit("code/13-zones.R")
+source("https://github.com/geocompx/geocompr/raw/main/code/13-zones.R", print.eval = TRUE)
+```
+
+## 希望線  {#desire-lines}
+
+希望線 (desire line) は、出発地と目的地をつなぎ、人々がゾーン間で行きたいと<u>望む</u>場所を表している。
+これは、建物や風の強い道路などの障害物がなければ、A-B 間を最も早く移動できる「蜂の飛行線」または「カラスの飛行線」ルートを表している（希望線をルートに変換する方法については、次のセクションで説明する）。
+一般的に、希望線は各ゾーンの地理的（または人口加重）重心を始点および終点として地理的に表現される。
+このセクションでは、このタイプの希望線を作成して使用するが、OD データを基にした分析の空間的なカバレッジと精度を高めるために、複数の開始点と終了点を可能にする「ジッタリング」技術は知っておく価値がある [@lovelace_jittering_2022b]。
+
+データセット `bristol_od` に、希望線を表すデータをすでに読み込んでいる。
+この起点ー終点（OD）データフレームオブジェクトは、`o` で表されるゾーンと `d`、 Table \@ref(tab:od) で示されるゾーン間の移動人数を表している。
+OD データをすべてのトリップで並べ、上位5つだけをフィルタリングするには、次のように入力する（非空間属性操作の詳細については、Chapter \@ref(attr) を参照）。
+
+```{r 13-transport-12}
+od_top5 = bristol_od |> 
+  slice_max(all, n = 5)
+```
+
+```{r od, echo=FALSE}
+od_top5 |> 
+  knitr::kable(
+    caption = paste("ブリストルODデータフレームの上位5組の起点と終点の",
+                    "サンプルで、調査地域のゾーン間の",
+		    "旅行希望線を表している。"),
+    caption.short = "Sample of the origin-destination data.",
+    booktabs = TRUE)
+```
+
+この表は、ブリストル人の通勤・通学パターンを示すものである。
+これは、上位5つの起点と終点のペアにおいて、徒歩が最も人気のある交通手段であること、ゾーン `E02003043` が人気のある目的地であること（ブリストルの中心部、上位5つの OD ペアの目的地）、ゾーン `E02003043` のある部分から別の部分への<u>ゾーン内</u>トリップ（ Table \@ref(tab:od) の最初の行）がデータセットで最も移動した OD ペアであることを実証している。
+しかし、政策的な観点から見ると、Table \@ref(tab:od) で示される生データは、限られた用途にしか使えない。2,910 組の OD のうち、ごく一部しか含まれていないという事実を除けば、政策的措置が必要な場所は<u>どこ</u>か、徒歩や自転車による移動が<u>どの程度の割合を占める</u>のかについては、ほとんどわからないのである。
+次のコマンドは、これらのアクティブなモードによって作られる各希望線の割合を計算する。
+
+```{r 13-transport-13}
+bristol_od$Active = (bristol_od$bicycle + bristol_od$foot) /
+  bristol_od$all * 100
+```
+
+OD  ペアは、大きく分けて<u>ゾーン間</u>と<u>ゾーン内</u>の2種類がある。
+ゾーン間 OD ペアは、目的地と出発地が異なるゾーン間の移動を表する。
+ゾーン内 OD ペアは、同一ゾーン内の移動を表す（ Table \@ref(tab:od) の上段参照）。
+以下のコードチャンクでは、`od_bristol` をこの2種類に分割している。
+
+```{r 13-transport-14}
+od_intra = filter(bristol_od, o == d)
+od_inter = filter(bristol_od, o != d)
+```
+
+次のステップは、ゾーン間 OD ペアを、**stplanr**\index{stplanr (package)} 関数 `od2line()` を用いて地図上にプロットできる希望線を表す `sf` オブジェクトに変換することである。[^13-transport-5]
+
+[^13-transport-5]:`od2line()` は、 オブジェクトの最初の 2 列の ID を、地理的な オブジェクトの ID 列にマッチングさせることで動作する。
+      `bristol_od` `zones_od` `zone_code` なお、この操作は警告を発するが、これは `od2line()` が各起点と終点のペアをその起点と終点のゾーンの<u>重心</u>\index{centroid}に割り当てることで動作するためである。
+      実際の使用では、投影データから生成された重心を使用するか、できれば<u>人口重み付け</u>された重心を使用することになるだろう [@lovelace_propensity_2017]。
+
+```{r 13-transport-15, warning=FALSE}
+desire_lines = od2line(od_inter, zones_od)
+```
+
+結果の図は Figure \@ref(fig:desire) に示されており、その簡易版は以下のコマンドで作成される（図を正確に再現するには `12-desire.R` のコードを、 **tmap** による視覚化の詳細については Chapter \@ref(adv-map) を参照 \index{tmap (package)}  ）。
+
+```{r 13-transport-16, eval=FALSE}
+qtm(desire_lines, lines.lwd = "all")
+```
+
+```{r desire, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="ブリストルのトリップパターンを表す希望線は、幅がトリップ数、色がアクティブモード（徒歩と自転車）によるトリップの割合を表している。4本の黒い線は、表7.1のゾーン間ODペアを表している。", fig.asp=0.8, fig.scap="Desire lines representing trip patterns in Bristol."}
+source("https://github.com/geocompx/geocompr/raw/main/code/13-desire.R", print.eval = TRUE)
+```
+
+この地図から、地域の交通パターンを支配しているのは中心市街地であり、そこに政策を優先させるべきであることがわかるが、周辺には副都心も多く見られる。
+希望線は交通システムの重要な一般化された構成要素である。
+より具体的な構成要素としては、（希望線のような仮想的な直線ではなく）特定の目的地を持つノードがある。
+ノードについては次節で述べる。
+
+## ノード  {#nodes}
+
+地理的な交通データにおけるノード\index{node}は、ネットワーク \index{network}を構成する主に一次元のフィーチャ（線）のうち、ゼロ次元のフィーチャ（点）である。
+交通ノードには2種類ある。
+
+1. ノード\index{node}  ネットワーク\index{network}上に直接存在しないノード   例えばゾーン重心\index{centroid}（次のセクションで取り上げる）あるいは家や職場などの個人の発着地。
+2. 交通網の一部であるノード。
+技術的には、ノードは交通ネットワーク上のどの点にも位置することができるが、実際には、ルートの交差点（ジャンクション）やバス停や駅など交通ネットワークに出入りする点など、特殊な頂点である場合が多い。[^13-transport-6]
+
+[^13-transport-6]: **sfnetworks** パッケージの関数 [`st_network_blend()`](https://luukvdmeer.github.io/sfnetworks/reference/st_network_blend.html) により、ネットワーク上またはネットワーク外の任意の点への近接性に基づいて、ネットワーク上に新しいノードを作成することができる。
+
+交通ネットワーク \index{network}  は、グラフ \index{graph}  として表すことができ、その中で各セグメントは、ネットワーク内の1つ以上の他のエッジ \index{edge}  に（地理的な線を表すエッジを介して）接続されている。
+ネットワーク外のノード \index{network}  は「重心・コネクタ」で追加可能 \index{centroid}、ネットワーク\index{network}上の近くのノード \index{node}への新しいルートセグメント    [@hollander_transport_2016] 。[^13-transport-7]
+ネットワーク \index{network}  の各ノード \index{node}  は、ネットワーク\index{network}上の個々のセグメントを表す 1 つ以上の「エッジ」\index{edge}によって接続されている。
+交通ネットワーク\index{network}がグラフ \index{graph}  として表現できることを Section \@ref(route-networks) で確認する。
+
+[^13-transport-7]: これらのコネクターは、その近辺の交通量を過大に見積もる可能性があるため、その位置は慎重に選ぶ必要がある [@jafari_investigation_2015]。
+
+公共交通機関の駅や停留所は特に重要なノード\index{node}である。道路の一部であるバス停、または線路から数百メートルの歩行者入口ポイントによって表される大規模な鉄道駅のいずれかのタイプのノードとして表現されることができる。
+ここでは、ブリストルにおける自転車の増加という研究課題に関連して、公共交通機関のノード \index{node}を説明するために鉄道駅を使用しよう。
+鉄道駅のデータは、`bristol_stations` の **spDataLarge** で提供されている。
+
+通勤において自動車から他の交通への転換を阻む共通の障壁は、自宅から職場までの距離が遠すぎると徒歩や自転車では無理だということである。
+公共交通機関は、都市への一般的なルートにおいて、高速かつ大量に利用できるオプションを提供することで、この障壁を軽減することができる。
+アクティブ・トラベルの観点から、公共交通機関を利用した長距離移動の「行程」は、旅を3つに分けている。 
+
+- 住宅地から公共交通機関の駅までの起点となる行程。
+- 公共交通機関（通常、出発地の最寄り駅から目的地の最寄り駅まで）。
+- 降車駅から目的地までの行程。
+
+Section \@ref(desire-lines) で行った分析に基づき、公共交通機関のノード\index{node}を使って、バスと（この例では）鉄道を利用できる旅行のための3分割の希望線\index{desire lines}を構築することができる。
+最初の段階は、公共交通機関の利用が多い希望線\index{desire lines}を特定することである。ここでは、先に作成したデータセット `desire_lines` にすでに電車での移動回数を表す変数が含まれているので簡単である（公共交通機関の利用可能性は、 [OpenTripPlanner](http://www.opentripplanner.org/) などの公共交通ルート探索\index{routing}  サービスを使って推定することも可能）。
+アプローチを簡単にするために、レールの使用量の上位3つの欲求ライン \index{desire lines}  のみを選択することにする。
+
+```{r 13-transport-20}
+desire_rail = top_n(desire_lines, n = 3, wt = train)
+```
+
+そこで、これらの線を3つに分解し、公共交通機関\index{node}の乗り換えを表現することにする。
+これは、希望線を、旅行の出発地、公共交通機関、目的地の3つの線ジオメトリからなるマルチラインストリングに変換することで実現できる。
+この作業は、行列の作成（起点、終点、鉄道駅を表す「経由点」）、最近傍\index{nearest neighbor}の特定、マルチラインストリング\index{multilinestrings}への変換の3段階に分けることができる。
+この一連の処理は、`line_via()` 関数が行う。
+この **stplanr**\index{stplanr (package)}  関数は入力された線と点を受け取り、希望線\index{desire lines}のコピーを返す（この動作の詳細については geocompr.github.io ウェブサイトの [Desire Lines Extended](https://geocompr.github.io/geocompkg/articles/linevia.html) vignette と `?line_via` を参照）。
+出力は入力と同じだが、公共交通機関のノード\index{node}を使った旅を表す新しいジオメトリの列がある（以下に示す）。
+
+```{r 13-transport-21}
+ncol(desire_rail)
+desire_rail = line_via(desire_rail, bristol_stations)
+ncol(desire_rail)
+```
+
+Figure \@ref(fig:stations) に示すように、最初の `desire_rail` の行に、自宅から出発駅まで、そこから目的地まで、そして最後に目的地から目的地までの移動を表す 3 つのジオメトリリスト列\index{list column}が追加されている。
+この場合、目的地までの距離は非常に短いが（歩行距離）、出発地までの距離は十分であるため、往路の駅まで自転車での移動を促すためのインフラ投資を正当化することができる。Figure \@ref(fig:stations) にある 3 つの出発地の駅周辺の住宅地では、人々が通勤するために自転車を利用することができる。
+
+```{r stations, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="鉄道利用率の高い直線的な希望線（黒）を、公共交通機関（グレー）を経由して出発駅（赤）へ、そして目的地（ごく短い青線）へという3レグに変換する中間点として使用される駅ノード（赤い点）。", fig.scap="Station nodes."}
+# zone_cents = st_centroid(zones_od)
+# Temporary hack:
+zone_cents = st_centroid(zones_od) |> st_set_crs(st_crs(desire_rail))
+zone_cents_rail = zone_cents[desire_rail, ]
+bb = tmaptools::bb(desire_rail, ext = 1.1)
+desire_rail_plot = rbind(
+  st_sf(data.frame(Geometry = "Desire line (original)"), geometry = desire_rail$geometry),
+  st_sf(data.frame(Geometry = "Leg 1 (origin to station)"), geometry = desire_rail$leg_orig),
+  st_sf(data.frame(Geometry = "Leg 2 (station to station)"), geometry = desire_rail$leg_via),
+  st_sf(data.frame(Geometry = "Leg 3 (station to destination)"), geometry = desire_rail$leg_dest)
+) 
+desire_rail_plot = desire_rail_plot |> 
+  mutate(lty = case_when(Geometry == "Desire line (original)" ~ 2, TRUE ~ 1)) |> 
+  mutate(size = case_when(Geometry == "Desire line (original)" ~ 1, TRUE ~ 2))
+bristol_rail_points = rbind(
+  st_sf(data.frame(
+    Node = "Origin and destination locations",
+    col = "black"
+    ), geometry = zone_cents_rail$geometry),
+  st_sf(data.frame(
+    Node = "Public transport node",
+    col = "red"
+    ), geometry = bristol_stations$geometry)
+)
+# tmaptools::palette_explorer()
+tm_shape(desire_rail_plot, bbox = bb) +
+  # legend incorrect in tmap v3.0.0: https://github.com/r-tmap/tmap/issues/672
+  # tm_lines(col = "Geometry", palette = "Set2", lty = desire_rail_plot$lty) +
+  tm_lines(col = "Geometry", palette = "Set2", lwd = "size", scale = 3, legend.lwd.show = FALSE) +
+  tm_shape(bristol_rail_points) +
+  # Try with different alpha values:
+  # tm_dots(col = "col", size = 0.3, alpha = 0.2)
+  tm_dots(col = "col", size = 0.3) +
+  tm_scale_bar()
+# tmap_mode("plot")
+# qtm(bristol_stations, basemaps = "https://{s}.tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=feae177da543411c9efa64160305212d", dots.col = "red", symbols.size = 2) +
+#   tm_shape(desire_rail) +
+#   tm_lines(col = "black", lwd = 4) +
+#   tm_shape(legs) +
+#   tm_lines()
+```
+
+## ルート  {#routes}
+
+地理学者から見れば、ルートとは直線でなくなった希望線\index{desire lines}である。出発地と目的地は同じだが、A から B へのルートはより複雑である。
+ルートは、ローカルまたはリモートで実行されるルート探索サービスを使用して、希望線\index{desire lines}（より一般的には起点と終点のペア）から生成される。
+
+希望線が2つの頂点（始点と終点）しか持たないのに対し、ルートは任意の数の頂点を持つことができ、A-B間の点を直線で結んだものと定義される（ラインストリングジオメトリ）。
+長距離をカバーするルートや複雑なネットワークに沿ったルートは何百もの頂点を持つことができるが、グリッドベースや簡略化された道路ネットワーク上のルートは頂点数が少なくなる傾向がある。
+
+ルートは、希望線から生成されるか、より一般的には、希望線を表す座標ペアを含むマトリックスから生成される。
+このルーティングプロセスは、広義に定義されたさまざまな<u>ルーティングエンジン</u>、すなわち、起点から目的地までの移動方法を記述した形状と属性を返すソフトウェアやウェブサービスによって行われる。
+ルーティングエンジンは、以下のように、R と相対的に実行される<u>場所</u>に基づいて分類することができる。
+
+- ルート計算を可能にする R パッケージを使用したインメモリルーティング (Section \@ref(memengine)
+- R から呼び出せる、R の外部にあるローカルホスティングのルーティングエンジン (Section \@ref(localengine))
+- R から呼び出せる Web API を提供する、外部エンティティによるリモートホスティング型ルーティングエンジン (Section \@ref(remoteengine))
+
+それぞれについて説明する前に、ルーティングエンジンを分類する他の方法について概説しておく価値がある。
+ルーティングエンジンはマルチモーダルである。つまり、複数の交通手段からなるトリップを計算することができるし、そうでないこともある。
+マルチモーダルなルーティングエンジンは、それぞれが異なる交通手段で作られた複数の<u>旅程 (leg)</u>からなる結果を返すことができる。
+住宅地から商業地までの最適なルートは、1）最寄りのバス停まで歩く、2）目的地に最も近いノードまでバスに乗る、3）目的地まで歩く、などが考えられる（入力パラメータ一式がある場合）。
+この 3 つの旅程間の移行点は、一般的に「入口」(ingress)と「出口」(egress)と呼ばれ、公共交通機関の乗り降りを意味する。
+R5 のようなマルチモーダルなルーティングエンジンは、OSRM のような「ユニモーダル」ルーティングエンジンよりも高度で、入力データ要件も大きくなる（Section \@ref(localengine) に記載）。
+
+マルチモーダルエンジンの大きな強みは、電車やバスなどの「トランジット」（公共交通機関）トリップを表現する能力です。
+マルチモデルルーティングエンジンは、公共交通機関のネットワークを表す入力データセットを必要とします。一般的には、General Transit Feed Specification ([GTFS](https://developers.google.com/transit/gtfs)) ファイルで、これは [**tidytransit**](https://r-transit.github.io/tidytransit/index.html) および [**gtfstools**](https://ipeagit.github.io/gtfstools/) パッケージ内の関数で処理できる（GTFSファイルを処理する他のパッケージやツールは利用可能）。
+特定の（公共ではない）交通手段に焦点を当てたプロジェクトでは、ユニモーダルなルーティングエンジンで十分かもしれない。
+ルーティングエンジン（または設定）を分類するもう一つの方法は、ルート、レッグ、セグメントという出力の地理的なレベルによるものである。
+
+
+### ルート、レッグ、セグメント {#route-legs-segments}
+
+ルーティングエンジンは、ルート、レッグ、セグメントという3つの地理的なレベルで出力を生成することができる。
+
+- **Route** レベルの出力には、出発地と目的地のペアごとに1つのフィーチャー（通常はデータフレーム表現におけるマルチライン文字列と関連する行）が含まれ、トリップごとに1つのデータ行があることを意味します。
+- **Leg** レベルの出力には、各起点と終点のペアに1つのフィーチャーと関連する属性が含まれまる。1 つのモードを含むだけのトリップの場合（たとえば、自宅から職場まで車で行き、車まで の短い徒歩は無視）、レッグはルートと同じで、車の旅になる。公共交通機関を利用するトリップの場合、レッグは重要な情報を提供する。**r5r**の関数 `detailed_itineraries()` はレッグを返すが、紛らわしいことに、これは「セグメント」と呼ばれることもあります。
+- Segment レベルの出力は、交通ネットワークの各小セクションのレコードを持つ、ルートに関する最も詳細な情報を提供します。一般的にセグメントは、OpenStreetMap の道と同じか、同じ長さになっている。**cyclestreets** 関数 `journey()` はセグメントレベルのデータを返し、これは **stplanr** の `route()` 関数が返す出発地と目的地レベルのデータでグループ化することによって集約できる。
+
+ほとんどのルーティングエンジンは、デフォルトでルートレベルを返すが、マルチモーダルエンジンは一般的にレッグレベル（単一の輸送モードによる連続した移動ごとに1つの機能）の出力を提供する。
+セグメントレベルの出力は、より詳細な情報を提供するという利点がある。
+**cyclestreets** パッケージは、ルートごとに複数の「静かさ」レベルを返し、サイクルネットワークの「最も弱いリンク」の特定を可能にする。
+セグメントレベル出力の欠点は、ファイルサイズの増大と余分な詳細情報に関連する複雑さである。
+
+ルートレベルの結果は、関数 `stplanr::overline()` を使用してセグメントレベルの結果に変換することができる [@morgan_travel_2020]。
+セグメントやレッグレベルのデータを扱う場合、旅行の開始点と終了点を表すカラムでグループ化し、セグメントレベルのデータを含むカラムを要約/集計することで、ルートレベルの統計情報を返すことができる。
+
+### R のメモリ内ルーティング {#memengine}
+
+R のルーティングエンジンは、R のオブジェクトとして<u>メモリ</u>に格納されているルートネットワークをルート計算のベースとして使用することができる。
+選択肢としては、[**sfnetworks**](https://luukvdmeer.github.io/sfnetworks/) \index{sfnetworks (package)}、 [**dodgr**](https://atfutures.github.io/dodgr/)、 [**cppRouting**](https://github.com/vlarmet/cppRouting) といったパッケージがあり、それぞれ次節のテーマであるルートネットワークを表す独自のクラス体系を提供している。
+
+R ネイティブなルーティングは高速で柔軟な反面、現実的なルート計算のための専用ルーティングエンジンに比べて、一般に設定が困難である。
+ルーティングは難しい問題であり、ダウンロードしてローカルでホストできるオープンソースのルーティングエンジンに何百時間もの時間が費やされている。
+一方、R ベースのルーティングエンジンは、モデル実験や、ネットワークへの変更の影響の統計的分析に適しているかもしれない。
+ルートネットワークの特性（または異なるルートセグメントの種類に関連する重み）を変更し、ルートを再計算し、多くのシナリオの下で結果を分析することを1つの言語で行うことは、研究用途にメリットがある。
+
+### ローカル型専用ルーティングエンジン {#localengine}
+
+**ローカル型**ルーティングエンジンには、OpenTripPlanner、[Valhalla](https://github.com/valhalla/valhalla)、OpenStreetMap Routing Machine (OSRM) （これは「ユニモーダル」のみ対応）、R5 などがある。
+R からこうしたサービスにアクセスするには、**opentripplanner**、[**valhalla**](https://github.com/chris31415926535/valhallr)、**r5r**、[**osrm**](https://github.com/riatelab/osrm)  などのパッケージがある [@morgan_opentripplanner_2019; @pereira_r5r_2021]。
+ローカルにホストされたルーティングエンジンは、ユーザのコンピュータ上で実行されるが、R とは別のプロセスで実行される。
+利点としては、実行速度が速く、異なる輸送手段に対する重み付けプロファイルを制御できるという点がある。
+反対に欠点は、複雑なネットワークをローカルに表現することが難しく、時間的ダイナミクス（主にトラフィックによる）、特殊なソフトウェアが必要となるなどの点が挙げられる。
+
+### リモート型専用ルーティングエンジン {#remoteengine}
+
+**リモート型**\index{routing}ルーティングエンジンは、Web API\index{API} を使用して、起点と終点に関するクエリーを送信し、専用のソフトウェアが動作する強力なサーバーで生成された結果を返す。
+OSRM の一般公開されているサービスのような、オープンソースルーティングエンジンに基づくルーティングサービスは、R から呼び出された場合、ローカルにホストされたインスタンスと全く同じように動作し、単に更新される「ベース URL」を指定する引数を必要とするだけである。
+しかし、外部のルーティングサービスは専用のマシンでホストされているため（通常、正確なルートを生成するインセンティブを持つ営利企業が資金を提供している）、以下のような利点がある。
+
+- 世界中（または通常少なくとも広い地域）にルーティングサービスを提供すること
+- 確立されたルーティングサービスは、通常定期的に更新され、トラフィックレベルに対応することができる
+- ルーティングサービスは通常、専用のハードウェアとソフトウェアで実行され、ロードバランサーなどのシステムにより一貫したパフォーマンスを確保できる
+
+リモートルーティングサービスのデメリットとしては、バッチジョブができない場合の速度（ルートごとにインターネットでのデータ転送に頼ることが多い）、価格（例えば Google ルーティング API では、無料のクエリー回数に制限がある）、ライセンス問題などが挙げられる。
+[**googleway**](http://symbolixau.github.io/googleway/) と [**mapbox**](https://walker-data.com/mapboxapi/articles/navigation.html) という二つのパッケージは、それぞれ Google と Mapbox のルート検索サービスへのアクセスを提供する\index{API}。
+無料（ただし料金に制限あり）のルーティングサービスは、 [OSRM](http://project-osrm.org/)、 [**osrm**](https://rgeomatic.hypotheses.org/category/osrm) からアクセスできる [openrouteservice.org](https://openrouteservice.org/)、[**openrouteservice**](https://github.com/GIScience/openrouteservice-r) などがある。最後のパッケージは CRAN にはない。
+また、[CycleStreets.net](https://www.cyclestreets.net/) のような、より具体的なルート検索サービスもある。これは、「サイクリストによるサイクリストのための」サイクル・ジャーニー・プランナーで非営利の交通技術会社である。
+R では [**cyclestreets**](https://rpackage.cyclestreets.net/) パッケージを通して CycleStreets ルートにアクセスできるが、多くのルーティングサービスには R インターフェースがなく、パッケージ開発の大きなチャンスとなっている。Web API へのインターフェースを提供する R パッケージを構築することはやりがいのある経験になることだろう。
+
+R 言語は、交通ネットワーク上のルートを表すデータを計算したりインポートしたりするためのパッケージが豊富にあることが強みであり、ここ数年、交通研究に使われることが多くなっている。
+しかし、このようにパッケージや手法が多様化すると、覚えるべきパッケージ名や関数名が多くなってしまうというデメリットがある。
+**stplanr** パッケージは、`route()` 関数でルートを生成するための統一されたインタフェースを提供することで、この問題に取り組んでいる。
+この関数は、地理的な希望線（引数 `l =`）や座標、さらにはユニークな住所を表すテキスト文字列など、さまざまな入力を受け取り、ルートデータを一貫した `sf` オブジェクトとして返す。
+<!-- TODO: at some point I hope to create a dedicated router package, mention that if it gets created (RL 2022-07) -->
+
+### ルーティング: 実例紹介
+
+前のセクションで生成された希望線を<u>すべて</u>ルート探索\index{routing}する代わりに、政策上関心のある希望線\index{desire lines}に焦点を当てることにする。
+データ全体を処理する前に、一部のデータに対して計算量の多い処理を実行することは、賢明な方法である。ルーティングも然り。
+ルーティングは、ジオメトリが詳細でかつローとオブジェクトの属性が多いと、時間とメモリを消費し、オブジェクトが巨大になる。
+このため、この節では、ルートを計算する前に希望線をフィルタする。
+
+自転車旅行の利点は、自動車旅行を置き換えるときに最も大きく、比較的短い旅行は長い旅行よりも自転車に乗る可能性が高いという観察に基づいて、自転車旅行の可能性を推定することに重点を置いて希望線のサブセットをフィルタリングする [@lovelace_propensity_2017]。
+短い距離（5 km 程度、時速 20 km で15分程度で走れる距離）は、比較的自転車で移動する確率が高く、[electric bike](https://www.sciencedirect.com/science/article/pii/S0967070X21003401) で移動すると最大距離が延びる [@lovelace_propensity_2017]。
+これらの考察に基づき、希望線をフィルタし、多くの（100以上の）短い（ユークリッド距離2.5〜5km）トリップを駆動する OD ペアを表すオブジェクト `desire_lines_short` を返す次のコードチャンクに反映しよう。
+
+```{r 13-transport-17, message=FALSE}
+desire_lines$distance_km = as.numeric(st_length(desire_lines)) / 1000
+desire_lines_short = desire_lines |> 
+  filter(car_driver >= 100, distance_km <= 5, distance_km >= 2.5)
+```
+
+上記のコードで、`st_length()` は Section \@ref(distance-relations) にあるように、各希望線の長さを計算している。
+Section \@ref(vector-attribute-subsetting) で述べるように、**dplyr** の `filter()` 関数で、上記の条件に基づいて `desire_lines` データセットにフィルタをかけている\index{filter operation|see{attribute!subsetting}},。
+次に、この希望線をルートに変換する。
+これは一般に公開されている OSRM サービスを用いて、以下のコードにある **stplanr** 関数 `route()` と `route_osrm()`\index{stplanr (package)} で行われる。
+
+```{r 13-transport-18, message=FALSE}
+routes_short = route(l = desire_lines_short, route_fun = route_osrm,
+                     osrm.profile = "bike")
+```
+
+出力は `routes_short` で、（少なくとも OSRM ルーティングエンジンによれば）サイクリングに適したトランスポートネットワーク\index{network} 上のルートを表す `sf` オブジェクトで、各欲求行に対して一つずつ出力される。
+注意：上記のコマンドのような外部のルーティングエンジンの呼び出しは、インターネット接続（そして、今回は必要ないが、環境変数に保存された API キーも必要な場合がある）でのみ動作する。
+`desire_lines` オブジェクトに含まれるカラムに加えて、新しいルートデータセットには `distance` (今回はルートの距離を参照) と `duration` (秒単位) のカラムが含まれ、それぞれのルートについて有用な追加情報を提供する可能性がある。
+サイクリングルートと一緒に、多くの短い車での移動が行われる希望線をプロットすることにする。
+ルートの幅を置き換えられる可能性のある車の旅の数に比例させることは、道路網への介入に優先順位をつける効果的な方法を提供する [@lovelace_propensity_2017]。
+以下のコードチャンクは、希望線とルートをプロットし、その結果、人々が短距離を運転するルートを示す Figure \@ref(fig:routes) になる。[^13-transport-8]
+
+[^13-transport-8]: なお、赤いルートと黒い希望線は、まったく同じ地点からスタートしているわけではない。
+    これは、ゾーンの重心がルートネットワーク上に存在することはほとんどなく、重心に最も近い輸送ネットワークノードからルートが発信されるためである。
+    また、ルートはゾーンセントロイドを起点とすると仮定しているが、これは可能な起点と目的地のすべての組み合わせの間の最短ルートを計算するのに必要な計算資源を減らすために交通モデルで使用される単純化した仮定であることに注意 [@hollander_transport_2016]。
+
+```{r routes, warning=FALSE, fig.cap="短距離（ユークリッド距離 5 km 未満）の自動車移動が多数（100 回以上）行われたルート（赤）と、同じ移動を表す希望線（黒）および重心（点）を重ねたもの。", fig.scap="Routes along which many car journeys are made.", echo=FALSE}
+# TODO (low priority, RL): add a facetted plot showing network cleaning/overline functions
+
+# waldo::compare(
+#   sf::st_crs(desire_lines_short),
+#   sf::st_crs(routes_short)
+# )
+routes_plot_data = rbind(
+  desire_lines_short |> transmute(Entity = "Desire lines") |> sf::st_set_crs("EPSG:4326"),
+  routes_short |> transmute(Entity = "Routes") |> sf::st_set_crs("EPSG:4326")
+)
+zone_cents_routes = zone_cents[desire_lines_short, ]
+routes_plot_data |> 
+  ggplot() +
+  geom_sf(aes(color = Entity, linetype = Entity)) +
+  scale_color_manual(values = c("black", "red")) +
+  scale_linetype_manual(values = c(2, 1)) +
+  geom_sf(data = zone_cents_routes) +
+  theme_void()
+# tm_shape(desire_lines_short) + tm_lines() +
+#   tm_shape(routes_short) + tm_lines(col = "red") 
+```
+
+例えば `mapview::mapview(desire_carshort$geom_car)` でインタラクティブな地図にプロットしてみると、ブリストル中心部から約 10 km 北のブラッドリー・ストーク周辺で多くの短距離自動車旅行が行われていることがわかる。
+[Wikipedia](https://en.wikipedia.org/wiki/Bradley_Stoke) によると、ブラッドリー・ストークは「民間投資によって建設されたヨーロッパ最大のニュータウン」であり、公共交通機関の整備が限定的であることを示唆している。
+さらに、この町は、「M4高速道路とM5高速道路など、大規模な（サイクリングに不利な）道路構造に囲まれている」 [@tallon_bristol_2007]。
+
+旅行希望線\index{desire lines}を旅行ルートに変換することは、政策の観点から多くの利点がある。
+ルーティングエンジンによって計算された正確なルートをたどるトリップがどれだけあるか（あったとしても）確認することはできないことを覚えておくことが重要である。
+しかし、ルートや道路・区間レベルの結果は、政策に大きく関連する可能性がある。
+ルートセグメントの結果は、利用可能なデータ に従って、最も必要な場所に投資を優先させることを可能にすることができる [@lovelace_propensity_2017]。
+
+## ルートネットワーク  {#route-networks}
+
+一般に路線は、希望線と同じレベルのデータ（または重複する可能性のあるセグメントのレベル）を含むが、路線網データセットは、交通網をほぼ完全に表現するものである。
+路線網の各セグメント（交差点間の連続した道路区間にほぼ相当）は、一度だけ存在する。しかし、セグメントの平均長はデータソースによって異なる（このセクションで使用した OSM 由来の `bristol_ways` データセットのセグメントの平均長は 200 m 強で、標準偏差は 500 m 近い）。
+セグメント長にばらつきがあるのは、地方では交差点が遠く、密集した都市部では数メートルおきに交差点があるなど、セグメントの切れ目があるためと思われる。
+
+路線網は、インプットである場合もあれば、アウトプットである場合もあり、両方である場合もある。
+ルート計算を行う交通研究は、内部または外部のルーティングエンジンのルートネットワークデータを必要とする（後者の場合、ルート網データは必ずしも R にインポートされるわけではない）。
+しかし、路線ネットワークは、多くの交通研究プロジェクトにおいて重要なアウトプットでもある。特定の区間で発生しうるトリップ数などのデータをまとめ、路線ネットワークとして表現することで、最も必要なところに優先的に投資することができる。
+\index{network}
+
+ルートレベルのデータから得られる出力としてルートネットワークを作成する方法を示すために、モーダルシフトの簡単なシナリオを想像してください。
+ルート距離 0～3 km の車移動の 50％ が自転車に置き換えられ、その割合はルート距離が 1 km 増えるごとに 10 ポイントずつ下がり、6 km の車移動の 20％ が自転車に置き換えられ、8 km 以上の車移動が自転車に置き換えられないと想像してみよう。
+これはもちろん非現実的なシナリオ [@lovelace_propensity_2017] ではあるものの、出発点としては有用であろう。
+この場合、自動車から自転車へのモーダルシフトを次のようにモデル化することができる。
+
+```{r uptakefun}
+uptake = function(x) {
+  case_when(
+    x <= 3 ~ 0.5,
+    x >= 8 ~ 0,
+    TRUE ~ (8 - x) / (8 - 3) * 0.5
+  )
+}
+routes_short_scenario = routes_short |> 
+  mutate(uptake = uptake(distance / 1000)) |> 
+  mutate(bicycle = bicycle + car_driver * uptake,
+         car_driver = car_driver * (1 - uptake))
+sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
+```
+
+約 4000 のトリップが車から自転車に切り替わるというシナリオを作成したので、この更新されたモデル化されたサイクリング活動がどこで行われるかをモデル化することができるようになった。
+これには、**stplanr** パッケージの関数 `overline()` を使用する。
+この関数は、ルートと要約する属性の名前を含むオブジェクトを第1と第2の引数として受け取り、分岐点（2つ以上のラインストリングの形状が出会うところ）でラインストリングを切断し、それぞれのユニークなルートセグメント [@morgan_travel_2020] について集約した統計量を計算するものである。
+
+```{r rnet1}
+route_network_scenario = overline(routes_short_scenario, attrib = "bicycle")
+```
+
+前出の2つのコードチャンクの出力は、以下の Figure \@ref(fig:rnetvis) に要約している。
+
+```{r rnetvis, out.width="49%", fig.show='hold', fig.cap="自動車旅行から自転車への移行率を距離の関数で表した図（左）と、この関数のルートネットワークレベルの結果（右）。", echo=FALSE, fig.height=6}
+routes_short_scenario |> 
+  ggplot() +
+  geom_line(aes(distance / 1000, uptake)) +
+  labs(x = "ルート距離 (km)", y = NULL, title = "自動車から自転車へ変換した割合") +
+  scale_y_continuous(labels = scales::percent) + theme(text = element_text(family = "HiraginoSans-W3"))
+tm_shape(route_network_scenario) +
+  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "1日あたりの自転車トリップ数\n(modeled, one direction)") + tm_layout(fontfamily = "HiraginoSans-W3")
+```
+
+道路種別や幅員などの属性がセグメントレベルで記録されている交通網は、一般的な路線網の一種である。
+このような路線網のデータセットは、OpenStreetMap から世界中で入手でき、**osmdata**\index{osmdata (package)} や **osmextract**\index{osmextract (package)} などのパッケージでダウンロードすることが可能である。
+OSM\index{OpenStreetMap}のダウンロードと準備の時間を節約するために、以下の出力に示すように、ケーススタディ地域の交通ネットワークのサンプルを表す LINESTRING ジオメトリと属性を持つ`sf`オブジェクト、**spDataLarge** パッケージから `bristol_ways` オブジェクトを使用します（詳細は `?bristol_ways` を参照）。
+
+```{r 13-transport-22}
+summary(bristol_ways)
+```
+
+出力は、`bristol_ways` が輸送ネットワーク\index{network}上の6,000以上のセグメントを表していることを示している。
+このネットワークや他の地理的なネットワークは、数学的なグラフとして表現することができ、ネットワーク上のノード\index{node}とエッジ\index{edge}で接続されている。
+このようなグラフを扱うために、多くのRパッケージが開発されており、特に **igraph**\index{igraph (package)} が有名である。
+ルートネットワークを手動で `igraph` オブジェクトに変換することはできるが、地理的な属性は失われる。
+この **igraph** の制限を克服するために、路線ネットワークをグラフと地理的な線として同時に表現する **sfnetworks**\index{sfnetworks (package)} パッケージが開発された。
+ここでは、`bristol_ways` オブジェクトを対象に、**sfnetworks** の機能を紹介する。
+
+```{r 13-transport-23}
+bristol_ways$lengths = st_length(bristol_ways)
+ways_sfn = as_sfnetwork(bristol_ways)
+class(ways_sfn)
+```
+
+```{r 13-transport-23-2, eval=FALSE}
+ways_sfn
+#> # A sfnetwork with 5728 nodes and 4915 edges
+#> # A directed multigraph with 1013 components with spatially explicit edges
+#> # Node Data:     5,728 × 1 (active)
+#> # Edge Data:     4,915 × 7
+#>    from    to highway maxspeed ref                              geometry lengths
+#>   <int> <int> <fct>   <fct>    <fct>                    <LINESTRING [°]>     [m]
+#> 1     1     2 road    <NA>     B3130 (-2.61 51.4, -2.61 51.4, -2.61 51.…    218.
+#> # … 
+```
+
+前のコードチャンクの出力(スペースの関係上、最終的な出力は最も重要な8行のみを含むように短縮されている)は、 `ways_sfn` がグラフ形式と空間形式の両方のノードとエッジを含む複合オブジェクトであることを表している。
+`ways_sfn` は `sfnetwork` クラスで、 **igraph** パッケージの `igraph` クラスをベースにしている。
+下の例では、各エッジを通る最短ルート\index{shortest route}の数を意味する 'edge betweenness' \index{edge} が計算されている（詳しくは `?igraph::betweenness` を参照）。
+このデータセットに対して、エッジの間 隔を計算した結果を図に示す。図には、比較のために `overline()` 関数で計算した自転車ルートネットワークデータセットをオーバーレイで表示している。
+この結果は、グラフの各エッジがセグメントを表していることを示している。道路ネットワークの中心に近いセグメントは最も高い betweenness 値を持ち、一方、ブリストル中心部に近いセグメントはより高いサイクリングの可能性を持っていることが、これらの単純化されたデータセットに基づいて示されている。
+
+```{r wayssln-gen}
+ways_centrality = ways_sfn |> 
+  activate("edges") |>  
+  mutate(betweenness = tidygraph::centrality_edge_betweenness(lengths)) 
+```
+
+```{r wayssln, fig.cap="路線ネットワークデータセットの図。グレーの線は簡略化された道路網を表し、セグメントの太さは betweenness に比例する。緑色の線は、上記のコードで計算された潜在的なサイクリングフロー（片道）である。", out.width="60%", fig.scap="Illustration of a small route network."}
+bb_wayssln = tmaptools::bb(route_network_scenario, xlim = c(0.1, 0.9), ylim = c(0.1, 0.6), relative = TRUE)
+tm_shape(ways_centrality |> st_as_sf(), bb = bb_wayssln) +
+  tm_lines(lwd = "betweenness", scale = 9, title.lwd = "Betweenness", col = "grey",
+    lwd.legend = c(5000, 10000), legend.lwd.is.portrait = TRUE) +
+  tm_shape(route_network_scenario) +
+  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "自転車トリップ数 (modeled, one direction)",
+    lwd.legend = c(1000, 2000), legend.lwd.is.portrait = TRUE, col = "darkgreen") + tm_layout(fontfamily = "HiraginoSans-W3")
+```
+
+```{r 13-transport-24, eval=FALSE, echo=FALSE}
+# not producing groups of routes so removing for now...
+# m = igraph::clusters(ways_sfn@g)
+# igraph::V(ways_sfn@g)$m = m$membership
+# gdf = igraph::as_long_data_frame(ways_sfn@g)
+```
+
+また、**sfnetworks** パッケージを用いると、このルートネットワークのグラフ表現を使って、出発地と目的地の間の最短ルート\index{shortest route}を求めることができる。
+<!-- TODO: make an exercise based on this if time allows (RL 2022-07) -->
+このセクションで紹介した方法は比較的単純で、実際にはもっと可能なことはある。
+**sfnetworks** が提供するグラフと空間のデュアル機能により、多くの新しい強力な技法が可能になりますが、このセクションで完全にカバーすることはできない。
+このセクションは、この分野のさらなる探求と研究のための強力な出発点を提供する。
+上で使った例のデータセットが比較的小さい。
+データのサブセットで手法をテストし、十分な RAM を確保することが助けになるが、R5 [@alessandretti_multimodal_2022] などの大規模ネットワークに最適化された輸送ネットワーク分析ができる他のツールも調べる価値があるだろう。
+
+## 新しいインフラの優先順位付け  {#prioritizing-new-infrastructure}
+
+この節では、交通計画分野においてジオコンピュテーションが政策関連の成果を作ることができることを示す。
+持続可能な交通インフラの投資先として有望な場所を、教育目的のシンプルなアプローチで特定する。
+
+本章で紹介するデータ駆動型アプローチの利点は、モジュール化されていることである。
+この段階に至るまでには、(欲望線から生成された)短いが車に依存する通勤経路を特定するための手順があり、(ルート・ネットワーク)セクションで **sfnetworks** パッケージを使用してルート・ネットワークの特性を分析することが含まれています。
+本章の最後のコードチャンクは、サイクリングインフラから短い距離のエリアを表す新しいデータセットに、前のセクションのサイクリング潜在力の推定値を重ねることによって、これらの一連の分析を結合する。
+この新しいデータセットは、以下のコードで作成される。1) 交通ネットワークを表す`bristol_ways`オブジェクトからサイクルウェイのエンティティをフィルタリングする。2) サイクルウェイの個々の LINESTRING エンティティを単一の multilinestring オブジェクトに「統合」する（バッファ作成が速くなるため）。
+
+```{r 13-transport-25}
+existing_cycleways_buffer = bristol_ways |> 
+  filter(highway == "cycleway") |>    # 1) filter out cycleways
+  st_union() |>                       # 2) unite geometries
+  st_buffer(dist = 100)               # 3) create buffer
+```
+
+次の段階は、ネットワークの中で、サイクリングの可能性が高いが、サイクリングのための設備がほとんどないポイントを表すデータセットを作成することである。
+
+```{r, echo=FALSE, eval=FALSE}
+waldo::compare(
+  sf::st_crs(route_network_scenario),
+  sf::st_crs(existing_cycleways_buffer)
+)
+```
+
+```{r 13-transport-26, eval=FALSE}
+route_network_no_infra = st_difference(
+  route_network_scenario,
+  route_network_scenario |> st_set_crs(st_crs(existing_cycleways_buffer)),
+  existing_cycleways_buffer
+)
+```
+
+```{r 13-transport-26-workaround, echo=FALSE}
+# TODO: remove this hidden chunk when rocker project updates PROJ version
+route_network_no_infra = st_difference(
+  # route_network_scenario,
+  # Temporary workaround, see https://github.com/geocompx/geocompr/issues/863:
+  route_network_scenario |> st_set_crs(st_crs(existing_cycleways_buffer)),
+  existing_cycleways_buffer
+)
+```
+
+Figure \@ref(fig:cycleways) には、自動車への依存度が高く、自転車の利用可能性が高いが、自転車専用道路が整備されていないルートが示されている。
+
+```{r 13-transport-28, eval=FALSE}
+tmap_mode("view")
+qtm(route_network_no_infra, basemaps = leaflet::providers$Esri.WorldTopoMap,
+    lines.lwd = 5)
+```
+
+```{r cycleways, echo=FALSE, message=FALSE, fig.cap="ブリストルにおける自動車依存度を下げるために、自転車インフラを優先的に整備するルートの候補。静的マップは、既存のインフラと自動車と自転車の乗り換えの可能性が高いルートとの間のオーバーレイの概要を提供する（左）。`qtm()` 関数から生成されたインタラクティブマップのスクリーンショットは、新しいサイクルウェイから利益を得ることができる場所としてWhiteladies Roadを強調している（右）。", out.width="50%", fig.show='hold', fig.scap="Routes along which to prioritise cycle infrastructure.", fig.height=6}
+# Previous verson:
+# source("https://github.com/geocompx/geocompr/raw/main/code/13-cycleways.R")
+# m_leaflet
+# tmap_leaflet(m_leaflet) # not working
+# online figure - backup
+# u = "https://user-images.githubusercontent.com/1825120/39901156-a8ec9ef6-54be-11e8-94fb-0b5f6b48775e.png"
+# knitr::include_graphics(u)
+tm_shape(existing_cycleways_buffer, bbox = bristol_region) +
+ tm_polygons(col = "lightgreen") +
+ tm_shape(route_network_scenario) +
+ tm_lines(lwd = "bicycle", scale = 9, title.lwd = "自転車トリップ数 (modeled, one direction)") + tm_layout(fontfamily = "HiraginoSans-W3")
+knitr::include_graphics("figures/bristol_cycleways_zoomed.png")
+```
+
+この方法には限界がある。現実には、人々はゾーン重心に移動したり、特定のモードの最短ルート\index{shortest route}アルゴリズムを常に使用するわけではない。
+しかし、この結果は、自動車依存と公共交通の観点から、自転車専用道路を優先的に整備できるルートを示している。
+この分析は、現実の交通計画の立案に使うためには、より大きなデータを使うなど、大幅に拡大して行う必要がある。
+
+## 今後の方向性  {#future-directions-of-travel}
+
+この章では、交通研究にジオコンピューティングを利用する可能性を紹介し、オープンデータと再現可能なコードを用いて、都市の交通システムを構成するいくつかの重要な地理的要素を調査した。
+この結果は、どこに投資が必要かを計画するのに役立つだろう。
+
+交通システムは複数の相互作用レベルで機能しているため、ジオコンピューティングの手法は交通システムの仕組みや異なる介入の効果を理解する上で大きな可能性を秘めている。
+この分野でできることはまだまだたくさんある。この章で紹介した基礎の上に、さまざまな方向性を構築することが可能であろう。
+交通は、多くの国で温室効果ガスの排出源として最も急速に増加しており、「特に先進国では最大の温室効果ガス排出部門」になると言われている（ [EURACTIV.com](https://www.euractiv.com/section/agriculture-food/opinion/transport-needs-to-do-a-lot-more-to-fight-climate-change/) を参照）。
+交通機関の排出量は社会全体で非常に不平等に配分されており、交通機関は（食料や暖房とは異なり）幸福に不可欠なものではない。
+需要の削減、車両の電化、徒歩や自転車などのアクティブな移動手段の導入により、このセクターが急速に脱炭素化する大きな可能性を秘めている。
+新しいテクノロジーは、カーシェアリングを可能にすることで、車への依存度を下げることができる。
+ドックレス自転車やeスクーターのような「マイクロモビリティ」システムも出現し、General Bikeshare Feed Specification (GBFS) フォーマットの貴重なデータセットを作成し、[**gbfs**](https://github.com/simonpcouch/gbfs) パッケージで取り込んで処理することができるようになった。
+これらやその他の変化は、人々が必要とする雇用やサービスの場所に到達する能力であるアクセシビリティに大きな影響を与えます。このようなことは、[**accessibility**](https://ipeagit.github.io/accessibility/) パッケージなどのパッケージを使用して、現在および変化のシナリオに基づいて定量化することが可能である。
+このような「交通の未来」を地域や国レベルでさらに探求することで、新たな知見を得られるだろう。
+
+方法論的には、本章で示した基礎は、より多くの変数を分析に含めることで拡張することが可能である。
+速度制限、交通量の多さ、自転車や歩行者用保護道の設置などのルートの特徴は、「モーダルスプリット」（異なる交通手段による旅行の割合）に関連付けることができる。
+例えば、OpenStreetMapの \index{OpenStreetMap}  データをバッファや、Chapter \@ref(attr) と Chapter \@ref(spatial-operations) で紹介した地理データ手法で集約すれば、交通ルートの近くに緑地があるかどうかを検出することも可能である。
+R\index{R} の統計モデリング機能を使えば、例えば、現在と将来のサイクリングのレベルを予測することができるだろう。
+
+この種の分析のベースには、Propensity to Cycle Tool (PCT)がある。 これは、R\index{R} で開発された一般にアクセス可能な ( [www.pct.bike](http://www.pct.bike/) 参照) マッピングツールで、イングランド全域のサイクリングへの投資を優先させるために使用されている [@lovelace_propensity_2017]。
+同様のツールは、世界中の大気汚染や公共交通機関へのアクセスなど、他のテーマに関連したエビデンスに基づく交通政策を奨励するためにも使用できる。
+
+## 演習  {#ex-transport}
+
+```{r, echo=FALSE, results='asis'}
+res = knitr::knit_child('_13-ex.Rmd', quiet = TRUE, options = list(include = FALSE, eval = FALSE))
+cat(res, sep = '\n')
+```
