@@ -858,7 +858,7 @@ Figure \@ref(fig:resampl) shows a comparison of different resampling methods on 
 The `resample()` function also has some additional resampling methods, including `sum`, `min`, `q1`, `med`, `q3`, `max`, `average`, `mode`, and `rms`.
 All of them calculate a given statistic based on the values of all non-NA contributing grid cells.
 For example, `sum` is useful when each raster cell represents a spatially extensive variable (e.g., number of people).
-As an effect of using `sum`, the resampled raster should have the sample total number of people as the original one.
+As an effect of using `sum`, the resampled raster should have the same total number of people as the original one.
 
 As you will see in section \@ref(reproj-ras), raster reprojection is a special case of resampling when our target raster has a different CRS than the original raster.
 
