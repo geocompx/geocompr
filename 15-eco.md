@@ -476,8 +476,9 @@ To do so, we only need to run the `predict` method of our fitted `AutoTuner` obj
 ```r
 # predicting using the best hyperparameter combination
 autotuner_rf$predict(task)
-#> Warning: Detected version mismatch: Learner 'regr.ranger.tuned' has been trained
-#> with mlr3 version '0.13.3', not matching currently installed version '0.14.1'
+#> Warning: Detected version mismatch: Learner 'regr.ranger.tuned' has been
+#> trained with mlr3 version '0.13.3', not matching currently installed version
+#> '0.14.1'
 #> Warning: Detected version mismatch: Learner 'regr.ranger' has been trained with
 #> mlr3 version '0.13.3', not matching currently installed version '0.14.1'
 #> <PredictionRegr> for 84 observations:
