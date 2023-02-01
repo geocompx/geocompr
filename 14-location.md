@@ -95,6 +95,11 @@ input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
 # set -1 and -9 to NA
 input_tidy = dplyr::mutate(input,
   dplyr::across(.fns =  ~ifelse(.x %in% c(-1, -9), NA, .x)))
+#> Warning: There was 1 warning in `dplyr::mutate()`.
+#> ℹ In argument: `dplyr::across(.fns = ~ifelse(.x %in% c(-1, -9), NA, .x))`.
+#> Caused by warning:
+#> ! Using `across()` without supplying `.cols` was deprecated in dplyr 1.1.0.
+#> ℹ Please supply `.cols` instead.
 ```
 
 

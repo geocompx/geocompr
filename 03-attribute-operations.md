@@ -421,7 +421,7 @@ A 'left join', which preserves the first dataset, merges `world` with `coffee_da
 
 ```r
 world_coffee = left_join(world, coffee_data)
-#> Joining, by = "name_long"
+#> Joining with `by = join_by(name_long)`
 class(world_coffee)
 #> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
 ```
@@ -474,7 +474,7 @@ In that case an inner join can be used:
 
 ```r
 world_coffee_inner = inner_join(world, coffee_data)
-#> Joining, by = "name_long"
+#> Joining with `by = join_by(name_long)`
 nrow(world_coffee_inner)
 #> [1] 45
 ```
@@ -510,7 +510,7 @@ To fix this issue, we will create a new version of `coffee_data` and update the 
 ```r
 coffee_data$name_long[grepl("Congo,", coffee_data$name_long)] = drc
 world_coffee_match = inner_join(world, coffee_data)
-#> Joining, by = "name_long"
+#> Joining with `by = join_by(name_long)`
 nrow(world_coffee_match)
 #> [1] 46
 ```
@@ -523,7 +523,7 @@ the output of a join tends to match its first argument:
 
 ```r
 coffee_world = left_join(coffee_data, world)
-#> Joining, by = "name_long"
+#> Joining with `by = join_by(name_long)`
 class(coffee_world)
 #> [1] "tbl_df"     "tbl"        "data.frame"
 ```
