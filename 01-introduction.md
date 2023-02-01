@@ -304,7 +304,7 @@ Functions such as `gIntersection()` enabled users to find spatial relationships 
 
 A limitation of the **sp** ecosystem was its limited support for raster data.
 This was overcome by **raster**\index{raster}, first released in 2010 [@R-raster].
-**raster**'s class system and functions enabled a range of raster operations, capabilities now implemented in the **terra** package, which superscedes **raster**, as outlined in Section \@ref(raster-data).
+**raster**'s class system and functions enabled a range of raster operations, capabilities now implemented in the **terra** package, which supersedes **raster**, as outlined in Section \@ref(raster-data).
 An important capability of **raster** and **terra** is their ability to work with datasets that are too large to fit into RAM (R's interface to PostGIS\index{PostGIS} also supports off-disk operations, on geographic vector datasets).
 **raster** and **terra** also supports map algebra, as described in Section \@ref(map-algebra).
 
