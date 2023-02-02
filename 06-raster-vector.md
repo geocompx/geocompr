@@ -300,7 +300,7 @@ To calculate that we must `sum` the field (`"capacity"`), resulting in output il
 
 ```r
 ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template, 
-                       field = "capacity", fun = sum)
+                       field = "capacity", fun = sum, na.rm = TRUE)
 ```
 
 <div class="figure" style="text-align: center">
