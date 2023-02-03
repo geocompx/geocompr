@@ -14,7 +14,7 @@ if(!exists("cycle_hire_osm_projected")) {
                          field = 1, fun = "length")
   
   ch_raster3 = rasterize(vect(cycle_hire_osm_projected), raster_template, 
-                         field = "capacity", fun = sum)
+                         field = "capacity", fun = sum, na.rm = TRUE)
 }
 
 r0p = tm_shape(cycle_hire_osm_projected) + 
