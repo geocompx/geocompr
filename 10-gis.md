@@ -434,7 +434,7 @@ In the above example, we first opened the `imagery_segmentation` library and the
 We also assigned it to the `sg` object, not to retype the whole tool code in our next steps.^[You can read more about the tool at https://saga-gis.sourceforge.io/saga_tool_doc/8.3.0/imagery_segmentation_2.html.]
 If we just type `sg`, we will get a quick summary of the tool and a data frame with its parameters, descriptions, and defaults.
 You may also use `tidy(sg)` to extract just the parameters' table.
-The `seed_generation` tool takes a a raster dataset as its first argument (`features`); optional arguments include `band_width` that specifies the size of initial polygons.
+The `seed_generation` tool takes a raster dataset as its first argument (`features`); optional arguments include `band_width` that specifies the size of initial polygons.
 
 
 ```r
@@ -862,7 +862,7 @@ But the same is true for the lightweight SQLite/SpatiaLite database engine and G
 
 If your datasets are too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, it may be worth exploring large-scale geographic querying on distributed computing systems.
 Such systems are outside the scope of this book but it worth mentioning that open source software providing this functionality exists.
-Prominent projects in this space include [GeoMesa](http://www.geomesa.org/) and [Apache Sedona](https://sedona.apache.org/). The [**apache.sedona**](https://cran.r-project.org/package=apache.sedona) package provides an interace to the latter.
+Prominent projects in this space include [GeoMesa](http://www.geomesa.org/) and [Apache Sedona](https://sedona.apache.org/). The [**apache.sedona**](https://cran.r-project.org/package=apache.sedona) package provides an interface to the latter.
 
 ## Bridges to cloud technologies and services {#cloud}
 
