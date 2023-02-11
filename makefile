@@ -3,13 +3,13 @@ html:
 	cp -fvr style/style.css _book/
 	cp -fvr _redirects _book/
 	# cp -fvr images _book/
-	-cp -fvr _main* _book/
+	cp -fvr _main* _book/
 
 html2:
 	/Library/Frameworks/R.framework/Resources/bin/Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::gitbook", clean = FALSE)'
 	cp -fvr style/style.css _book/
 	# cp -fvr images _book/
-	-cp -fvr _main* _book/
+	cp -fvr _main* _book/
 
 build: ## Make Build
 	make html
