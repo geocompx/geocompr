@@ -1,34 +1,34 @@
 html:
-	/Library/Frameworks/R.framework/Resources/bin/Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::bs4_book", clean = TRUE)'
+	Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::bs4_book", clean = TRUE)'
 	cp -fvr style/style.css _book/
 	cp -fvr _redirects _book/
 	# cp -fvr images _book/
 	cp -fvr _main* _book/
 
 html2:
-	/Library/Frameworks/R.framework/Resources/bin/Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::gitbook", clean = FALSE)'
+	Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::gitbook", clean = FALSE)'
 	cp -fvr style/style.css _book/
 	# cp -fvr images _book/
 	cp -fvr _main* _book/
 
 build: ## Make Build
 	make html
-	/Library/Frameworks/R.framework/Resources/bin/Rscript -e 'browseURL("_book/index.html")'
+	Rscript -e 'browseURL("_book/index.html")'
 
 pdf: ## Render book in pdf
-	/Library/Frameworks/R.framework/Resources/bin/Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::pdf_book")'
+	Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::pdf_book")'
 
 md: ## Generate Markdown
-	/Library/Frameworks/R.framework/Resources/bin/Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::pdf_book", clean = FALSE)'
+	Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::pdf_book", clean = FALSE)'
 
 install: ## Perform install
-	/Library/Frameworks/R.framework/Resources/bin/Rscript -e 'remotes::install_github("geocompx/geocompr")'
+	Rscript -e 'remotes::install_github("geocompx/geocompr")'
 
 deploy: ## Perform deployment
-	/Library/Frameworks/R.framework/Resources/bin/Rscript -e 'bookdown::publish_book(render = "local", account = "robinlovelace")'
+	Rscript -e 'bookdown::publish_book(render = "local", account = "robinlovelace")'
 
 clean:
-	/Library/Frameworks/R.framework/Resources/bin/Rscript -e "bookdown::clean_book(TRUE)"
+	Rscript -e "bookdown::clean_book(TRUE)"
 	rm -fvr *.log Rplots.pdf _bookdown_files land.sqlite3
 
 cleaner:
