@@ -503,6 +503,8 @@ So, to sum it all up -- the GRASS GIS database may contain many locations (all d
 Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass-stable/manuals/helptext.html) for more information on the GRASS spatial database\index{spatial database} system.
 To quickly use GRASS from within R, we will use the **link2GI** package, however, one can also set up the GRASS GIS database step-by-step.
 See [GRASS within R](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#GRASS_within_R) for how to do so.
+Please note that the code instructions in the following paragraphs might be hard to follow when using GRASS for the first time but by running through the code line-by-line and by examining the intermediate results, the reasoning behind it should become even clearer.
+
 
 Here, we introduce **rgrass**\index{rgrass (package)} with one of the most interesting problems in GIScience - the traveling salesman problem\index{traveling salesman}.
 Suppose a traveling salesman would like to visit 24 customers.

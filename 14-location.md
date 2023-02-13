@@ -94,12 +94,8 @@ input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D, hh_size = HHGroesse_D)
 # set -1 and -9 to NA
 input_tidy = dplyr::mutate(input,
-  dplyr::across(.fns =  ~ifelse(.x %in% c(-1, -9), NA, .x)))
-#> Warning: There was 1 warning in `dplyr::mutate()`.
-#> ℹ In argument: `dplyr::across(.fns = ~ifelse(.x %in% c(-1, -9), NA, .x))`.
-#> Caused by warning:
-#> ! Using `across()` without supplying `.cols` was deprecated in dplyr 1.1.0.
-#> ℹ Please supply `.cols` instead.
+  dplyr::across(.cols = c(pop, women, mean_age, hh_size), 
+                .fns =  ~ifelse(.x %in% c(-1, -9), NA, .x)))
 ```
 
 
