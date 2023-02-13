@@ -343,50 +343,52 @@ mlr3extralearners::list_mlr3learners(
   head()
 ```
 
-
-```
-#> This will take a few seconds.
-```
-
 <table>
 <caption>(\#tab:lrns)Sample of available learners for binomial tasks in the mlr3 package.</caption>
  <thead>
   <tr>
-   <th style="text-align:left;"> id </th>
-   <th style="text-align:left;"> mlr3_package </th>
-   <th style="text-align:left;"> required_packages </th>
+   <th style="text-align:left;"> Class </th>
+   <th style="text-align:left;"> Name </th>
+   <th style="text-align:left;"> Short name </th>
+   <th style="text-align:left;"> Package </th>
   </tr>
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> classif.abess </td>
-   <td style="text-align:left;"> mlr3extralearners </td>
-   <td style="text-align:left;"> mlr3 , abess </td>
+   <td style="text-align:left;"> classif.adaboostm1 </td>
+   <td style="text-align:left;"> ada Boosting M1 </td>
+   <td style="text-align:left;"> adaboostm1 </td>
+   <td style="text-align:left;"> RWeka </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> classif.AdaBoostM1 </td>
-   <td style="text-align:left;"> mlr3extralearners </td>
-   <td style="text-align:left;"> mlr3             , mlr3extralearners, RWeka </td>
+   <td style="text-align:left;"> classif.binomial </td>
+   <td style="text-align:left;"> Binomial Regression </td>
+   <td style="text-align:left;"> binomial </td>
+   <td style="text-align:left;"> stats </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> classif.bart </td>
-   <td style="text-align:left;"> mlr3extralearners </td>
-   <td style="text-align:left;"> mlr3             , mlr3extralearners, dbarts </td>
+   <td style="text-align:left;"> classif.featureless </td>
+   <td style="text-align:left;"> Featureless classifier </td>
+   <td style="text-align:left;"> featureless </td>
+   <td style="text-align:left;"> mlr </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> classif.C50 </td>
-   <td style="text-align:left;"> mlr3extralearners </td>
-   <td style="text-align:left;"> mlr3             , mlr3extralearners, C50 </td>
+   <td style="text-align:left;"> classif.fnn </td>
+   <td style="text-align:left;"> Fast k-Nearest Neighbour </td>
+   <td style="text-align:left;"> fnn </td>
+   <td style="text-align:left;"> FNN </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> classif.catboost </td>
-   <td style="text-align:left;"> mlr3extralearners </td>
-   <td style="text-align:left;"> mlr3             , mlr3extralearners, catboost </td>
+   <td style="text-align:left;"> classif.gausspr </td>
+   <td style="text-align:left;"> Gaussian Processes </td>
+   <td style="text-align:left;"> gausspr </td>
+   <td style="text-align:left;"> kernlab </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> classif.cforest </td>
-   <td style="text-align:left;"> mlr3extralearners </td>
-   <td style="text-align:left;"> mlr3             , mlr3extralearners, partykit         , sandwich         , coin </td>
+   <td style="text-align:left;"> classif.IBk </td>
+   <td style="text-align:left;"> k-Nearest Neighbours </td>
+   <td style="text-align:left;"> ibk </td>
+   <td style="text-align:left;"> RWeka </td>
   </tr>
 </tbody>
 </table>
@@ -517,21 +519,11 @@ This works for non-spatial data but is of less use for spatial data where 'spati
 
 Before defining spatial tuning, we will set up the **mlr3**\index{mlr3 (package)} building blocks, introduced in Section \@ref(glm), for the SVM.
 The classification\index{classification} task remains the same, hence we can simply reuse the `task` object created in Section \@ref(glm).
-Learners implementing SVM can be found using the `list_mlr3learners()` command of the **mlr3extralearners** package as follows:
+Learners implementing SVM can be found using the `list_mlr3learners()` command of the **mlr3extralearners**.
 
 
-```r
-mlr3_learners = mlr3extralearners::list_mlr3learners()
-#> This will take a few seconds.
-mlr3_learners[class == "classif" & grepl("svm", id),
-              .(id, class, mlr3_package, required_packages)]
-#>               id   class      mlr3_package              required_packages
-#> 1:  classif.ksvm classif mlr3extralearners mlr3,mlr3extralearners,kernlab
-#> 2: classif.lssvm classif mlr3extralearners mlr3,mlr3extralearners,kernlab
-#> 3:   classif.svm classif      mlr3learners        mlr3,mlr3learners,e1071
-```
 
-Of the options illustrated above, we will use `ksvm()` from the **kernlab** package [@karatzoglou_kernlab_2004].
+Of the options, we will use `ksvm()` from the **kernlab** package [@karatzoglou_kernlab_2004].
 To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel (`"rbfdot" `) which is also the default of `ksvm()`.
 Setting the`type` argument to `"C-svc"` makes sure that `ksvm()` is solving a classification task. 
 To make sure that the tuning does not stop because of one failing model, we additionally define a fallback learner (for more information please refer to https://mlr3book.mlr-org.com/technical.html#fallback-learners).
