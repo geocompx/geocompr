@@ -429,8 +429,8 @@ tm_shape(grid_sf) +
 set.seed(2018) # set seed for reproducibility
 (bb = st_bbox(world)) # the world's bounds
 random_df = data.frame(
-  x = runif (n = 10, min = bb[1], max = bb[3]),
-  y = runif (n = 10, min = bb[2], max = bb[4])
+  x = runif(n = 10, min = bb[1], max = bb[3]),
+  y = runif(n = 10, min = bb[2], max = bb[4])
 )
 random_points = random_df |> 
   st_as_sf(coords = c("x", "y")) |> # set coordinates
