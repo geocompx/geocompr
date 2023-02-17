@@ -27,7 +27,7 @@ qtm(bristol_ways, lines.col = "highway", lines.lwd = 3, lines.palette = c("green
 knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34452756-985267de-ed3e-11e7-9f59-fda1f3852253.png")
 
 ## ----12-transport-3, eval=FALSE, echo=FALSE------------------------------
-## if(!require(readODS)) {
+## if (!require(readODS)) {
 ##   install.packages("readODS")
 ## }
 ## u = "https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/536823/local-area-walking-and-cycling-in-england-2015.zip"
@@ -49,7 +49,7 @@ nrow(bristol_zones)
 ## ----12-transport-7------------------------------------------------------
 zones_attr = bristol_od %>% 
   group_by(o) %>% 
-  summarize_if(is.numeric, sum) %>% 
+  summarize_if (is.numeric, sum) %>% 
   dplyr::rename(geo_code = o)
 
 ## ----12-transport-8------------------------------------------------------
@@ -63,7 +63,7 @@ names(zones_joined)
 ## ----12-transport-10-----------------------------------------------------
 zones_od = bristol_od %>% 
   group_by(d) %>% 
-  summarize_if(is.numeric, sum) %>% 
+  summarize_if (is.numeric, sum) %>% 
   dplyr::select(geo_code = d, all_dest = all) %>% 
   inner_join(zones_joined, ., by = "geo_code")
 

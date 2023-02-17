@@ -8,12 +8,12 @@ library(tmap)
 # what % of country populations lived in their largest agglomerations?
 # explanation: we're joining the point data onto world
 
-if(!exists("random_joined")) {
+if (!exists("random_joined")) {
   set.seed(2018)
   bb = st_bbox(world)
   random_df = tibble::tibble(
-    x = runif(n = 10, min = bb[1], max = bb[3]),
-    y = runif(n = 10, min = bb[2], max = bb[4])
+    x = runif (n = 10, min = bb[1], max = bb[3]),
+    y = runif (n = 10, min = bb[2], max = bb[4])
   )
   random_points = st_as_sf(random_df, coords = c("x", "y")) %>% 
     st_set_crs(4326)

@@ -4,7 +4,7 @@
 # Pre-requisite: an input object named poly_mat with 2 columns representing
 # vertices of a polygon, with 1st and last rows identical:
 
-if(!exists("poly_mat")) {
+if (!exists("poly_mat")) {
   message("No poly_mat object provided, creating object representing a 9 by 9 square")
   poly_mat = cbind(
     x = c(0, 0, 9, 9, 0),

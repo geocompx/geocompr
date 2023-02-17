@@ -48,7 +48,7 @@ knitr::include_graphics("figures/lsl-map-1.png")
 
 ## ----lslsummary, echo=FALSE, warning=FALSE----------------------------------------------------------
 lsl_table = lsl |>
-  mutate(across(.cols = -any_of(c("x", "y", "lslpts")), ~signif(., 2)))
+  mutate(across(.cols = -any_of(c("x", "y", "lslpts")), ~signif (., 2)))
 knitr::kable(lsl_table[c(1, 2, 350), ], caption = "Structure of the lsl dataset.",
              caption.short = "`lsl` dataset.", booktabs = TRUE) |>
   kableExtra::kable_styling(latex_options = "scale_down")
