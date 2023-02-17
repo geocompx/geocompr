@@ -5,7 +5,7 @@ pkgs = c(
   )
 
 to_install = !pkgs %in% installed.packages()
-if(any(to_install)) {
+if (any(to_install)) {
   install.packages(pkgs[to_install])
 }
 

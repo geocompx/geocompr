@@ -92,7 +92,7 @@ contributors_text = paste0(c_rmd, collapse = ", ")
 ##                              col_types=('iiDd'))
 ## 
 ## # to prevent excessive chapter count
-## if(Sys.Date() > max(book_stats$date) + 5) {
+## if (Sys.Date() > max(book_stats$date) + 5) {
 ##   book_stats_new = geocompkg:::generate_book_stats()
 ##   book_stats = bind_rows(book_stats, book_stats_new)
 ##   readr::write_csv(book_stats, "extdata/word-count-time.csv")

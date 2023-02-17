@@ -3,7 +3,7 @@ library(tmap)
 library(spData)
 library(terra)
 
-if(!exists("cycle_hire_osm_projected")) {
+if (!exists("cycle_hire_osm_projected")) {
   cycle_hire_osm_projected = st_transform(cycle_hire_osm, "EPSG:27700")
   raster_template = rast(ext(cycle_hire_osm_projected), resolution = 1000,
                          crs = "EPSG:27700")

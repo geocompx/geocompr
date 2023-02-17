@@ -1,6 +1,6 @@
 library(tmap)
 
-if(!exists("raster_template2")) {
+if (!exists("raster_template2")) {
   library(sf)
   library(terra)
   library(spData)

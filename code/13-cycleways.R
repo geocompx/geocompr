@@ -1,4 +1,4 @@
-if(!exists("route_cycleway")) {
+if (!exists("route_cycleway")) {
   source("code/chapters/13-transport.R")
 } 
 tmap_mode("plot")

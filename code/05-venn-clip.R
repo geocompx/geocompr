@@ -1,4 +1,4 @@
-if(!exists("b")) {
+if (!exists("b")) {
   library(sf)
   b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
   b = st_buffer(b, dist = 1) # convert points to circles
