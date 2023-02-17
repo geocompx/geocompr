@@ -49,7 +49,7 @@ nrow(bristol_zones)
 ## ----12-transport-7------------------------------------------------------
 zones_attr = bristol_od %>% 
   group_by(o) %>% 
-  summarize_if (is.numeric, sum) %>% 
+  summarize_if(is.numeric, sum) %>% 
   dplyr::rename(geo_code = o)
 
 ## ----12-transport-8------------------------------------------------------
@@ -63,7 +63,7 @@ names(zones_joined)
 ## ----12-transport-10-----------------------------------------------------
 zones_od = bristol_od %>% 
   group_by(d) %>% 
-  summarize_if (is.numeric, sum) %>% 
+  summarize_if(is.numeric, sum) %>% 
   dplyr::select(geo_code = d, all_dest = all) %>% 
   inner_join(zones_joined, ., by = "geo_code")
 
