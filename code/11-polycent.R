@@ -46,7 +46,7 @@ for(i in rep(1:length(T_all), 2)) {
   # lines(do.call(rbind, T_all[1:i]), col = cols[1:i], lwd = 2)
   text(x = C[i, 1], y = C[i, 2], paste0("C", i), col = cols[i])
   if (i != 1) {
-    points(x = mean(C[1:i, 1]), y = mean(C[1:i, 2]), pch = 4, cex = 2)
+    points(x = mean(C[1:i, 1]), y = mean(C[1:i, 2]), pch = 4, cex = 3)
   }
   Sys.sleep(time = 0.5)
 }
