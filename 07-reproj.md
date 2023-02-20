@@ -460,7 +460,7 @@ To show how the system works, let's create a function, `lonlat2UTM()` to calcula
 ```r
 lonlat2UTM = function(lonlat) {
   utm = (floor((lonlat[1] + 180) / 6) %% 60) + 1
-  if(lonlat[2] > 0) {
+  if (lonlat[2] > 0) {
     utm + 32600
   } else{
     utm + 32700
