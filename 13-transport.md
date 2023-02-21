@@ -731,20 +731,25 @@ E1. In much of the analysis presented in the chapter we focused on active modes,
 
 
 
-E2. What additional length of cycleways would result if all the routes presented in Figure \@ref(fig:cycleways), on sections beyond 100 m from existing cycleways, were constructed?
+E2. What additional length of cycleways would result if all the routes presented in the last Figure, on sections beyond 100 m from existing cycleways, were constructed?
 
 
 
 E3. What proportion of trips represented in the `desire_lines` are accounted for in the `routes_short_scenario` object?
-    - Bonus: what proportion of all trips happen on desire lines that cross `routes_short_scenario`?
+
+  - Bonus: what proportion of all trips happen on desire lines that cross `routes_short_scenario`?
 
 
 
-E4. The analysis presented in this chapter is designed for teaching how geocomputation methods can be applied to transport research. If you were doing this for real, in government or for a transport consultancy, what top 3 things would you do differently?
+E4. The analysis presented in this chapter is designed for teaching how geocomputation methods can be applied to transport research.
+If you were doing this for real, in government or for a transport consultancy, what top 3 things would you do differently?
 
 
 
-E5. Clearly, the routes identified in Figure \@ref(fig:cycleways) only provide part of the picture. How would you extend the analysis?
+E5. Clearly, the routes identified in the last Figure only provide part of the picture.
+How would you extend the analysis?
 
-E6. Imagine that you want to extend the scenario by creating key *areas* (not routes) for investment in place-based cycling policies such as car-free zones, cycle parking points and reduced car parking strategy. How could raster\index{raster} datasets assist with this work? 
-    - Bonus: develop a raster layer that divides the Bristol region into 100 cells (10 by 10) and estimate the average speed limit of roads in each, from the `bristol_ways` dataset (see Chapter \@ref(location)).
+E6. Imagine that you want to extend the scenario by creating key *areas* (not routes) for investment in place-based cycling policies such as car-free zones, cycle parking points and reduced car parking strategy.
+How could raster\index{raster} datasets assist with this work? 
+
+  - Bonus: develop a raster layer that divides the Bristol region into 100 cells (10 by 10) and estimate the average speed limit of roads in each, from the `bristol_ways` dataset (see Chapter \@ref(location)).
