@@ -199,9 +199,10 @@ For spatial statistics\index{spatial!statistics} and predictive modeling, howeve
 This does not mean you must choose either R or Python: Python\index{Python} supports most common statistical techniques (though R tends to support new developments in spatial statistics earlier) and many concepts learned from Python can be applied to the R\index{R} world.
 <!--rl:toDo-->
 <!--to update! -->
-Like R, Python also supports geographic data analysis and manipulation with packages such as **osgeo**, **Shapely**, **NumPy** and **PyGeoProcessing** [@garrard_geoprocessing_2016].
+Like R, Python also supports geographic data analysis and manipulation with packages such as **shapely**, **geopandas**, **rasterio** and **xarray**.
 
 ## R's spatial ecosystem {#r-ecosystem}
+<!--rl-->
 
 There are many ways to handle geographic data in R, with dozens of packages\index{R-spatial} in the area.^[
 An overview of R's spatial ecosystem can be found in the CRAN\index{CRAN} Task View on the Analysis of Spatial Data
@@ -249,6 +250,7 @@ Parallel group of developments relates to the [rspatial](https://github.com/rspa
 Its main member is the **terra** package for spatial raster handling (see Section \@ref(an-introduction-to-terra)).
 
 ## The history of R-spatial
+<!-- jn -->
 
 There are many benefits of using recent spatial packages such as **sf**, but it also important to be aware of the history of R's spatial capabilities: many functions, use-cases and teaching material are contained in older packages.
 These can still be useful today, provided you know where to look.
@@ -371,7 +373,7 @@ E1. Think about the terms 'GIS'\index{GIS}, 'GDS' and 'geocomputation' described
 
 E2. Provide three reasons for using a scriptable language such as R for geocomputation instead of using a graphical user interface (GUI) based GIS such as QGIS\index{QGIS}.
 
-E3. In the year 2000 Stan Openshaw wrote that geocomputation involved "practical work that is beneficial or useful" to others. Think about a practical problem and possible solutions that could be informed with new evidence derived from the analysis, visualisation or modelling of geographic data. With a pen and paper (or computational equivalent) sketch inputs and possible outputs illustrating how geocomputation could help.
+E3. In the year 2000 Stan Openshaw wrote that geocomputation involved "practical work that is beneficial or useful" to others. Think about a practical problem and possible solutions that could be informed with new evidence derived from the analysis, visualization or modelling of geographic data. With a pen and paper (or computational equivalent) sketch inputs and possible outputs illustrating how geocomputation could help.
 
 <!--toDo: rl -->
 <!--add solutions!-->
