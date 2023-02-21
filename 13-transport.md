@@ -722,6 +722,7 @@ Similar tools could be used to encourage evidence-based transport policies relat
 
 
 E1. In much of the analysis presented in the chapter we focused on active modes, but what about driving trips?
+
   - What proportion of trips in the `desire_lines` object are made by driving?
   - What proportion of `desire_lines` have a straight line length of 5 km or more in distance?
   - What proportion of trips in desire lines that are longer than 5 km in length are made by driving?
