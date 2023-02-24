@@ -119,7 +119,8 @@ poly_mat = cbind(
   x = c(0, 0, 9, 9, 0),
   y = c(0, 9, 9, 0, 0)
 )
-source("https://raw.githubusercontent.com/geocompx/geocompr/main/code/11-centroid-alg.R")
+# Short URL to code/11-centroid-alg.R in the geocompr repo
+source("https://t.ly/0nzj")
 ```
 
 
