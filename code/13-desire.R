@@ -1,7 +1,7 @@
 # Aim: generate tmap figure representing desire lines
 
 # load data if not already loaded:
-if(!exists("desire_lines")) {
+if (!exists("desire_lines")) {
   library(sf)
   library(dplyr)
   library(spDataLarge)

@@ -26,7 +26,7 @@ poly_mat = cbind(
   x = c(0, 0, 9, 9, 0),
   y = c(0, 9, 9, 0, 0)
 )
-if(curl::has_internet()) {
+if (curl::has_internet()) {
   source("https://raw.githubusercontent.com/Robinlovelace/geocompr/master/code/11-centroid-alg.R")
   } else {
   source("code/11-centroid-setup.R")
@@ -158,9 +158,9 @@ poly_centroid = function(poly_mat) {
 ##   C = do.call(rbind, C_list)
 ##   A = vapply(T_all, t_area, FUN.VALUE = double(1))
 ##   centroid_coords = c(weighted.mean(C[, 1], A), weighted.mean(C[, 2], A))
-##   if(output == "matrix") {
+##   if (output == "matrix") {
 ##     return(centroid_coords)
-##   } else if(output == "area")
+##   } else if (output == "area")
 ##     return(sum(A))
 ## }
 

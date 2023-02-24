@@ -1,5 +1,5 @@
 # Aim: plot globe
-if(!require(globe)) {
+if (!require(globe)) {
   install.packages("globe")
 }
 library(sf)
