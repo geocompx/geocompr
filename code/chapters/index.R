@@ -146,7 +146,7 @@ if (is_html) {
 ## ----index-3-2, echo=FALSE, include=FALSE-----------------------------------------------------------
 # is geocompkg installed?
 geocompkg_is_installed = "geocompkg" %in% installed.packages()
-if(!geocompkg_is_installed){
+if (!geocompkg_is_installed){
   message(
   'geocompkg not installed, run\nremotes::install_github("geocompr/geocompkg") # to install it'
   )

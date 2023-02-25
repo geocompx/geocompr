@@ -30,5 +30,5 @@ centroid = function(poly_mat, return_area = FALSE) {
   }
   A = A / 2
   C = c(xmean / (6 * A), ymean / (6 * A))
-  if(return_area) return(abs(A)) else return(C)
+  if (return_area) return(abs(A)) else return(C)
 }

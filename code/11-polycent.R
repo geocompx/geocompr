@@ -1,5 +1,5 @@
 # Aim: create visualization showing steps in centroid algorithm
-if(!exists("poly_mat")) {
+if (!exists("poly_mat")) {
   # source("code/chapters/10-algorithms.R")
   x_coords = c(10, 0, 0, 2, 20, 10)
   y_coords = c(0, 0, 10, 12, 15, 0)
@@ -36,17 +36,17 @@ if(!exists("poly_mat")) {
 # iterating solution:
 par(mfrow = c(1, 3), mar = c(0, 0, 0, 0), pty = "s") # optional wide plot (alternative = animation)
 i = 2
-cols = c("red", "blue", "darkgreen")
+cols = c("#fa8072", "#000080", "#93e9be")
 for(i in rep(1:length(T_all), 2)) {
-  if(i == 1 | sum(par()$mfrow) > 2) {
-    plot(poly_mat, xlab = "", ylab = "", axes = FALSE)
-    lines(poly_mat)
+  if (i == 1 | sum(par()$mfrow) > 2) {
+    plot(poly_mat, xlab = "", ylab = "", axes = FALSE, cex = 3)
+    lines(poly_mat, lwd = 7)
   }
   lines(T_all[[i]], col = cols[i], lwd = 2)
   # lines(do.call(rbind, T_all[1:i]), col = cols[1:i], lwd = 2)
   text(x = C[i, 1], y = C[i, 2], paste0("C", i), col = cols[i])
-  if(i != 1) {
-    points(x = mean(C[1:i, 1]), y = mean(C[1:i, 2]), pch = 4, cex = 2)
+  if (i != 1) {
+    points(x = mean(C[1:i, 1]), y = mean(C[1:i, 2]), pch = 4, cex = 3)
   }
   Sys.sleep(time = 0.5)
 }
