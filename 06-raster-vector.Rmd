@@ -404,15 +404,16 @@ source("https://github.com/geocompx/geocompr/raw/main/code/06-vector-rasterizati
 
 ## Spatial vectorization
 
-\index{raster-vector!spatial vectorization} 
+\index{spatial vectorization} 
 Spatial vectorization is the counterpart of rasterization (Section \@ref(rasterization)), but in the opposite direction.
 It involves converting spatially continuous raster data into spatially discrete vector data such as points, lines or polygons.
 
 ```{block2 06-raster-vector-33, type="rmdnote"}
 Be careful with the wording!
-In R, vectorization refers to the possibility of replacing `for`-loops and alike by doing things like `1:10 / 2` (see also @wickham_advanced_2019).
+In R, vectorization usually refers to the possibility of replacing `for`-loops and alike by doing things like `1:10 / 2` (see also @wickham_advanced_2019).
 ```
 
+\index{spatial vectorization!points} 
 The simplest form of vectorization is to convert the centroids of raster cells into points.
 `as.points()` does exactly this for all non-`NA` raster grid cells (Figure \@ref(fig:raster-vectorization1)).
 Note, here we also used `st_as_sf()` to convert the resulting object to the `sf` class.
@@ -423,18 +424,19 @@ elev_point = as.points(elev) |>
   st_as_sf()
 ```
 
-
 ```{r raster-vectorization1, echo=FALSE, fig.cap="Raster and point representation of the elev object.", warning=FALSE}
 source("https://github.com/geocompx/geocompr/raw/main/code/06-raster-vectorization1.R", print.eval = TRUE)
 ```
 
+\index{spatial vectorization!contours} 
 Another common type of spatial vectorization is the creation of contour lines representing lines of continuous height or temperatures (isotherms) for example.
 We will use a real-world digital elevation model (DEM) because the artificial raster `elev` produces parallel lines (task for the reader: verify this and explain why this happens).
-Contour lines can be created with the **terra** function `as.contour()`, which is itself a wrapper around `filled.contour()`, as demonstrated below (not shown):
+Contour lines can be created with the **terra** function `as.contour()`, which is itself a wrapper around the built-in R function `filled.contour()`, as demonstrated below (not shown):
 
 ```{r 06-raster-vector-36, eval=FALSE}
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
-cl = as.contour(dem)
+cl = as.contour(dem) |> 
+  st_as_sf()
 plot(dem, axes = FALSE)
 plot(cl, add = TRUE)
 ```
@@ -455,6 +457,7 @@ As illustrated in Figure \@ref(fig:contour-tmap), isolines can be labelled.
 knitr::include_graphics("figures/06-contour-tmap.png")
 ```
 
+\index{spatial vectorization!polygons} 
 The final type of vectorization involves conversion of rasters to polygons.
 This can be done with `terra::as.polygons()`, which converts each raster cell into a polygon consisting of five coordinates, all of which are stored in memory (explaining why rasters are often fast compared with vectors!).
 
@@ -466,14 +469,14 @@ grain_poly = as.polygons(grain) |>
   st_as_sf()
 ```
 
+```{r 06-raster-vector-40, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right).", warning=FALSE, fig.asp=0.4, fig.scap="Illustration of vectorization."}
+source("https://github.com/geocompx/geocompr/raw/main/code/06-raster-vectorization2.R", print.eval = TRUE)
+```
+
 The aggregated polygons of the `grain` dataset have rectilinear boundaries which arise from being defined by connecting rectangular pixels.
 The **smoothr** package described in Chapter \@ref(geometry-operations) can be used to smooth the edges of the polygons.
 As smoothing removes sharp edges in the polygon boundaries, the smoothed polygons will not have the same exact spatial coverage as the original pixels (see the **smoothr** [website](https://strimas.com/smoothr/) for examples).
 Caution should therefore be taken when using the smoothed polygons for further analysis.
-
-```{r 06-raster-vector-40, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right).", warning=FALSE, fig.asp=0.4, fig.scap="Illustration of vectorization."}
-source("https://github.com/geocompx/geocompr/raw/main/code/06-raster-vectorization2.R", print.eval = TRUE)
-```
 
 ## Exercises
 
