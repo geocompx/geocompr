@@ -131,7 +131,7 @@ The above concepts are demonstrated using data used in previous chapters to unde
 <p>
 Many geographic data projects involve integrating data from many different sources, such as remote sensing images (rasters) and administrative boundaries (vectors).
 Often the extent of input raster datasets is larger than the area of interest.
-In this case raster <strong>cropping</strong> and <strong>masking</strong> are useful for unifying the spatial extent of input data.
+In this case, raster <strong>cropping</strong> and <strong>masking</strong> are useful for unifying the spatial extent of input data.
 Both operations reduce object memory use and associated computational resources for subsequent analysis steps, and may be a necessary preprocessing step before creating attractive maps involving raster data.</p>
 <p>We will use two objects to illustrate raster cropping:</p>
 <ul>
@@ -160,8 +160,7 @@ This combination of functions would (a) limit the raster’s extent to our area 
 <code class="sourceCode R"><span><span class="va">srtm_cropped</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/crop.html">crop</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">zion</span><span class="op">)</span></span>
 <span><span class="va">srtm_final</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/mask.html">mask</a></span><span class="op">(</span><span class="va">srtm_cropped</span>, <span class="va">zion</span><span class="op">)</span></span></code></pre></div>
 <p>Changing the settings of <code><a href="https://rdrr.io/pkg/terra/man/mask.html">mask()</a></code> yields different results.
-Setting <code>updatevalue = 0</code>, for example, will set all pixels outside the national park to 0.
-Setting <code>inverse = TRUE</code> will mask everything <em>inside</em> the bounds of the park (see <code><a href="https://rdrr.io/pkg/terra/man/mask.html">?mask</a></code> for details) (Figure <a href="raster-vector.html#fig:cropmask">6.1</a>(D)).</p>
+Setting <code>inverse = TRUE</code> will mask everything <em>inside</em> the bounds of the park (see <code><a href="https://rdrr.io/pkg/terra/man/mask.html">?mask</a></code> for details) (Figure <a href="raster-vector.html#fig:cropmask">6.1</a>(D)), while setting <code>updatevalue = 0</code> will set all pixels outside the national park to 0.</p>
 <div class="sourceCode" id="cb203"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">srtm_inv_masked</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/mask.html">mask</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="va">zion</span>, inverse <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -177,9 +176,10 @@ FIGURE 6.1: Illustration of raster cropping and raster masking.
 </h2>
 <p>
 Raster extraction is the process of identifying and returning the values associated with a ‘target’ raster at specific locations, based on a (typically vector) geographic ‘selector’ object.
-The results depend on the type of selector used (points, lines or polygons) and arguments passed to the <code><a href="https://rdrr.io/pkg/terra/man/extract.html">terra::extract()</a></code> function, which we use to demonstrate raster extraction.
+The results depend on the type of selector used (points, lines or polygons) and arguments passed to the <code><a href="https://rdrr.io/pkg/terra/man/extract.html">terra::extract()</a></code> function.
 The reverse of raster extraction — assigning raster cell values based on vector objects — is rasterization, described in Section <a href="raster-vector.html#rasterization">6.4</a>.</p>
-<p>The basic example is of extracting the value of a raster cell at specific <strong>points</strong>.
+<p>
+The basic example is of extracting the value of a raster cell at specific <strong>points</strong>.
 For this purpose, we will use <code>zion_points</code>, which contain a sample of 30 locations within the Zion National Park (Figure <a href="raster-vector.html#fig:pointextr">6.2</a>).
 The following command extracts elevation values from <code>srtm</code> and creates a data frame with points’ IDs (one value per vector’s row) and related <code>srtm</code> values for each point.
 Now, we can add the resulting object to our <code>zion_points</code> dataset with the <code><a href="https://rdrr.io/r/base/cbind.html">cbind()</a></code> function:</p>
@@ -193,13 +193,12 @@ Now, we can add the resulting object to our <code>zion_points</code> dataset wit
 FIGURE 6.2: Locations of points used for raster extraction.
 </p>
 </div>
-<p>Raster extraction also works with <strong>line</strong> selectors.
+<p>
+Raster extraction also works with <strong>line</strong> selectors.
 Then, it extracts one value for each raster cell touched by a line.
 However, the line extraction approach is not recommended to obtain values along the transects as it is hard to get the correct distance between each pair of extracted raster values.</p>
 <p>In this case, a better approach is to split the line into many points and then extract the values for these points.
 To demonstrate this, the code below creates <code>zion_transect</code>, a straight line going from northwest to southeast of the Zion National Park, illustrated in Figure <a href="raster-vector.html#fig:lineextr">6.3</a>(A) (see Section <a href="spatial-class.html#vector-data">2.2</a> for a recap on the vector data model):</p>
-<!--toDo:jn-->
-<!--fix pipes-->
 <div class="sourceCode" id="cb205"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zion_transect</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">113.2</span>, <span class="op">-</span><span class="fl">112.9</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">37.45</span>, <span class="fl">37.2</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_linestring</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -230,15 +229,14 @@ In this case, we only have one transect, but the code, in principle, should work
 FIGURE 6.3: Location of a line used for raster extraction (left) and the elevation along this line (right).
 </p>
 </div>
-<p>The final type of geographic vector object for raster extraction is <strong>polygons</strong>.
+<p>
+The final type of geographic vector object for raster extraction is <strong>polygons</strong>.
 Like lines, polygons tend to return many raster values per polygon.
 This is demonstrated in the command below, which results in a data frame with column names <code>ID</code> (the row number of the polygon) and <code>srtm</code> (associated elevation values):</p>
-<!--toDo:jn-->
-<!--fix pipes-->
 <div class="sourceCode" id="cb209"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zion_srtm_values</span> <span class="op">=</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">srtm</span>, y <span class="op">=</span> <span class="va">zion</span><span class="op">)</span></span></code></pre></div>
 <p>Such results can be used to generate summary statistics for raster values per polygon, for example to characterize a single region or to compare many regions.
-The generation of summary statistics is demonstrated in the code below, which creates the object <code>zion_srtm_df</code> containing summary statistics for elevation values in Zion National Park (see Figure <a href="raster-vector.html#fig:polyextr">6.4</a>(A)):</p>
+This is shown in the code below, which creates the object <code>zion_srtm_df</code> containing summary statistics for elevation values in Zion National Park (see Figure <a href="raster-vector.html#fig:polyextr">6.4</a>(A)):</p>
 <div class="sourceCode" id="cb210"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">zion_srtm_values</span>, <span class="va">ID</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html">across</a></span><span class="op">(</span><span class="va">srtm</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>min <span class="op">=</span> <span class="va">min</span>, mean <span class="op">=</span> <span class="va">mean</span>, max <span class="op">=</span> <span class="va">max</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
@@ -246,12 +244,9 @@ The generation of summary statistics is demonstrated in the code below, which cr
 <span><span class="co">#&gt;      ID srtm_min srtm_mean srtm_max</span></span>
 <span><span class="co">#&gt;   &lt;dbl&gt;    &lt;int&gt;     &lt;dbl&gt;    &lt;int&gt;</span></span>
 <span><span class="co">#&gt; 1     1     1122     1818.     2661</span></span></code></pre></div>
-<!--jn:toDo -->
-<!--should we use the tidyverse name or dplyr here?-->
-<!--btw we could also add reference to the tidyverse paper somewhere in the book-->
-<p>The preceding code chunk used the <strong>tidyverse</strong> to provide summary statistics for cell values per polygon ID, as described in Chapter <a href="attr.html#attr">3</a>.
+<p>The preceding code chunk used the <strong>dplyr</strong> to provide summary statistics for cell values per polygon ID, as described in Chapter <a href="attr.html#attr">3</a>.
 The results provide useful summaries, for example that the maximum height in the park is around 2,661 meters above see level (other summary statistics, such as standard deviation, can also be calculated in this way).
-Because there is only one polygon in the example a data frame with a single row is returned; however, the method works when multiple selector polygons are used.</p>
+Because there is only one polygon in the example, a data frame with a single row is returned; however, the method works when multiple selector polygons are used.</p>
 <p>The similar approach works for counting occurrences of categorical raster values within polygons.
 This is illustrated with a land cover dataset (<code>nlcd</code>) from the <strong>spDataLarge</strong> package in Figure <a href="raster-vector.html#fig:polyextr">6.4</a>(B), and demonstrated in the code below:</p>
 <div class="sourceCode" id="cb211"><pre class="downlit sourceCode r">
@@ -276,20 +271,19 @@ This is illustrated with a land cover dataset (<code>nlcd</code>) from the <stro
 FIGURE 6.4: Area used for continuous (left) and categorical (right) raster extraction.
 </p>
 </div>
-<p>Although the <strong>terra</strong> package offers rapid extraction of raster values within polygons, <code><a href="https://rdrr.io/pkg/terra/man/extract.html">extract()</a></code> can still be a bottleneck when processing large polygon datasets.
+<p>
+Although the <strong>terra</strong> package offers rapid extraction of raster values within polygons, <code><a href="https://rdrr.io/pkg/terra/man/extract.html">extract()</a></code> can still be a bottleneck when processing large polygon datasets.
 The <strong>exactextractr</strong> package offers a <a href="https://github.com/geocompx/geocompr/issues/813">significantly faster alternative</a> for extracting pixel values through the <code>exact_extract()</code> function.
 The <code>exact_extract()</code> function also computes, by default, the fraction of each raster cell overlapped by the polygon, which is more precise (see note below for details).</p>
 
 <div class="rmdnote">
 Polygons usually have irregular shapes, and therefore, a polygon can overlap only some parts of a raster’s cells.
-To get more detailed results, the <code><a href="https://rdrr.io/pkg/terra/man/extract.html">extract()</a></code> function has an argument called <code>exact</code>.
-With <code>exact = TRUE</code>, we get one more column <code>fraction</code> in the output data frame, which contains a fraction of each cell that is covered by the polygon.
-This could be useful to calculate a weighted mean for continuous rasters or more precise coverage for categorical rasters.
+To get more detailed results, the <code><a href="https://rdrr.io/pkg/terra/man/extract.html">terra::extract()</a></code> function has an argument called <code>exact</code>.
+With <code>exact = TRUE</code>, we get one more column <code>fraction</code> in the output data frame, which represents a fraction of each cell that is covered by the polygon.
+This could be useful to calculate, for example, a weighted mean for continuous rasters or more precise coverage for categorical rasters.
 By default, it is <code>FALSE</code> as this operation requires more computations.
 The <code><a href="https://isciences.gitlab.io/exactextractr/reference/exact_extract.html">exactextractr::exact_extract()</a></code> function always computes the coverage fraction of the polygon in each cell.
 </div>
-<!--toDo:JN-->
-<!-- mention https://github.com/isciences/exactextractr -->
 </div>
 <div id="rasterization" class="section level2" number="6.4">
 <h2>
@@ -297,15 +291,16 @@ The <code><a href="https://isciences.gitlab.io/exactextractr/reference/exact_ext
 </h2>
 <p>
 Rasterization is the conversion of vector objects into their representation in raster objects.
-Usually, the output raster is used for quantitative analysis (e.g., analysis of terrain) or modeling.
-As we saw in Chapter <a href="spatial-class.html#spatial-class">2</a> the raster data model has some characteristics that make it conducive to certain methods.
+Usually, the output raster is then used for quantitative analysis (e.g., analysis of terrain) or modeling.
+As we saw in Chapter <a href="spatial-class.html#spatial-class">2</a>, the raster data model has some characteristics that make it conducive to certain methods.
 Furthermore, the process of rasterization can help simplify datasets because the resulting values all have the same spatial resolution: rasterization can be seen as a special type of geographic data aggregation.</p>
 <p>The <strong>terra</strong> package contains the function <code><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize()</a></code> for doing this work.
 Its first two arguments are, <code>x</code>, vector object to be rasterized and, <code>y</code>, a ‘template raster’ object defining the extent, resolution and CRS of the output.
 The geographic resolution of the input raster has a major impact on the results: if it is too low (cell size is too large), the result may miss the full geographic variability of the vector data; if it is too high, computational times may be excessive.
 There are no simple rules to follow when deciding an appropriate geographic resolution, which is heavily dependent on the intended use of the results.
-Often the target resolution is imposed on the user, for example when the output of rasterization needs to be aligned to the existing raster.</p>
-<p>To demonstrate rasterization in action, we will use a template raster that has the same extent and CRS as the input vector data <code>cycle_hire_osm_projected</code> (a dataset on cycle hire points in London is illustrated in Figure <a href="raster-vector.html#fig:vector-rasterization1">6.5</a>(A)) and spatial resolution of 1000 meters:</p>
+Often the target resolution is imposed on the user, for example when the output of rasterization needs to be aligned to some other existing raster.</p>
+<p>
+To demonstrate rasterization in action, we will use a template raster that has the same extent and CRS as the input vector data <code>cycle_hire_osm_projected</code> (a dataset on cycle hire points in London is illustrated in Figure <a href="raster-vector.html#fig:vector-rasterization1">6.5</a>(A)) and spatial resolution of 1000 meters:</p>
 <div class="sourceCode" id="cb212"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_hire_osm</span> <span class="op">=</span> <span class="fu">spData</span><span class="fu">::</span><span class="va"><a href="https://jakubnowosad.com/spData/reference/cycle_hire_osm.html">cycle_hire_osm</a></span></span>
 <span><span class="va">cycle_hire_osm_projected</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">cycle_hire_osm</span>, <span class="st">"EPSG:27700"</span><span class="op">)</span></span>
@@ -314,10 +309,9 @@ Often the target resolution is imposed on the user, for example when the output 
 <p>Rasterization is a very flexible operation: the results depend not only on the nature of the template raster, but also on the type of input vector (e.g., points, polygons) and a variety of arguments taken by the <code><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize()</a></code> function.</p>
 <p>To illustrate this flexibility we will try three different approaches to rasterization.
 First, we create a raster representing the presence or absence of cycle hire points (known as presence/absence rasters).
-In this case <code><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize()</a></code> requires only one argument in addition to <code>x</code> and <code>y</code> (the aforementioned vector and raster objects): a value to be transferred to all non-empty cells specified by <code>field</code> (results illustrated Figure <a href="raster-vector.html#fig:vector-rasterization1">6.5</a>(B)).</p>
+In this case <code><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize()</a></code> requires no argument in addition to <code>x</code> and <code>y</code>, the aforementioned vector and raster objects (results illustrated Figure <a href="raster-vector.html#fig:vector-rasterization1">6.5</a>(B)).</p>
 <div class="sourceCode" id="cb213"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ch_raster1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="va">cycle_hire_osm_projected</span>, <span class="va">raster_template</span>,</span>
-<span>                       field <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">ch_raster1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="va">cycle_hire_osm_projected</span>, <span class="va">raster_template</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>fun</code> argument specifies summary statistics used to convert multiple observations in close proximity into associate cells in the raster object.
 By default <code>fun = "last"</code> is used but other options such as <code>fun = "length"</code> can be used, in this case to count the number of cycle hire points in each grid cell (the results of this operation are illustrated in Figure <a href="raster-vector.html#fig:vector-rasterization1">6.5</a>(C)).</p>
 <div class="sourceCode" id="cb214"><pre class="downlit sourceCode r">
@@ -335,7 +329,8 @@ To calculate that we must <code>sum</code> the field (<code>"capacity"</code>), 
 FIGURE 6.5: Examples of point rasterization.
 </p>
 </div>
-<p>Another dataset based on California’s polygons and borders (created below) illustrates rasterization of lines.
+<p>
+Another dataset based on California’s polygons and borders (created below) illustrates rasterization of lines.
 After casting the polygon objects into a multilinestring, a template raster is created with a resolution of a 0.5 degree:</p>
 <div class="sourceCode" id="cb216"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">california</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">us_states</span>, <span class="va">NAME</span> <span class="op">==</span> <span class="st">"California"</span><span class="op">)</span></span>
@@ -348,7 +343,7 @@ Line rasterization with <code>touches = TRUE</code> is demonstrated in the code 
 <div class="sourceCode" id="cb217"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">california_raster1</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="va">california_borders</span>, <span class="va">raster_template2</span>,</span>
 <span>                               touches <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>Compare it to a polygon rasterization, with <code>touches = FALSE</code> by default, which selects only cells whose centroids are inside the selector polygon, as illustrated in Figure <a href="raster-vector.html#fig:vector-rasterization2">6.6</a>(B).</p>
+<p>Compare it to a polygon rasterization, with <code>touches = FALSE</code> by default, which selects only raster cells whose centroids are inside the selector polygon, as illustrated in Figure <a href="raster-vector.html#fig:vector-rasterization2">6.6</a>(B).</p>
 <div class="sourceCode" id="cb218"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">california_raster2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="va">california</span>, <span class="va">raster_template2</span><span class="op">)</span> </span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -368,9 +363,10 @@ It involves converting spatially continuous raster data into spatially discrete 
 
 <div class="rmdnote">
 Be careful with the wording!
-In R, vectorization refers to the possibility of replacing <code>for</code>-loops and alike by doing things like <code>1:10 / 2</code> (see also <span class="citation">Wickham (<a href="references.html#ref-wickham_advanced_2019" role="doc-biblioref">2019</a>)</span>).
+In R, vectorization usually refers to the possibility of replacing <code>for</code>-loops and alike by doing things like <code>1:10 / 2</code> (see also <span class="citation">Wickham (<a href="references.html#ref-wickham_advanced_2019" role="doc-biblioref">2019</a>)</span>).
 </div>
-<p>The simplest form of vectorization is to convert the centroids of raster cells into points.
+<p>
+The simplest form of vectorization is to convert the centroids of raster cells into points.
 <code><a href="https://rdrr.io/pkg/terra/man/as.spatvector.html">as.points()</a></code> does exactly this for all non-<code>NA</code> raster grid cells (Figure <a href="raster-vector.html#fig:raster-vectorization1">6.7</a>).
 Note, here we also used <code><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf()</a></code> to convert the resulting object to the <code>sf</code> class.</p>
 <div class="sourceCode" id="cb219"><pre class="downlit sourceCode r">
@@ -383,12 +379,14 @@ Note, here we also used <code><a href="https://r-spatial.github.io/sf/reference/
 FIGURE 6.7: Raster and point representation of the elev object.
 </p>
 </div>
-<p>Another common type of spatial vectorization is the creation of contour lines representing lines of continuous height or temperatures (isotherms) for example.
+<p>
+Another common type of spatial vectorization is the creation of contour lines representing lines of continuous height or temperatures (isotherms) for example.
 We will use a real-world digital elevation model (DEM) because the artificial raster <code>elev</code> produces parallel lines (task for the reader: verify this and explain why this happens).
-Contour lines can be created with the <strong>terra</strong> function <code><a href="https://rdrr.io/pkg/terra/man/contour.html">as.contour()</a></code>, which is itself a wrapper around <code><a href="https://rdrr.io/r/graphics/filled.contour.html">filled.contour()</a></code>, as demonstrated below (not shown):</p>
+Contour lines can be created with the <strong>terra</strong> function <code><a href="https://rdrr.io/pkg/terra/man/contour.html">as.contour()</a></code>, which is itself a wrapper around the built-in R function <code><a href="https://rdrr.io/r/graphics/filled.contour.html">filled.contour()</a></code>, as demonstrated below (not shown):</p>
 <div class="sourceCode" id="cb220"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dem</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/dem.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">cl</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/contour.html">as.contour</a></span><span class="op">(</span><span class="va">dem</span><span class="op">)</span></span>
+<span><span class="va">cl</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/contour.html">as.contour</a></span><span class="op">(</span><span class="va">dem</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">dem</span>, axes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">cl</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Contours can also be added to existing plots with functions such as <code><a href="https://rdrr.io/pkg/terra/man/contour.html">contour()</a></code>, <code>rasterVis::contourplot()</code> or <code><a href="https://rdrr.io/pkg/tmap/man/tm_iso.html">tmap::tm_iso()</a></code>.
@@ -400,29 +398,30 @@ As illustrated in Figure <a href="raster-vector.html#fig:contour-tmap">6.8</a>, 
 FIGURE 6.8: DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines.
 </p>
 </div>
-<p>The final type of vectorization involves conversion of rasters to polygons.
+<p>
+The final type of vectorization involves conversion of rasters to polygons.
 This can be done with <code><a href="https://rdrr.io/pkg/terra/man/as.spatvector.html">terra::as.polygons()</a></code>, which converts each raster cell into a polygon consisting of five coordinates, all of which are stored in memory (explaining why rasters are often fast compared with vectors!).</p>
 <p>This is illustrated below by converting the <code>grain</code> object into polygons and subsequently dissolving borders between polygons with the same attribute values (also see the <code>dissolve</code> argument in <code><a href="https://rdrr.io/pkg/terra/man/as.spatvector.html">as.polygons()</a></code>).</p>
 <div class="sourceCode" id="cb221"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">grain</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/grain.tif"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">grain_poly</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/as.spatvector.html">as.polygons</a></span><span class="op">(</span><span class="va">grain</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>The aggregated polygons of the <code>grain</code> dataset have rectilinear boundaries which arise from being defined by connecting rectangular pixels.
-The <strong>smoothr</strong> package described in Chapter <a href="geometry-operations.html#geometry-operations">5</a> can be used to smooth the edges of the polygons.
-As smoothing removes sharp edges in the polygon boundaries, the smoothed polygons will not have the same exact spatial coverage as the original pixels (see the <strong>smoothr</strong> <a href="https://strimas.com/smoothr/">website</a> for examples).
-Caution should therefore be taken when using the smoothed polygons for further analysis.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:06-raster-vector-40"></span>
 <img src="06-raster-vector_files/figure-html/06-raster-vector-40-1.png" alt="Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right)." width="100%"><p class="caption">
 FIGURE 6.9: Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right).
 </p>
 </div>
+<p>The aggregated polygons of the <code>grain</code> dataset have rectilinear boundaries which arise from being defined by connecting rectangular pixels.
+The <strong>smoothr</strong> package described in Chapter <a href="geometry-operations.html#geometry-operations">5</a> can be used to smooth the edges of the polygons.
+As smoothing removes sharp edges in the polygon boundaries, the smoothed polygons will not have the same exact spatial coverage as the original pixels (see the <strong>smoothr</strong> <a href="https://strimas.com/smoothr/">website</a> for examples).
+Caution should therefore be taken when using the smoothed polygons for further analysis.</p>
 </div>
 <div id="exercises-4" class="section level2" number="6.6">
 <h2>
 <span class="header-section-number">6.6</span> Exercises<a class="anchor" aria-label="anchor" href="#exercises-4"><i class="fas fa-link"></i></a>
 </h2>
-<p>Some of the exercises use a vector (<code>zion_points</code>) and raster dataset (<code>srtm</code>) from the <strong>spDataLarge</strong> package.
+<p>Some of the following exercises use a vector (<code>zion_points</code>) and raster dataset (<code>srtm</code>) from the <strong>spDataLarge</strong> package.
 They also use a polygonal ‘convex hull’ derived from the vector dataset (<code>ch</code>) to represent the area of interest:</p>
 <div class="sourceCode" id="cb222"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span></span>
@@ -505,7 +504,7 @@ Using these two new objects:</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-02-26.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-02-27.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
