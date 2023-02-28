@@ -2,7 +2,6 @@
 # Author - Kiranmayi Vadlamudi
 # 2020-12-25
 # Last updated: 2023-02-28 by Jakub Nowosad
-
 library(shiny)
 library(sf)
 library(spData)
@@ -18,11 +17,14 @@ ui = fluidPage(
   # Application title
   titlePanel("Closest available cycle in London"),
   
-  # Numerio Input from User
+  # Numeric Input from User
   fluidRow (
-    column(3,numericInput("x", ("Enter x-coordinate of your location"), value = 51.5000000, step = 0.0000001)),
-    column(3, numericInput("y", ("Enter y-coordinate of your location"), value = -0.1000000 , step = 0.0000001)),
-    column(4, numericInput("num", "How many cycles are you looking for?", value = 1, step = 1))
+    column(3, numericInput("x", ("Enter x-coordinate of your location"),
+                           value = 51.5000000, step = 0.0000001)),
+    column(3, numericInput("y", ("Enter y-coordinate of your location"),
+                           value = -0.1000000 , step = 0.0000001)),
+    column(4, numericInput("num", "How many cycles are you looking for?",
+                           value = 1, step = 1))
   ),
   
   # Where leaflet map will be rendered
@@ -32,8 +34,8 @@ ui = fluidPage(
 )
 
 server = function(input, output) {
-  #centring the leaflet map onto london - use if needed
-  map_centre = matrix(c(-0.2574846,51.4948089), nrow = 1, ncol = 2, 
+  #centring the leaflet map onto London - use if needed
+  map_centre = matrix(c(-0.2574846, 51.4948089), nrow = 1, ncol = 2, 
                       dimnames = list(c("r1"), c("X", "Y")))
   
   #based on input coords calculating top 5 closest stations to be displayed 
@@ -50,7 +52,7 @@ server = function(input, output) {
       setView(lng = input_pt()[, "X"], input_pt()[, "Y"], zoom = 15)
   })
   
-  #Findind the top distance between input coordinates and all other cycle stations, then sorting them.
+  #Finding the top distance between input coordinates and all other cycle stations, then sorting them.
   data = reactive({
     cycle_hire$dist = st_point(input_pt()) |>  
       st_sfc() |> 
@@ -73,7 +75,8 @@ server = function(input, output) {
   })
   
   #Making changes to the output leaflet map reflecting the cycle stations found above
-  icons = awesomeIcons(icon = "bicycle", library = "fa", squareMarker = TRUE, markerColor = "blue")
+  icons = awesomeIcons(icon = "bicycle", library = "fa",
+                       squareMarker = TRUE, markerColor = "blue")
   
   observe({
     proxy = leafletProxy("map", data = filteredData()) |> clearMarkers()
