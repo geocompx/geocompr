@@ -13,10 +13,8 @@ library(stringr)
 
 # Based on input coordinates finding the nearest bicycle points
 ui = fluidPage(
-  
   # Application title
   titlePanel("Closest available cycle in London"),
-  
   # Numeric Input from User
   fluidRow (
     column(3, numericInput("x", ("Enter x-coordinate of your location"),
@@ -26,7 +24,6 @@ ui = fluidPage(
     column(4, numericInput("num", "How many cycles are you looking for?",
                            value = 1, step = 1))
   ),
-  
   # Where leaflet map will be rendered
   fluidRow(
     leafletOutput("map", height= 500)
@@ -51,7 +48,6 @@ server = function(input, output) {
       addTiles() |>
       setView(lng = input_pt()[, "X"], input_pt()[, "Y"], zoom = 15)
   })
-  
   #Finding the top distance between input coordinates and all other cycle stations, then sorting them.
   data = reactive({
     cycle_hire$dist = st_point(input_pt()) |>  
@@ -63,7 +59,6 @@ server = function(input, output) {
     
     cycle_hire[order(cycle_hire$dist), ]
   })
-  
   #Filtering the distance data from above to show top 5 closest stations meeting requirement of # of bikes needed  
   filteredData = reactive({
     data() |> 
@@ -73,7 +68,6 @@ server = function(input, output) {
                      str_c("Available bikes:", nbikes, sep=" "), sep = "<br/>"))
     
   })
-  
   #Making changes to the output leaflet map reflecting the cycle stations found above
   icons = awesomeIcons(icon = "bicycle", library = "fa",
                        squareMarker = TRUE, markerColor = "blue")
