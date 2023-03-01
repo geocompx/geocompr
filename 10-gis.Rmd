@@ -152,7 +152,7 @@ The second one focuses on deriving new information from a digital elevation mode
 
 Consider a situation when you have two polygon objects with different spatial units (e.g., regions, administrative units).
 Our goal is to merge these two objects into one, containing all of the boundary lines and related attributes.
-We use again the incongruent polygons we have already encountered in Section \@ref(incongruent) (Figure \@ref(fig:uniondata)).
+We use again the incongruent polygons\index{spatial congruence} we have already encountered in Section \@ref(incongruent) (Figure \@ref(fig:uniondata)).
 Both polygon datasets are available in the **spData** package, and for both we would like to use a geographic CRS\index{CRS!geographic} (see also Chapter \@ref(reproj-geo-data)).
 
 ```{r 09-gis-4}
@@ -235,9 +235,9 @@ union_sf = st_as_sf(union)
 Note that the QGIS\index{QGIS} union\index{vector!union} operation merges the two input layers into one layer by using the intersection\index{vector!intersection} and the symmetrical difference of the two input layers (which, by the way, is also the default when doing a union operation in GRASS\index{GRASS} and SAGA\index{SAGA}).
 This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)!
 
-Our result, `union_sf`, is a multipolygon with a larger number of features than two input objects .
+Our result, `union_sf`, is a multipolygon with a larger number of features than two input objects.
 Notice, however, that many of these polygons are small and do not represent real areas but are rather a result of our two datasets having a different level of detail.
-These artifacts of error are called sliver polygons (see red-colored polygons in the left panel of Figure \@ref(fig:sliver))
+These artifacts of error are called sliver polygons\index{sliver polygons} (see red-colored polygons in the left panel of Figure \@ref(fig:sliver)).
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^, and next remove them.
 Let's search for an appropriate algorithm.
 
@@ -245,8 +245,8 @@ Let's search for an appropriate algorithm.
 grep("clean", qgis_algo$algorithm, value = TRUE)
 ```
 
-This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS.
-GRASS GIS's `v.clean` is a powerful tool for cleaning topology of spatial vector data. 
+This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS\index{GRASS}.
+GRASS GIS's `v.clean` is a powerful tool for cleaning topology of spatial vector data \index{topology cleaning}. 
 Importantly, we can use it through **qgisprocess**.
 
 Similarly to the previous step, we should start by looking at this algorithm's help.
@@ -257,7 +257,7 @@ qgis_show_help("grass7:v.clean")
 
 We have omitted the output here, because the help text is quite long and contains a lot of arguments.^[Also note that these arguments, contrary to the QGIS's ones, are in lower case.]
 This is because `v.clean` is a multi tool -- it can clean different types of geometries and solve different types of topological problems.
-For this example, let's focus on just a few arguments, however, we encourage you to visit [this algorithm's documentation](https://grass.osgeo.org/grass78/manuals/v.clean.html) to learn more about `v.clean` capabilities.
+For this example, let's focus on just a few arguments, however, we encourage you to visit [this algorithm's documentation](https://grass.osgeo.org/grass82/manuals/v.clean.html) to learn more about `v.clean` capabilities.
 
 ```{r, eval=FALSE}
 qgis_arguments("grass7:v.clean") |>
@@ -295,12 +295,12 @@ knitr::include_graphics("figures/10-sliver.png")
 
 ### Raster data {#qgis-raster}
 
-Digital elevation models (DEMs) contain elevation information for each raster cell.
+Digital elevation models (DEMs)\index{digital elevation model} contain elevation information for each raster cell.
 They are used for many purposes, including satellite navigation, water flow models, surface analysis, or visualization.
 Here, we are interested in deriving new information from a DEM raster that could be used as predictors for statistical learning.
 Various terrain parameters, for example, can be helpful for the prediction of landslides (see Chapter \@ref(spatial-cv))
 
-For this section, we will use `dem.tif` -- a digital elevation model\index{digital elevation model} of the Mongón study area (downloaded from the Land Process Distributed Active Archive Center, see also `?dem.tif`)
+For this section, we will use `dem.tif` -- a digital elevation model of the Mongón study area (downloaded from the Land Process Distributed Active Archive Center, see also `?dem.tif`)
 It has a resolution of about 30 by 30 meters and uses a projected CRS.
 
 ```{r, eval=FALSE}
@@ -320,7 +320,7 @@ grep("wetness", qgis_algo$algorithm, value = TRUE)
 #> [1] "saga:sagawetnessindex"           "saga:topographicwetnessindextwi"
 ```
 
-An output of the above code suggests that the desired algorithm exists in the SAGA GIS software.^[TWI can be also calculated using the `r.topidx` GRASS GIS function.]
+An output of the above code suggests that the desired algorithm exists in the SAGA GIS software\index{SAGA}.^[TWI can be also calculated using the `r.topidx` GRASS GIS function.]
 Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here, particularly on digital elevation models\index{digital elevation model} (soil properties, terrain attributes, climate parameters). 
 Hence, SAGA is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets [@conrad_system_2015].
 
@@ -341,19 +341,18 @@ dem_wetness = qgis_run_algorithm("saga:sagawetnessindex", DEM = dem,
                                  .quiet = TRUE)
 ```
 
-The result, `dem_wetness`, is a list with file paths to the four outputs.
+<!-- The result, `dem_wetness`, is a list with file paths to the four outputs. -->
 We can read a selected output by providing an output name in the `qgis_as_terra()` function.
 
 ```{r, eval=FALSE}
 dem_wetness_twi = qgis_as_terra(dem_wetness$TWI)
 ```
 
-You can see the output TWI map on the left panel of Figure \@ref(fig:qgis-raster-map).
-The topographic wetness index is unitless.
-Its low values represent areas that will not accumulate water, while higher values show areas that will accumulate water at increasing levels.
+You can see the TWI map on the left panel of Figure \@ref(fig:qgis-raster-map).
+The topographic wetness index is unitless: its low values represent areas that will not accumulate water, while higher values show areas that will accumulate water at increasing levels.
 
-Information from digital elevation models can also be categorized, for example, to geomorphons -- the geomorphological phonotypes consisting of 10 classes that represent terrain forms, such as slopes, ridges, or valleys [@jasiewicz_geomorphons_2013].
-These phonotypes are used in many studies, including landslide susceptibility, ecosystem services, human mobility, and digital soil mapping. 
+Information from digital elevation models can also be categorized, for example, to geomorphons\index{geomorphons} -- the geomorphological phenotypes consisting of 10 classes that represent terrain forms, such as slopes, ridges, or valleys [@jasiewicz_geomorphons_2013].
+These phenotypes are used in many studies, including landslide susceptibility, ecosystem services, human mobility, and digital soil mapping. 
 
 The original implementation of the geomorphons' algorithm was created in GRASS GIS, and we can find it in the **qgisprocess** list as `"grass7:r.geomorphon"`:
 
@@ -366,7 +365,7 @@ qgis_show_help("grass7:r.geomorphon")
 
 Calculation of geomorphons requires an input DEM (`elevation`), and can be customized with a set of optional arguments.
 It includes, `search` -- a length for which the line-of-sight is calculated, and ``-m`` -- a flag specifying that the search value will be provided in meters (and not the number of cells).
-More information about additional arguments can be found in the original paper and the [GRASS GIS documentation](https://grass.osgeo.org/grass78/manuals/r.geomorphon.html).
+More information about additional arguments can be found in the original paper and the [GRASS GIS documentation](https://grass.osgeo.org/grass82/manuals/r.geomorphon.html).
 
 ```{r, eval=FALSE}
 dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon", elevation = dem, 
