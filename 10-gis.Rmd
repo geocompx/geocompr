@@ -849,6 +849,8 @@ tm_shape(buf) +
 ```
 
 Unlike PostGIS, **sf** only supports spatial vector data. 
+<!--toDo:jn-->
+<!-- reconsider referening to rpostgis -- https://github.com/r-spatial/discuss/issues/58 -->
 To query and manipulate raster data stored in a PostGIS database, use the **rpostgis** package [@bucklin_rpostgis_2018] and/or use command-line tools such as `rastertopgsql` which comes as part of the PostGIS\index{PostGIS} installation. 
 
 This subsection is only a brief introduction to PostgreSQL/PostGIS.
@@ -859,27 +861,28 @@ But the same is true for the lightweight SQLite/SpatiaLite database engine and G
 
 If your datasets are too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, it may be worth exploring large-scale geographic querying on distributed computing systems.
 Such systems are outside the scope of this book but it worth mentioning that open source software providing this functionality exists.
-Prominent projects in this space include [GeoMesa](http://www.geomesa.org/) and [Apache Sedona](https://sedona.apache.org/). The [**apache.sedona**](https://cran.r-project.org/package=apache.sedona) package provides an interface to the latter.
+Prominent projects in this space include [GeoMesa](http://www.geomesa.org/) and [Apache Sedona](https://sedona.apache.org/).
+The [**apache.sedona**](https://cran.r-project.org/package=apache.sedona) package provides an interface to the latter.
 
 ## Bridges to cloud technologies and services {#cloud}
 
 In recent years, cloud technologies have become more and more prominent on the internet. 
 This also includes their use to store and process spatial data.
-Major cloud computing providers (Amazon Web Services, Microsoft Azure / Planetary Computer, Google Cloud Platform, and others)\index{cloud computing} offer vast catalogs of open Earth observation data, such as the complete Sentinel-2 archive, on their platforms. 
+Major cloud computing providers (Amazon Web Services, Microsoft Azure / Planetary Computer, Google Cloud Platform, and others)\index{cloud computing} offer vast catalogs of open Earth observation data, such as the complete Sentinel-2\index{Sentinel-2} archive, on their platforms. 
 We can use R and directly connect to and process data from these archives, ideally from a machine in the same cloud and region.
 
 Three promising developments that make working with such image archives on cloud platforms _easier_ and _more efficient_ are the [SpatioTemporal Asset Catalog (STAC)](https://stacspec.org)\index{STAC}, the [cloud-optimized GeoTIFF (COG)](https://www.cogeo.org/)\index{COG} image file format, and the concept of data cubes\index{data cube}. 
 Section \@ref(staccog) introduces these individual developments and briefly describes how they can be used from R.
 
 Besides hosting large data archives, numerous cloud-based services\index{cloud computing} to process Earth observation data have been launched during the last few years.
-It includes the OpenEO initiative -- a unified interface between programming languages (including R) and various cloud-based services.
+It includes the OpenEO initiative\index{OpenEO} -- a unified interface between programming languages (including R) and various cloud-based services.
 You can find more information about OpenEO in Section \@ref(openeo).
 
 ### STAC, COGs, and data cubes in the cloud {#staccog}
 
 The SpatioTemporal Asset Catalog (STAC)\index{STAC} is a general description format for spatiotemporal data that is used to describe a variety of datasets on cloud platforms including imagery, synthetic aperture radar (SAR) data, and point clouds. 
 Besides simple static catalog descriptions, STAC-API presents a web service to query items (e.g. images) of catalogs by space, time, and other properties. 
-In R, the **rstac** package [@simoes_rstac_2021] allows to connect to STAC-API endpoints and search for items. 
+In R, the **rstac** package\index{rstac (package)}  [@simoes_rstac_2021] allows to connect to STAC-API endpoints and search for items. 
 In the example below, we request all images from the [Sentinel-2 Cloud-Optimized GeoTIFF (COG) dataset on Amazon Web Services](https://registry.opendata.aws/sentinel-2-l2a-cogs)\index{COG} that intersect with a predefined area and time of interest. 
 The result contains all found images and their metadata (e.g. cloud cover) and URLs pointing to actual files on AWS. 
 
@@ -898,17 +901,17 @@ items = s |>
 Cloud storage differs from local hard disks and traditional image file formats do not perform well in cloud-based geoprocessing. 
 Broadly speaking, the cloud-optimized GeoTIFF\index{COG} format is a specific type of GeoTIFF that makes it possible to efficiently read only parts of an image from cloud storage. 
 As a result, reading rectangular subsets of an image or reading images at lower resolution becomes much more efficient. 
-As an R user, you don't have to install anything to work with COGs because [GDAL](https://gdal.org)\index{GDAL} (and any package using it) can already work with COGs. However, keep in mind that the availability of COGs is a big plus while browsing through catalogs of data providers.
+As an R user, you do not have to install anything to work with COGs because [GDAL](https://gdal.org)\index{GDAL} (and any package using it) can already work with COGs. 
+However, keep in mind that the availability of COGs is a big plus while browsing through catalogs of data providers.
 
 For larger areas of interest, requested images are still relatively difficult to work with: they may use different map projections, may spatially overlap, and the spatial resolution often depends on the spectral band. 
-The **gdalcubes** package [@appel_gdalcubes_2019] can be used to abstract from individual images and to create and process image collections as four-dimensional data cubes\index{data cube}.
+The **gdalcubes** package\index{gdalcubes (package)}  [@appel_gdalcubes_2019] can be used to abstract from individual images and to create and process image collections as four-dimensional data cubes\index{data cube}.
 
-The code below shows a minimal example to create a lower resolution (250m) maximum NDVI composite from the Sentinel-2 images returned by the previous STAC-API search. 
+The code below shows a minimal example to create a lower resolution (250m) maximum NDVI composite from the Sentinel-2 images returned by the previous STAC-API search.
 
 ```{r 09-gdalcubes-example, eval = FALSE}
 library(gdalcubes)
-# Filter images from STAC response by cloud cover 
-# and create an image collection object
+# Filter images by cloud cover and create an image collection object
 collection = stac_image_collection(items$features, 
                   property_filter = function(x) {x[["eo:cloud_cover"]] < 10})
 # Define extent, resolution (250m, daily) and CRS of the target data cube
@@ -929,7 +932,7 @@ In this case, we ignore images with 10% or more cloud cover.
 For more details, please refer to this [tutorial presented at OpenGeoHub summer school 2021](https://appelmar.github.io/ogh2021/tutorial.html).
 
 The combination of STAC\index{STAC}, COGs\index{COG}, and data cubes\index{data cube} forms a cloud-native workflow to analyze (large) collections of satellite imagery in the cloud\index{cloud computing}. 
-These tools already form a backbone, for example, of the **sits** R package, which allows land use and land cover classification of big Earth observation data.
+These tools already form a backbone, for example, of the **sits** R package\index{sits (package)} , which allows land use and land cover classification of big Earth observation data.
 The package builds EO data cubes from image collections available in cloud services and performs land classification of data cubes using various machine learning algorithms.
 For more information about **sits** visit https://e-sensing.github.io/sitsbook/ or read the related article [@rs13132428].
 
