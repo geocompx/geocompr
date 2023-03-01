@@ -77,7 +77,7 @@ However, its ability to interface with dedicated GISs gives it astonishing geosp
 R is well known as a statistical programming language, but many people are unaware of its ability to replicate GIS workflows, with the additional benefits of a (relatively) consistent CLI.
 Furthermore, R outperforms GISs in some areas of geocomputation\index{geocomputation}, including interactive/animated map making (see Chapter \@ref(adv-map)) and spatial statistical modeling (see Chapter \@ref(spatial-cv)).
 This chapter focuses on 'bridges' to three mature open source GIS products (see Table \@ref(tab:gis-comp)): QGIS\index{QGIS} (via the package **qgisprocess**\index{qgisprocess (package)}; Section \@ref(rqgis)), SAGA\index{SAGA} (via **Rsagacmd**\index{Rsagacmd (package)}; Section \@ref(saga)) and GRASS\index{GRASS} (via **rgrass**\index{rgrass (package)}; Section \@ref(grass)).^[
-The now now longer maintained R package **RPyGeo** established an interface to the geoprocessing tools of ArcGIS from with R.
+The now not longer maintained R package **RPyGeo** established an interface to the geoprocessing tools of ArcGIS from with R.
 And though not covered here, it is worth being aware of the so-called R-ArcGIS bridge (see https://github.com/R-ArcGIS/r-bridge) that allows R to be used from within ArcGIS\index{ArcGIS}.
 Please note further that one can also use R scripts from within QGIS\index{QGIS} (see https://docs.qgis.org/3.22/en/docs/training_manual/processing/r_intro.html).
 Finally, it is also possible to use R from the GRASS GIS\index{GRASS} command line (see https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#R_within_GRASS).
@@ -111,7 +111,7 @@ Before running **qgisprocess**\index{qgisprocess (package)}, make sure you have 
 ```r
 library(qgisprocess)
 #> Using 'qgis_process' in the system PATH.
-#> QGIS version: 3.26.1-Buenos Aires
+#> QGIS version: 3.28.2-Firenze
 #> ...
 ```
 
@@ -148,7 +148,7 @@ The second one focuses on deriving new information from a digital elevation mode
 
 Consider a situation when you have two polygon objects with different spatial units (e.g., regions, administrative units).
 Our goal is to merge these two objects into one, containing all of the boundary lines and related attributes.
-We use again the incongruent polygons we have already encountered in Section \@ref(incongruent) (Figure \@ref(fig:uniondata)).
+We use again the incongruent polygons\index{spatial congruence} we have already encountered in Section \@ref(incongruent) (Figure \@ref(fig:uniondata)).
 Both polygon datasets are available in the **spData** package, and for both we would like to use a geographic CRS\index{CRS!geographic} (see also Chapter \@ref(reproj-geo-data)).
 
 
@@ -226,9 +226,9 @@ union_sf = st_as_sf(union)
 Note that the QGIS\index{QGIS} union\index{vector!union} operation merges the two input layers into one layer by using the intersection\index{vector!intersection} and the symmetrical difference of the two input layers (which, by the way, is also the default when doing a union operation in GRASS\index{GRASS} and SAGA\index{SAGA}).
 This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)!
 
-Our result, `union_sf`, is a multipolygon with a larger number of features than two input objects .
+Our result, `union_sf`, is a multipolygon with a larger number of features than two input objects.
 Notice, however, that many of these polygons are small and do not represent real areas but are rather a result of our two datasets having a different level of detail.
-These artifacts of error are called sliver polygons (see red-colored polygons in the left panel of Figure \@ref(fig:sliver))
+These artifacts of error are called sliver polygons\index{sliver polygons} (see red-colored polygons in the left panel of Figure \@ref(fig:sliver)).
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^, and next remove them.
 Let's search for an appropriate algorithm.
 
@@ -237,8 +237,8 @@ Let's search for an appropriate algorithm.
 grep("clean", qgis_algo$algorithm, value = TRUE)
 ```
 
-This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS.
-GRASS GIS's `v.clean` is a powerful tool for cleaning topology of spatial vector data. 
+This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS\index{GRASS}.
+GRASS GIS's `v.clean` is a powerful tool for cleaning topology of spatial vector data \index{topology cleaning}. 
 Importantly, we can use it through **qgisprocess**.
 
 Similarly to the previous step, we should start by looking at this algorithm's help.
@@ -250,7 +250,7 @@ qgis_show_help("grass7:v.clean")
 
 We have omitted the output here, because the help text is quite long and contains a lot of arguments.^[Also note that these arguments, contrary to the QGIS's ones, are in lower case.]
 This is because `v.clean` is a multi tool -- it can clean different types of geometries and solve different types of topological problems.
-For this example, let's focus on just a few arguments, however, we encourage you to visit [this algorithm's documentation](https://grass.osgeo.org/grass78/manuals/v.clean.html) to learn more about `v.clean` capabilities.
+For this example, let's focus on just a few arguments, however, we encourage you to visit [this algorithm's documentation](https://grass.osgeo.org/grass82/manuals/v.clean.html) to learn more about `v.clean` capabilities.
 
 
 ```r
@@ -291,12 +291,12 @@ The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver po
 
 ### Raster data {#qgis-raster}
 
-Digital elevation models (DEMs) contain elevation information for each raster cell.
+Digital elevation models (DEMs)\index{digital elevation model} contain elevation information for each raster cell.
 They are used for many purposes, including satellite navigation, water flow models, surface analysis, or visualization.
 Here, we are interested in deriving new information from a DEM raster that could be used as predictors for statistical learning.
 Various terrain parameters, for example, can be helpful for the prediction of landslides (see Chapter \@ref(spatial-cv))
 
-For this section, we will use `dem.tif` -- a digital elevation model\index{digital elevation model} of the Mongón study area (downloaded from the Land Process Distributed Active Archive Center, see also `?dem.tif`)
+For this section, we will use `dem.tif` -- a digital elevation model of the Mongón study area (downloaded from the Land Process Distributed Active Archive Center, see also `?dem.tif`)
 It has a resolution of about 30 by 30 meters and uses a projected CRS.
 
 
@@ -318,7 +318,7 @@ grep("wetness", qgis_algo$algorithm, value = TRUE)
 #> [1] "saga:sagawetnessindex"           "saga:topographicwetnessindextwi"
 ```
 
-An output of the above code suggests that the desired algorithm exists in the SAGA GIS software.^[TWI can be also calculated using the `r.topidx` GRASS GIS function.]
+An output of the above code suggests that the desired algorithm exists in the SAGA GIS software\index{SAGA}.^[TWI can be also calculated using the `r.topidx` GRASS GIS function.]
 Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here, particularly on digital elevation models\index{digital elevation model} (soil properties, terrain attributes, climate parameters). 
 Hence, SAGA is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets [@conrad_system_2015].
 
@@ -341,7 +341,7 @@ dem_wetness = qgis_run_algorithm("saga:sagawetnessindex", DEM = dem,
                                  .quiet = TRUE)
 ```
 
-The result, `dem_wetness`, is a list with file paths to the four outputs.
+<!-- The result, `dem_wetness`, is a list with file paths to the four outputs. -->
 We can read a selected output by providing an output name in the `qgis_as_terra()` function.
 
 
@@ -349,12 +349,11 @@ We can read a selected output by providing an output name in the `qgis_as_terra(
 dem_wetness_twi = qgis_as_terra(dem_wetness$TWI)
 ```
 
-You can see the output TWI map on the left panel of Figure \@ref(fig:qgis-raster-map).
-The topographic wetness index is unitless.
-Its low values represent areas that will not accumulate water, while higher values show areas that will accumulate water at increasing levels.
+You can see the TWI map on the left panel of Figure \@ref(fig:qgis-raster-map).
+The topographic wetness index is unitless: its low values represent areas that will not accumulate water, while higher values show areas that will accumulate water at increasing levels.
 
-Information from digital elevation models can also be categorized, for example, to geomorphons -- the geomorphological phonotypes consisting of 10 classes that represent terrain forms, such as slopes, ridges, or valleys [@jasiewicz_geomorphons_2013].
-These phonotypes are used in many studies, including landslide susceptibility, ecosystem services, human mobility, and digital soil mapping. 
+Information from digital elevation models can also be categorized, for example, to geomorphons\index{geomorphons} -- the geomorphological phenotypes consisting of 10 classes that represent terrain forms, such as slopes, ridges, or valleys [@jasiewicz_geomorphons_2013].
+These phenotypes are used in many studies, including landslide susceptibility, ecosystem services, human mobility, and digital soil mapping. 
 
 The original implementation of the geomorphons' algorithm was created in GRASS GIS, and we can find it in the **qgisprocess** list as `"grass7:r.geomorphon"`:
 
@@ -368,7 +367,7 @@ qgis_show_help("grass7:r.geomorphon")
 
 Calculation of geomorphons requires an input DEM (`elevation`), and can be customized with a set of optional arguments.
 It includes, `search` -- a length for which the line-of-sight is calculated, and ``-m`` -- a flag specifying that the search value will be provided in meters (and not the number of cells).
-More information about additional arguments can be found in the original paper and the [GRASS GIS documentation](https://grass.osgeo.org/grass78/manuals/r.geomorphon.html).
+More information about additional arguments can be found in the original paper and the [GRASS GIS documentation](https://grass.osgeo.org/grass82/manuals/r.geomorphon.html).
 
 
 ```r
@@ -421,7 +420,7 @@ Our `saga` object contains connections to all of the available SAGA tools.
 It is organized as a list of libraries (groups of tools), and inside of a library it has a list of tools.
 We can access any tool with the `$` sign (remember to use TAB for autocompletion).
 
-The seeded region growing algorithm works in two main steps [@adams_seeded_1994;@bohner_image_2006].
+The seeded region growing algorithm works\index{seeded region growing algorithm} in two main steps [@adams_seeded_1994;@bohner_image_2006].
 First, initial cells ("seeds") are generated by finding the cells with the smallest variance in local windows of a specified size.
 Then, the region growing algorithm is used to merge neighboring pixels of the seeds to create homogeneous areas.
 
@@ -430,7 +429,7 @@ Then, the region growing algorithm is used to merge neighboring pixels of the se
 sg = saga$imagery_segmentation$seed_generation
 ```
 
-In the above example, we first opened the `imagery_segmentation` library and then its `seed_generation` tool.
+In the above example, we first pointed to the `imagery_segmentation` library and then its `seed_generation` tool.
 We also assigned it to the `sg` object, not to retype the whole tool code in our next steps.^[You can read more about the tool at https://saga-gis.sourceforge.io/saga_tool_doc/8.3.0/imagery_segmentation_2.html.]
 If we just type `sg`, we will get a quick summary of the tool and a data frame with its parameters, descriptions, and defaults.
 You may also use `tidy(sg)` to extract just the parameters' table.
@@ -466,7 +465,8 @@ We can convert it into polygons with `as.polygons()` and `st_as_sf()` (Section \
 
 
 ```r
-ndvi_segments = as.polygons(ndvi_srg$segments) |> 
+ndvi_segments = ndvi_srg$segments |> 
+  as.polygons() |> 
   st_as_sf()
 ```
 
@@ -504,7 +504,6 @@ Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass
 To quickly use GRASS from within R, we will use the **link2GI** package, however, one can also set up the GRASS GIS database step-by-step.
 See [GRASS within R](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#GRASS_within_R) for how to do so.
 Please note that the code instructions in the following paragraphs might be hard to follow when using GRASS for the first time but by running through the code line-by-line and by examining the intermediate results, the reasoning behind it should become even clearer.
-
 
 Here, we introduce **rgrass**\index{rgrass (package)} with one of the most interesting problems in GIScience - the traveling salesman problem\index{traveling salesman}.
 Suppose a traveling salesman would like to visit 24 customers.
@@ -564,11 +563,11 @@ write_VECT(terra::vect(points[, 1]), vname = "points")
 ```
 
 The **rgrass** package expects its inputs and gives its outputs as **terra** objects. 
-Therefore, we need to convert our `sf` spatial vectors to **terra**'s `SpatVector`s using the `vect()` function to be able to use `write_VECT()`.^[You can learn more how to convert between spatial classes in R by reading the (Conversions between different spatial classes in R)[https://geocompr.github.io/post/2021/spatial-classes-conversion/] blog post and the 
+Therefore, we need to convert our `sf` spatial vectors to **terra**'s `SpatVector`s using the `vect()` function to be able to use `write_VECT()`.^[You can learn more how to convert between spatial classes in R by reading the (Conversions between different spatial classes in R)[https://geocompx.org/post/2021/spatial-classes-conversion/] blog post and the 
 (Coercion between object formats)[https://CRAN.R-project.org/package=rgrass/vignettes/coerce.html] vignette] 
 
 Now, both datasets exist in the GRASS GIS database.
-To perform our network\index{network} analysis, we need a topological clean street network.
+To perform our network\index{network} analysis, we need a topologically clean street network\index{topology cleaning}.
 GRASS's `"v.clean"` takes care of the removal of duplicates, small angles and dangles, among others.
 Here, we break lines at each intersection to ensure that the subsequent routing algorithm can actually turn right or left at an intersection, and save the output in a GRASS object named `streets_clean`.
 
@@ -641,7 +640,7 @@ Use `"v.select"` and `"v.extract"` for vector data.
 To recommend a single R-GIS interface is hard since the usage depends on personal preferences, the tasks at hand and your familiarity with different GIS\index{GIS} software packages which in turn probably depends on your field of study.
 As mentioned previously, SAGA\index{SAGA} is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets, and frequently used by hydrologists, climatologists and soil scientists [@conrad_system_2015].
 GRASS GIS\index{GRASS}, on the other hand, is the only GIS presented here supporting a topologically based spatial database which is especially useful for network analyses but also simulation studies.
-QGIS is much more user-friendly compared to GRASS- and SAGA-GIS, especially for first-time GIS users, and probably the most popular open-source GIS.
+QGISS\index{QGIS} is much more user-friendly compared to GRASS- and SAGA-GIS, especially for first-time GIS users, and probably the most popular open-source GIS.
 Therefore, **qgisprocess**\index{qgisprocess (package)} is an appropriate choice for most use cases.
 Its main advantages are:
 
@@ -653,10 +652,10 @@ Its main advantages are:
 By all means, there are use cases when you certainly should use one of the other R-GIS bridges.
 Though QGIS is the only GIS providing a unified interface to several GIS\index{GIS} software packages, it only provides access to a subset of the corresponding third-party geoalgorithms (for more information please refer to @muenchow_rqgis:_2017).
 Therefore, to use the complete set of SAGA and GRASS functions, stick with **Rsagacmd**\index{Rsagacmd (package)} and **rgrass**. 
-Finally, if you need topological correct data and/or spatial database management functionality such as multi-user access, we recommend the usage of GRASS. 
 In addition, if you would like to run simulations with the help of a geodatabase\index{spatial database} [@krug_clearing_2010], use **rgrass** directly since **qgisprocess** always starts a new GRASS session for each call.
+Finally, if you need topological correct data and/or spatial database management functionality such as multi-user access, we recommend the usage of GRASS. 
 
-Please note that there are a number of further GIS software packages that have a scripting interface but for which there is no dedicated R package that accesses these: gvSig, OpenJump, and the Orfeo Toolbox.^[Please note that **link2GI** provides a partial integration with the Orfeo Toolbox and that you can also access the Orfeo Toolbox geoalgorithms via **qgisprocess**. Note also that TauDEM can be accessed from with R with package **traudem**.]
+Please note that there are a number of further GIS software packages that have a scripting interface but for which there is no dedicated R package that accesses these: gvSig, OpenJump, and the Orfeo Toolbox.^[Please note that **link2GI** provides a partial integration with the Orfeo Toolbox\index{Orfeo Toolbox} and that you can also access the Orfeo Toolbox geoalgorithms via **qgisprocess**. Note also that TauDEM\index{TauDEM} can be accessed from with R with package **traudem**.]
 
 ## Other bridges
 
@@ -854,6 +853,8 @@ RPostgreSQL::postgresqlCloseConnection(conn)
 </div>
 
 Unlike PostGIS, **sf** only supports spatial vector data. 
+<!--toDo:jn-->
+<!-- reconsider referening to rpostgis -- https://github.com/r-spatial/discuss/issues/58 -->
 To query and manipulate raster data stored in a PostGIS database, use the **rpostgis** package [@bucklin_rpostgis_2018] and/or use command-line tools such as `rastertopgsql` which comes as part of the PostGIS\index{PostGIS} installation. 
 
 This subsection is only a brief introduction to PostgreSQL/PostGIS.
@@ -864,27 +865,28 @@ But the same is true for the lightweight SQLite/SpatiaLite database engine and G
 
 If your datasets are too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, it may be worth exploring large-scale geographic querying on distributed computing systems.
 Such systems are outside the scope of this book but it worth mentioning that open source software providing this functionality exists.
-Prominent projects in this space include [GeoMesa](http://www.geomesa.org/) and [Apache Sedona](https://sedona.apache.org/). The [**apache.sedona**](https://cran.r-project.org/package=apache.sedona) package provides an interface to the latter.
+Prominent projects in this space include [GeoMesa](http://www.geomesa.org/) and [Apache Sedona](https://sedona.apache.org/).
+The [**apache.sedona**](https://cran.r-project.org/package=apache.sedona) package provides an interface to the latter.
 
 ## Bridges to cloud technologies and services {#cloud}
 
 In recent years, cloud technologies have become more and more prominent on the internet. 
 This also includes their use to store and process spatial data.
-Major cloud computing providers (Amazon Web Services, Microsoft Azure / Planetary Computer, Google Cloud Platform, and others)\index{cloud computing} offer vast catalogs of open Earth observation data, such as the complete Sentinel-2 archive, on their platforms. 
+Major cloud computing providers (Amazon Web Services, Microsoft Azure / Planetary Computer, Google Cloud Platform, and others)\index{cloud computing} offer vast catalogs of open Earth observation data, such as the complete Sentinel-2\index{Sentinel-2} archive, on their platforms. 
 We can use R and directly connect to and process data from these archives, ideally from a machine in the same cloud and region.
 
 Three promising developments that make working with such image archives on cloud platforms _easier_ and _more efficient_ are the [SpatioTemporal Asset Catalog (STAC)](https://stacspec.org)\index{STAC}, the [cloud-optimized GeoTIFF (COG)](https://www.cogeo.org/)\index{COG} image file format, and the concept of data cubes\index{data cube}. 
 Section \@ref(staccog) introduces these individual developments and briefly describes how they can be used from R.
 
 Besides hosting large data archives, numerous cloud-based services\index{cloud computing} to process Earth observation data have been launched during the last few years.
-It includes the OpenEO initiative -- a unified interface between programming languages (including R) and various cloud-based services.
+It includes the OpenEO initiative\index{OpenEO} -- a unified interface between programming languages (including R) and various cloud-based services.
 You can find more information about OpenEO in Section \@ref(openeo).
 
 ### STAC, COGs, and data cubes in the cloud {#staccog}
 
 The SpatioTemporal Asset Catalog (STAC)\index{STAC} is a general description format for spatiotemporal data that is used to describe a variety of datasets on cloud platforms including imagery, synthetic aperture radar (SAR) data, and point clouds. 
 Besides simple static catalog descriptions, STAC-API presents a web service to query items (e.g. images) of catalogs by space, time, and other properties. 
-In R, the **rstac** package [@simoes_rstac_2021] allows to connect to STAC-API endpoints and search for items. 
+In R, the **rstac** package\index{rstac (package)}  [@simoes_rstac_2021] allows to connect to STAC-API endpoints and search for items. 
 In the example below, we request all images from the [Sentinel-2 Cloud-Optimized GeoTIFF (COG) dataset on Amazon Web Services](https://registry.opendata.aws/sentinel-2-l2a-cogs)\index{COG} that intersect with a predefined area and time of interest. 
 The result contains all found images and their metadata (e.g. cloud cover) and URLs pointing to actual files on AWS. 
 
@@ -904,18 +906,18 @@ items = s |>
 Cloud storage differs from local hard disks and traditional image file formats do not perform well in cloud-based geoprocessing. 
 Broadly speaking, the cloud-optimized GeoTIFF\index{COG} format is a specific type of GeoTIFF that makes it possible to efficiently read only parts of an image from cloud storage. 
 As a result, reading rectangular subsets of an image or reading images at lower resolution becomes much more efficient. 
-As an R user, you don't have to install anything to work with COGs because [GDAL](https://gdal.org)\index{GDAL} (and any package using it) can already work with COGs. However, keep in mind that the availability of COGs is a big plus while browsing through catalogs of data providers.
+As an R user, you do not have to install anything to work with COGs because [GDAL](https://gdal.org)\index{GDAL} (and any package using it) can already work with COGs. 
+However, keep in mind that the availability of COGs is a big plus while browsing through catalogs of data providers.
 
 For larger areas of interest, requested images are still relatively difficult to work with: they may use different map projections, may spatially overlap, and the spatial resolution often depends on the spectral band. 
-The **gdalcubes** package [@appel_gdalcubes_2019] can be used to abstract from individual images and to create and process image collections as four-dimensional data cubes\index{data cube}.
+The **gdalcubes** package\index{gdalcubes (package)}  [@appel_gdalcubes_2019] can be used to abstract from individual images and to create and process image collections as four-dimensional data cubes\index{data cube}.
 
-The code below shows a minimal example to create a lower resolution (250m) maximum NDVI composite from the Sentinel-2 images returned by the previous STAC-API search. 
+The code below shows a minimal example to create a lower resolution (250m) maximum NDVI composite from the Sentinel-2 images returned by the previous STAC-API search.
 
 
 ```r
 library(gdalcubes)
-# Filter images from STAC response by cloud cover 
-# and create an image collection object
+# Filter images by cloud cover and create an image collection object
 collection = stac_image_collection(items$features, 
                   property_filter = function(x) {x[["eo:cloud_cover"]] < 10})
 # Define extent, resolution (250m, daily) and CRS of the target data cube
@@ -936,7 +938,7 @@ In this case, we ignore images with 10% or more cloud cover.
 For more details, please refer to this [tutorial presented at OpenGeoHub summer school 2021](https://appelmar.github.io/ogh2021/tutorial.html).
 
 The combination of STAC\index{STAC}, COGs\index{COG}, and data cubes\index{data cube} forms a cloud-native workflow to analyze (large) collections of satellite imagery in the cloud\index{cloud computing}. 
-These tools already form a backbone, for example, of the **sits** R package, which allows land use and land cover classification of big Earth observation data.
+These tools already form a backbone, for example, of the **sits** R package\index{sits (package)} , which allows land use and land cover classification of big Earth observation data.
 The package builds EO data cubes from image collections available in cloud services and performs land classification of data cubes using various machine learning algorithms.
 For more information about **sits** visit https://e-sensing.github.io/sitsbook/ or read the related article [@rs13132428].
 
