@@ -30,8 +30,8 @@ It teaches how to change the resolution (also called raster aggregation and disa
 These operations are especially useful if one would like to align raster datasets from diverse sources.
 Aligned raster objects share a one-to-one correspondence between pixels, allowing them to be processed using map algebra operations, described in Section \@ref(map-algebra). 
 The interaction between raster and vector objects is covered in Chapter \@ref(raster-vector). 
-It shows how raster values can be 'masked' and 'extracted' by vector geometries.
-Importantly it shows how to 'polygonize' rasters and 'rasterize' vector datasets, making the two data models more interchangeable.
+It presents how raster values can be 'masked' and 'extracted' by vector geometries.
+Importantly it also shows how to 'polygonize' rasters and 'rasterize' vector datasets, making the two data models more interchangeable.
 
 ## Geometric operations on vector data {#geo-vec}
 
@@ -71,10 +71,11 @@ object.size(seine_simp)
 #> 9112 bytes
 ```
 
+\index{vector!simplification} 
 Simplification is also applicable for polygons.
 This is illustrated using `us_states`, representing the contiguous United States.
 As we show in Chapter \@ref(reproj-geo-data), GEOS assumes that the data is in a projected CRS and this could lead to unexpected results when using a geographic CRS.
-Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (epsg = 2163) (on the left in Figure \@ref(fig:us-simp)):
+Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (EPSG = 2163) (on the top left in Figure \@ref(fig:us-simp)):
 
 
 ```r
@@ -90,7 +91,7 @@ us_states_simp1 = st_simplify(us_states2163, dTolerance = 100000)  # 100 km
 ```
 
 A limitation with `st_simplify()` is that it simplifies objects on a per-geometry basis.
-This means the 'topology' is lost, resulting in overlapping and 'holey' areal units illustrated in Figure \@ref(fig:us-simp) (middle panel).
+This means the 'topology' is lost, resulting in overlapping and 'holey' areal units illustrated in Figure \@ref(fig:us-simp) (right top panel).
 `ms_simplify()` from **rmapshaper** provides an alternative that overcomes this issue.
 By default it uses the Visvalingam algorithm, which overcomes some limitations of the Douglas-Peucker algorithm [@visvalingam_line_1993].
 <!-- https://bost.ocks.org/mike/simplify/ -->
@@ -106,8 +107,8 @@ us_states_simp2 = rmapshaper::ms_simplify(us_states2163, keep = 0.01,
                                           keep_shapes = TRUE)
 ```
 
-
-An alternative to simplification is smoothing the boundaries of polygon and linestring geometries, which is implemented in the **smoothr** package. 
+\index{vector!simplification}
+An alternative to simplification is smoothing the boundaries of polygon and linestring geometries, which is implemented in the **smoothr** package\index{smoothr (package)}. 
 Smoothing interpolates the edges of geometries and does not necessarily lead to fewer vertices, but can be especially useful when working with geometries that arise from spatially vectorizing a raster (a topic covered in Chapter \@ref(raster-vector)).
 **smoothr** implements three techniques for smoothing: a Gaussian kernel regression, Chaikin's corner cutting algorithm, and spline interpolation, which are all described in the package vignette and [website](https://strimas.com/smoothr/). 
 Note that similar to `st_simplify()`, the smoothing algorithms don't preserve 'topology'.
@@ -117,10 +118,12 @@ The `smoothness` argument controls the bandwidth of the Gaussian that is used to
 
 
 ```r
-us_states_simp3 = smoothr::smooth(us_states2163, method = 'ksmooth', smoothness = 6)
+us_states_simp3 = smoothr::smooth(us_states2163, 
+                                  method = "ksmooth", smoothness = 6)
 ```
 
-Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in (Figure \@ref(fig:us-simp)). Differences can be observed between the outputs of the Douglas-Peucker (`st_simplify`), Visvalingam (`ms_simplify`), and Gaussian kernel regression (`smooth(method=ksmooth`) algorithms.
+Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in (Figure \@ref(fig:us-simp)). 
+Differences can be observed between the outputs of the Douglas-Peucker (`st_simplify`), Visvalingam (`ms_simplify`), and Gaussian kernel regression (`smooth(method=ksmooth`) algorithms.
 
 <div class="figure" style="text-align: center">
 <img src="05-geometry-operations_files/figure-html/us-simp-1.png" alt="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages." width="100%" />
@@ -149,7 +152,7 @@ Sometimes the geographic centroid falls outside the boundaries of their parent o
 In such cases *point on surface* operations can be used to guarantee the point will be in the parent object (e.g., for labeling irregular multipolygon objects such as island states), as illustrated by the red points in Figure \@ref(fig:centr).
 Notice that these red points always lie on their parent objects.
 They were created with `st_point_on_surface()` as follows:^[
-A description of how `st_point_on_surface()` works is provided at https://gis.stackexchange.com/q/76498.
+A description of how `st_point_on_surface()` works is provided at https://gis.stackexchange.com/a/76563/20955.
 ]
 
 
@@ -336,6 +339,8 @@ The subsequent code chunk demonstrates how this works for all combinations of th
 
 ### Subsetting and clipping
 
+\index{vector!clipping} 
+\index{spatial!subsetting} 
 Clipping objects can change their geometry but it can also subset objects, returning only features that intersect (or partly intersect) with a clipping/subsetting object.
 To illustrate this point, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
 Some points will be inside just one circle, some will be inside both and some will be inside neither.
@@ -345,7 +350,6 @@ Some points will be inside just one circle, some will be inside both and some wi
 <img src="05-geometry-operations_files/figure-html/venn-subset-1.png" alt="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted." width="100%" />
 <p class="caption">(\#fig:venn-subset)Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted.</p>
 </div>
-
 
 
 ```r
@@ -365,10 +369,10 @@ The results are identical (except superficial differences in attribute names), b
 
 
 ```r
-p_xy1 = p[x_and_y]
-p_xy2 = st_intersection(p, x_and_y)
-sel_p_xy = st_intersects(p, x, sparse = FALSE)[, 1] &
-  st_intersects(p, y, sparse = FALSE)[, 1]
+p_xy1 = p[x_and_y] # way #1
+p_xy2 = st_intersection(p, x_and_y) # way #2
+sel_p_xy = st_intersects(p, x, sparse = FALSE)[, 1] & 
+  st_intersects(p, y, sparse = FALSE)[, 1] # way #3
 p_xy3 = p[sel_p_xy]
 ```
 
@@ -383,7 +387,7 @@ We will return to the question of choosing between different implementations of 
 \index{vector!union} 
 \index{aggregation!spatial} 
 As we saw in Section \@ref(vector-attribute-aggregation), spatial aggregation can silently dissolve the geometries of touching polygons in the same group.
-This is demonstrated in the code chunk below in which 49 `us_states` are aggregated into 4 regions using base and **tidyverse**\index{tidyverse (package)} functions (see results in Figure \@ref(fig:us-regions)):
+This is demonstrated in the code chunk below in which 49 `us_states` are aggregated into four regions using base and **dplyr**\index{dplyr (package)} functions (see results in Figure \@ref(fig:us-regions)):
 
 
 ```r
@@ -664,10 +668,6 @@ To retrieve a spatial output, we can use almost the same subsetting syntax.
 The only difference is that we have to make clear that we would like to keep the matrix structure by setting the `drop` argument to `FALSE`.
 This will return a raster object containing the cells whose midpoints overlap with `clip`.
 
-<!--jn:toDo-->
-<!-- https://github.com/rspatial/terra/issues/914 -->
-<!-- turn eval back on -->
-
 
 ```r
 elev = rast(system.file("raster/elev.tif", package = "spData"))
@@ -726,6 +726,7 @@ The values of the newly added rows and columns are set to `NA`.
 elev_4 = extend(elev, elev_2)
 ```
 
+\index{raster!origin} 
 The origin of a raster is the cell corner closest to the coordinates (0, 0).
 The `origin()` function returns the coordinates of the origin.
 In the below example a cell corner exists with coordinates (0, 0), but that is not necessarily the case.
@@ -779,6 +780,7 @@ dem_agg = aggregate(dem, fact = 5, fun = mean)
 <p class="caption">(\#fig:aggregate-example)Original raster (left). Aggregated raster (right).</p>
 </div>
 
+\index{raster!disaggregation}
 The `disagg()` function increases the resolution of raster objects. 
 It comes with two methods on how to compute the values of the newly created cells: the default method (`method = "near"`) simply gives all output cells the value of the input cell, and hence duplicates values, which translates into a 'blocky' output.
 The `bilinear` method uses the four nearest pixel centers of the input image (salmon colored points in Figure \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Figure \@ref(fig:bilinear).

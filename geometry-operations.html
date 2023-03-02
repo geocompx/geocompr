@@ -131,8 +131,8 @@ It teaches how to change the resolution (also called raster aggregation and disa
 These operations are especially useful if one would like to align raster datasets from diverse sources.
 Aligned raster objects share a one-to-one correspondence between pixels, allowing them to be processed using map algebra operations, described in Section <a href="spatial-operations.html#map-algebra">4.3.2</a>.
 The interaction between raster and vector objects is covered in Chapter <a href="raster-vector.html#raster-vector">6</a>.
-It shows how raster values can be ‘masked’ and ‘extracted’ by vector geometries.
-Importantly it shows how to ‘polygonize’ rasters and ‘rasterize’ vector datasets, making the two data models more interchangeable.</p>
+It presents how raster values can be ‘masked’ and ‘extracted’ by vector geometries.
+Importantly it also shows how to ‘polygonize’ rasters and ‘rasterize’ vector datasets, making the two data models more interchangeable.</p>
 </div>
 <div id="geo-vec" class="section level2" number="5.2">
 <h2>
@@ -168,10 +168,11 @@ This is apparent, with the result being visually simpler (Figure <a href="geomet
 <span><span class="co">#&gt; 18096 bytes</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/object.size.html">object.size</a></span><span class="op">(</span><span class="va">seine_simp</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 9112 bytes</span></span></code></pre></div>
-<p>Simplification is also applicable for polygons.
+<p>
+Simplification is also applicable for polygons.
 This is illustrated using <code>us_states</code>, representing the contiguous United States.
 As we show in Chapter <a href="reproj-geo-data.html#reproj-geo-data">7</a>, GEOS assumes that the data is in a projected CRS and this could lead to unexpected results when using a geographic CRS.
-Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (epsg = 2163) (on the left in Figure <a href="geometry-operations.html#fig:us-simp">5.2</a>):</p>
+Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (EPSG = 2163) (on the top left in Figure <a href="geometry-operations.html#fig:us-simp">5.2</a>):</p>
 <div class="sourceCode" id="cb162"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">us_states2163</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">us_states</span>, <span class="st">"EPSG:2163"</span><span class="op">)</span></span>
 <span><span class="va">us_states2163</span> <span class="op">=</span> <span class="va">us_states2163</span></span></code></pre></div>
@@ -179,7 +180,7 @@ Therefore, the first step is to project the data into some adequate projected CR
 <div class="sourceCode" id="cb163"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">us_states_simp1</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_simplify</a></span><span class="op">(</span><span class="va">us_states2163</span>, dTolerance <span class="op">=</span> <span class="fl">100000</span><span class="op">)</span>  <span class="co"># 100 km</span></span></code></pre></div>
 <p>A limitation with <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_simplify()</a></code> is that it simplifies objects on a per-geometry basis.
-This means the ‘topology’ is lost, resulting in overlapping and ‘holey’ areal units illustrated in Figure <a href="geometry-operations.html#fig:us-simp">5.2</a> (middle panel).
+This means the ‘topology’ is lost, resulting in overlapping and ‘holey’ areal units illustrated in Figure <a href="geometry-operations.html#fig:us-simp">5.2</a> (right top panel).
 <code>ms_simplify()</code> from <strong>rmapshaper</strong> provides an alternative that overcomes this issue.
 By default it uses the Visvalingam algorithm, which overcomes some limitations of the Douglas-Peucker algorithm <span class="citation">(<a href="references.html#ref-visvalingam_line_1993" role="doc-biblioref">Visvalingam and Whyatt 1993</a>)</span>.
 <!-- https://bost.ocks.org/mike/simplify/ -->
@@ -190,7 +191,8 @@ Simplification of multipolygon objects can remove small internal polygons, even 
 <code class="sourceCode R"><span><span class="co"># proportion of points to retain (0-1; default 0.05)</span></span>
 <span><span class="va">us_states_simp2</span> <span class="op">=</span> <span class="fu">rmapshaper</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rmapshaper/man/ms_simplify.html">ms_simplify</a></span><span class="op">(</span><span class="va">us_states2163</span>, keep <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>                                          keep_shapes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>An alternative to simplification is smoothing the boundaries of polygon and linestring geometries, which is implemented in the <strong>smoothr</strong> package.
+<p>
+An alternative to simplification is smoothing the boundaries of polygon and linestring geometries, which is implemented in the <strong>smoothr</strong> package.
 Smoothing interpolates the edges of geometries and does not necessarily lead to fewer vertices, but can be especially useful when working with geometries that arise from spatially vectorizing a raster (a topic covered in Chapter <a href="raster-vector.html#raster-vector">6</a>).
 <strong>smoothr</strong> implements three techniques for smoothing: a Gaussian kernel regression, Chaikin’s corner cutting algorithm, and spline interpolation, which are all described in the package vignette and <a href="https://strimas.com/smoothr/">website</a>.
 Note that similar to <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_simplify()</a></code>, the smoothing algorithms don’t preserve ‘topology’.
@@ -198,8 +200,10 @@ The workhorse function of <strong>smoothr</strong> is <code><a href="https://rdr
 Below is an example of using Gaussian kernel regression to smooth the borders of US states by using <code>method=ksmooth</code>.
 The <code>smoothness</code> argument controls the bandwidth of the Gaussian that is used to smooth the geometry and has a default value of 1.</p>
 <div class="sourceCode" id="cb165"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">us_states_simp3</span> <span class="op">=</span> <span class="fu">smoothr</span><span class="fu">::</span><span class="fu"><a href="https://strimas.com/smoothr/reference/smooth.html">smooth</a></span><span class="op">(</span><span class="va">us_states2163</span>, method <span class="op">=</span> <span class="st">'ksmooth'</span>, smoothness <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
-<p>Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in (Figure <a href="geometry-operations.html#fig:us-simp">5.2</a>). Differences can be observed between the outputs of the Douglas-Peucker (<code>st_simplify</code>), Visvalingam (<code>ms_simplify</code>), and Gaussian kernel regression (<code>smooth(method=ksmooth</code>) algorithms.</p>
+<code class="sourceCode R"><span><span class="va">us_states_simp3</span> <span class="op">=</span> <span class="fu">smoothr</span><span class="fu">::</span><span class="fu"><a href="https://strimas.com/smoothr/reference/smooth.html">smooth</a></span><span class="op">(</span><span class="va">us_states2163</span>, </span>
+<span>                                  method <span class="op">=</span> <span class="st">"ksmooth"</span>, smoothness <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></code></pre></div>
+<p>Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in (Figure <a href="geometry-operations.html#fig:us-simp">5.2</a>).
+Differences can be observed between the outputs of the Douglas-Peucker (<code>st_simplify</code>), Visvalingam (<code>ms_simplify</code>), and Gaussian kernel regression (<code>smooth(method=ksmooth</code>) algorithms.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:us-simp"></span>
 <img src="05-geometry-operations_files/figure-html/us-simp-1.png" alt="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages." width="100%"><p class="caption">
@@ -226,7 +230,7 @@ They can be calculated with the <strong>sf</strong> function <code><a href="http
 In such cases <em>point on surface</em> operations can be used to guarantee the point will be in the parent object (e.g., for labeling irregular multipolygon objects such as island states), as illustrated by the red points in Figure <a href="geometry-operations.html#fig:centr">5.3</a>.
 Notice that these red points always lie on their parent objects.
 They were created with <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_point_on_surface()</a></code> as follows:<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
-A description of how &lt;code&gt;st_point_on_surface()&lt;/code&gt; works is provided at &lt;a href="https://gis.stackexchange.com/q/76498" class="uri"&gt;https://gis.stackexchange.com/q/76498&lt;/a&gt;.&lt;/p&gt;'><sup>22</sup></a></p>
+A description of how &lt;code&gt;st_point_on_surface()&lt;/code&gt; works is provided at &lt;a href="https://gis.stackexchange.com/a/76563/20955" class="uri"&gt;https://gis.stackexchange.com/a/76563/20955&lt;/a&gt;.&lt;/p&gt;'><sup>22</sup></a></p>
 <div class="sourceCode" id="cb167"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nz_pos</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_point_on_surface</a></span><span class="op">(</span><span class="va">nz</span><span class="op">)</span></span>
 <span><span class="va">seine_pos</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_point_on_surface</a></span><span class="op">(</span><span class="va">seine</span><span class="op">)</span></span></code></pre></div>
@@ -376,7 +380,8 @@ FIGURE 5.8: Spatial equivalents of logical operators.
 <h3>
 <span class="header-section-number">5.2.6</span> Subsetting and clipping<a class="anchor" aria-label="anchor" href="#subsetting-and-clipping"><i class="fas fa-link"></i></a>
 </h3>
-<p>Clipping objects can change their geometry but it can also subset objects, returning only features that intersect (or partly intersect) with a clipping/subsetting object.
+<p>
+Clipping objects can change their geometry but it can also subset objects, returning only features that intersect (or partly intersect) with a clipping/subsetting object.
 To illustrate this point, we will subset points that cover the bounding box of the circles <code>x</code> and <code>y</code> in Figure <a href="geometry-operations.html#fig:venn-clip">5.8</a>.
 Some points will be inside just one circle, some will be inside both and some will be inside neither.
 <code><a href="https://r-spatial.github.io/sf/reference/st_sample.html">st_sample()</a></code> is used below to generate a <em>simple random</em> distribution of points within the extent of circles <code>x</code> and <code>y</code>, resulting in output illustrated in Figure <a href="geometry-operations.html#fig:venn-subset">5.9</a>, raising the question: how to subset the points to only return the point that intersects with <em>both</em> <code>x</code> and <code>y</code>?</p>
@@ -399,10 +404,10 @@ This second approach will return features that partly intersect with <code>x_and
 The third approach is to create a subsetting object using the binary spatial predicate <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects()</a></code>, introduced in the previous chapter.
 The results are identical (except superficial differences in attribute names), but the implementation differs substantially:</p>
 <div class="sourceCode" id="cb178"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p_xy1</span> <span class="op">=</span> <span class="va">p</span><span class="op">[</span><span class="va">x_and_y</span><span class="op">]</span></span>
-<span><span class="va">p_xy2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_ops.html">st_intersection</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">x_and_y</span><span class="op">)</span></span>
-<span><span class="va">sel_p_xy</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">x</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">&amp;</span></span>
-<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">y</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="va">p_xy1</span> <span class="op">=</span> <span class="va">p</span><span class="op">[</span><span class="va">x_and_y</span><span class="op">]</span> <span class="co"># way #1</span></span>
+<span><span class="va">p_xy2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_ops.html">st_intersection</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">x_and_y</span><span class="op">)</span> <span class="co"># way #2</span></span>
+<span><span class="va">sel_p_xy</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">x</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">&amp;</span> </span>
+<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">y</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="co"># way #3</span></span>
 <span><span class="va">p_xy3</span> <span class="op">=</span> <span class="va">p</span><span class="op">[</span><span class="va">sel_p_xy</span><span class="op">]</span></span></code></pre></div>
 <p>Although the example above is rather contrived and provided for educational rather than applied purposes, and we encourage the reader to reproduce the results to deepen your understanding for handling geographic vector objects in R, it raises an important question: which implementation to use?
 Generally, more concise implementations should be favored, meaning the first approach above.
@@ -414,7 +419,7 @@ We will return to the question of choosing between different implementations of 
 </h3>
 <p>
 As we saw in Section <a href="attr.html#vector-attribute-aggregation">3.2.3</a>, spatial aggregation can silently dissolve the geometries of touching polygons in the same group.
-This is demonstrated in the code chunk below in which 49 <code>us_states</code> are aggregated into 4 regions using base and <strong>tidyverse</strong> functions (see results in Figure <a href="geometry-operations.html#fig:us-regions">5.10</a>):</p>
+This is demonstrated in the code chunk below in which 49 <code>us_states</code> are aggregated into four regions using base and <strong>dplyr</strong> functions (see results in Figure <a href="geometry-operations.html#fig:us-regions">5.10</a>):</p>
 <div class="sourceCode" id="cb179"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">regions</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/aggregate.html">aggregate</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">us_states</span><span class="op">[</span>, <span class="st">"total_pop_15"</span><span class="op">]</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">us_states</span><span class="op">$</span><span class="va">REGION</span><span class="op">)</span>,</span>
 <span>                    FUN <span class="op">=</span> <span class="va">sum</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -787,9 +792,6 @@ In Section <a href="spatial-operations.html#spatial-raster-subsetting">4.3.1</a>
 To retrieve a spatial output, we can use almost the same subsetting syntax.
 The only difference is that we have to make clear that we would like to keep the matrix structure by setting the <code>drop</code> argument to <code>FALSE</code>.
 This will return a raster object containing the cells whose midpoints overlap with <code>clip</code>.</p>
-<!--jn:toDo-->
-<!-- https://github.com/rspatial/terra/issues/914 -->
-<!-- turn eval back on -->
 <div class="sourceCode" id="cb188"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">elev</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/elev.tif"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">clip</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="fl">0.9</span>, xmax <span class="op">=</span> <span class="fl">1.8</span>, ymin <span class="op">=</span> <span class="op">-</span><span class="fl">0.45</span>, ymax <span class="op">=</span> <span class="fl">0.45</span>,</span>
@@ -835,7 +837,8 @@ Here, we extend the <code>elev</code> object to the extent of <code>elev_2</code
 The values of the newly added rows and columns are set to <code>NA</code>.</p>
 <div class="sourceCode" id="cb191"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">elev_4</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/extend.html">extend</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">elev_2</span><span class="op">)</span></span></code></pre></div>
-<p>The origin of a raster is the cell corner closest to the coordinates (0, 0).
+<p>
+The origin of a raster is the cell corner closest to the coordinates (0, 0).
 The <code><a href="https://rdrr.io/pkg/terra/man/origin.html">origin()</a></code> function returns the coordinates of the origin.
 In the below example a cell corner exists with coordinates (0, 0), but that is not necessarily the case.</p>
 <div class="sourceCode" id="cb192"><pre class="downlit sourceCode r">
@@ -877,7 +880,8 @@ Additionally, the output cell value should correspond to the mean of the input c
 FIGURE 5.15: Original raster (left). Aggregated raster (right).
 </p>
 </div>
-<p>The <code><a href="https://rdrr.io/pkg/terra/man/disaggregate.html">disagg()</a></code> function increases the resolution of raster objects.
+<p>
+The <code><a href="https://rdrr.io/pkg/terra/man/disaggregate.html">disagg()</a></code> function increases the resolution of raster objects.
 It comes with two methods on how to compute the values of the newly created cells: the default method (<code>method = "near"</code>) simply gives all output cells the value of the input cell, and hence duplicates values, which translates into a ‘blocky’ output.
 The <code>bilinear</code> method uses the four nearest pixel centers of the input image (salmon colored points in Figure <a href="geometry-operations.html#fig:bilinear">5.16</a>) to compute an average weighted by distance (arrows in Figure <a href="geometry-operations.html#fig:bilinear">5.16</a>.
 The value of the output cell is represented by a square in the upper left corner in Figure <a href="geometry-operations.html#fig:bilinear">5.16</a>).</p>
@@ -1058,7 +1062,7 @@ Can you notice any differences between the results of these resampling methods?<
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-03-01.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-03-02.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
