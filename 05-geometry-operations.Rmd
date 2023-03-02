@@ -361,12 +361,14 @@ source("https://github.com/geocompx/geocompr/raw/main/code/05-venn-clip.R")
 
 ### Subsetting and clipping
 
+\index{vector!clipping} 
+\index{spatial!subsetting} 
 Clipping objects can change their geometry but it can also subset objects, returning only features that intersect (or partly intersect) with a clipping/subsetting object.
 To illustrate this point, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
 Some points will be inside just one circle, some will be inside both and some will be inside neither.
 `st_sample()` is used below to generate a *simple random* distribution of points within the extent of circles `x` and `y`, resulting in output illustrated in Figure \@ref(fig:venn-subset), raising the question: how to subset the points to only return the point that intersects with *both* `x` and `y`?
 
-```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted.", fig.height=6, fig.width=9, fig.asp=0.4, fig.scap="Randomly distributed points within the bounding box. Note that only one point intersects with both x and y, highlighted with a red circle.", echo=FALSE}
+```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted.", fig.height=6, fig.width=9, fig.scap="Randomly distributed points within the bounding box. Note that only one point intersects with both x and y, highlighted with a red circle.", echo=FALSE}
 bb = st_bbox(st_union(x, y))
 box = st_as_sfc(bb)
 set.seed(2017)
@@ -379,7 +381,6 @@ plot(p, add = TRUE)
 plot(p_xy1, cex = 3, col = "red", add = TRUE)
 text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 2)
 ```
-
 
 ```{r venn-subset-to-show, eval=FALSE}
 bb = st_bbox(st_union(x, y))
@@ -397,10 +398,10 @@ The third approach is to create a subsetting object using the binary spatial pre
 The results are identical (except superficial differences in attribute names), but the implementation differs substantially:
 
 ```{r 05-geometry-operations-21}
-p_xy1 = p[x_and_y]
-p_xy2 = st_intersection(p, x_and_y)
-sel_p_xy = st_intersects(p, x, sparse = FALSE)[, 1] &
-  st_intersects(p, y, sparse = FALSE)[, 1]
+p_xy1 = p[x_and_y] # way #1
+p_xy2 = st_intersection(p, x_and_y) # way #2
+sel_p_xy = st_intersects(p, x, sparse = FALSE)[, 1] & 
+  st_intersects(p, y, sparse = FALSE)[, 1] # way #3
 p_xy3 = p[sel_p_xy]
 ```
 
@@ -428,7 +429,7 @@ We will return to the question of choosing between different implementations of 
 \index{vector!union} 
 \index{aggregation!spatial} 
 As we saw in Section \@ref(vector-attribute-aggregation), spatial aggregation can silently dissolve the geometries of touching polygons in the same group.
-This is demonstrated in the code chunk below in which 49 `us_states` are aggregated into 4 regions using base and **tidyverse**\index{tidyverse (package)} functions (see results in Figure \@ref(fig:us-regions)):
+This is demonstrated in the code chunk below in which 49 `us_states` are aggregated into four regions using base and **dplyr**\index{dplyr (package)} functions (see results in Figure \@ref(fig:us-regions)):
 
 ```{r 05-geometry-operations-23}
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
@@ -628,10 +629,6 @@ To retrieve a spatial output, we can use almost the same subsetting syntax.
 The only difference is that we have to make clear that we would like to keep the matrix structure by setting the `drop` argument to `FALSE`.
 This will return a raster object containing the cells whose midpoints overlap with `clip`.
 
-<!--jn:toDo-->
-<!-- https://github.com/rspatial/terra/issues/914 -->
-<!-- turn eval back on -->
-
 ```{r 05-geometry-operations-36}
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 clip = rast(xmin = 0.9, xmax = 1.8, ymin = -0.45, ymax = 0.45,
@@ -675,6 +672,7 @@ The values of the newly added rows and columns are set to `NA`.
 elev_4 = extend(elev, elev_2)
 ```
 
+\index{raster!origin} 
 The origin of a raster is the cell corner closest to the coordinates (0, 0).
 The `origin()` function returns the coordinates of the origin.
 In the below example a cell corner exists with coordinates (0, 0), but that is not necessarily the case.
@@ -738,6 +736,7 @@ p_ar2 = tm_shape(dem_agg) +
 tmap_arrange(p_ar1, p_ar2, ncol = 2)
 ```
 
+\index{raster!disaggregation}
 The `disagg()` function increases the resolution of raster objects. 
 It comes with two methods on how to compute the values of the newly created cells: the default method (`method = "near"`) simply gives all output cells the value of the input cell, and hence duplicates values, which translates into a 'blocky' output.
 The `bilinear` method uses the four nearest pixel centers of the input image (salmon colored points in Figure \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Figure \@ref(fig:bilinear).
