@@ -238,7 +238,7 @@ grep("clean", qgis_algo$algorithm, value = TRUE)
 ```
 
 This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS\index{GRASS}.
-GRASS GIS's `v.clean` is a powerful tool for cleaning topology of spatial vector data \index{topology cleaning}. 
+GRASS GIS's `v.clean` is a powerful tool for cleaning topology of spatial vector data\index{topology cleaning}. 
 Importantly, we can use it through **qgisprocess**.
 
 Similarly to the previous step, we should start by looking at this algorithm's help.
@@ -250,7 +250,7 @@ qgis_show_help("grass7:v.clean")
 
 We have omitted the output here, because the help text is quite long and contains a lot of arguments.^[Also note that these arguments, contrary to the QGIS's ones, are in lower case.]
 This is because `v.clean` is a multi tool -- it can clean different types of geometries and solve different types of topological problems.
-For this example, let's focus on just a few arguments, however, we encourage you to visit [this algorithm's documentation](https://grass.osgeo.org/grass82/manuals/v.clean.html) to learn more about `v.clean` capabilities.
+For this example, let's focus on just a few arguments, however, we encourage you to visit [this algorithm's documentation](https://grass.osgeo.org/grass-stable/manuals/v.clean.html) to learn more about `v.clean` capabilities.
 
 
 ```r
@@ -367,7 +367,7 @@ qgis_show_help("grass7:r.geomorphon")
 
 Calculation of geomorphons requires an input DEM (`elevation`), and can be customized with a set of optional arguments.
 It includes, `search` -- a length for which the line-of-sight is calculated, and ``-m`` -- a flag specifying that the search value will be provided in meters (and not the number of cells).
-More information about additional arguments can be found in the original paper and the [GRASS GIS documentation](https://grass.osgeo.org/grass82/manuals/r.geomorphon.html).
+More information about additional arguments can be found in the original paper and the [GRASS GIS documentation](https://grass.osgeo.org/grass-stable/manuals/r.geomorphon.html).
 
 
 ```r
@@ -512,7 +512,7 @@ There is a single best solution to this problem; however, to check all of the po
 In our case, the number of possible solutions correspond to `(25 - 1)! / 2`, i.e., the factorial of 24 divided by 2 (since we do not differentiate between forward or backward direction).
 Even if one iteration can be done in a nanosecond, this still corresponds to 9837145 years.
 Luckily, there are clever, almost optimal solutions which run in a tiny fraction of this inconceivable amount of time.
-GRASS GIS\index{GRASS} provides one of these solutions (for more details, see [v.net.salesman](https://grass.osgeo.org/grass82/manuals/v.net.salesman.html)).
+GRASS GIS\index{GRASS} provides one of these solutions (for more details, see [v.net.salesman](https://grass.osgeo.org/grass-stable/manuals/v.net.salesman.html)).
 In our use case, we would like to find the shortest path\index{shortest route} between the first 25 bicycle stations (instead of customers) on London's streets (and we simply assume that the first bike station corresponds to the home of our traveling salesman\index{traveling salesman}).
 
 
@@ -633,7 +633,7 @@ Prior to importing data into R, you might want to perform some (spatial) subsett
 Use `"v.select"` and `"v.extract"` for vector data.
 `"db.select"` lets you select subsets of the attribute table of a vector layer without returning the corresponding geometry.
 - You can also start R from within a running GRASS\index{GRASS} session [for more information please refer to @bivand_applied_2013].
-- Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass82/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm\index{geoalgorithm}.
+- Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass-stable/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm\index{geoalgorithm}.
 
 ## When to use what?
 
