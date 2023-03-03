@@ -383,6 +383,8 @@ nrow(world_agg2)
 ```
 
 The resulting `world_agg2` object is a spatial object containing 8 features representing the continents of the world (and the open ocean).
+
+\index{attribute!aggregation}
 `group_by() |> summarize()` is the **dplyr** equivalent of `aggregate()`, with the variable name provided in the `group_by()` function specifying the grouping variable and information on what is to be summarized passed to the `summarize()` function, as shown below:
 
 ```{r 03-attribute-operations-28}
@@ -397,12 +399,15 @@ This flexibility is illustrated in the command below, which calculates not only 
 ```{r 03-attribute-operations-29}
 world_agg4  = world |> 
   group_by(continent) |> 
-  summarize(pop = sum(pop, na.rm = TRUE), `area_sqkm` = sum(area_km2), n = n())
+  summarize(Pop = sum(pop, na.rm = TRUE), Area = sum(area_km2), N = n())
 ```
 
-In the previous code chunk `pop`, `area_sqkm` and `n` are column names in the result, and `sum()` and `n()` were the aggregating functions.
+In the previous code chunk `Pop`, `Area` and `N` are column names in the result, and `sum()` and `n()` were the aggregating functions.
 These aggregating functions return `sf` objects with rows representing continents and geometries containing the multiple polygons representing each land mass and associated islands (this works thanks to the geometric operation 'union', as explained in Section \@ref(geometry-unions)).
 
+\index{pipe operator}
+\index{attribute!subsetting}
+\index{attribute!aggregation}
 Let's combine what we have learned so far about **dplyr** functions, by chaining multiple commands to summarize attribute data about countries worldwide by continent.
 The following command calculates population density (with `mutate()`), arranges continents by the number countries they contain (with `dplyr::arrange()`), and keeps only the 3 most populous continents (with `dplyr::slice_max()`), the result of which is presented in Table \@ref(tab:continents)):
 
@@ -464,8 +469,8 @@ plot(world_coffee["coffee_production_2017"])
 ```
 
 For joining to work, a 'key variable' must be supplied in both datasets.
-By default **dplyr** uses all variables with matching names.
-In this case, both `world_coffee` and `world` objects contained a variable called `name_long`, explaining the message `Joining, by = "name_long"`.
+By default, **dplyr** uses all variables with matching names.
+In this case, both `world_coffee` and `world` objects contained a variable called `name_long`, explaining the message `Joining with `by = join_by(name_long)``.
 In the majority of cases where variable names are not the same, you have two options:
 
 1. Rename the key variable in one of the objects so they match.
@@ -475,7 +480,7 @@ The latter approach is demonstrated below on a renamed version of `coffee_data`:
 
 ```{r 03-attribute-operations-33, warning=FALSE}
 coffee_renamed = rename(coffee_data, nm = name_long)
-world_coffee2 = left_join(world, coffee_renamed, by = c(name_long = "nm"))
+world_coffee2 = left_join(world, coffee_renamed, by = join_by(name_long == nm))
 ```
 
 ```{r 03-attribute-operations-34, eval=FALSE, echo=FALSE}
@@ -489,6 +494,7 @@ Another feature of the result is that it has the same number of rows as the orig
 Although there are only 47 rows of data in `coffee_data`, all 177 country records are kept intact in `world_coffee` and `world_coffee2`:
 rows in the original dataset with no match are assigned `NA` values for the new coffee production variables.
 What if we only want to keep countries that have a match in the key variable?
+\index{attribute!join}
 In that case an inner join can be used:
 
 ```{r 03-attribute-operations-35, warning=FALSE}
@@ -506,10 +512,11 @@ setdiff(coffee_data$name_long, world$name_long)
 
 The result shows that `Others` accounts for one row not present in the `world` dataset and that the name of the `Democratic Republic of the Congo` accounts for the other:
 it has been abbreviated, causing the join to miss it.
-The following command uses a string matching (regex) function from the **stringr** package to confirm what `Congo, Dem. Rep. of` should be:
+The following command uses a string matching (*regex*) function from the **stringr** package to confirm what `Congo, Dem. Rep. of` should be:
 
 ```{r 03-attribute-operations-37}
-(drc = stringr::str_subset(world$name_long, "Dem*.+Congo"))
+drc = stringr::str_subset(world$name_long, "Dem*.+Congo")
+drc
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
@@ -553,6 +560,7 @@ Spatial joins are covered in the next chapter (Section \@ref(spatial-joining)).
 
 ### Creating attributes and removing spatial information {#vec-attr-creation}
 
+\index{attribute!create}
 Often, we would like to create a new column based on already existing columns.
 For example, we want to calculate population density for each country.
 For this we need to divide a population column, here `pop`, by an area column, here `area_km2` with unit area in square kilometers.
