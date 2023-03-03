@@ -63,6 +63,7 @@ Section \@ref(summarizing-raster-objects) provides an overview of 'global' raste
 
 ## Vector attribute manipulation
 
+\index{attribute}
 Geographic vector datasets are well supported in R thanks to the `sf` class, which extends base R's `data.frame`.
 Like data frames, `sf` objects have one column per attribute variable (such as 'name') and one row per observation or *feature* (e.g., per bus station).
 `sf` objects differ from basic data frames because they have a `geometry` column of class `sfc` which can contain a range of geographic entities (single and 'multi' point, line, and polygon features) per row.
@@ -99,7 +100,7 @@ The following command, for example, creates a geometry column named g:
 This enables geometries imported from spatial databases to have a variety of names such as `wkb_geometry` and `the_geom`.
 ```
 
-`sf` objects can also extend the `tidyverse` classes for data frames, `tibble` and `tbl`.
+`sf` objects can also extend the `tidyverse` classes for data frames, `tbl_df` and `tbl`.
 \index{tidyverse (package)}.
 Thus **sf** enables the full power of R's data analysis capabilities to be unleashed on geographic data, whether you use base R or tidyverse functions for data analysis.
 \index{tibble}
@@ -112,6 +113,7 @@ class(world) # it's an sf object and a (tidy) data frame
 dim(world)   # it is a 2 dimensional object, with 177 rows and 11 columns
 ```
 
+\index{attribute!dropping geometries}
 `world` contains ten non-geographic columns (and one geometry list column) with almost 200 rows representing the world's countries.
 The function `st_drop_geometry()` keeps only the attributes data of an `sf` object, in other words removing its geometry:
 
@@ -137,6 +139,7 @@ Both approaches preserve the spatial components of attribute data in `sf` object
 \index{attribute!subsetting}
 This section focuses on subsetting `sf` data frames; for further details on subsetting vectors and non-geographic data frames we recommend reading section section [2.7](https://cran.r-project.org/doc/manuals/r-release/R-intro.html#Index-vectors) of An Introduction to R [@rcoreteam_introduction_2021] and Chapter [4](https://adv-r.hadley.nz/subsetting.html) of Advanced R Programming [@wickham_advanced_2019], respectively.
 
+\index{attribute!subsetting}
 The `[` operator can subset both rows and columns. 
 Indices placed inside square brackets placed directly after a data frame object name specify the elements to keep.
 The command `object[i, j]` means 'return the rows represented by `i` and the columns represented by `j`, where `i` and `j` typically contain integers or `TRUE`s and `FALSE`s (indices can also be character strings, indicating row or column names).
@@ -182,8 +185,9 @@ The base R function `subset()` provides another way to achieve the same result:
 small_countries = subset(world, area_km2 < 10000)
 ```
 
+\index{attribute!subsetting}
 Base R functions are mature, stable and widely used, making them a rock solid choice, especially in contexts where reproducibility and reliability are key.
-**dplyr** functions enable 'tidy' workflows which some people (the authors of this book included) find intuitive and productive for interactive data analysis, especially when combined with code editors such as RStudio that enable [auto-completion](https://support.rstudio.com/hc/en-us/articles/205273297-Code-Completion-in-the-RStudio-IDE) of column names.
+**dplyr** functions enable 'tidy' workflows which some people (the authors of this book included) find intuitive and productive for interactive data analysis, especially when combined with code editors such as RStudio that enable [auto-completion](https://support.posit.co/hc/en-us/articles/205273297-Code-Completion-in-the-RStudio-IDE) of column names.
 Key functions for subsetting data frames (including `sf` data frames) with **dplyr** functions are demonstrated below.
 <!-- The sentence below seems to be untrue based on the benchmark below. -->
 <!-- `dplyr` is also faster than base R for some operations, due to its C++\index{C++} backend. -->
@@ -211,7 +215,7 @@ benchmark_subset[c("expression", "itr/sec", "mem_alloc")]
 For example, you could select only two columns, `name_long` and `pop`, with the following command:
 
 ```{r 03-attribute-operations-14}
-world1 = dplyr::select(world, name_long, pop)
+world1 = select(world, name_long, pop)
 names(world1)
 ```
 
@@ -220,20 +224,20 @@ Note: as with the equivalent command in base R (`world[, c("name_long", "pop")]`
 
 ```{r 03-attribute-operations-15}
 # all columns between name_long and pop (inclusive)
-world2 = dplyr::select(world, name_long:pop)
+world2 = select(world, name_long:pop)
 ```
 
 You can remove specific columns with the `-` operator:
 
 ```{r 03-attribute-operations-16}
 # all columns except subregion and area_km2 (inclusive)
-world3 = dplyr::select(world, -subregion, -area_km2)
+world3 = select(world, -subregion, -area_km2)
 ```
 
 Subset and rename columns at the same time with the `new_name = old_name` syntax:
 
 ```{r 03-attribute-operations-17}
-world4 = dplyr::select(world, name_long, population = pop)
+world4 = select(world, name_long, population = pop)
 ```
 
 It is worth noting that the command above is more concise than base R equivalent, which requires two lines of code:
@@ -288,7 +292,7 @@ slice(world, 1:6)
 It keeps only rows matching given criteria, e.g., only countries with and area below a certain threshold, or with a high average of life expectancy, as shown in the following examples:
 
 ```{r 03-attribute-operations-23, eval=FALSE}
-world7 = filter(world ,area_km2 < 10000) # countries with a small area
+world7 = filter(world, area_km2 < 10000)  # countries with a small area
 world7 = filter(world, lifeExp > 82)      # with high life expectancy
 ```
 
@@ -315,6 +319,7 @@ knitr::kable(tibble(Symbol = operators, Name = operators_exp),
 
 ### Chaining commands with pipes
 
+\index{pipe operator}
 Key to workflows using **dplyr** functions is the ['pipe'](http://r4ds.had.co.nz/pipes.html) operator `%>%` (or since R `4.1.0` the native pipe `|>`), which takes its name from the Unix pipe `|` [@grolemund_r_2016].
 Pipes enable expressive code: the output of a previous function becomes the first argument of the next function, enabling *chaining*.
 This is illustrated below, in which only countries from Asia are filtered from the `world` dataset, next the object is subset by columns (`name_long` and `continent`) and the first five rows (result not shown).
@@ -322,7 +327,7 @@ This is illustrated below, in which only countries from Asia are filtered from t
 ```{r 03-attribute-operations-24}
 world7 = world |>
   filter(continent == "Asia") |>
-  dplyr::select(name_long, continent) |>
+  select(name_long, continent) |>
   slice(1:5)
 ```
 
@@ -332,7 +337,7 @@ An alternative to piped operations is nested function calls, which are harder to
 
 ```{r 03-attribute-operations-25}
 world8 = slice(
-  dplyr::select(
+  select(
     filter(world, continent == "Asia"),
     name_long, continent),
   1:5)
@@ -342,12 +347,12 @@ Another alternative is to split the operations into multiple self-contained line
 
 ```{r 03-attribute-operations-25-2}
 world9_filtered = filter(world, continent == "Asia")
-world9_selected = dplyr::select(world9_filtered, continent)
+world9_selected = select(world9_filtered, continent)
 world9 = slice(world9_selected, 1:5)
 ```
 
 Each approach has advantages and disadvantages, the importance of which depend on your programming style and applications.
-For interactive data analysis, the focus of this chapter, we find piped operations fast and intuitive, especially when combined with [RStudio](https://support.rstudio.com/hc/en-us/articles/200711853-Keyboard-Shortcuts-in-the-RStudio-IDE)/[VSCode](https://github.com/REditorSupport/vscode-R/wiki/Keyboard-shortcuts) shortcuts for creating pipes and [auto-completing](https://support.rstudio.com/hc/en-us/articles/205273297-Code-Completion-in-the-RStudio-IDE) variable names.
+For interactive data analysis, the focus of this chapter, we find piped operations fast and intuitive, especially when combined with [RStudio](https://support.posit.co/hc/en-us/articles/200711853-Keyboard-Shortcuts-in-the-RStudio-IDE)/[VSCode](https://github.com/REditorSupport/vscode-R/wiki/Keyboard-shortcuts) shortcuts for creating pipes and [auto-completing](https://support.posit.co/hc/en-us/articles/205273297-Code-Completion-in-the-RStudio-IDE) variable names.
 
 ### Vector attribute aggregation
 
