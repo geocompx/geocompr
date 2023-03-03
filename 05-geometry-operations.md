@@ -810,7 +810,10 @@ However, what to do when we have two or more rasters with different resolutions 
 This is the role of resampling -- a process of computing values for new pixel locations.
 In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin (Figure \@ref(fig:resampl0)).
 
-
+<div class="figure" style="text-align: center">
+<img src="05-geometry-operations_files/figure-html/resampl0-1.png" alt="Resampling of an original (input) raster into a target raster with custom resolution and origin." width="100%" />
+<p class="caption">(\#fig:resampl0)Resampling of an original (input) raster into a target raster with custom resolution and origin.</p>
+</div>
 
 \index{raster!resampling}
 There are several methods for estimating values for a raster with different resolutions/origins, as shown in Figure \@ref(fig:resampl).
