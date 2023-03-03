@@ -808,14 +808,11 @@ It is important to keep in mind that disaggregating results in a finer resolutio
 The above methods of aggregation and disaggregation are only suitable when we want to change the resolution of our raster by the aggregation/disaggregation factor. 
 However, what to do when we have two or more rasters with different resolutions and origins?
 This is the role of resampling -- a process of computing values for new pixel locations.
-In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin.
-
-<!--toDo: jn-->
-<!-- consider if adding this new figure makes sense -->
+In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin (Figure \@ref(fig:resampl0)).
 
 
 
-
+\index{raster!resampling}
 There are several methods for estimating values for a raster with different resolutions/origins, as shown in Figure \@ref(fig:resampl).
 The main resampling methods include:
 
@@ -838,8 +835,8 @@ For this example, we create `target_rast`, but you would often use an already ex
 
 
 ```r
-target_rast = rast(xmin = 794600, xmax = 798200, 
-                   ymin = 8931800, ymax = 8935400,
+target_rast = rast(xmin = 794650, xmax = 798250, 
+                   ymin = 8931750, ymax = 8935350,
                    resolution = 150, crs = "EPSG:32717")
 ```
 
@@ -862,6 +859,7 @@ All of them calculate a given statistic based on the values of all non-NA contri
 For example, `sum` is useful when each raster cell represents a spatially extensive variable (e.g., number of people).
 As an effect of using `sum`, the resampled raster should have the same total number of people as the original one.
 
+\index{raster!resampling}
 As you will see in section \@ref(reproj-ras), raster reprojection is a special case of resampling when our target raster has a different CRS than the original raster.
 
 \index{GDAL}
