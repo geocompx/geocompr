@@ -762,37 +762,31 @@ It is important to keep in mind that disaggregating results in a finer resolutio
 The above methods of aggregation and disaggregation are only suitable when we want to change the resolution of our raster by the aggregation/disaggregation factor. 
 However, what to do when we have two or more rasters with different resolutions and origins?
 This is the role of resampling -- a process of computing values for new pixel locations.
-In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin.
+In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin (Figure \@ref(fig:resampl0)).
 
-<!--toDo: jn-->
-<!-- consider if adding this new figure makes sense -->
-
-```{r, echo=FALSE, eval=FALSE}
-target_rast = rast(xmin = 794600, xmax = 798200, 
-                   ymin = 8931800, ymax = 8935400,
+```{resampl0, echo=FALSE, fig.cap="Resampling of an original (input) raster into a target raster with custom resolution and origin."}
+target_rast = rast(xmin = 794650, xmax = 798250, 
+                   ymin = 8931750, ymax = 8935350,
                    resolution = 150, crs = "EPSG:32717")
-
 target_rast_p = st_as_sf(as.polygons(target_rast))
 dem_resampl1 = resample(dem, target_rast, method = "near")
-
 tm1 = tm_shape(dem) +
   tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
-  tm_layout(frame = FALSE)
-
+  tm_layout(frame = FALSE, main.title = "Original raster")
 tm2 = tm_shape(dem) +
   tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
-  tm_layout(frame = FALSE) +
+  tm_layout(frame = FALSE, main.title = "Target raster") +
   tm_shape(target_rast_p) +
   tm_borders()
-
-tm3 = tm_shape(dem_resampl1) +
+tm3 = tm_shape(dem) +
+  tm_raster(alpha = 0, legend.show = FALSE) +
+  tm_shape(dem_resampl1) +
   tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
-  tm_layout(frame = FALSE)
-
+  tm_layout(frame = FALSE, main.title = "Resampled raster")
 tmap_arrange(tm1, tm2, tm3, nrow = 1)
 ```
 
-
+\index{raster!resampling}
 There are several methods for estimating values for a raster with different resolutions/origins, as shown in Figure \@ref(fig:resampl).
 The main resampling methods include:
 
@@ -814,8 +808,8 @@ We need a raster with target spatial properties to see how the `resample()` func
 For this example, we create `target_rast`, but you would often use an already existing raster object.
 
 ```{r 05-geometry-operations-42}
-target_rast = rast(xmin = 794600, xmax = 798200, 
-                   ymin = 8931800, ymax = 8935400,
+target_rast = rast(xmin = 794650, xmax = 798250, 
+                   ymin = 8931750, ymax = 8935350,
                    resolution = 150, crs = "EPSG:32717")
 ```
 
@@ -861,6 +855,7 @@ All of them calculate a given statistic based on the values of all non-NA contri
 For example, `sum` is useful when each raster cell represents a spatially extensive variable (e.g., number of people).
 As an effect of using `sum`, the resampled raster should have the same total number of people as the original one.
 
+\index{raster!resampling}
 As you will see in section \@ref(reproj-ras), raster reprojection is a special case of resampling when our target raster has a different CRS than the original raster.
 
 \index{GDAL}
