@@ -110,6 +110,7 @@ Also, as outlined in the [PROJ documentation](https://proj.org/development/refer
 
 ## Querying and setting coordinate systems {#crs-setting}
 
+\index{vector!CRS}
 Let's look at how CRSs are stored in R spatial objects and how they can be queried and set.
 First we will look at getting and setting CRSs in **vector** geographic data objects, starting with the following example:
 
@@ -134,16 +135,18 @@ st_crs(new_vector) # get CRS
 new_vector_crs = st_crs(new_vector)
 ```
 
+\index{vector!CRS}
 The output is a list containing two main components:
 
 1. `User input` (in this case `WGS 84`, a synonym for `EPSG:4326` which in this case was taken from the input file), corresponding to CRS identifiers described above
-1. `wkt`, containing the full WKT string with all relevant information about the CRS.
+2. `wkt`, containing the full WKT string with all relevant information about the CRS
 
 The `input` element is flexible, and depending on the input file or user input, can contain the `AUTHORITY:CODE` representation (e.g., `EPSG:4326`), the CRS's name (e.g., `WGS 84`), or even the proj-string definition.
 The `wkt` element stores the WKT representation, which is used when saving the object to a file or doing any coordinate operations.
 Above, we can see that the `new_vector` object has the WGS84 ellipsoid, uses the Greenwich prime meridian, and the latitude and longitude axis order.
 In this case, we also have some additional elements, such as `USAGE` explaining the area suitable for the use of this CRS, and `ID` pointing to the CRS's identifier: `EPSG:4326`.
 
+\index{vector!CRS}
 The `st_crs` function also has one helpful feature -- we can retrieve some additional information about the used CRS. 
 For example, try to run:
 
@@ -164,6 +167,7 @@ waldo::compare(new_vector_crs, st_crs(new_vector))
 # `new$input`: "EPSG:4326"
 ```
 
+\index{raster!CRS}
 Getting and setting CRSs works in a similar way for **raster** geographic data objects.
 The `crs()` function in the `terra` package accesses CRS information from a `SpatRaster` object (note the use of the `cat()` function to print it nicely): 
 
@@ -173,14 +177,14 @@ my_rast = rast(raster_filepath)
 cat(crs(my_rast)) # get CRS
 ```
 
-The output is the WKT representation of CRS. 
+The output is the WKT string representation of CRS. 
 The same function, `crs()`, can be also used to set a CRS for raster objects.
 
 ```{r 02-spatial-data-56}
 crs(my_rast) = "EPSG:26912" # set CRS
 ```
 
-Here, we can use either the identifier (recommended in most cases) or complete WKT representation.
+Here, we can use either the identifier (recommended in most cases) or complete WKT string representation.
 Alternative methods to set `crs` include proj-string strings or CRSs extracted from other existing object with `crs()`, although these approaches may be less future proof.
 
 Importantly, the `st_crs()` and `crs()` functions do not alter coordinates' values or geometries.
@@ -198,11 +202,12 @@ The output `NA` shows that **sf** does not know what the CRS is and is unwilling
 Unless a CRS is manually specified or is loaded from a source that has CRS metadata, **sf** does not make any explicit assumptions about which coordinate systems, other than to say "I don't know".
 This behavior makes sense given the diversity of available CRSs but differs from some approaches, such as the GeoJSON file format specification, which makes the simplifying assumption that all coordinates have a lon/lat CRS: `EPSG:4326`.
 
+\index{vector!CRS}
 A CRS can be added to `sf` objects in three main ways:
 
 - By assigning the CRS to a pre-existing object, e.g. with `st_crs(london) = "EPSG:4326"`
 - By passing a CRS to the `crs` argument in **sf** functions that create geometry objects such as `st_as_sf(... crs = "EPSG:4326")`. The same argument can also be used to set the CRS when creating raster datasets (e.g., `rast(crs = "EPSG:4326")`)
-- With the `st_set_crs()`, which returns a version of the data that has a new CRS, an approach that is demonstrated in the following code chunk
+- With the `st_set_crs()`, which returns a version of the data that has a new CRS, an approach that is demonstrated in the following code chunk:
 
 ```{r 06-reproj-3}
 london_geo = st_set_crs(london, "EPSG:4326")
