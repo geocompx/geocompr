@@ -107,7 +107,7 @@
 <ul>
 <li>This chapter requires the following packages:</li>
 </ul>
-<!-- TODO: remove warning=FALSE in next chunk to suppress the following message: --><!-- #> Warning: multiple methods tables found for 'gridDistance' --><div class="sourceCode" id="cb222"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb222"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/terra/">terra</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
@@ -125,7 +125,7 @@ It demonstrates how to set and <em>transform</em> geographic data from one CRS t
 <p>In many projects there is no need to worry about, let alone convert between, different CRSs.
 It is important to know if your data is in a projected or geographic coordinate system, and the consequences of this for geometry operations.
 However, if you know the CRS of your data and the consequences for geometry operations (covered in the next section), CRSs should <em>just work</em> behind the scenes: people often suddenly need to learn about CRSs when things go wrong.
-Having a clearly defined project CRS that all project data is in, plus understanding how and why to use different CRSs, can ensure that things don’t go wrong.
+Having a clearly defined CRS that all project data is in, plus understanding how and why to use different CRSs, can ensure that things don’t go wrong.
 Furthermore, learning about coordinate systems will deepen your knowledge of geographic datasets and how to use them effectively.</p>
 <p>This chapter teaches the fundamentals of CRSs, demonstrates the consequences of using different CRSs (including what can go wrong), and how to ‘reproject’ datasets from one coordinate system to another.
 In the next section we introduce CRSs in R, followed by Section <a href="reproj-geo-data.html#crs-setting">7.3</a> which shows how to get and set CRSs associated with spatial objects.
@@ -141,33 +141,24 @@ We cover reprojecting vector and raster objects in sections <a href="reproj-geo-
 Most modern geographic tools that require CRS conversions, including core R-spatial packages and desktop GIS software such as QGIS, interface with <a href="https://proj.org">PROJ</a>, an open source C++ library that “transforms coordinates from one coordinate reference system (CRS) to another”.
 CRSs can be described in many ways, including the following.</p>
 <ol style="list-style-type: decimal">
-<li>Simple yet potentially ambiguous statements such as “it’s in lon/lat coordinates”.</li>
-<li>Formalized yet now outdated ‘proj4 strings’ such as <code>+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs</code>.</li>
-<li>With an identifying ‘authority:code’ text string such as <code>EPSG:4326</code>.</li>
+<li>Simple yet potentially ambiguous statements such as “it’s in lon/lat coordinates”</li>
+<li>Formalized yet now outdated ‘proj4 strings’ (also known as ‘proj-string’) such as <code>+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs</code>
+</li>
+<li>With an identifying ‘authority:code’ text string such as <code>EPSG:4326</code>
+</li>
 </ol>
 <p>Each refers to the same thing: the ‘WGS84’ coordinate system that forms the basis of Global Positioning System (GPS) coordinates and many other datasets.
 But which one is correct?</p>
-<p>The short answer is that the third way to identify CRSs is correct: <code>EPSG:4326</code> is understood by <strong>sf</strong> (and by extension <strong>stars</strong>) and <strong>terra</strong> packages covered in this book, plus many other software projects for working with geographic data including <a href="https://docs.qgis.org/3.16/en/docs/user_manual/working_with_projections/working_with_projections.html">QGIS</a> and <a href="https://proj.org/development/quickstart.html">PROJ</a>.
+<p>
+The short answer is that the third way to identify CRSs is preferable: <code>EPSG:4326</code> is understood by <strong>sf</strong> (and by extension <strong>stars</strong>) and <strong>terra</strong> packages covered in this book, plus many other software projects for working with geographic data including <a href="https://docs.qgis.org/3.16/en/docs/user_manual/working_with_projections/working_with_projections.html">QGIS</a> and <a href="https://proj.org/development/quickstart.html">PROJ</a>.
 <code>EPSG:4326</code> is future-proof.
 Furthermore, although it is machine readable, unlike the proj-string representation “EPSG:4326” is short, easy to remember and highly ‘findable’ online (searching for EPSG:4326 yields a dedicated page on the website <a href="https://epsg.io/4326">epsg.io</a>, for example).
 The more concise identifier <code>4326</code> is understood by <strong>sf</strong>, but <strong>we recommend the more explicit <code>AUTHORITY:CODE</code> representation to prevent ambiguity and to provide context</strong>.</p>
-<p>The longer answer is that none of the three descriptions are sufficient and more detail is needed for unambiguous CRS handling and transformations: due to the complexity of CRSs, it is not possible to capture all relevant information about them in such short text strings.
-For this reason, the Open Geospatial Consortium (OGC, which also developed the simple features specification that the <strong>sf</strong> package implements) developed an open standard format for describing CRSs that is called WKT (Well Known Text).
+<p>
+The longer answer is that none of the three descriptions are sufficient and more detail is needed for unambiguous CRS handling and transformations: due to the complexity of CRSs, it is not possible to capture all relevant information about them in such short text strings.
+For this reason, the Open Geospatial Consortium (OGC, which also developed the simple features specification that the <strong>sf</strong> package implements) developed an open standard format for describing CRSs that is called WKT (Well-Known Text).
 This is detailed in a <a href="https://portal.opengeospatial.org/files/18-010r7">100+ page document</a> that “defines the structure and content of a text string implementation of the abstract model for coordinate reference systems described in ISO 19111:2019” <span class="citation">(<a href="references.html#ref-opengeospatialconsortium_wellknown_2019" role="doc-biblioref">Open Geospatial Consortium 2019</a>)</span>.
 The WKT representation of the WGS84 CRS, which has the <strong>identifier</strong> <code>EPSG:4326</code> is as follows:</p>
-<!-- Source: https://spatialreference.org/ref/epsg/4326/prettywkt/ -->
-<!-- ``` -->
-<!-- GEOGCS["WGS 84", -->
-<!--     DATUM["WGS_1984", -->
-<!--         SPHEROID["WGS 84",6378137,298.257223563, -->
-<!--             AUTHORITY["EPSG","7030"]], -->
-<!--         AUTHORITY["EPSG","6326"]], -->
-<!--     PRIMEM["Greenwich",0, -->
-<!--         AUTHORITY["EPSG","8901"]], -->
-<!--     UNIT["degree",0.01745329251994328, -->
-<!--         AUTHORITY["EPSG","9122"]], -->
-<!--     AUTHORITY["EPSG","4326"]] -->
-<!-- ``` -->
 <div class="sourceCode" id="cb223"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="st">"EPSG:4326"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Coordinate Reference System:</span></span>
@@ -199,19 +190,21 @@ The WKT representation of the WGS84 CRS, which has the <strong>identifier</stron
 <span><span class="co">#&gt;         AREA["World."],</span></span>
 <span><span class="co">#&gt;         BBOX[-90,-180,90,180]],</span></span>
 <span><span class="co">#&gt;     ID["EPSG",4326]]</span></span></code></pre></div>
-<p>The output of the command shows how the CRS identifier (also known as a Spatial Reference Identifier or <a href="https://postgis.net/workshops/postgis-intro/projection.html">SRID</a>) works: it is simply a look-up, providing a unique identifier associated with a more complete WKT representation of the CRS.
+<p>
+The output of the command shows how the CRS identifier (also known as a Spatial Reference Identifier or <a href="https://postgis.net/workshops/postgis-intro/projection.html">SRID</a>) works: it is simply a look-up, providing a unique identifier associated with a more complete WKT representation of the CRS.
 This raises the question: what happens if there is a mismatch between the identifier and the longer WKT representation of a CRS?
 On this point <span class="citation">Open Geospatial Consortium (<a href="references.html#ref-opengeospatialconsortium_wellknown_2019" role="doc-biblioref">2019</a>)</span> is clear, the verbose WKT representation takes precedence over the <a href="https://docs.opengeospatial.org/is/18-010r7/18-010r7.html#37">identifier</a>:</p>
 <blockquote>
 <p>Should any attributes or values given in the cited identifier be in conflict with attributes or values given explicitly in the WKT description, the WKT values shall prevail.</p>
 </blockquote>
-<p>The convention of referring to CRSs identifiers in the form <code>AUTHORITY:CODE</code>, which is also used by geographic software written in other <a href="https://jorisvandenbossche.github.io/blog/2020/02/11/geopandas-pyproj-crs/">languages</a>, allows a wide range of formally defined coordinate systems to be referred to.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
-Several other ways of referring to unique CRSs can be used, with five identifier types (EPSG code, PostGIS SRID, INTERNAL SRID, PROJ4 string, and WKT strings) accepted by &lt;a href="https://docs.qgis.org/3.16/en/docs/pyqgis_developer_cookbook/crs.html?highlight=srid"&gt;QGIS&lt;/a&gt; and other identifier types such as a more verbose variant of the &lt;code&gt;EPSG:4326&lt;/code&gt; identifier, &lt;code&gt;urn:ogc:def:crs:EPSG::4326&lt;/code&gt; &lt;span class="citation"&gt;(&lt;a href="references.html#ref-opengeospatialconsortium_wellknown_2019" role="doc-biblioref"&gt;Open Geospatial Consortium 2019&lt;/a&gt;)&lt;/span&gt;.&lt;/p&gt;'><sup>26</sup></a>
+<p>
+The convention of referring to CRSs identifiers in the form <code>AUTHORITY:CODE</code>, which is also used by geographic software written in other <a href="https://jorisvandenbossche.github.io/blog/2020/02/11/geopandas-pyproj-crs/">languages</a>, allows a wide range of formally defined coordinate systems to be referred to.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
+Several other ways of referring to unique CRSs can be used, with five identifier types (EPSG code, PostGIS SRID, INTERNAL SRID, proj-string, and WKT strings) accepted by &lt;a href="https://docs.qgis.org/3.16/en/docs/pyqgis_developer_cookbook/crs.html?highlight=srid"&gt;QGIS&lt;/a&gt; and other identifier types such as a more verbose variant of the &lt;code&gt;EPSG:4326&lt;/code&gt; identifier, &lt;code&gt;urn:ogc:def:crs:EPSG::4326&lt;/code&gt; &lt;span class="citation"&gt;(&lt;a href="references.html#ref-opengeospatialconsortium_wellknown_2019" role="doc-biblioref"&gt;Open Geospatial Consortium 2019&lt;/a&gt;)&lt;/span&gt;.&lt;/p&gt;'><sup>26</sup></a>
 The most commonly used authority in CRS identifiers is <em>EPSG</em>, an acronym for the European Petroleum Survey Group which published a standardized list of CRSs (the EPSG was <a href="http://wiki.gis.com/wiki/index.php/European_Petroleum_Survey_Group">taken over</a> by the oil and gas body the <a href="https://www.iogp.org/our-committees/geomatics/">Geomatics Committee of the International Association of Oil &amp; Gas Producers</a> in 2005).
 Other authorities can be used in CRS identifiers.
 <code>ESRI:54030</code>, for example, refers to ESRI’s implementation of the Robinson projection, which has the following WKT string (only first 8 lines shown):</p>
 <div class="sourceCode" id="cb224"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="st">"ESRI:54030"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="st">"ESRI:54030"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Coordinate Reference System:</span></span>
 <span><span class="co">#&gt;   User input: ESRI:54030 </span></span>
 <span><span class="co">#&gt;   wkt:</span></span>
@@ -221,20 +214,23 @@ Other authorities can be used in CRS identifiers.
 <span><span class="co">#&gt;             ELLIPSOID["WGS 84",6378137,298.257223563,</span></span>
 <span><span class="co">#&gt;                 LENGTHUNIT["metre",1]]],</span></span>
 <span><span class="co">#&gt; ...</span></span></code></pre></div>
-<p>WKT strings are exhaustive, detailed, and precise, allowing for unambiguous CRSs storage and transformations.
+<p>
+WKT strings are exhaustive, detailed, and precise, allowing for unambiguous CRSs storage and transformations.
 They contain all relevant information about any given CRS, including its datum and ellipsoid, prime meridian, projection, and units.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 Before the emergence of WKT CRS definitions, proj-string was the standard way to specify coordinate operations and store CRSs.
 These string representations, built on a key=value form (e.g, &lt;code&gt;+proj=longlat +datum=WGS84 +no_defs&lt;/code&gt;), have already been, or should in the future be, superseded by WKT representations in most cases.&lt;/p&gt;"><sup>27</sup></a></p>
-<p>Recent PROJ versions (6+) still allow use of proj-strings to define coordinate operations, but some proj-string keys (<code>+nadgrids</code>, <code>+towgs84</code>, <code>+k</code>, <code>+init=epsg:</code>) are either no longer supported or are discouraged.
+<p>
+Recent PROJ versions (6+) still allow use of proj-strings to define coordinate operations, but some proj-string keys (<code>+nadgrids</code>, <code>+towgs84</code>, <code>+k</code>, <code>+init=epsg:</code>) are either no longer supported or are discouraged.
 Additionally, only three datums (i.e., WGS84, NAD83, and NAD27) can be directly set in proj-string.
 Longer explanations of the evolution of CRS definitions and the PROJ library can be found in <span class="citation">Bivand (<a href="references.html#ref-bivand_progress_2021" role="doc-biblioref">2021</a>)</span>, Chapter 2 of <span class="citation">Pebesma and Bivand (<a href="references.html#ref-pebesma_spatial_2022" role="doc-biblioref">2022</a>)</span>, and a <a href="https://inbo.github.io/tutorials/tutorials/spatial_crs_coding/">blog post by Floris Vanderhaeghe</a>.
-As outlined in the <a href="https://proj.org/development/reference/cpp/cpp_general.html">PROJ documentation</a> there are different versions of the WKT CRS format including WKT1 and two variants of WKT2, the latter of which (WKT2, 2018 specification) corresponds to the ISO 19111:2019 <span class="citation">(<a href="references.html#ref-opengeospatialconsortium_wellknown_2019" role="doc-biblioref">Open Geospatial Consortium 2019</a>)</span>.</p>
+Also, as outlined in the <a href="https://proj.org/development/reference/cpp/cpp_general.html">PROJ documentation</a> there are different versions of the WKT CRS format including WKT1 and two variants of WKT2, the latter of which (WKT2, 2018 specification) corresponds to the ISO 19111:2019 <span class="citation">(<a href="references.html#ref-opengeospatialconsortium_wellknown_2019" role="doc-biblioref">Open Geospatial Consortium 2019</a>)</span>.</p>
 </div>
 <div id="crs-setting" class="section level2" number="7.3">
 <h2>
 <span class="header-section-number">7.3</span> Querying and setting coordinate systems<a class="anchor" aria-label="anchor" href="#crs-setting"><i class="fas fa-link"></i></a>
 </h2>
-<p>Let’s look at how CRSs are stored in R spatial objects and how they can be queried and set.
+<p>
+Let’s look at how CRSs are stored in R spatial objects and how they can be queried and set.
 First we will look at getting and setting CRSs in <strong>vector</strong> geographic data objects, starting with the following example:</p>
 <div class="sourceCode" id="cb225"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vector_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shapes/world.gpkg"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span></span>
@@ -247,18 +243,20 @@ The CRS can be retrieved with the <strong>sf</strong> function <code><a href="ht
 <span><span class="co">#&gt;   User input: WGS 84 </span></span>
 <span><span class="co">#&gt;   wkt:</span></span>
 <span><span class="co">#&gt;   ...</span></span></code></pre></div>
-<p>The output is a list containing two main components:</p>
+<p>
+The output is a list containing two main components:</p>
 <ol style="list-style-type: decimal">
 <li>
 <code>User input</code> (in this case <code>WGS 84</code>, a synonym for <code>EPSG:4326</code> which in this case was taken from the input file), corresponding to CRS identifiers described above</li>
 <li>
-<code>wkt</code>, containing the full WKT string with all relevant information about the CRS.</li>
+<code>wkt</code>, containing the full WKT string with all relevant information about the CRS</li>
 </ol>
 <p>The <code>input</code> element is flexible, and depending on the input file or user input, can contain the <code>AUTHORITY:CODE</code> representation (e.g., <code>EPSG:4326</code>), the CRS’s name (e.g., <code>WGS 84</code>), or even the proj-string definition.
 The <code>wkt</code> element stores the WKT representation, which is used when saving the object to a file or doing any coordinate operations.
 Above, we can see that the <code>new_vector</code> object has the WGS84 ellipsoid, uses the Greenwich prime meridian, and the latitude and longitude axis order.
 In this case, we also have some additional elements, such as <code>USAGE</code> explaining the area suitable for the use of this CRS, and <code>ID</code> pointing to the CRS’s identifier: <code>EPSG:4326</code>.</p>
-<p>The <code>st_crs</code> function also has one helpful feature – we can retrieve some additional information about the used CRS.
+<p>
+The <code>st_crs</code> function also has one helpful feature – we can retrieve some additional information about the used CRS.
 For example, try to run:</p>
 <ul>
 <li>
@@ -273,7 +271,8 @@ For example, try to run:</p>
 <p>In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs()</a></code> function can be used (in this case the WKT string remains unchanged because the CRS was already set correctly when the file was read-in):</p>
 <div class="sourceCode" id="cb227"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">new_vector</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs</a></span><span class="op">(</span><span class="va">new_vector</span>, <span class="st">"EPSG:4326"</span><span class="op">)</span> <span class="co"># set CRS</span></span></code></pre></div>
-<p>Getting and setting CRSs works in a similar way for <strong>raster</strong> geographic data objects.
+<p>
+Getting and setting CRSs works in a similar way for <strong>raster</strong> geographic data objects.
 The <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> function in the <code>terra</code> package accesses CRS information from a <code>SpatRaster</code> object (note the use of the <code><a href="https://rdrr.io/r/base/cat.html">cat()</a></code> function to print it nicely):</p>
 <div class="sourceCode" id="cb228"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">raster_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/srtm.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span></span>
@@ -293,11 +292,11 @@ The <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> func
 <span><span class="co">#&gt;             ORDER[2],</span></span>
 <span><span class="co">#&gt;             ANGLEUNIT["degree",0.0174532925199433]],</span></span>
 <span><span class="co">#&gt;     ID["EPSG",4326]]</span></span></code></pre></div>
-<p>The output is the WKT representation of CRS.
+<p>The output is the WKT string representation of CRS.
 The same function, <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code>, can be also used to set a CRS for raster objects.</p>
 <div class="sourceCode" id="cb229"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/crs.html">crs</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span> <span class="op">=</span> <span class="st">"EPSG:26912"</span> <span class="co"># set CRS</span></span></code></pre></div>
-<p>Here, we can use either the identifier (recommended in most cases) or complete WKT representation.
+<p>Here, we can use either the identifier (recommended in most cases) or complete WKT string representation.
 Alternative methods to set <code>crs</code> include proj-string strings or CRSs extracted from other existing object with <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code>, although these approaches may be less future proof.</p>
 <p>Importantly, the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code> and <code><a href="https://rdrr.io/pkg/terra/man/crs.html">crs()</a></code> functions do not alter coordinates’ values or geometries.
 Their role is only to set a metadata information about the object CRS.</p>
@@ -310,12 +309,13 @@ Their role is only to set a metadata information about the object CRS.</p>
 <p>The output <code>NA</code> shows that <strong>sf</strong> does not know what the CRS is and is unwilling to guess (<code>NA</code> literally means ‘not available’).
 Unless a CRS is manually specified or is loaded from a source that has CRS metadata, <strong>sf</strong> does not make any explicit assumptions about which coordinate systems, other than to say “I don’t know”.
 This behavior makes sense given the diversity of available CRSs but differs from some approaches, such as the GeoJSON file format specification, which makes the simplifying assumption that all coordinates have a lon/lat CRS: <code>EPSG:4326</code>.</p>
-<p>A CRS can be added to <code>sf</code> objects in three main ways:</p>
+<p>
+A CRS can be added to <code>sf</code> objects in three main ways:</p>
 <ul>
 <li>By assigning the CRS to a pre-existing object, e.g. with <code>st_crs(london) = "EPSG:4326"</code>
 </li>
 <li>By passing a CRS to the <code>crs</code> argument in <strong>sf</strong> functions that create geometry objects such as <code>st_as_sf(... crs = "EPSG:4326")</code>. The same argument can also be used to set the CRS when creating raster datasets (e.g., <code>rast(crs = "EPSG:4326")</code>)</li>
-<li>With the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs()</a></code>, which returns a version of the data that has a new CRS, an approach that is demonstrated in the following code chunk</li>
+<li>With the <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs()</a></code>, which returns a version of the data that has a new CRS, an approach that is demonstrated in the following code chunk:</li>
 </ul>
 <div class="sourceCode" id="cb231"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">london_geo</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs</a></span><span class="op">(</span><span class="va">london</span>, <span class="st">"EPSG:4326"</span><span class="op">)</span></span>
