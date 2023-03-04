@@ -89,7 +89,7 @@ names(zones_joined)
 zones_destinations = bristol_od |> 
   group_by(d) |> 
   summarize(across(where(is.numeric), sum)) |> 
-  dplyr::select(geo_code = d, all_dest = all)
+  select(geo_code = d, all_dest = all)
 zones_od = inner_join(zones_joined, zones_destinations, by = "geo_code") |> 
   st_as_sf()
 

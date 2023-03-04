@@ -518,7 +518,7 @@ g1
 
 ## ----map-gpkg, echo=FALSE, message=FALSE, warning=FALSE---------------------------------------------
 gpkg_df = readr::read_csv("extdata/generic_map_pkgs.csv")
-map_gpkg_df = dplyr::select(gpkg_df, Package = package, Title = title)
+map_gpkg_df = select(gpkg_df, Package = package, Title = title)
 map_gpkg_df$Title[map_gpkg_df$Package == "leaflet"] =
   "Create Interactive Web Maps with Leaflet"
 knitr::kable(map_gpkg_df, 
@@ -530,7 +530,7 @@ knitr::kable(map_gpkg_df,
 
 ## ----map-spkg, echo=FALSE, message=FALSE------------------------------------------------------------
 spkg_df = readr::read_csv("extdata/specific_map_pkgs.csv")
-map_spkg_df = dplyr::select(spkg_df, Package = package, Title = title)
+map_spkg_df = select(spkg_df, Package = package, Title = title)
 knitr::kable(map_spkg_df, 
              caption = paste("Selected specific-purpose mapping packages,", 
                              "with associated metrics."),
@@ -575,7 +575,7 @@ tmap_arrange(carto_map3, carto_map4, carto_map_34legend, ncol = 3)
 africa = world |> 
   filter(continent == "Africa", !is.na(iso_a2)) |> 
   left_join(worldbank_df, by = "iso_a2") |> 
-  dplyr::select(name, subregion, gdpPercap, HDI, pop_growth) |> 
+  select(name, subregion, gdpPercap, HDI, pop_growth) |> 
   st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
 
 

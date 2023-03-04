@@ -132,7 +132,7 @@ ep = terra::rast(system.file("raster/ep.tif", package = "spDataLarge"))
 ## ----15-eco-10, cache=TRUE, cache.lazy=FALSE, message=FALSE, warning=FALSE--------------------------
 # terra::extract adds automatically a for our purposes unnecessary ID column
 ep_rp = terra::extract(ep, random_points) |>
-  dplyr::select(-ID)
+  select(-ID)
 random_points = cbind(random_points, ep_rp)
 
 
@@ -275,7 +275,7 @@ knitr::opts_chunk$set(eval = FALSE)
 
 ## ----15-eco-20--------------------------------------------------------------------------------------
 # create task
-task = mlr3spatiotempcv::as_task_regr_st(dplyr::select(rp, -id, -spri),
+task = mlr3spatiotempcv::as_task_regr_st(select(rp, -id, -spri),
   id = "mongon", target = "sc")
 
 

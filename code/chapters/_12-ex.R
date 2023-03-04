@@ -58,10 +58,10 @@ library(tmap)
 ## # exercise)
 ## data("lsl", package = "spDataLarge")
 ## ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
-## lsl = dplyr::select(lsl, x, y, lslpts)
+## lsl = select(lsl, x, y, lslpts)
 ## # extract values to points, i.e., create predictors
 ## lsl[, names(ta)] = terra::extract(ta, lsl[, c("x", "y")]) |>
-##   dplyr::select(-ID)
+##   select(-ID)
 
 
 ## ----12-ex-e3, eval=FALSE---------------------------------------------------------------------------

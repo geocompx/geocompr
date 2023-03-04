@@ -2,8 +2,8 @@
 # old_par = par()
 # breaks = c(1e5, 5e6, 1e7, 7e7, 2e8)
 # rdf = st_drop_geometry(regions)
-# us_states$region_pop = inner_join(dplyr::select(us_states, REGION),
-#                                   dplyr::select(rdf, Group.1, total_pop_15),
+# us_states$region_pop = inner_join(select(us_states, REGION),
+#                                   select(rdf, Group.1, total_pop_15),
 #                                   by = c("REGION" = "Group.1")) %>%
 #   pull(total_pop_15)
 # 
@@ -19,7 +19,7 @@ library(sf)
 
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
                     FUN = sum, na.rm = TRUE)
-us_states_facet = dplyr::select(us_states, REGION, total_pop_15) %>%
+us_states_facet = select(us_states, REGION, total_pop_15) %>%
   mutate(Level = "State")
 regions_facet = dplyr::rename(regions, REGION = Group.1) %>%
   mutate(Level = "Region")
