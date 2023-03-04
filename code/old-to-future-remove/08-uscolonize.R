@@ -4,7 +4,7 @@ library(tidyr)
 library(sf)
 
 statepop = historydata::us_state_populations %>%
-  dplyr::select(-GISJOIN) %>% rename(NAME = state)
+  select(-GISJOIN) %>% rename(NAME = state)
 statepop_wide = spread(statepop, year, population, sep = "_")
 statepop_sf = left_join(spData::us_states, statepop_wide, by = "NAME") %>% 
   st_transform(2163)

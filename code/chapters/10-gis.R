@@ -211,7 +211,7 @@ points = cycle_hire[1:25, ]
 ##   add_osm_feature(key = "highway") |>
 ##   osmdata_sf()
 ## london_streets = london_streets[["osm_lines"]]
-## london_streets = dplyr::select(london_streets, osm_id)
+## london_streets = select(london_streets, osm_id)
 
 
 ## ----09-gis-30, eval=FALSE--------------------------------------------------------------------------

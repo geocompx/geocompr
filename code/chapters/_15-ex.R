@@ -134,7 +134,7 @@ library(ranger)
 
 # define the task
 task = mlr3spatiotempcv::as_task_regr_st(
-  dplyr::select(rp, -id, -spri),
+  select(rp, -id, -spri),
   target = "sc", 
   id = "mongon")
 

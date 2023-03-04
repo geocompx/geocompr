@@ -84,9 +84,9 @@ rp = inner_join(random_points, rp, by = "id")
 #**********************************************************
 
 # create task
-task = TaskRegrST$new(id = "mongon", backend = dplyr::select(rp, -id, -spri),
+task = TaskRegrST$new(id = "mongon", backend = select(rp, -id, -spri),
                       target = "sc")
-rp = dplyr::select(rp, -id, -spri)
+rp = select(rp, -id, -spri)
 rp[, c("x", "y")] = st_coordinates(rp)
 rp = st_drop_geometry(rp)
 task = TaskRegrST$new(id = "mongon", backend = rp, target = "sc",
