@@ -392,7 +392,7 @@ The following command calculates population density (with `mutate()`), arranges 
 ```r
 world_agg5 = world |> 
   st_drop_geometry() |>                      # drop the geometry for speed
-  dplyr::select(pop, continent, area_km2) |> # subset the columns of interest  
+  select(pop, continent, area_km2) |> # subset the columns of interest  
   group_by(continent) |>                     # group by continent and summarize:
   summarize(Pop = sum(pop, na.rm = TRUE), Area = sum(area_km2), N = n()) |>
   mutate(Density = round(Pop / Area)) |>     # calculate population density
@@ -669,7 +669,6 @@ grain = rast(nrows = 6, ncols = 6,
              xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
              vals = grain_fact)
 ```
-
 
 
 
