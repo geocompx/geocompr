@@ -895,12 +895,9 @@ This way your prototype web applications should be limited not by technical cons
 
 <div class="figure" style="text-align: center">
 <iframe src="https://shiny.robinlovelace.net/CycleHireApp/?showcase=0" width="690" height="400px" data-external="1"></iframe>
-<p class="caption">(\#fig:CycleHireApp-html)Hire a cycle App, a simple web mapping application for finding the closest cycle hiring station based on your location and requirement of cycles. Interactive version available online at r.geocompx.org.</p>
+<p class="caption">(\#fig:CycleHireApp-html)CycleHireApp, a simple web mapping application for finding the closest cycle hiring station based on your location and requirement of cycles. Interactive version available online at r.geocompx.org.</p>
 </div>
 
-<!--toDo:rl-->
-<!-- !!!!! -->
-<!--the image is missing!!-->
 
 
 ## Other mapping packages
