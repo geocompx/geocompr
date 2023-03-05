@@ -90,7 +90,7 @@ Further, `mutate()` is used to convert values -1 and -9 (meaning "unknown") to `
 
 ```r
 # pop = population, hh_size = household size
-input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
+input = select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D, hh_size = HHGroesse_D)
 # set -1 and -9 to NA
 input_tidy = dplyr::mutate(input,
@@ -252,7 +252,7 @@ However, here, we are only interested in the name of the city.
 ```r
 metro_names = sf::st_centroid(metros, of_largest_polygon = TRUE) |>
   tmaptools::rev_geocode_OSM(as.data.frame = TRUE) |>
-  dplyr::select(city, town, state)
+  select(city, town, state)
 # smaller cities are returned in column town. To have all names in one column,
 # we move the town name to the city column in case it is NA
 metro_names = dplyr::mutate(metro_names, city = ifelse(is.na(city), town, city))
@@ -342,7 +342,7 @@ To make sure that each list element (an `sf`\index{sf} data frame) comes with th
 
 ```r
 # select only specific columns
-shops = purrr::map_dfr(shops, dplyr::select, osm_id, shop)
+shops = purrr::map_dfr(shops, select, osm_id, shop)
 ```
 
 Note: `shops` is provided in the `spDataLarge` and can be accessed as follows:

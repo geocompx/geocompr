@@ -432,7 +432,7 @@ learner$model
 
 ```r
 fit = glm(lslpts ~ ., family = binomial(link = "logit"), 
-          data = dplyr::select(lsl, -x, -y))
+          data = select(lsl, -x, -y))
 identical(fit$coefficients, learner$model$coefficients)
 ```
 -->

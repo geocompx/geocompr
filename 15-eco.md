@@ -203,7 +203,7 @@ Finally, we can extract the terrain attributes to our field observations (see al
 ```r
 # terra::extract adds automatically a for our purposes unnecessary ID column
 ep_rp = terra::extract(ep, random_points) |>
-  dplyr::select(-ID)
+  select(-ID)
 random_points = cbind(random_points, ep_rp)
 ```
 
@@ -387,7 +387,7 @@ For specifying a spatial task, we use again the **mlr3spatiotempcv** package [@s
 
 ```r
 # create task
-task = mlr3spatiotempcv::as_task_regr_st(dplyr::select(rp, -id, -spri),
+task = mlr3spatiotempcv::as_task_regr_st(select(rp, -id, -spri),
   id = "mongon", target = "sc")
 ```
 
