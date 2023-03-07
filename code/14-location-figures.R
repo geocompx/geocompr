@@ -44,7 +44,7 @@ ger = geodata::gadm(country = "DEU", level = 0, path = tempdir())
 
 # 2.1 Data preparation=====================================
 #**********************************************************
-input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
+input = select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D,
                       hh_size = HHGroesse_D)
 # set -1 and -9 to NA

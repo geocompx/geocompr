@@ -20,7 +20,7 @@ data("census_de", package = "spDataLarge")
 
 ## ----14-location-4----------------------------------------------------
 # pop = population, hh_size = household size
-input = dplyr::select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
+input = select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D,
                       hh_size = HHGroesse_D)
 # set -1 and -9 to NA
@@ -149,7 +149,7 @@ knitr::include_graphics("figures/08_metro_areas.png")
 ## ----14-location-17, warning=FALSE, eval=FALSE------------------------
 ## metro_names = sf::st_centroid(metros, of_largest_polygon = TRUE) |>
 ##   tmaptools::rev_geocode_OSM(as.data.frame = TRUE) |>
-##   dplyr::select(city, town, state)
+##   select(city, town, state)
 ## # smaller cities are returned in column town. To have all names in one column,
 ## # we move the town name to the city column in case it is NA
 ## metro_names = dplyr::mutate(metro_names, city = ifelse(is.na(city), town, city))
@@ -157,7 +157,7 @@ knitr::include_graphics("figures/08_metro_areas.png")
 
 ## ----metro-names, echo=FALSE------------------------------------------
 data("metro_names", package = "spDataLarge")
-knitr::kable(dplyr::select(metro_names, city, state), 
+knitr::kable(select(metro_names, city, state), 
              caption = "Result of the reverse geocoding.", 
              caption.short = "Result of the reverse geocoding.", 
              booktabs = TRUE)
@@ -200,7 +200,7 @@ metro_names = metro_names$city |>
 
 ## ----14-location-22, eval=FALSE---------------------------------------
 ## # select only specific columns
-## shops = purrr::map_dfr(shops, dplyr::select, osm_id, shop)
+## shops = purrr::map_dfr(shops, select, osm_id, shop)
 
 
 ## ----attach-shops-----------------------------------------------------

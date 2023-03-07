@@ -18,7 +18,7 @@ plot(usb1$geometry)
 usbl = map(dates_unique, ~USAboundaries::us_states(map_date = .))
 # usb = do.call(rbind, usbl)
 statepop = historydata::us_state_populations %>%
-  dplyr::select(-GISJOIN) %>% rename(name = state) 
+  select(-GISJOIN) %>% rename(name = state) 
 sel = usb1$name %in% statepop$name
 summary(sel)
 usb1$name[!sel]
@@ -32,7 +32,7 @@ for(i in 2:length(dates_unique)) {
   usbi = USAboundaries::us_states(map_date = dates_unique[i])
   print(st_crs(usbi))
   usbi$year = lubridate::year(dates_unique[i])
-  if(dates_unique[i] == "2000-12-31") usbi$year = 2010
+  if (dates_unique[i] == "2000-12-31") usbi$year = 2010
   plot(usbi$geometry)
   usbji = left_join(usbi, statepop)
   plot(usbji["population"])

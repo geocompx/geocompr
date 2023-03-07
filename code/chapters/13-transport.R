@@ -39,7 +39,7 @@ knitr::include_graphics("figures/13_bristol.png")
 
 
 ## ----13-transport-3, eval=FALSE, echo=FALSE---------------------------------------------------------
-## if(!require(readODS)) {
+## if (!require(readODS)) {
 ##   install.packages("readODS")
 ## }
 ## u = "https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/536823/local-area-walking-and-cycling-in-england-2015.zip"
@@ -89,7 +89,7 @@ names(zones_joined)
 zones_destinations = bristol_od |> 
   group_by(d) |> 
   summarize(across(where(is.numeric), sum)) |> 
-  dplyr::select(geo_code = d, all_dest = all)
+  select(geo_code = d, all_dest = all)
 zones_od = inner_join(zones_joined, zones_destinations, by = "geo_code") |> 
   st_as_sf()
 

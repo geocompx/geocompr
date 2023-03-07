@@ -1,7 +1,7 @@
 # Aim: generate tmap figure representing desire lines
 
 # load data if not already loaded:
-if(!exists("desire_lines")) {
+if (!exists("desire_lines")) {
   library(sf)
   library(tidyverse)
   library(spDataLarge)
@@ -17,7 +17,7 @@ if(!exists("desire_lines")) {
   zones_od = bristol_od %>% 
     group_by(d) %>% 
     summarize_if(is.numeric, sum) %>% 
-    dplyr::select(geo_code = d, all_dest = all) %>% 
+    select(geo_code = d, all_dest = all) %>% 
     inner_join(zones_joined, ., by = "geo_code")
   
   od_top5 = bristol_od %>% 

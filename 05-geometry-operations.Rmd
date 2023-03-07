@@ -29,8 +29,8 @@ It teaches how to change the resolution (also called raster aggregation and disa
 These operations are especially useful if one would like to align raster datasets from diverse sources.
 Aligned raster objects share a one-to-one correspondence between pixels, allowing them to be processed using map algebra operations, described in Section \@ref(map-algebra). 
 The interaction between raster and vector objects is covered in Chapter \@ref(raster-vector). 
-It shows how raster values can be 'masked' and 'extracted' by vector geometries.
-Importantly it shows how to 'polygonize' rasters and 'rasterize' vector datasets, making the two data models more interchangeable.
+It presents how raster values can be 'masked' and 'extracted' by vector geometries.
+Importantly it also shows how to 'polygonize' rasters and 'rasterize' vector datasets, making the two data models more interchangeable.
 
 ## Geometric operations on vector data {#geo-vec}
 
@@ -70,10 +70,11 @@ object.size(seine)
 object.size(seine_simp)
 ```
 
+\index{vector!simplification} 
 Simplification is also applicable for polygons.
 This is illustrated using `us_states`, representing the contiguous United States.
 As we show in Chapter \@ref(reproj-geo-data), GEOS assumes that the data is in a projected CRS and this could lead to unexpected results when using a geographic CRS.
-Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (epsg = 2163) (on the left in Figure \@ref(fig:us-simp)):
+Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (EPSG = 2163) (on the top left in Figure \@ref(fig:us-simp)):
 
 ```{r 05-geometry-operations-4}
 us_states2163 = st_transform(us_states, "EPSG:2163")
@@ -87,7 +88,7 @@ us_states_simp1 = st_simplify(us_states2163, dTolerance = 100000)  # 100 km
 ```
 
 A limitation with `st_simplify()` is that it simplifies objects on a per-geometry basis.
-This means the 'topology' is lost, resulting in overlapping and 'holey' areal units illustrated in Figure \@ref(fig:us-simp) (middle panel).
+This means the 'topology' is lost, resulting in overlapping and 'holey' areal units illustrated in Figure \@ref(fig:us-simp) (right top panel).
 `ms_simplify()` from **rmapshaper** provides an alternative that overcomes this issue.
 By default it uses the Visvalingam algorithm, which overcomes some limitations of the Douglas-Peucker algorithm [@visvalingam_line_1993].
 <!-- https://bost.ocks.org/mike/simplify/ -->
@@ -102,8 +103,8 @@ us_states_simp2 = rmapshaper::ms_simplify(us_states2163, keep = 0.01,
                                           keep_shapes = TRUE)
 ```
 
-
-An alternative to simplification is smoothing the boundaries of polygon and linestring geometries, which is implemented in the **smoothr** package. 
+\index{vector!simplification}
+An alternative to simplification is smoothing the boundaries of polygon and linestring geometries, which is implemented in the **smoothr** package\index{smoothr (package)}. 
 Smoothing interpolates the edges of geometries and does not necessarily lead to fewer vertices, but can be especially useful when working with geometries that arise from spatially vectorizing a raster (a topic covered in Chapter \@ref(raster-vector)).
 **smoothr** implements three techniques for smoothing: a Gaussian kernel regression, Chaikin's corner cutting algorithm, and spline interpolation, which are all described in the package vignette and [website](https://strimas.com/smoothr/). 
 Note that similar to `st_simplify()`, the smoothing algorithms don't preserve 'topology'.
@@ -112,18 +113,19 @@ Below is an example of using Gaussian kernel regression to smooth the borders of
 The `smoothness` argument controls the bandwidth of the Gaussian that is used to smooth the geometry and has a default value of 1.
 
 ```{r 05-geometry-operations-6b, warning=FALSE}
-us_states_simp3 = smoothr::smooth(us_states2163, method = 'ksmooth', smoothness = 6)
-
+us_states_simp3 = smoothr::smooth(us_states2163, 
+                                  method = "ksmooth", smoothness = 6)
 ```
 
-Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in (Figure \@ref(fig:us-simp)). Differences can be observed between the outputs of the Douglas-Peucker (`st_simplify`), Visvalingam (`ms_simplify`), and Gaussian kernel regression (`smooth(method=ksmooth`) algorithms.
+Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in (Figure \@ref(fig:us-simp)). 
+Differences can be observed between the outputs of the Douglas-Peucker (`st_simplify`), Visvalingam (`ms_simplify`), and Gaussian kernel regression (`smooth(method=ksmooth`) algorithms.
 
-```{r us-simp, echo=FALSE, fig.cap="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages.", warning=FALSE, fig.asp=0.3, fig.scap="Polygon simplification in action."}
+```{r us-simp, echo=FALSE, fig.cap="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages.", warning=FALSE, fig.scap="Polygon simplification in action."}
 library(tmap)
 p_ussimp1 = tm_shape(us_states2163) + tm_polygons() + tm_layout(main.title = "Original data")
 p_ussimp2 = tm_shape(us_states_simp1) + tm_polygons() + tm_layout(main.title = "st_simplify")
 p_ussimp3 = tm_shape(us_states_simp2) + tm_polygons() + tm_layout(main.title = "ms_simplify")
-p_ussimp4 = tm_shape(us_states_simp3) + tm_polygons() + tm_layout(main.title = "smooth(method=ksmooth)")
+p_ussimp4 = tm_shape(us_states_simp3) + tm_polygons() + tm_layout(main.title = 'smooth(method = "ksmooth")')
 tmap_arrange(p_ussimp1, p_ussimp2, p_ussimp3, p_ussimp4, ncol = 2, nrow = 2)
 ```
 
@@ -148,7 +150,7 @@ Sometimes the geographic centroid falls outside the boundaries of their parent o
 In such cases *point on surface* operations can be used to guarantee the point will be in the parent object (e.g., for labeling irregular multipolygon objects such as island states), as illustrated by the red points in Figure \@ref(fig:centr).
 Notice that these red points always lie on their parent objects.
 They were created with `st_point_on_surface()` as follows:^[
-A description of how `st_point_on_surface()` works is provided at https://gis.stackexchange.com/q/76498.
+A description of how `st_point_on_surface()` works is provided at https://gis.stackexchange.com/a/76563/20955.
 ]
 
 ```{r 05-geometry-operations-8, warning=FALSE}
@@ -359,12 +361,14 @@ source("https://github.com/geocompx/geocompr/raw/main/code/05-venn-clip.R")
 
 ### Subsetting and clipping
 
+\index{vector!clipping} 
+\index{spatial!subsetting} 
 Clipping objects can change their geometry but it can also subset objects, returning only features that intersect (or partly intersect) with a clipping/subsetting object.
 To illustrate this point, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
 Some points will be inside just one circle, some will be inside both and some will be inside neither.
 `st_sample()` is used below to generate a *simple random* distribution of points within the extent of circles `x` and `y`, resulting in output illustrated in Figure \@ref(fig:venn-subset), raising the question: how to subset the points to only return the point that intersects with *both* `x` and `y`?
 
-```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted.", fig.height=6, fig.width=9, fig.asp=0.4, fig.scap="Randomly distributed points within the bounding box. Note that only one point intersects with both x and y, highlighted with a red circle.", echo=FALSE}
+```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted.", fig.height=6, fig.width=9, fig.scap="Randomly distributed points within the bounding box. Note that only one point intersects with both x and y, highlighted with a red circle.", echo=FALSE}
 bb = st_bbox(st_union(x, y))
 box = st_as_sfc(bb)
 set.seed(2017)
@@ -377,7 +381,6 @@ plot(p, add = TRUE)
 plot(p_xy1, cex = 3, col = "red", add = TRUE)
 text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 2)
 ```
-
 
 ```{r venn-subset-to-show, eval=FALSE}
 bb = st_bbox(st_union(x, y))
@@ -395,10 +398,10 @@ The third approach is to create a subsetting object using the binary spatial pre
 The results are identical (except superficial differences in attribute names), but the implementation differs substantially:
 
 ```{r 05-geometry-operations-21}
-p_xy1 = p[x_and_y]
-p_xy2 = st_intersection(p, x_and_y)
-sel_p_xy = st_intersects(p, x, sparse = FALSE)[, 1] &
-  st_intersects(p, y, sparse = FALSE)[, 1]
+p_xy1 = p[x_and_y] # way #1
+p_xy2 = st_intersection(p, x_and_y) # way #2
+sel_p_xy = st_intersects(p, x, sparse = FALSE)[, 1] & 
+  st_intersects(p, y, sparse = FALSE)[, 1] # way #3
 p_xy3 = p[sel_p_xy]
 ```
 
@@ -426,7 +429,7 @@ We will return to the question of choosing between different implementations of 
 \index{vector!union} 
 \index{aggregation!spatial} 
 As we saw in Section \@ref(vector-attribute-aggregation), spatial aggregation can silently dissolve the geometries of touching polygons in the same group.
-This is demonstrated in the code chunk below in which 49 `us_states` are aggregated into 4 regions using base and **tidyverse**\index{tidyverse (package)} functions (see results in Figure \@ref(fig:us-regions)):
+This is demonstrated in the code chunk below in which 49 `us_states` are aggregated into four regions using base and **dplyr**\index{dplyr (package)} functions (see results in Figure \@ref(fig:us-regions)):
 
 ```{r 05-geometry-operations-23}
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
@@ -626,10 +629,6 @@ To retrieve a spatial output, we can use almost the same subsetting syntax.
 The only difference is that we have to make clear that we would like to keep the matrix structure by setting the `drop` argument to `FALSE`.
 This will return a raster object containing the cells whose midpoints overlap with `clip`.
 
-<!--jn:toDo-->
-<!-- https://github.com/rspatial/terra/issues/914 -->
-<!-- turn eval back on -->
-
 ```{r 05-geometry-operations-36}
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 clip = rast(xmin = 0.9, xmax = 1.8, ymin = -0.45, ymax = 0.45,
@@ -673,6 +672,7 @@ The values of the newly added rows and columns are set to `NA`.
 elev_4 = extend(elev, elev_2)
 ```
 
+\index{raster!origin} 
 The origin of a raster is the cell corner closest to the coordinates (0, 0).
 The `origin()` function returns the coordinates of the origin.
 In the below example a cell corner exists with coordinates (0, 0), but that is not necessarily the case.
@@ -736,6 +736,7 @@ p_ar2 = tm_shape(dem_agg) +
 tmap_arrange(p_ar1, p_ar2, ncol = 2)
 ```
 
+\index{raster!disaggregation}
 The `disagg()` function increases the resolution of raster objects. 
 It comes with two methods on how to compute the values of the newly created cells: the default method (`method = "near"`) simply gives all output cells the value of the input cell, and hence duplicates values, which translates into a 'blocky' output.
 The `bilinear` method uses the four nearest pixel centers of the input image (salmon colored points in Figure \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Figure \@ref(fig:bilinear).
@@ -761,37 +762,31 @@ It is important to keep in mind that disaggregating results in a finer resolutio
 The above methods of aggregation and disaggregation are only suitable when we want to change the resolution of our raster by the aggregation/disaggregation factor. 
 However, what to do when we have two or more rasters with different resolutions and origins?
 This is the role of resampling -- a process of computing values for new pixel locations.
-In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin.
+In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin (Figure \@ref(fig:resampl0)).
 
-<!--toDo: jn-->
-<!-- consider if adding this new figure makes sense -->
-
-```{r, echo=FALSE, eval=FALSE}
-target_rast = rast(xmin = 794600, xmax = 798200, 
-                   ymin = 8931800, ymax = 8935400,
+```{r resampl0, echo=FALSE, fig.cap="Resampling of an original (input) raster into a target raster with custom resolution and origin."}
+target_rast = rast(xmin = 794650, xmax = 798250, 
+                   ymin = 8931750, ymax = 8935350,
                    resolution = 150, crs = "EPSG:32717")
-
 target_rast_p = st_as_sf(as.polygons(target_rast))
 dem_resampl1 = resample(dem, target_rast, method = "near")
-
 tm1 = tm_shape(dem) +
   tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
-  tm_layout(frame = FALSE)
-
+  tm_layout(frame = FALSE, main.title = "Original raster")
 tm2 = tm_shape(dem) +
   tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
-  tm_layout(frame = FALSE) +
+  tm_layout(frame = FALSE, main.title = "Target raster") +
   tm_shape(target_rast_p) +
   tm_borders()
-
-tm3 = tm_shape(dem_resampl1) +
+tm3 = tm_shape(dem) +
+  tm_raster(alpha = 0, legend.show = FALSE) +
+  tm_shape(dem_resampl1) +
   tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
-  tm_layout(frame = FALSE)
-
+  tm_layout(frame = FALSE, main.title = "Resampled raster")
 tmap_arrange(tm1, tm2, tm3, nrow = 1)
 ```
 
-
+\index{raster!resampling}
 There are several methods for estimating values for a raster with different resolutions/origins, as shown in Figure \@ref(fig:resampl).
 The main resampling methods include:
 
@@ -813,8 +808,8 @@ We need a raster with target spatial properties to see how the `resample()` func
 For this example, we create `target_rast`, but you would often use an already existing raster object.
 
 ```{r 05-geometry-operations-42}
-target_rast = rast(xmin = 794600, xmax = 798200, 
-                   ymin = 8931800, ymax = 8935400,
+target_rast = rast(xmin = 794650, xmax = 798250, 
+                   ymin = 8931750, ymax = 8935350,
                    resolution = 150, crs = "EPSG:32717")
 ```
 
@@ -860,6 +855,7 @@ All of them calculate a given statistic based on the values of all non-NA contri
 For example, `sum` is useful when each raster cell represents a spatially extensive variable (e.g., number of people).
 As an effect of using `sum`, the resampled raster should have the same total number of people as the original one.
 
+\index{raster!resampling}
 As you will see in section \@ref(reproj-ras), raster reprojection is a special case of resampling when our target raster has a different CRS than the original raster.
 
 \index{GDAL}

@@ -112,22 +112,22 @@ small_countries = world[world$area_km2 < 10000, ]
 
 
 ## ----03-attribute-operations-14---------------------------------------------------------------------
-world1 = dplyr::select(world, name_long, pop)
+world1 = select(world, name_long, pop)
 names(world1)
 
 
 ## ----03-attribute-operations-15---------------------------------------------------------------------
 # all columns between name_long and pop (inclusive)
-world2 = dplyr::select(world, name_long:pop)
+world2 = select(world, name_long:pop)
 
 
 ## ----03-attribute-operations-16---------------------------------------------------------------------
 # all columns except subregion and area_km2 (inclusive)
-world3 = dplyr::select(world, -subregion, -area_km2)
+world3 = select(world, -subregion, -area_km2)
 
 
 ## ----03-attribute-operations-17---------------------------------------------------------------------
-world4 = dplyr::select(world, name_long, population = pop)
+world4 = select(world, name_long, population = pop)
 
 
 ## ----03-attribute-operations-18, eval=FALSE---------------------------------------------------------
@@ -189,13 +189,13 @@ knitr::kable(tibble(Symbol = operators, Name = operators_exp),
 ## ----03-attribute-operations-24---------------------------------------------------------------------
 world7 = world |>
   filter(continent == "Asia") |>
-  dplyr::select(name_long, continent) |>
+  select(name_long, continent) |>
   slice(1:5)
 
 
 ## ----03-attribute-operations-25---------------------------------------------------------------------
 world8 = slice(
-  dplyr::select(
+  select(
     filter(world, continent == "Asia"),
     name_long, continent),
   1:5)
@@ -203,7 +203,7 @@ world8 = slice(
 
 ## ----03-attribute-operations-25-2-------------------------------------------------------------------
 world9_filtered = filter(world, continent == "Asia")
-world9_selected = dplyr::select(world9_filtered, continent)
+world9_selected = select(world9_filtered, continent)
 world9 = slice(world9_selected, 1:5)
 
 
@@ -235,7 +235,7 @@ world_agg4  = world |>
 ## ----03-attribute-operations-30---------------------------------------------------------------------
 world_agg5 = world |> 
   st_drop_geometry() |>                      # drop the geometry for speed
-  dplyr::select(pop, continent, area_km2) |> # subset the columns of interest  
+  select(pop, continent, area_km2) |> # subset the columns of interest  
   group_by(continent) |>                     # group by continent and summarize:
   summarize(Pop = sum(pop, na.rm = TRUE), Area = sum(area_km2), N = n()) |>
   mutate(Density = round(Pop / Area)) |>     # calculate population density

@@ -1,0 +1,65 @@
+```{asis 11-ex-asis1, message=FALSE}
+The solutions assume the following packages are attached (other packages will be attached when needed):
+```
+
+```{r 11-ex-e0, message=FALSE, warning=FALSE, eval=FALSE}
+library(sf)
+```
+
+E1. Read the script `11-centroid-alg.R` in the `code` folder of the book's GitHub repo.
+
+  - Which of the best practices covered in Section \@ref(scripts) does it follow?
+  - Create a version of the script on your computer in an IDE\index{IDE} such as RStudio\index{RStudio} (preferably by typing-out the script line-by-line, in your own coding style and with your own comments, rather than copy-pasting --- this will help you learn how to type scripts). Using the example of a square polygon (e.g., created with `poly_mat = cbind(x = c(0, 0, 9, 9, 0), y = c(0, 9, 9, 0, 0))`) execute the script line-by-line.
+  - What changes could be made to the script to make it more reproducible?
+  - How could the documentation be improved?
+
+    <!-- - Answer: The script could state that it needs an object called `poly_mat` to be present and, if none is present, create an example dataset at the outset for testing. -->
+<!-- 1. Check-out the script `11-earthquakes.R` in the `code` folder of the book's GitHub [repo](https://github.com/geocompx/geocompr/blob/main/code/11-earthquakes.R). -->
+<!--     - Try to reproduce the results: how many significant earthquakes were there last month? -->
+<!--     - Modify the script so that it provides a map with all earthquakes that happened in the past hour. -->
+<!-- change line 10 to: -->
+<!-- u = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_hour.geojson" -->
+  <!-- It could document the source of the data better - e.g. with `data from https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php` -->
+
+E2. In the geometric algorithms section  we calculated that the area and geographic centroid\index{centroid} of the polygon represented by `poly_mat` was `r sum(A)` and `r round(c(weighted.mean(C[, 1], A), weighted.mean(C[, 2], A)), 1)`, respectively.
+
+<!-- Todo: add link to that script file (RL) -->
+
+  - Reproduce the results on your own computer with reference to the script `11-centroid-alg.R`, an implementation of this algorithm (bonus: type out the commands - try to avoid copy-pasting).
+  - Are the results correct? Verify them by converting `poly_mat` into an `sfc` object (named `poly_sfc`) with `st_polygon()` (hint: this function takes objects of class `list()`) and then using `st_area()` and `st_centroid()`.
+
+<!-- We can verify the answer by converting `poly_mat` into a simple feature collection as follows, which shows the calculations match: -->
+
+```{r 10-algorithms-20, eval=FALSE, echo=FALSE}
+poly_sfc = sf::st_polygon(list(poly_mat))
+sf::st_area(poly_sfc)
+sf::st_centroid(poly_sfc)
+```
+
+E3. It was stated that the algorithm\index{algorithm} we created only works for *convex hulls*. Define convex hulls\index{convex hull} (see the geometry operations chapter) and test the algorithm on a polygon that is *not* a convex hull.
+
+<!-- The algorithm would need to be able to have negative as well as positive area values. -->
+
+  - Bonus 1: Think about why the method only works for convex hulls and note changes that would need to be made to the algorithm to make it work for other types of polygon.
+  - Bonus 2: Building on the contents of `11-centroid-alg.R`, write an algorithm\index{algorithm} only using base R functions that can find the total length of linestrings represented in matrix form.
+  
+<!-- Todo: add example of matrix representing a linestring, demonstrate code to verify the answer, suggest alternative functions to decompose as a bonus. -->
+
+E4. In the functions section we created different versions of the `poly_centroid()` function that generated outputs of class `sfg` (`poly_centroid_sfg()`) and type-stable `matrix` outputs (`poly_centroid_type_stable()`). 
+Further extend the function by creating a version (e.g., called `poly_centroid_sf()`) that is type stable (only accepts inputs of class `sf`) *and* returns `sf` objects (hint: you may need to convert the object `x` into a matrix with the command `sf::st_coordinates(x)`).
+
+  - Verify it works by running `poly_centroid_sf(sf::st_sf(sf::st_sfc(poly_sfc)))`
+  - What error message do you get when you try to run `poly_centroid_sf(poly_mat)`?
+    
+```{r 10-algorithms-21, eval=FALSE}
+poly_centroid_sf = function(x) {
+  stopifnot(is(x, "sf"))
+  xcoords = sf::st_coordinates(x)
+  centroid_coords = poly_centroid(xcoords)
+  centroid_sf = sf::st_sf(geometry = sf::st_sfc(sf::st_point(centroid_coords)))
+  centroid_sf
+}
+poly_centroid_sf(sf::st_sf(sf::st_sfc(poly_sfc)))
+poly_centroid_sf(poly_sfc)
+poly_centroid_sf(poly_mat)
+```

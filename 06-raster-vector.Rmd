@@ -12,7 +12,7 @@ library(dplyr)
 
 ## Introduction
 
-\index{raster-vector!interactions} 
+\index{raster-vector interactions} 
 This Chapter focuses on interactions between raster and vector geographic data models, introduced in Chapter \@ref(spatial-class).
 It includes four main techniques:
 raster cropping and masking using vector objects (Section \@ref(raster-cropping));
@@ -22,10 +22,10 @@ The above concepts are demonstrated using data used in previous chapters to unde
 
 ## Raster cropping
 
-\index{raster-vector!raster cropping} 
+\index{raster cropping} 
 Many geographic data projects involve integrating data from many different sources, such as remote sensing images (rasters) and administrative boundaries (vectors).
 Often the extent of input raster datasets is larger than the area of interest.
-In this case raster **cropping** and **masking** are useful for unifying the spatial extent of input data.
+In this case, raster **cropping** and **masking** are useful for unifying the spatial extent of input data.
 Both operations reduce object memory use and associated computational resources for subsequent analysis steps, and may be a necessary preprocessing step before creating attractive maps involving raster data.
 
 We will use two objects to illustrate raster cropping:
@@ -50,7 +50,7 @@ This functionality is demonstrated in the command below, which generates Figure 
 srtm_cropped = crop(srtm, zion)
 ```
 
-\index{raster-vector!raster masking} 
+\index{raster masking} 
 Related to `crop()` is the **terra** function `mask()`, which sets values outside of the bounds of the object passed to its second argument to `NA`.
 The following command therefore masks every cell outside of the Zion National Park boundaries (Figure \@ref(fig:cropmask)(C)):
 
@@ -67,8 +67,7 @@ srtm_final = mask(srtm_cropped, zion)
 ```
 
 Changing the settings of `mask()` yields different results.
-Setting `updatevalue = 0`, for example, will set all pixels outside the national park to 0.
-Setting `inverse = TRUE` will mask everything *inside* the bounds of the park (see `?mask` for details) (Figure \@ref(fig:cropmask)(D)).
+Setting `inverse = TRUE` will mask everything *inside* the bounds of the park (see `?mask` for details) (Figure \@ref(fig:cropmask)(D)), while setting `updatevalue = 0` will set all pixels outside the national park to 0.
 
 ```{r 06-raster-vector-6 }
 srtm_inv_masked = mask(srtm, zion, inverse = TRUE)
@@ -103,11 +102,12 @@ tmap_arrange(pz1, pz2, pz3, pz4, ncol = 4, asp = NA)
 
 ## Raster extraction
 
-\index{raster-vector!raster extraction} 
+\index{raster extraction} 
 Raster extraction is the process of identifying and returning the values associated with a 'target' raster at specific locations, based on a (typically vector) geographic 'selector' object.
-The results depend on the type of selector used (points, lines or polygons) and arguments passed to the `terra::extract()` function, which we use to demonstrate raster extraction.
+The results depend on the type of selector used (points, lines or polygons) and arguments passed to the `terra::extract()` function.
 The reverse of raster extraction --- assigning raster cell values based on vector objects --- is rasterization, described in Section \@ref(rasterization).
 
+\index{raster extraction!points} 
 The basic example is of extracting the value of a raster cell at specific **points**.
 For this purpose, we will use `zion_points`, which contain a sample of 30 locations within the Zion National Park (Figure \@ref(fig:pointextr)). 
 The following command extracts elevation values from `srtm` and creates a data frame with points' IDs (one value per vector's row) and related `srtm` values for each point.
@@ -132,6 +132,7 @@ zion_points = cbind(zion_points, elevation)
 source("https://github.com/geocompx/geocompr/raw/main/code/06-pointextr.R", print.eval = TRUE)
 ```
 
+\index{raster extraction!lines} 
 Raster extraction also works with **line** selectors.
 Then, it extracts one value for each raster cell touched by a line.
 However, the line extraction approach is not recommended to obtain values along the transects as it is hard to get the correct distance between each pair of extracted raster values.
@@ -139,10 +140,7 @@ However, the line extraction approach is not recommended to obtain values along 
 In this case, a better approach is to split the line into many points and then extract the values for these points.
 To demonstrate this, the code below creates `zion_transect`, a straight line going from northwest to southeast of the Zion National Park, illustrated in Figure \@ref(fig:lineextr)(A) (see Section \@ref(vector-data) for a recap on the vector data model):
 
-<!--toDo:jn-->
-<!--fix pipes-->
-
-```{r 06-raster-vector-11 }
+```{r 06-raster-vector-11}
 zion_transect = cbind(c(-113.2, -112.9), c(37.45, 37.2)) |>
   st_linestring() |> 
   st_sfc(crs = crs(srtm)) |>
@@ -228,13 +226,10 @@ print(rast_poly_line, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
 print(plot_transect, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
 ```
 
+\index{raster extraction!polygons} 
 The final type of geographic vector object for raster extraction is **polygons**.
 Like lines, polygons tend to return many raster values per polygon.
 This is demonstrated in the command below, which results in a data frame with column names `ID` (the row number of the polygon) and `srtm` (associated elevation values):
-
-<!--toDo:jn-->
-<!--fix pipes-->
-
 
 ```{r 06-raster-vector-17, eval=FALSE, echo=FALSE}
 # aim: create zion_many to test multi-polygon results
@@ -261,20 +256,16 @@ zion_srtm_values = terra::extract(x = srtm, y = zion)
 ```
 
 Such results can be used to generate summary statistics for raster values per polygon, for example to characterize a single region or to compare many regions.
-The generation of summary statistics is demonstrated in the code below, which creates the object `zion_srtm_df` containing summary statistics for elevation values in Zion National Park (see Figure \@ref(fig:polyextr)(A)):
+This is shown in the code below, which creates the object `zion_srtm_df` containing summary statistics for elevation values in Zion National Park (see Figure \@ref(fig:polyextr)(A)):
 
 ```{r 06-raster-vector-19 }
 group_by(zion_srtm_values, ID) |> 
   summarize(across(srtm, list(min = min, mean = mean, max = max)))
 ```
 
-<!--jn:toDo -->
-<!--should we use the tidyverse name or dplyr here?-->
-<!--btw we could also add reference to the tidyverse paper somewhere in the book-->
-
-The preceding code chunk used the **tidyverse**\index{tidyverse (package)} to provide summary statistics for cell values per polygon ID, as described in Chapter \@ref(attr).
+The preceding code chunk used the **dplyr**\index{dplyr (package)} to provide summary statistics for cell values per polygon ID, as described in Chapter \@ref(attr).
 The results provide useful summaries, for example that the maximum height in the park is around 2,661 meters above see level (other summary statistics, such as standard deviation, can also be calculated in this way).
-Because there is only one polygon in the example a data frame with a single row is returned; however, the method works when multiple selector polygons are used.
+Because there is only one polygon in the example, a data frame with a single row is returned; however, the method works when multiple selector polygons are used.
 
 The similar approach works for counting occurrences of categorical raster values within polygons.
 This is illustrated with a land cover dataset (`nlcd`) from the **spDataLarge** package in Figure \@ref(fig:polyextr)(B), and demonstrated in the code below:
@@ -307,15 +298,16 @@ rast_poly_nlcd = tm_shape(nlcd) +
 tmap_arrange(rast_poly_srtm, rast_poly_nlcd, ncol = 2)
 ```
 
+\index{raster extraction!exact fractions} 
 Although the **terra** package offers rapid extraction of raster values within polygons, `extract()` can still be a bottleneck when processing large polygon datasets.
 The **exactextractr** package offers a [significantly faster alternative](https://github.com/geocompx/geocompr/issues/813) for extracting pixel values through the `exact_extract()` function. 
 The `exact_extract()` function also computes, by default, the fraction of each raster cell overlapped by the polygon, which is more precise (see note below for details). 
 
 ```{block2 06-raster-vector-22, type='rmdnote'}
 Polygons usually have irregular shapes, and therefore, a polygon can overlap only some parts of a raster's cells. 
-To get more detailed results, the `extract()` function has an argument called `exact`. 
-With `exact = TRUE`, we get one more column `fraction` in the output data frame, which contains a fraction of each cell that is covered by the polygon.
-This could be useful to calculate a weighted mean for continuous rasters or more precise coverage for categorical rasters.
+To get more detailed results, the `terra::extract()` function has an argument called `exact`. 
+With `exact = TRUE`, we get one more column `fraction` in the output data frame, which represents a fraction of each cell that is covered by the polygon.
+This could be useful to calculate, for example, a weighted mean for continuous rasters or more precise coverage for categorical rasters.
 By default, it is `FALSE` as this operation requires more computations. 
 The `exactextractr::exact_extract()` function always computes the coverage fraction of the polygon in each cell.
 ```
@@ -324,23 +316,21 @@ The `exactextractr::exact_extract()` function always computes the coverage fract
 zion_srtm_values = terra::extract(x = srtm, y = zion, exact = FALSE)
 ```
 
-<!--toDo:JN-->
-<!-- mention https://github.com/isciences/exactextractr -->
-
 ## Rasterization {#rasterization}
 
-\index{raster-vector!rasterization} 
+\index{rasterization} 
 Rasterization is the conversion of vector objects into their representation in raster objects.
-Usually, the output raster is used for quantitative analysis (e.g., analysis of terrain) or modeling.
-As we saw in Chapter \@ref(spatial-class) the raster data model has some characteristics that make it conducive to certain methods.
+Usually, the output raster is then used for quantitative analysis (e.g., analysis of terrain) or modeling.
+As we saw in Chapter \@ref(spatial-class), the raster data model has some characteristics that make it conducive to certain methods.
 Furthermore, the process of rasterization can help simplify datasets because the resulting values all have the same spatial resolution: rasterization can be seen as a special type of geographic data aggregation.
 
 The **terra** package contains the function `rasterize()` for doing this work.
 Its first two arguments are, `x`, vector object to be rasterized and, `y`, a 'template raster' object defining the extent, resolution and CRS of the output.
 The geographic resolution of the input raster has a major impact on the results: if it is too low (cell size is too large), the result may miss the full geographic variability of the vector data; if it is too high, computational times may be excessive.
 There are no simple rules to follow when deciding an appropriate geographic resolution, which is heavily dependent on the intended use of the results.
-Often the target resolution is imposed on the user, for example when the output of rasterization needs to be aligned to the existing raster.
+Often the target resolution is imposed on the user, for example when the output of rasterization needs to be aligned to some other existing raster.
 
+\index{rasterization!points} 
 To demonstrate rasterization in action, we will use a template raster that has the same extent and CRS as the input vector data `cycle_hire_osm_projected` (a dataset on cycle hire points in London is illustrated in Figure \@ref(fig:vector-rasterization1)(A)) and spatial resolution of 1000 meters:
 
 ```{r 06-raster-vector-24 }
@@ -354,11 +344,10 @@ Rasterization is a very flexible operation: the results depend not only on the n
 
 To illustrate this flexibility we will try three different approaches to rasterization.
 First, we create a raster representing the presence or absence of cycle hire points (known as presence/absence rasters).
-In this case `rasterize()` requires only one argument in addition to `x` and `y` (the aforementioned vector and raster objects): a value to be transferred to all non-empty cells specified by `field` (results illustrated Figure \@ref(fig:vector-rasterization1)(B)).
+In this case `rasterize()` requires no argument in addition to `x` and `y`, the aforementioned vector and raster objects (results illustrated Figure \@ref(fig:vector-rasterization1)(B)).
 
 ```{r 06-raster-vector-25 }
-ch_raster1 = rasterize(cycle_hire_osm_projected, raster_template,
-                       field = 1)
+ch_raster1 = rasterize(cycle_hire_osm_projected, raster_template)
 ```
 
 The `fun` argument specifies summary statistics used to convert multiple observations in close proximity into associate cells in the raster object.
@@ -382,6 +371,8 @@ ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template,
 source("https://github.com/geocompx/geocompr/raw/main/code/06-vector-rasterization1.R", print.eval = TRUE)
 ```
 
+\index{rasterization!lines} 
+\index{rasterization!polygons} 
 Another dataset based on California's polygons and borders (created below) illustrates rasterization of lines.
 After casting the polygon objects into a multilinestring, a template raster is created with a resolution of a 0.5 degree:
 
@@ -401,7 +392,7 @@ california_raster1 = rasterize(california_borders, raster_template2,
                                touches = TRUE)
 ```
 
-Compare it to a polygon rasterization, with `touches = FALSE` by default, which selects only cells whose centroids are inside the selector polygon, as illustrated in Figure \@ref(fig:vector-rasterization2)(B).
+Compare it to a polygon rasterization, with `touches = FALSE` by default, which selects only raster cells whose centroids are inside the selector polygon, as illustrated in Figure \@ref(fig:vector-rasterization2)(B).
 
 ```{r 06-raster-vector-31 }
 california_raster2 = rasterize(california, raster_template2) 
@@ -413,15 +404,16 @@ source("https://github.com/geocompx/geocompr/raw/main/code/06-vector-rasterizati
 
 ## Spatial vectorization
 
-\index{raster-vector!spatial vectorization} 
+\index{spatial vectorization} 
 Spatial vectorization is the counterpart of rasterization (Section \@ref(rasterization)), but in the opposite direction.
 It involves converting spatially continuous raster data into spatially discrete vector data such as points, lines or polygons.
 
 ```{block2 06-raster-vector-33, type="rmdnote"}
 Be careful with the wording!
-In R, vectorization refers to the possibility of replacing `for`-loops and alike by doing things like `1:10 / 2` (see also @wickham_advanced_2019).
+In R, vectorization usually refers to the possibility of replacing `for`-loops and alike by doing things like `1:10 / 2` (see also @wickham_advanced_2019).
 ```
 
+\index{spatial vectorization!points} 
 The simplest form of vectorization is to convert the centroids of raster cells into points.
 `as.points()` does exactly this for all non-`NA` raster grid cells (Figure \@ref(fig:raster-vectorization1)).
 Note, here we also used `st_as_sf()` to convert the resulting object to the `sf` class.
@@ -432,18 +424,19 @@ elev_point = as.points(elev) |>
   st_as_sf()
 ```
 
-
 ```{r raster-vectorization1, echo=FALSE, fig.cap="Raster and point representation of the elev object.", warning=FALSE}
 source("https://github.com/geocompx/geocompr/raw/main/code/06-raster-vectorization1.R", print.eval = TRUE)
 ```
 
+\index{spatial vectorization!contours} 
 Another common type of spatial vectorization is the creation of contour lines representing lines of continuous height or temperatures (isotherms) for example.
 We will use a real-world digital elevation model (DEM) because the artificial raster `elev` produces parallel lines (task for the reader: verify this and explain why this happens).
-Contour lines can be created with the **terra** function `as.contour()`, which is itself a wrapper around `filled.contour()`, as demonstrated below (not shown):
+Contour lines can be created with the **terra** function `as.contour()`, which is itself a wrapper around the built-in R function `filled.contour()`, as demonstrated below (not shown):
 
 ```{r 06-raster-vector-36, eval=FALSE}
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
-cl = as.contour(dem)
+cl = as.contour(dem) |> 
+  st_as_sf()
 plot(dem, axes = FALSE)
 plot(cl, add = TRUE)
 ```
@@ -464,6 +457,7 @@ As illustrated in Figure \@ref(fig:contour-tmap), isolines can be labelled.
 knitr::include_graphics("figures/06-contour-tmap.png")
 ```
 
+\index{spatial vectorization!polygons} 
 The final type of vectorization involves conversion of rasters to polygons.
 This can be done with `terra::as.polygons()`, which converts each raster cell into a polygon consisting of five coordinates, all of which are stored in memory (explaining why rasters are often fast compared with vectors!).
 
@@ -475,14 +469,14 @@ grain_poly = as.polygons(grain) |>
   st_as_sf()
 ```
 
+```{r 06-raster-vector-40, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right).", warning=FALSE, fig.asp=0.4, fig.scap="Illustration of vectorization."}
+source("https://github.com/geocompx/geocompr/raw/main/code/06-raster-vectorization2.R", print.eval = TRUE)
+```
+
 The aggregated polygons of the `grain` dataset have rectilinear boundaries which arise from being defined by connecting rectangular pixels.
 The **smoothr** package described in Chapter \@ref(geometry-operations) can be used to smooth the edges of the polygons.
 As smoothing removes sharp edges in the polygon boundaries, the smoothed polygons will not have the same exact spatial coverage as the original pixels (see the **smoothr** [website](https://strimas.com/smoothr/) for examples).
 Caution should therefore be taken when using the smoothed polygons for further analysis.
-
-```{r 06-raster-vector-40, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right).", warning=FALSE, fig.asp=0.4, fig.scap="Illustration of vectorization."}
-source("https://github.com/geocompx/geocompr/raw/main/code/06-raster-vectorization2.R", print.eval = TRUE)
-```
 
 ## Exercises
 
