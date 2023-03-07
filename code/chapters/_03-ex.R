@@ -22,16 +22,16 @@ attributes(us_states_name$geometry)
 
 
 ## ----03-ex-e2---------------------------------------------------------------------------------------
-us_states |> dplyr::select(total_pop_10, total_pop_15)
+us_states |> select(total_pop_10, total_pop_15)
 
 # or
-us_states |> dplyr::select(starts_with("total_pop"))
+us_states |> select(starts_with("total_pop"))
 
 # or
-us_states |> dplyr::select(contains("total_pop"))
+us_states |> select(contains("total_pop"))
 
 # or
-us_states |> dplyr::select(matches("tal_p"))
+us_states |> select(matches("tal_p"))
 
 
 ## ----03-ex-e3---------------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ us_states %>%
 ## ----03-ex-e12--------------------------------------------------------------------------------------
 us_states_sel = us_states |>
   left_join(us_states_df, by = c("NAME" = "state")) |>
-  dplyr::select(Income = median_income_15)
+  select(Income = median_income_15)
 
 
 ## ----03-ex-e13--------------------------------------------------------------------------------------

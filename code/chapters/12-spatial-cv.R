@@ -187,7 +187,7 @@ knitr::kable(lrns_df,
 
 ## ----12-spatial-cv-17, eval=FALSE-------------------------------------------------------------------
 ## fit = glm(lslpts ~ ., family = binomial(link = "logit"),
-##           data = dplyr::select(lsl, -x, -y))
+##           data = select(lsl, -x, -y))
 ## identical(fit$coefficients, learner$model$coefficients)
 
 

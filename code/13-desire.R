@@ -17,7 +17,7 @@ if (!exists("desire_lines")) {
   zones_od = bristol_od |> 
     group_by(d) |> 
     summarize_if(is.numeric, sum) |> 
-    dplyr::select(geo_code = d, all_dest = all) |> 
+    select(geo_code = d, all_dest = all) |> 
     inner_join(zones_joined, ., by = "geo_code") |> 
     st_as_sf()
   

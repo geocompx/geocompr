@@ -14,19 +14,16 @@ library(stringr)
 # Based on input coordinates finding the nearest bicycle points
 ui = fluidPage(
   # Application title
-  titlePanel("Closest available cycle in London"),
+  titlePanel("CycleHireApp"),
   # Numeric Input from User
-  fluidRow (
-    column(3, numericInput("x", ("Enter x-coordinate of your location"),
-                           value = 51.5000000, step = 0.0000001)),
-    column(3, numericInput("y", ("Enter y-coordinate of your location"),
-                           value = -0.1000000 , step = 0.0000001)),
-    column(4, numericInput("num", "How many cycles are you looking for?",
-                           value = 1, step = 1))
-  ),
+  bootstrapPage(
+    div(style="display:inline-block", numericInput("x", ("Enter x-coordinate of your location"), value = 51.5, step = 0.001)),
+    div(style="display:inline-block", numericInput("y", ("Enter y-coordinate of your location"), value = -0.1 , step = 0.001)),
+    div(style="display:inline-block",  numericInput("num", "How many cycles are you looking for?", value = 1, step = 1))
+    ),
   # Where leaflet map will be rendered
   fluidRow(
-    leafletOutput("map", height= 500)
+    leafletOutput("map", height= 300)
   )
 )
 

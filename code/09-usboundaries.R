@@ -18,7 +18,7 @@ plot(usb1$geometry)
 usbl = map(dates_unique, ~USAboundaries::us_states(map_date = .))
 # usb = do.call(rbind, usbl)
 statepop = historydata::us_state_populations %>%
-  dplyr::select(-GISJOIN) %>% rename(name = state) 
+  select(-GISJOIN) %>% rename(name = state) 
 sel = usb1$name %in% statepop$name
 summary(sel)
 usb1$name[!sel]

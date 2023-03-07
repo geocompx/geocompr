@@ -24,7 +24,7 @@ nz_height_count = aggregate(nz_height, nz, length)
 nz_height_combined = cbind(nz, count = nz_height_count$elevation)
 nz_height_combined |> 
   st_drop_geometry() |> 
-  dplyr::select(Name, count) |> 
+  select(Name, count) |> 
   arrange(desc(count)) |> 
   slice(2)
 
@@ -49,7 +49,7 @@ nz_height_combined = left_join(nz, nz_height_counts |> sf::st_drop_geometry())
 # Generate a summary table
 nz_height_combined |> 
   st_drop_geometry() |> 
-  dplyr::select(Name, count) |> 
+  select(Name, count) |> 
   arrange(desc(count)) |> 
   na.omit()
 
