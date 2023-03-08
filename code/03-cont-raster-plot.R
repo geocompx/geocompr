@@ -18,3 +18,20 @@ p2 = tm_shape(grain) +
   tm_legend(bg.color = "white")
 
 tmap_arrange(p1, p2, nrow = 1)
+
+if (packageVersion("tmap") >= "4.0"){
+  p1 = tm_shape(elev) + 
+    tm_raster(col.scale = tm_scale_continuous(),
+              col.legend = tm_legend(title = "",
+                                     position = tm_pos_auto_in(),
+                                     bg.color = "white")) 
+  
+  # toDo -- does not work
+  p2 = tm_shape(grain) + 
+    tm_raster(col.scale = tm_scale_categorical(values = colfunc2),
+              col.legend = tm_legend(title = "",
+                                     position = tm_pos_auto_in(),
+                                     bg.color = "white")) 
+
+  tmap_arrange(p1, p2, nrow = 1)
+}
