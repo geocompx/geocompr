@@ -205,7 +205,7 @@ head(pred_glm)
 #> 0.1901 0.1172 0.0952 0.2503 0.3382 0.1575
 ```
 
-Spatial predictions can be made by applying the coefficients to the predictor rasters. 
+Spatial distribution maps can be made by applying the coefficients to the predictor rasters. 
 This can be done manually or with `terra::predict()`.
 In addition to a model object (`fit`), this function also expects a `SpatRaster` with the predictors (raster layers) named as in the model's input data frame (Figure \@ref(fig:lsl-susc)).
 
@@ -216,8 +216,8 @@ pred = terra::predict(ta, model = fit, type = "response")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/lsl-susc-1.png" alt="Spatial prediction of landslide susceptibility using a GLM." width="70%" />
-<p class="caption">(\#fig:lsl-susc)Spatial prediction of landslide susceptibility using a GLM.</p>
+<img src="figures/lsl-susc-1.png" alt="Spatial distribution mapping of landslide susceptibility using a GLM." width="70%" />
+<p class="caption">(\#fig:lsl-susc)Spatial distribution mapping of landslide susceptibility using a GLM.</p>
 </div>
 
 Here, when making predictions we neglect spatial autocorrelation\index{autocorrelation!spatial} since we assume that on average the predictive accuracy remains the same with or without spatial autocorrelation structures.
@@ -233,7 +233,7 @@ This mixed modeling approach assumes normal and independent distributed random i
 This can even be extended by using a random intercept that is normal and spatially dependent.
 For this, however, you will have to resort most likely to Bayesian modeling approaches since frequentist software tools are rather limited in this respect especially for more complex models [@blangiardo_spatial_2015; @zuur_beginners_2017].
 
-Spatial prediction maps are one very important outcome of a model.
+Spatial distribution mapping is one very important outcome of a model (Figure \@ref(fig:lsl-susc)).
 Even more important is how good the underlying model is at making them since a prediction map is useless if the model's predictive performance is bad.
 The most popular measure to assess the predictive performance of a binomial model is the Area Under the Receiver Operator Characteristic Curve (AUROC)\index{AUROC}.
 This is a value between 0.5 and 1.0, with 0.5 indicating a model that is no better than random and 1.0 indicating perfect prediction of the two classes. 
@@ -515,7 +515,7 @@ In Section \@ref(glm) a GLM was used to predict landslide susceptibility.
 This section introduces support vector machines (SVM)\index{SVM} for the same purpose.
 Random forest\index{random forest} models might be more popular than SVMs; however, the positive effect of tuning hyperparameters\index{hyperparameter} on model performance is much more pronounced in the case of SVMs [@probst_hyperparameters_2018].
 Since (spatial) hyperparameter tuning is the major aim of this section, we will use an SVM.
-For those wishing to apply a random forest model, we recommend to read this chapter, and then proceed to Chapter \@ref(eco) in which we will apply the currently covered concepts and techniques to make spatial predictions based on a random forest model.
+For those wishing to apply a random forest model, we recommend to read this chapter, and then proceed to Chapter \@ref(eco) in which we will apply the currently covered concepts and techniques to make spatial distribution maps based on a random forest model.
 
 SVMs\index{SVM} search for the best possible 'hyperplanes' to separate classes (in a classification\index{classification} case) and estimate 'kernels' with specific hyperparameters\index{hyperparameter} to create non-linear boundaries between classes [@james_introduction_2013].
 Machine learning algorithms often feature hyperparameters\index{hyperparameter} and parameters.
@@ -688,7 +688,7 @@ Please note also that using more than 50 iterations in the random search of the 
 On the other hand, increasing the number of random search iterations would also increase the total number of models and thus runtime.
 
 So far spatial CV\index{cross-validation!spatial CV} has been used to assess the ability of learning algorithms to generalize to unseen data.
-For spatial predictions, one would tune the hyperparameters\index{hyperparameter} on the complete dataset.
+For predictive mapping purposes, one would tune the hyperparameters\index{hyperparameter} on the complete dataset.
 This will be covered in Chapter \@ref(eco).
 
 ## Conclusions

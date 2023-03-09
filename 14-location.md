@@ -360,6 +360,9 @@ The result of the subsequent code chunk is therefore an estimate of shop density
 `st_transform()`\index{sf!st\_transform} is used before `rasterize()`\index{raster!rasterize} to ensure the CRS\index{CRS} of both inputs match.
 
 
+
+
+
 ```r
 shops = sf::st_transform(shops, st_crs(reclass))
 # create poi raster

@@ -276,6 +276,10 @@ ch_raster1 = rasterize(cycle_hire_osm_projected, raster_template)
 The `fun` argument specifies summary statistics used to convert multiple observations in close proximity into associate cells in the raster object.
 By default `fun = "last"` is used but other options such as `fun = "length"` can be used, in this case to count the number of cycle hire points in each grid cell (the results of this operation are illustrated in Figure \@ref(fig:vector-rasterization1)(C)).
 
+<!-- # toDo: jn clean in the future -->
+
+
+
 
 ```r
 ch_raster2 = rasterize(cycle_hire_osm_projected, raster_template, 
@@ -313,6 +317,9 @@ raster_template2 = rast(ext(california), resolution = 0.5,
 When considering line or polygon rasterization, one useful additional argument is `touches`.
 By default it is `FALSE`, but when changed to `TRUE` -- all cells that are touched by a line or polygon border get a value.
 Line rasterization with `touches = TRUE` is demonstrated in the code below (Figure \@ref(fig:vector-rasterization2)(A)).
+<!-- # toDo: jn clean in the future -->
+
+
 
 
 ```r
@@ -321,6 +328,9 @@ california_raster1 = rasterize(california_borders, raster_template2,
 ```
 
 Compare it to a polygon rasterization, with `touches = FALSE` by default, which selects only raster cells whose centroids are inside the selector polygon, as illustrated in Figure \@ref(fig:vector-rasterization2)(B).
+
+<!-- # toDo: jn clean in the future -->
+
 
 
 ```r
