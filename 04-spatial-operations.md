@@ -12,14 +12,6 @@ library(dplyr)
 library(spData)
 ```
 
-- You also need to read in a couple of datasets as follows for Section \@ref(spatial-ras):
-
-
-```r
-elev = rast(system.file("raster/elev.tif", package = "spData"))
-grain = rast(system.file("raster/grain.tif", package = "spData"))
-```
-
 ## Introduction
 
 Spatial operations, including spatial joins between vector datasets and local and focal operations on raster datasets, are a vital part of geocomputation\index{geocomputation}.
@@ -132,9 +124,6 @@ The same result can be achieved with the **sf** function `st_filter()` which was
 canterbury_height3 = nz_height |>
   st_filter(y = canterbury, .predicate = st_intersects)
 ```
-
-<!--toDo:jn-->
-<!-- fix pipes -->
 
 
 
@@ -317,7 +306,7 @@ This is the same as the result obtained from the function `st_relate()` (see the
 
 ```r
 xy2sfc = function(x, y) st_sfc(st_polygon(list(cbind(x, y))))
-x = xy2sfc(x = c(0, 0, 1, 1,   0), y = c(0, 1, 1, 0.5, 0))
+x = xy2sfc(x = c(0, 0, 1, 1, 0), y = c(0, 1, 1, 0.5, 0))
 y = xy2sfc(x = c(0.7, 0.7, 0.9, 0.7), y = c(0.8, 0.5, 0.5, 0.8))
 st_relate(x, y)
 #>      [,1]       
@@ -352,7 +341,6 @@ plot(grid, col = grid_sf$rooks)
 <p class="caption">(\#fig:queens)Demonstration of custom binary spatial predicates for finding 'queen' (left) and 'rook' (right) relations to the central square in a grid with 9 geometries.</p>
 </div>
 
-
 <!-- Another of a custom binary spatial predicate is 'overlapping lines' which detects lines that overlap for some or all of another line's geometry. -->
 <!-- This can be implemented as follows, with the pattern signifying that the intersection between the two line interiors must be a line: -->
 
@@ -381,8 +369,7 @@ random_df = data.frame(
   y = runif(n = 10, min = bb[2], max = bb[4])
 )
 random_points = random_df |> 
-  st_as_sf(coords = c("x", "y")) |> # set coordinates
-  st_set_crs("EPSG:4326") # set geographic CRS
+  st_as_sf(coords = c("x", "y"), crs = "EPSG:4326") # set coordinates and CRS
 ```
 
 The scenario illustrated in Figure \@ref(fig:spatial-join) shows that the `random_points` object (top left) lacks attribute data, while the `world` (top right) has attributes, including country names shown for a sample of countries in the legend.
@@ -456,7 +443,6 @@ summary(lengths(sel) > 0)
 #>    Mode   FALSE    TRUE 
 #> logical     304     438
 ```
-
 
 
 
@@ -537,7 +523,6 @@ Other functions could be used instead of `mean()` here, including `median()`, `s
 Note: one difference between the `aggregate()` and `group_by() |> summarize()` approaches is that the former results in `NA` values for unmatching region names while the latter preserves region names.
 The 'tidy' approach is thus more flexible in terms of aggregating functions and the column names of the results.
 Aggregating operations that also create new geometries are covered in Section \@ref(geometry-unions).
-
 
 ### Joining incongruent layers {#incongruent}
 
@@ -626,6 +611,12 @@ plot(st_geometry(nz_height)[2:3], add = TRUE)
 This section builds on Section \@ref(manipulating-raster-objects), which highlights various basic methods for manipulating raster datasets, to demonstrate more advanced and explicitly spatial raster operations, and uses the objects `elev` and `grain` manually created in Section \@ref(manipulating-raster-objects).
 For the reader's convenience, these datasets can be also found in the **spData** package.
 
+
+```r
+elev = rast(system.file("raster/elev.tif", package = "spData"))
+grain = rast(system.file("raster/grain.tif", package = "spData"))
+```
+
 ### Spatial subsetting {#spatial-raster-subsetting}
 
 The previous chapter (Section \@ref(manipulating-raster-objects)) demonstrated how to retrieve values associated with specific cell IDs or row and column combinations.
@@ -644,9 +635,6 @@ elev[id]
 terra::extract(elev, matrix(c(0.1, 0.1), ncol = 2))
 ```
 
-<!--jn:toDo-->
-<!-- to update? -->
-<!-- It is convenient that both functions also accept objects of class `Spatial* Objects`. -->
 Raster objects can also be subset with another raster object, as demonstrated in the code chunk below:
 
 
@@ -714,8 +702,7 @@ The next subsection explores these and related operations in more detail.
 
 \index{map algebra}
 The term 'map algebra' was coined in the late 1970s to describe a "set of conventions, capabilities, and techniques" for the analysis of geographic raster *and* (although less prominently) vector data [@tomlin_map_1994].
-<!-- Although the concept never became widely adopted, the term usefully encapsulates and helps classify the range operations that can be undertaken on raster datasets. -->
-In this context, we define map algebra more narrowly, as operations that modify or summarise raster cell values, with reference to surrounding cells, zones, or statistical functions that apply to every cell.
+In this context, we define map algebra more narrowly, as operations that modify or summarize raster cell values, with reference to surrounding cells, zones, or statistical functions that apply to every cell.
 
 Map algebra operations tend to be fast, because raster datasets only implicitly store coordinates, hence the [old adage](https://geozoneblog.wordpress.com/2013/04/19/raster-vs-vector/) "raster is faster but vector is corrector".
 The location of cells in raster datasets can be calculated by using its matrix position and the resolution and origin of the dataset (stored in the header).
