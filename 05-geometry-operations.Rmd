@@ -772,6 +772,7 @@ origin(elev_4) = c(0.25, 0.25)
 ```{r origin-example, fig.cap="Rasters with identical values but different origins.", echo=FALSE}
 elev_poly = st_as_sf(as.polygons(elev, dissolve = FALSE))
 elev4_poly = st_as_sf(as.polygons(elev_4, dissolve = FALSE))
+
 tm_shape(elev4_poly) +
   tm_grid() +
   tm_polygons(col = "elev") +
@@ -779,6 +780,16 @@ tm_shape(elev4_poly) +
   tm_polygons(col = "elev") +
   tm_layout(frame = FALSE, legend.show = FALSE,
             inner.margins = c(0.1, 0.12, 0, 0))
+
+if (packageVersion("tmap") >= "4.0"){
+  tm_shape(elev4_poly) +
+  tm_grid() +
+  tm_polygons(fill = "elev") +
+  tm_shape(elev_poly) +
+  tm_polygons(fill = "elev") +
+  tm_layout(frame = FALSE, legend.show = FALSE,
+            inner.margins = c(0.1, 0.12, 0, 0))
+}
 # # See https://github.com/geocompx/geocompr/issues/695
 # knitr::include_graphics("https://user-images.githubusercontent.com/1825120/146618199-786fe3ad-9718-4dd0-a640-41180fc17e63.png")
 ```
@@ -811,6 +822,18 @@ p_ar2 = tm_shape(dem_agg) +
   tm_raster(style = "cont", legend.show = FALSE) +
   tm_layout(main.title = "B. Aggregated", frame = FALSE)
 tmap_arrange(p_ar1, p_ar2, ncol = 2)
+
+if (packageVersion("tmap") >= "4.0"){
+  p_ar1 = tm_shape(dem) +
+    tm_raster(col.scale = tm_scale_continuous()) +
+    tm_title("A. Original") + 
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  p_ar2 = tm_shape(dem_agg) +
+    tm_raster(col.scale = tm_scale_continuous()) +
+    tm_title("B. Aggregated") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tmap_arrange(p_ar1, p_ar2, ncol = 2)
+}
 ```
 
 \index{raster!disaggregation}
@@ -861,6 +884,26 @@ tm3 = tm_shape(dem) +
   tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
   tm_layout(frame = FALSE, main.title = "Resampled raster")
 tmap_arrange(tm1, tm2, tm3, nrow = 1)
+
+if (packageVersion("tmap") >= "4.0"){
+  tm1 = tm_shape(dem) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("Original raster") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tm2 = tm_shape(dem) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("Target raster") +
+    tm_layout(frame = FALSE, legend.show = FALSE) +
+    tm_shape(target_rast_p) +
+    tm_borders()
+  tm3 = tm_shape(dem) +
+    tm_raster(col_alpha = 0) +
+    tm_shape(dem_resampl1) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("Resampled raster") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tmap_arrange(tm1, tm2, tm3, nrow = 1)
+}
 ```
 
 \index{raster!resampling}
@@ -925,6 +968,35 @@ tm6 = tm_shape(dem_resampl5) +
   tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
   tm_layout(frame = FALSE, main.title = "lanczos")
 tmap_arrange(tm1, tm2, tm3, tm4, tm5, tm6)
+
+if (packageVersion("tmap") >= "4.0"){
+  library(tmap)
+  tm1 = tm_shape(dem) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("Original raster") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tm2 = tm_shape(dem_resampl1) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("near") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tm3 = tm_shape(dem_resampl2) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("bilinear") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tm4 = tm_shape(dem_resampl3) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("cubic") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tm5 = tm_shape(dem_resampl4) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("cubicspline") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tm6 = tm_shape(dem_resampl5) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("lanczos") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tmap_arrange(tm1, tm2, tm3, tm4, tm5, tm6)
+}
 ```
 
 The `resample()` function also has some additional resampling methods, including `sum`, `min`, `q1`, `med`, `q3`, `max`, `average`, `mode`, and `rms`.
