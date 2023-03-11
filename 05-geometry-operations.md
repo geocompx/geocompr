@@ -313,6 +313,8 @@ text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3) # add text
 <p class="caption">(\#fig:points)Overlapping circles.</p>
 </div>
 
+
+
 Imagine you want to select not one circle or the other, but the space covered by both `x` *and* `y`.
 This can be done using the function `st_intersection()`\index{vector!intersection}, illustrated using objects named `x` and `y` which represent the left- and right-hand circles (Figure \@ref(fig:circle-intersection)).
 
@@ -330,6 +332,8 @@ plot(x_and_y, col = "lightgrey", border = "grey", add = TRUE) # intersecting are
 <p class="caption">(\#fig:circle-intersection)Overlapping circles with a gray color indicating intersection between them.</p>
 </div>
 
+
+
 The subsequent code chunk demonstrates how this works for all combinations of the 'Venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book *R for Data Science* [@grolemund_r_2016].
 
 <div class="figure" style="text-align: center">
@@ -346,10 +350,27 @@ To illustrate this point, we will subset points that cover the bounding box of t
 Some points will be inside just one circle, some will be inside both and some will be inside neither.
 `st_sample()` is used below to generate a *simple random* distribution of points within the extent of circles `x` and `y`, resulting in output illustrated in Figure \@ref(fig:venn-subset), raising the question: how to subset the points to only return the point that intersects with *both* `x` and `y`?
 
+
+```r
+bb = st_bbox(st_union(x, y))
+box = st_as_sfc(bb)
+set.seed(2017)
+p = st_sample(x = box, size = 10)
+p_xy1 = p[x_and_y]
+plot(box, border = "grey", lty = 2)
+plot(x, add = TRUE, border = "grey")
+plot(y, add = TRUE, border = "grey")
+plot(p, add = TRUE)
+plot(p_xy1, cex = 3, col = "red", add = TRUE)
+text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 2)
+```
+
 <div class="figure" style="text-align: center">
 <img src="05-geometry-operations_files/figure-html/venn-subset-1.png" alt="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted." width="100%" />
 <p class="caption">(\#fig:venn-subset)Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted.</p>
 </div>
+
+
 
 
 ```r
