@@ -19,3 +19,18 @@ tm1 = tm_shape(srtm) +
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
 
 tm1
+
+if (packageVersion("tmap") >= "4.0"){
+  tm1 = tm_shape(srtm) +
+    tm_raster(col.scale = tm_scale_continuous(values = terrain_colors),
+              col.legend = tm_legend("Elevation (m)")) + 
+    tm_shape(zion) +
+    tm_borders(lwd = 2) + 
+    tm_shape(zion_points) + 
+    tm_dots(col = "black", size = 0.1) + 
+    tm_add_legend(type = "symbol", col = "black", size = 0.2,
+                  labels = "zion_points") + 
+    tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
+  
+  tm1
+}
