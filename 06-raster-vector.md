@@ -333,6 +333,7 @@ Compare it to a polygon rasterization, with `touches = FALSE` by default, which 
 
 
 
+
 ```r
 california_raster2 = rasterize(california, raster_template2) 
 ```

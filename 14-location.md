@@ -362,7 +362,6 @@ The result of the subsequent code chunk is therefore an estimate of shop density
 
 
 
-
 ```r
 shops = sf::st_transform(shops, st_crs(reclass))
 # create poi raster

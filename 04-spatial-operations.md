@@ -249,7 +249,6 @@ st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
 
 
 
-
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Functions for calculating topological relations use spatial indices to largely speed up spatial query performance.
 They achieve that using the Sort-Tile-Recursive (STR) algorithm.
 The `st_join` function, mentioned in the next section, also uses the spatial indexing. 
