@@ -831,7 +831,6 @@ world_wintri = st_transform(world, crs = "+proj=wintri")
 
 
 
-
 <div class="figure" style="text-align: center">
 <img src="07-reproj_files/figure-html/wintriproj-1.png" alt="Winkel tripel projection of the world." width="100%" />
 <p class="caption">(\#fig:wintriproj)Winkel tripel projection of the world.</p>
