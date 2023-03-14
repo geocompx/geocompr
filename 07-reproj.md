@@ -276,7 +276,6 @@ GEOS is always used for projected data and data with no CRS; for geographic data
 <p class="caption">(\#fig:s2geos)The behavior of the geometry operations in the sf package depending on the input data's CRS.</p>
 </div>
 
-
 To demonstrate the importance of CRSs, we will create buffer of 100 km around the `london` object from the previous section.
 We will also create a deliberately faulty buffer with a 'distance' of 1 degree, which is roughly equivalent to 100 km (1 degree is about 111 km at the equator).
 Before diving into the code, it may be worth skipping briefly ahead to peek at Figure \@ref(fig:crs-buf) to get a visual handle on the outputs that you should be able to reproduce by following the code chunks below.
@@ -286,8 +285,8 @@ The first stage is to create three buffers around the `london` and `london_geo` 
 
 ```r
 london_buff_no_crs = st_buffer(london, dist = 1)   # incorrect: no CRS
-london_buff_s2 = st_buffer(london_geo, dist = 1e5) # silent use of s2
-london_buff_s2_100_cells = st_buffer(london_geo, dist = 1e5, max_cells = 100) 
+london_buff_s2 = st_buffer(london_geo, dist = 100000) # silent use of s2
+london_buff_s2_100_cells = st_buffer(london_geo, dist = 100000, max_cells = 100) 
 ```
 
 In the first line above, **sf** assumes that the input is projected and generates a result that has a buffer in units of degrees, which is problematic, as we will see.
@@ -327,7 +326,7 @@ This is done in the code chunk below:
 
 ```r
 london_proj = data.frame(x = 530000, y = 180000) |> 
-  st_as_sf(coords = 1:2, crs = "EPSG:27700")
+  st_as_sf(coords = c("x", "y"), crs = "EPSG:27700")
 ```
 
 The result is a new object that is identical to `london`, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters.
@@ -358,7 +357,7 @@ The following line of code creates a buffer around *projected* data of exactly 1
 
 
 ```r
-london_buff_projected = st_buffer(london_proj, 1e5)
+london_buff_projected = st_buffer(london_proj, 100000)
 ```
 
 The geometries of the three `london_buff*` objects that *have* a specified CRS created above (`london_buff_s2`, `london_buff_lonlat` and `london_buff_projected`) created in the preceding code chunks are illustrated in Figure \@ref(fig:crs-buf).
@@ -397,10 +396,7 @@ There are no clear-cut answers to these questions and CRS selection always invol
 However, there are some general principles provided in this section that can help you decide. 
 
 First it's worth considering *when to transform*.
-<!--toDo:rl-->
-<!--not longer valid-->
-In some cases transformation to a projected CRS is essential, such as when using geometric functions such as `st_buffer()`, as Figure \@ref(fig:crs-buf) showed.
-Conversely, publishing data online with the **leaflet** package may require a geographic CRS.
+In some cases transformation to a geographic CRS is essential, such as when publishing data online with the **leaflet** package.
 Another case is when two objects with different CRSs must be compared or combined, as shown when we try to find the distance between two objects with different CRSs:
 
 

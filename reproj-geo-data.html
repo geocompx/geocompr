@@ -32,7 +32,7 @@
 <script src="libs/htmlwidgets-1.6.1/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
 <script src="libs/leaflet-1.3.1/leaflet.js"></script><link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
 <script src="libs/proj4-2.6.2/proj4.min.js"></script><script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script><link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
-<script src="libs/leaflet-binding-2.1.1/leaflet.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+<script src="libs/leaflet-binding-2.1.2/leaflet.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
 <script>
@@ -344,8 +344,8 @@ Before diving into the code, it may be worth skipping briefly ahead to peek at F
 <p>The first stage is to create three buffers around the <code>london</code> and <code>london_geo</code> objects created above with boundary distances of 1 degree and 100 km (or 100,000 m, which can be expressed as <code>1e5</code> in scientific notation) from central London:</p>
 <div class="sourceCode" id="cb233"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">london_buff_no_crs</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london</span>, dist <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>   <span class="co"># incorrect: no CRS</span></span>
-<span><span class="va">london_buff_s2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_geo</span>, dist <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span> <span class="co"># silent use of s2</span></span>
-<span><span class="va">london_buff_s2_100_cells</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_geo</span>, dist <span class="op">=</span> <span class="fl">1e5</span>, max_cells <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> </span></code></pre></div>
+<span><span class="va">london_buff_s2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_geo</span>, dist <span class="op">=</span> <span class="fl">100000</span><span class="op">)</span> <span class="co"># silent use of s2</span></span>
+<span><span class="va">london_buff_s2_100_cells</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_geo</span>, dist <span class="op">=</span> <span class="fl">100000</span>, max_cells <span class="op">=</span> <span class="fl">100</span><span class="op">)</span> </span></code></pre></div>
 <p>In the first line above, <strong>sf</strong> assumes that the input is projected and generates a result that has a buffer in units of degrees, which is problematic, as we will see.
 In the second line, <strong>sf</strong> silently uses the spherical geometry engine S2, introduced in Chapter <a href="spatial-class.html#spatial-class">2</a>, to calculate the extent of the buffer using the default value of <code>max_cells = 1000</code> — set to <code>100</code> in line three — the consequences which will become apparent shortly (see <code><a href="https://r-spatial.github.io/s2/reference/s2_boundary.html">?s2::s2_buffer_cells</a></code> for details).
 To highlight the impact of <strong>sf</strong>’s use of the S2 geometry engine for unprojected (geographic) coordinate systems, we will temporarily disable it with the command <code><a href="https://r-spatial.github.io/sf/reference/s2.html">sf_use_s2()</a></code> (which is on, <code>TRUE</code>, by default), in the code chunk below.
@@ -378,7 +378,7 @@ But for operations involving distances such as buffering, the only way to ensure
 This is done in the code chunk below:</p>
 <div class="sourceCode" id="cb235"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">london_proj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">530000</span>, y <span class="op">=</span> <span class="fl">180000</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, crs <span class="op">=</span> <span class="st">"EPSG:27700"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span>coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span>, crs <span class="op">=</span> <span class="st">"EPSG:27700"</span><span class="op">)</span></span></code></pre></div>
 <p>The result is a new object that is identical to <code>london</code>, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters.
 We can verify that the CRS has changed using <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code> as follows (some of the output has been replaced by <code>...</code>):</p>
 <div class="sourceCode" id="cb236"><pre class="downlit sourceCode r">
@@ -400,7 +400,7 @@ The fact that the units of the CRS, described in the LENGTHUNIT field, are meter
 Buffers operations on the <code>london_proj</code> will use GEOS and results will returned with proper units of distance.
 The following line of code creates a buffer around <em>projected</em> data of exactly 100 km:</p>
 <div class="sourceCode" id="cb237"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">london_buff_projected</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_proj</span>, <span class="fl">1e5</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">london_buff_projected</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">london_proj</span>, <span class="fl">100000</span><span class="op">)</span></span></code></pre></div>
 <p>The geometries of the three <code>london_buff*</code> objects that <em>have</em> a specified CRS created above (<code>london_buff_s2</code>, <code>london_buff_lonlat</code> and <code>london_buff_projected</code>) created in the preceding code chunks are illustrated in Figure <a href="reproj-geo-data.html#fig:crs-buf">7.2</a>.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:crs-buf"></span>
@@ -435,10 +435,7 @@ And into which CRS?
 There are no clear-cut answers to these questions and CRS selection always involves trade-offs <span class="citation">(<a href="references.html#ref-maling_coordinate_1992" role="doc-biblioref">Maling 1992</a>)</span>.
 However, there are some general principles provided in this section that can help you decide.</p>
 <p>First it’s worth considering <em>when to transform</em>.
-<!--toDo:rl-->
-<!--not longer valid-->
-In some cases transformation to a projected CRS is essential, such as when using geometric functions such as <code><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer()</a></code>, as Figure <a href="reproj-geo-data.html#fig:crs-buf">7.2</a> showed.
-Conversely, publishing data online with the <strong>leaflet</strong> package may require a geographic CRS.
+In some cases transformation to a geographic CRS is essential, such as when publishing data online with the <strong>leaflet</strong> package.
 Another case is when two objects with different CRSs must be compared or combined, as shown when we try to find the distance between two objects with different CRSs:</p>
 <div class="sourceCode" id="cb238"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">london_geo</span>, <span class="va">london_proj</span><span class="op">)</span></span>
@@ -917,7 +914,7 @@ How does it influence the results?</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-03-13.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-03-14.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
