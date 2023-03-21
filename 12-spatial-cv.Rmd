@@ -104,6 +104,22 @@ The 175 non-landslide points were sampled randomly from the study area, with the
 #   tm_legend(bg.color = "white")
 # tmap::tmap_save(map, filename = "figures/lsl-map-1.png", width = 11,
 #                 height = 11, units = "cm")
+# 
+# if (packageVersion("tmap") >= "4.0"){
+#   map = tm_shape(hs, bbox = bbx) +
+#     tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
+#             labels.rot = c(0, 90), lines = FALSE) +
+#     tm_raster(col.scale = tm_scale(values = gray(0:100 / 100), n = 100), col.legend = tm_legend_hide()) +
+#     tm_shape(ta$elev) +
+#     tm_raster(col_alpha = 0.6, col.scale = tm_scale(values = hcl.colors(25, "Geyser")), col.legend = tm_legend_hide()) +
+#     tm_shape(lsl_sf) +
+#     tm_symbols(fill = "lslpts", size = 0.5, col = "white",
+#                fill.scale = tm_scale(values = c("#0071A6", "#C73000")), fill.legend = tm_legend(title = "Landslide: ")) +
+#     tm_layout(inner.margins = rep(0, 4), legend.bg.color = "white", legend.position = tm_pos_in())
+#   tmap::tmap_save(map, filename = "figures/lsl-map-1.png", width = 11,
+#                 height = 11, units = "cm")
+# }
+
 knitr::include_graphics("figures/lsl-map-1.png")
 ```
 \index{hillshade}
@@ -121,7 +137,7 @@ knitr::kable(lsl_table[c(1, 2, 350), ], caption = "Structure of the lsl dataset.
 To model landslide susceptibility, we need some predictors.
 Since terrain attributes are frequently associated with landsliding [@muenchow_geomorphic_2012], we have already extracted following terrain attributes from `ta` to `lsl`:
 
-- `slope`:  slope angle (°)
+- `slope`: slope angle (°)
 - `cplan`: plan curvature (rad m^−1^) expressing the convergence or divergence of a slope and thus water flow
 - `cprof`: profile curvature (rad m^-1^) as a measure of flow acceleration, also known as downslope change in slope angle
 - `elev`: elevation (m a.s.l.) as the representation of different altitudinal zones of vegetation and precipitation in the study area
@@ -204,6 +220,24 @@ pred = terra::predict(ta, model = fit, type = "response")
 # 	          inner.margins = 0)
 # tmap::tmap_save(map, filename = "figures/lsl-susc-1.png", width = 11,
 #                 height = 11, units = "cm")
+# 
+# if (packageVersion("tmap") >= "4.0"){
+#   tm_shape(hs, bbox = bbx) +
+#     tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
+#             labels.rot = c(0, 90), lines = FALSE) +
+#     tm_raster(col.scale = tm_scale(values = "white"), col.legend = tm_legend_hide()) +
+#     tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
+#   	tm_raster(col.scale = tm_scale(values = gray(0:100 / 100), n = 100), col.legend = tm_legend_hide()) +
+#     tm_shape(terra::mask(pred, study_mask)) +
+#   	tm_raster(col_alpha = 0.5, col.scale = tm_scale(values = "Reds", n = 6),
+#   	          col.legend = tm_legend(title = "Susceptibility")) +
+#   	tm_layout(legend.position = c("left", "bottom"),
+#   	          legend.title.size = 0.9,
+#   	          inner.margins = rep(0, 4))
+#   tmap::tmap_save(map, filename = "figures/lsl-susc-1.png", width = 11,
+#                 height = 11, units = "cm")
+# }
+
 knitr::include_graphics("figures/lsl-susc-1.png")
 ```
 
