@@ -15,7 +15,7 @@ library(terra)
 
 
 ```r
-# remotes::install_github("paleolimbot/qgisprocess")
+# remotes::install_github("r-spatial/qgisprocess")
 library(qgisprocess)
 library(Rsagacmd)
 library(rgrass)

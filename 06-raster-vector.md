@@ -215,7 +215,7 @@ zion_nlcd |>
 #> 2     1 Barren     98285
 #> 3     1 Forest    298299
 #> 4     1 Shrubland 203701
-#> # … with 3 more rows
+#> # ℹ 3 more rows
 ```
 
 <div class="figure" style="text-align: center">
