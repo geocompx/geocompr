@@ -269,7 +269,6 @@ GEOS is always used for projected data and data with no CRS; for geographic data
 knitr::include_graphics("figures/07-s2geos.png")
 ```
 
-
 To demonstrate the importance of CRSs, we will create buffer of 100 km around the `london` object from the previous section.
 We will also create a deliberately faulty buffer with a 'distance' of 1 degree, which is roughly equivalent to 100 km (1 degree is about 111 km at the equator).
 Before diving into the code, it may be worth skipping briefly ahead to peek at Figure \@ref(fig:crs-buf) to get a visual handle on the outputs that you should be able to reproduce by following the code chunks below.
@@ -278,8 +277,8 @@ The first stage is to create three buffers around the `london` and `london_geo` 
 
 ```{r 06-reproj-4-1}
 london_buff_no_crs = st_buffer(london, dist = 1)   # incorrect: no CRS
-london_buff_s2 = st_buffer(london_geo, dist = 1e5) # silent use of s2
-london_buff_s2_100_cells = st_buffer(london_geo, dist = 1e5, max_cells = 100) 
+london_buff_s2 = st_buffer(london_geo, dist = 100000) # silent use of s2
+london_buff_s2_100_cells = st_buffer(london_geo, dist = 100000, max_cells = 100) 
 ```
 
 In the first line above, **sf** assumes that the input is projected and generates a result that has a buffer in units of degrees, which is problematic, as we will see.
@@ -314,7 +313,7 @@ This is done in the code chunk below:
 
 ```{r 06-reproj-6}
 london_proj = data.frame(x = 530000, y = 180000) |> 
-  st_as_sf(coords = 1:2, crs = "EPSG:27700")
+  st_as_sf(coords = c("x", "y"), crs = "EPSG:27700")
 ```
 
 The result is a new object that is identical to `london`, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters.
@@ -343,7 +342,7 @@ Buffers operations on the `london_proj` will use GEOS and results will returned 
 The following line of code creates a buffer around *projected* data of exactly 100 km:
 
 ```{r 06-reproj-8}
-london_buff_projected = st_buffer(london_proj, 1e5)
+london_buff_projected = st_buffer(london_proj, 100000)
 ```
 
 The geometries of the three `london_buff*` objects that *have* a specified CRS created above (`london_buff_s2`, `london_buff_lonlat` and `london_buff_projected`) created in the preceding code chunks are illustrated in Figure \@ref(fig:crs-buf).
@@ -366,8 +365,8 @@ plot(st_geometry(uk), add = TRUE, border = "gray", lwd = 3)
 ```
 
 ```{r crs-buf, fig.cap="Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot illustrates the result of buffering unprojected data with sf, which calls Google's S2 spherical geometry engine by default with max cells set to 1000 (thin line). The thick 'blocky' line illustrates the result of the same operation with max cells set to 100.", fig.scap="Buffers around London with a geographic and projected CRS.", echo=FALSE, fig.asp=0.39, fig.width = 8}
-uk = rnaturalearth::ne_countries(scale = 50) %>% 
-  st_as_sf() %>% 
+uk = rnaturalearth::ne_countries(scale = 50) |> 
+  st_as_sf() |> 
   filter(grepl(pattern = "United Kingdom|Ire", x = name_long))
 library(tmap)
 tm1 = tm_shape(london_buff_s2, bbox = st_bbox(london_buff_s2_100_cells)) + 
@@ -397,6 +396,37 @@ tm3 = tm_shape(london_buff_lonlat, bbox = st_bbox(london_buff_s2_100_cells)) +
   tm_symbols()
 
 tmap_arrange(tm1, tm2, tm3, nrow = 1)
+
+if (packageVersion("tmap") >= "4.0"){
+  library(tmap)
+  tm1 = tm_shape(london_buff_s2, bbox = st_bbox(london_buff_s2_100_cells)) + 
+    tm_graticules(lwd = 0.2) +
+    tm_borders(col = "black", lwd = 0.5) + 
+    tm_shape(london_buff_s2_100_cells) +
+    tm_borders(col = "black", lwd = 1.5) +
+    tm_shape(uk) +
+    tm_polygons(lty = 3, fill_alpha = 0.2, fill = "#567D46") +
+    tm_shape(london_proj) +
+    tm_symbols()
+  
+  tm2 = tm_shape(london_buff_projected, bbox = st_bbox(london_buff_s2_100_cells)) + 
+    tm_grid(lwd = 0.2) +
+    tm_borders(col = "black", lwd = 0.5) + 
+    tm_shape(uk) +
+    tm_polygons(lty = 3, fill_alpha = 0.2, fill = "#567D46") +
+    tm_shape(london_proj) +
+    tm_symbols()
+  
+  tm3 = tm_shape(london_buff_lonlat, bbox = st_bbox(london_buff_s2_100_cells)) + 
+    tm_graticules(lwd = 0.2) +
+    tm_borders(col = "black", lwd = 0.5) + 
+    tm_shape(uk) +
+    tm_polygons(lty = 3, fill_alpha = 0.2, fill = "#567D46") +
+    tm_shape(london_proj) +
+    tm_symbols()
+  
+  tmap_arrange(tm1, tm2, tm3, nrow = 1)
+}
 ```
 
 It is clear from Figure \@ref(fig:crs-buf) that buffers based on `s2` and properly projected CRSs are not 'squashed', meaning that every part of the buffer boundary is equidistant to London.
@@ -426,10 +456,7 @@ There are no clear-cut answers to these questions and CRS selection always invol
 However, there are some general principles provided in this section that can help you decide. 
 
 First it's worth considering *when to transform*.
-<!--toDo:rl-->
-<!--not longer valid-->
-In some cases transformation to a projected CRS is essential, such as when using geometric functions such as `st_buffer()`, as Figure \@ref(fig:crs-buf) showed.
-Conversely, publishing data online with the **leaflet** package may require a geographic CRS.
+In some cases transformation to a geographic CRS is essential, such as when publishing data online with the **leaflet** package.
 Another case is when two objects with different CRSs must be compared or combined, as shown when we try to find the distance between two objects with different CRSs:
 
 ```{r 06-reproj-9, eval=FALSE}
@@ -877,7 +904,6 @@ world_tpers_complete = world_tpers[st_is_valid(world_tpers), ]
 world_tpers_complete = world_tpers_complete[!st_is_empty(world_tpers_complete), ] 
 plot(world_tpers_complete["pop"]) 
 ```
-
 
 ```{r wintriproj, fig.cap="Winkel tripel projection of the world.", echo=FALSE}
 world_wintri_gr = st_graticule(lat = c(-89.9, seq(-80, 80, 20), 89.9)) |>

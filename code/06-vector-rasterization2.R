@@ -35,3 +35,25 @@ r2po = tm_shape(california_raster2) +
             legend.show = FALSE, frame = FALSE)
 
 tmap_arrange(r1po, r2po, ncol = 2)
+
+if (packageVersion("tmap") >= "4.0"){
+  r1po = tm_shape(california_raster1) + 
+    tm_raster(col.legend = tm_legend("Values: "),
+              col.scale = tm_scale(values = "#b6d8fc")) + 
+    tm_shape(california_raster_centr) +
+    tm_symbols(shape = 20, col = "black", size = 0.2) + 
+    tm_shape(california) + tm_borders() + 
+    tm_title("A. Line rasterization") + 
+    tm_layout(legend.show = FALSE, frame = FALSE)
+  
+  r2po = tm_shape(california_raster2) +
+    tm_raster(col.legend = tm_legend("Values: "),
+              col.scale = tm_scale(values = "#b6d8fc")) + 
+    tm_shape(california_raster_centr) + 
+    tm_symbols(shape = 20, col = "black", size = 0.2) + 
+    tm_shape(california) + tm_borders() + 
+    tm_title("B. Polygon rasterization")  + 
+    tm_layout(legend.show = FALSE, frame = FALSE)
+  
+  tmap_arrange(r1po, r2po, ncol = 2)
+}

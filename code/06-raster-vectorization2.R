@@ -26,3 +26,24 @@ p3p = tm_shape(grain_poly2) +
 
 tmap_arrange(p1p, p2p, p3p, ncol = 3)
 
+# toDo: jn
+# fix colors in panel A
+
+if (packageVersion("tmap") >= "4.0"){
+  p1p = tm_shape(grain) +
+    tm_raster("grain", col.scale = tm_scale(palette = cols)) +
+    tm_title("A. Raster") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  
+  p2p = tm_shape(grain_poly) +
+    tm_polygons("grain", col.scale = tm_scale(palette = cols), lwd = 3) +
+    tm_title("B.Polygons") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  
+  p3p = tm_shape(grain_poly2) + 
+    tm_polygons("grain", col.scale = tm_scale(palette = cols), lwd = 3)  +
+    tm_title("C. Aggregated polygons") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  
+  tmap_arrange(p1p, p2p, p3p, ncol = 3)
+}

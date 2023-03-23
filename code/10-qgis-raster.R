@@ -71,5 +71,11 @@ tm2 = tm_shape(dem_hillshade) +
             main.title.position = "right") 
 
 qgis_raster_map = tmap_arrange(tm1, tm2, nrow = 1)
+
+
+# toDO: jn
+if (packageVersion("tmap") >= "4.0"){
+}
+
 tmap_save(qgis_raster_map, "figures/10-qgis-raster-map.png",
           width = 20, height = 9, units = "cm")

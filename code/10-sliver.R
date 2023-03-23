@@ -36,6 +36,22 @@ tm2 = tm_shape(clean_sf) +
 
 sc_maps = tmap_arrange(tm1, tm2, nrow = 1)
 
+if (packageVersion("tmap") >= "4.0"){
+  tm1 = tm_shape(union_sf) +
+    tm_polygons(fill_alpha = 0.2, lwd = 0.2) +
+    tm_shape(sub) +
+    tm_fill(fill = "#C51111") +
+    tm_title("Sliver polygons included")
+  
+  tm2 = tm_shape(clean_sf) +
+    tm_polygons(fill_alpha = 0.2, lwd = 0.2) +
+    tm_title("Sliver polygons cleaned")
+  
+  sc_maps = tmap_arrange(tm1, tm2, nrow = 1)
+}
+
 # save the output
 tmap_save(sc_maps, "figures/10-sliver.png",
           width = 12, height = 5, units = "cm")
+
+

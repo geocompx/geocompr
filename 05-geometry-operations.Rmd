@@ -60,6 +60,15 @@ p_simp1 = tm_shape(seine) + tm_lines() +
 p_simp2 = tm_shape(seine_simp) + tm_lines() +
   tm_layout(main.title = "st_simplify")
 tmap_arrange(p_simp1, p_simp2, ncol = 2)
+
+if (packageVersion("tmap") >= "4.0"){
+  library(tmap)
+  p_simp1 = tm_shape(seine) + tm_lines() +
+    tm_title("Original data")
+  p_simp2 = tm_shape(seine_simp) + tm_lines() +
+    tm_title("st_simplify")
+  tmap_arrange(p_simp1, p_simp2, ncol = 2)
+}
 ```
 
 The resulting `seine_simp` object is a copy of the original `seine` but with fewer vertices.
@@ -127,6 +136,16 @@ p_ussimp2 = tm_shape(us_states_simp1) + tm_polygons() + tm_layout(main.title = "
 p_ussimp3 = tm_shape(us_states_simp2) + tm_polygons() + tm_layout(main.title = "ms_simplify")
 p_ussimp4 = tm_shape(us_states_simp3) + tm_polygons() + tm_layout(main.title = 'smooth(method = "ksmooth")')
 tmap_arrange(p_ussimp1, p_ussimp2, p_ussimp3, p_ussimp4, ncol = 2, nrow = 2)
+
+if (packageVersion("tmap") >= "4.0") {
+  library(tmap)
+  p_ussimp1 = tm_shape(us_states2163) + tm_polygons() + tm_title("Original data")
+  p_ussimp2 = tm_shape(us_states_simp1) + tm_polygons() + tm_title("st_simplify")
+  p_ussimp3 = tm_shape(us_states_simp2) + tm_polygons() + tm_title("ms_simplify")
+  p_ussimp4 = tm_shape(us_states_simp3) + tm_polygons() + tm_title('smooth(method = "ksmooth")')
+  tmap_arrange(p_ussimp1, p_ussimp2, p_ussimp3, p_ussimp4,
+               ncol = 2, nrow = 2)
+}
 ```
 
 ### Centroids
@@ -197,6 +216,18 @@ p_buffs2 = tm_shape(seine_buff_50km) + tm_polygons(col = "name") +
   tm_shape(seine) + tm_lines() +
   tm_layout(main.title = "50 km buffer", legend.show = FALSE)
 tmap_arrange(p_buffs1, p_buffs2, ncol = 2)
+
+if (packageVersion("tmap") >= "4.0"){
+  p_buffs1 = tm_shape(seine_buff_5km) + tm_polygons(fill =   "name") +
+    tm_shape(seine) + tm_lines() +
+    tm_title("5 km buffer") +
+    tm_layout(legend.show = FALSE)
+  p_buffs2 = tm_shape(seine_buff_50km) + tm_polygons(fill =   "name") +
+    tm_shape(seine) + tm_lines() +
+    tm_title("50 km buffer") +
+    tm_layout(legend.show = FALSE)
+  tmap_arrange(p_buffs1, p_buffs2, ncol = 2)  
+}
 ```
 
 ```{block2 05-geometry-operations-10, type = "rmdnote"}
@@ -301,6 +332,19 @@ p_at3 = tm_shape(nz_sfc) + tm_polygons() +
   tm_shape(nz_rotate) + tm_polygons(col = "red") +
   tm_layout(main.title = "Rotate")
 tmap_arrange(p_at1, p_at2, p_at3, ncol = 3)
+
+if (packageVersion("tmap") >= "4.0"){
+  p_at1 = tm_shape(nz_sfc) + tm_polygons() +
+    tm_shape(nz_shift) + tm_polygons(fill = "red") +
+    tm_title("Shift")
+  p_at2 = tm_shape(nz_sfc) + tm_polygons() +
+    tm_shape(nz_scale) + tm_polygons(fill = "red") +
+    tm_title("Scale")
+  p_at3 = tm_shape(nz_sfc) + tm_polygons() +
+    tm_shape(nz_rotate) + tm_polygons(fill = "red") +
+    tm_title("Rotate")
+  tmap_arrange(p_at1, p_at2, p_at3, ncol = 3)
+}
 ```
 
 ```{r 05-geometry-operations-17, echo=FALSE,eval=FALSE}
@@ -334,22 +378,32 @@ lines, polygons and their 'multi' equivalents.
 To illustrate the concept we will start with a simple example:
 two overlapping circles with a center point one unit away from each other and a radius of one (Figure \@ref(fig:points)).
 
-```{r points, fig.cap="Overlapping circles.", fig.asp=0.4, crop = TRUE}
+```{r points, fig.cap="Overlapping circles.", fig.asp=0.4, crop = TRUE, echo=-1}
+op = par(mar = rep(0, 4))
 b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
 b = st_buffer(b, dist = 1) # convert points to circles
 plot(b, border = "grey")
 text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3) # add text
 ```
 
+```{r, echo=FALSE}
+par(op)
+```
+
 Imagine you want to select not one circle or the other, but the space covered by both `x` *and* `y`.
 This can be done using the function `st_intersection()`\index{vector!intersection}, illustrated using objects named `x` and `y` which represent the left- and right-hand circles (Figure \@ref(fig:circle-intersection)).
 
-```{r circle-intersection, fig.cap="Overlapping circles with a gray color indicating intersection between them.", fig.asp=0.4, fig.scap="Overlapping circles showing intersection types.", crop = TRUE}
+```{r circle-intersection, fig.cap="Overlapping circles with a gray color indicating intersection between them.", fig.asp=0.4, fig.scap="Overlapping circles showing intersection types.", crop = TRUE, echo=-1}
+op = par(mar = rep(0, 4))
 x = b[1]
 y = b[2]
 x_and_y = st_intersection(x, y)
 plot(b, border = "grey")
 plot(x_and_y, col = "lightgrey", border = "grey", add = TRUE) # intersecting area
+```
+
+```{r, echo=FALSE}
+par(op)
 ```
 
 The subsequent code chunk demonstrates how this works for all combinations of the 'Venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book *R for Data Science* [@grolemund_r_2016].
@@ -368,7 +422,8 @@ To illustrate this point, we will subset points that cover the bounding box of t
 Some points will be inside just one circle, some will be inside both and some will be inside neither.
 `st_sample()` is used below to generate a *simple random* distribution of points within the extent of circles `x` and `y`, resulting in output illustrated in Figure \@ref(fig:venn-subset), raising the question: how to subset the points to only return the point that intersects with *both* `x` and `y`?
 
-```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted.", fig.height=6, fig.width=9, fig.scap="Randomly distributed points within the bounding box. Note that only one point intersects with both x and y, highlighted with a red circle.", echo=FALSE}
+```{r venn-subset, fig.cap="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted.", fig.height=6, fig.width=9, fig.scap="Randomly distributed points within the bounding box. Note that only one point intersects with both x and y, highlighted with a red circle.", echo=FALSE, echo=-1}
+op = par(mar = rep(0, 4))
 bb = st_bbox(st_union(x, y))
 box = st_as_sfc(bb)
 set.seed(2017)
@@ -380,6 +435,10 @@ plot(y, add = TRUE, border = "grey")
 plot(p, add = TRUE)
 plot(p_xy1, cex = 3, col = "red", add = TRUE)
 text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 2)
+```
+
+```{r, echo=FALSE}
+par(op)
 ```
 
 ```{r venn-subset-to-show, eval=FALSE}
@@ -412,7 +471,6 @@ identical(p_xy2, p_xy3)
 identical(p_xy1, p_xy3)
 waldo::compare(p_xy1, p_xy2) # the same except attribute names
 waldo::compare(p_xy2, p_xy3) # the same except attribute names
-
 
 # An alternative way to sample from the bb
 bb = st_bbox(st_union(x, y))
@@ -500,6 +558,19 @@ p_sc2 = tm_shape(st_sfc(linestring)) + tm_lines() +
 p_sc3 = tm_shape(st_sfc(polyg)) + tm_polygons(border.col = "black") +
   tm_layout(main.title = "POLYGON")
 tmap_arrange(p_sc1, p_sc2, p_sc3, ncol = 3)
+
+if (packageVersion("tmap") >= "4.0"){
+  p_sc1 = tm_shape(st_sfc(multipoint)) + tm_symbols(shape = 1,
+                                                    col = "black",
+                                                    size = 0.5) +
+    tm_title("MULTIPOINT") +
+    tm_layout(inner.margins = c(0.05, 0.05, 0.05, 0.05))
+  p_sc2 = tm_shape(st_sfc(linestring)) + tm_lines() +
+    tm_title("LINESTRING")
+  p_sc3 = tm_shape(st_sfc(polyg)) + tm_polygons(border.col = "black") +
+    tm_title("POLYGON")
+  tmap_arrange(p_sc1, p_sc2, p_sc3, ncol = 3)  
+}
 ```
 
 Conversion from multipoint to linestring is a common operation that creates a line object from ordered point observations, such as GPS measurements or geotagged media.
@@ -589,6 +660,16 @@ linestring_sf2$name = c("Riddle Rd", "Marshall Ave", "Foulke St")
 p_lc2 = tm_shape(linestring_sf2) + tm_lines(lwd = 3, col = "name", palette = "Set2") +
   tm_layout(main.title = "LINESTRING", legend.show = FALSE)
 tmap_arrange(p_lc1, p_lc2, ncol = 2)
+
+if (packageVersion("tmap") >= "4.0"){
+  p_lc1 = tm_shape(multilinestring_sf) + tm_lines(lwd = 3) +
+    tm_title("MULTILINESTRING")
+  linestring_sf2$name = c("Riddle Rd", "Marshall Ave", "Foulke St")
+  p_lc2 = tm_shape(linestring_sf2) + tm_lines(lwd = 3, col = "name", col.scale = tm_scale(values = "Set2")) +
+    tm_title("LINESTRING") +
+    tm_layout(legend.show = FALSE)
+  tmap_arrange(p_lc1, p_lc2, ncol = 2)
+}
 ```
 
 The newly created object allows for attributes creation (see more in Section \@ref(vec-attr-creation)) and length measurements:
@@ -695,6 +776,7 @@ origin(elev_4) = c(0.25, 0.25)
 ```{r origin-example, fig.cap="Rasters with identical values but different origins.", echo=FALSE}
 elev_poly = st_as_sf(as.polygons(elev, dissolve = FALSE))
 elev4_poly = st_as_sf(as.polygons(elev_4, dissolve = FALSE))
+
 tm_shape(elev4_poly) +
   tm_grid() +
   tm_polygons(col = "elev") +
@@ -702,6 +784,16 @@ tm_shape(elev4_poly) +
   tm_polygons(col = "elev") +
   tm_layout(frame = FALSE, legend.show = FALSE,
             inner.margins = c(0.1, 0.12, 0, 0))
+
+if (packageVersion("tmap") >= "4.0"){
+  tm_shape(elev4_poly) +
+  tm_grid() +
+  tm_polygons(fill = "elev") +
+  tm_shape(elev_poly) +
+  tm_polygons(fill = "elev") +
+  tm_layout(frame = FALSE, legend.show = FALSE,
+            inner.margins = c(0.1, 0.12, 0, 0))
+}
 # # See https://github.com/geocompx/geocompr/issues/695
 # knitr::include_graphics("https://user-images.githubusercontent.com/1825120/146618199-786fe3ad-9718-4dd0-a640-41180fc17e63.png")
 ```
@@ -734,6 +826,18 @@ p_ar2 = tm_shape(dem_agg) +
   tm_raster(style = "cont", legend.show = FALSE) +
   tm_layout(main.title = "B. Aggregated", frame = FALSE)
 tmap_arrange(p_ar1, p_ar2, ncol = 2)
+
+if (packageVersion("tmap") >= "4.0"){
+  p_ar1 = tm_shape(dem) +
+    tm_raster(col.scale = tm_scale_continuous()) +
+    tm_title("A. Original") + 
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  p_ar2 = tm_shape(dem_agg) +
+    tm_raster(col.scale = tm_scale_continuous()) +
+    tm_title("B. Aggregated") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tmap_arrange(p_ar1, p_ar2, ncol = 2)
+}
 ```
 
 \index{raster!disaggregation}
@@ -784,6 +888,26 @@ tm3 = tm_shape(dem) +
   tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
   tm_layout(frame = FALSE, main.title = "Resampled raster")
 tmap_arrange(tm1, tm2, tm3, nrow = 1)
+
+if (packageVersion("tmap") >= "4.0"){
+  tm1 = tm_shape(dem) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("Original raster") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tm2 = tm_shape(dem) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("Target raster") +
+    tm_layout(frame = FALSE, legend.show = FALSE) +
+    tm_shape(target_rast_p) +
+    tm_borders()
+  tm3 = tm_shape(dem) +
+    tm_raster(col_alpha = 0) +
+    tm_shape(dem_resampl1) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("Resampled raster") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tmap_arrange(tm1, tm2, tm3, nrow = 1)
+}
 ```
 
 \index{raster!resampling}
@@ -848,6 +972,35 @@ tm6 = tm_shape(dem_resampl5) +
   tm_raster(breaks = seq(200, 1100, by = 150), legend.show = FALSE) +
   tm_layout(frame = FALSE, main.title = "lanczos")
 tmap_arrange(tm1, tm2, tm3, tm4, tm5, tm6)
+
+if (packageVersion("tmap") >= "4.0"){
+  library(tmap)
+  tm1 = tm_shape(dem) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("Original raster") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tm2 = tm_shape(dem_resampl1) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("near") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tm3 = tm_shape(dem_resampl2) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("bilinear") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tm4 = tm_shape(dem_resampl3) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("cubic") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tm5 = tm_shape(dem_resampl4) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("cubicspline") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tm6 = tm_shape(dem_resampl5) +
+    tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
+    tm_title("lanczos") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  tmap_arrange(tm1, tm2, tm3, tm4, tm5, tm6)
+}
 ```
 
 The `resample()` function also has some additional resampling methods, including `sum`, `min`, `q1`, `med`, `q3`, `max`, `average`, `mode`, and `rms`.
