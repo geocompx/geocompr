@@ -50,7 +50,8 @@ input = select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
 # set -1 and -9 to NA
 input_tidy = dplyr::mutate(
   input, 
-  dplyr::across(.fns =  ~ifelse(.x %in% c(-1, -9), NA, .x)))
+  dplyr::across(.cols = c(pop, women, mean_age, hh_size),
+                .fns =  ~ifelse(.x %in% c(-1, -9), NA, .x)))
 input_ras = terra::rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 
 # reproject German outline
@@ -67,6 +68,20 @@ tm_1 = tm_shape(input_ras) +
             legend.outside.size = 0.08)
 
 tmap_save(tm_1, "figures/14_census_stack.png", width = 5.1, height = 2)
+
+# toDO: to improve
+if (packageVersion("tmap") >= "4.0"){
+  tm_1 = tm_shape(input_ras) +
+    tm_raster(col.scale = tm_scale_categorical(values = "GnBu"),
+              col.legend = tm_legend(title = "Class")) +
+    tm_facets(nrow = 1) +
+    tm_shape(ger) +
+    tm_borders() +
+    tm_layout(panel.labels = c("population", "women", "mean age", "household size"),
+              legend.position = tm_pos_auto_out())
+  
+  tmap_save(tm_1, "figures/14_census_stack.png", width = 5.1, height = 2)
+}
 
 #**********************************************************
 # 3 METROPOLITAN AREA FIGURE-------------------------------
@@ -114,6 +129,24 @@ tm_2 = tm_shape(pop_agg/1000) +
   tm_layout(legend.outside = TRUE, legend.outside.size = 0.3)
 
 tmap_save(tm_2, "figures/14_metro_areas.png", width = 4, height = 4)
+
+# toDo:jn
+# fix tm_text
+if (packageVersion("tmap") >= "4.0"){
+  tm_2 = tm_shape(pop_agg/1000) +
+    tm_raster(col.scale = tm_scale(values = "GnBu"),
+              col.legend = tm_legend(title = "Number of people\n(in 1,000)")) +
+    tm_shape(ger) +
+    tm_borders() +
+    tm_shape(metros) +
+    tm_borders(col = "gold", lwd = 2) +
+    tm_shape(metros_points) +
+    tm_text(text = "names", ymod = 0.6, shadow = TRUE, size = 0.75,
+            fontface = "italic") +
+    tm_layout(legend.position = tm_pos_auto_out())
+  
+  tmap_save(tm_2, "figures/14_metro_areas.png", width = 4, height = 4)
+}
 
 #**********************************************************
 # 4 POTENTIAL LOCATIONS------------------------------------ 
