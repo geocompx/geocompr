@@ -861,7 +861,7 @@ For this example, we create `target_rast`, but you would often use an already ex
 ```r
 target_rast = rast(xmin = 794650, xmax = 798250, 
                    ymin = 8931750, ymax = 8935350,
-                   resolution = 150, crs = "EPSG:32717")
+                   resolution = 300, crs = "EPSG:32717")
 ```
 
 Next, we need to provide our two raster objects as the first two arguments and one of the resampling methods described above.
