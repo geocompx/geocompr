@@ -140,14 +140,15 @@ This syntax allows the creation of maps with multiple shapes and layers, as illu
 
 ```{r 08-mapping-5, results='hide'}
 map_nz1 = map_nz +
-  tm_shape(nz_elev) + tm_raster(alpha = 0.7)
+  tm_shape(nz_elev) + tm_raster(col_alpha = 0.7)
 ```
 
 Building on the previously created `map_nz` object, the preceding code creates a new map object `map_nz1` that contains another shape (`nz_elev`) representing average elevation across New Zealand (see Figure \@ref(fig:tmlayers), left).
 More shapes and layers can be added, as illustrated in the code chunk below which creates `nz_water`, representing New Zealand's [territorial waters](https://en.wikipedia.org/wiki/Territorial_waters), and adds the resulting lines to an existing map object.
 
 ```{r 08-mapping-6}
-nz_water = st_union(nz) |> st_buffer(22200) |> 
+nz_water = st_union(nz) |>
+  st_buffer(22200) |> 
   st_cast(to = "LINESTRING")
 map_nz2 = map_nz1 +
   tm_shape(nz_water) + tm_lines()
@@ -159,8 +160,10 @@ The final map illustrated in Figure \@ref(fig:tmlayers) is created by adding a l
 The resulting map, which has four layers, is illustrated in the right-hand panel of Figure \@ref(fig:tmlayers):
 
 ```{r 08-mapping-7}
+# map_nz3 = map_nz2 +
+  # tm_shape(nz_height) + tm_symbols()
 map_nz3 = map_nz2 +
-  tm_shape(nz_height) + tm_dots()
+  tm_shape(nz_height) + tm_symbols()
 ```
 
 A useful and little known feature of **tmap** is that multiple map objects can be arranged in a single 'metaplot' with `tmap_arrange()`.
@@ -190,13 +193,13 @@ The most commonly used aesthetics for fill and border layers include color, tran
 The impact of setting these with fixed values is illustrated in Figure \@ref(fig:tmstatic).
 
 ```{r tmstatic, message=FALSE, fig.cap="The impact of changing commonly used fill and border aesthetics to fixed values.", fig.scap="The impact of changing commonly used aesthetics."}
-ma1 = tm_shape(nz) + tm_fill(col = "red")
-ma2 = tm_shape(nz) + tm_fill(col = "red", alpha = 0.3)
-ma3 = tm_shape(nz) + tm_borders(col = "blue")
-ma4 = tm_shape(nz) + tm_borders(lwd = 3)
-ma5 = tm_shape(nz) + tm_borders(lty = 2)
-ma6 = tm_shape(nz) + tm_fill(col = "red", alpha = 0.3) +
-  tm_borders(col = "blue", lwd = 3, lty = 2)
+ma1 = tm_shape(nz) + tm_polygons(fill = "red")
+ma2 = tm_shape(nz) + tm_polygons(fill = "red", fill_alpha = 0.3)
+ma3 = tm_shape(nz) + tm_polygons(col = "blue")
+ma4 = tm_shape(nz) + tm_polygons(lwd = 3)
+ma5 = tm_shape(nz) + tm_polygons(lty = 2)
+ma6 = tm_shape(nz) + tm_polygons(fill = "red", fill_alpha = 0.3,
+                                 col = "blue", lwd = 3, lty = 2)
 tmap_arrange(ma1, ma2, ma3, ma4, ma5, ma6)
 ```
 
@@ -214,19 +217,19 @@ Unlike the base R code below (which generates the left panel in Figure \@ref(fig
 ```{r 08-mapping-9, eval=FALSE}
 plot(st_geometry(nz), col = nz$Land_area)  # works
 tm_shape(nz) + tm_fill(col = nz$Land_area) # fails
-#> Error: Fill argument neither colors nor valid variable name(s)
+#> Error: palette should be a character value
 ```
 
 Instead `col` (and other aesthetics that can vary such as `lwd` for line layers and `size` for point layers) requires a character string naming an attribute associated with the geometry to be plotted.
 Thus, one would achieve the desired result as follows (plotted in the right-hand panel of Figure \@ref(fig:tmcol)):
 
 ```{r 08-mapping-10, fig.show='hide', message=FALSE}
-tm_shape(nz) + tm_fill(col = "Land_area")
+tm_shape(nz) + tm_fill(fill = "Land_area")
 ```
 
 ```{r tmcol, message=FALSE, fig.cap="Comparison of base (left) and tmap (right) handling of a numeric color field.", fig.scap="Comparison of base graphics and tmap", echo=FALSE, out.width="45%", fig.show='hold', warning=FALSE, message=FALSE}
 plot(nz["Land_area"])
-tm_shape(nz) + tm_fill(col = "Land_area")
+tm_shape(nz) + tm_fill(fill = "Land_area")
 ```
 
 An important argument in functions defining aesthetic layers such as `tm_fill()` is `title`, which sets the title of the associated legend.
@@ -235,7 +238,7 @@ The following code chunk demonstrates this functionality by providing a more att
 ```{r 08-mapping-11}
 legend_title = expression("Area (km"^2*")")
 map_nza = tm_shape(nz) +
-  tm_fill(col = "Land_area", title = legend_title) + tm_borders()
+  tm_polygons(fill = "Land_area", fill.legend = tm_legend(title = legend_title))
 ```
 
 ### Color settings
@@ -251,11 +254,14 @@ This shows four ways of coloring regions in New Zealand depending on median inco
 - `palette` defines the color scheme, for example `BuGn`
 
 ```{r 08-mapping-12, eval=FALSE}
-tm_shape(nz) + tm_polygons(col = "Median_income")
+tm_shape(nz) + tm_polygons(fill = "Median_income")
 breaks = c(0, 3, 4, 5) * 10000
-tm_shape(nz) + tm_polygons(col = "Median_income", breaks = breaks)
-tm_shape(nz) + tm_polygons(col = "Median_income", n = 10)
-tm_shape(nz) + tm_polygons(col = "Median_income", palette = "BuGn")
+tm_shape(nz) + tm_polygons(fill = "Median_income",
+                           fill.scale = tm_scale(breaks = breaks))
+tm_shape(nz) + tm_polygons(fill = "Median_income",
+                           fill.scale = tm_scale(n = 10))
+tm_shape(nz) + tm_polygons(fill = "Median_income",
+                           fill.scale = tm_scale(values = "BuGn"))
 ```
 
 ```{r tmpal, message=FALSE, fig.cap="Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette.", fig.scap="Illustration of settings that affect color settings.", echo=FALSE, fig.asp=0.56}
@@ -299,8 +305,8 @@ These follow a gradient, for example from light to dark colors (light colors ten
 Sequential palettes can be single (`Blues` go from light to dark blue, for example) or multi-color/hue (`YlOrBr` is gradient from light yellow to brown via orange, for example), as demonstrated in the code chunk below --- output not shown, run the code yourself to see the results!
 
 ```{r 08-mapping-13, eval=FALSE}
-tm_shape(nz) + tm_polygons("Population", palette = "Blues")
-tm_shape(nz) + tm_polygons("Population", palette = "YlOrBr")
+tm_shape(nz) + tm_polygons("Population", fill.scale = tm_scale(values = "Blues"))
+tm_shape(nz) + tm_polygons("Population", fill.scale = tm_scale(values = "YlOrBr"))
 ```
 
 The last group, diverging palettes, typically range between three distinct colors (purple-white-green in Figure \@ref(fig:colpal)) and are usually created by joining two single-color sequential palettes with the darker colors at each end.
@@ -351,13 +357,13 @@ Additional elements such as north arrows\index{tmap (package)!north arrows} and 
 ```{r na-sb, message=FALSE, fig.cap="Map with additional elements - a north arrow and scale bar.", out.width="50%", fig.asp=1, fig.scap="Map with a north arrow and scale bar."}
 map_nz + 
   tm_compass(type = "8star", position = c("left", "top")) +
-  tm_scale_bar(breaks = c(0, 100, 200), text.size = 1)
+  tm_scale_bar(breaks = c(0, 100, 200), text.size = 1, position = c("left", "top"))
 ```
 
 **tmap** also allows a wide variety of layout settings to be changed, some of which, produced using the following code (see `args(tm_layout)` or `?tm_layout` for a full list), are illustrated in Figure \@ref(fig:layout1):
 
 ```{r 08-mapping-14, eval=FALSE}
-map_nz + tm_layout(title = "New Zealand")
+map_nz + tm_title("New Zealand")
 map_nz + tm_layout(scale = 5)
 map_nz + tm_layout(bg.color = "lightblue")
 map_nz + tm_layout(frame = FALSE)
@@ -431,7 +437,7 @@ urb_1970_2030 = urban_agglomerations |>
 tm_shape(world) +
   tm_polygons() +
   tm_shape(urb_1970_2030) +
-  tm_symbols(col = "black", border.col = "white", size = "population_millions") +
+  tm_symbols(fill = "black", col = "white", size = "population_millions") +
   tm_facets(by = "year", nrow = 2, free.coords = FALSE)
 ```
 
@@ -468,7 +474,7 @@ This is a place where the most important message is stated.
 
 ```{r 08-mapping-17}
 nz_height_map = tm_shape(nz_elev, bbox = nz_region) +
-  tm_raster(style = "cont", palette = "YlGn", legend.show = TRUE) +
+  tm_raster(col.scale = tm_scale_continuous(values = "YlGn")) +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 1) +
   tm_scale_bar(position = c("left", "bottom"))
 ```
@@ -506,11 +512,15 @@ us_states_map = tm_shape(us_states, projection = "EPSG:2163") + tm_polygons() +
 The rest of our objects, `hawaii` and `alaska`, already have proper projections; therefore, we just need to create two separate maps:
 
 ```{r 08-mapping-20}
-hawaii_map = tm_shape(hawaii) + tm_polygons() + 
-  tm_layout(title = "Hawaii", frame = FALSE, bg.color = NA, 
+hawaii_map = tm_shape(hawaii) +
+  tm_polygons() + 
+  tm_title("Hawaii") +
+  tm_layout(frame = FALSE, bg.color = NA, 
             title.position = c("LEFT", "BOTTOM"))
-alaska_map = tm_shape(alaska) + tm_polygons() + 
-  tm_layout(title = "Alaska", frame = FALSE, bg.color = NA)
+alaska_map = tm_shape(alaska) +
+  tm_polygons() + 
+  tm_title("Alaska") +
+  tm_layout(frame = FALSE, bg.color = NA)
 ```
 
 The final map is created by combining and arranging these three maps:
@@ -1046,10 +1056,14 @@ tm_shape(nz_carto) + tm_polygons("Median_income")
 ```
 
 ```{r cartomap1, echo=FALSE, message=FALSE, fig.cap="Comparison of standard map (left) and continuous area cartogram (right).", fig.scap="Comparison of standard map and continuous area cartogram."}
-carto_map1 = tm_shape(nz) + 
-  tm_polygons("Median_income", title = "Median income (NZD)", palette = "Greens")
+arto_map1 = tm_shape(nz) + 
+  tm_polygons("Median_income",
+              fill.scale = tm_scale(values = "Greens"),
+              fill.legend = tm_legend(title = "Median income (NZD)"))
 carto_map2 = tm_shape(nz_carto) + 
-  tm_polygons("Median_income", title = "Median income (NZD)", palette = "Greens")
+  tm_polygons("Median_income",
+              fill.scale = tm_scale(values = "Greens"),
+              fill.legend = tm_legend(title = "Median income (NZD)"))
 tmap_arrange(carto_map1, carto_map2)
 ```
 
@@ -1066,10 +1080,14 @@ us_states2163_dorling = cartogram_dorling(us_states2163, "total_pop_15")
 
 ```{r cartomap2, echo=FALSE, message=FALSE, fig.cap="Comparison of non-continuous area cartogram (left) and Dorling cartogram (right).", fig.scap="Comparison of cartograms.", fig.asp=0.32}
 carto_map3 = tm_shape(us_states2163_ncont) + 
-  tm_polygons("total_pop_15", title = "Total population", palette = "BuPu") +
+  tm_polygons("total_pop_15",
+              fill.scale = tm_scale(values = "BuPu"),
+              fill.legend = tm_legend(title = "Total population")) +
   tm_layout(legend.show = FALSE)
 carto_map4 = tm_shape(us_states2163_dorling) + 
-  tm_polygons("total_pop_15", title = "Total population", palette = "BuPu") +
+  tm_polygons("total_pop_15",
+              fill.scale = tm_scale(values = "BuPu"),
+              fill.legend = tm_legend(title = "Total population")) +
   tm_layout(legend.show = FALSE)
 carto_map_34legend = tm_shape(us_states2163_dorling) + 
   tm_polygons("total_pop_15", title = "Total population", palette = "BuPu") +
