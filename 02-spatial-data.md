@@ -943,7 +943,7 @@ Depending on the nature of the application, vector representations of discrete f
 
 Over the last two decades, several packages for reading and processing raster datasets have been developed.
 As outlined in Section \@ref(the-history-of-r-spatial), chief among them was **raster**, which led to a step change in R's raster capabilities when it was launched in 2010 and the premier package in the space until the development of **terra** and **stars**.
-Both more recently developed package provide powerful and performant functions for working with raster datasets and there is substantial overlap between their possible use cases.
+Both more recently developed packages provide powerful and performant functions for working with raster datasets and there is substantial overlap between their possible use cases.
 In this book we focus on **terra**, which replaces the older and (in most cases) slower **raster**.
 Before learning about the how **terra**'s class system works, this section describes similarities and differences between **terra** and **stars**; this knowledge will help decide which is most appropriate in different situations.
 
