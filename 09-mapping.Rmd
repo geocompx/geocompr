@@ -17,6 +17,7 @@ library(spDataLarge)
 - In addition, it uses the following visualization packages (also install shiny if you want to develop interactive mapping applications):
 
 ```{r 08-mapping-2, message=FALSE}
+# remotes::install_github("r-tmap/tmap@v4")
 library(tmap)    # for static and interactive maps
 library(leaflet) # for interactive maps
 library(ggplot2) # tidyverse data visualization package
@@ -61,31 +62,32 @@ Finally, Section \@ref(other-mapping-packages) covers a range of alternative map
 
 \index{map making!static maps}
 Static maps are the most common type of visual output from geocomputation.
-Standard formats include `.png` and `.pdf` for raster and vector outputs, respectively.
+They are usually stored in standard formats include `.png` and `.pdf` for graphical raster and vector outputs, respectively.
 Initially, static maps were the only type of maps that R could produce.
-Things have advanced with the release of **sp** [see @pebesma_classes_2005], and many map-making techniques have been developed since then.
+Things have advanced with the release of **sp** [see @pebesma_classes_2005], and many map-making techniques, functions, and packages have been developed since then.
 However, despite the innovation of interactive mapping, static plotting was still the emphasis of geographic data visualization in R a decade later [@cheshire_spatial_2015].
 
 The generic `plot()` function is often the fastest way to create static maps from vector and raster spatial objects (see sections \@ref(basic-map) and \@ref(basic-map-raster)).
 Sometimes, simplicity and speed are priorities, especially during the development phase of a project, and this is where `plot()` excels.
 The base R approach is also extensible, with `plot()` offering dozens of arguments.
 Another approach is the **grid** package which allows low-level control of static maps, as illustrated in Chapter [14](https://www.stat.auckland.ac.nz/~paul/RG2e/chapter14.html) of @murrell_r_2016.
-This section focuses on **tmap** and emphasizes the essential aesthetic and layout options.
+This part of the book focuses on **tmap** and emphasizes the essential aesthetic and layout options.
 
 \index{tmap (package)}
 **tmap** is a powerful and flexible map-making package with sensible defaults.
 It has a concise syntax that allows for the creation of attractive maps with minimal code which will be familiar to **ggplot2** users.
 It also has the unique capability to generate static and interactive maps using the same code via `tmap_mode()`.
-Finally, it accepts a wider range of spatial classes (including **sf** and **terra** objects) than alternatives such as **ggplot2** (see the vignettes [`tmap-getstarted`](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html) and [`tmap-changes-v2`](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-changes-v2.html), as well as @tennekes_tmap_2018, for further documentation).
+Finally, it accepts a wider range of spatial classes (including **sf** and **terra** objects) than alternatives such as **ggplot2**.
 <!--toDo:jn-->
-<!-- update the above vignettes links -->
+<!-- update the below vignettes links -->
+<!-- (see the vignettes [`tmap-getstarted`](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html) and [`tmap-changes-v2`](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-changes-v2.html), as well as @tennekes_tmap_2018, for further documentation). -->
 
 ### tmap basics
 
 \index{tmap (package)!basics}
 Like **ggplot2**, **tmap** is based on the idea of a 'grammar of graphics' [@wilkinson_grammar_2005].
-This involves a separation between the input data and the aesthetics (how data are visualised): each input dataset can be 'mapped' in a range of different ways including location on the map (defined by data's `geometry`), color, and other visual variables.
-The basic building block is `tm_shape()` (which defines input data, raster and vector objects), followed by one or more layer elements such as `tm_fill()` and `tm_dots()`.
+This involves a separation between the input data and the aesthetics (how data are visualized): each input dataset can be 'mapped' in a range of different ways including location on the map (defined by data's `geometry`), color, and other visual variables.
+The basic building block is `tm_shape()` (which defines input data: an vector or raster object), followed by one or more layer elements such as `tm_fill()` and `tm_dots()`.
 This layering is demonstrated in the chunk below, which generates the maps presented in Figure \@ref(fig:tmshape):
 
 ```{r 08-mapping-3, eval=FALSE}
@@ -101,6 +103,9 @@ tm_shape(nz) +
   tm_borders() 
 ```
 
+<!--toDo: jn-->
+<!-- update the titles -->
+
 ```{r tmshape, echo=FALSE, message=FALSE, fig.cap="New Zealand's shape plotted with fill (left), border (middle) and fill and border (right) layers added using tmap functions.", fig.scap="New Zealand's shape plotted using tmap functions."}
 source("https://github.com/geocompx/geocompr/raw/main/code/09-tmshape.R", print.eval = TRUE)
 ```
@@ -110,9 +115,23 @@ Layers are added to represent `nz` visually, with `tm_fill()` and `tm_borders()`
 
 This is an intuitive approach to map making:
 the common task of *adding* new layers is undertaken by the addition operator `+`, followed by `tm_*()`.
-The asterisk (\*) refers to a wide range of layer types which have self-explanatory names including `fill`, `borders` (demonstrated above), `bubbles`, `text` and `raster` (see `help("tmap-element")` for a full list).
+The asterisk (\*) refers to a wide range of layer types which have self-explanatory names including:
+
+- `fill`: shaded areas for (mutli)polygons
+- `borders`: border outlines for (mutli)polygons
+- `polygons`: both, shaded areas and border outlines for (mutli)polygons
+- `lines`: lines for (mutli)linestrings
+- `symbols`: symbols for (mutli)points, (mutli)linestrings, and (mutli)polygons
+- `raster`: colored cells of raster data
+- `text`: text information for (mutli)points, (mutli)linestrings, and (mutli)polygons
+
+<!--toDo: jn-->
+<!-- update help link -->
+See `help("tmap-element")` for a full list of possible layer types.
 This layering is illustrated in the right panel of Figure \@ref(fig:tmshape), the result of adding a border *on top of* the fill layer.
 
+<!--toDo: jn-->
+<!-- update when/if -->
 ```{block2 qtm, type = 'rmdnote'}
 `qtm()` is a handy function to create **q**uick **t**hematic **m**aps (hence the snappy name).
 It is concise and provides a good default visualization in many cases:
@@ -134,15 +153,17 @@ class(map_nz)
 `map_nz` can be plotted later, for example by adding additional layers (as shown below) or simply running `map_nz` in the console, which is equivalent to `print(map_nz)`.
 
 New *shapes* can be added with `+ tm_shape(new_obj)`.
-In this case `new_obj` represents a new spatial object to be plotted on top of preceding layers.
+In this case, `new_obj` represents a new spatial object to be plotted on top of preceding layers.
 When a new shape is added in this way, all subsequent aesthetic functions refer to it, until another new shape is added.
-This syntax allows the creation of maps with multiple shapes and layers, as illustrated in the next code chunk which uses the function `tm_raster()` to plot a raster layer (with `alpha` set to make the layer semi-transparent):
+This syntax allows the creation of maps with multiple shapes and layers, as illustrated in the next code chunk which uses the function `tm_raster()` to plot a raster layer (with `col_alpha` set to make the layer semi-transparent):
 
 ```{r 08-mapping-5, results='hide'}
 map_nz1 = map_nz +
   tm_shape(nz_elev) + tm_raster(col_alpha = 0.7)
 ```
 
+<!--toDo: jn-->
+<!-- explain the SpatRaster object downsampled to 1141 by 877 cells. message -->
 Building on the previously created `map_nz` object, the preceding code creates a new map object `map_nz1` that contains another shape (`nz_elev`) representing average elevation across New Zealand (see Figure \@ref(fig:tmlayers), left).
 More shapes and layers can be added, as illustrated in the code chunk below which creates `nz_water`, representing New Zealand's [territorial waters](https://en.wikipedia.org/wiki/Territorial_waters), and adds the resulting lines to an existing map object.
 
@@ -154,14 +175,15 @@ map_nz2 = map_nz1 +
   tm_shape(nz_water) + tm_lines()
 ```
 
-There is no limit to the number of layers or shapes that can be added to `tmap` objects.
-The same shape can even be used multiple times.
-The final map illustrated in Figure \@ref(fig:tmlayers) is created by adding a layer representing high points (stored in the object `nz_height`) onto the previously created `map_nz2` object with `tm_dots()` (see `?tm_dots` and `?tm_bubbles` for details on **tmap**'s point plotting functions).
+There is no limit to the number of layers or shapes that can be added to `tmap` objects, and the same shape can even be used multiple times.
+The final map illustrated in Figure \@ref(fig:tmlayers) is created by adding a layer representing high points (stored in the object `nz_height`) onto the previously created `map_nz2` object with `tm_dots()` (see `?tm_dots` and `?tm_symbols` for details on **tmap**'s point plotting functions).
 The resulting map, which has four layers, is illustrated in the right-hand panel of Figure \@ref(fig:tmlayers):
 
+<!--toDo: jn-->
+<!-- update when/if tm_dots is added -->
 ```{r 08-mapping-7}
 # map_nz3 = map_nz2 +
-  # tm_shape(nz_height) + tm_symbols()
+  # tm_shape(nz_height) + tm_dots()
 map_nz3 = map_nz2 +
   tm_shape(nz_height) + tm_symbols()
 ```
