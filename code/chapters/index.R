@@ -119,7 +119,7 @@ if (is_html) {
 
 ## ----index-3, message=FALSE, eval=FALSE, echo=is_html, results='hide'-------------------------------
 ## install.packages("remotes")
-## remotes::install_github("geocompr/geocompkg")
+## remotes::install_github("geocompx/geocompkg")
 
 
 ## ---- echo=FALSE, eval=FALSE------------------------------------------------------------------------
@@ -148,7 +148,7 @@ if (is_html) {
 geocompkg_is_installed = "geocompkg" %in% installed.packages()
 if (!geocompkg_is_installed){
   message(
-  'geocompkg not installed, run\nremotes::install_github("geocompr/geocompkg") # to install it'
+  'geocompkg not installed, run\nremotes::install_github("geocompx/geocompkg") # to install it'
   )
 } 
 
