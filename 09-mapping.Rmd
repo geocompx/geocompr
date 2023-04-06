@@ -210,17 +210,13 @@ The purpose of this section is to show how.
 There are two main types of map aesthetics: those that change with the data and those that are constant.
 Unlike **ggplot2**, which uses the helper function `aes()` to represent variable aesthetics, **tmap** accepts a few aesthetic arguments, depending on a selected layer type:
 
-<!--toDo:jn-->
-<!-- update the list -->
+- `fill`: fill color of a polygon
+- `col`: color of a polygon border, line, point, or raster
+- `lwd`: line width
+- `lty`: line type
+- `size`: size of a symbol
+- `shape`: shape of a symbol
 
-- `fill`:
-- `col`:
-- `lwd`:
-- `lty`:
-- `size`:
-- `shape`:
-
-<!-- The most commonly used aesthetics for fill and border layers include color, transparency, line width and line type, set with `col`, `alpha`, `lwd`, and `lty` arguments, respectively. -->
 Additionally, we may customize the fill and border color transparency using `fill_alpha` and  `col_alpha`.
 
 To map a variable to an aesthetic, pass its column name to the corresponding argument, and to set a fixed aesthetic, pass the desired value instead.^[
@@ -270,25 +266,26 @@ tm_shape(nz) + tm_fill(fill = "Land_area")
 
 Each visual variable has three related additional arguments, with prefixes of `.scale`, `.legend`, and `.free`.
 For example, the `tm_fill()` function has arguments such as `fill`, `fill.scale`, `fill.legend`, and `fill.free`.
-The `.scale` argument determines how the provided values are represented on the map and the legend (Section \@ref(scales)), while the `.legend` argument is used to customize the legend settings, such as its title, orientation, or position (Section \@ref(legends)).
+The `.scale` argument determines how the provided values are represented on the map and in the legend (Section \@ref(scales)), while the `.legend` argument is used to customize the legend settings, such as its title, orientation, or position (Section \@ref(legends)).
 The `.free` argument is relevant only for maps with many facets to determine if each facet has the same or different scale and legend (Section \@ref(faceted-maps)).
 
 ### Scales
 
-### Legends
+Scales control how the values are represented on the map and in the legend, and depends on the selected visual variable. 
+For example, when our visual variable is `col`, then `col.scale` controls how the colors of spatial objects are related to the provided values; and when our visual variable is `size`, then `size.scale` controls how the sizes represent the provided values.
+By default, the used scale is set automatically given by the data type (factor, numeric, and integer).
+<!-- At the same time, we are able to customize scales with a family of functions, including the `tm_scale()`,  -->
 
-
-
-An important argument in functions defining aesthetic layers such as `tm_fill()` is `title`, which sets the title of the associated legend.
-The following code chunk demonstrates this functionality by providing a more attractive name than the variable name `Land_area` (note the use of `expression()` to create superscript text):
-
-```{r 08-mapping-11}
-legend_title = expression("Area (km"^2*")")
-map_nza = tm_shape(nz) +
-  tm_polygons(fill = "Land_area", fill.legend = tm_legend(title = legend_title))
+```{r}
+#| eval: false
+#| echo: false
+tm_shape(nz) + tm_fill(fill = "Land_area", fill.scale = tm_scale_continuous())
+tm_shape(nz) + tm_symbols(size = "Land_area", size.scale = tm_scale_intervals())
 ```
 
-### Color settings
+
+
+
 
 \index{tmap (package)!color breaks}
 Color settings are an important part of map design.
@@ -334,6 +331,21 @@ source("https://github.com/geocompx/geocompr/raw/main/code/09-break-styles.R", p
 ```{block2 break-style-note, type='rmdnote'}
 Although `style` is an argument of **tmap** functions, in fact it originates as an argument in `classInt::classIntervals()` --- see the help page of this function for details.
 ```
+
+
+### Legends
+
+An important argument in functions defining aesthetic layers such as `tm_fill()` is `title`, which sets the title of the associated legend.
+The following code chunk demonstrates this functionality by providing a more attractive name than the variable name `Land_area` (note the use of `expression()` to create superscript text):
+
+```{r 08-mapping-11}
+legend_title = expression("Area (km"^2*")")
+map_nza = tm_shape(nz) +
+  tm_polygons(fill = "Land_area", fill.legend = tm_legend(title = legend_title))
+```
+
+### Color settings
+
 
 Palettes define the color ranges associated with the bins and  determined by the `breaks`, `n`, and `style` arguments described above.
 The default color palette is specified in `tm_layout()` (see Section \@ref(layouts) to learn more); however, it could be quickly changed using the `palette` argument.
