@@ -271,37 +271,25 @@ The `.free` argument is relevant only for maps with many facets to determine if 
 
 ### Scales
 
-Scales control how the values are represented on the map and in the legend, and depends on the selected visual variable. 
+\index{tmap (package)!scales}
+Scales control how the values are represented on the map and in the legend, and largely depend on the selected visual variable. 
 For example, when our visual variable is `col`, then `col.scale` controls how the colors of spatial objects are related to the provided values; and when our visual variable is `size`, then `size.scale` controls how the sizes represent the provided values.
-By default, the used scale is set automatically given by the data type (factor, numeric, and integer).
-<!-- At the same time, we are able to customize scales with a family of functions, including the `tm_scale()`,  -->
-
-```{r}
-#| eval: false
-#| echo: false
-tm_shape(nz) + tm_fill(fill = "Land_area", fill.scale = tm_scale_continuous())
-tm_shape(nz) + tm_symbols(size = "Land_area", size.scale = tm_scale_intervals())
-```
-
-
-
-
+By default, the used scale is `tm_scale()`, which selects the visual settings automatically given by the data type (factor, numeric, and integer).
 
 \index{tmap (package)!color breaks}
-Color settings are an important part of map design.
-They can have a major impact on how spatial variability is portrayed as illustrated in Figure \@ref(fig:tmpal).
-This shows four ways of coloring regions in New Zealand depending on median income, from left to right (and demonstrated in the code chunk below):
+Let's see how the scales work by customizing polygons' fill colors.
+Color settings are an important part of map design -- they can have a major impact on how spatial variability is portrayed as illustrated in Figure \@ref(fig:tmpal).
+This figure shows four ways of coloring regions in New Zealand depending on median income, from left to right (and demonstrated in the code chunk below):
 
 - The default setting uses 'pretty' breaks, described in the next paragraph
 - `breaks` allows you to manually set the breaks
 - `n` sets the number of bins into which numeric variables are categorized
-- `palette` defines the color scheme, for example `BuGn`
+- `values` defines the color scheme, for example, `BuGn`
 
 ```{r 08-mapping-12, eval=FALSE}
 tm_shape(nz) + tm_polygons(fill = "Median_income")
-breaks = c(0, 3, 4, 5) * 10000
 tm_shape(nz) + tm_polygons(fill = "Median_income",
-                           fill.scale = tm_scale(breaks = breaks))
+                           fill.scale = tm_scale(breaks = c(0, 30000, 40000, 50000)))
 tm_shape(nz) + tm_polygons(fill = "Median_income",
                            fill.scale = tm_scale(n = 10))
 tm_shape(nz) + tm_polygons(fill = "Median_income",
@@ -312,29 +300,55 @@ tm_shape(nz) + tm_polygons(fill = "Median_income",
 source("https://github.com/geocompx/geocompr/raw/main/code/09-tmpal.R", print.eval = TRUE)
 ```
 
-Another way to change color settings is by altering color break (or bin) settings.
-In addition to manually setting `breaks` **tmap** allows users to specify algorithms to automatically create breaks with the `style` argument.
-\index{tmap (package)!break styles}
-Here are six of the most useful break styles:
-
-- `style = "pretty"`, the default setting, rounds breaks into whole numbers where possible and spaces them evenly;
-- `style = "equal"` divides input values into bins of equal range and is appropriate for variables with a uniform distribution (not recommended for variables with a skewed distribution as the resulting map may end-up having little color diversity);
-- `style = "quantile"` ensures the same number of observations fall into each category (with the potential downside that bin ranges can vary widely);
-- `style = "jenks"` identifies groups of similar values in the data and maximizes the differences between categories;
-- `style = "cont"` (and `"order"`) present a large number of colors over continuous color fields and are particularly suited for continuous rasters (`"order"` can help visualize skewed distributions);
-- `style = "cat"` was designed to represent categorical values and assures that each category receives a unique color.
-
-```{r break-styles, message=FALSE, fig.cap="Illustration of different binning methods set using the style argument in tmap.", , fig.scap="Illustration of different binning methods using tmap.", echo=FALSE}
-source("https://github.com/geocompx/geocompr/raw/main/code/09-break-styles.R", print.eval = TRUE)
+```{block2 break-style-note, type='rmdnote'}
+All of the above arguments (`breaks`, `n`, and `values`) also work for other types of visual variables.
+For example, `values` expects a vector of colors or a palette name for `fill.scale` or `col.scale`, a vector of sizes for `size.scale`, or a vector of symbols for `shape.scale`.
 ```
+
+\index{tmap (package)!break styles}
+We are also able to customize scales using a family of functions that start with the `tm_scale_` prefix.
+The most important ones are `tm_scale_intervals()`, `tm_scale_continuous()`, and `tm_scale_categorical()`.
+
+```{r}
+#| eval: false
+#| echo: false
+tm_shape(nz) + tm_fill(fill = "Land_area", fill.scale = tm_scale_intervals())
+tm_shape(nz) + tm_fill(fill = "Land_area", fill.scale = tm_scale_continuous())
+tm_shape(nz) + tm_fill(fill = "Land_area", fill.scale = tm_scale_categorical())
+tm_shape(nz) + tm_fill(fill = "Land_area", fill.scale = tm_scale_continuous_log())
+tm_shape(nz) + tm_fill(fill = "Land_area", fill.scale = tm_scale_continuous_log1p())
+tm_shape(nz) + tm_fill(fill = "Land_area", fill.scale = tm_scale_discrete())
+tm_shape(nz) + tm_fill(fill = "Land_area", fill.scale = tm_scale_ordinal())
+tm_shape(nz) + tm_fill(fill = "Land_area", fill.scale = tm_scale_rgb())
+tm_shape(nz) + tm_fill(fill = "Land_area", fill.scale = tm_scale_continuous())
+tm_shape(nz) + tm_symbols(size = "Land_area", size.scale = tm_scale_intervals())
+```
+
+The `tm_scale_intervals()` function splits the input data values into a set of intervals.
+In addition to manually setting `breaks, ` **tmap** allows users to specify algorithms to create breaks with the `style` argument automatically.
+Here are some of the most useful scale functions:
+
+- `style = "pretty"`: the default setting, rounds breaks into whole numbers where possible and spaces them evenly
+- `style = "equal"`: divides input values into bins of equal range and is appropriate for variables with a uniform distribution (not recommended for variables with a skewed distribution as the resulting map may end-up having little color diversity)
+- `style = "quantile"`: ensures the same number of observations fall into each category (with the potential downside that bin ranges can vary widely)
+- `style = "jenks"`: identifies groups of similar values in the data and maximizes the differences between categories
+- `style = "log10_pretty"`: a common logarithmic (the logarithm to base 10) version of the regular pretty style used for variables with a right-skewed distribution
 
 ```{block2 break-style-note, type='rmdnote'}
 Although `style` is an argument of **tmap** functions, in fact it originates as an argument in `classInt::classIntervals()` --- see the help page of this function for details.
 ```
 
+```{r break-styles, message=FALSE, fig.cap="Illustration of different binning methods set using the style argument in tmap.", , fig.scap="Illustration of different binning methods using tmap.", echo=FALSE}
+source("https://github.com/geocompx/geocompr/raw/main/code/09-break-styles.R", print.eval = TRUE)
+```
+
+<!-- `tm_scale_continuous()`, and `tm_scale_categorical()` -->
+<!-- - `style = "cont"` (and `"order"`) present a large number of colors over continuous color fields and are particularly suited for continuous rasters (`"order"` can help visualize skewed distributions); -->
+<!-- - `style = "cat"` was designed to represent categorical values and assures that each category receives a unique color. -->
 
 ### Legends
 
+\index{tmap (package)!legends}
 An important argument in functions defining aesthetic layers such as `tm_fill()` is `title`, which sets the title of the associated legend.
 The following code chunk demonstrates this functionality by providing a more attractive name than the variable name `Land_area` (note the use of `expression()` to create superscript text):
 
