@@ -374,25 +374,36 @@ You can also add a `-` as the color palette name prefix to reverse the palette o
 All of the default `values` of the visual variables, such as default color palettes for different types of input variables, can be found with `tmap_options()$values.var`.
 ```
 
-There are three main groups of color palettes\index{map making!color palettes}: categorical, sequential and diverging (Figure \@ref(fig:colpal)), and each of them serves a different purpose.
+There are three main groups of color palettes\index{map making!color palettes}: categorical, sequential and diverging (Figure \@ref(fig:colpal)), and each of them serves a different purpose.^[
+A fourth group of color palettes, called bivariate, also exists.
+They are used when we want to represent relations between two variables on one map.
+]
 Categorical palettes consist of easily distinguishable colors and are most appropriate for categorical data without any particular order such as state names or land cover classes.
 Colors should be intuitive: rivers should be blue, for example, and pastures green.
 Avoid too many categories: maps with large legends and many colors can be uninterpretable.^[
-`col = "MAP_COLORS"` can be used in maps with a large number of individual polygons (for example, a map of individual countries) to create unique colors for adjacent polygons.
+<!--toDo:jn-->
+<!-- tmap4?? -->
+`fill = "MAP_COLORS"` can be used in maps with a large number of individual polygons (for example, a map of individual countries) to create unique fill colors for adjacent polygons.
 ] 
 
 The second group is sequential palettes.
-These follow a gradient, for example from light to dark colors (light colors tend to represent lower values), and are appropriate for continuous (numeric) variables.
-Sequential palettes can be single (`Blues` go from light to dark blue, for example) or multi-color/hue (`YlOrBr` is gradient from light yellow to brown via orange, for example), as demonstrated in the code chunk below --- output not shown, run the code yourself to see the results!
+These follow a gradient, for example from light to dark colors (light colors often tend to represent lower values), and are appropriate for continuous (numeric) variables.
+Sequential palettes can be single (`greens` go from light to dark blue, for example) or multi-color/hue (`yl_gn_bu` is gradient from light yellow to blue via green, for example), as demonstrated in the code chunk below --- output not shown, run the code yourself to see the results!
 
 ```{r 08-mapping-13, eval=FALSE}
-tm_shape(nz) + tm_polygons("Population", fill.scale = tm_scale(values = "Blues"))
-tm_shape(nz) + tm_polygons("Population", fill.scale = tm_scale(values = "YlOrBr"))
+tm_shape(nz) + tm_polygons("Median_income", fill.scale = tm_scale(values = "greens"))
+tm_shape(nz) + tm_polygons("Median_income", fill.scale = tm_scale(values = "yl_gn_bu"))
 ```
 
 The third group, diverging palettes, typically range between three distinct colors (purple-white-green in Figure \@ref(fig:colpal)) and are usually created by joining two single-color sequential palettes with the darker colors at each end.
 Their main purpose is to visualize the difference from an important reference point, e.g., a certain temperature, the median household income or the mean probability for a drought event.
 The reference point's value can be adjusted in **tmap** using the `midpoint` argument.
+
+```{r 08-mapping-13b, eval=FALSE}
+tm_shape(nz) + 
+  tm_polygons("Median_income",
+              fill.scale = tm_scale_continuous(values = "pu_gn_div", midpoint = 28000))
+```
 
 ```{r colpal, echo=FALSE, message=FALSE, fig.cap="Examples of categorical, sequential and diverging palettes.", out.width="50%"}
 library(cols4all)
@@ -415,20 +426,18 @@ many_palette_plotter(c(all_default_pals$div, all_default_pals$seq, all_default_p
                      titles = c("Diverging", "Sequential", "Categorical"))
 ```
 
-<!--toDo:jn-->
-<!--expand-->
-Additional, fourth group of color palettes, bivariate, also exist.
-
 There are two important principles for consideration when working with colors: perceptibility and accessibility.
 Firstly, colors on maps should match our perception. 
 This means that certain colors are viewed through our experience and also cultural lenses.
 For example, green colors usually represent vegetation or lowlands and blue is connected with water or cool.
 Color palettes should also be easy to understand to effectively convey information.
 It should be clear which values are lower and which are higher, and colors should change gradually.
-This property is not preserved in the rainbow color palette; therefore, we suggest avoiding it in geographic data visualization [@borland_rainbow_2007].
-Instead, [the viridis color palettes](https://cran.r-project.org/web/packages/viridis/), also available in **tmap**, can be used.
+<!--toDo:jn-->
+<!-- update and improve -->
+<!-- This property is not preserved in the rainbow color palette; therefore, we suggest avoiding it in geographic data visualization [@borland_rainbow_2007]. -->
+<!-- Instead, [the viridis color palettes](https://cran.r-project.org/web/packages/viridis/), also available in **tmap**, can be used. -->
 Secondly, changes in colors should be accessible to the largest number of people.
-Therefore, it is important to use colorblind friendly palettes as often as possible.^[See the "Color blindness simulator" options in `tmaptools::palette_explorer()`.]
+Therefore, it is important to use colorblind friendly palettes as often as possible.^[See the "Color vision" options and the "Color Blind Friendliness" panel in `cols4all::c4a_gui()`.]
 
 ### Legends
 
