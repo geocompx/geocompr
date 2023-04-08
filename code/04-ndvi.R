@@ -17,3 +17,19 @@ tm2 = tm_shape(ndvi_rast) +
             legend.frame = TRUE, legend.position = c("left", "bottom"))
 tma = tmap_arrange(tm1, tm2, nrow = 1)
 tmap_save(tma, "figures/04-ndvi.png", height = 800, width = 1100)
+
+if (packageVersion("tmap") >= "4.0"){
+  tm1 = tm_shape(multi_rast2[[3:1]]) +
+    tm_rgb() +
+    tm_title("RGB image") +
+    tm_layout(frame = FALSE)
+  tm2 = tm_shape(ndvi_rast) +
+    tm_raster(col.scale = tm_scale_continuous(), col.legend = tm_legend(title = "")) +
+    tm_title("NDVI") +
+    tm_layout(frame = FALSE,
+              legend.frame = TRUE,
+              legend.position = c("left", "bottom"),
+              legend.bg.color = "white")
+  tma = tmap_arrange(tm1, tm2, nrow = 1)
+  tmap_save(tma, "figures/04-ndvi.png", height = 800, width = 1100)
+}

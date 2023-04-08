@@ -1,0 +1,223 @@
+```{r 10-ex-e0, message=FALSE}
+library(sf)
+library(terra)
+```
+
+<!-- qgisprocess 1-3 -->
+E1. Compute global solar irradiation for an area of `system.file("raster/dem.tif", package = "spDataLarge")` for March 21 at 11:00 AM using the `r.sun` GRASS GIS through **qgisprocess**.
+
+```{r}
+library(qgisprocess)
+dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
+slope = terrain(dem, "slope", unit = "degrees")
+aspect = terrain(dem, "aspect", unit = "degrees")
+qgis_algo = qgis_algorithms()
+grep("r.sun", qgis_algo$algorithm, value = TRUE)
+alg = "grass7:r.sun.incidout"
+qgis_show_help(alg)
+dem_sun = qgis_run_algorithm(alg,
+                             elevation = dem, aspect = aspect, slope = slope,
+                             day = 80, time = 11)
+dem_sun
+
+# output global (total) irradiance/irradiation [W.m-2] for given time
+gsi_dem = qgis_as_terra(dem_sun$glob_rad)
+plot(dem)
+plot(gsi_dem)
+```
+
+<!-- sagagis 1 -->
+E2. Compute catchment area\index{catchment area} and catchment slope of `system.file("raster/dem.tif", package = "spDataLarge")` using **Rsagacmd**.
+
+```{r}
+library(Rsagacmd)
+dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
+saga = saga_gis(raster_backend = "terra", vector_backend = "sf")
+swi = saga$ta_hydrology$saga_wetness_index
+tidy(swi)
+swi_results = swi(dem, area_type = 0, slope_type = 1)
+swi_results_all = rast(swi_results)
+plot(swi_results_all[["area"]])
+plot(swi_results_all[["slope"]])
+```
+
+E3. Continue working on the `ndvi_segments` object created in the SAGA GIS section.
+Extract average NDVI values from the `ndvi` raster and group them into six clusters using `kmeans()`. 
+Visualize the results.
+
+```{r}
+library(Rsagacmd)
+saga = saga_gis(raster_backend = "terra", vector_backend = "sf")
+ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
+sg = saga$imagery_segmentation$seed_generation
+
+ndvi_seeds = sg(ndvi, band_width = 2)
+plot(ndvi_seeds$seed_grid)
+
+srg = saga$imagery_segmentation$seeded_region_growing
+ndvi_srg = srg(ndvi_seeds$seed_grid, ndvi, method = 1)
+plot(ndvi_srg$segments)
+
+ndvi_segments = as.polygons(ndvi_srg$segments) |> 
+  st_as_sf()
+
+# extract values
+ndvi_segments_vals = extract(ndvi, ndvi_segments, fun = "mean")
+ndvi_segments = cbind(ndvi_segments, ndvi_segments_vals)
+
+# k-means
+ks = kmeans(ndvi_segments[["ndvi"]], centers = 6)
+ndvi_segments$k = ks$cluster
+
+# merge polygons
+library(dplyr)
+ndvi_segments2 = ndvi_segments |> 
+  group_by(k) |> 
+  summarise()
+
+# visualize results
+library(tmap)
+tm1 = tm_shape(ndvi) +
+  tm_raster(style = "cont", palette = "PRGn", title = "NDVI", n = 7) + 
+  tm_shape(ndvi_segments2) +
+  tm_borders(col = "red") +
+  tm_layout(legend.outside = TRUE)
+
+tm2 = tm_shape(ndvi_segments2) +
+  tm_polygons(col = "k", style = "cat", palette = "Set1") +
+  tm_layout(legend.outside = TRUE)
+
+tmap_arrange(tm1, tm2)
+```
+
+<!-- rgrass 1 -->
+E4. Attach `data(random_points, package = "spDataLarge")` and read `system.file("raster/dem.tif", package = "spDataLarge")` into R.
+Select a point randomly from `random_points` and find all `dem` pixels that can be seen from this point (hint: viewshed\index{viewshed} can be calculated using GRASS GIS).
+Visualize your result.
+For example, plot a hillshade\index{hillshade}, the digital elevation model\index{digital elevation model}, your viewshed\index{viewshed} output, and the point.
+Additionally, give `mapview` a try.
+
+```{r}
+library(rgrass)
+dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
+data(random_points, package = "spDataLarge")
+random_point = random_points[sample(1:nrow(random_points), 1), ]
+
+link2GI::linkGRASS(dem)
+write_RAST(dem, vname = "dem")
+
+execGRASS("r.viewshed",
+          input = "dem", 
+          coordinates = sf::st_coordinates(random_point),
+          output = "view",
+          flags = "overwrite")
+out = read_RAST("view")
+
+# simple viz
+plot(out)
+
+# hillshade viz
+hs = shade(slope = terrain(dem, "slope", unit = "radians"), 
+           aspect = terrain(dem, "aspect", unit = "radians"))
+
+library(tmap)
+tm_shape(hs) +
+	tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+	tm_shape(dem) +
+	tm_raster(alpha = 0.6, palette = hcl.colors(25, "Geyser"), legend.show = FALSE) +
+  tm_shape(out) +
+  tm_raster(style = "cont", legend.show = FALSE) +
+	tm_shape(random_point) +
+	tm_symbols(col = "black") +
+	tm_layout(frame = FALSE)
+
+# mapview viz
+library(mapview)
+mapview(out, col = "white", map.type = "Esri.WorldImagery") +
+  mapview(point)
+```
+
+<!-- gdal 1-2 -->
+E5. Use `gdalinfo` via a system call for a raster\index{raster} file stored on disk of your choice.
+What kind of information you can find there?
+
+```{r}
+link2GI::linkGDAL()
+our_filepath = system.file("raster/elev.tif", package = "spData")
+cmd = paste("gdalinfo", our_filepath)
+system(cmd)
+# Driver, file path, dimensions, CRS, resolution, bounding box, summary statistics
+```
+
+E6. Use `gdalwarp` to decrease the resolution of your raster file (for example, if the resolution is 0.5, change it into 1). Note: `-tr` and `-r` flags will be used in this exercise.
+
+```{r}
+our_filepath = system.file("raster/elev.tif", package = "spData")
+cmd2 = paste("gdalwarp", our_filepath, "new_elev.tif", "-tr 1 1", "-r bilinear")
+system(cmd2)
+```
+
+<!-- postgis 1? -->
+E7. Query all Californian highways from the PostgreSQL/PostGIS\index{PostGIS} database living in the QGIS\index{QGIS} Cloud introduced in this chapter.
+
+```{r}
+library(RPostgreSQL)
+conn = dbConnect(drv = PostgreSQL(), 
+                 dbname = "rtafdf_zljbqm", host = "db.qgiscloud.com",
+                 port = "5432", user = "rtafdf_zljbqm", password = "d3290ead")
+query = paste(
+  "SELECT *",
+  "FROM highways",
+  "WHERE state = 'CA';")
+ca_highways = read_sf(conn, query = query, geom = "wkb_geometry")
+plot(st_geometry(ca_highways))
+```
+
+<!-- stac+gdalcubes 1 -->
+E8. The `ndvi.tif` raster (`system.file("raster/ndvi.tif", package = "spDataLarge")`) contains NDVI calculated for the Mongón study area based on Landsat data from September 22nd, 2000.
+Use **rstac**, **gdalcubes**, and **terra** to download Sentinel-2 images for the same area from 
+2020-08-01 to 2020-10-31, calculate its NDVI, and then compare it with the results from `ndvi.tif`.
+
+```{r}
+library(rstac)
+library(gdalcubes)
+?spDataLarge::ndvi.tif
+ndvi1 = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
+bbox1 = as.numeric(st_bbox(project(ndvi1, "EPSG:4326")))
+
+# get data
+s = stac("https://earth-search.aws.element84.com/v0")
+items = s |>
+  stac_search(collections = "sentinel-s2-l2a-cogs",
+              bbox = bbox1, 
+              datetime = "2020-08-01/2020-10-31") |>
+  post_request() |> items_fetch()
+collection = stac_image_collection(items$features, 
+                  property_filter = function(x) {x[["eo:cloud_cover"]] < 10})
+v = cube_view(srs = "EPSG:32717", extent = collection,
+              dx = xres(ndvi1), dy = yres(ndvi1),
+              dt = "P1D")
+
+# calculate ndvi
+ndvi2 = raster_cube(collection, v) |>
+  select_bands(c("B04", "B08")) |>
+  apply_pixel("(B08-B04)/(B08+B04)", "NDVI")
+
+# write results to file
+gdalcubes_options(parallel = 2)
+gdalcubes::write_tif(ndvi2, dir = ".", prefix = "ndvi2")
+
+# unify two datasets
+ndvi2 = rast("ndvi22020-10-10.tif")
+plot(ndvi2)
+ndvi2 = resample(ndvi2, ndvi1, method = "bilinear")
+plot(ndvi2)
+
+# vizualize the final results
+ndvi_all = c(ndvi1, ndvi2)
+names(ndvi_all) = c("y2000", "y2020")
+library(tmap)
+tm_shape(ndvi_all) +
+  tm_raster(style = "cont")
+```
+

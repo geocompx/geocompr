@@ -1,6 +1,7 @@
 html:
 	Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::bs4_book", clean = TRUE)'
 	cp -fvr style/style.css _book/
+	cp -fvr _redirects _book/
 	# cp -fvr images _book/
 	cp -fvr _main* _book/
 
@@ -21,7 +22,7 @@ md: ## Generate Markdown
 	Rscript -e 'bookdown::render_book("index.Rmd", output_format = "bookdown::pdf_book", clean = FALSE)'
 
 install: ## Perform install
-	Rscript -e 'remotes::install_github("Robinlovelace/geocompr")'
+	Rscript -e 'remotes::install_github("geocompx/geocompr")'
 
 deploy: ## Perform deployment
 	Rscript -e 'bookdown::publish_book(render = "local", account = "robinlovelace")'

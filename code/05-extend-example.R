@@ -16,3 +16,15 @@ tm2 = tm_shape(elev2_poly) +
   tm_layout(frame = FALSE, legend.show = FALSE)
 
 tmap_arrange(tm1, tm2, nrow = 1)
+
+if (packageVersion("tmap") >= "4.0"){
+  tm1 = tm_shape(elev_poly, bbox = elev2_poly) +
+    tm_polygons(fill = "elev") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  
+  tm2 = tm_shape(elev2_poly) +
+    tm_polygons(fill = "elev") +
+    tm_layout(frame = FALSE, legend.show = FALSE)
+  
+  tmap_arrange(tm1, tm2, nrow = 1)
+}

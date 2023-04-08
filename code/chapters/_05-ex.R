@@ -1,0 +1,118 @@
+## ----05-ex-e0, message=FALSE------------------------------------------------------------------------
+library(sf)
+library(terra)
+library(dplyr)
+library(spData)
+library(spDataLarge)
+
+
+## ----05-ex-e1---------------------------------------------------------------------------------------
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.5))
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.05))
+# Starts to breakdown here at 0.5% of the points:
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.005))
+# At this point no further simplification changes the result
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.0005))
+plot(rmapshaper::ms_simplify(st_geometry(nz), keep = 0.00005))
+plot(st_simplify(st_geometry(nz), dTolerance = 100))
+plot(st_simplify(st_geometry(nz), dTolerance = 1000))
+# Starts to breakdown at 10 km:
+plot(st_simplify(st_geometry(nz), dTolerance = 10000))
+plot(st_simplify(st_geometry(nz), dTolerance = 100000))
+plot(st_simplify(st_geometry(nz), dTolerance = 100000, preserveTopology = TRUE))
+
+# Problem: st_simplify returns POLYGON and MULTIPOLYGON results, affecting plotting
+# Cast into a single geometry type to resolve this
+nz_simple_poly = st_simplify(st_geometry(nz), dTolerance = 10000) |> 
+  st_sfc() |> 
+  st_cast("POLYGON")
+nz_simple_multipoly = st_simplify(st_geometry(nz), dTolerance = 10000) |> 
+  st_sfc() |> 
+  st_cast("MULTIPOLYGON")
+plot(nz_simple_poly)
+length(nz_simple_poly)
+nrow(nz)
+
+
+## ----05-ex-e2---------------------------------------------------------------------------------------
+canterbury = nz[nz$Name == "Canterbury", ]
+cant_buff = st_buffer(canterbury, 100)
+nz_height_near_cant = nz_height[cant_buff, ]
+nrow(nz_height_near_cant) # 75 - 5 more
+
+
+## ----05-ex-e3---------------------------------------------------------------------------------------
+cant_cent = st_centroid(canterbury)
+nz_centre = st_centroid(st_union(nz))
+st_distance(cant_cent, nz_centre) # 234 km
+
+
+## ----05-ex-e4---------------------------------------------------------------------------------------
+world_sfc = st_geometry(world)
+world_sfc_mirror = world_sfc * c(1, -1)
+plot(world_sfc)
+plot(world_sfc_mirror)
+
+us_states_sfc = st_geometry(us_states)
+us_states_sfc_mirror = us_states_sfc * c(1, -1)
+plot(us_states_sfc)
+plot(us_states_sfc_mirror)
+## nicer plot
+# library(ggrepel)
+# us_states_sfc_mirror_labels = st_centroid(us_states_sfc_mirror) |> 
+#   st_coordinates() |>
+#   as_data_frame() |> 
+#   mutate(name = us_states$NAME)
+# us_states_sfc_mirror_sf = st_set_geometry(us_states, us_states_sfc_mirror)
+# ggplot(data = us_states_sfc_mirror_sf) +
+#   geom_sf(color = "white") +
+#   geom_text_repel(data = us_states_sfc_mirror_labels, mapping = aes(X, Y, label = name), size = 3, min.segment.length = 0) +
+#   theme_void() 
+
+
+## ----05-ex-e5a, echo=FALSE--------------------------------------------------------------------------
+b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
+b = st_buffer(b, dist = 1) # convert points to circles
+x = b[1]
+y = b[2]
+bb = st_bbox(st_union(x, y))
+box = st_as_sfc(bb)
+set.seed(2017)
+p = st_sample(x = box, size = 10)
+
+
+## ----05-ex-e5---------------------------------------------------------------------------------------
+p_in_y = p[y]
+p_in_xy = p_in_y[x]
+x_and_y = st_intersection(x, y)
+p[x_and_y]
+
+
+## ----05-ex-e6---------------------------------------------------------------------------------------
+us_states2163 = st_transform(us_states, "EPSG:2163")
+us_states_bor = st_cast(us_states2163, "MULTILINESTRING")
+us_states_bor$borders = st_length(us_states_bor)
+arrange(us_states_bor, borders)
+arrange(us_states_bor, -borders)
+
+
+## ----05-ex-e7---------------------------------------------------------------------------------------
+srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
+rast_template = rast(ext(srtm), res = 0.01)
+srtm_resampl1 = resample(srtm, y = rast_template, method = "bilinear")
+srtm_resampl2 = resample(srtm, y = rast_template, method = "near")
+srtm_resampl3 = resample(srtm, y = rast_template, method = "cubic")
+srtm_resampl4 = resample(srtm, y = rast_template, method = "cubicspline")
+srtm_resampl5 = resample(srtm, y = rast_template, method = "lanczos")
+
+srtm_resampl_all = c(srtm_resampl1, srtm_resampl2, srtm_resampl3,
+                     srtm_resampl4, srtm_resampl5)
+plot(srtm_resampl_all)
+
+# differences
+plot(srtm_resampl_all - srtm_resampl1, range = c(-300, 300))
+plot(srtm_resampl_all - srtm_resampl2, range = c(-300, 300))
+plot(srtm_resampl_all - srtm_resampl3, range = c(-300, 300))
+plot(srtm_resampl_all - srtm_resampl4, range = c(-300, 300))
+plot(srtm_resampl_all - srtm_resampl5, range = c(-300, 300))
+
