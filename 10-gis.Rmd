@@ -13,12 +13,16 @@ library(terra)
 <!-- qgisprocess to CRAN -->
 
 ```{r 09-gis-1-2, message=FALSE, eval=FALSE}
-# remotes::install_github("r-spatial/qgisprocess")
+remotes::install_github("r-spatial/qgisprocess")
 library(qgisprocess)
 library(Rsagacmd)
 library(rgrass)
 library(rstac)
 library(gdalcubes)
+```
+
+```{r 09-gis-1-3, echo=FALSE}
+qgisprocess_installed = "qgisprocess" %in% installed.packages()
 ```
 
 ## Introduction
@@ -45,8 +49,7 @@ However, interactive command line interfaces have several important advantages i
 - Automating repetitive tasks
 - Enabling transparency and reproducibility
 - Encouraging software development by providing tools to modify existing functions and implement new ones
-- Developing future-proof programming skills which are in high demand
-- Efficient workflows
+- Developing future-proof and efficient programming skills which are in high demand
 - Improving touch typing, a key skill in the digital age
 
 On the other hand, good GUIs also have advantages, including:
@@ -85,17 +88,23 @@ There have also been major developments in enabling open source GIS software to 
 
 ```{r gis-comp, echo=FALSE, message=FALSE}
 library(dplyr)
-d = tibble("GIS" = c("QGIS", "SAGA", "GRASS"),
-            "First release" = c("2002", "2004", "1982"),
-            "No. functions" = c(">1000", ">600", ">500"),
-            "Support" = c("hybrid", "hybrid", "hybrid"))
-knitr::kable(x = d, 
-             caption = paste("Comparison between three open-source GIS.", 
-                             "Hybrid refers to the support of vector and", 
-                             "raster operations."),
-             caption.short = "Comparison between three open-source GIS.", 
-             booktabs = TRUE) #|>
-  # kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
+d = tibble(
+  "GIS" = c("QGIS", "SAGA", "GRASS"),
+  "First release" = c("2002", "2004", "1982"),
+  "No. functions" = c(">1000", ">600", ">500"),
+  "Support" = c("hybrid", "hybrid", "hybrid")
+)
+knitr::kable(
+  x = d,
+  caption = paste(
+    "Comparison between three open-source GIS.",
+    "Hybrid refers to the support of vector and",
+    "raster operations."
+  ),
+  caption.short = "Comparison between three open-source GIS.",
+  booktabs = TRUE
+) #|>
+# kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
 ```
 
 In addition to the three R-GIS bridges mentioned above, this chapter also provides a brief introduction to R interfaces to spatial libraries (Section \@ref(gdal)), spatial databases\index{spatial database} (Section \@ref(postgis)), and cloud-based processing of Earth observation data (Section \@ref(cloud)).
@@ -113,7 +122,7 @@ Since version 3.14, QGIS provides a command line API\index{API}, `qgis_process`,
 The **qgisprocess** package \index{qgisprocess (package)} wraps this QGIS command-line utility, and thus makes it possible to call QGIS, GDAL, GRASS, and SAGA algorithms from the R session.
 Before running **qgisprocess**\index{qgisprocess (package)}, make sure you have installed QGIS\index{QGIS} and all its (third-party) dependencies such as SAGA\index{SAGA} and GRASS\index{GRASS}.
 
-```{r}
+```{r, eval=qgisprocess_installed}
 library(qgisprocess)
 #> Using 'qgis_process' in the system PATH.
 #> QGIS version: 3.28.2-Firenze
@@ -128,16 +137,16 @@ The above approaches can also be used when you have more than one QGIS installat
 
 Next, we can find which providers (meaning different software) are available on our computer.
 
-```{r providers, eval=FALSE}
+```{r providers, eval=qgisprocess_installed}
 qgis_providers()
 #> # A tibble: 6 × 2
-#>   provider provider_title   
-#>   <chr>    <chr>            
-#> 1 3d       QGIS (3D)        
-#> 2 gdal     GDAL             
-#> 3 grass7   GRASS            
+#>   provider provider_title
+#>   <chr>    <chr>
+#> 1 3d       QGIS (3D)
+#> 2 gdal     GDAL
+#> 3 grass7   GRASS
 #> 4 native   QGIS (native c++)
-#> 5 qgis     QGIS             
+#> 5 qgis     QGIS
 #> 6 saga     SAGA
 ```
 
@@ -161,24 +170,30 @@ incongr_wgs = st_transform(incongruent, "EPSG:4326")
 aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 ```
 
-```{r uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders). "}
+```{r uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders).", eval=qgisprocess_installed}
 library(tmap)
 tm_shape(incongr_wgs) +
   tm_polygons(border.col = "grey5") +
   tm_shape(aggzone_wgs) +
   tm_borders(alpha = 0.5, col = "red") +
-  tm_add_legend(type = "line",
-                labels = c("incongr_wgs", "aggzone_wgs"),
-                col = c("grey5", "red"),
-                lwd = 3) +
-  tm_scale_bar(position = c("left", "bottom"),
-               breaks = c(0, 0.5, 1)) +
-  tm_layout(frame = FALSE,
-            legend.text.size = 1)
+  tm_add_legend(
+    type = "line",
+    labels = c("incongr_wgs", "aggzone_wgs"),
+    col = c("grey5", "red"),
+    lwd = 3
+  ) +
+  tm_scale_bar(
+    position = c("left", "bottom"),
+    breaks = c(0, 0.5, 1)
+  ) +
+  tm_layout(
+    frame = FALSE,
+    legend.text.size = 1
+  )
 
 # toDo: jn
 # tm_add_legend is missing
-if (packageVersion("tmap") >= "4.0"){
+if (packageVersion("tmap") >= "4.0") {
   library(tmap)
   tm_shape(incongr_wgs) +
     tm_polygons(col = "grey5") +
@@ -194,14 +209,14 @@ if (packageVersion("tmap") >= "4.0"){
 To find an algorithm to do this work, we can search the output of the `qgis_algorithms()` function.
 This function returns a data frame containing all of the available providers and the algorithms they contain.^[Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.] 
 
-```{r}
+```{r, eval=qgisprocess_installed}
 qgis_algo = qgis_algorithms()
 ```
 
 The `qgis_algo` object has a lot of columns, but usually, we are only interested in the `algorithm` column that combines information about the provider and the algorithm name.
 Assuming that the short description of the function contains the word "union"\index{union}, we can run the following code to find the algorithm of interest:
 
-```{r, eval=FALSE}
+```{r, eval=qgisprocess_installed}
 grep("union", qgis_algo$algorithm, value = TRUE)
 #> [1] "native:multiunion" "native:union"      "saga:fuzzyunionor" "saga:polygonunion"
 ```
@@ -212,9 +227,9 @@ This is the role of the `qgis_show_help()`, which returns a short summary of wha
 This makes it output rather long.
 Here, we only present the arguments`"native:union"` expects.
 
-```{r 09-gis-6, eval=FALSE}
+```{r 09-gis-6, eval=qgisprocess_installed}
 alg = "native:union"
-qgis_arguments(alg) |> 
+qgis_arguments(alg) |>
   dplyr::mutate(acceptable_values = unlist(acceptable_values)) |>
   select(name, description, acceptable_values)
 ```
@@ -232,9 +247,11 @@ The first one, `INPUT`, is our main vector object `incongr_wgs`, while the secon
 The last argument, `OUTPUT`, expects a path to a new vector file; however, if we do not provide the path, **qgisprocess** will automatically create a temporary file.
 The `.quiet` argument only tells **qgisprocess** to be less verbose.
 
-```{r 09-gis-7, eval=FALSE}
-union = qgis_run_algorithm(alg, INPUT = incongr_wgs, OVERLAY = aggzone_wgs, 
-                           .quiet = TRUE)
+```{r 09-gis-7, eval=qgisprocess_installed}
+union = qgis_run_algorithm(alg,
+  INPUT = incongr_wgs, OVERLAY = aggzone_wgs,
+  .quiet = TRUE
+)
 union
 ```
 
@@ -242,7 +259,7 @@ Running the above line of code will save our two input objects into temporary .g
 The **qgisprocess** package stores the `qgis_run_algorithm()` result as a list containing, in this case, a path to the output file.
 We can either read this file back into R with `read_sf()` (e.g., `union_sf = read_sf(union[[1]])`) or directly with `st_as_sf()`:
 
-```{r, eval=FALSE}
+```{r, eval=qgisprocess_installed}
 union_sf = st_as_sf(union)
 ```
 
@@ -255,7 +272,7 @@ These artifacts of error are called sliver polygons\index{sliver polygons} (see 
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^, and next remove them.
 Let's search for an appropriate algorithm.
 
-```{r, eval=FALSE}
+```{r, eval=qgisprocess_installed}
 grep("clean", qgis_algo$algorithm, value = TRUE)
 ```
 
@@ -278,11 +295,11 @@ qgis_arguments("grass7:v.clean") |>
   select(name, description) |>
   dplyr::slice_head(n = 4)
 #> # A tibble: 4 × 2
-#>   name      description                              
-#>   <chr>     <chr>                                    
-#> 1 input     Layer to clean                           
-#> 2 type      Input feature type                       
-#> 3 tool      Cleaning tool                            
+#>   name      description
+#>   <chr>     <chr>
+#> 1 input     Layer to clean
+#> 2 type      Input feature type
+#> 3 tool      Cleaning tool
 #> 4 threshold Threshold (comma separated for each tool)
 ```
 
@@ -295,15 +312,17 @@ In our case, the `rmarea` tool removes all areas smaller or equal to a provided 
 
 Let's run this algorithm and convert its output into a new `sf` object `clean_sf`.
 
-```{r 09-gis-7c, eval=FALSE}
-clean = qgis_run_algorithm("grass7:v.clean", input = union_sf,
-                           tool = "rmarea", threshold = 25000, .quiet = TRUE)
+```{r 09-gis-7c, eval=qgisprocess_installed}
+clean = qgis_run_algorithm("grass7:v.clean",
+  input = union_sf,
+  tool = "rmarea", threshold = 25000, .quiet = TRUE
+)
 clean_sf = st_as_sf(clean)
 ```
 
 The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver polygons are now removed.
 
-```{r sliver, echo=FALSE, fig.cap="Sliver polygons colored in red (left panel). Cleaned polygons (right panel)."}
+```{r sliver, echo=FALSE, fig.cap="Sliver polygons colored in red (left panel). Cleaned polygons (right panel).", eval=qgisprocess_installed}
 knitr::include_graphics("figures/10-sliver.png")
 ```
 
@@ -317,7 +336,7 @@ Various terrain parameters, for example, can be helpful for the prediction of la
 For this section, we will use `dem.tif` -- a digital elevation model of the Mongón study area (downloaded from the Land Process Distributed Active Archive Center, see also `?dem.tif`)
 It has a resolution of about 30 by 30 meters and uses a projected CRS.
 
-```{r, eval=FALSE}
+```{r, eval=qgisprocess_installed}
 library(qgisprocess)
 library(terra)
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
@@ -328,7 +347,7 @@ However, GIS programs offer many more terrain characteristics, some of which can
 For example, the topographic wetness index (TWI) was found useful in studying hydrological and biological processes [@sorensen_calculation_2006].
 Let's search the algorithm list for this index using `"wetness"` as keyword.
 
-```{r, eval=FALSE}
+```{r, eval=qgisprocess_installed}
 qgis_algo = qgis_algorithms()
 grep("wetness", qgis_algo$algorithm, value = TRUE)
 #> [1] "saga:sagawetnessindex"           "saga:topographicwetnessindextwi"
@@ -340,7 +359,7 @@ Hence, SAGA is especially good at the fast processing of large (high-resolution)
 
 The `"saga:sagawetnessindex"` algorithm is actually a modified TWI, that results in a more realistic soil moisture potential for the cells located in valley floors [@bohner_spatial_2006].
 
-```{r, eval=FALSE}
+```{r, eval=qgisprocess_installed}
 qgis_show_help("saga:sagawetnessindex")
 # output not shown here
 ```
@@ -350,9 +369,11 @@ Therefore, we only have to specify one argument -- the input `DEM`.
 Of course, when applying this algorithm you should make sure that the default values are in correspondence with your study aim.^[The additional arguments of `"saga:sagawetnessindex"` are well-explained at https://gis.stackexchange.com/a/323454/20955.]
 `"saga:sagawetnessindex"` returns not one but four rasters -- catchment area, catchment slope, modified catchment area, and topographic wetness index.
 
-```{r, eval=FALSE}
-dem_wetness = qgis_run_algorithm("saga:sagawetnessindex", DEM = dem, 
-                                 .quiet = TRUE)
+```{r, eval=qgisprocess_installed}
+dem_wetness = qgis_run_algorithm("saga:sagawetnessindex",
+  DEM = dem,
+  .quiet = TRUE
+)
 ```
 
 <!-- The result, `dem_wetness`, is a list with file paths to the four outputs. -->
@@ -370,7 +391,7 @@ These phenotypes are used in many studies, including landslide susceptibility, e
 
 The original implementation of the geomorphons' algorithm was created in GRASS GIS, and we can find it in the **qgisprocess** list as `"grass7:r.geomorphon"`:
 
-```{r, eval=FALSE}
+```{r, eval=qgisprocess_installed}
 grep("geomorphon", qgis_algo$algorithm, value = TRUE)
 #> [1] "grass7:r.geomorphon"
 qgis_show_help("grass7:r.geomorphon")
@@ -381,15 +402,17 @@ Calculation of geomorphons requires an input DEM (`elevation`), and can be custo
 It includes, `search` -- a length for which the line-of-sight is calculated, and ``-m`` -- a flag specifying that the search value will be provided in meters (and not the number of cells).
 More information about additional arguments can be found in the original paper and the [GRASS GIS documentation](https://grass.osgeo.org/grass-stable/manuals/r.geomorphon.html).
 
-```{r, eval=FALSE}
-dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon", elevation = dem, 
-                                    `-m` = TRUE, search = 120, .quiet = TRUE)
+```{r, eval=qgisprocess_installed}
+dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon",
+  elevation = dem,
+  `-m` = TRUE, search = 120, .quiet = TRUE
+)
 ```
 
 Our output, `dem_geomorph$forms`, contains a raster file with 10 categories -- each one representing a terrain form.
 We can read it into R with `qgis_as_terra()`, and then visualize it (the right panel of Figure \@ref(fig:qgis-raster-map)) or use it in our subsequent calculations.
 
-```{r, eval=FALSE}
+```{r, eval=qgisprocess_installed}
 dem_geomorph_terra = qgis_as_terra(dem_geomorph$forms)
 ```
 
@@ -468,8 +491,8 @@ Finally, `ndvi_srg$segments` is a raster with our resulting areas (the right pan
 We can convert it into polygons with `as.polygons()` and `st_as_sf()` (Section \@ref(spatial-vectorization)).
 
 ```{r, eval=FALSE}
-ndvi_segments = ndvi_srg$segments |> 
-  as.polygons() |> 
+ndvi_segments = ndvi_srg$segments |>
+  as.polygons() |>
   st_as_sf()
 ```
 
@@ -532,7 +555,7 @@ library(osmdata)
 b_box = st_bbox(points)
 london_streets = opq(b_box) |>
   add_osm_feature(key = "highway") |>
-  osmdata_sf() 
+  osmdata_sf()
 london_streets = london_streets[["osm_lines"]]
 london_streets = select(london_streets, osm_id)
 ```
@@ -570,8 +593,10 @@ GRASS's `"v.clean"` takes care of the removal of duplicates, small angles and da
 Here, we break lines at each intersection to ensure that the subsequent routing algorithm can actually turn right or left at an intersection, and save the output in a GRASS object named `streets_clean`.
 
 ```{r 09-gis-32, eval=FALSE}
-execGRASS(cmd = "v.clean", input = "london_streets", output = "streets_clean",
-          tool = "break", flags = "overwrite")
+execGRASS(
+  cmd = "v.clean", input = "london_streets", output = "streets_clean",
+  tool = "break", flags = "overwrite"
+)
 ```
 
 ```{block2 06-raster-vector-22, type='rmdnote'}
@@ -585,9 +610,11 @@ However, to find the shortest route\index{shortest route} between them, we need 
 We save its output in `streets_points_con`.
 
 ```{r 09-gis-32b, eval=FALSE}
-execGRASS(cmd = "v.net", input = "streets_clean", output = "streets_points_con",
-          points = "points", operation = "connect", threshold = 0.001,
-          flags = c("overwrite", "c"))
+execGRASS(
+  cmd = "v.net", input = "streets_clean", output = "streets_points_con",
+  points = "points", operation = "connect", threshold = 0.001,
+  flags = c("overwrite", "c")
+)
 ```
 
 The resulting clean dataset serves as input for the `"v.net.salesman"` algorithm, which finally finds the shortest route between all cycle hire stations.
@@ -597,9 +624,11 @@ Since we would like to calculate the route for all cycle stations, we set it to 
 To access the GRASS help page of the traveling salesman\index{traveling salesman} algorithm\index{algorithm}, run `execGRASS("g.manual", entry = "v.net.salesman")`.
 
 ```{r 09-gis-33, eval=FALSE}
-execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
-          output = "shortest_route", center_cats = paste0("1-", nrow(points)),
-          flags = "overwrite")
+execGRASS(
+  cmd = "v.net.salesman", input = "streets_points_con",
+  output = "shortest_route", center_cats = paste0("1-", nrow(points)),
+  flags = "overwrite"
+)
 ```
 
 To see our result, we read the result into R, convert it into an sf-object keeping only the geometry, and visualize it with the help of the **mapview** package (Figure \@ref(fig:grass-mapview) and Section \@ref(interactive-maps)).
@@ -617,11 +646,14 @@ knitr::include_graphics("figures/10_shortest_route.png")
 
 ```{r 09-gis-35, eval=FALSE, echo=FALSE}
 library(mapview)
-m_1 = mapview(route) +  points
+m_1 = mapview(route) + points
 mapview::mapshot(m_1,
-                 file = file.path(getwd(), "figures/09_shortest_route.png"),
-                 remove_controls = c("homeButton", "layersControl",
-                                     "zoomControl"))
+  file = file.path(getwd(), "figures/09_shortest_route.png"),
+  remove_controls = c(
+    "homeButton", "layersControl",
+    "zoomControl"
+  )
+)
 ```
 
 There are a few important considerations to note in the process:
@@ -695,7 +727,7 @@ cmd = paste("ogrinfo -al -so", our_filepath)
 system(cmd)
 #> INFO: Open of `.../spData/shapes/world.gpkg'
 #>       using driver `GPKG' successful.
-#> 
+#>
 #> Layer name: world
 #> Geometry: Multi Polygon
 #> Feature Count: 177
@@ -750,9 +782,11 @@ Our first step here is to create a connection to a database by providing its nam
 
 ```{r 09-gis-37, eval=FALSE}
 library(RPostgreSQL)
-conn = dbConnect(drv = PostgreSQL(), 
-                 dbname = "rtafdf_zljbqm", host = "db.qgiscloud.com",
-                 port = "5432", user = "rtafdf_zljbqm", password = "d3290ead")
+conn = dbConnect(
+  drv = PostgreSQL(),
+  dbname = "rtafdf_zljbqm", host = "db.qgiscloud.com",
+  port = "5432", user = "rtafdf_zljbqm", password = "d3290ead"
+)
 ```
 
 Our new object, `conn`, is just an established link between our R session and the database.
@@ -763,8 +797,8 @@ This can be answered with `dbListTables()` as follows:
 
 ```{r 09-gis-38, eval=FALSE}
 dbListTables(conn)
-#> [1] "spatial_ref_sys" "topology"        "layer"           "restaurants"    
-#> [5] "highways" 
+#> [1] "spatial_ref_sys" "topology"        "layer"           "restaurants"
+#> [5] "highways"
 ```
 
 The answer is five tables.
@@ -774,8 +808,8 @@ To find out about attributes available in a table, we can run `dbListFields`:
 
 ```{r 09-gis-39, eval=FALSE}
 dbListFields(conn, "highways")
-#> [1] "qc_id"        "wkb_geometry" "gid"          "feature"     
-#> [5] "name"         "state"   
+#> [1] "qc_id"        "wkb_geometry" "gid"          "feature"
+#> [5] "name"         "state"
 ```
 
 Now, as we know the available datasets, we can perform some queries -- ask the database some questions.
@@ -788,7 +822,8 @@ Additionally, `read_sf()` needs to know which column represents the geometry (he
 query = paste(
   "SELECT *",
   "FROM highways",
-  "WHERE name = 'US Route 1' AND state = 'MD';")
+  "WHERE name = 'US Route 1' AND state = 'MD';"
+)
 us_route = read_sf(conn, query = query, geom = "wkb_geometry")
 ```
 
@@ -801,7 +836,8 @@ To show this, the next example adds a 35-kilometer (35,000 m) buffer around the 
 query = paste(
   "SELECT ST_Union(ST_Buffer(wkb_geometry, 35000))::geometry",
   "FROM highways",
-  "WHERE name = 'US Route 1' AND state = 'MD';")
+  "WHERE name = 'US Route 1' AND state = 'MD';"
+)
 buf = read_sf(conn, query = query)
 ```
 
@@ -851,17 +887,25 @@ tm_shape(buf) +
   tm_lines(col = "black", lwd = 3) +
   tm_shape(hardees) +
   tm_symbols(col = "#F10C26") +
-  tm_add_legend(type = "line", col = "black", lwd = 3,
-                labels = "The US Route 1 highway") +
-  tm_add_legend(type = "fill", col = "#FFFDD0",
-                border.alpha = 0.3, label = "35km buffer") +
-  tm_add_legend(type = "symbol", col = "#F10C26",
-                labels = "Restaurants") +
-  tm_layout(frame = FALSE,
-            legend.outside = TRUE,
-            legend.outside.size = 0.3) 
+  tm_add_legend(
+    type = "line", col = "black", lwd = 3,
+    labels = "The US Route 1 highway"
+  ) +
+  tm_add_legend(
+    type = "fill", col = "#FFFDD0",
+    border.alpha = 0.3, label = "35km buffer"
+  ) +
+  tm_add_legend(
+    type = "symbol", col = "#F10C26",
+    labels = "Restaurants"
+  ) +
+  tm_layout(
+    frame = FALSE,
+    legend.outside = TRUE,
+    legend.outside.size = 0.3
+  )
 
-if (packageVersion("tmap") >= "4.0"){
+if (packageVersion("tmap") >= "4.0") {
   library(tmap)
   tm_shape(buf) +
     tm_polygons(fill = "#FFFDD0", col_alpha = 0.3) +
@@ -875,7 +919,7 @@ if (packageVersion("tmap") >= "4.0"){
     #               border.alpha = 0.3, label = "35km buffer") +
     # tm_add_legend(type = "symbol", col = "#F10C26",
     #               labels = "Restaurants") +
-    tm_layout(frame = FALSE) 
+    tm_layout(frame = FALSE)
 }
 ```
 
@@ -917,16 +961,19 @@ In R, the **rstac** package\index{rstac (package)}  [@simoes_rstac_2021] allows 
 In the example below, we request all images from the [Sentinel-2 Cloud-Optimized GeoTIFF (COG) dataset on Amazon Web Services](https://registry.opendata.aws/sentinel-2-l2a-cogs)\index{COG} that intersect with a predefined area and time of interest. 
 The result contains all found images and their metadata (e.g. cloud cover) and URLs pointing to actual files on AWS. 
 
-```{r 09-stac-example, eval = FALSE}
+```{r 09-stac-example, eval=FALSE}
 library(rstac)
 # Connect to the STAC-API endpoint for Sentinel-2 data
 # and search for images intersecting our AOI
 s = stac("https://earth-search.aws.element84.com/v0")
 items = s |>
-  stac_search(collections = "sentinel-s2-l2a-cogs",
-              bbox = c(7.1, 51.8, 7.2, 52.8), 
-              datetime = "2020-01-01/2020-12-31") |>
-  post_request() |> items_fetch()
+  stac_search(
+    collections = "sentinel-s2-l2a-cogs",
+    bbox = c(7.1, 51.8, 7.2, 52.8),
+    datetime = "2020-01-01/2020-12-31"
+  ) |>
+  post_request() |>
+  items_fetch()
 ```
 
 Cloud storage differs from local hard disks and traditional image file formats do not perform well in cloud-based geoprocessing. 
@@ -940,14 +987,19 @@ The **gdalcubes** package\index{gdalcubes (package)}  [@appel_gdalcubes_2019] ca
 
 The code below shows a minimal example to create a lower resolution (250m) maximum NDVI composite from the Sentinel-2 images returned by the previous STAC-API search.
 
-```{r 09-gdalcubes-example, eval = FALSE}
+```{r 09-gdalcubes-example, eval=FALSE}
 library(gdalcubes)
 # Filter images by cloud cover and create an image collection object
-collection = stac_image_collection(items$features, 
-                  property_filter = function(x) {x[["eo:cloud_cover"]] < 10})
+collection = stac_image_collection(items$features,
+  property_filter = function(x) {
+    x[["eo:cloud_cover"]] < 10
+  }
+)
 # Define extent, resolution (250m, daily) and CRS of the target data cube
-v = cube_view(srs = "EPSG:3857", extent = collection, dx = 250, dy = 250,
-              dt = "P1D") # "P1D" is an ISO 8601 duration string
+v = cube_view(
+  srs = "EPSG:3857", extent = collection, dx = 250, dy = 250,
+  dt = "P1D"
+) # "P1D" is an ISO 8601 duration string
 # Create and process the data cube
 cube = raster_cube(collection, v) |>
   select_bands(c("B04", "B08")) |>
@@ -986,24 +1038,36 @@ p = processes() # load available processes
 collections = list_collections() # load available collections
 formats = list_file_formats() # load available output formats
 # Load Sentinel-2 collection
-s2 = p$load_collection(id = "SENTINEL2_L2A",
-                       spatial_extent = list(west = 7.5, east = 8.5,
-                                             north = 51.1, south = 50.1),
-                       temporal_extent = list("2021-01-01", "2021-01-31"),
-                       bands = list("B04","B08")) 
+s2 = p$load_collection(
+  id = "SENTINEL2_L2A",
+  spatial_extent = list(
+    west = 7.5, east = 8.5,
+    north = 51.1, south = 50.1
+  ),
+  temporal_extent = list("2021-01-01", "2021-01-31"),
+  bands = list("B04", "B08")
+)
 # Compute NDVI vegetation index
-compute_ndvi = p$reduce_dimension(data = s2, dimension = "bands",
-                                  reducer = function(data, context) {
-                                    (data[2] - data[1]) / (data[2] + data[1])
-                                  })
+compute_ndvi = p$reduce_dimension(
+  data = s2, dimension = "bands",
+  reducer = function(data, context) {
+    (data[2] - data[1]) / (data[2] + data[1])
+  }
+)
 # Compute maximum over time
-reduce_max = p$reduce_dimension(data = compute_ndvi, dimension = "t",
-                                reducer = function(x, y) {max(x)})
+reduce_max = p$reduce_dimension(
+  data = compute_ndvi, dimension = "t",
+  reducer = function(x, y) {
+    max(x)
+  }
+)
 # Export as GeoTIFF
 result = p$save_result(reduce_max, formats$output$GTiff)
 # Login, see https://docs.openeo.cloud/getting-started/r/#authentication
-login(login_type = "oidc", provider = "egi", 
-      config = list(client_id = "...", secret = "..."))
+login(
+  login_type = "oidc", provider = "egi",
+  config = list(client_id = "...", secret = "...")
+)
 # Execute processes
 compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 ```
@@ -1011,7 +1075,9 @@ compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 ## Exercises
 
 ```{r, echo=FALSE, results='asis'}
-res = knitr::knit_child('_10-ex.Rmd', quiet = TRUE, 
-                        options = list(include = FALSE, eval = FALSE))
-cat(res, sep = '\n')
+res = knitr::knit_child("_10-ex.Rmd",
+  quiet = TRUE,
+  options = list(include = FALSE, eval = FALSE)
+)
+cat(res, sep = "\n")
 ```
