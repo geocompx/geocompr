@@ -22,7 +22,17 @@ library(gdalcubes)
 ```
 
 ```{r 09-gis-1-3, echo=FALSE}
+# Only run code if qgis is installed
+qgis = FALSE
 qgisprocess_installed = "qgisprocess" %in% installed.packages()
+if(qgisprocess_installed) {
+  algs = qgisprocess::qgis_algorithms()
+  if(!is.null(algs)) {
+    if(nrow(algs) > 300) {
+      qgis = TRUE
+    }
+  }
+}
 ```
 
 ## Introduction
@@ -122,7 +132,7 @@ Since version 3.14, QGIS provides a command line API\index{API}, `qgis_process`,
 The **qgisprocess** package \index{qgisprocess (package)} wraps this QGIS command-line utility, and thus makes it possible to call QGIS, GDAL, GRASS, and SAGA algorithms from the R session.
 Before running **qgisprocess**\index{qgisprocess (package)}, make sure you have installed QGIS\index{QGIS} and all its (third-party) dependencies such as SAGA\index{SAGA} and GRASS\index{GRASS}.
 
-```{r, eval=qgisprocess_installed}
+```{r, eval=qgis}
 library(qgisprocess)
 #> Using 'qgis_process' in the system PATH.
 #> QGIS version: 3.28.2-Firenze
@@ -137,7 +147,7 @@ The above approaches can also be used when you have more than one QGIS installat
 
 Next, we can find which providers (meaning different software) are available on our computer.
 
-```{r providers, eval=qgisprocess_installed}
+```{r providers, eval=qgis}
 qgis_providers()
 #> # A tibble: 6 × 2
 #>   provider provider_title
@@ -151,6 +161,17 @@ qgis_providers()
 ```
 
 The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
+Enable external algorithms with the following command:
+
+```{r enable-providers, eval=qgis}
+qgis_enable_plugins()
+#> Trying to enable following plugin(s): grassprovider, otbprovider, processing_saga_nextgen
+#> grassprovider successfully enabled!
+#> otbprovider successfully enabled!
+#> processing_saga_nextgen successfully enabled!
+#> ...
+#> You now have access to 1162 algorithms from 6 QGIS processing providers.
+```
 
 We are now ready for some QGIS geocomputation from within R!
 Let's try two example case studies.
@@ -170,7 +191,7 @@ incongr_wgs = st_transform(incongruent, "EPSG:4326")
 aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 ```
 
-```{r uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders).", eval=qgisprocess_installed}
+```{r uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders).", eval=qgis}
 library(tmap)
 tm_shape(incongr_wgs) +
   tm_polygons(border.col = "grey5") +
@@ -209,14 +230,14 @@ if (packageVersion("tmap") >= "4.0") {
 To find an algorithm to do this work, we can search the output of the `qgis_algorithms()` function.
 This function returns a data frame containing all of the available providers and the algorithms they contain.^[Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.] 
 
-```{r, eval=qgisprocess_installed}
+```{r, eval=qgis}
 qgis_algo = qgis_algorithms()
 ```
 
 The `qgis_algo` object has a lot of columns, but usually, we are only interested in the `algorithm` column that combines information about the provider and the algorithm name.
 Assuming that the short description of the function contains the word "union"\index{union}, we can run the following code to find the algorithm of interest:
 
-```{r, eval=qgisprocess_installed}
+```{r, eval=FALSE}
 grep("union", qgis_algo$algorithm, value = TRUE)
 #> [1] "native:multiunion" "native:union"      "saga:fuzzyunionor" "saga:polygonunion"
 ```
