@@ -23,13 +23,13 @@ library(gdalcubes)
 
 ```{r 09-gis-1-3, echo=FALSE}
 # Only run code if qgis is installed
-qgis = FALSE
+has_qgis = FALSE
 qgisprocess_installed = "qgisprocess" %in% installed.packages()
 if(qgisprocess_installed) {
   algs = qgisprocess::qgis_algorithms()
   if(!is.null(algs)) {
     if(nrow(algs) > 300) {
-      qgis = TRUE
+      has_qgis = TRUE
     }
   }
 }
@@ -133,7 +133,7 @@ Since version 3.14 (released in summer 2020), QGIS installs the command line uti
 The **qgisprocess** package \index{qgisprocess (package)} wraps this QGIS command-line utility, and thus makes it possible to call QGIS, GDAL, GRASS, and SAGA algorithms from the R session.
 Before running **qgisprocess**\index{qgisprocess (package)}, make sure you have installed QGIS\index{QGIS} and all its (third-party) dependencies such as SAGA\index{SAGA} and GRASS\index{GRASS}.
 
-```{r, eval=qgis}
+```{r, eval=has_qgis}
 library(qgisprocess)
 #> Attempting to load the cache ... Success!
 #> QGIS version: 3.30.1-'s-Hertogenbosch
@@ -148,7 +148,7 @@ The above approaches can also be used when you have more than one QGIS installat
 
 Next, we can find which providers (meaning different software) are available on our computer.
 
-```{r providers, eval=qgis}
+```{r providers, eval=has_qgis}
 qgis_providers()
 #> # A tibble: 6 × 3
 #>   provider provider_title    algorithm_count
@@ -164,7 +164,7 @@ qgis_providers()
 The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
 Enable external algorithms with the following command:
 
-```{r enable-providers, eval=qgis}
+```{r enable-providers, eval=has_qgis}
 qgis_enable_plugins()
 #> Trying to enable following plugin(s): grassprovider, otbprovider, processing_saga_nextgen
 #> grassprovider successfully enabled!
@@ -192,7 +192,7 @@ incongr_wgs = st_transform(incongruent, "EPSG:4326")
 aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 ```
 
-```{r uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders).", eval=qgis}
+```{r uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders).", eval=has_qgis}
 library(tmap)
 tm_shape(incongr_wgs) +
   tm_polygons(border.col = "grey5") +
@@ -231,7 +231,7 @@ if (packageVersion("tmap") >= "4.0") {
 To find an algorithm to do this work, we can search the output of the `qgis_algorithms()` function.
 This function returns a data frame containing all of the available providers and the algorithms they contain.^[Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.] 
 
-```{r, eval=qgis}
+```{r, eval=has_qgis}
 qgis_algo = qgis_algorithms()
 ```
 
@@ -249,7 +249,7 @@ This is the role of the `qgis_show_help()`, which returns a short summary of wha
 This makes it output rather long.
 The following command returns a data frame with each row representing an argument required by `"native:union"` and columns with the name, description, type, default value, available values, and acceptable values associated with each:
 
-```{r 09-gis-6, eval=qgis}
+```{r 09-gis-6, eval=has_qgis}
 alg = "native:union"
 union_arguments = qgis_arguments(alg)
 union_arguments
@@ -282,7 +282,7 @@ The first one, `INPUT`, is our main vector object `incongr_wgs`, while the secon
 The last argument, `OUTPUT`, is an output file name, which **qgisprocess** will automatically choose and create in `tempdir()` if none is provided.
 The `.quiet` argument only tells **qgisprocess** to be less verbose.
 
-```{r 09-gis-7, eval=qgis}
+```{r 09-gis-7, eval=has_qgis}
 union = qgis_run_algorithm(alg,
   INPUT = incongr_wgs, OVERLAY = aggzone_wgs,
   .quiet = TRUE
@@ -295,7 +295,7 @@ Running the above line of code will save our two input objects into temporary .g
 The **qgisprocess** package stores the `qgis_run_algorithm()` result as a list containing, in this case, a path to the output file.
 We can either read this file back into R with `read_sf()` (e.g., `union_sf = read_sf(union[[1]])`) or directly with `st_as_sf()`:
 
-```{r, eval=qgis}
+```{r, eval=has_qgis}
 union_sf = st_as_sf(union)
 ```
 
@@ -308,7 +308,7 @@ These artifacts of error are called sliver polygons\index{sliver polygons} (see 
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^, and next remove them.
 Let's search for an appropriate algorithm.
 
-```{r, eval=qgis}
+```{r, eval=has_qgis}
 grep("clean", qgis_algo$algorithm, value = TRUE)
 ```
 
@@ -348,7 +348,7 @@ In our case, the `rmarea` tool removes all areas smaller or equal to a provided 
 
 Let's run this algorithm and convert its output into a new `sf` object `clean_sf`.
 
-```{r 09-gis-7c, eval=qgis}
+```{r 09-gis-7c, eval=has_qgis}
 clean = qgis_run_algorithm("grass7:v.clean",
   input = union_sf,
   tool = "rmarea", threshold = 25000, .quiet = TRUE
@@ -358,7 +358,7 @@ clean_sf = st_as_sf(clean)
 
 The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver polygons are now removed.
 
-```{r sliver, echo=FALSE, fig.cap="Sliver polygons colored in red (left panel). Cleaned polygons (right panel).", eval=qgis}
+```{r sliver, echo=FALSE, fig.cap="Sliver polygons colored in red (left panel). Cleaned polygons (right panel).", eval=has_qgis}
 knitr::include_graphics("figures/10-sliver.png")
 ```
 
@@ -372,7 +372,7 @@ Various terrain parameters, for example, can be helpful for the prediction of la
 For this section, we will use `dem.tif` -- a digital elevation model of the Mongón study area (downloaded from the Land Process Distributed Active Archive Center, see also `?dem.tif`)
 It has a resolution of about 30 by 30 meters and uses a projected CRS.
 
-```{r, eval=qgis}
+```{r, eval=has_qgis}
 library(qgisprocess)
 library(terra)
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
@@ -383,7 +383,7 @@ However, GIS programs offer many more terrain characteristics, some of which can
 For example, the topographic wetness index (TWI) was found useful in studying hydrological and biological processes [@sorensen_calculation_2006].
 Let's search the algorithm list for this index using `"wetness"` as keyword.
 
-```{r, eval=qgis}
+```{r, eval=has_qgis}
 qgis_algo = qgis_algorithms()
 grep("wetness", qgis_algo$algorithm, value = TRUE)
 #> [1] "sagang:sagawetnessindex"              
@@ -408,7 +408,7 @@ Therefore, we only have to specify one argument -- the input `DEM`.
 Of course, when applying this algorithm you should make sure that the default values are in correspondence with your study aim.^[The additional arguments of `"sagang:sagawetnessindex"` are well-explained at https://gis.stackexchange.com/a/323454/20955.]
 `"sagang:sagawetnessindex"` returns not one but four rasters -- catchment area, catchment slope, modified catchment area, and topographic wetness index.
 
-```{r, eval=qgis}
+```{r, eval=has_qgis}
 dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex",
   DEM = dem,
   .quiet = TRUE
@@ -418,7 +418,7 @@ dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex",
 <!-- The result, `dem_wetness`, is a list with file paths to the four outputs. -->
 We can read a selected output by providing an output name in the `qgis_as_terra()` function.
 
-```{r, eval=FALSE}
+```{r, eval=has_qgis}
 dem_wetness_twi_sdat = gsub("tif", "sdat", dem_wetness$TWI)
 dem_wetness_twi = qgis_as_terra(dem_wetness_twi_sdat)
 # plot(dem_wetness_twi)
@@ -432,7 +432,7 @@ These phenotypes are used in many studies, including landslide susceptibility, e
 
 The original implementation of the geomorphons' algorithm was created in GRASS GIS, and we can find it in the **qgisprocess** list as `"grass7:r.geomorphon"`:
 
-```{r, eval=qgis}
+```{r, eval=has_qgis}
 grep("geomorphon", qgis_algo$algorithm, value = TRUE)
 #> [1] "grass7:r.geomorphon" "sagang:geomorphons" 
 qgis_show_help("grass7:r.geomorphon")
@@ -443,7 +443,7 @@ Calculation of geomorphons requires an input DEM (`elevation`), and can be custo
 It includes, `search` -- a length for which the line-of-sight is calculated, and ``-m`` -- a flag specifying that the search value will be provided in meters (and not the number of cells).
 More information about additional arguments can be found in the original paper and the [GRASS GIS documentation](https://grass.osgeo.org/grass-stable/manuals/r.geomorphon.html).
 
-```{r, eval=qgis}
+```{r, eval=has_qgis}
 dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon",
   elevation = dem,
   `-m` = TRUE, search = 120, .quiet = TRUE
@@ -453,7 +453,7 @@ dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon",
 Our output, `dem_geomorph$forms`, contains a raster file with 10 categories -- each one representing a terrain form.
 We can read it into R with `qgis_as_terra()`, and then visualize it (the right panel of Figure \@ref(fig:qgis-raster-map)) or use it in our subsequent calculations.
 
-```{r, eval=qgis}
+```{r, eval=has_qgis}
 dem_geomorph_terra = qgis_as_terra(dem_geomorph$forms)
 ```
 
