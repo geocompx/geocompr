@@ -246,26 +246,38 @@ One of the algorithms on the above list, `"native:union"`, sounds promising.
 The next step is to find out what this algorithm does and how we can use it.
 This is the role of the `qgis_show_help()`, which returns a short summary of what the algorithm does, its arguments, and outputs.^[We can also extract some of information independently with `qgis_description()`, `qgis_arguments()`, and `qgis_outputs()`.]
 This makes it output rather long.
-Here, we only present the arguments`"native:union"` expects.
+The following command returns a data frame with each row representing an argument required by `"native:union"` and columns with the name, description, type, default value, available values, and acceptable values associated with each:
 
 ```{r 09-gis-6, eval=qgis}
-alg = "native:union"
-qgis_arguments(alg) |>
-  dplyr::mutate(acceptable_values = unlist(acceptable_values)) |>
-  select(name, description, acceptable_values)
+union_arguments = qgis_arguments("native:union")
+union_arguments
+#> # A tibble: 5 × 6
+#>   name    description qgis_type default_value available_values acceptable_values
+#>   <chr>   <chr>       <chr>     <list>        <list>           <list>           
+#> 1 INPUT   Input layer source    <NULL>        <NULL>           <chr [1]>        
+#> 2 OVERLAY Overlay la… source    <NULL>        <NULL>           <chr [1]>        
+#> 3 OVERLA… Overlay fi… string    <NULL>        <NULL>           <chr [3]>        
+#> 4 OUTPUT  Union       sink      <NULL>        <NULL>           <chr [1]>        
+#> 5 GRID_S… Grid size   number    <NULL>        <NULL>           <chr [3]>  
+
+#> [[1]]
+#> [1] "A numeric value"                                                                                 
+#> [2] "field:FIELD_NAME to use a data defined value taken from the FIELD_NAME field"                    
+#> [3] "expression:SOME EXPRESSION to use a data defined value calculated using a custom QGIS expression"
 ```
 
-These arguments are `INPUT`, `OVERLAY`, `OVERLAY_FIELDS_PREFIX`, and `OUTPUT`.
-It seems that some of the above arguments expect a "path to a vector layer" (column: `acceptaple_values`).
-However, the **qgisprocess** package also allows to provide `sf` objects as well in these cases.^[Objects from the **terra** and **stars** package can be used when a "path to a raster layer" is expected.]
-Though this is really convenient, if your spatial data is already available in your R session, we recommend to provide the path to your spatial data on disk when you only read it in to submit it to a **qgisprocess** algorithm because the first thing **qgisprocess** does when executing a geoalgorithm is to export the spatial data living in your R session back to disk in a format known to QGIS such as .gpkg or .tif files.
+The arguments, contained in `union_arguments$name`, are `INPUT`, `OVERLAY`, `OVERLAY_FIELDS_PREFIX`, and `OUTPUT`.
+`union_arguments$acceptable_values` contains a list with the possible input values for each argument.
+Many functions require inputs representing paths to a vector layer; **qgisprocess** functions accept `sf` objects for such arguments.
+Objects from the **terra** and **stars** package can be used when a "path to a raster layer" is expected.
+This can be very convenient, but we recommend providing the path to your spatial data on disk when you only read it in to submit it to a **qgisprocess** algorithm: the first thing **qgisprocess** does when executing a geoalgorithm is to export the spatial data living in your R session back to disk in a format known to QGIS such as .gpkg or .tif files.
+This can increease algorithm runtimes.
 
-Finally, we can let QGIS\index{QGIS} do the work.
-The main function of **qgisprocess** is `qgis_run_algorithm()`.
+The main function of **qgisprocess** is `qgis_run_algorithm()`, which sends inputs to QGIS and returns the outputs.
 It accepts the used algorithm name and a set of named arguments shown in the help list, and performs expected calculations.
 In our case, three arguments seem important - `INPUT`, `OVERLAY`, and `OUTPUT`.
 The first one, `INPUT`, is our main vector object `incongr_wgs`, while the second one, `OVERLAY`, is `aggzone_wgs`.
-The last argument, `OUTPUT`, expects a path to a new vector file; however, if we do not provide the path, **qgisprocess** will automatically create a temporary file.
+The last argument, `OUTPUT`, is an output file name, which **qgisprocess** will automatically choose and create in `tempdir()` if none is provided.
 The `.quiet` argument only tells **qgisprocess** to be less verbose.
 
 ```{r 09-gis-7, eval=qgis}
@@ -274,6 +286,7 @@ union = qgis_run_algorithm(alg,
   .quiet = TRUE
 )
 union
+#>  $ OUTPUT: 'qgis_outputVector' chr "/tmp/...gpkg"
 ```
 
 Running the above line of code will save our two input objects into temporary .gpkg files, run the selected algorithm on them, and return a temporary .gpkg file as the output.
@@ -287,7 +300,7 @@ union_sf = st_as_sf(union)
 Note that the QGIS\index{QGIS} union\index{vector!union} operation merges the two input layers into one layer by using the intersection\index{vector!intersection} and the symmetrical difference of the two input layers (which, by the way, is also the default when doing a union operation in GRASS\index{GRASS} and SAGA\index{SAGA}).
 This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)!
 
-Our result, `union_sf`, is a multipolygon with a larger number of features than two input objects.
+The result, `union_sf`, is a multipolygon with a larger number of features than two input objects.
 Notice, however, that many of these polygons are small and do not represent real areas but are rather a result of our two datasets having a different level of detail.
 These artifacts of error are called sliver polygons\index{sliver polygons} (see red-colored polygons in the left panel of Figure \@ref(fig:sliver)).
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^, and next remove them.
