@@ -499,6 +499,7 @@ This is done using the publicly available OSRM service with the **stplanr** func
 ```r
 routes_short = route(l = desire_lines_short, route_fun = route_osrm,
                      osrm.profile = "bike")
+#> <simpleError in open.connection(con, "rb"): cannot open the connection to 'https://routing.openstreetmap.de/routed-bike/route/v1/driving/-2.52706318854382,51.4840462428283;-2.53603976477844,51.5071444949879?alternatives=false&geometries=geojson&steps=false&overview=full'>
 ```
 
 The output is `routes_short`, an `sf` object representing routes on the transport network\index{network} that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line.
@@ -556,7 +557,7 @@ routes_short_scenario = routes_short |>
   mutate(bicycle = bicycle + car_driver * uptake,
          car_driver = car_driver * (1 - uptake))
 sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
-#> [1] 3788
+#> [1] 3089
 ```
 
 Having created a scenario in which approximately 4000 trips have switched from driving to cycling, we can now model where this updated modeled cycling activity will take place.
@@ -569,6 +570,11 @@ route_network_scenario = overline(routes_short_scenario, attrib = "bicycle")
 ```
 
 The outputs of the two preceding code chunks are summarized in Figure \@ref(fig:rnetvis) below.
+
+
+```
+#> Legend labels were too wide. Therefore, legend.text.size has been set to 0.65. Increase legend.width (argument of tm_layout) to make the legend wider and therefore the labels larger.
+```
 
 <div class="figure" style="text-align: center">
 <img src="13-transport_files/figure-html/rnetvis-1.png" alt="Illustration of the percentage of car trips switching to cycling as a function of distance (left) and route network level results of this function (right)." width="49%" /><img src="13-transport_files/figure-html/rnetvis-2.png" alt="Illustration of the percentage of car trips switching to cycling as a function of distance (left) and route network level results of this function (right)." width="49%" />
