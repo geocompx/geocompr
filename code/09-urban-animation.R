@@ -1,9 +1,9 @@
 library(sf)
-library(tidyverse)
+library(dplyr)
 library(spData)
 library(tmap)
-m_save = world %>% filter(continent != "Antarctica") %>% 
-  tm_shape() + 
+world2 = filter(world, continent != "Antarctica")
+m_save = tm_shape(world2) + 
   tm_polygons() +
   tm_shape(urban_agglomerations) +
   tm_dots(size = "population_millions", title.size = "Population (m)", alpha = 0.5, col = "red") +
