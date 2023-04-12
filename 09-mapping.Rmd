@@ -576,7 +576,8 @@ This is a place where the most important message is stated.
 
 ```{r 08-mapping-17}
 nz_height_map = tm_shape(nz_elev, bbox = nz_region) +
-  tm_raster(col.scale = tm_scale_continuous(values = "YlGn")) +
+  tm_raster(col.scale = tm_scale_continuous(values = "YlGn"),
+            col.legend = tm_legend(position = c("left", "top"))) +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 1) +
   tm_scale_bar(position = c("left", "bottom"))
 ```
@@ -588,18 +589,56 @@ Importantly, this map needs to clearly indicate the location of the main map, fo
 ```{r 08-mapping-18}
 nz_map = tm_shape(nz) + tm_polygons() +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 0.1) + 
-  tm_shape(nz_region) + tm_borders(lwd = 3) 
+  tm_shape(nz_region) + tm_borders(lwd = 3) +
+  tm_layout(bg.color = "lightblue")
 ```
 
-Finally, we combine the two maps using the function `viewport()` from the **grid** package, the first arguments of which specify the center location (`x` and `y`) and a size (`width` and `height`) of the inset map.
+
+```{r}
+norm_dim = function(obj){
+    bbox = st_bbox(obj)
+    width = bbox[["xmax"]] - bbox[["xmin"]]
+    height = bbox[["ymax"]] - bbox[["ymin"]]
+    w = width / max(width, height)
+    h = height / max(width, height)
+    c("w" = w, "h" = h)
+}
+```
+
+```{r}
+main_w = norm_dim(nz_region)[["w"]]
+main_h = norm_dim(nz_region)[["h"]]
+```
+
+```{r}
+ins_w = norm_dim(nz)[["w"]]
+ins_h = norm_dim(nz)[["h"]]
+```
+
+```{r}
+# using "snpc" unit to ensure width to height ratio stays constant
+# independently of ROOT viewport dimensions
+library(grid)
+main_vp = viewport(x = 0.5, y = 0.5,
+                   width = unit(main_w, "snpc"), height = unit(main_h, "snpc"))
+```
+
+```{r}
+ins_vp = viewport(x = unit(1, "npc") - unit(0.5, "cm"), y = unit(0.5, "cm"),
+                  width = unit(ins_w, "snpc") * 0.5, height = unit(ins_h, "snpc") * 0.5,
+                  just = c("right", "bottom"))
+```
+
+<!-- Finally, we combine the two maps using the function `viewport()` from the **grid** package, the first arguments of which specify the center location (`x` and `y`) and a size (`width` and `height`) of the inset map. -->
 
 ```{r insetmap1, message=FALSE, fig.cap="Inset map providing a context - location of the central part of the Southern Alps in New Zealand.", fig.scap="Inset map providing a context."}
-library(grid)
-nz_height_map
-print(nz_map, vp = viewport(0.8, 0.27, width = 0.5, height = 0.5))
+grid.newpage()
+print(nz_height_map, vp = main_vp)
+pushViewport(main_vp)
+print(nz_map, vp = ins_vp)
 ```
 
-Inset map can be saved to file either by using a graphic device (see Section \@ref(visual-outputs)) or the `tmap_save()` function and its arguments - `insets_tm` and `insets_vp`.
+<!-- Inset map can be saved to file either by using a graphic device (see Section \@ref(visual-outputs)) or the `tmap_save()` function and its arguments - `insets_tm` and `insets_vp`. -->
 
 Inset maps are also used to create one map of non-contiguous areas.
 Probably, the most often used example is a map of the United States, which consists of the contiguous United States, Hawaii and Alaska.
