@@ -15,12 +15,18 @@ library(terra)
 
 
 ```r
-# remotes::install_github("r-spatial/qgisprocess")
+remotes::install_github("r-spatial/qgisprocess")
 library(qgisprocess)
 library(Rsagacmd)
 library(rgrass)
 library(rstac)
 library(gdalcubes)
+```
+
+
+```
+#> Attempting to load the cache ... No cache found.
+#> Will try to reconfigure qgisprocess and build new cache ...
 ```
 
 ## Introduction
@@ -47,16 +53,14 @@ However, interactive command line interfaces have several important advantages i
 - Automating repetitive tasks
 - Enabling transparency and reproducibility
 - Encouraging software development by providing tools to modify existing functions and implement new ones
-- Developing future-proof programming skills which are in high demand
-- Efficient workflows
+- Developing future-proof and efficient programming skills which are in high demand
 - Improving touch typing, a key skill in the digital age
 
 On the other hand, good GUIs also have advantages, including:
 
 - 'Shallow' learning curves meaning geographic data can be explored and visualized without hours of learning a new language
-- Support for 'digitizing' (creating new vector datasets), including trace, snap and topological tools^[
-The **mapedit** R package allows the quick editing of a few spatial features in a browser window opened from R but not professional, large-scale cartographic digitizing.
-]
+- Support for 'digitizing' (creating new vector datasets), including trace, snap and topological tools.
+(The **mapedit** R package allows the quick editing of a few spatial features in a browser window opened from R but not professional, large-scale cartographic digitizing.)
 - Enables georeferencing (matching raster images to existing maps) with ground control points and orthorectification
 - Supports stereoscopic mapping (e.g., LiDAR and structure from motion)
 
@@ -72,7 +76,7 @@ A key feature of R (and its predecessor S) is that it provides access to statist
 R continues this tradition with interfaces to numerous languages, notably C++\index{C++}.
 
 Although R was not designed as a command-line GIS, its ability to interface with dedicated GISs gives it astonishing geospatial capabilities.
-With GIS bridges, R can replicate sophisticated and performant GIS workflows, with the additional reproducibility, scalability and productity benefits of controlling them from a programming environment and a consistent CLI.
+With GIS bridges, R can replicate more diverse workflows, with the additional reproducibility, scalability and productity benefits of controlling them from a programming environment and a consistent CLI.
 Furthermore, R outperforms GISs in some areas of geocomputation\index{geocomputation}, including interactive/animated map making (see Chapter \@ref(adv-map)) and spatial statistical modeling (see Chapter \@ref(spatial-cv)).
 
 This chapter focuses on 'bridges' to three mature open source GIS products, summarized in Table \@ref(tab:gis-comp)):
@@ -95,24 +99,31 @@ Table: (\#tab:gis-comp)Comparison between three open-source GIS. Hybrid refers t
 
 In addition to the three R-GIS bridges mentioned above, this chapter also provides a brief introduction to R interfaces to spatial libraries (Section \@ref(gdal)), spatial databases\index{spatial database} (Section \@ref(postgis)), and cloud-based processing of Earth observation data (Section \@ref(cloud)).
 
-## QGIS through **qgisprocess** {#rqgis}
+## **qgisprocess**: a bridge to QGIS and beyond {#rqgis}
 
 <!--toDo:jn-->
 <!-- how to mention/use the QGIS package (https://en.cahik.cz//2022/03/07/r-package-qgis/) here? -->
 
-QGIS\index{QGIS} is one of the most popular open-source GIS [Table \@ref(tab:gis-comp); @graser_processing_2015]. 
-Its main advantage lies in the fact that it provides a unified interface to several other open-source GIS.
-This means that you have access to GDAL\index{GDAL}, GRASS\index{GRASS}, and SAGA\index{SAGA} through QGIS\index{QGIS} [@graser_processing_2015]. 
-Since version 3.14, QGIS provides a command line API\index{API}, `qgis_process`, that allows to run all these geoalgorithms (frequently more than 1000, depending on your set-up) outside of the QGIS GUI.
+QGIS\index{QGIS} is the most popular open-source GIS [Table \@ref(tab:gis-comp); @graser_processing_2015]. 
+QGIS provides a unified interface to QGIS's native geoalgorithms, GDAL, and --- when they are installed --- from *providers* such as GRASS\index{GRASS}, and SAGA\index{SAGA} [@graser_processing_2015]. 
+Since version 3.14 (released in summer 2020), QGIS ships with the `qgis_process` command line utility for accessing a bounty of functionality for geocomputation.
+`qgis_process` provides access to with 300+ geoalgorithms in the standard QGIS installation and 1,000+ via plugins to external providers such as GRASS and SAGA.
 
-The **qgisprocess** package \index{qgisprocess (package)} wraps this QGIS command-line utility, and thus makes it possible to call QGIS, GDAL, GRASS, and SAGA algorithms from the R session.
-Before running **qgisprocess**\index{qgisprocess (package)}, make sure you have installed QGIS\index{QGIS} and all its (third-party) dependencies such as SAGA\index{SAGA} and GRASS\index{GRASS}.
+The **qgisprocess** package \index{qgisprocess (package)} provides access to `qgis_process` from R.
+The package requires QGIS --- and any other relevant plugins such as GRASS and SAGA, used in this chapter --- to be installed and available to the system.
+For installation instructions, see **qgisprocess**'s [documentation](https://r-spatial.github.io/qgisprocess/).
+A quick way to get up-and-running with **qgisprocess** if you have Docker installed is via the `qgis` image developed as part of this project.
+Assuming you have Docker installed and sufficient computational resources, you can run an R session with **qgisprocess** and relevant plugins with the following command (see the [geocompx/docker](https://github.com/geocompx/docker) repo for details):
+
+```bash
+docker run -e PASSWORD=pw -p 8786:8787 ghcr.io/geocompx/docker:qgis
+```
 
 
 ```r
 library(qgisprocess)
-#> Using 'qgis_process' in the system PATH.
-#> QGIS version: 3.28.2-Firenze
+#> Attempting to load the cache ... Success!
+#> QGIS version: 3.30.1-'s-Hertogenbosch
 #> ...
 ```
 
@@ -127,20 +138,32 @@ Next, we can find which providers (meaning different software) are available on 
 
 ```r
 qgis_providers()
-#> # A tibble: 6 × 2
-#>   provider provider_title   
-#>   <chr>    <chr>            
-#> 1 3d       QGIS (3D)        
-#> 2 gdal     GDAL             
-#> 3 grass7   GRASS            
-#> 4 native   QGIS (native c++)
-#> 5 qgis     QGIS             
-#> 6 saga     SAGA
+#> # A tibble: 6 × 3
+#>   provider provider_title    algorithm_count
+#>   <chr>    <chr>                       <int>
+#> 1 gdal     GDAL                           56
+#> 2 grass7   GRASS                         304
+#> 3 qgis     QGIS                           50
+#> 4 3d       QGIS (3D)                       1
+#> 5 native   QGIS (native c++)             242
+#> 6 sagang   SAGA Next Gen                 509
 ```
 
 The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
+Enable external algorithms with the following command:
 
-We are now ready for some QGIS geocomputation from within R!
+
+```r
+qgis_enable_plugins()
+#> Trying to enable following plugin(s): grassprovider, otbprovider, processing_saga_nextgen
+#> grassprovider successfully enabled!
+#> otbprovider successfully enabled!
+#> processing_saga_nextgen successfully enabled!
+#> ...
+#> You now have access to 1162 algorithms from 6 QGIS processing providers.
+```
+
+We are now ready for some geocomputation with QGIS and friends, from within R!
 Let's try two example case studies.
 The first one shows how to unite two polygonal datasets with different borders\index{union} (Section \@ref(qgis-vector)).
 The second one focuses on deriving new information from a digital elevation model represented as a raster (Section \@ref(qgis-raster)).
@@ -159,10 +182,7 @@ incongr_wgs = st_transform(incongruent, "EPSG:4326")
 aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 ```
 
-<div class="figure" style="text-align: center">
-<img src="10-gis_files/figure-html/uniondata-1.png" alt="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders). " width="100%" />
-<p class="caption">(\#fig:uniondata)Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders). </p>
-</div>
+
 
 To find an algorithm to do this work, we can search the output of the `qgis_algorithms()` function.
 This function returns a data frame containing all of the available providers and the algorithms they contain.^[Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.] 
@@ -178,41 +198,57 @@ Assuming that the short description of the function contains the word "union"\in
 
 ```r
 grep("union", qgis_algo$algorithm, value = TRUE)
-#> [1] "native:multiunion" "native:union"      "saga:fuzzyunionor" "saga:polygonunion"
+#> [1] "native:multiunion" "native:union"      "sagang:fuzzyunionor" "sagang:polygonunion"
 ```
 
 One of the algorithms on the above list, `"native:union"`, sounds promising.
 The next step is to find out what this algorithm does and how we can use it.
 This is the role of the `qgis_show_help()`, which returns a short summary of what the algorithm does, its arguments, and outputs.^[We can also extract some of information independently with `qgis_description()`, `qgis_arguments()`, and `qgis_outputs()`.]
 This makes it output rather long.
-Here, we only present the arguments`"native:union"` expects.
+The following command returns a data frame with each row representing an argument required by `"native:union"` and columns with the name, description, type, default value, available values, and acceptable values associated with each:
 
 
 ```r
 alg = "native:union"
-qgis_arguments(alg) |> 
-  dplyr::mutate(acceptable_values = unlist(acceptable_values)) |>
-  select(name, description, acceptable_values)
+union_arguments = qgis_arguments(alg)
+union_arguments
+#> # A tibble: 5 × 6
+#>   name    description qgis_type default_value available_values acceptable_values
+#>   <chr>   <chr>       <chr>     <list>        <list>           <list>           
+#> 1 INPUT   Input layer source    <NULL>        <NULL>           <chr [1]>        
+#> 2 OVERLAY Overlay la… source    <NULL>        <NULL>           <chr [1]>        
+#> 3 OVERLA… Overlay fi… string    <NULL>        <NULL>           <chr [3]>        
+#> 4 OUTPUT  Union       sink      <NULL>        <NULL>           <chr [1]>        
+#> 5 GRID_S… Grid size   number    <NULL>        <NULL>           <chr [3]>  
+
+#> [[1]]
+#> [1] "A numeric value"                                                                                 
+#> [2] "field:FIELD_NAME to use a data defined value taken from the FIELD_NAME field"                    
+#> [3] "expression:SOME EXPRESSION to use a data defined value calculated using a custom QGIS expression"
 ```
 
-These arguments are `INPUT`, `OVERLAY`, `OVERLAY_FIELDS_PREFIX`, and `OUTPUT`.
-It seems that some of the above arguments expect a "path to a vector layer" (column: `acceptaple_values`).
-However, the **qgisprocess** package also allows to provide `sf` objects as well in these cases.^[Objects from the **terra** and **stars** package can be used when a "path to a raster layer" is expected.]
-Though this is really convenient, if your spatial data is already available in your R session, we recommend to provide the path to your spatial data on disk when you only read it in to submit it to a **qgisprocess** algorithm because the first thing **qgisprocess** does when executing a geoalgorithm is to export the spatial data living in your R session back to disk in a format known to QGIS such as .gpkg or .tif files.
+The arguments, contained in `union_arguments$name`, are `INPUT`, `OVERLAY`, `OVERLAY_FIELDS_PREFIX`, and `OUTPUT`.
+`union_arguments$acceptable_values` contains a list with the possible input values for each argument.
+Many functions require inputs representing paths to a vector layer; **qgisprocess** functions accept `sf` objects for such arguments.
+Objects from the **terra** and **stars** package can be used when a "path to a raster layer" is expected.
+This can be very convenient, but we recommend providing the path to your spatial data on disk when you only read it in to submit it to a **qgisprocess** algorithm: the first thing **qgisprocess** does when executing a geoalgorithm is to export the spatial data living in your R session back to disk in a format known to QGIS such as .gpkg or .tif files.
+This can increease algorithm runtimes.
 
-Finally, we can let QGIS\index{QGIS} do the work.
-The main function of **qgisprocess** is `qgis_run_algorithm()`.
+The main function of **qgisprocess** is `qgis_run_algorithm()`, which sends inputs to QGIS and returns the outputs.
 It accepts the used algorithm name and a set of named arguments shown in the help list, and performs expected calculations.
 In our case, three arguments seem important - `INPUT`, `OVERLAY`, and `OUTPUT`.
 The first one, `INPUT`, is our main vector object `incongr_wgs`, while the second one, `OVERLAY`, is `aggzone_wgs`.
-The last argument, `OUTPUT`, expects a path to a new vector file; however, if we do not provide the path, **qgisprocess** will automatically create a temporary file.
+The last argument, `OUTPUT`, is an output file name, which **qgisprocess** will automatically choose and create in `tempdir()` if none is provided.
 The `.quiet` argument only tells **qgisprocess** to be less verbose.
 
 
 ```r
-union = qgis_run_algorithm(alg, INPUT = incongr_wgs, OVERLAY = aggzone_wgs, 
-                           .quiet = TRUE)
+union = qgis_run_algorithm(alg,
+  INPUT = incongr_wgs, OVERLAY = aggzone_wgs,
+  .quiet = TRUE
+)
 union
+#>  $ OUTPUT: 'qgis_outputVector' chr "/tmp/...gpkg"
 ```
 
 Running the above line of code will save our two input objects into temporary .gpkg files, run the selected algorithm on them, and return a temporary .gpkg file as the output.
@@ -227,7 +263,7 @@ union_sf = st_as_sf(union)
 Note that the QGIS\index{QGIS} union\index{vector!union} operation merges the two input layers into one layer by using the intersection\index{vector!intersection} and the symmetrical difference of the two input layers (which, by the way, is also the default when doing a union operation in GRASS\index{GRASS} and SAGA\index{SAGA}).
 This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)!
 
-Our result, `union_sf`, is a multipolygon with a larger number of features than two input objects.
+The result, `union_sf`, is a multipolygon with a larger number of features than two input objects.
 Notice, however, that many of these polygons are small and do not represent real areas but are rather a result of our two datasets having a different level of detail.
 These artifacts of error are called sliver polygons\index{sliver polygons} (see red-colored polygons in the left panel of Figure \@ref(fig:sliver)).
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^, and next remove them.
@@ -259,11 +295,11 @@ qgis_arguments("grass7:v.clean") |>
   select(name, description) |>
   dplyr::slice_head(n = 4)
 #> # A tibble: 4 × 2
-#>   name      description                              
-#>   <chr>     <chr>                                    
-#> 1 input     Layer to clean                           
-#> 2 type      Input feature type                       
-#> 3 tool      Cleaning tool                            
+#>   name      description
+#>   <chr>     <chr>
+#> 1 input     Layer to clean
+#> 2 type      Input feature type
+#> 3 tool      Cleaning tool
 #> 4 threshold Threshold (comma separated for each tool)
 ```
 
@@ -278,17 +314,16 @@ Let's run this algorithm and convert its output into a new `sf` object `clean_sf
 
 
 ```r
-clean = qgis_run_algorithm("grass7:v.clean", input = union_sf,
-                           tool = "rmarea", threshold = 25000, .quiet = TRUE)
+clean = qgis_run_algorithm("grass7:v.clean",
+  input = union_sf,
+  tool = "rmarea", threshold = 25000, .quiet = TRUE
+)
 clean_sf = st_as_sf(clean)
 ```
 
 The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver polygons are now removed.
 
-<div class="figure" style="text-align: center">
-<img src="figures/10-sliver.png" alt="Sliver polygons colored in red (left panel). Cleaned polygons (right panel)." width="100%" />
-<p class="caption">(\#fig:sliver)Sliver polygons colored in red (left panel). Cleaned polygons (right panel).</p>
-</div>
+
 
 ### Raster data {#qgis-raster}
 
@@ -316,30 +351,35 @@ Let's search the algorithm list for this index using `"wetness"` as keyword.
 ```r
 qgis_algo = qgis_algorithms()
 grep("wetness", qgis_algo$algorithm, value = TRUE)
-#> [1] "saga:sagawetnessindex"           "saga:topographicwetnessindextwi"
+#> [1] "sagang:sagawetnessindex"              
+#> [2] "sagang:topographicwetnessindexonestep"
+#> ...
 ```
 
 An output of the above code suggests that the desired algorithm exists in the SAGA GIS software\index{SAGA}.^[TWI can be also calculated using the `r.topidx` GRASS GIS function.]
 Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here, particularly on digital elevation models\index{digital elevation model} (soil properties, terrain attributes, climate parameters). 
 Hence, SAGA is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets [@conrad_system_2015].
 
-The `"saga:sagawetnessindex"` algorithm is actually a modified TWI, that results in a more realistic soil moisture potential for the cells located in valley floors [@bohner_spatial_2006].
+The `"sagang:sagawetnessindex"` algorithm is actually a modified TWI, that results in a more realistic soil moisture potential for the cells located in valley floors [@bohner_spatial_2006].
 
 
 ```r
-qgis_show_help("saga:sagawetnessindex")
-# output not shown here
+qgis_show_help("sagang:sagawetnessindex")
+#> Saga wetness index (sagang:sagawetnessindex)
+#> Description
 ```
 
 Here, we stick with the default values for all arguments.
 Therefore, we only have to specify one argument -- the input `DEM`.
-Of course, when applying this algorithm you should make sure that the default values are in correspondence with your study aim.^[The additional arguments of `"saga:sagawetnessindex"` are well-explained at https://gis.stackexchange.com/a/323454/20955.]
-`"saga:sagawetnessindex"` returns not one but four rasters -- catchment area, catchment slope, modified catchment area, and topographic wetness index.
+Of course, when applying this algorithm you should make sure that the default values are in correspondence with your study aim.^[The additional arguments of `"sagang:sagawetnessindex"` are well-explained at https://gis.stackexchange.com/a/323454/20955.]
+`"sagang:sagawetnessindex"` returns not one but four rasters -- catchment area, catchment slope, modified catchment area, and topographic wetness index.
 
 
 ```r
-dem_wetness = qgis_run_algorithm("saga:sagawetnessindex", DEM = dem, 
-                                 .quiet = TRUE)
+dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex",
+  DEM = dem,
+  .quiet = TRUE
+)
 ```
 
 <!-- The result, `dem_wetness`, is a list with file paths to the four outputs. -->
@@ -347,7 +387,9 @@ We can read a selected output by providing an output name in the `qgis_as_terra(
 
 
 ```r
-dem_wetness_twi = qgis_as_terra(dem_wetness$TWI)
+dem_wetness_twi_sdat = gsub("tif", "sdat", dem_wetness$TWI)
+dem_wetness_twi = qgis_as_terra(dem_wetness_twi_sdat)
+# plot(dem_wetness_twi)
 ```
 
 You can see the TWI map on the left panel of Figure \@ref(fig:qgis-raster-map).
@@ -361,7 +403,7 @@ The original implementation of the geomorphons' algorithm was created in GRASS G
 
 ```r
 grep("geomorphon", qgis_algo$algorithm, value = TRUE)
-#> [1] "grass7:r.geomorphon"
+#> [1] "grass7:r.geomorphon" "sagang:geomorphons" 
 qgis_show_help("grass7:r.geomorphon")
 # output not shown
 ```
@@ -372,8 +414,10 @@ More information about additional arguments can be found in the original paper a
 
 
 ```r
-dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon", elevation = dem, 
-                                    `-m` = TRUE, search = 120, .quiet = TRUE)
+dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon",
+  elevation = dem,
+  `-m` = TRUE, search = 120, .quiet = TRUE
+)
 ```
 
 Our output, `dem_geomorph$forms`, contains a raster file with 10 categories -- each one representing a terrain form.
@@ -466,8 +510,8 @@ We can convert it into polygons with `as.polygons()` and `st_as_sf()` (Section \
 
 
 ```r
-ndvi_segments = ndvi_srg$segments |> 
-  as.polygons() |> 
+ndvi_segments = ndvi_srg$segments |>
+  as.polygons() |>
   st_as_sf()
 ```
 
@@ -533,7 +577,7 @@ library(osmdata)
 b_box = st_bbox(points)
 london_streets = opq(b_box) |>
   add_osm_feature(key = "highway") |>
-  osmdata_sf() 
+  osmdata_sf()
 london_streets = london_streets[["osm_lines"]]
 london_streets = select(london_streets, osm_id)
 ```
@@ -574,8 +618,10 @@ Here, we break lines at each intersection to ensure that the subsequent routing 
 
 
 ```r
-execGRASS(cmd = "v.clean", input = "london_streets", output = "streets_clean",
-          tool = "break", flags = "overwrite")
+execGRASS(
+  cmd = "v.clean", input = "london_streets", output = "streets_clean",
+  tool = "break", flags = "overwrite"
+)
 ```
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">To learn about the possible arguments and flags of the GRASS GIS modules you can you the `help` flag.
@@ -588,9 +634,11 @@ We save its output in `streets_points_con`.
 
 
 ```r
-execGRASS(cmd = "v.net", input = "streets_clean", output = "streets_points_con",
-          points = "points", operation = "connect", threshold = 0.001,
-          flags = c("overwrite", "c"))
+execGRASS(
+  cmd = "v.net", input = "streets_clean", output = "streets_points_con",
+  points = "points", operation = "connect", threshold = 0.001,
+  flags = c("overwrite", "c")
+)
 ```
 
 The resulting clean dataset serves as input for the `"v.net.salesman"` algorithm, which finally finds the shortest route between all cycle hire stations.
@@ -601,9 +649,11 @@ To access the GRASS help page of the traveling salesman\index{traveling salesman
 
 
 ```r
-execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
-          output = "shortest_route", center_cats = paste0("1-", nrow(points)),
-          flags = "overwrite")
+execGRASS(
+  cmd = "v.net.salesman", input = "streets_points_con",
+  output = "shortest_route", center_cats = paste0("1-", nrow(points)),
+  flags = "overwrite"
+)
 ```
 
 To see our result, we read the result into R, convert it into an sf-object keeping only the geometry, and visualize it with the help of the **mapview** package (Figure \@ref(fig:grass-mapview) and Section \@ref(interactive-maps)).
@@ -696,7 +746,7 @@ cmd = paste("ogrinfo -al -so", our_filepath)
 system(cmd)
 #> INFO: Open of `.../spData/shapes/world.gpkg'
 #>       using driver `GPKG' successful.
-#> 
+#>
 #> Layer name: world
 #> Geometry: Multi Polygon
 #> Feature Count: 177
@@ -752,9 +802,11 @@ Our first step here is to create a connection to a database by providing its nam
 
 ```r
 library(RPostgreSQL)
-conn = dbConnect(drv = PostgreSQL(), 
-                 dbname = "rtafdf_zljbqm", host = "db.qgiscloud.com",
-                 port = "5432", user = "rtafdf_zljbqm", password = "d3290ead")
+conn = dbConnect(
+  drv = PostgreSQL(),
+  dbname = "rtafdf_zljbqm", host = "db.qgiscloud.com",
+  port = "5432", user = "rtafdf_zljbqm", password = "d3290ead"
+)
 ```
 
 Our new object, `conn`, is just an established link between our R session and the database.
@@ -766,8 +818,8 @@ This can be answered with `dbListTables()` as follows:
 
 ```r
 dbListTables(conn)
-#> [1] "spatial_ref_sys" "topology"        "layer"           "restaurants"    
-#> [5] "highways" 
+#> [1] "spatial_ref_sys" "topology"        "layer"           "restaurants"
+#> [5] "highways"
 ```
 
 The answer is five tables.
@@ -778,8 +830,8 @@ To find out about attributes available in a table, we can run `dbListFields`:
 
 ```r
 dbListFields(conn, "highways")
-#> [1] "qc_id"        "wkb_geometry" "gid"          "feature"     
-#> [5] "name"         "state"   
+#> [1] "qc_id"        "wkb_geometry" "gid"          "feature"
+#> [5] "name"         "state"
 ```
 
 Now, as we know the available datasets, we can perform some queries -- ask the database some questions.
@@ -793,7 +845,8 @@ Additionally, `read_sf()` needs to know which column represents the geometry (he
 query = paste(
   "SELECT *",
   "FROM highways",
-  "WHERE name = 'US Route 1' AND state = 'MD';")
+  "WHERE name = 'US Route 1' AND state = 'MD';"
+)
 us_route = read_sf(conn, query = query, geom = "wkb_geometry")
 ```
 
@@ -807,7 +860,8 @@ To show this, the next example adds a 35-kilometer (35,000 m) buffer around the 
 query = paste(
   "SELECT ST_Union(ST_Buffer(wkb_geometry, 35000))::geometry",
   "FROM highways",
-  "WHERE name = 'US Route 1' AND state = 'MD';")
+  "WHERE name = 'US Route 1' AND state = 'MD';"
+)
 buf = read_sf(conn, query = query)
 ```
 
@@ -898,10 +952,13 @@ library(rstac)
 # and search for images intersecting our AOI
 s = stac("https://earth-search.aws.element84.com/v0")
 items = s |>
-  stac_search(collections = "sentinel-s2-l2a-cogs",
-              bbox = c(7.1, 51.8, 7.2, 52.8), 
-              datetime = "2020-01-01/2020-12-31") |>
-  post_request() |> items_fetch()
+  stac_search(
+    collections = "sentinel-s2-l2a-cogs",
+    bbox = c(7.1, 51.8, 7.2, 52.8),
+    datetime = "2020-01-01/2020-12-31"
+  ) |>
+  post_request() |>
+  items_fetch()
 ```
 
 Cloud storage differs from local hard disks and traditional image file formats do not perform well in cloud-based geoprocessing. 
@@ -919,11 +976,16 @@ The code below shows a minimal example to create a lower resolution (250m) maxim
 ```r
 library(gdalcubes)
 # Filter images by cloud cover and create an image collection object
-collection = stac_image_collection(items$features, 
-                  property_filter = function(x) {x[["eo:cloud_cover"]] < 10})
+collection = stac_image_collection(items$features,
+  property_filter = function(x) {
+    x[["eo:cloud_cover"]] < 10
+  }
+)
 # Define extent, resolution (250m, daily) and CRS of the target data cube
-v = cube_view(srs = "EPSG:3857", extent = collection, dx = 250, dy = 250,
-              dt = "P1D") # "P1D" is an ISO 8601 duration string
+v = cube_view(
+  srs = "EPSG:3857", extent = collection, dx = 250, dy = 250,
+  dt = "P1D"
+) # "P1D" is an ISO 8601 duration string
 # Create and process the data cube
 cube = raster_cube(collection, v) |>
   select_bands(c("B04", "B08")) |>
@@ -963,24 +1025,36 @@ p = processes() # load available processes
 collections = list_collections() # load available collections
 formats = list_file_formats() # load available output formats
 # Load Sentinel-2 collection
-s2 = p$load_collection(id = "SENTINEL2_L2A",
-                       spatial_extent = list(west = 7.5, east = 8.5,
-                                             north = 51.1, south = 50.1),
-                       temporal_extent = list("2021-01-01", "2021-01-31"),
-                       bands = list("B04","B08")) 
+s2 = p$load_collection(
+  id = "SENTINEL2_L2A",
+  spatial_extent = list(
+    west = 7.5, east = 8.5,
+    north = 51.1, south = 50.1
+  ),
+  temporal_extent = list("2021-01-01", "2021-01-31"),
+  bands = list("B04", "B08")
+)
 # Compute NDVI vegetation index
-compute_ndvi = p$reduce_dimension(data = s2, dimension = "bands",
-                                  reducer = function(data, context) {
-                                    (data[2] - data[1]) / (data[2] + data[1])
-                                  })
+compute_ndvi = p$reduce_dimension(
+  data = s2, dimension = "bands",
+  reducer = function(data, context) {
+    (data[2] - data[1]) / (data[2] + data[1])
+  }
+)
 # Compute maximum over time
-reduce_max = p$reduce_dimension(data = compute_ndvi, dimension = "t",
-                                reducer = function(x, y) {max(x)})
+reduce_max = p$reduce_dimension(
+  data = compute_ndvi, dimension = "t",
+  reducer = function(x, y) {
+    max(x)
+  }
+)
 # Export as GeoTIFF
 result = p$save_result(reduce_max, formats$output$GTiff)
 # Login, see https://docs.openeo.cloud/getting-started/r/#authentication
-login(login_type = "oidc", provider = "egi", 
-      config = list(client_id = "...", secret = "..."))
+login(
+  login_type = "oidc", provider = "egi",
+  config = list(client_id = "...", secret = "...")
+)
 # Execute processes
 compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 ```
