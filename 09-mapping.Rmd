@@ -756,9 +756,9 @@ Less advanced interactivity levels include popups which appear when you click on
 More advanced levels of interactivity include the ability to tilt and rotate maps, as demonstrated in the **mapdeck** example below, and the provision of "dynamically linked" sub-plots which automatically update when the user pans and zooms [@pezanowski_senseplace3_2018].
 
 The most important type of interactivity, however, is the display of geographic data on interactive or 'slippy' web maps.
-The release of the **leaflet** package in 2015 revolutionized interactive web map creation from within R and a number of packages have built on these foundations adding new features (e.g., **leaflet.extras**) and making the creation of web maps as simple as creating static maps (e.g., **mapview** and **tmap**).
+The release of the **leaflet** package in 2015 (that uses the leaflet JavaScript library) revolutionized interactive web map creation from within R and a number of packages have built on these foundations adding new features (e.g., **leaflet.extras**) and making the creation of web maps as simple as creating static maps (e.g., **mapview** and **tmap**).
 This section illustrates each approach in the opposite order.
-We will explore how to make slippy maps with **tmap** (the syntax of which we have already learned), **mapview**\index{mapview (package)} and finally **leaflet**\index{leaflet (package)} (which provides low-level control over interactive maps).
+We will explore how to make slippy maps with **tmap** (the syntax of which we have already learned), **mapview**\index{mapview (package)}, **mapdeck**\index{mapdeck (package)} and finally **leaflet**\index{leaflet (package)} (which provides low-level control over interactive maps).
 
 A unique feature of **tmap** mentioned in Section \@ref(static-maps) is its ability to create static and interactive maps using the same code.
 Maps can be viewed interactively at any point by switching to view mode, using the command `tmap_mode("view")`.
@@ -782,7 +782,9 @@ if (knitr::is_latex_output()){
 
 ```
 
-Now that the interactive mode has been 'turned on', all maps produced with **tmap** will launch (another way to create interactive maps is with the `tmap_leaflet` function).
+<!--toDo:jn-->
+<!-- tmap_leaflet? -->
+Now that the interactive mode has been 'turned on', all maps produced with **tmap** will launch (another way to create interactive maps is with the `tmap_leaflet()` function).
 Notable features of this interactive mode include the ability to specify the basemap  with `tm_basemap()` (or `tmap_options()`) as demonstrated below (result not shown):
 
 ```{r 08-mapping-26, eval=FALSE}
@@ -796,7 +798,7 @@ The argument `sync` in `tm_facets()` can be used in this case to produce multipl
 world_coffee = left_join(world, coffee_data, by = "name_long")
 facets = c("coffee_production_2016", "coffee_production_2017")
 tm_shape(world_coffee) + tm_polygons(facets) + 
-  tm_facets(nrow = 1, sync = TRUE)
+  tm_facets_wrap(nrow = 1, sync = TRUE)
 ```
 
 ```{r sync, message=FALSE, fig.cap="Faceted interactive maps of global coffee production in 2016 and 2017 in sync, demonstrating tmap's view mode in action.", fig.scap="Faceted interactive maps of global coffee production.", echo=FALSE}
@@ -809,7 +811,7 @@ Switch **tmap** back to plotting mode with the same function:
 tmap_mode("plot")
 ```
 
-If you are not proficient with **tmap**, the quickest way to create interactive maps may be with **mapview**\index{mapview (package)}.
+If you are not proficient with **tmap**, the quickest way to create interactive maps in R may be with **mapview**\index{mapview (package)}.
 The following 'one liner' is a reliable way to interactively explore a wide range of geographic data formats:
 
 ```{r 08-mapping-29, eval=FALSE}
@@ -822,10 +824,6 @@ knitr::include_graphics("figures/mapview.png")
 # mv = mapview::mapview(nz)
 # mv@map
 ```
-
-<!--toDo:jn-->
-<!-- wait for the terra support -->
-<!-- https://github.com/r-spatial/mapview/issues/340 -->
 
 **mapview** has a concise syntax yet is powerful.
 By default, it has some standard GIS functionality such as mouse position information, attribute queries (via pop-ups), scale bar, and zoom-to-layer buttons.
@@ -845,7 +843,7 @@ trails |>
   st_intersection(oberfranken) |>
   st_collection_extract("LINESTRING") |>
   mapview(color = "red", lwd = 3, layer.name = "trails") +
-  mapview(franconia, zcol = "district", burst = TRUE) +
+  mapview(franconia, zcol = "district") +
   breweries
 ```
 
@@ -858,7 +856,7 @@ knitr::include_graphics("figures/mapview-example.png")
 #   st_intersection(franconia[franconia$district == "Oberfranken", ]) |>
 #   st_collection_extract("LINE") |>
 #   mapview(color = "red", lwd = 3, layer.name = "trails") +
-#   mapview(franconia, zcol = "district", burst = TRUE) +
+#   mapview(franconia, zcol = "district") +
 #   breweries
 # mv2@map
 ```
