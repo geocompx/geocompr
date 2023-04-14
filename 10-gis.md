@@ -24,10 +24,6 @@ library(gdalcubes)
 ```
 
 
-```
-#> Attempting to load the cache ... No cache found.
-#> Will try to reconfigure qgisprocess and build new cache ...
-```
 
 ## Introduction
 
@@ -107,7 +103,7 @@ In addition to the three R-GIS bridges mentioned above, this chapter also provid
 QGIS\index{QGIS} is the most popular open-source GIS [Table \@ref(tab:gis-comp); @graser_processing_2015]. 
 QGIS provides a unified interface to QGIS's native geoalgorithms, GDAL, and --- when they are installed --- from *providers* such as GRASS\index{GRASS}, and SAGA\index{SAGA} [@graser_processing_2015]. 
 Since version 3.14 (released in summer 2020), QGIS ships with the `qgis_process` command line utility for accessing a bounty of functionality for geocomputation.
-`qgis_process` provides access to with 300+ geoalgorithms in the standard QGIS installation and 1,000+ via plugins to external providers such as GRASS and SAGA.
+`qgis_process` provides access to 300+ geoalgorithms in the standard QGIS installation and 1,000+ via plugins to external providers such as GRASS and SAGA.
 
 The **qgisprocess** package \index{qgisprocess (package)} provides access to `qgis_process` from R.
 The package requires QGIS --- and any other relevant plugins such as GRASS and SAGA, used in this chapter --- to be installed and available to the system.
@@ -116,7 +112,7 @@ A quick way to get up-and-running with **qgisprocess** if you have Docker instal
 Assuming you have Docker installed and sufficient computational resources, you can run an R session with **qgisprocess** and relevant plugins with the following command (see the [geocompx/docker](https://github.com/geocompx/docker) repo for details):
 
 ```bash
-docker run -e PASSWORD=pw -p 8786:8787 ghcr.io/geocompx/docker:qgis
+docker run -e DISABLE_AUTH=True -p 8786:8787 ghcr.io/geocompx/docker:qgis
 ```
 
 
@@ -198,7 +194,6 @@ Assuming that the short description of the function contains the word "union"\in
 
 ```r
 grep("union", qgis_algo$algorithm, value = TRUE)
-#> [1] "native:multiunion" "native:union"      "sagang:fuzzyunionor" "sagang:polygonunion"
 ```
 
 One of the algorithms on the above list, `"native:union"`, sounds promising.
@@ -239,13 +234,11 @@ It accepts the used algorithm name and a set of named arguments shown in the hel
 In our case, three arguments seem important - `INPUT`, `OVERLAY`, and `OUTPUT`.
 The first one, `INPUT`, is our main vector object `incongr_wgs`, while the second one, `OVERLAY`, is `aggzone_wgs`.
 The last argument, `OUTPUT`, is an output file name, which **qgisprocess** will automatically choose and create in `tempdir()` if none is provided.
-The `.quiet` argument only tells **qgisprocess** to be less verbose.
 
 
 ```r
 union = qgis_run_algorithm(alg,
-  INPUT = incongr_wgs, OVERLAY = aggzone_wgs,
-  .quiet = TRUE
+  INPUT = incongr_wgs, OVERLAY = aggzone_wgs
 )
 union
 #>  $ OUTPUT: 'qgis_outputVector' chr "/tmp/...gpkg"
@@ -316,7 +309,7 @@ Let's run this algorithm and convert its output into a new `sf` object `clean_sf
 ```r
 clean = qgis_run_algorithm("grass7:v.clean",
   input = union_sf,
-  tool = "rmarea", threshold = 25000, .quiet = TRUE
+  tool = "rmarea", threshold = 25000
 )
 clean_sf = st_as_sf(clean)
 ```
@@ -339,7 +332,7 @@ It has a resolution of about 30 by 30 meters and uses a projected CRS.
 ```r
 library(qgisprocess)
 library(terra)
-dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
+dem = system.file("raster/dem.tif", package = "spDataLarge")
 ```
 
 The **terra** package's `terrain()` command already allows the calculation of several fundamental topographic characteristics such as slope, aspect, TPI (*Topographic Position Index*), TRI (*Topographic Ruggedness Index*), roughness, and flow directions.
@@ -377,8 +370,7 @@ Of course, when applying this algorithm you should make sure that the default va
 
 ```r
 dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex",
-  DEM = dem,
-  .quiet = TRUE
+  DEM = dem
 )
 ```
 
@@ -416,7 +408,7 @@ More information about additional arguments can be found in the original paper a
 ```r
 dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon",
   elevation = dem,
-  `-m` = TRUE, search = 120, .quiet = TRUE
+  `-m` = TRUE, search = 120
 )
 ```
 
