@@ -593,43 +593,42 @@ nz_map = tm_shape(nz) + tm_polygons() +
   tm_layout(bg.color = "lightblue")
 ```
 
+One of the main differences between regular charts (e.g., scatterplots) and maps is that the input data determine the aspect ratio of maps.
+Thus, in this case, we need to calculate the aspect ratios of our two main datasets, `nz_region` and `nz`.
+The following function, `norm_dim()` returns the normalized width (`"w"`) and height (`"h"`) of the object (as `"snpc"` units understood my the graphic device).
 
 ```{r}
+library(grid)
 norm_dim = function(obj){
     bbox = st_bbox(obj)
     width = bbox[["xmax"]] - bbox[["xmin"]]
     height = bbox[["ymax"]] - bbox[["ymin"]]
     w = width / max(width, height)
     h = height / max(width, height)
-    c("w" = w, "h" = h)
+    return(unit(c(w, h), "snpc"))
 }
+main_dim = norm_dim(nz_region)
+ins_dim = norm_dim(nz)
 ```
 
-```{r}
-main_w = norm_dim(nz_region)[["w"]]
-main_h = norm_dim(nz_region)[["h"]]
-```
+Next, knowing the aspect ratios, we need to specify the sizes and locations of our two maps -- the main map and the inset map -- using the `viewport()` function.
+A viewport is part of a graphics device we use to draw the graphical elements at a given moment.
+The viewport of our main map is just the representation of its aspect ratio.
 
 ```{r}
-ins_w = norm_dim(nz)[["w"]]
-ins_h = norm_dim(nz)[["h"]]
+main_vp = viewport(width = main_dim[1], height = main_dim[2])
 ```
 
-```{r}
-# using "snpc" unit to ensure width to height ratio stays constant
-# independently of ROOT viewport dimensions
-library(grid)
-main_vp = viewport(x = 0.5, y = 0.5,
-                   width = unit(main_w, "snpc"), height = unit(main_h, "snpc"))
-```
+On the other hand, the viewport of the inset map needs to specify its size and location.
+Here, we would make the inset map twice smaller as the main one by multiplying the width and height by 0.5, and we will locate it 0.5 cm from the bottom right of the main map frame.
 
 ```{r}
-ins_vp = viewport(x = unit(1, "npc") - unit(0.5, "cm"), y = unit(0.5, "cm"),
-                  width = unit(ins_w, "snpc") * 0.5, height = unit(ins_h, "snpc") * 0.5,
+ins_vp = viewport(width = ins_dim[1] * 0.5, height = ins_dim[2] * 0.5,
+                  x = unit(1, "npc") - unit(0.5, "cm"), y = unit(0.5, "cm"),
                   just = c("right", "bottom"))
 ```
 
-<!-- Finally, we combine the two maps using the function `viewport()` from the **grid** package, the first arguments of which specify the center location (`x` and `y`) and a size (`width` and `height`) of the inset map. -->
+Finally, we combine the two maps by creating a new, blank canvas, printing out the main map, and then placing the inset map inside of the main map viewport.
 
 ```{r insetmap1, message=FALSE, fig.cap="Inset map providing a context - location of the central part of the Southern Alps in New Zealand.", fig.scap="Inset map providing a context."}
 grid.newpage()
@@ -638,7 +637,9 @@ pushViewport(main_vp)
 print(nz_map, vp = ins_vp)
 ```
 
-<!-- Inset map can be saved to file either by using a graphic device (see Section \@ref(visual-outputs)) or the `tmap_save()` function and its arguments - `insets_tm` and `insets_vp`. -->
+<!--toDo: jn-->
+<!-- recheck if still true -->
+Inset map can be saved to file either by using a graphic device (see Section \@ref(visual-outputs)) or the `tmap_save()` function and its arguments - `insets_tm` and `insets_vp`.
 
 Inset maps are also used to create one map of non-contiguous areas.
 Probably, the most often used example is a map of the United States, which consists of the contiguous United States, Hawaii and Alaska.
