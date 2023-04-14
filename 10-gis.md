@@ -112,7 +112,7 @@ A quick way to get up-and-running with **qgisprocess** if you have Docker instal
 Assuming you have Docker installed and sufficient computational resources, you can run an R session with **qgisprocess** and relevant plugins with the following command (see the [geocompx/docker](https://github.com/geocompx/docker) repo for details):
 
 ```bash
-docker run -e DISABLE_AUTH=True -p 8786:8787 ghcr.io/geocompx/docker:qgis
+docker run -e DISABLE_AUTH=true -p 8786:8787 ghcr.io/geocompx/docker:qgis
 ```
 
 
