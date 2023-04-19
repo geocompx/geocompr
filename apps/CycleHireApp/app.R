@@ -1,7 +1,7 @@
 # Shiny app for cycle hire from https://github.com/geocompx/geocompr/issues/584
 # Author - Kiranmayi Vadlamudi
 # 2020-12-25
-# Last updated: 2023-02-28 by Jakub Nowosad
+# Last updated: 2023-04-19 by Jakub Nowosad
 library(shiny)
 library(sf)
 library(spData)
@@ -28,18 +28,18 @@ ui = fluidPage(
 )
 
 server = function(input, output) {
-  #centring the leaflet map onto London - use if needed
+  #Centering the leaflet map onto London - use if needed
   map_centre = matrix(c(-0.2574846, 51.4948089), nrow = 1, ncol = 2, 
                       dimnames = list(c("r1"), c("X", "Y")))
   
-  #based on input coords calculating top 5 closest stations to be displayed 
+  #Based on input coords calculating top 5 closest stations to be displayed 
   
-  #making reactive object of input location coordinates
+  #Making reactive object of input location coordinates
   input_pt = reactive({
     matrix(c(input$y, input$x), nrow = 1, ncol = 2,
            dimnames = list(c("r1"), c("X", "Y")))
   })
-  #rendering the output map showing the input coordinates
+  #Rendering the output map showing the input coordinates
   output$map = renderLeaflet({
     leaflet() |> 
       addTiles() |>
