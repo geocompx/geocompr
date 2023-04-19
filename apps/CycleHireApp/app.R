@@ -17,13 +17,16 @@ ui = fluidPage(
   titlePanel("CycleHireApp"),
   # Numeric Input from User
   bootstrapPage(
-    div(style="display:inline-block", numericInput("x", ("Enter x-coordinate of your location"), value = 51.5, step = 0.001)),
-    div(style="display:inline-block", numericInput("y", ("Enter y-coordinate of your location"), value = -0.1 , step = 0.001)),
-    div(style="display:inline-block",  numericInput("num", "How many cycles are you looking for?", value = 1, step = 1))
+    div(style = "display:inline-block", 
+        numericInput("x", ("Enter x-coordinate of your location"), value = 51.5, step = 0.001)),
+    div(style = "display:inline-block", 
+        numericInput("y", ("Enter y-coordinate of your location"), value = -0.1, step = 0.001)),
+    div(style = "display:inline-block", 
+        numericInput("num", "How many cycles are you looking for?", value = 1, step = 1))
     ),
   # Where leaflet map will be rendered
   fluidRow(
-    leafletOutput("map", height= 300)
+    leafletOutput("map", height = 300)
   )
 )
 
@@ -62,7 +65,7 @@ server = function(input, output) {
       filter(nbikes >= input$num) |> 
       head(5) |> 
       mutate(popup = str_c(str_c("Station:", name, sep = " "),
-                     str_c("Available bikes:", nbikes, sep=" "), sep = "<br/>"))
+                     str_c("Available bikes:", nbikes, sep = " "), sep = "<br/>"))
     
   })
   #Making changes to the output leaflet map reflecting the cycle stations found above
