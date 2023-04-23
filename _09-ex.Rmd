@@ -14,7 +14,9 @@ africa = world |>
   filter(continent == "Africa", !is.na(iso_a2)) |> 
   left_join(worldbank_df, by = "iso_a2") |> 
   select(name, subregion, gdpPercap, HDI, pop_growth) |> 
-  st_transform("ESRI:102022")
+  st_transform("ESRI:102022") |> 
+  st_make_valid() |> 
+  st_collection_extract("POLYGON")
 ```
 
 We will also use `zion` and `nlcd` datasets from **spDataLarge**:
@@ -30,14 +32,38 @@ E1. Create a map showing the geographic distribution of the Human Development In
     - Bonus: create three more maps of Africa using these three packages.
 
 ```{r}
-# toDo
+# graphics
+plot(africa["HDI"])
+# tmap
+library(tmap)
+tm_shape(africa) + 
+  tm_polygons("HDI")
+# ggplot
+library(ggplot2)
+ggplot() +
+  geom_sf(data = africa, aes(fill = HDI))
+# ggplotly
+library(plotly)
+g = ggplot() +
+  geom_sf(data = africa, aes(fill = HDI))
+ggplotly(g)
+# mapsf
+library(mapsf)
+mf_map(x = africa, var = "HDI", type = "choro")
+#
 ```
 
 E2. Extend the **tmap** created for the previous exercise so the legend has three bins: "High" (`HDI` above 0.7), "Medium" (`HDI` between 0.55 and 0.7) and "Low" (`HDI` below 0.55).
     - Bonus: improve the map aesthetics, for example by changing the legend title, class labels and color palette.
 
 ```{r}
-# toDo
+library(tmap)
+tm_shape(africa) + 
+  tm_polygons("HDI",
+              fill.scale = tm_scale_intervals(breaks = c(0, 0.55, 0.7, 1),
+                                              labels = c("Low", "Medium", "High"),
+                                              values = "-viridis"),
+              fill.legend = tm_legend(title = "Human Development Index")) 
 ```
 
 E3. Represent `africa`'s subregions on the map. 
@@ -45,7 +71,17 @@ Change the default color palette and legend title.
 Next, combine this map and the map created in the previous exercise into a single plot.
 
 ```{r}
-# toDo
+asubregions = tm_shape(africa) +
+  tm_polygons("subregion",
+              fill.scale = tm_scale_categorical(values = "Set3"),
+              fill.legend = tm_legend(title = "Subregion:"))
+ahdi = tm_shape(africa) + 
+  tm_polygons("HDI",
+              fill.scale = tm_scale_intervals(breaks = c(0, 0.55, 0.7, 1),
+                                              labels = c("Low", "Medium", "High"),
+                                              values = "-viridis"),
+              fill.legend = tm_legend(title = "Human Development Index:")) 
+tmap_arrange(ahdi, asubregions)
 ```
 
 E4. Create a land cover map of the Zion National Park.
