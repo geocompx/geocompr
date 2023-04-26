@@ -22,8 +22,8 @@ africa = world |>
 We will also use `zion` and `nlcd` datasets from **spDataLarge**:
 
 ```{r 08-mapping-42, results='hide', include=TRUE}
-zion = st_read((system.file("vector/zion.gpkg", package = "spDataLarge")))
-data(nlcd, package = "spDataLarge")
+zion = read_sf((system.file("vector/zion.gpkg", package = "spDataLarge")))
+nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 ```
 
 E1. Create a map showing the geographic distribution of the Human Development Index (`HDI`) across Africa with base **graphics** (hint: use `plot()`) and **tmap** packages (hint: use `tm_shape(africa) + ...`).
@@ -90,7 +90,61 @@ E4. Create a land cover map of the Zion National Park.
     - Bonus: Add an inset map of Zion National Park's location in the context of the Utah state. (Hint: an object representing Utah can be subset from the `us_states` dataset.) 
 
 ```{r}
-# toDo
+tm_shape(nlcd) +
+  tm_raster(col.scale = tm_scale_categorical(values = c("#495EA1", "#AF5F63", "#EDE9E4",
+                                                        "#487F3F", "#EECFA8", "#A4D378",
+                                                        "#FFDB5C", "#72D593"), levels.drop = TRUE)) +
+  tm_scalebar(bg.color = "white", position = c("left", "bottom")) +
+  tm_compass(bg.color = "white", position = c("right", "top")) +
+  tm_layout(legend.position = c("left", "top"), legend.bg.color = "white")
+```
+
+```{r}
+# Bonus
+utah = subset(us_states, NAME == "Utah")
+utah = st_transform(utah, st_crs(zion))
+
+zion_region = st_bbox(zion) |> 
+  st_as_sfc()
+
+main = tm_shape(nlcd) +
+  tm_raster(col.scale = tm_scale_categorical(values = c("#495EA1", "#AF5F63", "#EDE9E4",
+                                                        "#487F3F", "#EECFA8", "#A4D378",
+                                                        "#FFDB5C", "#72D593"), levels.drop = TRUE)) +
+  tm_scalebar(bg.color = "white", position = c("left", "bottom")) +
+  tm_compass(bg.color = "white", position = c("right", "top")) +
+  tm_layout(legend.position = c("left", "top"), legend.bg.color = "white")
+
+inset = tm_shape(utah) +
+  tm_polygons() +
+  tm_text("UTAH", size = 3) +
+  #tm_shape(zion) +
+  #tm_polygons(col = "red") +
+  tm_shape(zion_region) +
+  tm_borders(col = "red") +
+  tm_layout(frame = FALSE)
+
+library(grid)
+norm_dim = function(obj){
+    bbox = st_bbox(obj)
+    width = bbox[["xmax"]] - bbox[["xmin"]]
+    height = bbox[["ymax"]] - bbox[["ymin"]]
+    w = width / max(width, height)
+    h = height / max(width, height)
+    return(unit(c(w, h), "snpc"))
+}
+main_dim = norm_dim(zion)
+ins_dim = norm_dim(utah)
+
+main_vp = viewport(width = main_dim[1], height = main_dim[2])
+ins_vp = viewport(width = ins_dim[1] * 0.4, height = ins_dim[2] * 0.4,
+                  x = unit(1, "npc") - unit(0.5, "cm"), y = unit(0.5, "cm"),
+                  just = c("right", "bottom"))
+
+grid.newpage()
+print(main, vp = main_vp)
+pushViewport(main_vp)
+print(inset, vp = ins_vp)
 ```
 
 E5. Create facet maps of countries in Eastern Africa:
@@ -98,7 +152,14 @@ E5. Create facet maps of countries in Eastern Africa:
     - With a 'small multiple' per country
 
 ```{r}
-# toDo
+ea = subset(africa, subregion == "Eastern Africa")
+#1
+tm_shape(ea) +
+  tm_polygons(c("HDI", "pop_growth"))
+#2
+tm_shape(ea) +
+  tm_polygons() +
+  tm_facets_wrap("name")
 ```
 
 E6. Building on the previous facet map examples, create animated maps of East Africa:
