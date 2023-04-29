@@ -166,18 +166,33 @@ E6. Building on the previous facet map examples, create animated maps of East Af
     - Showing first the spatial distribution of HDI scores then population growth
     - Showing each country in order
 
+<!--toDo: jn-->
+<!-- add -->
 ```{r}
 # toDo
 ```
 
-E7. Create an interactive map of Africa:
+E7. Create an interactive map of HDI in Africa:
     - With **tmap**
     - With **mapview**
     - With **leaflet**
     - Bonus: For each approach, add a legend (if not automatically provided) and a scale bar
 
 ```{r}
-# toDo
+# tmap
+tmap_mode("view")
+tm_shape(africa) + tm_polygons("HDI") + tm_scale_bar()
+# mapview
+mapview::mapview(africa["HDI"])
+# leaflet
+africa4326 = st_transform(africa, "EPSG:4326")
+library(leaflet)
+pal = colorNumeric(palette = "YlGnBu", domain = africa4326$HDI)
+leaflet(africa4326) |> 
+  addTiles() |> 
+  addPolygons(stroke = FALSE, smoothFactor = 0.2, fillOpacity = 1, color = ~pal(HDI)) |> 
+  addLegend("bottomright", pal = pal, values = ~HDI, opacity = 1) |> 
+  addScaleBar()
 ```
 
 E8. Sketch on paper ideas for a web mapping app that could be used to make transport or land-use policies more evidence based:
@@ -185,22 +200,56 @@ E8. Sketch on paper ideas for a web mapping app that could be used to make trans
     - In the country you live, for dozens of users per day
     - Worldwide for hundreds of users per day and large data serving requirements
 
-```{r}
-# toDo
+```{asis}
+Ideas could include identification of routes where many people currently drive short distances, ways to encourage access to parks, or prioritization of new developments to reduce long-distance travel.
+
+At the city level a web map would be sufficient.
+
+A the national level a mapping application, e.g. with shiny, would probably be needed.
+
+Worldwide, a database to serve the data would likely be needed. Then various front-ends could plug in to this.
 ```
 
 E9. Update the code in `coffeeApp/app.R` so that instead of centering on Brazil the user can select which country to focus on:
     - Using `textInput()`
     - Using `selectInput()`
 
-```{r}
-# toDo
+```{asis}
+The answer can be found in the `shinymod` branch of the geocompr repo: https://github.com/Robinlovelace/geocompr/pull/318/files
+You create the new widget and then use it to set the center.
+Note: the input data must be fed into the map earlier to prevent the polygons disappearing when you change the center this way.
 ```
 
+<!--toDo: jn-->
+<!-- update figures references -->
+<!-- plus check code -->
 E10. Reproduce Figure \@ref(fig:tmshape) and the 1st and 6th panel of Figure \@ref(fig:break-styles) as closely as possible using the **ggplot2** package.
 
 ```{r}
-# toDo
+library(ggplot2)
+ggplot() + 
+  geom_sf(data = nz, color = NA) +
+  coord_sf(crs = st_crs(nz), datum = NA) +
+  theme_void()
+ggplot() +
+  geom_sf(data = nz, fill = NA) +
+  coord_sf(crs = st_crs(nz), datum = NA) +
+  theme_void()
+ggplot() +
+  geom_sf(data = nz) + 
+  coord_sf(crs = st_crs(nz), datum = NA) +
+  theme_void()
+# fig 8.6
+ggplot() +
+  geom_sf(data = nz, aes(fill = Median_income)) +
+  coord_sf(crs = st_crs(nz), datum = NA) +
+  scale_fill_distiller(palette = "Oranges", direction = 1) + 
+  theme_void()
+ggplot() + 
+  geom_sf(data = nz, aes(fill = Island)) + 
+  coord_sf(crs = st_crs(nz), datum = NA) +
+  scale_fill_brewer(palette = "Set3") + 
+  theme_void()
 ```
 
 E11. Join `us_states` and `us_states_df` together and calculate a poverty rate for each state using the new dataset.
@@ -210,12 +259,41 @@ What is the information provided by the first and the second map?
 How do they differ from each other?
 
 ```{r}
-# toDo
+library(cartogram)
+# prepare the data
+us = st_transform(us_states, "EPSG:2163")
+us = left_join(us, us_states_df, by = c("NAME" = "state"))
+# calculate a poverty rate
+us$poverty_rate = us$poverty_level_15 / us$total_pop_15
+# create a regular map
+ecm1 = tm_shape(us) +
+  tm_polygons("poverty_rate", fill.legend = tm_legend(title = "Poverty rate"))
+# create a cartogram
+us_carto = cartogram(us, "total_pop_15")
+ecm2 = tm_shape(us_carto) + 
+  tm_polygons("poverty_rate", fill.legend = tm_legend(title = "Poverty rate"))
+# combine two maps
+tmap_arrange(ecm1, ecm2)
 ```
 
 E12. Visualize population growth in Africa. 
 Next, compare it with the maps of a hexagonal and regular grid created using the **geogrid** package.
 
 ```{r}
-# toDo
+library(geogrid)
+
+hex_cells = calculate_grid(africa, grid_type = "hexagonal", seed = 25, learning_rate = 0.03)
+africa_hex = assign_polygons(africa, hex_cells)
+
+reg_cells = calculate_grid(africa, grid_type = "regular", seed = 25, learning_rate = 0.03)
+africa_reg = assign_polygons(africa, reg_cells)
+
+tgg1 = tm_shape(africa) +
+  tm_polygons("pop_growth", fill.legend = tm_legend(title = "Population's growth (annual %)"))
+tgg2 = tm_shape(africa_hex) + 
+  tm_polygons("pop_growth", fill.legend = tm_legend(title = "Population's growth (annual %)"))
+tgg3 = tm_shape(africa_reg) + 
+  tm_polygons("pop_growth", fill.legend = tm_legend(title = "Population's growth (annual %)"))
+
+tmap_arrange(tgg1, tgg2, tgg3)
 ```
