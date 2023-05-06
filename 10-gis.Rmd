@@ -22,10 +22,19 @@ library(gdalcubes)
 ```
 
 ```{r 09-gis-1-3, echo=FALSE, message=FALSE}
-# Only run code if qgis is installed
+# Only run code if qgis and relevant plugins are installed
 has_qgis = FALSE
-if ("qgisprocess" %in% installed.packages()) {
-  has_qgis = qgisprocess::has_qgis()
+qgisprocess_installed = "qgisprocess" %in% installed.packages()
+if(qgisprocess_installed) {
+  algs = qgisprocess::qgis_algorithms()
+  if(!is.null(algs)) {
+    qgis_enable_plugins()
+    has_saga = any(grepl("saga", algs$provider))
+    has_grass = any(grepl("grass", algs$provider))
+    if(has_grass && has_saga) {
+      has_qgis = TRUE
+    }
+  }
 }
 ```
 
