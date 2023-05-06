@@ -31,14 +31,10 @@ Furthermore, the anonymous functions could be replaced with named functions and 
 
 E2. In the geometric algorithms section we calculated that the area and geographic centroid of the polygon represented by `poly_mat` was `r sum(A)` and `r round(c(weighted.mean(C[, 1], A), weighted.mean(C[, 2], A)), 1)`, respectively.
 
-<!-- Todo: add link to that script file (RL) -->
-
   - Reproduce the results on your own computer with reference to the script [`11-centroid-alg.R`](https://github.com/geocompx/geocompr/blob/main/code/11-centroid-alg.R), an implementation of this algorithm (bonus: type out the commands - try to avoid copy-pasting).
   - Are the results correct? Verify them by converting `poly_mat` into an `sfc` object (named `poly_sfc`) with `st_polygon()` (hint: this function takes objects of class `list()`) and then using `st_area()` and `st_centroid()`.
 
-<!--  -->
-
-```{r 11-ex-e2}
+```{r 11-ex-e}
 # We can verify the answer by converting `poly_mat` into a simple feature collection
 # as follows, which shows the calculations match:
 x_coords = c(10, 0, 0, 12, 20, 10)
@@ -53,12 +49,27 @@ sf::st_centroid(poly_sfc)
 
 E3. It was stated that the algorithm\index{algorithm} we created only works for *convex hulls*. Define convex hulls\index{convex hull} (see the geometry operations chapter) and test the algorithm on a polygon that is *not* a convex hull.
 
-<!-- The algorithm would need to be able to have negative as well as positive area values. -->
+```{r 11-ex-e3}
+x_coords = c(10, 5, 0, 0, 12, 20, 10)
+y_coords = c(0, 5, 0, 10, 20, 15, 0)
+plot(x_coords, y_coords, type = "l")
+poly_mat = cbind(x_coords, y_coords)
+# source("https://github.com/geocompx/geocompr/raw/main/code/11-centroid-alg.R")
+# Area from our script: 270
+poly_sfc = sf::st_polygon(list(poly_mat))
+sf::st_area(poly_sfc) # Actual area: 220
+```
 
   - Bonus 1: Think about why the method only works for convex hulls and note changes that would need to be made to the algorithm to make it work for other types of polygon.
-  - Bonus 2: Building on the contents of `11-centroid-alg.R`, write an algorithm\index{algorithm} only using base R functions that can find the total length of linestrings represented in matrix form.
+  - Bonus 2: Building on the contents of `11-centroid-alg.R`, write an algorithm only using base R functions that can find the total length of linestrings represented in matrix form.
   
 <!-- Todo: add example of matrix representing a linestring, demonstrate code to verify the answer, suggest alternative functions to decompose as a bonus. -->
+
+```{asis 11-ex-e3-bonus1}
+The algorithm would need to be able to have negative as well as positive area values.
+
+We leave Bonus 2 as an exercise for the reader.
+```
 
 E4. In the functions section we created different versions of the `poly_centroid()` function that generated outputs of class `sfg` (`poly_centroid_sfg()`) and type-stable `matrix` outputs (`poly_centroid_type_stable()`). 
 Further extend the function by creating a version (e.g., called `poly_centroid_sf()`) that is type stable (only accepts inputs of class `sf`) *and* returns `sf` objects (hint: you may need to convert the object `x` into a matrix with the command `sf::st_coordinates(x)`).
@@ -66,7 +77,7 @@ Further extend the function by creating a version (e.g., called `poly_centroid_s
   - Verify it works by running `poly_centroid_sf(sf::st_sf(sf::st_sfc(poly_sfc)))`
   - What error message do you get when you try to run `poly_centroid_sf(poly_mat)`?
     
-```{r 10-algorithms-21, eval=FALSE}
+```{r 11-ex-e4}
 poly_centroid_sf = function(x) {
   stopifnot(is(x, "sf"))
   xcoords = sf::st_coordinates(x)
