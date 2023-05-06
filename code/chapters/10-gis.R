@@ -4,7 +4,7 @@ library(terra)
 
 
 ## ----09-gis-1-2, message=FALSE, eval=FALSE----------------------------------------------------------
-## # remotes::install_github("paleolimbot/qgisprocess")
+## # remotes::install_github("r-spatial/qgisprocess")
 ## library(qgisprocess)
 ## library(Rsagacmd)
 ## library(rgrass)
