@@ -21,7 +21,7 @@ This final section of the book also provides some pointers on how to get involve
 A feature of R\index{R}, and open source software in general, is that there are often multiple ways to achieve the same result.
 The code chunk below illustrates this by using three functions, covered in Chapters \@ref(attr) and \@ref(geometry-operations), to combine the 16 regions of New Zealand into a single geometry:
 
-```{r 15-synthesis-1}
+```{r 16-synnthesis-1}
 library(spData)
 nz_u1 = sf::st_union(nz)
 nz_u2 = aggregate(nz["Population"], list(rep(1, nrow(nz))), sum)
@@ -47,7 +47,7 @@ The same applies for all packages showcased in this book, although it can be hel
 A common choice, for which there is no simple answer, is between **tidyverse**\index{tidyverse (package)} and base R for geocomputation.
 The following code chunk, for example, shows **tidyverse** and base R ways to extract the `Name` column from the `nz` object, as described in Chapter \@ref(attr):
 
-```{r 15-synthesis-2, message=FALSE}
+```{r 16-synnthesis-2, message=FALSE}
 library(dplyr)                          # attach tidyverse package
 nz_name1 = nz["Name"]                   # base R approach
 nz_name2 = nz |>                        # tidyverse approach
@@ -66,7 +66,7 @@ Chapter \@ref(intro) mentions 20+ influential packages for working with geograph
 Hundreds of other packages are available for working with geographic data in R, and many more are developed each year.
 As of mid-2023, there are more than 160 packages mentioned in the Spatial [Task View](https://cran.r-project.org/web/views/) and countless functions for geographic data are developed each year.
 
-```{r 15-synthesis-3, eval=FALSE, echo=FALSE}
+```{r 16-synnthesis-3, eval=FALSE, echo=FALSE}
 # aim: find number of packages in the spatial task view
 # how? see:
 # vignette("selectorgadget")
@@ -94,7 +94,7 @@ The equivalent numbers for **sf** are 69 in 2018 and 431 in 2023, highlighting t
 Although best known for point pattern analysis, the **spatstat** package also supports raster\index{raster} and other vector geometries and provides powerful functionality for spatial statistics and more [@baddeley_spatstat_2005].
 It may also be worth researching new alternatives that are under development if you have needs that are not met by established packages.
 
-```{r 15-synthesis-4, eval=FALSE, echo=FALSE}
+```{r 16-synnthesis-4, eval=FALSE, echo=FALSE}
 # aim: find number of packages that depend on sp, sf and spatstat
 sfdeps = devtools::revdep(pkg = "sf", dependencies = c("Depends", "Imports"))
 spatstatdeps = devtools::revdep(pkg = "spatstat", dependencies = c("Depends", "Imports"))
@@ -198,26 +198,37 @@ The following code creates a map of the world with blue sea and green land, but 
 ```r
 library(sf)
 library(spData)
-plot(st_geometry(world), col = "green", border = NA)
+plot(st_geometry(world), col = "green")
+```
+
+If you post this code in a forum, it is likely that you will get a more specific and useful responses.
+For example, someone might respond with the following code, which demonstrably solves the problem, as illustrated in Figure \@ref(fig:16-synthesis-reprex):
+
+```r
+library(sf)
+library(spData)
+# use the bg argument to fill in the land
+plot(st_geometry(world), col = "green", bg = "lightblue")
 ```
 
 
+```{r 16-synthesis-reprex, out.width="49%", fig.show="hold", fig.cap="A map of the world with green land, illustrating a question with a reproducible example (left) and the solution (right)."}
+library(sf)
+library(spData)
+plot(st_geometry(world), col = "green")
+plot(st_geometry(world), col = "green", bg = "lightblue")
+```
 
-<!-- Todo: show how reprex works. -->
+Exercise for the reader: copy the above code, run the command `reprex::reprex()` (or paste the command into the `reprex()` function call) and paste the output into a forum or other online space.
 
-
-
-<!-- A strength of open source and collaborative approaches to geocomputation is that they generate a vast and ever evolving body on knowledge, of which this book is a part. -->
-<!-- Thousands of exchanges have taken place in publicly accessible fora, demonstrating the importance of knowing how to search for answers and, perhaps more importantly, show how beginners can support open source software communities by asking good questions. -->
-<!-- This section covers these interrelated topics, with a focus on common places to search for answers and ask questions and how to ask good questions. -->
-<!-- Should we divide these topics in 2? RL 2022-02 -->
-
-<!-- Key fora for discussing methods and code for working with geographic data in R include: -->
-<!-- I was thinking of saying "in descening order of ease of use" or something but not sure that's a good idea (RL 2022-02) -->
+A strength of open source and collaborative approaches to geocomputation is that they generate a vast and ever evolving body on knowledge, of which this book is a part.
+Demonstrating your own efforts to solve a problem, and providing a reproducible example of the problem, is a way of contributing to this body of knowledge.
 
 ### Defining and sketching the problem
 
-The best starting point when developing a new geocomputational methodology or approach is often a pen and paper (or equivalent digital sketching tools such as [Excalidraw](https://excalidraw.com/) and [tldraw](https://www.tldraw.com/) which allow collaborative sketching and rapid sharing of ideas): during the most creative early stages of methodological development work software *of any kind* can slow down your thoughts and direct your thinking away from important abstract thoughts.
+In some cases, you may not be able to find a solution to your problem online, or you may not be able to formulate a question that can be answered by a search engine.
+The best starting point in such cases, or when developing a new geocomputational methodology, may be a pen and paper (or equivalent digital sketching tools such as [Excalidraw](https://excalidraw.com/) and [tldraw](https://www.tldraw.com/) which allow collaborative sketching and rapid sharing of ideas). 
+During the most creative early stages of methodological development work software *of any kind* can slow down your thoughts and direct your thinking away from important abstract thoughts.
 Framing the question with mathematics is also highly recommended, with reference to a minimal example that you can sketch 'before and after' versions of numerically.
 If you have the skills and if the problem warrants it, describing the approach algebraically can in some cases help develop effective implementations.
 
@@ -234,14 +245,12 @@ This can be done with reference to documents that are part of R, and which can b
 
 Another software-related direction for future learning is **discovering geocomputation with other languages**.
 There are good reasons for learning R as a language for geocomputation, as described in Chapter \@ref(intro), but it is not the only option.^[
-R's strengths relevant to our definition of geocomputation include its emphasis on scientific reproducibility\index{reproducibility}, widespread use in academic research and unparalleled support for statistical modeling of geographic data.
-Furthermore, we advocate learning one language (R) for geocomputation\index{geocomputation} in depth before delving into other languages/frameworks because of the costs associated with context switching.
-It is preferable to have expertise in one language than basic knowledge of many.
+R's strengths are particularly relevant to our definition of geocomputation due to its emphasis on scientific reproducibility, widespread use in academic research and unparalleled support for statistical modeling of geographic data.
+Furthermore, we advocate learning one language for geocomputation in depth before delving into other languages/frameworks because of the costs associated with context switching, and R is an excellent starting point on your geocomputational journey.
 ]
-It would be possible to study *Geocomputation with: Python*\index{Python}, *C++*\index{C++}, *JavaScript*\index{JavaScript}, *Scala*\index{Scala} or *Rust*\index{Rust} in equal depth.
+It would be possible to study *Geocomputation with: Python*, *C++*, *JavaScript*, *Scala*\index{Scala} or *Rust*\index{Rust} in equal depth.
 Each has evolving geospatial capabilities.
-[**rasterio**](https://github.com/mapbox/rasterio), for example, is a Python package
-that could supplement/replace the **raster** package used in this book --- see @garrard_geoprocessing_2016 and online tutorials such as [automating-gis-processes](https://automating-gis-processes.github.io/CSC18) for more on the Python\index{Python} ecosystem.
+[**rasterio**](https://github.com/mapbox/rasterio), for example, is a Python package with similar functionality as the **terra** package used in this book.
 Dozens of geospatial libraries have been developed in C++\index{C++}, including well known libraries such as GDAL\index{GDAL} and GEOS\index{GEOS}, and less well known libraries such as the **[Orfeo Toolbox](https://github.com/orfeotoolbox/OTB)** for processing remote sensing (raster) data.
 [**Turf.js**](https://github.com/Turfjs/turf) is an example of the potential for doing geocomputation with JavaScript.
 \index{Scala}
