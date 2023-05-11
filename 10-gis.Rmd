@@ -23,12 +23,16 @@ library(gdalcubes)
 
 ```{r 09-gis-1-3, echo=FALSE, message=FALSE}
 # Only run code if qgis and relevant plugins are installed
-has_qgis = FALSE
+has_qgis_plugins = FALSE
+# Check to see that the qgisprocess package is installed:
 if ("qgisprocess" %in% installed.packages()) {
-  has_qgis = qgisprocess::has_qgis() && 
-    c("grassprovider", "processing_saga_nextgen") %in%
-    qgisprocess::qgis_plugins()$name |>
-    all()
+  # Check that QGIS is available to prevent errors in subsequent checks:
+  if (qgisprocess::has_qgis()) {
+    # Check that the plugins are installed (they will loaded later):
+    has_grass = qgisprocess::qgis_has_provider("grass7")
+    has_saga = qgisprocess::qgis_has_provider("sagang")
+    has_qgis_plugins = has_grass && has_saga
+  }
 }
 ```
 
@@ -136,7 +140,7 @@ Assuming you have Docker installed and sufficient computational resources, you c
 docker run -e DISABLE_AUTH=true -p 8786:8787 ghcr.io/geocompx/docker:qgis
 ```
 
-```{r, eval=has_qgis}
+```{r, eval=has_qgis_plugins}
 library(qgisprocess)
 #> Attempting to load the cache ... Success!
 #> QGIS version: 3.30.1-'s-Hertogenbosch
@@ -151,7 +155,7 @@ The above approaches can also be used when you have more than one QGIS installat
 
 Next, we can find which providers (meaning different software) are available on our computer.
 
-```{r providers, eval=has_qgis}
+```{r providers, eval=has_qgis_plugins}
 qgis_providers()
 #> # A tibble: 6 × 3
 #>   provider provider_title    algorithm_count
@@ -167,7 +171,7 @@ qgis_providers()
 The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
 Enable external algorithms with the following command:
 
-```{r enable-providers, eval=has_qgis}
+```{r enable-providers, eval=has_qgis_plugins}
 qgis_enable_plugins()
 #> Trying to enable following plugin(s): grassprovider, otbprovider, processing_saga_nextgen
 #> grassprovider successfully enabled!
@@ -195,7 +199,7 @@ incongr_wgs = st_transform(incongruent, "EPSG:4326")
 aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 ```
 
-```{r uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders).", eval=has_qgis}
+```{r uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders).", eval=has_qgis_plugins}
 library(tmap)
 tm_shape(incongr_wgs) +
   tm_polygons(border.col = "grey5") +
@@ -234,14 +238,14 @@ if (packageVersion("tmap") >= "4.0") {
 To find an algorithm to do this work, we can search the output of the `qgis_algorithms()` function.
 This function returns a data frame containing all of the available providers and the algorithms they contain.^[Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.] 
 
-```{r, eval=has_qgis}
+```{r, eval=has_qgis_plugins}
 qgis_algo = qgis_algorithms()
 ```
 
 The `qgis_algo` object has a lot of columns, but usually, we are only interested in the `algorithm` column that combines information about the provider and the algorithm name.
 Assuming that the short description of the function contains the word "union"\index{union}, we can run the following code to find the algorithm of interest:
 
-```{r, eval=has_qgis}
+```{r, eval=has_qgis_plugins}
 grep("union", qgis_algo$algorithm, value = TRUE)
 ```
 
@@ -251,7 +255,7 @@ This is the role of the `qgis_show_help()`, which returns a short summary of wha
 This makes it output rather long.
 The following command returns a data frame with each row representing an argument required by `"native:union"` and columns with the name, description, type, default value, available values, and acceptable values associated with each:
 
-```{r 09-gis-6, eval=has_qgis}
+```{r 09-gis-6, eval=has_qgis_plugins}
 alg = "native:union"
 union_arguments = qgis_arguments(alg)
 union_arguments
@@ -283,7 +287,7 @@ In our case, three arguments seem important - `INPUT`, `OVERLAY`, and `OUTPUT`.
 The first one, `INPUT`, is our main vector object `incongr_wgs`, while the second one, `OVERLAY`, is `aggzone_wgs`.
 The last argument, `OUTPUT`, is an output file name, which **qgisprocess** will automatically choose and create in `tempdir()` if none is provided.
 
-```{r 09-gis-7, eval=has_qgis}
+```{r 09-gis-7, eval=has_qgis_plugins}
 union = qgis_run_algorithm(alg,
   INPUT = incongr_wgs, OVERLAY = aggzone_wgs
 )
@@ -295,7 +299,7 @@ Running the above line of code will save our two input objects into temporary .g
 The **qgisprocess** package stores the `qgis_run_algorithm()` result as a list containing, in this case, a path to the output file.
 We can either read this file back into R with `read_sf()` (e.g., `union_sf = read_sf(union[[1]])`) or directly with `st_as_sf()`:
 
-```{r, eval=has_qgis}
+```{r, eval=has_qgis_plugins}
 union_sf = st_as_sf(union)
 ```
 
@@ -308,7 +312,7 @@ These artifacts of error are called sliver polygons\index{sliver polygons} (see 
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^, and next remove them.
 Let's search for an appropriate algorithm.
 
-```{r, eval=has_qgis}
+```{r, eval=has_qgis_plugins}
 grep("clean", qgis_algo$algorithm, value = TRUE)
 ```
 
@@ -348,7 +352,7 @@ In our case, the `rmarea` tool removes all areas smaller or equal to a provided 
 
 Let's run this algorithm and convert its output into a new `sf` object `clean_sf`.
 
-```{r 09-gis-7c, eval=has_qgis}
+```{r 09-gis-7c, eval=has_qgis_plugins}
 clean = qgis_run_algorithm("grass7:v.clean",
   input = union_sf,
   tool = "rmarea", threshold = 25000
@@ -358,7 +362,7 @@ clean_sf = st_as_sf(clean)
 
 The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver polygons are now removed.
 
-```{r sliver, echo=FALSE, fig.cap="Sliver polygons colored in red (left panel). Cleaned polygons (right panel).", eval=has_qgis}
+```{r sliver, echo=FALSE, fig.cap="Sliver polygons colored in red (left panel). Cleaned polygons (right panel).", eval=has_qgis_plugins}
 knitr::include_graphics("figures/10-sliver.png")
 ```
 
@@ -372,7 +376,7 @@ Various terrain parameters, for example, can be helpful for the prediction of la
 For this section, we will use `dem.tif` -- a digital elevation model of the Mongón study area (downloaded from the Land Process Distributed Active Archive Center, see also `?dem.tif`)
 It has a resolution of about 30 by 30 meters and uses a projected CRS.
 
-```{r, eval=has_qgis}
+```{r, eval=has_qgis_plugins}
 library(qgisprocess)
 library(terra)
 dem = system.file("raster/dem.tif", package = "spDataLarge")
@@ -383,7 +387,7 @@ However, GIS programs offer many more terrain characteristics, some of which can
 For example, the topographic wetness index (TWI) was found useful in studying hydrological and biological processes [@sorensen_calculation_2006].
 Let's search the algorithm list for this index using `"wetness"` as keyword.
 
-```{r, eval=has_qgis}
+```{r, eval=has_qgis_plugins}
 qgis_algo = qgis_algorithms()
 grep("wetness", qgis_algo$algorithm, value = TRUE)
 #> [1] "sagang:sagawetnessindex"              
@@ -408,7 +412,7 @@ Therefore, we only have to specify one argument -- the input `DEM`.
 Of course, when applying this algorithm you should make sure that the default values are in correspondence with your study aim.^[The additional arguments of `"sagang:sagawetnessindex"` are well-explained at https://gis.stackexchange.com/a/323454/20955.]
 `"sagang:sagawetnessindex"` returns not one but four rasters -- catchment area, catchment slope, modified catchment area, and topographic wetness index.
 
-```{r, eval=has_qgis}
+```{r, eval=has_qgis_plugins}
 dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex",
   DEM = dem
 )
