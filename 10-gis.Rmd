@@ -385,7 +385,12 @@ Therefore, we only have to specify one argument -- the input `DEM`.
 Of course, when applying this algorithm you should make sure that the default values are in correspondence with your study aim.^[The additional arguments of `"sagang:sagawetnessindex"` are well-explained at https://gis.stackexchange.com/a/323454/20955.]
 `"sagang:sagawetnessindex"` returns not one but four rasters -- catchment area, catchment slope, modified catchment area, and topographic wetness index.
 
+Before running the SAGA algorithm from within QGIS, we change the default raster output format from `.tif` to SAGA's native raster format `.sdat`.
+Hence, all output rasters we do not specify ourselves will from now on be written to the `.sdat` format. 
+Depending on the software versions (SAGA, GDAL) you are using, this might not be necessary but often enough this will save you trouble when trying to read in output rasters created with SAGA.
+
 ```{r, eval=has_qgis_plugins}
+options(qgisprocess.tmp_raster_ext = ".sdat")
 dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex",
   DEM = dem
 )
@@ -393,11 +398,12 @@ dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex",
 
 <!-- The result, `dem_wetness`, is a list with file paths to the four outputs. -->
 We can read a selected output by providing an output name in the `qgis_as_terra()` function.
+And since we are done with the SAGA processing from within QGIS, we change the raster output format back to `.tif`.
 
 ```{r, eval=has_qgis_plugins}
-dem_wetness_twi_sdat = gsub("tif", "sdat", dem_wetness$TWI)
-dem_wetness_twi = qgis_as_terra(dem_wetness_twi_sdat)
+dem_wetness_twi = qgis_as_terra(dem_wetness$TWI)
 # plot(dem_wetness_twi)
+options(qgisprocess.tmp_raster_ext = ".tif")
 ```
 
 You can see the TWI map on the left panel of Figure \@ref(fig:qgis-raster-map).
