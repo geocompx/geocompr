@@ -149,7 +149,24 @@ There are a few possible solutions when the configuration fails: you can set `op
 <!-- link to the vignette https://github.com/r-spatial/qgisprocess/pull/31/files when it is online -->
 The above approaches can also be used when you have more than one QGIS installation and want to decide which one to use.
 
-Next, we can find which providers (meaning different software) are available on our computer.
+Next, we can find which plugins (meaning different software) are available on our computer.
+
+```{r plugins, eval=has_qgis_plugins}
+qgis_plugins()
+```
+
+This tells us that the GRASS (`grassprovider`) and SAGA (`processing_saga_nextgen`) plugins are available on the system but are not yet enabled.
+Since we need both later on in the chapter, let's enable them. 
+
+```{r enable-providers, eval=has_qgis_plugins}
+qgis_enable_plugins(c("grassprovider", "processing_saga_nextgen"), 
+                    quiet = TRUE)
+```
+
+Please note that aside from installing SAGA on your system you also need to install the QGIS Python plugin Processing Saga NextGen.
+You can do so from within QGIS with the [Plugin Manager](https://docs.qgis.org/3.28/en/docs/training_manual/qgis_plugins/fetching_plugins.html) or programmatically with the help of the Python package [qgis-plugin-manager](https://github.com/3liz/qgis-plugin-manager) (at least on Linux).
+
+`qgis_providers()` lists the name of the software and the corresponding count of available geoalgorithms.
 
 ```{r providers, eval=has_qgis_plugins}
 qgis_providers()
@@ -163,19 +180,7 @@ qgis_providers()
 #> 5 native   QGIS (native c++)             242
 #> 6 sagang   SAGA Next Gen                 509
 ```
-
 The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
-Enable external algorithms with the following command:
-
-```{r enable-providers, eval=has_qgis_plugins}
-qgis_enable_plugins()
-#> Trying to enable following plugin(s): grassprovider, otbprovider, processing_saga_nextgen
-#> grassprovider successfully enabled!
-#> otbprovider successfully enabled!
-#> processing_saga_nextgen successfully enabled!
-#> ...
-#> You now have access to 1162 algorithms from 6 QGIS processing providers.
-```
 
 We are now ready for some geocomputation with QGIS and friends, from within R!
 Let's try two example case studies.
