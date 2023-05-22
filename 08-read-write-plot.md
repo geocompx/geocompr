@@ -412,10 +412,7 @@ Table \@ref(tab:formats) presents some basic information about selected and ofte
   </tr>
 </tbody>
 </table>
-<!-- additional suggestions from our readers: -->
-<!-- - KEA - https://gdal.org/drivers/raster/kea.html -->
-<!-- - sfarrow & geoparquet/pandas/GeoFeather -->
-<!-- Zarr - long term time series raster cloud format -->
+
 
 \index{Shapefile}
 \index{GeoPackage}
@@ -450,7 +447,13 @@ Additionally, some spatial data formats can store other data models (types) than
 It includes LAS and LAZ formats for storing lidar point clouds, and NetCDF and HDF for storing multidimensional arrays.
 <!-- do we mention them anywhere in the book and can reference to? -->
 
-Finally, spatial data is also often stored using tabular (non-spatial) text formats, including CSV files or Excel spreadsheets.
+<!-- additional suggestions from our readers: -->
+<!-- - KEA - https://gdal.org/drivers/raster/kea.html -->
+<!-- - sfarrow & geoparquet/pandas/GeoFeather -->
+<!-- Zarr - long term time series raster cloud format -->
+
+
+Spatial data is also often stored using tabular (non-spatial) text formats, including CSV files or Excel spreadsheets.
 For example, this can be convenient to share spatial samples with people who do not use GIS tools or exchange data with other software that does not accept spatial data formats. 
 However, this approach has several possible issues -- it is fairly challenging for storing geometries more complex than POINTs and does not directly store information about CRS.
 
