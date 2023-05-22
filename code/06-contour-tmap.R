@@ -5,6 +5,11 @@ dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 # create hillshade
 hs = shade(slope = terrain(dem, "slope", unit = "radians"), 
            aspect = terrain(dem, "aspect", unit = "radians"))
+# https://github.com/rspatial/terra/issues/948#issuecomment-1356226265
+# h = shade(slope = terrain(dem, "slope", unit = "radians"),
+#           aspect = terrain(dem, "aspect", unit = "radians"),
+#           angle = c(45, 45, 45), direction = c(0, 45, 315))
+# h = Reduce(mean, h)
 # create contour
 cn = st_as_sf(as.contour(dem))
 
