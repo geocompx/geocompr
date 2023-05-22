@@ -22,6 +22,7 @@ specific_map_pkgs = c(
   "geogrid",
   "geofacet",
   "linemap",
+  "tanaka",
   "rayshader"
 )
 
