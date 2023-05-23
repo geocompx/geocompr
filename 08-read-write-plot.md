@@ -38,10 +38,9 @@ The final Section \@ref(visual-outputs) demonstrates methods for saving visual o
 
 <!--toDo:RL-->
 <!--revise and update the following section-->
-<!-- we should add http://freegisdata.rtwilson.com/ somewhere -->
 
 \index{open data}
-A vast and ever-increasing amount of geographic data is available on the internet, much of which is free to access and use (with appropriate credit given to its providers).
+A vast and ever-increasing amount of geographic data is available on the internet, much of which is free to access and use (with appropriate credit given to its providers).^[For example, visit https://freegisdata.rtwilson.com/ for a list of websites with freely available geographic datasets.]
 In some ways there is now *too much* data, in the sense that there are often multiple places to access the same dataset.
 Some datasets are of poor quality.
 In this context, it is vital to know where to look, so the first section covers some of the most important sources.
@@ -77,8 +76,6 @@ canada_perma_land = read_sf("PeRL_permafrost_landscapes/canada_perma_land.shp")
 Many R packages have been developed for accessing geographic data, some of which are presented in Table \@ref(tab:datapackages).
 These provide interfaces to one or more spatial libraries or geoportals and aim to make data access even quicker from the command line.
 
-<!--toDo:JN-->
-<!-- update the table -->
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>(\#tab:datapackages)Selected R packages for geographic data retrieval.</caption>
  <thead>
@@ -89,16 +86,20 @@ These provide interfaces to one or more spatial libraries or geoportals and aim 
  </thead>
 <tbody>
   <tr>
+   <td style="text-align:left;"> FedData </td>
+   <td style="text-align:left;"> Datasets maintained by the US Federal government, including elevation and land cover. </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> geodata </td>
+   <td style="text-align:left;"> Download and import imports administrative, elevation, WorldClim data. </td>
+  </tr>
+  <tr>
    <td style="text-align:left;"> osmdata </td>
    <td style="text-align:left;"> Download and import small OpenStreetMap datasets. </td>
   </tr>
   <tr>
    <td style="text-align:left;"> osmextract </td>
    <td style="text-align:left;"> Download and import large OpenStreetMap datasets. </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> geodata </td>
-   <td style="text-align:left;"> Download and import imports administrative, elevation, WorldClim data. </td>
   </tr>
   <tr>
    <td style="text-align:left;"> rnaturalearth </td>
@@ -113,23 +114,19 @@ These provide interfaces to one or more spatial libraries or geoportals and aim 
 
 <!--toDo:JN-->
 <!-- add to the table: -->
-<!-- - elevatr - https://github.com/jhollist/elevatr/issues/64 -->
-<!-- https://github.com/ropensci/rsat -->
+<!-- https://github.com/jhollist/elevatr/issues/64 -->
 <!-- https://github.com/mikejohnson51/climateR/issues/44 -->
 <!-- maybe: -->
-<!-- - https://github.com/ErikKusch/KrigR -->
-<!-- https://cran.r-project.org/web/packages/FedData/index.html -->
+<!-- https://github.com/ErikKusch/KrigR -->
 <!-- https://github.com/VeruGHub/easyclimate -->
 <!-- mention: -->
-<!-- - https://github.com/ropensci/MODIStsp -->
+<!-- https://github.com/ropensci/MODIStsp -->
+<!-- https://github.com/ropensci/rsat -->
 
 It should be emphasized that Table \@ref(tab:datapackages) represents only a small number of available geographic data packages.
 For example, a large number of R packages exist to obtain various socio-demographic data, such as **tidycensus** and **tigris** (USA),  **cancensus** (Canada), **eurostat** and **giscoR** (European Union), or **idbr** (international databases) -- read [Analyzing US Census Data](https://walker-data.com/census-r) [@walker_analyzing_2022] to find some examples of how to analyse such data.
 Similarly, several R packages exist giving access to spatial data for various regions and countries, such as **bcdata** (Province of British Columbia), **geobr** (Brazil), **RCzechia** (Czechia), or **rgugik** (Poland).
 Other notable package is **GSODR**, which provides Global Summary Daily Weather Data in R (see the package's [README](https://github.com/ropensci/GSODR) for an overview of weather data sources).
-<!--toDo:JN-->
-<!-- ; and **hddtools**, which provides access to a range of hydrological datasets. --> 
-<!-- not on CRAN anymore -->
 
 Each data package has its own syntax for accessing data.
 This diversity is demonstrated in the subsequent code chunks, which show how to get data using three packages from Table \@ref(tab:datapackages).^[More examples of data downloading using dedicated R packages can be found at https://rspatialdata.github.io/.]
@@ -156,7 +153,7 @@ usa_sf = st_as_sf(usa)
 ```
 
 <!--toDo:JN-->
-<!-- add info about other world-data packages -->
+<!-- add info about other world-data packages, when rgeoboundaries on CRAN -->
 <!-- https://github.com/wmgeolab/rgeoboundaries/issues/11 -->
 <!-- https://github.com/wmgeolab/rgeoboundaries -->
 <!-- https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0231866 -->
@@ -234,7 +231,6 @@ geo_sf = st_as_sf(geo_df, coords = c("long", "lat"), crs = "EPSG:4326")
 ```
 
 This package also allows performing the opposite process called reverse geocoding used to get a set of information (name, address, etc.) based on a pair of coordinates.
-<!-- https://github.com/jessecambon/tidygeocoder -->
 
 <!--toDo:jn-->
 <!-- we should add a rgee section in the bridges chapter and add a reference here -->
@@ -438,20 +434,14 @@ The GeoTIFF format seems to be the most prominent raster data format.
 It allows spatial information, such as CRS, to be embedded within a TIFF file. 
 Similar to ESRI Shapefile, this format was firstly developed in the 1990s, but as an open format.
 Additionally, GeoTIFF is still being expanded and improved.
-One of the most significant recent addition to the GeoTIFF format is its variant called COG (*Cloud Optimized GeoTIFF*).
+One of the most significant recent addition to the GeoTIFF format is its variant called [COG](https://www.cogeo.org/) (*Cloud Optimized GeoTIFF*).
 Raster objects saved as COGs can be hosted on HTTP servers, so other people can read only parts of the file without downloading the whole file (see Sections \@ref(raster-data-read) and \@ref(raster-data-write)).
 
-There is also a plethora of other spatial data formats that we do not explain in detail or mention in Table \@ref(tab:formats) due to the book limits.
-If you need to use other formats, we encourage you to read the GDAL documentation about [vector](https://gdal.org/drivers/vector/index.html) and [raster](https://gdal.org/drivers/raster/index.html) drivers.
+A plethora of other spatial data formats that we do not explain in detail or mention in Table \@ref(tab:formats) due to the book limits also exists.
+Moreover, new spatial data formats are being developed (e.g., [GeoParquet](https://geoparquet.org/) and [Zarr](https://zarr.dev/)) and existing ones are being improved.
+If you need to learn more about other formats, we encourage you to read the GDAL documentation about [vector](https://gdal.org/drivers/vector/index.html) and [raster](https://gdal.org/drivers/raster/index.html) drivers.
 Additionally, some spatial data formats can store other data models (types) than vector or raster.
 It includes LAS and LAZ formats for storing lidar point clouds, and NetCDF and HDF for storing multidimensional arrays.
-<!-- do we mention them anywhere in the book and can reference to? -->
-
-<!-- additional suggestions from our readers: -->
-<!-- - KEA - https://gdal.org/drivers/raster/kea.html -->
-<!-- - sfarrow & geoparquet/pandas/GeoFeather -->
-<!-- Zarr - long term time series raster cloud format -->
-
 
 Spatial data is also often stored using tabular (non-spatial) text formats, including CSV files or Excel spreadsheets.
 For example, this can be convenient to share spatial samples with people who do not use GIS tools or exchange data with other software that does not accept spatial data formats. 
@@ -550,8 +540,6 @@ summary(sf_drivers[-c(1:2)])
 </tbody>
 </table>
 
-<!-- One of the major advantages of **sf** is that it is fast. -->
-<!-- reference to the vignette -->
 The first argument of `read_sf()` is `dsn`, which should be a text string or an object containing a single text string.
 The content of a text string could vary between different drivers.
 In most cases, as with the ESRI Shapefile\index{Shapefile} (`.shp`) or the `GeoPackage`\index{GeoPackage} format (`.gpkg`), the `dsn` would be a file name.
@@ -751,7 +739,6 @@ Importantly, `/vsicurl/` is not the only prefix provided by GDAL -- many more ex
 You can learn more about it at https://gdal.org/user/virtual_file_systems.html.
 
 <!-- ### Databases -->
-
 <!-- jn:toDo-->
 <!-- postgis input example -->
 
@@ -904,7 +891,6 @@ Additionally, we can save our raster object as COG (*Cloud Optimized GeoTIFF*, S
 writeRaster(x = single_layer, filename = "my_raster.tif",
             filetype = "COG", overwrite = TRUE)
 ```
-
 
 ## Visual outputs
 
