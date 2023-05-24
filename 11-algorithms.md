@@ -116,8 +116,8 @@ If you do not, the same script can be called with `source("code/11-centroid-alg.
 
 ```r
 poly_mat = cbind(
-  x = c(0, 0, 9, 9, 0),
-  y = c(0, 9, 9, 0, 0)
+  x = c(0, 9, 9, 0, 0),
+  y = c(0, 0, 9, 9, 0)
 )
 # Short URL to code/11-centroid-alg.R in the geocompr repo
 source("https://t.ly/0nzj")
@@ -169,8 +169,8 @@ In this case, we will create a polygon with five vertices in base R, building on
 
 ```r
 # generate a simple matrix representation of a polygon:
-x_coords = c(10, 0, 0, 12, 20, 10)
-y_coords = c(0, 0, 10, 20, 15, 0)
+x_coords = c(10, 20, 12, 0, 0, 10)
+y_coords = c(0, 15, 20, 10, 0, 0)
 poly_mat = cbind(x_coords, y_coords)
 ```
 
@@ -210,7 +210,7 @@ A translation of this formula into R code that works with the data in the matrix
 abs(T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
     T1[2, 1] * (T1[3, 2] - T1[1, 2]) +
     T1[3, 1] * (T1[1, 2] - T1[2, 2])) / 2
-#> [1] 50
+#> [1] 85
 ```
 
 This code chunk outputs the correct result.^[
@@ -305,7 +305,7 @@ The function now works on any inputs you pass it, as illustrated in the below co
 ```r
 t_centroid(T1)
 #> x_coords y_coords 
-#>     3.33     3.33
+#>     14.0     11.7
 ```
 
 We can also create a function\index{function} to calculate a triangle's area, which we will name `t_area()`:
@@ -328,7 +328,7 @@ The newly created function\index{function} `t_area()` takes any object `x`, assu
 
 ```r
 t_area(T1)
-#> [1] 50
+#> [1] 85
 ```
 
 We can test the generalizability of the function\index{function} by using it to find the area of a new triangle matrix, which has a height of 1 and a base of 3:
@@ -441,7 +441,7 @@ First steps towards programming can be slow (the exercises below should not be r
 E1. Read the script [`11-centroid-alg.R`](https://github.com/geocompx/geocompr/blob/main/code/11-centroid-alg.R) in the `code` folder of the book's GitHub repo.
 
   - Which of the best practices covered in Section \@ref(scripts) does it follow?
-  - Create a version of the script on your computer in an IDE\index{IDE} such as RStudio\index{RStudio} (preferably by typing-out the script line-by-line, in your own coding style and with your own comments, rather than copy-pasting --- this will help you learn how to type scripts). Using the example of a square polygon (e.g., created with `poly_mat = cbind(x = c(0, 0, 9, 9, 0), y = c(0, 9, 9, 0, 0))`) execute the script line-by-line.
+  - Create a version of the script on your computer in an IDE\index{IDE} such as RStudio\index{RStudio} (preferably by typing-out the script line-by-line, in your own coding style and with your own comments, rather than copy-pasting --- this will help you learn how to type scripts). Using the example of a square polygon (e.g., created with `poly_mat = cbind(x = c(0, 9, 9, 0, 0), y = c(0, 0, 9, 9, 0))`) execute the script line-by-line.
   - What changes could be made to the script to make it more reproducible?
   - How could the documentation be improved?
 
