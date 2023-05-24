@@ -194,7 +194,7 @@ new_vector = st_set_crs(new_vector, "EPSG:4326") # set CRS
 
 
 \index{raster!CRS}
-Getting and setting CRSs works in a similar way for **raster** geographic data objects.
+Getting and setting CRSs works in a similar way for raster geographic data objects.
 The `crs()` function in the `terra` package accesses CRS information from a `SpatRaster` object (note the use of the `cat()` function to print it nicely): 
 
 
@@ -245,13 +245,8 @@ st_is_longlat(london)
 The output `NA` shows that **sf** does not know what the CRS is and is unwilling to guess (`NA` literally means 'not available').
 Unless a CRS is manually specified or is loaded from a source that has CRS metadata, **sf** does not make any explicit assumptions about which coordinate systems, other than to say "I don't know".
 This behavior makes sense given the diversity of available CRSs but differs from some approaches, such as the GeoJSON file format specification, which makes the simplifying assumption that all coordinates have a lon/lat CRS: `EPSG:4326`.
-
-\index{vector!CRS}
-A CRS can be added to `sf` objects in three main ways:
-
-- By assigning the CRS to a pre-existing object, e.g. with `st_crs(london) = "EPSG:4326"`
-- By passing a CRS to the `crs` argument in **sf** functions that create geometry objects such as `st_as_sf(... crs = "EPSG:4326")`. The same argument can also be used to set the CRS when creating raster datasets (e.g., `rast(crs = "EPSG:4326")`)
-- With the `st_set_crs()`, which returns a version of the data that has a new CRS, an approach that is demonstrated in the following code chunk:
+Datasets without a specified CRS can cause problems: all geographic coordinates have a coordinate system and software can only make good decisions around plotting and and geometry operations if it knows what type of CRS it is working with.
+Thus, again, it is important to always check the CRS of a dataset and to set it if it is missing.
 
 
 ```r
@@ -259,11 +254,6 @@ london_geo = st_set_crs(london, "EPSG:4326")
 st_is_longlat(london_geo)
 #> [1] TRUE
 ```
-
-<!-- The following example demonstrates how to add CRS metadata to raster datasets. -->
-<!-- Todo: add this -->
-
-Datasets without a specified CRS can cause problems: all geographic coordinates have a coordinate system and software can only make good decisions around plotting and and geometry operations if it knows what type of CRS it is working with.
 
 ## Geometry operations on projected and unprojected data {#geom-proj}
 
@@ -319,8 +309,6 @@ Do not interpret the warning about the geographic (`longitude/latitude`) CRS as 
 It is better understood as a suggestion to *reproject* the data onto a projected CRS.
 This suggestion does not always need to be heeded: performing spatial and geometric operations makes little or no difference in some cases (e.g., spatial subsetting).
 But for operations involving distances such as buffering, the only way to ensure a good result (without using spherical geometry engines) is to create a projected copy of the data and run the operation on that.
-<!--toDo:rl-->
-<!-- jn: idea -- maybe it would be add a table somewhere in the book showing which operations are impacted by s2? -->
 This is done in the code chunk below:
 
 
@@ -483,8 +471,6 @@ Regardless of the projected CRS used, the results may not be accurate for geomet
 
 \index{CRS!custom}
 When deciding on a custom CRS, we recommend the following:^[
-<!--toDo:rl-->
-<!-- jn:I we can assume who is the "anonymous reviewer", can we ask him/her to use his/her name? -->
 Many thanks to an anonymous reviewer whose comments formed the basis of this advice.
 ]
 
@@ -836,9 +822,6 @@ world_wintri = st_transform(world, crs = "+proj=wintri")
 <p class="caption">(\#fig:wintriproj)Winkel tripel projection of the world.</p>
 </div>
 
-<!--jn:toDO-->
-<!--check if the following block is still correct-->
-
 
 
 
@@ -858,13 +841,6 @@ world_laea2 = st_transform(world,
 </div>
 
 More information on CRS modifications can be found in the [Using PROJ](https://proj.org/usage/index.html) documentation.
-
-<!--toDo:jn-->
-<!--revise the last paragraph-->
-
-<!-- There is more to learn about CRSs. -->
-<!-- An excellent resource in this area, also implemented in R, is the website R Spatial. -->
-<!-- Chapter 6 from this free online book is recommended reading --- see: [rspatial.org/terra/spatial/6-crs.html](https://rspatial.org/terra/spatial/6-crs.html) -->
 
 ## Exercises
 
