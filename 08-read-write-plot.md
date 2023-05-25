@@ -409,7 +409,6 @@ Table \@ref(tab:formats) presents some basic information about selected and ofte
 </tbody>
 </table>
 
-
 \index{Shapefile}
 \index{GeoPackage}
 An important development ensuring the standardization and open-sourcing of file formats was the founding of the Open Geospatial Consortium ([OGC](http://www.opengeospatial.org/)) in 1994.
