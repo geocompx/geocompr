@@ -2,8 +2,8 @@
 
 ## Prerequisites {-}
 
-This chapter assumes you have a strong grasp of geographic data analysis\index{geographic data analysis} and processing, covered in Chapters \@ref(spatial-class) to \@ref(geometry-operations).
-In it you will also make use of R's\index{R} interfaces to dedicated GIS\index{GIS} software, and spatial cross-validation\index{cross-validation!spatial CV}, topics covered in Chapters \@ref(gis) and \@ref(spatial-cv), respectively.
+This chapter assumes you have a strong grasp of geographic data analysis and processing, covered in Chapters \@ref(spatial-class) to \@ref(geometry-operations).
+The chapter makes use of bridges to GIS software, and spatial cross-validation, covered in Chapters \@ref(gis) and \@ref(spatial-cv) respectively.
 
 The chapter uses the following packages:
 
@@ -25,34 +25,28 @@ library(vegan)             # community ecology package
 
 ## Introduction
 
-In this chapter we will model the floristic gradient of fog oases to reveal distinctive vegetation belts that are clearly controlled by water availability.
-To do so, we will bring together concepts presented in previous chapters and even extend them (Chapters \@ref(spatial-class) to \@ref(geometry-operations) and  Chapters \@ref(gis) and \@ref(spatial-cv)).
+This chapter models the floristic gradient of fog oases to reveal distinctive vegetation belts that are clearly controlled by water availability.
+The case study provides an opportunity to bring together and extend concepts presented in previous, chapters to further enhance your skills at using R for geocomputation.
 
-Fog oases are fascinating vegetation formations, locally termed *lomas*, which develop on mountains along the coastal deserts of Peru and Chile.^[Similar vegetation formations develop also in other parts of the world, e.g., in Namibia and along the coasts of Yemen and Oman [@galletti_land_2016].]
-The deserts' extreme conditions and remoteness provide the habitat for a unique ecosystem, including species endemic to the fog oases.
-Despite the arid conditions and low levels of precipitation of around 30-50 mm per year on average, fog deposition increases the amount of water available to plants during austral winter.
-This results in green southern-facing mountain slopes along the coastal strip of Peru (Figure \@ref(fig:study-area-mongon)). 
+Fog oases, locally called *lomas*, are vegetation formations found on mountains along the coastal deserts of Peru and Chile.
+Similar ecosystems can be found elsewhere, including in the deserts of Namibia and along the coasts of Yemen and Oman [@galletti_land_2016].
+Despite the arid conditions and low levels of precipitation of around 30-50 mm per year on average, fog deposition increases the amount of water available to plants during austral winter, resulting in green southern-facing mountain slopes along the coastal strip of Peru. 
 The fog, which develops below the temperature inversion caused by the cold Humboldt current in austral winter, provides the name for this habitat.
-Every few years, the El Niño phenomenon brings torrential rainfall to this sun-baked environment [@dillon_lomas_2003].
-This causes the desert to bloom, and provides tree seedlings a chance to develop roots long enough to survive the following arid conditions.
+Every few years, the El Niño phenomenon brings torrential rainfall to this sun-baked environment, providing tree seedlings a chance to develop roots long enough to survive the following arid conditions [@dillon_lomas_2003].
 
-Unfortunately, fog oases are heavily endangered, primarily due to human activity (agriculture and climate change).
-To effectively protect the last remnants of this unique vegetation ecosystem, evidence is needed on the composition and spatial distribution of the native flora [@muenchow_predictive_2013; @muenchow_soil_2013].
-*Lomas* mountains also have economic value as a tourist destination, and can contribute to the well-being of local people via recreation.
-For example, most Peruvians live in the coastal desert, and *lomas* mountains are frequently the closest "green" destination.
-
-In this chapter we will demonstrate ecological applications of some of the techniques learned in the previous chapters.
-This case study will involve analyzing the composition and the spatial distribution of the vascular plants on the southern slope of Mt. Mongón, a *lomas* mountain near Casma on the central northern coast of Peru (Figure \@ref(fig:study-area-mongon)).
+Unfortunately, fog oases are heavily endangered, primarily due to agriculture and anthropogenic climate change.
+Evidence on the composition and spatial distribution of the native flora can support efforts to protect remaining fragments of fog oases [@muenchow_predictive_2013; @muenchow_soil_2013].
+The chapter also demonstrates how to apply techniques covered in previous chapters to an important applied field: ecology.
+In it you will analyze the composition and the spatial distribution of vascular plants (here referring mostly to flowering plants) on the southern slope of Mt. Mongón, a *lomas* mountain near Casma on the central northern coast of Peru (Figure \@ref(fig:study-area-mongon)).
 
 ```{r study-area-mongon, echo=FALSE, fig.cap="The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017).", out.width="60%", fig.scap="The Mt. Mongón study area."}
 knitr::include_graphics("figures/15_study_area_mongon.png")
 # knitr::include_graphics("https://user-images.githubusercontent.com/1825120/38989956-6eae7c9a-43d0-11e8-8f25-3dd3594f7e74.png")
 ```
 
-During a field study to Mt. Mongón, we recorded all vascular plants living in 100 randomly sampled 4x4 m^2^ plots in the austral winter of 2011 [@muenchow_predictive_2013].
-The sampling coincided with a strong La Niña event that year (see ENSO monitoring of the [NOASS Climate Prediction Center](http://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php)).
-This led to even higher levels of aridity than usual in the coastal desert.
-On the other hand, it also increased fog activity on the southern slopes of Peruvian *lomas* mountains.
+During a field study to Mt. Mongón, all vascular plants living in 100 randomly sampled 4x4 m^2^ plots in the austral winter of 2011  were recorded[@muenchow_predictive_2013].
+The sampling coincided with a strong La Niña event that year, as shown in data published by the National Oceanic and Atmospheric Administration ([NOAA](http://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php)).
+This led to even higher levels of aridity than usual in the coastal desert and increased fog activity on the southern slopes of Peruvian *lomas* mountains.
 
 <!--
 The first hypothesis is that four plant belts will be found along the altitudinal gradient: a low-elevation *Tillandsia* belt, a herbaceous belt, a bromeliad belt, and an uppermost succulent belt [@muenchow_soil_2013].
@@ -60,9 +54,10 @@ The first hypothesis is that four plant belts will be found along the altitudina
 
 Ordinations\index{ordination} are dimension-reducing techniques that allow the extraction of the main gradients from a (noisy) dataset, in our case the floristic gradient developing along the southern mountain slope (see next section).
 In this chapter, we will model the first ordination axis, i.e., the floristic gradient, as a function of environmental predictors such as altitude, slope, catchment area\index{catchment area} and NDVI\index{NDVI}.
-For this, we will make use of a random forest model\index{random forest} - a very popular machine learning\index{machine learning} algorithm [@breiman_random_2001].
+For this, we will make use of a random forest model\index{random forest} --- a very popular machine learning\index{machine learning} algorithm [@breiman_random_2001].
 The model will allow us to make spatial distribution maps of the floristic composition anywhere in the study area.
 To guarantee an optimal prediction, it is advisable to tune beforehand the hyperparameters\index{hyperparameter} with the help of spatial cross-validation\index{cross-validation!spatial CV} (see Section \@ref(svm)).
+
 
 ## Data and data preparation
 

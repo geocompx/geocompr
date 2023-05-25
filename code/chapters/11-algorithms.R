@@ -23,8 +23,8 @@ knitr::include_graphics("figures/codecheck.png")
 
 ## ----10-algorithms-3, echo=FALSE--------------------------------------------------------------------
 poly_mat = cbind(
-  x = c(0, 0, 9, 9, 0),
-  y = c(0, 9, 9, 0, 0)
+  x = c(0, 9, 9, 0, 0),
+  y = c(0, 0, 9, 9, 0)
 )
 if (curl::has_internet()) {
   source("https://raw.githubusercontent.com/Robinlovelace/geocompr/master/code/11-centroid-alg.R")
@@ -40,8 +40,8 @@ if (curl::has_internet()) {
 
 ## ----10-algorithms-4--------------------------------------------------------------------------------
 # generate a simple matrix representation of a polygon:
-x_coords = c(10, 0, 0, 12, 20, 10)
-y_coords = c(0, 0, 10, 20, 15, 0)
+x_coords = c(10, 20, 12, 0, 0, 10)
+y_coords = c(0, 15, 20, 10, 0, 0)
 poly_mat = cbind(x_coords, y_coords)
 
 
