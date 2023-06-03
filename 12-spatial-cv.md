@@ -138,6 +138,8 @@ The first three rows of `lsl`, rounded to two significant digits, can be found i
 </tbody>
 </table>
 
+
+
 To model landslide susceptibility, we need some predictors.
 Since terrain attributes are frequently associated with landsliding [@muenchow_geomorphic_2012], we have already extracted following terrain attributes from `ta` to `lsl`:
 
@@ -400,6 +402,8 @@ mlr3extralearners::list_mlr3learners(
   </tr>
 </tbody>
 </table>
+
+
 
 This yields all learners able to model two-class problems (landslide yes or no).
 We opt for the binomial classification\index{classification} method used in Section \@ref(conventional-model) and implemented as `classif.log_reg` in **mlr3learners**.

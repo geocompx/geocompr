@@ -263,6 +263,7 @@ od_top5 = bristol_od |>
 ```
 
 
+
 Table: (\#tab:od)Sample of the top 5 origin-destination pairs in the Bristol OD data frame, representing travel desire lines between zones in the study area.
 
 |o         |d         |  all| bicycle| foot| car_driver| train|
@@ -272,6 +273,8 @@ Table: (\#tab:od)Sample of the top 5 origin-destination pairs in the Bristol OD 
 |E02003031 |E02003043 | 1221|     305|  600|        176|     7|
 |E02003037 |E02003043 | 1186|      88|  908|        110|     3|
 |E02003034 |E02003043 | 1177|     281|  711|        100|     7|
+
+
 
 The resulting table provides a snapshot of Bristolian travel patterns in terms of commuting (travel to work).
 It demonstrates that walking is the most popular mode of transport among the top 5 origin-destination pairs, that zone `E02003043` is a popular destination (Bristol city center, the destination of all the top 5 OD pairs), and that the *intrazonal* trips, from one part of zone `E02003043` to another (first row of Table \@ref(tab:od)), constitute the most traveled OD pair in the dataset.

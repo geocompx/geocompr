@@ -283,6 +283,7 @@ DE-9IM strings are derived from the dimension of each type of relation.
 In this case the red intersections in Figure \@ref(fig:de9imgg) have dimensions of 0 (points), 1 (lines), and 2 (polygons), as shown in Table \@ref(tab:de9emtable).
 
 
+
 Table: (\#tab:de9emtable)Table showing relations between interiors, boundaries and exteriors of geometries x and y.
 
 |             |Interior (x) |Boundary (x) |Exterior (x) |
@@ -290,6 +291,8 @@ Table: (\#tab:de9emtable)Table showing relations between interiors, boundaries a
 |Interior (y) |2            |1            |2            |
 |Boundary (y) |1            |1            |1            |
 |Exterior (y) |2            |1            |2            |
+
+
 
 Flattening this matrix 'row-wise' (meaning concatenating the first row, then the second, then the third) results in the string `212111212`.
 Another example will serve to demonstrate the system:

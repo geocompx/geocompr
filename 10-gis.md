@@ -85,6 +85,7 @@ There are other relevant bridges, including the no-longer-maintained R package *
 There have also been major developments in enabling open source GIS software to write and execute R scripts from QGIS\index{QGIS} (see [docs.qgis.org](https://docs.qgis.org/3.28/en/docs/training_manual/processing/r_intro.html)) and GRASS (see [grasswiki.osgeo.org](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#R_within_GRASS)).
 
 
+
 Table: (\#tab:gis-comp)Comparison between three open-source GIS. Hybrid refers to the support of vector and raster operations.
 
 |GIS   |First release |No. functions |Support |
@@ -92,6 +93,8 @@ Table: (\#tab:gis-comp)Comparison between three open-source GIS. Hybrid refers t
 |QGIS  |2002          |>1000         |hybrid  |
 |SAGA  |2004          |>600          |hybrid  |
 |GRASS |1982          |>500          |hybrid  |
+
+
 
 In addition to the three R-GIS bridges mentioned above, this chapter also provides a brief introduction to R interfaces to spatial libraries (Section \@ref(gdal)), spatial databases\index{spatial database} (Section \@ref(postgis)), and cloud-based processing of Earth observation data (Section \@ref(cloud)).
 
@@ -888,6 +891,14 @@ RPostgreSQL::postgresqlCloseConnection(conn)
 ```
 
 
+
+
+```
+#> The legacy packages maptools, rgdal, and rgeos, underpinning this package
+#> will retire shortly. Please refer to R-spatial evolution reports on
+#> https://r-spatial.org/r/2023/05/15/evolution4.html for details.
+#> This package is now running under evolution status 0
+```
 
 <div class="figure" style="text-align: center">
 <img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer." width="100%" />

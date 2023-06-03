@@ -1008,6 +1008,8 @@ Before we cover mapping packages for plotting a specific type of map (in the nex
 </tbody>
 </table>
 
+
+
 Table \@ref(tab:map-gpkg) shows a range of mapping packages are available, and there are many others not listed in this table.
 Of note is **mapsf**, which can generate range of geographic visualizations including choropleth, 'proportional symbol' and 'flow' maps.
 These are documented in the [`mapsf`](https://cran.r-project.org/web/packages/mapsf/vignettes/mapsf.html)\index{mapsf (package)} vignette.
@@ -1046,6 +1048,8 @@ Such packages create cartograms that distort geographical space, create line map
   </tr>
 </tbody>
 </table>
+
+
 
 All of the aforementioned packages, however, have different approaches for data preparation and map creation.
 In the next paragraph, we focus solely on the **cartogram** package\index{cartogram (package)}.

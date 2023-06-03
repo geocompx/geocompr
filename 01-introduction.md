@@ -18,6 +18,7 @@ R, by contrast, emphasizes the command line interface\index{command-line interfa
 A simplistic comparison between the different approaches is illustrated in Table \@ref(tab:gdsl).
 
 
+
 Table: (\#tab:gdsl)Differences in emphasis between software packages (Graphical User Interface (GUI) of Geographic Information Systems (GIS) and R).
 
 |Attribute        |Desktop GIS (GUI)        |R                     |
@@ -25,6 +26,8 @@ Table: (\#tab:gdsl)Differences in emphasis between software packages (Graphical 
 |Home disciplines |Geography                |Computing, Statistics |
 |Software focus   |Graphical User Interface |Command line          |
 |Reproducibility  |Minimal                  |Maximal               |
+
+
 
 This book is motivated by the importance of reproducibility\index{reproducibility} for scientific research (see the note below).
 It aims to make reproducible geographic data analysis\index{geographic data analysis} workflows more accessible, and demonstrate the power of open geospatial software available from the command-line.
@@ -236,6 +239,7 @@ An obvious feature of the **tidyverse** is the tendency for packages to work in 
 There is no equivalent **geoverse**, but there are attempts at harmonization between packages hosted in the [r-spatial](https://github.com/r-spatial/discuss/issues/11) organization and a growing number of packages use **sf**\index{sf} (Table \@ref(tab:revdep)). 
 
 
+
 Table: (\#tab:revdep)The top 5 most downloaded packages that depend on sf, in terms of average number of downloads per day over the previous month. As of 2022-04-22  there are  332  packages which import sf.
 
 |Package | Downloads|
@@ -245,6 +249,8 @@ Table: (\#tab:revdep)The top 5 most downloaded packages that depend on sf, in te
 |stars   |       940|
 |leafem  |       863|
 |mapview |       760|
+
+
 
 Parallel group of developments relates to the [rspatial](https://github.com/rspatial) set of packages.^[Note the difference between "r-spatial", organization containing packages such as **sf**, and "rspatial", organization responsible for **terra**.]
 Its main member is the **terra** package for spatial raster handling (see Section \@ref(an-introduction-to-terra)).

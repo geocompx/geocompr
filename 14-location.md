@@ -99,6 +99,7 @@ input_tidy = dplyr::mutate(input,
 ```
 
 
+
 Table: (\#tab:census-desc)Categories for each variable in census data from Datensatzbeschreibung...xlsx located in the downloaded file census.zip (see Figure \@ref(fig:census-stack) for their spatial distribution).
 
 | Class | Population | % female | Mean age | Household size |
@@ -109,6 +110,8 @@ Table: (\#tab:census-desc)Categories for each variable in census data from Daten
 |   4   | 2000-4000  |  53-60   |  44-47   |     3-3.5      |
 |   5   | 4000-8000  |   >60    |   >47    |      >3.5      |
 |   6   |   >8000    |          |          |                |
+
+
 
 ## Create census rasters
  
@@ -261,6 +264,7 @@ metro_names = dplyr::mutate(metro_names, city = ifelse(is.na(city), town, city))
 To make sure that the reader uses the exact same results, we have put them into **spDataLarge** as the object `metro_names`.
 
 
+
 Table: (\#tab:metro-names)Result of the reverse geocoding.
 
 |city              |state               |
@@ -273,6 +277,8 @@ Table: (\#tab:metro-names)Result of the reverse geocoding.
 |Nürnberg          |Bayern              |
 |Stuttgart         |Baden-Württemberg   |
 |München           |Bayern              |
+
+
 
 Overall, we are satisfied with the `city` column serving as metropolitan names (Table \@ref(tab:metro-names)) apart from one exception, namely Velbert which belongs to the greater region of Düsseldorf.
 Hence, we replace Velbert with Düsseldorf (Figure \@ref(fig:metro-areas)).
@@ -411,6 +417,14 @@ result = sum(reclass)
 ```
 
 For instance, a score greater than 9 might be a suitable threshold indicating raster cells where a bike shop could be placed (Figure \@ref(fig:bikeshop-berlin); see also `code/14-location-figures.R`).
+
+
+```
+#> The legacy packages maptools, rgdal, and rgeos, underpinning this package
+#> will retire shortly. Please refer to R-spatial evolution reports on
+#> https://r-spatial.org/r/2023/05/15/evolution4.html for details.
+#> This package is now running under evolution status 0
+```
 
 <div class="figure" style="text-align: center">
 

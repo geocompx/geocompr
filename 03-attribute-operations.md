@@ -16,6 +16,10 @@ library(dplyr)   # tidyverse package for data frame manipulation
 
 ```r
 library(spData)  # spatial data package introduced in Chapter 2
+#> The legacy packages maptools, rgdal, and rgeos, underpinning this package
+#> will retire shortly. Please refer to R-spatial evolution reports on
+#> https://r-spatial.org/r/2023/05/15/evolution4.html for details.
+#> This package is now running under evolution status 0
 ```
 
 - Also ensure you have installed the **tidyr** package, or the **tidyverse** of which it is a part, if you want to run data 'tidying' operations in Section \@ref(vec-attr-creation).
@@ -274,6 +278,7 @@ The standard set of comparison operators can be used in the `filter()` function,
 
 
 
+
 Table: (\#tab:operators)Comparison operators that return Booleans (TRUE/FALSE).
 
 |Symbol                        |Name                            |
@@ -283,6 +288,8 @@ Table: (\#tab:operators)Comparison operators that return Booleans (TRUE/FALSE).
 |`>`, `<`                      |Greater/Less than               |
 |`>=`, `<=`                    |Greater/Less than or equal      |
 |`&`, <code>&#124;</code>, `!` |Logical operators: And, Or, Not |
+
+
 
 ### Chaining commands with pipes
 
@@ -401,6 +408,7 @@ world_agg5 = world |>
 ```
 
 
+
 Table: (\#tab:continents)The top 3 most populous continents ordered by number of countries.
 
 |continent |        Pop|     Area|  N| Density|
@@ -408,6 +416,8 @@ Table: (\#tab:continents)The top 3 most populous continents ordered by number of
 |Africa    | 1154946633| 29946198| 51|      39|
 |Asia      | 4311408059| 31252459| 47|     138|
 |Europe    |  669036256| 23065219| 39|      29|
+
+
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">More details are provided in the help pages (which can be accessed via `?summarize` and `vignette(package = "dplyr")` and Chapter 5 of [R for Data Science](http://r4ds.had.co.nz/transform.html#grouped-summaries-with-summarize). </div>\EndKnitrBlock{rmdnote}
 

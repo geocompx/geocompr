@@ -112,6 +112,8 @@ These provide interfaces to one or more spatial libraries or geoportals and aim 
 </tbody>
 </table>
 
+
+
 <!--toDo:JN-->
 <!-- add to the table: -->
 <!-- https://github.com/jhollist/elevatr/issues/64 -->
@@ -409,6 +411,8 @@ Table \@ref(tab:formats) presents some basic information about selected and ofte
 </tbody>
 </table>
 
+
+
 \index{Shapefile}
 \index{GeoPackage}
 An important development ensuring the standardization and open-sourcing of file formats was the founding of the Open Geospatial Consortium ([OGC](http://www.opengeospatial.org/)) in 1994.
@@ -538,6 +542,8 @@ summary(sf_drivers[-c(1:2)])
   </tr>
 </tbody>
 </table>
+
+
 
 The first argument of `read_sf()` is `dsn`, which should be a text string or an object containing a single text string.
 The content of a text string could vary between different drivers.
@@ -864,6 +870,8 @@ Therefore, we would recommend to use the data type that needs the least storage 
   </tr>
 </tbody>
 </table>
+
+
 
 By default, the output file format is derived from the filename.
 Naming a file `*.tif` will create a GeoTIFF file, as demonstrated below:

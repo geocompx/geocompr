@@ -680,12 +680,15 @@ cat_raster_wgs84 = project(cat_raster, "EPSG:4326", method = "near")
 Many properties of the new object differ from the previous one, including the number of columns and rows (and therefore number of cells), resolution (transformed from meters into degrees), and extent, as illustrated in Table \@ref(tab:catraster) (note that the number of categories increases from 8 to 9 because of the addition of `NA` values, not because a new category has been created --- the land cover classes are preserved).
 
 
+
 Table: (\#tab:catraster)Key attributes in the original ('cat\_raster') and projected ('cat\_raster\_wgs84') categorical raster datasets.
 
 |CRS   | nrow| ncol|   ncell| resolution| unique_categories|
 |:-----|----:|----:|-------:|----------:|-----------------:|
 |NAD83 | 1359| 1073| 1458207|    31.5275|                 8|
 |WGS84 | 1246| 1244| 1550024|     0.0003|                 9|
+
+
 
 Reprojecting numeric rasters (with `numeric` or in this case `integer` values) follows an almost identical procedure.
 This is demonstrated below with `srtm.tif` in **spDataLarge** from [the Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/), which represents height in meters above sea level (elevation) with the WGS84 CRS:
@@ -720,12 +723,15 @@ This can have implications for file sizes when raster datasets are saved.
 ]:
 
 
+
 Table: (\#tab:rastercrs)Key attributes in the original ('con\_raster') and projected ('con\_raster\_ea') continuous raster datasets.
 
 |CRS          | nrow| ncol|  ncell| resolution| mean|
 |:------------|----:|----:|------:|----------:|----:|
 |WGS84        |  457|  465| 212505|     0.0008| 1843|
 |UTM zone 12N |  515|  422| 217330|    83.5334| 1842|
+
+
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Of course, the limitations of 2D Earth projections apply as much to vector as to raster data.
 At best we can comply with two out of three spatial properties (distance, area, direction).

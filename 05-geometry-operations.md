@@ -597,6 +597,8 @@ When a multipoint geometry consisting of five pairs of coordinates is tranformed
 </tfoot>
 </table>
 
+
+
 Let's try to apply geometry type transformations on a new object, `multilinestring_sf`, as an example (on the left in Figure \@ref(fig:line-cast)):
 
 

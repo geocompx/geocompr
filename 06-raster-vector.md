@@ -79,6 +79,14 @@ Setting `inverse = TRUE` will mask everything *inside* the bounds of the park (s
 srtm_inv_masked = mask(srtm, zion, inverse = TRUE)
 ```
 
+
+```
+#> The legacy packages maptools, rgdal, and rgeos, underpinning this package
+#> will retire shortly. Please refer to R-spatial evolution reports on
+#> https://r-spatial.org/r/2023/05/15/evolution4.html for details.
+#> This package is now running under evolution status 0
+```
+
 <div class="figure" style="text-align: center">
 <img src="06-raster-vector_files/figure-html/cropmask-1.png" alt="Illustration of raster cropping and raster masking." width="100%" />
 <p class="caption">(\#fig:cropmask)Illustration of raster cropping and raster masking.</p>
