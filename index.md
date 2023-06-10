@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2023-06-03'
+date: '2023-06-10'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -44,7 +44,7 @@ Its current 'build status' as follows:
 
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 
-This version of the book was built on GH Actions on 2023-06-03.
+This version of the book was built on GH Actions on 2023-06-10.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
@@ -234,7 +234,7 @@ The wider context and motivations underlying this book are covered in Chapter \@
 
 
 
-Many thanks to everyone who contributed directly and indirectly via the code hosting and collaboration site GitHub, including the following people who contributed direct via pull requests: prosoitos, florisvdh, katygregg, Lvulis, babayoshihiko, rsbivand, iod-ine, KiranmayiV, cuixueqin, defuneste, zmbc, erstearns, FlorentBedecarratsNM, dcooley, darrellcarvalho, marcosci, appelmar, MikeJohnPage, eyesofbambi, krystof236, nickbearman, tyluRp, giocomai, KHwong12, LaurieLBaker, MarHer90, mdsumner, pat-s, sdesabbata, ateucher, annakrystalli, andtheWings, kant, gavinsimpson, Himanshuteli, yutannihilation, howardbaek, jimr1603, jbixon13, olyerickson, yvkschaefer, katiejolly, kwhkim, layik, mpaulacaldas, mtennekes, mvl22, ganes1410, richfitz, VLucet, wdearden, yihui, adambhouston, chihinl, cshancock, e-clin, ec-nebi, gregor-d, jasongrahn, p-kono, pokyah, schuetzingit, tim-salabim, tszberkowitz.
+Many thanks to everyone who contributed directly and indirectly via the code hosting and collaboration site GitHub, including the following people who contributed direct via pull requests: prosoitos, florisvdh, katygregg, babayoshihiko, Lvulis, babayoshihiko, rsbivand, iod-ine, KiranmayiV, cuixueqin, defuneste, zmbc, erstearns, FlorentBedecarratsNM, dcooley, darrellcarvalho, marcosci, appelmar, MikeJohnPage, eyesofbambi, krystof236, nickbearman, tylerlittlefield, giocomai, KHwong12, LaurieLBaker, MarHer90, mdsumner, pat-s, sdesabbata, ateucher, annakrystalli, andtheWings, kant, gavinsimpson, Himanshuteli, yutannihilation, howardbaek, jimr1603, jbixon13, olyerickson, yvkschaefer, katiejolly, kwhkim, layik, mpaulacaldas, mtennekes, mvl22, ganes1410, richfitz, VLucet, wdearden, yihui, adambhouston, chihinl, cshancock, e-clin, ec-nebi, gregor-d, jasongrahn, p-kono, pokyah, schuetzingit, tim-salabim, tszberkowitz.
 Special thanks to Marco Sciaini, who not only created the front cover image, but also published the code that generated it (see `code/frontcover.R` in the book's GitHub repo). 
 Dozens more people contributed online, by raising and commenting on issues, and by providing feedback via social media.
 The `#geocompr` hashtag will live on!

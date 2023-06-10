@@ -352,6 +352,16 @@ The geometries of the three `london_buff*` objects that *have* a specified CRS c
 
 
 
+
+```
+#> Warning: The `returnclass` argument of `ne_download()` sp as of rnaturalearth 1.0.0.
+#> ℹ Please use `sf` objects with {rnaturalearth}, support for Spatial objects
+#>   (sp) will be removed in a future release of the package.
+#> This warning is displayed once every 8 hours.
+#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+#> generated.
+```
+
 <div class="figure" style="text-align: center">
 <img src="07-reproj_files/figure-html/crs-buf-1.png" alt="Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot illustrates the result of buffering unprojected data with sf, which calls Google's S2 spherical geometry engine by default with max cells set to 1000 (thin line). The thick 'blocky' line illustrates the result of the same operation with max cells set to 100." width="100%" />
 <p class="caption">(\#fig:crs-buf)Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot illustrates the result of buffering unprojected data with sf, which calls Google's S2 spherical geometry engine by default with max cells set to 1000 (thin line). The thick 'blocky' line illustrates the result of the same operation with max cells set to 100.</p>

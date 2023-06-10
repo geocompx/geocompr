@@ -137,7 +137,14 @@ Country borders are often useful and these can be accessed with the `ne_countrie
 
 ```r
 library(rnaturalearth)
+#> Support for Spatial objects (`sp`) will be deprecated in {rnaturalearth} and will be removed in a future release of the package. Please use `sf` objects with {rnaturalearth}. For example: `ne_download(returnclass = 'sf')`
 usa = ne_countries(country = "United States of America") # United States borders
+#> Warning: The `returnclass` argument of `ne_download()` sp as of rnaturalearth 1.0.0.
+#> ℹ Please use `sf` objects with {rnaturalearth}, support for Spatial objects
+#>   (sp) will be removed in a future release of the package.
+#> This warning is displayed once every 8 hours.
+#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+#> generated.
 class(usa)
 #> [1] "SpatialPolygonsDataFrame"
 #> attr(,"package")
