@@ -118,8 +118,8 @@ Many thanks to all contributors to the book so far via GitHub (this list
 will update automatically): [prosoitos](https://github.com/prosoitos),
 [florisvdh](https://github.com/florisvdh),
 [katygregg](https://github.com/katygregg),
-[Lvulis](https://github.com/Lvulis),
 [babayoshihiko](https://github.com/babayoshihiko),
+[Lvulis](https://github.com/Lvulis),
 [rsbivand](https://github.com/rsbivand),
 [iod-ine](https://github.com/iod-ine),
 [KiranmayiV](https://github.com/KiranmayiV),
@@ -136,7 +136,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [eyesofbambi](https://github.com/eyesofbambi),
 [krystof236](https://github.com/krystof236),
 [nickbearman](https://github.com/nickbearman),
-[tyluRp](https://github.com/tyluRp),
+[tylerlittlefield](https://github.com/tylerlittlefield),
 [giocomai](https://github.com/giocomai),
 [KHwong12](https://github.com/KHwong12),
 [LaurieLBaker](https://github.com/LaurieLBaker),
@@ -244,11 +244,15 @@ installs additional ‘Suggests’ packages, this may take some time to
 run\!):
 
 ``` r
-# To reproduce all chapters (install lots of packages, may take some time!)
+# Install packages to fully reproduce book (may take several minutes):
 options(repos = c(
   geocompx = 'https://geocompx.r-universe.dev',
   cran = 'https://cloud.r-project.org'
 ))
+# From geocompx.r-universe.dev (recommended):
+install.packages("geocompkg", dependencies = TRUE)
+
+# Alternatively from GitHub:
 remotes::install_github("geocompr/geocompkg", dependencies = TRUE)
 ```
 
