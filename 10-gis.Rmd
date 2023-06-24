@@ -23,17 +23,14 @@ library(gdalcubes)
 
 ```{r 09-gis-1-3, echo=FALSE, message=FALSE}
 # Only run code if qgis and relevant plugins are installed
-has_qgis_plugins = FALSE
-# Check to see that the qgisprocess package is installed:
-if ("qgisprocess" %in% installed.packages()) {
-  # Check that QGIS is available to prevent errors in subsequent checks:
-  if (qgisprocess::has_qgis()) {
-    # Check that the plugins are installed (they will loaded later):
-    has_grass = qgisprocess::qgis_has_provider("grass7")
-    has_saga = qgisprocess::qgis_has_provider("sagang")
-    has_qgis_plugins = has_grass && has_saga
-  }
-}
+has_qgis_plugins = 
+  # make sure that qgisprocess is installed
+  "qgisprocess" %in% installed.packages() &&
+  # make sure that QGIS is available
+  qgisprocess::has_qgis() &&
+  # make sure that all required plugins are available
+   all(qgisprocess::qgis_has_plugin(c("grassprovider", 
+                                      "processing_saga_nextgen")))
 ```
 
 ## Introduction
@@ -139,44 +136,37 @@ docker run -e DISABLE_AUTH=true -p 8786:8787 ghcr.io/geocompx/docker:qgis
 
 ```{r, eval=has_qgis_plugins}
 library(qgisprocess)
-#> Attempting to load the cache ... Success!
-#> QGIS version: 3.30.1-'s-Hertogenbosch
-#> ...
 ```
 
 This package automatically tries to detect a QGIS installation and complains if it cannot find it.^[You can see details of the detection process with `qgis_configure()`.]
 There are a few possible solutions when the configuration fails: you can set `options(qgisprocess.path = "path/to/your_qgis_process")`, or set up the `R_QGISPROCESS_PATH` environment variable.
-<!--toDo:jn-->
-<!-- link to the vignette https://github.com/r-spatial/qgisprocess/pull/31/files when it is online -->
 The above approaches can also be used when you have more than one QGIS installation and want to decide which one to use.
+For more details, please refer to the **qgisprocess** ['getting started' vignette](https://r-spatial.github.io/qgisprocess/articles/qgisprocess.html).
 
-Next, we can find which providers (meaning different software) are available on our computer.
+Next, we can find which plugins (meaning different software) are available on our computer.
+
+```{r plugins, eval=has_qgis_plugins}
+qgis_plugins()
+```
+
+This tells us that the GRASS (`grassprovider`) and SAGA (`processing_saga_nextgen`) plugins are available on the system but are not yet enabled.
+Since we need both later on in the chapter, let's enable them. 
+
+```{r enable-providers, eval=has_qgis_plugins}
+qgis_enable_plugins(c("grassprovider", "processing_saga_nextgen"), 
+                    quiet = TRUE)
+```
+
+Please note that aside from installing SAGA on your system you also need to install the QGIS Python plugin Processing Saga NextGen.
+You can do so from within QGIS with the [Plugin Manager](https://docs.qgis.org/latest/en/docs/training_manual/qgis_plugins/fetching_plugins.html) or programmatically with the help of the Python package [qgis-plugin-manager](https://github.com/3liz/qgis-plugin-manager) (at least on Linux).
+
+`qgis_providers()` lists the name of the software and the corresponding count of available geoalgorithms.
 
 ```{r providers, eval=has_qgis_plugins}
 qgis_providers()
-#> # A tibble: 6 × 3
-#>   provider provider_title    algorithm_count
-#>   <chr>    <chr>                       <int>
-#> 1 gdal     GDAL                           56
-#> 2 grass7   GRASS                         304
-#> 3 qgis     QGIS                           50
-#> 4 3d       QGIS (3D)                       1
-#> 5 native   QGIS (native c++)             242
-#> 6 sagang   SAGA Next Gen                 509
 ```
 
 The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
-Enable external algorithms with the following command:
-
-```{r enable-providers, eval=has_qgis_plugins}
-qgis_enable_plugins()
-#> Trying to enable following plugin(s): grassprovider, otbprovider, processing_saga_nextgen
-#> grassprovider successfully enabled!
-#> otbprovider successfully enabled!
-#> processing_saga_nextgen successfully enabled!
-#> ...
-#> You now have access to 1162 algorithms from 6 QGIS processing providers.
-```
 
 We are now ready for some geocomputation with QGIS and friends, from within R!
 Let's try two example case studies.
@@ -248,27 +238,14 @@ grep("union", qgis_algo$algorithm, value = TRUE)
 
 One of the algorithms on the above list, `"native:union"`, sounds promising.
 The next step is to find out what this algorithm does and how we can use it.
-This is the role of the `qgis_show_help()`, which returns a short summary of what the algorithm does, its arguments, and outputs.^[We can also extract some of information independently with `qgis_description()`, `qgis_arguments()`, and `qgis_outputs()`.]
+This is the role of the `qgis_show_help()`, which returns a short summary of what the algorithm does, its arguments, and outputs.^[We can also extract some of information independently with `qgis_get_description()`, `qgis_get_argument_specs()`, and `qgis_get_output_specss()`.]
 This makes it output rather long.
 The following command returns a data frame with each row representing an argument required by `"native:union"` and columns with the name, description, type, default value, available values, and acceptable values associated with each:
 
 ```{r 09-gis-6, eval=has_qgis_plugins}
 alg = "native:union"
-union_arguments = qgis_arguments(alg)
+union_arguments = qgis_get_argument_specs(alg)
 union_arguments
-#> # A tibble: 5 × 6
-#>   name    description qgis_type default_value available_values acceptable_values
-#>   <chr>   <chr>       <chr>     <list>        <list>           <list>           
-#> 1 INPUT   Input layer source    <NULL>        <NULL>           <chr [1]>        
-#> 2 OVERLAY Overlay la… source    <NULL>        <NULL>           <chr [1]>        
-#> 3 OVERLA… Overlay fi… string    <NULL>        <NULL>           <chr [3]>        
-#> 4 OUTPUT  Union       sink      <NULL>        <NULL>           <chr [1]>        
-#> 5 GRID_S… Grid size   number    <NULL>        <NULL>           <chr [3]>  
-
-#> [[1]]
-#> [1] "A numeric value"                                                                                 
-#> [2] "field:FIELD_NAME to use a data defined value taken from the FIELD_NAME field"                    
-#> [3] "expression:SOME EXPRESSION to use a data defined value calculated using a custom QGIS expression"
 ```
 
 The arguments, contained in `union_arguments$name`, are `INPUT`, `OVERLAY`, `OVERLAY_FIELDS_PREFIX`, and `OUTPUT`.
@@ -289,7 +266,6 @@ union = qgis_run_algorithm(alg,
   INPUT = incongr_wgs, OVERLAY = aggzone_wgs
 )
 union
-#>  $ OUTPUT: 'qgis_outputVector' chr "/tmp/...gpkg"
 ```
 
 Running the above line of code will save our two input objects into temporary .gpkg files, run the selected algorithm on them, and return a temporary .gpkg file as the output.
@@ -328,16 +304,9 @@ This is because `v.clean` is a multi tool -- it can clean different types of geo
 For this example, let's focus on just a few arguments, however, we encourage you to visit [this algorithm's documentation](https://grass.osgeo.org/grass-stable/manuals/v.clean.html) to learn more about `v.clean` capabilities.
 
 ```{r, eval=FALSE}
-qgis_arguments("grass7:v.clean") |>
+qgis_get_argument_specs("grass7:v.clean") |>
   select(name, description) |>
-  dplyr::slice_head(n = 4)
-#> # A tibble: 4 × 2
-#>   name      description
-#>   <chr>     <chr>
-#> 1 input     Layer to clean
-#> 2 type      Input feature type
-#> 3 tool      Cleaning tool
-#> 4 threshold Threshold (comma separated for each tool)
+  slice_head(n = 4)
 ```
 
 The main argument for this algorithm is `input` -- our vector object.
@@ -346,12 +315,13 @@ About a dozen tools exist in `v.clean` allowing to remove duplicate geometries, 
 In this case, we are interested in the latter tool, `rmarea`.
 Several of the tools, `rmarea` included, expect an additional argument `threshold`, whose behavior depends on the selected tool.
 In our case, the `rmarea` tool removes all areas smaller or equal to a provided `threshold`. 
+Note that the threshold must be specified in square meters regardless of the coordinate reference system of the input layer.
 
 Let's run this algorithm and convert its output into a new `sf` object `clean_sf`.
 
-```{r 09-gis-7c, eval=has_qgis_plugins}
+```{r 09-gis-7c, eval=has_qgis_plugins, message=FALSE}
 clean = qgis_run_algorithm("grass7:v.clean",
-  input = union_sf,
+  input = union_sf, 
   tool = "rmarea", threshold = 25000
 )
 clean_sf = st_as_sf(clean)
@@ -373,7 +343,7 @@ Various terrain parameters, for example, can be helpful for the prediction of la
 For this section, we will use `dem.tif` -- a digital elevation model of the Mongón study area (downloaded from the Land Process Distributed Active Archive Center, see also `?dem.tif`)
 It has a resolution of about 30 by 30 meters and uses a projected CRS.
 
-```{r, eval=has_qgis_plugins}
+```{r, eval=has_qgis_plugins, message=FALSE}
 library(qgisprocess)
 library(terra)
 dem = system.file("raster/dem.tif", package = "spDataLarge")
@@ -386,10 +356,8 @@ Let's search the algorithm list for this index using `"wetness"` as keyword.
 
 ```{r, eval=has_qgis_plugins}
 qgis_algo = qgis_algorithms()
-grep("wetness", qgis_algo$algorithm, value = TRUE)
-#> [1] "sagang:sagawetnessindex"              
-#> [2] "sagang:topographicwetnessindexonestep"
-#> ...
+grep("wetness", qgis_algo$algorithm, value = TRUE) |>
+  head(2)
 ```
 
 An output of the above code suggests that the desired algorithm exists in the SAGA GIS software\index{SAGA}.^[TWI can be also calculated using the `r.topidx` GRASS GIS function.]
@@ -409,7 +377,12 @@ Therefore, we only have to specify one argument -- the input `DEM`.
 Of course, when applying this algorithm you should make sure that the default values are in correspondence with your study aim.^[The additional arguments of `"sagang:sagawetnessindex"` are well-explained at https://gis.stackexchange.com/a/323454/20955.]
 `"sagang:sagawetnessindex"` returns not one but four rasters -- catchment area, catchment slope, modified catchment area, and topographic wetness index.
 
+Before running the SAGA algorithm from within QGIS, we change the default raster output format from `.tif` to SAGA's native raster format `.sdat`.
+Hence, all output rasters we do not specify ourselves will from now on be written to the `.sdat` format. 
+Depending on the software versions (SAGA, GDAL) you are using, this might not be necessary but often enough this will save you trouble when trying to read in output rasters created with SAGA.
+
 ```{r, eval=has_qgis_plugins}
+options(qgisprocess.tmp_raster_ext = ".sdat")
 dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex",
   DEM = dem
 )
@@ -417,11 +390,12 @@ dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex",
 
 <!-- The result, `dem_wetness`, is a list with file paths to the four outputs. -->
 We can read a selected output by providing an output name in the `qgis_as_terra()` function.
+And since we are done with the SAGA processing from within QGIS, we change the raster output format back to `.tif`.
 
 ```{r, eval=has_qgis_plugins}
-dem_wetness_twi_sdat = gsub("tif", "sdat", dem_wetness$TWI)
-dem_wetness_twi = qgis_as_terra(dem_wetness_twi_sdat)
+dem_wetness_twi = qgis_as_terra(dem_wetness$TWI)
 # plot(dem_wetness_twi)
+options(qgisprocess.tmp_raster_ext = ".tif")
 ```
 
 You can see the TWI map on the left panel of Figure \@ref(fig:qgis-raster-map).
@@ -432,7 +406,7 @@ These phenotypes are used in many studies, including landslide susceptibility, e
 
 The original implementation of the geomorphons' algorithm was created in GRASS GIS, and we can find it in the **qgisprocess** list as `"grass7:r.geomorphon"`:
 
-```{r, eval=has_qgis_plugins}
+```{r, eval=FALSE}
 grep("geomorphon", qgis_algo$algorithm, value = TRUE)
 #> [1] "grass7:r.geomorphon" "sagang:geomorphons" 
 qgis_show_help("grass7:r.geomorphon")

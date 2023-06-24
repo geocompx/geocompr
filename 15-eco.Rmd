@@ -145,13 +145,16 @@ The next step is to compute variables which are not only needed for the modeling
 Specifically, we compute catchment slope and catchment area\index{catchment area} from a digital elevation model\index{digital elevation model} using R-GIS bridges (see Chapter \@ref(gis)).
 Curvatures might also represent valuable predictors, and in the Exercise section you can find out how they would impact the modeling result.
 
-To compute catchment area\index{catchment area} and catchment slope, we can make use of the `saga:sagawetnessindex` function.^[Admittedly, it is a bit unsatisfying that the only way of knowing that `sagawetnessindex` computes the desired terrain attributes is to be familiar with SAGA\index{SAGA}.]
+To compute catchment area\index{catchment area} and catchment slope, we can make use of the `sagang:sagawetnessindex` function.^[Admittedly, it is a bit unsatisfying that the only way of knowing that `sagawetnessindex` computes the desired terrain attributes is to be familiar with SAGA\index{SAGA}.]
 `qgis_show_help()` returns all function\index{function} parameters and default values of a specific geoalgorithm\index{geoalgorithm}.
 Here, we present only a selection of the complete output.
 
 ```{r 15-eco-5, eval=FALSE}
-qgisprocess::qgis_show_help("saga:sagawetnessindex")
-#> Saga wetness index (saga:sagawetnessindex)
+# if not already done, enable the saga next generation plugin
+qgisprocess::qgis_enable_plugins("processing_saga_nextgen")
+# show help
+qgisprocess::qgis_show_help("sagang:sagawetnessindex")
+#> Saga wetness index (sagang:sagawetnessindex)
 #> ...
 #> ----------------
 #> Arguments
@@ -185,14 +188,14 @@ qgisprocess::qgis_show_help("saga:sagawetnessindex")
 ```
 
 Subsequently, we can specify the needed parameters using R named arguments (see Section \@ref(rqgis)).
-Remember that we can use a `SpatRaster` living in R's\index{R} global environment to specify the input raster `DEM` (see Section \@ref(rqgis)).
+Remember that we can use a path to a file on disk or a `SpatRaster` living in R's\index{R} global environment to specify the input raster `DEM` (see Section \@ref(rqgis)).
 Specifying 1 as the `SLOPE_TYPE` makes sure that the algorithm will return the catchment slope.
-The resulting rasters\index{raster} are saved to temporary files with an `.sdat` extension which is a SAGA\index{SAGA} raster format.
+The resulting rasters\index{raster} are saved to temporary files with an `.sdat` extension which is the native SAGA\index{SAGA} raster format.
 
 ```{r 15-eco-6, eval=FALSE}
 # environmental predictors: catchment slope and catchment area
 ep = qgisprocess::qgis_run_algorithm(
-  alg = "saga:sagawetnessindex",
+  alg = "sagang:sagawetnessindex",
   DEM = dem,
   SLOPE_TYPE = 1, 
   SLOPE = tempfile(fileext = ".sdat"),
