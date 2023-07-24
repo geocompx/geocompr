@@ -27,10 +27,10 @@ if (packageVersion("tmap") >= "4.0"){
     tm_shape(zion) +
     tm_borders(lwd = 2) + 
     tm_shape(zion_points) + 
-    tm_dots(col = "black", size = 0.1) + 
-    tm_add_legend(type = "symbol", col = "black", size = 0.2,
-                  labels = "zion_points") + 
-    tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
-  
+    tm_symbols(fill = "black", size = 0.5) + 
+    tm_add_legend(type = "Symbols", fill = "black", size = 0.7,
+                  labels = "zion_points", shape = 21) + 
+    tm_layout(legend.frame = TRUE, legend.position = c("right", "top"),
+              legend.bg.color = "white")  
   tm1
 }
