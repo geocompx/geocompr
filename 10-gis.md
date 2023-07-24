@@ -174,6 +174,21 @@ aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 ```
 
 
+```
+#> The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,
+#> which was just loaded, will retire in October 2023.
+#> Please refer to R-spatial evolution reports for details, especially
+#> https://r-spatial.org/r/2023/05/15/evolution4.html.
+#> It may be desirable to make the sf package available;
+#> package maintainers should consider adding sf to Suggests:.
+#> The sp package is now running under evolution status 2
+#>      (status 2 uses the sf package in place of rgdal)
+```
+
+<div class="figure" style="text-align: center">
+<img src="10-gis_files/figure-html/uniondata-1.png" alt="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders)." width="100%" />
+<p class="caption">(\#fig:uniondata)Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders).</p>
+</div>
 
 To find an algorithm to do this work, we can search the output of the `qgis_algorithms()` function.
 This function returns a data frame containing all of the available providers and the algorithms they contain.^[Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.] 
@@ -291,7 +306,10 @@ clean_sf = st_as_sf(clean)
 
 The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver polygons are now removed.
 
-
+<div class="figure" style="text-align: center">
+<img src="figures/10-sliver.png" alt="Sliver polygons colored in red (left panel). Cleaned polygons (right panel)." width="100%" />
+<p class="caption">(\#fig:sliver)Sliver polygons colored in red (left panel). Cleaned polygons (right panel).</p>
+</div>
 
 ### Raster data {#qgis-raster}
 
@@ -869,18 +887,6 @@ RPostgreSQL::postgresqlCloseConnection(conn)
 ```
 
 
-
-
-```
-#> The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,
-#> which was just loaded, will retire in October 2023.
-#> Please refer to R-spatial evolution reports for details, especially
-#> https://r-spatial.org/r/2023/05/15/evolution4.html.
-#> It may be desirable to make the sf package available;
-#> package maintainers should consider adding sf to Suggests:.
-#> The sp package is now running under evolution status 2
-#>      (status 2 uses the sf package in place of rgdal)
-```
 
 <div class="figure" style="text-align: center">
 <img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer." width="100%" />
