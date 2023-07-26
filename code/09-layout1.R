@@ -1,7 +1,7 @@
 library(spData)
 library(tmap)
 map_nz = tm_shape(nz) + tm_fill() + tm_borders()
-l2 = map_nz + tm_layout(scale = 5)
+l2 = map_nz + tm_layout(scale = 4)
 l3 = map_nz + tm_layout(bg.color = "lightblue")
 l4 = map_nz + tm_layout(frame = FALSE)
 tmap_arrange(l2, l3, l4, nrow = 1)
