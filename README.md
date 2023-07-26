@@ -229,7 +229,7 @@ with the following commands:
 ``` r
 install.packages("remotes")
 # To reproduce the first Part (chapters 1 to 8):
-remotes::install_github("geocompr/geocompkg")
+remotes::install_github("geocompx/geocompkg")
 ```
 
 Installing `geocompkg` will also install core packages required for
