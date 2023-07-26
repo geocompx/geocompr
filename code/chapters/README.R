@@ -32,12 +32,12 @@ contributors_text = paste0(c_rmd, collapse = ", ")
 ## ----readme-install-github, eval=FALSE--------------------------------------------------------------
 ## install.packages("remotes")
 ## # To reproduce the first Part (chapters 1 to 8):
-## remotes::install_github("geocompr/geocompkg")
+## remotes::install_github("geocompx/geocompkg")
 
 
 ## ----readme-install-github-2, message=FALSE, eval=FALSE, results='hide'-----------------------------
 ## # To reproduce all chapters (install lots of packages, may take some time!)
-## remotes::install_github("geocompr/geocompkg", dependencies = TRUE)
+## remotes::install_github("geocompx/geocompkg", dependencies = TRUE)
 
 
 ## ----readme-render-book, eval=FALSE-----------------------------------------------------------------
