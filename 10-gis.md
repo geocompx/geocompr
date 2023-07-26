@@ -8,6 +8,16 @@
 ```r
 library(sf)
 library(terra)
+remotes::install_github("r-tmap/tmap")
+#> 
+#> ── R CMD build ─────────────────────────────────────────────────────────────────
+#> * checking for file ‘/tmp/RtmpEsfUMf/remotesdbe49e080ea/r-tmap-tmap-39acf6c/DESCRIPTION’ ... OK
+#> * preparing ‘tmap’:
+#> * checking DESCRIPTION meta-information ... OK
+#> * checking for LF line-endings in source and make files and shell scripts
+#> * checking for empty or unneeded directories
+#> * looking to see if a ‘data/datalist’ file should be added
+#> * building ‘tmap_3.3-4.tar.gz’
 ```
 
 <!--toDo:jn-->

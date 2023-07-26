@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2023-07-24'
+date: '2023-07-26'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -44,7 +44,7 @@ Its current 'build status' as follows:
 
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 
-This version of the book was built on GH Actions on 2023-07-24.
+This version of the book was built on GH Actions on 2023-07-26.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
@@ -85,7 +85,7 @@ These can be installed using the [**remotes**](https://github.com/r-lib/remotes)
 
 ```r
 install.packages("remotes")
-remotes::install_github("geocompr/geocompkg")
+remotes::install_github("geocompx/geocompkg")
 ```
 
 
@@ -244,9 +244,11 @@ The reviewers deserve special mention here: their detailed feedback and expertis
 
 We thank Patrick Schratz and Alexander Brenning from the University of Jena for fruitful discussions on and input into Chapters \@ref(spatial-cv) and \@ref(eco).
 We thank Emmanuel Blondel from the Food and Agriculture Organization of the United Nations for expert input into the section on web services;
-Michael Sumner for critical input into many areas of the book, especially the discussion of algorithms in Chapter 10;
-Tim Appelhans and David Cooley for key contributions to the visualization chapter (Chapter 8);
+Michael Sumner for critical input into many areas of the book, especially the discussion of algorithms in Chapter 11;
+Tim Appelhans and David Cooley for key contributions to the visualization chapter (Chapter 9);
 and Katy Gregg, who proofread every chapter and greatly improved the readability of the book.
+
+<!-- Daniel Herszenhut -- inset maps -->
 
 Countless others could be mentioned who contributed in myriad ways.
 The final thank you is for all the software developers who make geocomputation with R possible.
