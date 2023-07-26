@@ -24,7 +24,7 @@ remotes::install_github("r-tmap/tmap@v4")
 #> leafgl     (NA -> 0.1.1 ) [CRAN]
 #> cols4all   (NA -> 0.6   ) [CRAN]
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/RtmpLmIXnJ/remotesc404669428/r-tmap-tmap-b445066/DESCRIPTION’ ... OK
+#> * checking for file ‘/tmp/RtmpNxEkxq/remotesc40480ed9f/r-tmap-tmap-b445066/DESCRIPTION’ ... OK
 #> * preparing ‘tmap’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
@@ -318,12 +318,6 @@ tm_shape(nz) + tm_polygons(fill = "Median_income",
                            fill.scale = tm_scale(values = "BuGn"))
 ```
 
-
-```
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
-```
-
 <div class="figure" style="text-align: center">
 <img src="09-mapping_files/figure-html/tmpal-1.png" alt="Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette." width="100%" />
 <p class="caption">(\#fig:tmpal)Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette.</p>
@@ -350,12 +344,6 @@ Here are some of the most useful scale functions (Figure \@ref(fig:break-styles)
 - `style = "log10_pretty"`: a common logarithmic (the logarithm to base 10) version of the regular pretty style used for variables with a right-skewed distribution
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Although `style` is an argument of **tmap** functions, in fact it originates as an argument in `classInt::classIntervals()` --- see the help page of this function for details.</div>\EndKnitrBlock{rmdnote}
-
-
-```
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
-```
 
 <div class="figure" style="text-align: center">
 <img src="09-mapping_files/figure-html/break-styles-1.png" alt="Illustration of different interval scales' methods set using the style argument in tmap." width="100%" />
@@ -416,7 +404,7 @@ tm_shape(nz) +
 ```
 
 <div class="figure" style="text-align: center">
-<img src="09-mapping_files/figure-html/colpal-1.png" alt="Examples of categorical, sequential and diverging palettes." width="50%" />
+<img src="09-mapping_files/figure-html/colpal-1.png" alt="Examples of categorical, sequential and diverging palettes." width="75%" />
 <p class="caption">(\#fig:colpal)Examples of categorical, sequential and diverging palettes.</p>
 </div>
 
@@ -489,7 +477,7 @@ map_nz +
 ```
 
 <div class="figure" style="text-align: center">
-<img src="09-mapping_files/figure-html/na-sb-1.png" alt="Map with additional elements - a north arrow and scale bar." width="50%" />
+<img src="09-mapping_files/figure-html/na-sb-1.png" alt="Map with additional elements - a north arrow and scale bar." width="65%" />
 <p class="caption">(\#fig:na-sb)Map with additional elements - a north arrow and scale bar.</p>
 </div>
 
@@ -497,7 +485,7 @@ map_nz +
 
 
 ```r
-map_nz + tm_layout(scale = 5)
+map_nz + tm_layout(scale = 4)
 map_nz + tm_layout(bg.color = "lightblue")
 map_nz + tm_layout(frame = FALSE)
 ```
@@ -515,21 +503,6 @@ Here are some useful layout settings (some of which are illustrated in Figure \@
 - Legend settings including options such as `legend.show` (whether or not to show the legend) `legend.orientation`, `legend.position`, and `legend.frame`
 - Frame width (`frame.lwd`) and an option to allow double lines (`frame.double.line`)
 - Color settings controlling `color.sepia.intensity` (how *yellowy* the map looks) and `color.saturation` (a color-grayscale)
-
-
-```
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
-
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
-
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
-
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
-```
 
 <div class="figure" style="text-align: center">
 <img src="09-mapping_files/figure-html/layout2-1.png" alt="Illustration of selected layout options." width="100%" />
@@ -628,11 +601,6 @@ The following function, `norm_dim()` returns the normalized width (`"w"`) and he
 
 ```r
 library(grid)
-#> 
-#> Attaching package: 'grid'
-#> The following object is masked from 'package:terra':
-#> 
-#>     depth
 norm_dim = function(obj){
     bbox = st_bbox(obj)
     width = bbox[["xmax"]] - bbox[["xmin"]]
@@ -713,8 +681,6 @@ The final map is created by combining and arranging these three maps:
 ```r
 us_states_map
 print(hawaii_map, vp = grid::viewport(0.35, 0.1, width = 0.2, height = 0.1))
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
 print(alaska_map, vp = grid::viewport(0.15, 0.15, width = 0.3, height = 0.3))
 ```
 
@@ -1088,7 +1054,7 @@ an initial `ggplot()` call is followed by one or more layers, that are added wit
 
 **ggplot2** plots graticules by default.
 The default settings for the graticules can be overridden using `scale_x_continuous()`, `scale_y_continuous()` or [`coord_sf(datum = NA)`](https://github.com/tidyverse/ggplot2/issues/2071).
-Other notable features include the use of unquoted variable names encapsulated in `aes()` to indicate which aesthetics vary and switching data sources using the `data` argument, as demonstrated in the code chunk below which creates Figure \@ref(fig:nz-gg):
+Other notable features include the use of unquoted variable names encapsulated in `aes()` to indicate which aesthetics vary and switching data sources using the `data` argument, as demonstrated in the code chunk below which creates Figure \@ref(fig:nz-gg2):
 
 
 ```r
@@ -1099,11 +1065,6 @@ g1 = ggplot() + geom_sf(data = nz, aes(fill = Median_income)) +
 g1
 ```
 
-<div class="figure" style="text-align: center">
-<img src="09-mapping_files/figure-html/nz-gg-1.png" alt="Map of New Zealand created with ggplot2." width="50%" />
-<p class="caption">(\#fig:nz-gg)Map of New Zealand created with ggplot2.</p>
-</div>
-
 Another benefit of maps based on **ggplot2** is that they can easily be given a level of interactivity when printed using the function `ggplotly()` from the **plotly** package\index{plotly (package)}.
 Try `plotly::ggplotly(g1)`, for example, and compare the result with other **plotly** mapping functions described at: [blog.cpsievert.me](https://blog.cpsievert.me/2018/03/30/visualizing-geo-spatial-data-with-sf-and-plotly/).
 
@@ -1112,11 +1073,39 @@ Try `plotly::ggplotly(g1)`, for example, and compare the result with other **plo
 An advantage of **ggplot2** is that it has a strong user community and many add-on packages.
 It includes **ggspatial**, which enhances **ggplot2**'s mapping capabilities by providing options to add a north arrow (`annotation_north_arrow()`) and a scale bar (`annotation_scale()`), or to add background tiles (`annotation_map_tile()`).
 It also accepts various spatial data classes with `layer_spatial()`.
-Thus, we are able to plot `SpatRaster` objects from **terra** using this function as seen in Figure \@ref(fig:ggterra).
+Thus, we are able to plot `SpatRaster` objects from **terra** using this function as seen in Figure \@ref(fig:nz-gg2).
+
+
+```r
+library(ggspatial)
+ggplot() + 
+  layer_spatial(nz_elev) +
+  geom_sf(data = nz, fill = NA) +
+  annotation_scale() +
+  scale_x_continuous(breaks = c(170, 175)) +
+  scale_fill_continuous(na.value = NA)
+```
+
+
+```r
+library(ggplot2)
+g1 = ggplot() + geom_sf(data = nz, aes(fill = Median_income)) +
+  geom_sf(data = nz_height) +
+  scale_x_continuous(breaks = c(170, 175))
+g1
+library(ggspatial)
+ggplot() + 
+  layer_spatial(nz_elev) +
+  geom_sf(data = nz, fill = NA) +
+  annotation_scale() +
+  scale_x_continuous(breaks = c(170, 175)) +
+  scale_fill_continuous(na.value = NA)
+#> Warning: Removed 1348639 rows containing missing values (`geom_raster()`).
+```
 
 <div class="figure" style="text-align: center">
-<img src="09-mapping_files/figure-html/ggterra-1.png" alt="Map of New Zealand's elevation created with ggplot2 and ggspatial." width="100%" />
-<p class="caption">(\#fig:ggterra)Map of New Zealand's elevation created with ggplot2 and ggspatial.</p>
+<img src="09-mapping_files/figure-html/nz-gg2-1.png" alt="Comparison of map of New Zealand created with ggplot2 alone (left) and ggplot2 and ggspatial (right)." width="45%" /><img src="09-mapping_files/figure-html/nz-gg2-2.png" alt="Comparison of map of New Zealand created with ggplot2 alone (left) and ggplot2 and ggspatial (right)." width="45%" />
+<p class="caption">(\#fig:nz-gg2)Comparison of map of New Zealand created with ggplot2 alone (left) and ggplot2 and ggspatial (right).</p>
 </div>
 
 At the same time, **ggplot2** has a few drawbacks, for example the `geom_sf()` function is not always able to create a desired legend to use from the spatial [data](https://github.com/tidyverse/ggplot2/issues/2037).
