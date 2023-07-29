@@ -24,7 +24,7 @@ remotes::install_github("r-tmap/tmap@v4")
 #> leafgl     (NA -> 0.1.1 ) [CRAN]
 #> cols4all   (NA -> 0.6   ) [CRAN]
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/RtmpHKfJun/remotesc415d81e4f8/r-tmap-tmap-b445066/DESCRIPTION’ ... OK
+#> * checking for file ‘/tmp/Rtmpbszkcg/remotesc434c5b4e59/r-tmap-tmap-31dfe86/DESCRIPTION’ ... OK
 #> * preparing ‘tmap’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
@@ -722,7 +722,7 @@ There are two differences, however, related to arguments in `tm_facets()`:
 - `nrow = 1, ncol = 1` are added to keep one moment in time as one layer
 - `free.coords = FALSE`, which maintains the map extent for each map iteration
 
-These additional arguments are demonstrated in the subsequent code chunk:
+These additional arguments are demonstrated in the subsequent code chunk^[There is also a shortcut for this approach: `tm_facets_pagewise()`.]:
 
 
 ```r
