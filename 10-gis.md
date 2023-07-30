@@ -11,7 +11,7 @@ library(terra)
 remotes::install_github("r-tmap/tmap")
 #> 
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/RtmpB4J4SJ/remotesdf432c72be1/r-tmap-tmap-1a2b4a7/DESCRIPTION’ ... OK
+#> * checking for file ‘/tmp/RtmpHEMKWh/remotesdf3168b8aff/r-tmap-tmap-1a2b4a7/DESCRIPTION’ ... OK
 #> * preparing ‘tmap’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
