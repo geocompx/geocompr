@@ -24,7 +24,7 @@ remotes::install_github("r-tmap/tmap@v4")
 #> leafgl     (NA -> 0.1.1 ) [CRAN]
 #> cols4all   (NA -> 0.6   ) [CRAN]
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/RtmpyxNGEo/remotesc635f05e019/r-tmap-tmap-fad0b46/DESCRIPTION’ ... OK
+#> * checking for file ‘/tmp/Rtmpj8238c/remotesc791439558d/r-tmap-tmap-fad0b46/DESCRIPTION’ ... OK
 #> * preparing ‘tmap’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
@@ -1324,11 +1324,9 @@ E5. Create facet maps of countries in Eastern Africa:
 
 
 E6. Building on the previous facet map examples, create animated maps of East Africa:
-    - Showing first the spatial distribution of HDI scores then population growth
     - Showing each country in order
+    - Showing each country in order with a legend showing the HDI
 
-<!--toDo: jn-->
-<!-- add -->
 
 
 E7. Create an interactive map of HDI in Africa:
@@ -1355,7 +1353,7 @@ E9. Update the code in `coffeeApp/app.R` so that instead of centering on Brazil 
 <!--toDo: jn-->
 <!-- update figures references -->
 <!-- plus check code -->
-E10. Reproduce Figure \@ref(fig:tmshape) and the 1st and 6th panel of Figure \@ref(fig:break-styles) as closely as possible using the **ggplot2** package.
+E10. Reproduce Figure 9.1 and Figure 9.7 as closely as possible using the **ggplot2** package.
 
 
 
