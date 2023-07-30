@@ -24,7 +24,7 @@ remotes::install_github("r-tmap/tmap@v4")
 #> leafgl     (NA -> 0.1.1 ) [CRAN]
 #> cols4all   (NA -> 0.6   ) [CRAN]
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/Rtmp7R1RtQ/remotesc7714582118/r-tmap-tmap-fad0b46/DESCRIPTION’ ... OK
+#> * checking for file ‘/tmp/Rtmpq4UaQA/remotesc78562d6f23/r-tmap-tmap-fad0b46/DESCRIPTION’ ... OK
 #> * preparing ‘tmap’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
