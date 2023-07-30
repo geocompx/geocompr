@@ -24,7 +24,7 @@ remotes::install_github("r-tmap/tmap@v4")
 #> leafgl     (NA -> 0.1.1 ) [CRAN]
 #> cols4all   (NA -> 0.6   ) [CRAN]
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/Rtmpj8238c/remotesc791439558d/r-tmap-tmap-fad0b46/DESCRIPTION’ ... OK
+#> * checking for file ‘/tmp/Rtmplh7p3F/remotesc775ac44f85/r-tmap-tmap-fad0b46/DESCRIPTION’ ... OK
 #> * preparing ‘tmap’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
@@ -1350,9 +1350,6 @@ E9. Update the code in `coffeeApp/app.R` so that instead of centering on Brazil 
 
 
 
-<!--toDo: jn-->
-<!-- update figures references -->
-<!-- plus check code -->
 E10. Reproduce Figure 9.1 and Figure 9.7 as closely as possible using the **ggplot2** package.
 
 
