@@ -24,7 +24,7 @@ remotes::install_github("r-tmap/tmap@v4")
 #> leafgl     (NA -> 0.1.1 ) [CRAN]
 #> cols4all   (NA -> 0.6   ) [CRAN]
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/Rtmpbszkcg/remotesc434c5b4e59/r-tmap-tmap-31dfe86/DESCRIPTION’ ... OK
+#> * checking for file ‘/tmp/RtmpLPVsNr/remotesc642e1c4faa/r-tmap-tmap-fad0b46/DESCRIPTION’ ... OK
 #> * preparing ‘tmap’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
@@ -1293,7 +1293,7 @@ nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 E1. Create a map showing the geographic distribution of the Human Development Index (`HDI`) across Africa with base **graphics** (hint: use `plot()`) and **tmap** packages (hint: use `tm_shape(africa) + ...`).
     - Name two advantages of each based on the experience.
     - Name three other mapping packages and an advantage of each.
-    - Bonus: create three more maps of Africa using these three packages.
+    - Bonus: create three more maps of Africa using these three other packages.
 
 
 
