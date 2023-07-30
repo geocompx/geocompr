@@ -6,7 +6,7 @@ opts_chunk$set(
         collapse = TRUE,
         # The following line speeds-up the build.
         # Uncomment it to avoid cached data (which can cause issues):
-        cache = TRUE,
+        # cache = TRUE,
         fig.pos = "t",
         fig.path = "figures/",
         fig.align = "center",
