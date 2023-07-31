@@ -58,30 +58,16 @@ canterbury_height = nz_height[canterbury, ]
 
 ```{r nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in gray, right).", fig.scap="Illustration of spatial subsetting.", message=FALSE}
 library(tmap)
-p_hpnz1 = tm_shape(nz) + tm_polygons(col = "white") +
-  tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 0.25) +
-  tm_layout(main.title = "High points in New Zealand", main.title.size = 1,
-            bg.color = "lightblue")
-p_hpnz2 = tm_shape(nz) + tm_polygons(col = "white") +
+p_hpnz1 = tm_shape(nz) + tm_polygons(fill = "white") +
+  tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 0.5, col_alpha = 0.75) +
+  tm_title("High points in New Zealand") +
+  tm_layout(bg.color = "lightblue")
+p_hpnz2 = tm_shape(nz) + tm_polygons(fill = "white") +
   tm_shape(canterbury) + tm_fill(col = "gray") + 
-  tm_shape(canterbury_height) + tm_symbols(shape = 2, col = "red", size = 0.25) +
-  tm_layout(main.title = "High points in Canterbury", main.title.size = 1,
-            bg.color = "lightblue")
+  tm_shape(canterbury_height) + tm_symbols(shape = 2, col = "red", size = 0.5, col_alpha = 0.75) +
+  tm_title("High points in Canterbury") +
+  tm_layout(bg.color = "lightblue")
 tmap_arrange(p_hpnz1, p_hpnz2, ncol = 2)
-
-if (packageVersion("tmap") >= "4.0"){
-  library(tmap)
-  p_hpnz1 = tm_shape(nz) + tm_polygons(fill = "white") +
-    tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 0.25) +
-    tm_title("High points in New Zealand") +
-    tm_layout(bg.color = "lightblue")
-  p_hpnz2 = tm_shape(nz) + tm_polygons(fill = "white") +
-    tm_shape(canterbury) + tm_fill(col = "gray") + 
-    tm_shape(canterbury_height) + tm_symbols(shape = 2, col = "red", size = 0.25) +
-    tm_title("High points in Canterbury") +
-    tm_layout(bg.color = "lightblue")
-  tmap_arrange(p_hpnz1, p_hpnz2, ncol = 2)
-}
 ```
 
 Like attribute subsetting, the command `x[y, ]` (equivalent to `nz_height[canterbury, ]`) subsets features of a *target* `x` using the contents of a *source* object `y`.
@@ -521,22 +507,14 @@ plot(grid, col = grid_sf$rooks)
 ```
 
 ```{r queens, fig.cap="Demonstration of custom binary spatial predicates for finding 'queen' (left) and 'rook' (right) relations to the central square in a grid with 9 geometries.", echo=FALSE, warning=FALSE}
+st_crs(grid_sf) = "EPSG:2180"
 tm_shape(grid_sf) +
-  tm_fill(col = c("queens", "rooks"), palette = c("white", "black")) +
+  tm_fill(fill = c("queens", "rooks"), 
+          fill.scale = tm_scale(values = c("white", "black"))) +
   tm_shape(grid_sf) +
   tm_borders(col = "grey", lwd = 2) +
   tm_layout(frame = FALSE, legend.show = FALSE,
             panel.labels = c("queen", "rook"))
-
-if (packageVersion("tmap") >= "4.0"){
-  tm_shape(grid_sf) +
-    tm_fill(fill = c("queens", "rooks"), 
-            fill.scale = tm_scale(values = c("white", "black"))) +
-    tm_shape(grid_sf) +
-    tm_borders(col = "grey", lwd = 2) +
-    tm_layout(frame = FALSE, legend.show = FALSE,
-              panel.labels = c("queen", "rook"))
-}
 ```
 
 <!-- Another of a custom binary spatial predicate is 'overlapping lines' which detects lines that overlap for some or all of another line's geometry. -->
@@ -629,6 +607,7 @@ random_joined = st_join(random_points, world["name_long"])
 
 ```{r spatial-join, echo=FALSE, fig.cap="Illustration of a spatial join. A new attribute variable is added to random points (top left) from source world object (top right) resulting in the data represented in the final panel.", fig.asp=0.5, warning=FALSE, message=FALSE, out.width="100%", fig.scap="Illustration of a spatial join."}
 # source("https://github.com/geocompx/geocompr/raw/main/code/04-spatial-join.R")
+# toDo: tm_layout(legend.only = TRUE)
 source("code/04-spatial-join.R")
 tmap_arrange(jm1, jm2, jm3, jm4, nrow = 2, ncol = 2)
 ```
