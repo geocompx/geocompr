@@ -88,9 +88,12 @@ de_9im_plot2 = function(xy, label1 = "test", label2 = "",
                        theme = ggplot2::theme_void()) {
   require("tmap", quietly = TRUE)
   # browser()
+  # toDo: does not work yet
+  st_crs(xy) = "EPSG:2180"
   tm_shape(xy) +
-    tm_polygons("Object", legend.show = FALSE, alpha = alpha,
-                palette = c("#E36939", "#6673E3")) +
+    tm_polygons("Object", fill.legend = tm_legend_hide(), 
+                fill_alpha = alpha,
+                fill.scale = tm_scale(values = c("#E36939", "#6673E3"))) +
     tm_credits(label1, position = c(0.1, "top"), just = "top") +
     tm_credits(label2, position = c(0.1, 0.4), fontface = "italic", just = "bottom") +
     tm_layout(frame = FALSE)
