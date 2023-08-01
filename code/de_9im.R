@@ -98,7 +98,7 @@ de_9im_plot2 = function(xy, label1 = "test", label2 = "",
     tm_credits(label2, position = c(0.1, 0.4), fontface = "italic", just = "bottom") +
     tm_layout(frame = FALSE)
 }
-
+9
 # # Test code to functionalize:
 # theme_set(new = theme_void())
 # g1 = ggplot(ps1) + geom_sf(aes(fill = Object), alpha = 0.5, show.legend = FALSE)
