@@ -10,40 +10,18 @@ grain_poly2 = as.polygons(grain) %>%
 cols = c("clay" = "brown", "sand" = "rosybrown", "silt" = "sandybrown")
 
 p1p = tm_shape(grain) +
-  tm_raster(legend.show = FALSE, palette = cols) +
-  tm_layout(main.title = "A. Raster", frame = FALSE,
-            main.title.size = 1)
+  tm_raster("grain", col.scale = tm_scale(values = cols)) +
+  tm_title("A. Raster") +
+  tm_layout(frame = FALSE, legend.show = FALSE)
 
 p2p = tm_shape(grain_poly) +
-  tm_polygons("grain", legend.show = FALSE, palette = cols, lwd = 3) +
-  tm_layout(main.title = "B.Polygons", frame = FALSE,
-            main.title.size = 1)
+  tm_polygons("grain", fill.scale = tm_scale(values = cols), lwd = 3) +
+  tm_title("B.Polygons") +
+  tm_layout(frame = FALSE, legend.show = FALSE)
 
 p3p = tm_shape(grain_poly2) + 
-  tm_polygons("grain", legend.show = FALSE, palette = cols, lwd = 3) +
-  tm_layout(main.title = "C. Aggregated polygons", frame = FALSE,
-            main.title.size = 1)
+  tm_polygons("grain", fill.scale = tm_scale(values = cols), lwd = 3)  +
+  tm_title("C. Aggregated polygons") +
+  tm_layout(frame = FALSE, legend.show = FALSE)
 
 tmap_arrange(p1p, p2p, p3p, ncol = 3)
-
-# toDo: jn
-# fix colors in panel A
-
-if (packageVersion("tmap") >= "4.0"){
-  p1p = tm_shape(grain) +
-    tm_raster("grain", col.scale = tm_scale(palette = cols)) +
-    tm_title("A. Raster") +
-    tm_layout(frame = FALSE, legend.show = FALSE)
-  
-  p2p = tm_shape(grain_poly) +
-    tm_polygons("grain", col.scale = tm_scale(palette = cols), lwd = 3) +
-    tm_title("B.Polygons") +
-    tm_layout(frame = FALSE, legend.show = FALSE)
-  
-  p3p = tm_shape(grain_poly2) + 
-    tm_polygons("grain", col.scale = tm_scale(palette = cols), lwd = 3)  +
-    tm_title("C. Aggregated polygons") +
-    tm_layout(frame = FALSE, legend.show = FALSE)
-  
-  tmap_arrange(p1p, p2p, p3p, ncol = 3)
-}
