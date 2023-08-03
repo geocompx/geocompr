@@ -78,57 +78,30 @@ library(tmap)
 library(rcartocolor)
 terrain_colors = carto_pal(7, "Geyser")
 pz1 = tm_shape(srtm) + 
-  tm_raster(palette = terrain_colors, legend.show = FALSE, style = "cont") + 
+  tm_raster(col.scale = tm_scale_continuous(values = terrain_colors)) +
   tm_shape(zion) + 
   tm_borders(lwd = 2) + 
-  tm_layout(main.title = "A. Original", inner.margins = 0)
+  tm_title("A. Original") +
+  tm_layout(legend.show = FALSE)
 pz2 = tm_shape(srtm_cropped) +
-  tm_raster(palette = terrain_colors, legend.show = FALSE, style = "cont") + 
+  tm_raster(col.scale = tm_scale_continuous(values = terrain_colors)) +
   tm_shape(zion) +
   tm_borders(lwd = 2) + 
-  tm_layout(main.title = "B. Crop", inner.margins = 0)
+  tm_title("B. Crop") +
+  tm_layout(legend.show = FALSE)
 pz3 = tm_shape(srtm_masked) + 
-  tm_raster(palette = terrain_colors, legend.show = FALSE, style = "cont") + 
+  tm_raster(col.scale = tm_scale_continuous(values = terrain_colors)) +
   tm_shape(zion) + 
   tm_borders(lwd = 2) + 
-  tm_layout(main.title = "C. Mask", inner.margins = 0)
+  tm_title("C. Mask") +
+  tm_layout(legend.show = FALSE)
 pz4 = tm_shape(srtm_inv_masked) +
-  tm_raster(palette = terrain_colors, legend.show = FALSE, style = "cont") + 
+  tm_raster(col.scale = tm_scale_continuous(values = terrain_colors)) +
   tm_shape(zion) +
   tm_borders(lwd = 2) + 
-  tm_layout(main.title = "D. Inverse mask", inner.margins = 0)
+  tm_title("D. Inverse mask") +
+  tm_layout(legend.show = FALSE)
 tmap_arrange(pz1, pz2, pz3, pz4, ncol = 4, asp = NA)
-
-if (packageVersion("tmap") >= "4.0"){
-  library(tmap)
-  library(rcartocolor)
-  terrain_colors = carto_pal(7, "Geyser")
-  pz1 = tm_shape(srtm) + 
-    tm_raster(col.scale = tm_scale_continuous(values = terrain_colors)) +
-    tm_shape(zion) + 
-    tm_borders(lwd = 2) + 
-    tm_title("A. Original") +
-    tm_layout(legend.show = FALSE)
-  pz2 = tm_shape(srtm_cropped) +
-    tm_raster(col.scale = tm_scale_continuous(values = terrain_colors)) +
-    tm_shape(zion) +
-    tm_borders(lwd = 2) + 
-    tm_title("B. Crop") +
-    tm_layout(legend.show = FALSE)
-  pz3 = tm_shape(srtm_masked) + 
-    tm_raster(col.scale = tm_scale_continuous(values = terrain_colors)) +
-    tm_shape(zion) + 
-    tm_borders(lwd = 2) + 
-    tm_title("C. Mask") +
-    tm_layout(legend.show = FALSE)
-  pz4 = tm_shape(srtm_inv_masked) +
-    tm_raster(col.scale = tm_scale_continuous(values = terrain_colors)) +
-    tm_shape(zion) +
-    tm_borders(lwd = 2) + 
-    tm_title("D. Inverse mask") +
-    tm_layout(legend.show = FALSE)
-  tmap_arrange(pz1, pz2, pz3, pz4, ncol = 4, asp = NA)
-}
 ```
 
 ## Raster extraction
@@ -232,32 +205,17 @@ zion_transect_points = st_cast(zion_transect, "POINT")[c(1, nrow(zion_transect))
 zion_transect_points$name = c("start", "end")
 
 rast_poly_line = tm_shape(srtm) +
-  tm_raster(palette = terrain_colors, title = "Elevation (m)", 
-            legend.show = TRUE, style = "cont") + 
+  tm_raster(col.scale = tm_scale_continuous(values = terrain_colors),
+            col.legend = tm_legend("Elevation (m)")) + 
   tm_shape(zion) +
   tm_borders(lwd = 2) + 
   tm_shape(zion_transect_line) + 
   tm_lines(col = "black", lwd = 4) + 
-  tm_shape(zion_transect_points) +                                                 
-  tm_text("name", bg.color = "white", bg.alpha = 0.75, auto.placement = TRUE) +
-  tm_layout(legend.frame = TRUE, legend.position = c("right", "top"))
-
-# toDo: jn
-# how to customize text
-if (packageVersion("tmap") >= "4.0"){
-  rast_poly_line = tm_shape(srtm) +
-    tm_raster(col.scale = tm_scale_continuous(values = terrain_colors),
-              col.legend = tm_legend("Elevation (m)")) + 
-    tm_shape(zion) +
-    tm_borders(lwd = 2) + 
-    tm_shape(zion_transect_line) + 
-    tm_lines(col = "black", lwd = 4) + 
-    tm_shape(zion_transect_points) +   
-    # tm_text("name", 
-            # text.scale = tm_scale(bg.color = "white", bg.alpha = 0.75, auto.placement = TRUE))
-    tm_layout(legend.frame = TRUE, legend.position = c("right", "top"),
-              legend.bg.color = "white")
-}
+  tm_shape(zion_transect_points) +   
+  tm_text("name", 
+          text.scale = tm_scale(bg.color = "white", bg.alpha = 0.75, auto.placement = TRUE)) +
+  tm_layout(legend.frame = TRUE, legend.position = c("right", "top"),
+            legend.bg.color = "white")
 
 plot_transect = ggplot(zion_transect, aes(as.numeric(dist), srtm)) + 
   geom_line() +
@@ -329,42 +287,23 @@ zion_nlcd |>
 
 ```{r polyextr, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Area used for continuous (left) and categorical (right) raster extraction."}
 rast_poly_srtm = tm_shape(srtm) + 
-  tm_raster(palette = terrain_colors, title = "Elevation (m)",
-            legend.show = TRUE, style = "cont") + 
+  tm_raster(col.scale = tm_scale_continuous(values = terrain_colors),
+            col.legend = tm_legend("Elevation (m)")) + 
   tm_shape(zion) +
-  tm_polygons(lwd = 2, alpha = 0.3) +
-  tm_layout(main.title = "A. Continuous data extraction",
-            main.title.size = 1, legend.frame = TRUE,
-            legend.position = c("left", "bottom"))
+  tm_polygons(lwd = 2, fill_alpha = 0.3) +
+  tm_title("A. Continuous data extraction") +
+  tm_layout(legend.frame = TRUE, legend.position = c("left", "bottom"),
+            legend.bg.color = "white")
 rast_poly_nlcd = tm_shape(nlcd) +
-  tm_raster(drop.levels = TRUE, title = "Land cover", legend.show = TRUE) + 
+  tm_raster(col.scale = tm_scale_categorical(levels.drop = TRUE),
+            col.legend = tm_legend(title = "Land cover")) + 
+  # tm_raster(drop.levels = TRUE, title = "Land cover", legend.show = TRUE) + 
   tm_shape(zion) +
-  tm_polygons(lwd = 2, alpha = 0.3) +
-  tm_layout(main.title = "B. Categorical data extraction", 
-            main.title.size = 1, legend.frame = TRUE, 
-            legend.position = c("left", "bottom"))
+  tm_polygons(lwd = 2, fill_alpha = 0.3)  +
+  tm_title("B. Categorical data extraction") +
+  tm_layout(legend.frame = TRUE, legend.position = c("left", "bottom"),
+            legend.bg.color = "white")
 tmap_arrange(rast_poly_srtm, rast_poly_nlcd, ncol = 2)
-
-if (packageVersion("tmap") >= "4.0"){
-  rast_poly_srtm = tm_shape(srtm) + 
-    tm_raster(col.scale = tm_scale_continuous(values = terrain_colors),
-              col.legend = tm_legend("Elevation (m)")) + 
-    tm_shape(zion) +
-    tm_polygons(lwd = 2, fill_alpha = 0.3) +
-    tm_title("A. Continuous data extraction") +
-    tm_layout(legend.frame = TRUE, legend.position = c("left", "bottom"),
-              legend.bg.color = "white")
-  rast_poly_nlcd = tm_shape(nlcd) +
-    tm_raster(col.scale = tm_scale_categorical(levels.drop = TRUE),
-              col.legend = tm_legend(title = "Land cover")) + 
-    # tm_raster(drop.levels = TRUE, title = "Land cover", legend.show = TRUE) + 
-    tm_shape(zion) +
-    tm_polygons(lwd = 2, fill_alpha = 0.3)  +
-    tm_title("B. Categorical data extraction") +
-    tm_layout(legend.frame = TRUE, legend.position = c("left", "bottom"),
-              legend.bg.color = "white")
-  tmap_arrange(rast_poly_srtm, rast_poly_nlcd, ncol = 2)
-}
 ```
 
 \index{raster extraction!exact fractions} 
