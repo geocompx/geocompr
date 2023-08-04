@@ -10,7 +10,6 @@ library(terra)
 library(dplyr)
 library(spData)
 library(spDataLarge)
-remotes::install_github("r-tmap/tmap")
 ```
 
 ## Introduction {#reproj-intro}
@@ -357,6 +356,7 @@ plot(st_geometry(uk), add = TRUE, border = "gray", lwd = 3)
 uk = rnaturalearth::ne_countries(scale = 50) |> 
   st_as_sf() |> 
   filter(grepl(pattern = "United Kingdom|Ire", x = name_long))
+
 library(tmap)
 tm1 = tm_shape(london_buff_s2, bbox = st_bbox(london_buff_s2_100_cells)) + 
   tm_graticules(lwd = 0.2) +
@@ -364,7 +364,7 @@ tm1 = tm_shape(london_buff_s2, bbox = st_bbox(london_buff_s2_100_cells)) +
   tm_shape(london_buff_s2_100_cells) +
   tm_borders(col = "black", lwd = 1.5) +
   tm_shape(uk) +
-  tm_polygons(lty = 3, alpha = 0.2, col = "#567D46") +
+  tm_polygons(lty = 3, fill_alpha = 0.2, fill = "#567D46") +
   tm_shape(london_proj) +
   tm_symbols()
 
@@ -372,7 +372,7 @@ tm2 = tm_shape(london_buff_projected, bbox = st_bbox(london_buff_s2_100_cells)) 
   tm_grid(lwd = 0.2) +
   tm_borders(col = "black", lwd = 0.5) + 
   tm_shape(uk) +
-  tm_polygons(lty = 3, alpha = 0.2, col = "#567D46") +
+  tm_polygons(lty = 3, fill_alpha = 0.2, fill = "#567D46") +
   tm_shape(london_proj) +
   tm_symbols()
 
@@ -380,42 +380,11 @@ tm3 = tm_shape(london_buff_lonlat, bbox = st_bbox(london_buff_s2_100_cells)) +
   tm_graticules(lwd = 0.2) +
   tm_borders(col = "black", lwd = 0.5) + 
   tm_shape(uk) +
-  tm_polygons(lty = 3, alpha = 0.2, col = "#567D46") +
+  tm_polygons(lty = 3, fill_alpha = 0.2, fill = "#567D46") +
   tm_shape(london_proj) +
   tm_symbols()
 
 tmap_arrange(tm1, tm2, tm3, nrow = 1)
-
-if (packageVersion("tmap") >= "4.0"){
-  library(tmap)
-  tm1 = tm_shape(london_buff_s2, bbox = st_bbox(london_buff_s2_100_cells)) + 
-    tm_graticules(lwd = 0.2) +
-    tm_borders(col = "black", lwd = 0.5) + 
-    tm_shape(london_buff_s2_100_cells) +
-    tm_borders(col = "black", lwd = 1.5) +
-    tm_shape(uk) +
-    tm_polygons(lty = 3, fill_alpha = 0.2, fill = "#567D46") +
-    tm_shape(london_proj) +
-    tm_symbols()
-  
-  tm2 = tm_shape(london_buff_projected, bbox = st_bbox(london_buff_s2_100_cells)) + 
-    tm_grid(lwd = 0.2) +
-    tm_borders(col = "black", lwd = 0.5) + 
-    tm_shape(uk) +
-    tm_polygons(lty = 3, fill_alpha = 0.2, fill = "#567D46") +
-    tm_shape(london_proj) +
-    tm_symbols()
-  
-  tm3 = tm_shape(london_buff_lonlat, bbox = st_bbox(london_buff_s2_100_cells)) + 
-    tm_graticules(lwd = 0.2) +
-    tm_borders(col = "black", lwd = 0.5) + 
-    tm_shape(uk) +
-    tm_polygons(lty = 3, fill_alpha = 0.2, fill = "#567D46") +
-    tm_shape(london_proj) +
-    tm_symbols()
-  
-  tmap_arrange(tm1, tm2, tm3, nrow = 1)
-}
 ```
 
 It is clear from Figure \@ref(fig:crs-buf) that buffers based on `s2` and properly projected CRSs are not 'squashed', meaning that every part of the buffer boundary is equidistant to London.
@@ -929,7 +898,6 @@ world_laea2_g = st_graticule(ndiscr = 10000) |>
   st_geometry()
 tm_shape(world_laea2_g) + tm_lines(col = "gray") +
   tm_shape(world_laea2) + tm_borders(col = "black")
-# knitr::include_graphics("https://user-images.githubusercontent.com/1825120/72223267-c79a4780-3564-11ea-9d7e-9644523e349b.png")
 ```
 
 More information on CRS modifications can be found in the [Using PROJ](https://proj.org/usage/index.html) documentation.
