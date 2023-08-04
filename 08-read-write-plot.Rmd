@@ -9,11 +9,9 @@ library(sf)
 library(terra)
 library(dplyr)
 library(spData)
-remotes::install_github("r-tmap/tmap")
 ```
 
 ## Introduction
-
 <!--toDo:RL-->
 <!--revise and update the following section-->
 
@@ -35,7 +33,6 @@ The process of actually reading and writing such file formats efficiently is not
 The final Section \@ref(visual-outputs) demonstrates methods for saving visual outputs (maps), in preparation for Chapter \@ref(adv-map) on visualization.
 
 ## Retrieving open data {#retrieving-data}
-
 <!--toDo:RL-->
 <!--revise and update the following section-->
 
@@ -66,7 +63,6 @@ canada_perma_land = read_sf("PeRL_permafrost_landscapes/canada_perma_land.shp")
 ```
 
 ## Geographic data packages
-
 <!--toDo:RL-->
 <!--revise and update the following section-->
 <!-- JN: btw -- should we add references to these packages? -->
@@ -447,52 +443,27 @@ tanzania_neigh = read_sf(f, wkt_filter = tanzania_buf_wkt)
 
 Our result, shown in Figure \@ref(fig:readsfquery):B, contains Tanzania and every country within its 50 km buffer.
 
-```{r readsfquery, echo=FALSE, message=FALSE, fig.cap="Reading a subset of the vector data using a query (A) and a wkt filter (B)."}
+```{r readsfquery, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Reading a subset of the vector data using a query (A) and a wkt filter (B)."}
 library(tmap)
 tm1 = tm_shape(tanzania) +
   tm_polygons(lwd = 2) +
   tm_text(text = "name_long") + 
-  tm_scale_bar(c(0, 200, 400), position = c("left", "bottom")) +
-  tm_layout(main.title = "A. query")
-tanzania_neigh[tanzania_neigh$iso_a2 == "CD", "name_long"] = "Democratic\nRepublic\nof the Congo"
+  tm_scalebar(c(0, 200, 400), position = c("left", "bottom")) +
+  tm_title("A. query")
+tanzania_neigh[tanzania_neigh$iso_a2 == "CD", "name_long"] = "Democratic\nRepublic\nof the ongo"
 tm2 = tm_shape(tanzania_neigh) +
   tm_polygons() +
-  tm_text(text = "name_long", size = "AREA",
-          auto.placement = FALSE, remove.overlap = FALSE,
-          root = 6, legend.size.show = FALSE) +
+  tm_text(text = "name_long", 
+          text.scale = tm_scale(auto.placement = FALSE, remove.overlap = FALSE), 
+          size = "AREA", size.legend = tm_legend_hide(), root = 6) +
   tm_shape(tanzania_buf) +
-  tm_polygons(col = "red", border.col = "red", alpha = 0.05) +
+  tm_polygons(col = "red", fill = "red", fill_alpha = 0.05) +
   tm_add_legend(type = "fill", labels = "50km buffer around Tanzania",
-                col = "red", alpha = 0.1, border.col = "red")  +
-  tm_scale_bar(c(0, 200, 400), position = c("right", "bottom")) +
-  tm_layout(legend.width = 0.5,
-            legend.position = c("left", "bottom"),
-            main.title = "B. wkt_filter")
+                col = "red", fill_alpha = 0.1, fill = "red")  +
+  tm_scalebar(c(0, 200, 400), position = c("right", "bottom")) +
+  tm_title("B. wkt_filter") +
+  tm_layout(legend.position = c("left", "bottom"))
 tmap_arrange(tm1, tm2)
-
-# toDo: jn
-# tm_add_legend is missing
-if (packageVersion("tmap") >= "4.0"){
-  tm1 = tm_shape(tanzania) +
-    tm_polygons(lwd = 2) +
-    tm_text(text = "name_long") + 
-    tm_scalebar(c(0, 200, 400), position = c("left", "bottom")) +
-    tm_title("A. query")
-  tanzania_neigh[tanzania_neigh$iso_a2 == "CD", "name_long"] = "Democratic\nRepublic\nof the Congo"
-  tm2 = tm_shape(tanzania_neigh) +
-    tm_polygons() +
-    tm_text(text = "name_long", 
-            text.scale = tm_scale(auto.placement = FALSE, remove.overlap = FALSE), 
-            size = "AREA", size.legend = tm_legend_hide(), root = 6) +
-    tm_shape(tanzania_buf) +
-    tm_polygons(col = "red", fill = "red", fill_alpha = 0.05) +
-    tm_add_legend(type = "fill", labels = "50km buffer around Tanzania",
-                  col = "red", fill_alpha = 0.1, fill = "red")  +
-    tm_scalebar(c(0, 200, 400), position = c("right", "bottom")) +
-    tm_title("B. wkt_filter") +
-    tm_layout(legend.position = c("left", "bottom"))
-  tmap_arrange(tm1, tm2)
-}
 ```
 
 Naturally, some options are specific to certain drivers.^[
