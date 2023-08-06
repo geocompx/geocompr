@@ -25,7 +25,7 @@ library(RSAGA)
 data("landslides", package = "RSAGA")
 lsl_sf = st_as_sf(landslides, coords = c("x", "y"), crs = 32717)
 write.sgrd(data = dem, file = file.path(tempdir(), "dem"), header = dem$header)
-dem = file.path(tempdir(), "dem.sdat") %>%
+dem = file.path(tempdir(), "dem.sdat") |>
                raster(crs = st_crs(lsl_sf)$proj4string)
 
 #**********************************************************

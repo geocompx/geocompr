@@ -53,9 +53,9 @@ execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
           flags = c("overwrite"))
 
 # load output into R
-route = readVECT("shortest_route") %>%
-  st_as_sf %>%
-  st_geometry
+route = readVECT("shortest_route") |>
+  st_as_sf() |>
+  st_geometry()
 
 # make a plot
 fig = mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) +
