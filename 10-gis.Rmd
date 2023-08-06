@@ -7,7 +7,6 @@
 ```{r 09-gis-1, message=FALSE}
 library(sf)
 library(terra)
-remotes::install_github("r-tmap/tmap")
 ```
 
 <!--toDo:jn-->
@@ -143,7 +142,6 @@ This package automatically tries to detect a QGIS installation and complains if 
 There are a few possible solutions when the configuration fails: you can set `options(qgisprocess.path = "path/to/your_qgis_process")`, or set up the `R_QGISPROCESS_PATH` environment variable.
 The above approaches can also be used when you have more than one QGIS installation and want to decide which one to use.
 For more details, please refer to the **qgisprocess** ['getting started' vignette](https://r-spatial.github.io/qgisprocess/articles/qgisprocess.html).
-
 Next, we can find which plugins (meaning different software) are available on our computer.
 
 ```{r plugins, eval=has_qgis_plugins}
@@ -190,48 +188,28 @@ aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 ```{r uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders)."}
 library(tmap)
 tm_shape(incongr_wgs) +
-  tm_polygons(border.col = "grey5") +
+  tm_polygons(col = "grey5") +
   tm_shape(aggzone_wgs) +
-  tm_borders(alpha = 0.5, col = "red") +
-  tm_add_legend(
-    type = "line",
-    labels = c("incongr_wgs", "aggzone_wgs"),
-    col = c("grey5", "red"),
-    lwd = 3
-  ) +
-  tm_scale_bar(
-    position = c("left", "bottom"),
-    breaks = c(0, 0.5, 1)
-  ) +
-  tm_layout(
-    frame = FALSE,
-    legend.text.size = 1
-  )
-if (packageVersion("tmap") >= "4.0") {
-  library(tmap)
-  tm_shape(incongr_wgs) +
-    tm_polygons(col = "grey5") +
-    tm_shape(aggzone_wgs) +
-    tm_borders(col_alpha = 0.5, col = "red") +
-    tm_add_legend(type = "Lines", labels = c("incongr_wgs", "aggzone_wgs"),
-                  col = c("grey5", "red"), lwd = 3) +
-    tm_scalebar(position = c("left", "bottom"), breaks = c(0, 0.5, 1)) +
-    tm_layout(frame = FALSE, legend.text.size = 1)
-}
+  tm_borders(col_alpha = 0.5, col = "red") +
+  tm_add_legend(type = "Lines", labels = c("incongr_wgs", "aggzone_wgs"),
+                col = c("grey5", "red"), lwd = 3, position = tm_pos_in("right", "top")) +
+  tm_scalebar(position = c("left", "bottom"), breaks = c(0, 0.5, 1)) +
+  tm_layout(frame = FALSE, legend.text.size = 1)
 ```
 
-To find an algorithm to do this work, we can search the output of the `qgis_algorithms()` function.
+The first step is to find an algorithm that can merge two vector objects.
+To list all of the available algorithms, we can use the `qgis_algorithms()` function.
 This function returns a data frame containing all of the available providers and the algorithms they contain.^[Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.] 
 
 ```{r, eval=has_qgis_plugins}
-qgis_algo = qgis_algorithms()
+qgis_algorithms()
 ```
 
-The `qgis_algo` object has a lot of columns, but usually, we are only interested in the `algorithm` column that combines information about the provider and the algorithm name.
+To find an algorithm, we can use the `qgis_search_algorithms()` function.
 Assuming that the short description of the function contains the word "union"\index{union}, we can run the following code to find the algorithm of interest:
 
 ```{r, eval=has_qgis_plugins}
-grep("union", qgis_algo$algorithm, value = TRUE)
+qgis_search_algorithms("union")
 ```
 
 One of the algorithms on the above list, `"native:union"`, sounds promising.
@@ -889,48 +867,20 @@ load("extdata/postgis_data.Rdata")
 ```
 
 ```{r postgis, echo=FALSE, fig.cap="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer.", fig.scap="Visualization of the output of previous PostGIS commands."}
-# plot the results of the queries
 library(tmap)
 tm_shape(buf) +
-  tm_polygons(col = "#FFFDD0", border.alpha = 0.3) +
+  tm_polygons(fill = "#FFFDD0", col_alpha = 0.3) +
   tm_shape(us_route) +
   tm_lines(col = "black", lwd = 3) +
   tm_shape(hardees) +
-  tm_symbols(col = "#F10C26") +
-  tm_add_legend(
-    type = "line", col = "black", lwd = 3,
-    labels = "The US Route 1 highway"
-  ) +
-  tm_add_legend(
-    type = "fill", col = "#FFFDD0",
-    border.alpha = 0.3, label = "35km buffer"
-  ) +
-  tm_add_legend(
-    type = "symbol", col = "#F10C26",
-    labels = "Restaurants"
-  ) +
-  tm_layout(
-    frame = FALSE,
-    legend.outside = TRUE,
-    legend.outside.size = 0.3
-  )
-
-if (packageVersion("tmap") >= "4.0") {
-  library(tmap)
-  tm_shape(buf) +
-    tm_polygons(fill = "#FFFDD0", col_alpha = 0.3) +
-    tm_shape(us_route) +
-    tm_lines(col = "black", lwd = 3) +
-    tm_shape(hardees) +
-    tm_symbols(fill = "#F10C26") +
-    tm_add_legend(type = "Lines", col = "black", lwd = 3,
-                  labels = "The US Route 1 highway") +
-    tm_add_legend(type = "Polygons", fill = "#FFFDD0",
-                  border.alpha = 0.3, labels = "35km buffer") +
-    tm_add_legend(type = "Symbols", fill = "#F10C26",
-                  labels = "Restaurants", shape = 21) +
-    tm_layout(frame = FALSE)
-}
+  tm_symbols(fill = "#F10C26") +
+  tm_add_legend(type = "Lines", col = "black", lwd = 3,
+                labels = "The US Route 1 highway") +
+  tm_add_legend(type = "Polygons", fill = "#FFFDD0",
+                border.alpha = 0.3, labels = "35km buffer") +
+  tm_add_legend(type = "Symbols", fill = "#F10C26",
+                labels = "Restaurants", shape = 21) +
+  tm_layout(frame = FALSE)
 ```
 
 Unlike PostGIS, **sf** only supports spatial vector data. 
