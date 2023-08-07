@@ -2,7 +2,6 @@
 
 ```{r 12-knitr-settings, include=FALSE}
 knitr::opts_chunk$set(cache = FALSE)
-remotes::install_github("r-tmap/tmap")
 ```
 
 ## Prerequisites {-}
@@ -87,39 +86,20 @@ The 175 non-landslide points were sampled randomly from the study area, with the
 # hs = terra::shade(slope = ta$slope * pi / 180,
 #                   terra::terrain(ta$elev, v = "aspect", unit = "radians"))
 # # so far tmaptools does not support terra objects
-# 
 # bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.0001, 1),
 #                     ylim = c(-0.0001, 1), relative = TRUE)
-# 
 # map = tm_shape(hs, bbox = bbx) +
 #   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
 #           labels.rot = c(0, 90), lines = FALSE) +
-#   tm_raster(palette = gray(0:100 / 100), n = 100, legend.show = FALSE) +
+#   tm_raster(col.scale = tm_scale(values = gray(0:100 / 100), n = 100), col.legend = tm_legend_hide()) +
 #   tm_shape(ta$elev) +
-#   tm_raster(alpha = 0.5, palette = terrain.colors(10), legend.show = FALSE) +
+#   tm_raster(col_alpha = 0.6, col.scale = tm_scale(values = hcl.colors(25, "Geyser")), col.legend = tm_legend_hide()) +
 #   tm_shape(lsl_sf) +
-#   tm_bubbles("lslpts", size = 0.2, palette = "-RdYlBu",
-#              title.col = "Landslide: ") +
-#   tm_layout(inner.margins = 0) +
-#   tm_legend(bg.color = "white")
+#   tm_symbols(fill = "lslpts", size = 0.5, col = "white",
+#              fill.scale = tm_scale(values = c("#0071A6", "#C73000")), fill.legend = tm_legend(title = "Landslide: ")) +
+#   tm_layout(inner.margins = rep(0, 4), legend.bg.color = "white", legend.position = tm_pos_in())
 # tmap::tmap_save(map, filename = "figures/lsl-map-1.png", width = 11,
-#                 height = 11, units = "cm")
-# 
-# if (packageVersion("tmap") >= "4.0"){
-#   map = tm_shape(hs, bbox = bbx) +
-#     tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
-#             labels.rot = c(0, 90), lines = FALSE) +
-#     tm_raster(col.scale = tm_scale(values = gray(0:100 / 100), n = 100), col.legend = tm_legend_hide()) +
-#     tm_shape(ta$elev) +
-#     tm_raster(col_alpha = 0.6, col.scale = tm_scale(values = hcl.colors(25, "Geyser")), col.legend = tm_legend_hide()) +
-#     tm_shape(lsl_sf) +
-#     tm_symbols(fill = "lslpts", size = 0.5, col = "white",
-#                fill.scale = tm_scale(values = c("#0071A6", "#C73000")), fill.legend = tm_legend(title = "Landslide: ")) +
-#     tm_layout(inner.margins = rep(0, 4), legend.bg.color = "white", legend.position = tm_pos_in())
-#   tmap::tmap_save(map, filename = "figures/lsl-map-1.png", width = 11,
-#                 height = 11, units = "cm")
-# }
-
+#               height = 11, units = "cm")
 knitr::include_graphics("figures/lsl-map-1.png")
 ```
 \index{hillshade}
@@ -193,7 +173,7 @@ pred = terra::predict(ta, model = fit, type = "response")
 ```
 
 ```{r lsl-susc, echo=FALSE, out.width="70%",fig.cap="Spatial distribution mapping of landslide susceptibility using a GLM.", fig.scap = "Spatial distribution of landslide susceptibility.", warning=FALSE}
-# # attach study mask for the natural part of the study area
+# attach study mask for the natural part of the study area
 # data("lsl", "study_mask", package = "spDataLarge")
 # ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 # study_mask = terra::vect(study_mask)
@@ -202,42 +182,20 @@ pred = terra::predict(ta, model = fit, type = "response")
 #                   terra::terrain(ta$elev, v = "aspect", unit = "radians"))
 # bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.0001, 1),
 #                     ylim = c(-0.0001, 1), relative = TRUE)
-# 
-# map = tm_shape(hs, bbox = bbx) +
+# map2 = tm_shape(hs, bbox = bbx) +
 #   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
 #           labels.rot = c(0, 90), lines = FALSE) +
-#   tm_raster(palette = "white", legend.show = FALSE) +
-#   # hillshade
+#   tm_raster(col.scale = tm_scale(values = "white"), col.legend = tm_legend_hide()) +
 #   tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
-# 	tm_raster(palette = gray(0:100 / 100), n = 100,
-# 	          legend.show = FALSE) +
-# 	# prediction raster
+# 	tm_raster(col.scale = tm_scale(values = gray(0:100 / 100), n = 100), col.legend = tm_legend_hide()) +
 #   tm_shape(terra::mask(pred, study_mask)) +
-# 	tm_raster(alpha = 0.5, palette = "Reds", n = 6, legend.show = TRUE,
-# 	          title = "Susceptibility") +
+# 	tm_raster(col_alpha = 0.5, col.scale = tm_scale(values = "Reds", n = 6),
+# 	          col.legend = tm_legend(title = "Susceptibility")) +
 # 	tm_layout(legend.position = c("left", "bottom"),
 # 	          legend.title.size = 0.9,
-# 	          inner.margins = 0)
-# tmap::tmap_save(map, filename = "figures/lsl-susc-1.png", width = 11,
-#                 height = 11, units = "cm")
-# 
-# if (packageVersion("tmap") >= "4.0"){
-#   tm_shape(hs, bbox = bbx) +
-#     tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
-#             labels.rot = c(0, 90), lines = FALSE) +
-#     tm_raster(col.scale = tm_scale(values = "white"), col.legend = tm_legend_hide()) +
-#     tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
-#   	tm_raster(col.scale = tm_scale(values = gray(0:100 / 100), n = 100), col.legend = tm_legend_hide()) +
-#     tm_shape(terra::mask(pred, study_mask)) +
-#   	tm_raster(col_alpha = 0.5, col.scale = tm_scale(values = "Reds", n = 6),
-#   	          col.legend = tm_legend(title = "Susceptibility")) +
-#   	tm_layout(legend.position = c("left", "bottom"),
-#   	          legend.title.size = 0.9,
-#   	          inner.margins = rep(0, 4))
-#   tmap::tmap_save(map, filename = "figures/lsl-susc-1.png", width = 11,
-#                 height = 11, units = "cm")
-# }
-
+# 	          inner.margins = rep(0, 4))
+# tmap::tmap_save(map2, filename = "figures/lsl-susc-1.png", width = 11,
+#               height = 11, units = "cm")
 knitr::include_graphics("figures/lsl-susc-1.png")
 ```
 
