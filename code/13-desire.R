@@ -39,15 +39,14 @@ tmap_mode("plot")
 desire_lines_top5 = od2line(od_top5, zones_od)
 # tmaptools::palette_explorer()
 tm_shape(desire_lines) +
-  tm_lines(palette = "plasma", breaks = c(0, 5, 10, 20, 40, 100),
-    lwd = "all",
-    scale = 9,
-    title.lwd = "Number of trips",
-    alpha = 0.6,
-    col = "Active",
-    title = "Active travel (%)"
-  ) +
+  tm_lines(col = "Active",
+           col.scale = tm_scale(values = viridis::plasma(5), breaks = c(0, 5, 10, 20, 40, 100)),
+           col.legend = tm_legend(title = "Active travel (%)"),
+           col_alpha = 0.6,
+           lwd = "all",
+           #lwd.scale = tm_scale(values.scale = 2),
+           lwd.legend = tm_legend(title = "Number of trips"))  +
   tm_shape(desire_lines_top5) +
-  tm_lines(lwd = 5, col = "black", alpha = 0.7) +
-  tm_scale_bar()
+  tm_lines(lwd = 5, col = "black", col_alpha = 0.7) +
+  tm_scalebar()
 
