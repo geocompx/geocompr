@@ -93,49 +93,24 @@ Visualizing the data helps to get more familiar with it, as shown in Figure \@re
 
 ```{r sa-mongon, echo=FALSE, message=FALSE, fig.cap="Study mask (polygon), location of the sampling sites (black points) and DEM in the background.", fig.scap="Study mask, location of the sampling sites."}
 # hs = terra::shade(terra::terrain(dem, v = "slope", unit = "radians"),
-#                   terra::terrain(dem, v = "aspect", unit = "radians"),
-#                   10, 200)
+#                 terra::terrain(dem, v = "aspect", unit = "radians"),
+#                 10, 200)
 # library(tmap)
 # tm = tm_shape(hs) +
 #   tm_grid(n.x = 3, n.y = 3) +
-#   tm_raster(style = "cont", palette = rev(hcl.colors(99, "Grays")),
-#             legend.show = FALSE) +
+#   tm_raster(col.scale = tm_scale_continuous(values = rev(hcl.colors(99, "Grays"))),
+#             col.legend = tm_legend_hide()) +
 #   tm_shape(dem) +
-#   tm_raster(alpha = 0.5,
-#             style = "cont",
-#             title = "m asl",
-#             legend.reverse = TRUE,
-#             n = 11,
-#             palette = terrain.colors(50)) +
+#   tm_raster(col_alpha = 0.5, 
+#             col.scale = tm_scale_continuous(n = 11, values = terrain.colors(50)),
+#             col.legend = tm_legend(title = "m asl", reverse = TRUE)) +
 #   tm_shape(study_area) +
 #   tm_borders() +
 #   tm_shape(random_points) +
-#   tm_dots() +
-#   tm_layout(inner.margins = 0, legend.outside = TRUE)
+#   tm_symbols(col = "black", size = 0.2) +
+#   tm_layout(legend.position = tm_pos_auto_out())
 # tmap_save(tm, "figures/15_sa_mongon_sampling.png",
 #           width = 12, height = 7, units = "cm")
-
-# if (packageVersion("tmap") >= "4.0"){
-#   hs = terra::shade(terra::terrain(dem, v = "slope", unit = "radians"),
-#                   terra::terrain(dem, v = "aspect", unit = "radians"),
-#                   10, 200)
-#   library(tmap)
-#   tm = tm_shape(hs) +
-#     tm_grid(n.x = 3, n.y = 3) +
-#     tm_raster(col.scale = tm_scale_continuous(values = rev(hcl.colors(99, "Grays"))),
-#               col.legend = tm_legend_hide()) +
-#     tm_shape(dem) +
-#     tm_raster(col_alpha = 0.5, 
-#               col.scale = tm_scale_continuous(n = 11, values = terrain.colors(50)),
-#               col.legend = tm_legend(title = "m asl", reverse = TRUE)) +
-#     tm_shape(study_area) +
-#     tm_borders() +
-#     tm_shape(random_points) +
-#     tm_symbols(col = "black", size = 0.2) +
-#     tm_layout(legend.position = tm_pos_auto_out())
-#   tmap_save(tm, "figures/15_sa_mongon_sampling.png",
-#             width = 12, height = 7, units = "cm")
-# }
 
 knitr::include_graphics("figures/15_sa_mongon_sampling.png")
 ```
@@ -569,46 +544,30 @@ Given a multilayer `SpatRaster` containing rasters named as the predictors used 
 pred = terra::predict(ep, model = autotuner_rf, fun = predict)
 ```
 
-```{r rf-pred, echo=FALSE, eval=TRUE, fig.cap="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.", out.width="60%", fig.scap="Predictive mapping of the floristic gradient."}
+```{r rf-pred, echo=FALSE, eval=TRUE, fig.cap="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.", fig.scap="Predictive mapping of the floristic gradient."}
 # hs = terra::shade(terra::terrain(dem, v = "slope", unit = "radians"),
 #                   terra::terrain(dem, v = "aspect", unit = "radians"),
 #                   10, 200) |>
 #   terra::mask(terra::vect(study_area))
 # pred = terra::mask(pred, terra::vect(study_area)) |>
 #   terra::trim()
-# 
+
 # library(tmap)
 # pal = rev(hcl.colors(n = 15, "RdYlBu"))
 # tm = tm_shape(hs) +
 #   tm_grid(n.x = 3, n.y = 3, lines = FALSE) +
-#   tm_raster(style = "cont", palette = rev(hcl.colors(99, "Grays")),
-#             legend.show = FALSE) +
-#   tm_shape(pred, is.master = TRUE) +
-#   tm_raster(style = "cont", title = "NMDS1", alpha = 0.8,
-#             legend.reverse = TRUE, palette = pal, midpoint	= NA) +
+#   tm_raster(col.scale = tm_scale_continuous(values = rev(hcl.colors(99, "Grays"))),
+#             col.legend = tm_legend_hide()) +
+#   tm_shape(pred, is.main = TRUE) +
+#   tm_raster(col.scale = tm_scale_continuous(values = pal, midpoint = NA),
+#             col.legend = tm_legend(title = "NMDS1", reverse = TRUE),
+#             col_alpha = 0.8) +
 #   tm_shape(study_area) +
 #   tm_borders() +
-#   tm_layout(inner.margins = 0.02, legend.outside = TRUE)
+#   tm_layout(legend.position = tm_pos_auto_out())
 # tmap_save(tm, "figures/15_rf_pred.png",
-#           width = 12, height = 7, units = "cm")
+#           width = 10, height = 8, units = "cm")
 
-# if (packageVersion("tmap") >= "4.0"){
-#   library(tmap)
-#   pal = rev(hcl.colors(n = 15, "RdYlBu"))
-#   tm = tm_shape(hs) +
-#     tm_grid(n.x = 3, n.y = 3, lines = FALSE) +
-#     tm_raster(col.scale = tm_scale_continuous(values = rev(hcl.colors(99, "Grays"))),
-#               col.legend = tm_legend_hide()) +
-#     tm_shape(pred, is.main = TRUE) +
-#     tm_raster(col.scale = tm_scale_continuous(values = pal, midpoint = NA),
-#               col.legend = tm_legend(title = "NMDS1", reverse = TRUE),
-#               col_alpha = 0.8) +
-#     tm_shape(study_area) +
-#     tm_borders() +
-#     tm_layout(legend.position = tm_pos_auto_out())
-#   tmap_save(tm, "figures/15_rf_pred.png",
-#             width = 12, height = 7, units = "cm")
-# }
 knitr::include_graphics("figures/15_rf_pred.png")
 ```
 
