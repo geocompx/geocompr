@@ -12,7 +12,6 @@ library(mlr3spatiotempcv)
 library(mlr3tuning)
 library(qgisprocess)
 library(terra)
-# library(rlang)
 library(sf)
 library(tmap)
 ```
@@ -29,10 +28,10 @@ E1. Compute the following terrain attributes from the `elev` dataset loaded with
 dem = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))$elev
 
 algs = qgisprocess::qgis_algorithms()
-dplyr::filter(algs, grepl("curvature", algorithm))
-alg = "saga:slopeaspectcurvature"
+qgis_search_algorithms("curvature")
+alg = "sagang:slopeaspectcurvature"
 qgisprocess::qgis_show_help(alg)
-qgisprocess::qgis_arguments(alg)
+qgisprocess::qgis_get_argument_specs(alg)
 # terrain attributes (ta)
 out_nms = paste0(tempdir(), "/", c("slope", "cplan", "cprof"),
                  ".sdat")
@@ -45,10 +44,10 @@ out = qgis_run_algorithm(alg, ELEVATION = dem, METHOD = 6,
 ta = out[names(args)] |> unlist() |> terra::rast()
 names(ta) = c("slope", "cplan", "cprof")
 # catchment area
-dplyr::filter(algs, grepl("[Cc]atchment", algorithm))
-alg = "saga:catchmentarea"
+qgis_search_algorithms("[Cc]atchment")
+alg = "sagang:catchmentarea"
 qgis_show_help(alg)
-qgis_arguments(alg)
+qgis_get_argument_specs(alg)
 carea = qgis_run_algorithm(alg,
                            ELEVATION = dem, 
                            METHOD = 4, 
@@ -98,23 +97,21 @@ hs = terra::shade(ta$slope * pi / 180,
 rect = tmaptools::bb_poly(raster::raster(hs))
 bbx = tmaptools::bb(raster::raster(hs), xlim = c(-0.00001, 1),
                     ylim = c(-0.00001, 1), relative = TRUE)
-# white raster to only plot the axis ticks, otherwise gridlines would be visible
-tm_shape(hs, bbox = bbx) +
+
+tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
   tm_grid(col = "black", n.x = 1, n.y = 1, labels.inside.frame = FALSE,
-          labels.rot = c(0, 90)) +
-  tm_raster(palette = "white", legend.show = FALSE) +
-  # hillshade
-  tm_shape(terra::mask(hs, study_mask), bbox = bbx) +
-	tm_raster(palette = gray(0:100 / 100), n = 100,
-	          legend.show = FALSE) +
+          labels.rot = c(0, 90), lines = FALSE) +
+	tm_raster(col.scale = tm_scale(values = gray(0:100 / 100), n = 100),
+            col.legend = tm_legend_hide()) +
 	# prediction raster
   tm_shape(terra::mask(pred, study_mask)) +
-	tm_raster(alpha = 0.5, palette = "Reds", n = 6, legend.show = TRUE,
-	          title = "Susceptibility") +
+	tm_raster(col_alpha = 0.5,
+            col.scale = tm_scale(values = "Reds", n = 6),
+            col.legend = tm_legend(title = "Susceptibility")) +
 	# rectangle and outer margins
-  qtm(rect, fill = NULL) +
-	tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE,
-	          legend.position = c("left", "bottom"),
+  tm_shape(rect) + 
+  tm_borders() +
+	tm_layout(legend.position = c("left", "bottom"),
 	          legend.title.size = 0.9)
 ```
 
