@@ -1,8 +1,8 @@
-# Filename: 14-location_figures.R (2022-11-30)
+# Filename: 14-location_figures.R (2022-11-30, last update: 2023-08-09)
 #
 # TO DO: Build figures for location chapter
 #
-# Author(s): Jannes Muenchow
+# Author(s): Jannes Muenchow, Jakub Nowosad
 #
 #**********************************************************
 # CONTENTS-------------------------------------------------
@@ -19,24 +19,20 @@
 
 # attach packages
 library(terra)
-library(sp)
 library(sf)
 library(geodata)
 library(tmap)
 library(classInt)
 library(mapview)
-library(tidyverse)
+library(dplyr)
+library(purrr)
 library(htmlwidgets)
 library(leaflet)
-# we still need the raster package but will reference it when needed with
-# raster::
-# library(raster)
 
 # attach data
 data("census_de", "metro_names", "shops", package = "spDataLarge")
 # download German border polygon
 ger = geodata::gadm(country = "DEU", level = 0, path = tempdir())
-# ger = raster::getData(country = "DEU", level = 0)
 
 #**********************************************************
 # 2 CENSUS STACK FIGURE------------------------------------
@@ -60,28 +56,16 @@ ger = st_as_sf(terra::project(ger, crs(input_ras)))
 # 2.2 Create figure========================================
 #**********************************************************
 tm_1 = tm_shape(input_ras) +
-  tm_raster(style = "cat", palette = "GnBu", title = "Class") +
+  tm_raster(col.scale = tm_scale_categorical(values = "GnBu"),
+            col.legend = tm_legend(title = "Class"),
+            col.free = FALSE) +
   tm_facets(nrow = 1) +
   tm_shape(ger) +
   tm_borders() +
   tm_layout(panel.labels = c("population", "women", "mean age", "household size"),
-            legend.outside.size = 0.08)
+            legend.position = tm_pos_auto_out())
 
 tmap_save(tm_1, "figures/14_census_stack.png", width = 5.1, height = 2)
-
-# toDO: to improve
-if (packageVersion("tmap") >= "4.0"){
-  tm_1 = tm_shape(input_ras) +
-    tm_raster(col.scale = tm_scale_categorical(values = "GnBu"),
-              col.legend = tm_legend(title = "Class")) +
-    tm_facets(nrow = 1) +
-    tm_shape(ger) +
-    tm_borders() +
-    tm_layout(panel.labels = c("population", "women", "mean age", "household size"),
-              legend.position = tm_pos_auto_out())
-  
-  tmap_save(tm_1, "figures/14_census_stack.png", width = 5.1, height = 2)
-}
 
 #**********************************************************
 # 3 METROPOLITAN AREA FIGURE-------------------------------
@@ -116,37 +100,21 @@ metros$names = c("Hamburg", "Berlin", "Düsseldorf", "Leipzig",
 
 metros_points = st_centroid(metros)
 
+# toDo:jn
+# tm_text could be further improved (not yer implemented)
 tm_2 = tm_shape(pop_agg/1000) +
-  tm_raster(palette = "GnBu",
-            title = "Number of people\n(in 1,000)") +
+  tm_raster(col.scale = tm_scale(values = "GnBu"),
+            col.legend = tm_legend(title = "Number of people\n(in 1,000)")) +
   tm_shape(ger) +
   tm_borders() +
   tm_shape(metros) +
   tm_borders(col = "gold", lwd = 2) +
   tm_shape(metros_points) +
-  tm_text(text = "names", ymod = 0.6, shadow = TRUE, size = 0.75,
+  tm_text(text = "names", shadow = TRUE, size = 0.6,
           fontface = "italic") +
-  tm_layout(legend.outside = TRUE, legend.outside.size = 0.3)
+  tm_layout(legend.position = tm_pos_auto_out())
 
 tmap_save(tm_2, "figures/14_metro_areas.png", width = 4, height = 4)
-
-# toDo:jn
-# fix tm_text
-if (packageVersion("tmap") >= "4.0"){
-  tm_2 = tm_shape(pop_agg/1000) +
-    tm_raster(col.scale = tm_scale(values = "GnBu"),
-              col.legend = tm_legend(title = "Number of people\n(in 1,000)")) +
-    tm_shape(ger) +
-    tm_borders() +
-    tm_shape(metros) +
-    tm_borders(col = "gold", lwd = 2) +
-    tm_shape(metros_points) +
-    tm_text(text = "names", ymod = 0.6, shadow = TRUE, size = 0.75,
-            fontface = "italic") +
-    tm_layout(legend.position = tm_pos_auto_out())
-  
-  tmap_save(tm_2, "figures/14_metro_areas.png", width = 4, height = 4)
-}
 
 #**********************************************************
 # 4 POTENTIAL LOCATIONS------------------------------------ 
