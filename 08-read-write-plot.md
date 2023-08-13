@@ -13,7 +13,6 @@ library(spData)
 ```
 
 ## Introduction
-
 <!--toDo:RL-->
 <!--revise and update the following section-->
 
@@ -35,7 +34,6 @@ The process of actually reading and writing such file formats efficiently is not
 The final Section \@ref(visual-outputs) demonstrates methods for saving visual outputs (maps), in preparation for Chapter \@ref(adv-map) on visualization.
 
 ## Retrieving open data {#retrieving-data}
-
 <!--toDo:RL-->
 <!--revise and update the following section-->
 
@@ -67,7 +65,6 @@ canada_perma_land = read_sf("PeRL_permafrost_landscapes/canada_perma_land.shp")
 ```
 
 ## Geographic data packages
-
 <!--toDo:RL-->
 <!--revise and update the following section-->
 <!-- JN: btw -- should we add references to these packages? -->

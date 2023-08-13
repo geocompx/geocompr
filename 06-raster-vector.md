@@ -89,6 +89,11 @@ srtm_inv_masked = mask(srtm, zion, inverse = TRUE)
 #> package maintainers should consider adding sf to Suggests:.
 #> The sp package is now running under evolution status 2
 #>      (status 2 uses the sf package in place of rgdal)
+#> 
+#> Attaching package: 'tmap'
+#> The following object is masked from 'package:datasets':
+#> 
+#>     rivers
 ```
 
 <div class="figure" style="text-align: center">

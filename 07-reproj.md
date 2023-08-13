@@ -360,6 +360,11 @@ The geometries of the three `london_buff*` objects that *have* a specified CRS c
 #> This warning is displayed once every 8 hours.
 #> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
 #> generated.
+#> 
+#> Attaching package: 'tmap'
+#> The following object is masked from 'package:datasets':
+#> 
+#>     rivers
 ```
 
 <div class="figure" style="text-align: center">

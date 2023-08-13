@@ -20,16 +20,6 @@ library(spDataLarge)
 
 ```r
 remotes::install_github("r-tmap/tmap@v4")
-#> stringdist (NA -> 0.9.10) [CRAN]
-#> leafgl     (NA -> 0.1.1 ) [CRAN]
-#> cols4all   (NA -> 0.6   ) [CRAN]
-#> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/Rtmpq4UaQA/remotesc78562d6f23/r-tmap-tmap-fad0b46/DESCRIPTION’ ... OK
-#> * preparing ‘tmap’:
-#> * checking DESCRIPTION meta-information ... OK
-#> * checking for LF line-endings in source and make files and shell scripts
-#> * checking for empty or unneeded directories
-#> * building ‘tmap_4.0.tar.gz’
 library(tmap)    # for static and interactive maps
 library(leaflet) # for interactive maps
 library(ggplot2) # tidyverse data visualization package
@@ -1087,19 +1077,7 @@ ggplot() +
 ```
 
 
-```r
-library(ggplot2)
-g1 = ggplot() + geom_sf(data = nz, aes(fill = Median_income)) +
-  geom_sf(data = nz_height) +
-  scale_x_continuous(breaks = c(170, 175))
-g1
-library(ggspatial)
-ggplot() + 
-  layer_spatial(nz_elev) +
-  geom_sf(data = nz, fill = NA) +
-  annotation_scale() +
-  scale_x_continuous(breaks = c(170, 175)) +
-  scale_fill_continuous(na.value = NA)
+```
 #> Warning: Removed 1348639 rows containing missing values (`geom_raster()`).
 ```
 

@@ -497,7 +497,7 @@ pred = terra::predict(ep, model = autotuner_rf, fun = predict)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/15_rf_pred.png" alt="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts." width="60%" />
+<img src="figures/15_rf_pred.png" alt="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts." width="100%" />
 <p class="caption">(\#fig:rf-pred)Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.</p>
 </div>
 

@@ -638,6 +638,11 @@ linestring_sf2
 #> 3 LINESTRING (2 2, 4 2)
 ```
 
+
+```
+#> Multiple palettes called "set2 found: "brewer.set2", "hcl.set2". The first one, "brewer.set2", is returned.
+```
+
 <div class="figure" style="text-align: center">
 <img src="05-geometry-operations_files/figure-html/line-cast-1.png" alt="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right)." width="100%" />
 <p class="caption">(\#fig:line-cast)Examples of type casting between MULTILINESTRING (left) and LINESTRING (right).</p>

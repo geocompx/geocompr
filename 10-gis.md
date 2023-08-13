@@ -8,16 +8,6 @@
 ```r
 library(sf)
 library(terra)
-remotes::install_github("r-tmap/tmap")
-#> 
-#> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/RtmpajEBPj/remotesdf64455115c/r-tmap-tmap-1a2b4a7/DESCRIPTION’ ... OK
-#> * preparing ‘tmap’:
-#> * checking DESCRIPTION meta-information ... OK
-#> * checking for LF line-endings in source and make files and shell scripts
-#> * checking for empty or unneeded directories
-#> * looking to see if a ‘data/datalist’ file should be added
-#> * building ‘tmap_3.3-4.tar.gz’
 ```
 
 <!--toDo:jn-->
@@ -135,7 +125,6 @@ This package automatically tries to detect a QGIS installation and complains if 
 There are a few possible solutions when the configuration fails: you can set `options(qgisprocess.path = "path/to/your_qgis_process")`, or set up the `R_QGISPROCESS_PATH` environment variable.
 The above approaches can also be used when you have more than one QGIS installation and want to decide which one to use.
 For more details, please refer to the **qgisprocess** ['getting started' vignette](https://r-spatial.github.io/qgisprocess/articles/qgisprocess.html).
-
 Next, we can find which plugins (meaning different software) are available on our computer.
 
 
@@ -193,6 +182,11 @@ aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 #> package maintainers should consider adding sf to Suggests:.
 #> The sp package is now running under evolution status 2
 #>      (status 2 uses the sf package in place of rgdal)
+#> 
+#> Attaching package: 'tmap'
+#> The following object is masked from 'package:datasets':
+#> 
+#>     rivers
 ```
 
 <div class="figure" style="text-align: center">
@@ -200,20 +194,21 @@ aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 <p class="caption">(\#fig:uniondata)Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders).</p>
 </div>
 
-To find an algorithm to do this work, we can search the output of the `qgis_algorithms()` function.
+The first step is to find an algorithm that can merge two vector objects.
+To list all of the available algorithms, we can use the `qgis_algorithms()` function.
 This function returns a data frame containing all of the available providers and the algorithms they contain.^[Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.] 
 
 
 ```r
-qgis_algo = qgis_algorithms()
+qgis_algorithms()
 ```
 
-The `qgis_algo` object has a lot of columns, but usually, we are only interested in the `algorithm` column that combines information about the provider and the algorithm name.
+To find an algorithm, we can use the `qgis_search_algorithms()` function.
 Assuming that the short description of the function contains the word "union"\index{union}, we can run the following code to find the algorithm of interest:
 
 
 ```r
-grep("union", qgis_algo$algorithm, value = TRUE)
+qgis_search_algorithms("union")
 ```
 
 One of the algorithms on the above list, `"native:union"`, sounds promising.
@@ -270,7 +265,7 @@ Let's search for an appropriate algorithm.
 
 
 ```r
-grep("clean", qgis_algo$algorithm, value = TRUE)
+qgis_search_algorithms("clean")
 ```
 
 This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS\index{GRASS}.
@@ -345,8 +340,7 @@ Let's search the algorithm list for this index using `"wetness"` as keyword.
 
 
 ```r
-qgis_algo = qgis_algorithms()
-grep("wetness", qgis_algo$algorithm, value = TRUE) |>
+qgis_search_algorithms("wetness") |>
   head(2)
 ```
 
@@ -401,7 +395,7 @@ The original implementation of the geomorphons' algorithm was created in GRASS G
 
 
 ```r
-grep("geomorphon", qgis_algo$algorithm, value = TRUE)
+qgis_search_algorithms("geomorphon")
 #> [1] "grass7:r.geomorphon" "sagang:geomorphons" 
 qgis_show_help("grass7:r.geomorphon")
 # output not shown

@@ -36,6 +36,28 @@ install.packages("spData")
 install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
 ```
 
+
+```r
+remotes::install_github("r-tmap/tmap@v4")
+#> Using github PAT from envvar GITHUB_PAT
+#> Downloading GitHub repo r-tmap/tmap@v4
+#> stringdist (NA -> 0.9.10) [CRAN]
+#> leafgl     (NA -> 0.1.1 ) [CRAN]
+#> cols4all   (NA -> 0.6   ) [CRAN]
+#> Installing 3 packages: stringdist, leafgl, cols4all
+#> Installing packages into '/usr/local/lib/R/site-library'
+#> (as 'lib' is unspecified)
+#> ── R CMD build ─────────────────────────────────────────────────────────────────
+#> * checking for file ‘/tmp/RtmpPBlDoa/remotesb0c5e525843/r-tmap-tmap-75ab54e/DESCRIPTION’ ... OK
+#> * preparing ‘tmap’:
+#> * checking DESCRIPTION meta-information ... OK
+#> * checking for LF line-endings in source and make files and shell scripts
+#> * checking for empty or unneeded directories
+#> * building ‘tmap_4.0.tar.gz’
+#> Installing package into '/usr/local/lib/R/site-library'
+#> (as 'lib' is unspecified)
+```
+
 \index{R!installation}
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">We recommend following R instructions on [CRAN](https://cran.r-project.org/).
 If you're running Mac or Linux, the previous command to install **sf** may not work first time.
@@ -891,6 +913,15 @@ india_buffer_without_s2 = st_buffer(india, 1)
 #> dist is assumed to be in decimal degrees (arc_degrees).
 ```
 
+
+```
+#> 
+#> Attaching package: 'tmap'
+#> The following object is masked from 'package:datasets':
+#> 
+#>     rivers
+```
+
 <div class="figure" style="text-align: center">
 <img src="02-spatial-data_files/figure-html/s2example-1.png" alt="Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer with inaccurate units of degrees longitude/latitude." width="100%" />
 <p class="caption">(\#fig:s2example)Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer with inaccurate units of degrees longitude/latitude.</p>
@@ -932,8 +963,22 @@ This and map algebra (Section \@ref(map-algebra)) makes raster processing much m
 However, in contrast to vector data, the cell of one raster layer can only hold a single value.
 The value might be numeric or categorical (Figure \@ref(fig:raster-intro-plot):C).
 
+
+```
+#> Warning: The 'main.title' argument of tm_layout is deprecated as of tmap 4.0.
+#> Please use tm_title instead.
+
+#> Warning: The 'main.title' argument of tm_layout is deprecated as of tmap 4.0.
+#> Please use tm_title instead.
+
+#> Warning: The 'main.title' argument of tm_layout is deprecated as of tmap 4.0.
+#> Please use tm_title instead.
+#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
+#> specified font size).
+```
+
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/raster-intro-plot-1.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%" />
+<img src="02-spatial-data_files/figure-html/raster-intro-plot-1.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%" /><img src="02-spatial-data_files/figure-html/raster-intro-plot-2.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%" />
 <p class="caption">(\#fig:raster-intro-plot)Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map.</p>
 </div>
 
