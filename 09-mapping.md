@@ -324,7 +324,7 @@ The most important ones are `tm_scale_intervals()`, `tm_scale_continuous()`, and
 
 \index{tmap (package)!interval scale}
 The `tm_scale_intervals()` function splits the input data values into a set of intervals.
-In addition to manually setting `breaks, ` **tmap** allows users to specify algorithms to create breaks with the `style` argument automatically.
+In addition to manually setting `breaks`, **tmap** allows users to specify algorithms to create breaks with the `style` argument automatically.
 Here are some of the most useful scale functions (Figure \@ref(fig:break-styles)):
 
 - `style = "pretty"`: the default setting, rounds breaks into whole numbers where possible and spaces them evenly

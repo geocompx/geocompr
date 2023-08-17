@@ -48,7 +48,7 @@ remotes::install_github("r-tmap/tmap@v4")
 #> Installing packages into '/usr/local/lib/R/site-library'
 #> (as 'lib' is unspecified)
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/RtmpE2TRxz/remotesb211564d36f/r-tmap-tmap-1fc940f/DESCRIPTION’ ... OK
+#> * checking for file ‘/tmp/RtmpueZMVu/remotesb226e4ad338/r-tmap-tmap-6951613/DESCRIPTION’ ... OK
 #> * preparing ‘tmap’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
