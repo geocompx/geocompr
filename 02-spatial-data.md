@@ -48,7 +48,7 @@ remotes::install_github("r-tmap/tmap@v4")
 #> Installing packages into '/usr/local/lib/R/site-library'
 #> (as 'lib' is unspecified)
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/RtmpPBlDoa/remotesb0c5e525843/r-tmap-tmap-75ab54e/DESCRIPTION’ ... OK
+#> * checking for file ‘/tmp/RtmpE2TRxz/remotesb211564d36f/r-tmap-tmap-1fc940f/DESCRIPTION’ ... OK
 #> * preparing ‘tmap’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
@@ -963,22 +963,8 @@ This and map algebra (Section \@ref(map-algebra)) makes raster processing much m
 However, in contrast to vector data, the cell of one raster layer can only hold a single value.
 The value might be numeric or categorical (Figure \@ref(fig:raster-intro-plot):C).
 
-
-```
-#> Warning: The 'main.title' argument of tm_layout is deprecated as of tmap 4.0.
-#> Please use tm_title instead.
-
-#> Warning: The 'main.title' argument of tm_layout is deprecated as of tmap 4.0.
-#> Please use tm_title instead.
-
-#> Warning: The 'main.title' argument of tm_layout is deprecated as of tmap 4.0.
-#> Please use tm_title instead.
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
-```
-
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/raster-intro-plot-1.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%" /><img src="02-spatial-data_files/figure-html/raster-intro-plot-2.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%" />
+<img src="02-spatial-data_files/figure-html/raster-intro-plot-1.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%" />
 <p class="caption">(\#fig:raster-intro-plot)Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map.</p>
 </div>
 

@@ -228,7 +228,7 @@ Unlike **ggplot2**, which uses the helper function `aes()` to represent variable
 - `size`: size of a symbol
 - `shape`: shape of a symbol
 
-Additionally, we may customize the fill and border color transparency using `fill_alpha` and  `col_alpha`.
+Additionally, we may customize the fill and border color transparency using `fill_alpha` and `col_alpha`.
 
 To map a variable to an aesthetic, pass its column name to the corresponding argument, and to set a fixed aesthetic, pass the desired value instead.^[
 If there is a clash between a fixed value and a column name, the column name takes precedence. This can be verified by running the next code chunk after running `nz$red = 1:nrow(nz)`.
@@ -275,7 +275,7 @@ tm_shape(nz) + tm_fill(fill = "Land_area")
 <p class="caption">(\#fig:tmcol)Comparison of base (left) and tmap (right) handling of a numeric color field.</p>
 </div>
 
-Each visual variable has three related additional arguments, with prefixes of `.scale`, `.legend`, and `.free`.
+Each visual variable has three related additional arguments, with suffixes of `.scale`, `.legend`, and `.free`.
 For example, the `tm_fill()` function has arguments such as `fill`, `fill.scale`, `fill.legend`, and `fill.free`.
 The `.scale` argument determines how the provided values are represented on the map and in the legend (Section \@ref(scales)), while the `.legend` argument is used to customize the legend settings, such as its title, orientation, or position (Section \@ref(legends)).
 The `.free` argument is relevant only for maps with many facets to determine if each facet has the same or different scale and legend (Section \@ref(faceted-maps)).
@@ -648,6 +648,7 @@ We can use US National Atlas Equal Area for the map of the contiguous United Sta
 ```r
 us_states_map = tm_shape(us_states, projection = "EPSG:2163") + tm_polygons() + 
   tm_layout(frame = FALSE)
+#> The argument 'projection' is deprecated as of tmap 4.0. Pleaes use 'crs' insteadFALSE
 ```
 
 The rest of our objects, `hawaii` and `alaska`, already have proper projections; therefore, we just need to create two separate maps:
