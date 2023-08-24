@@ -10,12 +10,8 @@ library(sf)
 library(terra)
 ```
 
-<!--toDo:jn-->
-<!-- qgisprocess to CRAN -->
-
 
 ```r
-remotes::install_github("r-spatial/qgisprocess")
 library(qgisprocess)
 library(Rsagacmd)
 library(rgrass)
