@@ -39,16 +39,6 @@ install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
 
 ```r
 remotes::install_github("r-tmap/tmap@v4")
-#> stringdist (NA -> 0.9.10) [CRAN]
-#> leafgl     (NA -> 0.1.1 ) [CRAN]
-#> cols4all   (NA -> 0.6   ) [CRAN]
-#> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/RtmpmIwMFT/remotesb282aecc1f1/r-tmap-tmap-a8ee517/DESCRIPTION’ ... OK
-#> * preparing ‘tmap’:
-#> * checking DESCRIPTION meta-information ... OK
-#> * checking for LF line-endings in source and make files and shell scripts
-#> * checking for empty or unneeded directories
-#> * building ‘tmap_4.0.tar.gz’
 ```
 
 \index{R!installation}
@@ -81,14 +71,6 @@ The other packages that were installed contain data that will be used in the boo
 
 ```r
 library(spData)        # load geographic data
-#> The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,
-#> which was just loaded, will retire in October 2023.
-#> Please refer to R-spatial evolution reports for details, especially
-#> https://r-spatial.org/r/2023/05/15/evolution4.html.
-#> It may be desirable to make the sf package available;
-#> package maintainers should consider adding sf to Suggests:.
-#> The sp package is now running under evolution status 2
-#>      (status 2 uses the sf package in place of rgdal)
 library(spDataLarge)   # load larger geographic data
 ```
 
