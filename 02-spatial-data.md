@@ -39,23 +39,16 @@ install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
 
 ```r
 remotes::install_github("r-tmap/tmap@v4")
-#> Using github PAT from envvar GITHUB_PAT
-#> Downloading GitHub repo r-tmap/tmap@v4
 #> stringdist (NA -> 0.9.10) [CRAN]
 #> leafgl     (NA -> 0.1.1 ) [CRAN]
 #> cols4all   (NA -> 0.6   ) [CRAN]
-#> Installing 3 packages: stringdist, leafgl, cols4all
-#> Installing packages into '/usr/local/lib/R/site-library'
-#> (as 'lib' is unspecified)
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/tmp/RtmpKiXrmN/remotesb28cd28e58/r-tmap-tmap-a8ee517/DESCRIPTION’ ... OK
+#> * checking for file ‘/tmp/RtmpmIwMFT/remotesb282aecc1f1/r-tmap-tmap-a8ee517/DESCRIPTION’ ... OK
 #> * preparing ‘tmap’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
 #> * checking for empty or unneeded directories
 #> * building ‘tmap_4.0.tar.gz’
-#> Installing package into '/usr/local/lib/R/site-library'
-#> (as 'lib' is unspecified)
 ```
 
 \index{R!installation}
