@@ -163,26 +163,10 @@ Both polygon datasets are available in the **spData** package, and for both we w
 
 
 ```r
+
 data("incongruent", "aggregating_zones", package = "spData")
 incongr_wgs = st_transform(incongruent, "EPSG:4326")
 aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
-```
-
-
-```
-#> The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,
-#> which was just loaded, will retire in October 2023.
-#> Please refer to R-spatial evolution reports for details, especially
-#> https://r-spatial.org/r/2023/05/15/evolution4.html.
-#> It may be desirable to make the sf package available;
-#> package maintainers should consider adding sf to Suggests:.
-#> The sp package is now running under evolution status 2
-#>      (status 2 uses the sf package in place of rgdal)
-#> 
-#> Attaching package: 'tmap'
-#> The following object is masked from 'package:datasets':
-#> 
-#>     rivers
 ```
 
 <div class="figure" style="text-align: center">
@@ -938,11 +922,9 @@ library(rstac)
 # and search for images intersecting our AOI
 s = stac("https://earth-search.aws.element84.com/v0")
 items = s |>
-  stac_search(
-    collections = "sentinel-s2-l2a-cogs",
-    bbox = c(7.1, 51.8, 7.2, 52.8),
-    datetime = "2020-01-01/2020-12-31"
-  ) |>
+  stac_search(collections = "sentinel-s2-l2a-cogs",
+              bbox = c(7.1, 51.8, 7.2, 52.8),
+              datetime = "2020-01-01/2020-12-31") |>
   post_request() |>
   items_fetch()
 ```
@@ -1011,36 +993,26 @@ p = processes() # load available processes
 collections = list_collections() # load available collections
 formats = list_file_formats() # load available output formats
 # Load Sentinel-2 collection
-s2 = p$load_collection(
-  id = "SENTINEL2_L2A",
-  spatial_extent = list(
-    west = 7.5, east = 8.5,
-    north = 51.1, south = 50.1
-  ),
-  temporal_extent = list("2021-01-01", "2021-01-31"),
-  bands = list("B04", "B08")
-)
+s2 = p$load_collection(id = "SENTINEL2_L2A",
+                       spatial_extent = list(west = 7.5, east = 8.5,
+                                             north = 51.1, south = 50.1),
+                       temporal_extent = list("2021-01-01", "2021-01-31"),
+                       bands = list("B04", "B08"))
 # Compute NDVI vegetation index
-compute_ndvi = p$reduce_dimension(
-  data = s2, dimension = "bands",
-  reducer = function(data, context) {
-    (data[2] - data[1]) / (data[2] + data[1])
-  }
-)
+compute_ndvi = p$reduce_dimension(data = s2, dimension = "bands",
+                                  reducer = function(data, context) {
+                                      (data[2] - data[1]) / (data[2] + data[1])
+                                  })
 # Compute maximum over time
-reduce_max = p$reduce_dimension(
-  data = compute_ndvi, dimension = "t",
-  reducer = function(x, y) {
-    max(x)
-  }
-)
+reduce_max = p$reduce_dimension(data = compute_ndvi, dimension = "t",
+                                reducer = function(x, y) {
+                                    max(x)
+                                })
 # Export as GeoTIFF
 result = p$save_result(reduce_max, formats$output$GTiff)
 # Login, see https://docs.openeo.cloud/getting-started/r/#authentication
-login(
-  login_type = "oidc", provider = "egi",
-  config = list(client_id = "...", secret = "...")
-)
+login(login_type = "oidc", provider = "egi", 
+      config = list(client_id = "...", secret = "..."))
 # Execute processes
 compute_result(graph = result, output_file = tempfile(fileext = ".tif"))
 ```

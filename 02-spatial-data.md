@@ -36,6 +36,8 @@ install.packages("spData")
 install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
 ```
 
+<!-- toDo: explain (maybe also move tmapv4 to main) -->
+
 
 ```r
 remotes::install_github("r-tmap/tmap@v4")
@@ -886,15 +888,6 @@ india_buffer_without_s2 = st_buffer(india, 1)
 #> Warning in st_buffer.sfc(st_geometry(x), dist, nQuadSegs, endCapStyle =
 #> endCapStyle, : st_buffer does not correctly buffer longitude/latitude data
 #> dist is assumed to be in decimal degrees (arc_degrees).
-```
-
-
-```
-#> 
-#> Attaching package: 'tmap'
-#> The following object is masked from 'package:datasets':
-#> 
-#>     rivers
 ```
 
 <div class="figure" style="text-align: center">

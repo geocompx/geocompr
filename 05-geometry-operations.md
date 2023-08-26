@@ -80,7 +80,6 @@ Therefore, the first step is to project the data into some adequate projected CR
 
 ```r
 us_states2163 = st_transform(us_states, "EPSG:2163")
-us_states2163 = us_states2163
 ```
 
 `st_simplify()` works equally well with projected polygons:

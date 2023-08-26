@@ -301,7 +301,7 @@ This figure shows four ways of coloring regions in New Zealand depending on medi
 ```r
 tm_shape(nz) + tm_polygons(fill = "Median_income")
 tm_shape(nz) + tm_polygons(fill = "Median_income",
-                           fill.scale = tm_scale(breaks = c(0, 30000, 40000, 50000)))
+                        fill.scale = tm_scale(breaks = c(0, 30000, 40000, 50000)))
 tm_shape(nz) + tm_polygons(fill = "Median_income",
                            fill.scale = tm_scale(n = 10))
 tm_shape(nz) + tm_polygons(fill = "Median_income",
@@ -378,8 +378,10 @@ Sequential palettes can be single (`greens` goes from light to dark blue, for ex
 
 
 ```r
-tm_shape(nz) + tm_polygons("Median_income", fill.scale = tm_scale(values = "greens"))
-tm_shape(nz) + tm_polygons("Median_income", fill.scale = tm_scale(values = "yl_gn_bu"))
+tm_shape(nz) + 
+  tm_polygons("Median_income", fill.scale = tm_scale(values = "greens"))
+tm_shape(nz) + 
+  tm_polygons("Median_income", fill.scale = tm_scale(values = "yl_gn_bu"))
 ```
 
 The third group, diverging palettes, typically range between three distinct colors (purple-white-green in Figure \@ref(fig:colpal)) and are usually created by joining two single-color sequential palettes with the darker colors at each end.
@@ -390,7 +392,8 @@ The reference point's value can be adjusted in **tmap** using the `midpoint` arg
 ```r
 tm_shape(nz) + 
   tm_polygons("Median_income",
-              fill.scale = tm_scale_continuous(values = "pu_gn_div", midpoint = 28000))
+              fill.scale = tm_scale_continuous(values = "pu_gn_div", 
+                                               midpoint = 28000))
 ```
 
 <div class="figure" style="text-align: center">
@@ -433,9 +436,10 @@ Other than that, we can also customize the location of the legend using the `pos
 
 ```r
 map_nza2 = tm_shape(nz) +
-  tm_polygons(fill = "Land_area", fill.legend = tm_legend(title = legend_title,
-                                                          orientation = "landscape",
-                                                          position = tm_pos_out("center", "bottom")))
+  tm_polygons(fill = "Land_area",
+              fill.legend = tm_legend(title = legend_title,
+                                      orientation = "landscape",
+                                      position = tm_pos_out("center", "bottom")))
 ```
 
 The legend position (and also the position of several other map elements in **tmap**) can be customized using one of a few functions.
@@ -1204,15 +1208,6 @@ For example, we could represent median income in New Zeleand's regions as a cont
 library(cartogram)
 nz_carto = cartogram_cont(nz, "Median_income", itermax = 5)
 tm_shape(nz_carto) + tm_polygons("Median_income")
-```
-
-
-```
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
-
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
 ```
 
 <div class="figure" style="text-align: center">
