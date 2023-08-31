@@ -5,13 +5,11 @@
 - This chapter requires QGIS\index{QGIS}, SAGA\index{SAGA} and GRASS\index{GRASS} to be installed and the following packages to be attached:
 
 
+
+
 ```r
 library(sf)
 library(terra)
-```
-
-
-```r
 library(qgisprocess)
 library(Rsagacmd)
 library(rgrass)
