@@ -593,22 +593,26 @@ function preventUnintendedZoomOnScroll(map) {
   });
   (0, _jquery2["default"])(document).on("mousemove", "*", function (e) {
     // Did the mouse really move?
-    if (lastScreen.x !== null && e.screenX !== lastScreen.x || e.screenY !== lastScreen.y) {
-      // It really moved. Enable zooming.
+    if (map.options.scrollWheelZoom) {
+      if (lastScreen.x !== null && e.screenX !== lastScreen.x || e.screenY !== lastScreen.y) {
+        // It really moved. Enable zooming.
+        map.scrollWheelZoom.enable();
+        lastScreen = {
+          x: null,
+          y: null
+        };
+      }
+    }
+  });
+  (0, _jquery2["default"])(document).on("mousedown", ".leaflet", function (e) {
+    // Clicking always enables zooming.
+    if (map.options.scrollWheelZoom) {
       map.scrollWheelZoom.enable();
       lastScreen = {
         x: null,
         y: null
       };
     }
-  });
-  (0, _jquery2["default"])(document).on("mousedown", ".leaflet", function (e) {
-    // Clicking always enables zooming.
-    map.scrollWheelZoom.enable();
-    lastScreen = {
-      x: null,
-      y: null
-    };
   });
 }
 
