@@ -45,19 +45,17 @@ This may sound simple and easy to achieve (which it is if you carefully maintain
 
 ## What is geocomputation?
 
-We define geocomputation as
-
-> working with geographic data in a computational way, focusing on code, reproducibility\index{reproducibility} and modularity.
-
-Geocomputation\index{geocomputation!definition} is a young term, dating back to the first conference on the subject in 1996.^[
+Geocomputation is the application and development of computational methods for geographic data processing, analysis, modeling and visualisation with command-line tools and scripts, focussed on performance, reproducibility and modularity.
+This definition encapsulates many of the key ideas in this book, building on the short history of the word, dating back to the first conference on the subject in 1996 when it entered the lexicon.^[
 The first 'GeoComputation' conference took place at the University of Leeds, where one of the authors (Robin) is currently based.
 In 2017 the GeoComputation conference returned to University of Leeds, providing a chance for us to work on and present the book (see www.geocomputation.org for more on the conference series, and papers/presentations spanning two decades).
 ]
-What distinguished geocomputation from the (at the time) commonly used term 'quantitative geography' was its emphasis on "creative and experimental" applications [@longley_geocomputation_1998] and the development of new tools and methods [@openshaw_geocomputation_2000]:
-"GeoComputation is about using the various different types of geodata and about developing relevant geo-tools within the overall context of a 'scientific' approach."
-This book aims to go beyond teaching methods and code; by the end of it you should be able to use your geocomputational skills, to do "practical work that is beneficial or useful" [@openshaw_geocomputation_2000].
 
-Our approach differs from early adopters such as Stan Openshaw, however, in its emphasis on reproducibility and collaboration.
+What distinguished geocomputation from the (at the time) commonly used term 'quantitative geography' was its emphasis on "creative and experimental" applications [@longley_geocomputation_1998] and the development of new tools and methods.
+In the words of Stan Openshaw, a pioneer in the field who was an advocate (and possibly originator) of the term, "GeoComputation is about using the various different types of geodata and about developing relevant geo-tools within the overall context of a 'scientific' approach" [@openshaw_geocomputation_2000].
+Building on this early definition, *Geocomputation with R* goes beyond data analysis and modeling to include the development of new tools and methods for work that is not just interesting academically but beneficial.
+
+Our approach differs from early definitions of geocomputation in one important way, however: in its emphasis on on reproducibility and collaboration.
 At the turn of the 21^st^ Century, it was unrealistic to expect readers to be able to reproduce code examples, due to barriers preventing access to the necessary hardware, software and data.
 Fast-forward two decades and things have progressed rapidly.
 Anyone with access to a laptop with sufficient RAM (at least 8 GB recommended) can install and run software for geocomputation, and reproduce the contents of this book.
