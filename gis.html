@@ -227,14 +227,24 @@ A quick way to get up-and-running with <strong>qgisprocess</strong> if you have 
 Assuming you have Docker installed and sufficient computational resources, you can run an R session with <strong>qgisprocess</strong> and relevant plugins with the following command (see the <a href="https://github.com/geocompx/docker">geocompx/docker</a> repo for details):</p>
 <div class="sourceCode" id="cb350"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb350-1"><a href="gis.html#cb350-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-e</span> DISABLE_AUTH=true <span class="at">-p</span> 8786:8787 ghcr.io/geocompx/docker:qgis</span></code></pre></div>
 <div class="sourceCode" id="cb351"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/qgisprocess/">qgisprocess</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/qgisprocess/">qgisprocess</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Attempting to load the cache ... Success!</span></span>
+<span><span class="co">#&gt; QGIS version: 3.30.3-'s-Hertogenbosch</span></span>
+<span><span class="co">#&gt; ...</span></span></code></pre></div>
 <p>This package automatically tries to detect a QGIS installation and complains if it cannot find it.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;You can see details of the detection process with &lt;code&gt;qgis_configure()&lt;/code&gt;.&lt;/p&gt;"><sup>50</sup></a>
 There are a few possible solutions when the configuration fails: you can set <code>options(qgisprocess.path = "path/to/your_qgis_process")</code>, or set up the <code>R_QGISPROCESS_PATH</code> environment variable.
 The above approaches can also be used when you have more than one QGIS installation and want to decide which one to use.
 For more details, please refer to the <strong>qgisprocess</strong> <a href="https://r-spatial.github.io/qgisprocess/articles/qgisprocess.html">‘getting started’ vignette</a>.
 Next, we can find which plugins (meaning different software) are available on our computer.</p>
 <div class="sourceCode" id="cb352"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_algorithms.html">qgis_plugins</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_algorithms.html">qgis_plugins</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 4 × 2</span></span>
+<span><span class="co">#&gt;   name                    enabled</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;                   &lt;lgl&gt;</span></span>
+<span><span class="co">#&gt; 1 grassprovider           FALSE</span></span>
+<span><span class="co">#&gt; 2 otbprovider             FALSE</span></span>
+<span><span class="co">#&gt; 3 processing              TRUE</span></span>
+<span><span class="co">#&gt; 4 processing_saga_nextgen FALSE</span></span></code></pre></div>
 <p>This tells us that the GRASS (<code>grassprovider</code>) and SAGA (<code>processing_saga_nextgen</code>) plugins are available on the system but are not yet enabled.
 Since we need both later on in the chapter, let’s enable them.</p>
 <div class="sourceCode" id="cb353"><pre class="downlit sourceCode r">
@@ -244,8 +254,18 @@ Since we need both later on in the chapter, let’s enable them.</p>
 You can do so from within QGIS with the <a href="https://docs.qgis.org/latest/en/docs/training_manual/qgis_plugins/fetching_plugins.html">Plugin Manager</a> or programmatically with the help of the Python package <a href="https://github.com/3liz/qgis-plugin-manager">qgis-plugin-manager</a> (at least on Linux).</p>
 <p><code><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_algorithms.html">qgis_providers()</a></code> lists the name of the software and the corresponding count of available geoalgorithms.</p>
 <div class="sourceCode" id="cb354"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_algorithms.html">qgis_providers</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>The output table affirms that we can use QGIS geoalgorithms (<code>native</code>, <code>qgis</code>, <code>3d</code>) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_algorithms.html">qgis_providers</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 7 × 3</span></span>
+<span><span class="co">#&gt;   provider provider_title    algorithm_count</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;                       &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1 gdal     GDAL                           56</span></span>
+<span><span class="co">#&gt; 2 grass7   GRASS                         306</span></span>
+<span><span class="co">#&gt; 3 qgis     QGIS                           50</span></span>
+<span><span class="co">#&gt; 4 3d       QGIS (3D)                       1</span></span>
+<span><span class="co">#&gt; 5 native   QGIS (native c++)             243</span></span>
+<span><span class="co">#&gt; 6 pdal     QGIS (PDAL)                    17</span></span>
+<span><span class="co">#&gt; 7 sagang   SAGA Next Gen                 509</span></span></code></pre></div>
+<p>The output table affirms that we can use QGIS geoalgorithms (<code>native</code>, <code>qgis</code>, <code>3d</code>, <code>pdal</code>) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.</p>
 <p>We are now ready for some geocomputation with QGIS and friends, from within R!
 Let’s try two example case studies.
 The first one shows how to unite two polygonal datasets with different borders (Section <a href="gis.html#qgis-vector">10.2.1</a>).
@@ -259,8 +279,7 @@ Our goal is to merge these two objects into one, containing all of the boundary 
 We use again the incongruent polygons we have already encountered in Section <a href="spatial-operations.html#incongruent">4.2.7</a> (Figure <a href="gis.html#fig:uniondata">10.1</a>).
 Both polygon datasets are available in the <strong>spData</strong> package, and for both we would like to use a geographic CRS (see also Chapter <a href="reproj-geo-data.html#reproj-geo-data">7</a>).</p>
 <div class="sourceCode" id="cb355"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"incongruent"</span>, <span class="st">"aggregating_zones"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"incongruent"</span>, <span class="st">"aggregating_zones"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span></span>
 <span><span class="va">incongr_wgs</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">incongruent</span>, <span class="st">"EPSG:4326"</span><span class="op">)</span></span>
 <span><span class="va">aggzone_wgs</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html">st_transform</a></span><span class="op">(</span><span class="va">aggregating_zones</span>, <span class="st">"EPSG:4326"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -273,11 +292,17 @@ FIGURE 10.1: Illustration of two areal units: incongruent (black lines) and aggr
 To list all of the available algorithms, we can use the <code><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_algorithms.html">qgis_algorithms()</a></code> function.
 This function returns a data frame containing all of the available providers and the algorithms they contain.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.&lt;/p&gt;"><sup>51</sup></a></p>
 <div class="sourceCode" id="cb356"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_algorithms.html">qgis_algorithms</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># output not shown</span></span>
+<span><span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_algorithms.html">qgis_algorithms</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>To find an algorithm, we can use the <code><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_search_algorithms.html">qgis_search_algorithms()</a></code> function.
 Assuming that the short description of the function contains the word “union”, we can run the following code to find the algorithm of interest:</p>
 <div class="sourceCode" id="cb357"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_search_algorithms.html">qgis_search_algorithms</a></span><span class="op">(</span><span class="st">"union"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_search_algorithms.html">qgis_search_algorithms</a></span><span class="op">(</span><span class="st">"union"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 5</span></span>
+<span><span class="co">#&gt;   provider provider_title    group          algorithm         algorithm_title </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;             &lt;chr&gt;          &lt;chr&gt;             &lt;chr&gt;           </span></span>
+<span><span class="co">#&gt; 1 native   QGIS (native c++) Vector overlay native:multiunion Union (multiple)</span></span>
+<span><span class="co">#&gt; 2 native   QGIS (native c++) Vector overlay native:union      Union  </span></span></code></pre></div>
 <p>One of the algorithms on the above list, <code>"native:union"</code>, sounds promising.
 The next step is to find out what this algorithm does and how we can use it.
 This is the role of the <code><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_show_help.html">qgis_show_help()</a></code>, which returns a short summary of what the algorithm does, its arguments, and outputs.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;We can also extract some of information independently with &lt;code&gt;qgis_get_description()&lt;/code&gt;, &lt;code&gt;qgis_get_argument_specs()&lt;/code&gt;, and &lt;code&gt;qgis_get_output_specss()&lt;/code&gt;.&lt;/p&gt;"><sup>52</sup></a>
@@ -286,7 +311,20 @@ The following command returns a data frame with each row representing an argumen
 <div class="sourceCode" id="cb358"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">alg</span> <span class="op">=</span> <span class="st">"native:union"</span></span>
 <span><span class="va">union_arguments</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_show_help.html">qgis_get_argument_specs</a></span><span class="op">(</span><span class="va">alg</span><span class="op">)</span></span>
-<span><span class="va">union_arguments</span></span></code></pre></div>
+<span><span class="va">union_arguments</span></span>
+<span><span class="co">#&gt; # A tibble: 5 × 6</span></span>
+<span><span class="co">#&gt;   name    description qgis_type default_value available_values acceptable_values</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;       &lt;chr&gt;     &lt;list&gt;        &lt;list&gt;           &lt;list&gt;           </span></span>
+<span><span class="co">#&gt; 1 INPUT   Input layer source    &lt;NULL&gt;        &lt;NULL&gt;           &lt;chr [1]&gt;        </span></span>
+<span><span class="co">#&gt; 2 OVERLAY Overlay la… source    &lt;NULL&gt;        &lt;NULL&gt;           &lt;chr [1]&gt;        </span></span>
+<span><span class="co">#&gt; 3 OVERLA… Overlay fi… string    &lt;NULL&gt;        &lt;NULL&gt;           &lt;chr [3]&gt;        </span></span>
+<span><span class="co">#&gt; 4 OUTPUT  Union       sink      &lt;NULL&gt;        &lt;NULL&gt;           &lt;chr [1]&gt;        </span></span>
+<span><span class="co">#&gt; 5 GRID_S… Grid size   number    &lt;NULL&gt;        &lt;NULL&gt;           &lt;chr [3]&gt;  </span></span>
+<span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] "A numeric value"                                                                                 </span></span>
+<span><span class="co">#&gt; [2] "field:FIELD_NAME to use a data defined value taken from the FIELD_NAME field"                    </span></span>
+<span><span class="co">#&gt; [3] "expression:SOME EXPRESSION to use a data defined value calculated using a custom QGIS expression"</span></span></code></pre></div>
 <p>The arguments, contained in <code>union_arguments$name</code>, are <code>INPUT</code>, <code>OVERLAY</code>, <code>OVERLAY_FIELDS_PREFIX</code>, and <code>OUTPUT</code>.
 <code>union_arguments$acceptable_values</code> contains a list with the possible input values for each argument.
 Many functions require inputs representing paths to a vector layer; <strong>qgisprocess</strong> functions accept <code>sf</code> objects for such arguments.
@@ -302,7 +340,8 @@ The last argument, <code>OUTPUT</code>, is an output file name, which <strong>qg
 <code class="sourceCode R"><span><span class="va">union</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_run_algorithm.html">qgis_run_algorithm</a></span><span class="op">(</span><span class="va">alg</span>,</span>
 <span>  INPUT <span class="op">=</span> <span class="va">incongr_wgs</span>, OVERLAY <span class="op">=</span> <span class="va">aggzone_wgs</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">union</span></span></code></pre></div>
+<span><span class="va">union</span></span>
+<span><span class="co">#&gt;  $ OUTPUT: 'qgis_outputVector' chr "/tmp/...gpkg"</span></span></code></pre></div>
 <p>Running the above line of code will save our two input objects into temporary .gpkg files, run the selected algorithm on them, and return a temporary .gpkg file as the output.
 The <strong>qgisprocess</strong> package stores the <code><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_run_algorithm.html">qgis_run_algorithm()</a></code> result as a list containing, in this case, a path to the output file.
 We can either read this file back into R with <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> (e.g., <code>union_sf = read_sf(union[[1]])</code>) or directly with <code><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf()</a></code>:</p>
@@ -316,7 +355,11 @@ These artifacts of error are called sliver polygons (see red-colored polygons in
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m<sup>2</sup>, and next remove them.
 Let’s search for an appropriate algorithm.</p>
 <div class="sourceCode" id="cb361"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_search_algorithms.html">qgis_search_algorithms</a></span><span class="op">(</span><span class="st">"clean"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_search_algorithms.html">qgis_search_algorithms</a></span><span class="op">(</span><span class="st">"clean"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 5</span></span>
+<span><span class="co">#&gt;   provider provider_title group        algorithm      algorithm_title</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;        &lt;chr&gt;          &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1 grass7   GRASS          Vector (v.*) grass7:v.clean v.clean</span></span></code></pre></div>
 <p>This time the found algorithm, <code>v.clean</code>, is not included in QGIS, but GRASS GIS.
 GRASS GIS’s <code>v.clean</code> is a powerful tool for cleaning topology of spatial vector data.
 Importantly, we can use it through <strong>qgisprocess</strong>.</p>
@@ -329,7 +372,14 @@ For this example, let’s focus on just a few arguments, however, we encourage y
 <div class="sourceCode" id="cb363"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_show_help.html">qgis_get_argument_specs</a></span><span class="op">(</span><span class="st">"grass7:v.clean"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">name</span>, <span class="va">description</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html">slice_head</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html">slice_head</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 4 × 2</span></span>
+<span><span class="co">#&gt;   name      description</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1 input     Layer to clean</span></span>
+<span><span class="co">#&gt; 2 type      Input feature type</span></span>
+<span><span class="co">#&gt; 3 tool      Cleaning tool</span></span>
+<span><span class="co">#&gt; 4 threshold Threshold (comma separated for each tool)</span></span></code></pre></div>
 <p>The main argument for this algorithm is <code>input</code> – our vector object.
 Next, we need to select a tool – a cleaning method. <a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;It is also possible to select several tools, which will then be executed sequentially.&lt;/p&gt;"><sup>54</sup></a>
 About a dozen tools exist in <code>v.clean</code> allowing to remove duplicate geometries, remove small angles between lines, or remove small areas, among others.
@@ -372,7 +422,13 @@ For example, the topographic wetness index (TWI) was found useful in studying hy
 Let’s search the algorithm list for this index using <code>"wetness"</code> as keyword.</p>
 <div class="sourceCode" id="cb366"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/qgisprocess/reference/qgis_search_algorithms.html">qgis_search_algorithms</a></span><span class="op">(</span><span class="st">"wetness"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html">head</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">provider_title</span>, <span class="va">algorithm</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html">head</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
+<span><span class="co">#&gt;   provider_title algorithm</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;          &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1 SAGA Next Gen  sagang:sagawetnessindex</span></span>
+<span><span class="co">#&gt; 2 SAGA Next Gen  sagang:topographicwetnessindexonestep</span></span></code></pre></div>
 <p>An output of the above code suggests that the desired algorithm exists in the SAGA GIS software.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;TWI can be also calculated using the &lt;code&gt;r.topidx&lt;/code&gt; GRASS GIS function.&lt;/p&gt;"><sup>55</sup></a>
 Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here, particularly on digital elevation models (soil properties, terrain attributes, climate parameters).
 Hence, SAGA is especially good at the fast processing of large (high-resolution) raster datasets <span class="citation">(<a href="references.html#ref-conrad_system_2015" role="doc-biblioref">Conrad et al. 2015</a>)</span>.</p>
@@ -1021,7 +1077,7 @@ Use <strong>rstac</strong>, <strong>gdalcubes</strong>, and <strong>terra</stron
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-09-03.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-09-04.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

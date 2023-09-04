@@ -113,6 +113,9 @@ docker run -e DISABLE_AUTH=true -p 8786:8787 ghcr.io/geocompx/docker:qgis
 
 ```r
 library(qgisprocess)
+#> Attempting to load the cache ... Success!
+#> QGIS version: 3.30.3-'s-Hertogenbosch
+#> ...
 ```
 
 This package automatically tries to detect a QGIS installation and complains if it cannot find it.^[You can see details of the detection process with `qgis_configure()`.]
@@ -124,6 +127,13 @@ Next, we can find which plugins (meaning different software) are available on ou
 
 ```r
 qgis_plugins()
+#> # A tibble: 4 × 2
+#>   name                    enabled
+#>   <chr>                   <lgl>
+#> 1 grassprovider           FALSE
+#> 2 otbprovider             FALSE
+#> 3 processing              TRUE
+#> 4 processing_saga_nextgen FALSE
 ```
 
 This tells us that the GRASS (`grassprovider`) and SAGA (`processing_saga_nextgen`) plugins are available on the system but are not yet enabled.
@@ -143,9 +153,18 @@ You can do so from within QGIS with the [Plugin Manager](https://docs.qgis.org/l
 
 ```r
 qgis_providers()
+#> # A tibble: 7 × 3
+#>   provider provider_title    algorithm_count
+#>   <chr>    <chr>                       <int>
+#> 1 gdal     GDAL                           56
+#> 2 grass7   GRASS                         306
+#> 3 qgis     QGIS                           50
+#> 4 3d       QGIS (3D)                       1
+#> 5 native   QGIS (native c++)             243
+#> 6 pdal     QGIS (PDAL)                    17
+#> 7 sagang   SAGA Next Gen                 509
 ```
-
-The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
+The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`, `pdal`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
 
 We are now ready for some geocomputation with QGIS and friends, from within R!
 Let's try two example case studies.
@@ -161,7 +180,6 @@ Both polygon datasets are available in the **spData** package, and for both we w
 
 
 ```r
-
 data("incongruent", "aggregating_zones", package = "spData")
 incongr_wgs = st_transform(incongruent, "EPSG:4326")
 aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
@@ -178,6 +196,7 @@ This function returns a data frame containing all of the available providers and
 
 
 ```r
+# output not shown
 qgis_algorithms()
 ```
 
@@ -187,6 +206,11 @@ Assuming that the short description of the function contains the word "union"\in
 
 ```r
 qgis_search_algorithms("union")
+#> # A tibble: 2 × 5
+#>   provider provider_title    group          algorithm         algorithm_title 
+#>   <chr>    <chr>             <chr>          <chr>             <chr>           
+#> 1 native   QGIS (native c++) Vector overlay native:multiunion Union (multiple)
+#> 2 native   QGIS (native c++) Vector overlay native:union      Union  
 ```
 
 One of the algorithms on the above list, `"native:union"`, sounds promising.
@@ -200,6 +224,19 @@ The following command returns a data frame with each row representing an argumen
 alg = "native:union"
 union_arguments = qgis_get_argument_specs(alg)
 union_arguments
+#> # A tibble: 5 × 6
+#>   name    description qgis_type default_value available_values acceptable_values
+#>   <chr>   <chr>       <chr>     <list>        <list>           <list>           
+#> 1 INPUT   Input layer source    <NULL>        <NULL>           <chr [1]>        
+#> 2 OVERLAY Overlay la… source    <NULL>        <NULL>           <chr [1]>        
+#> 3 OVERLA… Overlay fi… string    <NULL>        <NULL>           <chr [3]>        
+#> 4 OUTPUT  Union       sink      <NULL>        <NULL>           <chr [1]>        
+#> 5 GRID_S… Grid size   number    <NULL>        <NULL>           <chr [3]>  
+
+#> [[1]]
+#> [1] "A numeric value"                                                                                 
+#> [2] "field:FIELD_NAME to use a data defined value taken from the FIELD_NAME field"                    
+#> [3] "expression:SOME EXPRESSION to use a data defined value calculated using a custom QGIS expression"
 ```
 
 The arguments, contained in `union_arguments$name`, are `INPUT`, `OVERLAY`, `OVERLAY_FIELDS_PREFIX`, and `OUTPUT`.
@@ -221,6 +258,7 @@ union = qgis_run_algorithm(alg,
   INPUT = incongr_wgs, OVERLAY = aggzone_wgs
 )
 union
+#>  $ OUTPUT: 'qgis_outputVector' chr "/tmp/...gpkg"
 ```
 
 Running the above line of code will save our two input objects into temporary .gpkg files, run the selected algorithm on them, and return a temporary .gpkg file as the output.
@@ -244,6 +282,10 @@ Let's search for an appropriate algorithm.
 
 ```r
 qgis_search_algorithms("clean")
+#> # A tibble: 1 × 5
+#>   provider provider_title group        algorithm      algorithm_title
+#>   <chr>    <chr>          <chr>        <chr>          <chr>
+#> 1 grass7   GRASS          Vector (v.*) grass7:v.clean v.clean
 ```
 
 This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS\index{GRASS}.
@@ -265,7 +307,14 @@ For this example, let's focus on just a few arguments, however, we encourage you
 ```r
 qgis_get_argument_specs("grass7:v.clean") |>
   select(name, description) |>
-  slice_head(n = 4)
+  dplyr::slice_head(n = 4)
+#> # A tibble: 4 × 2
+#>   name      description
+#>   <chr>     <chr>
+#> 1 input     Layer to clean
+#> 2 type      Input feature type
+#> 3 tool      Cleaning tool
+#> 4 threshold Threshold (comma separated for each tool)
 ```
 
 The main argument for this algorithm is `input` -- our vector object.
@@ -319,7 +368,13 @@ Let's search the algorithm list for this index using `"wetness"` as keyword.
 
 ```r
 qgis_search_algorithms("wetness") |>
+  dplyr::select(provider_title, algorithm) |>
   head(2)
+#> # A tibble: 2 × 2
+#>   provider_title algorithm
+#>   <chr>          <chr>
+#> 1 SAGA Next Gen  sagang:sagawetnessindex
+#> 2 SAGA Next Gen  sagang:topographicwetnessindexonestep
 ```
 
 An output of the above code suggests that the desired algorithm exists in the SAGA GIS software\index{SAGA}.^[TWI can be also calculated using the `r.topidx` GRASS GIS function.]
