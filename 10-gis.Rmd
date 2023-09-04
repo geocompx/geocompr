@@ -135,7 +135,7 @@ docker run -e DISABLE_AUTH=true -p 8786:8787 ghcr.io/geocompx/docker:qgis
 ```{r, eval=has_qgis_plugins}
 library(qgisprocess)
 #> Attempting to load the cache ... Success!
-#> QGIS version: 3.30.1-'s-Hertogenbosch
+#> QGIS version: 3.30.3-'s-Hertogenbosch
 #> ...
 ```
 
@@ -147,6 +147,13 @@ Next, we can find which plugins (meaning different software) are available on ou
 
 ```{r plugins, eval=has_qgis_plugins}
 qgis_plugins()
+#> # A tibble: 4 × 2
+#>   name                    enabled
+#>   <chr>                   <lgl>
+#> 1 grassprovider           FALSE
+#> 2 otbprovider             FALSE
+#> 3 processing              TRUE
+#> 4 processing_saga_nextgen FALSE
 ```
 
 This tells us that the GRASS (`grassprovider`) and SAGA (`processing_saga_nextgen`) plugins are available on the system but are not yet enabled.
@@ -164,17 +171,18 @@ You can do so from within QGIS with the [Plugin Manager](https://docs.qgis.org/l
 
 ```{r providers, eval=has_qgis_plugins}
 qgis_providers()
-#> # A tibble: 6 × 3
+#> # A tibble: 7 × 3
 #>   provider provider_title    algorithm_count
 #>   <chr>    <chr>                       <int>
 #> 1 gdal     GDAL                           56
-#> 2 grass7   GRASS                         304
+#> 2 grass7   GRASS                         306
 #> 3 qgis     QGIS                           50
 #> 4 3d       QGIS (3D)                       1
-#> 5 native   QGIS (native c++)             242
-#> 6 sagang   SAGA Next Gen                 509
+#> 5 native   QGIS (native c++)             243
+#> 6 pdal     QGIS (PDAL)                    17
+#> 7 sagang   SAGA Next Gen                 509
 ```
-The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
+The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`, `pdal`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
 
 We are now ready for some geocomputation with QGIS and friends, from within R!
 Let's try two example case studies.
@@ -189,7 +197,6 @@ We use again the incongruent polygons\index{spatial congruence} we have already 
 Both polygon datasets are available in the **spData** package, and for both we would like to use a geographic CRS\index{CRS!geographic} (see also Chapter \@ref(reproj-geo-data)).
 
 ```{r 09-gis-4}
-
 data("incongruent", "aggregating_zones", package = "spData")
 incongr_wgs = st_transform(incongruent, "EPSG:4326")
 aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
@@ -214,6 +221,7 @@ To list all of the available algorithms, we can use the `qgis_algorithms()` func
 This function returns a data frame containing all of the available providers and the algorithms they contain.^[Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.] 
 
 ```{r, eval=has_qgis_plugins}
+# output not shown
 qgis_algorithms()
 ```
 
@@ -222,6 +230,11 @@ Assuming that the short description of the function contains the word "union"\in
 
 ```{r, eval=has_qgis_plugins}
 qgis_search_algorithms("union")
+#> # A tibble: 2 × 5
+#>   provider provider_title    group          algorithm         algorithm_title 
+#>   <chr>    <chr>             <chr>          <chr>             <chr>           
+#> 1 native   QGIS (native c++) Vector overlay native:multiunion Union (multiple)
+#> 2 native   QGIS (native c++) Vector overlay native:union      Union  
 ```
 
 One of the algorithms on the above list, `"native:union"`, sounds promising.
@@ -289,6 +302,10 @@ Let's search for an appropriate algorithm.
 
 ```{r, eval=has_qgis_plugins}
 qgis_search_algorithms("clean")
+#> # A tibble: 1 × 5
+#>   provider provider_title group        algorithm      algorithm_title
+#>   <chr>    <chr>          <chr>        <chr>          <chr>
+#> 1 grass7   GRASS          Vector (v.*) grass7:v.clean v.clean
 ```
 
 This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS\index{GRASS}.
@@ -365,7 +382,13 @@ Let's search the algorithm list for this index using `"wetness"` as keyword.
 
 ```{r, eval=has_qgis_plugins}
 qgis_search_algorithms("wetness") |>
+  dplyr::select(provider_title, algorithm) |>
   head(2)
+#> # A tibble: 2 × 2
+#>   provider_title algorithm
+#>   <chr>          <chr>
+#> 1 SAGA Next Gen  sagang:sagawetnessindex
+#> 2 SAGA Next Gen  sagang:topographicwetnessindexonestep
 ```
 
 An output of the above code suggests that the desired algorithm exists in the SAGA GIS software\index{SAGA}.^[TWI can be also calculated using the `r.topidx` GRASS GIS function.]
