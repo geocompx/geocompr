@@ -45,10 +45,10 @@ This may sound simple and easy to achieve (which it is if you carefully maintain
 
 ## What is geocomputation?
 
-Geocomputation is the application and development of computational methods for geographic data processing, analysis, modeling and visualisation with command-line tools and scripts, focussed on performance, reproducibility and modularity.
+Geocomputation is the application and development of computational methods for geographic data processing, analysis, modeling and visualization with command-line tools and scripts, focused on performance, reproducibility and modularity.
 This definition encapsulates many of the key ideas in this book, building on the short history of the word, dating back to the first conference on the subject in 1996 when it entered the lexicon.^[
 The first 'GeoComputation' conference took place at the University of Leeds, where one of the authors (Robin) is currently based.
-In 2017 the GeoComputation conference returned to University of Leeds, providing a chance for us to work on and present the book (see www.geocomputation.org for more on the conference series, and papers/presentations spanning two decades).
+In 2017 the GeoComputation conference returned to University of Leeds, providing a chance for us to work on and present the book (see www.geocomputation.org for more on the conference series, and papers/presentations spanning more than two decades).
 ]
 
 What distinguished geocomputation from the (at the time) commonly used term 'quantitative geography' was its emphasis on "creative and experimental" applications [@longley_geocomputation_1998] and the development of new tools and methods.
