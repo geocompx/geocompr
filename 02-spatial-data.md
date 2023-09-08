@@ -339,7 +339,7 @@ For workflows that depend on the legacy class system, `sf` objects can be conver
 library(sp)
 world_sp = as(world, "Spatial") # from an sf object to sp
 # sp functions ...
-world_sf = st_as_sf(world_sp)           # from sp to sf
+world_sf = st_as_sf(world_sp)   # from sp to sf
 ```
 
 ### Basic map making {#basic-map}
