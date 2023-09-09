@@ -3,21 +3,20 @@
 # Introduction {#intro}
 
 This book is about using the power of computers to *do things* with geographic data.
-It teaches a range of spatial skills, including: reading, writing and manipulating geographic file formats; making static and interactive maps; and applying geocomputation\index{geocomputation} to support more evidence-based decision making related to a range of geographic phenomena, from ecosystems to transport systems.
+It teaches a range of spatial skills, including: reading, writing and manipulating geographic file formats; making static and interactive maps; and applying geocomputation\index{geocomputation} to support more evidence-based decision making related to a range of geographic phenomena, from transport systems to ecosystems .
 By demonstrating how various geographic operations can be linked, in 'code chunks' that intersperse the prose, the book also teaches reproducible, open and thus scientific workflows.
 
-The book is not just about using the wealth of *existing tools* for geocomputation: it's also about understanding the structure of geographic datasets and software from processing them, and enabling the development *new tools*.
+The book is not just about using the wealth of *existing tools* for geocomputation: it's also about understanding the structure of geographic datasets and software from processing them, and enabling the development of *new tools*.
 The approach we teach throughout, and programming techniques covered in Chapter \@ref(algorithms)\index{algorithm} in particular, can remove constraints on your creativity imposed by software.
 After reading the book and completing the exercises you should feel empowered with a strong understanding of the possibilities opened up by R's\index{R} impressive geographic capabilities.
-By the end of the book we hope you will be ready to apply your skills tackle real-world problems, to communicate your work in maps and reproducible code, and to participate in reproducible research and free software communities.
+By the end of the book, we hope you will be ready to apply your skills tackle real-world problems, to communicate your work in maps and code, and to participate in reproducible research and free software communities.
 
 Over the last few decades free and open source software for geospatial (FOSS4G\index{FOSS4G}) has progressed at an astonishing rate.
 Thanks to organizations such as OSGeo, advanced geographic techniques are no longer the preserve of those with expensive hardware and software: anyone can now download and run high-performance software for geocomputation.
 Open source Geographic Information Systems (GIS\index{GIS}), such as [QGIS](http://qgis.org/en/site/)\index{QGIS}, have made geographic analysis accessible worldwide.
-GIS software products such as QGIS are powerful, but tend to emphasize a graphical user interface\index{graphical user interface} (GUI) approach over the command-line interface (CLI) approach advocated in this book.
+GIS software products are powerful, but tend to emphasize a graphical user interface\index{graphical user interface} (GUI) approach over the command-line interface (CLI) approach advocated in this book.
 The 'GUI-focus' of many GIS products has unintended consequence of disabling many users from making their work full reproducible,\index{reproducibility} a problem that can be overcome by calling 'geoalgorithms' contained in GIS software from the command line, as we'll see in Chapter \@ref(gis)).
 A simplistic comparison between the different approaches is illustrated in Table \@ref(tab:gdsl).
-
 
 
 
@@ -36,7 +35,7 @@ Other command environments with powerful geographic capabilities exist, includin
 We encourage curious readers to give them a try and to reproduce the examples in this book in other languages, perhaps with reference to the book [Geocomputation with Python](https://py.geocompx.org/), the open access version of which is also hosted on [geocompx.org](https://geocompx.org/).
 However, R has some advantages that make it well-suited to geocomputation.
 The 'R-spatial stack' is easy to install, has comprehensive and well-maintained core packages meaning less 'context switching' and more focus on techniques rather than getting the code working.
-R has 'batteries included' with statistical functions as part of the base installation and hundreds of well-mainted packages implementing many cutting edge methods.
+R has 'batteries included' with statistical functions as part of the base installation and hundreds of well-maintained packages implementing many cutting edge methods.
 With R, you can dive and get things working with surprisingly few lines of code, and generate publication quality interactive maps thanks to excellent mapping packages, as outlined in Chapter \@ref(adv-map).
 
 This book is also motivated by the importance of reproducibility\index{reproducibility} for scientific research.
