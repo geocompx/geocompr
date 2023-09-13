@@ -19,7 +19,7 @@ library(spDataLarge)
 
 
 ```r
-remotes::install_github("r-tmap/tmap@v4")
+remotes::install_github("r-tmap/tmap")
 library(tmap)    # for static and interactive maps
 library(leaflet) # for interactive maps
 library(ggplot2) # tidyverse data visualization package

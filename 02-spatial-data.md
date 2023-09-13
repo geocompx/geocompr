@@ -40,7 +40,7 @@ install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
 
 
 ```r
-remotes::install_github("r-tmap/tmap@v4")
+remotes::install_github("r-tmap/tmap")
 ```
 
 \index{R!installation}
