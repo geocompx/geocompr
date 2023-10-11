@@ -421,13 +421,11 @@ For instance, a score greater than 9 might be a suitable threshold indicating ra
 
 ```
 #> The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,
-#> which was just loaded, will retire in October 2023.
+#> which was just loaded, were retired in October 2023.
 #> Please refer to R-spatial evolution reports for details, especially
 #> https://r-spatial.org/r/2023/05/15/evolution4.html.
 #> It may be desirable to make the sf package available;
 #> package maintainers should consider adding sf to Suggests:.
-#> The sp package is now running under evolution status 2
-#>      (status 2 uses the sf package in place of rgdal)
 ```
 
 <div class="figure" style="text-align: center">

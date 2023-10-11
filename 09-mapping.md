@@ -652,7 +652,8 @@ We can use US National Atlas Equal Area for the map of the contiguous United Sta
 ```r
 us_states_map = tm_shape(us_states, projection = "EPSG:2163") + tm_polygons() + 
   tm_layout(frame = FALSE)
-#> The argument 'projection' is deprecated as of tmap 4.0. Pleaes use 'crs' insteadFALSE
+#> Warning: The 'projection' argument of 'tm_shape()' is deprecated as of tmap
+#> 4.0. Pleaes use 'crs' instead.
 ```
 
 The rest of our objects, `hawaii` and `alaska`, already have proper projections; therefore, we just need to create two separate maps:
@@ -1230,6 +1231,15 @@ us_states2163_dorling = cartogram_dorling(us_states2163, "total_pop_15")
 <!--toDo:JN-->
 <!--
 
+```
+#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
+#> specified font size).
+```
+
+<div class="figure" style="text-align: center">
+<img src="09-mapping_files/figure-html/cartomap2-1.png" alt="Comparison of non-continuous area cartogram (left) and Dorling cartogram (right)." width="100%" />
+<p class="caption">(\#fig:cartomap2)Comparison of non-continuous area cartogram (left) and Dorling cartogram (right).</p>
+</div>
 -->
 <!--toDo:JN-->
 <!-- update -->
