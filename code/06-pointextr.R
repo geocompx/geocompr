@@ -14,7 +14,7 @@ tm1 = tm_shape(srtm) +
   tm_borders(lwd = 2) + 
   tm_shape(zion_points) + 
   tm_symbols(fill = "black", size = 0.5) + 
-  tm_add_legend(type = "Symbols", fill = "black", size = 0.7,
+  tm_add_legend(type = "symbols", fill = "black", size = 0.7,
                 labels = "zion_points", shape = 21) + 
   tm_layout(legend.frame = TRUE, legend.position = c("right", "top"),
             legend.bg.color = "white")  
