@@ -707,6 +707,7 @@ elev[clip, drop = FALSE]
 #> extent      : 1, 1.5, -0.5, 0.5  (xmin, xmax, ymin, ymax)
 #> coord. ref. : lon/lat WGS 84 (EPSG:4326) 
 #> source(s)   : memory
+#> varname     : elev 
 #> name        : elev 
 #> min value   :   18 
 #> max value   :   24
