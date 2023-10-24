@@ -38,54 +38,53 @@ latest version at [r.geocompx.org](https://r.geocompx.org/).
 ### Note: we are actively working on the Second Edition 🏗
 
 <details>
-
-<summary>Summary of the changes</summary>
+<summary>
+Summary of the changes
+</summary>
 
 Since commencing work on the Second Edition in September 2021 much has
 changed, including:
 
-  - Replacement of `raster` with `terra` in Chapters 1 to 7 (see commits
-    related to this update
-    [here](https://github.com/geocompx/geocompr/search?q=terra&type=commits))
-  - Update of Chapter 7 to include mention alternative ways or
-    reading-in OSM data in
-    [\#656](https://github.com/geocompx/geocompr/pull/656)
-  - Refactor build settings so the book builds on Docker images in the
-    [geocompr/docker](https://github.com/geocompr/docker) repo
-  - Improve the experience of using the book in Binder (ideal for trying
-    out the code before installing or updating the necessary R
-    packages), as documented in issue
-    [\#691](https://github.com/geocompx/geocompr/issues/691) (thanks to
-    [yuvipanda](https://github.com/yuvipanda))
-  - Improved communication of binary spatial predicates in Chapter 4
-    (see [\#675](https://github.com/geocompx/geocompr/pull/675))
-  - New section on the links between subsetting and clipping (see
-    [\#698](https://github.com/geocompx/geocompr/pull/698)) in Chapter 5
-  - New
-    [section](https://r.geocompx.org/spatial-operations.html#de-9im-strings)
-    on the dimensionally extended 9 intersection model (DE-9IM)
-  - New [chapter](https://r.geocompx.org/raster-vector.html) on
-    raster-vector interactions split out from Chapter 5
-  - New
-    [section](https://r.geocompx.org/spatial-class.html#the-sfheaders-package)
-    on the **sfheaders** package
-  - New [section](https://r.geocompx.org/spatial-class.html#s2) in
-    Chapter 2 on spherical geometry engines and the **s2** package
-  - Replacement of code based on the old **mlr** package with code based
-    on the new **mlr3** package, as described in a huge [pull
-    request](https://github.com/geocompx/geocompr/pull/771)
-    <!-- Todo: update this bullet point (Rl 2021-11) -->
-    <!-- - Next issue  -->
+- Replacement of `raster` with `terra` in Chapters 1 to 7 (see commits
+  related to this update
+  [here](https://github.com/geocompx/geocompr/search?q=terra&type=commits))
+- Update of Chapter 7 to include mention alternative ways or reading-in
+  OSM data in [\#656](https://github.com/geocompx/geocompr/pull/656)
+- Refactor build settings so the book builds on Docker images in the
+  [geocompr/docker](https://github.com/geocompr/docker) repo
+- Improve the experience of using the book in Binder (ideal for trying
+  out the code before installing or updating the necessary R packages),
+  as documented in issue
+  [\#691](https://github.com/geocompx/geocompr/issues/691) (thanks to
+  [yuvipanda](https://github.com/yuvipanda))
+- Improved communication of binary spatial predicates in Chapter 4 (see
+  [\#675](https://github.com/geocompx/geocompr/pull/675))
+- New section on the links between subsetting and clipping (see
+  [\#698](https://github.com/geocompx/geocompr/pull/698)) in Chapter 5
+- New
+  [section](https://r.geocompx.org/spatial-operations.html#de-9im-strings)
+  on the dimensionally extended 9 intersection model (DE-9IM)
+- New [chapter](https://r.geocompx.org/raster-vector.html) on
+  raster-vector interactions split out from Chapter 5
+- New
+  [section](https://r.geocompx.org/spatial-class.html#the-sfheaders-package)
+  on the **sfheaders** package
+- New [section](https://r.geocompx.org/spatial-class.html#s2) in Chapter
+  2 on spherical geometry engines and the **s2** package
+- Replacement of code based on the old **mlr** package with code based
+  on the new **mlr3** package, as described in a huge [pull
+  request](https://github.com/geocompx/geocompr/pull/771)
+  <!-- Todo: update this bullet point (Rl 2021-11) -->
+  <!-- - Next issue  -->
 
 <!-- Todo: add news file? (RL 2021-11) -->
-
 <!-- See NEWS.md for a summary of the changes. -->
 
 See
 [https://github.com/geocompx/geocompr/compare/1.9…main](https://github.com/geocompx/geocompr/compare/1.9...main#files_bucket)
 for a continuously updated summary of the changes to date. At the time
 of writing (April 2022) there have been more than 10k lines of
-code/prose added, lots of refactoring\!
+code/prose added, lots of refactoring!
 
 [![](https://user-images.githubusercontent.com/1825120/140612663-e62566a2-62ab-4a22-827a-e86f5ce7bd63.png)](https://github.com/geocompx/geocompr/compare/1.9...main)
 
@@ -97,18 +96,18 @@ Contributions at this stage are very welcome.
 
 We encourage contributions on any part of the book, including:
 
-  - improvements to the text, e.g. clarifying unclear sentences, fixing
-    typos (see guidance from [Yihui
-    Xie](https://yihui.org/en/2013/06/fix-typo-in-documentation/));
-  - changes to the code, e.g. to do things in a more efficient way;
-  - suggestions on content (see the project’s [issue
-    tracker](https://github.com/geocompx/geocompr/issues));
-  - improvements to and alternative approaches in the Geocompr solutions
-    booklet hosted at
-    [r.geocompx.org/solutions](https://r.geocompx.org/solutions) (see a
-    blog post on how to update solutions in files such as
-    [\_01-ex.Rmd](https://github.com/geocompx/geocompr/blob/main/_01-ex.Rmd)
-    [here](https://geocompr.github.io/post/2022/geocompr-solutions/))
+- improvements to the text, e.g. clarifying unclear sentences, fixing
+  typos (see guidance from [Yihui
+  Xie](https://yihui.org/en/2013/06/fix-typo-in-documentation/));
+- changes to the code, e.g. to do things in a more efficient way;
+- suggestions on content (see the project’s [issue
+  tracker](https://github.com/geocompx/geocompr/issues));
+- improvements to and alternative approaches in the Geocompr solutions
+  booklet hosted at
+  [r.geocompx.org/solutions](https://r.geocompx.org/solutions) (see a
+  blog post on how to update solutions in files such as
+  [\_01-ex.Rmd](https://github.com/geocompx/geocompr/blob/main/_01-ex.Rmd)
+  [here](https://geocompr.github.io/post/2022/geocompr-solutions/))
 
 See
 [our-style.md](https://github.com/geocompx/geocompr/blob/main/misc/our-style.md)
@@ -117,10 +116,9 @@ for the book’s style.
 Many thanks to all contributors to the book so far via GitHub (this list
 will update automatically): [prosoitos](https://github.com/prosoitos),
 [florisvdh](https://github.com/florisvdh),
+[babayoshihiko](https://github.com/babayoshihiko),
 [katygregg](https://github.com/katygregg),
-[babayoshihiko](https://github.com/babayoshihiko),
 [Lvulis](https://github.com/Lvulis),
-[babayoshihiko](https://github.com/babayoshihiko),
 [rsbivand](https://github.com/rsbivand),
 [iod-ine](https://github.com/iod-ine),
 [KiranmayiV](https://github.com/KiranmayiV),
@@ -145,6 +143,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [mdsumner](https://github.com/mdsumner),
 [pat-s](https://github.com/pat-s),
 [sdesabbata](https://github.com/sdesabbata),
+[ahmohil](https://github.com/ahmohil),
 [ateucher](https://github.com/ateucher),
 [annakrystalli](https://github.com/annakrystalli),
 [andtheWings](https://github.com/andtheWings),
@@ -242,7 +241,7 @@ installed:
 
 To reproduce book **in its entirety**, run the following command (which
 installs additional ‘Suggests’ packages, this may take some time to
-run\!):
+run!):
 
 ``` r
 # Install packages to fully reproduce book (may take several minutes):
@@ -275,9 +274,7 @@ bookdown::serve_book()
 ```
 
 <!-- The code associated with each chapter is saved in the `code/chapters/` folder. -->
-
 <!-- `source("code/chapters/07-transport.R")` runs run the code chunks in chapter 7, for example. -->
-
 <!-- These R scripts are generated with the follow command which wraps `knitr::purl()`: -->
 
 ## Geocompr in a devcontainer
@@ -342,7 +339,7 @@ docker run -it geocompr/geocompr R
 ![](https://user-images.githubusercontent.com/1825120/39538109-9b50e7ac-4e33-11e8-93b3-e00e95a79294.png)
 
 If you see something like this after following the steps above,
-congratulations: it worked\! See
+congratulations: it worked! See
 [github.com/rocker-org](https://github.com/rocker-org/rocker/wiki/Using-the-RStudio-image#running-rstudio-server)
 for more info.
 
@@ -396,9 +393,7 @@ rmarkdown::render("README.Rmd", output_format = "github_document", output_file =
 ```
 
 <!-- ## Book statistics -->
-
 <!-- An indication of the book's progress over time is illustrated below (to be updated roughly every week as the book progresses). -->
-
 <!-- Book statistics: estimated number of pages per chapter over time. -->
 
 ## Citations
@@ -440,7 +435,8 @@ followed by `N`), and as illustrated in the figure below:
 
 Zotero settings: these are useful if you want to add references.
 
+When you export the citations as a .bib file from Zotero, use the
+`Better BibTex` (not `BibLaTeX`) format.
+
 We use Zotero because it is a powerful open source reference manager
-that integrates well with the **citr** package. As described in the
-GitHub repo
-[Robinlovelace/rmarkdown-citr-demo](https://github.com/Robinlovelace/rmarkdown-citr-demo).
+that integrates well with citation tools in VS Code and RStudio.
