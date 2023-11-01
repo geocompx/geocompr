@@ -333,7 +333,7 @@ plot(x_and_y, col = "lightgrey", border = "grey", add = TRUE) # intersecting are
 
 
 
-The subsequent code chunk demonstrates how this works for all combinations of the 'Venn' diagram representing `x` and `y`, inspired by [Figure 5.1](http://r4ds.had.co.nz/transform.html#logical-operators) of the book *R for Data Science* [@grolemund_r_2016].
+The subsequent code chunk demonstrates how this works for all combinations of the 'Venn' diagram representing `x` and `y`, inspired by [Figure 5.1](https://r4ds.had.co.nz/transform.html#logical-operators) of the book *R for Data Science* [@grolemund_r_2016].
 
 <div class="figure" style="text-align: center">
 <img src="05-geometry-operations_files/figure-html/venn-clip-1.png" alt="Spatial equivalents of logical operators." width="100%" />

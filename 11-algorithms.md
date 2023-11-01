@@ -42,7 +42,7 @@ Scripts should be stored and executed in a logical order to create reproducible 
 If you are new to programming scripts may seem intimidating when you first encounter them, but they are simply plain text files.
 Scripts are usually saved as a file with an extension representing the language they contain, such as `.py` for scripts written in Python or `.rs` for scripts written in Rust.
 R scripts should be saved with a `.R` extension and named to reflect what they do.
-An example is [`11-hello.R`](https://github.com/geocompx/geocompr/blob/main/code/11-hello.R), a script file stored in the [`code`](https://github.com/geocompx/geocompr/blob/main/code/) folder of the book's repository.
+An example is [`11-hello.R`](https://github.com/geocompx/geocompr/blob/main/code/11-hello.R), a script file stored in the [`code`](https://github.com/geocompx/geocompr/tree/main/code/) folder of the book's repository.
 `11-hello.R` is a simple script containing only two lines of code, one of which is a comment:
 
 ```r
