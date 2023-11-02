@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2023-11-01'
+date: '2023-11-02'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -44,9 +44,11 @@ Its current 'build status' as follows:
 
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 
-This version of the book was built on GH Actions on 2023-11-01.
+This version of the book was built on GH Actions on 2023-11-02.
 
-<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png"/></a><br/>This book is licensed to you under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
+
+<a rel="license" href="https://creativecommons.org/publicdomain/zero/1.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/zero/1.0/88x31.png"/></a><br/>The code samples in this book are licensed under <a rel="license" href="https://creativecommons.org/publicdomain/zero/1.0/">reative Commons CC0 1.0 Universal (CC0 1.0)</a>.
 
 ## How to contribute? {-}
 
@@ -54,9 +56,7 @@ This version of the book was built on GH Actions on 2023-11-01.
 Once logged-in to GitHub, click on the 'Edit this page' icon in the right panel of the book website.
 This will take you to an editable version of the the source [R Markdown](https://rmarkdown.rstudio.com/) file that generated the page you're on.
 
-<!--[![](figures/editme.png)](https://github.com/geocompx/geocompr/edit/main/index.Rmd)-->
-
-To raise an issue about the book's content (e.g. code not running) or make a feature request, check-out the [issue tracker](https://github.com/geocompx/geocompr/issues).
+To raise an issue about the book's content (e.g., code not running) or make a feature request, check-out the [issue tracker](https://github.com/geocompx/geocompr/issues).
 
 Maintainers and contributors must follow this repository’s [CODE OF CONDUCT](https://github.com/geocompx/geocompr/blob/main/CODE_OF_CONDUCT.md).
 
@@ -70,14 +70,10 @@ Clicking on the link below should open a new window containing RStudio Server in
 If you see something like the image below, congratulations, it worked!
 You can start exploring Geocomputation with R in a cloud-based environment, noting [mybinder.org user guidelines](https://mybinder.readthedocs.io/en/latest/about/user-guidelines.html)):
 
-<!-- ![](https://user-images.githubusercontent.com/1825120/134802314-6dd368c7-f5eb-4cd7-b8ff-428dfa93954c.png) -->
-
-
 <div class="figure" style="text-align: center">
 <img src="https://user-images.githubusercontent.com/1825120/134802314-6dd368c7-f5eb-4cd7-b8ff-428dfa93954c.png" alt="Screenshot of reproducible code contained in Geocomputation with R running in RStudio Server on a browser served by Binder" width="100%" />
 <p class="caption">(\#fig:index-2-4)Screenshot of reproducible code contained in Geocomputation with R running in RStudio Server on a browser served by Binder</p>
 </div>
-
 
 To reproduce the code in the book on your own computer, you need a recent version of [R](https://cran.r-project.org/) and up-to-date packages.
 These can be installed using the [**remotes**](https://github.com/r-lib/remotes) package.
@@ -87,9 +83,6 @@ These can be installed using the [**remotes**](https://github.com/r-lib/remotes)
 install.packages("remotes")
 remotes::install_github("geocompx/geocompkg")
 ```
-
-
-
 
 After installing the book's dependencies, you can rebuild the book for testing and educational purposes.
 To do this [download](https://github.com/geocompx/geocompr/archive/refs/heads/main.zip) and unzip or [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the book's source code.
@@ -109,14 +102,14 @@ See the project's [GitHub repo](https://github.com/geocompx/geocompr#reproducing
 If you find the project of use and interest, you can get involved in many ways, by:
 
 - Telling people about it
-- [Buying](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577) a copy
-- Helping people get started with open source software for reproducible research in general, and working with geographic data in R in particular (this can be an excellent way to consolidate and build your own skills)
 - '[Starring](https://help.github.com/articles/about-stars/)' the [geocompr GitHub repository](https://github.com/geocompx/geocompr)
+- Communicating about the book online, via the [#geocompr hashtag](https://twitter.com/hashtag/geocompr) on Twitter (see our [Guestbook at geocompx.org](https://geocompx.org/guestbook/)) or by letting us know of [courses](https://github.com/geocompx/geocompx.org/edit/main/guestbook.qmd) using the book
 - [Citing](https://github.com/geocompx/geocompr/raw/main/CITATION.bib) and [linking-to](https://r.geocompx.org) it
-- Communicating about the book online, via the [#geocompr hashtag](https://twitter.com/hashtag/geocompr) on Twitter (see our [Guestbook at geocompx.org](https://geocompx.org/guestbook/)) or by letting us know of [courses](https://github.com/geocompx/geocompx.org/edit/source/content/guestbook/index.md) using the book
+- [Buying](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577) a copy
 - Reviewing it, on [Amazon](https://www.amazon.com/Geocomputation-Chapman-Hall-Robin-Lovelace/dp/1138304514/), [Goodreads](https://www.goodreads.com/book/show/42780859-geocomputation-with-r) or elsewhere
 - Asking questions about the content or making suggestion on [GitHub](https://github.com/geocompx/geocompr/issues), [Twitter](https://twitter.com/hashtag/geocompr?src=hashtag_click) or [Discord](https://discord.com/invite/PMztXYgNxp)
 - Answering questions, or at least responding to people asking for clarification or reproducible examples to demonstrate their question
+- Helping people get started with open source software for reproducible research in general, and working with geographic data in R in particular (this can be an excellent way to consolidate and build your own skills)
 - Supporting community translations
   - The Spanish version: https://r.geocompx.org/es/
   - The French version: https://r.geocompx.org/fr/
@@ -129,6 +122,7 @@ Further details can be found at [github.com/geocompx/geocompr](https://github.co
 The globe icon used in this book was created by [Jean-Marc Viglino](https://github.com/Viglino) and is licensed under [CC-BY 4.0 International](https://github.com/Viglino/font-gis/blob/main/LICENSE-CC-BY.md).
 
 <a href="https://www.netlify.com"><img src="https://www.netlify.com/img/global/badges/netlify-color-accent.svg"/></a>
+The book website is hosted on [Netlify](https://www.netlify.com/).
 
 
 
@@ -195,13 +189,13 @@ An important aspect of the book from a teaching/learning perspective is the **ex
 Completing these will develop your skills and equip you with the confidence needed to tackle a range of geospatial problems.
 Solutions to the exercises can be found in an online booklet that accompanies Geocomputation with R, hosted at [r.geocompx.org/solutions](https://r.geocompx.org/solutions).
 To learn how to this booklet was created, and how to update solutions in files such as [_01-ex.Rmd](https://github.com/geocompx/geocompr/blob/main/_01-ex.Rmd), see this [blog post](https://geocompx.org/post/2022/geocompr-solutions/).
-For more blog posts and extended examples see the book's supporting website at [geocompx.org](https://geocompx.org).
+For more blog posts and extended examples, see the book's supporting website at [geocompx.org](https://geocompx.org).
 
 Impatient readers are welcome to dive straight into the practical examples, starting in Chapter \@ref(spatial-class).
 However, we recommend reading about the wider context of *Geocomputation with R* in Chapter \@ref(intro) first.
 If you are new to R, we also recommend learning more about the language before attempting to run the code chunks provided in each chapter (unless you're reading the book for an understanding of the concepts).
 Fortunately for R beginners R has a supportive community that has developed a wealth of resources that can help.
-We particularly recommend three tutorials:  [R for Data Science](https://r4ds.had.co.nz/) [@grolemund_r_2016] and [Efficient R Programming](https://csgillespie.github.io/efficientR/) [@gillespie_efficient_2016], especially [Chapter 2](https://csgillespie.github.io/efficientR/set-up.html#r-version) (on installing and setting-up R/RStudio) and [Chapter 10](https://csgillespie.github.io/efficientR/learning.html) (on learning to learn), and  [An introduction to R](http://colinfay.me/intro-to-r/) [@rcoreteam_introduction_2021].
+We particularly recommend three tutorials:  [R for Data Science](https://r4ds.had.co.nz/) [@grolemund_r_2016] and [Efficient R Programming](https://csgillespie.github.io/efficientR/) [@gillespie_efficient_2016], and  [An introduction to R](http://colinfay.me/intro-to-r/) [@rcoreteam_introduction_2021].
 
 ## Why R? {-}
 
@@ -235,7 +229,7 @@ The wider context and motivations underlying this book are covered in Chapter \@
 
 
 Many thanks to everyone who contributed directly and indirectly via the code hosting and collaboration site GitHub, including the following people who contributed direct via pull requests: prosoitos, florisvdh, babayoshihiko, katygregg, Lvulis, rsbivand, iod-ine, KiranmayiV, cuixueqin, defuneste, zmbc, erstearns, FlorentBedecarratsNM, dcooley, darrellcarvalho, marcosci, appelmar, MikeJohnPage, eyesofbambi, krystof236, nickbearman, tylerlittlefield, giocomai, KHwong12, LaurieLBaker, MarHer90, mdsumner, pat-s, sdesabbata, ahmohil, ateucher, annakrystalli, andtheWings, kant, gavinsimpson, Himanshuteli, yutannihilation, howardbaek, jimr1603, jbixon13, olyerickson, yvkschaefer, katiejolly, kwhkim, layik, mpaulacaldas, mtennekes, mvl22, ganes1410, richfitz, VLucet, wdearden, yihui, adambhouston, chihinl, cshancock, e-clin, ec-nebi, gregor-d, jasongrahn, p-kono, pokyah, schuetzingit, tim-salabim, tszberkowitz.
-Special thanks to Marco Sciaini, who not only created the front cover image, but also published the code that generated it (see `code/frontcover.R` in the book's GitHub repo). 
+Special thanks to Marco Sciaini, who not only created the front cover image for the first edition of the book, but also published the code that generated it (see `code/frontcover.R` in the GitHub repo). 
 Dozens more people contributed online, by raising and commenting on issues, and by providing feedback via social media.
 The `#geocompr` hashtag will live on!
 

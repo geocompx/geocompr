@@ -519,7 +519,7 @@ The code chunk below plots the desire lines and routes, resulting in Figure \@re
     Note also that routes are assumed to originate in the zone centroids, a simplifying assumption which is used in transport models to reduce the computational resources needed to calculate the shortest path between all combinations of possible origins and destinations [@hollander_transport_2016].
 
 <div class="figure" style="text-align: center">
-<img src="13-transport_files/figure-html/routes-1.png" alt="Routes along which many (100+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots)." width="100%" />
+<img src="13-transport_files/figure-html/routes-1.png" alt="Routes along which many (100+) short (&lt;5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots)." width="100%" />
 <p class="caption">(\#fig:routes)Routes along which many (100+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).</p>
 </div>
 
