@@ -540,6 +540,7 @@ To allow for non-linear relationships, we use the popular radial basis function 
 Setting the`type` argument to `"C-svc"` makes sure that `ksvm()` is solving a classification task. 
 To make sure that the tuning does not stop because of one failing model, we additionally define a fallback learner (for more information please refer to https://mlr3book.mlr-org.com/chapters/chapter10/advanced_technical_aspects_of_mlr3.html#sec-fallback).
 
+
 ```r
 lrn_ksvm = mlr3::lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot",
                      type = "C-svc")
