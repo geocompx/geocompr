@@ -865,13 +865,13 @@ There is also the headerless (flat) binary raster format which should facilitate
 The raster header\index{raster!header} defines the coordinate reference system, the extent and the origin.
 \index{raster}
 \index{raster data model}
-The origin (or starting point) is frequently the coordinate of the lower-left corner of the matrix (the **terra** package, however, uses the upper left corner, by default (Figure  \@ref(fig:raster-intro-plot):B)).
+The origin (or starting point) is frequently the coordinate of the lower left corner of the matrix (the **terra** package, however, uses the upper left corner, by default (Figure  \@ref(fig:raster-intro-plot):B)).
 The header defines the extent via the number of columns, the number of rows and the cell size resolution.
-Hence, starting from the origin, we can easily access and modify each single cell by either using the ID of a cell (Figure  \@ref(fig:raster-intro-plot):B) or by explicitly specifying the rows and columns.
+Hence, starting from the origin, we can easily access and modify each single cell by either using the ID of a cell (Figure \@ref(fig:raster-intro-plot):B) or by explicitly specifying the rows and columns.
 This matrix representation avoids storing explicitly the coordinates for the four corner points (in fact it only stores one coordinate, namely the origin) of each cell corner as would be the case for rectangular vector polygons.
 This and map algebra (Section \@ref(map-algebra)) makes raster processing much more efficient and faster than vector data processing.
-However, in contrast to vector data, the cell of one raster layer can only hold a single value.
-The value might be numeric or categorical (Figure \@ref(fig:raster-intro-plot):C).
+However, in contrast to vector data, the cell of one raster layer can only hold a single value.^[Thus to store many values for a single location we need to have many raster layers.]
+The value might be continous or categorical (Figure \@ref(fig:raster-intro-plot):C).
 
 ```{r raster-intro-plot, echo = FALSE, fig.cap = "Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map.", fig.scap="Raster data types.", fig.asp=0.5, message=FALSE}
 source("https://github.com/geocompx/geocompr/raw/main/code/02-raster-intro-plot.R", print.eval = TRUE)
@@ -902,10 +902,10 @@ Second, both packages allow to either read all of the raster data into memory or
 However, they store raster values very differently. 
 **terra** is based on C++ code and mostly uses C++ pointers.
 **stars** stores values as lists of arrays for smaller rasters or just a file path for larger ones.
-Third, **stars** functions are closely related to the vector objects and functions in **sf**, while **terra** uses its own class of objects for vector data, namely `SpatVector`.
+Third, **stars** functions are closely related to the vector objects and functions in **sf**, while **terra** uses its own class of objects for vector data, namely `SpatVector`, but also accepts `sf` ones.
 Fourth, both packages have a different approach for how various functions work on their objects.
 The **terra** package mostly relies on a large number of built-in functions, where each function has a specific purpose (e.g., resampling or cropping).
-On the other hand, **stars** uses some build-in functions (usually with names starting with `st_`), has its own methods for existing R functions (e.g., `split()` or `aggregate()`), and also for existing **dplyr** functions (e.g., `filter()` or `slice()`).
+On the other hand, **stars** uses some build-in functions (usually with names starting with `st_`), some existing **dplyr** functions (e.g., `filter()` or `slice()`), and also has its own methods for existing R functions (e.g., `split()` or `aggregate()`).
 
 Importantly, it is straightforward to convert objects from **terra** to **stars** (using `st_as_stars()`) and the other way round (using `rast()`).
 We also encourage you to read @pebesma_spatial_2022 for the most comprehensive introduction to the **stars** package.
@@ -913,7 +913,7 @@ We also encourage you to read @pebesma_spatial_2022 for the most comprehensive i
 ### An introduction to terra
 
 The **terra** package supports raster objects in R.
-Like its predecessor **raster** (created by the same developer, Robert Hijmans), it provides an extensive set of functions to create, read, export, manipulate and process raster datasets.
+It provides an extensive set of functions to create, read, export, manipulate and process raster datasets.
 **terra**'s functionality is largely the same as the more mature **raster** package, but there are some differences: **terra** functions are usually more computationally efficient than **raster** equivalents.
 On the other hand, the **raster** class system is popular and used by many other packages.
 You can seamlessly translate between the two types of object to ensure backwards compatibility with older scripts and packages, for example, with the functions [`raster()`](https://rspatial.github.io/raster/reference/raster.html), [`stack()`](https://rspatial.github.io/raster/reference/stack.html), and `brick()` in the **raster** package (see the previous chapter for more on the evolution of R packages for working with geographic data).
@@ -946,9 +946,11 @@ my_rast
 ```
 
 Dedicated functions report each component: `dim()` returns the number of rows, columns and layers; `ncell()` the number of cells (pixels); `res()` the spatial resolution; `ext()` its spatial extent; and `crs()` its coordinate reference system (raster reprojection is covered in Section \@ref(reproj-ras)).
-`inMemory()` reports whether the raster data is stored in memory or on disk.
+`inMemory()` reports whether the raster data is stored in memory or on disk, and `sources` specifies the file location.
 
+```{block2 terrahelp, type='rmdnote'}
 `help("terra-package")` returns a full list of all available **terra** functions.
+```
 
 ### Basic map making {#basic-map-raster}
 
@@ -961,14 +963,14 @@ plot(my_rast)
 
 There are several other approaches for plotting raster data in R that are outside the scope of this section, including:
 
-- `plotRGB()` function from the **terra** package to create *a Red-Green-Blue plot* based on three layers in a `SpatRaster` object
+- `plotRGB()` function from the **terra** package to create a plot based on three layers in a `SpatRaster` object
 - Packages such as **tmap** to create static and interactive maps of raster and vector objects (see Chapter \@ref(adv-map)) 
 - Functions, for example `levelplot()` from the **rasterVis** package, to create facets, a common technique for visualizing change over time
 
 ### Raster classes {#raster-classes}
 
-The `SpatRaster` class represents rasters object in **terra**.
-The easiest way to create a raster object in R is to read-in a raster file from disk or from a server (Section \@ref(raster-data-read).
+The `SpatRaster` class represents rasters object of **terra**.
+The easiest way to create a raster object in R is to read-in a raster file from disk or from a server (Section \@ref(raster-data-read)).
 \index{raster!class}
 
 ```{r 02-spatial-data-41}
@@ -1030,14 +1032,14 @@ multi_rast34 = c(multi_rast3, multi_rast4)
 ```{block2 02-spatial-data-2a, type='rmdnote'}
 Most `SpatRaster` objects do not store raster values, but rather a pointer to the file itself.
 This has a significant side-effect -- they cannot be directly saved to `".rds"` or `".rda"` files or used in cluster computing.
-In these cases, there are two possible solutions: (1) use of the `wrap()` function that creates a special kind of temporary object that can be saved as an R object or used in cluster computing, or (2) save the object as a regular raster with `writeRaster()`.
+In these cases, there are two main possible solutions: (1) use of the `wrap()` function that creates a special kind of temporary object that can be saved as an R object or used in cluster computing, or (2) save the object as a regular raster with `writeRaster()`.
 ```
 
 <!--jn:toDo-->
 <!--consider new section with other data models-->
 <!-- e.g. point clouds, data cubes, meshes, etc. -->
 
-## Geographic and projected Coordinate Reference Systems {#crs-intro}
+## Coordinate Reference Systems {#crs-intro}
 
 \index{CRS!introduction}
 Vector and raster spatial data types share concepts intrinsic to spatial data.
@@ -1045,18 +1047,18 @@ Perhaps the most fundamental of these is the Coordinate Reference System (CRS), 
 CRSs are either geographic or projected, as introduced at the beginning of this chapter (see Figure \@ref(fig:vectorplots)).
 This section explains each type, laying the foundations for Chapter \@ref(reproj-geo-data), which provides a deep dive into setting, transforming and querying CRSs.
 
-### Geographic coordinate systems
+### Geographic coordinate reference systems
 
 \index{CRS!geographic}
-Geographic coordinate systems identify any location on the Earth's surface using two values --- longitude and latitude (Figure \@ref(fig:vector-crs), left panel). 
+Geographic coordinate reference systems identify any location on the Earth's surface using two values --- longitude and latitude (Figure \@ref(fig:vector-crs), left panel). 
 *Longitude* is location in the East-West direction in angular distance from the Prime Meridian plane.
 *Latitude* is angular distance North or South of the equatorial plane.
 Distances in geographic CRSs are therefore not measured in meters.
 This has important consequences, as demonstrated in Section \@ref(reproj-geo-data).
 
-The surface of the Earth in geographic coordinate systems is represented by a spherical or ellipsoidal surface.
-Spherical models assume that the Earth is a perfect sphere of a given radius -- they have the advantage of simplicity but, at the same time, they are inaccurate: the Earth is not a sphere!
-Ellipsoidal models are defined by two parameters: the equatorial radius and the polar radius.
+The surface of the Earth in geographic coordinate reference systems is represented by a spherical or ellipsoidal surface.
+Spherical models assume that the Earth is a perfect sphere of a given radius -- they have the advantage of simplicity but, at the same time, they are inaccurate as the Earth is not exactly a sphere.
+Ellipsoidal models are slighly more accurate, and are defined by two parameters: the equatorial radius and the polar radius.
 These are suitable because the Earth is compressed: the equatorial radius is around 11.5 km longer than the polar radius [@maling_coordinate_1992].^[
 The degree of compression is often referred to as *flattening*, defined in terms of the equatorial radius ($a$) and polar radius ($b$) as follows: $f = (a - b) / a$. The terms *ellipticity* and *compression* can also be used.
 Because $f$ is a rather small value, digital ellipsoid models use the 'inverse flattening' ($rf = 1/f$) to define the Earth's compression.
@@ -1064,7 +1066,7 @@ Values of $a$ and $rf$ in various ellipsoidal models can be seen by executing `s
 ]
 
 Ellipsoids are part of a wider component of CRSs: the *datum*.
-This contains information on what ellipsoid to use and the precise relationship between the Cartesian coordinates and location on the Earth's surface.
+This contains information on what ellipsoid to use and the precise relationship between the coordinates and location on the Earth's surface.
 There are two types of datum --- geocentric (such as `WGS84`) and local (such as `NAD83`).
 You can see examples of these two types of datums in Figure \@ref(fig:datum-fig).
 Black lines represent a *geocentric datum*, whose center is located in the Earth's center of gravity and is not optimized for a specific location.
@@ -1088,7 +1090,7 @@ They have an origin, x and y axes, and a linear unit of measurement such as mete
 
 This transition cannot be done without adding some deformations.
 Therefore, some properties of the Earth's surface are distorted in this process, such as area, direction, distance, and shape.
-A projected coordinate system can preserve only one or two of those properties.
+A projected coordinate reference system can preserve only one or two of those properties.
 Projections are often named based on a property they preserve: equal-area preserves area, azimuthal preserve direction, equidistant preserve distance, and conformal preserve local shape.
 
 There are three main groups of projection types - conic, cylindrical, and planar (azimuthal).
@@ -1116,9 +1118,7 @@ knitr::include_graphics("figures/02_vector_crs.png")
 ```
 
 ## Units
-<!--rl-->
 
-<!-- https://cran.r-project.org/web/packages/units/vignettes/measurement_units_in_R.html -->
 An important feature of CRSs is that they contain information about spatial units.
 Clearly, it is vital to know whether a house's measurements are in feet or meters, and the same applies to maps.
 It is good cartographic practice to add a *scale bar* or some other distance indicator onto maps to demonstrate the relationship between distances on the page or screen and distances on the ground.
