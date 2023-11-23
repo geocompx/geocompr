@@ -40,7 +40,12 @@ jm2 = jm0 +
 jm3 = jm0 +
   tm_shape(shp = random_joined, bbox = bb) +
   tm_symbols(col = "name_long", shape = 4, lwd = 3, col.scale = tm_scale(values = "Dark2")) +
-  tm_layout(legend.show = TRUE)
+  tm_layout(legend.show = FALSE)
 
-tmap_arrange(jm1, jm2, jm3)
+jm4 = jm0 +
+  tm_shape(shp = random_joined, bbox = bb) +
+  tm_symbols(col = "name_long", shape = 4, lwd = 3, col.scale = tm_scale(values = "Dark2")) +
+  tm_layout(legend.only = TRUE)
+
+tmap_arrange(jm1, jm2, jm3, jm4, nrow = 2, ncol = 2)
 
