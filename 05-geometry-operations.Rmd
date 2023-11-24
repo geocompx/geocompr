@@ -15,19 +15,20 @@ library(spDataLarge)
 ## Introduction
 
 So far the book has explained the structure of geographic datasets (Chapter \@ref(spatial-class)), and how to manipulate them based on their non-geographic attributes (Chapter \@ref(attr)) and spatial relations (Chapter \@ref(spatial-operations)).
-This chapter focuses on manipulating the geographic elements of geographic objects, for example by simplifying and converting vector geometries, cropping raster datasets, and converting vector objects into rasters and from rasters into vectors.
+This chapter focuses on manipulating the geographic elements of spatial objects, for example by creating buffers, simplifying and converting vector geometries, and aggregating and resampling raster data.
 After reading it --- and attempting the exercises at the end --- you should understand and have control over the geometry column in `sf` objects and the extent and geographic location of pixels represented in rasters in relation to other geographic objects.
 
 Section \@ref(geo-vec) covers transforming vector geometries with 'unary' and 'binary' operations.
 Unary operations work on a single geometry in isolation, including simplification (of lines and polygons), the creation of buffers and centroids, and shifting/scaling/rotating single geometries using 'affine transformations' (Sections \@ref(simplification) to \@ref(affine-transformations)).
-Binary transformations modify one geometry based on the shape of another, including clipping and geometry unions\index{vector!union}, covered in Sections \@ref(clipping) and \@ref(geometry-unions), respectively.
+Binary transformations modify one geometry based on the shape of another, including clipping and geometry unions\index{vector!union}, covered in Sections \@ref(clipping) to \@ref(geometry-unions).
 Type transformations (from a polygon to a line, for example) are demonstrated in Section \@ref(type-trans).
 
 Section \@ref(geo-ras) covers geometric transformations on raster objects.
 This involves changing the size and number of the underlying pixels, and assigning them new values.
 It teaches how to change the resolution (also called raster aggregation and disaggregation), the extent and the origin of a raster.
 These operations are especially useful if one would like to align raster datasets from diverse sources.
-Aligned raster objects share a one-to-one correspondence between pixels, allowing them to be processed using map algebra operations, described in Section \@ref(map-algebra). 
+Aligned raster objects share a one-to-one correspondence between pixels, allowing them to be processed using map algebra operations, described in Section \@ref(map-algebra).
+
 The interaction between raster and vector objects is covered in Chapter \@ref(raster-vector). 
 It presents how raster values can be 'masked' and 'extracted' by vector geometries.
 Importantly it also shows how to 'polygonize' rasters and 'rasterize' vector datasets, making the two data models more interchangeable.
@@ -44,7 +45,7 @@ the functions discussed in this section work on objects of class `sfc` in additi
 Simplification is a process for generalization of vector objects (lines and polygons) usually for use in smaller scale maps.
 Another reason for simplifying objects is to reduce the amount of memory, disk space and network bandwidth they consume:
 it may be wise to simplify complex geometries before publishing them as interactive maps. 
-The **sf** package provides `st_simplify()`, which uses the GEOS implementation of the Douglas-Peucker algorithm to reduce the vertex count.
+The **sf** package provides `st_simplify()`, which uses the Douglas-Peucker algorithm to reduce the vertex count.
 `st_simplify()` uses the `dTolerance` to control the level of generalization in map units [see @douglas_algorithms_1973 for details].
 Figure \@ref(fig:seine-simp) illustrates simplification of a `LINESTRING` geometry representing the river Seine and tributaries.
 The simplified geometry was created by the following command:
@@ -73,17 +74,9 @@ object.size(seine_simp)
 \index{vector!simplification} 
 Simplification is also applicable for polygons.
 This is illustrated using `us_states`, representing the contiguous United States.
-As we show in Chapter \@ref(reproj-geo-data), GEOS assumes that the data is in a projected CRS and this could lead to unexpected results when using a geographic CRS.
-Therefore, the first step is to project the data into some adequate projected CRS, such as US National Atlas Equal Area (EPSG = 2163) (on the top left in Figure \@ref(fig:us-simp)):
-
-```{r 05-geometry-operations-4}
-us_states2163 = st_transform(us_states, "EPSG:2163")
-```
-
-`st_simplify()` works equally well with projected polygons:
 
 ```{r 05-geometry-operations-5}
-us_states_simp1 = st_simplify(us_states2163, dTolerance = 100000)  # 100 km
+us_states_simp1 = st_simplify(us_states, dTolerance = 100000)  # 100 km
 ```
 
 A limitation with `st_simplify()` is that it simplifies objects on a per-geometry basis.
@@ -91,14 +84,14 @@ This means the 'topology' is lost, resulting in overlapping and 'holey' areal un
 `ms_simplify()` from **rmapshaper** provides an alternative that overcomes this issue.
 By default it uses the Visvalingam algorithm, which overcomes some limitations of the Douglas-Peucker algorithm [@visvalingam_line_1993].
 <!-- https://bost.ocks.org/mike/simplify/ -->
-The following code chunk uses this function to simplify `us_states2163`.
+The following code chunk uses this function to simplify `us_states`.
 The result has only 1% of the vertices of the input (set using the argument `keep`) but its number of objects remains intact because we set `keep_shapes = TRUE`:^[
 Simplification of multipolygon objects can remove small internal polygons, even if the `keep_shapes` argument is set to TRUE. To prevent this, you need to set `explode = TRUE`. This option converts all mutlipolygons into separate polygons before its simplification.
 ]
 
 ```{r 05-geometry-operations-6, warning=FALSE, message=FALSE}
 # proportion of points to retain (0-1; default 0.05)
-us_states_simp2 = rmapshaper::ms_simplify(us_states2163, keep = 0.01,
+us_states_simp2 = rmapshaper::ms_simplify(us_states, keep = 0.01,
                                           keep_shapes = TRUE)
 ```
 
@@ -112,8 +105,7 @@ Below is an example of using Gaussian kernel regression to smooth the borders of
 The `smoothness` argument controls the bandwidth of the Gaussian that is used to smooth the geometry and has a default value of 1.
 
 ```{r 05-geometry-operations-6b, warning=FALSE}
-us_states_simp3 = smoothr::smooth(us_states2163, 
-                                  method = "ksmooth", smoothness = 6)
+us_states_simp3 = smoothr::smooth(us_states, method = "ksmooth", smoothness = 6)
 ```
 
 Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in (Figure \@ref(fig:us-simp)). 
@@ -121,12 +113,11 @@ Differences can be observed between the outputs of the Douglas-Peucker (`st_simp
 
 ```{r us-simp, echo=FALSE, fig.cap="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages.", warning=FALSE, fig.scap="Polygon simplification in action."}
 library(tmap)
-p_ussimp1 = tm_shape(us_states2163) + tm_polygons() + tm_title("Original data")
+p_ussimp1 = tm_shape(us_states) + tm_polygons() + tm_title("Original data")
 p_ussimp2 = tm_shape(us_states_simp1) + tm_polygons() + tm_title("st_simplify")
 p_ussimp3 = tm_shape(us_states_simp2) + tm_polygons() + tm_title("ms_simplify")
 p_ussimp4 = tm_shape(us_states_simp3) + tm_polygons() + tm_title('smooth(method = "ksmooth")')
-tmap_arrange(p_ussimp1, p_ussimp2, p_ussimp3, p_ussimp4,
-             ncol = 2, nrow = 2)
+tmap_arrange(p_ussimp1, p_ussimp2, p_ussimp3, p_ussimp4, ncol = 2, nrow = 2)
 ```
 
 ### Centroids
