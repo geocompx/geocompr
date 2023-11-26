@@ -2,7 +2,7 @@
 
 ## Prerequisites {-}
 
-- This chapter requires QGIS\index{QGIS}, SAGA\index{SAGA} and GRASS\index{GRASS} to be installed and the following packages to be attached:
+- This chapter requires QGIS\index{QGIS}, SAGA\index{SAGA} and GRASS GIS\index{GRASS GIS} to be installed and the following packages to be attached:
 
 ```{r 09-gis-1, message=FALSE,echo=FALSE}
 library(sf)
@@ -38,16 +38,16 @@ rather than relying on pointing and clicking on different parts of a screen, you
 A common and effective workflow when using interactive development environments such as RStudio or VS Code is to type code into source files in a source editor and control interactive execution of the code with a shortcut such as `Ctrl+Enter`.
 
 CLIs are not unique to R: most early computing environments relied on a command line 'shell' and it was only after the invention and widespread adoption of the computer mouse in the 1990s that graphical user interfaces (GUIs)\index{graphical user interface} became common.
-GRASS the longest-standing continuously-developed open source GIS\index{GIS} software, for example, relied on its command-line interface before it gained a GUI [@landa_new_2008].
+GRASS GIS the longest-standing continuously-developed open source GIS\index{GIS} software, for example, relied on its command-line interface before it gained a GUI [@landa_new_2008].
 Most popular GIS software projects are GUI-driven.
-You *can* interact with QGIS\index{QGIS}, SAGA\index{SAGA}, GRASS\index{GRASS} and gvSIG from system terminals and embedded CLIs, but their design encourages most people to interact with them by 'pointing and clicking'.
+You *can* interact with QGIS\index{QGIS}, SAGA\index{SAGA}, GRASS GIS\index{GRASS GIS} and gvSIG from system terminals and embedded CLIs, but their design encourages most people to interact with them by 'pointing and clicking'.
 An unintended consequence of this is that most GIS users miss out on the advantages of CLI-driven and scriptable approaches.
 According to the creator of the popular QGIS software [@sherman_desktop_2008]:
 
 > With the advent of 'modern' GIS software, most people want to point and click their way through life. That’s good, but there is a tremendous amount of flexibility and power waiting for you with the command line. Many times you can do something on the command line in a fraction of the time you can do it with a GUI.
 
 The 'CLI vs GUI' debate does not have to be adverserial: both ways of working have advantages, depending on a range of factors including the task (with drawing new features being well-suited to GUIs), the level of reproducibility desired, and the user's skillset.
-GRASS is a good example of GIS software that is primarily based on a CLI but which also has a prominent GUI.
+GRASS GIS is a good example of GIS software that is primarily based on a CLI but which also has a prominent GUI.
 Likewise, while R is focused on its CLI, IDEs such as RStudio provide a GUI for improving accessibility.
 Software cannot be neatly categorised into CLI-based or GUI-based.
 However, interactive command line interfaces have several important advantages in terms of:
@@ -87,15 +87,15 @@ This chapter focuses on 'bridges' to three mature open source GIS products, summ
 
 - QGIS\index{QGIS}, via the package **qgisprocess**\index{qgisprocess (package)} (Section \@ref(rqgis))
 - SAGA\index{SAGA}, via **Rsagacmd**\index{Rsagacmd (package)} (Section \@ref(saga))
-- GRASS\index{GRASS}, via **rgrass**\index{rgrass (package)} (Section \@ref(grass))
+- GRASS GIS\index{GRASS GIS}, via **rgrass**\index{rgrass (package)} (Section \@ref(grass))
 
 There are other relevant bridges, including the no-longer-maintained R package **RPyGeo** interface to proprietary GIS software.
-There have also been major developments in enabling open source GIS software to write and execute R scripts from QGIS\index{QGIS} (see [docs.qgis.org](https://docs.qgis.org/3.28/en/docs/training_manual/processing/r_intro.html)) and GRASS (see [grasswiki.osgeo.org](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#R_within_GRASS)).
+There have also been major developments in enabling open source GIS software to write and execute R scripts from QGIS\index{QGIS} (see [docs.qgis.org](https://docs.qgis.org/3.28/en/docs/training_manual/processing/r_intro.html)) and GRASS GIS (see [grasswiki.osgeo.org](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#R_within_GRASS)).
 
 ```{r gis-comp, echo=FALSE, message=FALSE}
 library(dplyr)
 d = tibble(
-  "GIS" = c("QGIS", "SAGA", "GRASS"),
+  "GIS" = c("QGIS", "SAGA", "GRASS GIS"),
   "First release" = c("2002", "2004", "1982"),
   "No. functions" = c(">1000", ">600", ">500"),
   "Support" = c("hybrid", "hybrid", "hybrid")
@@ -110,7 +110,7 @@ knitr::kable(
   caption.short = "Comparison between three open-source GIS.",
   booktabs = TRUE
 ) #|>
-# kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS.", notation = "alphabet")
+# kableExtra::add_footnote(label = "Comparing downloads of different providers is rather difficult (see http://spatialgalaxy.net/2011/12/19/qgis-users-around-the-world), and here also useless since every Windows QGIS download automatically also downloads SAGA and GRASS GIS.", notation = "alphabet")
 ```
 
 In addition to the three R-GIS bridges mentioned above, this chapter also provides a brief introduction to R interfaces to spatial libraries (Section \@ref(gdal)), spatial databases\index{spatial database} (Section \@ref(postgis)), and cloud-based processing of Earth observation data (Section \@ref(cloud)).
@@ -118,12 +118,12 @@ In addition to the three R-GIS bridges mentioned above, this chapter also provid
 ## **qgisprocess**: a bridge to QGIS and beyond {#rqgis}
 
 QGIS\index{QGIS} is the most popular open-source GIS [Table \@ref(tab:gis-comp); @graser_processing_2015]. 
-QGIS provides a unified interface to QGIS's native geoalgorithms, GDAL, and --- when they are installed --- from *providers* such as GRASS\index{GRASS}, and SAGA\index{SAGA} [@graser_processing_2015]. 
+QGIS provides a unified interface to QGIS's native geoalgorithms, GDAL, and --- when they are installed --- from *providers* such as GRASS GIS\index{GRASS GIS}, and SAGA\index{SAGA} [@graser_processing_2015]. 
 Since version 3.14 (released in summer 2020), QGIS ships with the `qgis_process` command line utility for accessing a bounty of functionality for geocomputation.
-`qgis_process` provides access to 300+ geoalgorithms in the standard QGIS installation and 1,000+ via plugins to external providers such as GRASS and SAGA.
+`qgis_process` provides access to 300+ geoalgorithms in the standard QGIS installation and 1,000+ via plugins to external providers such as GRASS GIS and SAGA.
 
 The **qgisprocess** package\index{qgisprocess (package)} provides access to `qgis_process` from R.
-The package requires QGIS --- and any other relevant plugins such as GRASS and SAGA, used in this chapter --- to be installed and available to the system.
+The package requires QGIS --- and any other relevant plugins such as GRASS GIS and SAGA, used in this chapter --- to be installed and available to the system.
 For installation instructions, see **qgisprocess**'s [documentation](https://r-spatial.github.io/qgisprocess/).
 A quick way to get up-and-running with **qgisprocess** if you have Docker installed is via the `qgis` image developed as part of this project.
 Assuming you have Docker installed and sufficient computational resources, you can run an R session with **qgisprocess** and relevant plugins with the following command (see the [geocompx/docker](https://github.com/geocompx/docker) repo for details):
@@ -156,7 +156,7 @@ qgis_plugins()
 #> 4 processing_saga_nextgen FALSE
 ```
 
-This tells us that the GRASS (`grassprovider`) and SAGA (`processing_saga_nextgen`) plugins are available on the system but are not yet enabled.
+This tells us that the GRASS GIS (`grassprovider`) and SAGA (`processing_saga_nextgen`) plugins are available on the system but are not yet enabled.
 Since we need both later on in the chapter, let's enable them. 
 
 ```{r enable-providers, eval=has_qgis_plugins}
@@ -183,7 +183,7 @@ qgis_providers()
 #> 7 sagang   SAGA Next Gen                 509
 ```
 
-The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`, `pdal`) and external ones from the third-party providers GDAL, SAGA and GRASS through the QGIS interface.
+The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`, `pdal`) and external ones from the third-party providers GDAL, SAGA and GRASS GIS through the QGIS interface.
 
 We are now ready for some geocomputation with QGIS and friends, from within R!
 Let's try two example case studies.
@@ -292,7 +292,7 @@ We can either read this file back into R with `read_sf()` (e.g., `union_sf = rea
 union_sf = st_as_sf(union)
 ```
 
-Note that the QGIS\index{QGIS} union\index{vector!union} operation merges the two input layers into one layer by using the intersection\index{vector!intersection} and the symmetrical difference of the two input layers (which, by the way, is also the default when doing a union operation in GRASS\index{GRASS} and SAGA\index{SAGA}).
+Note that the QGIS\index{QGIS} union\index{vector!union} operation merges the two input layers into one layer by using the intersection\index{vector!intersection} and the symmetrical difference of the two input layers (which, by the way, is also the default when doing a union operation in GRASS GIS\index{GRASS GIS} and SAGA\index{SAGA}).
 This is **not** the same as `st_union(incongr_wgs, aggzone_wgs)` (see Exercises)!
 
 The result, `union_sf`, is a multipolygon with a larger number of features than two input objects.
@@ -309,7 +309,7 @@ qgis_search_algorithms("clean")
 #> 1 grass7   GRASS          Vector (v.*) grass7:v.clean v.clean
 ```
 
-This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS\index{GRASS}.
+This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS\index{GRASS GIS}.
 GRASS GIS's `v.clean` is a powerful tool for cleaning topology of spatial vector data\index{topology cleaning}. 
 Importantly, we can use it through **qgisprocess**.
 
@@ -556,26 +556,26 @@ It includes the **SegOptim** package [@goncalves_segoptim_2019] that allows runn
 
 ## GRASS GIS {#grass}
 
-The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the Geographical Resources Analysis Support System (GRASS)\index{GRASS} (Table \@ref(tab:gis-comp); @neteler_open_2008) from 1982 to 1995. 
+The U.S. Army - Construction Engineering Research Laboratory (USA-CERL) created the core of the Geographical Resources Analysis Support System (GRASS GIS)\index{GRASS GIS} (Table \@ref(tab:gis-comp); @neteler_open_2008) from 1982 to 1995. 
 Academia continued this work since 1997.
-Similar to SAGA\index{SAGA}, GRASS focused on raster processing in the beginning while only later, since GRASS 6.0, adding advanced vector functionality [@bivand_applied_2013].
+Similar to SAGA\index{SAGA}, GRASS GIS focused on raster processing in the beginning while only later, since GRASS GIS 6.0, adding advanced vector functionality [@bivand_applied_2013].
 
-GRASS stores the input data in a GRASS GIS database.
-With regard to vector data, GRASS is by default a topological GIS, i.e., it only stores the geometry of adjacent features once.
+GRASS GIS stores the input data in a GRASS GIS database.
+With regard to vector data, GRASS GIS is by default a topological GIS, i.e., it only stores the geometry of adjacent features once.
 SQLite is the default database driver for vector attribute management, and attributes are linked to the geometry, i.e., to the GRASS GIS database, via keys ([GRASS GIS vector management](https://grasswiki.osgeo.org/wiki/Vector_Database_Management#GRASS_GIS_vector_management_model)).
 
-Before one can use GRASS, one has to set up the GRASS GIS database\index{spatial database} (also from within R), and users might find this process a bit intimidating in the beginning.
-First of all, the GRASS database requires its own directory, which, in turn, contains a location (see the [GRASS GIS Database](https://grass.osgeo.org/grass-stable/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass-stable/manuals/index.html) for further information).
+Before one can use GRASS GIS, one has to set up the GRASS GIS database\index{spatial database} (also from within R), and users might find this process a bit intimidating in the beginning.
+First of all, the GRASS GIS database requires its own directory, which, in turn, contains a location (see the [GRASS GIS Database](https://grass.osgeo.org/grass-stable/manuals/grass_database.html) help pages at [grass.osgeo.org](https://grass.osgeo.org/grass-stable/manuals/index.html) for further information).
 The location stores the geodata for one project or one area.
 Within one location, several mapsets can exist that typically refer to different users or different tasks.
 Each location also has a PERMANENT mapset -- a mandatory mapset that is created automatically.
 In order to share geographic data with all users of a project, the database owner can add spatial data to the PERMANENT mapset.
 In addition, the PERMANENT mapset stores the projection, the spatial extent and the default resolution for raster data.
 So, to sum it all up -- the GRASS GIS database may contain many locations (all data in one location have the same CRS), and each location can store many mapsets (groups of datasets).
-Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass-stable/manuals/helptext.html) for more information on the GRASS spatial database\index{spatial database} system.
-To quickly use GRASS from within R, we will use the **link2GI** package, however, one can also set up the GRASS GIS database step-by-step.
+Please refer to @neteler_open_2008 and the [GRASS GIS quick start](https://grass.osgeo.org/grass-stable/manuals/helptext.html) for more information on the GRASS GIS spatial database\index{spatial database} system.
+To quickly use GRASS GIS from within R, we will use the **link2GI** package, however, one can also set up the GRASS GIS database step-by-step.
 See [GRASS within R](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#GRASS_within_R) for how to do so.
-Please note that the code instructions in the following paragraphs might be hard to follow when using GRASS for the first time but by running through the code line-by-line and by examining the intermediate results, the reasoning behind it should become even clearer.
+Please note that the code instructions in the following paragraphs might be hard to follow when using GRASS GIS for the first time but by running through the code line-by-line and by examining the intermediate results, the reasoning behind it should become even clearer.
 
 Here, we introduce **rgrass**\index{rgrass (package)} with one of the most interesting problems in GIScience - the traveling salesman problem\index{traveling salesman}.
 Suppose a traveling salesman would like to visit 24 customers.
@@ -584,7 +584,7 @@ There is a single best solution to this problem; however, to check all of the po
 In our case, the number of possible solutions correspond to `(25 - 1)! / 2`, i.e., the factorial of 24 divided by 2 (since we do not differentiate between forward or backward direction).
 Even if one iteration can be done in a nanosecond, this still corresponds to `r format(factorial(25 - 1) / (2 * 10^9 * 3600 * 24 * 365))` years.
 Luckily, there are clever, almost optimal solutions which run in a tiny fraction of this inconceivable amount of time.
-GRASS GIS\index{GRASS} provides one of these solutions (for more details, see [v.net.salesman](https://grass.osgeo.org/grass-stable/manuals/v.net.salesman.html)).
+GRASS GIS\index{GRASS GIS} provides one of these solutions (for more details, see [v.net.salesman](https://grass.osgeo.org/grass-stable/manuals/v.net.salesman.html)).
 In our use case, we would like to find the shortest path\index{shortest route} between the first 25 bicycle stations (instead of customers) on London's streets (and we simply assume that the first bike station corresponds to the home of our traveling salesman\index{traveling salesman}).
 
 ```{r 09-gis-24}
@@ -607,11 +607,11 @@ london_streets = london_streets[["osm_lines"]]
 london_streets = select(london_streets, osm_id)
 ```
 
-Now that we have the data, we can go on and initiate a GRASS\index{GRASS} session.
-Luckily, `linkGRASS()` of the **link2GI** packages lets one set up the GRASS environment with just one line of code.
+Now that we have the data, we can go on and initiate a GRASS GIS\index{GRASS GIS} session.
+Luckily, `linkGRASS()` of the **link2GI** packages lets one set up the GRASS GIS environment with just one line of code.
 The only thing you need to provide is a spatial object which determines the projection and the extent of the spatial database\index{spatial database}.
-First, `linkGRASS()` finds all GRASS\index{GRASS} installations on your computer.
-Since we have set `ver_select` to `TRUE`, we can interactively choose one of the found GRASS-installations.
+First, `linkGRASS()` finds all GRASS GIS\index{GRASS GIS} installations on your computer.
+Since we have set `ver_select` to `TRUE`, we can interactively choose one of the found GRASS GIS-installations.
 If there is just one installation, the `linkGRASS()` automatically chooses it.
 Second, `linkGRASS()` establishes a connection to GRASS GIS.
 
@@ -620,10 +620,10 @@ library(rgrass)
 link2GI::linkGRASS(london_streets, ver_select = TRUE)
 ```
 
-Before we can use GRASS geoalgorithms\index{geoalgorithm}, we need to add data to GRASS's spatial database\index{spatial database}.
+Before we can use GRASS GIS geoalgorithms\index{geoalgorithm}, we need to add data to GRASS GIS's spatial database\index{spatial database}.
 Luckily, the convenience function `write_VECT()` does this for us.
 (Use `write_RAST()` for raster data.)
-In our case, we add the street and cycle hire point data while using only the first attribute column, and name them as `london_streets` and `points` in GRASS.
+In our case, we add the street and cycle hire point data while using only the first attribute column, and name them as `london_streets` and `points` in GRASS GIS.
 
 ```{r 09-gis-31, eval=FALSE}
 write_VECT(terra::vect(london_streets), vname = "london_streets")
@@ -636,8 +636,8 @@ Therefore, we need to convert our `sf` spatial vectors to **terra**'s `SpatVecto
 
 Now, both datasets exist in the GRASS GIS database.
 To perform our network\index{network} analysis, we need a topologically clean street network\index{topology cleaning}.
-GRASS's `"v.clean"` takes care of the removal of duplicates, small angles and dangles, among others.
-Here, we break lines at each intersection to ensure that the subsequent routing algorithm can actually turn right or left at an intersection, and save the output in a GRASS object named `streets_clean`.
+GRASS GIS's `"v.clean"` takes care of the removal of duplicates, small angles and dangles, among others.
+Here, we break lines at each intersection to ensure that the subsequent routing algorithm can actually turn right or left at an intersection, and save the output in a GRASS GIS object named `streets_clean`.
 
 ```{r 09-gis-32, eval=FALSE}
 execGRASS(
@@ -668,7 +668,7 @@ The resulting clean dataset serves as input for the `"v.net.salesman"` algorithm
 One of its arguments is `center_cats`, which requires a numeric range as input.
 This range represents the points for which a shortest route should be calculated.
 Since we would like to calculate the route for all cycle stations, we set it to `1-25`.
-To access the GRASS help page of the traveling salesman\index{traveling salesman} algorithm\index{algorithm}, run `execGRASS("g.manual", entry = "v.net.salesman")`.
+To access the GRASS GIS help page of the traveling salesman\index{traveling salesman} algorithm\index{algorithm}, run `execGRASS("g.manual", entry = "v.net.salesman")`.
 
 ```{r 09-gis-33, eval=FALSE}
 execGRASS(
@@ -705,36 +705,36 @@ mapview::mapshot(m_1,
 
 There are a few important considerations to note in the process:
 
-- We could have used GRASS's spatial database\index{spatial database} which allows faster processing.
+- We could have used GRASS GIS's spatial database\index{spatial database} which allows faster processing.
 That means we have only exported geographic data at the beginning.
 Then we created new objects but only imported the final result back into R.
 To find out which datasets are currently available, run `execGRASS("g.list", type = "vector,raster", flags = "p")`.
-- We could have also accessed an already existing GRASS spatial database from within R.
+- We could have also accessed an already existing GRASS GIS spatial database from within R.
 Prior to importing data into R, you might want to perform some (spatial) subsetting\index{vector!subsetting}.
 Use `"v.select"` and `"v.extract"` for vector data.
 `"db.select"` lets you select subsets of the attribute table of a vector layer without returning the corresponding geometry.
-- You can also start R from within a running GRASS\index{GRASS} session [for more information please refer to @bivand_applied_2013].
-- Refer to the excellent [GRASS online help](https://grass.osgeo.org/grass-stable/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS geoalgorithm\index{geoalgorithm}.
+- You can also start R from within a running GRASS GIS\index{GRASS GIS} session [for more information please refer to @bivand_applied_2013].
+- Refer to the excellent [GRASS GIS online help](https://grass.osgeo.org/grass-stable/manuals/) or `execGRASS("g.manual", flags = "i")` for more information on each available GRASS GIS geoalgorithm\index{geoalgorithm}.
 
 ## When to use what?
 
 To recommend a single R-GIS interface is hard since the usage depends on personal preferences, the tasks at hand and your familiarity with different GIS\index{GIS} software packages which in turn probably depends on your field of study.
 As mentioned previously, SAGA\index{SAGA} is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets, and frequently used by hydrologists, climatologists and soil scientists [@conrad_system_2015].
-GRASS GIS\index{GRASS}, on the other hand, is the only GIS presented here supporting a topologically based spatial database which is especially useful for network analyses but also simulation studies.
-QGISS\index{QGIS} is much more user-friendly compared to GRASS- and SAGA-GIS, especially for first-time GIS users, and probably the most popular open-source GIS.
+GRASS GIS\index{GRASS GIS}, on the other hand, is the only GIS presented here supporting a topologically based spatial database which is especially useful for network analyses but also simulation studies.
+QGISS\index{QGIS} is much more user-friendly compared to GRASS GIS and SAGA, especially for first-time GIS users, and probably the most popular open-source GIS.
 Therefore, **qgisprocess**\index{qgisprocess (package)} is an appropriate choice for most use cases.
 Its main advantages are:
 
-- A unified access to several GIS, and therefore the provision of >1000 geoalgorithms (Table \@ref(tab:gis-comp)) including duplicated functionality, e.g., you can perform overlay-operations using QGIS-\index{QGIS}, SAGA-\index{SAGA} or GRASS-geoalgorithms\index{GRASS}
-- Automatic data format conversions (SAGA uses `.sdat` grid files and GRASS uses its own database format but QGIS will handle the corresponding conversions)
+- A unified access to several GIS, and therefore the provision of >1000 geoalgorithms (Table \@ref(tab:gis-comp)) including duplicated functionality, e.g., you can perform overlay-operations using QGIS-\index{QGIS}, SAGA-\index{SAGA} or GRASS GIS-geoalgorithms\index{GRASS GIS}
+- Automatic data format conversions (SAGA uses `.sdat` grid files and GRASS GIS uses its own database format but QGIS will handle the corresponding conversions)
 - Its automatic passing of geographic R objects to QGIS geoalgorithms\index{geoalgorithm} and back into R
 - Convenience functions to support named arguments and automatic default value retrieval (as inspired by **rgrass**\index{rgrass (package)})
 
 By all means, there are use cases when you certainly should use one of the other R-GIS bridges.
 Though QGIS is the only GIS providing a unified interface to several GIS\index{GIS} software packages, it only provides access to a subset of the corresponding third-party geoalgorithms (for more information please refer to @muenchow_rqgis:_2017).
-Therefore, to use the complete set of SAGA and GRASS functions, stick with **Rsagacmd**\index{Rsagacmd (package)} and **rgrass**. 
-In addition, if you would like to run simulations with the help of a geodatabase\index{spatial database} [@krug_clearing_2010], use **rgrass** directly since **qgisprocess** always starts a new GRASS session for each call.
-Finally, if you need topological correct data and/or spatial database management functionality such as multi-user access, we recommend the usage of GRASS. 
+Therefore, to use the complete set of SAGA and GRASS GIS functions, stick with **Rsagacmd**\index{Rsagacmd (package)} and **rgrass**. 
+In addition, if you would like to run simulations with the help of a geodatabase\index{spatial database} [@krug_clearing_2010], use **rgrass** directly since **qgisprocess** always starts a new GRASS GIS session for each call.
+Finally, if you need topological correct data and/or spatial database management functionality such as multi-user access, we recommend the usage of GRASS GIS. 
 
 Please note that there are a number of further GIS software packages that have a scripting interface but for which there is no dedicated R package that accesses these: gvSig, OpenJump, and the Orfeo Toolbox.^[Please note that **link2GI** provides a partial integration with the Orfeo Toolbox\index{Orfeo Toolbox} and that you can also access the Orfeo Toolbox geoalgorithms via **qgisprocess**. Note also that TauDEM\index{TauDEM} can be accessed from with R with package **traudem**.]
 
@@ -809,7 +809,7 @@ This is useful because geographic datasets tend to become big and messy quite qu
 Databases enable storing and querying large datasets efficiently based on spatial and non-spatial fields, and provide multi-user access and topology\index{topological relations} support.
 
 The most important open source spatial database\index{spatial database} is PostGIS\index{PostGIS} [@obe_postgis_2015].^[
-SQLite/SpatiaLite are certainly also important but implicitly we have already introduced this approach since GRASS\index{GRASS} is using SQLite in the background (see Section \@ref(grass)).
+SQLite/SpatiaLite are certainly also important but implicitly we have already introduced this approach since GRASS GIS\index{GRASS GIS} is using SQLite in the background (see Section \@ref(grass)).
 ]
 R bridges to spatial DBMSs such as PostGIS\index{PostGIS} are important, allowing access to huge data stores without loading several gigabytes of geographic data into RAM, and likely crashing the R session.
 The remainder of this section shows how PostGIS can be called from R, based on "Hello real world" from *PostGIS in Action, Second Edition* [@obe_postgis_2015].^[
@@ -948,7 +948,7 @@ This subsection is only a brief introduction to PostgreSQL/PostGIS.
 Nevertheless, we would like to encourage the practice of storing geographic and non-geographic data in a spatial DBMS\index{spatial database} while only attaching those subsets to R's global environment which are needed for further (geo-)statistical analysis.
 Please refer to @obe_postgis_2015 for a more detailed description of the SQL queries presented and a more comprehensive introduction to PostgreSQL/PostGIS in general.
 PostgreSQL/PostGIS is a formidable choice as an open-source spatial database.
-But the same is true for the lightweight SQLite/SpatiaLite database engine and GRASS\index{GRASS} which uses SQLite in the background (see Section \@ref(grass)).
+But the same is true for the lightweight SQLite/SpatiaLite database engine and GRASS GIS\index{GRASS GIS} which uses SQLite in the background (see Section \@ref(grass)).
 
 If your datasets are too big for PostgreSQL/PostGIS and you require massive spatial data management and query performance, it may be worth exploring large-scale geographic querying on distributed computing systems.
 Such systems are outside the scope of this book but it worth mentioning that open source software providing this functionality exists.
