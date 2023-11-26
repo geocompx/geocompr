@@ -3,7 +3,7 @@
 ## Prerequisites {-}
 
 This chapter has minimal software prerequisites as it primarily uses base R.
-The **sf**\index{sf} package is used to check the results of an algorithm we will develop to calculate the area of polygons.
+Only, the **sf**\index{sf} package is used to check the results of an algorithm we will develop to calculate the area of polygons.
 In terms of prior knowledge, this chapter assumes you have an understanding of the geographic classes introduced in Chapter \@ref(spatial-class) and how they can be used to represent a wide range of input file formats (see Chapter \@ref(read-write)).
 
 ## Introduction {#intro-algorithms}
@@ -69,11 +69,11 @@ Lines of code that do not contain valid R should be commented out, by adding a `
 There are, however, some conventions worth following:
 
 - Write the script in order: just like the script of a film, scripts should have a clear order such as 'setup', 'data processing' and 'save results' (roughly equivalent to 'beginning', 'middle' and 'end' in a film).
-- Add comments to the script so other people (and your future self) can understand it. 
+- Add comments to the script so other people (and your future self) can understand it
 At a minimum, a comment should state the purpose of the script (see Figure \@ref(fig:codecheck)) and (for long scripts) divide it into sections.
-This can be done in RStudio\index{RStudio}, for example, with the shortcut `Ctrl+Shift+R`, which creates 'foldable' code section headings.
+This can be done in RStudio\index{RStudio}, for example, with the shortcut `Ctrl+Shift+R`, which creates 'foldable' code section headings
 - Above all, scripts should be reproducible: self-contained scripts that will work on any computer are more useful than scripts that only run on your computer, on a good day. 
-This involves attaching required packages at the beginning, reading-in data from persistent sources (such as a reliable website) and ensuring that previous steps have been taken.^[
+This involves attaching required packages at the beginning, reading-in data from persistent sources (such as a reliable website) and ensuring that previous steps have been taken^[
 Prior steps can be referred to with a comment or with an if statement such as `if (!exists("x")) source("x.R")` (which would run the script file `x.R` if the object `x` is missing).
 ]
 
@@ -155,13 +155,13 @@ There are many approaches to centroid\index{centroid} calculation, some of which
 For the purposes of this section, we choose an approach that is easy to visualize: breaking the polygon into many triangles and finding the centroid\index{centroid} of each of these, an approach discussed by @kaiser_algorithms_1993 alongside other centroid algorithms [and mentioned briefly in @orourke_computational_1998].
 It helps to further break down this approach into discrete tasks before writing any code (subsequently referred to as step 1 to step 4, these could also be presented as a schematic diagram or pseudocode\index{pseudocode}):
 
-1. Divide the polygon into contiguous triangles.
-2. Find the centroid\index{centroid} of each triangle.
-3. Find the area of each triangle.
-4. Find the area-weighted mean of triangle centroids\index{centroid}.
+1. Divide the polygon into contiguous triangles
+2. Find the centroid\index{centroid} of each triangle
+3. Find the area of each triangle
+4. Find the area-weighted mean of triangle centroids\index{centroid}
 
 These steps may sound straightforward, but converting words into working code requires some work and plenty of trial-and-error, even when the inputs are constrained:
-The algorithm will only work for *convex polygons*, which contain no internal angles greater than 180°, no star shapes allowed (packages **decido** and **sfdct** can triangulate non-convex polygons using external libraries, as shown in the [algorithm](https://geocompx.github.io/geocompkg/articles/algorithm.html) vignette hosted at [geocompx.org](https://geocompx.org/). 
+The algorithm will only work for *convex polygons*, which contain no internal angles greater than 180°, no star shapes allowed (packages **decido** and **sfdct** can triangulate non-convex polygons using external libraries, as shown in the [algorithm](https://geocompx.github.io/geocompkg/articles/algorithm.html) vignette hosted at [geocompx.org](https://geocompx.org/)). 
 
 The simplest data structure representing a polygon is a matrix of x and y coordinates in which each row represents a vertex tracing the polygon's border in order where the first and last rows are identical [@wise_gis_2001].
 In this case, we will create a polygon with five vertices in base R, building on an example from *GIS Algorithms* [@xiao_gis_2016 see [github.com/gisalgs](https://github.com/gisalgs/geom) for Python code], as illustrated in Figure \@ref(fig:polymat):
@@ -276,7 +276,7 @@ This is captured in the saying "premature optimization is the root of all evil (
 
 Algorithm\index{algorithm} development is hard.
 This should be apparent from the amount of work that has gone into developing a centroid\index{centroid} algorithm\index{algorithm} in base R\index{R} that is just one, rather inefficient, approach to the problem with limited real-world applications (convex polygons are uncommon in practice).
-The experience should lead to an appreciation of low-level geographic libraries such as GEOS\index{GEOS} (which underlies `sf::st_centroid()`) and CGAL\index{CGAL} (the Computational Geometry Algorithms Library) which not only run fast but work on a wide range of input geometry types.
+The experience should lead to an appreciation of low-level geographic libraries such as GEOS\index{GEOS} and CGAL\index{CGAL} (the Computational Geometry Algorithms Library) which not only run fast but work on a wide range of input geometry types.
 A great advantage of the open source nature of such libraries is that their source code\index{source code} is readily available for study, comprehension and (for those with the skills and confidence) modification.^[
 The CGAL\index{CGAL} function `CGAL::centroid()` is in fact composed of 7 sub-functions as described at https://doc.cgal.org/latest/Kernel_23/group__centroid__grp.html allowing it to work on a wide range of input data types, whereas the solution we created works only on a very specific input data type.
 The source code underlying GEOS\index{GEOS} function `Centroid::getCentroid()` can be found at https://github.com/libgeos/geos/search?q=getCentroid.
@@ -307,7 +307,7 @@ formals(t_centroid)
 environment(t_centroid)
 ```
 
-The function now works on any inputs you pass it, as illustrated in the below command which calculates the area of the 1^st^ triangle from the example polygon in the previous section (see Figure \@ref(fig:polycent)):
+The function now works on any inputs you pass it, as illustrated in the below command which calculates the area of the 1^st^ triangle from the example polygon in the previous section (see Figure \@ref(fig:polycent)).
 
 ```{r 10-algorithms-11}
 t_centroid(T1)
@@ -344,7 +344,7 @@ t_area(t_new)
 A useful feature of functions is that they are modular.
 Provided that you know what the output will be, one function can be used as the building block of another.
 Thus, the functions `t_centroid()` and `t_area()` can be used as sub-components of a larger function\index{function} to do the work of the script `11-centroid-alg.R`: calculate the area of any convex polygon.
-The code chunk below creates the function `poly_centroid()` to mimic the behavior of `sf::st_centroid()` for convex polygons:^[
+The code chunk below creates the function `poly_centroid()` to mimic the behavior of `sf::st_centroid()` for convex polygons.^[
 Note that the functions we created are called iteratively in `lapply()`\index{loop!lapply} and `vapply()`\index{loop!vapply} function calls.
 ]
 
