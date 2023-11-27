@@ -144,7 +144,7 @@ See the inner blue boundary in Figure \@ref(fig:bristol): there are a couple of 
 
 [^13-transport-2]: In cases where the first match does not provide the right name, the country or region should be specified, for example `Bristol Tennessee` for a Bristol located in America.
 
-- The first OSM boundary returned by OSM may not be the official boundary used by local authorities
+- The first boundary returned by OSM may not be the official boundary used by local authorities
 - Even if OSM returns the official boundary, this may be inappropriate for transport research because they bear little relation to where people travel
 
 Travel to Work Areas (TTWAs) address these issues by creating a zoning system analogous to hydrological watersheds.
@@ -184,7 +184,7 @@ nrow(bristol_od)
 nrow(bristol_zones)
 ```
 
-The results of the previous code chunk shows that there are more than 10 OD pairs for every zone, meaning we will need to aggregate the origin-destination data before it is joined with `bristol_zones`, as illustrated below (origin-destination data is described in Section \@ref(desire-lines)):
+The results of the previous code chunk shows that there are more than 10 OD pairs for every zone, meaning we will need to aggregate the origin-destination data before it is joined with `bristol_zones`, as illustrated below (origin-destination data is described in Section \@ref(desire-lines)).
 
 ```{r 13-transport-7}
 zones_attr = bristol_od |> 
@@ -199,8 +199,7 @@ The preceding chunk:
 - Aggregated the variables in the `bristol_od` dataset *if* they were numeric, to find the total number of people living in each zone by mode of transport[^13-transport-3]
 - Renamed the grouping variable `o` so it matches the ID column `geo_code` in the `bristol_zones` object
 
-[^13-transport-3]: The `_if` affix requires a `TRUE`/`FALSE` question to be asked of the variables, in this case 'is it numeric?'
-    and only variables returning true are summarized.
+[^13-transport-3]: The `_if` affix requires a `TRUE`/`FALSE` question to be asked of the variables, in this case 'is it numeric?' and only variables returning true are summarized.
 
 The resulting object `zones_attr` is a data frame with rows representing zones and an ID variable.
 We can verify that the IDs match those in the `zones` dataset using the `%in%` operator as follows:
@@ -243,7 +242,7 @@ zones_destinations = bristol_od |>
 zones_od = inner_join(zones_joined, zones_destinations, by = "geo_code")
 ```
 
-A simplified version of Figure \@ref(fig:zones) is created with the code below (see `12-zones.R` in the [`code`](https://github.com/geocompx/geocompr/tree/main/code) folder of the book's GitHub repository to reproduce the figure and Section \@ref(faceted-maps) for details on faceted maps with **tmap**\index{tmap (package)}):
+A simplified version of Figure \@ref(fig:zones) is created with the code below (see `13-zones.R` in the [`code`](https://github.com/geocompx/geocompr/tree/main/code) folder of the book's GitHub repository to reproduce the figure and Section \@ref(faceted-maps) for details on faceted maps with **tmap**\index{tmap (package)}):
 
 <!-- toDo: rl   -->
 <!-- qtm does not exist... -->
@@ -320,7 +319,7 @@ An illustration of the results is presented in Figure \@ref(fig:desire), a simpl
 qtm(desire_lines, lines.lwd = "all")
 ```
 
-```{r desire, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Desire lines representing trip patterns in Bristol, with width representing number of trips and color representing the percentage of trips made by active modes (walking and cycling). The four black lines represent the interzonal OD pairs in Table 7.1.", fig.asp=0.8, fig.scap="Desire lines representing trip patterns in Bristol."}
+```{r desire, echo=FALSE, warning=FALSE, message=FALSE, fig.cap="Desire lines representing trip patterns in Bristol, with width representing number of trips and color representing the percentage of trips made by active modes (walking and cycling). The four black lines represent the interzonal OD pairs in Table 13.1.", fig.asp=0.8, fig.scap="Desire lines representing trip patterns in Bristol."}
 source("code/13-desire.R", print.eval = TRUE)
 ```
 
@@ -407,7 +406,9 @@ bristol_rail_points = rbind(
     col = "red"
     ), geometry = bristol_stations$geometry)
 )
-tm_shape(desire_rail_plot, bbox = bb) +
+tm_shape(zones_od) +
+  tm_fill(fill_alpha = 0.2, lwd = 0.1) +
+  tm_shape(desire_rail_plot, bbox = bb, is.main = TRUE) +
   tm_lines(col = "Geometry",
            col.scale = tm_scale(values = "Set2"),
            col.legend = tm_legend(position = tm_pos_in("left", "top")),
@@ -451,11 +452,11 @@ Another way of classifying routing engines (or settings) is by the geographic le
 
 ### Routes, legs and segments {#route-legs-segments}
 
-Routing engines can generate outputs at three geographic levels: routes, legs and segments:
+Routing engines can generate outputs at three geographic levels of routes, legs and segments:
 
-- **Route** level outputs contain a single feature (typically a multilinestring and associated row in the data frame representation) per origin-destination pair, meaning a single row of data per trip.
-- **Leg** level outputs contain a single feature and associated attributes each *mode* within each origin-destination pair, as described in Section \@ref(nodes). For trips only involves one mode (for example driving from home to work, ignoring the short walk to the car) the leg is the same as the route: the car journey. For trips involving public transport, legs provide key information.  The **r5r** function `detailed_itineraries()` returns legs which, confusingly, are sometimes referred to as 'segments'.
-- Segment level outputs provide the most detailed information about routes, with records for each small section of the transport network. Typically segments are similar in length, or identical to, ways in OpenStreetMap. The **cyclestreets** function `journey()` returns data at the segment level which can be aggregated by grouping by origin and destination level data returned by the `route()` function in **stplanr**.
+- **Route** level outputs contain a single feature (typically a multilinestring and associated row in the data frame representation) per origin-destination pair, meaning a single row of data per trip
+- **Leg** level outputs contain a single feature and associated attributes each *mode* within each origin-destination pair, as described in Section \@ref(nodes). For trips only involves one mode (for example driving from home to work, ignoring the short walk to the car) the leg is the same as the route: the car journey. For trips involving public transport, legs provide key information.  The **r5r** function `detailed_itineraries()` returns legs which, confusingly, are sometimes referred to as 'segments'
+- Segment level outputs provide the most detailed information about routes, with records for each small section of the transport network. Typically segments are similar in length, or identical to, ways in OpenStreetMap. The **cyclestreets** function `journey()` returns data at the segment level which can be aggregated by grouping by origin and destination level data returned by the `route()` function in **stplanr**
 
 Most routing engines return route level by default, although multi-modal engines generally provide outputs at the leg level (one feature per continuous movement by a single mode of transport).
 Segment level outputs have the advantage of providing more detail.
@@ -555,7 +556,9 @@ routes_plot_data = rbind(
   routes_short |> transmute(Entity = "Routes") |> sf::st_set_crs("EPSG:4326")
 )
 zone_cents_routes = zone_cents[desire_lines_short, ]
-tm_shape(desire_lines_short) + 
+tm_shape(zones_od) +
+  tm_fill(fill_alpha = 0.2, lwd = 0.1) +
+  tm_shape(desire_lines_short, is.main = TRUE) + 
   tm_lines(lty = 2) +
   tm_shape(routes_short) +
   tm_lines(col = "red") +
@@ -563,7 +566,8 @@ tm_shape(desire_lines_short) +
                 type = "lines", col = c("black", "red"), lty = c(2, 1),
                 position = tm_pos_in("left", "top")) +
   tm_shape(zone_cents_routes) +
-  tm_symbols(fill = "black", size = 0.5)
+  tm_symbols(fill = "black", size = 0.5) +
+  tm_scalebar()
 ```
 
 Plotting the results on an interactive map, with `mapview::mapview(st_geometry(routes_short))` for example, shows that many short car trips take place in and around Bradley Stoke, around 10 km North of central Bristol.
@@ -616,17 +620,20 @@ route_network_scenario = overline(routes_short_scenario, attrib = "bicycle")
 
 The outputs of the two preceding code chunks are summarized in Figure \@ref(fig:rnetvis) below.
 
-```{r rnetvis, out.width="49%", fig.show='hold', fig.cap="Illustration of the percentage of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).", echo=FALSE, fig.height=6}
+```{r rnetvis, out.width="49%", fig.show='hold', fig.cap="Illustration of the percentage of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).", echo=FALSE, fig.height=7.5}
 routes_short_scenario |> 
   ggplot() +
-  geom_line(aes(distance / 1000, uptake)) +
+  geom_line(aes(distance / 1000, uptake), color = "red", linewidth = 3) +
   labs(x = "Route distance (km)", y = NULL, title = "Percent trips switching from driving to cycling") +
   scale_y_continuous(labels = scales::percent)
-tm_shape(route_network_scenario) +
+tm_shape(zones_od) +
+  tm_fill(fill_alpha = 0.2, lwd = 0.1) +
+  tm_shape(route_network_scenario, is.main = TRUE) +
   tm_lines(lwd = "bicycle", 
            lwd.scale = tm_scale(values.scale = 1.5),
            lwd.legend = tm_legend(title = "Number of bike trips per day\n(modeled, one direction)",
-                                  position = tm_pos_in("left", "top")))
+                                  position = tm_pos_in("left", "top")),
+           col = "red")
 ```
 
 Transport networks with records at the segment level, typically with attributes such as road type and width, constitute a common type of route network.
@@ -641,7 +648,7 @@ The output shows that `bristol_ways` represents just over 6 thousand segments on
 This and other geographic networks can be represented as mathematical graphs\index{graph}, with nodes\index{node} on the network, connected by edges\index{edge}.
 A number of R packages have been developed for dealing with such graphs, notably **igraph**\index{igraph (package)}.
 You can manually convert a route network into an `igraph` object, but the geographic attributes will be lost.
-To overcome this limitation of **igraph**, the **sfnetworks**\index{sfnetworks (package)} package, which to represent route networks simultaneously as graphs *and* geographic lines, was developed.
+To overcome this limitation of **igraph**, the **sfnetworks**\index{sfnetworks (package)} package [@R-sfnetworks], which to represent route networks simultaneously as graphs *and* geographic lines, was developed.
 We will demonstrate **sfnetworks** functionality on the `bristol_ways` object.
 
 ```{r 13-transport-23}
@@ -676,7 +683,9 @@ ways_centrality = ways_sfn |>
 
 ```{r wayssln, fig.cap="Illustration of route network datasets. The grey lines represent a simplified road network, with segment thickness proportional to betweenness. The green lines represent potential cycling flows (one way) calculated with the code above.", fig.scap="Illustration of a small route network.", echo=FALSE}
 bb_wayssln = tmaptools::bb(route_network_scenario, xlim = c(0.1, 0.9), ylim = c(0.1, 0.6), relative = TRUE)
-tm_shape(ways_centrality |> st_as_sf(), bb = bb_wayssln) +
+tm_shape(zones_od) +
+  tm_fill(fill_alpha = 0.2, lwd = 0.1) +
+  tm_shape(ways_centrality |> st_as_sf(), bb = bb_wayssln, is.main = TRUE) +
   tm_lines(lwd = "betweenness", 
            lwd.scale = tm_scale(n = 2, values.scale = 2),
            lwd.legend = tm_legend(title = "Betweenness"),
@@ -699,7 +708,7 @@ tm_shape(ways_centrality |> st_as_sf(), bb = bb_wayssln) +
 One can also find the shortest route\index{shortest route} between origins and destinations using this graph representation of the route network with the **sfnetworks** package.
 <!-- TODO: make an exercise based on this if time allows (RL 2022-07) -->
 The methods presented in this section are relatively simple compared with what is possible.
-The dual graph/spatial capabilities that **sfnetworks** opens up enable many new powerful techniques can cannot be fully covered in this section.
+The dual graph/spatial capabilities that **sfnetworks** enable many new powerful techniques can cannot be fully covered in this section.
 This section does, however, provide a strong starting point for further exploration and research into the area.
 A final point is that the example dataset we used above is relatively small.
 It may also be worth considering how the work could adapt to larger networks: testing methods on a subset of the data, and ensuring you have enough RAM will help, although it's also worth exploring other tools that can do transport network analysis that are optimized for large networks, such as R5 [@alessandretti_multimodal_2022].
@@ -712,7 +721,7 @@ We will identify promising locations for investment in sustainable transport inf
 An advantage of the data driven approach outlined in this chapter is its modularity: each aspect can be useful on its own, and feed into wider analyses.
 The steps that got us to this stage included identifying short but car-dependent commuting routes (generated from desire lines) in Section \@ref(routes) and analysis of route network characteristics with the **sfnetworks** package in Section \@ref(route-networks).
 The final code chunk of this chapter combines these strands of analysis, by overlaying estimates of cycling potential from the previous section on top of a new dataset representing areas within a short distance of cycling infrastructure.
-This new dataset is created in the code chunk below which: 1) filters out the cycleway entities from the `bristol_ways` object representing the transport network; 2) 'unions' the individual LINESTRING entities of the cycleways into a single multilinestring object (for speed of buffering); and 3) creates a 100 m buffer around them to create a polygon:
+This new dataset is created in the code chunk below which: 1) filters out the cycleway entities from the `bristol_ways` object representing the transport network; 2) 'unions' the individual LINESTRING entities of the cycleways into a single multilinestring object (for speed of buffering); and 3) creates a 100 m buffer around them to create a polygon.
 
 ```{r 13-transport-25}
 existing_cycleways_buffer = bristol_ways |> 
@@ -721,7 +730,7 @@ existing_cycleways_buffer = bristol_ways |>
   st_buffer(dist = 100)               # 3) create buffer
 ```
 
-The next stage is to create a dataset representing points on the network where there is high cycling potential but little provision for cycling:
+The next stage is to create a dataset representing points on the network where there is high cycling potential but little provision for cycling.
 
 ```{r, echo=FALSE, eval=FALSE}
 waldo::compare(
@@ -759,7 +768,7 @@ qtm(route_network_no_infra, basemaps = leaflet::providers$Esri.WorldTopoMap,
 <!-- toDo: rl -->
 <!-- the next figure must be updated -->
 
-```{r cycleways, echo=FALSE, message=FALSE, fig.cap="Potential routes along which to prioritise cycle infrastructure in Bristol to reduce car dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right).", out.width="50%", fig.show='hold', fig.scap="Routes along which to prioritise cycle infrastructure.", fig.height=6}
+```{r cycleways, echo=FALSE, message=FALSE, fig.cap="Potential routes along which to prioritise cycle infrastructure in Bristol to reduce car dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right).", out.width="50%", fig.show='hold', fig.scap="Routes along which to prioritise cycle infrastructure.", fig.height=7}
 # Previous verson:
 # source("code/13-cycleways.R")
 tm_shape(existing_cycleways_buffer, bbox = bristol_region) +
@@ -767,7 +776,8 @@ tm_shape(existing_cycleways_buffer, bbox = bristol_region) +
  tm_shape(route_network_scenario) +
  tm_lines(lwd = "bicycle",
           lwd.scale = tm_scale(values.scale = 3),
-          lwd.legend = tm_legend(title = "Number of bike trips (modeled, one direction)"))
+          lwd.legend = tm_legend(title = "Number of bike trips (modeled, one direction)"),
+                                 position = tm_pos_out("left", "bottom"))
 knitr::include_graphics("figures/bristol_cycleways_zoomed.png")
 ```
 
