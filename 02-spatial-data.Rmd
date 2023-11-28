@@ -810,25 +810,25 @@ By default the S2 geometry engine is turned on, as can be verified with the foll
 sf_use_s2()
 ```
 
-An example of the consequences of turning the geometry engine off is shown below, by creating buffers around the `india` object created earlier in the chapter (note the warnings emitted when S2 is turned off):
+An example of the consequences of turning the geometry engine off is shown below, by creating buffers around the `india` object created earlier in the chapter (note the warnings emitted when S2 is turned off) (Figure \ref(fig:s2example)):
 
 ```{r}
-india_buffer_with_s2 = st_buffer(india, 1)
+india_buffer_with_s2 = st_buffer(india, 1) # 1 meter
 sf_use_s2(FALSE)
-india_buffer_without_s2 = st_buffer(india, 1)
+india_buffer_without_s2 = st_buffer(india, 1) # 1 degree
 ```
 
-```{r s2example, echo=FALSE, fig.cap="Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer with inaccurate units of degrees longitude/latitude.", message=FALSE}
+```{r s2example, echo=FALSE, fig.cap="Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer of 1 degree, which is not accurate.", message=FALSE}
 library(tmap)
 tm1 = tm_shape(india_buffer_with_s2) +
-  tm_fill(fill = hcl.colors(4, palette = "purple green")[3]) +
+  tm_fill(fill = hcl.colors(4, palette = "purple green")[2], lwd = 0.01) +
   tm_shape(india) +
   tm_fill(fill = "grey95") +
   tm_title("st_buffer() with dist = 1") +
   tm_title("s2 switched on (default)", position = tm_pos_in(), size = 1)
 
 tm2 = tm_shape(india_buffer_without_s2) +
-  tm_fill(fill = hcl.colors(4, palette = "purple green")[3]) +
+  tm_fill(fill = hcl.colors(4, palette = "purple green")[3], lwd = 0.01) +
   tm_shape(india) +
   tm_fill(fill = "grey95") +
   tm_title(" ") +
@@ -836,6 +836,8 @@ tm2 = tm_shape(india_buffer_without_s2) +
 
 tmap_arrange(tm1, tm2, ncol = 2)
 ```
+
+The right panel of Figure \@ref(fig:s2example) is incorrect as the buffer of 1 degree does not return the equal distance around the `india` polygon (for more explanation of this issue, read Section \@ref(geom-proj)).
 
 Throughout this book we will assume that S2 is turned on, unless explicitly stated.
 Turn it on again with the following command.
