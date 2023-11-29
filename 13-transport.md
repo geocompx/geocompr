@@ -472,12 +472,6 @@ Free (but rate limited) routing service include [OSRM](http://project-osrm.org/)
 There are also more specific routing services such as that provided by [CycleStreets.net](https://www.cyclestreets.net/), a cycle journey planner and not-for-profit transport technology company "for cyclists, by cyclists".
 While R users can access CycleStreets routes via the package [**cyclestreets**](https://rpackage.cyclestreets.net/), many routing services lack R interfaces, representing a substantial opportunity for package development: building an R package to provide an interface to a web API can be a rewarding experience.
 
-The wide range of R packages for computing and importing data representing routes on transport networks is a strength, meaning that the language has been increasingly used for transport research over the last few years.
-However, a minor disadvantage of this proliferation of package and approaches is that there are many package and function names to remember.
-The package **stplanr** tackles this problem by providing a unified interface for generating routes with the `route()` function.
-The function takes a wide range of inputs, including geographic desire lines (with the `l =` argument), coordinates and even text strings representing unique addresses, and returns route data as consistent `sf` objects.
-<!-- TODO: at some point I hope to create a dedicated router package, mention that if it gets created (RL 2022-07) -->  
-
 ### Contraction hierarchies 
 
 When the network is big and the number of routes to compute is high, routing algorithms may take a large amount of time to finish. Several algorithmic techniques have been developed to significantly speed-up routing calculations. A famous one is called **contraction hierarchies**, which could divide computation time by 10, 100 or even 1000 depending the original network size. Contraction hierarchies algorithm is provided to the R landscape by [**cppRouting**](https://github.com/vlarmet/cppRouting) package.  
