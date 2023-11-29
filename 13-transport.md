@@ -476,7 +476,12 @@ The wide range of R packages for computing and importing data representing route
 However, a minor disadvantage of this proliferation of package and approaches is that there are many package and function names to remember.
 The package **stplanr** tackles this problem by providing a unified interface for generating routes with the `route()` function.
 The function takes a wide range of inputs, including geographic desire lines (with the `l =` argument), coordinates and even text strings representing unique addresses, and returns route data as consistent `sf` objects.
-<!-- TODO: at some point I hope to create a dedicated router package, mention that if it gets created (RL 2022-07) -->
+<!-- TODO: at some point I hope to create a dedicated router package, mention that if it gets created (RL 2022-07) -->  
+
+### Contraction hierarchies 
+
+When the network is big and the number of routes to compute is high, routing algorithms may take a large amount of time to finish. Several algorithmic techniques have been developed to significantly speed-up routing calculations. A famous one is called **contraction hierarchies**, which could divide computation time by 10, 100 or even 1000 depending the original network size. Contraction hierarchies algorithm is provided to the R landscape by [**cppRouting**](https://github.com/vlarmet/cppRouting) package.  
+
 
 ### Routing: A worked example
 
@@ -649,6 +654,13 @@ The dual graph/spatial capabilities that **sfnetworks** opens up enable many new
 This section does, however, provide a strong starting point for further exploration and research into the area.
 A final point is that the example dataset we used above is relatively small.
 It may also be worth considering how the work could adapt to larger networks: testing methods on a subset of the data, and ensuring you have enough RAM will help, although it's also worth exploring other tools that can do transport network analysis that are optimized for large networks, such as R5 [@alessandretti_multimodal_2022].
+
+## Traffic assignment  
+
+Traffic assignment is a fundamental topic in transportation modeling. Given an origin-destination flow matrix, it attempts to estimate flow on each route of the network. The most common way to resolve this problem is to follow the Wardrop’s principle of user equilibrium which states “The journey times in all routes actually used are equal and less than those that would be experienced by a single vehicle on any unused route”. To be realistic, congestion effect must be taken into account by defining a mathematical relationship between cost and flow.
+
+This kind of optimization problem can be solved by iterative algorithms like Frank-Wolfe or Algorithm-B. [**cppRouting**](https://github.com/vlarmet/cppRouting) package offer a large choice of algorithms to assign traffic in a network.  
+
 
 ## Prioritizing new infrastructure
 

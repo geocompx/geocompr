@@ -22,17 +22,17 @@
 <script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><link href="libs/Lato-0.4.7/font.css" rel="stylesheet">
 <link href="libs/Roboto_Mono-0.4.7/font.css" rel="stylesheet">
 <link href="libs/Montserrat-0.4.7/font.css" rel="stylesheet">
-<script src="libs/bs3compat-0.5.1/transition.js"></script><script src="libs/bs3compat-0.5.1/tabs.js"></script><script src="libs/bs3compat-0.5.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs3compat-0.6.1/transition.js"></script><script src="libs/bs3compat-0.6.1/tabs.js"></script><script src="libs/bs3compat-0.6.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
 <script src="libs/bs4_book-1.0.0/bs4_book.js"></script><meta name="citation_title" content="Chapter 13 Transportation | Geocomputation with R">
 <meta name="citation_author" content="Robin Lovelace">
 <meta name="citation_author" content="Jakub Nowosad">
 <meta name="citation_author" content="Jannes Muenchow">
 <meta name="citation_publication_date" content="2019">
 <meta name="citation_isbn" content="9780203730058">
-<script src="libs/htmlwidgets-1.6.2/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
+<script src="libs/htmlwidgets-1.6.3/htmlwidgets.js"></script><link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
 <script src="libs/leaflet-1.3.1/leaflet.js"></script><link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
 <script src="libs/proj4-2.6.2/proj4.min.js"></script><script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script><link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
-<script src="libs/leaflet-binding-2.2.0/leaflet.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+<script src="libs/leaflet-binding-2.2.1/leaflet.js"></script><script src="libs/kePrint-0.0.1/kePrint.js"></script><link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
 <script>
@@ -164,7 +164,7 @@ Beyond geographic levels and agents, the basic unit of analysis in many transpor
 Trips join-up the different levels of transport systems and can be represented simplistically as geographic <em>desire lines</em> connecting <em>zone</em> centroids (<em>nodes</em>) or as routes that follow the transport <em>route network</em>.
 In this context, <em>agents</em> are usually point entities that move within the transport network.</p>
 <p>Transport systems are dynamic <span class="citation">(<a href="references.html#ref-xie_evolving_2011">Xie and Levinson 2011</a>)</span>.
-While the focus of this chapter is the <em>geographic</em> analysis of a transport systems, it provides insights into how the approach can be used to simulate scenarios of change, in Section <a href="transport.html#prioritizing-new-infrastructure">13.8</a>.
+While the focus of this chapter is the <em>geographic</em> analysis of a transport systems, it provides insights into how the approach can be used to simulate scenarios of change, in Section <a href="transport.html#prioritizing-new-infrastructure">13.9</a>.
 The purpose of geographic transport modeling can be interpreted as simplifying the complexity of these spatio-temporal systems in ways that capture their essence.
 Selecting appropriate levels of geographic analysis can help simplify this complexity without losing its most important features and variables, enabling better decision making and more effective interventions <span class="citation">(<a href="references.html#ref-hollander_transport_2016">Hollander 2016</a>)</span>.</p>
 <p>Typically, models are designed to tackle a particular problem, such as how to improve safety or the environmental performance of transport systems.
@@ -569,9 +569,15 @@ The package <strong>stplanr</strong> tackles this problem by providing a unified
 The function takes a wide range of inputs, including geographic desire lines (with the <code>l =</code> argument), coordinates and even text strings representing unique addresses, and returns route data as consistent <code>sf</code> objects.
 <!-- TODO: at some point I hope to create a dedicated router package, mention that if it gets created (RL 2022-07) --></p>
 </div>
-<div id="routing-a-worked-example" class="section level3" number="13.6.5">
+<div id="contraction-hierarchies" class="section level3" number="13.6.5">
 <h3>
-<span class="header-section-number">13.6.5</span> Routing: A worked example<a class="anchor" aria-label="anchor" href="#routing-a-worked-example"><i class="fas fa-link"></i></a>
+<span class="header-section-number">13.6.5</span> Contraction hierarchies<a class="anchor" aria-label="anchor" href="#contraction-hierarchies"><i class="fas fa-link"></i></a>
+</h3>
+<p>When the network is big and the number of routes to compute is high, routing algorithms may take a large amount of time to finish. Several algorithmic techniques have been developed to significantly speed-up routing calculations. A famous one is called <strong>contraction hierarchies</strong>, which could divide computation time by 10, 100 or even 1000 depending the original network size. Contraction hierarchies algorithm is provided to the R landscape by <a href="https://github.com/vlarmet/cppRouting"><strong>cppRouting</strong></a> package.</p>
+</div>
+<div id="routing-a-worked-example" class="section level3" number="13.6.6">
+<h3>
+<span class="header-section-number">13.6.6</span> Routing: A worked example<a class="anchor" aria-label="anchor" href="#routing-a-worked-example"><i class="fas fa-link"></i></a>
 </h3>
 <p>Instead of routing <em>all</em> desire lines generated in Section <a href="transport.html#desire-lines">13.4</a>, we focus on a subset that is highly policy relevant.
 Running a computationally intensive operation on a subset before trying to process the whole dataset is often sensible, and this applies to routing.
@@ -708,9 +714,16 @@ This section does, however, provide a strong starting point for further explorat
 A final point is that the example dataset we used above is relatively small.
 It may also be worth considering how the work could adapt to larger networks: testing methods on a subset of the data, and ensuring you have enough RAM will help, although it’s also worth exploring other tools that can do transport network analysis that are optimized for large networks, such as R5 <span class="citation">(<a href="references.html#ref-alessandretti_multimodal_2022">Alessandretti et al. 2022</a>)</span>.</p>
 </div>
-<div id="prioritizing-new-infrastructure" class="section level2" number="13.8">
+<div id="traffic-assignment" class="section level2" number="13.8">
 <h2>
-<span class="header-section-number">13.8</span> Prioritizing new infrastructure<a class="anchor" aria-label="anchor" href="#prioritizing-new-infrastructure"><i class="fas fa-link"></i></a>
+<span class="header-section-number">13.8</span> Traffic assignment<a class="anchor" aria-label="anchor" href="#traffic-assignment"><i class="fas fa-link"></i></a>
+</h2>
+<p>Traffic assignment is a fundamental topic in transportation modeling. Given an origin-destination flow matrix, it attempts to estimate flow on each route of the network. The most common way to resolve this problem is to follow the Wardrop’s principle of user equilibrium which states “The journey times in all routes actually used are equal and less than those that would be experienced by a single vehicle on any unused route”. To be realistic, congestion effect must be taken into account by defining a mathematical relationship between cost and flow.</p>
+<p>This kind of optimization problem can be solved by iterative algorithms like Frank-Wolfe or Algorithm-B. <a href="https://github.com/vlarmet/cppRouting"><strong>cppRouting</strong></a> package offer a large choice of algorithms to assign traffic in a network.</p>
+</div>
+<div id="prioritizing-new-infrastructure" class="section level2" number="13.9">
+<h2>
+<span class="header-section-number">13.9</span> Prioritizing new infrastructure<a class="anchor" aria-label="anchor" href="#prioritizing-new-infrastructure"><i class="fas fa-link"></i></a>
 </h2>
 <p>This section demonstrates how geocomputation can create policy relevant outcomes in the field of transport planning.
 We will identify promising locations for investment in sustainable transport infrastructure, using a simple approach for educational purposes.</p>
@@ -747,9 +760,9 @@ FIGURE 13.8: Potential routes along which to prioritise cycle infrastructure in 
 However, the results demonstrate how geographic data analysis can be used to highlight places where new investment in cycleways could be particularly beneficial, despite the simplicity of the approach.
 The analysis would need to be substantially expanded — including with larger input datasets — to inform transport planning design in practice.</p>
 </div>
-<div id="future-directions-of-travel" class="section level2" number="13.9">
+<div id="future-directions-of-travel" class="section level2" number="13.10">
 <h2>
-<span class="header-section-number">13.9</span> Future directions of travel<a class="anchor" aria-label="anchor" href="#future-directions-of-travel"><i class="fas fa-link"></i></a>
+<span class="header-section-number">13.10</span> Future directions of travel<a class="anchor" aria-label="anchor" href="#future-directions-of-travel"><i class="fas fa-link"></i></a>
 </h2>
 <p>This chapter provided a taste of the possibilities of using geocomputation for transport research, and explored some key geographic elements that make-up a city’s transport system with open data and reproducible code.
 The results could help plan where investment is needed.</p>
@@ -769,9 +782,9 @@ Using R’s statistical modeling capabilities, this could then be used to predic
 <p>This type of analysis underlies the Propensity to Cycle Tool (PCT), a publicly accessible (see <a href="https://www.pct.bike/">www.pct.bike</a>) mapping tool developed in R that is being used to prioritize investment in cycling across England <span class="citation">(<a href="references.html#ref-lovelace_propensity_2017">Lovelace et al. 2017</a>)</span>.
 Similar tools could be used to encourage evidence-based transport policies related to other topics such as air pollution and public transport access around the world.</p>
 </div>
-<div id="ex-transport" class="section level2" number="13.10">
+<div id="ex-transport" class="section level2" number="13.11">
 <h2>
-<span class="header-section-number">13.10</span> Exercises<a class="anchor" aria-label="anchor" href="#ex-transport"><i class="fas fa-link"></i></a>
+<span class="header-section-number">13.11</span> Exercises<a class="anchor" aria-label="anchor" href="#ex-transport"><i class="fas fa-link"></i></a>
 </h2>
 <p>E1. In much of the analysis presented in the chapter we focused on active modes, but what about driving trips?</p>
 <ul>
@@ -828,13 +841,15 @@ How could raster datasets assist with this work?</p>
 <li><a class="nav-link" href="#memengine"><span class="header-section-number">13.6.2</span> In-memory routing with R</a></li>
 <li><a class="nav-link" href="#localengine"><span class="header-section-number">13.6.3</span> Locally hosted dedicated routing engines</a></li>
 <li><a class="nav-link" href="#remoteengine"><span class="header-section-number">13.6.4</span> Remotely hosted dedicated routing engines</a></li>
-<li><a class="nav-link" href="#routing-a-worked-example"><span class="header-section-number">13.6.5</span> Routing: A worked example</a></li>
+<li><a class="nav-link" href="#contraction-hierarchies"><span class="header-section-number">13.6.5</span> Contraction hierarchies</a></li>
+<li><a class="nav-link" href="#routing-a-worked-example"><span class="header-section-number">13.6.6</span> Routing: A worked example</a></li>
 </ul>
 </li>
 <li><a class="nav-link" href="#route-networks"><span class="header-section-number">13.7</span> Route networks</a></li>
-<li><a class="nav-link" href="#prioritizing-new-infrastructure"><span class="header-section-number">13.8</span> Prioritizing new infrastructure</a></li>
-<li><a class="nav-link" href="#future-directions-of-travel"><span class="header-section-number">13.9</span> Future directions of travel</a></li>
-<li><a class="nav-link" href="#ex-transport"><span class="header-section-number">13.10</span> Exercises</a></li>
+<li><a class="nav-link" href="#traffic-assignment"><span class="header-section-number">13.8</span> Traffic assignment</a></li>
+<li><a class="nav-link" href="#prioritizing-new-infrastructure"><span class="header-section-number">13.9</span> Prioritizing new infrastructure</a></li>
+<li><a class="nav-link" href="#future-directions-of-travel"><span class="header-section-number">13.10</span> Future directions of travel</a></li>
+<li><a class="nav-link" href="#ex-transport"><span class="header-section-number">13.11</span> Exercises</a></li>
 </ul>
 
       <div class="book-extra">
@@ -852,7 +867,7 @@ How could raster datasets assist with this work?</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-11-11.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-11-29.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">

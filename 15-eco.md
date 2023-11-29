@@ -474,9 +474,9 @@ To do so, we only need to run the `predict` method of our fitted `AutoTuner` obj
 autotuner_rf$predict(task)
 #> Warning: Detected version mismatch: Learner 'regr.ranger.tuned' has been
 #> trained with mlr3 version '0.13.3', not matching currently installed version
-#> '0.16.1'
+#> '0.17.0'
 #> Warning: Detected version mismatch: Learner 'regr.ranger' has been trained with
-#> mlr3 version '0.13.3', not matching currently installed version '0.16.1'
+#> mlr3 version '0.13.3', not matching currently installed version '0.17.0'
 #> <PredictionRegr> for 84 observations:
 #>     row_ids  truth response
 #>           1 -1.084   -1.073
