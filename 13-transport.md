@@ -474,11 +474,18 @@ While R users can access CycleStreets routes via the package [**cyclestreets**](
 
 ### Contraction hierarchies and traffic assigment
 
-When the network is big and the number of routes to compute is high, routing algorithms may take a large amount of time to finish. Several algorithmic techniques have been developed to significantly speed-up routing calculations. A famous one is called **contraction hierarchies**, which could divide computation time by 10, 100 or even 1000 depending the original network size. Contraction hierarchies algorithm is provided to the R landscape by [**cppRouting**](https://github.com/vlarmet/cppRouting) package.  
+Calculating many routes on large networks is resource intensive that can take hours.
+Several algorithmic techniques have been developed to speed-up routing calculations.
+A famous one is called **contraction hierarchies**, which could divide computation time by 10, 100 or even 1000 depending the original network size.
+Contraction hierarchies algorithm is provided to the R landscape by [**cppRouting**](https://github.com/vlarmet/cppRouting) package.  
 
-Traffic assignment is a fundamental topic in transportation modeling. Given an origin-destination flow matrix, it attempts to estimate flow on each route of the network. The most common way to resolve this problem is to follow the Wardrop’s principle of user equilibrium which states “The journey times in all routes actually used are equal and less than those that would be experienced by a single vehicle on any unused route”. To be realistic, congestion effect must be taken into account by defining a mathematical relationship between cost and flow.
+Traffic assignment is a fundamental topic in transportation modeling.
+Given an origin-destination flow matrix, it attempts to estimate flow on each route of the network.
+The most common way to resolve this problem is to follow the Wardrop’s principle of user equilibrium which states “The journey times in all routes actually used are equal and less than those that would be experienced by a single vehicle on any unused route”.
+To be realistic, congestion effect must be taken into account by defining a mathematical relationship between cost and flow.
 
-This kind of optimization problem can be solved by iterative algorithms like Frank-Wolfe or Algorithm-B. [**cppRouting**](https://github.com/vlarmet/cppRouting) package offer a large choice of algorithms to assign traffic in a network.  
+This kind of optimization problem can be solved by iterative algorithms like Frank-Wolfe or Algorithm-B.
+[**cppRouting**](https://github.com/vlarmet/cppRouting) package offer a large choice of algorithms to assign traffic in a network.  
 
 
 ### Routing: A worked example
