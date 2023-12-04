@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2023-11-29'
+date: '2023-12-04'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -44,7 +44,7 @@ Its current 'build status' as follows:
 
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 
-This version of the book was built on GH Actions on 2023-11-29.
+This version of the book was built on GH Actions on 2023-12-04.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png"/></a><br/>This book is licensed to you under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
@@ -188,7 +188,7 @@ The chapters in Part I aim to address this by providing reproducible code on sim
 An important aspect of the book from a teaching/learning perspective is the **exercises** at the end of each chapter.
 Completing these will develop your skills and equip you with the confidence needed to tackle a range of geospatial problems.
 Solutions to the exercises can be found in an online booklet that accompanies Geocomputation with R, hosted at [r.geocompx.org/solutions](https://r.geocompx.org/solutions).
-To learn how to this booklet was created, and how to update solutions in files such as [_01-ex.Rmd](https://github.com/geocompx/geocompr/blob/main/_01-ex.Rmd), see this [blog post](https://geocompx.org/post/2022/geocompr-solutions/).
+To learn how this booklet was created, and how to update solutions in files such as [_01-ex.Rmd](https://github.com/geocompx/geocompr/blob/main/_01-ex.Rmd), see this [blog post](https://geocompx.org/post/2022/geocompr-solutions/).
 For more blog posts and extended examples, see the book's supporting website at [geocompx.org](https://geocompx.org).
 
 Impatient readers are welcome to dive straight into the practical examples, starting in Chapter \@ref(spatial-class).
