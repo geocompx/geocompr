@@ -257,7 +257,7 @@ Table: (\#tab:revdep)The top 5 most downloaded packages that depend on sf, in te
 
 
 
-Parallel group of developments relates to the [rspatial](https://github.com/rspatial) set of packages.^[Note the difference between "r-spatial", organization containing packages such as **sf**, and "rspatial", organization responsible for **terra**.]
+A parallel group of developments relates to the [rspatial](https://github.com/rspatial) set of packages.^[Note the difference between "r-spatial", organization containing packages such as **sf**, and "rspatial", organization responsible for **terra**.]
 Its main member is the **terra** package for spatial raster handling (see Section \@ref(an-introduction-to-terra)).
 
 ## The history of R-spatial
