@@ -11,7 +11,7 @@ The chapter uses the following packages:
 library(sf)
 library(terra)
 library(dplyr)
-library(data.table)        # fast data.frame manipulation (used by mlr3)
+library(data.table)        # fast data frame manipulation (used by mlr3)
 library(mlr3)              # machine learning (see Chapter 12)
 library(mlr3spatiotempcv)  # spatio-temporal resampling 
 library(mlr3tuning)        # hyperparameter tuning package
@@ -44,7 +44,7 @@ knitr::include_graphics("figures/15_study_area_mongon.png")
 # knitr::include_graphics("https://user-images.githubusercontent.com/1825120/38989956-6eae7c9a-43d0-11e8-8f25-3dd3594f7e74.png")
 ```
 
-During a field study to Mt. Mongón, all vascular plants living in 100 randomly sampled 4x4 m^2^ plots in the austral winter of 2011  were recorded[@muenchow_predictive_2013].
+During a field study to Mt. Mongón, all vascular plants living in 100 randomly sampled 4x4 m^2^ plots in the austral winter of 2011  were recorded [@muenchow_predictive_2013].
 The sampling coincided with a strong La Niña event that year, as shown in data published by the National Oceanic and Atmospheric Administration ([NOAA](https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php)).
 This led to even higher levels of aridity than usual in the coastal desert and increased fog activity on the southern slopes of Peruvian *lomas* mountains.
 
@@ -115,10 +115,10 @@ Visualizing the data helps to get more familiar with it, as shown in Figure \@re
 knitr::include_graphics("figures/15_sa_mongon_sampling.png")
 ```
 
-The next step is to compute variables which are not only needed for the modeling and predictive mapping (see Section \@ref(predictive-mapping)) but also for aligning the Non-metric multidimensional scaling (NMDS)\index{NMDS} axes with the main gradient in the study area, altitude and humidity, respectively (see Section \@ref(nmds)).
+The next step is to compute variables which are not only needed for the modeling and predictive mapping (see Section \@ref(predictive-mapping)) but also for aligning the non-metric multidimensional scaling (NMDS)\index{NMDS} axes with the main gradient in the study area, altitude and humidity, respectively (see Section \@ref(nmds)).
 
 Specifically, we compute catchment slope and catchment area\index{catchment area} from a digital elevation model\index{digital elevation model} using R-GIS bridges (see Chapter \@ref(gis)).
-Curvatures might also represent valuable predictors, and in the Exercise section you can find out how they would impact the modeling result.
+Curvatures might also represent valuable predictors, and in the exercise section you can find out how they would impact the modeling result.
 
 To compute catchment area\index{catchment area} and catchment slope, we can make use of the `sagang:sagawetnessindex` function.^[Admittedly, it is a bit unsatisfying that the only way of knowing that `sagawetnessindex` computes the desired terrain attributes is to be familiar with SAGA\index{SAGA}.]
 `qgis_show_help()` returns all function\index{function} parameters and default values of a specific geoalgorithm\index{geoalgorithm}.
@@ -186,9 +186,9 @@ Additionally, we will add two more raster objects to it, namely `dem` and `ndvi`
 # read in catchment area and catchment slope
 ep = ep[c("AREA", "SLOPE")] |>
   unlist() |>
-  terra::rast()
-names(ep) = c("carea", "cslope") # assign proper names 
-terra::origin(ep) = terra::origin(dem) # make sure rasters have the same origin
+  rast()
+names(ep) = c("carea", "cslope") # assign better names 
+origin(ep) = origin(dem) # make sure rasters have the same origin
 ep = c(dem, ndvi, ep) # add dem and ndvi to the multilayer SpatRaster object
 ```
 
@@ -202,15 +202,14 @@ ep$carea = log10(ep$carea)
 As a convenience to the reader, we have added `ep` to **spDataLarge**:
 
 ```{r 15-eco-9, cache.lazy=FALSE}
-ep = terra::rast(system.file("raster/ep.tif", package = "spDataLarge"))
+ep = rast(system.file("raster/ep.tif", package = "spDataLarge"))
 ```
 
 Finally, we can extract the terrain attributes to our field observations (see also Section \@ref(raster-extraction)).
 
 ```{r 15-eco-10, cache=TRUE, cache.lazy=FALSE, message=FALSE, warning=FALSE}
 # terra::extract adds automatically a for our purposes unnecessary ID column
-ep_rp = terra::extract(ep, random_points) |>
-  select(-ID)
+ep_rp = terra::extract(ep, random_points, ID = FALSE)
 random_points = cbind(random_points, ep_rp)
 ```
 
@@ -255,7 +254,7 @@ The resulting matrix serves as input for the NMDS\index{NMDS}.
 One way of choosing `k` is to try `k` values between 1 and 6 and then using the result which yields the best stress value [@mccune_analysis_2002].
 ]
 NMDS\index{NMDS} is an iterative procedure trying to make the ordinated space more similar to the input matrix in each step.
-To make sure that the algorithm converges, we set the number of steps to 500 (`try` parameter).
+To make sure that the algorithm converges, we set the number of steps to 500 using the `try` parameter.
 
 ```{r 15-eco-12, eval=FALSE, message=FALSE}
 set.seed(25072018)
@@ -365,8 +364,8 @@ To spatially visualize them, we can model the NMDS\index{NMDS} scores with the p
 
 ## Modeling the floristic gradient
 
-To predict the floristic gradient spatially, we use a random forest\index{random forest} model [@hengl_random_2018].
-Random forest\index{random forest} models are frequently applied in environmental and ecological modeling, and often provide the best results in terms of predictive performance [@schratz_hyperparameter_2019]. 
+To predict the floristic gradient spatially, we use a random forest\index{random forest} model.
+Random forest\index{random forest} models are frequently applied in environmental and ecological modeling, and often provide the best results in terms of predictive performance [@hengl_random_2018;@schratz_hyperparameter_2019]. 
 Here, we shortly introduce decision trees and bagging, since they form the basis of random forests\index{random forest}.
 We refer the reader to @james_introduction_2013 for a more detailed description of random forests\index{random forest} and related techniques.
 
@@ -409,7 +408,7 @@ The observations falling into the left branch have a mean NMDS\index{NMDS} score
 Overall, we can interpret the tree as follows: the higher the elevation, the higher the NMDS\index{NMDS} score becomes.
 This means that the simple decision tree has already revealed four distinct floristic assemblages.
 For a more in-depth interpretation please refer to the \@ref(predictive-mapping) section.
-Decision trees have a tendency to overfit\index{overfitting}, that is they mirror too closely the input data including its noise which in turn leads to bad predictive performances [Section \@ref(intro-cv); @james_introduction_2013].
+Decision trees have a tendency to overfit\index{overfitting}, that is they mirror too closely the input data including its noise which in turn leads to bad predictive performances (Section \@ref(intro-cv); @james_introduction_2013).
 Bootstrap aggregation (bagging) is an ensemble technique that can help to overcome this problem.
 Ensemble techniques simply combine the predictions of multiple models.
 Thus, bagging takes repeated samples from the same input data and averages the predictions.
@@ -435,7 +434,7 @@ The only differences are the following:
 1. We are leaving the assessment of a bias-reduced performance measure as an exercise to the reader (see Exercises).
 Instead we show how to tune hyperparameters\index{hyperparameter} for (spatial) predictions
 
-Remember that 125,500 models were necessary to retrieve bias-reduced performance estimates when using 100-repeated 5-fold spatial cross-validation\index{cross-validation!spatial CV} and a random search of 50 iterations (see Section \@ref(svm)).
+Remember that 125,500 models were necessary to retrieve bias-reduced performance estimates when using 100-repeated 5-fold spatial cross-validation\index{cross-validation!spatial CV} and a random search of 50 iterations in Section \@ref(svm).
 In the hyperparameter\index{hyperparameter} tuning level, we found the best hyperparameter combination which in turn was used in the outer performance level for predicting the test data of a specific spatial partition (see also Figure \@ref(fig:inner-outer)). 
 This was done for five spatial partitions, and repeated a 100 times yielding in total 500 optimal hyperparameter combinations.
 Which one should we use for making spatial distribution maps?
@@ -527,12 +526,13 @@ An `mtry` of `r # autotuner_rf$tuning_result$mtry`, a `sample.fraction` of `r # 
 An RMSE\index{RMSE} of `r # round(autotuner_rf$tuning_result$regr.rmse, 2)`
 is relatively good when considering the range of the response variable which is `r # round(diff(range(rp$sc)), 2)` (`diff(range(rp$sc))`).
 -->
+
 ### Predictive mapping
 
 The tuned hyperparameters\index{hyperparameter} can now be used for the prediction.
 To do so, we only need to run the `predict` method of our fitted `AutoTuner` object.
 
-```{r 15-eco-27, cache=TRUE, cache.lazy=FALSE}
+```{r 15-eco-27, cache=TRUE, cache.lazy=FALSE, warning=FALSE}
 # predicting using the best hyperparameter combination
 autotuner_rf$predict(task)
 ```
@@ -609,7 +609,7 @@ Since *lomas* mountains are heavily endangered, the prediction map can serve as 
 In terms of methodology, a few additional points could be addressed:
 
 - It would be interesting to also model the second ordination\index{ordination} axis, and to subsequently find an innovative way of visualizing jointly the modeled scores of the two axes in one prediction map
-- If we were interested in interpreting the model in an ecologically meaningful way, we should probably use (semi-)parametric models [@muenchow_predictive_2013;@zuur_mixed_2009;@zuur_beginners_2017]
+- If we were interested in interpreting the model in an ecologically meaningful way, we should probably use (semi-)parametric models [@muenchow_predictive_2013;@zuur_mixed_2009;@zuur_beginners_2017]/
 However, there are at least approaches that help to interpret machine learning models such as random forests\index{random forest} (see, e.g., [https://mlr-org.com/posts/2018-04-30-interpretable-machine-learning-iml-and-mlr/](https://mlr-org.com/posts/2018-04-30-interpretable-machine-learning-iml-and-mlr/))
 - A sequential model-based optimization (SMBO) might be preferable to the random search for hyperparameter\index{hyperparameter} optimization used in this chapter [@probst_hyperparameters_2018]
 
@@ -622,7 +622,7 @@ If the linear model cannot cope with the degree of non-linearity present in the 
 The point here is that the toolbox of a data scientist consists of more than one tool, and it is your responsibility to select the tool best suited for the task or purpose at hand.
 Here, we wanted to introduce the reader to random forest\index{random forest} modeling and how to use the corresponding results for predictive mapping purposes.
 For this purpose, a well-studied dataset with known relationships between response and predictors, is appropriate.
-However, this does not imply that the random forest\index{random forest} model has returned the best result in terms of predictive performance (see Exercises).
+However, this does not imply that the random forest\index{random forest} model has returned the best result in terms of predictive performance.
 
 ## Exercises
 

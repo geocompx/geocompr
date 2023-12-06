@@ -12,8 +12,6 @@ library(spData)
 ```
 
 ## Introduction
-<!--toDo:RL-->
-<!--revise and update the following section-->
 
 This chapter is about reading and writing geographic data.
 Geographic data *input* is essential for geocomputation\index{geocomputation}: real-world applications are impossible without data.
@@ -22,10 +20,11 @@ Taken together, these processes of input/output can be referred to as data I/O.
 
 Geographic data I/O is often done with few lines of code at the beginning and end of projects.
 It is often overlooked as a simple one step process.
-However, mistakes made at the outset of projects (e.g. using an out-of-date or in some way faulty dataset) can lead to large problems later down the line, so it is worth putting considerable time into identifying which datasets are *available*, where they can be *found* and how to *retrieve* them.
+However, mistakes made at the outset of projects (e.g., using an out-of-date or in some way faulty dataset) can lead to large problems later down the line, so it is worth putting considerable time into identifying which datasets are *available*, where they can be *found* and how to *retrieve* them.
 These topics are covered in Section \@ref(retrieving-data), which describes various *geoportals*, which collectively contain many terabytes of data, and how to use them.
 To further ease data access, a number of packages for downloading geographic data have been developed.
 These are described in Section \@ref(geographic-data-packages).
+Another possibility to obtain spatial data is to use web services, such as WFS (Section \@ref(geographic-web-services)).
 
 There are many geographic file formats, each of which has pros and cons.
 These are described in Section \@ref(file-formats).
@@ -33,11 +32,9 @@ The process of actually reading and writing such file formats efficiently is not
 The final Section \@ref(visual-outputs) demonstrates methods for saving visual outputs (maps), in preparation for Chapter \@ref(adv-map) on visualization.
 
 ## Retrieving open data {#retrieving-data}
-<!--toDo:RL-->
-<!--revise and update the following section-->
 
 \index{open data}
-A vast and ever-increasing amount of geographic data is available on the internet, much of which is free to access and use (with appropriate credit given to its providers).^[For example, visit https://freegisdata.rtwilson.com/ for a list of websites with freely available geographic datasets.]
+A vast and ever-increasing amount of geographic data is available on the internet, much of which is free to access and use (with appropriate credit given to its providers).^[For example, visit https://freegisdata.rtwilson.com/ for a long list of websites with freely available geographic datasets.]
 In some ways there is now *too much* data, in the sense that there are often multiple places to access the same dataset.
 Some datasets are of poor quality.
 In this context, it is vital to know where to look, so the first section covers some of the most important sources.
@@ -45,14 +42,14 @@ Various 'geoportals' (web services providing geospatial datasets such as [Data.g
 
 \index{geoportals}
 Some global geoportals overcome this issue.
-The [GEOSS portal](https://www.geoportal.org/) and the [Copernicus Open Access Hub](https://scihub.copernicus.eu/), for example, contain many raster datasets with global coverage.
+The [GEOSS portal](https://www.geoportal.org/) and the [Copernicus Data Space Ecosystem](https://dataspace.copernicus.eu/), for example, contain many raster datasets with global coverage.
 A wealth of vector datasets can be accessed from the [SEDAC](https://sedac.ciesin.columbia.edu/) portal run by the National Aeronautics and Space Administration (NASA) and the European Union's [INSPIRE geoportal](http://inspire-geoportal.ec.europa.eu/), with global and regional coverage.
 
 Most geoportals provide a graphical interface allowing datasets to be queried based on characteristics such as spatial and temporal extent, the United States Geological Survey's [EarthExplorer](https://earthexplorer.usgs.gov/) being a prime example.
 *Exploring* datasets interactively on a browser is an effective way of understanding available layers.
 *Downloading* data is best done with code, however, from reproducibility and efficiency perspectives.
-Downloads can be initiated from the command line using a variety of techniques, primarily via URLs and APIs\index{API} (see the [Sentinel API](https://scihub.copernicus.eu/twiki/do/view/SciHubWebPortal/APIHubDescription) for example).
-Files hosted on static URLs can be downloaded with `download.file()`, as illustrated in the code chunk below which accesses PeRL: Permafrost Region Pond and Lake Database from [doi.pangaea.de](https://doi.pangaea.de/10.1594/PANGAEA.868349):
+Downloads can be initiated from the command line using a variety of techniques, primarily via URLs and APIs\index{API} (see the [Copernicus APIs](https://dataspace.copernicus.eu/analyse/apis) for example).^[An example of using a STAC API to download Sentinel-2 data is provided in Section \@ref(staccog).]
+Files hosted on static URLs can be downloaded with `download.file()`, as illustrated in the code chunk below which accesses PeRL: Permafrost Region Pond and Lake Database from [pangaea.de](https://doi.pangaea.de/10.1594/PANGAEA.868349):
 
 ```{r 07-read-write-plot-2, eval=FALSE}
 download.file(url = "https://hs.pangaea.de/Maps/PeRL/PeRL_permafrost_landscapes.zip",
@@ -63,9 +60,6 @@ canada_perma_land = read_sf("PeRL_permafrost_landscapes/canada_perma_land.shp")
 ```
 
 ## Geographic data packages
-<!--toDo:RL-->
-<!--revise and update the following section-->
-<!-- JN: btw -- should we add references to these packages? -->
 
 \index{data packages}
 Many R packages have been developed for accessing geographic data, some of which are presented in Table \@ref(tab:datapackages).
@@ -74,6 +68,8 @@ These provide interfaces to one or more spatial libraries or geoportals and aim 
 ```{r datapackages, echo=FALSE, warning=FALSE}
 datapackages = tibble::tribble(
   ~`Package`, ~Description,
+  "climateR", "Access over 100,000k gridded climate and landscape datasets from over 2,000 data providers by area of interest.",
+  "elevatr", "Access point and raster elevation data from various sources.",
   "FedData", "Datasets maintained by the US Federal government, including elevation and land cover.",
   "geodata", "Download and import imports administrative, elevation, WorldClim data.",
   "osmdata", "Download and import small OpenStreetMap datasets.",
@@ -88,50 +84,29 @@ knitr::kable(datapackages,
   kableExtra::kable_styling(latex_options="scale_down")
 ```
 
-<!--toDo:JN-->
-<!-- add to the table: -->
-<!-- https://github.com/jhollist/elevatr/issues/64 -->
-<!-- https://github.com/mikejohnson51/climateR/issues/44 -->
-<!-- maybe: -->
+<!-- other options: -->
 <!-- https://github.com/ErikKusch/KrigR -->
 <!-- https://github.com/VeruGHub/easyclimate -->
-<!-- mention: -->
 <!-- https://github.com/ropensci/MODIStsp -->
 <!-- https://github.com/ropensci/rsat -->
-<!--https://onlinelibrary.wiley.com/doi/10.1111/ecog.06768-->
+<!-- https://onlinelibrary.wiley.com/doi/10.1111/ecog.06768-->
 
 It should be emphasized that Table \@ref(tab:datapackages) represents only a small number of available geographic data packages.
 For example, a large number of R packages exist to obtain various socio-demographic data, such as **tidycensus** and **tigris** (USA),  **cancensus** (Canada), **eurostat** and **giscoR** (European Union), or **idbr** (international databases) -- read [Analyzing US Census Data](https://walker-data.com/census-r/) [@walker_analyzing_2022] to find some examples of how to analyse such data.
 Similarly, several R packages exist giving access to spatial data for various regions and countries, such as **bcdata** (Province of British Columbia), **geobr** (Brazil), **RCzechia** (Czechia), or **rgugik** (Poland).
-Other notable package is **GSODR**, which provides Global Summary Daily Weather Data in R (see the package's [README](https://github.com/ropensci/GSODR) for an overview of weather data sources).
 
 Each data package has its own syntax for accessing data.
 This diversity is demonstrated in the subsequent code chunks, which show how to get data using three packages from Table \@ref(tab:datapackages).^[More examples of data downloading using dedicated R packages can be found at https://rspatialdata.github.io/.]
-Country borders are often useful and these can be accessed with the `ne_countries()` function from the **rnaturalearth** package as follows:
+Country borders are often useful and these can be accessed with the `ne_countries()` function from the **rnaturalearth** package [@R-rnaturalearth] as follows:
 
 ```{r 07-read-write-plot-3}
 library(rnaturalearth)
-usa = ne_countries(country = "United States of America") # United States borders
-class(usa)
-# alternative way of accessing the data, with geodata
-# geodata::gadm("USA", level = 0, path = tempdir())
+usa_sf = ne_countries(country = "United States of America", returnclass = "sf")
 ```
 
-By default **rnaturalearth** returns objects of class `Spatial*`.
-The result can be converted into an `sf` objects with `st_as_sf()` as follows:
+Country borders can be also accessed with other packages, such as **geodata**, **giscoR**, or **rgeoboundaries**.
 
-```{r 07-read-write-plot-4}
-usa_sf = st_as_sf(usa)
-```
-
-<!--toDo:JN-->
-<!-- add info about other world-data packages, when rgeoboundaries on CRAN -->
-<!-- https://github.com/wmgeolab/rgeoboundaries/issues/11 -->
-<!-- https://github.com/wmgeolab/rgeoboundaries -->
-<!-- https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0231866 -->
-<!-- https://www.geoboundaries.org/ -->
-
-A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of ten minutes (~18.5 km at the equator) using the **geodata** package.
+A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of ten minutes (~18.5 km at the equator) using the **geodata** package [@R-geodata].
 The result is a multilayer object of class `SpatRaster`.
 
 ```{r 07-read-write-plot-5, eval=FALSE}
@@ -152,14 +127,15 @@ parks = opq(bbox = "leeds uk") |>
   osmdata_sf()
 ```
 
-A limitation with the **osmdata** package is that it is *rate limited*, meaning that it cannot download large OSM datasets (e.g. all the OSM data for a large city).
+A limitation with the **osmdata** package is that it is *rate limited*, meaning that it cannot download large OSM datasets (e.g., all the OSM data for a large city).
 To overcome this limitation, the **osmextract** package was developed, which can be used to download and import binary `.pbf` files containing compressed versions of the OSM database for pre-defined regions.
-<!--todo: add proper citation-->
 
 OpenStreetMap is a vast global database of crowd-sourced data, is growing daily, and has a wider ecosystem of tools enabling easy access to the data, from the [Overpass turbo](https://overpass-turbo.eu/) web service for rapid development and testing of OSM queries to [osm2pgsql](https://osm2pgsql.org/) for importing the data into a PostGIS database.
 Although the quality of datasets derived from OSM varies, the data source and wider OSM ecosystems have many advantages: they provide datasets that are available globally, free of charge, and constantly improving thanks to an army of volunteers.
 Using OSM encourages 'citizen science' and contributions back to the digital commons (you can start editing data representing a part of the world you know well at [www.openstreetmap.org](https://www.openstreetmap.org)).
 Further examples of OSM data in action are provided in Chapters \@ref(gis), \@ref(transport) and \@ref(location).
+
+<!-- system.time({zion_lc = climateR::getNLCD(zion, year = 2019)}) -->
 
 Sometimes, packages come with built-in datasets.
 These can be accessed in four ways: by attaching the package (if the package uses 'lazy loading' as **spData** does), with `data(dataset, package = mypackage)`, by referring to the dataset with `mypackage::dataset`, or with `system.file(filepath, package = mypackage)` to access raw data files.
@@ -182,7 +158,7 @@ R has several packages for geocoding; however, **tidygeocoder** seems to allow t
 The **tidygeocoder** main function is `geocode`, which takes a data frame with addresses and adds coordinates as `"lat"` and `"long"`.
 This function also allows to select a geocoding service with the `method` argument and has many additional parameters.
 
-The example below searches for John Snow blue plaque coordinates located on a building in the Soho district of London.
+Let's try this package by searching for coordinates of the John Snow blue plaque located on a building in the Soho district of London.
 
 ```{r, eval=FALSE}
 library(tidygeocoder)
@@ -223,7 +199,7 @@ Like other web APIs, OWS APIs use a 'base URL', an 'endpoint' and 'URL query arg
 
 There are many requests that can be made to a OWS service.
 One of the most fundamental is `getCapabilities`, demonstrated with **httr** functions `GET()` and `modify_url()` below.
-The code chunk demonstrates how API\index{API} queries can be constructed and dispatched, in this case to discover the capabilities of a service run by the Food and Agriculture Organization of the United Nations (FAO):
+The following code chunk demonstrates how API\index{API} queries can be constructed and dispatched, in this case to discover the capabilities of a service run by the Food and Agriculture Organization of the United Nations (FAO).
 
 ```{r 07-read-write-plot-8}
 library(httr)
@@ -294,7 +270,7 @@ Today the variety of file formats may seem bewildering but there has been much c
 \index{GDAL}
 GDAL (which should be pronounced "goo-dal", with the double "o" making a reference to object-orientation), the Geospatial Data Abstraction Library, has resolved many issues associated with incompatibility between geographic file formats since its release in 2000.
 GDAL provides a unified and high-performance interface for reading and writing of many raster and vector data formats.^[As we mentioned in Chapter \@ref(geometry-operations), GDAL also contains a set of utility functions allowing for raster mosaicing, resampling, cropping, and reprojecting, etc.]
-Many open and proprietary GIS programs, including GRASS, ArcGIS\index{ArcGIS} and QGIS\index{QGIS}, use GDAL\index{GDAL} behind their GUIs\index{graphical user interface} for doing the legwork of ingesting and spitting out geographic data in appropriate formats.
+Many open and proprietary GIS programs, including GRASS GIS, ArcGIS\index{ArcGIS} and QGIS\index{QGIS}, use GDAL\index{GDAL} behind their GUIs\index{graphical user interface} for doing the legwork of ingesting and spitting out geographic data in appropriate formats.
 
 GDAL\index{GDAL} provides access to more than 200 vector and raster data formats.
 Table \@ref(tab:formats) presents some basic information about selected and often used spatial file formats.
@@ -333,7 +309,7 @@ First of all, it is a multi-file format, which consists of at least three files.
 It only supports 255 columns, column names are restricted to ten characters and the file size limit is 2 GB.
 Furthermore, ESRI Shapefile\index{Shapefile} does not support all possible geometry types, for example, it is unable to distinguish between a polygon and a multipolygon.^[To learn more about ESRI Shapefile limitations and possible alternative file formats, visit http://switchfromshapefile.org/.]
 Despite these limitations, a viable alternative had been missing for a long time. 
-In the meantime, [GeoPackage](https://www.geopackage.org/)\index{GeoPackage} emerged, and seems to be a more than suitable replacement candidate for ESRI Shapefile.
+In the recent years, [GeoPackage](https://www.geopackage.org/)\index{GeoPackage} emerged, and seems to be a more than suitable replacement candidate for ESRI Shapefile.
 Geopackage is a format for exchanging geospatial information and an OGC standard. 
 The GeoPackage standard describes the rules on how to store geospatial information in a tiny SQLite container.
 Hence, GeoPackage is a lightweight spatial database container, which allows the storage of vector and raster data but also of non-spatial data and extensions.
@@ -369,15 +345,7 @@ All of them load the data into R or, more precisely, assign objects to your work
 \index{vector!data input}
 Spatial vector data comes in a wide variety of file formats.
 Most popular representations such as `.geojson` and `.gpkg` files can be imported directly into R with the **sf** function `read_sf()` (or the equivalent `st_read()`), which uses [GDAL's vector drivers](https://gdal.org/drivers/vector/index.html)\index{GDAL} behind the scenes.
-`st_drivers()` returns a data frame containing `name` and `long_name` in the first two columns, and features of each driver available to GDAL (and therefore **sf**), including ability to write data and store raster data in the subsequent columns, as illustrated for key file formats in Table \@ref(tab:drivers).  
-The following commands show the first three drivers reported the computer's GDAL installation (results can vary depending on the GDAL version installed) and a summary of the their features.
-Note that the majority of drivers can write data (51 out of 87) while only 16 formats can efficiently represent raster data in addition to vector data (see `?st_drivers()` for details):
-
-```{r 07-read-write-plot-17, eval=FALSE}
-sf_drivers = st_drivers()
-head(sf_drivers, n = 3)
-summary(sf_drivers[-c(1:2)])
-```
+The `st_drivers()` function returns a data frame containing `name` and `long_name` in the first two columns, and features of each driver available to GDAL (and therefore **sf**), including ability to write data and store raster data in the subsequent columns, as illustrated for key file formats in Table \@ref(tab:drivers).
 
 ```{r drivers, echo=FALSE}
 sf_drivers = st_drivers() |>
@@ -391,6 +359,15 @@ knitr::kable(head(sf_drivers, n = 6),
   kableExtra::column_spec(2, width = "7em")
 ```
 
+The following commands show the first three drivers reported the computer's GDAL installation (results can vary depending on the GDAL version installed) and a summary of the their features.
+Note that the majority of drivers can write data while only a dozen or so formats can efficiently represent raster data in addition to vector data (see `?st_drivers()` for details):
+
+```{r 07-read-write-plot-17, eval=FALSE}
+sf_drivers = st_drivers()
+head(sf_drivers, n = 3)
+summary(sf_drivers[-c(1:2)])
+```
+
 The first argument of `read_sf()` is `dsn`, which should be a text string or an object containing a single text string.
 The content of a text string could vary between different drivers.
 In most cases, as with the ESRI Shapefile\index{Shapefile} (`.shp`) or the `GeoPackage`\index{GeoPackage} format (`.gpkg`), the `dsn` would be a file name.
@@ -398,7 +375,7 @@ In most cases, as with the ESRI Shapefile\index{Shapefile} (`.shp`) or the `GeoP
 
 ```{r 07-read-write-plot-19}
 f = system.file("shapes/world.gpkg", package = "spData")
-world = read_sf(f, quiet = TRUE)
+world = read_sf(f)
 ```
 
 For some drivers, `dsn` could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the `read_sf()` help page for more details).
@@ -489,19 +466,12 @@ We will again use the `options` parameter to indicate this.
 ```{r 07-read-write-plot-21, results='hide'}
 world_txt = system.file("misc/world_wkt.csv", package = "spData")
 world_wkt = read_sf(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT")
-# the same as
-world_wkt2 = st_read(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT", 
-                    quiet = TRUE, stringsAsFactors = FALSE, as_tibble = TRUE)
-```
-
-```{r, echo=FALSE, eval=FALSE}
-identical(world_wkt, world_wkt2)
 ```
 
 ```{block2 07-read-write-plot-22, type='rmdnote'}
 Not all of the supported vector file formats store information about their coordinate reference system.
 In these situations, it is possible to add the missing information using the `st_set_crs()` function.
-Please refer also to Section \@ref(crs-intro) for more information.
+Please refer also to Section \@ref(crs-setting) for more information.
 ```
 
 \index{KML}
@@ -553,7 +523,7 @@ All of the previous examples read spatial information from files stored on your 
 However, GDAL also allows reading data directly from online resources, such as HTTP/HTTPS/FTP web resources.
 The only thing we need to do is to add a `/vsicurl/` prefix before the path to the file.
 Let's try it by connecting to the global monthly snow probability at 500 m resolution for the period 2000-2012 [@hengl_t_2021_5774954].
-Snow probability for December is stored as a Cloud Optimized GeoTIFF (COG) file (see Section \@ref(file-formats)) at \url{https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif}.
+Snow probability for December is stored as a Cloud Optimized GeoTIFF (COG) file (see Section \@ref(file-formats)) at [zenodo.org](https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif).
 To read an online file, we just need to provide its URL together with the `/vsicurl/` prefix.
 
 ```{r}
@@ -649,10 +619,9 @@ The `writeRaster()` function saves `SpatRaster` objects to files on disk.
 The function expects input regarding output data type and file format, but also accepts GDAL options specific to a selected file format (see `?writeRaster` for more details).
 
 \index{raster!data types}
-The **terra** package offers seven data types when saving a raster: INT1U, INT2S, INT2U, INT4S, INT4U, FLT4S, and FLT8S.^[
+The **terra** package offers seven data types when saving a raster: INT1U, INT2S, INT2U, INT4S, INT4U, FLT4S, and FLT8S,^[
 Using INT4U is not recommended as R does not support 32-bit unsigned integers.
-]
-The data type determines the bit representation of the raster object written to disk (Table \@ref(tab:datatypes)).
+] which determine the bit representation of the raster object written to disk (Table \@ref(tab:datatypes)).
 Which data type to use depends on the range of the values of your raster object.
 The more values a data type can represent, the larger the file will get on disk.
 Unsigned integers (INT1U, INT2U, INT4U) are suitable for categorical data, while float numbers (FLT4S and FLT8S) usually represent continuous data.
@@ -699,6 +668,8 @@ writeRaster(x = single_layer, filename = "my_raster.tif",
             filetype = "COG", overwrite = TRUE)
 ```
 
+To learn more about the compression of GeoTIFF files, read Paul Ramsey's [comprehensive blog post on this topic](https://blog.cleverelephant.ca/2015/02/geotiff-compression-for-dummies.html).
+
 ## Visual outputs
 
 \index{map making!outputs}
@@ -725,12 +696,12 @@ tmap_obj = tm_shape(world) + tm_polygons(col = "lifeExp")
 tmap_save(tmap_obj, filename = "lifeExp_tmap.png")
 ```
 
-On the other hand, you can save interactive maps created in the **mapview** package as an HTML file or image using the `mapshot()` function:
+On the other hand, you can save interactive maps created in the **mapview** package as an HTML file or image using the `mapshot2()` function:
 
 ```{r 07-read-write-plot-38, eval=FALSE}
 library(mapview)
 mapview_obj = mapview(world, zcol = "lifeExp", legend = TRUE)
-mapshot(mapview_obj, file = "my_interactive_map.html")
+mapshot2(mapview_obj, file = "my_interactive_map.html")
 ```
 
 ## Exercises
