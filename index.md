@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2023-12-05'
+date: '2023-12-06'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -44,7 +44,7 @@ Its current 'build status' as follows:
 
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 
-This version of the book was built on GH Actions on 2023-12-05.
+This version of the book was built on GH Actions on 2023-12-06.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png"/></a><br/>This book is licensed to you under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
@@ -103,11 +103,11 @@ If you find the project of use and interest, you can get involved in many ways, 
 
 - Telling people about it
 - '[Starring](https://help.github.com/articles/about-stars/)' the [geocompr GitHub repository](https://github.com/geocompx/geocompr)
-- Communicating about the book online, via the [#geocompr hashtag](https://twitter.com/hashtag/geocompr) on Twitter (see our [Guestbook at geocompx.org](https://geocompx.org/guestbook/)) or by letting us know of [courses](https://github.com/geocompx/geocompx.org/edit/main/guestbook.qmd) using the book
+- Communicating about the book online, via the [#geocompr hashtag](https://fosstodon.org/tags/geocompx) on Mastodon (see our [Guestbook at geocompx.org](https://geocompx.org/guestbook/)) or by letting us know of [courses](https://github.com/geocompx/geocompx.org/edit/main/guestbook.qmd) using the book
 - [Citing](https://github.com/geocompx/geocompr/raw/main/CITATION.bib) and [linking-to](https://r.geocompx.org) it
 - [Buying](https://www.amazon.com/Geocomputation-R-Robin-Lovelace-dp-0367670577/dp/0367670577) a copy
 - Reviewing it, on [Amazon](https://www.amazon.com/Geocomputation-Chapman-Hall-Robin-Lovelace/dp/1138304514/), [Goodreads](https://www.goodreads.com/book/show/42780859-geocomputation-with-r) or elsewhere
-- Asking questions about the content or making suggestion on [GitHub](https://github.com/geocompx/geocompr/issues), [Twitter](https://twitter.com/hashtag/geocompr?src=hashtag_click) or [Discord](https://discord.com/invite/PMztXYgNxp)
+- Asking questions about the content or making suggestion on [GitHub](https://github.com/geocompx/geocompr/issues), [Mastodon](https://fosstodon.org/tags/geocompx) or [Discord](https://discord.com/invite/PMztXYgNxp)
 - Answering questions, or at least responding to people asking for clarification or reproducible examples to demonstrate their question
 - Helping people get started with open source software for reproducible research in general, and working with geographic data in R in particular (this can be an excellent way to consolidate and build your own skills)
 - Supporting community translations
@@ -162,7 +162,7 @@ This book is for people who want to analyze, visualize and model geographic data
 It is based on R, a statistical programming language that has powerful data processing, visualization and geospatial capabilities.
 The book covers a wide range of topics and will be of interest to a wide range of people from many different backgrounds, especially:
 
-- People who have learned spatial analysis skills using a desktop Geographic Information System (GIS), such as [QGIS](https://qgis.org/en/site/), [ArcGIS](http://desktop.arcgis.com/en/arcmap/), [GRASS](https://grass.osgeo.org/) or [SAGA](https://saga-gis.sourceforge.io/en/index.html), who want access to a powerful (geo)statistical and visualization programming language and the benefits of a command-line approach [@sherman_desktop_2008]:
+- People who have learned spatial analysis skills using a desktop Geographic Information System (GIS), such as [QGIS](https://qgis.org/en/site/), [ArcGIS](http://desktop.arcgis.com/en/arcmap/), [GRASS GIS](https://grass.osgeo.org/) or [SAGA](https://saga-gis.sourceforge.io/en/index.html), who want access to a powerful (geo)statistical and visualization programming language and the benefits of a command-line approach [@sherman_desktop_2008]:
 
   > With the advent of 'modern' GIS software, most people want to point and click their way through life. That's good, but there is a tremendous amount of flexibility and power waiting for you with the command line.
 

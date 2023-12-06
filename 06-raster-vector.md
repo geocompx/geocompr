@@ -15,7 +15,7 @@ library(dplyr)
 
 \index{raster-vector interactions} 
 This Chapter focuses on interactions between raster and vector geographic data models, introduced in Chapter \@ref(spatial-class).
-It includes four main techniques:
+It includes several main techniques:
 raster cropping and masking using vector objects (Section \@ref(raster-cropping));
 extracting raster values using different types of vector data (Section \@ref(raster-extraction));
 and raster-vector conversion (Sections \@ref(rasterization) and \@ref(spatial-vectorization)).
@@ -41,12 +41,12 @@ The following code chunk therefore not only reads the datasets from the **spData
 ```r
 srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
 zion = read_sf(system.file("vector/zion.gpkg", package = "spDataLarge"))
-zion = st_transform(zion, crs(srtm))
+zion = st_transform(zion, st_crs(srtm))
 ```
 
 We use `crop()` from the **terra** package to crop the `srtm` raster.
 The function reduces the rectangular extent of the object passed to its first argument based on the extent of the object passed to its second argument.
-This functionality is demonstrated in the command below, which generates Figure \@ref(fig:cropmask)(B):
+This functionality is demonstrated in the command below, which generates Figure \@ref(fig:cropmask)(B).
 
 
 ```r
@@ -55,7 +55,7 @@ srtm_cropped = crop(srtm, zion)
 
 \index{raster masking} 
 Related to `crop()` is the **terra** function `mask()`, which sets values outside of the bounds of the object passed to its second argument to `NA`.
-The following command therefore masks every cell outside of the Zion National Park boundaries (Figure \@ref(fig:cropmask)(C)):
+The following command therefore masks every cell outside of the Zion National Park boundaries (Figure \@ref(fig:cropmask)(C)).
 
 
 ```r
@@ -63,7 +63,7 @@ srtm_masked = mask(srtm, zion)
 ```
 
 Importantly, we want to use both `crop()` and `mask()` together in most cases. 
-This combination of functions would (a) limit the raster's extent to our area of interest and then (b) replace all of the values outside of the area to NA.
+This combination of functions would (a) limit the raster's extent to our area of interest and then (b) replace all of the values outside of the area to NA.^[These two operations can be combined into a single step with `terra::crop(srtm, zion, mask = TRUE)`, but we prefer to keep them separate for clarity.]
 
 
 ```r
@@ -259,7 +259,7 @@ To demonstrate rasterization in action, we will use a template raster that has t
 cycle_hire_osm = spData::cycle_hire_osm
 cycle_hire_osm_projected = st_transform(cycle_hire_osm, "EPSG:27700")
 raster_template = rast(ext(cycle_hire_osm_projected), resolution = 1000,
-                       crs = st_crs(cycle_hire_osm_projected)$wkt)
+                       crs = crs(cycle_hire_osm_projected))
 ```
 
 Rasterization is a very flexible operation: the results depend not only on the nature of the template raster, but also on the type of input vector (e.g., points, polygons) and a variety of arguments taken by the `rasterize()` function.
@@ -284,7 +284,7 @@ ch_raster2 = rasterize(cycle_hire_osm_projected, raster_template,
 
 The new output, `ch_raster2`, shows the number of cycle hire points in each grid cell.
 The cycle hire locations have different numbers of bicycles described by the `capacity` variable, raising the question, what's the capacity in each grid cell?
-To calculate that we must `sum` the field (`"capacity"`), resulting in output illustrated in Figure \@ref(fig:vector-rasterization1)(D), calculated with the following command (other summary functions such as `mean` could be used):
+To calculate that we must `sum` the field (`"capacity"`), resulting in output illustrated in Figure \@ref(fig:vector-rasterization1)(D), calculated with the following command (other summary functions such as `mean` could be used).
 
 
 ```r
@@ -372,7 +372,8 @@ plot(dem, axes = FALSE)
 plot(cl, add = TRUE)
 ```
 
-Contours can also be added to existing plots with functions such as `contour()`, `rasterVis::contourplot()` or `tmap::tm_iso()`.
+Contours can also be added to existing plots with functions such as `contour()`, `rasterVis::contourplot()`.
+<!-- or `tmap::tm_iso()` (not yet implemented as of 2023-11-24) -->
 As illustrated in Figure \@ref(fig:contour-tmap), isolines can be labelled.
 
 \index{hillshade}
@@ -402,7 +403,7 @@ grain_poly = as.polygons(grain) |>
 
 The aggregated polygons of the `grain` dataset have rectilinear boundaries which arise from being defined by connecting rectangular pixels.
 The **smoothr** package described in Chapter \@ref(geometry-operations) can be used to smooth the edges of the polygons.
-As smoothing removes sharp edges in the polygon boundaries, the smoothed polygons will not have the same exact spatial coverage as the original pixels (see the **smoothr** [website](https://strimas.com/smoothr/) for examples).
+As smoothing removes sharp edges in the polygon boundaries, the smoothed polygons will not have the same exact spatial coverage as the original pixels.
 Caution should therefore be taken when using the smoothed polygons for further analysis.
 
 ## Exercises

@@ -18,17 +18,19 @@ Spatial operations, including spatial joins between vector datasets and local an
 This chapter shows how spatial objects can be modified in a multitude of ways based on their location and shape.
 Many spatial operations have a non-spatial (attribute) equivalent, so concepts such as subsetting and joining datasets demonstrated in the previous chapter are applicable here.
 This is especially true for *vector* operations: Section \@ref(vector-attribute-manipulation) on vector attribute manipulation provides the basis for understanding its spatial counterpart, namely spatial subsetting (covered in Section \@ref(spatial-subsetting)).
-Spatial joining (Section \@ref(spatial-joining)) and aggregation (Section \@ref(spatial-aggr)) also have non-spatial counterparts, covered in the previous chapter.
+Spatial joining (Section \@ref(spatial-joining), \@ref(non-overlapping-joins) and \@ref(incongruent)) and aggregation (Section \@ref(spatial-aggr)) also have non-spatial counterparts, covered in the previous chapter.
 
 Spatial operations differ from non-spatial operations in a number of ways, however:
-Spatial joins, for example, can be done in a number of ways --- including matching entities that intersect with or are within a certain distance of the target dataset --- while the attribution joins discussed in Section \@ref(vector-attribute-joining) in the previous chapter can only be done in one way (except when using fuzzy joins, as described in the documentation of the [**fuzzyjoin**](https://cran.r-project.org/package=fuzzyjoin) package).
-Different *types* of spatial relationship between objects, including intersects and disjoint, are described in Section \@ref(topological-relations).
+spatial joins, for example, can be done in a number of ways --- including matching entities that intersect with or are within a certain distance of the target dataset --- while the attribution joins discussed in Section \@ref(vector-attribute-joining) in the previous chapter can only be done in one way (except when using fuzzy joins, as described in the documentation of the [**fuzzyjoin**](https://cran.r-project.org/package=fuzzyjoin) package).
+Different *types* of spatial relationship between objects, including intersects and disjoint, are described in Sections \@ref(topological-relations) and \@ref(DE-9IM-strings).
 \index{spatial operations}
 Another unique aspect of spatial objects is distance: all spatial objects are related through space, and distance calculations can be used to explore the strength of this relationship, as described in the context of vector data in Section \@ref(distance-relations).
 
-Spatial operations on raster objects include subsetting --- covered in Section \@ref(spatial-raster-subsetting) --- and merging several raster 'tiles' into a single object, as demonstrated in Section \@ref(merging-rasters).
+Spatial operations on raster objects include subsetting --- covered in Section \@ref(spatial-raster-subsetting).
 *Map algebra* covers a range of operations that modify raster cell values, with or without reference to surrounding cell values.
-The concept of map algebra, vital for many applications, is introduced in Section \@ref(map-algebra); local, focal and zonal map algebra operations are covered in sections \@ref(local-operations), \@ref(focal-operations), and \@ref(zonal-operations), respectively. Global map algebra operations, which generate summary statistics representing an entire raster dataset, and distance calculations on rasters, are discussed in Section \@ref(global-operations-and-distances).
+The concept of map algebra, vital for many applications, is introduced in Section \@ref(map-algebra); local, focal and zonal map algebra operations are covered in sections \@ref(local-operations), \@ref(focal-operations), and \@ref(zonal-operations), respectively. 
+Global map algebra operations, which generate summary statistics representing an entire raster dataset, and distance calculations on rasters, are discussed in Section \@ref(global-operations-and-distances).
+Next, relation between map algebra and vector operations are discussed in Section \@ref(map-algebra-counterparts-in-vector-processing).
 In the final section before the exercises (\@ref(merging-rasters)) the process of merging two raster datasets is discussed and demonstrated with reference to a reproducible example.
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">It is important to note that spatial operations that use two spatial objects rely on both objects having the same coordinate reference system, a topic that was introduced in Section \@ref(crs-intro) and which will be covered in more depth in Chapter \@ref(reproj-geo-data).</div>\EndKnitrBlock{rmdnote}
@@ -47,8 +49,8 @@ The `filter()` function from the **tidyverse**\index{tidyverse (package)} can al
 \index{vector!subsetting}
 \index{spatial!subsetting}
 
-To demonstrate spatial subsetting, we will use the `nz` and `nz_height` datasets in the **spData** package, which contain geographic data on the 16 main regions and 101 highest points in New Zealand, respectively (Figure \@ref(fig:nz-subset)), in a projected coordinate system.
-The following code chunk creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region:
+To demonstrate spatial subsetting, we will use the `nz` and `nz_height` datasets in the **spData** package, which contain geographic data on the 16 main regions and 101 highest points in New Zealand, respectively (Figure \@ref(fig:nz-subset)), in a projected coordinate reference system.
+The following code chunk creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region.
 
 
 ```r
@@ -68,7 +70,7 @@ Specifically, objects used for spatial subsetting in this way must have the clas
 Various *topological relations* can be used for spatial subsetting which determine the type of spatial relationship that features in the target object must have with the subsetting object to be selected.
 These include *touches*, *crosses* or *within*, as we will see shortly in Section \@ref(topological-relations). 
 The default setting `st_intersects` is a 'catch all' topological relation that will return features in the target that *touch*, *cross* or are *within* the source 'subsetting' object.
-As indicated above, alternative spatial operators can be specified with the `op =` argument, as demonstrated in the following command which returns the opposite of `st_intersects()`, points that do not intersect with Canterbury (see Section \@ref(topological-relations)):
+Alternative spatial operators can be specified with the `op =` argument, as demonstrated in the following command which returns the opposite of `st_intersects()`, points that do not intersect with Canterbury (see Section \@ref(topological-relations)).
 
 
 ```r
@@ -77,14 +79,14 @@ nz_height[canterbury, , op = st_disjoint]
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Note the empty argument --- denoted with `, ,` --- in the preceding code chunk is included to highlight `op`, the third argument in `[` for `sf` objects.
 One can use this to change the subsetting operation in many ways.
-`nz_height[canterbury, 2, op = st_disjoint]`, for example, returns the same rows but only includes the second attribute column (see `` sf:::`[.sf` `` and the `?sf` for details).</div>\EndKnitrBlock{rmdnote}
+`nz_height[canterbury, 2, op = st_disjoint]`, for example, returns the same rows but only includes the second attribute column (see `` sf::`[.sf` `` and the `?sf` for details).</div>\EndKnitrBlock{rmdnote}
 
 For many applications, this is all you'll need to know about spatial subsetting for vector data: it just works.
 If you are impatient to learn about more topological relations, beyond `st_intersects()` and `st_disjoint()`, skip to the next section (\@ref(topological-relations)).
 If you're interested in the details, including other ways of subsetting, read on.
 
 Another way of doing spatial subsetting uses objects returned by topological operators.
-These objects can be useful in their own right, for example when exploring the graph network of relationships between contiguous regions, but they can also be used for subsetting, as demonstrated in the code chunk below:
+These objects can be useful in their own right, for example when exploring the graph network of relationships between contiguous regions, but they can also be used for subsetting, as demonstrated in the code chunk below.
 
 
 ```r
@@ -117,7 +119,7 @@ In this case 1 is the greatest possible value but for more complex operations on
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Note: another way to return a logical output is by setting `sparse = FALSE` (meaning 'return a dense matrix not a sparse one') in operators such as `st_intersects()`. The command `st_intersects(x = nz_height, y = canterbury, sparse = FALSE)[, 1]`, for example, would return an output identical to `sel_logical`.
 Note: the solution involving `sgbp` objects is more generalisable though, as it works for many-to-many operations and has lower memory requirements.</div>\EndKnitrBlock{rmdnote}
 
-The same result can be achieved with the **sf** function `st_filter()` which was [created](https://github.com/r-spatial/sf/issues/1148) to increase compatibility between `sf` objects and **dplyr** data manipulation code:
+The same result can be also achieved with the **sf** function `st_filter()` which was [created](https://github.com/r-spatial/sf/issues/1148) to increase compatibility between `sf` objects and **dplyr** data manipulation code:
 
 
 ```r
@@ -140,7 +142,8 @@ That may sound rather abstract and, indeed, the definition and classification of
 
 Despite their mathematical origins, topological relations can be understood intuitively with reference to visualizations of commonly used functions that test for common types of spatial relationships.
 Figure \@ref(fig:relations) shows a variety of geometry pairs and their associated relations.
-The third and fourth pairs in Figure \@ref(fig:relations) (from left to right and then down) demonstrate that, for some relations, order is important: while the relations *equals*, *intersects*, *crosses*, *touches* and *overlaps* are symmetrical, meaning that if `function(x, y)` is true, `function(y, x)` will also be true, relations in which the order of the geometries are important such as *contains* and *within* are not.
+The third and fourth pairs in Figure \@ref(fig:relations) (from left to right and then down) demonstrate that, for some relations, order is important.
+While the relations *equals*, *intersects*, *crosses*, *touches* and *overlaps* are symmetrical, meaning that if `function(x, y)` is true, `function(y, x)` will also be true, relations in which the order of the geometries are important such as *contains* and *within* are not.
 Notice that each geometry pair has a "DE-9IM" string such as FF2F11212, described in the next section.
 \index{topological relations}
 
@@ -201,7 +204,7 @@ The result should match your intuition:
 positive (`1`) results are returned for the first and third point, and a negative result (represented by an empty vector) for the second are outside the polygon's border.
 What may be unexpected is that the result comes in the form of a list of vectors.
 This *sparse matrix* output only registers a relation if one exists, reducing the memory requirements of topological operations on multi-feature objects.
-As we saw in the previous section, a *dense matrix* consisting of `TRUE` or `FALSE` values is returned when `sparse = FALSE`:
+As we saw in the previous section, a *dense matrix* consisting of `TRUE` or `FALSE` values is returned when `sparse = FALSE`.
 
 
 ```r
@@ -226,7 +229,7 @@ st_touches(point_sf, polygon_sfc)
 ```
 
 Note that although the first point *touches* the boundary polygon, it is not within it; the third point is within the polygon but does not touch any part of its border.
-The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (note `[, 1]` converts the result into a vector):
+The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (note `[, 1]` converts the result into a vector).
 
 
 ```r
@@ -236,16 +239,17 @@ st_disjoint(point_sf, polygon_sfc, sparse = FALSE)[, 1]
 
 The function `st_is_within_distance()` detects features that *almost touch* the selection object, which has an additional `dist` argument.
 It can be used to set how close target objects need to be before they are selected.
-Note that although point 2 is more than 0.2 units of distance from the nearest vertex of `polygon_sfc`, it is still selected when the distance is set to 0.2.
-This is because distance is measured to the nearest edge, in this case the part of the the polygon that lies directly above point 2 in Figure \@ref(fig:relation-objects).
-(You can verify the actual distance between point 2 and the polygon is 0.13 with the command `st_distance(point_sf, polygon_sfc)`.)
-The 'is within distance' binary spatial predicate is demonstrated in the code chunk below, the results of which show that every point is within 0.2 units of the polygon:
+The 'is within distance' binary spatial predicate is demonstrated in the code chunk below, the results of which show that every point is within 0.2 units of the polygon.
 
 
 ```r
 st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
 #> [1] TRUE TRUE TRUE
 ```
+
+Note that although point 2 is more than 0.2 units of distance from the nearest vertex of `polygon_sfc`, it is still selected when the distance is set to 0.2.
+This is because distance is measured to the nearest edge, in this case the part of the the polygon that lies directly above point 2 in Figure \@ref(fig:relation-objects).
+(You can verify the actual distance between point 2 and the polygon is 0.13 with the command `st_distance(point_sf, polygon_sfc)`.)
 
 
 
@@ -267,7 +271,6 @@ As the cryptic name suggests, this is not an easy topic.
 Learning it may be worthwhile, however, to better understand spatial relationships.
 Furthermore, advanced uses of DE-9IM include creating custom spatial predicates.
 The model was originally labelled "DE + 9IM" by its inventors, referring to the "dimension of the intersections of boundaries, interiors, and exteriors of two features" [@clementini_comparison_1995], but is now referred to as DE-9IM [@shen_classification_2018].
-<!-- The model's workings can be demonstrated with reference to two intersecting polygons, as illustrated in Figure \@ref(fig:de-9im). -->
 
 
 
@@ -275,8 +278,8 @@ To demonstrate how DE-9IM strings work, let's take a look at the various ways th
 Figure \@ref(fig:de9imgg) illustrates the 9 intersection model (9IM) which shows the intersections between every combination of each object's interior, boundary and exterior: when each component of the first object `x` is arranged as columns and each component of `y` is arranged as rows, a facetted graphic is created with the intersections between each element highlighted.
 
 <div class="figure" style="text-align: center">
-<img src="04-spatial-operations_files/figure-html/de9imgg-1.png" alt="Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works. Colors not in the legend represent the overlap between different components. The thick lines highlight 2 dimensional intesections, e.g. between the boundary of object x and the interior of object y, shown in the middle top facet." width="100%" />
-<p class="caption">(\#fig:de9imgg)Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works. Colors not in the legend represent the overlap between different components. The thick lines highlight 2 dimensional intesections, e.g. between the boundary of object x and the interior of object y, shown in the middle top facet.</p>
+<img src="04-spatial-operations_files/figure-html/de9imgg-1.png" alt="Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works. Colors not in the legend represent the overlap between different components. The thick lines highlight 2 dimensional intesections, e.g., between the boundary of object x and the interior of object y, shown in the middle top facet." width="100%" />
+<p class="caption">(\#fig:de9imgg)Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works. Colors not in the legend represent the overlap between different components. The thick lines highlight 2 dimensional intesections, e.g., between the boundary of object x and the interior of object y, shown in the middle top facet.</p>
 </div>
 
 DE-9IM strings are derived from the dimension of each type of relation.
@@ -358,7 +361,7 @@ As with attribute data, joining adds new columns to the target object (the argum
 
 The process is illustrated by the following example: imagine you have ten points randomly distributed across the Earth's surface and you ask, for the points that are on land, which countries are they in?
 Implementing this idea in a [reproducible example](https://github.com/geocompx/geocompr/blob/main/code/04-spatial-join.R) will build your geographic data handling skills and show how spatial joins work.
-The starting point is to create points that are randomly scattered over the Earth's surface:
+The starting point is to create points that are randomly scattered over the Earth's surface.
 
 
 ```r
@@ -377,7 +380,7 @@ random_points = random_df |>
 The scenario illustrated in Figure \@ref(fig:spatial-join) shows that the `random_points` object (top left) lacks attribute data, while the `world` (top right) has attributes, including country names shown for a sample of countries in the legend.
 Spatial joins are implemented with `st_join()`, as illustrated in the code chunk below.
 The output is the `random_joined` object which is illustrated in Figure \@ref(fig:spatial-join) (bottom left).
-Before creating the joined dataset, we use spatial subsetting to create `world_random`, which contains only countries that contain random points, to verify the number of country names returned in the joined dataset should be four (see the top right panel of Figure \@ref(fig:spatial-join)).
+Before creating the joined dataset, we use spatial subsetting to create `world_random`, which contains only countries that contain random points, to verify the number of country names returned in the joined dataset should be four (Figure \@ref(fig:spatial-join), top right panel).
 
 
 ```r
@@ -396,8 +399,6 @@ By default, `st_join()` performs a left join, meaning that the result is an obje
 Like spatial subsetting, the default topological operator used by `st_join()` is `st_intersects()`, which can be changed by setting the `join` argument (see `?st_join` for details).
 The example above demonstrates the addition of a column from a polygon layer to a point layer, but the approach works regardless of geometry types.
 In such cases, for example when `x` contains polygons, each of which match multiple objects in `y`, spatial joins will result in duplicate features by creating a new row for each match in `y`.
-
-<!-- Idea: demonstrate what happens when there are multiple matches with reprex (low priority, RL: 2021-12) -->
 
 ### Non-overlapping joins
 
@@ -435,7 +436,7 @@ any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
 Imagine that we need to join the `capacity` variable in `cycle_hire_osm` onto the official 'target' data contained in `cycle_hire`.
 This is when a non-overlapping join is needed.
 The simplest method is to use the binary predicate `st_is_within_distance()`, as demonstrated below using a threshold distance of 20 m.
-One can set the threshold distance in metric units also for unprojected data (e.g. lon/lat CRSs such as WGS84), if the spherical geometry engine (s2) is enabled, as it is in **sf** by default (see section \@ref(s2)).
+One can set the threshold distance in metric units also for unprojected data (e.g., lon/lat CRSs such as WGS84), if the spherical geometry engine (S2) is enabled, as it is in **sf** by default (see Section \@ref(s2)).
 
 
 ```r
@@ -445,10 +446,6 @@ summary(lengths(sel) > 0)
 #>    Mode   FALSE    TRUE 
 #> logical     304     438
 ```
-
-
-
-
 
 This shows that there are 438 points in the target object `cycle_hire` within the threshold distance of `cycle_hire_osm`.
 How to retrieve the *values* associated with the respective `cycle_hire_osm` points?
@@ -466,7 +463,7 @@ nrow(z)
 
 Note that the number of rows in the joined result is greater than the target.
 This is because some cycle hire stations in `cycle_hire` have multiple matches in `cycle_hire_osm`.
-To aggregate the values for the overlapping points and return the mean, we can use the aggregation methods learned in Chapter \@ref(attr), resulting in an object with the same number of rows as the target:
+To aggregate the values for the overlapping points and return the mean, we can use the aggregation methods learned in Chapter \@ref(attr), resulting in an object with the same number of rows as the target.
 
 
 ```r
@@ -495,7 +492,7 @@ Section \@ref(vector-attribute-aggregation) demonstrated how `aggregate()` and `
 \index{aggregation!spatial}
 
 Returning to the example of New Zealand, imagine you want to find out the average height of high points in each region: it is the geometry of the source (`y` or `nz` in this case) that defines how values in the target object (`x` or `nz_height`) are grouped.
-This can be done in a single line of code with base R's `aggregate()` method:
+This can be done in a single line of code with base R's `aggregate()` method.
 
 
 ```r
@@ -670,7 +667,7 @@ elev[1:2, drop = FALSE]    # spatial subsetting with cell IDs
 
 
 Another common use case of spatial subsetting is when a raster with `logical` (or `NA`) values is used to mask another raster with the same extent and resolution, as illustrated in Figure \@ref(fig:raster-subset).
-In this case, the `[` and `mask()` functions can be used (results not shown):
+In this case, the `[` and `mask()` functions can be used (results not shown).
 
 
 ```r
@@ -687,7 +684,8 @@ In other words, we want to mask `elev` with `rmask`.
 ```r
 # spatial subsetting
 elev[rmask, drop = FALSE]           # with [ operator
-mask(elev, rmask)                   # with mask()
+# we can also use mask
+# mask(elev, rmask)
 ```
 
 The above approach can be also used to replace some values (e.g., expected to be wrong) with NA. 
@@ -733,7 +731,7 @@ The following sections explain how each type of map algebra operations can be us
 
 \index{map algebra!local operations}
 **Local** operations comprise all cell-by-cell operations in one or several layers.
-Raster algebra is a classical use case of local operations -- this includes adding or subtracting values from a raster, squaring and multipling rasters.
+This includes adding or subtracting values from a raster, squaring and multipling rasters.
 Raster algebra also allows logical operations such as finding all raster cells that are greater than a specific value (5 in our example below).
 The **terra** package supports all these operations and more, as demonstrated below (Figure \@ref(fig:04-local-operations)):
 
@@ -774,7 +772,7 @@ recl = classify(elev, rcl = rcl)
 The `classify()` function can be also used when we want to reduce the number of classes in our categorical rasters.
 We will perform several additional reclassifications in Chapter \@ref(location).
 
-Apart from arithmetic operators, one can also use the `app()`, `tapp()` and `lapp()` functions.
+Apart from applying arithmetic operators directly, one can also use the `app()`, `tapp()` and `lapp()` functions.
 They are more efficient, hence, they are preferable in the presence of large raster datasets. 
 Additionally, they allow you to save an output file directly.
 The `app()` function applies a function to each cell of a raster and is used to summarize (e.g., calculating the sum) the values of multiple layers into one layer.
@@ -812,7 +810,7 @@ ndvi_fun = function(nir, red){
 
 This function accepts two numerical arguments, `nir` and `red`, and returns a numerical vector with NDVI values.
 It can be used as the `fun` argument of `lapp()`.
-We just need to remember that our function just needs two bands (not four from the original raster), and they need to be in the NIR, red order.
+We just need to remember that our function expects two bands (not four from the original raster), and they need to be in the NIR, red order.
 That is why we subset the input raster with `multi_rast[[c(4, 3)]]` before doing any calculations.
 
 
@@ -821,7 +819,7 @@ ndvi_rast = lapp(multi_rast[[c(4, 3)]], fun = ndvi_fun)
 ```
 
 The result, shown on the right panel in Figure \@ref(fig:04-ndvi), can be compared to the RGB image of the same area (left panel of the same Figure).
-It allows us to see that the largest NDVI values are connected to areas of dense forest in the northern parts of the area, while the lowest values are related to the lake in the north and snowy mountain ridges.
+It allows us to see that the largest NDVI values are connected to northern areas of dense forest, while the lowest values are related to the lake in the north and snowy mountain ridges.
 
 <div class="figure" style="text-align: center">
 <img src="figures/04-ndvi.png" alt="RGB image (left) and NDVI values (right) calculated for the example satellite file of the Zion National Park" width="100%" />
@@ -830,7 +828,7 @@ It allows us to see that the largest NDVI values are connected to areas of dense
 
 Predictive mapping is another interesting application of local raster operations.
 The response variable corresponds to measured or observed points in space, for example, species richness, the presence of landslides, tree disease or crop yield.
-Consequently, we can easily retrieve space- or airborne predictor variables from various rasters (elevation, pH, precipitation, temperature, landcover, soil class, etc.).
+Consequently, we can easily retrieve space- or airborne predictor variables from various rasters (elevation, pH, precipitation, temperature, land cover, soil class, etc.).
 Subsequently, we model our response as a function of our predictors using `lm()`, `glm()`, `gam()` or a machine-learning technique. 
 Spatial predictions on raster objects can therefore be made by applying estimated coefficients to the predictor raster values, and summing the output raster values (see Chapter \@ref(eco)).
 
@@ -838,7 +836,7 @@ Spatial predictions on raster objects can therefore be made by applying estimate
 
 \index{map algebra!focal operations}
 While local functions operate on one cell, though possibly from multiple layers, **focal** operations take into account a central (focal) cell and its neighbors.
-The neighborhood (also named kernel, filter or moving window) under consideration is typically of size 3-by-3 cells (that is the central cell and its eight surrounding neighbors), but can take on any other (not necessarily rectangular) shape as defined by the user.
+The neighborhood (also named kernel, filter or moving window) under consideration is typically of size 3-by-3 cells (that is the central cell and its eight surrounding neighbors), but can take on any other size or (not necessarily rectangular) shape as defined by the user.
 A focal operation applies an aggregation function to all cells within the specified neighborhood, uses the corresponding output as the new value for the the central cell, and moves on to the next central cell (Figure \@ref(fig:focal-example)).
 Other names for this operation are spatial filtering and convolution [@burrough_principles_2015].
 
@@ -879,13 +877,13 @@ Chapter \@ref(gis) shows how to access such GIS functionality from within R.
 
 \index{map algebra!zonal operations}
 Just like focal operations, *zonal* operations apply an aggregation function to multiple raster cells.
-However, a second raster, usually with categorical values, defines the *zonal filters* (or 'zones') in the case of zonal operations, as opposed to a predefined neighborhood window in the case of focal operation presented in the previous section.
+However, a second raster, usually with categorical values, defines the *zonal filters* (or 'zones') in the case of zonal operations, as opposed to a neighborhood window in the case of focal operation presented in the previous section.
 Consequently, raster cells defining the zonal filter do not necessarily have to be neighbors.
 Our grain size raster is a good example, as illustrated in the right panel of Figure \@ref(fig:cont-raster): different grain sizes are spread irregularly throughout the raster.
 Finally, the result of a zonal operation is a summary table grouped by zone which is why this operation is also known as *zonal statistics* in the GIS world\index{GIS}. 
-This is in contrast to focal operations which return a raster object.
+This is in contrast to focal operations which return a raster object by default.
 
-The following code chunk uses the `zonal()` function to calculate the mean elevation associated with each grain size class, for example.
+The following code chunk uses the `zonal()` function to calculate the mean elevation associated with each grain size class.
 
 
 ```r
@@ -898,7 +896,7 @@ z
 ```
 
 This returns the statistics\index{statistics} for each category, here the mean altitude for each grain size class.
-Note: it is also possible to get a raster with calculated statistics for each zone by setting the `as.raster` argument to `TRUE`.
+Note that it is also possible to get a raster with calculated statistics for each zone by setting the `as.raster` argument to `TRUE`.
 
 ### Global operations and distances
 
@@ -933,7 +931,7 @@ Such computations rely on remotely sensed information.
 The corresponding imagery is often divided into scenes covering a specific spatial extent, and frequently, a study area covers more than one scene.
 Then, we would need to merge the scenes covered by our study area. 
 In the easiest case, we can just merge these scenes, that is put them side by side.
-This is possible, for example, with digital elevation data (SRTM, ASTER).
+This is possible, for example, with digital elevation data.
 In the following code chunk we first download the SRTM elevation data for Austria and Switzerland (for the country codes, see the **geodata** function `country_codes()`).
 In a second step, we merge the two rasters into one.
 
@@ -951,15 +949,7 @@ This is frequently the case when you want to combine spectral imagery from scene
 The `merge()` command will still work but you will see a clear border in the resulting image.
 On the other hand, the `mosaic()` command lets you define a function for the overlapping area. 
 For instance, we could compute the mean value -- this might smooth the clear border in the merged result but it will most likely not make it disappear.
-<!--jn:toDo-->
-<!-- The following sentences have been commented out and can be removed because the packages, and info, is now out of date -->
-<!-- See https://github.com/geocompx/geocompr/pull/424 for discussion -->
-<!-- To do so, we need a more advanced approach.  -->
-<!-- Remote sensing scientists frequently apply histogram matching or use regression techniques to align the values of the first image with those of the second image. -->
-<!-- The packages **landsat** (`histmatch()`, `relnorm()`, `PIF()`), **satellite** (`calcHistMatch()`) and **RStoolbox** (`histMatch()`, `pifMatch()`) provide the corresponding functions for the **raster**'s package objects. -->
 For a more detailed introduction to remote sensing with R, see @wegmann_remote_2016.
-<!--jn:toDo-->
-<!--update the above reference to the 2nd edition-->
 
 ## Exercises
 

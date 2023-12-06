@@ -22,8 +22,8 @@ It demonstrates how to set and *transform* geographic data from one CRS to anoth
 \index{CRS!projected} 
 
 In many projects there is no need to worry about, let alone convert between, different CRSs.
-It is important to know if your data is in a projected or geographic coordinate system, and the consequences of this for geometry operations.
-However, if you know the CRS of your data and the consequences for geometry operations (covered in the next section), CRSs should *just work* behind the scenes: people often suddenly need to learn about CRSs when things go wrong.
+Nonetheless, it is important to know if your data is in a projected or geographic coordinate reference system, and the consequences of this for geometry operations.
+If you know this information, CRSs should *just work* behind the scenes: people often suddenly need to learn about CRSs when things go wrong.
 Having a clearly defined CRS that all project data is in, plus understanding how and why to use different CRSs, can ensure that things don't go wrong.
 Furthermore, learning about coordinate systems will deepen your knowledge of geographic datasets and how to use them effectively.
 
@@ -31,7 +31,7 @@ This chapter teaches the fundamentals of CRSs, demonstrates the consequences of 
 In the next section we introduce CRSs in R, followed by Section \@ref(crs-setting) which shows how to get and set CRSs associated with spatial objects. 
 Section \@ref(geom-proj) demonstrates the importance of knowing what CRS your data is in with reference to a worked example of creating buffers.
 We tackle questions of when to reproject and which CRS to use in Section \@ref(whenproject) and Section \@ref(which-crs), respectively.
-We cover reprojecting vector and raster objects in sections \@ref(reproj-vec-geom) and \@ref(reproj-ras) and modifying map projections in Section \@ref(mapproj).
+Finally, we cover reprojecting vector and raster objects in sections \@ref(reproj-vec-geom) and \@ref(reproj-ras) and modifying map projections in Section \@ref(mapproj).
 
 ## Coordinate Reference Systems {#crs-in-r}
 
@@ -39,7 +39,7 @@ We cover reprojecting vector and raster objects in sections \@ref(reproj-vec-geo
 \index{CRS!WKT}
 \index{CRS!proj-string}
 Most modern geographic tools that require CRS conversions, including core R-spatial packages and desktop GIS software such as QGIS, interface with [PROJ](https://proj.org), an open source C++ library that "transforms coordinates from one coordinate reference system (CRS) to another".
-CRSs can be described in many ways, including the following.
+CRSs can be described in many ways, including the following:
 
 1. Simple yet potentially ambiguous statements such as "it's in lon/lat coordinates"
 2. Formalized yet now outdated 'proj4 strings' (also known as 'proj-string') such as `+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs`
@@ -51,7 +51,7 @@ But which one is correct?
 \index{CRS!EPSG}
 The short answer is that the third way to identify CRSs is preferable: `EPSG:4326` is understood by **sf** (and by extension **stars**) and **terra** packages covered in this book, plus many other software projects for working with geographic data including [QGIS](https://docs.qgis.org/3.16/en/docs/user_manual/working_with_projections/working_with_projections.html) and [PROJ](https://proj.org/development/quickstart.html).
 `EPSG:4326` is future-proof.
-Furthermore, although it is machine readable, unlike the proj-string representation "EPSG:4326" is short, easy to remember and highly 'findable' online (searching for EPSG:4326 yields a dedicated page on the website [epsg.io](https://epsg.io/4326), for example).
+Furthermore, although it is machine readable, "EPSG:4326" is short, easy to remember and highly 'findable' online (searching for EPSG:4326 yields a dedicated page on the website [epsg.io](https://epsg.io/4326), for example).
 The more concise identifier `4326` is understood by **sf**, but **we recommend the more explicit `AUTHORITY:CODE` representation to prevent ambiguity and to provide context**.
 
 \index{CRS!WKT}
@@ -105,7 +105,7 @@ On this point @opengeospatialconsortium_wellknown_2019 is clear, the verbose WKT
 The convention of referring to CRSs identifiers in the form `AUTHORITY:CODE`, which is also used by geographic software written in other [languages](https://jorisvandenbossche.github.io/blog/2020/02/11/geopandas-pyproj-crs/), allows a wide range of formally defined coordinate systems to be referred to.^[
 Several other ways of referring to unique CRSs can be used, with five identifier types (EPSG code, PostGIS SRID, INTERNAL SRID, proj-string, and WKT strings) accepted by [QGIS](https://docs.qgis.org/3.16/en/docs/pyqgis_developer_cookbook/crs.html?highlight=srid) and other identifier types such as a more verbose variant of the `EPSG:4326` identifier, `urn:ogc:def:crs:EPSG::4326` [@opengeospatialconsortium_wellknown_2019].
 ]
-The most commonly used authority in CRS identifiers is *EPSG*\index{CRS!EPSG}, an acronym for the European Petroleum Survey Group which published a standardized list of CRSs (the EPSG was [taken over](http://wiki.gis.com/wiki/index.php/European_Petroleum_Survey_Group) by the oil and gas body the [Geomatics Committee of the International Association of Oil & Gas Producers](https://www.iogp.org/our-committees/geomatics/) in 2005).
+The most commonly used authority in CRS identifiers is *EPSG*\index{CRS!EPSG}, an acronym for the European Petroleum Survey Group which published a standardized list of CRSs (the EPSG was [taken over](http://wiki.gis.com/wiki/index.php/European_Petroleum_Survey_Group) by the [Geomatics Committee of the International Association of Oil & Gas Producers](https://epsg.org/home.html) in 2005).
 Other authorities can be used in CRS identifiers.
 `ESRI:54030`, for example, refers to ESRI's implementation of the Robinson projection, which has the following WKT string (only first 8 lines shown):
 
@@ -181,8 +181,8 @@ For example, try to run:
 
 - `st_crs(new_vector)$IsGeographic` to check is the CRS is geographic or not
 - `st_crs(new_vector)$units_gdal` to find out the CRS units
-- `st_crs(new_vector)$srid` extracts its 'SRID' identifier (when available)
-- `st_crs(new_vector)$proj4string` extracts the proj-string representation
+- `st_crs(new_vector)$srid` to extract its 'SRID' identifier (when available)
+- `st_crs(new_vector)$proj4string` to extract the proj-string representation
 
 In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used (in this case the WKT string remains unchanged because the CRS was already set correctly when the file was read-in):
 
@@ -195,7 +195,7 @@ new_vector = st_set_crs(new_vector, "EPSG:4326") # set CRS
 
 \index{raster!CRS}
 Getting and setting CRSs works in a similar way for raster geographic data objects.
-The `crs()` function in the `terra` package accesses CRS information from a `SpatRaster` object (note the use of the `cat()` function to print it nicely): 
+The `crs()` function in the `terra` package accesses CRS information from a `SpatRaster` object (note the use of the `cat()` function to print it nicely).
 
 
 ```r
@@ -245,7 +245,7 @@ st_is_longlat(london)
 The output `NA` shows that **sf** does not know what the CRS is and is unwilling to guess (`NA` literally means 'not available').
 Unless a CRS is manually specified or is loaded from a source that has CRS metadata, **sf** does not make any explicit assumptions about which coordinate systems, other than to say "I don't know".
 This behavior makes sense given the diversity of available CRSs but differs from some approaches, such as the GeoJSON file format specification, which makes the simplifying assumption that all coordinates have a lon/lat CRS: `EPSG:4326`.
-Datasets without a specified CRS can cause problems: all geographic coordinates have a coordinate system and software can only make good decisions around plotting and and geometry operations if it knows what type of CRS it is working with.
+Datasets without a specified CRS can cause problems: all geographic coordinates have a coordinate reference system and software can only make good decisions around plotting and geometry operations if it knows what type of CRS it is working with.
 Thus, again, it is important to always check the CRS of a dataset and to set it if it is missing.
 
 
@@ -259,7 +259,7 @@ st_is_longlat(london_geo)
 
 Since **sf** version 1.0.0, R's ability to work with geographic vector datasets that have lon/lat CRSs has improved substantially, thanks to its integration with the S2 *spherical geometry engine* introduced in Section \@ref(s2).
 As shown in Figure \@ref(fig:s2geos), **sf** uses either GEOS or the S2  depending on the type of CRS and whether S2 has been disabled (it is enabled by default).
-GEOS is always used for projected data and data with no CRS; for geographic data S2 is used by default but can be disabled with `sf::sf_use_s2(FALSE)`
+GEOS is always used for projected data and data with no CRS; for geographic data S2 is used by default but can be disabled with `sf::sf_use_s2(FALSE)`.
 
 <div class="figure" style="text-align: center">
 <img src="figures/07-s2geos.png" alt="The behavior of the geometry operations in the sf package depending on the input data's CRS." width="100%" />
@@ -280,7 +280,7 @@ london_buff_s2_100_cells = st_buffer(london_geo, dist = 100000, max_cells = 100)
 ```
 
 In the first line above, **sf** assumes that the input is projected and generates a result that has a buffer in units of degrees, which is problematic, as we will see.
-In the second line, **sf** silently uses the spherical geometry engine S2, introduced in Chapter \@ref(spatial-class), to calculate the extent of the buffer using the default value of `max_cells = 1000` --- set to `100` in line three --- the consequences which will become apparent shortly (see `?s2::s2_buffer_cells` for details).
+In the second line, **sf** silently uses the spherical geometry engine S2, introduced in Chapter \@ref(spatial-class), to calculate the extent of the buffer using the default value of `max_cells = 1000` --- set to `100` in line three --- the consequences which will become apparent shortly.
 To highlight the impact of **sf**'s use of the S2 geometry engine for unprojected (geographic) coordinate systems, we will temporarily disable it with the command `sf_use_s2()` (which is on, `TRUE`, by default), in the code chunk below.
 Like `london_buff_no_crs`, the new `london_geo` object is a geographic abomination: it has units of degrees, which makes no sense in the vast majority of cases:
 
@@ -309,7 +309,7 @@ Do not interpret the warning about the geographic (`longitude/latitude`) CRS as 
 It is better understood as a suggestion to *reproject* the data onto a projected CRS.
 This suggestion does not always need to be heeded: performing spatial and geometric operations makes little or no difference in some cases (e.g., spatial subsetting).
 But for operations involving distances such as buffering, the only way to ensure a good result (without using spherical geometry engines) is to create a projected copy of the data and run the operation on that.
-This is done in the code chunk below:
+This is done in the code chunk below.
 
 
 ```r
@@ -317,7 +317,7 @@ london_proj = data.frame(x = 530000, y = 180000) |>
   st_as_sf(coords = c("x", "y"), crs = "EPSG:27700")
 ```
 
-The result is a new object that is identical to `london`, but reprojected onto a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters.
+The result is a new object that is identical to `london`, but created using a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters.
 We can verify that the CRS has changed using `st_crs()` as follows (some of the output has been replaced by `...`):
 
 
@@ -354,12 +354,6 @@ The geometries of the three `london_buff*` objects that *have* a specified CRS c
 
 
 ```
-#> Warning: The `returnclass` argument of `ne_download()` sp as of rnaturalearth 1.0.0.
-#> ℹ Please use `sf` objects with {rnaturalearth}, support for Spatial objects
-#>   (sp) will be removed in a future release of the package.
-#> This warning is displayed once every 8 hours.
-#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-#> generated.
 #> 
 #> Attaching package: 'tmap'
 #> The following object is masked from 'package:datasets':
@@ -380,9 +374,9 @@ Both buffer boundaries in Figure \@ref(fig:crs-buf) (left) are jagged, although 
 <!--jn: maybe it is worth to emphasize that the differences are due to the use of S2 vs GEOS-->
 <!--jn: you mention S2 a lot in this section, but not GEOS...-->
 The lesson is that results obtained from lon/lat data via S2 will be different from results obtained from using projected data.
-The difference between S2 derived buffers and GEOS derived buffers on projected data reduce as the value of `max_cells` increases: the 'right' value for this argument may depend on many factors and the default value 1000 is a reasonable default.
+The difference between S2 derived buffers and GEOS derived buffers on projected data reduce as the value of `max_cells` increases: the 'right' value for this argument may depend on many factors and the default value 1000 is often a reasonable default.
 When choosing `max_cells` values, speed of computation should be balanced against resolution of results.
-In situations where curved boundaries are advantageous, transforming to a projected CRS before buffering (or performing other geometry operations) may be appropriate.
+In situations where smooth curved boundaries are advantageous, transforming to a projected CRS before buffering (or performing other geometry operations) may be appropriate.
 
 The importance of CRSs (primarily whether they are projected or geographic) and the impacts of **sf**'s default setting to use S2 for buffers on lon/lat data is clear from the example above.
 The subsequent sections go into more depth, exploring which CRS to use when projected CRSs *are* needed and the details of reprojecting vector and raster objects.
@@ -400,7 +394,7 @@ However, there are some general principles provided in this section that can hel
 
 First it's worth considering *when to transform*.
 In some cases transformation to a geographic CRS is essential, such as when publishing data online with the **leaflet** package.
-Another case is when two objects with different CRSs must be compared or combined, as shown when we try to find the distance between two objects with different CRSs:
+Another case is when two objects with different CRSs must be compared or combined, as shown when we try to find the distance between two `sf` objects with different CRSs:
 
 
 ```r
@@ -411,7 +405,7 @@ st_distance(london_geo, london_proj)
 To make the `london` and `london_proj` objects geographically comparable one of them must be transformed into the CRS of the other.
 But which CRS to use?
 The answer depends on context: many projects, especially those involving web mapping, require outputs in EPSG:4326, in which case it is worth transforming the projected object.
-If, however, the project requires planar geometry operations rather than spherical geometry operations engine (e.g. to create buffers with smooth edges), it may be worth transforming data with a geographic CRS into an equivalent object with a projected CRS, such as the British National Grid (EPSG:27700).
+If, however, the project requires planar geometry operations rather than spherical geometry operations engine (e.g., to create buffers with smooth edges), it may be worth transforming data with a geographic CRS into an equivalent object with a projected CRS, such as the British National Grid (EPSG:27700).
 That is the subject of Section \@ref(reproj-vec-geom).
 
 ## Which CRS to use? {#which-crs}
@@ -426,7 +420,8 @@ Always try to pick the CRS that serves your goal best!
 
 When selecting **geographic CRSs**, the answer is often [WGS84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84).
 It is used not only for web mapping, but also because GPS datasets and thousands of raster and vector datasets are provided in this CRS by default.
-WGS84 is the most common CRS in the world, so it is worth knowing its EPSG code: 4326.
+WGS84 is the most common CRS in the world, so it is worth knowing its EPSG code: 4326.^[
+Instead of `"EPSG:4326"`, you may also use `"OGC:CRS84"`. The former assumes that latitude is always ordered before longitude, while the latter is the standard representation used by GeoJSON, with coordinates ordered longitude before latitude.]
 This 'magic number' can be used to convert objects with unusual projected CRSs into something that is widely understood.
 
 What about when a **projected CRS** is required?
@@ -437,14 +432,8 @@ The example of London was easy to answer because (a) the British National Grid (
 
 \index{UTM} 
 A commonly used default is Universal Transverse Mercator ([UTM](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system)), a set of CRSs that divides the Earth into 60 longitudinal wedges and 20 latitudinal segments.
-The transverse Mercator projection used by UTM CRSs is conformal but distorts areas and distances with increasing severity with distance from the center of the UTM zone.
-Documentation from the GIS software Manifold therefore suggests restricting the longitudinal extent of projects using UTM zones to 6 degrees from the central meridian (source: [manifold.net](https://manifold.net/doc/mfd9/universal_transverse_mercator_projection.htm)).
-Therefore, we recommend using UTM only when your focus is on preserving angles for relatively small area!
-
 Almost every place on Earth has a UTM code, such as "60H" which refers to northern New Zealand where R was invented.
 UTM EPSG codes run sequentially from 32601 to 32660 for northern hemisphere locations and from 32701 to 32760 for southern hemisphere locations.
-
-
 
 To show how the system works, let's create a function, `lonlat2UTM()` to calculate the EPSG code associated with any point on the planet as [follows](https://stackoverflow.com/a/9188972/): 
 
@@ -472,14 +461,18 @@ lonlat2UTM(st_coordinates(london))
 #> [1] 32630
 ```
 
-Currently, we also have tools helping us to select a proper CRS, which includes the **crssuggest** package<!--add ref or docs-->.
+The transverse Mercator projection used by UTM CRSs is conformal but distorts areas and distances with increasing severity with distance from the center of the UTM zone.
+Documentation from the GIS software Manifold therefore suggests restricting the longitudinal extent of projects using UTM zones to 6 degrees from the central meridian (source: [manifold.net](https://manifold.net/doc/mfd9/universal_transverse_mercator_projection.htm)).
+Therefore, we recommend using UTM only when your focus is on preserving angles for relatively small area!
+
+Currently, we also have tools helping us to select a proper CRS, which includes the **crsuggest** package (@R-crsuggest).
 The main function in this package, `suggest_crs()`, takes a spatial object with geographic CRS and returns a list of possible projected CRSs that could be used for the given area.^[This package also allows to figure out the true CRS of the data without any CRS information attached.]
 Another helpful tool is a webpage https://jjimenezshaw.github.io/crs-explorer/ that lists CRSs based on selected location and type.
 Important note: while these tools are helpful in many situations, you need to be aware of the properties of the recommended CRS before you apply it.
 
 \index{CRS!custom} 
 In cases where an appropriate CRS is not immediately clear, the choice of CRS should depend on the properties that are most important to preserve in the subsequent maps and analysis.
-All CRSs are either equal-area, equidistant, conformal (with shapes remaining unchanged), or some combination of compromises of those (section \@ref(projected-coordinate-reference-systems)).
+CRSs are either equal-area, equidistant, conformal (with shapes remaining unchanged), or some combination of compromises of those (section \@ref(projected-coordinate-reference-systems)).
 Custom CRSs with local parameters can be created for a region of interest and multiple CRSs can be used in projects when no single CRS suits all tasks.
 'Geodesic calculations' can provide a fall-back if no CRSs are appropriate (see [proj.org/geodesic.html](https://proj.org/geodesic.html)).
 Regardless of the projected CRS used, the results may not be accurate for geometries covering hundreds of kilometers.
@@ -507,11 +500,10 @@ Note that this approach should be used with caution: no other datasets will be c
 The principles outlined in this section apply equally to vector and raster datasets.
 Some features of CRS transformation however are unique to each geographic data model.
 We will cover the particularities of vector data transformation in Section \@ref(reproj-vec-geom) and those of raster transformation in Section \@ref(reproj-ras).
-Next, the last section, shows how to create custom map projections (Section \@ref(mapproj)).
+Next, Section \@ref(mapproj), shows how to create custom map projections.
 
 ## Reprojecting vector geometries {#reproj-vec-geom}
-
-<!--jn: idea adding info about custom piplines?-->
+<!--jn: idea adding info about custom piplines? (nope: too advanced)-->
 
 \index{CRS!reprojection} 
 \index{vector!reprojection} 
@@ -527,9 +519,9 @@ london2 = st_transform(london_geo, "EPSG:27700")
 
 Now that a transformed version of `london` has been created, using the **sf** function `st_transform()`, the distance between the two representations of London can be found.^[
 An alternative to `st_transform()` is `st_transform_proj()` from the **lwgeom**, which enables transformations which bypasses GDAL and can support projections not supported by GDAL.
-At the time of writing (2022) we could not find any projections supported by `st_transform_proj()` but not supported by `st_transform()`.
+However, at the time of writing (2022) we could not find any projections supported by `st_transform_proj()` but not supported by `st_transform()`.
 ]
-It may come as a surprise that `london` and `london2` are just over 2 km apart!^[
+It may come as a surprise that `london` and `london2` are over 2 km apart!^[
 The difference in location between the two points is not due to imperfections in the transforming operation (which is in fact very accurate) but the low precision of the manually-created coordinates that created `london` and `london_proj`.
 Also surprising may be that the result is provided in a matrix with units of meters.
 This is because `st_distance()` can provide distances between many features and because the CRS has units of meters.
@@ -593,7 +585,7 @@ As mentioned in Section \@ref(crs-in-r), WKT representation, stored in the `$wkt
 This means that the outputs of the previous code chunk are queries from the `wkt` representation provided by PROJ, rather than inherent attributes of the object and its CRS.
 
 Both `wkt` and `User Input` elements of the CRS are changed when the object's CRS is transformed.
-In the code chunk below, we create a new version of `cycle_hire_osm` with a projected CRS (only the first 4 lines of the CRS output are shown for brevity):
+In the code chunk below, we create a new version of `cycle_hire_osm` with a projected CRS (only the first 4 lines of the CRS output are shown for brevity).
 
 
 ```r
@@ -608,7 +600,7 @@ st_crs(cycle_hire_osm_projected)
 
 The resulting object has a new CRS with an EPSG code 27700.
 But how to find out more details about this EPSG code, or any code?
-One option is to search for it online, 
+One option is to search for it online, another is to look at the properties of the CRS object:
 
 
 ```r
@@ -621,7 +613,7 @@ crs_lnd_new$epsg
 #> [1] 27700
 ```
 
-The result shows that the EPSG code 27700 represents the British National Grid, a result that could have been found by searching online for "[EPSG 27700](https://www.google.com/search?q=CRS+27700)".
+The result shows that the EPSG code 27700 represents the British National Grid, which could have been found by searching online for "[EPSG 27700](https://www.google.com/search?q=CRS+27700)".
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Printing a spatial object in the console automatically returns its coordinate reference system.
 To access and modify it explicitly, use the `st_crs` function, for example, `st_crs(cycle_hire_osm)`.</div>\EndKnitrBlock{rmdnote}
@@ -632,11 +624,11 @@ To access and modify it explicitly, use the `st_crs` function, for example, `st_
 \index{raster!warping} 
 \index{raster!transformation} 
 \index{raster!resampling} 
-The projection concepts described in the previous section apply equally to rasters.
+The projection concepts described in the previous section apply to rasters.
 However, there are important differences in reprojection of vectors and rasters:
 transforming a vector object involves changing the coordinates of every vertex but this does not apply to raster data.
 Rasters are composed of rectangular cells of the same size (expressed by map units, such as degrees or meters), so it is usually impracticable to transform coordinates of pixels separately.
-Raster reprojection involves creating a new raster object, often with a different number of columns and rows than the original.
+Thus, raster reprojection involves creating a new raster object, often with a different number of columns and rows than the original.
 The attributes must subsequently be re-estimated, allowing the new pixels to be 'filled' with appropriate values.
 In other words, raster reprojection can be thought of as two separate spatial operations: a vector reprojection of the raster extent to another CRS (Section \@ref(reproj-vec-geom)), and computation of new pixel values through resampling (Section \@ref(resampling)).
 Thus in most cases when both raster and vector data are used, it is better to avoid reprojecting rasters and reproject vectors instead.
@@ -650,12 +642,12 @@ The transformation operation can be performed in R using [the **stars** package]
 
 
 The raster reprojection process is done with `project()` from the **terra** package.
-Like the `st_transform()` function demonstrated in the previous section, `project()` takes a geographic object (a raster dataset in this case) and some CRS representation as the second argument.
+Like the `st_transform()` function demonstrated in the previous section, `project()` takes a spatial object (a raster dataset in this case) and some CRS representation as the second argument.
 On a side note -- the second argument can also be an existing raster object with a different CRS.
 
 Let's take a look at two examples of raster transformation: using categorical and continuous data.
 Land cover data are usually represented by categorical maps.
-The `nlcd.tif` file provides information for a small area in Utah, USA obtained from [National Land Cover Database 2011](https://www.mrlc.gov/data/nlcd-2011-land-cover-conus) in the NAD83 / UTM zone 12N CRS, as shown in the output of the code chunk below (only first line of output shown):
+The `nlcd.tif` file provides information for a small area in Utah, USA obtained from [National Land Cover Database 2011](https://www.mrlc.gov/data/nlcd-2011-land-cover-conus) in the NAD83 / UTM zone 12N CRS, as shown in the output of the code chunk below (only first line of output shown).
 
 
 ```r
@@ -684,8 +676,8 @@ unique(cat_raster)
 When reprojecting categorical rasters, the estimated values must be the same as those of the original.
 This could be done using the nearest neighbor method (`near`), which sets each new cell value to the value of the nearest cell (center) of the input raster.
 An example is reprojecting `cat_raster` to WGS84, a geographic CRS well suited for web mapping.
-The first step is to obtain the PROJ definition of this CRS, which can be done, for example using the [https://spatialreference.org/](https://spatialreference.org/ref/epsg/wgs-84/) webpage. 
-The final step is to reproject the raster with the `project()` function which, in the case of categorical data, uses the nearest neighbor method (`near`):
+The first step is to obtain the definition of this CRS. 
+The second step is to reproject the raster with the `project()` function which, in the case of categorical data, uses the nearest neighbor method (`near`).
 
 
 ```r
@@ -711,8 +703,21 @@ This is demonstrated below with `srtm.tif` in **spDataLarge** from [the Shuttle 
 
 ```r
 con_raster = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
-crs(con_raster)
-#> [1] "GEOGCRS[\"WGS 84\",\n    DATUM[\"World Geodetic System 1984\",\n        ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n            LENGTHUNIT[\"metre\",1]]],\n    PRIMEM[\"Greenwich\",0,\n        ANGLEUNIT[\"degree\",0.0174532925199433]],\n    CS[ellipsoidal,2],\n        AXIS[\"geodetic latitude (Lat)\",north,\n            ORDER[1],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        AXIS[\"geodetic longitude (Lon)\",east,\n            ORDER[2],\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n    ID[\"EPSG\",4326]]"
+cat(crs(con_raster))
+#> GEOGCRS["WGS 84",
+#>     DATUM["World Geodetic System 1984",
+#>         ELLIPSOID["WGS 84",6378137,298.257223563,
+#>             LENGTHUNIT["metre",1]]],
+#>     PRIMEM["Greenwich",0,
+#>         ANGLEUNIT["degree",0.0174532925199433]],
+#>     CS[ellipsoidal,2],
+#>         AXIS["geodetic latitude (Lat)",north,
+#>             ORDER[1],
+#>             ANGLEUNIT["degree",0.0174532925199433]],
+#>         AXIS["geodetic longitude (Lon)",east,
+#>             ORDER[2],
+#>             ANGLEUNIT["degree",0.0174532925199433]],
+#>     ID["EPSG",4326]]
 ```
 
 We will reproject this dataset into a projected CRS, but *not* with the nearest neighbor method which is appropriate for categorical data.
@@ -721,21 +726,20 @@ Other methods mentioned in Section \@ref(resampling) also can be used here.
 ]
 The values in the projected dataset are the distance-weighted average of the values from these four cells:
 the closer the input cell is to the center of the output cell, the greater its weight.
-The following commands create a text string representing WGS 84 / UTM zone 12N, and reproject the raster into this CRS, using the `bilinear` method:
+The following commands create a text string representing WGS 84 / UTM zone 12N, and reproject the raster into this CRS, using the `bilinear` method (output not shown). 
 
 
 ```r
 con_raster_ea = project(con_raster, "EPSG:32612", method = "bilinear")
-crs(con_raster_ea)
-#> [1] "PROJCRS[\"WGS 84 / UTM zone 12N\",\n    BASEGEOGCRS[\"WGS 84\",\n        ENSEMBLE[\"World Geodetic System 1984 ensemble\",\n            MEMBER[\"World Geodetic System 1984 (Transit)\"],\n            MEMBER[\"World Geodetic System 1984 (G730)\"],\n            MEMBER[\"World Geodetic System 1984 (G873)\"],\n            MEMBER[\"World Geodetic System 1984 (G1150)\"],\n            MEMBER[\"World Geodetic System 1984 (G1674)\"],\n            MEMBER[\"World Geodetic System 1984 (G1762)\"],\n            MEMBER[\"World Geodetic System 1984 (G2139)\"],\n            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n                LENGTHUNIT[\"metre\",1]],\n            ENSEMBLEACCURACY[2.0]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4326]],\n    CONVERSION[\"UTM zone 12N\",\n        METHOD[\"Transverse Mercator\",\n            ID[\"EPSG\",9807]],\n        PARAMETER[\"Latitude of natural origin\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8801]],\n        PARAMETER[\"Longitude of natural origin\",-111,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8802]],\n        PARAMETER[\"Scale factor at natural origin\",0.9996,\n            SCALEUNIT[\"unity\",1],\n            ID[\"EPSG\",8805]],\n        PARAMETER[\"False easting\",500000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8806]],\n        PARAMETER[\"False northing\",0,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8807]]],\n    CS[Cartesian,2],\n        AXIS[\"(E)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"(N)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"Engineering survey, topographic mapping.\"],\n        AREA[\"Between 114°W and 108°W, northern hemisphere between equator and 84°N, onshore and offshore. Canada - Alberta; Northwest Territories (NWT); Nunavut; Saskatchewan. Mexico. United States (USA).\"],\n        BBOX[0,-114,84,-108]],\n    ID[\"EPSG\",32612]]"
+cat(crs(con_raster_ea))
 ```
 
-Raster reprojection on numeric variables also leads to small changes to values and spatial properties, such as the number of cells, resolution, and extent.
+Raster reprojection on numeric variables also leads to changes to values and spatial properties, such as the number of cells, resolution, and extent.
 These changes are demonstrated in Table \@ref(tab:rastercrs)^[
 Another minor change, that is not represented in Table \@ref(tab:rastercrs), is that the class of the values in the new projected raster dataset is `numeric`.
 This is because the `bilinear` method works with continuous data and the results are rarely coerced into whole integer values.
 This can have implications for file sizes when raster datasets are saved.
-]:
+].
 
 
 
@@ -761,7 +765,7 @@ Section \@ref(which-crs) mentioned reasons for using custom CRSs, and provided s
 Here, we show how to apply these ideas in R.
 
 One is to take an existing WKT definition of a CRS, modify some of its elements, and then use the new definition for reprojecting.
-This can be done for spatial vectors with `st_crs()$wkt` and `st_transform()`, and for spatial rasters with `crs()` and `project()`, as demonstrated in the following example which transforms the `zion` object to a custom azimuthal equidistant (AEQD) CRS.
+This can be done for spatial vectors with `st_crs()` and `st_transform()`, and for spatial rasters with `crs()` and `project()`, as demonstrated in the following example which transforms the `zion` object to a custom azimuthal equidistant (AEQD) CRS.
 
 
 ```r
@@ -806,13 +810,13 @@ zion_aeqd = st_transform(zion, my_wkt)
 Custom projections can also be made interactively, for example, using the [Projection Wizard](https://projectionwizard.org/#) web application [@savric_projection_2016].
 This website allows you to select a spatial extent of your data and a distortion property, and returns a list of possible projections.
 The list also contains WKT definitions of the projections that you can copy and use for reprojections.
-See @opengeospatialconsortium_wellknown_2019 for details on creating custom CRS definitions with WKT strings.
+Also, see @opengeospatialconsortium_wellknown_2019 for details on creating custom CRS definitions with WKT strings.
 
 \index{CRS!proj-string}
 PROJ strings can also be used to create custom projections, accepting the limitations inherent to projections, especially of geometries covering large geographic areas, mentioned in Section \@ref(crs-in-r).
 Many projections have been developed and can be set with the `+proj=` element of PROJ strings, with dozens of projects described in detail on the [PROJ website](https://proj.org/operations/projections/index.html) alone. 
 
-When mapping the world while preserving area relationships the Mollweide projection, illustrated in Figure \@ref(fig:mollproj), is a popular and often sensible choice [@jenny_guide_2017].
+When mapping the world while preserving area relationships, the Mollweide projection, illustrated in Figure \@ref(fig:mollproj), is a popular and often sensible choice [@jenny_guide_2017].
 To use this projection, we need to specify it using the proj-string element, `"+proj=moll"`, in the `st_transform` function:
 
 

@@ -116,7 +116,7 @@ See the inner blue boundary in Figure \@ref(fig:bristol): there are a couple of 
 
 [^13-transport-2]: In cases where the first match does not provide the right name, the country or region should be specified, for example `Bristol Tennessee` for a Bristol located in America.
 
-- The first OSM boundary returned by OSM may not be the official boundary used by local authorities
+- The first boundary returned by OSM may not be the official boundary used by local authorities
 - Even if OSM returns the official boundary, this may be inappropriate for transport research because they bear little relation to where people travel
 
 Travel to Work Areas (TTWAs) address these issues by creating a zoning system analogous to hydrological watersheds.
@@ -126,7 +126,7 @@ The polygon representing this transport-orientated boundary is stored in the obj
 
 The origin and destination zones used in this chapter are the same: officially defined zones of intermediate geographic resolution (their [official](https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/bulletins/annualsmallareapopulationestimates/2014-10-23) name is Middle layer Super Output Areas or MSOAs).
 Each houses around 8,000 people.
-Such administrative zones can provide vital context to transport analysis, such as the type of people who might benefit most from particular interventions [e.g., @moreno-monroy_public_2017].
+Such administrative zones can provide vital context to transport analysis, such as the type of people who might benefit most from particular interventions (e.g., @moreno-monroy_public_2017).
 
 The geographic resolution of these zones is important: small zones with high geographic resolution are usually preferable but their high number in large regions can have consequences for processing (especially for origin-destination analysis in which the number of possibilities increases as a non-linear function of the number of zones) [@hollander_transport_2016].
 
@@ -164,7 +164,7 @@ nrow(bristol_zones)
 #> [1] 102
 ```
 
-The results of the previous code chunk shows that there are more than 10 OD pairs for every zone, meaning we will need to aggregate the origin-destination data before it is joined with `bristol_zones`, as illustrated below (origin-destination data is described in Section \@ref(desire-lines)):
+The results of the previous code chunk shows that there are more than 10 OD pairs for every zone, meaning we will need to aggregate the origin-destination data before it is joined with `bristol_zones`, as illustrated below (origin-destination data is described in Section \@ref(desire-lines)).
 
 
 ```r
@@ -180,8 +180,7 @@ The preceding chunk:
 - Aggregated the variables in the `bristol_od` dataset *if* they were numeric, to find the total number of people living in each zone by mode of transport[^13-transport-3]
 - Renamed the grouping variable `o` so it matches the ID column `geo_code` in the `bristol_zones` object
 
-[^13-transport-3]: The `_if` affix requires a `TRUE`/`FALSE` question to be asked of the variables, in this case 'is it numeric?'
-    and only variables returning true are summarized.
+[^13-transport-3]: The `_if` affix requires a `TRUE`/`FALSE` question to be asked of the variables, in this case 'is it numeric?' and only variables returning true are summarized.
 
 The resulting object `zones_attr` is a data frame with rows representing zones and an ID variable.
 We can verify that the IDs match those in the `zones` dataset using the `%in%` operator as follows:
@@ -232,7 +231,7 @@ zones_destinations = bristol_od |>
 zones_od = inner_join(zones_joined, zones_destinations, by = "geo_code")
 ```
 
-A simplified version of Figure \@ref(fig:zones) is created with the code below (see `12-zones.R` in the [`code`](https://github.com/geocompx/geocompr/tree/main/code) folder of the book's GitHub repo to reproduce the figure and Section \@ref(faceted-maps) for details on faceted maps with **tmap**\index{tmap (package)}):
+A simplified version of Figure \@ref(fig:zones) is created with the code below (see `13-zones.R` in the [`code`](https://github.com/geocompx/geocompr/tree/main/code) folder of the book's GitHub repository to reproduce the figure and Section \@ref(faceted-maps) for details on faceted maps with **tmap**\index{tmap (package)}):
 
 <!-- toDo: rl   -->
 <!-- qtm does not exist... -->
@@ -321,8 +320,8 @@ qtm(desire_lines, lines.lwd = "all")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="13-transport_files/figure-html/desire-1.png" alt="Desire lines representing trip patterns in Bristol, with width representing number of trips and color representing the percentage of trips made by active modes (walking and cycling). The four black lines represent the interzonal OD pairs in Table 7.1." width="100%" />
-<p class="caption">(\#fig:desire)Desire lines representing trip patterns in Bristol, with width representing number of trips and color representing the percentage of trips made by active modes (walking and cycling). The four black lines represent the interzonal OD pairs in Table 7.1.</p>
+<img src="13-transport_files/figure-html/desire-1.png" alt="Desire lines representing trip patterns in Bristol, with width representing number of trips and color representing the percentage of trips made by active modes (walking and cycling). The four black lines represent the interzonal OD pairs in Table 13.1." width="100%" />
+<p class="caption">(\#fig:desire)Desire lines representing trip patterns in Bristol, with width representing number of trips and color representing the percentage of trips made by active modes (walking and cycling). The four black lines represent the interzonal OD pairs in Table 13.1.</p>
 </div>
 
 The map shows that the city center dominates transport patterns in the region, suggesting policies should be prioritized there, although a number of peripheral sub-centers can also be seen.
@@ -424,11 +423,11 @@ Another way of classifying routing engines (or settings) is by the geographic le
 
 ### Routes, legs and segments {#route-legs-segments}
 
-Routing engines can generate outputs at three geographic levels: routes, legs and segments:
+Routing engines can generate outputs at three geographic levels of routes, legs and segments:
 
-- **Route** level outputs contain a single feature (typically a multilinestring and associated row in the data frame representation) per origin-destination pair, meaning a single row of data per trip.
-- **Leg** level outputs contain a single feature and associated attributes each *mode* within each origin-destination pair, as described in Section \@ref(nodes). For trips only involves one mode (for example driving from home to work, ignoring the short walk to the car) the leg is the same as the route: the car journey. For trips involving public transport, legs provide key information.  The **r5r** function `detailed_itineraries()` returns legs which, confusingly, are sometimes referred to as 'segments'.
-- Segment level outputs provide the most detailed information about routes, with records for each small section of the transport network. Typically segments are similar in length, or identical to, ways in OpenStreetMap. The **cyclestreets** function `journey()` returns data at the segment level which can be aggregated by grouping by origin and destination level data returned by the `route()` function in **stplanr**.
+- **Route** level outputs contain a single feature (typically a multilinestring and associated row in the data frame representation) per origin-destination pair, meaning a single row of data per trip
+- **Leg** level outputs contain a single feature and associated attributes each *mode* within each origin-destination pair, as described in Section \@ref(nodes). For trips only involves one mode (for example driving from home to work, ignoring the short walk to the car) the leg is the same as the route: the car journey. For trips involving public transport, legs provide key information.  The **r5r** function `detailed_itineraries()` returns legs which, confusingly, are sometimes referred to as 'segments'
+- Segment level outputs provide the most detailed information about routes, with records for each small section of the transport network. Typically segments are similar in length, or identical to, ways in OpenStreetMap. The **cyclestreets** function `journey()` returns data at the segment level which can be aggregated by grouping by origin and destination level data returned by the `route()` function in **stplanr**
 
 Most routing engines return route level by default, although multi-modal engines generally provide outputs at the leg level (one feature per continuous movement by a single mode of transport).
 Segment level outputs have the advantage of providing more detail.
@@ -605,7 +604,7 @@ The output shows that `bristol_ways` represents just over 6 thousand segments on
 This and other geographic networks can be represented as mathematical graphs\index{graph}, with nodes\index{node} on the network, connected by edges\index{edge}.
 A number of R packages have been developed for dealing with such graphs, notably **igraph**\index{igraph (package)}.
 You can manually convert a route network into an `igraph` object, but the geographic attributes will be lost.
-To overcome this limitation of **igraph**, the **sfnetworks**\index{sfnetworks (package)} package, which to represent route networks simultaneously as graphs *and* geographic lines, was developed.
+To overcome this limitation of **igraph**, the **sfnetworks**\index{sfnetworks (package)} package [@R-sfnetworks], which to represent route networks simultaneously as graphs *and* geographic lines, was developed.
 We will demonstrate **sfnetworks** functionality on the `bristol_ways` object.
 
 
@@ -652,7 +651,7 @@ ways_centrality = ways_sfn |>
 One can also find the shortest route\index{shortest route} between origins and destinations using this graph representation of the route network with the **sfnetworks** package.
 <!-- TODO: make an exercise based on this if time allows (RL 2022-07) -->
 The methods presented in this section are relatively simple compared with what is possible.
-The dual graph/spatial capabilities that **sfnetworks** opens up enable many new powerful techniques can cannot be fully covered in this section.
+The dual graph/spatial capabilities that **sfnetworks** enable many new powerful techniques can cannot be fully covered in this section.
 This section does, however, provide a strong starting point for further exploration and research into the area.
 A final point is that the example dataset we used above is relatively small.
 It may also be worth considering how the work could adapt to larger networks: testing methods on a subset of the data, and ensuring you have enough RAM will help, although it's also worth exploring other tools that can do transport network analysis that are optimized for large networks, such as R5 [@alessandretti_multimodal_2022].
@@ -665,7 +664,7 @@ We will identify promising locations for investment in sustainable transport inf
 An advantage of the data driven approach outlined in this chapter is its modularity: each aspect can be useful on its own, and feed into wider analyses.
 The steps that got us to this stage included identifying short but car-dependent commuting routes (generated from desire lines) in Section \@ref(routes) and analysis of route network characteristics with the **sfnetworks** package in Section \@ref(route-networks).
 The final code chunk of this chapter combines these strands of analysis, by overlaying estimates of cycling potential from the previous section on top of a new dataset representing areas within a short distance of cycling infrastructure.
-This new dataset is created in the code chunk below which: 1) filters out the cycleway entities from the `bristol_ways` object representing the transport network; 2) 'unions' the individual LINESTRING entities of the cycleways into a single multilinestring object (for speed of buffering); and 3) creates a 100 m buffer around them to create a polygon:
+This new dataset is created in the code chunk below which: 1) filters out the cycleway entities from the `bristol_ways` object representing the transport network; 2) 'unions' the individual LINESTRING entities of the cycleways into a single multilinestring object (for speed of buffering); and 3) creates a 100 m buffer around them to create a polygon.
 
 
 ```r
@@ -675,7 +674,7 @@ existing_cycleways_buffer = bristol_ways |>
   st_buffer(dist = 100)               # 3) create buffer
 ```
 
-The next stage is to create a dataset representing points on the network where there is high cycling potential but little provision for cycling:
+The next stage is to create a dataset representing points on the network where there is high cycling potential but little provision for cycling.
 
 
 
