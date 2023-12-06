@@ -26,7 +26,7 @@ library(spData)  # spatial data package introduced in Chapter 2
 Attribute data is non-spatial information associated with geographic (geometry) data.
 A bus stop provides a simple example: its position would typically be represented by latitude and longitude coordinates (geometry data), in addition to its name.
 The [Elephant & Castle / New Kent Road](https://www.openstreetmap.org/relation/6610626) stop in London, for example has coordinates of -0.098 degrees longitude and 51.495 degrees latitude which can be represented as `POINT (-0.098 51.495)` in the `sfc` representation described in Chapter \@ref(spatial-class).
-Attributes such as the name *attribute*\index{attribute} of the POINT feature (to use Simple Features terminology) are the topic of this chapter.
+Attributes, such as *name*\index{attribute}, of the POINT feature (to use simple features terminology) are the topic of this chapter.
 
 ```{r, eval=FALSE, echo=FALSE}
 # Aim: find a bus stop in central London
@@ -50,18 +50,19 @@ Unlike the vector data model, the raster data model stores the coordinate of the
 To illustrate the point, think of a pixel in the 3^rd^ row and the 4^th^ column of a raster matrix.
 Its spatial location is defined by its index in the matrix: move from the origin four cells in the x direction (typically east and right on maps) and three cells in the y direction (typically south and down).
 The raster's *resolution* defines the distance for each x- and y-step which is specified in a *header*.
-The header is a vital component of raster datasets which specifies how pixels relate to geographic coordinates (see also Chapter \@ref(spatial-operations)).
+The header is a vital component of raster datasets which specifies how pixels relate to spatial coordinates (see also Chapter \@ref(spatial-operations)).
 
 This chapter teaches how to manipulate geographic objects based on attributes such as the names of bus stops in a vector dataset and elevations of pixels in a raster dataset.
-For vector data, this means techniques such as subsetting and aggregation (see Sections \@ref(vector-attribute-subsetting) and \@ref(vector-attribute-aggregation)).
+For vector data, this means techniques such as subsetting and aggregation (see Sections \@ref(vector-attribute-subsetting) to \@ref(vector-attribute-aggregation)).
 Sections \@ref(vector-attribute-joining) and \@ref(vec-attr-creation) demonstrate how to join data onto simple feature objects using a shared ID and how to create new variables, respectively.
 Each of these operations has a spatial equivalent:
 the `[` operator in base R, for example, works equally for subsetting objects based on their attribute and spatial objects; you can also join attributes in two geographic datasets using spatial joins.
 This is good news: skills developed in this chapter are cross-transferable.
-Chapter \@ref(spatial-operations) extends the methods presented here to the spatial world.
 
-After a deep dive into various types of *vector* attribute operations in the next section, *raster* attribute data operations are covered in Section \@ref(manipulating-raster-objects), which demonstrates how to create raster layers containing continuous and categorical attributes and extracting cell values from one or more layer (raster subsetting). 
+After a deep dive into various types of *vector* attribute operations in the next section, *raster* attribute data operations are covered.
+Creatation of raster layers containing continuous and categorical attributes and extraction of cell values from one or more layer (raster subsetting) (Section \@ref(raster-subsetting)) are demonstrated.
 Section \@ref(summarizing-raster-objects) provides an overview of 'global' raster operations which can be used to summarize entire raster datasets.
+Chapter \@ref(spatial-operations) extends the methods presented here to the spatial world.
 
 ## Vector attribute manipulation
 
@@ -102,8 +103,7 @@ The following command, for example, creates a geometry column named g:
 This enables geometries imported from spatial databases to have a variety of names such as `wkb_geometry` and `the_geom`.
 ```
 
-`sf` objects can also extend the `tidyverse` classes for data frames, `tbl_df` and `tbl`.
-\index{tidyverse (package)}.
+`sf` objects can also extend the tidyverse classes for data frames, `tbl_df` and `tbl`.\index{tidyverse (package)}
 Thus **sf** enables the full power of R's data analysis capabilities to be unleashed on geographic data, whether you use base R or tidyverse functions for data analysis.
 \index{tibble}
 **sf** objects can also be used with the high-performance data processing package **data.table** although, as documented in the issue [`Rdatatable/data.table#2273`](https://github.com/Rdatatable/data.table/issues/2273), is not fully [compatible](https://github.com/Rdatatable/data.table/issues/5352) with `sf` objects.
@@ -130,7 +130,7 @@ For most cases, however, it makes sense to keep the geometry column, explaining 
 Non-spatial data operations on `sf` objects only change an object's geometry when appropriate (e.g., by dissolving borders between adjacent polygons following aggregation).
 Becoming skilled at geographic attribute data manipulation means becoming skilled at manipulating data frames.
 
-For many applications, the tidyverse\index{tidyverse (package)} package **dplyr** offers an effective approach for working with data frames.
+For many applications, the tidyverse\index{tidyverse (package)} package **dplyr** [@R-dplyr] offers an effective approach for working with data frames.
 Tidyverse compatibility is an advantage of **sf** over its predecessor **sp**, but there are some pitfalls to avoid (see the supplementary `tidyverse-pitfalls` vignette at [geocompx.org](https://geocompx.github.io/geocompkg/articles/tidyverse-pitfalls.html) for details).
 
 ### Vector attribute subsetting
@@ -144,7 +144,7 @@ This section focuses on subsetting `sf` data frames; for further details on subs
 \index{attribute!subsetting}
 The `[` operator can subset both rows and columns. 
 Indices placed inside square brackets placed directly after a data frame object name specify the elements to keep.
-The command `object[i, j]` means 'return the rows represented by `i` and the columns represented by `j`, where `i` and `j` typically contain integers or `TRUE`s and `FALSE`s (indices can also be character strings, indicating row or column names).
+The command `object[i, j]` means 'return the rows represented by `i` and the columns represented by `j`', where `i` and `j` typically contain integers or `TRUE`s and `FALSE`s (indices can also be character strings, indicating row or column names).
 `object[5, 1:3]`, for example, means 'return data containing the 5th row and columns 1 to 3: the result should be a data frame with only 1 row and 3 columns, and a fourth geometry column if it's an `sf` object.
 Leaving `i` or `j` empty returns all rows or columns, so `world[1:5, ]` returns the first five rows and all 11 columns.
 The examples below demonstrate subsetting with base R.
@@ -166,7 +166,7 @@ world[c(1, 5), c(T, T, F, F, F, F, F, T, T, F, F, F)]
 ```
 
 A demonstration of the utility of using `logical` vectors for subsetting is shown in the code chunk below.
-This creates a new object, `small_countries`, containing nations whose surface area is smaller than 10,000 km^2^:
+This creates a new object, `small_countries`, containing nations whose surface area is smaller than 10,000 km^2^.
 
 ```{r 03-attribute-operations-10}
 i_small = world$area_km2 < 10000
@@ -191,10 +191,6 @@ small_countries = subset(world, area_km2 < 10000)
 Base R functions are mature, stable and widely used, making them a rock solid choice, especially in contexts where reproducibility and reliability are key.
 **dplyr** functions enable 'tidy' workflows which some people (the authors of this book included) find intuitive and productive for interactive data analysis, especially when combined with code editors such as RStudio that enable [auto-completion](https://support.posit.co/hc/en-us/articles/205273297-Code-Completion-in-the-RStudio-IDE) of column names.
 Key functions for subsetting data frames (including `sf` data frames) with **dplyr** functions are demonstrated below.
-<!-- The sentence below seems to be untrue based on the benchmark below. -->
-<!-- `dplyr` is also faster than base R for some operations, due to its C++\index{C++} backend. -->
-<!-- Something on dbplyr? I've never seen anyone use it regularly for spatial data 'in the wild' so leaving out the bit on integration with dbs for now (RL 2021-10) -->
-<!-- The main **dplyr** subsetting functions are `select()`, `slice()`, `filter()` and `pull()`. -->
 
 ```{r, echo=FALSE, eval=FALSE}
 # Aim: benchmark base vs dplyr subsetting
@@ -252,9 +248,6 @@ names(world5)[names(world5) == "pop"] = "population" # rename column manually
 `select()` also works with 'helper functions' for more advanced subsetting operations, including `contains()`, `starts_with()` and `num_range()` (see the help page with `?select` for details).
 
 Most **dplyr** verbs return a data frame, but you can extract a single column as a vector with `pull()`.
-<!-- Note: I have commented out the statement below because it is not true for `sf` objects, it's a bit confusing that the behaviour differs between data frames and `sf` objects. -->
-<!-- The subsetting operator in base R (see `?[`), by contrast, tries to return objects in the lowest possible dimension. -->
-<!-- This means selecting a single column returns a vector in base R as demonstrated in code chunk below which returns a numeric vector representing the population of countries in the `world`: -->
 You can get the same result in base R with the list subsetting operators `$` and `[[`, the three following commands return the same numeric vector:
 
 ```{r 03-attribute-operations-21, eval = FALSE}
@@ -262,9 +255,6 @@ pull(world, pop)
 world$pop
 world[["pop"]]
 ```
-
-<!-- Commenting out the following because it's confusing and covered better in other places (RL, 2021-10) -->
-<!-- To turn off this behavior, set the `drop` argument to `FALSE`,  -->
 
 ```{r 03-attribute-operations-19, eval=FALSE, echo=FALSE}
 # create throw-away data frame
@@ -378,7 +368,7 @@ The result is a non-spatial data frame with six rows, one per continent, and two
 **sf** provides the method `aggregate.sf()` which is activated automatically when `x` is an `sf` object and a `by` argument is provided:
 
 ```{r 03-attribute-operations-27}
-world_agg2 = aggregate(world["pop"], list(world$continent), FUN = sum, 
+world_agg2 = aggregate(world["pop"], by = list(world$continent), FUN = sum, 
                        na.rm = TRUE)
 class(world_agg2)
 nrow(world_agg2)
@@ -411,7 +401,7 @@ These aggregating functions return `sf` objects with rows representing continent
 \index{attribute!subsetting}
 \index{attribute!aggregation}
 Let's combine what we have learned so far about **dplyr** functions, by chaining multiple commands to summarize attribute data about countries worldwide by continent.
-The following command calculates population density (with `mutate()`), arranges continents by the number countries they contain (with `dplyr::arrange()`), and keeps only the 3 most populous continents (with `dplyr::slice_max()`), the result of which is presented in Table \@ref(tab:continents)):
+The following command calculates population density (with `mutate()`), arranges continents by the number countries they contain (with `arrange()`), and keeps only the 3 most populous continents (with `slice_max()`), the result of which is presented in Table \@ref(tab:continents)):
 
 ```{r 03-attribute-operations-30}
 world_agg5 = world |> 
@@ -452,9 +442,9 @@ The most common type of attribute join on spatial data takes an `sf` object as t
 
 To demonstrate joins, we will combine data on coffee production with the `world` dataset.
 The coffee data is in a data frame called `coffee_data` from the **spData** package (see `?coffee_data` for details).
-It has 3 columns:
+It has three columns:
 `name_long` names major coffee-producing nations and `coffee_production_2016` and `coffee_production_2017` contain estimated values for coffee production in units of 60-kg bags in each year.
-A 'left join', which preserves the first dataset, merges `world` with `coffee_data`:
+A 'left join', which preserves the first dataset, merges `world` with `coffee_data`.
 
 ```{r 03-attribute-operations-32, warning=FALSE}
 world_coffee = left_join(world, coffee_data)
@@ -463,7 +453,7 @@ class(world_coffee)
 
 Because the input datasets share a 'key variable' (`name_long`) the join worked without using the `by` argument (see `?left_join` for details).
 The result is an `sf` object identical to the original `world` object but with two new variables (with column indices 11 and 12) on coffee production.
-This can be plotted as a map, as illustrated in Figure \@ref(fig:coffeemap), generated with the `plot()` function below:
+This can be plotted as a map, as illustrated in Figure \@ref(fig:coffeemap), generated with the `plot()` function below.
 
 ```{r coffeemap, fig.cap="World coffee production (thousand 60-kg bags) by country, 2017. Source: International Coffee Organization.", fig.scap="World coffee production by country."}
 names(world_coffee)
@@ -472,13 +462,13 @@ plot(world_coffee["coffee_production_2017"])
 
 For joining to work, a 'key variable' must be supplied in both datasets.
 By default, **dplyr** uses all variables with matching names.
-In this case, both `world_coffee` and `world` objects contained a variable called `name_long`, explaining the message `Joining with `by = join_by(name_long)``.
+In this case, both `world_coffee` and `world` objects contained a variable called `name_long`, explaining the message `Joining with 'by = join_by(name_long)'`.
 In the majority of cases where variable names are not the same, you have two options:
 
 1. Rename the key variable in one of the objects so they match.
 2. Use the `by` argument to specify the joining variables.
 
-The latter approach is demonstrated below on a renamed version of `coffee_data`:
+The latter approach is demonstrated below on a renamed version of `coffee_data`.
 
 ```{r 03-attribute-operations-33, warning=FALSE}
 coffee_renamed = rename(coffee_data, nm = name_long)
@@ -497,7 +487,7 @@ Although there are only 47 rows of data in `coffee_data`, all 177 country record
 rows in the original dataset with no match are assigned `NA` values for the new coffee production variables.
 What if we only want to keep countries that have a match in the key variable?
 \index{attribute!join}
-In that case an inner join can be used:
+In that case an inner join can be used.
 
 ```{r 03-attribute-operations-35, warning=FALSE}
 world_coffee_inner = inner_join(world, coffee_data)
@@ -514,7 +504,7 @@ setdiff(coffee_data$name_long, world$name_long)
 
 The result shows that `Others` accounts for one row not present in the `world` dataset and that the name of the `Democratic Republic of the Congo` accounts for the other:
 it has been abbreviated, causing the join to miss it.
-The following command uses a string matching (*regex*) function from the **stringr** package to confirm what `Congo, Dem. Rep. of` should be:
+The following command uses a string matching (*regex*) function from the **stringr** package to confirm what `Congo, Dem. Rep. of` should be.
 
 ```{r 03-attribute-operations-37}
 drc = stringr::str_subset(world$name_long, "Dem*.+Congo")
@@ -532,7 +522,7 @@ str_subset(coffee_data$name_long, "Ivo|Congo,")
 ```
 
 To fix this issue, we will create a new version of `coffee_data` and update the name.
-`inner_join()`ing the updated data frame returns a result with all 46 coffee-producing nations:
+`inner_join()`ing the updated data frame returns a result with all 46 coffee-producing nations.
 
 ```{r 03-attribute-operations-39, warning=FALSE}
 coffee_data$name_long[grepl("Congo,", coffee_data$name_long)] = drc
@@ -543,7 +533,7 @@ nrow(world_coffee_match)
 It is also possible to join in the other direction: starting with a non-spatial dataset and adding variables from a simple features object.
 This is demonstrated below, which starts with the `coffee_data` object and adds variables from the original `world` dataset.
 In contrast with the previous joins, the result is *not* another simple feature object, but a data frame in the form of a **tidyverse** tibble:
-the output of a join tends to match its first argument:
+the output of a join tends to match its first argument.
 
 ```{r 03-attribute-operations-40, warning=FALSE}
 coffee_world = left_join(coffee_data, world)
@@ -558,7 +548,7 @@ Fortunately, non-spatial data frames with a geometry list column (like `coffee_w
 
 This section covers the majority of joining use cases.
 For more information, we recommend reading the chapter [Relational data](https://r4ds.had.co.nz/relational-data.html?q=join#relational-data) in @grolemund_r_2016, the [join vignette](https://geocompx.github.io/geocompkg/articles/join.html) in the **geocompkg** package that accompanies this book, and [documentation](https://asardaes.github.io/table.express/articles/joins.html) describing joins with **data.table** and other packages.
-Spatial joins are covered in the next chapter (Section \@ref(spatial-joining)).
+Additionally, spatial joins are covered in the next chapter (Section \@ref(spatial-joining)).
 
 ### Creating attributes and removing spatial information {#vec-attr-creation}
 
@@ -587,14 +577,14 @@ The difference between `mutate()` and `transmute()` is that the latter drops all
 \index{attribute!create}
 `unite()` from the **tidyr** package (which provides many useful functions for reshaping datasets, including `pivot_longer()`) pastes together existing columns.
 For example, we want to combine the `continent` and `region_un` columns into a new column named `con_reg`.
-Additionally, we can define a separator (here: a colon `:`) which defines how the values of the input columns should be joined, and if the original columns should be removed (here: `TRUE`):
+Additionally, we can define a separator (here: a colon `:`) which defines how the values of the input columns should be joined, and if the original columns should be removed (here: `TRUE`).
 
 ```{r 03-attribute-operations-45, eval=FALSE}
 world_unite = world |>
   tidyr::unite("con_reg", continent:region_un, sep = ":", remove = TRUE)
 ```
 
-The resulting `sf` object has a new column called `con_reg` representing the continent and region of each country, e.g. `South America:Americas` for Argentina and other South America countries.
+The resulting `sf` object has a new column called `con_reg` representing the continent and region of each country, e.g., `South America:Americas` for Argentina and other South America countries.
 \index{attribute!create}
 **tidyr**'s `separate()` function does the opposite of `unite()`: it splits one column into multiple columns using either a regular expression or character positions.
 
@@ -661,6 +651,7 @@ elev = rast(nrows = 6, ncols = 6,
 
 The result is a raster object with 6 rows and 6 columns (specified by the `nrow` and `ncol` arguments), and a minimum and maximum spatial extent in x and y direction (`xmin`, `xmax`, `ymin`, `ymax`).
 The `vals` argument sets the values that each cell contains: numeric data ranging from 1 to 36 in this case.
+
 \index{raster!manipulation}
 \index{categorical raster}
 Raster objects can also contain categorical values of class `logical` or `factor` variables in R.
@@ -684,7 +675,7 @@ grain = rast(system.file("raster/grain.tif", package = "spData"))
 \index{raster attribute table}
 The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a list of data frames, which can be viewed with `cats(grain)` (see `?cats()` for more information).
 Each element of this list is a layer of the raster.
-It is also possible to use the function `levels()` for retrieving and adding new or replacing existing factor levels:
+It is also possible to use the function `levels()` for retrieving and adding new or replacing existing factor levels.
 
 ```{r 03-attribute-operations-56}
 levels(grain) = data.frame(value = c(0, 1, 2), wetness = c("wet", "moist", "dry"))
@@ -710,8 +701,8 @@ Raster subsetting is done with the base R operator `[`, which accepts a variety 
 
 - Row-column indexing
 - Cell IDs
-- Coordinates (see Section \@ref(spatial-raster-subsetting))
-- Another spatial object (see Section \@ref(spatial-raster-subsetting))
+- Coordinates
+- Another spatial object
 
 Here, we only show the first two options since these can be considered non-spatial operations.
 If we need a spatial object to subset another or the output is a spatial object, we refer to this as spatial subsetting.
@@ -719,7 +710,7 @@ Therefore, the latter two options will be shown in the next chapter (see Section
 
 \index{raster!subsetting}
 The first two subsetting options are demonstrated in the commands below ---
-both return the value of the top left pixel in the raster object `elev` (results not shown):
+both return the value of the top left pixel in the raster object `elev` (results not shown).
 
 ```{r 03-attribute-operations-58, eval = FALSE}
 # row 1, column 1
@@ -728,9 +719,9 @@ elev[1, 1]
 elev[1]
 ```
 
-Subsetting of multi-layered raster objects will return the cell value(s) for each layer.
+Subsetting of multilayered raster objects will return the cell value(s) for each layer.
 For example, `two_layers = c(grain, elev); two_layers[1]` returns a data frame with one row and two columns --- one for each layer.
-To extract all values or complete rows, you can also use `values()`.
+To extract all values you can also use `values()`.
 
 Cell values can be modified by overwriting existing values in conjunction with a subsetting operation.
 The following code chunk, for example, sets the upper left cell of `elev` to 0 (results not shown):
@@ -769,14 +760,18 @@ global(elev, sd)
 ```
 
 ```{block2 03-attribute-operations-63, type='rmdnote'}
-If you provide the `summary()` and `global()` functions with a multi-layered raster object, they will summarize each layer separately, as can be illustrated by running: `summary(c(elev, grain))`.
+If you provide the `summary()` and `global()` functions with a multilayered raster object, they will summarize each layer separately, as can be illustrated by running: `summary(c(elev, grain))`.
 ```
 
 \index{raster!summarizing}
 Additionally, the `freq()` function allows to get the frequency table of categorical values.
 
+```{r}
+freq(grain)
+```
+
 Raster value statistics can be visualized in a variety of ways.
-Specific functions such as `boxplot()`, `density()`, `hist()` and `pairs()` work also with raster objects, as demonstrated in the histogram created with the command below (not shown):
+Specific functions such as `boxplot()`, `density()`, `hist()` and `pairs()` work also with raster objects, as demonstrated in the histogram created with the command below (not shown).
 
 ```{r 03-attribute-operations-64, eval=FALSE}
 hist(elev)
@@ -790,6 +785,7 @@ These and other typical raster processing operations are part of the map algebra
 
 ```{block 03-attribute-operations-65, type='rmdnote'}
 Some function names clash between packages (e.g., a function with the name `extract()` exist in both **terra** and **tidyr** packages).
+This may lead to unexpected results when loading packages in a different order.
 In addition to not loading packages by referring to functions verbosely (e.g., `tidyr::extract()`), another way to prevent function names clashes is by unloading the offending package with `detach()`.
 The following command, for example, unloads the **terra** package (this can also be done in the *package* tab which resides by default in the right-bottom pane in RStudio): `detach("package:terra", unload = TRUE, force = TRUE)`.
 The `force` argument makes sure that the package will be detached even if other packages depend on it.

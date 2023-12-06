@@ -27,7 +27,7 @@ There are also many non-commercial applications that can use the technique for p
 
 People are fundamental to location analysis\index{location analysis}, in particular where they are likely to spend their time and other resources.
 Interestingly, ecological concepts and models are quite similar to those used for store location analysis.
-Animals and plants can best meet their needs in certain 'optimal' locations, based on variables that change over space (@muenchow_review_2018; see also chapter \@ref(eco)).
+Animals and plants can best meet their needs in certain 'optimal' locations, based on variables that change over space (@muenchow_review_2018; see also Chapter \@ref(eco)).
 This is one of the great strengths of geocomputation and GIScience in general: concepts and methods are transferable to other fields.
 Polar bears, for example, prefer northern latitudes where temperatures are lower and food (seals and sea lions) is plentiful.
 Similarly, humans tend to congregate in certain places, creating economic niches (and high land prices) analogous to the ecological niche of the Arctic.
@@ -89,9 +89,8 @@ Further, `mutate()` is used to convert values -1 and -9 (meaning "unknown") to `
 input = select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D, hh_size = HHGroesse_D)
 # set -1 and -9 to NA
-input_tidy = dplyr::mutate(input,
-  dplyr::across(.cols = c(pop, women, mean_age, hh_size), 
-                .fns =  ~ifelse(.x %in% c(-1, -9), NA, .x)))
+input_tidy = mutate(input, across(.cols = c(pop, women, mean_age, hh_size), 
+                                  .fns =  ~ifelse(.x %in% c(-1, -9), NA, .x)))
 ```
 
 ```{r census-desc, echo=FALSE}
@@ -142,10 +141,10 @@ knitr::kable(tab,
  
 After the preprocessing, the data can be converted into a `SpatRaster` object (see Sections \@ref(raster-classes) and \@ref(raster-subsetting)) with the help of the `rast()` function.
 When setting its `type` argument to `xyz`, the `x` and `y` columns of the input data frame should correspond to coordinates on a regular grid.
-All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as values of the raster layers (Figure \@ref(fig:census-stack); see also `code/14-location-figures.R` in our github repository).
+All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as values of the raster layers (Figure \@ref(fig:census-stack); see also `code/14-location-figures.R` in our GitHub repository).
 
 ```{r 14-location-5}
-input_ras = terra::rast(input_tidy, type = "xyz", crs = "EPSG:3035")
+input_ras = rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 ```
 
 ```{r 14-location-6}
@@ -195,15 +194,15 @@ Finally, the code chunk below ensures the `reclass` layers have the same name as
 
 ```{r 14-location-9}
 reclass = input_ras
-for (i in seq_len(terra::nlyr(reclass))) {
-  reclass[[i]] = terra::classify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
+for (i in seq_len(nlyr(reclass))) {
+  reclass[[i]] = classify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
 }
 names(reclass) = names(input_ras)
 ```
 
 ```{r 14-location-10, eval=FALSE}
-reclass
-#> ... (full output not shown)
+reclass # full output not shown
+#> ... 
 #> names       :  pop, women, mean_age, hh_size 
 #> min values  :  127,     0,        0,       0 
 #> max values  : 8000,     3,        3,       3
@@ -214,10 +213,10 @@ reclass
 
 We deliberately define metropolitan areas as pixels of 20 km^2^ inhabited by more than 500,000 people.
 Pixels at this coarse resolution can rapidly be created using `aggregate()`\index{aggregation}, as introduced in Section \@ref(aggregation-and-disaggregation).
-The command below uses the argument `fact = 20` to reduce the resolution of the result twenty-fold (recall the original raster resolution was 1 km^2^):
+The command below uses the argument `fact = 20` to reduce the resolution of the result twenty-fold (recall the original raster resolution was 1 km^2^).
 
 ```{r 14-location-11, warning=FALSE, cache=TRUE, cache.lazy=FALSE}
-pop_agg = terra::aggregate(reclass$pop, fact = 20, fun = sum, na.rm = TRUE)
+pop_agg = aggregate(reclass$pop, fact = 20, fun = sum, na.rm = TRUE)
 summary(pop_agg)
 ```
 
@@ -235,9 +234,9 @@ Subsequently, `as.polygons()` converts the raster object into spatial polygons, 
 
 ```{r 14-location-13, warning=FALSE, message=FALSE}
 metros = pop_agg |> 
-  terra::patches(directions = 8) |>
-  terra::as.polygons() |>
-  sf::st_as_sf()
+  patches(directions = 8) |>
+  as.polygons() |>
+  st_as_sf()
 ```
 
 ```{r metro-areas, echo=FALSE, out.width= "70%", fig.cap="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names.", fig.scap="The aggregated population raster."}
@@ -288,10 +287,10 @@ The **osmdata**\index{osmdata (package)} package provides easy-to-use access to 
 Instead of downloading shops for the whole of Germany, we restrict the query to the defined metropolitan areas, reducing computational load and providing shop locations only in areas of interest.
 The subsequent code chunk does this using a number of functions including:
 
-- `map()`\index{loop!map} (the **tidyverse** equivalent of `lapply()`\index{loop!lapply}), which iterates through all eight metropolitan names which subsequently define the bounding box\index{bounding box} in the OSM\index{OpenStreetMap} query function `opq()` (see Section \@ref(retrieving-data)).
-- `add_osm_feature()` to specify OSM\index{OpenStreetMap} elements with a key value of `shop` (see [wiki.openstreetmap.org](https://wiki.openstreetmap.org/wiki/Map_Features) for a list of common key:value pairs).
-- `osmdata_sf()`, which converts the OSM\index{OpenStreetMap} data into spatial objects (of class `sf`).
-- `while()`\index{loop!while}, which tries repeatedly (three times in this case) to download the data if it fails the first time.^[The OSM-download will sometimes fail at the first attempt.
+- `map()`\index{loop!map} (the **tidyverse** equivalent of `lapply()`\index{loop!lapply}), which iterates through all eight metropolitan names which subsequently define the bounding box\index{bounding box} in the OSM\index{OpenStreetMap} query function `opq()` (see Section \@ref(retrieving-data))
+- `add_osm_feature()` to specify OSM\index{OpenStreetMap} elements with a key value of `shop` (see [wiki.openstreetmap.org](https://wiki.openstreetmap.org/wiki/Map_Features) for a list of common key:value pairs)
+- `osmdata_sf()`, which converts the OSM\index{OpenStreetMap} data into spatial objects (of class `sf`)
+- `while()`\index{loop!while}, which tries repeatedly (three times in this case) to download the data if it fails the first time^[The OSM-download will sometimes fail at the first attempt.
 ]
 
 Before running this code: please consider it will download almost 2GB of data.
@@ -352,14 +351,14 @@ The result of the subsequent code chunk is therefore an estimate of shop density
 
 ```{r tmmppp21, echo=FALSE, message=FALSE, warning=FALSE}
 shops = sf::st_transform(shops, st_crs(reclass))
-# create poi raster
-poi = terra::rasterize(x = vect(shops), y = reclass, field = "osm_id", fun = "length")
+# create point of interest (poi) raster
+poi = rasterize(x = vect(shops), y = reclass, field = "osm_id", fun = "length")
 ```
 
 ```{r 14-location-25, message=FALSE, warning=FALSE, eval=FALSE}
 shops = sf::st_transform(shops, st_crs(reclass))
 # create poi raster
-poi = terra::rasterize(x = shops, y = reclass, field = "osm_id", fun = "length")
+poi = rasterize(x = shops, y = reclass, field = "osm_id", fun = "length")
 ```
 
 As with the other raster layers (population, women, mean age, household size) the `poi` raster is reclassified into four classes (see Section \@ref(create-census-rasters)). 
@@ -369,13 +368,13 @@ Here, we choose the Fisher-Jenks natural breaks approach which minimizes within-
 
 ```{r 14-location-26, message=FALSE, warning=FALSE}
 # construct reclassification matrix
-int = classInt::classIntervals(terra::values(poi), n = 4, style = "fisher")
+int = classInt::classIntervals(values(poi), n = 4, style = "fisher")
 int = round(int$brks)
 rcl_poi = matrix(c(int[1], rep(int[-c(1, length(int))], each = 2), 
                    int[length(int)] + 1), ncol = 2, byrow = TRUE)
 rcl_poi = cbind(rcl_poi, 0:3)  
 # reclassify
-poi = terra::classify(poi, rcl = rcl_poi, right = NA) 
+poi = classify(poi, rcl = rcl_poi, right = NA) 
 names(poi) = "poi"
 ```
 
@@ -410,7 +409,7 @@ if (knitr::is_latex_output()) {
     library(leaflet)
     # have a look at suitable bike shop locations in Berlin
     berlin = metros[metro_names == "Berlin", ]
-    berlin_raster = terra::crop(result, terra::vect(berlin)) 
+    berlin_raster = crop(result, vect(berlin)) 
     # summary(berlin_raster)
     # berlin_raster
     berlin_raster = berlin_raster[berlin_raster > 9, drop = FALSE]
