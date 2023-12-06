@@ -341,7 +341,7 @@ Plots are added as layers to existing images by setting `add = TRUE`.^[
 `plot()`ing of **sf** objects uses `sf:::plot.sf()` behind the scenes.
 `plot()` is a generic method that behaves differently depending on the class of object being plotted.
 ]
-To demonstrate this, and to provide a insight into the contents of Chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, the subsequent code chunk filters countries in Asia and combines them into a single feature:
+To demonstrate this, and to provide an insight into the contents of Chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, the subsequent code chunk filters countries in Asia and combines them into a single feature:
 
 
 ```r
@@ -369,7 +369,7 @@ the `plot()` function is fast to execute and requires few lines of code, but doe
 For more advanced map making we recommend using dedicated visualization packages such as **tmap** [@tmap2018] (see Chapter \@ref(adv-map)).</div>\EndKnitrBlock{rmdnote}
 
 There are various ways to modify maps with **sf**'s `plot()` method.
-Because **sf** extends base R plotting methods, `plot()`'s arguments such as `main =` (which specifies the title of the map) work with `sf` objects (see `?graphics::plot` and `?par`).^[
+Because **sf** extends base R plotting methods, `plot()`'s arguments work with `sf` objects (see `?graphics::plot` and `?par` for information on arguments such as `main =`).^[
 Note: many plot arguments are ignored in facet maps, when more than one `sf` column is plotted.] 
 \index{base plot|see {map making}}\index{map making!base plotting} Figure \@ref(fig:contpop) illustrates this flexibility by overlaying circles, whose diameters (set with `cex =`) represent country populations, on a map of the world.
 An unprojected version of this figure can be created with the following commands (see exercises at the end of this chapter and the script [`02-contplot.R`](https://github.com/geocompx/geocompr/blob/main/code/02-contpop.R) to reproduce Figure \@ref(fig:contpop)):
