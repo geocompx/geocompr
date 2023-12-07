@@ -50,7 +50,7 @@ The packages needed to run the code presented in this chapter can be 'loaded' (t
 
 
 ```r
-library(sf)          # classes and functions for vector data
+library(sf)            # classes and functions for vector data
 #> Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
 ```
 
@@ -58,7 +58,7 @@ The output from `library(sf)` reports which versions of key geographic libraries
 
 
 ```r
-library(terra)      # classes and functions for raster data
+library(terra)         # classes and functions for raster data
 ```
 
 The other packages that were installed contain data that will be used in the book:
@@ -477,7 +477,7 @@ Finally, a geometry collection can contain any combination of geometries includi
 - Geometry collection: `GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2), LINESTRING (1 5, 4 4, 4 1, 2 2, 3 2))`
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/geomcollection-1.png" alt="Illustration of a geometry collection." width="60%" />
+<img src="02-spatial-data_files/figure-html/geomcollection-1.png" alt="Illustration of a geometry collection." width="100%" />
 <p class="caption">(\#fig:geomcollection)Illustration of a geometry collection.</p>
 </div>
 

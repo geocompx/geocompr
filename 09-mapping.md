@@ -20,11 +20,8 @@ We recommend you to install its development version from the [r-universe](https:
 
 
 ```r
-# eval: false
 install.packages("tmap", repos = c("https://r-tmap.r-universe.dev",
                                    "https://cloud.r-project.org"))
-#> Installing package into '/usr/local/lib/R/site-library'
-#> (as 'lib' is unspecified)
 ```
 
 - It uses the following visualization packages (also install shiny if you want to develop interactive mapping applications):
@@ -268,7 +265,7 @@ tm_shape(nz) + tm_fill(fill = "Land_area")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="09-mapping_files/figure-html/tmcol-1.png" alt="Comparison of base (left) and tmap (right) handling of a numeric color field." width="100%" /><img src="09-mapping_files/figure-html/tmcol-2.png" alt="Comparison of base (left) and tmap (right) handling of a numeric color field." width="100%" />
+<img src="09-mapping_files/figure-html/tmcol-1.png" alt="Comparison of base (left) and tmap (right) handling of a numeric color field." width="45%" /><img src="09-mapping_files/figure-html/tmcol-2.png" alt="Comparison of base (left) and tmap (right) handling of a numeric color field." width="45%" />
 <p class="caption">(\#fig:tmcol)Comparison of base (left) and tmap (right) handling of a numeric color field.</p>
 </div>
 
@@ -1207,12 +1204,6 @@ The code chunk below demonstrates creation of non-contiguous area and Dorling ca
 us_states9311 = st_transform(us_states, "EPSG:9311")
 us_states9311_ncont = cartogram_ncont(us_states9311, "total_pop_15")
 us_states9311_dorling = cartogram_dorling(us_states9311, "total_pop_15")
-```
-
-
-```
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
 ```
 
 <div class="figure" style="text-align: center">
