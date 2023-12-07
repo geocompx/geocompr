@@ -337,7 +337,6 @@ st_crs(london_proj)
 Notable components of this CRS description include the EPSG code (`EPSG: 27700`) and the detailed `wkt` string (only the first 5 lines of which are shown).^[
 For a short description of the most relevant projection parameters and related concepts, see the fourth lecture by Jochen Albrecht hosted at
 http://www.geography.hunter.cuny.edu/~jochen/GTECH361/lectures/ and information at https://proj.org/usage/projections.html.
-Other great resources on projections are spatialreference.org and progonos.com/furuti/MapProj.
 ]
 The fact that the units of the CRS, described in the LENGTHUNIT field, are meters (rather than degrees) tells us that this is a projected CRS: `st_is_longlat(london_proj)` now returns `FALSE` and geometry operations on `london_proj` will work without a warning.
 Buffers operations on the `london_proj` will use GEOS and results will returned with proper units of distance.
