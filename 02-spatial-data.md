@@ -476,10 +476,7 @@ Finally, a geometry collection can contain any combination of geometries includi
 
 - Geometry collection: `GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2), LINESTRING (1 5, 4 4, 4 1, 2 2, 3 2))`
 
-<div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/geomcollection-1.png" alt="Illustration of a geometry collection." width="100%" />
-<p class="caption">(\#fig:geomcollection)Illustration of a geometry collection.</p>
-</div>
+<img src="02-spatial-data_files/figure-html/geomcollection-1.png" width="100%" style="display: block; margin: auto;" />
 
 ### The sf class {#sf}
 
