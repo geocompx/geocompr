@@ -620,7 +620,7 @@ st_polygon(polygon_with_hole_list)
 ## MULTILINESTRING
 multilinestring_list = list(rbind(c(1, 5), c(4, 4), c(4, 1), c(2, 2), c(3, 2)), 
                             rbind(c(1, 2), c(2, 4)))
-st_multilinestring((multilinestring_list))
+st_multilinestring(multilinestring_list)
 #> MULTILINESTRING ((1 5, 4 4, 4 1, 2 2, 3 2), (1 2, 2 4))
 ```
 
