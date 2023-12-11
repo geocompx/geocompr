@@ -251,7 +251,7 @@ slice(world, 1:6)
 ```
 
 `filter()` is **dplyr**'s equivalent of base R's `subset()` function.
-It keeps only rows matching given criteria, e.g., only countries with and area below a certain threshold, or with a high average of life expectancy, as shown in the following examples:
+It keeps only rows matching given criteria, e.g., only countries with an area below a certain threshold, or with a high average of life expectancy, as shown in the following examples:
 
 
 ```r
