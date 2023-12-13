@@ -677,8 +677,9 @@ It is also possible to use the function `levels()` for retrieving and adding new
 
 
 ```r
-levels(grain) = data.frame(value = c(0, 1, 2), wetness = c("wet", "moist", "dry"))
-levels(grain)
+grain2 = grain # do not overwrite the original data
+levels(grain2) = data.frame(value = c(0, 1, 2), wetness = c("wet", "moist", "dry"))
+levels(grain2)
 #> [[1]]
 #>   value wetness
 #> 1     0     wet
