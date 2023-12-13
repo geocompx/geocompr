@@ -131,7 +131,6 @@ Country borders are often useful and these can be accessed with the `ne_countrie
 
 ```r
 library(rnaturalearth)
-#> Support for Spatial objects (`sp`) will be deprecated in {rnaturalearth} and will be removed in a future release of the package. Please use `sf` objects with {rnaturalearth}. For example: `ne_download(returnclass = 'sf')`
 usa_sf = ne_countries(country = "United States of America", returnclass = "sf")
 ```
 

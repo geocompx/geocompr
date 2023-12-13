@@ -799,14 +799,14 @@ These and other typical raster processing operations are part of the map algebra
 <p>Some function names clash between packages (e.g., a function with the
 name <code>extract()</code> exist in both <strong>terra</strong> and
 <strong>tidyr</strong> packages). This may lead to unexpected results
-when loading packages in a different order. In addition to not loading
-packages by referring to functions verbosely (e.g.,
-<code>tidyr::extract()</code>), another way to prevent function names
-clashes is by unloading the offending package with
-<code>detach()</code>. The following command, for example, unloads the
-<strong>terra</strong> package (this can also be done in the
-<em>package</em> tab which resides by default in the right-bottom pane
-in RStudio):
+when loading packages in a different order. In addition to calling
+functions verbosely with their full namespace (e.g.,
+<code>tidyr::extract()</code>) to avoid attaching packages with
+<code>library()</code>, another way to prevent function name clashes is
+by unloading the offending package with <code>detach()</code>. The
+following command, for example, unloads the <strong>terra</strong>
+package (this can also be done in the <em>package</em> tab which resides
+by default in the right-bottom pane in RStudio):
 <code>detach("package:terra", unload = TRUE, force = TRUE)</code>. The
 <code>force</code> argument makes sure that the package will be detached
 even if other packages depend on it. This, however, may lead to a
