@@ -1,5 +1,7 @@
 # Raster-vector interactions {#raster-vector}
 
+
+
 ## Prerequisites {.unnumbered}
 
 - This chapter requires the following packages:
@@ -80,7 +82,7 @@ srtm_inv_masked = mask(srtm, zion, inverse = TRUE)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="06-raster-vector_files/figure-html/cropmask-1.png" alt="Illustration of raster cropping and raster masking." width="100%" />
+<img src="figures/cropmask-1.png" alt="Illustration of raster cropping and raster masking." width="100%" />
 <p class="caption">(\#fig:cropmask)Illustration of raster cropping and raster masking.</p>
 </div>
 
@@ -107,7 +109,7 @@ zion_points = cbind(zion_points, elevation)
 
 
 <div class="figure" style="text-align: center">
-<img src="06-raster-vector_files/figure-html/pointextr-1.png" alt="Locations of points used for raster extraction." width="100%" />
+<img src="figures/pointextr-1.png" alt="Locations of points used for raster extraction." width="100%" />
 <p class="caption">(\#fig:pointextr)Locations of points used for raster extraction.</p>
 </div>
 
@@ -163,7 +165,7 @@ zion_transect = cbind(zion_transect, zion_elev)
 The resulting `zion_transect` can be used to create elevation profiles, as illustrated in Figure \@ref(fig:lineextr)(B).
 
 <div class="figure" style="text-align: center">
-<img src="06-raster-vector_files/figure-html/lineextr-1.png" alt="Location of a line used for raster extraction (left) and the elevation along this line (right)." width="100%" />
+<img src="figures/lineextr-1.png" alt="Location of a line used for raster extraction (left) and the elevation along this line (right)." width="100%" />
 <p class="caption">(\#fig:lineextr)Location of a line used for raster extraction (left) and the elevation along this line (right).</p>
 </div>
 
@@ -219,7 +221,7 @@ zion_nlcd |>
 ```
 
 <div class="figure" style="text-align: center">
-<img src="06-raster-vector_files/figure-html/polyextr-1.png" alt="Area used for continuous (left) and categorical (right) raster extraction." width="100%" />
+<img src="figures/polyextr-1.png" alt="Area used for continuous (left) and categorical (right) raster extraction." width="100%" />
 <p class="caption">(\#fig:polyextr)Area used for continuous (left) and categorical (right) raster extraction.</p>
 </div>
 
@@ -293,7 +295,7 @@ ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template,
 ```
 
 <div class="figure" style="text-align: center">
-<img src="06-raster-vector_files/figure-html/vector-rasterization1-1.png" alt="Examples of point rasterization." width="100%" />
+<img src="figures/vector-rasterization1-1.png" alt="Examples of point rasterization." width="100%" />
 <p class="caption">(\#fig:vector-rasterization1)Examples of point rasterization.</p>
 </div>
 
@@ -328,7 +330,7 @@ california_raster2 = rasterize(california, raster_template2)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="06-raster-vector_files/figure-html/vector-rasterization2-1.png" alt="Examples of line and polygon rasterizations." width="100%" />
+<img src="figures/vector-rasterization2-1.png" alt="Examples of line and polygon rasterizations." width="100%" />
 <p class="caption">(\#fig:vector-rasterization2)Examples of line and polygon rasterizations.</p>
 </div>
 
@@ -354,7 +356,7 @@ elev_point = as.points(elev) |>
 ```
 
 <div class="figure" style="text-align: center">
-<img src="06-raster-vector_files/figure-html/raster-vectorization1-1.png" alt="Raster and point representation of the elev object." width="100%" />
+<img src="figures/raster-vectorization1-1.png" alt="Raster and point representation of the elev object." width="100%" />
 <p class="caption">(\#fig:raster-vectorization1)Raster and point representation of the elev object.</p>
 </div>
 
@@ -397,7 +399,7 @@ grain_poly = as.polygons(grain) |>
 ```
 
 <div class="figure" style="text-align: center">
-<img src="06-raster-vector_files/figure-html/06-raster-vector-40-1.png" alt="Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right)." width="100%" />
+<img src="figures/06-raster-vector-40-1.png" alt="Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right)." width="100%" />
 <p class="caption">(\#fig:06-raster-vector-40)Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right).</p>
 </div>
 

@@ -2,6 +2,8 @@
 
 
 
+
+
 ## Prerequisites {-}
 
 This chapter assumes proficiency with geographic data analysis\index{geographic data analysis}, for example gained by studying the contents and working-through the exercises in Chapters \@ref(spatial-class) to \@ref(reproj-geo-data).
@@ -504,7 +506,7 @@ To put these results in perspective, let us compare them with AUROC\index{AUROC}
 As expected (see section \@ref(intro-cv)), the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance of the latter due to its spatial autocorrelation\index{autocorrelation!spatial}.
 
 <div class="figure" style="text-align: center">
-<img src="12-spatial-cv_files/figure-html/boxplot-cv-1.png" alt="Boxplot showing the difference in GLM AUROC values on spatial and conventional 100-repeated 5-fold cross-validation." width="75%" />
+<img src="figures/boxplot-cv-1.png" alt="Boxplot showing the difference in GLM AUROC values on spatial and conventional 100-repeated 5-fold cross-validation." width="75%" />
 <p class="caption">(\#fig:boxplot-cv)Boxplot showing the difference in GLM AUROC values on spatial and conventional 100-repeated 5-fold cross-validation.</p>
 </div>
 

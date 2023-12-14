@@ -2,6 +2,8 @@
 
 # Geographic data in R {#spatial-class}
 
+
+
 ## Prerequisites {-}
 
 This is the first practical chapter of the book, and therefore it comes with some software requirements.
@@ -206,7 +208,7 @@ plot(world)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/world-all-1.png" alt="A spatial plot of the world using the sf package, with a facet for each attribute." width="100%" />
+<img src="figures/world-all-1.png" alt="A spatial plot of the world using the sf package, with a facet for each attribute." width="100%" />
 <p class="caption">(\#fig:world-all)A spatial plot of the world using the sf package, with a facet for each attribute.</p>
 </div>
 
@@ -333,7 +335,7 @@ plot(world["pop"])
 ```
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/sfplot-1.png" alt="Plotting with sf, with multiple variables (left) and a single variable (right)." width="49%" /><img src="02-spatial-data_files/figure-html/sfplot-2.png" alt="Plotting with sf, with multiple variables (left) and a single variable (right)." width="49%" />
+<img src="figures/sfplot-1.png" alt="Plotting with sf, with multiple variables (left) and a single variable (right)." width="49%" /><img src="figures/sfplot-2.png" alt="Plotting with sf, with multiple variables (left) and a single variable (right)." width="49%" />
 <p class="caption">(\#fig:sfplot)Plotting with sf, with multiple variables (left) and a single variable (right).</p>
 </div>
 
@@ -360,7 +362,7 @@ plot(asia, add = TRUE, col = "red")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/asia-1.png" alt="A plot of Asia added as a layer on top of countries worldwide." width="50%" />
+<img src="figures/asia-1.png" alt="A plot of Asia added as a layer on top of countries worldwide." width="50%" />
 <p class="caption">(\#fig:asia)A plot of Asia added as a layer on top of countries worldwide.</p>
 </div>
 
@@ -383,7 +385,7 @@ plot(st_geometry(world_cents), add = TRUE, cex = cex)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/contpop-1.png" alt="Country continents (represented by fill color) and 2015 populations (represented by circles, with area proportional to population)." width="100%" />
+<img src="figures/contpop-1.png" alt="Country continents (represented by fill color) and 2015 populations (represented by circles, with area proportional to population)." width="100%" />
 <p class="caption">(\#fig:contpop)Country continents (represented by fill color) and 2015 populations (represented by circles, with area proportional to population).</p>
 </div>
 
@@ -405,7 +407,7 @@ plot(st_geometry(world_asia), add = TRUE)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/china-1.png" alt="India in context, demonstrating the expandBB argument." width="50%" />
+<img src="figures/china-1.png" alt="India in context, demonstrating the expandBB argument." width="50%" />
 <p class="caption">(\#fig:china)India in context, demonstrating the expandBB argument.</p>
 </div>
 
@@ -452,7 +454,7 @@ A polygon with a hole would be, for example, `POLYGON ((1 5, 2 2, 4 1, 4 4, 1 5)
 - Polygon without a hole: `POLYGON ((1 5, 2 2, 4 1, 4 4, 1 5))`
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/sfcs-1.png" alt="Illustration of point, linestring and polygon geometries." width="100%" />
+<img src="figures/sfcs-1.png" alt="Illustration of point, linestring and polygon geometries." width="100%" />
 <p class="caption">(\#fig:sfcs)Illustration of point, linestring and polygon geometries.</p>
 </div>
 
@@ -467,7 +469,7 @@ Simple feature standard also allows multiple geometries of a single type to exis
 - Multipolygon: `MULTIPOLYGON (((1 5, 2 2, 4 1, 4 4, 1 5), (0 2, 1 2, 1 3, 0 3, 0 2)))`
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/multis-1.png" alt="Illustration of multi* geometries." width="100%" />
+<img src="figures/multis-1.png" alt="Illustration of multi* geometries." width="100%" />
 <p class="caption">(\#fig:multis)Illustration of multi* geometries.</p>
 </div>
 
@@ -477,7 +479,7 @@ Finally, a geometry collection can contain any combination of geometries includi
 - Geometry collection: `GEOMETRYCOLLECTION (MULTIPOINT (5 2, 1 3, 3 4, 3 2), LINESTRING (1 5, 4 4, 4 1, 2 2, 3 2))`
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/geomcollection-1.png" alt="Illustration of a geometry collection." width="100%" />
+<img src="figures/geomcollection-1.png" alt="Illustration of a geometry collection." width="100%" />
 <p class="caption">(\#fig:geomcollection)Illustration of a geometry collection.</p>
 </div>
 
@@ -860,7 +862,7 @@ india_buffer_without_s2 = st_buffer(india, 1) # 1 degree
 ```
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/s2example-1.png" alt="Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer of 1 degree, which is not accurate." width="100%" />
+<img src="figures/s2example-1.png" alt="Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer of 1 degree, which is not accurate." width="100%" />
 <p class="caption">(\#fig:s2example)Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer of 1 degree, which is not accurate.</p>
 </div>
 
@@ -903,7 +905,7 @@ However, in contrast to vector data, the cell of one raster layer can only hold 
 The value might be continous or categorical (Figure \@ref(fig:raster-intro-plot):C).
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/raster-intro-plot-1.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%" />
+<img src="figures/raster-intro-plot-1.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%" />
 <p class="caption">(\#fig:raster-intro-plot)Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map.</p>
 </div>
 
@@ -913,7 +915,7 @@ Both uses of raster datasets are illustrated in Figure \@ref(fig:raster-intro-pl
 Depending on the nature of the application, vector representations of discrete features may be more suitable.
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/raster-intro-plot2-1.png" alt="Examples of continuous and categorical rasters." width="100%" />
+<img src="figures/raster-intro-plot2-1.png" alt="Examples of continuous and categorical rasters." width="100%" />
 <p class="caption">(\#fig:raster-intro-plot2)Examples of continuous and categorical rasters.</p>
 </div>
 
@@ -1002,7 +1004,7 @@ plot(my_rast)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="02-spatial-data_files/figure-html/basic-new-raster-plot-1.png" alt="Basic raster plot." width="100%" />
+<img src="figures/basic-new-raster-plot-1.png" alt="Basic raster plot." width="100%" />
 <p class="caption">(\#fig:basic-new-raster-plot)Basic raster plot.</p>
 </div>
 

@@ -1,5 +1,7 @@
 # Reprojecting geographic data {#reproj-geo-data}
 
+
+
 ## Prerequisites {-}
 
 - This chapter requires the following packages:
@@ -120,31 +122,7 @@ st_crs("ESRI:54030")
 #>         DATUM["World Geodetic System 1984",
 #>             ELLIPSOID["WGS 84",6378137,298.257223563,
 #>                 LENGTHUNIT["metre",1]]],
-#>         PRIMEM["Greenwich",0,
-#>             ANGLEUNIT["Degree",0.0174532925199433]]],
-#>     CONVERSION["World_Robinson",
-#>         METHOD["Robinson"],
-#>         PARAMETER["Longitude of natural origin",0,
-#>             ANGLEUNIT["Degree",0.0174532925199433],
-#>             ID["EPSG",8802]],
-#>         PARAMETER["False easting",0,
-#>             LENGTHUNIT["metre",1],
-#>             ID["EPSG",8806]],
-#>         PARAMETER["False northing",0,
-#>             LENGTHUNIT["metre",1],
-#>             ID["EPSG",8807]]],
-#>     CS[Cartesian,2],
-#>         AXIS["(E)",east,
-#>             ORDER[1],
-#>             LENGTHUNIT["metre",1]],
-#>         AXIS["(N)",north,
-#>             ORDER[2],
-#>             LENGTHUNIT["metre",1]],
-#>     USAGE[
-#>         SCOPE["Not known."],
-#>         AREA["World."],
-#>         BBOX[-90,-180,90,180]],
-#>     ID["ESRI",54030]]
+....
 ```
 
 
@@ -385,7 +363,7 @@ The geometries of the three `london_buff*` objects that *have* a specified CRS c
 ```
 
 <div class="figure" style="text-align: center">
-<img src="07-reproj_files/figure-html/crs-buf-1.png" alt="Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot illustrates the result of buffering unprojected data with sf, which calls Google's S2 spherical geometry engine by default with max cells set to 1000 (thin line). The thick 'blocky' line illustrates the result of the same operation with max cells set to 100." width="100%" />
+<img src="figures/crs-buf-1.png" alt="Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot illustrates the result of buffering unprojected data with sf, which calls Google's S2 spherical geometry engine by default with max cells set to 1000 (thin line). The thick 'blocky' line illustrates the result of the same operation with max cells set to 100." width="100%" />
 <p class="caption">(\#fig:crs-buf)Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot illustrates the result of buffering unprojected data with sf, which calls Google's S2 spherical geometry engine by default with max cells set to 1000 (thin line). The thick 'blocky' line illustrates the result of the same operation with max cells set to 100.</p>
 </div>
 
@@ -848,7 +826,7 @@ world_mollweide = st_transform(world, crs = "+proj=moll")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="07-reproj_files/figure-html/mollproj-1.png" alt="Mollweide projection of the world." width="100%" />
+<img src="figures/mollproj-1.png" alt="Mollweide projection of the world." width="100%" />
 <p class="caption">(\#fig:mollproj)Mollweide projection of the world.</p>
 </div>
 
@@ -866,7 +844,7 @@ world_wintri = st_transform(world, crs = "+proj=wintri")
 
 
 <div class="figure" style="text-align: center">
-<img src="07-reproj_files/figure-html/wintriproj-1.png" alt="Winkel tripel projection of the world." width="100%" />
+<img src="figures/wintriproj-1.png" alt="Winkel tripel projection of the world." width="100%" />
 <p class="caption">(\#fig:wintriproj)Winkel tripel projection of the world.</p>
 </div>
 
@@ -884,7 +862,7 @@ world_laea2 = st_transform(world,
 ```
 
 <div class="figure" style="text-align: center">
-<img src="07-reproj_files/figure-html/laeaproj2-1.png" alt="Lambert azimuthal equal-area projection of the world centered on New York City." width="100%" />
+<img src="figures/laeaproj2-1.png" alt="Lambert azimuthal equal-area projection of the world centered on New York City." width="100%" />
 <p class="caption">(\#fig:laeaproj2)Lambert azimuthal equal-area projection of the world centered on New York City.</p>
 </div>
 

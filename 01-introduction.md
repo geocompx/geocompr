@@ -2,6 +2,8 @@
 
 # Introduction {#intro}
 
+
+
 This book is about using the power of computers to *do things* with geographic data.
 It teaches a range of spatial skills, including: reading, writing and manipulating geographic file formats; making static and interactive maps; and applying geocomputation\index{geocomputation} to support more evidence-based decision making related to a range of geographic phenomena, from transport systems to ecosystems .
 By demonstrating how various geographic operations can be linked, in 'code chunks' that intersperse the prose, the book also teaches reproducible, open and thus scientific workflows.

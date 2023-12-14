@@ -1,5 +1,7 @@
 # Scripts, algorithms and functions {#algorithms}
 
+
+
 ## Prerequisites {-}
 
 This chapter has minimal software prerequisites as it primarily uses base R.
@@ -190,7 +192,7 @@ C1 = (T1[1,] + T1[2,] + T1[3,]) / 3
 
 
 <div class="figure" style="text-align: center">
-<img src="11-algorithms_files/figure-html/polymat-1.png" alt="Illustration of polygon centroid calculation problem." width="100%" />
+<img src="figures/polymat-1.png" alt="Illustration of polygon centroid calculation problem." width="100%" />
 <p class="caption">(\#fig:polymat)Illustration of polygon centroid calculation problem.</p>
 </div>
 
@@ -245,7 +247,7 @@ A = vapply(T_all, function(x) {
 ```
 
 <div class="figure" style="text-align: center">
-<img src="11-algorithms_files/figure-html/polycent-1.png" alt="Illustration of iterative centroid algorithm with triangles. The X represents the area-weighted centroid in iterations 2 and 3." width="100%" />
+<img src="figures/polycent-1.png" alt="Illustration of iterative centroid algorithm with triangles. The X represents the area-weighted centroid in iterations 2 and 3." width="100%" />
 <p class="caption">(\#fig:polycent)Illustration of iterative centroid algorithm with triangles. The X represents the area-weighted centroid in iterations 2 and 3.</p>
 </div>
 

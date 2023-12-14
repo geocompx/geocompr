@@ -1,5 +1,7 @@
 # Geometry operations {#geometry-operations}
 
+
+
 ## Prerequisites {-}
 
 - This chapter uses the same packages as Chapter \@ref(spatial-operations) but with the addition of **spDataLarge**, which was installed in Chapter \@ref(spatial-class):
@@ -57,7 +59,7 @@ seine_simp = st_simplify(seine, dTolerance = 2000)  # 2000 m
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/seine-simp-1.png" alt="Comparison of the original and simplified geometry of the seine object." width="100%" />
+<img src="figures/seine-simp-1.png" alt="Comparison of the original and simplified geometry of the seine object." width="100%" />
 <p class="caption">(\#fig:seine-simp)Comparison of the original and simplified geometry of the seine object.</p>
 </div>
 
@@ -116,7 +118,7 @@ Finally, the visual comparison of the original dataset with the simplified and s
 Differences can be observed between the outputs of the Douglas-Peucker (`st_simplify`), Visvalingam (`ms_simplify`), and Gaussian kernel regression (`smooth(method=ksmooth`) algorithms.
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/us-simp-1.png" alt="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages." width="100%" />
+<img src="figures/us-simp-1.png" alt="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages." width="100%" />
 <p class="caption">(\#fig:us-simp)Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages.</p>
 </div>
 
@@ -152,7 +154,7 @@ seine_pos = st_point_on_surface(seine)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/centr-1.png" alt="Centroids (black points) and 'points on surface' (red points) of New Zealand's regions (left) and the Seine (right) datasets." width="100%" />
+<img src="figures/centr-1.png" alt="Centroids (black points) and 'points on surface' (red points) of New Zealand's regions (left) and the Seine (right) datasets." width="100%" />
 <p class="caption">(\#fig:centr)Centroids (black points) and 'points on surface' (red points) of New Zealand's regions (left) and the Seine (right) datasets.</p>
 </div>
 
@@ -179,7 +181,7 @@ seine_buff_50km = st_buffer(seine, dist = 50000)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/buffs-1.png" alt="Buffers around the Seine dataset of 5 km (left) and 50 km (right). Note the colors, which reflect the fact that one buffer is created per geometry feature." width="100%" />
+<img src="figures/buffs-1.png" alt="Buffers around the Seine dataset of 5 km (left) and 50 km (right). Note the colors, which reflect the fact that one buffer is created per geometry feature." width="100%" />
 <p class="caption">(\#fig:buffs)Buffers around the Seine dataset of 5 km (left) and 50 km (right). Note the colors, which reflect the fact that one buffer is created per geometry feature.</p>
 </div>
 
@@ -271,7 +273,7 @@ nz_rotate = (nz_sfc - nz_centroid_sfc) * rotation(30) + nz_centroid_sfc
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/affine-trans-1.png" alt="Illustrations of affine transformations: shift, scale and rotate." width="100%" />
+<img src="figures/affine-trans-1.png" alt="Illustrations of affine transformations: shift, scale and rotate." width="100%" />
 <p class="caption">(\#fig:affine-trans)Illustrations of affine transformations: shift, scale and rotate.</p>
 </div>
 
@@ -306,7 +308,7 @@ text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3) # add text
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/points-1.png" alt="Overlapping circles." width="100%" />
+<img src="figures/points-1.png" alt="Overlapping circles." width="100%" />
 <p class="caption">(\#fig:points)Overlapping circles.</p>
 </div>
 
@@ -325,7 +327,7 @@ plot(x_and_y, col = "lightgrey", border = "grey", add = TRUE) # intersecting are
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/circle-intersection-1.png" alt="Overlapping circles with a gray color indicating intersection between them." width="100%" />
+<img src="figures/circle-intersection-1.png" alt="Overlapping circles with a gray color indicating intersection between them." width="100%" />
 <p class="caption">(\#fig:circle-intersection)Overlapping circles with a gray color indicating intersection between them.</p>
 </div>
 
@@ -334,7 +336,7 @@ plot(x_and_y, col = "lightgrey", border = "grey", add = TRUE) # intersecting are
 The subsequent code chunk demonstrates how this works for all combinations of the 'Venn' diagram representing `x` and `y`, inspired by [Figure 5.1](https://r4ds.had.co.nz/transform.html#logical-operators) of the book *R for Data Science* [@grolemund_r_2016].
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/venn-clip-1.png" alt="Spatial equivalents of logical operators." width="100%" />
+<img src="figures/venn-clip-1.png" alt="Spatial equivalents of logical operators." width="100%" />
 <p class="caption">(\#fig:venn-clip)Spatial equivalents of logical operators.</p>
 </div>
 
@@ -363,7 +365,7 @@ text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/venn-subset-1.png" alt="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted." width="100%" />
+<img src="figures/venn-subset-1.png" alt="Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted." width="100%" />
 <p class="caption">(\#fig:venn-subset)Randomly distributed points within the bounding box enclosing circles x and y. The point that intersects with both objects x and y is highlighted.</p>
 </div>
 
@@ -422,7 +424,7 @@ regions2 = us_states |>
 
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/us-regions-1.png" alt="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states." width="100%" />
+<img src="figures/us-regions-1.png" alt="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states." width="100%" />
 <p class="caption">(\#fig:us-regions)Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.</p>
 </div>
 
@@ -469,7 +471,7 @@ polyg = st_cast(multipoint, "POLYGON")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/single-cast-1.png" alt="Examples of a linestring and a polygon casted from a multipoint geometry." width="100%" />
+<img src="figures/single-cast-1.png" alt="Examples of a linestring and a polygon casted from a multipoint geometry." width="100%" />
 <p class="caption">(\#fig:single-cast)Examples of a linestring and a polygon casted from a multipoint geometry.</p>
 </div>
 
@@ -639,7 +641,7 @@ linestring_sf2
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/line-cast-1.png" alt="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right)." width="100%" />
+<img src="figures/line-cast-1.png" alt="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right)." width="100%" />
 <p class="caption">(\#fig:line-cast)Examples of type casting between MULTILINESTRING (left) and LINESTRING (right).</p>
 </div>
 
@@ -728,7 +730,7 @@ elev_2 = extend(elev, c(1, 2))
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/extend-example-1.png" alt="Original raster (left) and the same raster (right) extended by one row on the top and bottom and two columns on the left and right." width="100%" />
+<img src="figures/extend-example-1.png" alt="Original raster (left) and the same raster (right) extended by one row on the top and bottom and two columns on the left and right." width="100%" />
 <p class="caption">(\#fig:extend-example)Original raster (left) and the same raster (right) extended by one row on the top and bottom and two columns on the left and right.</p>
 </div>
 
@@ -774,7 +776,7 @@ origin(elev_4) = c(0.25, 0.25)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/origin-example-1.png" alt="Rasters with identical values but different origins." width="100%" />
+<img src="figures/origin-example-1.png" alt="Rasters with identical values but different origins." width="100%" />
 <p class="caption">(\#fig:origin-example)Rasters with identical values but different origins.</p>
 </div>
 
@@ -800,7 +802,7 @@ dem_agg = aggregate(dem, fact = 5, fun = mean)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/aggregate-example-1.png" alt="Original raster (left). Aggregated raster (right)." width="100%" />
+<img src="figures/aggregate-example-1.png" alt="Original raster (left). Aggregated raster (right)." width="100%" />
 <p class="caption">(\#fig:aggregate-example)Original raster (left). Aggregated raster (right).</p>
 </div>
 
@@ -818,7 +820,7 @@ identical(dem, dem_disagg)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/bilinear-1.png" alt="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation." width="100%" />
+<img src="figures/bilinear-1.png" alt="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation." width="100%" />
 <p class="caption">(\#fig:bilinear)The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation.</p>
 </div>
 
@@ -837,7 +839,7 @@ This is the role of resampling -- a process of computing values for new pixel lo
 In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin (Figure \@ref(fig:resampl0)).
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/resampl0-1.png" alt="Resampling of an original (input) raster into a target raster with custom resolution and origin." width="100%" />
+<img src="figures/resampl0-1.png" alt="Resampling of an original (input) raster into a target raster with custom resolution and origin." width="100%" />
 <p class="caption">(\#fig:resampl0)Resampling of an original (input) raster into a target raster with custom resolution and origin.</p>
 </div>
 
@@ -880,7 +882,7 @@ dem_resampl = resample(dem, y = target_rast, method = "bilinear")
 Figure \@ref(fig:resampl) shows a comparison of different resampling methods on the `dem` object.
 
 <div class="figure" style="text-align: center">
-<img src="05-geometry-operations_files/figure-html/resampl-1.png" alt="Visual comparison of the original raster and five different resampling methods." width="100%" />
+<img src="figures/resampl-1.png" alt="Visual comparison of the original raster and five different resampling methods." width="100%" />
 <p class="caption">(\#fig:resampl)Visual comparison of the original raster and five different resampling methods.</p>
 </div>
 

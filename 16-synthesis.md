@@ -1,5 +1,7 @@
 # Conclusion {#conclusion}
 
+
+
 ## Introduction
 
 Like the introduction, this concluding chapter contains few code chunks.
@@ -202,7 +204,7 @@ plot(st_geometry(world), col = "green", bg = "lightblue")
 
 
 <div class="figure" style="text-align: center">
-<img src="16-synthesis_files/figure-html/16-synthesis-reprex-1.png" alt="A map of the world with green land, illustrating a question with a reproducible example (left) and the solution (right)." width="49%" /><img src="16-synthesis_files/figure-html/16-synthesis-reprex-2.png" alt="A map of the world with green land, illustrating a question with a reproducible example (left) and the solution (right)." width="49%" />
+<img src="figures/16-synthesis-reprex-1.png" alt="A map of the world with green land, illustrating a question with a reproducible example (left) and the solution (right)." width="49%" /><img src="figures/16-synthesis-reprex-2.png" alt="A map of the world with green land, illustrating a question with a reproducible example (left) and the solution (right)." width="49%" />
 <p class="caption">(\#fig:16-synthesis-reprex)A map of the world with green land, illustrating a question with a reproducible example (left) and the solution (right).</p>
 </div>
 

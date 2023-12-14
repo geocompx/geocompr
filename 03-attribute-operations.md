@@ -1,5 +1,7 @@
 # Attribute data operations {#attr}
 
+
+
 ## Prerequisites {-}
 
 - This chapter requires the following packages to be installed and attached:
@@ -449,7 +451,7 @@ plot(world_coffee["coffee_production_2017"])
 ```
 
 <div class="figure" style="text-align: center">
-<img src="03-attribute-operations_files/figure-html/coffeemap-1.png" alt="World coffee production (thousand 60-kg bags) by country, 2017. Source: International Coffee Organization." width="100%" />
+<img src="figures/coffeemap-1.png" alt="World coffee production (thousand 60-kg bags) by country, 2017. Source: International Coffee Organization." width="100%" />
 <p class="caption">(\#fig:coffeemap)World coffee production (thousand 60-kg bags) by country, 2017. Source: International Coffee Organization.</p>
 </div>
 
@@ -688,7 +690,7 @@ levels(grain2)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="03-attribute-operations_files/figure-html/cont-raster-1.png" alt="Raster datasets with numeric (left) and categorical values (right)." width="100%" />
+<img src="figures/cont-raster-1.png" alt="Raster datasets with numeric (left) and categorical values (right)." width="100%" />
 <p class="caption">(\#fig:cont-raster)Raster datasets with numeric (left) and categorical values (right).</p>
 </div>
 

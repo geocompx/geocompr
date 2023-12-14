@@ -70,8 +70,8 @@ Clicking on the link below should open a new window containing RStudio Server in
 If you see something like the image below, congratulations, it worked!
 You can start exploring Geocomputation with R in a cloud-based environment, noting [mybinder.org user guidelines](https://mybinder.readthedocs.io/en/latest/about/user-guidelines.html)):
 
-<div class="figure" style="text-align: center">
-<img src="https://user-images.githubusercontent.com/1825120/134802314-6dd368c7-f5eb-4cd7-b8ff-428dfa93954c.png" alt="Screenshot of reproducible code contained in Geocomputation with R running in RStudio Server on a browser served by Binder" width="100%" />
+<div class="figure">
+<img src="https://user-images.githubusercontent.com/1825120/134802314-6dd368c7-f5eb-4cd7-b8ff-428dfa93954c.png" alt="Screenshot of reproducible code contained in Geocomputation with R running in RStudio Server on a browser served by Binder"  />
 <p class="caption">(\#fig:index-2-4)Screenshot of reproducible code contained in Geocomputation with R running in RStudio Server on a browser served by Binder</p>
 </div>
 

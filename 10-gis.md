@@ -1,5 +1,7 @@
 # Bridges to GIS software {#gis}
 
+
+
 ## Prerequisites {-}
 
 - This chapter requires QGIS\index{QGIS}, SAGA\index{SAGA} and GRASS GIS\index{GRASS GIS} to be installed and the following packages to be attached:
@@ -185,7 +187,7 @@ aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="10-gis_files/figure-html/uniondata-1.png" alt="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders)." width="100%" />
+<img src="figures/uniondata-1.png" alt="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders)." width="100%" />
 <p class="caption">(\#fig:uniondata)Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders).</p>
 </div>
 
@@ -913,7 +915,7 @@ RPostgreSQL::postgresqlCloseConnection(conn)
 
 
 <div class="figure" style="text-align: center">
-<img src="10-gis_files/figure-html/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer." width="100%" />
+<img src="figures/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer." width="100%" />
 <p class="caption">(\#fig:postgis)Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer.</p>
 </div>
 

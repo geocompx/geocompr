@@ -1,5 +1,7 @@
 # Geographic data I/O {#read-write}
 
+
+
 ## Prerequisites {-}
 
 This chapter requires the following packages:
@@ -577,7 +579,7 @@ tanzania_neigh = read_sf(f, wkt_filter = tanzania_buf_wkt)
 Our result, shown in Figure \@ref(fig:readsfquery):B, contains Tanzania and every country within its 50 km buffer.
 
 <div class="figure" style="text-align: center">
-<img src="08-read-write-plot_files/figure-html/readsfquery-1.png" alt="Reading a subset of the vector data using a query (A) and a wkt filter (B)." width="100%" />
+<img src="figures/readsfquery-1.png" alt="Reading a subset of the vector data using a query (A) and a wkt filter (B)." width="100%" />
 <p class="caption">(\#fig:readsfquery)Reading a subset of the vector data using a query (A) and a wkt filter (B).</p>
 </div>
 

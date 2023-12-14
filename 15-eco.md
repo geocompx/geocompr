@@ -1,5 +1,7 @@
 # Ecology {#eco}
 
+
+
 ## Prerequisites {-}
 
 This chapter assumes you have a strong grasp of geographic data analysis and processing, covered in Chapters \@ref(spatial-class) to \@ref(geometry-operations).
