@@ -120,7 +120,31 @@ st_crs("ESRI:54030")
 #>         DATUM["World Geodetic System 1984",
 #>             ELLIPSOID["WGS 84",6378137,298.257223563,
 #>                 LENGTHUNIT["metre",1]]],
-#> ...
+#>         PRIMEM["Greenwich",0,
+#>             ANGLEUNIT["Degree",0.0174532925199433]]],
+#>     CONVERSION["World_Robinson",
+#>         METHOD["Robinson"],
+#>         PARAMETER["Longitude of natural origin",0,
+#>             ANGLEUNIT["Degree",0.0174532925199433],
+#>             ID["EPSG",8802]],
+#>         PARAMETER["False easting",0,
+#>             LENGTHUNIT["metre",1],
+#>             ID["EPSG",8806]],
+#>         PARAMETER["False northing",0,
+#>             LENGTHUNIT["metre",1],
+#>             ID["EPSG",8807]]],
+#>     CS[Cartesian,2],
+#>         AXIS["(E)",east,
+#>             ORDER[1],
+#>             LENGTHUNIT["metre",1]],
+#>         AXIS["(N)",north,
+#>             ORDER[2],
+#>             LENGTHUNIT["metre",1]],
+#>     USAGE[
+#>         SCOPE["Not known."],
+#>         AREA["World."],
+#>         BBOX[-90,-180,90,180]],
+#>     ID["ESRI",54030]]
 ```
 
 
