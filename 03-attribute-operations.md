@@ -758,7 +758,7 @@ two_layers[]
 **terra** contains functions for extracting descriptive statistics\index{statistics} for entire rasters.
 Printing a raster object to the console by typing its name returns minimum and maximum values of a raster.
 \index{raster!summarizing}
-`summary()` provides common descriptive statistics\index{statistics} -- minimum, maximum, quartiles and number of `NA`s for continuous rasters and a number of cells of each class for categorical rasters.
+`summary()` provides common descriptive statistics\index{statistics} -- minimum, maximum, quartiles and number of `NA`s for continuous rasters and the number of cells of each class for categorical rasters.
 \index{raster!summarizing}
 Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with `global()`. 
 
