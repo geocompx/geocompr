@@ -264,7 +264,7 @@ You can learn more at https://www.r-spatial.org/r/2017/06/22/spatial-index.html.
 
 
 
-### DE-9IM strings
+### DE-9IM strings {#DE-9IM-strings}
 
 Underlying the binary predicates demonstrated in the previous section is the Dimensionally Extended 9-Intersection Model (DE-9IM).
 As the cryptic name suggests, this is not an easy topic.
