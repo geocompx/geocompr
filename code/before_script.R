@@ -16,19 +16,6 @@ opts_chunk$set(
         out.width = "100%",
         dpi = 105 # this creates 2*105 dpi at 6in, which is 300 dpi at 4.2in, see the  EmilHvitfeldt/smltar repo
 )
-# https://github.com/EmilHvitfeldt/smltar/issues/114
-hook_output = knit_hooks$get('output')
-knit_hooks$set(output = function(x, options) {
-        # this hook is used only when the linewidth option is not NULL
-        if (!is.null(n <- options$linewidth)) {
-                x = knitr:::split_lines(x)
-                # any lines wider than n should be wrapped
-                if (any(nchar(x) > n)) x = strwrap(x, width = n)
-                x = paste(x, collapse = '\n')
-        }
-        hook_output(x, options)
-},
-               crop = knitr::hook_pdfcrop)
 
 set.seed(2017)
 options(digits = 3)
@@ -49,3 +36,16 @@ knitr::knit_hooks$set(output = function(x, options) {
   }
   hook_output(x, options)
 })
+
+# https://github.com/EmilHvitfeldt/smltar/issues/114
+knit_hooks$set(output = function(x, options) {
+        # this hook is used only when the linewidth option is not NULL
+        if (!is.null(n <- options$linewidth)) {
+                x = knitr:::split_lines(x)
+                # any lines wider than n should be wrapped
+                if (any(nchar(x) > n)) x = strwrap(x, width = n)
+                x = paste(x, collapse = '\n')
+        }
+        hook_output(x, options)
+},
+               crop = knitr::hook_pdfcrop)
