@@ -102,6 +102,9 @@ sel_sgbp
 #>  1: (empty)
 #>  2: (empty)
 #>  3: (empty)
+#>  4: (empty)
+#>  5: 1
+#>  6: 1
 ....
 sel_logical = lengths(sel_sgbp) > 0
 canterbury_height2 = nz_height[sel_logical, ]

@@ -210,14 +210,7 @@ cat(crs(my_rast)) # get CRS
 #>             LENGTHUNIT["metre",1]]],
 #>     PRIMEM["Greenwich",0,
 #>         ANGLEUNIT["degree",0.0174532925199433]],
-#>     CS[ellipsoidal,2],
-#>         AXIS["geodetic latitude (Lat)",north,
-#>             ORDER[1],
-#>             ANGLEUNIT["degree",0.0174532925199433]],
-#>         AXIS["geodetic longitude (Lon)",east,
-#>             ORDER[2],
-#>             ANGLEUNIT["degree",0.0174532925199433]],
-#>     ID["EPSG",4326]]
+....
 ```
 
 The output is the WKT string representation of CRS. 
@@ -320,7 +313,7 @@ london_proj = data.frame(x = 530000, y = 180000) |>
 ```
 
 The result is a new object that is identical to `london`, but created using a suitable CRS (the British National Grid, which has an EPSG code of 27700 in this case) that has units of meters.
-We can verify that the CRS has changed using `st_crs()` as follows (some of the output has been replaced by `...`):
+We can verify that the CRS has changed using `st_crs()` as follows (some of the output has been replaced by `...,`):
 
 
 ```r
@@ -333,7 +326,7 @@ st_crs(london_proj)
 #>         DATUM["Ordnance Survey of Great Britain 1936",
 #>             ELLIPSOID["Airy 1830",6377563.396,299.3249646,
 #>                 LENGTHUNIT["metre",1]]],
-#> ...
+....
 ```
 
 Notable components of this CRS description include the EPSG code (`EPSG: 27700`) and the detailed `wkt` string (only the first 5 lines of which are shown).^[
@@ -352,15 +345,6 @@ london_buff_projected = st_buffer(london_proj, 100000)
 The geometries of the three `london_buff*` objects that *have* a specified CRS created above (`london_buff_s2`, `london_buff_lonlat` and `london_buff_projected`) created in the preceding code chunks are illustrated in Figure \@ref(fig:crs-buf).
 
 
-
-
-```
-#> 
-#> Attaching package: 'tmap'
-#> The following object is masked from 'package:datasets':
-#> 
-#>     rivers
-```
 
 <div class="figure" style="text-align: center">
 <img src="figures/crs-buf-1.png" alt="Buffers around London showing results created with the S2 spherical geometry engine on lon/lat data (left), projected data (middle) and lon/lat data without using spherical geometry (right). The left plot illustrates the result of buffering unprojected data with sf, which calls Google's S2 spherical geometry engine by default with max cells set to 1000 (thin line). The thick 'blocky' line illustrates the result of the same operation with max cells set to 100." width="100%" />
@@ -550,13 +534,7 @@ st_crs(cycle_hire_osm)
 #> GEOGCS["WGS 84",
 #>     DATUM["WGS_1984",
 #>         SPHEROID["WGS 84",6378137,298.257223563,
-#>             AUTHORITY["EPSG","7030"]],
-#>         AUTHORITY["EPSG","6326"]],
-#>     PRIMEM["Greenwich",0,
-#>         AUTHORITY["EPSG","8901"]],
-#>     UNIT["degree",0.0174532925199433,
-#>         AUTHORITY["EPSG","9122"]],
-#>     AUTHORITY["EPSG","4326"]]
+....
 ```
 
 As we saw in Section \@ref(crs-setting), the main CRS components, `User input` and `wkt`, are printed as a single entity, the output of `st_crs()` is in fact a named list of class `crs` with two elements, single character strings named `input` and `wkt`, as shown in the output of the following code chunk:
@@ -711,14 +689,7 @@ cat(crs(con_raster))
 #>             LENGTHUNIT["metre",1]]],
 #>     PRIMEM["Greenwich",0,
 #>         ANGLEUNIT["degree",0.0174532925199433]],
-#>     CS[ellipsoidal,2],
-#>         AXIS["geodetic latitude (Lat)",north,
-#>             ORDER[1],
-#>             ANGLEUNIT["degree",0.0174532925199433]],
-#>         AXIS["geodetic longitude (Lon)",east,
-#>             ORDER[2],
-#>             ANGLEUNIT["degree",0.0174532925199433]],
-#>     ID["EPSG",4326]]
+....
 ```
 
 We will reproject this dataset into a projected CRS, but *not* with the nearest neighbor method which is appropriate for categorical data.

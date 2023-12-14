@@ -633,13 +633,7 @@ st_layers("KML_Samples.kml")
 #> 1             Placemarks                      3     11   WGS 84
 #> 2      Styles and Markup                      1     11   WGS 84
 #> 3       Highlighted Icon                      1     11   WGS 84
-#> 4        Ground Overlays                      1     11   WGS 84
-#> 5        Screen Overlays                      0     11   WGS 84
-#> 6                  Paths                      6     11   WGS 84
-#> 7               Polygons                      0     11   WGS 84
-#> 8          Google Campus                      4     11   WGS 84
-#> 9       Extruded Polygon                      1     11   WGS 84
-#> 10 Absolute and Relative                      4     11   WGS 84
+....
 kml = read_sf("KML_Samples.kml", layer = "Placemarks")
 ```
 
