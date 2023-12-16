@@ -42,8 +42,7 @@ With R, you can dive and get things working with surprisingly few lines of code,
 
 This book is also motivated by the importance of reproducibility\index{reproducibility} for scientific research.
 It aims to make reproducible geographic data analysis\index{geographic data analysis} workflows more accessible, and demonstrate the power of open geospatial software available from the command-line.
-"Interfaces to other software are part of R" [@eddelbuettel_extending_2018].
-This means that in addition to outstanding 'in house' capabilities, R allows access to many other spatial software libraries, explained in Section \@ref(why-use-r-for-geocomputation) and demonstrated in Chapter \@ref(gis).
+R provides ways to interface with other languages [@eddelbuettel_extending_2018], enabling numerous spatial software libraries to be called from R, as explained in Section \@ref(why-use-r-for-geocomputation) and demonstrated in Chapter \@ref(gis).
 Before going into the details of the software, however, it is worth taking a step back and thinking about what we mean by geocomputation\index{geocomputation}.
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Reproducibility is a major advantage of command-line interfaces, but what does it mean in practice?
