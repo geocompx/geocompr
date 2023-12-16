@@ -43,13 +43,13 @@ for(i in 2:length(dates_unique)) {
 summary(usbj)
 usa_contig = usbji[!grepl(pattern = "Alaska|Haw", usbji$name), ]
 
-usbj_contig2163 = st_intersection(usbj, usa_contig[0]) |>
-  st_transform("EPSG:2163") |> 
+usbj_contig9311 = st_intersection(usbj, usa_contig[0]) |>
+  st_transform("EPSG:9311") |> 
   st_collection_extract("POLYGON")
 
 pal = viridis::viridis(n = 7, direction = -1)
 pb = c(0, 1, 2, 5, 10, 20, 30, 40) * 1e6
-facet_anim = tm_shape(usbj_contig2163) +
+facet_anim = tm_shape(usbj_contig9311) +
   tm_polygons(fill = "population",
               fill.scale = tm_scale(values = pal, breaks = pb, label.na = FALSE)) +
   tm_facets(by = "year", nrow = 1, ncol = 1, free.coords = FALSE) +
