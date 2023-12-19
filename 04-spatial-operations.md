@@ -412,11 +412,11 @@ plot(st_geometry(cycle_hire), col = "blue")
 plot(st_geometry(cycle_hire_osm), add = TRUE, pch = 3, col = "red")
 ```
 
-We can check if any points are the same `st_intersects()` as shown below:
+We can check if any points are the same using `st_intersects()` as shown below:
 
 
 ```r
-any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
+any(st_intersects(cycle_hire, cycle_hire_osm, sparse = FALSE))
 #> [1] FALSE
 ```
 
