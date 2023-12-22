@@ -448,7 +448,7 @@ summary(lengths(sel) > 0)
 
 This shows that there are 438 points in the target object `cycle_hire` within the threshold distance of `cycle_hire_osm`.
 How to retrieve the *values* associated with the respective `cycle_hire_osm` points?
-The solution is again with `st_join()`, but with an addition `dist` argument (set to 20 m below):
+The solution is again with `st_join()`, but with an additional `dist` argument (set to 20 m below):
 
 
 ```r
