@@ -621,11 +621,6 @@ Finally, we combine the two maps by creating a new, blank canvas, printing out t
 ```r
 grid.newpage()
 print(nz_height_map, vp = main_vp)
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
-
-#> Warning: Some legend items or map compoments do not fit well (e.g. due to the
-#> specified font size).
 pushViewport(main_vp)
 print(nz_map, vp = ins_vp)
 ```

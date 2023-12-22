@@ -387,8 +387,6 @@ The `"sagang:sagawetnessindex"` algorithm is actually a modified TWI, that resul
 
 ```r
 qgis_show_help("sagang:sagawetnessindex")
-#> Saga wetness index (sagang:sagawetnessindex)
-#> Description
 ```
 
 Here, we stick with the default values for all arguments.
