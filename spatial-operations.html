@@ -127,11 +127,11 @@
 This chapter shows how spatial objects can be modified in a multitude of ways based on their location and shape.
 Many spatial operations have a non-spatial (attribute) equivalent, so concepts such as subsetting and joining datasets demonstrated in the previous chapter are applicable here.
 This is especially true for <em>vector</em> operations: Section <a href="attr.html#vector-attribute-manipulation">3.2</a> on vector attribute manipulation provides the basis for understanding its spatial counterpart, namely spatial subsetting (covered in Section <a href="spatial-operations.html#spatial-subsetting">4.2.1</a>).
-Spatial joining (Section <a href="spatial-operations.html#spatial-joining">4.2.4</a>, <a href="spatial-operations.html#non-overlapping-joins">4.2.5</a> and <a href="spatial-operations.html#incongruent">4.2.7</a>) and aggregation (Section <a href="spatial-operations.html#spatial-aggr">4.2.6</a>) also have non-spatial counterparts, covered in the previous chapter.</p>
+Spatial joining (Section <a href="spatial-operations.html#spatial-joining">4.2.5</a>, <a href="spatial-operations.html#non-overlapping-joins">4.2.6</a> and <a href="spatial-operations.html#incongruent">4.2.8</a>) and aggregation (Section <a href="spatial-operations.html#spatial-aggr">4.2.7</a>) also have non-spatial counterparts, covered in the previous chapter.</p>
 <p>Spatial operations differ from non-spatial operations in a number of ways, however:
 spatial joins, for example, can be done in a number of ways — including matching entities that intersect with or are within a certain distance of the target dataset — while the attribution joins discussed in Section <a href="attr.html#vector-attribute-joining">3.2.4</a> in the previous chapter can only be done in one way (except when using fuzzy joins, as described in the documentation of the <a href="https://cran.r-project.org/package=fuzzyjoin"><strong>fuzzyjoin</strong></a> package).
-Different <em>types</em> of spatial relationship between objects, including intersects and disjoint, are described in Sections <a href="spatial-operations.html#topological-relations">4.2.2</a> and <a href="spatial-operations.html#DE-9IM-strings">4.2.3</a>.
-Another unique aspect of spatial objects is distance: all spatial objects are related through space, and distance calculations can be used to explore the strength of this relationship, as described in the context of vector data in Section <a href="spatial-operations.html#distance-relations">4.2.8</a>.</p>
+Different <em>types</em> of spatial relationship between objects, including intersects and disjoint, are described in Sections <a href="spatial-operations.html#topological-relations">4.2.2</a> and <a href="spatial-operations.html#DE-9IM-strings">4.2.4</a>.
+Another unique aspect of spatial objects is distance: all spatial objects are related through space, and distance calculations can be used to explore the strength of this relationship, as described in the context of vector data in Section <a href="spatial-operations.html#distance-relations">4.2.3</a>.</p>
 <p>Spatial operations on raster objects include subsetting — covered in Section <a href="spatial-operations.html#spatial-raster-subsetting">4.3.1</a>.
 <em>Map algebra</em> covers a range of operations that modify raster cell values, with or without reference to surrounding cell values.
 The concept of map algebra, vital for many applications, is introduced in Section <a href="spatial-operations.html#map-algebra">4.3.2</a>; local, focal and zonal map algebra operations are covered in sections <a href="spatial-operations.html#local-operations">4.3.3</a>, <a href="spatial-operations.html#focal-operations">4.3.4</a>, and <a href="spatial-operations.html#zonal-operations">4.3.5</a>, respectively.
@@ -320,15 +320,51 @@ The <code>st_join</code> function, mentioned in the next section, also uses the 
 You can learn more at <a href="https://www.r-spatial.org/r/2017/06/22/spatial-index.html" class="uri">https://www.r-spatial.org/r/2017/06/22/spatial-index.html</a>.
 </div>
 </div>
-<div id="DE-9IM-strings" class="section level3" number="4.2.3">
+<div id="distance-relations" class="section level3" number="4.2.3">
 <h3>
-<span class="header-section-number">4.2.3</span> DE-9IM strings<a class="anchor" aria-label="anchor" href="#DE-9IM-strings"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.2.3</span> Distance relations<a class="anchor" aria-label="anchor" href="#distance-relations"><i class="fas fa-link"></i></a>
+</h3>
+<p>While the topological relations presented in the previous section are binary (a feature either intersects with another or does not) distance relations are continuous.
+The distance between two <code>sf</code> objects is calculated with <code><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance()</a></code>, which is also used behind the scenes in Section <a href="spatial-operations.html#non-overlapping-joins">4.2.6</a> for distance-based joins.
+This is illustrated in the code chunk below, which finds the distance between the highest point in New Zealand and the geographic centroid of the Canterbury region, created in Section <a href="spatial-operations.html#spatial-subsetting">4.2.1</a>:
+</p>
+<div class="sourceCode" id="cb123"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">nz_highest</span> <span class="op">=</span> <span class="va">nz_height</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html">slice_max</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span>, order_by <span class="op">=</span> <span class="va">elevation</span><span class="op">)</span></span>
+<span><span class="va">canterbury_centroid</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid</a></span><span class="op">(</span><span class="va">canterbury</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">nz_highest</span>, <span class="va">canterbury_centroid</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Units: [m]</span></span>
+<span><span class="co">#&gt;        [,1]</span></span>
+<span><span class="co">#&gt; [1,] 115540</span></span></code></pre></div>
+<p>There are two potentially surprising things about the result:</p>
+<ul>
+<li>It has <code>units</code>, telling us the distance is 100,000 meters, not 100,000 inches, or any other measure of distance</li>
+<li>It is returned as a matrix, even though the result only contains a single value</li>
+</ul>
+<p>This second feature hints at another useful feature of <code><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance()</a></code>, its ability to return <em>distance matrices</em> between all combinations of features in objects <code>x</code> and <code>y</code>.
+This is illustrated in the command below, which finds the distances between the first three features in <code>nz_height</code> and the Otago and Canterbury regions of New Zealand represented by the object <code>co</code>.</p>
+<div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">co</span> <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">nz</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"Canter|Otag"</span>, <span class="va">Name</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">nz_height</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span>, <span class="va">co</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Units: [m]</span></span>
+<span><span class="co">#&gt;        [,1]  [,2]</span></span>
+<span><span class="co">#&gt; [1,] 123537 15498</span></span>
+<span><span class="co">#&gt; [2,]  94283     0</span></span>
+<span><span class="co">#&gt; [3,]  93019     0</span></span></code></pre></div>
+<p>Note that the distance between the second and third features in <code>nz_height</code> and the second feature in <code>co</code> is zero.
+This demonstrates the fact that distances between points and polygons refer to the distance to <em>any part of the polygon</em>:
+The second and third points in <code>nz_height</code> are <em>in</em> Otago, which can be verified by plotting them (result not shown):</p>
+<div class="sourceCode" id="cb125"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">co</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">nz_height</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div id="DE-9IM-strings" class="section level3" number="4.2.4">
+<h3>
+<span class="header-section-number">4.2.4</span> DE-9IM strings<a class="anchor" aria-label="anchor" href="#DE-9IM-strings"><i class="fas fa-link"></i></a>
 </h3>
 <p>Underlying the binary predicates demonstrated in the previous section is the Dimensionally Extended 9-Intersection Model (DE-9IM).
-As the cryptic name suggests, this is not an easy topic.
-Learning it may be worthwhile, however, to better understand spatial relationships.
-Furthermore, advanced uses of DE-9IM include creating custom spatial predicates.
-The model was originally labelled “DE + 9IM” by its inventors, referring to the “dimension of the intersections of boundaries, interiors, and exteriors of two features” <span class="citation">(<a href="references.html#ref-clementini_comparison_1995">Clementini and Di Felice 1995</a>)</span>, but is now referred to as DE-9IM <span class="citation">(<a href="references.html#ref-shen_classification_2018">Shen, Chen, and Liu 2018</a>)</span>.</p>
+As the cryptic name suggests, this is not an easy topic to understand, but it is worth knowing about because it underlies many spatial operations and enables the creation of custom spatial predicates.
+The model was originally labelled “DE + 9IM” by its inventors, referring to the “dimension of the intersections of boundaries, interiors, and exteriors of two features” <span class="citation">(<a href="references.html#ref-clementini_comparison_1995">Clementini and Di Felice 1995</a>)</span>, but is now referred to as DE-9IM <span class="citation">(<a href="references.html#ref-shen_classification_2018">Shen, Chen, and Liu 2018</a>)</span>.
+DE-9IM is applicable to 2-dimensional objects (points, lines and polygons) in Euclidean space, meaning that the model (and software implementing it such as GEOS) assumes you are working with data in a projected coordinate reference system, described in Chapter <a href="reproj-geo-data.html#reproj-geo-data">7</a>.</p>
 <p>To demonstrate how DE-9IM strings work, let’s take a look at the various ways that the first geometry pair in Figure <a href="spatial-operations.html#fig:relations">4.2</a> relate.
 Figure <a href="spatial-operations.html#fig:de9imgg">4.4</a> illustrates the 9 intersection model (9IM) which shows the intersections between every combination of each object’s interior, boundary and exterior: when each component of the first object <code>x</code> is arranged as columns and each component of <code>y</code> is arranged as rows, a facetted graphic is created with the intersections between each element highlighted.</p>
 <div class="figure" style="text-align: center">
@@ -379,7 +415,7 @@ the relation shown in Figure <a href="spatial-operations.html#fig:relations">4.2
 </ul>
 <p>These three components, when concatenated, create the string <code>212</code>, <code>FF1</code>, and <code>FF2</code>.
 This is the same as the result obtained from the function <code><a href="https://r-spatial.github.io/sf/reference/st_relate.html">st_relate()</a></code> (see the source code of this chapter to see how other geometries in Figure <a href="spatial-operations.html#fig:relations">4.2</a> were created):</p>
-<div class="sourceCode" id="cb123"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb126"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">xy2sfc</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_polygon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu">xy2sfc</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0.5</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">y</span> <span class="op">=</span> <span class="fu">xy2sfc</span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.7</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span>, <span class="fl">0.7</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span><span class="op">)</span><span class="op">)</span></span>
@@ -390,11 +426,11 @@ This is the same as the result obtained from the function <code><a href="https:/
 The help page <code><a href="https://r-spatial.github.io/sf/reference/st_relate.html">?st_relate</a></code> contains function definitions for ‘queen’ and ‘rook’ relations in which polygons share a border or only a point, respectively.
 ‘Queen’ relations mean that ‘boundary-boundary’ relations (the cell in the second column and the second row in Table <a href="spatial-operations.html#tab:de9emtable">4.1</a>, or the 5th element of the DE-9IM string) must not be empty, corresponding to the pattern <code>F***T****</code>, while for ‘rook’ relations the same element must be 1 (meaning a linear intersection).
 These are implemented as follows:</p>
-<div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb127"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">st_queen</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_relate.html">st_relate</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, pattern <span class="op">=</span> <span class="st">"F***T****"</span><span class="op">)</span></span>
 <span><span class="va">st_rook</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_relate.html">st_relate</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, pattern <span class="op">=</span> <span class="st">"F***1****"</span><span class="op">)</span></span></code></pre></div>
 <p>Building on the object <code>x</code> created previously, we can use the newly created functions to find out which elements in the grid are a ‘queen’ and ‘rook’ in relation to the middle square of the grid as follows:</p>
-<div class="sourceCode" id="cb125"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb128"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">grid</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_make_grid.html">st_make_grid</a></span><span class="op">(</span><span class="va">x</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">grid_sf</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html">st_sf</a></span><span class="op">(</span><span class="va">grid</span><span class="op">)</span></span>
 <span><span class="va">grid_sf</span><span class="op">$</span><span class="va">queens</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lengths.html">lengths</a></span><span class="op">(</span><span class="fu">st_queen</span><span class="op">(</span><span class="va">grid</span>, <span class="va">grid</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span></span>
@@ -410,9 +446,9 @@ FIGURE 4.5: Demonstration of custom binary spatial predicates for finding ‘que
 <!-- Another of a custom binary spatial predicate is 'overlapping lines' which detects lines that overlap for some or all of another line's geometry. -->
 <!-- This can be implemented as follows, with the pattern signifying that the intersection between the two line interiors must be a line: -->
 </div>
-<div id="spatial-joining" class="section level3" number="4.2.4">
+<div id="spatial-joining" class="section level3" number="4.2.5">
 <h3>
-<span class="header-section-number">4.2.4</span> Spatial joining<a class="anchor" aria-label="anchor" href="#spatial-joining"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.2.5</span> Spatial joining<a class="anchor" aria-label="anchor" href="#spatial-joining"><i class="fas fa-link"></i></a>
 </h3>
 <p>Joining two non-spatial datasets relies on a shared ‘key’ variable, as described in Section <a href="attr.html#vector-attribute-joining">3.2.4</a>.
 Spatial data joining applies the same concept, but instead relies on spatial relations, described in the previous section.
@@ -421,7 +457,7 @@ As with attribute data, joining adds new columns to the target object (the argum
 <p>The process is illustrated by the following example: imagine you have ten points randomly distributed across the Earth’s surface and you ask, for the points that are on land, which countries are they in?
 Implementing this idea in a <a href="https://github.com/geocompx/geocompr/blob/main/code/04-spatial-join.R">reproducible example</a> will build your geographic data handling skills and show how spatial joins work.
 The starting point is to create points that are randomly scattered over the Earth’s surface.</p>
-<div class="sourceCode" id="cb126"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb129"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">2018</span><span class="op">)</span> <span class="co"># set seed for reproducibility</span></span>
 <span><span class="op">(</span><span class="va">bb</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html">st_bbox</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span><span class="op">)</span> <span class="co"># the world's bounds</span></span>
 <span><span class="co">#&gt;   xmin   ymin   xmax   ymax </span></span>
@@ -436,7 +472,7 @@ The starting point is to create points that are randomly scattered over the Eart
 Spatial joins are implemented with <code><a href="https://r-spatial.github.io/sf/reference/st_join.html">st_join()</a></code>, as illustrated in the code chunk below.
 The output is the <code>random_joined</code> object which is illustrated in Figure <a href="spatial-operations.html#fig:spatial-join">4.6</a> (bottom left).
 Before creating the joined dataset, we use spatial subsetting to create <code>world_random</code>, which contains only countries that contain random points, to verify the number of country names returned in the joined dataset should be four (Figure <a href="spatial-operations.html#fig:spatial-join">4.6</a>, top right panel).</p>
-<div class="sourceCode" id="cb127"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb130"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">world_random</span> <span class="op">=</span> <span class="va">world</span><span class="op">[</span><span class="va">random_points</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">world_random</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4</span></span>
@@ -452,19 +488,19 @@ Like spatial subsetting, the default topological operator used by <code><a href=
 The example above demonstrates the addition of a column from a polygon layer to a point layer, but the approach works regardless of geometry types.
 In such cases, for example when <code>x</code> contains polygons, each of which match multiple objects in <code>y</code>, spatial joins will result in duplicate features by creating a new row for each match in <code>y</code>.</p>
 </div>
-<div id="non-overlapping-joins" class="section level3" number="4.2.5">
+<div id="non-overlapping-joins" class="section level3" number="4.2.6">
 <h3>
-<span class="header-section-number">4.2.5</span> Non-overlapping joins<a class="anchor" aria-label="anchor" href="#non-overlapping-joins"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.2.6</span> Distance-based joins<a class="anchor" aria-label="anchor" href="#non-overlapping-joins"><i class="fas fa-link"></i></a>
 </h3>
-<p>Sometimes two geographic datasets do not touch but still have a strong geographic relationship.
+<p>Sometimes two geographic datasets do not intersect but still have a strong geographic relationship due to their proximity.
 The datasets <code>cycle_hire</code> and <code>cycle_hire_osm</code>, already attached in the <strong>spData</strong> package, provide a good example.
 Plotting them shows that they are often closely related but they do not touch, as shown in Figure <a href="spatial-operations.html#fig:cycle-hire">4.7</a>, a base version of which is created with the following code below:
 </p>
-<div class="sourceCode" id="cb128"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb131"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">cycle_hire</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">cycle_hire_osm</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span>, pch <span class="op">=</span> <span class="fl">3</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></code></pre></div>
 <p>We can check if any points are the same using <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects()</a></code> as shown below:</p>
-<div class="sourceCode" id="cb129"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb132"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/any.html">any</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_intersects</a></span><span class="op">(</span><span class="va">cycle_hire</span>, <span class="va">cycle_hire_osm</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
@@ -478,7 +514,7 @@ FIGURE 4.7: The spatial distribution of cycle hire points in London based on off
 This is when a non-overlapping join is needed.
 The simplest method is to use the binary predicate <code><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_is_within_distance()</a></code>, as demonstrated below using a threshold distance of 20 m.
 One can set the threshold distance in metric units also for unprojected data (e.g., lon/lat CRSs such as WGS84), if the spherical geometry engine (S2) is enabled, as it is in <strong>sf</strong> by default (see Section <a href="spatial-class.html#s2">2.2.9</a>).</p>
-<div class="sourceCode" id="cb130"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sel</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html">st_is_within_distance</a></span><span class="op">(</span><span class="va">cycle_hire</span>, <span class="va">cycle_hire_osm</span>, </span>
 <span>                            dist <span class="op">=</span> <span class="fu">units</span><span class="fu">::</span><span class="fu"><a href="https://r-quantities.github.io/units/reference/units.html">set_units</a></span><span class="op">(</span><span class="fl">20</span>, <span class="st">"m"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/summary.html">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lengths.html">lengths</a></span><span class="op">(</span><span class="va">sel</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
@@ -487,7 +523,7 @@ One can set the threshold distance in metric units also for unprojected data (e.
 <p>This shows that there are 438 points in the target object <code>cycle_hire</code> within the threshold distance of <code>cycle_hire_osm</code>.
 How to retrieve the <em>values</em> associated with the respective <code>cycle_hire_osm</code> points?
 The solution is again with <code><a href="https://r-spatial.github.io/sf/reference/st_join.html">st_join()</a></code>, but with an additional <code>dist</code> argument (set to 20 m below):</p>
-<div class="sourceCode" id="cb131"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb134"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_join.html">st_join</a></span><span class="op">(</span><span class="va">cycle_hire</span>, <span class="va">cycle_hire_osm</span>, <span class="va">st_is_within_distance</span>, </span>
 <span>            dist <span class="op">=</span> <span class="fu">units</span><span class="fu">::</span><span class="fu"><a href="https://r-quantities.github.io/units/reference/units.html">set_units</a></span><span class="op">(</span><span class="fl">20</span>, <span class="st">"m"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">cycle_hire</span><span class="op">)</span></span>
@@ -497,21 +533,21 @@ The solution is again with <code><a href="https://r-spatial.github.io/sf/referen
 <p>Note that the number of rows in the joined result is greater than the target.
 This is because some cycle hire stations in <code>cycle_hire</code> have multiple matches in <code>cycle_hire_osm</code>.
 To aggregate the values for the overlapping points and return the mean, we can use the aggregation methods learned in Chapter <a href="attr.html#attr">3</a>, resulting in an object with the same number of rows as the target.</p>
-<div class="sourceCode" id="cb132"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb135"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z</span> <span class="op">=</span> <span class="va">z</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span><span class="op">(</span>capacity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html">mean</a></span><span class="op">(</span><span class="va">capacity</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/dimensions.html">nrow</a></span><span class="op">(</span><span class="va">cycle_hire</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <p>The capacity of nearby stations can be verified by comparing a plot of the capacity of the source <code>cycle_hire_osm</code> data with the results in this new object (plots not shown):</p>
-<div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb136"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">cycle_hire_osm</span><span class="op">[</span><span class="st">"capacity"</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">z</span><span class="op">[</span><span class="st">"capacity"</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <p>The result of this join has used a spatial operation to change the attribute data associated with simple features; the geometry associated with each feature has remained unchanged.</p>
 </div>
-<div id="spatial-aggr" class="section level3" number="4.2.6">
+<div id="spatial-aggr" class="section level3" number="4.2.7">
 <h3>
-<span class="header-section-number">4.2.6</span> Spatial aggregation<a class="anchor" aria-label="anchor" href="#spatial-aggr"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.2.7</span> Spatial aggregation<a class="anchor" aria-label="anchor" href="#spatial-aggr"><i class="fas fa-link"></i></a>
 </h3>
 <p>As with attribute data aggregation, spatial data aggregation <em>condenses</em> data: aggregated outputs have fewer rows than non-aggregated inputs.
 Statistical <em>aggregating functions</em>, such as mean average or sum, summarise multiple values of a variable, and return a single value per <em>grouping variable</em>.
@@ -519,7 +555,7 @@ Section <a href="attr.html#vector-attribute-aggregation">3.2.3</a> demonstrated 
 </p>
 <p>Returning to the example of New Zealand, imagine you want to find out the average height of high points in each region: it is the geometry of the source (<code>y</code> or <code>nz</code> in this case) that defines how values in the target object (<code>x</code> or <code>nz_height</code>) are grouped.
 This can be done in a single line of code with base R’s <code><a href="https://rdrr.io/pkg/terra/man/aggregate.html">aggregate()</a></code> method.</p>
-<div class="sourceCode" id="cb134"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb137"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nz_agg</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/aggregate.html">aggregate</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">nz_height</span>, by <span class="op">=</span> <span class="va">nz</span>, FUN <span class="op">=</span> <span class="va">mean</span><span class="op">)</span></span></code></pre></div>
 <p>The result of the previous command is an <code>sf</code> object with the same geometry as the (spatial) aggregating object (<code>nz</code>), which you can verify with the command <code>identical(st_geometry(nz), st_geometry(nz_agg))</code>.
 The result of the previous operation is illustrated in Figure <a href="spatial-operations.html#fig:spatial-aggregation">4.8</a>, which shows the average value of features in <code>nz_height</code> within each of New Zealand’s 16 regions.
@@ -530,7 +566,7 @@ The same result can also be generated by piping the output from <code><a href="h
 FIGURE 4.8: Average height of the top 101 high points across the regions of New Zealand.
 </p>
 </div>
-<div class="sourceCode" id="cb135"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb138"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nz_agg2</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_join.html">st_join</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">nz</span>, y <span class="op">=</span> <span class="va">nz_height</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">Name</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span><span class="op">(</span>elevation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html">mean</a></span><span class="op">(</span><span class="va">elevation</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -540,9 +576,9 @@ Note: one difference between the <code><a href="https://rdrr.io/pkg/terra/man/ag
 The ‘tidy’ approach is thus more flexible in terms of aggregating functions and the column names of the results.
 Aggregating operations that also create new geometries are covered in Section <a href="geometry-operations.html#geometry-unions">5.2.7</a>.</p>
 </div>
-<div id="incongruent" class="section level3" number="4.2.7">
+<div id="incongruent" class="section level3" number="4.2.8">
 <h3>
-<span class="header-section-number">4.2.7</span> Joining incongruent layers<a class="anchor" aria-label="anchor" href="#incongruent"><i class="fas fa-link"></i></a>
+<span class="header-section-number">4.2.8</span> Joining incongruent layers<a class="anchor" aria-label="anchor" href="#incongruent"><i class="fas fa-link"></i></a>
 </h3>
 <p>Spatial congruence is an important concept related to spatial aggregation.
 An <em>aggregating object</em> (which we will refer to as <code>y</code>) is <em>congruent</em> with the target object (<code>x</code>) if the two objects have shared borders.
@@ -561,7 +597,7 @@ Let us assume that the <code>value</code> column of <code>incongruent</code> ref
 How can we transfer the values of the underlying nine spatial polygons into the two polygons of <code>aggregating_zones</code>?</p>
 <p>The simplest useful method for this is <em>area weighted</em> spatial interpolation, which transfers values from the <code>incongruent</code> object to a new column in <code>aggregating_zones</code> in proportion with the area of overlap: the larger the spatial intersection between input and output features, the larger the corresponding value.
 This is implemented in <code><a href="https://r-spatial.github.io/sf/reference/interpolate_aw.html">st_interpolate_aw()</a></code>, as demonstrated in the code chunk below.</p>
-<div class="sourceCode" id="cb136"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb139"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">iv</span> <span class="op">=</span> <span class="va">incongruent</span><span class="op">[</span><span class="st">"value"</span><span class="op">]</span> <span class="co"># keep only the values to be transferred</span></span>
 <span><span class="va">agg_aw</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/interpolate_aw.html">st_interpolate_aw</a></span><span class="op">(</span><span class="va">iv</span>, <span class="va">aggregating_zones</span>, extensive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in st_interpolate_aw.sf(iv, aggregating_zones, extensive = TRUE):</span></span>
@@ -571,43 +607,6 @@ This is implemented in <code><a href="https://r-spatial.github.io/sf/reference/i
 <p>In our case it is meaningful to sum up the values of the intersections falling into the aggregating zones since total income is a so-called spatially extensive variable (which increases with area), assuming income is evenly distributed across the smaller zones (hence the warning message above).
 This would be different for spatially <a href="https://geodacenter.github.io/workbook/3b_rates/lab3b.html#spatially-extensive-and-spatially-intensive-variables">intensive</a> variables such as <em>average</em> income or percentages, which do not increase as the area increases.
 <code><a href="https://r-spatial.github.io/sf/reference/interpolate_aw.html">st_interpolate_aw()</a></code> works equally with spatially intensive variables: set the <code>extensive</code> parameter to <code>FALSE</code> and it will use an average rather than a sum function when doing the aggregation.</p>
-</div>
-<div id="distance-relations" class="section level3" number="4.2.8">
-<h3>
-<span class="header-section-number">4.2.8</span> Distance relations<a class="anchor" aria-label="anchor" href="#distance-relations"><i class="fas fa-link"></i></a>
-</h3>
-<p>While topological relations are binary — a feature either intersects with another or does not — distance relations are continuous.
-The distance between two objects is calculated with the <code><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance()</a></code> function.
-This is illustrated in the code chunk below, which finds the distance between the highest point in New Zealand and the geographic centroid of the Canterbury region, created in Section <a href="spatial-operations.html#spatial-subsetting">4.2.1</a>:
-</p>
-<div class="sourceCode" id="cb137"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nz_highest</span> <span class="op">=</span> <span class="va">nz_height</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html">slice_max</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span>, order_by <span class="op">=</span> <span class="va">elevation</span><span class="op">)</span></span>
-<span><span class="va">canterbury_centroid</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_centroid</a></span><span class="op">(</span><span class="va">canterbury</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">nz_highest</span>, <span class="va">canterbury_centroid</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Units: [m]</span></span>
-<span><span class="co">#&gt;        [,1]</span></span>
-<span><span class="co">#&gt; [1,] 115540</span></span></code></pre></div>
-<p>There are two potentially surprising things about the result:</p>
-<ul>
-<li>It has <code>units</code>, telling us the distance is 100,000 meters, not 100,000 inches, or any other measure of distance</li>
-<li>It is returned as a matrix, even though the result only contains a single value</li>
-</ul>
-<p>This second feature hints at another useful feature of <code><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance()</a></code>, its ability to return <em>distance matrices</em> between all combinations of features in objects <code>x</code> and <code>y</code>.
-This is illustrated in the command below, which finds the distances between the first three features in <code>nz_height</code> and the Otago and Canterbury regions of New Zealand represented by the object <code>co</code>.</p>
-<div class="sourceCode" id="cb138"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">co</span> <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">nz</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"Canter|Otag"</span>, <span class="va">Name</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_measures.html">st_distance</a></span><span class="op">(</span><span class="va">nz_height</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span>, <span class="va">co</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Units: [m]</span></span>
-<span><span class="co">#&gt;        [,1]  [,2]</span></span>
-<span><span class="co">#&gt; [1,] 123537 15498</span></span>
-<span><span class="co">#&gt; [2,]  94283     0</span></span>
-<span><span class="co">#&gt; [3,]  93019     0</span></span></code></pre></div>
-<p>Note that the distance between the second and third features in <code>nz_height</code> and the second feature in <code>co</code> is zero.
-This demonstrates the fact that distances between points and polygons refer to the distance to <em>any part of the polygon</em>:
-The second and third points in <code>nz_height</code> are <em>in</em> Otago, which can be verified by plotting them (result not shown):</p>
-<div class="sourceCode" id="cb139"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">co</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">nz_height</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div id="spatial-ras" class="section level2" number="4.3">
@@ -865,7 +864,7 @@ Visibility and viewshed computations also belong to the family of global operati
 </h3>
 <p>Many map algebra operations have a counterpart in vector processing <span class="citation">(<a href="references.html#ref-liu_essential_2009">Liu and Mason 2009</a>)</span>.
 Computing a distance raster (global operation) while only considering a maximum distance (logical focal operation) is the equivalent to a vector buffer operation (Section <a href="geometry-operations.html#clipping">5.2.5</a>).
-Reclassifying raster data (either local or zonal function depending on the input) is equivalent to dissolving vector data (Section <a href="spatial-operations.html#spatial-joining">4.2.4</a>).
+Reclassifying raster data (either local or zonal function depending on the input) is equivalent to dissolving vector data (Section <a href="spatial-operations.html#spatial-joining">4.2.5</a>).
 Overlaying two rasters (local operation), where one contains <code>NULL</code> or <code>NA</code> values representing a mask, is similar to vector clipping (Section <a href="geometry-operations.html#clipping">5.2.5</a>).
 Quite similar to spatial clipping is intersecting two layers (Section <a href="spatial-operations.html#spatial-subsetting">4.2.1</a>).
 The difference is that these two layers (vector or raster) simply share an overlapping area (see Figure <a href="geometry-operations.html#fig:venn-clip">5.8</a> for an example).
@@ -966,12 +965,12 @@ Next, compute and visualize the difference between the raster created using the 
 <a class="nav-link" href="#spatial-vec"><span class="header-section-number">4.2</span> Spatial operations on vector data</a><ul class="nav navbar-nav">
 <li><a class="nav-link" href="#spatial-subsetting"><span class="header-section-number">4.2.1</span> Spatial subsetting</a></li>
 <li><a class="nav-link" href="#topological-relations"><span class="header-section-number">4.2.2</span> Topological relations</a></li>
-<li><a class="nav-link" href="#DE-9IM-strings"><span class="header-section-number">4.2.3</span> DE-9IM strings</a></li>
-<li><a class="nav-link" href="#spatial-joining"><span class="header-section-number">4.2.4</span> Spatial joining</a></li>
-<li><a class="nav-link" href="#non-overlapping-joins"><span class="header-section-number">4.2.5</span> Non-overlapping joins</a></li>
-<li><a class="nav-link" href="#spatial-aggr"><span class="header-section-number">4.2.6</span> Spatial aggregation</a></li>
-<li><a class="nav-link" href="#incongruent"><span class="header-section-number">4.2.7</span> Joining incongruent layers</a></li>
-<li><a class="nav-link" href="#distance-relations"><span class="header-section-number">4.2.8</span> Distance relations</a></li>
+<li><a class="nav-link" href="#distance-relations"><span class="header-section-number">4.2.3</span> Distance relations</a></li>
+<li><a class="nav-link" href="#DE-9IM-strings"><span class="header-section-number">4.2.4</span> DE-9IM strings</a></li>
+<li><a class="nav-link" href="#spatial-joining"><span class="header-section-number">4.2.5</span> Spatial joining</a></li>
+<li><a class="nav-link" href="#non-overlapping-joins"><span class="header-section-number">4.2.6</span> Distance-based joins</a></li>
+<li><a class="nav-link" href="#spatial-aggr"><span class="header-section-number">4.2.7</span> Spatial aggregation</a></li>
+<li><a class="nav-link" href="#incongruent"><span class="header-section-number">4.2.8</span> Joining incongruent layers</a></li>
 </ul>
 </li>
 <li>
@@ -1004,7 +1003,7 @@ Next, compute and visualize the difference between the raster created using the 
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-12-27.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-12-28.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
