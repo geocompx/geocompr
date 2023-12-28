@@ -319,13 +319,47 @@ plot(l, add = TRUE)
 plot(p, add = TRUE)
 ```
 
+### Distance relations 
+
+While the topological relations presented in the previous section are binary (a feature either intersects with another or does not) distance relations are continuous.
+The distance between two `sf` objects is calculated with `st_distance()`, which is also used behind the scenes in Section \@ref(non-overlapping-joins) for distance-based joins.
+This is illustrated in the code chunk below, which finds the distance between the highest point in New Zealand and the geographic centroid of the Canterbury region, created in Section \@ref(spatial-subsetting):
+\index{sf!distance relations}
+
+```{r 04-spatial-operations-31, warning=FALSE}
+nz_highest = nz_height |> slice_max(n = 1, order_by = elevation)
+canterbury_centroid = st_centroid(canterbury)
+st_distance(nz_highest, canterbury_centroid)
+```
+
+There are two potentially surprising things about the result:
+
+- It has `units`, telling us the distance is 100,000 meters, not 100,000 inches, or any other measure of distance
+- It is returned as a matrix, even though the result only contains a single value
+
+This second feature hints at another useful feature of `st_distance()`, its ability to return *distance matrices* between all combinations of features in objects `x` and `y`.
+This is illustrated in the command below, which finds the distances between the first three features in `nz_height` and the Otago and Canterbury regions of New Zealand represented by the object `co`.
+
+```{r 04-spatial-operations-32}
+co = filter(nz, grepl("Canter|Otag", Name))
+st_distance(nz_height[1:3, ], co)
+```
+
+Note that the distance between the second and third features in `nz_height` and the second feature in `co` is zero.
+This demonstrates the fact that distances between points and polygons refer to the distance to *any part of the polygon*:
+The second and third points in `nz_height` are *in* Otago, which can be verified by plotting them (result not shown):
+
+```{r 04-spatial-operations-33, eval=FALSE}
+plot(st_geometry(co)[2])
+plot(st_geometry(nz_height)[2:3], add = TRUE)
+```
+
 ### DE-9IM strings {#DE-9IM-strings}
 
 Underlying the binary predicates demonstrated in the previous section is the Dimensionally Extended 9-Intersection Model (DE-9IM).
-As the cryptic name suggests, this is not an easy topic.
-Learning it may be worthwhile, however, to better understand spatial relationships.
-Furthermore, advanced uses of DE-9IM include creating custom spatial predicates.
+As the cryptic name suggests, this is not an easy topic to understand, but it is worth knowing about because it underlies many spatial operations and enables the creation of custom spatial predicates.
 The model was originally labelled "DE + 9IM" by its inventors, referring to the "dimension of the intersections of boundaries, interiors, and exteriors of two features" [@clementini_comparison_1995], but is now referred to as DE-9IM [@shen_classification_2018].
+DE-9IM is applicable to 2-dimensional objects (points, lines and polygons) in Euclidean space, meaning that the model (and software implementing it such as GEOS) assumes you are working with data in a projected coordinate reference system, described in Chapter \@ref(reproj-geo-data).
 
 ```{r de-9im, echo=FALSE, eval=FALSE}
 # Todo one day: revive this
@@ -626,9 +660,9 @@ Like spatial subsetting, the default topological operator used by `st_join()` is
 The example above demonstrates the addition of a column from a polygon layer to a point layer, but the approach works regardless of geometry types.
 In such cases, for example when `x` contains polygons, each of which match multiple objects in `y`, spatial joins will result in duplicate features by creating a new row for each match in `y`.
 
-### Non-overlapping joins
+### Distance-based joins {#non-overlapping-joins}
 
-Sometimes two geographic datasets do not touch but still have a strong geographic relationship.
+Sometimes two geographic datasets do not intersect but still have a strong geographic relationship due to their proximity.
 The datasets `cycle_hire` and `cycle_hire_osm`, already attached in the **spData** package, provide a good example.
 Plotting them shows that they are often closely related but they do not touch, as shown in Figure \@ref(fig:cycle-hire), a base version of which is created with the following code below:
 \index{join!non-overlapping}
@@ -787,41 +821,6 @@ agg_aw$value
 In our case it is meaningful to sum up the values of the intersections falling into the aggregating zones since total income is a so-called spatially extensive variable (which increases with area), assuming income is evenly distributed across the smaller zones (hence the warning message above).
 This would be different for spatially [intensive](https://geodacenter.github.io/workbook/3b_rates/lab3b.html#spatially-extensive-and-spatially-intensive-variables) variables such as *average* income or percentages, which do not increase as the area increases.
 `st_interpolate_aw()` works equally with spatially intensive variables: set the `extensive` parameter to `FALSE` and it will use an average rather than a sum function when doing the aggregation.
-
-### Distance relations 
-
-While topological relations are binary --- a feature either intersects with another or does not --- distance relations are continuous.
-The distance between two objects is calculated with the `st_distance()` function.
-This is illustrated in the code chunk below, which finds the distance between the highest point in New Zealand and the geographic centroid of the Canterbury region, created in Section \@ref(spatial-subsetting):
-\index{sf!distance relations}
-
-```{r 04-spatial-operations-31, warning=FALSE}
-nz_highest = nz_height |> slice_max(n = 1, order_by = elevation)
-canterbury_centroid = st_centroid(canterbury)
-st_distance(nz_highest, canterbury_centroid)
-```
-
-There are two potentially surprising things about the result:
-
-- It has `units`, telling us the distance is 100,000 meters, not 100,000 inches, or any other measure of distance
-- It is returned as a matrix, even though the result only contains a single value
-
-This second feature hints at another useful feature of `st_distance()`, its ability to return *distance matrices* between all combinations of features in objects `x` and `y`.
-This is illustrated in the command below, which finds the distances between the first three features in `nz_height` and the Otago and Canterbury regions of New Zealand represented by the object `co`.
-
-```{r 04-spatial-operations-32}
-co = filter(nz, grepl("Canter|Otag", Name))
-st_distance(nz_height[1:3, ], co)
-```
-
-Note that the distance between the second and third features in `nz_height` and the second feature in `co` is zero.
-This demonstrates the fact that distances between points and polygons refer to the distance to *any part of the polygon*:
-The second and third points in `nz_height` are *in* Otago, which can be verified by plotting them (result not shown):
-
-```{r 04-spatial-operations-33, eval=FALSE}
-plot(st_geometry(co)[2])
-plot(st_geometry(nz_height)[2:3], add = TRUE)
-```
 
 ## Spatial operations on raster data {#spatial-ras}
 

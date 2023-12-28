@@ -9,7 +9,7 @@
 [![RstudioCloud](images/cloud.png)](https://rstudio.cloud/project/1642300)
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 [![Docker](https://img.shields.io/docker/pulls/geocompr/geocompr?style=plastic)](https://github.com/geocompx/docker/)
-[![discord](https://img.shields.io/discord/878051191374876683?label=discord&logo=Discord&color=blue)](https://discord.gg/PMztXYgNxp)
+[![discord](https://img.shields.io/discord/878051191374876683?label=discord&logo=Discord&color=blue)](https://discord.com/invite/PMztXYgNxp)
 [![Open in GitHub
 Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=84222786&machine=basicLinux32gb&devcontainer_path=.devcontainer.json&location=WestEurope)
 <!-- [![DOI](https://zenodo.org/badge/84222786.svg)](https://zenodo.org/badge/latestdoi/84222786) -->
@@ -51,7 +51,7 @@ changed, including:
 - Update of Chapter 7 to include mention alternative ways or reading-in
   OSM data in [\#656](https://github.com/geocompx/geocompr/pull/656)
 - Refactor build settings so the book builds on Docker images in the
-  [geocompr/docker](https://github.com/geocompr/docker) repo
+  [geocompr/docker](https://github.com/geocompx/docker) repo
 - Improve the experience of using the book in Binder (ideal for trying
   out the code before installing or updating the necessary R packages),
   as documented in issue
@@ -96,10 +96,10 @@ Contributions at this stage are very welcome.
 
 We encourage contributions on any part of the book, including:
 
-- improvements to the text, e.g. clarifying unclear sentences, fixing
+- improvements to the text, e.g., clarifying unclear sentences, fixing
   typos (see guidance from [Yihui
   Xie](https://yihui.org/en/2013/06/fix-typo-in-documentation/));
-- changes to the code, e.g. to do things in a more efficient way;
+- changes to the code, e.g., to do things in a more efficient way;
 - suggestions on content (see the project’s [issue
   tracker](https://github.com/geocompx/geocompr/issues));
 - improvements to and alternative approaches in the Geocompr solutions
@@ -107,7 +107,7 @@ We encourage contributions on any part of the book, including:
   [r.geocompx.org/solutions](https://r.geocompx.org/solutions) (see a
   blog post on how to update solutions in files such as
   [\_01-ex.Rmd](https://github.com/geocompx/geocompr/blob/main/_01-ex.Rmd)
-  [here](https://geocompr.github.io/post/2022/geocompr-solutions/))
+  [here](https://geocompx.org/post/2022/geocompr-solutions/))
 
 See
 [our-style.md](https://github.com/geocompx/geocompr/blob/main/misc/our-style.md)
@@ -118,6 +118,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [florisvdh](https://github.com/florisvdh),
 [babayoshihiko](https://github.com/babayoshihiko),
 [katygregg](https://github.com/katygregg),
+[tibbles-and-tribbles](https://github.com/tibbles-and-tribbles),
 [Lvulis](https://github.com/Lvulis),
 [rsbivand](https://github.com/rsbivand),
 [iod-ine](https://github.com/iod-ine),
@@ -177,7 +178,8 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [pokyah](https://github.com/pokyah),
 [schuetzingit](https://github.com/schuetzingit),
 [tim-salabim](https://github.com/tim-salabim),
-[tszberkowitz](https://github.com/tszberkowitz).
+[tszberkowitz](https://github.com/tszberkowitz),
+[vlarmet](https://github.com/vlarmet).
 
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
@@ -247,7 +249,7 @@ run!):
 # Install packages to fully reproduce book (may take several minutes):
 options(repos = c(
   geocompx = 'https://geocompx.r-universe.dev',
-  cran = 'https://cloud.r-project.org'
+  cran = 'https://cloud.r-project.org/'
 ))
 # From geocompx.r-universe.dev (recommended):
 install.packages("geocompkg", dependencies = TRUE)
@@ -300,65 +302,16 @@ the book:
 [![Launch Rstudio
 Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/geocompx/geocompr/main?urlpath=rstudio)
 
-You can also have a play with the repo in RStudio Cloud by clicking on
-this link (requires log-in):
+You can also have a play with the repository in RStudio Cloud by
+clicking on this link (requires log-in):
 
 [![Launch Rstudio
 Cloud](images/cloud.png)](https://rstudio.cloud/project/1642300)
 
 ## Geocomputation with R in a Docker container
 
-To ease reproducibility we have made Docker images available, at
-[geocompr/geocompr](https://hub.docker.com/r/geocompr/geocompr/) on
-DockerHub. These images allow you to explore Geocomputation with R in a
-virtual machine that has up-to-date dependencies.
-
-After you have [installed
-docker](https://www.docker.com/products/container-runtime/) and set-it
-up on [your
-computer](https://docs.docker.com/engine/install/linux-postinstall/) you
-can start RStudio Server without a password (see the [Rocker
-project](https://www.rocker-project.org/use/managing_users/) for info on
-how to add a password and other security steps for public-facing
-servers):
-
-``` sh
-docker run -p 8787:8787 -e DISABLE_AUTH=TRUE geocompr/geocompr
-```
-
-If it worked you should be able to open-up RStudio server by opening a
-browser and navigating to <http://localhost:8787/> resulting in an
-up-to-date version of R and RStudio running in a container.
-
-Start a plain R session running:
-
-``` sh
-docker run -it geocompr/geocompr R
-```
-
-![](https://user-images.githubusercontent.com/1825120/39538109-9b50e7ac-4e33-11e8-93b3-e00e95a79294.png)
-
-If you see something like this after following the steps above,
-congratulations: it worked! See
-[github.com/rocker-org](https://github.com/rocker-org/rocker/wiki/Using-the-RStudio-image#running-rstudio-server)
-for more info.
-
-If you want to call QGIS from R, you can use the `qgis` tag, by running
-the following command for example (which also shows how to set a
-password and use a different port on localhost):
-
-    docker run -d -p 8799:8787 -e USERID=$UID -e PASSWORD=strongpass -v $(pwd):/home/rstudio/geocompr geocompx/geocompr:qgis
-
-From this point to *build* the book you can open projects in the
-`geocompr` directory from the project box in the top-right hand corner,
-and knit `index.Rmd` with the little `knit` button above the the RStudio
-script panel (`Ctl+Shift+B` should do the same job).
-
-See the
-[geocompr/docker](https://github.com/geocompr/docker#geocomputation-with-r-in-docker)
-repo for details, including how to share volumes between your computer
-and the Docker image, for using geographic R packages on your own data
-and for information on available tags.
+See the [geocompx/docker](https://github.com/geocompx/docker) repository
+for details.
 
 ## Reproducing this README
 
@@ -398,21 +351,8 @@ rmarkdown::render("README.Rmd", output_format = "github_document", output_file =
 
 ## Citations
 
-To cite packages used in this book we use code from [Efficient R
-Programming](https://csgillespie.github.io/efficientR/):
-
-``` r
-# geocompkg:::generate_citations()
-```
-
-This generates .bib and .csv files containing the packages. The current
-of packages used can be read-in as follows:
-
-``` r
-pkg_df = readr::read_csv("extdata/package_list.csv")
-```
-
-Other citations are stored online using Zotero.
+The main packages used in this book are cited from `packages.bib`. Other
+citations are stored online using Zotero.
 
 If you would like to add to the references, please use Zotero, join the
 [open group](https://www.zotero.org/groups/418217/energy-and-transport)
