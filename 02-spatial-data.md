@@ -1074,9 +1074,8 @@ nlyr(multi_rast)
 #> [1] 4
 ```
 
-For multilayer raster objects, layers can be selected with `terra::subset()`.^[
-The `[[` and `$` operators can also be used to select layers, for example with commands `multi_rast$landsat_1` and `multi_rast[["landsat_1"]]`.
-]
+For multilayer raster objects, layers can be selected with the `[[` and `$` operators, for example with commands `multi_rast[["landsat_1"]]` and `multi_rast$landsat_1`.
+The `terra::subset()` can also be used to select layers.
 It accepts a layer number or its name as the second argument:
 
 
