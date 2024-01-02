@@ -135,7 +135,7 @@ Another possibility to obtain spatial data is to use web services, such as WFS (
 <p>There are many geographic file formats, each of which has pros and cons.
 These are described in Section <a href="read-write.html#file-formats">8.5</a>.
 The process of actually reading and writing such file formats efficiently is not covered until Sections <a href="read-write.html#data-input">8.6</a> and <a href="read-write.html#data-output">8.7</a>, respectively.
-The final Section <a href="read-write.html#visual-outputs">8.8</a> demonstrates methods for saving visual outputs (maps), in preparation for Chapter <a href="adv-map.html#adv-map">9</a> on visualization.</p>
+The final Section <a href="read-write.html#visual-outputs">8.9</a> demonstrates methods for saving visual outputs (maps), in preparation for Chapter <a href="adv-map.html#adv-map">9</a> on visualization.</p>
 </div>
 <div id="retrieving-data" class="section level2" number="8.2">
 <h2>
@@ -1125,14 +1125,44 @@ To change or disable the compression, we need to modify this argument.</p>
 <p>To learn more about the compression of GeoTIFF files, read Paul Ramsey’s <a href="https://blog.cleverelephant.ca/2015/02/geotiff-compression-for-dummies.html">comprehensive blog post on this topic</a>.</p>
 </div>
 </div>
-<div id="visual-outputs" class="section level2" number="8.8">
+<div id="geographic-metadata" class="section level2" number="8.8">
 <h2>
-<span class="header-section-number">8.8</span> Visual outputs<a class="anchor" aria-label="anchor" href="#visual-outputs"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.8</span> Geographic metadata<a class="anchor" aria-label="anchor" href="#geographic-metadata"><i class="fas fa-link"></i></a>
+</h2>
+<p>Geographic metadata are a cornerstone of geographic information management, used to describe datasets, data structures and services.
+They help make datasets FAIR (Findable, Accessible, Interoperable, Reusable) and are defined by the ISO/OGC standards, in particular the ISO 19115 standard and underlying schemas.
+These standards are widely used within spatial data infrastructures, handled through metadata catalogs.</p>
+<p>Geographic metadata can be managed with <strong>geometa</strong>, a package that allows writing, reading and validating geographic metadata according to the ISO/OGC standards.
+It already supports various international standards for geographic metadata information, such as the ISO 19110 (Feature catalogue), ISO 19115-1 and 19115-2 (geographic metadata for vector and gridded/imagery datasets), ISO 19119 (geographic metadata for service), and ISO 19136 (Geographic Markup Language) providing methods to read, validate and write geographic metadata from R using the ISO/TS 19139 (XML) technical specification.
+To address the complexity and exhaustiveness the standards, and the advanced knowledge required to use them, complementary packages such as <a href="https://github.com/r-geoflow/geoflow">geoflow</a> have been built to ease and automate the management of metadata.
+Geographic metadata can be created with <strong>geometa</strong> as follows, which creates and saves a metadata file:</p>
+<div class="sourceCode" id="cb291"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/eblondel/geometa/wiki">geometa</a></span><span class="op">)</span></span>
+<span><span class="co"># create a metadata</span></span>
+<span><span class="va">md</span> <span class="op">=</span> <span class="va">ISOMetadata</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#... fill the metadata 'md' object</span></span>
+<span><span class="co"># validate metadata</span></span>
+<span><span class="va">md</span><span class="op">$</span><span class="fu">validate</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># XML representation of the ISOMetadata</span></span>
+<span><span class="va">xml</span> <span class="op">=</span> <span class="va">md</span><span class="op">$</span><span class="fu">encode</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># save metadata</span></span>
+<span><span class="va">md</span><span class="op">$</span><span class="fu">save</span><span class="op">(</span><span class="st">"my_metadata.xml"</span><span class="op">)</span></span>
+<span><span class="co"># read a metadata from an XML file</span></span>
+<span><span class="va">md</span> <span class="op">=</span> <span class="fu">readISO19139</span><span class="op">(</span><span class="st">"my_metadata.xml"</span><span class="op">)</span></span></code></pre></div>
+<p>The package comes with more <a href="https://github.com/eblondel/geometa/tree/master/inst/extdata/examples">examples</a> and has been extended by packages such as <strong><a href="https://github.com/r-geoflow/geoflow">geoflow</a></strong> to ease and automate the management of metadata</p>
+<p>In the field of standard geographic information management, the distinction between data and metadata is less clear.
+The Geography Markup Language (GML) standard and file format covers both data and metadata, for example.
+The <strong>geometa</strong> package allows exporting GML (ISO 19136) objects from geometry objects modeled with <strong>sf</strong>.
+Such functionality allows use of geographic metadata (enabling the inclusion of metadata on detailed geographic and temporal extents, rather than simple bounding boxes, for example) and the provisioin of services that extend the GML standard (e.g., OGC Web Coverage Service).</p>
+</div>
+<div id="visual-outputs" class="section level2" number="8.9">
+<h2>
+<span class="header-section-number">8.9</span> Visual outputs<a class="anchor" aria-label="anchor" href="#visual-outputs"><i class="fas fa-link"></i></a>
 </h2>
 <p>
 R supports many different static and interactive graphics formats.
 The most general method to save a static plot is to open a graphic device, create a plot, and close it, for example:</p>
-<div class="sourceCode" id="cb291"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb292"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/grDevices/png.html">png</a></span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"lifeExp.png"</span>, width <span class="op">=</span> <span class="fl">500</span>, height <span class="op">=</span> <span class="fl">350</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">world</span><span class="op">[</span><span class="st">"lifeExp"</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html">dev.off</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -1142,19 +1172,19 @@ You can specify several properties of the output plot, including width, height a
 Additionally, several graphic packages provide their own functions to save a graphical output.
 For example, the <strong>tmap</strong> package has the <code><a href="https://r-tmap.github.io/tmap/reference/tmap_save.html">tmap_save()</a></code> function.
 You can save a <code>tmap</code> object to different graphic formats or an HTML file by specifying the object name and a file path to a new file.</p>
-<div class="sourceCode" id="cb292"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb293"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-tmap/tmap">tmap</a></span><span class="op">)</span></span>
 <span><span class="va">tmap_obj</span> <span class="op">=</span> <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html">tm_shape</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_polygons.html">tm_polygons</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"lifeExp"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tmap_save.html">tmap_save</a></span><span class="op">(</span><span class="va">tmap_obj</span>, filename <span class="op">=</span> <span class="st">"lifeExp_tmap.png"</span><span class="op">)</span></span></code></pre></div>
 <p>On the other hand, you can save interactive maps created in the <strong>mapview</strong> package as an HTML file or image using the <code><a href="https://rdrr.io/pkg/mapview/man/mapshot.html">mapshot2()</a></code> function:</p>
-<div class="sourceCode" id="cb293"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb294"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/mapview">mapview</a></span><span class="op">)</span></span>
 <span><span class="va">mapview_obj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mapview/man/mapView.html">mapview</a></span><span class="op">(</span><span class="va">world</span>, zcol <span class="op">=</span> <span class="st">"lifeExp"</span>, legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/mapview/man/mapshot.html">mapshot2</a></span><span class="op">(</span><span class="va">mapview_obj</span>, file <span class="op">=</span> <span class="st">"my_interactive_map.html"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div id="exercises-6" class="section level2" number="8.9">
+<div id="exercises-6" class="section level2" number="8.10">
 <h2>
-<span class="header-section-number">8.9</span> Exercises<a class="anchor" aria-label="anchor" href="#exercises-6"><i class="fas fa-link"></i></a>
+<span class="header-section-number">8.10</span> Exercises<a class="anchor" aria-label="anchor" href="#exercises-6"><i class="fas fa-link"></i></a>
 </h2>
 <p>E1. List and describe three types of vector, raster, and geodatabase formats.</p>
 <p>E2. Name at least two differences between the <strong>sf</strong> functions <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> and <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">st_read()</a></code>.</p>
@@ -1211,8 +1241,9 @@ Export this map to a file called <code>cycle_hire.html</code>.</p>
 <li><a class="nav-link" href="#raster-data-write"><span class="header-section-number">8.7.2</span> Raster data</a></li>
 </ul>
 </li>
-<li><a class="nav-link" href="#visual-outputs"><span class="header-section-number">8.8</span> Visual outputs</a></li>
-<li><a class="nav-link" href="#exercises-6"><span class="header-section-number">8.9</span> Exercises</a></li>
+<li><a class="nav-link" href="#geographic-metadata"><span class="header-section-number">8.8</span> Geographic metadata</a></li>
+<li><a class="nav-link" href="#visual-outputs"><span class="header-section-number">8.9</span> Visual outputs</a></li>
+<li><a class="nav-link" href="#exercises-6"><span class="header-section-number">8.10</span> Exercises</a></li>
 </ul>
 
       <div class="book-extra">
