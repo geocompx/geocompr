@@ -324,30 +324,36 @@ This function also allows to select a geocoding service with the <code>method</c
 <!-- potentially useful package - https://github.com/eblondel/geosapi -->
 <!-- rstac - https://gist.github.com/h-a-graham/420434c158c139180f5eb82859099082, -->
 <p>
-In an effort to standardize web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of specifications for web services (collectively known as OWS, which is short for OGC Web Services).
-These specifications include the Web Feature Service (WFS), Web Map Service (WMS), Web Map Tile Service (WMTS), the Web Coverage Service (WCS) and even a Web Processing Service (WPS).
-Map servers such as PostGIS have adopted these protocols, leading to standardization of queries.
-Like other web APIs, OWS APIs use a ‘base URL’, an ‘endpoint’ and ‘URL query arguments’ following a <code>?</code> to request data (see the <a href="https://httr.r-lib.org/articles/api-packages.html"><code>best-practices-api-packages</code></a> vignette in the <strong>httr</strong> package).</p>
-<p>There are many requests that can be made to a OWS service.
-One of the most fundamental is <code>getCapabilities</code>, demonstrated with <strong>httr</strong> functions <code><a href="https://httr.r-lib.org/reference/GET.html">GET()</a></code> and <code><a href="https://httr.r-lib.org/reference/modify_url.html">modify_url()</a></code> below.
-The following code chunk demonstrates how API queries can be constructed and dispatched, in this case to discover the capabilities of a service run by the Food and Agriculture Organization of the United Nations (FAO).</p>
+In an effort to standardize web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of standard specifications for web services (collectively known as OWS, which is short for OGC Web Services).
+These services complement and use core standards developed to model geographic information, such as the <a href="https://www.iso.org/standard/66175.html">ISO/OGC Spatial Schema (ISO 19107:2019)</a>, or the <a href="https://www.iso.org/standard/40114.html">Simple Features (ISO 19125-1:2004)</a>, and to format data, such as with the <a href="https://www.iso.org/standard/75676.html">Geographic Markup Language (GML)</a>.
+These specifications cover common access services for data and metadata.
+Vector data can be accessed with the Web Feature Service (WFS), whereas grid/imagery can be accessed with the Web Coverage Service (WCS).
+Map image representations, such as tiles, can be accessed with the Web Map Service (WMS) or the Web Map Tile Service (WMTS).
+Metadata is also covered by means of the Catalogue Service for the Web (CSW).
+Finally, standard processing is handled through the Web Processing Service (WPS) or the the Web Coverage Processing Service (WCPS).</p>
+<p>Various open-source projects have adopted these protocols, such as <a href="https://geoserver.org/">GeoServer</a> and <a href="https://mapserver.org/">MapServer</a> for data handling, or <a href="https://geonetwork-opensource.org/">GeoNetwork</a> and <a href="https://pycsw.org/">PyCSW</a> for metadata handling, leading to standardization of queries.
+Integrated tools for Spatial Data Infrastructures (SDI), such as <a href="https://geonode.org/">GeoNode</a>, <a href="https://www.georchestra.org/">GeOrchestra</a> or <a href="https://www.examind.com/">Examind</a> have also adopted these standard web-services, either directly or by using previously mentioned open-source tools.</p>
+<p>Like other web APIs, OWS APIs use a ‘base URL’, an ‘endpoint’ and ‘URL query arguments’ following a <code>?</code> to request data (see the <a href="https://httr.r-lib.org/articles/api-packages.html"><code>best-practices-api-packages</code></a> vignette in the <strong>httr</strong> package).</p>
+<p>There are many requests that can be made to a OWS service. Below examples illustrate how some requests can be made directly with <strong>httr</strong> or more straightforward with the <strong>ows4R</strong> package (OGC Web-Services for R).</p>
+<p>Let’s start with examples using the <strong>httr</strong> package, which can be useful for understanding how web services work.
+One of the most fundamental requests is <code>getCapabilities</code>, demonstrated with <strong>httr</strong> functions <code><a href="https://httr.r-lib.org/reference/GET.html">GET()</a></code> and <code><a href="https://httr.r-lib.org/reference/modify_url.html">modify_url()</a></code> below.
+The following code chunk demonstrates how API queries can be constructed and dispatched, in this case to discover the capabilities of a service run by the Fisheries and Aquaculture Division of the Food and Agriculture Organization of the United Nations (UN-FAO).</p>
 <div class="sourceCode" id="cb266"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://httr.r-lib.org/">httr</a></span><span class="op">)</span></span>
-<span><span class="va">base_url</span> <span class="op">=</span> <span class="st">"http://www.fao.org"</span></span>
-<span><span class="va">endpoint</span> <span class="op">=</span> <span class="st">"/figis/geoserver/wfs"</span></span>
+<span><span class="va">base_url</span> <span class="op">=</span> <span class="st">"https://www.fao.org"</span></span>
+<span><span class="va">endpoint</span> <span class="op">=</span> <span class="st">"/fishery/geoserver/wfs"</span></span>
 <span><span class="va">q</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>request <span class="op">=</span> <span class="st">"GetCapabilities"</span><span class="op">)</span></span>
 <span><span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="https://httr.r-lib.org/reference/GET.html">GET</a></span><span class="op">(</span>url <span class="op">=</span> <span class="fu"><a href="https://httr.r-lib.org/reference/modify_url.html">modify_url</a></span><span class="op">(</span><span class="va">base_url</span>, path <span class="op">=</span> <span class="va">endpoint</span><span class="op">)</span>, query <span class="op">=</span> <span class="va">q</span><span class="op">)</span></span>
 <span><span class="va">res</span><span class="op">$</span><span class="va">url</span></span>
-<span><span class="co">#&gt; [1] "https://www.fao.org/figis/geoserver/wfs?request=GetCapabilities"</span></span></code></pre></div>
-<p>The above code chunk demonstrates how API requests can be constructed programmatically with the <code><a href="https://httr.r-lib.org/reference/GET.html">GET()</a></code> function, which takes a base URL and a list of query parameters which can easily be extended.
+<span><span class="co">#&gt; [1] "https://www.fao.org/fishery/geoserver/wfs?request=GetCapabilities"</span></span></code></pre></div>
+<p>The above code chunk demonstrates how API requests can be constructed programmatically with the <code><a href="https://httr.r-lib.org/reference/GET.html">GET()</a></code> function, which takes a base URL and a list of query parameters that can easily be extended.
 The result of the request is saved in <code>res</code>, an object of class <code>response</code> defined in the <strong>httr</strong> package, which is a list containing information of the request, including the URL.
 As can be seen by executing <code>browseURL(res$url)</code>, the results can also be read directly in a browser.
 One way of extracting the contents of the request is as follows:</p>
 <div class="sourceCode" id="cb267"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">txt</span> <span class="op">=</span> <span class="fu"><a href="https://httr.r-lib.org/reference/content.html">content</a></span><span class="op">(</span><span class="va">res</span>, <span class="st">"text"</span><span class="op">)</span></span>
-<span><span class="va">xml</span> <span class="op">=</span> <span class="fu">xml2</span><span class="fu">::</span><span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_xml</a></span><span class="op">(</span><span class="va">txt</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb268"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">xml</span></span>
+<span><span class="va">xml</span> <span class="op">=</span> <span class="fu">xml2</span><span class="fu">::</span><span class="fu"><a href="http://xml2.r-lib.org/reference/read_xml.html">read_xml</a></span><span class="op">(</span><span class="va">txt</span><span class="op">)</span></span>
+<span><span class="va">xml</span></span>
 <span><span class="co">#&gt; {xml_document} ...</span></span>
 <span><span class="co">#&gt; [1] &lt;ows:ServiceIdentification&gt;\n  &lt;ows:Title&gt;GeoServer WFS...</span></span>
 <span><span class="co">#&gt; [2] &lt;ows:ServiceProvider&gt;\n  &lt;ows:ProviderName&gt;UN-FAO Fishe...</span></span>
@@ -355,15 +361,38 @@ One way of extracting the contents of the request is as follows:</p>
 <p>Data can be downloaded from WFS services with the <code>GetFeature</code> request and a specific <code>typeName</code> (as illustrated in the code chunk below).</p>
 <p>Available names differ depending on the accessed web feature service.
 One can extract them programmatically using web technologies <span class="citation">(<a href="references.html#ref-nolan_xml_2014">Nolan and Lang 2014</a>)</span> or scrolling manually through the contents of the <code>GetCapabilities</code> output in a browser.</p>
-<div class="sourceCode" id="cb269"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">qf</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>request <span class="op">=</span> <span class="st">"GetFeature"</span>, typeName <span class="op">=</span> <span class="st">"area:FAO_AREAS"</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb268"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span></span>
+<span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/s2.html">sf_use_s2</a></span><span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">qf</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>request <span class="op">=</span> <span class="st">"GetFeature"</span>, typeName <span class="op">=</span> <span class="st">"fifao:FAO_MAJOR"</span><span class="op">)</span></span>
 <span><span class="va">file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".gml"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://httr.r-lib.org/reference/GET.html">GET</a></span><span class="op">(</span>url <span class="op">=</span> <span class="va">base_url</span>, path <span class="op">=</span> <span class="va">endpoint</span>, query <span class="op">=</span> <span class="va">qf</span>, <span class="fu"><a href="https://httr.r-lib.org/reference/write_disk.html">write_disk</a></span><span class="op">(</span><span class="va">file</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">fao_areas</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">file</span><span class="op">)</span></span></code></pre></div>
-<p>Note the use of <code><a href="https://httr.r-lib.org/reference/write_disk.html">write_disk()</a></code> to ensure that the results are written to disk rather than loaded into memory, allowing them to be imported with <strong>sf</strong>.
-This example shows how to gain low-level access to web services using <strong>httr</strong>, which can be useful for understanding how web services work.
-For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose.
-The package <strong>ows4R</strong> was developed for working with OWS services.</p>
+<p>In order to keep geometry validity along the data access chain, and since standards and underlying open-source server solutions (such as GeoServer) have been built on the Simple Features access, it is important to deactivate the new default behavior introduced in <strong>sf</strong>, and do not to use the S2 geometry model at data access time.
+This is done with above code <code>sf::sf_use_s2(FALSE)</code>.
+Also note the use of <code><a href="https://httr.r-lib.org/reference/write_disk.html">write_disk()</a></code> to ensure that the results are written to disk rather than loaded into memory, allowing them to be imported with <strong>sf</strong>.</p>
+<p>For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose.
+The package <strong>ows4R</strong> has been developed for working with OWS services.
+It provides a stable interface to common access services, such as the WFS, WCS for data, CSW for metadata, and WPS for processing.
+The OGC services coverage is described <a href="https://github.com/eblondel/ows4R?tab=readme-ov-file#ogc-standards-coverage-status">here</a>, with new standard protocols under investigation/development.</p>
+<p>Based on the above example, the code below show how to perform <code>getCapabilities</code> and <code>getFeatures</code> operations with this package.</p>
+<p>The <strong>ows4R</strong> package relies on the principle of clients.
+To interact with an OWS service (such as WFS), a client is created as follows:</p>
+<div class="sourceCode" id="cb269"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/eblondel/ows4R">ows4R</a></span><span class="op">)</span></span>
+<span><span class="va">WFS</span> <span class="op">=</span> <span class="va">WFSClient</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
+<span>  url <span class="op">=</span> <span class="st">"https://www.fao.org/fishery/geoserver/wfs"</span>,</span>
+<span>  serviceVersion <span class="op">=</span> <span class="st">"1.0.0"</span>,</span>
+<span>  logger <span class="op">=</span> <span class="st">"INFO"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The operations are then accessible from this client object, e.g., <code>getCapabilities</code> or <code>getFeatures</code>.</p>
+<div class="sourceCode" id="cb270"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/eblondel/ows4R">ows4R</a></span><span class="op">)</span></span>
+<span><span class="va">caps</span> <span class="op">=</span> <span class="va">WFS</span><span class="op">$</span><span class="fu">getCapabilities</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">features</span> <span class="op">=</span> <span class="va">WFS</span><span class="op">$</span><span class="fu">getFeatures</span><span class="op">(</span><span class="st">"fifao:FAO_MAJOR"</span><span class="op">)</span></span></code></pre></div>
+<p>As explained before, when accessing data with OGC services, handling <strong>sf</strong> features should be done by deactivating the new default behavior introduced in <strong>sf</strong>, with <code>sf::sf_use_s2(FALSE)</code>.
+This is done by default with <strong>ows4R</strong>.</p>
+<p>Additional examples are available through vignettes, such as <a href="https://cran.r-project.org/web/packages/ows4R/vignettes/wcs.html">how to access raster data with the WCS</a>, or <a href="https://cran.r-project.org/web/packages/ows4R/vignettes/csw.html">how to access metadata with the CSW</a>.</p>
 </div>
 <div id="file-formats" class="section level2" number="8.5">
 <h2>
@@ -575,7 +604,7 @@ Open
 </table></div>
 <p>
 An important development ensuring the standardization and open-sourcing of file formats was the founding of the Open Geospatial Consortium (<a href="https://www.ogc.org/">OGC</a>) in 1994.
-Beyond defining the simple features data model (see Section <a href="spatial-class.html#intro-sf">2.2.1</a>), the OGC also coordinates the development of open standards, for example as used in file formats such as KML and GeoPackage.
+Beyond defining the simple features data model (see Section <a href="spatial-class.html#intro-sf">2.2.1</a>), the OGC also coordinates the development of open standards, for example as used in file formats such as GML, KML and GeoPackage.
 Open file formats of the kind endorsed by the OGC have several advantages over proprietary formats: the standards are published, ensure transparency and open up the possibility for users to further develop and adjust the file formats to their specific needs.</p>
 <p>ESRI Shapefile is the most popular vector data exchange format; however, it is not an open format (though its specification is open).
 It was developed in the early 1990s and has a number of limitations.
@@ -789,7 +818,7 @@ TRUE
 </table></div>
 <p>The following commands show the first three drivers reported the computer’s GDAL installation (results can vary depending on the GDAL version installed) and a summary of the their features.
 Note that the majority of drivers can write data while only a dozen or so formats can efficiently represent raster data in addition to vector data (see <code>?st_drivers()</code> for details):</p>
-<div class="sourceCode" id="cb270"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb271"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sf_drivers</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_drivers.html">st_drivers</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/headtail.html">head</a></span><span class="op">(</span><span class="va">sf_drivers</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/summary.html">summary</a></span><span class="op">(</span><span class="va">sf_drivers</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
@@ -797,7 +826,7 @@ Note that the majority of drivers can write data while only a dozen or so format
 The content of a text string could vary between different drivers.
 In most cases, as with the ESRI Shapefile (<code>.shp</code>) or the <code>GeoPackage</code> format (<code>.gpkg</code>), the <code>dsn</code> would be a file name.
 <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> guesses the driver based on the file extension, as illustrated for a <code>.gpkg</code> file below:</p>
-<div class="sourceCode" id="cb271"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb272"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"shapes/world.gpkg"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span></span>
 <span><span class="va">world</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></code></pre></div>
 <p>For some drivers, <code>dsn</code> could be provided as a folder name, access credentials for a database, or a GeoJSON string representation (see the examples of the <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code> help page for more details).</p>
@@ -808,7 +837,7 @@ The <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_s
 The first one is related to the <code>query</code> argument, which allows specifying what part of the data to read with <a href="https://gdal.org/user/ogr_sql_dialect.html">the OGR SQL query text</a>.
 An example below extracts data for Tanzania only (Figure <a href="read-write.html#fig:readsfquery">8.1</a>:A).
 It is done by specifying that we want to get all columns (<code>SELECT *</code>) from the <code>"world"</code> layer for which the <code>name_long</code> equals to <code>"Tanzania"</code>:</p>
-<div class="sourceCode" id="cb272"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb273"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tanzania</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">f</span>, query <span class="op">=</span> <span class="st">'SELECT * FROM world WHERE name_long = "Tanzania"'</span><span class="op">)</span></span></code></pre></div>
 <p>If you do not know the names of the available columns, a good approach is to just read one row of the data with <code>'SELECT * FROM world WHERE FID = 1'</code>.
 <code>FID</code> represents a <em>feature ID</em> – most often, it is a row number; however, its values depend on the used file format.
@@ -817,12 +846,12 @@ For example, <code>FID</code> starts from 0 in ESRI Shapefile, from 1 in some ot
 This argument expects a well-known text representing study area for which we want to extract the data.
 Let’s try it using a small example – we want to read polygons from our file that intersect with the buffer of 50,000 meters of Tanzania’s borders.
 To do it, we need to prepare our “filter” by (a) creating the buffer (Section <a href="geometry-operations.html#buffers">5.2.3</a>), (b) converting the <code>sf</code> buffer object into an <code>sfc</code> geometry object with <code><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry()</a></code>, and (c) translating geometries into their well-known text representation with <code><a href="https://r-spatial.github.io/sf/reference/st_as_text.html">st_as_text()</a></code>:</p>
-<div class="sourceCode" id="cb273"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb274"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tanzania_buf</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span><span class="va">tanzania</span>, <span class="fl">50000</span><span class="op">)</span></span>
 <span><span class="va">tanzania_buf_geom</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html">st_geometry</a></span><span class="op">(</span><span class="va">tanzania_buf</span><span class="op">)</span></span>
 <span><span class="va">tanzania_buf_wkt</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_text.html">st_as_text</a></span><span class="op">(</span><span class="va">tanzania_buf_geom</span><span class="op">)</span></span></code></pre></div>
 <p>Now, we can apply this “filter” using the <code>wkt_filter</code> argument.</p>
-<div class="sourceCode" id="cb274"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb275"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tanzania_neigh</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">f</span>, wkt_filter <span class="op">=</span> <span class="va">tanzania_buf_wkt</span><span class="op">)</span></span></code></pre></div>
 <p>Our result, shown in Figure <a href="read-write.html#fig:readsfquery">8.1</a>:B, contains Tanzania and every country within its 50 km buffer.</p>
 <div class="figure" style="text-align: center">
@@ -838,7 +867,7 @@ To read in such files as spatial objects, we naturally have to specify the names
 We can do this with the help of the <code>options</code> parameter.
 To find out about possible options, please refer to the ‘Open Options’ section of the corresponding GDAL driver description.
 For the comma-separated value (csv) format, visit <a href="https://gdal.org/drv_csv.html" class="uri">https://gdal.org/drv_csv.html</a>.</p>
-<div class="sourceCode" id="cb275"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb276"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cycle_hire_txt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"misc/cycle_hire_xy.csv"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span></span>
 <span><span class="va">cycle_hire_xy</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">cycle_hire_txt</span>,</span>
 <span>  options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"X_POSSIBLE_NAMES=X"</span>, <span class="st">"Y_POSSIBLE_NAMES=Y"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -846,7 +875,7 @@ For the comma-separated value (csv) format, visit <a href="https://gdal.org/drv_
 Well-known text (WKT), well-known binary (WKB), and the GeoJSON formats are examples of this.
 For instance, the <code>world_wkt.csv</code> file has a column named <code>WKT</code> representing polygons of the world’s countries.
 We will again use the <code>options</code> parameter to indicate this.</p>
-<div class="sourceCode" id="cb276"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb277"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">world_txt</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"misc/world_wkt.csv"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span></span>
 <span><span class="va">world_wkt</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf</a></span><span class="op">(</span><span class="va">world_txt</span>, options <span class="op">=</span> <span class="st">"GEOM_POSSIBLE_NAMES=WKT"</span><span class="op">)</span></span></code></pre></div>
 
@@ -862,7 +891,7 @@ Here, we access a KML file from the web.
 This file contains more than one layer.
 <code><a href="https://r-spatial.github.io/sf/reference/st_layers.html">st_layers()</a></code> lists all available layers.
 We choose the first layer <code>Placemarks</code> and say so with the help of the <code>layer</code> parameter in <code><a href="https://r-spatial.github.io/sf/reference/st_read.html">read_sf()</a></code>.</p>
-<div class="sourceCode" id="cb277"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb278"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">u</span> <span class="op">=</span> <span class="st">"https://developers.google.com/kml/documentation/KML_Samples.kml"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span><span class="op">(</span><span class="va">u</span>, <span class="st">"KML_Samples.kml"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_layers.html">st_layers</a></span><span class="op">(</span><span class="st">"KML_Samples.kml"</span><span class="op">)</span></span>
@@ -884,11 +913,11 @@ It is fast and flexible but it may be worth looking at other packages such as <s
 <p>
 Similar to vector data, raster data comes in many file formats with some of them supporting multilayer files.
 <strong>terra</strong>’s <code><a href="https://rdrr.io/pkg/terra/man/rast.html">rast()</a></code> command reads in a single layer when a file with just one layer is provided.</p>
-<div class="sourceCode" id="cb278"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb279"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">raster_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/srtm.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span></span>
 <span><span class="va">single_layer</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">raster_filepath</span><span class="op">)</span></span></code></pre></div>
 <p>It also works in case you want to read a multilayer file.</p>
-<div class="sourceCode" id="cb279"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb280"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multilayer_filepath</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/landsat.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span></span>
 <span><span class="va">multilayer_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">multilayer_filepath</span><span class="op">)</span></span></code></pre></div>
 <p>
@@ -898,7 +927,7 @@ The only thing we need to do is to add a <code>/vsicurl/</code> prefix before th
 Let’s try it by connecting to the global monthly snow probability at 500 m resolution for the period 2000-2012 <span class="citation">(<a href="references.html#ref-hengl_t_2021_5774954">T. Hengl 2021</a>)</span>.
 Snow probability for December is stored as a Cloud Optimized GeoTIFF (COG) file (see Section <a href="read-write.html#file-formats">8.5</a>) at <a href="https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif">zenodo.org</a>.
 To read an online file, we just need to provide its URL together with the <code>/vsicurl/</code> prefix.</p>
-<div class="sourceCode" id="cb280"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb281"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">myurl</span> <span class="op">=</span> <span class="st">"/vsicurl/https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif"</span></span>
 <span><span class="va">snow</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="va">myurl</span><span class="op">)</span></span>
 <span><span class="va">snow</span></span>
@@ -913,7 +942,7 @@ To read an online file, we just need to provide its URL together with the <code>
 Its values will be read if we apply any value-based operation (e.g., <code><a href="https://rdrr.io/pkg/terra/man/crop.html">crop()</a></code> or <code><a href="https://rdrr.io/pkg/terra/man/extract.html">extract()</a></code>).
 This allows us also to just read a tiny portion of the data without downloading the entire file.
 For example, we can get the snow probability for December in Reykjavik (70%) by specifying its coordinates and applying the <code><a href="https://rdrr.io/pkg/terra/man/extract.html">extract()</a></code> function:</p>
-<div class="sourceCode" id="cb281"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb282"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rey</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>lon <span class="op">=</span> <span class="op">-</span><span class="fl">21.94</span>, lat <span class="op">=</span> <span class="fl">64.15</span><span class="op">)</span></span>
 <span><span class="va">snow_rey</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/extract.html">extract</a></span><span class="op">(</span><span class="va">snow</span>, <span class="va">rey</span><span class="op">)</span></span>
 <span><span class="va">snow_rey</span></span>
@@ -946,17 +975,17 @@ The next two sections will demonstrate how to do this.</p>
 It allows you to write <strong>sf</strong> objects to a wide range of geographic vector file formats, including the most common such as <code>.geojson</code>, <code>.shp</code> and <code>.gpkg</code>.
 Based on the file name, <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf()</a></code> decides automatically which driver to use.
 The speed of the writing process depends also on the driver.</p>
-<div class="sourceCode" id="cb282"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span><span class="op">)</span></span></code></pre></div>
-<p><strong>Note</strong>: if you try to write to the same data source again, the function will overwrite the file:</p>
 <div class="sourceCode" id="cb283"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span><span class="op">)</span></span></code></pre></div>
-<p>Instead of overwriting the file, we could add a new layer to the file with <code>append = TRUE</code>, which is supported by several spatial formats, including GeoPackage.</p>
+<p><strong>Note</strong>: if you try to write to the same data source again, the function will overwrite the file:</p>
 <div class="sourceCode" id="cb284"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world.gpkg"</span><span class="op">)</span></span></code></pre></div>
+<p>Instead of overwriting the file, we could add a new layer to the file with <code>append = TRUE</code>, which is supported by several spatial formats, including GeoPackage.</p>
+<div class="sourceCode" id="cb285"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world_many_layers.gpkg"</span>, append <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Alternatively, you can use <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write()</a></code> since it is equivalent to <code><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf()</a></code>.
 However, it has different defaults – it does not overwrite files (returns an error when you try to do it) and shows a short summary of the written file format and the object.</p>
-<div class="sourceCode" id="cb285"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb286"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">st_write</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">world</span>, dsn <span class="op">=</span> <span class="st">"world2.gpkg"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Writing layer `world2' to data source `world2.gpkg' using driver `GPKG'</span></span>
 <span><span class="co">#&gt; Writing 177 features with 10 fields and geometry type Multi Polygon.</span></span></code></pre></div>
@@ -964,7 +993,7 @@ However, it has different defaults – it does not overwrite files (returns an e
 One of them is to write spatial data to a text file.
 This can be done by specifying <code>GEOMETRY</code> inside of <code>layer_options</code>.
 It could be either <code>AS_XY</code> for simple point datasets (it creates two new columns for coordinates) or <code>AS_WKT</code> for more complex spatial data (one new column is created which contains the well-known text representation of spatial objects).</p>
-<div class="sourceCode" id="cb286"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb287"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span><span class="va">cycle_hire_xy</span>, <span class="st">"cycle_hire_xy.csv"</span>, layer_options <span class="op">=</span> <span class="st">"GEOMETRY=AS_XY"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html">write_sf</a></span><span class="op">(</span><span class="va">world_wkt</span>, <span class="st">"world_wkt.csv"</span>, layer_options <span class="op">=</span> <span class="st">"GEOMETRY=AS_WKT"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -1081,16 +1110,16 @@ FLT8S
 </table></div>
 <p>By default, the output file format is derived from the filename.
 Naming a file <code>*.tif</code> will create a GeoTIFF file, as demonstrated below:</p>
-<div class="sourceCode" id="cb287"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb288"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/writeRaster.html">writeRaster</a></span><span class="op">(</span><span class="va">single_layer</span>, filename <span class="op">=</span> <span class="st">"my_raster.tif"</span>, datatype <span class="op">=</span> <span class="st">"INT2U"</span><span class="op">)</span></span></code></pre></div>
 <p>Some raster file formats have additional options, that can be set by providing <a href="https://gdal.org/formats_list.html">GDAL parameters</a> to the <code>options</code> argument of <code><a href="https://rdrr.io/pkg/terra/man/writeRaster.html">writeRaster()</a></code>.
 GeoTIFF files are written in <strong>terra</strong>, by default, with the LZW compression <code>gdal = c("COMPRESS=LZW")</code>.
 To change or disable the compression, we need to modify this argument.</p>
-<div class="sourceCode" id="cb288"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb289"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/writeRaster.html">writeRaster</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">single_layer</span>, filename <span class="op">=</span> <span class="st">"my_raster.tif"</span>,</span>
 <span>            gdal <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"COMPRESS=NONE"</span><span class="op">)</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Additionally, we can save our raster object as COG (<em>Cloud Optimized GeoTIFF</em>, Section <a href="read-write.html#file-formats">8.5</a>) with the <code>filetype = "COG"</code> options.</p>
-<div class="sourceCode" id="cb289"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb290"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/writeRaster.html">writeRaster</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">single_layer</span>, filename <span class="op">=</span> <span class="st">"my_raster.tif"</span>,</span>
 <span>            filetype <span class="op">=</span> <span class="st">"COG"</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>To learn more about the compression of GeoTIFF files, read Paul Ramsey’s <a href="https://blog.cleverelephant.ca/2015/02/geotiff-compression-for-dummies.html">comprehensive blog post on this topic</a>.</p>
@@ -1103,7 +1132,7 @@ To change or disable the compression, we need to modify this argument.</p>
 <p>
 R supports many different static and interactive graphics formats.
 The most general method to save a static plot is to open a graphic device, create a plot, and close it, for example:</p>
-<div class="sourceCode" id="cb290"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb291"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/grDevices/png.html">png</a></span><span class="op">(</span>filename <span class="op">=</span> <span class="st">"lifeExp.png"</span>, width <span class="op">=</span> <span class="fl">500</span>, height <span class="op">=</span> <span class="fl">350</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/terra/man/plot.html">plot</a></span><span class="op">(</span><span class="va">world</span><span class="op">[</span><span class="st">"lifeExp"</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html">dev.off</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -1113,12 +1142,12 @@ You can specify several properties of the output plot, including width, height a
 Additionally, several graphic packages provide their own functions to save a graphical output.
 For example, the <strong>tmap</strong> package has the <code><a href="https://r-tmap.github.io/tmap/reference/tmap_save.html">tmap_save()</a></code> function.
 You can save a <code>tmap</code> object to different graphic formats or an HTML file by specifying the object name and a file path to a new file.</p>
-<div class="sourceCode" id="cb291"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb292"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-tmap/tmap">tmap</a></span><span class="op">)</span></span>
 <span><span class="va">tmap_obj</span> <span class="op">=</span> <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_shape.html">tm_shape</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tm_polygons.html">tm_polygons</a></span><span class="op">(</span>col <span class="op">=</span> <span class="st">"lifeExp"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tmap_save.html">tmap_save</a></span><span class="op">(</span><span class="va">tmap_obj</span>, filename <span class="op">=</span> <span class="st">"lifeExp_tmap.png"</span><span class="op">)</span></span></code></pre></div>
 <p>On the other hand, you can save interactive maps created in the <strong>mapview</strong> package as an HTML file or image using the <code><a href="https://rdrr.io/pkg/mapview/man/mapshot.html">mapshot2()</a></code> function:</p>
-<div class="sourceCode" id="cb292"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb293"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-spatial/mapview">mapview</a></span><span class="op">)</span></span>
 <span><span class="va">mapview_obj</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mapview/man/mapView.html">mapview</a></span><span class="op">(</span><span class="va">world</span>, zcol <span class="op">=</span> <span class="st">"lifeExp"</span>, legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/mapview/man/mapshot.html">mapshot2</a></span><span class="op">(</span><span class="va">mapview_obj</span>, file <span class="op">=</span> <span class="st">"my_interactive_map.html"</span><span class="op">)</span></span></code></pre></div>
@@ -1201,7 +1230,7 @@ Export this map to a file called <code>cycle_hire.html</code>.</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2023-12-30.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2024-01-02.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
