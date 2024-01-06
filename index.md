@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2024-01-02'
+date: '2024-01-06'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -44,7 +44,7 @@ Its current 'build status' as follows:
 
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 
-This version of the book was built on GH Actions on 2024-01-02.
+This version of the book was built on GH Actions on 2024-01-06.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png"/></a><br/>This book is licensed to you under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
@@ -152,7 +152,7 @@ Bergen, September 2018
 
 # Foreword (2nd Edition) {-}
 
-TBC.
+
 
 # Preface {-}
 
@@ -229,11 +229,12 @@ The wider context and motivations underlying this book are covered in Chapter \@
 
 
 Many thanks to everyone who contributed directly and indirectly via the code hosting and collaboration site GitHub, including the following people who contributed direct via pull requests: prosoitos, florisvdh, babayoshihiko, katygregg, tibbles-and-tribbles, Lvulis, rsbivand, iod-ine, KiranmayiV, cuixueqin, defuneste, zmbc, erstearns, FlorentBedecarratsNM, dcooley, darrellcarvalho, marcosci, appelmar, MikeJohnPage, eyesofbambi, krystof236, nickbearman, tylerlittlefield, giocomai, KHwong12, LaurieLBaker, MarHer90, mdsumner, pat-s, sdesabbata, ahmohil, ateucher, annakrystalli, andtheWings, kant, gavinsimpson, Himanshuteli, yutannihilation, howardbaek, jimr1603, jbixon13, olyerickson, yvkschaefer, katiejolly, kwhkim, layik, mpaulacaldas, mtennekes, mvl22, ganes1410, richfitz, VLucet, wdearden, yihui, adambhouston, chihinl, cshancock, e-clin, ec-nebi, gregor-d, jasongrahn, p-kono, pokyah, schuetzingit, tim-salabim, tszberkowitz, vlarmet.
-Special thanks to Marco Sciaini, who not only created the front cover image for the first edition of the book, but also published the code that generated it (see `code/frontcover.R` in the GitHub repo). 
+Thanks to Marco Sciaini who created the front cover image for the first edition and to Benjamin Nowak who created the cover image for the second edition.
+See `code/frontcover.R` and `code/frontcover2.R` for the reproducible code that generated these visualisation.
 Dozens more people contributed online, by raising and commenting on issues, and by providing feedback via social media.
-The `#geocompr` hashtag will live on!
+The `#geocompr` and `geocompx` hashtags will live on!
 
-We would like to thank John Kimmel from CRC Press, who has worked with us over two years to take our ideas from an early book plan into production via four rounds of peer review.
+We would like to thank John Kimmel and Lara Spieker from CRC Press and Taylor and Francis for taking our ideas from an early book plan into production via four rounds of peer review for each edition.
 The reviewers deserve special mention here: their detailed feedback and expertise substantially improved the book's structure and content.
 
 We thank Patrick Schratz and Alexander Brenning from the University of Jena for fruitful discussions on and input into Chapters \@ref(spatial-cv) and \@ref(eco).
@@ -241,8 +242,6 @@ We thank Emmanuel Blondel from the Food and Agriculture Organization of the Unit
 Michael Sumner for critical input into many areas of the book, especially the discussion of algorithms in Chapter 11;
 Tim Appelhans and David Cooley for key contributions to the visualization chapter (Chapter 9);
 and Katy Gregg, who proofread every chapter and greatly improved the readability of the book.
-
-<!-- Daniel Herszenhut -- inset maps -->
 
 Countless others could be mentioned who contributed in myriad ways.
 The final thank you is for all the software developers who make geocomputation with R possible.
