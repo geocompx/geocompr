@@ -1002,8 +1002,15 @@ multi_raster_file = system.file("raster/landsat.tif", package = "spDataLarge")
 multi_rast = rast(multi_raster_file)
 ```
 
-The raster object has four satellite bands - blue, green, red, and near-infrared (NIR).
-Our next step should be to implement the NDVI formula into an R function:
+Our raster object has four satellite bands from the Landsat 8 satellite — blue, green, red, and near-infrared (NIR).
+Importantly, Landsat level-2 products are stored as integers to save disk space, and thus we need to convert them to floating-point numbers before doing any calculations.
+For that purpose, we need to apply a scaling factor (0.0000275) and add an offset (-0.2) to the original values.^[You can read more about it at https://www.usgs.gov/faqs/how-do-i-use-a-scale-factor-landsat-level-2-science-products.]
+
+```{r}
+multi_rast = (multi_rast * 0.0000275) - 0.2
+```
+
+The next step should be to implement the NDVI formula into an R function:
 
 ```{r}
 ndvi_fun = function(nir, red){
