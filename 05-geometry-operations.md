@@ -500,7 +500,17 @@ Geometry casting of simple features geometry column (`sfc`) and simple features 
 One important difference is the conversion between multi-types to non-multi-types.
 As a result of this process, multi-objects of `sfc` or `sf` are split into many non-multi-objects.
 
-Table \@ref(tab:sfs-st-cast) shows possible geometry type transformations on simple feature objects.
+Let's say we have the following `sf` objects:
+
+- `POI` - POINT type (with one point by definition)
+- `MPOI` - MULTIPOINT type with four points
+- `LIN` - LINESTRING type with one linestring containing five points
+- `MLIN` - MULTILINESTRING type with two linestrings (one with five points and one with two points)
+- `POL` - POLYGON type with one polygon (created using five points)
+- `MPOL` - MULTIPOLYGON type consisting of two polygons (both consiting of five points)
+- `GC` - GEOMETRYCOLLECTION type with two geometries, a MULTIPOINT (four points) and a LINESTRING (five points)
+
+Table \@ref(tab:sfs-st-cast) shows possible geometry type transformations on the simple feature objects listed above.
 Single simple feature geometries (represented by the first column in the table) can be transformed into multiple geometry types, represented by the columns in Table \@ref(tab:sfs-st-cast).
 Some transformations are not possible: you cannot convert a single point into a multilinestring or a polygon, for example, explaining why the cells `[1, 4:5]` in the table contain NA.
 Some transformations split single features input into multiple sub-features, 'expanding' `sf` objects (adding new rows with duplicate attribute values).
@@ -594,7 +604,7 @@ When a multipoint geometry consisting of five pairs of coordinates is tranformed
 </tbody>
 <tfoot>
 <tr>
-<td style = 'padding: 0; border:0;' colspan='100%'><sup></sup> Note: Values like (1) represent the number of features; NA means the operation is not possible. Abbreviations: POI, LIN, POL and GC refer to POINT, LINESTRING, POLYGON and GEOMETRYCOLLECTION. The MULTI version of these geometry types is indicated by a preceding M, e.g., MPOI is the acronym for MULTIPOINT.</td>
+<td style = 'padding: 0; border:0;' colspan='100%'><sup></sup> Note: Values like (1) represent the number of features; NA means the operation is not possible</td>
 </tr>
 </tfoot>
 </table>
@@ -721,7 +731,7 @@ The same problem arises when we would like to merge satellite imagery from diffe
 We can deal with such mismatches by aligning the rasters.
 
 In the simplest case, two images only differ with regard to their extent.
-Following code adds one row and two columns to each side of the raster while setting all new values to `NA` (Figure \@ref(fig:extend-example)).
+The following code adds one row and two columns to each side of the raster while setting all new values to `NA` (Figure \@ref(fig:extend-example)).
 
 
 ```r
@@ -755,7 +765,7 @@ elev_4 = extend(elev, elev_2)
 \index{raster!origin} 
 The origin of a raster is the cell corner closest to the coordinates (0, 0).
 The `origin()` function returns the coordinates of the origin.
-In the below example a cell corner exists with coordinates (0, 0), but that is not necessarily the case.
+In the example below a cell corner exists with coordinates (0, 0), but that is not necessarily the case.
 
 
 ```r
@@ -764,7 +774,7 @@ origin(elev_4)
 ```
 
 If two rasters have different origins, their cells do not overlap completely which would make map algebra impossible.
-To change the origin -- use `origin()`.^[
+To change the origin, use `origin()`.^[
 If the origins of two raster datasets are just marginally apart, it sometimes is sufficient to simply increase the `tolerance` argument  of `terra::terraOptions()`.
 ]
 Figure \@ref(fig:origin-example) reveals the effect of changing the origin in this way.
