@@ -2,6 +2,8 @@ library(tmap)
 library(terra)
 multi_raster_file = system.file("raster/landsat.tif", package = "spDataLarge")
 multi_rast = rast(multi_raster_file)
+multi_rast = (multi_rast * 0.0000275) - 0.2
+multi_rast[multi_rast < 0] = 0
 ndvi_fun = function(nir, red){
   (nir - red) / (nir + red)
 }
