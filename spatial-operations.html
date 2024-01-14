@@ -766,8 +766,12 @@ Importantly, Landsat level-2 products are stored as integers to save disk space,
 For that purpose, we need to apply a scaling factor (0.0000275) and add an offset (-0.2) to the original values.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;You can read more about it at &lt;a href="https://www.usgs.gov/faqs/how-do-i-use-a-scale-factor-landsat-level-2-science-products" class="uri"&gt;https://www.usgs.gov/faqs/how-do-i-use-a-scale-factor-landsat-level-2-science-products&lt;/a&gt;.&lt;/p&gt;'><sup>23</sup></a></p>
 <div class="sourceCode" id="cb151"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multi_rast</span> <span class="op">=</span> <span class="op">(</span><span class="va">multi_rast</span> <span class="op">*</span> <span class="fl">0.0000275</span><span class="op">)</span> <span class="op">-</span> <span class="fl">0.2</span></span></code></pre></div>
-<p>The next step should be to implement the NDVI formula into an R function:</p>
+<p>The proper values now should be in a range between 0 and 1.
+This is not the case here, probably due to the presence of clouds and other atmospheric effects, thus we need to replace below 0 to 0.</p>
 <div class="sourceCode" id="cb152"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">multi_rast</span><span class="op">[</span><span class="va">multi_rast</span> <span class="op">&lt;</span> <span class="fl">0</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0</span></span></code></pre></div>
+<p>The next step should be to implement the NDVI formula into an R function:</p>
+<div class="sourceCode" id="cb153"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ndvi_fun</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">nir</span>, <span class="va">red</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="op">(</span><span class="va">nir</span> <span class="op">-</span> <span class="va">red</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">nir</span> <span class="op">+</span> <span class="va">red</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
@@ -775,7 +779,7 @@ For that purpose, we need to apply a scaling factor (0.0000275) and add an offse
 It can be used as the <code>fun</code> argument of <code><a href="https://rdrr.io/pkg/terra/man/lapp.html">lapp()</a></code>.
 We just need to remember that our function expects two bands (not four from the original raster), and they need to be in the NIR, red order.
 That is why we subset the input raster with <code>multi_rast[[c(4, 3)]]</code> before doing any calculations.</p>
-<div class="sourceCode" id="cb153"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb154"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ndvi_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/lapp.html">lapp</a></span><span class="op">(</span><span class="va">multi_rast</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">)</span><span class="op">]</span><span class="op">]</span>, fun <span class="op">=</span> <span class="va">ndvi_fun</span><span class="op">)</span></span></code></pre></div>
 <p>The result, shown on the right panel in Figure <a href="spatial-operations.html#fig:04-ndvi">4.12</a>, can be compared to the RGB image of the same area (left panel of the same Figure).
 It allows us to see that the largest NDVI values are connected to northern areas of dense forest, while the lowest values are related to the lake in the north and snowy mountain ridges.</p>
@@ -804,7 +808,7 @@ Other names for this operation are spatial filtering and convolution <span class
 We define the shape of the moving window with a <code>matrix</code> whose values correspond to weights (see <code>w</code> parameter in the code chunk below).
 Secondly, the <code>fun</code> parameter lets us specify the function we wish to apply to this neighborhood.
 Here, we choose the minimum, but any other summary function, including <code><a href="https://rdrr.io/r/base/sum.html">sum()</a></code>, <code><a href="https://rdrr.io/pkg/terra/man/summarize-generics.html">mean()</a></code>, or <code><a href="https://rdrr.io/r/stats/cor.html">var()</a></code> can be used.</p>
-<div class="sourceCode" id="cb154"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb155"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">r_focal</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/focal.html">focal</a></span><span class="op">(</span><span class="va">elev</span>, w <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fl">1</span>, nrow <span class="op">=</span> <span class="fl">3</span>, ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>, fun <span class="op">=</span> <span class="va">min</span><span class="op">)</span></span></code></pre></div>
 <p>This function also accepts additional arguments, for example, should it remove NAs in the process (<code>na.rm = TRUE</code>) or not (<code>na.rm = FALSE</code>).</p>
 <div class="figure" style="text-align: center">
@@ -839,7 +843,7 @@ Our grain size raster is a good example, as illustrated in the right panel of Fi
 Finally, the result of a zonal operation is a summary table grouped by zone which is why this operation is also known as <em>zonal statistics</em> in the GIS world.
 This is in contrast to focal operations which return a raster object by default.</p>
 <p>The following code chunk uses the <code><a href="https://rdrr.io/pkg/terra/man/zonal.html">zonal()</a></code> function to calculate the mean elevation associated with each grain size class.</p>
-<div class="sourceCode" id="cb155"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb156"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/zonal.html">zonal</a></span><span class="op">(</span><span class="va">elev</span>, <span class="va">grain</span>, fun <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span>
 <span><span class="va">z</span></span>
 <span><span class="co">#&gt;   grain elev</span></span>
@@ -890,7 +894,7 @@ In the easiest case, we can just merge these scenes, that is put them side by si
 This is possible, for example, with digital elevation data.
 In the following code chunk we first download the SRTM elevation data for Austria and Switzerland (for the country codes, see the <strong>geodata</strong> function <code>country_codes()</code>).
 In a second step, we merge the two rasters into one.</p>
-<div class="sourceCode" id="cb156"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb157"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">aut</span> <span class="op">=</span> <span class="fu">geodata</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geodata/man/elevation.html">elevation_30s</a></span><span class="op">(</span>country <span class="op">=</span> <span class="st">"AUT"</span>, path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">ch</span> <span class="op">=</span> <span class="fu">geodata</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/geodata/man/elevation.html">elevation_30s</a></span><span class="op">(</span>country <span class="op">=</span> <span class="st">"CHE"</span>, path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">aut_ch</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/merge.html">merge</a></span><span class="op">(</span><span class="va">aut</span>, <span class="va">ch</span><span class="op">)</span></span></code></pre></div>
@@ -907,7 +911,7 @@ For a more detailed introduction to remote sensing with R, see <span class="cita
 <h2>
 <span class="header-section-number">4.4</span> Exercises<a class="anchor" aria-label="anchor" href="#exercises-2"><i class="fas fa-link"></i></a>
 </h2>
-<div class="sourceCode" id="cb157"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb158"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://jakubnowosad.com/spData/">spData</a></span><span class="op">)</span></span></code></pre></div>
