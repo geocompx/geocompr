@@ -817,13 +817,13 @@ dem_agg = aggregate(dem, fact = 5, fun = mean)
 <p class="caption">(\#fig:aggregate-example)Original raster (left). Aggregated raster (right).</p>
 </div>
 
-Table \@ref(tab:agg_df) compares the properties of the original and aggregated raster.
+Table \@ref(tab:aggdf) compares the properties of the original and aggregated raster.
 Notice that "decreasing" the resolution with `aggregate()` increases the resolution from $(30.85, 30.85)$ to $(154.25, 154.25)$. 
 This is done by decreasing the number of rows (`nrow`) and columns (`ncol`) (see Section \@ref(raster-data)).
 The extent was slightly adjusted to accommodate the new grid size.
 
 <table>
-<caption>(\#tab:agg_df)Properties of the original and aggregated raster.</caption>
+<caption>(\#tab:aggdf)Properties of the original and aggregated raster.</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> object </th>
