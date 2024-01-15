@@ -797,13 +797,14 @@ Note that changing the resolution (next section) frequently also changes the ori
 \index{raster!aggregation} 
 \index{raster!disaggregation} 
 Raster datasets can also differ with regard to their resolution. 
-To match resolutions, one can either decrease  (`aggregate()`) or increase (`disagg()`) the resolution of one raster.^[
+To match resolutions, one can either decrease (`aggregate()`) or increase (`disagg()`) the resolution of one raster.^[
 Here we refer to spatial resolution.
 In remote sensing the spectral (spectral bands), temporal (observations through time of the same area) and radiometric (color depth) resolution are also important.
 Check out the `tapp()` example in the documentation for getting an idea on how to do temporal raster aggregation.
 ]
+
 As an example, we here change the spatial resolution of `dem` (found in the **spDataLarge** package) by a factor of 5 (Figure \@ref(fig:aggregate-example)).
-Additionally, the output cell value should correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()`, etc.):
+Additionally, the output cell value is going to correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()`, etc.):
 
 
 ```r
@@ -815,6 +816,39 @@ dem_agg = aggregate(dem, fact = 5, fun = mean)
 <img src="figures/aggregate-example-1.png" alt="Original raster (left). Aggregated raster (right)." width="100%" />
 <p class="caption">(\#fig:aggregate-example)Original raster (left). Aggregated raster (right).</p>
 </div>
+
+Table \@ref(tab:agg_df) compares the properties of the original and aggregated raster.
+Notice that "decreasing" the resolution with `aggregate()` increases the resolution from $(30.85, 30.85)$ to $(154.25, 154.25)$. 
+This is done by decreasing the number of rows (`nrow`) and columns (`ncol`) (see Section \@ref(raster-data)).
+The extent was slightly adjusted to accommodate the new grid size.
+
+<table>
+<caption>(\#tab:agg_df)Properties of the original and aggregated raster.</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> object </th>
+   <th style="text-align:left;"> resolution </th>
+   <th style="text-align:left;"> dimensions </th>
+   <th style="text-align:left;"> extent </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> dem </td>
+   <td style="text-align:left;"> (30.85, 30.85) </td>
+   <td style="text-align:left;"> 117 x 117 </td>
+   <td style="text-align:left;"> 794599.1, 798208.6, 8931775, 8935384 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> dem_agg </td>
+   <td style="text-align:left;"> (154.25, 154.25) </td>
+   <td style="text-align:left;"> 24 x 24 </td>
+   <td style="text-align:left;"> 794599.1, 798301.1, 8931682, 8935384 </td>
+  </tr>
+</tbody>
+</table>
+
+
 
 \index{raster!disaggregation}
 The `disagg()` function increases the resolution of raster objects. 
