@@ -26,7 +26,7 @@ install.packages("tmap", repos = c("https://r-tmap.r-universe.dev",
                                    "https://cloud.r-project.org"))
 ```
 
-- It uses the following visualization packages (also install shiny if you want to develop interactive mapping applications):
+- It uses the following visualization packages (also install **shiny** if you want to develop interactive mapping applications):
 
 
 ```r
