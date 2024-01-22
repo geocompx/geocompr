@@ -21,288 +21,16 @@ This chapter is about reading and writing geographic data.
 Geographic data *input* is essential for geocomputation\index{geocomputation}: real-world applications are impossible without data.
 Data *output* is also vital, enabling others to use valuable new or improved datasets resulting from your work.
 Taken together, these processes of input/output can be referred to as data I/O.
+Geographic data I/O is often done in haste at the beginning and end of projects and otherwise ignored.
+However, data import and export are fundamental to the success or otherwise of projects: small I/O mistakes made at the beginning of projects (e.g., using an out-of-date dataset) can lead to large problems later down the line.
 
-Geographic data I/O is often done with few lines of code at the beginning and end of projects.
-It is often overlooked as a simple one step process.
-However, mistakes made at the outset of projects (e.g., using an out-of-date or in some way faulty dataset) can lead to large problems later down the line, so it is worth putting considerable time into identifying which datasets are *available*, where they can be *found* and how to *retrieve* them.
-These topics are covered in Section \@ref(retrieving-data), which describes various *geoportals*, which collectively contain many terabytes of data, and how to use them.
-To further ease data access, a number of packages for downloading geographic data have been developed.
-These are described in Section \@ref(geographic-data-packages).
-Another possibility to obtain spatial data is to use web services, such as WFS (Section \@ref(geographic-web-services)).
-
-There are many geographic file formats, each of which has pros and cons.
-These are described in Section \@ref(file-formats).
-The process of actually reading and writing such file formats efficiently is not covered until Sections \@ref(data-input) and \@ref(data-output), respectively.
+There are many geographic file formats, each with their own advantages and disadvantages, as described in Section \@ref(file-formats).
+Reading and writing from and to these file formats is covered in Sections \@ref(data-input) and \@ref(data-output), respectively.
+In terms of where to *find* data, Section \@ref(retrieving-data) describes *geoportals* and how to import data from them.
+Dedicated packages to ease geographic data import, from sources including OpenStreetMap, are described in Section \@ref(geographic-data-packages).
+If you want to put your data 'into production' in web services (or if you want be sure that your data adheres to established standards), geographic metadata is important, as described in Section \@ref(geographic-metadata).
+Another possibility to obtain spatial data is to use web services, outlined in Section \@ref(geographic-web-services).
 The final Section \@ref(visual-outputs) demonstrates methods for saving visual outputs (maps), in preparation for Chapter \@ref(adv-map) on visualization.
-
-## Retrieving open data {#retrieving-data}
-
-\index{open data}
-A vast and ever-increasing amount of geographic data is available on the internet, much of which is free to access and use (with appropriate credit given to its providers).^[For example, visit https://freegisdata.rtwilson.com/ for a long list of websites with freely available geographic datasets.]
-In some ways there is now *too much* data, in the sense that there are often multiple places to access the same dataset.
-Some datasets are of poor quality.
-In this context, it is vital to know where to look, so the first section covers some of the most important sources.
-Various 'geoportals' (web services providing geospatial datasets such as [Data.gov](https://catalog.data.gov/dataset?metadata_type=geospatial)) are a good place to start, providing a wide range of data but often only for specific locations (as illustrated in the updated [Wikipedia page](https://en.wikipedia.org/wiki/Geoportal) on the topic).
-
-\index{geoportals}
-Some global geoportals overcome this issue.
-The [GEOSS portal](https://www.geoportal.org/) and the [Copernicus Data Space Ecosystem](https://dataspace.copernicus.eu/), for example, contain many raster datasets with global coverage.
-A wealth of vector datasets can be accessed from the [SEDAC](https://sedac.ciesin.columbia.edu/) portal run by the National Aeronautics and Space Administration (NASA) and the European Union's [INSPIRE geoportal](http://inspire-geoportal.ec.europa.eu/), with global and regional coverage.
-
-Most geoportals provide a graphical interface allowing datasets to be queried based on characteristics such as spatial and temporal extent, the United States Geological Survey's [EarthExplorer](https://earthexplorer.usgs.gov/) being a prime example.
-*Exploring* datasets interactively on a browser is an effective way of understanding available layers.
-*Downloading* data is best done with code, however, from reproducibility and efficiency perspectives.
-Downloads can be initiated from the command line using a variety of techniques, primarily via URLs and APIs\index{API} (see the [Copernicus APIs](https://dataspace.copernicus.eu/analyse/apis) for example).^[An example of using a STAC API to download Sentinel-2 data is provided in Section \@ref(staccog).]
-Files hosted on static URLs can be downloaded with `download.file()`, as illustrated in the code chunk below which accesses PeRL: Permafrost Region Pond and Lake Database from [pangaea.de](https://doi.pangaea.de/10.1594/PANGAEA.868349):
-
-```{r 07-read-write-plot-2, eval=FALSE}
-download.file(url = "https://hs.pangaea.de/Maps/PeRL/PeRL_permafrost_landscapes.zip",
-              destfile = "PeRL_permafrost_landscapes.zip", 
-              mode = "wb")
-unzip("PeRL_permafrost_landscapes.zip")
-canada_perma_land = read_sf("PeRL_permafrost_landscapes/canada_perma_land.shp")
-```
-
-## Geographic data packages
-
-\index{data packages}
-Many R packages have been developed for accessing geographic data, some of which are presented in Table \@ref(tab:datapackages).
-These provide interfaces to one or more spatial libraries or geoportals and aim to make data access even quicker from the command line.
-
-```{r datapackages, echo=FALSE, warning=FALSE}
-datapackages = tibble::tribble(
-  ~`Package`, ~Description,
-  "climateR", "Access over 100,000k gridded climate and landscape datasets from over 2,000 data providers by area of interest.",
-  "elevatr", "Access point and raster elevation data from various sources.",
-  "FedData", "Datasets maintained by the US Federal government, including elevation and land cover.",
-  "geodata", "Download and import imports administrative, elevation, WorldClim data.",
-  "osmdata", "Download and import small OpenStreetMap datasets.",
-  "osmextract", "Download and import large OpenStreetMap datasets.",
-  "rnaturalearth", "Access to Natural Earth vector and raster data.",
-  "rnoaa", "Imports National Oceanic and Atmospheric Administration (NOAA) climate data."
-)
-knitr::kable(datapackages, 
-             caption = "Selected R packages for geographic data retrieval.", 
-             caption.short = "Selected R packages for geographic data retrieval.",
-             booktabs = TRUE) |>
-  kableExtra::kable_styling(latex_options="scale_down")
-```
-
-<!-- other options: -->
-<!-- https://github.com/ErikKusch/KrigR -->
-<!-- https://github.com/VeruGHub/easyclimate -->
-<!-- https://github.com/ropensci/MODIStsp -->
-<!-- https://github.com/ropensci/rsat -->
-<!-- https://onlinelibrary.wiley.com/doi/10.1111/ecog.06768-->
-
-It should be emphasized that Table \@ref(tab:datapackages) represents only a small number of available geographic data packages.
-For example, a large number of R packages exist to obtain various socio-demographic data, such as **tidycensus** and **tigris** (USA),  **cancensus** (Canada), **eurostat** and **giscoR** (European Union), or **idbr** (international databases) -- read [Analyzing US Census Data](https://walker-data.com/census-r/) [@walker_analyzing_2022] to find some examples of how to analyse such data.
-Similarly, several R packages exist giving access to spatial data for various regions and countries, such as **bcdata** (Province of British Columbia), **geobr** (Brazil), **RCzechia** (Czechia), or **rgugik** (Poland).
-
-Each data package has its own syntax for accessing data.
-This diversity is demonstrated in the subsequent code chunks, which show how to get data using three packages from Table \@ref(tab:datapackages).^[More examples of data downloading using dedicated R packages can be found at https://rspatialdata.github.io/.]
-Country borders are often useful and these can be accessed with the `ne_countries()` function from the **rnaturalearth** package [@R-rnaturalearth] as follows:
-
-```{r 07-read-write-plot-3}
-library(rnaturalearth)
-usa_sf = ne_countries(country = "United States of America", returnclass = "sf")
-```
-
-Country borders can be also accessed with other packages, such as **geodata**, **giscoR**, or **rgeoboundaries**.
-
-A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of ten minutes (~18.5 km at the equator) using the **geodata** package [@R-geodata].
-The result is a multilayer object of class `SpatRaster`.
-
-```{r 07-read-write-plot-5, eval=FALSE}
-library(geodata)
-worldclim_prec = worldclim_global("prec", res = 10, path = tempdir())
-class(worldclim_prec)
-```
-
-A third example uses the **osmdata** package [@R-osmdata] to find parks from the OpenStreetMap (OSM) database\index{OpenStreetMap}.
-As illustrated in the code-chunk below, queries begin with the function `opq()` (short for OpenStreetMap query), the first argument of which is bounding box, or text string representing a bounding box (the city of Leeds in this case).
-The result is passed to a function for selecting which OSM elements we're interested in (parks in this case), represented by *key-value pairs*.
-Next, they are passed to the function `osmdata_sf()` which does the work of downloading the data and converting it into a list of `sf` objects (see `vignette('osmdata')` for further details):
-
-```{r 07-read-write-plot-6, eval=FALSE}
-library(osmdata)
-parks = opq(bbox = "leeds uk") |> 
-  add_osm_feature(key = "leisure", value = "park") |> 
-  osmdata_sf()
-```
-
-A limitation with the **osmdata** package is that it is *rate limited*, meaning that it cannot download large OSM datasets (e.g., all the OSM data for a large city).
-To overcome this limitation, the **osmextract** package was developed, which can be used to download and import binary `.pbf` files containing compressed versions of the OSM database for pre-defined regions.
-
-OpenStreetMap is a vast global database of crowd-sourced data, is growing daily, and has a wider ecosystem of tools enabling easy access to the data, from the [Overpass turbo](https://overpass-turbo.eu/) web service for rapid development and testing of OSM queries to [osm2pgsql](https://osm2pgsql.org/) for importing the data into a PostGIS database.
-Although the quality of datasets derived from OSM varies, the data source and wider OSM ecosystems have many advantages: they provide datasets that are available globally, free of charge, and constantly improving thanks to an army of volunteers.
-Using OSM encourages 'citizen science' and contributions back to the digital commons (you can start editing data representing a part of the world you know well at [www.openstreetmap.org](https://www.openstreetmap.org)).
-Further examples of OSM data in action are provided in Chapters \@ref(gis), \@ref(transport) and \@ref(location).
-
-<!-- system.time({zion_lc = climateR::getNLCD(zion, year = 2019)}) -->
-
-Sometimes, packages come with built-in datasets.
-These can be accessed in four ways: by attaching the package (if the package uses 'lazy loading' as **spData** does), with `data(dataset, package = mypackage)`, by referring to the dataset with `mypackage::dataset`, or with `system.file(filepath, package = mypackage)` to access raw data files.
-The following code chunk illustrates the latter two options using the `world` dataset (already loaded by attaching its parent package with `library(spData)`):^[
-For more information on data import with R packages, see Sections 5.5 and 5.6 of @gillespie_efficient_2016.
-]
-
-```{r 07-read-write-plot-7, eval=FALSE}
-world2 = spData::world
-world3 = read_sf(system.file("shapes/world.gpkg", package = "spData"))
-```
-
-The last example, `system.file("shapes/world.gpkg", package = "spData")`, returns a path to the `world.gpkg` file, which is stored inside of the `"shapes/"` folder of the **spData** package.
-
-\index{geocoding}
-Another way to obtain spatial information is to perform geocoding -- transform a description of a location, usually an address, into its coordinates.
-This is usually done by sending a query to an online service and getting the location as a result.
-Many such services exist that differ in the used method of geocoding, usage limitations, costs, or API key requirements. 
-R has several packages for geocoding; however, **tidygeocoder** seems to allow to connect to [the largest number of geocoding services](https://jessecambon.github.io/tidygeocoder/articles/geocoder_services.html) with a consistent interface.
-The **tidygeocoder** main function is `geocode`, which takes a data frame with addresses and adds coordinates as `"lat"` and `"long"`.
-This function also allows to select a geocoding service with the `method` argument and has many additional parameters.
-
-Let's try this package by searching for coordinates of the John Snow blue plaque located on a building in the Soho district of London.
-
-```{r, eval=FALSE}
-library(tidygeocoder)
-geo_df = data.frame(address = "54 Frith St, London W1D 4SJ, UK")
-geo_df = geocode(geo_df, address, method = "osm")
-geo_df
-```
-
-The resulting data frame can be converted into an `sf` object with `st_as_sf()`.
-
-```{r, eval=FALSE}
-geo_sf = st_as_sf(geo_df, coords = c("long", "lat"), crs = "EPSG:4326")
-```
-
-This package also allows performing the opposite process called reverse geocoding used to get a set of information (name, address, etc.) based on a pair of coordinates.
-
-<!--toDo:jn-->
-<!-- we should add a rgee section in the bridges chapter and add a reference here -->
-<!-- consider data from rgee -->
-<!-- rgee - see https://github.com/loreabad6/30DayMapChallenge/blob/main/scripts/day08_blue.R -->
-<!-- Finally, there are some packages that allows to download spatial data among many other functions.  -->
-<!-- Prominent example here is the **rgee** package  -->
-<!-- ee_imagecollection_to_local -->
-
-## Geographic web services
-
-<!--toDo:RL-->
-<!--revise and update the following section-->
-<!--jn: Robin, I am leaving this section entirely to you -- I have zero knowledge about OWS-->
-<!-- potentially useful package - https://github.com/eblondel/geosapi -->
-<!-- rstac - https://gist.github.com/h-a-graham/420434c158c139180f5eb82859099082, -->
-
-\index{geographic web services}
-In an effort to standardize web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of standard specifications for web services (collectively known as OWS, which is short for OGC Web Services).
-These services complement and use core standards developed to model geographic information, such as the [ISO/OGC Spatial Schema (ISO 19107:2019)](https://www.iso.org/standard/66175.html), or the [Simple Features (ISO 19125-1:2004)](https://www.iso.org/standard/40114.html), and to format data, such as with the [Geographic Markup Language (GML)](https://www.iso.org/standard/75676.html).
-These specifications cover common access services for data and metadata.
-Vector data can be accessed with the Web Feature Service (WFS)\index{geographic web services!WFS}, whereas grid/imagery can be accessed with the Web Coverage Service (WCS)\index{geographic web services!WCS}.
-Map image representations, such as tiles, can be accessed with the Web Map Service (WMS)\index{geographic web services!WMS} or the Web Map Tile Service (WMTS)\index{geographic web services!WMTS}.
-Metadata is also covered by means of the Catalogue Service for the Web (CSW)\index{geographic web services!CSW}. 
-Finally, standard processing is handled through the Web Processing Service (WPS)\index{geographic web services!WPS} or the the Web Coverage Processing Service (WCPS)\index{geographic web services!WCPS}.
-
-Various open-source projects have adopted these protocols, such as [GeoServer](https://geoserver.org/) and [MapServer](https://mapserver.org/) for data handling, or [GeoNetwork](https://geonetwork-opensource.org/) and [PyCSW](https://pycsw.org/) for metadata handling, leading to standardization of queries. 
-Integrated tools for Spatial Data Infrastructures (SDI), such as [GeoNode](https://geonode.org/), [GeOrchestra](https://www.georchestra.org/) or [Examind](https://www.examind.com/) have also adopted these standard web-services, either directly or by using previously mentioned open-source tools.
-
-Like other web APIs, OWS APIs use a 'base URL', an 'endpoint' and 'URL query arguments' following a `?` to request data (see the [`best-practices-api-packages`](https://httr.r-lib.org/articles/api-packages.html) vignette in the **httr** package).
-
-There are many requests that can be made to a OWS service. Below examples illustrate how some requests can be made directly with **httr** or more straightforward with the **ows4R** package (OGC Web-Services for R).
-
-Let's start with examples using the **httr** package, which can be useful for understanding how web services work.
-One of the most fundamental requests is `getCapabilities`, demonstrated with **httr** functions `GET()` and `modify_url()` below.
-The following code chunk demonstrates how API\index{API} queries can be constructed and dispatched, in this case to discover the capabilities of a service run by the Fisheries and Aquaculture Division of the Food and Agriculture Organization of the United Nations (UN-FAO).
-
-```{r 07-read-write-plot-8}
-library(httr)
-base_url = "https://www.fao.org"
-endpoint = "/fishery/geoserver/wfs"
-q = list(request = "GetCapabilities")
-res = GET(url = modify_url(base_url, path = endpoint), query = q)
-res$url
-```
-
-The above code chunk demonstrates how API\index{API} requests can be constructed programmatically with the `GET()` function, which takes a base URL and a list of query parameters that can easily be extended.
-The result of the request is saved in `res`, an object of class `response` defined in the **httr** package, which is a list containing information of the request, including the URL.
-As can be seen by executing `browseURL(res$url)`, the results can also be read directly in a browser.
-One way of extracting the contents of the request is as follows:
-
-```{r 07-read-write-plot-9, eval=FALSE}
-txt = content(res, "text")
-xml = xml2::read_xml(txt)
-xml
-#> {xml_document} ...
-#> [1] <ows:ServiceIdentification>\n  <ows:Title>GeoServer WFS...
-#> [2] <ows:ServiceProvider>\n  <ows:ProviderName>UN-FAO Fishe...
-#> ...
-```
-
-Data can be downloaded from WFS services with the `GetFeature` request and a specific `typeName` (as illustrated in the code chunk below).
-
-```{r 07-read-write-plot-11, echo=FALSE, eval=FALSE}
-library(XML)
-library(curl)
-library(httr)
-base_url = "https://www.fao.org/fishery/geoserver/wfs"
-q = list(request = "GetCapabilities")
-res = GET(url = base_url, query = q)
-doc = xmlParse(res)
-root = xmlRoot(doc)
-names(root)
-names(root[["FeatureTypeList"]])
-root[["FeatureTypeList"]][["FeatureType"]][["Name"]]
-tmp = xmlSApply(root[["FeatureTypeList"]], function(x) xmlValue(x[["Name"]]))
-```
-
-Available names differ depending on the accessed web feature service.
-One can extract them programmatically using web technologies [@nolan_xml_2014] or scrolling manually through the contents of the `GetCapabilities` output in a browser.
-
-```{r 07-read-write-plot-12, eval=FALSE}
-library(sf)
-sf::sf_use_s2(FALSE)
-qf = list(request = "GetFeature", typeName = "fifao:FAO_MAJOR")
-file = tempfile(fileext = ".gml")
-GET(url = base_url, path = endpoint, query = qf, write_disk(file))
-fao_areas = read_sf(file)
-```
-
-In order to keep geometry validity along the data access chain, and since standards and underlying open-source server solutions (such as GeoServer) have been built on the Simple Features access, it is important to deactivate the new default behavior introduced in **sf**, and do not to use the S2 geometry model at data access time. 
-This is done with above code `sf::sf_use_s2(FALSE)`.
-Also note the use of `write_disk()` to ensure that the results are written to disk rather than loaded into memory, allowing them to be imported with **sf**.
-
-For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose. 
-The package **ows4R** has been developed for working with OWS services. 
-It provides a stable interface to common access services, such as the WFS, WCS for data, CSW for metadata, and WPS for processing. 
-The OGC services coverage is described [here](https://github.com/eblondel/ows4R?tab=readme-ov-file#ogc-standards-coverage-status), with new standard protocols under investigation/development.
-
-Based on the above example, the code below show how to perform `getCapabilities` and `getFeatures` operations with this package.
-
-The **ows4R** package relies on the principle of clients. 
-To interact with an OWS service (such as WFS), a client is created as follows:
-
-```{r 07-read-write-plot-12b, eval=FALSE}
-library(ows4R)
-WFS = WFSClient$new(
-  url = "https://www.fao.org/fishery/geoserver/wfs",
-  serviceVersion = "1.0.0",
-  logger = "INFO"
-)
-```
-
-The operations are then accessible from this client object, e.g., `getCapabilities` or `getFeatures`.
-
-```{r 07-read-write-plot-12c, eval=FALSE}
-library(ows4R)
-caps = WFS$getCapabilities()
-features = WFS$getFeatures("fifao:FAO_MAJOR")
-```
-
-As explained before, when accessing data with OGC services, handling **sf** features should be done by deactivating the new default behavior introduced in **sf**, with `sf::sf_use_s2(FALSE)`. 
-This is done by default with **ows4R**. 
-
-Additional examples are available through vignettes, such as [how to access raster data with the WCS](https://cran.r-project.org/web/packages/ows4R/vignettes/wcs.html), or [how to access metadata with the CSW](https://cran.r-project.org/web/packages/ows4R/vignettes/csw.html).
 
 ## File formats
 
@@ -368,21 +96,22 @@ Additionally, GeoTIFF is still being expanded and improved.
 One of the most significant recent addition to the GeoTIFF format is its variant called [COG](https://www.cogeo.org/) (*Cloud Optimized GeoTIFF*).
 Raster objects saved as COGs can be hosted on HTTP servers, so other people can read only parts of the file without downloading the whole file (see Sections \@ref(raster-data-read) and \@ref(raster-data-write)).
 
-A plethora of other spatial data formats that we do not explain in detail or mention in Table \@ref(tab:formats) due to the book limits also exists.
-Moreover, new spatial data formats are being developed (e.g., [GeoParquet](https://geoparquet.org/) and [Zarr](https://zarr.dev/)) and existing ones are being improved.
-If you need to learn more about other formats, we encourage you to read the GDAL documentation about [vector](https://gdal.org/drivers/vector/index.html) and [raster](https://gdal.org/drivers/raster/index.html) drivers.
-Additionally, some spatial data formats can store other data models (types) than vector or raster.
+There are many geographic file formats beyond those shown in Table \@ref(tab:formats) and new data formats capable of representing geographic are being developed.
+Recent examples are formats based on the [GeoArrow](https://github.com/geoarrow/geoarrow) and [Zarr](https://zarr.dev/) specifications.
+GDAL's documentation provides a good resource for learning about other [vector](https://gdal.org/drivers/vector/index.html) and [raster](https://gdal.org/drivers/raster/index.html) drivers.
+Furthermore, some data formats can store other data models (types) beyond the vector and raster data models introduced in Chapter \@ref(intro-sf).
 It includes LAS and LAZ formats for storing lidar point clouds, and NetCDF and HDF for storing multidimensional arrays.
 
 Spatial data is also often stored using tabular (non-spatial) text formats, including CSV files or Excel spreadsheets.
 For example, this can be convenient to share spatial samples with people who do not use GIS tools or exchange data with other software that does not accept spatial data formats. 
-However, this approach has several possible issues -- it is fairly challenging for storing geometries more complex than POINTs and does not directly store information about CRS.
+However, this approach has downsides: it is challenging for storing geometries more complex than POINTs and omits important spatial metadata such as the CRS.
 
 ## Data input (I) {#data-input}
 
 Executing commands such as `sf::read_sf()` (the main function we use for loading vector data) or `terra::rast()` (the main function used for loading raster data) silently sets off a chain of events that reads data from files.
-Moreover, there are many R packages containing a wide range of geographic data or providing simple access to different data sources.
-All of them load the data into R or, more precisely, assign objects to your workspace, stored in RAM accessible from the [`.GlobalEnv`](http://adv-r.had.co.nz/Environments.html) of the R session.
+Many R packages provide example datasets (e.g. the dataset `spData::world` that we used in earlier chapters) and functions to get geographic datasets from a range of data sources.
+All of them load the data into R or, more precisely, assign objects to your workspace.
+This means that when objects are imported into R they are stored in RAM (with the exception of objects that represent a database connection, that can be imported into memory with functions such as `dplyr::collect()`, as outlined in Section \@ref(postgis)), can be listed with the `ls()` (and should be viewable in 'Environment' panels in your development environement) and can be accessed from the [`.GlobalEnv`](http://adv-r.had.co.nz/Environments.html) of the R session.
 
 ### Vector data {#iovec}
 
@@ -582,7 +311,6 @@ snow_rey
 ```
 
 This way, we just downloaded a single value instead of the whole, large GeoTIFF file.
-
 The above example just shows one simple (but useful) case, but there is more to explore.
 The `/vsicurl/` prefix also works not only for raster but also for vector file formats.
 It allows reading vectors directly from online storage with `read_sf()` just by adding the prefix before the vector file URL.
@@ -590,9 +318,8 @@ It allows reading vectors directly from online storage with `read_sf()` just by 
 Importantly, `/vsicurl/` is not the only prefix provided by GDAL -- many more exist, such as `/vsizip/` to read spatial files from ZIP archives without decompressing them beforehand or `/vsis3/` for on-the-fly reading files available in AWS S3 buckets.
 You can learn more about it at https://gdal.org/user/virtual_file_systems.html.
 
-<!-- ### Databases -->
-<!-- jn:toDo-->
-<!-- postgis input example -->
+As with vector data, raster datasets can also be stored in and read from some spatial databases, notably PostGIS.
+See Section \@ref(postgis) for more details.
 
 ## Data output (O) {#data-output}
 
@@ -708,6 +435,151 @@ writeRaster(x = single_layer, filename = "my_raster.tif",
 
 To learn more about the compression of GeoTIFF files, read Paul Ramsey's [comprehensive blog post on this topic](https://blog.cleverelephant.ca/2015/02/geotiff-compression-for-dummies.html).
 
+## Geoportals {#retrieving-data}
+
+\index{open data}
+A vast and ever-increasing amount of geographic data is available on the internet, much of which is free to access and use (with appropriate credit given to its providers).^[For example, visit https://freegisdata.rtwilson.com/ for a long list of websites with freely available geographic datasets.]
+In some ways there is now *too much* data, in the sense that there are often multiple places to access the same dataset.
+Some datasets are of poor quality.
+In this context, it is vital to know where to look, so the first section covers some of the most important sources.
+Various 'geoportals' (web services providing geospatial datasets such as [Data.gov](https://catalog.data.gov/dataset?metadata_type=geospatial)) are a good place to start, providing a wide range of data but often only for specific locations (as illustrated in the updated [Wikipedia page](https://en.wikipedia.org/wiki/Geoportal) on the topic).
+
+\index{geoportals}
+Some global geoportals overcome this issue.
+The [GEOSS portal](https://www.geoportal.org/) and the [Copernicus Data Space Ecosystem](https://dataspace.copernicus.eu/), for example, contain many raster datasets with global coverage.
+A wealth of vector datasets can be accessed from the [SEDAC](https://sedac.ciesin.columbia.edu/) portal run by the National Aeronautics and Space Administration (NASA) and the European Union's [INSPIRE geoportal](http://inspire-geoportal.ec.europa.eu/), with global and regional coverage.
+
+Most geoportals provide a graphical interface allowing datasets to be queried based on characteristics such as spatial and temporal extent, the United States Geological Survey's [EarthExplorer](https://earthexplorer.usgs.gov/) being a prime example.
+*Exploring* datasets interactively on a browser is an effective way of understanding available layers.
+*Downloading* data is best done with code, however, from reproducibility and efficiency perspectives.
+Downloads can be initiated from the command line using a variety of techniques, primarily via URLs and APIs\index{API} (see the [Copernicus APIs](https://dataspace.copernicus.eu/analyse/apis) for example).^[An example of using a STAC API to download Sentinel-2 data is provided in Section \@ref(staccog).]
+Files hosted on static URLs can be downloaded with `download.file()`, as illustrated in the code chunk below which accesses PeRL: Permafrost Region Pond and Lake Database from [pangaea.de](https://doi.pangaea.de/10.1594/PANGAEA.868349):
+
+```{r 07-read-write-plot-2, eval=FALSE}
+download.file(url = "https://hs.pangaea.de/Maps/PeRL/PeRL_permafrost_landscapes.zip",
+              destfile = "PeRL_permafrost_landscapes.zip", 
+              mode = "wb")
+unzip("PeRL_permafrost_landscapes.zip")
+canada_perma_land = read_sf("PeRL_permafrost_landscapes/canada_perma_land.shp")
+```
+
+## Geographic data packages
+
+\index{data packages}
+Many R packages have been developed for accessing geographic data, some of which are presented in Table \@ref(tab:datapackages).
+These provide interfaces to one or more spatial libraries or geoportals and aim to make data access even quicker from the command line.
+
+```{r datapackages, echo=FALSE, warning=FALSE}
+datapackages = tibble::tribble(
+  ~`Package`, ~Description,
+  "climateR", "Access over 100,000k gridded climate and landscape datasets from over 2,000 data providers by area of interest.",
+  "elevatr", "Access point and raster elevation data from various sources.",
+  "FedData", "Datasets maintained by the US Federal government, including elevation and land cover.",
+  "geodata", "Download and import imports administrative, elevation, WorldClim data.",
+  "osmdata", "Download and import small OpenStreetMap datasets.",
+  "osmextract", "Download and import large OpenStreetMap datasets.",
+  "rnaturalearth", "Access to Natural Earth vector and raster data.",
+  "rnoaa", "Imports National Oceanic and Atmospheric Administration (NOAA) climate data."
+)
+knitr::kable(datapackages, 
+             caption = "Selected R packages for geographic data retrieval.", 
+             caption.short = "Selected R packages for geographic data retrieval.",
+             booktabs = TRUE) |>
+  kableExtra::kable_styling(latex_options="scale_down")
+```
+
+<!-- other options: -->
+<!-- https://github.com/ErikKusch/KrigR -->
+<!-- https://github.com/VeruGHub/easyclimate -->
+<!-- https://github.com/ropensci/MODIStsp -->
+<!-- https://github.com/ropensci/rsat -->
+<!-- https://onlinelibrary.wiley.com/doi/10.1111/ecog.06768-->
+
+It should be emphasized that Table \@ref(tab:datapackages) represents only a small number of available geographic data packages.
+For example, a large number of R packages exist to obtain various socio-demographic data, such as **tidycensus** and **tigris** (USA),  **cancensus** (Canada), **eurostat** and **giscoR** (European Union), or **idbr** (international databases) -- read [Analyzing US Census Data](https://walker-data.com/census-r/) [@walker_analyzing_2022] to find some examples of how to analyse such data.
+Similarly, several R packages exist giving access to spatial data for various regions and countries, such as **bcdata** (Province of British Columbia), **geobr** (Brazil), **RCzechia** (Czechia), or **rgugik** (Poland).
+
+Each data package has its own syntax for accessing data.
+This diversity is demonstrated in the subsequent code chunks, which show how to get data using three packages from Table \@ref(tab:datapackages).^[More examples of data downloading using dedicated R packages can be found at https://rspatialdata.github.io/.]
+Country borders are often useful and these can be accessed with the `ne_countries()` function from the **rnaturalearth** package [@R-rnaturalearth] as follows:
+
+```{r 07-read-write-plot-3}
+library(rnaturalearth)
+usa_sf = ne_countries(country = "United States of America", returnclass = "sf")
+```
+
+Country borders can be also accessed with other packages, such as **geodata**, **giscoR**, or **rgeoboundaries**.
+
+A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of ten minutes (~18.5 km at the equator) using the **geodata** package [@R-geodata].
+The result is a multilayer object of class `SpatRaster`.
+
+```{r 07-read-write-plot-5, eval=FALSE}
+library(geodata)
+worldclim_prec = worldclim_global("prec", res = 10, path = tempdir())
+class(worldclim_prec)
+```
+
+A third example uses the **osmdata** package [@R-osmdata] to find parks from the OpenStreetMap (OSM) database\index{OpenStreetMap}.
+As illustrated in the code-chunk below, queries begin with the function `opq()` (short for OpenStreetMap query), the first argument of which is bounding box, or text string representing a bounding box (the city of Leeds in this case).
+The result is passed to a function for selecting which OSM elements we're interested in (parks in this case), represented by *key-value pairs*.
+Next, they are passed to the function `osmdata_sf()` which does the work of downloading the data and converting it into a list of `sf` objects (see `vignette('osmdata')` for further details):
+
+```{r 07-read-write-plot-6, eval=FALSE}
+library(osmdata)
+parks = opq(bbox = "leeds uk") |> 
+  add_osm_feature(key = "leisure", value = "park") |> 
+  osmdata_sf()
+```
+
+A limitation with the **osmdata** package is that it is *rate limited*, meaning that it cannot download large OSM datasets (e.g., all the OSM data for a large city).
+To overcome this limitation, the **osmextract** package was developed, which can be used to download and import binary `.pbf` files containing compressed versions of the OSM database for pre-defined regions.
+
+OpenStreetMap is a vast global database of crowd-sourced data, is growing daily, and has a wider ecosystem of tools enabling easy access to the data, from the [Overpass turbo](https://overpass-turbo.eu/) web service for rapid development and testing of OSM queries to [osm2pgsql](https://osm2pgsql.org/) for importing the data into a PostGIS database.
+Although the quality of datasets derived from OSM varies, the data source and wider OSM ecosystems have many advantages: they provide datasets that are available globally, free of charge, and constantly improving thanks to an army of volunteers.
+Using OSM encourages 'citizen science' and contributions back to the digital commons (you can start editing data representing a part of the world you know well at [www.openstreetmap.org](https://www.openstreetmap.org)).
+Further examples of OSM data in action are provided in Chapters \@ref(gis), \@ref(transport) and \@ref(location).
+
+<!-- system.time({zion_lc = climateR::getNLCD(zion, year = 2019)}) -->
+
+Sometimes, packages come with built-in datasets.
+These can be accessed in four ways: by attaching the package (if the package uses 'lazy loading' as **spData** does), with `data(dataset, package = mypackage)`, by referring to the dataset with `mypackage::dataset`, or with `system.file(filepath, package = mypackage)` to access raw data files.
+The following code chunk illustrates the latter two options using the `world` dataset (already loaded by attaching its parent package with `library(spData)`):^[
+For more information on data import with R packages, see Sections 5.5 and 5.6 of @gillespie_efficient_2016.
+]
+
+```{r 07-read-write-plot-7, eval=FALSE}
+world2 = spData::world
+world3 = read_sf(system.file("shapes/world.gpkg", package = "spData"))
+```
+
+The last example, `system.file("shapes/world.gpkg", package = "spData")`, returns a path to the `world.gpkg` file, which is stored inside of the `"shapes/"` folder of the **spData** package.
+
+\index{geocoding}
+Another way to obtain spatial information is to perform geocoding -- transform a description of a location, usually an address, into its coordinates.
+This is usually done by sending a query to an online service and getting the location as a result.
+Many such services exist that differ in the used method of geocoding, usage limitations, costs, or API key requirements. 
+R has several packages for geocoding; however, **tidygeocoder** seems to allow to connect to [the largest number of geocoding services](https://jessecambon.github.io/tidygeocoder/articles/geocoder_services.html) with a consistent interface.
+The **tidygeocoder** main function is `geocode`, which takes a data frame with addresses and adds coordinates as `"lat"` and `"long"`.
+This function also allows to select a geocoding service with the `method` argument and has many additional parameters.
+
+Let's try this package by searching for coordinates of the John Snow blue plaque located on a building in the Soho district of London.
+
+```{r, eval=FALSE}
+library(tidygeocoder)
+geo_df = data.frame(address = "54 Frith St, London W1D 4SJ, UK")
+geo_df = geocode(geo_df, address, method = "osm")
+geo_df
+```
+
+The resulting data frame can be converted into an `sf` object with `st_as_sf()`.
+
+```{r, eval=FALSE}
+geo_sf = st_as_sf(geo_df, coords = c("long", "lat"), crs = "EPSG:4326")
+```
+
+**tidygeocoder** also allows performing the opposite process called reverse geocoding used to get a set of information (name, address, etc.) based on a pair of coordinates.
+Geographic data can also be imported into R from various 'bridges' to geographic software, as described in Chapter \@ref(gis).
+
 ## Geographic metadata
 
 Geographic metadata are a cornerstone of geographic information management, used to describe datasets, data structures and services. 
@@ -741,10 +613,122 @@ The Geography Markup Language (GML) standard and file format covers both data an
 The **geometa** package allows exporting GML (ISO 19136) objects from geometry objects modeled with **sf**.
 Such functionality allows use of geographic metadata (enabling the inclusion of metadata on detailed geographic and temporal extents, rather than simple bounding boxes, for example) and the provisioin of services that extend the GML standard (e.g., OGC Web Coverage Service).
 
+## Geographic web services
+
+\index{geographic web services}
+In an effort to standardize web APIs for accessing spatial data, the Open Geospatial Consortium (OGC) has created a number of standard specifications for web services (collectively known as OWS, which is short for OGC Web Services).
+These services complement and use core standards developed to model geographic information, such as the [ISO/OGC Spatial Schema (ISO 19107:2019)](https://www.iso.org/standard/66175.html), or the [Simple Features (ISO 19125-1:2004)](https://www.iso.org/standard/40114.html), and to format data, such as with the [Geographic Markup Language (GML)](https://www.iso.org/standard/75676.html).
+These specifications cover common access services for data and metadata.
+Vector data can be accessed with the Web Feature Service (WFS)\index{geographic web services!WFS}, whereas grid/imagery can be accessed with the Web Coverage Service (WCS)\index{geographic web services!WCS}.
+Map image representations, such as tiles, can be accessed with the Web Map Service (WMS)\index{geographic web services!WMS} or the Web Map Tile Service (WMTS)\index{geographic web services!WMTS}.
+Metadata is also covered by means of the Catalogue Service for the Web (CSW)\index{geographic web services!CSW}. 
+Finally, standard processing is handled through the Web Processing Service (WPS)\index{geographic web services!WPS} or the the Web Coverage Processing Service (WCPS)\index{geographic web services!WCPS}.
+
+Various open-source projects have adopted these protocols, such as [GeoServer](https://geoserver.org/) and [MapServer](https://mapserver.org/) for data handling, or [GeoNetwork](https://geonetwork-opensource.org/) and [PyCSW](https://pycsw.org/) for metadata handling, leading to standardization of queries. 
+Integrated tools for Spatial Data Infrastructures (SDI), such as [GeoNode](https://geonode.org/), [GeOrchestra](https://www.georchestra.org/) or [Examind](https://www.examind.com/) have also adopted these standard web-services, either directly or by using previously mentioned open-source tools.
+
+Like other web APIs, OWS APIs use a 'base URL', an 'endpoint' and 'URL query arguments' following a `?` to request data (see the [`best-practices-api-packages`](https://httr.r-lib.org/articles/api-packages.html) vignette in the **httr** package).
+
+There are many requests that can be made to a OWS service. Below examples illustrate how some requests can be made directly with **httr** or more straightforward with the **ows4R** package (OGC Web-Services for R).
+
+Let's start with examples using the **httr** package, which can be useful for understanding how web services work.
+One of the most fundamental requests is `getCapabilities`, demonstrated with **httr** functions `GET()` and `modify_url()` below.
+The following code chunk demonstrates how API\index{API} queries can be constructed and dispatched, in this case to discover the capabilities of a service run by the Fisheries and Aquaculture Division of the Food and Agriculture Organization of the United Nations (UN-FAO).
+
+```{r 07-read-write-plot-8}
+library(httr)
+base_url = "https://www.fao.org"
+endpoint = "/fishery/geoserver/wfs"
+q = list(request = "GetCapabilities")
+res = GET(url = modify_url(base_url, path = endpoint), query = q)
+res$url
+```
+
+The above code chunk demonstrates how API\index{API} requests can be constructed programmatically with the `GET()` function, which takes a base URL and a list of query parameters that can easily be extended.
+The result of the request is saved in `res`, an object of class `response` defined in the **httr** package, which is a list containing information of the request, including the URL.
+As can be seen by executing `browseURL(res$url)`, the results can also be read directly in a browser.
+One way of extracting the contents of the request is as follows:
+
+```{r 07-read-write-plot-9, eval=FALSE}
+txt = content(res, "text")
+xml = xml2::read_xml(txt)
+xml
+#> {xml_document} ...
+#> [1] <ows:ServiceIdentification>\n  <ows:Title>GeoServer WFS...
+#> [2] <ows:ServiceProvider>\n  <ows:ProviderName>UN-FAO Fishe...
+#> ...
+```
+
+Data can be downloaded from WFS services with the `GetFeature` request and a specific `typeName` (as illustrated in the code chunk below).
+
+```{r 07-read-write-plot-11, echo=FALSE, eval=FALSE}
+library(XML)
+library(curl)
+library(httr)
+base_url = "https://www.fao.org/fishery/geoserver/wfs"
+q = list(request = "GetCapabilities")
+res = GET(url = base_url, query = q)
+doc = xmlParse(res)
+root = xmlRoot(doc)
+names(root)
+names(root[["FeatureTypeList"]])
+root[["FeatureTypeList"]][["FeatureType"]][["Name"]]
+tmp = xmlSApply(root[["FeatureTypeList"]], function(x) xmlValue(x[["Name"]]))
+```
+
+Available names differ depending on the accessed web feature service.
+One can extract them programmatically using web technologies [@nolan_xml_2014] or scrolling manually through the contents of the `GetCapabilities` output in a browser.
+
+```{r 07-read-write-plot-12, eval=FALSE}
+library(sf)
+sf::sf_use_s2(FALSE)
+qf = list(request = "GetFeature", typeName = "fifao:FAO_MAJOR")
+file = tempfile(fileext = ".gml")
+GET(url = base_url, path = endpoint, query = qf, write_disk(file))
+fao_areas = read_sf(file)
+```
+
+In order to keep geometry validity along the data access chain, and since standards and underlying open-source server solutions (such as GeoServer) have been built on the Simple Features access, it is important to deactivate the new default behavior introduced in **sf**, and do not to use the S2 geometry model at data access time. 
+This is done with above code `sf::sf_use_s2(FALSE)`.
+Also note the use of `write_disk()` to ensure that the results are written to disk rather than loaded into memory, allowing them to be imported with **sf**.
+
+For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose. 
+The package **ows4R** has been developed for working with OWS services. 
+It provides a stable interface to common access services, such as the WFS, WCS for data, CSW for metadata, and WPS for processing. 
+The OGC services coverage is described [here](https://github.com/eblondel/ows4R?tab=readme-ov-file#ogc-standards-coverage-status), with new standard protocols under investigation/development.
+
+Based on the above example, the code below show how to perform `getCapabilities` and `getFeatures` operations with this package.
+
+The **ows4R** package relies on the principle of clients. 
+To interact with an OWS service (such as WFS), a client is created as follows:
+
+```{r 07-read-write-plot-12b, eval=FALSE}
+library(ows4R)
+WFS = WFSClient$new(
+  url = "https://www.fao.org/fishery/geoserver/wfs",
+  serviceVersion = "1.0.0",
+  logger = "INFO"
+)
+```
+
+The operations are then accessible from this client object, e.g., `getCapabilities` or `getFeatures`.
+
+```{r 07-read-write-plot-12c, eval=FALSE}
+library(ows4R)
+caps = WFS$getCapabilities()
+features = WFS$getFeatures("fifao:FAO_MAJOR")
+```
+
+As explained before, when accessing data with OGC services, handling **sf** features should be done by deactivating the new default behavior introduced in **sf**, with `sf::sf_use_s2(FALSE)`. 
+This is done by default with **ows4R**. 
+
+Additional examples are available through vignettes, such as [how to access raster data with the WCS](https://cran.r-project.org/web/packages/ows4R/vignettes/wcs.html), or [how to access metadata with the CSW](https://cran.r-project.org/web/packages/ows4R/vignettes/csw.html).
+
 ## Visual outputs
 
 \index{map making!outputs}
 R supports many different static and interactive graphics formats.
+Chapter \@ref(adv-map) covers map making in detail but it is worth mentioning ways to output visualizations here.
 The most general method to save a static plot is to open a graphic device, create a plot, and close it, for example:
 
 ```{r 07-read-write-plot-36, eval=FALSE}
