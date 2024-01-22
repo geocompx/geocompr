@@ -29,6 +29,7 @@ There are many geographic file formats, each with their own advantages and disad
 Reading and writing from and to these file formats is covered in Sections \@ref(data-input) and \@ref(data-output), respectively.
 In terms of where to *find* data, Section \@ref(retrieving-data) describes *geoportals* and how to import data from them.
 Dedicated packages to ease geographic data import, from sources including OpenStreetMap, are described in Section \@ref(geographic-data-packages).
+If you want to put your data 'into production' in web services (or if you want be sure that your data adheres to established standards), geographic metadata is important, as described in Section \@ref(geographic-metadata).
 Another possibility to obtain spatial data is to use web services, outlined in Section \@ref(geographic-web-services).
 The final Section \@ref(visual-outputs) demonstrates methods for saving visual outputs (maps), in preparation for Chapter \@ref(adv-map) on visualization.
 
@@ -588,6 +589,38 @@ This package also allows performing the opposite process called reverse geocodin
 <!-- Prominent example here is the **rgee** package  -->
 <!-- ee_imagecollection_to_local -->
 
+## Geographic metadata
+
+Geographic metadata are a cornerstone of geographic information management, used to describe datasets, data structures and services. 
+They help make datasets FAIR (Findable, Accessible, Interoperable, Reusable) and are defined by the ISO/OGC standards, in particular the ISO 19115 standard and underlying schemas. 
+These standards are widely used within spatial data infrastructures, handled through metadata catalogs.
+
+Geographic metadata can be managed with **geometa**, a package that allows writing, reading and validating geographic metadata according to the ISO/OGC standards. 
+It already supports various international standards for geographic metadata information, such as the ISO 19110 (Feature catalogue), ISO 19115-1 and 19115-2 (geographic metadata for vector and gridded/imagery datasets), ISO 19119 (geographic metadata for service), and ISO 19136 (Geographic Markup Language) providing methods to read, validate and write geographic metadata from R using the ISO/TS 19139 (XML) technical specification.
+To address the complexity and exhaustiveness the standards, and the advanced knowledge required to use them, complementary packages such as [geoflow](https://github.com/r-geoflow/geoflow) have been built to ease and automate the management of metadata.
+Geographic metadata can be created with **geometa** as follows, which creates and saves a metadata file:
+
+```{r 07-read-write-plot-m5, eval=FALSE}
+library(geometa)
+# create a metadata
+md = ISOMetadata$new()
+#... fill the metadata 'md' object
+# validate metadata
+md$validate()
+# XML representation of the ISOMetadata
+xml = md$encode()
+# save metadata
+md$save("my_metadata.xml")
+# read a metadata from an XML file
+md = readISO19139("my_metadata.xml")
+```
+
+The package comes with more [examples](https://github.com/eblondel/geometa/tree/master/inst/extdata/examples) and has been extended by packages such as **[geoflow](https://github.com/r-geoflow/geoflow)** to ease and automate the management of metadata
+
+In the field of standard geographic information management, the distinction between data and metadata is less clear.
+The Geography Markup Language (GML) standard and file format covers both data and metadata, for example. 
+The **geometa** package allows exporting GML (ISO 19136) objects from geometry objects modeled with **sf**.
+Such functionality allows use of geographic metadata (enabling the inclusion of metadata on detailed geographic and temporal extents, rather than simple bounding boxes, for example) and the provisioin of services that extend the GML standard (e.g., OGC Web Coverage Service).
 
 ## Geographic web services
 
@@ -699,39 +732,6 @@ As explained before, when accessing data with OGC services, handling **sf** feat
 This is done by default with **ows4R**. 
 
 Additional examples are available through vignettes, such as [how to access raster data with the WCS](https://cran.r-project.org/web/packages/ows4R/vignettes/wcs.html), or [how to access metadata with the CSW](https://cran.r-project.org/web/packages/ows4R/vignettes/csw.html).
-
-## Geographic metadata
-
-Geographic metadata are a cornerstone of geographic information management, used to describe datasets, data structures and services. 
-They help make datasets FAIR (Findable, Accessible, Interoperable, Reusable) and are defined by the ISO/OGC standards, in particular the ISO 19115 standard and underlying schemas. 
-These standards are widely used within spatial data infrastructures, handled through metadata catalogs.
-
-Geographic metadata can be managed with **geometa**, a package that allows writing, reading and validating geographic metadata according to the ISO/OGC standards. 
-It already supports various international standards for geographic metadata information, such as the ISO 19110 (Feature catalogue), ISO 19115-1 and 19115-2 (geographic metadata for vector and gridded/imagery datasets), ISO 19119 (geographic metadata for service), and ISO 19136 (Geographic Markup Language) providing methods to read, validate and write geographic metadata from R using the ISO/TS 19139 (XML) technical specification.
-To address the complexity and exhaustiveness the standards, and the advanced knowledge required to use them, complementary packages such as [geoflow](https://github.com/r-geoflow/geoflow) have been built to ease and automate the management of metadata.
-Geographic metadata can be created with **geometa** as follows, which creates and saves a metadata file:
-
-```{r 07-read-write-plot-m5, eval=FALSE}
-library(geometa)
-# create a metadata
-md = ISOMetadata$new()
-#... fill the metadata 'md' object
-# validate metadata
-md$validate()
-# XML representation of the ISOMetadata
-xml = md$encode()
-# save metadata
-md$save("my_metadata.xml")
-# read a metadata from an XML file
-md = readISO19139("my_metadata.xml")
-```
-
-The package comes with more [examples](https://github.com/eblondel/geometa/tree/master/inst/extdata/examples) and has been extended by packages such as **[geoflow](https://github.com/r-geoflow/geoflow)** to ease and automate the management of metadata
-
-In the field of standard geographic information management, the distinction between data and metadata is less clear.
-The Geography Markup Language (GML) standard and file format covers both data and metadata, for example. 
-The **geometa** package allows exporting GML (ISO 19136) objects from geometry objects modeled with **sf**.
-Such functionality allows use of geographic metadata (enabling the inclusion of metadata on detailed geographic and temporal extents, rather than simple bounding boxes, for example) and the provisioin of services that extend the GML standard (e.g., OGC Web Coverage Service).
 
 ## Visual outputs
 
