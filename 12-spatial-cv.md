@@ -89,10 +89,10 @@ The 175 non-landslide points were sampled randomly from the study area, with the
 The first three rows of `lsl`, rounded to two significant digits, can be found in Table \@ref(tab:lslsummary).
 
 <table class="table" style="margin-left: auto; margin-right: auto;">
-<caption>(\#tab:lslsummary)Structure of the lsl dataset.</caption>
+<caption>(\#tab:lslsummary)(\#tab:lslsummary)Structure of the lsl dataset.</caption>
  <thead>
   <tr>
-   <th style="text-align:left;">   </th>
+   <th style="text-align:left;">  </th>
    <th style="text-align:right;"> x </th>
    <th style="text-align:right;"> y </th>
    <th style="text-align:left;"> lslpts </th>
@@ -355,55 +355,18 @@ mlr3extralearners::list_mlr3learners(
   head()
 ```
 
-<table>
-<caption>(\#tab:lrns)Sample of available learners for binomial tasks in the mlr3 package.</caption>
- <thead>
-  <tr>
-   <th style="text-align:left;"> Class </th>
-   <th style="text-align:left;"> Name </th>
-   <th style="text-align:left;"> Short name </th>
-   <th style="text-align:left;"> Package </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> classif.adaboostm1 </td>
-   <td style="text-align:left;"> ada Boosting M1 </td>
-   <td style="text-align:left;"> adaboostm1 </td>
-   <td style="text-align:left;"> RWeka </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> classif.binomial </td>
-   <td style="text-align:left;"> Binomial Regression </td>
-   <td style="text-align:left;"> binomial </td>
-   <td style="text-align:left;"> stats </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> classif.featureless </td>
-   <td style="text-align:left;"> Featureless classifier </td>
-   <td style="text-align:left;"> featureless </td>
-   <td style="text-align:left;"> mlr </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> classif.fnn </td>
-   <td style="text-align:left;"> Fast k-Nearest Neighbour </td>
-   <td style="text-align:left;"> fnn </td>
-   <td style="text-align:left;"> FNN </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> classif.gausspr </td>
-   <td style="text-align:left;"> Gaussian Processes </td>
-   <td style="text-align:left;"> gausspr </td>
-   <td style="text-align:left;"> kernlab </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> classif.IBk </td>
-   <td style="text-align:left;"> k-Nearest Neighbours </td>
-   <td style="text-align:left;"> ibk </td>
-   <td style="text-align:left;"> RWeka </td>
-  </tr>
-</tbody>
-</table>
+
+
+Table: (\#tab:lrns)Sample of available learners for binomial tasks in the mlr3 package.
+
+|Class               |Name                     |Short name  |Package |
+|:-------------------|:------------------------|:-----------|:-------|
+|classif.adaboostm1  |ada Boosting M1          |adaboostm1  |RWeka   |
+|classif.binomial    |Binomial Regression      |binomial    |stats   |
+|classif.featureless |Featureless classifier   |featureless |mlr     |
+|classif.fnn         |Fast k-Nearest Neighbour |fnn         |FNN     |
+|classif.gausspr     |Gaussian Processes       |gausspr     |kernlab |
+|classif.IBk         |k-Nearest Neighbours     |ibk         |RWeka   |
 
 
 

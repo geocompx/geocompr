@@ -1080,7 +1080,7 @@ We have covered mapping with **sf**, **terra** and **ggplot2** first because the
 Before we cover mapping packages for plotting a specific type of map (in the next paragraph), it is worth considering alternatives to the packages already covered for general-purpose mapping (Table \@ref(tab:map-gpkg)).
 
 <table>
-<caption>(\#tab:map-gpkg)Selected general-purpose mapping packages.</caption>
+<caption>(\#tab:map-gpkg)(\#tab:map-gpkg)Selected general-purpose mapping packages.</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Package </th>
@@ -1132,41 +1132,18 @@ These are documented in the [`mapsf`](https://cran.r-project.org/package=mapsf/v
 Several packages focus on specific map types, as illustrated in Table \@ref(tab:map-spkg).
 Such packages create cartograms that distort geographical space, create line maps, transform polygons into regular or hexagonal grids, visualize complex data on grids representing geographic topologies, and create 3D visualizations.
 
-<table>
-<caption>(\#tab:map-spkg)Selected specific-purpose mapping packages, with associated metrics.</caption>
- <thead>
-  <tr>
-   <th style="text-align:left;"> Package </th>
-   <th style="text-align:left;"> Title </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> cartogram </td>
-   <td style="text-align:left;"> Create Cartograms with R </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> geogrid </td>
-   <td style="text-align:left;"> Turn Geospatial Polygons into Regular or Hexagonal Grids </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> geofacet </td>
-   <td style="text-align:left;"> 'ggplot2' Faceting Utilities for Geographical Data </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> linemap </td>
-   <td style="text-align:left;"> Line Maps </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> tanaka </td>
-   <td style="text-align:left;"> Design Shaded Contour Lines (or Tanaka) Maps </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> rayshader </td>
-   <td style="text-align:left;"> Create Maps and Visualize Data in 2D and 3D </td>
-  </tr>
-</tbody>
-</table>
+
+
+Table: (\#tab:map-spkg)Selected specific-purpose mapping packages, with associated metrics.
+
+|Package   |Title                                                    |
+|:---------|:--------------------------------------------------------|
+|cartogram |Create Cartograms with R                                 |
+|geogrid   |Turn Geospatial Polygons into Regular or Hexagonal Grids |
+|geofacet  |'ggplot2' Faceting Utilities for Geographical Data       |
+|linemap   |Line Maps                                                |
+|tanaka    |Design Shaded Contour Lines (or Tanaka) Maps             |
+|rayshader |Create Maps and Visualize Data in 2D and 3D              |
 
 
 <!-- another: https://github.com/riatelab/fisheye -->

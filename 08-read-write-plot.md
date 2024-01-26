@@ -47,7 +47,7 @@ GDAL\index{GDAL} provides access to more than 200 vector and raster data formats
 Table \@ref(tab:formats) presents some basic information about selected and often used spatial file formats.
 
 <table>
-<caption>(\#tab:formats)Selected spatial file formats.</caption>
+<caption>(\#tab:formats)(\#tab:formats)Selected spatial file formats.</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Name </th>
@@ -175,7 +175,7 @@ However, this approach has downsides: it is challenging for storing geometries m
 Executing commands such as `sf::read_sf()` (the main function we use for loading vector data) or `terra::rast()` (the main function used for loading raster data) silently sets off a chain of events that reads data from files.
 Many R packages provide example datasets (e.g. the dataset `spData::world` that we used in earlier chapters) and functions to get geographic datasets from a range of data sources.
 All of them load the data into R or, more precisely, assign objects to your workspace.
-This means that when objects are imported into R they are stored in RAM (with the exception of objects that represent a database connection, that can be imported into memory with functions such as `dplyr::collect()`, as outlined in Section \@ref(postgis)), can be listed with the `ls()` (and should be viewable in 'Environment' panels in your development environement) and can be accessed from the [`.GlobalEnv`](http://adv-r.had.co.nz/Environments.html) of the R session.
+This means that when objects are imported into R they are stored in RAM^[There are some exceptions to this rule, e.g., **terra**'s `SpatRaster` objects (which are C++ pointers to the actual data) and objects that represent database connections that can be imported into memory with functions such as `dplyr::collect()`, as outlined in Section \@ref(postgis)], can be listed with the `ls()` (and should be viewable in 'Environment' panels in your development environement) and can be accessed from the [`.GlobalEnv`](http://adv-r.had.co.nz/Environments.html) of the R session.
 
 ### Vector data {#iovec}
 
@@ -185,7 +185,7 @@ Most popular representations such as `.geojson` and `.gpkg` files can be importe
 The `st_drivers()` function returns a data frame containing `name` and `long_name` in the first two columns, and features of each driver available to GDAL (and therefore **sf**), including ability to write data and store raster data in the subsequent columns, as illustrated for key file formats in Table \@ref(tab:drivers).
 
 <table>
-<caption>(\#tab:drivers)Popular drivers/formats for reading/writing vector data.</caption>
+<caption>(\#tab:drivers)(\#tab:drivers)Popular drivers/formats for reading/writing vector data.</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> name </th>
@@ -527,53 +527,19 @@ Unsigned integers (INT1U, INT2U, INT4U) are suitable for categorical data, while
 While this works in most cases, the size of the output file will be unnecessarily large if you save binary or categorical data.
 Therefore, we would recommend to use the data type that needs the least storage space, but is still able to represent all values (check the range of values with the `summary()` function).
 
-<table>
-<caption>(\#tab:datatypes)Data types supported by the terra package.</caption>
- <thead>
-  <tr>
-   <th style="text-align:left;"> Data type </th>
-   <th style="text-align:left;"> Minimum value </th>
-   <th style="text-align:left;"> Maximum value </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> INT1U </td>
-   <td style="text-align:left;"> 0 </td>
-   <td style="text-align:left;"> 255 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> INT2S </td>
-   <td style="text-align:left;"> -32,767 </td>
-   <td style="text-align:left;"> 32,767 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> INT2U </td>
-   <td style="text-align:left;"> 0 </td>
-   <td style="text-align:left;"> 65,534 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> INT4S </td>
-   <td style="text-align:left;"> -2,147,483,647 </td>
-   <td style="text-align:left;"> 2,147,483,647 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> INT4U </td>
-   <td style="text-align:left;"> 0 </td>
-   <td style="text-align:left;"> 4,294,967,296 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> FLT4S </td>
-   <td style="text-align:left;"> -3.4e+38 </td>
-   <td style="text-align:left;"> 3.4e+38 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> FLT8S </td>
-   <td style="text-align:left;"> -1.7e+308 </td>
-   <td style="text-align:left;"> 1.7e+308 </td>
-  </tr>
-</tbody>
-</table>
+
+
+Table: (\#tab:datatypes)Data types supported by the terra package.
+
+|Data type |Minimum value  |Maximum value |
+|:---------|:--------------|:-------------|
+|INT1U     |0              |255           |
+|INT2S     |-32,767        |32,767        |
+|INT2U     |0              |65,534        |
+|INT4S     |-2,147,483,647 |2,147,483,647 |
+|INT4U     |0              |4,294,967,296 |
+|FLT4S     |-3.4e+38       |3.4e+38       |
+|FLT8S     |-1.7e+308      |1.7e+308      |
 
 
 
@@ -641,7 +607,7 @@ Many R packages have been developed for accessing geographic data, some of which
 These provide interfaces to one or more spatial libraries or geoportals and aim to make data access even quicker from the command line.
 
 <table class="table" style="margin-left: auto; margin-right: auto;">
-<caption>(\#tab:datapackages)Selected R packages for geographic data retrieval.</caption>
+<caption>(\#tab:datapackages)(\#tab:datapackages)Selected R packages for geographic data retrieval.</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Package </th>

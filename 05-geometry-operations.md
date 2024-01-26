@@ -516,98 +516,22 @@ Some transformations are not possible: you cannot convert a single point into a 
 Some transformations split single features input into multiple sub-features, 'expanding' `sf` objects (adding new rows with duplicate attribute values).
 When a multipoint geometry consisting of five pairs of coordinates is tranformed into a 'POINT' geometry, for example, the output will contain five features.
 
-<table>
-<caption>(\#tab:sfs-st-cast)Geometry casting on simple feature geometries (see Section 2.1) with input type by row and output type by column</caption>
- <thead>
-  <tr>
-   <th style="text-align:left;">  </th>
-   <th style="text-align:right;"> POI </th>
-   <th style="text-align:right;"> MPOI </th>
-   <th style="text-align:right;"> LIN </th>
-   <th style="text-align:right;"> MLIN </th>
-   <th style="text-align:right;"> POL </th>
-   <th style="text-align:right;"> MPOL </th>
-   <th style="text-align:right;"> GC </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> POI(1) </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> NA </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> MPOI(1) </td>
-   <td style="text-align:right;"> 4 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> NA </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> LIN(1) </td>
-   <td style="text-align:right;"> 5 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> NA </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> MLIN(1) </td>
-   <td style="text-align:right;"> 7 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> NA </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> POL(1) </td>
-   <td style="text-align:right;"> 5 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> NA </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> MPOL(1) </td>
-   <td style="text-align:right;"> 10 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 2 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> GC(1) </td>
-   <td style="text-align:right;"> 9 </td>
-   <td style="text-align:right;"> 1 </td>
-   <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> NA </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-</tbody>
-<tfoot>
-<tr>
-<td style = 'padding: 0; border:0;' colspan='100%'><sup></sup> Note: Values like (1) represent the number of features; NA means the operation is not possible</td>
-</tr>
-</tfoot>
-</table>
+
+
+Table: (\#tab:sfs-st-cast)Geometry casting on simple feature geometries (see Section 2.1) with input type by row and output type by column
+
+|        | POI| MPOI| LIN| MLIN| POL| MPOL| GC|
+|:-------|---:|----:|---:|----:|---:|----:|--:|
+|POI(1)  |   1|    1|   1|   NA|  NA|   NA| NA|
+|MPOI(1) |   4|    1|   1|    1|   1|   NA| NA|
+|LIN(1)  |   5|    1|   1|    1|   1|   NA| NA|
+|MLIN(1) |   7|    2|   2|    1|  NA|   NA| NA|
+|POL(1)  |   5|    1|   1|    1|   1|    1| NA|
+|MPOL(1) |  10|    1|  NA|    1|   2|    1|  1|
+|GC(1)   |   9|    1|  NA|   NA|  NA|   NA|  1|
+
+__Note:__
+Note: Values like (1) represent the number of features; NA means the operation is not possible
 
 
 
@@ -822,31 +746,14 @@ Notice that "decreasing" the resolution with `aggregate()` increases the resolut
 This is done by decreasing the number of rows (`nrow`) and columns (`ncol`) (see Section \@ref(raster-data)).
 The extent was slightly adjusted to accommodate the new grid size.
 
-<table>
-<caption>(\#tab:aggdf)Properties of the original and aggregated raster.</caption>
- <thead>
-  <tr>
-   <th style="text-align:left;"> object </th>
-   <th style="text-align:left;"> resolution </th>
-   <th style="text-align:left;"> dimensions </th>
-   <th style="text-align:left;"> extent </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> dem </td>
-   <td style="text-align:left;"> (30.85, 30.85) </td>
-   <td style="text-align:left;"> 117 x 117 </td>
-   <td style="text-align:left;"> 794599.1, 798208.6, 8931775, 8935384 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> dem_agg </td>
-   <td style="text-align:left;"> (154.25, 154.25) </td>
-   <td style="text-align:left;"> 24 x 24 </td>
-   <td style="text-align:left;"> 794599.1, 798301.1, 8931682, 8935384 </td>
-  </tr>
-</tbody>
-</table>
+
+
+Table: (\#tab:aggdf)Properties of the original and aggregated raster.
+
+|object  |resolution       |dimensions |extent                               |
+|:-------|:----------------|:----------|:------------------------------------|
+|dem     |(30.85, 30.85)   |117 x 117  |794599.1, 798208.6, 8931775, 8935384 |
+|dem_agg |(154.25, 154.25) |24 x 24    |794599.1, 798301.1, 8931682, 8935384 |
 
 
 
