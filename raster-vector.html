@@ -352,6 +352,8 @@ Line rasterization with <code>touches = TRUE</code> is demonstrated in the code 
 <p>Compare it to a polygon rasterization, with <code>touches = FALSE</code> by default, which selects only raster cells whose centroids are inside the selector polygon, as illustrated in Figure <a href="raster-vector.html#fig:vector-rasterization2">6.6</a>(B).</p>
 <div class="sourceCode" id="cb218"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">california_raster2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rasterize.html">rasterize</a></span><span class="op">(</span><span class="va">california</span>, <span class="va">raster_template2</span><span class="op">)</span> </span></code></pre></div>
+<pre><code>#&gt; The visual variable "col" of the layer, ", layer" contains a unique value. Therefore a discrete scale is applied (tm_scale_discrete).
+#&gt; The visual variable "col" of the layer, ", layer" contains a unique value. Therefore a discrete scale is applied (tm_scale_discrete).</code></pre>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:vector-rasterization2"></span>
 <img src="figures/vector-rasterization2-1.png" alt="Examples of line and polygon rasterizations." width="100%"><p class="caption">
@@ -375,7 +377,7 @@ In R, vectorization usually refers to the possibility of replacing <code>for</co
 The simplest form of vectorization is to convert the centroids of raster cells into points.
 <code><a href="https://rdrr.io/pkg/terra/man/as.points.html">as.points()</a></code> does exactly this for all non-<code>NA</code> raster grid cells (Figure <a href="raster-vector.html#fig:raster-vectorization1">6.7</a>).
 Note, here we also used <code><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf()</a></code> to convert the resulting object to the <code>sf</code> class.</p>
-<div class="sourceCode" id="cb219"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb220"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">elev</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/elev.tif"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">elev_point</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/as.points.html">as.points</a></span><span class="op">(</span><span class="va">elev</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -389,7 +391,7 @@ FIGURE 6.7: Raster and point representation of the elev object.
 Another common type of spatial vectorization is the creation of contour lines representing lines of continuous height or temperatures (isotherms) for example.
 We will use a real-world digital elevation model (DEM) because the artificial raster <code>elev</code> produces parallel lines (task for the reader: verify this and explain why this happens).
 Contour lines can be created with the <strong>terra</strong> function <code><a href="https://rdrr.io/pkg/terra/man/contour.html">as.contour()</a></code>, which is itself a wrapper around the built-in R function <code><a href="https://rdrr.io/r/graphics/filled.contour.html">filled.contour()</a></code>, as demonstrated below (not shown):</p>
-<div class="sourceCode" id="cb220"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb221"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dem</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/dem.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">cl</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/contour.html">as.contour</a></span><span class="op">(</span><span class="va">dem</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -409,7 +411,7 @@ FIGURE 6.8: DEM with hillshading, showing the southern flank of Mt. Mongón over
 The final type of vectorization involves conversion of rasters to polygons.
 This can be done with <code><a href="https://rdrr.io/pkg/terra/man/as.polygons.html">terra::as.polygons()</a></code>, which converts each raster cell into a polygon consisting of five coordinates, all of which are stored in memory (explaining why rasters are often fast compared with vectors!).</p>
 <p>This is illustrated below by converting the <code>grain</code> object into polygons and subsequently dissolving borders between polygons with the same attribute values (also see the <code>dissolve</code> argument in <code><a href="https://rdrr.io/pkg/terra/man/as.polygons.html">as.polygons()</a></code>).</p>
-<div class="sourceCode" id="cb221"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb222"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">grain</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/rast.html">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/grain.tif"</span>, package <span class="op">=</span> <span class="st">"spData"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">grain_poly</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/terra/man/as.polygons.html">as.polygons</a></span><span class="op">(</span><span class="va">grain</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html">st_as_sf</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -430,7 +432,7 @@ Caution should therefore be taken when using the smoothed polygons for further a
 </h2>
 <p>Some of the following exercises use a vector (<code>zion_points</code>) and raster dataset (<code>srtm</code>) from the <strong>spDataLarge</strong> package.
 They also use a polygonal ‘convex hull’ derived from the vector dataset (<code>ch</code>) to represent the area of interest:</p>
-<div class="sourceCode" id="cb222"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb223"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/">sf</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/">terra</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://jakubnowosad.com/spData/">spData</a></span><span class="op">)</span></span>
@@ -513,7 +515,7 @@ Using these two new objects:</p>
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2024-01-27.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2024-01-29.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
