@@ -39,27 +39,25 @@ Every few years, the El Niño phenomenon brings torrential rainfall to this sun-
 
 Unfortunately, fog oases are heavily endangered, primarily due to agriculture and anthropogenic climate change.
 Evidence on the composition and spatial distribution of the native flora can support efforts to protect remaining fragments of fog oases [@muenchow_predictive_2013; @muenchow_soil_2013].
-The chapter also demonstrates how to apply techniques covered in previous chapters to an important applied field: ecology.
-In it you will analyze the composition and the spatial distribution of vascular plants (here referring mostly to flowering plants) on the southern slope of Mt. Mongón, a *lomas* mountain near Casma on the central northern coast of Peru (Figure \@ref(fig:study-area-mongon)).
+
+In this chapter you will analyze the composition and the spatial distribution of vascular plants (here referring mostly to flowering plants) on the southern slope of Mt. Mongón, a *lomas* mountain near Casma on the central northern coast of Peru (Figure \@ref(fig:study-area-mongon)).
+During a field study to Mt. Mongón, all vascular plants living in 100 randomly sampled 4x4 m^2^ plots in the austral winter of 2011  were recorded [@muenchow_predictive_2013].
+The sampling coincided with a strong La Niña event that year, as shown in data published by the National Oceanic and Atmospheric Administration ([NOAA](https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php)).
+This led to even higher levels of aridity than usual in the coastal desert and increased fog activity on the southern slopes of Peruvian *lomas* mountains.
 
 <div class="figure" style="text-align: center">
 <img src="figures/15_study_area_mongon.png" alt="The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017)." width="60%" />
 <p class="caption">(\#fig:study-area-mongon)The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017).</p>
 </div>
 
-During a field study to Mt. Mongón, all vascular plants living in 100 randomly sampled 4x4 m^2^ plots in the austral winter of 2011  were recorded [@muenchow_predictive_2013].
-The sampling coincided with a strong La Niña event that year, as shown in data published by the National Oceanic and Atmospheric Administration ([NOAA](https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php)).
-This led to even higher levels of aridity than usual in the coastal desert and increased fog activity on the southern slopes of Peruvian *lomas* mountains.
+This chapter also demonstrates how to apply techniques covered in previous chapters to an important applied field: ecology.
+Specifically, we will:
 
-<!--
-The first hypothesis is that four plant belts will be found along the altitudinal gradient: a low-elevation *Tillandsia* belt, a herbaceous belt, a bromeliad belt, and an uppermost succulent belt [@muenchow_soil_2013].
--->
-
-Ordinations\index{ordination} are dimension-reducing techniques that allow the extraction of the main gradients from a (noisy) dataset, in our case the floristic gradient developing along the southern mountain slope (see next section).
-In this chapter, we will model the first ordination axis, i.e., the floristic gradient, as a function of environmental predictors such as altitude, slope, catchment area\index{catchment area} and NDVI\index{NDVI}.
-For this, we will make use of a random forest model\index{random forest} --- a very popular machine learning\index{machine learning} algorithm [@breiman_random_2001].
-The model will allow us to make spatial distribution maps of the floristic composition anywhere in the study area.
-To guarantee an optimal prediction, it is advisable to tune beforehand the hyperparameters\index{hyperparameter} with the help of spatial cross-validation\index{cross-validation!spatial CV} (see Section \@ref(svm)).
+- Load in needed data and compute environmental predictors (Section \@ref(data-and-data-preparation))
+- Extract the main floristic gradient from our species composition matrix with the help of a dimension-reducing technique (ordinations\index{ordination}; Section @ref(nmds))
+- Model the first ordination axis, i.e., the floristic gradient, as a function of environmental predictors such as altitude, slope, catchment area\index{catchment area} and NDVI\index{NDVI} (Section \@ref(modeling-the-floristic-gradient)).
+For this, we will make use of a random forest model\index{random forest} --- a very popular machine learning\index{machine learning} algorithm [@breiman_random_2001]. To guarantee an optimal prediction, it is advisable to tune beforehand the hyperparameters\index{hyperparameter} with the help of spatial cross-validation\index{cross-validation!spatial CV} (see Section \@ref(svm))
+- Make a spatial distribution map of the floristic composition anywhere in the study area (Section \@ref(predictive-mapping))
 
 ## Data and data preparation
 
