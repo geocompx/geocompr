@@ -342,7 +342,7 @@ The following line of code creates a buffer around *projected* data of exactly 1
 london_buff_projected = st_buffer(london_proj, 100000)
 ```
 
-The geometries of the three `london_buff*` objects that *have* a specified CRS created above (`london_buff_s2`, `london_buff_lonlat` and `london_buff_projected`) created in the preceding code chunks are illustrated in Figure \@ref(fig:crs-buf).
+The geometries of the three `london_buff*` objects created in the preceding code that *have* a specified CRS (`london_buff_s2`, `london_buff_lonlat` and `london_buff_projected`) are illustrated in Figure \@ref(fig:crs-buf).
 
 
 
