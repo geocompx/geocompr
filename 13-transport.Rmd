@@ -119,14 +119,14 @@ View(cw0103)
 
 Like many cities, Bristol has major congestion, air quality and physical inactivity problems.
 Cycling can tackle all of these issues efficiently: it has a greater potential to replace car trips than walking, with typical [speeds](https://en.wikipedia.org/wiki/Bicycle_performance) of 15-20 km/h vs 4-6 km/h for walking.
-For this reason Bristol's [Transport Strategy](https://www.bristol.gov.uk/council-and-mayor/policies-plans-and-strategies/bristol-transport-strategy), has ambitious plans for cycling.
+For this reason Bristol's [Transport Strategy](https://www.bristol.gov.uk/council-and-mayor/policies-plans-and-strategies/bristol-transport-strategy) has ambitious plans for cycling.
 
 To highlight the importance of policy considerations in transportation research, this chapter is guided by the need to provide evidence for people (transport planners, politicians and other stakeholders) tasked with getting people out of cars and onto more sustainable modes --- walking and cycling in particular.
 The broader aim is to demonstrate how geocomputation can support evidence-based transport planning.
 In this chapter you will learn how to:
 
 - Describe the geographical patterns of transport behavior in cities
-- Identify key public transport nodes supporting multi-model trips
+- Identify key public transport nodes supporting multi-modal trips
 - Analyze travel 'desire lines' to find where many people drive short distances
 - Identify cycle route locations that will encourage less car driving and more cycling
 
@@ -442,7 +442,7 @@ Routing engines can be classified based on *where* they run relative to R:
 - Remotely hosted routing engines by external entities that provide a web API that can be called from R (Section \@ref(remoteengine))
 
 Before describing each, it is worth outlining other ways of categorizing routing engines.
-Routing engines can be multi-modal, meaning that they can calculate trips composed of more than one more of transport, or not.
+Routing engines can be multi-modal, meaning that they can calculate trips composed of more than one mode of transport, or not.
 Multi-modal routing engines can return results consisting of multiple *legs*, each one made by a different mode of transport.
 The optimal route from a residential area to a commercial area could involve 1) walking to the nearest bus stop, 2) catching the bus to the nearest node to the destination, and 3) walking to the destination, given a set of input parameters.
 The transition points between these three legs are commonly referred to as 'ingress' and 'egress', meaning getting on/off a public transport vehicle.
@@ -459,7 +459,7 @@ Another way of classifying routing engines (or settings) is by the geographic le
 Routing engines can generate outputs at three geographic levels of routes, legs and segments:
 
 - **Route** level outputs contain a single feature (typically a multilinestring and associated row in the data frame representation) per origin-destination pair, meaning a single row of data per trip
-- **Leg** level outputs contain a single feature and associated attributes each *mode* within each origin-destination pair, as described in Section \@ref(nodes). For trips only involves one mode (for example driving from home to work, ignoring the short walk to the car) the leg is the same as the route: the car journey. For trips involving public transport, legs provide key information.  The **r5r** function `detailed_itineraries()` returns legs which, confusingly, are sometimes referred to as 'segments'
+- **Leg** level outputs contain a single feature and associated attributes each *mode* within each origin-destination pair, as described in Section \@ref(nodes). For trips only involving one mode (for example driving from home to work, ignoring the short walk to the car) the leg is the same as the route: the car journey. For trips involving public transport, legs provide key information.  The **r5r** function `detailed_itineraries()` returns legs which, confusingly, are sometimes referred to as 'segments'
 - Segment level outputs provide the most detailed information about routes, with records for each small section of the transport network. Typically segments are similar in length, or identical to, ways in OpenStreetMap. The **cyclestreets** function `journey()` returns data at the segment level which can be aggregated by grouping by origin and destination level data returned by the `route()` function in **stplanr**
 
 Most routing engines return route level by default, although multi-modal engines generally provide outputs at the leg level (one feature per continuous movement by a single mode of transport).
@@ -492,10 +492,10 @@ Disadvantages include the difficulty of representing complex networks locally; t
 
 **Remotely hosted**\index{routing} routing engines use a web API\index{API} to send queries about origins and destinations and return results.
 Routing services based on open source routing engines, such as OSRM's publicly available service, work the same when called from R as locally hosted instances, simply requiring arguments specifying 'base URLs' to be updated.
-However, the fact that external routing services are hosted on a dedicated machine (usually funded by commercial company with incentives to generate accurate routes) can can give them advantages, including:
+However, the fact that external routing services are hosted on a dedicated machine (usually funded by commercial company with incentives to generate accurate routes) can give them advantages, including:
 
 - Provision of routing services worldwide (or usually at least over a large region)
-- Established routing services available are usually update regularly and can often respond to traffic levels
+- Established routing services are usually updated regularly and can often respond to traffic levels
 - Routing services usually run on dedicated hardware and software including systems such as load balancers to ensure consistent performance
 
 Disadvantages of remote routing services include speed when batch jobs are not possible (they often rely on data transfer over the internet on a route-by-route basis), price (the Google routing API, for example, limits the number of free queries) and licensing issues.
@@ -513,7 +513,7 @@ Contraction hierarchies are used behind the scenes in the routing engines mentio
 
 Traffic assignment is a problem that is closely related to routing: in practice, the shortest path between two points is not always the fastest, especially if there is congestion.
 The process takes OD datasets, of the kind described in Section \@ref(desire-lines), and assigns traffic to each segment in the network, generating route networks of the kind described in Section \@ref(route-networks).
-An established solution is Wardrop’s principle of user equilibrium which shows that, to be realistic, congestion should be considered when estimating flows on the network, with reference to mathematically defined relationship between cost and flow [@wardrop_theoretical_1952].
+An established solution is Wardrop’s principle of user equilibrium which shows that, to be realistic, congestion should be considered when estimating flows on the network, with reference to a mathematically defined relationship between cost and flow [@wardrop_theoretical_1952].
 This optimization problem can be solved by iterative algorithms which are implemented in the [**cppRouting**](https://github.com/vlarmet/cppRouting) package, which also implements contraction hierarchies for fast routing.
 
 
@@ -525,7 +525,7 @@ Routing can be time and memory-consuming, resulting in large objects, due to the
 We will therefore filter the desire lines before calculating routes in this section.
 
 Cycling is most beneficial when it replaces car trips.
-Short (around 5 km, which can be cycled in 15 minutes at a speed of 20 km/hr) have a relatively high probability of being cycled, and the maximum distance increases when trips are made by electric bike [@lovelace_propensity_2017].
+Short trips (around 5 km, which can be cycled in 15 minutes at a speed of 20 km/hr) have a relatively high probability of being cycled, and the maximum distance increases when trips are made by electric bike [@lovelace_propensity_2017].
 These considerations inform the following code chunk which filters the desire lines and returns the object `desire_lines_short` representing OD pairs between which many (100+) short (2.5 to 5 km Euclidean distance) trips are driven:
 
 ```{r 13-transport-17, message=FALSE}
@@ -552,7 +552,7 @@ Making the width of the routes proportional to the number of car journeys that c
 The code chunk below plots the desire lines and routes, resulting in Figure \@ref(fig:routes) which shows routes along which people drive short distances:[^13-transport-8]
 
 [^13-transport-8]: Note that the red routes and black desire lines do not start at exactly the same points.
-    This is because zone centroids rarely lie on the route network: instead the route originate from the transport network node nearest the centroid.
+    This is because zone centroids rarely lie on the route network: instead the routes originate from the transport network node nearest the centroid.
     Note also that routes are assumed to originate in the zone centroids, a simplifying assumption which is used in transport models to reduce the computational resources needed to calculate the shortest path between all combinations of possible origins and destinations [@hollander_transport_2016].
 
 ```{r routes, warning=FALSE, fig.cap="Routes along which many (100+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).", fig.scap="Routes along which many car journeys are made.", echo=FALSE}
