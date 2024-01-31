@@ -522,7 +522,7 @@ st_distance(london2, london_proj)
 ```
 
 Functions for querying and reprojecting CRSs are demonstrated below with reference to `cycle_hire_osm`, an `sf` object from **spData** that represents 'docking stations' where you can hire bicycles in London.
-The CRS of `sf` objects can be queried --- and as we learned in Section \@ref(reproj-intro) set --- with the function `st_crs()`.
+The CRS of `sf` objects can be queried, and as we learned in Section \@ref(reproj-intro), set with the function `st_crs()`.
 The output is printed as multiple lines of text containing information about the coordinate system:
 
 
@@ -537,7 +537,7 @@ st_crs(cycle_hire_osm)
 ....
 ```
 
-As we saw in Section \@ref(crs-setting), the main CRS components, `User input` and `wkt`, are printed as a single entity, the output of `st_crs()` is in fact a named list of class `crs` with two elements, single character strings named `input` and `wkt`, as shown in the output of the following code chunk:
+As we saw in Section \@ref(crs-setting), the main CRS components, `User input` and `wkt`, are printed as a single entity. The output of `st_crs()` is in fact a named list of class `crs` with two elements, single character strings named `input` and `wkt`, as shown in the output of the following code chunk:
 
 
 ```r
@@ -578,7 +578,7 @@ st_crs(cycle_hire_osm_projected)
 ```
 
 The resulting object has a new CRS with an EPSG code 27700.
-But how to find out more details about this EPSG code, or any code?
+But how do we find out more details about this EPSG code, or any code?
 One option is to search for it online, another is to look at the properties of the CRS object:
 
 
