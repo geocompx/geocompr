@@ -520,7 +520,7 @@ Note: calls to external routing engines such as in the command above only work w
 In addition to the columns contained in the `desire_lines` object, the new route dataset contains `distance` (referring to route distance this time) and `duration` columns (in seconds), which provide potentially useful extra information on the nature of each route.
 We will plot desire lines along which many short car journeys take place alongside cycling routes.
 Making the width of the routes proportional to the number of car journeys that could potentially be replaced provides an effective way to prioritize interventions on the road network [@lovelace_propensity_2017].
-The code chunk below plots the desire lines and routes, resulting in Figure \@ref(fig:routes) which shows routes along which people drive short distances:[^13-transport-8]
+Figure \@ref(fig:routes) shows routes along which people drive short distances (see the github.com/geocompx for the source code).[^13-transport-8]
 
 [^13-transport-8]: Note that the red routes and black desire lines do not start at exactly the same points.
     This is because zone centroids rarely lie on the route network: instead the routes originate from the transport network node nearest the centroid.
@@ -531,7 +531,7 @@ The code chunk below plots the desire lines and routes, resulting in Figure \@re
 <p class="caption">(\#fig:routes)Routes along which many (100+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).</p>
 </div>
 
-Plotting the results on an interactive map, with `mapview::mapview(st_geometry(routes_short))` for example, shows that many short car trips take place in and around Bradley Stoke, around 10 km North of central Bristol.
+Visualizing the results in an interactive map shows that many short car trips take place in and around Bradley Stoke, around 10 km North of central Bristol.
 It is easy to find explanations for the area's high level of car dependency: according to [Wikipedia](https://en.wikipedia.org/wiki/Bradley_Stoke), Bradley Stoke is "Europe's largest new town built with private investment", suggesting limited public transport provision.
 Furthermore, the town is surrounded by large (cycling unfriendly) road structures, including the M4 and M5 motorways [@tallon_bristol_2007].
 
