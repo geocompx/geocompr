@@ -225,7 +225,7 @@ alg = "native:union"
 union_arguments = qgis_get_argument_specs(alg)
 union_arguments
 #> # A tibble: 5 × 6
-#>   name    description qgis_type default_value available_values acceptable_values
+#>   name    description qgis_type default_value available_values acceptable_...
 #>   <chr>   <chr>       <chr>     <list>        <list>           <list>           
 #> 1 INPUT   Input layer source    <NULL>        <NULL>           <chr [1]>        
 #> 2 OVERLAY Overlay la… source    <NULL>        <NULL>           <chr [1]>        
@@ -235,8 +235,10 @@ union_arguments
 
 #> [[1]]
 #> [1] "A numeric value"                                                                                 
-#> [2] "field:FIELD_NAME to use a data defined value taken from the FIELD_NAME field"                    
-#> [3] "expression:SOME EXPRESSION to use a data defined value calculated using a custom QGIS expression"
+#> [2] "field:FIELD_NAME to use a data defined value taken from the FIELD_NAME
+#>      field"                    
+#> [3] "expression:SOME EXPRESSION to use a data defined value calculated using
+#>      a custom QGIS expression"
 ```
 
 The arguments, contained in `union_arguments$name`, are `INPUT`, `OVERLAY`, `OVERLAY_FIELDS_PREFIX`, and `OUTPUT`.

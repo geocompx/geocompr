@@ -583,7 +583,8 @@ crs_lnd_new = st_crs("EPSG:27700")
 crs_lnd_new$Name
 #> [1] "OSGB36 / British National Grid"
 crs_lnd_new$proj4string
-#> [1] "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +units=m +no_defs"
+#> [1] "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000
++y_0=-100000 +ellps=airy +units=m +no_defs"
 crs_lnd_new$epsg
 #> [1] 27700
 ```

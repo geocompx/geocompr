@@ -192,7 +192,8 @@ The most important ones are:
 Unusual cases where it may be useful include when the memory consumed by the output of a buffer operation is a major concern (in which case it should be reduced) or when very high precision is needed (in which case it should be increased)
 - `max_cells` (when the S2\index{S2} engine is used), the larger the value, the more smooth the buffer will be, but the calculations will take longer
 - `endCapStyle` and `joinStyle` (when the GEOS engine is used), which control the appearance of the buffer's edges
-- `singleSide` (when the GEOS engine is used), which controls whether the buffer is created on one or both sides of the input geometry</div>\EndKnitrBlock{rmdnote}
+- `singleSide` (when the GEOS engine is used), which controls whether the buffer is created on one or both sides of the input geometry
+</div>\EndKnitrBlock{rmdnote}
 
 
 

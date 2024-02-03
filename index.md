@@ -153,7 +153,6 @@ Bergen, September 2018
 # Foreword (2nd Edition) {-}
 
 
-
 # Preface {-}
 
 ## Who this book is for {-}
