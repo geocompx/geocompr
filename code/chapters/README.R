@@ -32,7 +32,7 @@ contributors_text = paste0(c_rmd, collapse = ", ")
 ## ----readme-install-github, eval=FALSE--------------------------------------------------------------
 ## install.packages("remotes")
 ## # To reproduce the first Part (chapters 1 to 8):
-## remotes::install_github("geocompx/geocompkg")
+## install.packages('geocompkg', repos = c('https://geocompr.r-universe.dev', 'https://cloud.r-project.org'), dependencies = TRUE, force = TRUE)
 
 
 ## ----readme-install-github-2, message=FALSE, eval=FALSE, results='hide'-----------------------------

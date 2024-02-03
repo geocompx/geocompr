@@ -230,7 +230,7 @@ with the following commands:
 ``` r
 install.packages("remotes")
 # To reproduce the first Part (chapters 1 to 8):
-remotes::install_github("geocompx/geocompkg")
+install.packages('geocompkg', repos = c('https://geocompr.r-universe.dev', 'https://cloud.r-project.org'), dependencies = TRUE, force = TRUE)
 ```
 
 Installing `geocompkg` will also install core packages required for
