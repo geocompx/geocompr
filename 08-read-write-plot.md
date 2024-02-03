@@ -155,9 +155,9 @@ Aside from GeoPackage, there are other geospatial data exchange formats worth ch
 \index{COG}
 The GeoTIFF format seems to be the most prominent raster data format.
 It allows spatial information, such as CRS, to be embedded within a TIFF file. 
-Similar to ESRI Shapefile, this format was firstly developed in the 1990s, but as an open format.
+Similar to ESRI Shapefile, this format was first developed in the 1990s, but as an open format.
 Additionally, GeoTIFF is still being expanded and improved.
-One of the most significant recent addition to the GeoTIFF format is its variant called [COG](https://www.cogeo.org/) (*Cloud Optimized GeoTIFF*).
+One of the most significant recent additions to the GeoTIFF format is its variant called [COG](https://www.cogeo.org/) (*Cloud Optimized GeoTIFF*).
 Raster objects saved as COGs can be hosted on HTTP servers, so other people can read only parts of the file without downloading the whole file (see Sections \@ref(raster-data-read) and \@ref(raster-data-write)).
 
 There are many geographic file formats beyond those shown in Table \@ref(tab:formats) and new data formats capable of representing geographic are being developed.
