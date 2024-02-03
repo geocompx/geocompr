@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2024-01-31'
+date: '2024-02-03'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -44,7 +44,7 @@ Its current 'build status' as follows:
 
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 
-This version of the book was built on GH Actions on 2024-01-31.
+This version of the book was built on GH Actions on 2024-02-03.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png"/></a><br/>This book is licensed to you under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
@@ -81,7 +81,7 @@ These can be installed using the [**remotes**](https://github.com/r-lib/remotes)
 
 ```r
 install.packages("remotes")
-remotes::install_github("geocompx/geocompkg")
+install.packages('geocompkg', repos = c('https://geocompr.r-universe.dev', 'https://cloud.r-project.org'), dependencies = TRUE, force = TRUE)
 ```
 
 After installing the book's dependencies, you can rebuild the book for testing and educational purposes.

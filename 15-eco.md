@@ -453,8 +453,9 @@ autotuner_rf$train(task)
 
 ```r
 autotuner_rf$tuning_result
-#>    mtry sample.fraction min.node.size learner_param_vals  x_domain regr.rmse
-#> 1:    4             0.9             7          <list[4]> <list[3]>     0.375
+#>     mtry sample.fraction min.node.size learner_param_vals  x_domain regr.rmse
+#>    <int>           <num>         <int>             <list>    <list>     <num>
+#> 1:     4             0.9             7          <list[4]> <list[3]>     0.375
 ```
 
 <!--
