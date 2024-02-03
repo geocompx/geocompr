@@ -286,8 +286,8 @@ Third, the **resampling** approach assesses the predictive performance of the mo
 ### Generalized linear model {#glm}
 
 To use a GLM\index{GLM} in **mlr3**\index{mlr3 (package)}, we must create a **task** containing the landslide data.
-Since the response is binary (two-category variable) and has a spatial dimension, we create a classification\index{classification} task with `TaskClassifST$new()` of the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021, for non-spatial tasks, use `mlr3::TaskClassif$new()` or `mlr3::TaskRegr$new()` for regression\index{regression} tasks, see `?Task` for other task types].^[The **mlr3** ecosystem makes heavily use of **data.table** and **R6** classes. And though you might use **mlr3** without knowing the specifics of **data.table** or **R6**, it might be rather helpful. To learn more about **data.table**, please refer to https://rdatatable.gitlab.io/data.table/. To learn more about **R6**, we recommend [Chapter 14](https://adv-r.hadley.nz/fp.html) of the Advanced R book [@wickham_advanced_2019].]
-The first essential argument of these `Task*$new()` functions is `backend`.
+Since the response is binary (two-category variable) and has a spatial dimension, we create a classification\index{classification} task with `as_task_classif_st()` of the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021, for non-spatial tasks, use `mlr3::as_task_classif` or `mlr3::as_task_regr` for regression\index{regression} tasks, see `?Task` for other task types].^[The **mlr3** ecosystem makes heavily use of **data.table** and **R6** classes. And though you might use **mlr3** without knowing the specifics of **data.table** or **R6**, it might be rather helpful. To learn more about **data.table**, please refer to https://rdatatable.gitlab.io/data.table/. To learn more about **R6**, we recommend [Chapter 14](https://adv-r.hadley.nz/fp.html) of the Advanced R book [@wickham_advanced_2019].]
+The first essential argument of these `as_task_` functions is `backend`.
 `backend` expects that the input data includes the response and predictor variables.
 The `target` argument indicates the name of a response variable (in our case this is `lslpts`) and `positive` determines which of the two factor levels of the response variable indicate the landslide initiation point (in our case this is `TRUE`).
 All other variables of the `lsl` dataset will serve as predictors.
@@ -297,7 +297,7 @@ Additionally, we should decide if we want to use the coordinates as predictors i
 
 ```{r 12-spatial-cv-11, eval=FALSE}
 # 1. create task
-task = mlr3spatiotempcv::TaskClassifST$new(
+task = mlr3spatiotempcv::as_task_classif_st(
   id = "ecuador_lsl",
   backend = mlr3::as_data_backend(lsl), 
   target = "lslpts", 
@@ -310,7 +310,7 @@ task = mlr3spatiotempcv::TaskClassifST$new(
 
 Note that `mlr3spatiotempcv::as_task_classif_st()` also accepts an `sf`-object as input for the `backend` parameter.
 In this case, you might only want to additionally specify the `coords_as_features` argument.
-We did not convert `lsl` into an `sf`-object because `TaskClassifST$new()` would just turn it back into a non-spatial `data.table` object in the background.
+We did not convert `lsl` into an `sf`-object because `as_task_classif_st()` would just turn it back into a non-spatial `data.table` object in the background.
 
 For a short data exploration, the `autoplot()` function of the **mlr3viz** package might come in handy since it plots the response against all predictors and all predictors against all predictors (not shown).
 
@@ -508,9 +508,6 @@ lrn_ksvm$fallback = lrn("classif.featureless", predict_type = "prob")
 The next stage is to specify a resampling strategy.
 Again we will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatial CV}.
 
-<!-- we agreed on using "performance estimation level" and "tuning level" instead of saying "outer and inner resampling" in our paper
--->
-
 ```{r 12-spatial-cv-25}
 # performance estimation level
 perf_level = mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
@@ -545,10 +542,10 @@ terminator = mlr3tuning::trm("evals", n_evals = 50)
 tuner = mlr3tuning::tnr("random_search")
 ```
 
-The next stage is to modify the learner `lrn_ksvm` in accordance with all the characteristics defining the hyperparameter tuning with `AutoTuner$new()`.
+The next stage is to modify the learner `lrn_ksvm` in accordance with all the characteristics defining the hyperparameter tuning with `auto_tuner()`.
 
 ```{r 12-spatial-cv-27, eval=FALSE}
-at_ksvm = mlr3tuning::AutoTuner$new(
+at_ksvm = mlr3tuning::auto_tuner(
   learner = lrn_ksvm,
   resampling = tune_level,
   measure = mlr3::msr("classif.auc"),
