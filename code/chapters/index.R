@@ -119,7 +119,7 @@ if (is_html) {
 
 ## ----index-3, message=FALSE, eval=FALSE, echo=is_html, results='hide'-------------------------------
 ## install.packages("remotes")
-## remotes::install_github("geocompx/geocompkg")
+## install.packages('geocompkg', repos = c('https://geocompr.r-universe.dev', 'https://cloud.r-project.org'), dependencies = TRUE, force = TRUE)
 
 
 ## ---- echo=FALSE, eval=FALSE------------------------------------------------------------------------
