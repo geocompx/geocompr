@@ -40,7 +40,7 @@ The example also reflects a secondary aim of the chapter which, following @xiao_
 ## Scripts
 
 If functions distributed in packages are the building blocks of R code, scripts are the glue that holds them together.
-Scripts should be stored and executed in a logical order to create reproducible workflows, manually or with workflow automation tools such as **targets** [@landau_targets_2021].
+Scripts should be stored and executed in a logical order to create reproducible workflows\index{reproducibility}, manually or with workflow automation tools such as **targets** [@landau_targets_2021].
 If you are new to programming scripts may seem intimidating when you first encounter them, but they are simply plain text files.
 Scripts are usually saved as a file with an extension representing the language they contain, such as `.py` for scripts written in Python or `.rs` for scripts written in Rust.
 R scripts should be saved with a `.R` extension and named to reflect what they do.
@@ -188,7 +188,6 @@ Origin = poly_mat[1, ]
 T1 = rbind(Origin, poly_mat[2:3, ], Origin) 
 C1 = (T1[1,] + T1[2,] + T1[3,]) / 3
 ```
-
 
 
 

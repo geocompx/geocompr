@@ -427,6 +427,7 @@ snow
 #> name        : clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0
 ```
 
+\index{COG} 
 Due to the fact that the input data is COG, we are actually not reading this file to our RAM, but rather creating a connection to it without obtaining any values.
 Its values will be read if we apply any value-based operation (e.g., `crop()` or `extract()`).
 This allows us also to just read a tiny portion of the data without downloading the entire file.
@@ -561,6 +562,7 @@ writeRaster(x = single_layer, filename = "my_raster.tif",
             gdal = c("COMPRESS=NONE"), overwrite = TRUE)
 ```
 
+\index{COG}
 Additionally, we can save our raster object as COG (*Cloud Optimized GeoTIFF*, Section \@ref(file-formats)) with the `filetype = "COG"` options.
 
 
@@ -752,7 +754,7 @@ Geographic data can also be imported into R from various 'bridges' to geographic
 
 ## Geographic metadata
 
-Geographic metadata are a cornerstone of geographic information management, used to describe datasets, data structures and services. 
+Geographic metadata\index{geographic metadata} are a cornerstone of geographic information management, used to describe datasets, data structures and services. 
 They help make datasets FAIR (Findable, Accessible, Interoperable, Reusable) and are defined by the ISO/OGC standards, in particular the ISO 19115 standard and underlying schemas. 
 These standards are widely used within spatial data infrastructures, handled through metadata catalogs.
 

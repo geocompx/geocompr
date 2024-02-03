@@ -332,11 +332,8 @@ text(tree_mo, pretty = 0)
 </div>
 
 The resulting tree consists of three internal nodes and four terminal nodes (Figure \@ref(fig:tree)).
-The first internal node at the top of the tree assigns all observations which are below
-<!---->
-328.5 m to the left and all other observations to the right branch.
-The observations falling into the left branch have a mean NMDS\index{NMDS} score of
-<!---->-1.198.
+The first internal node at the top of the tree assigns all observations which are below 328.5 m to the left and all other observations to the right branch.
+The observations falling into the left branch have a mean NMDS\index{NMDS} score of -1.198.
 Overall, we can interpret the tree as follows: the higher the elevation, the higher the NMDS\index{NMDS} score becomes.
 This means that the simple decision tree has already revealed four distinct floristic assemblages.
 For a more in-depth interpretation please refer to the \@ref(predictive-mapping) section.
@@ -427,7 +424,7 @@ The performance measure is the root mean squared error (RMSE\index{RMSE}).
 
 
 ```r
-autotuner_rf = mlr3tuning::AutoTuner$new(
+autotuner_rf = mlr3tuning::auto_tuner(
   learner = lrn_rf,
   resampling = mlr3::rsmp("spcv_coords", folds = 5), # spatial partitioning
   measure = mlr3::msr("regr.rmse"), # performance measure
@@ -457,12 +454,6 @@ autotuner_rf$tuning_result
 #>    <int>           <num>         <int>             <list>    <list>     <num>
 #> 1:     4             0.9             7          <list[4]> <list[3]>     0.375
 ```
-
-<!--
-An `mtry` of , a `sample.fraction` of , and a `min.node.size` of  represent the best hyperparameter\index{hyperparameter} combination.
-An RMSE\index{RMSE} of 
-is relatively good when considering the range of the response variable which is  (`diff(range(rp$sc))`).
--->
 
 ### Predictive mapping
 

@@ -253,7 +253,7 @@ st_is_longlat(london_geo)
 ## Geometry operations on projected and unprojected data {#geom-proj}
 
 Since **sf** version 1.0.0, R's ability to work with geographic vector datasets that have lon/lat CRSs has improved substantially, thanks to its integration with the S2 *spherical geometry engine* introduced in Section \@ref(s2).
-As shown in Figure \@ref(fig:s2geos), **sf** uses either GEOS or the S2  depending on the type of CRS and whether S2 has been disabled (it is enabled by default).
+As shown in Figure \@ref(fig:s2geos), **sf** uses either GEOS\index{GEOS} or the S2\index{S2} depending on the type of CRS and whether S2 has been disabled (it is enabled by default).
 GEOS is always used for projected data and data with no CRS; for geographic data S2 is used by default but can be disabled with `sf::sf_use_s2(FALSE)`.
 
 <div class="figure" style="text-align: center">
@@ -276,7 +276,7 @@ london_buff_s2_100_cells = st_buffer(london_geo, dist = 100000, max_cells = 100)
 
 In the first line above, **sf** assumes that the input is projected and generates a result that has a buffer in units of degrees, which is problematic, as we will see.
 In the second line, **sf** silently uses the spherical geometry engine S2, introduced in Chapter \@ref(spatial-class), to calculate the extent of the buffer using the default value of `max_cells = 1000` --- set to `100` in line three --- the consequences which will become apparent shortly.
-To highlight the impact of **sf**'s use of the S2 geometry engine for unprojected (geographic) coordinate systems, we will temporarily disable it with the command `sf_use_s2()` (which is on, `TRUE`, by default), in the code chunk below.
+To highlight the impact of **sf**'s use of the S2\index{S2} geometry engine for unprojected (geographic) coordinate systems, we will temporarily disable it with the command `sf_use_s2()` (which is on, `TRUE`, by default), in the code chunk below.
 Like `london_buff_no_crs`, the new `london_geo` object is a geographic abomination: it has units of degrees, which makes no sense in the vast majority of cases:
 
 
@@ -294,7 +294,7 @@ sf::sf_use_s2(TRUE)
 The warning message above hints at issues with performing planar geometry operations on lon/lat data. 
 When spherical geometry operations are turned off, with the command `sf::sf_use_s2(FALSE)`, buffers (and other geometric operations) may result in worthless outputs because they use units of latitude and longitude, a poor substitute for proper units of distances such as meters.
 
-\BeginKnitrBlock{rmdnote}<div class="rmdnote">The distance between two lines of longitude, called meridians, is around 111 km at the equator (execute `geosphere::distGeo(c(0, 0), c(1, 0))` to find the precise distance).
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">The distance between two lines of longitude, called meridians\index{meridians}, is around 111 km at the equator (execute `geosphere::distGeo(c(0, 0), c(1, 0))` to find the precise distance).
 This shrinks to zero at the poles.
 At the latitude of London, for example, meridians are less than 70 km apart (challenge: execute code that verifies this).
 <!-- `geosphere::distGeo(c(0, 51.5), c(1, 51.5))` -->
@@ -353,13 +353,10 @@ The geometries of the three `london_buff*` objects created in the preceding code
 
 It is clear from Figure \@ref(fig:crs-buf) that buffers based on `s2` and properly projected CRSs are not 'squashed', meaning that every part of the buffer boundary is equidistant to London.
 The results that are generated from lon/lat CRSs when `s2` is *not* used, either because the input lacks a CRS or because `sf_use_s2()` is turned off, are heavily distorted, with the result elongated in the north-south axis, highlighting the dangers of using algorithms that assume projected data on lon/lat inputs (as GEOS does).
-The results generated using S2 are also distorted, however, although less dramatically.
+The results generated using S2\index{S2} are also distorted, however, although less dramatically.
 Both buffer boundaries in Figure \@ref(fig:crs-buf) (left) are jagged, although this may only be apparent or relevant for the thick boundary representing a buffer created with the `s2` argument `max_cells` set to 100.
-<!--toDo:rl-->
-<!--jn: maybe it is worth to emphasize that the differences are due to the use of S2 vs GEOS-->
-<!--jn: you mention S2 a lot in this section, but not GEOS...-->
 The lesson is that results obtained from lon/lat data via S2 will be different from results obtained from using projected data.
-The difference between S2 derived buffers and GEOS derived buffers on projected data reduce as the value of `max_cells` increases: the 'right' value for this argument may depend on many factors and the default value 1000 is often a reasonable default.
+The difference between S2\index{S2} derived buffers and GEOS\index{GEOS} derived buffers on projected data reduce as the value of `max_cells` increases: the 'right' value for this argument may depend on many factors and the default value 1000 is often a reasonable default.
 When choosing `max_cells` values, speed of computation should be balanced against resolution of results.
 In situations where smooth curved boundaries are advantageous, transforming to a projected CRS before buffering (or performing other geometry operations) may be appropriate.
 
@@ -403,13 +400,13 @@ Additionally, you should not be attached just to one projection for every task.
 It is possible to use one projection for some part of the analysis, another projection for a different part, and even some other for visualization.
 Always try to pick the CRS that serves your goal best!
 
-When selecting **geographic CRSs**, the answer is often [WGS84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84).
+When selecting **geographic CRSs**\index{geographic CRS}, the answer is often [WGS84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84).
 It is used not only for web mapping, but also because GPS datasets and thousands of raster and vector datasets are provided in this CRS by default.
 WGS84 is the most common CRS in the world, so it is worth knowing its EPSG code: 4326.^[
 Instead of `"EPSG:4326"`, you may also use `"OGC:CRS84"`. The former assumes that latitude is always ordered before longitude, while the latter is the standard representation used by GeoJSON, with coordinates ordered longitude before latitude.]
 This 'magic number' can be used to convert objects with unusual projected CRSs into something that is widely understood.
 
-What about when a **projected CRS** is required?
+What about when a **projected CRS**\index{projected CRS} is required?
 In some cases, it is not something that we are free to decide:
 "often the choice of projection is made by a public mapping agency" [@bivand_applied_2013].
 This means that when working with local data sources, it is likely preferable to work with the CRS in which the data was provided, to ensure compatibility, even if the official CRS is not the most accurate.
@@ -488,7 +485,6 @@ We will cover the particularities of vector data transformation in Section \@ref
 Next, Section \@ref(mapproj), shows how to create custom map projections.
 
 ## Reprojecting vector geometries {#reproj-vec-geom}
-<!--jn: idea adding info about custom piplines? (nope: too advanced)-->
 
 \index{CRS!reprojection} 
 \index{vector!reprojection} 
@@ -616,6 +612,7 @@ Thus in most cases when both raster and vector data are used, it is better to av
 Additionally, there is a second similar operation called "transformation".
 Instead of resampling all of the values, it leaves all values intact but recomputes new coordinates for every raster cell, changing the grid geometry.
 For example, it could convert the input raster (a regular grid) into a curvilinear grid.
+\index{stars (package)}
 The transformation operation can be performed in R using [the **stars** package](https://r-spatial.github.io/stars/articles/stars5.html).</div>\EndKnitrBlock{rmdnote}
 
 
@@ -731,6 +728,7 @@ For instance, if we are interested in a density (points per grid cell or inhabit
 
 ## Custom map projections {#mapproj}
 
+\index{CRS!custom projections} 
 Established CRSs captured by `AUTHORITY:CODE` identifiers such as `EPSG:4326` are well suited for many applications.
 However, it is desirable to use alternative projections or to create custom CRSs in some cases.
 Section \@ref(which-crs) mentioned reasons for using custom CRSs, and provided several possible approaches.

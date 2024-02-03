@@ -385,7 +385,6 @@ Contours can also be added to existing plots with functions such as `contour()`,
 As illustrated in Figure \@ref(fig:contour-tmap), isolines can be labelled.
 
 \index{hillshade}
-
 <div class="figure" style="text-align: center">
 <img src="figures/06-contour-tmap.png" alt="DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines." width="100%" />
 <p class="caption">(\#fig:contour-tmap)DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines.</p>
