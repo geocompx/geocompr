@@ -415,7 +415,8 @@ To read an online file, we just need to provide its URL together with the `/vsic
 
 
 ```r
-myurl = "/vsicurl/https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif"
+myurl = paste0("/vsicurl/https://zenodo.org/record/5774954/files/",
+               "clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif")
 snow = rast(myurl)
 snow
 #> class       : SpatRaster 
