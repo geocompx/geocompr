@@ -369,7 +369,7 @@ desire_rail = top_n(desire_lines, n = 3, wt = train)
 
 The challenge now is to 'break-up' each of these lines into three pieces, representing travel via public transport nodes.
 This can be done by converting a desire line into a multilinestring object consisting of three line geometries representing origin, public transport and destination legs of the trip.
-This operation can be divided into three stages: matrix creation (of origins, destinations and the 'via' points representing rail stations), identification of nearest neighbors\index{nearest neighbor} and conversion to multilinestrings\index{multilinestrings}.
+This operation can be divided into three stages: matrix creation (of origins, destinations and the 'via' points representing rail stations), identification of nearest neighbors\index{nearest neighbor} and conversion to multilinestrings\index{vector!multilinestrings}.
 These are undertaken by `line_via()`.
 This **stplanr**\index{stplanr (package)} function takes input lines and points and returns a copy of the desire lines --- see the [`?line_via()`](https://docs.ropensci.org/stplanr/reference/line_via.html) for details on how this works.
 The output is the same as the input line, except it has new geometry columns representing the journey via public transport nodes, as demonstrated below:

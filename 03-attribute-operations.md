@@ -655,7 +655,7 @@ The result is a raster object with 6 rows and 6 columns (specified by the `nrow`
 The `vals` argument sets the values that each cell contains: numeric data ranging from 1 to 36 in this case.
 
 \index{raster!manipulation}
-\index{categorical raster}
+\index{raster!categorical}
 Raster objects can also contain categorical values of class `logical` or `factor` variables in R.
 The following code creates the raster datasets shown in Figure \@ref(fig:cont-raster):
 
@@ -671,7 +671,7 @@ grain = rast(nrows = 6, ncols = 6,
 
 
 
-\index{categorical raster}
+\index{raster!categorical}
 \index{raster attribute table}
 The raster object stores the corresponding look-up table or "Raster Attribute Table" (RAT) as a list of data frames, which can be viewed with `cats(grain)` (see `?cats()` for more information).
 Each element of this list is a layer of the raster.

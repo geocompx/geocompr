@@ -25,7 +25,7 @@ The above concepts are demonstrated using data used in previous chapters to unde
 
 ## Raster cropping
 
-\index{raster cropping} 
+\index{raster!cropping} 
 Many geographic data projects involve integrating data from many different sources, such as remote sensing images (rasters) and administrative boundaries (vectors).
 Often the extent of input raster datasets is larger than the area of interest.
 In this case, raster **cropping** and **masking** are useful for unifying the spatial extent of input data.
@@ -55,7 +55,7 @@ This functionality is demonstrated in the command below, which generates Figure 
 srtm_cropped = crop(srtm, zion)
 ```
 
-\index{raster masking} 
+\index{raster!masking} 
 Related to `crop()` is the **terra** function `mask()`, which sets values outside of the bounds of the object passed to its second argument to `NA`.
 The following command therefore masks every cell outside of the Zion National Park boundaries (Figure \@ref(fig:cropmask)(C)).
 
@@ -88,12 +88,12 @@ srtm_inv_masked = mask(srtm, zion, inverse = TRUE)
 
 ## Raster extraction
 
-\index{raster extraction} 
+\index{raster!extraction} 
 Raster extraction is the process of identifying and returning the values associated with a 'target' raster at specific locations, based on a (typically vector) geographic 'selector' object.
 The results depend on the type of selector used (points, lines or polygons) and arguments passed to the `terra::extract()` function.
 The reverse of raster extraction --- assigning raster cell values based on vector objects --- is rasterization, described in Section \@ref(rasterization).
 
-\index{raster extraction!points} 
+\index{raster!extraction points} 
 The basic example is of extracting the value of a raster cell at specific **points**.
 For this purpose, we will use `zion_points`, which contain a sample of 30 locations within the Zion National Park (Figure \@ref(fig:pointextr)). 
 The following command extracts elevation values from `srtm` and creates a data frame with points' IDs (one value per vector's row) and related `srtm` values for each point.
@@ -113,7 +113,7 @@ zion_points = cbind(zion_points, elevation)
 <p class="caption">(\#fig:pointextr)Locations of points used for raster extraction.</p>
 </div>
 
-\index{raster extraction!lines} 
+\index{raster!extraction lines} 
 Raster extraction also works with **line** selectors.
 Then, it extracts one value for each raster cell touched by a line.
 However, the line extraction approach is not recommended to obtain values along the transects as it is hard to get the correct distance between each pair of extracted raster values.
@@ -169,7 +169,7 @@ The resulting `zion_transect` can be used to create elevation profiles, as illus
 <p class="caption">(\#fig:lineextr)Location of a line used for raster extraction (left) and the elevation along this line (right).</p>
 </div>
 
-\index{raster extraction!polygons} 
+\index{raster!extraction polygons} 
 The final type of geographic vector object for raster extraction is **polygons**.
 Like lines, polygons tend to return many raster values per polygon.
 This is demonstrated in the command below, which results in a data frame with column names `ID` (the row number of the polygon) and `srtm` (associated elevation values):
@@ -225,7 +225,7 @@ zion_nlcd |>
 <p class="caption">(\#fig:polyextr)Area used for continuous (left) and categorical (right) raster extraction.</p>
 </div>
 
-\index{raster extraction!exact fractions} 
+\index{raster!extraction fractions} 
 Although the **terra** package offers rapid extraction of raster values within polygons, `extract()` can still be a bottleneck when processing large polygon datasets.
 The **exactextractr** package offers a [significantly faster alternative](https://github.com/geocompx/geocompr/issues/813) for extracting pixel values through the `exact_extract()` function. 
 The `exact_extract()` function also computes, by default, the fraction of each raster cell overlapped by the polygon, which is more precise (see note below for details). 
