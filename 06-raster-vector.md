@@ -331,8 +331,8 @@ california_raster2 = rasterize(california, raster_template2)
 
 
 ```
-#> The visual variable "col" of the layer, ", layer" contains a unique value. Therefore a discrete scale is applied (tm_scale_discrete).
-#> The visual variable "col" of the layer, ", layer" contains a unique value. Therefore a discrete scale is applied (tm_scale_discrete).
+#> The visual variable "col" of the layer "raster" contains a unique value. Therefore a discrete scale is applied (tm_scale_discrete).
+#> The visual variable "col" of the layer "raster" contains a unique value. Therefore a discrete scale is applied (tm_scale_discrete).
 ```
 
 <div class="figure" style="text-align: center">
