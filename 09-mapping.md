@@ -477,8 +477,8 @@ map_nz + tm_layout(frame = FALSE)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/layout1-1.png" alt="Layout options specified by (from left to right) title, scale, bg.color and frame arguments." width="100%" />
-<p class="caption">(\#fig:layout1)Layout options specified by (from left to right) title, scale, bg.color and frame arguments.</p>
+<img src="figures/layout1-1.png" alt="Layout options specified by (from left to right) scale, bg.color and frame arguments." width="100%" />
+<p class="caption">(\#fig:layout1)Layout options specified by (from left to right) scale, bg.color and frame arguments.</p>
 </div>
 
 The other arguments in `tm_layout()` provide control over many more aspects of the map in relation to the canvas on which it is placed.
