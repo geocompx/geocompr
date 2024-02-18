@@ -1128,7 +1128,7 @@ Before we cover mapping packages for plotting a specific type of map (in the nex
 
 
 
-Table \@ref(tab:map-gpkg) shows a range of mapping packages are available, and there are many others not listed in this table.
+Table \@ref(tab:map-gpkg) shows a range of mapping packages that are available, and there are many others not listed in this table.
 Of note is **mapsf**, which can generate range of geographic visualizations including choropleth, 'proportional symbol' and 'flow' maps.
 These are documented in the [`mapsf`](https://cran.r-project.org/package=mapsf/vignettes/mapsf.html)\index{mapsf (package)} vignette.
 
