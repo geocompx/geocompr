@@ -16,7 +16,7 @@ p1p = tm_shape(grain) +
 
 p2p = tm_shape(grain_poly) +
   tm_polygons("grain", fill.scale = tm_scale(values = cols), lwd = 3) +
-  tm_title("B.Polygons") +
+  tm_title("B. Polygons") +
   tm_layout(frame = FALSE, legend.show = FALSE)
 
 p3p = tm_shape(grain_poly2) + 
