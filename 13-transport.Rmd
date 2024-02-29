@@ -2,6 +2,10 @@
 
 # Transportation {#transport}
 
+```{r, include=FALSE}
+source("code/before_script.R")
+```
+
 ```{r transport-setup, include=FALSE}
 knitr::opts_chunk$set(warning = FALSE)
 ```
@@ -38,16 +42,16 @@ It is therefore unsurprising that transport researchers have long turned to geog
 
 This chapter introduces the geographic analysis of transport systems at different geographic levels:
 
-- **Areal units**: transport patterns can be understood with reference to zonal aggregates, such as the main mode of travel (by car, bike or foot, for example), and average distance of trips made by people living in a particular zone, covered in Section \@ref(transport-zones)
+- **Areal units**\index{areal units}: transport patterns can be understood with reference to zonal aggregates, such as the main mode of travel (by car, bike or foot, for example), and average distance of trips made by people living in a particular zone, covered in Section \@ref(transport-zones)
 - **Desire lines**\index{desire lines}: straight lines that represent 'origin-destination' data that records how many people travel (or could travel) between places (points or zones) in geographic space, the topic of Section \@ref(desire-lines)
 - **Nodes**\index{node}: these are points in the transport system that can represent common origins and destinations and public transport stations such as bus stops and rail stations, the topic of Section \@ref(nodes)
-- **Routes**: these are lines representing a path along the route network along the desire lines and between nodes.
+- **Routes**\index{routes}: these are lines representing a path along the route network along the desire lines and between nodes.
 Routes (which can be represented as single linestrings or multiple short *segments*) and the *routing engines* that generate them, are covered in Section \@ref(routes)
 - **Route networks**\index{network}: these represent the system of roads, paths and other linear features in an area and are covered in Section \@ref(route-networks).
 They can be represented as geographic features (typically short segments of road that add up to create a full network) or structured as an interconnected graph, with the level of traffic on different segments referred to as 'flow' by transport modelers [@hollander_transport_2016]
 
 Another key level is **agents**, mobile entities like you and me and vehicles that enable us to move such as bikes and buses.
-These can be represented computationally in software such as [MATSim](http://www.matsim.org/) and [A/B Street](https://github.com/a-b-street/abstreet), which represent the dynamics of transport systems using an agent-based modeling (ABM)\index{agent-based modeling} frameworks, usually at high levels of spatial and temporal resolution [@horni_multi-agent_2016]. 
+These can be represented computationally in software such as [MATSim](http://www.matsim.org/) and [A/B Street](https://github.com/a-b-street/abstreet), which represent the dynamics of transport systems using an agent-based modeling (ABM)\index{agent-based modeling} framework, usually at high levels of spatial and temporal resolution [@horni_multi-agent_2016]. 
 ABM is a powerful approach to transport research with great potential for integration with R's spatial classes [@thiele_r_2014; @lovelace_spatial_2016], but is outside the scope of this chapter.
 Beyond geographic levels and agents, the basic unit of analysis in many transport models is the **trip**, a single purpose journey from an origin 'A' to a destination 'B' [@hollander_transport_2016].
 Trips join-up the different levels of transport systems and can be represented simplistically as geographic *desire lines* connecting *zone* centroids\index{centroid} (*nodes*) or as routes that follow the transport *route network*.
@@ -89,7 +93,7 @@ tm_shape(region_all[1, ], bbox = region_all) +
   tm_basemap(server = leaflet::providers$Esri.WorldTopoMap)
 ```
 
-```{r bristol, echo=FALSE, fig.cap="Bristol's transport network represented by colored lines for active (green), public (railways, black) and private motor (red) modes of travel. Black border lines represent the inner city boundary (highlighted in yellow) and the larger Travel To Work Area (TTWA).", fig.scap="Bristol's transport network."}
+```{r bristol, echo=FALSE, fig.cap="Bristol's transport network represented by colored lines for active (green), public (railways, blue) and private motor (red) modes of travel. Black border lines represent the inner city boundary (highlighted in yellow) and the larger Travel To Work Area (TTWA).", fig.scap="Bristol's transport network."}
 knitr::include_graphics("figures/13_bristol.png")
 ```
 
@@ -115,14 +119,14 @@ View(cw0103)
 
 Like many cities, Bristol has major congestion, air quality and physical inactivity problems.
 Cycling can tackle all of these issues efficiently: it has a greater potential to replace car trips than walking, with typical [speeds](https://en.wikipedia.org/wiki/Bicycle_performance) of 15-20 km/h vs 4-6 km/h for walking.
-For this reason Bristol's [Transport Strategy](https://www.bristol.gov.uk/council-and-mayor/policies-plans-and-strategies/bristol-transport-strategy), has ambitious plans for cycling.
+For this reason Bristol's [Transport Strategy](https://www.bristol.gov.uk/council-and-mayor/policies-plans-and-strategies/bristol-transport-strategy) has ambitious plans for cycling.
 
 To highlight the importance of policy considerations in transportation research, this chapter is guided by the need to provide evidence for people (transport planners, politicians and other stakeholders) tasked with getting people out of cars and onto more sustainable modes --- walking and cycling in particular.
 The broader aim is to demonstrate how geocomputation can support evidence-based transport planning.
 In this chapter you will learn how to:
 
 - Describe the geographical patterns of transport behavior in cities
-- Identify key public transport nodes supporting multi-model trips
+- Identify key public transport nodes supporting multi-modal trips
 - Analyze travel 'desire lines' to find where many people drive short distances
 - Identify cycle route locations that will encourage less car driving and more cycling
 
@@ -243,9 +247,6 @@ zones_od = inner_join(zones_joined, zones_destinations, by = "geo_code")
 ```
 
 A simplified version of Figure \@ref(fig:zones) is created with the code below (see `13-zones.R` in the [`code`](https://github.com/geocompx/geocompr/tree/main/code) folder of the book's GitHub repository to reproduce the figure and Section \@ref(faceted-maps) for details on faceted maps with **tmap**\index{tmap (package)}):
-
-<!-- toDo: rl   -->
-<!-- qtm does not exist... -->
 
 ```{r 13-transport-11, eval=FALSE}
 qtm(zones_od, c("all", "all_dest")) +
@@ -368,7 +369,7 @@ desire_rail = top_n(desire_lines, n = 3, wt = train)
 
 The challenge now is to 'break-up' each of these lines into three pieces, representing travel via public transport nodes.
 This can be done by converting a desire line into a multilinestring object consisting of three line geometries representing origin, public transport and destination legs of the trip.
-This operation can be divided into three stages: matrix creation (of origins, destinations and the 'via' points representing rail stations), identification of nearest neighbors\index{nearest neighbor} and conversion to multilinestrings\index{multilinestrings}.
+This operation can be divided into three stages: matrix creation (of origins, destinations and the 'via' points representing rail stations), identification of nearest neighbors\index{nearest neighbor} and conversion to multilinestrings\index{vector!multilinestrings}.
 These are undertaken by `line_via()`.
 This **stplanr**\index{stplanr (package)} function takes input lines and points and returns a copy of the desire lines --- see the [`?line_via()`](https://docs.ropensci.org/stplanr/reference/line_via.html) for details on how this works.
 The output is the same as the input line, except it has new geometry columns representing the journey via public transport nodes, as demonstrated below:
@@ -423,6 +424,7 @@ tm_shape(zones_od) +
 
 ## Routes
 
+\index{routes}
 From a geographical perspective, routes are desire lines\index{desire lines} that are no longer straight: the origin and destination points are the same as in the desire line representation of travel, but the pathway to get from A to B is more complex.
 The geometries of routes are typically (but not always) determined by the transport network.
 
@@ -438,7 +440,7 @@ Routing engines can be classified based on *where* they run relative to R:
 - Remotely hosted routing engines by external entities that provide a web API that can be called from R (Section \@ref(remoteengine))
 
 Before describing each, it is worth outlining other ways of categorizing routing engines.
-Routing engines can be multi-modal, meaning that they can calculate trips composed of more than one more of transport, or not.
+Routing engines can be multi-modal, meaning that they can calculate trips composed of more than one mode of transport, or not.
 Multi-modal routing engines can return results consisting of multiple *legs*, each one made by a different mode of transport.
 The optimal route from a residential area to a commercial area could involve 1) walking to the nearest bus stop, 2) catching the bus to the nearest node to the destination, and 3) walking to the destination, given a set of input parameters.
 The transition points between these three legs are commonly referred to as 'ingress' and 'egress', meaning getting on/off a public transport vehicle.
@@ -455,7 +457,7 @@ Another way of classifying routing engines (or settings) is by the geographic le
 Routing engines can generate outputs at three geographic levels of routes, legs and segments:
 
 - **Route** level outputs contain a single feature (typically a multilinestring and associated row in the data frame representation) per origin-destination pair, meaning a single row of data per trip
-- **Leg** level outputs contain a single feature and associated attributes each *mode* within each origin-destination pair, as described in Section \@ref(nodes). For trips only involves one mode (for example driving from home to work, ignoring the short walk to the car) the leg is the same as the route: the car journey. For trips involving public transport, legs provide key information.  The **r5r** function `detailed_itineraries()` returns legs which, confusingly, are sometimes referred to as 'segments'
+- **Leg** level outputs contain a single feature and associated attributes each *mode* within each origin-destination pair, as described in Section \@ref(nodes). For trips only involving one mode (for example driving from home to work, ignoring the short walk to the car) the leg is the same as the route: the car journey. For trips involving public transport, legs provide key information.  The **r5r** function `detailed_itineraries()` returns legs which, confusingly, are sometimes referred to as 'segments'
 - Segment level outputs provide the most detailed information about routes, with records for each small section of the transport network. Typically segments are similar in length, or identical to, ways in OpenStreetMap. The **cyclestreets** function `journey()` returns data at the segment level which can be aggregated by grouping by origin and destination level data returned by the `route()` function in **stplanr**
 
 Most routing engines return route level by default, although multi-modal engines generally provide outputs at the leg level (one feature per continuous movement by a single mode of transport).
@@ -479,7 +481,7 @@ Changing route network characteristics (or weights associated with different rou
 ### Locally hosted dedicated routing engines {#localengine}
 
 **Locally hosted** routing engines include OpenTripPlanner, [Valhalla](https://github.com/valhalla/valhalla), and R5 (which are multi-modal), and the OpenStreetMap Routing Machine (OSRM) (which is 'uni-modal').
-These can be accessed from R with the packages **opentripplanner**, [**valhalla**](https://github.com/chris31415926535/valhallr), **r5r** and [**osrm**](https://github.com/riatelab/osrm) [@morgan_opentripplanner_2019; @pereira_r5r_2021].
+These can be accessed from R with the packages **opentripplanner**, [**valhallr**](https://github.com/chris31415926535/valhallr), **r5r** and [**osrm**](https://github.com/riatelab/osrm) [@morgan_opentripplanner_2019; @pereira_r5r_2021].
 Locally hosted routing engines run on the user's computer but in a process separate from R.
 They benefit from speed of execution and control over the weighting profile for different modes of transport.
 Disadvantages include the difficulty of representing complex networks locally; temporal dynamics (primarily due to traffic); and the need for specialized external software.
@@ -488,10 +490,10 @@ Disadvantages include the difficulty of representing complex networks locally; t
 
 **Remotely hosted**\index{routing} routing engines use a web API\index{API} to send queries about origins and destinations and return results.
 Routing services based on open source routing engines, such as OSRM's publicly available service, work the same when called from R as locally hosted instances, simply requiring arguments specifying 'base URLs' to be updated.
-However, the fact that external routing services are hosted on a dedicated machine (usually funded by commercial company with incentives to generate accurate routes) can can give them advantages, including:
+However, the fact that external routing services are hosted on a dedicated machine (usually funded by commercial company with incentives to generate accurate routes) can give them advantages, including:
 
 - Provision of routing services worldwide (or usually at least over a large region)
-- Established routing services available are usually update regularly and can often respond to traffic levels
+- Established routing services are usually updated regularly and can often respond to traffic levels
 - Routing services usually run on dedicated hardware and software including systems such as load balancers to ensure consistent performance
 
 Disadvantages of remote routing services include speed when batch jobs are not possible (they often rely on data transfer over the internet on a route-by-route basis), price (the Google routing API, for example, limits the number of free queries) and licensing issues.
@@ -509,7 +511,7 @@ Contraction hierarchies are used behind the scenes in the routing engines mentio
 
 Traffic assignment is a problem that is closely related to routing: in practice, the shortest path between two points is not always the fastest, especially if there is congestion.
 The process takes OD datasets, of the kind described in Section \@ref(desire-lines), and assigns traffic to each segment in the network, generating route networks of the kind described in Section \@ref(route-networks).
-An established solution is Wardrop’s principle of user equilibrium which shows that, to be realistic, congestion should be considered when estimating flows on the network, with reference to mathematically defined relationship between cost and flow [@wardrop_theoretical_1952].
+An established solution is Wardrop’s principle of user equilibrium which shows that, to be realistic, congestion should be considered when estimating flows on the network, with reference to a mathematically defined relationship between cost and flow [@wardrop_theoretical_1952].
 This optimization problem can be solved by iterative algorithms which are implemented in the [**cppRouting**](https://github.com/vlarmet/cppRouting) package, which also implements contraction hierarchies for fast routing.
 
 
@@ -521,7 +523,7 @@ Routing can be time and memory-consuming, resulting in large objects, due to the
 We will therefore filter the desire lines before calculating routes in this section.
 
 Cycling is most beneficial when it replaces car trips.
-Short (around 5 km, which can be cycled in 15 minutes at a speed of 20 km/hr) have a relatively high probability of being cycled, and the maximum distance increases when trips are made by electric bike [@lovelace_propensity_2017].
+Short trips (around 5 km, which can be cycled in 15 minutes at a speed of 20 km/hr) have a relatively high probability of being cycled, and the maximum distance increases when trips are made by electric bike [@lovelace_propensity_2017].
 These considerations inform the following code chunk which filters the desire lines and returns the object `desire_lines_short` representing OD pairs between which many (100+) short (2.5 to 5 km Euclidean distance) trips are driven:
 
 ```{r 13-transport-17, message=FALSE}
@@ -545,10 +547,10 @@ Note: calls to external routing engines such as in the command above only work w
 In addition to the columns contained in the `desire_lines` object, the new route dataset contains `distance` (referring to route distance this time) and `duration` columns (in seconds), which provide potentially useful extra information on the nature of each route.
 We will plot desire lines along which many short car journeys take place alongside cycling routes.
 Making the width of the routes proportional to the number of car journeys that could potentially be replaced provides an effective way to prioritize interventions on the road network [@lovelace_propensity_2017].
-The code chunk below plots the desire lines and routes, resulting in Figure \@ref(fig:routes) which shows routes along which people drive short distances:[^13-transport-8]
+Figure \@ref(fig:routes) shows routes along which people drive short distances (see the github.com/geocompx for the source code).[^13-transport-8]
 
 [^13-transport-8]: Note that the red routes and black desire lines do not start at exactly the same points.
-    This is because zone centroids rarely lie on the route network: instead the route originate from the transport network node nearest the centroid.
+    This is because zone centroids rarely lie on the route network: instead the routes originate from the transport network node nearest the centroid.
     Note also that routes are assumed to originate in the zone centroids, a simplifying assumption which is used in transport models to reduce the computational resources needed to calculate the shortest path between all combinations of possible origins and destinations [@hollander_transport_2016].
 
 ```{r routes, warning=FALSE, fig.cap="Routes along which many (100+) short (<5km Euclidean distance) car journeys are made (red) overlaying desire lines representing the same trips (black) and zone centroids (dots).", fig.scap="Routes along which many car journeys are made.", echo=FALSE}
@@ -577,7 +579,7 @@ tm_shape(zones_od) +
   tm_scalebar()
 ```
 
-Plotting the results on an interactive map, with `mapview::mapview(st_geometry(routes_short))` for example, shows that many short car trips take place in and around Bradley Stoke, around 10 km North of central Bristol.
+Visualizing the results in an interactive map shows that many short car trips take place in and around Bradley Stoke, around 10 km North of central Bristol.
 It is easy to find explanations for the area's high level of car dependency: according to [Wikipedia](https://en.wikipedia.org/wiki/Bradley_Stoke), Bradley Stoke is "Europe's largest new town built with private investment", suggesting limited public transport provision.
 Furthermore, the town is surrounded by large (cycling unfriendly) road structures, including the M4 and M5 motorways [@tallon_bristol_2007].
 
@@ -588,6 +590,7 @@ Route segment results can enable the prioritization of investment where it is mo
 
 ## Route networks
 
+\index{network}
 While routes generally contain data on travel *behavior*, at the same geographic level as desire lines and OD pairs, route network datasets usually represent the physical transport network.
 Each *segment* in a route network roughly corresponds to a continuous section of street between junctions and appears only once, although the average length of segments depends on the data source (segments in the OSM-derived `bristol_ways` dataset used in this section have an average length of just over 200 m, with a standard deviation of nearly 500 m).
 Variability in segment lengths can be explained by the fact that in some rural locations junctions are far apart while in dense urban areas there are crossings and other segment breaks every few meters.

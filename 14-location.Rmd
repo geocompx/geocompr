@@ -1,5 +1,9 @@
 # Geomarketing {#location}
 
+```{r, include=FALSE}
+source("code/before_script.R")
+```
+
 ## Prerequisites {-}
 
 - This chapter requires the following packages (**tmaptools** must also be installed):
@@ -138,7 +142,7 @@ knitr::kable(tab,
 ```
 
 ## Create census rasters
- 
+
 After the preprocessing, the data can be converted into a `SpatRaster` object (see Sections \@ref(raster-classes) and \@ref(raster-subsetting)) with the help of the `rast()` function.
 When setting its `type` argument to `xyz`, the `x` and `y` columns of the input data frame should correspond to coordinates on a regular grid.
 All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as values of the raster layers (Figure \@ref(fig:census-stack); see also `code/14-location-figures.R` in our GitHub repository).
@@ -208,7 +212,6 @@ reclass # full output not shown
 #> max values  : 8000,     3,        3,       3
 ```
 
-
 ## Define metropolitan areas
 
 We deliberately define metropolitan areas as pixels of 20 km^2^ inhabited by more than 500,000 people.
@@ -229,7 +232,7 @@ pop_agg = pop_agg[pop_agg > 500000, drop = FALSE]
 Plotting this reveals eight metropolitan regions (Figure \@ref(fig:metro-areas)).
 Each region consists of one or more raster cells.
 It would be nice if we could join all cells belonging to one region.
-**terra**'s\index{terra} `patches()` command does exactly that.
+**terra**'s\index{terra (package)} `patches()` command does exactly that.
 Subsequently, `as.polygons()` converts the raster object into spatial polygons, and `st_as_sf()` converts it into an `sf` object.
 
 ```{r 14-location-13, warning=FALSE, message=FALSE}
@@ -290,7 +293,7 @@ The subsequent code chunk does this using a number of functions including:
 - `map()`\index{loop!map} (the **tidyverse** equivalent of `lapply()`\index{loop!lapply}), which iterates through all eight metropolitan names which subsequently define the bounding box\index{bounding box} in the OSM\index{OpenStreetMap} query function `opq()` (see Section \@ref(retrieving-data))
 - `add_osm_feature()` to specify OSM\index{OpenStreetMap} elements with a key value of `shop` (see [wiki.openstreetmap.org](https://wiki.openstreetmap.org/wiki/Map_Features) for a list of common key:value pairs)
 - `osmdata_sf()`, which converts the OSM\index{OpenStreetMap} data into spatial objects (of class `sf`)
-- `while()`\index{loop!while}, which tries repeatedly (three times in this case) to download the data if it fails the first time^[The OSM-download will sometimes fail at the first attempt.
+- `while()`\index{loop!while}, which tries two more times to download the data if the download failed the first time^[The OSM-download will sometimes fail at the first attempt.
 ]
 
 Before running this code: please consider it will download almost 2GB of data.

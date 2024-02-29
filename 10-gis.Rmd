@@ -1,5 +1,9 @@
 # Bridges to GIS software {#gis}
 
+```{r, include=FALSE}
+source("code/before_script.R")
+```
+
 ## Prerequisites {-}
 
 - This chapter requires QGIS\index{QGIS}, SAGA\index{SAGA} and GRASS GIS\index{GRASS GIS} to be installed and the following packages to be attached:
@@ -58,7 +62,7 @@ However, interactive command line interfaces have several important advantages i
 - Developing future-proof and efficient programming skills which are in high demand
 - Improving touch typing, a key skill in the digital age
 
-On the other hand, good GUIs also have advantages, including:
+On the other hand, good GUIs\index{graphical user interface} also have advantages, including:
 
 - 'Shallow' learning curves meaning geographic data can be explored and visualized without hours of learning a new language
 - Support for 'digitizing' (creating new vector datasets), including trace, snap and topological tools^[The **mapedit** R package allows the quick editing of a few spatial features in a browser window opened from R but not professional, large-scale cartographic digitizing.]
@@ -88,7 +92,6 @@ This chapter focuses on 'bridges' to three mature open source GIS products, summ
 - SAGA\index{SAGA}, via **Rsagacmd**\index{Rsagacmd (package)} (Section \@ref(saga))
 - GRASS GIS\index{GRASS GIS}, via **rgrass**\index{rgrass (package)} (Section \@ref(grass))
 
-<!-- There are other relevant bridges, including the no-longer-maintained R package **RPyGeo** interface to proprietary GIS software. -->
 There have also been major developments in enabling open source GIS software to write and execute R scripts inside QGIS\index{QGIS} (see [docs.qgis.org](https://docs.qgis.org/3.28/en/docs/training_manual/processing/r_intro.html)) and GRASS GIS (see [grasswiki.osgeo.org](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#R_within_GRASS)).
 
 ```{r gis-comp, echo=FALSE, message=FALSE}
@@ -204,7 +207,7 @@ incongr_wgs = st_transform(incongruent, "EPSG:4326")
 aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 ```
 
-```{r uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders)."}
+```{r uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders).", fig.width=8}
 #| message: FALSE
 #| results: hide
 library(tmap)
@@ -246,12 +249,12 @@ This is the role of the `qgis_show_help()`, which returns a short summary of wha
 This makes it output rather long.
 The following command returns a data frame with each row representing an argument required by `"native:union"` and columns with the name, description, type, default value, available values, and acceptable values associated with each:
 
-```{r 09-gis-6, eval=has_qgis_plugins}
+```{r 09-gis-6, eval=has_qgis_plugins, linewidth=80}
 alg = "native:union"
 union_arguments = qgis_get_argument_specs(alg)
 union_arguments
 #> # A tibble: 5 × 6
-#>   name    description qgis_type default_value available_values acceptable_values
+#>   name    description qgis_type default_value available_values acceptable_...
 #>   <chr>   <chr>       <chr>     <list>        <list>           <list>           
 #> 1 INPUT   Input layer source    <NULL>        <NULL>           <chr [1]>        
 #> 2 OVERLAY Overlay la… source    <NULL>        <NULL>           <chr [1]>        
@@ -261,8 +264,10 @@ union_arguments
 
 #> [[1]]
 #> [1] "A numeric value"                                                                                 
-#> [2] "field:FIELD_NAME to use a data defined value taken from the FIELD_NAME field"                    
-#> [3] "expression:SOME EXPRESSION to use a data defined value calculated using a custom QGIS expression"
+#> [2] "field:FIELD_NAME to use a data defined value taken from the FIELD_NAME
+#>      field"                    
+#> [3] "expression:SOME EXPRESSION to use a data defined value calculated using
+#>      a custom QGIS expression"
 ```
 
 The arguments, contained in `union_arguments$name`, are `INPUT`, `OVERLAY`, `OVERLAY_FIELDS_PREFIX`, and `OUTPUT`.
@@ -380,7 +385,7 @@ dem = system.file("raster/dem.tif", package = "spDataLarge")
 
 The **terra** package's `terrain()` command already allows the calculation of several fundamental topographic characteristics such as slope, aspect, TPI (*Topographic Position Index*), TRI (*Topographic Ruggedness Index*), roughness, and flow directions.
 However, GIS programs offer many more terrain characteristics, some of which can be more suitable in certain contexts.
-For example, the topographic wetness index (TWI) was found useful in studying hydrological and biological processes [@sorensen_calculation_2006].
+For example, the topographic wetness index (TWI)\index{topographic wetness index} was found useful in studying hydrological and biological processes [@sorensen_calculation_2006].
 Let's search the algorithm list for this index using `"wetness"` as keyword.
 
 ```{r, eval=has_qgis_plugins}
@@ -402,8 +407,6 @@ The `"sagang:sagawetnessindex"` algorithm is actually a modified TWI, that resul
 
 ```{r, eval=FALSE}
 qgis_show_help("sagang:sagawetnessindex")
-#> Saga wetness index (sagang:sagawetnessindex)
-#> Description
 ```
 
 Here, we stick with the default values for all arguments.
@@ -477,7 +480,7 @@ The System for Automated Geoscientific Analyses (SAGA\index{SAGA}; Table \@ref(t
 In addition, there is a Python interface (SAGA Python API\index{API}).
 **Rsagacmd**\index{Rsagacmd (package)} uses the former to run SAGA\index{SAGA} from within R.
 
-We will use **Rsagacmd** in this section to delineate areas with similar values of the normalized difference vegetation index (NDVI) of the Mongón study area in Peru from the 22nd of September 2000 (Figure \@ref(fig:sagasegments), left panel) by using a seeded region growing algorithm from SAGA.^[Read Section \@ref(local-operations) on details of how to calculate NDVI from a remote sensing image.]
+We will use **Rsagacmd** in this section to delineate areas with similar values of the normalized difference vegetation index (NDVI) of the Mongón study area in Peru from the 22nd of September 2000 (Figure \@ref(fig:sagasegments), left panel) by using a seeded region growing algorithm from SAGA\index{segmentation}.^[Read Section \@ref(local-operations) on details of how to calculate NDVI from a remote sensing image.]
 
 ```{r, eval=FALSE}
 ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
@@ -498,8 +501,8 @@ Our `saga` object contains connections to all of the available SAGA tools.
 It is organized as a list of libraries (groups of tools), and inside of a library it has a list of tools.
 We can access any tool with the `$` sign (remember to use TAB for autocompletion).
 
-The seeded region growing algorithm works\index{seeded region growing algorithm} in two main steps [@adams_seeded_1994;@bohner_image_2006].
-First, initial cells ("seeds") are generated by finding the cells with the smallest variance in local windows of a specified size.
+The seeded region growing algorithm works\index{segmentation!seeded region growing algorithm} in two main steps [@adams_seeded_1994;@bohner_image_2006].
+First, initial cells ("seeds") are generated by finding the cells with the smallest variance in local windows of a specified size\index{autocorrelation!spatial}.
 Second, the region growing algorithm is used to merge neighboring pixels of the seeds to create homogeneous areas.
 
 ```{r, eval=FALSE}
@@ -553,7 +556,7 @@ They can also be further aggregated into larger polygons using various technique
 You can try to do it in Exercises.
 
 R also has other tools to achieve the goal of creating polygons with similar values (so-called segments).
-It includes the **SegOptim** package [@goncalves_segoptim_2019] that allows running several image segmentation algorithms and **supercells** [@nowosad_extended_2022] that implements superpixels algorithm SLIC to work with geospatial data.
+It includes the **SegOptim** package [@goncalves_segoptim_2019] that allows running several image segmentation algorithms and **supercells** [@nowosad_extended_2022] that implements superpixels\index{segmentation!superpixels} algorithm SLIC to work with geospatial data.
 
 ## GRASS GIS {#grass}
 
@@ -1021,7 +1024,7 @@ For more information about **sits** visit https://e-sensing.github.io/sitsbook/ 
 
 ### openEO
 
-OpenEO [@schramm_openeo_2021]\index{openEO} is an initiative to support interoperability among cloud services by defining a common language for processing the data. 
+OpenEO [@schramm_openeo_2021]\index{OpenEO} is an initiative to support interoperability among cloud services by defining a common language for processing the data. 
 The initial idea has been described in an [r-spatial.org blog post](https://r-spatial.org/2016/11/29/openeo.html) and aims at making it possible for users to change between cloud services easily with as little code changes as possible. 
 The [standardized processes](https://processes.openeo.org) use a multidimensional data cube model\index{data cube} as an interface to the data. 
 Implementations are available for eight different backends (see https://hub.openeo.org) to which users can connect with R, Python, JavaScript, QGIS, or a web editor and define (and chain) processes on collections. 
@@ -1029,7 +1032,7 @@ Since the functionality and data availability differs among the backends, the **
 Afterwards, users can load image collections, apply and chain processes, submit jobs, and explore and plot results. 
 
 The following code will connect to the [openEO platform backend](https://openeo.cloud/), request available datasets, processes, and output formats, define a process graph to compute a maximum NDVI image from Sentinel-2 data, and finally executes the graph after logging in to the backend. 
-The openEO\index{openEO} platform backend includes a free tier and registration is possible from existing institutional or internet platform accounts. 
+The openEO\index{OpenEO} platform backend includes a free tier and registration is possible from existing institutional or internet platform accounts. 
 
 ```{r 09-openeo-example, eval=FALSE}
 library(openeo)

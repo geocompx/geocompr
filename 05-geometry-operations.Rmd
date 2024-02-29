@@ -1,5 +1,9 @@
 # Geometry operations {#geometry-operations}
 
+```{r, include=FALSE}
+source("code/before_script.R")
+```
+
 ## Prerequisites {-}
 
 - This chapter uses the same packages as Chapter \@ref(spatial-operations) but with the addition of **spDataLarge**, which was installed in Chapter \@ref(spatial-class):
@@ -200,11 +204,12 @@ tmap_arrange(p_buffs1, p_buffs2, ncol = 2)
 The `st_buffer()` has a few additional arguments. 
 The most important ones are:
 
-- `nQuadSegs` (when the GEOS engine is used), which means 'number of segments per quadrant' and is set by default to 30 (meaning circles created by buffers are composed of $4 \times 30 = 120$ lines).
+- `nQuadSegs` (when the GEOS\index{GEOS} engine is used), which means 'number of segments per quadrant' and is set by default to 30 (meaning circles created by buffers are composed of $4 \times 30 = 120$ lines).
 Unusual cases where it may be useful include when the memory consumed by the output of a buffer operation is a major concern (in which case it should be reduced) or when very high precision is needed (in which case it should be increased)
-- `max_cells` (when the S2 engine is used), the larger the value, the more smooth the buffer will be, but the calculations will take longer
+- `max_cells` (when the S2\index{S2} engine is used), the larger the value, the more smooth the buffer will be, but the calculations will take longer
 - `endCapStyle` and `joinStyle` (when the GEOS engine is used), which control the appearance of the buffer's edges
 - `singleSide` (when the GEOS engine is used), which controls whether the buffer is created on one or both sides of the input geometry
+
 ```
 
 ```{r nQuadSegs, eval=FALSE, echo=FALSE}
@@ -461,7 +466,7 @@ We will return to the question of choosing between different implementations of 
 \index{vector!union} 
 \index{aggregation!spatial} 
 As we saw in Section \@ref(vector-attribute-aggregation), spatial aggregation can silently dissolve the geometries of touching polygons in the same group.
-This is demonstrated in the code chunk below in which 49 `us_states` are aggregated into four regions using base and **dplyr**\index{dplyr (package)} functions (see results in Figure \@ref(fig:us-regions)):
+This is demonstrated in the code chunk below in which 48 US states and the District of Columbia (`us_states`) are aggregated into four regions using base and **dplyr**\index{dplyr (package)} functions (see results in Figure \@ref(fig:us-regions)):
 
 ```{r 05-geometry-operations-23}
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
@@ -540,7 +545,7 @@ tmap_arrange(p_sc1, p_sc2, p_sc3, ncol = 3)
 ```
 
 Conversion from multipoint to linestring is a common operation that creates a line object from ordered point observations, such as GPS measurements or geotagged media.
-This, in turn, allows to perform spatial operations such as the calculation of the length of the path traveled.
+This, in turn, allows us to perform spatial operations such as the calculation of the length of the path traveled.
 Conversion from multipoint or linestring to polygon is often used to calculate an area, for example from the set of GPS measurements taken around a lake or from the corners of a building lot.
 
 The transformation process can be also reversed using `st_cast()`:
@@ -570,7 +575,17 @@ Geometry casting of simple features geometry column (`sfc`) and simple features 
 One important difference is the conversion between multi-types to non-multi-types.
 As a result of this process, multi-objects of `sfc` or `sf` are split into many non-multi-objects.
 
-Table \@ref(tab:sfs-st-cast) shows possible geometry type transformations on simple feature objects.
+Let's say we have the following `sf` objects:
+
+- `POI` - POINT type (with one point by definition)
+- `MPOI` - MULTIPOINT type with four points
+- `LIN` - LINESTRING type with one linestring containing five points
+- `MLIN` - MULTILINESTRING type with two linestrings (one with five points and one with two points)
+- `POL` - POLYGON type with one polygon (created using five points)
+- `MPOL` - MULTIPOLYGON type consisting of two polygons (both consisting of five points)
+- `GC` - GEOMETRYCOLLECTION type with two geometries, a MULTIPOINT (four points) and a LINESTRING (five points)
+
+Table \@ref(tab:sfs-st-cast) shows possible geometry type transformations on the simple feature objects listed above.
 Single simple feature geometries (represented by the first column in the table) can be transformed into multiple geometry types, represented by the columns in Table \@ref(tab:sfs-st-cast).
 Some transformations are not possible: you cannot convert a single point into a multilinestring or a polygon, for example, explaining why the cells `[1, 4:5]` in the table contain NA.
 Some transformations split single features input into multiple sub-features, 'expanding' `sf` objects (adding new rows with duplicate attribute values).
@@ -595,7 +610,7 @@ knitr::kable(sfs_st_cast,
                              "output type by column"),
              caption.short = "Geometry casting on simple feature geometries.",
              booktabs = TRUE) |> 
-  kableExtra::add_footnote("Note: Values like (1) represent the number of features; NA means the operation is not possible. Abbreviations: POI, LIN, POL and GC refer to POINT, LINESTRING, POLYGON and GEOMETRYCOLLECTION. The MULTI version of these geometry types is indicated by a preceding M, e.g., MPOI is the acronym for MULTIPOINT.", notation = "none")
+  kableExtra::add_footnote("Note: Values like (1) represent the number of features; NA means the operation is not possible", notation = "none")
 ```
 
 Let's try to apply geometry type transformations on a new object, `multilinestring_sf`, as an example (on the left in Figure \@ref(fig:line-cast)):
@@ -684,7 +699,7 @@ The same problem arises when we would like to merge satellite imagery from diffe
 We can deal with such mismatches by aligning the rasters.
 
 In the simplest case, two images only differ with regard to their extent.
-Following code adds one row and two columns to each side of the raster while setting all new values to `NA` (Figure \@ref(fig:extend-example)).
+The following code adds one row and two columns to each side of the raster while setting all new values to `NA` (Figure \@ref(fig:extend-example)).
 
 ```{r extend-example0}
 elev = rast(system.file("raster/elev.tif", package = "spData"))
@@ -713,14 +728,14 @@ elev_4 = extend(elev, elev_2)
 \index{raster!origin} 
 The origin of a raster is the cell corner closest to the coordinates (0, 0).
 The `origin()` function returns the coordinates of the origin.
-In the below example a cell corner exists with coordinates (0, 0), but that is not necessarily the case.
+In the example below a cell corner exists with coordinates (0, 0), but that is not necessarily the case.
 
 ```{r 05-geometry-operations-39}
 origin(elev_4)
 ```
 
 If two rasters have different origins, their cells do not overlap completely which would make map algebra impossible.
-To change the origin -- use `origin()`.^[
+To change the origin, use `origin()`.^[
 If the origins of two raster datasets are just marginally apart, it sometimes is sufficient to simply increase the `tolerance` argument  of `terra::terraOptions()`.
 ]
 Figure \@ref(fig:origin-example) reveals the effect of changing the origin in this way.
@@ -750,13 +765,14 @@ Note that changing the resolution (next section) frequently also changes the ori
 \index{raster!aggregation} 
 \index{raster!disaggregation} 
 Raster datasets can also differ with regard to their resolution. 
-To match resolutions, one can either decrease  (`aggregate()`) or increase (`disagg()`) the resolution of one raster.^[
+To match resolutions, one can either decrease (`aggregate()`) or increase (`disagg()`) the resolution of one raster.^[
 Here we refer to spatial resolution.
 In remote sensing the spectral (spectral bands), temporal (observations through time of the same area) and radiometric (color depth) resolution are also important.
 Check out the `tapp()` example in the documentation for getting an idea on how to do temporal raster aggregation.
 ]
+
 As an example, we here change the spatial resolution of `dem` (found in the **spDataLarge** package) by a factor of 5 (Figure \@ref(fig:aggregate-example)).
-Additionally, the output cell value should correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()`, etc.):
+Additionally, the output cell value is going to correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()`, etc.):
 
 ```{r 05-geometry-operations-40}
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
@@ -773,6 +789,22 @@ p_ar2 = tm_shape(dem_agg) +
   tm_title("B. Aggregated") +
   tm_layout(frame = FALSE, legend.show = FALSE)
 tmap_arrange(p_ar1, p_ar2, ncol = 2)
+```
+
+Table \@ref(tab:aggdf) compares the properties of the original and aggregated raster.
+Notice that "decreasing" the resolution with `aggregate()` increases the resolution from $(30.85, 30.85)$ to $(154.25, 154.25)$. 
+This is done by decreasing the number of rows (`nrow`) and columns (`ncol`) (see Section \@ref(raster-data)).
+The extent was slightly adjusted to accommodate the new grid size.
+
+```{r aggdf}
+#| echo: false
+agg_df = data.frame(
+  object = c("dem", "dem_agg"),
+  resolution = c("(30.85, 30.85)", "(154.25, 154.25)"),
+  dimensions = c("117 x 117", "24 x 24"),
+  extent = c("794599.1, 798208.6, 8931775, 8935384", "794599.1, 798301.1, 8931682, 8935384")
+)
+knitr::kable(agg_df, caption = "Properties of the original and aggregated raster.", booktabs = TRUE)
 ```
 
 \index{raster!disaggregation}
@@ -811,7 +843,7 @@ However, what to do when we have two or more rasters with different resolutions 
 This is the role of resampling -- a process of computing values for new pixel locations.
 In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin (Figure \@ref(fig:resampl0)).
 
-```{r resampl0, echo=FALSE, fig.cap="Resampling of an original (input) raster into a target raster with custom resolution and origin.", fig.height=2}
+```{r resampl0, echo=FALSE, fig.cap="Resampling of an original (input) raster into a target raster with custom resolution and origin.", fig.asp = 0.4}
 target_rast = rast(xmin = 794650, xmax = 798250, 
                    ymin = 8931750, ymax = 8935350,
                    resolution = 150, crs = "EPSG:32717")
@@ -826,7 +858,7 @@ tm2 = tm_shape(dem) +
   tm_raster(col.scale = tm_scale(breaks = seq(200, 1100, by = 150))) +
   tm_title("Target raster") +
   tm_layout(frame = FALSE, legend.show = FALSE) +
-  tm_shape(target_rast_p) +
+  tm_shape(target_rast_p, is.main = TRUE) +
   tm_borders()
 tm3 = tm_shape(dem) +
   tm_raster(col_alpha = 0) +

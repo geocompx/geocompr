@@ -1,5 +1,9 @@
 # Ecology {#eco}
 
+```{r, include=FALSE}
+source("code/before_script.R")
+```
+
 ## Prerequisites {-}
 
 This chapter assumes you have a strong grasp of geographic data analysis and processing, covered in Chapters \@ref(spatial-class) to \@ref(geometry-operations).
@@ -15,7 +19,7 @@ library(data.table)        # fast data frame manipulation (used by mlr3)
 library(mlr3)              # machine learning (see Chapter 12)
 library(mlr3spatiotempcv)  # spatio-temporal resampling 
 library(mlr3tuning)        # hyperparameter tuning package
-library(mlr3learners)      # interface to most important machine learning packages
+library(mlr3learners)      # interface to most important machine learning pkgs
 library(paradox)           # defining hyperparameter spaces
 library(ranger)            # random forest package
 library(qgisprocess)       # bridge to QGIS (Chapter 10)
@@ -36,27 +40,25 @@ Every few years, the El Niño phenomenon brings torrential rainfall to this sun-
 
 Unfortunately, fog oases are heavily endangered, primarily due to agriculture and anthropogenic climate change.
 Evidence on the composition and spatial distribution of the native flora can support efforts to protect remaining fragments of fog oases [@muenchow_predictive_2013; @muenchow_soil_2013].
-The chapter also demonstrates how to apply techniques covered in previous chapters to an important applied field: ecology.
-In it you will analyze the composition and the spatial distribution of vascular plants (here referring mostly to flowering plants) on the southern slope of Mt. Mongón, a *lomas* mountain near Casma on the central northern coast of Peru (Figure \@ref(fig:study-area-mongon)).
+
+In this chapter you will analyze the composition and the spatial distribution of vascular plants (here referring mostly to flowering plants) on the southern slope of Mt. Mongón, a *lomas* mountain near Casma on the central northern coast of Peru (Figure \@ref(fig:study-area-mongon)).
+During a field study to Mt. Mongón, all vascular plants living in 100 randomly sampled 4x4 m^2^ plots in the austral winter of 2011  were recorded [@muenchow_predictive_2013].
+The sampling coincided with a strong La Niña event that year, as shown in data published by the National Oceanic and Atmospheric Administration ([NOAA](https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php)).
+This led to even higher levels of aridity than usual in the coastal desert and increased fog activity on the southern slopes of Peruvian *lomas* mountains.
 
 ```{r study-area-mongon, echo=FALSE, fig.cap="The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017).", out.width="60%", fig.scap="The Mt. Mongón study area."}
 knitr::include_graphics("figures/15_study_area_mongon.png")
 # knitr::include_graphics("https://user-images.githubusercontent.com/1825120/38989956-6eae7c9a-43d0-11e8-8f25-3dd3594f7e74.png")
 ```
 
-During a field study to Mt. Mongón, all vascular plants living in 100 randomly sampled 4x4 m^2^ plots in the austral winter of 2011  were recorded [@muenchow_predictive_2013].
-The sampling coincided with a strong La Niña event that year, as shown in data published by the National Oceanic and Atmospheric Administration ([NOAA](https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php)).
-This led to even higher levels of aridity than usual in the coastal desert and increased fog activity on the southern slopes of Peruvian *lomas* mountains.
+This chapter also demonstrates how to apply techniques covered in previous chapters to an important applied field: ecology.
+Specifically, we will:
 
-<!--
-The first hypothesis is that four plant belts will be found along the altitudinal gradient: a low-elevation *Tillandsia* belt, a herbaceous belt, a bromeliad belt, and an uppermost succulent belt [@muenchow_soil_2013].
--->
-
-Ordinations\index{ordination} are dimension-reducing techniques that allow the extraction of the main gradients from a (noisy) dataset, in our case the floristic gradient developing along the southern mountain slope (see next section).
-In this chapter, we will model the first ordination axis, i.e., the floristic gradient, as a function of environmental predictors such as altitude, slope, catchment area\index{catchment area} and NDVI\index{NDVI}.
-For this, we will make use of a random forest model\index{random forest} --- a very popular machine learning\index{machine learning} algorithm [@breiman_random_2001].
-The model will allow us to make spatial distribution maps of the floristic composition anywhere in the study area.
-To guarantee an optimal prediction, it is advisable to tune beforehand the hyperparameters\index{hyperparameter} with the help of spatial cross-validation\index{cross-validation!spatial CV} (see Section \@ref(svm)).
+- Load in needed data and compute environmental predictors (Section \@ref(data-and-data-preparation))
+- Extract the main floristic gradient from our species composition matrix with the help of a dimension-reducing technique (ordinations\index{ordination}; Section \@ref(nmds))
+- Model the first ordination axis, i.e., the floristic gradient, as a function of environmental predictors such as altitude, slope, catchment area\index{catchment area} and NDVI\index{NDVI} (Section \@ref(modeling-the-floristic-gradient)).
+For this, we will make use of a random forest model\index{random forest} --- a very popular machine learning\index{machine learning} algorithm [@breiman_random_2001]. To guarantee an optimal prediction, it is advisable to tune beforehand the hyperparameters\index{hyperparameter} with the help of spatial cross-validation\index{cross-validation!spatial CV} (see Section \@ref(svm))
+- Make a spatial distribution map of the floristic composition anywhere in the study area (Section \@ref(predictive-mapping))
 
 ## Data and data preparation
 
@@ -247,7 +249,7 @@ Hence, we need to dismiss all sites in which no species were found.
 pa = vegan::decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
 pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
-``` 
+```
 
 The resulting matrix serves as input for the NMDS\index{NMDS}.
 `k` specifies the number of output axes, here, set to 4.^[
@@ -400,11 +402,8 @@ knitr::include_graphics("figures/15_tree.png")
 ```
 
 The resulting tree consists of three internal nodes and four terminal nodes (Figure \@ref(fig:tree)).
-The first internal node at the top of the tree assigns all observations which are below
-<!--`r # gsub("<", "", as.character(as.data.frame(tree_mo$fram$splits)[1, "cutleft"]))`-->
-328.5 m to the left and all other observations to the right branch.
-The observations falling into the left branch have a mean NMDS\index{NMDS} score of
-<!--`r # round(tree_mo$frame$yval[2], 3)`-->-1.198.
+The first internal node at the top of the tree assigns all observations which are below 328.5 m to the left and all other observations to the right branch.
+The observations falling into the left branch have a mean NMDS\index{NMDS} score of -1.198.
 Overall, we can interpret the tree as follows: the higher the elevation, the higher the NMDS\index{NMDS} score becomes.
 This means that the simple decision tree has already revealed four distinct floristic assemblages.
 For a more in-depth interpretation please refer to the \@ref(predictive-mapping) section.
@@ -491,7 +490,7 @@ In each of these spatial partitions, we run 50 models (`trm()`) while using rand
 The performance measure is the root mean squared error (RMSE\index{RMSE}).
 
 ```{r 15-eco-23}
-autotuner_rf = mlr3tuning::AutoTuner$new(
+autotuner_rf = mlr3tuning::auto_tuner(
   learner = lrn_rf,
   resampling = mlr3::rsmp("spcv_coords", folds = 5), # spatial partitioning
   measure = mlr3::msr("regr.rmse"), # performance measure
@@ -520,12 +519,6 @@ autotuner_rf = readRDS("extdata/15-tune.rds")
 ```{r tuning-result, cache=TRUE, cache.lazy=FALSE}
 autotuner_rf$tuning_result
 ```
-
-<!--
-An `mtry` of `r # autotuner_rf$tuning_result$mtry`, a `sample.fraction` of `r # round(autotuner_rf$tuning_result$sample.fraction, 2)`, and a `min.node.size` of `r # autotuner_rf$tuning_result$min.node.size` represent the best hyperparameter\index{hyperparameter} combination.
-An RMSE\index{RMSE} of `r # round(autotuner_rf$tuning_result$regr.rmse, 2)`
-is relatively good when considering the range of the response variable which is `r # round(diff(range(rp$sc)), 2)` (`diff(range(rp$sc))`).
--->
 
 ### Predictive mapping
 

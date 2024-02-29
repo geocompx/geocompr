@@ -1,5 +1,9 @@
 # Statistical learning {#spatial-cv}
 
+```{r, include=FALSE}
+source("code/before_script.R")
+```
+
 ```{r 12-knitr-settings, include=FALSE}
 knitr::opts_chunk$set(cache = FALSE)
 ```
@@ -17,15 +21,15 @@ Packages **GGally**, **lgr**, **kernlab**, **mlr3measures**, **paradox**, **pROC
 library(sf)
 library(terra)
 library(dplyr)
-library(future)
-library(lgr)
-library(mlr3)
-library(mlr3learners)
-library(mlr3extralearners)
-library(mlr3spatiotempcv)
-library(mlr3tuning)
-library(mlr3viz)
-library(progressr)
+library(future)             # parallel processing
+library(lgr)                # logging framework for R
+library(mlr3)               # unified interface to machine learning algorithms
+library(mlr3learners)       # most important machine learning algorithms
+library(mlr3extralearners)  # access to even more learning algorithms
+library(mlr3spatiotempcv)   # spatio-temporal resampling strategies
+library(mlr3tuning)         # hyperparameter tuning
+library(mlr3viz)            # plotting functions for mlr3 objects
+library(progressr)          # report progress updates
 ```
 
 Required data will be attached in due course.
@@ -47,7 +51,7 @@ The primary aim of much machine learning\index{machine learning} research is to 
 Machine learning thrives in the age of 'big data'\index{big data} because its methods make few assumptions about input variables and can handle huge datasets.
 Machine learning is conducive to tasks such as the prediction of future customer behavior, recommendation services (music, movies, what to buy next), face recognition, autonomous driving, text classification and predictive maintenance (infrastructure, industry).
 
-This chapter is based on a case study: the (spatial) prediction of landslides.
+This chapter is based on a case study: modeling the occurrence of landslides.
 This application links to the applied nature of geocomputation, defined in Chapter \@ref(intro), and illustrates how machine learning\index{machine learning} borrows from the field of statistics\index{statistics} when the sole aim is prediction.
 Therefore, this chapter first introduces modeling and cross-validation\index{cross-validation} concepts with the help of a Generalized Linear Model \index{GLM} [@zuur_mixed_2009].
 Building on this, the chapter implements a more typical machine learning\index{machine learning} algorithm\index{algorithm}, namely a Support Vector Machine (SVM)\index{SVM}.
@@ -60,6 +64,10 @@ CV helps to detect overfitting\index{overfitting} since models that predict the 
 Randomly splitting spatial data can lead to training points that are neighbors in space with test points.
 Due to spatial autocorrelation\index{autocorrelation!spatial}, test and training datasets would not be independent in this scenario, with the consequence that CV\index{cross-validation} fails to detect a possible overfitting\index{overfitting}.
 Spatial CV\index{cross-validation!spatial CV} alleviates this problem and is the **central** theme in this chapter.
+
+Hence, and to emphasize it again, this chapter is focusing on the **predictive performance** of models.
+It **does not** teach how to do predictive mapping.
+This will be the topic of Chapter \@ref(eco).
 
 ## Case study: Landslide susceptibility {#case-landslide}
 
@@ -250,7 +258,7 @@ This partitioning strategy is the **only** difference between spatial and conven
 As a result, spatial CV leads to a bias-reduced assessment of a model's predictive performance, and hence helps to avoid overfitting\index{overfitting}.
 
 ```{r partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row).", echo=FALSE, fig.scap="Spatial visualization of selected test and training observations."}
-knitr::include_graphics("figures/13_partitioning.png")
+knitr::include_graphics("figures/12_partitioning.png")
 ```
 
 ## Spatial CV with **mlr3**
@@ -267,7 +275,7 @@ As illustrated in Figure \@ref(fig:building-blocks), these have a clear order.
 (ref:building-blocks) Basic building blocks of the mlr3 package. Source: @becker_mlr3_2022. (Permission to reuse this figure was kindly granted.)
 
 ```{r building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="(ref:building-blocks)", fig.scap="Basic building blocks of the mlr3 package."}
-knitr::include_graphics("figures/13_ml_abstraction_crop.png")
+knitr::include_graphics("figures/12_ml_abstraction_crop.png")
 ```
 
 The **mlr3** modeling process consists of three main stages.
@@ -278,8 +286,8 @@ Third, the **resampling** approach assesses the predictive performance of the mo
 ### Generalized linear model {#glm}
 
 To use a GLM\index{GLM} in **mlr3**\index{mlr3 (package)}, we must create a **task** containing the landslide data.
-Since the response is binary (two-category variable) and has a spatial dimension, we create a classification\index{classification} task with `TaskClassifST$new()` of the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021, for non-spatial tasks, use `mlr3::TaskClassif$new()` or `mlr3::TaskRegr$new()` for regression\index{regression} tasks, see `?Task` for other task types].^[The **mlr3** ecosystem makes heavily use of **data.table** and **R6** classes. And though you might use **mlr3** without knowing the specifics of **data.table** or **R6**, it might be rather helpful. To learn more about **data.table**, please refer to https://rdatatable.gitlab.io/data.table/. To learn more about **R6**, we recommend [Chapter 14](https://adv-r.hadley.nz/fp.html) of the Advanced R book [@wickham_advanced_2019].]
-The first essential argument of these `Task*$new()` functions is `backend`.
+Since the response is binary (two-category variable) and has a spatial dimension, we create a classification\index{classification} task with `as_task_classif_st()` of the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021, for non-spatial tasks, use `mlr3::as_task_classif()` or `mlr3::as_task_regr()` for regression\index{regression} tasks, see `?Task` for other task types].^[The **mlr3** ecosystem makes heavily use of **data.table** and **R6** classes. And though you might use **mlr3** without knowing the specifics of **data.table** or **R6**, it might be rather helpful. To learn more about **data.table**, please refer to https://rdatatable.gitlab.io/data.table/. To learn more about **R6**, we recommend [Chapter 14](https://adv-r.hadley.nz/fp.html) of the Advanced R book [@wickham_advanced_2019].]
+The first essential argument of these `as_task_` functions is `backend`.
 `backend` expects that the input data includes the response and predictor variables.
 The `target` argument indicates the name of a response variable (in our case this is `lslpts`) and `positive` determines which of the two factor levels of the response variable indicate the landslide initiation point (in our case this is `TRUE`).
 All other variables of the `lsl` dataset will serve as predictors.
@@ -289,7 +297,7 @@ Additionally, we should decide if we want to use the coordinates as predictors i
 
 ```{r 12-spatial-cv-11, eval=FALSE}
 # 1. create task
-task = mlr3spatiotempcv::TaskClassifST$new(
+task = mlr3spatiotempcv::as_task_classif_st(
   id = "ecuador_lsl",
   backend = mlr3::as_data_backend(lsl), 
   target = "lslpts", 
@@ -302,7 +310,7 @@ task = mlr3spatiotempcv::TaskClassifST$new(
 
 Note that `mlr3spatiotempcv::as_task_classif_st()` also accepts an `sf`-object as input for the `backend` parameter.
 In this case, you might only want to additionally specify the `coords_as_features` argument.
-We did not convert `lsl` into an `sf`-object because `TaskClassifST$new()` would just turn it back into a non-spatial `data.table` object in the background.
+We did not convert `lsl` into an `sf`-object because `as_task_classif_st()` would just turn it back into a non-spatial `data.table` object in the background.
 
 For a short data exploration, the `autoplot()` function of the **mlr3viz** package might come in handy since it plots the response against all predictors and all predictors against all predictors (not shown).
 
@@ -435,7 +443,7 @@ mean(score_spcv_glm$classif.auc) |>
 ```
 
 To put these results in perspective, let us compare them with AUROC\index{AUROC} values from a 100-repeated 5-fold non-spatial cross-validation (Figure \@ref(fig:boxplot-cv); the code for the non-spatial cross-validation\index{cross-validation} is not shown here but will be explored in the exercise section).
-As expected (see section \@ref(intro-cv)), the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance of the latter due to its spatial autocorrelation\index{autocorrelation!spatial}.
+As expected (see Section \@ref(intro-cv)), the spatially cross-validated result yields lower AUROC values on average than the conventional cross-validation approach, underlining the over-optimistic predictive performance of the latter due to its spatial autocorrelation\index{autocorrelation!spatial}.
 
 ```{r boxplot-cv, echo=FALSE, message=FALSE, out.width="75%", fig.cap="Boxplot showing the difference in GLM AUROC values on spatial and conventional 100-repeated 5-fold cross-validation.", fig.scap="Boxplot showing AUROC values."}
 library(ggplot2)
@@ -500,9 +508,6 @@ lrn_ksvm$fallback = lrn("classif.featureless", predict_type = "prob")
 The next stage is to specify a resampling strategy.
 Again we will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatial CV}.
 
-<!-- we agreed on using "performance estimation level" and "tuning level" instead of saying "outer and inner resampling" in our paper
--->
-
 ```{r 12-spatial-cv-25}
 # performance estimation level
 perf_level = mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
@@ -516,7 +521,7 @@ Using the same data for the performance assessment and the tuning would potentia
 This can be avoided using nested spatial CV\index{cross-validation!spatial CV}.
 
 ```{r inner-outer, echo=FALSE, fig.cap="Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2019). Permission to reuse it was kindly granted.)", fig.scap="Schematic of hyperparameter tuning."}
-knitr::include_graphics("figures/13_cv.png")
+knitr::include_graphics("figures/12_cv.png")
 ```
 
 This means that we split each fold again into five spatially disjoint subfolds which are used to determine the optimal hyperparameters\index{hyperparameter} (`tune_level` object in the code chunk below; see Figure \@ref(fig:inner-outer) for a visual representation).
@@ -537,10 +542,10 @@ terminator = mlr3tuning::trm("evals", n_evals = 50)
 tuner = mlr3tuning::tnr("random_search")
 ```
 
-The next stage is to modify the learner `lrn_ksvm` in accordance with all the characteristics defining the hyperparameter tuning with `AutoTuner$new()`.
+The next stage is to modify the learner `lrn_ksvm` in accordance with all the characteristics defining the hyperparameter tuning with `auto_tuner()`.
 
 ```{r 12-spatial-cv-27, eval=FALSE}
-at_ksvm = mlr3tuning::AutoTuner$new(
+at_ksvm = mlr3tuning::auto_tuner(
   learner = lrn_ksvm,
   resampling = tune_level,
   measure = mlr3::msr("classif.auc"),

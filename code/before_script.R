@@ -28,11 +28,11 @@ hook_output = knitr::knit_hooks$get("output")
 knitr::knit_hooks$set(output = function(x, options) {
         if (!is.null(n <- options$out.lines)) {
                 x = knitr:::split_lines(x)
-        if (length(x) > n) {
-                # truncate the output
-                x = c(head(x, n), '....\n')
-        }
-                x = paste(x, collapse = '\n')
+                if (length(x) > n) {
+                        # truncate the output
+                        x = c(head(x, n), '....\n')
+                }              
+                        x = paste(x, collapse = '\n')
         }
         # https://github.com/EmilHvitfeldt/smltar/issues/114
         # this hook is used only when the linewidth option is not NULL
@@ -44,3 +44,4 @@ knitr::knit_hooks$set(output = function(x, options) {
         }
   hook_output(x, options)
 }, crop = knitr::hook_pdfcrop)
+
