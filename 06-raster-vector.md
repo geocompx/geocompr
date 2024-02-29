@@ -329,12 +329,6 @@ Compare it to a polygon rasterization, with `touches = FALSE` by default, which 
 california_raster2 = rasterize(california, raster_template2) 
 ```
 
-
-```
-#> The visual variable "col" of the layer "raster" contains a unique value. Therefore a discrete scale is applied (tm_scale_discrete).
-#> The visual variable "col" of the layer "raster" contains a unique value. Therefore a discrete scale is applied (tm_scale_discrete).
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/vector-rasterization2-1.png" alt="Examples of line and polygon rasterizations." width="100%" />
 <p class="caption">(\#fig:vector-rasterization2)Examples of line and polygon rasterizations.</p>
