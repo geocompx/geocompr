@@ -156,7 +156,7 @@ qgis_providers()
 #>   provider provider_title    algorithm_count
 #>   <chr>    <chr>                       <int>
 #> 1 gdal     GDAL                           56
-#> 2 grass7   GRASS                         306
+#> 2 grass    GRASS                         306
 #> 3 qgis     QGIS                           50
 #> 4 3d       QGIS (3D)                       1
 #> 5 native   QGIS (native c++)             243
@@ -287,18 +287,21 @@ qgis_search_algorithms("clean")
 #> # A tibble: 1 × 5
 #>   provider provider_title group        algorithm      algorithm_title
 #>   <chr>    <chr>          <chr>        <chr>          <chr>
-#> 1 grass7   GRASS          Vector (v.*) grass7:v.clean v.clean
+#> 1 grass   GRASS           Vector (v.*) grass:v.clean v.clean
 ```
 
 This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS\index{GRASS GIS}.
 GRASS GIS's `v.clean` is a powerful tool for cleaning topology of spatial vector data\index{topology cleaning}. 
 Importantly, we can use it through **qgisprocess**.
 
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">The GRASS GIS provider in QGIS was called `grass7` until QGIS version 3.34.
+Thus, if you have an older QGIS version, you must prefix the algorithms with `grass7` instead of `grass`.</div>\EndKnitrBlock{rmdnote}
+
 Similarly to the previous step, we should start by looking at this algorithm's help.
 
 
 ```r
-qgis_show_help("grass7:v.clean")
+qgis_show_help("grass:v.clean")
 ```
 
 We have omitted the output here, because the help text is quite long and contains a lot of arguments.^[Also note that these arguments, contrary to the QGIS's ones, are in lower case.]
@@ -307,7 +310,7 @@ For this example, let's focus on just a few arguments, however, we encourage you
 
 
 ```r
-qgis_get_argument_specs("grass7:v.clean") |>
+qgis_get_argument_specs("grass:v.clean") |>
   select(name, description) |>
   slice_head(n = 4)
 #> # A tibble: 4 × 2
@@ -331,7 +334,7 @@ Let's run this algorithm and convert its output into a new `sf` object `clean_sf
 
 
 ```r
-clean = qgis_run_algorithm("grass7:v.clean",
+clean = qgis_run_algorithm("grass:v.clean",
   input = union_sf, 
   tool = "rmarea", threshold = 25000
 )
@@ -423,13 +426,13 @@ The topographic wetness index is unitless: its low values represent areas that w
 Information from digital elevation models can also be categorized, for example, to geomorphons\index{geomorphons} -- the geomorphological phenotypes consisting of 10 classes that represent terrain forms, such as slopes, ridges, or valleys [@jasiewicz_geomorphons_2013].
 These phenotypes are used in many studies, including landslide susceptibility, ecosystem services, human mobility, and digital soil mapping. 
 
-The original implementation of the geomorphons' algorithm was created in GRASS GIS, and we can find it in the **qgisprocess** list as `"grass7:r.geomorphon"`:
+The original implementation of the geomorphons' algorithm was created in GRASS GIS, and we can find it in the **qgisprocess** list as `"grass:r.geomorphon"`:
 
 
 ```r
 qgis_search_algorithms("geomorphon")
-#> [1] "grass7:r.geomorphon" "sagang:geomorphons" 
-qgis_show_help("grass7:r.geomorphon")
+#> [1] "grass:r.geomorphon" "sagang:geomorphons" 
+qgis_show_help("grass:r.geomorphon")
 # output not shown
 ```
 
@@ -439,7 +442,7 @@ More information about additional arguments can be found in the original paper a
 
 
 ```r
-dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon",
+dem_geomorph = qgis_run_algorithm("grass:r.geomorphon",
   elevation = dem,
   `-m` = TRUE, search = 120
 )
