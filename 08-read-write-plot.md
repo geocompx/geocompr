@@ -927,7 +927,7 @@ On the other hand, you can save interactive maps created in the **mapview** pack
 ```r
 library(mapview)
 mapview_obj = mapview(world, zcol = "lifeExp", legend = TRUE)
-mapshot2(mapview_obj, file = "my_interactive_map.html")
+mapshot2(mapview_obj, url = "my_interactive_map.html")
 ```
 
 ## Exercises
