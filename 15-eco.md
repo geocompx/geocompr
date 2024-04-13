@@ -380,8 +380,11 @@ For specifying a spatial task, we use again the **mlr3spatiotempcv** package [@s
 
 ```r
 # create task
-task = mlr3spatiotempcv::as_task_regr_st(select(rp, -id, -spri),
-  id = "mongon", target = "sc")
+task = mlr3spatiotempcv::as_task_regr_st(
+  select(rp, -id, -spri),
+  target = "sc",
+  id = "mongon"
+)
 ```
 
 Using an `sf` object as the backend automatically provides the geometry information needed for the spatial partitioning later on.

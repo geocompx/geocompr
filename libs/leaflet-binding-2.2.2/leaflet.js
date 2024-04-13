@@ -2266,7 +2266,7 @@ methods.setGroupOptions = function (group, options) {
   this.showHideGroupsOnZoom();
 };
 
-methods.addRasterImage = function (uri, bounds, opacity, attribution, layerId, group) {
+methods.addRasterImage = function (uri, bounds, layerId, group, options) {
   // uri is a data URI containing an image. We want to paint this image as a
   // layer at (top-left) bounds[0] to (bottom-right) bounds[1].
   // We can't simply use ImageOverlay, as it uses bilinear scaling which looks
@@ -2386,12 +2386,10 @@ methods.addRasterImage = function (uri, bounds, opacity, attribution, layerId, g
 
   img.src = uri;
 
-  var canvasTiles = _leaflet2["default"].gridLayer({
-    opacity: opacity,
-    attribution: attribution,
+  var canvasTiles = _leaflet2["default"].gridLayer(Object.assign({}, options, {
     detectRetina: true,
     async: true
-  }); // NOTE: The done() function MUST NOT be invoked until after the current
+  })); // NOTE: The done() function MUST NOT be invoked until after the current
   // tick; done() looks in Leaflet's tile cache for the current tile, and
   // since it's still being constructed, it won't be found.
 

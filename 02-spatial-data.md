@@ -247,11 +247,9 @@ world_mini
 #> Dimension:     XY
 #> Bounding box:  xmin: -180 ymin: -18.3 xmax: 180 ymax: -0.95
 #> Geodetic CRS:  WGS 84
-#> # A tibble: 2 × 4
-#>   iso_a2 name_long continent                                                geom
-#>   <chr>  <chr>     <chr>                                      <MULTIPOLYGON [°]>
-#> 1 FJ     Fiji      Oceania   (((-180 -16.6, -180 -16.5, -180 -16, -180 -16.1, -…
-#> 2 TZ     Tanzania  Africa    (((33.9 -0.95, 31.9 -1.03, 30.8 -1.01, 30.4 -1.13,…
+#>   iso_a2 name_long continent                           geom
+#> 1     FJ      Fiji   Oceania MULTIPOLYGON (((-180 -16.6,...
+#> 2     TZ  Tanzania    Africa MULTIPOLYGON (((33.9 -0.95,...
 ```
 
 All this may seem rather complex, especially for a class system that is supposed to be 'simple'!
