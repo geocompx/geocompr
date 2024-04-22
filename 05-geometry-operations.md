@@ -471,6 +471,11 @@ linestring = st_cast(multipoint, "LINESTRING")
 polyg = st_cast(multipoint, "POLYGON")
 ```
 
+
+```
+#> tmap v3 code detected. Specific changes listed below.
+```
+
 <div class="figure" style="text-align: center">
 <img src="figures/single-cast-1.png" alt="Examples of a linestring and a polygon casted from a multipoint geometry." width="100%" />
 <p class="caption">(\#fig:single-cast)Examples of a linestring and a polygon casted from a multipoint geometry.</p>
