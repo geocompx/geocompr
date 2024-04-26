@@ -1219,9 +1219,9 @@ nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 
 E1. Create a map showing the geographic distribution of the Human Development Index (`HDI`) across Africa with base **graphics** (hint: use `plot()`) and **tmap** packages (hint: use `tm_shape(africa) + ...`).
 
-    - Name two advantages of each based on the experience.
-    - Name three other mapping packages and an advantage of each.
-    - Bonus: create three more maps of Africa using these three other packages.
+- Name two advantages of each based on the experience.
+- Name three other mapping packages and an advantage of each.
+- Bonus: create three more maps of Africa using these three other packages.
 
 
 
@@ -1238,9 +1238,9 @@ Next, combine this map and the map created in the previous exercise into a singl
 
 E4. Create a land cover map of the Zion National Park.
 
-    - Change the default colors to match your perception of the land cover categories
-    - Add a scale bar and north arrow and change the position of both to improve the map's aesthetic appeal
-    - Bonus: Add an inset map of Zion National Park's location in the context of the Utah state. (Hint: an object representing Utah can be subset from the `us_states` dataset.) 
+- Change the default colors to match your perception of the land cover categories
+- Add a scale bar and north arrow and change the position of both to improve the map's aesthetic appeal
+- Bonus: Add an inset map of Zion National Park's location in the context of the Utah state. (Hint: an object representing Utah can be subset from the `us_states` dataset.) 
 
 
 
@@ -1248,39 +1248,39 @@ E4. Create a land cover map of the Zion National Park.
 
 E5. Create facet maps of countries in Eastern Africa:
 
-    - With one facet showing HDI and the other representing population growth (hint: using variables `HDI` and `pop_growth`, respectively)
-    - With a 'small multiple' per country
+- With one facet showing HDI and the other representing population growth (hint: using variables `HDI` and `pop_growth`, respectively)
+- With a 'small multiple' per country
 
 
 
 E6. Building on the previous facet map examples, create animated maps of East Africa:
 
-    - Showing each country in order
-    - Showing each country in order with a legend showing the HDI
+- Showing each country in order
+- Showing each country in order with a legend showing the HDI
 
 
 
 E7. Create an interactive map of HDI in Africa:
 
-    - With **tmap**
-    - With **mapview**
-    - With **leaflet**
-    - Bonus: For each approach, add a legend (if not automatically provided) and a scale bar
+- With **tmap**
+- With **mapview**
+- With **leaflet**
+- Bonus: For each approach, add a legend (if not automatically provided) and a scale bar
 
 
 
 E8. Sketch on paper ideas for a web mapping app that could be used to make transport or land-use policies more evidence based:
 
-    - In the city you live, for a couple of users per day
-    - In the country you live, for dozens of users per day
-    - Worldwide for hundreds of users per day and large data serving requirements
+- In the city you live, for a couple of users per day
+- In the country you live, for dozens of users per day
+- Worldwide for hundreds of users per day and large data serving requirements
 
 
 
 E9. Update the code in `coffeeApp/app.R` so that instead of centering on Brazil the user can select which country to focus on:
 
-    - Using `textInput()`
-    - Using `selectInput()`
+- Using `textInput()`
+- Using `selectInput()`
 
 
 

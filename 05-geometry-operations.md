@@ -473,7 +473,7 @@ polyg = st_cast(multipoint, "POLYGON")
 
 
 ```
-#> tmap v3 code detected. Specific changes listed below.
+#> -- tmap v3 code detected --
 ```
 
 <div class="figure" style="text-align: center">
