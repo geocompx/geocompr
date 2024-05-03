@@ -287,24 +287,24 @@ Third, the **resampling** approach assesses the predictive performance of the mo
 
 To use a GLM\index{GLM} in **mlr3**\index{mlr3 (package)}, we must create a **task** containing the landslide data.
 Since the response is binary (two-category variable) and has a spatial dimension, we create a classification\index{classification} task with `as_task_classif_st()` of the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021, for non-spatial tasks, use `mlr3::as_task_classif()` or `mlr3::as_task_regr()` for regression\index{regression} tasks, see `?Task` for other task types].^[The **mlr3** ecosystem makes heavily use of **data.table** and **R6** classes. And though you might use **mlr3** without knowing the specifics of **data.table** or **R6**, it might be rather helpful. To learn more about **data.table**, please refer to https://rdatatable.gitlab.io/data.table/. To learn more about **R6**, we recommend [Chapter 14](https://adv-r.hadley.nz/fp.html) of the Advanced R book [@wickham_advanced_2019].]
-The first essential argument of these `as_task_` functions is `backend`.
-`backend` expects that the input data includes the response and predictor variables.
+The first essential argument of these `as_task_` functions is `x`.
+`x` expects that the input data includes the response and predictor variables.
 The `target` argument indicates the name of a response variable (in our case this is `lslpts`) and `positive` determines which of the two factor levels of the response variable indicate the landslide initiation point (in our case this is `TRUE`).
 All other variables of the `lsl` dataset will serve as predictors.
 For spatial CV, we need to provide a few extra arguments.
 The `coordinate_names` argument expects the names of the coordinate columns (see Section \@ref(intro-cv) and Figure \@ref(fig:partitioning)).
-Additionally, we should decide if we want to use the coordinates as predictors in the modeling (`coords_as_features`) and indicate the used CRS (`crs`).
+Additionally, we should indicate the used CRS (`crs`) and decide if we want to use the coordinates as predictors in the modeling (`coords_as_features`).
 
 ```{r 12-spatial-cv-11, eval=FALSE}
 # 1. create task
 task = mlr3spatiotempcv::as_task_classif_st(
-  id = "ecuador_lsl",
-  backend = mlr3::as_data_backend(lsl), 
+  mlr3::as_data_backend(lsl), 
   target = "lslpts", 
+  id = "ecuador_lsl",
   positive = "TRUE",
   coordinate_names = c("x", "y"),
-  coords_as_features = FALSE,
-  crs = "EPSG:32717"
+  crs = "EPSG:32717",
+  coords_as_features = FALSE
   )
 ```
 
