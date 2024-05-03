@@ -460,8 +460,8 @@ Interestingly, there are connections between some geomorphons and the TWI values
 The largest TWI values mostly occur in valleys and hollows, while the lowest values are seen, as expected, on ridges.
 
 <div class="figure" style="text-align: center">
-<img src="figures/10-qgis-raster-map.png" alt="Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mongón study area." width="100%" />
-<p class="caption">(\#fig:qgis-raster-map)Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mongón study area.</p>
+<img src="figures/10-qgis-raster-map.png" alt="Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mong&lt;U+00F3&gt;n study area." width="100%" />
+<p class="caption">(\#fig:qgis-raster-map)Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mong<U+00F3>n study area.</p>
 </div>
 
 ## SAGA {#saga}
@@ -544,8 +544,8 @@ ndvi_segments = ndvi_srg$segments |>
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/10-saga-segments.png" alt="Normalized difference vegetation index (NDVI, left panel) and NDVI-based segments derived using the seeded region growing algorithm for the Mongón study area." width="100%" />
-<p class="caption">(\#fig:sagasegments)Normalized difference vegetation index (NDVI, left panel) and NDVI-based segments derived using the seeded region growing algorithm for the Mongón study area.</p>
+<img src="figures/10-saga-segments.png" alt="Normalized difference vegetation index (NDVI, left panel) and NDVI-based segments derived using the seeded region growing algorithm for the Mong&lt;U+00F3&gt;n study area." width="100%" />
+<p class="caption">(\#fig:sagasegments)Normalized difference vegetation index (NDVI, left panel) and NDVI-based segments derived using the seeded region growing algorithm for the Mong<U+00F3>n study area.</p>
 </div>
 
 The resulting polygons (segments) represent areas with similar values. 
@@ -1100,6 +1100,6 @@ E7. Query all Californian highways from the PostgreSQL/PostGIS\index{PostGIS} da
 
 
 <!-- stac+gdalcubes 1 -->
-E8. The `ndvi.tif` raster (`system.file("raster/ndvi.tif", package = "spDataLarge")`) contains NDVI calculated for the Mongón study area based on Landsat data from September 22nd, 2000.
+E8. The `ndvi.tif` raster (`system.file("raster/ndvi.tif", package = "spDataLarge")`) contains NDVI calculated for the Mong<U+00F3>n study area based on Landsat data from September 22nd, 2000.
 Use **rstac**, **gdalcubes**, and **terra** to download Sentinel-2 images for the same area from 
 2020-08-01 to 2020-10-31, calculate its NDVI, and then compare it with the results from `ndvi.tif`.

@@ -267,16 +267,16 @@ To make sure that the reader uses the exact same results, we have put them into 
 
 Table: (\#tab:metro-names)Result of the reverse geocoding.
 
-|city              |state               |
-|:-----------------|:-------------------|
-|Hamburg           |NA                  |
-|Berlin            |NA                  |
-|Velbert           |Nordrhein-Westfalen |
-|Leipzig           |Sachsen             |
-|Frankfurt am Main |Hessen              |
-|Nürnberg          |Bayern              |
-|Stuttgart         |Baden-Württemberg   |
-|München           |Bayern              |
+|city              |state                    |
+|:-----------------|:------------------------|
+|Hamburg           |NA                       |
+|Berlin            |NA                       |
+|Velbert           |Nordrhein-Westfalen      |
+|Leipzig           |Sachsen                  |
+|Frankfurt am Main |Hessen                   |
+|N<U+00FC>rnberg   |Bayern                   |
+|Stuttgart         |Baden-W<U+00FC>rttemberg |
+|M<U+00FC>nchen    |Bayern                   |
 
 
 

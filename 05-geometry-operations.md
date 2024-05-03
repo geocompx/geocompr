@@ -474,6 +474,7 @@ polyg = st_cast(multipoint, "POLYGON")
 
 ```
 #> -- tmap v3 code detected --
+#> [v3->v4] polygons(): use 'fill' for the fill color of polygons/symbols (instead of 'col'), and 'col' for the outlines (instead of 'border.col')
 ```
 
 <div class="figure" style="text-align: center">
