@@ -27,5 +27,5 @@ sf_diagram = grViz("digraph {
                   }",
                   height = 100)
 
-save_png(sf_diagram, "figures/02-sfdiagram.png")
-knitr::plot_crop("figures/02-sfdiagram.png")
+save_png(sf_diagram, "images/02-sfdiagram.png")
+knitr::plot_crop("images/02-sfdiagram.png")

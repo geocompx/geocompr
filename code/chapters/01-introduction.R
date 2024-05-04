@@ -39,7 +39,7 @@ knitr::kable(x = d,
 
 ## ----interactive, fig.cap="The blue markers indicate where the authors are from. The basemap is a tiled image of the Earth at night provided by NASA. Interact with the online version at geocompr.robinlovelace.net, for example by zooming in and clicking on the popups.", out.width="100%", fig.scap="Where the authors are from.", echo=FALSE----
 if (knitr::is_latex_output()){
-    knitr::include_graphics("figures/interactive.png")   
+    knitr::include_graphics("images/interactive.png")   
 } else if (knitr::is_html_output()){
     # library(leaflet)
     # popup = c("Robin", "Jakub", "Jannes")
@@ -56,7 +56,7 @@ if (knitr::is_latex_output()){
 
 
 ## ----cranlogs, fig.cap="Downloads of selected R packages for working with geographic data from early 2013 to present. The y axis shows the average number of dailly downloads from the popular cloud.r-project.org CRAN mirror with a 91-day rolling window (log scale).", echo=FALSE, fig.scap="The popularity of spatial packages in R."----
-knitr::include_graphics("figures/01-cranlogs.png")
+knitr::include_graphics("images/01-cranlogs.png")
 
 
 ## ----revdep, echo=FALSE, message=FALSE--------------------------------------------------------------

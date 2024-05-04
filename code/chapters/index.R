@@ -75,7 +75,7 @@ if (is_html) {
 
 ## 
 
-## <!--[![](figures/editme.png)](https://github.com/Robinlovelace/geocompr/edit/main/index.Rmd)-->
+## <!--[![](images/editme.png)](https://github.com/Robinlovelace/geocompr/edit/main/index.Rmd)-->
 
 ## 
 

@@ -16,7 +16,7 @@ library(vegan)
 
 
 ## ----study-area-mongon, echo=FALSE, fig.cap="The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017).", out.width="60%", fig.scap="The Mt. Mongón study area."----
-knitr::include_graphics("figures/15_study_area_mongon.png")
+knitr::include_graphics("images/15_study_area_mongon.png")
 # knitr::include_graphics("https://user-images.githubusercontent.com/1825120/38989956-6eae7c9a-43d0-11e8-8f25-3dd3594f7e74.png")
 
 
@@ -60,9 +60,9 @@ ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 #   tm_shape(random_points) +
 #   tm_dots() +
 #   tm_layout(inner.margins = 0, legend.outside = TRUE)
-# tmap_save(tm, "figures/15_sa_mongon_sampling.png",
+# tmap_save(tm, "images/15_sa_mongon_sampling.png",
 #           width = 12, height = 7, units = "cm")
-knitr::include_graphics("figures/15_sa_mongon_sampling.png")
+knitr::include_graphics("images/15_sa_mongon_sampling.png")
 
 
 ## ----15-eco-5, eval=FALSE---------------------------------------------------------------------------
@@ -185,7 +185,7 @@ elev = dplyr::filter(random_points, id %in% rownames(pa)) |>
 rotnmds = vegan::MDSrotate(nmds, elev)
 # extracting the first two axes
 sc = vegan::scores(rotnmds, choices = 1:2)
-knitr::include_graphics("figures/15_xy_nmds.png")
+knitr::include_graphics("images/15_xy_nmds.png")
 
 
 ## ----15-eco-15, eval=FALSE, echo=FALSE--------------------------------------------------------------
@@ -261,12 +261,12 @@ rp = readRDS("extdata/15-rp.rds")
 
 ## ----tree, echo=FALSE, fig.cap="Simple example of a decision tree with three internal nodes and four terminal nodes.", out.width="60%", fig.scap="Simple example of a decision tree."----
 # tree_mo = tree::tree(sc ~ dem, data = rp)
-# png("figures/15_tree.png", width = 1100, height = 700, units = "px", res = 300)
+# png("images/15_tree.png", width = 1100, height = 700, units = "px", res = 300)
 # par(mar = rep(1, 4))
 # plot(tree_mo)
 # text(tree_mo, pretty = 0)
 # dev.off()
-knitr::include_graphics("figures/15_tree.png")
+knitr::include_graphics("images/15_tree.png")
 
 
 ## ---------------------------------------------------------------------------------------------------
@@ -349,9 +349,9 @@ autotuner_rf$predict(task)
 #   tm_shape(study_area) +
 #   tm_borders() +
 #   tm_layout(inner.margins = 0.02, legend.outside = TRUE)
-# tmap_save(tm, "figures/15_rf_pred.png",
+# tmap_save(tm, "images/15_rf_pred.png",
 #           width = 12, height = 7, units = "cm")
-knitr::include_graphics("figures/15_rf_pred.png")
+knitr::include_graphics("images/15_rf_pred.png")
 
 
 ## ----15-eco-29, cache=TRUE, cache.lazy=FALSE, eval=FALSE--------------------------------------------

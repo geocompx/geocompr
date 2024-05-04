@@ -22,4 +22,4 @@ tm2 = tm_shape(ndvi_rast) +
             legend.position = c("left", "bottom"),
             legend.bg.color = "white")
 tma = tmap_arrange(tm1, tm2, nrow = 1)
-tmap_save(tma, "figures/04-ndvi.png", height = 800*2, width = 1100*2)
+tmap_save(tma, "images/04-ndvi.png", height = 800*2, width = 1100*2)

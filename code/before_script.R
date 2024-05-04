@@ -8,7 +8,7 @@ opts_chunk$set(
         # Uncomment it to avoid cached data (which can cause issues):
         cache = TRUE,
         fig.pos = "t",
-        fig.path = "figures/",
+        fig.path = "images/",
         fig.align = "center",
         fig.width = 6,
         fig.asp = 0.618,  # 1 / phi

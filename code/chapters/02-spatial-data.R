@@ -41,11 +41,11 @@ library(spDataLarge)   # load larger geographic data
 
 
 ## ----vectorplots, fig.cap="Illustration of vector (point) data in which location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.", out.width="49%", fig.show='hold', echo=FALSE, fig.scap="Illustration of vector (point) data."----
-knitr::include_graphics(c("figures/vector_lonlat.png", "figures/vector_projected.png"))
+knitr::include_graphics(c("images/vector_lonlat.png", "images/vector_projected.png"))
 
 
 ## ----sf-ogc, fig.cap="Simple feature types fully supported by sf.", out.width="60%", echo=FALSE-----
-knitr::include_graphics("figures/sf-classes.png")
+knitr::include_graphics("images/sf-classes.png")
 
 
 ## ----02-spatial-data-6, eval=FALSE------------------------------------------------------------------
@@ -193,7 +193,7 @@ par(old_par)
 
 ## ----02-sfdiagram, fig.cap="Building blocks of sf objects.", echo=FALSE-----------------------------
 # source("code/02-sfdiagram.R")
-knitr::include_graphics("figures/02-sfdiagram.png")
+knitr::include_graphics("images/02-sfdiagram.png")
 
 
 ## ----02-spatial-data-33-----------------------------------------------------------------------------
@@ -514,12 +514,12 @@ multi_rast34 = c(multi_rast3, multi_rast4)
 
 
 ## ----datum-fig, echo=FALSE, message=FALSE, fig.cap="(ref:datum-fig)", fig.scap="Geocentric and local geodetic datums on a geoid."----
-knitr::include_graphics("figures/02_datum_fig.png")
+knitr::include_graphics("images/02_datum_fig.png")
 
 
 ## ----vector-crs, echo=FALSE, fig.cap="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for a vector data type.", message=FALSE, fig.asp=0.56, fig.scap="Examples of geographic and projected CRSs (vector data)."----
 # source("https://github.com/Robinlovelace/geocompr/raw/main/code/02-vector-crs.R")
-knitr::include_graphics("figures/02_vector_crs.png")
+knitr::include_graphics("images/02_vector_crs.png")
 
 
 ## ----02-spatial-data-57-----------------------------------------------------------------------------

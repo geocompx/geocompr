@@ -65,7 +65,7 @@ tm_1 = tm_shape(input_ras) +
   tm_layout(panel.labels = c("population", "women", "mean age", "household size"),
             legend.position = tm_pos_auto_out())
 
-tmap_save(tm_1, "figures/14_census_stack.png", width = 5.1, height = 2)
+tmap_save(tm_1, "images/14_census_stack.png", width = 5.1, height = 2)
 
 #**********************************************************
 # 3 METROPOLITAN AREA FIGURE-------------------------------
@@ -114,7 +114,7 @@ tm_2 = tm_shape(pop_agg/1000) +
           fontface = "italic") +
   tm_layout(legend.position = tm_pos_auto_out())
 
-tmap_save(tm_2, "figures/14_metro_areas.png", width = 4, height = 4)
+tmap_save(tm_2, "images/14_metro_areas.png", width = 4, height = 4)
 
 #**********************************************************
 # 4 POTENTIAL LOCATIONS------------------------------------ 
@@ -148,7 +148,7 @@ berlin_raster = terra::crop(result, berlin)
 #**********************************************************
 m = mapview(raster::raster(berlin_raster), col.regions = c(NA, "darkgreen"),
             na.color = "transparent", legend = TRUE, map.type = "OpenStreetMap")
-mapshot(m, url = file.path(getwd(), "figures/08_bikeshops_berlin.html"))
+mapshot(m, url = file.path(getwd(), "images/08_bikeshops_berlin.html"))
 
 # using leaflet (instead of mapview)
 berlin_raster = berlin_raster > 9

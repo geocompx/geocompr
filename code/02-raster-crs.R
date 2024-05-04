@@ -22,6 +22,6 @@ tm2 = tm_shape(new_raster2) +
   tm_xlab("x")
 
 tm = tmap_arrange(tm1, tm2)
-tmap_save(tm, "figures/02_raster_crs.png", 
+tmap_save(tm, "images/02_raster_crs.png", 
           width = 950*1.5, height = 532*1.5, dpi = 150, 
           scale = 1.5)

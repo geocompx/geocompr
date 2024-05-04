@@ -27,4 +27,4 @@ tm1 = tm_shape(hs) +
   #tm_iso("level", col = "white") +
   tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE, legend.show = FALSE)
 
-tmap_save(tm1, "figures/05-contour-tmap.png", height = 1000, width = 1000)
+tmap_save(tm1, "images/05-contour-tmap.png", height = 1000, width = 1000)

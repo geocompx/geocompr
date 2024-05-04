@@ -34,7 +34,7 @@ library(sfnetworks)   # spatial network classes and functions
 
 
 ## ----bristol, echo=FALSE, fig.cap="Bristol's transport network represented by colored lines for active (green), public (railways, black) and private motor (red) modes of travel. Black border lines represent the inner city boundary (highlighted in yellow) and the larger Travel To Work Area (TTWA).", fig.scap="Bristol's transport network."----
-knitr::include_graphics("figures/13_bristol.png")
+knitr::include_graphics("images/13_bristol.png")
 # knitr::include_graphics("https://user-images.githubusercontent.com/1825120/34452756-985267de-ed3e-11e7-9f59-fda1f3852253.png")
 
 
@@ -347,7 +347,7 @@ tm_shape(existing_cycleways_buffer, bbox = bristol_region) +
  tm_polygons(col = "lightgreen") +
  tm_shape(route_network_scenario) +
  tm_lines(lwd = "bicycle", scale = 9, title.lwd = "No. bike trips (modeled, one direction)")
-knitr::include_graphics("figures/bristol_cycleways_zoomed.png")
+knitr::include_graphics("images/bristol_cycleways_zoomed.png")
 
 
 ## ---- echo=FALSE, results='asis'--------------------------------------------------------------------

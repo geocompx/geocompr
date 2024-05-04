@@ -3,7 +3,7 @@ source("code/11-hello.R")
 
 
 ## ----codecheck, echo=FALSE, fig.cap="Code checking in RStudio. This example, from the script 11-centroid-alg.R, highlights an unclosed curly bracket on line 19.", fig.scap="Illustration of 'code checking' in RStudio."----
-knitr::include_graphics("figures/codecheck.png")
+knitr::include_graphics("images/codecheck.png")
 
 
 ## A useful tool for reproducibility is the **reprex** package.

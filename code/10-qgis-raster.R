@@ -66,5 +66,5 @@ tm2 = tm_shape(dem_hillshade) +
 
 qgis_raster_map = tmap_arrange(tm1, tm2, nrow = 1)
 
-tmap_save(qgis_raster_map, "figures/10-qgis-raster-map.png",
+tmap_save(qgis_raster_map, "images/10-qgis-raster-map.png",
           width = 20, height = 9, units = "cm")

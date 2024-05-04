@@ -43,5 +43,5 @@ tm_folds = tm_shape(all_sf) +
             panel.labels = list(c("random partitioning", "spatial partitioning"),
                              c("fold 1", "fold 2", "fold 3", "fold 4", "fold 5")))
 
-tmap_save(tm_folds, "figures/12_partitioning.png", width = 1417, height = 726, dpi = 144)  
+tmap_save(tm_folds, "images/12_partitioning.png", width = 1417, height = 726, dpi = 144)  
             

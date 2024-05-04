@@ -104,20 +104,20 @@ st_is_longlat(london_geo)
    }' -> s2geos
 # # exported manually; the code below returns a low res version of png
 # tmp = DiagrammeR::grViz(s2geos)
-# htmlwidgets::saveWidget(widget = tmp, file = "figures/07-s2geos.html")
+# htmlwidgets::saveWidget(widget = tmp, file = "images/07-s2geos.html")
 # # tmp
 # tmp = DiagrammeRsvg::export_svg(tmp)
 # library(htmltools)
 # html_print(HTML(tmp))
 # tmp = charToRaw(tmp)
-# # rsvg::rsvg_png(tmp, "figures/07-s2geos.png")
-# webshot::webshot(url = "figures/07-s2geos.html", file = "figures/07-s2geos.png", vwidth = 800, vheight = 600)
+# # rsvg::rsvg_png(tmp, "images/07-s2geos.png")
+# webshot::webshot(url = "images/07-s2geos.html", file = "images/07-s2geos.png", vwidth = 800, vheight = 600)
 # download.file(
 #   "https://user-images.githubusercontent.com/1825120/188572856-7946ae32-98de-444c-9f48-b1d7afcf9345.png", 
-#   destfile = "figures/07-s2geos.png"
+#   destfile = "images/07-s2geos.png"
 #   )
-# browseURL("figures/07-s2geos.png")
-knitr::include_graphics("figures/07-s2geos.png")
+# browseURL("images/07-s2geos.png")
+knitr::include_graphics("images/07-s2geos.png")
 
 
 ## ----06-reproj-4-1----------------------------------------------------------------------------------

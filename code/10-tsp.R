@@ -62,5 +62,5 @@ fig = mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) +
   mapview(points)
 
 # save it as a png
-mapshot(fig, file = "figures/09_shortest_route.png",
+mapshot(fig, file = "images/09_shortest_route.png",
         remove_controls = c("homeButton", "layersControl"))
