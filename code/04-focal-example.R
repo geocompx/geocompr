@@ -40,7 +40,7 @@ tm2 = tm_shape(poly_focal) +
   tm_borders(lwd = 3, col = "orange") +
   tm_layout(frame = FALSE, legend.show = FALSE)
 
-png(filename = "figures/04_focal_example.png", width = 950, height = 555)
+png(filename = "images/04_focal_example.png", width = 950, height = 555)
 tmap_arrange(tm1, tm2)
 grid.polyline(x = c(0.255, 0.59), y = c(0.685, 0.685), 
               arrow = arrow(length = unit(0.2, "inches")), 

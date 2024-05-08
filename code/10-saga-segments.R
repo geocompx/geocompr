@@ -29,5 +29,5 @@ tms2 = tms1 +
   tm_layout(legend.show = FALSE)
 tms = tmap_arrange(tms1, tms2)
 
-tmap_save(tms, filename = "figures/10-saga-segments.png", dpi = 150, width = 9,
+tmap_save(tms, filename = "images/10-saga-segments.png", dpi = 150, width = 9,
           height = 4.75, units = "cm")

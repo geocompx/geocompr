@@ -116,7 +116,7 @@ p_geometrycollection_sf = ggplot() +
   )
 
 ## combine plot ------------
-png("figures/sf-classes.png", height = 600, width = 600)
+png("images/sf-classes.png", height = 600, width = 600)
 # Empty grob for spacing
 b = nullGrob() # per @baptiste's comment, use nullGrob() instead of rectGrob()
 

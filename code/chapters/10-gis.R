@@ -114,7 +114,7 @@ tm_shape(incongr_wgs) +
 
 
 ## ----sliver, echo=FALSE, fig.cap="Sliver polygons colored in red (left panel). Cleaned polygons (right panel)."----
-knitr::include_graphics("figures/10-sliver.png")
+knitr::include_graphics("images/10-sliver.png")
 
 
 ## ---- eval=FALSE------------------------------------------------------------------------------------
@@ -160,7 +160,7 @@ knitr::include_graphics("figures/10-sliver.png")
 
 
 ## ----qgis-raster-map, echo=FALSE, fig.cap="Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mongón study area."----
-knitr::include_graphics("figures/10-qgis-raster-map.png")
+knitr::include_graphics("images/10-qgis-raster-map.png")
 
 
 ## ---- eval=FALSE------------------------------------------------------------------------------------
@@ -196,7 +196,7 @@ knitr::include_graphics("figures/10-qgis-raster-map.png")
 
 
 ## ----sagasegments, echo=FALSE, fig.cap="Normalized difference vegetation index (NDVI, left panel) and NDVi-based segments derived using t he seeded region growing algorithm for the Mongón study area."----
-knitr::include_graphics("figures/10-saga-segments.png")
+knitr::include_graphics("images/10-saga-segments.png")
 
 
 ## ----09-gis-24--------------------------------------------------------------------------------------
@@ -254,14 +254,14 @@ points = cycle_hire[1:25, ]
 
 
 ## ----grass-mapview, fig.cap="Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London.", fig.scap="Shortest route between 24 cycle hire stations.", echo=FALSE, out.width="80%"----
-knitr::include_graphics("figures/10_shortest_route.png")
+knitr::include_graphics("images/10_shortest_route.png")
 
 
 ## ----09-gis-35, eval=FALSE, echo=FALSE--------------------------------------------------------------
 ## library(mapview)
 ## m_1 = mapview(route) +  points
 ## mapview::mapshot(m_1,
-##                  file = file.path(getwd(), "figures/09_shortest_route.png"),
+##                  file = file.path(getwd(), "images/09_shortest_route.png"),
 ##                  remove_controls = c("homeButton", "layersControl",
 ##                                      "zoomControl"))
 

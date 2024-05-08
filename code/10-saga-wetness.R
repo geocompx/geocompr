@@ -56,5 +56,5 @@ fig = tm_shape(hs, bbox = bbx) +
   tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) +
   tm_legend(bg.color = "white")
 # save the figure
-tmap_save(fig, filename = "figures/09_twi.png", dpi = 300, width = 9,
+tmap_save(fig, filename = "images/09_twi.png", dpi = 300, width = 9,
           height = 9.75, units = "cm")

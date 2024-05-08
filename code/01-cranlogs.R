@@ -26,5 +26,5 @@ ggfig = ggplot(data = dd_top, mapping = aes(date, Downloads, color = package)) +
   theme_bw() +
   scale_y_log10(limits = c(10, NA))
 # ggfig
-ggsave("figures/01-cranlogs.png", ggfig, width = 6, height = 3, dpi = 150)
-# magick::image_read("figures/spatial-package-growth.png")
+ggsave("images/01-cranlogs.png", ggfig, width = 6, height = 3, dpi = 150)
+# magick::image_read("images/spatial-package-growth.png")

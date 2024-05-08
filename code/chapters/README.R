@@ -2,7 +2,7 @@
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "figures/"
+  fig.path = "images/"
 )
 is_online = curl::has_internet()
 

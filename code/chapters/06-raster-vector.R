@@ -296,7 +296,7 @@ source("https://github.com/Robinlovelace/geocompr/raw/main/code/06-raster-vector
 # plot(dem, col = terrain.colors(25), alpha = 0.5, legend = FALSE, add = TRUE)
 # # add contour lines
 # contour(dem, col = "white", add = TRUE)
-knitr::include_graphics("figures/06-contour-tmap.png")
+knitr::include_graphics("images/06-contour-tmap.png")
 
 
 ## ----06-raster-vector-39----------------------------------------------------------------------------

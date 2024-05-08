@@ -39,6 +39,6 @@ tm3 = tm_shape(masked_poly) +
 
 tma = tmap_arrange(tm1, tm2, tm3, nrow = 1)
 
-tmap_save(tma, "figures/04_raster_subset.png", 
+tmap_save(tma, "images/04_raster_subset.png", 
           width = 7.5, height = 3, dpi = 300)
 

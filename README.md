@@ -371,7 +371,7 @@ followed by `N`), and as illustrated in the figure below:
 
     Edit > Preferences > Better Bibtex
 
-![](figures/zotero-settings.png)
+![](images/zotero-settings.png)
 
 Zotero settings: these are useful if you want to add references.
 

@@ -11,4 +11,4 @@ statepop_sf = left_join(spData::us_states, statepop_wide, by = "NAME") %>%
 year_vars = names(statepop_sf)[grepl("year", names(statepop_sf))]
 facet_anim = tm_shape(statepop_sf) + tm_fill(year_vars) + tm_facets(free.scales.fill = FALSE, 
                                                                     ncol = 1, nrow = 1)
-tmap_animation(tm = facet_anim, filename = "figures/09-us_pop.gif")
+tmap_animation(tm = facet_anim, filename = "images/09-us_pop.gif")

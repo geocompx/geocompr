@@ -88,9 +88,9 @@ Furthermore, R outperforms GISs in some areas of geocomputation\index{geocomputa
 
 This chapter focuses on 'bridges' to three mature open source GIS products, summarized in Table \@ref(tab:gis-comp):
 
-- QGIS\index{QGIS}, via the package **qgisprocess**\index{qgisprocess (package)} (Section \@ref(rqgis))
-- SAGA\index{SAGA}, via **Rsagacmd**\index{Rsagacmd (package)} (Section \@ref(saga))
-- GRASS GIS\index{GRASS GIS}, via **rgrass**\index{rgrass (package)} (Section \@ref(grass))
+- QGIS\index{QGIS}, via the package **qgisprocess**\index{qgisprocess (package)} [@R-qgisprocess; Section \@ref(rqgis)]
+- SAGA\index{SAGA}, via **Rsagacmd**\index{Rsagacmd (package)} [@R-Rsagacmd; Section \@ref(saga)]
+- GRASS GIS\index{GRASS GIS}, via **rgrass**\index{rgrass (package)} [@R-rgrass; Section \@ref(grass)]
 
 There have also been major developments in enabling open source GIS software to write and execute R scripts inside QGIS\index{QGIS} (see [docs.qgis.org](https://docs.qgis.org/3.28/en/docs/training_manual/processing/r_intro.html)) and GRASS GIS (see [grasswiki.osgeo.org](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#R_within_GRASS)).
 
@@ -358,7 +358,7 @@ Note that the threshold must be specified in square meters regardless of the coo
 
 Let's run this algorithm and convert its output into a new `sf` object `clean_sf`.
 
-```{r 09-gis-7c, eval=has_qgis_plugins, message=FALSE}
+```{r 09-gis-7c, eval=FALSE, message=FALSE}
 clean = qgis_run_algorithm("grass:v.clean",
   input = union_sf, 
   tool = "rmarea", threshold = 25000
@@ -369,7 +369,7 @@ clean_sf = st_as_sf(clean)
 The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver polygons are now removed.
 
 ```{r sliver, echo=FALSE, fig.cap="Sliver polygons colored in red (left panel). Cleaned polygons (right panel)."}
-knitr::include_graphics("figures/10-sliver.png")
+knitr::include_graphics("images/10-sliver.png")
 ```
 
 ### Raster data {#qgis-raster}
@@ -458,7 +458,7 @@ Calculation of geomorphons requires an input DEM (`elevation`), and can be custo
 It includes, `search` -- a length for which the line-of-sight is calculated, and ``-m`` -- a flag specifying that the search value will be provided in meters (and not the number of cells).
 More information about additional arguments can be found in the original paper and the [GRASS GIS documentation](https://grass.osgeo.org/grass-stable/manuals/r.geomorphon.html).
 
-```{r, eval=has_qgis_plugins}
+```{r, eval=FALSE}
 dem_geomorph = qgis_run_algorithm("grass:r.geomorphon",
   elevation = dem,
   `-m` = TRUE, search = 120
@@ -468,7 +468,7 @@ dem_geomorph = qgis_run_algorithm("grass:r.geomorphon",
 Our output, `dem_geomorph$forms`, contains a raster file with 10 categories -- each one representing a terrain form.
 We can read it into R with `qgis_as_terra()`, and then visualize it (Figure \@ref(fig:qgis-raster-map), right panel) or use it in our subsequent calculations.
 
-```{r, eval=has_qgis_plugins}
+```{r, eval=FALSE}
 dem_geomorph_terra = qgis_as_terra(dem_geomorph$forms)
 ```
 
@@ -476,7 +476,7 @@ Interestingly, there are connections between some geomorphons and the TWI values
 The largest TWI values mostly occur in valleys and hollows, while the lowest values are seen, as expected, on ridges.
 
 ```{r qgis-raster-map, echo=FALSE, fig.cap="Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mongón study area."}
-knitr::include_graphics("figures/10-qgis-raster-map.png")
+knitr::include_graphics("images/10-qgis-raster-map.png")
 ```
 
 ## SAGA {#saga}
@@ -553,7 +553,7 @@ ndvi_segments = ndvi_srg$segments |>
 ```
 
 ```{r sagasegments, echo=FALSE, fig.cap="Normalized difference vegetation index (NDVI, left panel) and NDVI-based segments derived using the seeded region growing algorithm for the Mongón study area."}
-knitr::include_graphics("figures/10-saga-segments.png")
+knitr::include_graphics("images/10-saga-segments.png")
 ```
 
 The resulting polygons (segments) represent areas with similar values. 
@@ -697,14 +697,14 @@ mapview::mapview(route) + points
 ```
 
 ```{r grass-mapview, fig.cap="Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London.", fig.scap="Shortest route between 24 cycle hire stations.", echo=FALSE, out.width="80%"}
-knitr::include_graphics("figures/10_shortest_route.png")
+knitr::include_graphics("images/10_shortest_route.png")
 ```
 
 ```{r 09-gis-35, eval=FALSE, echo=FALSE}
 library(mapview)
 m_1 = mapview(route) + points
 mapview::mapshot(m_1,
-  file = file.path(getwd(), "figures/09_shortest_route.png"),
+  file = file.path(getwd(), "images/09_shortest_route.png"),
   remove_controls = c(
     "homeButton", "layersControl",
     "zoomControl"
