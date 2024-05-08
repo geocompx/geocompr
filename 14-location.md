@@ -144,7 +144,7 @@ Since we are using mainly densities such as the number of inhabitants or the por
 Be careful with geographic CRS\index{CRS!geographic} where grid cell areas constantly decrease in poleward directions (see also Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)). </div>\EndKnitrBlock{rmdnote}
 
 <div class="figure" style="text-align: center">
-<img src="figures/14_census_stack.png" alt="Gridded German census data of 2011 (see Table \@ref(tab:census-desc) for a description of the classes)." width="100%" />
+<img src="images/14_census_stack.png" alt="Gridded German census data of 2011 (see Table \@ref(tab:census-desc) for a description of the classes)." width="100%" />
 <p class="caption">(\#fig:census-stack)Gridded German census data of 2011 (see Table \@ref(tab:census-desc) for a description of the classes).</p>
 </div>
 
@@ -240,7 +240,7 @@ metros = pop_agg |>
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/14_metro_areas.png" alt="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names." width="70%" />
+<img src="images/14_metro_areas.png" alt="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names." width="70%" />
 <p class="caption">(\#fig:metro-areas)The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names.</p>
 </div>
 

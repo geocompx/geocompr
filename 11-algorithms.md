@@ -85,7 +85,7 @@ It is hard to enforce reproducibility in R scripts, but there are tools that can
 By default, RStudio \index{RStudio} 'code-checks' R scripts and underlines faulty code with a red wavy line, as illustrated below:
 
 <div class="figure" style="text-align: center">
-<img src="figures/codecheck.png" alt="Code checking in RStudio. This example, from the script 11-centroid-alg.R, highlights an unclosed curly bracket on line 19." width="100%" />
+<img src="images/codecheck.png" alt="Code checking in RStudio. This example, from the script 11-centroid-alg.R, highlights an unclosed curly bracket on line 19." width="100%" />
 <p class="caption">(\#fig:codecheck)Code checking in RStudio. This example, from the script 11-centroid-alg.R, highlights an unclosed curly bracket on line 19.</p>
 </div>
 

@@ -116,7 +116,7 @@ There is more to CRSs, as described in Section \@ref(crs-intro) and Chapter \@re
 
 
 <div class="figure" style="text-align: center">
-<img src="figures/vector_lonlat.png" alt="Illustration of vector (point) data in which the location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0&lt;U+00B0&gt; longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula." width="49%" /><img src="figures/vector_projected.png" alt="Illustration of vector (point) data in which the location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0&lt;U+00B0&gt; longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula." width="49%" />
+<img src="images/vector_lonlat.png" alt="Illustration of vector (point) data in which the location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0&lt;U+00B0&gt; longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula." width="49%" /><img src="images/vector_projected.png" alt="Illustration of vector (point) data in which the location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0&lt;U+00B0&gt; longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula." width="49%" />
 <p class="caption">(\#fig:vectorplots)Illustration of vector (point) data in which the location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0<U+00B0> longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.</p>
 </div>
 
@@ -149,7 +149,7 @@ All 18 types can be represented with the **sf** package, although at the time of
 ]
 
 <div class="figure" style="text-align: center">
-<img src="figures/sf-classes.png" alt="Simple feature types fully supported by sf." width="60%" />
+<img src="images/sf-classes.png" alt="Simple feature types fully supported by sf." width="60%" />
 <p class="caption">(\#fig:sf-ogc)Simple feature types fully supported by sf.</p>
 </div>
 
@@ -483,7 +483,7 @@ Simple features consist of two main parts: geometries and non-geographic attribu
 Figure \@ref(fig:02-sfdiagram) shows how an sf object is created -- geometries come from an `sfc` object, while attributes are taken from a `data.frame` or `tibble`.^[To learn more about building sf geometries from scratch read the following Sections \@ref(sfg) and \@ref(sfc).]
 
 <div class="figure" style="text-align: center">
-<img src="figures/02-sfdiagram.png" alt="Building blocks of sf objects." width="100%" />
+<img src="images/02-sfdiagram.png" alt="Building blocks of sf objects." width="100%" />
 <p class="caption">(\#fig:02-sfdiagram)Building blocks of sf objects.</p>
 </div>
 
@@ -843,7 +843,7 @@ sf_use_s2()
 #> [1] TRUE
 ```
 
-An example of the consequences of turning the geometry engine off is shown below, by creating buffers around the `india` object created earlier in the chapter (note the warnings emitted when S2 is turned off) (Figure \ref(fig:s2example)):
+An example of the consequences of turning the geometry engine off is shown below, by creating buffers around the `india` object created earlier in the chapter (note the warnings emitted when S2 is turned off) (Figure \@ref(fig:s2example)):
 
 
 ```r
@@ -1142,7 +1142,7 @@ Both datums in Figure \@ref(fig:datum-fig) are put on top of a geoid - a model o
 (ref:datum-fig) Geocentric and local geodetic datums shown on top of a geoid (in false color and the vertical exaggeration by 10,000 scale factor). Image of the geoid is adapted from the work of @essd-11-647-2019.
 
 <div class="figure" style="text-align: center">
-<img src="figures/02_datum_fig.png" alt="(ref:datum-fig)" width="100%" />
+<img src="images/02_datum_fig.png" alt="(ref:datum-fig)" width="100%" />
 <p class="caption">(\#fig:datum-fig)(ref:datum-fig)</p>
 </div>
 
@@ -1178,7 +1178,7 @@ For now, it is sufficient to know:
 - CRSs of `sf` objects can be queried with the function `st_crs()`, CRSs of `terra` objects can be queried with the function `crs()`
 
 <div class="figure" style="text-align: center">
-<img src="figures/02_vector_crs.png" alt="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for a vector data type." width="100%" />
+<img src="images/02_vector_crs.png" alt="Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for a vector data type." width="100%" />
 <p class="caption">(\#fig:vector-crs)Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zone 12N; right) coordinate systems for a vector data type.</p>
 </div>
 

@@ -72,9 +72,9 @@ Furthermore, R outperforms GISs in some areas of geocomputation\index{geocomputa
 
 This chapter focuses on 'bridges' to three mature open source GIS products, summarized in Table \@ref(tab:gis-comp):
 
-- QGIS\index{QGIS}, via the package **qgisprocess**\index{qgisprocess (package)} (Section \@ref(rqgis))
-- SAGA\index{SAGA}, via **Rsagacmd**\index{Rsagacmd (package)} (Section \@ref(saga))
-- GRASS GIS\index{GRASS GIS}, via **rgrass**\index{rgrass (package)} (Section \@ref(grass))
+- QGIS\index{QGIS}, via the package **qgisprocess**\index{qgisprocess (package)} [@R-qgisprocess; Section \@ref(rqgis)]
+- SAGA\index{SAGA}, via **Rsagacmd**\index{Rsagacmd (package)} [@R-Rsagacmd; Section \@ref(saga)]
+- GRASS GIS\index{GRASS GIS}, via **rgrass**\index{rgrass (package)} [@R-rgrass; Section \@ref(grass)]
 
 There have also been major developments in enabling open source GIS software to write and execute R scripts inside QGIS\index{QGIS} (see [docs.qgis.org](https://docs.qgis.org/3.28/en/docs/training_manual/processing/r_intro.html)) and GRASS GIS (see [grasswiki.osgeo.org](https://grasswiki.osgeo.org/wiki/R_statistics/rgrass#R_within_GRASS)).
 
@@ -344,7 +344,7 @@ clean_sf = st_as_sf(clean)
 The result, the right panel of \@ref(fig:sliver), looks as expected -- sliver polygons are now removed.
 
 <div class="figure" style="text-align: center">
-<img src="figures/10-sliver.png" alt="Sliver polygons colored in red (left panel). Cleaned polygons (right panel)." width="100%" />
+<img src="images/10-sliver.png" alt="Sliver polygons colored in red (left panel). Cleaned polygons (right panel)." width="100%" />
 <p class="caption">(\#fig:sliver)Sliver polygons colored in red (left panel). Cleaned polygons (right panel).</p>
 </div>
 
@@ -460,7 +460,7 @@ Interestingly, there are connections between some geomorphons and the TWI values
 The largest TWI values mostly occur in valleys and hollows, while the lowest values are seen, as expected, on ridges.
 
 <div class="figure" style="text-align: center">
-<img src="figures/10-qgis-raster-map.png" alt="Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mong&lt;U+00F3&gt;n study area." width="100%" />
+<img src="images/10-qgis-raster-map.png" alt="Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mong&lt;U+00F3&gt;n study area." width="100%" />
 <p class="caption">(\#fig:qgis-raster-map)Topographic wetness index (TWI, left panel) and geomorphons (right panel) derived for the Mong<U+00F3>n study area.</p>
 </div>
 
@@ -544,7 +544,7 @@ ndvi_segments = ndvi_srg$segments |>
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/10-saga-segments.png" alt="Normalized difference vegetation index (NDVI, left panel) and NDVI-based segments derived using the seeded region growing algorithm for the Mong&lt;U+00F3&gt;n study area." width="100%" />
+<img src="images/10-saga-segments.png" alt="Normalized difference vegetation index (NDVI, left panel) and NDVI-based segments derived using the seeded region growing algorithm for the Mong&lt;U+00F3&gt;n study area." width="100%" />
 <p class="caption">(\#fig:sagasegments)Normalized difference vegetation index (NDVI, left panel) and NDVI-based segments derived using the seeded region growing algorithm for the Mong<U+00F3>n study area.</p>
 </div>
 
@@ -695,7 +695,7 @@ mapview::mapview(route) + points
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/10_shortest_route.png" alt="Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London." width="80%" />
+<img src="images/10_shortest_route.png" alt="Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London." width="80%" />
 <p class="caption">(\#fig:grass-mapview)Shortest route (blue line) between 24 cycle hire stations (blue dots) on the OSM street network of London.</p>
 </div>
 

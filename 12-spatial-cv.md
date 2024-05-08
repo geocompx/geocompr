@@ -85,7 +85,7 @@ There are 175 landslide and 175 non-landslide points, as shown by `summary(lsl$l
 The 175 non-landslide points were sampled randomly from the study area, with the restriction that they must fall outside a small buffer around the landslide polygons.
 
 <div class="figure" style="text-align: center">
-<img src="figures/lsl-map-1.png" alt="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador." width="70%" />
+<img src="images/lsl-map-1.png" alt="Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador." width="70%" />
 <p class="caption">(\#fig:lsl-map)Landslide initiation points (red) and points unaffected by landsliding (blue) in Southern Ecuador.</p>
 </div>
 \index{hillshade}
@@ -223,7 +223,7 @@ pred = terra::predict(ta, model = fit, type = "response")
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/lsl-susc-1.png" alt="Spatial distribution mapping of landslide susceptibility using a GLM." width="70%" />
+<img src="images/lsl-susc-1.png" alt="Spatial distribution mapping of landslide susceptibility using a GLM." width="70%" />
 <p class="caption">(\#fig:lsl-susc)Spatial distribution mapping of landslide susceptibility using a GLM.</p>
 </div>
 
@@ -279,7 +279,7 @@ This partitioning strategy is the **only** difference between spatial and conven
 As a result, spatial CV leads to a bias-reduced assessment of a model's predictive performance, and hence helps to avoid overfitting\index{overfitting}.
 
 <div class="figure" style="text-align: center">
-<img src="figures/12_partitioning.png" alt="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row)." width="100%" />
+<img src="images/12_partitioning.png" alt="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row)." width="100%" />
 <p class="caption">(\#fig:partitioning)Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row).</p>
 </div>
 
@@ -297,7 +297,7 @@ As illustrated in Figure \@ref(fig:building-blocks), these have a clear order.
 (ref:building-blocks) Basic building blocks of the mlr3 package. Source: @becker_mlr3_2022. (Permission to reuse this figure was kindly granted.)
 
 <div class="figure" style="text-align: center">
-<img src="figures/12_ml_abstraction_crop.png" alt="(ref:building-blocks)" width="100%" />
+<img src="images/12_ml_abstraction_crop.png" alt="(ref:building-blocks)" width="100%" />
 <p class="caption">(\#fig:building-blocks)(ref:building-blocks)</p>
 </div>
 
@@ -535,7 +535,7 @@ Using the same data for the performance assessment and the tuning would potentia
 This can be avoided using nested spatial CV\index{cross-validation!spatial CV}.
 
 <div class="figure" style="text-align: center">
-<img src="figures/12_cv.png" alt="Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2019). Permission to reuse it was kindly granted.)" width="100%" />
+<img src="images/12_cv.png" alt="Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2019). Permission to reuse it was kindly granted.)" width="100%" />
 <p class="caption">(\#fig:inner-outer)Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2019). Permission to reuse it was kindly granted.)</p>
 </div>
 

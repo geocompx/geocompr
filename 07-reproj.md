@@ -257,7 +257,7 @@ As shown in Figure \@ref(fig:s2geos), **sf** uses either GEOS\index{GEOS} or the
 GEOS is always used for projected data and data with no CRS; for geographic data S2 is used by default but can be disabled with `sf::sf_use_s2(FALSE)`.
 
 <div class="figure" style="text-align: center">
-<img src="figures/07-s2geos.png" alt="The behavior of the geometry operations in the sf package depending on the input data's CRS." width="100%" />
+<img src="images/07-s2geos.png" alt="The behavior of the geometry operations in the sf package depending on the input data's CRS." width="100%" />
 <p class="caption">(\#fig:s2geos)The behavior of the geometry operations in the sf package depending on the input data's CRS.</p>
 </div>
 

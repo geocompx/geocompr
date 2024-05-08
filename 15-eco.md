@@ -46,7 +46,7 @@ The sampling coincided with a strong La Niña event that year, as shown in data 
 This led to even higher levels of aridity than usual in the coastal desert and increased fog activity on the southern slopes of Peruvian *lomas* mountains.
 
 <div class="figure" style="text-align: center">
-<img src="figures/15_study_area_mongon.png" alt="The Mt. Mong&lt;U+00F3&gt;n study area, from Muenchow, Schratz, and Brenning (2017)." width="60%" />
+<img src="images/15_study_area_mongon.png" alt="The Mt. Mong&lt;U+00F3&gt;n study area, from Muenchow, Schratz, and Brenning (2017)." width="60%" />
 <p class="caption">(\#fig:study-area-mongon)The Mt. Mong<U+00F3>n study area, from Muenchow, Schratz, and Brenning (2017).</p>
 </div>
 
@@ -95,7 +95,7 @@ Visualizing the data helps to get more familiar with it, as shown in Figure \@re
 \index{hillshade}
 
 <div class="figure" style="text-align: center">
-<img src="figures/15_sa_mongon_sampling.png" alt="Study mask (polygon), location of the sampling sites (black points) and DEM in the background." width="100%" />
+<img src="images/15_sa_mongon_sampling.png" alt="Study mask (polygon), location of the sampling sites (black points) and DEM in the background." width="100%" />
 <p class="caption">(\#fig:sa-mongon)Study mask (polygon), location of the sampling sites (black points) and DEM in the background.</p>
 </div>
 
@@ -288,7 +288,7 @@ plot(y = sc[, 1], x = elev, xlab = "elevation in m",
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/15_xy_nmds.png" alt="Plotting the first NMDS axis against altitude." width="60%" />
+<img src="images/15_xy_nmds.png" alt="Plotting the first NMDS axis against altitude." width="60%" />
 <p class="caption">(\#fig:xy-nmds)Plotting the first NMDS axis against altitude.</p>
 </div>
 
@@ -327,7 +327,7 @@ text(tree_mo, pretty = 0)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/15_tree.png" alt="Simple example of a decision tree with three internal nodes and four terminal nodes." width="60%" />
+<img src="images/15_tree.png" alt="Simple example of a decision tree with three internal nodes and four terminal nodes." width="60%" />
 <p class="caption">(\#fig:tree)Simple example of a decision tree with three internal nodes and four terminal nodes.</p>
 </div>
 
@@ -487,7 +487,7 @@ pred = terra::predict(ep, model = autotuner_rf, fun = predict)
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/15_rf_pred.png" alt="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts." width="100%" />
+<img src="images/15_rf_pred.png" alt="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts." width="100%" />
 <p class="caption">(\#fig:rf-pred)Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.</p>
 </div>
 

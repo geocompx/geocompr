@@ -380,7 +380,7 @@ As illustrated in Figure \@ref(fig:contour-tmap), isolines can be labelled.
 
 \index{hillshade}
 <div class="figure" style="text-align: center">
-<img src="figures/06-contour-tmap.png" alt="DEM with hillshading, showing the southern flank of Mt. Mong&lt;U+00F3&gt;n overlaid with contour lines." width="100%" />
+<img src="images/06-contour-tmap.png" alt="DEM with hillshading, showing the southern flank of Mt. Mong&lt;U+00F3&gt;n overlaid with contour lines." width="100%" />
 <p class="caption">(\#fig:contour-tmap)DEM with hillshading, showing the southern flank of Mt. Mong<U+00F3>n overlaid with contour lines.</p>
 </div>
 
@@ -395,11 +395,6 @@ This is illustrated below by converting the `grain` object into polygons and sub
 grain = rast(system.file("raster/grain.tif", package = "spData"))
 grain_poly = as.polygons(grain) |> 
   st_as_sf()
-```
-
-
-```
-#> [plot mode] fit legend/component: Some legend items or map compoments do not fit well, and are therefore rescaled. Set the tmap option 'component.autoscale' to FALSE to disable rescaling.
 ```
 
 <div class="figure" style="text-align: center">

@@ -646,7 +646,7 @@ elev[clip]
 This amounts to retrieving the values of the first raster object (in this case `elev`) that fall within the extent of a second raster (here: `clip`), as illustrated in Figure \@ref(fig:raster-subset).
 
 <div class="figure" style="text-align: center">
-<img src="figures/04_raster_subset.png" alt="Original raster (left). Raster mask (middle). Output of masking a raster (right)." width="100%" />
+<img src="images/04_raster_subset.png" alt="Original raster (left). Raster mask (middle). Output of masking a raster (right)." width="100%" />
 <p class="caption">(\#fig:raster-subset)Original raster (left). Raster mask (middle). Output of masking a raster (right).</p>
 </div>
 
@@ -742,7 +742,7 @@ elev > 5
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/04-local-operations.png" alt="Examples of different local operations of the elev raster object: adding two rasters, squaring, applying logarithmic transformation, and performing a logical operation." width="100%" />
+<img src="images/04-local-operations.png" alt="Examples of different local operations of the elev raster object: adding two rasters, squaring, applying logarithmic transformation, and performing a logical operation." width="100%" />
 <p class="caption">(\#fig:04-local-operations)Examples of different local operations of the elev raster object: adding two rasters, squaring, applying logarithmic transformation, and performing a logical operation.</p>
 </div>
 
@@ -836,7 +836,7 @@ The result, shown on the right panel in Figure \@ref(fig:04-ndvi), can be compar
 It allows us to see that the largest NDVI values are connected to northern areas of dense forest, while the lowest values are related to the lake in the north and snowy mountain ridges.
 
 <div class="figure" style="text-align: center">
-<img src="figures/04-ndvi.png" alt="RGB image (left) and NDVI values (right) calculated for the example satellite file of the Zion National Park" width="100%" />
+<img src="images/04-ndvi.png" alt="RGB image (left) and NDVI values (right) calculated for the example satellite file of the Zion National Park" width="100%" />
 <p class="caption">(\#fig:04-ndvi)RGB image (left) and NDVI values (right) calculated for the example satellite file of the Zion National Park</p>
 </div>
 
@@ -867,7 +867,7 @@ r_focal = focal(elev, w = matrix(1, nrow = 3, ncol = 3), fun = min)
 This function also accepts additional arguments, for example, should it remove NAs in the process (`na.rm = TRUE`) or not (`na.rm = FALSE`).
 
 <div class="figure" style="text-align: center">
-<img src="figures/04_focal_example.png" alt="Input raster (left) and resulting output raster (right) due to a focal operation - finding the minimum value in 3-by-3 moving windows." width="100%" />
+<img src="images/04_focal_example.png" alt="Input raster (left) and resulting output raster (right) due to a focal operation - finding the minimum value in 3-by-3 moving windows." width="100%" />
 <p class="caption">(\#fig:focal-example)Input raster (left) and resulting output raster (right) due to a focal operation - finding the minimum value in 3-by-3 moving windows.</p>
 </div>
 
