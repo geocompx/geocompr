@@ -134,7 +134,7 @@ The **sf** package provides classes for geographic vector data and a consistent 
 - [GDAL](https://gdal.org/)\index{GDAL}, for reading, writing and manipulating a wide range of geographic data formats, covered in Chapter \@ref(read-write)
 - [PROJ](https://proj.org/), a powerful library for coordinate system transformations, which underlies the content covered in Chapter \@ref(reproj-geo-data)
 - [GEOS](https://libgeos.org/)\index{GEOS}, a planar geometry engine for operations such as calculating buffers and centroids on data with a projected CRS, covered in Chapter \@ref(geometry-operations)
-- [](https://s2geometry.io/)\index{S2}, a spherical geometry engine written in C++ developed by Google, via the [**s2**](https://r-spatial.github.io/s2/) package, covered in Section \@ref(s2) below and in Chapter \@ref(reproj-geo-data)
+- [S2](https://s2geometry.io/)\index{S2}, a spherical geometry engine written in C++ developed by Google, via the [**s2**](https://r-spatial.github.io/s2/) package, covered in Section \@ref(s2) below and in Chapter \@ref(reproj-geo-data)
 
 Information about these interfaces is printed by **sf** the first time the package is loaded: the message `r print(capture.output(sf:::.onAttach(), type = "message"))` that appears below the `library(sf)` command at the beginning of this chapter tells us the versions of linked GEOS, GDAL and PROJ libraries (these vary between computers and over time) and whether or not the S2\index{S2} interface is turned on.
 Nowadays, we take it for granted, however, only the tight integration with different geographic libraries makes reproducible geocomputation possible in the first place.
@@ -794,65 +794,65 @@ st_crs(df_sf) = "EPSG:4326"
 It is fast and reliable at 'casting' geometry columns to different types, a topic covered in Chapter \@ref(geometry-operations).
 Benchmarks, in the package's [documentation](https://dcooley.github.io/sfheaders/articles/examples.html#performance) and in test code developed for this book, show it is much faster than the `sf` package for such operations.
 
-### Spherical geometry operations with  {#}
+### Spherical geometry operations with S2 {#s2}
 
 Spherical geometry engines are based on the fact that world is round while simple mathematical procedures for geocomputation, such as calculating a straight line between two points or the area enclosed by a polygon, assume planar (projected) geometries.
-Since **sf** version 1.0.0, R supports spherical geometry operations 'out of the box' (and by default), thanks to its interface to Google's  spherical geometry engine via the **** interface package
-\index{}.
- is perhaps best known as an example of a Discrete Global Grid System (DGGS).
+Since **sf** version 1.0.0, R supports spherical geometry operations 'out of the box' (and by default), thanks to its interface to Google's S2 spherical geometry engine via the **s2** interface package
+\index{S2}.
+S2 is perhaps best known as an example of a Discrete Global Grid System (DGGS).
 Another example is the [H3](https://h3geo.org/) global hexagonal hierarchical spatial index  [@bondaruk_assessing_2020].
 
-Although potentially useful for describing locations anywhere on Earth using character strings, the main benefit of **sf**'s interface to  is its provision of drop-in functions for calculations such as distance, buffer, and area calculations, as described in **sf**'s built in documentation which can be opened with the command [`vignette("sf7")`](https://r-spatial.github.io/sf/articles/sf7.html).
+Although potentially useful for describing locations anywhere on Earth using character strings, the main benefit of **sf**'s interface to S2 is its provision of drop-in functions for calculations such as distance, buffer, and area calculations, as described in **sf**'s built in documentation which can be opened with the command [`vignette("sf7")`](https://r-spatial.github.io/sf/articles/sf7.html).
 
-**sf** can run in two modes with respect to : on and off.
-By default the  geometry engine is turned on, as can be verified with the following command:
-
-```{r}
-sf_use_()
-```
-
-An example of the consequences of turning the geometry engine off is shown below, by creating buffers around the `india` object created earlier in the chapter (note the warnings emitted when  is turned off) (Figure \@ref(fig:example)):
+**sf** can run in two modes with respect to S2: on and off.
+By default the S2 geometry engine is turned on, as can be verified with the following command:
 
 ```{r}
-india_buffer_with_ = st_buffer(india, 1) # 1 meter
-sf_use_(FALSE)
-india_buffer_without_ = st_buffer(india, 1) # 1 degree
+sf_use_s2()
 ```
 
-```{r example, echo=FALSE, fig.cap="Example of the consequences of turning off the  geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with  switched on, resulting in a buffer of 1 m. The larger light green polygon was created with  switched off, resulting in a buffer of 1 degree, which is not accurate.", message=FALSE}
+An example of the consequences of turning the geometry engine off is shown below, by creating buffers around the `india` object created earlier in the chapter (note the warnings emitted when S2 is turned off) (Figure \@ref(fig:s2example)):
+
+```{r}
+india_buffer_with_s2 = st_buffer(india, 1) # 1 meter
+sf_use_s2(FALSE)
+india_buffer_without_s2 = st_buffer(india, 1) # 1 degree
+```
+
+```{r s2example, echo=FALSE, fig.cap="Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer of 1 degree, which is not accurate.", message=FALSE}
 library(tmap)
-tm1 = tm_shape(india_buffer_with_) +
+tm1 = tm_shape(india_buffer_with_s2) +
   tm_fill(fill = hcl.colors(4, palette = "purple green")[2], lwd = 0.01) +
   tm_shape(india) +
   tm_fill(fill = "grey95") +
   tm_title("st_buffer() with dist = 1") +
-  tm_title(" switched on (default)", position = tm_pos_in("right", "bottom"), size = 1)
+  tm_title("s2 switched on (default)", position = tm_pos_in("right", "bottom"), size = 1)
 
-tm2 = tm_shape(india_buffer_without_) +
+tm2 = tm_shape(india_buffer_without_s2) +
   tm_fill(fill = hcl.colors(4, palette = "purple green")[3], lwd = 0.01) +
   tm_shape(india) +
   tm_fill(fill = "grey95") +
   tm_title(" ") +
-  tm_title(" switched off", position = tm_pos_in("right", "bottom"), size = 1)
+  tm_title("s2 switched off", position = tm_pos_in("right", "bottom"), size = 1)
 
 tmap_arrange(tm1, tm2, ncol = 2)
 ```
 
-The right panel of Figure \@ref(fig:example) is incorrect as the buffer of 1 degree does not return the equal distance around the `india` polygon (for more explanation of this issue, read Section \@ref(geom-proj)).
+The right panel of Figure \@ref(fig:s2example) is incorrect as the buffer of 1 degree does not return the equal distance around the `india` polygon (for more explanation of this issue, read Section \@ref(geom-proj)).
 
-Throughout this book we will assume that  is turned on, unless explicitly stated.
+Throughout this book we will assume that S2 is turned on, unless explicitly stated.
 Turn it on again with the following command.
 
 ```{r}
-sf_use_(TRUE)
+sf_use_s2(TRUE)
 ```
 
 ```{block2 09-gis-2, type="rmdnote"}
-Although the **sf**'s use of  makes sense in many cases, in some cases there are good reasons for turning  off for the duration of an R session or even for an entire project.
-As documented in issue [1771](https://github.com/r-spatial/sf/issues/1771) in **sf**'s GitHub repo, the default behavior can make code that would work with  turned off (and with older versions of **sf**) fail.
-These edge cases include operations on polygons that are not valid according to 's stricter definition.
-If you see error message such as `#> Error in _geography_from_wkb ...` it may be worth trying the command that generated the error message again, after turning off . 
-To turn off  for the entirety of a project you can create a file called .Rprofile in the root directory (the main folder) of your project containing the command `sf::sf_use_(FALSE)`.
+Although the **sf**'s use of S2 makes sense in many cases, in some cases there are good reasons for turning S2 off for the duration of an R session or even for an entire project.
+As documented in issue [1771](https://github.com/r-spatial/sf/issues/1771) in **sf**'s GitHub repo, the default behavior can make code that would work with S2 turned off (and with older versions of **sf**) fail.
+These edge cases include operations on polygons that are not valid according to S2's stricter definition.
+If you see error message such as `#> Error in s2_geography_from_wkb ...` it may be worth trying the command that generated the error message again, after turning off S2. 
+To turn off S2 for the entirety of a project you can create a file called .Rprofile in the root directory (the main folder) of your project containing the command `sf::sf_use_s2(FALSE)`.
 ```
 
 ## Raster data
@@ -1144,7 +1144,7 @@ luxembourg = world[world$name_long == "Luxembourg", ]
 ```
 
 ```{r 02-spatial-data-58}
-st_area(luxembourg) # requires the  package in recent versions of sf
+st_area(luxembourg) # requires the s2 package in recent versions of sf
 ```
 
 The output is in units of square meters (m^2^), showing that the result represents two-dimensional space.
