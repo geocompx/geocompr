@@ -123,7 +123,7 @@ There is more to CRSs, as described in Section \@ref(crs-intro) and Chapter \@re
 The **sf** package provides classes for geographic vector data and a consistent command-line interface to important low level libraries for geocomputation:
 
 - [GDAL](https://gdal.org/)\index{GDAL}, for reading, writing and manipulating a wide range of geographic data formats, covered in Chapter \@ref(read-write)
-- [PROJ](https://proj.org/), a powerful library for coordinate system transformations, which underlies the content covered in Chapter \@ref(reproj-geo-data) and \@ref(reproj-geo-data)
+- [PROJ](https://proj.org/), a powerful library for coordinate system transformations, which underlies the content covered in Chapter \@ref(reproj-geo-data)
 - [GEOS](https://libgeos.org/)\index{GEOS}, a planar geometry engine for operations such as calculating buffers and centroids on data with a projected CRS, covered in Chapter \@ref(geometry-operations)
 - [S2](https://s2geometry.io/)\index{S2}, a spherical geometry engine written in C++ developed by Google, via the [**s2**](https://r-spatial.github.io/s2/) package, covered in Section \@ref(s2) below and in Chapter \@ref(reproj-geo-data)
 
