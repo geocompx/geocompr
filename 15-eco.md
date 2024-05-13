@@ -46,8 +46,8 @@ The sampling coincided with a strong La Niña event that year, as shown in data 
 This led to even higher levels of aridity than usual in the coastal desert and increased fog activity on the southern slopes of Peruvian *lomas* mountains.
 
 <div class="figure" style="text-align: center">
-<img src="images/15_study_area_mongon.png" alt="The Mt. Mong&lt;U+00F3&gt;n study area, from Muenchow, Schratz, and Brenning (2017)." width="60%" />
-<p class="caption">(\#fig:study-area-mongon)The Mt. Mong<U+00F3>n study area, from Muenchow, Schratz, and Brenning (2017).</p>
+<img src="images/15_study_area_mongon.png" alt="The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017)." width="60%" />
+<p class="caption">(\#fig:study-area-mongon)The Mt. Mongón study area, from Muenchow, Schratz, and Brenning (2017).</p>
 </div>
 
 This chapter also demonstrates how to apply techniques covered in previous chapters to an important applied field: ecology.

@@ -188,7 +188,7 @@ This is shown in the code below, which creates the object `zion_srtm_df` contain
 ```r
 group_by(zion_srtm_values, ID) |> 
   summarize(across(srtm, list(min = min, mean = mean, max = max)))
-#> # A tibble: 1 x 4
+#> # A tibble: 1 × 4
 #>      ID srtm_min srtm_mean srtm_max
 #>   <dbl>    <int>     <dbl>    <int>
 #> 1     1     1122     1818.     2661
@@ -209,7 +209,7 @@ zion_nlcd = terra::extract(nlcd, zion2)
 zion_nlcd |> 
   group_by(ID, levels) |>
   count()
-#> # A tibble: 7 x 3
+#> # A tibble: 7 × 3
 #> # Groups:   ID, levels [7]
 #>      ID levels         n
 #>   <dbl> <fct>      <int>
@@ -217,7 +217,7 @@ zion_nlcd |>
 #> 2     1 Barren     98285
 #> 3     1 Forest    298299
 #> 4     1 Shrubland 203700
-#> # i 3 more rows
+#> # ℹ 3 more rows
 ```
 
 <div class="figure" style="text-align: center">
@@ -380,8 +380,8 @@ As illustrated in Figure \@ref(fig:contour-tmap), isolines can be labelled.
 
 \index{hillshade}
 <div class="figure" style="text-align: center">
-<img src="images/06-contour-tmap.png" alt="DEM with hillshading, showing the southern flank of Mt. Mong&lt;U+00F3&gt;n overlaid with contour lines." width="100%" />
-<p class="caption">(\#fig:contour-tmap)DEM with hillshading, showing the southern flank of Mt. Mong<U+00F3>n overlaid with contour lines.</p>
+<img src="images/06-contour-tmap.png" alt="DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines." width="100%" />
+<p class="caption">(\#fig:contour-tmap)DEM with hillshading, showing the southern flank of Mt. Mongón overlaid with contour lines.</p>
 </div>
 
 \index{spatial vectorization!polygons} 
