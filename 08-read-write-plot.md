@@ -573,12 +573,12 @@ writeRaster(x = single_layer, filename = "my_raster.tif",
             filetype = "COG", overwrite = TRUE)
 ```
 
-To learn more about the compression of GeoTIFF files, read Paul Ramsey's [comprehensive blog post on this topic](https://blog.cleverelephant.ca/2015/02/geotiff-compression-for-dummies.html).
+To learn more about the compression of GeoTIFF files, we recommend Paul Ramsey's [comprehensive blog post, GeoTiff Compression for Dummies](https://blog.cleverelephant.ca/2015/02/geotiff-compression-for-dummies.html) which can be found online.
 
 ## Geoportals {#retrieving-data}
 
 \index{open data}
-A vast and ever-increasing amount of geographic data is available on the internet, much of which is free to access and use (with appropriate credit given to its providers).^[For example, visit https://freegisdata.rtwilson.com/ for a long list of websites with freely available geographic datasets.]
+A vast and ever-increasing amount of geographic data is available on the internet, much of which is free to access and use (with appropriate credit given to its providers).^[For example, visit [freegisdata.rtwilson.com](https://freegisdata.rtwilson.com/) for a long list of websites with freely available geographic datasets.]
 In some ways there is now *too much* data, in the sense that there are often multiple places to access the same dataset.
 Some datasets are of poor quality.
 In this context, it is vital to know where to look, so the first section covers some of the most important sources.
@@ -861,10 +861,9 @@ Also note the use of `write_disk()` to ensure that the results are written to di
 For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose. 
 The package **ows4R** has been developed for working with OWS services. 
 It provides a stable interface to common access services, such as the WFS, WCS for data, CSW for metadata, and WPS for processing. 
-The OGC services coverage is described [here](https://github.com/eblondel/ows4R?tab=readme-ov-file#ogc-standards-coverage-status), with new standard protocols under investigation/development.
+The OGC services coverage is described in the README of the `ows4R` package, hosted at  [github.com/eblondel/ows4R](https://github.com/eblondel/ows4R?tab=readme-ov-file#ogc-standards-coverage-status), with new standard protocols under investigation/development.
 
 Based on the above example, the code below show how to perform `getCapabilities` and `getFeatures` operations with this package.
-
 The **ows4R** package relies on the principle of clients. 
 To interact with an OWS service (such as WFS), a client is created as follows:
 
