@@ -861,7 +861,7 @@ Also note the use of `write_disk()` to ensure that the results are written to di
 For many everyday tasks, however, a higher-level interface may be more appropriate, and a number of R packages, and tutorials, have been developed precisely for this purpose. 
 The package **ows4R** has been developed for working with OWS services. 
 It provides a stable interface to common access services, such as the WFS, WCS for data, CSW for metadata, and WPS for processing. 
-The OGC services coverage is described in the README of the `ows4R` package, hosted at  [github.com/eblondel/ows4R](https://github.com/eblondel/ows4R?tab=readme-ov-file#ogc-standards-coverage-status), with new standard protocols under investigation/development.
+The OGC services coverage is described in the README of the package, hosted at  [github.com/eblondel/ows4R](https://github.com/eblondel/ows4R?tab=readme-ov-file#ogc-standards-coverage-status), with new standard protocols under investigation/development.
 
 Based on the above example, the code below show how to perform `getCapabilities` and `getFeatures` operations with this package.
 The **ows4R** package relies on the principle of clients. 
