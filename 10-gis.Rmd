@@ -136,7 +136,7 @@ Assuming you have Docker installed and sufficient computational resources, you c
 
 ```
 
-```{r, eval=has_qgis_plugins}
+```{r, eval=FALSE}
 library(qgisprocess)
 #> Attempting to load the cache ... Success!
 #> QGIS version: 3.30.3-'s-Hertogenbosch
@@ -149,7 +149,7 @@ The above approaches can also be used when you have more than one QGIS installat
 For more details, please refer to the **qgisprocess** ['getting started' vignette](https://r-spatial.github.io/qgisprocess/articles/qgisprocess.html).
 Next, we can find which plugins (meaning different software) are available on our computer:
 
-```{r plugins, eval=has_qgis_plugins}
+```{r plugins, eval=FALSE}
 qgis_plugins()
 #> # A tibble: 4 × 2
 #>   name                    enabled
@@ -163,7 +163,7 @@ qgis_plugins()
 This tells us that the GRASS GIS (`grassprovider`) and SAGA (`processing_saga_nextgen`) plugins are available on the system but are not yet enabled.
 Since we need both later on in the chapter, let's enable them. 
 
-```{r enable-providers, eval=has_qgis_plugins}
+```{r enable-providers, eval=FALSE}
 qgis_enable_plugins(c("grassprovider", "processing_saga_nextgen"), 
                     quiet = TRUE)
 ```
@@ -226,7 +226,7 @@ The first step is to find an algorithm that can merge two vector objects.
 To list all of the available algorithms, we can use the `qgis_algorithms()` function.
 This function returns a data frame containing all of the available providers and the algorithms they contain.^[Therefore, if you cannot see an expected provider, it is probably because you still need to install some external GIS software.] 
 
-```{r, eval=has_qgis_plugins}
+```{r, eval=FALSE}
 # output not shown
 qgis_algorithms()
 ```
@@ -234,7 +234,7 @@ qgis_algorithms()
 To find an algorithm, we can use the `qgis_search_algorithms()` function.
 Assuming that the short description of the function contains the word "union"\index{union}, we can run the following code to find the algorithm of interest:
 
-```{r, eval=has_qgis_plugins}
+```{r, eval=FALSE}
 qgis_search_algorithms("union")
 #> # A tibble: 2 × 5
 #>   provider provider_title    group          algorithm         algorithm_title 
@@ -249,7 +249,7 @@ This is the role of the `qgis_show_help()`, which returns a short summary of wha
 This makes it output rather long.
 The following command returns a data frame with each row representing an argument required by `"native:union"` and columns with the name, description, type, default value, available values, and acceptable values associated with each:
 
-```{r 09-gis-6, eval=has_qgis_plugins, linewidth=80}
+```{r 09-gis-6, eval=FALSE, linewidth=80}
 alg = "native:union"
 union_arguments = qgis_get_argument_specs(alg)
 union_arguments
@@ -283,7 +283,7 @@ In our case, three arguments seem important - `INPUT`, `OVERLAY`, and `OUTPUT`.
 The first one, `INPUT`, is our main vector object `incongr_wgs`, while the second one, `OVERLAY`, is `aggzone_wgs`.
 The last argument, `OUTPUT`, is an output file name, which **qgisprocess** will automatically choose and create in `tempdir()` if none is provided.
 
-```{r 09-gis-7, eval=has_qgis_plugins}
+```{r 09-gis-7, eval=FALSE}
 union = qgis_run_algorithm(alg,
   INPUT = incongr_wgs, OVERLAY = aggzone_wgs
 )
@@ -295,7 +295,7 @@ Running the above line of code will save our two input objects into temporary .g
 The **qgisprocess** package stores the `qgis_run_algorithm()` result as a list containing, in this case, a path to the output file.
 We can either read this file back into R with `read_sf()` (e.g., `union_sf = read_sf(union[[1]])`) or directly with `st_as_sf()`:
 
-```{r, eval=has_qgis_plugins}
+```{r, eval=FALSE}
 union_sf = st_as_sf(union)
 ```
 
@@ -308,7 +308,7 @@ These artifacts of error are called sliver polygons\index{sliver polygons} (see 
 One way to identify slivers is to find polygons with comparatively very small areas, here, e.g., 25000 m^2^, and next remove them.
 Let's search for an appropriate algorithm.
 
-```{r, eval=has_qgis_plugins}
+```{r, eval=FALSE}
 qgis_search_algorithms("clean")
 #> # A tibble: 1 × 5
 #>   provider provider_title group        algorithm      algorithm_title
@@ -382,7 +382,7 @@ Various terrain parameters can be helpful, for example, for the prediction of la
 For this section, we will use `dem.tif` -- a digital elevation model of the Mongón study area (downloaded from the Land Process Distributed Active Archive Center, see also `?dem.tif`).
 It has a resolution of about 30 by 30 meters and uses a projected CRS.
 
-```{r, eval=has_qgis_plugins, message=FALSE}
+```{r, eval=FALSE, message=FALSE}
 library(qgisprocess)
 library(terra)
 dem = system.file("raster/dem.tif", package = "spDataLarge")
@@ -393,7 +393,7 @@ However, GIS programs offer many more terrain characteristics, some of which can
 For example, the topographic wetness index (TWI)\index{topographic wetness index} was found useful in studying hydrological and biological processes [@sorensen_calculation_2006].
 Let's search the algorithm list for this index using `"wetness"` as keyword.
 
-```{r, eval=has_qgis_plugins}
+```{r, eval=FALSE}
 qgis_search_algorithms("wetness") |>
   dplyr::select(provider_title, algorithm) |>
   head(2)
@@ -422,7 +422,7 @@ Before running the SAGA algorithm from within QGIS, we change the default raster
 Hence, all output rasters we do not specify ourselves will from now on be written to the `.sdat` format. 
 Depending on the software versions (SAGA, GDAL) you are using, this might not be necessary but often enough this will save you trouble when trying to read in output rasters created with SAGA.
 
-```{r, eval=has_qgis_plugins}
+```{r, eval=FALSE}
 options(qgisprocess.tmp_raster_ext = ".sdat")
 dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex",
   DEM = dem
@@ -433,7 +433,7 @@ dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex",
 We can read a selected output by providing an output name in the `qgis_as_terra()` function.
 And since we are done with the SAGA processing from within QGIS, we change the raster output format back to `.tif`.
 
-```{r, eval=has_qgis_plugins}
+```{r, eval=FALSE}
 dem_wetness_twi = qgis_as_terra(dem_wetness$TWI)
 # plot(dem_wetness_twi)
 options(qgisprocess.tmp_raster_ext = ".tif")
